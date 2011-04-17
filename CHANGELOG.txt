@@ -1,0 +1,124 @@
+CHANGELOG
+---------
+
+cocos3d 0.5.4
+
+Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+http://www.brenwill.com
+
++++++++++++++++++++++++++++++++++++
+
+
+cocos3d 0.5.4 - 2011/04/14
+--------------------------
+
+- CC3Camera now support parallel/isometric/orthographic projection by setting the isUsingParallelProjection property
+- CC3MeshNode now supports selectively showing or culling either backfaces or frontfaces via the shouldCullBackFaces and shouldCullFrontFaces properties. These properties are also available to CC3Node to allow setting complete node assemblies at once.
+- Added method retainVertexLocations to CC3Node to allow certain nodes to retain their vertex locations when releaseRedundantData is invoked, so that it is available for use in calculations.
+- CC3NodeArrayZOrderSequencer now supports sorting nodes based on Z-distance as measured straight-out from the camera, ignoring distance contributed from node being off to the side. This is selectable using the shouldUseOnlyForwardDistance property. This is useful for planar cell animation.
+- instance variable cc3World removed from AppDelegate class in 'hello, world' templates, plus CC3DemoMashUp and CC3Performance demo apps, to simplify changing the active CC3World instance during 3D scene changes. Swapping the CC3World instance is now accomplished by simply setting the cc3World property of your customized CC3Layer.
+- [API change] CC3World cleanCaches method removed. AppDelegate no longer sends low-memory notifications to original CCWorld. This allows the app to devise its own method for managing memory in a multiple-CC3World app.
+- [API Change] CC3Camera near and far clipping planes normalized to a standard (less arbitrary) range. The nearClippingPlane now defaults to 1.0, and the farClippingPlane now defaults to 1000.0.
+
+
+cocos3d 0.5.3 - 2011/04/06
+--------------------------
+
+- includes Xcode 4 cocos3d project template (The Xcode 4 project template requires an additional project template step. See the README! file in the Xcode 4 project after creating it from the project template).
+- positioning objects by touch point location is now supported. See the CC3Camera unprojectPoint: and unprojectPoint:ontoPlane: methods. For an example of how to use this functionality, see how the CC3DemoMashUp handles touch events on the ground plane.
+- CC3Node now has an addAndLocalizeChild: method to add objects of known size and rotation and not have those properties affected by the transform of the parent object.
+- performance tuning
+- CC3World now optionally collects application drawing and updating performance statistics in the performanceStatistics property. 
+- new demo project CC3Performance now available for developers to explore cocos3d performance with various 3D models.
+- changing scale of CC3Camera (scale or uniformScale properties) now updates projectionMatrix automatically.
+- CC3BoxNode class added as subclass of CC3MeshNode to simplify the creation of cube and box meshes.
+- CC3LineNode added line population methods
+- setting CC3Material isOpaque property to NO now checks for pre-multiplied alpha in the texture and sets the sourceBlend property accordingly.
+- API docs now includes a collaboration diagram for each class, plus an overall library class hierarchy diagram
+- fixed issue where texture transparency appeared black instead of transparent.
+- fixed issue where materials flickered on touch if lighting was turned off.
+- fixed issue where meshes with vertex colors were only drawing on first node when multiple nodes use same mesh and color pointers.
+- fixed issue where replacing the cc3World in a CC3Layer with a new CC3World (ie- to perform a scene change) was not correctly updating the viewport automatically in the new CC3World.
+- [API change] CC3MeshNode populateAsCenteredRectangleWithSize:andPureColor: changed to populateAsCenteredRectangleWithSize:.
+- [API change] CC3MeshNode populateAsRectangleWithSize:andPivot:andPureColor: changed to populateAsRectangleWithSize:andPivot:.
+- [API change] CC3MeshNode populateAsWireBox:andPureColor: changed to populateAsWireBox:.
+- [API change] CC3DemoMashUpLayer - changed name of pushBallWorld property to mashUpWorld.
+- CC3DemoMashUpLayer now uses createGLBuffers to use GL VBO's for the robot army.
+- hello, world template now using a mesh with fewer vertices to improve performance on older devices
+
+
+cocos3d 0.5.2 - 2011/03/12
+--------------------------
+
+- retina display now supported
+- CC3LineNode class added as a subclass of CC3MeshNode to simplify the drawing of lines using vertex arrays. The method populateAsWireBox:withPureColor: added to CC3MeshNode as a convenience method for easily creating wire-frame boxes.
+- CC3PlaneNode class added as a subclass of CC3MeshNode to simplify support for simple planes and rectangular meshes.
+- [API change] CC3Node udpateBeforeChildren: renamed to updateBeforeTransform:
+- [API change] CC3Node udpateAfterChildren: renamed to updateAfterTransform:
+- CC3Node updateBeforeTransform: invoked automatically before transformation matrix is recalculated on that node and before same method invoked on chid nodes.
+- CC3Node updateAfterTransform: invoked automatically after transformation matrix is recalculated on that node and after same method invoked on chid nodes.
+- CC3MeshNode now supports drawing meshes in a pure, solid color that is not affected by lighting conditions, using the pureColor property. This color will only be used if a material is not attached to the node.
+- added CC3NodeArrayZOrderSequencer to allow drawing order for translucent objects to be sorted by Z-order, from farthest to nearest
+- CC3World's default drawingSequencer now draws opaque nodes first, then translucent nodes by Z-order. Z-order based on centerOfGeometry of node mesh.
+- CC3World drawingSequencer updated on each draw frame, to take into consideration dynamic Z-ordering.
+- [API change] combined CC3NodePointBoundingVolume into base CC3NodeBoundingVolume
+- [API change] renamed CC3VertexLocationsPointBoundingVolume to CC3VertexLocationsBoundingVolume
+- changing the opacity of a CC3Material (or any node holding it) using the <CCRGBAProtocol> opacity property now automatically changes the sourceBlend and destinationBlend properties to make use of the new opacity.
+- CC3Material and CC3MeshNode isOpaque property now returns YES if the alpha component of ambientColor and diffuseColor properties are both 1.0. This is in addition to returning YES if the sourceBlend and destinationBlend properties are GL_ONE and GL_ZERO respectively.
+- corrected reported issue where translucent objects experience a slight flicker when a touch event is processed. This no longer occurs when the translucent object has other 3D artifacts behind it. The flicker still occurs when the translucent object only has the layer's background color behind it, because the background color does not participate in the translucency of the object (does not show through the object).
+- corrected reported issue where CCNodes carried by CC3Billboards were not displaying correctly on the right side of a landscape screen.
+- removed memory leaks from node copying
+- corrected spontaneous and incorrect flips between device orientations when device placed in unknown orientation.
+- corrected issue with touch selection where touch events that were close together were sometimes sent with incorrect touch type. 
+- CC3DemoMashUp: corrected issue where the robot army was not visible through the translucent beach ball.
+- CC3DemoMashUp: touching the beach ball toggles the it between opacity and translucency.
+- CC3DemoMashUp: the translucent beach ball no longer flickers during touch event processing when it has 3D objects behind it. It still flickers when no objects are behind it, such as when the "sky" appears behind it. This is because the "sky" is really just the background color of the cocos2d layer, and does not participate in the translucency of the beach ball.
+- CC3DemoMashUp: touching either the textured or rainbow teapot will toggle the display of a wire-frame of the teapot's bounding box.
+- CC3DemoMashUp: the ground plane is now constructed using a CC3PlaneNode instance.
+
+
+cocos3d 0.5.1 - 2011/02/24
+--------------------------
+
+- added support for picking 3D nodes via UI touch events
+- nodes now support the <NSCopying> protocol. CC3Node copy method returns a deep copy, that creates copies of all content, except mesh data. Mesh data is never copied. This allows multiple copies of a node to be easily created from a single original node, but have all nodes share mesh data for efficiency and performance.
+- [API change] releasing redundant data from main memory, after it has been copied to a VBO within the GL engine, is no longer automatic. The application should now invoke the releaseRedundantData method on a node assembly sometime after invoking createGLBuffers. 
+- [API change] CC3Node update: method replaced with distinct updateBeforeChildren: and updateBeforeChildren: methods.
+- [API change] CC3Node visitWithVisitor: method renamed to drawWithVisitor:.
+- [API change] CC3World visit method renamed to drawWorld.
+- Added CC3Node projectedLocation property, which includes distance to camera
+- [API change] CC3Node projectedPosition property now read-only
+- [API change] CC3Camera:
+                - default camera field of view changed to 45 degrees
+                - projectLocation: now returns distance to camera in Z-component of returned CC3Vector.
+                - projectNode: now returns CC3Vector, containing the result of projectLocation: method.
+                - projectToVisiblePoint: removed.
+                - removed CC3Projector class and moved some methods to CC3ViewportManager class in CC3World.
+- [API change] CC3MeshNode populateAsCenteredRectangleWithSize:andTexture:invertTexture: and populateAsRectangleWithSize:andPivot:andTexture:invertTexture: now support flag to optionally invert textures when applying to a rectangular mesh.
+- [API change] renamed misspelled CCLayer initializeContols method to initializeControls
+- [API change] function CCC4FTranslate renamed to CCC4FAdd
+- CC3Node now supports <CCRGBAProtocol> for tinting and fading of whole node assemblies
+- CC3Node now supports material color properties
+- CC3Animate now supports animating only a fraction of a full animation, allowing you to extract one of several movements in an animation, and animate only that movement.
+- Added CC3NodeAnimation and CC3ArrayNodeAnimation classes to allow any CC3Node to be animated. Previously, only POD nodes were animated.
+- [API change] 'POD' removed from all node animation methods (eg- enablePODAnimation changed to enableAnimation).
+- CC3Camera camera compensates frustum scaling when mounted on a parent node that is scaled. Previously, near clip plane scaled when parent scaled, causing undesirable clipping.
+- Adding a node to a parent using addChild: now also automatically removes the node from the previous parent.
+- projecting from 3D to 2D now works for layers that are smaller than the full screen size.
+- Fixed bug in CC3Node removeAllChildren that caused SIGABRT
+- Added abstract CC3Resource and CC3ResourceNode classes to better support future file loaders.
+- [API change] removed *POD* loading methods from CC3PODResource and CC3PODResourceNode. Now uses generic superclass loading methods.
+- corrected problem where 2D billboards were not tracking location accurately when layer was not full-screen and device was rotated.
+- [API change] CC3Billboard draw2dWithinViewport: and doesIntersectViewport: changed to draw2dWithinBounds: and doesIntersectBounds: and checks against CC3Layer bounds for culling.
+- animations can be shared by multiple node copies
+- [API change] animations are no longer enabled and disabled themselves. The node now tracks whether its animation is enabled.
+- CC3Identifiable tags now allocated separately for each major subclass (eg- node, material, mesh, etc). This better aligns tag values with count of major instances (eg- node count, material count, etc).
+- moved BUILD_OGLES directive declaration into code instead of relying on project directive. Removed directive from compiler build settings.
+- minor documentation and commenting corrections
+
+
+cocos3d 0.5 - 2011/02/01
+------------------------
+
+Initial public release.
+

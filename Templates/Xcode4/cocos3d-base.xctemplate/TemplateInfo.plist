@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>com.benwill.cocos3dBase</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Project</key>
+	<dict>
+		<key>Configurations</key>
+		<dict>
+			<key>Debug</key>
+			<dict>
+				<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+				<array>
+					<string>LOGGING_ENABLED=1</string>
+					<string>LOGGING_LEVEL_TRACE=0</string>
+					<string>GL_ERROR_LOGGING_ENABLED=1</string>
+					<string>GL_LOGGING_ENABLED=0</string>
+				</array>
+			</dict>
+			<key>Release</key>
+			<dict>
+				<key>GCC_UNROLL_LOOPS</key>
+				<string>YES
+</string>
+			</dict>
+		</dict>
+		<key>SharedSettings</key>
+		<dict>
+			<key>GCC_THUMB_SUPPORT</key>
+			<string>NO</string>
+			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+			<string>3.0</string>
+			<key>ONLY_ACTIVE_ARCH</key>
+			<string>YES</string>
+			<key>TARGETED_DEVICE_FAMILY</key>
+			<string>1,2</string>
+			<key>WARNING_CFLAGS</key>
+			<string>-Wall
+</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
