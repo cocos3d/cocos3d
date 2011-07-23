@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,28 +31,6 @@
 
 
 #import "CC3OpenGLES11StateTracker.h"
-
-
-#pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerCapability
-
-/**
- * CC3OpenGLES11StateTrackerCapability tracks a boolean GL capability, indicating whether
- * the capability is enabled or disabled.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLES11StateTrackerCapability : CC3OpenGLES11StateTrackerBoolean {}
-
-/** Enables the capability. This is the same as setting the value property to YES. */
--(void) enable;
-
-/** Disables the capability. This is the same as setting the value property to NO. */
--(void) disable;
-
-@end
 
 
 #pragma mark -
@@ -100,12 +78,11 @@
 	CC3OpenGLES11StateTrackerServerCapability* dither;
 	CC3OpenGLES11StateTrackerServerCapability* fog;
 	CC3OpenGLES11StateTrackerServerCapability* lighting;
-	NSMutableArray* lights;
 	CC3OpenGLES11StateTrackerServerCapability* lineSmooth;
 	CC3OpenGLES11StateTrackerServerCapability* multisample;
 	CC3OpenGLES11StateTrackerServerCapability* normalize;
 	CC3OpenGLES11StateTrackerServerCapability* pointSmooth;
-	CC3OpenGLES11StateTrackerServerCapability* pointSpriteOES;
+	CC3OpenGLES11StateTrackerServerCapability* pointSprites;
 	CC3OpenGLES11StateTrackerServerCapability* polygonOffsetFill;
 	CC3OpenGLES11StateTrackerServerCapability* rescaleNormal;
 	CC3OpenGLES11StateTrackerServerCapability* sampleAlphaToCoverage;
@@ -113,7 +90,6 @@
 	CC3OpenGLES11StateTrackerServerCapability* sampleCoverage;
 	CC3OpenGLES11StateTrackerServerCapability* scissorTest;
 	CC3OpenGLES11StateTrackerServerCapability* stencilTest;
-	CC3OpenGLES11StateTrackerServerCapability* texture2D;
 }
 
 /** Tracks the alpha testing capability (GL capability name GL_ALPHA_TEST). */
@@ -154,17 +130,6 @@
 /** Tracks the lighting capability (GL capability name GL_LIGHTING). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* lighting;
 
-/**
- * Tracks the capability for each light (GL capability name GL_LIGHTi).
- *
- * Do not access individual light trackers through this property.
- * Use the lightAt: method instead.
- *
- * The number of available lights is retrieved from
- * [CC3OpenGLES11Engine engine].platform.maxLights.value.
- */
-@property(nonatomic, retain) NSMutableArray* lights;
-
 /** Tracks the line smoothing capability (GL capability name GL_LINE_SMOOTH). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* lineSmooth;
 
@@ -178,7 +143,7 @@
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* pointSmooth;
 
 /** Tracks the point sprite capability (GL capability name GL_POINT_SPRITE_OES). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* pointSpriteOES;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* pointSprites;
 
 /** Tracks the polygon offset fill capability (GL capability name GL_POLYGON_OFFSET_FILL). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* polygonOffsetFill;
@@ -201,9 +166,6 @@
 /** Tracks the stencil testing capability (GL capability name GL_STENCIL_TEST). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* stencilTest;
 
-/** Tracks the texturing capability (GL capability name GL_TEXTURE_2D). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* texture2D;
-
 /**
  * Returns the tracker for the clip plane with the specified index.
  *
@@ -214,17 +176,6 @@
  * [CC3OpenGLES11Engine engine].platform.maxClipPlanes.value.
  */
 -(CC3OpenGLES11StateTrackerServerCapability*) clipPlaneAt: (GLint) cpIndx;
-
-/**
- * Returns the tracker for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLES11Engine engine].platform.maxLights.value.
- */
--(CC3OpenGLES11StateTrackerServerCapability*) lightAt: (GLint) ltIndx;
 
 @end
 
@@ -237,26 +188,22 @@
  * client capabilities once, and restore that capability when the close method is invoked.
  */
 @interface CC3OpenGLES11ClientCapabilities : CC3OpenGLES11StateTrackerManager {
-	CC3OpenGLES11StateTrackerServerCapability* colorArray;
-	CC3OpenGLES11StateTrackerServerCapability* normalArray;
-	CC3OpenGLES11StateTrackerServerCapability* pointSizeArrayOES;
-	CC3OpenGLES11StateTrackerServerCapability* textureCoordArray;
-	CC3OpenGLES11StateTrackerServerCapability* vertexArray;
+	CC3OpenGLES11StateTrackerClientCapability* colorArray;
+	CC3OpenGLES11StateTrackerClientCapability* normalArray;
+	CC3OpenGLES11StateTrackerClientCapability* pointSizeArray;
+	CC3OpenGLES11StateTrackerClientCapability* vertexArray;
 }
 
 /** Tracks the color array capability (GL capability name GL_COLOR_ARRAY). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* colorArray;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* colorArray;
 
 /** Tracks the normal array capability (GL capability name GL_NORMAL_ARRAY). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* normalArray;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* normalArray;
 
 /** Tracks the point size array capability (GL capability name GL_POINT_SIZE_ARRAY_OES). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* pointSizeArrayOES;
-
-/** Tracks the texture coordinate array capability (GL capability name GL_TEXTURE_COORD_ARRAY). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* textureCoordArray;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* pointSizeArray;
 
 /** Tracks the vertex array capability (GL capability name GL_VERTEX_ARRAY). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* vertexArray;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* vertexArray;
 
 @end

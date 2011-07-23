@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,23 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPointParameterVector
+
+/**
+ * CC3OpenGLES11StateTrackerPointParameterVector tracks a 3D vector GL point parameter state value.
+ *
+ * This implementation uses GL function glGetFloatv to read the value from the
+ * GL engine, and GL function glPointParameterfv to set the value in the GL engine.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ */
+@interface CC3OpenGLES11StateTrackerPointParameterVector : CC3OpenGLES11StateTrackerVector {}
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11State
 
 /**
@@ -55,6 +72,8 @@
 	CC3OpenGLES11StateTrackerBoolean* depthMask;
 	CC3OpenGLES11StateTrackerEnumeration* frontFace;
 	CC3OpenGLES11StateTrackerFloat* lineWidth;
+	CC3OpenGLES11StateTrackerFloat* pointSize;
+	CC3OpenGLES11StateTrackerPointParameterVector* pointSizeAttenuation;
 	CC3OpenGLES11StateTrackerViewport* scissor;
 	CC3OpenGLES11StateTrackerEnumeration* shadeModel;
 	CC3OpenGLES11StateTrackerViewport* viewport;
@@ -86,6 +105,12 @@
 
 /** Tracks line width (GL get name GL_LINE_WIDTH and set function glLineWidth). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerFloat* lineWidth;
+
+/** Tracks line width (GL get name GL_POINT_SIZE and set function glPointSize). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerFloat* pointSize;
+
+/** Tracks line width (GL get name GL_POINT_DISTANCE_ATTENUATION and set function glPointParameterfv). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointParameterVector* pointSizeAttenuation;
 
 /** Tracks viewport (GL get name GL_SCISSOR_BOX and set function glScissor). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerViewport* scissor;

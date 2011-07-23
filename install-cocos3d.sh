@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# cocos3d 0.5.4
+# cocos3d 0.6.0-sp
 
 echo 'cocos3d installer'
-
-COCOS3D_TEMPLATE_3_DIR='cocos3d 0.5'
-BASE_TEMPLATE_3_DIR="/Library/Application Support/Developer/Shared/Xcode"
-BASE_TEMPLATE_3_USER_DIR="$HOME/Library/Application Support/Developer/Shared/Xcode"
 
 COCOS3D_TEMPLATE_4_DIR='cocos3d'
 BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
@@ -90,7 +86,7 @@ check_dst_dir(){
 	if [[ -d $DST_DIR ]];  then
 		if [[ $force ]]; then
 			echo "...removing old template: ${DST_DIR}"
-			rm -rf $DST_DIR
+			rm -rf "$DST_DIR"
 		else
 			echo "Template ${DST_DIR} already installed. To force a re-install use the '-f' parameter"
 			exit 1
@@ -124,9 +120,6 @@ copy_base_files(){
 
 	echo ...copying cocoslive dependency files
 	copy_files "$c2d_dist_dir/external/TouchJSON" "$LIBS_DIR"
-
-	echo ...copying cocos3d files
-	copy_files cocos3d "$LIBS_DIR"
 }
 
 print_template_banner(){
@@ -134,35 +127,6 @@ print_template_banner(){
 	echo "$1"
 	echo '----------------------------------------------------'
 	echo ''
-}
-
-# copies Xcode 3 project-based templates
-copy_xc3_project_templates(){
-	if [[ $user_dir ]]; then
-		TEMPLATE_DIR="${BASE_TEMPLATE_3_USER_DIR}/Project Templates/${COCOS3D_TEMPLATE_3_DIR}/"
-	else
-		TEMPLATE_DIR="${BASE_TEMPLATE_3_DIR}/Project Templates/${COCOS3D_TEMPLATE_3_DIR}/"
-	fi
-
-	if [[ ! -d "$TEMPLATE_DIR" ]]; then
-		echo '...creating Xcode 3 cocos3d template folder'
-		echo ''
-		mkdir -p "$TEMPLATE_DIR"
-	fi
-
-	print_template_banner "Installing Xcode 3 cocos3d iOS template"
-
-	DST_DIR="$TEMPLATE_DIR""cocos3d Application/"
-	LIBS_DIR="$DST_DIR"libs
-
-	check_dst_dir
-
-	echo ...copying template files
-	copy_files "Templates/Xcode3/cocos3d Application/" "$DST_DIR"
-
-	copy_base_files
-
-	echo done!
 }
 
 # copies Xcode 4 project-based templates
@@ -193,28 +157,27 @@ copy_xc4_project_templates(){
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
 
+	TEMPLATE="cocos3d-lib"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	echo ...copying cocos3d files to $TEMPLATE template
+	copy_files cocos3d "$DST_DIR"
+
 	echo done!
 }
 
-copy_2_demos(){
+copy_cocos2d_libs(){
 	echo
-	echo Copying coocs2d and cocos3d to CC3DemoMashUp demo project
-	DST_DIR="Demos/CC3DemoMashUp/"
-	LIBS_DIR="$DST_DIR"libs
-	copy_base_files
-	echo done!
-
-	echo
-	echo Copying coocs2d and cocos3d to CC3Performance project
-	DST_DIR="Demos/CC3Performance/"
-	LIBS_DIR="$DST_DIR"libs
+	echo Copying coocs2d libraries to workspace
+	LIBS_DIR=libs
 	copy_base_files
 	echo done!
 }
 
-copy_2_demos
-
-copy_xc3_project_templates
+copy_cocos2d_libs
 
 copy_xc4_project_templates
 

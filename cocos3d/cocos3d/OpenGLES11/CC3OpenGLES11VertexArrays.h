@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -64,11 +64,19 @@
 -(void) unbind;
 
 /**
- * Loads data into the GL buffer for this vertex array, starting at the specified buffer
+ * Loads data into the currently bound GL buffer, starting at the specified buffer
  * pointer, and extending for the specified length. The buffer usage is a hint for the
  * GL engine, and must be a valid GL buffer usage enumeration value.
  */
 -(void) loadBufferData: (GLvoid*) buffPtr  ofLength: (GLsizeiptr) buffLen forUse: (GLenum) buffUsage;
+
+/**
+ * Updates data in the GL buffer, from data starting at the specified offset
+ * in the specified buffer pointer, and extending for the specified length.
+ */
+-(void) updateBufferData: (GLvoid*) buffPtr
+			  startingAt: (GLintptr) offset
+			   forLength: (GLsizeiptr) length;
 
 @end
 
@@ -241,22 +249,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerVertexTexCoordsPointer
-
-/**
- * CC3OpenGLES11StateTrackerVertexTexCoordsPointer tracks the parameters
- * of the vertex texture coordinates pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
- *   - elementSize uses GL name GL_TEXTURE_COORD_ARRAY_SIZE.
- *   - elementType uses GL name GL_TEXTURE_COORD_ARRAY_TYPE.
- *   - elementStride uses GL name GL_TEXTURE_COORD_ARRAY_STRIDE.
- *   - the values are set in the GL engine using the glTexCoordPointer method
- */
-@interface CC3OpenGLES11StateTrackerVertexTexCoordsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerVertexPointSizesPointer
 
 /**
@@ -282,7 +274,6 @@
 	CC3OpenGLES11StateTrackerVertexLocationsPointer* locations;
 	CC3OpenGLES11StateTrackerVertexNormalsPointer* normals;
 	CC3OpenGLES11StateTrackerVertexColorsPointer* colors;
-	CC3OpenGLES11StateTrackerVertexTexCoordsPointer* textureCoordinates;
 	CC3OpenGLES11StateTrackerVertexPointSizesPointer* pointSizes;
 }
 
@@ -300,9 +291,6 @@
 
 /** Tracks the vertex colors pointer. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexColorsPointer* colors;
-
-/** Tracks the vertex texture coordinates pointer. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexTexCoordsPointer* textureCoordinates;
 
 /** Tracks the vertex point sizes pointer. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexPointSizesPointer* pointSizes;

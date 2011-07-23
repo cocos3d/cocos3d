@@ -1,7 +1,7 @@
 /*
  * CC3PODResourceNode.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -55,19 +55,39 @@
  * Instantiates an instance of CC3PODResourceNode, loads it from the POD
  * file at the specified path, which must be an absolute path, and adds
  * the CC3PODResourceNode instance as a child node to this CC3World instance.
+ * The name of the resource node will be that of the file.
  */
 -(void) addContentFromPODFile: (NSString*) aFilepath;
+
+/**
+ * Instantiates an instance of CC3PODResourceNode with the specified name, loads
+ * it from the POD file at the specified path, which must be an absolute path, and
+ * adds the CC3PODResourceNode instance as a child node to this CC3World instance.
+ */
+-(void) addContentFromPODFile: (NSString*) aFilepath withName: (NSString*) aName;
 
 /**
  * Instantiates an instance of CC3PODResourceNode, loads it from the POD
  * file at the specified resource path, and adds the CC3PODResourceNode
  * instance as a child node to this CC3World instance.
+ * The name of the resource node will be that of the file.
  *
  * The specified file path is a path relative to the resource directory.
  * Typically this means that the specified path can just be the name of
  * the file, with no path information.
  */
 -(void) addContentFromPODResourceFile: (NSString*) aRezPath;
+
+/**
+ * Instantiates an instance of CC3PODResourceNode with the specified name,
+ * loads it from the POD file at the specified resource path, and adds the
+ * CC3PODResourceNode instance as a child node to this CC3World instance.
+ *
+ * The specified file path is a path relative to the resource directory.
+ * Typically this means that the specified path can just be the name of
+ * the file, with no path information.
+ */
+-(void) addContentFromPODResourceFile: (NSString*) aRezPath withName: (NSString*) aName;
 
 @end
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,6 +70,12 @@
 
 -(void) loadBufferData: (GLvoid*) buffPtr  ofLength: (GLsizeiptr) buffLen forUse: (GLenum) buffUsage {
 	glBufferData(name, buffLen, buffPtr, buffUsage);
+}
+
+-(void) updateBufferData: (GLvoid*) buffPtr
+			  startingAt: (GLintptr) offset
+			   forLength: (GLsizeiptr) length {
+	glBufferSubData(name, offset, length, buffPtr);
 }
 
 @end
@@ -186,6 +192,16 @@
 	}
 }
 
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", elementSize];
+	[desc appendFormat: @"\n    %@ ", elementType];
+	[desc appendFormat: @"\n    %@ ", elementStride];
+	[desc appendFormat: @"\n    %@ ", elementPointer];
+	return desc;
+}
+
 @end
 
 
@@ -247,25 +263,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerVertexTexCoordsPointer
-
-@implementation CC3OpenGLES11StateTrackerVertexTexCoordsPointer
-
--(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_TEXTURE_COORD_ARRAY_SIZE];
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_TEXTURE_COORD_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_TEXTURE_COORD_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
-}
-
--(void) setGLValues {
-	glTexCoordPointer(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerVertexPointSizesPointer
 
 @implementation CC3OpenGLES11StateTrackerVertexPointSizesPointer
@@ -294,7 +291,6 @@
 @synthesize locations;
 @synthesize normals;
 @synthesize colors;
-@synthesize textureCoordinates;
 @synthesize pointSizes;
 
 -(void) dealloc {
@@ -303,7 +299,6 @@
 	[locations release];
 	[normals release];
 	[colors release];
-	[textureCoordinates release];
 	[pointSizes release];
 	[super dealloc];
 }
@@ -314,7 +309,6 @@
 	self.locations = [CC3OpenGLES11StateTrackerVertexLocationsPointer tracker];
 	self.normals = [CC3OpenGLES11StateTrackerVertexNormalsPointer tracker];
 	self.colors = [CC3OpenGLES11StateTrackerVertexColorsPointer tracker];
-	self.textureCoordinates = [CC3OpenGLES11StateTrackerVertexTexCoordsPointer tracker];
 	self.pointSizes = [CC3OpenGLES11StateTrackerVertexPointSizesPointer tracker];
 }
 
@@ -337,7 +331,6 @@
 	[locations open];
 	[normals open];
 	[colors open];
-	[textureCoordinates open];
 	[pointSizes open];
 }
 
@@ -348,7 +341,6 @@
 	[locations close];
 	[normals close];
 	[colors close];
-	[textureCoordinates close];
 	[pointSizes close];
 }
 

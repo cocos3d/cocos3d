@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -142,12 +142,18 @@
 	return [NSArray array];
 }
 
-+(id) sequencer {
-	return [[[self alloc] init] autorelease];
+-(BOOL) shouldUseOnlyForwardDistance {
+	return NO;
 }
+
+-(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {}
 
 -(id) init {
 	return [self initWithEvaluator: nil];
+}
+
++(id) sequencer {
+	return [[[self alloc] init] autorelease];
 }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
@@ -182,7 +188,6 @@
 	}
 	return NO;
 }
-
 
 -(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {}
 
@@ -258,6 +263,21 @@
 		[nodes addObjectsFromArray: s.nodes];
 	}
 	return nodes;
+}
+
+-(BOOL) shouldUseOnlyForwardDistance {
+	for (CC3NodeSequencer* s in sequencers) {
+		if (s.shouldUseOnlyForwardDistance) {
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {
+	for (CC3NodeSequencer* s in sequencers) {
+		s.shouldUseOnlyForwardDistance = onlyForward;
+	}
 }
 
 -(NSString*) fullDescription {
@@ -382,7 +402,13 @@
 
 @implementation CC3NodeArrayZOrderSequencer
 
-@synthesize shouldUseOnlyForwardDistance;
+-(BOOL) shouldUseOnlyForwardDistance {
+	return shouldUseOnlyForwardDistance;
+}
+
+-(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {
+	shouldUseOnlyForwardDistance = onlyForward;
+}
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
@@ -536,9 +562,9 @@
 	
 	// If the left mesh is the same, but the right one isn't,
 	// this is where we want to insert to keep like meshes together.
-	CC3MeshModel* mesh = aNode.meshModel;
-	CC3MeshModel* leftMesh = leftNode.meshModel;
-	CC3MeshModel* rightMesh = rightNode.meshModel;
+	CC3Mesh* mesh = aNode.mesh;
+	CC3Mesh* leftMesh = leftNode.mesh;
+	CC3Mesh* rightMesh = rightNode.mesh;
 	return (mesh == leftMesh && mesh != rightMesh);
 }
 

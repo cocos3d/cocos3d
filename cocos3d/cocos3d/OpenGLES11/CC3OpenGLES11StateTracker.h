@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -340,6 +340,28 @@ typedef void( CC3SetGLBooleanFunction( GLboolean ) );
  * The application should not invoke this method directly.
  */
 -(BOOL) attemptSetValue: (BOOL) aValue;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerCapability
+
+/**
+ * CC3OpenGLES11StateTrackerCapability tracks a boolean GL capability, indicating whether
+ * the capability is enabled or disabled.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ */
+@interface CC3OpenGLES11StateTrackerCapability : CC3OpenGLES11StateTrackerBoolean {}
+
+/** Enables the capability. This is the same as setting the value property to YES. */
+-(void) enable;
+
+/** Disables the capability. This is the same as setting the value property to NO. */
+-(void) disable;
 
 @end
 

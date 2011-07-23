@@ -1,7 +1,7 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -52,6 +52,11 @@
 -(void) applyScaling;
 -(void) updateWithVisitor: (CC3NodeTransformingVisitor*) visitor;
 -(id) transformVisitorClass;
+-(void) transformMatrixChanged;
+-(void) updateGlobalOrientation;
+-(void) updateGlobalLocation;
+-(void) updateGlobalRotation;
+-(void) updateGlobalScale;
 -(void) updateBoundingVolume;
 -(void) drawChildrenWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -62,6 +67,8 @@
 -(id) rotatorClass;
 -(void) populateFrom: (CC3Node*) another;
 -(void) copyChildrenFrom: (CC3Node*) another;
+-(void) resumeActions;
+-(void) pauseActions;
 @property(nonatomic, readonly) CC3Rotator* rotator;
 @property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
 @end
@@ -70,7 +77,7 @@
 
 @synthesize location, scale, globalLocation, globalScale;
 @synthesize boundingVolume, projectedLocation, transformMatrix, animation;
-@synthesize visible, isTouchEnabled, isAnimationEnabled;
+@synthesize visible, isTouchEnabled, isAnimationEnabled, isRunning;
 @synthesize parent, children;
 
 -(void) dealloc {
@@ -155,6 +162,17 @@
 				: ccp(-CGFLOAT_MAX, -CGFLOAT_MAX);
 }
 
+-(void) setIsRunning: (BOOL) shouldRun {
+	if (!isRunning && shouldRun) [self resumeActions];
+	if (isRunning && !shouldRun) [self pauseActions];
+	isRunning = shouldRun;
+	if (children) {
+		for (CC3Node* child in children) {
+			child.isRunning = isRunning;
+		}
+	}
+}
+
 -(BOOL) shouldCullBackFaces {
 	if (children) {
 		for (CC3Node* child in children) {
@@ -206,6 +224,25 @@
 
 
 #pragma mark Matierial coloring
+
+-(BOOL) shouldUseLighting {
+	if (children) {
+		for (CC3Node* child in children) {
+			if(child.shouldUseLighting) {
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldUseLighting: (BOOL) useLighting {
+	if (children) {
+		for (CC3Node* child in children) {
+			child.shouldUseLighting = useLighting;
+		}
+	}
+}
 
 -(ccColor4F) ambientColor {
 	ccColor4F col = kCCC4FBlackTransparent;
@@ -311,6 +348,26 @@
 	}
 }
 
+-(CC3Vector) globalLightLocation {
+	if (children) {
+		for (CC3Node* child in children) {
+			CC3Vector cgll = child.globalLightLocation;
+			if ( !CC3VectorsAreEqual(cgll, kCC3VectorZero) ) {
+				return cgll;
+			}
+		}
+	}
+	return kCC3VectorZero;
+}
+
+-(void) setGlobalLightLocation: (CC3Vector) aDirection {
+	if (children) {
+		for (CC3Node* child in children) {
+			child.globalLightLocation = aDirection;
+		}
+	}
+}
+
 
 #pragma mark CCRGBAProtocol support
 
@@ -384,7 +441,6 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		transformMatrix = [[CC3GLMatrix identity] retain];
 		transformMatrixInverted = nil;
 		globalRotationMatrix = nil;
 		rotator = [[[self rotatorClass] rotator] retain];
@@ -398,6 +454,8 @@
 		isTouchEnabled = NO;
 		isAnimationEnabled = YES;
 		visible = YES;
+		isRunning = NO;
+		self.transformMatrix = [CC3GLMatrix identity];		// Has side effects...so do last (transformMatrixInverted is built in some subclasses)
 	}
 	return self;
 }
@@ -437,6 +495,7 @@
 -(void) populateFrom: (CC3Node*) another {
 	[super populateFrom: another];
 
+	// Bypass setter method to avoid side effects.
 	[transformMatrix release];
 	transformMatrix = [another.transformMatrix copy];		// retained
 
@@ -462,6 +521,7 @@
 	isTouchEnabled = another.isTouchEnabled;
 	isAnimationEnabled = another.isAnimationEnabled;
 	visible = another.visible;
+	isRunning = another.isRunning;
 }
 
 // Protected properties for copying
@@ -579,7 +639,10 @@ static GLuint lastAssignedNodeTag;
 	[visitor updateNode: self];
 }
 
-/** Passes along the updateWithVisitor: request to all child nodes. */
+/**
+ * Passes along the updateWithVisitor: request to all child nodes,
+ * then processes any descendants that have requested removal.
+ */
 -(void) updateChildrenWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	if (children) {
 		for (CC3Node* child in children) {
@@ -611,9 +674,24 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Transformations
 
+-(void) setTransformMatrix: (CC3GLMatrix*) aCC3GLMatrix {
+	if (transformMatrix != aCC3GLMatrix) {
+		[transformMatrix release];
+		transformMatrix = [aCC3GLMatrix retain];
+		[self updateGlobalOrientation];
+		[self transformMatrixChanged];
+	}
+}
+
 /** Marks the node's transformMatrix as requiring a recalculation. */
 -(void) markTransformDirty {
 	isTransformDirty = YES;
+}
+
+-(void) updateTransformMatrix {
+	CC3NodeTransformingVisitor* visitor = [[self transformVisitorClass] visitor];
+	visitor.shouldVisitChildren = NO;
+	[self updateWithVisitor: visitor];
 }
 
 -(void) updateTransformMatrices {
@@ -635,16 +713,12 @@ static GLuint lastAssignedNodeTag;
 
 /**
  * Template method that recalculates the transform matrix of this node from the location,
- * rotation and scale properties, updates the bounding volume of this node, and marks the
- * globalRotationMatrix and transformInvertedMatrix as dirty so they will be lazily rebuilt.
+ * rotation and scale properties.
  */
 -(void) buildTransformMatrix {
 	[transformMatrix populateFrom: (parent ? parent.transformMatrix : [CC3GLMatrix identity])];
 	[self applyLocalTransforms];
-	[self updateBoundingVolume];
-	isTransformDirty = NO;
-	isTransformInvertedDirty = YES;
-	isGlobalRotationDirty = YES;
+	[self transformMatrixChanged];
 }
 
 /**
@@ -657,38 +731,63 @@ static GLuint lastAssignedNodeTag;
 	[self applyScaling];
 }
 
-/**
- * Template method that applies the local location property to the transform matrix,
- * and then updates the value of the globalLocation property. Subclasses may override
- * to enhance or modify this behaviour.
- */
+/** Template method that applies the local location property to the transform matrix. */
 -(void) applyTranslation {
 	[transformMatrix translateBy: location];
-	globalLocation = [transformMatrix transformLocation: kCC3VectorZero];
+	[self updateGlobalLocation];
 	LogTrace(@"%@ translated to %@, globally %@ %@", self, NSStringFromCC3Vector(location),
 			 NSStringFromCC3Vector(globalLocation), transformMatrix);
 }
 
-/**
- * Template method that applies the local rotation property to the transform matrix.
- * Subclasses may override to enhance or modify this behaviour.
- */
+/** Template method that applies the local rotation property to the transform matrix. */
 -(void) applyRotation {
 	[rotator applyRotationTo: transformMatrix];
-	LogTrace(@"%@ rotated to %@, globally %@ %@", self, NSStringFromCC3Vector(rotator.rotation),
-			 NSStringFromCC3Vector(self.globalRotation), transformMatrix);
+	[self updateGlobalRotation];
+	LogTrace(@"%@ rotated to %@ %@", self, NSStringFromCC3Vector(rotator.rotation), transformMatrix);
+}
+
+/** Template method that applies the local scale property to the transform matrix. */
+-(void) applyScaling {
+	[transformMatrix scaleBy: scale];
+	[self updateGlobalScale];
+	LogTrace(@"%@ scaled to %@, globally %@ %@", self, NSStringFromCC3Vector(scale),
+			 NSStringFromCC3Vector(globalScale), transformMatrix);
 }
 
 /**
- * Template method that applies the local scale property to the transform matrix,
- * and then updates the value of the globalScale property. Subclasses may override
- * to enhance or modify this behaviour.
+ * Template method that is invoked automatically whenever the transform matrix of this node
+ * is changed. Updates the bounding volume of this node, and marks the globalRotationMatrix
+ * and transformInvertedMatrix as dirty so they will be lazily rebuilt.
  */
--(void) applyScaling {
-	[transformMatrix scaleBy: scale];
+-(void) transformMatrixChanged {
+	[self updateBoundingVolume];
+	isTransformDirty = NO;
+	isTransformInvertedDirty = YES;
+}
+
+/**
+ * Template method that updates the global orientation properties
+ * (globalLocation, globalRotation & globalScale).
+ */
+-(void) updateGlobalOrientation {
+	[self updateGlobalLocation];
+	[self updateGlobalRotation];
+	[self updateGlobalScale];
+}
+
+/** Template method to update the globalLocation property. */
+-(void) updateGlobalLocation {
+	globalLocation = [transformMatrix transformLocation: kCC3VectorZero];
+}
+
+/** Template method to update the globalRotation property. */
+-(void) updateGlobalRotation {
+	isGlobalRotationDirty = YES;
+}
+
+/** Template method to update the globalScale property. */
+-(void) updateGlobalScale {
 	globalScale = parent ? CC3VectorScale(parent.globalScale, scale) : scale;
-	LogTrace(@"%@ scaled to %@, globally %@ %@", self, NSStringFromCC3Vector(scale),
-			 NSStringFromCC3Vector(globalScale), transformMatrix);
 }
 
 /**
@@ -818,7 +917,6 @@ static GLuint lastAssignedNodeTag;
 	[gles11MatrixStack multiply: transformMatrix.glMatrix];
 
 	[visitor drawLocalContentOf: self];
-	LogGLErrorState();
 
 	[gles11MatrixStack pop];
 }
@@ -864,6 +962,7 @@ static GLuint lastAssignedNodeTag;
 	LogTrace(@"Adding %@ to %@", aNode, self);
 	[children addObject: aNode];
 	aNode.parent = self;
+	aNode.isRunning = self.isRunning;
 	[self didAddDescendant: aNode];
 }
 
@@ -877,15 +976,17 @@ static GLuint lastAssignedNodeTag;
  * Mathematically, if Mcg is the global matrix of the child node, Mpg is the
  * matrix of this parent, and Mcl is the desired local matrix, we have:
  *     Normally: Mcg = Mpg.Mcl
- * multiplying both sides by  Mpg(-1), the inverse of the parent's matrix:
+ * Multiplying both sides by  Mpg(-1), the inverse of the parent's matrix:
  *     Mpg(-1).Mcg = Mpg(-1).Mpg.Mcl
  *     Mcl = Mpg(-1).Mcg
  */
 -(void) addAndLocalizeChild: (CC3Node*) aNode {
 	CC3GLMatrix* g2LMtx;		// Global to local transformation matrix
 	
-	// Make sure the child node's transformMatrix is current
-	[aNode updateTransformMatrices];
+	// Since this calculation depends both the parent and child transformMatrixes,
+	// make sure they are up to date.
+	[self updateTransformMatrix];
+	[aNode updateTransformMatrix];
 	
 	// Localize the child node's location by finding the right local matrix,
 	// and then translating the child node's local origin by the resulting matrix.
@@ -937,6 +1038,7 @@ static GLuint lastAssignedNodeTag;
 				[children release];
 				children = nil;
 			}
+			aNode.isRunning = NO;
 			[self didRemoveDescendant: aNode];
 		}
 	}
@@ -954,6 +1056,10 @@ static GLuint lastAssignedNodeTag;
 
 -(void) remove {
 	[parent removeChild: self];
+}
+
+-(BOOL) isDescendantOf: (CC3Node*) aNode {
+	return parent ? (parent == aNode || [parent isDescendantOf: aNode]) : NO;
 }
 
 /**
@@ -1038,7 +1144,7 @@ static GLuint lastAssignedNodeTag;
 
 -(CCAction*) runAction:(CCAction*) action {
 	NSAssert( action != nil, @"Argument must be non-nil");
-	[[CCActionManager sharedManager] addAction: action target: self paused: NO];
+	[[CCActionManager sharedManager] addAction: action target: self paused: !isRunning];
 	return action;
 }
 
@@ -1062,6 +1168,23 @@ static GLuint lastAssignedNodeTag;
 
 -(int) numberOfRunningActions {
 	return [[CCActionManager sharedManager] numberOfRunningActionsInTarget: self];
+}
+
+- (void) resumeActions {
+	[[CCActionManager sharedManager] resumeTarget: self];
+}
+
+- (void) pauseActions {
+	[[CCActionManager sharedManager] pauseTarget: self];
+}
+
+- (void)cleanup {
+	[self stopAllActions];
+	if (children) {
+		for (CC3Node* child in children) {
+			[child cleanup];
+		}
+	}
 }
 
 

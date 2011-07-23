@@ -4,67 +4,78 @@
 <dict>
 	<key>Ancestors</key>
 	<array>
+		<string>com.brenwill.cocos3dBase</string>
+		<string>com.brenwill.cocos3dLib</string>
 		<string>com.cocos2d.bundlebase</string>
 		<string>com.cocos2d.iosbase</string>
 		<string>com.cocos2d.cocos2dlib</string>
 		<string>com.cocos2d.cocosdenshionlib</string>
 		<string>com.cocos2d.cocoslivelib</string>
 		<string>com.cocos2d.fontlabellib</string>
-		<string>com.benwill.cocos3dBase</string>
 	</array>
 	<key>Concrete</key>
 	<true/>
 	<key>Definitions</key>
 	<dict>
-		<key>README!.txt</key>
-		<dict>
-			<key>Path</key>
-			<string>README!.txt</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___AppDelegate.h</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___AppDelegate.m</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___Layer.h</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___Layer.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___Layer.m</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___Layer.m</string>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___World.h</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___World.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>___PROJECTNAMEASIDENTIFIER___World.m</key>
-		<dict>
-			<key>Path</key>
-			<string>___PROJECTNAMEASIDENTIFIER___World.m</string>
-		</dict>
-		<key>hello-world.pod</key>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Classes</string>
+			</array>
 			<key>Path</key>
-			<string>hello-world.pod</string>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</string>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___World.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___World.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>Classes/___PROJECTNAMEASIDENTIFIER___World.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Classes</string>
+			</array>
+			<key>Path</key>
+			<string>Classes/___PROJECTNAMEASIDENTIFIER___World.m</string>
 		</dict>
 		<key>main.m</key>
 		<dict>
@@ -82,25 +93,41 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
+		<key>README!</key>
+		<dict>
+			<key>Path</key>
+			<string>README!.txt</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>Resources/hello-world.pod</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/hello-world.pod</string>
+		</dict>
 	</dict>
 	<key>Description</key>
-	<string>READ ME!! After creating the project, drag the &quot;cocos3d/cocos3d&quot; folder from the cocos3d distribution to your project in the Xcode Navigator, choosing both the &quot;Copy items into destination group&apos;s folder&quot; and &quot;Create groups for any added folders&quot; options.</string>
+	<string>A simple &quot;hello, world&quot; application. You can use this as the base for any cocos3d application.</string>
 	<key>Identifier</key>
 	<string>com.benwill.cocos3dTemplate</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Nodes</key>
 	<array>
-		<string>README!.txt</string>
+		<string>README!</string>
 		<string>Prefix.pch</string>
 		<string>main.m</string>
-		<string>___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
-		<string>___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
-		<string>___PROJECTNAMEASIDENTIFIER___Layer.h</string>
-		<string>___PROJECTNAMEASIDENTIFIER___Layer.m</string>
-		<string>___PROJECTNAMEASIDENTIFIER___World.h</string>
-		<string>___PROJECTNAMEASIDENTIFIER___World.m</string>
-		<string>hello-world.pod</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.h</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___Layer.m</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___World.h</string>
+		<string>Classes/___PROJECTNAMEASIDENTIFIER___World.m</string>
+		<string>Resources/hello-world.pod</string>
 	</array>
 	<key>Options</key>
 	<array>

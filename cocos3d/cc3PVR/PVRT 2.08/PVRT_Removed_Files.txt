@@ -1,0 +1,30 @@
+
+cocos3d Modifications to PVRT library
+------------------------------------------------------------------
+
+The following files were removed from the PVRT library used by
+cocos3d because they are unused, and increase distribution size
+substantially. If they are needed, they are included in the
+PowerVR SDK, which can be downloaded from the PowerVR site:
+
+http://www.imgtec.com/powervr/insider/sdk/KhronosOpenGLES1xMBX.asp
+
+------------------------------------------------------------------
+
+PVRTools.h
+PVRTPrint3D.cpp
+PVRTPrint3D.h
+PVRTPrint3Ddat.h
+
+OGLES/OGLESTools.h
+OGLES/PVRTPrint3DAPI.cpp
+OGLES/PVRTPrint3DIMGLogo.h
+OGLES/PVRTPrint3DPVRLogo.h
+
+------------------------------------------------------------------
+
+The following files were patched to make compatible with cocos3d usage:
+
+PVRTGlobal.h			- added BUILD_OGLES declaration
+OGLES/PVRTContext.h		- added TARGET_OS_IPHONE declaration
+

@@ -1,7 +1,7 @@
 /*
  * CC3Material.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 #import "CC3Texture.h"
 #import "CCProtocols.h"
+#import "CC3NodeVisitor.h"
 
 /** Default material color under ambient lighting. */
 static const ccColor4F kCC3DefaultMaterialColorAmbient = { 0.2, 0.2, 0.2, 1.0 };
@@ -46,6 +47,13 @@ static const ccColor4F kCC3DefaultMaterialColorEmission = { 0.0, 0.0, 0.0, 1.0 }
 
 /** Default material shininess. */
 static const GLfloat kCC3DefaultMaterialShininess = 0.0;
+
+/** Maximum material shininess allowed by OGLES. */
+static const GLfloat kCC3MaximumMaterialShininess = 128.0;
+
+
+#pragma mark -
+#pragma mark CC3Material
 
 /** 
  * CC3Material manages information about a material that is used to cover one or more meshes.
@@ -77,6 +85,53 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
  *     with materials can be changed using standard cocos2d CCTint and CCFade actions, making
  *     it easier for you to add dynamic coloring effects to your nodes.
  * 
+ * Textures are optional. In some cases, if simple solid coloring is to be used, the material
+ * may hold no texture at all. This solid coloring will still interact with lighting, creating
+ * a realistic surface.
+ *
+ * More commonly, a material will hold a single instance of CC3Texture in the texture
+ * property to provide a simple single-texture surface. This is the most common application
+ * of textures to a material.
+ *
+ * For more sophisticated surfaces, materials also support multi-texturing, where more than
+ * one instance of CC3Texture is added to the material using the addTexture: method. Using
+ * multi-texturing, these textures can be combined in flexible, customized fashion,
+ * permitting sophisticated surface effects.
+ *
+ * With OpenGL, multi-texturing is processed by a chain of texture units. The material's
+ * first texture is processed by the first texture unit (texture unit zero), and subsequent
+ * textures held in the material are processed by subsequent texture units, in the order in
+ * which the textures were added to the material.
+ * 
+ * Each texture unit combines its texture with the output of the previous texture unit
+ * in the chain. Combining textures is quite flexible under OpenGL, and there are many
+ * ways that each texture can be combined with the output of the previous texture unit.
+ * The way that a particular texture combines with the previous textures is defined by
+ * an instance of CC3TextureUnit, held in the textureUnit property of each texture that
+ * was added to the material.
+ *
+ * For example, to configure a material for bump-mapping, add a texture that contains a
+ * normal vector at each pixel instead of a color, and set the textureUnit property of
+ * the texture to a CC3BumpMapTextureUnit. You can then combine the output of this
+ * bump-mapping with an additional texture that contains the image that will be visible,
+ * to provide a detailed 3D bump-mapped surface. To do so, add that second texture to
+ * the material, with a texture unit that defines how that addtional texture is to be
+ * combined with the output of the bump-mapped texture.
+ *
+ * The maximum number of texture units is platform dependent, and can be read from
+ * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. This effectively defines
+ * how many textures you can add to a material.
+ *
+ * You'll notice that there are two ways to assign textures to a material: through the
+ * texture propety, and through the addTexture: method. The texture property exists for
+ * the common case where only one texture is attached to a material. The addTexture:
+ * method is used when more than one texture is to be added to the material. However,
+ * for the first texture, the two mechanisms are synonomous. The texture property
+ * corresponds to the first texture added using the addTexture: method, and for that
+ * first texture, you can use either the texture property or the addTexture: method.
+ * When multi-texturing, for consistency and simplicity, you would likely just use the
+ * addTexture: method for all textures added to the material, including the first texture.
+ * 
  * Each CC3MeshNode instance references an instance of CC3Material. Many CC3MeshNode
  * instances may reference the same instance of CC3Material, allowing many objects to
  * be covered by the same material.
@@ -93,6 +148,7 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
  */
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol> {
 	CC3Texture* texture;
+	NSMutableArray* textureOverlays;
 	ccColor4F ambientColor;
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
@@ -100,11 +156,26 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
 	GLfloat shininess;
 	GLenum sourceBlend;
 	GLenum destinationBlend;
+	BOOL shouldUseLighting;
 	BOOL isOpaque;
 }
 
-/** The texture covering this material. This may be left nil if no texture is needed. */
-@property(nonatomic, retain) CC3Texture* texture;
+/**
+ * If this value is set to YES, current lighting conditions will be taken into consideration
+ * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
+ * emissionColor, and shininess properties will interact with lighting settings.
+ *
+ * If this value is set to NO, lighting conditions will be ignored when drawing colors and
+ * textures, and the emissionColor will be applied to the mesh surface without regard to
+ * lighting. Blending will still occur, but the other material aspects, including ambientColor,
+ * diffuseColor, specularColor, and shininess will be ignored. This is useful for a cartoon
+ * effect, where you want a pure color, or the natural colors of the texture, to be included
+ * in blending calculations, without having to arrange lighting, or if you want those colors
+ * to be displayed in their natural values despite current lighting conditions.
+ *
+ * The initial value of this property is YES.
+ */
+@property(nonatomic, assign) BOOL shouldUseLighting;
 
 /**
  * The color of this material under ambient lighting.
@@ -142,7 +213,12 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
  */
 @property(nonatomic, assign) ccColor4F emissionColor;
 
-/** The shininess of this material. Initially set to kCC3DefaultMaterialShininess. */
+/**
+ * The shininess of this material.
+ * 
+ * This value is clamped to between zero and kCC3MaximumMaterialShininess.
+ * Initially set to kCC3DefaultMaterialShininess.
+ */
 @property(nonatomic, assign) GLfloat shininess;
 
 /**
@@ -298,6 +374,128 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
 @property(nonatomic, assign) GLubyte opacity;
 
 
+#pragma mark Textures
+
+/**
+ * When using a single texture for this material, this property holds that texture.
+ *
+ * This property may be left nil if no texture is needed.
+ *
+ * When using multiple textures for this material, this property holds the first
+ * texture. You can add additional textures using the addTexture: method.
+ *
+ * As a convenience, this property can also be set using the addTexture: method,
+ * which will set this property if it has not been set already. This is useful when
+ * using multi-texturing, because it allows all textures attached to this material
+ * to be handled the same way.
+ *
+ * The texture held by this property will be processed by the first GL texture unit
+ * (texture unit zero). 
+ */
+@property(nonatomic, retain) CC3Texture* texture;
+
+/**
+ * Returns the number of textures attached to this material, regardless of whether
+ * the textures were attached using the texture property or the addTexture: method.
+ */
+@property(nonatomic, readonly) GLuint textureCount;
+
+/**
+ * Returns whether this material contains a texture that is configured as a bump-map.
+ *
+ * Returns YES only if one of the textures that was added to this material (either
+ * through the texture property or the addTexture: method) returns YES from its
+ * isBumpMap property. Otherwise, this property returns NO.
+ */
+@property(nonatomic, readonly) BOOL hasBumpMap;
+
+/**
+ * The direction, in local tangent coordinates, of the light source that is to
+ * interact with any texture contained in this material that has been configured
+ * as a bump-map.
+ *
+ * Bump-maps are textures that store a normal vector (XYZ coordinates) in
+ * the RGB components of each texture pixel, instead of color information.
+ * These per-pixel normals interact with the value of this lightDirection
+ * property (through a dot-product), to determine the luminance of the pixel.
+ *
+ * Setting this property sets the equivalent property in all textures contained
+ * within this material.
+ *
+ * Reading this value returns the value of the equivalent property in the first
+ * texture that is configrued as a bump-map. Otherwise kCC3VectorZero is returned.
+ *
+ * The value of this property must be in the tangent-space coordinates associated
+ * with the texture UV space, in practice, this property is typically not set
+ * directly. Instead, you can use the globalLightLocation property of the mesh
+ * node that is making use of this texture.
+ */
+@property(nonatomic, assign) CC3Vector lightDirection;
+
+/**
+ * In most situations, the material will use a single CC3Texture in the texture property.
+ * However, if multi-texturing is used, additional CC3Texture instances can be provided
+ * by adding them using this method.
+ *
+ * When multiple textures are attached to a material, when drawing, the material will
+ * combine these textures together using configurations contained in the textureUnit
+ * property of each texture.
+ *
+ * As a consistency convenience, if the texture property has not yet been set directly,
+ * the first texture added using this method will appear in that property.
+ *
+ * Textures are processed by GL texture units in the order they are added to the material.
+ * The first texture added (or set directly into the texture property) will be processed
+ * by GL texture unit zero. Subsequent textures added with this method will be processed
+ * by subsequent texture units, in the order they were added.
+ *
+ * The maximum number of texture units available is platform dependent, but will
+ * be at least two. The maximum number of texture units available can be read from
+ * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. If you attempt to
+ * add more than this number of textures to the material, the additional textures
+ * will be ignored, and an informational message to that fact will be logged.
+ */
+-(void) addTexture: (CC3Texture*) aTexture;
+
+/**
+ * Removes the specified texture from this material.
+ *
+ * If the specified texture is that in the texture property, that property is set to nil.
+ */
+-(void) removeTexture: (CC3Texture*) aTexture;
+
+/** Removes all textures from this material. */
+-(void) removeAllTextures;
+
+/**
+ * Returns the texture with the specified name, that was added either via the texture
+ * property or via the addTexture: method. Returns nil if such a texture cannot be found.
+ */
+-(CC3Texture*) getTextureNamed: (NSString*) aName;
+
+/**
+ * Returns the texture that will be processed by the texture unit with the specified
+ * index, which should be a number between zero, and one less than the value of the
+ * textureCount property.
+ *
+ * The value returned will be nil if there are no textures.
+ */
+-(CC3Texture*) textureForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the texture that will be processed by the texture unit with the specified index,
+ * which should be a number between zero, and the value of the textureCount property.
+ * 
+ * If the specified index is less than the number of texture units added already, the
+ * specified texture will replace the one assigned to that texture unit. Otherwise, this
+ * implementation will invoke the addTexture: method to add the texture to this material.
+ *
+ * If the specified texture unit index is zero, the value of the texture property will
+ * be changed to the specified texture.
+ */
+-(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
+
+
 #pragma mark Allocation and initialization
 
 /**
@@ -360,16 +558,27 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
 #pragma mark Drawing
 
 /**
- * If needed, applies this material to the GL engine.
+ * Applies this material to the GL engine. The specified visitor encapsulates
+ * the frustum of the currently active camera, and certain drawing options.
  *
- * This implementation first determine if this material is different than the material that
- * was last bound to the GL engine. If this material is indeed different, this method
+ * This implementation first determines if this material is different than the material
+ * that was last bound to the GL engine. If this material is indeed different, this method
  * applies the material to the GL engine, otherwise it does nothing.
  *
- * This method is invoked from the draw method of any CC3Node instance referencing this
- * CC3Material intance. Usually, the application never needs to invoke this method directly.
+ * Draws this texture to the GL engine as follows:
+ *  - Applies the blending properties to the GL engine
+ *  - Applies the various lighting and color properties to the GL engine
+ *  - Binds the texture property to the GL engine as texture unit zero.
+ *  - Binds any additional textures added using addTexture: to additional texture units.
+ *  - Disables any unused texture units.
+ *
+ * If the texture property is nil, and there are no overlays, all texture units
+ * in the GL engine will be disabled.
+ *
+ * This method is invoked automatically during node drawing. Usually, the application
+ * never needs to invoke this method directly.
  */
--(void) draw;
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Unbinds the GL engine from any materials.
@@ -383,9 +592,9 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
  * Unbinds the GL engine from any materials.
  * 
  * Disables material blending in the GL engine, and invokes the unbind class method
- * of CC3Texture to disable texturing.
+ * of CC3Texture to disable all texturing.
  *
- * This method is invoked automatically from the CC3VertexArrayMeshModel instance.
+ * This method is invoked automatically from the CC3Node instance.
  * Usually, the application never needs to invoke this method directly.
  */
 +(void) unbind;
@@ -396,10 +605,9 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
 /**
  * Resets the tracking of the material switching functionality.
  *
- * This is invoked automatically by the CC3World at the beginning of each frame drawing cycle.
- * Usually, the application never needs to invoke this method directly.
+ * This is invoked automatically by the CC3World at the beginning of each frame
+ * drawing cycle. Usually, the application never needs to invoke this method directly.
  */
 +(void) resetSwitching;
 
 @end
-

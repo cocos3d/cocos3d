@@ -1,7 +1,7 @@
 /*
  * CC3VertexArraysPODExtensions.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -72,13 +72,13 @@
  * Initializes this instance from the  specified SPODMesh structure,
  * using the specified texture channel.
  */
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureChannel: (GLuint) texChannelIndex;
+-(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit;
 
 /**
  * Allocates and initializes an autoreleased instance from the
  * specified SPODMesh structure, using the specified texture channel.
  */
-+(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureChannel: (GLuint) texChannelIndex;
++(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit;
 
 /**
  * Initializes this instance from the  specified SPODMesh structure,

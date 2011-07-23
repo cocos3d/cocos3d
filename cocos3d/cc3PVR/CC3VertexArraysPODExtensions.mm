@@ -1,7 +1,7 @@
 /*
  * CC3VertexArraysPODExtensions.mm
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,10 +39,13 @@ extern "C" {
 
 #pragma mark CC3VertexArray PVRPOD extensions
 
+@interface CC3VertexArray (PVRPODTemplateMethods)
+	-(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh;
+@end
+
 @implementation CC3VertexArray (PVRPOD)
 
--(id) initFromCPODData: (PODClassPtr) aCPODData
-		  fromSPODMesh: (PODStructPtr) aSPODMesh {
+-(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
 	CPODData* pcd = (CPODData*)aCPODData;
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
@@ -53,20 +56,11 @@ extern "C" {
 			self.elementSize = elemSize;
 			self.elementStride = pcd->nStride;
 			self.elementCount = psm->nNumVertex;
-			if (psm->pInterleaved) {					// vertex data is interleaved
-				self.elements = psm->pInterleaved;
-				self.elementOffset = (GLuint)pcd->pData;
-			} else {									// not interleaved
-				self.elements = pcd->pData;
-				elementsAreRetained = YES;	// CC3VertexArray instance will free data when needed.
-				pcd->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
-				self.elementOffset = 0;
-			}
+			[self setElementsFromCPODData: pcd fromSPODMesh: psm];
 		} else {
 			[self release];
 			return nil;
 		}
-		
 	}
 	return self;
 }
@@ -78,7 +72,19 @@ extern "C" {
 
 +(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh {
 	return [[[self alloc] initFromSPODMesh: aSPODMesh] autorelease];
+}
 
+/** Template method extracts the vertex data from the specified SPODMesh and CPODData structures.  */
+-(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
+	if (aSPODMesh->pInterleaved) {					// vertex data is interleaved
+		self.elements = aSPODMesh->pInterleaved;
+		self.elementOffset = (GLuint)aCPODData->pData;
+	} else {										// not interleaved
+		self.elements = aCPODData->pData;
+		elementsAreRetained = YES;			// CC3VertexArray instance will free data when needed.
+		aCPODData->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
+		self.elementOffset = 0;
+	}
 }
 
 @end
@@ -119,11 +125,10 @@ extern "C" {
 	return [self initFromCPODData: &psm->sVertex fromSPODMesh: aSPODMesh];
 }
 
--(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
-	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
-		elementsAreRetained = YES;	// CC3VertexLocations manages freeing either dedicated or interleaved data
-	}
-	return self;
+/** CC3VertexLocations manages freeing either dedicated or interleaved data */
+-(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
+	[super setElementsFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
+	elementsAreRetained = YES;
 }
 
 @end
@@ -161,21 +166,21 @@ extern "C" {
 @implementation CC3VertexTextureCoordinates (PVRPOD)
 
 -(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	return [self initFromSPODMesh: aSPODMesh forTextureChannel: 0];
+	return [self initFromSPODMesh: aSPODMesh forTextureUnit: 0];
 }
 
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureChannel: (GLuint) texChannelIndex {
+-(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	if (texChannelIndex < psm->nNumUVW) {
-		return [self initFromCPODData: &psm->psUVW[texChannelIndex] fromSPODMesh: aSPODMesh];
+	if (texUnit < psm->nNumUVW) {
+		return [self initFromCPODData: &psm->psUVW[texUnit] fromSPODMesh: aSPODMesh];
 	} else {
 		[self release];
 		return nil;
 	}
 }
 
-+(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureChannel: (GLuint) texChannelIndex {
-	return [[[self alloc] initFromSPODMesh: aSPODMesh forTextureChannel: texChannelIndex] autorelease];
++(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
+	return [[[self alloc] initFromSPODMesh: aSPODMesh forTextureUnit: texUnit] autorelease];
 }
 
 @end
@@ -191,17 +196,19 @@ extern "C" {
 	return [self initFromCPODData: &psm->sFaces fromSPODMesh: aSPODMesh];
 }
 
+/** Calc elementCount after drawingMode has been set. */
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	CPODData* pcd = (CPODData*)aCPODData;
 	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
-		self.elementCount = [self vertexCountFromFaceCount: psm->nNumFaces];
-		self.elements = pcd->pData;
-		elementsAreRetained = YES;	// CC3VertexIndices instance will free data when needed.
-		pcd->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
-		self.elementOffset = 0;		// Indices are not interleaved.
+		self.elementCount = [self vertexCountFromFaceCount: ((SPODMesh*)aSPODMesh)->nNumFaces];
 	}
 	return self;
+}
+
+-(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
+	self.elements = aCPODData->pData;
+	elementsAreRetained = YES;			// CC3VertexIndices instance will free data when needed.
+	aCPODData->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
+	self.elementOffset = 0;				// Indices are not interleaved.
 }
 
 @end

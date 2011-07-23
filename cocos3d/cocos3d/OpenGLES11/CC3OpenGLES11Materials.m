@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Materials.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -121,6 +121,11 @@
 	LogTrace("%@ %@ %@ = %@ and %@ = %@", [self class], (shouldSetGL ? @"applied" : @"reused"),
 			 NSStringFromGLEnum(sourceBlend.name), NSStringFromGLEnum(sourceBlend.value),
 			 NSStringFromGLEnum(destinationBlend.name), NSStringFromGLEnum(destinationBlend.value));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@:\n    %@\n    %@",
+			[self class], sourceBlend, destinationBlend];
 }
 
 @end

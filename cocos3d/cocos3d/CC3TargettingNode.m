@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,9 +35,11 @@
 -(void) applyRotation;
 -(void) updateTransformMatrices;
 -(void) populateFrom: (CC3Node*) another;
+@property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
 @end
 
 @interface CC3TargettingNode (TemplateMethods)
+-(CC3Vector) rotationallyRestrictTargetLocation: (CC3Vector) aLocation;
 @property(nonatomic, readonly) BOOL isNewTarget;
 @property(nonatomic, readonly) BOOL isTargetLocationDirty;
 @property(nonatomic, readonly) BOOL isRotatorDirtyByTargetLocation;
@@ -45,7 +47,7 @@
 
 @implementation CC3TargettingNode
 
-@synthesize target, targetLocation, shouldTrackTarget;
+@synthesize target, targetLocation, shouldTrackTarget, axisRestriction;
 
 -(void) dealloc {
 	[target release];
@@ -100,7 +102,7 @@
 }
 
 -(void) setTargetLocation: (CC3Vector) aLocation {
-	targetLocation = aLocation;
+	targetLocation = [self rotationallyRestrictTargetLocation: aLocation];
 	isTargetLocationDirty = NO;
 	[self markTransformDirty];
 	// Target location cannot be applied immediately, because the direction to the target depends on
@@ -108,8 +110,38 @@
 	isRotatorDirtyByTargetLocation = YES;
 }
 
+/**
+ * If the value of the axisRestriction property is set to one of kCC3TargettingAxisRestrictionXAxis, 
+ * kCC3TargettingAxisRestrictionYAxis or kCC3TargettingAxisRestrictionZAxis, the value of the
+ * corresponding component of the specified location will be set to the value of that component
+ * from the globalLocation of this node. The result is that rotation will be restricted to only
+ * that axis. For example, by setting the axisRestriction property to kCC3TargettingAxisRestrictionYAxis,
+ * the Y-component of the specified location will be set to the Y-component of the globalLocation
+ * of this targetting node.
+ */
+-(CC3Vector) rotationallyRestrictTargetLocation: (CC3Vector) aLocation {
+	switch (axisRestriction) {
+		case kCC3TargettingAxisRestrictionXAxis:
+			aLocation.x = self.globalLocation.x;
+			break;
+		case kCC3TargettingAxisRestrictionYAxis:
+			aLocation.y = self.globalLocation.y;
+			break;
+		case kCC3TargettingAxisRestrictionZAxis:
+			aLocation.z = self.globalLocation.z;
+			break;
+		default:
+			break;
+	}
+	return aLocation;
+}
+
 -(CC3Vector) forwardDirection {
 	return ((CC3DirectionalRotator*)rotator).forwardDirection;
+}
+
+-(CC3Vector) globalForwardDirection {
+	return [self.globalRotationMatrix extractForwardDirection];
 }
 
 -(void) setForwardDirection: (CC3Vector) aDirection {
@@ -122,6 +154,10 @@
 
 -(CC3Vector) upDirection {
 	return ((CC3DirectionalRotator*)rotator).upDirection;
+}
+
+-(CC3Vector) globalUpDirection {
+	return [self.globalRotationMatrix extractUpDirection];
 }
 
 -(CC3Vector) worldUpDirection {
@@ -137,6 +173,10 @@
 	return ((CC3DirectionalRotator*)rotator).rightDirection;
 }
 
+-(CC3Vector) globalRightDirection {
+	return [self.globalRotationMatrix extractRightDirection];
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -144,6 +184,7 @@
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		target = nil;
 		targetLocation = kCC3VectorZero;
+		axisRestriction = kCC3TargettingAxisRestrictionNone;
 		isNewTarget = NO;
 		shouldTrackTarget = NO;
 		isTargetLocationDirty = NO;
@@ -175,6 +216,7 @@
 	target = [another.target retain];			// retained...not copied
 
 	targetLocation = another.targetLocation;
+	axisRestriction = another.axisRestriction;
 	isNewTarget = another.isNewTarget;
 	shouldTrackTarget = another.shouldTrackTarget;
 	isTargetLocationDirty = another.isTargetLocationDirty;
@@ -313,9 +355,10 @@
 
 -(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
 	if ( (self = [super initOnRotationMatrix: aGLMatrix]) ) {
-		forwardDirection = kCC3VectorUnitZNegative;
-		upDirection = kCC3VectorUnitYPositive;
-		worldUpDirection = kCC3VectorUnitYPositive;
+		forwardDirection = kCC3VectorInitialForwardDirection;
+		upDirection = kCC3VectorInitialUpDirection;
+		worldUpDirection = kCC3VectorInitialUpDirection;
+		rightDirection = kCC3VectorInitialRightDirection;
 		isForwardDirectionDirty = NO;
 		isUpDirectionDirty = NO;
 		isRightDirectionDirty = NO;
@@ -396,6 +439,22 @@
 			NSStringFromCC3Vector(self.forwardDirection),
 			NSStringFromCC3Vector(self.upDirection),
 			NSStringFromCC3Vector(self.worldUpDirection)];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3LightTracker
+
+@implementation CC3LightTracker
+
+-(void) trackTarget {
+	if (target && (isNewTarget || shouldTrackTarget)) {
+		self.globalLightLocation = target.globalLocation;
+		LogTrace(@"%@ tracking adjusted to target", [self fullDescription]);
+	}
+	isNewTarget = NO;
 }
 
 @end

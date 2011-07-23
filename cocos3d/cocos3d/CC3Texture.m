@@ -1,7 +1,7 @@
 /*
  * CC3Texture.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,16 +39,21 @@
 
 @interface CC3Texture (TemplateMethods)
 -(void) updateTexture2DWithParameters;
--(void) bindGL;
+-(void) drawMainWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) drawOverlaysWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindToGLTextureUnit: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+				withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 
 @implementation CC3Texture
 
-@synthesize texture, textureParameters, textureChannel;
+@synthesize texture, textureUnit, textureParameters;
 
 -(void) dealloc {
 	[texture release];
+	[textureUnit release];
 	[super dealloc];
 }
 
@@ -84,6 +89,19 @@
 -(void) updateTexture2DWithParameters {
 	[texture setTexParameters: &textureParameters];
 }
+
+-(CC3Vector) lightDirection {
+	return textureUnit ? textureUnit.lightDirection : kCC3VectorZero;
+}
+
+-(void) setLightDirection: (CC3Vector) aDirection {
+	textureUnit.lightDirection = aDirection;
+}
+
+-(BOOL) isBumpMap {
+	return textureUnit && textureUnit.isBumpMap;
+}
+
 
 #pragma mark Allocation and Initialization
 
@@ -127,8 +145,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		textureChannel = 0;
 		textureParameters = kCC3DefaultTextureParameters;
+		texture = nil;
+		textureUnit = nil;
 	}
 	return self;
 }
@@ -146,15 +165,17 @@
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
-// The 2D texture is not copied, but instead retained by reference, and shared between instances.
 -(void) populateFrom: (CC3Texture*) another {
 	[super populateFrom: another];
 	
+	// The 2D texture is not copied, but instead retained by reference, and shared between instances.
 	[texture release];
 	texture = [another.texture retain];				// retained
 
+	[textureUnit release];
+	textureUnit = [another.textureUnit copy];	// retained
+
 	textureParameters = another.textureParameters;
-	textureChannel = another.textureChannel;
 }
 
 
@@ -175,33 +196,49 @@ static GLuint lastAssignedTextureTag;
 
 #pragma mark Drawing
 
--(void) draw {
-	[self bindGL];
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (texture) {
+		[self bindGLWithVisitor: visitor];
+		visitor.textureUnit += 1;
+	}
+}
+
+-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGLES11TextureUnit* gles11TexUnit = [[CC3OpenGLES11Engine engine].textures textureUnitAt: visitor.textureUnit];
+	[gles11TexUnit.texture2D enable];
+	gles11TexUnit.textureBinding.value = texture.name;
+	[self bindToGLTextureUnit: gles11TexUnit withVisitor: visitor];
+	
+	LogTrace(@"%@ bound to %@", self, gles11TexUnit);
 }
 
 /**
  * If the texture property is not nil, binds this texture to the  GL engine, in the
- * texture channel indicated by the textureChannel property. If the texture property
- * is nil, invokes the unbind method to disable texture handling in the GL engine.
+ * specified texture unit. If the texture property is nil, invokes the bindDefaultTo:
+ * method to disable texture handling in the GL engine.
  */
--(void) bindGL {
-	if (texture) {
-		[[CC3OpenGLES11Engine engine].serverCapabilities.texture2D enable];
-		CC3OpenGLES11Textures* gles11Textures = [CC3OpenGLES11Engine engine].textures;
-		gles11Textures.activeTexture.value = textureChannel;
-		gles11Textures.clientActiveTexture.value = textureChannel;
-		gles11Textures.textureBinding.value = texture.name;
+-(void) bindToGLTextureUnit: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+				withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (textureUnit) {
+		[textureUnit bindTo: gles11TexUnit withVisitor: visitor];
 	} else {
-		[self unbind];
+		[CC3TextureUnit bindDefaultTo: gles11TexUnit];
 	}
 }
 
--(void) unbind {
-	[[self class] unbind];
++(void) unbind: (GLuint) texUnit {
+	[[[CC3OpenGLES11Engine engine].textures textureUnitAt: texUnit].texture2D disable];
+}
+
++(void) unbindRemainingFrom: (GLuint)texUnit {
+	GLuint maxTexUnits = [CC3OpenGLES11Engine engine].textures.textureUnitCount;
+	for (int tu = texUnit; tu < maxTexUnits; tu++) {
+		[self unbind: tu];
+	}
 }
 
 +(void) unbind {
-	[[CC3OpenGLES11Engine engine].serverCapabilities.texture2D disable];
+	[self unbindRemainingFrom: 0];
 }
 
 @end

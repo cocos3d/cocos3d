@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -120,7 +120,6 @@
 	CC3OpenGLES11StateTrackerEnumeration* mode;
 	CC3OpenGLES11MatrixStack* modelview;
 	CC3OpenGLES11MatrixStack* projection;
-	CC3OpenGLES11MatrixStack* texture;
 }
 
 /** Tracks matrix mode (GL get name GL_MATRIX_MODE and set function glMatrixMode). */
@@ -131,8 +130,5 @@
 
 /** Manages the projection matrix stack. */
 @property(nonatomic, retain) CC3OpenGLES11MatrixStack* projection;
-
-/** Manages the texture matrix stack. */
-@property(nonatomic, retain) CC3OpenGLES11MatrixStack* texture;
 
 @end

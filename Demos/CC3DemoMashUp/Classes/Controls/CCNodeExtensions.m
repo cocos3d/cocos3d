@@ -1,7 +1,7 @@
 /*
  * CCNodeExtensions.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010 The Brenwill Workshop Ltd.
  * http://www.brenwill.com

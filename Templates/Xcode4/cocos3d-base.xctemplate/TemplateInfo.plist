@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>Description</key>
+	<string>Standard cocos3d project settings.</string>
 	<key>Identifier</key>
-	<string>com.benwill.cocos3dBase</string>
+	<string>com.brenwill.cocos3dBase</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Project</key>
@@ -38,9 +40,31 @@
 			<key>TARGETED_DEVICE_FAMILY</key>
 			<string>1,2</string>
 			<key>WARNING_CFLAGS</key>
-			<string>-Wall
-</string>
+			<array>
+				<string>-Wall</string>
+				<string>-Werror</string>
+			</array>
+			<key>OTHER_LDFLAGS</key>
+			<array>
+				<string>-lz</string>
+				<string>-all_load</string>
+				<string>-ObjC</string>
+			</array>
 		</dict>
 	</dict>
+	<key>Targets</key>
+	<array>
+		<dict>
+			<key>SharedSettings</key>
+			<dict>
+				<key>OTHER_LDFLAGS</key>
+				<array>
+					<string>-lz</string>
+					<string>-all_load</string>
+					<string>-ObjC</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

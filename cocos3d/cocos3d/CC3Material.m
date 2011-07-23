@@ -1,7 +1,7 @@
 /*
  * CC3Material.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,22 +37,21 @@
 @end
 
 @interface CC3Material (TemplateMethods)
--(void) apply;
 -(void) applyColors;
 -(void) applyBlend;
--(void) drawTexture;
+-(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) checkIsOpaque;
 -(BOOL) switchingMaterial;
 @end
 
-
 @implementation CC3Material
 
 @synthesize ambientColor, diffuseColor, specularColor, emissionColor, shininess;
-@synthesize texture, sourceBlend, destinationBlend, isOpaque;
+@synthesize texture, sourceBlend, destinationBlend, shouldUseLighting, isOpaque;
 
 -(void) dealloc {
 	[texture release];
+	[textureOverlays release];
 	[super dealloc];
 }
 
@@ -74,6 +73,10 @@
 -(void) setEmissionColor: (ccColor4F) aColor {
 	emissionColor = aColor;
 	[self checkIsOpaque];
+}
+
+-(void) setShininess: (GLfloat) aValue {
+	shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess);		// clamp to allowed range
 }
 
 -(void) setSourceBlend: (GLenum) aBlend {
@@ -102,6 +105,7 @@
 	}
 	[self checkIsOpaque];
 }
+
 
 #pragma mark CCRGBAProtocol support
 
@@ -167,10 +171,156 @@
 }
 
 
+#pragma mark Textures
+
+-(GLuint) textureCount {
+	return (textureOverlays ? textureOverlays.count : 0) + (texture ? 1 : 0);
+}
+
+-(BOOL) hasBumpMap {
+	// Check the first texture.
+	if (texture && texture.isBumpMap) {
+		return YES;
+	}
+
+	// Then check in the overlays array
+	if (textureOverlays) {
+		for (CC3Texture* ot in textureOverlays) {
+			if (ot.isBumpMap) {
+				return YES;
+			}
+		}
+	}
+	return NO;
+}
+
+-(CC3Vector) lightDirection {
+	// Check the first texture.
+	if (texture && texture.isBumpMap) {
+		return texture.lightDirection;
+	}
+	
+	// Then check in the overlays array
+	if (textureOverlays) {
+		for (CC3Texture* ot in textureOverlays) {
+			if (ot.isBumpMap) {
+				return ot.lightDirection;
+			}
+		}
+	}
+	return kCC3VectorZero;
+}
+
+-(void) setLightDirection: (CC3Vector) aDirection {
+	// Set the first texture.
+	texture.lightDirection = aDirection;
+	
+	// Then check in the overlays array
+	if (textureOverlays) {
+		for (CC3Texture* ot in textureOverlays) {
+			ot.lightDirection = aDirection;
+		}
+	}
+}
+
+// If the texture property has not been set yet, set it. Otherwise add as an overlay.
+-(void) addTexture: (CC3Texture*) aTexture {
+	LogTrace(@"Adding %@ to %@", aTexture, self);
+	if (aTexture) {
+		if (!texture) {
+			self.texture = aTexture;
+		} else {
+			if(!textureOverlays) {
+				textureOverlays = [[NSMutableArray array] retain];
+			}
+			GLint maxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
+			if (self.textureCount < maxTexUnits) {
+				[textureOverlays addObject: aTexture];
+			} else {
+				LogInfo(@"Attempt to add texture %@ to %@ ignored because platform supports only %i texture units.",
+						aTexture, self, maxTexUnits);
+			}
+		}
+	}
+}
+
+// If it's the texture property, clear it, otherwise remove the overlay.
+-(void) removeTexture: (CC3Texture*) aTexture {
+	LogTrace(@"Removing %@ from %@", aTexture, self);
+	if (texture == aTexture) {
+		self.texture = nil;
+	} else {
+		if (textureOverlays && aTexture) {
+			[textureOverlays removeObjectIdenticalTo: aTexture];
+			if (textureOverlays.count == 0) {
+				[textureOverlays release];
+				textureOverlays = nil;
+			}
+		}
+	}
+}
+
+-(void) removeAllTextures {
+	// Remove the first texture
+	[self removeTexture: texture];
+
+	// Remove the overlay textures
+	if (textureOverlays) {
+		NSArray* myOTs = [textureOverlays copyAutoreleased];
+		for (CC3Texture* ot in myOTs) {
+			[self removeTexture: ot];
+		}
+	}
+}
+
+-(CC3Texture*) textureForTextureUnit: (GLuint) texUnit {
+	// If first texture unit, return texture property, otherwise retrieve from overlay array
+	if (texUnit == 0) {
+		return texture;
+	} else {
+		return [textureOverlays objectAtIndex: (texUnit - 1)];
+	}
+}
+
+-(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
+	NSAssert(aTexture, @"Overlay texture cannot be nil");
+	if (texUnit == 0) {
+		self.texture = aTexture;
+	} else if (texUnit < self.textureCount) {
+		[textureOverlays replaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
+	} else {
+		[self addTexture: aTexture];
+	}
+}
+
+-(CC3Texture*) getTextureNamed: (NSString*) aName {
+	NSString* tcName;
+	
+	// First check if the first texture is the one
+	if (texture) {
+		tcName = texture.name;
+		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+			return texture;
+		}
+	}
+	// Then look for it in the overlays array
+	if (textureOverlays) {
+		for (CC3Texture* ot in textureOverlays) {
+			tcName = ot.name;
+			if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+				return ot;
+			}
+		}
+	}
+	return nil;
+}
+
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		texture = nil;
+		textureOverlays = nil;
 		ambientColor = kCC3DefaultMaterialColorAmbient;
 		diffuseColor = kCC3DefaultMaterialColorDiffuse;
 		specularColor = kCC3DefaultMaterialColorSpecular;
@@ -178,6 +328,7 @@
 		shininess = kCC3DefaultMaterialShininess;
 		sourceBlend = [[self class] defaultSourceBlend];
 		destinationBlend = [[self class] defaultDestinationBlend];
+		shouldUseLighting = YES;
 		[self checkIsOpaque];
 	}
 	return self;
@@ -216,13 +367,13 @@
 	return mat;
 }
 
+// Protected properties for copying
+-(NSArray*) textureOverlays { return textureOverlays; }
+
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Material*) another {
 	[super populateFrom: another];
-	
-	[texture release];
-	texture = [another.texture copy];			// retained
 
 	ambientColor = another.ambientColor;
 	diffuseColor = another.diffuseColor;
@@ -231,7 +382,21 @@
 	shininess = another.shininess;
 	sourceBlend = another.sourceBlend;
 	destinationBlend = another.destinationBlend;
+	shouldUseLighting = another.shouldUseLighting;
 	isOpaque = another.isOpaque;
+	
+	[texture release];
+	texture = [another.texture copy];			// retained
+	
+	// Remove any existing overlays and add the overlays from the other material.
+	[textureOverlays removeAllObjects];
+	NSArray* otherOTs = another.textureOverlays;
+	if (otherOTs) {
+		for (CC3Texture* ot in otherOTs) {
+			[self addTexture: [ot copyAutoreleased]];	// retained by collection
+		}
+	}
+
 }
 
 static GLenum defaultSourceBlend = GL_ONE;
@@ -255,11 +420,12 @@ static GLenum defaultDestinationBlend = GL_ZERO;
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@)",
+	return [NSString stringWithFormat: @"%@, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), with %u textures",
 			[super fullDescription], NSStringFromCCC4F(ambientColor),
 			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor),
 			NSStringFromCCC4F(emissionColor), shininess,
-			NSStringFromGLEnum(sourceBlend), NSStringFromGLEnum(destinationBlend)];
+			NSStringFromGLEnum(sourceBlend), NSStringFromGLEnum(destinationBlend),
+			self.textureCount];
 }
 
 
@@ -280,20 +446,14 @@ static GLuint lastAssignedMaterialTag;
 
 #pragma mark Drawing
 
--(void) draw {
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ([self switchingMaterial]) {
-		[self apply];
+		[self applyBlend];
+		[self applyColors];
+		[self drawTexturesWithVisitor: visitor];
 	} else {
 		LogTrace(@"Reusing currently bound %@", self);
 	}
-}
-
-/** Applies this material to the GL engine. */
--(void) apply {
-	LogTrace(@"Applying %@", self);
-	[self applyBlend];
-	[self applyColors];
-	[self drawTexture];
 }
 
 /**
@@ -306,23 +466,42 @@ static GLuint lastAssignedMaterialTag;
 	[gles11Engine.materials.blend applySource: sourceBlend andDestination: destinationBlend];
 }
 
-/** Applies the color and shininess properties to the GL engine. */
+/**
+ * If the shouldUseLighting property is YES, applies the color and shininess properties to
+ * the GL engine, otherwise turns lighting off and applies emission color as a flat color.
+ */
 -(void) applyColors {
-	CC3OpenGLES11Materials* gles11Materials = [CC3OpenGLES11Engine engine].materials;
-	gles11Materials.ambientColor.value = ambientColor;
-	gles11Materials.diffuseColor.value = diffuseColor;
-	gles11Materials.specularColor.value = specularColor;
-	gles11Materials.emissionColor.value = emissionColor;
-	gles11Materials.shininess.value = shininess;
+	if (shouldUseLighting) {
+		CC3OpenGLES11Materials* gles11Materials = [CC3OpenGLES11Engine engine].materials;
+		gles11Materials.ambientColor.value = ambientColor;
+		gles11Materials.diffuseColor.value = diffuseColor;
+		gles11Materials.specularColor.value = specularColor;
+		gles11Materials.emissionColor.value = emissionColor;
+		gles11Materials.shininess.value = shininess;
+	} else {
+		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+		[gles11Engine.serverCapabilities.lighting disable];
+		gles11Engine.state.color.value = emissionColor;
+	}
 }
 
-/** If this instance has a texture, draw it, otherwise unbind all textures from the GL engine. */
--(void) drawTexture {
+/**
+ * Draw the texture property and the texture overlays using separate GL texture units
+ * The visitor keeps track of which texture unit is being processed, with each texture
+ * incrementing the texture unit index as it draws.
+ */
+-(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	visitor.textureUnit = 0;
 	if (texture) {
-		[texture draw];
-	} else {
-		[CC3Texture unbind];
+		[texture drawWithVisitor: visitor];
 	}
+	if (textureOverlays) {
+		for (CC3Texture* ot in textureOverlays) {
+			[ot drawWithVisitor: visitor];
+		}
+	}
+	[CC3Texture	unbindRemainingFrom: visitor.textureUnit];
+	visitor.textureUnitCount = visitor.textureUnit;
 }
 
 -(void) unbind {

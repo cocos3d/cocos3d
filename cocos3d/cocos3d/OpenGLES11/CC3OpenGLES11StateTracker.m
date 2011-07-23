@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -142,6 +142,10 @@
 
 -(void) logSetValue: (BOOL) wasSet {}
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ %@", [self class], NSStringFromGLEnum(self.name)];
+}
+
 @end
 
 
@@ -226,6 +230,42 @@
 
 -(void) restoreOriginalValue {
 	self.value = originalValue;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)", [super description],
+				NSStringFromBoolean(self.value), NSStringFromBoolean(self.originalValue)];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerCapability
+
+@implementation CC3OpenGLES11StateTrackerCapability
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
+-(void) enable {
+	self.value = YES;
+}
+
+-(void) disable {
+	self.value = NO;
+}
+
+-(void) logSetValue: (BOOL) wasSet {
+	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
+			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"));
 }
 
 @end
@@ -314,6 +354,11 @@
 	self.value = originalValue;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %.3f (orig %.3f)",
+			[super description], self.value, self.originalValue];
+}
+
 @end
 
 
@@ -398,6 +443,11 @@
 
 -(void) restoreOriginalValue {
 	self.value = originalValue;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %i (orig %i)",
+				[super description], self.value, self.originalValue];
 }
 
 @end
@@ -486,6 +536,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	self.value = originalValue;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
+				[super description], NSStringFromGLEnum(self.value), NSStringFromGLEnum(self.originalValue)];
+}
+
 @end
 
 
@@ -570,6 +625,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) restoreOriginalValue {
 	self.value = originalValue;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
+				[super description], NSStringFromCCC4F(self.value), NSStringFromCCC4F(self.originalValue)];
 }
 
 @end
@@ -753,6 +813,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	self.value = originalValue;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
+			[super description], NSStringFromCC3Viewport(self.value), NSStringFromCC3Viewport(self.originalValue)];
+}
+
 @end
 
 
@@ -796,6 +861,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) restoreOriginalValue {
 	self.value = originalValue;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %p (orig %p)",
+			[super description], self.value, self.originalValue];
 }
 
 @end
@@ -843,6 +913,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	self.value = originalValue;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
+			[super description], NSStringFromCC3Vector(self.value), NSStringFromCC3Vector(self.originalValue)];
+}
+
 @end
 
 
@@ -886,6 +961,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) restoreOriginalValue {
 	self.value = originalValue;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
+			[super description], NSStringFromCC3Vector4(self.value), NSStringFromCC3Vector4(self.originalValue)];
 }
 
 @end

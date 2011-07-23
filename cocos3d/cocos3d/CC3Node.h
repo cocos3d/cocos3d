@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -127,6 +127,7 @@
 	BOOL isTouchEnabled;
 	BOOL isAnimationEnabled;
 	BOOL visible;
+	BOOL isRunning;
 }
 
 /**
@@ -138,7 +139,7 @@
 
 /**
  * The location of the node in 3D space, relative to the global origin.
- * This is calculated by using the transformMatrix to translate the global origin (0,0,0).
+ * This is calculated by using the transformMatrix to translate the local origin (0,0,0).
  */
 @property(nonatomic, readonly) CC3Vector globalLocation;
 
@@ -320,8 +321,44 @@
  */
 @property(nonatomic, assign) BOOL shouldCullFrontFaces;
 
+/**
+ * Indicates whether the dynamic behaviour of this node is enabled.
+ *
+ * Setting this property affects both internal activities driven by the update process,
+ * and any CCActions controling this node. Setting this property to NO will effectively
+ * pause all update and CCAction behaviour on the node. Setting this property to YES will
+ * effectively resume the update and CCAction behaviour.
+ * 
+ * Setting this property sets the same property in all descendant nodes.
+ *
+ * Be aware that when this property is set to NO, any CCActions are just paused, not stopped.
+ * If you want to fully stop all CCActions on this node, use the stopAllActions method, or
+ * if you want to fully stop all CCActions on this node AND all descendant nodes, use the
+ * cleanup method.
+ */
+@property(nonatomic, assign) BOOL isRunning;
+
 
 #pragma mark Matierial coloring
+
+/**
+ * If this value is set to YES, current lighting conditions will be taken into consideration
+ * when drawing colors and textures, and the ambientColor, diffuseColor, specularColor,
+ * emissionColor, and shininess properties will interact with lighting settings.
+ *
+ * If this value is set to NO, lighting conditions will be ignored when drawing colors and
+ * textures, and the material emissionColor will be applied to the mesh surface without regard
+ * to lighting. Blending will still occur, but the other material aspects, including ambientColor,
+ * diffuseColor, specularColor, and shininess will be ignored. This is useful for a cartoon
+ * effect, where you want a pure color, or the natural colors of the texture, to be included
+ * in blending calculations, without having to arrange lighting, or if you want those colors
+ * to be displayed in their natural values despite current lighting conditions.
+ *
+ * Setting the value of this property sets the same property in the materials contained in all
+ * descendant nodes. Reading the value of this property returns YES if any descendant node
+ * returns YES, and returns NO otherwise.
+ */
+@property(nonatomic, assign) BOOL shouldUseLighting;
 
 /**
  * The ambient color of the materials of this node.
@@ -363,9 +400,27 @@
  */
 @property(nonatomic, assign) ccColor4F emissionColor;
 
+/**
+ * When a mesh node is textured with a DOT3 bump-map (normal map), this property indicates
+ * the location, in the global coordinate system, of the light that is illuminating the node.
+ * 
+ * When setting this property, this implementation sets the same property in all child nodes.
+ * Set the value of this property to the globalLocation of the light source. Bump-map textures
+ * may interact with only one light source.
+ *
+ * This property only needs to be set, and will only have effect when set, on individual
+ * CC3MeshNodes whose material is configured for bump-mapping. This property is provided in
+ * CC3Node as a convenience to automatically traverse the node structural hierarchy to set
+ * this property in all descendant nodes.
+ *
+ * When reading this property, this implementation returns the value of the same property
+ * from the first descendant node that is a CC3MeshNode and that contains a texture configured
+ * for bump-mapping. Otherwise, this implementation returns kCC3VectorZero.
+ */
+@property(nonatomic, assign) CC3Vector globalLightLocation;
+
 
 #pragma mark CCRGBAProtocol support
-
 
 /**
  * Implementation of the CCRGBAProtocol color property.
@@ -506,7 +561,7 @@
  * the GL engine. It is safe to invokde this method even if createGLBuffer has not
  * been invoked, and even if VBO buffering was unsuccessful.
  *
- * To exempt vertex location data from release, invoke the retainLocation method
+ * To exempt vertex location data from release, invoke the retainVertexLocations method
  * once before invoking this method. For example, sophisticated physics engines and
  * collision detection algorithms may make use of vertex location data in main memory.
  *
@@ -569,6 +624,12 @@
  * maxUpdateInterval property of the CC3World instance, the value of dt may be clamped to
  * an upper limit before being passed to this method. See the description of the CC3World
  * maxUpdateInterval property for more information about clamping the update interval.
+ * 
+ * If you wish to remove this node during an update visitation, avoid invoking the remove
+ * method on the node from this method. The visitation process involves iterating through
+ * collections of child nodes, and removing a node during the iteration of a collection
+ * raises an error. Instead, you can use the requestRemovalOf: method on the visitor,
+ * which safely processes all removal requests once the full visitation run is complete.
  *
  * As described in the class documentation, in keeping with best practices, updating the
  * model state should be kept separate from frame rendering. Therefore, when overriding
@@ -612,6 +673,12 @@
  * maxUpdateInterval property of the CC3World instance, the value of dt may be clamped to
  * an upper limit before being passed to this method. See the description of the CC3World
  * maxUpdateInterval property for more information about clamping the update interval.
+ * 
+ * If you wish to remove this node during an update visitation, avoid invoking the remove
+ * method on the node from this method. The visitation process involves iterating through
+ * collections of child nodes, and removing a node during the iteration of a collection
+ * raises an error. Instead, you can use the requestRemovalOf: method on the visitor,
+ * which safely processes all removal requests once the full visitation run is complete.
  *
  * As described in the class documentation, in keeping with best practices, updating the
  * model state should be kept separate from frame rendering. Therefore, when overriding
@@ -636,8 +703,10 @@
  * all ancestors to the node. This streamlines rendering in that it allows the transform of
  * each drawable node to be applied directly, and allows the order in which drawable nodes
  * are drawn to be independent of the node structural hierarchy.
+ *
+ * Setting this property udpates the globalLocation and globalScale properties.
  */
-@property(nonatomic, readonly) CC3GLMatrix* transformMatrix;
+@property(nonatomic, retain) CC3GLMatrix* transformMatrix;
 
 /**
  * Indicates whether any of the transform properties, location, rotation, or scale
@@ -683,6 +752,17 @@
  * in order to have those changes applied to the transformMatrix.
  */
 -(void) updateTransformMatrices;
+
+/**
+ * Applies the transform properties (location, rotation, scale) to the transformMatrix
+ * of this node, but NOT to any descendent nodes.
+ *
+ * Use this method only when you know that you only need the transformMatrix of the
+ * specific node updated, and not the matrices of the decendants of that node, or if
+ * you will manually update the transformMatrices of the descendant nodes. If in doubt,
+ * use updateTransformMatrices.
+ */
+-(void) updateTransformMatrix;
 
 
 #pragma mark Drawing
@@ -771,6 +851,14 @@
  * Adds the specified node as a direct child node to this node.
  *
  * The child node is first removed from its existing parent.
+ *
+ * If you are invoking this method from the updateBeforeTransform: of the node
+ * being added, this node, or any ancestor node (including your CC3World), the
+ * transformMatrix of the node being added (and its descendant nodes) will
+ * automatically be updated. However, if you are invoking this method from the
+ * updateAfterTransform: method, you should invoke the updateTransformMatrices
+ * method on the node being added after this method is finished, to ensure that
+ * the transform matrices are udpated.
  */
 -(void) addChild: (CC3Node*) aNode;
 
@@ -798,6 +886,21 @@
  * been added to this parent node.
  *
  * The child node is removed from its existing parent.
+ *
+ * This method makes use of the transformMatrices of this node and the node
+ * being added. To ensure that both matrices are each up to date, this method
+ * invokes updateTransformMatrix method on both this node and the node being
+ * added. You can therefore invoke this method without having to consider
+ * whether the transformMatrix has been calculated already.
+ *
+ * This method changes the transform properties of the node being added.
+ * If you are invoking this method from the updateBeforeTransform: of the node
+ * being added, this node, or any ancestor node (including your CC3World), the
+ * transformMatrix of the node being added (and its descendant nodes) will
+ * automatically be updated. However, if you are invoking this method from the
+ * updateAfterTransform: method, you should invoke the updateTransformMatrices
+ * method on the node being added after this method is finished, to ensure that
+ * the transform matrices are udpated.
  */
 -(void) addAndLocalizeChild: (CC3Node*) aNode;
 
@@ -805,6 +908,11 @@
  * Removes the specified node as a direct child node to this node.
  *
  * Does nothing if the specified node is not actually a child of this node.
+ *
+ * Be aware that removing a node does not automatically stop all CCActions on the node.
+ * If you are removing the node and are finished with it, and there are CCActions
+ * associated with the node, to avoid memory leaks, be sure to invoke either the
+ * stopAllActions method or the cleanup method as well.
  */
 -(void) removeChild: (CC3Node*) aNode;
 
@@ -814,6 +922,19 @@
 /**
  * Convenience method that removes this node from its structural hierarchy
  * by simply invoking removeChild: on the parent of this node.
+ *
+ * Be aware that removing a node does not automatically stop all CCActions on the node.
+ * If you are removing this node and are finished with it, and there are CCActions
+ * associated with the node, to avoid memory leaks, be sure to invoke either the
+ * stopAllActions method or the cleanup method as well.
+ * 
+ * During a node visitation run with a CCNodeVisitor, you should avoid using this
+ * method directly. The visitation process involves iterating through collections of
+ * child nodes, and removing a node during the iteration of a collection raises an error.
+ *
+ * Instead, during a visitation run, you can use the requestRemovalOf: method on the
+ * visitor, which safely processes all removal requests once the full visitation run
+ * is complete.
  */
 -(void) remove;
 
@@ -828,6 +949,12 @@
  * of descendants of this node (not just direct children). The hierarchy search is depth-first.
  */
 -(CC3Node*) getNodeTagged: (GLuint) aTag;
+
+/**
+ * Returns whether this node is a structural descendant (child, grandchild, etc)
+ * of the specified node.
+ */
+-(BOOL) isDescendantOf: (CC3Node*) aNode;
 
 /**
  * Returns an autoreleased array containing this node and all its descendants.
@@ -861,6 +988,12 @@
 
 /** Gets an action from the running action list given its tag */
 -(CCAction*) getActionByTag:(int) tag;
+
+/**
+ * Stops all running actions for this node and all descendant nodes.
+ * Effectively invokes stopAllActions on this node and all descendant nodes.
+ */
+-(void) cleanup;
 
 /**
  * Returns the numbers of actions that are running plus the ones that are scheduled to run
@@ -1090,9 +1223,6 @@
  *
  * The rotation matrix for each instance is local to the node and does not include rotational
  * information about the node's ancestors.
- *
- * This matrix is recalculated by invoking applyRotation, which is invoked automatically by
- * the node.
  */
 @property(nonatomic, retain) CC3GLMatrix* rotationMatrix;
 

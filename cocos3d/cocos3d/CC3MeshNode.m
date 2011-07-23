@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,7 +33,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CGPointExtension.h"
-#import "CC3VertexArrayMeshModel.h"
+#import "CC3VertexArrayMesh.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -51,26 +51,36 @@
 
 @implementation CC3MeshNode
 
-@synthesize meshModel, material, pureColor, shouldCullBackFaces, shouldCullFrontFaces;
+@synthesize mesh, material, pureColor, shouldCullBackFaces, shouldCullFrontFaces;
 
 -(void) dealloc {
-	[meshModel release];
+	[mesh release];
 	[material release];
 	[super dealloc];
 }
 
-// Sets the mesh model then, if a bounding volume exists, forces it to rebuild
-// using the new mesh data, or creates a default bounding volume from the mesh model.
--(void) setMeshModel:(CC3MeshModel *) aMeshModel {
-	id oldMesh = meshModel;
-	meshModel = [aMeshModel retain];
+// Sets the mesh then, if a bounding volume exists, forces it to rebuild
+// using the new mesh data, or creates a default bounding volume from the mesh.
+-(void) setMesh:(CC3Mesh *) aMesh {
+	id oldMesh = mesh;
+	mesh = [aMesh retain];
 	[oldMesh release];
 	if (boundingVolume) {
 		[self.boundingVolume buildVolume];
 	} else {
-		self.boundingVolume = [meshModel defaultBoundingVolume];
+		self.boundingVolume = [mesh defaultBoundingVolume];
 	}
 
+}
+
+// Support for legacy CC3MeshModel class
+-(CC3MeshModel*) meshModel {
+	return (CC3MeshModel*)self.mesh;
+}
+
+// Support for legacy CC3MeshModel class
+-(void) setMeshModel: (CC3MeshModel *) aMesh {
+	self.mesh = aMesh;
 }
 
 // After setting the bounding volume, forces it to build its volume from the mesh
@@ -81,6 +91,15 @@
 
 
 #pragma mark Material coloring
+
+-(BOOL) shouldUseLighting {
+	return material ? material.shouldUseLighting : NO;
+}
+
+-(void) setShouldUseLighting: (BOOL) useLighting {
+	material.shouldUseLighting = useLighting;
+	[super setShouldUseLighting: useLighting];	// pass along to any children
+}
 
 -(ccColor4F) ambientColor {
 	return material ? material.ambientColor : kCCC4FBlackTransparent;
@@ -116,6 +135,20 @@
 -(void) setEmissionColor:(ccColor4F) aColor {
 	material.emissionColor = aColor;
 	[super setEmissionColor: aColor];	// pass along to any children
+}
+
+/** If the material has a bump-mapped texture, returns the global direction  */
+-(CC3Vector) globalLightLocation {
+	return (material && material.hasBumpMap)
+			? [self.transformMatrix transformDirection: material.lightDirection]
+			: [super globalLightLocation];
+}
+
+-(void) setGlobalLightLocation: (CC3Vector) aLocation {
+	if (material && material.hasBumpMap) {
+		material.lightDirection = [self.transformMatrixInverted transformDirection: aLocation];
+	}
+	[super setGlobalLightLocation: aLocation];
 }
 
 
@@ -173,38 +206,35 @@
 
 -(void) createGLBuffers {
 	LogTrace(@"%@ creating GL server buffers", self);
-	[meshModel createGLBuffers];
+	[mesh createGLBuffers];
 	[super createGLBuffers];
 }
 
 -(void) deleteGLBuffers {
-	[meshModel deleteGLBuffers];
+	[mesh deleteGLBuffers];
 	[super deleteGLBuffers];
 }
 
 -(void) releaseRedundantData {
-	[meshModel releaseRedundantData];
+	[mesh releaseRedundantData];
 	[super releaseRedundantData];
 }
 
 -(void) retainVertexLocations {
-	[meshModel retainVertexLocations];
+	[mesh retainVertexLocations];
 	[super retainVertexLocations];
 }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // A copy is made of the material.
-// The mesh model is simply assigned, without creating a copy.
-// Both this node and the other node will share the mesh model.
+// The mesh is simply retained, without creating a copy.
+// Both this node and the other node will share the mesh.
 -(void) populateFrom: (CC3MeshNode*) another {
 	[super populateFrom: another];
 	
-	[meshModel release];
-	meshModel = [another.meshModel retain];		// retained
-
-	[material release];
-	material = [another.material copy];			// retained
+	self.mesh = another.mesh;						// retained
+	self.material = [another.material copyAutoreleased];	// retained
 
 	pureColor = another.pureColor;
 	shouldCullBackFaces = another.shouldCullBackFaces;
@@ -216,51 +246,111 @@
 							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)];
 }
 
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+							andTessellation: (ccGridSize) facesPerSide {
+	[self populateAsRectangleWithSize: rectSize
+							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
+					  andTessellation: facesPerSide];
+}
+
 -(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot {
+	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: ccg(1, 1)];
+}
+
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+					andTessellation: (ccGridSize) facesPerSide {
 	NSString* itemName;
 	CCTexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
-	GLfloat xMin = 0.0f - pivot.x;
-	GLfloat xMax = rectSize.width - pivot.x;
-	GLfloat yMin = 0.0f - pivot.y;
-	GLfloat yMax = rectSize.height - pivot.y;
-	int vCount = 4;
+	
+	// Must be at least one tessellation face per side of the rectangle.
+	facesPerSide.x = MAX(facesPerSide.x, 1);
+	facesPerSide.y = MAX(facesPerSide.y, 1);
+
+	// Move the origin of the rectangle to the pivot point
+	CGPoint botLeft = ccpSub(CGPointZero, pivot);
+	CGPoint topRight = ccpSub(ccpFromSize(rectSize), pivot);
+
+	// The size of each face in the tessellated grid
+	CGSize faceSize = CGSizeMake((topRight.x - botLeft.x) / facesPerSide.x,
+								 (topRight.y - botLeft.y) / facesPerSide.y);
+
+	// Get vertices per side.
+	ccGridSize verticesPerSide;
+	verticesPerSide.x = facesPerSide.x + 1;
+	verticesPerSide.y = facesPerSide.y + 1;
+	int vertexCount = verticesPerSide.x * verticesPerSide.y;
 	
 	// Interleave the vertex locations, normals and tex coords
 	// Create vertex location array, allocating enough space for the stride of the full structure
 	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
 	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.drawingMode = GL_TRIANGLE_STRIP;			// Location array will do the drawing as a strip
 	locArray.elementStride = sizeof(CCTexturedVertex);	// Set stride before allocating elements.
 	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vCount];
-
-	// Populate vertex locations in the X-Y plane
-	vertices[0].location = (CC3Vector){xMax, yMax, 0.0};
-	vertices[1].location = (CC3Vector){xMin, yMax, 0.0};
-	vertices[2].location = (CC3Vector){xMax, yMin, 0.0};
-	vertices[3].location = (CC3Vector){xMin, yMin, 0.0};
+	vertices = [locArray allocateElements: vertexCount];
 	
 	// Create the normal array interleaved on the same element array
 	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
 	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
 	normArray.elements = vertices;
 	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vCount;
+	normArray.elementCount = vertexCount;
 	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
+
+	// Populate vertex locations and normals in the X-Y plane
+	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
+	// and set the location of each vertex to be proportional to its position in the grid,
+	// and set the normal of each vertex to point up the Z-axis.
+	for (int iy = 0; iy < verticesPerSide.y; iy++) {
+		for (int ix = 0; ix < verticesPerSide.x; ix++) {
+			int vIndx = iy * verticesPerSide.x + ix;
+			GLfloat vx = botLeft.x + (faceSize.width * ix);
+			GLfloat vy = botLeft.y + (faceSize.height * iy);
+			vertices[vIndx].location = cc3v(vx, vy, 0.0);
+			vertices[vIndx].normal = kCC3VectorUnitZPositive;
+		}
+	}
 	
-	// Populate normals up the positive Z-axis
-	vertices[0].normal = kCC3VectorUnitZPositive;
-	vertices[1].normal = kCC3VectorUnitZPositive;
-	vertices[2].normal = kCC3VectorUnitZPositive;
-	vertices[3].normal = kCC3VectorUnitZPositive;
+	// Construct the vertex indices that will draw the triangles that make up each
+	// face of the box. Indices are ordered for each of the six faces starting in
+	// the lower left corner and proceeding counter-clockwise.
+	GLuint triangleCount = facesPerSide.x * facesPerSide.y * 2;
+	GLuint indexCount = triangleCount * 3;
+	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
+	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
+	indexArray.drawingMode = GL_TRIANGLES;
+	indexArray.elementType = GL_UNSIGNED_SHORT;
+	indexArray.elementCount = indexCount;
+	GLushort* indices = [indexArray allocateElements: indexCount];
 	
-	// Create mesh model with interleaved vertex arrays
+	// Iterate through the rows and columns of the faces in the grid, from the bottom left corner,
+	// and specify the indexes of the three vertices in each of the two triangles of each face.
+	int iIndx = 0;
+	for (int iy = 0; iy < facesPerSide.y; iy++) {
+		for (int ix = 0; ix < facesPerSide.x; ix++) {
+			GLushort botLeftOfFace;
+			
+			// First triangle of face wound counter-clockwise
+			botLeftOfFace = iy * verticesPerSide.x + ix;
+			indices[iIndx++] = botLeftOfFace;							// Bottom left
+			indices[iIndx++] = botLeftOfFace + 1;						// Bot right
+			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
+
+			// Second triangle of face wound counter-clockwise
+			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
+			indices[iIndx++] = botLeftOfFace + verticesPerSide.x;		// Top left
+			indices[iIndx++] = botLeftOfFace;							// Bottom left
+		}
+	}
+	
+	// Create mesh with interleaved vertex arrays
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMeshModel* mesh = [CC3VertexArrayMeshModel meshWithName: itemName];
-	mesh.interleaveVertices = YES;
-	mesh.vertexLocations = locArray;
-	mesh.vertexNormals = normArray;
-	self.meshModel = mesh;
+	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
+	aMesh.interleaveVertices = YES;
+	aMesh.vertexLocations = locArray;
+	aMesh.vertexNormals = normArray;
+	aMesh.vertexIndices = indexArray;
+	self.mesh = aMesh;
 }
 
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
@@ -272,18 +362,53 @@
 						invertTexture: shouldInvert];
 }
 
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+							andTessellation: (ccGridSize) facesPerSide
+								withTexture: (CC3Texture*) texture
+							  invertTexture: (BOOL) shouldInvert {
+	[self populateAsRectangleWithSize: rectSize
+							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
+					  andTessellation: facesPerSide
+						  withTexture: texture
+						invertTexture: shouldInvert];
+}
+
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
 						withTexture: (CC3Texture*) texture
 					  invertTexture: (BOOL) shouldInvert {
+	[self populateAsRectangleWithSize: rectSize
+							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
+					  andTessellation:  ccg(1, 1)
+						  withTexture: texture
+						invertTexture: shouldInvert];
+}
+
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+					andTessellation: (ccGridSize) facesPerSide
+						withTexture: (CC3Texture*) texture
+					  invertTexture: (BOOL) shouldInvert {
 	NSString* itemName;
+	
+	// Must be at least one tessellation face per side of the rectangle.
+	facesPerSide.x = MAX(facesPerSide.x, 1);
+	facesPerSide.y = MAX(facesPerSide.y, 1);
+	
+	// The size of each face in the tessellated grid
+	CGSize faceSize = CGSizeMake((1.0 / facesPerSide.x), (1.0 / facesPerSide.y));
+	
+	// Get vertices per side.
+	ccGridSize verticesPerSide;
+	verticesPerSide.x = facesPerSide.x + 1;
+	verticesPerSide.y = facesPerSide.y + 1;
 
 	// Start as a basic white rectangle of the right size and location.
-	[self populateAsRectangleWithSize: rectSize andPivot: pivot];
+	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: facesPerSide];
 	
-	// Get my mesh model and vertices.
-	CC3VertexArrayMeshModel* vamm = (CC3VertexArrayMeshModel*)self.meshModel; 
-	CC3VertexLocations* locArray = vamm.vertexLocations;
+	// Get my aMesh model and vertices.
+	CC3VertexArrayMesh* vam = (CC3VertexArrayMesh*)self.mesh; 
+	CC3VertexLocations* locArray = vam.vertexLocations;
 	
 	// Create the tex coord array interleaved on the same element array as the vertex locations
 	CC3VertexTextureCoordinates* tcArray = nil;
@@ -294,16 +419,23 @@
 	tcArray.elementCount = locArray.elementCount;
 	tcArray.elementOffset = 2 * sizeof(CC3Vector);	// Offset to texcoord element in vertex structure
 
-	// Add the texture coordinates array to the mesh model
-	vamm.vertexTextureCoordinates = tcArray;
+	// Add the texture coordinates array to the mesh
+	vam.vertexTextureCoordinates = tcArray;
 	
 	// Populate the texture coordinate array mapping
 	CCTexturedVertex* vertices = locArray.elements;
 	
-	vertices[0].texCoord = (ccTex2F){1.0, 1.0};
-	vertices[1].texCoord = (ccTex2F){0.0, 1.0};
-	vertices[2].texCoord = (ccTex2F){1.0, 0.0};
-	vertices[3].texCoord = (ccTex2F){0.0, 0.0};
+	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
+	// and set the X & Y texture coordinate of each vertex to be proportional to its position
+	// in the grid.
+	for (int iy = 0; iy < verticesPerSide.y; iy++) {
+		for (int ix = 0; ix < verticesPerSide.x; ix++) {
+			int vIndx = iy * verticesPerSide.x + ix;
+			GLfloat vx = faceSize.width * ix;
+			GLfloat vy = faceSize.height * iy;
+			vertices[vIndx].texCoord = (ccTex2F){vx, vy};
+		}
+	}
 	
 	// Align the texture coordinates to the texture
 	if (shouldInvert) {
@@ -386,14 +518,14 @@ static const GLubyte solidBoxIndexData[] = {
 	indexArray.elementCount = indexCount;
 	indexArray.elements = (GLvoid*)solidBoxIndexData;
 	
-	// Create mesh model with interleaved vertex arrays
+	// Create mesh with interleaved vertex arrays
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMeshModel* mesh = [CC3VertexArrayMeshModel meshWithName: itemName];
-	mesh.interleaveVertices = YES;
-	mesh.vertexLocations = locArray;
-	mesh.vertexNormals = normArray;
-	mesh.vertexIndices = indexArray;
-	self.meshModel = mesh;
+	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
+	aMesh.interleaveVertices = YES;
+	aMesh.vertexLocations = locArray;
+	aMesh.vertexNormals = normArray;
+	aMesh.vertexIndices = indexArray;
+	self.mesh = aMesh;
 }
 
 // Vertex index data for the 12 lines of a wire box.
@@ -434,10 +566,10 @@ static const GLubyte wireBoxIndexData[] = {
 	indexArray.elements = (GLvoid*)wireBoxIndexData;
 	
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMeshModel* mesh = [CC3VertexArrayMeshModel meshWithName: itemName];
-	mesh.vertexLocations = locArray;
-	mesh.vertexIndices = indexArray;
-	self.meshModel = mesh;
+	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
+	aMesh.vertexLocations = locArray;
+	aMesh.vertexIndices = indexArray;
+	self.mesh = aMesh;
 }
 
 -(void) populateAsLineStripWith: (GLshort) vertexCount
@@ -458,9 +590,9 @@ static const GLubyte wireBoxIndexData[] = {
 	}
 	
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMeshModel* mesh = [CC3VertexArrayMeshModel meshWithName: itemName];
-	mesh.vertexLocations = locArray;
-	self.meshModel = mesh;
+	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
+	aMesh.vertexLocations = locArray;
+	self.mesh = aMesh;
 }
 
 
@@ -476,7 +608,7 @@ static const GLubyte wireBoxIndexData[] = {
 /**
  * If we have a material, delegates to the material to set material and texture state,
  * otherwise, establishes the pure color by turning lighting off and setting the color.
- * One material or color is set, delegates to the mesh model to draw mesh.
+ * One material or color is set, delegates to the mesh to draw mesh.
  */
 -(void) drawLocalContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
@@ -489,7 +621,7 @@ static const GLubyte wireBoxIndexData[] = {
 
 	if (visitor.shouldDecorateNode) {
 		if (material) {
-			[material draw];
+			[material drawWithVisitor: visitor];
 		} else {
 			[CC3Material unbind];
 			[gles11Lighting disable];
@@ -498,7 +630,7 @@ static const GLubyte wireBoxIndexData[] = {
 	} else {
 		[CC3Material unbind];
 	}
-	[meshModel drawWithVisitor: visitor];
+	[mesh drawWithVisitor: visitor];
 
 	// Re-establish previous lighting state.
 	gles11Lighting.value = lightingWasEnabled;
@@ -536,7 +668,7 @@ static const GLubyte wireBoxIndexData[] = {
 /** Configures GL scaling of normals, based on whether the scaling of this node is uniform or not. */
 -(void) configureNormalization {
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
-	if (meshModel && meshModel.hasNormals) {
+	if (mesh && mesh.hasNormals) {
 		if (self.isUniformlyScaledGlobally) {
 			[gles11ServCaps.rescaleNormal enable];
 			[gles11ServCaps.normalize disable];
@@ -557,7 +689,7 @@ static const GLubyte wireBoxIndexData[] = {
  * otherwise material colors will not stick.
  */
 -(void) configureColoring {
-	[CC3OpenGLES11Engine engine].serverCapabilities.colorMaterial.value = (meshModel ? meshModel.hasColors : NO);
+	[CC3OpenGLES11Engine engine].serverCapabilities.colorMaterial.value = (mesh ? mesh.hasColors : NO);
 }
 
 @end
@@ -573,7 +705,7 @@ static const GLubyte wireBoxIndexData[] = {
 
 @implementation CC3LineNode
 
-@synthesize lineWidth, shouldSmoothLines;
+@synthesize lineWidth, shouldSmoothLines, performanceHint;
 
 
 #pragma mark Allocation and initialization
@@ -582,6 +714,7 @@ static const GLubyte wireBoxIndexData[] = {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		lineWidth = 1.0f;
 		shouldSmoothLines = NO;
+		performanceHint = GL_DONT_CARE;
 	}
 	return self;
 }
@@ -593,6 +726,7 @@ static const GLubyte wireBoxIndexData[] = {
 	
 	lineWidth = another.lineWidth;
 	shouldSmoothLines = another.shouldSmoothLines;
+	performanceHint = another.performanceHint;
 }
 
 
@@ -605,8 +739,10 @@ static const GLubyte wireBoxIndexData[] = {
 }
 
 -(void) configureLineProperties {
-	[CC3OpenGLES11Engine engine].serverCapabilities.lineSmooth.value = shouldSmoothLines;
-	[CC3OpenGLES11Engine engine].state.lineWidth.value = lineWidth;
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	gles11Engine.state.lineWidth.value = lineWidth;
+	gles11Engine.serverCapabilities.lineSmooth.value = shouldSmoothLines;
+	gles11Engine.hints.lineSmooth.value = performanceHint;
 }
 
 @end
@@ -618,24 +754,21 @@ static const GLubyte wireBoxIndexData[] = {
 @implementation CC3PlaneNode
 
 -(CC3Plane) plane {
-	CC3VertexArrayMeshModel* vamm = (CC3VertexArrayMeshModel*)self.meshModel;
-	CC3VertexLocations* vLocs = vamm.vertexLocations;
-	CC3VertexIndices* vIndices = vamm.vertexIndices;
-
-	GLushort i0 = 0, i1 = 1, i2 = 2;
-
-	// If the mesh model uses indices, access the first three vertices through the indices.
-	if (vIndices) {
-		i0 = [vIndices indexAt: i0];
-		i1 = [vIndices indexAt: i1];
-		i2 = [vIndices indexAt: i2];
-	}
-	// Retrieve the first three indices in drawing order.
-	CC3Vector p1 = [self.transformMatrix transformLocation: [vLocs locationAt: i0]];
-	CC3Vector p2 = [self.transformMatrix transformLocation: [vLocs locationAt: i1]];
-	CC3Vector p3 = [self.transformMatrix transformLocation: [vLocs locationAt: i2]];
+	CC3VertexArrayMesh* vam = (CC3VertexArrayMesh*)self.mesh;
+	CC3BoundingBox bb = vam.vertexLocations.boundingBox;
 	
-	// Create and return a plane from these points
+	// Get three points on the plane by using three corners of the mesh bounding box.
+	CC3Vector p1 = bb.minimum;
+	CC3Vector p2 = bb.maximum;
+	CC3Vector p3 = bb.minimum;
+	p3.x = bb.maximum.x;
+
+	// Transform these points.
+	p1 = [self.transformMatrix transformLocation: p1];
+	p2 = [self.transformMatrix transformLocation: p2];
+	p3 = [self.transformMatrix transformLocation: p3];
+
+	// Create and return a plane from these points.
 	return CC3PlaneFromPoints(p1, p2, p3);
 }
 

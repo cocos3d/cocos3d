@@ -1,7 +1,7 @@
 /*
  * CC3Light.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,13 +36,15 @@
 #pragma mark CC3Light 
 
 @interface CC3Node (TemplateMethods)
--(void) applyTranslation;
+-(void) updateGlobalLocation;
+-(void) updateGlobalScale;
 -(void) populateFrom: (CC3Node*) another;
 @end
 
 @interface CC3Light (TemplateMethods)
 -(void) applyLocation;
 -(void) applyDirection;
+-(void) applyAttenuation;
 -(void) applyColor;
 -(GLuint) nextLightIndex;
 -(void) returnLightIndex: (GLuint) aLightIndex;
@@ -53,11 +55,10 @@
 @implementation CC3Light
 
 @synthesize lightIndex, ambientColor, diffuseColor, specularColor;
-@synthesize spotCutoffAngle, isDirectionalOnly, homogeneousLocation;
+@synthesize spotCutoffAngle, isDirectionalOnly, homogeneousLocation, attenuationCoefficients;
 
 -(void) dealloc {
 	[gles11Light release];
-	[gles11LightCap release];
 	[self returnLightIndex: lightIndex];
 	[super dealloc];
 }
@@ -72,17 +73,17 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		lightIndex = [self nextLightIndex];
-		if (lightIndex < 0) {	// All the lights have been used already.
+		if (lightIndex == UINT_MAX) {		// All the lights have been used already.
 			[self release];
 			return nil;
 		}
 		gles11Light = [[[CC3OpenGLES11Engine engine].lighting lightAt: lightIndex] retain];
-		gles11LightCap = [[[CC3OpenGLES11Engine engine].serverCapabilities lightAt: lightIndex] retain];
 		homogeneousLocation = CC3Vector4Make(0.0, 0.0, 0.0, 0.0);
 		ambientColor = kCC3DefaultLightColorAmbient;
 		diffuseColor = kCC3DefaultLightColorDiffuse;
 		specularColor = kCC3DefaultLightColorSpecular;
 		spotCutoffAngle = kCC3SpotCutoffNone;
+		attenuationCoefficients = kCC3DefaultLightAttenuationCoefficients;
 		isDirectionalOnly = YES;
 	}
 	return self;
@@ -98,26 +99,33 @@
 	diffuseColor = another.diffuseColor;
 	specularColor = another.specularColor;
 	spotCutoffAngle = another.spotCutoffAngle;
+	attenuationCoefficients = another.attenuationCoefficients;
 	isDirectionalOnly = another.isDirectionalOnly;
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, homoLoc: %@, ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f",
+	return [NSString stringWithFormat: @"%@, homoLoc: %@, ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, attenuation: %@",
 			[super fullDescription], NSStringFromCC3Vector4(homogeneousLocation), NSStringFromCCC4F(ambientColor),
-			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor), spotCutoffAngle];
+			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor), spotCutoffAngle,
+			NSStringFromCC3AttenuationCoefficients(attenuationCoefficients)];
 }
 
 
 #pragma mark Transformations
+
+/** Scaling does not apply to lights. */
+-(void) applyScaling {
+	[self updateGlobalScale];
+}
 
 /**
  * Overridden to determine the overall absolute location (taking into consideration
  * ancestor location) in the 4D homogeneous coordinates used by GL lights. The w component
  * of the homogeneous location is determined by the value of the isDirectionalOnly property.
  */
--(void) applyTranslation {
-	[super applyTranslation];
-	GLfloat w = isDirectionalOnly ? 0 : 1;
+-(void) updateGlobalLocation {
+	[super updateGlobalLocation];
+	GLfloat w = isDirectionalOnly ? 0.0 : 1.0;
 	homogeneousLocation = CC3Vector4FromCC3Vector(globalLocation, w);
 }
 
@@ -125,7 +133,7 @@
  * Scaling does not apply to lights. Sets the globalScale to that of the parent node,
  * or to unit scaling if no parent.
  */
--(void) applyScaling {
+-(void) updateGlobalScale {
 	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
 }
 
@@ -135,12 +143,13 @@
 -(void) turnOn {
 	if (self.visible) {
 		LogTrace(@"Turning on %@", self);
-		[gles11LightCap enable];
+		[gles11Light.light enable];
 		[self applyLocation];
 		[self applyDirection];
+		[self applyAttenuation];
 		[self applyColor];
 	} else {
-		[gles11LightCap disable];
+		[gles11Light.light disable];
 	}
 }
 
@@ -154,12 +163,22 @@
 
 /**
  * Template method that sets the spot direction and spot cutoff angle of this light
- * in the GL engine to the values of the forwardDirection and spotCutoffAngle
+ * in the GL engine to the values of the globalForwardDirection and spotCutoffAngle
  * properties of this node, respectively.
  */
 -(void) applyDirection {
-	gles11Light.spotDirection.value = self.forwardDirection;
+	gles11Light.spotDirection.value = self.globalForwardDirection;
 	gles11Light.spotCutoffAngle.value = spotCutoffAngle;
+}
+
+/**
+ * Template method that sets the light intensity attenuation characteristics
+ * in the GL engine from the attenuationCoefficients property of this light.
+ */
+-(void) applyAttenuation {
+	gles11Light.constantAttenuation.value = attenuationCoefficients.a;
+	gles11Light.linearAttenuation.value = attenuationCoefficients.b;
+	gles11Light.quadraticAttenuation.value = attenuationCoefficients.c;
 }
 
 /**
@@ -195,7 +214,7 @@ static GLuint lightPoolStartIndex = 0;
 
 /**
  * Assigns and returns the next available light index from the pool.
- * If no more lights are available, returns -1.
+ * If no more lights are available, returns UINT_MAX.
  */
 -(GLenum) nextLightIndex {
 	BOOL* indexPool = [[self class] lightIndexPool];
@@ -207,7 +226,7 @@ static GLuint lightPoolStartIndex = 0;
 		}
 	}
 	NSAssert1(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
-	return -1;
+	return UINT_MAX;
 }
 
 /** Returns the specified light index to the pool. */
@@ -215,7 +234,7 @@ static GLuint lightPoolStartIndex = 0;
 	LogTrace(@"Returning light index %u", aLightIndex);
 	BOOL* indexPool = [[self class] lightIndexPool];
 	indexPool[aLightIndex] = NO;
-	[gles11LightCap disable];
+	[gles11Light.light disable];
 }
 
 +(GLuint) lightCount {
@@ -240,7 +259,7 @@ static GLuint lightPoolStartIndex = 0;
 
 +(void) disableReservedLights {
 	for (int i = 0; i < lightPoolStartIndex; i++) {
-		[[[CC3OpenGLES11Engine engine].serverCapabilities lightAt: i] disable];
+		[[[CC3OpenGLES11Engine engine].lighting lightAt: i].light disable];
 	}
 }
 

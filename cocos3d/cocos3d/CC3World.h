@@ -1,7 +1,7 @@
 /*
  * CC3World.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,8 +32,12 @@
 #import "CC3Camera.h"
 #import "CC3NodeSequencer.h"
 #import "CC3PerformanceStatistics.h"
+#import "CC3Fog.h"
 #import "CCDirectorIOS.h"
 
+
+/** Default value of the minUpdateInterval property. */
+static const ccTime kCC3DefaultMinimumUpdateInterval = 0.0;
 
 /** Default value of the maxUpdateInterval property. */
 static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0 / 15.0);
@@ -42,6 +46,7 @@ static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0 / 15.0);
 static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 };
 
 @class CC3WorldTouchHandler, CC3ViewportManager;
+
 
 #pragma mark -
 #pragma mark CC3World
@@ -103,6 +108,13 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * updateAfterTransform: methods are defined in the CC3Node class.
  * See the documentation there.
  *
+ * If you change the contents of the world outside of the normal update mechanism,
+ * for instance, as a result of a user event, you may find that the next frame is
+ * rendered without the updated content. Depending on the degree of change to your
+ * world (for instance, if you have removed and added many nodes), you may notice a
+ * flicker. To avoid this, you can use the updateWorld method to force your updates
+ * to be processed immediately, without waiting for the next update interval.
+ *
  * You must add at least one CC3Camera to your 3D world to make it viewable. This
  * camera may be added directly, or it may be added as part of a larger node assembly.
  * Regardless of the technique used to add cameras, the CC3World will take the first
@@ -112,6 +124,10 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * a 2D point on the screen view, and can be used to project 2D screen points onto
  * a ray or plane intersection within the 3D world. See the class notes of  CC3Camera
  * for more information on mapping between 3D and 2D locations.
+ *
+ * You can add fog to your world using the fog property. Fog has a color and blends
+ * with the display of objects within the world. Objects farther away from the camera
+ * are affected by the fog more than objects that are closer to the camera.
  *
  * During drawing, the nodes can be traversed in the hierarchical order of the
  * node structural assembly, starting at the CC3World instance that forms the root node
@@ -174,6 +190,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * property for more information.
  */
 @interface CC3World : CC3Node {
+	NSMutableArray* targettingNodes;
 	NSMutableArray* lights;
 	NSMutableArray* cameras;
 	NSMutableArray* billboards;
@@ -183,9 +200,10 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 	CC3NodeSequencer* drawingSequencer;
 	CC3WorldTouchHandler* touchHandler;
 	CC3PerformanceStatistics* performanceStatistics;
+	CC3Fog* fog;
 	ccColor4F ambientLight;
+	ccTime minUpdateInterval;
 	ccTime maxUpdateInterval;
-	BOOL isRunning;
 }
 
 /**
@@ -242,6 +260,16 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  */
 @property(nonatomic, retain) CC3PerformanceStatistics* performanceStatistics;
 
+/**
+ * If set, creates fog within the CC3World. Fog has a color and blends with the
+ * display of objects within the world. Objects farther away from the camera are
+ * affected by the fog more than objects that are closer to the camera.
+ *
+ * The initial value is nil, indicating that the world will contain no fog.
+ */
+@property(nonatomic, retain) CC3Fog* fog;
+
+
 #pragma mark Allocation and initialization
 
 /**
@@ -277,6 +305,24 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Updating world state
 
 /**
+ * The value of this property is used as the lower limit accepted by the updateWorld: method.
+ * Values sent to the updateWorld: method that are smaller than this maximum will be clamped
+ * to this limit. If the value of this property is zero (or negative), the updateWorld: method
+ * will use the value that is passed to it unchanged.
+ *
+ * You can set this value if your custom world cannot work with a zero interval, or with an
+ * interval that is too small. For instance, if the logic of your world uses the update
+ * interval as the denominator in a division calculation, you would want to set this property
+ * to a value slightly above zero.
+ *
+ * The initial value of this property is set to kCC3DefaultMinimumUpdateInterval.
+ *
+ * The behaviour described here does not apply to nodes controlled by CCActionIntervals,
+ * which are not affected by the time between updates, or the value of this property.
+ */
+@property(nonatomic, assign) ccTime minUpdateInterval;
+
+/**
  * If the value of this property is greater than zero, it will be used as the upper limit
  * accepted by the updateWorld: method. Values sent to the updateWorld: method that are
  * larger than this maximum will be clamped to this limit. If the value of this property
@@ -310,8 +356,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  *
  * The dt argument gives the interval, in seconds, since the previous update. This value can be
  * used to create realistic real-time motion that is independent of specific frame or update rates.
- * If the maxUpdateInterval property has been set, this method will clamp dt to that limit.
- * See the description of maxUpdateInterval for more information about clamping the update interval.
+ * If either of the minUpdateInterval or maxUpdateInterval properties have been set, this method
+ * will clamp dt to those limits. See the description of minUpdateInterval and maxUpdateInterval
+ * for more information about clamping the update interval.
  *
  * If this instance is not running, as indicated by the isRunning property, this method does nothing.
  *
@@ -335,23 +382,37 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  */
 -(void) updateWorld: (ccTime)dt;
 
-/** 
- * Indicates whether the dynamics of this 3D model world are running. If this property is
- * set to NO, calls to the updateWorld: method will be effectively ignored. The play and
- * pause methods set this property to YES and NO respectively.
+/**
+ * Convenience method that invokes the udpateWorld: method with the value of the
+ * minUpdateInterval property.
  *
- * This does not affect the movement of nodes controlled by CCActionIntervals. They will
- * continue to move, irrespective of the state of this property.
+ * You can use this method if you change the contents of the world outside of the normal
+ * update mechanism, for instance, as a result of a user event, and need the update to
+ * be processed immediately, without waiting for the next update interval.
+ *
+ * This method is automatically invoked when a the world is assigned to the CC3Layer,
+ * to ensure that transforms have been processed before the first rendering frame
+ * processes the contents of the world.
  */
-@property(nonatomic, assign) BOOL isRunning;
+-(void) updateWorld;
 
-/** Starts the dynamics of the 3D world model by setting the isRunning property to YES. */
+/**
+ * Starts the dynamics of the 3D world model, including internal updates and CCActions,
+ * by setting the isRunning property to YES.
+ *
+ * The world will automatically start playing when added to a CC3Layer, and will
+ * automatically pause when removed from the CC3Layer. During typical use, you will
+ * not need to invoke this method directly.
+ */
 -(void) play;
 
 /**
- * Pauses the dynamics of the 3D world model by setting the isRunning property to NO.
+ * Pauses the dynamics of the 3D world model, including internal updates and CCActions,
+ * by setting the isRunning property to NO.
  *
- * This does not affect the movement of nodes controlled by CCActionIntervals.
+ * The world will automatically start playing when added to a CC3Layer, and will
+ * automatically pause when removed from the CC3Layer. During typical use, you will
+ * not need to invoke this method directly.
  */
 -(void) pause;
 
@@ -414,32 +475,44 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Touch handling
 
 /**
- * This method is invoked from the CC3Layer whenever a touch event occurs, if
- * that layer has indicated that it is interested in receiving touch events.
+ * This method is invoked from the CC3Layer whenever a touch event occurs, if that
+ * layer has indicated that it is interested in receiving touch events, and is
+ * handling them.
+ *
  * The touchType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
- * kCCTouchEnded, or kCCTouchCancelled.
+ * kCCTouchEnded, or kCCTouchCancelled, and may have originated as a single-touch
+ * event, a multi-touch event, or a gesture event.
+ * 
+ * To enable touch events, set the isTouchEnabled property of the CC3Layer. Once
+ * the CC3Layer is touch-enabled, this method is invoked automatically whenever a
+ * single-touch event occurs.
+ *
+ * Since the touch-move events are both voluminous and seldom used, the handling of
+ * ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
+ * To receive and handle touch-move events for object picking, copy the commented-out
+ * ccTouchMoved:withEvent: template method implementation in CC3Layer to your
+ * customized CC3Layer subclass.
  *
  * This default implementation engages a node picking mechanism, which determines
  * which 3D node is under the touch point. Object picking is handled asynchronously,
  * and once the node is retrieved, the nodeSelected:byTouchEvent:at: callback method
  * will be invoked on this instance.
- * 
- * To enable touch events, set the isTouchEnabled property of the CC3Layer.
  *
- * This method is invoked automatically whenever a touch event occurs. Usually, the
- * application never needs to invoke this method directly.
+ * To support multi-touch events or gestures, add event-handing behaviour to your
+ * customized CC3Layer, as you would for any cocos2d application, and invoke this
+ * method from your customized CC3Layer when node-picking is required.
  */
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
 
 /**
- * This callback template method is invoked when a node has been picked as a result
- * of a touch event.
+ * This callback template method is invoked automatically when a node has been picked
+ * as a result of a touch event.
  *
  * The specified node will be one of the visible nodes whose isTouchable property
  * returns YES, or will be nil if the touch event occurred in an area under which
  * there is no 3D node that is touch enabled.
  *
- * For node assemblies, the specified node will be not necessarily be the individual
+ * For node assemblies, the specified node will not necessarily be the individual
  * component or leaf node that was touched. The specified node will be the closest
  * structural ancestor of the leaf node that has the isTouchEnabled property set to YES.
  *
@@ -459,11 +532,11 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * 
  * To enable touch events, set the isTouchEnabled property of the CC3Layer.
  *
- * Also, since the touch-move events are both voluminous and seldom used, the
- * implementation of ccTouchMoved:withEvent: has been left out of the default CC3Layer
- * implementation. To receive and handle touch-move events for object picking, copy the
- * commented-out ccTouchMoved:withEvent: template method implementation in CC3Layer to
- * your customized CC3Layer subclass.
+ * Since the touch-move events are both voluminous and seldom used, the handling of
+ * ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
+ * To receive and handle touch-move events for object picking, copy the commented-out
+ * ccTouchMoved:withEvent: template method implementation in CC3Layer to your customized
+ * CC3Layer subclass.
  * 
  * To enable a node to be selectable by touching, set the isTouchEnabled property
  * of that node, or an ancestor node to YES. 
@@ -471,8 +544,11 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * This implementation does nothing. Subclasses that are interested in node picking
  * will override.
  *
- * This method is invoked automatically whenever a touch event occurs. Usually, the
- * application never needs to invoke this method directly.
+ * Usually, you would not invoke this method directly. This method is invoked automatically
+ * whenever a touch event occurs and is processed by the touchEvent:at: method. If you are
+ * handling touch events, multi-touch events, or gestures within your customized CC3Layer,
+ * invoke the touchEvent:at: method to initiate node selection, and implement this callback
+ * method to determine what to do with selected nodes.
  */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint;
 

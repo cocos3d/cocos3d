@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,8 @@
 
 
 #import "CC3PerformanceStatistics.h"
+#import "cocos2d.h"
+#import "ES1Renderer.h"
 
 
 #pragma mark -
@@ -54,6 +56,9 @@
 @interface CC3NodeVisitor : NSObject {
 	CC3World* world;
 	CC3PerformanceStatistics* performanceStatistics;
+	NSMutableSet* pendingRemovals;
+	GLuint pickingDepthBuffer;
+	GLuint pickingFrameBuffer;
 	BOOL shouldVisitChildren;
 }
 
@@ -108,6 +113,19 @@
 
 /** Allocates and initializes an autoreleased instance with the specified CC3World. */
 +(id) visitorWithWorld: (CC3World*) theWorld;
+
+/**
+ * Requests the removal of the specfied node.
+ * 
+ * During a visitation run, you should use this method instead of directly invoking the
+ * remove method on the node itself. Visitation involves iterating through collections
+ * of child nodes, and removing a node during the iteration of a collection raises an error.
+ *
+ * This method can safely be invoked while a node is being visited. The visitor keeps
+ * track of the requests, and safely removes all requested nodes as part of the close
+ * method, once the visitation of the full node assembly is finished.
+ */
+-(void) requestRemovalOf: (CC3Node*) aNode;
 
 @end
 
@@ -189,6 +207,8 @@
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3Frustum* frustum;
+	GLuint textureUnitCount;
+	GLuint textureUnit;
 	BOOL shouldDecorateNode;
 }
 
@@ -199,6 +219,21 @@
  * multiple cameras, this ensures that the frustum of the current activeCamera is used.
  */
 @property(nonatomic, readonly) CC3Frustum* frustum;
+
+/**
+ * The number of texture units being drawn.
+ *
+ * This value is set by the texture contained in the node's material,
+ * and is then consumed by the mesh when binding texture coordinates.
+ */
+@property(nonatomic, assign) GLuint textureUnitCount; 
+
+/**
+ * The current texture unit being drawn.
+ *
+ * This value is set during drawing when the visitor is passed to the texture coordinates array.
+ */
+@property(nonatomic, assign) GLuint textureUnit; 
 
 /**
  * Indicates whether nodes should decorate themselves with their configured material,
@@ -226,15 +261,21 @@
 #pragma mark CC3NodePickingVisitor
 
 /**
- * CC3NodePickingVisitor is a CC3NodeDrawingVisitor that is passed to a node when it is
- * visited during node picking operations using color-buffer based picking.
+ * CC3NodePickingVisitor is a CC3NodeDrawingVisitor that is passed to a node when
+ * it is visited during node picking operations using color-buffer based picking.
  *
  * Node picking is the act of picking a 3D node from user input, such as a touch.
  * One method of accomplishing this is to draw the scene such that each object is
- * drawn in a unique solid color. Once the scene is drawn, the color of the pixel that
- * has been touched can be read from the OpenGL ES color buffer, and mapped back to
- * the object that was painted with that color. This drawing is performed in the
- * background so that the user is unaware of the specialized coloring.
+ * drawn in a unique solid color. Once the scene is drawn, the color of the pixel
+ * that has been touched can be read from the OpenGL ES color buffer, and mapped
+ * back to the object that was painted with that color. This drawing is performed
+ * in the background so that the user is unaware of the specialized coloring.
+ *
+ * If antialiasing multisampling is active, before reading the color of the touched
+ * pixel, the multisampling framebuffer is resolved to the resolve framebuffer,
+ * and the resolve framebuffer is made active so that the color of the touched pixel
+ * can be read. After reading the color of the touched pixel, the multisampling
+ * framebuffer is made active in preparation of normal drawing operations.
  */
 @interface CC3NodePickingVisitor : CC3NodeDrawingVisitor {
 	CC3Node* pickedNode;
@@ -245,6 +286,3 @@
 @property(nonatomic, readonly) CC3Node* pickedNode;
 
 @end
-
-
-

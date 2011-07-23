@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -390,20 +390,6 @@ GLfloat CC3DistanceFromNormalizedPlane(CC3Plane p, CC3Vector v);
 CC3Vector CC3PlaneNormal(CC3Plane p);
 
 /**
- * Returns the location point of the intersection of the specified plane and a ray, which
- * is defined by a starting location and a direction.
- *
- * The returned result is a 4D vector, where the x, y & z components give the intersection
- * location in 3D space, and the w component gives the distance from the rayStart to the
- * intersection location. If this value is negative, the intersection point is in the
- * opposite direction to where the ray is pointing.
- *
- * If the ray is parallel to the plane, no intersection occurs, and the returned 4D vector
- * will be zeroed (equal to kCC3Vector4Zero).
- */
-//CC3Vector4 CC3RayIntersectionWithPlane(CC3Plane plane, CC3Vector rayStart, CC3Vector rayDir);
-
-/**
  * Returns the location of the point where the specified ray intersects the specified plane.
  *
  * The returned result is a 4D vector, where the x, y & z components give the intersection
@@ -416,6 +402,31 @@ CC3Vector CC3PlaneNormal(CC3Plane p);
  * will be zeroed (equal to kCC3Vector4Zero).
  */
 CC3Vector4 CC3RayIntersectionWithPlane(CC3Ray ray, CC3Plane plane);
+
+
+#pragma mark -
+#pragma mark Attenuation function structures
+
+/**
+ * The coefficients of the equation for an attenuation function: (a + b*r + c*r*r),
+ * where r is the radial distance between a the source (light or camera) and the 3D
+ * location at which we want to calculate attenuation.
+ */
+typedef struct {
+	GLfloat a;				/**< The a coefficient in the attenuation function. */
+	GLfloat b;				/**< The b coefficient in the attenuation function. */
+	GLfloat c;				/**< The c coefficient in the attenuation function. */
+} CC3AttenuationCoefficients;
+
+/**
+ * Returns a string description of the specified CC3AttenuationCoefficients struct
+ * in the form "(a, b, c)".
+ */
+NSString* NSStringFromCC3AttenuationCoefficients(CC3AttenuationCoefficients coeffs);
+
+/** Returns a CC3AttenuationCoefficients structure constructed from the specified coefficients. */
+CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat a, GLfloat b, GLfloat c);
+
 
 #pragma mark -
 #pragma mark Viewport structure and functions
@@ -539,6 +550,9 @@ GLubyte CCColorByteFromFloat(GLfloat colorValue);
 #pragma mark -
 #pragma mark Miscellaneous extensions and functionality
 
+/** Returns the string YES or NO, depending on the specified boolean value. */
+NSString* NSStringFromBoolean(BOOL value);
+
 /** Extension category to support cocos3d functionality. */
 @interface NSObject (CC3)
 
@@ -565,11 +579,13 @@ GLubyte CCColorByteFromFloat(GLfloat colorValue);
 
 @end
 
-
+/** Extension category to support cocos3d functionality. */
 @interface CCDirector (CC3)
 
+/** Returns the time interval in seconds between the current render frame and the previous frame. */
 -(ccTime) frameInterval;
 
+/** Returns the current rendering perfromance in average frames per second. */
 -(ccTime) frameRate;
 
 @end

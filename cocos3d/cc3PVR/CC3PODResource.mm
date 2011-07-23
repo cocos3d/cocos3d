@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,7 +38,7 @@ extern "C" {
 #import "CC3PODMeshNode.h"
 #import "CC3PODCamera.h"
 #import "CC3PODLight.h"
-#import "CC3PODMeshModel.h"
+#import "CC3PODMesh.h"
 #import "CC3PODMaterial.h"
 #import "CCTextureCache.h"
 
@@ -218,12 +218,12 @@ static const id placeHolder = [NSObject new];
 	}
 }
 
--(CC3MeshModel*) meshModelAtIndex: (uint) meshIndex {
-	return (CC3MeshModel*)[meshModels objectAtIndex: meshIndex];
+-(CC3Mesh*) meshModelAtIndex: (uint) meshIndex {
+	return (CC3Mesh*)[meshModels objectAtIndex: meshIndex];
 }
 
--(CC3MeshModel*) buildMeshModelAtIndex: (uint) meshIndex {
-	return [CC3PODMeshModel meshAtIndex: meshIndex fromPODResource: self];
+-(CC3Mesh*) buildMeshModelAtIndex: (uint) meshIndex {
+	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
 }
 
 -(PODStructPtr) meshPODStructAtIndex: (uint) meshIndex {

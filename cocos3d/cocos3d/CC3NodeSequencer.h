@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -187,6 +187,35 @@
 @property(nonatomic, assign) BOOL allowSequenceUpdates;
 
 /**
+ * For sequencers that order nodes based on distance to the camera, indicates whether,
+ * when comparing distances from the nodes to the camera, only the distance component
+ * that is parallel to the camera's forwardDirection should be considered.
+ *
+ * If the value of this property is NO, nodes will be sorted based on the true 3D
+ * straight-line distance from each node to the camera, as if drawing a measuring tape
+ * from the location of the camera to the location of the center of geometry of the node.
+ * This is the most common 3D scenario.
+ *
+ * If the value of this property is YES, nodes will be sorted based on the shortest
+ * distance from the camera to a plane that is perpendicular to the forwardDirection
+ * of the camera and contains the location of the node. This has the effect of sorting
+ * nodes based on their distance "straight-out" from the camera, ignoring distance
+ * contributed by nodes that are "off to the side" of the camera's view. This option
+ * is good for scenes that are built from large planar nodes that move in layers at
+ * fixed distances from a fixed camera, similar to cell-animation techniques.
+ *
+ * The initial value for this property is NO, indicating that the true 3D distance
+ * between the camera and the center of geometry of the node will be used to determine
+ * drawing order. Unless your 3D scene is using special cell-animation techniques with
+ * large planar nodes, you should not change the value of this property.
+ *
+ * In this default abstract implmentation, the value returned is always returned as NO,
+ * and values set in this property are ignored. Subclasses that sort based on Z-order,
+ * and subclasses that contain such other sequencers will override.
+ */
+@property(nonatomic, assign) BOOL shouldUseOnlyForwardDistance;
+
+/**
  * Allocates and initializes an autoreleased instance with no evaluator.
  * This sequencer will not accept any nodes until an evaluator is attached.
  */
@@ -258,6 +287,9 @@
  *
  * Instances of CC3BTreeNodeSequencer can be used to group nodes by some parent criteria
  * while allowing the nodes to be further grouped within each child grouping.
+ *
+ * Setting the property shouldUseOnlyForwardDistance sets the same value in each child sequencer.
+ * Reading that property returns YES if any child sequencer returns YES, otherwise it returns NO.
  */
 @interface CC3BTreeNodeSequencer : CC3NodeSequencer {
 	NSMutableArray* sequencers;
@@ -358,8 +390,8 @@
  *   -# The distance from the camera to the node measured "straight out" from the
  *      camera, ignoring how far the node is away from the center of the camera's view.
  * The value of the shouldUseOnlyForwardDistance property determines which of these two
- * methods will be used. See the notes of that property for more information. By default,
- * the true 3D distance is used.
+ * methods will be used. See the notes of that property in the CC3NodeSequencer for more
+ * information. By default, the true 3D distance is used.
  *
  * Since all nodes, and the camera, can move around on each update, this sequencer will
  * test and re-order its nodes on each update.
@@ -377,30 +409,6 @@
 @interface CC3NodeArrayZOrderSequencer : CC3NodeArraySequencer {
     BOOL shouldUseOnlyForwardDistance;
 }
-
-/**
- * Indicates whether, when comparing distances from the nodes to the camera, only the
- * distance component that is parallel to the camera's forwardDirection should be considered.
- *
- * If the value of this property is NO, nodes will be sorted based on the true 3D
- * straight-line distance from each node to the camera, as if drawing a measuring tape
- * from the location of the camera to the location of the center of geometry of the node.
- * This is the most common 3D scenario.
- *
- * If the value of this property is YES, nodes will be sorted based on the shortest
- * distance from the camera to a plane that is perpendicular to the forwardDirection
- * of the camera and contains the location of the node. This has the effect of sorting
- * nodes based on their distance "straight-out" from the camera, ignoring distance
- * contributed by nodes that are "off to the side" of the camera's view. This option
- * is good for scenes that are built from large planar nodes that move in layers at
- * fixed distances from a fixed camera, similar to cell-animation techniques.
- *
- * The initial value for this property is NO, indicating that the true 3D distance
- * between the camera and the center of geometry of the node will be used to determine
- * drawing order. Unless your 3D scene is using special cell-animation techniques with
- * large planar nodes, you should not change the value of this property.
- */
-@property(nonatomic, assign) BOOL shouldUseOnlyForwardDistance;
 
 @end
 

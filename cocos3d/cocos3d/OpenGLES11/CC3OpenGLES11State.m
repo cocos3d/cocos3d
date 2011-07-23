@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,22 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPointParameterVector
+
+@implementation CC3OpenGLES11StateTrackerPointParameterVector
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
+-(void) setGLValue {
+	glPointParameterfv(name, (GLfloat*)&value);
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11State
 
 @implementation CC3OpenGLES11State
@@ -46,6 +62,8 @@
 @synthesize depthMask;
 @synthesize frontFace;
 @synthesize lineWidth;
+@synthesize pointSize;
+@synthesize pointSizeAttenuation;
 @synthesize scissor;
 @synthesize shadeModel;
 @synthesize viewport;
@@ -60,6 +78,8 @@
 	[depthMask release];
 	[frontFace release];
 	[lineWidth release];
+	[pointSize release];
+	[pointSizeAttenuation release];
 	[scissor release];
 	[shadeModel release];
 	[viewport release];
@@ -104,6 +124,12 @@
 	self.lineWidth = [CC3OpenGLES11StateTrackerFloat trackerForState: GL_LINE_WIDTH
 													 andGLSetFunction: glLineWidth
 											 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
+	self.pointSize = [CC3OpenGLES11StateTrackerFloat trackerForState: GL_POINT_SIZE
+													andGLSetFunction: glPointSize
+											andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
+	self.pointSizeAttenuation = [CC3OpenGLES11StateTrackerPointParameterVector trackerForState: GL_POINT_DISTANCE_ATTENUATION];
 
 	self.scissor = [CC3OpenGLES11StateTrackerViewport trackerForState: GL_SCISSOR_BOX
 													 andGLSetFunction: glScissor
@@ -129,6 +155,8 @@
 	[depthMask open];
 	[frontFace open];
 	[lineWidth open];
+	[pointSize open];
+	[pointSizeAttenuation open];
 	[scissor open];
 	[shadeModel open];
 	[viewport open];
@@ -145,6 +173,8 @@
 	[depthMask close];
 	[frontFace close];
 	[lineWidth close];
+	[pointSize close];
+	[pointSizeAttenuation close];
 	[scissor close];
 	[shadeModel close];
 	[viewport close];

@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,7 +40,8 @@
 #pragma mark CC3Camera implementation
 
 @interface CC3Node (TemplateMethods)
--(void) buildTransformMatrix;
+-(void) transformMatrixChanged;
+-(void) updateGlobalScale;
 -(void) populateFrom: (CC3Node*) another;
 @end
 
@@ -182,21 +183,28 @@
  * scale of 1/10 is applied to the transform to counteract this effect.
  */
 -(void) applyScaling {
-	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
+	[self updateGlobalScale];	// Make sure globalScale is current first.
 	[transformMatrix scaleBy: CC3VectorInvert(globalScale)];
 	LogTrace(@"%@ scaled back by global %@ to counter parent scaling %@",
 			 self, NSStringFromCC3Vector(globalScale), transformMatrix);
 }
 
+/**
+ * Scaling does not apply to cameras. Sets the globalScale to that of the parent node,
+ * or to unit scaling if no parent.
+ */
+-(void) updateGlobalScale {
+	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
+}
+
 -(void) buildPerspective {
-	[self trackTarget];
 	[self buildProjectionMatrix];
 	[self buildFrustumPlanes];
 }
 
 /** Overridden to also build the modelview matrix. */
--(void) buildTransformMatrix {
-	[super buildTransformMatrix];
+-(void) transformMatrixChanged {
+	[super transformMatrixChanged];
 	[self buildModelViewMatrix];
 }
 
@@ -330,7 +338,7 @@
 	// the location is behind the camera.
 	CC3Vector camToLocVector = CC3VectorDifference(a3DLocation, self.globalLocation);
 	GLfloat camToLocDist = CC3VectorLength(camToLocVector);
-	GLfloat frontOrBack = SIGN(CC3VectorDot(camToLocVector, self.forwardDirection));
+	GLfloat frontOrBack = SIGN(CC3VectorDot(camToLocVector, self.globalForwardDirection));
 	projectedLoc.z = frontOrBack * camToLocDist;
 	
 	// Map the projected point to the device orientation then return it
@@ -385,15 +393,16 @@
 	if (self.isUsingParallelProjection) {
 		// The location on the near clipping plane is relative to the camera's
 		// local coordinates. Convert it to global coordinates before returning.
-		// The ray direction is straight out from that global location.
+		// The ray direction is straight out from that global location in the 
+		// camera's globalForwardDirection.
 		ray.startLocation =  [transformMatrix transformLocation: pointLocNear];
-		ray.direction = self.forwardDirection;
+		ray.direction = self.globalForwardDirection;
 	} else {
 		// The location on the near clipping plane is relative to the camera's local
-		// coordinates and forwardDirection vector. Since the camera's origin is zero
-		// in its local coordinates, this point on the near clipping plane forms a
-		// directional vector, which we now rotate with the camera's rotation matrix
-		// to convert it to a global direction vector in global coordinates.
+		// coordinates. Since the camera's origin is zero in its local coordinates,
+		// this point on the near clipping plane forms a directional vector from the
+		// camera's origin. Rotate this directional vector with the camera's rotation
+		// matrix to convert it to a global direction vector in global coordinates.
 		ray.startLocation = self.globalLocation;
 		ray.direction = [rotator.rotationMatrix transformDirection: pointLocNear];
 	}

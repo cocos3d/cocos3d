@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,18 +30,20 @@
  */
 
 #import "CC3Billboard.h"
+#import "CCParticleSystem.h"
 #import "CGPointExtension.h"
 
 
 @interface CC3Node (TemplateMethods)
 -(void) populateFrom: (CC3Node*) another;
+-(void) resumeActions;
+-(void) pauseActions;
 @end
-
 
 @implementation CC3Billboard
 
 @synthesize billboard, offsetPosition, unityScaleDistance;
-@synthesize minimumBillboardScale, maximumBillboardScale;
+@synthesize minimumBillboardScale, maximumBillboardScale, shouldNormalizeScaleToDevice;
 
 -(void) dealloc {
 	[billboard release];
@@ -49,15 +51,49 @@
 }
 
 -(void) setBillboard:(CCNode*) aCCNode {
-	id oldBB = billboard;
+	[billboard onExit];					// Stop scheduled activities on old billboard
+	[billboard autorelease];			// Autorelease (not release) in case its same instance
 	billboard = [aCCNode retain];
 	billboard.visible = self.visible;
-	[oldBB release];
+	if (isRunning) [billboard onEnter];	// If running, start scheduled activities on new billboard
 } 
 
 -(void) setVisible:(BOOL) isVisible {
 	[super setVisible: isVisible];
 	billboard.visible = isVisible;
+}
+
+
+#pragma mark CCRGBAProtocol support
+
+/** Returns color of billboard if it has a color, otherwise falls back to superclass implementation. */
+-(ccColor3B) color {
+	return ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
+				? [((id<CCRGBAProtocol>)billboard) color]
+				: [super color];
+}
+
+/** Also sets color of billboard if it can be set. */
+-(void) setColor: (ccColor3B) color {
+	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)]) {
+		[((id<CCRGBAProtocol>)billboard) setColor: color];
+	}
+	[super setColor: color];
+}
+
+/** Returns opacity of billboard if it has an opacity, otherwise falls back to superclass implementation. */
+-(GLubyte) opacity {
+	return ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
+				? [((id<CCRGBAProtocol>)billboard) opacity]
+				: [super opacity];
+}
+
+/** Also sets opacity of billboard if it can be set. */
+-(void) setOpacity: (GLubyte) opacity {
+	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)]) {
+		[((id<CCRGBAProtocol>)billboard) setOpacity: opacity];
+	}
+	[super setOpacity: opacity];
 }
 
 
@@ -71,6 +107,7 @@
 		minimumBillboardScale = CGPointZero;
 		maximumBillboardScale = CGPointZero;
 		unityScaleDistance = 0.0;
+		shouldNormalizeScaleToDevice = YES;
 	}
 	return self;
 }
@@ -127,12 +164,14 @@
 	unityScaleDistance = another.unityScaleDistance;
 	minimumBillboardScale = another.minimumBillboardScale;
 	maximumBillboardScale = another.maximumBillboardScale;
+	shouldNormalizeScaleToDevice = another.shouldNormalizeScaleToDevice;
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, billboard: %@, offset: %@, unity distance: %.2f, min: %@, max: %@",
-				[super fullDescription], billboard, NSStringFromCGPoint(offsetPosition), unityScaleDistance,
-				NSStringFromCGPoint(minimumBillboardScale), NSStringFromCGPoint(maximumBillboardScale)];
+	return [NSString stringWithFormat: @"%@, billboard: %@, offset: %@, unity distance: %.2f, min: %@, max: %@, normalizing: %@",
+			[super fullDescription], billboard, NSStringFromCGPoint(offsetPosition), unityScaleDistance,
+			NSStringFromCGPoint(minimumBillboardScale), NSStringFromCGPoint(maximumBillboardScale),
+			(shouldNormalizeScaleToDevice ? @"YES" : @"NO")];
 }
 
 
@@ -179,12 +218,29 @@
 			LogTrace(@"Projecting billboard %@ to %@, scaled to %@ using distance %.2f and unity distance %.2f",
 					 self, NSStringFromCGPoint(pPos), NSStringFromCGPoint(newBBScale), camDist, unityDist);
 		}
+
+		// If consistency across devices is desired, adjust size of 2D billboard so that
+		// it appears the same size relative to 3D artifacts across all device resolutions
+		if (shouldNormalizeScaleToDevice) {
+			newBBScale = ccpMult(newBBScale, [[self class] deviceScaleFactor]);
+		}
 		
 		// Set the new scale only if it has changed. 
 		if (billboard.scaleX != newBBScale.x) billboard.scaleX = newBBScale.x;
 		if (billboard.scaleY != newBBScale.y) billboard.scaleY = newBBScale.y;
 	}
 }
+
+#define kCC3DeviceScaleFactorBase 480.0f
+static GLfloat deviceScaleFactor = 0.0f;
+
++(GLfloat) deviceScaleFactor {
+	if (deviceScaleFactor == 0.0f) {
+		CGSize winSz = [[CCDirector sharedDirector] winSize];
+		deviceScaleFactor = winSz.height / kCC3DeviceScaleFactorBase;
+	}
+	return deviceScaleFactor;
+ }
 
 
 #pragma mark Drawing
@@ -210,14 +266,47 @@
 	return YES;
 }
 
+
+#pragma mark CC3Node Actions
+
+- (void) resumeActions {
+	[super resumeActions];
+	[billboard resumeSchedulerAndActions];
+}
+
+- (void) pauseActions {
+	[super pauseActions];
+	[billboard pauseSchedulerAndActions];
+}
+
 @end
 
+
+#pragma mark -
+#pragma mark CC3ParticleSystemBillboard interface
+
+@implementation CC3ParticleSystemBillboard
+
+/**
+ * If the particle system has exhausted and it is set to auto-remove, remove this
+ * node from the world so that this node and the particle system will be released.
+ */
+-(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
+	if (billboard) {
+		CCParticleSystem* ps = (CCParticleSystem*)billboard;
+		if (ps.autoRemoveOnFinish && !ps.active && ps.particleCount == 0) {
+			LogTrace(@"2D particle system exhausted. Removing %@", self);
+			[visitor requestRemovalOf: self];
+		}
+	}
+}
+
+@end
 
 #pragma mark -
 #pragma mark CC3BillboardBoundingBoxArea interface
 
 @implementation CC3BillboardBoundingBoxArea
-
 
 #pragma mark Updating
 

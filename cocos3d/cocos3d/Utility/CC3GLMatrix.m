@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -250,7 +250,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 											0.0f, 0.0f, 0.0f, 1.0f };
 
 -(void) populateFrom: (CC3GLMatrix*) aMtx {
-	if (aMtx.isIdentity) {
+	if (!aMtx || aMtx.isIdentity) {
 		[self populateIdentity];
 	} else {
 		[self populateFromGLMatrix: aMtx.glMatrix];
@@ -870,7 +870,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 -(void) multiplyByMatrix: (CC3GLMatrix*) aGLMatrix {
 
 	// If other matrix is identity, this matrix doesn't change, so leave
-	if (aGLMatrix.isIdentity) {
+	if (!aGLMatrix || aGLMatrix.isIdentity) {
 		return;
 	}
 	

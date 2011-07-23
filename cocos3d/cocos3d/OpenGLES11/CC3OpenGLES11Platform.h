@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -42,7 +42,7 @@
 @interface CC3OpenGLES11Platform : CC3OpenGLES11StateTrackerManager {
 	CC3OpenGLES11StateTrackerInteger* maxLights;
 	CC3OpenGLES11StateTrackerInteger* maxClipPlanes;
-	CC3OpenGLES11StateTrackerInteger* maxTextureChannels;
+	CC3OpenGLES11StateTrackerInteger* maxTextureUnits;
 }
 
 /** Reads the number of lights available, through GL parameter GL_MAX_LIGHTS. */
@@ -51,7 +51,7 @@
 /** Reads the number of clip planes available, through GL parameter GL_MAX_CLIP_PLANES. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxClipPlanes;
 
-/** Reads the number of texture channels available, through GL parameter GL_MAX_TEXTURE_UNITS. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxTextureChannels;
+/** Reads the number of texture units available, through GL parameter GL_MAX_TEXTURE_UNITS. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxTextureUnits;
 
 @end

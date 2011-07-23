@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpLayer.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,6 +40,7 @@
 #define kJoystickPadding  8.0
 #define kSwitchViewButtonFileName @"SwitchViewButton48x48.png"
 #define kInvasionButtonFileName @"InvasionButton48x48.png"
+#define kSunlightButtonFileName @"SunlightButton48x48.png"
 #define kButtonRingFileName @"ButtonRing48x48.png"
 #define kButtonShineFileName @"Shine48x48.png"
 #define kPeakShineOpacity 255
@@ -49,6 +50,7 @@
 -(void) addJoysticks;
 -(void) addSwitchViewButton;
 -(void) addInvasionButton;
+-(void) addSunlightButton;
 -(void) positionLocationJoystick;
 -(void) positionButtons;
 @property(nonatomic, readonly) CC3DemoMashUpWorld* mashUpWorld;
@@ -61,6 +63,7 @@
 	locationJoystick = nil;			// retained as child
 	switchViewMI = nil;				// retained as child
 	invasionMI = nil;				// retained as child
+	sunlightMI = nil;				// retained as child
     [super dealloc];
 }
 
@@ -76,6 +79,7 @@
 	[self addJoysticks];
 	[self addSwitchViewButton];
 	[self addInvasionButton];
+	[self addSunlightButton];
 	self.isTouchEnabled = YES;		// Enable touch event handling for 3D object picking
 }
 
@@ -193,6 +197,38 @@
 }
 
 /**
+ * Creates a button (actually a single-item menu) in the bottom center of the layer that will
+ * allow the user to turn the sun on or off.
+ */
+-(void) addSunlightButton {
+	
+	// Set up the menu item and position it in the bottom center of the layer
+	sunlightMI = [AdornableMenuItemImage itemFromNormalImage: kSunlightButtonFileName
+											   selectedImage: kSunlightButtonFileName
+													  target: self
+													selector: @selector(cycleLights:)];
+	[self positionButtons];
+	
+	// Instead of having different normal and selected images, the toggle menu item uses an
+	// adornment, which is displayed whenever an item is selected.
+	CCNodeAdornmentBase* adornment;
+	
+	// The adornment is a ring that fades in around the menu item and then fades out when
+	// the menu item is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
+	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+	
+	// Attach the adornment to the menu item and center it on the menu item
+	adornment.position = ccpCompMult(ccpFromSize(invasionMI.contentSize), sunlightMI.anchorPoint);
+	sunlightMI.adornment = adornment;
+	
+	CCMenu* viewMenu = [CCMenu menuWithItems: sunlightMI, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+}
+
+/**
  * Positions the right-side location joystick at the right of the layer.
  * This is called at initialization, and anytime the content size of the layer changes
  * to keep the joystick in the correct location within the new layer dimensions.
@@ -208,10 +244,11 @@
  */
 -(void) positionButtons {
 	GLfloat middle = self.contentSize.width / 2.0;
-	switchViewMI.position = ccp(middle - (switchViewMI.contentSize.width / 2.0) - kJoystickPadding,
-								(kJoystickSideLength - switchViewMI.contentSize.height) + kJoystickPadding);
-	invasionMI.position = ccp(middle + (invasionMI.contentSize.width / 2.0) + kJoystickPadding,
-								(kJoystickSideLength - invasionMI.contentSize.height) + kJoystickPadding);
+	GLfloat btnY = kJoystickSideLength - invasionMI.contentSize.height + kJoystickPadding;
+
+	switchViewMI.position = ccp(middle - switchViewMI.contentSize.width, btnY);
+	invasionMI.position = ccp(middle, btnY);
+	sunlightMI.position = ccp(middle + sunlightMI.contentSize.width, btnY);
 }
 
 
@@ -237,6 +274,15 @@
 /** The user has pressed the invade button. Tell the 3D world. */
 -(void) invade: (CCMenuItemToggle*) svMI {
 	[self.mashUpWorld invade];
+}
+
+/** The user has pressed the cycle lights button. Tell the 3D world. */
+-(void) cycleLights: (CCMenuItemToggle*) svMI {
+	if ([self.mashUpWorld cycleLights]) {
+		[self setColor: ccc3(100, 120, 220)];
+	} else {
+		[self setColor: ccBLACK];
+	}
 }
 
 /**

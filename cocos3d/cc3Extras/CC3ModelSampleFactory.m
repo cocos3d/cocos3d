@@ -1,7 +1,7 @@
 /*
  * CC3ModelSampleFactory.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,7 +33,7 @@
 #import "teapot.h"
 
 @interface CC3ModelSampleFactory (TemplateMethods)
--(CC3VertexArrayMeshModel*) makeTeapotMeshNamed: (NSString*) aName;
+-(CC3VertexArrayMesh*) makeTeapotMeshNamed: (NSString*) aName;
 @end
 
 
@@ -159,9 +159,9 @@ static CC3ModelSampleFactory* factory;
 
 #pragma mark Factory methods
 
-// Returns an autoreleased mesh model of a teapot named with the specified name
--(CC3VertexArrayMeshModel*) makeTeapotMeshNamed: (NSString*) aName {
-	CC3VertexArrayMeshModel* mesh = [CC3VertexArrayMeshModel meshWithName: aName];
+// Returns an autoreleased mesh of a teapot named with the specified name
+-(CC3VertexArrayMesh*) makeTeapotMeshNamed: (NSString*) aName {
+	CC3VertexArrayMesh* mesh = [CC3VertexArrayMesh meshWithName: aName];
 	mesh.vertexLocations = teapotVertexLocations;
 	mesh.vertexNormals = teapotVertexNormals;
 	mesh.vertexIndices = teapotVertexIndices;
@@ -171,7 +171,7 @@ static CC3ModelSampleFactory* factory;
 // Returns an autoreleased mesh node displaying a teapot in a particular color
 -(CC3MeshNode*) makeUniColoredTeapotNamed: (NSString*) aName withColor: (ccColor4F) color {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.meshModel = unicoloredTeapotMesh;
+	teapot.mesh = unicoloredTeapotMesh;
 	teapot.material = [CC3Material shiny];
 	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
 	teapot.material.diffuseColor = color;	
@@ -181,7 +181,7 @@ static CC3ModelSampleFactory* factory;
 // Returns an autoreleased mesh node displaying a teapot painted with a color gradient...very funky
 -(CC3MeshNode*) makeMultiColoredTeapotNamed: (NSString*) aName {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.meshModel = multicoloredTeapotMesh;
+	teapot.mesh = multicoloredTeapotMesh;
 	teapot.material = [CC3Material shiny];
 	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
 	return teapot;
@@ -190,7 +190,7 @@ static CC3ModelSampleFactory* factory;
 // Returns an autoreleased mesh node displaying a teapot covered by a cocos2d logo texture
 -(CC3MeshNode*) makeLogoTexturedTeapotNamed: (NSString*) aName {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
-	teapot.meshModel = texturedTeapotMesh;
+	teapot.mesh = texturedTeapotMesh;
 	teapot.material = [CC3Material shiny];
 	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
 	teapot.material.texture = logoTexture;

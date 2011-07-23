@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,37 +31,6 @@
 
 #import "CC3OpenGLES11Capabilities.h"
 #import "CC3OpenGLES11Engine.h"
-
-
-#pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerCapability
-
-@implementation CC3OpenGLES11StateTrackerCapability
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
--(void) enable {
-	self.value = YES;
-}
-
--(void) disable {
-	self.value = NO;
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
-}
-
--(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
-			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"));
-}
-
-@end
 
 
 #pragma mark -
@@ -111,12 +80,11 @@
 @synthesize dither;
 @synthesize fog;
 @synthesize lighting;
-@synthesize lights;
 @synthesize lineSmooth;
 @synthesize multisample;
 @synthesize normalize;
 @synthesize pointSmooth;
-@synthesize pointSpriteOES;
+@synthesize pointSprites;
 @synthesize polygonOffsetFill;
 @synthesize rescaleNormal;
 @synthesize sampleAlphaToCoverage;
@@ -124,7 +92,6 @@
 @synthesize sampleCoverage;
 @synthesize scissorTest;
 @synthesize stencilTest;
-@synthesize texture2D;
 
 -(void) dealloc {
 	[alphaTest release];
@@ -137,12 +104,11 @@
 	[dither release];
 	[fog release];
 	[lighting release];
-	[lights release];
 	[lineSmooth release];
 	[multisample release];
 	[normalize release];
 	[pointSmooth release];
-	[pointSpriteOES release];
+	[pointSprites release];
 	[polygonOffsetFill release];
 	[rescaleNormal release];
 	[sampleAlphaToCoverage release];
@@ -150,16 +116,11 @@
 	[sampleCoverage release];
 	[scissorTest release];
 	[stencilTest release];
-	[texture2D release];
 	[super dealloc];
 }
 
 -(CC3OpenGLES11StateTrackerServerCapability*) clipPlaneAt: (GLint) cpIndx {
 	return [clipPlanes objectAtIndex: cpIndx];
-}
-
--(CC3OpenGLES11StateTrackerServerCapability*) lightAt: (GLint) ltIndx {
-	return [lights objectAtIndex: ltIndx];
 }
 
 -(void) initializeTrackers {
@@ -179,20 +140,13 @@
 	self.dither = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_DITHER];
 	self.fog = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_FOG];
 	self.lighting = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LIGHTING];
-	self.lights = [NSMutableArray array];
-
-	GLint platformMaxLights = [CC3OpenGLES11Engine engine].platform.maxLights.value;
-	for (int i = 0; i < platformMaxLights; i++) {
-		[lights addObject: [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LIGHT0 + i]];
-	}
-
 	self.lineSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LINE_SMOOTH];
 	self.multisample = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_MULTISAMPLE];
 	self.normalize = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_NORMALIZE];
 	self.pointSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POINT_SMOOTH];
 
 	// Illegal GL enum when trying to read value of GL_POINT_SPRITE_OES.
-	self.pointSpriteOES = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POINT_SPRITE_OES
+	self.pointSprites = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POINT_SPRITE_OES
 															andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	self.polygonOffsetFill = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POLYGON_OFFSET_FILL];
 	self.rescaleNormal = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_RESCALE_NORMAL];
@@ -201,7 +155,6 @@
 	self.sampleCoverage = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SAMPLE_COVERAGE];
 	self.scissorTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SCISSOR_TEST];
 	self.stencilTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_STENCIL_TEST];
-	self.texture2D = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_TEXTURE_2D];
 }
 
 -(void) open {
@@ -216,12 +169,11 @@
 	[dither open];
 	[fog open];
 	[lighting open];
-	[self openTrackers: lights];
 	[lineSmooth open];
 	[multisample open];
 	[normalize open];
 	[pointSmooth open];
-	[pointSpriteOES open];
+	[pointSprites open];
 	[polygonOffsetFill open];
 	[rescaleNormal open];
 	[sampleAlphaToCoverage open];
@@ -229,7 +181,6 @@
 	[sampleCoverage open];
 	[scissorTest open];
 	[stencilTest open];
-	[texture2D open];
 }
 
 -(void) close {
@@ -244,12 +195,11 @@
 	[dither close];
 	[fog close];
 	[lighting close];
-	[self closeTrackers: lights];
 	[lineSmooth close];
 	[multisample close];
 	[normalize close];
 	[pointSmooth close];
-	[pointSpriteOES close];
+	[pointSprites close];
 	[polygonOffsetFill close];
 	[rescaleNormal close];
 	[sampleAlphaToCoverage close];
@@ -257,7 +207,6 @@
 	[sampleCoverage close];
 	[scissorTest close];
 	[stencilTest close];
-	[texture2D close];
 }
 
 @end
@@ -270,15 +219,13 @@
 
 @synthesize colorArray;
 @synthesize normalArray;
-@synthesize pointSizeArrayOES;
-@synthesize textureCoordArray;
+@synthesize pointSizeArray;
 @synthesize vertexArray;
 
 -(void) dealloc {
 	[colorArray release];
 	[normalArray release];
-	[pointSizeArrayOES release];
-	[textureCoordArray release];
+	[pointSizeArray release];
 	[vertexArray release];
 	[super dealloc];
 }
@@ -286,8 +233,7 @@
 -(void) initializeTrackers {
 	self.colorArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_COLOR_ARRAY];
 	self.normalArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_NORMAL_ARRAY];
-	self.pointSizeArrayOES = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_POINT_SIZE_ARRAY_OES];
-	self.textureCoordArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_TEXTURE_COORD_ARRAY];
+	self.pointSizeArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_POINT_SIZE_ARRAY_OES];
 	self.vertexArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_VERTEX_ARRAY];
 }	
 
@@ -295,8 +241,7 @@
 	LogTrace("Opening %@", [self class]);
 	[colorArray open];
 	[normalArray open];
-	[pointSizeArrayOES open];
-	[textureCoordArray open];
+	[pointSizeArray open];
 	[vertexArray open];
 }
 
@@ -304,8 +249,7 @@
 	LogTrace("Closing %@", [self class]);
 	[colorArray close];
 	[normalArray close];
-	[pointSizeArrayOES close];
-	[textureCoordArray close];
+	[pointSizeArray close];
 	[vertexArray close];
 }
 

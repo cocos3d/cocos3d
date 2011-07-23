@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,8 +35,8 @@
 
 
 /**
- * This CC3Node displays a 2D cocos2D CCNode at the projectedPosition of this node.
- * Since the  cocos2D node is displayed in 2D, it always appears to face the camera,
+ * This CC3Node displays a 2D cocos2d CCNode at the projectedPosition of this node.
+ * Since the  cocos2d node is displayed in 2D, it always appears to face the camera,
  * and it is never occluded by any 3D objects.
  *
  * CC3Billboards are useful for drawing a label, health-bar, or some other 2D artifact
@@ -56,6 +56,18 @@
  * artifact to a single static scale, set both the minimumBillboardScale and
  * minimumBillboardScale properties to the same non-zero value.
  *
+ * As with all CC3Nodes, CC3Billboards support the protocol CCRGBAProtocol.
+ * When wrapping a 2D CCNode billboard that also supports CCRGBAProtocol, changes to
+ * the CC3Billboard color and opacity properties will change those same properties in
+ * the encapsulated 2D CCNode billboard. When reading the color and opacity properties
+ * of the CC3Billboard, the value returned will be that of the 2D CCNode.
+ *
+ * Using the shouldNormalizeScaleToDevice property, you can choose whether the 2D
+ * billboard should be scaled to appear to be the same size, relative to the 3D
+ * artifacts around it, across all screen resolutions, or whether the 2D billboard
+ * should be drawn in its natural resolution, which may make it appear to be larger
+ * or smaller, relative to the 3D artifacts around it, on different devices.
+ *
  * Generally, CC3Billboards return NO for the hasLocalContent property, and are not
  * drawn along with other nodes that do have local content. Instead, CC3Billboards
  * are drawn by the CC3World after all 3D drawing has been completed. To do this,
@@ -74,6 +86,7 @@
 	GLfloat unityScaleDistance;
 	CGPoint minimumBillboardScale;
 	CGPoint maximumBillboardScale;
+	BOOL shouldNormalizeScaleToDevice;
 }
 
 /** The 2D artifact that this node will display. This can be any CCNode subclass. */
@@ -97,6 +110,40 @@
  * smaller than its natural size. The initial value of this property is zero.
  */
 @property(nonatomic, assign) GLfloat unityScaleDistance;
+
+
+/** 
+ * Indicates whether the size of the 2D billboard should be adjusted so that its size
+ * relative to the 3D artifacts appears to be the same across all devices.
+ *
+ * The 3D camera frustum is consistent across all devices, making the view of the 3D scene
+ * consistent across all devices. The result is that on devices with larger screen resolutions,
+ * each 3D artifact will be drawn across more pixels, and may appear visually larger. 
+ * 
+ * If this property is set to YES, the scale of the 2D billboard will be adjusted so
+ * that it appears to be the same size across all devices, relative to the 3D artifacts.
+ *
+ * If this property is set to NO, the 2D billboard will be drawn in the same absolute
+ * pixel size across all devices, which may make it appear to be smaller or larger,
+ * relative to the 3D artifacts around it, on different devices.
+ *
+ * The initial value of this property is YES.
+ */
+@property(nonatomic, assign) BOOL shouldNormalizeScaleToDevice;
+
+/**
+ * The scaling factor used to adjust the scale of the 2D billboard so that it's size
+ * relative to the 3D artifacts appears consistent across all device screen resolutions,
+ * if the shouldNormalizeScaleToDevice property is set to YES.
+ *
+ * The value returned depends on the device screen window size and is normalized to the
+ * original iPhone/iPod Touch screen size of 480 x 320. The value returned for an original
+ * iPhone or iPod Touch will be 1.0. The value returned for other devices depends on the
+ * screen resolution, and formally, on the screen height as measured in pixels.
+ * Devices with larger screen heights in pixels will return a value greater than 1.0.
+ * Devices with smaller screen heights in pixels will return a value less than 1.0
+ */
++(GLfloat) deviceScaleFactor;
 
 /**
  * The minimum scale that will be applied to the 2D artifact. Setting this property to a
@@ -200,6 +247,22 @@
 -(BOOL) doesIntersectBounds: (CGRect) bounds;
 
 	
+@end
+
+
+#pragma mark -
+#pragma mark CC3ParticleSystemBillboard interface
+
+/**
+ * A CC3Billboard node customized to display and manage a cocos2d 2D CCParticleSystem.
+ *
+ * You can use the base CC3Billboard class to display a 2D CCParticleSystem, but this
+ * class adds some additional management features, including:
+ *   - If the CCParticleSystem has a finite duration and its autoRemoveOnFinish property
+ *     is set to YES, the CC3ParticleSystemBillboard node is automatically removed from
+ *     its parent once the particle system has finished emitting.
+ */
+@interface CC3ParticleSystemBillboard : CC3Billboard
 @end
 
 

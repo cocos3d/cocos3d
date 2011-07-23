@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -275,10 +275,10 @@
 -(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex;
 
 /**
- * Returns the meshIndex'th mesh model.
- * Note that meshIndex is an ordinal number indicating the rank of the mesh model.
+ * Returns the meshIndex'th mesh.
+ * Note that meshIndex is an ordinal number indicating the rank of the mesh.
  */
--(CC3MeshModel*) meshModelAtIndex: (uint) meshIndex;
+-(CC3Mesh*) meshModelAtIndex: (uint) meshIndex;
 
 /**
  * Template method that extracts and builds the mesh models from the underlying data.
@@ -290,14 +290,14 @@
 -(void) buildMeshModels;
 
 /**
- * Builds the meshIndex'th mesh model.
- * Note that meshIndex is an ordinal number indicating the rank of the mesh model.
+ * Builds the meshIndex'th mesh.
+ * Note that meshIndex is an ordinal number indicating the rank of the mesh.
  */
--(CC3MeshModel*) buildMeshModelAtIndex: (uint) meshIndex;
+-(CC3Mesh*) buildMeshModelAtIndex: (uint) meshIndex;
 
 /**
  * Returns meshIndex'th SPODMesh structure from the data structures.
- * Note that meshIndex is an ordinal number indicating the rank of the mesh model.
+ * Note that meshIndex is an ordinal number indicating the rank of the mesh.
  *
  * The returned pointer must be cast to SPODMesh before accessing any internals of
  * the data structure.

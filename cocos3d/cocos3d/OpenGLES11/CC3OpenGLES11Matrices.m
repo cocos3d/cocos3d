@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,7 +38,7 @@
 @implementation CC3OpenGLES11MatrixStack
 
 -(void) dealloc {
-	[modeTracker dealloc];
+	[modeTracker release];
 	[super dealloc];
 }
 
@@ -124,13 +124,11 @@
 @synthesize mode;
 @synthesize modelview;
 @synthesize projection;
-@synthesize texture;
 
 -(void) dealloc {
 	[mode release];
 	[modelview release];
 	[projection release];
-	[texture release];
 
 	[super dealloc];
 }
@@ -150,11 +148,6 @@
 													andTopName: GL_PROJECTION_MATRIX
 												  andDepthName: GL_PROJECTION_STACK_DEPTH
 												andModeTracker: mode];
-
-	self.texture = [CC3OpenGLES11MatrixStack trackerWithMode: GL_TEXTURE 
-													andTopName: GL_TEXTURE_MATRIX
-												  andDepthName: GL_TEXTURE_STACK_DEPTH
-												andModeTracker: mode];
 }
 
 -(void) open {
@@ -162,7 +155,6 @@
 	[mode open];
 	[modelview open];
 	[projection open];
-	[texture open];
 }
 
 -(void) close {
@@ -170,7 +162,6 @@
 	[mode close];
 	[modelview close];
 	[projection close];
-	[texture close];
 }
 
 @end

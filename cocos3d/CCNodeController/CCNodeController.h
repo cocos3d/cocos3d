@@ -1,7 +1,7 @@
 /*
  * CCNodeController.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -123,7 +123,7 @@
  * as the device orientation changes. The value of this property is initially set to NO.
  *
  * If this property is set to YES, this controller will listen for notifications of device
- * orientation change, and propagate those changes to the cocos2D framework and the controlled
+ * orientation change, and propagate those changes to the cocos2d framework and the controlled
  * CCNode<ControlledCCNodeProtocol>'s through its deviceOrientationDidChange: method.
  *
  * If this property is set to NO, the application may still change the orientation of the CCNode
@@ -133,7 +133,7 @@
 @property(nonatomic, assign) BOOL doesAutoRotate;
 
 /**
- * Within cocos2D, not all UIDeviceOrientation enumerations are mapped to ccDeviceOrientations.
+ * Within cocos2d, not all UIDeviceOrientation enumerations are mapped to ccDeviceOrientations.
  * When the device is in a UIDeviceOrientation that is not mapped to a ccDeviceOrientation,
  * (typically UIDeviceOrientationFaceDown or UIDeviceOrientationFaceUp), the controller will
  * orient the CCNode to this defaultCCDeviceOrientation.
@@ -143,7 +143,7 @@
 
 /**
  * Called automatically when the orientation of the device (portrait, landscape, etc)
- * has changed. Propagates the change in orientation into the cocos2D framework.
+ * has changed. Propagates the change in orientation into the cocos2d framework.
  *
  * The current UIDeviceOrientation is mapped to a corresponding ccDeviceOrientation.
  * The new ccDeviceOrientation is set in the CCDirector singleton and the CCNode is sent

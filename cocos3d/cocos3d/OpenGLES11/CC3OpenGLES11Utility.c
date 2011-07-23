@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Utility.c
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -212,6 +212,8 @@ char* GLEnumName(GLenum gle) {
 			return "GL_CONSTANT_ATTENUATION";
 		case GL_LINEAR_ATTENUATION:
 			return "GL_LINEAR_ATTENUATION";
+		case GL_QUADRATIC_ATTENUATION:
+			return "GL_QUADRATIC_ATTENUATION";
 			
 			/* Data type */
 		case GL_BYTE:
@@ -301,9 +303,11 @@ char* GLEnumName(GLenum gle) {
 		case GL_SMOOTH:
 			return "GL_SMOOTH";
 			
-			/* TextureUnit */
+			/* TextureUnits */
 		case GL_TEXTURE_BINDING_2D:
 			return "GL_TEXTURE_BINDING_2D";
+		case GL_ACTIVE_TEXTURE:
+			return "GL_ACTIVE_TEXTURE";
 		case GL_CLIENT_ACTIVE_TEXTURE:
 			return "GL_CLIENT_ACTIVE_TEXTURE";
 		case GL_MAX_TEXTURE_UNITS:
@@ -324,7 +328,80 @@ char* GLEnumName(GLenum gle) {
 			return "GL_TEXTURE6";
 		case GL_TEXTURE7:
 			return "GL_TEXTURE7";
-			
+
+			/* Texture Environment parameters */
+		case GL_TEXTURE_ENV:
+			return "GL_TEXTURE_ENV";
+		case GL_TEXTURE_ENV_MODE:
+			return "GL_TEXTURE_ENV_MODE";
+		case GL_TEXTURE_ENV_COLOR:
+			return "GL_TEXTURE_ENV_COLOR";
+		case GL_MODULATE:
+			return "GL_MODULATE";
+		case GL_DECAL:
+			return "GL_DECAL";
+//		case GL_BLEND:
+//			return "GL_BLEND";
+		case GL_ADD:
+			return "GL_ADD";
+		case GL_REPLACE:
+			return "GL_REPLACE";
+		case GL_COMBINE:
+			return "GL_COMBINE";
+		
+		case GL_SUBTRACT:
+			return "GL_SUBTRACT";
+		case GL_COMBINE_RGB:
+			return "GL_COMBINE_RGB";
+		case GL_COMBINE_ALPHA:
+			return "GL_COMBINE_ALPHA";
+		case GL_ADD_SIGNED:
+			return "GL_ADD_SIGNED";
+		case GL_INTERPOLATE:
+			return "GL_INTERPOLATE";
+		case GL_CONSTANT:
+			return "GL_CONSTANT";
+		case GL_PRIMARY_COLOR:
+			return "GL_PRIMARY_COLOR";
+		case GL_PREVIOUS:
+			return "GL_PREVIOUS";
+		case GL_DOT3_RGB:
+			return "GL_DOT3_RGB";
+		case GL_DOT3_RGBA:
+			return "GL_DOT3_RGBA";
+
+		case GL_SRC0_RGB:
+			return "GL_SRC0_RGB";
+		case GL_SRC1_RGB:
+			return "GL_SRC1_RGB";
+		case GL_SRC2_RGB:
+			return "GL_SRC2_RGB";
+		case GL_OPERAND0_RGB:
+			return "GL_OPERAND0_RGB";
+		case GL_OPERAND1_RGB:
+			return "GL_OPERAND1_RGB";
+		case GL_OPERAND2_RGB:
+			return "GL_OPERAND2_RGB";
+		case GL_RGB_SCALE:
+			return "GL_RGB_SCALE";
+
+		case GL_SRC0_ALPHA:
+			return "GL_SRC0_ALPHA";
+		case GL_SRC1_ALPHA:
+			return "GL_SRC1_ALPHA";
+		case GL_SRC2_ALPHA:
+			return "GL_SRC2_ALPHA";
+		case GL_OPERAND0_ALPHA:
+			return "GL_OPERAND0_ALPHA";
+		case GL_OPERAND1_ALPHA:
+			return "GL_OPERAND1_ALPHA";
+		case GL_OPERAND2_ALPHA:
+			return "GL_OPERAND2_ALPHA";
+		case GL_ALPHA_SCALE:
+			return "GL_ALPHA_SCALE";
+		case GL_COORD_REPLACE_OES:
+			return "GL_COORD_REPLACE_OES";
+
 			/* LightName */
 		case GL_MAX_LIGHTS:
 			return "GL_MAX_LIGHTS";
@@ -435,6 +512,7 @@ char* GLEnumName(GLenum gle) {
 			return "GL_TEXTURE_STACK_DEPTH";
 			
 		default:
+			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);
 			return "UNKNOWN_GLENUM";
 	}
 }

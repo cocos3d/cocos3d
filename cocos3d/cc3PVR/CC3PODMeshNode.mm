@@ -1,7 +1,7 @@
 /*
  * CC3PODMeshNode.mm
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -72,7 +72,7 @@
 											fromPODResource: (CC3PODResource*) aPODRez];
 		// If this node has a mesh, build it
 		if (self.podContentIndex >= 0) {
-			self.meshModel = [aPODRez meshModelAtIndex: self.podContentIndex];
+			self.mesh = [aPODRez meshModelAtIndex: self.podContentIndex];
 		}
 		// If this node has a material, build it
 		self.podMaterialIndex = pmn->nIdxMaterial;

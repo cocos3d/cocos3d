@@ -1,7 +1,7 @@
 /*
  * CC3Light.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,7 +31,6 @@
 
 #import "CC3TargettingNode.h"
 #import "CC3OpenGLES11Lighting.h"
-#import "CC3OpenGLES11Capabilities.h"
 
 /** Cosntant indicating that the light is not directional. */
 static const GLfloat kCC3SpotCutoffNone = 180.0;
@@ -44,6 +43,9 @@ static const ccColor4F kCC3DefaultLightColorDiffuse = { 1.0, 1.0, 1.0, 1.0 };
 
 /** Default specular light color. */
 static const ccColor4F kCC3DefaultLightColorSpecular = { 1.0, 1.0, 1.0, 1.0 };
+
+/** Default light attenuation coefficients */
+static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients = {1.0, 0.0, 0.0};
 
 #pragma mark -
 #pragma mark CC3Light
@@ -71,11 +73,11 @@ static const ccColor4F kCC3DefaultLightColorSpecular = { 1.0, 1.0, 1.0, 1.0 };
  */
 @interface CC3Light : CC3TargettingNode {
 	CC3OpenGLES11Light* gles11Light;
-	CC3OpenGLES11StateTrackerServerCapability* gles11LightCap;
 	CC3Vector4 homogeneousLocation;
 	ccColor4F ambientColor;
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
+	CC3AttenuationCoefficients attenuationCoefficients;
 	GLfloat spotCutoffAngle;
 	GLenum lightIndex;
 	BOOL isDirectionalOnly;
@@ -135,6 +137,16 @@ static const ccColor4F kCC3DefaultLightColorSpecular = { 1.0, 1.0, 1.0, 1.0 };
  * omnidirectional light. Initially set to kCC3SpotCutoffNone.
  */
 @property(nonatomic, assign) GLfloat spotCutoffAngle;
+
+/**
+ * The coefficients of the attenuation function that reduces the intensity of the light
+ * based on the distance from the light source. The intensity of the light is attenuated
+ * according to the formula 1/sqrt(a + b * r + c * r * r), where r is the radial distance
+ * from the light source, and a, b and c are the coefficients from this property.
+ *
+ * The initial value of this property is kCC3DefaultLightAttenuationCoefficients.
+ */
+@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients;
 
 
 #pragma mark Drawing

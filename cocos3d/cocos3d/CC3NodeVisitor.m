@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,7 +31,9 @@
 
 #import "CC3NodeVisitor.h"
 #import "CC3World.h"
+#import "CC3VertexArrayMesh.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3EAGLView.h"
 
 @interface CC3Node (TemplateMethods)
 -(void) buildTransformMatrix;
@@ -48,6 +50,7 @@
 @interface CC3NodeVisitor (TemplateMethods)
 -(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode;
 -(void) visitNodeAfterUpdatingTransform: (CC3Node*) aNode;
+-(void) processRemovals;
 @end
 
 
@@ -57,6 +60,7 @@
 
 -(void) dealloc {
 	[world release];
+	[pendingRemovals release];
 	performanceStatistics = nil;		// not retained
 	[super dealloc];
 }
@@ -90,7 +94,26 @@
 
 -(void) open {}
 
--(void) close {}
+-(void) close {
+	[self processRemovals];
+}
+
+-(void) requestRemovalOf: (CC3Node*) aNode {
+	if (!pendingRemovals) {
+		pendingRemovals = [[NSMutableSet set] retain];
+	}
+	[pendingRemovals addObject: aNode];
+}
+
+-(void) processRemovals {
+	if (pendingRemovals) {
+		for (CC3Node* n in pendingRemovals) {
+			[n remove];
+		}
+		[pendingRemovals release];
+		pendingRemovals = nil;
+	}
+}
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@", [self class]];
@@ -261,20 +284,29 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize frustum, shouldDecorateNode;
+@synthesize frustum, shouldDecorateNode, textureUnit, textureUnitCount;
 
 -(void) dealloc {
 	frustum = nil;		// not retained
 	[super dealloc];
 }
 
-// Establishes the frustum from the currently active camera.
+/**
+ * Establishes the frustum from the currently active camera, initializes mesh and
+ * material context switching, and clears the depth buffer every time drawing begins so
+ * that 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
+ */
 -(void) open {
 	[super open];
 	frustum = world.activeCamera.frustum;
+
+	[CC3Material resetSwitching];
+	[CC3VertexArrayMesh resetSwitching];
+	
+	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
 }
 
-// Retracts the frustum, and sets the nodeProcessed property into the statistics.
+/** Retracts the frustum, and sets the nodeProcessed property into the statistics. */
 -(void) close {
 	frustum = nil;
 }
@@ -321,30 +353,46 @@
 }
 
 /**
- * Clears the pickedNode property, ensures that lighting is turned off, so that nodes can
- * be drawn in pure colors, and remembers the current color value so that is can be restored
- * after picking. This is necessary when the world has no lighting, to avoid flicker on
- * materials and textures.
+ * Clears the pickedNode property, ensures that lighting, blending, and fog are turned off,
+ * so that nodes can be drawn in pure colors, and remembers the current color value so that
+ * is can be restored after picking. This is necessary when the world has no lighting, to
+ * avoid flicker on materials and textures.
+ * 
+ * Superclass implementation also clears the depth buffer so that the real drawing pass
+ * will have a clear depth buffer. Otherwise, pixels from farther objects will not be drawn,
+ * since the  nearer objects were already drawn during color picking. This would be a problem
+ * if the nearer object is translucent, because we expect to see some of the farther object
+ * show through the translucent object. The result would be a noticable flicker in the nearer
+ * translucent object.
+ *
+ * If multisampling antialiasing is being used, we must use a different framebuffer,
+ * since the multisampling framebuffer does not support pixel reading.
  */
 -(void) open {
 	[super open];
+	
 	[pickedNode release];
 	pickedNode = nil;
 	
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	[gles11Engine.serverCapabilities.lighting disable];
+	
+	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
+	[gles11ServCaps.lighting disable];
+	[gles11ServCaps.blend disable];
+	[gles11ServCaps.fog disable];
+	
 	originalColor = gles11Engine.state.color.value;
+	
+	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
+	[[CCDirector sharedDirector].openGLView openPicking];
 }
 
 /**
  * Reads the color of the pixel at the touch point, maps that to the tag of the CC3Node
  * that was touched, and sets the picked node in the pickedNode property.
- * 
- * Also clears the depth buffer so that the real drawing pass will have a clear depth buffer.
- * Otherwise, pixels from farther objects will not be drawn, since the  nearer objects were
- * already drawn during color picking. This would be a problem if the nearer object is translucent,
- * because we expect to see some of the farther object show through the translucent object.
- * The result would be a noticable flicker in the nearer translucent object.
+ *
+ * If antialiasing multisampling is active, after reading the color of the touched pixel,
+ * the multisampling framebuffer is made active in preparation of normal drawing operations.
  *
  * Also restores the original GL color value, to avoid flicker on materials and textures
  * if the world has no lighting.
@@ -352,15 +400,24 @@
 -(void) close {
 	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
 	if (world) {
+		
+		// Read the pixel from the framebuffer
 		ccColor4B pixColor = [gles11State readPixelAt: world.touchHandler.glTouchPoint];
+		
+		// Fetch the node whose tags is mapped from the pixel color
 		pickedNode = [[world getNodeTagged: [self tagFromColor: pixColor]] retain];
+		
 		LogTrace(@"%@ picked %@ from color (%u, %u, %u, %u)", self, pickedNode,
 				 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
 	}
-	[gles11State clearDepthBuffer];
+	
+	// If multisampling antialiasing, rebind the multisampling framebuffer
+	[[CCDirector sharedDirector].openGLView closePicking];
+
 	gles11State.color.value = originalColor;
 	[super close];
 }
+
 
 /** Overridden to draw the node only if it is touchable, and to draw it in a uniquely identifiable color. */
 -(void) drawLocalContentOf: (CC3Node*) aNode {
@@ -400,4 +457,3 @@
 }
 
 @end
-

@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpAppDelegate.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
@@ -34,6 +34,8 @@
 #import "CC3DemoMashUpAppDelegate.h"
 #import "CC3DemoMashUpLayer.h"
 #import "CC3DemoMashUpWorld.h"
+#import "CC3EAGLView.h"
+#import "CCAction.h"
 
 @implementation CC3DemoMashUpAppDelegate
 
@@ -69,9 +71,19 @@
 	//     so must use RGBA8 color format. If not using device overlay or alpha blending
 	//     (transparency) in any 3D or 2D graphics this can be changed to kEAGLColorFormatRGB565.
 	//	2. 3D rendering requires a depth format of 16 bit.
-	EAGLView *glView = [EAGLView viewWithFrame: [window bounds]
-								   pixelFormat: kEAGLColorFormatRGBA8
-								   depthFormat: GL_DEPTH_COMPONENT16_OES];
+	//  3. For highest performance, multisampling antialiasing is disabled by default.
+	//     To enable multisampling antialiasing, set the multiSampling parameter to YES.
+	//     You can also change the number of samples used with the numberOfSamples parameter.
+	//  4. If you are using BOTH multisampling antialiasing AND node picking from touch events,
+	//     use the CC3EAGLView class instead of EAGLView. When using EAGLView, multisampling
+	//     antialiasing interferes with the color-testing algorithm used for touch-event node picking.
+	EAGLView *glView = [CC3EAGLView viewWithFrame: [window bounds]
+									  pixelFormat: kEAGLColorFormatRGBA8
+									  depthFormat: GL_DEPTH_COMPONENT16_OES
+							   preserveBackbuffer: NO
+									   sharegroup: nil
+									multiSampling: NO
+								  numberOfSamples: 4];
 	
 	// Turn on multiple touches if needed
 	[glView setMultipleTouchEnabled: YES];
@@ -96,17 +108,14 @@
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
-	// Create the customized 3D world.
-	CC3World* cc3World = [CC3DemoMashUpWorld world];
-	
-	// Create the CC3 layer that supports 3D rendering and give it a nice sky-blue background
+	// Create the customized CC3Layer that supports 3D rendering,
+	// and schedule it for automatic updates
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layerWithColor: ccc4(100, 120, 220, 255)];
-	cc3Layer.cc3World = cc3World;	// attach 3D world to 3D layer
-	
-	// Start the 3D world model and schedule its periodic updates.
-	[cc3World play];
 	[cc3Layer scheduleUpdate];
-
+	
+	// Create the customized 3D world, attach it to the layer, and start it playing.
+	cc3Layer.cc3World = [CC3DemoMashUpWorld world];
+	
 	ControllableCCLayer* mainLayer = cc3Layer;
 	
 	// The 3D layer can run either direcly in the scene, or it can run as a smaller "sub-window"
@@ -118,6 +127,13 @@
 //	cc3Layer.alignContentSizeWithDeviceOrientation = YES;
 //	mainLayer = [ControllableCCLayer layerWithColor: ccc4(0, 0, 0, 255)];
 //	[mainLayer addChild: cc3Layer];
+	
+	// When it is smaller, you can even move the 3D layer around on the screen dyanmically.
+	// To see this in action, uncomment the lines above as described, and also uncomment
+	// the following two lines. The shouldAlwaysUpdateViewport property ensures that the
+	// 3D world tracks the updated position of the 3D layer within its parent layer.
+//	cc3Layer.shouldAlwaysUpdateViewport = YES;
+//	[cc3Layer runAction: [CCMoveTo actionWithDuration: 10.0 position: ccp(100.0, 200.0)]];
 	
 	// The controller is optional. If you want to auto-rotate the view when the device orientation
 	// changes, or if you want to display a device camera behind a combined 3D & 2D scene
@@ -132,7 +148,7 @@
 //	CCScene *scene = [CCScene node];
 //	[scene addChild: mainLayer];
 //	[[CCDirector sharedDirector] runWithScene: scene];
-	
+
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

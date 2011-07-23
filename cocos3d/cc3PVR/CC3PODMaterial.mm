@@ -1,7 +1,7 @@
 /*
  * CC3PODMaterial.mm
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,10 +39,12 @@ extern "C" {
 -(void) populateFrom: (CC3Material*) another;
 @end
 
+@interface CC3PODMaterial (TemplateMethods)
+-(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
+-(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
+@end
 
 @implementation CC3PODMaterial
-
-@synthesize podTextureIndex;
 
 -(int) podIndex {
 	return podIndex;
@@ -74,15 +76,19 @@ static GLfloat shininessExpansionFactor = 400.0f;
 		self.sourceBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendSrcA);
 		self.destinationBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendDstA);
 
-		// If this material has a texture, build it
-		self.podTextureIndex = psm->nIdxTexDiffuse;
-		if (self.podTextureIndex >= 0) {
-			LogTrace(@"Attaching texture at index %i from file %@ to %@", self.podTextureIndex,
-					 [NSString stringWithUTF8String: ((SPODTexture*)[aPODRez texturePODStructAtIndex: aPODIndex])->pszName],
-					 [self class]);
-			self.texture = [aPODRez textureAtIndex: self.podTextureIndex];
-		}
-	}
+		// Add the bump-map texture first, then add the remaining in order.
+		// Textures are only added if they are in the POD file.
+		[self addBumpMapTexture: psm->nIdxTexBump fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexDiffuse fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexAmbient fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexSpecularColour fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexSpecularLevel fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexEmissive fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexGlossiness fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexOpacity fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexReflection fromPODResource: aPODRez];
+		[self addTexture: psm->nIdxTexRefraction fromPODResource: aPODRez];
+ }
 	return self;
 }
 
@@ -92,9 +98,30 @@ static GLfloat shininessExpansionFactor = 400.0f;
 
 -(void) populateFrom: (CC3PODMaterial*) another {
 	[super populateFrom: another];
-	
+
 	podIndex = another.podIndex;
-	podTextureIndex = another.podTextureIndex;
+}
+
+/**
+ * If the specified texture index is valid, extracts the texture from the POD resource
+ * and adds it to this material.
+ */
+-(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
+	if (aPODTexIndex >= 0) {
+		[self addTexture: [aPODRez textureAtIndex: aPODTexIndex]];
+	}
+}
+
+/**
+ * If the specified texture index is valid, extracts the texture from the POD resource,
+ * configures it as a bump-map texture, and adds it to this material.
+ */
+-(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
+	if (aPODTexIndex >= 0) {
+		CC3Texture* bmTex = [aPODRez textureAtIndex: aPODTexIndex];
+		bmTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
+		[self addTexture: bmTex];
+	}
 }
 
 @end

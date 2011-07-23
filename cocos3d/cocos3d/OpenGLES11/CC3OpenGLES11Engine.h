@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Engine.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,6 +37,8 @@
 #import "CC3OpenGLES11Matrices.h"
 #import "CC3OpenGLES11VertexArrays.h"
 #import "CC3OpenGLES11State.h"
+#import "CC3OpenGLES11Fog.h"
+#import "CC3OpenGLES11Hints.h"
 
 
 /**
@@ -102,6 +104,8 @@
 	CC3OpenGLES11Matrices* matrices;
 	CC3OpenGLES11VertexArrays* vertices;
 	CC3OpenGLES11State* state;
+	CC3OpenGLES11Fog* fog;
+	CC3OpenGLES11Hints* hints;
 	CC3OpenGLES11StateTrackerManager* appExtensions;
 }
 
@@ -131,6 +135,12 @@
 
 /** The state tracking manager that tracks general GL state.  */
 @property(nonatomic, retain) CC3OpenGLES11State* state;
+
+/** The state tracking manager that tracks GL fog state.  */
+@property(nonatomic, retain) CC3OpenGLES11Fog* fog;
+
+/** The state tracking manager that tracks GL engine hints.  */
+@property(nonatomic, retain) CC3OpenGLES11Hints* hints;
 
 /**
  * Most, but not all GL functionality and state is managed by the trackers attached

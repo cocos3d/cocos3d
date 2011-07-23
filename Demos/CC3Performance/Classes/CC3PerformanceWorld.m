@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceWorld.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -153,7 +153,7 @@
 	// Make a model templates with a small number of faces available.
 	rezNode = [CC3PODResourceNode nodeFromResourceFile: kBallsFileName];
 	
-	// Make a simple plane template available. Only 6 faces per node.
+	// Make a simple box template available. Only 6 faces per node.
 	aNode = [CC3BoxNode nodeWithName: @"Simple box"];
 	CC3BoundingBox bBox;
 	bBox.minimum = cc3v(-10.0, -10.0, -10.0);

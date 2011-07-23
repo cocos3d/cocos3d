@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -67,16 +67,18 @@ CC3Vector CC3VectorMaximize(CC3Vector v1, CC3Vector v2) {
 	return vMax;
 }
 
+// Avoid expensive sqrt calc if vector is unit length
 GLfloat CC3VectorLength(CC3Vector v) {
 	GLfloat x = v.x;
 	GLfloat y = v.y;
 	GLfloat z = v.z;
-	return sqrtf((x * x) + (y * y) + (z * z));
+	GLfloat lenSq = ((x * x) + (y * y) + (z * z));
+	return (lenSq == 1.0f) ? 1.0f : sqrtf(lenSq);
 }
 
 CC3Vector CC3VectorNormalize(CC3Vector v) {
 	GLfloat len = CC3VectorLength(v);
-	if (len == 0.0) return v;
+	if (len == 0.0f || len == 1.0f) return v;
 
 	CC3Vector normal;
 	normal.x = v.x / len;
@@ -423,6 +425,22 @@ CC3Vector4 CC3RayIntersectionWithPlane(CC3Ray ray, CC3Plane plane) {
 
 
 #pragma mark -
+#pragma mark Attenuation function structures
+
+NSString* NSStringFromCC3AttenuationCoefficients(CC3AttenuationCoefficients coeffs) {
+	return [NSString stringWithFormat: @"(%.3f, %.6f, %.9f)", coeffs.a, coeffs.b, coeffs.c];
+}
+
+CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat a, GLfloat b, GLfloat c) {
+	CC3AttenuationCoefficients coeffs;
+	coeffs.a = a;
+	coeffs.b = b;
+	coeffs.c = c;
+	return coeffs;
+}
+
+
+#pragma mark -
 #pragma mark Viewport structure and functions
 
 NSString* NSStringFromCC3Viewport(CC3Viewport vp) {
@@ -522,6 +540,10 @@ GLubyte CCColorByteFromFloat(GLfloat colorValue) {
 
 #pragma mark -
 #pragma mark Miscellaneous extensions and functionality
+
+NSString* NSStringFromBoolean(BOOL value) {
+	return value ? @"YES" : @"NO";
+}
 
 @implementation NSObject (CC3)
 

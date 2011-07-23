@@ -1,7 +1,7 @@
 /*
  * CC3World.m
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,7 +31,7 @@
 
 #import "CC3World.h"
 #import "CC3MeshNode.h"
-#import "CC3VertexArrayMeshModel.h"
+#import "CC3VertexArrayMesh.h"
 #import "CC3Material.h"
 #import "CC3Light.h"
 #import "CC3Billboard.h"
@@ -57,7 +57,8 @@
 
 @interface CC3World (TemplateMethods)
 -(void) updateCamera: (ccTime) dt;
--(void) updateLights: (ccTime) dt;
+-(void) updateTargets: (ccTime) dt;
+-(void) updateFog: (ccTime) dt;
 -(void) updateBillboards: (ccTime) dt;
 -(id) updateVisitorClass;
 -(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -69,6 +70,7 @@
 -(void) open3DCamera;
 -(void) close3DCamera;
 -(void) illuminate;
+-(void) drawFog;
 -(void) drawBillboards;
 -(id) drawVisitorClass;
 -(id) pickVisitorClass;
@@ -82,18 +84,20 @@
 
 @implementation CC3World
 
-@synthesize activeCamera, ambientLight, maxUpdateInterval, isRunning;
-@synthesize drawingSequencer, viewportManager, performanceStatistics;
+@synthesize activeCamera, ambientLight, minUpdateInterval, maxUpdateInterval;
+@synthesize drawingSequencer, viewportManager, performanceStatistics, fog;
 
 - (void)dealloc {
 	[drawingSequence release];
 	[drawingSequencer release];
+	[targettingNodes release];
 	[lights release];
 	[cameras release];
 	[billboards release];
 	[activeCamera release];
 	[touchHandler release];
 	[viewportManager release];
+	[fog release];
     [super dealloc];
 }
 
@@ -105,6 +109,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		targettingNodes = [[NSMutableArray array] retain];
 		lights = [[NSMutableArray array] retain];
 		cameras = [[NSMutableArray array] retain];
 		billboards = [[NSMutableArray array] retain];
@@ -112,10 +117,11 @@
 		touchHandler = [[CC3WorldTouchHandler handlerOnWorld: self] retain];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnWorld: self];
+		fog = nil;
 		activeCamera = nil;
 		ambientLight = kCC3DefaultLightColorAmbientWorld;
+		minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
 		maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
-		isRunning = NO;
 		[self initializeWorld];
 	}
 	return self;
@@ -133,7 +139,7 @@
 -(void) populateFrom: (CC3World*) another {
 	[super populateFrom: another];
 	
-	// Lights, cameras, billboards & drawing sequence collections,
+	// Lights, cameras, targetting nodes, billboards & drawing sequence collections,
 	// plus activeCamera will be populated as children are added.
 	// No need to configure touch handler.
 	[viewportManager release];
@@ -146,9 +152,12 @@
 	[performanceStatistics release];
 	performanceStatistics = [another.performanceStatistics copy];	// retained
 
+	[fog release];
+	fog = [another.fog copy];										// retained
+	
 	ambientLight = another.ambientLight;
+	minUpdateInterval = another.minUpdateInterval;
 	maxUpdateInterval = another.maxUpdateInterval;
-	isRunning = another.isRunning;
 }
 
 
@@ -169,16 +178,22 @@
 -(void) updateWorld: (ccTime) dt {
 	[performanceStatistics addUpdateTime: dt];
 	if(self.isRunning) {
-		// if a update interval limit has been set, apply it if the current interval is too large
-		ccTime dtClamped = (maxUpdateInterval > 0.0) ? MIN(dt, maxUpdateInterval) : dt;
-		LogTrace(@"******* %@ starting update: %.2f ms (clamped from %.2f ms)", self, dtClamped * 1000.0, dt * 1000.0);
+		// Clamp the specified interval to a range defined by the minimum and maximum
+		// update intervals. If the maximum update interval limit is zero or negative,
+		// its value is ignored, and the dt value is not limited to a maximum value.
+		ccTime dtClamped = CLAMP(dt, minUpdateInterval,
+								(maxUpdateInterval > 0.0 ? maxUpdateInterval : dt));
+
+		LogTrace(@"******* %@ starting update: %.2f ms (clamped from %.2f ms)",
+				 self, dtClamped * 1000.0, dt * 1000.0);
 
 		[touchHandler dispatchPickedNode];
 		[self updateWithVisitor: [[self updateVisitorClass] visitorWithWorld: self
 																andDeltaTime: dtClamped]];
+		[self updateTargets: dtClamped];
 		[self updateCamera: dtClamped];
-		[self updateLights: dtClamped];
 		[self updateBillboards: dtClamped];
+		[self updateFog: dtClamped];
 		[self updateDrawSequence];
 
 		LogTrace(@"******* %@ exiting update", self);
@@ -192,24 +207,27 @@
 	[visitor close];
 }
 
+/** 
+ * Template method to update the direction pointed to by any targetting nodes in this world.
+ * Iterates through all the targetting nodes in this world, updating their target tracking.
+ */
+-(void) updateTargets: (ccTime) dt {
+	for (CC3TargettingNode* tn in targettingNodes) {
+		[tn trackTarget];
+	}
+}
+
 /**
- * Template method to update the camera's perspective, including tracking targets,
- * and both projection and modelview matrices.
+ * Template method to update the camera's perspective,
+ * including both projection and modelview matrices.
  */
 -(void) updateCamera: (ccTime) dt {
 	[activeCamera buildPerspective];
-	LogTrace(@"%@ updated active camera", self);
 }
 
-/** 
- * Template method to update the lights lighting this world.
- * Iterates through all the lights in this world, updating their target tracking.
- */
--(void) updateLights: (ccTime) dt {
-	for (CC3Light* lt in lights) {
-		[lt trackTarget];
-	}
-	LogTrace(@"%@ updated %u lights", self, lights.count);
+/** Template method to update any fog characteristics. */
+-(void) updateFog: (ccTime) dt {
+	[fog update: dt];
 }
 
 /**
@@ -221,6 +239,10 @@
 		[bb faceCamera: activeCamera];
 	}
 	LogTrace(@"%@ updated %u billboards", self, billboards.count);
+}
+
+-(void) updateWorld {
+	[self updateWorld: minUpdateInterval];
 }
 
 /**
@@ -243,7 +265,7 @@
 
 -(void) drawWorld {
 	LogGLErrorState();			// Check and clear any GL error that occurred before 3D code
-	LogTrace(@"******* %@ staring drawing visit", self);
+	LogTrace(@"******* %@ starting drawing visit", self);
 	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 	
 	if (self.visible) {
@@ -252,6 +274,7 @@
 		[self open3DCamera];
 		[touchHandler pickTouchedNode];
 		[self illuminate];
+		[self drawFog];
 		[self drawWithVisitor: [[self drawVisitorClass] visitorWithWorld: self]];
 		[self close3DCamera];
 		[self closeViewport];
@@ -314,10 +337,6 @@
 -(void) open3D {
 	LogTrace(@"%@ opening the 3D world", self);
 
-	// Initialize context switching during this frame
-	[CC3Material resetSwitching];
-	[CC3VertexArrayMeshModel resetSwitching];
-
 	// Retrieves the GLES state trackers to set initial state
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
@@ -333,21 +352,15 @@
 	gles11State.frontFace.value = GL_CCW;
 
 	// Specify 3D depth testing capabilities
-	[gles11ServCaps.depthTest enable];		// Enable depth testing
+	[gles11ServCaps.depthTest enable];				// Enable depth testing
 	gles11State.depthMask.value = YES;				// Enble writing to depth buffer
-	gles11State.depthFunction.value = GL_LEQUAL;		// Set depth comparison function
+	gles11State.depthFunction.value = GL_LEQUAL;	// Set depth comparison function
 	
 	gles11State.shadeModel.value = GL_SMOOTH;		// Enable smooth shading
 	
 	// Ensure drawing is not slowed down by unexpected alpha testing and logic ops
 	[gles11ServCaps.alphaTest disable];
 	[gles11ServCaps.colorLogicOp disable];
-	
-	// Clear the depth buffer so that 3D rendering will occur on top of cocos2D
-	// rendering that has occured already from other layers, and child nodes whose
-	// zOrder are less than zero. We can't simply turn depth testing on for 3D
-	// and off for cocos2D because cocos2D can also use depth testing.
-	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
 }
 
 /**
@@ -362,9 +375,9 @@
 	// Close tracking of GL state, reverting to 2D values where required.
 	[[CC3OpenGLES11Engine engine] close];
 	
-	// Clear the depth buffer so that subsequent cocos2D rendering will occur
+	// Clear the depth buffer so that subsequent cocos2d rendering will occur
 	// on top of the 3D rendering. We can't simply turn depth testing off
-	// because cocos2D can use depth testing for 3D transition effects.
+	// because cocos2d can use depth testing for 3D transition effects.
 	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
 }
 
@@ -408,6 +421,15 @@
 	// Turn on any individual lights
 	for (CC3Light* lgt in lights) {
 		[lgt turnOn];
+	}
+}
+
+/** If this world contains fog, draw it, otherwise unbind fog from the GL engine. */
+-(void) drawFog {
+	if (fog) {
+		[fog draw];
+	} else {
+		[CC3Fog unbind];
 	}
 }
 
@@ -528,6 +550,12 @@
 							? [drawingSequencer add: addedNode withVisitor: seqVisitor]
 							: NO;
 		
+		// If the node is a targetting node, add it to the collection of such nodes
+		if ( [addedNode isKindOfClass: [CC3TargettingNode class]] ) {
+			LogTrace(@"Adding targetting node %@", addedNode);
+			[targettingNodes addObject: addedNode];
+		}
+		
 		// If the node is a light, add it to the collection of lights
 		if ( [addedNode isKindOfClass: [CC3Light class]] ) {
 			LogTrace(@"Adding light %@", addedNode);
@@ -578,6 +606,12 @@
 		drawSeqChanged |= drawingSequencer
 							? [drawingSequencer remove: removedNode withVisitor: seqVisitor]
 							: NO;
+		
+		// If the node is a targetting node, remove it from the collection of such nodes
+		if ( [removedNode isKindOfClass: [CC3TargettingNode class]] ) {
+			LogTrace(@"Removing targetting node %@", removedNode);
+			[targettingNodes removeObjectIdenticalTo: removedNode];
+		}
 		
 		// If the node is a light, remove it from the collection of lights
 		if ( [removedNode isKindOfClass: [CC3Light class]] ) {
@@ -842,6 +876,7 @@
 -(CC3World*) world { return world; }
 -(void) setWorld: (CC3World*) aCC3World { world = aCC3World; }
 
+
 #pragma mark Drawing
 
 -(void) openViewport {
@@ -914,78 +949,79 @@
 	CC3Viewport vp;
 	CGPoint bOrg = bounds.origin;
 	CGSize bSz = bounds.size;
-
+	
 	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
 	GLfloat c2g = CC_CONTENT_SCALE_FACTOR();		// Ratio of CC2 points to GL pixels...
 	GLfloat g2c = 1.0 / c2g;						// ...and its inverse.
-
+	
 	switch(deviceOrientation) {
-		case kCCDeviceOrientationLandscapeLeft:
-			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz));
 			
+		case kCCDeviceOrientationLandscapeLeft:
 			[self updateDeviceRotationAngle: -90.0f];
 			
-			vp.x = MAX((GLint)bOrg.y - 1, 0);
+			vp.x = MAX((GLint)bOrg.y, 0);
 			vp.y = (GLint)(winSz.width - (bOrg.x + bSz.width));
-			vp.w = MIN((GLint)(bSz.height) + 2, winSz.height);
-			vp.h = MIN((GLint)(bSz.width) + 1, winSz.width);
+			vp.w = MIN((GLint)(bSz.height), winSz.height);
+			vp.h = MIN((GLint)(bSz.width), winSz.width);
 			
 			glToCC2PointMapX = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
 			glToCC2PointMapY = cc3v(  g2c,  0.0, -vp.x * g2c );
 			cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
 			cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
 			
+			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
 			break;
-		case kCCDeviceOrientationLandscapeRight:
-			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz));
 			
+		case kCCDeviceOrientationLandscapeRight:
 			[self updateDeviceRotationAngle: 90.0f];
 			
-			vp.x = MAX((GLint)(winSz.height - (bOrg.y + bSz.height)) - 1, 0);
-			vp.y = MAX((GLint)bOrg.x - 1, 0);
-			vp.w = MIN((GLint)(bSz.height) + 2, winSz.height);
-			vp.h = MIN((GLint)(bSz.width) + 1, winSz.width);
+			vp.x = MAX((GLint)(winSz.height - (bOrg.y + bSz.height)), 0);
+			vp.y = MAX((GLint)bOrg.x, 0);
+			vp.w = MIN((GLint)(bSz.height), winSz.height);
+			vp.h = MIN((GLint)(bSz.width), winSz.width);
 			
 			glToCC2PointMapX = cc3v(  0.0,  g2c, -vp.y * g2c );
 			glToCC2PointMapY = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
 			cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
 			cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
 			
+			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
 			break;
-		case kCCDeviceOrientationPortraitUpsideDown:
-			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz));
 			
+		case kCCDeviceOrientationPortraitUpsideDown:
 			[self updateDeviceRotationAngle: 180.0f];
 			
-			vp.x = MAX((GLint)(winSz.width - (bOrg.x + bSz.width)) - 1, 0);
+			vp.x = MAX((GLint)(winSz.width - (bOrg.x + bSz.width)), 0);
 			vp.y = (GLint)(winSz.height - (bOrg.y + bSz.height));
-			vp.w = MIN((GLint)bSz.width + 2, winSz.width);
-			vp.h = MIN((GLint)bSz.height + 1, winSz.height);
+			vp.w = MIN((GLint)bSz.width, winSz.width);
+			vp.h = MIN((GLint)bSz.height, winSz.height);
 			
 			glToCC2PointMapX = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
 			glToCC2PointMapY = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
 			cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
 			cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
 			
+			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
 			break;
-		default:
-			LogTrace(@"Orienting to Portrait with bounds: %@ in window %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz));
 			
+		default:
 			[self updateDeviceRotationAngle: 0.0f];
 			
-			vp.x = MAX((GLint)bOrg.x - 1, 0);
-			vp.y = MAX((GLint)bOrg.y - 1, 0);
-			vp.w = MIN((GLint)bSz.width + 2, winSz.width);
-			vp.h = MIN((GLint)bSz.height + 1, winSz.height);
+			vp.x = MAX((GLint)bOrg.x, 0);
+			vp.y = MAX((GLint)bOrg.y, 0);
+			vp.w = MIN((GLint)bSz.width, winSz.width);
+			vp.h = MIN((GLint)bSz.height, winSz.height);
 			
 			glToCC2PointMapX = cc3v(  g2c,  0.0, -vp.x * g2c );
 			glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
 			cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
 			cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
+
+			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
 			break;
 	}
 	

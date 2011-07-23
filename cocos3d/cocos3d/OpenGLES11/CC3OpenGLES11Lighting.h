@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Lighting.h
  *
- * cocos3d 0.5.4
+ * cocos3d 0.6.0-sp
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-#import "CC3OpenGLES11StateTracker.h"
+#import "CC3OpenGLES11Capabilities.h"
 
 
 #pragma mark -
@@ -250,13 +250,20 @@
  */
 @interface CC3OpenGLES11Light : CC3OpenGLES11StateTrackerManager {
 	GLuint lightIndex;
+	CC3OpenGLES11StateTrackerServerCapability* light;
 	CC3OpenGLES11StateTrackerLightColor* ambientColor;
 	CC3OpenGLES11StateTrackerLightColor* diffuseColor;
 	CC3OpenGLES11StateTrackerLightColor* specularColor;
 	CC3OpenGLES11StateTrackerLightVector4* position;
 	CC3OpenGLES11StateTrackerLightVector* spotDirection;
 	CC3OpenGLES11StateTrackerLightFloat* spotCutoffAngle;
+	CC3OpenGLES11StateTrackerLightFloat* constantAttenuation;
+	CC3OpenGLES11StateTrackerLightFloat* linearAttenuation;
+	CC3OpenGLES11StateTrackerLightFloat* quadraticAttenuation;
 }
+
+/** Tracks the light capability (GL capability name GL_LIGHTi). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* light;
 
 /** Tracks ambient color (GL name GL_AMBIENT). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerLightColor* ambientColor;
@@ -275,6 +282,15 @@
 
 /** Tracks spot cutoff angle (GL name GL_SPOT_CUTOFF). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* spotCutoffAngle;
+
+/** Tracks spot cutoff angle (GL name GL_CONSTANT_ATTENUATION). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* constantAttenuation;
+
+/** Tracks spot cutoff angle (GL name GL_LINEAR_ATTENUATION). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* linearAttenuation;
+
+/** Tracks spot cutoff angle (GL name GL_QUADRATIC_ATTENUATION). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* quadraticAttenuation;
 
 /**
  * Initializes this instance to track GL state
@@ -340,8 +356,25 @@
  *
  * The number of available lights is retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ *
+ * To conserve memory, lights are lazily allocated when requested by the
+ * lightAt: method. The array returned by this property will initially be
+ * empty, and will subsequently contain a number of lights one more than
+ * the largest value passed to lightAt:.
  */
 @property(nonatomic, retain) NSMutableArray* lights;
+
+/**
+ * Returns the number of active lights.
+ *
+ * This value will be between zero and the maximum number of lights, as determined
+ * from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ *
+ * To conserve memory, lights are lazily allocated when requested by the
+ * lightAt: method. The value of this property will initially be zero, and
+ * will subsequently be one more than the largest value passed to lightAt:.
+ */
+@property(nonatomic, readonly) GLuint lightCount;
 
 /**
  * Returns the tracker for the light with the specified index.
