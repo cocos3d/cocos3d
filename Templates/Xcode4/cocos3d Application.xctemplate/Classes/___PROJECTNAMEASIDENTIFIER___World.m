@@ -79,7 +79,7 @@
 	
 	// If you encounter issues creating and adding nodes, or loading models from
 	// files, the following line is used to log the full structure of the world.
-	LogDebug(@"%@", [self structureDescription]);
+	LogDebug(@"The structure of this world is: %@", [self structureDescription]);
 	
 	// ------------------------------------------
 

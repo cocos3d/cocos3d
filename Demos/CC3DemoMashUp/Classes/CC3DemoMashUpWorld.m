@@ -252,7 +252,7 @@
 //	self.shouldDrawAllWireframeBoxes = YES;
 	
 	// The full node structure of the world is logged using the following line.
-	LogDebug(@"%@", [self structureDescription]);
+	LogDebug(@"The structure of this world is: %@", [self structureDescription]);
 }
 
 // Various options for configuring interesting camera behaviours.
