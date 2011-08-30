@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,7 +44,7 @@ NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
 	[desc appendFormat: @", parent index: %i ", psn->nIdxParent];
 	[desc appendFormat: @", content index: %i ", psn->nIdx];
 	[desc appendFormat: @", material index: %i ", psn->nIdxMaterial];
-	[desc appendFormat: @", animation flags: %i", psn->nAnimFlags];
+	[desc appendFormat: @",\n\tanimation flags: %i", psn->nAnimFlags];
 	BOOL first = YES;
 	if (psn->nAnimFlags & ePODHasPositionAni) {
 		[desc appendFormat: @"%@", first ? @" (" : @" + "];
@@ -67,7 +67,7 @@ NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
 		first = NO;
 	}
 	[desc appendFormat: @"%@", first ? @"" : @")"];
-	[desc appendFormat: @", animation: (position: %@", (psn->pfAnimPosition ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimPosition) : @"none")];
+	[desc appendFormat: @"\n\tposition: %@", (psn->pfAnimPosition ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimPosition) : @"none")];
 	[desc appendFormat: @", quaternion: %@", (psn->pfAnimRotation ? NSStringFromCC3Vector4(*(CC3Vector4*)psn->pfAnimRotation) : @"none")];
 	[desc appendFormat: @", scale: %@)", (psn->pfAnimScale ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimScale) : @"none")];
 	[desc appendFormat: @", matrix: %@)", (psn->pfAnimMatrix ? [CC3GLMatrix matrixOnGLMatrix: psn->pfAnimMatrix] : @"none")];
@@ -77,7 +77,7 @@ NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
 NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
 	SPODMesh* psm = (SPODMesh*)pSPODNode;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"\n\tSPODMesh drawing "];
+	[desc appendFormat: @"SPODMesh drawing "];
 	switch (psm->ePrimitiveType) {
 		case ePODTriangles:
 			[desc appendFormat: @"ePODTriangles"];
@@ -89,18 +89,18 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
 			[desc appendFormat: @"unknown ePrimitiveType (%u)", psm->ePrimitiveType];
 			break;
 	}
-	[desc appendFormat: @"\n\t\tvertices: %u (%@)", psm->nNumVertex, NSStringFromCPODData(&psm->sVertex)];
-	[desc appendFormat: @"\n\t\t\tnormals: (%@)", NSStringFromCPODData(&psm->sNormals)];
-	[desc appendFormat: @"\n\t\t\ttangents: (%@)", NSStringFromCPODData(&psm->sTangents)];
-	[desc appendFormat: @"\n\t\t\tbinormals: (%@)", NSStringFromCPODData(&psm->sBinormals)];
-	[desc appendFormat: @"\n\t\t\tcolors: (%@)", NSStringFromCPODData(&psm->sVtxColours)];
+	[desc appendFormat: @"\n\tvertices: %u (%@)", psm->nNumVertex, NSStringFromCPODData(&psm->sVertex)];
+	[desc appendFormat: @"\n\t\tnormals: (%@)", NSStringFromCPODData(&psm->sNormals)];
+	[desc appendFormat: @"\n\t\ttangents: (%@)", NSStringFromCPODData(&psm->sTangents)];
+	[desc appendFormat: @"\n\t\tbinormals: (%@)", NSStringFromCPODData(&psm->sBinormals)];
+	[desc appendFormat: @"\n\t\tcolors: (%@)", NSStringFromCPODData(&psm->sVtxColours)];
 	for (uint i = 0; i < psm->nNumUVW; i++) {
-		[desc appendFormat: @"\n\t\t\ttexmap%u: (%@)", i, NSStringFromCPODData(&psm->psUVW[i])];
+		[desc appendFormat: @"\n\t\ttexmap%u: (%@)", i, NSStringFromCPODData(&psm->psUVW[i])];
 	}
-	[desc appendFormat: @"\n\t\t\tboneIndices: (%@)", NSStringFromCPODData(&psm->sBoneIdx)];
-	[desc appendFormat: @"\n\t\t\tboneWeights: (%@)", NSStringFromCPODData(&psm->sBoneWeight)];
-	[desc appendFormat: @"\n\t\tfaces: %u (%@)", psm->nNumFaces, NSStringFromCPODData(&psm->sFaces)];
-	[desc appendFormat: @"\n\t\tstrips: %u", psm->nNumStrips];
+	[desc appendFormat: @"\n\t\tboneIndices: (%@)", NSStringFromCPODData(&psm->sBoneIdx)];
+	[desc appendFormat: @"\n\t\tboneWeights: (%@)", NSStringFromCPODData(&psm->sBoneWeight)];
+	[desc appendFormat: @"\n\tfaces: %u (%@)", psm->nNumFaces, NSStringFromCPODData(&psm->sFaces)];
+	[desc appendFormat: @"\n\tstrips: %u", psm->nNumStrips];
 	[desc appendFormat: @", texture channels: %u", psm->nNumUVW];
 	[desc appendFormat: @", bone batches: %i", psm->sBoneBatches.nBatchCnt];
 	[desc appendFormat: @", interleaved data: %u", psm->pInterleaved];
@@ -113,7 +113,7 @@ NSString* NSStringFromCPODData(PODClassPtr aCPODData) {
 	[desc appendFormat: @"CPODData type: %@", NSStringFromEPVRTDataType(pcd->eType)];
 	[desc appendFormat: @", size: %i", pcd->n];
 	[desc appendFormat: @", stride: %i", pcd->nStride];
-	[desc appendFormat: @", data: %u", pcd->pData];
+	[desc appendFormat: @", data ptr: %u", pcd->pData];
 	return desc;
 }
 
@@ -230,21 +230,21 @@ NSString* NSStringFromEPODLight(uint ePODLight) {
 NSString* NSStringFromSPODMaterial(PODStructPtr pSPODMaterial) {
 	SPODMaterial* psm = (SPODMaterial*)pSPODMaterial;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"\n\tSPODMaterial named %@", [NSString stringWithUTF8String: psm->pszName]];
-	[desc appendFormat: @"\n\t\tambient: (%.2f, %.2f, %.2f)", psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2]];
+	[desc appendFormat: @"SPODMaterial named %@", [NSString stringWithUTF8String: psm->pszName]];
+	[desc appendFormat: @"\n\tambient: (%.2f, %.2f, %.2f)", psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2]];
 	[desc appendFormat: @", diffuse: (%.2f, %.2f, %.2f)", psm->pfMatDiffuse[0], psm->pfMatDiffuse[1], psm->pfMatDiffuse[2]];
 	[desc appendFormat: @", specular: (%.2f, %.2f, %.2f)", psm->pfMatSpecular[0], psm->pfMatSpecular[1], psm->pfMatSpecular[2]];
 	[desc appendFormat: @", opacity: %.2f", psm->fMatOpacity];
 	[desc appendFormat: @", shininess: %.2f", psm->fMatShininess];
-	[desc appendFormat: @"\n\t\tsrc RGB blend: %@", NSStringFromEPODBlendFunc(psm->eBlendSrcRGB)];
+	[desc appendFormat: @"\n\tsrc RGB blend: %@", NSStringFromEPODBlendFunc(psm->eBlendSrcRGB)];
 	[desc appendFormat: @", src alpha blend: %@", NSStringFromEPODBlendFunc(psm->eBlendSrcA)];
-	[desc appendFormat: @"\n\t\tdest RGB blend: %@", NSStringFromEPODBlendFunc(psm->eBlendDstRGB)];
+	[desc appendFormat: @"\n\tdest RGB blend: %@", NSStringFromEPODBlendFunc(psm->eBlendDstRGB)];
 	[desc appendFormat: @", dest alpha blend: %@", NSStringFromEPODBlendFunc(psm->eBlendDstA)];
-	[desc appendFormat: @"\n\t\toperation RGB blend: %@", NSStringFromEPODBlendOp(psm->eBlendOpRGB)];
+	[desc appendFormat: @"\n\toperation RGB blend: %@", NSStringFromEPODBlendOp(psm->eBlendOpRGB)];
 	[desc appendFormat: @", operation alpha blend: %@", NSStringFromEPODBlendOp(psm->eBlendOpA)];
-	[desc appendFormat: @"\n\t\tblend color: (%.2f, %.2f, %.2f, %.2f)", psm->pfBlendColour[0], psm->pfBlendColour[1], psm->pfBlendColour[2], psm->pfBlendColour[3]];
+	[desc appendFormat: @"\n\tblend color: (%.2f, %.2f, %.2f, %.2f)", psm->pfBlendColour[0], psm->pfBlendColour[1], psm->pfBlendColour[2], psm->pfBlendColour[3]];
 	[desc appendFormat: @", blend factor: (%.2f, %.2f, %.2f, %.2f)", psm->pfBlendFactor[0], psm->pfBlendFactor[1], psm->pfBlendFactor[2], psm->pfBlendFactor[3]];
-	[desc appendFormat: @"\n\t\ttexture indices: (diffuse: %i", psm->nIdxTexDiffuse];
+	[desc appendFormat: @"\n\ttexture indices: (diffuse: %i", psm->nIdxTexDiffuse];
 	[desc appendFormat: @", ambient: %i", psm->nIdxTexAmbient];
 	[desc appendFormat: @", ambient: %i", psm->nIdxTexAmbient];
 	[desc appendFormat: @", specular color: %i", psm->nIdxTexSpecularColour];
@@ -255,7 +255,7 @@ NSString* NSStringFromSPODMaterial(PODStructPtr pSPODMaterial) {
 	[desc appendFormat: @", opacity: %i", psm->nIdxTexOpacity];
 	[desc appendFormat: @", reflection: %i", psm->nIdxTexReflection];
 	[desc appendFormat: @", refraction: %i)", psm->nIdxTexRefraction];
-	[desc appendFormat: @"\n\t\tflags: %i", psm->nFlags];
+	[desc appendFormat: @"\n\tflags: %i", psm->nFlags];
 	[desc appendFormat: @", effect %@ in file %@",
 			(psm->pszEffectName ? [NSString stringWithUTF8String: psm->pszEffectName] : @"none"),
 			(psm->pszEffectFile ? [NSString stringWithUTF8String: psm->pszEffectFile] : @"none")];
@@ -343,7 +343,7 @@ NSString* NSStringFromEPODBlendOp(uint ePODBlendOp) {
 
 NSString* NSStringFromSPODTexture(PODStructPtr pSPODTexture) {
 	SPODTexture* pst = (SPODTexture*)pSPODTexture;
-	return [NSString stringWithFormat: @"\n\tSPODTexture filename %@",
+	return [NSString stringWithFormat: @"\nSPODTexture filename %@",
 			[NSString stringWithUTF8String: pst->pszName]];
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3Mesh.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -48,10 +48,7 @@
 }
 
 -(CC3BoundingBox) boundingBox {
-	CC3BoundingBox bb;
-	bb.minimum = kCC3VectorZero;
-	bb.maximum = kCC3VectorZero;
-	return bb;
+	return kCC3BoundingBoxNull;
 }
 
 #pragma mark Allocation and initialization
@@ -79,6 +76,36 @@
 -(void) releaseRedundantData {}
 
 -(void) retainVertexLocations {}
+
+-(void) retainVertexNormals {}
+
+-(void) retainVertexColors {}
+
+-(void) retainVertexTextureCoordinates {}
+
+-(void) retainVertexIndices {}
+
+-(void) doNotBufferVertexLocations {}
+
+-(void) doNotBufferVertexNormals {}
+
+-(void) doNotBufferVertexColors {}
+
+-(void) doNotBufferVertexTextureCoordinates {}
+
+-(void) doNotBufferVertexIndices {}
+
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial {}
+
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {}
+
+-(CGRect) textureRectangle { return CGRectNull; }
+
+-(void) setTextureRectangle: (CGRect) aRect {}
+
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit { return CGRectNull; }
+
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {}
 
 
 #pragma mark Tag allocation
@@ -126,6 +153,43 @@ static GLuint lastAssignedMeshTag;
 -(CC3NodeBoundingVolume*) defaultBoundingVolume {
 	return nil;
 }
+
+
+#pragma mark Accessing vertex data
+
+-(CC3Vector) vertexLocationAt: (GLsizei) index { return kCC3VectorZero; }
+
+-(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index {}
+
+-(CC3Vector) vertexNormalAt: (GLsizei) index { return kCC3VectorZero; }
+
+-(void) setVertexNormal: (CC3Vector) aNormal at: (GLsizei) index {}
+
+-(ccColor4F) vertexColor4FAt: (GLsizei) index { return kCCC4FBlackTransparent; }
+
+-(void) setVertexColor4F: (ccColor4F) aColor at: (GLsizei) index {}
+
+-(ccColor4B) vertexColor4BAt: (GLsizei) index { return (ccColor4B){ 0, 0, 0, 0 }; }
+
+-(void) setVertexColor4B: (ccColor4B) aColor at: (GLsizei) index {}
+
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	return (ccTex2F){ 0.0, 0.0 };
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {}
+
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index {
+	return [self vertexTexCoord2FAt: index forTextureUnit: 0];
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index {
+	[self setVertexTexCoord2F: aTex2F at: index forTextureUnit: 0];
+}
+
+-(GLushort) vertexIndexAt: (GLsizei) index { return 0; }
+
+-(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index {}
 
 
 #pragma mark Mesh context switching

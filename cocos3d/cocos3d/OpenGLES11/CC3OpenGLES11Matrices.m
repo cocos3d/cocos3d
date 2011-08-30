@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -162,6 +162,15 @@
 	[mode close];
 	[modelview close];
 	[projection close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", mode];
+	[desc appendFormat: @"\n    %@ ", modelview];
+	[desc appendFormat: @"\n    %@ ", projection];
+	return desc;
 }
 
 @end

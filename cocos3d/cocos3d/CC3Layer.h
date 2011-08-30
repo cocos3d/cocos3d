@@ -1,7 +1,7 @@
 /*
  * CC3Layer.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -47,11 +47,7 @@
  * CCNode as a child with a negative Z-order.
  *
  * CC3Layer descends from CCLayerColor, and will draw a colored background behind both 2D
- * and 3D content if configured with a background color. When using 3D objects that use
- * alpha-blending, keep in mind that the background color does not participate in
- * alpha-blending with 3D models that are drawn over it. The background color will not show
- * through any semi-transparent 3D objects. See also the discussion below about translucent
- * objects when using touch events to select 3D nodes.
+ * and 3D content if configured with a background color.
  *
  * To make use of the standard cocos2d model updatating functionality to update and animate
  * the 3D world, use the scheduleUpdate or schedule:interval: methods of CC3Layer to invoke
@@ -74,22 +70,6 @@
  * event-handing behaviour to your customized CC3Layer, as you would for any cocos2d
  * application and, when required, invoke the touchEvent:at: method on your customized
  * CC3World to initiate node selection.
- *
- * Selection of 3D nodes using touch events uses a color-picking algorithm. When a touch
- * event occurs, the 3D scene is drawn in pure colors behind the scenes and then drawn in
- * its full glory over top. Since the full scene is redrawn as it should be before being
- * displayed, the user sees no visible difference.
- *
- * However, since the CC3Layer's background color and any background 2D nodes have already
- * been drawn by normal cocos2d CCLayer behaviour and cannot be redrawn during 3D drawing,
- * when a touch event is used to select a node, there is a very slight flicker on any
- * translucent nodes that have nothing behind them except the layer's background color or
- * 2D CCNodes. Opaque 3D nodes are not affected and do not flicker. Nor do translucent nodes
- * that have 3D nodes behind them.
- *
- * To remove this flicker on translucent nodes during touch event processing, make sure that
- * translucent nodes do not appear directly over the background color of the layer, or over
- * 2D CCNodes. In such cases, use a full 3D skybox in the 3D world instead.
  *
  * Most 3D games will be displayed in full-screen mode, so typically your custom CC3Layer
  * will be sized to cover the entire screen. However, the CC3Layer can indeed be set to a
@@ -213,6 +193,14 @@
  * processing of model updates separate from OpenGL ES drawing.
  */
 -(void) update: (ccTime)dt;
-	
+
+/**
+ * If a background color has been specified, and this layer is not overlaying the device
+ * camera, draws the background color over the entire layer.
+ *
+ * This method is invoked automatically when this layer is drawn. The application should
+ * never need to invoke this method directly.
+ */
+-(void) drawBackdrop;
 
 @end

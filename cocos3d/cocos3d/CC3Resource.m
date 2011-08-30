@@ -1,7 +1,7 @@
 /*
  * CC3Resource.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -85,7 +85,12 @@
 
 // Subclasses must override this method
 -(BOOL) loadFromFile: (NSString*) aFilepath {
-	self.name = aFilepath;
+	LogCleanRez(@"");
+	LogCleanRez(@"--------------------------------------------------");
+	LogRez(@"Loading resources from file '%@'", aFilepath);
+	if (!name) {
+		self.name = aFilepath;
+	}
 	return NO;
 }
 

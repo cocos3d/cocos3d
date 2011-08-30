@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -209,6 +209,36 @@
 	[stencilTest close];
 }
 
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", alphaTest];
+	[desc appendFormat: @"\n    %@ ", blend];
+	for (id t in clipPlanes) {
+		[desc appendFormat: @"\n    %@ ", t];
+	}
+	[desc appendFormat: @"\n    %@ ", colorLogicOp];
+	[desc appendFormat: @"\n    %@ ", colorMaterial];
+	[desc appendFormat: @"\n    %@ ", cullFace];
+	[desc appendFormat: @"\n    %@ ", depthTest];
+	[desc appendFormat: @"\n    %@ ", dither];
+	[desc appendFormat: @"\n    %@ ", fog];
+	[desc appendFormat: @"\n    %@ ", lighting];
+	[desc appendFormat: @"\n    %@ ", lineSmooth];
+	[desc appendFormat: @"\n    %@ ", multisample];
+	[desc appendFormat: @"\n    %@ ", normalize];
+	[desc appendFormat: @"\n    %@ ", pointSmooth];
+	[desc appendFormat: @"\n    %@ ", pointSprites];
+	[desc appendFormat: @"\n    %@ ", polygonOffsetFill];
+	[desc appendFormat: @"\n    %@ ", rescaleNormal];
+	[desc appendFormat: @"\n    %@ ", sampleAlphaToCoverage];
+	[desc appendFormat: @"\n    %@ ", sampleAlphaToOne];
+	[desc appendFormat: @"\n    %@ ", sampleCoverage];
+	[desc appendFormat: @"\n    %@ ", scissorTest];
+	[desc appendFormat: @"\n    %@ ", stencilTest];
+	return desc;
+}
+
 @end
 
 
@@ -251,6 +281,16 @@
 	[normalArray close];
 	[pointSizeArray close];
 	[vertexArray close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 300];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", colorArray];
+	[desc appendFormat: @"\n    %@ ", normalArray];
+	[desc appendFormat: @"\n    %@ ", pointSizeArray];
+	[desc appendFormat: @"\n    %@ ", vertexArray];
+	return desc;
 }
 
 @end

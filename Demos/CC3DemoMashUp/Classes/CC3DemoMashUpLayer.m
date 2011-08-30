@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpLayer.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,19 +38,26 @@
 #define kJoystickThumbFileName  @"JoystickThumb.png"
 #define kJoystickSideLength  80.0
 #define kJoystickPadding  8.0
+#define kButtonGrid  40.0
 #define kSwitchViewButtonFileName @"SwitchViewButton48x48.png"
 #define kInvasionButtonFileName @"InvasionButton48x48.png"
 #define kSunlightButtonFileName @"SunlightButton48x48.png"
+#define kZoomButtonFileName @"ZoomButton48x48.png"
 #define kButtonRingFileName @"ButtonRing48x48.png"
 #define kButtonShineFileName @"Shine48x48.png"
-#define kPeakShineOpacity 255
+#define kPeakShineOpacity 180
 #define kButtonAdornmentScale 1.5
+
+@interface CC3Layer (TemplateMethods)
+-(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
+@end
 
 @interface CC3DemoMashUpLayer (TemplateMethods)
 -(void) addJoysticks;
 -(void) addSwitchViewButton;
 -(void) addInvasionButton;
 -(void) addSunlightButton;
+-(void) addZoomButton;
 -(void) positionLocationJoystick;
 -(void) positionButtons;
 @property(nonatomic, readonly) CC3DemoMashUpWorld* mashUpWorld;
@@ -64,6 +71,7 @@
 	switchViewMI = nil;				// retained as child
 	invasionMI = nil;				// retained as child
 	sunlightMI = nil;				// retained as child
+	zoomMI = nil;					// retained as child
     [super dealloc];
 }
 
@@ -80,6 +88,7 @@
 	[self addSwitchViewButton];
 	[self addInvasionButton];
 	[self addSunlightButton];
+	[self addZoomButton];
 	self.isTouchEnabled = YES;		// Enable touch event handling for 3D object picking
 }
 
@@ -220,10 +229,42 @@
 	adornment.zOrder = kAdornmentUnderZOrder;
 	
 	// Attach the adornment to the menu item and center it on the menu item
-	adornment.position = ccpCompMult(ccpFromSize(invasionMI.contentSize), sunlightMI.anchorPoint);
+	adornment.position = ccpCompMult(ccpFromSize(sunlightMI.contentSize), sunlightMI.anchorPoint);
 	sunlightMI.adornment = adornment;
 	
 	CCMenu* viewMenu = [CCMenu menuWithItems: sunlightMI, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+}
+
+/**
+ * Creates a button (actually a single-item menu) in the bottom center of the layer
+ * that will allow the user to move between viewing the whole world scene and viewing
+ * from the previous position.
+ */
+-(void) addZoomButton {
+	
+	// Set up the menu item and position it in the bottom center of the layer
+	zoomMI = [AdornableMenuItemImage itemFromNormalImage: kZoomButtonFileName
+										   selectedImage: kZoomButtonFileName
+												  target: self
+												selector: @selector(cycleZoom:)];
+	[self positionButtons];
+	
+	// Instead of having different normal and selected images, the toggle menu
+	// item uses a shine adornment, which is displayed whenever an item is selected.
+	CCNodeAdornmentBase* adornment;
+
+	CCSprite* shineSprite = [CCSprite spriteWithFile: kButtonShineFileName];
+	shineSprite.color = ccWHITE;
+	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: shineSprite
+															peakOpacity: kPeakShineOpacity];
+	
+	// Attach the adornment to the menu item and center it on the menu item
+	adornment.position = ccpCompMult(ccpFromSize(zoomMI.contentSize), zoomMI.anchorPoint);
+	zoomMI.adornment = adornment;
+	
+	CCMenu* viewMenu = [CCMenu menuWithItems: zoomMI, nil];
 	viewMenu.position = CGPointZero;
 	[self addChild: viewMenu];
 }
@@ -244,11 +285,12 @@
  */
 -(void) positionButtons {
 	GLfloat middle = self.contentSize.width / 2.0;
-	GLfloat btnY = kJoystickSideLength - invasionMI.contentSize.height + kJoystickPadding;
-
-	switchViewMI.position = ccp(middle - switchViewMI.contentSize.width, btnY);
-	invasionMI.position = ccp(middle, btnY);
-	sunlightMI.position = ccp(middle + sunlightMI.contentSize.width, btnY);
+	GLfloat btnY = kJoystickPadding + (kJoystickSideLength / 2.0);
+	
+	switchViewMI.position = ccp(middle - (kButtonGrid * 1.5), btnY);
+	invasionMI.position = ccp(middle - (kButtonGrid * 0.5), btnY);
+	sunlightMI.position = ccp(middle + (kButtonGrid * 0.5), btnY);
+	zoomMI.position = ccp(middle + (kButtonGrid * 1.5), btnY);
 }
 
 
@@ -285,6 +327,11 @@
 	}
 }
 
+/** The user has pressed the zoom button. Tell the 3D world. */
+-(void) cycleZoom: (CCMenuItemToggle*) svMI {
+	[self.mashUpWorld cycleZoom];
+}
+
 /**
  * Called automatically when the contentSize has changed.
  * Move the location joystick to keep it in the bottom right corner of this layer
@@ -294,6 +341,19 @@
 	[super didUpdateContentSizeFrom: oldSize];
 	[self positionLocationJoystick];
 	[self positionButtons];
+}
+
+
+#pragma mark Touch handling
+
+// The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
+// The event dispatcher will not dispatch events for which there is no method
+// implementation. Since the touch-move events are both voluminous and seldom used,
+// the implementation of ccTouchMoved:withEvent: has been left out of the default
+// CC3Layer implementation. To receive and handle touch-move events for object
+// picking, it must be implemented here.
+-(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
+	[self handleTouch: touch ofType: kCCTouchMoved];
 }
 
 @end

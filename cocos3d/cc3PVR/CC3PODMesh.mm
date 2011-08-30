@@ -1,7 +1,7 @@
 /*
  * CC3PODMesh.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -51,7 +51,7 @@
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
-		LogTrace(@"Creating %@ at index %i from %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
+		LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
 		
 		self.vertexLocations = [CC3VertexLocations arrayFromSPODMesh: psm];
 

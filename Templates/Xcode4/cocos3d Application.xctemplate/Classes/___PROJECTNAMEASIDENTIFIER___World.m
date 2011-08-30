@@ -59,6 +59,28 @@
 	
 	// That's it! The model world is now constructed and is good to go.
 	
+	// If you encounter problems displaying your models, you can uncomment one or
+	// more of the following lines to help you troubleshoot. You can also use these
+	// features on a single node, or a structure of nodes. See the CC3Node notes.
+	
+	// Displays short descriptive text for each node (including class, node name & tag).
+	// The text is displayed centered on the pivot point (origin) of the node.
+//	self.shouldDrawAllDescriptors = YES;
+	
+	// Displays bounding boxes around those nodes with local content (eg- meshes).
+//	self.shouldDrawAllLocalContentWireframeBoxes = YES;
+	
+	// Displays bounding boxes around all nodes. The bounding box for each node
+	// will encompass its child nodes.
+//	self.shouldDrawAllWireframeBoxes = YES;
+	
+	// Moves the camera so that it will display the entire scene.
+//	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self];
+	
+	// If you encounter issues creating and adding nodes, or loading models from
+	// files, the following line is used to log the full structure of the world.
+	LogDebug(@"%@", [self structureDescription]);
+	
 	// ------------------------------------------
 
 	// But to add some dynamism, we'll animate the 'hello, world' message

@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -249,7 +249,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 											0.0f, 0.0f, 1.0f, 0.0f,
 											0.0f, 0.0f, 0.0f, 1.0f };
 
--(void) populateFrom: (CC3GLMatrix*) aMtx {
+-(void) populateFrom: (CC3GLMatrix*) aMtx { 
 	if (!aMtx || aMtx.isIdentity) {
 		[self populateIdentity];
 	} else {
@@ -954,13 +954,13 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 }
 
 +(CC3Vector) transformLocation: (CC3Vector) aLocation withMatrix: (GLfloat*) aGLMatrix {
-	return CC3VectorFromCC3Vector4([self transformHomogeneousVector: CC3Vector4FromCC3Vector(aLocation, 1.0)
-														withMatrix: aGLMatrix]);
+	return CC3VectorFromTruncatedCC3Vector4([self transformHomogeneousVector: CC3Vector4FromCC3Vector(aLocation, 1.0)
+																  withMatrix: aGLMatrix]);
 }
 
 +(CC3Vector) transformDirection: (CC3Vector) aDirection withMatrix: (GLfloat*) aGLMatrix {
-	return CC3VectorFromCC3Vector4([self transformHomogeneousVector: CC3Vector4FromCC3Vector(aDirection, 0.0)
-														withMatrix: aGLMatrix]);
+	return CC3VectorFromTruncatedCC3Vector4([self transformHomogeneousVector: CC3Vector4FromCC3Vector(aDirection, 0.0)
+																  withMatrix: aGLMatrix]);
 }
 
 +(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector withMatrix: (GLfloat*) aGLMatrix {

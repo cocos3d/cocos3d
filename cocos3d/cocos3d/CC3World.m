@@ -1,7 +1,7 @@
 /*
  * CC3World.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3World.h"
+#import "CC3Layer.h"
 #import "CC3MeshNode.h"
 #import "CC3VertexArrayMesh.h"
 #import "CC3Material.h"
@@ -45,8 +46,6 @@
 #pragma mark CC3World
 
 @interface CC3Node (TemplateMethods)
--(void) drawChildrenWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) updateWithVisitor: (CC3NodeTransformingVisitor*) visitor;
 -(void) updateTransformMatrices;
 -(void) populateFrom: (CC3Node*) another;
 @end
@@ -56,6 +55,7 @@
 @end
 
 @interface CC3World (TemplateMethods)
+-(void) activeCameraChangedFrom: (CC3Camera*) oldCam;
 -(void) updateCamera: (ccTime) dt;
 -(void) updateTargets: (ccTime) dt;
 -(void) updateFog: (ccTime) dt;
@@ -71,21 +71,21 @@
 -(void) close3DCamera;
 -(void) illuminate;
 -(void) drawFog;
--(void) drawBillboards;
+-(void) draw2DBillboards;
 -(id) drawVisitorClass;
 -(id) pickVisitorClass;
 -(void) populateDrawSequence;
 -(void) updateDrawSequence;
 -(BOOL) addToDrawingSequencer: (CC3Node*) aNode;
 -(BOOL) removeFromDrawingSequencer: (CC3Node*) aNode;
-@property(nonatomic, readonly) CC3WorldTouchHandler* touchHandler;
+@property(nonatomic, readonly) CC3TouchedNodePicker* touchedNodePicker;
 @end
 
 
 @implementation CC3World
 
-@synthesize activeCamera, ambientLight, minUpdateInterval, maxUpdateInterval;
-@synthesize drawingSequencer, viewportManager, performanceStatistics, fog;
+@synthesize cc3Layer, activeCamera, ambientLight, minUpdateInterval, maxUpdateInterval;
+@synthesize touchedNodePicker, drawingSequencer, viewportManager, performanceStatistics, fog;
 
 - (void)dealloc {
 	[drawingSequence release];
@@ -94,16 +94,37 @@
 	[lights release];
 	[cameras release];
 	[billboards release];
+	cc3Layer = nil;				// not retained
 	[activeCamera release];
-	[touchHandler release];
+	[touchedNodePicker release];
 	[viewportManager release];
 	[fog release];
     [super dealloc];
 }
 
-// Protected property
--(CC3WorldTouchHandler*) touchHandler { return touchHandler; }
+-(void) setActiveCamera: (CC3Camera*) aCamera {
+	CC3Camera* oldCam = activeCamera;
+	activeCamera = [aCamera retain];
+	[self activeCameraChangedFrom: oldCam];
+	[oldCam release];
+}
 
+/** The active camera has changed. Update whoever cares. */
+-(void) activeCameraChangedFrom: (CC3Camera*) oldCam {
+
+	// For any targetting nodes that were targetted to the old camera,
+	// set the target to the new camera.
+	for (CC3TargettingNode* tn in targettingNodes) {
+		// If the node should always target the camera, or if the target
+		// is already the old camera, set its target to the new camera.
+		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) {
+			tn.target = activeCamera;
+		}
+	}
+}
+
+/** Protected property */
+-(CC3TouchedNodePicker*) touchedNodePicker { return touchedNodePicker; }
 
 #pragma mark Allocation and initialization
 
@@ -114,7 +135,7 @@
 		cameras = [[NSMutableArray array] retain];
 		billboards = [[NSMutableArray array] retain];
 		drawingSequence = [[NSArray array] retain];
-		touchHandler = [[CC3WorldTouchHandler handlerOnWorld: self] retain];
+		self.touchedNodePicker = [CC3TouchedNodePicker handlerOnWorld: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnWorld: self];
 		fog = nil;
@@ -187,9 +208,8 @@
 		LogTrace(@"******* %@ starting update: %.2f ms (clamped from %.2f ms)",
 				 self, dtClamped * 1000.0, dt * 1000.0);
 
-		[touchHandler dispatchPickedNode];
-		[self updateWithVisitor: [[self updateVisitorClass] visitorWithWorld: self
-																andDeltaTime: dtClamped]];
+		[touchedNodePicker dispatchPickedNode];
+		[[[self updateVisitorClass] visitorWithDeltaTime: dtClamped] visit: self];
 		[self updateTargets: dtClamped];
 		[self updateCamera: dtClamped];
 		[self updateBillboards: dtClamped];
@@ -198,13 +218,6 @@
 
 		LogTrace(@"******* %@ exiting update", self);
 	}
-}
-
-/** Overridden to open and close the visitor before and after updating, respectively. */
--(void) updateWithVisitor: (CC3NodeUpdatingVisitor*) visitor {
-	[visitor open];
-	[super updateWithVisitor: visitor];
-	[visitor close];
 }
 
 /** 
@@ -232,11 +245,11 @@
 
 /**
  * Template method to update any billboards.
- * Iterates through all billboards, instructing them to face the current camera position.
+ * Iterates through all billboards, instructing them to align with the camera if needed.
  */
 -(void) updateBillboards: (ccTime) dt {
 	for (CC3Billboard* bb in billboards) {
-		[bb faceCamera: activeCamera];
+		[bb alignToCamera: activeCamera];
 	}
 	LogTrace(@"%@ updated %u billboards", self, billboards.count);
 }
@@ -246,12 +259,12 @@
 }
 
 /**
- * Returns the class of visitor that will be instantiated in the updateWorld: method,
- * and passed to the updateWithVisitor: method during update operations.
+ * Returns the class of visitor that will be instantiated in the updateWorld:
+ * method to perform update operations.
  *
  * The returned class must be a subclass of CC3NodeUpdatingVisitor. This implementation
- * returns CC3NodeUpdatingVisitor. Subclasses may override to customized the behaviour
- * of the update visits.
+ * returns CC3NodeUpdatingVisitor. Subclasses may override the visitor class to
+ * customize the behaviour during update visits.
  */
 -(id) updateVisitorClass {
 	return [CC3NodeUpdatingVisitor class];
@@ -272,40 +285,18 @@
 		[self open3D];
 		[self openViewport];
 		[self open3DCamera];
-		[touchHandler pickTouchedNode];
+		[touchedNodePicker pickTouchedNode];
 		[self illuminate];
 		[self drawFog];
-		[self drawWithVisitor: [[self drawVisitorClass] visitorWithWorld: self]];
+		[[[self drawVisitorClass] visitor] visit: self];
 		[self close3DCamera];
 		[self closeViewport];
 		[self close3D];
-		[self drawBillboards];	// Back to 2D now
+		[self draw2DBillboards];	// Back to 2D now
 	}
 	
 	LogGLErrorState();			// Check and clear any GL error that occurred during 3D code
 	LogTrace(@"******* %@ exiting drawing visit", self);
-}
-
-/**
- * Overridden to open and close the visitor before and after drawing, respectively,
- * and to avoid checking the world itself against the camera frustum.
- */
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor open];
-	if(self.visible && visitor.shouldVisitChildren) {
-		[self drawChildrenWithVisitor: visitor];
-	}
-	[visitor close];
-}
-
-
-/** Overridden to make use of the drawingSequence if it is available. */
--(void) drawChildrenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.isUsingDrawingSequence) {
-		[self drawDrawSequenceWithVisitor: visitor];
-	} else {
-		[super drawChildrenWithVisitor: visitor];
-	}
 }
 
 /**
@@ -316,7 +307,7 @@
 -(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.shouldVisitChildren = NO;
 	for (CC3Node* child in drawingSequence) {
-		[child drawWithVisitor: visitor];
+		[visitor visit: child];
 	}
 }
 
@@ -434,10 +425,10 @@
 }
 
 /**
- * Draws any billboards.
+ * Draws any 2D overlay billboards.
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
--(void) drawBillboards {
+-(void) draw2DBillboards {
 	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
 
 	if (activeCamera && (billboards.count > 0)) {
@@ -449,8 +440,9 @@
 		[[CC3OpenGLES11Engine engine].serverCapabilities.scissorTest enable];
 		[CC3OpenGLES11Engine engine].state.scissor.value = vp;
 		
+		CGRect lb = viewportManager.layerBoundsLocal;
 		for (CC3Billboard* bb in billboards) {
-			[bb draw2dWithinBounds: viewportManager.layerBoundsLocal];
+			[bb draw2dWithinBounds: lb];
 		}
 		
 		// All done...turn scissoring back off now.
@@ -462,8 +454,7 @@
 }
 
 /**
- * Returns the class of visitor that will be instantiated in the drawWorld method,
- * and passed to the drawWithVisitor: method during drawing operations.
+ * Returns the class of visitor that will be instantiated in the drawWorld method.
  *
  * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation
  * returns CC3NodeDrawingVisitor. Subclasses may override to customized the behaviour
@@ -474,10 +465,9 @@
 }
 
 /**
- * Returns the class of visitor that will be instantiated in the touchHandler
- * pickTouchedNode method, and passed to the drawWithVisitor: method in order
- * to paint each node a unique color so that the node under the touched pixel
- * can be identified.
+ * Returns the class of visitor that will be instantiated in the touchedNodePicker
+ * pickTouchedNode method, in order to paint each node a unique color so that
+ * the node under the touched pixel can be identified.
  *
  * The returned class must be a subclass of CC3NodePickingVisitor. This implementation
  * returns CC3NodePickingVisitor. Subclasses may override to customized the behaviour
@@ -554,6 +544,10 @@
 		if ( [addedNode isKindOfClass: [CC3TargettingNode class]] ) {
 			LogTrace(@"Adding targetting node %@", addedNode);
 			[targettingNodes addObject: addedNode];
+			CC3TargettingNode* tn = (CC3TargettingNode*)addedNode;
+			if (tn.shouldAutotargetCamera) {
+				tn.target = activeCamera;
+			}
 		}
 		
 		// If the node is a light, add it to the collection of lights
@@ -669,23 +663,23 @@
 
 #pragma mark Touch handling
 
-// Forward to the encapsulated touch handler.
+// Forward to the encapsulated touched node picker.
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
-	[touchHandler touchEvent: touchType at: touchPoint];
+	[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
 }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3WorldTouchHandler
+#pragma mark CC3TouchedNodePicker
 
-@interface CC3WorldTouchHandler (TemplateMethods)
+@interface CC3TouchedNodePicker (TemplateMethods)
 -(NSString*) nameOfTouchType: (uint) tType;
 @end
 
 
-@implementation CC3WorldTouchHandler
+@implementation CC3TouchedNodePicker
 
 -(void) dealloc {
 	world = nil;			// not retained
@@ -724,7 +718,7 @@
 
 #pragma mark Touch handling
 
--(void) touchEvent: (uint) tType at: (CGPoint) tPoint {
+-(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint {
 
 	// If the touch type is different than the previous touch type,
 	// add the touch type to the queue. Only the types are queued...not the location.
@@ -746,8 +740,8 @@
 -(void) pickTouchedNode {
 	if (wasTouched) {
 		wasTouched = NO;
-		CC3NodePickingVisitor* pickVisitor = [[world pickVisitorClass] visitorWithWorld: world];
-		[world drawWithVisitor: pickVisitor];
+		CC3NodePickingVisitor* pickVisitor = [[world pickVisitorClass] visitor];
+		[pickVisitor visit: world];
 		pickedNode = pickVisitor.pickedNode;
 		wasPicked = YES;
 	}
@@ -1007,6 +1001,7 @@
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
 			break;
 			
+		case kCCDeviceOrientationPortrait:
 		default:
 			[self updateDeviceRotationAngle: 0.0f];
 			

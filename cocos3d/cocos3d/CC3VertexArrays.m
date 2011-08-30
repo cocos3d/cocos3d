@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -185,6 +185,9 @@ static GLuint lastAssignedVertexArrayTag;
 			[self deleteGLBuffer];
 		}
 		[bufferBinding unbind];
+	} else {
+		LogTrace(@"%@ NOT creating GL server buffer because shouldAllowVertexBuffering is %@ or bufferID is %i",
+				 self, NSStringFromBoolean(shouldAllowVertexBuffering), bufferID);
 	}
 }
 
@@ -680,7 +683,6 @@ static GLuint currentNormalsTag = 0;
 									   withType: elementType
 									 withStride: elementStride];
 	[gles11Engine.clientCapabilities.colorArray enable];
-//	[gles11Engine.serverCapabilities.colorMaterial enable];
 
 	// Since material color tracking mucks with both ambient and diffuse material colors under
 	// the covers, we won't really know what the ambient and diffuse material color values will
@@ -691,7 +693,6 @@ static GLuint currentNormalsTag = 0;
 
 +(void) unbind {
 	[[CC3OpenGLES11Engine engine].clientCapabilities.colorArray disable];
-//	[[CC3OpenGLES11Engine engine].serverCapabilities.colorMaterial disable];
 	[self resetSwitching];
 }
 
@@ -720,13 +721,39 @@ static GLuint currentColorsTag = 0;
 #pragma mark -
 #pragma mark CC3VertexTextureCoordinates
 
+@interface CC3VertexTextureCoordinates (TemplateMethods)
+@property(nonatomic, readonly) CGSize naturalMapSize;
+-(void) alignWithTextureRectangle: (CGRect) newRect fromOld: (CGRect) oldRect;
+@end
+
 @implementation CC3VertexTextureCoordinates
+
+-(CGRect) textureRectangle {
+	return textureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	CGRect oldRect = textureRectangle;
+	textureRectangle = aRect;
+	[self alignWithTextureRectangle: aRect fromOld: oldRect];
+}
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		elementSize = 2;
+		naturalMapSize = CGSizeZero;
+		textureRectangle = kCC3UnitTextureRectangle;
 	}
 	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3VertexTextureCoordinates*) another {
+	[super populateFrom: another];
+	
+	naturalMapSize = another.naturalMapSize;
+	textureRectangle = another.textureRectangle;
 }
 
 -(ccTex2F) texCoord2FAt: (GLsizei) index {
@@ -770,28 +797,100 @@ static GLuint currentColorsTag = 0;
 	[self unbindRemainingFrom: 0];
 }
 
+/**
+ * Returns the size of the map as a fraction between zero and one. This indicates
+ * how much of the texture is covered by this texture coordinate map when the
+ * texture is simply overlaid on the mesh, before any textureRectangle is applied.
+ *
+ * If the value of this property has not yet been measured by one of the
+ * alignWith...Texture...: methods, it is measured when first accessed here.
+ */
+-(CGSize) naturalMapSize {
+	if (CGSizeEqualToSize(naturalMapSize, CGSizeZero)) {
+		for (GLsizei i = 0; i < elementCount; i++) {
+			ccTex2F tc = [self texCoord2FAt: i];
+			naturalMapSize.width = MAX(tc.u, naturalMapSize.width);
+			naturalMapSize.height = MAX(tc.v, naturalMapSize.height);
+		}
+	}
+	return naturalMapSize;
+}
+
+/**
+ * Aligns the vertex texture coordinates with the area of the texture defined
+ * by the newRect. The oldRect describes the area of the texture that is currently
+ * mapped by the texture coordinates.
+ */
+-(void) alignWithTextureRectangle: (CGRect) newRect fromOld: (CGRect) oldRect {
+
+	// The size of the mapping in its natural state, before slicing out a rectangle 
+	GLfloat natWidth = self.naturalMapSize.width;
+	GLfloat natHeight = self.naturalMapSize.height;
+	
+	// Origin of new rect
+	GLfloat nx = newRect.origin.x;
+	GLfloat ny = newRect.origin.y;
+	
+	// Origin of old rect
+	GLfloat ox = oldRect.origin.x;
+	GLfloat oy = oldRect.origin.y;
+	
+	// Scaling from size of old rect to size of new rect
+	GLfloat sw = newRect.size.width / oldRect.size.width;
+	GLfloat sh = newRect.size.height / oldRect.size.height;
+	
+	// Iterate the vertices moving point in old rect to point in new rect.
+	// Each of the current U & V are reverted back to the value they would
+	// naturally have, without a rectangle,
+	for (GLsizei i = 0; i < elementCount; i++) {
+		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
+
+		GLfloat natU = ptc->u / natWidth;
+		ptc->u = (nx + ((natU - ox) * sw)) * natWidth;
+
+		GLfloat natV = ptc->v / natHeight;
+		ptc->v = (ny + ((natV - oy) * sh)) * natHeight;
+	}
+}
+
 -(void) alignWithTextureMapSize: (ccTex2F) texMapSize {
+	naturalMapSize = CGSizeZero;
+
 	for (GLsizei i = 0; i < elementCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u *= texMapSize.u;
 		ptc->v *= texMapSize.v;
+
+		// While we are remapping, measure the resulting map size at the same time
+		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
+		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
 	}
 }
 
 -(void) alignWithInvertedTextureMapSize: (ccTex2F) texMapSize {
+	naturalMapSize = CGSizeZero;
+
 	for (GLsizei i = 0; i < elementCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u *= texMapSize.u;
 		ptc->v = (1.0 - ptc->v) * texMapSize.v;
+		
+		// While we are remapping, measure the resulting map size at the same time
+		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
+		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
 	}
 }
 
 -(void) alignWithTexture: (CC3Texture*) texture {
-	[self alignWithTextureMapSize: texture.mapSize];
+	if (texture) {
+		[self alignWithTextureMapSize: texture.mapSize];
+	}
 }
 
 -(void) alignWithInvertedTexture: (CC3Texture*) texture {
-	[self alignWithInvertedTextureMapSize: texture.mapSize];
+	if (texture) {
+		[self alignWithInvertedTextureMapSize: texture.mapSize];
+	}
 }
 
 -(void) flipHorizontally {
@@ -912,12 +1011,12 @@ static GLuint currentPointSizesTag = 0;
 	return elementType == GL_UNSIGNED_BYTE ? *(GLubyte*)ptr : *(GLushort*)ptr;
 }
 
--(void) setIndex: (GLushort) anIndex at: (GLsizei) index {
+-(void) setIndex: (GLushort) vertexIndex at: (GLsizei) index {
 	GLvoid* ptr = [self addressOfElement: index];
 	if (elementType == GL_UNSIGNED_BYTE) {
-		*(GLubyte*)ptr = anIndex;
+		*(GLubyte*)ptr = vertexIndex;
 	} else {
-		*(GLushort*)ptr = anIndex;
+		*(GLushort*)ptr = vertexIndex;
 	}
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3ResourceNode.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -58,10 +58,12 @@
 		if (!name) {
 			self.name = aResource.name;
 		}
-		LogTrace(@"%@ setting resource: %@", self, aResource);
 		for (CC3Node* aNode in [aResource nodes]) {
 			[self addChild: aNode];
 		}
+		LogCleanRez(@"%@ added resource %@ with node structure: %@", self, aResource,
+					[self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
+											withIndent: 1]);
 	}
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,6 +39,7 @@
 @interface CC3Node (TemplateMethods)
 -(void) populateFrom: (CC3Node*) another;
 -(void) updateBoundingVolume;
+-(void) transformMatrixChanged;
 @end
 
 @interface CC3MeshNode (TemplateMethods)
@@ -46,6 +47,8 @@
 -(void) configureFaceCulling;
 -(void) configureNormalization;
 -(void) configureColoring;
+-(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) populateAsVertexBox: (CC3BoundingBox) box;
 @end
 
@@ -89,6 +92,35 @@
 	[self.boundingVolume buildVolume];
 }
 
+-(void) alignTextures {
+	[mesh alignWithTexturesIn: material];
+	[super alignTextures];
+}
+
+-(void) alignInvertedTextures {
+	[mesh alignWithInvertedTexturesIn: material];
+	[super alignInvertedTextures];
+}
+
+-(CGRect) textureRectangle {
+	return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	mesh.textureRectangle = aRect;
+}
+
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
+	return mesh ? [mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
+	[mesh setTextureRectangle: aRect forTextureUnit: texUnit];
+}
+
+-(CC3BoundingBox) localContentBoundingBox {
+	return mesh ? mesh.boundingBox : kCC3BoundingBoxNull;
+}
 
 #pragma mark Material coloring
 
@@ -225,6 +257,51 @@
 	[super retainVertexLocations];
 }
 
+-(void) retainVertexNormals {
+	[mesh retainVertexNormals];
+	[super retainVertexNormals];
+}
+
+-(void) retainVertexColors {
+	[mesh retainVertexColors];
+	[super retainVertexColors];
+}
+
+-(void) retainVertexTextureCoordinates {
+	[mesh retainVertexTextureCoordinates];
+	[super retainVertexTextureCoordinates];
+}
+
+-(void) retainVertexIndices {
+	[mesh retainVertexIndices];
+	[super retainVertexIndices];
+}
+
+-(void) doNotBufferVertexLocations {
+	[mesh doNotBufferVertexLocations];
+	[super doNotBufferVertexLocations];
+}
+
+-(void) doNotBufferVertexNormals {
+	[mesh doNotBufferVertexNormals];
+	[super doNotBufferVertexNormals];
+}
+
+-(void) doNotBufferVertexColors {
+	[mesh doNotBufferVertexColors];
+	[super doNotBufferVertexColors];
+}
+
+-(void) doNotBufferVertexTextureCoordinates {
+	[mesh doNotBufferVertexTextureCoordinates];
+	[super doNotBufferVertexTextureCoordinates];
+}
+
+-(void) doNotBufferVertexIndices {
+	[mesh doNotBufferVertexIndices];
+	[super doNotBufferVertexIndices];
+}
+
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // A copy is made of the material.
@@ -261,7 +338,7 @@
 						   andPivot: (CGPoint) pivot
 					andTessellation: (ccGridSize) facesPerSide {
 	NSString* itemName;
-	CCTexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
+	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
 	
 	// Must be at least one tessellation face per side of the rectangle.
 	facesPerSide.x = MAX(facesPerSide.x, 1);
@@ -285,7 +362,7 @@
 	// Create vertex location array, allocating enough space for the stride of the full structure
 	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
 	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CCTexturedVertex);	// Set stride before allocating elements.
+	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
 	locArray.elementOffset = 0;							// Offset to location element in vertex structure
 	vertices = [locArray allocateElements: vertexCount];
 	
@@ -423,7 +500,7 @@
 	vam.vertexTextureCoordinates = tcArray;
 	
 	// Populate the texture coordinate array mapping
-	CCTexturedVertex* vertices = locArray.elements;
+	CC3TexturedVertex* vertices = locArray.elements;
 	
 	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
 	// and set the X & Y texture coordinate of each vertex to be proportional to its position
@@ -437,17 +514,17 @@
 		}
 	}
 	
-	// Align the texture coordinates to the texture
-	if (shouldInvert) {
-		[tcArray alignWithInvertedTexture: texture];
-	} else {
-		[tcArray alignWithTexture: texture];
-	}
-	
 	// Add a material and attach the texture
 	itemName = [NSString stringWithFormat: @"%@-Material", self.name];
 	self.material = [CC3Material materialWithName: itemName];
 	self.material.texture = texture;
+	
+	// Align the texture coordinates to the texture
+	if (shouldInvert) {
+		[self alignInvertedTextures];
+	} else {
+		[self alignTextures];
+	}
 }
 
 // Index data for the triangles covering the six faces of a solid box.
@@ -462,7 +539,7 @@ static const GLubyte solidBoxIndexData[] = {
 
 -(void) populateAsSolidBox: (CC3BoundingBox) box {
 	NSString* itemName;
-	CCTexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
+	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
 	CC3Vector boxMin = box.minimum;
 	CC3Vector boxMax = box.maximum;
 	GLuint vertexCount = 8;
@@ -470,7 +547,7 @@ static const GLubyte solidBoxIndexData[] = {
 	// Create vertexLocation array.
 	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
 	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CCTexturedVertex);	// Set stride before allocating elements.
+	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
 	locArray.elementOffset = 0;							// Offset to location element in vertex structure
 	vertices = [locArray allocateElements: vertexCount];
 	
@@ -602,7 +679,6 @@ static const GLubyte wireBoxIndexData[] = {
 	return YES;
 }
 
-
 #pragma mark Drawing
 
 /**
@@ -611,26 +687,16 @@ static const GLubyte wireBoxIndexData[] = {
  * One material or color is set, delegates to the mesh to draw mesh.
  */
 -(void) drawLocalContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11StateTrackerCapability* gles11Lighting = gles11Engine.serverCapabilities.lighting;
+	CC3OpenGLES11StateTrackerCapability* gles11Lighting = [CC3OpenGLES11Engine engine].serverCapabilities.lighting;
 
 	// Remember current lighting state in case we disable it to apply pure color.
 	BOOL lightingWasEnabled = gles11Lighting.value;
 
 	[self configureDrawingParameters];		// Before material draws.
 
-	if (visitor.shouldDecorateNode) {
-		if (material) {
-			[material drawWithVisitor: visitor];
-		} else {
-			[CC3Material unbind];
-			[gles11Lighting disable];
-			gles11Engine.state.color.value = pureColor;
-		}
-	} else {
-		[CC3Material unbind];
-	}
-	[mesh drawWithVisitor: visitor];
+	[self drawMaterialWithVisitor: visitor];
+
+	[self drawMeshWithVisitor: visitor];
 
 	// Re-establish previous lighting state.
 	gles11Lighting.value = lightingWasEnabled;
@@ -692,6 +758,87 @@ static const GLubyte wireBoxIndexData[] = {
 	[CC3OpenGLES11Engine engine].serverCapabilities.colorMaterial.value = (mesh ? mesh.hasColors : NO);
 }
 
+/** Template method to draw the material to the GL engine. */
+-(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLES11StateTrackerCapability* gles11Lighting = gles11Engine.serverCapabilities.lighting;
+	if (visitor.shouldDecorateNode) {
+		if (material) {
+			[material drawWithVisitor: visitor];
+		} else {
+			[CC3Material unbind];
+			[gles11Lighting disable];
+			gles11Engine.state.color.value = pureColor;
+		}
+	} else {
+		[CC3Material unbind];
+	}
+}
+
+/** Template method to draw the mesh to the GL engine. */
+-(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[mesh drawWithVisitor: visitor];
+}
+
+
+#pragma mark Accessing vertex data
+
+-(CC3Vector) vertexLocationAt: (GLsizei) index {
+	return mesh ? [mesh vertexLocationAt: index] : kCC3VectorZero;
+}
+
+-(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index {
+	[mesh setVertexLocation: aLocation at: index];
+}
+
+-(CC3Vector) vertexNormalAt: (GLsizei) index {
+	return mesh ? [mesh vertexNormalAt: index] : kCC3VectorZero;
+}
+
+-(void) setVertexNormal: (CC3Vector) aNormal at: (GLsizei) index {
+	[mesh setVertexNormal: aNormal at: index];
+}
+
+-(ccColor4F) vertexColor4FAt: (GLsizei) index {
+	return mesh ? [mesh vertexColor4FAt: index] : kCCC4FBlackTransparent;
+}
+
+-(void) setVertexColor4F: (ccColor4F) aColor at: (GLsizei) index {
+	[mesh setVertexColor4F: aColor at: index];
+}
+
+-(ccColor4B) vertexColor4BAt: (GLsizei) index {
+	return mesh ? [mesh vertexColor4BAt: index] : (ccColor4B){ 0, 0, 0, 0 };
+}
+
+-(void) setVertexColor4B: (ccColor4B) aColor at: (GLsizei) index {
+	[mesh setVertexColor4B: aColor at: index];
+}
+
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	return mesh ? [mesh vertexTexCoord2FAt: index forTextureUnit: texUnit] : (ccTex2F){ 0.0, 0.0 };
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	[mesh setVertexTexCoord2F: aTex2F at: index forTextureUnit: texUnit];
+}
+
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index {
+	return [self vertexTexCoord2FAt: index forTextureUnit: 0];
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index {
+	[self setVertexTexCoord2F: aTex2F at: index forTextureUnit: 0];
+}
+
+-(GLushort) vertexIndexAt: (GLsizei) index {
+	return mesh ? [mesh vertexIndexAt: index] : 0;
+}
+
+-(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index {
+	[mesh setVertexIndex: vertexIndex at: index];
+}
+
 @end
 
 
@@ -743,6 +890,109 @@ static const GLubyte wireBoxIndexData[] = {
 	gles11Engine.state.lineWidth.value = lineWidth;
 	gles11Engine.serverCapabilities.lineSmooth.value = shouldSmoothLines;
 	gles11Engine.hints.lineSmooth.value = performanceHint;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3WireframeBoundingBoxNode
+
+@interface CC3WireframeBoundingBoxNode (TemplateMethods)
+-(void) updateFromParentBoundingBoxWithVisitor: (CC3NodeUpdatingVisitor*) visitor;
+@property(nonatomic, readonly) CC3BoundingBox parentBoundingBox;
+@end
+
+@implementation CC3WireframeBoundingBoxNode
+
+@synthesize shouldAlwaysMeasureParentBoundingBox;
+
+-(CC3BoundingBox) localContentBoundingBox {
+	return kCC3BoundingBoxNull;
+}
+
+-(CC3BoundingBox) globalLocalContentBoundingBox {
+	return kCC3BoundingBoxNull;
+}
+
+-(BOOL) shouldIncludeInDeepCopy { return NO; }
+
+-(BOOL) shouldDrawDescriptor { return YES; }
+
+-(void) setShouldDrawDescriptor: (BOOL) shouldDraw {}
+
+-(BOOL) shouldDrawWireframeBox { return YES; }
+
+-(void) setShouldDrawWireframeBox: (BOOL) shouldDraw {}
+
+-(BOOL) shouldDrawLocalContentWireframeBox { return YES; }
+
+-(void) setShouldDrawLocalContentWireframeBox: (BOOL) shouldDraw {}
+
+// Overridden so that not touchable unless specifically set as such
+-(BOOL) isTouchable {
+	return isTouchEnabled;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		shouldAlwaysMeasureParentBoundingBox = NO;
+	}
+	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3WireframeBoundingBoxNode*) another {
+	[super populateFrom: another];
+	
+	shouldAlwaysMeasureParentBoundingBox = another.shouldAlwaysMeasureParentBoundingBox;
+}
+
+
+#pragma mark Updating
+
+/** If we should remeasure and update the bounding box dimensions, do so. */
+-(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
+	if (shouldAlwaysMeasureParentBoundingBox) {
+		[self updateFromParentBoundingBoxWithVisitor: visitor];
+	}
+}
+
+/** Measures the bounding box of the parent node and updates the vertex locations. */
+-(void) updateFromParentBoundingBoxWithVisitor: (CC3NodeUpdatingVisitor*) visitor {
+	CC3BoundingBox pbb = self.parentBoundingBox;
+	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.minimum.y, pbb.minimum.z) at: 0];
+	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.minimum.y, pbb.maximum.z) at: 1];
+	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.maximum.y, pbb.minimum.z) at: 2];
+	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.maximum.y, pbb.maximum.z) at: 3];
+	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.minimum.y, pbb.minimum.z) at: 4];
+	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.minimum.y, pbb.maximum.z) at: 5];
+	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.maximum.y, pbb.minimum.z) at: 6];
+	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.maximum.y, pbb.maximum.z) at: 7];
+}
+
+/** Retrieve the parent bounding box, or return the zero bounding box if no parent. */
+-(CC3BoundingBox) parentBoundingBox {
+	return parent ? parent.boundingBox : kCC3BoundingBoxZero;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3WireframeLocalContentBoundingBoxNode
+
+@implementation CC3WireframeLocalContentBoundingBoxNode
+
+/** Override to return the parent's local content bounding box */
+-(CC3BoundingBox) parentBoundingBox {
+	return (parent && parent.hasLocalContent)
+				? ((CC3LocalContentNode*)parent).localContentBoundingBox
+				: kCC3BoundingBoxZero;
 }
 
 @end

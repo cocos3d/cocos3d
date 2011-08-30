@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -69,11 +69,29 @@ typedef enum {
  *
  * To have an instance of CC3TargettingNode track the location of another node,
  * set that other node as the target property of the targetting node, and set the
- * shouldTrackTarget property of the targetting node to YES. If you leave the
- * shouldTrackTarget with a value of NO, the targetting node will rotate to point
- * at the target node initially, but will not then track that node. This can be useful
- * as a mechanism for orienting objects initially, but not forcing them to actively
- * track the other object dynamically.
+ * shouldTrackTarget property of the targetting node to YES. As eiteher the target
+ * object or the targetting node move around, the targetting node will automatically
+ * orient itself to face the target node.
+ *
+ * As an alternate to tracking another node, you can have an instance of
+ * CC3TargettingNode track a specific location in the global coordinate system,
+ * To do so, set the targetLocation property of the targetting node to a global
+ * location, and set the shouldTrackTarget property of the targetting node to YES.
+ * Unlike an active target, since the targetLocation is a fixed location and does
+ * not move itself (unless the property is set to a different value), the tracking
+ * of that location pertains to the movement of the targetting node itself. As the
+ * targetting node moves around, it will continue to point to the targetLocation.
+ * 
+ * If you leave the shouldTrackTarget with a value of NO, the targetting node will
+ * rotate to point at the target or targetLocation initially, but will not then
+ * track the target or targetLocation, as either the target or targetting node is
+ * moved. This can be useful as a mechanism for orienting a node initially, but
+ * not forcing it to actively track the original orientation.
+ *
+ * For convenience, to automatically track the active camera, you can simply set
+ * the shouldAutotargetCamera property to YES, which will cause the instance to
+ * automatically find and track the active camera, and will set the target and
+ * shouldTrackTarget properties automatically.
  *
  * You can also use an instance of CC3TargettingNode to make any node point at a target.
  * You do this by adding that node as a child to an instance of CC3TargettingNode, and
@@ -90,6 +108,11 @@ typedef enum {
  * Y-axis so that face of the cube is now facing down the negative Z-axis. When you add
  * the cube to an instance of CC3TargettingNode, that face of the cube will always point
  * in the direction of the parent targetting node's target.
+ *
+ * For convenience, any CC3Node can be quickly wrapped in a CC3TargettingNode through
+ * the methods asTargettingNode, asTracker and asCameraTracker, each of which create
+ * a CC3TargettingNode and wrap it around the CC3Node on which one of those methods
+ * was invoked.
  *
  * You can restrict the tracking of a target or targetLocation to rotation around a
  * single axis, if you want to have, say a signpost turn towards someone, but only
@@ -129,8 +152,10 @@ typedef enum {
 	CC3TargettingAxisRestriction axisRestriction;
 	BOOL isNewTarget;
 	BOOL shouldTrackTarget;
+	BOOL shouldAutotargetCamera;
 	BOOL isTargetLocationDirty;
 	BOOL isRotatorDirtyByTargetLocation;
+	BOOL wasGlobalLocationChanged;
 }
 
 /**
@@ -141,14 +166,18 @@ typedef enum {
 @property(nonatomic, retain) CC3Node* target;
 
 /** 
- * The location of the target. Instead of specifying a target node with the target
- * property, this property can be used to set a specific location to point towards.
- * This targetLocation is not tracked, and moving the targetting node will cause
- * it to point away from the targetLocation.
+ * The global location towards which this node is facing.
+ *
+ * Instead of specifying a target node with the target property, this property can be
+ * used to set a specific global location to point towards. If the shouldTrackTarget
+ * property is set to YES, this node will track the targetLocation so that it always
+ * points to the targetLocation, regardless of how this node moves through the 3D world.
+ *
+ * If both target and targetLocation properties are set, this node will orient to the target.
  *
  * When retrieving this property value, if the property was earlier explictly set,
  * it will be retrieved cleanly. However, if rotation was set by Euler angles,
- * quaternions, or forwardDirection, retriving the targetLocation comes with two
+ * quaternions, or forwardDirection, retrieving the targetLocation comes with two
  * caveats. The first is that calculating a targetLocation requires the global
  * location of this node, which is only calculated when the node's transformMatrix
  * is calculated after all model updates have been processed. This means that the
@@ -194,14 +223,43 @@ typedef enum {
 @property(nonatomic, assign) BOOL shouldTrackTarget;
 
 /**
- * The direction in which this node is pointing, relative to the node's coordinate
- * system, which is relative to the parent's rotation.
+ * Indicates whether this instance should automatically find and track the camera
+ * as its target. If this property is set to YES, this instance will automatically
+ * find and track the camera without having to set the target and shouldTrackTarget
+ * properties explicitly.
+ * 
+ * Setting this property to YES has the same effect as setting the shouldTrackTarget
+ * to YES and setting the target to the active camera. Beyond simplifying the two
+ * steps into one, this property that can be set before the active camera is
+ * established, or without knowing the active camera.
+ *
+ * In addition, subclasses that want to automatically find and track the camera
+ * can simply set this property to YES during initialization.
+ *
+ * Setting this property to NO also sets the shouldTrackTarget to NO.
+ *
+ * This iniital value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldAutotargetCamera;
+
+/**
+ * The direction in which this node is pointing, relative to the node's
+ * coordinate system, which is relative to the parent's rotation.
+ *
+ * The value returned is of unit length. When setting this property,
+ * the value will be normalized to be a unit vector.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
  */
 @property(nonatomic, assign) CC3Vector forwardDirection;
 
 /**
- * The direction in which this node is pointing, relative to the global coordinate system.
- * This is calculated by using the transformMatrix to translate the initial forwardDirection (0,0,-1).
+ * The direction in which this node is pointing, relative to the global
+ * coordinate system. This is calculated by using the transformMatrix
+ * to translate the initial forwardDirection (0,0,-1).
+ *
+ * The value returned is of unit length. 
  */
 @property(nonatomic, readonly) CC3Vector globalForwardDirection;
 
@@ -213,22 +271,32 @@ typedef enum {
  * indicates which direction should be considered 'up' when orienting the rotation of
  * the node. Initially, this property is set to point parallel to the positive Y-axis,
  * and in most cases, this property can be left with that value.
+ *
+ * The value returned is of unit length. When setting this property,
+ * the value will be normalized to be a unit vector.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
  */
 @property(nonatomic, assign) CC3Vector worldUpDirection;
 
 /**
  * The direction, in the node's coordinate system, that is considered to be 'up'.
- * This corresponds to the worldUpDirection, after it has been transformed by
- * the rotations of this node. For example, rotating the node upwards
- * to point towards an elevated target will move the upDirection of this node away
- * from the worldUpDirection. See the discussion of 'up' vectors in the class notes
- * above. This property is read-only.
+ * This corresponds to the worldUpDirection, after it has been transformed by the
+ * rotations of this node. For example, rotating the node upwards to point towards
+ * an elevated target will move the upDirection of this node away from the
+ * worldUpDirection. See the discussion of 'up' vectors in the class notes above.
+ *
+ * The value returned is of unit length. 
  */
 @property(nonatomic, readonly) CC3Vector upDirection;
 
 /**
- * The direction that is considered to be 'up' for this node, relative to the global coordinate system.
- * This is calculated by using the transformMatrix to translate the initial upDirection (0,1,0).
+ * The direction that is considered to be 'up' for this node, relative to the
+ * global coordinate system. This is calculated by using the transformMatrix to
+ * translate the initial upDirection (0,1,0).
+ *
+ * The value returned is of unit length. 
  */
 @property(nonatomic, readonly) CC3Vector globalUpDirection;
 
@@ -238,6 +306,8 @@ typedef enum {
  * to be 'up'. This property is read-only, is extracted from the transform matrix,
  * is generally of little use, but is included for completeness in describing the
  * rotation of the node.
+ *
+ * The value returned is of unit length. 
  */
 @property(nonatomic, readonly) CC3Vector rightDirection;
 
@@ -245,6 +315,8 @@ typedef enum {
  * The direction that is considered to be "off to the right" for this node,
  * relative to the global coordinate system. This is calculated by using the
  * transformMatrix to translate the initial rightDirection (1,0,0).
+ *
+ * The value returned is of unit length. 
  */
 @property(nonatomic, readonly) CC3Vector globalRightDirection;
 
@@ -265,12 +337,16 @@ typedef enum {
 #pragma mark -
 #pragma mark CC3DirectionalRotator
 
+/** Constants used by matrixIsDirtyBy to indicate why the transform matrix is dirty. */
+#define kCC3MatrixIsDirtyByDirection	11
+
 /**
  * This CC3Rotator subclass adds the ability to set rotation based on directional information.
  * 
- * In addition to specifying rotations in terms of three Euler angles or quaternions, rotations
- * of this class can be specified in terms of pointing in a particular forwardDirection, and
- * orienting so that 'up' is in a particular worldUpDirection.
+ * In addition to specifying rotations in terms of three Euler angles, a rotation axis and
+ * a rotation angle, or a quaternion, rotations of this class can be specified in terms of
+ * pointing in a particular forwardDirection, and orienting so that 'up' is in a particular
+ * worldUpDirection.
  *
  * The rotationMatrix of this rotator can be used to convert between directional rotation,
  * Euler angles, and quaternions. As such, the rotation of a node can be specified as a
@@ -286,15 +362,22 @@ typedef enum {
 	BOOL isForwardDirectionDirty;
 	BOOL isUpDirectionDirty;
 	BOOL isRightDirectionDirty;
-	BOOL isMatrixDirtyByDirection;
 }
 
-/** The direction towards which this node is pointing, relative to the parent of the node. */
+/**
+ * The direction towards which this node is pointing, relative to the parent of the node.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
+ */
 @property(nonatomic, assign) CC3Vector forwardDirection;
 
 /**
  * The direction, in the global coordinate system, that is considered to be 'up'.
  * See the discussion of 'up' vectors in the CC3TargettingNode class notes.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
  */
 @property(nonatomic, assign) CC3Vector worldUpDirection;
 
@@ -351,4 +434,79 @@ typedef enum {
  * illuminating the regular mesh nodes.
  */
 @interface  CC3LightTracker  :  CC3TargettingNode
+@end
+
+
+#pragma mark -
+#pragma mark CC3Node extension
+
+@interface CC3Node (CC3TargettingNode)
+
+/**
+ * Wraps this node in an instance of CC3TargettingNode, and returns the autoreleased
+ * CC3TargettingNode instance. This node appears as the lone child node of the returned
+ * targetting node.
+ *
+ * The CC3TargettingNode instance will have the name "<this node name>-TargettingWrapper".
+ */
+-(CC3TargettingNode*) asTargettingNode;
+
+/**
+ * Wraps this node in an instance of CC3TargettingNode, and returns the autoreleased
+ * CC3TargettingNode instance. This node appears as the lone child node of the returned
+ * targetting node.
+ *
+ * The shouldTrackTarget property of the returned targetting node is set to YES,
+ * indicating and the targetting node will always face whatever node is subsequently
+ * set in the target property.
+ *
+ * The shouldAutoremoveWhenEmpty property of the returned targetting node is set to YES,
+ * indicating that the targetting node will remove itself automatically from the node
+ * hierarchy when the last child node (likely this node) is removed from the targetting
+ * node. This assists in cleaning up nodes in the hierarchy by avoiding leaving empty
+ * wrapper nodes littering the hierarchy.
+ *
+ * The CC3TargettingNode instance will have the name "<this node name>-TargettingWrapper".
+ */
+-(CC3TargettingNode*) asTracker;
+
+/**
+ * Wraps this node in an instance of CC3TargettingNode, and returns the autoreleased
+ * CC3TargettingNode instance. This node appears as the lone child node of the returned
+ * targetting node.
+ *
+ * Both the shouldTrackTarget and shouldAutotargetCamera properties of the returned
+ * targetting node are set to YES, indicating that the targetting node will automatically
+ * find the camera and always face it.
+ *
+ * The shouldAutoremoveWhenEmpty property of the returned targetting node is set to YES,
+ * indicating that the targetting node will remove itself automatically from the node
+ * hierarchy when the last child node (likely this node) is removed from the targetting
+ * node. This assists in cleaning up nodes in the hierarchy by avoiding leaving empty
+ * wrapper nodes littering the hierarchy.
+ *
+ * The CC3TargettingNode instance will have the name "<this node name>-TargettingWrapper".
+ */
+-(CC3TargettingNode*) asCameraTracker;
+
+
+/**
+ * Wraps this node in an instance of CC3LightTracker, and returns the autoreleased
+ * CC3LightTracker instance. This node appears as the lone child node of the returned
+ * light tracker node.
+ *
+ * The shouldTrackTarget property of the returned light tracker is set to YES,
+ * indicating and the tracker will always face whatever node is subsequently
+ * set in the target property.
+ *
+ * The shouldAutoremoveWhenEmpty property of the returned targetting node is set to YES,
+ * indicating that the targetting node will remove itself automatically from the node
+ * hierarchy when the last child node (likely this node) is removed from the targetting
+ * node. This assists in cleaning up nodes in the hierarchy by avoiding leaving empty
+ * wrapper nodes littering the hierarchy.
+ *
+ * The CC3LightTracker instance will have the name "<this node name>-LightTrackerWrapper".
+ */
+-(CC3TargettingNode*) asLightTracker;
+
 @end

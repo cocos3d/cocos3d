@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -161,6 +161,12 @@ CC3Vector CC3VectorAdd(CC3Vector v, CC3Vector translation);
 CC3Vector CC3VectorDifference(CC3Vector minuend, CC3Vector subtrahend);
 
 /**
+ * Returns a modulo version of the specifed rotation, so that each component
+ * is between (+/-360 degrees).
+ */
+CC3Vector CC3VectorRotationModulo(CC3Vector aRotation);
+
+/**
  * Returns the difference between two rotation vectors, in terms of the minimal degrees,
  * along each axis, required to travel between the two roations, given that rotations
  * are cyclical with a period of 360 degrees. The result may be positive or negative,
@@ -200,6 +206,10 @@ CC3Vector CC3VectorCross(CC3Vector v1, CC3Vector v2);
  */
 CC3Vector CC3VectorLerp(CC3Vector v1, CC3Vector v2, GLfloat blendFactor);
 
+
+#pragma mark -
+#pragma mark Ray structure and functions
+
 /**
  * Defines a ray or line in 3D space, by specifying a starting location and direction.
  *
@@ -211,14 +221,15 @@ typedef struct {
 	CC3Vector direction;			/**< The direction in which the ray points. */
 } CC3Ray;
 
-/**
- * Defines an axially-aligned-bounding-box (AABB), describing
- * a 3D volume by specifying the minimum and maximum 3D corners.
- */
-typedef struct {
-	CC3Vector minimum;			/**< The minimum corner (bottom-left-rear). */
-	CC3Vector maximum;			/**< The maximum corner (top-right-front). */
-} CC3BoundingBox;
+/** Returns a string description of the specified CC3Ray struct. */
+NSString* NSStringFromCC3Ray(CC3Ray aRay);
+
+/** Returns a CC3Ray structure constructed from the start location and direction components. */
+CC3Ray CC3RayMake(GLfloat locX, GLfloat locY, GLfloat locZ,
+				  GLfloat dirX, GLfloat dirY, GLfloat dirZ);
+
+/** Returns a CC3Ray structure constructed from the start location and direction vectors. */
+CC3Ray CC3RayFromLocDir(CC3Vector aLocation, CC3Vector aDirection);
 
 /**
  * Defines a simple vertex, containing location, normal, and texture coordinate
@@ -228,7 +239,64 @@ typedef struct {
 	CC3Vector location;			/**< The 3D location of the vertex. */
 	CC3Vector normal;			/**< The 3D normal at the vertex. */
 	ccTex2F texCoord;			/**< The 2D coordinate of this vertex on the texture. */
-} CCTexturedVertex;
+} CC3TexturedVertex;
+
+typedef CC3TexturedVertex CCTexturedVertex;		//** Deprecated misspelling of CC3TexturedVertex. */
+
+
+#pragma mark -
+#pragma mark Bounding box structure and functions
+
+/**
+ * Defines an axially-aligned-bounding-box (AABB), describing
+ * a 3D volume by specifying the minimum and maximum 3D corners.
+ */
+typedef struct {
+	CC3Vector minimum;			/**< The minimum corner (bottom-left-rear). */
+	CC3Vector maximum;			/**< The maximum corner (top-right-front). */
+} CC3BoundingBox;
+
+/** A CC3BoundingBox of zero origin and dimensions. */
+static const CC3BoundingBox kCC3BoundingBoxZero = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
+
+/** The null bounding box. It cannot be drawn, but is useful for marking an uninitialized bounding box. */
+static const CC3BoundingBox kCC3BoundingBoxNull = { {INFINITY, INFINITY, INFINITY}, {INFINITY, INFINITY, INFINITY} };
+
+/** Returns a string description of the specified CC3BoundingBox struct. */
+NSString* NSStringFromCC3BoundingBox(CC3BoundingBox bb);
+
+/** Returns a CC3BoundingBox structure constructed from the min and max components. */
+CC3BoundingBox CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
+								  GLfloat maxX, GLfloat maxY, GLfloat maxZ);
+
+/** Returns a CC3BoundingBox structure constructed from the min and max vertices. */
+CC3BoundingBox CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx);
+
+/** Returns whether the two bounding boxes are equal by comparing their respective components. */
+BOOL CC3BoundingBoxesAreEqual(CC3BoundingBox bb1, CC3BoundingBox bb2);
+
+/**
+ * Returns whether the specified bounding box is equal to
+ * the null bounding box, specified by kCC3BoundingBoxNull.
+ */
+BOOL CC3BoundingBoxIsNull(CC3BoundingBox bb);
+
+/** Returns the geometric center of the specified bounding box. */
+CC3Vector CC3BoundingBoxCenter(CC3BoundingBox bb);
+
+/**
+ * Returns the smallest CC3BoundingBox that contains both the specified bounding box
+ * and location. If the specified bounding box is null, returns a bounding box of zero
+ * size at the specified location.
+ */
+CC3BoundingBox CC3BoundingBoxEngulfLocation(CC3BoundingBox bb, CC3Vector aLoc);
+
+/**
+ * Returns the smallest CC3BoundingBox that contains the two specified bounding boxes.
+ * If either bounding box is the null bounding box, simply returns the other bounding box
+ * (which may also be the null bounding box).
+ */
+CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3BoundingBox bb2);
 
 
 #pragma mark -
@@ -302,10 +370,17 @@ CC3Vector4 CC3Vector4Make(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 CC3Vector4 CC3Vector4FromCC3Vector(CC3Vector v, GLfloat w);
 
 /**
- * Returns a CC3Vector structure constructed from a CC3Vector4. The CC3Vector4 is first homogenized
- * (via CC3Vector4Homogenize), before copying the resulting x, y & z coordinates into the CC3Vector.
+ * Returns a CC3Vector structure constructed from a CC3Vector4. The CC3Vector4 is first
+ * homogenized (via CC3Vector4Homogenize), before copying the resulting x, y & z
+ * coordinates into the CC3Vector.
  */
-CC3Vector CC3VectorFromCC3Vector4(CC3Vector4 v);
+CC3Vector CC3VectorFromHomogenizedCC3Vector4(CC3Vector4 v);
+
+/**
+ * Returns a CC3Vector structure constructed from a CC3Vector4,
+ * by simply ignoring the w component of the 4D vector.
+ */
+CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v);
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2);
@@ -313,8 +388,9 @@ BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2);
 /**
  * If the specified homogeneous vector represents a location (w is not zero), returns
  * a homoginized copy of the vector, by dividing each component by the w-component
- * (including the w-component itself, leaving it with a value of one).
- * If the specified vector is a direction (w is zero), the vector is returned unchanged.
+ * (including the w-component itself, leaving it with a value of one). If the specified
+ * vector is a direction (w is zero), or is already homogenized (w is one) the vector
+ * is returned unchanged.
  */
 CC3Vector4 CC3Vector4Homogenize(CC3Vector4 v);
 
@@ -418,6 +494,9 @@ typedef struct {
 	GLfloat c;				/**< The c coefficient in the attenuation function. */
 } CC3AttenuationCoefficients;
 
+/** Default point size attenuation coefficients */
+static const CC3AttenuationCoefficients kCC3DefaultParticleSizeAttenuationCoefficients = {1.0, 0.0, 0.0};
+
 /**
  * Returns a string description of the specified CC3AttenuationCoefficients struct
  * in the form "(a, b, c)".
@@ -499,8 +578,20 @@ static const ccColor4F kCCC4FBlackTransparent = {0.0, 0.0, 0.0, 0.0};
 /** Returns a string description of the specified ccColor4F in the form "(r, g, b, a)" */
 NSString* NSStringFromCCC4F(ccColor4F rgba);
 
-/** Returns an ccColor4F structure constructed from the specified components */
+/** Returns a ccColor4F structure constructed from the specified components */
 ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+
+/** Returns a ccColor4F structure constructed from the specified ccColor4B */
+ccColor4F CCC4FFromCCC4B(ccColor4B byteColor);
+
+/** Returns a ccColor4B structure constructed from the specified ccColor4F */
+ccColor4B CCC4BFromCCC4F(ccColor4F floatColor);
+
+/** Returns a ccColor4F structure constructed from the specified ccColor3B */
+ccColor4F CCC4FFromCCC3B(ccColor3B byteColor);
+
+/** Returns a ccColor3B structure constructed from the specified ccColor4F */
+ccColor3B CCC3BFromCCC4F(ccColor4F floatColor);
 
 /** Returns whether the two colors are equal by comparing their respective components. */
 BOOL CCC4FAreEqual(ccColor4F c1, ccColor4F c2);

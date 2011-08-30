@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,7 +35,8 @@
 #import "CCAction.h"
 #import "CCProtocols.h"
 
-@class CC3NodeDrawingVisitor, CC3Rotator, CC3NodeBoundingVolume, CC3NodeAnimation;
+@class CC3NodeDrawingVisitor, CC3Rotator, CC3NodeBoundingVolume;
+@class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
 
 
 #pragma mark -
@@ -99,6 +100,27 @@
  * a subclass of the abstract CC3NodeAnimation class, populated with animation data, and
  * then create an instance of a CC3Animate action, and run it on this node.
  *
+ * Nodes can respond to iOS touch events. The property isTouchEnabled can be set to YES
+ * to allow a node to be selected by a touch event. If the shouldInheritTouchability
+ * property is also set to YES, then this touchable capability can also be inherited from
+ * a parent node. Selection of nodes based on touch events is handled by CC3World. The
+ * nodeSelected:byTouchEvent:at: callback method of your customized CC3World will be
+ * invoked to indicate which node has been touched.
+ *
+ * The iOS and PVR hardware expects textures to have width and height values that are a
+ * power-of-two (POT). If you are using textures that do not have POT dimensions, they will
+ * be converted to POT by the texture loader. If the corresponding mesh was not created in
+ * your 3D editor with this taken into consideration, you might find that the texture does
+ * not completely cover the mesh as expected. If this situation arises, you can compensate
+ * with the alignTextures and alignInvertedTextures methods to realign the texture coordinate
+ * arrays with the textures.
+ *
+ * You can cause a wireframe box to be drawn around the node and all its descendants by
+ * setting the shouldDrawWireframeBox property to YES. This can be particularly useful
+ * during development to locate the boundaries of a node, or to locate a node that is not
+ * drawing properly. You can set the default color of this wireframe using the class-side
+ * defaultWireframeBoxColor property.
+ *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
  * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
  * GL engine if GL state really is changing. It is critical that all changes to GL state
@@ -125,9 +147,11 @@
 	BOOL isTransformInvertedDirty;
 	BOOL isGlobalRotationDirty;
 	BOOL isTouchEnabled;
+	BOOL shouldInheritTouchability;
 	BOOL isAnimationEnabled;
 	BOOL visible;
 	BOOL isRunning;
+	BOOL shouldAutoremoveWhenEmpty;
 }
 
 /**
@@ -154,8 +178,11 @@
  * nature of the object you are trying to control, you can think of this order as yaw,
  * then pitch, then roll, or heading, then inclination, then tilt,
  *
- * Rotational transformation can also be specified using the quaternion property.
- * Subsequently, this rotation property can then be read to return the corresponding Euler angles.
+ * When setting this value, each component is converted to modulo +/-360 degrees.
+ *
+ * Rotational transformation can also be specified using the rotationAxis and rotationAngle
+ * properties, or the quaternion property. Subsequently, this property can be read to return
+ * the corresponding Euler angles.
  */
 @property(nonatomic, assign) CC3Vector rotation;
 
@@ -167,12 +194,40 @@
 @property(nonatomic, readonly) CC3Vector globalRotation;
 
 /**
- * The rotation of the node in 3D space, relative to the parent of this node, expressed as a quaternion.
+ * The rotation of the node in 3D space, relative to the parent of this node, expressed
+ * as a quaternion.
  *
- * Rotational transformation can also be specified as Euler angles using the rotation property.
- * Subsequently, this quaternion property can then be read to return the corresponding quaternion.
+ * Rotational transformation can also be specified using the rotation property (Euler angles),
+ * or the rotationAxis and rotationAngle properties. Subsequently, this property can be read
+ * to return the corresponding quaternion.
  */
 @property(nonatomic, assign) CC3Vector4 quaternion;
+
+/**
+ * The axis of rotation of the node in 3D space, relative to the parent of this node,
+ * expressed as a directional vector. This axis can be used in conjunction with the
+ * rotationAngle property to describe the rotation as a single angular rotation around
+ * an arbitrary axis.
+ *
+ * Under the identity rotation (no rotation), the rotationAngle is zero and the rotationAxis
+ * is undefined. Under that condition, this property will return the zero vector kCC3VectorZero.
+ *
+ * Rotational transformation can also be specified using the rotation property (Euler
+ * angles), or the quaternion property. Subsequently, this property can be read to return
+ * the corresponding axis of rotation.
+ */
+@property(nonatomic, assign) CC3Vector rotationAxis;
+
+/**
+ * The angular rotation around the axis specified in the rotationAxis property.
+ *
+ * When setting this value, it is converted to modulo +/-360 degrees.
+ *
+ * Rotational transformation can also be specified using the rotation property (Euler
+ * angles), or the quaternion property. Subsequently, this property can be read to return
+ * the corresponding angle of rotation.
+ */
+@property(nonatomic, assign) GLfloat rotationAngle;
 
 /** The scale of the node in each dimension, relative to the parent of this node. */
 @property(nonatomic, assign) CC3Vector scale;
@@ -221,6 +276,34 @@
  * By default, nodes do not have a bounding volume. Subclasses may set a suitable bounding volume.
  */
 @property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds any local content
+ * of this node, plus all descendants of this node.
+ *
+ * The returned bounding box is specfied in the local coordinate system of this node.
+ *
+ * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
+ *
+ * Since the bounding box of a node can change based on the locations, rotations, or
+ * scales of any descendant node, this property is measured dynamically on each access,
+ * by traversing all descendant nodes. This is a computationally expensive method.
+ */
+@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds any local content
+ * of this node, plus all descendants of this node.
+ *
+ * The returned bounding box is specfied in the global coordinate system of the 3D world.
+ *
+ * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
+ *
+ * Since the bounding box of a node can change based on the locations, rotations, or
+ * scales of any descendant node, this property is measured dynamically on each access,
+ * by traversing all descendant nodes. This is a computationally expensive method.
+ */
+@property(nonatomic, readonly) CC3BoundingBox globalBoundingBox;
 
 /**
  * The current location of this node, as projected onto the 2D viewport coordinate space.
@@ -337,6 +420,34 @@
  * cleanup method.
  */
 @property(nonatomic, assign) BOOL isRunning;
+
+/**
+ * Some node types (notably CC3World) collect runtime performance statistics using
+ * an instance of CC3PerformanceStatistics accessed by this property.
+ *
+ * By default, nodes do not collect statistics. This property always returns nil,
+ * and setting this property has no effect. Subclasses that performance support
+ * statistics collection will override to allow the property to be get and set.
+ */
+@property(nonatomic, retain) CC3PerformanceStatistics* performanceStatistics;
+
+/**
+ * Returns a description of the structure of this node and its descendants,
+ * by recursing through this node and its descendants and appending the
+ * result of the description property of each node.
+ *
+ * The description of each node appears on a separate line and is indented
+ * according to its depth in the structural hierarchy, starting at this node.
+ */
+@property(nonatomic, readonly) NSString* structureDescription;
+
+/**
+ * Appends the description of this node to the specified mutable string, on a new line
+ * and indented the specified number of levels.
+ *
+ * Returns the specified mutable string, as a convenience.
+ */
+-(NSString*) appendStructureDescriptionTo: (NSMutableString*) desc withIndent: (NSUInteger) indentLevel;
 
 
 #pragma mark Matierial coloring
@@ -561,35 +672,249 @@
  * the GL engine. It is safe to invokde this method even if createGLBuffer has not
  * been invoked, and even if VBO buffering was unsuccessful.
  *
- * To exempt vertex location data from release, invoke the retainVertexLocations method
- * once before invoking this method. For example, sophisticated physics engines and
- * collision detection algorithms may make use of vertex location data in main memory.
+ * To exempt vertex data from release, invoke one or more of the following methods
+ * once on nodes for which data should be retained, before invoking this method:
+ *   - retainVertexLocations
+ *   - retainVertexNormals
+ *   - retainVertexColors
+ *   - retainVertexTextureCoordinates
+ *   - retainVertexIndices
  *
- * To exempt other vertex data, such as normal or texture coordinate data, from release,
- * set the shouldReleaseRedundantData property of the appropriate vertex array to NO,
- * prior to invoking this method.
+ * For example, sophisticated physics engines and collision detection algorithms may
+ * make use of vertex location data in main memory. Or a rippling texture animation
+ * might retain texture coordinate data in order to dyamically adjust the texture
+ * coordinate data.
+ *
+ * Normally, you would invoke the retainVertex... methods on specific individual
+ * nodes, and then invoke this method on the parent node of a node assembly,
+ * or on the CC3World.
  */
 -(void) releaseRedundantData;
 
 /**
- * Convenience method to cause the vertex location data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex location data of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantData is invoked, even
+ * if it has been buffered to a GL VBO.
  *
- * This effectively causes vertex location data to be ignored during any subsequent
- * invocation of the releaseRedundantData method, even if it has been buffered to a GL VBO.
+ * Use this method if you require access to vertex data after the data has been
+ * buffered to a GL VBO.
  *
- * Some sophisticated physics engines and collision detection algorithms may make use of
- * vertex location data in main memory, and this method can be used to ensure that such
- * data is retained, even when other vertex data is released so save application memory.
- *
- * Only the vertex location will be retained. Any other vertex data, such as normals, or
- * texture coordinates, that has been buffered to GL VBO's, will be released from
+ * Only the vertex locations will be retained. Any other vertex data, such as normals,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
  * application memory when releaseRedundantData is invoked.
- *
- * If you also want to retain other vertex data, you can set the shouldReleaseRedundantData
- * property to NO on the associated vertex arrays.
  */
 -(void) retainVertexLocations;
+
+/**
+ * Convenience method to cause the vertex normal data of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex data after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex normals will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexNormals;
+
+/**
+ * Convenience method to cause the vertex color data of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex data after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex colors will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexColors;
+
+/**
+ * Convenience method to cause the vertex texture coordinate data of this node and
+ * all descendant nodes, for all texture units, used by this mesh to be retained in
+ * application memory when releaseRedundantData is invoked, even if it has been
+ * buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex data after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex texture coordinates will be retained. Any other vertex data, such as
+ * locations, or normals, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexTextureCoordinates;
+
+/**
+ * Convenience method to cause the vertex index data of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex data after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex indices will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexIndices;
+
+/**
+ * Convenience method to cause the vertex location data of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex locations will not be buffered to a GL VBO. Any other vertex
+ * data, such as normals, or texture coordinates, will be buffered to a GL VBO
+ * when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexLocations method.
+ */
+-(void) doNotBufferVertexLocations;
+
+/**
+ * Convenience method to cause the vertex normal data of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexNormals method.
+ */
+-(void) doNotBufferVertexNormals;
+
+/**
+ * Convenience method to cause the vertex color data of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex colors will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexColors method.
+ */
+-(void) doNotBufferVertexColors;
+
+/**
+ * Convenience method to cause the vertex texture coordinate data of this
+ * node and all descendant nodes, for all texture units used by those nodes,
+ * to be skipped when createGLBuffers is invoked. The vertex data is not
+ * buffered to a a GL VBO, is retained in application memory, and is submitted
+ * to the GL engine on each frame render.
+ *
+ * Only the vertex texture coordinates will not be buffered to a GL VBO.
+ * Any other vertex data, such as locations, or texture coordinates, will
+ * be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexTextureCoordinates method.
+ */
+-(void) doNotBufferVertexTextureCoordinates;
+
+/**
+ * Convenience method to cause the vertex index data of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex indices will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexColors method.
+ */
+-(void) doNotBufferVertexIndices;
+
+
+#pragma mark Texture alignment
+
+/**
+ * Aligns the texture coordinates held by a mesh in any descendant node with the textures
+ * held in the material of that mesh node.
+ *
+ * This method can be useful when the width and height of the textures in the material
+ * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
+ * the texture will be converted to a size whose width and height are a power-of-two.
+ * The result is a texture that can have empty space on the top and right sides. If the
+ * texture coordinates of the mesh do not take this into consideration, the result will
+ * be that only the lower left of the mesh will be covered by the texture.
+ *
+ * When this occurs, invoking this method will adjust the texture coordinates of the mesh
+ * to map to the original width and height of the textures.
+ *
+ * If the mesh is using multi-texturing, this method will adjust the texture coordinates
+ * array for each texture unit, using the corresponding texture for that texture unit
+ * in the specified material.
+ *
+ * Care should be taken when using this method, as it changes the actual vertex data.
+ * This method should only be invoked once on any mesh, and it may cause mapping conflicts
+ * if the same mesh is shared by other CC3MeshNodes that use different textures.
+ *
+ * Care should be taken when using this method, as it affects all descendant nodes, and
+ * changes the actual vertex data. This method should only be invoked once on any mesh,
+ * and it may cause mapping conflicts if the same mesh is shared by other nodes that use
+ * different textures.
+ *
+ * To adjust the texture coordinates of only a single mesh, invoke this method on that
+ * mesh node only, or invoke the alignWithTexturesIn: in the CC3Mesh within that mesh
+ * node. To adjust the texture coordinates of only a single texture coordinates array
+ * within a mesh, invoke the alignWithTexture: method on the appropriate instance of
+ * CC3VertexTextureCoordinates.
+ */
+-(void) alignTextures;
+
+/**
+ * Aligns the texture coordinates held by a mesh in any descendant node with the textures
+ * held in the material of that mesh node.
+ *
+ * The texture coordinates are aligned assuming that the texture is inverted in the
+ * Y-direction. Certain texture formats are inverted during loading, and this method
+ * can be used to compensate.
+ *
+ * This method can be useful when the width and height of the textures in the material
+ * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
+ * the texture will be converted to a size whose width and height are a power-of-two.
+ * The result is a texture that can have empty space on the top and right sides. If the
+ * texture coordinates of the mesh do not take this into consideration, the result will
+ * be that only the lower left of the mesh will be covered by the texture.
+ *
+ * When this occurs, invoking this method will adjust the texture coordinates of the mesh
+ * to map to the original width and height of the texturesa.
+ *
+ * If the mesh is using multi-texturing, this method will adjust the texture coordinates
+ * array for each texture unit, using the corresponding texture for that texture unit
+ * in the specified material.
+ *
+ * Care should be taken when using this method, as it affects all descendant nodes, and
+ * changes the actual vertex data. This method should only be invoked once on any mesh,
+ * and it may cause mapping conflicts if the same mesh is shared by other nodes that use
+ * different textures.
+ *
+ * To adjust the texture coordinates of only a single mesh, invoke this method on that
+ * mesh node only, or invoke the alignWithInvertedTexturesIn: in the CC3Mesh within that
+ * mesh node. To adjust the texture coordinates of only a single texture coordinates
+ * array within a mesh, invoke the alignWithInvertedTexture: method on the appropriate
+ * instance of CC3VertexTextureCoordinates.
+ */
+-(void) alignInvertedTextures;
 
 
 #pragma mark Updating
@@ -764,6 +1089,15 @@
  */
 -(void) updateTransformMatrix;
 
+/**
+ * Template method that recalculates the transform matrix of this node from the
+ * location, rotation and scale transformation properties, using the specified visitor.
+ *
+ * This method is invoked automatically by the visitor. Usually the application
+ * never needs to invoke this method.
+ */
+-(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor;
+
 
 #pragma mark Drawing
 
@@ -839,18 +1173,43 @@
 /** The child nodes of this node, in a node structural hierarchy. */
 @property(nonatomic, readonly) NSArray* children;
 
+/** The parent node of this node, in a node structural hierarchy. */
+@property(nonatomic, readonly) CC3Node* parent;
+
 /**
- * The parent node of this node, in a node structural hierarchy.
+ * Returns the root ancestor of this node, in the node structural hierarchy,
+ * or returns nil if this node has no parent.
  *
- * This property is set automatically by the addChild: method.
- * Usually, the application never needs to set this property directly.
+ * In almost all cases, this node returned will be the CC3World. However, if
+ * this node and all of its ancestors have not been added to the CC3World,
+ * then the returned node may be some other node.
  */
-@property(nonatomic, assign) CC3Node* parent;
+@property(nonatomic, readonly) CC3Node* rootAncestor;
+
+/**
+ * Indicates whether this instance should automatically remove itself from its parent
+ * once its last child is removed.
+ *
+ * Setting this property to YES can be useful for certain types of wrapper subclasses,
+ * where a instance wraps a single child node. Removing that child node from the node
+ * hierarchy (typically by invoking the remove method on that child node, and which
+ * may be performed automatically for some types of child nodes), will also cause the
+ * wrapper node to be removed as well. This cleanup is important to avoid littering
+ * your world with empty wrapper nodes.
+ *
+ * The initial value of this property is NO, indicating that this instance will NOT
+ * automatically remove itself from the node hierarchy once all its child nodes have
+ * been removed.
+ */
+@property(nonatomic, assign) BOOL shouldAutoremoveWhenEmpty;
 
 /**
  * Adds the specified node as a direct child node to this node.
  *
- * The child node is first removed from its existing parent.
+ * The child node is automatically removed from its existing parent.
+ *
+ * It is safe to invoke this method more than once for the same child node.
+ * This method does nothing if the child already has this node as its parent.
  *
  * If you are invoking this method from the updateBeforeTransform: of the node
  * being added, this node, or any ancestor node (including your CC3World), the
@@ -913,6 +1272,11 @@
  * If you are removing the node and are finished with it, and there are CCActions
  * associated with the node, to avoid memory leaks, be sure to invoke either the
  * stopAllActions method or the cleanup method as well.
+ *
+ * If the shouldAutoremoveWhenEmpty property is YES, and the last child node is being
+ * removed, this node will invoke its own remove method to remove itself from the
+ * node hierarchy as well. See the notes for the shouldAutoremoveWhenEmpty property
+ * for more info on autoremoving when all child nodes have been removed.
  */
 -(void) removeChild: (CC3Node*) aNode;
 
@@ -1008,11 +1372,11 @@
 #pragma mark Touch handling
 
 /**
- * Indicates if this node, or any of its descendants, can be selected by UI touch events.
+ * Indicates if this node, or any of its descendants, will respond to UI touch events.
  *
  * This property also affects which node will be returned by the touchableNode property.
  * If the isTouchEnabled property is explicitly set for a parent node, but not for a
- * child node, both the parent and the child will be touchable, but it will be the
+ * child node, both the parent and the child can be touchable, but it will be the
  * parent that is returned by the touchableNode property of either the parent or child.
  *
  * This design simplifies identifying the node that is of interest when a touch event
@@ -1029,17 +1393,49 @@
 @property(nonatomic, assign) BOOL isTouchEnabled;
 
 /**
- * Indicates whether this node can be selected by a UI touch event. It is touchable
- * if the isTouchEnabled property of this node, or any ancestor node is set to YES.
+ * Indicates whether this node will respond to UI touch events.
+ *
+ * A node may often be touchable even if the isTouchEnabled flag is set to NO.
+ * This property returns YES under either of the following conditions:
+ *   - The isTouchEnabled property of this node is set to YES.
+ *   - The shouldInheritTouchability property of this node is set to YES,
+ *     AND the isTouchable property of the parent of this node returns YES.
+ *
+ * This design simplifies identifying the node that is of interest when a touch event
+ * occurs. Thus, a car may be drawn as a node assembly of many descendent nodes (doors,
+ * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
+ * each wheel, it will be the parent car node that will be returned by the touchableNode
+ * property of the car structural node, or each wheel node. This allows the user to
+ * touch a wheel, but still have the car identified as the object of interest.
  */
 @property(nonatomic, readonly) BOOL isTouchable;
+
+/**
+ * Indicates whether this node should automatically be considered touchable if this
+ * node's parent is touchable.
+ * 
+ * By using this property, you can turn off touchability on a child node, even when
+ * the parent node is touchable.
+ *
+ * Normally, a node will be touchable if its isTouchEnabled property is set to YES
+ * on the node itself, or on one of its ancestors. You can change this behaviour by
+ * setting this property to NO on the child node. With the isTouchEnabled property
+ * and this property both set to NO, the isTouchable property will return NO, even
+ * if the isTouchable property of the parent returns YES, and the node will not
+ * respond to touch events even if the parent node does.
+ *
+ * The initial value of this property is YES, indicating that this node will return
+ * YES in the isTouchable property if the parent node returns YES in its isTouchable
+ * property, even if the isTouchEnabled property of this node is set to NO.
+ */
+@property(nonatomic, assign) BOOL shouldInheritTouchability;
 
 /**
  * Indicates the node that is of interest if this node is selected by a touch event.
  * The value of this property is not always this node, but may be an ancestor node instead.
  *
- * This value of this property is this node if the isTouchEnabled property of this node
- * is set to YES, or the nearest ancestor whose isTouchEnabled property is set to YES,
+ * The value returned by this property is this node if the isTouchEnabled property of this
+ * node is set to YES, or the nearest ancestor whose isTouchEnabled property is set to YES,
  * or nil if neither this node, nor any ancestor has the isTouchEnabled property set to YES.
  *
  * This design simplifies identifying the node that is of interest when a touch event
@@ -1153,6 +1549,179 @@
  */
 -(void) establishAnimationFrameAt: (ccTime) t;
 
+
+#pragma mark Wireframe box and descriptor
+
+/**
+ * Indicates whether this node should display a descriptive label on this node.
+ *
+ * When set to YES, a descriptive text label will appear on this node.
+ * The descriptive label is positioned at the origin of this node, in this node's
+ * local coordinate system. The origin is the pivot point around which transforms
+ * such as rotation, movement and scale will occur when applied to this node.
+ * The origin is not always the same as the center of geometry of the node.
+ *
+ * The descriptive text will appear in the font size specified in the class-side
+ * descriptorFontSize property. The color of the descriptive text is determined
+ * by the subclass. Typically, for structural nodes, it is the same color as the
+ * wireframe box that is drawn around the node when the shouldDrawWireframeBox
+ * property is set to YES. For nodes with local content to draw, the color of the
+ * text is the same as the wireframe box that is drawn around the local content
+ * of the node when the shouldDrawLocalContentWireframeBox property is set to YES.
+ *
+ * Setting this property to YES can be useful during development in determining the
+ * identification of visible nodes, or the location of nodes that are unable to be
+ * drawn correctly.
+ *
+ * The descriptive label is drawn by creating and adding a CC3NodeDescriptor node
+ * as a child node to this node. CC3NodeDescriptor is a type of CC3Billboard, and
+ * is configured to contain a 2D CCLabel, whose text is set to the description of
+ * this node. Setting this property to YES adds the descriptor child node, and
+ * setting this property to NO removes the descriptor child node.
+ *
+ * By default, the child descriptor node is not touchable, even if this node is
+ * touchable. If, for some reason you want the descriptor text to be touchable,
+ * you can retrieve the descriptor node from the descriptorNode property, and
+ * set the isTouchEnabled property to YES.
+ */
+@property(nonatomic, assign) BOOL shouldDrawDescriptor;
+
+/**
+ * If the shouldDrawDescriptor is set to YES, returns the child node
+ * that draws the descriptor text on this node. Otherwise, returns nil.
+ */
+@property(nonatomic, readonly) CC3NodeDescriptor* descriptorNode;
+
+/**
+ * Indicates the state of the shouldDrawDescriptor property of this node and all
+ * descendant nodes.
+ *
+ * Setting this property sets that value into the shouldDrawDescriptor property
+ * on this and all descendant nodes.
+ *
+ * Setting this property to YES draws a descriptor label on this node and each
+ * descendant node. Setting this property to NO removes all of those labels.
+ *
+ * Reading this property traverses this node and its descendants and returns NO
+ * if any descendant returns NO. Otherwise returns YES.
+ */
+@property(nonatomic, assign) BOOL shouldDrawAllDescriptors;
+
+/**
+ * Returns the font size that will be used when drawing the descriptor
+ * text when the shouldDrawDescriptor property is set to YES on any node.
+ * 
+ * The initial value of this class-side property is 14.0.
+ */
++(CGFloat) descriptorFontSize;
+
+/**
+ * Sets the font size that will be used when drawing the descriptor
+ * text when the shouldDrawDescriptor property is set to YES on any node.
+ * 
+ * The initial value of this class-side property is 14.0.
+ */
++(void) setDescriptorFontSize: (CGFloat) fontSize;
+
+/**
+ * Indicates whether the node should display a wireframe bounding box around this node
+ * and all its descendants.
+ *
+ * The wireframe box is drawn by creating and adding a CC3WireframeBoundingBoxNode as
+ * a child node to this node. The dimensions of the child node are set from the
+ * boundingBox property of this node. Setting this property to YES adds the wireframe
+ * child node, and setting this property to NO removes the wireframe child node.
+ *
+ * Setting this property to YES can be useful during development in determining the
+ * boundaries of a 3D structural node.
+ *
+ * The color of the wireframe box will be the value of the class-side
+ * defaultWireframeBoxColor property, or the value of the color property of
+ * this node if defaultWireframeBoxColor is equal to kCCC4FBlackTransparent.
+ *
+ * If this node has no local content, or no descendant nodes with local content,
+ * setting this property will have no effect. In this condition, it is possible
+ * to set this property to YES and subsequently read the property back as NO.
+ *
+ * By default, the child wireframe node is not touchable, even if this node is
+ * touchable. If, for some reason you want the wireframe to be touchable, you can
+ * retrieve the wireframe node from the wireframeBoxNode property, and set the
+ * isTouchEnabled property to YES.
+ */
+@property(nonatomic, assign) BOOL shouldDrawWireframeBox;
+
+/**
+ * If the shouldDrawWireframeBox is set to YES, returns the child node
+ * that draws the wireframe box around this node. Otherwise, returns nil.
+ */
+@property(nonatomic, readonly) CC3WireframeBoundingBoxNode* wireframeBoxNode;
+
+/**
+ * Returns the color that wireframe bounding boxes will be drawn in when created
+ * using the shouldDrawWireframeBox property.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new wireframe bounding boxes to be set to the value of the color
+ * property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FYellow.
+ */
++(ccColor4F) wireframeBoxColor;
+
+/**
+ * Sets the color that wireframes will be drawn in when created using
+ * the shouldDrawWireframeBox property.
+ *
+ * Changing this property will affect the color of any new wireframe bounding
+ * boxes created. It does not affect any instances that already have a wireframe
+ * bounding box established.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new wireframe bounding boxes to be set to the value of the color
+ * property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FYellow.
+ */
++(void) setWireframeBoxColor: (ccColor4F) aColor;
+
+/**
+ * Indicates the state of the shouldDrawWireframeBox property of this node and
+ * all descendant nodes.
+ *
+ * Setting this property sets that value into the shouldDrawWireframeBox property
+ * on this and all descendant nodes.
+ *
+ * Setting this property to YES draws individual wireframe boxes around this node
+ * and each descendant node. Setting this property to NO removes all of those boxes.
+ *
+ * Reading this property traverses this node and its descendants and returns NO
+ * if any descendant returns NO. Otherwise returns YES.
+ *
+ * If this node has no local content, or has descendant nodes without local content,
+ * or descendants themselves (for example cameras, lights, or simply empty structural
+ * or targetting nodes), setting this property will have no effect for those descendants.
+ * Under those conditions, it is possible to set this property to YES and subsequently
+ * read the property back as NO.
+ */
+@property(nonatomic, assign) BOOL shouldDrawAllWireframeBoxes;
+
+/**
+ * Indicates the state of the shouldDrawLocalContentWireframeBox property of this
+ * node, if it has local content, and all descendant nodes that have local content.
+ *
+ * Setting this property sets that value into the shouldDrawLocalContentWireframeBox
+ * property on this node, if it has local content, and all descendant nodes that
+ * have local content.
+ *
+ * Setting this property to YES draws individual wireframe boxes around any local
+ * content of this node and any descendant nodes that have local content.
+ * Setting this property to NO removes all of those boxes.
+ *
+ * Reading this property traverses this node and its descendants and returns NO
+ * if any descendant returns NO. Otherwise returns YES.
+ */
+@property(nonatomic, assign) BOOL shouldDrawAllLocalContentWireframeBoxes;
+
 @end
 
 
@@ -1160,10 +1729,41 @@
 #pragma mark CC3LocalContentNode
 
 /**
- * CC3LocalContentNode is an abstract class that forms the basis
- * for nodes that have local content to display.
+ * CC3LocalContentNode is an abstract class that forms the basis for nodes
+ * that have local content to draw.
+ *
+ * You can cause a wireframe box to be drawn around the local content of
+ * the node by setting the shouldDrawLocalContentWireframeBox property to YES.
+ * This can be particularly useful during development to locate the boundaries
+ * of a node, or to locate a node that is not drawing properly.
+ * You can set the default color of this wireframe using the class-side
+ * defaultLocalContentWireframeBoxColor property.
  */
-@interface CC3LocalContentNode : CC3Node
+@interface CC3LocalContentNode : CC3Node {
+	CC3BoundingBox globalLocalContentBoundingBox;
+}
+
+/**
+ * Returns the bounding box of this node's local content,
+ * in this node's local coordinate system.
+ *
+ * If this node has no local content, returns kCC3BoundingBoxNull.
+ */
+@property(nonatomic, readonly) CC3BoundingBox localContentBoundingBox;
+
+/**
+ * Returns the bounding box of this node's mesh, in the global coordinate system,
+ * by transforming the eight vertices derived from the localContentBoundingBox property,
+ * using the transformMatrix of this node, and constructing another bounding box
+ * that surrounds all eight transformed vertices.
+ *
+ * If this node has no local content, returns kCC3BoundingBoxNull.
+ *
+ * Since all bounding boxes are axis-aligned (AABB), if this node is rotated, the
+ * globalLocalContentBoundingBox will generally be significantly larger than the
+ * localContentBoundingBox.
+ */
+@property(nonatomic, readonly) CC3BoundingBox globalLocalContentBoundingBox;
 
 /**
  * Checks that this node is in the correct drawing order relative to other nodes.
@@ -1188,32 +1788,108 @@
  */
 -(void) checkDrawingOrder;
 
+
+#pragma mark Wireframe box and descriptor
+
+/**
+ * Indicates whether the node should display a wireframe box around the local content
+ * of this node.
+ *
+ * This property is distinct from the inherited shouldDrawWireframeBox property.
+ * The shouldDrawWireframeBox property draws a wireframe that encompasses this node
+ * and any child nodes, where this property draws a wireframe that encompasses just
+ * the local content for this node alone. If this node has no children, then the two
+ * wireframes will surround the same volume.
+ *
+ * The wireframe box is drawn by creating and adding a CC3WireframeBoundingBoxNode as a child node
+ * to this node. The dimensions of the child node are set from the localContentBoundingBox
+ * property of this node. Setting this property to YES adds the wireframe child node, and
+ * setting this property to NO removes the wireframe child node.
+ *
+ * Setting this property to YES can be useful during development in determining the
+ * boundaries of the local drawn content of a node.
+ *
+ * The color of the wireframe box will be the value of the class-side
+ * defaultLocalContentWireframeBoxColor property, or the value of the color
+ * property of this node if defaultLocalContentWireframeBoxColor is equal
+ * to kCCC4FBlackTransparent.
+ */
+@property(nonatomic, assign) BOOL shouldDrawLocalContentWireframeBox;
+
+/**
+ * If the shouldDrawLocalContentWireframeBox is set to YES, returns the child node that
+ * draws the wireframe around the local content of this node. Otherwise, returns nil.
+ */
+@property(nonatomic, readonly) CC3WireframeBoundingBoxNode* localContentWireframeBoxNode;
+
+/**
+ * Returns the color that local content wireframe bounding boxes will be drawn
+ * in when created using the shouldDrawLocalContentWireframeBox property.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new local content wireframe bounding boxes to be set to the value
+ * of the color property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FMagenta.
+ */
++(ccColor4F) localContentWireframeBoxColor;
+
+/**
+ * Sets the color that local content wireframes will be drawn in when created
+ * using the shouldDrawWireframeBox property.
+ *
+ * Changing this property will affect the color of any new local content wireframe
+ * bounding boxes created. It does not affect any instances that already have a
+ * wireframe bounding box established.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new local content wireframe bounding boxes to be set to the value
+ * of the color property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FMagenta.
+ */
++(void) setLocalContentWireframeBoxColor: (ccColor4F) aColor;
+
 @end
 
 
 #pragma mark -
 #pragma mark CC3Rotator
 
+/** Constants used by matrixIsDirtyBy to indicate why the transform matrix is dirty. */
+#define kCC3MatrixIsNotDirty				0
+#define kCC3MatrixIsDirtyByRotation			1
+#define kCC3MatrixIsDirtyByQuaternion		2
+#define kCC3MatrixIsDirtyByAxisAngle		3
+
 /**
- * CC3otator encapsulates the various mechanisms of rotating a node, and converts between them.
- * Nodes delegate responsibility for managing their rotation to an encapsulated instance of CC3Rotator.
+ * CC3otator encapsulates the various mechanisms of rotating a node, and converts
+ * between them. Nodes delegate responsibility for managing their rotation to an
+ * encapsulated instance of CC3Rotator.
  * 
- * Rotations can be specified in terms of three Euler angles or quaternions. Subclasses may also
- * specify other rotational mechanisms (such as pointing).
+ * Rotations can be specified in any of the following methods:
+ *   - three Euler angles
+ *   - rotation angle around an arbitrary rotation axis
+ *   - quaternion
+ * Subclasses may also specify other rotational mechanisms (such as pointing).
  *
- * The rotator maintains an internal rotationMatrix, separate from the node's transformMatrix,
- * and the rotator can use this rotationMatrix to convert between different rotational specifications.
- * As such, the rotation of a node can be specified as a quaternion, and then read back as a set
- * of Euler angles, or vice versa.
+ * The rotator maintains an internal rotationMatrix, separate from the node's
+ * transformMatrix, and the rotator can use this rotationMatrix to convert between
+ * different rotational specifications. As such, the rotation of a node can be set
+ * using any one of the above specifications, and read back as any of the other
+ * specifications.
  */
 @interface CC3Rotator : NSObject <NSCopying> {
 	CC3GLMatrix* rotationMatrix;
 	CC3Vector rotation;
 	CC3Vector4 quaternion;
+	CC3Vector rotationAxis;
+	GLfloat rotationAngle;
+	int matrixIsDirtyBy;
 	BOOL isRotationDirty;
-	BOOL isMatrixDirtyByRotation;
 	BOOL isQuaternionDirty;
-	BOOL isMatrixDirtyByQuaternion;	
+	BOOL isAxisAngleDirty;
+	BOOL isQuaternionDirtyByAxisAngle;
 }
 
 /**
@@ -1227,18 +1903,38 @@
 @property(nonatomic, retain) CC3GLMatrix* rotationMatrix;
 
 /**
- * The rotational orientation of the node in 3D space, relative to the parent of the node.
- * This value contains three Euler angles, defining a rotation of this nodearound the X, Y
- * and Z axes. Each angle is specified in degrees.
+ * The rotational orientation of the node in 3D space, relative to the parent of the
+ * node. This value contains three Euler angles, defining a rotation of this node
+ * around the X, Y and Z axes. Each angle is specified in degrees.
  *
- * Rotation is performed in Y-X-Z order, which is the OpenGL default. Depending on the
- * nature of the object you are trying to control, you can think of this order as yaw,
- * then pitch, then roll, or heading, then inclination, then tilt,
+ * Rotation is performed in Y-X-Z order, which is the OpenGL default. Depending on
+ * the nature of the object you are trying to control, you can think of this order
+ * as yaw, then pitch, then roll, or heading, then inclination, then tilt,
+ *
+ * When setting this value, each component is converted to modulo +/-360 degrees.
  */
 @property(nonatomic, assign) CC3Vector rotation;
 
-/** The rotation of the node in 3D space, relative to the parent of this node, expressed as a quaternion. */
+/**
+ * The rotation of the node in 3D space, relative to the parent of this node,
+ * expressed as a quaternion.
+ */
 @property(nonatomic, assign) CC3Vector4 quaternion;
+
+/**
+ * The axis of rotation of the node in 3D space, relative to the parent of this
+ * node, expressed as a directional vector. This axis can be used in conjunction
+ * with the rotationAngle property to describe the rotation as a single angular
+ * rotation around an arbitrary axis.
+ */
+@property(nonatomic, assign) CC3Vector rotationAxis;
+
+/**
+ * The angular rotation around the axis specified in the rotationAxis property.
+ *
+ * When setting this value, it is converted to modulo +/-360 degrees.
+ */
+@property(nonatomic, assign) GLfloat rotationAngle;
 
 /** Initializes this instance with an identity rotationMatrix. */
 -(id) init;

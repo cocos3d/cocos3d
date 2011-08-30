@@ -1,7 +1,7 @@
 /*
  * CC3BoundingVolumes.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -201,19 +201,21 @@
 -(void) transformVolume {
 	[super transformVolume];
 
+	CC3GLMatrix* tMtx = node.transformMatrix;
+
 	// Get the corners of the local bounding box
 	CC3Vector bbMin = boundingBox.minimum;
 	CC3Vector bbMax = boundingBox.maximum;
 	
 	// Construct all 8 corner vertices of the local bounding box and transform each to global coordinates
-	globalBoundingBoxVertices[0] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, bbMin.z)];
-	globalBoundingBoxVertices[1] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, bbMax.z)];
-	globalBoundingBoxVertices[2] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, bbMin.z)];
-	globalBoundingBoxVertices[3] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, bbMax.z)];
-	globalBoundingBoxVertices[4] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, bbMin.z)];
-	globalBoundingBoxVertices[5] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, bbMax.z)];
-	globalBoundingBoxVertices[6] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, bbMin.z)];
-	globalBoundingBoxVertices[7] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, bbMax.z)];
+	globalBoundingBoxVertices[0] = [tMtx transformLocation: cc3v(bbMin.x, bbMin.y, bbMin.z)];
+	globalBoundingBoxVertices[1] = [tMtx transformLocation: cc3v(bbMin.x, bbMin.y, bbMax.z)];
+	globalBoundingBoxVertices[2] = [tMtx transformLocation: cc3v(bbMin.x, bbMax.y, bbMin.z)];
+	globalBoundingBoxVertices[3] = [tMtx transformLocation: cc3v(bbMin.x, bbMax.y, bbMax.z)];
+	globalBoundingBoxVertices[4] = [tMtx transformLocation: cc3v(bbMax.x, bbMin.y, bbMin.z)];
+	globalBoundingBoxVertices[5] = [tMtx transformLocation: cc3v(bbMax.x, bbMin.y, bbMax.z)];
+	globalBoundingBoxVertices[6] = [tMtx transformLocation: cc3v(bbMax.x, bbMax.y, bbMin.z)];
+	globalBoundingBoxVertices[7] = [tMtx transformLocation: cc3v(bbMax.x, bbMax.y, bbMax.z)];
 }
 
 /** Returns whether the specified location lies inside the specified plane. */
@@ -359,7 +361,7 @@
 #pragma mark Drawing
 
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	return NO;
+	return YES;
 }
 
 -(BOOL) doesIntersectBounds: (CGRect) bounds {

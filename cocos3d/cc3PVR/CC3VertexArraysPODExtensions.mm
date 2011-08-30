@@ -1,7 +1,7 @@
 /*
  * CC3VertexArraysPODExtensions.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -50,7 +50,7 @@ extern "C" {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
 		GLint elemSize = pcd->n;
-		LogTrace(@"%@ %@ from %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
+		LogCleanRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
 		if (elemSize) {
 			self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
 			self.elementSize = elemSize;

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -178,6 +178,26 @@
 	[scissor close];
 	[shadeModel close];
 	[viewport close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", color];
+	[desc appendFormat: @"\n    %@ ", clearColor];
+	[desc appendFormat: @"\n    %@ ", clearDepth];
+	[desc appendFormat: @"\n    %@ ", clearStencil];
+	[desc appendFormat: @"\n    %@ ", cullFace];
+	[desc appendFormat: @"\n    %@ ", depthFunction];
+	[desc appendFormat: @"\n    %@ ", depthMask];
+	[desc appendFormat: @"\n    %@ ", frontFace];
+	[desc appendFormat: @"\n    %@ ", lineWidth];
+	[desc appendFormat: @"\n    %@ ", pointSize];
+	[desc appendFormat: @"\n    %@ ", pointSizeAttenuation];
+	[desc appendFormat: @"\n    %@ ", scissor];
+	[desc appendFormat: @"\n    %@ ", shadeModel];
+	[desc appendFormat: @"\n    %@ ", viewport];
+	return desc;
 }
 
 -(void) clearBuffers: (GLbitfield) mask {

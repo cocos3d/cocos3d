@@ -1,7 +1,7 @@
 /*
  * CC3NodePODExtensions.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -65,7 +65,7 @@ extern "C" {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex
 											fromPODResource: (CC3PODResource*) aPODRez];
-		LogTrace(@"Creating %@ at index %i from %@", [self class], aPODIndex, NSStringFromSPODNode(psn));
+		LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODNode(psn));
 		self.name = [NSString stringWithUTF8String: psn->pszName];
 		self.podContentIndex = psn->nIdx;
 		self.podParentIndex = psn->nIdxParent;

@@ -1,7 +1,7 @@
-README - cocos3d 0.6.0-sp
+README - cocos3d 0.6.1
 ----------------------
 
-cocos3d 0.6.0-sp
+cocos3d 0.6.1
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -81,11 +81,12 @@ The following demo apps are included in the cocos3d distribution:
      - transparency and alpha-blending
      - coloring a mesh with a per-vertex color blend
      - multi-texturing an object using texture units by combining several individual textures into overlays
-     - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model with few actual vertices
+     - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
+       with few actual vertices
      - animating 3D models using a variety of standard cocos2d CCActionIntervals
      - overlaying the 3D world with 2D cocos2d controls such as joysticks and buttons
-     - displaying 2D labels (eg- health-bars) at locations projected from the position of 3D objects
-     - incorporating 2D cocos2d CCParticleEmitters into the 3D world (as a sun and an explosion fire)
+     - embedding 2D cocos2d text labels into the 3D world
+     - incorporating 2D cocos2d CCParticleEmitters into the 3D world (as a sun and explosion fire)
      - creating a tightly focused spotlight whose intensity attenuates with distance
      - directing the 3D camera to track a particular target object
      - directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
@@ -94,53 +95,75 @@ The following demo apps are included in the cocos3d distribution:
      - placing a 3D object on another at a point that was touched with a finger
      - adding an object as a child of another, but keeping the original orientation of the child
        (addAndLocalizeChild:)
+     - handling touch-move events to create swipe gestures to spin a 3D object using rotation
+       around an arbitrary axis
      - toggling between opacity and translucency using the isOpaque property
      - choosing to cull or display backfaces (shouldCullBackFaces)
      - creating and deploying many independent copies of a node, while sharing the underlying mesh data
-     - constructing and drawing a wire-frame bounding box around a node using CC3LineNode
+     - drawing a descriptive text label on a node using CC3Node shouldDrawDescriptor property.
+     - drawing a wireframe bounding box around a node using CC3Node shouldDrawWireframeBox property.
+     - automatically zooming the camera out to view all objects in the world
      - constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode
      - caching mesh data into GL vertex buffer objects and releasing vertex data from application memory
      - retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
-
+     - attaching application-specific userData to any node
+  
    In addition, there are a number of interesting options for you to play with by uncommenting
-   certain line of code in the methods of the CC3DemoMashUpWorld class that build objects in the
-   3D world, including experimenting with:
+   certain line of code in the methods of this class that build objects in the 3D world,
+   including experimenting with:
      - different options for ordering nodes when drawing, including ordering by mesh or texture
      - translucent and transparent textures (addFloatingRing)
      - configuring the camera for parallel/isometric/orthographic projection instead of the default
        perpective projection
      - mounting the camera on a moving object, in this case a bouncing ball
+     - mounting the camera on a moving object, in this case a bouncing ball, and having the
+       camera stay focused on the rainbow teapot as both beach ball and teapot move and rotate
      - directing an object to track another object, always facing that object, but only
        rotating in one direction (eg- side-to-side, but not up and down).
+     - displaying 2D labels (eg- health-bars) overlayed on top of the 3D world at locations projected from the position of 3D objects
      - disabling animation for a particular node, in this case the camera and light
      - invading with an army of teapots instead of robots
      - ignore lighting conditions when drawing a node to draw in pure colors and textures
+     - initializing and disposing of users data by adding initUserData and releaseUserData method extension categories.
+     - displaying descriptive text and wireframe bounding boxes on every node.
+     - log a description of the entire node structure of the 3D world
 
 
    CC3Performance
    --------------
 
-   This is a simple demo of the performance characteristics of cocos3d. It demonstrates how to
-   collect statistics about your application's performance. In doing so, it presents a number
-   of model scenarios, and through the user interface, you can control the type of model loaded
-   and how many copies to render.
+   This is a simple demo of the performance characteristics of cocos3d. It demonstrates
+   how to collect statistics about your application's performance. In doing so, it
+   presents a number of model scenarios, and through the user interface, you can control
+   the type of model loaded and how many copies to render.
 
-   You can dynamically experiment with how different model types, sizes and quantities affects
-   the performance of cocos3d. You can also use this performance demo app to compare performance
-   across different device types.
+   You can dynamically experiment with how different model types, sizes and quantities
+   affects the performance of cocos3d. You can also use this performance demo app to
+   compare performance across different device types.
 
-If you are using cocos2d 0.99.5, read the cocos2d Version Compatibility selection below regarding
-running the demo apps with that version.
+If you are using cocos2d 0.99.5, read the cocos2d Version Compatibility selection below
+regarding running the demo apps with that version.
+
+
+Demo Models
+-----------
+
+Some of the POD models that appear in the demo and template apps were designed in Blender,
+exported to DAE, and converted to POD files using the PowerVR Collada2POD converter.
+
+As a reference for the creation of your own 3D models for use in cocos3d, you can find
+the original Blender files and DAE files for these POD models in the Models folder in
+the cocos3d distribution.
 
 
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.0-sp is compatible with cocos2d 1.0.0 and cocos2d 0.99.5.
+cocos3d 0.6.1 is compatible with cocos2d 1.0.1, cocos2d 1.0.0, and cocos2d 0.99.5.
 
-If you use cocos2d 0.99.5, be aware that the cocos3d Xcode projects are configured for the
-cocos2d 1.0.0 libraries. The cocos2d 0.99.5 distribution includes serveral fiiles that were
-removed in cocos2d 1.0.0:
+If you use cocos2d 0.99.5, be aware that the cocos3d Xcode projects are configured for
+the cocos2d 1.0.1 libraries. The cocos2d 0.99.5 distribution includes serveral fiiles
+that were removed in cocos2d 1.0.1:
 
 cocos2d/CCCompatibility.h
 cocos2d/CCCompatibility.m
@@ -154,9 +177,10 @@ TouchJSON/Extensions/NSScanner_Extensions.m
 If you are using cocos2d 0.99.5, you will need to add these files to the cocos2d group,
 and the cocos2d libraries target within your Xcode project.
 
-Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template project
-uses whichever cocos2d Xcode 4 project templates were installed. Typically this will be the
-cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5 Xcode 4 project templates.
+Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
+project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
+will be the cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5
+Xcode 4 project templates.
 
 
 Creating POD 3D Model Files

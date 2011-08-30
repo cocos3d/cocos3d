@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -69,6 +69,10 @@
  * in the mesh (including the vertexTextureCoordinates and the those in the
  * overlayTextureCoordinates collection), the last texture coordinate array is reused.
  *
+ * This class also supports covering the mesh with only a fractional part of the texture
+ * through the use of the textureRectangle property, effectlivly permitting sprite-sheet
+ * textures to be used with 3D meshes.
+ *
  * When a copy is made of a CC3VertexArrayMesh instance, copies are not made of the
  * vertex arrays. Instead, they are retained by reference and shared between both the
  * original mesh, and the new copy.
@@ -89,7 +93,6 @@
 	NSMutableArray* overlayTextureCoordinates;
 	CC3VertexIndices* vertexIndices;
 	BOOL interleaveVertices;
-	BOOL shouldAllowVertexBuffering;
 }
 
 /** The vertex array instance managing the positional data for the vertices. */
@@ -110,20 +113,6 @@
 @property(nonatomic, retain) CC3VertexColors* vertexColors;
 
 /**
- * The vertex array instance managing the texture mapping data for the vertices.
- *
- * Setting this property is optional. Not all meshes use textures.
- *
- * If multi-texturing is used, and separate texture coordinate mapping is required
- * for each texture unit, additional texture coordinate arrays can be added using
- * the addTextureCoordinates: method. If this property has not been set already,
- * the first texture coordinate array that is added via addTextureCoordinates:
- * will be placed in this property. This can simplify configurations in that all
- * texture coordinate arrays can be treated the same.
- */
-@property(nonatomic, retain) CC3VertexTextureCoordinates* vertexTextureCoordinates;
-
-/**
  * The vertex array instance managing the index data for the vertices.
  *
  * Setting this property is optional. If vertex index data is not provided, the vertices
@@ -140,47 +129,29 @@
  */
 @property(nonatomic, assign) BOOL interleaveVertices;
 
-/**
- * Indicates whether this instance should allow the vertex data to be copied to a vertex
- * buffer object within the GL engine when the createGLBuffer method is invoked.
- *
- * The initial value of this property is YES. In most cases, this is appropriate, but for
- * specific meshes, it might make sense to retain data in main memory and submit it to the
- * GL engine during each frame rendering.
- *
- * Setting this property set the same property on each contained vertex array.
- *
- * As an alternative to setting this property to NO, consider leaving it as YES, and making
- * use of the updateGLBuffer and updateGLBufferStartingAt:forLength: to dynamically update
- * the data in the GL engine buffer. Doing so permits the data to be copied to the GL engine
- * only when it is needed, and permits copying only the range of data that has changed, both
- * of which offer performance improvements over submitting all of the vertex data on each
- * frame render.
- */
-@property(nonatomic, assign) BOOL shouldAllowVertexBuffering;
-
-
-#pragma mark Updating
-
-/**
- * Convenience method to update GL buffers for all vertex arrays used by this mesh,
- * starting at the vertex at the specified offsetIndex, and extending for
- * the specified number of vertices.
- */
--(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) vertexCount;
-
-/** Convenience method to update all data in the GL buffers for all vertex arrays used by this mesh. */
--(void) updateGLBuffers;
-
 
 #pragma mark Texture overlays
 
 /**
- * The collection of texture coordinate arrays that provide additional texture coordinate
- * mapping when multi-texturing is applied to the associated node and separate texture
- * coordinate mapping is required for each texture unit
+ * The vertex array instance managing the texture mapping data for the vertices.
+ *
+ * Setting this property is optional. Not all meshes use textures.
+ *
+ * If multi-texturing is used, and separate texture coordinate mapping is required
+ * for each texture unit, additional texture coordinate arrays can be added using
+ * the addTextureCoordinates: method. If this property has not been set already,
+ * the first texture coordinate array that is added via addTextureCoordinates:
+ * will be placed in this property. This can simplify configurations in that all
+ * texture coordinate arrays can be treated the same.
  */
-@property(nonatomic, readonly) NSArray* overlayTextureCoordinates;
+@property(nonatomic, retain) CC3VertexTextureCoordinates* vertexTextureCoordinates;
+
+/**
+ * Returns the number of texture coordinate arrays used by this mesh, regardless of whether
+ * the texture coordinates were attached using the vertexTextureCoordinates property or the
+ * addTextureCoordinates: method.
+ */
+@property(nonatomic, readonly) GLuint textureCoordinatesArrayCount;
 
 /**
  * This class supports multi-texturing. In most situations, the mesh will use the same
@@ -219,6 +190,44 @@
  * property and the overlayTextureCoordinates collection.
  */
 -(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName;
+
+/**
+ * Returns the texture coordinate array that will be processed by the texture unit
+ * with the specified index, which should be a number between zero, and one less
+ * than the value of the textureCoordinatesArrayCount property.
+ *
+ * The value returned will be nil if there are no texture coordinates.
+ */
+-(CC3VertexTextureCoordinates*) textureCoordinatesForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the texture coordinates array that will be processed by the texture unit with
+ * the specified index, which should be a number between zero, and the value of the
+ * textureCoordinatesArrayCount property.
+ * 
+ * If the specified index is less than the number of texture units added already, the
+ * specified texture coordinates array will replace the one assigned to that texture unit.
+ * Otherwise, this implementation will invoke the addTextureCoordinates: method to add
+ * the texture to this material.
+ *
+ * If the specified texture unit index is zero, the value of the vertexTextureCoordinates
+ * property will be changed to the specified texture.
+ */
+-(void) setTextureCoordinates: (CC3VertexTextureCoordinates*) aTexture
+			   forTextureUnit: (GLuint) texUnit;
+
+
+#pragma mark Updating
+
+/**
+ * Convenience method to update GL buffers for all vertex arrays used by this mesh,
+ * starting at the vertex at the specified offsetIndex, and extending for
+ * the specified number of vertices.
+ */
+-(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) vertexCount;
+
+/** Convenience method to update all data in the GL buffers for all vertex arrays used by this mesh. */
+-(void) updateGLBuffers;
 
 @end
 

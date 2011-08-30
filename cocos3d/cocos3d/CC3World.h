@@ -1,7 +1,7 @@
 /*
  * CC3World.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -45,7 +45,7 @@ static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0 / 15.0);
 /** Default color for the ambient world light. */
 static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 };
 
-@class CC3WorldTouchHandler, CC3ViewportManager;
+@class CC3Layer, CC3TouchedNodePicker, CC3ViewportManager;
 
 
 #pragma mark -
@@ -87,7 +87,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * You can move and orient nodes using the node's location, rotation and scale
  * properties, and can show or hide nodes with the node's visible property.
  *
- * You should override the udpateBeforeTransform: method if you need to make changes to
+ * You should override the updateBeforeTransform: method if you need to make changes to
  * the transform properties (location, rotation, scale), of any node. These changes will
  * them automatically be applied to the transformMatrix of the node and its child nodes.
  *
@@ -194,17 +194,26 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 	NSMutableArray* lights;
 	NSMutableArray* cameras;
 	NSMutableArray* billboards;
+	CC3Layer* cc3Layer;
 	CC3ViewportManager* viewportManager;
 	CC3Camera* activeCamera;
 	NSArray* drawingSequence;
 	CC3NodeSequencer* drawingSequencer;
-	CC3WorldTouchHandler* touchHandler;
+	CC3TouchedNodePicker* touchedNodePicker;
 	CC3PerformanceStatistics* performanceStatistics;
 	CC3Fog* fog;
 	ccColor4F ambientLight;
 	ccTime minUpdateInterval;
 	ccTime maxUpdateInterval;
 }
+
+/**
+ * The CC3Layer that is holding this 3D world.
+ *
+ * This property is set automatically when this world is assigned to the CC3Layer.
+ * The application should not set this property directly.
+ */
+@property(nonatomic, assign) CC3Layer* cc3Layer;
 
 /**
  * The 3D camera that is currently displaying the scene of this world.
@@ -226,6 +235,14 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * make it viewable.
  */
 @property(nonatomic, retain) CC3Camera* activeCamera;
+
+/**
+ * The touchedNodePicker picks the node under the point at which a touch event occurred.
+ *
+ * Touch events are forwarded to the touchedNodePicker from the touchEvent:at:
+ * method when a node is to be picked from a particular touch event.
+ */
+@property(nonatomic, retain) CC3TouchedNodePicker* touchedNodePicker;
 
 /**
  * The viewport manager manages the viewport and device orientation, including
@@ -426,9 +443,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * This method is invoked asynchronously to the model updating loop, to keep the processing of
  * OpenGL ES drawing separate from model updates.
  *
- * This implementation invokes drawWithVisitor: with a CC3NodeDrawingVisitor containing the
- * activeCamera's frustum. Does nothing if the visible property of this instance is NO.
- *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
  * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
  * GL engine if GL state really is changing. It is critical that all changes to GL state
@@ -493,10 +507,23 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * ccTouchMoved:withEvent: template method implementation in CC3Layer to your
  * customized CC3Layer subclass.
  *
- * This default implementation engages a node picking mechanism, which determines
- * which 3D node is under the touch point. Object picking is handled asynchronously,
- * and once the node is retrieved, the nodeSelected:byTouchEvent:at: callback method
- * will be invoked on this instance.
+ * This default implementation forwards all touch events to the node picker held in
+ * the touchedNodePicker property, which determines which 3D node is under the touch
+ * point. Object picking is handled asynchronously, and once the node is retrieved,
+ * the nodeSelected:byTouchEvent:at: callback method will be invoked on this instance.
+ *
+ * Node picking from touch events is expensive, and you should only forward, from this
+ * method to the touchedNodePicker, only those touch events that actually intend to
+ * select a node. By default, all touch events are forwarded from this method, but in
+ * practice, you should override this implementation and handle touch events that are
+ * not used for selection directly in this method, and forward only those events for
+ * which you want a node picked, to the touchedNodePicker.
+ * 
+ * For example, if you want to let a user touch an object and move it around with their
+ * finger, only the initial touch-down event needs to select a node. Once the node is
+ * selected, you can cache the node, and move it and release it by capturing the
+ * touch-move and touch-up events in this method, and avoid forwarding them to the
+ * tochedNodePicker.
  *
  * To support multi-touch events or gestures, add event-handing behaviour to your
  * customized CC3Layer, as you would for any cocos2d application, and invoke this
@@ -505,8 +532,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
 
 /**
- * This callback template method is invoked automatically when a node has been picked
- * as a result of a touch event.
+ * This callback template method is invoked automatically from the touchedNodePicker
+ * when a node has been picked as a result of a touch event.
  *
  * The specified node will be one of the visible nodes whose isTouchable property
  * returns YES, or will be nil if the touch event occurred in an area under which
@@ -537,6 +564,17 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * To receive and handle touch-move events for object picking, copy the commented-out
  * ccTouchMoved:withEvent: template method implementation in CC3Layer to your customized
  * CC3Layer subclass.
+ *
+ * In addition, node selection is expensive, and you should only propagate touch events
+ * from touchEvent:at: that actually intend to select a node. By default, all touch events
+ * are propagated from touchEvent:at:, but in practice, you should override that method
+ * and handle touch events that are not used for selection in that method.
+ *
+ * For example, if you want to let a user touch an object and move it around with their
+ * finger, only the initial touch-down event needs to select a node. Once the node is
+ * selected, you can cache the node, and move it and release it by capturing the
+ * touch-move and touch-up events in the touchEvent:at: method, and avoid propagating
+ * them to the selection mechanism.
  * 
  * To enable a node to be selectable by touching, set the isTouchEnabled property
  * of that node, or an ancestor node to YES. 
@@ -556,13 +594,13 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 
 
 #pragma mark -
-#pragma mark CC3WorldTouchHandler
+#pragma mark CC3TouchedNodePicker
 
 /** The max length of the queue that tracks touch events. */
 #define kCC3TouchQueueLength 16
 
 /**
- * A CC3WorldTouchHandler instance handles the touch event logic for a CC3World instance.
+ * A CC3TouchedNodePicker instance handles picking nodes from touch events in a CC3World.
  * 
  * This handler maintains a queue of touch types, to ensure than none are missed. However,
  * it does not keep a queue of touch points. Instead, it uses the most recent touch point
@@ -572,7 +610,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * its type is added to the queue, and the touch position is updated. On the next rendering
  * pass, the 3D scene is rendered so that each 3D node has a unique color. The color of
  * the pixel under the touch point then identifies the node that was touched. The scene
- * is then re-rendered in full color in the same rendering pass, so the user never sees
+ * is then re-rendered in true colors in the same rendering pass, so the user never sees
  * the unique-color rendering that was used to pick the node.
  *
  * Once the node is picked, it is cached. On the next update pass, the node is picked up
@@ -591,7 +629,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * a rapid inflow of kCCTouchMoved events will only result in a single kCCTouchMoved event
  * being picked and dispatched to the CC3World on each pair of  rendering and updating passes.
  */
-@interface CC3WorldTouchHandler : NSObject {
+@interface CC3TouchedNodePicker : NSObject {
 	CC3World* world;
 	CC3Node* pickedNode;
 	uint touchQueue[kCC3TouchQueueLength];
@@ -611,16 +649,20 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 +(id) handlerOnWorld: (CC3World*) aCC3World;
 
 /**
- * Handles the touch event of the specified type that occurred at the specified point.
+ * Indicates that a node should be picked for the touch event of the specified type
+ * that occurred at the specified point.
  *
  * The tType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
  * kCCTouchEnded, or kCCTouchCancelled. The tPoint is the location in 2D coordinate
  * system of the CC3Layer where the touch occurred.
  *
+ * The event is queued internally, and the node is asychronously picked during the
+ * next rendering frame when the pickTouchedNode method is automatically invoked.
+ *
  * This method is invoked automatically whenever a touch event occurs. Usually, the
  * application never needs to invoke this method directly.
  */
--(void) touchEvent: (uint) tType at: (CGPoint) tPoint;
+-(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint;
 
 /**
  * Invoked by the CC3World during drawing operations in the rendering frame that

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Hints.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -124,6 +124,17 @@
 	[density close];
 	[start close];
 	[end close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", color];
+	[desc appendFormat: @"\n    %@ ", mode];
+	[desc appendFormat: @"\n    %@ ", density];
+	[desc appendFormat: @"\n    %@ ", start];
+	[desc appendFormat: @"\n    %@ ", end];
+	return desc;
 }
 
 @end

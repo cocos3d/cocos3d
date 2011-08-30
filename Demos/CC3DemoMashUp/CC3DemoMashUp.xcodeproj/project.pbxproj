@@ -19,8 +19,9 @@
 		50F414F01069373D002A0D5E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 50F414EC1069373D002A0D5E /* Default.png */; };
 		50F414F11069373D002A0D5E /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = 50F414ED1069373D002A0D5E /* fps_images.png */; };
 		50F414F21069373D002A0D5E /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 50F414EE1069373D002A0D5E /* Icon.png */; };
+		A942FDDA1401C98700D6ABC8 /* Balls.pod in Resources */ = {isa = PBXBuildFile; fileRef = A942FDD81401C98700D6ABC8 /* Balls.pod */; };
+		A942FDDF1401CF0200D6ABC8 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A942FDDE1401CF0200D6ABC8 /* DieCube.pod */; };
 		A98F295B1396ED2B00999910 /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A98F295A1396ED2B00999910 /* SunlightButton48x48.png */; };
-		A99360701383494100563835 /* Balls.pod in Resources */ = {isa = PBXBuildFile; fileRef = A993606F1383494100563835 /* Balls.pod */; };
 		A99B4E8F13B2B2C9005D2D66 /* Crate.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A99B4E8C13B2B2C9005D2D66 /* Crate.pvr */; };
 		A99B4E9013B2B2C9005D2D66 /* Stamp-nm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A99B4E8D13B2B2C9005D2D66 /* Stamp-nm.pvr */; };
 		A99B4E9113B2B2C9005D2D66 /* Stamp.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A99B4E8E13B2B2C9005D2D66 /* Stamp.pvr */; };
@@ -318,6 +319,7 @@
 		A9CB5BAF13D7CC5700443456 /* JSONRepresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = A9CB5AE413D7CC5700443456 /* JSONRepresentation.h */; };
 		A9CDEF92139F93C50007C63E /* cocos3dMascot.png in Resources */ = {isa = PBXBuildFile; fileRef = A9CDEF90139F93C50007C63E /* cocos3dMascot.png */; };
 		A9CDEF93139F93C50007C63E /* cocos3dMascot.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9CDEF91139F93C50007C63E /* cocos3dMascot.pod */; };
+		A9E7D36714095DCD0009548A /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9E7D36614095DCD0009548A /* ZoomButton48x48.png */; };
 		A9EC2D7112F26B8B00E1FB09 /* ButtonRing48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9EC2D6812F26B8B00E1FB09 /* ButtonRing48x48.png */; };
 		A9EC2D7212F26B8B00E1FB09 /* globeuv.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9EC2D6912F26B8B00E1FB09 /* globeuv.jpg */; };
 		A9EC2D7312F26B8B00E1FB09 /* IntroducingPOD_float.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9EC2D6A12F26B8B00E1FB09 /* IntroducingPOD_float.pod */; };
@@ -367,8 +369,9 @@
 		50F414ED1069373D002A0D5E /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
 		50F414EE1069373D002A0D5E /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		50F414EF1069373D002A0D5E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A942FDD81401C98700D6ABC8 /* Balls.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Balls.pod; sourceTree = "<group>"; };
+		A942FDDE1401CF0200D6ABC8 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = DieCube.pod; sourceTree = "<group>"; };
 		A98F295A1396ED2B00999910 /* SunlightButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SunlightButton48x48.png; sourceTree = "<group>"; };
-		A993606F1383494100563835 /* Balls.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Balls.pod; sourceTree = "<group>"; };
 		A99B4E8C13B2B2C9005D2D66 /* Crate.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Crate.pvr; sourceTree = "<group>"; };
 		A99B4E8D13B2B2C9005D2D66 /* Stamp-nm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Stamp-nm.pvr"; sourceTree = "<group>"; };
 		A99B4E8E13B2B2C9005D2D66 /* Stamp.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Stamp.pvr; sourceTree = "<group>"; };
@@ -755,6 +758,7 @@
 		A9CB5AE413D7CC5700443456 /* JSONRepresentation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONRepresentation.h; sourceTree = "<group>"; };
 		A9CDEF90139F93C50007C63E /* cocos3dMascot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cocos3dMascot.png; sourceTree = "<group>"; };
 		A9CDEF91139F93C50007C63E /* cocos3dMascot.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocos3dMascot.pod; sourceTree = "<group>"; };
+		A9E7D36614095DCD0009548A /* ZoomButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ZoomButton48x48.png; sourceTree = "<group>"; };
 		A9EC2D6812F26B8B00E1FB09 /* ButtonRing48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ButtonRing48x48.png; sourceTree = "<group>"; };
 		A9EC2D6912F26B8B00E1FB09 /* globeuv.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = globeuv.jpg; sourceTree = "<group>"; };
 		A9EC2D6A12F26B8B00E1FB09 /* IntroducingPOD_float.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = IntroducingPOD_float.pod; sourceTree = "<group>"; };
@@ -889,15 +893,17 @@
 		50F414EB1069373D002A0D5E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A942FDD81401C98700D6ABC8 /* Balls.pod */,
+				A942FDDE1401CF0200D6ABC8 /* DieCube.pod */,
 				A9CDEF90139F93C50007C63E /* cocos3dMascot.png */,
 				A9CDEF91139F93C50007C63E /* cocos3dMascot.pod */,
-				A993606F1383494100563835 /* Balls.pod */,
 				A9C3ACDB1361038700ACA289 /* debian.plist */,
 				A9C3ACD81360BE0600ACA289 /* fire.png */,
 				A9EC2D6812F26B8B00E1FB09 /* ButtonRing48x48.png */,
 				A9EC2D6912F26B8B00E1FB09 /* globeuv.jpg */,
 				A9EC2D6A12F26B8B00E1FB09 /* IntroducingPOD_float.pod */,
 				A9EC2D6B12F26B8B00E1FB09 /* JoystickThumb.png */,
+				A9E7D36614095DCD0009548A /* ZoomButton48x48.png */,
 				A9EC2D6C12F26B8B00E1FB09 /* Shine48x48.png */,
 				A99C18FB1311D9E9009A65F6 /* InvasionButton48x48.png */,
 				A98F295A1396ED2B00999910 /* SunlightButton48x48.png */,
@@ -1685,7 +1691,6 @@
 				A99C18FC1311D9E9009A65F6 /* InvasionButton48x48.png in Resources */,
 				A9C3ACD91360BE0600ACA289 /* fire.png in Resources */,
 				A9C3ACDC1361038700ACA289 /* debian.plist in Resources */,
-				A99360701383494100563835 /* Balls.pod in Resources */,
 				A98F295B1396ED2B00999910 /* SunlightButton48x48.png in Resources */,
 				A9CDEF92139F93C50007C63E /* cocos3dMascot.png in Resources */,
 				A9CDEF93139F93C50007C63E /* cocos3dMascot.pod in Resources */,
@@ -1696,6 +1701,9 @@
 				A99B4F0A13BBBF67005D2D66 /* Head_diffuse.pvr in Resources */,
 				A99B4F0B13BBBF67005D2D66 /* Head.pod in Resources */,
 				A9C0678813D5E92F00111114 /* PVRT_Removed_Files.txt in Resources */,
+				A942FDDA1401C98700D6ABC8 /* Balls.pod in Resources */,
+				A942FDDF1401CF0200D6ABC8 /* DieCube.pod in Resources */,
+				A9E7D36714095DCD0009548A /* ZoomButton48x48.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1969,6 +1977,7 @@
 					"CD_DEBUG=1",
 					"LOGGING_ENABLED=1",
 					"LOGGING_LEVEL_TRACE=0",
+					"LOGGING_REZLOAD=1",
 					"GL_ERROR_LOGGING_ENABLED=1",
 					"GL_LOGGING_ENABLED=0",
 				);

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -71,6 +71,15 @@
 	[maxLights close];
 	[maxClipPlanes close];
 	[maxTextureUnits close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", maxLights];
+	[desc appendFormat: @"\n    %@ ", maxClipPlanes];
+	[desc appendFormat: @"\n    %@ ", maxTextureUnits];
+	return desc;
 }
 
 @end

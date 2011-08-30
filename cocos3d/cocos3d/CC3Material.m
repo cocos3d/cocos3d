@@ -1,7 +1,7 @@
 /*
  * CC3Material.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -47,7 +47,7 @@
 @implementation CC3Material
 
 @synthesize ambientColor, diffuseColor, specularColor, emissionColor, shininess;
-@synthesize texture, sourceBlend, destinationBlend, shouldUseLighting, isOpaque;
+@synthesize texture, shouldUseLighting, isOpaque;
 
 -(void) dealloc {
 	[texture release];
@@ -79,35 +79,48 @@
 	shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess);		// clamp to allowed range
 }
 
+-(GLenum) sourceBlend {
+	return blendFunc.src;
+}
+
 -(void) setSourceBlend: (GLenum) aBlend {
-	sourceBlend = aBlend;
+	blendFunc.src = aBlend;
 	[self checkIsOpaque];
 }
 
+-(GLenum) destinationBlend {
+	return blendFunc.dst;
+}
+
 -(void) setDestinationBlend: (GLenum) aBlend {
-	destinationBlend = aBlend;
+	blendFunc.dst = aBlend;
 	[self checkIsOpaque];
 }
 
 -(void) setIsOpaque: (BOOL) opaque {
 	if (opaque) {
 		// If we're forcing full opacity, set no alpha blending
-		sourceBlend = GL_ONE;
-		destinationBlend = GL_ZERO;
+		blendFunc.src = GL_ONE;
+		blendFunc.dst = GL_ZERO;
 	} else {
 		// Enable alpha blending. Set destination blend to (1-SRC_ALPHA).
 		// Set source blend to SRC_ALPHA unless texture has pre-multiplied alpha AND
 		// material is at full opacity. If material is not at full opacity, we must
 		// enable source alpha blending even if texture has pre-multiplied alpha.
 		BOOL texHasPreMultAlpha = texture && texture.hasPremultipliedAlpha;
-		sourceBlend = (texHasPreMultAlpha && self.opacity == 255) ? GL_ONE : GL_SRC_ALPHA;
-		destinationBlend = GL_ONE_MINUS_SRC_ALPHA;
+		blendFunc.src = (texHasPreMultAlpha && self.opacity == 255) ? GL_ONE : GL_SRC_ALPHA;
+		blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
 	}
 	[self checkIsOpaque];
 }
 
 
-#pragma mark CCRGBAProtocol support
+#pragma mark CCRGBAProtocol & CCBlendProtocol support
+
+// Return diffuse color
+-(ccColor3B) color {
+	return CCC3BFromCCC4F(diffuseColor);
+}
 
 // Set both diffuse and ambient colors, retaining the alpha of each
 -(void) setColor: (ccColor3B) color {
@@ -122,13 +135,6 @@
 	diffuseColor.r = rf;
 	diffuseColor.g = gf;
 	diffuseColor.b = bf;
-}
-
-// Return diffuse color
--(ccColor3B) color {
-	return ccc3(CCColorByteFromFloat(diffuseColor.r),
-				CCColorByteFromFloat(diffuseColor.g),
-				CCColorByteFromFloat(diffuseColor.b));
 }
 
 // Return diffuse alpha
@@ -157,6 +163,15 @@
 	}
 }
 
+-(ccBlendFunc) blendFunc {
+	return blendFunc;
+}
+
+-(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
+	blendFunc = aBlendFunc;
+	[self checkIsOpaque];
+}
+
 /**
  * Check if this material is opaque, and set the isOpaque flag accordingly.
  *
@@ -167,7 +182,17 @@
  * Subclasses may choose to implement tests for more sophisticated combinations.
  */
 -(void) checkIsOpaque {
-	isOpaque = (sourceBlend == GL_ONE && destinationBlend == GL_ZERO);
+	isOpaque = (blendFunc.src == GL_ONE && blendFunc.dst == GL_ZERO);
+}
+
+static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
+
++(ccBlendFunc) defaultBlendFunc {
+	return defaultBlendFunc;
+}
+
++(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc {
+	defaultBlendFunc = aBlendFunc;
 }
 
 
@@ -326,8 +351,7 @@
 		specularColor = kCC3DefaultMaterialColorSpecular;
 		emissionColor = kCC3DefaultMaterialColorEmission;
 		shininess = kCC3DefaultMaterialShininess;
-		sourceBlend = [[self class] defaultSourceBlend];
-		destinationBlend = [[self class] defaultDestinationBlend];
+		blendFunc = [[self class] defaultBlendFunc];
 		shouldUseLighting = YES;
 		[self checkIsOpaque];
 	}
@@ -380,8 +404,7 @@
 	specularColor = another.specularColor;
 	emissionColor = another.emissionColor;
 	shininess = another.shininess;
-	sourceBlend = another.sourceBlend;
-	destinationBlend = another.destinationBlend;
+	blendFunc = another.blendFunc;
 	shouldUseLighting = another.shouldUseLighting;
 	isOpaque = another.isOpaque;
 	
@@ -399,32 +422,12 @@
 
 }
 
-static GLenum defaultSourceBlend = GL_ONE;
-
-+(GLenum) defaultSourceBlend {
-	return defaultSourceBlend;
-}
-
-+(void) setDefaultSourceBlend: (GLenum) srcBlend {
-	defaultSourceBlend = srcBlend;
-}
-
-static GLenum defaultDestinationBlend = GL_ZERO;
-
-+(GLenum) defaultDestinationBlend {
-	return defaultDestinationBlend;
-}
-
-+(void) setDefaultDestinationBlend: (GLenum) destBlend {
-	defaultDestinationBlend = destBlend;
-}
-
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), with %u textures",
 			[super fullDescription], NSStringFromCCC4F(ambientColor),
 			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor),
 			NSStringFromCCC4F(emissionColor), shininess,
-			NSStringFromGLEnum(sourceBlend), NSStringFromGLEnum(destinationBlend),
+			NSStringFromGLEnum(blendFunc.src), NSStringFromGLEnum(blendFunc.dst),
 			self.textureCount];
 }
 
@@ -463,7 +466,7 @@ static GLuint lastAssignedMaterialTag;
 -(void) applyBlend {
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 	gles11Engine.serverCapabilities.blend.value = !self.isOpaque;
-	[gles11Engine.materials.blend applySource: sourceBlend andDestination: destinationBlend];
+	[gles11Engine.materials.blend applySource: blendFunc.src andDestination: blendFunc.dst];
 }
 
 /**
@@ -481,7 +484,8 @@ static GLuint lastAssignedMaterialTag;
 	} else {
 		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 		[gles11Engine.serverCapabilities.lighting disable];
-		gles11Engine.state.color.value = emissionColor;
+//		gles11Engine.state.color.value = emissionColor;
+		gles11Engine.state.color.value = diffuseColor;
 	}
 }
 

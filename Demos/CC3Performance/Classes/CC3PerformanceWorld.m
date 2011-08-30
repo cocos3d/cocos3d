@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceWorld.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -327,11 +327,6 @@
 #pragma mark -
 #pragma mark CC3AnimatingVisitor
 
-@interface CC3NodeUpdatingVisitor (TemplateMethods)
--(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode;
-@end
-
-
 @implementation CC3AnimatingVisitor
 
 /**
@@ -339,7 +334,7 @@
  * the same name. For speed, the names are tested for identity, rather than content.
  */
 -(BOOL) nodeIsFromTemplate: (CC3Node*) aNode {
-	return (aNode.name == ((CC3PerformanceWorld*)world).templateNode.name);
+	return (aNode.name == ((CC3PerformanceWorld*)startingNode).templateNode.name);
 }
 
 /**
@@ -347,8 +342,7 @@
  * The rotation direction and magnitude is derived from the node's unique tag,
  * so that each template copy rotates a little differently than any of the others.
  */
--(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode {
-	[super visitNodeBeforeUpdatingTransform: aNode];
+-(void) processBeforeChildren: (CC3Node*) aNode {
 	if ([self nodeIsFromTemplate: aNode]) {
 		GLfloat direction = SIGN((GLfloat)(aNode.tag % 2) - 0.5);
 		GLfloat magnitude = (GLfloat)(aNode.tag % 8) + 4;
@@ -357,6 +351,7 @@
 								  0.0);
 		aNode.rotation = CC3VectorAdd(aNode.rotation, deltaRot);
 	}
+	[super processBeforeChildren: aNode];
 }
 
 @end

@@ -1,7 +1,7 @@
 /*
  * CC3Logging.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved. 
  * http://www.brenwill.com
@@ -41,7 +41,12 @@
  * independently via the LOGGING_LEVEL_TRACE, LOGGING_LEVEL_INFO, LOGGING_LEVEL_ERROR and
  * LOGGING_LEVEL_DEBUG switches, respectively.
  *
- * In addition, ALL logging can be enabled or disabled via the LOGGING_ENABLED switch.
+ * In addition, there are the following specialized logging switches that can be turned on
+ * to assist with diagnostics and troubleshooting:
+ *
+ *		LOGGING_REZLOAD		- output log messages during 3D model resource loading
+ *
+ * ALL logging can be enabled or disabled via the LOGGING_ENABLED switch.
  *
  * Logging functions are implemented here via macros. Disabling logging, either entirely, or
  * at a specific level, completely removes the corresponding log invocations from the compiled
@@ -53,17 +58,25 @@
  *
  * To perform logging, use any of the following function calls in your code:
  *
- *		LogTrace(fmt, ...)	- recommended for detailed tracing of program flow
- *							- will print if LOGGING_LEVEL_TRACE is set on.
+ *		LogTrace(fmt, ...)		- recommended for detailed tracing of program flow
+ *								- will print if LOGGING_LEVEL_TRACE is set on.
+ *		LogCleanTrace(fmt, ...)	- as above but does not print standard timestamp and app context preamble
  *
- *		LogInfo(fmt, ...)	- recommended for general, infrequent, information messages
- *							- will print if LOGGING_LEVEL_INFO is set on.
+ *		LogInfo(fmt, ...)		- recommended for general, infrequent, information messages
+ *								- will print if LOGGING_LEVEL_INFO is set on.
+ *		LogCleanInfo(fmt, ...)	- as above but does not print standard timestamp and app context preamble
  *
- *		LogError(fmt, ...)	- recommended for use only when there is an error to be logged
- *							- will print if LOGGING_LEVEL_ERROR is set on.
+ *		LogError(fmt, ...)		- recommended for use only when there is an error to be logged
+ *								- will print if LOGGING_LEVEL_ERROR is set on.
+ *		LogCleanError(fmt, ...)	- as above but does not print standard timestamp and app context preamble
  *
- *		LogDebug(fmt, ...)	- recommended for temporary use during debugging
- *							- will print if LOGGING_LEVEL_DEBUG is set on.
+ *		LogDebug(fmt, ...)		- recommended for temporary use during debugging
+ *								- will print if LOGGING_LEVEL_DEBUG is set on.
+ *		LogCleanDebug(fmt, ...)	- as above but does not print standard timestamp and app context preamble
+ *
+ *		LogRez(fmt, ...)		- recommended for temporary use during development
+ *								- will print if LOGGING_REZLOAD is set on.
+ *		LogCleanRez(fmt, ...)	- as above but does not print standard timestamp and app context preamble
  *
  * In each case, the functions follow the general NSLog/printf template, where the first argument
  * "fmt" is an NSString that optionally includes embedded Format Specifiers, and subsequent optional
@@ -107,6 +120,10 @@
 #	define LOGGING_LEVEL_DEBUG		1
 #endif
 
+#ifndef LOGGING_REZLOAD
+#	define LOGGING_REZLOAD		0
+#endif
+
 /**
  * Set this switch to indicate whether or not to include class, method and line information
  * in the log entries. This can be set either here or as a compiler build setting.
@@ -123,11 +140,13 @@
 	#undef LOGGING_LEVEL_INFO
 	#undef LOGGING_LEVEL_ERROR
 	#undef LOGGING_LEVEL_DEBUG
+	#undef LOGGING_REZLOAD
 #endif
 
-// Logging format
+// Logging formats
 #define LOG_FORMAT_NO_LOCATION(fmt, lvl, ...) NSLog((@"[%@] " fmt), lvl, ##__VA_ARGS__)
 #define LOG_FORMAT_WITH_LOCATION(fmt, lvl, ...) NSLog((@"%s[Line %d] [%@] " fmt), __PRETTY_FUNCTION__, __LINE__, lvl, ##__VA_ARGS__)
+#define LOG_FORMAT_CLEAR(fmt, ...) printf("%s\n", [[NSString stringWithFormat: fmt, ##__VA_ARGS__] UTF8String])
 
 #if defined(LOGGING_INCLUDE_CODE_LOCATION) && LOGGING_INCLUDE_CODE_LOCATION
 	#define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_WITH_LOCATION(fmt, lvl, ##__VA_ARGS__)
@@ -138,28 +157,45 @@
 // Trace logging - for detailed tracing
 #if defined(LOGGING_LEVEL_TRACE) && LOGGING_LEVEL_TRACE
 	#define LogTrace(fmt, ...) LOG_FORMAT(fmt, @"trace", ##__VA_ARGS__)
+	#define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
 #else
 	#define LogTrace(...)
+	#define LogCleanTrace(...)
 #endif
 
 // Info logging - for general, non-performance affecting information messages
 #if defined(LOGGING_LEVEL_INFO) && LOGGING_LEVEL_INFO
 	#define LogInfo(fmt, ...) LOG_FORMAT(fmt, @"info", ##__VA_ARGS__)
+	#define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
 #else
 	#define LogInfo(...)
+	#define LogCleanInfo(...)
 #endif
 
 // Error logging - only when there is an error to be logged
 #if defined(LOGGING_LEVEL_ERROR) && LOGGING_LEVEL_ERROR
 	#define LogError(fmt, ...) LOG_FORMAT(fmt, @"***ERROR***", ##__VA_ARGS__)
+	#define LogCleanError(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
 #else
 	#define LogError(...)
- #endif
+	#define LogCleanError(...)
+#endif
 
 // Debug logging - use only temporarily for highlighting and tracking down problems
 #if defined(LOGGING_LEVEL_DEBUG) && LOGGING_LEVEL_DEBUG
 	#define LogDebug(fmt, ...) LOG_FORMAT(fmt, @"DEBUG", ##__VA_ARGS__)
+	#define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
 #else
 	#define LogDebug(...)
+	#define LogCleanDebug(...)
+#endif
+
+// Resource loading - use only temporarily for information and troubleshooting
+#if defined(LOGGING_REZLOAD) && LOGGING_REZLOAD
+	#define LogRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
+	#define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+#else
+	#define LogRez(...)
+	#define LogCleanRez(...)
 #endif
 

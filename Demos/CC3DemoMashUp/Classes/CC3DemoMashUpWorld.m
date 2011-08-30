@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpWorld.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -42,11 +42,13 @@
 #import "CCTouchDispatcher.h"
 #import "CCParticleExamples.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3PODNode.h"
 
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"
 #define kBallsPODFile					@"Balls.pod"
 #define kMascotPODFile					@"cocos3dMascot.pod"
+#define kDieCubePODFile					@"DieCube.pod"
 #define kGroundTextureFile				@"Default.png"
 #define kFloaterTextureFile				@"ButtonRing48x48.png"
 #define kSignTextureFile				@"Crate.pvr"
@@ -55,7 +57,6 @@
 #define kHeadPODFile					@"Head.pod"
 #define kHeadTextureFile				@"Head_diffuse.pvr"
 #define kHeadBumpFile					@"Head_clonespacePVRTC.pvr"
-
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -69,6 +70,8 @@
 #define kPODBallsRezNodeName			@"BallsPODRez"
 #define kBeachBallName					@"BeachBall"
 #define kGlobeName						@"Globe"
+#define kDieCubeName					@"DieCube"
+#define kDieCubePODName					@"Cube"
 #define kTexturedTeapotName				@"Teapot"
 #define kRainbowTeapotName				@"Satellite"
 #define kTeapotHolderName				@"TeapotHolder"
@@ -85,17 +88,16 @@
 #define kFloaterName					@"Floater"
 #define kMascotName						@"cocos2d_3dmodel_unsubdivided"
 #define kDistractedMascotName			@"DistractedMascot"
-#define kMascotHolderName				@"MascotHolder"
-#define kDistractedMascotHolderName		@"DistractedMascotHolder"
 #define kSignName						@"MultiTextureSign"
-#define kWoodenSignHolderName			@"SignHolder"
 #define kSignLabelName					@"SignLabel"
-#define kPODHeadRezNodeName				@"BallsPODRez"
+#define kPODHeadRezNodeName				@"HeadPODRez"
 #define kFloatingHeadName				@"head03low01"
-#define kFloatingHeadHolderName			@"FloatingHeadHolder"
 #define kBumpMapLightTrackerName		@"BumpMapLightTracker"
+#define kExplosionName					@"Explosion"
 
 #define	kMultiTextureCombinerLabel		@"Multi-texture combiner function: %@"
+
+#define kCameraMoveDuration				3.0
 
 @interface CC3DemoMashUpWorld (Private)
 -(void) addRobot;
@@ -106,6 +108,7 @@
 -(void) addProjectedLabel;
 -(void) addTeapotAndSatellite;
 -(void) addBalls;
+-(void) addDieCube;
 -(void) addMascots;
 -(void) addBumpMapLightTracker;
 -(void) addWoodenSign;
@@ -119,9 +122,9 @@
 -(void) invadeWithRobotArmy;
 -(void) invadeWithTeapotArmy;
 -(void) invadeWithArmyOf: (CC3Node*) invaderTemplate;
+-(void) spinCubeFromSwipeAt: (CGPoint) touchPoint;
 -(void) touchGroundAt: (CGPoint) touchPoint;
 -(void) touchBeachBallAt: (CGPoint) touchPoint;
--(void) toggleBoxOn: (CC3Node*) aNode;
 -(void) switchWoodenSign;
 -(void) toggleFloatingHeadDefinition;
 @end
@@ -139,6 +142,7 @@
 	podLight = nil;				// not retained
 	beachBall = nil;			// not retained
 	globe = nil;				// not retained
+	dieCube = nil;				// not retained
 	mascot = nil;				// not retained
 	bumpMapLightTracker = nil;	// not retained
 	woodenSign = nil;			// not retained
@@ -180,12 +184,14 @@
 	//
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
-	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
 //	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
-//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
+	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 //	self.drawingSequencer = nil;
 	
 	[self addBalls];				// Add a transparent bouncing beach ball and a rotating globe...exported from Blender
+
+	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
 	
 	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
 
@@ -203,7 +209,7 @@
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 
 	[self addGround];				// Add a ground plane to provide some perspective to the user
-
+	
 	[self addMascots];				// Add the cocos3d mascot.
 									// This must happen after camera is loaded (in addRobot).
 	
@@ -223,8 +229,6 @@
 									// This spotlight will be turned on when the sun is turned off.
 
 	[self addFog];					// Adds fog to the world. This is initially invisible.
-
-	activeCamera.targetLocation = woodenSign.location;
 	
 	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
 	// and to save memory, release the vertex data in main memory because it is now redundant.
@@ -232,16 +236,36 @@
 	[self releaseRedundantData];
 
 	[self configureCamera];			// Check out some interesting camera options.
+	
+	// For an interesting effect, to draw text descriptors and/or bounding boxes on
+	// every node during debugging, uncomment one or more of the following lines.
+	// The first line displays short descriptive text for each node (including class,
+	// node name & tag). The second line displays bounding boxes of only those nodes
+	// with local content (eg- meshes). The third line shows the bounding boxes of all
+	// nodes, including those with local content AND structural nodes. You can also
+	// turn on any of these properties at a more granular level by using these and
+	// similar methods on individual nodes or node structures. See the CC3Node notes.
+	// This family of properties can be particularly useful during development to
+	// track down display issues.
+//	self.shouldDrawAllDescriptors = YES;
+//	self.shouldDrawAllLocalContentWireframeBoxes = YES;
+//	self.shouldDrawAllWireframeBoxes = YES;
+	
+	// The full node structure of the world is logged using the following line.
+	LogDebug(@"%@", [self structureDescription]);
 }
 
 // Various options for configuring interesting camera behaviours.
 -(void) configureCamera {
+
+	// Camera starts out embedded in the world.
+	cameraZoomType = kCameraZoomNone;
 	
 	// The camera comes from the POD file and is actually animated.
 	// Stop the camera from being animated so the user can control it via the user interface.
 	[self.activeCamera disableAnimation];
 	
-	// Keep track of which object the camera is pointing at.
+	// Keep track of which object the camera is pointing at
 	origCamTarget = self.activeCamera.target;
 	camTarget = origCamTarget;
 
@@ -259,12 +283,25 @@
 //	self.activeCamera.uniformScale = 0.015;
 	
 	// To see the effect of mounting a camera on a moving object, uncomment the following
-	// five lines to mount the camera on a virtual boom attached to the beach ball.
+	// lines to mount the camera on a virtual boom attached to the beach ball.
 	// Since the beach ball rotates as it bounces, you might also want to comment out the
 	// CC3RotateBy action that is run on the beachBall in the addBalls method!
 //	CC3Camera* cam = self.activeCamera;
-//	cam.target = nil;						// so we can point it manually now
-//	cam.location = cc3v(4.0, 1.0, 0.0);		// relative to the parent beach ball
+//	cam.location = cc3v(3.0, 1.0, 0.0);		// relative to the parent beach ball
+//	cam.rotation = cc3v(0.0, 90.0, 0.0);	// point camera out over the beach ball
+//	[beachBall addChild: cam];
+
+	// To see the effect of mounting a camera on a moving object AND having the camera
+	// track a location or object, even as the moving object bounces and rotates, 
+	// uncomment the following lines to mount the camera on a virtual boom attached to
+	// the beach ball, but stay pointed at the moving rainbow teapot, even as the beach
+	// ball that the camera is mounted on bounces and rotates. In this case, you do not
+	// need to comment out the CC3RotateBy action that is run on the beachBall in the
+	// addBalls method
+//	CC3Camera* cam = self.activeCamera;
+//	cam.shouldTrackTarget = YES;
+//	cam.target = teapotSatellite;
+//	cam.location = cc3v(3.0, 1.0, 0.0);		// relative to the parent beach ball
 //	cam.rotation = cc3v(0.0, 90.0, 0.0);	// point camera out over the beach ball
 //	[beachBall addChild: cam];
 }
@@ -354,7 +391,7 @@
 	// For extra realism, also rotate the beach ball as it bounces.
 	[beachBall runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																					rotateBy: cc3v(30.0, 0.0, 45.0)]]];
-
+	
 	// Configure the rotating globe
 	globe = (CC3MeshNode*)[self getNodeNamed: kGlobeName];
 	globe.location = cc3v(150.0, 200.0, -150.0);
@@ -366,11 +403,50 @@
 																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
-/** Add a large textured teapot and a small multicolored teapot orbiting it. */
+/**
+ * Adds a die cube that can be rotated by the user touching it and then swiping in any
+ * direction. The die cube rotates in the direction of the swipe, at a speed proportional
+ * to the speed and length of the swipe, and then steadily slows down over time.
+ *
+ * This die cube does not use a CCAction to rotate. Instead, a custom SpinningNode class
+ * replaces the node loaded from the POD file. This custom class spins by adjusting its
+ * rotational state on each update pass. It contains a spinSpeed property to indicate how
+ * fast it is currently spinning, and a friction property to adjust the spinSpeed on each
+ * update.
+ *
+ * To initiate spinning, the spinSpeed and rotationAxis properties are set from the
+ * touchEvent:at: method from touch-move events processed after this die cube node
+ * is selected by a touch-down event on the die cube.
+ *
+ * The die cube POD file was created from a Blender model available from the Blender
+ * "Two dice" modeling tutorial available online at:
+ * http://wiki.blender.org/index.php/Doc:Tutorials/Modeling/Two_dice
+ */
+-(void) addDieCube {
+
+	// Fetch the die cube model from the POD file.
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromResourceFile: kDieCubePODFile];
+	CC3Node* podDieCube = [podRezNode getNodeNamed: kDieCubePODName];
+	
+	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
+	// is loaded from the POD file. We can swap it out by creating a copy of the loaded
+	// POD node, using a different node class as the base.
+	dieCube = [[podDieCube copyWithName:kDieCubeName
+								asClass: [SpinningNode class]] autorelease];
+
+	// Now set some properties, including the friction, and add the die cube to the world
+	dieCube.uniformScale = 30.0;
+	dieCube.location = cc3v(-150.0, 200.0, -50.0);
+	dieCube.isTouchEnabled = YES;
+	dieCube.friction = 0.4;
+	[self addChild: dieCube];
+}
+
+/** Adds a large textured teapot and a small multicolored teapot orbiting it. */
 -(void) addTeapotAndSatellite {
 	teapotTextured = [[CC3ModelSampleFactory factory] makeLogoTexturedTeapotNamed: kTexturedTeapotName];
 	teapotTextured.isTouchEnabled = YES;		// allow this node to be selected by touch events
-
+	
 	// Uncomment the following two lines to experiment with a material that does not
 	// interact with the current lighting conditions. In fact, you can turn lighting
 	// completely off and this node will still be visible.
@@ -463,14 +539,14 @@
 	
 	// Green teapot is at postion 100 on the Y-axis
 	// Create it by copying the red teapot.
-	CC3Node* teapotGreen = [teapotRed copyWithName:  kTeapotGreenName];
+	CC3Node* teapotGreen = [[teapotRed copyWithName:  kTeapotGreenName] autorelease];
 	teapotGreen.diffuseColor = CCC4FMake(0.0, 0.7, 0.0, 1.0);
 	teapotGreen.location = cc3v(0.0, 100.0, 0.0);
 	[self addChild: teapotGreen];
 	
 	// Blue teapot is at postion 100 on the Z-axis
 	// Create it by copying the red teapot.
-	CC3Node* teapotBlue = [teapotRed copyWithName:  kTeapotBlueName];
+	CC3Node* teapotBlue = [[teapotRed copyWithName:  kTeapotBlueName] autorelease];
 	teapotBlue.diffuseColor = CCC4FMake(0.0, 0.0, 0.7, 1.0);
 	teapotBlue.location = cc3v(0.0, 0.0, 100.0);
 	[self addChild: teapotBlue];
@@ -489,23 +565,38 @@
 	[self addChild: teapotWhite];
 }
 
-/**
- * Adds a billboard text label attached to the animated arm.
- * This label tracks along with the robot hand, and always faces the camera.
- * This demonstrates a projecting a location in the 3D world to the 2D display surface.
- * Instead of a simple text label, the billboard could be a "health meter" or ballon speech
- * text for a character, or a targetting reticle, or any other 2D artifact.
- */
 -(void) addProjectedLabel {
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: @"Whoa...I'm dizzy!"
 											 fontName: @"Marker Felt"
-											 fontSize: 30.0];
-	CC3Billboard* bb = [CC3Billboard nodeWithName: kBillboardName withBillboard:bbLabel];
-	bb.unityScaleDistance = 250.0;
-	bb.location = cc3v( 0.0, 80.0, 0.0 );
-	bb.offsetPosition = ccp( 0.0, 15.0 );
+											 fontSize: 18.0];
+	CC3Billboard* bb = [CC3Billboard nodeWithName: kBillboardName withBillboard: bbLabel];
 	bb.color = ccYELLOW;
-	[[self getNodeNamed: kRobotTopArm] addChild: bb];
+	bb.shouldUseLighting = NO;
+	
+	// Uncomment to see the extent of the label as it moves in the 3D world
+//	bb.shouldDrawLocalContentWireframeBox = YES;
+	
+	// A billboard can be drawn either as part of the 3D scene, or as an overlay
+	// above the 3D scene. By commenting out one of the following sections of code,
+	// you can choose which method to use.
+	
+	// 1) In the 3D scene.
+	// The following lines wrap the emitter billboard in a wrapper that will find
+	// and track the camera in 3D. The label text can be occluded by other nodes
+	// between it and the camera.
+	CC3TargettingNode* camTrk = [bb asCameraTracker];
+	camTrk.location = cc3v( 0.0, 90.0, 0.0 );
+	[[self getNodeNamed: kRobotTopArm] addChild: camTrk];
+	
+	// 2) Overlaid above the 3D scene.
+	// The following lines add the emitter billboard as a 2D overlay that draws above
+	// the 3D world. The label text will not be occluded by any other 3D nodes.
+	// Comment out the lines just above, and uncomment the following lines:
+	//	bb.shouldDrawAs2DOverlay = YES;
+	//	bb.location = cc3v( 0.0, 80.0, 0.0 );
+	//	bb.unityScaleDistance = 425.0;
+	//	bb.offsetPosition = ccp( 0.0, 15.0 );
+	//	[[self getNodeNamed: kRobotTopArm] addChild: bb];
 }
 
 /**
@@ -568,18 +659,6 @@
 	// (forwardDirection) of its respective holder, which by default faces the negative Z-axis.
 	woodenSign.rotation = cc3v(0.0, 180.0, 0.0);
 	
-	// Create the targetting holder for the wooden sign so that it always faces the camera.
-	// Add the sign as a child of the targetting node.
-	// Set the targetting node to track its target, and set the camera as its target.
-	// Add the targetting node to the bump-map light tracker so that when the bump-map
-	// texture overlay is displayed, it will interact with the light source.
-	CC3TargettingNode* signHolder = [CC3TargettingNode nodeWithName: kWoodenSignHolderName];
-	[signHolder addChild: woodenSign];
-	signHolder.location = cc3v(-300.0, 200.0, -250.0);
-	signHolder.target = self.activeCamera;
-	signHolder.shouldTrackTarget = YES;
-	[bumpMapLightTracker addChild: signHolder];
-	
 	// Add a label below the sign that identifies which combiner method is being used.
 	// This label will be automatically updated whenever the user touches the wooden sign
 	// to switch the combiner function.
@@ -587,13 +666,26 @@
 	NSString* lblStr = [NSString stringWithFormat: kMultiTextureCombinerLabel, texEnvName];
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: lblStr
 											 fontName: @"Arial"
-											 fontSize: 16.0];
-	CC3Billboard* bb = [CC3Billboard nodeWithName: kSignLabelName withBillboard:bbLabel];
-	bb.unityScaleDistance = 250.0;
+											 fontSize: 9.0];
+	CC3Billboard* bb = [CC3Billboard nodeWithName: kSignLabelName withBillboard: bbLabel];
+	bb.unityScaleDistance = 350.0;
 	bb.location = cc3v( 0.0, -90.0, 0.0 );
 	bb.color = ccMAGENTA;
+	bb.shouldUseLighting = NO;
 	[woodenSign addChild: bb];
+	
+	// Create the targetting holder for the wooden sign so that it always faces the camera.
+	// Add the sign as a child of the targetting node.
+	// Set the targetting node to track the camera.
+	// Add the targetting node to the bump-map light tracker so that when the bump-map
+	// texture overlay is displayed, it will interact with the light source.
+	CC3TargettingNode* signHolder = [woodenSign asCameraTracker];
+	signHolder.location = cc3v(-350.0, 200.0, -300.0);
+	[bumpMapLightTracker addChild: signHolder];
 }
+
+// Text to hold in userData of floating head and then log when the head is poked.
+static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 /**
  * Adds a bump-mapped floating purple head to the world.
@@ -621,6 +713,9 @@
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = (CC3MeshNode*)[podRezNode getNodeNamed: kFloatingHeadName];
 	floatingHead.isTouchEnabled = YES;
+	
+	// Demonstrate the use of applicaiton-specific data attached to a node.
+	floatingHead.userData = kDontPokeMe;
 	
 	// The floating head normal texture was created in a left-handed coordinate system
 	// (eg- DirectX). OpenGL uses a right-handed coordinate system. We can correct for
@@ -653,19 +748,14 @@
 	
 	// Put the head node in a CC3TargettingNode so that we can orient it to face the camera.
 	// Place the floating head at the origin of the holder, and turn it to face left
-	floatingHead.location = cc3v(0.0, 0.0, 0.0);
-	floatingHead.rotation = cc3v(0.0, 90.0, 0.0);
-
 	// Create the targetting holder for the head so that it always faces the camera.
-	// Add the sign as a child of the targetting node.
-	// Set the targetting node to track its target, and set the camera as its target.
+	// Add the floating head as a child of the targetting node.
 	// Add the targetting node to the bump-map light tracker so that the bump-map
 	// will interact with the light source.
-	CC3TargettingNode* headHolder = [CC3TargettingNode nodeWithName: kFloatingHeadHolderName];
-	[headHolder addChild: floatingHead];
-	headHolder.location = cc3v(-250.0, 200.0, 0.0);
-	headHolder.target = self.activeCamera;
-	headHolder.shouldTrackTarget = YES;
+	floatingHead.location = cc3v(0.0, 0.0, 0.0);
+	floatingHead.rotation = cc3v(0.0, 90.0, 0.0);
+	CC3TargettingNode* headHolder = [floatingHead asCameraTracker];
+	headHolder.location = cc3v(-350.0, 200.0, -100.0);
 	[bumpMapLightTracker addChild: headHolder];
  }
 
@@ -701,22 +791,17 @@
 	// Add the mascot as a child of the targetting node.
 	// Set the targetting node to track its target, and set the camera as its target.
 	// Add the targetting node to the world.
-	CC3TargettingNode* mascotHolder = [CC3TargettingNode nodeWithName: kMascotHolderName];
-	[mascotHolder addChild: mascot];
-	mascotHolder.location = cc3v(-375.0, 100.0, -525.0);
-	mascotHolder.target = self.activeCamera;
-	mascotHolder.shouldTrackTarget = YES;
+	CC3TargettingNode* mascotHolder = [mascot asCameraTracker];
+	mascotHolder.location = cc3v(-400.0, 100.0, -525.0);
 	[self addChild: mascotHolder];
 
 	// Create the targetting holder for the mascot that is distracted by the rainbow
 	// teapot's movements. Add the distracted mascot as a child of the targetting node.
 	// Set the targetting node to track its target, and set the rainbow teapot as its target.
 	// Add the targetting node to the world.
-	CC3TargettingNode* distractedMascotHolder = [CC3TargettingNode nodeWithName: kDistractedMascotHolderName];	
-	[distractedMascotHolder addChild: distractedMascot];
-	distractedMascotHolder.location = cc3v(-300.0, 100.0, -650.0);
+	CC3TargettingNode* distractedMascotHolder = [distractedMascot asTracker];
+	distractedMascotHolder.location = cc3v(-325.0, 100.0, -650.0);
 	distractedMascotHolder.target = teapotSatellite;
-	distractedMascotHolder.shouldTrackTarget = YES;
 
 	// If you want to restrict the mascot to only rotating side-to-side around the
 	// Y-axis, but not up and down, uncomment the following line.
@@ -731,22 +816,61 @@
  * emitter, and you should notice a drop in frame rate when it is visible.
  */
 -(void) addSun {
-	// Create the particle emitter. Use kCCPositionTypeGrouped so that particles move with
-	// the emitter as the camera moves. Other values could be used for different effects.
-	// Content size sets the 2D clipping boundary. This should be set big enough to contain
-	// all particles that will be emitted. Alternately, we could remove the bounding volume
-	// of the CC3Billboard node below altogether.
+	// Create the cocos2d 2D particle emitter.
 	CCParticleSystem* emitter = [CCParticleSun node];
-	emitter.positionType = kCCPositionTypeGrouped;
-	emitter.contentSize = CGSizeMake(100.0, 100.0);
+	emitter.position = ccp(0.0, 0.0);
 	
 	// Create the 3D billboard node to hold the 2D particle emitter.
-	// Make it far away so that the sun appears fixed in the sky.
-	// Pick a unityScaleDistance to set the appropriate size for the sun.
-	CC3Billboard* bb = [CC3Billboard nodeWithName: kSunName withBillboard: emitter];
-	bb.location = cc3v(3000.0, 3000.0, -100.0);
-	bb.unityScaleDistance = 9000.0;
-	[self addChild: bb];
+	CC3Billboard* bb = [CC3ParticleSystemBillboard nodeWithName: kSunName
+												  withBillboard: emitter];
+
+	// A billboard can be drawn either as part of the 3D scene, or as an overlay
+	// above the 3D scene. By commenting out one of the following sections of code,
+	// you can choose which method to use.
+	
+	// 1) In the 3D scene.
+	// The following lines wrap the emitter billboard in a wrapper that will find
+	// and track the camera in 3D. The sun can be occluded by other nodes between
+	// it and the camera.
+
+	bb.shouldUseLighting = NO;		// Sun material not affected by lighting!
+	bb.uniformScale = 5.0;			// Find a suitable size
+
+	// 2D particle systems do not have a real contentSize and boundingBox, so we need to
+	// calculate it dynamically on each update pass, or assign one that will cover the
+	// area that will be used by this particular particle system. This bounding rectangle
+	// is specified in terms of the local coordinate system of the particle system and
+	// will be scaled and transformed as the node is transformed. By setting this once,
+	// we don't need to calculate it while running the particle system.
+	// To calculate it dynamically on each update instead, comment out the following line,
+	// and uncomment the line after.
+	bb.billboardBoundingRect = CGRectMake(-30.0, -30.0, 60.0, 60.0);
+//	bb.shouldAlwaysMeasureBillboardBoundingRect = YES;
+	
+	// How did we determine the billboardBoundingRect? This can be done by trial and
+	// error, by uncommenting culling logging in the CC3Billboard doesIntersectFrustum:
+	// method. Or it is better done by changing LogTrace to LogDebug in the CC3Billboard
+	// billboardBoundingRect property accessor method, commenting out the line above this
+	// comment, and uncommenting the following line. Doing so will cause an ever expanding
+	// bounding box to be logged, the maximum size of which can be used as the value to
+	// set in the billboardBoundingRect property.
+//	bb.shouldMaximizeBillboardBoundingRect = YES;
+
+	// Wrap the billboard in a tracker that will make it always face the camera.
+	// Set it far away so that the sun appears fixed in the sky.
+	CC3TargettingNode* camTrk = [bb asCameraTracker];
+	camTrk.location = cc3v(1000.0, 1000.0, -100.0);
+	[self addChild: camTrk];
+
+	// 2) Overlaid above the 3D scene.
+	// The following lines add the emitter billboard as a 2D overlay that draws above
+	// the 3D world. The flames will not be occluded by any other 3D nodes.
+	// Comment out the lines in section (1) just above, and uncomment the following lines:
+//	emitter.positionType = kCCPositionTypeGrouped;
+//	bb.shouldDrawAs2DOverlay = YES;
+//	bb.location = cc3v(3000.0, 3000.0, -100.0);
+//	bb.unityScaleDistance = 9000.0;
+//	[self addChild: bb];
 }
 
 /**
@@ -806,24 +930,74 @@
  * billboard it contains are automatically removed from the 3D world.
  */
 -(void) addExplosionTo: (CC3Node*) aNode {
-	// Create the particle emitter. Use kCCPositionTypeGrouped so that particles move with
-	// the emitter as the camera moves. Other values could be used for different effects.
-	// The particle system is set to a finite duration and is set to auto-remove once it
-	// is exhausted.
+	// Create the particle emitter with a finite duration, and set it to auto-remove
+	// once it is exhausted.
 	CCParticleSystem* emitter = [CCParticleFire node];
-	emitter.positionType = kCCPositionTypeGrouped;
+	emitter.position = ccp(0.0, 0.0);
 	emitter.duration = 0.75;
 	emitter.autoRemoveOnFinish = YES;
-	
+
 	// Create the 3D billboard node to hold the 2D particle emitter.
-	// Pick a unityScaleDistance to set the appropriate size for the sun.
 	// The bounding volume is removed so that the flames will not be culled as the
 	// camera pans away from the flames. This is suitable since the particle system
 	// only exists for a short duration.
-	CC3Billboard* bb = [CC3ParticleSystemBillboard nodeWithBillboard: emitter];
-	bb.unityScaleDistance = 180.0;
-	bb.boundingVolume = nil;
-	[aNode addChild: bb];
+	CC3ParticleSystemBillboard* bb = [CC3ParticleSystemBillboard nodeWithName: kExplosionName
+																withBillboard: emitter];
+	
+	// A billboard can be drawn either as part of the 3D scene, or as an overlay
+	// above the 3D scene. By commenting out one of the following sections of code,
+	// you can choose which method to use.
+	
+	// 1) In the 3D scene.
+	// The following lines wrap the emitter billboard in a wrapper that will find
+	// and track the camera in 3D. The flames can be occluded by other nodes between
+	// the explosion and the camera.
+
+	// Place the flames slightly in front of the node relative to the camera, and we
+	// don't want the flames to be touch enabled even if the specified node is.
+	bb.location = cc3v(0.0, 0.0, -0.5);
+	bb.uniformScale = 0.25 * (1.0 / aNode.uniformScale);	// Find a suitable scale
+	bb.shouldUseLighting = NO;								// Solid coloring
+	bb.shouldInheritTouchability = NO;						// Don't allow flames to be touched
+	
+	// If the 2D particle system uses point particles instead of quads, attenuate the
+	// particle sizes with distance realistically. This is not needed if the particle
+	// system will always use quads, but it doesn't hurt to set it.
+	bb.particleSizeAttenuationCoefficients = CC3AttenuationCoefficientsMake(0.05, 0.02, 0.0001);
+	
+	// 2D particle systems do not have a real contentSize and boundingBox, so we need to
+	// calculate it dynamically on each update pass, or assign one that will cover the
+	// area that will be used by this particular particle system. This bounding rectangle
+	// is specified in terms of the local coordinate system of the particle system and
+	// will be scaled and transformed as the node is transformed. By setting this once,
+	// we don't need to calculate it while running the particle system.
+	// To calculate it dynamically on each update instead, comment out the following line,
+	// and uncomment the line after. And also uncomment the third line to see the bounding
+	// box drawn and updated on each frame.
+	bb.billboardBoundingRect = CGRectMake(-90.0, -50.0, 190.0, 340.0);
+//	bb.shouldAlwaysMeasureBillboardBoundingRect = YES;
+//	bb.shouldDrawLocalContentWireframeBox = YES;
+
+	// How did we determine the billboardBoundingRect? This can be done by trial and
+	// error, by uncommenting culling logging in the CC3Billboard doesIntersectFrustum:
+	// method. Or it is better done by changing LogTrace to LogDebug in the CC3Billboard
+	// billboardBoundingRect property accessor method, commenting out the line above this
+	// comment, and uncommenting the following line. Doing so will cause an ever expanding
+	// bounding box to be logged, the maximum size of which can be used as the value to
+	// set in the billboardBoundingRect property.
+//	bb.shouldMaximizeBillboardBoundingRect = YES;
+
+	// Wrap the CC3Billboard in a node that will automatically track the camera
+	[aNode addChild: [bb asCameraTracker]];
+
+	// 2) Overlaid above the 3D scene.
+	// The following lines add the emitter billboard as a 2D overlay that draws above
+	// the 3D world. The flames will not be occluded by any other 3D nodes.
+	// Comment out the lines in section (1) just above, and uncomment the following lines:
+//	emitter.positionType = kCCPositionTypeGrouped;
+//	bb.shouldDrawAs2DOverlay = YES;
+//	bb.unityScaleDistance = 180.0;
+//	[aNode addChild: bb];
 }
 
 
@@ -845,7 +1019,7 @@
 	// To show where the POD light is, track the small white teapot to the current location
 	// of the light. The actual direction vector is of unit length, so scale it to show the
 	// direction of the light (through the white teapot towards the origin).
-	teapotWhite.location = CC3VectorScaleUniform(CC3VectorFromCC3Vector4(podLight.homogeneousLocation), 100.0);
+	teapotWhite.location = CC3VectorScaleUniform(CC3VectorFromHomogenizedCC3Vector4(podLight.homogeneousLocation), 100.0);
 }
 
 /** Update the location and direction of looking of the 3D camera */
@@ -898,9 +1072,12 @@
 		camTarget = woodenSign;
 	} else if (camTarget == woodenSign) {
 		camTarget = floatingHead;
+	} else if (camTarget == floatingHead) {
+		camTarget = dieCube;
 	} else {
 		camTarget = origCamTarget;
 	}
+	self.activeCamera.target = nil;			// Ensure the camera is not locked to the original target
 	[self.activeCamera stopAllActions];
 	[self.activeCamera runAction: [CC3RotateToLookAt actionWithDuration: 2.0
 														 targetLocation: camTarget.globalLocation]];
@@ -974,10 +1151,11 @@
 	[ground addAndLocalizeChild: landingCraft];
 }
 
+/** Cycle between sunshine, fog and spotlight. */
 -(BOOL) cycleLights {
 	CC3Node* sun = [self getNodeNamed: kSunName];
 	CC3Node* spotLight = [self getNodeNamed: kSpotlightName];
-
+	
 	if (sun.visible) {
 		if (fog.visible) {		// Cycle to spotlight
 			sun.visible = NO;
@@ -998,8 +1176,112 @@
 	return sun.visible;
 }
 
+/**
+ * Cycle between current camera view and two views showing the complete world.
+ * When the full world is showing, a wireframe is drawn so we can easily see its extent.
+ */
+-(void) cycleZoom {
+	CC3Camera* cam = self.activeCamera;
+	[cam stopAllActions];						// Stop any current camera motion
+	switch (cameraZoomType) {
+
+		// Currently in normal view. Remember orientation of camera, turn on wireframe
+		// and move away from the world along the line between the center of the world
+		// and the camera until everything in the world is visible.
+		case kCameraZoomNone:
+			lastCameraOrientation = CC3RayFromLocDir(cam.globalLocation, cam.globalForwardDirection);
+			self.shouldDrawDescriptor = YES;
+			self.shouldDrawWireframeBox = YES;
+			[cam moveWithDuration: kCameraMoveDuration toShowAllOf: self];
+			cameraZoomType = kCameraZoomStraightBack;	// Mark new state
+			break;
+		
+		// Currently looking at the full world.
+		// Move to view the world from a different direction.
+		case kCameraZoomStraightBack:
+			self.shouldDrawDescriptor = YES;
+			self.shouldDrawWireframeBox = YES;
+			[cam moveWithDuration: kCameraMoveDuration
+					  toShowAllOf: self
+					fromDirection: cc3v(-1.0, 1.0, 1.0)];
+			cameraZoomType = kCameraZoomBackTopRight;	// Mark new state
+			break;
+
+		// Currently in second full-world view.
+		// Turn off wireframe and move back to the original location and orientation.
+		case kCameraZoomBackTopRight:
+		default:
+			self.shouldDrawDescriptor = NO;
+			self.shouldDrawWireframeBox = NO;
+			[cam runAction: [CC3MoveTo actionWithDuration: kCameraMoveDuration
+												   moveTo: lastCameraOrientation.startLocation]];
+			[cam runAction: [CC3RotateToLookTowards actionWithDuration: kCameraMoveDuration
+													  forwardDirection: lastCameraOrientation.direction]];
+			cameraZoomType = kCameraZoomNone;	// Mark new state
+			break;
+	}
+}
+
+
+#pragma mark Touch events
+
+/**
+ * Handle touch events in the world:
+ *   - Touch-down events are used to select nodes. Forward these to the touched node picker.
+ *   - Touch-move events are used to generate a swipe gesture to spin the die cube
+ *   - Touch-up events are only used to cancel a selection
+ */
+-(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
+	switch (touchType) {
+		case kCCTouchBegan:
+			touchDownPoint = touchPoint;
+			[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+			break;
+		case kCCTouchMoved:
+			if (selectedNode == dieCube) {
+				[self spinCubeFromSwipeAt: touchPoint];
+			}
+			break;
+		case kCCTouchEnded:
+			selectedNode = nil;
+			break;
+		default:
+			break;
+	}
+}
+
+/**
+ * Sets the die cube spinning, by measuring the direction and length of a swipe.
+ *
+ * The swipe is measured in 2D screen coordinates, which are mapped to 3D coordinates
+ * by recognizing that the screen's X-coordinate maps to the camera's rightDirection
+ * vector, and the screen's Y-coordinates maps to the camera's upDirection.
+ *
+ * The cube rotates around an axis perpendicular to the swipe, and the initial speed
+ * of rotation is determined by the length of the swipe.
+ */
+-(void) spinCubeFromSwipeAt: (CGPoint) touchPoint {
+	
+	// Get the direction and length of the swipe in 2D screen coordinates
+	CGPoint swipe2d = ccpSub(touchPoint, touchDownPoint);
+
+	// Convert the swipe to 3D coordinates relative to the camera's view, by mapping
+	// the 2D X-component to the camera's rightDirection vector and the 2D Y-component
+	// to the camera's upDirection vector, and then assembling those vectors into a
+	// vector that represents the swipe across the camera's view.
+	CC3Vector swipe3dX = CC3VectorScaleUniform(activeCamera.rightDirection, swipe2d.x);
+	CC3Vector swipe3dY = CC3VectorScaleUniform(activeCamera.upDirection, swipe2d.y);
+	CC3Vector swipe3d = CC3VectorAdd(swipe3dX, swipe3dY);
+
+	// The axis of rotation is perpendicular to the swipe.
+	dieCube.rotationAxis = CC3VectorCross(swipe3d, activeCamera.forwardDirection);
+
+	// Sets the speed of rotation from the length of the swipe
+	dieCube.spinSpeed = CC3VectorLength(swipe3d) * 3.0;
+}
+
 /** 
- * This callback method is automatically invoked when a touchable 3D node is touched
+ * This callback method is automatically invoked when a touchable 3D node is picked
  * by the user. If the touch event indicates that the user has raised the finger,
  * thus completing the touch action.
  *
@@ -1008,37 +1290,52 @@
  * the materials underlying the node).
  *
  * Some nodes have other, or additional, behaviour. Nodes with special behaviour include
- * the ground, the beach ball, the textured and rainbow teapots, and the wooden sign.
+ * the ground, the die cube, the beach ball, the textured and rainbow teapots, and the wooden sign.
  */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {
-	if (touchType == kCCTouchEnded) {
-		LogInfo(@"You selected %@ at %@, or %@ in 2D.", aNode,
-				NSStringFromCC3Vector(aNode ? aNode.globalLocation : kCC3VectorZero),
-				NSStringFromCC3Vector(aNode ? [activeCamera projectNode: aNode] : kCC3VectorZero));
+	LogInfo(@"You selected %@ at %@, or %@ in 2D.", aNode,
+			NSStringFromCC3Vector(aNode ? aNode.globalLocation : kCC3VectorZero),
+			NSStringFromCC3Vector(aNode ? [activeCamera projectNode: aNode] : kCC3VectorZero));
 
-		// Don't visually highlight ground or wooden sign when touched. Handle these objects differently.
-		if (aNode == ground) {
-			[self touchGroundAt: touchPoint];
-		} else if (aNode == woodenSign) {
-			[self switchWoodenSign];
-		} else if (aNode == floatingHead) {
-			[self toggleFloatingHeadDefinition];
-		} else {
-			// Tint the node to pink and back again to provide user feedback to touch
-			CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.3f colorTo: kCCC4FMagenta];
-			CCActionInterval* tintDown = [CC3TintEmissionTo actionWithDuration: 0.9f colorTo: kCCC4FBlack];
-			[aNode runAction: [CCSequence actionOne: tintUp two: tintDown]];
+	// Remember the node that was selected
+	selectedNode = aNode;
+	
+	// Toggle the display of a descriptor label on the node
+	aNode.shouldDrawDescriptor = !aNode.shouldDrawDescriptor;
+	
+	// Don't visually highlight ground or wooden sign when touched. Handle these objects differently.
+	if (aNode == ground) {
+		[self touchGroundAt: touchPoint];
+	} else if (aNode == woodenSign) {
+		[self switchWoodenSign];
+	} else if (aNode == floatingHead) {
+		[self toggleFloatingHeadDefinition];
+	} else if (aNode == dieCube) {
+		// do nothing...but don't highlight
+	} else {
+		// Tint the node to cyan and back again to provide user feedback to touch
+		CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.3f colorTo: kCCC4FCyan];
+		CCActionInterval* tintDown = [CC3TintEmissionTo actionWithDuration: 0.9f colorTo: kCCC4FBlack];
+		[aNode runAction: [CCSequence actionOne: tintUp two: tintDown]];
+		
+		// If the beach ball is touched toggle its opacity.
+		if (aNode == beachBall) {
+			[self touchBeachBallAt: touchPoint];
+
+			// For fun, uncomment the following line to draw a wireframe box around the beachball
+//			aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
+		}
+		
+		// If the node is either the textured or rainbow teapot, toggle the display of
+		// a wireframe of its bounding box, plus a wireframe around both teapots.
+		if (aNode == teapotTextured || aNode == teapotSatellite) {
 			
-			// If the beach ball is touched toggle its opacity.
-			if (aNode == beachBall) {
-				[self touchBeachBallAt: touchPoint];
-			}
-			
-			// If the node is either the textured or rainbow teapot, toggle the display of
-			// a wire-frame of its bounding box.
-			if (aNode == teapotTextured || aNode == teapotSatellite) {
-				[self toggleBoxOn: aNode];
-			}
+			// Toggle wireframe box around the touched teapot's mesh
+			CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
+			lcNode.shouldDrawLocalContentWireframeBox = !lcNode.shouldDrawLocalContentWireframeBox;
+
+			// Toggle the large wireframe box around both teapots
+			aNode.parent.shouldDrawWireframeBox = !aNode.parent.shouldDrawWireframeBox;
 		}
 	}
 }
@@ -1053,8 +1350,11 @@
 -(void) touchGroundAt: (CGPoint) touchPoint {
 	CC3Plane groundPlane = ground.plane;
 	CC3Vector4 touchLoc = [self.activeCamera unprojectPoint: touchPoint ontoPlane: groundPlane];
+
+	// Make sure the projected touch is in front of the camera, not behind it
+	// (ie- cam is facing towards, not away from, the ground)
 	if (touchLoc.w > 0.0) {
-		CC3MeshNode* tp = [teapotWhite copyWithName: kTeapotOrangeName];
+		CC3MeshNode* tp = [[teapotWhite copyWithName: kTeapotOrangeName] autorelease];
 		tp.color = ccORANGE;
 		tp.location = cc3v(touchLoc.x, touchLoc.y, touchLoc.z);
 		
@@ -1079,30 +1379,6 @@
  */
 -(void) touchBeachBallAt: (CGPoint) touchPoint {
 	beachBall.isOpaque = !beachBall.isOpaque;
-}
-
-/**
- * Toggle the display of a wire-frame of the bounding box of the specified node.
- * This is done by either adding or removing a CC3LineNode as a child of the node.
- * The CC3LineNode is populated from the bounding box of the teapot mesh.
- */
--(void) toggleBoxOn: (CC3Node*) aNode {
-	NSString* boxName = [NSString stringWithFormat: @"%@-Box", aNode.name];
-	
-	// See if the wire-frame node exists already as a child of the teapot.
-	CC3LineNode* box = (CC3LineNode*)[aNode getNodeNamed: boxName];
-	if (box) {
-		[box remove];		// If so...remove it.
-	} else {
-		// Otherwise, create a new CC3LineNode from the bounding box of the
-		// teapot mesh and add it as a child of the teapot, so that it will
-		// move and scale with the teapot.
-		box = [CC3LineNode nodeWithName: boxName];
-		[box populateAsWireBox: ((CC3MeshNode*)aNode).mesh.boundingBox];
-		box.pureColor = kCCC4FYellow;
-		//					box.shouldSmoothLines = YES;	// Uncomment to see the difference
-		[aNode addChild: box];
-	}
 }
 
 /**
@@ -1158,10 +1434,17 @@
 	}
 	
 	// Get the label on top of the wooden sign, and update its contents to be
-	// the name of the new multi-texture combining function.
-	id<CCLabelProtocol> signLabel = (id<CCLabelProtocol>)((CC3Billboard*)[woodenSign getNodeNamed: kSignLabelName]).billboard;
+	// the name of the new multi-texture combining function, and re-measure the
+	// bounding box of the CC3Billboard from the new size of the label.
+	// Alternately, we could have set the shouldAlwaysMeasureBillboardBoundingRect
+	// property on the CC3Billboard to have the bounding box measured automatically
+	// on every update pass, at the cost of many unneccessary measurements when the
+	// label text does not change.
+	CC3Billboard* bbSign = (CC3Billboard*)[woodenSign getNodeNamed: kSignLabelName];
+	id<CCLabelProtocol> signLabel = (id<CCLabelProtocol>)bbSign.billboard;
 	[signLabel setString: [NSString stringWithFormat: kMultiTextureCombinerLabel,
 						   NSStringFromGLEnum(stampTU.combineRGBFunction)]];
+	[bbSign resetBillboardBoundingRect];
 }
 
 -(void) toggleFloatingHeadDefinition; {
@@ -1173,6 +1456,11 @@
 		[floatingHead.material addTexture: headBumpTex];
 		[floatingHead.material addTexture: headTex];
 	}
+	
+	// Demonstrate the use of application-specific data attached to a node, by logging the data.
+	if (floatingHead.userData) {
+		LogInfo(@"%@ says '%@'", floatingHead, floatingHead.userData);
+	}
 }
 
 @end
@@ -1180,6 +1468,14 @@
 
 #pragma mark -
 #pragma mark Specialized POD loading classes
+
+@interface CC3Node (TemplateMethods)
+-(void) updateGlobalLocation;
+-(void) populateFrom: (CC3Node*) another;
+@end
+
+
+#pragma mark IntroducingPODResource
 
 @implementation IntroducingPODResource
 
@@ -1206,9 +1502,7 @@
 @end
 
 
-@interface CC3Node (TemplateMethods)
--(void) updateGlobalLocation;
-@end
+#pragma mark IntroducingPODLight
 
 @implementation IntroducingPODLight
 
@@ -1238,6 +1532,9 @@
 
 @end
 
+
+#pragma mark HeadPODResource
+
 @implementation HeadPODResource
 
 /**
@@ -1251,4 +1548,73 @@
 
 @end
 
+
+#pragma mark SpinningNode
+
+@implementation SpinningNode
+
+@synthesize spinSpeed, friction;
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		spinSpeed = 0.0f;
+		friction = 0.0f;
+	}
+	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3Node*) another {
+	[super populateFrom: another];
+	
+	// Only copy these properties if the original is of the same class
+	if ( [another isKindOfClass: [SpinningNode class]] ) {
+		SpinningNode* anotherSpinningNode = (SpinningNode*)another;
+		friction = anotherSpinningNode.friction;
+		spinSpeed = anotherSpinningNode.spinSpeed;
+	}
+}
+
+/**
+ * On each update, slow the speed of rotation down based on the value of the
+ * friction property
+ */
+-(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
+	GLfloat dt = visitor.deltaTime;
+
+	// Slow the spinSpeed down based on the friction value and how long the
+	// friction has been applied since the past update.
+	if (spinSpeed > 0.0f) {
+		spinSpeed -= (spinSpeed * friction * dt);
+	} else if (spinSpeed < 0.0f) {
+		spinSpeed += (spinSpeed * friction * dt);
+	}
+	
+	// Update the rotation angle based on the speed of rotation, and length of time
+	// since the last update.
+	self.rotationAngle += spinSpeed * dt;
+}
+
+@end
+
+
+/**
+ * Demonstrates the initialization and disposal of application-specific userData by adding
+ * custom extension categories to subclasses of CC3Identifiable (nodes, materials, meshes,
+ * textures, etc).
+ */
+@implementation CC3Node (MashUpUserData)
+
+// Change the LogTrace to LogDebug to see when userData would be initialized for each node
+-(void) initUserData {
+	LogTrace(@"%@ initializing userData reference.", self);
+}
+
+// Change the LogTrace to LogDebug and then click the invade button when running the app.
+-(void) releaseUserData {
+	LogTrace(@"%@ disposing of userData.", self);
+}
+
+@end
 

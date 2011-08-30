@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Engine.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -130,6 +130,24 @@ static CC3OpenGLES11Engine* engine;
 	[fog close];
 	[hints close];
 	[appExtensions close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n%@ ", platform];
+	[desc appendFormat: @"\n%@ ", serverCapabilities];
+	[desc appendFormat: @"\n%@ ", clientCapabilities];
+	[desc appendFormat: @"\n%@ ", materials];
+	[desc appendFormat: @"\n%@ ", textures];
+	[desc appendFormat: @"\n%@ ", lighting];
+	[desc appendFormat: @"\n%@ ", matrices];
+	[desc appendFormat: @"\n%@ ", vertices];
+	[desc appendFormat: @"\n%@ ", state];
+	[desc appendFormat: @"\n%@ ", fog];
+	[desc appendFormat: @"\n%@ ", hints];
+	[desc appendFormat: @"\n%@ ", appExtensions];
+	return desc;
 }
 
 @end

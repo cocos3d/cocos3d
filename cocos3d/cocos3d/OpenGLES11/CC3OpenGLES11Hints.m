@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Hints.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -104,6 +104,17 @@
 	[lineSmooth close];
 	[perspectiveCorrection close];
 	[pointSmooth close];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", fog];
+	[desc appendFormat: @"\n    %@ ", generateMipMap];
+	[desc appendFormat: @"\n    %@ ", lineSmooth];
+	[desc appendFormat: @"\n    %@ ", perspectiveCorrection];
+	[desc appendFormat: @"\n    %@ ", pointSmooth];
+	return desc;
 }
 
 @end

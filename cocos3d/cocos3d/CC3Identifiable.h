@@ -1,7 +1,7 @@
 /*
  * CC3Identifiable.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,12 +36,16 @@
  * Instances can be initialized with either or both a tag and a name. Instances initialized without
  * an explcit tag will have a unique tag automatically generated and assigned.
  *
+ * You can assign your own data to instances of CC3Identifiable or its subclasses through the
+ * userData property.
+ *
  * When overriding initialization, subclasses typically need only override the most generic
  * initializer, initWithTag:withName:.
  */
 @interface CC3Identifiable : NSObject <NSCopying> {
 	GLuint tag;
 	NSString* name;
+	void* userData;
 }
 
 /**
@@ -58,6 +62,30 @@
  */
 @property(nonatomic, retain) NSString* name;
 
+/**
+ * Application-specific data associated with this object.
+ *
+ * You can use this property to add any data you want to an instance of CC3Identifiable or
+ * its concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.). Since this is
+ * a generic pointer, you can store any type of data, such as an object, structure, primitive,
+ * or array.
+ *
+ * This data is not retained by this instance, and is not managed by the cocos3d framework.
+ * It is the responsibility of the application to manage the allocation, retention, and
+ * disposal of this data.
+ *
+ * To assist in managing this data, the methods initUserData and releaseUserData are invoked
+ * automatically during the initialization and deallocation of each instance of this class.
+ * In this abstract class, these methods do nothing, but, if appropriate, you can override
+ * these methods by adding extention categories to the concrete subclasses of CC3Identifiable,
+ * (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.), to create, retain and dispose of the data.
+ *
+ * In this abstract class, this property is not retained. You can override the accessor
+ * methods by creating extension categories for the concrete subclasses, (CC3Node, CC3Mesh,
+ * CC3Material, CC3Texture, etc.), in order to retain the data if appropriate.
+ */
+@property(nonatomic, assign) void* userData;
+
 
 #pragma mark Allocation and initialization
 
@@ -71,8 +99,8 @@
 -(id) initWithTag: (GLuint) aTag;
 
 /**
- * Initializes this instance with the specified name and an automatically generated unique tag value.
- * The tag value will be generated automatically via the method nextTag.
+ * Initializes this instance with the specified name and an automatically generated unique
+ * tag value. The tag value will be generated automatically via the method nextTag.
  */
 -(id) initWithName: (NSString*) aName;
 
@@ -83,27 +111,182 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName;
 
 /**
- * Returns a newly allocated (retained) copy of this instance. The new copy will have the
- * same name as this instance, but will have a unique tag.
+ * Invoked automatically from the init* family of methods to initialize the userData reference.
  *
- * This method may often be used to duplicate an instance many times, to create large
- * number of similar instances to populate a game. To help you verify that you are correctly
- * releasing and deallocating all these copies, you can use the instanceCount class method
- * to get a current count of the total number of instances of all subclasses of CC3Identifiable,
+ * In this abstract class, this method does nothing. You can override this method by creating
+ * extension categories for the concrete subclasses, (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), if the userData can be initialized and retained in self-contained manner.
+ */
+-(void) initUserData;
+
+/**
+ * Invoked automatically from the dealloc method to release or dispose of the data referenced
+ * in the userData property.
+ *
+ * In this abstract class, this method does nothing. You can override this method by creating
+ * extension categories for the concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), to release or dispose of the data referenced in the userData property.
+ */
+-(void) releaseUserData;
+
+/**
+ * Returns a newly allocated (retained) copy of this instance. The new copy will have
+ * the same name as this instance, but will have a unique tag.
+ *
+ * The returned instance is retained. It is the responsiblity of the caller to manage
+ * the lifecycle of the returned instance and perform the corresponding invocation of
+ * the release method at the appropriate time.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * The copy... methods may often be used to duplicate an instance many times, to create
+ * large number of similar instances to populate a game. To help you verify that you are
+ * correctly releasing and deallocating all these copies, you can use the instanceCount
+ * class method to get a current count of the total number of instances of all subclasses
+ * of CC3Identifiable,
+ *
+ * Subclasses that extend copying should not override this method, but should override
+ * the populateFrom: method instead.
  */
  -(id) copy;
 
 /**
- * Returns a newly allocated (retained) copy of this instance. The new copy will have its
- * name set to the specified name, and will have a unique tag.
+ * Returns a newly allocated (retained) copy of this instance. The new copy
+ * will have its name set to the specified name, and will have a unique tag.
+ *
+ * The returned instance is retained. It is the responsiblity of the caller to manage
+ * the lifecycle of the returned instance and perform the corresponding invocation of
+ * the release method at the appropriate time.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * The copy... methods may often be used to duplicate an instance many times, to create
+ * large number of similar instances to populate a game. To help you verify that you are
+ * correctly releasing and deallocating all these copies, you can use the instanceCount
+ * class method to get a current count of the total number of instances of all subclasses
+ * of CC3Identifiable,
+ *
+ * Subclasses that extend copying should not override this method, but should override
+ * the populateFrom: method instead.
  */
 -(id) copyWithName: (NSString*) aName;
 
 /**
- * Returns a newly allocated (retained) copy of this instance. The new copy will have its
- * name set to the specified name, and will have a unique tag.
+ * Returns a newly allocated (retained) copy of this instance. The new copy
+ * will have its name set to the specified name, and will have a unique tag.
+ *
+ * The returned instance is retained. It is the responsiblity of the caller to manage
+ * the lifecycle of the returned instance and perform the corresponding invocation of
+ * the release method at the appropriate time.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * The copy... methods may often be used to duplicate an instance many times, to create
+ * large number of similar instances to populate a game. To help you verify that you are
+ * correctly releasing and deallocating all these copies, you can use the instanceCount
+ * class method to get a current count of the total number of instances of all subclasses
+ * of CC3Identifiable,
+ *
+ * Subclasses that extend copying should not override this method, but should override
+ * the populateFrom: method instead.
  */
 -(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName;
+
+/**
+ * Returns a newly allocated (retained) copy of this instance. The new copy
+ * will be an instance of the specified class, will have its name set to the
+ * specified name, and will have a unique tag.
+ *
+ * Care should be taken when choosing the class to be instantiated. If the class is
+ * different than that of this instance, the populateFrom: method of that class must
+ * be compatible with the contents of this instance.
+ *
+ * The returned instance is retained. It is the responsiblity of the caller to manage
+ * the lifecycle of the returned instance and perform the corresponding invocation of
+ * the release method at the appropriate time.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * The copy... methods may often be used to duplicate an instance many times, to create
+ * large number of similar instances to populate a game. To help you verify that you are
+ * correctly releasing and deallocating all these copies, you can use the instanceCount
+ * class method to get a current count of the total number of instances of all subclasses
+ * of CC3Identifiable,
+ *
+ * Subclasses that extend copying should not override this method, but should override
+ * the populateFrom: method instead.
+ */
+-(id) copyWithName: (NSString*) aName asClass: (Class) aClass;
+
+/**
+ * Returns a newly allocated (retained) copy of this instance. The new copy
+ * will be an instance of the specified class, will have its name set to the
+ * specified name, and will have a unique tag.
+ *
+ * Care should be taken when choosing the class to be instantiated. If the class is
+ * different than that of this instance, the populateFrom: method of that class must
+ * be compatible with the contents of this instance.
+ *
+ * The returned instance is retained. It is the responsiblity of the caller to manage
+ * the lifecycle of the returned instance and perform the corresponding invocation of
+ * the release method at the appropriate time.
+ *
+ * This copy operation is a deep copy. Copies of most of the content of the original
+ * will be created as well. For structural subclasses, such as CC3Node, copies will
+ * be made of each structual element (eg- child nodes). Some exceptions are made.
+ * For instance, copies are generally not made for fixed, voluminous content such as
+ * mesh data. In addition, subclasses may excuse themselves from being copied through
+ * the shouldIncludeInDeepCopy property.
+ *
+ * The copy... methods may often be used to duplicate an instance many times, to create
+ * large number of similar instances to populate a game. To help you verify that you are
+ * correctly releasing and deallocating all these copies, you can use the instanceCount
+ * class method to get a current count of the total number of instances of all subclasses
+ * of CC3Identifiable,
+ *
+ * Subclasses that extend copying should not override this method, but should override
+ * the populateFrom: method instead.
+ */
+-(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName asClass: (Class) aClass;
+
+/**
+ * Returns whether this instance should be included in a deep copy.
+ *
+ * This method simply returns YES by default, and in most cases this is sufficient.
+ * However, for some structural subclasses (notably subclasses of CC3Node) it may
+ * be desirable to not copy some components.
+ *
+ * This property is not universally automatically applied or honoured. It is
+ * up to the invoker and invokee to agree on when to make use of this property.
+ */
+@property(nonatomic, readonly) BOOL shouldIncludeInDeepCopy;
 	
 /**
  * Returns a unique tag value to identify instances. This value is unique across all instances

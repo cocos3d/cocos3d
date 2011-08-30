@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Utility.c
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -170,6 +170,32 @@ char* GLEnumName(GLenum gle) {
 			return "GL_CW";
 		case GL_CCW:
 			return "GL_CCW";
+
+			/* Misc GL state */
+		case GL_LINE_WIDTH:
+			return "GL_LINE_WIDTH";
+		case GL_POINT_SIZE:
+			return "GL_POINT_SIZE";
+		case GL_POINT_DISTANCE_ATTENUATION:
+			return "GL_POINT_DISTANCE_ATTENUATION";
+		case GL_SCISSOR_BOX:
+			return "GL_SCISSOR_BOX";
+
+			/* Fog */
+		case GL_FOG_COLOR:
+			return "GL_FOG_COLOR";
+		case GL_FOG_MODE:
+			return "GL_FOG_MODE";
+		case GL_FOG_DENSITY:
+			return "GL_FOG_DENSITY";
+		case GL_FOG_START:
+			return "GL_FOG_START";
+		case GL_FOG_END:
+			return "GL_FOG_END";
+		case GL_EXP:
+			return "GL_EXP";
+		case GL_EXP2:
+			return "GL_EXP2";
 			
 			/* Hint Mode and Target */
 		case GL_DONT_CARE:
@@ -510,6 +536,14 @@ char* GLEnumName(GLenum gle) {
 			return "GL_PROJECTION_STACK_DEPTH";
 		case GL_TEXTURE_STACK_DEPTH:
 			return "GL_TEXTURE_STACK_DEPTH";
+
+			/* Clearing values */
+		case GL_COLOR_CLEAR_VALUE:
+			return "GL_COLOR_CLEAR_VALUE";
+		case GL_DEPTH_CLEAR_VALUE:
+			return "GL_DEPTH_CLEAR_VALUE";
+		case GL_STENCIL_CLEAR_VALUE:
+			return "GL_STENCIL_CLEAR_VALUE";
 			
 		default:
 			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);

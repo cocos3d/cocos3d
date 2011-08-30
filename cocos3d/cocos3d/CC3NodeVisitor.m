@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,66 +31,86 @@
 
 #import "CC3NodeVisitor.h"
 #import "CC3World.h"
+#import "CC3Layer.h"
 #import "CC3VertexArrayMesh.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CC3EAGLView.h"
 
-@interface CC3Node (TemplateMethods)
--(void) buildTransformMatrix;
--(void) updateChildrenWithVisitor: (CC3NodeTransformingVisitor*) visitor;
-@end
-
 @interface CC3World (TemplateMethods)
-@property(nonatomic, readonly) CC3WorldTouchHandler* touchHandler;
+@property(nonatomic, readonly) CC3TouchedNodePicker* touchedNodePicker;
 @end
 
 #pragma mark -
 #pragma mark CC3NodeVisitor
 
 @interface CC3NodeVisitor (TemplateMethods)
--(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode;
--(void) visitNodeAfterUpdatingTransform: (CC3Node*) aNode;
 -(void) processRemovals;
 @end
 
-
 @implementation CC3NodeVisitor
 
-@synthesize world, performanceStatistics, shouldVisitChildren;
+@synthesize startingNode, shouldVisitChildren;
 
 -(void) dealloc {
-	[world release];
+	[startingNode release];
 	[pendingRemovals release];
-	performanceStatistics = nil;		// not retained
 	[super dealloc];
 }
 
--(void) setWorld:(CC3World *) aWorld {
-	id oldWorld = world;
-	world = [aWorld retain];
-	[oldWorld release];
-	performanceStatistics = world.performanceStatistics;
+-(CC3PerformanceStatistics*) performanceStatistics {
+	return startingNode.performanceStatistics;
 }
 
 -(id) init {
-	return [self initWithWorld: nil];
+	if ( (self = [super init]) ) {
+		startingNode = nil;
+		pendingRemovals = nil;
+		shouldVisitChildren = YES;
+	}
+	return self;
 }
 
 +(id) visitor {
 	return [[[self alloc] init] autorelease];
 }
 
--(id) initWithWorld: (CC3World*) theWorld {
-	if ( (self = [super init]) ) {
-		self.world = theWorld;
-		shouldVisitChildren = YES;
+-(void) visit: (CC3Node*) aNode {
+
+	if (!aNode) return;		// Must have a node to work on
+	
+	// If this is the first node, open the visitor
+	if (startingNode == nil) {
+		startingNode = [aNode retain];
+		[self open];
 	}
-	return self;
+
+	// Do the heavy lifting before visiting children
+	[self processBeforeChildren: aNode];
+	
+	// Recurse through the child nodes if required
+	if (shouldVisitChildren) {
+		[self drawChildrenOf: aNode];
+	}
+
+	// Do the heavy lifting after visiting children
+	[self processAfterChildren: aNode];
+	
+	// If this is the first node, close the visitor
+	if (aNode == startingNode) {
+		[self close];
+	}
 }
 
-+(id) visitorWithWorld: (CC3World*) theWorld {
-	return [[[self alloc] initWithWorld: theWorld] autorelease];
+-(void) processBeforeChildren: (CC3Node*) aNode {}
+
+-(void) drawChildrenOf: (CC3Node*) aNode {
+	NSArray* children = aNode.children;
+	for (CC3Node* child in children) {
+		[self visit: child];
+	}
 }
+
+-(void) processAfterChildren: (CC3Node*) aNode {}
 
 -(void) open {}
 
@@ -127,78 +147,57 @@
 
 @implementation CC3NodeTransformingVisitor
 
--(id) initWithWorld: (CC3World*) theWorld {
-	if ( (self = [super initWithWorld: theWorld]) ) {
+@synthesize shouldLocalizeToStartingNode;
+
+-(void) setShouldLocalizeToStartingNode: (BOOL) shouldLocalize {
+	shouldLocalizeToStartingNode = shouldLocalize;
+	if (shouldLocalizeToStartingNode) {
+		isTransformDirty = YES;
+	}
+}
+
+-(id) init {
+	if ( (self = [super init]) ) {
 		isTransformDirty = NO;
+		shouldLocalizeToStartingNode = NO;
 	}
 	return self;
 }
 
--(void) updateNode: (CC3Node*) aNode {
-
-	// Remember whether an ancestor was dirty.
+/**
+ * As each node is visited, remember whether an ancestor was dirty, and restore that
+ * indication for the benefit of other nodes that will be visited after this node.
+ *
+ * This flag cannot be carried by the visitor itself, because it is state associated
+ * with a particular node, not the visitor, and a child node could modify it and mess
+ * up later siblings of a the parent node.
+ */
+-(void) visit: (CC3Node*) aNode {
 	BOOL wasAncestorDirty = isTransformDirty;
-	
-	// Give this visitor a chance to do something before building the transform matrix.
-	[self visitNodeBeforeUpdatingTransform: aNode];
-	
-	// Force a transform recalc if either the specified node,
-	// or one of its ancestors has been changed.
-	isTransformDirty = aNode.isTransformDirty || wasAncestorDirty;
-	
-	if (isTransformDirty) {
-		[performanceStatistics incrementNodesTransformed];
-		[aNode buildTransformMatrix];
-	}
-	
-	// If we should, update child nodes as well
-	if (shouldVisitChildren) {
-		[aNode updateChildrenWithVisitor: self];
-	}
-	
-	// Give this visitor a chance to do something after building the transform matrix.
-	[self visitNodeAfterUpdatingTransform: aNode];
-	
-	// Restore the original indication of whether the ancestor was dirty for
-	// the benefit of other nodes that will be visited
+	[super visit: aNode];
 	isTransformDirty = wasAncestorDirty;
 }
 
 /**
- * Template method that is invoked automatically for each node visited, before the
- * transformation matrix is recalculated.
- *
- * This method is invoked prior to testing whether the node transformMatrix should be
- * recalculated. At this point, the isTransformDirty flag on the visitor reflects the
- * state of the parent node, and indicates whether the transformMatrix of any of the
- * node's ancestors was rebuilt.
- *
- * Since this method is invoked prior to recalculation of the transformMatrix, the node's
- * global properties: globalLocation, globalRotation and globalScale are not current.
- *
- * When nodes are visited hierarchically during transformations, this method will be
- * invoked prior to the invocation of the same method on any of the node's descendants.
- * 
- * This implementation does nothing. Subclasses may override
+ * Force a transform recalc of this node and all subsequent children if
+ * either the specified node, or one of its ancestors has been changed.
  */
--(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode {}
+-(void) processBeforeChildren: (CC3Node*) aNode {
+	
+	isTransformDirty = isTransformDirty || aNode.isTransformDirty;
+	
+	if (isTransformDirty) {
+		[self.performanceStatistics incrementNodesTransformed];
+		[aNode buildTransformMatrixWithVisitor: self];
+	}
+}
 
-/**
- * Template method that is invoked automatically for each node visited, after the
- * transformation matrix is recalculated.
- *
- * At this point, the isTransformDirty flag on the visitor reflects whether the transformMatrix
- * of this node or that of any of its ancestors was rebuilt.
- *
- * Since this method is invoked after to recalculation of the transformMatrix, the node's
- * global properties: globalLocation, globalRotation and globalScale are valid and can be used.
- *
- * When nodes are visited hierarchically during transformations, this method will be
- * invoked after the invocation of the same method on all of the node's descendants.
- * 
- * This implementation does nothing. Subclasses may override.
- */
--(void) visitNodeAfterUpdatingTransform: (CC3Node*) aNode {}
+-(CC3GLMatrix*) parentTansformMatrixFor: (CC3Node*) aNode {
+	CC3Node* parentNode = aNode.parent;
+	BOOL localizeToThisNode = shouldLocalizeToStartingNode && (aNode == startingNode ||
+															   parentNode == startingNode);
+	return (parentNode && !localizeToThisNode) ? parentNode.transformMatrix : nil;
+}
 
 @end
 
@@ -211,75 +210,95 @@
 @synthesize deltaTime;
 
 -(id) init {
-	return [self initWithWorld: nil];
+	return [self initWithDeltaTime: 0.0f];
 }
 
--(id) initWithWorld: (CC3World*) theWorld {
-	return [self initWithWorld: theWorld andDeltaTime: 0.0f];
-}
-
--(id) initWithWorld: (CC3World*) theWorld andDeltaTime: (ccTime) dt {
-	if ( (self = [super initWithWorld: theWorld]) ) {
+-(id) initWithDeltaTime: (ccTime) dt {
+	if ( (self = [super init]) ) {
 		deltaTime = dt;
 	}
 	return self;
 }
 
-+(id) visitorWithWorld: (CC3World*) theWorld andDeltaTime: (ccTime) dt {
-	return [[[self alloc] initWithWorld: theWorld andDeltaTime: dt] autorelease];
++(id) visitorWithDeltaTime: (ccTime) dt {
+	return [[[self alloc] initWithDeltaTime: dt] autorelease];
 }
 
-/**
- * Template method that is invoked automatically for each node visited, before the
- * transformation matrix is recalculated.
- * 
- * This method delegates to the node by invoking the updateBeforeTransform: on the node.
- * It also increments the nodesUdated property of the CC3World's performanceStatistics.
- *
- * This method is invoked prior to testing whether the node transformMatrix should be
- * recalculated. At this point, the isTransformDirty flag on the visitor reflects the
- * state of the parent node, and indicates whether the transformMatrix of any of the
- * node's ancestors was rebuilt.
- *
- * Since this method is invoked prior to recalculation of the transformMatrix, the node's
- * global properties: globalLocation, globalRotation and globalScale are not current.
- *
- * When nodes are visited hierarchically during transformations, this method will be
- * invoked prior to the invocation of the same method on any of the node's descendants.
- */
--(void) visitNodeBeforeUpdatingTransform: (CC3Node*) aNode {
+-(void) processBeforeChildren: (CC3Node*) aNode {
 	LogTrace(@"Updating %@ after %.3f ms", aNode, deltaTime * 1000.0f);
-	[performanceStatistics incrementNodesUpdated];
+	[self.performanceStatistics incrementNodesUpdated];
 	[aNode updateBeforeTransform: self];
+
+	// Process the transform AFTER updateBeforeTransform: invoked
+	[super processBeforeChildren: aNode];
 }
 
-/**
- * Template method that is invoked automatically for each node visited, after the
- * transformation matrix is recalculated.
- * 
- * This method delegates to the node by invoking the updateAfterTransform: on the node.
- *
- * At this point, the isTransformDirty flag on the visitor reflects whether the transformMatrix
- * of this node or that of any of its ancestors was rebuilt.
- *
- * Since this method is invoked after to recalculation of the transformMatrix, the node's
- * global properties: globalLocation, globalRotation and globalScale are valid and can be used.
- *
- * When nodes are visited hierarchically during transformations, this method will be
- * invoked after the invocation of the same method on all of the node's descendants.
- */
--(void) visitNodeAfterUpdatingTransform: (CC3Node*) aNode {
+-(void) processAfterChildren: (CC3Node*) aNode {
 	[aNode updateAfterTransform: self];
+	[super processAfterChildren: aNode];
 }
 
 @end
 
 
 #pragma mark -
+#pragma mark CC3NodeBoundingBoxVisitor
+
+@implementation CC3NodeBoundingBoxVisitor
+
+@synthesize boundingBox;
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		boundingBox = kCC3BoundingBoxNull;
+	}
+	return self;
+}
+
+-(void) processAfterChildren: (CC3Node*) aNode {
+	[super processAfterChildren: aNode];
+	if (aNode.hasLocalContent) {
+
+		// If the bounding box is being localized to the starting node, and the node
+		// isthe starting node, don't apply transform to bounding box, because we want
+		// the bounding box in the local coordinate system of the startingNode
+		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
+		CC3BoundingBox nodeBox = (shouldLocalizeToStartingNode && (aNode == startingNode)) 
+									? lcNode.localContentBoundingBox
+									: lcNode.globalLocalContentBoundingBox;
+
+		// Merge the node's bounding box into the aggregate bounding box
+		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3BoundingBox(nodeBox),
+				 aNode, NSStringFromCC3BoundingBox(boundingBox));
+		boundingBox = CC3BoundingBoxUnion(boundingBox, nodeBox);
+	}
+}
+
+/**
+ * If the node transforms were changed to be relative to the starting node,
+ * brings the transforms back to what they were by rebuilding them again,
+ * this time from the normal CC3World perspective.
+ */
+-(void) close {
+	[super close];
+	if (shouldLocalizeToStartingNode) {
+		[startingNode markTransformDirty];
+		[startingNode updateTransformMatrices];
+	}
+}
+
+@end
+
+#pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
 @interface CC3Node (CC3NodeDrawingVisitor)
 -(void) drawLocalContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+@property(nonatomic, readonly) CC3World* world;
+@end
+
+@interface CC3World (CC3NodeDrawingVisitor)
+-(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3NodeDrawingVisitor
@@ -291,6 +310,31 @@
 	[super dealloc];
 }
 
+-(CC3World*) world {
+	return (CC3World*)startingNode;
+}
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		self.shouldDecorateNode = YES;
+	}
+	return self;
+}
+
+-(void) processBeforeChildren: (CC3Node*) aNode {
+	LogTrace(@"Visiting %@ %@ children", aNode, (shouldVisitChildren ? @"and" : @"but not"));
+	[self.performanceStatistics incrementNodesVisitedForDrawing];
+	[aNode drawWithVisitor: self];
+}
+
+-(void) drawChildrenOf: (CC3Node*) aNode {
+	if (self.world.isUsingDrawingSequence) {
+		[self.world drawDrawSequenceWithVisitor: self];
+	} else {
+		[super drawChildrenOf: aNode];
+	}
+}
+
 /**
  * Establishes the frustum from the currently active camera, initializes mesh and
  * material context switching, and clears the depth buffer every time drawing begins so
@@ -298,7 +342,7 @@
  */
 -(void) open {
 	[super open];
-	frustum = world.activeCamera.frustum;
+	frustum = self.world.activeCamera.frustum;
 
 	[CC3Material resetSwitching];
 	[CC3VertexArrayMesh resetSwitching];
@@ -306,21 +350,15 @@
 	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
 }
 
-/** Retracts the frustum, and sets the nodeProcessed property into the statistics. */
+/** Retracts the frustum. */
 -(void) close {
+	[super close];
 	frustum = nil;
-}
-
--(id) initWithWorld: (CC3World*) theWorld {
-	if ( (self = [super initWithWorld: theWorld]) ) {
-		self.shouldDecorateNode = YES;
-	}
-	return self;
 }
 
 -(void) drawLocalContentOf: (CC3Node*) aNode {
 	[aNode drawLocalContentWithVisitor: self];
-	[performanceStatistics incrementNodesDrawn];
+	[self.performanceStatistics incrementNodesDrawn];
 }
 
 @end
@@ -333,6 +371,7 @@
 -(void) paintNode: (CC3Node*) aNode;
 -(ccColor4B) colorFromNodeTag: (GLuint) tag;
 -(GLuint) tagFromColor: (ccColor4B) color;
+-(void) drawBackdrop;
 @end
 
 @implementation CC3NodePickingVisitor
@@ -345,8 +384,8 @@
 }
 
 /** Overridden to initially set the shouldDecorateNode to NO. */
--(id) initWithWorld: (CC3World*) theWorld {
-	if ( (self = [super initWithWorld: theWorld]) ) {
+-(id) init {
+	if ( (self = [super init]) ) {
 		self.shouldDecorateNode = NO;
 	}
 	return self;
@@ -394,30 +433,81 @@
  * If antialiasing multisampling is active, after reading the color of the touched pixel,
  * the multisampling framebuffer is made active in preparation of normal drawing operations.
  *
+ * If the
+ *
  * Also restores the original GL color value, to avoid flicker on materials and textures
  * if the world has no lighting.
  */
 -(void) close {
 	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
-	if (world) {
 		
-		// Read the pixel from the framebuffer
-		ccColor4B pixColor = [gles11State readPixelAt: world.touchHandler.glTouchPoint];
-		
-		// Fetch the node whose tags is mapped from the pixel color
-		pickedNode = [[world getNodeTagged: [self tagFromColor: pixColor]] retain];
-		
-		LogTrace(@"%@ picked %@ from color (%u, %u, %u, %u)", self, pickedNode,
-				 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
-	}
+	// Read the pixel from the framebuffer
+	ccColor4B pixColor = [gles11State readPixelAt: self.world.touchedNodePicker.glTouchPoint];
+	
+	// Fetch the node whose tags is mapped from the pixel color
+	pickedNode = [[self.world getNodeTagged: [self tagFromColor: pixColor]] retain];
+	
+	LogTrace(@"%@ picked %@ from color (%u, %u, %u, %u)", self, pickedNode,
+			 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
 	
 	// If multisampling antialiasing, rebind the multisampling framebuffer
 	[[CCDirector sharedDirector].openGLView closePicking];
+	
+	[self drawBackdrop];	// Draw the backdrop behind the 3D world
 
 	gles11State.color.value = originalColor;
 	[super close];
 }
 
+/**
+ * Template method that draws the backdrop behind the 3D world.
+ *
+ * This method is automatically invoked after the 3D world has been drawn in pure
+ * solid colors, and prior to the second redrawing with the true coloring, to
+ * provide an empty canvas on which to draw the real scene.
+ *
+ * This implementation simply clears the GL color buffer to create an empty canvas.
+ * If the CC3Layer has a colored background, that color is used to clear the GL
+ * color buffer, otherwise the current GL clearing color is used.
+ *
+ * Subclasses can override to do something more sophisticated with the background.
+ */
+-(void) drawBackdrop {
+	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
+	CC3Layer* cc3Layer = self.world.cc3Layer;
+		
+	// If the CC3Layer has a background color, use it as the GL clear color
+	if (cc3Layer && cc3Layer.isColored) {
+		// Remember the current GL clear color
+		ccColor4F currClearColor = gles11State.clearColor.value;
+		
+		// Retrieve the CC3Layer background color
+		ccColor3B lcub3 = cc3Layer.color;
+		ccColor4F layerColor = CCC4FMake(CCColorFloatFromByte(lcub3.r),
+										 CCColorFloatFromByte(lcub3.g),
+										 CCColorFloatFromByte(lcub3.b),
+										 CCColorFloatFromByte(cc3Layer.opacity));
+		
+		// Set the GL clear color from the layer color
+		gles11State.clearColor.value = layerColor;
+		LogTrace(@"%@ clearing background to %@ color: %@",
+				 self, cc3Layer, NSStringFromCCC4F(layerColor));
+		
+		// Clear the color buffer to redraw the background
+		[gles11State clearColorBuffer];
+		
+		// Reinstate the current GL clear color
+		gles11State.clearColor.value = currClearColor;
+		
+	} else {
+		// Otherwise use the current clear color
+		LogTrace(@"%@ clearing background to default clear color: %@",
+				 self, NSStringFromCCC4F(gles11State.clearColor.value));
+		
+		// Clear the color buffer to redraw the background
+		[gles11State clearColorBuffer];
+	}
+}
 
 /** Overridden to draw the node only if it is touchable, and to draw it in a uniquely identifiable color. */
 -(void) drawLocalContentOf: (CC3Node*) aNode {

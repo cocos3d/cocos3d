@@ -1,7 +1,7 @@
 /*
  * CC3Identifiable.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,16 +34,16 @@
 
 @implementation CC3Identifiable
 
-@synthesize tag, name;
+@synthesize tag, name, userData;
 
 static GLint instanceCount = 0;
 
 -(void) dealloc {
+	[self releaseUserData];
 	[name release];
 	instanceCount--;
 	[super dealloc];
 }
-
 
 #pragma mark Allocation and initialization
 
@@ -64,36 +64,57 @@ static GLint instanceCount = 0;
 		instanceCount++;
 		self.tag = aTag;
 		self.name = aName;
+		[self initUserData];
 	}
 	return self;
 }
 
+-(void) initUserData {}
+
+-(void) releaseUserData {}
+
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
-// Default does nothing. Subclasses that extend copying will override this method.
--(void) populateFrom: (CC3Identifiable*) another {}
+// Subclasses that extend copying will override this method.
+-(void) populateFrom: (CC3Identifiable*) another {
+	self.userData = another.userData;		// Assigned by default. Subclassses may override accessors.
+}
 
 // Implementation to keep compiler happy so this method can be included in interface for documentation.
 -(id) copy { return [super copy]; }
 
-// Subclasses that extend copying should not override this method,
-// but should override the populateFrom: method instead.
+/*
 -(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName {
 	CC3Identifiable* aCopy = [[[self class] allocWithZone: zone] initWithName: aName];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
+*/
 
-// Subclasses that extend copying should not override this method,
-// but should override the populateFrom: method instead.
+-(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName {
+	return [self copyWithZone: zone withName: aName asClass: [self class]];
+}
+
 -(id) copyWithName: (NSString*) aName {
 	return [self copyWithZone: nil withName: aName];
 }
 
-// Subclasses that extend copying should not override this method,
-// but should override the populateFrom: method instead.
 -(id) copyWithZone: (NSZone*) zone {
 	return [self copyWithZone: zone withName: self.name];
+}
+
+-(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName asClass: (Class) aClass {
+	CC3Identifiable* aCopy = [[aClass allocWithZone: zone] initWithName: aName];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
+
+-(id) copyWithName: (NSString*) aName asClass: (Class) aClass {
+	return [self copyWithZone: nil withName: aName asClass: aClass];
+}
+
+-(BOOL) shouldIncludeInDeepCopy {
+	return YES;
 }
 
 // Class variable tracking the most recent tag value assigned. This class variable is 

@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -60,11 +60,11 @@ static const id placeHolder = [NSObject new];
 
 @implementation CC3PODResource
 
-@synthesize pvrtModel, allNodes, meshModels, materials, textures, textureParameters;
+@synthesize pvrtModel, allNodes, meshes, materials, textures, textureParameters;
 
 -(void) dealloc {
 	[allNodes release];
-	[meshModels release];
+	[meshes release];
 	[materials release];
 	[textures release];
 	if (self.pvrtModel) {
@@ -84,7 +84,7 @@ static const id placeHolder = [NSObject new];
 	if ( (self = [super init]) ) {
 		pvrtModel = new CPVRTModelPOD();
 		allNodes = [[NSMutableArray array] retain];
-		meshModels = [[NSMutableArray array] retain];
+		meshes = [[NSMutableArray array] retain];
 		materials = [[NSMutableArray array] retain];
 		textures = [[NSMutableArray array] retain];
 		self.textureParameters = kCC3DefaultTextureParameters;
@@ -98,11 +98,16 @@ static const id placeHolder = [NSObject new];
 		LogError(@"%@ has already been loaded from POD file '%@'", self, aFilepath);
 		return wasLoaded;
 	}
-	LogTrace(@"Loading POD file '%@'", aFilepath);
-	self.name = aFilepath;
+	LogCleanRez(@"");
+	LogCleanRez(@"--------------------------------------------------");
+	LogRez(@"Loading resources from POD file '%@'", aFilepath);
+	if (!name) {
+		self.name = [aFilepath lastPathComponent];
+	}
 	wasLoaded = (self.pvrtModelImpl->ReadFromFile([aFilepath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
 	if (wasLoaded) {
 		[self build];
+		LogRez(@"Loaded %@", self.fullDescription);
 	} else {
 		LogError(@"Could not load POD file '%@'", aFilepath);
 	}
@@ -113,7 +118,7 @@ static const id placeHolder = [NSObject new];
 	LogTrace(@"Building %@", self);
 	[self buildTextures];
 	[self buildMaterials];
-	[self buildMeshModels];
+	[self buildMeshes];
 	[self buildNodes];
 }
 
@@ -205,21 +210,21 @@ static const id placeHolder = [NSObject new];
 	return [self nodePODStructAtIndex: meshIndex];
 }
 
--(uint) meshModelCount {
+-(uint) meshCount {
 	return self.pvrtModelImpl->nNumMesh;
 }
 
--(void) buildMeshModels {
-	uint mCount = self.meshModelCount;
+-(void) buildMeshes {
+	uint mCount = self.meshCount;
 	
 	// Build the array containing all materials in the PVRT structure
 	for (uint i = 0; i < mCount; i++) {
-		[meshModels addObject: [self buildMeshModelAtIndex: i]];
+		[meshes addObject: [self buildMeshModelAtIndex: i]];
 	}
 }
 
 -(CC3Mesh*) meshModelAtIndex: (uint) meshIndex {
-	return (CC3Mesh*)[meshModels objectAtIndex: meshIndex];
+	return (CC3Mesh*)[meshes objectAtIndex: meshIndex];
 }
 
 -(CC3Mesh*) buildMeshModelAtIndex: (uint) meshIndex {
@@ -371,14 +376,18 @@ static const id placeHolder = [NSObject new];
 }
 
 -(NSString*) description {
+	return [NSString stringWithFormat: @"%@ from file %@", [self class], self.name];
+}
+
+-(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"%@ from file %@", [self class], self.name];
+	[desc appendFormat: @"%@", self];
 	if (self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) {		// highlight if fixed point
 		[desc appendFormat: @" (FIXED POINT!)"];
 	}
 	[desc appendFormat: @" containing %u nodes", self.nodeCount];
 	[desc appendFormat: @" (%u mesh nodes)", self.meshNodeCount];
-	[desc appendFormat: @", %u meshes", self.meshModelCount];
+	[desc appendFormat: @", %u meshes", self.meshCount];
 	[desc appendFormat: @", %u cameras", self.cameraCount];
 	[desc appendFormat: @", %u lights", self.lightCount];
 	[desc appendFormat: @", %u materials", self.materialCount];

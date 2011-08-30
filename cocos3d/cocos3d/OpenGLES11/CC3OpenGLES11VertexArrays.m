@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -361,5 +361,17 @@
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
 	glDrawElements(drawMode, len, type, indicies);
 } 
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", arrayBuffer];
+	[desc appendFormat: @"\n    %@ ", indexBuffer];
+	[desc appendFormat: @"\n    %@ ", locations];
+	[desc appendFormat: @"\n    %@ ", normals];
+	[desc appendFormat: @"\n    %@ ", colors];
+	[desc appendFormat: @"\n    %@ ", pointSizes];
+	return desc;
+}
 
 @end

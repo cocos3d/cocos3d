@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Lighting.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -357,6 +357,16 @@
 	LogTrace("Closing %@", [self class]);
 	[worldAmbientLight close];
 	[self closeTrackers: lights];
+}
+
+-(NSString*) description {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
+	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"\n    %@ ", worldAmbientLight];
+	for (id t in lights) {
+		[desc appendFormat: @"\n    %@ ", t];
+	}
+	return desc;
 }
 
 @end

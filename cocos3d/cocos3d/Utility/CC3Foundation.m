@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -73,7 +73,9 @@ GLfloat CC3VectorLength(CC3Vector v) {
 	GLfloat y = v.y;
 	GLfloat z = v.z;
 	GLfloat lenSq = ((x * x) + (y * y) + (z * z));
-	return (lenSq == 1.0f) ? 1.0f : sqrtf(lenSq);
+
+	// Take square root...optimizing out the obvious ones
+	return (lenSq == 1.0f || lenSq == 0.0f) ? lenSq : sqrtf(lenSq);
 }
 
 CC3Vector CC3VectorNormalize(CC3Vector v) {
@@ -109,6 +111,14 @@ CC3Vector CC3VectorDifference(CC3Vector minuend, CC3Vector subtrahend) {
 	difference.y = minuend.y - subtrahend.y;
 	difference.z = minuend.z - subtrahend.z;
 	return difference;
+}
+
+CC3Vector CC3VectorRotationModulo(CC3Vector aRotation) {
+	CC3Vector modRot;
+	modRot.x = Cyclic(aRotation.x, kCircleDegreesPeriod);
+	modRot.y = Cyclic(aRotation.y, kCircleDegreesPeriod);
+	modRot.z = Cyclic(aRotation.z, kCircleDegreesPeriod);
+	return modRot;
 }
 
 CC3Vector CC3VectorRotationalDifference(CC3Vector minuend, CC3Vector subtrahend) {
@@ -168,6 +178,93 @@ CC3Vector CC3VectorLerp(CC3Vector v1, CC3Vector v2, GLfloat blendFactor) {
 	}
 	// Return: v1 + (blendFactor * (v2 - v1))
 	return CC3VectorAdd(v1, CC3VectorScaleUniform(CC3VectorDifference(v2, v1), blendFactor));
+}
+
+
+#pragma mark -
+#pragma mark Ray structure and functions
+
+NSString* NSStringFromCC3Ray(CC3Ray aRay) {
+	return [NSString stringWithFormat: @"(Start: %@, Towards: %@)",
+			NSStringFromCC3Vector(aRay.startLocation), NSStringFromCC3Vector(aRay.direction)];
+}
+
+CC3Ray CC3RayMake(GLfloat locX, GLfloat locY, GLfloat locZ,
+				  GLfloat dirX, GLfloat dirY, GLfloat dirZ) {
+	return CC3RayFromLocDir(CC3VectorMake(locX, locY, locZ),
+							CC3VectorMake(dirX, dirY, dirZ));
+}
+	
+CC3Ray CC3RayFromLocDir(CC3Vector aLocation, CC3Vector aDirection) {
+	CC3Ray aRay;
+	aRay.startLocation = aLocation;
+	aRay.direction = aDirection;
+	return aRay;
+}
+
+
+#pragma mark -
+#pragma mark Bounding box structure and functions
+
+NSString* NSStringFromCC3BoundingBox(CC3BoundingBox bb) {
+	return [NSString stringWithFormat: @"(Min: %@, Max: %@)",
+			NSStringFromCC3Vector(bb.minimum), NSStringFromCC3Vector(bb.maximum)];
+}
+
+CC3BoundingBox CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
+								  GLfloat maxX, GLfloat maxY, GLfloat maxZ) {
+	return CC3BoundingBoxFromMinMax(CC3VectorMake(minX, minY, minZ),
+									CC3VectorMake(maxX, maxY, maxZ));
+}
+
+CC3BoundingBox CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) {
+	CC3BoundingBox bb;
+	bb.minimum = minVtx;
+	bb.maximum = maxVtx;
+	return bb;
+}
+
+BOOL CC3BoundingBoxesAreEqual(CC3BoundingBox bb1, CC3BoundingBox bb2) {
+	return CC3VectorsAreEqual(bb1.minimum, bb2.minimum)
+		&& CC3VectorsAreEqual(bb1.maximum, bb2.maximum);
+}
+
+BOOL CC3BoundingBoxIsNull(CC3BoundingBox bb) {
+	return CC3BoundingBoxesAreEqual(bb, kCC3BoundingBoxNull);
+}
+
+CC3Vector CC3BoundingBoxCenter(CC3BoundingBox bb) {
+	return CC3VectorScaleUniform(CC3VectorAdd(bb.minimum, bb.maximum), 0.5);
+}
+
+
+CC3BoundingBox CC3BoundingBoxEngulfLocation(CC3BoundingBox bb, CC3Vector aLoc) {
+	CC3BoundingBox bbOut;
+	if(CC3BoundingBoxIsNull(bb)) {
+		bbOut.minimum = aLoc;
+		bbOut.maximum = aLoc;
+	} else {
+		bbOut.minimum.x = MIN(bb.minimum.x, aLoc.x);
+		bbOut.minimum.y = MIN(bb.minimum.y, aLoc.y);
+		bbOut.minimum.z = MIN(bb.minimum.z, aLoc.z);
+		
+		bbOut.maximum.x = MAX(bb.maximum.x, aLoc.x);
+		bbOut.maximum.y = MAX(bb.maximum.y, aLoc.y);
+		bbOut.maximum.z = MAX(bb.maximum.z, aLoc.z);
+	}	
+	return bbOut;
+}
+
+CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3BoundingBox bb2) {
+	if(CC3BoundingBoxIsNull(bb1)) {
+		return bb2;
+	}
+	if(CC3BoundingBoxIsNull(bb2)) {
+		return bb1;
+	}
+	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.minimum);
+	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.maximum);
+	return bb1;
 }
 
 
@@ -246,12 +343,15 @@ CC3Vector4 CC3Vector4FromCC3Vector(CC3Vector v, GLfloat w) {
 	return v4;
 }
 
-CC3Vector CC3VectorFromCC3Vector4(CC3Vector4 v) {
-	CC3Vector4 hv = CC3Vector4Homogenize(v);
+CC3Vector CC3VectorFromHomogenizedCC3Vector4(CC3Vector4 v) {
+	return CC3VectorFromTruncatedCC3Vector4(CC3Vector4Homogenize(v));
+}
+
+CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) {
 	CC3Vector v3;
-	v3.x = hv.x;
-	v3.y = hv.y;
-	v3.z = hv.z;
+	v3.x = v.x;
+	v3.y = v.y;
+	v3.z = v.z;
 	return v3;
 }
 
@@ -260,14 +360,14 @@ BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
 }
 
 CC3Vector4 CC3Vector4Homogenize(CC3Vector4 v) {
-	if (v.w == 0.0f) {
+	if (v.w == 0.0f || v.w == 1.0f) {
 		return v;
 	}
 	CC3Vector4 hv;
 	hv.x = v.x / v.w;
 	hv.y = v.y / v.w;
 	hv.z = v.z / v.w;
-	hv.w = 1.0;
+	hv.w = 1.0f;
 	return hv;
 }
 
@@ -483,6 +583,41 @@ ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
 	color.g = green;
 	color.b = blue;
 	color.a = alpha;
+	return color;
+}
+
+ccColor4F CCC4FFromCCC4B(ccColor4B byteColor) {
+	ccColor4F color;
+	color.r = CCColorFloatFromByte(byteColor.r);
+	color.g = CCColorFloatFromByte(byteColor.g);
+	color.b = CCColorFloatFromByte(byteColor.b);
+	color.a = CCColorFloatFromByte(byteColor.a);
+	return color;
+}
+
+ccColor4B CCC4BFromCCC4F(ccColor4F floatColor) {
+	ccColor4B color;
+	color.r = CCColorByteFromFloat(floatColor.r);
+	color.g = CCColorByteFromFloat(floatColor.g);
+	color.b = CCColorByteFromFloat(floatColor.b);
+	color.a = CCColorByteFromFloat(floatColor.a);
+	return color;
+}
+
+ccColor4F CCC4FFromCCC3B(ccColor3B byteColor) {
+	ccColor4F color;
+	color.r = CCColorFloatFromByte(byteColor.r);
+	color.g = CCColorFloatFromByte(byteColor.g);
+	color.b = CCColorFloatFromByte(byteColor.b);
+	color.a = 1.0;
+	return color;
+}
+
+ccColor3B CCC3BFromCCC4F(ccColor4F floatColor) {
+	ccColor3B color;
+	color.r = CCColorByteFromFloat(floatColor.r);
+	color.g = CCColorByteFromFloat(floatColor.g);
+	color.b = CCColorByteFromFloat(floatColor.b);
 	return color;
 }
 

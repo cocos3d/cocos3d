@@ -1,7 +1,7 @@
 /*
  * CC3Layer.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,7 +34,6 @@
 	
 @interface CC3Layer (TemplateMethods)
 -(void) updateViewport;
--(void) drawBackdrop;
 -(void) drawWorld;
 -(int) touchPriority;
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
@@ -49,11 +48,16 @@
     [super dealloc];
 }
 
-/** Overridden to update the viewport of the new world and to start and stop actions. */
+/**
+ * Overridden to link the world back here as well, update the viewport of the new world,
+ * and to start and stop actions. */
 -(void) setCc3World: (CC3World*) aWorld {
 	cc3World.isRunning = NO;				// Stop actions in old world.
+	cc3World.cc3Layer = nil;				// Detach this layer from old world.
 	[cc3World autorelease];					// Release old after new is retained, in case it's same object.
+
 	cc3World = [aWorld retain];				// Retain the new world.
+	cc3World.cc3Layer = self;				// Point the world back here
 	[self updateViewport];					// Set the camera viewport
 	cc3World.isRunning = self.isRunning;	// Start actions in new world.
 	[cc3World updateWorld];					// Update the new world to ensure transforms have been calculated.

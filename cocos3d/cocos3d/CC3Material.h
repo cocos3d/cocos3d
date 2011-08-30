@@ -1,7 +1,7 @@
 /*
  * CC3Material.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -146,7 +146,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * materials. This strategy can minimize the number of mesh switches in the GL engine,
  * which improves performance. 
  */
-@interface CC3Material : CC3Identifiable <CCRGBAProtocol> {
+@interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* texture;
 	NSMutableArray* textureOverlays;
 	ccColor4F ambientColor;
@@ -154,8 +154,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 	ccColor4F specularColor;
 	ccColor4F emissionColor;
 	GLfloat shininess;
-	GLenum sourceBlend;
-	GLenum destinationBlend;
+	ccBlendFunc blendFunc;
 	BOOL shouldUseLighting;
 	BOOL isOpaque;
 }
@@ -249,7 +248,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * were translucent.
  *
  * The initial value is determined by the value of the class-side property
- * defaultSourceBlend, which can be modified by the setDefaultSourceBlend: method.
+ * defaultBlendFunc, which can be modified by the setDefaultBlendFunc: method.
  *
  * The value of this property is also affected by changes to the isOpaque and opacity
  * properties. See the notes for those properties for more information.
@@ -279,7 +278,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * were translucent.
  *
  * The initial value is determined by the value of the class-side property
- * defaultDestinationBlend, which can be modified by the setDefaultDestinationBlend: method.
+ * defaultBlendFunc, which can be modified by the setDefaultBlendFunc: method.
  *
  * The value of this property is also affected by changes to the isOpaque and opacity
  * properties. See the notes for those properties for more information.
@@ -328,7 +327,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 @property(nonatomic, assign) BOOL isOpaque;
 
 
-#pragma mark CCRGBAProtocol support
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
  * Implementation of the CCRGBAProtocol color property.
@@ -372,6 +371,24 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * colors directly, and avoid making changes to this property.
  */
 @property(nonatomic, assign) GLubyte opacity;
+
+/**
+ * Implementation of the CCBlendProtocol blendFunc property.
+ *
+ * This is a convenience property that gets and sets both the sourceBlend and
+ * destinationBlend properties using a single structure.
+ */
+@property(nonatomic, assign) ccBlendFunc blendFunc;
+
+/**
+ * Returns the default GL material source and destination blend function used for new instances.
+ *
+ * The initial value is {GL_ONE GL_ZERO}.
+ */
++(ccBlendFunc) defaultBlendFunc;
+
+/** Sets the default GL material source and destination blend function used for new instances. */
++(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 
 #pragma mark Textures
@@ -533,26 +550,6 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * { 1.0, 1.0, 1.0, 1.0 } and a shininess of 75.0.
  */
 +(id) shinyWhite;
-
-/**
- * Returns the default GL material source blend used for new instances.
- *
- * The initial value is GL_ONE.
- */
-+(GLenum) defaultSourceBlend;
-
-/** Sets the default GL material source blend used for new instances. */
-+(void) setDefaultSourceBlend: (GLenum) srcBlend;
-
-/**
- * Returns the default GL material destination blend used for new instances.
- *
- * The initial value is GL_ZERO.
- */
-+(GLenum) defaultDestinationBlend;
-
-/** Sets the default GL material destination blend used for new instances. */
-+(void) setDefaultDestinationBlend: (GLenum) destBlend;
 
 
 #pragma mark Drawing

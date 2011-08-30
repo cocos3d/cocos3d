@@ -1,7 +1,7 @@
 /*
  * LandingCraft.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -109,10 +109,8 @@
 /** Callback to actually remove the army. Stop all actions, then remove this instance from the world. */
 -(void) cleanUp {
 	[self stopAllActions];
-	if (children) {
-		for (CC3Node* child in children) {
-			[child stopAllActions];
-		}
+	for (CC3Node* child in children) {
+		[child stopAllActions];
 	}
 	[super remove];
 }

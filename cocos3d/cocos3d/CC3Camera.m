@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,7 @@
 #import "CC3World.h"
 #import "CC3Math.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3ActionInterval.h"
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 
@@ -43,6 +44,7 @@
 -(void) transformMatrixChanged;
 -(void) updateGlobalScale;
 -(void) populateFrom: (CC3Node*) another;
+@property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
 @end
 
 @interface CC3Camera (TemplateMethods)
@@ -56,6 +58,8 @@
 -(void) closeModelView;
 -(void) loadProjectionMatrix;
 -(void) loadModelViewMatrix;
+-(void) ensureAtRootAncestor;
+@property(nonatomic, readonly) CGSize fovRatios;
 @property(nonatomic, readonly) BOOL isProjectionDirty;
 @end
 
@@ -301,6 +305,157 @@
 }
 
 
+#pragma mark Viewing nodes
+
+-(void) moveToShowAllOf: (CC3Node*) aNode {
+	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
+	[self moveToShowAllOf: aNode fromDirection: moveDir];
+}
+
+-(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection {
+	self.location = [self calculateLocationToShowAllOf: aNode fromDirection: aDirection];
+	self.forwardDirection = CC3VectorNegate(aDirection);
+	[self ensureAtRootAncestor];
+	[self updateTransformMatrices];
+}
+
+-(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode {
+	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
+	[self moveWithDuration: t toShowAllOf: aNode fromDirection: moveDir];
+}
+
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection {
+	CC3Vector newLoc = [self calculateLocationToShowAllOf: aNode fromDirection: aDirection];
+	CC3Vector newFwdDir = CC3VectorNegate(aDirection);
+	[self ensureAtRootAncestor];
+	[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
+	[self runAction: [CC3RotateToLookTowards actionWithDuration: t forwardDirection: newFwdDir]];
+}
+
+/**
+ * Empty-space padding to add around the bounding box of a node when showing
+ * all of that node. Expressed as a percent.
+ */
+#define kCC3FrustumFitPadding 0.02
+
+/**
+ * Padding to add to the far clipping plane when it is adjusted
+ * as a result of showing all of a node.
+ */
+#define kCC3FrustumFitFarPadding 0.01
+
+-(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
+							fromDirection: (CC3Vector) aDirection {
+
+	// Complementary unit vectors pointing towards camera from node, and vice versa
+	CC3Vector camDir = CC3VectorNormalize(aDirection);
+	CC3Vector viewDir = CC3VectorNegate(camDir);
+	
+	// The camera's new forward direction will be viewDir. Use a matrix to detrmine
+	// the camera's new up and right directions assuming the same world up direction. 
+	CC3GLMatrix* rotMtx = [CC3GLMatrix identity];
+	[rotMtx populateToPointTowards: viewDir withUp: self.worldUpDirection];
+	CC3Vector upDir = [rotMtx extractUpDirection];
+	CC3Vector rtDir = [rotMtx extractRightDirection];
+	
+	// Determine the center eight vertices, plus the center, of the node's
+	// bounding box, in the global coordinate system
+	CC3BoundingBox gbb = aNode.globalBoundingBox;
+	CC3Vector bbCtr = CC3BoundingBoxCenter(gbb);
+	CC3Vector bbMin = gbb.minimum;
+	CC3Vector bbMax = gbb.maximum;
+	CC3Vector bbVertices[8];
+	bbVertices[0] = cc3v(bbMin.x, bbMin.y, bbMin.z);
+	bbVertices[1] = cc3v(bbMin.x, bbMin.y, bbMax.z);
+	bbVertices[2] = cc3v(bbMin.x, bbMax.y, bbMin.z);
+	bbVertices[3] = cc3v(bbMin.x, bbMax.y, bbMax.z);
+	bbVertices[4] = cc3v(bbMax.x, bbMin.y, bbMin.z);
+	bbVertices[5] = cc3v(bbMax.x, bbMin.y, bbMax.z);
+	bbVertices[6] = cc3v(bbMax.x, bbMax.y, bbMin.z);
+	bbVertices[7] = cc3v(bbMax.x, bbMax.y, bbMax.z);
+
+	// Express the camera's FOV in terms of ratios of the near clip bounds to
+	// the near clip distance, so we can determine distances using similar triangles.
+	CGSize fovRatios = self.fovRatios;
+	
+	// Iterate through all eight vertices of the node's bounding box, and calculate
+	// the largest distance required to place the camera away from the center of the
+	// node in order to fit all eight vertices within the camera's frustum.
+	// Simultaneously, calculate the extra distance from the center of the node to
+	// the vertex that will be farthest from the camera, so we can ensure that all
+	// vertices will fall within the frustum's far end.
+	GLfloat maxCtrDist = 0;
+	GLfloat maxVtxDeltaDist = 0;
+	for (int i = 0; i < 8; i++) {
+		
+		// Get a vector from the center of the bounding box to the vertex 
+		CC3Vector relVtx = CC3VectorDifference(bbVertices[i], bbCtr);
+
+		// Project that vector onto each of the camera's new up and right directions,
+		// and use similar triangles to determine the distance at which to place the
+		// camera so that the vertex will fit in both the up and right directions.
+		GLfloat vtxDistUp = ABS(CC3VectorDot(relVtx, upDir) / fovRatios.height);
+		GLfloat vtxDistRt = ABS(CC3VectorDot(relVtx, rtDir) / fovRatios.width);
+		GLfloat vtxDist = MAX(vtxDistUp, vtxDistRt);
+
+		// Calculate how far along the view direction the vertex is from the center
+		GLfloat vtxDeltaDist = CC3VectorDot(relVtx, viewDir);
+		GLfloat ctrDist = vtxDist - vtxDeltaDist;
+
+		// Accumulate the maximum distance from the node's center to the camera
+		// required to fit all eight points, and the distance from the node's
+		// center to the vertex that will be farthest away from the camera. 
+		maxCtrDist = MAX(maxCtrDist, ctrDist);
+		maxVtxDeltaDist = MAX(maxVtxDeltaDist, vtxDeltaDist);
+	}
+
+	// Add some padding so we will have a bit of space around the node when it fills the view.
+	maxCtrDist *= (1 + kCC3FrustumFitPadding);
+
+	// Determine if we need to move the far end of the camera frustum farther away
+	GLfloat farClip = CC3VectorLength(CC3VectorScaleUniform(viewDir, maxCtrDist + maxVtxDeltaDist));
+	farClip *= (1 + kCC3FrustumFitFarPadding);		// Include a little bit of padding
+	if (farClip > self.farClippingPlane) {
+		self.farClippingPlane = farClip;
+	}
+
+	LogTrace(@"%@ moving to %@ to show %@ at %@ within %@ with new farClip: %.3f", self,
+			 NSStringFromCC3Vector(CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist))),
+			 aNode, NSStringFromCC3Vector(bbCtr), frustum, self.farClippingPlane);
+
+	// Return the new location of the camera,
+	return CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist));
+}
+
+/**
+ * Returns the camera's FOV in terms of ratios of the near clip bounds
+ * (width & height) to the near clip distance.
+ */
+-(CGSize) fovRatios {
+	switch([[CCDirector sharedDirector]deviceOrientation]) {
+		case kCCDeviceOrientationLandscapeLeft:
+		case kCCDeviceOrientationLandscapeRight:
+			return CGSizeMake(frustum.top / frustum.near, frustum.right / frustum.near);
+		case kCCDeviceOrientationPortrait:
+		case kCCDeviceOrientationPortraitUpsideDown:
+		default:
+			return CGSizeMake(frustum.right / frustum.near, frustum.top / frustum.near);
+	}
+}
+
+
+/**
+ * Ensures that this camera is a direct child of its root ancestor, which in almost all
+ * cases will be CC3World. This is done by simply adding this camera to the root ancestor.
+ * The request will be ignored if this camera is already a direct child of the root ancestor.
+ */
+-(void) ensureAtRootAncestor {
+	[self.rootAncestor addChild: self];
+}
+
+
 #pragma mark 3D <-> 2D mapping functionality
 
 -(CC3Vector) projectNode: (CC3Node*) aNode {
@@ -319,7 +474,7 @@
 	hLoc = [frustum.projectionMatrix transformHomogeneousVector: hLoc];
 	
 	// Convert projected 4D vector back to 3D.
-	CC3Vector projectedLoc = CC3VectorFromCC3Vector4(hLoc);
+	CC3Vector projectedLoc = CC3VectorFromHomogenizedCC3Vector4(hLoc);
 
 	// The projected vector is in a projection coordinate space between -1 and +1 on all axes.
 	// Normalize the vector so that each component is between 0 and 1 by calculating ( v = (v + 1) / 2 ).
@@ -403,8 +558,9 @@
 		// this point on the near clipping plane forms a directional vector from the
 		// camera's origin. Rotate this directional vector with the camera's rotation
 		// matrix to convert it to a global direction vector in global coordinates.
+		// Thanks to cocos3d forum user Rogs for suggesting the use of the globalRotationMatrix.
 		ray.startLocation = self.globalLocation;
-		ray.direction = [rotator.rotationMatrix transformDirection: pointLocNear];
+		ray.direction = [self.globalRotationMatrix transformDirection: pointLocNear];
 	}
 	
 	// Ensure the direction component is normalized before returning.
@@ -502,7 +658,7 @@
 	// Field of view measures to the top distance. ZoomFactor modifies the tangent.
 	near = nearClip;
 	top = (zoomFactor > 0.0)
-			? (near * tanf(fieldOfView * M_PI / 360.0) / zoomFactor)
+			? (near * tanf(DegreesToRadians((fieldOfView / 2.0) / zoomFactor)))
 			: 0.0;
 	bottom = -top;
 	right = top * aspect;

@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 
+#import "CC3GLMatrix.h"
 #import "CC3PerformanceStatistics.h"
 #import "cocos2d.h"
 #import "ES1Renderer.h"
@@ -42,90 +43,149 @@
 
 /**
  * A CC3NodeVisitor is a context object that is passed to a node when it is visited
- * during a traversal of the node hierarchy. The traversal of the node structural
- * hierarchy is handled by the node, using contextual information contained in the
- * visitor. The visitor encapsulates the CC3World, so that nodes have access to other
- * nodes within their world.
+ * during a traversal of the node hierarchy.
  *
- * The visitor class may also determine some or all of the activities that will occur 
- * during the traversal of the node hierarchy.
+ * To initiate a visitation run, invoke the visit: method on any CC3Node. A visitation
+ * run proceeds with following steps:
+ *   -# The open method is invoked on the visitor
+ *   -# The visit: method is invoked on each node in the node hierarchy,
+ *      in a depth-first recursive traversal.
+ *   -# The close method is invoked on the visitor
+ * 
+ * The following steps occur for each node that is visited with the visit: method:
+ *   -# The processBeforeChildren: method is invoked on the visitor
+ *   -# The visit: method is invoked on the visitor for each child node
+ *   -# The processAfterChildren: method is invoked on the visitor
+ * 
+ * Subclasses will override the open, processBeforeChildren:, processAfterChildren:,
+ * and close methods to customize the behaviour prior to, during, and after the node
+ * traversal. The implementation of each of those methods in this base class does nothing.
  *
- * This base implementation does nothing. Subclasses can perform specialized functions
- * when visiting the nodes, such as drawing, updating, or selecting nodes.
+ * If a node is to be removed from the node structural hierarchy during a visitation run,
+ * the requestRemovalOf: method can be used instead of directly invoking the remove method
+ * on the node itself. A visitation run involves iterating through collections of child
+ * nodes, and removing a node during the iteration of a collection raises an error.
  */
 @interface CC3NodeVisitor : NSObject {
-	CC3World* world;
-	CC3PerformanceStatistics* performanceStatistics;
+	CC3Node* startingNode;
 	NSMutableSet* pendingRemovals;
-	GLuint pickingDepthBuffer;
-	GLuint pickingFrameBuffer;
 	BOOL shouldVisitChildren;
 }
 
 /**
  * Indicates whether nodes should propagate visits to their children.
  *
- * The default initial value is YES.
+ * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldVisitChildren;
 
 /**
- * The CC3World that the node is part of. Each node can interact with other nodes in
- * the 3D world, through this property.
+ * The CC3Node on which this visitation traversal was intitiated. This is the node
+ * on which the visit: method was first invoked to begin a traversal of the node
+ * structural hierarchy. 
  *
- * The requirement for encapsulating the world is determined by the subclass.
- * Some subclasses may not need access to the CC3World.
+ * This property will be nil until the visit: method is invoked.
  */
-@property(nonatomic, retain) CC3World* world;
+@property(nonatomic, readonly) CC3Node* startingNode;
 
 /**
- * The performanceStatistics being accumulated by the CC3World.
+ * The performanceStatistics being accumulated during the visitation runs.
  *
- * This is extracted from the CC3World, and may be nil if the world is not collecting statistics.
+ * This is extracted from the startingNode, and may be nil if that node
+ * is not collecting statistics.
  */
 @property(nonatomic, readonly) CC3PerformanceStatistics* performanceStatistics;
+
+/**
+ * Visits the specified node, then if the shouldVisitChildren property is set to YES,
+ * invokes this visit: method on each child node as well.
+ *
+ * The heavy lifting of processing a particular node is handled by the processBeforeChildren:
+ * and processAfterChildren: methods, which are invoked automatically on each node as it is
+ * visited, before and after the childn nodes are visited respectively.
+ *
+ * Subclasses will override the processBeforeChildren: and processAfterChildren: methods to
+ * customize node visitation behaviour.
+ *
+ * If the specified node is the node on which the traversal began (and retained in
+ * the origin property), the open method is invoked before the process: method is
+ * invoked, and the close method is invoked after the last child node is processed.
+ */
+-(void) visit: (CC3Node*) aNode;
+
+/**
+ * Invoked automatically to process the specified node when that node is visited,
+ * before the visit: method is invoked on the child nodes of the specified node.
+ * 
+ * This abstract implementation does nothing. Subclasses will override to process
+ * each node as it is visited.
+ */
+-(void) processBeforeChildren: (CC3Node*) aNode;
+
+/**
+ * If the shouldVisitChildren property is set to YES, this template method is invoked
+ * automatically to cause the visitor to visit the child nodes of the specified node .
+ *
+ * This implementation invokes the visit: method on this visitor for each of the
+ * children of the specified node. This establishes a depth-first traveral of the
+ * node hierarchy.
+ *
+ * Subclasses may override this method to establish a different traversal.
+ */
+-(void) drawChildrenOf: (CC3Node*) aNode;
+
+/**
+ * Invoked automatically to process the specified node when that node is visited,
+ * after the visit: method is invoked on the child nodes of the specified node.
+ * 
+ * This abstract implementation does nothing. Subclasses will override to process
+ * each node as it is visited.
+ */
+-(void) processAfterChildren: (CC3Node*) aNode;
 
 /**
  * Invoked automatically prior to the first node being visited during a visitation run.
  * This method is invoked automatically once before visiting any nodes.
  * It is not invoked for each node visited.
  *
- * Default implementation does nothing. Subclasses can override to initialize their state,
- * or to set any external state needed, such as GL state, prior to starting a visitation run.
+ * This abstract implementation does nothing. Subclasses can override to initialize
+ * their state, or to set any external state needed, such as GL state, prior to starting
+ * a visitation run.
  */
 -(void) open;
 
 /**
- * Invoked automatically after visiting the last node during a visitation run.
+ * Invoked automatically after the last node has been visited during a visitation run.
  * This method is invoked automatically after all nodes have been visited.
  * It is not invoked for each node visited.
  *
- * Default implementation does nothing. Subclasses can override to clean up their state,
- * or to reset any external state, such as GL state, upon completion of a visitation run.
+ * This implementation processes the removals of any nodes that were requested to
+ * be removed via the requestRemovalOf: method during the visitation run. Subclasses
+ * can override to clean up their state, or to reset any external state, such as GL
+ * state, upon completion of a visitation run, and should invoke this superclass
+ * implementation to process any removal requests.
  */
 -(void) close;
-
-/** Allocates and initializes an autoreleased instance without a CC3World. */
-+(id) visitor;
-
-/** Initializes this instance with the specified CC3World. */
--(id) initWithWorld: (CC3World*) theWorld;
-
-/** Allocates and initializes an autoreleased instance with the specified CC3World. */
-+(id) visitorWithWorld: (CC3World*) theWorld;
 
 /**
  * Requests the removal of the specfied node.
  * 
- * During a visitation run, you should use this method instead of directly invoking the
- * remove method on the node itself. Visitation involves iterating through collections
- * of child nodes, and removing a node during the iteration of a collection raises an error.
+ * During a visitation run, to remove a node from the hierarchy, you must use this method
+ * instead of directly invoking the remove method on the node itself. Visitation involves
+ * iterating through collections of child nodes, and removing a node during the iteration
+ * of a collection raises an error.
  *
  * This method can safely be invoked while a node is being visited. The visitor keeps
  * track of the requests, and safely removes all requested nodes as part of the close
  * method, once the visitation of the full node assembly is finished.
  */
 -(void) requestRemovalOf: (CC3Node*) aNode;
+
+
+#pragma mark Allocation and initialization
+
+/** Allocates and initializes an autoreleased instance. */
++(id) visitor;
 
 @end
 
@@ -141,21 +201,57 @@
  * The transformation matrix needs to be recalculated if any of the node's transform properties
  * (location, rotation, scale) have changed, or if those of an ancestor node were changed.
  *
- * This visitor inherits the ability to enapsulate the CC3World, but it does not use
- * this property. It is okay to instantiate an instance without the world.
+ * The transforms can be calculated from the CC3World or from the startingNode, depending
+ * on the value of the shouldLocalizeToStartingNode property. Normally, the transforms
+ * are calculated from the CC3World, but localizing to the startingNode can be useful for
+ * determining relative transforms between ancestors and descendants.
  */
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor {
 	BOOL isTransformDirty;
+	BOOL shouldLocalizeToStartingNode;
 }
 
 /**
- * Builds the transformation matrices of the specified node and all descendent nodes.
+ * Indicates whether all transforms should be localized to the local coordinate system
+ * of the startingNode.
  *
- * Each node rebuilds its transformation matrix if either its own transform is dirty,
- * or if an ancestor's transform was dirty. As it traverses the node hierarchy, this
- * visitor keeps track of whether the transform of an ancestor node was dirty.
+ * If this property is set to NO, the transforms of all ancestors of each node, all the
+ * way to CC3World, will be included when calculating the transformMatrix and global
+ * properties of that node. This is the normal situation.
+ *
+ * If this property is set to YES the transforms of the startingNode and its ancestors,
+ * right up to the CC3World, will be ignored. The result is that the transformMatrix
+ * and all global properties (globalLocation, etc) will be relative to the startingNode.
+ 
+ * This can be useful when you want to coordinate node positioning within a particular
+ * common ancestor, by using their global properties relative to that common ancestor
+ * node.
+ * 
+ * It is also used when determine the boundingBox property of a node, by transforming
+ * all descendant nodes by all transforms between the node and each descendant, but
+ * ignoring the transforms of the ancestor nodes of the node whose local bounding box
+ * is being calculated.
+ *
+ * Setting this property to YES will force the recalculation of the transformMatrix of
+ * each node visited, to ensure that they are relative to the startingNode. Further,
+ * once the visitation run is complete, if this property is set to YES, the close
+ * method will rebuild the transformMatrices of the startingNode and its descendants,
+ * to leave the transformMatrices in their normal global form.
+ * 
+ * The initial value of this property is NO.
  */
--(void) updateNode: (CC3Node*) aNode;
+@property(nonatomic, assign) BOOL shouldLocalizeToStartingNode;
+
+/**
+ * Returns the transform matrix to use as the parent matrix when transforming the
+ * specified node.
+ * 
+ * This usually returns the transformMatrix of the parent of the specified node.
+ * However, if the specified node has no parent, or if the shouldLocalizeToStartingNode
+ * is set to YES and the startingNode is either the specified node or its parent,
+ * this method returns nil.
+ */
+-(CC3GLMatrix*) parentTansformMatrixFor: (CC3Node*) aNode;
 
 @end
 
@@ -183,14 +279,47 @@
  */
 @property(nonatomic, assign) ccTime deltaTime;
 
-/** Initializes this instance with the specified world and delta time. */
--(id) initWithWorld: (CC3World*) theWorld andDeltaTime: (ccTime) dt;
+/** Initializes this instance with the specified delta time. */
+-(id) initWithDeltaTime: (ccTime) dt;
 
-/** Allocates and initializes an autoreleased instance with the specified world and delta time. */
-+(id) visitorWithWorld: (CC3World*) theWorld andDeltaTime: (ccTime) dt;
+/** Allocates and initializes an autoreleased instance with the specified delta time. */
++(id) visitorWithDeltaTime: (ccTime) dt;
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3NodeBoundingBoxVisitor
+
+/**
+ * Specialized transforming visitor that measures the bounding box of a node and all
+ * its descendants, by traversing each descendant node, ensuring each transformMatrix
+ * is up to date, and accumulating a bounding box that encompasses the local content
+ * of the startingNode and all of its descendants.
+ *
+ * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
+ * box will be in the local coordinate system of the startingNode, otherwise it
+ * will be in the global coordinate system of the 3D world.
+ */
+@interface CC3NodeBoundingBoxVisitor : CC3NodeTransformingVisitor {
+	CC3BoundingBox boundingBox;
+}
+
+/**
+ * Returns the bounding box accumulated during the visitation run.
+ *
+ * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
+ * box will be in the local coordinate system of the startingNode, otherwise it
+ * will be in the global coordinate system of the 3D world.
+ *
+ * If none of the startingNode or its descendants have any local content, this
+ * property will return kCC3BoundingBoxNull.
+ *
+ * The initial value of this property will be kCC3BoundingBoxNull.
+ */
+@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+
+@end
 
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
@@ -286,3 +415,4 @@
 @property(nonatomic, readonly) CC3Node* pickedNode;
 
 @end
+

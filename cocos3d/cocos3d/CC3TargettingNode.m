@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,15 +34,21 @@
 @interface CC3Node (TemplateMethods)
 -(void) applyRotation;
 -(void) updateTransformMatrices;
+-(void) updateGlobalLocation;
 -(void) populateFrom: (CC3Node*) another;
 @property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
 @end
 
 @interface CC3TargettingNode (TemplateMethods)
+-(void) applyTargetLocation;
+-(void) applyTargetDirectionRotation;
 -(CC3Vector) rotationallyRestrictTargetLocation: (CC3Vector) aLocation;
+-(void) resetTargetTrackingState;
 @property(nonatomic, readonly) BOOL isNewTarget;
 @property(nonatomic, readonly) BOOL isTargetLocationDirty;
 @property(nonatomic, readonly) BOOL isRotatorDirtyByTargetLocation;
+@property(nonatomic, readonly) BOOL shouldRotateToTarget;
+@property(nonatomic, readonly) BOOL shouldRotateToTargetLocation;
 @end
 
 @implementation CC3TargettingNode
@@ -61,9 +67,13 @@
 	[oldTarget release];
 }
 
+// Set the location anyway...and mark target location dirty if not set to track
 -(void) setLocation: (CC3Vector) aLocation {
 	[super setLocation: aLocation];
-	isTargetLocationDirty = YES;
+	if (!shouldTrackTarget) {
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
 }
 
 -(void) setRotation: (CC3Vector) aRotation {
@@ -77,6 +87,26 @@
 -(void) setQuaternion: (CC3Vector4) aQuaternion {
 	if (!shouldTrackTarget) {
 		[super setQuaternion: aQuaternion];
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
+}
+
+-(void) setRotationAxis: (CC3Vector) aDirection {
+	if (!shouldTrackTarget) {
+		[super setRotationAxis: aDirection];
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
+}
+
+-(GLfloat) rotationAngle {
+	return rotator.rotationAngle;
+}
+
+-(void) setRotationAngle: (GLfloat) anAngle {
+	if (!shouldTrackTarget) {
+		[super setRotationAngle: anAngle];
 		isTargetLocationDirty = YES;
 		isRotatorDirtyByTargetLocation = NO;
 	}
@@ -101,12 +131,15 @@
 	return targetLocation;
 }
 
+/**
+ * The new target location cannot be applied immediately, because the direction to
+ * the target depends on the transformed global location of both this node
+ * and the target location. Remember that it was set.
+ */
 -(void) setTargetLocation: (CC3Vector) aLocation {
 	targetLocation = [self rotationallyRestrictTargetLocation: aLocation];
 	isTargetLocationDirty = NO;
 	[self markTransformDirty];
-	// Target location cannot be applied immediately, because the direction to the target depends on
-	// the transformed global location of both this node and the target node. Remember that it was set.
 	isRotatorDirtyByTargetLocation = YES;
 }
 
@@ -177,6 +210,14 @@
 	return [self.globalRotationMatrix extractRightDirection];
 }
 
+-(BOOL) shouldAutotargetCamera {
+	return shouldAutotargetCamera;
+}
+
+-(void) setShouldAutotargetCamera: (BOOL) shouldAutotarg {
+	shouldAutotargetCamera = shouldAutotarg;
+	self.shouldTrackTarget = shouldAutotarg;
+}
 
 #pragma mark Allocation and initialization
 
@@ -187,8 +228,10 @@
 		axisRestriction = kCC3TargettingAxisRestrictionNone;
 		isNewTarget = NO;
 		shouldTrackTarget = NO;
+		shouldAutotargetCamera = NO;
 		isTargetLocationDirty = NO;
 		isRotatorDirtyByTargetLocation = NO;
+		wasGlobalLocationChanged = NO;
 	}
 	return self;
 }
@@ -206,6 +249,7 @@
 -(BOOL) isNewTarget { return isNewTarget; }
 -(BOOL) isTargetLocationDirty { return isTargetLocationDirty; }
 -(BOOL) isRotatorDirtyByTargetLocation { return isRotatorDirtyByTargetLocation; }
+-(BOOL) wasGlobalLocationChanged { return wasGlobalLocationChanged; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -219,34 +263,110 @@
 	axisRestriction = another.axisRestriction;
 	isNewTarget = another.isNewTarget;
 	shouldTrackTarget = another.shouldTrackTarget;
+	shouldAutotargetCamera = another.shouldAutotargetCamera;
 	isTargetLocationDirty = another.isTargetLocationDirty;
 	isRotatorDirtyByTargetLocation = another.isRotatorDirtyByTargetLocation;
+	wasGlobalLocationChanged = another.wasGlobalLocationChanged;
 }
 
 
 #pragma mark Updating
 
 -(void) trackTarget {
-	if (target && (isNewTarget || shouldTrackTarget) && !CC3VectorsAreEqual(self.targetLocation, target.globalLocation)) {
+	if (self.shouldRotateToTarget) {
 		self.targetLocation = target.globalLocation;
 		// Recalculate the transforms of this node and all descendants.
 		[self updateTransformMatrices];
 		LogTrace(@"%@ tracking adjusted to target", [self fullDescription]);
 	}
-	isNewTarget = NO;
+	[self resetTargetTrackingState];
+}
+
+/**
+ * Returns whether this node should rotate to face the target. It will do so if:
+ *   - target exists, AND
+ *   - the target has just been set OR shouldTrackTarget is YES, AND
+ *   - either the global location of this node or the target node has changed
+ */
+-(BOOL) shouldRotateToTarget {
+	return target && (isNewTarget || shouldTrackTarget)
+				&& (wasGlobalLocationChanged || !CC3VectorsAreEqual(self.targetLocation, target.globalLocation));
 }
 
 
 #pragma mark Transformations
 
+/** Keeps track of whether the globalLocation is changed by this method. */
+-(void) updateGlobalLocation {
+	CC3Vector oldGlobLoc = globalLocation;
+	[super updateGlobalLocation];
+	wasGlobalLocationChanged = !CC3VectorsAreEqual(globalLocation, oldGlobLoc);
+}
+
+/**
+ * Target location can only be applied once translation is complete, because the
+ * direction to the target depends on the transformed global location of both this
+ * node and the target location.
+ */
 -(void) applyRotation {
-	// Target location can only be applied once translation is complete, because the direction to the
-	// target depends on the transformed global location of both this node and the target node.
-	if (isRotatorDirtyByTargetLocation) {
-		((CC3DirectionalRotator*)rotator).forwardDirection = CC3VectorDifference(self.targetLocation, self.globalLocation);
+	if (self.shouldRotateToTargetLocation) {
+		[self applyTargetLocation];
+		[self applyTargetDirectionRotation];
 		isRotatorDirtyByTargetLocation = NO;
+	} else {
+		[super applyRotation];
 	}
+}
+
+/**
+ * Template method to update the rotator transform from the targetLocation
+ * and the globalLocation.
+ *
+ * Only update the rotation transform if the targetLocation was changed, or this
+ * node has moved. But don't update if the target location is the same as the
+ * globalLocation of this node (which makes the direction to point undefined).
+ */
+-(void) applyTargetLocation {
+	CC3Vector targLoc = self.targetLocation;
+	CC3Vector globLoc = self.globalLocation;
+	if ((isRotatorDirtyByTargetLocation || wasGlobalLocationChanged) 
+			&& !CC3VectorsAreEqual(targLoc, globLoc)) {
+		((CC3DirectionalRotator*)rotator).forwardDirection = CC3VectorDifference(targLoc, globLoc);
+	}
+}
+
+/**
+ * Applies the target location rotation using the forward direction.
+ *
+ * Since we want to target a global direction, we must ignore the rotation
+ * of all ancestor nodes. The transformMatrix is rebuilt using the globalLocation
+ * (which was calculated during the location transform), and then the global
+ * rotation is applied by the rotator. Finally, the ancestor scale is applied.
+ */
+-(void) applyTargetDirectionRotation {
+	[transformMatrix populateIdentity];
+	[transformMatrix translateBy: self.globalLocation];
 	[super applyRotation];
+	if (parent) {
+		[transformMatrix scaleBy: parent.globalScale];
+	}
+}
+
+/**
+ * Returns whether this node should rotate to face the targetLocation.
+ * It will do so if targetDirection was just set, or shouldTrackTarget is YES.
+ */
+-(BOOL) shouldRotateToTargetLocation {
+	return isRotatorDirtyByTargetLocation || shouldTrackTarget;
+}
+
+/**
+ * Resets the internal indicators of whether the target or this instance has moved
+ * and therefore the targetLocation needs updating.
+ */
+-(void) resetTargetTrackingState {
+	isNewTarget = NO;
+	wasGlobalLocationChanged = NO;
 }
 
 @end
@@ -261,9 +381,9 @@
 @end
 
 @interface CC3DirectionalRotator (TemplateMethods)
--(CC3Vector) extractForwardDirectionFromMatrix;
--(CC3Vector) extractUpDirectionFromMatrix;
--(CC3Vector) extractRightDirectionFromMatrix;
+-(void) ensureForwardDirectionFromMatrix;
+-(void) ensureUpDirectionFromMatrix;
+-(void) ensureRightDirectionFromMatrix;
 @property(nonatomic, readonly) BOOL isForwardDirectionDirty;
 @property(nonatomic, readonly) BOOL isUpDirectionDirty;
 @property(nonatomic, readonly) BOOL isRightDirectionDirty;
@@ -274,32 +394,29 @@
 @implementation CC3DirectionalRotator
 
 -(CC3Vector) forwardDirection {
-	if (isForwardDirectionDirty) {
-		forwardDirection = [self extractForwardDirectionFromMatrix];
-		isForwardDirectionDirty = NO;
-	}
+	[self ensureForwardDirectionFromMatrix];
 	return forwardDirection;
 }
 
 -(void) setForwardDirection: (CC3Vector) aDirection {
+	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+			 @"The forwardDirection may not be set to the zero vector.");
+
 	forwardDirection = CC3VectorNormalize(aDirection);
 
 	isRotationDirty = YES;
+	isAxisAngleDirty = YES;
 	isQuaternionDirty = YES;
+	isQuaternionDirtyByAxisAngle = NO;
 	isForwardDirectionDirty = NO;
-	isUpDirectionDirty = NO;
-	isRightDirectionDirty = NO;
-
-	isMatrixDirtyByRotation = NO;
-	isMatrixDirtyByQuaternion = NO;
-	isMatrixDirtyByDirection = YES;
+	isUpDirectionDirty = YES;
+	isRightDirectionDirty = YES;
+	
+	matrixIsDirtyBy = kCC3MatrixIsDirtyByDirection;
 }
 
 -(CC3Vector) upDirection {
-	if (isUpDirectionDirty) {
-		upDirection = [self extractUpDirectionFromMatrix];
-		isUpDirectionDirty = NO;
-	}
+	[self ensureUpDirectionFromMatrix];
 	return upDirection;
 }
 
@@ -308,24 +425,24 @@
 }
 
 -(void) setWorldUpDirection: (CC3Vector) aDirection {
+	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+			 @"The worldUpDirection may not be set to the zero vector.");
+	
 	worldUpDirection = CC3VectorNormalize(aDirection);
 	
 	isRotationDirty = YES;
+	isAxisAngleDirty = YES;
 	isQuaternionDirty = YES;
+	isQuaternionDirtyByAxisAngle = NO;
 	isForwardDirectionDirty = NO;
 	isUpDirectionDirty = YES;
 	isRightDirectionDirty = YES;
 	
-	isMatrixDirtyByRotation = NO;
-	isMatrixDirtyByQuaternion = NO;
-	isMatrixDirtyByDirection = YES;
+	matrixIsDirtyBy = kCC3MatrixIsDirtyByDirection;
 }
 
 -(CC3Vector) rightDirection {
-	if (isRightDirectionDirty) {
-		rightDirection = [self extractRightDirectionFromMatrix];
-		isRightDirectionDirty = NO;
-	}
+	[self ensureRightDirectionFromMatrix];
 	return rightDirection;
 }
 
@@ -334,7 +451,6 @@
 	isForwardDirectionDirty = YES;
 	isUpDirectionDirty = YES;
 	isRightDirectionDirty = YES;
-	isMatrixDirtyByDirection = NO;
 }
 
 -(void) setQuaternion:(CC3Vector4) aQuaternion {
@@ -342,7 +458,6 @@
 	isForwardDirectionDirty = YES;
 	isUpDirectionDirty = YES;
 	isRightDirectionDirty = YES;
-	isMatrixDirtyByDirection = NO;
 }
 
 -(void) setRotationMatrix:(CC3GLMatrix*) aGLMatrix {
@@ -350,7 +465,6 @@
 	isForwardDirectionDirty = YES;
 	isUpDirectionDirty = YES;
 	isRightDirectionDirty = YES;
-	isMatrixDirtyByDirection = NO;
 }
 
 -(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
@@ -362,7 +476,6 @@
 		isForwardDirectionDirty = NO;
 		isUpDirectionDirty = NO;
 		isRightDirectionDirty = NO;
-		isMatrixDirtyByDirection = NO;
 	}
 	return self;
 }
@@ -371,7 +484,6 @@
 -(BOOL) isForwardDirectionDirty { return isForwardDirectionDirty; }
 -(BOOL) isUpDirectionDirty { return isUpDirectionDirty; }
 -(BOOL) isRightDirectionDirty { return isRightDirectionDirty; }
--(BOOL) isMatrixDirtyByDirection { return isMatrixDirtyByDirection; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -385,51 +497,52 @@
 	isForwardDirectionDirty = another.isForwardDirectionDirty;
 	isUpDirectionDirty = another.isUpDirectionDirty;
 	isRightDirectionDirty = another.isRightDirectionDirty;
-	isMatrixDirtyByDirection = another.isMatrixDirtyByDirection;
 }
 
 /**
- * Extracts and returns a forwardDirection from the encapsulated rotation
+ * If needed, extracts and sets the forwardDirection from the encapsulated rotation
  * matrix. This method is invoked automatically when accessing the forwardDirection
  * property, if that property is not current (ie- if the rotation was most recently
  * set with Euler angles or a quaternion).
  */
--(CC3Vector) extractForwardDirectionFromMatrix {
-	return [self.rotationMatrix extractForwardDirection];
+-(void) ensureForwardDirectionFromMatrix {
+	if (isForwardDirectionDirty) {
+		forwardDirection = [self.rotationMatrix extractForwardDirection];
+		isForwardDirectionDirty = NO;
+	}
 }
 
 /**
- * Extracts and returns an upDirection from the encapsulated rotation matrix.
+ * If needed, extracts and sets the upDirection from the encapsulated rotation matrix.
  * This method is invoked automatically when accessing the upDirection property,
  * if that property is not current (ie- if the rotation was most recently set with
  * Euler angles or a quaternion).
  */
--(CC3Vector) extractUpDirectionFromMatrix {
-	return [self.rotationMatrix extractUpDirection];
+-(void) ensureUpDirectionFromMatrix {
+	if (isUpDirectionDirty) {
+		upDirection = [self.rotationMatrix extractUpDirection];
+		isUpDirectionDirty = NO;
+	}
 }
 
 /**
- * Extracts and returns an rightDirection from the encapsulated rotation matrix.
+ * If needed, extracts and sets the rightDirection from the encapsulated rotation matrix.
  * This method is invoked automatically when accessing the rightDirection property,
  * if that property is not current (ie- if the rotation was most recently set with
  * Euler angles or a quaternion).
  */
--(CC3Vector) extractRightDirectionFromMatrix {
-	return [self.rotationMatrix extractRightDirection];
+-(void) ensureRightDirectionFromMatrix {
+	if (isRightDirectionDirty) {
+		rightDirection = [self.rotationMatrix extractRightDirection];
+		isRightDirectionDirty = NO;
+	}
 }
 
 -(void) applyRotation {
 	[super applyRotation];
-	if (isMatrixDirtyByDirection) {
-		// TODO: This may not work if the camera is attached to an object that is itself rotating.
-		//       Directing works in the global frame, not the local, and will ignore parent
-		//       rotation. Subsequent extractions of the rotation and quaternion from the
-		//       rotation matrix will thus be relative to the global frame, not the parent.
-		//       The worldUpDirection should also probably rotate with the parent.
+	if (matrixIsDirtyBy == kCC3MatrixIsDirtyByDirection) {
 		[rotationMatrix populateToPointTowards: forwardDirection withUp: worldUpDirection];
-		isUpDirectionDirty = YES;
-		isRightDirectionDirty = YES;
-		isMatrixDirtyByDirection = NO;
+		matrixIsDirtyBy = kCC3MatrixIsNotDirty;
 	}
 }
 
@@ -454,7 +567,42 @@
 		self.globalLightLocation = target.globalLocation;
 		LogTrace(@"%@ tracking adjusted to target", [self fullDescription]);
 	}
-	isNewTarget = NO;
+	[self resetTargetTrackingState];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3Node extension
+
+@implementation CC3Node (CC3TargettingNode)
+
+-(CC3TargettingNode*) asTargettingNode {
+	CC3TargettingNode* tn = [CC3TargettingNode nodeWithName: [NSString stringWithFormat: @"%@-TargettingWrapper", self.name]];
+	tn.shouldAutoremoveWhenEmpty = YES;
+	[tn addChild: self];
+	return tn;
+}
+
+-(CC3TargettingNode*) asTracker {
+	CC3TargettingNode* tn = [self asTargettingNode];
+	tn.shouldTrackTarget = YES;
+	return tn;
+}
+
+-(CC3TargettingNode*) asCameraTracker {
+	CC3TargettingNode* tn = [self asTracker];
+	tn.shouldAutotargetCamera = YES;
+	return tn;
+}
+
+-(CC3TargettingNode*) asLightTracker {
+	CC3TargettingNode* tn = [CC3LightTracker nodeWithName: [NSString stringWithFormat: @"%@-LightTrackerWrapper", self.name]];
+	tn.shouldAutoremoveWhenEmpty = YES;
+	tn.shouldTrackTarget = YES;
+	[tn addChild: self];
+	return tn;
 }
 
 @end

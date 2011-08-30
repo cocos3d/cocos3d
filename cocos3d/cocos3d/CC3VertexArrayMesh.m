@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -52,8 +52,7 @@
 @implementation CC3VertexArrayMesh
 
 @synthesize vertexLocations, vertexNormals, vertexColors, vertexTextureCoordinates;
-@synthesize vertexIndices, interleaveVertices, shouldAllowVertexBuffering;
-@synthesize overlayTextureCoordinates;
+@synthesize vertexIndices, interleaveVertices;
 
 -(void) dealloc {
 	[vertexLocations release];
@@ -77,60 +76,150 @@
 	return vertexLocations.elementCount;
 }
 
--(void) setVertexLocations: (CC3VertexLocations*) aVertexLocations {
-	[vertexLocations autorelease];
-	vertexLocations = [aVertexLocations retain];
-	vertexLocations.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-}
-
--(void) setVertexNormals: (CC3VertexNormals*) aVertexNormals {
-	[vertexNormals autorelease];
-	vertexNormals = [aVertexNormals retain];
-	vertexNormals.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-}
-
--(void) setVertexColors: (CC3VertexColors*) aVertexColors {
-	[vertexColors autorelease];
-	vertexColors = [aVertexColors retain];
-	vertexColors.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-}
-
--(void) setVertexTextureCoordinates: (CC3VertexTextureCoordinates*) aVertexTexCoords {
-	[vertexTextureCoordinates autorelease];
-	vertexTextureCoordinates = [aVertexTexCoords retain];
-	vertexTextureCoordinates.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-}
-
--(void) setVertexIndices: (CC3VertexIndices*) aVertexIndices {
-	[vertexIndices autorelease];
-	vertexIndices = [aVertexIndices retain];
-	vertexIndices.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-}
-
--(void) setShouldAllowVertexBuffering: (BOOL) allowVertexBuffering {
-	shouldAllowVertexBuffering = allowVertexBuffering;
-
-	vertexLocations.shouldAllowVertexBuffering = allowVertexBuffering;
-	vertexNormals.shouldAllowVertexBuffering = allowVertexBuffering;
-	vertexColors.shouldAllowVertexBuffering = allowVertexBuffering;
-	vertexTextureCoordinates.shouldAllowVertexBuffering = allowVertexBuffering;
-
-	if (overlayTextureCoordinates) {
-		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-			otc.shouldAllowVertexBuffering = allowVertexBuffering;
-		}
-	}
-	
-	vertexIndices.shouldAllowVertexBuffering = allowVertexBuffering;
-}
-
-
 /**
  * Returns the boundingBox from the vertexLocation array.
- * If no vertexLocation array has been set, returns a zero bounding box.
+ * If no vertexLocation array has been set, returns a null bounding box.
  */
 -(CC3BoundingBox) boundingBox {
 	return vertexLocations ? vertexLocations.boundingBox : [super boundingBox];
+}
+
+
+#pragma mark Texture coordinates
+
+-(GLuint) textureCoordinatesArrayCount {
+	return (overlayTextureCoordinates ? overlayTextureCoordinates.count : 0) + (vertexTextureCoordinates ? 1 : 0);
+}
+
+-(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord {
+	NSAssert(aTexCoord, @"Overlay texture cannot be nil");
+	NSAssert1(!overlayTextureCoordinates || ((overlayTextureCoordinates.count + 1) <
+											 [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value),
+			  @"Too many overlaid textures. This platform only supports %i texture units.",
+			  [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value);
+	LogTrace(@"Adding %@ to %@", aTexCoord, self);
+	
+	// Set the first texture coordinates into vertexTextureCoordinates
+	if (!vertexTextureCoordinates) {
+		self.vertexTextureCoordinates = aTexCoord;
+	} else {
+		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
+		// creating it first if necessary
+		if(!overlayTextureCoordinates) {
+			overlayTextureCoordinates = [[NSMutableArray array] retain];
+		}
+		[overlayTextureCoordinates addObject: aTexCoord];
+	}
+}
+
+-(void) removeTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord {
+	LogTrace(@"Removing %@ from %@", aTexCoord, self);
+	
+	// If the array to be removed is actually the vertexTextureCoordinates, remove it
+	if (vertexTextureCoordinates == aTexCoord) {
+		self.vertexTextureCoordinates = nil;
+	} else {
+		// Otherwise, find it in the array of overlays and remove it,
+		// and remove the overlay array if it is now empty
+		if (overlayTextureCoordinates && aTexCoord) {
+			[overlayTextureCoordinates removeObjectIdenticalTo: aTexCoord];
+			if (overlayTextureCoordinates.count == 0) {
+				[overlayTextureCoordinates release];
+				overlayTextureCoordinates = nil;
+			}
+		}
+	}
+}
+
+-(void) removeAllTextureCoordinates {
+	// Remove the first texture coordinates
+	self.vertexTextureCoordinates = nil;
+	
+	// Remove the overlay texture coordinates
+	NSArray* myOTCs = [overlayTextureCoordinates copy];
+	for (CC3VertexTextureCoordinates* otc in myOTCs) {
+		[self removeTextureCoordinates: otc];
+	}
+	[myOTCs release];
+}
+
+-(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName {
+	NSString* tcName;
+	
+	// First check if the first texture coordinates is the one
+	if (vertexTextureCoordinates) {
+		tcName = vertexTextureCoordinates.name;
+		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+			return vertexTextureCoordinates;
+		}
+	}
+	// Then look for it in the overlays array
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		tcName = otc.name;
+		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+			return otc;
+		}
+	}
+	return nil;
+}
+
+-(CC3VertexTextureCoordinates*) textureCoordinatesForTextureUnit: (GLuint) texUnit {
+	// If first texture unit, return vertexTextureCoordinates property
+	if (texUnit == 0) {
+		return vertexTextureCoordinates;
+	} else {
+		// Otherwise retrieve from overlay array
+		return [overlayTextureCoordinates objectAtIndex: (texUnit - 1)];
+	}
+}
+
+-(void) setTextureCoordinates: (CC3VertexTextureCoordinates *) aTexCoords
+			   forTextureUnit: (GLuint) texUnit {
+	NSAssert(aTexCoords, @"Overlay texture coordinates cannot be nil");
+	if (texUnit == 0) {
+		self.vertexTextureCoordinates = aTexCoords;
+	} else if (texUnit < self.textureCoordinatesArrayCount) {
+		[overlayTextureCoordinates replaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
+	} else {
+		[self addTextureCoordinates: aTexCoords];
+	}
+}
+
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[[self textureCoordinatesForTextureUnit: i]
+			alignWithTexture: [aMaterial textureForTextureUnit: i]];
+	}
+}
+
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[[self textureCoordinatesForTextureUnit: i]
+			alignWithInvertedTexture: [aMaterial textureForTextureUnit: i]];
+	}
+}
+
+-(CGRect) textureRectangle {
+	return [self textureRectangleForTextureUnit: 0];
+}
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[self textureCoordinatesForTextureUnit: i].textureRectangle = aRect;
+	}
+}
+
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	return texCoords ? texCoords.textureRectangle : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	texCoords.textureRectangle = aRect;
 }
 
 
@@ -139,7 +228,6 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		interleaveVertices = NO;
-		shouldAllowVertexBuffering = YES;
 		vertexLocations = nil;
 		vertexNormals = nil;
 		vertexColors = nil;
@@ -149,6 +237,9 @@
 	}
 	return self;
 }
+
+// Protected properties for copying
+-(NSArray*) overlayTextureCoordinates { return overlayTextureCoordinates; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -172,7 +263,6 @@
 
 	self.vertexIndices = another.vertexIndices;							// retained
 	interleaveVertices = another.interleaveVertices;
-	shouldAllowVertexBuffering = another.shouldAllowVertexBuffering;
 }
 
 /**
@@ -191,21 +281,15 @@
 		vertexNormals.bufferID = commonBufferId;
 		vertexColors.bufferID = commonBufferId;
 		vertexTextureCoordinates.bufferID = commonBufferId;
-
-		if (overlayTextureCoordinates) {
-			for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-				otc.bufferID = commonBufferId;
-			}
+		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+			otc.bufferID = commonBufferId;
 		}
 	} else {
 		[vertexNormals createGLBuffer];
 		[vertexColors createGLBuffer];
 		[vertexTextureCoordinates createGLBuffer];
-
-		if (overlayTextureCoordinates) {
-			for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-				[otc createGLBuffer];
-			}
+		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+			[otc createGLBuffer];
 		}
 	}
 	[vertexIndices createGLBuffer];
@@ -216,13 +300,9 @@
 	[vertexNormals deleteGLBuffer];
 	[vertexColors deleteGLBuffer];
 	[vertexTextureCoordinates deleteGLBuffer];
-	
-	if (overlayTextureCoordinates) {
-		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-			[otc deleteGLBuffer];
-		}
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		[otc deleteGLBuffer];
 	}
-
 	[vertexIndices deleteGLBuffer];
 }
 
@@ -231,19 +311,69 @@
 	[vertexNormals releaseRedundantData];
 	[vertexColors releaseRedundantData];
 	[vertexTextureCoordinates releaseRedundantData];
-	
-	if (overlayTextureCoordinates) {
-		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-			[otc releaseRedundantData];
-		}
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		[otc releaseRedundantData];
 	}
-	
 	[vertexIndices releaseRedundantData];
 }
 
-/** Sets the shouldReleaseRedundantData of vertexLocations array to NO. */
 -(void) retainVertexLocations {
 	vertexLocations.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexNormals {
+	vertexNormals.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexColors {
+	vertexColors.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexTextureCoordinates {
+	vertexTextureCoordinates.shouldReleaseRedundantData = NO;
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		otc.shouldReleaseRedundantData = NO;
+	}
+}
+
+-(void) retainVertexIndices {
+	vertexIndices.shouldReleaseRedundantData = NO;
+}
+
+-(void) doNotBufferVertexLocations {
+	vertexLocations.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexNormals {
+	if (interleaveVertices) {
+		[self doNotBufferVertexLocations];
+	} else {
+		vertexNormals.shouldAllowVertexBuffering = NO;
+	}
+}
+
+-(void) doNotBufferVertexColors {
+	if (interleaveVertices) {
+		[self doNotBufferVertexLocations];
+	} else {
+		vertexColors.shouldAllowVertexBuffering = NO;
+	}
+}
+
+-(void) doNotBufferVertexTextureCoordinates {
+	if (interleaveVertices) {
+		[self doNotBufferVertexLocations];
+	} else {
+		vertexTextureCoordinates.shouldAllowVertexBuffering = NO;
+		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+			otc.shouldAllowVertexBuffering = NO;
+		}
+	}
+
+}
+
+-(void) doNotBufferVertexIndices {
+	vertexIndices.shouldAllowVertexBuffering = NO;
 }
 
 
@@ -255,11 +385,8 @@
 		[vertexNormals updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[vertexColors updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[vertexTextureCoordinates updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-		
-		if (overlayTextureCoordinates) {
-			for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-				[otc updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-			}
+		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+			[otc updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		}
 	}
 }
@@ -342,21 +469,15 @@
 
 		// For each texture unit that has a texture...
 		while(tu < visitor.textureUnitCount) {
-			// The first texture unit uses the vertexTextureCoordinates property
-			if (tu == 0) {
-				vtc = vertexTextureCoordinates;
 
-			// Subsequent texture unit use the arrays in the overlayTextureCoordinates property
-			} else if(overlayTextureCoordinates && tu <= overlayTextureCoordinates.count) {
-				vtc = (CC3VertexTextureCoordinates*)[overlayTextureCoordinates objectAtIndex: tu - 1];
+			if (tu < self.textureCoordinatesArrayCount) {
+				vtc = [self textureCoordinatesForTextureUnit: tu];
 			}
 
 			// Note that vtc at this point will be the most recently assigned array,
-			// and may be the array that was used on the last iteration of this loop if
-			// the overlayTextureCoordinates array has less tex coord arrays than there
-			// are textures. In this case, we keep reusing the last used tex coord array,
-			// which may be a previous overlayTextureCoordinate, or may even be the vertex
-			// tex coords from the vertexTextureCoordinates propety.
+			// and may be the array that was used on the last iteration of this loop
+			// if there are less texture coord arrays than there are textures.
+			// In this case, we keep reusing the most recently used texture coord array.
 			if(vtc) {
 				visitor.textureUnit = tu;
 				[vtc bindWithVisitor: visitor];
@@ -407,6 +528,59 @@
 }
 
 
+#pragma mark Accessing vertex data
+
+-(CC3Vector) vertexLocationAt: (GLsizei) index {
+	return vertexLocations ? [vertexLocations locationAt: index] : kCC3VectorZero;
+}
+
+-(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index {
+	[vertexLocations setLocation: aLocation at: index];
+}
+
+-(CC3Vector) vertexNormalAt: (GLsizei) index {
+	return vertexNormals ? [vertexNormals normalAt: index] : kCC3VectorZero;
+}
+
+-(void) setVertexNormal: (CC3Vector) aNormal at: (GLsizei) index {
+	[vertexNormals setNormal: aNormal at: index];
+}
+
+-(ccColor4F) vertexColor4FAt: (GLsizei) index {
+	return vertexColors ? [vertexColors color4FAt: index] : kCCC4FBlackTransparent;
+}
+
+-(void) setVertexColor4F: (ccColor4F) aColor at: (GLsizei) index {
+	[vertexColors setColor4F: aColor at: index];
+}
+
+-(ccColor4B) vertexColor4BAt: (GLsizei) index {
+	return vertexColors ? [vertexColors color4BAt: index] : (ccColor4B){ 0, 0, 0, 0 };
+}
+
+-(void) setVertexColor4B: (ccColor4B) aColor at: (GLsizei) index {
+	[vertexColors setColor4B: aColor at: index];
+}
+
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	return texCoords ? [texCoords texCoord2FAt: index] : (ccTex2F){ 0.0, 0.0 };
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	[texCoords setTexCoord2F: aTex2F at: index];
+}
+
+-(GLushort) vertexIndexAt: (GLsizei) index {
+	return vertexIndices ? [vertexIndices indexAt: index] : 0;
+}
+
+-(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index {
+	[vertexIndices setIndex: vertexIndex at: index];
+}
+
+
 #pragma mark Mesh context switching
 
 +(void) resetSwitching {
@@ -416,88 +590,6 @@
 	[CC3VertexColors resetSwitching];
 	[CC3VertexTextureCoordinates resetSwitching];
 	[CC3VertexIndices resetSwitching];
-}
-
-
-#pragma mark Texture overlays
-
--(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord {
-	NSAssert(aTexCoord, @"Overlay texture cannot be nil");
-	NSAssert1(!overlayTextureCoordinates || ((overlayTextureCoordinates.count + 1) <
-											[CC3OpenGLES11Engine engine].platform.maxTextureUnits.value),
-			  @"Too many overlaid textures. This platform only supports %i texture units.",
-			  [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value);
-	LogTrace(@"Adding %@ to %@", aTexCoord, self);
-
-	// Set vertex buffering to be consistent with this mesh
-	aTexCoord.shouldAllowVertexBuffering = self.shouldAllowVertexBuffering;
-	
-	// Set the first texture coordinates into vertexTextureCoordinates
-	if (!vertexTextureCoordinates) {
-		self.vertexTextureCoordinates = aTexCoord;
-	} else {
-		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
-		// creating it first if necessary
-		if(!overlayTextureCoordinates) {
-			overlayTextureCoordinates = [[NSMutableArray array] retain];
-		}
-		[overlayTextureCoordinates addObject: aTexCoord];
-	}
-}
-
--(void) removeTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord {
-	LogTrace(@"Removing %@ from %@", aTexCoord, self);
-
-	// If the array to be removed is actually the vertexTextureCoordinates, remove it
-	if (vertexTextureCoordinates == aTexCoord) {
-		self.vertexTextureCoordinates = nil;
-	} else {
-		// Otherwise, find it in the array of overlays and remove it,
-		// and remove the overlay array if it is now empty
-		if (overlayTextureCoordinates && aTexCoord) {
-			[overlayTextureCoordinates removeObjectIdenticalTo: aTexCoord];
-			if (overlayTextureCoordinates.count == 0) {
-				[overlayTextureCoordinates release];
-				overlayTextureCoordinates = nil;
-			}
-		}
-	}
-}
-
--(void) removeAllTextureCoordinates {
-	// Remove the first texture coordinates
-	self.vertexTextureCoordinates = nil;
-	
-	// Remove the overlay texture coordinates
-	if (overlayTextureCoordinates) {
-		NSArray* myOTCs = [overlayTextureCoordinates copy];
-		for (CC3VertexTextureCoordinates* otc in myOTCs) {
-			[self removeTextureCoordinates: otc];
-		}
-		[myOTCs release];
-	}
-}
-
--(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName {
-	NSString* tcName;
-
-	// First check if the first texture coordinates is the one
-	if (vertexTextureCoordinates) {
-		tcName = vertexTextureCoordinates.name;
-		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
-			return vertexTextureCoordinates;
-		}
-	}
-	// Then look for it in the overlays array
-	if (overlayTextureCoordinates) {
-		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
-			tcName = otc.name;
-			if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
-				return otc;
-			}
-		}
-	}
-	return nil;
 }
 
 @end
@@ -549,7 +641,6 @@
 		}
 		LogTrace(@"%@ setting radius of %@ to %.2f", [self class], self.node, radius);
 	}
-	NSAssert(radius > 0.0f, @"Spherical bounding radius is zero");
 }
 
 -(void) buildVolume {

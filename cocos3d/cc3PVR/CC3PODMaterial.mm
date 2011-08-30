@@ -1,7 +1,7 @@
 /*
  * CC3PODMaterial.mm
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -66,7 +66,7 @@ static GLfloat shininessExpansionFactor = 400.0f;
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	SPODMaterial* psm = (SPODMaterial*)[aPODRez materialPODStructAtIndex: aPODIndex];
-	LogTrace(@"Creating %@ at index %i from %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
+	LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
 	if ( (self = [super initWithName: [NSString stringWithUTF8String: psm->pszName]]) ) {
 		self.podIndex = aPODIndex;
 		self.ambientColor = CCC4FMake(psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2], psm->fMatOpacity);
@@ -107,7 +107,7 @@ static GLfloat shininessExpansionFactor = 400.0f;
  * and adds it to this material.
  */
 -(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if (aPODTexIndex >= 0) {
+	if (aPODTexIndex >= 0 && aPODTexIndex < (int)aPODRez.textureCount) {
 		[self addTexture: [aPODRez textureAtIndex: aPODTexIndex]];
 	}
 }
@@ -117,7 +117,7 @@ static GLfloat shininessExpansionFactor = 400.0f;
  * configures it as a bump-map texture, and adds it to this material.
  */
 -(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if (aPODTexIndex >= 0) {
+	if (aPODTexIndex >= 0 && aPODTexIndex < (int)aPODRez.textureCount) {
 		CC3Texture* bmTex = [aPODRez textureAtIndex: aPODTexIndex];
 		bmTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
 		[self addTexture: bmTex];

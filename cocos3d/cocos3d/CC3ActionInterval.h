@@ -1,7 +1,7 @@
 /*
  * CC3ActionInterval.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,127 @@
 #import "CCActionEase.h"
 
 
+#pragma mark -
+#pragma mark CC3TransformBy
+
+/**
+ * CC3TransformBy is an abstract subclass of CCActionInterval that is the parent
+ * of subclasses that transform the location, rotation, or scale of a target
+ * CC3Node by some amount in some way.
+ */
+@interface CC3TransformBy : CCActionInterval {
+	CC3Vector startVector;
+	CC3Vector diffVector;
+}
+
+/**
+ * Initializes this instance to transform the target property of the node
+ * by the specified vector within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
+
+/**
+ * Allocates and initializes an autoreleased instance to transform the target
+ * property of the node by the specified vector within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveBy
+
+/** CC3MoveBy is a CCActionInterval that moves a target CC3Node by a specific translation amount. */
+@interface CC3MoveBy : CC3TransformBy {}
+
+/**
+ * Initializes this instance to move the target node
+ * by the specified translation amount, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
+
+/**
+ * Allocates and initializes an autoreleased instance to move the target node
+ * by the specified translation amount, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3RotateBy
+
+/** CC3RotateBy is a CCActionInterval that rotates a target CC3Node by a specific rotation amount. */
+@interface CC3RotateBy : CC3TransformBy {}
+
+/**
+ * Initializes this instance to rotate the target node
+ * by the specified rotation amount, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node
+ * by the specified rotation amount, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3RotateByAngle
+
+/**
+ * CC3RotateByAngle is a CCActionInterval that rotates a target CC3Node by a specific
+ * amount, by updating the rotationAngle propety.
+ *
+ * The rotationAngle property rotates the node around the axis set in the rotationAxis
+ * property of the node. Make sure that you set the rotationAxis property appropriately.
+ */
+@interface CC3RotateByAngle : CCActionInterval {
+	GLfloat startAngle;
+	GLfloat diffAngle;
+}
+
+/**
+ * Initializes this instance to rotate the target node
+ * by the specified angle, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node
+ * by the specified angle, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ScaleBy
+
+/** CC3ScaleBy is a CCActionInterval that scales a target CC3Node by a specific scale factor. */
+@interface CC3ScaleBy : CC3TransformBy {}
+
+/**
+ * Initializes this instance to scale the target node
+ * by the specified scale factor, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
+
+/**
+ * Allocates and initializes an autoreleased instance to scale the target node
+ * by the specified scale factor, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
+
+@end
+
+
 #pragma mark CC3TransformTo
 
 /**
@@ -41,17 +162,9 @@
  * of subclasses that transform the location, rotation, or scale of a target
  * CC3Node to some end value in some way.
  */
-@interface CC3TransformTo : CCActionInterval {
-	CC3Vector startVector;
+@interface CC3TransformTo : CC3TransformBy {
 	CC3Vector endVector;
-	CC3Vector differenceVector;
 }
-
-/**
- * The property within the target node that is being transformed.
- * Subclasses will map this property to the appropriate property within the target.
- */
-@property(nonatomic, assign) CC3Vector targetVector;
 
 /**
  * Initializes this instance to transform the target property of the node
@@ -112,6 +225,39 @@
  * to the specified rotation, within the specified time duration.
  */
 +(id) actionWithDuration: (ccTime) t rotateTo: (CC3Vector) aRotation;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3RotateToAngle
+
+/**
+ * CC3RotateToAngle is a CCActionInterval that rotates a target CC3Node to a specific
+ * rotationAngle, by updating the rotationAngle propety.
+ *
+ * The rotationAngle property rotates the node around the axis set in the rotationAxis
+ * property of the node. Make sure that you set the rotationAxis property appropriately.
+ *
+ * The rotational travel will be minimized, taking into consideration the cyclical nature
+ * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
+ * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
+ */
+@interface CC3RotateToAngle : CC3RotateByAngle {
+	GLfloat endAngle;
+}
+
+/**
+ * Initializes this instance to move the target node to the
+ * specified rotation angle, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node
+ * to the specified rotation angle, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t rotateToAngle: (GLfloat) anAngle;
 
 @end
 
@@ -181,94 +327,6 @@
  * to the specified scale, within the specified time duration.
  */
 +(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3TransformBy
-
-/**
- * CC3TransformBy is an abstract subclass of CCActionInterval that is the parent
- * of subclasses that transform the location, rotation, or scale of a target
- * CC3Node by some amount in some way.
- */
-@interface CC3TransformBy : CC3TransformTo {}
-
-/**
- * Initializes this instance to transform the target property of the node
- * by the specified vector within the specified time duration.
- */
--(id) initWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
-
-/**
- * Allocates and initializes an autoreleased instance to transform the target
- * property of the node by the specified vector within the specified time duration.
- */
-+(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3MoveBy
-
-/** CC3MoveBy is a CCActionInterval that moves a target CC3Node by a specific translation amount. */
-@interface CC3MoveBy : CC3TransformBy {}
-
-/**
- * Initializes this instance to move the target node
- * by the specified translation amount, within the specified time duration.
- */
--(id) initWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
-
-/**
- * Allocates and initializes an autoreleased instance to move the target node
- * by the specified translation amount, within the specified time duration.
- */
-+(id) actionWithDuration: (ccTime) t moveBy: (CC3Vector) aTranslation;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3RotateBy
-
-/** CC3RotateBy is a CCActionInterval that rotates a target CC3Node by a specific rotation amount. */
-@interface CC3RotateBy : CC3TransformBy {}
-
-/**
- * Initializes this instance to rotate the target node
- * by the specified rotation amount, within the specified time duration.
- */
--(id) initWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
-
-/**
- * Allocates and initializes an autoreleased instance to rotate the target node
- * by the specified rotation amount, within the specified time duration.
- */
-+(id) actionWithDuration: (ccTime) t rotateBy: (CC3Vector) aRotation;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3ScaleBy
-
-/** CC3ScaleBy is a CCActionInterval that scales a target CC3Node by a specific scale factor. */
-@interface CC3ScaleBy : CC3TransformBy {}
-
-/**
- * Initializes this instance to scale the target node
- * by the specified scale factor, within the specified time duration.
- */
--(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
-
-/**
- * Allocates and initializes an autoreleased instance to scale the target node
- * by the specified scale factor, within the specified time duration.
- */
-+(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
 
 @end
 

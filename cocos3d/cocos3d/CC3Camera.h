@@ -1,7 +1,7 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -202,6 +202,112 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * Usually, the application never needs to invoke this method directly.
  */
 -(void) close;
+
+
+#pragma mark Viewing nodes
+
+/**
+ * Calculates and returns where to position this camera along a line extending in the
+ * specified direction from the center of the specified node, so that the camera will
+ * show the entire content of the node, including any descendant nodes.
+ *
+ * The entire node can then be shown by positioning the camera at the returned location
+ * and setting the forwardDirection of the camera to the negated specified direction.
+ *
+ * By setting CC3World as the specified node, you can use this method to determine
+ * where to position the camera in order to show the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ */
+-(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
+							fromDirection: (CC3Vector) aDirection;
+
+/**
+ * Moves this camera to a location along a line between the center of the specified
+ * node and this camera, so that the camera will show the entire content of the node,
+ * including any descendant nodes. The camera will point back towards the node along
+ * the line between itself and the center of the node.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ */
+-(void) moveToShowAllOf: (CC3Node*) aNode;
+
+/**
+ * Moves this camera to a location along a line extending in the specified direction
+ * from the center of the specified node, so that the camera will show the entire
+ * content of the node, including any descendant nodes. The camera will point back
+ * towards the center of the node along the specified direction.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ */
+-(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection;
+
+/**
+ * Moves this camera to a location along a line between the center of the specified
+ * node and this camera, so that the camera will show the entire content of the node,
+ * including any descendant nodes. The camera will point back towards the node along
+ * the line between itself and the center of the node.
+ *
+ * The camera's movement will take the specified amount of time, starting at its
+ * current location and orientation, and ending at the calculated location and
+ * oriented to point back towards the center of the node.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ */
+-(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode;
+
+
+/**
+ * Moves this camera to a location along a line extending in the specified direction
+ * from the center of the specified node, so that the camera will show the entire
+ * content of the node, including any descendant nodes. The camera will point back
+ * towards the center of the node along the specified direction.
+ *
+ * The camera's movement will take the specified amount of time, starting at its
+ * current location and orientation, and ending at the calculated location and
+ * oriented to point back towards the center of the node.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ */
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection;
 
 	
 #pragma mark 3D <-> 2D mapping functionality

@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -148,6 +148,140 @@
  * unless you have a specific need not to display the front faces.
  */
 @property(nonatomic, assign) BOOL shouldCullFrontFaces;
+
+/**
+ * Aligns the texture coordinates of the mesh with the textures held in the material.
+ *
+ * This method can be useful when the width and height of the textures in the material
+ * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
+ * the texture will be converted to a size whose width and height are a power-of-two.
+ * The result is a texture that can have empty space on the top and right sides. If the
+ * texture coordinates of the mesh do not take this into consideration, the result will
+ * be that only the lower left of the mesh will be covered by the texture.
+ *
+ * When this occurs, invoking this method will adjust the texture coordinates of the mesh
+ * to map to the original width and height of the textures.
+ *
+ * If the mesh is using multi-texturing, this method will adjust the texture coordinates
+ * array for each texture unit, using the corresponding texture for that texture unit
+ * in the specified material.
+ *
+ * Care should be taken when using this method, as it changes the actual vertex data.
+ * This method should only be invoked once on any mesh, and it may cause mapping conflicts
+ * if the same mesh is shared by other CC3MeshNodes that use different textures.
+ *
+ * This method will also invoke the superclass behaviour to invoke the same method on
+ * each child node.
+ *
+ * To adjust the texture coordinates of only a single mesh, without adjusting the texture
+ * coordinates of any descendant nodes, invoke the alignWithTexturesIn: method of the
+ * CC3Mesh held in this mesh node. To adjust the texture coordinates of only a single
+ * texture coordinates array within the mesh, invoke the alignWithTexture: method on the
+ * appropriate instance of CC3VertexTextureCoordinates.
+ */
+-(void) alignTextures;
+
+/**
+ * Aligns the texture coordinates of the mesh with the textures held in the material.
+ *
+ * The texture coordinates are aligned assuming that the texture is inverted in the
+ * Y-direction. Certain texture formats are inverted during loading, and this method
+ * can be used to compensate.
+ *
+ * This method can be useful when the width and height of the textures in the material
+ * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
+ * the texture will be converted to a size whose width and height are a power-of-two.
+ * The result is a texture that can have empty space on the top and right sides. If the
+ * texture coordinates of the mesh do not take this into consideration, the result will
+ * be that only the lower left of the mesh will be covered by the texture.
+ *
+ * When this occurs, invoking this method will adjust the texture coordinates of the mesh
+ * to map to the original width and height of the texturesa.
+ *
+ * If the mesh is using multi-texturing, this method will adjust the texture coordinates
+ * array for each texture unit, using the corresponding texture for that texture unit
+ * in the specified material.
+ *
+ * Care should be taken when using this method, as it changes the actual vertex data.
+ * This method should only be invoked once on any mesh, and it may cause mapping conflicts
+ * if the same mesh is shared by other CC3MeshNodes that use different textures.
+ *
+ * This method will also invoke the superclass behaviour to invoke the same method on
+ * each child node.
+ *
+ * To adjust the texture coordinates of only a single mesh, without adjusting the texture
+ * coordinates of any descendant nodes, invoke the alignWithInvertedTexturesIn: method of
+ * the CC3Mesh held in this mesh node. To adjust the texture coordinates of only a single
+ * texture coordinates array within the mesh, invoke the alignWithInvertedTexture: method
+ * on the appropriate instance of CC3VertexTextureCoordinates.
+ */
+-(void) alignInvertedTextures;
+
+/**
+ * Defines the rectangular area of the textures, for all texture units, that should
+ * be mapped to the mesh used by this node.
+ *
+ * This property facilitates the use of sprite-sheets, where the mesh is covered
+ * by a small fraction of a larger texture. This technique has many uses, including
+ * animating a texture onto a mesh, where each section of the full texture is really
+ * a different frame of a texture animation, or simply loading one larger texture
+ * and using parts of it to texture many different meshes.
+ *
+ * The dimensions of this rectangle are taken as fractional portions of the full
+ * area of the texture. Therefore, a rectangle with zero origin, and unit size
+ * ((0.0, 0.0), (1.0, 1.0)) indicates that the mesh should be covered with the
+ * complete texture.
+ * 
+ * A rectangle of smaller size, and/or a non-zero origin, indicates that the mesh
+ * should be covered by a fractional area of the texture. For example, a rectangular
+ * value for this property with origin at (0.5, 0.5), and size of (0.5, 0.5) indicates
+ * that only the top-right quarter of the texture will be used to cover this mesh.
+ *
+ * The bounds of the texture rectangle must fit within a unit rectangle. Both the
+ * bottom-left and top-right corners must lie between zero and one in both the
+ * X and Y directions.
+ *
+ * The dimensions of the rectangle in this property are independent of adjustments
+ * made by the  alignTextures and alignInvertedTextures methods. A unit rectangle
+ * value for this property will automatically take into consideration the adjustment
+ * made to the mesh by those methods, and will display only the part of the texture
+ * defined by them. Rectangular values for this property that are smaller than the
+ * unit rectangle will be relative to the displayable area defined by alignTextures
+ * and alignInvertedTextures.
+ *
+ * As an example, if the alignWithTexturesIn: method was used to limit the mesh
+ * to using only 80% of the texture (perhaps when using a non-POT texture), and this
+ * property was set to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5),
+ * the mesh will be covered by the bottom-right quarter of the usable 80% of the
+ * overall texture.
+ *
+ * This property affects all texture units used by this mesh, to query or change
+ * this property for a single texture unit only, use the textureRectangleForTextureUnit:
+ * and setTextureRectangle:forTextureUnit: methods.
+ *
+ * The initial value of this property is a rectangle with origin at zero, and unit
+ * size, indicating that the mesh will be covered with the complete usable area of
+ * the texture.
+ */
+@property(nonatomic, assign) CGRect textureRectangle;
+
+/**
+ * Returns the textureRectangle property from the texture coordinates that are
+ * mapping the specified texture unit index.
+ *
+ * See the notes for the textureRectangle property of this class for an explanation
+ * of the use of this property.
+ */
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the textureRectangle property from the texture coordinates that are
+ * mapping the specified texture unit index.
+ *
+ * See the notes for the textureRectangle property of this class for an explanation
+ * of the use of this property.
+ */
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit;
 
 
 #pragma mark Material coloring
@@ -311,9 +445,9 @@
 
 /**
  * Draws the local content of this mesh node by following these steps:
- *   -# If the shouldDecorateNode property of the visitor is YES, and this node has a
- *      material, invokes the draw method of the material. Otherwise, invokes the
- *      CC3Material class-side unbind method.
+ *   -# If the shouldDecorateNode property of the visitor is YES, and this node
+ *      has a material, invokes the drawWithVisitor method of the material.
+ *      Otherwise, invokes the CC3Material class-side unbind method.
  *   -# Invokes the drawWithVisitor: method of the encapsulated mesh.
  *
  * This method is called automatically from the transformAndDrawWithVisitor: method
@@ -563,7 +697,7 @@
  * set the elements property of the CC3VertexTextureCoordinates instance to the same as the
  * elements property of the CC3VertexLocations instance from the vertexLocations property
  * of the mesh. Then insert the texture coordinate data into that interleaved vertex
- * data. Each element of that interleaved elements array is a CCTexturedVertex structure,
+ * data. Each element of that interleaved elements array is a CC3TexturedVertex structure,
  * which contains the combined location, normal, and texture coordinate data for a single
  * vertex. For more on how to do this, see the implementation of this method and take note
  * of how this is done with the normal data.
@@ -626,7 +760,174 @@
 -(void) populateAsLineStripWith: (GLshort) vertexCount
 					   vertices: (CC3Vector*) vertices
 					  andRetain: (BOOL) shouldRetainVertices;
-	
+
+
+#pragma mark Accessing vertex data
+
+/**
+ * Returns the location element at the specified index from the vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector) vertexLocationAt: (GLsizei) index;
+
+/**
+ * Sets the location element at the specified index in the vertex data to the specified value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index;
+
+/**
+ * Returns the normal element at the specified index from the vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector) vertexNormalAt: (GLsizei) index;
+
+/**
+ * Sets the normal element at the specified index in the vertex data to the specified value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexNormal: (CC3Vector) aNormal at: (GLsizei) index;
+
+/**
+ * Returns the color element at the specified index from the vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(ccColor4F) vertexColor4FAt: (GLsizei) index;
+
+/**
+ * Sets the color element at the specified index in the vertex data to the specified value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexColor4F: (ccColor4F) aColor at: (GLsizei) index;
+
+/**
+ * Returns the color element at the specified index from the vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(ccColor4B) vertexColor4BAt: (GLsizei) index;
+
+/**
+ * Sets the color element at the specified index in the vertex data to the specified value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexColor4B: (ccColor4B) aColor at: (GLsizei) index;
+
+/**
+ * Returns the texture coordinate element at the specified index from the vertex data
+ * at the specified texture unit index.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the texture coordinate element at the specified index in the vertex data, at
+ * the specified texture unit index, to the specified texture coordinate value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Returns the texture coordinate element at the specified index from the vertex data
+ * at the commonly used texture unit zero.
+ *
+ * This is a convenience method that delegates to the vertexTexCoord2FAt:forTextureUnit:
+ * method, passing in zero for the texture unit index.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index;
+
+/**
+ * Sets the texture coordinate element at the specified index in the vertex data,
+ * at the commonly used texture unit zero, to the specified texture coordinate value.
+ *
+ * This is a convenience method that delegates to the setVertexTexCoord2F:at:forTextureUnit:
+ * method, passing in zero for the texture unit index.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index;
+
+/**
+ * Returns the index element at the specified index from the vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLushort) vertexIndexAt: (GLsizei) index;
+
+/**
+ * Sets the index element at the specified index in the vertex data to the specified value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index;
+
 @end
 
 
@@ -679,6 +980,81 @@
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3WireframeBoundingBoxNode
+
+/**
+ * CC3WireframeBoundingBoxNode is a type of CC3LineNode specialized for drawing
+ * a wireframe bounding box around another node. A CC3WireframeBoundingBoxNode
+ * is typically added as a child node to the node whose bounding box is to
+ * be displayed.
+ *
+ * The CC3WireframeBoundingBoxNode node can be set to automatically track
+ * the dynamic nature of the boundingBox of the parent node by setting
+ * the shouldAlwaysMeasureParentBoundingBox property to YES.
+ *
+ * Since we don't want to add descriptor labels or wireframe boxes to
+ * wireframe nodes, the shouldDrawDescriptor, shouldDrawWireframeBox,
+ * and shouldDrawLocalContentWireframeBox properties are overridden to
+ * do nothing when set, and to always return YES.
+ *
+ * Similarly, CC3WireframeBoundingBoxNode node does not participate in calculating
+ * the bounding box of the node whose bounding box it is drawing, since, as a child
+ * of that node, it would interfere with accurate measurement of the bounding box.
+ *
+ * The shouldIncludeInDeepCopy property returns NO, so that the CC3WireframeBoundingBoxNode
+ * will not be copied when the parent node is copied. A bounding box node for the copy
+ * will be created automatically when each of the shouldDrawLocalContentWireframeBox
+ * and shouldDrawWireframeBox properties are copied, if they are set to YES on the
+ * original node that is copied.
+ */
+@interface CC3WireframeBoundingBoxNode : CC3LineNode {
+	BOOL shouldAlwaysMeasureParentBoundingBox;
+}
+
+/**
+ * Indicates whether the dimensions of this node should automatically be
+ * remeasured on each update pass.
+ *
+ * If this property is set to YES, the box will automatically be resized
+ * to account for movements by any descendant nodes of the parent node.
+ * For bounding box nodes that track the overall boundingBox of a parent
+ * node, this property should be set to YES.
+ *
+ * It is not necessary to set this property to YES to account for changes in
+ * the transform properties of the parent node itself, or if this node is
+ * tracking the bounding box of local content of the parent node. Generally,
+ * changes to that will automatically be handled by the transform updates.
+ *
+ * When setting this property, be aware that measuring the bounding box of
+ * the parent node can be an expensive operation.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldAlwaysMeasureParentBoundingBox;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3WireframeLocalContentBoundingBoxNode
+
+/**
+ * CC3WireframeLocalContentBoundingBoxNode is a CC3WireframeBoundingBoxNode that
+ * further specializes in drawing a bounding box around the local content of another
+ * node with local content. A CC3WireframeLocalContentBoundingBoxNode is typically
+ * added as a child node to the node whose bounding box is to be displayed.
+ *
+ * Since for almost all nodes, the local content generally does not change, the
+ * shouldAlwaysMeasureParentBoundingBox property is usually left at NO, to avoid unnecessary
+ * remeasuring of the bounding box of the local content of the parent node when
+ * we know it will not be changing. However, this property can be set to YES when
+ * adding a CC3WireframeLocalContentBoundingBoxNode to a node whose local content
+ * does change frequently.
+ */
+@interface  CC3WireframeLocalContentBoundingBoxNode  : CC3WireframeBoundingBoxNode
+@end
 
 #pragma mark -
 #pragma mark CC3PlaneNode

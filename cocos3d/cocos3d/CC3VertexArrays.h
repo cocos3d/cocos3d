@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -286,9 +286,9 @@
  * As an alternative to setting this property to NO, consider leaving it as YES, and making
  * use of the updateGLBuffer and updateGLBufferStartingAt:forLength: to dynamically update
  * the data in the GL engine buffer. Doing so permits the data to be copied to the GL engine
- * only when it is needed, and permits copying only the range of data that has changed, both
- * of which offer performance improvements over submitting all of the vertex data on each
- * frame render.
+ * only when it has changed, and permits copying only the range of data that has changed,
+ * both of which offer performance improvements over submitting all of the vertex data on
+ * each frame render.
  */
 @property(nonatomic, assign) BOOL shouldAllowVertexBuffering;
 
@@ -721,16 +721,69 @@
 #pragma mark -
 #pragma mark CC3VertexTextureCoordinates
 
+/** A rectangle with origin zero and unit size for initial value of the textureRectangle property. */
+static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
+
 /**
  * A CC3VertexArray that manages the texture coordinates aspect of an array of vertices.
  *
- * This class supports multi-texturing, and a single CC3VertexTextureCoordinates instace
+ * This class supports multi-texturing, and a single CC3VertexTextureCoordinates instance
  * can be applied to multiple texture units.
  *
  * This class includes several convenience methods that allow the texture coordinates
  * to be adjusted to match the visible area of a particular texture.
+ *
+ * This class also supports covering the mesh with only a fractional part of the texture
+ * through the use of the textureRectangle property, effectlivly permitting sprite-sheet
+ * textures to be used with 3D meshes.
  */
-@interface CC3VertexTextureCoordinates : CC3VertexArray {}
+@interface CC3VertexTextureCoordinates : CC3VertexArray {
+	CGSize naturalMapSize;
+	CGRect textureRectangle;
+}
+
+/**
+ * Defines the rectangular area of the texture that should be mapped to the mesh.
+ *
+ * This property facilitates the use of sprite-sheets, where the mesh is covered
+ * by a small fraction of a larger texture. This technique has many uses, including
+ * animating a texture onto a mesh, where each section of the full texture is really
+ * a different frame of a texture animation, or simply loading one larger texture
+ * and using parts of it to texture many different meshes.
+ *
+ * The dimensions of this rectangle are taken as fractional portions of the full
+ * area of the texture. Therefore, a rectangle with zero origin, and unit size
+ * ((0.0, 0.0), (1.0, 1.0)) indicates that the mesh should be covered with the
+ * complete texture.
+ * 
+ * A rectangle of smaller size, and/or a non-zero origin, indicates that the mesh
+ * should be covered by a fractional area of the texture. For example, a rectangular
+ * value for this property with origin at (0.5, 0.5), and size of (0.5, 0.5) indicates
+ * that only the top-right quarter of the texture will be used to cover this mesh.
+ *
+ * The bounds of the texture rectangle must fit within a unit rectangle. Both the
+ * bottom-left and top-right corners must lie between zero and one in both the
+ * X and Y directions.
+ *
+ * The dimensions of the rectangle in this property are independent of the size
+ * specified in the  alignWithTextureMapSize: and alignWithInvertedTextureMapSize:
+ * methods. A unit rectangle value for this property will automatically take into
+ * consideration the adjustment made to the mesh by those methods, and will display
+ * only the part of the texture defined by them. Rectangular values for this property
+ * that are smaller than the unit rectangle will be relative to the displayable area
+ * defined by alignWithTextureMapSize: and alignWithInvertedTextureMapSize:.
+ *
+ * As an example, if the alignWithTextureMapSize: method was used to limit the mesh
+ * to using only 80% of the texture (perhaps when using a non-POT texture), and this
+ * property was set to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5),
+ * the mesh will be covered by the bottom-right quarter of the usable 80% of the
+ * overall texture.
+ *
+ * The initial value of this property is a rectangle with origin at zero, and unit
+ * size, indicating that the mesh will be covered with the complete usable area of
+ * the texture.
+ */
+@property(nonatomic, assign) CGRect textureRectangle;
 
 /**
  * Returns the texture coordinate element at the specified index in the underlying vertex data.
@@ -881,7 +934,7 @@
 
 /**
  * Sets the index element at the specified index in the underlying vertex data to
- * the specified location value.
+ * the specified value.
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
@@ -889,7 +942,7 @@
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
--(void) setIndex: (GLushort) anIndex at: (GLsizei) index;
+-(void) setIndex: (GLushort) vertexIndex at: (GLsizei) index;
 
 @end
 

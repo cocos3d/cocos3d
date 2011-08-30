@@ -1,12 +1,63 @@
 CHANGELOG
 ---------
 
-cocos3d 0.6.0-sp
+cocos3d 0.6.1
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++
+
+
+cocos3d 0.6.1 - 2011/08/30
+-------------------------------------
+
+- Added several new diagnostic features to help developers:
+    - Added CC3Node shouldDrawDescriptor property that, when set to YES, will automatically draw an identifying description of the node at the origin (pivot point) of the node.
+    - Added CC3Node shouldDrawWireframeBox and shouldDrawLocalContentWireframeBox properties that, when set to YES< will automatically draw a wireframe box around the node and all its descendants, or just the the local content of the node, respectively.
+    - Added CC3Camera moveToShowAllOf: family of methods to move the camera so that it will frame a particular node (which may be the world node) in the view.
+    - Added LOGGING_REZLOAD compiler switch to optionally log the details of POD file loading and resulting node structures to troubleshoot POD file loading.
+    - Added CC3Node structureDescription to return string descriptive outline of the descendant nodes of a node (including the CC3World) for use in diagnostic logging.
+    - Added Models folder, containing the original Blender and Collada source files for some POD models in CC3DemoMashUp and hello, world template, to help developers resolve issues with their own model files. 
+- CC3Billboards drawing cocos2d 2D nodes can now be fully embedded in the 3D world, in addition to being drawn as an overlay on the 3D world.
+- CC3Billboards that are embedded in the 3D world (the default) can be:
+    - Occluded by other 3D nodes.
+    - Rotated to face away from the camera.
+	- Selected by touch events.
+- CC3Billboard property shouldDrawAs2DOverlay can be turned on to draw 2D nodes as an overlay drawing (no occlusion by other nodes). 
+- Added enhancements to CC3TargettingNode tracking:
+    - Targetting nodes will now auto-track the targetLocation property when the shouldTrackTarget property is set to YES. This is in addition to tracking the target property if it is set.
+    - Added shouldAutotargetCamera property to CC3TargettingNode to cause the node to automatically find and track the active camera.
+    - Added CC3Node convenience methods asTargettingNode, asTracker, asCameraTracker and asLightTracker to easily and conveniently wrap any node in a targetting node.
+    - Added CC3Node shouldAutoremoveWhenEmpty property to automatically remove a node once its last child node is removed. Useful for wrappers such as CC3TargettingNode.
+    - Fixed issue where targets were not tracked when the targetting node moved and the target did not.
+- Added ability to rotate nodes around an arbitrary axis:
+    - Added CC3Node rotationAxis and rotationAngle properties (and can be used interchangably with rotation (Euler angles) and quaternion properties).
+    - Added CC3RotateByAngle and CC3RotateToAngle interval actions to animate the rotation of a node around its rotationAxis
+    - Added a spinning die cube to CC3DemoMashUp to demonstrate rotation around any axis (and using touch-move events to create swipe gestures)
+- Added vertex data access methods to CC3MeshNode and CC3Mesh to make is easy to manipulate the underlying vertex data:
+    - Vertex data access methods include: setVertexLocation:at:, setVertexNormal:at:, setVertexTexCoord2F:at:forTextureUnit:, setVertexColor4F:at:, setVertexColor4B:at:, and setVertexIndex:at: 
+- Added methods to CC3Node to identify which vertex data should be retained in main memory:
+    - doNotBufferVertexLocations, doNotBufferVertexNormals, doNotBufferVertexColors, doNotBufferVertexTextureCoordinates & doNotBufferVertexIndices to identify volitile vertex data that should not be copied to GL VBO's.
+    - retainVertexNormals, retainVertexColors, retainVertexTextureCoordinates and retainVertexIndices methods to retain vertex data even when copied to GL VBOs. Method retainVertexLocations already exists.
+    - removed obsolete shouldAllowVertexBuffering property from CC3VertexArrayMesh. 
+- Added support for using texture atlases & sprite-sheets with 3D meshes through textureRectangle property on CC3VertexTextureCoordinates, CC3Mesh and CC3MeshNode.
+- Added shouldInheritTouchability property to CC3Node to turn off touch events on a child node even when the parent is touchable.
+- Added userData property, along with initUserData and releaseUserData methods to CC3Identifiable to allow application-specific data in nodes, meshes, materials, textures, etc.
+- Added methods to make it easier to align textures with mesh data:
+    - CC3Node added alignTextures and alignInvertedTextures methods.
+    - CC3Mesh added alignWithTexturesIn: and alignWithInvertedTexturesIn: methods.
+- CC3Material now supports CCBlendProtocol property blendFunc in addition to individual sourceBlend and destinationBlend properties. Class property defaultBlendFunc now replace defaultSourceBlend and defaultDestinationBlend properties.
+- Enhancements to CC3Logging to log create log entries without timestamp and app context preamble info.
+- Fixed issue where translucent and transparent 3D nodes that are over CC3Layer background color would flicker during 3D node selection from touch events.
+- Fixed issue where changing the CC3Billboard property did not change the running status of the contained 2D CCNode. Thanks to cocos3d user Sev_Inf for submitting this patch.
+- Fixed issue where unprojecting did not work correctly when the camera was mounted on a rotating object.
+  Thanks to cocos3d forum user Rogs for suggesting a fix for this.
+- Added protection code to guard against materials in POD files containing out-of-range texture indices.
+- Fixed file permissions on file in the PVR 2.08 directory that was causing the files not to be installed in project templates.
+- CC3NodeVisitor design standardized across subclasses. Now uses a single standard visit: method.
+- CC3TransformTo now subclasses from CC3TransformBy instead of the other way around.
+- Renamed CC3WorldTouchHandler to CC3TouchedNodePicker to clarify its only function is to pick a touched node when handling touch events.
 
 
 cocos3d 0.6.0-sp - 2011/07/21

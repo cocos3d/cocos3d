@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.h
  *
- * cocos3d 0.6.0-sp
+ * cocos3d 0.6.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -91,9 +91,10 @@
 @interface CC3PODResource : CC3Resource {
 	PODClassPtr pvrtModel;
 	NSMutableArray* allNodes;
-	NSMutableArray* meshModels;
+	NSMutableArray* meshes;
 	NSMutableArray* materials;
 	NSMutableArray* textures;
+	ccTexParams textureParameters;
 	BOOL wasLoaded;
 }
 
@@ -127,13 +128,13 @@
 @property(nonatomic, readonly) uint cameraCount;
 
 /**
- * The total number of mesh models in the POD file. This is different than the
+ * The total number of meshes in the POD file. This is different than the
  * meshNodeCount because mesh models may be used by more than one mesh node.
  */
-@property(nonatomic, readonly) uint meshModelCount;
+@property(nonatomic, readonly) uint meshCount;
 
-/** A collection of the CC3MeshModels extracted from  the POD file. */
-@property(nonatomic, readonly) NSArray* meshModels;
+/** A collection of the CC3Meshs extracted from  the POD file. */
+@property(nonatomic, readonly) NSArray* meshes;
 
 /** The number of materials in the POD file. */
 @property(nonatomic, readonly) uint materialCount;
@@ -181,7 +182,7 @@
  * The order of component extraction and building is:
  *   - textures, by invoking the buildTextures template method
  *   - materials, by invoking the buildMaterials template method
- *   - mesh models, by invoking the buildMeshModels template method
+ *   - mesh models, by invoking the buildMeshes template method
  *   - nodes, by invoking the buildNodes template method
  *
  * This template method can be overridden in a subclass if specialized processing is required.
@@ -281,13 +282,13 @@
 -(CC3Mesh*) meshModelAtIndex: (uint) meshIndex;
 
 /**
- * Template method that extracts and builds the mesh models from the underlying data.
+ * Template method that extracts and builds the meshes from the underlying data.
  * This is automatically invoked from the build method.
  * The application should not invoke this method directly.
  *
  * This template method can be overridden in a subclass if specialized processing is required.
  */
--(void) buildMeshModels;
+-(void) buildMeshes;
 
 /**
  * Builds the meshIndex'th mesh.
