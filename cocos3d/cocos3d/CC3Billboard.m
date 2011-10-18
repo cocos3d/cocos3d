@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,6 +35,7 @@
 #import "CCParticleSystemQuad.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
+#import "ccMacros.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -44,7 +45,8 @@
 @end
 
 @interface CC3MeshNode (TemplateMethods)
--(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
@@ -455,7 +457,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		deviceScaleFactor = MAX(winSz.height, winSz.width) / kCC3DeviceScaleFactorBase;
 	}
 	return deviceScaleFactor;
- }
+}
 
 
 #pragma mark Drawing
@@ -481,51 +483,54 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 /**
- * During normal drawing, configure the material and texture environment for
- * cocos2d node drawing. Don't configure anything if painting for node picking.
+ * During normal drawing, configure the material, texture, and vertex arrays environments
+ * for cocos2d node drawing. Don't configure anything if painting for node picking.
  */
--(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super drawMaterialWithVisitor: visitor];
-
+-(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super configureMaterialWithVisitor: visitor];
+	
 	if (visitor.shouldDecorateNode) {
-		CC3OpenGLES11Textures* gles11Textures = [CC3OpenGLES11Engine engine].textures;
-		
-		// Enable the texture unit to draw the 2D texture (usually GL_TEXTURE0)
-		// and bind the default texture unit parameters
-		CC3OpenGLES11TextureUnit* gles11TexUnit = [gles11Textures textureUnitAt: textureUnitIndex];
-		[gles11TexUnit.texture2D enable];
-		[CC3TextureUnit bindDefaultTo: gles11TexUnit];
-		
-		// Disable all other texture units
-		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
 		
 		// 2D drawing might change material properties unbeknownst to cocos3d,
 		// so force the material to be respecified on next 3D draw
 		[CC3Material resetSwitching];
-	}
-}
 
-/**
- * During normal drawing, configure the mesh environment for cocos2d node drawing.
- * When painting for node picking, update the bounding box mesh vertices and draw it.
- */
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-
-	if (visitor.shouldDecorateNode) {
-		// Enable vertex and color arrays, and disable normal and point size arrays.
 		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+		
+		// Set blending to the value expected by cocos2d
+		CC3OpenGLES11StateTrackerServerCapability* gles11Blend = gles11Engine.serverCapabilities.blend;
+		gles11Blend.value = gles11Blend.originalValue;
+		
+		// Set the blend functions to those expected by cocos2d
+		CC3OpenGLES11StateTrackerMaterialBlend* gles11MatBlend = gles11Engine.materials.blendFunc;
+		[gles11MatBlend applySource: gles11MatBlend.sourceBlend.originalValue
+					 andDestination: gles11MatBlend.destinationBlend.originalValue];
+		
+		// Enable the texture unit to draw the 2D texture mesh (usually GL_TEXTURE0)
+		// and bind the default texture unit parameters
+		CC3OpenGLES11Textures* gles11Textures = gles11Engine.textures;
+		CC3OpenGLES11TextureUnit* gles11TexUnit = [gles11Textures textureUnitAt: textureUnitIndex];
+		[gles11TexUnit.texture2D enable];
+		[CC3TextureUnit bindDefaultTo: gles11TexUnit];
+		[gles11TexUnit.textureCoordArray enable];
+		
+		// Clear the texture unit binding so we start afresh on next 3D binding
+		gles11TexUnit.textureBinding.value = 0;
+		
+		// Disable all other texture units
+		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
+		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
+		
+		// Make sure the 2D texture unit is active
+		gles11Textures.activeTexture.value = textureUnitIndex;
+		gles11Textures.clientActiveTexture.value = textureUnitIndex;
+		
+		// Enable vertex and color arrays, and disable normal and point size arrays.
 		CC3OpenGLES11ClientCapabilities* gles11ClientCaps = gles11Engine.clientCapabilities;
 		[gles11ClientCaps.vertexArray enable];
 		[gles11ClientCaps.colorArray enable];
 		[gles11ClientCaps.normalArray disable];
 		[gles11ClientCaps.pointSizeArray disable];
-		
-		// Enable the texture unit to draw the 2D texture mesh (usually GL_TEXTURE0)
-		CC3OpenGLES11Textures* gles11Textures = gles11Engine.textures;
-		[[gles11Textures textureUnitAt: textureUnitIndex].textureCoordArray enable];
-		
-		// Disable all other texture units
-		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
 		
 		// 2D drawing might change buffer properties unbeknownst to cocos3d,
 		// so force the buffers to be respecified on next 3D draw
@@ -536,18 +541,23 @@ static GLfloat deviceScaleFactor = 0.0f;
 		// 2D drawing might change mesh properties unbeknownst to cocos3d,
 		// so force the mesh to be respecified on next 3D draw
 		[CC3VertexArrayMesh resetSwitching];
-		
-		// Make sure the 2D texture unit is active
-		gles11Textures.activeTexture.value = textureUnitIndex;
-		gles11Textures.clientActiveTexture.value = textureUnitIndex;
+	}
+}
+
+/**
+ * During normal drawing, draw the cocos2d node.
+ * When painting for node picking, update the bounding box mesh vertices and draw it.
+ */
+-(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	
+	if (visitor.shouldDecorateNode) {
 		
 		// If things get weird when drawing some CCNode subclasses, use the following
 		// to log the full GL engine state prior to drawing the 2D node
 		LogTrace(@"%@ drawing 2D node with GL engine state:\n %@", self, gles11Engine);
 		
-		// Draw the 2D CCNode
-		[billboard visit];
-
+		[billboard visit];		// Draw the 2D CCNode
+		
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that
@@ -771,14 +781,14 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CC3ParticleSystemBillboard
 
-@synthesize particleSizeAttenuationCoefficients, shouldDisableDepthMask;
+@synthesize particleSizeAttenuationCoefficients;
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		particleSizeAttenuationCoefficients = kCC3DefaultParticleSizeAttenuationCoefficients;
+		particleSizeAttenuationCoefficients = kCC3ParticleSizeAttenuationNone;
 		shouldDisableDepthMask = YES;
 	}
 	return self;
@@ -790,7 +800,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 	[super populateFrom: another];
 	
 	particleSizeAttenuationCoefficients = another.particleSizeAttenuationCoefficients;
-	shouldDisableDepthMask = another.shouldDisableDepthMask;
 }
 
 
@@ -813,33 +822,11 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 #pragma mark Drawing
 
-/**
- * Set the particle size attenuation before drawing.
- * 
- * In addition, cocos2d particle systems draw all particles at the same Z-distance.
- * When undergoing transforms in the 3D world, the result is that the Z-distances
- * are very close but not equal, resulting in Z-fighting between the particles.
- * To avoid this, if the shouldDisableDepthMask property is set to YES, the GL depth
- * mask is temporarily disabled so that particles will not update the depth buffer,
- * meaning that the Z-distance of each particle will be compared against previously
- * drawn objects, but not against each other.
- */
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
+/** Overridden to add setting the point size attenuation parameters. */
+-(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
+	[super configureDrawingParameters: visitor];
 
-	gles11State.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
-	
-	if (shouldDisableDepthMask) {
-		CC3OpenGLES11StateTrackerBoolean* gles11DepthMask = gles11State.depthMask;
-		BOOL dmVal = gles11DepthMask.value;
-		gles11DepthMask.value = NO;				// Disable depth mask
-		
-		[super drawMeshWithVisitor: visitor];
-		
-		gles11DepthMask.value = dmVal;			// Set depth mask back to initial value
-	} else {
-		[super drawMeshWithVisitor: visitor];
-	}
+	[CC3OpenGLES11Engine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
 }
 
 @end
@@ -872,9 +859,18 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(void) setShouldDrawLocalContentWireframeBox: (BOOL) shouldDraw {}
 
+-(BOOL) shouldContributeToParentBoundingBox { return NO; }
+
+
 // Overridden so that not touchable unless specifically set as such
 -(BOOL) isTouchable {
 	return isTouchEnabled;
+}
+
+// Overridden so that will still be visible if parent is invisible,
+// unless explicitly set off.
+-(BOOL) visible {
+	return visible;
 }
 
 
@@ -1000,7 +996,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 #pragma mark -
-#pragma mark CCParticleSystemPoint extensions
+#pragma mark CCLabelTTF extensions
 
 @implementation CCLabelTTF (CC3)
 

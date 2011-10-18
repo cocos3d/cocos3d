@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Lighting.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,15 +44,21 @@
 	return GL_LIGHT0 + lightIndex;
 }
 
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initForState: qName]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx {
+	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
 		lightIndex = ltIndx;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initForState: qName andLightIndex: ltIndx] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx {
+	return [[[self alloc] initWithParent: aTracker
+								forState: qName
+						   andLightIndex: ltIndx] autorelease];
 }
 
 -(void) getGLValue {
@@ -88,15 +94,21 @@
 	return GL_LIGHT0 + lightIndex;
 }
 
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initForState: qName]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx {
+	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
 		lightIndex = ltIndx;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initForState: qName andLightIndex: ltIndx] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx {
+	return [[[self alloc] initWithParent: aTracker
+								forState: qName
+						   andLightIndex: ltIndx] autorelease];
 }
 
 -(void) getGLValue {
@@ -132,15 +144,21 @@
 	return GL_LIGHT0 + lightIndex;
 }
 
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initForState: qName]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx {
+	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
 		lightIndex = ltIndx;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initForState: qName andLightIndex: ltIndx] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx {
+	return [[[self alloc] initWithParent: aTracker
+								forState: qName
+						   andLightIndex: ltIndx] autorelease];
 }
 
 -(void) getGLValue {
@@ -176,15 +194,21 @@
 	return GL_LIGHT0 + lightIndex;
 }
 
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initForState: qName]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx {
+	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
 		lightIndex = ltIndx;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initForState: qName andLightIndex: ltIndx] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx {
+	return [[[self alloc] initWithParent: aTracker
+								forState: qName
+						   andLightIndex: ltIndx] autorelease];
 }
 
 -(void) getGLValue {
@@ -220,6 +244,7 @@
 @synthesize specularColor;
 @synthesize position;
 @synthesize spotDirection;
+@synthesize spotExponent;
 @synthesize spotCutoffAngle;
 @synthesize constantAttenuation;
 @synthesize linearAttenuation;
@@ -232,6 +257,7 @@
 	[specularColor release];
 	[position release];
 	[spotDirection release];
+	[spotExponent release];
 	[spotCutoffAngle release];
 	[constantAttenuation release];
 	[linearAttenuation release];
@@ -239,57 +265,70 @@
 	[super dealloc];
 }
 
--(id) initWithLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initMinimal]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker withLightIndex: (GLuint) ltIndx {
+	if ( (self = [super initMinimalWithParent: aTracker]) ) {
 		lightIndex = ltIndx;
 		[self initializeTrackers];
 	}
 	return self;
 }
 
-+(id) trackerWithLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initWithLightIndex: ltIndx] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker withLightIndex: (GLuint) ltIndx {
+	return [[[self alloc] initWithParent: aTracker withLightIndex: ltIndx] autorelease];
 }
 
 -(void) initializeTrackers {
-	self.light = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LIGHT0 + lightIndex];
-	self.ambientColor = [CC3OpenGLES11StateTrackerLightColor trackerForState: GL_AMBIENT andLightIndex: lightIndex];
-	self.diffuseColor = [CC3OpenGLES11StateTrackerLightColor trackerForState: GL_DIFFUSE andLightIndex: lightIndex];
-	self.specularColor = [CC3OpenGLES11StateTrackerLightColor trackerForState: GL_SPECULAR andLightIndex: lightIndex];
-	self.position = [CC3OpenGLES11StateTrackerLightVector4 trackerForState: GL_POSITION andLightIndex: lightIndex];
-	self.spotDirection = [CC3OpenGLES11StateTrackerLightVector trackerForState: GL_SPOT_DIRECTION andLightIndex: lightIndex];
-	self.spotCutoffAngle = [CC3OpenGLES11StateTrackerLightFloat trackerForState: GL_SPOT_CUTOFF andLightIndex: lightIndex];
-	self.constantAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerForState: GL_CONSTANT_ATTENUATION andLightIndex: lightIndex];
-	self.linearAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerForState: GL_LINEAR_ATTENUATION andLightIndex: lightIndex];
-	self.quadraticAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerForState: GL_QUADRATIC_ATTENUATION andLightIndex: lightIndex];
+	self.light = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																	 forState: GL_LIGHT0 + lightIndex];
+	self.ambientColor = [CC3OpenGLES11StateTrackerLightColor trackerWithParent: self
+																	  forState: GL_AMBIENT
+																 andLightIndex: lightIndex];
+	self.diffuseColor = [CC3OpenGLES11StateTrackerLightColor trackerWithParent: self
+																	  forState: GL_DIFFUSE
+																 andLightIndex: lightIndex];
+	self.specularColor = [CC3OpenGLES11StateTrackerLightColor trackerWithParent: self
+																	   forState: GL_SPECULAR
+																  andLightIndex: lightIndex];
+	self.position = [CC3OpenGLES11StateTrackerLightVector4 trackerWithParent: self
+																	forState: GL_POSITION
+															   andLightIndex: lightIndex];
+	self.spotDirection = [CC3OpenGLES11StateTrackerLightVector trackerWithParent: self
+																		forState: GL_SPOT_DIRECTION
+																   andLightIndex: lightIndex];
+	self.spotExponent = [CC3OpenGLES11StateTrackerLightFloat trackerWithParent: self
+																	  forState: GL_SPOT_EXPONENT
+																 andLightIndex: lightIndex];
+	self.spotCutoffAngle = [CC3OpenGLES11StateTrackerLightFloat trackerWithParent: self
+																		 forState: GL_SPOT_CUTOFF
+																	andLightIndex: lightIndex];
+	self.constantAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerWithParent: self
+																			 forState: GL_CONSTANT_ATTENUATION
+																		andLightIndex: lightIndex];
+	self.linearAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerWithParent: self
+																		   forState: GL_LINEAR_ATTENUATION
+																	  andLightIndex: lightIndex];
+	self.quadraticAttenuation = [CC3OpenGLES11StateTrackerLightFloat trackerWithParent: self
+																			  forState: GL_QUADRATIC_ATTENUATION
+																		 andLightIndex: lightIndex];
 }
 
+/**
+ * Since this class can be instantiated dynamically, when opened,
+ * open each contained primitive tracker.
+ */
 -(void) open {
-	LogTrace("Opening %@", [self class]);
+	[super open];
 	[light open];
 	[ambientColor open];
 	[diffuseColor open];
 	[specularColor open];
 	[position open];
 	[spotDirection open];
+	[spotExponent open];
 	[spotCutoffAngle open];
 	[constantAttenuation open];
 	[linearAttenuation open];
 	[quadraticAttenuation open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[light close];
-	[ambientColor close];
-	[diffuseColor close];
-	[specularColor close];
-	[position close];
-	[spotDirection close];
-	[spotCutoffAngle close];
-	[constantAttenuation close];
-	[linearAttenuation close];
-	[quadraticAttenuation close];
 }
 
 @end
@@ -328,12 +367,12 @@
 	// If the requested light hasn't been allocated yet, add it.
 	if (ltIndx >= self.lightCount) {
 		// Make sure we don't add beyond the max number of texture units for the platform
-		GLuint platformMaxLights = [CC3OpenGLES11Engine engine].platform.maxLights.value;
+		GLuint platformMaxLights = self.engine.platform.maxLights.value;
 		GLuint ltMax = MIN(ltIndx, platformMaxLights);
 		
 		// Add all lights between the current count and the requested texture unit.
 		for (GLuint i = self.lightCount; i <= ltMax; i++) {
-			CC3OpenGLES11Light* lt = [CC3OpenGLES11Light trackerWithLightIndex: i];
+			CC3OpenGLES11Light* lt = [CC3OpenGLES11Light trackerWithParent: self withLightIndex: i];
 			[lt open];		// Read the initial values
 			[lights addObject: lt];
 			LogTrace(@"%@ added light %u: %@", [self class], i, lt);
@@ -343,20 +382,9 @@
 }
 
 -(void) initializeTrackers {
-	self.worldAmbientLight = [CC3OpenGLES11StateTrackerWorldLightColor trackerForState: GL_LIGHT_MODEL_AMBIENT];
-	self.lights = [NSMutableArray array];		// Start with none. Add them as requested.
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[worldAmbientLight open];
-	[self openTrackers: lights];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[worldAmbientLight close];
-	[self closeTrackers: lights];
+	self.worldAmbientLight = [CC3OpenGLES11StateTrackerWorldLightColor trackerWithParent: self
+																				forState: GL_LIGHT_MODEL_AMBIENT];
+	self.lights = [CCArray array];		// Start with none. Add them as requested.
 }
 
 -(NSString*) description {

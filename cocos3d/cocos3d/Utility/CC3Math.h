@@ -1,7 +1,7 @@
 /*
  * CC3Math.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -54,15 +54,18 @@
 /** Returns a weighted average of the two values, where weight is between zero and one, inclusive. */
 #define WAVG(val1, val2, weight) ((val1) + (((val2) - (val1)) * CLAMP(weight, 0.0, 1.0)))
 
+/** Returns the positive or negative modulo remainder of value divided by period. */
+#define Cyclic(value, period) (fmodf((value), (period)))
+
 /**
  * Returns the positive modulo remainder of value divided by period.
  *
- * This function is similar to fmod() (and uses fmod()), but converts a negative result
- * into a positive value that is the same distance away from the end of the cycle as the
- * result was below zero. In this sense, this function behaves like the numbers on a clock,
- * and Cyclic(-2.0, 12.0) will return 10.0 rather than -2.0. 
+ * This function is similar to Cyclic(), but converts a negative result into a positive
+ * value that is the same distance away from the end of the cycle as the result was
+ * below zero. In this sense, this function behaves like the numbers on a clock, and
+ * Cyclic(-2.0, 12.0) will return 10.0 rather than -2.0. 
  */
-float Cyclic(float value, float period);
+float PositiveCyclic(float value, float period);
 
 /**
  * Returns the difference between the specified minuend and subtrahend, in terms of the

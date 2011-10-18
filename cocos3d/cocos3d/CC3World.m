@@ -1,7 +1,7 @@
 /*
  * CC3World.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,7 +37,6 @@
 #import "CC3Light.h"
 #import "CC3Billboard.h"
 #import "CC3OpenGLES11Engine.h"
-#import "CCTouchDispatcher.h"
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 
@@ -46,8 +45,8 @@
 #pragma mark CC3World
 
 @interface CC3Node (TemplateMethods)
--(void) updateTransformMatrices;
 -(void) populateFrom: (CC3Node*) another;
+-(id) transformVisitorClass;
 @end
 
 @interface CC3ViewportManager (CC3WorldCopying)
@@ -60,8 +59,6 @@
 -(void) updateTargets: (ccTime) dt;
 -(void) updateFog: (ccTime) dt;
 -(void) updateBillboards: (ccTime) dt;
--(id) updateVisitorClass;
--(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) collectFrameInterval;
 -(void) open3D;
 -(void) close3D;
@@ -72,23 +69,22 @@
 -(void) illuminate;
 -(void) drawFog;
 -(void) draw2DBillboards;
--(id) drawVisitorClass;
--(id) pickVisitorClass;
--(void) populateDrawSequence;
+-(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) updateDrawSequence;
 -(BOOL) addToDrawingSequencer: (CC3Node*) aNode;
 -(BOOL) removeFromDrawingSequencer: (CC3Node*) aNode;
-@property(nonatomic, readonly) CC3TouchedNodePicker* touchedNodePicker;
 @end
 
 
 @implementation CC3World
 
 @synthesize cc3Layer, activeCamera, ambientLight, minUpdateInterval, maxUpdateInterval;
-@synthesize touchedNodePicker, drawingSequencer, viewportManager, performanceStatistics, fog;
+@synthesize touchedNodePicker, drawingSequencer, drawingSequenceVisitor;
+@synthesize drawVisitor, updateVisitor, transformVisitor;
+@synthesize viewportManager, performanceStatistics, fog;
+@synthesize shouldClearDepthBufferBefore3D, shouldClearDepthBufferBefore2D;
 
 - (void)dealloc {
-	[drawingSequence release];
 	[drawingSequencer release];
 	[targettingNodes release];
 	[lights release];
@@ -98,8 +94,16 @@
 	[activeCamera release];
 	[touchedNodePicker release];
 	[viewportManager release];
+	[drawVisitor release];
+	[updateVisitor release];
+	[transformVisitor release];
+	[drawingSequenceVisitor release];
 	[fog release];
     [super dealloc];
+}
+
+-(CC3Camera*) activeCamera {
+	return activeCamera;
 }
 
 -(void) setActiveCamera: (CC3Camera*) aCamera {
@@ -123,21 +127,24 @@
 	}
 }
 
-/** Protected property */
--(CC3TouchedNodePicker*) touchedNodePicker { return touchedNodePicker; }
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		targettingNodes = [[NSMutableArray array] retain];
-		lights = [[NSMutableArray array] retain];
-		cameras = [[NSMutableArray array] retain];
-		billboards = [[NSMutableArray array] retain];
-		drawingSequence = [[NSArray array] retain];
+		targettingNodes = [[CCArray array] retain];
+		lights = [[CCArray array] retain];
+		cameras = [[CCArray array] retain];
+		billboards = [[CCArray array] retain];
+		shouldClearDepthBufferBefore3D = YES;
+		shouldClearDepthBufferBefore2D = YES;
 		self.touchedNodePicker = [CC3TouchedNodePicker handlerOnWorld: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnWorld: self];
+		self.drawVisitor = [[self drawVisitorClass] visitor];
+		self.updateVisitor = [[self updateVisitorClass] visitor];
+		self.transformVisitor = [[self transformVisitorClass] visitor];
+		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithWorld: self];
 		fog = nil;
 		activeCamera = nil;
 		ambientLight = kCC3DefaultLightColorAmbientWorld;
@@ -164,17 +171,23 @@
 	// plus activeCamera will be populated as children are added.
 	// No need to configure touch handler.
 	[viewportManager release];
-	viewportManager = [another.viewportManager copy];				// retained
+	viewportManager = [another.viewportManager copy];					// retained
 	viewportManager.world = self;
 	
 	[drawingSequencer release];
-	drawingSequencer = [another.drawingSequencer retain];			// retained...not copied
+	drawingSequencer = [another.drawingSequencer copy];					// retained
 	
 	[performanceStatistics release];
-	performanceStatistics = [another.performanceStatistics copy];	// retained
+	performanceStatistics = [another.performanceStatistics copy];		// retained
+
+	self.drawVisitor = [[another.drawVisitor class] visitor];			// retained
+	self.updateVisitor = [[another.updateVisitor class] visitor];		// retained
+	self.transformVisitor = [[another.transformVisitor class] visitor];	// retained
+	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithWorld: self];	// retained
+	self.touchedNodePicker = [[another.touchedNodePicker class] handlerOnWorld: self];		// retained
 
 	[fog release];
-	fog = [another.fog copy];										// retained
+	fog = [another.fog copy];											// retained
 	
 	ambientLight = another.ambientLight;
 	minUpdateInterval = another.minUpdateInterval;
@@ -190,6 +203,21 @@
 
 -(void) pause {
 	self.isRunning = NO;
+}
+
+/**
+ * Overridden to update the world immediately once it starts running.
+ *
+ * Since the isRunning property is set to YES when the associated CC3Layer
+ * starts running, or the world is added to a running CC3Layer, this ensures
+ * that the world is in an updated before it is first displayed.
+ * 
+ * Thanks to cocos3d user Paco_777 for finding this issue and suggesting a solution.
+ */
+-(void) setIsRunning: (BOOL) shouldRun {
+	BOOL changingToRunning = !isRunning && shouldRun;
+	[super setIsRunning: shouldRun];
+	if (changingToRunning) [self updateWorld];
 }
 
 /**
@@ -209,7 +237,10 @@
 				 self, dtClamped * 1000.0, dt * 1000.0);
 
 		[touchedNodePicker dispatchPickedNode];
-		[[[self updateVisitorClass] visitorWithDeltaTime: dtClamped] visit: self];
+
+		updateVisitor.deltaTime = dtClamped;
+		[updateVisitor visit: self];
+
 		[self updateTargets: dtClamped];
 		[self updateCamera: dtClamped];
 		[self updateBillboards: dtClamped];
@@ -220,13 +251,22 @@
 	}
 }
 
+-(void) updateWorld {
+	BOOL wasRunning = isRunning;
+	isRunning = YES;
+	[self updateWorld: minUpdateInterval];
+	isRunning = wasRunning;
+}
+
 /** 
  * Template method to update the direction pointed to by any targetting nodes in this world.
  * Iterates through all the targetting nodes in this world, updating their target tracking.
  */
 -(void) updateTargets: (ccTime) dt {
+	transformVisitor.shouldVisitChildren = YES;
+	transformVisitor.shouldLocalizeToStartingNode = NO;
 	for (CC3TargettingNode* tn in targettingNodes) {
-		[tn trackTarget];
+		[tn trackTargetWithVisitor: transformVisitor];
 	}
 }
 
@@ -254,10 +294,6 @@
 	LogTrace(@"%@ updated %u billboards", self, billboards.count);
 }
 
--(void) updateWorld {
-	[self updateWorld: minUpdateInterval];
-}
-
 /**
  * Returns the class of visitor that will be instantiated in the updateWorld:
  * method to perform update operations.
@@ -269,9 +305,6 @@
 -(id) updateVisitorClass {
 	return [CC3NodeUpdatingVisitor class];
 }
-
-/** Default does nothing. Subclasses that handle touch events will override. */
--(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
 
 
 #pragma mark Drawing
@@ -288,7 +321,7 @@
 		[touchedNodePicker pickTouchedNode];
 		[self illuminate];
 		[self drawFog];
-		[[[self drawVisitorClass] visitor] visit: self];
+		[self visitForDrawingWithVisitor: drawVisitor];
 		[self close3DCamera];
 		[self closeViewport];
 		[self close3D];
@@ -297,18 +330,6 @@
 	
 	LogGLErrorState();			// Check and clear any GL error that occurred during 3D code
 	LogTrace(@"******* %@ exiting drawing visit", self);
-}
-
-/**
- * Template method that draws children by cycling through the nodes in the drawingSequence,
- * instead of drawing hierarchically. Sets the visitor not to visit the children of the
- * nodes in the drawingSequence.
- */
--(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.shouldVisitChildren = NO;
-	for (CC3Node* child in drawingSequence) {
-		[visitor visit: child];
-	}
 }
 
 /**
@@ -330,26 +351,13 @@
 
 	// Retrieves the GLES state trackers to set initial state
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
-	CC3OpenGLES11State* gles11State = gles11Engine.state;
 	
 	// Open tracking of GL state. Where needed, will cache current 2D GL state items
 	// for later reinstatement in the close3D method.
 	[gles11Engine open];
-
-	// Specify culling capabilities needed for 3D
-	[gles11ServCaps.cullFace enable];
-	gles11State.cullFace.value = GL_BACK;
-	gles11State.frontFace.value = GL_CCW;
-
-	// Specify 3D depth testing capabilities
-	[gles11ServCaps.depthTest enable];				// Enable depth testing
-	gles11State.depthMask.value = YES;				// Enble writing to depth buffer
-	gles11State.depthFunction.value = GL_LEQUAL;	// Set depth comparison function
-	
-	gles11State.shadeModel.value = GL_SMOOTH;		// Enable smooth shading
 	
 	// Ensure drawing is not slowed down by unexpected alpha testing and logic ops
+	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
 	[gles11ServCaps.alphaTest disable];
 	[gles11ServCaps.colorLogicOp disable];
 }
@@ -369,7 +377,9 @@
 	// Clear the depth buffer so that subsequent cocos2d rendering will occur
 	// on top of the 3D rendering. We can't simply turn depth testing off
 	// because cocos2d can use depth testing for 3D transition effects.
-	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+	if (shouldClearDepthBufferBefore2D) {
+		[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+	}
 }
 
 /** Template method that opens the 3D camera. */
@@ -399,13 +409,13 @@
  * lights, they are disabled.
  */
 -(void) illuminate {
-	LogTrace(@"%@ lighting the 3D world", self);
-
 	[CC3Light disableReservedLights];		// disable any lights used by 2D world
 
 	BOOL hasLighting = (lights.count > 0 || !ccc4FEqual(ambientLight, kCCC4FBlackTransparent));
 	[CC3OpenGLES11Engine engine].serverCapabilities.lighting.value = hasLighting;
 
+	LogTrace(@"%@ lighting is %@", self, (hasLighting ? @"on" : @"off"));
+	
 	// Set the ambient light for the whole world
 	[CC3OpenGLES11Engine engine].lighting.worldAmbientLight.value = ambientLight;
 
@@ -432,49 +442,49 @@
 	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
 
 	if (activeCamera && (billboards.count > 0)) {
+		CC3OpenGLES11Engine* gles11Engine;
+		CC3OpenGLES11StateTrackerViewport* gles11Scissor;
+		CC3OpenGLES11StateTrackerServerCapability* gles11ScissorTest;
+		
 		CC3Viewport vp = viewportManager.viewport;
-
-		// Since billboards draw outside the 3D camera, if the CC3Layer does not
+		BOOL isFullScreen = viewportManager.isFullScreen;
+		
+		// Since billboards draw outside the 3D environment, if the CC3Layer does not
 		// cover the full screen, billboards can be drawn outside the CC3Layer.
 		// Enable scissoring to the viewport dimensions to clip to the layer bounds.
-		[[CC3OpenGLES11Engine engine].serverCapabilities.scissorTest enable];
-		[CC3OpenGLES11Engine engine].state.scissor.value = vp;
+		if ( !isFullScreen ) {
+			gles11Engine = [CC3OpenGLES11Engine engine];
+			gles11Scissor = gles11Engine.state.scissor;
+			gles11ScissorTest = gles11Engine.serverCapabilities.scissorTest;
+			
+			[gles11ScissorTest enable];
+			gles11Scissor.value = vp;
+		}
 		
 		CGRect lb = viewportManager.layerBoundsLocal;
 		for (CC3Billboard* bb in billboards) {
 			[bb draw2dWithinBounds: lb];
 		}
 		
-		// All done...turn scissoring back off now.
-		// This is happening after the close3D method, so we need to close
-		// the scissor trackers manually.
-		[[CC3OpenGLES11Engine engine].serverCapabilities.scissorTest close];
-		[[CC3OpenGLES11Engine engine].state.scissor close];
+		// All done...turn scissoring back off now. This is happening after the
+		// close3D method, so we need to close the scissor trackers manually.
+		if ( !isFullScreen ) {
+			[gles11ScissorTest close];
+			[gles11Scissor close];
+		}
 	}
 }
 
-/**
- * Returns the class of visitor that will be instantiated in the drawWorld method.
- *
- * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation
- * returns CC3NodeDrawingVisitor. Subclasses may override to customized the behaviour
- * of the drawing visits.
- */
--(id) drawVisitorClass {
-	return [CC3NodeDrawingVisitor class];
+/** Visits this world for drawing (or picking) using the specified visitor. */
+-(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	visitor.shouldClearDepthBuffer = shouldClearDepthBufferBefore3D;
+	visitor.frustum = activeCamera.frustum;
+	visitor.drawingSequencer = drawingSequencer;
+	[visitor visit: self];
 }
 
-/**
- * Returns the class of visitor that will be instantiated in the touchedNodePicker
- * pickTouchedNode method, in order to paint each node a unique color so that
- * the node under the touched pixel can be identified.
- *
- * The returned class must be a subclass of CC3NodePickingVisitor. This implementation
- * returns CC3NodePickingVisitor. Subclasses may override to customized the behaviour
- * of the drawing visits.
- */
--(id) pickVisitorClass {
-	return [CC3NodePickingVisitor class];
+-(id) drawVisitorClass {
+	return [CC3NodeDrawingVisitor class];
 }
 
 
@@ -486,38 +496,46 @@
 
 /**
  * Property setter overridden to add all the decendent nodes of this world
- * into the new  node sequencer, and then generate a new drawSequence.
+ * into the new  node sequencer.
  */
 -(void) setDrawSequencer:(CC3NodeSequencer*) aNodeSequencer {
 	id oldDSS = drawingSequencer;
 	drawingSequencer = [aNodeSequencer retain];
 	[oldDSS release];
 
-	CC3NodeSequencerVisitor* seqVisitor = [CC3NodeSequencerVisitor visitorWithWorld: self];
-	NSArray* allNodes = [self flatten];
+	CCArray* allNodes = [self flatten];
 	for (CC3Node* aNode in allNodes) {
-		[drawingSequencer add: aNode withVisitor: seqVisitor];
+		[drawingSequencer add: aNode withVisitor: drawingSequenceVisitor];
 	}
-	[self populateDrawSequence];
-}
-
-/** Populates a new linear draw sequence from the nodes in the drawSequencer. */
--(void) populateDrawSequence {
-	[drawingSequence release];
-	drawingSequence = [ (drawingSequencer ? drawingSequencer.nodes : [NSArray array]) retain];
-	LogTrace("%@ created draw sequence of %u children: %@", self, drawingSequence.count, drawingSequence);
 }
 
 -(void) updateDrawSequence {
-	if (drawingSequencer && [drawingSequencer updateSequenceWithVisitor:
-								[CC3NodeSequencerMisplacedNodeVisitor visitorWithWorld: self]]) {
-		LogTrace(@"%@", [drawingSequencer fullDescription]);
-		[self populateDrawSequence];
+	if (drawingSequencer && drawingSequencer.allowSequenceUpdates) {
+		[drawingSequencer updateSequenceWithVisitor: drawingSequenceVisitor];
+		LogTrace(@"%@ updated %@", self, [drawingSequencer fullDescription]);
+	}
+}
+
+/**
+ * A property on a descendant node has changed that potentially affects its order in
+ * the drawing sequence. To put it in the correct drawing order, remove it from the
+ * drawingSequencer and then re-add it.
+ */
+-(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode {
+	if (drawingSequencer) {
+		if ([drawingSequencer remove: aNode withVisitor: drawingSequenceVisitor]) {
+			[drawingSequencer add: aNode withVisitor: drawingSequenceVisitor];
+		}
 	}
 }
 
 
 #pragma mark Node structural hierarchy
+
+/** Overridden. I am the world. */
+-(CC3World*) world {
+	return self;
+}
 
 /**
  * Overridden to attempt to add each node to the drawingSequencer, and to add any nodes
@@ -527,18 +545,14 @@
  */
 -(void) didAddDescendant: (CC3Node*) aNode {
 	LogTrace(@"Adding %@ as descendant to %@", aNode, self);
-	BOOL drawSeqChanged = NO;
-	CC3NodeSequencerVisitor* seqVisitor = [CC3NodeSequencerVisitor visitorWithWorld: self];
 	
 	// Collect all the nodes being added, including all descendants,
 	// and see if they require special treatment
-	NSArray* allAdded = [aNode flatten];
+	CCArray* allAdded = [aNode flatten];
 	for (CC3Node* addedNode in allAdded) {
 	
-		// Attempt to add the node to the draw sequence sorter and remember if it was added.
-		drawSeqChanged |= drawingSequencer
-							? [drawingSequencer add: addedNode withVisitor: seqVisitor]
-							: NO;
+		// Attempt to add the node to the draw sequence sorter.
+		[drawingSequencer add: addedNode withVisitor: drawingSequenceVisitor];
 		
 		// If the node is a targetting node, add it to the collection of such nodes
 		if ( [addedNode isKindOfClass: [CC3TargettingNode class]] ) {
@@ -559,7 +573,6 @@
 		// If the node is a camera, add it to the collection of cameras, and
 		// if the node is the first camera to be added, make it the active camera.
 		if ( [addedNode isKindOfClass: [CC3Camera class]] ) {
-			((CC3Camera*)addedNode).world = self;
 			[cameras addObject: addedNode];
 			if ( !activeCamera ) {
 				self.activeCamera = (CC3Camera*)addedNode;
@@ -573,11 +586,6 @@
 			[billboards addObject: addedNode];
 		}
 	}
-
-	// If the draw sequence was changed, re-populate it.
-	if (drawSeqChanged) {
-		[self populateDrawSequence];
-	}
 }
 
 /**
@@ -588,18 +596,14 @@
  */
 -(void) didRemoveDescendant: (CC3Node*) aNode {
 	LogTrace(@"Removing %@ as descendant of %@", aNode, self);
-	BOOL drawSeqChanged = NO;
-	CC3NodeSequencerVisitor* seqVisitor = [CC3NodeSequencerVisitor visitorWithWorld: self];
 	
 	// Collect all the nodes being removed, including all descendants,
 	// and see if they require special treatment
-	NSArray* allRemoved = [aNode flatten];
+	CCArray* allRemoved = [aNode flatten];
 	for (CC3Node* removedNode in allRemoved) {
 		
-		// Attempt to remove the node to the draw sequence sorter and remember if it was removed.
-		drawSeqChanged |= drawingSequencer
-							? [drawingSequencer remove: removedNode withVisitor: seqVisitor]
-							: NO;
+		// Attempt to remove the node to the draw sequence sorter.
+		[drawingSequencer remove: removedNode withVisitor: drawingSequenceVisitor];
 		
 		// If the node is a targetting node, remove it from the collection of such nodes
 		if ( [removedNode isKindOfClass: [CC3TargettingNode class]] ) {
@@ -621,7 +625,6 @@
 				self.activeCamera = cameras.count ? [cameras objectAtIndex: 0] : nil;
 				LogTrace(@"Assigning %@ as the active camera", self.activeCamera);
 			}
-			((CC3Camera*)removedNode).world = nil;
 		}
 		
 		// If the node is a billboard, remove it from the collection of billboards
@@ -630,42 +633,30 @@
 			[billboards removeObjectIdenticalTo: removedNode];
 		}
 	}
-	
-	// If the draw sequence was changed, re-populate it.
-	if (drawSeqChanged) {
-		[self populateDrawSequence];
-	}
-}
-
-/**
- * A property on a descendant node has changed that potentially affects its order
- * in the drawingSequence. To put it in the correct position within the sequencer,
- * remove it from the drawingSequencer and then re-add it.
- */
--(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode {
-	CC3NodeSequencerVisitor* seqVisitor = [CC3NodeSequencerVisitor visitorWithWorld: self];
-	BOOL drawSeqChanged = NO;
-	
-	// Remove the node and then re-add it to make sure it it sequenced correctly
-	drawSeqChanged |= drawingSequencer
-						? [drawingSequencer remove: aNode withVisitor: seqVisitor]
-						: NO;
-	drawSeqChanged |= drawingSequencer
-						? [drawingSequencer add: aNode withVisitor: seqVisitor]
-						: NO;
-	
-	// If the draw sequence was changed, re-populate it.
-	if (drawSeqChanged) {
-		[self populateDrawSequence];
-	}
 }
 
 
 #pragma mark Touch handling
 
-// Forward to the encapsulated touched node picker.
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
-	[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+	switch (touchType) {
+		case kCCTouchBegan:
+			[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+			break;
+		case kCCTouchMoved:
+			break;
+		case kCCTouchEnded:
+			break;
+		default:
+			break;
+	}
+}
+
+/** Default does nothing. Subclasses that handle touch events will override. */
+-(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
+
+-(id) pickVisitorClass {
+	return [CC3NodePickingVisitor class];
 }
 
 @end
@@ -674,14 +665,12 @@
 #pragma mark -
 #pragma mark CC3TouchedNodePicker
 
-@interface CC3TouchedNodePicker (TemplateMethods)
--(NSString*) nameOfTouchType: (uint) tType;
-@end
-
-
 @implementation CC3TouchedNodePicker
 
+@synthesize pickVisitor;
+
 -(void) dealloc {
+	[pickVisitor release];
 	world = nil;			// not retained
 	pickedNode = nil;		// not retained
 	[super dealloc];
@@ -702,6 +691,7 @@
 -(id) initOnWorld: (CC3World*) aCC3World {
 	if ( (self = [super init]) ) {
 		world = aCC3World;
+		self.pickVisitor = [[world pickVisitorClass] visitor];
 		touchPoint = CGPointZero;
 		wasTouched = NO;
 		wasPicked = NO;
@@ -733,16 +723,17 @@
 	// Update the touch location, even if the touch type is the same as the previous touch.
 	touchPoint = tPoint;
 
-	LogTrace(@"%@ touched %@ at %@. Queue length now %u.", self, [self nameOfTouchType: tType],
+	LogTrace(@"%@ touched %@ at %@. Queue length now %u.", self, NSStringFromTouchType(tType),
 			 NSStringFromCGPoint(touchPoint), queuedTouchCount);
 }
 
 -(void) pickTouchedNode {
 	if (wasTouched) {
 		wasTouched = NO;
-		CC3NodePickingVisitor* pickVisitor = [[world pickVisitorClass] visitor];
-		[pickVisitor visit: world];
+
+		[world visitForDrawingWithVisitor: pickVisitor];
 		pickedNode = pickVisitor.pickedNode;
+
 		wasPicked = YES;
 	}
 }
@@ -762,7 +753,7 @@
 
 		for (int i = 0; i < touchCount; i++) {
 			LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
-					 self, [self nameOfTouchType: touchQueue[i]], pickedNode.touchableNode,
+					 self, NSStringFromTouchType(touchQueue[i]), pickedNode.touchableNode,
 					 NSStringFromCGPoint(touchPoint), NSStringFromCGPoint(self.glTouchPoint), pickedNode);
 
 			[world nodeSelected: pickedNode.touchableNode byTouchEvent: touchQueue[i] at: touchPoint];
@@ -772,21 +763,6 @@
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@", [self class]];
-}
-
--(NSString*) nameOfTouchType: (uint) tType {
-	switch (tType) {
-		case kCCTouchBegan:
-			return @"kCCTouchBegan";
-		case kCCTouchMoved:
-			return @"kCCTouchMoved";
-		case kCCTouchEnded:
-			return @"kCCTouchEnded";
-		case kCCTouchCancelled:
-			return @"kCCTouchCancelled";
-		default:
-			return [NSString stringWithFormat: @"unknown touch type (%u)", tType];
-	}
 }
 
 @end
@@ -807,7 +783,7 @@
 
 @implementation CC3ViewportManager
 
-@synthesize layerBounds, viewport, deviceRotationMatrix;
+@synthesize layerBounds, viewport, deviceRotationMatrix, isFullScreen;
 
 -(void) dealloc {
 	[deviceRotationMatrix release];
@@ -838,6 +814,7 @@
 		glToCC2PointMapY = cc3v( 0.0,  1.0, 0.0 );
 		cc2ToGLPointMapX = cc3v( 1.0,  0.0, 0.0 );
 		cc2ToGLPointMapY = cc3v( 0.0,  1.0, 0.0 );
+		isFullScreen = NO;
 	}
 	return self;
 }
@@ -845,6 +822,14 @@
 +(id) viewportManagerOnWorld: (CC3World*) aCC3World {
 	return [[[self alloc] initOnWorld: aCC3World] autorelease];
 }
+
+// Protected properties for copying
+-(CC3Vector) glToCC2PointMapX { return glToCC2PointMapX; }
+-(CC3Vector) glToCC2PointMapY { return glToCC2PointMapY; }
+-(CC3Vector) cc2ToGLPointMapX { return cc2ToGLPointMapX; }
+-(CC3Vector) cc2ToGLPointMapY { return cc2ToGLPointMapY; }
+-(CC3World*) world { return world; }
+-(void) setWorld: (CC3World*) aCC3World { world = aCC3World; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -862,20 +847,28 @@
 	cc2ToGLPointMapY = another.cc2ToGLPointMapY;
 }
 
-// Protected properties for copying
--(CC3Vector) glToCC2PointMapX { return glToCC2PointMapX; }
--(CC3Vector) glToCC2PointMapY { return glToCC2PointMapY; }
--(CC3Vector) cc2ToGLPointMapX { return cc2ToGLPointMapX; }
--(CC3Vector) cc2ToGLPointMapY { return cc2ToGLPointMapY; }
--(CC3World*) world { return world; }
--(void) setWorld: (CC3World*) aCC3World { world = aCC3World; }
+-(id) copyWithZone: (NSZone*) zone {
+	CC3ViewportManager* aCopy = [[[self class] allocWithZone: zone] init];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
 
 
 #pragma mark Drawing
 
 -(void) openViewport {
-	LogTrace(@"%@ opening 3D viewport %@", self, NSStringFromCC3Viewport(viewport));
-	[CC3OpenGLES11Engine engine].state.viewport.value = viewport;
+	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
+			 NSStringFromCC3Viewport(viewport), (isFullScreen ? @"" : @"not "));
+
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLES11State* gles11State = gles11Engine.state;
+	
+	gles11State.viewport.value = viewport;
+
+	if ( !isFullScreen ) {
+		[gles11Engine.serverCapabilities.scissorTest enable];
+		gles11State.scissor.value = viewport;
+	}
 }
 
 -(void) closeViewport {}
@@ -937,12 +930,115 @@
  * can be stated as:
  *   - Xout = (Xvx * Xin) + (Yvx * Yin) + (Zvx * 1.0)
  *   - Yout = (Xvy * Xin) + (Yvy * Yin) + (Zvy * 1.0)
+ *
+ * Thanks to cocos3d user Robert Szeleney who pointed out a previous issue where the
+ * viewport bounds were unnecessarily being constrained to the window bounds, thereby
+ * restricting the movement of the CC3Layer and 3D world, and for suggesting the fix. 
  */
 -(void) updateBounds: (CGRect) bounds withDeviceOrientation: (ccDeviceOrientation) deviceOrientation {
 	CGSize winSz = [[CCDirector sharedDirector] winSizeInPixels];
 	CC3Viewport vp;
 	CGPoint bOrg = bounds.origin;
 	CGSize bSz = bounds.size;
+
+	// Mark whether the viewport covers the full screen.
+	isFullScreen = CGSizeEqualToSize(bSz, winSz) && CGPointEqualToPoint(bOrg, CGPointZero);
+	
+	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
+	GLfloat c2g = CC_CONTENT_SCALE_FACTOR();		// Ratio of CC2 points to GL pixels...
+	GLfloat g2c = 1.0 / c2g;						// ...and its inverse.
+	
+	switch(deviceOrientation) {
+			
+		case kCCDeviceOrientationLandscapeLeft:
+			[self updateDeviceRotationAngle: -90.0f];
+			
+			vp.x = (GLint)bOrg.y;
+			vp.y = (GLint)(winSz.width - (bOrg.x + bSz.width));
+			vp.w = (GLint)(bSz.height);
+			vp.h = (GLint)(bSz.width);
+			
+			glToCC2PointMapX = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
+			glToCC2PointMapY = cc3v(  g2c,  0.0, -vp.x * g2c );
+			cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
+			cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
+			
+			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
+			break;
+			
+		case kCCDeviceOrientationLandscapeRight:
+			[self updateDeviceRotationAngle: 90.0f];
+			
+			vp.x = (GLint)(winSz.height - (bOrg.y + bSz.height));
+			vp.y = (GLint)bOrg.x;
+			vp.w = (GLint)(bSz.height);
+			vp.h = (GLint)(bSz.width);
+			
+			glToCC2PointMapX = cc3v(  0.0,  g2c, -vp.y * g2c );
+			glToCC2PointMapY = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
+			cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
+			cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
+			
+			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
+			break;
+			
+		case kCCDeviceOrientationPortraitUpsideDown:
+			[self updateDeviceRotationAngle: 180.0f];
+			
+			vp.x = (GLint)(winSz.width - (bOrg.x + bSz.width));
+			vp.y = (GLint)(winSz.height - (bOrg.y + bSz.height));
+			vp.w = (GLint)bSz.width;
+			vp.h = (GLint)bSz.height;
+			
+			glToCC2PointMapX = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
+			glToCC2PointMapY = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
+			cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
+			cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
+			
+			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
+			break;
+			
+		case kCCDeviceOrientationPortrait:
+		default:
+			[self updateDeviceRotationAngle: 0.0f];
+			
+			vp.x = (GLint)bOrg.x;
+			vp.y = (GLint)bOrg.y;
+			vp.w = (GLint)bSz.width;
+			vp.h = (GLint)bSz.height;
+			
+			glToCC2PointMapX = cc3v(  g2c,  0.0, -vp.x * g2c );
+			glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
+			cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
+			cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
+
+			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
+			break;
+	}
+	
+	// Set the layerBounds and viewport, and tell the camera that we've been updated
+	layerBounds = bounds;
+	viewport = vp;
+	[world.activeCamera markProjectionDirty];
+}
+
+/*
+-(void) updateBounds: (CGRect) bounds withDeviceOrientation: (ccDeviceOrientation) deviceOrientation {
+	CGSize winSz = [[CCDirector sharedDirector] winSizeInPixels];
+	CC3Viewport vp;
+	CGPoint bOrg = bounds.origin;
+	CGSize bSz = bounds.size;
+	
+	// Mark whether the viewport covers the full screen.
+	isFullScreen = CGSizeEqualToSize(bSz, winSz) && CGPointEqualToPoint(bOrg, CGPointZero);
 	
 	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
 	GLfloat c2g = CC_CONTENT_SCALE_FACTOR();		// Ratio of CC2 points to GL pixels...
@@ -963,8 +1059,9 @@
 			cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
 			cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
 			
-			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
+			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
 			break;
 			
 		case kCCDeviceOrientationLandscapeRight:
@@ -980,8 +1077,9 @@
 			cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
 			cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
 			
-			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
+			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
 			break;
 			
 		case kCCDeviceOrientationPortraitUpsideDown:
@@ -997,8 +1095,9 @@
 			cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
 			cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
 			
-			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
+			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
 			break;
 			
 		case kCCDeviceOrientationPortrait:
@@ -1014,9 +1113,10 @@
 			glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
 			cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
 			cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
-
-			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz), NSStringFromCC3Viewport(vp));
+			
+			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
+					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
+					 NSStringFromCC3Viewport(vp), (isFullScreen ? @"" : @"not "));
 			break;
 	}
 	
@@ -1025,6 +1125,7 @@
 	viewport = vp;
 	[world.activeCamera markProjectionDirty];
 }
+*/
 
 /**
  * Rebuilds the deviceRotationMatrix from the specified rotation angle, and marks the

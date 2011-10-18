@@ -1,7 +1,7 @@
 /*
  * CC3Layer.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -46,6 +46,20 @@
  * Similarly, a 2D backdrop could be rendered behind the 3D world by adding an appropriate
  * CCNode as a child with a negative Z-order.
  *
+ * Like other CCNodes, this layer can be added to another 2D node, and given a contentSize,
+ * position, and scale. You can even dynamically move and scale the embedded CC3Layer
+ * using CCActions.
+ *
+ * Changes to the position and scale of the CC3Layer are propagated to the viewport of the
+ * contained CC3World, and to any child CC3Layers and CC3Worlds.
+ *
+ * However, these properties will only be propagated if the node being moved is a CC3Layer.
+ * If the CC3Layer is a child of a regular 2D CCLayer or  CCNode, and that node is moved,
+ * the resulting changes to the position or scale of the child CC3Layer may not
+ * automatically be propagated to the CC3World viewport. In this case, you can use the
+ * updateViewport method of CC3Layer to ensure that the CC3World viewport is aligned
+ * with the position and scale of the CC3Layer.
+ *
  * CC3Layer descends from CCLayerColor, and will draw a colored background behind both 2D
  * and 3D content if configured with a background color.
  *
@@ -77,10 +91,7 @@
  * within a parent CCLayer like any other CCNode.
  * 
  * You can even dyanamically move your CC3Layer around within the window, by changing the
- * position property (for example, by using a CCMoveTo action). However, if you do want
- * to move the CC3Layer around the screen, be sure to set the shouldAlwaysUpdateViewport
- * property to YES before doing so. See the notes for the shouldAlwaysUpdateViewport
- * property for more info on this.
+ * position property (for example, by using a CCMoveTo action).
  *
  * CC3Layer directly descends from ControllableCCLayer, which means that it can optionally
  * be controlled by a CCNodeController instance. Doing so enables two features:
@@ -123,6 +134,14 @@
 	BOOL shouldAlwaysUpdateViewport;
 }
 
+/**
+ * Returns whether this layer is opaque.
+ *
+ * Return YES if the isColored property returns YES and
+ * the opacity property returns 255, otherwise returns NO.
+ */
+@property(nonatomic, readonly) BOOL isOpaque;
+
 
 #pragma mark Allocation and initialization
 
@@ -163,15 +182,19 @@
  * Indicates whether this layer should update the 3D viewport on each rendering frame.
  *
  * If the value of this property is YES, the 3D viewport will be updated before each
- * frame is drawn. This is necessary if the position of this layer may be dynamically
- * changing. For example, if you have scheduled this layer to be moved around the
- * screen under control of a CCAction, set this property to YES prior to doing so.
+ * frame is drawn. This is sometimes useful if the layer is changing in a way that is
+ * not automatically tracked by the 3D world.
  *
- * You do NOT need to set this property to YES to position the layer during initialization.
+ * You do not need to set this property when changing the position or scale of the layer.
+ * These changes are forwarded to the 3D world automatically.
  *
- * The initial value of this property is NO. Unless the layer will actually be moving
- * around, leave this property set to NO, to avoid the overhead of calculating an
+ * The initial value of this property is NO. Unless you encounter issues when modifying
+ * the layer, leave this property set to NO, to avoid the overhead of calculating an
  * unnecessary transformation matrix on each frame render.
+ *
+ * As an alternate to updating the viewport on every frame render, consider invoking
+ * the updateViewport method whenever your application changes the orientation of this
+ * layer in a manner that is not automatically propagated to the CC3World viewport.
  */
 @property(nonatomic, assign) BOOL shouldAlwaysUpdateViewport;
 
@@ -193,6 +216,21 @@
  * processing of model updates separate from OpenGL ES drawing.
  */
 -(void) update: (ccTime)dt;
+
+/**
+ * Updates the viewport of the contained CC3World instance with the dimensions
+ * of this layer and the device orientation.
+ *
+ * This method is invoked automatically when the position, size, scale, or orientation
+ * of this layer changes. You do not need to invoke this method when changing the position
+ * or scale of the layer. These changes are forwarded to the CC3World viewport automatically.
+ *
+ * Usually, the application should never need to invoke this method directly. However,
+ * if your application changes the orientation of this layer in a manner that is not
+ * automatically detected, you can use this method to align the CC3World viewport with
+ * the updated layer.
+ */
+-(void) updateViewport;
 
 /**
  * If a background color has been specified, and this layer is not overlaying the device

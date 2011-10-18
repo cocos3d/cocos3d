@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Textures.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,34 +70,49 @@
 
 @implementation CC3OpenGLES11StateTrackerTextureBinding
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initForState: qName]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initForState: qName withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) getGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	[super getGLValue];
 }
 
 -(void) setGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glBindTexture(GL_TEXTURE_2D, value);
 }
 
 -(void) unbind {
 	self.value = 0;
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %i (was tracking %@) for texture unit %@",
+			 [self class], NSStringFromGLEnum(name), originalValue,
+			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %i for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), value,
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %i for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), value,
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -108,20 +123,9 @@
 
 @implementation CC3OpenGLES11StateTrackerTexEnvEnumeration
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initForState: qName]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initForState: qName withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
@@ -129,13 +133,37 @@
 }
 
 -(void) getGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glGetTexEnviv(GL_TEXTURE_ENV, name, (GLint*)&originalValue);
 }
 
 -(void) setGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glTexEnvi(GL_TEXTURE_ENV, name, value);
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@",
+			 [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(originalValue),
+			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -146,30 +174,43 @@
 
 @implementation CC3OpenGLES11StateTrackerTexEnvColor
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initForState: qName]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initForState: qName withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) getGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glGetTexEnvfv(GL_TEXTURE_ENV, name, (GLfloat*)&originalValue);
 }
 
 -(void) setGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glTexEnvfv(GL_TEXTURE_ENV, name, (GLfloat*)&value);
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+			 [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(originalValue),
+			 (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromCCC4F(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromCCC4F(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -180,32 +221,44 @@
 
 @implementation CC3OpenGLES11StateTrackerTextureServerCapability
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initForState: qName]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initForState: qName withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) getGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	[super getGLValue];
 }
 
 -(void) setGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	[super setGLValue];
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
+			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
+}
 
 @end
 
@@ -217,13 +270,13 @@
 
 -(void) getGLValue {
 	GLint* origIntVal;
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glGetTexEnviv(GL_POINT_SPRITE_OES, name, (GLint*)&origIntVal);
 	originalValue = (origIntVal != GL_FALSE);
 }
 
 -(void) setGLValue {
-	[textureUnit activate];
+	[self.textureUnit activate];
 	glTexEnvi(GL_POINT_SPRITE_OES, name, (value ? GL_TRUE : GL_FALSE));
 }
 
@@ -235,30 +288,43 @@
 
 @implementation CC3OpenGLES11StateTrackerTextureClientCapability
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initForState: qName]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initForState: qName withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) getGLValue {
-	[textureUnit clientActivate];
+	[self.textureUnit clientActivate];
 	[super getGLValue];
 }
 
 -(void) setGLValue {
-	[textureUnit clientActivate];
+	[self.textureUnit clientActivate];
 	[super setGLValue];
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logGetGLValue {
+	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
+			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -269,37 +335,50 @@
 
 @implementation CC3OpenGLES11StateTrackerVertexTexCoordsPointer
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initWithParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super init]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initWithParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_TEXTURE_COORD_ARRAY_SIZE];
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_TEXTURE_COORD_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_TEXTURE_COORD_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																  forState: GL_TEXTURE_COORD_ARRAY_SIZE];
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_TEXTURE_COORD_ARRAY_TYPE];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_TEXTURE_COORD_ARRAY_STRIDE];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	[textureUnit clientActivate];
+	[self.textureUnit clientActivate];
 	glTexCoordPointer(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
 }
 
--(void) open {
-	[textureUnit clientActivate];
-	[super open];
+-(void) logSetGLValues: (BOOL) wasChanged {
+	if (elementSize.value != 0) {
+		// GL function uses element size
+		LogTrace("%@ for texture unit %@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class],
+				 NSStringFromGLEnum(self.textureUnit.glEnumValue),
+				 (wasChanged ? @"applied" : @"reused"),
+				 NSStringFromGLEnum(elementSize.name), elementSize.value,
+				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
+				 NSStringFromGLEnum(elementStride.name), elementStride.value,
+				 @"POINTER", elementPointer.value);
+	} else {
+		// GL function doesn't use element size
+		LogTrace("%@ for texture unit %@ %@ %@ = %@, %@ = %i and %@ = %p", [self class],
+				 NSStringFromGLEnum(self.textureUnit.glEnumValue),
+				 (wasChanged ? @"applied" : @"reused"),
+				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
+				 NSStringFromGLEnum(elementStride.name), elementStride.value,
+				 @"POINTER", elementPointer.value);
+	}
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -310,40 +389,19 @@
 
 @implementation CC3OpenGLES11TextureMatrixStack
 
--(void) dealloc {
-	textureUnit = nil;		// not retained
-	[super dealloc];
-}
-
--(id) initWithMode: (GLenum) matrixMode
-		andTopName: (GLenum) tName
-	  andDepthName: (GLenum) dName
-	andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker
-		withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	if ( (self = [super initWithMode: matrixMode
-						  andTopName: tName
-						andDepthName: dName
-					  andModeTracker: tracker]) ) {
-		textureUnit = aTexUnit;
-	}
-	return self;
-}
-
-+(id) trackerWithMode: (GLenum) matrixMode
-		   andTopName: (GLenum) tName
-		 andDepthName: (GLenum) dName
-	   andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker
-		   withParent: (CC3OpenGLES11TextureUnit*) aTexUnit {
-	return [[[self alloc] initWithMode: matrixMode
-							andTopName: tName
-						  andDepthName: dName
-						andModeTracker: tracker
-							withParent: aTexUnit] autorelease];
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit {
+	return (CC3OpenGLES11TextureUnit*)parent;
 }
 
 -(void) activate {
 	[super activate];
-	[textureUnit activate];
+	[self.textureUnit activate];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
 }
 
 @end
@@ -404,70 +462,89 @@
 	[super dealloc];
 }
 
--(id) initWithTextureUnitIndex: (GLuint) texUnit withParent: (CC3OpenGLES11Textures*) aTexState {
-	if ( (self = [super initMinimal]) ) {
-		texturesState = aTexState;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker withTextureUnitIndex: (GLuint) texUnit {
+	if ( (self = [super initMinimalWithParent: aTracker]) ) {
 		textureUnitIndex = texUnit;
 		[self initializeTrackers];
 	}
 	return self;
 }
 
-+(id) trackerWithTextureUnitIndex: (GLuint) texUnit withParent: (CC3OpenGLES11Textures*) aTexState {
-	return [[[self alloc] initWithTextureUnitIndex: texUnit withParent: aTexState] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker withTextureUnitIndex: (GLuint) texUnit {
+	return [[[self alloc] initWithParent: aTracker withTextureUnitIndex: texUnit] autorelease];
 }
 
 -(void) initializeTrackers {
-	self.texture2D = [CC3OpenGLES11StateTrackerTextureServerCapability trackerForState: GL_TEXTURE_2D
-																			withParent: self];
-	self.textureCoordArray = [CC3OpenGLES11StateTrackerTextureClientCapability trackerForState: GL_TEXTURE_COORD_ARRAY
-																					withParent: self];
+	self.texture2D = [CC3OpenGLES11StateTrackerTextureServerCapability trackerWithParent: self
+																				forState: GL_TEXTURE_2D];
+	self.textureCoordArray = [CC3OpenGLES11StateTrackerTextureClientCapability trackerWithParent: self
+																						forState: GL_TEXTURE_COORD_ARRAY];
 	self.textureCoordinates = [CC3OpenGLES11StateTrackerVertexTexCoordsPointer trackerWithParent: self];
-	self.textureBinding = [CC3OpenGLES11StateTrackerTextureBinding trackerForState: GL_TEXTURE_BINDING_2D
-																		withParent: self];
-	self.textureEnvironmentMode = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_TEXTURE_ENV_MODE
-																				   withParent: self];
-	self.combineRGBFunction = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_COMBINE_RGB
-																			   withParent: self];
-	self.rgbSource0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC0_RGB
-																	   withParent: self];
-	self.rgbSource1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC1_RGB
-																	   withParent: self];
-	self.rgbSource2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC2_RGB
-																	   withParent: self];
-	self.rgbOperand0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND0_RGB
-																		withParent: self];
-	self.rgbOperand1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND1_RGB
-																		withParent: self];
-	self.rgbOperand2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND2_RGB
-																		withParent: self];
-	self.combineAlphaFunction = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_COMBINE_ALPHA
-																				 withParent: self];
-	self.alphaSource0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC0_ALPHA
-																		 withParent: self];
-	self.alphaSource1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC1_ALPHA
-																		 withParent: self];
-	self.alphaSource2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_SRC2_ALPHA
-																		 withParent: self];
-	self.alphaOperand0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND0_ALPHA
-																		  withParent: self];
-	self.alphaOperand1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND1_ALPHA
-																		  withParent: self];
-	self.alphaOperand2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerForState: GL_OPERAND2_ALPHA
-																		  withParent: self];
-	self.color = [CC3OpenGLES11StateTrackerTexEnvColor trackerForState: GL_TEXTURE_ENV_COLOR
-															withParent: self];
-	self.pointSpriteCoordReplace = [CC3OpenGLES11StateTrackerTexEnvPointSpriteCapability trackerForState: GL_COORD_REPLACE_OES
-																							  withParent: self];
-	self.matrixStack = [CC3OpenGLES11TextureMatrixStack trackerWithMode: GL_TEXTURE 
-															 andTopName: GL_TEXTURE_MATRIX
-														   andDepthName: GL_TEXTURE_STACK_DEPTH
-														 andModeTracker: [CC3OpenGLES11Engine engine].matrices.mode
-															 withParent: self];
+	self.textureBinding = [CC3OpenGLES11StateTrackerTextureBinding trackerWithParent: self
+																			forState: GL_TEXTURE_BINDING_2D];
+	self.textureEnvironmentMode = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																					   forState: GL_TEXTURE_ENV_MODE];
+	self.combineRGBFunction = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																				   forState: GL_COMBINE_RGB];
+	self.rgbSource0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																		   forState: GL_SRC0_RGB];
+	self.rgbSource1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																		   forState: GL_SRC1_RGB];
+	self.rgbSource2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																		   forState: GL_SRC2_RGB];
+	self.rgbOperand0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			forState: GL_OPERAND0_RGB];
+	self.rgbOperand1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			forState: GL_OPERAND1_RGB];
+	self.rgbOperand2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			forState: GL_OPERAND2_RGB];
+	self.combineAlphaFunction = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																					 forState: GL_COMBINE_ALPHA];
+	self.alphaSource0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			 forState: GL_SRC0_ALPHA];
+	self.alphaSource1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			 forState: GL_SRC1_ALPHA];
+	self.alphaSource2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			 forState: GL_SRC2_ALPHA];
+	self.alphaOperand0 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			  forState: GL_OPERAND0_ALPHA];
+	self.alphaOperand1 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			  forState: GL_OPERAND1_ALPHA];
+	self.alphaOperand2 = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
+																			  forState: GL_OPERAND2_ALPHA];
+	self.color = [CC3OpenGLES11StateTrackerTexEnvColor trackerWithParent: self
+																forState: GL_TEXTURE_ENV_COLOR];
+	self.pointSpriteCoordReplace = [CC3OpenGLES11StateTrackerTexEnvPointSpriteCapability trackerWithParent: self
+																								  forState: GL_COORD_REPLACE_OES];
+	self.matrixStack = [CC3OpenGLES11TextureMatrixStack trackerWithParent: self
+																 withMode: GL_TEXTURE 
+															   andTopName: GL_TEXTURE_MATRIX
+															 andDepthName: GL_TEXTURE_STACK_DEPTH
+														   andModeTracker: self.engine.matrices.mode];
 }
 
+-(CC3OpenGLES11Textures*) texturesState {
+	return (CC3OpenGLES11Textures*)parent;
+}
+
+-(void) activate {
+	self.texturesState.activeTexture.value = textureUnitIndex;
+}
+
+-(void) clientActivate {
+	self.texturesState.clientActiveTexture.value = textureUnitIndex;
+}
+
+-(GLenum) glEnumValue {
+	return GL_TEXTURE0 + textureUnitIndex;
+}
+
+/**
+ * Since this class can be instantiated dynamically, when opened,
+ * open each contained primitive tracker.
+ */
 -(void) open {
-	LogTrace("Opening %@", [self class]);
+	[super open];
 	[texture2D open];
 	[textureCoordArray open];
 	[textureCoordinates open];
@@ -490,44 +567,6 @@
 	[color open];
 	[pointSpriteCoordReplace open];
 	[matrixStack open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[texture2D close];
-	[textureCoordArray close];
-	[textureCoordinates close];
-	[textureBinding close];
-	[textureEnvironmentMode close];
-	[combineRGBFunction close];
-	[rgbSource0 close];
-	[rgbSource1 close];
-	[rgbSource2 close];
-	[rgbOperand0 close];
-	[rgbOperand1 close];
-	[rgbOperand2 close];
-	[combineAlphaFunction close];
-	[alphaSource0 close];
-	[alphaSource1 close];
-	[alphaSource2 close];
-	[alphaOperand0 close];
-	[alphaOperand1 close];
-	[alphaOperand2 close];
-	[color close];
-	[pointSpriteCoordReplace close];
-	[matrixStack close];
-}
-
--(void) activate {
-	texturesState.activeTexture.value = textureUnitIndex;
-}
-
--(void) clientActivate {
-	texturesState.clientActiveTexture.value = textureUnitIndex;
-}
-
--(GLenum) glEnumValue {
-	return GL_TEXTURE0 + textureUnitIndex;
 }
 
 -(NSString*) description {
@@ -599,14 +638,14 @@ GLuint minimumTextureUnits = 1;
 
 /** Template method returns an autoreleased instance of a texture unit tracker. */
 -(CC3OpenGLES11TextureUnit*) makeTextureUnit: (GLuint) texUnit {
-	return [CC3OpenGLES11TextureUnit trackerWithTextureUnitIndex: texUnit withParent: self];
+	return [CC3OpenGLES11TextureUnit trackerWithParent: self withTextureUnitIndex: texUnit];
 }
 
 -(CC3OpenGLES11TextureUnit*) textureUnitAt: (GLuint) texUnit {
 	// If the requested texture unit hasn't been allocated yet, add it.
 	if (texUnit >= self.textureUnitCount) {
 		// Make sure we don't add beyond the max number of texture units for the platform
-		GLuint platformMaxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
+		GLuint platformMaxTexUnits = self.engine.platform.maxTextureUnits.value;
 		GLuint tuMax = MIN(texUnit, platformMaxTexUnits);
 
 		// Add all texture units between the current count and the requested texture unit.
@@ -621,30 +660,18 @@ GLuint minimumTextureUnits = 1;
 }
 
 -(void) initializeTrackers {
-	self.activeTexture = [CC3OpenGLES11StateTrackerActiveTexture trackerForState: GL_ACTIVE_TEXTURE
-																andGLSetFunction: glActiveTexture];
-	self.clientActiveTexture = [CC3OpenGLES11StateTrackerActiveTexture trackerForState: GL_CLIENT_ACTIVE_TEXTURE
-																	  andGLSetFunction: glClientActiveTexture];
+	self.activeTexture = [CC3OpenGLES11StateTrackerActiveTexture trackerWithParent: self
+																		  forState: GL_ACTIVE_TEXTURE
+																  andGLSetFunction: glActiveTexture];
+	self.clientActiveTexture = [CC3OpenGLES11StateTrackerActiveTexture trackerWithParent: self
+																				forState: GL_CLIENT_ACTIVE_TEXTURE
+																		andGLSetFunction: glClientActiveTexture];
 
 	// Start with the min number of texture unit trackers. Add more as requested by textureUnitAt:.
-	self.textureUnits = [NSMutableArray array];
+	self.textureUnits = [CCArray array];
 	for (GLuint i = 0; i < minimumTextureUnits; i++) {
 		[textureUnits addObject: [self makeTextureUnit: i]];
 	}
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[activeTexture open];
-	[clientActiveTexture open];
-	[self openTrackers: textureUnits];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[self closeTrackers: textureUnits];
-	[activeTexture close];					// Close after texture units because they can change this.
-	[clientActiveTexture close];			// Close after texture units because they can change this.
 }
 
 -(NSString*) description {

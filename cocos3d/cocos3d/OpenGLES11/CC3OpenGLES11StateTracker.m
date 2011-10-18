@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3OpenGLES11StateTracker.h"
+#import "CC3OpenGLES11Engine.h"
 
 
 #pragma mark -
@@ -37,23 +38,47 @@
 
 @implementation CC3OpenGLES11StateTracker
 
-+(id) tracker {
-	return [[[self alloc] init] autorelease];
+@synthesize parent;
+
+-(void) dealloc {
+	parent = nil;			// not retained
+	[super dealloc];
+}
+
+-(CC3OpenGLES11StateTracker*) parent { return parent; }
+
+-(CC3OpenGLES11Engine*) engine { return parent.engine; }
+
+-(id) init {
+	return [self initWithParent: nil];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	if ( (self = [super init]) ) {
+		parent = aTracker;
+		isScheduledForClose = NO;
+	}
+	return self;
+}
+
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	return [[[self alloc] initWithParent: aTracker] autorelease];
 }
 
 -(void) open {}
 
--(void) close {}
-
--(void) openTrackers: (NSArray*) trackers {
-	for (CC3OpenGLES11StateTracker* t in trackers) {
-		[t open];
-	}
+-(void) close {
+	isScheduledForClose = NO;
 }
 
--(void) closeTrackers: (NSArray*) trackers {
-	for (CC3OpenGLES11StateTracker* t in trackers) {
-		[t close];
+-(void) notifyTrackerAdded {
+	[self.engine addTrackerToOpen: self];
+}
+
+-(void) notifyGLChanged {
+	if (!isScheduledForClose) {
+		isScheduledForClose = YES;
+		[self.engine addTrackerToClose: self];
 	}
 }
 
@@ -66,6 +91,12 @@
 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerPrimitive
+
+@interface CC3OpenGLES11StateTrackerPrimitive (TemplateMethods)
+-(void) logGetGLValue;
+-(void) logSetValue;
+-(void) logReuseValue;
+@end
 
 @implementation CC3OpenGLES11StateTrackerPrimitive
 
@@ -80,28 +111,53 @@
 	return kCC3GLESStateOriginalValueIgnore;
 }
 
--(id) init {
-	return [self initForState: 0];
+-(BOOL) shouldAlwaysReadOriginal {
+	return name && (originalValueHandling == kCC3GLESStateOriginalValueReadAlways ||
+					originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore);
 }
 
--(id) initForState: (GLenum) aName {
-	return [self initForState: aName andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+-(BOOL) shouldRestoreOriginalOnClose {
+	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
+			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore);
 }
 
-+(id) trackerForState: (GLenum) aName {
-	return [[[self alloc] initForState: aName] autorelease];
+-(BOOL) valueIsKnownOnClose {
+	return originalValueHandling != kCC3GLESStateOriginalValueIgnore;
 }
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super init]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	return [self initWithParent: aTracker forState: 0];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName {
+	return [self initWithParent: aTracker
+					   forState: aName
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+}
+
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName {
+	return [[[self alloc] initWithParent: aTracker forState: aName] autorelease];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker]) ) {
 		self.name = aName;
 		self.originalValueHandling = origValueHandling;
+		[self notifyTrackerAdded];
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [[[self alloc] initForState: aName andOriginalValueHandling: origValueHandling] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) open {
@@ -118,6 +174,7 @@
 				[self getGLValue];
 				[self logGetGLValue];
 				[self restoreOriginalValue];
+				valueIsKnown = YES;
 			} else {
 				valueIsKnown = NO;
 			}
@@ -130,21 +187,34 @@
 }
 
 -(void) close {
-	if (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
-		originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore) {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
 		[self restoreOriginalValue];
+		[self setGLValue];
 	}
+	valueIsKnown = self.valueIsKnownOnClose;
 }
 
 -(void) restoreOriginalValue {}
 
--(void) getGLValue {}
+-(void) setGLValueAndNotify {
+	[self setGLValue];
+	[self notifyGLChanged];
+	valueIsKnown = YES;
+	[self logSetValue];
+}
 
--(void) logGetGLValue {}
+-(void) getGLValue {}
 
 -(void) setGLValue {}
 
 -(void) logSetValue: (BOOL) wasSet {}
+
+-(void) logSetValue {}
+
+-(void) logReuseValue {}
+
+-(void) logGetGLValue {}
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ %@", [self class], NSStringFromGLEnum(self.name)];
@@ -160,53 +230,65 @@
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
 }
 
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
 }
 
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc {
-	return [[[self alloc] initForState: aName andGLSetFunction: setGLFunc] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc {
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: setGLFunc] autorelease];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
-  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
-	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	 return [[[self alloc] initForState: aName
-					   andGLSetFunction: setGLFunc
-			   andOriginalValueHandling: origValueHandling] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	 return [[[self alloc] initWithParent: aTracker
+								 forState: aName
+						 andGLSetFunction: setGLFunc
+				 andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (BOOL) aValue {
-	BOOL wasSet = [self attemptSetValue: aValue];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (BOOL) aValue {
 	if (!valueIsKnown || aValue != value) {
 		value = aValue;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (BOOL) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
@@ -215,15 +297,18 @@
 	}
 }
 
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
-}
-
 -(void) getGLValue {
 	GLboolean glValue;
 	glGetBooleanv(name, &glValue);
 	originalValue = (glValue != 0);
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
+}
+
+-(void) logReuseValue: (BOOL) wasSet {
+	LogTrace("%@ reused %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
 }
 
 -(void) logGetGLValue {
@@ -233,7 +318,7 @@
 }
 
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -261,15 +346,20 @@
 	self.value = NO;
 }
 
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
-}
-
 -(void) logGetGLValue {
 	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
 			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"));
+}
+
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
 }
 
 @end
@@ -282,66 +372,73 @@
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
 }
 
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
 }
 
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName andGLSetFunction: (void*)setGLFunc] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc] autorelease];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
-  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
-	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (GLfloat) aValue {
-	BOOL wasSet = [self attemptSetValue: aValue];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (GLfloat) aValue {
 	if (!valueIsKnown || aValue != value) {
 		value = aValue;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (GLfloat) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
 	if( setGLFunction ) {
 		setGLFunction(value);
 	}
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %.2f", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), value);
 }
 
 -(void) getGLValue {
@@ -354,8 +451,16 @@
 			 (valueIsKnown ? [NSString stringWithFormat: @"%.2f", value] : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -373,66 +478,73 @@
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
 }
 
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
 }
 
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName andGLSetFunction: (void*)setGLFunc] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc] autorelease];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
-  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
-	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (GLint) aValue {
-	BOOL wasSet = [self attemptSetValue: aValue];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (GLint) aValue {
 	if (!valueIsKnown || aValue != value) {
 		value = aValue;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (GLint) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
 	if( setGLFunction ) {
 		setGLFunction(value);
 	}
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %i", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), value);
 }
 
 -(void) getGLValue {
@@ -445,8 +557,16 @@
 			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %i", [self class], NSStringFromGLEnum(name), value);
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %i", [self class], NSStringFromGLEnum(name), value);
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -464,66 +584,73 @@
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
-}
-
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
-}
-
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc {
-	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName andGLSetFunction: (void*)setGLFunc] autorelease];
-}
-
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+}
+
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc {
+	// cast setGLFunc to void to remove bogus compiler warning
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc] autorelease];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (GLenum) aValue {
-	BOOL wasSet = [self attemptSetValue: aValue];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (GLenum) aValue {
 	if (!valueIsKnown || aValue != value) {
 		value = aValue;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (GLenum) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
 	if( setGLFunction ) {
 		setGLFunction(value);
 	}
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), NSStringFromGLEnum(value));
 }
 
 -(void) getGLValue {
@@ -536,8 +663,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -555,66 +690,73 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
-}
-
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
-}
-
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc {
-	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName andGLSetFunction: (void*)setGLFunc] autorelease];
-}
-
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+}
+
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc {
+	// cast setGLFunc to void to remove bogus compiler warning
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc] autorelease];
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (ccColor4F) aColor {
-	BOOL wasSet = [self attemptSetValue: aColor];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (ccColor4F) aColor {
 	if (!valueIsKnown || !CCC4FAreEqual(aColor, value)) {
 		value = aColor;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (ccColor4F) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
 	if( setGLFunction ) {
 		setGLFunction(value.r, value.g, value.b, value.a);
 	}
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), NSStringFromCCC4F(value));
 }
 
 -(void) getGLValue {
@@ -627,8 +769,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -642,82 +792,100 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerColorFixedAndFloat
 
+@interface CC3OpenGLES11StateTrackerColorFixedAndFloat (TemplateMethods)
+-(void) logSetFixedValue;
+-(void) logReuseFixedValue;
+@end
+
 @implementation CC3OpenGLES11StateTrackerColorFixedAndFloat
 
 @synthesize fixedValue, setGLFunctionFixed;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-		andGLSetFunctionFixed: NULL
-	 andOriginalValueHandling: origValueHandling];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+		  andGLSetFunctionFixed: NULL
+	   andOriginalValueHandling: origValueHandling];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-		andGLSetFunctionFixed: setGLFuncFixed
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+		  andGLSetFunctionFixed: setGLFuncFixed
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
-andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+  andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed {
 	// cast setGLFunc & setGLFuncFixed to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-				 andGLSetFunctionFixed: (void*)setGLFuncFixed] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				   andGLSetFunctionFixed: (void*)setGLFuncFixed] autorelease];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName
-					andGLSetFunction: setGLFunc
-			andOriginalValueHandling: origValueHandling]) ) {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+					  andGLSetFunction: setGLFunc
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunctionFixed = setGLFuncFixed;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
-andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+  andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-				 andGLSetFunctionFixed: setGLFuncFixed
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				   andGLSetFunctionFixed: setGLFuncFixed
+				andOriginalValueHandling: origValueHandling] autorelease];
+}
+
+-(void) setValue: (ccColor4F) aColor {
+	if (!valueIsKnown || !CCC4FAreEqual(aColor, value)) {
+		value = aColor;
+		[self setGLValueAndNotify];
+		fixedValueIsKnown = NO;
+	} else {
+		[self logReuseValue];
+	}	
 }
 
 -(void) setFixedValue: (ccColor4B) aColor {
-	BOOL wasSet = [self attemptSetFixedValue: aColor];
-	[self logSetFixedValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (ccColor4F) aColor {
-	BOOL wasSet = [super attemptSetValue: aColor];
-	if (wasSet) {
-		fixedValueIsKnown = NO;
-	}
-	return wasSet;
-}
-
--(BOOL) attemptSetFixedValue: (ccColor4B) aColor {
 	if (!fixedValueIsKnown || fixedValue.r != aColor.r || fixedValue.g != aColor.g
-						   || fixedValue.b != aColor.b || fixedValue.a != aColor.a) {
+		|| fixedValue.b != aColor.b || fixedValue.a != aColor.a) {
 		fixedValue = aColor;
+		[self setGLFixedValue];
+		[self notifyGLChanged];
 		fixedValueIsKnown = YES;
 		valueIsKnown = NO;
-		[self setGLFixedValue];
-		return YES;
+		[self logSetFixedValue];
 	} else {
-		return NO;
+		[self logReuseFixedValue];
 	}	
+}
+
+-(void) setFixedValueRaw: (ccColor4B) aValue {
+	fixedValue = aValue;
 }
 
 -(void) setGLFixedValue {
@@ -726,8 +894,13 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	}
 }
 
--(void) logSetFixedValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = (%u, %u, %u, %u)", [self class], (wasSet ? @"set" : @"reused"),
+-(void) logSetFixedValue {
+	LogTrace("%@ set %@ = (%u, %u, %u, %u)", [self class],
+			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
+}
+
+-(void) logReuseFixedValue {
+	LogTrace("%@ reuse %@ = (%u, %u, %u, %u)", [self class],
 			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
 }
 
@@ -741,66 +914,73 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 @synthesize value, originalValue, setGLFunction;
 
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	return [self initForState: aName
-			 andGLSetFunction: NULL
-	 andOriginalValueHandling: origValueHandling];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+	   andOriginalValueHandling: origValueHandling];
 }
 
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc {
-	return [self initForState: aName
-			 andGLSetFunction: setGLFunc
-	 andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
 }
 
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName andGLSetFunction: (void*)setGLFunc] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc] autorelease];
 }
 
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
-  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
-	if ( (self = [super initForState: aName andOriginalValueHandling: origValueHandling]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+			  andOriginalValueHandling: origValueHandling]) ) {
 		setGLFunction = setGLFunc;
 	}
 	return self;
 }
 
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
-	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	// cast setGLFunc to void to remove bogus compiler warning
-	return [[[self alloc] initForState: aName
-					  andGLSetFunction: (void*)setGLFunc
-			  andOriginalValueHandling: origValueHandling] autorelease];
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(void) setValue: (CC3Viewport) aViewport {
-	BOOL wasSet = [self attemptSetValue: aViewport];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (CC3Viewport) aViewport {
 	if (!valueIsKnown || !CC3ViewportsAreEqual(aViewport, value)) {
 		value = aViewport;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
+}
+
+-(void) setValueRaw: (CC3Viewport) aValue {
+	value = aValue;
 }
 
 -(void) setGLValue {
 	if( setGLFunction ) {
 		setGLFunction(value.x, value.y, value.w, value.h);
 	}
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
 }
 
 -(void) getGLValue {
@@ -813,8 +993,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? NSStringFromCC3Viewport(value) : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -833,24 +1021,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (GLvoid*) aValue {
-	BOOL wasSet = [self attemptSetValue: aValue];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (GLvoid*) aValue {
 	if (!valueIsKnown || aValue != value) {
 		value = aValue;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
 }
 
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %p", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), value);
+-(void) setValueRaw: (GLvoid*) aValue {
+	value = aValue;
 }
 
 -(void) getGLValue {
@@ -863,8 +1043,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? [NSString stringWithFormat: @"%p", value] : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %p", [self class], NSStringFromGLEnum(name), value);
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %p", [self class], NSStringFromGLEnum(name), value);
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -883,24 +1071,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (CC3Vector) aVector {
-	BOOL wasSet = [self attemptSetValue: aVector];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (CC3Vector) aVector {
 	if (!valueIsKnown || !CC3VectorsAreEqual(aVector, value)) {
 		value = aVector;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
 }
 
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
+-(void) setValueRaw: (CC3Vector) aValue {
+	value = aValue;
 }
 
 -(void) getGLValue {
@@ -913,8 +1093,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? NSStringFromCC3Vector(value) : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -933,24 +1121,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (CC3Vector4) aVector {
-	BOOL wasSet = [self attemptSetValue: aVector];
-	[self logSetValue: wasSet];
-}
-
--(BOOL) attemptSetValue: (CC3Vector4) aVector {
 	if (!valueIsKnown || !CC3Vector4sAreEqual(aVector, value)) {
 		value = aVector;
-		valueIsKnown = YES;
-		[self setGLValue];
-		return YES;
+		[self setGLValueAndNotify];
 	} else {
-		return NO;
+		[self logReuseValue];
 	}	
 }
 
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ = %@", [self class], (wasSet ? @"set" : @"reused"),
-			 NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
+-(void) setValueRaw: (CC3Vector4) aValue {
+	value = aValue;
 }
 
 -(void) getGLValue {
@@ -963,8 +1143,16 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			 (valueIsKnown ? NSStringFromCC3Vector4(value) : @"UNKNOWN"));
 }
 
+-(void) logSetValue {
+	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
+}
+
+-(void) logReuseValue {
+	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
+}
+
 -(void) restoreOriginalValue {
-	self.value = originalValue;
+	value = originalValue;
 }
 
 -(NSString*) description {
@@ -982,8 +1170,8 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 @synthesize originalValueHandling, shouldAlwaysSetGL;
 
--(id) init {
-	if ( (self = [super init]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	if ( (self = [super initWithParent: aTracker]) ) {
 		[self initializeTrackers];
 		self.shouldAlwaysSetGL = [[self class] defaultShouldAlwaysSetGL];
 		self.originalValueHandling = [[self class] defaultOriginalValueHandling];
@@ -1017,14 +1205,14 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) setValueIsKnown:(BOOL) aBoolean {}
 
--(void) close {
-	if (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
-		originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore) {
-		[self restoreOriginalValue];
-	}
+-(BOOL) valueIsKnownOnClose {
+	return originalValueHandling != kCC3GLESStateOriginalValueIgnore;
 }
 
--(void) restoreOriginalValue {}
+-(BOOL) shouldRestoreOriginalOnClose {
+	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
+			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore);
+}
 
 @end
 
@@ -1036,12 +1224,12 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) initializeTrackers {}
 
--(id) initMinimal {
-	return [super init];
+-(id) initMinimalWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	return [super initWithParent: aTracker];
 }
 
--(id) init {
-	if ( (self = [super init]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	if ( (self = [super initWithParent: aTracker]) ) {
 		[self initializeTrackers];
 	}
 	return self;

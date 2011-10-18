@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,22 @@
  */
 
 #import "CC3OpenGLES11State.h"
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPointParameterFloat
+
+@implementation CC3OpenGLES11StateTrackerPointParameterFloat
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
+-(void) setGLValue {
+	glPointParameterf(name, value);
+}
+
+@end
 
 
 #pragma mark -
@@ -64,6 +80,9 @@
 @synthesize lineWidth;
 @synthesize pointSize;
 @synthesize pointSizeAttenuation;
+@synthesize pointSizeFadeThreshold;
+@synthesize pointSizeMaximum;
+@synthesize pointSizeMinimum;
 @synthesize scissor;
 @synthesize shadeModel;
 @synthesize viewport;
@@ -80,6 +99,9 @@
 	[lineWidth release];
 	[pointSize release];
 	[pointSizeAttenuation release];
+	[pointSizeFadeThreshold release];
+	[pointSizeMaximum release];
+	[pointSizeMinimum release];
 	[scissor release];
 	[shadeModel release];
 	[viewport release];
@@ -88,96 +110,83 @@
 }
 
 -(void) initializeTrackers {
-	self.color = [CC3OpenGLES11StateTrackerColorFixedAndFloat trackerForState: GL_CURRENT_COLOR
-															 andGLSetFunction: glColor4f
-														andGLSetFunctionFixed: glColor4ub
-													 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	self.color = [CC3OpenGLES11StateTrackerColorFixedAndFloat trackerWithParent: self
+																	   forState: GL_CURRENT_COLOR
+															   andGLSetFunction: glColor4f
+														  andGLSetFunctionFixed: glColor4ub
+													   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 
-	self.clearColor = [CC3OpenGLES11StateTrackerColor trackerForState: GL_COLOR_CLEAR_VALUE
-													 andGLSetFunction: glClearColor
-											 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	self.clearColor = [CC3OpenGLES11StateTrackerColor trackerWithParent: self
+															   forState: GL_COLOR_CLEAR_VALUE
+													   andGLSetFunction: glClearColor
+											   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 
-	self.clearDepth = [CC3OpenGLES11StateTrackerFloat trackerForState: GL_DEPTH_CLEAR_VALUE
-													 andGLSetFunction: glClearDepthf
-											 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	self.clearDepth = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+															   forState: GL_DEPTH_CLEAR_VALUE
+													   andGLSetFunction: glClearDepthf
+											   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	
-	self.clearStencil = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_STENCIL_CLEAR_VALUE
-														 andGLSetFunction: glClearStencil
-												 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-	
-	self.cullFace = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_CULL_FACE_MODE
-														 andGLSetFunction: glCullFace
-												 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-	
-	self.depthFunction = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_DEPTH_FUNC
-															  andGLSetFunction: glDepthFunc
-													  andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-	
-	self.depthMask = [CC3OpenGLES11StateTrackerBoolean trackerForState: GL_DEPTH_WRITEMASK
-													  andGLSetFunction: glDepthMask
-											  andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-	
-	self.frontFace = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_FRONT_FACE
-														  andGLSetFunction: glFrontFace
-												  andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-	
-	self.lineWidth = [CC3OpenGLES11StateTrackerFloat trackerForState: GL_LINE_WIDTH
-													 andGLSetFunction: glLineWidth
-											 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
-	
-	self.pointSize = [CC3OpenGLES11StateTrackerFloat trackerForState: GL_POINT_SIZE
-													andGLSetFunction: glPointSize
-											andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
-	
-	self.pointSizeAttenuation = [CC3OpenGLES11StateTrackerPointParameterVector trackerForState: GL_POINT_DISTANCE_ATTENUATION];
-
-	self.scissor = [CC3OpenGLES11StateTrackerViewport trackerForState: GL_SCISSOR_BOX
-													 andGLSetFunction: glScissor
-											 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
-	
-	self.shadeModel = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_SHADE_MODEL
-														   andGLSetFunction: glShadeModel
+	self.clearStencil = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																   forState: GL_STENCIL_CLEAR_VALUE
+														   andGLSetFunction: glClearStencil
 												   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	
-	self.viewport = [CC3OpenGLES11StateTrackerViewport trackerForState: GL_VIEWPORT
-													  andGLSetFunction: glViewport
-											  andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-}
+	self.cullFace = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																   forState: GL_CULL_FACE_MODE
+														   andGLSetFunction: glCullFace
+												   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.depthFunction = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																		forState: GL_DEPTH_FUNC
+																andGLSetFunction: glDepthFunc
+														andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.depthMask = [CC3OpenGLES11StateTrackerBoolean trackerWithParent: self
+																forState: GL_DEPTH_WRITEMASK
+														andGLSetFunction: glDepthMask
+												andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.frontFace = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	forState: GL_FRONT_FACE
+															andGLSetFunction: glFrontFace
+													andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.lineWidth = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+															  forState: GL_LINE_WIDTH
+													  andGLSetFunction: glLineWidth
+											  andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
+	self.pointSize = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+															  forState: GL_POINT_SIZE
+													  andGLSetFunction: glPointSize
+											  andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
+	self.pointSizeAttenuation = [CC3OpenGLES11StateTrackerPointParameterVector trackerWithParent: self
+																						forState: GL_POINT_DISTANCE_ATTENUATION];
+	
+	self.pointSizeFadeThreshold = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
+																						 forState: GL_POINT_FADE_THRESHOLD_SIZE];
+	
+	self.pointSizeMaximum = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
+																				   forState: GL_POINT_SIZE_MAX];
+	
+	self.pointSizeMinimum = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
+																				   forState: GL_POINT_SIZE_MIN];
 
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[color open];
-	[clearColor open];
-	[clearDepth open];
-	[clearStencil open];
-	[cullFace open];
-	[depthFunction open];
-	[depthMask open];
-	[frontFace open];
-	[lineWidth open];
-	[pointSize open];
-	[pointSizeAttenuation open];
-	[scissor open];
-	[shadeModel open];
-	[viewport open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[color close];
-	[clearColor close];
-	[clearDepth close];
-	[clearStencil close];
-	[cullFace close];
-	[depthFunction close];
-	[depthMask close];
-	[frontFace close];
-	[lineWidth close];
-	[pointSize close];
-	[pointSizeAttenuation close];
-	[scissor close];
-	[shadeModel close];
-	[viewport close];
+	self.scissor = [CC3OpenGLES11StateTrackerViewport trackerWithParent: self
+															   forState: GL_SCISSOR_BOX
+													   andGLSetFunction: glScissor
+											   andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
+	self.shadeModel = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	 forState: GL_SHADE_MODEL
+															 andGLSetFunction: glShadeModel
+													 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.viewport = [CC3OpenGLES11StateTrackerViewport trackerWithParent: self
+																forState: GL_VIEWPORT
+														andGLSetFunction: glViewport
+												andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 }
 
 -(NSString*) description {
@@ -194,6 +203,9 @@
 	[desc appendFormat: @"\n    %@ ", lineWidth];
 	[desc appendFormat: @"\n    %@ ", pointSize];
 	[desc appendFormat: @"\n    %@ ", pointSizeAttenuation];
+	[desc appendFormat: @"\n    %@ ", pointSizeFadeThreshold];
+	[desc appendFormat: @"\n    %@ ", pointSizeMaximum];
+	[desc appendFormat: @"\n    %@ ", pointSizeMinimum];
 	[desc appendFormat: @"\n    %@ ", scissor];
 	[desc appendFormat: @"\n    %@ ", shadeModel];
 	[desc appendFormat: @"\n    %@ ", viewport];

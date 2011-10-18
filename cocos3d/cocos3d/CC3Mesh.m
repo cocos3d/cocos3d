@@ -1,7 +1,7 @@
 /*
  * CC3Mesh.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -157,6 +157,12 @@ static GLuint lastAssignedMeshTag;
 
 #pragma mark Accessing vertex data
 
+-(void) movePivotTo: (CC3Vector) aLocation {}
+
+-(void) movePivotToCenterOfGeometry {}
+
+-(GLsizei) vertexCount { return 0; }
+
 -(CC3Vector) vertexLocationAt: (GLsizei) index { return kCC3VectorZero; }
 
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index {}
@@ -190,6 +196,20 @@ static GLuint lastAssignedMeshTag;
 -(GLushort) vertexIndexAt: (GLsizei) index { return 0; }
 
 -(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index {}
+
+-(void) updateVertexLocationsGLBuffer {}
+
+-(void) updateVertexNormalsGLBuffer {}
+
+-(void) updateVertexColorsGLBuffer {}
+
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {}
+
+-(void) updateVertexTextureCoordinatesGLBuffer {
+	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
+}
+
+-(void) updateVertexIndicesGLBuffer {}
 
 
 #pragma mark Mesh context switching

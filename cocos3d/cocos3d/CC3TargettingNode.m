@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,7 +33,6 @@
 
 @interface CC3Node (TemplateMethods)
 -(void) applyRotation;
--(void) updateTransformMatrices;
 -(void) updateGlobalLocation;
 -(void) populateFrom: (CC3Node*) another;
 @property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
@@ -84,9 +83,25 @@
 	}
 }
 
+-(void) rotateBy: (CC3Vector) aRotation {
+	if (!shouldTrackTarget) {
+		[super rotateBy: aRotation];
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
+}
+
 -(void) setQuaternion: (CC3Vector4) aQuaternion {
 	if (!shouldTrackTarget) {
 		[super setQuaternion: aQuaternion];
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
+}
+
+-(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
+	if (!shouldTrackTarget) {
+		[super rotateByQuaternion: aQuaternion];
 		isTargetLocationDirty = YES;
 		isRotatorDirtyByTargetLocation = NO;
 	}
@@ -107,6 +122,14 @@
 -(void) setRotationAngle: (GLfloat) anAngle {
 	if (!shouldTrackTarget) {
 		[super setRotationAngle: anAngle];
+		isTargetLocationDirty = YES;
+		isRotatorDirtyByTargetLocation = NO;
+	}
+}
+
+-(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
+	if (!shouldTrackTarget) {
+		[super rotateByAngle: anAngle aroundAxis: anAxis];
 		isTargetLocationDirty = YES;
 		isRotatorDirtyByTargetLocation = NO;
 	}
@@ -272,11 +295,10 @@
 
 #pragma mark Updating
 
--(void) trackTarget {
+-(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	if (self.shouldRotateToTarget) {
 		self.targetLocation = target.globalLocation;
-		// Recalculate the transforms of this node and all descendants.
-		[self updateTransformMatrices];
+		[visitor visit: self];		// Recalculate transforms
 		LogTrace(@"%@ tracking adjusted to target", [self fullDescription]);
 	}
 	[self resetTargetTrackingState];
@@ -453,8 +475,22 @@
 	isRightDirectionDirty = YES;
 }
 
+-(void) rotateBy: (CC3Vector) aRotation {
+	[super rotateBy: aRotation];
+	isForwardDirectionDirty = YES;
+	isUpDirectionDirty = YES;
+	isRightDirectionDirty = YES;
+}
+
 -(void) setQuaternion:(CC3Vector4) aQuaternion {
 	[super setQuaternion: aQuaternion];
+	isForwardDirectionDirty = YES;
+	isUpDirectionDirty = YES;
+	isRightDirectionDirty = YES;
+}
+
+-(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
+	[super rotateByQuaternion: aQuaternion];
 	isForwardDirectionDirty = YES;
 	isUpDirectionDirty = YES;
 	isRightDirectionDirty = YES;
@@ -562,7 +598,7 @@
 
 @implementation CC3LightTracker
 
--(void) trackTarget {
+-(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	if (target && (isNewTarget || shouldTrackTarget)) {
 		self.globalLightLocation = target.globalLocation;
 		LogTrace(@"%@ tracking adjusted to target", [self fullDescription]);

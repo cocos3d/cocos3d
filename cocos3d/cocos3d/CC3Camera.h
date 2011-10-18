@@ -1,7 +1,7 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -42,6 +42,12 @@ static const GLfloat kCC3DefaultNearClippingPlane = 1.0;
 /** Default distance from the camera to the far clipping plane. */
 static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
 
+/**
+ * Default padding around a node when framed by the camera using one of the
+ * moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of methods.
+ */
+static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
+
 
 #pragma mark -
 #pragma mark CC3Camera interface
@@ -54,6 +60,15 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * For example, a camera can be mounted on a boom object or truck, and will move along with
  * the parent node. Or the camera node itself might have a light node attached as a child,
  * so that the light will move along with the camera, and point where the camera points.
+ *
+ * However, when adding a camera to an assembly of nodes, be aware of whether the parent
+ * nodes use scaling. To construct the modelviewMatrix, the camera makes heavy use of
+ * matrix inversion of the cummulative transform matrix of the camera's transforms and
+ * the transforms of all its ancestors. If scaling has not been added to any ancestor
+ * nodes, the cummulative transform will be a Rigid transform. Inverting a Rigid transform
+ * matrix is much, much faster (orders of magnitude) than inverting a matrix that contains
+ * scaling and is therefore not rigid. If possible, try to avoid applying scaling to the
+ * ancestor nodes of this camera.
  *
  * CC3Camera is also a type of CC3TargettingNode, and can be pointed in a particular
  * direction, or can be made to track a target node as that node moves, or the camera moves.
@@ -70,6 +85,10 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * 2D screen position into either a ray (a line) in the 3D world, or into a specific 
  * intersection location on a 3D plane.
  *
+ * You can use the  moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of
+ * methods to have the camera automatically focus on, and display all of, a particular
+ * node, or even the whole world itself.
+ *
  * Scaling a camera is a null operation because it scales everything, including the size
  * of objects, but also the distance from the camera to those objects. The effects cancel
  * out, and visually it appears that nothing has changed.
@@ -84,7 +103,6 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * See the notes of the fieldOfView property for more on this.
  */
 @interface CC3Camera : CC3TargettingNode {
-	CC3World* world;
 	CC3GLMatrix* modelviewMatrix;
 	CC3Frustum* frustum;
 	GLfloat fieldOfView;
@@ -92,15 +110,6 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
 	GLfloat farClippingPlane;
 	BOOL isProjectionDirty;
 }
-
-/**
- * The CC3World in which the camera exists.
- *
- * This property is automatically set when this camera is added to the CC3World,
- * even if it is part of a larger assembly of nodes. Usually, the application
- * never needs to set this property.
- */
-@property(nonatomic, assign) CC3World* world;
 
 /**
  * The nominal field of view of this camera, in degrees. The initial value of this
@@ -214,19 +223,32 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * The entire node can then be shown by positioning the camera at the returned location
  * and setting the forwardDirection of the camera to the negated specified direction.
  *
+ * The padding argument indicates the empty-space padding to add around the bounding box
+ * of the node when it is framed in the camera. This value is expressed as a fraction of
+ * the size of the bounding box of the node. For example, if the padding value is set to
+ * 0.1, then this method will locate the camera so that there will be 10% empty space
+ * around the node when it is framed by the camera. A negative padding value will cause
+ * the node to expand to more fully fill the camera frame, or even expand beyond it.
+ *
  * By setting CC3World as the specified node, you can use this method to determine
  * where to position the camera in order to show the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
  */
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
-							fromDirection: (CC3Vector) aDirection;
+							fromDirection: (CC3Vector) aDirection
+							  withPadding: (GLfloat) padding;
+
 
 /**
  * Moves this camera to a location along a line between the center of the specified
  * node and this camera, so that the camera will show the entire content of the node,
- * including any descendant nodes. The camera will point back towards the node along
- * the line between itself and the center of the node.
+ * including any descendant nodes, with minimal padding. The camera will point back
+ * towards the node along the line between itself and the center of the node.
  *
  * The specified node may be the CC3World, in which case, the camera will be located
  * to display the entire scene.
@@ -238,14 +260,25 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * In addition, in some cases, if the bounds of the node are fluid because of movement,
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode;
 
 /**
- * Moves this camera to a location along a line extending in the specified direction
- * from the center of the specified node, so that the camera will show the entire
- * content of the node, including any descendant nodes. The camera will point back
- * towards the center of the node along the specified direction.
+ * Moves this camera to a location along a line between the center of the specified
+ * node and this camera, so that the camera will show the entire content of the node,
+ * including any descendant nodes. The camera will point back towards the node along
+ * the line between itself and the center of the node.
+ *
+ * The padding argument indicates the empty-space padding to add around the bounding box
+ * of the node when it is framed in the camera. This value is expressed as a fraction of
+ * the size of the bounding box of the node. For example, if the padding value is set to
+ * 0.1, then this method will locate the camera so that there will be 10% empty space
+ * around the node when it is framed by the camera. A negative padding value will cause
+ * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
  * The specified node may be the CC3World, in which case, the camera will be located
  * to display the entire scene.
@@ -257,8 +290,94 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * In addition, in some cases, if the bounds of the node are fluid because of movement,
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
+ */
+-(void) moveToShowAllOf: (CC3Node*) aNode withPadding: (GLfloat) padding;
+
+/**
+ * Moves this camera to a location along a line extending in the specified direction
+ * from the center of the specified node, so that the camera will show the entire
+ * content of the node, including any descendant nodes, with minimal padding. The
+ * camera will point back towards the center of the node along the specified direction.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection;
+
+/**
+ * Moves this camera to a location along a line extending in the specified direction
+ * from the center of the specified node, so that the camera will show the entire
+ * content of the node, including any descendant nodes. The camera will point back
+ * towards the center of the node along the specified direction.
+ *
+ * The padding argument indicates the empty-space padding to add around the bounding box
+ * of the node when it is framed in the camera. This value is expressed as a fraction of
+ * the size of the bounding box of the node. For example, if the padding value is set to
+ * 0.1, then this method will locate the camera so that there will be 10% empty space
+ * around the node when it is framed by the camera. A negative padding value will cause
+ * the node to expand to more fully fill the camera frame, or even expand beyond it.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
+ */
+-(void) moveToShowAllOf: (CC3Node*) aNode
+		  fromDirection: (CC3Vector) aDirection
+			withPadding: (GLfloat) padding;
+
+/**
+ * Moves this camera to a location along a line between the center of the specified
+ * node and this camera, so that the camera will show the entire content of the node,
+ * including any descendant nodes, with minimal padding. The camera will point back
+ * towards the node along the line between itself and the center of the node.
+ *
+ * The camera's movement will take the specified amount of time, starting at its
+ * current location and orientation, and ending at the calculated location and
+ * oriented to point back towards the center of the node.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
+ */
+-(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode;
 
 /**
  * Moves this camera to a location along a line between the center of the specified
@@ -270,6 +389,13 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * current location and orientation, and ending at the calculated location and
  * oriented to point back towards the center of the node.
  *
+ * The padding argument indicates the empty-space padding to add around the bounding box
+ * of the node when it is framed in the camera. This value is expressed as a fraction of
+ * the size of the bounding box of the node. For example, if the padding value is set to
+ * 0.1, then this method will locate the camera so that there will be 10% empty space
+ * around the node when it is framed by the camera. A negative padding value will cause
+ * the node to expand to more fully fill the camera frame, or even expand beyond it.
+ *
  * The specified node may be the CC3World, in which case, the camera will be located
  * to display the entire scene.
  *
@@ -280,9 +406,14 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * In addition, in some cases, if the bounds of the node are fluid because of movement,
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
  */
--(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode;
-
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+			 withPadding: (GLfloat) padding;
 
 /**
  * Moves this camera to a location along a line extending in the specified direction
@@ -304,10 +435,51 @@ static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
  * In addition, in some cases, if the bounds of the node are fluid because of movement,
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
  */
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection;
+
+/**
+ * Moves this camera to a location along a line extending in the specified direction
+ * from the center of the specified node, so that the camera will show the entire
+ * content of the node, including any descendant nodes, with minimal padding. The
+ * camera will point back towards the center of the node along the specified direction.
+ *
+ * The camera's movement will take the specified amount of time, starting at its
+ * current location and orientation, and ending at the calculated location and
+ * oriented to point back towards the center of the node.
+ *
+ * The padding argument indicates the empty-space padding to add around the bounding box
+ * of the node when it is framed in the camera. This value is expressed as a fraction of
+ * the size of the bounding box of the node. For example, if the padding value is set to
+ * 0.1, then this method will locate the camera so that there will be 10% empty space
+ * around the node when it is framed by the camera. A negative padding value will cause
+ * the node to expand to more fully fill the camera frame, or even expand beyond it.
+ *
+ * The specified node may be the CC3World, in which case, the camera will be located
+ * to display the entire scene.
+ *
+ * This method can be useful during development to troubleshoot scene display issues.
+ *
+ * Since the camera points to the center of the node, when displayed, the node may
+ * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
+ * In addition, in some cases, if the bounds of the node are fluid because of movement,
+ * or billboards that rotate as the camera moves into position, one or more corners of
+ * the node may extend slightly out of the camera's view.
+ *
+ * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * contentSize. This is necessary so that the frustum of the camera has been set from
+ * the contentSize of the CC3Layer.
+ */
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection
+			 withPadding: (GLfloat) padding;
 
 	
 #pragma mark 3D <-> 2D mapping functionality

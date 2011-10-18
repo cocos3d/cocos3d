@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,8 +43,9 @@
 	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
--(id) init {
-	if ( (self = [self initForState: GL_ARRAY_BUFFER]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	if ( (self = [self initWithParent: aTracker
+							 forState: GL_ARRAY_BUFFER]) ) {
 		self.queryName = GL_ARRAY_BUFFER_BINDING;
 	}
 	return self;
@@ -86,8 +87,8 @@
 
 @implementation CC3OpenGLES11StateTrackerElementArrayBufferBinding
 
--(id) init {
-	if ( (self = [self initForState: GL_ELEMENT_ARRAY_BUFFER]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
+	if ( (self = [self initWithParent: aTracker forState: GL_ELEMENT_ARRAY_BUFFER]) ) {
 		self.queryName = GL_ELEMENT_ARRAY_BUFFER_BINDING;
 	}
 	return self;
@@ -98,6 +99,18 @@
 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerVertexPointer
+
+@interface CC3OpenGLES11StateTrackerInteger (VertexPointer)
+-(void) setValueRaw:(GLint) value;
+@end
+
+@interface CC3OpenGLES11StateTrackerEnumeration (VertexPointer)
+-(void) setValueRaw:(GLenum) value;
+@end
+
+@interface CC3OpenGLES11StateTrackerPointer (VertexPointer)
+-(void) setValueRaw:(GLvoid*) value;
+@end
 
 @implementation CC3OpenGLES11StateTrackerVertexPointer
 
@@ -139,32 +152,24 @@
 	elementPointer.valueIsKnown = aBoolean;
 }
 
--(void) open {
-	[elementSize open];
-	[elementType open];
-	[elementStride open];
-	[elementPointer open];
-}
-
--(void) restoreOriginalValue {
-	[self useElementsAt: elementPointer.originalValue
-			   withSize: elementSize.originalValue
-			   withType: elementType.originalValue
-			 withStride: elementStride.originalValue];
-}
-
 // Set the values in the GL engine if either we should always do it, or if something has changed
 -(void) useElementsAt: (GLvoid*) pData
 			 withSize: (GLint) elemSize
 			 withType: (GLenum) elemType
 		   withStride: (GLsizei) elemStride {
 	BOOL shouldSetGL = self.shouldAlwaysSetGL;
-	shouldSetGL |= [elementPointer attemptSetValue: pData];
-	shouldSetGL |= [elementSize attemptSetValue: elemSize];
-	shouldSetGL |= [elementType attemptSetValue: elemType];
-	shouldSetGL |= [elementStride attemptSetValue: elemStride];
+	shouldSetGL |= (!elementPointer.valueIsKnown || pData != elementPointer.value);
+	shouldSetGL |= (!elementSize.valueIsKnown || elemSize != elementSize.value);
+	shouldSetGL |= (!elementType.valueIsKnown || elemType != elementType.value);
+	shouldSetGL |= (!elementStride.valueIsKnown || elemStride != elementStride.value);
 	if (shouldSetGL) {
+		[elementPointer setValueRaw: pData];
+		[elementSize setValueRaw: elemSize];
+		[elementType setValueRaw: elemType];
+		[elementStride setValueRaw: elemStride];
 		[self setGLValues];
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
 	}
 	[self logSetGLValues: shouldSetGL];
 }
@@ -192,6 +197,27 @@
 	}
 }
 
+/** Invoked when dynamically instantiated (specifically with texture units. */
+-(void) open {
+	[super open];
+	[elementSize open];
+	[elementType open];
+	[elementStride open];
+	[elementPointer open];
+}
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[elementPointer restoreOriginalValue];
+		[elementSize restoreOriginalValue];
+		[elementType restoreOriginalValue];
+		[elementStride restoreOriginalValue];
+		[self setGLValues];
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
 	[desc appendFormat: @"%@:", [self class]];
@@ -211,10 +237,13 @@
 @implementation CC3OpenGLES11StateTrackerVertexLocationsPointer
 
 -(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_VERTEX_ARRAY_SIZE];
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_VERTEX_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_VERTEX_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																  forState: GL_VERTEX_ARRAY_SIZE];
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_VERTEX_ARRAY_TYPE];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_VERTEX_ARRAY_STRIDE];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
@@ -230,10 +259,12 @@
 @implementation CC3OpenGLES11StateTrackerVertexNormalsPointer
 
 -(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger tracker];		// no-op tracker
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_NORMAL_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_NORMAL_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self];		// no-op tracker
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_NORMAL_ARRAY_TYPE];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_NORMAL_ARRAY_STRIDE];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
@@ -249,10 +280,13 @@
 @implementation CC3OpenGLES11StateTrackerVertexColorsPointer
 
 -(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_COLOR_ARRAY_SIZE];
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_COLOR_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_COLOR_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																  forState: GL_COLOR_ARRAY_SIZE];
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_COLOR_ARRAY_TYPE];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_COLOR_ARRAY_STRIDE];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
@@ -268,10 +302,12 @@
 @implementation CC3OpenGLES11StateTrackerVertexPointSizesPointer
 
 -(void) initializeTrackers {
-	self.elementSize = [CC3OpenGLES11StateTrackerInteger tracker];		// no-op tracker
-	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_POINT_SIZE_ARRAY_TYPE_OES];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerForState: GL_POINT_SIZE_ARRAY_STRIDE_OES];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer tracker];
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self];		// no-op tracker
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_POINT_SIZE_ARRAY_TYPE_OES];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_POINT_SIZE_ARRAY_STRIDE_OES];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
@@ -304,12 +340,12 @@
 }
 
 -(void) initializeTrackers {
-	self.arrayBuffer = [CC3OpenGLES11StateTrackerArrayBufferBinding tracker];
-	self.indexBuffer = [CC3OpenGLES11StateTrackerElementArrayBufferBinding tracker];
-	self.locations = [CC3OpenGLES11StateTrackerVertexLocationsPointer tracker];
-	self.normals = [CC3OpenGLES11StateTrackerVertexNormalsPointer tracker];
-	self.colors = [CC3OpenGLES11StateTrackerVertexColorsPointer tracker];
-	self.pointSizes = [CC3OpenGLES11StateTrackerVertexPointSizesPointer tracker];
+	self.arrayBuffer = [CC3OpenGLES11StateTrackerArrayBufferBinding trackerWithParent: self];
+	self.indexBuffer = [CC3OpenGLES11StateTrackerElementArrayBufferBinding trackerWithParent: self];
+	self.locations = [CC3OpenGLES11StateTrackerVertexLocationsPointer trackerWithParent: self];
+	self.normals = [CC3OpenGLES11StateTrackerVertexNormalsPointer trackerWithParent: self];
+	self.colors = [CC3OpenGLES11StateTrackerVertexColorsPointer trackerWithParent: self];
+	self.pointSizes = [CC3OpenGLES11StateTrackerVertexPointSizesPointer trackerWithParent: self];
 }
 
 -(CC3OpenGLES11StateTrackerArrayBufferBinding*) bufferBinding: (GLenum) bufferTarget {
@@ -322,26 +358,6 @@
 			NSAssert1(NO, @"Illegal buffer target %u", bufferTarget);
 			return nil;
 	}
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[arrayBuffer open];
-	[indexBuffer open];
-	[locations open];
-	[normals open];
-	[colors open];
-	[pointSizes open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[arrayBuffer close];
-	[indexBuffer close];
-	[locations close];
-	[normals close];
-	[colors close];
-	[pointSizes close];
 }
 
 -(GLuint) generateBuffer {

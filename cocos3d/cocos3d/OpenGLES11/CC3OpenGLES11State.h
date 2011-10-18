@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,23 @@
 
 
 #import "CC3OpenGLES11StateTracker.h"
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPointParameterFloat
+
+/**
+ * CC3OpenGLES11StateTrackerPointParameterFloat tracks a float GL point parameter state value.
+ *
+ * This implementation uses GL function glGetFloatv to read the value from the
+ * GL engine, and GL function glPointParameterf to set the value in the GL engine.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ */
+@interface CC3OpenGLES11StateTrackerPointParameterFloat : CC3OpenGLES11StateTrackerFloat {}
+@end
 
 
 #pragma mark -
@@ -74,6 +91,9 @@
 	CC3OpenGLES11StateTrackerFloat* lineWidth;
 	CC3OpenGLES11StateTrackerFloat* pointSize;
 	CC3OpenGLES11StateTrackerPointParameterVector* pointSizeAttenuation;
+	CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeFadeThreshold;
+	CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeMaximum;
+	CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeMinimum;
 	CC3OpenGLES11StateTrackerViewport* scissor;
 	CC3OpenGLES11StateTrackerEnumeration* shadeModel;
 	CC3OpenGLES11StateTrackerViewport* viewport;
@@ -106,11 +126,20 @@
 /** Tracks line width (GL get name GL_LINE_WIDTH and set function glLineWidth). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerFloat* lineWidth;
 
-/** Tracks line width (GL get name GL_POINT_SIZE and set function glPointSize). */
+/** Tracks point size (GL get name GL_POINT_SIZE and set function glPointSize). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerFloat* pointSize;
 
-/** Tracks line width (GL get name GL_POINT_DISTANCE_ATTENUATION and set function glPointParameterfv). */
+/** Tracks point distance attenuation (GL get name GL_POINT_DISTANCE_ATTENUATION and set function glPointParameterfv). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerPointParameterVector* pointSizeAttenuation;
+
+/** Tracks point fading threshold (GL get name GL_POINT_FADE_THRESHOLD_SIZE and set function glPointParameterf). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeFadeThreshold;
+
+/** Tracks maximum points size (GL get name GL_POINT_SIZE_MAX and set function glPointParameterf). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeMaximum;
+
+/** Tracks minimum points size (GL get name GL_POINT_SIZE_MIN and set function glPointParameterf). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointParameterFloat* pointSizeMinimum;
 
 /** Tracks viewport (GL get name GL_SCISSOR_BOX and set function glScissor). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerViewport* scissor;

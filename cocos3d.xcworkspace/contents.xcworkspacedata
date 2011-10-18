@@ -8,6 +8,9 @@
       location = "group:Demos/CC3Performance/CC3Performance.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:Demos/CC3Demo3DTiles/CC3Demo3DTiles.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:README">
    </FileRef>
    <FileRef

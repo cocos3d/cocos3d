@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -59,6 +59,20 @@
 -(void) loadProjectionMatrix;
 -(void) loadModelViewMatrix;
 -(void) ensureAtRootAncestor;
+-(void) ensureWorldUpdated: (BOOL) checkWorld;
+-(void) moveToShowAllOf: (CC3Node*) aNode
+		  fromDirection: (CC3Vector) aDirection
+			withPadding: (GLfloat) padding
+			 checkWorld: (BOOL) checkWorld;
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection
+			 withPadding: (GLfloat) padding
+			  checkWorld: (BOOL) checkWorld;
+-(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
+							fromDirection: (CC3Vector) aDirection
+							  withPadding: (GLfloat) padding
+							   checkWorld: (BOOL) checkWorld;
 @property(nonatomic, readonly) CGSize fovRatios;
 @property(nonatomic, readonly) BOOL isProjectionDirty;
 @end
@@ -67,10 +81,9 @@
 @implementation CC3Camera
 
 @synthesize fieldOfView, nearClippingPlane, farClippingPlane;
-@synthesize world, frustum, modelviewMatrix;
+@synthesize frustum, modelviewMatrix;
 
 -(void) dealloc {
-	world = nil;						// not retained
 	[modelviewMatrix release];
 	[frustum release];
 	[super dealloc];
@@ -114,7 +127,7 @@
 
 // The CC3World's viewport manager.
 -(CC3ViewportManager*) viewportManager {
-	return world.viewportManager;
+	return self.world.viewportManager;
 }
 
 /** Since scale is not used by cameras, only consider ancestors. */
@@ -308,26 +321,79 @@
 #pragma mark Viewing nodes
 
 -(void) moveToShowAllOf: (CC3Node*) aNode {
+	[self moveToShowAllOf: aNode withPadding: kCC3DefaultFrustumFitPadding];
+}
+
+-(void) moveToShowAllOf: (CC3Node*) aNode withPadding: (GLfloat) padding {
+	[self ensureWorldUpdated: YES];
 	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
-	[self moveToShowAllOf: aNode fromDirection: moveDir];
+	[self moveToShowAllOf: aNode fromDirection: moveDir withPadding: padding checkWorld: NO];
 }
 
 -(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection {
-	self.location = [self calculateLocationToShowAllOf: aNode fromDirection: aDirection];
+	[self moveToShowAllOf: aNode fromDirection: aDirection withPadding: kCC3DefaultFrustumFitPadding];
+}
+
+-(void) moveToShowAllOf: (CC3Node*) aNode
+		  fromDirection: (CC3Vector) aDirection
+			withPadding: (GLfloat) padding {
+	[self moveToShowAllOf: aNode fromDirection: aDirection withPadding: padding checkWorld: YES];
+}
+
+-(void) moveToShowAllOf: (CC3Node*) aNode
+		  fromDirection: (CC3Vector) aDirection
+			withPadding: (GLfloat) padding
+			 checkWorld: (BOOL) checkWorld {
+	self.location = [self calculateLocationToShowAllOf: aNode
+										 fromDirection: aDirection
+										   withPadding: padding
+											checkWorld: checkWorld];
 	self.forwardDirection = CC3VectorNegate(aDirection);
 	[self ensureAtRootAncestor];
 	[self updateTransformMatrices];
 }
 
 -(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode {
+	[self moveWithDuration: t toShowAllOf: aNode withPadding: kCC3DefaultFrustumFitPadding];
+}
+
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+			 withPadding: (GLfloat) padding {
+	[self ensureWorldUpdated: YES];
 	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
-	[self moveWithDuration: t toShowAllOf: aNode fromDirection: moveDir];
+	[self moveWithDuration: t toShowAllOf: aNode fromDirection: moveDir withPadding: padding checkWorld: NO];
 }
 
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection {
-	CC3Vector newLoc = [self calculateLocationToShowAllOf: aNode fromDirection: aDirection];
+	[self moveWithDuration: t
+			   toShowAllOf: aNode
+			 fromDirection: aDirection
+			   withPadding: kCC3DefaultFrustumFitPadding];
+}
+
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection
+			 withPadding: (GLfloat) padding {
+	[self moveWithDuration: t
+			   toShowAllOf: aNode
+			 fromDirection: aDirection
+			   withPadding: padding
+				checkWorld: YES ];
+}
+
+-(void) moveWithDuration: (ccTime) t
+			 toShowAllOf: (CC3Node*) aNode
+		   fromDirection: (CC3Vector) aDirection
+			 withPadding: (GLfloat) padding
+			  checkWorld: (BOOL) checkWorld {
+	CC3Vector newLoc = [self calculateLocationToShowAllOf: aNode
+											fromDirection: aDirection
+											  withPadding: padding
+											   checkWorld: checkWorld];
 	CC3Vector newFwdDir = CC3VectorNegate(aDirection);
 	[self ensureAtRootAncestor];
 	[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
@@ -335,20 +401,27 @@
 }
 
 /**
- * Empty-space padding to add around the bounding box of a node when showing
- * all of that node. Expressed as a percent.
- */
-#define kCC3FrustumFitPadding 0.02
-
-/**
- * Padding to add to the far clipping plane when it is adjusted
- * as a result of showing all of a node.
+ * Padding to add to the far clipping plane when it is adjusted as a result of showing
+ * all of a node, to ensure that all of the node is within the far end of the frustum.
  */
 #define kCC3FrustumFitFarPadding 0.01
 
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
-							fromDirection: (CC3Vector) aDirection {
+							fromDirection: (CC3Vector) aDirection
+							  withPadding: (GLfloat) padding {
+	return [self calculateLocationToShowAllOf: aNode
+								fromDirection: aDirection
+								  withPadding: padding
+								   checkWorld: YES];
+}
 
+-(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
+							fromDirection: (CC3Vector) aDirection
+							  withPadding: (GLfloat) padding
+							   checkWorld: (BOOL) checkWorld {
+
+	[self ensureWorldUpdated: checkWorld];
+	
 	// Complementary unit vectors pointing towards camera from node, and vice versa
 	CC3Vector camDir = CC3VectorNormalize(aDirection);
 	CC3Vector viewDir = CC3VectorNegate(camDir);
@@ -375,7 +448,7 @@
 	bbVertices[5] = cc3v(bbMax.x, bbMin.y, bbMax.z);
 	bbVertices[6] = cc3v(bbMax.x, bbMax.y, bbMin.z);
 	bbVertices[7] = cc3v(bbMax.x, bbMax.y, bbMax.z);
-
+	
 	// Express the camera's FOV in terms of ratios of the near clip bounds to
 	// the near clip distance, so we can determine distances using similar triangles.
 	CGSize fovRatios = self.fovRatios;
@@ -392,41 +465,54 @@
 		
 		// Get a vector from the center of the bounding box to the vertex 
 		CC3Vector relVtx = CC3VectorDifference(bbVertices[i], bbCtr);
-
+		
 		// Project that vector onto each of the camera's new up and right directions,
 		// and use similar triangles to determine the distance at which to place the
 		// camera so that the vertex will fit in both the up and right directions.
 		GLfloat vtxDistUp = ABS(CC3VectorDot(relVtx, upDir) / fovRatios.height);
 		GLfloat vtxDistRt = ABS(CC3VectorDot(relVtx, rtDir) / fovRatios.width);
 		GLfloat vtxDist = MAX(vtxDistUp, vtxDistRt);
-
+		
 		// Calculate how far along the view direction the vertex is from the center
 		GLfloat vtxDeltaDist = CC3VectorDot(relVtx, viewDir);
 		GLfloat ctrDist = vtxDist - vtxDeltaDist;
-
+		
 		// Accumulate the maximum distance from the node's center to the camera
 		// required to fit all eight points, and the distance from the node's
 		// center to the vertex that will be farthest away from the camera. 
 		maxCtrDist = MAX(maxCtrDist, ctrDist);
 		maxVtxDeltaDist = MAX(maxVtxDeltaDist, vtxDeltaDist);
 	}
-
+	
 	// Add some padding so we will have a bit of space around the node when it fills the view.
-	maxCtrDist *= (1 + kCC3FrustumFitPadding);
-
+	maxCtrDist *= (1 + padding);
+	
 	// Determine if we need to move the far end of the camera frustum farther away
 	GLfloat farClip = CC3VectorLength(CC3VectorScaleUniform(viewDir, maxCtrDist + maxVtxDeltaDist));
 	farClip *= (1 + kCC3FrustumFitFarPadding);		// Include a little bit of padding
 	if (farClip > self.farClippingPlane) {
 		self.farClippingPlane = farClip;
 	}
-
+	
 	LogTrace(@"%@ moving to %@ to show %@ at %@ within %@ with new farClip: %.3f", self,
 			 NSStringFromCC3Vector(CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist))),
 			 aNode, NSStringFromCC3Vector(bbCtr), frustum, self.farClippingPlane);
-
+	
 	// Return the new location of the camera,
 	return CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist));
+}
+
+/**
+ * If the checkWorld arg is YES, and the world is not running, force an update
+ * to ensure that all nodes are transformed to their global coordinates.
+ */
+-(void) ensureWorldUpdated: (BOOL) checkWorld {
+	if (checkWorld) {
+		CC3World* myWorld = self.world;
+		if ( !myWorld.isRunning ) {
+			[myWorld updateWorld];
+		}
+	}
 }
 
 /**
@@ -439,7 +525,7 @@
 		case kCCDeviceOrientationLandscapeRight:
 			return CGSizeMake(frustum.top / frustum.near, frustum.right / frustum.near);
 		case kCCDeviceOrientationPortrait:
-		case kCCDeviceOrientationPortraitUpsideDown:
+			case kCCDeviceOrientationPortraitUpsideDown:
 		default:
 			return CGSizeMake(frustum.right / frustum.near, frustum.top / frustum.near);
 	}
@@ -478,7 +564,7 @@
 
 	// The projected vector is in a projection coordinate space between -1 and +1 on all axes.
 	// Normalize the vector so that each component is between 0 and 1 by calculating ( v = (v + 1) / 2 ).
-	projectedLoc = CC3VectorScaleUniform(CC3VectorAdd(projectedLoc, kCC3VectorUnitCube), 0.5f);
+	projectedLoc = CC3VectorAverage(projectedLoc, kCC3VectorUnitCube);
 	
 	// Map the X & Y components of the projected location (now between 0 and 1) to viewport coordinates.
 	CC3Viewport vp = self.viewportManager.viewport;

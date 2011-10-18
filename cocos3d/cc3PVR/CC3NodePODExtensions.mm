@@ -1,7 +1,7 @@
 /*
  * CC3NodePODExtensions.mm
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -94,7 +94,7 @@ extern "C" {
 	return [aPODRez nodePODStructAtIndex: aPODIndex];
 }
 
--(void) linkToPODNodes: (NSArray*) nodeArray {
+-(void) linkToPODNodes: (CCArray*) nodeArray {
 	LogTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
 	if (!self.isBasePODNode) {
 		CC3Node* parentNode = [nodeArray objectAtIndex: self.podParentIndex];
@@ -116,7 +116,7 @@ extern "C" {
 // Subclasses must override to use instance variable.
 -(void) setPodTargetIndex: (int) aPODIndex {}
 
--(void) linkToPODNodes: (NSArray*) nodeArray {
+-(void) linkToPODNodes: (CCArray*) nodeArray {
 	[super linkToPODNodes: nodeArray];
 	if (self.podTargetIndex >= 0) {
 		self.target = [nodeArray objectAtIndex: self.podTargetIndex];

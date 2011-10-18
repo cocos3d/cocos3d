@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,10 +49,12 @@
 
 /* Base library of definitions and functions for operating in a 3D world. */
 
-#import "ccTypes.h"
+#import "CCArray.h"
 #import "CC3Math.h"
 #import "CC3Logging.h"
+#import "CCNode.h"
 #import "CCDirector.h"
+#import <AvailabilityMacros.h>
 
 
 #pragma mark -
@@ -119,12 +121,21 @@ CC3Vector CC3VectorMinimize(CC3Vector v1, CC3Vector v2);
  * maximum value for that component between the two vectors.
  */
 CC3Vector CC3VectorMaximize(CC3Vector v1, CC3Vector v2);
-	
+
 /**
  * Returns the scalar length of the specified CC3Vector from the origin.
  * This is calculated as sqrt(x*x + y*y + z*z) and will always be positive.
  */
 GLfloat CC3VectorLength(CC3Vector v);
+
+/**
+ * Returns the square of the scalar length of the specified CC3Vector from the origin.
+ * This is calculated as (x*x + y*y + z*z) and will always be positive.
+ *
+ * This function is useful for comparing vector sizes without having to run an
+ * expensive square-root calculation.
+ */
+GLfloat CC3VectorLengthSquared(CC3Vector v);
 
 /**
  * Returns a normalized copy of the specified CC3Vector so that its length is 1.0.
@@ -155,6 +166,15 @@ CC3Vector CC3VectorInvert(CC3Vector v);
 CC3Vector CC3VectorAdd(CC3Vector v, CC3Vector translation);
 
 /**
+ * Returns a vector that represents the average of the two specified vectors. This is
+ * calculated by adding the two specified vectors and scaling the resulting sum vector by half.
+ *
+ * The returned vector represents the midpoint between a line that joins the endpoints
+ * of the two specified vectors.
+ */
+CC3Vector CC3VectorAverage(CC3Vector v1, CC3Vector v2);
+
+/**
  * Returns the difference between two vectors, by subtracting the subtrahend from the minuend,
  * which is accomplished by subtracting each of the corresponding x,y,z components.
  */
@@ -181,6 +201,14 @@ CC3Vector CC3VectorRotationalDifference(CC3Vector minuend, CC3Vector subtrahend)
 
 /** Returns the positive scalar distance between the ends of the two specified vectors. */
 GLfloat CC3VectorDistance(CC3Vector start, CC3Vector end);
+
+/**
+ * Returns the square of the scalar distance between the ends of the two specified vectors.
+ *
+ * This function is useful for comparing vector distances without having to run an
+ * expensive square-root calculation.
+ */
+GLfloat CC3VectorDistanceSquared(CC3Vector start, CC3Vector end);
 
 /**
  * Returns the result of scaling the original vector by the corresponding scale vector.
@@ -297,6 +325,34 @@ CC3BoundingBox CC3BoundingBoxEngulfLocation(CC3BoundingBox bb, CC3Vector aLoc);
  * (which may also be the null bounding box).
  */
 CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3BoundingBox bb2);
+
+/**
+ * Returns a bounding box that has the same dimensions as the specified bounding
+ * box, but with each corner expanded outward by the specified amount of padding.
+ *
+ * The padding value is added to all three components of the maximum vector,
+ * and subtracted from all three components of the minimum vector.
+ */
+CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, GLfloat padding);
+
+
+#pragma mark -
+#pragma mark Sphere structure and functions
+
+/** Defines a sphere. */
+typedef struct {
+	CC3Vector center;			/**< The center of the sphere. */
+	GLfloat radius;				/**< The radius of the sphere */
+} CC3Sphere;
+
+/** Returns a string description of the specified sphere. */
+NSString* NSStringFromCC3Spere(CC3Sphere sphere);
+
+/** Returns a CC3Spere constructed from the specified center and radius. */
+CC3Sphere CC3SphereMake(CC3Vector center, GLfloat radius);
+
+/** Returns the smallest CC3Sphere that contains the two specified spheres. */
+CC3Sphere CC3SphereUnion(CC3Sphere s1, CC3Sphere s2);
 
 
 #pragma mark -
@@ -419,6 +475,20 @@ CC3Vector4 CC3Vector4Translate(CC3Vector4 v, CC3Vector4 translation);
 GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2);
 
 /**
+ * Converts the specified vector that represents an rotation in axis-angle form
+ * to the corresponding quaternion. The X, Y & Z components of the incoming vector
+ * contain the rotation axis, and the W component specifies the angle, in degrees.
+ */
+CC3Vector4 CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle);
+
+/**
+ * Converts the specified quaternion to a vector that represents a rotation in
+ * axis-angle form. The X, Y & Z components of the returned vector contain the
+ * rotation axis, and the W component specifies the angle, in degrees.
+ */
+CC3Vector4 CC3AxisAngleFromQuaternion(CC3Vector4 quaternion);
+
+/**
  * Returns a spherical linear interpolation between two vectors, based on the blendFactor.
  * which should be between zero and one inclusive. The returned value is calculated
  * as v1 + (blendFactor * (v2 - v1)). If the blendFactor is either zero or one
@@ -494,8 +564,8 @@ typedef struct {
 	GLfloat c;				/**< The c coefficient in the attenuation function. */
 } CC3AttenuationCoefficients;
 
-/** Default point size attenuation coefficients */
-static const CC3AttenuationCoefficients kCC3DefaultParticleSizeAttenuationCoefficients = {1.0, 0.0, 0.0};
+/** Point size attenuation coefficients corresponding to no attenuation with distance (constant size). */
+static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone = {1.0, 0.0, 0.0};
 
 /**
  * Returns a string description of the specified CC3AttenuationCoefficients struct
@@ -578,6 +648,9 @@ static const ccColor4F kCCC4FBlackTransparent = {0.0, 0.0, 0.0, 0.0};
 /** Returns a string description of the specified ccColor4F in the form "(r, g, b, a)" */
 NSString* NSStringFromCCC4F(ccColor4F rgba);
 
+/** Convenience alias macro to create ccColor4F with less keystrokes. */
+#define ccc4f(R,G,B,A) CCC4FMake((R),(G),(B),(A))
+
 /** Returns a ccColor4F structure constructed from the specified components */
 ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 
@@ -587,8 +660,8 @@ ccColor4F CCC4FFromCCC4B(ccColor4B byteColor);
 /** Returns a ccColor4B structure constructed from the specified ccColor4F */
 ccColor4B CCC4BFromCCC4F(ccColor4F floatColor);
 
-/** Returns a ccColor4F structure constructed from the specified ccColor3B */
-ccColor4F CCC4FFromCCC3B(ccColor3B byteColor);
+/** Returns a ccColor4F structure constructed from the specified ccColor3B and opacity. */
+ccColor4F CCC4FFromColorAndOpacity(ccColor3B byteColor, GLubyte opacity);
 
 /** Returns a ccColor3B structure constructed from the specified ccColor4F */
 ccColor3B CCC3BFromCCC4F(ccColor4F floatColor);
@@ -611,11 +684,18 @@ ccColor4F CCC4FAdd(ccColor4F rgba, ccColor4F translation);
 ccColor4F CCC4FDifference(ccColor4F minuend, ccColor4F subtrahend);
 
 /**
- * Returns an ccColor4F structure whose values are those of the specified original color,
+ * Returns a ccColor4F structure whose values are those of the specified original color,
  * where each color component has been translated by the specified offset.
  * Each of the resulting color components is clamped to be between 0.0 and 1.0.
  */
 ccColor4F CCC4FUniformTranslate(ccColor4F rgba, GLfloat offset);
+
+/**
+ * Returns a ccColor4F structure whose values are those of the specified original color,
+ * multiplied by the specified scaling factor.
+ * Each of the resulting color components is clamped to be between 0.0 and 1.0.
+ */
+ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale);
 
 /**
  * Returns an ccColor4F structure whose values are a weighted average of the specified base color
@@ -641,6 +721,9 @@ GLubyte CCColorByteFromFloat(GLfloat colorValue);
 #pragma mark -
 #pragma mark Miscellaneous extensions and functionality
 
+/** Returns the name of the specified touch type. */
+NSString* NSStringFromTouchType(uint tType);
+
 /** Returns the string YES or NO, depending on the specified boolean value. */
 NSString* NSStringFromBoolean(BOOL value);
 
@@ -665,10 +748,32 @@ NSString* NSStringFromBoolean(BOOL value);
 /** Returns an autoreleased UIColor instance created from the RGBA values in the specified ccColor4F. */
 +(UIColor*) colorWithCCColor4F: (ccColor4F) rgba;
 
-/** Sets the OpenGL current painting color to this color. */
--(void) setGLColor;
+@end
+
+
+#pragma mark -
+#pragma mark CCNode extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCNode (CC3)
+
+/** Returns the bounding box of this CCNode, measured in pixels, in the global coordinate system. */
+- (CGRect) globalBoundingBoxInPixels;
+
+/**
+ * Updates the viewport of any contained CC3World instances with the dimensions
+ * of its CC3Layer and the device orientation.
+ *
+ * This CCNode implementation simply passes the notification along to its children.
+ * Descendants that are CC3Layers will update their CC3World instances.
+ */
+-(void) updateViewport;
 
 @end
+
+
+#pragma mark -
+#pragma mark CCDirector extension
 
 /** Extension category to support cocos3d functionality. */
 @interface CCDirector (CC3)
@@ -681,3 +786,88 @@ NSString* NSStringFromBoolean(BOOL value);
 
 @end
 
+
+#pragma mark -
+#pragma mark CCArray extension
+
+/**
+ * Extension category to support cocos3d functionality.
+ *
+ * This extension includes a number of methods that add or remove objects to and from
+ * the array without retaining and releasing them. These methods are identified by the
+ * word Unretained in their names, and are faster than their standard equivalent methods
+ * that do retain and release objects.
+ *
+ * It is critical that use of these methods is consistent for any object added. If an
+ * object is added using an "Unretained" method, then it must be removed using an
+ * "Unretained" method.
+ */
+@interface CCArray (CC3)
+
+/** Returns the index of the specified object, by comparing objects using the == operator. */
+-(NSUInteger) indexOfObjectIdenticalTo: (id) anObject;
+
+/** Removes the specified object, by comparing objects using the == operator. */
+-(void) removeObjectIdenticalTo: (id) anObject;
+
+/** Replaces the object at the specified index with the specified object. */
+-(void) replaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject;
+
+
+#pragma mark Support for unretained objects
+
+/**
+ * Adds the specified object to the end of the array, but does not retain the object.
+ *
+ * When removing the object, it must not be released. Use one the
+ * removeUnretainedObject... methods to remove the object.
+ */
+- (void) addUnretainedObject: (id) anObject;
+
+/**
+ * Inserts the specified object at the specified index within the array,
+ * but does not retain the object. The elements in the array after the
+ * specified index position are shuffled up to make room for the new object.
+ *
+ * When removing the object, it must not be released. Use one the
+ * removeUnretainedObject... methods to remove the object.
+ */
+- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index;
+
+/**
+ * Removes the specified object from the array, without releasing it,
+ * by comparing objects using the == operator.
+ *
+ * The objects after this object in the array are shuffled down to fill in the gap.
+ *
+ * The object being removed must not have been retained when added to the array.
+ */
+- (void) removeUnretainedObjectIdenticalTo: (id) anObject;
+
+/**
+ * Removes the object at the specified index, without releasing it.
+ *
+ * The objects after this object in the array are shuffled down to fill in the gap.
+ *
+ * The object being removed must not have been retained when added to the array.
+ */
+- (void) removeUnretainedObjectAtIndex: (NSUInteger) index;
+
+/**
+ * Removes all objects in the array, without releasing them.
+ *
+ * All objects being removed must not have been retained when added to the array.
+ */
+- (void) removeAllObjectsAsUnretained;
+
+/**
+ * Releases the array without releasing each contained object.
+ *
+ * All contained objects must not have been retained when added to the array.
+ */
+-(void) releaseAsUnretained;
+
+/** Returns a more detailed description of this instance. */
+-(NSString*) fullDescription;
+
+@end

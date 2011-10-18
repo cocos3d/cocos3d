@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -325,11 +325,13 @@ typedef enum {
 
 /**
  * If the shouldTrackTarget property is set to YES, orients this node to point towards
- * its target, otherwise does nothing. This method is invoked automatically if either
- * the target node or this node moves. Usually, the application should never need to
- * invoke this method directly.
+ * its target, otherwise does nothing. The transform visitor is used to transform
+ * this node and all its children if this node re-orients.
+ *
+ * This method is invoked automatically if either the target node or this node moves.
+ * Usually, the application should never need to invoke this method directly.
  */
--(void) trackTarget;
+-(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor;
 	
 @end
 

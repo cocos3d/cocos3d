@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Materials.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -67,7 +67,6 @@
 @interface CC3OpenGLES11StateTrackerMaterialFloat : CC3OpenGLES11StateTrackerFloat {}
 @end
 
-
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerMaterialBlend
 
@@ -104,6 +103,42 @@
 
 @end
 
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerAlphaFunction
+
+/**
+ * CC3OpenGLES11StateTrackerAlphaFunction is a type of CC3OpenGLES11StateTrackerComposite
+ * that tracks the alpha test function and reference GL state values for materials.
+ *
+ * The function and reference values are read from GL individually, using distinct 
+ * primitive trackers for each of the function and reference values. Both values are set
+ * into the GL engine together using a single call to the GL set function glAlphaFunc.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ */
+@interface CC3OpenGLES11StateTrackerAlphaFunction : CC3OpenGLES11StateTrackerComposite {
+	CC3OpenGLES11StateTrackerEnumeration* function;
+	CC3OpenGLES11StateTrackerFloat* reference;
+}
+
+/** Tracks the alpha test function (GL get name GL_ALPHA_TEST_FUNC) */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerEnumeration* function;
+
+/** Tracks the alpha test reference value (GL get name GL_ALPHA_TEST_REF) */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerFloat* reference;
+
+/**
+ * Sets the alpha test function and reference values together. The values will be
+ * set in the GL engine only if at least one of the values has actually changed.
+ *
+ * Uses the GL set function glAlphaFunc to set the values in the GL engine.
+ */
+-(void) applyFunction: (GLenum) func andReference: (GLfloat) refValue;
+
+@end
+
 
 #pragma mark -
 #pragma mark CC3OpenGLES11Materials
@@ -115,7 +150,8 @@
 	CC3OpenGLES11StateTrackerMaterialColor* specularColor;
 	CC3OpenGLES11StateTrackerMaterialColor* emissionColor;
 	CC3OpenGLES11StateTrackerMaterialFloat* shininess;
-	CC3OpenGLES11StateTrackerMaterialBlend* blend;
+	CC3OpenGLES11StateTrackerAlphaFunction* alphaFunc;
+	CC3OpenGLES11StateTrackerMaterialBlend* blendFunc;
 }
 
 /** Tracks ambient color (GL name GL_AMBIENT). */
@@ -133,7 +169,10 @@
 /** Tracks shininess (GL name GL_SHININESS). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerMaterialFloat* shininess;
 
+/** Tracks alpha test function and reference value together. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerAlphaFunction* alphaFunc;
+
 /** Tracks both the source and destination blend functions together. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerMaterialBlend* blend;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerMaterialBlend* blendFunc;
 
 @end

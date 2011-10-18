@@ -1,7 +1,7 @@
 /*
  * CC3Material.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,8 +37,9 @@
 @end
 
 @interface CC3Material (TemplateMethods)
--(void) applyColors;
+-(void) applyAlphaTest;
 -(void) applyBlend;
+-(void) applyColors;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) checkIsOpaque;
 -(BOOL) switchingMaterial;
@@ -47,7 +48,7 @@
 @implementation CC3Material
 
 @synthesize ambientColor, diffuseColor, specularColor, emissionColor, shininess;
-@synthesize texture, shouldUseLighting, isOpaque;
+@synthesize texture, shouldUseLighting, isOpaque, alphaTestFunction, alphaTestReference;
 
 -(void) dealloc {
 	[texture release];
@@ -112,6 +113,21 @@
 		blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
 	}
 	[self checkIsOpaque];
+}
+
+-(BOOL) shouldDrawLowAlpha {
+	switch (alphaTestFunction) {
+		case GL_ALWAYS:
+		case GL_LESS:
+		case GL_LEQUAL:
+			return YES;
+		default:
+			return NO;
+	}
+}
+
+-(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
+	alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
 }
 
 
@@ -256,7 +272,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 			self.texture = aTexture;
 		} else {
 			if(!textureOverlays) {
-				textureOverlays = [[NSMutableArray array] retain];
+				textureOverlays = [[CCArray array] retain];
 			}
 			GLint maxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
 			if (self.textureCount < maxTexUnits) {
@@ -291,7 +307,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 	// Remove the overlay textures
 	if (textureOverlays) {
-		NSArray* myOTs = [textureOverlays copyAutoreleased];
+		CCArray* myOTs = [textureOverlays copyAutoreleased];
 		for (CC3Texture* ot in myOTs) {
 			[self removeTexture: ot];
 		}
@@ -352,6 +368,8 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		emissionColor = kCC3DefaultMaterialColorEmission;
 		shininess = kCC3DefaultMaterialShininess;
 		blendFunc = [[self class] defaultBlendFunc];
+		alphaTestFunction = GL_ALWAYS;
+		alphaTestReference = 0.0f;
 		shouldUseLighting = YES;
 		[self checkIsOpaque];
 	}
@@ -392,7 +410,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 // Protected properties for copying
--(NSArray*) textureOverlays { return textureOverlays; }
+-(CCArray*) textureOverlays { return textureOverlays; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -405,6 +423,8 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	emissionColor = another.emissionColor;
 	shininess = another.shininess;
 	blendFunc = another.blendFunc;
+	alphaTestFunction = another.alphaTestFunction;
+	alphaTestReference = another.alphaTestReference;
 	shouldUseLighting = another.shouldUseLighting;
 	isOpaque = another.isOpaque;
 	
@@ -413,7 +433,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	
 	// Remove any existing overlays and add the overlays from the other material.
 	[textureOverlays removeAllObjects];
-	NSArray* otherOTs = another.textureOverlays;
+	CCArray* otherOTs = another.textureOverlays;
 	if (otherOTs) {
 		for (CC3Texture* ot in otherOTs) {
 			[self addTexture: [ot copyAutoreleased]];	// retained by collection
@@ -423,11 +443,12 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), with %u textures",
+	return [NSString stringWithFormat: @"%@, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
 			[super fullDescription], NSStringFromCCC4F(ambientColor),
 			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor),
 			NSStringFromCCC4F(emissionColor), shininess,
 			NSStringFromGLEnum(blendFunc.src), NSStringFromGLEnum(blendFunc.dst),
+			NSStringFromGLEnum(alphaTestFunction), alphaTestReference,
 			self.textureCount];
 }
 
@@ -451,6 +472,7 @@ static GLuint lastAssignedMaterialTag;
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ([self switchingMaterial]) {
+		[self applyAlphaTest];
 		[self applyBlend];
 		[self applyColors];
 		[self drawTexturesWithVisitor: visitor];
@@ -460,18 +482,41 @@ static GLuint lastAssignedMaterialTag;
 }
 
 /**
+ * Enables or disables alpha testing in the GL engine, depending on the whether or not
+ * the alphaTestFunction indicates that alpha testing should occur, and applies the
+ * alphaTestFunction and alphaTestReference properties.
+ */
+-(void) applyAlphaTest {
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	BOOL shouldAlphaTest = (alphaTestFunction != GL_ALWAYS);
+
+	gles11Engine.serverCapabilities.alphaTest.value = shouldAlphaTest;
+
+	if (shouldAlphaTest) {
+		[gles11Engine.materials.alphaFunc applyFunction: alphaTestFunction
+										   andReference: alphaTestReference];
+	}
+}
+
+/**
  * Enables or disables blending in the GL engine, depending on the whether or not this
  * instance is opaque or not, and applies the sourceBlend and destinationBlend properties.
  */
 -(void) applyBlend {
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	gles11Engine.serverCapabilities.blend.value = !self.isOpaque;
-	[gles11Engine.materials.blend applySource: blendFunc.src andDestination: blendFunc.dst];
+	BOOL shouldBlend = !self.isOpaque;
+
+	gles11Engine.serverCapabilities.blend.value = shouldBlend;
+
+	if (shouldBlend) {
+		[gles11Engine.materials.blendFunc applySource: blendFunc.src
+									   andDestination: blendFunc.dst];
+	}
 }
 
 /**
  * If the shouldUseLighting property is YES, applies the color and shininess properties to
- * the GL engine, otherwise turns lighting off and applies emission color as a flat color.
+ * the GL engine, otherwise turns lighting off and applies diffuse color as a flat color.
  */
 -(void) applyColors {
 	if (shouldUseLighting) {
@@ -484,7 +529,6 @@ static GLuint lastAssignedMaterialTag;
 	} else {
 		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 		[gles11Engine.serverCapabilities.lighting disable];
-//		gles11Engine.state.color.value = emissionColor;
 		gles11Engine.state.color.value = diffuseColor;
 	}
 }
@@ -513,7 +557,9 @@ static GLuint lastAssignedMaterialTag;
 }
 
 +(void) unbind {
-	[[CC3OpenGLES11Engine engine].serverCapabilities.blend disable];
+	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
+	[gles11ServCaps.blend disable];
+	[gles11ServCaps.alphaTest disable];
 	[self resetSwitching];
 	[CC3Texture unbind];
 }

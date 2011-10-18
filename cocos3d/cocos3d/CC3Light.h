@@ -1,7 +1,7 @@
 /*
  * CC3Light.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,7 +33,7 @@
 #import "CC3OpenGLES11Lighting.h"
 
 /** Cosntant indicating that the light is not directional. */
-static const GLfloat kCC3SpotCutoffNone = 180.0;
+static const GLfloat kCC3SpotCutoffNone = 180.0f;
 
 /** Default ambient light color. */
 static const ccColor4F kCC3DefaultLightColorAmbient = { 0.0, 0.0, 0.0, 1.0 };
@@ -53,23 +53,29 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 /**
  * CC3Light represents the light in the 3D world.
  *
- * CC3Light is a type of CC3Node, and can therefore participate in a structural node assembly.
- * An instance can be the child of another node, and the light itself can have child nodes.
- * For example, a light can be mounted on a boom object or camera, and will move along with
- * the parent node.
+ * CC3Light is a type of CC3Node, and can therefore participate in a structural node
+ * assembly. An instance can be the child of another node, and the light itself can
+ * have child nodes. For example, a light can be mounted on a boom object or camera,
+ * and will move along with the parent node.
  *
- * CC3Light is also a type of CC3TargettingNode, and can be pointed so that it shines in a
- * particular direction, or can be made to track a target node as that node moves.
+ * CC3Light is also a type of CC3TargettingNode, and can be pointed so that it shines
+ * in a particular direction, or can be made to track a target node as that node moves.
  *
  * To turn a CC3Light on or off, set the visible property.
  *
- * The maximum number of lights available is determined by the platform. That number can
- * be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value. All platforms
- * support at least eight lights.
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
  *
- * If the application uses lights in the 2D world as well, the indexes of those lights can
- * be reserved by invoking the class method setLightPoolStartIndex:. Light indexes reserved
- * for use by the 2D world will not be used by the 3D world.
+ * Lights in different scenes (different instances of CC3World) can have the same
+ * GL lightIndex value. Applications that make use of multiple CC3Worlds, either as
+ * a sequence of scenes, or as multiple worlds (and multiple CC3Layers) displayed
+ * on the screen at once, can reuse a light index across the worlds.
+ * The shouldCopyLightIndex property can be used to help copy lights across worlds.
+ *
+ * If the application uses lights in the 2D world as well, the indexes of those lights
+ * can be reserved by invoking the class method setLightPoolStartIndex:. Light indexes
+ * reserved for use by the 2D world will not be used by the 3D world.
  */
 @interface CC3Light : CC3TargettingNode {
 	CC3OpenGLES11Light* gles11Light;
@@ -78,10 +84,12 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
 	CC3AttenuationCoefficients attenuationCoefficients;
+	GLfloat spotExponent;
 	GLfloat spotCutoffAngle;
 	GLenum lightIndex;
 	BOOL isDirectionalOnly;
- }
+	BOOL shouldCopyLightIndex;
+}
 
 /**
  * The index of this light to identify it to the GL engine. This is automatically assigned
@@ -115,6 +123,12 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * directional-only light bounces off a flat surface at a single angle, whereas
  * the angle for a point-source light also depends on the location of the camera.
  *
+ * The value of this property also impacts performance. Because positional light
+ * involves significantly more calculations within the GL engine, setting this
+ * property to YES (the initial value) will improve lighting performance.
+ * You should only set this property to NO if you need to make use of the
+ * positional features described above.
+ *
  * The initial value is YES, indicating directional-only lighting.
  */
 @property(nonatomic, assign) BOOL isDirectionalOnly;
@@ -127,6 +141,21 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * an indication of the direction the light is coming from, and not an absolute location.
  */
 @property(nonatomic, readonly) CC3Vector4 homogeneousLocation;
+
+/**
+ * Indicates the intensity distribution of the light.
+ *
+ * Effective light intensity is attenuated by the cosine of the angle between the
+ * direction of the light and the direction from the light to the vertex being lighted,
+ * raised to the power of the value of this property. Thus, higher spot exponents result
+ * in a more focused light source, regardless of the value of the spotCutoffAngle property.
+ *
+ * The value of this property must be in the range [0, 128], and is clamped to that
+ * range if an attempt is made to set the value outside this range.
+ *
+ * The initial value of this property is zero, indicating a uniform light distribution.
+ */
+@property(nonatomic, assign) GLfloat spotExponent;
 
 /**
  * Indicates the angle, in degrees, of dispersion of the light from the direction of the light.
@@ -147,6 +176,230 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * The initial value of this property is kCC3DefaultLightAttenuationCoefficients.
  */
 @property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients;
+
+/**
+ * When a copy is made of this node, indicates whether this node should copy the value
+ * of the lightIndex property to the new node when performing a copy of this node.
+ *
+ * The initial value of this property is NO.
+ *
+ * When this property is set to NO, and this light node is copied, the new copy will
+ * be assigned its own lightIndex, to identify it to the GL engine. This allows both
+ * lights to illuminate the same scene (instance of CC3World), and is the most common
+ * mechanism for assigning the lightIndex property.
+ *
+ * OpenGL ES limits the number of lights available to illuminate a single scene.
+ * Once that limit is reached, additional lights cannot be created, and attempting
+ * to copy this node will fail, returning a nil node.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ *
+ * When this property is set to YES, and this light node is copied, the new copy will
+ * be assigned the same lightIndex as this node. This means that the copy may not be
+ * used in the same scene as the original light, but it may be used in another scene
+ * (another CC3World instance).
+ *
+ * Applications that make use of multiple CC3Worlds, either as a sequence of scenes,
+ * or as multiple worlds (and multiple CC3Layers) displayed on the screen at once,
+ * can set this property to YES when making copies of a light to be placed in
+ * different CC3World instances.
+ */
+@property(nonatomic, assign) BOOL shouldCopyLightIndex;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this unnamed instance with an automatically generated unique tag value.
+ * The tag value will be generated automatically via the method nextTag.
+ *
+ * The lightIndex property will be set to the next available GL light index.
+ * This method will return nil if all GL light indexes have been consumed.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) init;
+
+/**
+ * Initializes this unnamed instance with the specified tag.
+ *
+ * The lightIndex property will be set to the next available GL light index.
+ * This method will return nil if all GL light indexes have been consumed.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithTag: (GLuint) aTag;
+
+/**
+ * Initializes this instance with the specified name and an automatically generated unique
+ * tag value. The tag value will be generated automatically via the method nextTag.
+ *
+ * The lightIndex property will be set to the next available GL light index.
+ * This method will return nil if all GL light indexes have been consumed.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithName: (NSString*) aName;
+
+/**
+ * Initializes this instance with the specified tag and name.
+ *
+ * The lightIndex property will be set to the next available GL light index.
+ * This method will return nil if all GL light indexes have been consumed.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName;
+
+/**
+ * Initializes this unnamed instance with the specified GL light index, and an
+ * automatically generated unique tag value. The tag value will be generated
+ * automatically via the method nextTag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithLightIndex: (GLenum) ltIndx;
+
+/**
+ * Initializes this unnamed instance with the specified GL light index, and the
+ * specified tag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithTag: (GLuint) aTag withLightIndex: (GLenum) ltIndx;
+
+/**
+ * Initializes this instance with the specified GL light index, the specified name,
+ * and an automatically generated unique tag value. The tag value will be generated
+ * automatically via the method nextTag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithName: (NSString*) aName withLightIndex: (GLenum) ltIndx;
+
+/**
+ * Initializes this instance with the specified GL light index, the specified name,
+ * and the specified tag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLenum) ltIndx;
+
+/**
+ * Allocates and initializes an autoreleased unnamed instance with the specified
+ * GL light index, and an automatically generated unique tag value. The tag value
+ * will be generated automatically via the method nextTag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
++(id) lightWithLightIndex: (GLenum) ltIndx;
+
+/**
+ * Allocates and initializes an autoreleased unnamed instance with the specified
+ * GL light index, and the specified tag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
++(id) lightWithTag: (GLuint) aTag withLightIndex: (GLenum) ltIndx;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified GL light
+ * index, the specified name, and an automatically generated unique tag value.
+ * The tag value will be generated automatically via the method nextTag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
++(id) lightWithName: (NSString*) aName withLightIndex: (GLenum) ltIndx;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified GL light
+ * index, the specified name, and the specified tag.
+ *
+ * If multiple lights are used to illumniate a scene (a CC3World instance),
+ * each light must have its own GL light index. Do not assign the same light
+ * index to more than one light in a scene.
+ *
+ * This method will return nil if the specified light index is not less than the
+ * maximum number of lights available.
+ *
+ * The maximum number of lights available is determined by the platform. That number
+ * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * All platforms support at least eight lights.
+ */
++(id) lightWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLenum) ltIndx;
 
 
 #pragma mark Drawing
@@ -199,5 +452,5 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * drawing cycle. Usually, the application never needs to invoke this method directly.
  */
 +(void) disableReservedLights;
-	
+
 @end

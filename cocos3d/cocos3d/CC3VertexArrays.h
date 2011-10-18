@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -413,7 +413,8 @@
  * properties to locate the aspect of interest in this instance.
  *
  * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * vertex data has been released, or the index is beyond the elementCount,
+ * this method will raise an assertion exception.
  */
 -(GLvoid*) addressOfElement: (GLsizei) index;
 
@@ -423,11 +424,19 @@
 /**
  * Resets the tracking of the vertex array switching functionality.
  *
- * This is invoked automatically by the similar method in CC3VertexArrayMesh at the
+ * This is invoked automatically by the resetAllSwitching method at the beginning of each
+ * frame drawing cycle. Usually, the application never needs to invoke this method directly.
+ */
++(void) resetSwitching;
+
+/**
+ * Resets the tracking of the vertex array switching functionality for all vertex array subclasses.
+ *
+ * This is invoked automatically by the resetSwitching method in CC3VertexArrayMesh at the
  * beginning of each frame drawing cycle. Usually, the application never needs to invoke
  * this method directly.
  */
-+(void) resetSwitching;
++(void) resetAllSwitching;
 
 @end
 
@@ -532,7 +541,9 @@
 	GLuint firstElement;
 	CC3BoundingBox boundingBox;
 	CC3Vector centerOfGeometry;
-	BOOL boundingBoxNeedsBuilding;
+	GLfloat radius;
+	BOOL boundaryIsDirty;
+	BOOL radiusIsDirty;
 }
 
 /**
@@ -550,13 +561,22 @@
 @property(nonatomic, assign) GLuint firstElement;
 
 /** Indicates that the bounding box should be rebuilt on next access. */
-@property(nonatomic, assign) BOOL boundingBoxNeedsBuilding;
+//@property(nonatomic, assign) BOOL boundaryIsDirty;
 
 /** Returns the axially-aligned bounding box of this mesh. */
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;
 
 /** Returns the center of geometry of this mesh. */
 @property(nonatomic, readonly) CC3Vector centerOfGeometry;
+
+/**
+ * Returns the radius of a spherical boundary, centered on the centerOfGeometry,
+ * that encompasses all the vertices of this mesh.
+ */
+@property(nonatomic, readonly) GLfloat radius;
+
+/** Marks the boundary, including bounding box and radius, as dirty, and need of recalculation. */
+-(void) markBoundaryDirty;
 
 /**
  * Returns the location element at the specified index in the underlying vertex data.
@@ -575,6 +595,11 @@
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
+ * 
+ * If the new vertex location changes the bounding box of this instance, and this
+ * instance is being used by any mesh nodes, be sure to invoke the rebuildBoundingVolume
+ * method on all mesh nodes that use this vertex array, to ensure that the boundingVolume
+ * encompasses the new vertex location.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -599,9 +624,11 @@
  * properties (location, rotation and scale) of the CC3Node that contains this mesh,
  * and let the GL engine do the heavy lifting of transforming the mesh vertices.
  * 
- * If this instance is being used by any mesh nodes, be sure to set the volumeNeedsBuilding
- * property to YES, in the boundingVolume of all mesh node's that use this vertex array,
- * to ensure that the boundingVolume is recalculated using the new location values.
+ * If this instance is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all mesh nodes that use this vertex array,
+ * to ensure that the boundingVolume encompasses the new vertex locations.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
  */
 -(void) movePivotTo: (CC3Vector) aLocation;
 
@@ -622,9 +649,11 @@
  * properties (location, rotation and scale) of the CC3Node that contains this mesh,
  * and let the GL engine do the heavy lifting of transforming the mesh vertices.
  * 
- * If this instance is being used by any mesh nodes, be sure to set the volumeNeedsBuilding
- * property to YES, in the boundingVolume of all mesh node's that use this vertex array,
- * to ensure that the boundingVolume is recalculated using the new location values.
+ * If this instance is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all mesh nodes that use this vertex array,
+ * to ensure that the boundingVolume encompasses the new vertex locations.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
  */
 -(void) movePivotToCenterOfGeometry;
 
@@ -672,6 +701,9 @@
 /**
  * Returns the color element at the specified index in the underlying vertex data.
  *
+ * If the underlying vertex data is not of type GLfloat, the color components are
+ * converted to GLfloat before the color value is returned.
+ *
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
@@ -683,6 +715,10 @@
 /**
  * Sets the color element at the specified index in the underlying vertex data to
  * the specified color value.
+ *
+ * If the underlying vertex data is not of type GLfloat, the color components are
+ * converted to the appropriate type (typically GLubyte) before being set in the
+ * vertex data.
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
@@ -695,6 +731,9 @@
 /**
  * Returns the color element at the specified index in the underlying vertex data.
  *
+ * If the underlying vertex data is not of type GLubyte, the color components are
+ * converted to GLubyte before the color value is returned.
+ *
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
@@ -706,6 +745,10 @@
 /**
  * Sets the color element at the specified index in the underlying vertex data to
  * the specified color value.
+ *
+ * If the underlying vertex data is not of type GLubyte, the color components are
+ * converted to the appropriate type (typically GLfloat) before being set in the
+ * vertex data.
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
@@ -897,6 +940,30 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
 
 /** A CC3VertexArray that manages the point sizes aspect of an array of point sprite vertices. */
 @interface CC3VertexPointSizes : CC3VertexArray {}
+
+/**
+ * Returns the point size element at the specified index in the underlying vertex data.
+ *
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLfloat) pointSizeAt: (GLsizei) index;
+
+/**
+ * Sets the point size element at the specified index in the underlying vertex data
+ * to the specified location value.
+ * 
+ * The index refers to elements, not bytes. The implementation takes into consideration
+ * the elementStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setPointSize: (GLfloat) aSize at: (GLsizei) index;
+
 @end
 
 

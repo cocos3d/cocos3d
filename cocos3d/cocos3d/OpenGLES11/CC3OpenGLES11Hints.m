@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Hints.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -81,29 +81,16 @@
 }
 
 -(void) initializeTrackers {
-	self.fog = [CC3OpenGLES11StateTrackerHintEnumeration trackerForState: GL_FOG_HINT];
-	self.generateMipMap = [CC3OpenGLES11StateTrackerHintEnumeration trackerForState: GL_GENERATE_MIPMAP_HINT];
-	self.lineSmooth = [CC3OpenGLES11StateTrackerHintEnumeration trackerForState: GL_LINE_SMOOTH_HINT];
-	self.perspectiveCorrection = [CC3OpenGLES11StateTrackerHintEnumeration trackerForState: GL_PERSPECTIVE_CORRECTION_HINT];
-	self.pointSmooth = [CC3OpenGLES11StateTrackerHintEnumeration trackerForState: GL_POINT_SMOOTH_HINT];
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[fog open];
-	[generateMipMap open];
-	[lineSmooth open];
-	[perspectiveCorrection open];
-	[pointSmooth open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[fog close];
-	[generateMipMap close];
-	[lineSmooth close];
-	[perspectiveCorrection close];
-	[pointSmooth close];
+	self.fog = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
+																  forState: GL_FOG_HINT];
+	self.generateMipMap = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
+																			 forState: GL_GENERATE_MIPMAP_HINT];
+	self.lineSmooth = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
+																		 forState: GL_LINE_SMOOTH_HINT];
+	self.perspectiveCorrection = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
+																					forState: GL_PERSPECTIVE_CORRECTION_HINT];
+	self.pointSmooth = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
+																		  forState: GL_POINT_SMOOTH_HINT];
 }
 
 -(NSString*) description {

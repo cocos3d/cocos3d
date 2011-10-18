@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -83,33 +83,27 @@ static const id placeHolder = [NSObject new];
 -(id) init {
 	if ( (self = [super init]) ) {
 		pvrtModel = new CPVRTModelPOD();
-		allNodes = [[NSMutableArray array] retain];
-		meshes = [[NSMutableArray array] retain];
-		materials = [[NSMutableArray array] retain];
-		textures = [[NSMutableArray array] retain];
+		allNodes = [[CCArray array] retain];
+		meshes = [[CCArray array] retain];
+		materials = [[CCArray array] retain];
+		textures = [[CCArray array] retain];
 		self.textureParameters = kCC3DefaultTextureParameters;
-		wasLoaded = NO;
 	}
 	return self;
 }
 
--(BOOL) loadFromFile: (NSString*) aFilepath {
-	if (wasLoaded) {
-		LogError(@"%@ has already been loaded from POD file '%@'", self, aFilepath);
-		return wasLoaded;
-	}
-	LogCleanRez(@"");
-	LogCleanRez(@"--------------------------------------------------");
-	LogRez(@"Loading resources from POD file '%@'", aFilepath);
-	if (!name) {
-		self.name = [aFilepath lastPathComponent];
-	}
-	wasLoaded = (self.pvrtModelImpl->ReadFromFile([aFilepath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
-	if (wasLoaded) {
-		[self build];
-		LogRez(@"Loaded %@", self.fullDescription);
-	} else {
-		LogError(@"Could not load POD file '%@'", aFilepath);
+-(BOOL) loadFromFile: (NSString*) aFilePath {
+	[super loadFromFile: aFilePath];	// Perform checks and set name and directory.
+
+	// Make sure we only attempt to load it once.
+	if (!wasLoaded) {
+		wasLoaded = (self.pvrtModelImpl->ReadFromFile([aFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
+		if (wasLoaded) {
+			[self build];
+			LogRez(@"Loaded %@", self.fullDescription);
+		} else {
+			LogError(@"Could not load POD file '%@'", aFilePath);
+		}
 	}
 	return wasLoaded;
 }
@@ -347,10 +341,14 @@ static const id placeHolder = [NSObject new];
 	}
 }
 
+/** Loads the texture file from the directory indicated by the directory property. */
 -(CC3Texture*) buildTextureAtIndex: (uint) textureIndex {
 	SPODTexture* pst = (SPODTexture*)[self texturePODStructAtIndex: textureIndex];
-	CC3Texture* texNode = [CC3Texture textureFromFile: [NSString stringWithUTF8String: pst->pszName]];
+	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
+	NSString* texPath = [directory stringByAppendingPathComponent: texFile];
+	CC3Texture* texNode = [CC3Texture textureFromFile: texPath];
 	texNode.textureParameters = self.textureParameters;
+	LogCleanRez(@"Creating %@ at POD index %u from: '%@'", [texNode class], textureIndex, texPath);
 	return texNode;
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3MeshNode.h"
 #import "CCNode.h"
+#import "CCParticleSystemPoint.h"
 
 
 /**
@@ -376,7 +377,7 @@
  * pixel size across all devices, which may make it appear to be smaller or larger,
  * relative to the 3D artifacts around it, on different devices.
  *
- * This property has different affects, depending on the value of the shouldDrawAs2DOverlay
+ * This property has different effects, depending on the value of the shouldDrawAs2DOverlay
  * property. If that property is set to YES, and the 2D node is being drawn as an overlay
  * over the entire 3D scene, all 2D nodes will be adjusted.
  *
@@ -562,12 +563,12 @@
  *     To avoid this, if the shouldDisableDepthMask property is set to YES, the GL depth
  *     mask is temporarily disabled during drawing so that particles will not update the
  *     depth buffer, meaning that the Z-distance of each particle will be compared against
- *     previously drawn objects, but not against each other.
+ *     previously drawn objects, but not against each other. For CC3Billboard, the default
+ *     value of the shouldDisableDepthMask is YES, indicating that the GL depth mask will
+ *     be disabled during the drawing of the particles.
  */
-
 @interface CC3ParticleSystemBillboard : CC3Billboard {
 	CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
-	BOOL shouldDisableDepthMask;
 }
 
 /**
@@ -577,28 +578,10 @@
  * distance from the particle to the camera, and a, b and c are the coefficients
  * from this property.
  *
- * The initial value of this property is kCC3DefaultParticleSizeAttenuationCoefficients,
+ * The initial value of this property is kCC3ParticleSizeAttenuationNone,
  * indicating no attenuation with distance.
  */
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
-
-/**
- * Indicates whether this instance will disable the GL depth mask while drawing the
- * particles.
- * 
- * The cocos2d particle system draws all particles at the same Z-distance.
- * When undergoing transforms in the 3D world, the result is that the Z-distances
- * are very close but not equal, resulting in Z-fighting between the particles.
- * 
- * To avoid this, set this property to YES to temporarily disable the GL depth mask
- * while the particles are drawn. Particle drawing will not update the depth buffer,
- * meaning that the Z-distance of each particle will be compared against previously
- * drawn objects, but not against each other.
- *
- * The initial value of this property is YES, indicating that the GL depth mask will
- * be disabled during the drawing of the particles.
- */
-@property(nonatomic, assign) BOOL shouldDisableDepthMask;
 
 @end
 
@@ -624,6 +607,9 @@
  * will not be copied when the parent node is copied. A descriptor node for the copy
  * will be created automatically when the shouldDrawDescriptor property is copied,
  * if it was set to YES on the original node that is copied.
+ * 
+ * A CC3NodeDescriptor will continue to be visible even when its ancestor
+ * nodes are invisible, unless the CC3NodeDescriptor itself is made invisible.
  */
 @interface CC3NodeDescriptor : CC3Billboard
 @end

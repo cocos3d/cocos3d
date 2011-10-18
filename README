@@ -1,7 +1,7 @@
-README - cocos3d 0.6.1
+README - cocos3d 0.6.2
 ----------------------
 
-cocos3d 0.6.1
+cocos3d 0.6.2
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -141,6 +141,24 @@ The following demo apps are included in the cocos3d distribution:
    affects the performance of cocos3d. You can also use this performance demo app to
    compare performance across different device types.
 
+
+
+   CC3Demo3DTiles
+   _____________
+
+   A simple demo that lays out multiple small cocos3d worlds as layers in a larger cocos2d
+   layer. The effect is a grid of tiles, with each tile displaying a separate 3D world,
+   each containing its own camera and lighting. The main node in each 3D tile can be rotated
+   under touch control.
+
+   This demonstrates the ability to simply include 3D objects in an otherwise 2D game,
+   and techniques for optimizing under those conditions. It also demonstrates touch control
+   when many 3D world are visible concurrently, and the ability to add app data to nodes
+   using the userData property.
+
+   The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d RootController with cocos3d.
+
+
 If you are using cocos2d 0.99.5, read the cocos2d Version Compatibility selection below
 regarding running the demo apps with that version.
 
@@ -159,7 +177,7 @@ the cocos3d distribution.
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.1 is compatible with cocos2d 1.0.1, cocos2d 1.0.0, and cocos2d 0.99.5.
+cocos3d 0.6.2 is compatible with cocos2d 1.0.1, cocos2d 1.0.0, and cocos2d 0.99.5.
 
 If you use cocos2d 0.99.5, be aware that the cocos3d Xcode projects are configured for
 the cocos2d 1.0.1 libraries. The cocos2d 0.99.5 distribution includes serveral fiiles

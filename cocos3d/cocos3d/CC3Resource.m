@@ -1,7 +1,7 @@
 /*
  * CC3Resource.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,10 +34,11 @@
 
 @implementation CC3Resource
 
-@synthesize nodes;
+@synthesize nodes, directory, wasLoaded;
 
 -(void) dealloc {
 	[nodes release];
+	[directory release];
 	[super dealloc];
 }
 
@@ -52,7 +53,9 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		nodes = [[NSMutableArray array] retain];
+		nodes = [[CCArray array] retain];
+		directory = nil;
+		wasLoaded = NO;
 	}
 	return self;
 }
@@ -61,9 +64,9 @@
 	return [[[self alloc] init] autorelease];
 }
 
--(id) initFromFile: (NSString*) aFilepath {
+-(id) initFromFile: (NSString*) aFilePath {
 	if ( (self = [self init]) ) {
-		if ( ![self loadFromFile: aFilepath] ) {
+		if ( ![self loadFromFile: aFilePath] ) {
 			[self release];
 			return nil;
 		}
@@ -71,8 +74,8 @@
 	return self;
 }
 
-+(id) resourceFromFile: (NSString*) aFilepath {
-	return [[[self alloc] initFromFile: aFilepath] autorelease];
++(id) resourceFromFile: (NSString*) aFilePath {
+	return [[[self alloc] initFromFile: aFilePath] autorelease];
 }
 
 -(id) initFromResourceFile: (NSString*) aRezPath {
@@ -83,13 +86,20 @@
 	return [[[self alloc] initFromResourceFile: aRezPath] autorelease];
 }
 
-// Subclasses must override this method
--(BOOL) loadFromFile: (NSString*) aFilepath {
+// Subclasses should override this method, but invoke this superclass implementation first.
+-(BOOL) loadFromFile: (NSString*) aFilePath {
+	if (wasLoaded) {
+		LogError(@"%@ has already been loaded from file '%@'", self, self.name);
+		return wasLoaded;
+	}
 	LogCleanRez(@"");
 	LogCleanRez(@"--------------------------------------------------");
-	LogRez(@"Loading resources from file '%@'", aFilepath);
+	LogRez(@"Loading resources from file '%@'", aFilePath);
 	if (!name) {
-		self.name = aFilepath;
+		self.name = [aFilePath lastPathComponent];
+	}
+	if (!directory) {
+		self.directory = [aFilePath stringByDeletingLastPathComponent];
 	}
 	return NO;
 }

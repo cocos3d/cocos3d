@@ -1,7 +1,7 @@
 /*
  * CC3NodePODExtensions.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -91,7 +91,7 @@
  * This implementation attaches this node to its parent as identified by the
  * podParentIndex property. Subclasses may override to perform other linking.
  */
--(void) linkToPODNodes: (NSArray*) nodeArray;
+-(void) linkToPODNodes: (CCArray*) nodeArray;
 
 @end
 

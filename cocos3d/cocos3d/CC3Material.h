@@ -1,7 +1,7 @@
 /*
  * CC3Material.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -85,6 +85,12 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  *     with materials can be changed using standard cocos2d CCTint and CCFade actions, making
  *     it easier for you to add dynamic coloring effects to your nodes.
  * 
+ * CC3Material also supports alpha testing, where the alpha value of each pixel can be
+ * tested to determine whether or not it should be drawn. By default, alpha testing is
+ * disabled, but alpha testing can sometimes be useful when drawing overlapping objects 
+ * each contain transparency and it is not possible to rely only on drawing order and
+ * depth testing to mediate whether a pixel should be drawn.
+ *
  * Textures are optional. In some cases, if simple solid coloring is to be used, the material
  * may hold no texture at all. This solid coloring will still interact with lighting, creating
  * a realistic surface.
@@ -148,12 +154,14 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  */
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* texture;
-	NSMutableArray* textureOverlays;
+	CCArray* textureOverlays;
 	ccColor4F ambientColor;
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
 	ccColor4F emissionColor;
 	GLfloat shininess;
+	GLenum alphaTestFunction;
+	GLfloat alphaTestReference;
 	ccBlendFunc blendFunc;
 	BOOL shouldUseLighting;
 	BOOL isOpaque;
@@ -325,6 +333,90 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * can add up if a large number of opaque objects are rendered as if they were translucent.
  */
 @property(nonatomic, assign) BOOL isOpaque;
+
+/**
+ * Indicates the alpha test function that is used to determine if a pixel should be
+ * drawn, based on the value of its alpha component.
+ *
+ * The value of this property must be one of the following values:
+ *   - GL_ALWAYS: The pixel is always drawn, regardless of its alpha value.
+ *   - GL_GREATER - The pixel is drawn only if its alpha value is greater than the
+ *     value in the reference property.
+ *   - GL_GEQUAL - The pixel is drawn only if its alpha value is greater than or equal
+ *     to the value in the reference property.
+ *   - GL_LESS - The pixel is drawn only if its alpha value is less than the value
+ *     in the reference property.
+ *   - GL_LEQUAL - The pixel is drawn only if its alpha value is less than or equal
+ *     to the value in the reference property.
+ *   - GL_EQUAL - The pixel is drawn only if its alpha value is equal to the value
+ *     in the reference property.
+ *   - GL_NOTEQUAL - The pixel is drawn only if its alpha value is not equal to the
+ *     value in the reference property.
+ *   - GL_NEVER: The pixel is never drawn.
+ *
+ * The initial value of this property is GL_ALWAYS, indicating that each pixel will
+ * always be drawn, regardless of its alpha value.
+ * 
+ * For most situations, alpha testing is not necessary, and you can leave the value
+ * of this property at its initial value. Alpha testing can sometimes be useful when
+ * drawing overlapping objects that each contain transparency, and it is not possible
+ * to rely only on drawing order and depth testing to mediate whether a pixel should
+ * be drawn.
+ *
+ * Although you can set this property directly, since the most common values are
+ * either GL_ALWAYS or GL_GREATER, you can use the shouldDrawLowAlpha property as
+ * a shortcut to switch between these two values.
+ *
+ * Alpha testing within the GL engine is automatically disabled if this property
+ * is set to GL_ALWAYS, and enabled for any other value.
+ */
+@property(nonatomic, assign) GLenum alphaTestFunction;
+
+/**
+ * Indicates the reference value used by the alpha test function to compare against
+ * the alpha value of each pixel to determine if it should be drawn.
+ *
+ * The value of this property must be between zero and one, inclusive. The value
+ * is clamped by the GL engine if it is set to a value outside this range.
+ *
+ * The initial value of this property is zero.
+ *
+ * The value of this property has no effect if the value of the alphaTestFunction
+ * property is either GL_ALWAYS or GL_NEVER.
+ *
+ * See the notes for the alphaTestFunction property for more information on alpha
+ * testing.
+ */
+@property(nonatomic, assign) GLfloat alphaTestReference;
+
+/**
+ * Indicates whether alpha testing should be used to determine if pixels with
+ * lower alpha values should be drawn.
+ *
+ * This property is really a shortcut for setting the alphaTestFunction to either
+ * of its two most common values. Setting this property to YES will set the
+ * alphaTestFunction propery to GL_ALWAYS. Setting this property to NO will set
+ * the alphaTestFunction property to GL_GREATER.
+ *
+ * If the value of this property is set to YES, each pixel will be drawn regardless
+ * of the value of its alpha component. If the value of this property is set to NO,
+ * the value of the alpha component of each pixel will be compared against the value
+ * in the alphaTestReference property, and only those pixel alpha values that are
+ * greater than that reference value will be drawn. You can set the value of the
+ * alphaTestReference property to determine the cutoff level.
+ *
+ * Reading the value of this property will return YES if the value of the alphaTestFunction
+ * is any of GL_ALWAYS, GL_LESS or GL_LEQUAL, otherwise it returns NO.
+ *
+ * The initial value of this property is YES, indicating that pixels with lower
+ * alpha values will be drawn.
+ * 
+ * For most situations, alpha testing is not necessary, and you can leave the value
+ * of this property set to YES. Alpha testing can sometimes be useful when drawing
+ * overlapping objects that each contain transparency, and it is not possible to rely
+ * only on drawing order and depth testing to mediate whether a pixel should be drawn.
+ */
+@property(nonatomic, assign) BOOL shouldDrawLowAlpha;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

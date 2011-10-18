@@ -1,7 +1,7 @@
 /*
  * CC3TextureUnit.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,7 +70,7 @@
 	
 	// Normalize direction, then half-shift to move value from +/-1.0 to between 0.0 and 1.0
 	aDirection = CC3VectorNormalize(aDirection);
-	CC3Vector hv = CC3VectorScaleUniform(CC3VectorAdd(aDirection, kCC3VectorUnitCube), 0.5f);
+	CC3Vector hv = CC3VectorAverage(aDirection, kCC3VectorUnitCube);
 	
 	// Set constantColor from normal direction, according to RGB <-> normal mapping
 	switch (rgbNormalMap) {

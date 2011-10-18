@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -59,10 +59,18 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODMesh);
 /** Returns a string description of the specified CPODData structure. */
 NSString* NSStringFromCPODData(PODClassPtr aCPODData);
 
-/** Maps the specified ePVRTDataType to a valid GL data type, and returns the GL value. */
+/**
+ * Maps the specified ePVRTDataType to a valid GL data type, and returns the GL value.
+ *
+ * Thanks to cocos3d user esmrg who contributed additional type mappings.
+ */
 GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType);
 
-/** Returns the name of the specified ePVRTDataType enumeration. */
+/**
+ * Returns the name of the specified ePVRTDataType enumeration.
+ *
+ * Thanks to cocos3d user esmrg who contributed additional type mappings.
+ */
 NSString* NSStringFromEPVRTDataType(uint ePVRTDataType);
 
 /** Extracts and returns the appropriate GL drawing mode from the specified SPODMesh structure. */

@@ -1,7 +1,7 @@
 /*
  * CC3Resource.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,20 +49,38 @@
  * which contains the root nodes of a structural 3D node assembly constructed from
  * the 3D data loaded from the file. Subclasses should ensure that the nodes array
  * property is fully populated upon successful completion of the loadFromFile: method.
- *
- * Subclasses should ensure that the loadFromFile: method sets the name property
- * of this instance to the name of the file, and returns whether the file was
- * successfully loaded.
  */
 @interface CC3Resource : CC3Identifiable {
-	NSMutableArray* nodes;
+	CCArray* nodes;
+	NSString* directory;
+	BOOL wasLoaded;
 }
 
 /**
  * A collection of the root nodes of the node assembly extracted from the file.
  * Each of these nodes will usually contain child nodes.
  */
-@property(nonatomic, readonly) NSMutableArray* nodes;
+@property(nonatomic, readonly) CCArray* nodes;
+
+/**
+ * The directory where additional resources (typically textures) can be found.
+ *
+ * By default, this property will be set to the directory where the resource
+ * file is located, as indicated by the file path provided when the loadFromFile:
+ * method is invoked.
+ *
+ * The application may set this property to a different directory if appropriate,
+ * but must do so before the loadFromFile: method is invoked.
+ */
+@property(nonatomic, retain) NSString* directory;
+
+/**
+ * Indicates whether the resource has been successfully loaded.
+ *
+ * The initial value of this property is NO, but will change to YES if the
+ * loadFromFile: method successfully loads the resource.
+ */
+@property(nonatomic, readonly) BOOL wasLoaded;
 
 
 #pragma mark Allocation and initialization
@@ -77,41 +95,61 @@
 +(id) resource;
 
 /**
+ * This template method is the primary method for loading this resource.
+ *
  * Populates the internal data structures from the file at the specified path,
  * which must be an absolute path, extracts the nodes from the data, and returns
  * whether the loading was successful.
  *
- * This is a template method. Default behaviour is simply to return NO.
- * Subclasses must override this method to perform the actual file loading,
- * parsing, and node extraction. Once this method has been successfully invoked,
- * the application may immediately access the nodes property.
+ * This is a template method. This implementation performs the following:
+ *   - Tests that a file has not already been loaded into this instance, and logs
+ *     an error if it has.
+ *   - Logs the header information for loading this resource.
+ *   - If the name property of this instance has not been set, sets it from the
+ *     name of the file as extracted from the specified file path.
+ *   - If the directory property of this instance has not been set, sets it from
+ *     the directory path as extracted from the specified file path.
  *
- * Subclasses should also set the name property to that of the file.
+ * Subclasses must override this method to perform the actual file loading,
+ * parsing, and node extraction, but should be sure to invoke this superclass
+ * implementation to ensure the above tasks are performed.
+ * 
+ * Once this method has been successfully invoked, the application may immediately
+ * access the nodes property to retrieve the node assemblies contained in this resource.
  */
--(BOOL) loadFromFile: (NSString*) aFilepath;
+-(BOOL) loadFromFile: (NSString*) aFilePath;
 
 /**
  * Initializes this instance and populates the internal data structures
  * from the file at the specified path, which must be an absolute path,
  * and extracts the nodes from the data.
  *
+ * This method invokes the loadFromFile: template method to perform the
+ * actual file loading.
+ *
  * This method will return nil if the file could not be loaded.
  */
--(id) initFromFile: (NSString*) aFilepath;
+-(id) initFromFile: (NSString*) aFilePath;
 
 /**
  * Allocates and initializes an autoreleased instance, and populates the
  * internal data structures from the file at the specified path, which
  * must be an absolute path, and extracts the nodes from the data.
  *
+ * This method invokes the loadFromFile: template method to perform the
+ * actual file loading.
+ *
  * This method will return nil if the file could not be loaded.
  */
-+(id) resourceFromFile: (NSString*) aFilepath;
++(id) resourceFromFile: (NSString*) aFilePath;
 
 /**
  * Populates the internal data structures from the file at the specified
  * resource path, extracts the nodes from the data, and returns whether
  * the loading was successful.
+ *
+ * This method invokes the loadFromFile: template method to perform the
+ * actual file loading.
  *
  * The specified file path is a path relative to the resource directory.
  * Typically this means that the specified path can just be the name of
@@ -128,6 +166,9 @@
  * Typically this means that the specified path can just be the name of
  * the file, with no path information.
  *
+ * This method invokes the loadFromFile: template method to perform the
+ * actual file loading.
+ *
  * This method will return nil if the file could not be loaded.
  */
 -(id) initFromResourceFile: (NSString*) aRezPath;
@@ -140,6 +181,9 @@
  * The specified file path is a path relative to the resource directory.
  * Typically this means that the specified path can just be the name of
  * the file, with no path information.
+ *
+ * This method invokes the loadFromFile: template method to perform the
+ * actual file loading.
  *
  * This method will return nil if the file could not be loaded.
  */

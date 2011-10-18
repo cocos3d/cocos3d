@@ -1,7 +1,7 @@
 /*
  * CC3Mesh.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -421,6 +421,59 @@
 
 #pragma mark Accessing vertex data
 
+/**
+ * Changes the mesh data so that the pivot point of the mesh will be at the specified
+ * location. The pivot point of the mesh is the location in the local coordinate system
+ * around which all transforms are performed. A vertex at the pivot point would have
+ * local coordinates (0,0,0).
+ *
+ * This method can be used to adjust the mesh structure to make it easier to apply
+ * transformations, by moving the origin of the transformations to a more convenient
+ * location in the mesh.
+ *
+ * This method changes the location component of every vertex in the mesh data.
+ * This can be quite costly, and should only be performed once to adjust a mesh
+ * so that it is easier to manipulate.
+ * 
+ * Do not use this method to move your model around. Instead, use the transform
+ * properties (location, rotation and scale) of the CC3Node that contains this mesh,
+ * and let the GL engine do the heavy lifting of transforming the mesh vertices.
+ * 
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
+ */
+-(void) movePivotTo: (CC3Vector) aLocation;
+
+/**
+ * Changes the mesh data so that the pivot point of the mesh will be at the center of
+ * geometry of the mesh vertices. The pivot point of the mesh is the location in the
+ * local coordinate system around which all transforms are performed. A vertex at the
+ * pivot point would have local coordinates (0,0,0).
+ *
+ * This method can be used to adjust the mesh structure to make it easier to apply
+ * transformations, by moving the origin of the transformations to the center of the mesh.
+ *
+ * This method changes the location component of every vertex in the mesh data.
+ * This can be quite costly, and should only be performed once to adjust a mesh
+ * so that it is easier to manipulate.
+ * 
+ * Do not use this method to move your model around. Instead, use the transform
+ * properties (location, rotation and scale) of the CC3Node that contains this mesh,
+ * and let the GL engine do the heavy lifting of transforming the mesh vertices.
+ * 
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
+ */
+-(void) movePivotToCenterOfGeometry;
+
+/** Returns the number of vertices in this mesh. */
+@property(nonatomic, readonly) GLsizei vertexCount;
 
 /**
  * Returns the location element at the specified index from the vertex data.
@@ -438,6 +491,14 @@
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
+ * 
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexLocationsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -461,6 +522,10 @@
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexNormalsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
+ *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
@@ -483,6 +548,10 @@
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexColorsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
+ *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
@@ -504,6 +573,10 @@
  * 
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexColorsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -529,6 +602,10 @@
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexTextureCoordinatesGLBufferForTextureUnit: method
+ * to ensure that the GL VBO that holds the vertex data is updated.
+ *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
@@ -538,8 +615,8 @@
  * Returns the texture coordinate element at the specified index from the vertex data
  * at the commonly used texture unit zero.
  *
- * This is a convenience method that delegates to the vertexTexCoord2FAt:forTextureUnit:
- * method, passing in zero for the texture unit index.
+ * This is a convenience method that is equivalent to invoking the vertexTexCoord2FAt:forTextureUnit:
+ * method, with zero as the texture unit index.
  *
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
@@ -558,6 +635,10 @@
  *
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexTextureCoordinatesGLBuffer method to ensure that
+ * the GL VBO that holds the vertex data is updated.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -581,10 +662,38 @@
  * The index refers to elements, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexIndicesGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
+ *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
 -(void) setVertexIndex: (GLushort) vertexIndex at: (GLsizei) index;
+
+/** Updates the GL engine buffer with the vertex location data in this mesh. */
+-(void) updateVertexLocationsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex normal data in this mesh. */
+-(void) updateVertexNormalsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex color data in this mesh. */
+-(void) updateVertexColorsGLBuffer;
+
+/**
+ * Updates the GL engine buffer with the vertex texture coord data from the
+ * specified texture unit in this mesh.
+ */
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Updates the GL engine buffer with the vertex texture coord data from
+ * texture unit zero in this mesh.
+ */
+-(void) updateVertexTextureCoordinatesGLBuffer;
+
+/** Updates the GL engine buffer with the vertex index data in this mesh. */
+-(void) updateVertexIndicesGLBuffer;
 
 
 #pragma mark Mesh context switching

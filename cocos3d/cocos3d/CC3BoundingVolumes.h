@@ -1,7 +1,7 @@
 /*
  * CC3BoundingVolumes.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,15 +44,17 @@
  * This base bounding volume is simply a single point. When applied to a node, it indicates
  * that the node intersects the frustum if the node's center of geometry is within the frustum.
  *
- * For meshes, the center of geometry is calculated from the vertex locations. For other nodes,
- * it can be set directly within the bounding volume via the centerOfGeometry property.
+ * For meshes, the center of geometry is calculated from the vertex locations, via specialized
+ * subclasses of CC3NodeBoundingVolume. For other nodes, it can be set directly within the
+ * bounding volume via the centerOfGeometry property.
  */
 @interface CC3NodeBoundingVolume : NSObject <NSCopying> {
 	CC3Node* node;
 	CC3Vector centerOfGeometry;
 	CC3Vector globalCenterOfGeometry;
 	GLfloat cameraDistanceProduct;
-	BOOL volumeNeedsBuilding;
+	BOOL shouldMaximize;
+	BOOL volumeIsDirty;
 }
 
 /** The node whose boundary this instance is keeping track of. */
@@ -60,7 +62,23 @@
 
 /**
  * The center of geometry for the node in the node's local coordinate system.
- * Defaults to {0, 0, 0}.
+ *
+ * For mesh nodes, the value of this property is automatically calculated from the
+ * vertex locations, via specialized subclasses of CC3NodeBoundingVolume used for
+ * meshes. For other nodes, this property can be set directly, if needed.
+ *
+ * You can also set this property directly for mesh nodes as well. Doing so will
+ * override the value that was calculated automatically. This can be useful when
+ * the vertices will be changing frequently, and therefore the bounding volume will
+ * need to be recalculated frequently. By setting this property to a value that
+ * suits all possible vertex configurations, you can avoid expensive recalculations
+ * of the bounding volume as the vertices change.
+ *
+ * When setting the value of this property on a mesh node directly, be sure to also
+ * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
+ * recalculation of this bounding volume whenever the underlying mesh vertices change.
+ *
+ * The initial value of this property is kCC3VectorZero.
  */
 @property(nonatomic, assign) CC3Vector centerOfGeometry;
 
@@ -91,35 +109,71 @@
 @property(nonatomic, assign) GLfloat cameraDistanceProduct;
 
 /**
- * Indicates whether the volume needs building. This is typically set to YES during instance
- * initialization, and then to NO when the local bounding volume is calculated. This occurs
- * the first time the update method is invoked. Usually, that is sufficient, and the application
- * never needs to set this property. But, if for some reason it is determined that the bounding
- * volume needs to be recalculated, this property can be reset back to YES, and the next
- * invocation of the update method will rebuild the volume.
+ * If the value of this property is set to YES, the boundary of this volume will only
+ * ever expand when this bounding volume is repeatedly rebuilt from the underlying mesh
+ * vertex data.
+ * 
+ * The shape of the boundary depends on the subclass. Whenever this bounding volume is
+ * rebuilt, the resulting boundary is compared to the previous boundary, and replaces
+ * the previous boundary only if it is larger.
+ *
+ * Rebuilding occurs whenever the update method is invoked and this bounding volume has
+ * previously been marked as dirty via the markDirty method. Rebuilding also occurs
+ * directly when the markDirtyAndUpdate method is invoked.
+ *
+ * Rebuilding occurs under control of the node, when the rebuildBoundingVolume method
+ * of the node is invoked and the shouldUseFixedBoundingVolume of the node is set to NO.
+ * Typically, the node invokes the rebuildBoundingVolume method whenever the vertex
+ * location data in the underlying mesh has changed.
+ *
+ * Setting this property to YES and the shouldUseFixedBoundingVolume of the node to NO
+ * can be useful when pre-computing an appropriate fixed boundary for a node whose vertex
+ * location data frequently changes, such as a particle generator, and is often used at
+ * development time.
+ *
+ * Once the resulting maximized boundary is determined, it can then be explicitly set
+ * into this bounding volume at run time, and the shouldUseFixedBoundingVolume of the
+ * node can be set to YES so that the processing cost of constantly rebuilding this
+ * bounding volume will not be incurred.
+ * 
+ * If a dynamic boundary is required at runtime, set both the shouldUseFixedBoundingVolume
+ * of the node and this property to NO. With a dynamic boundary, setting this property
+ * to YES has no advantage. The performance cost will be the same, and the resulting
+ * boundary will be less accurate.
+ *
+ * The initial value of this property is NO.
  */
-@property(nonatomic, assign) BOOL volumeNeedsBuilding;
-
-/** Allocates and initializes an autoreleased instance. */
-+(id) boundingVolume;
+@property(nonatomic, assign) BOOL shouldMaximize;
 
 /**
- * Transforms this bounding volume to match the transformation of the node. If this bounding
- * volume has not yet been built, invokes the buildVolume method first.
+ * Transforms this bounding volume to match the transformation of the node.
+ * If this bounding volume has been marked dirty via the markDirty method,
+ * this bounding volume will first be rebuilt from teh associated mesh vertices.
  *
- * This method is invoked automatically by the node whenever it recalculates its transformMatrix.
- * Usually, the application never needs to invoke this method directly.
+ * This method is invoked automatically by the node whenever it recalculates
+ * its transformMatrix. Usually, the application never needs to invoke this method directly.
  */
 -(void) update;
 
 /**
- * Template method that builds the bounding volume in the node's local coordinate system.
- *
- * Default does nothing except set the volumeNeedsBuilding property to NO.
- * Subclasses will override to calculated a real bounding volume, but should invoke this
- * superclass method to set the volumeNeedsBuilding property to NO.
+ * Marks the volume as dirty and in need of rebuilding from the associated mesh vertices
+ * the next time that the update method is invoked.
  */
--(void) buildVolume;
+-(void) markDirty;
+
+/**
+ * Marks the volume as dirty and in need of rebuilding from the associated mesh vertices,
+ * and forces an update and transform of the bounding volume.
+ *
+ * This method should be invoked whenever changes are made to the underlying mesh vertices.
+ * It is invoked automatically when the rebuildBoundingVolume is invoked on a node.
+ *
+ * This is a convenience method that simply invokes the markDirty and update methods in order.
+ */
+-(void) markDirtyAndUpdate;
+
+/** Allocates and initializes an autoreleased instance. */
++(id) boundingVolume;
 
 /**
  * Returns whether this bounding volume intersects the specfied frustum.
@@ -155,6 +209,23 @@
 /**
  * The radius that encompasses the extent of the node in the node's local coordinate
  * system, as measured from the center of geometry of this instance.
+ *
+ * For mesh nodes, the value of this property is automatically calculated from the
+ * vertex locations, via specialized subclasses of CC3NodeBoundingVolume used for
+ * meshes. For other nodes, this property can be set directly, if needed.
+ *
+ * You can also set this property directly for mesh nodes as well. Doing so will
+ * override the value that was calculated automatically. This can be useful when
+ * the vertices will be changing frequently, and therefore the bounding volume will
+ * need to be recalculated frequently. By setting this property to a value that
+ * suits all possible vertex configurations, you can avoid expensive recalculations
+ * of the bounding volume as the vertices change.
+ *
+ * When setting the value of this property on a mesh node directly, be sure to also
+ * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
+ * recalculation of this bounding volume whenever the underlying mesh vertices change.
+ *
+ * The initial value of this property is zero.
  */
 @property(nonatomic, assign) GLfloat radius;
 
@@ -193,7 +264,26 @@
 	CC3Vector globalBoundingBoxVertices[8];
 }
 
-/** The axially-aligned-bounding-box (AABB) in the node's local coordinate system. */
+/**
+ * The axially-aligned-bounding-box (AABB) in the node's local coordinate system.
+ *
+ * For mesh nodes, the value of this property is automatically calculated from the
+ * vertex locations, via specialized subclasses of CC3NodeBoundingVolume used for
+ * meshes. For other nodes, this property can be set directly, if needed.
+ *
+ * You can also set this property directly for mesh nodes as well. Doing so will
+ * override the value that was calculated automatically. This can be useful when
+ * the vertices will be changing frequently, and therefore the bounding volume will
+ * need to be recalculated frequently. By setting this property to a value that
+ * suits all possible vertex configurations, you can avoid expensive recalculations
+ * of the bounding volume as the vertices change.
+ *
+ * When setting the value of this property on a mesh node directly, be sure to also
+ * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
+ * recalculation of this bounding volume whenever the underlying mesh vertices change.
+ *
+ * The initial value of this property is kCC3BoundingBoxZero.
+ */
 @property(nonatomic, assign) CC3BoundingBox boundingBox;
 
 /**
@@ -233,14 +323,14 @@
  */
 
 @interface CC3NodeTighteningBoundingVolumeSequence : CC3NodeBoundingVolume {
-	NSMutableArray* boundingVolumes;
+	CCArray* boundingVolumes;
 }
 
 /**
  * The array of contained bounding volumes.
  * The contained bounding volumes will be traversed in the order they appear in the array.
  */
-@property(nonatomic, readonly) NSMutableArray* boundingVolumes;
+@property(nonatomic, readonly) CCArray* boundingVolumes;
 
 /** Adds the specified bounding volume to the end of the array of contained bounding volumes. */
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume;

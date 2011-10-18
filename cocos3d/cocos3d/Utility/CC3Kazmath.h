@@ -1,7 +1,7 @@
 /*
  * CC3Kazmath.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  *
  * Copyright (c) 2008, Luke Benstead.
  * All rights reserved.

@@ -36,8 +36,6 @@
 			<string>NO</string>
 			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
 			<string>3.0</string>
-			<key>ONLY_ACTIVE_ARCH</key>
-			<string>YES</string>
 			<key>OTHER_LDFLAGS</key>
 			<array>
 				<string>-lz</string>
@@ -49,7 +47,6 @@
 			<key>WARNING_CFLAGS</key>
 			<array>
 				<string>-Wall</string>
-				<string>-Werror</string>
 			</array>
 		</dict>
 	</dict>

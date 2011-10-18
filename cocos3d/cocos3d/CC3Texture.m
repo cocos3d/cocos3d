@@ -1,7 +1,7 @@
 /*
  * CC3Texture.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -105,33 +105,33 @@
 
 #pragma mark Allocation and Initialization
 
--(id) initFromFile: (NSString*) aFileName {
-	return [self initWithName: aFileName fromFile: aFileName];
+-(id) initFromFile: (NSString*) aFilePath {
+	return [self initWithName: nil fromFile: aFilePath];
 }
 
-+(id) textureFromFile: (NSString*) aFileName {
-	return [[[self alloc] initFromFile: aFileName] autorelease];
++(id) textureFromFile: (NSString*) aFilePath {
+	return [[[self alloc] initFromFile: aFilePath] autorelease];
 }
 
--(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFileName {
-	return [self initWithTag: aTag withName: aFileName fromFile: aFileName];
+-(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath {
+	return [self initWithTag: aTag withName: nil fromFile: aFilePath];
 }
 
-+(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFileName {
-	return [[[self alloc] initWithTag: aTag fromFile: aFileName] autorelease];
++(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath {
+	return [[[self alloc] initWithTag: aTag fromFile: aFilePath] autorelease];
 }
 
--(id) initWithName: (NSString*) aName fromFile: (NSString*) aFileName {
-	return [self initWithTag: [self nextTag] withName: aName fromFile: aFileName];
+-(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilePath {
+	return [self initWithTag: [self nextTag] withName: aName fromFile: aFilePath];
 }
 
-+(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFileName {
-	return [[[self alloc] initWithName: aName fromFile: aFileName] autorelease];
++(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFilePath {
+	return [[[self alloc] initWithName: aName fromFile: aFilePath] autorelease];
 }
 
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFileName {
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath {
 	if ( (self = [self initWithTag: aTag withName: aName]) ) {
-		if ( ![self loadTextureFile: aFileName] ) {
+		if ( ![self loadTextureFile: aFilePath] ) {
 			[self release];
 			return nil;
 		}
@@ -139,8 +139,8 @@
 	return self;
 }
 
-+(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFileName {
-	return [[[self alloc] initWithTag: aTag withName: aName fromFile: aFileName] autorelease];
++(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath {
+	return [[[self alloc] initWithTag: aTag withName: aName fromFile: aFilePath] autorelease];
 }
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -152,13 +152,16 @@
 	return self;
 }
 
--(BOOL) loadTextureFile: (NSString*) aFileName {
-	self.texture = [[CCTextureCache sharedTextureCache] addImage: aFileName];
+-(BOOL) loadTextureFile: (NSString*) aFilePath {
+	if (!name) {
+		self.name = [aFilePath lastPathComponent];
+	}
+	self.texture = [[CCTextureCache sharedTextureCache] addImage: aFilePath];
 	if (texture) {
-		LogTrace(@"%@ loaded texture from file %@", self, aFileName);
+		LogTrace(@"%@ loaded texture from file %@", self, aFilePath);
 		return YES;
 	} else {
-		LogError(@"%@ could not load texture from file %@", self, aFileName);
+		LogError(@"%@ could not load texture from file %@", self, aFilePath);
 		return NO;
 	}
 }

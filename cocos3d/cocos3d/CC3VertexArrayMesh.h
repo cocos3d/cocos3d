@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -90,7 +90,7 @@
 	CC3VertexNormals* vertexNormals;
 	CC3VertexColors* vertexColors;
 	CC3VertexTextureCoordinates* vertexTextureCoordinates;
-	NSMutableArray* overlayTextureCoordinates;
+	CCArray* overlayTextureCoordinates;
 	CC3VertexIndices* vertexIndices;
 	BOOL interleaveVertices;
 }

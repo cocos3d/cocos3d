@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,29 +32,34 @@
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3OpenGLES11Engine.h"
-#import "CGPointExtension.h"
 #import "CC3VertexArrayMesh.h"
 
 
 @interface CC3Node (TemplateMethods)
 -(void) populateFrom: (CC3Node*) another;
 -(void) updateBoundingVolume;
+-(void) rebuildBoundingVolume;
 -(void) transformMatrixChanged;
+@property(nonatomic, assign, readwrite) CC3Node* parent;
 @end
 
 @interface CC3MeshNode (TemplateMethods)
--(void) configureDrawingParameters;
--(void) configureFaceCulling;
--(void) configureNormalization;
--(void) configureColoring;
--(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureFaceCulling: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureColoring: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor;
+-(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
+-(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) populateAsVertexBox: (CC3BoundingBox) box;
 @end
 
 @implementation CC3MeshNode
 
-@synthesize mesh, material, pureColor, shouldCullBackFaces, shouldCullFrontFaces;
+@synthesize mesh, material, pureColor, shouldUseSmoothShading;
+@synthesize shouldCullBackFaces, shouldCullFrontFaces, shouldUseClockwiseFrontFaceWinding;
+@synthesize shouldDisableDepthMask, shouldDisableDepthTest, depthFunction;
 
 -(void) dealloc {
 	[mesh release];
@@ -69,7 +74,7 @@
 	mesh = [aMesh retain];
 	[oldMesh release];
 	if (boundingVolume) {
-		[self.boundingVolume buildVolume];
+		[self rebuildBoundingVolume];
 	} else {
 		self.boundingVolume = [mesh defaultBoundingVolume];
 	}
@@ -89,37 +94,13 @@
 // After setting the bounding volume, forces it to build its volume from the mesh
 -(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
 	[super setBoundingVolume: aBoundingVolume];
-	[self.boundingVolume buildVolume];
-}
-
--(void) alignTextures {
-	[mesh alignWithTexturesIn: material];
-	[super alignTextures];
-}
-
--(void) alignInvertedTextures {
-	[mesh alignWithInvertedTexturesIn: material];
-	[super alignInvertedTextures];
-}
-
--(CGRect) textureRectangle {
-	return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle;
-}
-
--(void) setTextureRectangle: (CGRect) aRect {
-	mesh.textureRectangle = aRect;
-}
-
--(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
-	return mesh ? [mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
-}
-
--(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
-	[mesh setTextureRectangle: aRect forTextureUnit: texUnit];
+	[self rebuildBoundingVolume];
 }
 
 -(CC3BoundingBox) localContentBoundingBox {
-	return mesh ? mesh.boundingBox : kCC3BoundingBoxNull;
+	return mesh
+			? CC3BoundingBoxAddPadding(mesh.boundingBox, boundingVolumePadding)
+			: kCC3BoundingBoxNull;
 }
 
 #pragma mark Material coloring
@@ -184,7 +165,7 @@
 }
 
 
-#pragma mark CCRGBAProtocol support
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 -(ccColor3B) color {
 	return material ? material.color : ccc3(CCColorByteFromFloat(pureColor.r),
@@ -224,14 +205,77 @@
 	[super setIsOpaque: opaque];	// pass along to any children
 }
 
+-(ccBlendFunc) blendFunc {
+	return material ? material.blendFunc : (ccBlendFunc){GL_ONE, GL_ZERO};
+}
+
+-(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
+	material.blendFunc = aBlendFunc;
+	[super setBlendFunc: aBlendFunc];
+}
+
+-(BOOL) shouldDrawLowAlpha {
+	return material ? material.shouldDrawLowAlpha : YES;
+}
+
+-(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
+	material.shouldDrawLowAlpha = shouldDraw;
+}
+
+
+#pragma mark Textures
+
+-(CC3Texture*) texture {
+	return material.texture;
+}
+
+-(void) setTexture: (CC3Texture*) aTexture {
+	if (!material) {
+		NSString* matName = [NSString stringWithFormat: @"%@-Material", self.name];
+		self.material = [CC3Material materialWithName: matName];
+	}
+	material.texture = aTexture;
+}
+
+-(void) alignTextures {
+	[mesh alignWithTexturesIn: material];
+	[super alignTextures];
+}
+
+-(void) alignInvertedTextures {
+	[mesh alignWithInvertedTexturesIn: material];
+	[super alignInvertedTextures];
+}
+
+-(CGRect) textureRectangle {
+	return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	mesh.textureRectangle = aRect;
+}
+
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
+	return mesh ? [mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
+	[mesh setTextureRectangle: aRect forTextureUnit: texUnit];
+}
+
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		pureColor = kCCC4FWhite;
+		shouldUseSmoothShading = YES;
 		shouldCullBackFaces = YES;
 		shouldCullFrontFaces = NO;
+		shouldUseClockwiseFrontFaceWinding = NO;
+		shouldDisableDepthMask = NO;
+		shouldDisableDepthTest = NO;
+		depthFunction = GL_LEQUAL;
 	}
 	return self;
 }
@@ -310,368 +354,19 @@
 -(void) populateFrom: (CC3MeshNode*) another {
 	[super populateFrom: another];
 	
-	self.mesh = another.mesh;						// retained
+	self.mesh = another.mesh;								// retained but not copied
 	self.material = [another.material copyAutoreleased];	// retained
 
 	pureColor = another.pureColor;
+	shouldUseSmoothShading = another.shouldUseSmoothShading;
 	shouldCullBackFaces = another.shouldCullBackFaces;
 	shouldCullFrontFaces = another.shouldCullFrontFaces;
+	shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
+	shouldDisableDepthMask = another.shouldDisableDepthMask;
+	shouldDisableDepthTest = another.shouldDisableDepthTest;
+	depthFunction = another.depthFunction;
+	
 }
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize {
-	[self populateAsRectangleWithSize: rectSize
-							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)];
-}
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide {
-	[self populateAsRectangleWithSize: rectSize
-							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-					  andTessellation: facesPerSide];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot {
-	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: ccg(1, 1)];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide {
-	NSString* itemName;
-	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
-	
-	// Must be at least one tessellation face per side of the rectangle.
-	facesPerSide.x = MAX(facesPerSide.x, 1);
-	facesPerSide.y = MAX(facesPerSide.y, 1);
-
-	// Move the origin of the rectangle to the pivot point
-	CGPoint botLeft = ccpSub(CGPointZero, pivot);
-	CGPoint topRight = ccpSub(ccpFromSize(rectSize), pivot);
-
-	// The size of each face in the tessellated grid
-	CGSize faceSize = CGSizeMake((topRight.x - botLeft.x) / facesPerSide.x,
-								 (topRight.y - botLeft.y) / facesPerSide.y);
-
-	// Get vertices per side.
-	ccGridSize verticesPerSide;
-	verticesPerSide.x = facesPerSide.x + 1;
-	verticesPerSide.y = facesPerSide.y + 1;
-	int vertexCount = verticesPerSide.x * verticesPerSide.y;
-	
-	// Interleave the vertex locations, normals and tex coords
-	// Create vertex location array, allocating enough space for the stride of the full structure
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
-	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vertexCount];
-	
-	// Create the normal array interleaved on the same element array
-	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
-	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
-	normArray.elements = vertices;
-	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vertexCount;
-	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
-
-	// Populate vertex locations and normals in the X-Y plane
-	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
-	// and set the location of each vertex to be proportional to its position in the grid,
-	// and set the normal of each vertex to point up the Z-axis.
-	for (int iy = 0; iy < verticesPerSide.y; iy++) {
-		for (int ix = 0; ix < verticesPerSide.x; ix++) {
-			int vIndx = iy * verticesPerSide.x + ix;
-			GLfloat vx = botLeft.x + (faceSize.width * ix);
-			GLfloat vy = botLeft.y + (faceSize.height * iy);
-			vertices[vIndx].location = cc3v(vx, vy, 0.0);
-			vertices[vIndx].normal = kCC3VectorUnitZPositive;
-		}
-	}
-	
-	// Construct the vertex indices that will draw the triangles that make up each
-	// face of the box. Indices are ordered for each of the six faces starting in
-	// the lower left corner and proceeding counter-clockwise.
-	GLuint triangleCount = facesPerSide.x * facesPerSide.y * 2;
-	GLuint indexCount = triangleCount * 3;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_TRIANGLES;
-	indexArray.elementType = GL_UNSIGNED_SHORT;
-	indexArray.elementCount = indexCount;
-	GLushort* indices = [indexArray allocateElements: indexCount];
-	
-	// Iterate through the rows and columns of the faces in the grid, from the bottom left corner,
-	// and specify the indexes of the three vertices in each of the two triangles of each face.
-	int iIndx = 0;
-	for (int iy = 0; iy < facesPerSide.y; iy++) {
-		for (int ix = 0; ix < facesPerSide.x; ix++) {
-			GLushort botLeftOfFace;
-			
-			// First triangle of face wound counter-clockwise
-			botLeftOfFace = iy * verticesPerSide.x + ix;
-			indices[iIndx++] = botLeftOfFace;							// Bottom left
-			indices[iIndx++] = botLeftOfFace + 1;						// Bot right
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
-
-			// Second triangle of face wound counter-clockwise
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x;		// Top left
-			indices[iIndx++] = botLeftOfFace;							// Bottom left
-		}
-	}
-	
-	// Create mesh with interleaved vertex arrays
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.interleaveVertices = YES;
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexNormals = normArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
-}
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert {
-	[self populateAsRectangleWithSize: rectSize
-							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-						  withTexture: texture
-						invertTexture: shouldInvert];
-}
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert {
-	[self populateAsRectangleWithSize: rectSize
-							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-					  andTessellation: facesPerSide
-						  withTexture: texture
-						invertTexture: shouldInvert];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert {
-	[self populateAsRectangleWithSize: rectSize
-							 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-					  andTessellation:  ccg(1, 1)
-						  withTexture: texture
-						invertTexture: shouldInvert];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert {
-	NSString* itemName;
-	
-	// Must be at least one tessellation face per side of the rectangle.
-	facesPerSide.x = MAX(facesPerSide.x, 1);
-	facesPerSide.y = MAX(facesPerSide.y, 1);
-	
-	// The size of each face in the tessellated grid
-	CGSize faceSize = CGSizeMake((1.0 / facesPerSide.x), (1.0 / facesPerSide.y));
-	
-	// Get vertices per side.
-	ccGridSize verticesPerSide;
-	verticesPerSide.x = facesPerSide.x + 1;
-	verticesPerSide.y = facesPerSide.y + 1;
-
-	// Start as a basic white rectangle of the right size and location.
-	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: facesPerSide];
-	
-	// Get my aMesh model and vertices.
-	CC3VertexArrayMesh* vam = (CC3VertexArrayMesh*)self.mesh; 
-	CC3VertexLocations* locArray = vam.vertexLocations;
-	
-	// Create the tex coord array interleaved on the same element array as the vertex locations
-	CC3VertexTextureCoordinates* tcArray = nil;
-	itemName = [NSString stringWithFormat: @"%@-Texture", self.name];
-	tcArray = [CC3VertexTextureCoordinates vertexArrayWithName: itemName];
-	tcArray.elements = locArray.elements;
-	tcArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	tcArray.elementCount = locArray.elementCount;
-	tcArray.elementOffset = 2 * sizeof(CC3Vector);	// Offset to texcoord element in vertex structure
-
-	// Add the texture coordinates array to the mesh
-	vam.vertexTextureCoordinates = tcArray;
-	
-	// Populate the texture coordinate array mapping
-	CC3TexturedVertex* vertices = locArray.elements;
-	
-	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
-	// and set the X & Y texture coordinate of each vertex to be proportional to its position
-	// in the grid.
-	for (int iy = 0; iy < verticesPerSide.y; iy++) {
-		for (int ix = 0; ix < verticesPerSide.x; ix++) {
-			int vIndx = iy * verticesPerSide.x + ix;
-			GLfloat vx = faceSize.width * ix;
-			GLfloat vy = faceSize.height * iy;
-			vertices[vIndx].texCoord = (ccTex2F){vx, vy};
-		}
-	}
-	
-	// Add a material and attach the texture
-	itemName = [NSString stringWithFormat: @"%@-Material", self.name];
-	self.material = [CC3Material materialWithName: itemName];
-	self.material.texture = texture;
-	
-	// Align the texture coordinates to the texture
-	if (shouldInvert) {
-		[self alignInvertedTextures];
-	} else {
-		[self alignTextures];
-	}
-}
-
-// Index data for the triangles covering the six faces of a solid box.
-static const GLubyte solidBoxIndexData[] = {
-	1, 5, 7, 7, 3, 1,
-	0, 1, 3, 3, 2, 0,
-	4, 0, 2, 2, 6, 4,
-	5, 4, 6, 6, 7, 5,
-	3, 7, 6, 6, 2, 3,
-	0, 4, 5, 5, 1, 0,
-};
-
--(void) populateAsSolidBox: (CC3BoundingBox) box {
-	NSString* itemName;
-	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
-	CC3Vector boxMin = box.minimum;
-	CC3Vector boxMax = box.maximum;
-	GLuint vertexCount = 8;
-	
-	// Create vertexLocation array.
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
-	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vertexCount];
-	
-	// Extract all 8 corner vertices from the box.
-	vertices[0].location = cc3v(boxMin.x, boxMin.y, boxMin.z);
-	vertices[1].location = cc3v(boxMin.x, boxMin.y, boxMax.z);
-	vertices[2].location = cc3v(boxMin.x, boxMax.y, boxMin.z);
-	vertices[3].location = cc3v(boxMin.x, boxMax.y, boxMax.z);
-	vertices[4].location = cc3v(boxMax.x, boxMin.y, boxMin.z);
-	vertices[5].location = cc3v(boxMax.x, boxMin.y, boxMax.z);
-	vertices[6].location = cc3v(boxMax.x, boxMax.y, boxMin.z);
-	vertices[7].location = cc3v(boxMax.x, boxMax.y, boxMax.z);
-	
-	// Create the normal array interleaved on the same element array
-	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
-	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
-	normArray.elements = vertices;
-	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vertexCount;
-	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
-
-	// Since this is a box, and all sides meet at right angles, all components
-	// of all normals will have a value of either positive or negative (1 / sqrt(3)).
-	GLfloat oort = 1.0f / M_SQRT3;		// One-over-root-three
-	
-	// Populate normals up the positive Z-axis
-	vertices[0].normal = cc3v(-oort, -oort, -oort);
-	vertices[1].normal = cc3v(-oort, -oort,  oort);
-	vertices[2].normal = cc3v(-oort,  oort, -oort);
-	vertices[3].normal = cc3v(-oort,  oort,  oort);
-	vertices[4].normal = cc3v( oort, -oort, -oort);
-	vertices[5].normal = cc3v( oort, -oort,  oort);
-	vertices[6].normal = cc3v( oort,  oort, -oort);
-	vertices[7].normal = cc3v( oort,  oort,  oort);
-	
-	// Construct the vertex indices that will draw the triangles that make up each
-	// face of the box. Indices are ordered for each of the six faces starting in
-	// the lower left corner and proceeding counter-clockwise.
-	GLuint triangleCount = 12;
-	GLuint indexCount = triangleCount * 3;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_TRIANGLES;
-	indexArray.elementType = GL_UNSIGNED_BYTE;
-	indexArray.elementCount = indexCount;
-	indexArray.elements = (GLvoid*)solidBoxIndexData;
-	
-	// Create mesh with interleaved vertex arrays
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.interleaveVertices = YES;
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexNormals = normArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
-}
-
-// Vertex index data for the 12 lines of a wire box.
-static const GLubyte wireBoxIndexData[] = {
-	0, 1, 1, 3, 3, 2, 2, 0,
-	4, 5, 5, 7, 7, 6, 6, 4,
-	0, 4, 1, 5, 2, 6, 3, 7,
-};
-
--(void) populateAsWireBox: (CC3BoundingBox) box {
-	NSString* itemName;
-	CC3Vector boxMin = box.minimum;
-	CC3Vector boxMax = box.maximum;
-	GLuint vertexCount = 8;
-	
-	// Create vertexLocation array.
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	CC3Vector* vertices = [locArray allocateElements: vertexCount];
-	
-	// Extract all 8 corner vertices from the box.
-	vertices[0] = cc3v(boxMin.x, boxMin.y, boxMin.z);
-	vertices[1] = cc3v(boxMin.x, boxMin.y, boxMax.z);
-	vertices[2] = cc3v(boxMin.x, boxMax.y, boxMin.z);
-	vertices[3] = cc3v(boxMin.x, boxMax.y, boxMax.z);
-	vertices[4] = cc3v(boxMax.x, boxMin.y, boxMin.z);
-	vertices[5] = cc3v(boxMax.x, boxMin.y, boxMax.z);
-	vertices[6] = cc3v(boxMax.x, boxMax.y, boxMin.z);
-	vertices[7] = cc3v(boxMax.x, boxMax.y, boxMax.z);
-	
-	GLuint lineCount = 12;
-	GLuint indexCount = lineCount * 2;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_LINES;
-	indexArray.elementType = GL_UNSIGNED_BYTE;
-	indexArray.elementCount = indexCount;
-	indexArray.elements = (GLvoid*)wireBoxIndexData;
-	
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
-}
-
--(void) populateAsLineStripWith: (GLshort) vertexCount
-					   vertices: (CC3Vector*) vertices
-					  andRetain: (BOOL) shouldRetainVertices {
-	NSString* itemName;
-	
-	// Create vertexLocation array.
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.drawingMode = GL_LINE_STRIP;
-	if (shouldRetainVertices) {
-		[locArray allocateElements: vertexCount];
-		memcpy(locArray.elements, vertices, vertexCount * sizeof(CC3Vector));
-	} else {
-		locArray.elementCount = vertexCount;
-		locArray.elements = vertices;
-	}
-	
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.vertexLocations = locArray;
-	self.mesh = aMesh;
-}
-
 
 #pragma mark Type testing
 
@@ -679,43 +374,39 @@ static const GLubyte wireBoxIndexData[] = {
 	return YES;
 }
 
+
 #pragma mark Drawing
 
 /**
- * If we have a material, delegates to the material to set material and texture state,
- * otherwise, establishes the pure color by turning lighting off and setting the color.
- * One material or color is set, delegates to the mesh to draw mesh.
+ * Template method that uses template methods to configure drawing parameters
+ * and the material, draws the mesh, and cleans up the drawing state.
  */
--(void) drawLocalContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11StateTrackerCapability* gles11Lighting = [CC3OpenGLES11Engine engine].serverCapabilities.lighting;
-
-	// Remember current lighting state in case we disable it to apply pure color.
-	BOOL lightingWasEnabled = gles11Lighting.value;
-
-	[self configureDrawingParameters];		// Before material draws.
-
-	[self drawMaterialWithVisitor: visitor];
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self configureDrawingParameters: visitor];		// Before material is configured.
+	[self configureMaterialWithVisitor: visitor];
 
 	[self drawMeshWithVisitor: visitor];
-
-	// Re-establish previous lighting state.
-	gles11Lighting.value = lightingWasEnabled;
+	
+	[self cleanupDrawingParameters: visitor];
 }
 
 /**
- * Configures the drawing parameters.
+ * Template method to configure the drawing parameters.
  *
- * The default implementation configures normalization and vertex coloring.
  * Subclasses may override to add additional drawing parameters.
  */
--(void) configureDrawingParameters {
-	[self configureFaceCulling];
-	[self configureNormalization];
-	[self configureColoring];
+-(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
+	[self configureFaceCulling: visitor];
+	[self configureNormalization: visitor];
+	[self configureColoring: visitor];
+	[self configureDepthTesting: visitor];
 }
 
-/** Configures GL face culling based on the shouldCullBackFaces and shouldCullBackFaces properties. */
--(void) configureFaceCulling {
+/**
+ * Template method configures GL face culling based on the shouldCullBackFaces,
+ * shouldCullBackFaces, and shouldUseClockwiseFrontFaceWinding properties.
+ */
+-(void) configureFaceCulling: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
 	CC3OpenGLES11State* gles11State = gles11Engine.state;
@@ -729,10 +420,15 @@ static const GLubyte wireBoxIndexData[] = {
 									? (shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
 									: (shouldCullFrontFaces ? GL_FRONT : GL_BACK);
 
+	// Set the front face winding
+	gles11State.frontFace.value = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
 }
 
-/** Configures GL scaling of normals, based on whether the scaling of this node is uniform or not. */
--(void) configureNormalization {
+/**
+ * Template method configures GL scaling of normals, based on
+ * whether the scaling of this node is uniform or not.
+ */
+-(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
 	if (mesh && mesh.hasNormals) {
 		if (self.isUniformlyScaledGlobally) {
@@ -749,25 +445,54 @@ static const GLubyte wireBoxIndexData[] = {
 }
 
 /**
- * Configures the GL state to support vertex coloring. This must be invoked every time, because
- * both the material and mesh influence this property, and the mesh will not be re-bound if it
- * does not need to be switched. And this method must be invoked before material colors are set,
- * otherwise material colors will not stick.
+ * Configures the GL state for smooth shading, and to support vertex coloring.
+ * This must be invoked every time, because both the material and mesh influence
+ * the colorMaterial property, and the mesh will not be re-bound if it does not
+ * need to be switched. And this method must be invoked before material colors
+ * are set, otherwise material colors will not stick.
  */
--(void) configureColoring {
-	[CC3OpenGLES11Engine engine].serverCapabilities.colorMaterial.value = (mesh ? mesh.hasColors : NO);
+-(void) configureColoring: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+
+	// Set the smoothing model
+	gles11Engine.state.shadeModel.value = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
+
+	// Attach the color to the material
+	gles11Engine.serverCapabilities.colorMaterial.value = (mesh ? mesh.hasColors : NO);
 }
 
-/** Template method to draw the material to the GL engine. */
--(void) drawMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+/**
+ * Template method disables depth testing and/or writing to the depth buffer if the
+ * shouldDisableDepthTest and shouldDisableDepthMask property is set to YES, respectively,
+ * and set the depth function.
+ */
+-(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11StateTrackerCapability* gles11Lighting = gles11Engine.serverCapabilities.lighting;
+	CC3OpenGLES11State* gles11State = gles11Engine.state;
+	gles11Engine.serverCapabilities.depthTest.value = !shouldDisableDepthTest;
+	gles11State.depthMask.value = !shouldDisableDepthMask;
+	gles11State.depthFunction.value = depthFunction;
+}
+
+/**
+ * Reverts any drawing parameters that were set in the configureDrawingParameters:
+ * method that need to be cleaned up.
+ * 
+ * Since most mesh drawing confguration is set for each mesh, most state does not
+ * need to be cleaned up. Only specialized subclasses that need to set very specific
+ * state and unset it once they are finished drawing, will need to override this method.
+ */
+-(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {}
+
+/** Template method to configure the material properties in the GL engine. */
+-(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
 	if (visitor.shouldDecorateNode) {
 		if (material) {
 			[material drawWithVisitor: visitor];
 		} else {
 			[CC3Material unbind];
-			[gles11Lighting disable];
+			[gles11Engine.serverCapabilities.lighting disable];
 			gles11Engine.state.color.value = pureColor;
 		}
 	} else {
@@ -782,6 +507,20 @@ static const GLubyte wireBoxIndexData[] = {
 
 
 #pragma mark Accessing vertex data
+
+-(void) movePivotTo: (CC3Vector) aLocation {
+	[mesh movePivotTo: aLocation];
+	[self rebuildBoundingVolume];
+}
+
+-(void) movePivotToCenterOfGeometry {
+	[mesh movePivotToCenterOfGeometry];
+	[self rebuildBoundingVolume];
+}
+
+-(GLsizei) vertexCount {
+	return mesh ? mesh.vertexCount : 0;
+}
 
 -(CC3Vector) vertexLocationAt: (GLsizei) index {
 	return mesh ? [mesh vertexLocationAt: index] : kCC3VectorZero;
@@ -839,6 +578,30 @@ static const GLubyte wireBoxIndexData[] = {
 	[mesh setVertexIndex: vertexIndex at: index];
 }
 
+-(void) updateVertexLocationsGLBuffer {
+	[mesh updateVertexLocationsGLBuffer];
+}
+
+-(void) updateVertexNormalsGLBuffer {
+	[mesh updateVertexNormalsGLBuffer];
+}
+
+-(void) updateVertexColorsGLBuffer {
+	[mesh updateVertexColorsGLBuffer];
+}
+
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
+	[mesh updateVertexTextureCoordinatesGLBufferForTextureUnit: texUnit];
+}
+
+-(void) updateVertexTextureCoordinatesGLBuffer {
+	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
+}
+
+-(void) updateVertexIndicesGLBuffer {
+	[mesh updateVertexIndicesGLBuffer];
+}
+
 @end
 
 
@@ -880,8 +643,8 @@ static const GLubyte wireBoxIndexData[] = {
 #pragma mark Drawing
 
 /** Overridden to set the line properties in addition to other configuration. */
--(void) configureDrawingParameters {
-	[super configureDrawingParameters];
+-(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
+	[super configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor];
 	[self configureLineProperties];
 }
 
@@ -907,14 +670,6 @@ static const GLubyte wireBoxIndexData[] = {
 
 @synthesize shouldAlwaysMeasureParentBoundingBox;
 
--(CC3BoundingBox) localContentBoundingBox {
-	return kCC3BoundingBoxNull;
-}
-
--(CC3BoundingBox) globalLocalContentBoundingBox {
-	return kCC3BoundingBoxNull;
-}
-
 -(BOOL) shouldIncludeInDeepCopy { return NO; }
 
 -(BOOL) shouldDrawDescriptor { return YES; }
@@ -929,9 +684,17 @@ static const GLubyte wireBoxIndexData[] = {
 
 -(void) setShouldDrawLocalContentWireframeBox: (BOOL) shouldDraw {}
 
+-(BOOL) shouldContributeToParentBoundingBox { return NO; }
+
 // Overridden so that not touchable unless specifically set as such
 -(BOOL) isTouchable {
-	return isTouchEnabled;
+	return (self.visible || shouldAllowTouchableWhenInvisible) && isTouchEnabled;
+}
+
+// Overridden so that can still be visible if parent is invisible,
+// unless explicitly set off.
+-(BOOL) visible {
+	return visible;
 }
 
 
@@ -950,6 +713,11 @@ static const GLubyte wireBoxIndexData[] = {
 	[super populateFrom: another];
 	
 	shouldAlwaysMeasureParentBoundingBox = another.shouldAlwaysMeasureParentBoundingBox;
+}
+
+-(void) releaseRedundantData {
+	[self retainVertexLocations];
+	[super releaseRedundantData];
 }
 
 
@@ -973,11 +741,22 @@ static const GLubyte wireBoxIndexData[] = {
 	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.minimum.y, pbb.maximum.z) at: 5];
 	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.maximum.y, pbb.minimum.z) at: 6];
 	[self setVertexLocation: cc3v(pbb.maximum.x, pbb.maximum.y, pbb.maximum.z) at: 7];
+	[self updateVertexLocationsGLBuffer];
+	[self rebuildBoundingVolume];
 }
 
-/** Retrieve the parent bounding box, or return the zero bounding box if no parent. */
+/**
+ * Returns the parent's bounding box, or kCC3BoundingBoxZero if no parent,
+ * or if parent doesn't have a bounding box.
+ */
 -(CC3BoundingBox) parentBoundingBox {
-	return parent ? parent.boundingBox : kCC3BoundingBoxZero;
+	if (parent) {
+		CC3BoundingBox pbb = parent.boundingBox;
+		if (!CC3BoundingBoxIsNull(pbb)) {
+			return pbb;
+		}
+	}
+	return kCC3BoundingBoxZero;
 }
 
 @end
@@ -988,11 +767,96 @@ static const GLubyte wireBoxIndexData[] = {
 
 @implementation CC3WireframeLocalContentBoundingBoxNode
 
-/** Override to return the parent's local content bounding box */
+/**
+ * Overridden to return the parent's local content bounding box,
+ * or kCC3BoundingBoxZero if no parent, or if parent doesn't have a bounding box.
+ */
 -(CC3BoundingBox) parentBoundingBox {
-	return (parent && parent.hasLocalContent)
-				? ((CC3LocalContentNode*)parent).localContentBoundingBox
-				: kCC3BoundingBoxZero;
+	if (parent && parent.hasLocalContent) {
+		CC3BoundingBox pbb = ((CC3LocalContentNode*)parent).localContentBoundingBox;
+		if (!CC3BoundingBoxIsNull(pbb)) {
+			return pbb;
+		}
+	}
+	return kCC3BoundingBoxZero;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3DirectionMarkerNode
+
+@interface CC3DirectionMarkerNode (TemplateMethods)
+-(CC3Vector) calculateLineEnd;
+@end
+
+@implementation CC3DirectionMarkerNode
+
+-(CC3Vector) markerDirection {
+	return markerDirection;
+}
+
+-(void) setMarkerDirection: (CC3Vector) aDirection {
+	markerDirection = CC3VectorNormalize(aDirection);
+}
+
+-(void) setParent: (CC3Node*) aNode {
+	[super setParent: aNode];
+	[self updateFromParentBoundingBoxWithVisitor: nil];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		markerDirection = kCC3VectorUnitZNegative;
+	}
+	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3DirectionMarkerNode*) another {
+	[super populateFrom: another];
+	
+	markerDirection = another.markerDirection;
+}
+
+
+#pragma mark Updating
+
+/** Measures the bounding box of the parent node and updates the vertex locations. */
+-(void) updateFromParentBoundingBoxWithVisitor: (CC3NodeUpdatingVisitor*) visitor {
+	[self setVertexLocation: [self calculateLineEnd] at: 1];
+	[self updateVertexLocationsGLBuffer];
+	[self rebuildBoundingVolume];
+}
+
+#define kCC3DirMarkerLineScale 1.5
+
+-(CC3Vector) calculateLineEnd {
+	CC3BoundingBox pbb = self.parentBoundingBox;
+	CC3Vector md = self.markerDirection;
+	CC3Vector mdInv = cc3v(md.x ? (1.0 / md.x) : CGFLOAT_MAX,
+						   md.y ? (1.0 / md.y) : CGFLOAT_MAX,
+						   md.z ? (1.0 / md.z) : CGFLOAT_MAX);
+	CC3Vector pbbDirScale = CC3VectorMaximize(CC3VectorScale(pbb.maximum, mdInv),
+											  CC3VectorScale(pbb.minimum, mdInv));
+	GLfloat dirScale = MIN(pbbDirScale.x, MIN(pbbDirScale.y, pbbDirScale.z));
+	return CC3VectorScaleUniform(md, (dirScale * [[self class] directionMarkerScale]));
+}
+
+// The proportional distance that the direction should protrude from the parent node
+static GLfloat directionMarkerScale = 1.5;
+
++(GLfloat) directionMarkerScale {
+	return directionMarkerScale;
+}
+
++(void) setDirectionMarkerScale: (GLfloat) aScale {
+	directionMarkerScale = aScale;
 }
 
 @end

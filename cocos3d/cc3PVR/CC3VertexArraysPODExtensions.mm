@@ -1,7 +1,7 @@
 /*
  * CC3VertexArraysPODExtensions.mm
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -152,9 +152,13 @@ extern "C" {
 
 @implementation CC3VertexColors (PVRPOD)
 
+// Thanks to cocos3d user esmrg who contributed the fix for element size.
 -(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sVtxColours fromSPODMesh: aSPODMesh];
+	if ( (self = [self initFromCPODData: &psm->sVtxColours fromSPODMesh: aSPODMesh]) ) {
+		self.elementSize = 4;		// Must be 4 for colors...but POD loader sometimes provides incorrect value.
+	}
+	return self;
 }
 
 @end

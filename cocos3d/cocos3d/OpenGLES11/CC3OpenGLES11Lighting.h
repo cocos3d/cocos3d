@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Lighting.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -68,7 +68,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track the GL state with
@@ -80,7 +82,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx;
 
 @end
 
@@ -120,7 +124,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track the GL state with
@@ -132,7 +138,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx;
 
 @end
 
@@ -172,7 +180,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track the GL state with
@@ -184,7 +194,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx;
 
 @end
 
@@ -224,7 +236,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
--(id) initForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) qName
+	   andLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track the GL state with
@@ -236,7 +250,9 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
-+(id) trackerForState: (GLenum) qName andLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) qName
+		  andLightIndex: (GLuint) ltIndx;
 
 @end
 
@@ -256,6 +272,7 @@
 	CC3OpenGLES11StateTrackerLightColor* specularColor;
 	CC3OpenGLES11StateTrackerLightVector4* position;
 	CC3OpenGLES11StateTrackerLightVector* spotDirection;
+	CC3OpenGLES11StateTrackerLightFloat* spotExponent;
 	CC3OpenGLES11StateTrackerLightFloat* spotCutoffAngle;
 	CC3OpenGLES11StateTrackerLightFloat* constantAttenuation;
 	CC3OpenGLES11StateTrackerLightFloat* linearAttenuation;
@@ -280,6 +297,9 @@
 /** Tracks spot direction (GL name GL_SPOT_DIRECTION). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerLightVector* spotDirection;
 
+/** Tracks spot cutoff angle (GL name GL_SPOT_EXPONENT). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* spotExponent;
+
 /** Tracks spot cutoff angle (GL name GL_SPOT_CUTOFF). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerLightFloat* spotCutoffAngle;
 
@@ -302,7 +322,8 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
--(id) initWithLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+	  withLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track GL state
@@ -314,7 +335,8 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxLights.value.
  */
-+(id) trackerWithLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+		 withLightIndex: (GLuint) ltIndx;
 
 @end
 
@@ -342,7 +364,7 @@
 /** CC3OpenGLES11Lighting manages trackers for lighting state. */
 @interface CC3OpenGLES11Lighting : CC3OpenGLES11StateTrackerManager {
 	CC3OpenGLES11StateTrackerWorldLightColor* worldAmbientLight;
-	NSMutableArray* lights;
+	CCArray* lights;
 }
 
 /** Tracks world ambient light color (GL name GL_LIGHT_MODEL_AMBIENT). */
@@ -362,7 +384,7 @@
  * empty, and will subsequently contain a number of lights one more than
  * the largest value passed to lightAt:.
  */
-@property(nonatomic, retain) NSMutableArray* lights;
+@property(nonatomic, retain) CCArray* lights;
 
 /**
  * Returns the number of active lights.

@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,6 +37,7 @@
 
 @class CC3NodeDrawingVisitor, CC3Rotator, CC3NodeBoundingVolume;
 @class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
+@class CC3World, CC3Camera;
 
 
 #pragma mark -
@@ -71,8 +72,9 @@
  * made in the updateBeforeTransform: method, since those changes will automatically be
  * applied to the transformMatrix.
  *
- * The second place a node is touched is, the drawWithVisitor: method, which is automaticaly
- * invoked during each frame rendering cycle. You should have no need to override this method.
+ * The second place a node is touched is, the transformAndDrawWithVisitor: method,
+ * which is automaticaly invoked during each frame rendering cycle. You should have
+ * no need to override this method.
  * 
  * To maximize throughput, the operations of updating model state should be kept
  * separate from the operations of frame rendering, and the two should not be mixed.
@@ -129,8 +131,8 @@
  * state change tracker in the CC3OpenGLES11Engine singleton. Route the state change request
  * through the CC3OpenGLES11Engine singleton instead.
  */
-@interface CC3Node : CC3Identifiable <CCRGBAProtocol> {
-	NSMutableArray* children;
+@interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
+	CCArray* children;
 	CC3Node* parent;
 	CC3GLMatrix* transformMatrix;
 	CC3GLMatrix* transformMatrixInverted;
@@ -143,15 +145,18 @@
 	CC3Vector projectedLocation;
 	CC3Vector scale;
 	CC3Vector globalScale;
+	GLfloat boundingVolumePadding;
 	BOOL isTransformDirty;
 	BOOL isTransformInvertedDirty;
 	BOOL isGlobalRotationDirty;
 	BOOL isTouchEnabled;
 	BOOL shouldInheritTouchability;
+	BOOL shouldAllowTouchableWhenInvisible;
 	BOOL isAnimationEnabled;
 	BOOL visible;
 	BOOL isRunning;
 	BOOL shouldAutoremoveWhenEmpty;
+	BOOL shouldUseFixedBoundingVolume;
 }
 
 /**
@@ -166,6 +171,17 @@
  * This is calculated by using the transformMatrix to translate the local origin (0,0,0).
  */
 @property(nonatomic, readonly) CC3Vector globalLocation;
+
+/** Returns the rotator that manages the local rotation of this node. */
+@property(nonatomic, readonly) CC3Rotator* rotator;
+
+/**
+ * Translates the location of this node by the specified vector.
+ *
+ * The incoming vector specify the amount of change in location,
+ * not the final location.
+ */
+-(void) translateBy: (CC3Vector) aVector;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of this node.
@@ -194,6 +210,15 @@
 @property(nonatomic, readonly) CC3Vector globalRotation;
 
 /**
+ * Rotates this node from its current rotational state by the specified
+ * Euler angles in degrees.
+ *
+ * The incoming Euler angles specify the amount of change in rotation,
+ * not the final rotational state.
+ */
+-(void) rotateBy: (CC3Vector) aRotation;
+
+/**
  * The rotation of the node in 3D space, relative to the parent of this node, expressed
  * as a quaternion.
  *
@@ -202,6 +227,14 @@
  * to return the corresponding quaternion.
  */
 @property(nonatomic, assign) CC3Vector4 quaternion;
+
+/**
+ * Rotates this node from its current rotational state by the specified quaternion.
+ *
+ * The incoming quaternion specifies the amount of change in rotation,
+ * not the final rotational state.
+ */
+-(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
 
 /**
  * The axis of rotation of the node in 3D space, relative to the parent of this node,
@@ -228,6 +261,17 @@
  * the corresponding angle of rotation.
  */
 @property(nonatomic, assign) GLfloat rotationAngle;
+
+/**
+ * Rotates this node from its current rotational state by rotating around
+ * the specified axis by the specified angle in degrees.
+ *
+ * The incoming axis and angle specify the amount of change in rotation,
+ * not the final rotational state.
+ *
+ * Thanks to cocos3d user nt901 for contributing to the development of this feature
+ */
+-(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 
 /** The scale of the node in each dimension, relative to the parent of this node. */
 @property(nonatomic, assign) CC3Vector scale;
@@ -276,6 +320,14 @@
  * By default, nodes do not have a bounding volume. Subclasses may set a suitable bounding volume.
  */
 @property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
+
+/**
+ * Padding that is added to all edges of the bounding volume, when the bounding volume
+ * is automatically calculated, to ensure that all content is within the bounding volume.
+ *
+ * The initial value of this property is zero.
+ */
+@property(nonatomic, assign) GLfloat boundingVolumePadding;
 
 /**
  * Returns the smallest axis-aligned bounding box that surrounds any local content
@@ -362,6 +414,38 @@
 @property(nonatomic, assign) BOOL visible;
 
 /**
+ * Indicates the order in which this node should be drawn when compared to other nodes,
+ * when drawing order should be determined by distance from the camera (Z-order).
+ *
+ * Sequencing nodes for drawing based on distance from the camera is necessary for
+ * translucent nodes.
+ *
+ * In a drawing sequencer that sorts nodes by drawing order based on distance from the
+ * camera, the value of this property overrides the distances of the nodes from the camera.
+ * Sorting occurs on the value of this property first, and then on distance from the camera.
+ *
+ * Sorting based on distance to the camera alone is quite effective. In almost all cases,
+ * it is not necessary to set the value of this property, and if nodes are moving around,
+ * setting a value to this property can actually interfere with the dynamic determination
+ * of the correct drawing order. Only use this property if you have reason to force a node
+ * to be drawn before or after another node for visual effect.
+ *
+ * The smaller the value of this property, the closer to the camera the node is deemed
+ * to be. This property may be assigned a negative value.
+ *
+ * The initial value of this property is zero.
+ *
+ * The CC3World must be configured with a drawing sequencer that sorts by Z-order
+ * for this property to be effective.
+ *
+ * This property only has effect for nodes with local content to draw (instances of
+ * CC3LocalContentNode). Setting this property passes the value to all descendent nodes.
+ * Reading this value returns the average value of all child nodes, or returns zero if
+ * there are no child nodes.
+ */
+@property(nonatomic, assign) GLint zOrder;
+
+/**
  * Indicates whether this node has local content that will be drawn.
  * Default value is NO. Subclasses that do draw content will override to return YES.
  */
@@ -403,6 +487,36 @@
  * property on the CC3MeshNode class, plus the class notes of that class.
  */
 @property(nonatomic, assign) BOOL shouldCullFrontFaces;
+
+/**
+ * Indicates whether the bounding volume of this node should be considered fixed,
+ * even if the mesh vertices that determine the boundary are changed, or should be
+ * recalculated whenever the underlying mesh vertices change.
+ *
+ * If the value of this property is set to YES, the bounding volume will NOT be
+ * recalculated each time the vertices of the mesh are modified (typically via the
+ * setVertexLocation:at: method). If the value of this property is set to NO, the
+ * bounding volume will be recalculated each time the vertices of the mesh are modified.
+ *
+ * The initial value of this property is NO, indicating that the bounding volume will
+ * be recalculated whenever the underlying mesh vertices change.
+ *
+ * For most scenarios, the most accurate bounding volume is achieved by leaving setting
+ * this property to NO, and letting the bounding volume automatically adapt to changes
+ * in the underlying mesh vertices.
+ * 
+ * However, for some specialized meshes, such as particle generators, where the vertex
+ * data is continuously being modified in a predictable manner, the processing cost of
+ * constantly re-measuring the bounding volume may be significant, and it may be more
+ * effective to set a fixed bounding volume that encompasses the entire possible range
+ * of vertex location data, and set the value of this property to YES to stop the
+ * bounding volume from being recalculated every time the vertex data is changed.
+ *
+ * See the note for the various subclasses of CC3NodeBoundingVolume
+ * (eg- CC3NodeBoundingBoxVolume and CC3NodeSphericalBoundingVolume) to learn how
+ * to set the properties of the bounding volumes, to fix them to a particular range.
+ */
+@property(nonatomic, assign) BOOL shouldUseFixedBoundingVolume;
 
 /**
  * Indicates whether the dynamic behaviour of this node is enabled.
@@ -531,7 +645,7 @@
 @property(nonatomic, assign) CC3Vector globalLightLocation;
 
 
-#pragma mark CCRGBAProtocol support
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
 
 /**
  * Implementation of the CCRGBAProtocol color property.
@@ -576,6 +690,19 @@
  * changes to this property.
  */
 @property(nonatomic, assign) BOOL isOpaque;
+
+/**
+ * Implementation of the CCBlendProtocol blendFunc property.
+ *
+ * This is a convenience property that gets and sets the same property of the material
+ * of all descendant nodes
+ *
+ * Querying this property returns the value of the same property from the first
+ * descendant node that supports materials, or {GL_ONE, GL_ZERO} if no descendant
+ * nodes support materials. Setting this property sets the same property on the
+ * materials in all descendant nodes.
+ */
+@property(nonatomic, assign) ccBlendFunc blendFunc;
 
 
 #pragma mark Allocation and initialization
@@ -1015,6 +1142,20 @@
  */
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
 
+/**
+ * If the shouldUseFixedBoundingVolume property is set to NO, this method forces
+ * the bounding volume to be rebuilt. Otherwise, this method does nothing.
+ *
+ * If this node has an underlying mesh, and you have changed the vertex locations
+ * in the mesh, you should invoke this method to ensure that the bounding volume
+ * is rebuilt to encompass the new vertex locations.
+ *
+ * The bounding volume is automatically transformed as the node is transformed, so this
+ * method does NOT need to be invoked when the node is transformed (moved, rotated,
+ * or scaled).
+ */
+-(void) rebuildBoundingVolume;
+
 
 #pragma mark Transformations
 
@@ -1062,7 +1203,7 @@
 
 /**
  * Applies the transform properties (location, rotation, scale) to the transformMatrix
- * of this node, and all descendent nodes.
+ * of this node, and all descendant nodes.
  *
  * This method is invoked automatically during scheduled update processing between the
  * invocations of the updateBeforeTransform: and updateAfterTransform: methods.
@@ -1080,7 +1221,7 @@
 
 /**
  * Applies the transform properties (location, rotation, scale) to the transformMatrix
- * of this node, but NOT to any descendent nodes.
+ * of this node, but NOT to any descendant nodes.
  *
  * Use this method only when you know that you only need the transformMatrix of the
  * specific node updated, and not the matrices of the decendants of that node, or if
@@ -1098,15 +1239,26 @@
  */
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor;
 
+/**
+ * Returns the class of visitor that will automatically be instantiated when visiting
+ * this node to transform, without updating.
+ *
+ * The returned class must be a subclass of CC3NodeTransformingVisitor. This implementation
+ * returns CC3NodeTransformingVisitor. Subclasses may override to customize the behaviour
+ * of the updating visits.
+ */
+-(id) transformVisitorClass;
+
 
 #pragma mark Drawing
 
 /**
- * Draws or applies this node to the GL engine. The specified visitor encapsulates
- * the frustum of the currently active camera, and certain drawing options.
+ * Template method that applies this node's transform matrix to the GL matrix stack
+ * and draws this node using the specified visitor.
  *
- * To avoid unnecessary drawing operations, this node will only be drawn if the node:
- *   - is visible (as indicated by the visible property)
+ * This method is invoked by the drawing visitor when it visits the node, if all of
+ * the following conditions are met by this node:
+ *   - ths node is visible (as indicated by the visible property)
  *   - has content to draw (as indicated by the hasLocalContent property)
  *   - intersects the camera's frustum (which is checked by invoking the method
  *     doesIntersectFrustum: of this node with the frustum from the visitor).
@@ -1114,15 +1266,10 @@
  * If all of these tests pass, drawing is required, and this method transforms and draws
  * the local content of this node.
  *
- * If this node is visible and the visitor indicates that children should also be drawn,
- * this method then passes this notificaton along to the child nodes.
- *
- * As described in the class documentation, in keeping with best practices, drawing and frame
- * rendering should be kept separate from updating the model state. Therefore, when overriding
- * this method in a subclass (or any of the template methods invoked by this method), do not
- * update any model state. This method should perform only frame rendering operations.
+ * This method is automatically invoked from the visitor. The application should
+ * never have need to used this method.
  */
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Returns whether the local content of this node intersects the given frustum.
@@ -1143,6 +1290,20 @@
  * Otherwise, it simply returns YES. Subclasses may override to change this standard behaviour. 
  */
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum;
+
+/**
+ * Draws the content of this node to the GL engine. The specified visitor encapsulates
+ * the frustum of the currently active camera, and certain drawing options.
+ *
+ * As described in the class documentation, in keeping with best practices, drawing and frame
+ * rendering should be kept separate from updating the model state. Therefore, when overriding
+ * this method in a subclass (or any of the template methods invoked by this method), do not
+ * update any model state. This method should perform only frame rendering operations.
+ * 
+ * This method is invoked automatically as part of the drawing operations initiated by
+ * the transformAndDrawWithVisitor: method.
+ */
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Checks that the child nodes of this node are in the correct drawing order relative
@@ -1171,20 +1332,43 @@
 #pragma mark Node structural hierarchy
 
 /** The child nodes of this node, in a node structural hierarchy. */
-@property(nonatomic, readonly) NSArray* children;
+@property(nonatomic, readonly) CCArray* children;
 
 /** The parent node of this node, in a node structural hierarchy. */
 @property(nonatomic, readonly) CC3Node* parent;
 
 /**
  * Returns the root ancestor of this node, in the node structural hierarchy,
- * or returns nil if this node has no parent.
+ * or returns this node, if this node has no parent.
  *
  * In almost all cases, this node returned will be the CC3World. However, if
  * this node and all of its ancestors have not been added to the CC3World,
  * then the returned node may be some other node.
+ *
+ * Reading this property traverses up the node hierarchy. If this property
+ * is accessed frequently, it is recommended that it be cached.
  */
 @property(nonatomic, readonly) CC3Node* rootAncestor;
+
+/**
+ * If this node has been added to the 3D world, either directly, or as part
+ * of a node assembly, returns the CC3World instance that forms the 3D world,
+ * otherwise returns nil.
+ *
+ * Reading this property traverses up the node hierarchy. If this property
+ * is accessed frequently, it is recommended that it be cached.
+ */
+@property(nonatomic, readonly) CC3World* world;
+
+/**
+ * If this node has been added to the 3D world, either directly, or as part
+ * of a node assembly, returns the activeCamera property of the CC3World instance,
+ * as accessed via the world property, otherwise returns nil.
+ *
+ * Reading this property traverses up the node hierarchy. If this property
+ * is accessed frequently, it is recommended that it be cached.
+ */
+@property(nonatomic, retain, readonly) CC3Camera* activeCamera;
 
 /**
  * Indicates whether this instance should automatically remove itself from its parent
@@ -1324,13 +1508,13 @@
  * Returns an autoreleased array containing this node and all its descendants.
  * This is done by invoking flattenInto: with a newly-created array, and returning the array. 
  */
--(NSArray*) flatten;
+-(CCArray*) flatten;
 
 /**
  * Adds this node to the specified array, and then invokes this method on each child node.
  * The effect is to populate the array with this node and all its descendants.
  */
--(void) flattenInto: (NSMutableArray*) anArray;
+-(void) flattenInto: (CCArray*) anArray;
 	
 
 #pragma mark CC3Node actions
@@ -1380,13 +1564,14 @@
  * parent that is returned by the touchableNode property of either the parent or child.
  *
  * This design simplifies identifying the node that is of interest when a touch event
- * occurs. Thus, a car may be drawn as a node assembly of many descendent nodes (doors,
+ * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
  * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
  * each wheel, it will be the parent car node that will be returned by the touchableNode
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
  * 
- * Only visible nodes can be touched.
+ * Normally, only visible nodes can be touched. But this can be changed by setting the
+ * shouldAllowTouchableWhenInvisible property to YES.
  * 
  * The initial value of this property is NO.
  */
@@ -1396,19 +1581,46 @@
  * Indicates whether this node will respond to UI touch events.
  *
  * A node may often be touchable even if the isTouchEnabled flag is set to NO.
- * This property returns YES under either of the following conditions:
+ *
+ * When the node is visible, this property returns YES under either of the
+ * following conditions:
  *   - The isTouchEnabled property of this node is set to YES.
  *   - The shouldInheritTouchability property of this node is set to YES,
  *     AND the isTouchable property of the parent of this node returns YES.
  *
+ * When the node is NOT visible, this property returns YES under either of the
+ * following conditions:
+ *   - The isTouchEnabled property of this node is set to YES
+ *     AND the shouldAllowTouchableWhenInvisible is set to YES.
+ *   - The shouldInheritTouchability property of this node is set to YES,
+ *     AND the isTouchable property of the parent of this node returns YES.
+ *     AND the shouldAllowTouchableWhenInvisible of this node is set to YES.
+ *
  * This design simplifies identifying the node that is of interest when a touch event
- * occurs. Thus, a car may be drawn as a node assembly of many descendent nodes (doors,
+ * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
  * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
  * each wheel, it will be the parent car node that will be returned by the touchableNode
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
  */
 @property(nonatomic, readonly) BOOL isTouchable;
+
+/**
+ * Indicates the node that is of interest if this node is selected by a touch event.
+ * The value of this property is not always this node, but may be an ancestor node instead.
+ *
+ * The value returned by this property is this node if the isTouchEnabled property of this
+ * node is set to YES, or the nearest ancestor whose isTouchEnabled property is set to YES,
+ * or nil if neither this node, nor any ancestor has the isTouchEnabled property set to YES.
+ *
+ * This design simplifies identifying the node that is of interest when a touch event
+ * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
+ * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
+ * each wheel, it will be the parent car node that will be returned by the touchableNode
+ * property of the car structural node, or each wheel node. This allows the user to
+ * touch a wheel, but still have the car identified as the object of interest.
+ */
+@property(nonatomic, readonly) CC3Node* touchableNode;
 
 /**
  * Indicates whether this node should automatically be considered touchable if this
@@ -1431,21 +1643,16 @@
 @property(nonatomic, assign) BOOL shouldInheritTouchability;
 
 /**
- * Indicates the node that is of interest if this node is selected by a touch event.
- * The value of this property is not always this node, but may be an ancestor node instead.
+ * Indicates whether this node should be touchable even when invisible.
  *
- * The value returned by this property is this node if the isTouchEnabled property of this
- * node is set to YES, or the nearest ancestor whose isTouchEnabled property is set to YES,
- * or nil if neither this node, nor any ancestor has the isTouchEnabled property set to YES.
+ * When this property and the visible property are set to NO, the isTouchable
+ * property will always return NO. When this property is YES, the isTouchable
+ * property can return YES for an invisible node, if the other conditions for
+ * touchability are met. See the isTouchable property for more info.
  *
- * This design simplifies identifying the node that is of interest when a touch event
- * occurs. Thus, a car may be drawn as a node assembly of many descendent nodes (doors,
- * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
- * each wheel, it will be the parent car node that will be returned by the touchableNode
- * property of the car structural node, or each wheel node. This allows the user to
- * touch a wheel, but still have the car identified as the object of interest.
+ * The initial value of this propety is NO.
  */
-@property(nonatomic, readonly) CC3Node* touchableNode;
+@property(nonatomic, assign) BOOL shouldAllowTouchableWhenInvisible;
 
 /**
  * Sets the isTouchEnabled property to YES on this node and all descendant nodes.
@@ -1722,6 +1929,99 @@
  */
 @property(nonatomic, assign) BOOL shouldDrawAllLocalContentWireframeBoxes;
 
+/**
+ * Adds a visble line, drawn in the specified color, from the pivot location of
+ * this node (the origin in this node's local coordinate system) to a location
+ * somewhat outside the node in the specified direction.
+ *
+ * The extent that the line will protrude from this node is proportional to the
+ * size of this node, as determined by the CC3DirectionMarkerNode class-side
+ * directionMarkerScale property.
+ * 
+ * The line is drawn by creating and adding a CC3DirectionMarkerNode as a child
+ * node to this node. The length of the child node is set from the boundingBox
+ * property of this node, so that the line protrudes somewhat from this node.
+ *
+ * You can add more than one direction marker, and assign different colors to each.
+ *
+ * This feature can be useful during development in helping to determine the
+ * rotational orientation of a 3D structural node.
+ *
+ * By default, the child line node is not touchable, even if this node is touchable.
+ * If, for some reason you want the wireframe to be touchable, you can retrieve
+ * the direction marker nodes via the directionMarkers property, and set the
+ * isTouchEnabled property to YES.
+ */
+-(void) addDirectionMarkerColored: (ccColor4F) aColor inDirection: (CC3Vector) aDirection;
+
+/**
+ * Adds a visble line, drawn in the color indicated by the directionMarkerColor
+ * class-side property, from the pivot location of this node (the origin in this
+ * node's local coordinate system) to a location somewhat outside the node in
+ * the direction kCC3VectorUnitZNegative, pointing down the negative Z-axis
+ * (which is the default direction in OpenGL).
+ *
+ * For subclasses that use targetting, the line will point in the forwardDirection,
+ * which is the direction of the target location.
+ * 
+ * See the addDirectionMarkerColored:inDirection: method for more info.
+ */
+-(void) addDirectionMarker;
+
+/**
+ * Adds three visble direction marker lines, indicating the direction of the
+ * X, Y & Z axes, in the local coordinate system of this node.
+ *
+ * The lines extend from the pivot location of this node (the origin in this
+ * node's local coordinate system) to a location somewhat outside the node in
+ * the direction of each of the X, Y & Z axes.
+ *
+ * The lines are color-coded red, green and blue for the X, Y & Z axes,
+ * respectively, as an easy (RGB <=> XYZ) mnemonic.
+ * 
+ * See the addDirectionMarkerColored:inDirection: method for more info.
+ */
+-(void) addAxesDirectionMarkers;
+
+/**
+ * Removes all the direction marker child nodes that were previously added using
+ * the addDirectionMarkerColored:inDirection: and addDirectionMarker methods.
+ */
+-(void) removeAllDirectionMarkers;
+
+/**
+ * Returns an array of all the direction marker child nodes that were previously added
+ * using the addDirectionMarkerColored:inDirection: and addDirectionMarker methods.
+ */
+@property(nonatomic, readonly) CCArray* directionMarkers;
+
+/**
+ * Returns the color that direction marker lines will be drawn in when created
+ * using the addDirectionMarker method.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new direction marker lines to be set to the value of the color
+ * property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FRed.
+ */
++(ccColor4F) directionMarkerColor;
+
+/**
+ * Sets the color that direction marker lines will be drawn in when created
+ * using the addDirectionMarker method.
+ *
+ * Changing this property will affect the color of any new direction marker lines
+ * created. It does not affect any existing direction marker lines.
+ *
+ * Setting this property to kCCC4FBlackTransparent will cause the color
+ * of any new direction marker lines to be set to the value of the color
+ * property of the node instead.
+ * 
+ * The initial value of this class property is kCCC4FRed.
+ */
++(void) setDirectionMarkerColor: (ccColor4F) aColor;
+
 @end
 
 
@@ -1741,6 +2041,7 @@
  */
 @interface CC3LocalContentNode : CC3Node {
 	CC3BoundingBox globalLocalContentBoundingBox;
+	GLint zOrder;
 }
 
 /**
@@ -1935,6 +2236,18 @@
  * When setting this value, it is converted to modulo +/-360 degrees.
  */
 @property(nonatomic, assign) GLfloat rotationAngle;
+
+/** Rotates this rotator from its current state by the specified Euler angles in degrees. */
+-(void) rotateBy: (CC3Vector) aRotation;
+
+/** Rotates this rotator from its current state by the specified quaternion. */
+-(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
+
+/**
+ * Rotates this rotator from its current state by rotating around
+ * the specified axis by the specified angle in degrees.
+ */
+-(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 
 /** Initializes this instance with an identity rotationMatrix. */
 -(id) init;

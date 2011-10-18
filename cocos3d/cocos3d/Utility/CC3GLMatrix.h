@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -362,21 +362,75 @@
 			scaleBy: (CC3Vector) scaleVector;
 	
 /**
- * Rotates this matrix by the specified amount. Each element of the rotation vector represents
- * an Euler angle in degrees, and rotation is performed in YXZ order, which is the OpenGL default.
+ * Rotates this matrix by the specified amount. Each element of the rotation
+ * vector represents an Euler angle in degrees, and rotation is performed in
+ * YXZ order, which is the OpenGL default.
+ *
+ * Since this matrix may potentially already contains rotations, the new rotation
+ * is performed first, followed by the rotation already contained within this matrix.
+ * If the existing rotations were performed first, the new rotation would be performed
+ * in the rotated coordinate system defined by this matrix, which is almost always
+ * not the desired effect.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to this matrix. 
  */
 -(void) rotateBy: (CC3Vector) aVector;
 
-/** Rotates this matrix around the X-axis by the specified number of degrees. */
+/**
+ * Rotates this matrix around the X-axis by the specified number of degrees.
+ *
+ * Since this matrix may potentially already contains rotations, the new rotation
+ * is performed first, followed by the rotation already contained within this matrix.
+ * If the existing rotations were performed first, the new rotation would be performed
+ * in the rotated coordinate system defined by this matrix, which is almost always
+ * not the desired effect.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to this matrix. 
+ */
 -(void) rotateByX: (GLfloat) degrees;
 
-/** Rotates this matrix around the Y-axis by the specified number of degrees. */
+/**
+ * Rotates this matrix around the Y-axis by the specified number of degrees.
+ *
+ * Since this matrix may potentially already contains rotations, the new rotation
+ * is performed first, followed by the rotation already contained within this matrix.
+ * If the existing rotations were performed first, the new rotation would be performed
+ * in the rotated coordinate system defined by this matrix, which is almost always
+ * not the desired effect.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to this matrix. 
+ */
 -(void) rotateByY: (GLfloat) degrees;
 
-/** Rotates this matrix around the Z-axis by the specified number of degrees. */
+/**
+ * Rotates this matrix around the Z-axis by the specified number of degrees.
+ *
+ * Since this matrix may potentially already contains rotations, the new rotation
+ * is performed first, followed by the rotation already contained within this matrix.
+ * If the existing rotations were performed first, the new rotation would be performed
+ * in the rotated coordinate system defined by this matrix, which is almost always
+ * not the desired effect.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to this matrix. 
+ */
 -(void) rotateByZ: (GLfloat) degrees;
 
-/** Rotates this matrix by the rotation specified in the given quaternion. */
+/**
+ * Rotates this matrix by the rotation specified in the given quaternion.
+ *
+ * Since this matrix may potentially already contains rotations, the new rotation
+ * is performed first, followed by the rotation already contained within this matrix.
+ * If the existing rotations were performed first, the new rotation would be performed
+ * in the rotated coordinate system defined by this matrix, which is almost always
+ * not the desired effect.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to this matrix. 
+ */
 -(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
 
 /** Translates this matrix in three dimensions by the specified translation vector. */
@@ -424,8 +478,18 @@
 		  scaleBy: (CC3Vector) scaleVector;
 
 /**
- * Rotates the specified matrix by the specified amount. Each element of the rotation vector represents
- * an Euler angle in degrees, and rotation is performed in YXZ order, which is the OpenGL default.
+ * Rotates the specified matrix by the specified amount. Each element of the rotation
+ * vector represents an Euler angle in degrees, and rotation is performed in YXZ order,
+ * which is the OpenGL default.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
@@ -433,36 +497,82 @@
 /**
  * Rotates the specified matrix by the specified amount. Each element of the rotation
  * vector represents an Euler angle in degrees, and rotation is performed in XYZ order.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
 
 /**
  * Rotates the specified matrix around the X-axis by the specified number of degrees.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotate: (GLfloat*) aGLMatrix byX: (GLfloat) degrees;
 
 /**
  * Rotates the specified matrix around the Y-axis by the specified number of degrees.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotate: (GLfloat*) aGLMatrix byY: (GLfloat) degrees;
 
 /**
  * Rotates the specified matrix around the Z-axis by the specified number of degrees.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotate: (GLfloat*) aGLMatrix byZ: (GLfloat) degrees;
 
 /**
  * Rotates the specified matrix by the rotation specified in the given quaternion.
+ *
+ * Since this operation rotates a matrix that potentially already contains rotations,
+ * the new rotation is performed first, followed by the rotation already contained
+ * within the specified matrix. If the matrix rotations were performed first, the new
+ * rotation would be performed in the rotated coordinate system defined by the matrix.
+ *
+ * In mathematical terms, the incoming rotation is converted to matrix form, and is
+ * left-multiplied to the specified matrix. 
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) rotate: (GLfloat*) aGLMatrix byQuaternion: (CC3Vector4) aQuaternion;
 
 /**
  * Translates this matrix in three dimensions by the specified translation vector.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) translate: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
@@ -475,43 +585,51 @@
 
 /**
  * Translates this matrix along the Y-axis by the specified amount.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) translate: (GLfloat*) aGLMatrix byY: (GLfloat) distance;
 
 /**
  * Translates this matrix along the Z-axis by the specified amount.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) translate: (GLfloat*) aGLMatrix byZ: (GLfloat) distance;
 
 /**
- * Scales this matrix in three dimensions by the specified scaling vector. Non-uniform scaling
- * can be achieved by specifying different values for each element of the scaling vector.
+ * Scales this matrix in three dimensions by the specified scaling vector.
+ * Non-uniform scaling can be achieved by specifying different values for
+ * each element of the scaling vector.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) scale: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
 
 /**
  * Scales this matrix along the X-axis by the specified factor.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) scale: (GLfloat*) aGLMatrix byX: (GLfloat) scaleFactor;
 
 /**
  * Scales this matrix along the Y-axis by the specified factor.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) scale: (GLfloat*) aGLMatrix byY: (GLfloat) scaleFactor;
 
 /**
  * Scales this matrix along the Z-axis by the specified factor.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) scale: (GLfloat*) aGLMatrix byZ: (GLfloat) scaleFactor;
 
 /**
  * Scales this matrix uniformly in three dimensions by the specified factor.
+ *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) scale: (GLfloat*) aGLMatrix uniformlyBy: (GLfloat) scaleFactor;
@@ -521,10 +639,22 @@
 #pragma mark Instance math operations
 
 /**
- * Multiplies this matrix by the specified matrix.
- * The contents of this matrix are changed. The contents of the specified matrix remain unchanged.
+ * Multiplies a matrix by the specified matrix, where, in the matrix multiplication
+ * equation, this matrix is on the left, and the specified matrix is on the right.
+ *
+ * The contents of this matrix are changed.
+ * The contents of the specified matrix remain unchanged.
  */
 -(void) multiplyByMatrix: (CC3GLMatrix*) aMatrix;
+
+/**
+ * Multiplies a matrix by the specified matrix, where, in the matrix multiplication
+ * equation, the specified matrix is on the left and this matrix is on the right.
+ *
+ * The contents of this matrix are changed.
+ * The contents of the specified matrix remain unchanged.
+ */
+-(void) leftMultiplyByMatrix: (CC3GLMatrix*) aMatrix;
 
 /**
  * Transforms the specified location vector using this matrix, and returns the transformed location.
@@ -604,11 +734,26 @@
 #pragma mark Matrix math operations
 
 /**
- * Multiplies a matrix by another matrix.
- * The contents of the first matrix are changed. The contents of the second matrix remain unchanged.
+ * Multiplies a matrix by another matrix, where, in the matrix multiplication
+ * equation, the first matrix is on the left and the second matrix is on the right.
+ *
+ * The contents of the first matrix are changed. The contents of the second
+ * matrix remain unchanged.
+ * 
  * Both matrices must be a standard 4x4 OpenGL matrices in column-major order.
  */
 +(void) multiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix;
+
+/**
+ * Multiplies a matrix by another matrix, where, in the matrix multiplication
+ * equation, the first matrix is on the right and the second matrix is on the left.
+ *
+ * The contents of the first matrix are changed. The contents of the second
+ * matrix remain unchanged.
+ * 
+ * Both matrices must be a standard 4x4 OpenGL matrices in column-major order.
+ */
++(void) leftMultiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix;
 
 /**
  * Transforms the specified location vector using the specified matrix, and returns the transformed

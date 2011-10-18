@@ -1,7 +1,7 @@
 /*
  * CC3Texture.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -173,60 +173,60 @@ static const ccTexParams kCC3DefaultTextureParameters = { GL_LINEAR, GL_LINEAR, 
 /**
  * Initializes this unnamed instance with an automatically generated unique tag value.
  * The tag value will be generated automatically via the method nextTag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
--(id) initFromFile: (NSString*) aFileName;
+-(id) initFromFile: (NSString*) aFilePath;
 
 /**
  * Allocates and initializes an autoreleased unnamed instance with an automatically
  * generated unique tag value. The tag value is generated using a call to nextTag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
-+(id) textureFromFile: (NSString*) aFileName;
++(id) textureFromFile: (NSString*) aFilePath;
 
 /**
  * Initializes this unnamed instance with the specified tag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
--(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFileName;
+-(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath;
 
 /**
  * Allocates and initializes an unnamed autoreleased instance with the specified tag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
-+(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFileName;
++(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath;
 
 /**
  * Initializes this instance with the specified name and an automatically generated unique
  * tag value. The tag value will be generated automatically via the method nextTag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
--(id) initWithName: (NSString*) aName fromFile: (NSString*) aFileName;
+-(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified name and an
  * automatically generated unique tag value. The tag value is generated using a call to nextTag.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
-+(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFileName;
++(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
  * Initializes this instance with the specified tag and name.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFileName;
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified tag and name.
- * The texture file with the specified fileName will be loaded into the texture property.
+ * The texture file from the specified path will be loaded into the texture property.
  */
-+(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFileName;
++(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
  * Loads the specified texture file into the texture property,
  * and returns whether the loading was successful.
  */
--(BOOL) loadTextureFile: (NSString*) aFileName;
+-(BOOL) loadTextureFile: (NSString*) aFilePath;
 
 
 #pragma mark Drawing

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Materials.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,15 @@
  */
 
 #import "CC3OpenGLES11Materials.h"
+
+
+@interface CC3OpenGLES11StateTrackerEnumeration (Materials)
+-(void) setValueRaw:(GLenum) value;
+@end
+
+@interface CC3OpenGLES11StateTrackerFloat (Materials)
+-(void) setValueRaw:(GLfloat) value;
+@end
 
 
 #pragma mark -
@@ -78,8 +87,10 @@
 }
 
 -(void) initializeTrackers {
-	self.sourceBlend = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_BLEND_SRC];
-	self.destinationBlend = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_BLEND_DST];
+	self.sourceBlend = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_BLEND_SRC];
+	self.destinationBlend = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																		   forState: GL_BLEND_DST];
 }
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
@@ -101,31 +112,105 @@
 	destinationBlend.valueIsKnown = aBoolean;
 }
 
--(void) open {
-	[sourceBlend open];
-	[destinationBlend open];
-}
-
--(void) restoreOriginalValue {
-	[self applySource: sourceBlend.originalValue
-	   andDestination: destinationBlend.originalValue];
-}
-
 -(void) applySource: (GLenum) srcBlend andDestination: (GLenum) dstBlend {
 	BOOL shouldSetGL = self.shouldAlwaysSetGL;
-	shouldSetGL |= [sourceBlend attemptSetValue: srcBlend];
-	shouldSetGL |= [destinationBlend attemptSetValue: dstBlend];
+	shouldSetGL |= (!sourceBlend.valueIsKnown || srcBlend != sourceBlend.value);
+	shouldSetGL |= (!destinationBlend.valueIsKnown || dstBlend != destinationBlend.value);
 	if (shouldSetGL) {
-		glBlendFunc(sourceBlend.value, destinationBlend.value);
+		[sourceBlend setValueRaw: srcBlend];
+		[destinationBlend setValueRaw: dstBlend];
+		glBlendFunc(srcBlend, dstBlend);
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
 	}
 	LogTrace("%@ %@ %@ = %@ and %@ = %@", [self class], (shouldSetGL ? @"applied" : @"reused"),
 			 NSStringFromGLEnum(sourceBlend.name), NSStringFromGLEnum(sourceBlend.value),
 			 NSStringFromGLEnum(destinationBlend.name), NSStringFromGLEnum(destinationBlend.value));
 }
 
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[sourceBlend restoreOriginalValue];
+		[destinationBlend restoreOriginalValue];
+		glBlendFunc(sourceBlend.value, destinationBlend.value);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@:\n    %@\n    %@",
 			[self class], sourceBlend, destinationBlend];
+}
+
+@end
+
+
+@implementation CC3OpenGLES11StateTrackerAlphaFunction
+
+@synthesize function, reference;
+
+-(void) dealloc {
+	[function release];
+	[reference release];
+	[super dealloc];
+}
+
+-(void) initializeTrackers {
+	self.function = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																   forState: GL_ALPHA_TEST_FUNC];
+	self.reference = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+															  forState: GL_ALPHA_TEST_REF];
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
+-(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	function.originalValueHandling = origValueHandling;
+	reference.originalValueHandling = origValueHandling;
+	[super setOriginalValueHandling: origValueHandling];
+} 
+
+-(BOOL) valueIsKnown {
+	return function.valueIsKnown && reference.valueIsKnown;
+}
+
+-(void) setValueIsKnown:(BOOL) aBoolean {
+	function.valueIsKnown = aBoolean;
+	reference.valueIsKnown = aBoolean;
+}
+
+-(void) applyFunction: (GLenum) func andReference: (GLfloat) refValue {
+	BOOL shouldSetGL = self.shouldAlwaysSetGL;
+	shouldSetGL |= (!function.valueIsKnown || func != function.value);
+	shouldSetGL |= (!reference.valueIsKnown || refValue != reference.value);
+	if (shouldSetGL) {
+		[function setValueRaw: func];
+		[reference setValueRaw: refValue];
+		glAlphaFunc(func, refValue);
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
+	}
+	LogTrace("%@ %@ %@ = %@ and %@ = %.3f", [self class], (shouldSetGL ? @"applied" : @"reused"),
+			 NSStringFromGLEnum(function.name), NSStringFromGLEnum(function.value),
+			 NSStringFromGLEnum(reference.name), reference.value);
+}
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[function restoreOriginalValue];
+		[reference restoreOriginalValue];
+		glAlphaFunc(function.value, reference.value);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@:\n    %@\n    %@",
+			[self class], function, reference];
 }
 
 @end
@@ -141,7 +226,8 @@
 @synthesize specularColor;
 @synthesize emissionColor;
 @synthesize shininess;
-@synthesize blend;
+@synthesize alphaFunc;
+@synthesize blendFunc;
 
 -(void) dealloc {
 	[ambientColor release];
@@ -149,37 +235,25 @@
 	[specularColor release];
 	[emissionColor release];
 	[shininess release];
-	[blend release];
+	[alphaFunc release];
+	[blendFunc release];
 	[super dealloc];
 }
 
 -(void) initializeTrackers {
-	self.ambientColor = [CC3OpenGLES11StateTrackerMaterialColor trackerForState: GL_AMBIENT];
-	self.diffuseColor = [CC3OpenGLES11StateTrackerMaterialColor trackerForState: GL_DIFFUSE];
-	self.specularColor = [CC3OpenGLES11StateTrackerMaterialColor trackerForState: GL_SPECULAR];
-	self.emissionColor = [CC3OpenGLES11StateTrackerMaterialColor trackerForState: GL_EMISSION];
-	self.shininess = [CC3OpenGLES11StateTrackerMaterialFloat trackerForState: GL_SHININESS];
-	self.blend = [CC3OpenGLES11StateTrackerMaterialBlend tracker];
-}
+	self.ambientColor = [CC3OpenGLES11StateTrackerMaterialColor trackerWithParent: self
+																		 forState: GL_AMBIENT];
+	self.diffuseColor = [CC3OpenGLES11StateTrackerMaterialColor trackerWithParent: self
+																		 forState: GL_DIFFUSE];
+	self.specularColor = [CC3OpenGLES11StateTrackerMaterialColor trackerWithParent: self
+																		  forState: GL_SPECULAR];
+	self.emissionColor = [CC3OpenGLES11StateTrackerMaterialColor trackerWithParent: self
+																		  forState: GL_EMISSION];
+	self.shininess = [CC3OpenGLES11StateTrackerMaterialFloat trackerWithParent: self
+																	  forState: GL_SHININESS];
+	self.alphaFunc = [CC3OpenGLES11StateTrackerAlphaFunction trackerWithParent: self];
 
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[ambientColor open];
-	[diffuseColor open];
-	[specularColor open];
-	[emissionColor open];
-	[shininess open];
-	[blend open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[ambientColor close];
-	[diffuseColor close];
-	[specularColor close];
-	[emissionColor close];
-	[shininess close];
-	[blend close];
+	self.blendFunc = [CC3OpenGLES11StateTrackerMaterialBlend trackerWithParent: self];
 }
 
 -(NSString*) description {
@@ -190,7 +264,8 @@
 	[desc appendFormat: @"\n    %@ ", specularColor];
 	[desc appendFormat: @"\n    %@ ", emissionColor];
 	[desc appendFormat: @"\n    %@ ", shininess];
-	[desc appendFormat: @"\n    %@ ", blend];
+	[desc appendFormat: @"\n    %@ ", alphaFunc];
+	[desc appendFormat: @"\n    %@ ", blendFunc];
 	return desc;
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Engine.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -94,7 +94,9 @@
  *      CC3OpenGLES11StateTrackerManager into the appExtensions property,
  *      which is nil, unless your application sets a tracker manager there.
  */
-@interface CC3OpenGLES11Engine : NSObject {
+@interface CC3OpenGLES11Engine : CC3OpenGLES11StateTracker {
+	CCArray* trackersToOpen;
+	CCArray* trackersToClose;
 	CC3OpenGLES11Platform* platform;
 	CC3OpenGLES11ServerCapabilities* serverCapabilities;
 	CC3OpenGLES11ClientCapabilities* clientCapabilities;
@@ -107,7 +109,29 @@
 	CC3OpenGLES11Fog* fog;
 	CC3OpenGLES11Hints* hints;
 	CC3OpenGLES11StateTrackerManager* appExtensions;
+	BOOL isClosing;
+	BOOL trackerToOpenWasAdded;
 }
+
+/**
+ * A collection of trackers that are to opened when this instance is opened
+ * at the start of each frame render cycle.
+ *
+ * Initially, most trackers are added to this collection automatically, but
+ * any trackers that are set to read their GL state only once are removed
+ * once the GL value has been read.
+ */
+@property(nonatomic, readonly) CCArray* trackersToOpen;
+
+/**
+ * A collection of trackers that are to closed when this instance is closed
+ * at the end of each frame render cycle.
+ *
+ * At the beginning of each render cycle, this collection is empty. Trackers
+ * that make changes to the GL state are automatically added here when the
+ * GL state change is made.
+ */
+@property(nonatomic, readonly) CCArray* trackersToClose;
 
 /** The state tracking manager that tracks GL platform functionality state.  */
 @property(nonatomic, retain) CC3OpenGLES11Platform* platform;
@@ -157,6 +181,17 @@
 +(CC3OpenGLES11Engine*) engine;
 
 /**
+ * Template method that initializes the tracker managers.
+ *
+ * Customized subclasses that add additional tracker managers
+ * can override this method if necessary.
+ *
+ * Automatically invoked during instance initialization.
+ * The application should not invoke this method.
+ */
+-(void) initializeTrackers;
+
+/**
  * Opens tracking of GL state.
  * 
  * All gl* function calls that make changes to GL engine state made between
@@ -173,5 +208,34 @@
  * through this CC3OpenGLES11Engine singleton.
  */
 -(void) close;
+
+/**
+ * Adds the specified tracker to the collection of trackers that are to be opened.
+ *
+ * Invoked automatically when a tracker has been added somewhere in the hierarchy.
+ *
+ * When the CC3OpenGGLES11Engine singleton is created, all primitive element trackers
+ * (CC3OpenGLES11StateTrackerPrimitive) are added using this method. When the open
+ * method of this instance is invoked, those that need to read their original value
+ * from the GL engine do so.
+ *
+ * Most trackers only need to be opened once in order to read the original value
+ * from the GL engine. Once that has occurred, the tracker will be removed from
+ * this collection. Trackers that are configured to read the value on each frame
+ * render cycle (as indicated by returning YES in the shouldAlwaysReadOriginal
+ * property) will remain in this collection.
+ */
+-(void) addTrackerToOpen: (CC3OpenGLES11StateTracker*) aTracker;
+
+/**
+ * Adds the specified tracker to the collection of trackers that are to be closed.
+ *
+ * Invoked automatically when the value of the specified tracker is set in the GL engine.
+ *
+ * Once 3D rendering is completed, the close method of this class causes the value in
+ * each of the changed trackers to be restored to the GL engine by invoking the close
+ * method on each of the trackers in this collection.
+ */
+-(void) addTrackerToClose: (CC3OpenGLES11StateTracker*) aTracker;
 
 @end

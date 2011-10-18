@@ -1,7 +1,7 @@
 /*
  * CC3Math.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,8 +35,8 @@
 
 #pragma mark Basic math support
 
-float Cyclic(float value, float period) {
-	float modVal = fmod(value, period);
+float PositiveCyclic(float value, float period) {
+	float modVal = Cyclic(value, period);
 	return (modVal < 0.0) ? (modVal + period) : modVal;
 }
 

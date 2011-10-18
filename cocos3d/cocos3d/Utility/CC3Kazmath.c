@@ -1,7 +1,7 @@
 /*
  * CC3Kazmath.c
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  *
  * Copyright (c) 2008, Luke Benstead.
  * All rights reserved.
@@ -194,6 +194,8 @@ kmMat4* kmMat4RotationX(kmMat4* pOut, const float radians) {
      |  0  0       0       1 |
 */
 	kmScalar* m = pOut->mat;
+	kmScalar c = cosf(radians);
+	kmScalar s = sinf(radians);
 	
 	m[0] = 1.0f;
 	m[1] = 0.0f;
@@ -201,13 +203,13 @@ kmMat4* kmMat4RotationX(kmMat4* pOut, const float radians) {
 	m[3] = 0.0f;
 	
 	m[4] = 0.0f;
-	m[5] = cosf(radians);
-	m[6] = sinf(radians);
+	m[5] = c;
+	m[6] = s;
 	m[7] = 0.0f;
 	
 	m[8] = 0.0f;
-	m[9] = -sinf(radians);
-	m[10] = cosf(radians);
+	m[9] = -s;
+	m[10] = c;
 	m[11] = 0.0f;
 	
 	m[12] = 0.0f;
@@ -227,10 +229,12 @@ kmMat4* kmMat4RotationY(kmMat4* pOut, const float radians) {
      |  0       0   0       1 |
 */
 	kmScalar* m = pOut->mat;
+	kmScalar c = cosf(radians);
+	kmScalar s = sinf(radians);
 	
-	m[0] = cosf(radians);
+	m[0] = c;
 	m[1] = 0.0f;
-	m[2] = -sinf(radians);
+	m[2] = -s;
 	m[3] = 0.0f;
 	
 	m[4] = 0.0f;
@@ -238,9 +242,9 @@ kmMat4* kmMat4RotationY(kmMat4* pOut, const float radians) {
 	m[6] = 0.0f;
 	m[7] = 0.0f;
 	
-	m[8] = sinf(radians);
+	m[8] = s;
 	m[9] = 0.0f;
-	m[10] = cosf(radians);
+	m[10] = c;
 	m[11] = 0.0f;
 	
 	m[12] = 0.0f;
@@ -260,14 +264,16 @@ kmMat4* kmMat4RotationZ(kmMat4* pOut, const float radians) {
      |  0        0        0   1 |
 */
 	kmScalar* m = pOut->mat;
+	kmScalar c = cosf(radians);
+	kmScalar s = sinf(radians);
 	
-	m[0] = cosf(radians);
-	m[1] = sinf(radians);
+	m[0] = c;
+	m[1] = s;
 	m[2] = 0.0f;
 	m[3] = 0.0f;
 	
-	m[4] = -sinf(radians);;
-	m[5] = cosf(radians);
+	m[4] = -s;
+	m[5] = c;
 	m[6] = 0.0f;
 	m[7] = 0.0f;
 	
@@ -298,25 +304,25 @@ M =  | ZS + XY(1-C)    C + YY(1 - C)  -XS + YZ(1-C)  0 |
 
      where X, Y, Z define axis of rotation and C = cos(A), S = sin(A) for A = angle of rotation
 */
-	kmScalar ca = cosf(radians);
-	kmScalar sa = sinf(radians);
+	kmScalar c = cosf(radians);
+	kmScalar s = sinf(radians);
 	
 	kmVec3 rax;
 	kmVec3Normalize(&rax, axis);
 	
-	pOut->mat[0] = ca + rax.x * rax.x * (1 - ca);
-	pOut->mat[1] = rax.z * sa + rax.y * rax.x * (1 - ca);
-	pOut->mat[2] = -rax.y * sa + rax.z * rax.x * (1 - ca);
+	pOut->mat[0] = c + rax.x * rax.x * (1 - c);
+	pOut->mat[1] = rax.z * s + rax.y * rax.x * (1 - c);
+	pOut->mat[2] = -rax.y * s + rax.z * rax.x * (1 - c);
 	pOut->mat[3] = 0.0f;
 	
-	pOut->mat[4] = -rax.z * sa + rax.x * rax.y * (1 - ca);
-	pOut->mat[5] = ca + rax.y * rax.y * (1 - ca);
-	pOut->mat[6] = rax.x * sa + rax.z * rax.y * (1 - ca);
+	pOut->mat[4] = -rax.z * s + rax.x * rax.y * (1 - c);
+	pOut->mat[5] = c + rax.y * rax.y * (1 - c);
+	pOut->mat[6] = rax.x * s + rax.z * rax.y * (1 - c);
 	pOut->mat[7] = 0.0f;
 	
-	pOut->mat[8] = rax.y * sa + rax.x * rax.z * (1 - ca);
-	pOut->mat[9] = -rax.x * sa + rax.y * rax.z * (1 - ca);
-	pOut->mat[10] = ca + rax.z * rax.z * (1 - ca);
+	pOut->mat[8] = rax.y * s + rax.x * rax.z * (1 - c);
+	pOut->mat[9] = -rax.x * s + rax.y * rax.z * (1 - c);
+	pOut->mat[10] = c + rax.z * rax.z * (1 - c);
 	pOut->mat[11] = 0.0f;
 	
 	pOut->mat[12] = 0.0f;

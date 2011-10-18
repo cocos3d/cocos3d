@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -46,6 +46,21 @@
 
 +(id) evaluator {
 	return [[[self alloc] init] autorelease];
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+// Subclasses that extend copying will override this method.
+-(void) populateFrom: (CC3NodeEvaluator*) another {}
+
+-(id) copyWithZone: (NSZone*) zone {
+	CC3NodeEvaluator* aCopy = [[[self class] allocWithZone: zone] init];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@", [self class]];
 }
 
 @end
@@ -138,8 +153,8 @@
 	[super dealloc];
 }
 
--(NSArray*) nodes {
-	return [NSArray array];
+-(CCArray*) nodes {
+	return [CCArray array];
 }
 
 -(BOOL) shouldUseOnlyForwardDistance {
@@ -168,6 +183,20 @@
 	return [[[self alloc] initWithEvaluator: anEvaluator] autorelease];
 }
 
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+// Subclasses that extend copying will override this method.
+-(void) populateFrom: (CC3NodeSequencer*) another {
+	allowSequenceUpdates = another.allowSequenceUpdates;
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	CC3NodeSequencer* aCopy = [[[self class] allocWithZone: zone]
+									initWithEvaluator: [evaluator copyAutoreleased]];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
+
 -(BOOL) add: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
 	return NO;
 }
@@ -176,27 +205,32 @@
 	return NO;
 }
 
--(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {
-	[self removeMisplacedNodesWithVisitor: visitor];
+-(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerVisitor*) visitor {
+	[self identifyMisplacedNodesWithVisitor: visitor];
 	if (visitor.hasMisplacedNodes) {
 		LogTrace(@"%@ detected %u misplaced nodes: %@",
 				 self, visitor.misplacedNodes.count, visitor.misplacedNodes);
-		for(CC3Node* n in visitor.misplacedNodes) {
-			[self add: n withVisitor: visitor];
+		for(CC3Node* aNode in visitor.misplacedNodes) {
+			if ([self remove: aNode withVisitor: visitor]) {
+				[self add: aNode withVisitor: visitor];
+			}
 		}
+		[visitor clearMisplacedNodes];
 		return YES;
 	}
 	return NO;
 }
 
--(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {}
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {}
+
+-(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) nodeVisitor {}
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@", [self class]];
+	return [NSString stringWithFormat: @"%@ with evaluator %@", [self class], evaluator];
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ %@", self, self.nodes];
+	return self.description;
 }
 
 @end
@@ -216,9 +250,20 @@
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		sequencers = [[NSMutableArray array] retain];
+		sequencers = [[CCArray array] retain];
 	}
 	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3BTreeNodeSequencer*) another {
+	[super populateFrom: another];
+
+	CCArray* otherChildren = another.sequencers;
+	for (CC3NodeSequencer* otherChild in otherChildren) {
+		[self addSequencer: [otherChild copyAutoreleased]];
+	}
 }
 
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer {
@@ -247,18 +292,24 @@
 	return NO;
 }
 
-/** Iterates through the sequencers, asking each to remove misplaced nodes. */
--(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {
+/** Iterates through the sequencers, collecting misplaced nodes in the visitor. */
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
 	if (allowSequenceUpdates) {
 		for (CC3NodeSequencer* s in sequencers) {
-			[s removeMisplacedNodesWithVisitor: visitor];
+			[s identifyMisplacedNodesWithVisitor: visitor];
 		}
 	}
 }
 
+-(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) aNodeVisitor {
+	for (CC3NodeSequencer* s in sequencers) {
+		[s visitNodesWithNodeVisitor: aNodeVisitor];
+	}
+}
+
 /** Concatenates the nodes from the contained sequencers into one array. */
--(NSArray*) nodes {
-	NSMutableArray* nodes = [NSMutableArray array];
+-(CCArray*) nodes {
+	CCArray* nodes = [CCArray array];
 	for (CC3NodeSequencer* s in sequencers) {
 		[nodes addObjectsFromArray: s.nodes];
 	}
@@ -282,7 +333,7 @@
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@", self.description];
+	[desc appendFormat: @"%@", [super fullDescription]];
 	for (CC3NodeSequencer* s in sequencers) {
 		[desc appendFormat: @"\n%@", [s fullDescription]];
 	}
@@ -319,17 +370,18 @@
 @implementation CC3NodeArraySequencer
 
 -(void) dealloc {
-	[nodes release];
+	[nodes releaseAsUnretained];		// Clears without releasing each element.
+	
 	[super dealloc];
 }
 
--(NSArray*) nodes {
-	return nodes;
+-(CCArray*) nodes {
+	return [CCArray arrayWithArray: nodes];
 }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		nodes = [[NSMutableArray array] retain];
+		nodes = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -351,11 +403,11 @@
 								between: leftNode
 									and: rightNode
 							withVisitor: visitor] ) {
-				[nodes insertObject: aNode atIndex: i];
+				[nodes insertUnretainedObject: aNode atIndex: i];
 				return YES;
 			}
 		}
-		[nodes addObject: aNode];
+		[nodes addUnretainedObject: aNode];
 		return YES;
 	}
 	return NO;
@@ -371,27 +423,31 @@
 -(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
 	NSUInteger nodeIndex = [nodes indexOfObjectIdenticalTo: aNode];
 	if (nodeIndex != NSNotFound) {
-		[nodes removeObjectAtIndex: nodeIndex];
+		[nodes removeUnretainedObjectAtIndex: nodeIndex];
 		return YES;
 	}
 	return NO;
 }
 
-/** Removes nodes that do not pass the evaluator. */
--(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {
-	if (!allowSequenceUpdates) return;		// Leave if sequence updating should not happen.
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
+	// Leave if sequence updating should not happen or if there is nothing to sort.
+	if (!allowSequenceUpdates || nodes.count == 0) return;
 
-	NSMutableArray* misplacedNodes = [NSMutableArray arrayWithCapacity: nodes.count];
-	for (CC3Node* n in nodes) {
-		if ( (evaluator && ![evaluator evaluate: n]) ) {
-			[misplacedNodes addObject: n];
+	for (CC3Node* aNode in nodes) {
+		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
+			[visitor addMisplacedNode: aNode];
 		}
 	}
-	// Remove all misplaced nodes from this node array, and add them to the visitor's cache.
-	for (CC3Node* n in misplacedNodes) {
-		[nodes removeObjectIdenticalTo: n];
+}
+
+-(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) aNodeVisitor {
+	for (CC3Node* aNode in nodes) {
+		[aNodeVisitor visit: aNode];
 	}
-	[visitor addMisplacedNodes: misplacedNodes];
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@ with nodes: %@", [super fullDescription], [nodes fullDescription]];
 }
 
 @end
@@ -417,9 +473,19 @@
 	return self;
 }
 
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+-(void) populateFrom: (CC3NodeArrayZOrderSequencer*) another {
+	[super populateFrom: another];
+	shouldUseOnlyForwardDistance = another.shouldUseOnlyForwardDistance;
+}
+
 /**
- * If the distance from the node of interest to the camera is greater than the
- * distance from the rightNode to the camera, return YES, otherwise return NO.
+ * If either the Z-order of the node of interest is greater than the Z-order
+ * of the rightNode, or the Z-order is equal, and the distance from the node of interest to the camera
+ * is greater than the distance from the rightNode to the camera, return YES,
+ * otherwise return NO.
+ * 
  * Since the array is traversed from front to back, the node will have already
  * been tested against the leftNode. Nodes without a boundingVolume are added
  * to the end of the array.
@@ -428,30 +494,38 @@
 				 between: (CC3Node*) leftNode
 					 and: (CC3Node*) rightNode
 			 withVisitor: (CC3NodeSequencerVisitor*) visitor {
+
+	// Check explicit Z-Order first. It overrides camera distance.
+	if (aNode.zOrder > rightNode.zOrder) return YES;
+	if (aNode.zOrder < rightNode.zOrder) return NO;
+
+	// Next check camera distance based on bounding volume centers.
 	CC3NodeBoundingVolume* bv = aNode.boundingVolume;
 	CC3NodeBoundingVolume* rtBV = rightNode.boundingVolume;
 	return (bv && rtBV && bv.cameraDistanceProduct >= rtBV.cameraDistanceProduct);
 }
 
 /**
- * Removes nodes that do not pass the evaluator or are not in the correct Z-order sequence.
- * Any node whose distance to the camera is greater than the nodes before it is removed.
+ * Identify nodes that do not pass the evaluator or are not in the correct Z-order sequence.
+ * Any node whose distance to the camera is greater than the nodes before it is considered misplaced.
  */
--(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor {
-	if (!allowSequenceUpdates) return;		// Leave if sequence updating should not happen.
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
+	// Leave if sequence updating should not happen or if there is nothing to sort.
+	if (!allowSequenceUpdates || nodes.count == 0) return;
 
-	NSMutableArray* misplacedNodes = [NSMutableArray arrayWithCapacity: nodes.count];
 	CC3Camera* cam = visitor.world.activeCamera;
 	if (!cam) return;		// Can't do anything without a camera.
 
 	CC3Vector camGlobalLoc = cam.globalLocation;
+	GLint prevZOrder = NSIntegerMax;
 	GLfloat prevCamDistProduct = CGFLOAT_MAX;
 
-	for (CC3Node* n in nodes) {
-		if ( (evaluator && ![evaluator evaluate: n]) ) {
-			[misplacedNodes addObject: n];
+	for (CC3Node* aNode in nodes) {
+		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
+			[visitor addMisplacedNode: aNode];
 		} else {
-			CC3NodeBoundingVolume* bv = n.boundingVolume;
+			// Calculate the distance from the camera and cache it for insertion
+			CC3NodeBoundingVolume* bv = aNode.boundingVolume;
 			if (bv) {
 				// Get vector from node's center of geometry to camera.
 				CC3Vector node2Cam = CC3VectorDifference(bv.globalCenterOfGeometry, camGlobalLoc);
@@ -461,11 +535,62 @@
                 // restricted to the direction "staight-out" from the camera.
                 CC3Vector measurementDirection = shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
 
-                // Cache the dot product of the direction vector, and the vector between the node and the camera.
-                // This is a relative measure of the distance in that direction. In the case of measuring along
-                // the line between the node and camera, it will be the square of the distance. We don't bother
-                // finding the actual distance, because for comparison purposes the square is good enough, and
-                // the relatively costly square-root calculation is unnecessary.
+                // Cache the dot product of the direction vector, and the vector between the node
+				// and the camera. This is a relative measure of the distance in that direction.
+				// In the case of measuring along the line between the node and camera, it will be
+				// the square of the distance. Comparing the squares of the distance instead of the
+				// distance itself also has the benefit of avoiding expensive square-root calculations.
+				bv.cameraDistanceProduct = CC3VectorDot(node2Cam, measurementDirection);
+			}
+
+			// If this node is closer than the previous node in the array, update the
+			// previous Z-order and distance value. Otherwise, mark the node as misplaced.
+			// Explicit Z-order overrides actual distance.
+			if ( aNode.zOrder < prevZOrder ) {
+				prevZOrder = aNode.zOrder;
+				prevCamDistProduct = bv.cameraDistanceProduct;
+			} else if ( aNode.zOrder > prevZOrder ) {
+				[visitor addMisplacedNode: aNode];
+			} else if ( bv.cameraDistanceProduct <= prevCamDistProduct ) {
+				prevZOrder = aNode.zOrder;
+				prevCamDistProduct = bv.cameraDistanceProduct;
+			} else {
+				[visitor addMisplacedNode: aNode];
+			}
+		}
+	}
+}
+
+/*
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
+	// Leave if sequence updating should not happen or if there is nothing to sort.
+	if (!allowSequenceUpdates || nodes.count == 0) return;
+	
+	CC3Camera* cam = visitor.world.activeCamera;
+	if (!cam) return;		// Can't do anything without a camera.
+	
+	CC3Vector camGlobalLoc = cam.globalLocation;
+	GLfloat prevCamDistProduct = CGFLOAT_MAX;
+	
+	for (CC3Node* aNode in nodes) {
+		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
+			[visitor addMisplacedNode: aNode];
+		} else {
+			CC3NodeBoundingVolume* bv = aNode.boundingVolume;
+			if (bv) {
+				// Get vector from node's center of geometry to camera.
+				CC3Vector node2Cam = CC3VectorDifference(bv.globalCenterOfGeometry, camGlobalLoc);
+				
+                // Determine the direction in which to measure from the camera. This will either be
+                // in the direction of a straight line between the camera and the node, or will be
+                // restricted to the direction "staight-out" from the camera.
+                CC3Vector measurementDirection = shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
+				
+                // Cache the dot product of the direction vector, and the vector between the node
+				// and the camera. This is a relative measure of the distance in that direction.
+				// In the case of measuring along the line between the node and camera, it will be
+				// the square of the distance. Comparing the squares of the distance instead of the
+				// distance itself also has the benefit of avoiding expensive square-root calculations.
 				bv.cameraDistanceProduct = CC3VectorDot(node2Cam, measurementDirection);
 				
 				// If this node is closer than the previous node in the array, update the
@@ -473,19 +598,15 @@
 				if (bv.cameraDistanceProduct <= prevCamDistProduct) {
 					prevCamDistProduct = bv.cameraDistanceProduct;
 				} else {
-					[misplacedNodes addObject: n];
+					[visitor addMisplacedNode: aNode];
 				}
 			} else {		// If no bounding volume, mark the node as misplaced.
-				[misplacedNodes addObject: n];
+				[visitor addMisplacedNode: aNode];
 			}
 		}
 	}
-	// Remove all misplaced nodes from this node array, and add them to the visitor's cache.
-	for (CC3Node* n in misplacedNodes) {
-		[nodes removeObjectIdenticalTo: n];
-	}
-	[visitor addMisplacedNodes: misplacedNodes];
 }
+*/
 
 @end
 
@@ -538,9 +659,9 @@
 	
 	// If the left texture is the same, but the right one isn't,
 	// this is where we want to insert to keep like textures together.
-	CCTexture2D* tex = aNode.material.texture.texture;
-	CCTexture2D* leftTex = leftNode.material.texture.texture;
-	CCTexture2D* rightTex = rightNode.material.texture.texture;
+	CCTexture2D* tex = aNode.texture.texture;
+	CCTexture2D* leftTex = leftNode.texture.texture;
+	CCTexture2D* rightTex = rightNode.texture.texture;
 	return (tex == leftTex && tex != rightTex);
 }
 
@@ -576,16 +697,22 @@
 
 @implementation CC3NodeSequencerVisitor
 
-@synthesize world;
+@synthesize world, misplacedNodes;
 
 -(void) dealloc {
-	world = nil;				// not retained
+	[misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
+	world = nil;								// not retained
 	[super dealloc];
+}
+
+-(id) init {
+	return [self initWithWorld: nil];
 }
 
 -(id) initWithWorld: (CC3World*) aCC3World {
 	if ( (self = [super init]) ) {
-		world = aCC3World;
+		world = aCC3World;			// not retained
+		misplacedNodes = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -594,35 +721,16 @@
 	return [[[self alloc] initWithWorld: aCC3World] autorelease];
 }
 
-@end
-
-
-
-#pragma mark -
-#pragma mark CC3NodeSequencerMisplacedNodeVisitor
-
-@implementation CC3NodeSequencerMisplacedNodeVisitor
-
-@synthesize misplacedNodes;
-
--(void) dealloc {
-	[misplacedNodes release];
-	[super dealloc];
-}
-
 -(BOOL) hasMisplacedNodes {
 	return (misplacedNodes.count > 0);
 }
 
--(id) initWithWorld: (CC3World*) aCC3World {
-	if ( (self = [super initWithWorld: aCC3World]) ) {
-		misplacedNodes = [[NSMutableArray array] retain];
-	}
-	return self;
+-(void) addMisplacedNode: (CC3Node*) aNode {
+	[misplacedNodes addUnretainedObject: aNode];
 }
 
--(void) addMisplacedNodes: (NSArray*) anArrayOfNodes {
-	[misplacedNodes addObjectsFromArray: anArrayOfNodes];
+-(void) clearMisplacedNodes {
+	[misplacedNodes removeAllObjectsAsUnretained];
 }
 
 @end

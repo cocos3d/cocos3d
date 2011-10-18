@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,7 +70,7 @@
 @interface CC3OpenGLES11ServerCapabilities : CC3OpenGLES11StateTrackerManager {
 	CC3OpenGLES11StateTrackerServerCapability* alphaTest;
 	CC3OpenGLES11StateTrackerServerCapability* blend;
-	NSMutableArray* clipPlanes;
+	CCArray* clipPlanes;
 	CC3OpenGLES11StateTrackerServerCapability* colorLogicOp;
 	CC3OpenGLES11StateTrackerServerCapability* colorMaterial;
 	CC3OpenGLES11StateTrackerServerCapability* cullFace;
@@ -107,7 +107,7 @@
  * The number of available clip planes is retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxClipPlanes.value.
  */
-@property(nonatomic, retain) NSMutableArray* clipPlanes;
+@property(nonatomic, retain) CCArray* clipPlanes;
 
 /** Tracks the color logic operation capability (GL capability name GL_COLOR_LOGIC_OP). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* colorLogicOp;

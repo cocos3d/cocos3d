@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -202,6 +202,7 @@ static GLuint lastAssignedVertexArrayTag;
 		[bufferBinding updateBufferData: elements
 							 startingAt: (offsetIndex * elemStride)
 							  forLength: (elemCount * elemStride)];
+		[bufferBinding unbind];
 	}
 }
 
@@ -275,6 +276,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(GLvoid*) addressOfElement: (GLsizei) index {
 	NSAssert(elements, @"Elements are no longer in application memory.");
+	NSAssert2(index < elementCount, @"Requested index %i is greater than number of vertices %i.", index, elementCount);
 	return (GLbyte*)elements + (self.elementStride * index) + elementOffset;
 }
 
@@ -295,6 +297,15 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 +(void) resetSwitching {}
+
++(void) resetAllSwitching {
+	[CC3VertexLocations resetSwitching];
+	[CC3VertexNormals resetSwitching];
+	[CC3VertexColors resetSwitching];
+	[CC3VertexTextureCoordinates resetSwitching];
+	[CC3VertexIndices resetSwitching];
+	[CC3VertexPointSizes resetSwitching];
+}
 
 @end
 
@@ -444,28 +455,44 @@ static GLuint lastAssignedVertexArrayTag;
 @interface CC3VertexLocations (TemplateMethods)
 -(void) buildBoundingBox;
 -(void) buildBoundingBoxIfNecessary;
+-(void) calcRadius;
+-(void) calcRadiusIfNecessary;
 @end
 
 
 @implementation CC3VertexLocations
 
-@synthesize firstElement, boundingBoxNeedsBuilding;
+@synthesize firstElement;
+
+-(void) markBoundaryDirty {
+	boundaryIsDirty = YES;
+	radiusIsDirty = YES;
+}
 
 -(void) setElements: (GLvoid*) elems {
 	[super setElements: elems];
-	self.boundingBoxNeedsBuilding = YES;
+	[self markBoundaryDirty];
+}
+
+-(void) setElementCount: (GLsizei) count {
+	[super setElementCount: count];
+	[self markBoundaryDirty];
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
 		firstElement = 0;
 		centerOfGeometry = kCC3VectorZero;
-		boundingBox.minimum = kCC3VectorZero;
-		boundingBox.maximum = kCC3VectorZero;
-		self.boundingBoxNeedsBuilding = YES;
+		boundingBox = kCC3BoundingBoxZero;
+		radius = 0.0;
+		[self markBoundaryDirty];
 	}
 	return self;
 }
+
+// Protected properties used during copying instances of this class
+-(BOOL) boundaryIsDirty { return boundaryIsDirty; }
+-(BOOL) radiusIsDirty { return radiusIsDirty; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -475,7 +502,9 @@ static GLuint lastAssignedVertexArrayTag;
 	firstElement = another.firstElement;
 	boundingBox = another.boundingBox;
 	centerOfGeometry = another.centerOfGeometry;
-	boundingBoxNeedsBuilding = another.boundingBoxNeedsBuilding;
+	radius = another.radius;
+	boundaryIsDirty = another.boundaryIsDirty;
+	radiusIsDirty = another.radiusIsDirty;
 }
 
 -(CC3Vector) locationAt: (GLsizei) index {
@@ -484,9 +513,8 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) setLocation: (CC3Vector) aLocation at: (GLsizei) index {
 	*(CC3Vector*)[self addressOfElement: index] = aLocation;
-	self.boundingBoxNeedsBuilding = YES;
+	[self markBoundaryDirty];
 }
-
 
 /** Returns the boundingBox, building it if necessary. */
 -(CC3BoundingBox) boundingBox {
@@ -502,8 +530,21 @@ static GLuint lastAssignedVertexArrayTag;
 
 /** Builds the bounding box if it needs to be built. */
 -(void) buildBoundingBoxIfNecessary {
-	if (boundingBoxNeedsBuilding) {
+	if (boundaryIsDirty) {
 		[self buildBoundingBox];
+	}
+}
+
+/** Returns the radius, calculating it if necessary. */
+-(GLfloat) radius {
+	[self calcRadiusIfNecessary];
+	return radius;
+}
+
+/** Calculates the radius if it necessary. */
+-(void) calcRadiusIfNecessary {
+	if (radiusIsDirty) {
+		[self calcRadius];
 	}
 }
 
@@ -519,7 +560,7 @@ static GLuint lastAssignedVertexArrayTag;
 	NSAssert1(elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to build the bounding box", self);
 
 	CC3Vector vl, vlMin, vlMax;
-	vl = [self locationAt: 0];
+	vl = (elementCount > 0) ? [self locationAt: 0] : kCC3VectorZero;
 	vlMin = vl;
 	vlMax = vl;
 	for (GLsizei i = 1; i < elementCount; i++) {
@@ -529,12 +570,37 @@ static GLuint lastAssignedVertexArrayTag;
 	}
 	boundingBox.minimum = vlMin;
 	boundingBox.maximum = vlMax;
-	centerOfGeometry = CC3VectorScaleUniform(CC3VectorAdd(vlMax, vlMin), 0.5);
-	self.boundingBoxNeedsBuilding = NO;
+	centerOfGeometry = CC3BoundingBoxCenter(boundingBox);
+	boundaryIsDirty = NO;
 	LogTrace(@"%@ bounding box: (%@, %@) and center of geometry: %@", self,
 			 NSStringFromCC3Vector(boundingBox.minimum),
 			 NSStringFromCC3Vector(boundingBox.maximum),
 			 NSStringFromCC3Vector(centerOfGeometry));
+}
+
+
+/**
+ * Calculates and populates the radius property from the vertex locations.
+ *
+ * This method is invoked automatically when the radius property is accessed
+ * for the first time after the elements property has been set.
+ */
+-(void) calcRadius {
+	NSAssert1(elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to calculate mesh radius", [self class]);
+
+	CC3Vector cog = self.centerOfGeometry;		// Will measure it if necessary
+	if (elements && elementCount) {
+		// Work with the square of the radius so that all distances can be compared
+		// without having to run expensive square-root calculations.
+		GLfloat radiusSq = 0.0;
+		for (GLsizei i=0; i < elementCount; i++) {
+			CC3Vector vl = [self locationAt: i];
+			GLfloat distSq = CC3VectorDistanceSquared(vl, cog);
+			radiusSq = MAX(radiusSq, distSq);
+		}
+		radius = sqrtf(radiusSq);		// Now finally take the square-root
+		LogTrace(@"%@ setting radius to %.2f", self, radius);
+	}
 }
 
 -(void) movePivotTo: (CC3Vector) aLocation {
@@ -543,7 +609,8 @@ static GLuint lastAssignedVertexArrayTag;
 		CC3Vector locNew = CC3VectorDifference(locOld, aLocation);
 		[self setLocation: locNew at: i];
 	}
-	self.boundingBoxNeedsBuilding = YES;
+	[self markBoundaryDirty];
+	[self updateGLBuffer];
 }
 
 -(void) movePivotToCenterOfGeometry {
@@ -661,19 +728,45 @@ static GLuint currentNormalsTag = 0;
 }
 
 -(ccColor4F) color4FAt: (GLsizei) index {
-	return *(ccColor4F*)[self addressOfElement: index];
+	switch (elementType) {
+		case GL_UNSIGNED_BYTE:
+			return CCC4FFromCCC4B(*(ccColor4B*)[self addressOfElement: index]);
+		case GL_FLOAT:
+		default:
+			return *(ccColor4F*)[self addressOfElement: index];
+	}
 }
 
 -(void) setColor4F: (ccColor4F) aColor at: (GLsizei) index {
-	*(ccColor4F*)[self addressOfElement: index] = aColor;
+	switch (elementType) {
+		case GL_UNSIGNED_BYTE:
+			*(ccColor4B*)[self addressOfElement: index] = CCC4BFromCCC4F(aColor);
+			break;
+		case GL_FLOAT:
+		default:
+			*(ccColor4F*)[self addressOfElement: index] = aColor;
+	}
 }
 
 -(ccColor4B) color4BAt: (GLsizei) index {
-	return *(ccColor4B*)[self addressOfElement: index];
+	switch (elementType) {
+		case GL_FLOAT:
+			return CCC4BFromCCC4F(*(ccColor4F*)[self addressOfElement: index]);
+		case GL_UNSIGNED_BYTE:
+		default:
+			return *(ccColor4B*)[self addressOfElement: index];
+	}
 }
 
 -(void) setColor4B: (ccColor4B) aColor at: (GLsizei) index {
-	*(ccColor4B*)[self addressOfElement: index] = aColor;
+	switch (elementType) {
+		case GL_FLOAT:
+			*(ccColor4F*)[self addressOfElement: index] = CCC4FFromCCC4B(aColor);
+			break;
+		case GL_UNSIGNED_BYTE:
+		default:
+			*(ccColor4B*)[self addressOfElement: index] = aColor;
+	}
 }
 
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -962,6 +1055,14 @@ static GLuint currentColorsTag = 0;
 +(void) unbind {
 	[[CC3OpenGLES11Engine engine].clientCapabilities.pointSizeArray disable];
 	[self resetSwitching];
+}
+
+-(GLfloat) pointSizeAt: (GLsizei) index {
+	return *(GLfloat*)[self addressOfElement: index];
+}
+
+-(void) setPointSize: (GLfloat) aSize at: (GLsizei) index {
+	*(GLfloat*)[self addressOfElement: index] = aSize;
 }
 
 

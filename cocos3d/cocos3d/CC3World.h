@@ -1,7 +1,7 @@
 /*
  * CC3World.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -155,21 +155,49 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * to its CC3World instance. You will also typically create a subclass of CC3Layer that
  * is customized for your application. In most cases, you will add methods and state to
  * both your CC3World and CC3Layer subclasses to facilitate user interaction.
- *
- * The CC3Layer and CC3World can process touch events to select the 3D node visible under
- * the touch point. To enable touch selection of 3D nodes, set the isTouchEnabled property
- * of your customized CC3Layer to YES, and set the isTouchEnabled property to YES on any
- * node that you wish to be selectable via touch events. Subsequently, whenever a touch
- * event occurs, the callback method nodeSelected:byTouchEvent:at: will be invoked on your
- * customized CC3World instance. See the description of the nodeSelected:byTouchEvent:at:
- * method and the CC3Node isTouchEnabled property for useful hints about choosing which
- * nodes to enable for touch selection.
+ * 
+ * The CC3Layer and CC3World can process touch events. To enable touch event handling,
+ * set the isTouchEnabled property of your customized CC3Layer to YES. Touch events are
+ * forwarded from the CC3Layer to the touchEvent:at: method of your CC3World for handling
+ * by your CC3World.
  *
  * Since the touch-move events are both voluminous and seldom used, the implementation
  * of ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
  * To receive and handle touch-move events for object picking, copy the commented-out
  * ccTouchMoved:withEvent: template method implementation in CC3Layer to your customized
  * CC3Layer subclass.
+ *
+ * The default implementation of the touchEvent:at: method forwards all touch events to
+ * the node picker held in the touchedNodePicker property. The node picker determines
+ * which 3D node is under the touch point. Object picking is handled asynchronously, and
+ * once the node is retrieved, the nodeSelected:byTouchEvent:at: callback method will be
+ * invoked on your customized CC3World instance. You indicate which nodes in your world
+ * should respond to touch events by setting the isTouchEnabled property on those nodes
+ * that you want to trigger a touch event callback to the nodeSelected:byTouchEvent:at:
+ * method. See the description of the nodeSelected:byTouchEvent:at: method and the
+ * CC3Node isTouchEnabled property for useful hints about choosing which nodes to enable
+ * for touch selection.
+ *
+ * Be aware that node picking from touch events is expensive, and you should override
+ * the touchEvent:at: method to forward to the node picker only those touch events that
+ * you actually intend to select a node. By default, all touch events are forwarded from
+ * the touchEvent:at: method. You should override this implementation, handle touch events
+ * that are not used for selection directly in this method, and forward only those events
+ * for which you want a node picked, to the touchedNodePicker.
+ *
+ * The node picker uses a colorization algorithm to determine which node is under the
+ * touch point. When a touch event occurs and has been forwarded to the node picker,
+ * the node picker draws the scene in solid colors, with each node a different color,
+ * and then reads the color of the pixel under the touch point to identify the object
+ * under the touch point. This is performed under the covers, and the scene is immediately
+ * redrawn in true colors and textures before being presented to the screen, so the user
+ * is never aware that the scene was drawn twice. However, be aware that, if a translucent
+ * or transparent object has nothing but the CC3Layer background color behind it, AND that
+ * CC3Layer background color is also translucent or transparent, you might notice an
+ * unavoidable flicker of the translucent node. To avoid this, you can use a backdrop or
+ * skybox in your 3D world. This issue only occurs during node picking, and only when
+ * BOTH the node and the CC3Layer background colors are translucent or transparent, and
+ * the backgound color is directly behind the node.
  *
  * Depending on the complexity of the application, it may instantiate a single CC3World,
  * instance, or multiple instances if the application progresses from scene to scene.
@@ -190,21 +218,26 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * property for more information.
  */
 @interface CC3World : CC3Node {
-	NSMutableArray* targettingNodes;
-	NSMutableArray* lights;
-	NSMutableArray* cameras;
-	NSMutableArray* billboards;
+	CCArray* targettingNodes;
+	CCArray* lights;
+	CCArray* cameras;
+	CCArray* billboards;
 	CC3Layer* cc3Layer;
 	CC3ViewportManager* viewportManager;
 	CC3Camera* activeCamera;
-	NSArray* drawingSequence;
 	CC3NodeSequencer* drawingSequencer;
 	CC3TouchedNodePicker* touchedNodePicker;
 	CC3PerformanceStatistics* performanceStatistics;
+	CC3NodeUpdatingVisitor* updateVisitor;
+	CC3NodeDrawingVisitor* drawVisitor;
+	CC3NodeTransformingVisitor* transformVisitor;
+	CC3NodeSequencerVisitor* drawingSequenceVisitor;
 	CC3Fog* fog;
 	ccColor4F ambientLight;
 	ccTime minUpdateInterval;
 	ccTime maxUpdateInterval;
+	BOOL shouldClearDepthBufferBefore3D;
+	BOOL shouldClearDepthBufferBefore2D;
 }
 
 /**
@@ -234,7 +267,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * The initial value is nil. You must add at least one CC3Camera to your 3D world to
  * make it viewable.
  */
-@property(nonatomic, retain) CC3Camera* activeCamera;
+@property(nonatomic, retain, readwrite) CC3Camera* activeCamera;
 
 /**
  * The touchedNodePicker picks the node under the point at which a touch event occurred.
@@ -322,6 +355,32 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Updating world state
 
 /**
+ * The visitor that is used to visit the nodes to update and transform them during scheduled updates.
+ *
+ * This property defaults to an instance of the class returned by the updateVisitorClass method.
+ * The application can set a different visitor if desired.
+ */
+@property(nonatomic, retain) CC3NodeUpdatingVisitor* updateVisitor;
+
+/**
+ * Returns the class of visitor that will automatically be instantiated into the
+ * updateVisitor property.
+ *
+ * The returned class must be a subclass of CC3NodeUpdatingVisitor. This implementation
+ * returns CC3NodeUpdatingVisitor. Subclasses may override to customize the behaviour
+ * of the updating visits.
+ */
+-(id) updateVisitorClass;
+
+/**
+ * The visitor that is used to visit the nodes when transforming them without updating.
+ *
+ * This property defaults to an instance of the class returned by the transformVisitorClass
+ * method. The application can set a different visitor if desired.
+ */
+@property(nonatomic, retain) CC3NodeTransformingVisitor* transformVisitor;
+
+/**
  * The value of this property is used as the lower limit accepted by the updateWorld: method.
  * Values sent to the updateWorld: method that are smaller than this maximum will be clamped
  * to this limit. If the value of this property is zero (or negative), the updateWorld: method
@@ -400,16 +459,19 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 -(void) updateWorld: (ccTime)dt;
 
 /**
- * Convenience method that invokes the udpateWorld: method with the value of the
- * minUpdateInterval property.
+ * Invokes the udpateWorld: method with the value of the minUpdateInterval property.
+ *
+ * This method temporarily ensures that the isRunning property is set to YES internally,
+ * to ensure that the updateWorld: method will run successfully.
  *
  * You can use this method if you change the contents of the world outside of the normal
  * update mechanism, for instance, as a result of a user event, and need the update to
- * be processed immediately, without waiting for the next update interval.
+ * be processed immediately, without waiting for the next update interval, and even if
+ * the world has not been set running yet via the play method, or isRunning property.
  *
  * This method is automatically invoked when a the world is assigned to the CC3Layer,
- * to ensure that transforms have been processed before the first rendering frame
- * processes the contents of the world.
+ * and when the world is added to a running CC3Layer, to ensure that transforms have
+ * been processed before the first rendering frame draws the contents of the world.
  */
 -(void) updateWorld;
 
@@ -437,27 +499,57 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Drawing
 
 /**
- * This method is invoked periodically when the objects in the CC3World are to be drawn.
+ * Indicates whether the OpenGL depth buffer should be cleared before drawing
+ * the 3D world.
  *
- * Typcially this method is invoked automatically from the draw method of the CC3Layer instance.
- * This method is invoked asynchronously to the model updating loop, to keep the processing of
- * OpenGL ES drawing separate from model updates.
+ * If the CC3Layer, or other 2D nodes that the CC3Layer may be contained within,
+ * have drawn 2D content on which the 3D world is to be drawn on top of, AND is
+ * using depth testing, then this property should be set to YES to ensure that
+ * the 3D content will not conflict with the previously drawn 2D content, and
+ * will be drawn on top of that 2D content.
  *
- * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
- * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLES11Engine singleton. When overriding this method, or any
- * other 3D drawing features, do NOT make gl* function calls directly if there is a
- * corresponding state change tracker in the CC3OpenGLES11Engine singleton. Route the
- * state change request through the CC3OpenGLES11Engine singleton instead.
+ * However, if this is not the case, then this property can be set to NO to skip
+ * the overhead of clearing of the depth buffer when transitioning from 2D to 3D.
+ * 
+ * Clearing the depth buffer is a relatively expensive operation, and avoiding it
+ * when it is not necessary can result in a performance improvement. Because of
+ * this, it is recommended that this property be set to NO unless conflicts arise
+ * when drawing 3D content over previously drawn 2D content.
  *
- * This method is invoked automatically during each rendering frame. Usually, the application
- * never needs to invoke this method directly.
+ * The initial value of this property is YES. Set this property to NO to improve
+ * performance if 3D content is not being drawn on top of 2D content.
  */
--(void) drawWorld;
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D;
 
-
-#pragma mark Node structural hierarchy
+/**
+ * Indicates whether the OpenGL depth buffer should be cleared before reverting
+ * back to the 2D world.
+ *
+ * If 2D content will be drawn on top of the 3D content, AND it is being drawn
+ * with depth testing enabled, then this property should be set to YES.
+ *
+ * However, if this is not the case, then this property can be set to NO to skip the
+ * overhead of clearing of the depth buffer when transitioning from 3D back to 2D.
+ * 
+ * Clearing the depth buffer is a relatively expensive operation, and avoiding it
+ * when it is not necessary can result in a performance improvement. Because of
+ * this, it is recommended that this property be set to NO, and turn depth testing
+ * off during drawing of the 2D content on top of the 3D world.
+ *
+ * You can turn depth testing off for the 2D content by invoking the following
+ * code once during the initialization of your application after the EAGLView
+ * has been created:
+ *
+ *   [[CCDirector sharedDirector] setDepthTest: NO];
+ *
+ * By doing so, you will then be able to set this property to NO and still be able
+ * to draw 2D content on top of the 3D world, while avoiding an unnecessary clearing
+ * of the depth buffer.
+ *
+ * The initial value of this property is YES. Set this property to NO to improve
+ * performance if depth-testing 2D content is not being drawn on top of 3D content.
+ */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D;
 
 /**
  * The node sequencer being used by this instance to order the drawing of child nodes.
@@ -485,6 +577,53 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
+/**
+ * The visitor that is used to visit the nodes to draw them to the GL engine.
+ *
+ * This property defaults to an instance of the class returned by the drawVisitorClass method.
+ * The application can set a different visitor if desired.
+ */
+@property(nonatomic, retain) CC3NodeDrawingVisitor* drawVisitor;
+
+/**
+ * Returns the class of visitor that will automatically be instantiated into the
+ * drawVisitor property.
+ *
+ * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation
+ * returns CC3NodeDrawingVisitor. Subclasses may override to customize the behaviour
+ * of the drawing visits.
+ */
+-(id) drawVisitorClass;
+
+/**
+ * The sequencer visitor used to visit the drawing sequencer during operations
+ * on the drawing sequencer, such as adding or removing individual nodes.
+ *
+ * This property defaults to an instance of the CC3NodeSequencerVisitor class.
+ * The application can set a different visitor if desired.
+ */
+@property(nonatomic, retain) CC3NodeSequencerVisitor* drawingSequenceVisitor;
+
+/**
+ * This method is invoked periodically when the objects in the CC3World are to be drawn.
+ *
+ * Typcially this method is invoked automatically from the draw method of the CC3Layer instance.
+ * This method is invoked asynchronously to the model updating loop, to keep the processing of
+ * OpenGL ES drawing separate from model updates.
+ *
+ * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
+ * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
+ * GL engine if GL state really is changing. It is critical that all changes to GL state
+ * are made through the CC3OpenGLES11Engine singleton. When overriding this method, or any
+ * other 3D drawing features, do NOT make gl* function calls directly if there is a
+ * corresponding state change tracker in the CC3OpenGLES11Engine singleton. Route the
+ * state change request through the CC3OpenGLES11Engine singleton instead.
+ *
+ * This method is invoked automatically during each rendering frame. Usually, the application
+ * never needs to invoke this method directly.
+ */
+-(void) drawWorld;
+
 
 #pragma mark Touch handling
 
@@ -507,27 +646,27 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * ccTouchMoved:withEvent: template method implementation in CC3Layer to your
  * customized CC3Layer subclass.
  *
- * This default implementation forwards all touch events to the node picker held in
+ * This default implementation forwards touch-down events to the node picker held in
  * the touchedNodePicker property, which determines which 3D node is under the touch
- * point. Object picking is handled asynchronously, and once the node is retrieved,
+ * point, and does nothing with touch-move and touch-up events. For the touch-down
+ * events, object picking is handled asynchronously, and once the node is retrieved,
  * the nodeSelected:byTouchEvent:at: callback method will be invoked on this instance.
  *
- * Node picking from touch events is expensive, and you should only forward, from this
- * method to the touchedNodePicker, only those touch events that actually intend to
- * select a node. By default, all touch events are forwarded from this method, but in
- * practice, you should override this implementation and handle touch events that are
- * not used for selection directly in this method, and forward only those events for
- * which you want a node picked, to the touchedNodePicker.
+ * Node picking from touch events is somewhat expensive. If you do not require node
+ * picking, you should override this implementation and avoid forwarding the touch-down
+ * events to the node picker. You can also override this method to enhance the touch
+ * interaction, such as swipe detection, or dragging & dropping objects. You can use
+ * the implementation of this method as a template for enhancements.
  * 
  * For example, if you want to let a user touch an object and move it around with their
  * finger, only the initial touch-down event needs to select a node. Once the node is
  * selected, you can cache the node, and move it and release it by capturing the
- * touch-move and touch-up events in this method, and avoid forwarding them to the
- * tochedNodePicker.
+ * touch-move and touch-up events in this method.
  *
  * To support multi-touch events or gestures, add event-handing behaviour to your
  * customized CC3Layer, as you would for any cocos2d application, and invoke this
- * method from your customized CC3Layer when node-picking is required.
+ * method from your customized CC3Layer when interaction with 3D objects, such as
+ * node-picking, is required.
  */
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
 
@@ -590,6 +729,17 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint;
 
+/**
+ * Returns the class of visitor that will be instantiated in the touchedNodePicker
+ * pickTouchedNode method, in order to paint each node a unique color so that
+ * the node under the touched pixel can be identified.
+ *
+ * The returned class must be a subclass of CC3NodePickingVisitor. This implementation
+ * returns CC3NodePickingVisitor. Subclasses may override to customized the behaviour
+ * of the drawing visits.
+ */
+-(id) pickVisitorClass;
+
 @end
 
 
@@ -630,6 +780,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  * being picked and dispatched to the CC3World on each pair of  rendering and updating passes.
  */
 @interface CC3TouchedNodePicker : NSObject {
+	CC3NodePickingVisitor* pickVisitor;
 	CC3World* world;
 	CC3Node* pickedNode;
 	uint touchQueue[kCC3TouchQueueLength];
@@ -638,6 +789,16 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 	BOOL wasTouched;
 	BOOL wasPicked;
 }
+
+/**
+ * The visitor that is used to visit the nodes to draw them when picking
+ * a node from touch selection.
+ *
+ * This property defaults to an instance of the class returned by the
+ * pickVisitorClass method of the CC3World.
+ * The application can set a different visitor if desired.
+ */
+@property(nonatomic, retain) CC3NodePickingVisitor* pickVisitor;
 
 /** The most recent touch point in OpenGL ES coordinates. */
 @property(nonatomic, readonly) CGPoint glTouchPoint;
@@ -718,6 +879,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 	CC3Vector glToCC2PointMapY;
 	CC3Vector cc2ToGLPointMapX;
 	CC3Vector cc2ToGLPointMapY;
+	BOOL isFullScreen;
 }
 
 /** The bounding box of the CC3Layer the world is drawing within. */
@@ -739,6 +901,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
  */
 @property(nonatomic, retain) CC3GLMatrix* deviceRotationMatrix;
 
+/** Returns whether the viewport covers the full screen. */
+@property(nonatomic, readonly) BOOL isFullScreen;
+
 /** Initializes this instance on the specified CC3World. */
 -(id) initOnWorld: (CC3World*) aCC3World;
 
@@ -749,19 +914,22 @@ static const ccColor4F kCC3DefaultLightColorAmbientWorld = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Drawing
 
 /**
- * Template method that opens the viewport for 3D drawing.
- * Sets the GL viewport to the contained viewport.
+ * Template method that opens the viewport for 3D drawing
+ *
+ * Sets the GL viewport to the contained viewport, and if the viewport does not cover
+ * the screen, applies GL scissors to the viewport so that GL drawing for this world
+ * does not extend beyond the layer bounds.
  */
 -(void) openViewport;
 
 /**
  * Template method that closes the viewport for 3D drawing.
  *
- * Default implementation does nothing. The GL viewport will be automatically reset to its
- * 2D value when CC3OpenGLES11Engine is closed by 3D world. If that behaviour is changed by
- * the application, it may be necessary to override this method to handle changing the
- * viewport to what the 2D world expects. In general, the 2D and 3D worlds have different
- * viewports only when the 3D layer does not cover the window.
+ * Default implementation does nothing. The GL viewport and scissor will automatically
+ * be reset to their 2D values when CC3OpenGLES11Engine is closed by 3D world. If that
+ * behaviour is changed by the application, it may be necessary to override this method
+ * to handle changing the viewport to what the 2D world expects. In general, the 2D and
+ * 3D worlds have different viewports only when the 3D layer does not cover the window.
  */
 -(void) closeViewport;
 

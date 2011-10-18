@@ -1,7 +1,7 @@
 /*
  * CC3Identifiable.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -80,6 +80,13 @@
  * these methods by adding extention categories to the concrete subclasses of CC3Identifiable,
  * (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.), to create, retain and dispose of the data.
  *
+ * Similarly, when copying instances of CC3Identifiable and its subclasses, the
+ * copyUserDataFrom: method is invoked in the new copy so that it can copy the data in the
+ * original instance to the new instance copy. In this abstract class, the copyUserDataFrom:
+ * method does nothing, but, if appropriate, you can override the method by adding extention
+ * categories to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material,
+ * CC3Texture, etc.), to copy whatever data you have in the userData property.
+ *
  * In this abstract class, this property is not retained. You can override the accessor
  * methods by creating extension categories for the concrete subclasses, (CC3Node, CC3Mesh,
  * CC3Material, CC3Texture, etc.), in order to retain the data if appropriate.
@@ -128,6 +135,17 @@
  * etc.), to release or dispose of the data referenced in the userData property.
  */
 -(void) releaseUserData;
+
+/**
+ * Invoked automatically when this instance has been created as a copy of the specified
+ * instance.
+ *
+ * In this abstract class, this method does nothing. You can override this method by creating
+ * extension categories for the concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), to copy the userData referenced in the userData property of the specified
+ * instance to the userData property of this instance.
+ */
+-(void) copyUserDataFrom: (CC3Identifiable*) another;
 
 /**
  * Returns a newly allocated (retained) copy of this instance. The new copy will have

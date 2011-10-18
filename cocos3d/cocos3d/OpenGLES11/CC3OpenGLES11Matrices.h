@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -92,10 +92,11 @@
  * The specified tracker is used to ensure that the matrix mode of this matrix
  * is active before issuing any commands.
  */
--(id) initWithMode: (GLenum) matrixMode
-		andTopName: (GLenum) tName
-	  andDepthName: (GLenum) dName
-	andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			withMode: (GLenum) matrixMode
+		  andTopName: (GLenum) tName
+		andDepthName: (GLenum) dName
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
 
 /**
  * Allocates and initializes an autoreleased instance for the specified matrix mode.
@@ -104,10 +105,11 @@
  * The specified tracker is used to ensure that the matrix mode of this matrix
  * is active before issuing any commands.
  */
-+(id) trackerWithMode: (GLenum) matrixMode
-		   andTopName: (GLenum) tName
-		 andDepthName: (GLenum) dName
-	   andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   withMode: (GLenum) matrixMode
+			 andTopName: (GLenum) tName
+		   andDepthName: (GLenum) dName
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
 
 @end
 

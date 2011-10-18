@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,8 +44,6 @@
 -(void) bindTextureCoordinatesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-@property(nonatomic, readonly) GLsizei vertexCount;
-
 @end
 
 
@@ -70,10 +68,6 @@
 
 -(BOOL) hasColors {
 	return (vertexColors != nil);
-}
-
--(GLsizei) vertexCount {
-	return vertexLocations.elementCount;
 }
 
 /**
@@ -106,7 +100,7 @@
 		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
 		// creating it first if necessary
 		if(!overlayTextureCoordinates) {
-			overlayTextureCoordinates = [[NSMutableArray array] retain];
+			overlayTextureCoordinates = [[CCArray array] retain];
 		}
 		[overlayTextureCoordinates addObject: aTexCoord];
 	}
@@ -136,7 +130,7 @@
 	self.vertexTextureCoordinates = nil;
 	
 	// Remove the overlay texture coordinates
-	NSArray* myOTCs = [overlayTextureCoordinates copy];
+	CCArray* myOTCs = [overlayTextureCoordinates copy];
 	for (CC3VertexTextureCoordinates* otc in myOTCs) {
 		[self removeTextureCoordinates: otc];
 	}
@@ -239,7 +233,7 @@
 }
 
 // Protected properties for copying
--(NSArray*) overlayTextureCoordinates { return overlayTextureCoordinates; }
+-(CCArray*) overlayTextureCoordinates { return overlayTextureCoordinates; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -247,14 +241,14 @@
 	[super populateFrom: another];
 
 	// Share vertex arrays between copies
-	self.vertexLocations = another.vertexLocations;						// retained
-	self.vertexNormals = another.vertexNormals;							// retained
-	self.vertexColors = another.vertexColors;							// retained
-	self.vertexTextureCoordinates = another.vertexTextureCoordinates;	// retained
+	self.vertexLocations = another.vertexLocations;						// retained but not copied
+	self.vertexNormals = another.vertexNormals;							// retained but not copied
+	self.vertexColors = another.vertexColors;							// retained but not copied
+	self.vertexTextureCoordinates = another.vertexTextureCoordinates;	// retained but not copied
 	
 	// Remove any existing overlay textures and add the overlay textures from the other vertex array.
 	[overlayTextureCoordinates removeAllObjects];
-	NSArray* otherOTCs = another.overlayTextureCoordinates;
+	CCArray* otherOTCs = another.overlayTextureCoordinates;
 	if (otherOTCs) {
 		for (CC3VertexTextureCoordinates* otc in otherOTCs) {
 			[self addTextureCoordinates: [otc copyAutoreleased]];	// retained by collection
@@ -530,6 +524,18 @@
 
 #pragma mark Accessing vertex data
 
+-(void) movePivotTo: (CC3Vector) aLocation {
+	[vertexLocations movePivotTo: aLocation];
+}
+
+-(void) movePivotToCenterOfGeometry {
+	[vertexLocations movePivotToCenterOfGeometry];
+}
+
+-(GLsizei) vertexCount {
+	return vertexLocations.elementCount;
+}
+
 -(CC3Vector) vertexLocationAt: (GLsizei) index {
 	return vertexLocations ? [vertexLocations locationAt: index] : kCC3VectorZero;
 }
@@ -580,16 +586,33 @@
 	[vertexIndices setIndex: vertexIndex at: index];
 }
 
+-(void) updateVertexLocationsGLBuffer {
+	[vertexLocations updateGLBuffer];
+}
+
+-(void) updateVertexNormalsGLBuffer {
+	[vertexNormals updateGLBuffer];
+}
+
+-(void) updateVertexColorsGLBuffer {
+	[vertexColors updateGLBuffer];
+}
+
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	[texCoords updateGLBuffer];
+}
+
+-(void) updateVertexIndicesGLBuffer {
+	[vertexIndices updateGLBuffer];
+}
+
 
 #pragma mark Mesh context switching
 
 +(void) resetSwitching {
 	[super resetSwitching];
-	[CC3VertexLocations resetSwitching];
-	[CC3VertexNormals resetSwitching];
-	[CC3VertexColors resetSwitching];
-	[CC3VertexTextureCoordinates resetSwitching];
-	[CC3VertexIndices resetSwitching];
+	[CC3VertexArray resetAllSwitching];
 }
 
 @end
@@ -628,24 +651,25 @@
 	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
 }
 
--(void) calcRadius {
-	CC3VertexLocations* vLocs = self.vertexLocations;
-	NSAssert1(vLocs.elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to calculate mesh radius", [vLocs class]);
-	GLsizei vlCount = vLocs.elementCount;
-	if (vlCount && vLocs.elements) {
-		radius = 0.0;
-		for (GLsizei i=0; i < vlCount; i++) {
-			CC3Vector vl = [vLocs locationAt: i];
-			GLfloat dist = CC3VectorLength(CC3VectorDifference(vl, centerOfGeometry));
-			radius = MAX(radius, dist);
-		}
-		LogTrace(@"%@ setting radius of %@ to %.2f", [self class], self.node, radius);
-	}
-}
-
+/**
+ * Find the sphere that currently encompasses all the vertices. Then, if we should maximize
+ * the boundary, find the sphere that is the union of that sphere, and the sphere that
+ * previously encompassed all the vertices. Otherwise, just use the new sphere.
+ */
 -(void) buildVolume {
-	centerOfGeometry = self.vertexLocations.centerOfGeometry;
-	[self calcRadius];
+	CC3Vector newCOG = self.vertexLocations.centerOfGeometry;
+	GLfloat newRadius = self.vertexLocations.radius + self.node.boundingVolumePadding;
+	
+	if (shouldMaximize) {
+		CC3Sphere unionSphere = CC3SphereUnion(CC3SphereMake(newCOG, newRadius),
+											   CC3SphereMake(centerOfGeometry, radius));
+		centerOfGeometry = unionSphere.center;
+		radius = unionSphere.radius;
+	} else {
+		centerOfGeometry = newCOG;
+		radius = newRadius;
+	}
+	
 	[super buildVolume];
 }
 
@@ -661,9 +685,23 @@
 	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
 }
 
+/**
+ * Find the bounding box that currently encompasses all the vertices. Then, if we should
+ * maximize the boundary, find the bounding box that is the union of that bounding box,
+ * and the bounding box that previously encompassed all the vertices. Otherwise, just use
+ * the new bounding box.
+ */
 -(void) buildVolume {
-	centerOfGeometry = self.vertexLocations.centerOfGeometry;
-	boundingBox = self.vertexLocations.boundingBox;
+	CC3BoundingBox newBB = ((CC3MeshNode*)self.node).localContentBoundingBox;	// Includes possible padding
+	
+	if (shouldMaximize) {
+		boundingBox = CC3BoundingBoxUnion(newBB, boundingBox);
+	} else {
+		boundingBox = newBB;
+	}
+
+	centerOfGeometry = CC3BoundingBoxCenter(boundingBox);
+
 	[super buildVolume];
 }
 

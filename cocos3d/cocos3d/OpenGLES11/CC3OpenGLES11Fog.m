@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Hints.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -101,29 +101,16 @@
 }
 
 -(void) initializeTrackers {
-	self.color = [CC3OpenGLES11StateTrackerFogColor trackerForState: GL_FOG_COLOR];
-	self.mode = [CC3OpenGLES11StateTrackerFogEnumeration trackerForState: GL_FOG_MODE];
-	self.density = [CC3OpenGLES11StateTrackerFogFloat trackerForState: GL_FOG_DENSITY];
-	self.start = [CC3OpenGLES11StateTrackerFogFloat trackerForState: GL_FOG_START];
-	self.end = [CC3OpenGLES11StateTrackerFogFloat trackerForState: GL_FOG_END];
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[color open];
-	[mode open];
-	[density open];
-	[start open];
-	[end open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[color close];
-	[mode close];
-	[density close];
-	[start close];
-	[end close];
+	self.color = [CC3OpenGLES11StateTrackerFogColor trackerWithParent: self
+															 forState: GL_FOG_COLOR];
+	self.mode = [CC3OpenGLES11StateTrackerFogEnumeration trackerWithParent: self
+																  forState: GL_FOG_MODE];
+	self.density = [CC3OpenGLES11StateTrackerFogFloat trackerWithParent: self
+															   forState: GL_FOG_DENSITY];
+	self.start = [CC3OpenGLES11StateTrackerFogFloat trackerWithParent: self
+															 forState: GL_FOG_START];
+	self.end = [CC3OpenGLES11StateTrackerFogFloat trackerWithParent: self
+														   forState: GL_FOG_END];
 }
 
 -(NSString*) description {

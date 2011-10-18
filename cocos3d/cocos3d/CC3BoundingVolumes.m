@@ -1,7 +1,7 @@
 /*
  * CC3BoundingVolumes.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -44,7 +44,7 @@
 
 @implementation CC3NodeBoundingVolume
 
-@synthesize node, volumeNeedsBuilding;
+@synthesize node, shouldMaximize;
 @synthesize centerOfGeometry, globalCenterOfGeometry, cameraDistanceProduct;
 
 -(void) dealloc {
@@ -52,15 +52,24 @@
 	[super dealloc];
 }
 
+-(void) setCenterOfGeometry: (CC3Vector) aLocation {
+	centerOfGeometry = aLocation;
+	volumeIsDirty = NO;
+}
+
 -(id) init {
 	if ( (self = [super init]) ) {
 		node = nil;
 		centerOfGeometry = kCC3VectorZero;
 		globalCenterOfGeometry = kCC3VectorZero;
-		volumeNeedsBuilding = YES;
+		shouldMaximize = NO;
+		volumeIsDirty = YES;
 	}
 	return self;
 }
+
+// Protected properties used for copying
+-(BOOL) volumeIsDirty { return volumeIsDirty; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -69,7 +78,8 @@
 	centerOfGeometry = another.centerOfGeometry;
 	globalCenterOfGeometry = another.globalCenterOfGeometry;
 	cameraDistanceProduct = another.cameraDistanceProduct;
-	volumeNeedsBuilding = another.volumeNeedsBuilding;
+	shouldMaximize = another.shouldMaximize;
+	volumeIsDirty = another.volumeIsDirty;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -89,15 +99,32 @@
 	}
 }
 
+-(void) markDirty {
+	volumeIsDirty = YES;
+}
+
+-(void) markDirtyAndUpdate {
+	[self markDirty];
+	[self update];
+}
+
 /** Invokes the buildVolume method if the volume needs building, otherwise does nothing. */
 -(void) buildVolumeIfNeeded {
-	if (volumeNeedsBuilding) {
+	if (volumeIsDirty) {
 		[self buildVolume];
 	}
 }
 
+/**
+ * Builds the bounding volume in the node's local coordinate system.
+ *
+ * This is a template method. Default does nothing except mark the volume as no longer
+ * dirty. Subclasses will override to calculate a real bounding volume, but should
+ * invoke this superclass method to mark the volume as no longer dirty.
+ */
 -(void) buildVolume {
-	volumeNeedsBuilding = NO;
+	LogTrace(@"Rebuilt %@", self);
+	volumeIsDirty = NO;
 }
 
 /**
@@ -120,8 +147,8 @@
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ globally centered at: %@",
-			[self class], NSStringFromCC3Vector(globalCenterOfGeometry) ];
+	return [NSString stringWithFormat: @"%@ for %@ centered at: %@ (globally: %@)", [self class], node,
+			NSStringFromCC3Vector(centerOfGeometry), NSStringFromCC3Vector(globalCenterOfGeometry) ];
 }
 
 @end
@@ -133,6 +160,11 @@
 @implementation CC3NodeSphericalBoundingVolume
 
 @synthesize radius, globalRadius;
+
+-(void) setRadius: (GLfloat) aRadius {
+	radius = aRadius;
+	volumeIsDirty = NO;
+}
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -159,7 +191,8 @@
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with radius: %.2f, global radius: %.2f", [super description], radius, globalRadius];
+	return [NSString stringWithFormat: @"%@ with radius: %.3f (globally: %.3f)",
+			[super description], radius, globalRadius];
 }
 
 @end
@@ -172,14 +205,18 @@
 
 @synthesize boundingBox;
 
+-(void) setBoundingBox: (CC3BoundingBox) aBoundingBox {
+	boundingBox = aBoundingBox;
+	volumeIsDirty = NO;
+}
+
 -(CC3Vector*) globalBoundingBoxVertices {
 	return globalBoundingBoxVertices;
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		boundingBox.minimum = kCC3VectorZero;
-		boundingBox.maximum = kCC3VectorZero;
+		boundingBox = kCC3BoundingBoxZero;
 		for (int i=0; i < 8; i++) {
 			globalBoundingBoxVertices[i] = kCC3VectorZero;
 		}
@@ -254,17 +291,19 @@
 }
 
 -(NSString*) description {
-	CC3Vector gbbv, gbbvMin, gbbvMax;
+	CC3BoundingBox gbb;
+	CC3Vector gbbv;
 	gbbv = globalBoundingBoxVertices[0];
-	gbbvMin = gbbv;
-	gbbvMax = gbbv;
+	gbb.minimum = gbbv;
+	gbb.maximum = gbbv;
 	for (GLsizei i = 1; i < 8; i++) {
 		gbbv = globalBoundingBoxVertices[i];
-		gbbvMin = CC3VectorMinimize(gbbvMin, gbbv);
-		gbbvMax = CC3VectorMaximize(gbbvMax, gbbv);
+		gbb.minimum = CC3VectorMinimize(gbbv, gbb.minimum);
+		gbb.maximum = CC3VectorMaximize(gbbv, gbb.maximum);
 	}
-	return [NSString stringWithFormat: @"%@ with global bounding box: (%@, %@)", [self class],
-			NSStringFromCC3Vector(gbbvMin), NSStringFromCC3Vector(gbbvMax)];
+	return [NSString stringWithFormat: @"%@ with bounding box: %@ (globally: %@))",
+			[super description], NSStringFromCC3BoundingBox(boundingBox),
+			NSStringFromCC3BoundingBox(gbb)];
 }
 
 @end
@@ -282,6 +321,13 @@
 	[super dealloc];
 }
 
+-(void) setShouldMaximize: (BOOL) shouldMax {
+	shouldMaximize = shouldMax;
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
+		bv.shouldMaximize = shouldMax;
+	}
+}
+
 -(void) setNode:(CC3Node*) aNode {
 	[super setNode: aNode];
 	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
@@ -289,9 +335,17 @@
 	}
 }
 
+/** Overridden to keep the COG consistent for all BV's.  */
+-(void) setCenterOfGeometry: (CC3Vector) aLocation {
+	[super setCenterOfGeometry: aLocation];
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
+		bv.centerOfGeometry = aLocation;
+	}
+}
+
 -(id) init {
 	if ( (self = [super init]) ) {
-		boundingVolumes = [[NSMutableArray array] retain];
+		boundingVolumes = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -309,6 +363,14 @@
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume {
 	[boundingVolumes addObject: aBoundingVolume];
 	aBoundingVolume.node = self.node;
+}
+
+
+-(void) markDirty {
+	[super markDirty];
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
+		[bv markDirty];
+	}
 }
 
 /** Builds each contained bounding volume, and sets the local centerOfGeometry from the last one. */

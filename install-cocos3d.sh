@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# cocos3d 0.6.1
+# cocos3d 0.6.2
 
 echo 'cocos3d installer'
 
@@ -150,6 +150,10 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	DST_DIR="$DST_DIR""/Resources"
+	check_dst_dir
+	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
 
 	TEMPLATE="cocos3d-base"
 	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"

@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,6 +35,7 @@
 #import "CC3VertexArrayMesh.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CC3EAGLView.h"
+#import "CC3NodeSequencer.h"
 
 @interface CC3World (TemplateMethods)
 @property(nonatomic, readonly) CC3TouchedNodePicker* touchedNodePicker;
@@ -44,6 +45,12 @@
 #pragma mark CC3NodeVisitor
 
 @interface CC3NodeVisitor (TemplateMethods)
+-(void) process: (CC3Node*) aNode;
+-(void) processBeforeChildren: (CC3Node*) aNode;
+-(void) processChildrenOf: (CC3Node*) aNode;
+-(void) processAfterChildren: (CC3Node*) aNode;
+-(void) open;
+-(void) close;
 -(void) processRemovals;
 @end
 
@@ -52,7 +59,6 @@
 @synthesize startingNode, shouldVisitChildren;
 
 -(void) dealloc {
-	[startingNode release];
 	[pendingRemovals release];
 	[super dealloc];
 }
@@ -75,68 +81,118 @@
 }
 
 -(void) visit: (CC3Node*) aNode {
+	if (!aNode) return;			// Must have a node to work on
 
-	if (!aNode) return;		// Must have a node to work on
-	
-	// If this is the first node, open the visitor
-	if (startingNode == nil) {
-		startingNode = [aNode retain];
-		[self open];
+	if (!startingNode) {			// If this is the first node, start up
+		startingNode = aNode;		// Not retained
+		[self open];				// Open the visitor
 	}
 
-	// Do the heavy lifting before visiting children
-	[self processBeforeChildren: aNode];
-	
-	// Recurse through the child nodes if required
-	if (shouldVisitChildren) {
-		[self drawChildrenOf: aNode];
-	}
+	[self process: aNode];			// Process the node and its children recursively
 
-	// Do the heavy lifting after visiting children
-	[self processAfterChildren: aNode];
-	
-	// If this is the first node, close the visitor
-	if (aNode == startingNode) {
-		[self close];
+	if (aNode == startingNode) {	// If we're back to the first node, finish up
+		[self close];				// Close the visitor
+		startingNode = nil;			// Not retained
 	}
 }
 
+/** Template method that is invoked automatically during visitation to process the specified node. */
+-(void) process: (CC3Node*) aNode {
+	LogTrace(@"%@ visiting %@ %@ children", self, aNode, (shouldVisitChildren ? @"and" : @"but not"));
+	
+	[self processBeforeChildren: aNode];	// Heavy lifting before visiting children
+	
+	if (shouldVisitChildren) {				// Recurse through the child nodes if required
+		[self processChildrenOf: aNode];
+	}
+
+	[self processAfterChildren: aNode];		// Heavy lifting after visiting children
+}
+
+/**
+ * Template method that is invoked automatically to process the specified node when
+ * that node is visited, before the visit: method is invoked on the child nodes of
+ * the specified node.
+ * 
+ * This abstract implementation does nothing. Subclasses will override to process
+ * each node as it is visited.
+ */
 -(void) processBeforeChildren: (CC3Node*) aNode {}
 
--(void) drawChildrenOf: (CC3Node*) aNode {
-	NSArray* children = aNode.children;
+/**
+ * If the shouldVisitChildren property is set to YES, this template method is invoked
+ * automatically to cause the visitor to visit the child nodes of the specified node .
+ *
+ * This implementation invokes the visit: method on this visitor for each of the
+ * children of the specified node. This establishes a depth-first traveral of the
+ * node hierarchy.
+ *
+ * Subclasses may override this method to establish a different traversal.
+ */
+-(void) processChildrenOf: (CC3Node*) aNode {
+	CCArray* children = aNode.children;
 	for (CC3Node* child in children) {
 		[self visit: child];
 	}
 }
 
+/**
+ * Invoked automatically to process the specified node when that node is visited,
+ * after the visit: method is invoked on the child nodes of the specified node.
+ * 
+ * This abstract implementation does nothing. Subclasses will override to process
+ * each node as it is visited.
+ */
 -(void) processAfterChildren: (CC3Node*) aNode {}
 
+/**
+ * Template method that prepares the visitor to perform a visitation run. This method
+ * is invoked automatically prior to the first node being visited. It is not invoked
+ * for each node visited.
+ *
+ * This implementation does nothing. Subclasses can override to initialize their state,
+ * or to set any external state needed, such as GL state, prior to starting a visitation
+ * run, and should invoke this superclass implementation.
+ */
 -(void) open {}
 
+/**
+ * Invoked automatically after the last node has been visited during a visitation run.
+ * This method is invoked automatically after all nodes have been visited.
+ * It is not invoked for each node visited.
+ *
+ * This implementation processes the removals of any nodes that were requested to
+ * be removed via the requestRemovalOf: method during the visitation run. Subclasses
+ * can override to clean up their state, or to reset any external state, such as GL
+ * state, upon completion of a visitation run, and should invoke this superclass
+ * implementation to process any removal requests.
+ */
 -(void) close {
 	[self processRemovals];
 }
 
 -(void) requestRemovalOf: (CC3Node*) aNode {
 	if (!pendingRemovals) {
-		pendingRemovals = [[NSMutableSet set] retain];
+		pendingRemovals = [[CCArray array] retain];
 	}
 	[pendingRemovals addObject: aNode];
 }
 
 -(void) processRemovals {
-	if (pendingRemovals) {
-		for (CC3Node* n in pendingRemovals) {
-			[n remove];
-		}
-		[pendingRemovals release];
-		pendingRemovals = nil;
+	for (CC3Node* n in pendingRemovals) {
+		[n remove];
 	}
+	[pendingRemovals removeAllObjects];
 }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@", [self class]];
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@ visiting %@ %@ children, %i removals",
+			[self description], startingNode, (shouldVisitChildren ? @"and" : @"but not"),
+			pendingRemovals.count];
 }
 
 @end
@@ -147,14 +203,7 @@
 
 @implementation CC3NodeTransformingVisitor
 
-@synthesize shouldLocalizeToStartingNode;
-
--(void) setShouldLocalizeToStartingNode: (BOOL) shouldLocalize {
-	shouldLocalizeToStartingNode = shouldLocalize;
-	if (shouldLocalizeToStartingNode) {
-		isTransformDirty = YES;
-	}
-}
+@synthesize shouldLocalizeToStartingNode, isTransformDirty;
 
 -(id) init {
 	if ( (self = [super init]) ) {
@@ -162,6 +211,11 @@
 		shouldLocalizeToStartingNode = NO;
 	}
 	return self;
+}
+
+-(void) open {
+	[super open];
+	isTransformDirty = shouldLocalizeToStartingNode;
 }
 
 /**
@@ -172,9 +226,9 @@
  * with a particular node, not the visitor, and a child node could modify it and mess
  * up later siblings of a the parent node.
  */
--(void) visit: (CC3Node*) aNode {
+-(void) process: (CC3Node*) aNode {
 	BOOL wasAncestorDirty = isTransformDirty;
-	[super visit: aNode];
+	[super process: aNode];
 	isTransformDirty = wasAncestorDirty;
 }
 
@@ -199,6 +253,12 @@
 	return (parentNode && !localizeToThisNode) ? parentNode.transformMatrix : nil;
 }
 
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, localize: %@, dirty: %@",
+			[super fullDescription], NSStringFromBoolean(shouldLocalizeToStartingNode),
+			NSStringFromBoolean(isTransformDirty)];
+}
+
 @end
 
 
@@ -208,21 +268,6 @@
 @implementation CC3NodeUpdatingVisitor
 
 @synthesize deltaTime;
-
--(id) init {
-	return [self initWithDeltaTime: 0.0f];
-}
-
--(id) initWithDeltaTime: (ccTime) dt {
-	if ( (self = [super init]) ) {
-		deltaTime = dt;
-	}
-	return self;
-}
-
-+(id) visitorWithDeltaTime: (ccTime) dt {
-	return [[[self alloc] initWithDeltaTime: dt] autorelease];
-}
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	LogTrace(@"Updating %@ after %.3f ms", aNode, deltaTime * 1000.0f);
@@ -238,11 +283,20 @@
 	[super processAfterChildren: aNode];
 }
 
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, dt: %.3f ms",
+			[super fullDescription], deltaTime * 1000.0f];
+}
+
 @end
 
 
 #pragma mark -
 #pragma mark CC3NodeBoundingBoxVisitor
+
+@interface CC3Node (CC3NodeBoundingBoxVisitor)
+-(BOOL) shouldContributeToParentBoundingBox;
+@end
 
 @implementation CC3NodeBoundingBoxVisitor
 
@@ -255,12 +309,17 @@
 	return self;
 }
 
+-(void) open {
+	[super open];
+	boundingBox = kCC3BoundingBoxNull;
+}
+
 -(void) processAfterChildren: (CC3Node*) aNode {
 	[super processAfterChildren: aNode];
-	if (aNode.hasLocalContent) {
+	if (aNode.shouldContributeToParentBoundingBox) {
 
 		// If the bounding box is being localized to the starting node, and the node
-		// isthe starting node, don't apply transform to bounding box, because we want
+		// is the starting node, don't apply transform to bounding box, because we want
 		// the bounding box in the local coordinate system of the startingNode
 		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
 		CC3BoundingBox nodeBox = (shouldLocalizeToStartingNode && (aNode == startingNode)) 
@@ -287,78 +346,102 @@
 	}
 }
 
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, box: %@",
+			[super fullDescription], NSStringFromCC3BoundingBox(boundingBox)];
+}
+
 @end
 
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
-@interface CC3Node (CC3NodeDrawingVisitor)
--(void) drawLocalContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-@property(nonatomic, readonly) CC3World* world;
-@end
-
-@interface CC3World (CC3NodeDrawingVisitor)
--(void) drawDrawSequenceWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+@interface CC3NodeDrawingVisitor (TemplateMethods)
+-(BOOL) shouldDrawNode: (CC3Node*) aNode;
+-(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode;
 @end
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize frustum, shouldDecorateNode, textureUnit, textureUnitCount;
+@synthesize drawingSequencer, frustum;
+@synthesize shouldDecorateNode, shouldClearDepthBuffer;
+@synthesize textureUnit, textureUnitCount;
 
 -(void) dealloc {
-	frustum = nil;		// not retained
+	drawingSequencer = nil;		// not retained
+	frustum = nil;				// not retained
 	[super dealloc];
-}
-
--(CC3World*) world {
-	return (CC3World*)startingNode;
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		self.shouldDecorateNode = YES;
+		shouldDecorateNode = YES;
+		shouldClearDepthBuffer = YES;
 	}
 	return self;
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
-	LogTrace(@"Visiting %@ %@ children", aNode, (shouldVisitChildren ? @"and" : @"but not"));
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
-	[aNode drawWithVisitor: self];
+	if ([self shouldDrawNode: aNode]) {
+		[aNode transformAndDrawWithVisitor: self];
+	}
 }
 
--(void) drawChildrenOf: (CC3Node*) aNode {
-	if (self.world.isUsingDrawingSequence) {
-		[self.world drawDrawSequenceWithVisitor: self];
+-(BOOL) shouldDrawNode: (CC3Node*) aNode {
+	return aNode.hasLocalContent
+			&& [self isNodeVisibleForDrawing: aNode]
+			&& [aNode doesIntersectFrustum: frustum];
+}
+
+-(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode {
+	return aNode.visible;
+}
+
+-(void) processChildrenOf: (CC3Node*) aNode {
+	if (drawingSequencer) {
+		shouldVisitChildren = NO;
+		[drawingSequencer visitNodesWithNodeVisitor: self];
 	} else {
-		[super drawChildrenOf: aNode];
+		[super processChildrenOf: aNode];
 	}
 }
 
 /**
- * Establishes the frustum from the currently active camera, initializes mesh and
- * material context switching, and clears the depth buffer every time drawing begins so
- * that 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
+ * Starts with assumption that we are visiting children so that the processChildren:
+ * method will be invoked. Initializes mesh and material context switching, and clears
+ * the depth buffer every time drawing begins so that 3D rendering will occur over top
+ * of any previously rendered 3D or 2D artifacts.
  */
 -(void) open {
 	[super open];
-	frustum = self.world.activeCamera.frustum;
+
+	shouldVisitChildren = YES;
 
 	[CC3Material resetSwitching];
 	[CC3VertexArrayMesh resetSwitching];
 	
-	[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+	if (shouldClearDepthBuffer) {
+		[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+	}
 }
 
-/** Retracts the frustum. */
--(void) close {
-	[super close];
-	frustum = nil;
-}
+-(void) draw: (CC3Node*) aNode {
+	CC3OpenGLES11StateTrackerCapability* gles11Lighting = [CC3OpenGLES11Engine engine].serverCapabilities.lighting;
+	
+	BOOL lightingWasEnabled = gles11Lighting.value;		// Remember current lighting state in case it is disabled during drawing.
 
--(void) drawLocalContentOf: (CC3Node*) aNode {
-	[aNode drawLocalContentWithVisitor: self];
+	[aNode drawWithVisitor: self];
+
+	gles11Lighting.value = lightingWasEnabled;			// Re-establish previous lighting state.
+
 	[self.performanceStatistics incrementNodesDrawn];
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clearDepth: %@",
+			[super fullDescription], drawingSequencer, textureUnit, textureUnitCount,
+			NSStringFromBoolean(shouldDecorateNode), NSStringFromBoolean(shouldClearDepthBuffer)];
 }
 
 @end
@@ -383,10 +466,14 @@
 	[super dealloc];
 }
 
+-(CC3World*) world {
+	return (CC3World*)startingNode;
+}
+
 /** Overridden to initially set the shouldDecorateNode to NO. */
 -(id) init {
 	if ( (self = [super init]) ) {
-		self.shouldDecorateNode = NO;
+		shouldDecorateNode = NO;
 	}
 	return self;
 }
@@ -433,8 +520,6 @@
  * If antialiasing multisampling is active, after reading the color of the touched pixel,
  * the multisampling framebuffer is made active in preparation of normal drawing operations.
  *
- * If the
- *
  * Also restores the original GL color value, to avoid flicker on materials and textures
  * if the world has no lighting.
  */
@@ -459,61 +544,97 @@
 	[super close];
 }
 
+
+#pragma mark Drawing
+
+/**
+ * Overridden because what matters here is not visibility, but touchability.
+ * Invisible nodes will be drawn if touchable.
+ */
+-(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode {
+	return aNode.isTouchable;
+}
+
+/** Overridden to draw the node in a uniquely identifiable color. */
+-(void) draw: (CC3Node*) aNode {
+	[self paintNode: aNode];
+	[super draw: aNode];
+}
+
 /**
  * Template method that draws the backdrop behind the 3D world.
  *
  * This method is automatically invoked after the 3D world has been drawn in pure
  * solid colors, and prior to the second redrawing with the true coloring, to
- * provide an empty canvas on which to draw the real scene.
+ * provide an empty canvas on which to draw the real scene, and to make sure that
+ * the depth buffer is cleared before the second redrawing.
  *
  * This implementation simply clears the GL color buffer to create an empty canvas.
  * If the CC3Layer has a colored background, that color is used to clear the GL
  * color buffer, otherwise the current GL clearing color is used.
+ *
+ * To minimize flicker, if the background is translucent, the color buffer is not cleared.
+ *
+ * In addition, the depth buffer needs to be cleared in between drawing the pure
+ * colors for node picking, and drawing the real scene, to ensure that the the two
+ * passes do not interfere with each other, which would cause flicker. To that end,
+ * if this visitor is configured NOT to clear the depth buffer at the start of each
+ * drawing pass, the depth buffer is cleared here when the color buffer is cleared.
+ *
+ * This use of clearing the color buffer, instead of redrawing the CC3Layer backdrop,
+ * is used because redrawing the CC3Layer involves delving back into the 2D world,
+ * and losing knowledge of the GL state.
  *
  * Subclasses can override to do something more sophisticated with the background.
  */
 -(void) drawBackdrop {
 	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
 	CC3Layer* cc3Layer = self.world.cc3Layer;
-		
-	// If the CC3Layer has a background color, use it as the GL clear color
-	if (cc3Layer && cc3Layer.isColored) {
-		// Remember the current GL clear color
-		ccColor4F currClearColor = gles11State.clearColor.value;
-		
-		// Retrieve the CC3Layer background color
-		ccColor3B lcub3 = cc3Layer.color;
-		ccColor4F layerColor = CCC4FMake(CCColorFloatFromByte(lcub3.r),
-										 CCColorFloatFromByte(lcub3.g),
-										 CCColorFloatFromByte(lcub3.b),
-										 CCColorFloatFromByte(cc3Layer.opacity));
-		
-		// Set the GL clear color from the layer color
-		gles11State.clearColor.value = layerColor;
-		LogTrace(@"%@ clearing background to %@ color: %@",
-				 self, cc3Layer, NSStringFromCCC4F(layerColor));
-		
-		// Clear the color buffer to redraw the background
-		[gles11State clearColorBuffer];
-		
-		// Reinstate the current GL clear color
-		gles11State.clearColor.value = currClearColor;
-		
-	} else {
-		// Otherwise use the current clear color
-		LogTrace(@"%@ clearing background to default clear color: %@",
-				 self, NSStringFromCCC4F(gles11State.clearColor.value));
-		
-		// Clear the color buffer to redraw the background
-		[gles11State clearColorBuffer];
-	}
-}
+	
+	// Only clear the color if the layer is opaque. This is to stop flicker
+	// of the background if it is translucent. Unfortunately, flicker WILL occur
+	// if BOTH the object and the CC3Layer background are translucent.
+	GLbitfield colorFlag = cc3Layer.isOpaque ? GL_COLOR_BUFFER_BIT : 0;
 
-/** Overridden to draw the node only if it is touchable, and to draw it in a uniquely identifiable color. */
--(void) drawLocalContentOf: (CC3Node*) aNode {
-	if (aNode.isTouchable) {
-		[self paintNode: aNode];
-		[super drawLocalContentOf: aNode];
+	// If the depth buffer will not be cleared as part of normal drawing,
+	// do it now, while we are clearing the color buffer.
+	GLbitfield depthFlag = shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
+
+	// If the CC3Layer has a background color, use it as the GL clear color
+	if (colorFlag) {
+		if (cc3Layer.isColored) {
+			// Remember the current GL clear color
+			ccColor4F currClearColor = gles11State.clearColor.value;
+			
+			// Retrieve the CC3Layer background color
+			ccColor4F layerColor = CCC4FFromColorAndOpacity(cc3Layer.color, cc3Layer.opacity);
+			
+			// Set the GL clear color from the layer color
+			gles11State.clearColor.value = layerColor;
+			LogTrace(@"%@ clearing background to %@ color: %@ %@ clearing depth buffer",
+						  self, cc3Layer, NSStringFromCCC4F(layerColor),
+						  (depthFlag ? @"and" : @"but not"));
+			
+			// Clear the color buffer redraw the background, and depth buffer if required
+			[gles11State clearBuffers: (colorFlag | depthFlag)];
+			
+			// Reinstate the current GL clear color
+			gles11State.clearColor.value = currClearColor;
+			
+		} else {
+			// Otherwise use the current clear color
+			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer",
+						  self, NSStringFromCCC4F(gles11State.clearColor.value),
+						  (depthFlag ? @"and" : @"but not"));
+			
+			// Clear the color buffer redraw the background, and depth buffer if required
+			[gles11State clearBuffers: (colorFlag | depthFlag)];
+		}
+	} else if (depthFlag) {
+		LogTrace(@"%@ clearing depth buffer", self);
+		[gles11State clearBuffers: depthFlag];		// Clear the depth buffer only
+	} else {
+		LogTrace(@"%@ clearing neither color or depth buffer", self);
 	}
 }
 
@@ -544,6 +665,11 @@
  */
 -(GLuint) tagFromColor: (ccColor4B) color {
 	return ((GLuint)color.r << 16) | ((GLuint)color.g << 8) | (GLuint)color.b;
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, picked: %@, orig color: %@",
+			[super fullDescription], pickedNode, NSStringFromCCC4F(originalColor)];
 }
 
 @end

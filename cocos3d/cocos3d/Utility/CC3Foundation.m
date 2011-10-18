@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,7 +30,7 @@
  */
 
 #import "CC3Foundation.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CCTouchDispatcher.h"
 
 #pragma mark -
 #pragma mark 3D cartesian vector structure and functions
@@ -67,21 +67,24 @@ CC3Vector CC3VectorMaximize(CC3Vector v1, CC3Vector v2) {
 	return vMax;
 }
 
-// Avoid expensive sqrt calc if vector is unit length
-GLfloat CC3VectorLength(CC3Vector v) {
+GLfloat CC3VectorLengthSquared(CC3Vector v) {
 	GLfloat x = v.x;
 	GLfloat y = v.y;
 	GLfloat z = v.z;
-	GLfloat lenSq = ((x * x) + (y * y) + (z * z));
+	return (x * x) + (y * y) + (z * z);
+}
 
-	// Take square root...optimizing out the obvious ones
+// Avoid expensive sqrt calc if vector is unit length or zero
+GLfloat CC3VectorLength(CC3Vector v) {
+	GLfloat lenSq = CC3VectorLengthSquared(v);
 	return (lenSq == 1.0f || lenSq == 0.0f) ? lenSq : sqrtf(lenSq);
 }
 
 CC3Vector CC3VectorNormalize(CC3Vector v) {
-	GLfloat len = CC3VectorLength(v);
-	if (len == 0.0f || len == 1.0f) return v;
+	GLfloat lenSq = CC3VectorLengthSquared(v);
+	if (lenSq == 0.0f || lenSq == 1.0f) return v;
 
+	GLfloat len = sqrtf(lenSq);
 	CC3Vector normal;
 	normal.x = v.x / len;
 	normal.y = v.y / len;
@@ -133,6 +136,10 @@ GLfloat CC3VectorDistance(CC3Vector start, CC3Vector end) {
 	return CC3VectorLength(CC3VectorDifference(end, start));
 }
 
+GLfloat CC3VectorDistanceSquared(CC3Vector start, CC3Vector end) {
+	return CC3VectorLengthSquared(CC3VectorDifference(end, start));
+}
+
 CC3Vector CC3VectorScale(CC3Vector v, CC3Vector scale) {
 	CC3Vector result;
 	result.x = v.x * scale.x;
@@ -155,6 +162,10 @@ CC3Vector CC3VectorAdd(CC3Vector v, CC3Vector translation) {
 	result.y = v.y + translation.y;
 	result.z = v.z + translation.z;
 	return result;
+}
+
+CC3Vector CC3VectorAverage(CC3Vector v1, CC3Vector v2) {
+	return CC3VectorScaleUniform(CC3VectorAdd(v1, v2), 0.5);	
 }
 
 GLfloat CC3VectorDot(CC3Vector v1, CC3Vector v2) {
@@ -234,7 +245,7 @@ BOOL CC3BoundingBoxIsNull(CC3BoundingBox bb) {
 }
 
 CC3Vector CC3BoundingBoxCenter(CC3BoundingBox bb) {
-	return CC3VectorScaleUniform(CC3VectorAdd(bb.minimum, bb.maximum), 0.5);
+	return CC3VectorAverage(bb.minimum, bb.maximum);
 }
 
 
@@ -265,6 +276,69 @@ CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3BoundingBox bb2) {
 	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.minimum);
 	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.maximum);
 	return bb1;
+}
+
+CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, GLfloat padding) {
+	CC3Vector padVector = cc3v(padding, padding, padding);
+	CC3BoundingBox bbPadded;
+	bbPadded.maximum = CC3VectorAdd(bb.maximum, padVector);
+	bbPadded.minimum = CC3VectorDifference(bb.minimum, padVector);
+	return bbPadded;
+}
+
+
+#pragma mark -
+#pragma mark Sphere structure and functions
+
+NSString* NSStringFromCC3Spere(CC3Sphere sphere) {
+	return [NSString stringWithFormat: @"(Center: %@, Radius: %.3f)",
+			NSStringFromCC3Vector(sphere.center), sphere.radius];
+}
+
+CC3Sphere CC3SphereMake(CC3Vector center, GLfloat radius) {
+	CC3Sphere s;
+	s.center = center;
+	s.radius = radius;
+	return s;
+}
+
+CC3Sphere CC3SphereUnion(CC3Sphere s1, CC3Sphere s2) {
+	CC3Vector uc, mc, is1, is2, epF, epB;
+
+	// The center of the union sphere will lie on the line between the centers of the
+	// two component spheres. We will look for the two end points (epF & epB) that
+	// define the diameter of the sphere on that same line. Each endpoint is the
+	// farther of the two points where the spheres intersect this center line.
+	// The distance is measured from the midpoint of the line between the centers.
+	// This comparison is performed twice, once in each direction of the line.
+
+	// Unit vector between the centers
+	uc = CC3VectorNormalize(CC3VectorDifference(s2.center, s1.center));
+	
+	// The location midpoint between the centers. This is used as an anchor
+	// for comparing distances along the line that intersects both centers.
+	mc = CC3VectorAverage(s1.center, s2.center);
+
+	// Calculate where each sphere intersects the line in the direction of the unit
+	// vector between the centers. Then take the intersection point that is farther
+	// from the midpoint along this line as the foward endpoint.
+	is1 = CC3VectorAdd(s1.center, CC3VectorScaleUniform(uc, s1.radius));
+	is2 = CC3VectorAdd(s2.center, CC3VectorScaleUniform(uc, s2.radius));
+	epF = (CC3VectorDistanceSquared(is1, mc) > CC3VectorDistanceSquared(is2, mc)) ? is1 : is2;
+	
+	// Calculate where each sphere intersects the line in the opposite direction of
+	// the unit vector between the centers. Then take the intersection point that is
+	// farther from the midpoint along this line as the backward endpoint.
+	is1 = CC3VectorDifference(s1.center, CC3VectorScaleUniform(uc, s1.radius));
+	is2 = CC3VectorDifference(s2.center, CC3VectorScaleUniform(uc, s2.radius));
+	epB = (CC3VectorDistanceSquared(is1, mc) > CC3VectorDistanceSquared(is2, mc)) ? is1 : is2;
+
+	// The resulting union sphere has a center at the midpoint between the two endpoints,
+	// and a radius that is half the distance between the two endpoints.
+	CC3Sphere rslt;
+	rslt.center = CC3VectorAverage(epF, epB);
+	rslt.radius = CC3VectorDistance(epF, epB) * 0.5;
+	return rslt;
 }
 
 
@@ -418,6 +492,39 @@ CC3Vector4 CC3Vector4Translate(CC3Vector4 v, CC3Vector4 translation) {
 
 GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
 	return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z) + (v1.w * v2.w);
+}
+
+CC3Vector4 CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
+	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
+	// the rotation angle (negated for right-handed coordinate system), then:
+	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
+	
+	GLfloat halfAngle = -DegreesToRadians(axisAngle.w) / 2.0;		// negate for RH system
+	CC3Vector axis = CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(axisAngle));
+	return CC3Vector4FromCC3Vector(CC3VectorScaleUniform(axis, sinf(halfAngle)), cosf(halfAngle));
+}
+
+CC3Vector4 CC3AxisAngleFromQuaternion(CC3Vector4 quaternion) {
+	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
+	// the rotation angle (negated for right-handed coordinate system), then:
+	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
+	// ra = acos(q.w) * 2
+	// (rx, ry, rz) = (q.x, q.y, q.z) / sin(ra/2)
+	
+	CC3Vector4 q = CC3Vector4Normalize(quaternion);
+	GLfloat halfAngle = acosf(q.w);
+
+	GLfloat angle = -RadiansToDegrees(halfAngle) * 2.0;		// negate for RH system
+
+	// If angle is zero, rotation axis is undefined. Use zero vector.
+	CC3Vector axis;
+	if (halfAngle != 0.0f) {
+		axis = CC3VectorScaleUniform(CC3VectorFromTruncatedCC3Vector4(q),
+									 (1.0 / sinf(halfAngle)));
+	} else {
+		axis = kCC3VectorZero;
+	}
+	return CC3Vector4FromCC3Vector(axis, angle);
 }
 
 #define kSlerpCosAngleLinearEpsilon 0.01	// about 8 degrees
@@ -574,7 +681,7 @@ CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 #pragma mark ccColor4F functions
 
 NSString* NSStringFromCCC4F(ccColor4F rgba) {
-	return [NSString stringWithFormat: @"(%.2f, %.2f, %.2f, %.2f)", rgba.r, rgba.g, rgba.b, rgba.a];
+	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", rgba.r, rgba.g, rgba.b, rgba.a];
 }
 
 ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
@@ -604,12 +711,12 @@ ccColor4B CCC4BFromCCC4F(ccColor4F floatColor) {
 	return color;
 }
 
-ccColor4F CCC4FFromCCC3B(ccColor3B byteColor) {
+ccColor4F CCC4FFromColorAndOpacity(ccColor3B byteColor, GLubyte opacity) {
 	ccColor4F color;
 	color.r = CCColorFloatFromByte(byteColor.r);
 	color.g = CCColorFloatFromByte(byteColor.g);
 	color.b = CCColorFloatFromByte(byteColor.b);
-	color.a = 1.0;
+	color.a = CCColorFloatFromByte(opacity);
 	return color;
 }
 
@@ -647,8 +754,16 @@ ccColor4F CCC4FUniformTranslate(ccColor4F rgba, GLfloat offset) {
 	return CCC4FAdd(rgba, CCC4FMake(offset, offset, offset, offset));
 }
 
+ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
+	ccColor4F result;
+	result.r = CLAMP(rgba.r * scale, 0.0, 1.0);
+	result.g = CLAMP(rgba.g * scale, 0.0, 1.0);
+	result.b = CLAMP(rgba.b * scale, 0.0, 1.0);
+	result.a = CLAMP(rgba.a * scale, 0.0, 1.0);
+	return result;
+}
+
 ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GLfloat blendWeight) {
-	blendWeight = CLAMP(blendWeight, 0.0, 1.0);
 	return CCC4FMake(WAVG(baseColor.r, blendColor.r, blendWeight),
 					 WAVG(baseColor.g, blendColor.g, blendWeight),
 					 WAVG(baseColor.b, blendColor.b, blendWeight),
@@ -675,6 +790,21 @@ GLubyte CCColorByteFromFloat(GLfloat colorValue) {
 
 #pragma mark -
 #pragma mark Miscellaneous extensions and functionality
+
+NSString* NSStringFromTouchType(uint tType) {
+	switch (tType) {
+		case kCCTouchBegan:
+			return @"kCCTouchBegan";
+		case kCCTouchMoved:
+			return @"kCCTouchMoved";
+		case kCCTouchEnded:
+			return @"kCCTouchEnded";
+		case kCCTouchCancelled:
+			return @"kCCTouchCancelled";
+		default:
+			return [NSString stringWithFormat: @"unknown touch type (%u)", tType];
+	}
+}
 
 NSString* NSStringFromBoolean(BOOL value) {
 	return value ? @"YES" : @"NO";
@@ -722,12 +852,28 @@ NSString* NSStringFromBoolean(BOOL value) {
 	return [UIColor colorWithRed: rgba.r green: rgba.g blue: rgba.b alpha: rgba.a];
 }
 
--(void) setGLColor {
-	[CC3OpenGLES11Engine engine].state.color.value = [self asCCColor4F];
+@end
+
+
+#pragma mark -
+#pragma mark CCNode extension
+
+@implementation CCNode (CC3)
+
+- (CGRect) globalBoundingBoxInPixels {
+	CGRect rect = CGRectMake(0, 0, contentSizeInPixels_.width, contentSizeInPixels_.height);
+	return CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
+}
+
+-(void) updateViewport {
+	[children_ makeObjectsPerformSelector:@selector(updateViewport)];	
 }
 
 @end
 
+
+#pragma mark -
+#pragma mark CCDirector extension
 
 @implementation CCDirector (CC3)
 
@@ -736,6 +882,71 @@ NSString* NSStringFromBoolean(BOOL value) {
 }
 -(ccTime) frameRate {
 	return frameRate_;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CCArray extension
+
+@implementation CCArray (CC3)
+
+-(NSUInteger) indexOfObjectIdenticalTo: (id) anObject {
+	return [self indexOfObject: anObject];
+}
+
+-(void) removeObjectIdenticalTo: (id) anObject {
+	[self removeObject: anObject];
+}
+
+-(void) replaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
+	NSAssert(index < data->num, @"Invalid index. Out of bounds");
+
+	id oldObj = data->arr[index];
+	data->arr[index] = [anObject retain];
+	[oldObj release];						// Release after in case new is same as old
+}
+
+
+#pragma mark Support for unretained objects
+
+- (void) addUnretainedObject: (id) anObject {
+	ccCArrayAppendValueWithResize(data, anObject);
+}
+
+- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index {
+	ccCArrayEnsureExtraCapacity(data, 1);
+	ccCArrayInsertValueAtIndex(data, anObject, index);
+}
+
+- (void) removeUnretainedObjectIdenticalTo: (id) anObject {
+	ccCArrayRemoveValue(data, anObject);
+}
+
+- (void) removeUnretainedObjectAtIndex: (NSUInteger) index {
+	ccCArrayRemoveValueAtIndex(data, index);
+}
+
+- (void) removeAllObjectsAsUnretained {
+	ccCArrayRemoveAllValues(data);
+}
+
+-(void) releaseAsUnretained {
+	[self removeAllObjectsAsUnretained];
+	[self release];
+}
+
+- (NSString*) fullDescription {
+	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];
+	if (data->num > 0) {
+		[desc appendFormat:@"\n\t%@", data->arr[0]];
+	}
+	for (NSUInteger i = 1; i < data->num; i++) {
+		[desc appendFormat:@",\n\t%@", data->arr[i]];
+	}
+	[desc appendString:@")"];
+	return desc;
 }
 
 @end

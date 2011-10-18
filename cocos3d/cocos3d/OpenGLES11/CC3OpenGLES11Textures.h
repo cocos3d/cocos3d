@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Textures.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -75,23 +75,7 @@
  * which will not read the GL value from the GL engine in the open method, and will
  * not restore the value in the close method.
  */
-@interface CC3OpenGLES11StateTrackerTextureBinding : CC3OpenGLES11StateTrackerInteger {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
+@interface CC3OpenGLES11StateTrackerTextureBinding : CC3OpenGLES11StateTrackerInteger
 
 /** Unbinds all textures by setting the value property to zero. */
 -(void) unbind;
@@ -112,24 +96,7 @@
  * which will cause the state to be automatically read once, on the first invocation of the
  * open method, and to be automatically restored on each invocation of the close method.
  */
-@interface CC3OpenGLES11StateTrackerTexEnvEnumeration : CC3OpenGLES11StateTrackerEnumeration {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11StateTrackerTexEnvEnumeration : CC3OpenGLES11StateTrackerEnumeration
 @end
 
 
@@ -147,24 +114,7 @@
  * not restore the value in the close method.
  *
  */
-@interface CC3OpenGLES11StateTrackerTexEnvColor : CC3OpenGLES11StateTrackerColor {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11StateTrackerTexEnvColor : CC3OpenGLES11StateTrackerColor
 @end
 
 
@@ -182,24 +132,7 @@
  * which will cause the state to be automatically read once, on the first invocation of the
  * open method, and to be automatically restored on each invocation of the close method.
  */
-@interface CC3OpenGLES11StateTrackerTextureServerCapability : CC3OpenGLES11StateTrackerServerCapability {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11StateTrackerTextureServerCapability : CC3OpenGLES11StateTrackerServerCapability
 @end
 
 
@@ -235,24 +168,7 @@
  * which will cause the state to be automatically read once, on the first invocation of the
  * open method, and to be automatically restored on each invocation of the close method.
  */
-@interface CC3OpenGLES11StateTrackerTextureClientCapability : CC3OpenGLES11StateTrackerClientCapability {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerForState: (GLenum) qName withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11StateTrackerTextureClientCapability : CC3OpenGLES11StateTrackerClientCapability
 @end
 
 
@@ -268,24 +184,7 @@
  *   - elementStride uses GL name GL_TEXTURE_COORD_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glTexCoordPointer method
  */
-@interface CC3OpenGLES11StateTrackerVertexTexCoordsPointer : CC3OpenGLES11StateTrackerVertexPointer{
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initialize this instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initWithParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with the specified name.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerWithParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11StateTrackerVertexTexCoordsPointer : CC3OpenGLES11StateTrackerVertexPointer
 @end
 
 
@@ -300,40 +199,7 @@
  * tracker for the matrix mode, to ensure that the matrix mode associated
  * with this matrix stack is active before calling a GL function.
  */
-@interface CC3OpenGLES11TextureMatrixStack : CC3OpenGLES11MatrixStack {
-	CC3OpenGLES11TextureUnit* textureUnit;
-}
-
-/**
- * Initializes this instance for the specified matrix mode.
- * The specified tName is used to query the matrix at the top of this matrix stack.
- * The specified dName is used to query the depth of this matrix stack.
- * The specified tracker is used to ensure that the matrix mode of this matrix
- * is active before issuing any commands.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
--(id) initWithMode: (GLenum) matrixMode
-		andTopName: (GLenum) tName
-	  andDepthName: (GLenum) dName
-	andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker
-		withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
-/**
- * Allocates and initializes an autoreleased instance for the specified matrix mode.
- * The specified tName is used to query the matrix at the top of this matrix stack.
- * The specified dName is used to query the depth of this matrix stack.
- * The specified tracker is used to ensure that the matrix mode of this matrix
- * is active before issuing any commands.
- *
- * The parent is the CC3OpenGLES11TextureUnit state manager that is holding this tracker.
- */
-+(id) trackerWithMode: (GLenum) matrixMode
-		   andTopName: (GLenum) tName
-		 andDepthName: (GLenum) dName
-	   andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker
-		   withParent: (CC3OpenGLES11TextureUnit*) aTexUnit;
-
+@interface CC3OpenGLES11TextureMatrixStack : CC3OpenGLES11MatrixStack
 @end
 
 
@@ -345,7 +211,6 @@
 /** CC3OpenGLES11Textures manages trackers for texture and texture environment state. */
 @interface CC3OpenGLES11TextureUnit : CC3OpenGLES11StateTrackerManager {
 	GLuint textureUnitIndex;
-	CC3OpenGLES11Textures* texturesState;
 	CC3OpenGLES11StateTrackerTextureServerCapability* texture2D;
 	CC3OpenGLES11StateTrackerTextureClientCapability* textureCoordArray;
 	CC3OpenGLES11StateTrackerVertexTexCoordsPointer* textureCoordinates;
@@ -452,7 +317,7 @@
  *
  * The parent is the CC3OpenGLES11Textures state manager that is holding this manager.
  */
--(id) initWithTextureUnitIndex: (GLuint) texUnit withParent: (CC3OpenGLES11Textures*) aTexState;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker withTextureUnitIndex: (GLuint) texUnit;
 
 /**
  * Allocates and initializes an autoreleased instance to track GL state for
@@ -466,7 +331,7 @@
  *
  * The parent is the CC3OpenGLES11Textures state manager that is holding this manager.
  */
-+(id) trackerWithTextureUnitIndex: (GLuint) texUnit withParent: (CC3OpenGLES11Textures*) aTexState;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker withTextureUnitIndex: (GLuint) texUnit;
 
 /**
  * Make this texture unit the active texture unit.
@@ -492,7 +357,7 @@
 @interface CC3OpenGLES11Textures : CC3OpenGLES11StateTrackerManager {
 	CC3OpenGLES11StateTrackerActiveTexture* activeTexture;
 	CC3OpenGLES11StateTrackerActiveTexture* clientActiveTexture;
-	NSMutableArray* textureUnits;
+	CCArray* textureUnits;
 }
 
 /** Tracks active texture (GL get name GL_ACTIVE_TEXTURE and set function glActiveTexture). */
@@ -515,7 +380,7 @@
  * empty, and will subsequently contain a number of texture units one more than
  * the largest value passed to textureUnitAt:.
  */
-@property(nonatomic, retain) NSMutableArray* textureUnits;
+@property(nonatomic, retain) CCArray* textureUnits;
 
 /**
  * Returns the number of active texture units.

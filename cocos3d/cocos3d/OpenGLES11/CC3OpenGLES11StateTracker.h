@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,8 @@
 #import "ccTypes.h"
 #import "CC3Foundation.h"
 #import "CC3OpenGLES11Foundation.h"
+
+@class CC3OpenGLES11Engine;
 
 /**
  * An enumeration of the techniques for handling the existing value of a GL state
@@ -114,10 +116,25 @@ typedef enum {
  * for handling the original GL state value (see the notes for the
  * CC3GLESStateOriginalValueHandling enumeration).
  */
-@interface CC3OpenGLES11StateTracker : NSObject {}
+@interface CC3OpenGLES11StateTracker : NSObject {
+	CC3OpenGLES11StateTracker* parent;
+	BOOL isScheduledForClose;
+}
 
-/** Allocates and initializes an autoreleased instance. */
-+(id) tracker;
+/** The parent of this tracker. */
+@property(nonatomic, readonly) CC3OpenGLES11StateTracker* parent;
+
+/** The CC3OpenGLES11Engine at the root of the tracker assembly. */
+@property(nonatomic, readonly) CC3OpenGLES11Engine* engine;
+
+/** Initializes this instance, attached to the specified parent tracker. */
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker;
+
+/**
+ * Allocates and initializes an autoreleased instance,
+ * attached to the specified parent tracker.
+ */
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker;
 
 /**
  * Opens this tracker. This will be automatically invoked
@@ -131,21 +148,26 @@ typedef enum {
  * Closes this tracker. This will be automatically invoked
  * each time the CC3OpenGLES11Engine close method is invoked.
  *
- * This abstract implementation does nothing. Subclasses will override.
+ * This abstract implementation clears an internal marker. Subclasses will override.
+ * Subclasses that override must invoke this superclass method.
  */
 -(void) close;
 
 /**
- * A convenience method that iterates through the specified collection
- * of trackers, and invokes the open method on each tracker.
+ * Invoked automatically when a tracker is added to its parent.
+ *
+ * This implementation adds this tracker to the collection of trackers
+ * to be opened by the CC3OpenGLES11Engine.
  */
--(void) openTrackers: (NSArray*) trackers;
+-(void) notifyTrackerAdded;
 
 /**
- * A convenience method that iterates through the specified collection
- * of trackers, and invokes the close method on each tracker.
+ * Invoked automatically when the value of the specified tracker was set in the GL engine.
+ *
+ * This implementation adds this tracker to the collection of trackers to be closed
+ * by the CC3OpenGLES11Engine.
  */
--(void) closeTrackers: (NSArray*) trackers;
+-(void) notifyGLChanged;
 
 @end
 
@@ -193,23 +215,55 @@ typedef enum {
 /** Indicates whether the current state in the GL engine is known. */
 @property(nonatomic, assign) BOOL valueIsKnown;
 
+/**
+ * Returns the value to set the valueIsKnown property to when closing this tracker.
+ *
+ * Returns NO if the value of the originalValueHandling property is
+ * kCC3GLESStateOriginalValueIgnore, otherwise returns YES.
+ */
+@property(nonatomic, readonly) BOOL valueIsKnownOnClose;
+
+/**
+ * Returns whether the tracker should read the original value from the GL engine
+ * on every frame.
+ *
+ * Returns YES if the name property is not nil, and the value of the
+ * originalValueHandling property is either kCC3GLESStateOriginalValueReadAlways
+ * or kCC3GLESStateOriginalValueReadAlwaysAndRestore, otherwise returns NO.
+ */
+@property(nonatomic, readonly) BOOL shouldAlwaysReadOriginal;
+
+/**
+ * Returns whether the tracker should restore the original value back to the GL engine
+ * when this tracker is closed.
+ *
+ * Returns YES if the value of the originalValueHandling property is either
+ * kCC3GLESStateOriginalValueReadOnceAndRestore or
+ * kCC3GLESStateOriginalValueReadAlwaysAndRestore, otherwise returns NO.
+ */
+@property(nonatomic, readonly) BOOL shouldRestoreOriginalOnClose;
+
 /** Initializes this instance with the specified enumerated GL name. */
--(id) initForState: (GLenum) qName;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker forState: (GLenum) qName;
 
 /** Allocates and initializes an autoreleased instance with the specified enumerated GL name. */
-+(id) trackerForState: (GLenum) qName;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker forState: (GLenum) qName;
 
 /**
  * Initializes this instance with the specified enumerated GL name,
  * and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+			andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+			andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
  * Depending on the value of the originalValueHandling property, this implementation may
@@ -248,16 +302,6 @@ typedef enum {
 -(void) getGLValue;
 
 /**
- * Template method to log the value retrieved by the getGLValue method.
- *
- * This abstract implementation does nothing.
- * Subclasses will override to log the value as the appropriate variable type.
- *
- * The application should not invoke this method directly.
- */
--(void) logGetGLValue;
-
-/**
  * Template method to set the value into the GL engine.
  *
  * This abstract implementation does nothing. Subclasses will override to set a value
@@ -268,16 +312,14 @@ typedef enum {
 -(void) setGLValue;
 
 /**
- * Template method to log the value set in the GL engine by the setGLValue method.
- * The wasSet parameter indicates whether the value has changed and was set in
- * the GL engine.
+ * Set the GL value, notify the CC3OpenGLES11Engine, mark the value as known,
+ * and log the activity.
  *
- * This abstract implementation does nothing.
- * Subclasses will override to log the value as the appropriate variable type.
- *
+ * This method is invoked automatically by the value property setter method,
+ * and, in turn, invokes the setGLValue template method.
  * The application should not invoke this method directly.
  */
--(void) logSetValue: (BOOL) wasSet;
+-(void) setGLValueAndNotify;
 
 @end
 
@@ -308,20 +350,25 @@ typedef void( CC3SetGLBooleanFunction( GLboolean ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
   andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
@@ -329,17 +376,10 @@ typedef void( CC3SetGLBooleanFunction( GLboolean ) );
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLBooleanFunction*) setGLFunc
 	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (BOOL) aValue;
 
 @end
 
@@ -392,20 +432,25 @@ typedef void( CC3SetGLFloatFunction( GLfloat ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
   andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
@@ -413,17 +458,10 @@ typedef void( CC3SetGLFloatFunction( GLfloat ) );
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLFloatFunction*) setGLFunc
 	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (GLfloat) aValue;
 
 @end
 
@@ -454,20 +492,25 @@ typedef void( CC3SetGLIntegerFunction( GLint ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
   andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
@@ -475,17 +518,10 @@ typedef void( CC3SetGLIntegerFunction( GLint ) );
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLIntegerFunction*) setGLFunc
 	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (GLint) aValue;
 
 @end
 
@@ -515,38 +551,36 @@ typedef void( CC3SetGLEnumerationFunction( GLenum ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
-  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
-	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (GLenum) aValue;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLEnumerationFunction*) setGLFunc
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 @end
 
@@ -577,20 +611,25 @@ typedef void( CC3SetGLColorFunction( GLfloat, GLfloat, GLfloat, GLfloat ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
   andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
@@ -598,17 +637,10 @@ typedef void( CC3SetGLColorFunction( GLfloat, GLfloat, GLfloat, GLfloat ) );
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (ccColor4F) aValue;
 
 @end
 
@@ -639,24 +671,27 @@ typedef void( CC3SetGLColorFunctionFixed( GLubyte, GLubyte, GLubyte, GLubyte ) )
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* functions to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* functions to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* functions to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
 andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
@@ -665,18 +700,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
  * to use the specified gl* functions to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
-andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+  andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the fixed value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetFixedValue: (ccColor4B) aFixedValue;
 
 /**
  * Template method to set the fixedValue into the GL engine..
@@ -684,15 +712,6 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
  * The application should not invoke this method directly.
  */
 -(void) setGLFixedValue;
-
-/**
- * Template method to log the fixedValue set in the GL engine by the setGLFixedValue method.
- * The wasSet parameter indicates whether the value has changed and was set in
- * the GL engine.
- *
- * The application should not invoke this method directly.
- */
--(void) logSetFixedValue: (BOOL) wasSet;
 
 @end
 
@@ -729,20 +748,25 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
  * Initializes this instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
--(id) initForState: (GLenum) aName andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc;
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc;
 
 /**
  * Allocates and initializes an autoreleased instance with the specified enumerated GL name,
  * and to use the specified gl* function to set the state in the GL engine.
  */
-+(id) trackerForState: (GLenum) aName andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc;
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc;
 
 /**
  * Initializes this instance with the specified enumerated GL name, to use the specified
  * gl* function to set the state in the GL engine, and to handle original values as specified.
  */
--(id) initForState: (GLenum) aName
-  andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
   andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
 
 /**
@@ -750,17 +774,10 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
  * to use the specified gl* function to set the state in the GL engine,
  * and to handle original values as specified..
  */
-+(id) trackerForState: (GLenum) aName
-	 andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLViewportFunction*) setGLFunc
 	 andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (CC3Viewport) aValue;
 
 @end
 
@@ -780,14 +797,6 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 /** The value of the GL state when the open method was invoked. */
 @property(nonatomic, assign) GLvoid* originalValue;
 
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (GLvoid*) aValue;
-
 @end
 
 
@@ -806,14 +815,6 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 /** The value of the GL state when the open method was invoked. */
 @property(nonatomic, assign) CC3Vector originalValue;
 
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (CC3Vector) aValue;
-
 @end
 
 
@@ -831,14 +832,6 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 
 /** The value of the GL state when the open method was invoked. */
 @property(nonatomic, assign) CC3Vector4 originalValue;
-
-/**
- * Attempts to set the value to the specified value.
- * If the value has not changed, it will not be set. Returns whether the value was set in GL.
- *
- * The application should not invoke this method directly.
- */
--(BOOL) attemptSetValue: (CC3Vector4) aValue;
 
 @end
 
@@ -911,26 +904,30 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 +(BOOL) defaultShouldAlwaysSetGL;
 
 /**
+ * Returns the value to set the valueIsKnown property to when closing this tracker.
+ *
+ * Returns NO if the value of the originalValueHandling property is
+ * kCC3GLESStateOriginalValueIgnore, otherwise returns YES.
+ */
+@property(nonatomic, readonly) BOOL valueIsKnownOnClose;
+
+/**
+ * Returns whether the tracker should restore the original value back to the GL engine
+ * when this tracker is closed.
+ *
+ * Returns YES if the value of the originalValueHandling property is either
+ * kCC3GLESStateOriginalValueReadOnceAndRestore or
+ * kCC3GLESStateOriginalValueReadAlwaysAndRestore, otherwise returns NO.
+ */
+@property(nonatomic, readonly) BOOL shouldRestoreOriginalOnClose;
+
+/**
  * Initializes the component primitive trackers.
  *
  * Automatically invoked during instance initialization.
  * The application should not invoke this method.
  */
 -(void) initializeTrackers;
-
-/**
- * Template method that sets the current values of the GL state back to the original values.
- * 
- * The values will only be propagated to the GL engine if at least one of the original
- * values is different than the current GL values, or if the current value in the GL
- * engine is unknown, or if the shouldAlwaysSetGL property is set to YES.
- * 
- * This abstract implementation does nothing. Subclasses will override to set the value
- * using the appropriate variable types.
- *
- * The application should not invoke this method directly.
- */
--(void) restoreOriginalValue;
 
 @end
 
@@ -953,7 +950,7 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
  * Automatically invoked when needed during subclass initialization.
  * The application should not invoke this method.
  */
--(id) initMinimal;
+-(id) initMinimalWithParent: (CC3OpenGLES11StateTracker*) aTracker;
 
 /**
  * Initializes the managed trackers.

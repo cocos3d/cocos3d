@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -124,89 +124,59 @@
 }
 
 -(void) initializeTrackers {
-	self.alphaTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_ALPHA_TEST];
-	self.blend = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_BLEND];
-	self.clipPlanes = [NSMutableArray array];
+	self.alphaTest = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		 forState: GL_ALPHA_TEST];
+	self.blend = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																	 forState: GL_BLEND];
+	self.clipPlanes = [CCArray array];
 	
-	GLint platformMaxClipPlanes = [CC3OpenGLES11Engine engine].platform.maxClipPlanes.value;
+	GLint platformMaxClipPlanes = self.engine.platform.maxClipPlanes.value;
 	for (int i = 0; i < platformMaxClipPlanes; i++) {
-		[clipPlanes addObject: [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_CLIP_PLANE0 + i]];
+		[clipPlanes addObject: [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																				   forState: GL_CLIP_PLANE0 + i]];
 	}
 
-	self.colorLogicOp = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_COLOR_LOGIC_OP];
-	self.colorMaterial = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_COLOR_MATERIAL];
-	self.cullFace = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_CULL_FACE];
-	self.depthTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_DEPTH_TEST];
-	self.dither = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_DITHER];
-	self.fog = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_FOG];
-	self.lighting = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LIGHTING];
-	self.lineSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_LINE_SMOOTH];
-	self.multisample = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_MULTISAMPLE];
-	self.normalize = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_NORMALIZE];
-	self.pointSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POINT_SMOOTH];
+	self.colorLogicOp = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			forState: GL_COLOR_LOGIC_OP];
+	self.colorMaterial = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			 forState: GL_COLOR_MATERIAL];
+	self.cullFace = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		forState: GL_CULL_FACE];
+	self.depthTest = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		 forState: GL_DEPTH_TEST];
+	self.dither = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																	  forState: GL_DITHER];
+	self.fog = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																   forState: GL_FOG];
+	self.lighting = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		forState: GL_LIGHTING];
+	self.lineSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		  forState: GL_LINE_SMOOTH];
+	self.multisample = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		   forState: GL_MULTISAMPLE];
+	self.normalize = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		 forState: GL_NORMALIZE];
+	self.pointSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		   forState: GL_POINT_SMOOTH];
 
 	// Illegal GL enum when trying to read value of GL_POINT_SPRITE_OES.
-	self.pointSprites = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POINT_SPRITE_OES
+	self.pointSprites = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			forState: GL_POINT_SPRITE_OES
 															andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
-	self.polygonOffsetFill = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_POLYGON_OFFSET_FILL];
-	self.rescaleNormal = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_RESCALE_NORMAL];
-	self.sampleAlphaToCoverage = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SAMPLE_ALPHA_TO_COVERAGE];
-	self.sampleAlphaToOne = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SAMPLE_ALPHA_TO_ONE];
-	self.sampleCoverage = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SAMPLE_COVERAGE];
-	self.scissorTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_SCISSOR_TEST];
-	self.stencilTest = [CC3OpenGLES11StateTrackerServerCapability trackerForState: GL_STENCIL_TEST];
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[alphaTest open];
-	[blend open];
-	[self openTrackers: clipPlanes];
-	[colorLogicOp open];
-	[colorMaterial open];
-	[cullFace open];
-	[depthTest open];
-	[dither open];
-	[fog open];
-	[lighting open];
-	[lineSmooth open];
-	[multisample open];
-	[normalize open];
-	[pointSmooth open];
-	[pointSprites open];
-	[polygonOffsetFill open];
-	[rescaleNormal open];
-	[sampleAlphaToCoverage open];
-	[sampleAlphaToOne open];
-	[sampleCoverage open];
-	[scissorTest open];
-	[stencilTest open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[alphaTest close];
-	[blend close];
-	[self closeTrackers: clipPlanes];
-	[colorLogicOp close];
-	[colorMaterial close];
-	[cullFace close];
-	[depthTest close];
-	[dither close];
-	[fog close];
-	[lighting close];
-	[lineSmooth close];
-	[multisample close];
-	[normalize close];
-	[pointSmooth close];
-	[pointSprites close];
-	[polygonOffsetFill close];
-	[rescaleNormal close];
-	[sampleAlphaToCoverage close];
-	[sampleAlphaToOne close];
-	[sampleCoverage close];
-	[scissorTest close];
-	[stencilTest close];
+	self.polygonOffsetFill = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																				 forState: GL_POLYGON_OFFSET_FILL];
+	self.rescaleNormal = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			 forState: GL_RESCALE_NORMAL];
+	self.sampleAlphaToCoverage = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																					 forState: GL_SAMPLE_ALPHA_TO_COVERAGE];
+	self.sampleAlphaToOne = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																				forState: GL_SAMPLE_ALPHA_TO_ONE];
+	self.sampleCoverage = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			  forState: GL_SAMPLE_COVERAGE];
+	self.scissorTest = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		   forState: GL_SCISSOR_TEST];
+	self.stencilTest = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																		   forState: GL_STENCIL_TEST];
 }
 
 -(NSString*) description {
@@ -261,27 +231,15 @@
 }
 
 -(void) initializeTrackers {
-	self.colorArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_COLOR_ARRAY];
-	self.normalArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_NORMAL_ARRAY];
-	self.pointSizeArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_POINT_SIZE_ARRAY_OES];
-	self.vertexArray = [CC3OpenGLES11StateTrackerClientCapability trackerForState: GL_VERTEX_ARRAY];
+	self.colorArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																		  forState: GL_COLOR_ARRAY];
+	self.normalArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																		   forState: GL_NORMAL_ARRAY];
+	self.pointSizeArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																			  forState: GL_POINT_SIZE_ARRAY_OES];
+	self.vertexArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																		   forState: GL_VERTEX_ARRAY];
 }	
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[colorArray open];
-	[normalArray open];
-	[pointSizeArray open];
-	[vertexArray open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[colorArray close];
-	[normalArray close];
-	[pointSizeArray close];
-	[vertexArray close];
-}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 300];

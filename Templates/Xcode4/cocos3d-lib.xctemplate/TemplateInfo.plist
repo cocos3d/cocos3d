@@ -26,6 +26,28 @@
 			<key>Path</key>
 			<string>cocos3d/cc3Extras/CC3ModelSampleFactory.m</string>
 		</dict>
+		<key>cocos3d/cc3Extras/CC3PointParticleSamples.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3Extras</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3Extras/CC3PointParticleSamples.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3Extras/CC3PointParticleSamples.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3Extras</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3Extras/CC3PointParticleSamples.m</string>
+		</dict>
 		<key>cocos3d/cc3Extras/teapot.h</key>
 		<dict>
 			<key>Group</key>
@@ -1288,6 +1310,28 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/CC3NodeVisitor.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/CC3ParametricMeshNodes.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3ParametricMeshNodes.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/CC3ParametricMeshNodes.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3ParametricMeshNodes.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/CC3PerformanceStatistics.h</key>
 		<dict>
 			<key>Group</key>
@@ -1309,6 +1353,28 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/CC3PerformanceStatistics.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/CC3PointParticles.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3PointParticles.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/CC3PointParticles.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3PointParticles.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/CC3Resource.h</key>
 		<dict>
@@ -1990,6 +2056,8 @@
 	<array>
 		<string>cocos3d/cc3Extras/CC3ModelSampleFactory.h</string>
 		<string>cocos3d/cc3Extras/CC3ModelSampleFactory.m</string>
+		<string>cocos3d/cc3Extras/CC3PointParticleSamples.h</string>
+		<string>cocos3d/cc3Extras/CC3PointParticleSamples.m</string>
 		<string>cocos3d/cc3Extras/teapot.h</string>
 		<string>cocos3d/cc3PVR/CC3IdentifiablePODExtensions.h</string>
 		<string>cocos3d/cc3PVR/CC3IdentifiablePODExtensions.m</string>
@@ -2099,8 +2167,12 @@
 		<string>cocos3d/cocos3d/CC3NodeSequencer.m</string>
 		<string>cocos3d/cocos3d/CC3NodeVisitor.h</string>
 		<string>cocos3d/cocos3d/CC3NodeVisitor.m</string>
+		<string>cocos3d/cocos3d/CC3ParametricMeshNodes.h</string>
+		<string>cocos3d/cocos3d/CC3ParametricMeshNodes.m</string>
 		<string>cocos3d/cocos3d/CC3PerformanceStatistics.h</string>
 		<string>cocos3d/cocos3d/CC3PerformanceStatistics.m</string>
+		<string>cocos3d/cocos3d/CC3PointParticles.h</string>
+		<string>cocos3d/cocos3d/CC3PointParticles.m</string>
 		<string>cocos3d/cocos3d/CC3Resource.h</string>
 		<string>cocos3d/cocos3d/CC3Resource.m</string>
 		<string>cocos3d/cocos3d/CC3ResourceNode.h</string>

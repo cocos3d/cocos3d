@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.mm
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -122,17 +122,22 @@ GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType) {
 		case EPODDataFloat:
 			return GL_FLOAT;
 		case EPODDataInt:
+		case EPODDataUnsignedInt:
 			return GL_FIXED;
-		case EPODDataUnsignedShort:
-			return GL_UNSIGNED_SHORT;
+		case EPODDataByte:
+		case EPODDataByteNorm:
+			return GL_BYTE;
 		case EPODDataUnsignedByte:
+		case EPODDataUnsignedByteNorm:
+		case EPODDataARGB:
+		case EPODDataRGBA:
 			return GL_UNSIGNED_BYTE;
 		case EPODDataShort:
 		case EPODDataShortNorm:
 			return GL_SHORT;
-		case EPODDataByte:
-		case EPODDataByteNorm:
-			return GL_BYTE;
+		case EPODDataUnsignedShort:
+		case EPODDataUnsignedShortNorm:
+			return GL_UNSIGNED_SHORT;
 		default:
 			LogError(@"Unknown EPVRTDataType '%@'", NSStringFromEPVRTDataType(ePVRTDataType));
 			return GL_BYTE;
@@ -147,8 +152,24 @@ NSString* NSStringFromEPVRTDataType(uint ePVRTDataType) {
 			return @"EPODDataFloat";
 		case EPODDataInt:
 			return @"EPODDataInt";
+		case EPODDataUnsignedInt:
+			return @"EPODDataUnsignedInt";
+		case EPODDataByte:
+			return @"EPODDataByte";
+		case EPODDataByteNorm:
+			return @"EPODDataByteNorm";
+		case EPODDataUnsignedByte:
+			return @"EPODDataUnsignedByte";
+		case EPODDataUnsignedByteNorm:
+			return @"EPODDataUnsignedByteNorm";
+		case EPODDataShort:
+			return @"EPODDataShort";
+		case EPODDataShortNorm:
+			return @"EPODDataShortNorm";
 		case EPODDataUnsignedShort:
 			return @"EPODDataUnsignedShort";
+		case EPODDataUnsignedShortNorm:
+			return @"EPODDataUnsignedShortNorm";
 		case EPODDataRGBA:
 			return @"EPODDataRGBA";
 		case EPODDataARGB:
@@ -161,16 +182,6 @@ NSString* NSStringFromEPVRTDataType(uint ePVRTDataType) {
 			return @"EPODDataDEC3N";
 		case EPODDataFixed16_16:
 			return @"EPODDataFixed16_16";
-		case EPODDataUnsignedByte:
-			return @"EPODDataUnsignedByte";
-		case EPODDataShort:
-			return @"EPODDataShort";
-		case EPODDataShortNorm:
-			return @"EPODDataShortNorm";
-		case EPODDataByte:
-			return @"EPODDataByte";
-		case EPODDataByteNorm:
-			return @"EPODDataByteNorm";
 		default:
 			return [NSString stringWithFormat: @"unknown EPVRTDataType (%u)", ePVRTDataType];
 	}

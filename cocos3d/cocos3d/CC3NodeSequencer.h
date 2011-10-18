@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,9 +30,8 @@
 /** @file */	// Doxygen marker
 
 #import "CC3MeshNode.h"
-#import "CC3Camera.h"
 
-@class CC3World, CC3NodeSequencerVisitor, CC3NodeSequencerMisplacedNodeVisitor;
+@class CC3World, CC3NodeSequencerVisitor;
 
 #pragma mark -
 #pragma mark CC3NodeEvaluator
@@ -45,7 +44,7 @@
  * The central evaluation method evaluate: returns YES or NO, indicating whether the
  * evaluator accepts or rejects the node.
  */
-@interface CC3NodeEvaluator : NSObject {}
+@interface CC3NodeEvaluator : NSObject <NSCopying> {}
 
 /**
  * Performs the evaluation defined by this class on the specified node and returns
@@ -151,7 +150,7 @@
  * The type of sequencing performed is determined by the subclass of CC3NodeSequencer.
  * A wide range of subclasses may be constructed to perform a variety of sequencing techniques.
  */
-@interface CC3NodeSequencer : NSObject {
+@interface CC3NodeSequencer : NSObject <NSCopying> {
 	CC3NodeEvaluator* evaluator;
 	BOOL allowSequenceUpdates;
 }
@@ -162,8 +161,14 @@
  */
 @property(nonatomic, retain) CC3NodeEvaluator* evaluator;
 
-/** An array of the nodes that have been added to this sequencer, ordered as this sequencer defines. */
-@property(nonatomic, readonly) NSArray* nodes;
+/**
+ * Returns an array of the nodes that have been added to this sequencer,
+ * ordered as this sequencer defines.
+ *
+ * The returned array is a copy of the any internal arrays.
+ * Changing the contents will not change the internal node seqeunce.
+ */
+@property(nonatomic, readonly) CCArray* nodes;
 
 /**
  * Indicates that the sequencer will run the algorithm to relocate misplaced nodes
@@ -241,22 +246,22 @@
 -(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor;
 
 /**
- * Invokes the removeMisplacedNodesWithVisitor: method on this sequencer to look for and
- * remove nodes that are "misplaced", then re-adds those misplaced nodes back into
- * this sequencer, so that they can be inserted into their correct sequence position.
+ * Invokes the identifyMisplacedNodesWithVisitor: method on this sequencer to
+ * look for nodes that are "misplaced", then removes and re-adds those misplaced
+ * nodes back into this sequencer, so that they can be inserted into their correct
+ * sequence position.
  *
  * This method is invoked automatically from the CC3World on each drawing frame.
  * The application should never need to invoke this method directly.
  */
--(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor;
+-(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerVisitor*) visitor;
 
 /**
- * If the allowSequenceUpdates is set to YES, looks for nodes that are misplaced
- * in this sequencer, removes them from this sequencer, and adds them to the
- * misplacedNodes property of the specified visitor. 
+ * If the allowSequenceUpdates is set to YES, looks for nodes that are misplaced in
+ * this sequencer, and adds them to the misplacedNodes property of the specified visitor. 
  *
  * What it means for a node to be "misplaced" is defined by the sequencer subclass.
- * A sequencer subclasses may determine that the node no longer meets the criteria
+ * A sequencer subclass may determine that the node no longer meets the criteria
  * of the sequencer's evaluator, or that the node is now out of order, relative to
  * the sorting or grouping criteria defined by the sequencer.
  *
@@ -265,7 +270,19 @@
  * This method is invoked automatically by the updateSequenceWithVisitor: method.
  * The application should never need to invoke this method directly.
  */
--(void) removeMisplacedNodesWithVisitor: (CC3NodeSequencerMisplacedNodeVisitor*) visitor;
+-(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor;
+
+/**
+ * Visits the nodes contained in this node sequencer with the specified node visitor.
+ * The nodes are visited in the order that they are sequenced by this node sequencer.
+ *
+ * Note that the argument is a CC3NodeVisitor, not a CC3NodeSequencerVisitor as with
+ * other methods on this class.
+ *
+ * The default implementation does nothing. Subclasses that contain nodes, or contain
+ * other sequencers that contain nodes, will override.
+ */
+-(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) aNodeVisitor;
 
 /** Returns a string containing a more complete description of this object. */
 -(NSString*) fullDescription;
@@ -292,11 +309,11 @@
  * Reading that property returns YES if any child sequencer returns YES, otherwise it returns NO.
  */
 @interface CC3BTreeNodeSequencer : CC3NodeSequencer {
-	NSMutableArray* sequencers;
+	CCArray* sequencers;
 }
 
 /** The array of child sequencers. */
-@property(nonatomic, readonly) NSMutableArray* sequencers;
+@property(nonatomic, readonly) CCArray* sequencers;
 
 /** Adds the specified sequencer as a child sequencer. */
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer;
@@ -341,7 +358,7 @@
 
 /**
  * An CC3NodeArraySequencer is a type of CC3NodeSequencer that arranges nodes into an
- * array, and groups the nodes in the array by some criteria.
+ * array, and orders the nodes in the array by some criteria.
  *
  * When a node is added, it is first evaluated by the contained evaluator. If it is
  * accepted, the sequencer iterates through the existing nodes that it holds, invoking
@@ -353,9 +370,11 @@
  * This base class simply arranges the nodes in the order they are presented, by always
  * adding to the end of the contained array of nodes. Subclasses will customize the way
  * that the nodes are ordered and grouped in the array.
+ *
+ * The contents of the nodes array are not copied when this sequencer is copied.
  */
 @interface CC3NodeArraySequencer : CC3NodeSequencer {
-	NSMutableArray* nodes;
+	CCArray* nodes;
 }
 
 /**
@@ -378,27 +397,37 @@
 
 /**
  * An CC3NodeArrayZOrderSequencer is a type of CC3NodeArraySequencer that sorts
- * the contained nodes by their Z-order, which is a measure of the distance from
- * the camera to the globalCenterOfGravity of the node's bounding volume.
+ * the contained nodes by their Z-order, which is a combination of the explicit
+ * Z-order property of each node, and a measure of the distance from the camera
+ * to the globalCenterOfGravity of the node's bounding volume.
  *
- * The nodes are sorted using the cameraDistanceProduct property of the boundingVolume
- * of each node, from furthest from the camera to closest. Nodes without a
- * boundingVolume are added to the end of the array.
+ * Use this sequencer for translucent nodes. There is no need to use this sequencer
+ * for nodes that are opaque (whose isOpaque property returns YES), and the overhead
+ * of testing each node on each update should be avoided in that case.
+ *
+ * The nodes are sorted using the Z-order property and the cameraDistanceProduct
+ * property of the boundingVolume of each node, from furthest from the camera to
+ * closest. Nodes without a boundingVolume are added to the end of the array.
+ *
+ * Explicit Z-order sequence takes priority over distance to camera. However,
+ * sorting based on distance to the camera alone is quite effective. In almost all
+ * cases, it is not necessary to set the Z-order property of the nodes, and if the
+ * nodes are moving around, assigning an explicit Z-order to each node can actually
+ * interfere with the dynamic determination of the correct drawing order. Only use
+ * the Z-order property if you have reason to force a specific node to be drawn
+ * before or after another node for visual effect.
  *
  * The distance between a node and the camera can be measured in one of two ways:
  *   -# The true 3D straight-line distance between the node and the camera.
  *   -# The distance from the camera to the node measured "straight out" from the
  *      camera, ignoring how far the node is away from the center of the camera's view.
+ *
  * The value of the shouldUseOnlyForwardDistance property determines which of these two
  * methods will be used. See the notes of that property in the CC3NodeSequencer for more
  * information. By default, the true 3D distance is used.
  *
  * Since all nodes, and the camera, can move around on each update, this sequencer will
  * test and re-order its nodes on each update.
- *
- * Use this sequencer for translucent nodes. There is no need to use this sequencer
- * for nodes that are opaque (whose isOpaque property returns YES), and the overhead
- * of testing each node on each update should be avoided in that case.
  *
  * Be careful about setting the allowSequenceUpdates property to NO on this sequencer.
  * Since this sequencer will generally only be used to keep translucent nodes in their
@@ -478,9 +507,24 @@
  *
  * The visitor maintains a reference to the CC3World, so that the sequencer may
  * use aspects of the world during operations.
+ *
+ * This visitor can be used to visit CC3NodeSequencers to detect and keep track of
+ * nodes that are misplaced within the sequencer, using the updateSequenceWithVisitor:
+ * method on the sequencer.
+ *
+ * What it means for a node to be "misplaced" is defined by the sequencer itself.
+ * A sequencer may determine that the node no longer meets the criteria of the
+ * sequencer's evaluator, or that the node is now out of order, relative to the
+ * sorting or grouping criteria defined by the sequencer.
+ *
+ * A sequencer visitor can either be instantiated for a single visitation of a sequencer,
+ * or can be instantiated once and reused to visit different sequencers over and over.
+ * In doing so, you should invoke the reset method on the sequencer visitor prior to
+ * using it to visit a sequencer.
  */
 @interface CC3NodeSequencerVisitor : NSObject {
 	CC3World* world;
+	CCArray* misplacedNodes;
 }
 
 /**
@@ -495,35 +539,21 @@
 /** Allocates and initializes an autoreleased instance with the specified CC3World. */
 +(id) visitorWithWorld: (CC3World*) aCC3World;
 
-@end
-
-
-
-#pragma mark -
-#pragma mark CC3NodeSequencerMisplacedNodeVisitor
-
-/**
- * This visitor is used to visit CC3NodeSequencers to detect and keep track of
- * nodes that are misplaced within the sequencer. After visiting, nodes that are
- * found to be misplaced will appear in the misplacedNodes property of this visitor.
- *
- * What it means for a node to be "misplaced" is defined by the sequencer itself.
- * A sequencer may determine that the node no longer meets the criteria of the
- * sequencer's evaluator, or that the node is now out of order, relative to the
- * sorting or grouping criteria defined by the sequencer.
- */
-@interface CC3NodeSequencerMisplacedNodeVisitor : CC3NodeSequencerVisitor {
-	NSMutableArray* misplacedNodes;
-}
-
 /** Indicates whether the misplacedNodes property contains nodes. */
 @property(nonatomic, readonly) BOOL hasMisplacedNodes;
 
-/** An array of nodes that the sequencer deems to be misplaced after being visited by this visitor. */
-@property(nonatomic, readonly) NSArray* misplacedNodes;
+/**
+ * Returns an array of nodes that the sequencer deems to be misplaced after
+ * being visited by this visitor.
+ *
+ * The returned array may be nil.
+ */
+@property(nonatomic, readonly) CCArray* misplacedNodes;
 
-/** Adds the specified array of nodes to the array of nodes held in the misplacedNodes property */
--(void) addMisplacedNodes: (NSArray*) anArrayOfNodes;
+/** Adds the specified node to the array of nodes held in the misplacedNodes property */
+-(void) addMisplacedNode: (CC3Node*) aNode;
+
+/** Clears the misplacedNodes array. */
+-(void) clearMisplacedNodes;
 
 @end
-

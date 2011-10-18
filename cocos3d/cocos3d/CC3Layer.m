@@ -1,7 +1,7 @@
 /*
  * CC3Layer.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,10 +33,10 @@
 #import "CC3OpenGLES11Foundation.h"
 	
 @interface CC3Layer (TemplateMethods)
--(void) updateViewport;
 -(void) drawWorld;
 -(int) touchPriority;
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
+-(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint;
 @end
 
 @implementation CC3Layer
@@ -59,8 +59,7 @@
 	cc3World = [aWorld retain];				// Retain the new world.
 	cc3World.cc3Layer = self;				// Point the world back here
 	[self updateViewport];					// Set the camera viewport
-	cc3World.isRunning = self.isRunning;	// Start actions in new world.
-	[cc3World updateWorld];					// Update the new world to ensure transforms have been calculated.
+	cc3World.isRunning = self.isRunning;	// Updates the world, and starts actions in new world.
 }
 
 -(NSString*) description {
@@ -86,6 +85,38 @@
  */
 -(void) initializeControls {
 	[self initializeContols];
+}
+
+
+#pragma mark Transforming
+
+-(void) setPosition: (CGPoint) newPosition {
+	[super setPosition: newPosition];
+	[self updateViewport];
+}
+
+-(void) setPositionInPixels: (CGPoint) newPosition {
+	[super setPositionInPixels: newPosition];
+	[self updateViewport];
+}
+
+-(void) setScale: (float) s {
+	[super setScale: s];
+	[self updateViewport];
+}
+
+-(void) setScaleX: (float) newScaleX {
+	[super setScaleX: newScaleX];
+	[self updateViewport];
+}
+
+-(void) setScaleY: (float) newScaleY {
+	[super setScaleY: newScaleY];
+	[self updateViewport];
+}
+
+-(BOOL) isOpaque {
+	return self.isColored && self.opacity == 255;
 }
 
 
@@ -169,15 +200,15 @@
 }
 
 /**
- * Updates the viewport of the contained CC3World instance with the dimensions of this layer
- * and the device orientation.
+ * Updates the viewport of the contained CC3World instance with the dimensions
+ * of this layer and the device orientation.
  *
- * Invoked automatically when the home content size (which is the content size, independent of
- * device orientation) changes, or when the device orientation changes.
+ * Invoked automatically when the position, size, or scale of this layer changes.
  */
 -(void) updateViewport {
-	[cc3World.viewportManager updateBounds: self.boundingBoxInPixels
+	[cc3World.viewportManager updateBounds: self.globalBoundingBoxInPixels
 					 withDeviceOrientation: [[CCDirector sharedDirector] deviceOrientation]];
+	[super updateViewport];
 }
 
 
@@ -228,19 +259,33 @@
 */
 
 /**
- * Invoked when any of the touch event handler methods are invoked. Checks that
- * the touch event is within the bounds of this layer and forwards the event to
- * the CC3World instance. Returns whether the event was handled and forwarded.
+ * Invoked when any of the touch event handler methods are invoked.
+ * Returns whether the event was handled by this layer.
+ *
+ * This implementation checks that the touch event is within the bounds of this
+ * layer and, if it is, forwards the event to the handleTouchType:at: method.
  */
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType {
 	CGSize cs = self.contentSize;
 	CGRect nodeBounds = CGRectMake(0, 0, cs.width, cs.height);
 	CGPoint nodeTouchPoint = [self convertTouchToNodeSpace: touch];
 	if(CGRectContainsPoint(nodeBounds, nodeTouchPoint)) {
-		[cc3World touchEvent: touchType at: nodeTouchPoint];
-		return YES;
+		return [self handleTouchType: touchType at: nodeTouchPoint];
 	}
 	return NO;
+}
+
+/**
+ * Invoked when any of the touch event handler methods are invoked, and the touchEvent
+ * occurred within the bounds of this layer. Returns whether the event was handled.
+ *
+ * This implementation forwards all events to the CC3World and always returns YES.
+ * Subclasses may override this method to handle some events here instead of in
+ * the CC3World.
+ */
+-(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint {
+	[cc3World touchEvent: touchType at: touchPoint];
+	return YES;
 }
 
 @end

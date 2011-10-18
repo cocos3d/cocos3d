@@ -1,7 +1,7 @@
 /*
  * CC3Identifiable.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -77,19 +77,13 @@ static GLint instanceCount = 0;
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // Subclasses that extend copying will override this method.
 -(void) populateFrom: (CC3Identifiable*) another {
-	self.userData = another.userData;		// Assigned by default. Subclassses may override accessors.
+	[self copyUserDataFrom: another];
 }
+
+-(void) copyUserDataFrom: (CC3Identifiable*) another {}
 
 // Implementation to keep compiler happy so this method can be included in interface for documentation.
 -(id) copy { return [super copy]; }
-
-/*
--(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName {
-	CC3Identifiable* aCopy = [[[self class] allocWithZone: zone] initWithName: aName];
-	[aCopy populateFrom: self];
-	return aCopy;
-}
-*/
 
 -(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName {
 	return [self copyWithZone: zone withName: aName asClass: [self class]];

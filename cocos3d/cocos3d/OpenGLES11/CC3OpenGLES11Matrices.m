@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,52 +49,53 @@
 -(void) push {
 	[self activate];
 	glPushMatrix();
-	LogTrace("%@ %@ pushed", [self class], NSStringFromGLEnum(mode));
+	LogTrace("%@ pushed", self);
 }
 
 -(void) pop {
 	[self activate];
 	glPopMatrix();
-	LogTrace("%@ %@ popped", [self class], NSStringFromGLEnum(mode));
+	LogTrace("%@ popped", self);
 }
 
 -(GLuint) getDepth {
 	[self activate];
 	GLuint depth;
 	glGetIntegerv(depthName, (GLint*)&depth);
-	LogTrace("%@ %@ read GL stack depth %u", [self class], NSStringFromGLEnum(mode), depth);
+	LogTrace("%@ read GL stack depth %u", self, depth);
 	return depth;
 }
 
 -(void) identity {
 	[self activate];
 	glLoadIdentity();
-	LogTrace("%@ %@ loaded identity", [self class], NSStringFromGLEnum(mode));
+	LogTrace("%@ loaded identity", self);
 }
 
 -(void) load: (GLvoid*) glMatrix {
 	[self activate];
 	glLoadMatrixf(glMatrix);
-	LogTrace("%@ %@ loaded matrix at %p", [self class], NSStringFromGLEnum(mode), glMatrix);
+	LogTrace("%@ loaded matrix at %p", self, glMatrix);
 }
 
 -(void) getTop: (GLvoid*) glMatrix {
 	[self activate];
 	glGetFloatv(topName, glMatrix);
-	LogTrace("%@ %@ read top into %p", [self class], NSStringFromGLEnum(mode), glMatrix);
+	LogTrace("%@ read top into %p", self, glMatrix);
 }
 
 -(void) multiply: (GLvoid*) glMatrix {
 	[self activate];
 	glMultMatrixf(glMatrix);
-	LogTrace("%@ %@ multiplied matrix at %p", [self class], NSStringFromGLEnum(mode), glMatrix);
+	LogTrace("%@ multiplied matrix at %p", self, glMatrix);
 }
 
--(id) initWithMode: (GLenum) matrixMode
-		andTopName: (GLenum) tName
-	  andDepthName: (GLenum) dName
-	andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
-	if ( (self = [super init]) ) {
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			withMode: (GLenum) matrixMode
+		  andTopName: (GLenum) tName
+		andDepthName: (GLenum) dName
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
+	if ( (self = [super initWithParent: aTracker]) ) {
 		mode = matrixMode;
 		topName = tName;
 		depthName = dName;
@@ -103,14 +104,20 @@
 	return self;
 }
 
-+(id) trackerWithMode: (GLenum) matrixMode
-		   andTopName: (GLenum) tName
-		 andDepthName: (GLenum) dName
-	   andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
-	return [[[self alloc] initWithMode: matrixMode
-							andTopName: tName
-						  andDepthName: dName
-						andModeTracker: tracker] autorelease];
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			   withMode: (GLenum) matrixMode
+			 andTopName: (GLenum) tName
+		   andDepthName: (GLenum) dName
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
+	return [[[self alloc] initWithParent: aTracker
+								withMode: matrixMode
+							  andTopName: tName
+							andDepthName: dName
+						  andModeTracker: tracker] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ %@", [super description], NSStringFromGLEnum(mode)];
 }
 
 @end
@@ -135,33 +142,22 @@
 
 -(void) initializeTrackers {
 	// Matrix mode tracker needs to read and restore
-	self.mode = [CC3OpenGLES11StateTrackerEnumeration trackerForState: GL_MATRIX_MODE
-													 andGLSetFunction: glMatrixMode
-											 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	self.mode = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+															   forState: GL_MATRIX_MODE
+													   andGLSetFunction: glMatrixMode
+											   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 
-	self.modelview = [CC3OpenGLES11MatrixStack trackerWithMode: GL_MODELVIEW 
-													andTopName: GL_MODELVIEW_MATRIX
-												  andDepthName: GL_MODELVIEW_STACK_DEPTH
-												andModeTracker: mode];
+	self.modelview = [CC3OpenGLES11MatrixStack trackerWithParent: self
+														withMode: GL_MODELVIEW 
+													  andTopName: GL_MODELVIEW_MATRIX
+													andDepthName: GL_MODELVIEW_STACK_DEPTH
+												  andModeTracker: mode];
 
-	self.projection = [CC3OpenGLES11MatrixStack trackerWithMode: GL_PROJECTION 
-													andTopName: GL_PROJECTION_MATRIX
-												  andDepthName: GL_PROJECTION_STACK_DEPTH
-												andModeTracker: mode];
-}
-
--(void) open {
-	LogTrace("Opening %@", [self class]);
-	[mode open];
-	[modelview open];
-	[projection open];
-}
-
--(void) close {
-	LogTrace("Closing %@", [self class]);
-	[mode close];
-	[modelview close];
-	[projection close];
+	self.projection = [CC3OpenGLES11MatrixStack trackerWithParent: self
+														 withMode: GL_PROJECTION 
+													   andTopName: GL_PROJECTION_MATRIX
+													 andDepthName: GL_PROJECTION_STACK_DEPTH
+												   andModeTracker: mode];
 }
 
 -(NSString*) description {

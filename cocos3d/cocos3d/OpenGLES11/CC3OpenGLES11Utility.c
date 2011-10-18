@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Utility.c
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -178,6 +178,12 @@ char* GLEnumName(GLenum gle) {
 			return "GL_POINT_SIZE";
 		case GL_POINT_DISTANCE_ATTENUATION:
 			return "GL_POINT_DISTANCE_ATTENUATION";
+		case GL_POINT_FADE_THRESHOLD_SIZE:
+			return "GL_POINT_FADE_THRESHOLD_SIZE";
+		case GL_POINT_SIZE_MAX:
+			return "GL_POINT_SIZE_MAX";
+		case GL_POINT_SIZE_MIN:
+			return "GL_POINT_SIZE_MIN";
 		case GL_SCISSOR_BOX:
 			return "GL_SCISSOR_BOX";
 

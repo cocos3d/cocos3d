@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -546,19 +546,19 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	GLfloat cxcy = aGLMatrix[10];
 	if (sx < +1.0) {
 		if (sx > -1.0) {
-			radX = asin(sx);
-			radY = atan2(cxsy, cxcy);
-			radZ = atan2(cxsz, cxcz);
+			radX = asinf(sx);
+			radY = atan2f(cxsy, cxcy);
+			radZ = atan2f(cxsz, cxcz);
 		}
 		else {		// sx = -1. Not a unique solution: radZ + radY = atan2(-m01,m00).
 			radX = -M_PI_2;
-			radY = atan2(-aGLMatrix[4], aGLMatrix[0]);
+			radY = atan2f(-aGLMatrix[4], aGLMatrix[0]);
 			radZ = 0.0;
 		}
 	}
 	else {			// sx = +1. Not a unique solution: radZ - radY = atan2(-m01,m00).
 		radX = +M_PI_2;
-		radY = -atan2(-aGLMatrix[4], aGLMatrix[0]);
+		radY = -atan2f(-aGLMatrix[4], aGLMatrix[0]);
 		radZ = 0.0;
 	}	
 	return cc3v(RadiansToDegrees(radX), RadiansToDegrees(radY), RadiansToDegrees(radZ));
@@ -582,19 +582,19 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	GLfloat cxcy = aGLMatrix[10];
 	if (sy < +1.0) {
 		if (sy > -1.0) {
-			radY = asin(sy);
-			radZ = atan2(cysz, cycz);
-			radX = atan2(sxcy, cxcy);
+			radY = asinf(sy);
+			radZ = atan2f(cysz, cycz);
+			radX = atan2f(sxcy, cxcy);
 		}
 		else {		// sy = -1. Not a unique solution: radX + radZ = atan2(-m12,m11).
 			radY = -M_PI_2;
-			radZ = atan2(-aGLMatrix[9], aGLMatrix[5]);
+			radZ = atan2f(-aGLMatrix[9], aGLMatrix[5]);
 			radX = 0.0;
 		}
 	}
 	else {			// sy = +1. Not a unique solution: radX - radZ = atan2(-m12,m11).
 		radY = +M_PI_2;
-		radZ = -atan2(-aGLMatrix[9], aGLMatrix[5]);
+		radZ = -atan2f(-aGLMatrix[9], aGLMatrix[5]);
 		radX = 0.0;
 	}	
 	return cc3v(RadiansToDegrees(radX), RadiansToDegrees(radY), RadiansToDegrees(radZ));
@@ -771,49 +771,48 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	kmMat4 mRot;
 	CC3Vector rotRads = CC3VectorScaleUniform(aVector, DegreesToRadiansFactor);
 	kmMat4RotationYXZ(&mRot, rotRads.x, rotRads.y, rotRads.z);
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
 	kmMat4 mRot;
 	CC3Vector rotRads = CC3VectorScaleUniform(aVector, DegreesToRadiansFactor);
 	kmMat4RotationZYX(&mRot, rotRads.x, rotRads.y, rotRads.z);
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byX: (GLfloat) degrees {
 	kmMat4 mRot;
 	kmMat4RotationX(&mRot, DegreesToRadians(degrees));
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byY: (GLfloat) degrees {
 	kmMat4 mRot;
 	kmMat4RotationY(&mRot, DegreesToRadians(degrees));
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byZ: (GLfloat) degrees {
 	kmMat4 mRot;
 	kmMat4RotationZ(&mRot, DegreesToRadians(degrees));
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byQuaternion: (CC3Vector4) aQuaternion {
 	kmMat4 mRot;
 	kmMat4RotationQuaternion(&mRot, (kmQuaternion*)&aQuaternion);
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
 }
 
 +(void) translate: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
 	GLfloat* m = aGLMatrix;					// Make a simple alias
 	
-	m[12] = aVector.x * m[0] + aVector.y * m[4] + aVector.z * m[8] + m[12];
-	m[13] = aVector.x * m[1] + aVector.y * m[5] + aVector.z * m[9] + m[13];
-	m[14] = aVector.x * m[2] + aVector.y * m[6] + aVector.z * m[10] + m[14];
-    m[15] = aVector.x * m[3] + aVector.y * m[7] + aVector.z * m[11] + m[15];
+	m[12] += aVector.x * m[0] + aVector.y * m[4] + aVector.z * m[8];
+	m[13] += aVector.x * m[1] + aVector.y * m[5] + aVector.z * m[9];
+	m[14] += aVector.x * m[2] + aVector.y * m[6] + aVector.z * m[10];
+    m[15] += aVector.x * m[3] + aVector.y * m[7] + aVector.z * m[11];
 }
-
 
 +(void) translate: (GLfloat*) aGLMatrix byX: (GLfloat) distance {
 	[self translate: aGLMatrix by: cc3v(distance, 0.0, 0.0)];
@@ -885,6 +884,25 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	isIdentity = NO;
 }
 
+// Includes short-circuits when one of the matrix is an identity matrix
+-(void) leftMultiplyByMatrix: (CC3GLMatrix*) aGLMatrix {
+	
+	// If other matrix is identity, this matrix doesn't change, so leave
+	if (!aGLMatrix || aGLMatrix.isIdentity) {
+		return;
+	}
+	
+	// If this matrix is identity, it just becomes the other matrix
+	if (self.isIdentity) {
+		[self populateFrom: aGLMatrix];
+		return;
+	}
+	
+	// Otherwise, go through with the multiplication
+	[[self class] leftMultiply: self.glMatrix byMatrix: aGLMatrix.glMatrix];
+	isIdentity = NO;
+}
+
 -(CC3Vector) transformLocation: (CC3Vector) aLocation {
 	// Short-circuit if this is an identity matrix
 	if (isIdentity) {
@@ -950,6 +968,12 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 +(void) multiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix {
 	kmMat4 mOut;
 	kmMat4Multiply(&mOut, (kmMat4*)aGLMatrix, (kmMat4*)anotherGLMatrix);
+	[self copyMatrix: (GLfloat*)&mOut into: aGLMatrix];
+}
+
++(void) leftMultiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix {
+	kmMat4 mOut;
+	kmMat4Multiply(&mOut, (kmMat4*)anotherGLMatrix, (kmMat4*)aGLMatrix);
 	[self copyMatrix: (GLfloat*)&mOut into: aGLMatrix];
 }
 

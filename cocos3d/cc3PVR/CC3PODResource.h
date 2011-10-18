@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -90,12 +90,11 @@
  */
 @interface CC3PODResource : CC3Resource {
 	PODClassPtr pvrtModel;
-	NSMutableArray* allNodes;
-	NSMutableArray* meshes;
-	NSMutableArray* materials;
-	NSMutableArray* textures;
+	CCArray* allNodes;
+	CCArray* meshes;
+	CCArray* materials;
+	CCArray* textures;
 	ccTexParams textureParameters;
-	BOOL wasLoaded;
 }
 
 /**
@@ -116,7 +115,7 @@
  * A collection of all of the nodes extracted from the POD file.
  * This is the equivalent of flattening the nodes array.
  */
-@property(nonatomic, readonly) NSArray* allNodes;
+@property(nonatomic, readonly) CCArray* allNodes;
 
 /** The total number of mesh nodes in the POD file. */
 @property(nonatomic, readonly) uint meshNodeCount;
@@ -134,19 +133,19 @@
 @property(nonatomic, readonly) uint meshCount;
 
 /** A collection of the CC3Meshs extracted from  the POD file. */
-@property(nonatomic, readonly) NSArray* meshes;
+@property(nonatomic, readonly) CCArray* meshes;
 
 /** The number of materials in the POD file. */
 @property(nonatomic, readonly) uint materialCount;
 
 /** A collection of the CC3Materials extracted from  the POD file. */
-@property(nonatomic, readonly) NSArray* materials;
+@property(nonatomic, readonly) CCArray* materials;
 
 /** The number of different textures in the POD file. */
 @property(nonatomic, readonly) uint textureCount;
 
 /** A collection of the CC3Textures extracted from  the POD file. */
-@property(nonatomic, readonly) NSArray* textures;
+@property(nonatomic, readonly) CCArray* textures;
 
 /**
  * An set of texture parameters used to optimize the display of textures in the GL engine.

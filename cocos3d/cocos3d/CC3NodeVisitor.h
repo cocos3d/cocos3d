@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.6.1
+ * cocos3d 0.6.2
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,8 +32,8 @@
 
 #import "CC3GLMatrix.h"
 #import "CC3PerformanceStatistics.h"
-#import "cocos2d.h"
-#import "ES1Renderer.h"
+
+@class CC3NodeSequencer;
 
 
 #pragma mark -
@@ -45,21 +45,10 @@
  * A CC3NodeVisitor is a context object that is passed to a node when it is visited
  * during a traversal of the node hierarchy.
  *
- * To initiate a visitation run, invoke the visit: method on any CC3Node. A visitation
- * run proceeds with following steps:
- *   -# The open method is invoked on the visitor
- *   -# The visit: method is invoked on each node in the node hierarchy,
- *      in a depth-first recursive traversal.
- *   -# The close method is invoked on the visitor
- * 
- * The following steps occur for each node that is visited with the visit: method:
- *   -# The processBeforeChildren: method is invoked on the visitor
- *   -# The visit: method is invoked on the visitor for each child node
- *   -# The processAfterChildren: method is invoked on the visitor
- * 
- * Subclasses will override the open, processBeforeChildren:, processAfterChildren:,
- * and close methods to customize the behaviour prior to, during, and after the node
- * traversal. The implementation of each of those methods in this base class does nothing.
+ * To initiate a visitation run, invoke the visit: method on any CC3Node.
+ *
+ * Subclasses will override template methods to customize the behaviour prior to, during,
+ * and after the node traversal.
  *
  * If a node is to be removed from the node structural hierarchy during a visitation run,
  * the requestRemovalOf: method can be used instead of directly invoking the remove method
@@ -68,12 +57,12 @@
  */
 @interface CC3NodeVisitor : NSObject {
 	CC3Node* startingNode;
-	NSMutableSet* pendingRemovals;
+	CCArray* pendingRemovals;
 	BOOL shouldVisitChildren;
 }
 
 /**
- * Indicates whether nodes should propagate visits to their children.
+ * Indicates whether this visitor should traverse the child nodes of any node it visits.
  *
  * The initial value of this property is YES.
  */
@@ -84,7 +73,8 @@
  * on which the visit: method was first invoked to begin a traversal of the node
  * structural hierarchy. 
  *
- * This property will be nil until the visit: method is invoked.
+ * This property is only valid during the traversal, and will be nil both before
+ * and after the visit: method is invoked.
  */
 @property(nonatomic, readonly) CC3Node* startingNode;
 
@@ -100,72 +90,9 @@
  * Visits the specified node, then if the shouldVisitChildren property is set to YES,
  * invokes this visit: method on each child node as well.
  *
- * The heavy lifting of processing a particular node is handled by the processBeforeChildren:
- * and processAfterChildren: methods, which are invoked automatically on each node as it is
- * visited, before and after the childn nodes are visited respectively.
- *
- * Subclasses will override the processBeforeChildren: and processAfterChildren: methods to
- * customize node visitation behaviour.
- *
- * If the specified node is the node on which the traversal began (and retained in
- * the origin property), the open method is invoked before the process: method is
- * invoked, and the close method is invoked after the last child node is processed.
+ * Subclasses will override several template methods to customize node visitation behaviour.
  */
 -(void) visit: (CC3Node*) aNode;
-
-/**
- * Invoked automatically to process the specified node when that node is visited,
- * before the visit: method is invoked on the child nodes of the specified node.
- * 
- * This abstract implementation does nothing. Subclasses will override to process
- * each node as it is visited.
- */
--(void) processBeforeChildren: (CC3Node*) aNode;
-
-/**
- * If the shouldVisitChildren property is set to YES, this template method is invoked
- * automatically to cause the visitor to visit the child nodes of the specified node .
- *
- * This implementation invokes the visit: method on this visitor for each of the
- * children of the specified node. This establishes a depth-first traveral of the
- * node hierarchy.
- *
- * Subclasses may override this method to establish a different traversal.
- */
--(void) drawChildrenOf: (CC3Node*) aNode;
-
-/**
- * Invoked automatically to process the specified node when that node is visited,
- * after the visit: method is invoked on the child nodes of the specified node.
- * 
- * This abstract implementation does nothing. Subclasses will override to process
- * each node as it is visited.
- */
--(void) processAfterChildren: (CC3Node*) aNode;
-
-/**
- * Invoked automatically prior to the first node being visited during a visitation run.
- * This method is invoked automatically once before visiting any nodes.
- * It is not invoked for each node visited.
- *
- * This abstract implementation does nothing. Subclasses can override to initialize
- * their state, or to set any external state needed, such as GL state, prior to starting
- * a visitation run.
- */
--(void) open;
-
-/**
- * Invoked automatically after the last node has been visited during a visitation run.
- * This method is invoked automatically after all nodes have been visited.
- * It is not invoked for each node visited.
- *
- * This implementation processes the removals of any nodes that were requested to
- * be removed via the requestRemovalOf: method during the visitation run. Subclasses
- * can override to clean up their state, or to reset any external state, such as GL
- * state, upon completion of a visitation run, and should invoke this superclass
- * implementation to process any removal requests.
- */
--(void) close;
 
 /**
  * Requests the removal of the specfied node.
@@ -186,6 +113,9 @@
 
 /** Allocates and initializes an autoreleased instance. */
 +(id) visitor;
+
+/** Returns a more detailed description of this instance. */
+-(NSString*) fullDescription;
 
 @end
 
@@ -243,6 +173,18 @@
 @property(nonatomic, assign) BOOL shouldLocalizeToStartingNode;
 
 /**
+ * Returns whether the transform matrix of the node currently being visited is dirty
+ * and needs to be recalculated.
+ *
+ * The value of this property is consistent throughout the processing of a particular
+ * node. It is set before each node is visited, and is not changed until after the
+ * node has finished being processed, even if the node's transform matrix is recalculated
+ * during processing. This allows any post-node-processing activities, either within the
+ * visitor or within the node, to know that the transform matrix was changed.
+ */
+@property(nonatomic, readonly) BOOL isTransformDirty;
+
+/**
  * Returns the transform matrix to use as the parent matrix when transforming the
  * specified node.
  * 
@@ -278,12 +220,6 @@
  * about clamping the update interval.
  */
 @property(nonatomic, assign) ccTime deltaTime;
-
-/** Initializes this instance with the specified delta time. */
--(id) initWithDeltaTime: (ccTime) dt;
-
-/** Allocates and initializes an autoreleased instance with the specified delta time. */
-+(id) visitorWithDeltaTime: (ccTime) dt;
 
 @end
 
@@ -330,24 +266,38 @@
  * CC3NodeDrawingVisitor is a CC3NodeVisitor that is passed to a node when it is visited
  * during drawing operations.
  *
- * This visitor extracts the camera's frustum from the encapsulated world, so that only
- * nodes that are within the camera's field of view will be visited. Nodes outside the
- * frustum will be culled and not drawn.
+ * The camera's frustum must be set in the frustum property before invoking this method,
+ * so that only nodes that are within the camera's field of view will be visited. Nodes
+ * outside the frustum will neither be visited nor drawn.
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
+	CC3NodeSequencer* drawingSequencer;
 	CC3Frustum* frustum;
 	GLuint textureUnitCount;
 	GLuint textureUnit;
 	BOOL shouldDecorateNode;
+	BOOL shouldClearDepthBuffer;
 }
 
 /**
- * The frustum used to determine if a node is within the camera's view. This is extracted
- * from the CC3World, set in the property by the open method, and cleared by the close method.
+ * The node sequencer that contains the drawable nodes, in the sequence in which
+ * they will be drawn.
+ *
+ * If this property is not nil, the nodes will be drawn in the order they appear
+ * in the node sequencer. If this property is set to nil, the visitor will
+ * traverse the node tree during the visitation run, drawing each node that contains
+ * local content as it is encountered.
+ */
+@property(nonatomic, assign) CC3NodeSequencer* drawingSequencer;
+
+/**
+ * The frustum used to determine if a node is within the camera's view.
+ *
+ * This property must be set before the visit: method is invoked.
  * It is therefore only available during a visitation run. Since the CC3World may contain
  * multiple cameras, this ensures that the frustum of the current activeCamera is used.
  */
-@property(nonatomic, readonly) CC3Frustum* frustum;
+@property(nonatomic, assign) CC3Frustum* frustum;
 
 /**
  * The number of texture units being drawn.
@@ -375,13 +325,26 @@
 @property(nonatomic, assign) BOOL shouldDecorateNode;
 
 /**
- * Draws the local content of the specified node. Invoked by the node itself when the
- * node's local content is to be drawn.
- *
- * This implementation double-dispatches back to the node's drawLocalContentWithVisitor:
- * method to perform the drawing. Subclass may override to enhance or modify this behaviour.
+ * Indicates whether the OpenGL depth buffer should be cleared before drawing
+ * the 3D world.
+ * 
+ * This property is automatically set to the value of the
+ * shouldClearDepthBufferBefore3D property of the CC3World.
  */
--(void) drawLocalContentOf: (CC3Node*) aNode;
+@property(nonatomic, assign) BOOL shouldClearDepthBuffer;
+
+/**
+ * Draws the specified node. Invoked by the node itself when the node's local
+ * content is to be drawn.
+ *
+ * This implementation first caches the current lighting enablement state in case
+ * lighting is turned off during drawing of the material, then it double-dispatches
+ * back to the node's drawWithVisitor: method to perform the drawing. Finally, this
+ * implementation updates the drawing performance statistics.
+ *
+ * Subclass may override to enhance or modify this behaviour.
+ */
+-(void) draw: (CC3Node*) aNode;
 
 @end
 
@@ -392,6 +355,8 @@
 /**
  * CC3NodePickingVisitor is a CC3NodeDrawingVisitor that is passed to a node when
  * it is visited during node picking operations using color-buffer based picking.
+ *
+ * The visit: method must be invoked with a CC3World instance as the arguement.
  *
  * Node picking is the act of picking a 3D node from user input, such as a touch.
  * One method of accomplishing this is to draw the scene such that each object is
