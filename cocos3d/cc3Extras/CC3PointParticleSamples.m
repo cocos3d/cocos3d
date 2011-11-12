@@ -1,7 +1,7 @@
 /*
  * CC3PointParticleSamples.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -173,14 +173,14 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	ump.location = [nozzleMatrix transformLocation: kCC3VectorZero];
 	
 	// Speed of particle is randomized.
-	GLfloat emissionSpeed = RandomFloatBetween(minParticleSpeed, maxParticleSpeed);
+	GLfloat emissionSpeed = CC3RandomFloatBetween(minParticleSpeed, maxParticleSpeed);
 
 	// Emission direction in the nozzle's local coordinate system is towards the negative
 	// Z-axis, with randomization in the X & Y directions based on the shape of the nozzle.
 	// Randomization is performed either on the dispersion angle, or on the tangents of the
 	// dispersion angle, depending on the value of the shouldPrecalculateNozzleTangents.
-	CGSize nozzleAspect = CGSizeMake(RandomFloatBetween(-nozzleShape.width, nozzleShape.width),
-									 RandomFloatBetween(-nozzleShape.height, nozzleShape.height));
+	CGSize nozzleAspect = CGSizeMake(CC3RandomFloatBetween(-nozzleShape.width, nozzleShape.width),
+									 CC3RandomFloatBetween(-nozzleShape.height, nozzleShape.height));
 	if ( !shouldPrecalculateNozzleTangents ) {
 		nozzleAspect = CC3ShapeFromDispersionAngle(nozzleAspect);
 	}
@@ -244,7 +244,7 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 #pragma mark Updating
 
 /** Returns a random number between min and max, or returns alt if either min or max is negative. */
-#define CC3RandomOrAlt(min, max, alt) (((min) >= 0.0f && (max) >= 0.0f) ? RandomFloatBetween((min), (max)) : (alt))
+#define CC3RandomOrAlt(min, max, alt) (((min) >= 0.0f && (max) >= 0.0f) ? CC3RandomFloatBetween((min), (max)) : (alt))
 
 -(void) initializeMortalParticle: (CC3MortalPointParticle*) aParticle {
 	[super initializeMortalParticle: aParticle];
@@ -282,7 +282,7 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	// Set the particle's initial size and size velocity, which is calculated by
 	// taking the difference of the start and end sizes and dividing by the lifeSpan.
 	if(self.particleMesh.hasPointSizes) {
-		GLfloat startSize = RandomFloatBetween(minParticleStartingSize, maxParticleStartingSize);
+		GLfloat startSize = CC3RandomFloatBetween(minParticleStartingSize, maxParticleStartingSize);
 		uep.size = startSize;
 
 		// End size is treated differently. If either min or max is negative, it indicates that

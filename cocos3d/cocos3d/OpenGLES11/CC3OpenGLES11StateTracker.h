@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -72,6 +72,10 @@
  *     CC3OpenGLES11Engine close method, the GL state is ensured to be set back to this value
  *     before 2D drawing resumes.
  *
+ *   - kCC3GLESStateOriginalValueRestore: The original GL state value is set manually
+ *     during initialization. On every invocation of the CC3OpenGLES11Engine close method,
+ *     the GL state is ensured to be set back to this value before 2D drawing resumes.
+ *
  * For maximum throughput in the GL engine, reading of GL state from the GL engine should
  * be minimized. Therefore, the enumerations kCC3GLESStateOriginalValueReadAlways and
  * kCC3GLESStateOriginalValueReadAlwaysAndRestore should be avoided whenever possible and
@@ -91,6 +95,9 @@
  * for GL state that is unpredictable when 3D drawing begins, but must be left in that
  * same state when 2D drawing ends. This is rare, and should only be used as a last resort.
  * 
+ * The enumeration kCC3GLESStateOriginalValueRestore should only be used when it is not
+ * possible to read the GL value from the GL engine. This is the case for a few OES state values.
+ * 
  * The enumerations kCC3GLESStateOriginalValueReadOnce and kCC3GLESStateOriginalValueReadAlways
  * have limited value, since they perform a GL read, but do not restore that value once 3D
  * drawing is complete. It is generally better to simply use the enumeration
@@ -102,7 +109,8 @@ typedef enum {
 	kCC3GLESStateOriginalValueReadOnce,
 	kCC3GLESStateOriginalValueReadAlways,
 	kCC3GLESStateOriginalValueReadOnceAndRestore,
-	kCC3GLESStateOriginalValueReadAlwaysAndRestore
+	kCC3GLESStateOriginalValueReadAlwaysAndRestore,
+	kCC3GLESStateOriginalValueRestore
 } CC3GLESStateOriginalValueHandling;
 
 

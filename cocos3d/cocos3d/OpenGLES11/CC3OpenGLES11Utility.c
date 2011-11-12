@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Utility.c
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -550,6 +550,42 @@ char* GLEnumName(GLenum gle) {
 			return "GL_DEPTH_CLEAR_VALUE";
 		case GL_STENCIL_CLEAR_VALUE:
 			return "GL_STENCIL_CLEAR_VALUE";
+			
+			/* OES_matrix_palette */
+		case GL_MAX_VERTEX_UNITS_OES:
+			return "GL_MAX_VERTEX_UNITS_OES";
+		case GL_MAX_PALETTE_MATRICES_OES:
+			return "GL_MAX_PALETTE_MATRICES_OES";
+		case GL_MATRIX_PALETTE_OES:
+			return "GL_MATRIX_PALETTE_OES";
+		case GL_MATRIX_INDEX_ARRAY_OES:
+			return "GL_MATRIX_INDEX_ARRAY_OES";
+		case GL_WEIGHT_ARRAY_OES:
+			return "GL_WEIGHT_ARRAY_OES";
+		case GL_CURRENT_PALETTE_MATRIX_OES:
+			return "GL_CURRENT_PALETTE_MATRIX_OES";
+
+		case GL_MATRIX_INDEX_ARRAY_SIZE_OES:
+			return "GL_MATRIX_INDEX_ARRAY_SIZE_OES";
+		case GL_MATRIX_INDEX_ARRAY_TYPE_OES:
+			return "GL_MATRIX_INDEX_ARRAY_TYPE_OES";
+		case GL_MATRIX_INDEX_ARRAY_STRIDE_OES:
+			return "GL_MATRIX_INDEX_ARRAY_STRIDE_OES";
+		case GL_MATRIX_INDEX_ARRAY_POINTER_OES:
+			return "GL_MATRIX_INDEX_ARRAY_POINTER_OES";
+		case GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES:
+			return "GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES";
+			
+		case GL_WEIGHT_ARRAY_SIZE_OES:
+			return "GL_WEIGHT_ARRAY_SIZE_OES";
+		case GL_WEIGHT_ARRAY_TYPE_OES:
+			return "GL_WEIGHT_ARRAY_TYPE_OES";
+		case GL_WEIGHT_ARRAY_STRIDE_OES:
+			return "GL_WEIGHT_ARRAY_STRIDE_OES";
+		case GL_WEIGHT_ARRAY_POINTER_OES:
+			return "GL_WEIGHT_ARRAY_POINTER_OES";
+		case GL_WEIGHT_ARRAY_BUFFER_BINDING_OES:
+			return "GL_WEIGHT_ARRAY_BUFFER_BINDING_OES";
 			
 		default:
 			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);

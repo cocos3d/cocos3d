@@ -1,7 +1,7 @@
 /*
  * CC3PODMeshNode.mm
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,41 +38,24 @@
 @end
 
 
-@implementation CC3PODMeshNode
+#pragma mark -
+#pragma mark CC3MeshNode extensions for PVR POD data
 
-@synthesize podMaterialIndex;
+@implementation CC3MeshNode (PVRPOD)
 
--(int) podIndex {
-	return podIndex;
-}
+// Subclasses must override to use instance variable.
+-(int) podMaterialIndex { return 0; }
 
--(void) setPodIndex: (int) aPODIndex {
-	podIndex = aPODIndex;
-}
-
--(int) podContentIndex {
-	return podContentIndex;
-}
-
--(void) setPodContentIndex: (int) aPODIndex {
-	podContentIndex = aPODIndex;
-}
-
--(int) podParentIndex {
-	return podParentIndex;
-}
-
--(void) setPodParentIndex: (int) aPODIndex {
-	podParentIndex = aPODIndex;
-}
+// Subclasses must override to use instance variable.
+-(void) setPodMaterialIndex: (int) aPODIndex {}
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODNode* pmn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex
-											fromPODResource: (CC3PODResource*) aPODRez];
+											  fromPODResource: (CC3PODResource*) aPODRez];
 		// If this node has a mesh, build it
 		if (self.podContentIndex >= 0) {
-			self.mesh = [aPODRez meshModelAtIndex: self.podContentIndex];
+			self.mesh = [aPODRez meshAtIndex: self.podContentIndex];
 		}
 		// If this node has a material, build it
 		self.podMaterialIndex = pmn->nIdxMaterial;
@@ -86,6 +69,30 @@
 -(PODStructPtr) nodePODStructAtIndex: (uint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [aPODRez meshNodePODStructAtIndex: aPODIndex];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PODMeshNode
+
+@implementation CC3PODMeshNode
+
+-(int) podIndex { return podIndex; }
+
+-(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+
+-(int) podContentIndex { return podContentIndex; }
+
+-(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
+
+-(int) podParentIndex { return podParentIndex; }
+
+-(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
+
+-(int) podMaterialIndex { return podMaterialIndex; }
+
+-(void) setPodMaterialIndex: (int) aPODIndex { podMaterialIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.

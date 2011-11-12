@@ -1,7 +1,7 @@
 /*
  * CC3NodeAnimation.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,6 +49,7 @@
 @interface CC3NodeAnimation : NSObject {
 	GLuint frameCount;
 	BOOL shouldInterpolate;
+	ccTime currentFrame;
 }
 
 /** The number of frames of animation. */
@@ -84,6 +85,12 @@
  * Default returns NO. Subclasses with data should override appropriately.
  */
 @property(nonatomic, readonly) BOOL isAnimatingScale;
+
+/**
+ * Returns the current frame. This is the value submitted to the most recent invocation of
+ * the establishFrameAt:forNode: method, or zero if that method has not yet been invoked.
+ */
+@property (assign,readonly) ccTime currentFrame;
 
 /** Initializes this instance to animate with the specified number of animation frames. */
 -(id) initWithFrameCount: (GLuint) numFrames;

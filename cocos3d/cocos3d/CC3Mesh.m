@@ -1,7 +1,7 @@
 /*
  * CC3Mesh.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,9 @@
 @interface CC3Mesh (TemplateMethods)
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) drawVerticesFrom: (GLuint) vertexIndex
+				forCount: (GLuint) vertexCount
+			 withVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(BOOL) switchingMesh;
 @end
 
@@ -99,6 +102,8 @@
 
 -(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {}
 
+-(void) repeatTexture: (ccTex2F) repeatFactor {}
+
 -(CGRect) textureRectangle { return CGRectNull; }
 
 -(void) setTextureRectangle: (CGRect) aRect {}
@@ -134,6 +139,17 @@ static GLuint lastAssignedMeshTag;
 	[self drawVerticesWithVisitor: visitor];
 }
 
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (self.switchingMesh) {
+		[self bindGLWithVisitor: visitor];
+	} else {
+		LogTrace(@"Reusing currently bound %@", self);
+	}
+	[self drawVerticesFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+}
+
 /**
  * Template method that binds the mesh arrays to the GL engine prior to drawing.
  * The specified visitor encapsulates the frustum of the currently active camera,
@@ -150,8 +166,26 @@ static GLuint lastAssignedMeshTag;
  */
 -(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
+/** 
+ * Draws a portion of the mesh vertices to the GL engine.
+ * Default implementation does nothing. Subclasses will override.
+ */
+-(void) drawVerticesFrom: (GLuint) vertexIndex
+				forCount: (GLuint) vertexCount
+			 withVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
 -(CC3NodeBoundingVolume*) defaultBoundingVolume {
 	return nil;
+}
+
+-(GLsizei) faceCountFromVertexCount: (GLsizei) vc {
+	NSAssert(NO, @"Override me!");
+	return 0;
+}
+
+-(GLsizei) vertexCountFromFaceCount: (GLsizei) fc {
+	NSAssert(NO, @"Override me!");
+	return 0;
 }
 
 
@@ -179,18 +213,28 @@ static GLuint lastAssignedMeshTag;
 
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLsizei) index {}
 
--(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLsizei) index {
 	return (ccTex2F){ 0.0, 0.0 };
 }
 
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {}
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLsizei) index {}
 
 -(ccTex2F) vertexTexCoord2FAt: (GLsizei) index {
-	return [self vertexTexCoord2FAt: index forTextureUnit: 0];
+	return [self vertexTexCoord2FForTextureUnit: 0 at: index];
 }
 
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index {
-	[self setVertexTexCoord2F: aTex2F at: index forTextureUnit: 0];
+	[self setVertexTexCoord2F: aTex2F forTextureUnit: 0 at: index];
+}
+
+// Deprecated
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	return [self vertexTexCoord2FForTextureUnit: texUnit at: index];
+}
+
+// Deprecated
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
 -(GLushort) vertexIndexAt: (GLsizei) index { return 0; }

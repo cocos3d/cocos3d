@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -57,9 +57,7 @@
 
 @implementation CC3MeshNode
 
-@synthesize mesh, material, pureColor, shouldUseSmoothShading;
-@synthesize shouldCullBackFaces, shouldCullFrontFaces, shouldUseClockwiseFrontFaceWinding;
-@synthesize shouldDisableDepthMask, shouldDisableDepthTest, depthFunction;
+@synthesize mesh, material, pureColor;
 
 -(void) dealloc {
 	[mesh release];
@@ -102,6 +100,63 @@
 			? CC3BoundingBoxAddPadding(mesh.boundingBox, boundingVolumePadding)
 			: kCC3BoundingBoxNull;
 }
+
+-(BOOL) shouldCullBackFaces { return shouldCullBackFaces; }
+
+-(void) setShouldCullBackFaces: (BOOL) shouldCull {
+	shouldCullBackFaces = shouldCull;
+	super.shouldCullBackFaces = shouldCull;
+}
+
+-(BOOL) shouldCullFrontFaces { return shouldCullFrontFaces; }
+
+-(void) setShouldCullFrontFaces: (BOOL) shouldCull {
+	shouldCullFrontFaces = shouldCull;
+	super.shouldCullFrontFaces = shouldCull;
+}
+
+-(BOOL) shouldUseClockwiseFrontFaceWinding { return shouldUseClockwiseFrontFaceWinding; }
+
+-(void) setShouldUseClockwiseFrontFaceWinding: (BOOL) shouldWindCW {
+	shouldUseClockwiseFrontFaceWinding = shouldWindCW;
+	super.shouldUseClockwiseFrontFaceWinding = shouldWindCW;
+}
+
+-(BOOL) shouldUseSmoothShading { return shouldUseSmoothShading; }
+
+-(void) setShouldUseSmoothShading: (BOOL) shouldSmooth {
+	shouldUseSmoothShading = shouldSmooth;
+	super.shouldUseSmoothShading = shouldSmooth;
+}
+
+-(CC3NormalScaling) normalScalingMethod { return normalScalingMethod; }
+
+-(void) setNormalScalingMethod: (CC3NormalScaling) nsMethod {
+	normalScalingMethod = nsMethod;
+	super.normalScalingMethod = nsMethod;
+}
+
+-(BOOL) shouldDisableDepthMask { return shouldDisableDepthMask; }
+
+-(void) setShouldDisableDepthMask: (BOOL) shouldDisable {
+	shouldDisableDepthMask = shouldDisable;
+	super.shouldDisableDepthMask = shouldDisable;
+}
+
+-(BOOL) shouldDisableDepthTest { return shouldDisableDepthTest; }
+
+-(void) setShouldDisableDepthTest: (BOOL) shouldDisable {
+	shouldDisableDepthTest = shouldDisable;
+	super.shouldDisableDepthTest = shouldDisable;
+}
+
+-(GLenum) depthFunction { return depthFunction; }
+
+-(void) setDepthFunction: (GLenum) depthFunc {
+	depthFunction = depthFunc;
+	super.depthFunction = depthFunc;
+}
+
 
 #pragma mark Material coloring
 
@@ -247,6 +302,10 @@
 	[super alignInvertedTextures];
 }
 
+-(void) repeatTexture: (ccTex2F) repeatFactor {
+	[mesh repeatTexture: repeatFactor];
+}
+
 -(CGRect) textureRectangle {
 	return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle;
 }
@@ -276,8 +335,31 @@
 		shouldDisableDepthMask = NO;
 		shouldDisableDepthTest = NO;
 		depthFunction = GL_LEQUAL;
+		normalScalingMethod = kCC3NormalScalingAutomatic;
 	}
 	return self;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+// A copy is made of the material.
+// The mesh is simply retained, without creating a copy.
+// Both this node and the other node will share the mesh.
+-(void) populateFrom: (CC3MeshNode*) another {
+	[super populateFrom: another];
+	
+	self.mesh = another.mesh;								// retained but not copied
+	self.material = [another.material copyAutoreleased];	// retained
+	
+	pureColor = another.pureColor;
+	shouldUseSmoothShading = another.shouldUseSmoothShading;
+	shouldCullBackFaces = another.shouldCullBackFaces;
+	shouldCullFrontFaces = another.shouldCullFrontFaces;
+	shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
+	shouldDisableDepthMask = another.shouldDisableDepthMask;
+	shouldDisableDepthTest = another.shouldDisableDepthTest;
+	depthFunction = another.depthFunction;
+	normalScalingMethod = another.normalScalingMethod;
 }
 
 -(void) createGLBuffers {
@@ -346,27 +428,6 @@
 	[super doNotBufferVertexIndices];
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// A copy is made of the material.
-// The mesh is simply retained, without creating a copy.
-// Both this node and the other node will share the mesh.
--(void) populateFrom: (CC3MeshNode*) another {
-	[super populateFrom: another];
-	
-	self.mesh = another.mesh;								// retained but not copied
-	self.material = [another.material copyAutoreleased];	// retained
-
-	pureColor = another.pureColor;
-	shouldUseSmoothShading = another.shouldUseSmoothShading;
-	shouldCullBackFaces = another.shouldCullBackFaces;
-	shouldCullFrontFaces = another.shouldCullFrontFaces;
-	shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
-	shouldDisableDepthMask = another.shouldDisableDepthMask;
-	shouldDisableDepthTest = another.shouldDisableDepthTest;
-	depthFunction = another.depthFunction;
-	
-}
 
 #pragma mark Type testing
 
@@ -430,15 +491,51 @@
  */
 -(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
+
 	if (mesh && mesh.hasNormals) {
-		if (self.isUniformlyScaledGlobally) {
-			[gles11ServCaps.rescaleNormal enable];
-			[gles11ServCaps.normalize disable];
-		} else {
-			[gles11ServCaps.rescaleNormal disable];
-			[gles11ServCaps.normalize enable];
+		switch (normalScalingMethod) {
+
+			// Enable normalizing & disable re-scaling
+			case kCC3NormalScalingNormalize:
+				[gles11ServCaps.rescaleNormal disable];
+				[gles11ServCaps.normalize enable];
+				break;
+
+			// Enable rescaling & disable normalizing
+			case kCC3NormalScalingRescale:
+				[gles11ServCaps.rescaleNormal enable];
+				[gles11ServCaps.normalize disable];
+				break;
+
+			// Choose one of the others, based on scaling characteristics
+			case kCC3NormalScalingAutomatic:	
+
+				// If no scaling, disable both normalizing and re-scaling
+				if (self.isTransformRigid) {
+					[gles11ServCaps.rescaleNormal disable];
+					[gles11ServCaps.normalize disable];
+
+				// If uniform scaling, enable re-scaling & disable normalizing
+				} else if (self.isUniformlyScaledGlobally) {
+					[gles11ServCaps.rescaleNormal enable];
+					[gles11ServCaps.normalize disable];
+
+				// If non-uniform scaling, enable normalizing & disable re-scaling
+				} else {
+					[gles11ServCaps.rescaleNormal disable];
+					[gles11ServCaps.normalize enable];
+				}
+				break;
+			
+			// Disable both rescaling & normalizing
+			case kCC3NormalScalingNone:
+			default:
+				[gles11ServCaps.rescaleNormal disable];
+				[gles11ServCaps.normalize disable];
+				break;
 		}
 	} else {
+		// No normals...so disable both rescaling & normalizing
 		[gles11ServCaps.rescaleNormal disable];
 		[gles11ServCaps.normalize disable];
 	}
@@ -554,20 +651,30 @@
 	[mesh setVertexColor4B: aColor at: index];
 }
 
--(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
-	return mesh ? [mesh vertexTexCoord2FAt: index forTextureUnit: texUnit] : (ccTex2F){ 0.0, 0.0 };
+-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLsizei) index {
+	return mesh ? [mesh vertexTexCoord2FForTextureUnit: texUnit at: index] : (ccTex2F){ 0.0, 0.0 };
 }
 
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
-	[mesh setVertexTexCoord2F: aTex2F at: index forTextureUnit: texUnit];
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLsizei) index {
+	[mesh setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
 -(ccTex2F) vertexTexCoord2FAt: (GLsizei) index {
-	return [self vertexTexCoord2FAt: index forTextureUnit: 0];
+	return [self vertexTexCoord2FForTextureUnit: 0 at: index];
 }
 
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index {
-	[self setVertexTexCoord2F: aTex2F at: index forTextureUnit: 0];
+	[self setVertexTexCoord2F: aTex2F forTextureUnit: 0 at: index];
+}
+
+// Deprecated
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	return [self vertexTexCoord2FForTextureUnit: texUnit at: index];
+}
+
+// Deprecated
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
 -(GLushort) vertexIndexAt: (GLsizei) index {
@@ -835,17 +942,47 @@
 }
 
 #define kCC3DirMarkerLineScale 1.5
+#define kCC3DirMarkerMinAbsoluteScale (0.25 / kCC3DirMarkerLineScale)
 
+/**
+ * Calculates the scale to use, along a single axis, for the length of the directional marker.
+ * Divide the distance from the origin, along this axis, to each of two opposite sides of the
+ * bounding box, by the length of the directional marker in this axis.
+ *
+ * Taking into consideration the sign of the direction, the real distance along this axis to
+ * the side it will intersect will be the maximum of these two values.
+ *
+ * Finally, in case the origin is on, or very close to, one side, make sure the length of the
+ * directional marker is at least 1/4 of the length of the distance between the two sides.
+ */
+-(GLfloat) calcScale: (GLfloat) markerAxis bbMin: (GLfloat) minBBAxis bbMax: (GLfloat) maxBBAxis {
+	if (markerAxis == 0.0f) return CGFLOAT_MAX;
+	
+	GLfloat scaleToMaxSide = maxBBAxis / markerAxis;
+	GLfloat scaleToMinSide = minBBAxis / markerAxis;
+	GLfloat minAbsoluteScale = fabs((maxBBAxis - minBBAxis) / markerAxis) * kCC3DirMarkerMinAbsoluteScale;
+	return MAX(MAX(scaleToMaxSide, scaleToMinSide), minAbsoluteScale);
+}
+
+/**
+ * Calculate the end of the directonal marker line.
+ *
+ * This is done by calculating the scale we need to multiply the directional marker by to
+ * reach each of the three sides of the bounding box, then take the smallest of these,
+ * because that is the side it will intersect. Finally, multiply by an overall scale factor.
+ */
 -(CC3Vector) calculateLineEnd {
 	CC3BoundingBox pbb = self.parentBoundingBox;
 	CC3Vector md = self.markerDirection;
-	CC3Vector mdInv = cc3v(md.x ? (1.0 / md.x) : CGFLOAT_MAX,
-						   md.y ? (1.0 / md.y) : CGFLOAT_MAX,
-						   md.z ? (1.0 / md.z) : CGFLOAT_MAX);
-	CC3Vector pbbDirScale = CC3VectorMaximize(CC3VectorScale(pbb.maximum, mdInv),
-											  CC3VectorScale(pbb.minimum, mdInv));
+	
+	CC3Vector pbbDirScale = cc3v([self calcScale: md.x bbMin: pbb.minimum.x bbMax: pbb.maximum.x],
+								 [self calcScale: md.y bbMin: pbb.minimum.y bbMax: pbb.maximum.y],
+								 [self calcScale: md.z bbMin: pbb.minimum.z bbMax: pbb.maximum.z]);
 	GLfloat dirScale = MIN(pbbDirScale.x, MIN(pbbDirScale.y, pbbDirScale.z));
-	return CC3VectorScaleUniform(md, (dirScale * [[self class] directionMarkerScale]));
+	CC3Vector lineEnd = CC3VectorScaleUniform(md, (dirScale * [[self class] directionMarkerScale]));
+	LogTrace(@"%@ calculated line end %@ from pbb scale %@ and dir scale %.3f", self,
+			 NSStringFromCC3Vector(lineEnd), NSStringFromCC3Vector(pbbDirScale), dirScale);
+	return lineEnd;
 }
 
 // The proportional distance that the direction should protrude from the parent node

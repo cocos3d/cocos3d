@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -265,6 +265,38 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerVertexWeightsPointer
+
+/**
+ * CC3OpenGLES11StateTrackerVertexLocationsPointer tracks the parameters
+ * of the vertex weights pointer.
+ *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - elementSize uses GL name GL_WEIGHT_ARRAY_SIZE_OES.
+ *   - elementType uses GL name GL_WEIGHT_ARRAY_TYPE_OES.
+ *   - elementStride uses GL name GL_WEIGHT_ARRAY_STRIDE_OES.
+ *   - the values are set in the GL engine using the glWeightPointerOES method
+ */
+@interface CC3OpenGLES11StateTrackerVertexWeightsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer
+
+/**
+ * CC3OpenGLES11StateTrackerVertexLocationsPointer tracks the parameters
+ * of the vertex matrix indices pointer.
+ *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - elementSize uses GL name GL_MATRIX_INDEX_ARRAY_SIZE_OES.
+ *   - elementType uses GL name GL_MATRIX_INDEX_ARRAY_TYPE_OES.
+ *   - elementStride uses GL name GL_MATRIX_INDEX_ARRAY_STRIDE_OES.
+ *   - the values are set in the GL engine using the glMatrixIndexPointerOES method
+ */
+@interface CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer : CC3OpenGLES11StateTrackerVertexPointer{}
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11VertexArrays
 
 /** CC3OpenGLES11VertexArrays manages trackers for vertex arrays. */
@@ -272,9 +304,11 @@
 	CC3OpenGLES11StateTrackerArrayBufferBinding* arrayBuffer;
 	CC3OpenGLES11StateTrackerElementArrayBufferBinding* indexBuffer;
 	CC3OpenGLES11StateTrackerVertexLocationsPointer* locations;
+	CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer* matrixIndices;
 	CC3OpenGLES11StateTrackerVertexNormalsPointer* normals;
 	CC3OpenGLES11StateTrackerVertexColorsPointer* colors;
 	CC3OpenGLES11StateTrackerVertexPointSizesPointer* pointSizes;
+	CC3OpenGLES11StateTrackerVertexWeightsPointer* weights;
 }
 
 /** Tracks vertex array buffer binding. */
@@ -286,6 +320,9 @@
 /** Tracks the vertex locations pointer. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexLocationsPointer* locations;
 
+/** Tracks the vertex matrix indices pointer. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer* matrixIndices;
+
 /** Tracks the vertex normals pointer. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexNormalsPointer* normals;
 
@@ -294,6 +331,9 @@
 
 /** Tracks the vertex point sizes pointer. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexPointSizesPointer* pointSizes;
+
+/** Tracks the vertex weights pointer. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerVertexWeightsPointer* weights;
 
 /**
  * Returns the array or index buffer binding tracker, as determined by the specified bufferTarget value.

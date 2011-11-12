@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,7 +43,9 @@
 -(void) bindColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) bindTextureCoordinatesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindBoneWeightsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 
@@ -192,6 +194,13 @@
 	for (GLuint i = 0; i < tcCount; i++) {
 		[[self textureCoordinatesForTextureUnit: i]
 			alignWithInvertedTexture: [aMaterial textureForTextureUnit: i]];
+	}
+}
+
+-(void) repeatTexture: (ccTex2F) repeatFactor {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[[self textureCoordinatesForTextureUnit: i] repeatTexture: repeatFactor];
 	}
 }
 
@@ -398,7 +407,10 @@
 	[self bindNormalsWithVisitor: visitor];
 	[self bindColorsWithVisitor: visitor];
 	[self bindTextureCoordinatesWithVisitor: visitor];
+	[self bindPointSizesWithVisitor: visitor];
 	[self bindIndicesWithVisitor: visitor];
+	[self bindBoneMatrixIndicesWithVisitor: visitor];
+	[self bindBoneWeightsWithVisitor: visitor];
 }
 
 /**
@@ -485,6 +497,33 @@
 	[CC3VertexTextureCoordinates unbindRemainingFrom: tu];
 }
 
+/**
+ * Template method that binds a pointer to the vertex point size data to the GL engine.
+ * Since this mesh has no vertex point size data, the pointer is cleared in the GL engine.
+ * Subclasses with vertex point size data will override.
+ */
+-(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[CC3VertexPointSizes unbind];
+}
+
+/**
+ * Template method that binds a pointer to the vertex matrix index data to the GL engine.
+ * Since this mesh has no vertex matrix index data, the pointer is cleared in the GL engine.
+ * Subclasses with vertex matrix index data will override.
+ */
+-(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[CC3VertexMatrixIndices unbind];
+}
+
+/**
+ * Template method that binds a pointer to the vertex weight data to the GL engine.
+ * Since this mesh has no vertex weight data, the pointer is cleared in the GL engine.
+ * Subclasses with vertex weight data will override.
+ */
+-(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
+	[CC3VertexWeights unbind];
+}
+
 /** Template method that binds a pointer to the vertex index data to the GL engine. */
 -(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[vertexIndices bindWithVisitor: visitor];
@@ -504,6 +543,39 @@
 	} else {
 		[vertexLocations drawWithVisitor: visitor];
 	}
+}
+
+-(void) drawVerticesFrom: (GLuint) vertexIndex
+				forCount: (GLuint) vertexCount
+			 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Drawing %@ from %u for %u vertices", self, vertexIndex, vertexCount);
+	if (vertexIndices) {
+		[vertexIndices drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+	} else {
+		[vertexLocations drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+	}
+}
+
+-(GLsizei) faceCountFromVertexCount: (GLsizei) vc {
+	if (vertexIndices) {
+		return [vertexIndices faceCountFromVertexCount: vc];
+	}
+	if (vertexLocations) {
+		return [vertexLocations faceCountFromVertexCount: vc];
+	}
+	NSAssert(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.");
+	return 0;
+}
+
+-(GLsizei) vertexCountFromFaceCount: (GLsizei) fc {
+	if (vertexIndices) {
+		return [vertexIndices vertexCountFromFaceCount: fc];
+	}
+	if (vertexLocations) {
+		return [vertexLocations vertexCountFromFaceCount: fc];
+	}
+	NSAssert(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.");
+	return 0;
 }
 
 /**
@@ -568,12 +640,12 @@
 	[vertexColors setColor4B: aColor at: index];
 }
 
--(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLsizei) index {
 	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
 	return texCoords ? [texCoords texCoord2FAt: index] : (ccTex2F){ 0.0, 0.0 };
 }
 
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit {
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLsizei) index {
 	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
 	[texCoords setTexCoord2F: aTex2F at: index];
 }

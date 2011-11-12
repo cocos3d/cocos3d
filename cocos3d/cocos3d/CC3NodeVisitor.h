@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -57,6 +57,8 @@
  */
 @interface CC3NodeVisitor : NSObject {
 	CC3Node* startingNode;
+	CC3Node* currentNode;
+	CC3GLMatrix* scratchMatrix;
 	CCArray* pendingRemovals;
 	BOOL shouldVisitChildren;
 }
@@ -69,6 +71,14 @@
 @property(nonatomic, assign) BOOL shouldVisitChildren;
 
 /**
+ * The CC3Node that is currently being visited. 
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3Node* currentNode;
+
+/**
  * The CC3Node on which this visitation traversal was intitiated. This is the node
  * on which the visit: method was first invoked to begin a traversal of the node
  * structural hierarchy. 
@@ -77,6 +87,23 @@
  * and after the visit: method is invoked.
  */
 @property(nonatomic, readonly) CC3Node* startingNode;
+
+/**
+ * Returns a CC3GLMatrix that can be used as a scratch pad for any matrix math
+ * that is required during drawing. This matrix is made available as a convenience
+ * to remove the overhead of repeatedly allocating and disposing temporary matrices
+ * during drawing matrix math calculations.
+ *
+ * The matrix is lazily created the first time this property is accessed, and
+ * is not released until the visitor is deallocated. It can be reused repeatedly
+ * during the drawing of any meshes, and from frame to frame.
+ *
+ * Because of this, you should not assume that the matrix will have any particular
+ * contents when accessed at the beginning of any particular calculation. Always
+ * ensure that you populate it to the desired initial state using one of the
+ * populate... methods of CC3GLMatrix.
+ */
+@property(nonatomic, retain, readonly) CC3GLMatrix* scratchMatrix;
 
 /**
  * The performanceStatistics being accumulated during the visitation runs.
@@ -139,6 +166,7 @@
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor {
 	BOOL isTransformDirty;
 	BOOL shouldLocalizeToStartingNode;
+	BOOL shouldRestoreTransforms;
 }
 
 /**
@@ -173,6 +201,20 @@
 @property(nonatomic, assign) BOOL shouldLocalizeToStartingNode;
 
 /**
+ * This property only has effect when the shouldLocalizeToStartingNode property is set to YES.
+ *
+ * Indicates whether the full global transforms should be restored afte the localized
+ * transforms have been calculated and consumed. Setting this to YES is useful when
+ * the localized transform is being temporarily calculated for a specialized purpose
+ * such as determining a local bounding box, but then the full global transform should
+ * be immediately restored for further use.
+ *
+ * The initial value of this property is NO. However, specialized subclasses may set
+ * to YES initially as appropriate.
+ */
+@property(nonatomic, assign) BOOL shouldRestoreTransforms;
+
+/**
  * Returns whether the transform matrix of the node currently being visited is dirty
  * and needs to be recalculated.
  *
@@ -188,10 +230,9 @@
  * Returns the transform matrix to use as the parent matrix when transforming the
  * specified node.
  * 
- * This usually returns the transformMatrix of the parent of the specified node.
- * However, if the specified node has no parent, or if the shouldLocalizeToStartingNode
- * is set to YES and the startingNode is either the specified node or its parent,
- * this method returns nil.
+ * This usually returns the value of the parentTransformMatrix of the specified node.
+ * However, if the shouldLocalizeToStartingNode property is set to YES and the
+ * startingNode is either the specified node or its parent, this method returns nil.
  */
 -(CC3GLMatrix*) parentTansformMatrixFor: (CC3Node*) aNode;
 
@@ -260,19 +301,19 @@
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
-@class CC3Frustum;
+@class CC3Camera;
 
 /**
  * CC3NodeDrawingVisitor is a CC3NodeVisitor that is passed to a node when it is visited
  * during drawing operations.
  *
- * The camera's frustum must be set in the frustum property before invoking this method,
- * so that only nodes that are within the camera's field of view will be visited. Nodes
- * outside the frustum will neither be visited nor drawn.
+ * The camera property must be set before invoking the visit, so that only nodes that are
+ * within the camera's field of view will be visited. Nodes outside the camera's frustum
+ * will neither be visited nor drawn.
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* drawingSequencer;
-	CC3Frustum* frustum;
+	CC3Camera* camera;
 	GLuint textureUnitCount;
 	GLuint textureUnit;
 	BOOL shouldDecorateNode;
@@ -291,13 +332,13 @@
 @property(nonatomic, assign) CC3NodeSequencer* drawingSequencer;
 
 /**
- * The frustum used to determine if a node is within the camera's view.
+ * The camera that is viewing the 3D scene that is being drawn.
  *
- * This property must be set before the visit: method is invoked.
- * It is therefore only available during a visitation run. Since the CC3World may contain
- * multiple cameras, this ensures that the frustum of the current activeCamera is used.
+ * This property must be set before the visit: method is invoked. It is therefore only
+ * available during a visitation run. Since the CC3World may contain multiple cameras,
+ * this ensures that the current activeCamera is used.
  */
-@property(nonatomic, assign) CC3Frustum* frustum;
+@property(nonatomic, assign) CC3Camera* camera;
 
 /**
  * The number of texture units being drawn.

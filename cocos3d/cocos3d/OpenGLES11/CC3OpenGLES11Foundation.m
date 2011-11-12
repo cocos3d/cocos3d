@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Foundation.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -59,19 +59,5 @@ NSString* GetGLErrorText(GLenum errCode) {
 			return @"GL_OUT_OF_MEMORY: Not enough memory to perform operation";
 		default:
 			return [NSString stringWithFormat: @"Unknown GL error (%i)", errCode];
-	}
-}
-
-/**
- * Do NOT call this function directly! Use LogGLErrorState instead, to allow
- * this function to be removed at compile time using the GL_ERROR_LOGGING_ENABLED
- * compiler switch.
- */
-void DoLogGLErrorState() {
-	GLenum errCode = glGetError();
-	if (errCode) {
-		LogError(@"%@", GetGLErrorText(errCode));
-	} else {
-		LogTrace(@"%@", GetGLErrorText(errCode));
 	}
 }

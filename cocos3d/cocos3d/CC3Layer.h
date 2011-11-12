@@ -1,7 +1,7 @@
 /*
  * CC3Layer.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -162,19 +162,26 @@
 /**
  * The CC3World instance that maintains the 3D models and draws the 3D content.
  *
- * If you application contains multiple 3D scenes, you can swap between these scenes by
- * simply setting the value of this property to the new scene.
- * 
- * Any CCActions that are running in the old cc3World instance are paused, and any CCActions
- * pending within the new world are resumed.
- * 
- * Take note that the CCActions of the old world are paused, not stopped, and nodes with
- * active CCActions will continue to be retained by the CCActionManager. To avoid memory
- * leaks, If you are finished with the old world, be sure to invoke the cleanup method as
- * well so that all descendant nodes will be released from their actions.
+ * If your application contains multiple 3D scenes, you can swap between these scenes
+ * by simply setting the value of this property to the new scene. The old CC3World
+ * instance is released. So if you want to swap that old world back into this layer
+ * at some point in the future, you should cache it somewhere, or recreated it.
  *
- * Setting this property also automatically invokes the udpateWorld method on the new
- * world to ensure that the transforms are up to date before the next frame is rendered.
+ * When the old world is released, it will clean up after itself, including all the
+ * nodes and meshes it contains.
+ *
+ * If this layer already has a CC3World assigned, the wasRemoved method of the existing
+ * CC3World to stop and remove any CCActions running on it and the nodes it contains.
+ *
+ * You can set the shouldCleanupWhenRemoved of the CC3World to NO if you want the
+ * CCActions attached to the world and its nodes to be paused, but not stopped and
+ * removed. Be aware that CCActions that are paused, but not stopped, will retain the
+ * CC3World, and could be cause for memory leaks if not managed correctly. Please see
+ * the notes of the CC3Node shouldCleanupWhenRemoved property and the CC3Node wasRemoved
+ * method for more information.
+ *
+ * Setting this property automatically invokes the udpateWorld method on the new world
+ * to ensure that the transforms are up to date before the next frame is rendered.
  */
 @property(nonatomic, retain) CC3World* cc3World;	
 

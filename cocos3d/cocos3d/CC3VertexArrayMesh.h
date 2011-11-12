@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -68,6 +68,9 @@
  * If there are more textures applied to a node than there are texture coordinate arrays
  * in the mesh (including the vertexTextureCoordinates and the those in the
  * overlayTextureCoordinates collection), the last texture coordinate array is reused.
+ *
+ * This class supports covering the mesh with a repeating texture through the
+ * repeatTexture: method.
  *
  * This class also supports covering the mesh with only a fractional part of the texture
  * through the use of the textureRectangle property, effectlivly permitting sprite-sheet

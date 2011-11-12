@@ -1,12 +1,54 @@
 CHANGELOG
 ---------
 
-cocos3d 0.6.2
+cocos3d 0.6.3
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++
+
+
+cocos3d 0.6.3 - 2011/11/12
+-------------------------------------
+
+- Added vertex skinning, allowing soft-body meshes to be realistically deformed based on the movement of an underlying skeleton constructed of bone and joints:
+    - Added CC3CC3SoftBodyNode to represent a character or other soft-body node.
+        - CC3CC3SoftBodyNode gathers together the skin mesh and control skeleton.
+    - Added CC3SkinMeshNode and CC3SkinMesh classes to manage the mesh that is the "skin" wrapped around the skeleton.
+    - Added CC3Bone to represent the underlying skeleton bones.
+        - CC3Bone is a subclass of CC3Node and these bones can be assembled into a skeleton.
+    - Added CC3SkinSection to manage the drawing of a section of the skin mesh that is controlled by a specific collection of bones.
+    - CC3DemoMashUp added running figures and flexible mallet to demonstrate vertex skinning, and copying soft-body nodes.
+    - Special thanks to cocos3d user Chris Myers, who took the initiative to add vertex skinning to cocos3d, and provided much of the code for vertex skinning in cocos3d.
+- Added repeatTexture: method to CC3MeshNode, CC3Mesh and CC3VertexTextureCoordinates to easily specify that the texture should repeat across the mesh, in one or both directions.
+- Support for cocos2d 1.1-beta:
+    - Fixed issue where compile breaks when using with cocos2d 1.1, due to changed structure used for 2D particle quad vertices
+    - When running with cocos2d 1.1 and above, set Xcode build setting CC_USES_2D_PARTICLES=0 in Preprocessor Macros.
+- CC3Node updateTransformMatrices and updateTransformMatrix methods now automatically incorporate any changes that have been made to ancestor nodes.
+- Added method drawFrom:forCount:withVisitor: to CC3Mesh and CC3DrawableVertexArray to allow drawing a subset of the vertices within a mesh.
+- Added CC3Node scaleTolerance property to support fuzzy testing for scaling unity and uniformity, to facilitate faster rigid matrix inversions when scaling is close to, but not exactly equal to one.
+- Added CC3Node normalScalingMethod property to allow control over how mesh vertex normals are scaled after modelview transformations.
+- Added CC3Node shouldCleanupWhenRemoved to indicate whether CCActions attached to a node should be stopped when node is removed
+    - [API change] By default, CCActions are now stopped and removed when a node is removed from its parent.
+    - [API change] By default, CCActions are now stopped and removed when a CC3World is removed from its CC3Layer.
+- Promoted shouldDisableDepthTest, shouldDisableDepthMask, shouldUseClockwiseFrontFaceWinding and depthFunction properties to CC3Node from CC3MeshNode.
+- Converted most of the CC3Foundation functions to inline functions.
+- Converted math functions to inline functions and moved functions to CC3 namespace.
+- Converted matrix math functions to inline functions and moved to CC3MatrixMath.h.
+- Fixed issue where certain combinations of rotation and scale caused incorrect matrix inversion calculation.
+    - Matrix inversion now uses adjoint-determinant algorithm instead of Gauss-Jordan reduction.
+- Fixed issue where CC3VertexIndices initialized with incorrect elementSize property, resulting in larger-than-needed memory & buffer allocations.
+- Fixed issue where length of directional marker CC3DirectionMarkerNode was sometimes failing to calculate a reasonable length.
+- Fixed issues around reading rotation angle and axis after setting them using rotateByAngle:aroundAxis:
+    - Axis and angle returned have same sign as those in the rotateByAngle:aroundAxis: method. Previously they were negated (same rotation, but confusing).
+    - Angle now smoothly moves within the range +/-180 degrees.
+    - Changed algorithm used to extract angle/axis and quaternion from a rotation matrix.
+- [API change] When the activeCamera is removed, CC3World no longer automatically makes another another camera active. This feature had caused unexpected behaviour when moving camera from one parent to another.
+- [API change] Added CC3MeshNode & CC3Mesh vertexTexCoord2FForTextureUnit:at: methods and deprecated vertexTexCoord2FAt:forTextureUnit: methods.
+- [API change] Added CC3MeshNode & CC3Mesh setVertexTexCoord2F:forTextureUnit:at: methods and deprecated setVertexTexCoord2F:at:forTextureUnit: methods.
+- [API change] Changed CC3PODResource methods meshModelAtIndex: and buildMeshModelAtIndex: to meshAtIndex: and buildMeshAtIndex:, respectively.
+- [API change] Redefined LogGLErrorState() macro function to take a format string and variable-length list of arguments.
 
 
 cocos3d 0.6.2 - 2011/10/19

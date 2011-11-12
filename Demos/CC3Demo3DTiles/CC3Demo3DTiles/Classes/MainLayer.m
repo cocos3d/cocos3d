@@ -1,7 +1,7 @@
 /*
  * MainLayer.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -73,7 +73,6 @@
 
 - (void) dealloc {
 	[tiles release];
-	[templateWorld release];
 	[templates release];
 	increaseNodesMI = nil;				// retained as child
 	decreaseNodesMI = nil;				// retained as child
@@ -189,8 +188,6 @@
 	CC3MeshNode* mn;
 	CC3ResourceNode* rezNode;
 
-	templateWorld = [[TileWorld world] retain];		// A world template
-
 	// Make a simple box template available. Only 6 faces per node.
 	mn = [CC3BoxNode nodeWithName: kBoxName];
 	CC3BoundingBox bBox;
@@ -256,11 +253,11 @@
 }
 
 /**
- * Creates a new CC3Layer with the specified bounds, creates a new CC3World from
- * a copy of the templates, frames the mainNode of the world in the camera, and
- * adds the CC3Layer to this layer.
+ * Creates a new CC3Layer with the specified bounds, creates a new CC3World, frames
+ * the mainNode of the world in the camera, and adds the CC3Layer to this layer.
  */
 -(void) addTileIn: (CGRect) bounds {
+//	CCLayer* tileLayer = [CCLayerColor layerWithColor: ccc4(50, 60, 110, 255)];
 	CC3Layer* tileLayer = [TileLayer layerWithColor: ccc4(50, 60, 110, 255)];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
@@ -273,19 +270,15 @@
 }
 
 /**
- * Copies a new world from the template world and chooses one of the template nodes
+ * Creates a new world and chooses one of the template nodes
  * and sets it as the main node of the world.
  */
 -(CC3World*) makeWorld {
-	TileWorld* world = [templateWorld copyAutoreleased];
-	
-	// Move the lamp to a random location to one side or the other of the camera (as
-	// if it were attached to a boom on the camera, of random length off to one side).
-	world.lamp.location = cc3v( RandomFloatBetween(-5.0, 5.0), 0.0, 0.0 );
+	TileWorld* world = [TileWorld world];		// A new world
 	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.
-	CC3Node* aNode = [[templates objectAtIndex: RandomUIntBelow(templates.count)] copyAutoreleased];
+	CC3Node* aNode = [[templates objectAtIndex: CC3RandomUIntBelow(templates.count)] copyAutoreleased];
 //	CC3Node* aNode = [[templates objectAtIndex: 0] copyAutoreleased];
 
 	// The shouldColorTile property is actually tracked by the userData property!
@@ -298,7 +291,7 @@
 }
 
 -(ccColor3B) pickNodeColor {
-	switch (RandomUIntBelow(6)) {
+	switch (CC3RandomUIntBelow(6)) {
 		case 0:
 			return ccRED;
 		case 1:

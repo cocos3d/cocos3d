@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -76,9 +76,9 @@
  * and all of its child nodes will transform in sync. The assembly will behave and
  * be seen as a single object.
  *
- * When the mesh is set in the mesh property, the CC3MeshNode instance
- * creates and builds a CC3NodeBoundingVolume instance from the mesh data, and
- * sets it into its boundingVolume property. 
+ * When the mesh is set in the mesh property, the CC3MeshNode instance creates and
+ * builds a CC3NodeBoundingVolume instance from the mesh data, and sets it into its
+ * boundingVolume property. 
  *
  * When a copy is made of a CC3MeshNode instance using the copy method, a copy is
  * made of the material, but the mesh is simply assigned by reference, and
@@ -103,6 +103,7 @@
 	CC3Material* material;
 	ccColor4F pureColor;
 	GLenum depthFunction;
+	CC3NormalScaling normalScalingMethod;
 	BOOL shouldDisableDepthMask;
 	BOOL shouldDisableDepthTest;
 	BOOL shouldCullFrontFaces;
@@ -133,152 +134,6 @@
  */
 @property(nonatomic, assign) ccColor4F pureColor;
 
-/**
- * Indicates whether the shading of the faces of the mesh of this node should be
- * smoothly shaded, using color interpolation between vertices.
- *
- * If this property is set to YES, the color of each pixel in any face in the mesh
- * of this node will be interpolated from the colors of all three vertices of the
- * face, using the distance of the pixel to each vertex as the means to interpolate.
- * The result is a smooth gradient of color across the face.
- *
- * If this property is set to NO, the color of all pixels in any face in the mesh
- * of this node will be determined by the color at the third vertex of the face.
- * All pixels in the face will be painted in the same color.
- *
- * The initial value is YES. For realistic rendering, you should leave this
- * property with the initial value, unless you have a specific need to render
- * flat color across each face in the mesh, such as to deliberately create a
- * cartoon-like effect on the model.
- */
-@property(nonatomic, assign) BOOL shouldUseSmoothShading;
-
-/**
- * Indicates whether the back faces of the mesh should be culled.
- *
- * The initial value is YES, indicating that back faces will not be displayed. You can set
- * this property to NO if you have reason to display the back faces of the mesh (for instance,
- * if you have a rectangular plane and you want to show both sides of it).
- *
- * Since the normal of the face points out the front face, back faces interact with light
- * the same way the front faces do, and will appear luminated by light that falls on the
- * front face, much like a stained-glass window. This may not be the affect that you are after,
- * and for some lighting conditions, instead of disabling back face culling, you might consider
- * creating a second textured front face, placed back-to-back with the original front face.
- *
- * Be aware that culling improves performance, so this property should be set to NO only when
- * specifically needed for visual effect, and only on the meshes that need it.
- */
-@property(nonatomic, assign) BOOL shouldCullBackFaces;
-
-/**
- * Indicates whether the front faces of the mesh should be culled.
- *
- * The initial value is NO. Normally, you should leave this property with the initial value,
- * unless you have a specific need not to display the front faces.
- */
-@property(nonatomic, assign) BOOL shouldCullFrontFaces;
-
-/**
- * Indicates whether the edge-widing algorithm used by the GL engine to determine
- * which face of a triangle is the front face should use clockwise winding.
- *
- * If this property is set to YES, the front face of all triangles in the mesh
- * of this node will be determined using clockwise winding of the edges. If this
- * property is set to NO, the front face of all triangles in the mesh of this
- * node will be determined using counter-clockwise winding of the edges.
- *
- * The initial value of this property is NO, indicating that the OpenGL-standard
- * counter-clockwise winding will be used by the GL engine to determine the front
- * face of all triangles in the mesh of this node. Unless you have a reason to
- * change this value, you should leave it at the initial value.
- */
-@property(nonatomic, assign) BOOL shouldUseClockwiseFrontFaceWinding;
-
-/**
- * Indicates whether this instance will disable the GL depth mask while drawing the
- * content of this node. When the depth mask is disabled, drawing activity will not
- * write to the depth buffer.
- *
- * If this property is set to NO, the Z-distance of this node will be compared against
- * previously drawn content, and the drawing of this node will update the depth buffer,
- * so that subsequent drawing will take into consideration the Z-distance of this node.
- *
- * If this property is set to YES, the Z-distance of this node will still be compared
- * against previously drawn content, but the drawing of this node will NOT update the
- * depth buffer, and subsequent drawing will NOT take into consideration the Z-distance
- * of this node.
- *
- * This property only has effect if the shouldDisableDepthTest property is set to NO.
- *
- * In most cases, to draw an accurate scene, we want depth testing to be performed
- * at all times, and this property is usually set to NO. However, there are some
- * occasions where it is useful to disable writing to the depth buffer during the
- * drawing of a node. One notable situation is with particle systems, where temporarily
- * disabling the depth mask will avoid Z-fighting between individual particles.
- *
- * The initial value of this property is NO, indicating that the GL depth mask will
- * not be disabled during the drawing of this node, and the depth buffer will be
- * updated during the drawing of this node.
- */
-@property(nonatomic, assign) BOOL shouldDisableDepthMask;
-
-/**
- * Indicates whether this instance will disable the GL depth test while drawing
- * the content of this node. When the depth test is disabled, the Z-distance of
- * this node will not be compared against previously drawn content, and drawing
- * activity will not write to the depth buffer.
- *
- * If this property is set to NO, the Z-distance of this node will be compared against
- * previously drawn content, and the drawing of this node will update the depth buffer,
- * so that subsequent drawing will take into consideration the Z-distance of this node.
- *
- * If this property is set to YES, the Z-distance of this node will not be compared
- * against previously drawn content and this node will be drawn over all previously
- * drawn content. In addition, the drawing of this node will not update the depth
- * buffer, with the result that subsequent object drawing will not take into
- * consideration the Z-distance of this node.
- *
- * In most cases, to draw an accurate scene, we want depth testing to be performed
- * at all times, and this property is usually set to NO. However, there are some
- * occasions where it is useful to disable depth testing during the drawing of a node.
- * One notable situation is with particle systems, where temporarily disabling depth
- * testing may help avoid Z-fighting between individual particles.
- *
- * The initial value of this property is NO, indicating that the GL depth tesing will
- * not be disabled during the drawing of this node, and the depth buffer will be
- * updated during the drawing of this node.
- */
-@property(nonatomic, assign) BOOL shouldDisableDepthTest;
-
-
-/**
- * The depth function used by the GL engine when comparing the Z-distance of this
- * node against previously drawn content.
- *
- * This property only has effect if the shouldDisableDepthTest property is set to NO.
- *
- * This property must be set to one of the following values:
- *   - GL_LESS - the content of this node will be drawn if it is closer to the camera
- *     than previously drawn content.
- *   - GL_LEQUAL - the content of this node will be drawn if it is at least as close
- *     to the camera as previously drawn content.
- *   - GL_EQUAL - the content of this node will be drawn if it is exactly as close
- *     to the camera as previously drawn content.
- *   - GL_GEQUAL - the content of this node will be drawn if it is at least as far
- *     away from the camera as previously drawn content.
- *   - GL_GREATER - the content of this node will be drawn if it is farther away from
- *     the camera than previously drawn content.
- *   - GL_NOTEQUAL - the content of this node will be drawn if it is not exactly as
- *     close to the camera as previously drawn content.
- *   - GL_ALWAYS - the content of this node will always be drawn
- *   - GL_NEVER - the content of this node will not be drawn
- *
- * The initial value of this property is GL_LEQUAL. In most cases, to draw an accurate
- * scene, this value is the most suitable. However, some special cases, including some
- * particle emitters, may benefit from the use of one of the other depth functions.
- */
-@property(nonatomic, assign) GLenum depthFunction;
 
 #pragma mark Material coloring
 
@@ -557,6 +412,54 @@
 -(void) alignInvertedTextures;
 
 /**
+ * Configures the mesh so that a texture applied to this mesh will be repeated the
+ * specified number of times across the mesh, in each dimension. The repeatFactor
+ * argument contains two numbers, corresponding to how many times in each dimension
+ * the texture should be repeated.
+ * 
+ * As an example, a value of (1, 2) for the repeatValue indicates that the texture
+ * should repeat twice vertically, but not repeat horizontally.
+ * 
+ * When a texture is repeated, the corresponding side of the texture covering this
+ * mesh must have a length that is a power-of-two, otherwise the padding added by
+ * iOS to convert it to a power-of-two length internally will be visible in the
+ * repeating pattern across the mesh.
+ *
+ * For a side that is not repeating, the corresponding side of the texture covering
+ * this mesh does not require a length that is a power-of-two.
+ *
+ * The textureParameters property of any texture covering this mesh should include
+ * the GL_REPEAT setting in each of its texture wrap components that correspond to
+ * a repeatFactor greater than one. The GL_REPEAT setting is the default setting
+ * for CC3Texture.
+ *
+ * For example, if you want to repeat your texture twice in one dimension, but only
+ * once in the other, then you would use a repeatFactor of (1, 2) or (2, 1). For the
+ * side that is repeating twice, the length of that side of the texture must be a
+ * power-of-two. But the other side may have any dimension. The textureParameters
+ * property of the CC3Texture should include the GL_REPEAT setting for the
+ * corresponding texture dimension.
+ *
+ * If your texture requires aligning with the mesh (typically if one of the texture
+ * dimensions is not a power-of-two), you should invoke either the alignTextures or
+ * alignInvertedTextures method before invoking this method.
+ *
+ * In the example above, you would invoke one of those methods before invoking this
+ * method, to first align the mesh with that non-power-of-two side.
+ *
+ * The dimensions of the repeatFactor are independent of the size derived from the
+ * texture by the alignTextures or alignInvertedTextures methods. A value of 1.0 for
+ * an element in the specified repeatFactor will automatically take into consideration
+ * the adjustment made to the mesh by those methods, and will display only the part of
+ * the texture defined by them.
+ *
+ * You can specify a fractional value for either of the components of the repeatFactor
+ * to expand the texture in that dimension so that only part of the texture appears
+ * in that dimension, while potentially repeating multiple times in the other dimension.
+ */
+-(void) repeatTexture: (ccTex2F) repeatFactor;
+
+/**
  * Defines the rectangular area of the textures, for all texture units, that should
  * be mapped to the mesh used by this node.
  *
@@ -697,7 +600,7 @@
 /**
  * Returns the location element at the specified index from the vertex data.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -708,7 +611,7 @@
 /**
  * Sets the location element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  * 
  * Since the new vertex location may change the bounding box of the mesh, when all
@@ -727,7 +630,7 @@
 /**
  * Returns the normal element at the specified index from the vertex data.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -738,7 +641,7 @@
 /**
  * Sets the normal element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the
@@ -753,7 +656,7 @@
 /**
  * Returns the color element at the specified index from the vertex data.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -764,7 +667,7 @@
 /**
  * Sets the color element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the
@@ -779,7 +682,7 @@
 /**
  * Returns the color element at the specified index from the vertex data.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -790,7 +693,7 @@
 /**
  * Sets the color element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the
@@ -806,19 +709,19 @@
  * Returns the texture coordinate element at the specified index from the vertex data
  * at the specified texture unit index.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
--(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit;
+-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLsizei) index;
 
 /**
- * Sets the texture coordinate element at the specified index in the vertex data, at
- * the specified texture unit index, to the specified texture coordinate value.
+ * Sets the texture coordinate element at the specified index in the vertex data,
+ * at the specified texture unit index, to the specified texture coordinate value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the
@@ -828,16 +731,16 @@
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  */
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit;
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLsizei) index;
 
 /**
  * Returns the texture coordinate element at the specified index from the vertex data
  * at the commonly used texture unit zero.
  *
- * This is a convenience method that is equivalent to invoking the vertexTexCoord2FAt:forTextureUnit:
- * method, with zero as the texture unit index.
+ * This is a convenience method that is equivalent to invoking the
+ * vertexTexCoord2FForTextureUnit:at: method, with zero as the texture unit index.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -849,10 +752,10 @@
  * Sets the texture coordinate element at the specified index in the vertex data,
  * at the commonly used texture unit zero, to the specified texture coordinate value.
  *
- * This is a convenience method that delegates to the setVertexTexCoord2F:at:forTextureUnit:
+ * This is a convenience method that delegates to the setVertexTexCoord2F:forTextureUnit:at:
  * method, passing in zero for the texture unit index.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the
@@ -864,10 +767,16 @@
  */
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index;
 
+/** @deprecated Use the vertexTexCoord2FForTextureUnit:at: method instead, */
+-(ccTex2F) vertexTexCoord2FAt: (GLsizei) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use the setVertexTexCoord2F:forTextureUnit:at: method instead, */
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLsizei) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
+
 /**
  * Returns the index element at the specified index from the vertex data.
  *
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * If the releaseRedundantData method has been invoked and the underlying
@@ -878,7 +787,7 @@
 /**
  * Sets the index element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to elements, not bytes. The implementation takes into consideration
+ * The index refers to vertices, not bytes. The implementation takes into consideration
  * the elementStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the

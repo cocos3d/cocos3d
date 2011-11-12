@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Foundation.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -45,26 +45,33 @@ NSString* NSStringFromGLEnum(GLenum gle);
 NSString* GetGLErrorText(GLenum errCode);
 
 /**
- * LogGLErrorState logs an ERROR level description of any glError that
- * occurrs, and logs a TRACE level description if no error has occurred.
+ * LogGLErrorState logs an ERROR level description of any glError that has occurred
+ * since it was last called.
+ *
+ * Like all logging macros, LogGLErrorState takes a format string and a variable
+ * length list of arguments. The GL error code and description is also added to
+ * the logged information.
  * 
  * Use the LogGLErrorState() macro and the GL_LOGGING_ENABLED compile switch
  * to turn checking and logging of GL error state. Be sure to set the compiler
  * switch GL_LOGGING_ENABLED to 0 when compiling for production code release,
  * to avoid the overhead of making the GL error state call. This is important
  * to maximize the GL state machine throughput.
- *
- * Do NOT call the DoLogGLErrorState function directly!
  */
 #ifndef GL_ERROR_LOGGING_ENABLED
 	#define GL_ERROR_LOGGING_ENABLED		0
 #endif
 
 #if GL_ERROR_LOGGING_ENABLED
-	#define LogGLErrorState() DoLogGLErrorState()
+	#define LogGLErrorState(fmt, ...)	{	\
+				GLenum errCode = glGetError();  \
+				if (errCode) {	\
+					NSLog((@"[***GL ERROR***] %@ " fmt), GetGLErrorText(errCode), ##__VA_ARGS__);	\
+				}	\
+			}
 #else
-	#define LogGLErrorState()
+	#define LogGLErrorState(...)
 #endif
-void DoLogGLErrorState();
+
 
 

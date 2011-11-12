@@ -1,7 +1,7 @@
 /*
  * ControllableCCLayer.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
@@ -42,8 +42,10 @@
 }
 
 // Initializes without a colored background.
+// Must avoid super init because as of cocos2d 1.1, it sets the contentSize to zero.
 - (id) init {
-	if( (self = [super init]) ) {
+	CGSize s = [[CCDirector sharedDirector] winSize];
+	if( (self = [super initWithColor: ccc4(0,0,0,0) width: s.width  height: s.height]) ) {
 		isColored = NO;
 		[self initInitialState];
 	}

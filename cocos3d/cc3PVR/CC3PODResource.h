@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -60,6 +60,10 @@
  *
  * The array of nodes accessible via the nodes property are the root nodes of a hierarchical
  * structure of nodes. The loading step takes care of assembling this structural assembly.
+ *
+ * If this resource contains soft-body components such as skinned meshes, the corresponding
+ * skinned mesh nodes and skeleton bone nodes are collected together and wrapped in a single
+ * soft body node that appears in the nodes array.
  * 
  * In addition to this core functionality, this class includes many methods for accessing
  * data structures within the resource, and extracting object content from those data
@@ -183,6 +187,7 @@
  *   - materials, by invoking the buildMaterials template method
  *   - mesh models, by invoking the buildMeshes template method
  *   - nodes, by invoking the buildNodes template method
+ *   - a soft body node if needed
  *
  * This template method can be overridden in a subclass if specialized processing is required.
  */
@@ -242,6 +247,27 @@
  */
 -(PODStructPtr) nodePODStructAtIndex: (uint) nodeIndex;
 
+/**
+ * Returns whether the specified node index is an ancestor of the specified
+ * child node index. If it is, once the nodes are assembled into their structural
+ * hierarchy, the node with the specified child index will be a descendant of the
+ * specified node index.
+ */
+-(BOOL) isNodeIndex: (int) aNodeIndex ancestorOfNodeIndex: (int) childIndex;
+
+/**
+ * Returns whether the specified node index represents a bone node that is part
+ * of a skeleton node assembly that will be used to control vertex skinning.
+ */
+-(BOOL) isBoneNode: (uint) nodeIndex;
+
+/**
+ * If this resource contains soft-body components such as skinned meshes, the corresponding
+ * skinned mesh nodes and skeleton bone nodes are collected together and wrapped in a single
+ * soft body node.
+ */
+-(void) buildSoftBodyNode;
+
 
 #pragma mark Accessing mesh data and building mesh nodes
 
@@ -278,7 +304,10 @@
  * Returns the meshIndex'th mesh.
  * Note that meshIndex is an ordinal number indicating the rank of the mesh.
  */
--(CC3Mesh*) meshModelAtIndex: (uint) meshIndex;
+-(CC3Mesh*) meshAtIndex: (uint) meshIndex;
+
+/** @deprecated Renamed to meshAtIndex:. */
+-(CC3Mesh*) meshModelAtIndex: (uint) meshIndex DEPRECATED_ATTRIBUTE;
 
 /**
  * Template method that extracts and builds the meshes from the underlying data.
@@ -293,7 +322,7 @@
  * Builds the meshIndex'th mesh.
  * Note that meshIndex is an ordinal number indicating the rank of the mesh.
  */
--(CC3Mesh*) buildMeshModelAtIndex: (uint) meshIndex;
+-(CC3Mesh*) buildMeshAtIndex: (uint) meshIndex;
 
 /**
  * Returns meshIndex'th SPODMesh structure from the data structures.

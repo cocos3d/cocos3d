@@ -1,10 +1,11 @@
 /*
  * CC3VertexArrays.m
  *
- * cocos3d 0.6.2
- * Author: Bill Hollings
+ * cocos3d 0.6.3
+ * Author: Bill Hollings, Chris Myers
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
+ * Copyright (c) 2011 Chris Myers. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -305,6 +306,8 @@ static GLuint lastAssignedVertexArrayTag;
 	[CC3VertexTextureCoordinates resetSwitching];
 	[CC3VertexIndices resetSwitching];
 	[CC3VertexPointSizes resetSwitching];
+	[CC3VertexMatrixIndices resetSwitching];
+	[CC3VertexWeights resetSwitching];
 }
 
 @end
@@ -312,12 +315,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 #pragma mark -
 #pragma mark CC3DrawableVertexArray
-
-@interface CC3DrawableVertexArray (TemplateArray)
--(void) drawStripOfLength: (GLuint) stripLen startingAt: (GLuint) startOfStrip;
--(GLsizei) faceCountFromVertexCount: (GLsizei) vc;
--(GLsizei) vertexCountFromFaceCount: (GLsizei) fc;
-@end
 
 @implementation CC3DrawableVertexArray
 
@@ -357,33 +354,28 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	GLuint startOfStrip = self.firstElement;
 	if (stripCount) {
 		LogTrace(@"%@ drawing %u strips", self, stripCount);
-		for (uint i=0; i < stripCount; i++) {
+		GLuint startOfStrip = 0;
+		for (GLuint i = 0; i < stripCount; i++) {
 			GLuint stripLen = stripLengths[i];
-			[self drawStripOfLength: stripLen startingAt: startOfStrip];
-			[visitor.performanceStatistics addSingleCallFacesPresented: [self faceCountFromVertexCount: stripLen]];
+			[self drawFrom: startOfStrip forCount: stripLen withVisitor: visitor];
 			startOfStrip += stripLen;
 		}
 	} else {
-		[self drawStripOfLength: elementCount startingAt: startOfStrip];
-		[visitor.performanceStatistics addSingleCallFacesPresented: [self faceCountFromVertexCount: elementCount]];
+		[self drawFrom: 0 forCount: elementCount withVisitor: visitor];
 	}
 }
 
-
-/**
- * Draws a single strip of vertices, of the specified number of elements, starting at
- * the element at startOfStrip.
- *
- * If drawing is to be performed in a single GL call, this method can be invoked
- * with stripLen equal to the elementCount property, and startOfStrip equal to the
- * firstElement property.
- *
- * This abstract implementation does nothing. Subclasses will override.
- */
--(void) drawStripOfLength: (GLuint) stripLen startingAt: (GLuint) startOfStrip {} 
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ drawing %u vertices", self, vertexCount);
+	CC3PerformanceStatistics* perfStats = visitor.performanceStatistics;
+	if (perfStats) {
+		[perfStats addSingleCallFacesPresented: [self faceCountFromVertexCount: vertexCount]];
+	}
+}
 
 -(void) allocateStripLengths: (GLsizei) sCount {
 	[self deallocateStripLengths];			// get rid of any existing array
@@ -618,7 +610,7 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 
-#pragma mark Binding GL artifacts
+#pragma mark Drawing
 
 /** Overridden to ensure the bounding box is built before releasing the vertices. */
 -(void) releaseRedundantData {
@@ -639,12 +631,16 @@ static GLuint lastAssignedVertexArrayTag;
 	[self resetSwitching];
 }
 
--(void) drawStripOfLength: (GLuint) stripLen startingAt: (GLuint) startOfStrip {
-	LogTrace(@"%@ drawing %u vertices", self, stripLen);
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+
+	GLuint firstVertex = self.firstElement + (self.elementStride * vertexIndex);
 	[[CC3OpenGLES11Engine engine].vertices drawVerticiesAs: drawingMode
-												startingAt: startOfStrip
-												withLength: stripLen];
-} 
+												startingAt: firstVertex
+												withLength: vertexCount];
+}
 
 
 #pragma mark Array context switching
@@ -722,6 +718,7 @@ static GLuint currentNormalsTag = 0;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		elementType = GL_FLOAT;
 		elementSize = 4;
 	}
 	return self;
@@ -833,6 +830,7 @@ static GLuint currentColorsTag = 0;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		elementType = GL_FLOAT;
 		elementSize = 2;
 		naturalMapSize = CGSizeZero;
 		textureRectangle = kCC3UnitTextureRectangle;
@@ -891,9 +889,9 @@ static GLuint currentColorsTag = 0;
 }
 
 /**
- * Returns the size of the map as a fraction between zero and one. This indicates
- * how much of the texture is covered by this texture coordinate map when the
- * texture is simply overlaid on the mesh, before any textureRectangle is applied.
+ * Returns the size of the map as a fraction between zero and one in each dimension.
+ * This indicates how much of the texture is covered by this texture coordinate map
+ * when the texture is simply overlaid on the mesh, before any textureRectangle is applied.
  *
  * If the value of this property has not yet been measured by one of the
  * alignWith...Texture...: methods, it is measured when first accessed here.
@@ -945,6 +943,35 @@ static GLuint currentColorsTag = 0;
 		ptc->v = (ny + ((natV - oy) * sh)) * natHeight;
 	}
 }
+/*
+-(void) alignWithTextureMapSize: (ccTex2F) texMapSize {
+	naturalMapSize = CGSizeZero;
+	
+	for (GLsizei i = 0; i < elementCount; i++) {
+		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
+		ptc->u *= texMapSize.u;
+		ptc->v *= texMapSize.v;
+		
+		// While we are remapping, measure the resulting map size at the same time
+		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
+		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
+	}
+}
+
+-(void) alignWithInvertedTextureMapSize: (ccTex2F) texMapSize {
+	naturalMapSize = CGSizeZero;
+	
+	for (GLsizei i = 0; i < elementCount; i++) {
+		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
+		ptc->u *= texMapSize.u;
+		ptc->v = (1.0 - ptc->v) * texMapSize.v;
+		
+		// While we are remapping, measure the resulting map size at the same time
+		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
+		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
+	}
+}
+*/
 
 -(void) alignWithTextureMapSize: (ccTex2F) texMapSize {
 	naturalMapSize = CGSizeZero;
@@ -983,6 +1010,15 @@ static GLuint currentColorsTag = 0;
 -(void) alignWithInvertedTexture: (CC3Texture*) texture {
 	if (texture) {
 		[self alignWithInvertedTextureMapSize: texture.mapSize];
+	}
+}
+
+-(void) repeatTexture: (ccTex2F) repeatFactor {
+	[self naturalMapSize];		// Ensure natural size calculated before expanding
+	for (GLsizei i = 0; i < elementCount; i++) {
+		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
+		ptc->u *= repeatFactor.u;
+		ptc->v *= repeatFactor.v;
 	}
 }
 
@@ -1034,12 +1070,136 @@ static GLuint currentColorsTag = 0;
 
 
 #pragma mark -
+#pragma mark CC3VertexIndices
+
+@implementation CC3VertexIndices
+
+-(GLenum) bufferTarget {
+	return GL_ELEMENT_ARRAY_BUFFER;
+}
+
+-(GLuint) firstElement {
+	return bufferID ? elementOffset : ((GLuint)elements + elementOffset);
+}
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		elementType = GL_UNSIGNED_SHORT;
+		elementSize = 1;
+	}
+	return self;
+}
+
+-(GLushort) indexAt: (GLsizei) index {
+	GLvoid* ptr = [self addressOfElement: index];
+	return elementType == GL_UNSIGNED_BYTE ? *(GLubyte*)ptr : *(GLushort*)ptr;
+}
+
+-(void) setIndex: (GLushort) vertexIndex at: (GLsizei) index {
+	GLvoid* ptr = [self addressOfElement: index];
+	if (elementType == GL_UNSIGNED_BYTE) {
+		*(GLubyte*)ptr = vertexIndex;
+	} else {
+		*(GLushort*)ptr = vertexIndex;
+	}
+}
+
+-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (bufferID) {									// use GL buffer if it exists
+		LogTrace(@"%@ binding GL buffer", self);
+		[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget].value = bufferID;
+	} else if (elementCount && elements) {			// use local client array if it exists
+		LogTrace(@"%@ using local array", self);
+		[[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget] unbind];
+	} else {
+		LogTrace(@"%@ no elements to bind", self);
+	}
+}
+
++(void) unbind {
+	[self resetSwitching];
+}
+
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+
+	GLuint firstVertex = self.firstElement + (self.elementStride * vertexIndex);
+	[[CC3OpenGLES11Engine engine].vertices drawIndicies: (GLvoid*)firstVertex
+											   ofLength: vertexCount
+												andType: elementType
+													 as: drawingMode];
+}
+
+
+#pragma mark Array context switching
+
+// The tag of the array that was most recently drawn to the GL engine.
+// The GL engine is only updated when an array of the same type with a different tag is presented.
+// This allows for optimization by ordering the drawing of objects so that objects with
+// the same arrays are drawn together, to minimize context switching within the GL engine.
+static GLuint currentIndicesTag = 0;
+
+-(BOOL) switchingArray {
+	BOOL shouldSwitch = currentIndicesTag != tag;
+	currentIndicesTag = tag;		// Set anyway - either it changes or it doesn't.
+	return shouldSwitch;
+}
+
++(void) resetSwitching {
+	currentIndicesTag = 0;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3IndexRunLengthArray
+
+@implementation CC3VertexRunLengthIndices
+
+// Since we want to use a run-length encoded index array, we need local control, so don't attempt to create a buffer
+-(void) createGLBuffer {}
+
+// Since we want to use a run-length encoded index array, we need local control, so remove any buffer binding.
+-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ using local array", self);
+	[[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget] unbind];
+}
+
+// Draws the mesh using a RLE (run-length encoded) index array
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ drawing %u indices using local run-length array", self, elementCount);
+
+	GLuint vertexCount = 0;
+	for(int i = 0; i < elementCount; i += vertexCount + 1) {
+		switch (elementType) {
+			case GL_UNSIGNED_BYTE:
+				vertexCount = ((GLubyte*)elements)[i];
+				break;
+			case GL_UNSIGNED_SHORT:
+				vertexCount = ((GLushort*)elements)[i];
+				break;
+			default:
+				LogError(@"Illegal index element type in %@: %u", self, elementType);
+				return;
+		}	
+		[self drawFrom: (i + 1) forCount: vertexCount withVisitor: visitor];
+	}
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3VertexPointSizes
 
 @implementation CC3VertexPointSizes
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		elementType = GL_FLOAT;
 		elementSize = 1;
 	}
 	return self;
@@ -1088,62 +1248,40 @@ static GLuint currentPointSizesTag = 0;
 
 
 #pragma mark -
-#pragma mark CC3VertexIndices
+#pragma mark CC3VertexWeights
 
-@implementation CC3VertexIndices
-
--(GLenum) bufferTarget {
-	return GL_ELEMENT_ARRAY_BUFFER;
-}
-
--(GLuint) firstElement {
-	return bufferID ? elementOffset : ((GLuint)elements + elementOffset);
-}
+@implementation CC3VertexWeights
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		elementType = GL_UNSIGNED_SHORT;
+		elementType = GL_FLOAT;
+		elementSize = 0;
 	}
 	return self;
 }
 
--(GLushort) indexAt: (GLsizei) index {
-	GLvoid* ptr = [self addressOfElement: index];
-	return elementType == GL_UNSIGNED_BYTE ? *(GLubyte*)ptr : *(GLushort*)ptr;
-}
-
--(void) setIndex: (GLushort) vertexIndex at: (GLsizei) index {
-	GLvoid* ptr = [self addressOfElement: index];
-	if (elementType == GL_UNSIGNED_BYTE) {
-		*(GLubyte*)ptr = vertexIndex;
-	} else {
-		*(GLushort*)ptr = vertexIndex;
-	}
-}
-
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (bufferID) {									// use GL buffer if it exists
-		LogTrace(@"%@ binding GL buffer", self);
-		[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget].value = bufferID;
-	} else if (elementCount && elements) {			// use local client array if it exists
-		LogTrace(@"%@ using local array", self);
-		[[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget] unbind];
-	} else {
-		LogTrace(@"%@ no elements to bind", self);
-	}
+-(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[[CC3OpenGLES11Engine engine].vertices.weights useElementsAt: pointer
+														withSize: elementSize
+														withType: elementType
+													  withStride: elementStride];
+	[[CC3OpenGLES11Engine engine].clientCapabilities.weightArray enable];
 }
 
 +(void) unbind {
+	[[CC3OpenGLES11Engine engine].clientCapabilities.weightArray disable];
 	[self resetSwitching];
 }
 
--(void) drawStripOfLength: (GLuint) stripLen startingAt: (GLuint) startOfStrip {
-	LogTrace(@"%@ drawing %u indices", self, stripLen);
-	[[CC3OpenGLES11Engine engine].vertices drawIndicies: (GLvoid*)startOfStrip
-											   ofLength: stripLen
-												andType: elementType
-													 as: drawingMode];
-} 
+-(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
+	GLfloat* vertexWeights = (GLfloat*)[self addressOfElement: index];
+	return vertexWeights[vertexUnit];
+}
+
+-(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
+	GLfloat* vertexWeights = (GLfloat*)[self addressOfElement: index];
+	vertexWeights[vertexUnit] = aWeight;
+}
 
 
 #pragma mark Array context switching
@@ -1152,63 +1290,84 @@ static GLuint currentPointSizesTag = 0;
 // The GL engine is only updated when an array of the same type with a different tag is presented.
 // This allows for optimization by ordering the drawing of objects so that objects with
 // the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentIndicesTag = 0;
+static GLuint currentWeightsTag = 0;
 
 -(BOOL) switchingArray {
-	BOOL shouldSwitch = currentIndicesTag != tag;
-	currentIndicesTag = tag;		// Set anyway - either it changes or it doesn't.
+	BOOL shouldSwitch = currentWeightsTag != tag;
+	currentWeightsTag = tag;		// Set anyway - either it changes or it doesn't.
 	return shouldSwitch;
 }
 
 +(void) resetSwitching {
-	currentIndicesTag = 0;
+	currentWeightsTag = 0;
 }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3IndexRunLengthArray
+#pragma mark CC3VertexMatrixIndices
 
-@implementation CC3VertexRunLengthIndices
+@implementation CC3VertexMatrixIndices
 
-// Since we want to use a run-length encoded index array, we need local control, so don't attempt to create a buffer
--(void) createGLBuffer {}
-
-// Since we want to use a run-length encoded index array, we need local control, so remove any buffer binding.
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ using local array", self);
-	[[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget] unbind];
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		elementType = GL_UNSIGNED_BYTE;
+		elementSize = 0;
+	}
+	return self;
 }
 
-// Draws the mesh using a RLE (run-length encoded) index array
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ drawing %u indices using local run-length array", self, elementCount);
-	GLubyte* elementsAsBytes = (GLubyte*) elements;
-	GLushort* elementsAsShorts = (GLushort*) elements;
-	switch (elementType) {
-		case GL_UNSIGNED_BYTE:
-			for(int i = 0; i < elementCount; i += elementsAsBytes[i] + 1) {
-				[[CC3OpenGLES11Engine engine].vertices drawIndicies: &elementsAsBytes[i+1]
-														   ofLength: elementsAsBytes[i]
-															andType: elementType
-																 as: drawingMode];
-				[visitor.performanceStatistics addSingleCallFacesPresented: [self faceCountFromVertexCount: elementsAsBytes[i]]];
-			}
-			break;
-		case GL_UNSIGNED_SHORT:
-			for(int i = 0; i < elementCount; i += elementsAsShorts[i] + 1) {
-				[[CC3OpenGLES11Engine engine].vertices drawIndicies: &elementsAsShorts[i+1]
-														   ofLength: elementsAsShorts[i]
-															andType: elementType
-																 as: drawingMode];
-				[visitor.performanceStatistics addSingleCallFacesPresented: [self faceCountFromVertexCount: elementsAsShorts[i]]];
-			}
-			break;
-		default:
-			LogError(@"Illegal index element type in %@: %u", self, elementType);
-			break;
-	}	
+-(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[[CC3OpenGLES11Engine engine].vertices.matrixIndices useElementsAt: pointer
+															  withSize: elementSize
+															  withType: elementType
+															withStride: elementStride];
+	[[CC3OpenGLES11Engine engine].clientCapabilities.matrixIndexArray enable];
+}
+
++(void) unbind {
+	[[CC3OpenGLES11Engine engine].clientCapabilities.matrixIndexArray disable];
+	[self resetSwitching];
+}
+
+-(GLushort) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
+	if (elementType == GL_UNSIGNED_BYTE) {
+		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
+		return vertexMatrices[vertexUnit];
+	} else {
+		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
+		return vertexMatrices[vertexUnit];
+	}
+}
+
+-(void) setMatrixIndex: (GLushort) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
+	if (elementType == GL_UNSIGNED_BYTE) {
+		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
+		vertexMatrices[vertexUnit] = aMatrixIndex;
+	} else {
+		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
+		vertexMatrices[vertexUnit] = aMatrixIndex;
+	}
+}
+
+
+#pragma mark Array context switching
+
+// The tag of the array that was most recently drawn to the GL engine.
+// The GL engine is only updated when an array of the same type with a different tag is presented.
+// This allows for optimization by ordering the drawing of objects so that objects with
+// the same arrays are drawn together, to minimize context switching within the GL engine.
+static GLuint currentMatrixIndicesTag = 0;
+
+-(BOOL) switchingArray {
+	BOOL shouldSwitch = currentMatrixIndicesTag != tag;
+	currentMatrixIndicesTag = tag;		// Set anyway - either it changes or it doesn't.
+	return shouldSwitch;
+}
+
++(void) resetSwitching {
+	currentMatrixIndicesTag = 0;
 }
 
 @end

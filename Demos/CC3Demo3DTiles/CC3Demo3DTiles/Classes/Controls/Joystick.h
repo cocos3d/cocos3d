@@ -1,7 +1,7 @@
 /*
  * Joystick.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010 The Brenwill Workshop Ltd.
  * http://www.brenwill.com

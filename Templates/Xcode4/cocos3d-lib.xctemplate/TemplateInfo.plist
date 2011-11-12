@@ -280,6 +280,28 @@
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3PODResourceNode.m</string>
 		</dict>
+		<key>cocos3d/cc3PVR/CC3PODVertexSkinning.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PODVertexSkinning.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PODVertexSkinning.mm</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PODVertexSkinning.mm</string>
+		</dict>
 		<key>cocos3d/cc3PVR/CC3PVRFoundation.h</key>
 		<dict>
 			<key>Group</key>
@@ -1530,6 +1552,28 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/CC3VertexArrays.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/CC3VertexSkinning.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3VertexSkinning.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/CC3VertexSkinning.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/CC3VertexSkinning.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/CC3World.h</key>
 		<dict>
 			<key>Group</key>
@@ -1984,30 +2028,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Utility/CC3GLMatrix.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3Kazmath.c</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3Kazmath.c</string>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3Kazmath.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3Kazmath.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Logging.h</key>
 		<dict>
 			<key>Group</key>
@@ -2034,7 +2054,7 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3Math.m</key>
+		<key>cocos3d/cocos3d/Utility/CC3MatrixMath.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2043,7 +2063,9 @@
 				<string>Utility</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3Math.m</string>
+			<string>cocos3d/cocos3d/Utility/CC3MatrixMath.h</string>
+			<key>TargetIndices</key>
+			<array/>
 		</dict>
 	</dict>
 	<key>Description</key>
@@ -2079,6 +2101,8 @@
 		<string>cocos3d/cc3PVR/CC3PODResource.mm</string>
 		<string>cocos3d/cc3PVR/CC3PODResourceNode.h</string>
 		<string>cocos3d/cc3PVR/CC3PODResourceNode.m</string>
+		<string>cocos3d/cc3PVR/CC3PODVertexSkinning.h</string>
+		<string>cocos3d/cc3PVR/CC3PODVertexSkinning.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVRTModelPOD.h</string>
@@ -2187,6 +2211,8 @@
 		<string>cocos3d/cocos3d/CC3VertexArrayMesh.m</string>
 		<string>cocos3d/cocos3d/CC3VertexArrays.h</string>
 		<string>cocos3d/cocos3d/CC3VertexArrays.m</string>
+		<string>cocos3d/cocos3d/CC3VertexSkinning.h</string>
+		<string>cocos3d/cocos3d/CC3VertexSkinning.m</string>
 		<string>cocos3d/cocos3d/CC3World.h</string>
 		<string>cocos3d/cocos3d/CC3World.m</string>
 		<string>cocos3d/cocos3d/OpenGLES11/CC3EAGLView.h</string>
@@ -2225,11 +2251,9 @@
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3GLMatrix.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3GLMatrix.m</string>
-		<string>cocos3d/cocos3d/Utility/CC3Kazmath.c</string>
-		<string>cocos3d/cocos3d/Utility/CC3Kazmath.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Logging.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Math.h</string>
-		<string>cocos3d/cocos3d/Utility/CC3Math.m</string>
+		<string>cocos3d/cocos3d/Utility/CC3MatrixMath.h</string>
 	</array>
 </dict>
 </plist>

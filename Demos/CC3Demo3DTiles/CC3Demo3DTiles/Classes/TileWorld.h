@@ -1,7 +1,7 @@
 /*
  * TileWorld.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -28,8 +28,6 @@
  */
 
 #import "CC3World.h"
-#import "CC3Light.h"
-
 
 /**
  * A CC3World that is specialized to display only a single main node, and is
@@ -62,9 +60,6 @@
 /** Each TileWorld displays a single, main node. */
 @property(nonatomic, assign) CC3Node* mainNode;
 
-/** Returns the lamp attached to the camera. */
-@property(nonatomic, readonly) CC3Light* lamp;
-
 /**
  * Force the camera to orient itself so that it faces directly at the main node, and
  * positions itself so that the main node is framed within the camera's field of view.
@@ -77,6 +72,7 @@
 -(void) frameMainNode;
 
 @end
+
 
 /**
  * Adds an extension category to CC3Node to add a property that indicates whether

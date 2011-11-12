@@ -1,7 +1,7 @@
 /*
  * CC3PODMesh.mm
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,15 +38,10 @@
 -(void) populateFrom: (CC3Identifiable*) another;
 @end
 
-@implementation CC3PODMesh
 
--(int) podIndex {
-	return podIndex;
-}
+#pragma mark CC3VertexArrayMesh extensions for PVR POD data
 
--(void) setPodIndex: (int) aPODIndex {
-	podIndex = aPODIndex;
-}
+@implementation CC3VertexArrayMesh (PVRPOD)
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
@@ -54,18 +49,18 @@
 		LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
 		
 		self.vertexLocations = [CC3VertexLocations arrayFromSPODMesh: psm];
-
+		
 		self.vertexNormals = [CC3VertexNormals arrayFromSPODMesh: psm];
-
+		
 		self.vertexColors = [CC3VertexColors arrayFromSPODMesh: psm];
-
+		
 		for (GLuint i = 0; i < psm->nNumUVW; i++) {
 			[self addTextureCoordinates: [CC3VertexTextureCoordinates arrayFromSPODMesh: psm
-																			 forTextureUnit: i]];
+																		 forTextureUnit: i]];
 		}
-
+		
 		self.vertexIndices = [CC3VertexIndices arrayFromSPODMesh: psm];
-
+		
 		// Once all vertex arrays are populated, if the data is interleaved, mark it as such and
 		// swap the reference to the original data within the SPODMesh, so that CC3VertexArray
 		// can take over responsibility for managing the data memory allocated by CPVRTModelPOD.
@@ -79,8 +74,8 @@
 		if (psm->pInterleaved != NULL) {
 			interleaveVertices = YES;
 			psm->pInterleaved = (unsigned char*)calloc(1, sizeof(GLint));
-	}
-
+		}
+		
 	}
 	return self;
 }
@@ -88,6 +83,17 @@
 +(id) meshAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
+
+@end
+
+
+#pragma mark CC3PODMesh
+
+@implementation CC3PODMesh
+
+-(int) podIndex { return podIndex; }
+
+-(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.

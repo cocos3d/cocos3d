@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -118,7 +118,8 @@
 
 -(BOOL) shouldRestoreOriginalOnClose {
 	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
-			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore);
+			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore ||
+			originalValueHandling == kCC3GLESStateOriginalValueRestore);
 }
 
 -(BOOL) valueIsKnownOnClose {
@@ -175,9 +176,14 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 				[self logGetGLValue];
 				[self restoreOriginalValue];
 				valueIsKnown = YES;
+				LogGLErrorState(@"opening %@", self);
 			} else {
 				valueIsKnown = NO;
 			}
+			break;
+		case kCC3GLESStateOriginalValueRestore:
+			[self restoreOriginalValue];
+			valueIsKnown = YES;
 			break;
 		default:
 			NSAssert3(NO, @"%@ bad original value handling definition %u for capability %@",
@@ -1211,7 +1217,8 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(BOOL) shouldRestoreOriginalOnClose {
 	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
-			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore);
+			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore ||
+			originalValueHandling == kCC3GLESStateOriginalValueRestore);
 }
 
 @end

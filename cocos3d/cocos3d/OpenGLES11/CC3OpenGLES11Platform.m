@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,31 +33,48 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPlatformInteger
+
+@implementation CC3OpenGLES11StateTrackerPlatformInteger
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11Platform
 
 @implementation CC3OpenGLES11Platform
 
 @synthesize maxLights;
 @synthesize maxClipPlanes;
+@synthesize maxPaletteMatrices;
 @synthesize maxTextureUnits;
+@synthesize maxVertexUnits;
 
 -(void) dealloc {
 	[maxLights release];
 	[maxClipPlanes release];
+	[maxPaletteMatrices release];
 	[maxTextureUnits release];
+	[maxVertexUnits release];
 	[super dealloc];
 }
 
 -(void) initializeTrackers {
-	self.maxLights = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
-																forState: GL_MAX_LIGHTS
-												andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnce];
-	self.maxClipPlanes = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
-																	forState: GL_MAX_CLIP_PLANES
-													andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnce];
-	self.maxTextureUnits = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
-																	  forState: GL_MAX_TEXTURE_UNITS
-													  andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnce];
+	self.maxLights = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																forState: GL_MAX_LIGHTS];
+	self.maxClipPlanes = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																	forState: GL_MAX_CLIP_PLANES];
+	self.maxPaletteMatrices = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																		 forState: GL_MAX_PALETTE_MATRICES_OES];
+	self.maxTextureUnits = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																	  forState: GL_MAX_TEXTURE_UNITS];
+	self.maxVertexUnits = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																	 forState: GL_MAX_VERTEX_UNITS_OES];
 
 	[self open];		// Automatically load the GL values at start-up
 }
@@ -67,7 +84,9 @@
 	LogTrace("Opening %@", [self class]);
 	[maxLights open];
 	[maxClipPlanes open];
+	[maxPaletteMatrices open];
 	[maxTextureUnits open];
+	[maxVertexUnits open];
 }
 
 -(NSString*) description {
@@ -75,7 +94,9 @@
 	[desc appendFormat: @"%@:", [self class]];
 	[desc appendFormat: @"\n    %@ ", maxLights];
 	[desc appendFormat: @"\n    %@ ", maxClipPlanes];
+	[desc appendFormat: @"\n    %@ ", maxPaletteMatrices];
 	[desc appendFormat: @"\n    %@ ", maxTextureUnits];
+	[desc appendFormat: @"\n    %@ ", maxVertexUnits];
 	return desc;
 }
 

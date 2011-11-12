@@ -1,7 +1,7 @@
 /*
  * CC3ActionInterval.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -324,7 +324,7 @@
 // that would result from simple subtraction.
 -(void) startWithTarget:(CC3Node*) aTarget {
 	[super startWithTarget: aTarget];
-	diffAngle = CyclicDifference(endAngle, startAngle, kCircleDegreesPeriod);
+	diffAngle = CC3SemiCyclicAngle(endAngle - startAngle);
 }
 
 -(NSString*) description {

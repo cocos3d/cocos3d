@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3OpenGLES11Matrices.h"
+#import "CC3OpenGLES11Engine.h"
 
 
 #pragma mark -
@@ -94,12 +95,12 @@
 			withMode: (GLenum) matrixMode
 		  andTopName: (GLenum) tName
 		andDepthName: (GLenum) dName
-	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker {
 	if ( (self = [super initWithParent: aTracker]) ) {
 		mode = matrixMode;
 		topName = tName;
 		depthName = dName;
-		modeTracker = [tracker retain];
+		modeTracker = [aModeTracker retain];
 	}
 	return self;
 }
@@ -108,16 +109,82 @@
 			   withMode: (GLenum) matrixMode
 			 andTopName: (GLenum) tName
 		   andDepthName: (GLenum) dName
-		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker {
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker {
 	return [[[self alloc] initWithParent: aTracker
 								withMode: matrixMode
 							  andTopName: tName
 							andDepthName: dName
-						  andModeTracker: tracker] autorelease];
+						  andModeTracker: aModeTracker] autorelease];
 }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ %@", [super description], NSStringFromGLEnum(mode)];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11MatrixPalette
+
+@implementation CC3OpenGLES11MatrixPalette
+
+-(void) activatePalette {
+	glCurrentPaletteMatrixOES(index);
+	LogTrace("%@ activated palette", self);
+}
+
+-(void) activate {
+	[super activate];
+	[self activatePalette];
+}
+
+-(void) push {
+	NSAssert1(NO, @"%@ can't be pushed", self);
+}
+
+-(void) pop {
+	NSAssert1(NO, @"%@ can't be popped", self);
+}
+
+-(GLuint) getDepth {
+	NSAssert1(NO, @"Can't get depth of %@", self);
+	return 0;
+}
+
+-(void) getTop: (GLvoid*) glMatrix {
+	NSAssert1(NO, @"Can't retrieve top of %@", self);
+}
+
+-(void) loadFromModelView {
+	[self activate];
+	glLoadPaletteFromModelViewMatrixOES();
+	LogTrace("%@ loaded matrix from modelview matrix", self);
+}
+
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+		  forPalette: (GLint) paletteIndex
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker {
+	if ( (self = [super initWithParent: aTracker
+							  withMode: GL_MATRIX_PALETTE_OES
+							andTopName: GL_ZERO
+						  andDepthName: GL_ZERO
+						andModeTracker: aModeTracker]) ) {
+		index = paletteIndex;
+	}
+	return self;
+}
+
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			 forPalette: (GLint) paletteIndex
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker {
+	return [[[self alloc] initWithParent: aTracker
+							  forPalette: paletteIndex
+						  andModeTracker: aModeTracker] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for palette %i", [super description], index];
 }
 
 @end
@@ -131,11 +198,13 @@
 @synthesize mode;
 @synthesize modelview;
 @synthesize projection;
+@synthesize paletteMatrices;
 
 -(void) dealloc {
 	[mode release];
 	[modelview release];
 	[projection release];
+	[paletteMatrices release];
 
 	[super dealloc];
 }
@@ -158,6 +227,36 @@
 													   andTopName: GL_PROJECTION_MATRIX
 													 andDepthName: GL_PROJECTION_STACK_DEPTH
 												   andModeTracker: mode];
+	self.paletteMatrices = nil;
+}
+
+-(GLuint) paletteMatrixCount {
+	return paletteMatrices ? paletteMatrices.count : 0;
+}
+
+/** Template method returns an autoreleased instance of a palette matrix tracker. */
+-(CC3OpenGLES11MatrixPalette*) makePaletteMatrix: (GLuint) index {
+	return [CC3OpenGLES11MatrixPalette trackerWithParent: self forPalette: index andModeTracker: mode];
+}
+
+-(CC3OpenGLES11MatrixPalette*) paletteAt: (GLuint) index {
+	// If the requested palette matrix hasn't been allocated yet, add it.
+	if (index >= self.paletteMatrixCount) {
+		// Make sure we don't add beyond the max number of texture units for the platform
+		NSAssert2(index < self.engine.platform.maxPaletteMatrices.value,
+				  @"Request for palette matrix index %u exceeds maximum palette size of %u matrices",
+				  index, self.engine.platform.maxPaletteMatrices.value);
+		
+		// Add all palette matrices between the current count and the requested index.
+		for (GLuint i = self.paletteMatrixCount; i <= index; i++) {
+			CC3OpenGLES11MatrixPalette* pm = [self makePaletteMatrix: i];
+			[pm open];		// Read the initial values
+			if (!paletteMatrices) self.paletteMatrices = [CCArray array];
+			[paletteMatrices addObject: pm];
+			LogTrace(@"%@ added palette matrix %u:\n%@", [self class], i, pm);
+		}
+	}
+	return [paletteMatrices objectAtIndex: index];
 }
 
 -(NSString*) description {
@@ -166,6 +265,9 @@
 	[desc appendFormat: @"\n    %@ ", mode];
 	[desc appendFormat: @"\n    %@ ", modelview];
 	[desc appendFormat: @"\n    %@ ", projection];
+	for (id pm in paletteMatrices) {
+		[desc appendFormat: @"\n%@", pm];
+	}
 	return desc;
 }
 

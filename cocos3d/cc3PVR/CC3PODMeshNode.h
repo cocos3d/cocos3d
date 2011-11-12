@@ -1,7 +1,7 @@
 /*
  * CC3PODMeshNode.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,21 @@
 #import "CC3NodePODExtensions.h"
 
 
+#pragma mark -
+#pragma mark CC3MeshNode extensions for PVR POD data
+
+/** Extensions to CC3MeshNode to support PVR POD data. */
+@interface CC3MeshNode (PVRPOD)
+
+/** The index of the material in the POD file used by this node. */
+@property(nonatomic, assign) int podMaterialIndex;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PODMeshNode
+
 /**
  * A CC3MeshNode whose content originates from POD resource data.
  *
@@ -45,8 +60,5 @@
 	int podParentIndex;
 	int podMaterialIndex;
 }
-
-/** The index of the material in the POD file used by this node. */
-@property(nonatomic, assign) int podMaterialIndex;
 
 @end

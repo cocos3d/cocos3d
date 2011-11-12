@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -89,27 +89,66 @@
  * Initializes this instance for the specified matrix mode.
  * The specified tName is used to query the matrix at the top of this matrix stack.
  * The specified dName is used to query the depth of this matrix stack.
- * The specified tracker is used to ensure that the matrix mode of this matrix
+ * The specified aModeTracker is used to ensure that the matrix mode of this matrix
  * is active before issuing any commands.
  */
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			withMode: (GLenum) matrixMode
 		  andTopName: (GLenum) tName
 		andDepthName: (GLenum) dName
-	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker;
 
 /**
  * Allocates and initializes an autoreleased instance for the specified matrix mode.
  * The specified tName is used to query the matrix at the top of this matrix stack.
  * The specified dName is used to query the depth of this matrix stack.
- * The specified tracker is used to ensure that the matrix mode of this matrix
+ * The specified aModeTracker is used to ensure that the matrix mode of this matrix
  * is active before issuing any commands.
  */
 +(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			   withMode: (GLenum) matrixMode
 			 andTopName: (GLenum) tName
 		   andDepthName: (GLenum) dName
-		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) tracker;
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11MatrixPalette
+
+/**
+ * CC3OpenGLES11MatrixPalette provides access to several commands that operate on
+ * one matrix the matrix palette. None of these commands require state tracking.
+ *
+ * Even though this class does not track any state, it does rely on the
+ * tracker for the matrix mode, to ensure that the matrix mode associated
+ * with this matrix stack is active before calling a GL function.
+ */
+@interface CC3OpenGLES11MatrixPalette : CC3OpenGLES11MatrixStack {
+	GLuint index;
+}
+
+/** Loads this matrix palette from the current modelview matrix. */
+-(void) loadFromModelView;
+
+/**
+ * Initializes this instance for the GL_MATRIX_PALETTE_OES matrix mode and specified
+ * palette index. The specified aModeTracker is used to ensure that the matrix mode
+ * of this matrix is active before issuing any commands.
+ */
+-(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
+		  forPalette: (GLint) paletteIndex
+	  andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker;
+
+/**
+ * Allocates and initializes an autoreleased instance for the GL_MATRIX_PALETTE_OES
+ * matrix mode and specified palette index. The specified aModeTracker is used to
+ * ensure that the matrix mode of this matrix is active before issuing any commands.
+ */
++(id) trackerWithParent: (CC3OpenGLES11StateTracker*) aTracker
+			 forPalette: (GLint) paletteIndex
+		 andModeTracker: (CC3OpenGLES11StateTrackerEnumeration*) aModeTracker;
 
 @end
 
@@ -122,6 +161,7 @@
 	CC3OpenGLES11StateTrackerEnumeration* mode;
 	CC3OpenGLES11MatrixStack* modelview;
 	CC3OpenGLES11MatrixStack* projection;
+	CCArray* paletteMatrices;
 }
 
 /** Tracks matrix mode (GL get name GL_MATRIX_MODE and set function glMatrixMode). */
@@ -132,5 +172,46 @@
 
 /** Manages the projection matrix stack. */
 @property(nonatomic, retain) CC3OpenGLES11MatrixStack* projection;
+
+/**
+ * Manages the palette of matrices.
+ *
+ * Do not access individual texture unit trackers through this property.
+ * Use the paletteAt: method instead.
+ *
+ * The number of available texture units can be retrieved from
+ * [CC3OpenGLES11Engine engine].platform.maxPaletteMatrices.value.
+ *
+ * To conserve memory and processing, texture units are lazily allocated when
+ * requested by the paletteAt: method. The array returned by this property will
+ * initially be empty, and will subsequently contain a number of palette matrices
+ * one more than the largest value passed to paletteAt:.
+ */
+@property(nonatomic, retain) CCArray* paletteMatrices;
+
+/**
+ * Returns the number of active palette matrices.
+ *
+ * This value will be between zero and the maximum number of palette matrices, as
+ * determined from [CC3OpenGLES11Engine engine].platform.maxPaletteMatrices.value.
+ *
+ * To conserve memory and processing, palette matrices are lazily allocated when
+ * requested by the paletteAt: method. The value of this property will initially
+ * be zero, and will subsequently be one more than the largest value passed to
+ * paletteAt:.
+ */
+@property(nonatomic, readonly) GLuint paletteMatrixCount;
+
+/**
+ * Returns the tracker for the palette matrix with the specified index.
+ *
+ * The index parameter must be between zero and the number of available palette
+ * matrices minus one, inclusive. The number of available palette matrices can be
+ * retrieved from [CC3OpenGLES11Engine engine].platform.maxPaletteMatrices.value.
+ *
+ * To conserve memory and processing, palette matrices are lazily allocated when
+ * requested by this method.
+ */
+-(CC3OpenGLES11MatrixPalette*) paletteAt: (GLuint) index;
 
 @end

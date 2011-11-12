@@ -1,7 +1,7 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -77,11 +77,12 @@
 
 @implementation CC3Node
 
-@synthesize rotator, location, scale, globalLocation, globalScale;
+@synthesize rotator, location, scale, globalLocation, globalScale, scaleTolerance;
 @synthesize boundingVolume, boundingVolumePadding, projectedLocation;
 @synthesize transformMatrix, animation, isRunning, visible, isAnimationEnabled;
 @synthesize isTouchEnabled, shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
 @synthesize parent, children, shouldAutoremoveWhenEmpty, shouldUseFixedBoundingVolume;
+@synthesize shouldCleanupWhenRemoved;
 
 -(void) dealloc {
 	[children release];
@@ -177,15 +178,43 @@
 }
 
 -(BOOL) isUniformlyScaledLocally {
-	return (scale.x == scale.y && scale.x == scale.z);
+	return (CC3IsWithinTolerance(scale.x, scale.y, scaleTolerance) &&
+			CC3IsWithinTolerance(scale.x, scale.z, scaleTolerance));
 }
+
+//-(BOOL) isUniformlyScaledLocally {
+//	return (scale.x == scale.y && scale.x == scale.z);
+//}
 
 -(BOOL) isUniformlyScaledGlobally {
 	return self.isUniformlyScaledLocally && (parent ? parent.isUniformlyScaledGlobally : YES);
 }
 
+//-(BOOL) isTransformRigid {
+//	return (scale.x == 1.0f && scale.y == 1.0f && scale.z == 1.0f) && (parent ? parent.isTransformRigid : YES);
+//}
+
 -(BOOL) isTransformRigid {
-	return (scale.x == 1.0f && scale.y == 1.0f && scale.z == 1.0f) && (parent ? parent.isTransformRigid : YES);
+	return (CC3IsWithinTolerance(scale.x, 1.0f, scaleTolerance) &&
+			CC3IsWithinTolerance(scale.y, 1.0f, scaleTolerance) &&
+			CC3IsWithinTolerance(scale.z, 1.0f, scaleTolerance) &&
+			(parent ? parent.isTransformRigid : YES));
+}
+
+-(void) setScaleTolerance: (GLfloat) aTolerance {
+	scaleTolerance = aTolerance;
+	for (CC3Node* child in children) {
+		child.scaleTolerance = aTolerance;
+	}
+}
+
+// Class-side property used to set the initial value of the unityScaleTolerance property.
+static GLfloat defaultScaleTolerance = 0.0f;
+
++(GLfloat) defaultScaleTolerance { return defaultScaleTolerance; }
+
++(void) setDefaultScaleTolerance: (GLfloat) aTolerance {
+	defaultScaleTolerance = aTolerance;
 }
 
 -(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
@@ -210,6 +239,9 @@
 		child.isRunning = isRunning;
 	}
 }
+
+
+#pragma mark Mesh configuration
 
 -(BOOL) shouldCullBackFaces {
 	for (CC3Node* child in children) {
@@ -238,6 +270,98 @@
 -(void) setShouldCullFrontFaces: (BOOL) shouldCull {
 	for (CC3Node* child in children) {
 		child.shouldCullFrontFaces = shouldCull;
+	}
+}
+
+-(BOOL) shouldUseClockwiseFrontFaceWinding {
+	for (CC3Node* child in children) {
+		if (child.shouldUseClockwiseFrontFaceWinding) {
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldUseClockwiseFrontFaceWinding: (BOOL) shouldWindCW {
+	for (CC3Node* child in children) {
+		child.shouldUseClockwiseFrontFaceWinding = shouldWindCW;
+	}
+}
+
+-(BOOL) shouldUseSmoothShading {
+	for (CC3Node* child in children) {
+		if (child.shouldUseSmoothShading == NO) {
+			return NO;
+		}
+	}
+	return YES;
+}
+
+-(void) setShouldUseSmoothShading: (BOOL) shouldSmooth {
+	for (CC3Node* child in children) {
+		child.shouldUseSmoothShading = shouldSmooth;
+	}
+}
+
+-(CC3NormalScaling) normalScalingMethod {
+	for (CC3Node* child in children) {
+		CC3NormalScaling csm = child.normalScalingMethod;
+		if (csm != kCC3NormalScalingNone) {
+			return csm;
+		}
+	}
+	return kCC3NormalScalingNone;
+}
+
+-(void) setNormalScalingMethod: (CC3NormalScaling) nsMethod {
+	for (CC3Node* child in children) {
+		child.normalScalingMethod = nsMethod;
+	}
+}
+
+-(BOOL) shouldDisableDepthMask {
+	for (CC3Node* child in children) {
+		if (child.shouldDisableDepthMask) {
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldDisableDepthMask: (BOOL) shouldDisable {
+	for (CC3Node* child in children) {
+		child.shouldDisableDepthMask = shouldDisable;
+	}
+}
+
+-(BOOL) shouldDisableDepthTest {
+	for (CC3Node* child in children) {
+		if (child.shouldDisableDepthTest) {
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldDisableDepthTest: (BOOL) shouldDisable {
+	for (CC3Node* child in children) {
+		child.shouldDisableDepthTest = shouldDisable;
+	}
+}
+
+-(GLenum) depthFunction {
+	for (CC3Node* child in children) {
+		GLenum df = child.depthFunction;
+		if (df != GL_NEVER) {
+			return df;
+		}
+	}
+	return GL_NEVER;
+}
+
+-(void) setDepthFunction: (GLenum) depthFunc {
+	for (CC3Node* child in children) {
+		child.depthFunction = depthFunc;
 	}
 }
 
@@ -509,6 +633,7 @@
 		projectedLocation = kCC3VectorZero;
 		scale = kCC3VectorUnitCube;
 		globalScale = kCC3VectorUnitCube;
+		scaleTolerance = [[self class] defaultScaleTolerance];
 		isTransformDirty = NO;			// everything starts out at identity
 		isTouchEnabled = NO;
 		shouldInheritTouchability = YES;
@@ -516,6 +641,7 @@
 		isAnimationEnabled = YES;
 		visible = YES;
 		isRunning = NO;
+		shouldCleanupWhenRemoved = YES;
 		shouldAutoremoveWhenEmpty = NO;
 		self.transformMatrix = [CC3GLMatrix identity];		// Has side effects...so do last (transformMatrixInverted is built in some subclasses)
 	}
@@ -561,9 +687,7 @@
 -(void) populateFrom: (CC3Node*) another {
 	[super populateFrom: another];
 
-	// Bypass setter method to avoid side effects.
-	[transformMatrix release];
-	transformMatrix = [another.transformMatrix copy];		// retained
+	[transformMatrix populateFrom: another.transformMatrix];
 
 	isTransformInvertedDirty = YES;							// create or rebuild lazily
 	isGlobalRotationDirty = YES;							// create or rebuild lazily
@@ -585,6 +709,7 @@
 	projectedLocation = another.projectedLocation;
 	scale = another.scale;
 	globalScale = another.globalScale;
+	scaleTolerance = another.scaleTolerance;
 	isTransformDirty = another.isTransformDirty;
 	isTouchEnabled = another.isTouchEnabled;
 	shouldInheritTouchability = another.shouldInheritTouchability;
@@ -592,6 +717,7 @@
 	isAnimationEnabled = another.isAnimationEnabled;
 	visible = another.rawVisible;
 	isRunning = another.isRunning;
+	shouldCleanupWhenRemoved = another.shouldCleanupWhenRemoved;
 	shouldAutoremoveWhenEmpty = another.shouldAutoremoveWhenEmpty;
 	self.shouldDrawDescriptor = another.shouldDrawDescriptor;		// May create a child node
 	self.shouldDrawWireframeBox = another.shouldDrawWireframeBox;	// May create a child node
@@ -617,11 +743,9 @@
 -(void) copyChildrenFrom: (CC3Node*) another {
 	[self removeAllChildren];
 	CCArray* otherKids = another.children;
-	if (otherKids) {
-		for (CC3Node* n in otherKids) {
-			if (n.shouldIncludeInDeepCopy) {
-				[self addChild: [n copyAutoreleased]];	// retained by collection
-			}
+	for (CC3Node* n in otherKids) {
+		if (n.shouldIncludeInDeepCopy) {
+			[self addChild: [n copyAutoreleased]];	// retained by collection
 		}
 	}
 }
@@ -820,14 +944,22 @@ static GLuint lastAssignedNodeTag;
 	isTransformDirty = YES;
 }
 
--(void) updateTransformMatrix {
-	CC3NodeTransformingVisitor* visitor = [[self transformVisitorClass] visitor];
-	visitor.shouldVisitChildren = NO;
-	[visitor visit: self];
+-(CC3Node*) dirtiestAncestor {
+	CC3Node* dap = parent.dirtiestAncestor;
+	if (dap) return dap;
+	return (self.isTransformDirty) ? self : nil;
 }
 
 -(void) updateTransformMatrices {
-	[[[self transformVisitorClass] visitor] visit: self];
+	CC3Node* da = self.dirtiestAncestor;
+	[[[self transformVisitorClass] visitor] visit: (da ? da : self)];
+}
+
+-(void) updateTransformMatrix {
+	CC3Node* da = self.dirtiestAncestor;
+	CC3NodeTransformingVisitor* visitor = [[self transformVisitorClass] visitor];
+	visitor.shouldVisitChildren = NO;
+	[visitor visit: (da ? da : self)];
 }
 
 /**
@@ -843,13 +975,12 @@ static GLuint lastAssignedNodeTag;
 	return [CC3NodeTransformingVisitor class];
 }
 
+-(CC3GLMatrix*) parentTransformMatrix {
+	return parent.transformMatrix;
+}
+
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	CC3GLMatrix* pMtx = [visitor parentTansformMatrixFor: self];
-	if (pMtx) {
-		[transformMatrix populateFrom: pMtx];
-	} else {
-		[transformMatrix populateIdentity];
-	}
+	[transformMatrix populateFrom: [visitor parentTansformMatrixFor: self]];
 	[self applyLocalTransforms];
 	[self transformMatrixChanged];
 }
@@ -955,7 +1086,9 @@ static GLuint lastAssignedNodeTag;
 		}
 		isTransformInvertedDirty = NO;
 
-		LogTrace(@"%@ transform %@ inverted %@to %@", self, transformMatrix,
+		LogTrace(@"%@ with global scale (%.6f, %.6f, %.6f) and tolerance %.6f transform %@ inverted %@to %@", self,
+				 self.globalScale.x, self.globalScale.y, self.globalScale.z,
+				 self.scaleTolerance, transformMatrix,
 				 (self.isTransformRigid ? @"rigidly " : @""), transformMatrixInverted);
 	}
 	return transformMatrixInverted;
@@ -1161,7 +1294,7 @@ static GLuint lastAssignedNodeTag;
 				[children release];
 				children = nil;
 			}
-			aNode.isRunning = NO;
+			[aNode wasRemoved];
 			[self didRemoveDescendant: aNode];
 		}
 		LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, children);
@@ -1186,6 +1319,13 @@ static GLuint lastAssignedNodeTag;
 
 -(void) remove {
 	[parent removeChild: self];
+}
+
+-(void) wasRemoved {
+	if (shouldCleanupWhenRemoved) {
+		[self cleanup];
+	}
+	self.isRunning = NO;
 }
 
 -(BOOL) isDescendantOf: (CC3Node*) aNode {
@@ -1929,7 +2069,7 @@ static ccColor4F localContentWireframeBoxColor = { 1.0, 0.0, 1.0, 1.0 };	// kCCC
 }
 
 -(void) setRotationAngle: (GLfloat) anAngle {
-	rotationAngle = Cyclic(anAngle, kCircleDegreesPeriod);
+	rotationAngle = CC3CyclicAngle(anAngle);
 	
 	isRotationDirty = YES;
 	isAxisAngleDirty = NO;
@@ -2007,8 +2147,7 @@ static ccColor4F localContentWireframeBoxColor = { 1.0, 0.0, 1.0, 1.0 };	// kCCC
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Rotator*) another {
 
-	[rotationMatrix release];
-	rotationMatrix = [another.rotationMatrix copy];			// retained
+	[rotationMatrix populateFrom: another.rotationMatrix];
 
 	rotation = another.rotation;
 	quaternion = another.quaternion;
@@ -2048,12 +2187,26 @@ static ccColor4F localContentWireframeBoxColor = { 1.0, 0.0, 1.0, 1.0 };	// kCCC
 /**
  * If needed, extracts and returns a rotation axis and angle from the encapsulated quaternion.
  * If the rotation angle is zero, the axis is undefined, and will be set to the zero vector.
+ *
+ * The rotationAxis can point in one of two equally valid directions. THe choice is made to
+ * return the direction that is closest to the previous rotation angle. This step is taken
+ * for consistency, so that small changes in rotation wont suddenly flip the rotation axis
+ * and angle.
+ *
+ * The rotation angle will be clamped to +/-180 degrees. The rotationAxis can point in one
  */
 -(void) ensureAxisAngleFromQuaternion {
 	if (isAxisAngleDirty) {
 		CC3Vector4 axisAngle = CC3AxisAngleFromQuaternion(self.quaternion);
-		rotationAxis = CC3VectorFromTruncatedCC3Vector4(axisAngle);
-		rotationAngle = axisAngle.w;
+		CC3Vector qAxis = CC3VectorFromTruncatedCC3Vector4(axisAngle);
+		GLfloat qAngle = CC3SemiCyclicAngle(axisAngle.w);
+		if ( CC3VectorDot(qAxis, rotationAxis) < 0 ) {
+			rotationAxis = CC3VectorNegate(qAxis);
+			rotationAngle = -qAngle;
+		} else {
+			rotationAxis = qAxis;
+			rotationAngle = qAngle;
+		}
 		isAxisAngleDirty = NO;
 	}
 }

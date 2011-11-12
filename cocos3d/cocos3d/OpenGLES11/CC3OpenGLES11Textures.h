@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Textures.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -395,7 +395,7 @@
 @property(nonatomic, readonly) GLuint textureUnitCount;
 
 /**
- * Returns the tracker for the light with the specified index.
+ * Returns the tracker for the texture unit with the specified index.
  *
  * Index texUnit corresponds to i in the GL capability name GL_TEXTUREi, and must
  * be between zero and the number of available texture units minus one, inclusive.

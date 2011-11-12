@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,23 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPlatformInteger
+
+/**
+ * CC3OpenGLES11StateTrackerMaterialFloat tracks a float GL state value for platform limits.
+ *
+ * This is a read-only value. This implementation uses GL function glGetIntegerv to read
+ * the value from the GL engine.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnce, which
+ * will cause the state to be automatically read once, on the first invocation of the
+ * open method, and the value will never be automatically restored.
+ */
+@interface CC3OpenGLES11StateTrackerPlatformInteger : CC3OpenGLES11StateTrackerInteger {}
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11Platform
 
 /**
@@ -40,18 +57,26 @@
  * capabilities and limits. None of the platform trackers attempt to update any values.
  */
 @interface CC3OpenGLES11Platform : CC3OpenGLES11StateTrackerManager {
-	CC3OpenGLES11StateTrackerInteger* maxLights;
-	CC3OpenGLES11StateTrackerInteger* maxClipPlanes;
-	CC3OpenGLES11StateTrackerInteger* maxTextureUnits;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxLights;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxClipPlanes;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxPaletteMatrices;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxTextureUnits;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxVertexUnits;
 }
 
 /** Reads the number of lights available, through GL parameter GL_MAX_LIGHTS. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxLights;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxLights;
 
 /** Reads the number of clip planes available, through GL parameter GL_MAX_CLIP_PLANES. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxClipPlanes;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxClipPlanes;
+
+/** Reads the number of palette matrices available, through GL parameter GL_MAX_PALETTE_MATRICES_OES. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxPaletteMatrices;
 
 /** Reads the number of texture units available, through GL parameter GL_MAX_TEXTURE_UNITS. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* maxTextureUnits;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxTextureUnits;
+
+/** Reads the number of vertex units available, through GL parameter GL_MAX_VERTEX_UNITS_OES. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxVertexUnits;
 
 @end

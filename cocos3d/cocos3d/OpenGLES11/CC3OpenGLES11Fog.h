@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Fog.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -45,7 +45,6 @@
  * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
  * which will cause the state to be automatically read once, on the first invocation of the
  * open method, and to be automatically restored on each invocation of the close method.
- *
  */
 @interface CC3OpenGLES11StateTrackerFogColor : CC3OpenGLES11StateTrackerColor {}
 @end

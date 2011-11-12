@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpWorld.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,6 +35,7 @@
 #import "CC3MeshNode.h"
 #import "CC3PODResourceNode.h"
 #import "CC3PODLight.h"
+#import "CC3PointParticles.h"
 
 @class SpinningNode;
 
@@ -62,6 +63,9 @@ typedef enum {
  *   - multi-texturing an object using texture units by combining several individual textures into overlays
  *   - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
  *     with few actual vertices
+ *   - Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
+ *   - Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
+ *     manipulated independently of the skeleton of the original.
  *   - animating 3D models using a variety of standard cocos2d CCActionIntervals
  *   - overlaying the 3D world with 2D cocos2d controls such as joysticks and buttons
  *   - embedding 2D cocos2d text labels into the 3D world
@@ -91,6 +95,8 @@ typedef enum {
  *   - retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
  *   - moving the pivot location (origin) of a mesh to the center of geometry of the mesh.
  *   - attaching application-specific userData to any node
+ *   - applying a texture to all six sides of a parametric box
+ *   - displaying direction marker lines on a node to clarify its orientation during development.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D world,
@@ -113,8 +119,7 @@ typedef enum {
  *   - displaying descriptive text and wireframe bounding boxes on every node
  *   - displaying a dynamic bounding box on a 3D particle emitter.
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
- *   - displaying direciton marker lines on a node to clarify its orientation during development.
- *   - log a description of the entire node structure of the 3D world
+ *   - displaying a repeating texture pattern across a mesh
  *
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached
  * to the end of the rotating arm, demonstrating the technique of embedding a 2D CCNode
@@ -134,6 +139,38 @@ typedef enum {
  *
  * A fourth teapot, this one white, indicates the position of the light source, which is also
  * animated. You can see the effect on the lighting of the world as it moves back and forth.
+ *
+ * Behind the to the left of the robot arm is a wooden mallet that is animated to alternately
+ * hammer two wooden anvils. The hammer bends and flexes as it bounces back and forth,
+ * demonstrating the technique of vertex skinning to deform a soft-body mesh based on the
+ * movement of an underlying skeleton constructed of bones and joints.
+ *
+ * As you watch the scene, two running figures will pass by. These figure run in a circular
+ * path around the world. The runners are also comprised of soft-body meshes that flex and
+ * bend realistically based on the movement of an underlying skeleton of bones and joints.
+ *
+ * Both the mallet and the runners are controlled by skeletons whose bones are moved and
+ * rotated using animation data loaded from the POD file. Because of the complexity of
+ * controlling multiple joints in a skeleton, animation, as created in a 3D editor, is
+ * the most common technique used for controlling vertex skinning using skeletons.
+ *
+ * However, these skeletons are simply structural node assemblies, with each bone being
+ * represented with a separate node. Therefore, the bones and joints of a skeleton can be
+ * moved and rotated using programatic control, or through interaction with a physics engine.
+ *
+ * To see the runners up close, touch one of the runners (which can be a bit tricky, as they
+ * are fast). This will switch the view to a camera that is travelling with the runners, giving
+ * you a close-up of the meshes that makes up the runners flexing realistically as they run.
+ * 
+ * Up-close, you'll notice that one runner is smaller than the other and is having to run
+ * with a faster stride than the larger runner. This smaller runner was actually created
+ * from a copy of the larger runner, and give a different animation rate. This demonstrates
+ * the ability to copy soft-body nodes, and that, after copying, each soft-body node will
+ * have its own skin and skeleton that can be manipulated separately.
+ * 
+ * Touching the runners again will switch back to the original camera that is viewing the
+ * larger scene. This demonstrates the ability to have more than one camera in the world
+ * and to switch between them using the activeCamera property of the world.
  *
  * At any time, you can move the camera using the two joysticks. The left joystick controls
  * the direction that the camera is pointing, and the right joystick controls the location
@@ -284,6 +321,12 @@ typedef enum {
  * a box. Direction markers have been added to the node to show which side of the box faces
  * each direction in the local coordinate system of the node. The multi-color cube can be
  * rotated like the die cube.
+ *
+ * Pointing out of the multi-color box are direction marker lines. During development,
+ * these lines can be added to any node to help track the orientation of the node, by
+ * using any of several convenience methods, including addDirectionMarker, 
+ * addDirectionMarkerColored:inDirection: and addAxesDirectionMarkers. These direction
+ * marker lines are oriented in the local coordinate system of the node.
  * 
  * Touching the switch-view button one final time will point the camera back at the animated
  * robot arm.
@@ -514,5 +557,22 @@ typedef enum {
 /** Indicates whether the node is spinning without direct control by touch events. */
 @property(nonatomic, assign) BOOL isFreeWheeling;
 
+@end
+
+
+#pragma mark -
+#pragma mark HangingParticle
+
+#define kParticlesPerSide		30
+#define kParticlesSpacing		40
+
+/**
+ * A particle type that simply hangs where it is located. When the particle is
+ * initialized, the location is set from the index, so that the particles are
+ * laid out in a simple rectangular grid in the X-Z plane, with kParticlesPerSide
+ * particles on each side of the grid. This particle type contains no additional
+ * state information.
+ */
+@interface HangingParticle : CC3PointParticle
 @end
 

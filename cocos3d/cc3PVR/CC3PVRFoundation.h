@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -58,6 +58,9 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODMesh);
 
 /** Returns a string description of the specified CPODData structure. */
 NSString* NSStringFromCPODData(PODClassPtr aCPODData);
+
+/** Returns a string description of the specified CPVRTBoneBatches structure. */
+NSString* NSStringFromCPVRTBoneBatches(PODClassPtr aCPVRTBoneBatches);
 
 /**
  * Maps the specified ePVRTDataType to a valid GL data type, and returns the GL value.

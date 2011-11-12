@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -318,6 +318,50 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerVertexWeightsPointer
+
+@implementation CC3OpenGLES11StateTrackerVertexWeightsPointer
+
+-(void) initializeTrackers {
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																  forState: GL_WEIGHT_ARRAY_SIZE_OES];
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_WEIGHT_ARRAY_TYPE_OES];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_WEIGHT_ARRAY_STRIDE_OES];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+}
+
+-(void) setGLValues {
+	glWeightPointerOES(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer
+
+@implementation CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer
+
+-(void) initializeTrackers {
+	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																  forState: GL_MATRIX_INDEX_ARRAY_SIZE_OES];
+	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_MATRIX_INDEX_ARRAY_TYPE_OES];
+	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																	forState: GL_MATRIX_INDEX_ARRAY_STRIDE_OES];
+	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+}
+
+-(void) setGLValues {
+	glMatrixIndexPointerOES(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11VertexArrays
 
 @implementation CC3OpenGLES11VertexArrays
@@ -325,17 +369,21 @@
 @synthesize arrayBuffer;
 @synthesize indexBuffer;
 @synthesize locations;
+@synthesize matrixIndices;
 @synthesize normals;
 @synthesize colors;
 @synthesize pointSizes;
+@synthesize weights;
 
 -(void) dealloc {
 	[arrayBuffer release];
 	[indexBuffer release];
 	[locations release];
+	[matrixIndices release];
 	[normals release];
 	[colors release];
 	[pointSizes release];
+	[weights release];
 	[super dealloc];
 }
 
@@ -343,9 +391,11 @@
 	self.arrayBuffer = [CC3OpenGLES11StateTrackerArrayBufferBinding trackerWithParent: self];
 	self.indexBuffer = [CC3OpenGLES11StateTrackerElementArrayBufferBinding trackerWithParent: self];
 	self.locations = [CC3OpenGLES11StateTrackerVertexLocationsPointer trackerWithParent: self];
+	self.matrixIndices = [CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer trackerWithParent: self];
 	self.normals = [CC3OpenGLES11StateTrackerVertexNormalsPointer trackerWithParent: self];
 	self.colors = [CC3OpenGLES11StateTrackerVertexColorsPointer trackerWithParent: self];
 	self.pointSizes = [CC3OpenGLES11StateTrackerVertexPointSizesPointer trackerWithParent: self];
+	self.weights = [CC3OpenGLES11StateTrackerVertexWeightsPointer trackerWithParent: self];
 }
 
 -(CC3OpenGLES11StateTrackerArrayBufferBinding*) bufferBinding: (GLenum) bufferTarget {
@@ -371,12 +421,16 @@
 }
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
+	LogTrace(@"GL drawing %u vertices as %@ starting from %u",
+			 len, NSStringFromGLEnum(drawMode), start);
 	glDrawArrays(drawMode, start, len);
 } 
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
+	LogTrace(@"GL drawing %u indices of type %@ as %@ starting from %u",
+			 len, NSStringFromGLEnum(type), NSStringFromGLEnum(drawMode), indicies);
 	glDrawElements(drawMode, len, type, indicies);
-} 
+}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
@@ -384,9 +438,11 @@
 	[desc appendFormat: @"\n    %@ ", arrayBuffer];
 	[desc appendFormat: @"\n    %@ ", indexBuffer];
 	[desc appendFormat: @"\n    %@ ", locations];
+	[desc appendFormat: @"\n    %@ ", matrixIndices];
 	[desc appendFormat: @"\n    %@ ", normals];
 	[desc appendFormat: @"\n    %@ ", colors];
 	[desc appendFormat: @"\n    %@ ", pointSizes];
+	[desc appendFormat: @"\n    %@ ", weights];
 	return desc;
 }
 

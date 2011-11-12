@@ -1,7 +1,7 @@
 /*
  * CC3Texture.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -106,7 +106,8 @@ static const ccTexParams kCC3DefaultTextureParameters = { GL_LINEAR, GL_LINEAR, 
  * A set of texture parameters used to optimize the display of the contained texture
  * in the GL engine. These setting are passed to the underlying CCTexture2D instance.
  *
- * The initial value of these parameters are:
+ * The initial value of these parameters are set to kCC3DefaultTextureParameters,
+ * which defines:
  *   - Minifying function: GL_LINEAR
  *   - Magnifying function: GL_LINEAR
  *   - Texture wrap S: GL_REPEAT

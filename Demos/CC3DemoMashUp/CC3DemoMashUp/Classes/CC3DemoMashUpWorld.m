@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpWorld.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,11 +43,11 @@
 #import "CCParticleExamples.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CC3PODNode.h"
-#import "CC3DemoMashUpParticles.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3ParametricMeshNodes.h"
 #import "CC3PointParticleSamples.h"
 #import "CC3DemoMashUpLayer.h"
+#import "CC3VertexSkinning.h"
 
 
 // File names
@@ -64,6 +64,8 @@
 #define kHeadTextureFile				@"Head_diffuse.pvr"
 #define kHeadBumpFile					@"Head_clonespacePVRTC.pvr"
 #define kCubeTextureFile				@"BoxTexture.png"
+#define kRunningManPODFile				@"man.pod"
+#define kMalletPODFile					@"mallet.pod"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -74,6 +76,7 @@
 #define kRobotBottomArm					@"BottomArm"
 #define kRobotCylinder					@"Cylinder01"
 #define kRobotBase						@"GeoSphere01"
+#define kRobotCameraName				@"Camera01"
 #define kPODBallsRezNodeName			@"BallsPODRez"
 #define kBeachBallName					@"BeachBall"
 #define kGlobeName						@"Globe"
@@ -101,8 +104,14 @@
 #define kFloatingHeadName				@"head03low01"
 #define kBumpMapLightTrackerName		@"BumpMapLightTracker"
 #define kExplosionName					@"Explosion"
-#define kHoseEmitter					@"Hose"
-#define kTexturedCube					@"TexturedCube"
+#define kHoseEmitterName				@"Hose"
+#define kTexturedCubeName				@"TexturedCube"
+#define kMalletName						@"Ellipse01"
+#define kRunningTrackName				@"RunningTrack"
+#define kRunnerName						@"Runner"
+#define kRunnerCameraName				@"RunnerCamera"
+#define kRunnerLampName					@"Spot01"
+#define kLittleBrotherName				@"LittleBrother"
 
 #define	kMultiTextureCombinerLabel		@"Multi-texture combiner function: %@"
 
@@ -128,6 +137,8 @@
 -(void) addParticles;
 -(void) addHose;
 -(void) addTexturedCube;
+-(void) addSkinnedMallet;
+-(void) addSkinnedRunners;
 -(void) addExplosionTo: (CC3Node*) aNode;
 -(void) configureCamera;
 -(void) updateCameraFromControls: (ccTime) dt;
@@ -140,6 +151,7 @@
 -(void) touchBeachBallAt: (CGPoint) touchPoint;
 -(void) switchWoodenSign;
 -(void) toggleFloatingHeadDefinition;
+-(void) toggleActiveCamera;
 @end
 
 
@@ -210,6 +222,8 @@
 	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 //	self.drawingSequencer = nil;
 	
+	[self addGround];				// Add a ground plane to provide some perspective to the user
+	
 	[self addBalls];				// Add a transparent bouncing beach ball and a rotating globe...exported from Blender
 
 	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
@@ -234,7 +248,7 @@
 	
 	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
 
-	[self addGround];				// Add a ground plane to provide some perspective to the user
+//	[self addGround];				// Add a ground plane to provide some perspective to the user
 	
 	[self addMascots];				// Add the cocos3d mascot.
 									// This must happen after camera is loaded (in addRobot).
@@ -256,6 +270,10 @@
 
 	[self addFog];					// Adds fog to the world. This is initially invisible.
 	
+	[self addSkinnedMallet];		// Adds a flexible mallet to the world, showing bone skinning.
+	
+	[self addSkinnedRunners];		// Adds two running figures to the world, showing bone skinning.
+
 //	[self addParticles];			// Uncomment to add a platform of multi-colored, light-interactive,
 									// particles hanging in the world.
 	
@@ -345,6 +363,10 @@
 										andTessellation: ccg(20, 20)];
 	ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
 	[ground alignInvertedTextures];
+
+	// To experiment with repeating textures, uncomment the following line
+//	[ground repeatTexture: (ccTex2F){1.0, 3.0}];
+	
 	ground.material.specularColor = kCCC4FLightGray;
 	ground.location = cc3v(0.0, -100.0, 0.0);
 	ground.rotation = cc3v(-90.0, 180.0, 0.0);
@@ -508,11 +530,6 @@
 	dieCube.friction = 1.0;
 	[self addChild: dieCube];
 
-	// Uncomment the following line to display short marker lines on each of the axes
-	// of the local coordinate system of the die cube. This can be useful during development
-	// to display and troubleshoot the orientation of a node.
-//	[dieCube addAxesDirectionMarkers];
-
 }
 
 /**
@@ -528,7 +545,7 @@
 	NSString* itemName;
 	
 	// Create a parametric textured cube, centered on the local origin.
-	CC3BoxNode* texCube = [CC3MeshNode nodeWithName: kTexturedCube];
+	CC3BoxNode* texCube = [CC3MeshNode nodeWithName: kTexturedCubeName];
 	[texCube populateAsTexturedBox: CC3BoundingBoxMake(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f)];
 	texCube.uniformScale = 30.0;
 
@@ -562,6 +579,13 @@
 -(void) addTeapotAndSatellite {
 	teapotTextured = [[CC3ModelSampleFactory factory] makeLogoTexturedTeapotNamed: kTexturedTeapotName];
 	teapotTextured.isTouchEnabled = YES;		// allow this node to be selected by touch events
+	
+	// To experiment with repeating textures, uncomment the following line
+	// Note that the texture does not actually appear repeated 5 times. This is because
+	// it is an NPOT texture, and the alignWithInvertedTexture: method was invoked on
+	// the vertex texture coordinates array during construction to align the mesh to
+	// only part of the texture. POT textures will repeat accurately.
+//	[teapotTextured repeatTexture: (ccTex2F){5.0, 1.0}];
 	
 	// Uncomment the following two lines to experiment with a material that does not
 	// interact with the current lighting conditions. In fact, you can turn lighting
@@ -886,7 +910,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3TargettingNode* headHolder = [floatingHead asCameraTracker];
 	headHolder.location = cc3v(-350.0, 200.0, -100.0);
 	[bumpMapLightTracker addChild: headHolder];
- }
+}
 
 /**
  * Loads a POD file containing the cocos3d mascot, and creates a copy of it so that we have
@@ -1054,6 +1078,112 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
+ * Adds a mallet that moves back and forth, alternately hammering two anvils.
+ * The mallet's mesh employs vertex skinning and an animated bone skeleton to
+ * simulate smooth motion and realistic flexibility.
+ */
+-(void) addSkinnedMallet {
+	// Load the POD file and remove its cmera since we won't need it.
+	// This is not actually necessary, but demonstrates that the resources loaded from
+	// a POD file, including the resource node, are just nodes that can be manipulated
+	// like any other node assembly.
+	CC3PODResourceNode* malletAndAnvils = [CC3PODResourceNode nodeFromResourceFile: kMalletPODFile];
+	[[malletAndAnvils getNodeNamed: @"Camera01"] remove];
+	[[malletAndAnvils getNodeNamed: @"Camera01Target"] remove];
+
+	CC3MeshNode* mallet = (CC3MeshNode*)[malletAndAnvils getNodeNamed: kMalletName];
+	
+	// Mallet normal transforms are scaled too far during transforms, so force
+	// the normals to be individually re-normalized after being transformed.
+	mallet.normalScalingMethod = kCC3NormalScalingNormalize;
+
+	// The mallet can flex well outside its initial mesh bounding box.
+	// Define a fixed bounding volume that includes the full range of the mallet motion
+	// during vertex skinning. In this case, a simple way of determining this is to use the
+	// bounding box of the parent node that includes the anvils, which we can get by logging.
+	// The first two commented lines below were used during development to help determine
+	// what we needed to do.
+
+//	mallet.shouldDrawLocalContentWireframeBox = YES;
+//	LogCleanDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
+	mallet.shouldUseFixedBoundingVolume = YES;
+	CCArray* bvs = ((CC3NodeTighteningBoundingVolumeSequence*)mallet.boundingVolume).boundingVolumes;
+	CC3NodeSphericalBoundingVolume* sbv = [bvs objectAtIndex: 0];
+	sbv.radius = 1500.0;
+	CC3NodeBoundingBoxVolume* bbbv =  [bvs objectAtIndex: 1];
+	bbbv.boundingBox = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0); 
+	
+	malletAndAnvils.isTouchEnabled = YES;		// make the mallet touchable
+	
+	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
+	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
+	malletAndAnvils.uniformScale = 0.15;
+	[self addChild: malletAndAnvils];
+	
+	CCActionInterval* hammering = [CC3Animate actionWithDuration: 3.0];
+	[malletAndAnvils runAction: [CCRepeatForever actionWithAction: hammering]];
+}
+
+/**
+ * Adds two running men to the world. The men runs endless laps around the world.
+ * The men's meshes employ vertex skinning and an animated bone skeleton to
+ * simulate smooth motion and realistic joint flexibility.
+ */
+-(void) addSkinnedRunners {
+	// Load the first running man from the POD file, and remove the light provided
+	// in the POD so that it does not contribute to the lighting of the world.
+	// We don't remove the POD's camera, but we rename it so that we can retrieve it
+	// distinctly from the camera loaded with the robot arm POD. All SDK POD files seem
+	// to use the same name for their included cameras.
+	CC3PODResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
+												 fromResourceFile: kRunningManPODFile];
+	[runner alignInvertedTextures];
+	[runner getNodeNamed: kRunnerLampName].visible = NO;
+	[runner getNodeNamed: @"Camera01"].name = kRunnerCameraName;
+
+	runner.isTouchEnabled = YES;		// make the runner touchable
+	
+	// Create a running track at the world's center.
+	// This "running track" is really just a structural node on which we can place the man
+	// and then rotate the "track" to move the man. It's really just an invisible boom
+	// holding the man.
+	CC3Node* runningTrack = [CC3Node nodeWithName: kRunningTrackName];
+	runningTrack.location = ground.location;
+	[self addChild: runningTrack];
+
+	// Place the man on the track, near the edge of the ground frame
+	runner.location = cc3v(-900.0, 0.0, 0.0);
+	[runningTrack addChild: runner];
+
+	// Run, man, run!
+	// The POD node contains animation to move the skinned character through a running stride.
+	// Make each stride 1.2 seconds in duration.
+	CCActionInterval* stride = [CC3Animate actionWithDuration: 1.2];
+	[runner runAction: [CCRepeatForever actionWithAction: stride]];
+
+	// Make him run around a circular track by rotating the "track" around the world's center,
+	// and it will carry the man around in a circle with it. By trial and error, set the
+	// rotation to match to take 15 seconds for a full circle, to match the man's stride.
+	CCActionInterval* runLap = [CC3RotateBy actionWithDuration: 15.0 rotateBy: cc3v(0.0, 360.0, 0.0)];
+	[runningTrack runAction: [CCRepeatForever actionWithAction: runLap]];
+
+	// To demonstrate copying of skinned nodes, add another runner that is a copy, but smaller and
+	// with a faster stride. We don't want the runner's POD camera or light, so we'll retrieve the
+	// running figure from the POD resource and just copy that. This demonstrates how we can animate
+	// either the whole POD resource node, or the specific soft-body node.
+	NSString* runnerFigureName = [NSString stringWithFormat: @"%@-SoftBody", kRunningManPODFile];
+	CC3Node* runnerFigure = [runner getNodeNamed: runnerFigureName];
+	CC3Node* littleBrother = [[runnerFigure copyWithName: kLittleBrotherName] autorelease];
+	littleBrother.uniformScale = 0.75f;
+	littleBrother.location = cc3v(-800.0, 0.0, 0.0);
+	littleBrother.isTouchEnabled = YES;		// make the runner touchable
+
+	[runningTrack addChild: littleBrother];
+	stride = [CC3Animate actionWithDuration: 0.8];
+	[littleBrother runAction: [CCRepeatForever actionWithAction: stride]];
+}
+
+/**
  * Adds a platform of 3D particles to the world, laid out in a grid, and hanging over the
  * back part of the ground. Each particle is displayed in a different color, and the 
  * entire platform rotates.
@@ -1124,7 +1254,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													kCC3PointParticleContentSize;
 	
 	// Set up the emitter for CC3VariegatedPointParticleHoseEmitter particles.
-	CC3VariegatedPointParticleHoseEmitter* emitter = [CC3VariegatedPointParticleHoseEmitter nodeWithName: kHoseEmitter];
+	CC3VariegatedPointParticleHoseEmitter* emitter = [CC3VariegatedPointParticleHoseEmitter nodeWithName: kHoseEmitterName];
 	[emitter populateForMaxParticles: 400 containing: particleContent];
 	
 	// Set the emission characteristics
@@ -1615,8 +1745,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self switchWoodenSign];
 	} else if (aNode == floatingHead) {
 		[self toggleFloatingHeadDefinition];
-	} else if (aNode == dieCube) {
-		// do nothing...but don't highlight
+	} else if (aNode == dieCube || aNode == texCubeSpinner) {
+		// These are spun by touch movement. Do nothing...and don't highlight
+	} else if (aNode == [self getNodeNamed: kRunnerName]) {
+		[self toggleActiveCamera];
+	} else if (aNode == [self getNodeNamed: kLittleBrotherName]) {
+		[self toggleActiveCamera];
 	} else {
 		// Tint the node to cyan and back again to provide user feedback to touch
 		CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.3f colorTo: kCCC4FCyan];
@@ -1645,7 +1779,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 		// If the robot arm was touched, toggle emission from the hose it holds.
 		if (aNode == [self getNodeNamed: kRobotTopArm] ) {
-			CC3PointParticleEmitter* hose = (CC3PointParticleEmitter*)[self getNodeNamed: kHoseEmitter];
+			CC3PointParticleEmitter* hose = (CC3PointParticleEmitter*)[self getNodeNamed: kHoseEmitterName];
 			hose.isEmitting = !hose.isEmitting;
 		}
 		
@@ -1779,6 +1913,24 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 }
 
+/** 
+ * Toggle between the main scene camera and the camera running along with the runner.
+ * When the runner's camera is active, turn on a local light to illuminate him.
+ */
+-(void) toggleActiveCamera {
+	CC3Camera* robotCam = (CC3Camera*)[self getNodeNamed: kRobotCameraName];
+	CC3Camera* runnerCam = (CC3Camera*)[self getNodeNamed: kRunnerCameraName];
+	CC3Light* runnerLamp = (CC3Light*)[self getNodeNamed: kRunnerLampName];
+
+	if (self.activeCamera == robotCam) {
+		self.activeCamera = runnerCam;
+		runnerLamp.visible = YES;
+	} else {
+		self.activeCamera = robotCam;
+		runnerLamp.visible = NO;
+	}
+}
+
 @end
 
 
@@ -1865,6 +2017,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 @end
 
 
+#pragma mark -
 #pragma mark SpinningNode
 
 @implementation SpinningNode
@@ -1912,6 +2065,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 @end
 
 
+#pragma mark -
+#pragma mark CC3Node extension for user data
+
 /**
  * Demonstrates the initialization and disposal of application-specific userData by adding
  * custom extension categories to subclasses of CC3Identifiable (nodes, materials, meshes,
@@ -1927,6 +2083,38 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 // Change the LogTrace to LogDebug and then click the invade button when running the app.
 -(void) releaseUserData {
 	LogTrace(@"%@ disposing of userData.", self);
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark HangingParticle
+
+@implementation HangingParticle
+
+/**
+ * Uses the index of the particle to determine its location relative to the origin of
+ * the emitter. The particles are laid out in a simple rectangular grid in the X-Z plane,
+ * with kParticlesPerSide particles on each side of the grid.
+ *
+ * Each particle is assigned a random color and size.
+ */
+-(void) initializeParticle {
+	GLint zIndex = index / kParticlesPerSide;
+	GLint xIndex = index % kParticlesPerSide;
+	
+	GLfloat xStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
+	GLfloat zStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
+	
+	self.location = cc3v(xStart + (xIndex * kParticlesSpacing),
+						 0.0,
+						 zStart + (zIndex * kParticlesSpacing) );
+	
+	self.color4F = RandomCCC4FBetween(kCCC4FDarkGray, kCCC4FWhite);
+	
+	GLfloat avgSize = emitter.particleSize;
+	self.size = CC3RandomFloatBetween(avgSize * 0.75, avgSize * 1.25);
 }
 
 @end

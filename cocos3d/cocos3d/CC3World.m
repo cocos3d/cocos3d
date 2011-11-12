@@ -1,7 +1,7 @@
 /*
  * CC3World.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -310,8 +310,11 @@
 #pragma mark Drawing
 
 -(void) drawWorld {
-	LogGLErrorState();			// Check and clear any GL error that occurred before 3D code
+
+	// Check and clear any GL error that occurred before 3D code
+	LogGLErrorState(@"in %@ before drawing", self);
 	LogTrace(@"******* %@ starting drawing visit", self);
+
 	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 	
 	if (self.visible) {
@@ -328,7 +331,8 @@
 		[self draw2DBillboards];	// Back to 2D now
 	}
 	
-	LogGLErrorState();			// Check and clear any GL error that occurred during 3D code
+	// Check and clear any GL error that occurred during 3D code
+	LogGLErrorState(@"in %@ after drawing", self);
 	LogTrace(@"******* %@ exiting drawing visit", self);
 }
 
@@ -478,7 +482,7 @@
 /** Visits this world for drawing (or picking) using the specified visitor. */
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.shouldClearDepthBuffer = shouldClearDepthBufferBefore3D;
-	visitor.frustum = activeCamera.frustum;
+	visitor.camera = activeCamera;
 	visitor.drawingSequencer = drawingSequencer;
 	[visitor visit: self];
 }
@@ -617,13 +621,12 @@
 			[lights removeObjectIdenticalTo: removedNode];
 		}
 		
-		// If the node is a camera, remove it from the collection of cameras,
-		// and if it is the active camera, make the next camera active if one is available.
+		// If the node is a camera, remove it from the collection of cameras.
 		if ( [removedNode isKindOfClass: [CC3Camera class]] ) {
 			[cameras removeObjectIdenticalTo: removedNode];
 			if (removedNode == activeCamera) {
-				self.activeCamera = cameras.count ? [cameras objectAtIndex: 0] : nil;
-				LogTrace(@"Assigning %@ as the active camera", self.activeCamera);
+				self.activeCamera = nil;
+				LogTrace(@"Removing %@ as the active camera", removedNode);
 			}
 		}
 		

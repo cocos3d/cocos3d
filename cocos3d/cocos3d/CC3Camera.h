@@ -1,7 +1,7 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -143,7 +143,12 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  */
 @property(nonatomic, assign) GLfloat farClippingPlane;
 
-/** The frustum of the camera. */
+/**
+ * The frustum of the camera.
+ * 
+ * This is constructed automatically from the field of view and the clipping plane
+ * properties. Usually the application never has need to set this property directly.
+ */
 @property(nonatomic, retain) CC3Frustum* frustum;
 
 /**

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -79,6 +79,7 @@
 	CC3OpenGLES11StateTrackerServerCapability* fog;
 	CC3OpenGLES11StateTrackerServerCapability* lighting;
 	CC3OpenGLES11StateTrackerServerCapability* lineSmooth;
+	CC3OpenGLES11StateTrackerServerCapability* matrixPalette;
 	CC3OpenGLES11StateTrackerServerCapability* multisample;
 	CC3OpenGLES11StateTrackerServerCapability* normalize;
 	CC3OpenGLES11StateTrackerServerCapability* pointSmooth;
@@ -132,6 +133,9 @@
 
 /** Tracks the line smoothing capability (GL capability name GL_LINE_SMOOTH). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* lineSmooth;
+
+/** Tracks the matrix palette capability (GL capability name GL_MATRIX_PALETTE_OES). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* matrixPalette;
 
 /** Tracks the multi-sampling capability (GL capability name GL_MULTISAMPLE). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerServerCapability* multisample;
@@ -189,13 +193,18 @@
  */
 @interface CC3OpenGLES11ClientCapabilities : CC3OpenGLES11StateTrackerManager {
 	CC3OpenGLES11StateTrackerClientCapability* colorArray;
+	CC3OpenGLES11StateTrackerClientCapability* matrixIndexArray;
 	CC3OpenGLES11StateTrackerClientCapability* normalArray;
 	CC3OpenGLES11StateTrackerClientCapability* pointSizeArray;
 	CC3OpenGLES11StateTrackerClientCapability* vertexArray;
+	CC3OpenGLES11StateTrackerClientCapability* weightArray;
 }
 
 /** Tracks the color array capability (GL capability name GL_COLOR_ARRAY). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* colorArray;
+
+/** Tracks the matrix index array capability (GL capability name GL_MATRIX_INDEX_ARRAY_OES). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* matrixIndexArray;
 
 /** Tracks the normal array capability (GL capability name GL_NORMAL_ARRAY). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* normalArray;
@@ -205,5 +214,8 @@
 
 /** Tracks the vertex array capability (GL capability name GL_VERTEX_ARRAY). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* vertexArray;
+
+/** Tracks the weight array capability (GL capability name GL_WEIGHT_ARRAY_OES). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerClientCapability* weightArray;
 
 @end

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -81,6 +81,7 @@
 @synthesize fog;
 @synthesize lighting;
 @synthesize lineSmooth;
+@synthesize matrixPalette;
 @synthesize multisample;
 @synthesize normalize;
 @synthesize pointSmooth;
@@ -105,6 +106,7 @@
 	[fog release];
 	[lighting release];
 	[lineSmooth release];
+	[matrixPalette release];
 	[multisample release];
 	[normalize release];
 	[pointSmooth release];
@@ -152,6 +154,13 @@
 																		forState: GL_LIGHTING];
 	self.lineSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																		  forState: GL_LINE_SMOOTH];
+
+	// Crashes when attempting to read the GL value of GL_MATRIX_PALETTE_OES
+	self.matrixPalette = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
+																			 forState: GL_MATRIX_PALETTE_OES
+															 andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+	self.matrixPalette.originalValue = NO;		// Assume starts out disabled
+
 	self.multisample = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																		   forState: GL_MULTISAMPLE];
 	self.normalize = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
@@ -162,7 +171,9 @@
 	// Illegal GL enum when trying to read value of GL_POINT_SPRITE_OES.
 	self.pointSprites = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																			forState: GL_POINT_SPRITE_OES
-															andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+															andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+	self.pointSprites.originalValue = NO;		// Assume starts out disabled
+
 	self.polygonOffsetFill = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																				 forState: GL_POLYGON_OFFSET_FILL];
 	self.rescaleNormal = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
@@ -195,6 +206,7 @@
 	[desc appendFormat: @"\n    %@ ", fog];
 	[desc appendFormat: @"\n    %@ ", lighting];
 	[desc appendFormat: @"\n    %@ ", lineSmooth];
+	[desc appendFormat: @"\n    %@ ", matrixPalette];
 	[desc appendFormat: @"\n    %@ ", multisample];
 	[desc appendFormat: @"\n    %@ ", normalize];
 	[desc appendFormat: @"\n    %@ ", pointSmooth];
@@ -218,36 +230,51 @@
 @implementation CC3OpenGLES11ClientCapabilities
 
 @synthesize colorArray;
+@synthesize matrixIndexArray;
 @synthesize normalArray;
 @synthesize pointSizeArray;
 @synthesize vertexArray;
+@synthesize weightArray;
 
 -(void) dealloc {
 	[colorArray release];
+	[matrixIndexArray release];
 	[normalArray release];
 	[pointSizeArray release];
 	[vertexArray release];
+	[weightArray release];
 	[super dealloc];
 }
 
 -(void) initializeTrackers {
 	self.colorArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
 																		  forState: GL_COLOR_ARRAY];
+
+	// Illegal GL enum when trying to read value of GL_MATRIX_INDEX_ARRAY_OES.
+	self.matrixIndexArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																				forState: GL_MATRIX_INDEX_ARRAY_OES
+																andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+	self.matrixIndexArray.originalValue = NO;		// Assume starts out disabled
+
 	self.normalArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
 																		   forState: GL_NORMAL_ARRAY];
 	self.pointSizeArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
 																			  forState: GL_POINT_SIZE_ARRAY_OES];
 	self.vertexArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
 																		   forState: GL_VERTEX_ARRAY];
+	self.weightArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
+																		   forState: GL_WEIGHT_ARRAY_OES];
 }	
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 300];
 	[desc appendFormat: @"%@:", [self class]];
 	[desc appendFormat: @"\n    %@ ", colorArray];
+	[desc appendFormat: @"\n    %@ ", matrixIndexArray];
 	[desc appendFormat: @"\n    %@ ", normalArray];
 	[desc appendFormat: @"\n    %@ ", pointSizeArray];
 	[desc appendFormat: @"\n    %@ ", vertexArray];
+	[desc appendFormat: @"\n    %@ ", weightArray];
 	return desc;
 }
 

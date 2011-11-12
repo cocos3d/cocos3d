@@ -1,12 +1,25 @@
-README - cocos3d 0.6.2
+README - cocos3d 0.6.3
 ----------------------
 
-cocos3d 0.6.2
+cocos3d 0.6.3
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++
+
+Table of Contents
+-----------------
+
+   - Installation
+   - cocos2d Version Compatibility
+   - Creating Your First cocos3d Project
+   - Documentation
+   - Demo Applications
+   - Demo Models
+   - Creating POD 3D Model Files
+   - PowerVR Library
+
 
 Installation
 ------------
@@ -36,6 +49,48 @@ and demo projects.
 That's it!
 
 
+cocos2d Version Compatibility
+-----------------------------
+
+cocos3d 0.6.3 is compatible with cocos2d versions 0.99.5 through 1.1.
+
+At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
+configured to use that version. This section includes notes on compatibility with other versions.
+
+   cocos2d 1.1
+   -----------
+
+   Version 1.1 of cocos2d introduced a change to the structure used for 2D particles.
+   When running cocos2d 1.1 set the following build setting in your Xcode build configuration:
+
+      CC_USES_2D_PARTICLES=0
+
+   You can set this in your Xcode project build settings in the Preprocessor Macros entry.
+   This applies to any cocos3d project, including the demo projects that are included in the
+   cocos3d distribution and the cocos3d project templates.
+
+   cocos2d 0.9.5
+   -------------
+
+   Version 0.99.5 of cocos2d contains several files that were removed in cocos2d 1.0,
+   These files are not included in the cocos3d Xcode demo apps and project templates.
+   When using cocos2d 0.9.5, drag the following files to the cocos2d group within the Xcode project:
+
+      cocos2d/CCCompatibility.h
+      cocos2d/CCCompatibility.m
+      cocos2d/CCSpriteSheet.h
+      cocos2d/CCSpriteSheet.m
+      TouchJSON/Extensions/NSCharacterSet_Extensions.h
+      TouchJSON/Extensions/NSCharacterSet_Extensions.m
+      TouchJSON/Extensions/NSScanner_Extensions.h
+      TouchJSON/Extensions/NSScanner_Extensions.m
+
+   Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
+   project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
+   will be the cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5
+   Xcode 4 project templates.
+
+
 Creating Your First cocos3d Project
 -----------------------------------
 
@@ -46,6 +101,23 @@ project template from the cocos3d template group.
 The template project starts with a working 3D variation on the familiar
 'hello, world' application, and you can use it as a starting point for
 your own application.
+
+
+Documentation
+-------------
+
+The cocos3d Programming Guide is online at:
+
+	http://brenwill.com/2011/cocos3d-programming-guide/.
+
+The API documentation is online at:
+
+	http://brenwill.com/docs/cocos3d/0.6.3/api/
+
+You can create a local copy of the API documentation using Doxygen to extract the
+documentation from the source files. There is a Doxygen configuration file to output
+the API documents in the same format as appears online in the folder Docs/API within
+the cocos3d distribution.
 
 
 Demo Applications
@@ -65,7 +137,7 @@ The following demo apps are included in the cocos3d distribution:
 
 
    CC3DemoMashUp
-   _____________
+   -------------
 
    Your camera hovers over a virtual world that includes animated robots, bouncing beach-balls,
    spinning globes, and a selection of animated teapots. This is a sophisticated demo that
@@ -83,16 +155,23 @@ The following demo apps are included in the cocos3d distribution:
      - multi-texturing an object using texture units by combining several individual textures into overlays
      - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
        with few actual vertices
+     - Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
+     - Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
+       manipulated independently of the skeleton of the original.
      - animating 3D models using a variety of standard cocos2d CCActionIntervals
      - overlaying the 3D world with 2D cocos2d controls such as joysticks and buttons
      - embedding 2D cocos2d text labels into the 3D world
      - incorporating 2D cocos2d CCParticleEmitters into the 3D world (as a sun and explosion fire)
+     - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
      - creating a tightly focused spotlight whose intensity attenuates with distance
      - directing the 3D camera to track a particular target object
      - directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
      - directing an object to track another object, always facing (looking at) that object
      - selecting a 3D object by touching the object on the screen with a finger
      - placing a 3D object on another at a point that was touched with a finger
+     - adding a small CC3Layer/CC3World pair as a child window to a larger CC3Layer/CC3World pair.
+     - moving, scaling and fading a CC3Layer and its CC3World
+     - creating parametric boxes and texturing all six sides of the box with a single texture.
      - adding an object as a child of another, but keeping the original orientation of the child
        (addAndLocalizeChild:)
      - handling touch-move events to create swipe gestures to spin a 3D object using rotation
@@ -106,11 +185,15 @@ The following demo apps are included in the cocos3d distribution:
      - constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode
      - caching mesh data into GL vertex buffer objects and releasing vertex data from application memory
      - retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
+     - moving the pivot location (origin) of a mesh to the center of geometry of the mesh.
      - attaching application-specific userData to any node
+     - applying a texture to all six sides of a parametric box
+     - displaying direction marker lines on a node to clarify its orientation during development.
   
    In addition, there are a number of interesting options for you to play with by uncommenting
-   certain line of code in the methods of this class that build objects in the 3D world,
+   certain lines of code in the methods of this class that build objects in the 3D world,
    including experimenting with:
+     - simple particle generator with multi-colored, light-interactive, particles
      - different options for ordering nodes when drawing, including ordering by mesh or texture
      - translucent and transparent textures (addFloatingRing)
      - configuring the camera for parallel/isometric/orthographic projection instead of the default
@@ -125,8 +208,10 @@ The following demo apps are included in the cocos3d distribution:
      - invading with an army of teapots instead of robots
      - ignore lighting conditions when drawing a node to draw in pure colors and textures
      - initializing and disposing of users data by adding initUserData and releaseUserData method extension categories.
-     - displaying descriptive text and wireframe bounding boxes on every node.
-     - log a description of the entire node structure of the 3D world
+     - displaying descriptive text and wireframe bounding boxes on every node
+     - displaying a dynamic bounding box on a 3D particle emitter.
+     - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
+     - displaying a repeating texture pattern across a mesh
 
 
    CC3Performance
@@ -144,7 +229,7 @@ The following demo apps are included in the cocos3d distribution:
 
 
    CC3Demo3DTiles
-   _____________
+   --------------
 
    A simple demo that lays out multiple small cocos3d worlds as layers in a larger cocos2d
    layer. The effect is a grid of tiles, with each tile displaying a separate 3D world,
@@ -159,7 +244,7 @@ The following demo apps are included in the cocos3d distribution:
    The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d RootController with cocos3d.
 
 
-If you are using cocos2d 0.99.5, read the cocos2d Version Compatibility selection below
+If you are using cocos2d 1.1 or 0.99.5, read the cocos2d Version Compatibility selection below
 regarding running the demo apps with that version.
 
 
@@ -172,33 +257,6 @@ exported to DAE, and converted to POD files using the PowerVR Collada2POD conver
 As a reference for the creation of your own 3D models for use in cocos3d, you can find
 the original Blender files and DAE files for these POD models in the Models folder in
 the cocos3d distribution.
-
-
-cocos2d Version Compatibility
------------------------------
-
-cocos3d 0.6.2 is compatible with cocos2d 1.0.1, cocos2d 1.0.0, and cocos2d 0.99.5.
-
-If you use cocos2d 0.99.5, be aware that the cocos3d Xcode projects are configured for
-the cocos2d 1.0.1 libraries. The cocos2d 0.99.5 distribution includes serveral fiiles
-that were removed in cocos2d 1.0.1:
-
-cocos2d/CCCompatibility.h
-cocos2d/CCCompatibility.m
-cocos2d/CCSpriteSheet.h
-cocos2d/CCSpriteSheet.m
-TouchJSON/Extensions/NSCharacterSet_Extensions.h
-TouchJSON/Extensions/NSCharacterSet_Extensions.m
-TouchJSON/Extensions/NSScanner_Extensions.h
-TouchJSON/Extensions/NSScanner_Extensions.m
-
-If you are using cocos2d 0.99.5, you will need to add these files to the cocos2d group,
-and the cocos2d libraries target within your Xcode project.
-
-Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
-project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
-will be the cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5
-Xcode 4 project templates.
 
 
 Creating POD 3D Model Files

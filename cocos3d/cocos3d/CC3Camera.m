@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -157,12 +157,11 @@
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Camera*) another {
 	[super populateFrom: another];
+	
+	self.frustum = [another.frustum copyAutoreleased];		// retained
 
 	[modelviewMatrix release];
 	modelviewMatrix = [another.modelviewMatrix copy];		// retained
-	
-	[frustum release];
-	frustum = [another.frustum copy];						// retained
 
 	fieldOfView = another.fieldOfView;
 	nearClippingPlane = another.nearClippingPlane;

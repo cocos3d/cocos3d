@@ -1,7 +1,7 @@
 /*
  * CC3PointParticles.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -689,7 +689,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
 
 /**
  * Convenience method to cause the vertex point size data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
+ * createGLBuffers is invoked. The vertex data is not buffered to a GL VBO,
  * is retained in application memory, and is submitted to the GL engine on
  * each frame render.
  *

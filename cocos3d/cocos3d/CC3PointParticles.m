@@ -1,7 +1,7 @@
 /*
  * CC3PointParticles.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -720,13 +720,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @interface CC3VertexArrayMesh (TemplateMethods)
 -(void) populateFrom: (CC3VertexArrayMesh*) another;
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) elemCount;
--(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-@end
-
-@interface CC3PointParticleMesh (TemplateMethods)
--(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3PointParticleMesh
@@ -906,11 +900,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 #pragma mark Drawing
-
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super bindGLWithVisitor: visitor];
-	[self bindPointSizesWithVisitor: visitor];
-}
 
 /**
  * Template method that binds a pointer to the vertex point size data to the GL engine.
@@ -1170,7 +1159,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) initializeParticle: (CC3PointParticle*) aParticle {
 	CC3MortalPointParticle* mp = (CC3MortalPointParticle*)aParticle;
-	mp.lifeSpan = RandomFloatBetween(minParticleLifeSpan, maxParticleLifeSpan);
+	mp.lifeSpan = CC3RandomFloatBetween(minParticleLifeSpan, maxParticleLifeSpan);
 	[self initializeMortalParticle: mp];
 	[super initializeParticle: aParticle];
 }

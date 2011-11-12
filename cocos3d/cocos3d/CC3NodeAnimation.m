@@ -1,7 +1,7 @@
 /*
  * CC3NodeAnimation.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,27 +49,19 @@
 
 @implementation CC3NodeAnimation
 
-@synthesize frameCount, shouldInterpolate;
+@synthesize frameCount, shouldInterpolate, currentFrame;
 
 -(void) dealloc {
 	[super dealloc];
 }
 
--(BOOL) isAnimatingLocation {
-	return NO;
-}
+-(BOOL) isAnimatingLocation { return NO; }
 
--(BOOL) isAnimatingRotation {
-	return NO;
-}
+-(BOOL) isAnimatingRotation { return NO; }
 
--(BOOL) isAnimatingQuaternion {
-	return NO;
-}
+-(BOOL) isAnimatingQuaternion { return NO; }
 
--(BOOL) isAnimatingScale {
-	return NO;
-}
+-(BOOL) isAnimatingScale { return NO; }
 
 /**
  * Template method that returns the location at the specified animation frame.
@@ -144,6 +136,8 @@
 -(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode {
 	LogTrace(@"%@ animating frame at %.3f ms", self, t);
 	NSAssert2(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
+	currentFrame = t;
+	
 	// Determine the virtual frame index, based on proportional time.
 	// This is a float to allow interpolating between frames.
 	GLfloat virtualFrameIndex = MIN(t * frameCount, frameCount - 1);

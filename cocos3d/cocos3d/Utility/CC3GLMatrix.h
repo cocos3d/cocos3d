@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3Foundation.h"
+#import "CC3MatrixMath.h"
 
 /**
  * A wrapper class for a 4x4 OpenGL matrix array.
@@ -137,7 +137,12 @@
 #pragma mark -
 #pragma mark Instance population
 
-/** Populates this instance from data copied from the specified matrix instance. */
+/**
+ * Populates this instance from data copied from the specified matrix instance.
+ *
+ * If the specified matrix is nil, it is treated as the identity matrix, and this
+ * matrix will be populated as an identity matrix.
+ */
 -(void) populateFrom: (CC3GLMatrix*) aMtx;
 
 /**
@@ -473,9 +478,9 @@
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
 +(void) transform: (GLfloat*) aGLMatrix
-	  translateBy: (CC3Vector) translationVector
-		 rotateBy: (CC3Vector) rotationVector
-		  scaleBy: (CC3Vector) scaleVector;
+	  translateBy: (CC3Vector) aTranslation
+		 rotateBy: (CC3Vector) aRotation
+		  scaleBy: (CC3Vector) aScale;
 
 /**
  * Rotates the specified matrix by the specified amount. Each element of the rotation
@@ -492,7 +497,7 @@
  *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
-+(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
++(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation;
 	
 /**
  * Rotates the specified matrix by the specified amount. Each element of the rotation
@@ -508,7 +513,7 @@
  *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
  */
-+(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aVector;
++(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation;
 
 /**
  * Rotates the specified matrix around the X-axis by the specified number of degrees.
@@ -644,6 +649,9 @@
  *
  * The contents of this matrix are changed.
  * The contents of the specified matrix remain unchanged.
+ *
+ * If the specified matrix is nil, it is treated as an identity matrix,
+ * and this matrix remains unchanged.
  */
 -(void) multiplyByMatrix: (CC3GLMatrix*) aMatrix;
 
@@ -653,6 +661,9 @@
  *
  * The contents of this matrix are changed.
  * The contents of the specified matrix remain unchanged.
+ *
+ * If the specified matrix is nil, it is treated as an identity matrix,
+ * and this matrix remains unchanged.
  */
 -(void) leftMultiplyByMatrix: (CC3GLMatrix*) aMatrix;
 
@@ -679,54 +690,73 @@
 /** Transposes this matrix. The contents of this matrix are changed. */
 -(void) transpose;
 
+
 /**
- * Inverts this matrix using the Gauss-Jordan elimination algorithm. The contents of this matrix are changed.
+ * Inverts this matrix by using the algorithm of calculating the classical adjoint
+ * and dividing by the determinant. The contents of the matrix are changed.
  *
- * Gauss-Jordan elimination matrix inversion is an computationally-expensive algorithm. If it is known that
- * the matrix contains only rotation and translation, use the invertRigid method instead, which is between
- * one and two orders of magnitude faster than this method.
+ * Not all matrices are invertable. Returns whether the matrix was inverted. If this method
+ * returns NO, then the matrix was not inverted and remains in the state it was when this
+ * method was invoked.
+ *
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
+ * contains only rotation and translation, use the invertRigid: method instead, which is
+ * between one and two orders of magnitude faster than this method.
  * 
- * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can often result
- * in the inverse of a matrix representing an affine transformation (the bottom row of the matrix is
- * {0, 0, 0 1}) that is not affine. These accumulated errors can often by significant when applied to the
- * bottom row and will affect further calculations. If it is known that a matrix represents an affine
- * transformation, use the invertAffine method instead, which forces the bottom row back to {0, 0, 0, 1}
- * after the inversion, to maintain the inverted matrix as an affine transformation. Affine transforms
- * include all combinations of rotation, scaling, shearing, translation, and orthographic projection,
- * so all matrices encountered while working with 3D graphics, with the exception of perspective projection,
- * will be affine transforms.
+ * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can
+ * often result in the inverse matrix that is not affine (the bottom row of the matrix is not
+ * {0, 0, 0 1}), even when the initial matrix was affine. These accumulated errors can often
+ * be significant when applied to the bottom row and will affect further calculations.
+ * 
+ * If it is known that a matrix represents an affine transformation, use the invertAffine:
+ * method instead, which forces the bottom row back to {0, 0, 0, 1} after the inversion
+ * to maintain the inverted matrix as an affine transformation.
+ *
+ * Affine transforms include all combinations of rotation, scaling, shearing, translation,
+ * and orthographic projection, so all matrices encountered while working with 3D graphics,
+ * with the exception of perspective projection, will be affine transforms.
  */
 -(BOOL) invert;
 
 /**
- * Inverts this matrix using the Gauss-Jordan elimination algorithm.
- * The contents of this matrix are changed.
+ * Inverts this matrix by using the algorithm of calculating the classical adjoint
+ * and dividing by the determinant. The contents of the matrix are changed.
  *
- * This method differs from the invert method in that it assumes that the matrix represents an affine
- * transform (the bottom row of the matrix is {0, 0, 0 1}), and that accumulated inaccuracies in the
- * inversion calculations should be removed from the bottom row of the resulting inverted matrix.
- * After inversion, it forces the bottom row of the inverted matrix back to {0, 0, 0 1}. This can be
- * quite useful, as this row is particularly sensitive to the accumulation of inaccuracies and can often
- * have a drastic impact on the accuracy of subsequent matrix and vector calculations. If it is known
- * that a matrix represents an affine transformation, use this method instead of the invert method.
+ * Not all matrices are invertable. Returns whether the matrix was inverted. If this method
+ * returns NO, then the matrix was not inverted and remains in the state it was when this
+ * method was invoked.
+ *
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
+ * contains only rotation and translation, use the invertRigid: method instead, which is
+ * between one and two orders of magnitude faster than this method.
+ *
+ * This method differs from the invert: method in that it assumes that the matrix represents
+ * an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and that accumulated
+ * inaccuracies in the inversion calculations should be removed from the bottom row of the
+ * resulting inverted matrix. After inversion, the bottom row of the inverted matrix is
+ * forced back to {0, 0, 0 1}.
+ *
+ * This can be quite useful, as this row is particularly sensitive to the accumulation of
+ * inaccuracies and can often have a drastic impact on the accuracy of subsequent matrix
+ * and vector calculations. If it is known that a matrix represents an affine transformation,
+ * use this method instead of the invert: method.
+ * 
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
  * with the exception of perspective projection, will be affine transforms. 
- *
- * Gauss-Jordan elimination matrix inversion is an computationally-expensive algorithm. If it is known
- * that the matrix contains only rotation and translation, use the invertRigid method instead, which
- * is between one and two orders of magnitude faster than this method.
  */
 -(BOOL) invertAffine;
 
 /**
- * Inverts this matrix using transposition and translation. The contents of this matrix are changed.
+ * Inverts this matrix using transposition and translation. The contents of this matrix
+ * are changed.
  *
- * This method assumes that the matrix represents a rigid transformation, containing only rotation and
- * translation. Use this method only if it is known that this is the case. Inversion of a rigid transform
- * matrix can be accomplished very quickly using transposition and translation, and is consistently one to
- * two orders of magnitude faster than the Gauss-Jordan elimination algorithm used by the invert and
- * invertAffine methods. It is recommended that this method be used wherever possible.
+ * This method assumes that the matrix represents a rigid transformation, containing only
+ * rotation and translation. Use this method only if it is known that this is the case.
+ * Inversion of a rigid transform matrix can be accomplished very quickly using transposition
+ * and translation, and is consistently one to two orders of magnitude faster than using
+ * either the invert: or invertAffine: methods. It is recommended that this method be used
+ * wherever possible.
  */
 -(void) invertRigid;
 	
@@ -785,43 +815,60 @@
 +(void) transpose: (GLfloat*) aGLMatrix;
 
 /**
- * Inverts the specified matrix using the Gauss-Jordan elimination algorithm. The contents of
- * the matrix are changed. The matrix must be a standard 4x4 OpenGL matrix in column-major order.
+ * Inverts the specified matrix by using the algorithm of calculating the classical adjoint
+ * and dividing by the determinant. The contents of the matrix are changed. The matrix must
+ * be a standard 4x4 OpenGL matrix in column-major order.
  *
- * Gauss-Jordan elimination matrix inversion is an computationally-expensive algorithm. If it is known that
- * the matrix contains only rotation and translation, use the invertRigid: method instead, which is between
- * one and two orders of magnitude faster than this method.
+ * Not all matrices are invertable. Returns whether the matrix was inverted. If this method
+ * returns NO, then the matrix was not inverted and remains in the state it was when this
+ * method was invoked.
+ *
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
+ * contains only rotation and translation, use the invertRigid: method instead, which is
+ * between one and two orders of magnitude faster than this method.
  * 
- * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can often result
- * in the inverse of a matrix representing an affine transformation (the bottom row of the matrix is
- * {0, 0, 0 1}) that is not affine. These accumulated errors can often by significant when applied to the
- * bottom row and will affect further calculations. If it is known that a matrix represents an affine
- * transformation, use the invertAffine: method instead, which forces the bottom row back to {0, 0, 0, 1}
- * after the inversion, to maintain the inverted matrix as an affine transformation. Affine transforms
- * include all combinations of rotation, scaling, shearing, translation, and orthographic projection,
- * so all matrices encountered while working with 3D graphics, with the exception of perspective projection,
- * will be affine transforms.
+ * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can
+ * often result in the inverse matrix that is not affine (the bottom row of the matrix is not
+ * {0, 0, 0 1}), even when the initial matrix was affine. These accumulated errors can often
+ * be significant when applied to the bottom row and will affect further calculations.
+ * 
+ * If it is known that a matrix represents an affine transformation, use the invertAffine:
+ * method instead, which forces the bottom row back to {0, 0, 0, 1} after the inversion
+ * to maintain the inverted matrix as an affine transformation.
+ *
+ * Affine transforms include all combinations of rotation, scaling, shearing, translation,
+ * and orthographic projection, so all matrices encountered while working with 3D graphics,
+ * with the exception of perspective projection, will be affine transforms.
  */
 +(BOOL) invert: (GLfloat*) aGLMatrix;
 
 /**
- * Inverts the specified matrix using the Gauss-Jordan elimination algorithm. The contents of
- * the matrix are changed. The matrix must be a standard 4x4 OpenGL matrix in column-major order.
+ * Inverts the specified matrix by using the algorithm of calculating the classical adjoint
+ * and dividing by the determinant. The contents of the matrix are changed. The matrix must
+ * be a standard 4x4 OpenGL matrix in column-major order.
  *
- * This method differs from the invert: method in that it assumes that the matrix represents an affine
- * transform (the bottom row of the matrix is {0, 0, 0 1}), and that accumulated inaccuracies in the
- * inversion calculations should be removed from the bottom row of the resulting inverted matrix.
- * After inversion, it forces the bottom row of the inverted matrix back to {0, 0, 0 1}. This can be
- * quite useful, as this row is particularly sensitive to the accumulation of inaccuracies and can often
- * have a drastic impact on the accuracy of subsequent matrix and vector calculations. If it is known
- * that a matrix represents an affine transformation, use this method instead of the invert: method.
+ * Not all matrices are invertable. Returns whether the matrix was inverted. If this method
+ * returns NO, then the matrix was not inverted and remains in the state it was when this
+ * method was invoked.
+ *
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
+ * contains only rotation and translation, use the invertRigid: method instead, which is
+ * between one and two orders of magnitude faster than this method.
+ *
+ * This method differs from the invert: method in that it assumes that the matrix represents
+ * an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and that accumulated
+ * inaccuracies in the inversion calculations should be removed from the bottom row of the
+ * resulting inverted matrix. After inversion, the bottom row of the inverted matrix is
+ * forced back to {0, 0, 0 1}.
+ *
+ * This can be quite useful, as this row is particularly sensitive to the accumulation of
+ * inaccuracies and can often have a drastic impact on the accuracy of subsequent matrix
+ * and vector calculations. If it is known that a matrix represents an affine transformation,
+ * use this method instead of the invert: method.
+ * 
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
  * with the exception of perspective projection, will be affine transforms. 
- *
- * Gauss-Jordan elimination matrix inversion is an computationally-expensive algorithm. If it is known
- * that the matrix contains only rotation and translation, use the invertRigid: method instead, which
- * is between one and two orders of magnitude faster than this method.
  */
 +(BOOL) invertAffine: (GLfloat*) aGLMatrix;
 
@@ -829,11 +876,12 @@
  * Inverts the specified matrix using transposition and translation. The contents of this
  * matrix are changed. The matrix must be a standard 4x4 OpenGL matrix in column-major order.
  *
- * This method assumes that the matrix represents a rigid transformation, containing only rotation and
- * translation. Use this method only if it is known that this is the case. Inversion of a rigid transform
- * matrix can be accomplished very quickly using transposition and translation, and is consistently one
- * to two orders of magnitude faster than the Gauss-Jordan elimination algorithm used by the invert:
- * and invertAffine: methods. It is recommended that this method be used wherever possible.
+ * This method assumes that the matrix represents a rigid transformation, containing only
+ * rotation and translation. Use this method only if it is known that this is the case.
+ * Inversion of a rigid transform matrix can be accomplished very quickly using transposition
+ * and translation, and is consistently one to two orders of magnitude faster than using
+ * either the invert: or invertAffine: methods. It is recommended that this method be used
+ * wherever possible.
  */
 +(void) invertRigid: (GLfloat*) aGLMatrix;
 

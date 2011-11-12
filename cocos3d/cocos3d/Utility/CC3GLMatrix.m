@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,8 +30,6 @@
  */
 
 #import "CC3GLMatrix.h"
-#import "CC3Math.h"
-#import "CC3Kazmath.h"
 
 
 #pragma mark CC3Matrix private method declaration
@@ -39,8 +37,6 @@
 @interface CC3GLMatrix (Private)
 -(id) initParent;
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args;
--(void) swap: (GLuint) idx1 with: (GLuint) idx2;
-+(void) swap: (GLuint) idx1 with: (GLuint) idx2 inMatrix: (GLfloat*) aGLMatrix;
 @end
 
 
@@ -57,6 +53,50 @@
 
 -(GLfloat*) glMatrix {
 	return glArray;
+}
+
+-(id) init {
+	if( (self = [self initParent]) ) {
+		[self populateZero];
+	}
+	return self;
+}
+
++(id) matrix {
+	return [[[self alloc] init] autorelease];
+}
+
+-(id) initIdentity {
+	if( (self = [self initParent]) ) {
+		[self populateIdentity];
+	}
+	return self;
+}
+
++(id) identity {
+	return [[[self alloc] initIdentity] autorelease];
+}
+
+-(id) initFromGLMatrix: (GLfloat*) aGLMtx {
+	if( (self = [self initParent]) ) {
+		[self populateFromGLMatrix: aGLMtx];
+	}
+	return self;
+}
+
++(id) matrixFromGLMatrix: (GLfloat*) aGLMtx {
+	return [[[self alloc] initFromGLMatrix: aGLMtx] autorelease];
+}
+
+-(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
+	if( (self = [self initParent]) ) {
+		GLfloat* p = self.glMatrix;
+		*p++ = e00;
+		for (int i = 1; i < 16; i++) {
+			*p++ = (GLfloat)va_arg(args, double);
+		}
+	}
+	return self;
 }
 
 @end
@@ -84,6 +124,10 @@
 	return self;
 }
 
++(id) matrixOnGLMatrix: (GLfloat*) aGLMtx {
+	return [[[self alloc] initOnGLMatrix: aGLMtx] autorelease];
+}
+
 @end
 
 
@@ -109,80 +153,42 @@
 	return [super init];
 }
 
+// Instantiate the appropriate concrete cluster class.
 -(id) init {
-	if ( [self isKindOfClass: [CC3GLArrayMatrix class]] ) {
-		if( (self = [self initParent]) ) {
-			[self populateZero];
-		}
-		return self;
-	} else {
-		[self release];
-		return [[CC3GLArrayMatrix alloc] init];
-	}
+	[self release];
+	return [[CC3GLArrayMatrix alloc] init];
 }
 
+// Instantiate the appropriate concrete cluster class.
 +(id) matrix {
-	if ( [self isSubclassOfClass: [CC3GLArrayMatrix class]] ) {
-		return [[[self alloc] init] autorelease];
-	} else {
-		return [CC3GLArrayMatrix matrix];
-	}
+	return [CC3GLArrayMatrix matrix];
 }
 
+// Instantiate the appropriate concrete cluster class.
 -(id) initIdentity {
-	if ( [self isKindOfClass: [CC3GLArrayMatrix class]] ) {
-		if( (self = [self initParent]) ) {
-			[self populateIdentity];
-		}
-		return self;
-	} else {
-		[self release];
-		return [[CC3GLArrayMatrix alloc] initIdentity];
-	}
+	[self release];
+	return [[CC3GLArrayMatrix alloc] initIdentity];
 }
 
+// Instantiate the appropriate concrete cluster class.
 +(id) identity {
-	if ( [self isSubclassOfClass: [CC3GLArrayMatrix class]] ) {
-		return [[[self alloc] initIdentity] autorelease];
-	} else {
-		return [CC3GLArrayMatrix identity];
-	}
+	return [CC3GLArrayMatrix identity];
 }
 
+// Instantiate the appropriate concrete cluster class.
 -(id) initFromGLMatrix: (GLfloat*) aGLMtx {
-	if ( [self isKindOfClass: [CC3GLArrayMatrix class]] ) {
-		if( (self = [self initParent]) ) {
-			[self populateFromGLMatrix: aGLMtx];
-		}
-		return self;
-	} else {
-		[self release];
-		return [[CC3GLArrayMatrix alloc] initFromGLMatrix: aGLMtx];
-	}
+	[self release];
+	return [[CC3GLArrayMatrix alloc] initFromGLMatrix: aGLMtx];
 }
 
+// Instantiate the appropriate concrete cluster class.
 +(id) matrixFromGLMatrix: (GLfloat*) aGLMtx {
-	if ( [self isSubclassOfClass: [CC3GLArrayMatrix class]] ) {
-		return [[[self alloc] initFromGLMatrix: aGLMtx] autorelease];
-	} else {
-		return [CC3GLArrayMatrix matrixFromGLMatrix: aGLMtx];
-	}
+	return [CC3GLArrayMatrix matrixFromGLMatrix: aGLMtx];
 }
 
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
-	if ( [self isKindOfClass: [CC3GLArrayMatrix class]] ) {
-		if( (self = [self initParent]) ) {
-			GLfloat* p = self.glMatrix;
-			*p++ = e00;
-			for (int i = 1; i < 16; i++) {
-				*p++ = (GLfloat)va_arg(args, double);
-			}
-		}
-	} else {
-		[self release];
-		self = [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
-	}
-	return self;
+	[self release];
+	return [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 }
 
 -(id) initWithElements: (GLfloat) e00, ... {
@@ -201,17 +207,15 @@
 	return [mtx autorelease];
 }
 
+// Instantiate the appropriate concrete cluster class.
 -(id) initOnGLMatrix: (GLfloat*) aGLMtx {
 	[self release];
 	return [[CC3GLPointerMatrix alloc] initOnGLMatrix: aGLMtx];
 }
 
+// Instantiate the appropriate concrete cluster class.
 +(id) matrixOnGLMatrix: (GLfloat*) aGLMtx {
-	if ( [self isSubclassOfClass: [CC3GLPointerMatrix class]] ) {
-		return [[[self alloc] initOnGLMatrix: aGLMtx] autorelease];
-	} else {
-		return [CC3GLPointerMatrix matrixOnGLMatrix: aGLMtx];
-	}
+	return [CC3GLPointerMatrix matrixOnGLMatrix: aGLMtx];
 }
 
 - (id) copyWithZone: (NSZone*) zone {
@@ -221,22 +225,22 @@
 -(NSString*) description {
 	GLfloat* m = self.glMatrix;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"\n\t[%.3f, ", m[0]];
-	[desc appendFormat: @"%.3f, ", m[4]];
-	[desc appendFormat: @"%.3f, ", m[8]];
-	[desc appendFormat: @"%.3f,\n\t ", m[12]];
-	[desc appendFormat: @"%.3f, ", m[1]];
-	[desc appendFormat: @"%.3f, ", m[5]];
-	[desc appendFormat: @"%.3f, ", m[9]];
-	[desc appendFormat: @"%.3f,\n\t ", m[13]];
-	[desc appendFormat: @"%.3f, ", m[2]];
-	[desc appendFormat: @"%.3f, ", m[6]];
-	[desc appendFormat: @"%.3f, ", m[10]];
-	[desc appendFormat: @"%.3f,\n\t ", m[14]];
-	[desc appendFormat: @"%.3f, ", m[3]];
-	[desc appendFormat: @"%.3f, ", m[7]];
-	[desc appendFormat: @"%.3f, ", m[11]];
-	[desc appendFormat: @"%.3f]", m[15]];
+	[desc appendFormat: @"\n\t[%.6f, ", m[0]];
+	[desc appendFormat: @"%.6f, ", m[4]];
+	[desc appendFormat: @"%.6f, ", m[8]];
+	[desc appendFormat: @"%.6f,\n\t ", m[12]];
+	[desc appendFormat: @"%.6f, ", m[1]];
+	[desc appendFormat: @"%.6f, ", m[5]];
+	[desc appendFormat: @"%.6f, ", m[9]];
+	[desc appendFormat: @"%.6f,\n\t ", m[13]];
+	[desc appendFormat: @"%.6f, ", m[2]];
+	[desc appendFormat: @"%.6f, ", m[6]];
+	[desc appendFormat: @"%.6f, ", m[10]];
+	[desc appendFormat: @"%.6f,\n\t ", m[14]];
+	[desc appendFormat: @"%.6f, ", m[3]];
+	[desc appendFormat: @"%.6f, ", m[7]];
+	[desc appendFormat: @"%.6f, ", m[11]];
+	[desc appendFormat: @"%.6f]", m[15]];
 	return desc;
 }
 
@@ -294,12 +298,11 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	}
 }
 
--(void) populateFromRotation: (CC3Vector) aVector {
-	if (CC3VectorsAreEqual(aVector, kCC3VectorZero)) {
+-(void) populateFromRotation: (CC3Vector) aRotation {
+	if (CC3VectorsAreEqual(aRotation, kCC3VectorZero)) {
 		[self populateIdentity];
 	} else {
-		CC3Vector rotRads = CC3VectorScaleUniform(aVector, DegreesToRadiansFactor);
-		kmMat4RotationYXZ((kmMat4*)self.glMatrix, rotRads.x, rotRads.y, rotRads.z);
+		kmMat4RotationYXZ(self.glMatrix, aRotation);
 		isIdentity = NO;
 	}
 }
@@ -308,7 +311,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	if (CC3Vector4sAreEqual(aQuaternion, kCC3Vector4QuaternionIdentity)) {
 		[self populateIdentity];
 	} else {
-		kmMat4RotationQuaternion((kmMat4*)self.glMatrix, (kmQuaternion*)&aQuaternion);
+		kmMat4RotationQuaternion(self.glMatrix, aQuaternion);
 		isIdentity = NO;
 	}
 }
@@ -493,12 +496,6 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 #pragma mark -
 #pragma mark Instance accessing
 
- // CAUTION: This is a simple convenience utility. For speed, it does not honour
- // the isIdentity flag. It is the responsibility of the caller to deal with that flag.
--(void) swap: (GLuint) idx1 with: (GLuint) idx2 {
-	[[self class] swap: idx1 with: idx2 inMatrix: self.glMatrix];
-}
-
 -(CC3Vector) extractRotation {
 	return [[self class] extractRotationYXZFromMatrix: self.glMatrix];
 }
@@ -521,12 +518,6 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 
 
 #pragma mark Matrix accessing
-
-+(void) swap: (GLuint) idx1 with: (GLuint) idx2 inMatrix: (GLfloat*) aGLMatrix {
-	GLfloat tmp = aGLMatrix[idx1];
-	aGLMatrix[idx1] = aGLMatrix[idx2];
-	aGLMatrix[idx2] = tmp;
-}
 
 // Assumes YXZ euler order, which is the OpenGL ES default
 +(CC3Vector) extractRotationYXZFromMatrix: (GLfloat*) aGLMatrix {
@@ -600,10 +591,84 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	return cc3v(RadiansToDegrees(radX), RadiansToDegrees(radY), RadiansToDegrees(radZ));
 }
 
+/**
+ * Extracts a quaternion from a rotation matrix, stores the result in quat and returns the result.
+ *
+ * This algorithm uses the technique of finding the largest combination of the diagonal elements
+ * to select which quaternion element (w,x,y,z) to solve for from the diagonal, and then using
+ * that value along with pairs of diagonally-opposite matrix elements to derive the other three
+ * quaternion elements. For example, if we want to solve for the quaternion w value first:
+ *   - sum of diagonal elements = m[0] + m[5] + m[10] = (4w^2 - 1).
+ *   - Therefore w = sqrt(m[0] + m[5] + m[10] + 1) / 2.
+ *   - And m[9] - m[6] = 4wx, therefore x = (m[9] - m[6]) / 4w
+ *   - And m[2] - m[8] = 4wy, therefore y = (m[2] - m[8]) / 4w
+ *   - And m[4] - m[1] = 4wz, therefore z = (m[4] - m[1]) / 4w
+ *
+ * Similar equations exist for the other combinations of the diagonal elements.
+ * Selecting the largest combination helps numerical stability and avoids
+ * divide-by-zeros and square roots of negative numbers.
+ */
 +(CC3Vector4) extractQuaternionFromMatrix: (GLfloat*) aGLMatrix {
-	CC3Vector4 quaternion;
-	kmQuaternionRotationMatrix((kmQuaternion*)&quaternion, (kmMat4*)aGLMatrix);
-	return quaternion;
+	enum {W,X,Y,Z} bigType;
+	CC3Vector4 quat;
+	GLfloat* m = aGLMatrix;		// Make a simple alias
+
+	// From the matrix diagonal element, calc (4q^2 - 1),
+	// where q is each of the quaternion components: w, x, y & z.
+	GLfloat fourWSqM1 =  m[0] + m[5] + m[10];
+	GLfloat fourXSqM1 =  m[0] - m[5] - m[10];
+	GLfloat fourYSqM1 = -m[0] + m[5] - m[10];
+	GLfloat fourZSqM1 = -m[0] - m[5] + m[10];
+	GLfloat bigFourSqM1;
+
+	// Determine the biggest quaternion component from the above options.
+	bigType = W;
+	bigFourSqM1 = fourWSqM1;
+	if (fourXSqM1 > bigFourSqM1) {
+		bigFourSqM1 = fourXSqM1;
+		bigType = X;
+	}
+	if (fourYSqM1 > bigFourSqM1) {
+		bigFourSqM1 = fourYSqM1;
+		bigType = Y;
+	}
+	if (fourZSqM1 > bigFourSqM1) {
+		bigFourSqM1 = fourZSqM1;
+		bigType = Z;
+	}
+
+	// Isolate that biggest component value, q from the above formula
+	// (4q^2 - 1), and calculate the factor  (1 / 4q).
+	GLfloat bigVal = sqrtf(bigFourSqM1 + 1.0f) * 0.5f;
+	GLfloat oo4BigVal = 1.0f / (4.0f * bigVal);
+	
+	switch (bigType) {
+		case W:
+			quat.w = bigVal;
+			quat.x = (m[9] - m[6]) * oo4BigVal;
+			quat.y = (m[2] - m[8]) * oo4BigVal;
+			quat.z = (m[4] - m[1]) * oo4BigVal;
+			break;
+		case X:
+			quat.w = (m[9] - m[6]) * oo4BigVal;
+			quat.x = bigVal;
+			quat.y = (m[4] + m[1]) * oo4BigVal;
+			quat.z = (m[2] + m[8]) * oo4BigVal;
+			break;
+		case Y:
+			quat.w = (m[2] - m[8]) * oo4BigVal;
+			quat.x = (m[4] + m[1]) * oo4BigVal;
+			quat.y = bigVal;
+			quat.z = (m[9] + m[6]) * oo4BigVal;
+			break;
+		case Z:
+			quat.w = (m[4] - m[1]) * oo4BigVal;
+			quat.x = (m[2] + m[8]) * oo4BigVal;
+			quat.y = (m[9] + m[6]) * oo4BigVal;
+			quat.z = bigVal;
+			break;
+	}
+	return quat;
 }
 
 +(CC3Vector) extractForwardDirectionFrom: (GLfloat*) aGLMatrix {
@@ -752,57 +817,49 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 #pragma mark Matrix transformations
 
 +(void) transform: (GLfloat*) aGLMatrix
-	  translateBy: (CC3Vector) translationVector
-		 rotateBy: (CC3Vector) rotationVector
-		  scaleBy: (CC3Vector) scaleVector {
+	  translateBy: (CC3Vector) aTranslation
+		 rotateBy: (CC3Vector) aRotation
+		  scaleBy: (CC3Vector) aScale {
 
-	kmVec3 kmTranslation = kmVec3Make(translationVector.x, translationVector.y, translationVector.z);
-	kmVec3 kmRotation = kmVec3Make(DegreesToRadians(rotationVector.x),
-								   DegreesToRadians(rotationVector.y),
-								   DegreesToRadians(rotationVector.z));
-	kmVec3 kmScale = kmVec3Make(scaleVector.x, scaleVector.y, scaleVector.z);
-
-	kmMat4 mXfm;
-	kmMat4Transformation(&mXfm, kmTranslation, kmRotation, kmScale);
-	[self multiply: aGLMatrix byMatrix: (GLfloat*)&mXfm];
+	GLfloat tmpMtx[16];
+	kmMat4Transformation(tmpMtx, aTranslation, aRotation, aScale);
+	[self multiply: aGLMatrix byMatrix: tmpMtx];
 }
 
-+(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
-	kmMat4 mRot;
-	CC3Vector rotRads = CC3VectorScaleUniform(aVector, DegreesToRadiansFactor);
-	kmMat4RotationYXZ(&mRot, rotRads.x, rotRads.y, rotRads.z);
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
++(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation {
+	GLfloat tmpMtx[16];
+	kmMat4RotationYXZ(tmpMtx, aRotation);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
-+(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
-	kmMat4 mRot;
-	CC3Vector rotRads = CC3VectorScaleUniform(aVector, DegreesToRadiansFactor);
-	kmMat4RotationZYX(&mRot, rotRads.x, rotRads.y, rotRads.z);
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
++(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation {
+	GLfloat tmpMtx[16];
+	kmMat4RotationZYX(tmpMtx, aRotation);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byX: (GLfloat) degrees {
-	kmMat4 mRot;
-	kmMat4RotationX(&mRot, DegreesToRadians(degrees));
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	GLfloat tmpMtx[16];
+	kmMat4RotationX(tmpMtx, degrees);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byY: (GLfloat) degrees {
-	kmMat4 mRot;
-	kmMat4RotationY(&mRot, DegreesToRadians(degrees));
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	GLfloat tmpMtx[16];
+	kmMat4RotationY(tmpMtx, degrees);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byZ: (GLfloat) degrees {
-	kmMat4 mRot;
-	kmMat4RotationZ(&mRot, DegreesToRadians(degrees));
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	GLfloat tmpMtx[16];
+	kmMat4RotationZ(tmpMtx, degrees);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byQuaternion: (CC3Vector4) aQuaternion {
-	kmMat4 mRot;
-	kmMat4RotationQuaternion(&mRot, (kmQuaternion*)&aQuaternion);
-	[self leftMultiply: aGLMatrix byMatrix: (GLfloat*)&mRot];
+	GLfloat tmpMtx[16];
+	kmMat4RotationQuaternion(tmpMtx, aQuaternion);
+	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) translate: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
@@ -858,7 +915,8 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 }
 	
 +(void) scale: (GLfloat*) aGLMatrix uniformlyBy: (GLfloat) scaleFactor {
-	[self scale: aGLMatrix by: cc3v(scaleFactor, scaleFactor, scaleFactor)];
+//	[self scale: aGLMatrix by: cc3v(scaleFactor, scaleFactor, scaleFactor)];
+	[self scale: aGLMatrix by: (CC3Vector){scaleFactor, scaleFactor, scaleFactor}];
 }
 		 
 
@@ -939,20 +997,24 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 
 -(BOOL) invert {
 	// Short-circuit if this is an identity matrix
-	if (isIdentity) {
-		return YES;
-	} else {
-		return [[self class] invert: self.glMatrix];
+	if (isIdentity) return YES;
+
+	BOOL wasInverted = [[self class] invert: self.glMatrix];
+	if ( !wasInverted ) {
+		LogError(@"Matrix is singular and cannot be inverted: %@", self);
 	}
+	return wasInverted;
 }
 
 -(BOOL) invertAffine {
 	// Short-circuit if this is an identity matrix
-	if (isIdentity) {
-		return YES;
-	} else {
-		return [[self class] invertAffine: self.glMatrix];
+	if (isIdentity) return YES;
+	
+	BOOL wasInverted = [[self class] invertAffine: self.glMatrix];
+	if ( !wasInverted ) {
+		LogError(@"Matrix is singular and cannot be inverted: %@", self);
 	}
+	return wasInverted;
 }
 
 -(void) invertRigid {
@@ -966,15 +1028,15 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 #pragma mark Matrix math operations
 
 +(void) multiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix {
-	kmMat4 mOut;
-	kmMat4Multiply(&mOut, (kmMat4*)aGLMatrix, (kmMat4*)anotherGLMatrix);
-	[self copyMatrix: (GLfloat*)&mOut into: aGLMatrix];
+	GLfloat mOut[16];
+	CC3Mat4Multiply(mOut, aGLMatrix, anotherGLMatrix);
+	[self copyMatrix: mOut into: aGLMatrix];
 }
 
 +(void) leftMultiply: (GLfloat*) aGLMatrix byMatrix: (GLfloat*) anotherGLMatrix {
-	kmMat4 mOut;
-	kmMat4Multiply(&mOut, (kmMat4*)anotherGLMatrix, (kmMat4*)aGLMatrix);
-	[self copyMatrix: (GLfloat*)&mOut into: aGLMatrix];
+	GLfloat mOut[16];
+	CC3Mat4Multiply(mOut, anotherGLMatrix, aGLMatrix);
+	[self copyMatrix: mOut into: aGLMatrix];
 }
 
 +(CC3Vector) transformLocation: (CC3Vector) aLocation withMatrix: (GLfloat*) aGLMatrix {
@@ -1000,26 +1062,60 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 }
 
 +(void) transpose: (GLfloat*) aGLMatrix {
-	[self swap: 1 with: 4 inMatrix: aGLMatrix];
-	[self swap: 2 with: 8 inMatrix: aGLMatrix];
-	[self swap: 3 with: 12 inMatrix: aGLMatrix];
-	[self swap: 6 with: 9 inMatrix: aGLMatrix];
-	[self swap: 7 with: 13 inMatrix: aGLMatrix];
-	[self swap: 11 with: 14 inMatrix: aGLMatrix];
+	GLfloat tmp;
+	GLfloat* m = aGLMatrix;							// Make a simple alias
+
+	tmp = m[1];    m[1] = m[4];    m[4] = tmp;		// Swap 1 and 4
+	tmp = m[2];    m[2] = m[8];    m[8] = tmp;		// Swap 2 and 8
+	tmp = m[3];    m[3] = m[12];   m[12] = tmp;		// Swap 3 and 12
+	tmp = m[6];    m[6] = m[9];    m[9] = tmp;		// Swap 6 and 9
+	tmp = m[7];    m[7] = m[13];   m[13] = tmp;		// Swap 7 and 13
+	tmp = m[11];   m[11] = m[14];  m[14] = tmp;		// Swap 11 and 14
 }
 
+/**
+ * Inverts the specified matrix by calculating the classical adjoint of
+ * the matrix and then divides by the determinant of the matrix.
+ * 
+ * Returns NO if the determinant is zero, as this indicates that the
+ * matrix is singular and cannot be inverted. Returns YES otherwise.
+ */
 +(BOOL) invert: (GLfloat*) aGLMatrix {
-    kmMat4 inv;
-	[[self class] copyMatrix: aGLMatrix into: (GLfloat*)&inv];
+	GLfloat* m = aGLMatrix;				// Make a simple alias
+	GLfloat inv[16];					// The inverse matrix
+	GLfloat det;						// The determinant.
 
-    kmMat4 tmp;
-	[[self class] copyMatrix: (GLfloat*)identityContents into: (GLfloat*)&tmp];
-    
-	BOOL wasInverted = kmGaussJordan(&inv, &tmp);
-	if (wasInverted) {
-		[[self class] copyMatrix: (GLfloat*)&inv into: aGLMatrix];
+	// Create the transpose of the cofactors, as the classical adjoint of the matrix.
+    inv[0] =  CC3Det3x3(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
+    inv[1] = -CC3Det3x3(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15]);
+    inv[2] =  CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15]);
+    inv[3] = -CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11]);
+	
+    inv[4] = -CC3Det3x3(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]);
+    inv[5] =  CC3Det3x3(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15]);
+    inv[6] = -CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15]);
+    inv[7] =  CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11]);
+	
+    inv[8] =  CC3Det3x3(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]);
+    inv[9] = -CC3Det3x3(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15]);
+    inv[10] =  CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]);
+    inv[11] = -CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11]);
+	
+    inv[12] = -CC3Det3x3(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
+    inv[13] =  CC3Det3x3(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14]);
+    inv[14] = -CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14]);
+    inv[15] =  CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
+
+	// Calculate the determinant as a combination of the cofactors of the first row.
+	det = (m[0] * inv[0]) + (m[4] * inv[1]) + (m[8] * inv[2]) + (m[12] * inv[3]);
+
+	BOOL isInvertable = (det != 0.0f);
+	if (isInvertable) {
+		[self scale: inv uniformlyBy: (1.0 / det)];
+		[self copyMatrix: inv into: aGLMatrix];
 	}
-    return wasInverted;
+
+	return isInvertable;
 }
 
 +(BOOL) invertAffine: (GLfloat*) aGLMatrix {

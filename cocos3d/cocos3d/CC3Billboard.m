@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -914,13 +914,24 @@ static GLfloat deviceScaleFactor = 0.0f;
 	return 1.0 / CC_CONTENT_SCALE_FACTOR();
 }
 
+// cocos2d 1.0 and below use 2D structures for particle quad vertices
+// cocos2d 1.1 and above use 3D structures for particle quad vertices
+#ifndef CC_USES_2D_PARTICLES
+	#define CC_USES_2D_PARTICLES	1
+#endif
+#if defined(CC_USES_2D_PARTICLES) && CC_USES_2D_PARTICLES
+	#define CC_PARTICLE_QUAD_TYPE ccV2F_C4B_T2F_Quad
+#else
+	#define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
+#endif
+
 /**
  * Find the absolute bottom left and top right from all four vertices in the quad,
  * assuming that the bl and tr of the quad are nominal representations and do not
  * necessarily represent the true corners of the quad. Then create a rectangle from
  * these true bottom left and top right corners.
  */
--(CGRect) makeRectFromQuad: (ccV2F_C4B_T2F_Quad) quad {
+-(CGRect) makeRectFromQuad: (CC_PARTICLE_QUAD_TYPE) quad {
 	CGFloat blx = MIN(quad.bl.vertices.x, MIN(quad.br.vertices.x, MIN(quad.tl.vertices.x, quad.tr.vertices.x)));
 	CGFloat bly = MIN(quad.bl.vertices.y, MIN(quad.br.vertices.y, MIN(quad.tl.vertices.y, quad.tr.vertices.y)));
 	CGFloat trx = MAX(quad.bl.vertices.x, MAX(quad.br.vertices.x, MAX(quad.tl.vertices.x, quad.tr.vertices.x)));

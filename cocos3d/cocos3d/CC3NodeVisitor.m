@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -56,11 +56,19 @@
 
 @implementation CC3NodeVisitor
 
-@synthesize startingNode, shouldVisitChildren;
+@synthesize currentNode, startingNode, shouldVisitChildren;
 
 -(void) dealloc {
+	[scratchMatrix release];
+	currentNode = nil;				// not retained
+	startingNode = nil;				// not retained
 	[pendingRemovals release];
 	[super dealloc];
+}
+
+-(CC3GLMatrix*) scratchMatrix {
+	if ( !scratchMatrix ) scratchMatrix = [[CC3GLMatrix matrix] retain];
+	return scratchMatrix;
 }
 
 -(CC3PerformanceStatistics*) performanceStatistics {
@@ -69,6 +77,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		currentNode = nil;
 		startingNode = nil;
 		pendingRemovals = nil;
 		shouldVisitChildren = YES;
@@ -81,7 +90,9 @@
 }
 
 -(void) visit: (CC3Node*) aNode {
-	if (!aNode) return;			// Must have a node to work on
+	if (!aNode) return;				// Must have a node to work on
+	
+	currentNode = aNode;			// Make the node being processed available.
 
 	if (!startingNode) {			// If this is the first node, start up
 		startingNode = aNode;		// Not retained
@@ -94,6 +105,8 @@
 		[self close];				// Close the visitor
 		startingNode = nil;			// Not retained
 	}
+	
+	currentNode = nil;				// Done with this node now.
 }
 
 /** Template method that is invoked automatically during visitation to process the specified node. */
@@ -130,10 +143,14 @@
  * Subclasses may override this method to establish a different traversal.
  */
 -(void) processChildrenOf: (CC3Node*) aNode {
+	CC3Node* currNode = currentNode;	// Remember current node
+	
 	CCArray* children = aNode.children;
 	for (CC3Node* child in children) {
 		[self visit: child];
 	}
+
+	currentNode = currNode;				// Restore current node
 }
 
 /**
@@ -203,12 +220,13 @@
 
 @implementation CC3NodeTransformingVisitor
 
-@synthesize shouldLocalizeToStartingNode, isTransformDirty;
+@synthesize shouldLocalizeToStartingNode, shouldRestoreTransforms, isTransformDirty;
 
 -(id) init {
 	if ( (self = [super init]) ) {
 		isTransformDirty = NO;
 		shouldLocalizeToStartingNode = NO;
+		shouldRestoreTransforms = NO;
 	}
 	return self;
 }
@@ -246,11 +264,24 @@
 	}
 }
 
+/**
+ * If the node transforms were changed to be relative to the starting node,
+ * brings the transforms back to what they were by rebuilding them again,
+ * this time from the normal CC3World perspective.
+ */
+-(void) close {
+	[super close];
+	if (shouldLocalizeToStartingNode && shouldRestoreTransforms) {
+		[startingNode markTransformDirty];
+		[startingNode updateTransformMatrices];
+	}
+}
+
 -(CC3GLMatrix*) parentTansformMatrixFor: (CC3Node*) aNode {
 	CC3Node* parentNode = aNode.parent;
 	BOOL localizeToThisNode = shouldLocalizeToStartingNode && (aNode == startingNode ||
 															   parentNode == startingNode);
-	return (parentNode && !localizeToThisNode) ? parentNode.transformMatrix : nil;
+	return localizeToThisNode ? nil : aNode.parentTransformMatrix;
 }
 
 -(NSString*) fullDescription {
@@ -305,6 +336,7 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		boundingBox = kCC3BoundingBoxNull;
+		shouldRestoreTransforms = YES;
 	}
 	return self;
 }
@@ -333,19 +365,6 @@
 	}
 }
 
-/**
- * If the node transforms were changed to be relative to the starting node,
- * brings the transforms back to what they were by rebuilding them again,
- * this time from the normal CC3World perspective.
- */
--(void) close {
-	[super close];
-	if (shouldLocalizeToStartingNode) {
-		[startingNode markTransformDirty];
-		[startingNode updateTransformMatrices];
-	}
-}
-
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, box: %@",
 			[super fullDescription], NSStringFromCC3BoundingBox(boundingBox)];
@@ -363,13 +382,13 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize drawingSequencer, frustum;
+@synthesize drawingSequencer, camera;
 @synthesize shouldDecorateNode, shouldClearDepthBuffer;
 @synthesize textureUnit, textureUnitCount;
 
 -(void) dealloc {
 	drawingSequencer = nil;		// not retained
-	frustum = nil;				// not retained
+	camera = nil;				// not retained
 	[super dealloc];
 }
 
@@ -391,7 +410,7 @@
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
 	return aNode.hasLocalContent
 			&& [self isNodeVisibleForDrawing: aNode]
-			&& [aNode doesIntersectFrustum: frustum];
+			&& [aNode doesIntersectFrustum: camera.frustum];
 }
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode {
@@ -400,8 +419,12 @@
 
 -(void) processChildrenOf: (CC3Node*) aNode {
 	if (drawingSequencer) {
+		CC3Node* currNode = currentNode;	// Remember current node
+
 		shouldVisitChildren = NO;
 		[drawingSequencer visitNodesWithNodeVisitor: self];
+
+		currentNode = currNode;				// Restore current node
 	} else {
 		[super processChildrenOf: aNode];
 	}

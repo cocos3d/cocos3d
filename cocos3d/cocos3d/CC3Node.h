@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,7 +37,19 @@
 
 @class CC3NodeDrawingVisitor, CC3Rotator, CC3NodeBoundingVolume;
 @class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
-@class CC3World, CC3Camera;
+@class CC3World, CC3Camera, CC3Frustum;
+
+
+/**
+ * Enumeration of options for scaling normals after they have been transformed during
+ * vertex drawing.
+ */
+typedef enum {
+	kCC3NormalScalingNone,			/**< Don't resize normals. */
+	kCC3NormalScalingRescale,		/**< Uniformly rescale normals using model-view matrix. */
+	kCC3NormalScalingNormalize,		/**< Normalize each normal after tranformation. */
+	kCC3NormalScalingAutomatic,		/**< Automatically determine optimal normal scaling method. */
+} CC3NormalScaling;
 
 
 #pragma mark -
@@ -146,6 +158,7 @@
 	CC3Vector scale;
 	CC3Vector globalScale;
 	GLfloat boundingVolumePadding;
+	GLfloat scaleTolerance;
 	BOOL isTransformDirty;
 	BOOL isTransformInvertedDirty;
 	BOOL isGlobalRotationDirty;
@@ -157,6 +170,7 @@
 	BOOL isRunning;
 	BOOL shouldAutoremoveWhenEmpty;
 	BOOL shouldUseFixedBoundingVolume;
+	BOOL shouldCleanupWhenRemoved;
 }
 
 /**
@@ -254,11 +268,17 @@
 /**
  * The angular rotation around the axis specified in the rotationAxis property.
  *
- * When setting this value, it is converted to modulo +/-360 degrees.
- *
  * Rotational transformation can also be specified using the rotation property (Euler
- * angles), or the quaternion property. Subsequently, this property can be read to return
- * the corresponding angle of rotation.
+ * angles), or the quaternion property. Subsequently, this property can be read to
+ * return the corresponding angle of rotation.
+ *
+ * When setting this value, it is converted to modulo +/-360 degrees. When reading this
+ * value after making changes using rotateByAngle:aroundAxis:, or using another rotation
+ * property, the value of this property will be clamped to +/-180 degrees.
+ *
+ * For example, if current rotation is 170 degrees around the rotationAxis, invoking
+ * the rotateByAngle:aroundAxis: method using the same rotation axis and 20 degrees,
+ * reading this property will return -170 degrees, not 190 degrees.
  */
 @property(nonatomic, assign) GLfloat rotationAngle;
 
@@ -294,23 +314,114 @@
 @property(nonatomic, assign) GLfloat uniformScale;
 
 /**
- * Indicates whether current local scaling (via the scale property) is uniform along all axes.
- * This does not take into consideration the scaling of any ancestors.
+ * Indicates whether current local scaling (via the scale property) is uniform along
+ * all axes, within the tolerance value specified in the  property.
+ *
+ * This property does not take into consideration the scaling of any ancestors.
  */
 @property(nonatomic, readonly) BOOL isUniformlyScaledLocally;
 
 /**
- * Indicates whether current global scaling (via the globalScale property) is uniform along
- * all axes. This takes into consideration the scaling of all ancestors.
+ * Indicates whether current global scaling (via the globalScale property) is uniform
+ * along all axes, within the tolerance value specified in the 
+ * property, as tested against each ancestor independently.
+ *
+ * This property takes into consideration the scaling of all ancestors.
  */
 @property(nonatomic, readonly) BOOL isUniformlyScaledGlobally;
 
 /**
- * Indicates whether the current transform applied to this node transform is rigid, meaning
- * that it includes only rotation and translation transformations, and does not include any
- * scaling transformations. This takes into consideration the transforms of all ancestors.
+ * Returns whether the current transform applied to this node is rigid.
+ *
+ * A rigid transform contains only rotation and translation transformations and does
+ * not include any scaling transformation. For the transform to be rigid, this node,
+ * and all ancestors of this node, must have unity scaling, or must be within the
+ * tolerance value specified in the  property of unity scaling.
+ *
+ * This implementation tests whether this node has unity scaling (within the
+ * tolerance set in the  property), and then queries whether
+ * the parent node of this node is also rigid. This propagates upwards in the
+ * structural hierarchy, all the way to the root ancestor.
+ *
+ * See the scaleTolerance property for more info on providing a tolerance to
+ * allow this evaluation to be fuzzy.
  */
 @property(nonatomic, readonly) BOOL isTransformRigid;
+
+/**
+ * Indicates a tolerance value that is used when testing scale component values,
+ * including testing whether a component value is close to unity (one), or whether
+ * two component values are close to each other (uniformity).
+ *
+ * Exact unity scaling is useful because an unscaled (rigid) transform matrix can be
+ * inverted much faster than a scaled transform matrix, by a factor of between one and
+ * two orders of magnitude. If it is known that the transform matrix includes no scaling
+ * (has unity scaling), then the matrix will be inverted as a rigid matrix, to make use
+ * of this performance gain during inversion.
+ *
+ * In addition, exact uniform scaling is useful when determining the method used to
+ * rescaling vertex normals during mesh transformations. The methods used if the
+ * transform includes no scaling, or if the transform includes only uniform scaling,
+ * are significantly faster than if the transform includes non-uniform scaling.
+ *
+ * Although you can often deliberately set the scaling to exactly unity, or to be
+ * exactly uniform, there are some occasions, including animation and automatic
+ * physics, where the scale can be close to, but not exactly zero. By permitting
+ * a tolerance, unity scaling or uniform scaling can be assumed if the values are
+ * reasonably close, and the performance gain can be acquired under a wider range
+ * of conditions.
+ *
+ * Specifically, the isTransformRigid will return YES if each of the X, Y & Z
+ * components of the scale property are within the tolerance range defined by
+ * this property, when comparing the components to unity.
+ *
+ * For example, if the value of this property is 0.02, and the value of the scale
+ * property is (1.01, 1.0, 1.02), the isTransformRigid will return YES. However, if
+ * the value of this property was left at zero, the isTransformRigid property would
+ * return NO with the same scale value.
+ *
+ * This property is also used by the isUniformlyScaledLocally and isUniformlyScaledGlobally
+ * properties when testing whether the components of the scale property are equal to each
+ * other, for the purpose of determining whether the scaling is uniform.
+ *
+ * For example, if the value of this property is 0.02 and the value of the scale property
+ * is (3.01, 3.0, 3.02), the isUniformlyScaledLocally property will return YES, as will
+ * the isUniformlyScaledGlobally, if the ancestor scales are similarly uniform.
+ *
+ * If this property is set to zero, then no tolerance is accepted, and all three
+ * components of the scale property must be exactly equal to one for this node to
+ * be considered to have no scaling applied, or exactly equal to each other for
+ * this node to be considered to have uniform scaling.
+ * 
+ * Setting this property sets the same property in all child nodes to the same value.
+ *
+ * Initially, the value of this property is set to the value of the class-side
+ * defaultUnityScaleTolerance property. Use the class-side property to establish
+ * a global tolerance for all CC3Nodes.
+ */
+@property(nonatomic, assign) GLfloat scaleTolerance;
+
+/**
+ * The default value used to set the initial value of the scaleTolerance property
+ * of new CC3Node instances.
+ * 
+ * The initial value of this property is zero, indicating that no tolerance is accepted.
+ * Each scaling component will only be considered to be unity if it is exactly equal to
+ * one, and scaling will only be considered to be uniform if all three components are
+ * exactly equal to each other.
+ */
++(GLfloat) defaultScaleTolerance;
+
+/**
+ * Sets the default value used to set the initial value of the 
+ * property of new CC3Node instances.
+ * 
+ * The initial value of this property is zero, indicating that no tolerance is accepted.
+ * Each scaling component will only be considered to be unity if it is exactly equal to
+ * one, and scaling will only be considered to be uniform if all three components are
+ * exactly equal to each other.
+ */
++(void) setDefaultScaleTolerance: (GLfloat) aTolerance;
 
 /**
  * The bounding volume of this node. This may be used by culling during drawing operations,
@@ -439,7 +550,7 @@
  * for this property to be effective.
  *
  * This property only has effect for nodes with local content to draw (instances of
- * CC3LocalContentNode). Setting this property passes the value to all descendent nodes.
+ * CC3LocalContentNode). Setting this property passes the value to all descendant nodes.
  * Reading this value returns the average value of all child nodes, or returns zero if
  * there are no child nodes.
  */
@@ -457,20 +568,33 @@
  */
 @property(nonatomic, readonly) BOOL isMeshNode;
 
+
+#pragma mark Mesh configuration
+
 /**
  * Indicates whether the back faces should be culled on the meshes contained in
  * descendants of this node.
+ *
+ * The initial value is YES, indicating that back faces will not be displayed. You can set
+ * this property to NO if you have reason to display the back faces of the mesh (for instance,
+ * if you have a rectangular plane and you want to show both sides of it).
+ *
+ * Since the normal of the face points out the front face, back faces interact with light
+ * the same way the front faces do, and will appear luminated by light that falls on the
+ * front face, much like a stained-glass window. This may not be the affect that you are after,
+ * and for some lighting conditions, instead of disabling back face culling, you might consider
+ * creating a second textured front face, placed back-to-back with the original front face.
+ *
+ * Be aware that culling improves performance, so this property should be set to NO
+ * only when specifically needed for visual effect, and only on the meshes that need it.
  *
  * Setting this value sets the same property on all descendant nodes.
  *
  * Querying this property returns NO if any of the descendant mesh nodes have this property
  * set to NO. Initially, and in most cases, all mesh nodes have this property set to YES.
  *
- * Be aware that culling improves performance, so this property should be set to NO
- * only when specifically needed for visual effect, and only on the meshes that need it.
- *
- * For more information about this use of this property, see the notes for the same
- * property on the CC3MeshNode class, plus the class notes of that class.
+ * For more information about this use of this property, see the class notes for the
+ * CC3MeshNode class.
  */
 @property(nonatomic, assign) BOOL shouldCullBackFaces;
 
@@ -478,15 +602,221 @@
  * Indicates whether the front faces should be culled on the meshes contained in
  * descendants of this node.
  *
+ * The initial value is NO. Normally, you should leave this property with the initial value,
+ * unless you have a specific need not to display the front faces.
+ *
  * Setting this value sets the same property on all descendant nodes.
  *
  * Querying this property returns YES if any of the descendant mesh nodes have this property
  * set to YES. Initially, and in most cases, all mesh nodes have this property set to NO.
  *
- * For more information about this use of this property, see the notes for the same
- * property on the CC3MeshNode class, plus the class notes of that class.
+ * For more information about this use of this property, see the class notes for the
+ * CC3MeshNode class.
  */
 @property(nonatomic, assign) BOOL shouldCullFrontFaces;
+
+/**
+ * Indicates whether the edge-widing algorithm used by the GL engine to determine
+ * which face of a triangle is the front face should use clockwise winding.
+ *
+ * If this property is set to YES, the front face of all triangles in the mesh
+ * of this node will be determined using clockwise winding of the edges. If this
+ * property is set to NO, the front face of all triangles in the mesh of this
+ * node will be determined using counter-clockwise winding of the edges.
+ *
+ * The initial value of this property is NO, indicating that the OpenGL-standard
+ * counter-clockwise winding will be used by the GL engine to determine the front
+ * face of all triangles in the mesh of this node. Unless you have a reason to
+ * change this value, you should leave it at the initial value.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns YES if any of the descendant mesh nodes have
+ * this property set to YES, otherwise returns NO.
+ */
+@property(nonatomic, assign) BOOL shouldUseClockwiseFrontFaceWinding;
+
+/**
+ * Indicates whether the shading of the faces of the mesh of this node should be
+ * smoothly shaded, using color interpolation between vertices.
+ *
+ * If this property is set to YES, the color of each pixel in any face in the mesh
+ * of this node will be interpolated from the colors of all three vertices of the
+ * face, using the distance of the pixel to each vertex as the means to interpolate.
+ * The result is a smooth gradient of color across the face.
+ *
+ * If this property is set to NO, the color of all pixels in any face in the mesh
+ * of this node will be determined by the color at the third vertex of the face.
+ * All pixels in the face will be painted in the same color.
+ *
+ * The initial value is YES. For realistic rendering, you should leave this
+ * property with the initial value, unless you have a specific need to render
+ * flat color across each face in the mesh, such as to deliberately create a
+ * cartoon-like effect on the model.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns NO if any of the descendant mesh nodes have this property
+ * set to NO. Initially, and in most cases, all mesh nodes have this property set to YES.
+ */
+@property(nonatomic, assign) BOOL shouldUseSmoothShading;
+
+/**
+ * Specifies the method to be used to scale vertex normals after they have been transformed
+ * during vertex drawing.
+ *
+ * Normal vectors should have a unit length. Since normals are vectors in the local coordinate
+ * system of the node, they are transformed into world and eye coordinates during drawing.
+ *
+ * During transformation, there are several factors that might distort the normal vector:
+ *   - If the normals started out not being of unit length, they will generally be transformed
+ *     into vectors that are not of unit length.
+ *   - If the transforms are not rigid, and include scaling, even normals that have unit
+ *     length in object space will end up shorter or longer than unit length in eye space.
+ *   - If the transform scaling is not uniform, the normals will shear, and end up shorter
+ *     or longer than unit length.
+ *
+ * Normals that are not of unit length, or are sheared, will cause portions of the objects
+ * to appear lighter or darker after transformation, or will cause specular highlights to
+ * actually be dark, distorting the overall look of the material covering the mesh.
+ *
+ * The GL engine can be instructed to compensate for these transforms by setting this
+ * property as follows:
+ *
+ *   - kCC3NormalScalingNone:
+ *     No compensating scaling is performed on the normals after they have been transformed.
+ *     This has the highest performance, but will not adjust the normals if they have been
+ *     scaled. Use this option if you know that the normals will not be significantly scaled
+ *     during transformation.
+ *
+ *   - kCC3NormalScalingRescale:
+ *     Uses the modelview matrix to scale all normals by the inverse of the node's overall
+ *     scaling. This does have a processing cost, but is much faster than using 
+ *     kCC3NormalScalingNormalize. However, it is not as accurate if significantly non-uniform
+ *     scaling has been applied to the node.
+ *
+ *   - kCC3NormalScalingNormalize:
+ *     Normalizes each norml vector independently. This is the most accurate method, but is
+ *     also, by far, the most computationally expensive. Use this method only if selecting
+ *     one of the other options does not give you the results that you expect.
+ *
+ *   - kCC3NormalScalingAutomatic:
+ *     Chooses the most appropriate method based on the scaling that has been applied to the
+ *     node. If no scaling has been applied to the node, kCC3NormalScalingNone will be used.
+ *     If only uniform scaling has been applied to the node, kCC3NormalScalingRescale will
+ *     be used. If non-uniform scaling has been applied to the node, then
+ *     kCC3NormalScalingNormalize will be used.
+ *
+ * The initial value of this property is kCC3NormalScalingAutomatic. You can generally leave
+ * this property at this default value unless you are not getting the results that you expect. 
+ *
+ * Setting this property sets the corresponding property in all descendant nodes, and affects
+ * the processing of normals in all vertex meshes contained in all descendant nodes.
+ *
+ * Querying this property returns the value of this property from the first descendant mesh
+ * node, or will return kCC3NormalScalingNone if no mesh node are found in the descendants
+ * of this node.
+ */
+@property(nonatomic, assign) CC3NormalScaling normalScalingMethod;
+
+/**
+ * Indicates whether this instance will disable the GL depth mask while drawing the
+ * content of this node. When the depth mask is disabled, drawing activity will not
+ * write to the depth buffer.
+ *
+ * If this property is set to NO, the Z-distance of this node will be compared against
+ * previously drawn content, and the drawing of this node will update the depth buffer,
+ * so that subsequent drawing will take into consideration the Z-distance of this node.
+ *
+ * If this property is set to YES, the Z-distance of this node will still be compared
+ * against previously drawn content, but the drawing of this node will NOT update the
+ * depth buffer, and subsequent drawing will NOT take into consideration the Z-distance
+ * of this node.
+ *
+ * This property only has effect if the shouldDisableDepthTest property is set to NO.
+ *
+ * In most cases, to draw an accurate scene, we want depth testing to be performed
+ * at all times, and this property is usually set to NO. However, there are some
+ * occasions where it is useful to disable writing to the depth buffer during the
+ * drawing of a node. One notable situation is with particle systems, where temporarily
+ * disabling the depth mask will avoid Z-fighting between individual particles.
+ *
+ * The initial value of this property is NO, indicating that the GL depth mask will
+ * not be disabled during the drawing of this node, and the depth buffer will be
+ * updated during the drawing of this node.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns YES if any of the descendant mesh nodes have
+ * this property set to YES, otherwise returns NO.
+ */
+@property(nonatomic, assign) BOOL shouldDisableDepthMask;
+
+/**
+ * Indicates whether this instance will disable the GL depth test while drawing
+ * the content of this node. When the depth test is disabled, the Z-distance of
+ * this node will not be compared against previously drawn content, and drawing
+ * activity will not write to the depth buffer.
+ *
+ * If this property is set to NO, the Z-distance of this node will be compared against
+ * previously drawn content, and the drawing of this node will update the depth buffer,
+ * so that subsequent drawing will take into consideration the Z-distance of this node.
+ *
+ * If this property is set to YES, the Z-distance of this node will not be compared
+ * against previously drawn content and this node will be drawn over all previously
+ * drawn content. In addition, the drawing of this node will not update the depth
+ * buffer, with the result that subsequent object drawing will not take into
+ * consideration the Z-distance of this node.
+ *
+ * In most cases, to draw an accurate scene, we want depth testing to be performed
+ * at all times, and this property is usually set to NO. However, there are some
+ * occasions where it is useful to disable depth testing during the drawing of a node.
+ * One notable situation is with particle systems, where temporarily disabling depth
+ * testing may help avoid Z-fighting between individual particles.
+ *
+ * The initial value of this property is NO, indicating that the GL depth tesing will
+ * not be disabled during the drawing of this node, and the depth buffer will be
+ * updated during the drawing of this node.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns YES if any of the descendant mesh nodes have
+ * this property set to YES, otherwise returns NO.
+ */
+@property(nonatomic, assign) BOOL shouldDisableDepthTest;
+
+/**
+ * The depth function used by the GL engine when comparing the Z-distance of this
+ * node against previously drawn content.
+ *
+ * This property only has effect if the shouldDisableDepthTest property is set to NO.
+ *
+ * This property must be set to one of the following values:
+ *   - GL_LESS - the content of this node will be drawn if it is closer to the camera
+ *     than previously drawn content.
+ *   - GL_LEQUAL - the content of this node will be drawn if it is at least as close
+ *     to the camera as previously drawn content.
+ *   - GL_EQUAL - the content of this node will be drawn if it is exactly as close
+ *     to the camera as previously drawn content.
+ *   - GL_GEQUAL - the content of this node will be drawn if it is at least as far
+ *     away from the camera as previously drawn content.
+ *   - GL_GREATER - the content of this node will be drawn if it is farther away from
+ *     the camera than previously drawn content.
+ *   - GL_NOTEQUAL - the content of this node will be drawn if it is not exactly as
+ *     close to the camera as previously drawn content.
+ *   - GL_ALWAYS - the content of this node will always be drawn
+ *   - GL_NEVER - the content of this node will not be drawn
+ *
+ * The initial value of this property is GL_LEQUAL. In most cases, to draw an accurate
+ * scene, this value is the most suitable. However, some special cases, including some
+ * particle emitters, may benefit from the use of one of the other depth functions.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns the value of this property from the first descendant mesh
+ * node, or will return GL_NEVER if no mesh node are found in the descendants of this node.
+ */
+@property(nonatomic, assign) GLenum depthFunction;
 
 /**
  * Indicates whether the bounding volume of this node should be considered fixed,
@@ -521,17 +851,17 @@
 /**
  * Indicates whether the dynamic behaviour of this node is enabled.
  *
- * Setting this property affects both internal activities driven by the update process,
- * and any CCActions controling this node. Setting this property to NO will effectively
- * pause all update and CCAction behaviour on the node. Setting this property to YES will
- * effectively resume the update and CCAction behaviour.
+ * Setting this property affects both internal activities driven by the update
+ * process, and any CCActions controling this node. Setting this property to NO will
+ * effectively pause all update and CCAction behaviour on the node. Setting this
+ * property to YES will effectively resume the update and CCAction behaviour.
  * 
  * Setting this property sets the same property in all descendant nodes.
  *
- * Be aware that when this property is set to NO, any CCActions are just paused, not stopped.
- * If you want to fully stop all CCActions on this node, use the stopAllActions method, or
- * if you want to fully stop all CCActions on this node AND all descendant nodes, use the
- * cleanup method.
+ * Be aware that when this property is set to NO, any CCActions are just paused,
+ * but not stopped, or removed. If you want to fully stop all CCActions on this node,
+ * use the stopAllActions method, or if you want to fully stop all CCActions on this
+ * node AND all descendant nodes, use the cleanup method.
  */
 @property(nonatomic, assign) BOOL isRunning;
 
@@ -1175,6 +1505,15 @@
 @property(nonatomic, retain) CC3GLMatrix* transformMatrix;
 
 /**
+ * Returns the transform matrix of the parent node. Returns nil if there is no parent.
+ * 
+ * This template property is used by this class to base the transform of this node on
+ * the transform of its parent. A subclass may override to return nil if it determines
+ * that it wants to ignore the parent transform when calculating its own transform.
+ */
+@property(nonatomic, readonly) CC3GLMatrix* parentTransformMatrix;
+
+/**
  * Indicates whether any of the transform properties, location, rotation, or scale
  * have been changed, and so the transformMatrix of this needs to be recalculated.
  *
@@ -1205,8 +1544,12 @@
  * Applies the transform properties (location, rotation, scale) to the transformMatrix
  * of this node, and all descendant nodes.
  *
- * This method is invoked automatically during scheduled update processing between the
- * invocations of the updateBeforeTransform: and updateAfterTransform: methods.
+ * To ensure that the transforms are accurately applied, this method also automatically
+ * ensures that the transform matrices of any ancestor nodes are also updated, if needed,
+ * before updating this node and its descendants.
+ *
+ * Equivalent behaviour is invoked automatically during scheduled update processing
+ * between the invocations of the updateBeforeTransform: and updateAfterTransform: methods.
  *
  * Changes that you make to the transform properties within the updateBeforeTransform:
  * method will automatically be applied to the transformMatrix of the node. Because of this,
@@ -1214,8 +1557,12 @@
  *
  * However, if you need to make changes to the transform properties in the
  * updateAfterTransform: method of a node, after you have made all your changes to the
- * node properties, you should then invoke this updateTransformMatrices method on the node,
- * in order to have those changes applied to the transformMatrix.
+ * node properties, you should then invoke this method on the node, in order to have
+ * those changes applied to the transformMatrix.
+ *
+ * Similarly, if you have updated the transform properties of this node asynchronously
+ * through an event callback, and want those changes to be immediately reflected in
+ * the transform matrices, you can use this method to do so.
  */
 -(void) updateTransformMatrices;
 
@@ -1223,12 +1570,30 @@
  * Applies the transform properties (location, rotation, scale) to the transformMatrix
  * of this node, but NOT to any descendant nodes.
  *
+ * To ensure that the transforms are accurately applied, this method also automatically
+ * ensures that the transform matrices of any ancestor nodes are also updated, if needed,
+ * before updating this node and its descendants.
+ *
  * Use this method only when you know that you only need the transformMatrix of the
  * specific node updated, and not the matrices of the decendants of that node, or if
  * you will manually update the transformMatrices of the descendant nodes. If in doubt,
- * use updateTransformMatrices.
+ * use the updateTransformMatrices method instead.
  */
 -(void) updateTransformMatrix;
+
+/**
+ * Returns the heighest node in my ancestor hierarchy, including myself, that
+ * is dirty. Returns nil if neither myself nor any of my ancestors are dirty.
+ *
+ * This method can be useful when deciding at what level to update a hierarchy.
+ *
+ * This method is invoked automatically by the updateTransformMatrices and
+ * updateTransformMatrix, so in most cases, you do not need to use this method
+ * directly. However, there may be special cases where you want to determine
+ * beforehand whether this node or its ancestors are dirty or not before running
+ * either of those methods.
+ */
+@property(nonatomic, readonly) CC3Node* dirtiestAncestor;
 
 /**
  * Template method that recalculates the transform matrix of this node from the
@@ -1452,15 +1817,26 @@
  *
  * Does nothing if the specified node is not actually a child of this node.
  *
- * Be aware that removing a node does not automatically stop all CCActions on the node.
- * If you are removing the node and are finished with it, and there are CCActions
- * associated with the node, to avoid memory leaks, be sure to invoke either the
- * stopAllActions method or the cleanup method as well.
+ * If the shouldCleanupWhenRemoved property of the node being removed is set
+ * to YES, any CCActions running on that node will be stopped and removed.
+ * If the shouldCleanupWhenRemoved property of the node being removed is set
+ * to NO, any CCActions running on that node will be paused, but not removed.
  *
- * If the shouldAutoremoveWhenEmpty property is YES, and the last child node is being
- * removed, this node will invoke its own remove method to remove itself from the
- * node hierarchy as well. See the notes for the shouldAutoremoveWhenEmpty property
- * for more info on autoremoving when all child nodes have been removed.
+ * Stopping and removing CCActions is important because the actions running on a
+ * node retain links to the node. If the actions are simply paused, those links
+ * will be retained forever, potentially creating memory leaks of nodes that are
+ * invisibly retained by their actions.
+ *
+ * By default, the shouldCleanupWhenRemoved property is set to YES, and all
+ * CCActions running on the node being removed will be stopped and removed.
+ * If the shouldCleanupWhenRemoved is set to NO, it is up to you to clean up any
+ * running CCActions when you are done with the node. You can do this using either
+ * the stopAllActions or cleahup method.
+ *
+ * If the shouldAutoremoveWhenEmpty property is YES, and the last child node is
+ * being removed, this node will invoke its own remove method to remove itself from
+ * the node hierarchy as well. See the notes for the shouldAutoremoveWhenEmpty
+ * property for more info on autoremoving when all child nodes have been removed.
  */
 -(void) removeChild: (CC3Node*) aNode;
 
@@ -1471,10 +1847,21 @@
  * Convenience method that removes this node from its structural hierarchy
  * by simply invoking removeChild: on the parent of this node.
  *
- * Be aware that removing a node does not automatically stop all CCActions on the node.
- * If you are removing this node and are finished with it, and there are CCActions
- * associated with the node, to avoid memory leaks, be sure to invoke either the
- * stopAllActions method or the cleanup method as well.
+ * If the shouldCleanupWhenRemoved property of this node is set to YES, any CCActions
+ * running on this node will be stopped and removed. If the shouldCleanupWhenRemoved
+ * property of this node is set to NO, any CCActions running on that node will be
+ * paused, but not removed.
+ *
+ * Stopping and removing CCActions is important because the actions running on a
+ * node retain links to the node. If the actions are simply paused, those links
+ * will be retained forever, potentially creating memory leaks of nodes that are
+ * invisibly retained by their actions.
+ *
+ * By default, the shouldCleanupWhenRemoved property is set to YES, and all
+ * CCActions running on this node will be stopped and removed. If the
+ * shouldCleanupWhenRemoved is set to NO, it is up to you to clean up any running
+ * CCActions when you are done with this node. You can do this using either the
+ * stopAllActions or cleahup method.
  * 
  * During a node visitation run with a CCNodeVisitor, you should avoid using this
  * method directly. The visitation process involves iterating through collections of
@@ -1485,6 +1872,16 @@
  * is complete.
  */
 -(void) remove;
+
+/**
+ * Template method that is invoked automatically when this node is removed from
+ * its parent node.
+ *
+ * This implementation sets the isRunning property to NO. It also checks the value
+ * of the shouldCleanupWhenRemoved property and, if it is set to YES, stops and
+ * removes any CCActions running on this node.
+ */
+-(void) wasRemoved;
 
 /**
  * Retrieves the first node found with the specified name, anywhere in the structural hierarchy
@@ -1520,6 +1917,35 @@
 #pragma mark CC3Node actions
 
 /**
+ * Indicates whether all the CCActions currently running on this node and all
+ * descendants should be stopped and removed when this node is removed from its parent.
+ *
+ * If the value of this property is YES, when this node is removed from its parent,
+ * the cleanup method will automatically be invoked. If the value of this method is NO,
+ * when this node is removed from its parent, the isRunning property will be set to NO,
+ * which causes all actions to be paused, but not removed.
+ *
+ * Stopping and removing CCActions is important because the actions running on a node
+ * retain links to the node. If the actions are simply paused, those links will be
+ * retained forever, potentially creating memory leaks of nodes that are invisibly
+ * retained by their actions.
+ *
+ * The iniital value of this property is YES, indicating that all actions will be stopped
+ * and removed when this node is removed from its parent. If you have reason to want the
+ * actions to be paused but not removed when removing this node from its parent, set this
+ * property to NO.
+ *
+ * One example of such a situation might be if you are moving a node from one parent
+ * to another. You may want to temporarily set this property to NO during the move
+ * so that the actions are paused during the move, but resumed when the node is added
+ * to a new parent.
+ *
+ * If you have this property set to NO, you can manually stop and remove all actions
+ * using the cleanup method.
+ */
+@property(nonatomic, assign) BOOL shouldCleanupWhenRemoved;
+
+/**
  * Executes an action, and returns the action that is executed.
  * The node becomes the action's target.
  */
@@ -1538,7 +1964,7 @@
 -(CCAction*) getActionByTag:(int) tag;
 
 /**
- * Stops all running actions for this node and all descendant nodes.
+ * Stops all running CCActions for this node and all descendant nodes.
  * Effectively invokes stopAllActions on this node and all descendant nodes.
  */
 -(void) cleanup;

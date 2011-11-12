@@ -1,7 +1,7 @@
 /*
  * LandingCraft.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -63,17 +63,17 @@
 				// that each invader moves at its own speed.
 				CCActionInterval* invaderAction;
 				if (invader.containsAnimation) {
-					invaderAction = [CC3Animate actionWithDuration: RandomFloatBetween(2.5, 10.0)];
+					invaderAction = [CC3Animate actionWithDuration: CC3RandomFloatBetween(2.5, 10.0)];
 				} else {
 					invaderAction = [CC3RotateBy actionWithDuration: 1.0
-														   rotateBy: cc3v(0.0, RandomFloatBetween(30.0, 90.0), 0.0)];
+														   rotateBy: cc3v(0.0, CC3RandomFloatBetween(30.0, 90.0), 0.0)];
 				}
 				CCActionInterval* groundAction = [CCRepeat actionWithAction: invaderAction times: UINT_MAX];
 
 				// Create a landing action that is a bouncing drop of random duration, to simulate raining down.
 				CC3Vector landingLocation = cc3v(invader.location.x, 0.0, invader.location.z);
 				CCActionInterval* landingAction = [CCEaseBounceOut actionWithAction:
-													[CC3MoveTo actionWithDuration: RandomFloatBetween(1.0, 2.0) 
+													[CC3MoveTo actionWithDuration: CC3RandomFloatBetween(1.0, 2.0) 
 																		   moveTo: landingLocation]];
 
 				// Set up a sequence on the invader...first drop, and then animate or rotate
@@ -102,17 +102,8 @@
  */
 -(void) evaporate {
 	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 1.0];
-	CCActionInstant* cleanUp = [CCCallFunc actionWithTarget: self selector: @selector(cleanUp)];
-	[self runAction: [CCSequence actionOne: fadeOut two: cleanUp]];
-}
-
-/** Callback to actually remove the army. Stop all actions, then remove this instance from the world. */
--(void) cleanUp {
-	[self stopAllActions];
-	for (CC3Node* child in children) {
-		[child stopAllActions];
-	}
-	[super remove];
+	CCActionInstant* remove = [CCCallFunc actionWithTarget: self selector: @selector(remove)];
+	[self runAction: [CCSequence actionOne: fadeOut two: remove]];
 }
 
 @end

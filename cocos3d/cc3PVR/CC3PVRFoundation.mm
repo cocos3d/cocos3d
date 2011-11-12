@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.mm
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -114,6 +114,29 @@ NSString* NSStringFromCPODData(PODClassPtr aCPODData) {
 	[desc appendFormat: @", size: %i", pcd->n];
 	[desc appendFormat: @", stride: %i", pcd->nStride];
 	[desc appendFormat: @", data ptr: %u", pcd->pData];
+	return desc;
+}
+
+NSString* NSStringFromCPVRTBoneBatches(PODClassPtr aCPVRTBoneBatches) {
+	CPVRTBoneBatches* pbb = (CPVRTBoneBatches*)aCPVRTBoneBatches;
+	int batchCount = pbb->nBatchCnt;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"CPVRTBoneBatches with %i batches of max %i bones per batch at: %x",
+			batchCount, pbb->nBatchBoneMax, pbb->pnBatches];
+
+	if (batchCount) {
+		[desc appendFormat: @"\n\t\tbone counts: (%i", pbb->pnBatchBoneCnt[0]];
+		for (int i = 1; i < batchCount; i++) {
+			[desc appendFormat: @", %i", pbb->pnBatchBoneCnt[i]];
+		}
+		[desc appendFormat: @")"];
+
+		[desc appendFormat: @"\n\t\tbone vertex offsets: (%i", pbb->pnBatchOffset[0]];
+		for (int i = 1; i < batchCount; i++) {
+			[desc appendFormat: @", %i", pbb->pnBatchOffset[i]];
+		}
+		[desc appendFormat: @")"];
+	}
 	return desc;
 }
 

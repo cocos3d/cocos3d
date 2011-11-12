@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Textures.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -645,11 +645,12 @@ GLuint minimumTextureUnits = 1;
 	// If the requested texture unit hasn't been allocated yet, add it.
 	if (texUnit >= self.textureUnitCount) {
 		// Make sure we don't add beyond the max number of texture units for the platform
-		GLuint platformMaxTexUnits = self.engine.platform.maxTextureUnits.value;
-		GLuint tuMax = MIN(texUnit, platformMaxTexUnits);
+		NSAssert2(texUnit < self.engine.platform.maxTextureUnits.value,
+				  @"Request for texture unit %u exceeds maximum of %u texture units",
+				  texUnit, self.engine.platform.maxTextureUnits.value);
 
 		// Add all texture units between the current count and the requested texture unit.
-		for (GLuint i = self.textureUnitCount; i <= tuMax; i++) {
+		for (GLuint i = self.textureUnitCount; i <= texUnit; i++) {
 			CC3OpenGLES11TextureUnit* tu = [self makeTextureUnit: i];
 			[tu open];		// Read the initial values
 			[textureUnits addObject: tu];

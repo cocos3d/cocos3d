@@ -1,7 +1,7 @@
 /*
  * TileWorld.m
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -70,10 +70,17 @@
 	[self addChild: cam];
 
 	// Create a light and attach it to the camera. Since we are creating many lights
-	// across many worlds by copying this world, we'll force all lights across all
-	// worlds to use the same GL light index, to avoid running out of OpenGL lights
+	// across many worlds, we'll force all lights across all worlds to use the same
+	// GL light index, to avoid running out of OpenGL lights.
+	// The shouldCopyLightIndex property is useful if we will be copying the light
+	// (which we do not do here...but it's included for demonstration purposes).
 	CC3Light* lamp = [CC3Light lightWithName: kLampName withLightIndex: kTileLightIndex];
 	lamp.shouldCopyLightIndex = YES;
+	
+	// Move the lamp to a random location to one side or the other of the camera (as
+	// if it were attached to a boom on the camera, of random length off to one side).
+	lamp.location = cc3v( CC3RandomFloatBetween(-5.0, 5.0), 0.0, 0.0 );
+	
 	[cam addChild: lamp];
 
 	// Turn off ambient lighting so that when the lamp is removed,
@@ -83,10 +90,6 @@
 
 -(CC3Node*) mainNode {
 	return mainNode;
-}
-
--(CC3Light*) lamp {
-	return (CC3Light*)[self getNodeNamed: kLampName];
 }
 
 -(void) setMainNode: (CC3Node*) aNode {

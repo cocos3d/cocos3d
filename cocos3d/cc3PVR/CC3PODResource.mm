@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.6.2
+ * cocos3d 0.6.3
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,6 +40,7 @@ extern "C" {
 #import "CC3PODLight.h"
 #import "CC3PODMesh.h"
 #import "CC3PODMaterial.h"
+#import "CC3PODVertexSkinning.h"
 #import "CCTextureCache.h"
 
 
@@ -54,7 +55,6 @@ static const id placeHolder = [NSObject new];
 
 /** The underlying pvrtModel property, cast to the correct CPVRTModelPOD C++ class. */
 @property(nonatomic, readonly)  CPVRTModelPOD* pvrtModelImpl;
-
 @end
 
 
@@ -114,6 +114,7 @@ static const id placeHolder = [NSObject new];
 	[self buildMaterials];
 	[self buildMeshes];
 	[self buildNodes];
+	[self buildSoftBodyNode];
 }
 
 
@@ -176,11 +177,72 @@ static const id placeHolder = [NSObject new];
 }
 
 -(CC3Node*) buildStructuralNodeAtIndex: (uint) nodeIndex {
+	if ( [self isBoneNode: nodeIndex] ) {
+		return [CC3PODBone nodeAtIndex: nodeIndex fromPODResource: self];
+	}
 	return [CC3PODNode nodeAtIndex: nodeIndex fromPODResource: self];
 }
 
 -(PODStructPtr) nodePODStructAtIndex: (uint) nodeIndex {
 	return &self.pvrtModelImpl->pNode[nodeIndex];
+}
+
+-(BOOL) isNodeIndex: (int) aNodeIndex ancestorOfNodeIndex: (int) childIndex {
+
+	// Return YES if nodes are the same
+	if (aNodeIndex == childIndex) return YES;
+
+	// Get the SPOD structure of the child, and extract the index of its parent node.
+	// Return no parent
+	SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: childIndex];
+	int parentIndex = psn->nIdxParent;
+	if (parentIndex < 0) return NO;
+
+	// Invoke recursion on the index of the parent node
+	return [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: parentIndex];
+}
+
+-(BOOL) isBoneNode: (uint) aNodeIndex {
+	uint mCount = self.meshCount;
+	// Cycle through the meshes
+	for (uint mi = 0; mi < mCount; mi++) {
+		SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: mi];
+		CPVRTBoneBatches* pbb = &psm->sBoneBatches;
+
+		// Cycle through the bone batches within each mesh
+		for (int batchIndex = 0; batchIndex < pbb->nBatchCnt; batchIndex++) {
+			int boneCount = pbb->pnBatchBoneCnt[batchIndex];
+			int* boneNodeIndices = &(pbb->pnBatches[batchIndex * pbb->nBatchBoneMax]);
+
+			// Cycle through the bones of each batch. If the bone node is a child of
+			// the specified node, then the specified node is a bone as well.
+			for (int boneIndex = 0; boneIndex < boneCount; boneIndex++) {
+				if ( [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: boneNodeIndices[boneIndex]] ) {
+					return YES;
+				}
+			}
+		}
+	}
+	return NO;
+}
+
+-(void) buildSoftBodyNode {
+	CCArray* softBodyComponents = [CCArray arrayWithCapacity: nodes.count];
+	for (CC3Node* baseNode in nodes) {
+		if (baseNode.hasSoftBodyContent) {
+			[softBodyComponents addObject: baseNode];
+		}
+	}
+	if (softBodyComponents.count > 0) {
+		NSString* sbName = [NSString stringWithFormat: @"%@-SoftBody", self.name];
+		CC3SoftBodyNode* sbn = [CC3SoftBodyNode nodeWithName: sbName];
+		for (CC3Node* sbc in softBodyComponents) {
+			[sbn addChild: sbc];
+			[nodes removeObjectIdenticalTo: sbc];
+		}
+		[sbn bindRestPose];
+		[nodes addObject: sbn];
+	}
 }
 
 
@@ -195,7 +257,12 @@ static const id placeHolder = [NSObject new];
 	return (CC3MeshNode*)[self nodeAtIndex: meshIndex];
 }
 
+/** If we are vertex skinning, return a skin mesh node, otherwise return a generic mesh node. */
 -(CC3MeshNode*) buildMeshNodeAtIndex: (uint) meshIndex {
+	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: meshIndex];
+	if (psm->sBoneBatches.nBatchCnt) {
+		return [CC3PODSkinMeshNode nodeAtIndex: meshIndex fromPODResource: self];
+	}
 	return [CC3PODMeshNode nodeAtIndex: meshIndex fromPODResource: self];
 }
 
@@ -213,15 +280,23 @@ static const id placeHolder = [NSObject new];
 	
 	// Build the array containing all materials in the PVRT structure
 	for (uint i = 0; i < mCount; i++) {
-		[meshes addObject: [self buildMeshModelAtIndex: i]];
+		[meshes addObject: [self buildMeshAtIndex: i]];
 	}
 }
 
--(CC3Mesh*) meshModelAtIndex: (uint) meshIndex {
+-(CC3Mesh*) meshAtIndex: (uint) meshIndex {
 	return (CC3Mesh*)[meshes objectAtIndex: meshIndex];
 }
 
--(CC3Mesh*) buildMeshModelAtIndex: (uint) meshIndex {
+// Deprecated method.
+-(CC3Mesh*) meshModelAtIndex: (uint) meshIndex { return [self meshAtIndex: meshIndex]; }
+
+/** If we have skinning bones, return a skinned mesh, otherwise return a generic mesh. */
+-(CC3Mesh*) buildMeshAtIndex: (uint) meshIndex {
+	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: meshIndex];
+	if (psm->sBoneBatches.nBatchCnt) {
+		return [CC3PODSkinMesh meshAtIndex:meshIndex fromPODResource:self];
+	}
 	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
 }
 
