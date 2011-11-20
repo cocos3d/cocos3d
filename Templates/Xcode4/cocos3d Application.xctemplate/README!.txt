@@ -1,7 +1,7 @@
 README!
 ----------------------
 
-cocos3d 0.6.3
+cocos3d 0.6.4
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -38,7 +38,7 @@ When adapting this template project for your own application, don't forget to re
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.3 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d 0.6.4 is compatible with cocos2d versions 0.99.5 through 1.1.
 
 At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
 configured to use that version. This section includes notes on compatibility with other versions.

@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.mm
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -82,8 +82,56 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
 		case ePODTriangles:
 			[desc appendFormat: @"ePODTriangles"];
 			break;
-		case ePODLines:
-			[desc appendFormat: @"ePODLines"];
+//		case ePODLines:				// ePODLines not supported as of PVR 2.09
+//			[desc appendFormat: @"ePODLines"];
+			break;
+		default:
+			[desc appendFormat: @"unknown ePrimitiveType (%u)", psm->ePrimitiveType];
+			break;
+	}
+	[desc appendFormat: @"\n\tvertices: %u (%@)", psm->nNumVertex, NSStringFromCPODData(&psm->sVertex)];
+	[desc appendFormat: @"\n\t\tnormals: (%@)", NSStringFromCPODData(&psm->sNormals)];
+	[desc appendFormat: @"\n\t\ttangents: (%@)", NSStringFromCPODData(&psm->sTangents)];
+	[desc appendFormat: @"\n\t\tbinormals: (%@)", NSStringFromCPODData(&psm->sBinormals)];
+	[desc appendFormat: @"\n\t\tcolors: (%@)", NSStringFromCPODData(&psm->sVtxColours)];
+	for (uint i = 0; i < psm->nNumUVW; i++) {
+		[desc appendFormat: @"\n\t\ttexmap%u: (%@)", i, NSStringFromCPODData(&psm->psUVW[i])];
+	}
+	[desc appendFormat: @"\n\t\tboneIndices: (%@)", NSStringFromCPODData(&psm->sBoneIdx)];
+	[desc appendFormat: @"\n\t\tboneWeights: (%@)", NSStringFromCPODData(&psm->sBoneWeight)];
+	[desc appendFormat: @"\n\tfaces: %u (%@)", psm->nNumFaces, NSStringFromCPODData(&psm->sFaces)];
+	[desc appendFormat: @"\n\tstrips: %u", psm->nNumStrips];
+	[desc appendFormat: @", texture channels: %u", psm->nNumUVW];
+	[desc appendFormat: @", interleaved data: %u", psm->pInterleaved];
+	
+	int batchCount = psm->sBoneBatches.nBatchCnt;
+	[desc appendFormat: @", bone batches: %i", batchCount];
+	
+	for (int bbi = 0; bbi < psm->sBoneBatches.nBatchCnt; bbi++) {
+		int boneCount = psm->sBoneBatches.pnBatchBoneCnt[bbi];
+		[desc appendFormat: @"\n\t\tbatch with %i bone nodes:", boneCount];
+		BOOL firstBone = YES;
+		for (int bi = 0; bi < boneCount; bi++) {
+			[desc appendFormat: @"%@", firstBone ? @" (" : @", "];
+			[desc appendFormat: @"%i", psm->sBoneBatches.pnBatches[bbi * psm->sBoneBatches.nBatchBoneMax + bi]];
+			firstBone = NO;
+		}
+		[desc appendFormat: @"%@", firstBone ? @"" : @")"];
+	}
+	return desc;
+}
+
+/*
+NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
+	SPODMesh* psm = (SPODMesh*)pSPODNode;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"SPODMesh drawing "];
+	switch (psm->ePrimitiveType) {
+		case ePODTriangles:
+			[desc appendFormat: @"ePODTriangles"];
+			break;
+//		case ePODLines:								// ePODLines not supported as of PVR 2.09
+//			[desc appendFormat: @"ePODLines"];
 			break;
 		default:
 			[desc appendFormat: @"unknown ePrimitiveType (%u)", psm->ePrimitiveType];
@@ -106,6 +154,7 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
 	[desc appendFormat: @", interleaved data: %u", psm->pInterleaved];
 	return desc;
 }
+ */
 
 NSString* NSStringFromCPODData(PODClassPtr aCPODData) {
 	CPODData* pcd = (CPODData*)aCPODData;
@@ -216,8 +265,8 @@ GLenum GLDrawingModeForSPODMesh(PODStructPtr aSPODMesh) {
 	switch (psm->ePrimitiveType) {
 		case ePODTriangles:
 			return usingStrips ? GL_TRIANGLE_STRIP : GL_TRIANGLES;
-		case ePODLines:
-			return usingStrips ? GL_LINE_STRIP : GL_LINES;
+//		case ePODLines:								// ePODLines not supported as of PVR 2.09
+//			return usingStrips ? GL_LINE_STRIP : GL_LINES;
 		default:
 			LogError(@"Unknown EPODPrimitiveType %u", psm->ePrimitiveType);
 			return GL_TRIANGLE_STRIP;

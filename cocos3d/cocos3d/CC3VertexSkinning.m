@@ -1,7 +1,7 @@
 /*
  * CC3VertexSkinning.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
@@ -586,10 +586,13 @@
 		[restPoseInvertedMatrix invertAffine];
 	}
 	
-	LogTrace(@"%@ with global scale (%.6f, %.6f, %.6f) and tolerance %.6f rest pose %@ inverted %@to %@", self,
-			 self.globalScale.x, self.globalScale.y, self.globalScale.z,
-			 self.scaleTolerance, transformMatrix,
-			 (self.isSkeletonRigid ? @"rigidly " : @""), restPoseInvertedMatrix);
+	LogCleanTrace(@"%@ with global scale (%.6f, %.6f, %.6f) and tolerance %.6f rest pose %@ inverted %@to %@",
+				  self, self.globalScale.x, self.globalScale.y, self.globalScale.z,
+				  self.scaleTolerance, transformMatrix,
+				  (self.isSkeletonRigid ? @"rigidly " : @""), restPoseInvertedMatrix);
+	LogCleanTrace(@"validating right multiply: %@ \nvalidating left multiply: %@",
+				  [CC3GLMatrix matrixByMultiplying: transformMatrix by: restPoseInvertedMatrix],
+				  [CC3GLMatrix matrixByMultiplying: restPoseInvertedMatrix by: transformMatrix]);
 }
 
 @end

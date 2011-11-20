@@ -1,7 +1,7 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -390,7 +390,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ location: %@, global: %@, %@, scale: %@, projected to: %@, bounded by: %@",
-			[super description],
+			[self description],
 			NSStringFromCC3Vector(self.location),
 			NSStringFromCC3Vector(self.globalLocation),
 			rotator,
@@ -1085,11 +1085,14 @@ static GLuint lastAssignedNodeTag;
 			[transformMatrixInverted invertAffine];
 		}
 		isTransformInvertedDirty = NO;
-
-		LogTrace(@"%@ with global scale (%.6f, %.6f, %.6f) and tolerance %.6f transform %@ inverted %@to %@", self,
-				 self.globalScale.x, self.globalScale.y, self.globalScale.z,
-				 self.scaleTolerance, transformMatrix,
-				 (self.isTransformRigid ? @"rigidly " : @""), transformMatrixInverted);
+		
+		LogCleanTrace(@"%@ with global scale (%.6f, %.6f, %.6f) and tolerance %.6f transform: %@ inverted %@to: %@",
+					  self, self.globalScale.x, self.globalScale.y, self.globalScale.z,
+					  self.scaleTolerance, transformMatrix,
+					  (self.isTransformRigid ? @"rigidly " : @""), transformMatrixInverted);
+		LogCleanTrace(@"validating right multiply: %@ \nvalidating left multiply: %@",
+					  [CC3GLMatrix matrixByMultiplying: transformMatrix by: transformMatrixInverted],
+					  [CC3GLMatrix matrixByMultiplying: transformMatrixInverted by: transformMatrix]);
 	}
 	return transformMatrixInverted;
 }

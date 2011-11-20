@@ -1,7 +1,7 @@
 /*
  * CC3PODCamera.mm
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -101,6 +101,10 @@
 	podContentIndex = another.podContentIndex;
 	podParentIndex = another.podParentIndex;
 	podTargetIndex = another.podTargetIndex;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
 }
 
 @end

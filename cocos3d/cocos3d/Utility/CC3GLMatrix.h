@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.h
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -100,6 +100,14 @@
  * the specified GL matrix, which must be a standard 4x4 OpenGL matrix in column-major order.
  */
 +(id) matrixFromGLMatrix: (GLfloat*) aGLMtx;
+
+/**
+ * Allocates and returns an initialized autoreleased instance that is the result of
+ * multiplying the first matrix by the second (m1 x m2).
+ *
+ * Neither of the two input matrices is modified.
+ */
++(id) matrixByMultiplying: (CC3GLMatrix*) m1 by: (CC3GLMatrix*) m2;
 
 /**
  * Returns an initialized instance that wraps the specified GL matrix, which must be a
@@ -690,7 +698,6 @@
 /** Transposes this matrix. The contents of this matrix are changed. */
 -(void) transpose;
 
-
 /**
  * Inverts this matrix by using the algorithm of calculating the classical adjoint
  * and dividing by the determinant. The contents of the matrix are changed.
@@ -700,21 +707,23 @@
  * method was invoked.
  *
  * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
- * contains only rotation and translation, use the invertRigid: method instead, which is
+ * contains only rotation and translation, use the invertRigid method instead, which is
  * between one and two orders of magnitude faster than this method.
  * 
  * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can
  * often result in the inverse matrix that is not affine (the bottom row of the matrix is not
- * {0, 0, 0 1}), even when the initial matrix was affine. These accumulated errors can often
+ * {0, 0, 0, 1}), even when the initial matrix was affine. These accumulated errors can often
  * be significant when applied to the bottom row and will affect further calculations.
  * 
- * If it is known that a matrix represents an affine transformation, use the invertAffine:
+ * If it is known that a matrix represents an affine transformation, use the invertAffine
  * method instead, which forces the bottom row back to {0, 0, 0, 1} after the inversion
  * to maintain the inverted matrix as an affine transformation.
  *
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
- * with the exception of perspective projection, will be affine transforms.
+ * with the exception of perspective projection, will be affine transforms. Unless you are
+ * working with the projection matrix, or a custom, non-affine matrix, it is recommended
+ * that you use invertAffine instead of this method.
  */
 -(BOOL) invert;
 
@@ -726,24 +735,26 @@
  * returns NO, then the matrix was not inverted and remains in the state it was when this
  * method was invoked.
  *
- * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
- * contains only rotation and translation, use the invertRigid: method instead, which is
- * between one and two orders of magnitude faster than this method.
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the
+ * matrix contains only rotation and translation, use the invertRigid method instead,
+ * which is between one and two orders of magnitude faster than this method.
  *
- * This method differs from the invert: method in that it assumes that the matrix represents
- * an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and that accumulated
- * inaccuracies in the inversion calculations should be removed from the bottom row of the
- * resulting inverted matrix. After inversion, the bottom row of the inverted matrix is
- * forced back to {0, 0, 0 1}.
+ * This method uses the invert: method, but differs in that it assumes that the matrix
+ * represents an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and
+ * that accumulated inaccuracies in the inversion calculations should be removed from
+ * the bottom row of the resulting inverted matrix. After inversion, the bottom row of
+ * the inverted matrix is forced back to exactly {0, 0, 0, 1}.
  *
  * This can be quite useful, as this row is particularly sensitive to the accumulation of
  * inaccuracies and can often have a drastic impact on the accuracy of subsequent matrix
  * and vector calculations. If it is known that a matrix represents an affine transformation,
- * use this method instead of the invert: method.
+ * use this method instead of the invert method.
  * 
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
- * with the exception of perspective projection, will be affine transforms. 
+ * with the exception of perspective projection, will be affine transforms.  Unless you are
+ * working with the projection matrix, or a custom, non-affine matrix, it is recommended
+ * that you use this method instead of the invert method.
  */
 -(BOOL) invertAffine;
 
@@ -753,9 +764,10 @@
  *
  * This method assumes that the matrix represents a rigid transformation, containing only
  * rotation and translation. Use this method only if it is known that this is the case.
+ *
  * Inversion of a rigid transform matrix can be accomplished very quickly using transposition
  * and translation, and is consistently one to two orders of magnitude faster than using
- * either the invert: or invertAffine: methods. It is recommended that this method be used
+ * either the invert or invertAffine methods. It is recommended that this method be used
  * wherever possible.
  */
 -(void) invertRigid;
@@ -829,7 +841,7 @@
  * 
  * Also, be aware that rounding inaccuracies accumulated during the inversion calculations can
  * often result in the inverse matrix that is not affine (the bottom row of the matrix is not
- * {0, 0, 0 1}), even when the initial matrix was affine. These accumulated errors can often
+ * {0, 0, 0, 1}), even when the initial matrix was affine. These accumulated errors can often
  * be significant when applied to the bottom row and will affect further calculations.
  * 
  * If it is known that a matrix represents an affine transformation, use the invertAffine:
@@ -838,7 +850,9 @@
  *
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
- * with the exception of perspective projection, will be affine transforms.
+ * with the exception of perspective projection, will be affine transforms. Unless you are
+ * working with the projection matrix, or a custom, non-affine matrix, it is recommended
+ * that you use invertAffine: instead of this method.
  */
 +(BOOL) invert: (GLfloat*) aGLMatrix;
 
@@ -851,15 +865,15 @@
  * returns NO, then the matrix was not inverted and remains in the state it was when this
  * method was invoked.
  *
- * Matrix inversion is an computationally-expensive algorithm. If it is known that the matrix
- * contains only rotation and translation, use the invertRigid: method instead, which is
- * between one and two orders of magnitude faster than this method.
+ * Matrix inversion is an computationally-expensive algorithm. If it is known that the
+ * matrix contains only rotation and translation, use the invertRigid: method instead,
+ * which is between one and two orders of magnitude faster than this method.
  *
- * This method differs from the invert: method in that it assumes that the matrix represents
- * an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and that accumulated
- * inaccuracies in the inversion calculations should be removed from the bottom row of the
- * resulting inverted matrix. After inversion, the bottom row of the inverted matrix is
- * forced back to {0, 0, 0 1}.
+ * This method uses the invert: method, but differs in that it assumes that the matrix
+ * represents an affine transform (the bottom row of the matrix is {0, 0, 0, 1}), and
+ * that accumulated inaccuracies in the inversion calculations should be removed from
+ * the bottom row of the resulting inverted matrix. After inversion, the bottom row of
+ * the inverted matrix is forced back to exactly {0, 0, 0, 1}.
  *
  * This can be quite useful, as this row is particularly sensitive to the accumulation of
  * inaccuracies and can often have a drastic impact on the accuracy of subsequent matrix
@@ -868,7 +882,9 @@
  * 
  * Affine transforms include all combinations of rotation, scaling, shearing, translation,
  * and orthographic projection, so all matrices encountered while working with 3D graphics,
- * with the exception of perspective projection, will be affine transforms. 
+ * with the exception of perspective projection, will be affine transforms.  Unless you are
+ * working with the projection matrix, or a custom, non-affine matrix, it is recommended
+ * that you use this method instead of the invert: method.
  */
 +(BOOL) invertAffine: (GLfloat*) aGLMatrix;
 
@@ -878,6 +894,7 @@
  *
  * This method assumes that the matrix represents a rigid transformation, containing only
  * rotation and translation. Use this method only if it is known that this is the case.
+ *
  * Inversion of a rigid transform matrix can be accomplished very quickly using transposition
  * and translation, and is consistently one to two orders of magnitude faster than using
  * either the invert: or invertAffine: methods. It is recommended that this method be used

@@ -1,12 +1,24 @@
 CHANGELOG
 ---------
 
-cocos3d 0.6.3
+cocos3d 0.6.4
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++
+
+
+cocos3d 0.6.4 - 2011/11/20
+-------------------------------------
+
+
+- Added support for iOS 5.0 and Xcode 4.2:
+    - Fixed casting warnings in glBufferDataLogged and glBufferSubDataLogged intercept logging functions CC3OpenGLES11Intercept.c file
+- Fixed error in matrix inversion calculation algorithm.
+    - This error was causing issues with some vertex skinning situations.
+- Upgraded PowerVR POD library to version 2.09
+- Removed unnecessary PowerVR POD library files
 
 
 cocos3d 0.6.3 - 2011/11/12

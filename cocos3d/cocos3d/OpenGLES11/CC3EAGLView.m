@@ -1,7 +1,7 @@
 /*
  * CC3EAGLView.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com

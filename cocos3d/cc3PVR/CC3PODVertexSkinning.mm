@@ -1,7 +1,7 @@
 /*
  * CC3PODVertexSkinning.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
@@ -97,6 +97,10 @@
 	for (CC3PODSkinSection* boneBatch in skinSections) {
 		[boneBatch linkToPODNodes: nodeArray];
 	}
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
 }
 
 @end
@@ -239,6 +243,10 @@
 	podIndex = another.podIndex;
 	podContentIndex = another.podContentIndex;
 	podParentIndex = another.podParentIndex;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
 }
 
 @end

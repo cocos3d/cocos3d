@@ -1,7 +1,7 @@
-README - cocos3d 0.6.3
+README - cocos3d 0.6.4
 ----------------------
 
-cocos3d 0.6.3
+cocos3d 0.6.4
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -52,7 +52,7 @@ That's it!
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.3 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d 0.6.4 is compatible with cocos2d versions 0.99.5 through 1.1.
 
 At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
 configured to use that version. This section includes notes on compatibility with other versions.
@@ -112,7 +112,7 @@ The cocos3d Programming Guide is online at:
 
 The API documentation is online at:
 
-	http://brenwill.com/docs/cocos3d/0.6.3/api/
+	http://brenwill.com/docs/cocos3d/0.6.4/api/
 
 You can create a local copy of the API documentation using Doxygen to extract the
 documentation from the source files. There is a Doxygen configuration file to output

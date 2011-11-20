@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -100,7 +100,6 @@ static const id placeHolder = [NSObject new];
 		wasLoaded = (self.pvrtModelImpl->ReadFromFile([aFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
 		if (wasLoaded) {
 			[self build];
-			LogRez(@"Loaded %@", self.fullDescription);
 		} else {
 			LogError(@"Could not load POD file '%@'", aFilePath);
 		}
@@ -109,7 +108,7 @@ static const id placeHolder = [NSObject new];
 }
 
 -(void) build {
-	LogTrace(@"Building %@", self);
+	LogRez(@"Building %@", self.fullDescription);
 	[self buildTextures];
 	[self buildMaterials];
 	[self buildMeshes];
@@ -456,7 +455,7 @@ static const id placeHolder = [NSObject new];
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self];
 	if (self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) {		// highlight if fixed point
-		[desc appendFormat: @" (FIXED POINT!)"];
+		[desc appendFormat: @" (FIXED POINT!!)"];
 	}
 	[desc appendFormat: @" containing %u nodes", self.nodeCount];
 	[desc appendFormat: @" (%u mesh nodes)", self.meshNodeCount];

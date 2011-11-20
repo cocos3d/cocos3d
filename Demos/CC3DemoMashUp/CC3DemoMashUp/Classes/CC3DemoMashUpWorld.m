@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpWorld.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -192,7 +192,7 @@
  * within this method.
  */
 -(void) initializeWorld {
-	
+
 	// Improve performance by avoiding clearing the depth buffer when transitioning
 	// between 2D content and 3D content. Since we are drawing 2D content on top of
 	// the 3D content, we must also turn off depth testing when drawing 2D content.

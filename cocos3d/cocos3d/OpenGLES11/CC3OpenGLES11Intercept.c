@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Intercept.c
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -315,7 +315,7 @@ void glBlendFuncLogged(GLenum sfactor, GLenum dfactor) {
 }
 
 void glBufferDataLogged(GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage) {
-	printf("glBufferData(%s, %i, %p, %s)\n", GLEnumName(target), size, data, GLEnumName(usage));
+	printf("glBufferData(%s, %ld, %p, %s)\n", GLEnumName(target), (long)size, data, GLEnumName(usage));
 	switch (target) {
 		case GL_ARRAY_BUFFER:
 			printf("As floats:");
@@ -332,7 +332,7 @@ void glBufferDataLogged(GLenum target, GLsizeiptr size, const GLvoid *data, GLen
 }
 
 void glBufferSubDataLogged(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data) {
-	printf("glBufferSubData(%s, %i, %i, %p)\n", GLEnumName(target), offset, size, data);
+	printf("glBufferSubData(%s, %ld, %ld, %p)\n", GLEnumName(target), (long)offset, (long)size, data);
 	switch (target) {
 		case GL_ARRAY_BUFFER:
 			printf("As floats:");

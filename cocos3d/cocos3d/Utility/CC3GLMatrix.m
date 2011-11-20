@@ -1,7 +1,7 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -186,11 +186,19 @@
 	return [CC3GLArrayMatrix matrixFromGLMatrix: aGLMtx];
 }
 
++(id) matrixByMultiplying: (CC3GLMatrix*) m1 by: (CC3GLMatrix*) m2 {
+	CC3GLMatrix* m = [self matrixFromGLMatrix: m1.glMatrix];
+	[m multiplyByMatrix: m2];
+	return m;
+}
+
+// Instantiate the appropriate concrete cluster class.
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args {
 	[self release];
 	return [[CC3GLArrayMatrix alloc] initWithFirstElement: e00 remainingElements: args];
 }
 
+// Instantiate the appropriate concrete cluster class.
 -(id) initWithElements: (GLfloat) e00, ... {
 	va_list args;
 	va_start(args, e00);
@@ -199,6 +207,7 @@
 	return self;
 }
 
+// Instantiate the appropriate concrete cluster class.
 +(id) matrixWithElements: (GLfloat) e00, ... {
 	va_list args;
 	va_start(args, e00);
@@ -1082,39 +1091,57 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
  */
 +(BOOL) invert: (GLfloat*) aGLMatrix {
 	GLfloat* m = aGLMatrix;				// Make a simple alias
-	GLfloat inv[16];					// The inverse matrix
+	GLfloat adj[16];					// The inverse matrix
 	GLfloat det;						// The determinant.
-
+	
 	// Create the transpose of the cofactors, as the classical adjoint of the matrix.
-    inv[0] =  CC3Det3x3(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
-    inv[1] = -CC3Det3x3(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15]);
-    inv[2] =  CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15]);
-    inv[3] = -CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11]);
+    adj[0] =  CC3Det3x3(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
+    adj[1] = -CC3Det3x3(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15]);
+    adj[2] =  CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15]);
+    adj[3] = -CC3Det3x3(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11]);
 	
-    inv[4] = -CC3Det3x3(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]);
-    inv[5] =  CC3Det3x3(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15]);
-    inv[6] = -CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15]);
-    inv[7] =  CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11]);
+    adj[4] = -CC3Det3x3(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]);
+    adj[5] =  CC3Det3x3(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15]);
+    adj[6] = -CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15]);
+    adj[7] =  CC3Det3x3(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11]);
 	
-    inv[8] =  CC3Det3x3(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]);
-    inv[9] = -CC3Det3x3(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15]);
-    inv[10] =  CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]);
-    inv[11] = -CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11]);
+    adj[8] =  CC3Det3x3(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]);
+    adj[9] = -CC3Det3x3(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15]);
+    adj[10] =  CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]);
+    adj[11] = -CC3Det3x3(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11]);
 	
-    inv[12] = -CC3Det3x3(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
-    inv[13] =  CC3Det3x3(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14]);
-    inv[14] = -CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14]);
-    inv[15] =  CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
-
+    adj[12] = -CC3Det3x3(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
+    adj[13] =  CC3Det3x3(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14]);
+    adj[14] = -CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14]);
+    adj[15] =  CC3Det3x3(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
+	
 	// Calculate the determinant as a combination of the cofactors of the first row.
-	det = (m[0] * inv[0]) + (m[4] * inv[1]) + (m[8] * inv[2]) + (m[12] * inv[3]);
-
+	det = (m[0] * adj[0]) + (m[4] * adj[1]) + (m[8] * adj[2]) + (m[12] * adj[3]);
+	
+	// If determinant is not zero, matrix is invertable.
+	// Divide the classical adjoint matrix by the determinant and set back into original matrix.
 	BOOL isInvertable = (det != 0.0f);
 	if (isInvertable) {
-		[self scale: inv uniformlyBy: (1.0 / det)];
-		[self copyMatrix: inv into: aGLMatrix];
+		GLfloat ooDet = 1.0 / det;		// Turn div into mult for speed
+		
+		m[0]  = adj[0]  * ooDet;
+		m[1]  = adj[1]  * ooDet;
+		m[2]  = adj[2]  * ooDet;
+		m[3]  = adj[3]  * ooDet;
+		m[4]  = adj[4]  * ooDet;
+		m[5]  = adj[5]  * ooDet;
+		m[6]  = adj[6]  * ooDet;
+		m[7]  = adj[7]  * ooDet;
+		m[8]  = adj[8]  * ooDet;
+		m[9]  = adj[9]  * ooDet;
+		m[10] = adj[10] * ooDet;
+		m[11] = adj[11] * ooDet;
+		m[12] = adj[12] * ooDet;
+		m[13] = adj[13] * ooDet;
+		m[14] = adj[14] * ooDet;
+		m[15] = adj[15] * ooDet;
 	}
-
+	
 	return isInvertable;
 }
 
@@ -1123,8 +1150,9 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
  M = |  L  t |
      |  0  1 |
 	 
-	 where L is a 3x3 linear tranformation matrix, t is a translation vector, and 0 is a row of 3 zeros
- */
+	 where L is a 3x3 linear tranformation matrix, t is a translation vector,
+	 and 0 is a row of 3 zeros
+*/
 
 	GLfloat* m = aGLMatrix;					// Make a simple alias
 	BOOL wasInverted = [self invert: m];	// Invert the matrix
@@ -1140,13 +1168,15 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	 
 	 where RT is the transposed 3x3 rotation matrix extracted from the 4x4 matrix
 	 and t is a translation vector extracted from the 4x4 matrix
- */
+*/
 	
 	GLfloat* m = aGLMatrix;		// Make a simple alias
 	
 	// Extract translation component of matrix and remove it to leave a rotation-only matrix
 	CC3Vector t = cc3v(m[12], m[13], m[14]);
 	m[12] = m[13] = m[14] = 0.0f;
+	m[3] = m[7] = m[11] = 0.0f;				// Ensure bottom row are exactly {0, 0, 0, 1}
+	m[15] = 1.0f;
 
 	// Transpose (invert) rotation matrix
 	[self transpose: m];

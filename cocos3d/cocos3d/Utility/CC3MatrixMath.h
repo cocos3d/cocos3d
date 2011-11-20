@@ -1,7 +1,7 @@
 /*
  * CC3MatrixMath.h
  *
- * cocos3d 0.6.3
+ * cocos3d 0.6.4
  * Author: Bill Hollings
  * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -348,8 +348,8 @@ static inline void CC3Mat4Multiply(GLfloat* mOut, const GLfloat* mL, const GLflo
 /**
  * Returns the determinant of the specified matrix values.
  *
- *   | a1 a2 |
- *   | b1 b2 |
+ *   | a1 b1 |
+ *   | a2 b2 |
  */
 static inline GLfloat CC3Det2x2(GLfloat a1, GLfloat a2, GLfloat b1, GLfloat b2) {
 	return a1 * b2 - b1 * a2;
@@ -358,9 +358,9 @@ static inline GLfloat CC3Det2x2(GLfloat a1, GLfloat a2, GLfloat b1, GLfloat b2) 
 /**
  * Returns the determinant of the specified matrix values.
  * 
- *  | a1 a2 a3 |
- *  | b1 b2 b3 |
- *  | c1 c2 c3 |
+ *  | a1 b1 c1 |
+ *  | a2 b2 c2 |
+ *  | a3 b3 c3 |
  */
 static inline GLfloat CC3Det3x3(GLfloat a1, GLfloat a2, GLfloat a3,
 							  GLfloat b1, GLfloat b2, GLfloat b3, 
