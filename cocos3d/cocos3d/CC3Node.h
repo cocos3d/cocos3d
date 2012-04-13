@@ -1,9 +1,9 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,14 +31,14 @@
 
 #import "CC3Identifiable.h"
 #import "CC3GLMatrix.h"
+#import "CC3Rotator.h"
 #import "CC3NodeVisitor.h"
+#import "CC3BoundingVolumes.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
 
-@class CC3NodeDrawingVisitor, CC3Rotator, CC3NodeBoundingVolume;
+@class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum;
 @class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
-@class CC3World, CC3Camera, CC3Frustum;
-
 
 /**
  * Enumeration of options for scaling normals after they have been transformed during
@@ -53,18 +53,66 @@ typedef enum {
 
 
 #pragma mark -
+#pragma mark CC3NodeTransformListenerProtocol
+
+/**
+ * This protocol defines the behaviour requirements for objects that wish to be
+ * notified whenever the transform of a node has changed.
+ *
+ * This occurs when one of the transform properties (location, rotation & scale)
+ * of the node, or any of its structural ancestor nodes, has changed.
+ *
+ * A transform listener can be registered with a node via the addTransformListener:
+ * method.
+ *
+ * Each listener registered with a node will be sent the nodeWasTransformed: notification
+ * message when the transformMatrix of this node is recalculated, or is set directly.
+ */
+@protocol CC3NodeTransformListenerProtocol
+
+/** Callback method that will be invoked when the transformMatrix of the specified node has changed. */
+-(void) nodeWasTransformed: (CC3Node*) aNode;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3Node
 
 /**
- * CC3Node and its subclasses form the basis of all 3D artifacts in the 3D world, including
- * visible meshes, structures, cameras, lights, resources, and the 3D world itself.
+ * CC3Node and its subclasses form the basis of all 3D artifacts in the 3D scene, including
+ * visible meshes, structures, cameras, lights, resources, and the 3D scene itself.
  *
- * Nodes can be moved, rotated and scaled. Rotation can be specified via either Euler angles
- * or quaternions.
+ * Nodes can be moved, rotated and scaled. Rotation can be specified via Euler angles,
+ * quaternions, rotation axis and angle, or changes to any of these properties.
  *
- * Nodes can be assembled in a structural hierarchy of parents and children, and transformations
- * that are applied to a node are also applied to its descendant nodes. Typically, the root
- * of a structural node hierarchy is an instance of CC3World.
+ * In addition to programmatically rotating a node using the rotation quaternion, rotationAxis,
+ * and rotationAngle properties, or one of the rotateBy...: methods, you can set a node to point
+ * towards a particular direction, location. You can even point a node towards another target
+ * node, and have it track that node, so that it always points towards the target node, as
+ * either the node, or the target node move around.
+ *
+ * For more on targetting the node in a direction, or to track a target node, see the notes
+ * of the following properties and methods:
+ *   - target
+ *   - targetLocation
+ *   - shouldTrackTarget
+ *   - axisRestriction
+ *   - shouldAutotargetCamera
+ *   - isTrackingForBumpMapping
+ *
+ * Nodes can be assembled in a structural hierarchy of parents and children, using the addChild:
+ * method. Transformations that are applied to a node are also applied to its descendant nodes.
+ * Typically, the root of a structural node hierarchy is an instance of CC3Scene.
+ *
+ * When creating a structural hierarchy of nodes, it is often useful to wrap one node in another
+ * node in order to orient the node of interest in a particular direction, or provide an offset
+ * location in order to allow the node of interest to pivot around a location other than its
+ * origin. To easily wrap a node in another node, use the following methods:
+ *   - asOrientingWrapper
+ *   - asTrackingWrapper
+ *   - asCameraTrackingWrapper
+ *   - asBumpMapLightTrackingWrapper
  *
  * Each node is automatically touched at two distinct times during animation frame handling.
  * First, the updateBeforeTransform: and updateAfterTransform: methods are each invoked during
@@ -84,7 +132,7 @@ typedef enum {
  * made in the updateBeforeTransform: method, since those changes will automatically be
  * applied to the transformMatrix.
  *
- * The second place a node is touched is, the transformAndDrawWithVisitor: method,
+ * The second place a node is touched is the transformAndDrawWithVisitor: method,
  * which is automaticaly invoked during each frame rendering cycle. You should have
  * no need to override this method.
  * 
@@ -104,7 +152,7 @@ typedef enum {
  * ease actions. See the class CC3TransformTo and its subclasses for actions that operate
  * on CC3Nodes.
  *
- * When populating your world, you can easily create hordes of similar nodes using the copy
+ * When populating your scene, you can easily create hordes of similar nodes using the copy
  * and copyWithName: methods. Those methods effect deep copies to allow each copy to be
  * manipulated independently, but will share underlying mesh data for efficient memory use.
  * See the notes at the copy method for more details about copying nodes.
@@ -117,23 +165,19 @@ typedef enum {
  * Nodes can respond to iOS touch events. The property isTouchEnabled can be set to YES
  * to allow a node to be selected by a touch event. If the shouldInheritTouchability
  * property is also set to YES, then this touchable capability can also be inherited from
- * a parent node. Selection of nodes based on touch events is handled by CC3World. The
- * nodeSelected:byTouchEvent:at: callback method of your customized CC3World will be
+ * a parent node. Selection of nodes based on touch events is handled by CC3Scene. The
+ * nodeSelected:byTouchEvent:at: callback method of your customized CC3Scene will be
  * invoked to indicate which node has been touched.
- *
- * The iOS and PVR hardware expects textures to have width and height values that are a
- * power-of-two (POT). If you are using textures that do not have POT dimensions, they will
- * be converted to POT by the texture loader. If the corresponding mesh was not created in
- * your 3D editor with this taken into consideration, you might find that the texture does
- * not completely cover the mesh as expected. If this situation arises, you can compensate
- * with the alignTextures and alignInvertedTextures methods to realign the texture coordinate
- * arrays with the textures.
  *
  * You can cause a wireframe box to be drawn around the node and all its descendants by
  * setting the shouldDrawWireframeBox property to YES. This can be particularly useful
  * during development to locate the boundaries of a node, or to locate a node that is not
  * drawing properly. You can set the default color of this wireframe using the class-side
  * defaultWireframeBoxColor property.
+ *
+ * You can also cause the name of the node to be displayed where the node is by setting 
+ * the shouldDrawDescriptor property to YES. This is also useful for locating a node when
+ * debugging rendering problems.
  *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
  * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
@@ -143,11 +187,12 @@ typedef enum {
  * state change tracker in the CC3OpenGLES11Engine singleton. Route the state change request
  * through the CC3OpenGLES11Engine singleton instead.
  */
-@interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
+@interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	CCArray* children;
 	CC3Node* parent;
 	CC3GLMatrix* transformMatrix;
 	CC3GLMatrix* transformMatrixInverted;
+	CCArray* transformListeners;
 	CC3GLMatrix* globalRotationMatrix;
 	CC3Rotator* rotator;
 	CC3NodeBoundingVolume* boundingVolume;
@@ -186,9 +231,6 @@ typedef enum {
  */
 @property(nonatomic, readonly) CC3Vector globalLocation;
 
-/** Returns the rotator that manages the local rotation of this node. */
-@property(nonatomic, readonly) CC3Rotator* rotator;
-
 /**
  * Translates the location of this node by the specified vector.
  *
@@ -196,6 +238,21 @@ typedef enum {
  * not the final location.
  */
 -(void) translateBy: (CC3Vector) aVector;
+
+/**
+ * Returns the rotator that manages the local rotation of this node.
+ *
+ * CC3Rotator is the base class of a class cluster, of which different subclasses perform
+ * different types of rotation. The type of object returned by this property may change,
+ * depending on what rotational changes have been made to this node.
+ *
+ * For example, if no rotation is applied to this node, this property will return a base
+ * CC3Rotator. After the rotation of this node has been changed, this property will return
+ * a CC3MutableRotator, and if directional properties, such as forwardDirection have been
+ * accessed or changed, this property will return a CC3DirectionalRotator. The creation
+ * of the type of rotator required to suppor the various rotations is automatic.
+ */
+@property(nonatomic, retain) CC3Rotator* rotator;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of this node.
@@ -292,6 +349,122 @@ typedef enum {
  * Thanks to cocos3d user nt901 for contributing to the development of this feature
  */
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
+
+/**
+ * The direction in which this node is pointing.
+ *
+ * The value returned by this property is in the local coordinate system of this node,
+ * except when this node is actively tracking a target node (the shouldTrackTarget
+ * property is YES), in which case, the value returned will be a global direction in
+ * the global coordinate system.
+ *
+ * The initial value of this property is kCC3VectorUnitZPositive, pointing
+ * down the positive Z-axis in the local coordinate system of this node.
+ * When this node is rotated, the original positive-Z axis of the node's
+ * local coordinate system will point in this direction.
+ *
+ * Pointing the node in a particular direction does not completely define
+ * its rotation in 3D space, because the node can be oriented in any rotation
+ * around the axis along the forwardDirection vector (think of pointing a
+ * camera at a scene, and then rotating the camera along the axis of its
+ * lens, landscape towards portrait).
+ *
+ * The orientation around this axis is defined by specifying an additional
+ * 'up' direction, which fixes the rotation around the forwardDirection by
+ * specifying which direction is considered to be 'up'. The 'up' direction
+ * is specified by setting the sceneUpDirection property, which is independent
+ * of the tilt of the local axes, and does not need to be perpendicular to
+ * the forwardDirection.
+ *
+ * The value returned for this property is of unit length. When setting this
+ * property, the value will be normalized to be a unit vector.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
+ */
+@property(nonatomic, assign) CC3Vector forwardDirection;
+
+/**
+ * The direction in which this node is pointing, relative to the global
+ * coordinate system. This is calculated by using the transformMatrix
+ * to translate the forwardDirection.
+ *
+ * The value returned is of unit length. 
+ */
+@property(nonatomic, readonly) CC3Vector globalForwardDirection;
+
+/**
+ * The direction, in the global coordinate system, that is considered to be 'up'.
+ *
+ * As explained in the note for the forwardDirection, specifying a forwardDirection
+ * is not sufficient to determine the rotation of a node in 3D space. This property
+ * indicates which direction should be considered 'up' when orienting the rotation of
+ * the node. This property is specified in the global coordinate system, and will not
+ * change as the orientation of the node changes.
+ *
+ * The initial value of this property is kCC3VectorUnitYPositive, pointing parallel
+ * to the positive Y-axis, and in most cases, this property can be left with that value.
+ *
+ * The value returned is of unit length. When setting this property,
+ * the value will be normalized to be a unit vector.
+ *
+ * A valid direction vector is required. Attempting to set this property
+ * to the zero vector (kCC3VectorZero) will raise an assertion error.
+ */
+@property(nonatomic, assign) CC3Vector sceneUpDirection;
+
+/** @deprecated Renamed to sceneUpDirection. */
+@property(nonatomic, assign) CC3Vector worldUpDirection DEPRECATED_ATTRIBUTE;
+
+/**
+ * The direction, in the node's coordinate system, that is considered to be 'up'.
+ * This corresponds to the sceneUpDirection, after it has been transformed by the
+ * rotations of this node. For example, rotating the node upwards to point towards
+ * an elevated target will move the upDirection of this node away from the
+ * sceneUpDirection.
+ *
+ * The value returned by this property is in the local coordinate system of this node,
+ * except when this node is actively tracking a target node (the shouldTrackTarget
+ * property is YES), in which case, the value returned will be a global direction in
+ * the global coordinate system.
+ *
+ * The value returned is of unit length. 
+ */
+@property(nonatomic, readonly) CC3Vector upDirection;
+
+/**
+ * The direction that is considered to be 'up' for this node, relative to the
+ * global coordinate system. This is calculated by using the transformMatrix to
+ * translate the upDirection. As the node is rotated from its default orientation,
+ * this value will be different than the sceneUpDirection, which is fixed and
+ * independent of the orientation of the node.
+ *
+ * The value returned is of unit length. 
+ */
+@property(nonatomic, readonly) CC3Vector globalUpDirection;
+
+/**
+ * The direction in the node's coordinate system that would be considered to be
+ * "off to the right" when looking out from the node, along the forwardDirection
+ * and with the upDirection defined.
+ *
+ * The value returned by this property is in the local coordinate system of this node,
+ * except when this node is actively tracking a target node (the shouldTrackTarget
+ * property is YES), in which case, the value returned will be a global direction in
+ * the global coordinate system.
+ *
+ * The value returned is of unit length. 
+ */
+@property(nonatomic, readonly) CC3Vector rightDirection;
+
+/**
+ * The direction that is considered to be "off to the right" for this node,
+ * relative to the global coordinate system. This is calculated by using the
+ * transformMatrix to translate the rightDirection.
+ *
+ * The value returned is of unit length. 
+ */
+@property(nonatomic, readonly) CC3Vector globalRightDirection;
 
 /** The scale of the node in each dimension, relative to the parent of this node. */
 @property(nonatomic, assign) CC3Vector scale;
@@ -424,11 +597,21 @@ typedef enum {
 +(void) setDefaultScaleTolerance: (GLfloat) aTolerance;
 
 /**
- * The bounding volume of this node. This may be used by culling during drawing operations,
- * or by physics simulations. Different shapes of boundaries are available, permitting
- * tradeoffs between accuracy and computational processing time.
+ * The bounding volume of this node. This is used by culling during drawing operations,
+ * it can be used by the application to detect when two nodes intersect in space
+ * (collision detection), and it can be used to determine whether a node intersects
+ * a specific location, ray, or plane.
  *
- * By default, nodes do not have a bounding volume. Subclasses may set a suitable bounding volume.
+ * Different shapes of boundaries are available, permitting tradeoffs between
+ * accuracy and computational processing time.
+ *
+ * By default, nodes do not have a bounding volume. Subclasses may set a suitable
+ * bounding volume.
+ *
+ * You can make the bounding volume of any node visible by setting the
+ * shouldDrawBoundingVolume property to YES. You can use the shouldDrawAllBoundingVolumes
+ * property to make the bounding volumes of this node and all its descendants visible
+ * by setting the shouldDrawAllBoundingVolumes property to YES.
  */
 @property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
 
@@ -448,8 +631,13 @@ typedef enum {
  *
  * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
  *
- * Since the bounding box of a node can change based on the locations, rotations, or
- * scales of any descendant node, this property is measured dynamically on each access,
+ * The computational cost of reading this property depends on whether the node has children.
+ * For a node without children, this property can be read quickly from the cached bounding
+ * box of any local content of the node (for example, the mesh in a CC3MeshNode).
+ *
+ * However, for nodes that contain children (and possibly other descendants), since
+ * the bounding box of a node can change based on the locations, rotations, or scales
+ * of any descendant node, this property must measured dynamically on each access,
  * by traversing all descendant nodes. This is a computationally expensive method.
  */
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;
@@ -458,7 +646,7 @@ typedef enum {
  * Returns the smallest axis-aligned bounding box that surrounds any local content
  * of this node, plus all descendants of this node.
  *
- * The returned bounding box is specfied in the global coordinate system of the 3D world.
+ * The returned bounding box is specfied in the global coordinate system of the 3D scene.
  *
  * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
  *
@@ -469,13 +657,42 @@ typedef enum {
 @property(nonatomic, readonly) CC3BoundingBox globalBoundingBox;
 
 /**
+ * Returns the center of geometry of this node, including any local content of
+ * this node, plus all descendants of this node.
+ *
+ * The returned location is specfied in the local coordinate system of this node.
+ *
+ * If this node has no local content or descendants, returns a zero vector.
+ *
+ * This property is calculated from the value of the boundingBox property.
+ * The computational cost of reading that property depends on whether this
+ * node has children. See the notes for that property for more info.
+ */
+@property(nonatomic, readonly) CC3Vector centerOfGeometry;
+
+/**
+ * Returns the center of geometry of this node, including any local content of
+ * this node, plus all descendants of this node.
+ *
+ * The returned location is specfied in the global coordinate system of the 3D scene.
+ *
+ * If this node has no local content or descendants, returns the value of the
+ * globalLocation property.
+ *
+ * This property is calculated from the value of the boundingBox property.
+ * The computational cost of reading that property depends on whether this
+ * node has children. See the notes for that property for more info.
+ */
+@property(nonatomic, readonly) CC3Vector globalCenterOfGeometry;
+
+/**
  * The current location of this node, as projected onto the 2D viewport coordinate space.
  * For most purposes, this is where this node will appear on the screen or window.
  * The 2D position can be read from the X and Y components of the returned 3D location.
  *
  * The initial value of this property is kCC3VectorZero. To set this property, pass this
  * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3World. The application should usually
+ * retrieved from the activeCamera property of the CC3Scene. The application should usually
  * not set this property directly. For more information, see the notes for the projectNode:
  * method of CC3Camera.
  *
@@ -505,7 +722,7 @@ typedef enum {
  *
  * The initial value of this property is CGPointZero. To set this property, pass this
  * node as the argument to the projectNode: method of the active camera, which can be
- * retrieved from the activeCamera property of the CC3World. For more information, see
+ * retrieved from the activeCamera property of the CC3Scene. For more information, see
  * the notes for the projectNode: method of CC3Camera.
  *
  * The returned value takes into account the orientation of the device (portrait, landscape). 
@@ -546,7 +763,7 @@ typedef enum {
  *
  * The initial value of this property is zero.
  *
- * The CC3World must be configured with a drawing sequencer that sorts by Z-order
+ * The CC3Scene must be configured with a drawing sequencer that sorts by Z-order
  * for this property to be effective.
  *
  * This property only has effect for nodes with local content to draw (instances of
@@ -562,11 +779,124 @@ typedef enum {
  */
 @property(nonatomic, readonly) BOOL hasLocalContent;
 
+
+#pragma mark Targetting
+
 /**
- * Indicates whether this node has 3D mesh data to be drawn.
- * Default value is NO. Subclasses that do draw 3D meshes will override to return YES.
+ * The target node at which this node is pointed. If the shouldTrackTarget property
+ * is set to YES, this node will track the target so that it always points to the
+ * target, regardless of how the target and this node move through the 3D scene.
  */
-@property(nonatomic, readonly) BOOL isMeshNode;
+@property(nonatomic, retain) CC3Node* target;
+
+/**
+ * Indicates whether this node is tracking the location of a target node.
+ *
+ * This is a convenience property that returns YES if the target property is not nil.
+ */
+@property(nonatomic, readonly) BOOL hasTarget;
+
+/** 
+ * The global location towards which this node is facing.
+ *
+ * Instead of specifying a target node with the target property, this property can be
+ * used to set a specific global location to point towards. If the shouldTrackTarget
+ * property is set to YES, this node will track the targetLocation so that it always
+ * points to the targetLocation, regardless of how this node moves through the 3D scene.
+ *
+ * If both target and targetLocation properties are set, this node will orient to the target.
+ *
+ * When retrieving this property value, if the property was earlier explictly set,
+ * it will be retrieved cleanly. However, if rotation was set by Euler angles,
+ * quaternions, or forwardDirection, retrieving the targetLocation comes with two
+ * caveats.
+ *
+ * The first caveat is that calculating a targetLocation requires the global location of
+ * this node, which is only calculated when the node's transformMatrix is calculated after
+ * all model updates have been processed. This means that, depending on when you access
+ * this property, the calculated targetLocation may be one frame behind the real value.
+ * 
+ * The second caveat is that the derived targetLocation will be an invented location
+ * one unit length away from the globalLocation of this node, in the direction of the
+ * fowardDirection of this node. Although this is a real location, it is unlikely that
+ * this location is meaningful to the application.
+ * 
+ * In general, it is best to use this property directly, both reading and writing it,
+ * rather than reading this property after setting one of the other rotational properties.
+ */
+@property(nonatomic, assign) CC3Vector targetLocation;
+
+/**
+ * Indicates whether this instance should track the node set in the target property
+ * as the target and this node move around, or should initially point to that target,
+ * but should then maintain the same pointing direction, regardless of how the target
+ * or this node moves around. Initially, this property is set to NO, indicating that
+ * if the target property is set, this node will initially point to it, but will not
+ * track it as it moves.
+ *
+ * If this property is set to YES, subsequently changing the value of the rotation,
+ * quaternion, or forwardDirection properties will have no effect, since they would
+ * interfere with the ability to track the target. To set specific rotations or
+ * pointing direction, first set this property back to NO.
+ */
+@property(nonatomic, assign) BOOL shouldTrackTarget;
+
+/**
+ * Indicates whether this instance should automatically find and track the camera
+ * as its target. If this property is set to YES, this instance will automatically
+ * find and track the camera without having to set the target and shouldTrackTarget
+ * properties explicitly.
+ * 
+ * Setting this property to YES has the same effect as setting the shouldTrackTarget
+ * to YES and setting the target to the active camera. Beyond simplifying the two
+ * steps into one, this property that can be set before the active camera is
+ * established, or without being aware of the active camera. When using this property,
+ * you do not need to set the target property, as it will automatically be set to
+ * the active camera.
+ *
+ * If the active camera is changed to a different camera (via the activeCamera
+ * property of the CC3Scene), this property will ensure that this node will target
+ * the new active camera. If you do not want this behaviour, leave this property
+ * set to NO, and set the shouldTrackTarget property to YES, and manually set the
+ * target property to the camera you want to track.
+ *
+ * Setting this property to NO also sets the shouldTrackTarget to NO.
+ *
+ * This initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldAutotargetCamera;
+
+/**
+ * If the node held in the target property is a CC3Light, the target can be tracked
+ * by this node for the purpose of updating the lighting of a contained bump-map
+ * texture, instead of rotating to face the light, as normally occurs with tracking.
+ * 
+ * This property indicates whether this node should update its globalLightLocation
+ * from the tracked location of the light, instead of rotating to face the light.
+ *
+ * The initial property is set to NO, indicating that this node will rotate to face
+ * the target as it or this node moves. If you have set the target property to a
+ * CC3Light instance, and want the bump-map lighting property globalLightLocation
+ * to be updated as the light is tracked instead, set this property to YES.
+ */
+@property(nonatomic, assign) BOOL isTrackingForBumpMapping;
+
+/**
+ * Indicates whether rotation should be restricted to a single axis when attempting
+ * to rotate the node to point at the target or targetLocation.
+ *
+ * For example, a cheap way of simulating a full 3D tree is to have a simple flat picture
+ * of a tree that you rotate around the vertical axis so that it always faces the camera.
+ * Or you might hae a signpost that you want to rotate towards the camera, or towards
+ * another object as that object moves around the scene, and you want the signpost to
+ * remain vertically oriented, and rotate side to side, but not up and down, should the
+ * object being tracked move up and down.
+ *
+ * The initial value of this property is kCC3TargettingAxisRestrictionNone, indicating
+ * that the forward direction of this node will point directly at the target or
+ * targetLocation, and is free to move in all three axial directions.
+ */
+@property(nonatomic, assign) CC3TargettingAxisRestriction axisRestriction;
 
 
 #pragma mark Mesh configuration
@@ -666,7 +996,7 @@ typedef enum {
  * during vertex drawing.
  *
  * Normal vectors should have a unit length. Since normals are vectors in the local coordinate
- * system of the node, they are transformed into world and eye coordinates during drawing.
+ * system of the node, they are transformed into scene and eye coordinates during drawing.
  *
  * During transformation, there are several factors that might distort the normal vector:
  *   - If the normals started out not being of unit length, they will generally be transformed
@@ -718,6 +1048,38 @@ typedef enum {
  * of this node.
  */
 @property(nonatomic, assign) CC3NormalScaling normalScalingMethod;
+
+/**
+ * Indicates whether information about the faces of mesh should be cached.
+ *
+ * If this property is set to NO, accessing information about the faces through the
+ * methods faceAt:, faceIndicesAt:, faceCenterAt:, faceNormalAt:, or facePlaneAt:,
+ * will be calculated dynamically from the mesh data.
+ *
+ * If such data will be accessed frequently, this repeated dynamic calculation may
+ * cause a noticable impact to performance. In such a case, this property can be
+ * set to YES to cause the data to be calculated once and cached, improving the
+ * performance of subsequent accesses to information about the faces.
+ *
+ * However, caching information about the faces will increase the amount of memory
+ * required by the mesh, sometimes significantly. To avoid this additional memory
+ * overhead, in general, you should leave this property set to NO, unless intensive
+ * access to face information is causing a performance impact.
+ *
+ * An example of a situation where the use of this property may be noticable,
+ * is when adding shadow volumes to nodes. Shadow volumes make intense use of
+ * accessing face information about the mesh that is casting the shadow.
+ *
+ * When the value of this property is set to NO, any data cached during previous
+ * access through the indicesAt:, centerAt:, normalAt:, or planeAt:, methods will
+ * be cleared.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns YES if any of the descendant mesh nodes have this property
+ * set to YES. Initially, and in most cases, all mesh nodes have this property set to NO.
+ */
+@property(nonatomic, assign) BOOL shouldCacheFaces;
 
 /**
  * Indicates whether this instance will disable the GL depth mask while drawing the
@@ -786,8 +1148,8 @@ typedef enum {
 @property(nonatomic, assign) BOOL shouldDisableDepthTest;
 
 /**
- * The depth function used by the GL engine when comparing the Z-distance of this
- * node against previously drawn content.
+ * The depth function used by the GL engine when comparing the Z-distance of the
+ * content of this node against previously drawn content.
  *
  * This property only has effect if the shouldDisableDepthTest property is set to NO.
  *
@@ -817,6 +1179,93 @@ typedef enum {
  * node, or will return GL_NEVER if no mesh node are found in the descendants of this node.
  */
 @property(nonatomic, assign) GLenum depthFunction;
+
+/**
+ * An offset factor used by the GL engine when comparing the Z-distance of the content
+ * of this node against previously drawn content. This can be used to correct for
+ * Z-fighting between overlapping, and nearly co-planar, faces of two objects that overlap.
+ *
+ * The definitive example is when you wish to apply a decal object on top of another,
+ * such as bullet-holes on a wall, or a real label on a box. Since the decal is
+ * co-planar with the surface it is attached to, it is easy for rounding errors to
+ * cause some of the pixels of the decal to be considered on top of the background,
+ * and others to be considered behind the background, resulting in only a partial
+ * display of the decal content. This is known as Z-fighting.
+ *
+ * A face whose orientation is at an angle to the camera, particularly those who are
+ * oriented almost edge-on to the camera, might have a significant change in depth
+ * across its visible span. Depending on which parts of the face are used to determine
+ * each pixel depth, the difference in the depth value might be significant.
+ *
+ * By assigning a value to this property, the depth of each pixel will be offset by the
+ * overall change in depth across the face being drawn, multiplied by the value of this
+ * property. When comparing the depth  of content to be drawn against content that has
+ * already been drawn, a positive value for this property will effectively move that
+ * content away from the camera, and a negative value will effectively move that content
+ * towards the camera, relative to the content that has already been drawn.
+ *
+ * A value of -1.0 will cause the depth of content to be drawn to be offset by the
+ * overall change in depth across the face, effectively pulling the face toward the
+ * camera by an amount equal to the span of its depth.
+ *
+ * The depth offset determined by this property is added to the depth offset determined
+ * by the decalOffsetUnits property to determine the overall depth offset to be applied
+ * to each pixel.
+ *
+ * This property only has effect if the shouldDisableDepthTest property is set to NO.
+ *
+ * The initial value of this property is zero, indicating that no depth offset based on
+ * the change in depth across the face will be applied.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns the first non-zero value of this property from
+ * any descendant mesh node, or will return zero if no mesh nodes are found in the
+ * descendants of this node.
+ */
+@property(nonatomic, assign) GLfloat decalOffsetFactor;
+
+
+/**
+ * An offset value used by the GL engine when comparing the Z-distance of the content
+ * of this node against previously drawn content. This can be used to correct for
+ * Z-fighting between overlapping, and nearly co-planar, faces of two objects that overlap.
+ *
+ * The definitive example is when you wish to apply a decal object on top of another,
+ * such as bullet-holes on a wall, or a real label on a box. Since the decal is
+ * co-planar with the surface it is attached to, it is easy for rounding errors to
+ * cause some of the pixels of the decal to be considered on top of the background,
+ * and others to be considered behind the background, resulting in only a partial
+ * display of the decal content. This is known as Z-fighting.
+ *
+ * By assigning a value to this property, the depth of each pixel will be offset by the
+ * minimum resolvable depth buffer value, multiplied by the value of this property.
+ * When comparing the depth  of content to be drawn against content that has already
+ * been drawn, a positive value for this property will effectively move that content
+ * away from the camera, and a negative value will effectively move that content towards
+ * the camera, relative to the content that has already been drawn.
+ *
+ * A value of -1.0 will cause the depth of content to be drawn to be offset by the
+ * minimum resolvable depth buffer value, effectively pulling the face toward the
+ * camera by an amount equal to the minimum Z-distance that is resolvable by the
+ * depth buffer (which depends on the configuration of the depth buffer).
+ *
+ * The depth offset determined by this property is added to the depth offset determined
+ * by the decalOffsetFactor property to determine the overall depth offset to be applied
+ * to each pixel.
+ *
+ * This property only has effect if the shouldDisableDepthTest property is set to NO.
+ *
+ * The initial value of this property is zero, indicating that no absolute depth offset
+ * will be applied.
+ *
+ * Setting this value sets the same property on all descendant nodes.
+ *
+ * Querying this property returns the first non-zero value of this property from
+ * any descendant mesh node, or will return zero if no mesh nodes are found in the
+ * descendants of this node.
+ */
+@property(nonatomic, assign) GLfloat decalOffsetUnits;
 
 /**
  * Indicates whether the bounding volume of this node should be considered fixed,
@@ -866,7 +1315,7 @@ typedef enum {
 @property(nonatomic, assign) BOOL isRunning;
 
 /**
- * Some node types (notably CC3World) collect runtime performance statistics using
+ * Some node types (notably CC3Scene) collect runtime performance statistics using
  * an instance of CC3PerformanceStatistics accessed by this property.
  *
  * By default, nodes do not collect statistics. This property always returns nil,
@@ -920,6 +1369,11 @@ typedef enum {
  *
  * Setting this property sets the same property on all child nodes.
  *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
+ *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -929,6 +1383,11 @@ typedef enum {
  * The diffuse color of the materials of this node.
  *
  * Setting this property sets the same property on all child nodes.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
  *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
@@ -940,6 +1399,11 @@ typedef enum {
  *
  * Setting this property sets the same property on all child nodes.
  *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
+ *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -949,6 +1413,11 @@ typedef enum {
  * The emission color of the materials of this node.
  *
  * Setting this property sets the same property on all child nodes.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
  *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
@@ -982,6 +1451,11 @@ typedef enum {
  *
  * Setting this property sets the same property on all child nodes.
  *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
+ *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -996,6 +1470,11 @@ typedef enum {
  * Setting this property sets the same property in all descendants. See the notes for
  * this property on CC3Material for more information on how this property interacts
  * with the other material properties.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
  *
  * Setting this property should be thought of as a convenient way to switch between the
  * two most common types of blending combinations. For finer control of blending, set
@@ -1018,6 +1497,11 @@ typedef enum {
  * two most common types of blending combinations. For finer control of blending, set
  * specific blending properties on the CC3Material instance directly, and avoid making
  * changes to this property.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
  */
 @property(nonatomic, assign) BOOL isOpaque;
 
@@ -1031,6 +1515,11 @@ typedef enum {
  * descendant node that supports materials, or {GL_ONE, GL_ZERO} if no descendant
  * nodes support materials. Setting this property sets the same property on the
  * materials in all descendant nodes.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
  */
 @property(nonatomic, assign) ccBlendFunc blendFunc;
 
@@ -1106,7 +1595,7 @@ typedef enum {
  * Invoking this method is optional and is not performed automatically. If an application does
  * not wish to use hardware buffering for some nodes, it can do so by avoiding the invocation of
  * this method on those nodes. Typically, however, an applicaiton will simply invoke this method
- * once during initialization of highest-level ancestor node (ususally a subclass of CC3World).
+ * once during initialization of highest-level ancestor node (ususally a subclass of CC3Scene).
  */
 -(void) createGLBuffers;
 
@@ -1144,7 +1633,7 @@ typedef enum {
  *
  * Normally, you would invoke the retainVertex... methods on specific individual
  * nodes, and then invoke this method on the parent node of a node assembly,
- * or on the CC3World.
+ * or on the CC3Scene.
  */
 -(void) releaseRedundantData;
 
@@ -1304,72 +1793,79 @@ typedef enum {
 #pragma mark Texture alignment
 
 /**
- * Aligns the texture coordinates held by a mesh in any descendant node with the textures
- * held in the material of that mesh node.
+ * Indicates whether the texture coordinates of the meshes of the descendants
+ * expect that the texture was flipped upside-down during texture loading.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
  *
- * This method can be useful when the width and height of the textures in the material
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
+ * For each descendant mesh node, the value of this property is used in
+ * combination with the value of the  isFlippedVertically property of a texture
+ * to determine whether the texture will be oriented correctly when displayed
+ * using these texture coordinates.
  *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the textures.
+ * When a texture or material is assigned to a mesh node, the value of this
+ * property is compared with the isFlippedVertically property of the texture to
+ * automatically determine whether the texture coordinates of the mesh need to
+ * be flipped vertically in order to display the texture correctly. If needed,
+ * the texture coordinates will be flipped automatically. As part of that inversion,
+ * the value of this property will also be flipped, to indicate that the texture
+ * coordinates are now aligned differently.
  *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
+ * Reading the value of this property will return YES if the same property of
+ * any descendant mesh node returns YES, otherwise this property will return NO.
  *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This method should only be invoked once on any mesh, and it may cause mapping conflicts
- * if the same mesh is shared by other CC3MeshNodes that use different textures.
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the same property on the CC3Resource
+ * class to understand how this property is set during mesh resource loading.
  *
- * Care should be taken when using this method, as it affects all descendant nodes, and
- * changes the actual vertex data. This method should only be invoked once on any mesh,
- * and it may cause mapping conflicts if the same mesh is shared by other nodes that use
- * different textures.
+ * Generally, the application never has need to change the value of this property.
+ * If you do need to adjust the value of this property, you sould do so before
+ * setting a texture or material into any descendant mesh nodes.
  *
- * To adjust the texture coordinates of only a single mesh, invoke this method on that
- * mesh node only, or invoke the alignWithTexturesIn: in the CC3Mesh within that mesh
- * node. To adjust the texture coordinates of only a single texture coordinates array
- * within a mesh, invoke the alignWithTexture: method on the appropriate instance of
- * CC3VertexTextureCoordinates.
+ * Setting the value of this property will set the same property on all descendant nodes.
+ * 
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR). This avoids the texture
+ * coordinate having to be flipped automatically when a texture or material
+ * is assigned to this mesh node.
+ */
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for all texture units on all descendant mesh nodes. This has the effect
+ * of flipping the textures vertically on the model. and can be useful for
+ * creating interesting effects, or mirror images.
+ */
+-(void) flipTexturesVertically;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for all texture units on all descendant mesh nodes. This has the effect
+ * of flipping the textures vertically on the model. and can be useful for
+ * creating interesting effects, or mirror images.
+ */
+-(void) flipTexturesHorizontally;
+
+/**
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to a mesh node. If you do need to manually
+ * align a mesh to a texture, use the expectsVerticallyFlippedTextures property
+ * to indicate whether the texture mesh is aligned with vertically-flipped texture
+ * prior to setting the texture or material into your mesh nodes.
  */
 -(void) alignTextures;
 
 /**
- * Aligns the texture coordinates held by a mesh in any descendant node with the textures
- * held in the material of that mesh node.
- *
- * The texture coordinates are aligned assuming that the texture is inverted in the
- * Y-direction. Certain texture formats are inverted during loading, and this method
- * can be used to compensate.
- *
- * This method can be useful when the width and height of the textures in the material
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
- *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the texturesa.
- *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
- *
- * Care should be taken when using this method, as it affects all descendant nodes, and
- * changes the actual vertex data. This method should only be invoked once on any mesh,
- * and it may cause mapping conflicts if the same mesh is shared by other nodes that use
- * different textures.
- *
- * To adjust the texture coordinates of only a single mesh, invoke this method on that
- * mesh node only, or invoke the alignWithInvertedTexturesIn: in the CC3Mesh within that
- * mesh node. To adjust the texture coordinates of only a single texture coordinates
- * array within a mesh, invoke the alignWithInvertedTexture: method on the appropriate
- * instance of CC3VertexTextureCoordinates.
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to a mesh node. If you do need to manually
+ * align a mesh to a texture, use the expectsVerticallyFlippedTextures property
+ * to indicate whether the texture mesh is aligned with vertically-flipped texture
+ * prior to setting the texture or material into your mesh nodes.
  */
 -(void) alignInvertedTextures;
 
@@ -1397,14 +1893,14 @@ typedef enum {
  * Subclasses that override do not need to invoke this superclass implementation. Nor do
  * subclasses need to invoke this method on their child nodes. That is performed automatically.
  *
- * The specified visitor encapsulates the CC3World instance, to allow this node to interact
- * with other nodes in its world.
+ * The specified visitor encapsulates the CC3Scene instance, to allow this node to interact
+ * with other nodes in the scene.
  *
  * The visitor also encapsulates the deltaTime, which is the interval, in seconds, since
  * the previous update. This value can be used to create realistic real-time motion that
  * is independent of specific frame or update rates. Depending on the setting of the
- * maxUpdateInterval property of the CC3World instance, the value of dt may be clamped to
- * an upper limit before being passed to this method. See the description of the CC3World
+ * maxUpdateInterval property of the CC3Scene instance, the value of dt may be clamped to
+ * an upper limit before being passed to this method. See the description of the CC3Scene
  * maxUpdateInterval property for more information about clamping the update interval.
  * 
  * If you wish to remove this node during an update visitation, avoid invoking the remove
@@ -1446,14 +1942,14 @@ typedef enum {
  * do not need to invoke this superclass implementation. Nor do subclasses need to invoke
  * this method on their child nodes. That is performed automatically.
  *
- * The specified visitor encapsulates the CC3World instance, to allow this node to interact
- * with other nodes in its world.
+ * The specified visitor encapsulates the CC3Scene instance, to allow this node to interact
+ * with other nodes in the scene.
  *
  * The visitor also encapsulates the deltaTime, which is the interval, in seconds, since
  * the previous update. This value can be used to create realistic real-time motion that
  * is independent of specific frame or update rates. Depending on the setting of the
- * maxUpdateInterval property of the CC3World instance, the value of dt may be clamped to
- * an upper limit before being passed to this method. See the description of the CC3World
+ * maxUpdateInterval property of the CC3Scene instance, the value of dt may be clamped to
+ * an upper limit before being passed to this method. See the description of the CC3Scene
  * maxUpdateInterval property for more information about clamping the update interval.
  * 
  * If you wish to remove this node during an update visitation, avoid invoking the remove
@@ -1473,6 +1969,16 @@ typedef enum {
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
 
 /**
+ * If the shouldTrackTarget property is set to YES, orients this node to point towards
+ * its target, otherwise does nothing. The transform visitor is used to transform
+ * this node and all its children if this node re-orients.
+ *
+ * This method is invoked automatically if either the target node or this node moves.
+ * Usually, the application should never need to invoke this method directly.
+ */
+-(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor;
+
+/**
  * If the shouldUseFixedBoundingVolume property is set to NO, this method forces
  * the bounding volume to be rebuilt. Otherwise, this method does nothing.
  *
@@ -1480,14 +1986,66 @@ typedef enum {
  * in the mesh, you should invoke this method to ensure that the bounding volume
  * is rebuilt to encompass the new vertex locations.
  *
- * The bounding volume is automatically transformed as the node is transformed, so this
- * method does NOT need to be invoked when the node is transformed (moved, rotated,
- * or scaled).
+ * The bounding volume is automatically transformed as the node is transformed,
+ * so this method does NOT need to be invoked when the node is transformed (moved,
+ * rotated, or scaled).
  */
 -(void) rebuildBoundingVolume;
 
 
 #pragma mark Transformations
+
+/**
+ * A list of objects that have requested that they be notified whenever the
+ * transform of this node has changed.
+ *
+ * This occurs when one of the transform properties (location, rotation & scale)
+ * of this node, or any of its structural ancestor nodes has changed.
+ *
+ * Each listener in this list will be sent the nodeWasTransformed: notification
+ * message when the transformMatrix of this node is recalculated, or is set directly.
+ *
+ * Objects can be added to this list by using the addTransformListener: method.
+ *
+ * This property will be nil if no objects have been added via addTransformListener:
+ * method, or if they have all been subsequently removed.
+ */
+@property(nonatomic, readonly) CCArray* transformListeners;
+
+/**
+ * Indicates that the specified listener object wishes to be notified whenever
+ * the transform of this node has changed.
+ *
+ * This occurs when one of the transform properties (location, rotation & scale)
+ * of this node, or any of its structural ancestor nodes has changed.
+ *
+ * The listener will be sent the nodeWasTransformed: notification message whenever
+ * the transformMatrix of this node is recalculated, or is set directly.
+ *
+ * Once added by this method, the newly added listener is immediately sent the
+ * nodeWasTransformed: notification message, so that the listener is aware of
+ * this node's current transform state. This is necessary in case this node
+ * will not be transformed in the near future,
+ *
+ * It is safe to invoke this method more than once for the same listener, or
+ * with a nil listener. In either case, this method simply ignores the request.
+ */
+-(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
+
+/**
+ * Removes the specified transform listener from the list of objects that have
+ * requested that they be notified whenever the transform of this node has changed.
+ *
+ * It is safe to invoke this method with a listener that was not previously added,
+ * or with a nil listener. In either case, this method simply ignores the request.
+ */
+-(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
+
+/**
+ * Removes all transform listeners, that were previously added via the
+ * addTransformListener: method, from this node.
+ */
+-(void) removeAllTransformListeners;
 
 /**
  * The transformation matrix derived from the location, rotation and scale transform properties
@@ -1626,7 +2184,7 @@ typedef enum {
  *   - ths node is visible (as indicated by the visible property)
  *   - has content to draw (as indicated by the hasLocalContent property)
  *   - intersects the camera's frustum (which is checked by invoking the method
- *     doesIntersectFrustum: of this node with the frustum from the visitor).
+ *     doesIntersectBoundingVolume: of this node with the frustum from the visitor).
  *
  * If all of these tests pass, drawing is required, and this method transforms and draws
  * the local content of this node.
@@ -1636,25 +2194,8 @@ typedef enum {
  */
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/**
- * Returns whether the local content of this node intersects the given frustum.
- * This check does not include checking children, only the local content.
- *
- * This method is called during the drawing operations of each frame to determine whether
- * this node should be culled from the visible nodes and not drawn. A return value of YES
- * will cause the node to be drawn, a return value of NO will cause the node to be culled
- * and not drawn.
- *
- * Culling nodes that are not visible to the camera is an important performance enhancement.
- * The node should strive to be as accurate as possible in returning whether it intersects
- * the camera's frustum. Incorrectly returning YES will cause wasted processing within the
- * GL engine. Incorrectly returning NO will cause a node that should at least be partially
- * visible to not be drawn.
- *
- * In this implementation, if this node has a boundingVolume, this method delegates to it.
- * Otherwise, it simply returns YES. Subclasses may override to change this standard behaviour. 
- */
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum;
+/** @deprecated Replaced by the more general doesIntersectBoundingVolume: method. */
+-(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum DEPRECATED_ATTRIBUTE;
 
 /**
  * Draws the content of this node to the GL engine. The specified visitor encapsulates
@@ -1674,7 +2215,7 @@ typedef enum {
  * Checks that the child nodes of this node are in the correct drawing order relative
  * to other nodes. This implementation forwards this request to all descendants.
  * Those descendants with local content to draw will check their positions in the
- * drawing sequence by passing this notification up the ancestor chain to the CC3World.
+ * drawing sequence by passing this notification up the ancestor chain to the CC3Scene.
  *
  * By default, nodes are automatically repositioned on each drawing frame to optimize
  * the drawing order, so you should usually have no need to use this method.
@@ -1684,30 +2225,41 @@ typedef enum {
  * property of specific drawing sequencers to NO.
  *
  * In that case, if you modify the properties of a node or its content, such as mesh or material
- * opacity, and your CC3World drawing sequencer uses that criteria to sort nodes, you can invoke
+ * opacity, and your CC3Scene drawing sequencer uses that criteria to sort nodes, you can invoke
  * this method to force the node to be repositioned in the correct drawing order.
  *
  * You don't need to invoke this method when initially setting the properties.
  * You only need to invoke this method if you modify the properties after the node has
- * been added to the CC3World, either by itself, or as part of a node assembly.
+ * been added to the CC3Scene, either by itself, or as part of a node assembly.
  */
 -(void) checkDrawingOrder;
 
 
 #pragma mark Node structural hierarchy
 
-/** The child nodes of this node, in a node structural hierarchy. */
+/**
+ * The child nodes of this node, in a node structural hierarchy.
+ *
+ * This property will be nil if this node has no child nodes.
+ *
+ * To change the contents of this array, use the addChild: and removeChild:
+ * methods of this class. Do not manipulate the contents of this array directly.
+ */
 @property(nonatomic, readonly) CCArray* children;
 
-/** The parent node of this node, in a node structural hierarchy. */
+/**
+ * The parent node of this node, in a node structural hierarchy.
+ *
+ * This property will be nil if this node has not been added as a child to a parent node.
+ */
 @property(nonatomic, readonly) CC3Node* parent;
 
 /**
  * Returns the root ancestor of this node, in the node structural hierarchy,
  * or returns this node, if this node has no parent.
  *
- * In almost all cases, this node returned will be the CC3World. However, if
- * this node and all of its ancestors have not been added to the CC3World,
+ * In almost all cases, this node returned will be the CC3Scene. However, if
+ * this node and all of its ancestors have not been added to the CC3Scene,
  * then the returned node may be some other node.
  *
  * Reading this property traverses up the node hierarchy. If this property
@@ -1716,19 +2268,22 @@ typedef enum {
 @property(nonatomic, readonly) CC3Node* rootAncestor;
 
 /**
- * If this node has been added to the 3D world, either directly, or as part
- * of a node assembly, returns the CC3World instance that forms the 3D world,
+ * If this node has been added to the 3D scene, either directly, or as part
+ * of a node assembly, returns the CC3Scene instance that forms the 3D scene,
  * otherwise returns nil.
  *
  * Reading this property traverses up the node hierarchy. If this property
  * is accessed frequently, it is recommended that it be cached.
  */
-@property(nonatomic, readonly) CC3World* world;
+@property(nonatomic, readonly) CC3Scene* scene;
+
+/** @deprecated Renamed to scene. */
+@property(nonatomic, readonly) CC3Scene* world DEPRECATED_ATTRIBUTE;
 
 /**
- * If this node has been added to the 3D world, either directly, or as part
- * of a node assembly, returns the activeCamera property of the CC3World instance,
- * as accessed via the world property, otherwise returns nil.
+ * If this node has been added to the 3D scene, either directly, or as part
+ * of a node assembly, returns the activeCamera property of the CC3Scene instance,
+ * as accessed via the scene property, otherwise returns nil.
  *
  * Reading this property traverses up the node hierarchy. If this property
  * is accessed frequently, it is recommended that it be cached.
@@ -1744,7 +2299,7 @@ typedef enum {
  * hierarchy (typically by invoking the remove method on that child node, and which
  * may be performed automatically for some types of child nodes), will also cause the
  * wrapper node to be removed as well. This cleanup is important to avoid littering
- * your world with empty wrapper nodes.
+ * your scene with empty wrapper nodes.
  *
  * The initial value of this property is NO, indicating that this instance will NOT
  * automatically remove itself from the node hierarchy once all its child nodes have
@@ -1761,7 +2316,7 @@ typedef enum {
  * This method does nothing if the child already has this node as its parent.
  *
  * If you are invoking this method from the updateBeforeTransform: of the node
- * being added, this node, or any ancestor node (including your CC3World), the
+ * being added, this node, or any ancestor node (including your CC3Scene), the
  * transformMatrix of the node being added (and its descendant nodes) will
  * automatically be updated. However, if you are invoking this method from the
  * updateAfterTransform: method, you should invoke the updateTransformMatrices
@@ -1803,7 +2358,7 @@ typedef enum {
  *
  * This method changes the transform properties of the node being added.
  * If you are invoking this method from the updateBeforeTransform: of the node
- * being added, this node, or any ancestor node (including your CC3World), the
+ * being added, this node, or any ancestor node (including your CC3Scene), the
  * transformMatrix of the node being added (and its descendant nodes) will
  * automatically be updated. However, if you are invoking this method from the
  * updateAfterTransform: method, you should invoke the updateTransformMatrices
@@ -1879,7 +2434,7 @@ typedef enum {
  *
  * This implementation sets the isRunning property to NO. It also checks the value
  * of the shouldCleanupWhenRemoved property and, if it is set to YES, stops and
- * removes any CCActions running on this node.
+ * removes any CCActions running on this node and its descendants.
  */
 -(void) wasRemoved;
 
@@ -1912,7 +2467,78 @@ typedef enum {
  * The effect is to populate the array with this node and all its descendants.
  */
 -(void) flattenInto: (CCArray*) anArray;
-	
+
+/**
+ * Wraps this node in a new autoreleased instance of CC3Node, and returns the new
+ * wrapper node. This node appears as the lone child node of the returned node.
+ *
+ * This is a convenience method that is useful when a rotational or locational
+ * offset needs to be assigned to a node.
+ *
+ * For instance, for nodes that point towards a specific target or location, to
+ * change the side of the node that is facing that target node, you can use this
+ * method to create a wrapper node, and then assign an offset rotation to the
+ * this node, so that it is rotated by a fixed amount relative to the wrapper
+ * node. You can then assign the target or target location to the wrapper, which
+ * will rotate to point its forwardDirection towards the target, carrying this
+ * node along with it. The result will be that the desired side of this node
+ * will point towards the target.
+ *
+ * As another example, to offset the pivot point of a node (the point around
+ * which the node pivots when rotated, and the point associated with its location)
+ * you can use this method to create a wrapper node, and then assign an offset
+ * location to this node, so that it is offset by a fixed amount relative to the
+ * wrapper node. You can then rotate or locate the wrapper node, which will carry
+ * this node along with it. The result will be that the desired point in this node
+ * will be located at the pivot point for rotation and location operations.
+ *
+ * The shouldAutoremoveWhenEmpty property of the returned wrapper node is set
+ * to YES, so the wrapper node will automatically disappear when this node is
+ * removed from the node structural hierarchy.
+ *
+ * The returned wrapper node will have the name "<this node name>-OW".
+ */
+-(CC3Node*) asOrientingWrapper;
+
+/**
+ * Wraps this node in a new  autoreleased instance of CC3Node, and returns the new
+ * wrapper node. This node appears as the lone child node of the returned node.
+ *
+ * This method uses the asOrientingWrapper method to create the wrapper. The
+ * shouldTrackTarget property of the returned wrapper node is set to YES so that
+ * the wrapper will automatically track the target after it has been assigned.
+ */
+-(CC3Node*) asTrackingWrapper;
+
+/**
+ * Wraps this node in a new  autoreleased instance of CC3Node, and returns the new
+ * wrapper node. This node appears as the lone child node of the returned node.
+ *
+ * This method uses the asOrientingWrapper method to create the wrapper. The
+ * shouldAutotargetCamera property of the returned wrapper node is set to YES
+ * so that the wrapper will automatically locate and track the active camera.
+ * When using this method, you do not need to set the camera as the target of
+ * the wrapper, as it is located and assigned automatically. See the notes of
+ * the shouldAutotargetCamera property for more info.
+ */
+-(CC3Node*) asCameraTrackingWrapper;
+
+/**
+ * Wraps this node in a new  autoreleased instance of CC3Node, and returns the new
+ * wrapper node. This node appears as the lone child node of the returned node.
+ *
+ * This method uses the asTrackingWrapper method to create a wrapper that
+ * automatically tracks the target once it has been assigned.
+ *
+ * The isTrackingForBumpMapping of the returned wrapper is set to YES, so that
+ * if the target that is assigned is a CC3Light, the wrapper will update the
+ * globalLightLocation of the wrapped node from the tracked location of the light,
+ * instead of rotating to face the light. This allows the normals embedded in any
+ * bump-mapped texture on the wrapped node to interact with the direction of the
+ * light source to create per-pixel luminosity that appears realistic
+ */
+-(CC3Node*) asBumpMapLightTrackingWrapper;
+
 
 #pragma mark CC3Node actions
 
@@ -1930,7 +2556,7 @@ typedef enum {
  * retained forever, potentially creating memory leaks of nodes that are invisibly
  * retained by their actions.
  *
- * The iniital value of this property is YES, indicating that all actions will be stopped
+ * The initial value of this property is YES, indicating that all actions will be stopped
  * and removed when this node is removed from its parent. If you have reason to want the
  * actions to be paused but not removed when removing this node from its parent, set this
  * property to NO.
@@ -2106,6 +2732,192 @@ typedef enum {
 -(void) touchDisableAll;
 
 
+#pragma mark Intersections and collision detection
+
+/**
+ * Returns whether the bounding volume of this node intersects the given bounding volume.
+ * This check does not include checking children, only the local content.
+ *
+ * This capability can be used for detecting collisions between nodes, or to indicate
+ * whether an object is located in a particular volume of space, for example, the
+ * frustum of the camera.
+ *
+ * This method is called during the drawing operations of each frame to determine whether
+ * this node does not intersect the camera frustum, should be culled from the visible
+ * nodes and not drawn. A return value of YES will cause the node to be drawn, a return
+ * value of NO will cause the node to be culled and not drawn.
+ *
+ * Culling nodes that are not visible to the camera is an important performance enhancement.
+ * The node should strive to be as accurate as possible in returning whether it intersects
+ * the camera's frustum. Incorrectly returning YES will cause wasted processing within the
+ * GL engine. Incorrectly returning NO will cause a node that should at least be partially
+ * visible to not be drawn.
+ *
+ * This implementation delegates to this node's boundingVolume. Nodes without a bounding
+ * volume will not intersect any other bounding volume. With that design in mind, if
+ * either the bounding volume of this node, or the otherBoundingVolume is nil, this
+ * method returns NO
+ */
+-(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume;
+
+/**
+ * Returns whether the bounding volume of this node intersects the bounding volume of
+ * the specified node. This check does not include checking descendants of either node,
+ * only the direct bounding volumes.
+ *
+ * This capability can be used for detecting collisions between nodes.
+ *
+ * This implementation invokes the doesIntersectBoundingVolume: method of this node,
+ * passing the bounding volume of the other node. For an intersection to occur, both
+ * nodes must each have a bounding volume. Nodes without a bounding volume will not
+ * intersect any other bounding volume. Correspondingly, if either of the nodes do
+ * not have a bounding volume, this method returns NO
+ */
+-(BOOL) doesIntersectNode: (CC3Node*) otherNode;
+
+/**
+ * Indicates whether this bounding volume should ignore intersections from rays.
+ * If this property is set to YES, intersections with rays will be ignored, and
+ * the doesIntersectGlobalRay: method will always return NO, and the
+ * locationOfGlobalRayIntesection: and globalLocationOfGlobalRayIntesection:
+ * properties will always return kCC3VectorNull.
+ *
+ * The initial value of this property is NO, and most of the time this is sufficient.
+ *
+ * For some uses, such as the bounding volumes of nodes that should be excluded from
+ * puncturing from touch selection rays, such as particle emitters, it might make
+ * sense to set this property to YES, so that the bounding volume is not affected
+ * by rays from touch events.
+ *
+ * This property delegates to the bounding volume. Setting this property will
+ * have no effect if this node does not have a bounding volume assigned.
+ */
+@property(nonatomic, assign) BOOL shouldIgnoreRayIntersection;
+
+/**
+ * Returns whether this node is intersected (punctured) by the specified ray,
+ * which is specified in the global coordinate system.
+ *
+ * This implementation delegates to this node's boundingVolume. If this node has
+ * no bounding volume, this method returns NO.
+ */
+-(BOOL) doesIntersectGlobalRay: (CC3Ray) aRay;
+
+/**
+ * Returns the location at which the specified ray intersects the bounding volume
+ * of this node, or returns kCC3VectorNull if this node does not have a bounding
+ * volume, the shouldIgnoreRayIntersection property is set to YES, or the ray does
+ * not intersect the bounding volume.
+ *
+ * The result honours the startLocation of the ray, and will return kCC3VectorNull
+ * if the bounding volume is "behind" the startLocation, even if the line projecting
+ * back through the startLocation in the negative direction of the ray intersects
+ * the bounding volume.
+ *
+ * The ray may start inside the bounding volume of this node, in which case, the
+ * returned location represents the exit location of the ray.
+ *
+ * The ray must be specified in global coordinates. The returned location is in
+ * the local coordinate system of this node. A valid non-null result can therefore
+ * be used to place another node at the intersection location, by simply adding
+ * it to this node at the returned location (eg- drag & drop, bullet holes, etc).
+ *
+ * The returned result can be tested for null using the CC3VectorIsNull function.
+ *
+ * When using this method, keep in mind that the returned intersection location is
+ * located on the surface of the bounding volume, not on the surface of the node.
+ * Depending on the shape of the surface of the node, the returned location may
+ * visually appear to be at a different location than where you expect to see it
+ * on the surface of on the node.
+ */
+-(CC3Vector) locationOfGlobalRayIntesection: (CC3Ray) aRay;
+
+/**
+ * Returns the location at which the specified ray intersects the bounding volume
+ * of this node, or returns kCC3VectorNull if this node does not have a bounding
+ * volume, the shouldIgnoreRayIntersection property is set to YES, or the ray does
+ * not intersect the bounding volume.
+ *
+ * The result honours the startLocation of the ray, and will return kCC3VectorNull
+ * if the bounding volume is "behind" the startLocation, even if the line projecting
+ * back through the startLocation in the negative direction of the ray intersects
+ * the bounding volume.
+ *
+ * The ray may start inside the bounding volume of this node, in which case, the
+ * returned location represents the exit location of the ray.
+ *
+ * Both the input ray and the returned location are specified in global coordinates.
+ *
+ * The returned result can be tested for null using the CC3VectorIsNull function.
+ *
+ * When using this method, keep in mind that the returned intersection location is
+ * located on the surface of the bounding volume, not on the surface of the node.
+ * Depending on the shape of the surface of the node, the returned location may
+ * visually appear to be at a different location than where you expect to see it
+ * on the surface of on the node.
+ */
+-(CC3Vector) globalLocationOfGlobalRayIntesection: (CC3Ray) aRay;
+
+/**
+ * Returns the descendant nodes that are intersected (punctured) by the specified 
+ * ray. This node is included in the test, and will be included in the returned
+ * nodes if it has a bounding volume that is punctured by the ray.
+ *
+ * The results are returned as a CC3NodePuncturingVisitor instance, which can be
+ * queried for the nodes that were punctured by the ray, and the locations of the
+ * punctures on the nodes. The returned visitor orders the nodes by distance between
+ * the startLocation of the ray and the global puncture location on each node.
+ *
+ * The ray must be specified in global coordinates.
+ *
+ * This implementation creates an instance of CC3NodePuncturingVisitor on the
+ * specified ray, and invokes the visit: method on that visitor, passing this
+ * node as that starting point of the visitation.
+ *
+ * The results will not include nodes that do not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ *
+ * This method also excludes invisible nodes and nodes where the ray starts inside
+ * the bounding volume of the node. To gain finer control over this behaviour,
+ * instead of using this method, create an instance of CC3NodePuncturingVisitor,
+ * adjust its settings, and invoke the visit: method on the visitor, with this
+ * node as the arguement.
+ *
+ * Also, to avoid creating a new visitor for each visit, you can create a single
+ * instance of CC3NodePuncturingVisitor, cache it, and invoke the visit: method
+ * repeatedly, with or without changing the ray between invocations.
+ */
+-(CC3NodePuncturingVisitor*) nodesIntersectedByGlobalRay: (CC3Ray) aRay;
+
+/**
+ * Collects the descendant nodes that are intersected (punctured) by the
+ * specified ray, and returns the node whose global puncture location is
+ * closest to the startLocation of the ray, or returns nil if the ray
+ * punctures no nodes. This node is included in the test.
+ *
+ * The ray must be specified in global coordinates.
+ *
+ * The result will not include any node that does not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ *
+ * This method also excludes invisible nodes and nodes where the ray starts inside
+ * the bounding volume of the node. To gain finer control over this behaviour,
+ * instead of using this method, create an instance of CC3NodePuncturingVisitor,
+ * adjust its settings, and invoke the visit: method on the visitor, with this
+ * node as the arguement.
+ *
+ * Also, to avoid creating a new visitor for each visit, you can create a single
+ * instance of CC3NodePuncturingVisitor, cache it, and invoke the visit: method
+ * repeatedly, with or without changing the ray between invocations.
+ *
+ * This implementation simply invokes the nodesIntersectedByGlobalRay:
+ * method, and reads the value of the closestPuncturedNode from the
+ * CC3NodePuncturingVisitor returned by that method. See the notes
+ * of the nodesIntersectedByGlobalRay: method for more info.
+ */
+-(CC3Node*) closestNodeIntersectedByGlobalRay: (CC3Ray) aRay;
+
+
 #pragma mark Animation
 
 /**
@@ -2162,6 +2974,17 @@ typedef enum {
  */
 -(void) disableAllAnimation;
 
+/**
+ * The number of frames of animation supported by this node, or its descendants.
+ *
+ * If this node is animated, returns the frame count from this node's animation.
+ * Otherwise, a depth-first traversal of the descendants is performed, and the
+ * first non-zero animation frame count value is returned.
+ *
+ * Returns zero if none of this node and its descendants contains any animation.
+ */
+@property(nonatomic, readonly) GLuint animationFrameCount;
+
 /** 
  * Updates the location, rotation and scale of this node based on the animation frame
  * located at the specified time, which should be a value between zero and one, with
@@ -2183,7 +3006,7 @@ typedef enum {
 -(void) establishAnimationFrameAt: (ccTime) t;
 
 
-#pragma mark Wireframe box and descriptor
+#pragma mark Developer support
 
 /**
  * Indicates whether this node should display a descriptive label on this node.
@@ -2332,8 +3155,8 @@ typedef enum {
  *
  * If this node has no local content, or has descendant nodes without local content,
  * or descendants themselves (for example cameras, lights, or simply empty structural
- * or targetting nodes), setting this property will have no effect for those descendants.
- * Under those conditions, it is possible to set this property to YES and subsequently
+ * nodes), setting this property will have no effect for those descendants. Under
+ * those conditions, it is possible to set this property to YES and subsequently
  * read the property back as NO.
  */
 @property(nonatomic, assign) BOOL shouldDrawAllWireframeBoxes;
@@ -2384,11 +3207,9 @@ typedef enum {
  * Adds a visble line, drawn in the color indicated by the directionMarkerColor
  * class-side property, from the pivot location of this node (the origin in this
  * node's local coordinate system) to a location somewhat outside the node in
- * the direction kCC3VectorUnitZNegative, pointing down the negative Z-axis
- * (which is the default direction in OpenGL).
- *
- * For subclasses that use targetting, the line will point in the forwardDirection,
- * which is the direction of the target location.
+ * the direction of the forwardDirection property, in the node's local coordinate
+ * system, and in the direction of the globalForwardDirection property, in the
+ * global coordinate system of the scene.
  * 
  * See the addDirectionMarkerColored:inDirection: method for more info.
  */
@@ -2411,7 +3232,8 @@ typedef enum {
 
 /**
  * Removes all the direction marker child nodes that were previously added using
- * the addDirectionMarkerColored:inDirection: and addDirectionMarker methods.
+ * the addDirectionMarkerColored:inDirection: and addDirectionMarker methods,
+ * from this node and all descendant nodes.
  */
 -(void) removeAllDirectionMarkers;
 
@@ -2448,6 +3270,84 @@ typedef enum {
  */
 +(void) setDirectionMarkerColor: (ccColor4F) aColor;
 
+/**
+ * Indicates whether the node should display the extent of its bounding volume.
+ *
+ * The bounding volume is drawn by creating and adding a CC3BoundingVolumeDisplayNode
+ * as a child node to this node. The shape, dimensions, and color of the child node
+ * are determined by the type of bounding volume.
+ *
+ * If the bounding volume of this node is a composite bounding node, such as the
+ * standard CC3NodeTighteningBoundingVolumeSequence, all bounding volumes will
+ * be displayed, each in its own color.
+ *
+ * If this node has no bounding volume, setting this property will have no visible effect.
+ *
+ * Setting this property to YES can be useful during development in determining
+ * the boundaries of a 3D structural node, and how it is interacting with the
+ * camera frustum and other nodes during collision detection.
+ *
+ * By default, the displayed bounding volume node is not touchable, even if this
+ * node is touchable. If, for some reason you want the displayed bounding volume
+ * to be touchable, you can retrieve the bounding volume node from the displayNode
+ * property of the bounding volume, and set its isTouchEnabled property to YES.
+ */
+@property(nonatomic, assign) BOOL shouldDrawBoundingVolume;
+
+/**
+ * Indicates that this node, and each of its descendant nodes, should display the
+ * extent of its bounding volumes.
+ *
+ * Setting the value of this property has the effect of setting the value of the
+ * shouldDrawBoundingVolume property on this node and all its descendant nodes.
+ *
+ * Reading this property will return YES if this property is set to YES on any
+ * descendant, otherwise NO will be return.
+ */
+@property(nonatomic, assign) BOOL shouldDrawAllBoundingVolumes;
+
+/**
+ * When this property is set to YES, a log message will be output whenever
+ * the doesIntersectBoundingVolume: method returns YES (indicating that
+ * another bounding volume intersects the bounding volume of this node),
+ * if the shouldLogIntersections property of the other bounding volume
+ * is also set to YES.
+ *
+ * The shouldLogIntersections property of this node and the other bounding
+ * volumes must both be set to YES for the log message to be output.
+ *
+ * The initial value of this property is NO.
+ *
+ * This property is useful during development to help trace intersections
+ * between nodes and bounding volumes, such as collision detection between
+ * nodes, or whether a node is within the camera's frustum.
+ * 
+ * This property is only available when the LOGGING_ENABLED
+ * compiler build setting is defined and set to 1.
+ */
+@property(nonatomic, assign) BOOL shouldLogIntersections;
+
+/**
+ * When this property is set to YES, a log message will be output whenever
+ * the doesIntersectBoundingVolume: method returns NO (indicating that
+ * another bounding volume does not intersect the bounding volume of this
+ * node), if the shouldLogIntersectionMisses property of the other bounding
+ * volume is also set to YES.
+ *
+ * The shouldLogIntersectionMisses property of this node and the other
+ * bounding volumes must both be set to YES for the log message to be output.
+ *
+ * The initial value of this property is NO.
+ *
+ * This property is useful during development to help trace intersections
+ * between nodes and bounding volumes, such as collision detection between
+ * nodes, or whether a node is within the camera's frustum.
+ * 
+ * This property is only available when the LOGGING_ENABLED
+ * compiler build setting is defined and set to 1.
+ */
+@property(nonatomic, assign) BOOL shouldLogIntersectionMisses;
+
 @end
 
 
@@ -2471,30 +3371,51 @@ typedef enum {
 }
 
 /**
- * Returns the bounding box of this node's local content,
- * in this node's local coordinate system.
+ * Returns the center of geometry of the local content of this node,
+ * in the local coordinate system of this node.
+ *
+ * If this node has no local content, returns the zero vector.
+ */
+@property(nonatomic, readonly) CC3Vector localContentCenterOfGeometry;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds the local
+ * content of this node, in the local coordinate system of this node.
  *
  * If this node has no local content, returns kCC3BoundingBoxNull.
  */
 @property(nonatomic, readonly) CC3BoundingBox localContentBoundingBox;
 
 /**
- * Returns the bounding box of this node's mesh, in the global coordinate system,
- * by transforming the eight vertices derived from the localContentBoundingBox property,
- * using the transformMatrix of this node, and constructing another bounding box
- * that surrounds all eight transformed vertices.
+ * Returns the center of geometry of the local content of this node,
+ * in the global coordinate system of the 3D scene.
+ *
+ * If this node has no local content, returns the value of the globalLocation property.
+ *
+ * The value of this property is calculated by transforming the value of the
+ * localContentCenterOfGeometry property, using the transformMatrix of this node.
+ */
+@property(nonatomic, readonly) CC3Vector globalLocalContentCenterOfGeometry;
+
+/**
+ * Returns the smallest axis-aligned bounding box that surrounds the local
+ * content of this node, in the global coordinate system of the 3D scene.
  *
  * If this node has no local content, returns kCC3BoundingBoxNull.
  *
+ * The value of this property is calculated by transforming the eight vertices derived
+ * from the localContentBoundingBox property, using the transformMatrix of this node,
+ * and constructing another bounding box that surrounds all eight transformed vertices.
+ *
  * Since all bounding boxes are axis-aligned (AABB), if this node is rotated, the
  * globalLocalContentBoundingBox will generally be significantly larger than the
- * localContentBoundingBox.
+ * localContentBoundingBox. 
  */
 @property(nonatomic, readonly) CC3BoundingBox globalLocalContentBoundingBox;
 
 /**
  * Checks that this node is in the correct drawing order relative to other nodes.
- * This implementation forwards this notification up the ancestor chain to the CC3World,
+ * This implementation forwards this notification up the ancestor chain to the CC3Scene,
  * which checks if the node is correctly positioned in the drawing sequence, and
  * repositions the node if needed.
  *
@@ -2506,17 +3427,17 @@ typedef enum {
  * property of specific drawing sequencers to NO.
  *
  * In that case, if you modify the properties of a node or its content, such as mesh or material
- * opacity, and your CC3World drawing sequencer uses that criteria to sort nodes, you can invoke
+ * opacity, and your CC3Scene drawing sequencer uses that criteria to sort nodes, you can invoke
  * this method to force the node to be repositioned in the correct drawing order.
  *
  * You don't need to invoke this method when initially setting the properties.
  * You only need to invoke this method if you modify the properties after the node has
- * been added to the CC3World, either by itself, or as part of a node assembly.
+ * been added to the CC3Scene, either by itself, or as part of a node assembly.
  */
 -(void) checkDrawingOrder;
 
 
-#pragma mark Wireframe box and descriptor
+#pragma mark Developer support
 
 /**
  * Indicates whether the node should display a wireframe box around the local content
@@ -2577,122 +3498,4 @@ typedef enum {
  */
 +(void) setLocalContentWireframeBoxColor: (ccColor4F) aColor;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3Rotator
-
-/** Constants used by matrixIsDirtyBy to indicate why the transform matrix is dirty. */
-#define kCC3MatrixIsNotDirty				0
-#define kCC3MatrixIsDirtyByRotation			1
-#define kCC3MatrixIsDirtyByQuaternion		2
-#define kCC3MatrixIsDirtyByAxisAngle		3
-
-/**
- * CC3otator encapsulates the various mechanisms of rotating a node, and converts
- * between them. Nodes delegate responsibility for managing their rotation to an
- * encapsulated instance of CC3Rotator.
- * 
- * Rotations can be specified in any of the following methods:
- *   - three Euler angles
- *   - rotation angle around an arbitrary rotation axis
- *   - quaternion
- * Subclasses may also specify other rotational mechanisms (such as pointing).
- *
- * The rotator maintains an internal rotationMatrix, separate from the node's
- * transformMatrix, and the rotator can use this rotationMatrix to convert between
- * different rotational specifications. As such, the rotation of a node can be set
- * using any one of the above specifications, and read back as any of the other
- * specifications.
- */
-@interface CC3Rotator : NSObject <NSCopying> {
-	CC3GLMatrix* rotationMatrix;
-	CC3Vector rotation;
-	CC3Vector4 quaternion;
-	CC3Vector rotationAxis;
-	GLfloat rotationAngle;
-	int matrixIsDirtyBy;
-	BOOL isRotationDirty;
-	BOOL isQuaternionDirty;
-	BOOL isAxisAngleDirty;
-	BOOL isQuaternionDirtyByAxisAngle;
-}
-
-/**
- * The rotation matrix derived from the rotation or quaternion properties. Rotation can be
- * specified in terms of either of these properties, and read by either property, even if set
- * by the other property. The matrix will reflect the rotational property most recently set.
- *
- * The rotation matrix for each instance is local to the node and does not include rotational
- * information about the node's ancestors.
- */
-@property(nonatomic, retain) CC3GLMatrix* rotationMatrix;
-
-/**
- * The rotational orientation of the node in 3D space, relative to the parent of the
- * node. This value contains three Euler angles, defining a rotation of this node
- * around the X, Y and Z axes. Each angle is specified in degrees.
- *
- * Rotation is performed in Y-X-Z order, which is the OpenGL default. Depending on
- * the nature of the object you are trying to control, you can think of this order
- * as yaw, then pitch, then roll, or heading, then inclination, then tilt,
- *
- * When setting this value, each component is converted to modulo +/-360 degrees.
- */
-@property(nonatomic, assign) CC3Vector rotation;
-
-/**
- * The rotation of the node in 3D space, relative to the parent of this node,
- * expressed as a quaternion.
- */
-@property(nonatomic, assign) CC3Vector4 quaternion;
-
-/**
- * The axis of rotation of the node in 3D space, relative to the parent of this
- * node, expressed as a directional vector. This axis can be used in conjunction
- * with the rotationAngle property to describe the rotation as a single angular
- * rotation around an arbitrary axis.
- */
-@property(nonatomic, assign) CC3Vector rotationAxis;
-
-/**
- * The angular rotation around the axis specified in the rotationAxis property.
- *
- * When setting this value, it is converted to modulo +/-360 degrees.
- */
-@property(nonatomic, assign) GLfloat rotationAngle;
-
-/** Rotates this rotator from its current state by the specified Euler angles in degrees. */
--(void) rotateBy: (CC3Vector) aRotation;
-
-/** Rotates this rotator from its current state by the specified quaternion. */
--(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
-
-/**
- * Rotates this rotator from its current state by rotating around
- * the specified axis by the specified angle in degrees.
- */
--(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
-
-/** Initializes this instance with an identity rotationMatrix. */
--(id) init;
-
-/** Allocates and initializes an autoreleased instance with an identity rotationMatrix. */
-+(id) rotator;
-
-/** Initializes this instance to use the specified matrix as the rotationMatrix. */
--(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix;
-
-/** Allocates and initializes an autoreleased instance to use the specified matrix as the rotationMatrix. */
-+(id) rotatorOnRotationMatrix: (CC3GLMatrix*) aGLMatrix;
-
-/**
- * Applies the rotationMatrix to the specified transform matrix.
- * This is accomplished by multiplying the transform matrix by the rotationMatrix.
- * This method is invoked automatically from the applyRotation method of the node.
- * Usually, the application never needs to invoke this method directly.
- */
--(void) applyRotationTo: (CC3GLMatrix*) aMatrix;
-	
 @end

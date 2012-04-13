@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,45 +50,45 @@
 -(void) push {
 	[self activate];
 	glPushMatrix();
-	LogTrace("%@ pushed", self);
+	LogTrace(@"%@ pushed", self);
 }
 
 -(void) pop {
 	[self activate];
 	glPopMatrix();
-	LogTrace("%@ popped", self);
+	LogTrace(@"%@ popped", self);
 }
 
 -(GLuint) getDepth {
 	[self activate];
 	GLuint depth;
 	glGetIntegerv(depthName, (GLint*)&depth);
-	LogTrace("%@ read GL stack depth %u", self, depth);
+	LogTrace(@"%@ read GL stack depth %u", self, depth);
 	return depth;
 }
 
 -(void) identity {
 	[self activate];
 	glLoadIdentity();
-	LogTrace("%@ loaded identity", self);
+	LogTrace(@"%@ loaded identity", self);
 }
 
 -(void) load: (GLvoid*) glMatrix {
 	[self activate];
 	glLoadMatrixf(glMatrix);
-	LogTrace("%@ loaded matrix at %p", self, glMatrix);
+	LogTrace(@"%@ loaded matrix at %p", self, glMatrix);
 }
 
 -(void) getTop: (GLvoid*) glMatrix {
 	[self activate];
 	glGetFloatv(topName, glMatrix);
-	LogTrace("%@ read top into %p", self, glMatrix);
+	LogTrace(@"%@ read top into %p", self, glMatrix);
 }
 
 -(void) multiply: (GLvoid*) glMatrix {
 	[self activate];
 	glMultMatrixf(glMatrix);
-	LogTrace("%@ multiplied matrix at %p", self, glMatrix);
+	LogTrace(@"%@ multiplied matrix at %p", self, glMatrix);
 }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
@@ -131,7 +131,7 @@
 
 -(void) activatePalette {
 	glCurrentPaletteMatrixOES(index);
-	LogTrace("%@ activated palette", self);
+	LogTrace(@"%@ activated palette", self);
 }
 
 -(void) activate {
@@ -159,7 +159,7 @@
 -(void) loadFromModelView {
 	[self activate];
 	glLoadPaletteFromModelViewMatrixOES();
-	LogTrace("%@ loaded matrix from modelview matrix", self);
+	LogTrace(@"%@ loaded matrix from modelview matrix", self);
 }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker

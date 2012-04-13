@@ -1,9 +1,9 @@
 /*
  * CC3GLMatrix.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,9 +32,9 @@
 #import "CC3GLMatrix.h"
 
 
-#pragma mark CC3Matrix private method declaration
+#pragma mark CC3Matrix private template method declaration
 
-@interface CC3GLMatrix (Private)
+@interface CC3GLMatrix (TemplateMethods)
 -(id) initParent;
 -(id) initWithFirstElement: (GLfloat) e00 remainingElements: (va_list) args;
 @end
@@ -51,9 +51,7 @@
 
 @implementation CC3GLArrayMatrix
 
--(GLfloat*) glMatrix {
-	return glArray;
-}
+-(GLfloat*) glMatrix { return glArray; }
 
 -(id) init {
 	if( (self = [self initParent]) ) {
@@ -117,6 +115,10 @@
 	return glMatrix;
 }
 
+-(void) setGlMatrix: (GLfloat*) aGLMtx {
+	glMatrix = aGLMtx;
+}
+
 -(id) initOnGLMatrix: (GLfloat*) aGLMtx {
 	if ( (self = [self initParent]) ) {
 		glMatrix = aGLMtx;
@@ -142,9 +144,10 @@
  * Abstract class simply returns NULL.
  * Subclasses will provide concrete access to the appropriate structure.
  */
--(GLfloat*) glMatrix {
-	return NULL;
-}
+-(GLfloat*) glMatrix { return NULL; }
+
+// Setting this property is ignored. Subclasses that permit this may override.
+-(void) setGlMatrix: (GLfloat*) aGLMtx {}
 
 
 #pragma mark Allocation and initialization
@@ -234,6 +237,28 @@
 -(NSString*) description {
 	GLfloat* m = self.glMatrix;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"\n\t[%.12f, ", m[0]];
+	[desc appendFormat: @"%.12f, ", m[4]];
+	[desc appendFormat: @"%.12f, ", m[8]];
+	[desc appendFormat: @"%.12f,\n\t ", m[12]];
+	[desc appendFormat: @"%.12f, ", m[1]];
+	[desc appendFormat: @"%.12f, ", m[5]];
+	[desc appendFormat: @"%.12f, ", m[9]];
+	[desc appendFormat: @"%.12f,\n\t ", m[13]];
+	[desc appendFormat: @"%.12f, ", m[2]];
+	[desc appendFormat: @"%.12f, ", m[6]];
+	[desc appendFormat: @"%.12f, ", m[10]];
+	[desc appendFormat: @"%.12f,\n\t ", m[14]];
+	[desc appendFormat: @"%.12f, ", m[3]];
+	[desc appendFormat: @"%.12f, ", m[7]];
+	[desc appendFormat: @"%.12f, ", m[11]];
+	[desc appendFormat: @"%.12f]", m[15]];
+	return desc;
+}
+/*
+-(NSString*) description {
+	GLfloat* m = self.glMatrix;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"\n\t[%.6f, ", m[0]];
 	[desc appendFormat: @"%.6f, ", m[4]];
 	[desc appendFormat: @"%.6f, ", m[8]];
@@ -252,7 +277,7 @@
 	[desc appendFormat: @"%.6f]", m[15]];
 	return desc;
 }
-
+*/
 
 #pragma mark -
 #pragma mark Instance population
@@ -374,6 +399,18 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	isIdentity = NO;
 }
 
+-(void) populateFromFrustumLeft: (GLfloat) left
+					   andRight: (GLfloat) right
+					  andBottom: (GLfloat) bottom
+						 andTop: (GLfloat) top  
+						andNear: (GLfloat) near {
+	[[self class] populate: self.glMatrix
+		   fromFrustumLeft: left andRight: right
+				 andBottom: bottom andTop: top  
+				   andNear: near];
+	isIdentity = NO;
+}
+
 -(void) populateOrthoFromFrustumLeft: (GLfloat) left
 							andRight: (GLfloat) right
 						   andBottom: (GLfloat) bottom
@@ -384,6 +421,18 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 				fromFrustumLeft: left andRight: right
 					  andBottom: bottom andTop: top  
 						andNear: near andFar: far];
+	isIdentity = NO;
+}
+
+-(void) populateOrthoFromFrustumLeft: (GLfloat) left
+							andRight: (GLfloat) right
+						   andBottom: (GLfloat) bottom
+							  andTop: (GLfloat) top  
+							 andNear: (GLfloat) near {
+	[[self class] populateOrtho: self.glMatrix
+				fromFrustumLeft: left andRight: right
+					  andBottom: bottom andTop: top  
+						andNear: near];
 	isIdentity = NO;
 }
 
@@ -451,25 +500,64 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 		 andNear: (GLfloat) near
 		  andFar: (GLfloat) far {
 	
-	aGLMatrix[0]  = (2.0 * near) / (right - left);
-	aGLMatrix[1]  = 0.0;
-	aGLMatrix[2]  = 0.0;
-	aGLMatrix[3] = 0.0;
+	GLfloat twoNear = 2.0f * near;
+	GLfloat ooWidth = 1.0f / (right - left);
+	GLfloat ooHeight = 1.0f / (top - bottom);
+	GLfloat ooDepth = 1.0f / (far - near);
 	
-	aGLMatrix[4]  = 0.0;
-	aGLMatrix[5]  = (2.0 * near) / (top - bottom);
-	aGLMatrix[6]  = 0.0;
-	aGLMatrix[7] = 0.0;
+	aGLMatrix[0]  = twoNear * ooWidth;
+	aGLMatrix[1]  = 0.0f;
+	aGLMatrix[2]  = 0.0f;
+	aGLMatrix[3] = 0.0f;
 	
-	aGLMatrix[8]  = (right + left) / (right - left);
-	aGLMatrix[9]  = (top + bottom) / (top - bottom);
-	aGLMatrix[10] = -(far + near) / (far - near);
-	aGLMatrix[11] = -1.0;
+	aGLMatrix[4]  = 0.0f;
+	aGLMatrix[5]  = twoNear * ooHeight;
+	aGLMatrix[6]  = 0.0f;
+	aGLMatrix[7] = 0.0f;
 	
-	aGLMatrix[12]  = 0.0;
-	aGLMatrix[13]  = 0.0;
-	aGLMatrix[14] = -(2.0 * far * near) / (far - near);
-	aGLMatrix[15] = 0.0;
+	aGLMatrix[8]  = (right + left) * ooWidth;
+	aGLMatrix[9]  = (top + bottom) * ooHeight;
+	aGLMatrix[10] = -(far + near) * ooDepth;
+	aGLMatrix[11] = -1.0f;
+	
+	aGLMatrix[12]  = 0.0f;
+	aGLMatrix[13]  = 0.0f;
+	aGLMatrix[14] = -(twoNear * far) * ooDepth;
+	aGLMatrix[15] = 0.0f;
+}
+
++(void) populate: (GLfloat*) aGLMatrix
+ fromFrustumLeft: (GLfloat) left
+		andRight: (GLfloat) right
+	   andBottom: (GLfloat) bottom
+		  andTop: (GLfloat) top  
+		 andNear: (GLfloat) near {
+	
+	GLfloat twoNear = 2.0f * near;
+	GLfloat ooWidth = 1.0f / (right - left);
+	GLfloat ooHeight = 1.0f / (top - bottom);
+	
+	GLfloat epsilon = 0.0f;
+		
+	aGLMatrix[0]  = twoNear * ooWidth;
+	aGLMatrix[1]  = 0.0f;
+	aGLMatrix[2]  = 0.0f;
+	aGLMatrix[3] = 0.0f;
+	
+	aGLMatrix[4]  = 0.0f;
+	aGLMatrix[5]  = twoNear * ooHeight;
+	aGLMatrix[6]  = 0.0f;
+	aGLMatrix[7] = 0.0f;
+	
+	aGLMatrix[8]  = (right + left) * ooWidth;
+	aGLMatrix[9]  = (top + bottom) * ooHeight;
+	aGLMatrix[10] = epsilon - 1.0f;
+	aGLMatrix[11] = -1.0f;
+	
+	aGLMatrix[12]  = 0.0f;
+	aGLMatrix[13]  = 0.0f;
+	aGLMatrix[14] = near * (epsilon - 2);
+	aGLMatrix[15] = 0.0f;
 }
 
 +(void) populateOrtho: (GLfloat*) aGLMatrix
@@ -479,26 +567,61 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 			   andTop: (GLfloat) top  
 			  andNear: (GLfloat) near
 			   andFar: (GLfloat) far {
-	
-	aGLMatrix[0]  = 2.0 / (right - left);
-	aGLMatrix[1]  = 0.0;
-	aGLMatrix[2]  = 0.0;
-	aGLMatrix[3] = 0.0;
-	
-	aGLMatrix[4]  = 0.0;
-	aGLMatrix[5]  = 2.0 / (top - bottom);
-	aGLMatrix[6]  = 0.0;
-	aGLMatrix[7] = 0.0;
 
-	aGLMatrix[8]  = 0.0;
-	aGLMatrix[9]  = 0.0;
-	aGLMatrix[10]  = -2.0 / (far - near);
-	aGLMatrix[11] = 0.0;
+	GLfloat ooWidth = 1.0f / (right - left);
+	GLfloat ooHeight = 1.0f / (top - bottom);
+	GLfloat ooDepth = 1.0f / (far - near);
+	
+	aGLMatrix[0]  = 2.0f * ooWidth;
+	aGLMatrix[1]  = 0.0f;
+	aGLMatrix[2]  = 0.0f;
+	aGLMatrix[3] = 0.0f;
+	
+	aGLMatrix[4]  = 0.0f;
+	aGLMatrix[5]  = 2.0f * ooHeight;
+	aGLMatrix[6]  = 0.0f;
+	aGLMatrix[7] = 0.0f;
 
-	aGLMatrix[12]  = -(right + left) / (right - left);
-	aGLMatrix[13]  = -(top + bottom) / (top - bottom);
-	aGLMatrix[14] = -(far + near) / (far - near);
-	aGLMatrix[15] = 1.0;
+	aGLMatrix[8]  = 0.0f;
+	aGLMatrix[9]  = 0.0f;
+	aGLMatrix[10]  = -2.0f * ooDepth;
+	aGLMatrix[11] = 0.0f;
+
+	aGLMatrix[12]  = -(right + left) * ooWidth;
+	aGLMatrix[13]  = -(top + bottom) * ooHeight;
+	aGLMatrix[14] = -(far + near) * ooDepth;
+	aGLMatrix[15] = 1.0f;
+}
+
++(void) populateOrtho: (GLfloat*) aGLMatrix
+	  fromFrustumLeft: (GLfloat) left
+			 andRight: (GLfloat) right
+			andBottom: (GLfloat) bottom
+			   andTop: (GLfloat) top  
+			  andNear: (GLfloat) near {
+	
+	GLfloat ooWidth = 1.0f / (right - left);
+	GLfloat ooHeight = 1.0f / (top - bottom);
+	
+	aGLMatrix[0]  = 2.0f * ooWidth;
+	aGLMatrix[1]  = 0.0f;
+	aGLMatrix[2]  = 0.0f;
+	aGLMatrix[3] = 0.0f;
+	
+	aGLMatrix[4]  = 0.0f;
+	aGLMatrix[5]  = 2.0f * ooHeight;
+	aGLMatrix[6]  = 0.0f;
+	aGLMatrix[7] = 0.0f;
+	
+	aGLMatrix[8]  = 0.0f;
+	aGLMatrix[9]  = 0.0f;
+	aGLMatrix[10]  = 0.0f;
+	aGLMatrix[11] = 0.0f;
+	
+	aGLMatrix[12]  = -(right + left) * ooWidth;
+	aGLMatrix[13]  = -(top + bottom) * ooHeight;
+	aGLMatrix[14] = -1.0f;
+	aGLMatrix[15] = 1.0f;
 }
 
 
@@ -680,6 +803,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	return quat;
 }
 
+/*
 +(CC3Vector) extractForwardDirectionFrom: (GLfloat*) aGLMatrix {
 	return cc3v(-aGLMatrix[8], -aGLMatrix[9], -aGLMatrix[10]);
 }
@@ -690,6 +814,19 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 
 +(CC3Vector) extractRightDirectionFrom: (GLfloat*) aGLMatrix {
 	return cc3v(aGLMatrix[0], aGLMatrix[1], aGLMatrix[2]);
+}
+*/
+
++(CC3Vector) extractForwardDirectionFrom: (GLfloat*) aGLMatrix {
+	return CC3VectorNegate(*(CC3Vector*)&aGLMatrix[8]);
+}
+
++(CC3Vector) extractUpDirectionFrom: (GLfloat*) aGLMatrix {
+	return *(CC3Vector*)&aGLMatrix[4];
+}
+
++(CC3Vector) extractRightDirectionFrom: (GLfloat*) aGLMatrix {
+	return *(CC3Vector*)&aGLMatrix[0];
 }
 
 
@@ -783,6 +920,11 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	}
 }
 
+-(void) orthonormalizeRotationStartingWith: (CC3GLMatrixOrthonormalizationStart) startVector {
+	if (isIdentity) return;		// Already orthonormal.
+	[[self class] orthonormalizeRotationOf: self.glMatrix startingWith: startVector];
+}
+
 -(void) scaleBy: (CC3Vector) aVector {
 	// Short-circuit an identity transform
 	if ( !CC3VectorsAreEqual(aVector, kCC3VectorUnitCube) ) {
@@ -871,6 +1013,52 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
++(void) orthonormalizeRotationOf: (GLfloat*) aGLMatrix
+					startingWith: (CC3GLMatrixOrthonormalizationStart) startVector {
+	#define CC3BasisVectorX		(*(CC3Vector*)&aGLMatrix[0])
+	#define CC3BasisVectorY		(*(CC3Vector*)&aGLMatrix[4])
+	#define CC3BasisVectorZ		(*(CC3Vector*)&aGLMatrix[8])
+	CC3Vector basisVectors[3];
+	switch (startVector) {
+			
+		// Start Gram-Schmidt orthonormalization with the X-axis basis vector.
+		case kCC3GLMatrixOrthonormalizationStartX:
+			basisVectors[0] = CC3BasisVectorX;
+			basisVectors[1] = CC3BasisVectorY;
+			basisVectors[2] = CC3BasisVectorZ;
+			CC3VectorOrthonormalizeTriple(basisVectors);
+			CC3BasisVectorX = basisVectors[0];
+			CC3BasisVectorY = basisVectors[1];
+			CC3BasisVectorZ = basisVectors[2];
+			break;
+			
+		// Start Gram-Schmidt orthonormalization with the Y-axis basis vector.
+		case kCC3GLMatrixOrthonormalizationStartY:
+			basisVectors[0] = CC3BasisVectorY;
+			basisVectors[1] = CC3BasisVectorZ;
+			basisVectors[2] = CC3BasisVectorX;
+			CC3VectorOrthonormalizeTriple(basisVectors);
+			CC3BasisVectorY = basisVectors[0];
+			CC3BasisVectorZ = basisVectors[1];
+			CC3BasisVectorX = basisVectors[2];
+			break;
+			
+		// Start Gram-Schmidt orthonormalization with the Z-axis basis vector.
+		case kCC3GLMatrixOrthonormalizationStartZ:
+			basisVectors[0] = CC3BasisVectorZ;
+			basisVectors[1] = CC3BasisVectorX;
+			basisVectors[2] = CC3BasisVectorY;
+			CC3VectorOrthonormalizeTriple(basisVectors);
+			CC3BasisVectorZ = basisVectors[0];
+			CC3BasisVectorX = basisVectors[1];
+			CC3BasisVectorY = basisVectors[2];
+			break;
+			
+		default:	// Don't do any orthonormalization
+			break;
+	}
+}
+
 +(void) translate: (GLfloat*) aGLMatrix by: (CC3Vector) aVector {
 	GLfloat* m = aGLMatrix;					// Make a simple alias
 	
@@ -924,8 +1112,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 }
 	
 +(void) scale: (GLfloat*) aGLMatrix uniformlyBy: (GLfloat) scaleFactor {
-//	[self scale: aGLMatrix by: cc3v(scaleFactor, scaleFactor, scaleFactor)];
-	[self scale: aGLMatrix by: (CC3Vector){scaleFactor, scaleFactor, scaleFactor}];
+	[self scale: aGLMatrix by: cc3v(scaleFactor, scaleFactor, scaleFactor)];
 }
 		 
 
@@ -936,9 +1123,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 -(void) multiplyByMatrix: (CC3GLMatrix*) aGLMatrix {
 
 	// If other matrix is identity, this matrix doesn't change, so leave
-	if (!aGLMatrix || aGLMatrix.isIdentity) {
-		return;
-	}
+	if (!aGLMatrix || aGLMatrix.isIdentity) return;
 	
 	// If this matrix is identity, it just becomes the other matrix
 	if (self.isIdentity) {
@@ -995,6 +1180,10 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	} else {
 		return [[self class] transformHomogeneousVector: aVector withMatrix: self.glMatrix];
 	}
+}
+
+-(CC3Ray) transformRay: (CC3Ray) aRay {
+	return [[self class] transformRay: aRay withMatrix: self.glMatrix];
 }
 
 -(void) transpose {
@@ -1068,6 +1257,13 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
     vOut.w = aVector.x * m[3] + aVector.y * m[7] + aVector.z * m[11] + aVector.w * m[15];
 
 	return vOut;
+}
+
++(CC3Ray) transformRay: (CC3Ray) aRay withMatrix: (GLfloat*) aGLMatrix {
+	CC3Ray rayOut;
+	rayOut.startLocation = [self transformLocation: aRay.startLocation withMatrix: aGLMatrix];
+	rayOut.direction = [self transformDirection: aRay.direction withMatrix: aGLMatrix];
+	return rayOut;
 }
 
 +(void) transpose: (GLfloat*) aGLMatrix {

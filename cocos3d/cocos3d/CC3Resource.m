@@ -1,9 +1,9 @@
 /*
  * CC3Resource.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +34,7 @@
 
 @implementation CC3Resource
 
-@synthesize nodes, directory, wasLoaded;
+@synthesize nodes, directory, wasLoaded, expectsVerticallyFlippedTextures;
 
 -(void) dealloc {
 	[nodes release];
@@ -45,17 +45,12 @@
 
 #pragma mark Allocation and initialization
 
-// Converts a resource file path to an absolute file path.
--(NSString*) filePathFromRezPath: (NSString*) aRezPath {
-	NSString* rezDir = [[NSBundle mainBundle] resourcePath];
-	return [rezDir stringByAppendingPathComponent: aRezPath];
-}
-
 -(id) init {
 	if ( (self = [super init]) ) {
 		nodes = [[CCArray array] retain];
 		directory = nil;
 		wasLoaded = NO;
+		expectsVerticallyFlippedTextures = [[self class] defaultExpectsVerticallyFlippedTextures];
 	}
 	return self;
 }
@@ -78,40 +73,50 @@
 	return [[[self alloc] initFromFile: aFilePath] autorelease];
 }
 
--(id) initFromResourceFile: (NSString*) aRezPath {
-	return [self initFromFile: [self filePathFromRezPath: aRezPath]];
-}
+-(BOOL) loadFromFile: (NSString*) aFilePath {
+	if (wasLoaded) {
+		LogError(@"%@ has already been loaded.", self);
+		return wasLoaded;
+	}
+	
+	// Ensure the path is absolute, converting it if needed.
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
 
-+(id) resourceFromResourceFile: (NSString*) aRezPath {
-	return [[[self alloc] initFromResourceFile: aRezPath] autorelease];
+	LogCleanRez(@"");
+	LogCleanRez(@"--------------------------------------------------");
+	LogCleanRez(@"Loading resources from file '%@'", absFilePath);
+
+	if (!name) self.name = [absFilePath lastPathComponent];
+	if (!directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
+
+	wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
+	
+	if ( !wasLoaded ) {
+		LogCleanError(@"Could not load resource file '%@'", absFilePath);
+	}
+	return wasLoaded;
 }
 
 // Subclasses should override this method, but invoke this superclass implementation first.
--(BOOL) loadFromFile: (NSString*) aFilePath {
-	if (wasLoaded) {
-		LogError(@"%@ has already been loaded from file '%@'", self, self.name);
-		return wasLoaded;
-	}
-	LogCleanRez(@"");
-	LogCleanRez(@"--------------------------------------------------");
-	LogRez(@"Loading resources from file '%@'", aFilePath);
-	if (!name) {
-		self.name = [aFilePath lastPathComponent];
-	}
-	if (!directory) {
-		self.directory = [aFilePath stringByDeletingLastPathComponent];
-	}
-	return NO;
+-(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
+
+
+#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
+
+static BOOL defaultExpectsVerticallyFlippedTextures = YES;
+
++(BOOL) defaultExpectsVerticallyFlippedTextures {
+	return defaultExpectsVerticallyFlippedTextures;
 }
 
--(BOOL) loadFromResourceFile: (NSString*) aRezPath {
-	return [self loadFromFile: [self filePathFromRezPath: aRezPath]];
++(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	defaultExpectsVerticallyFlippedTextures = expectsFlipped;
 }
 
 
 #pragma mark Tag allocation
 
-// Class variable tracking the most recent tag value assigned for CC3Nodes.
+// Class variable tracking the most recent tag value assigned for CC3Identifiables.
 // This class variable is automatically incremented whenever the method nextTag is called.
 static GLuint lastAssignedResourceTag;
 
@@ -122,5 +127,13 @@ static GLuint lastAssignedResourceTag;
 +(void) resetTagAllocation {
 	lastAssignedResourceTag = 0;
 }
+
+
+#pragma mark Deprecated file loading methods
+
+// Deprecated methods
+-(BOOL) loadFromResourceFile: (NSString*) aRezPath { return [self loadFromFile: aRezPath];}
+-(id) initFromResourceFile: (NSString*) aRezPath { return [self initFromFile: aRezPath]; }
++(id) resourceFromResourceFile: (NSString*) aRezPath { return [self resourceFromFile: aRezPath]; }
 
 @end

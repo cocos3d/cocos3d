@@ -1,9 +1,9 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,8 +29,7 @@
  * See header file CC3Node.h for full API documentation.
  */
 
-#import "CC3World.h"
-#import "CC3MeshNode.h"
+#import "CC3Scene.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3NodeAnimation.h"
 #import "CC3Billboard.h"
@@ -40,32 +39,35 @@
 #import "CCActionManager.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
+#import "CC3ShadowVolumes.h"
 
 
 #pragma mark CC3Node
-
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
 
 // Template methods that can be overridden and invoked by subclasses
 @interface CC3Node (TemplateMethods)
 -(void) applyLocalTransforms;
 -(void) applyTranslation;
 -(void) applyRotation;
+-(void) applyRotator;
+-(void) applyTargetLocation;
+-(void) applyTargetDirectionRotation;
+-(void) convertRotatorGlobalToLocal;
+-(void) applyGlobalTargetDirectionRotation;
+-(CC3Vector) rotationallyRestrictTargetLocation: (CC3Vector) aLocation;
+-(void) didSetTargetInDescendant: (CC3Node*) aNode;
 -(void) applyScaling;
 -(void) transformMatrixChanged;
+-(void) notifyTransformListeners;
 -(void) updateGlobalOrientation;
 -(void) updateGlobalLocation;
 -(void) updateGlobalRotation;
 -(void) updateGlobalScale;
--(void) updateBoundingVolume;
+-(void) transformBoundingVolume;
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) didAddDescendant: (CC3Node*) aNode;
 -(void) didRemoveDescendant: (CC3Node*) aNode;
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode;
--(id) rotatorClass;
--(void) populateFrom: (CC3Node*) another;
 -(void) copyChildrenFrom: (CC3Node*) another;
 -(void) resumeActions;
 -(void) pauseActions;
@@ -73,22 +75,29 @@
 @property(nonatomic, readonly) ccColor4F initialWireframeBoxColor;
 @property(nonatomic, readonly) ccColor4F initialDirectionMarkerColor;
 @property(nonatomic, readonly) BOOL rawVisible;
+@property(nonatomic, readonly) CC3MutableRotator* mutableRotator;
+@property(nonatomic, readonly) id mutableRotatorClass;
+@property(nonatomic, readonly) CC3DirectionalRotator* directionalRotator;
+@property(nonatomic, readonly) id directionalRotatorClass;
+@property(nonatomic, readonly) BOOL isRotatorLocal;
 @end
 
 @implementation CC3Node
 
 @synthesize rotator, location, scale, globalLocation, globalScale, scaleTolerance;
-@synthesize boundingVolume, boundingVolumePadding, projectedLocation;
-@synthesize transformMatrix, animation, isRunning, visible, isAnimationEnabled;
+@synthesize boundingVolume, boundingVolumePadding, projectedLocation, visible;
+@synthesize transformMatrix, transformListeners, animation, isRunning, isAnimationEnabled;
 @synthesize isTouchEnabled, shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
 @synthesize parent, children, shouldAutoremoveWhenEmpty, shouldUseFixedBoundingVolume;
-@synthesize shouldCleanupWhenRemoved;
+@synthesize shouldCleanupWhenRemoved, isTransformDirty;
 
 -(void) dealloc {
+	[self stopAllActions];
 	[children release];
 	parent = nil;						// not retained
 	[transformMatrix release];
 	[transformMatrixInverted release];
+	[transformListeners release];
 	[globalRotationMatrix release];
 	[rotator release];
 	[boundingVolume release];
@@ -96,6 +105,7 @@
 	[super dealloc];
 }
 
+// If tracking target, set the location anyway
 -(void) setLocation: (CC3Vector) aLocation {
 	location = aLocation;
 	[self markTransformDirty];
@@ -105,59 +115,102 @@
 	self.location = CC3VectorAdd(self.location, aVector);
 }
 
--(CC3Vector) rotation {
-	return rotator.rotation;
-}
+-(CC3Vector) rotation { return rotator.rotation; }
 
 -(void) setRotation: (CC3Vector) aRotation {
-	rotator.rotation = aRotation;
-	[self markTransformDirty];
+	// This test for change avoids unnecessarily creating and transforming a mutable rotator
+	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aRotation, rotator.rotation) ) {
+		self.mutableRotator.rotation = aRotation;
+		[self markTransformDirty];
+	}
 }
+
+-(CC3Vector) globalRotation { return [self.globalRotationMatrix extractRotation]; }
 
 -(void) rotateBy: (CC3Vector) aRotation {
-	[rotator rotateBy: aRotation];
-	[self markTransformDirty];
+	if ( !self.shouldTrackTarget ) {
+		[self.mutableRotator rotateBy: aRotation];
+		[self markTransformDirty];
+	}
 }
 
--(CC3Vector4) quaternion {
-	return rotator.quaternion;
-}
+-(CC3Vector4) quaternion { return rotator.quaternion; }
 
 -(void) setQuaternion: (CC3Vector4) aQuaternion {
-	rotator.quaternion = aQuaternion;
-	[self markTransformDirty];
+	// This test for change avoids unnecessarily creating and transforming a mutable rotator
+	if ( !self.shouldTrackTarget && !CC3Vector4sAreEqual(aQuaternion, rotator.quaternion) ) {
+		self.mutableRotator.quaternion = aQuaternion;
+		[self markTransformDirty];
+	}
 }
 
 -(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
-	[rotator rotateByQuaternion: aQuaternion];
-	[self markTransformDirty];
+	if ( !self.shouldTrackTarget ) {
+		[self.mutableRotator rotateByQuaternion: aQuaternion];
+		[self markTransformDirty];
+	}
 }
 
--(CC3Vector) rotationAxis {
-	return rotator.rotationAxis;
-}
+-(CC3Vector) rotationAxis { return rotator.rotationAxis; }
 
 -(void) setRotationAxis: (CC3Vector) aDirection {
-	rotator.rotationAxis = aDirection;
-	[self markTransformDirty];
+	// This test for change avoids unnecessarily creating and transforming a mutable rotator
+	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aDirection, rotator.rotationAxis) ) {
+		self.mutableRotator.rotationAxis = aDirection;
+		[self markTransformDirty];
+	}
 }
 
--(GLfloat) rotationAngle {
-	return rotator.rotationAngle;
-}
+-(GLfloat) rotationAngle { return rotator.rotationAngle; }
 
 -(void) setRotationAngle: (GLfloat) anAngle {
-	rotator.rotationAngle = anAngle;
-	[self markTransformDirty];
+	if ( !self.shouldTrackTarget && (anAngle != rotator.rotationAngle) ) {
+		self.mutableRotator.rotationAngle = anAngle;
+		[self markTransformDirty];
+	}
 }
 
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
-	[rotator rotateByAngle: anAngle aroundAxis: anAxis];
+	if (!self.shouldTrackTarget) {
+		[self.mutableRotator rotateByAngle: anAngle aroundAxis: anAxis];
+		[self markTransformDirty];
+	}
+}
+
+-(CC3Vector) forwardDirection { return self.directionalRotator.forwardDirection; }
+
+-(void) setForwardDirection: (CC3Vector) aDirection {
+	if (!self.shouldTrackTarget) {
+		self.directionalRotator.forwardDirection = aDirection;
+		[self markTransformDirty];
+	}
+}
+
+-(CC3Vector) globalForwardDirection {
+	return [self.globalRotationMatrix extractForwardDirection];
+}
+
+-(CC3Vector) upDirection { return self.directionalRotator.upDirection; }
+
+-(CC3Vector) globalUpDirection {
+	return [self.globalRotationMatrix extractUpDirection];
+}
+
+-(CC3Vector) sceneUpDirection { return self.directionalRotator.sceneUpDirection; }
+
+-(void) setSceneUpDirection: (CC3Vector) aDirection {
+	self.directionalRotator.sceneUpDirection = aDirection;
 	[self markTransformDirty];
 }
 
--(CC3Vector) globalRotation {
-	return [self.globalRotationMatrix extractRotation];
+// Deprecated
+-(CC3Vector) worldUpDirection { return self.sceneUpDirection; }
+-(void) setWorldUpDirection: (CC3Vector) aDirection { self.sceneUpDirection = aDirection; }
+
+-(CC3Vector) rightDirection { return self.directionalRotator.rightDirection; }
+
+-(CC3Vector) globalRightDirection {
+	return [self.globalRotationMatrix extractRightDirection];
 }
 
 -(void) setScale: (CC3Vector) aScale {
@@ -182,17 +235,9 @@
 			CC3IsWithinTolerance(scale.x, scale.z, scaleTolerance));
 }
 
-//-(BOOL) isUniformlyScaledLocally {
-//	return (scale.x == scale.y && scale.x == scale.z);
-//}
-
 -(BOOL) isUniformlyScaledGlobally {
 	return self.isUniformlyScaledLocally && (parent ? parent.isUniformlyScaledGlobally : YES);
 }
-
-//-(BOOL) isTransformRigid {
-//	return (scale.x == 1.0f && scale.y == 1.0f && scale.z == 1.0f) && (parent ? parent.isTransformRigid : YES);
-//}
 
 -(BOOL) isTransformRigid {
 	return (CC3IsWithinTolerance(scale.x, 1.0f, scaleTolerance) &&
@@ -218,8 +263,9 @@ static GLfloat defaultScaleTolerance = 0.0f;
 }
 
 -(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
-	id oldBV = boundingVolume;
+	CC3NodeBoundingVolume* oldBV = boundingVolume;
 	boundingVolume = [aBoundingVolume retain];
+	boundingVolume.shouldIgnoreRayIntersection = oldBV.shouldIgnoreRayIntersection;
 	[oldBV release];
 	boundingVolume.node = self;
 }
@@ -239,6 +285,189 @@ static GLfloat defaultScaleTolerance = 0.0f;
 		child.isRunning = isRunning;
 	}
 }
+
+
+#pragma mark Targetting
+
+-(CC3Vector) targetLocation {
+	CC3DirectionalRotator* dirRotator = self.directionalRotator;
+	if (dirRotator.isTargetLocationDirty && !self.isTransformDirty) {
+		dirRotator.rawTargetLocation = CC3VectorAdd(self.globalLocation, self.forwardDirection);
+	}
+	return dirRotator.targetLocation;
+}
+
+/** Apply any rotational axis restrictions to the target location before setting it. */
+-(void) setTargetLocation: (CC3Vector) aLocation {
+	self.directionalRotator.targetLocation = [self rotationallyRestrictTargetLocation: aLocation];
+	[self markTransformDirty];
+}
+
+/**
+ * If the value of the axisRestriction property is set to one of kCC3TargettingAxisRestrictionXAxis, 
+ * kCC3TargettingAxisRestrictionYAxis or kCC3TargettingAxisRestrictionZAxis, the value of the
+ * corresponding component of the specified location will be set to the value of that component
+ * from the globalLocation of this node. The result is that rotation will be restricted to only
+ * that axis. For example, by setting the axisRestriction property to kCC3TargettingAxisRestrictionYAxis,
+ * the Y-component of the specified location will be set to the Y-component of the globalLocation
+ * of this targetting node.
+ */
+-(CC3Vector) rotationallyRestrictTargetLocation: (CC3Vector) aLocation {
+	switch (self.axisRestriction) {
+		case kCC3TargettingAxisRestrictionXAxis:
+			aLocation.x = self.globalLocation.x;
+			break;
+		case kCC3TargettingAxisRestrictionYAxis:
+			aLocation.y = self.globalLocation.y;
+			break;
+		case kCC3TargettingAxisRestrictionZAxis:
+			aLocation.z = self.globalLocation.z;
+			break;
+		default:
+			break;
+	}
+	return aLocation;
+}
+
+-(CC3Node*) target { return rotator.target; }
+
+/** Set the new target and notify that I am now tracking a target. */
+-(void) setTarget:(CC3Node *) aNode {
+	if (aNode != self.target) {
+		self.directionalRotator.target = aNode;
+		[self didSetTargetInDescendant: self];
+	}
+}
+
+-(BOOL) hasTarget { return (self.target != nil); }
+
+-(BOOL) shouldTrackTarget { return rotator.shouldTrackTarget; }
+
+-(void) setShouldTrackTarget: (BOOL) shouldTrack {
+	self.directionalRotator.shouldTrackTarget = shouldTrack;
+}
+
+-(BOOL) shouldAutotargetCamera { return rotator.shouldAutotargetCamera; }
+
+-(void) setShouldAutotargetCamera: (BOOL) shouldAutotarg {
+	self.directionalRotator.shouldAutotargetCamera = shouldAutotarg;
+	self.shouldTrackTarget = shouldAutotarg;
+}
+
+-(CC3TargettingAxisRestriction) axisRestriction {
+	return self.directionalRotator.axisRestriction;
+}
+
+-(void) setAxisRestriction: (CC3TargettingAxisRestriction) axisRestriction {
+	self.directionalRotator.axisRestriction = axisRestriction;
+}
+
+-(BOOL) isTrackingForBumpMapping { return self.directionalRotator.isTrackingForBumpMapping; }
+
+-(void) setIsTrackingForBumpMapping: (BOOL) isBumpMapping {
+	self.directionalRotator.isTrackingForBumpMapping = isBumpMapping;
+}
+
+/**
+ * Checks if the camera should be a target, and if so,
+ * ensures that the target is the currently active camera.
+ */
+-(void) checkCameraTarget {
+	if (self.shouldAutotargetCamera) {
+		CC3Camera* cam = self.activeCamera;
+		if (self.target != cam) self.target = cam;
+	}
+}
+
+-(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor {
+	CC3DirectionalRotator* dirRotator = self.directionalRotator;
+	if (dirRotator.shouldUpdateToTarget) {
+		if (self.isTrackingForBumpMapping) {
+			self.globalLightLocation = dirRotator.target.globalLocation;
+		} else if ( [dirRotator wasRelativeMovement] ) {
+			self.targetLocation = dirRotator.target.globalLocation;
+			[visitor visit: self];		// Recalculate transforms
+		}
+		LogCleanTrace(@"%@ tracking adjusted to target", [self fullDescription]);
+	}
+	[dirRotator resetTargetTrackingState];
+}
+
+
+#pragma mark Rotator
+
+/**
+ * Returns the rotator property, cast as a CC3MutableRotator.
+ *
+ * If the rotator is not already a CC3MutableRotator, a new CC3MutableRotator
+ * is created and its state is copied from the current rotator.
+ *
+ * This design allows nodes that do not require rotation to use the empty and smaller
+ * CC3Rotator instance, but allows an automatic upgrade to a mutable rotator
+ * when the node needs to make changes to the rotational properties.
+ *
+ * This property should only be accessed if the intention is to swap the existing
+ * rotator with a directional rotator.
+ */
+-(CC3MutableRotator*) mutableRotator {
+	if ( !rotator.isMutable ) {
+		CC3MutableRotator* mRotator = (CC3MutableRotator*)[[self mutableRotatorClass] rotator];
+		[mRotator populateFrom: rotator];
+		LogCleanTrace(@"%@ swapping %@ for existing %@", self, mRotator, rotator);
+		self.rotator = mRotator;
+	}
+	return (CC3MutableRotator*)rotator;
+}
+
+/**
+ * Rotation tracking for each node is handled by a encapsulated instance of CC3Rotator.
+ *
+ * When the mutableRotator property is accessed, the default rotator is upgraded
+ * to a CC3MutableRotator, or one of its subclasses.
+ *
+ * This property returns the class to use when creating the rotator returned by the
+ * mutableRotator property. Different node types may use different mutable rotators.
+ *
+ * This base implementation returns a basic CC3MutableRotator.
+ */
+-(id) mutableRotatorClass { return [CC3MutableRotator class]; }
+
+/**
+ * Returns the rotator property, cast as a CC3DirectionalRotator.
+ *
+ * If the rotator is not already a CC3DirectionalRotator, a new CC3DirectionalRotator
+ * is created and its state is copied from the current rotator.
+ *
+ * This design allows most nodes to use a simpler and smaller CC3Rotator instance,
+ * but allow an automatic upgrade to a larger and more complex directional rotator
+ * when the node needs to make use of pointing or tracking functionality.
+ *
+ * This property should only be accessed if the intention is to swap the existing
+ * rotator with a directional rotator.
+ */
+-(CC3DirectionalRotator*) directionalRotator {
+	if ( !rotator.isDirectional ) {
+		CC3DirectionalRotator* dirRotator = (CC3DirectionalRotator*)[[self directionalRotatorClass] rotator];
+		[dirRotator populateFrom: rotator];
+		LogCleanTrace(@"%@ swapping %@ for existing %@", self, dirRotator, rotator);
+		self.rotator = dirRotator;
+	}
+	return (CC3DirectionalRotator*)rotator;
+}
+
+/**
+ * Rotation tracking for each node is handled by a encapsulated instance of CC3Rotator.
+ *
+ * When the directionalRotator property is accessed, the default rotator is upgraded
+ * to a CC3DirectionalRotator, or one of its subclasses.
+ *
+ * This property returns the class to use when creating the rotator returned by the
+ * directionalRotator property. Different node types may use different directional rotators.
+ *
+ * This base implementation returns a reversing directional rotator class that orients
+ * the positive-Z axis of the node along the forwardDirection.
+ */
+-(id) directionalRotatorClass { return [CC3ReverseDirectionalRotator class]; }
 
 
 #pragma mark Mesh configuration
@@ -319,6 +548,21 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	}
 }
 
+-(BOOL) shouldCacheFaces {
+	for (CC3Node* child in children) {
+		if (child.shouldCacheFaces) {
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(void) setShouldCacheFaces: (BOOL) shouldCache {
+	for (CC3Node* child in children) {
+		child.shouldCacheFaces = shouldCache;
+	}
+}
+
 -(BOOL) shouldDisableDepthMask {
 	for (CC3Node* child in children) {
 		if (child.shouldDisableDepthMask) {
@@ -365,9 +609,38 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	}
 }
 
+-(GLfloat) decalOffsetFactor {
+	for (CC3Node* child in children) {
+		GLenum df = child.decalOffsetFactor;
+		if (df) return df;
+	}
+	return 0.0f;
+}
+
+-(void) setDecalOffsetFactor: (GLfloat) factor {
+	for (CC3Node* child in children) {
+		child.decalOffsetFactor = factor;
+	}
+}
+
+-(GLfloat) decalOffsetUnits {
+	for (CC3Node* child in children) {
+		GLenum du = child.decalOffsetUnits;
+		if (du) return du;
+	}
+	return 0.0f;
+}
+
+-(void) setDecalOffsetUnits: (GLfloat) units {
+	for (CC3Node* child in children) {
+		child.decalOffsetUnits = units;
+	}
+}
+
 // Creates a specialized transforming visitor that traverses the node hierarchy below
 // this node, accumulating a bounding box that surrounds all descendant nodes.
 -(CC3BoundingBox) boundingBox {
+	if ( !children ) return kCC3BoundingBoxNull;	// Short-circuit if no children
 	CC3NodeBoundingBoxVisitor* bbVisitor = [CC3NodeBoundingBoxVisitor visitor];
 	bbVisitor.shouldLocalizeToStartingNode = YES;
 	[bbVisitor visit: self];
@@ -384,6 +657,15 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	return bbVisitor.boundingBox;
 }
 
+-(CC3Vector) centerOfGeometry {
+	CC3BoundingBox bb = self.boundingBox;
+	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
+}
+
+-(CC3Vector) globalCenterOfGeometry {
+	return [transformMatrix transformLocation: self.centerOfGeometry];
+}
+
 // By default, individual nodes do not collect their own performance statistics
 -(CC3PerformanceStatistics*) performanceStatistics { return nil; }
 -(void) setPerformanceStatistics: (CC3PerformanceStatistics*) aPerfStats {}
@@ -393,7 +675,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 			[self description],
 			NSStringFromCC3Vector(self.location),
 			NSStringFromCC3Vector(self.globalLocation),
-			rotator,
+			rotator.fullDescription,
 			NSStringFromCC3Vector(self.scale),
 			NSStringFromCGPoint(self.projectedPosition),
 			boundingVolume];
@@ -591,9 +873,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) isOpaque {
 	for (CC3Node* child in children) {
-		if(!child.isOpaque) {
-			return NO;
-		}
+		if(!child.isOpaque) return NO;
 	}
 	return YES;
 }
@@ -622,9 +902,10 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		transformListeners = nil;
 		transformMatrixInverted = nil;
 		globalRotationMatrix = nil;
-		rotator = [[[self rotatorClass] rotator] retain];
+		self.rotator = [CC3Rotator rotator];
 		boundingVolume = nil;
 		boundingVolumePadding = 0.0f;
 		shouldUseFixedBoundingVolume = NO;
@@ -666,7 +947,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 // Protected properties for copying
 -(BOOL) rawVisible { return visible; }
--(BOOL) isTransformDirty { return isTransformDirty; }
+-(CCArray*) transformListeners { return transformListeners; }
 
 /**
  * Populates this instance with content copied from the specified other node.
@@ -691,6 +972,14 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 	isTransformInvertedDirty = YES;							// create or rebuild lazily
 	isGlobalRotationDirty = YES;							// create or rebuild lazily
+	
+	location = another.location;
+	globalLocation = another.globalLocation;
+	projectedLocation = another.projectedLocation;
+	scale = another.scale;
+	globalScale = another.globalScale;
+	scaleTolerance = another.scaleTolerance;
+	isTransformDirty = another.isTransformDirty;
 
 	[rotator release];
 	rotator = [another.rotator copy];						// retained
@@ -704,13 +993,9 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	[animation release];
 	animation = [another.animation retain];					// retained...not copied
 
-	location = another.location;
-	globalLocation = another.globalLocation;
-	projectedLocation = another.projectedLocation;
-	scale = another.scale;
-	globalScale = another.globalScale;
-	scaleTolerance = another.scaleTolerance;
-	isTransformDirty = another.isTransformDirty;
+	[transformListeners release];
+	transformListeners = [another.transformListeners copy];
+
 	isTouchEnabled = another.isTouchEnabled;
 	shouldInheritTouchability = another.shouldInheritTouchability;
 	shouldAllowTouchableWhenInvisible = another.shouldAllowTouchableWhenInvisible;
@@ -835,27 +1120,45 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 #pragma mark Texture alignment
 
+-(BOOL) expectsVerticallyFlippedTextures {
+	for (CC3Node* child in children) {
+		if (child.expectsVerticallyFlippedTextures) return YES;
+	}
+	return NO;
+}
+
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	for (CC3Node* child in children) {
+		child.expectsVerticallyFlippedTextures = expectsFlipped;
+	}
+}
+
+-(void) flipTexturesVertically {
+	for (CC3Node* child in children) {
+		[child flipTexturesVertically];
+	}
+}
+
+-(void) flipTexturesHorizontally {
+	for (CC3Node* child in children) {
+		[child flipTexturesHorizontally];
+	}
+}
+
+// Deprecated
 -(void) alignTextures {
 	for (CC3Node* child in children) {
 		[child alignTextures];
 	}
 }
 
+// Deprecated
 -(void) alignInvertedTextures {
 	for (CC3Node* child in children) {
 		[child alignInvertedTextures];
 	}
 }
 
-/**
- * Rotation tracking for each node is handled by a encapsulated instance of CC3Rotator.
- * This method returns the subclass of CC3Rotator that will be instantiated and used by
- * instances of this node class. The default is CC3Rotator, but subclasses my override
- * to establish other rotational tracking functionality.
- */
--(id) rotatorClass {
-	return [CC3Rotator class];
-}
 
 #pragma mark Tag allocation
 
@@ -874,17 +1177,9 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Type testing
 
--(BOOL) hasLocalContent {
-	return NO;
-}
+-(BOOL) hasLocalContent { return NO; }
 
--(BOOL) isMeshNode {
-	return NO;
-}
-
--(BOOL) visible {
-	return visible && (!parent || parent.visible);
-}
+-(BOOL) visible { return visible && (!parent || parent.visible); }
 
 -(GLint) zOrder {
 	GLint childCount = children ? children.count : 0;
@@ -916,10 +1211,32 @@ static GLuint lastAssignedNodeTag;
 // Deprecated legacy method - supported for backwards compatibility
 -(void) updateAfterChildren: (CC3NodeUpdatingVisitor*) visitor {}
 
+/**
+ * Protected template method invoked from the update visitor just before updating
+ * the transform.
+ */
+-(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
+	[self checkCameraTarget];
+	[self updateBeforeTransform: visitor];
+}
+
 // Default invokes legacy updateBeforeChildren: and update: methods, for backwards compatibility.
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[self updateBeforeChildren: visitor];
 	[self update: visitor.deltaTime];
+}
+
+/**
+ * Protected template method invoked from the update visitor just after updating
+ * the transform.
+ *
+ * This implementation simply invokes the application callback updateAfterTransform:
+ * method. Framework subclasses that want to perform other activity may override, but
+ * should invoke this superclass method to ensure that the updateAfterTransform:
+ * will be invoked.
+ */
+-(void) processUpdateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
+	[self updateAfterTransform: visitor];
 }
 
 // Default invokes legacy updateAfterChildren: method, for backwards compatibility.
@@ -930,19 +1247,53 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Transformations
 
+-(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
+	if (!aListener) return;
+	
+	if( !transformListeners ) {
+		transformListeners = [[CCArray array] retain];
+	}
+	if ( ![transformListeners containsObject: aListener] ) {
+		[transformListeners addObject: aListener];
+		[aListener nodeWasTransformed: self];
+	}
+}
+
+-(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
+	if (!aListener) return;
+
+	[transformListeners removeObjectIdenticalTo: aListener];
+	if (transformListeners && transformListeners.count == 0) {
+		[transformListeners release];
+		transformListeners = nil;
+	}
+}
+
+-(void) removeAllTransformListeners {
+	CCArray* myListeners = [transformListeners copyAutoreleased];
+	for(id<CC3NodeTransformListenerProtocol> aListener in myListeners) {
+		[self removeTransformListener: aListener];
+	}
+}
+
+/**
+ * Nodes can be listeners of the transforms of other nodes. By default, they do nothing
+ * when notified. Subclasses that care about the movemements of other nodes may override.
+ */
+-(void) nodeWasTransformed: (CC3Node*) aNode {}
+
 -(void) setTransformMatrix: (CC3GLMatrix*) aCC3GLMatrix {
 	if (transformMatrix != aCC3GLMatrix) {
 		[transformMatrix release];
 		transformMatrix = [aCC3GLMatrix retain];
 		[self updateGlobalOrientation];
 		[self transformMatrixChanged];
+		[self notifyTransformListeners];
 	}
 }
 
 /** Marks the node's transformMatrix as requiring a recalculation. */
--(void) markTransformDirty {
-	isTransformDirty = YES;
-}
+-(void) markTransformDirty { isTransformDirty = YES; }
 
 -(CC3Node*) dirtiestAncestor {
 	CC3Node* dap = parent.dirtiestAncestor;
@@ -963,7 +1314,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 /**
- * Returns the class of visitor that will be instantiated in the updateWorld: method,
+ * Returns the class of visitor that will be instantiated in the updateScene: method,
  * and passed to the updateTransformMatrices method when the transformation matrices
  * of the nodes are being rebuilt.
  *
@@ -971,9 +1322,7 @@ static GLuint lastAssignedNodeTag;
  * returns CC3NodeTransformingVisitor. Subclasses may override to customized the behaviour
  * of the update visits.
  */
--(id) transformVisitorClass {
-	return [CC3NodeTransformingVisitor class];
-}
+-(id) transformVisitorClass { return [CC3NodeTransformingVisitor class]; }
 
 -(CC3GLMatrix*) parentTransformMatrix {
 	return parent.transformMatrix;
@@ -983,6 +1332,7 @@ static GLuint lastAssignedNodeTag;
 	[transformMatrix populateFrom: [visitor parentTansformMatrixFor: self]];
 	[self applyLocalTransforms];
 	[self transformMatrixChanged];
+	[self notifyTransformListeners];
 }
 
 /**
@@ -1003,19 +1353,97 @@ static GLuint lastAssignedNodeTag;
 			 NSStringFromCC3Vector(globalLocation), transformMatrix);
 }
 
-/** Template method that applies the local rotation property to the transform matrix. */
+/**
+ * Template method that applies the rotation in the rotator to the transform matrix.
+ *
+ * Target location can only be applied once translation is complete, because the
+ * direction to the target depends on the transformed global location of both this
+ * node and the target location.
+ */
 -(void) applyRotation {
+	if (rotator.shouldRotateToTargetLocation) {
+		[self applyTargetLocation];
+		[self applyTargetDirectionRotation];
+	} else {
+		[self applyRotator];
+	}
+}
+
+/** Template method to update the rotator transform from the targetLocation and the globalLocation. */
+-(void) applyTargetLocation {
+	[self.directionalRotator rotateToTargetLocationFrom: self.globalLocation];
+}
+
+-(void) applyTargetDirectionRotation {
+	if (self.shouldTrackTarget) {
+		[self applyGlobalTargetDirectionRotation];
+	} else {
+		[self convertRotatorGlobalToLocal];
+		[self applyRotator];
+	}
+}
+
+/**
+ * Applies the global target location rotation.
+ *
+ * Since we want to target a global direction, we must ignore the rotation
+ * of all ancestor nodes. The transformMatrix is rebuilt using the globalLocation
+ * (which was calculated during the location transform), and then the global
+ * rotation is applied by the rotator. Finally, the ancestor scale is applied.
+ */
+-(void) applyGlobalTargetDirectionRotation {
+	[transformMatrix populateIdentity];
+	[transformMatrix translateBy: self.globalLocation];
+	[self applyRotator];
+	if (parent) [transformMatrix scaleBy: parent.globalScale];
+}
+
+/**
+ * Converts the rotator's rotation matrix from global to local coordinates,
+ * by applying an inverse of the parent's global rotation matrix.
+ *
+ * If Mc is the local rotation of the child, Mp is the global rotation of
+ * the parent node, and Mg is the global rotation of this child node:
+ *   Mg = Mp.Mc
+ *   Mp(-1).Mg = Mp(-1).Mp.Mc
+ *   Mp(-1).Mg = Mc
+ *
+ * Therefore, we can determine the local rotation of this node by multiplying
+ * its global rotation by the inverse of the parent's global rotation.
+ */
+-(void) convertRotatorGlobalToLocal {
+	if ( !parent ) return;		// No transform needed if no parent
+
+	// Get parent's global rotation matrix and invert it using rigid inversion
+	CC3GLMatrix* rotMtx = [parent.globalRotationMatrix copyAutoreleased];
+	[rotMtx invertRigid];
+
+	// Multiply parent's inverted matrix by this rotator's matrix and set
+	// the result into the rotator to reset the rotator's property state.
+	CC3DirectionalRotator* dirRotator = self.directionalRotator;
+	[rotMtx multiplyByMatrix: dirRotator.rotationMatrix];
+	dirRotator.rotationMatrix = rotMtx;
+}
+
+/**
+ * Returns whether the rotator is using local coordiantes.
+ * It is if this node has a parent and is not tracking a target.
+ */
+-(BOOL) isRotatorLocal { return parent && !self.shouldTrackTarget; }
+
+/** Apply the rotational state of the rotator to the transform matrix. */
+-(void) applyRotator {
 	[rotator applyRotationTo: transformMatrix];
 	[self updateGlobalRotation];
-	LogTrace(@"%@ rotated to %@ %@", self, NSStringFromCC3Vector(rotator.rotation), transformMatrix);
+	LogCleanTrace(@"%@ rotated to %@ %@", self, NSStringFromCC3Vector(rotator.rotation), transformMatrix);
 }
 
 /** Template method that applies the local scale property to the transform matrix. */
 -(void) applyScaling {
 	[transformMatrix scaleBy: scale];
 	[self updateGlobalScale];
-	LogTrace(@"%@ scaled to %@, globally %@ %@", self, NSStringFromCC3Vector(scale),
-			 NSStringFromCC3Vector(globalScale), transformMatrix);
+	LogCleanTrace(@"%@ scaled to %@, globally %@ %@", self, NSStringFromCC3Vector(scale),
+				  NSStringFromCC3Vector(globalScale), transformMatrix);
 }
 
 /**
@@ -1024,9 +1452,16 @@ static GLuint lastAssignedNodeTag;
  * as dirty so it will be lazily rebuilt.
  */
 -(void) transformMatrixChanged {
-	[self updateBoundingVolume];
+	[self transformBoundingVolume];
 	isTransformDirty = NO;
 	isTransformInvertedDirty = YES;
+}
+
+/** Notify the transform listeners that the node has been transformed. */
+-(void) notifyTransformListeners {
+	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in transformListeners) {
+		[xfmLisnr nodeWasTransformed: self];
+	}
 }
 
 /**
@@ -1039,9 +1474,14 @@ static GLuint lastAssignedNodeTag;
 	[self updateGlobalScale];
 }
 
-/** Template method to update the globalLocation property. */
+/**
+ * Template method to update the globalLocation property.
+ * Keeps track of whether the globalLocation is changed by this method.
+ */
 -(void) updateGlobalLocation {
+	CC3Vector oldGlobLoc = globalLocation;
 	globalLocation = [transformMatrix transformLocation: kCC3VectorZero];
+	if ( !CC3VectorsAreEqual(globalLocation, oldGlobLoc) ) [rotator markGlobalLocationChanged];
 }
 
 /** Template method to update the globalRotation property. */
@@ -1113,7 +1553,7 @@ static GLuint lastAssignedNodeTag;
 		isGlobalRotationDirty = YES;
 	}
 	if (isGlobalRotationDirty) {
-		if (parent) {
+		if (self.isRotatorLocal) {
 			[globalRotationMatrix populateFrom: parent.globalRotationMatrix];
 			[globalRotationMatrix multiplyByMatrix: rotator.rotationMatrix];
 		} else {
@@ -1124,15 +1564,19 @@ static GLuint lastAssignedNodeTag;
 	return globalRotationMatrix;
 }
 
-/** Template method that updates the bounding volume. */
--(void) updateBoundingVolume {
-	[boundingVolume update];
-}
+/**
+ * Template method that marks the bounding volume as needing a transform.
+ * The bounding volume will be lazily updated next time it is accessed.
+ */
+-(void) transformBoundingVolume { [boundingVolume markTransformDirty]; }
 
-/** Template method that rebuilds the bounding volume if it is not fixed. */
+/**
+ * Template method that rebuilds the bounding volume if it is not fixed.
+ * The bounding volume will be lazily updated next time it is accessed.
+ */
 -(void) rebuildBoundingVolume {
 	if (!shouldUseFixedBoundingVolume) {
-		[boundingVolume markDirtyAndUpdate];
+		[boundingVolume markDirty];
 	}
 }
 
@@ -1141,28 +1585,13 @@ static GLuint lastAssignedNodeTag;
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
-/**
- * Returns whether the local content of this node intersects the given frustum. If this node
- * has a boundingVolume, it delegates to it, otherwise, it simply returns YES.
- * Subclasses may override to change this standard behaviour. 
- */
+// Deprecated and replaced by doesIntersectBoundingVolume:
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	if (boundingVolume && aFrustum) {
-		BOOL intersects = [boundingVolume doesIntersectFrustum: aFrustum];
-		LogTrace(@"%@ bounded by %@ %@\n%@", self, boundingVolume,
-				 (intersects ? @"intersects" : @"does not intersect"), aFrustum);
-
-		// Uncomment and change name to verify culling:
-//		if ( !intersects && [self.name isEqualToString: @"MyNodeName"] ) {
-//			LogDebug(@"%@ does not intersect\n%@", self, aFrustum);
-//		}
-		return intersects;
-	}
-	return YES;
+	return [self doesIntersectBoundingVolume: aFrustum];
 }
 
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Drawing %@", self);
+	LogCleanTrace(@"Drawing %@", self);
 	CC3OpenGLES11MatrixStack* gles11MatrixStack = [CC3OpenGLES11Engine engine].matrices.modelview;
 
 	[gles11MatrixStack push];
@@ -1193,17 +1622,14 @@ static GLuint lastAssignedNodeTag;
 	[self markTransformDirty];
 }
 
--(CC3Node*) rootAncestor {
-	return parent ? parent.rootAncestor : self;
-}
+-(CC3Node*) rootAncestor { return parent ? parent.rootAncestor : self; }
 
--(CC3World*) world {
-	return parent.world;
-}
+-(CC3Scene*) scene { return parent.scene; }
 
--(CC3Camera*) activeCamera {
-	return self.world.activeCamera;
-}
+// Deprecated
+-(CC3Scene*) world { return self.scene; }
+
+-(CC3Camera*) activeCamera { return self.scene.activeCamera; }
 
 /** Adds a child node and invokes didAddDescendant: so action can be taken by subclasses. */
 -(void) addChild: (CC3Node*) aNode {
@@ -1297,7 +1723,7 @@ static GLuint lastAssignedNodeTag;
 				[children release];
 				children = nil;
 			}
-			[aNode wasRemoved];
+			[aNode wasRemoved];						// Invoke before didRemoveDesc notification
 			[self didRemoveDescendant: aNode];
 		}
 		LogTrace(@"After removing %@, %@ now has children: %@", aNode, self, children);
@@ -1320,9 +1746,7 @@ static GLuint lastAssignedNodeTag;
 	[myKids release];
 }
 
--(void) remove {
-	[parent removeChild: self];
-}
+-(void) remove { [parent removeChild: self]; }
 
 -(void) wasRemoved {
 	if (shouldCleanupWhenRemoved) {
@@ -1342,9 +1766,7 @@ static GLuint lastAssignedNodeTag;
  * This default implementation simply passes the notification up the parental ancestor chain.
  * Subclasses may override to take a specific interest in which nodes are being added below them.
  */
--(void) didAddDescendant: (CC3Node*) aNode {
-	[parent didAddDescendant: aNode];
-}
+-(void) didAddDescendant: (CC3Node*) aNode { [parent didAddDescendant: aNode]; }
 
 /**
  * Invoked automatically when a node is removed as a child somewhere in the descendant structural
@@ -1353,9 +1775,7 @@ static GLuint lastAssignedNodeTag;
  * This default implementation simply passes the notification up the parental ancestor chain.
  * Subclasses may override to take a specific interest in which nodes are being removed below them.
  */
--(void) didRemoveDescendant: (CC3Node*) aNode {
-	[parent didRemoveDescendant: aNode];
-}
+-(void) didRemoveDescendant: (CC3Node*) aNode { [parent didRemoveDescendant: aNode]; }
 
 /**
  * Invoked automatically when a property was modified on a descendant node that potentially
@@ -1366,6 +1786,9 @@ static GLuint lastAssignedNodeTag;
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode {
 	[parent descendantDidModifySequencingCriteria: aNode];
 }
+
+/** Pass indication up the ancestor chain that a node has had its target set. */
+-(void) didSetTargetInDescendant: (CC3Node*) aNode { [parent didSetTargetInDescendant: aNode]; }
 
 -(CC3Node*) getNodeNamed: (NSString*) aName {
 	if ([name isEqual: aName] || (!name && !aName)) {	// my name equal or both nil
@@ -1404,6 +1827,31 @@ static GLuint lastAssignedNodeTag;
 	for (CC3Node* child in children) {
 		[child flattenInto: anArray];
 	}
+}
+
+-(CC3Node*) asOrientingWrapper {
+	CC3Node* wrap = [CC3Node nodeWithName: [NSString stringWithFormat: @"%@-OW", self.name]];
+	wrap.shouldAutoremoveWhenEmpty = YES;
+	[wrap addChild: self];
+	return wrap;
+}
+
+-(CC3Node*) asTrackingWrapper {
+	CC3Node* wrap = [self asOrientingWrapper];
+	wrap.shouldTrackTarget = YES;
+	return wrap;
+}
+
+-(CC3Node*) asCameraTrackingWrapper {
+	CC3Node* wrap = [self asOrientingWrapper];
+	wrap.shouldAutotargetCamera = YES;
+	return wrap;
+}
+
+-(CC3Node*) asBumpMapLightTrackingWrapper {
+	CC3Node* wrap = [self asTrackingWrapper];
+	wrap.isTrackingForBumpMapping = YES;
+	return wrap;
 }
 
 
@@ -1479,27 +1927,66 @@ static GLuint lastAssignedNodeTag;
 }
 
 
+#pragma mark Intersections and collision detection
+
+-(BOOL) shouldIgnoreRayIntersection {
+	return boundingVolume ? boundingVolume.shouldIgnoreRayIntersection : NO;
+}
+
+-(void) setShouldIgnoreRayIntersection: (BOOL) shouldIgnore {
+	boundingVolume.shouldIgnoreRayIntersection = shouldIgnore;
+}
+
+-(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume {
+	return boundingVolume && [boundingVolume doesIntersect: otherBoundingVolume];
+}
+
+-(BOOL) doesIntersectNode: (CC3Node*) otherNode {
+	return [self doesIntersectBoundingVolume: otherNode.boundingVolume];
+}
+
+-(BOOL) doesIntersectGlobalRay: (CC3Ray) aRay {
+	return boundingVolume && [boundingVolume doesIntersectRay: aRay];
+}
+
+-(CC3Vector) locationOfGlobalRayIntesection: (CC3Ray) aRay {
+	if ( !boundingVolume || self.shouldIgnoreRayIntersection ) return kCC3VectorNull;
+
+	CC3Ray localRay = [self.transformMatrixInverted transformRay: aRay];
+	return [boundingVolume locationOfRayIntesection: localRay]; 
+}
+
+-(CC3Vector) globalLocationOfGlobalRayIntesection: (CC3Ray) aRay {
+	if ( !boundingVolume ) return kCC3VectorNull;
+
+	return [boundingVolume globalLocationOfGlobalRayIntesection: aRay];
+}
+
+-(CC3NodePuncturingVisitor*) nodesIntersectedByGlobalRay: (CC3Ray) aRay {
+	CC3NodePuncturingVisitor* pnv = [CC3NodePuncturingVisitor visitorWithRay: aRay];
+	[pnv visit: self];
+	return pnv;
+}
+
+-(CC3Node*) closestNodeIntersectedByGlobalRay: (CC3Ray) aRay {
+	return [self nodesIntersectedByGlobalRay: aRay].closestPuncturedNode;
+}
+
+
 #pragma mark Animation
 
 -(BOOL) containsAnimation {
-	if (animation) {
-		return YES;
-	}
+	if (animation) return YES;
+
 	for (CC3Node* child in children) {
-		if (child.containsAnimation) {
-			return YES;
-		}
+		if (child.containsAnimation) return YES;
 	}
 	return NO;
 }
 
--(void) enableAnimation {
-	isAnimationEnabled = YES;
-}
+-(void) enableAnimation { isAnimationEnabled = YES; }
 
--(void) disableAnimation {
-	isAnimationEnabled = NO;
-}
+-(void) disableAnimation { isAnimationEnabled = NO; }
 
 -(void) enableAllAnimation {
 	[self enableAnimation];
@@ -1515,9 +2002,19 @@ static GLuint lastAssignedNodeTag;
 	}
 }
 
+-(GLuint) animationFrameCount {
+	if (animation) return animation.frameCount;
+
+	for (CC3Node* child in children) {
+		GLuint frameCount = child.animationFrameCount;
+		if (frameCount) return frameCount;
+	}
+	return 0;
+}
+
 -(void) establishAnimationFrameAt: (ccTime) t {
 	if (animation && isAnimationEnabled) {
-		LogTrace(@"%@ animating frame at %.3f ms", self, t);
+		LogCleanTrace(@"%@ animating frame at %.3f ms", self, t);
 		[animation establishFrameAt: t forNode: self];
 	}
 	for (CC3Node* child in children) {
@@ -1526,30 +2023,23 @@ static GLuint lastAssignedNodeTag;
 }
 
 
-#pragma mark Wireframe box and descriptor
+#pragma mark Developer support
 
 /** Suffix used to name the descriptor child node. */
 #define kDescriptorSuffix @"DESC"
 
-/**
- * The name to use when creating or retrieving the descriptor child node of this node.
- * For uniqueness, includes the tag of this node in case this node has no name.
- */
+/** The name to use when creating or retrieving the descriptor child node of this node. */
 -(NSString*) descriptorName {
-	return [NSString stringWithFormat: @"%@-%u-%@", self.name, self.tag, kDescriptorSuffix];
+	return [NSString stringWithFormat: @"%@-%@", self.name, kDescriptorSuffix];
 }
 
 -(CC3NodeDescriptor*) descriptorNode {
 	return (CC3NodeDescriptor*)[self getNodeNamed: [self descriptorName]];
 }
 
--(ccColor3B) initialDescriptorColor {
-	return CCC3BFromCCC4F(self.initialWireframeBoxColor);
-}
+-(ccColor3B) initialDescriptorColor { return CCC3BFromCCC4F(self.initialWireframeBoxColor); }
 
--(BOOL) shouldDrawDescriptor {
-	return (self.descriptorNode != nil);
-}
+-(BOOL) shouldDrawDescriptor { return (self.descriptorNode != nil); }
 
 -(void) setShouldDrawDescriptor: (BOOL) shouldDraw {
 	
@@ -1574,9 +2064,8 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(BOOL) shouldDrawAllDescriptors {
-	if (!self.shouldDrawDescriptor) {
-		return NO;
-	}
+	if (!self.shouldDrawDescriptor) return NO;
+	
 	for (CC3Node* child in children) {
 		if (!child.shouldDrawAllDescriptors) {
 			return NO;
@@ -1595,33 +2084,24 @@ static GLuint lastAssignedNodeTag;
 // Initial font size for any new descriptors
 static CGFloat descriptorFontSize = 14.0;
 
-+(CGFloat) descriptorFontSize {
-	return descriptorFontSize;
-}
++(CGFloat) descriptorFontSize { return descriptorFontSize; }
 
-+(void) setDescriptorFontSize: (CGFloat) fontSize {
-	descriptorFontSize = fontSize;
-}
++(void) setDescriptorFontSize: (CGFloat) fontSize { descriptorFontSize = fontSize; }
 
 
 /** Suffix used to name the wireframe child node. */
 #define kWireframeBoxSuffix @"WFB"
 
-/**
- * The name to use when creating or retrieving the wireframe child node of this node.
- * For uniqueness, includes the tag of this node in case this node has no name.
- */
+/** The name to use when creating or retrieving the wireframe child node of this node. */
 -(NSString*) wireframeBoxName {
-	return [NSString stringWithFormat: @"%@-%u-%@", self.name, self.tag, kWireframeBoxSuffix];
+	return [NSString stringWithFormat: @"%@-%@", self.name, kWireframeBoxSuffix];
 }
 
 -(CC3WireframeBoundingBoxNode*) wireframeBoxNode {
 	return (CC3WireframeBoundingBoxNode*)[self getNodeNamed: [self wireframeBoxName]];
 }
 
--(BOOL) shouldDrawWireframeBox {
-	return (self.wireframeBoxNode != nil);
-}
+-(BOOL) shouldDrawWireframeBox { return (self.wireframeBoxNode != nil); }
 
 -(void) setShouldDrawWireframeBox: (BOOL) shouldDraw {
 	
@@ -1662,13 +2142,9 @@ static CGFloat descriptorFontSize = 14.0;
 // The default color to use when drawing the wireframes
 static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 
-+(ccColor4F) wireframeBoxColor {
-	return wireframeBoxColor;
-}
++(ccColor4F) wireframeBoxColor { return wireframeBoxColor; }
 
-+(void) setWireframeBoxColor: (ccColor4F) aColor {
-	wireframeBoxColor = aColor;
-}
++(void) setWireframeBoxColor: (ccColor4F) aColor { wireframeBoxColor = aColor; }
 
 -(BOOL) shouldDrawAllWireframeBoxes {
 	if (!self.shouldDrawWireframeBox) {
@@ -1705,20 +2181,17 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 }
 
 -(void) addDirectionMarkerColored: (ccColor4F) aColor inDirection: (CC3Vector) aDirection {
-	CC3BoundingBox bb = self.boundingBox;
-	if ( !CC3BoundingBoxIsNull(bb) ) {
-		NSString* dmName = [NSString stringWithFormat: @"%@-%u-DM-%@",
-							self.name, self.tag, NSStringFromCC3Vector(aDirection)];
-		CC3DirectionMarkerNode* dm = [CC3DirectionMarkerNode nodeWithName: dmName];
+	NSString* dmName = [NSString stringWithFormat: @"%@-DM-%@",
+						self.name, NSStringFromCC3Vector(aDirection)];
+	CC3DirectionMarkerNode* dm = [CC3DirectionMarkerNode nodeWithName: dmName];
 
-		CC3Vector lineVertices[2] = { kCC3VectorZero, kCC3VectorZero };
-		[dm populateAsLineStripWith: 2 vertices: lineVertices andRetain: YES];
+	CC3Vector lineVertices[2] = { kCC3VectorZero, kCC3VectorZero };
+	[dm populateAsLineStripWith: 2 vertices: lineVertices andRetain: YES];
 
-		dm.markerDirection = aDirection;
-		dm.lineWidth = 4.0;
-		dm.pureColor = aColor;
-		[self addChild: dm];
-	}
+	dm.markerDirection = aDirection;
+	dm.lineWidth = 2.0;
+	dm.pureColor = aColor;
+	[self addChild: dm];
 }
 
 -(void) addDirectionMarker {
@@ -1734,8 +2207,11 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 
 -(void) removeAllDirectionMarkers {
 	CCArray* dirMks = self.directionMarkers;
-	for (CC3DirectionMarkerNode* dm in dirMks) {
+	for (CC3Node* dm in dirMks) {
 		[dm remove];
+	}
+	for (CC3Node* child in children) {
+		[child removeAllDirectionMarkers];
 	}
 }
 
@@ -1760,15 +2236,64 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 // The default color to use when drawing the direction markers
 static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 
-+(ccColor4F) directionMarkerColor {
-	return directionMarkerColor;
-}
++(ccColor4F) directionMarkerColor { return directionMarkerColor; }
 
-+(void) setDirectionMarkerColor: (ccColor4F) aColor {
-	directionMarkerColor = aColor;
-}
++(void) setDirectionMarkerColor: (ccColor4F) aColor { directionMarkerColor = aColor; }
 
 -(BOOL) shouldContributeToParentBoundingBox { return NO; }
+
+-(BOOL) shouldDrawBoundingVolume {
+	return boundingVolume ? boundingVolume.shouldDraw : NO;
+}
+
+-(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw {
+	boundingVolume.shouldDraw = shouldDraw;
+}
+
+-(BOOL) shouldDrawAllBoundingVolumes {
+	if (self.shouldDrawBoundingVolume) return YES;
+	for (CC3Node* child in children) {
+		if (child.shouldDrawAllBoundingVolumes) return YES;
+	}
+	return NO;
+}
+
+-(void) setShouldDrawAllBoundingVolumes: (BOOL) shouldDraw {
+	self.shouldDrawBoundingVolume = YES;
+	for (CC3Node* child in children) {
+		child.shouldDrawAllBoundingVolumes = YES;
+	}
+}
+
+-(BOOL) shouldLogIntersections {
+	if (boundingVolume && boundingVolume.shouldLogIntersections) return YES;
+	for (CC3Node* child in children) {
+		if (child.shouldLogIntersections) return YES;
+	}
+	return NO;
+}
+
+-(void) setShouldLogIntersections: (BOOL) shouldLog {
+	boundingVolume.shouldLogIntersections = shouldLog;
+	for (CC3Node* child in children) {
+		child.shouldLogIntersections = shouldLog;
+	}
+}
+
+-(BOOL) shouldLogIntersectionMisses {
+	if (boundingVolume && boundingVolume.shouldLogIntersectionMisses) return YES;
+	for (CC3Node* child in children) {
+		if (child.shouldLogIntersectionMisses) return YES;
+	}
+	return NO;
+}
+
+-(void) setShouldLogIntersectionMisses: (BOOL) shouldLog {
+	boundingVolume.shouldLogIntersectionMisses = shouldLog;
+	for (CC3Node* child in children) {
+		child.shouldLogIntersectionMisses = shouldLog;
+	}
+}
 
 @end
 
@@ -1782,21 +2307,29 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 
 @implementation CC3LocalContentNode
 
--(BOOL) hasLocalContent {
-	return YES;
-}
+-(BOOL) hasLocalContent { return YES; }
 
--(GLint) zOrder {
-	return zOrder;
-}
+-(GLint) zOrder { return zOrder; }
 
 -(void) setZOrder: (GLint) zo {
 	zOrder = zo;
 	super.zOrder = zo;
 }
 
--(CC3BoundingBox) localContentBoundingBox {
-	return kCC3BoundingBoxNull;
+// Overridden to return the localContentBoundingBox if no children.
+-(CC3BoundingBox) boundingBox {
+	return children ? super.boundingBox : self.localContentBoundingBox;
+}
+
+-(CC3BoundingBox) localContentBoundingBox { return kCC3BoundingBoxNull; }
+
+-(CC3Vector) localContentCenterOfGeometry {
+	CC3BoundingBox bb = self.localContentBoundingBox;
+	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
+}
+
+-(CC3Vector) globalLocalContentCenterOfGeometry {
+	return [transformMatrix transformLocation: self.localContentCenterOfGeometry];
 }
 
 -(CC3BoundingBox) globalLocalContentBoundingBox {
@@ -1862,7 +2395,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // The globalLocalContentBoundingBox is left uncopied so that it will start at
 // kCC3BoundingBoxNull and be lazily created on next access.
--(void) populateFrom: (CC3MeshNode*) another {
+-(void) populateFrom: (CC3LocalContentNode*) another {
 	[super populateFrom: another];
 
 	// Could create a child node
@@ -1881,7 +2414,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 }
 
 
-#pragma mark Wireframe box and descriptor
+#pragma mark Developer support
 
 /** Overridden to return local content box color */
 -(ccColor3B) initialDescriptorColor {
@@ -1891,12 +2424,9 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 /** Suffix used to name the local content wireframe. */
 #define kLocalContentWireframeBoxSuffix @"LCWFB"
 
-/**
- * The name to use when creating or retrieving the wireframe node of this node's local content.
- * For uniqueness, includes the tag of this node in case this node has no name.
- */
+/** The name to use when creating or retrieving the wireframe node of this node's local content. */
 -(NSString*) localContentWireframeBoxName {
-	return [NSString stringWithFormat: @"%@-%u-%@", self.name, self.tag, kLocalContentWireframeBoxSuffix];
+	return [NSString stringWithFormat: @"%@-%@", self.name, kLocalContentWireframeBoxSuffix];
 }
 
 -(CC3WireframeBoundingBoxNode*) localContentWireframeBoxNode {
@@ -1943,11 +2473,9 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 }
 
 // The default color to use when drawing the wireframes of the local content
-static ccColor4F localContentWireframeBoxColor = { 1.0, 0.0, 1.0, 1.0 };	// kCCC4FMagenta
+static ccColor4F localContentWireframeBoxColor = { 1.0, 0.5, 0.0, 1.0 };	// kCCC4FOrange
 
-+(ccColor4F) localContentWireframeBoxColor {
-	return localContentWireframeBoxColor;
-}
++(ccColor4F) localContentWireframeBoxColor { return localContentWireframeBoxColor; }
 
 +(void) setLocalContentWireframeBoxColor: (ccColor4F) aColor {
 	localContentWireframeBoxColor = aColor;
@@ -1966,282 +2494,5 @@ static ccColor4F localContentWireframeBoxColor = { 1.0, 0.0, 1.0, 1.0 };	// kCCC
 }
 
 -(BOOL) shouldContributeToParentBoundingBox { return YES; }
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3Rotator
-
-@interface CC3Rotator (TemplateMethods)
--(void) ensureRotationFromMatrix;
--(void) ensureQuaternionFromMatrix;
--(void) ensureQuaternionFromAxisAngle;
--(void) ensureAxisAngleFromQuaternion;
--(void) applyRotation;
--(void) populateFrom: (CC3Rotator*) another;
-@property(nonatomic, readonly) BOOL isRotationDirty;
-@property(nonatomic, readonly) BOOL isMatrixDirtyByRotation;
-@property(nonatomic, readonly) BOOL isQuaternionDirty;
-@property(nonatomic, readonly) BOOL isMatrixDirtyByQuaternion;
-@property(nonatomic, readonly) BOOL isAxisAngleDirty;
-@property(nonatomic, readonly) BOOL isQuaternionDirtyByAxisAngle;
-@end
-
-@implementation CC3Rotator
-
--(void) dealloc {
-	[rotationMatrix release];
-	[super dealloc];
-}
-
--(CC3Vector) rotation {
-	[self ensureRotationFromMatrix];
-	return rotation;
-}
-
--(void) setRotation:(CC3Vector) aRotation {
-	rotation = CC3VectorRotationModulo(aRotation);
-
-	isRotationDirty = NO;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-
-	matrixIsDirtyBy = kCC3MatrixIsDirtyByRotation;
-}
-
--(void) rotateBy: (CC3Vector) aRotation {
-	[rotationMatrix rotateBy: CC3VectorRotationModulo(aRotation)];
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-
-	matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-}
-
--(CC3Vector4) quaternion {
-	[self ensureQuaternionFromAxisAngle];
-	[self ensureQuaternionFromMatrix];
-	return quaternion;
-}
-
--(void) setQuaternion:(CC3Vector4) aQuaternion {
-	quaternion = aQuaternion;
-
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = NO;
-
-	matrixIsDirtyBy = kCC3MatrixIsDirtyByQuaternion;
-}
-
--(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
-	[rotationMatrix rotateByQuaternion: aQuaternion];
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-}
-
--(CC3Vector) rotationAxis {
-	[self ensureAxisAngleFromQuaternion];
-	return rotationAxis;
-}
-
--(void) setRotationAxis: (CC3Vector) aDirection {
-	rotationAxis = aDirection;
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = NO;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = YES;
-	
-	matrixIsDirtyBy = kCC3MatrixIsDirtyByAxisAngle;
-}
-
--(GLfloat) rotationAngle {
-	[self ensureAxisAngleFromQuaternion];
-	return rotationAngle;
-}
-
--(void) setRotationAngle: (GLfloat) anAngle {
-	rotationAngle = CC3CyclicAngle(anAngle);
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = NO;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = YES;
-	
-	matrixIsDirtyBy = kCC3MatrixIsDirtyByAxisAngle;
-}
-
--(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
-	CC3Vector4 q = CC3QuaternionFromAxisAngle(CC3Vector4FromCC3Vector(anAxis, anAngle));
-	[self rotateByQuaternion: q];
-}
-
--(CC3GLMatrix*) rotationMatrix {
-	[self applyRotation];
-	return rotationMatrix;
-}
-
--(void) setRotationMatrix:(CC3GLMatrix*) aGLMatrix {
-	id oldMtx = rotationMatrix;
-	rotationMatrix = [aGLMatrix retain];
-	[oldMtx release];
-	
-	isRotationDirty = YES;
-	isQuaternionDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-
-	matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-}
-
--(id) init {
-	return [self initOnRotationMatrix: [CC3GLMatrix identity]];
-}
-
-+(id) rotator {
-	return [[[self alloc] init] autorelease];
-}
-
--(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
-	if ( (self = [super init]) ) {
-		self.rotationMatrix = aGLMatrix;
-		rotation = kCC3VectorZero;
-		quaternion = kCC3Vector4QuaternionIdentity;
-		rotationAxis = kCC3VectorZero;
-		rotationAngle = 0.0;
-		isRotationDirty = NO;
-		isQuaternionDirty = NO;
-		isAxisAngleDirty = NO;
-		isQuaternionDirtyByAxisAngle = NO;
-		matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-	}
-	return self;
-}
-
-+(id) rotatorOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
-	return [[[self alloc] initOnRotationMatrix: aGLMatrix] autorelease];
-}
-
-// Protected properties for copying
--(BOOL) isRotationDirty { return isRotationDirty; }
--(BOOL) isAxisAngleDirty { return isAxisAngleDirty; }
--(BOOL) isQuaternionDirty { return isQuaternionDirty; }
--(BOOL) isQuaternionDirtyByAxisAngle { return isQuaternionDirtyByAxisAngle; }
--(BOOL) matrixIsDirtyBy { return matrixIsDirtyBy; }
-
--(id) copyWithZone: (NSZone*) zone {
-	CC3Rotator* aCopy = [[[self class] allocWithZone: zone] init];
-	[aCopy populateFrom: self];
-	return aCopy;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3Rotator*) another {
-
-	[rotationMatrix populateFrom: another.rotationMatrix];
-
-	rotation = another.rotation;
-	quaternion = another.quaternion;
-	rotationAxis = another.rotationAxis;
-	rotationAngle = another.rotationAngle;
-	isRotationDirty = another.isRotationDirty;
-	isAxisAngleDirty = another.isAxisAngleDirty;
-	isQuaternionDirty = another.isQuaternionDirty;
-	isQuaternionDirtyByAxisAngle = another.isQuaternionDirtyByAxisAngle;
-	matrixIsDirtyBy = another.matrixIsDirtyBy;
-}
-
-/** If needed, extracts and sets the rotation Euler angles from the encapsulated rotation matrix. */
--(void) ensureRotationFromMatrix {
-	if (isRotationDirty) {
-		rotation = [self.rotationMatrix extractRotation];
-		isRotationDirty = NO;
-	}
-}
-
-/** If needed, extracts and sets the quaternion from the encapsulated rotation matrix. */
--(void) ensureQuaternionFromMatrix {
-	if (isQuaternionDirty) {
-		quaternion = [self.rotationMatrix extractQuaternion];
-		isQuaternionDirty = NO;
-	}
-}
-
-/** If needed, extracts and sets the quaternion from the encapsulated rotation axis and angle. */
--(void) ensureQuaternionFromAxisAngle {
-	if (isQuaternionDirtyByAxisAngle) {
-		quaternion = CC3QuaternionFromAxisAngle(CC3Vector4FromCC3Vector(rotationAxis, rotationAngle));
-		isQuaternionDirtyByAxisAngle = NO;
-	}
-}
-
-/**
- * If needed, extracts and returns a rotation axis and angle from the encapsulated quaternion.
- * If the rotation angle is zero, the axis is undefined, and will be set to the zero vector.
- *
- * The rotationAxis can point in one of two equally valid directions. THe choice is made to
- * return the direction that is closest to the previous rotation angle. This step is taken
- * for consistency, so that small changes in rotation wont suddenly flip the rotation axis
- * and angle.
- *
- * The rotation angle will be clamped to +/-180 degrees. The rotationAxis can point in one
- */
--(void) ensureAxisAngleFromQuaternion {
-	if (isAxisAngleDirty) {
-		CC3Vector4 axisAngle = CC3AxisAngleFromQuaternion(self.quaternion);
-		CC3Vector qAxis = CC3VectorFromTruncatedCC3Vector4(axisAngle);
-		GLfloat qAngle = CC3SemiCyclicAngle(axisAngle.w);
-		if ( CC3VectorDot(qAxis, rotationAxis) < 0 ) {
-			rotationAxis = CC3VectorNegate(qAxis);
-			rotationAngle = -qAngle;
-		} else {
-			rotationAxis = qAxis;
-			rotationAngle = qAngle;
-		}
-		isAxisAngleDirty = NO;
-	}
-}
-
-/** Recalculates the rotation matrix from the most recently set rotation or quaternion property. */
--(void) applyRotation {
-	switch (matrixIsDirtyBy) {
-		case kCC3MatrixIsDirtyByRotation:
-			[rotationMatrix populateFromRotation: self.rotation];
-			matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-			break;
-		case kCC3MatrixIsDirtyByQuaternion:
-		case kCC3MatrixIsDirtyByAxisAngle:
-			[rotationMatrix populateFromQuaternion: self.quaternion];
-			matrixIsDirtyBy = kCC3MatrixIsNotDirty;
-			break;
-		default:
-			break;
-	}
-}
-
--(void) applyRotationTo: (CC3GLMatrix*) aMatrix {
-	[aMatrix multiplyByMatrix: self.rotationMatrix];	// Rotation matrix is built lazily if needed
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with rotation: %@, quaternion: %@, rotation axis: %@, rotation angle %.3f",
-			[self class],
-			NSStringFromCC3Vector(self.rotation),
-			NSStringFromCC3Vector4(self.quaternion),
-			NSStringFromCC3Vector(self.rotationAxis),
-			self.rotationAngle];
-}
 
 @end

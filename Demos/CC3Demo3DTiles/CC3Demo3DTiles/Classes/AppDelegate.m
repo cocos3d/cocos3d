@@ -6,8 +6,6 @@
 //  Copyright __MyCompanyName__ 2011. All rights reserved.
 //
 
-#import "cocos2d.h"
-
 #import "AppDelegate.h"
 #import "GameConfig.h"
 #import "MainLayer.h"
@@ -120,7 +118,6 @@
 	[self removeStartupFlicker];
 	
 	// Run the intro Scene
-//	[[CCDirector sharedDirector] runWithScene: [HelloWorldLayer scene]];
 	CCScene *scene = [CCScene node];
 	[scene addChild: [MainLayer node]];
 	[[CCDirector sharedDirector] runWithScene: scene];

@@ -1,9 +1,9 @@
 /*
  * CC3VertexArraysPODExtensions.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -81,8 +81,8 @@ extern "C" {
 		self.elementOffset = (GLuint)aCPODData->pData;
 	} else {										// not interleaved
 		self.elements = aCPODData->pData;
-		elementsAreRetained = YES;			// CC3VertexArray instance will free data when needed.
-		aCPODData->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
+		allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
+		aCPODData->pData = NULL;				// Clear data reference from CPODData so it won't try to free it.
 		self.elementOffset = 0;
 	}
 }
@@ -124,7 +124,7 @@ extern "C" {
 /** CC3VertexLocations manages freeing either dedicated or interleaved data */
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
 	[super setElementsFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
-	elementsAreRetained = YES;
+	allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
 }
 
 @end
@@ -200,13 +200,13 @@ extern "C" {
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
 	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
 		self.elementCount = [self vertexCountFromFaceCount: ((SPODMesh*)aSPODMesh)->nNumFaces];
+		allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
 	}
 	return self;
 }
 
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
 	self.elements = aCPODData->pData;
-	elementsAreRetained = YES;			// CC3VertexIndices instance will free data when needed.
 	aCPODData->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
 	self.elementOffset = 0;				// Indices are not interleaved.
 }

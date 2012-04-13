@@ -1,7 +1,7 @@
 README!
 ----------------------
 
-cocos3d 0.6.4
+cocos3d 0.7.0
 
 Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -14,10 +14,10 @@ Getting Started
 
 This starter application presents a 3D take on the ubiquitous "hello, world" application.
 
-The content of the world is constructed in the initializeWorld method in the
-___PROJECTNAMEASIDENTIFIER___World.m file. To add your own 3D content, edit that method.
+The content of the scene is constructed in the initializeScene method in the
+___PROJECTNAMEASIDENTIFIER___Scene.m file. To add your own 3D content, edit that method.
 
-The ___PROJECTNAMEASIDENTIFIER___World.m file is also where you add interactive behaviour,
+The ___PROJECTNAMEASIDENTIFIER___Scene.m file is also where you add interactive behaviour,
 typically in the updateBeforeTransform: method.
 
 You can also edit the applicationDidFinishLaunching: method in the
@@ -38,22 +38,10 @@ When adapting this template project for your own application, don't forget to re
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.4 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d 0.7.0 is compatible with cocos2d versions 0.99.5 through 1.1.
 
 At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
 configured to use that version. This section includes notes on compatibility with other versions.
-
-   cocos2d 1.1
-   -----------
-
-   Version 1.1 of cocos2d introduced a change to the structure used for 2D particles.
-   When running cocos2d 1.1 set the following build setting in your Xcode build configuration:
-
-      CC_USES_2D_PARTICLES=0
-
-   You can set this in your Xcode project build settings in the Preprocessor Macros entry.
-   This applies to any cocos3d project, including the demo projects that are included in the
-   cocos3d distribution and the cocos3d project templates.
 
    cocos2d 0.9.5
    -------------
@@ -73,5 +61,5 @@ configured to use that version. This section includes notes on compatibility wit
 
    Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
    project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
-   will be the cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5
+   will be the cocos2d 1.0.1 project templates, unless you have created cocos2d 0.99.5
    Xcode 4 project templates.

@@ -1,9 +1,9 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,7 +39,7 @@
 #pragma mark -
 #pragma mark CC3NodeVisitor
 
-@class CC3Node, CC3World;
+@class CC3Node, CC3Scene;
 
 /**
  * A CC3NodeVisitor is a context object that is passed to a node when it is visited
@@ -158,9 +158,9 @@
  * The transformation matrix needs to be recalculated if any of the node's transform properties
  * (location, rotation, scale) have changed, or if those of an ancestor node were changed.
  *
- * The transforms can be calculated from the CC3World or from the startingNode, depending
+ * The transforms can be calculated from the CC3Scene or from the startingNode, depending
  * on the value of the shouldLocalizeToStartingNode property. Normally, the transforms
- * are calculated from the CC3World, but localizing to the startingNode can be useful for
+ * are calculated from the CC3Scene, but localizing to the startingNode can be useful for
  * determining relative transforms between ancestors and descendants.
  */
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor {
@@ -174,11 +174,11 @@
  * of the startingNode.
  *
  * If this property is set to NO, the transforms of all ancestors of each node, all the
- * way to CC3World, will be included when calculating the transformMatrix and global
+ * way to CC3Scene, will be included when calculating the transformMatrix and global
  * properties of that node. This is the normal situation.
  *
  * If this property is set to YES the transforms of the startingNode and its ancestors,
- * right up to the CC3World, will be ignored. The result is that the transformMatrix
+ * right up to the CC3Scene, will be ignored. The result is that the transformMatrix
  * and all global properties (globalLocation, etc) will be relative to the startingNode.
  
  * This can be useful when you want to coordinate node positioning within a particular
@@ -256,8 +256,8 @@
  * This property gives the interval, in seconds, since the previous update. This value
  * can be used to create realistic real-time motion that is independent of specific frame
  * or update rates. Depending on the setting of the maxUpdateInterval property of the
- * CC3World instance, the value of this property may be clamped to an upper limit.
- * See the description of the CC3World maxUpdateInterval property for more information
+ * CC3Scene instance, the value of this property may be clamped to an upper limit.
+ * See the description of the CC3Scene maxUpdateInterval property for more information
  * about clamping the update interval.
  */
 @property(nonatomic, assign) ccTime deltaTime;
@@ -276,7 +276,7 @@
  *
  * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
  * box will be in the local coordinate system of the startingNode, otherwise it
- * will be in the global coordinate system of the 3D world.
+ * will be in the global coordinate system of the 3D scene.
  */
 @interface CC3NodeBoundingBoxVisitor : CC3NodeTransformingVisitor {
 	CC3BoundingBox boundingBox;
@@ -287,7 +287,7 @@
  *
  * If the value of the shouldLocalizeToStartingNode property is YES, the bounding
  * box will be in the local coordinate system of the startingNode, otherwise it
- * will be in the global coordinate system of the 3D world.
+ * will be in the global coordinate system of the 3D scene.
  *
  * If none of the startingNode or its descendants have any local content, this
  * property will return kCC3BoundingBoxNull.
@@ -297,6 +297,7 @@
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;
 
 @end
+
 
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
@@ -335,7 +336,7 @@
  * The camera that is viewing the 3D scene that is being drawn.
  *
  * This property must be set before the visit: method is invoked. It is therefore only
- * available during a visitation run. Since the CC3World may contain multiple cameras,
+ * available during a visitation run. Since the CC3Scene may contain multiple cameras,
  * this ensures that the current activeCamera is used.
  */
 @property(nonatomic, assign) CC3Camera* camera;
@@ -367,10 +368,10 @@
 
 /**
  * Indicates whether the OpenGL depth buffer should be cleared before drawing
- * the 3D world.
+ * the 3D scene.
  * 
  * This property is automatically set to the value of the
- * shouldClearDepthBufferBefore3D property of the CC3World.
+ * shouldClearDepthBufferBefore3D property of the CC3Scene.
  */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
 
@@ -397,7 +398,7 @@
  * CC3NodePickingVisitor is a CC3NodeDrawingVisitor that is passed to a node when
  * it is visited during node picking operations using color-buffer based picking.
  *
- * The visit: method must be invoked with a CC3World instance as the arguement.
+ * The visit: method must be invoked with a CC3Scene instance as the arguement.
  *
  * Node picking is the act of picking a 3D node from user input, such as a touch.
  * One method of accomplishing this is to draw the scene such that each object is
@@ -422,3 +423,196 @@
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3NodePuncturingVisitor
+
+/**
+ * CC3NodePuncturingVisitor is a CC3NodeVisitor that is used to collect nodes
+ * that are punctured (intersected) by a global ray.
+ *
+ * For example, you can use the CC3Camera unprojectPoint: method to convert
+ * a 2D touch point into a CC3Ray that projects into the 3D scene from the
+ * center of the camera. All objects that lie visually below the touch point
+ * will be punctured by that projected ray.
+ *
+ * Or, you may want to know which nodes lie under a targetting reticle, or
+ * have been hit by the path of a bullet.
+ * 
+ * To find the nodes that are punctured by a global CC3Ray, create an instance
+ * of this class, and invoke the visit: method on that instance, passing the
+ * CC3Scene as the argument. You can also invoke the visit: method with a
+ * particular structural node, instead of the full CC3Scene, to limit the range
+ * of nodes to inspect (for example, to determine which object in a room, but
+ * not outside the room, was hit by a bullet), for design or performance reasons.
+ *
+ * The visitor will collect the nodes that are punctured by the ray, in order
+ * of distance from the startLocation of the CC3Ray. You can access the nodes
+ * and the puncture locations using the closestPuncturedNode, punctureNodeAt:
+ * closestPunctureLocation, and punctureLocationAt: methods.
+ *
+ * Only nodes that have a bounding volume will be tested by this visitor.
+ * Nodes without a bounding volume, or whose shouldIgnoreRayIntersection
+ * property is set to YES will be ignored by this visitor.
+ *
+ * The shouldPunctureFromInside property can be used to include or exclude
+ * nodes where the start location of the ray is within its bounding volume. 
+ *
+ * To save instantiating a CC3NodePuncturingVisitor each time, you can reuse
+ * the visitor instance over and over, through different invocations of the
+ * visit: method.
+ */
+@interface CC3NodePuncturingVisitor : CC3NodeVisitor {
+	CCArray* nodePunctures;
+	CC3Ray ray;
+	BOOL shouldPunctureFromInside;
+	BOOL shouldPunctureInvisibleNodes;
+}
+
+/**
+ * Indicates whether the visitor should consider the ray to intersect a node's
+ * bounding volume if the ray starts within the bounding volume of the node.
+ *
+ * The initial value of this property is NO, indicating that the visitor
+ * will not collect punctures for any node where the ray starts within
+ * the bounding volume of that node.
+ *
+ * This initial value makes sense for the common use of using the ray to pick
+ * nodes from a touch, as, when the camera is within a node, that node will
+ * not be visible. However, if you have a character within a room, and you
+ * want to know where in the room a thrown object hits the walls, you might
+ * want to set this property to YES to collect nodes that are punctured from
+ * the inside as well as from the outside.
+ */
+@property(nonatomic, assign) BOOL shouldPunctureFromInside;
+
+/**
+ * Indicates whether the visitor should include those nodes that are not
+ * visible (whose visible property returns NO), when collecting the nodes
+ * whose bounding volumes are punctured by the ray.
+ *
+ * The initial value of this property is NO, indicating that invisible
+ * nodes will be ignored by this visitor.
+ */
+@property(nonatomic, assign) BOOL shouldPunctureInvisibleNodes;
+
+/**
+ * The ray that is to be traced, specified in the global coordinate system.
+ *
+ * This property is set on initialization, but you may set it to another
+ * ray when reusing the same visitor on more than one visitation.
+ */
+@property(nonatomic, assign) CC3Ray ray;
+
+/** The number of nodes that were punctured by the ray. */
+@property(nonatomic, readonly) NSUInteger nodeCount;
+
+/**
+ * Returns the node punctured by the ray that is closest to the startLocation
+ * of the ray, or nil if the ray intersects no nodes.
+ *
+ * The result will not include any node that does not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ */
+@property(nonatomic, readonly) CC3Node* closestPuncturedNode;
+
+/**
+ * Returns the location of the puncture on the node returned by the
+ * closestPuncturedNode property, or kCC3VectorNull if the ray intersects no nodes.
+ *
+ * The returned location is on the bounding volume of the node (or tightest
+ * bounding volume if the node is using a composite bounding volume such as
+ * CC3NodeTighteningBoundingVolumeSequence), and is specified in the local
+ * coordinate system of the node.
+ *
+ * The result will not include any node that does not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ */
+@property(nonatomic, readonly) CC3Vector closestPunctureLocation;
+
+/**
+ * Returns the location of the puncture on the node returned by the
+ * closestPuncturedNode property, or kCC3VectorNull if the ray intersects no nodes.
+ *
+ * The returned location is on the bounding volume of the node (or tightest
+ * bounding volume if the node is using a composite bounding volume such as
+ * CC3NodeTighteningBoundingVolumeSequence), and is specified in the global
+ * coordinate system.
+ */
+@property(nonatomic, readonly) CC3Vector closestGlobalPunctureLocation;
+
+/**
+ * Returns the node punctured by the ray at the specified order index,
+ * which must be between zero and nodeCount minus one, inclusive.
+ *
+ * When multiple nodes are punctured by the ray, they can be accessed
+ * using the specified positional index, with the order determined by
+ * the distance from the startLocation of the ray to the global location
+ * of the puncture for each node. The index zero represents the node
+ * whose puncture is globally closest to the startLocation of the ray.
+ *
+ * The results will not include nodes that do not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ */
+-(CC3Node*) puncturedNodeAt: (NSUInteger) index;
+
+/**
+ * Returns the location of the puncture on the node returned by the
+ * puncturedNodeAt: method. The specified index must be between zero
+ * and nodeCount minus one, inclusive.
+ *
+ * When multiple nodes are punctured by the ray, the location of the
+ * puncture on each can be accessed using the specified positional index,
+ * with the order determined by the distance from the startLocation of
+ * the ray to the global location of the puncture for each node. The
+ * index zero represents the node whose puncture is globally closest
+ * to the startLocation of the ray.
+ *
+ * The returned location is on the bounding volume of the node (or tightest
+ * bounding volume if the node is using a composite bounding volume such as
+ * CC3NodeTighteningBoundingVolumeSequence), and is specified in the local
+ * coordinate system of the node.
+ *
+ * The results will not include nodes that do not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ */
+-(CC3Vector) punctureLocationAt: (NSUInteger) index;
+
+/**
+ * Returns the location of the puncture on the node returned by the
+ * puncturedNodeAt: method. The specified index must be between zero
+ * and nodeCount minus one, inclusive.
+ *
+ * When multiple nodes are punctured by the ray, the location of the
+ * puncture on each can be accessed using the specified positional index,
+ * with the order determined by the distance from the startLocation of
+ * the ray to the global location of the puncture for each node. The
+ * index zero represents the node whose puncture is globally closest
+ * to the startLocation of the ray.
+ *
+ * The returned location is on the bounding volume of the node (or tightest
+ * bounding volume if the node is using a composite bounding volume such as
+ * CC3NodeTighteningBoundingVolumeSequence), and is specified in the local
+ * coordinate system of the node.
+ *
+ * The results will not include nodes that do not have a bounding volume,
+ * or whose shouldIgnoreRayIntersection property is set to YES.
+ */
+-(CC3Vector) globalPunctureLocationAt: (NSUInteger) index;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance with the specified ray,
+ * which is specified in the global coordinate system.
+ */
+-(id) initWithRay: (CC3Ray) aRay;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified ray,
+ * which is specified in the global coordinate system.
+ */
++(id) visitorWithRay: (CC3Ray) aRay;
+
+@end

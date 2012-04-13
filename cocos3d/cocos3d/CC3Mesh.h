@@ -1,9 +1,9 @@
 /*
  * CC3Mesh.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,25 @@
 #import "CC3Node.h"
 #import "CC3Material.h"
 
+@class CC3FaceArray;
+
+/** Indicates that a face has no neighbour over a particular edge. */
+#define kCC3FaceNoNeighbour  ((GLushort)~0)
+
+/**
+ * For each edge in a face, contains an index to the adjacent face,
+ * or kCC3FaceNoNeighbour if the face has no neighbour over that edge.
+ */
+typedef struct {
+	GLushort edges[3];		/**< Indices to the 3 neighbouring faces, in winding order. */
+} CC3FaceNeighbours;
+
+/** Returns a string description of the specified CC3FaceNeighbours struct. */
+static inline NSString* NSStringFromCC3FaceNeighbours(CC3FaceNeighbours faceNeighbours) {
+	return [NSString stringWithFormat: @"(%u, %u, %u)",
+			faceNeighbours.edges[0], faceNeighbours.edges[1], faceNeighbours.edges[2]];
+}
+
 /**
  * A CC3Mesh holds the 3D mesh for a CC3MeshNode. The CC3MeshNode enapsulates a reference
  * to the CC3Mesh.
@@ -48,14 +67,16 @@
  *
  * When drawing the mesh to the GL engine, this class remembers which mesh was last drawn
  * and only binds the mesh data to the GL engine when a different mesh is drawn. This allows
- * the application to organize the CC3MeshNodes within the CC3World so that nodes using the
+ * the application to organize the CC3MeshNodes within the CC3Scene so that nodes using the
  * same mesh are drawn together, before moving on to other mesh models. This strategy
  * can minimize the number of mesh switches in the GL engine, which improves performance. 
  *
  * CC3Mesh is an abstract class. Subclasses can be created for loading and managing
  * meshes from different sources and third-party libraries.
  */
-@interface CC3Mesh : CC3Identifiable
+@interface CC3Mesh : CC3Identifiable {
+	CC3FaceArray* faces;
+}
 
 /**
  * Indicates whether this mesh contains data for vertex normals.
@@ -73,12 +94,10 @@
  */
 @property(nonatomic, readonly) BOOL hasColors;
 
-/**
- * The axially-aligned-bounding-box (AABB) in the mesh local (untransformed) coordinate system.
- * 
- * This abstract implementation always returns the null bounding box.
- * Subclasses will override to return an appropriate value.
- */
+/** The center of geometry of this mesh. */
+@property(nonatomic, readonly) CC3Vector centerOfGeometry;
+
+/** Returns the the smallest axis-aligned-bounding-box (AABB) that surrounds the mesh. */
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;
 
 
@@ -124,6 +143,12 @@
  * vertex arrays, since vertex array GL buffers are only deleted if they exist.
  */
 -(void) deleteGLBuffers;
+
+/**
+ * Returns whether the underlying vertex data has been loaded into GL engine vertex
+ * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
+ */
+@property(nonatomic, readonly) BOOL isUsingGLBuffers;
 
 /**
  * Once the elements data has been buffered into a GL vertex buffer object (VBO)
@@ -267,69 +292,210 @@
  */
 -(void) doNotBufferVertexIndices;
 
-/**
- * Aligns the texture coordinates of the mesh with the textures held in the specified material.
- *
- * This method can be useful when the mesh is covered by textures whose width and height
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
- *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the texture.
- *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
- *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This method should only be invoked once on any mesh, and it may cause mapping conflicts
- * if the same mesh is shared by other CC3MeshNodes that use different textures.
- *
- * To adjust the texture coordinates of only a single texture coordinates array within
- * this mesh, invoke the alignWithTexture: method on the appropriate instance of
- * CC3VertexTextureCoordinates.
- */
--(void) alignWithTexturesIn: (CC3Material*) aMaterial;
+
+#pragma mark Textures
 
 /**
- * Aligns the texture coordinates of the mesh with the textures held in the specified material.
+ * Indicates whether the texture coordinates of this mesh expects that the texture
+ * was flipped upside-down during texture loading.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
  *
- * The texture coordinates are aligned assuming that the texture is inverted in the
- * Y-direction. Certain texture formats are inverted during loading, and this method
- * can be used to compensate.
+ * The value of this property is used in combination with the value of the 
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
  *
- * This method can be useful when the mesh is covered by textures whose width and height
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
+ * The alignTextureUnit:withTexture: method compares the value of this property
+ * with the isFlippedVertically property of the texture to automatically determine
+ * whether these texture coordinates need to be flipped vertically in order to
+ * display the texture correctly, and will do so if needed. As part of that inversion,
+ * the value of this property will also be flipped, to indicate that the texture
+ * coordinates are now aligned differently.
  *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the texture.
+ * The alignTextureUnit:withTexture: method is invoked automatically when a
+ * texture is assigned to cover this mesh in the mesh node. If you need to
+ * adjust the value of this property, you sould do so before setting a texture
+ * or material into the mesh node.
  *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
+ * When multi-texturing is being used on this mesh, you can use the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method for finer control
+ * of orienting textures for each texture unit. When multi-texturing is
+ * being used, setting this value of this property will invoke the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method to set the same
+ * value for each texture unit.
  *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This method should only be invoked once on any mesh, and it may cause mapping conflicts
- * if the same mesh is shared by other CC3MeshNodes that use different textures.
- *
- * To adjust the texture coordinates of only a single texture coordinates array within
- * this mesh, invoke the alignWithInvertedTexture: method on the appropriate instance
- * of CC3VertexTextureCoordinates.
+ * Reading the value of this property will return YES if the property-reading
+ * method expectsVerticallyFlippedTextureInTextureUnit: returns YES for
+ * any texture unit, otherwise this property will return NO.
+ * 
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
+ * property on the CC3Resource class to understand how this property is set
+ * during mesh resource loading.
+ * 
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR).
  */
--(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial;
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
 
 /**
- * Configures the mesh so that a texture applied to this mesh will be repeated the
- * specified number of times across the mesh, in each dimension. The repeatFactor
- * argument contains two numbers, corresponding to how many times in each dimension
- * the texture should be repeated.
+ * Returns whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
+ *
+ * The value of this property is used in combination with the value of the 
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
+ *
+ * The alignTextureUnit:withTexture: method compares the value of this property
+ * with the isFlippedVertically property of the texture to automatically determine
+ * whether these texture coordinates need to be flipped vertically in order to
+ * display the texture correctly, and will do so if needed. As part of that inversion,
+ * the value of this property for the specified texture unit will also be flipped,
+ * to indicate that the texture coordinates are now aligned differently.
+ *
+ * The alignTextureUnit:withTexture: method is invoked automatically when a
+ * texture is assigned to cover this mesh in the mesh node. If you need to
+ * adjust the value of this property, you sould do so before setting a texture
+ * or material into the mesh node.
+ * 
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
+ * property on the CC3Resource class to understand how this property is set
+ * during mesh resource loading.
+ * 
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR).
+ */
+-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ *
+ * See the notes of the expectsVerticallyFlippedTextureInTextureUnit: method
+ * for a discussion of texture coordinate orientation.
+ *
+ * Setting the value of this property will change the way the texture coordinates
+ * are aligned when a texture is assigned to cover this texture unit for this mesh.
+ */
+-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit;
+
+/**
+ * Aligns the texture coordinates of the specified texture unit to the specified texture.
+ * 
+ * Under iOS, textures that do not have dimensions that are a power-of-two, will
+ * be padded to dimensions of a power-of-two on loading. The result is that the
+ * texture will be physically larger than is expected by these texture coordinates.
+ *
+ * The usable area of the texture is indicated by its mapSize property, and invoking
+ * this method will align these texture coordinates with the usable size of the
+ * specified texture.
+ *
+ * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property
+ * is different than the value of the isFlippedVertically property of the specified
+ * texture, the texture coordinates are not oriented vertically for the texture.
+ * If so, this method also flips the texture coordinates to align with the texture.
+ *
+ * Thhis method is invoked automatically when a texture is assigned to cover this
+ * mesh in the mesh node. Normally, the application has no need to invoke this
+ * method directly. However, you can invoke this method manually if you have
+ * changed the texture coordinate alignment using the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method.
+ *
+ * To avoid updating the texture coordinates when no change has occurred, if the
+ * coordinates do not need to be flipped vertically, and the specified texture has
+ * the same usable area as the texture used on the previous invocation (or has a
+ * full usable area on the first invocation), this method does nothing.
+ *
+ * Care should be taken when using this method, as it changes the actual vertex data.
+ * This may cause mapping conflicts if the same vertex data is shared by other
+ * CC3MeshNodes that use different textures.
+ */
+-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture;
+
+/**
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to the mesh node holding this mesh.
+ * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
+ * to indicate whether the texture  mesh is aligned with vertically-flipped textures
+ * prior to setting the texture or material into your mesh node. 
+ */
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to the mesh node holding this mesh.
+ * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
+ * to indicate whether the texture  mesh is aligned with vertically-flipped textures
+ * prior to setting the texture or material into your mesh node. 
+ */
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel vertically on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for all texture units. This has the effect of flipping the textures
+ * vertically on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipVerticallyTextureUnit:
+ * method for all texture units.
+ */
+-(void) flipTexturesVertically;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel horizontally on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for all texture units. This has the effect of flipping the textures
+ * horizontally on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipHorizontallyTextureUnit:
+ * method for all texture units.
+ */
+-(void) flipTexturesHorizontally;
+
+/**
+ * Configures the mesh so that a texture applied to the specified texture unit will
+ * be repeated the specified number of times across the mesh, in each dimension.
+ * The repeatFactor argument contains two numbers, corresponding to how many times
+ * in each dimension the texture should be repeated.
  * 
  * As an example, a value of (1, 2) for the repeatValue indicates that the texture
  * should repeat twice vertically, but not repeat horizontally.
@@ -354,22 +520,20 @@
  * property of the CC3Texture should include the GL_REPEAT setting for the
  * corresponding texture dimension.
  *
- * If your texture requires aligning with the mesh (typically if one of the texture
- * dimensions is not a power-of-two), you should invoke either the alignWithTexturesIn:
- * or alignWithInvertedTexturesIn: method before invoking this method.
- *
- * In the example above, you would invoke one of those methods before invoking this
- * method, to first align the mesh with that non-power-of-two side.
- *
- * The dimensions of the repeatFactor are independent of the size derived from the
- * texture by the alignWithTexturesIn: or alignWithInvertedTexturesIn: methods.
- * A value of 1.0 for an element in the specified repeatFactor will automatically take
- * into consideration the adjustment made to the mesh by those methods, and will display
- * only the part of the texture defined by them.
- *
  * You can specify a fractional value for either of the components of the repeatFactor
  * to expand the texture in that dimension so that only part of the texture appears
  * in that dimension, while potentially repeating multiple times in the other dimension.
+ */
+-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Configures the mesh so that the textures in all texture units will be repeated the
+ * specified number of times across the mesh, in each dimension. The repeatFactor
+ * argument contains two numbers, corresponding to how many times in each dimension
+ * the texture should be repeated.
+ *
+ * This has the same effect as invoking the repeatTexture:forTextureUnit: method
+ * for each texture unit.
  */
 -(void) repeatTexture: (ccTex2F) repeatFactor;
 
@@ -443,6 +607,15 @@
 #pragma mark Drawing
 
 /**
+ * The drawing mode indicating how the vertices are connected (points, lines,
+ * triangles...).
+ *
+ * This must be set with a valid GL drawing mode enumeration.
+ * The default value is GL_TRIANGLE_STRIP.
+ */
+@property(nonatomic, assign) GLenum drawingMode;
+
+/**
  * Draws the mesh data to the GL engine. The specified visitor encapsulates
  * the currently active camera, and certain drawing options.
  *
@@ -475,25 +648,14 @@
 
 /**
  * Returns an allocated, initialized, autorelease instance of the bounding volume to
- * be used by the CC3MeshNode that wraps this mesh. This method is called automatically
+ * be used by the CC3MeshNode that wraps this mesh. This method is invoked automatically
  * by the CC3MeshNode instance when this mesh is attached to the CC3MeshNode.
  *
- * This abstract implementation always returns nil. Subclasses will override to provide
- * an appropriate and useful bounding volume instance.
+ * This abstract implementation always returns nil, and the node will never be considered
+ * to be inside the camera frustum, or to intersect with any other bounding volume.
+ * Subclasses will override to provide an appropriate and useful bounding volume instance.
  */
 -(CC3NodeBoundingVolume*) defaultBoundingVolume;
-
-/**
- * Returns the number of faces to be drawn from the specified number of
- * vertices, based on the type of primitives that this mesh is drawing.
- */ 
--(GLsizei) faceCountFromVertexCount: (GLsizei) vc;
-
-/**
- * Returns the number of vertices required to draw the specified number
- * of faces, based on the type of primitives that this mesh is drawing.
- */ 
--(GLsizei) vertexCountFromFaceCount: (GLsizei) fc;
 
 
 #pragma mark Accessing vertex data
@@ -549,14 +711,59 @@
  */
 -(void) movePivotToCenterOfGeometry;
 
-/** Returns the number of vertices in this mesh. */
-@property(nonatomic, readonly) GLsizei vertexCount;
+/**
+ * Indicates the number of vertices in this mesh.
+ *
+ * Usually, you should treat this property as read-only. However, there may be
+ * occasions with meshes that contain dynamic content, such as particle systems,
+ * where it may be appropriate to set the value of this property.
+ *
+ * Setting the value of this property changes the amount of vertex content that
+ * will be submitted to the GL engine during drawing.
+ *
+ * When setting this property, care should be taken to ensure that the value is
+ * not set larger than the number of vertices that were allocated for this mesh.
+ */
+@property(nonatomic, assign) GLsizei vertexCount;
+
+/**
+ * If indexed drawing is used by this mesh, indicates the number of vertex
+ * indices in the mesh.
+ *
+ * If indexed drawing is not used by this mesh, this property has no effect,
+ * and reading it will return zero.
+ *
+ * Usually, you should treat this property as read-only. However, there may be
+ * occasions with meshes that contain dynamic content, such as particle systems,
+ * where it may be appropriate to set the value of this property.
+ *
+ * Setting the value of this property changes the amount of vertex content that
+ * will be submitted to the GL engine during drawing.
+ *
+ * When setting this property, care should be taken to ensure that the value is
+ * not set larger than the number of vertices that were allocated for this mesh.
+ */
+@property(nonatomic, assign) GLsizei vertexIndexCount;
+
+/**
+ * Checks to see if the previously-allocated, underlying vertex data elements have
+ * enough capacity to hold the specified number of elements, and expands the memory
+ * allocations accordingly, if necessary.
+ *
+ * Returns whether the underlying element data had to be expanded. The application
+ * can use this response value to determine whether or not to reset GL buffers, etc.
+ */
+-(BOOL) ensureCapacity: (GLsizei) elemCount;
 
 /**
  * Returns the location element at the specified index from the vertex data.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * vertex data. If the dimensionality is 2, the returned vector will contain zero in
+ * the Z component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -567,7 +774,12 @@
  * Sets the location element at the specified index in the vertex data to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * vertex data. If the dimensionality is 2, the Z component of the specified vector
+ * will be ignored. If the dimensionality is 4, the specified vector will be converted
+ * to a 4D vector, with the W component set to one, before storing.
  * 
  * If this mesh is being used by any mesh nodes, be sure to invoke the
  * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
@@ -583,10 +795,52 @@
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index;
 
 /**
+ * Returns the location element at the specified index in the underlying vertex data,
+ * as a four-dimensional location in the 4D homogeneous coordinate space.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the elementSize property. If the
+ * value of the elementSize property is 3, the returned vector will contain one
+ * in the W component. If the value of the elementSize property is 2, the returned
+ * vector will contain zero in the Z component and one in the W component.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector4) vertexHomogeneousLocationAt: (GLsizei) index;
+
+/**
+ * Sets the location element at the specified index in the underlying vertex data to
+ * the specified four-dimensional location in the 4D homogeneous coordinate space.
+ * 
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * data. If the dimensionality is 3, the W component of the specified vector will be
+ * ignored. If the dimensionality is 2, both the W and Z components of the specified
+ * vector will be ignored.
+ * 
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexLocationsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLsizei) index;
+
+/**
  * Returns the normal element at the specified index from the vertex data.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -597,7 +851,7 @@
  * Sets the normal element at the specified index in the vertex data to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexNormalsGLBuffer method to ensure that the GL VBO
@@ -612,7 +866,7 @@
  * Returns the color element at the specified index from the vertex data.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -623,7 +877,7 @@
  * Sets the color element at the specified index in the vertex data to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexColorsGLBuffer method to ensure that the GL VBO
@@ -638,7 +892,7 @@
  * Returns the color element at the specified index from the vertex data.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -649,7 +903,7 @@
  * Sets the color element at the specified index in the vertex data to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexColorsGLBuffer method to ensure that the GL VBO
@@ -665,7 +919,7 @@
  * at the specified texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -677,7 +931,7 @@
  * at the specified texture unit index, to the specified texture coordinate value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexTextureCoordinatesGLBufferForTextureUnit: method
@@ -696,7 +950,7 @@
  * vertexTexCoord2FForTextureUnit:at: method, with zero as the texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -711,7 +965,7 @@
  * method, passing in zero for the texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexTextureCoordinatesGLBuffer method to ensure that
@@ -731,8 +985,7 @@
 /**
  * Returns the index element at the specified index from the vertex data.
  *
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * The index refers to vertices, not bytes.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -742,8 +995,7 @@
 /**
  * Sets the index element at the specified index in the vertex data to the specified value.
  * 
- * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * The index refers to vertices, not bytes.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexIndicesGLBuffer method to ensure that the GL VBO
@@ -779,12 +1031,171 @@
 -(void) updateVertexIndicesGLBuffer;
 
 
+#pragma mark Faces
+
+/**
+ * Additional information about the faces in the mesh.
+ *
+ * This property does not contain vertex information for the faces. That is contained
+ * within the mesh itself. As such, most meshes do not require this additional information
+ * about the faces of the mesh. This property provides additional information about the
+ * faces that can be used in certain customized lighting and shadowing effects.
+ *
+ * If this property is not set directly, it will be lazily initialized on first access.
+ *
+ * Since the face array contains static information about a mesh, when copying a mesh,
+ * the face array is not itself copied by default. This avoids duplication of data that
+ * does not change between two copies of the same mesh object. Instead, both mesh copies
+ * will share a reference to the same face array instance. If you need to create separate
+ * copies of the faces array when copying a mesh, you must explicitly create a copy.
+ */
+@property(nonatomic, retain) CC3FaceArray* faces;
+
+/**
+ * Indicates whether information about the faces of this mesh should be cached.
+ *
+ * If this property is set to NO, accessing information about the faces through the
+ * methods faceAt:, faceIndicesAt:, faceCenterAt:, faceNormalAt:, or facePlaneAt:,
+ * will be calculated dynamically from the mesh data.
+ *
+ * If such data will be accessed frequently, this repeated dynamic calculation may
+ * cause a noticable impact to performance. In such a case, this property can be
+ * set to YES to cause the data to be calculated once and cached, improving the
+ * performance of subsequent accesses to information about the faces.
+ *
+ * However, caching information about the faces will increase the amount of memory
+ * required by the mesh, sometimes significantly. To avoid this additional memory
+ * overhead, in general, you should leave this property set to NO, unless intensive
+ * access to face information is causing a performance impact.
+ *
+ * An example of a situation where the use of this property may be noticable,
+ * is when adding shadow volumes to nodes. Shadow volumes make intense use of
+ * accessing face information about the mesh that is casting the shadow.
+ *
+ * When the value of this property is set to NO, any data cached during previous
+ * access through the indicesAt:, centerAt:, normalAt:, or planeAt:, methods will
+ * be cleared.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldCacheFaces;
+
+/**
+ * Returns the number of faces in this mesh.
+ *
+ * This is calculated from the number of vertices, taking into
+ * consideration the type of primitives that this mesh is drawing.
+ */
+@property(nonatomic, readonly) GLsizei faceCount;
+
+/**
+ * Returns the number of faces to be drawn from the specified number of
+ * vertices, based on the type of primitives that this mesh is drawing.
+ */ 
+-(GLsizei) faceCountFromVertexCount: (GLsizei) vc;
+
+/**
+ * Returns the number of vertices required to draw the specified number
+ * of faces, based on the type of primitives that this mesh is drawing.
+ */ 
+-(GLsizei) vertexCountFromFaceCount: (GLsizei) fc;
+
+/**
+ * Returns the face from the mesh at the specified index.
+ *
+ * The specified faceIndex value refers to the index of the face, not the vertices
+ * themselves. So, a value of 5 will retrieve the three vertices that make up the
+ * fifth triangular face in this mesh. The specified index must be between zero,
+ * inclusive, and the value of the faceCount property, exclusive.
+ *
+ * The returned face structure contains only the locations of the vertices. If the vertex
+ * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * or other padding, that data will not appear in the returned face structure. For that
+ * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex data, and then use the vertex accessor methods to retrieve the individual
+ * vertex data components.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Face) faceAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the mesh face that is made up of the three vertices at the three indices
+ * within the specified face indices structure.
+ *
+ * The returned face structure contains only the locations of the vertices. If the vertex
+ * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * or other padding, that data will not appear in the returned face structure. For that
+ * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex data, and then use the vertex accessor methods to retrieve the individual
+ * vertex data components.
+ */
+-(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices;
+
+/**
+ * Returns the face from the mesh at the specified index, as indices into the mesh vertices.
+ *
+ * The specified faceIndex value refers to the index of the face, not the vertices
+ * themselves. So, a value of 5 will retrieve the three vertices that make up the
+ * fifth triangular face in this mesh. The specified index must be between zero,
+ * inclusive, and the value of the faceCount property, exclusive.
+ *
+ * The returned structure reference contains the indices of the three vertices that
+ * make up the triangular face. These indices index into the actual vertex data within
+ * the layout of the mesh.
+ *
+ * This method takes into consideration any padding (stride) between the vertex indices.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the center of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Vector) faceCenterAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the normal of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Vector) faceNormalAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the plane of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Plane) facePlaneAt: (GLsizei) faceIndex;
+
+/** Returns the indices of the neighbours of the mesh face at the specified index. */
+-(CC3FaceNeighbours) faceNeighboursAt: (GLsizei) faceIndex;
+
+
 #pragma mark Mesh context switching
 
 /**
  * Resets the tracking of the mesh switching functionality.
  *
- * This is invoked automatically by the CC3World at the beginning of each frame drawing cycle.
+ * This is invoked automatically by the CC3Scene at the beginning of each frame drawing cycle.
  * Usually, the application never needs to invoke this method directly.
  */
 +(void) resetSwitching;
@@ -793,8 +1204,483 @@
 
 
 #pragma mark -
-#pragma mark Deprecated CC3MeshModel
+#pragma mark CC3FaceArray
 
-/** Deprecated CC3MeshModel renamed to CC3Mesh. @deprecated */
-@interface CC3MeshModel : CC3Mesh
+/**
+ * CC3FaceArray holds additional cached calculated information about mesh faces,
+ * such as the centers, normals, planes and neighbours of each face.
+ *
+ * The additional face data is maintained in separate internal arrays, and each
+ * type of data is lazily allocated and initialized when accessed the first time.
+ * So, requesting information about the center of a face will cause all of the
+ * face centers to be calculated and cached, but will not cause the face normals
+ * or planes to be calculated and cached. They will be calculated and cached when
+ * a face normal or plane is explicitly requested.
+ */
+@interface CC3FaceArray : CC3Identifiable {
+	CC3Mesh* mesh;
+	CC3FaceIndices* indices;
+	CC3Vector* centers;
+	CC3Vector* normals;
+	CC3Plane* planes;
+	CC3FaceNeighbours* neighbours;
+	BOOL shouldCacheFaces;
+	BOOL indicesAreRetained;
+	BOOL centersAreRetained;
+	BOOL normalsAreRetained;
+	BOOL planesAreRetained;
+	BOOL neighboursAreRetained;
+	BOOL indicesAreDirty;
+	BOOL centersAreDirty;
+	BOOL normalsAreDirty;
+	BOOL planesAreDirty;
+	BOOL neighboursAreDirty;
+}
+
+/**
+ * The mesh containing the vertices for which this face array is managing faces.
+ *
+ * Setting this property will cause the centers, normals, planes and neighbours
+ * properties to be deallocated and then re-built on the next access.
+ */
+@property(nonatomic, assign) CC3Mesh* mesh;
+
+/**
+ * Indicates the number of faces in this array, as retrieved from the mesh.
+ *
+ * The value of this property will be zero until the mesh property is set.
+ */
+@property(nonatomic, readonly) GLsizei faceCount;
+
+/**
+ * Indicates whether information about the faces of this mesh should be cached.
+ *
+ * If this property is set to NO, accessing information about the faces through
+ * the methods indicesAt:, centerAt:, normalAt:, or planeAt:, will be calculated
+ * dynamically from the mesh data.
+ *
+ * If such data will be accessed frequently, this repeated dynamic calculation may
+ * cause a noticable impact to performance. In such a case, this property can be
+ * set to YES to cause the data to be calculated once and cached, improving the
+ * performance of subsequent accesses to information about the faces.
+ *
+ * However, caching information about the faces will increase the amount of memory
+ * required by the mesh, sometimes significantly. To avoid this additional memory
+ * overhead, in general, you should leave this property set to NO, unless intensive
+ * access to face information is causing a performance impact.
+ *
+ * An example of a situation where the use of this property may be noticable,
+ * is when adding shadow volumes to nodes. Shadow volumes make intense use of
+ * accessing face information about the mesh that is casting the shadow.
+ *
+ * When the value of this property is set to NO, any data cached during previous
+ * access through the indicesAt:, centerAt:, normalAt:, or planeAt:, methods will
+ * be cleared.
+ *
+ * Because the face neighbour data returned by the neighboursAt: method is
+ * a function of the relationship between faces, that data is always cached,
+ * and is not affected by the setting of this property.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldCacheFaces;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Allocates and initializes an autoreleased unnamed instance with an automatically
+ * generated unique tag value. The tag value is generated using a call to nextTag.
+ */
++(id) faceArray;
+
+/** Allocates and initializes an unnamed autoreleased instance with the specified tag. */
++(id) faceArrayWithTag: (GLuint) aTag;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified name and an
+ * automatically generated unique tag value. The tag value is generated using a call to nextTag.
+ */
++(id) faceArrayWithName: (NSString*) aName;
+
+/** Allocates and initializes an autoreleased instance with the specified tag and name. */
++(id) faceArrayWithTag: (GLuint) aTag withName: (NSString*) aName;
+
+
+#pragma mark Indices
+
+/**
+ * An array containing the vertex indices of each face.
+ *
+ * This property will be lazily initialized on the first access after the mesh
+ * property has been set, by an automatic invocation of the populateIndices method.
+ * When created in this manner, the memory allocated to hold the data in the
+ * returned array will be managed by this instance.
+ *
+ * Alternately, this property may be set directly to an array that was created
+ * externally. In this case, the underlying data memory is not managed by this
+ * instance, and it is up to the application to manage the allocation and
+ * deallocation of the underlying data memory, and to ensure that the array is
+ * large enough to contain the number of CC3FaceIndices structures specified by
+ * the faceCount property.
+ */
+@property(nonatomic, assign) CC3FaceIndices* indices;
+
+/**
+ * Returns the vertex indices of the face at the specified index,
+ * lazily initializing the indices property if needed.
+ */
+-(CC3FaceIndices) indicesAt: (GLsizei) faceIndex;
+
+/**
+ * Populates the contents of the indices property from the associated mesh,
+ * automatically allocating memory for the property if needed.
+ *
+ * This method is invoked automatically on the first access of the indices
+ * property after the mesh property has been set. Usually, the application
+ * never needs to invoke this method directly.
+ *
+ * However, if the indices property has been set to an array created outside
+ * this instance, this method may be invoked to populate that array from the mesh.
+ */
+-(void) populateIndices;
+
+/**
+ * Allocates underlying memory for the indices property, and returns a pointer
+ * to the allocated memory.
+ *
+ * This method will allocate enough memory for the indices property to hold
+ * the number of CC3FaceIndices structures specified by the faceCount property.
+ *
+ * This method is invoked automatically by the populateIndices method.
+ * Usually, the application never needs to invoke this method directly.
+ *
+ * It is safe to invoke this method more than once, but understand that any 
+ * previously allocated memory will be safely released prior to the allocation
+ * of the new memory. The memory allocated earlier will therefore be lost and
+ * should not be referenced.
+ * 
+ * The memory allocated will automatically be released when this instance
+ * is deallocated.
+ */
+-(CC3FaceIndices*) allocateIndices;
+
+/**
+ * Deallocates the underlying memory that was previously allocated with the
+ * allocateIndices method. It is safe to invoke this method more than once,
+ * or even if the allocateIndices method was not previously invoked.
+ *
+ * This method is invoked automatically when allocateIndices is invoked,
+ * and when this instance is deallocated. Usually, the application never
+ * needs to invoke this method directly.
+ */
+-(void) deallocateIndices;
+
+/** Marks the indices data as dirty. It will be automatically repopulated on the next access. */
+-(void) markIndicesDirty;
+
+
+#pragma mark Centers
+
+/**
+ * An array containing the location of the center of each face.
+ *
+ * This property will be lazily initialized on the first access after the mesh
+ * property has been set, by an automatic invocation of the populateCenters method.
+ * When created in this manner, the memory allocated to hold the data in the
+ * returned array will be managed by this instance.
+ *
+ * Alternately, this property may be set directly to an array that was created
+ * externally. In this case, the underlying data memory is not managed by this
+ * instance, and it is up to the application to manage the allocation and
+ * deallocation of the underlying data memory, and to ensure that the array is
+ * large enough to contain the number of CC3Vector structures specified by the
+ * faceCount property.
+ */
+@property(nonatomic, assign) CC3Vector* centers;
+
+/**
+ * Returns the center of the face at the specified index,
+ * lazily initializing the centers property if needed.
+ */
+-(CC3Vector) centerAt: (GLsizei) faceIndex;
+
+/**
+ * Populates the contents of the centers property from the associated mesh,
+ * automatically allocating memory for the property if needed.
+ *
+ * This method is invoked automatically on the first access of the centers
+ * property after the mesh property has been set. Usually, the application
+ * never needs to invoke this method directly.
+ *
+ * However, if the centers property has been set to an array created outside
+ * this instance, this method may be invoked to populate that array from the mesh.
+ *
+ * In addition, if the mesh is deformed in some way, the application may invoke
+ * this method in order to recalculate updated face centers.
+ */
+-(void) populateCenters;
+
+/**
+ * Allocates underlying memory for the centers property, and returns a pointer
+ * to the allocated memory.
+ *
+ * This method will allocate enough memory for the centers property to hold
+ * the number of CC3Vector structures specified by the faceCount property.
+ *
+ * This method is invoked automatically by the populateCenters method.
+ * Usually, the application never needs to invoke this method directly.
+ *
+ * It is safe to invoke this method more than once, but understand that any 
+ * previously allocated memory will be safely released prior to the allocation
+ * of the new memory. The memory allocated earlier will therefore be lost and
+ * should not be referenced.
+ * 
+ * The memory allocated will automatically be released when this instance
+ * is deallocated.
+ */
+-(CC3Vector*) allocateCenters;
+
+/**
+ * Deallocates the underlying memory that was previously allocated with the
+ * allocateCenters method. It is safe to invoke this method more than once,
+ * or even if the allocateCenters method was not previously invoked.
+ *
+ * This method is invoked automatically when allocateCenters is invoked,
+ * and when this instance is deallocated. Usually, the application never
+ * needs to invoke this method directly.
+ */
+-(void) deallocateCenters;
+
+/** Marks the centers data as dirty. It will be automatically repopulated on the next access. */
+-(void) markCentersDirty;
+
+
+#pragma mark Normals
+
+/**
+ * An array containing the normal vector for each face.
+ *
+ * This property will be lazily initialized on the first access after the mesh
+ * property has been set, by an automatic invocation of the populateNormals method.
+ * When created in this manner, the memory allocated to hold the data in the
+ * returned array will be managed by this instance.
+ *
+ * Alternately, this property may be set directly to an array that was created
+ * externally. In this case, the underlying data memory is not managed by this
+ * instance, and it is up to the application to manage the allocation and
+ * deallocation of the underlying data memory, and to ensure that the array is
+ * large enough to contain the number of CC3Vector structures specified by the
+ * faceCount property.
+ */
+@property(nonatomic, assign) CC3Vector* normals;
+
+/**
+ * Returns the normal of the face at the specified index,
+ * lazily initializing the normals property if needed.
+ */
+-(CC3Vector) normalAt: (GLsizei) faceIndex;
+
+/**
+ * Populates the contents of the normals property from the associated mesh,
+ * automatically allocating memory for the property if needed.
+ *
+ * This method is invoked automatically on the first access of the normals
+ * property after the mesh property has been set, or from the ensureNormals
+ * method. Usually, the application never needs to invoke this method directly.
+ *
+ * However, if the normals property has been set to an array created outside
+ * this instance, this method may be invoked to populate that array from the mesh.
+ *
+ * In addition, if the mesh is deformed in some way, the application may invoke
+ * this method in order to recalculate updated face normals.
+ */
+-(void) populateNormals;
+
+/**
+ * Allocates underlying memory for the normals property, and returns a pointer
+ * to the allocated memory.
+ *
+ * This method will allocate enough memory for the normals property to hold
+ * the number of CC3Vector structures specified by the faceCount property.
+ *
+ * This method is invoked automatically by the populateNormals method.
+ * Usually, the application never needs to invoke this method directly.
+ *
+ * It is safe to invoke this method more than once, but understand that any 
+ * previously allocated memory will be safely released prior to the allocation
+ * of the new memory. The memory allocated earlier will therefore be lost and
+ * should not be referenced.
+ * 
+ * The memory allocated will automatically be released when this instance
+ * is deallocated.
+ */
+-(CC3Vector*) allocateNormals;
+
+/**
+ * Deallocates the underlying memory that was previously allocated with the
+ * allocateNormals method. It is safe to invoke this method more than once,
+ * or even if the allocateNormals method was not previously invoked.
+ *
+ * This method is invoked automatically when allocateNormals is invoked,
+ * and when this instance is deallocated. Usually, the application never
+ * needs to invoke this method directly.
+ */
+-(void) deallocateNormals;
+
+/** Marks the normals data as dirty. It will be automatically repopulated on the next access. */
+-(void) markNormalsDirty;
+
+
+#pragma mark Planes
+
+/**
+ * An array containing the plane equation for each face.
+ *
+ * This property will be lazily initialized on the first access after the mesh
+ * property has been set, by an automatic invocation of the populatePlanes method.
+ * When created in this manner, the memory allocated to hold the data in the
+ * returned array will be managed by this instance.
+ *
+ * Alternately, this property may be set directly to an array that was created
+ * externally. In this case, the underlying data memory is not managed by this
+ * instance, and it is up to the application to manage the allocation and
+ * deallocation of the underlying data memory, and to ensure that the array is
+ * large enough to contain the number of CC3Plane structures specified by the
+ * faceCount property.
+ */
+@property(nonatomic, assign) CC3Plane* planes;
+
+/**
+ * Returns the plane of the face at the specified index,
+ * lazily initializing the planes property if needed.
+ */
+-(CC3Plane) planeAt: (GLsizei) faceIndex;
+
+/**
+ * Populates the contents of the planes property from the associated mesh,
+ * automatically allocating memory for the property if needed.
+ *
+ * This method is invoked automatically on the first access of the planes
+ * property after the mesh property has been set. Usually, the application
+ * never needs to invoke this method directly.
+ *
+ * However, if the planes property has been set to an array created outside
+ * this instance, this method may be invoked to populate that array from the mesh.
+ *
+ * In addition, if the mesh is deformed in some way, the application may invoke
+ * this method in order to recalculate updated face planes.
+ */
+-(void) populatePlanes;
+
+/**
+ * Allocates underlying memory for the planes property, and returns a pointer
+ * to the allocated memory.
+ *
+ * This method will allocate enough memory for the planes property to hold
+ * the number of CC3Plane structures specified by the faceCount property.
+ *
+ * This method is invoked automatically by the populatePlanes method.
+ * Usually, the application never needs to invoke this method directly.
+ *
+ * It is safe to invoke this method more than once, but understand that any 
+ * previously allocated memory will be safely released prior to the allocation
+ * of the new memory. The memory allocated earlier will therefore be lost and
+ * should not be referenced.
+ * 
+ * The memory allocated will automatically be released when this instance
+ * is deallocated.
+ */
+-(CC3Plane*) allocatePlanes;
+
+/**
+ * Deallocates the underlying memory that was previously allocated with the
+ * allocatePlanes method. It is safe to invoke this method more than once,
+ * or even if the allocatePlanes method was not previously invoked.
+ *
+ * This method is invoked automatically when allocatePlanes is invoked,
+ * and when this instance is deallocated. Usually, the application never
+ * needs to invoke this method directly.
+ */
+-(void) deallocatePlanes;
+
+/** Marks the planes data as dirty. It will be automatically repopulated on the next access. */
+-(void) markPlanesDirty;
+
+
+#pragma mark Neighbours
+
+/**
+ * An array containing neighbour data for each face. Each element in this array
+ * contains a CC3FaceNeighbours strucutre which keeps track of the indices to
+ * the neighbouring faces of each face.
+ *
+ * This property will be lazily initialized on the first access after the mesh
+ * property has been set, by an automatic invocation of the populateNeighbours method.
+ * When created in this manner, the memory allocated to hold the data in the
+ * returned array will be managed by this instance.
+ *
+ * Alternately, this property may be set directly to an array that was created
+ * externally. In this case, the underlying data memory is not managed by this
+ * instance, and it is up to the application to manage the allocation and
+ * deallocation of the underlying data memory, and to ensure that the array is
+ * large enough to contain the number of CC3FaceNeighbours structures specified
+ * by the faceCount property.
+ */
+@property(nonatomic, assign) CC3FaceNeighbours* neighbours;
+
+/**
+ * Returns the neighbours of the face at the specified index,
+ * lazily initializing the neighbours property if needed.
+ */
+-(CC3FaceNeighbours) neighboursAt: (GLsizei) faceIndex;
+
+/**
+ * Populates the contents of the neighbours property from the associated mesh,
+ * automatically allocating memory for the property if needed.
+ *
+ * This method is invoked automatically on the first access of the neighbours
+ * property after the mesh property has been set. Usually, the application
+ * never needs to invoke this method directly.
+ *
+ * However, if the neighbours property has been set to an array created outside
+ * this instance, this method may be invoked to populate that array from the mesh.
+ */
+-(void) populateNeighbours;
+
+/**
+ * Allocates underlying memory for the neighbours property, and returns a pointer
+ * to the allocated memory.
+ *
+ * This method will allocate enough memory for the normals property to hold
+ * the number of CC3FaceNeighbours structures specified by the faceCount property.
+ *
+ * This method is invoked automatically by the populateNeighbours method.
+ * Usually, the application never needs to invoke this method directly.
+ *
+ * It is safe to invoke this method more than once, but understand that any 
+ * previously allocated memory will be safely released prior to the allocation
+ * of the new memory. The memory allocated earlier will therefore be lost and
+ * should not be referenced.
+ * 
+ * The memory allocated will automatically be released when this instance
+ * is deallocated.
+ */
+-(CC3FaceNeighbours*) allocateNeighbours;
+
+/**
+ * Deallocates the underlying memory that was previously allocated with the
+ * allocateNeighbours method. It is safe to invoke this method more than once,
+ * or even if the allocateNeighbours method was not previously invoked.
+ *
+ * This method is invoked automatically when allocateNeighbours is invoked,
+ * and when this instance is deallocated. Usually, the application never
+ * needs to invoke this method directly.
+ */
+-(void) deallocateNeighbours;
+
+/** Marks the neighbours data as dirty. It will be automatically repopulated on the next access. */
+-(void) markNeighboursDirty;
+
 @end
+

@@ -1,10 +1,10 @@
 /*
  * CC3PODVertexSkinning.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -102,17 +102,17 @@
  * Initializes an instance from the specified POD SPODMesh structure, 
  * and that will be used by the specified skin mesh node.
  */
--(id) initAtIndex: (int) aBatchIndex
-	 fromSPODMesh: (PODStructPtr) aSPODMesh
-		  forNode: (CC3SkinMeshNode*) aNode;
+-(id) initFromBatchAtIndex: (int) aBatchIndex
+			  fromSPODMesh: (PODStructPtr) aSPODMesh
+				   forNode: (CC3SkinMeshNode*) aNode;
 
 /**
  * Allocates and initializes an autoreleased instance from the specified POD
  * SPODMesh structure, and that will be used by the specified skin mesh node.
  */
-+(id) boneBatchAtIndex: (int) aBatchIndex
-		  fromSPODMesh: (PODStructPtr) aSPODMesh
-			   forNode: (CC3SkinMeshNode*) aNode;
++(id) skinSectionFromBatchAtIndex: (int) aBatchIndex
+					 fromSPODMesh: (PODStructPtr) aSPODMesh
+						  forNode: (CC3SkinMeshNode*) aNode;
 
 /**
  * Create links to the nodes in the specified array.

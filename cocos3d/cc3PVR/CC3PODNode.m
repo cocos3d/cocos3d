@@ -1,9 +1,9 @@
 /*
  * CC3PODNode.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,35 +32,19 @@
 #import "CC3PODNode.h"
 
 
-@interface CC3Node (TemplateMethods)
--(void) populateFrom: (CC3Node*) another;
-@end
-
 @implementation CC3PODNode
 
--(int) podIndex {
-	return podIndex;
-}
+-(int) podIndex { return podIndex; }
 
--(void) setPodIndex: (int) aPODIndex {
-	podIndex = aPODIndex;
-}
+-(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
 
--(int) podContentIndex {
-	return podContentIndex;
-}
+-(int) podContentIndex { return podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex {
-	podContentIndex = aPODIndex;
-}
+-(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
 
--(int) podParentIndex {
-	return podParentIndex;
-}
+-(int) podParentIndex { return podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex {
-	podParentIndex = aPODIndex;
-}
+-(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.

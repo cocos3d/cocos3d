@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -60,7 +60,7 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %i (was tracking %@)",
+	LogTrace(@"%@ %@ read GL value %i (was tracking %@)",
 			 [self class], NSStringFromGLEnum(queryName), originalValue,
 			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"));
 }
@@ -124,9 +124,7 @@
 	[super dealloc];
 }
 
-+(BOOL) defaultShouldAlwaysSetGL {
-	return YES;
-}
++(BOOL) defaultShouldAlwaysSetGL { return YES; }
 
 -(void) initializeTrackers {}
 
@@ -183,14 +181,14 @@
 -(void) logSetGLValues: (BOOL) wasChanged {
 	if (elementSize.value != 0) {
 		// GL function uses element size
-		LogTrace("%@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
+		LogTrace(@"%@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
 				 NSStringFromGLEnum(elementSize.name), elementSize.value,
 				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
 				 NSStringFromGLEnum(elementStride.name), elementStride.value,
 				 @"POINTER", elementPointer.value);
 	} else {
 		// GL function doesn't use element size
-		LogTrace("%@ %@ %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
+		LogTrace(@"%@ %@ %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
 				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
 				 NSStringFromGLEnum(elementStride.name), elementStride.value,
 				 @"POINTER", elementPointer.value);

@@ -1,9 +1,9 @@
 /*
  * CC3NodeSequencer.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,7 +33,7 @@
 #import "CC3MeshNode.h"
 #import "CCTexture2D.h"
 #import "CC3BoundingVolumes.h"
-#import "CC3World.h"
+#import "CC3Scene.h"
 
 #pragma mark -
 #pragma mark CC3NodeEvaluator
@@ -163,6 +163,9 @@
 
 -(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {}
 
+
+#pragma mark Allocation and initialization
+
 -(id) init {
 	return [self initWithEvaluator: nil];
 }
@@ -182,6 +185,9 @@
 +(id) sequencerWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	return [[[self alloc] initWithEvaluator: anEvaluator] autorelease];
 }
+
+
+#pragma mark Sequencing nodes
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -513,7 +519,7 @@
 	// Leave if sequence updating should not happen or if there is nothing to sort.
 	if (!allowSequenceUpdates || nodes.count == 0) return;
 
-	CC3Camera* cam = visitor.world.activeCamera;
+	CC3Camera* cam = visitor.scene.activeCamera;
 	if (!cam) return;		// Can't do anything without a camera.
 
 	CC3Vector camGlobalLoc = cam.globalLocation;
@@ -560,53 +566,6 @@
 		}
 	}
 }
-
-/*
--(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
-	// Leave if sequence updating should not happen or if there is nothing to sort.
-	if (!allowSequenceUpdates || nodes.count == 0) return;
-	
-	CC3Camera* cam = visitor.world.activeCamera;
-	if (!cam) return;		// Can't do anything without a camera.
-	
-	CC3Vector camGlobalLoc = cam.globalLocation;
-	GLfloat prevCamDistProduct = CGFLOAT_MAX;
-	
-	for (CC3Node* aNode in nodes) {
-		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
-			[visitor addMisplacedNode: aNode];
-		} else {
-			CC3NodeBoundingVolume* bv = aNode.boundingVolume;
-			if (bv) {
-				// Get vector from node's center of geometry to camera.
-				CC3Vector node2Cam = CC3VectorDifference(bv.globalCenterOfGeometry, camGlobalLoc);
-				
-                // Determine the direction in which to measure from the camera. This will either be
-                // in the direction of a straight line between the camera and the node, or will be
-                // restricted to the direction "staight-out" from the camera.
-                CC3Vector measurementDirection = shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
-				
-                // Cache the dot product of the direction vector, and the vector between the node
-				// and the camera. This is a relative measure of the distance in that direction.
-				// In the case of measuring along the line between the node and camera, it will be
-				// the square of the distance. Comparing the squares of the distance instead of the
-				// distance itself also has the benefit of avoiding expensive square-root calculations.
-				bv.cameraDistanceProduct = CC3VectorDot(node2Cam, measurementDirection);
-				
-				// If this node is closer than the previous node in the array, update the
-				// previous distance value. Otherwise, mark the node as misplaced.
-				if (bv.cameraDistanceProduct <= prevCamDistProduct) {
-					prevCamDistProduct = bv.cameraDistanceProduct;
-				} else {
-					[visitor addMisplacedNode: aNode];
-				}
-			} else {		// If no bounding volume, mark the node as misplaced.
-				[visitor addMisplacedNode: aNode];
-			}
-		}
-	}
-}
-*/
 
 @end
 
@@ -697,40 +656,38 @@
 
 @implementation CC3NodeSequencerVisitor
 
-@synthesize world, misplacedNodes;
+@synthesize scene, misplacedNodes;
 
 -(void) dealloc {
 	[misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
-	world = nil;								// not retained
+	scene = nil;								// not retained
 	[super dealloc];
 }
 
--(id) init {
-	return [self initWithWorld: nil];
-}
+-(id) init { return [self initWithScene: nil]; }
 
--(id) initWithWorld: (CC3World*) aCC3World {
+-(id) initWithScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		world = aCC3World;			// not retained
+		scene = aCC3Scene;			// not retained
 		misplacedNodes = [[CCArray array] retain];
 	}
 	return self;
 }
 
-+(id) visitorWithWorld: (CC3World*) aCC3World {
-	return [[[self alloc] initWithWorld: aCC3World] autorelease];
++(id) visitorWithScene: (CC3Scene*) aCC3Scene {
+	return [[[self alloc] initWithScene: aCC3Scene] autorelease];
 }
 
--(BOOL) hasMisplacedNodes {
-	return (misplacedNodes.count > 0);
-}
+-(BOOL) hasMisplacedNodes { return (misplacedNodes.count > 0); }
 
--(void) addMisplacedNode: (CC3Node*) aNode {
-	[misplacedNodes addUnretainedObject: aNode];
-}
+-(void) addMisplacedNode: (CC3Node*) aNode { [misplacedNodes addUnretainedObject: aNode]; }
 
--(void) clearMisplacedNodes {
-	[misplacedNodes removeAllObjectsAsUnretained];
-}
+-(void) clearMisplacedNodes { [misplacedNodes removeAllObjectsAsUnretained]; }
+
+// Deprecated
+-(CC3Scene*) world { return scene; }
+-(void) setWorld: (CC3Scene*) aCC3Scene { self.scene = aCC3Scene; }
+-(id) initWithWorld: (CC3Scene*) aCC3Scene { return [self initWithScene: aCC3Scene]; }
++(id) visitorWithWorld: (CC3Scene*) aCC3Scene { return [self visitorWithScene: aCC3Scene]; }
 
 @end

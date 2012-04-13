@@ -1,9 +1,9 @@
 /*
  * CC3NodePODExtensions.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,20 +42,24 @@ extern "C" {
 @implementation CC3Node (PVRPOD)
 
 // Subclasses must override to use instance variable.
--(int) podContentIndex { return 0; }
+-(int) podContentIndex { return kCC3PODNilIndex; }
 
 // Subclasses must override to use instance variable.
 -(void) setPodContentIndex: (int) aPODIndex {}
 
 // Subclasses must override to use instance variable.
--(int) podParentIndex { return 0; }
+-(int) podParentIndex { return kCC3PODNilIndex; }
 
 // Subclasses must override to use instance variable.
 -(void) setPodParentIndex: (int) aPODIndex {}
 
--(BOOL) isBasePODNode {
-	return self.podParentIndex < 0;
-}
+-(BOOL) isBasePODNode { return self.podParentIndex < 0; }
+
+// Subclasses must override to use instance variable.
+-(int) podTargetIndex {return kCC3PODNilIndex;}
+
+// Subclasses must override to use instance variable.
+-(void) setPodTargetIndex: (int) aPODIndex {}
 
 
 #pragma mark Allocation and initialization
@@ -95,30 +99,13 @@ extern "C" {
 }
 
 -(void) linkToPODNodes: (CCArray*) nodeArray {
-	LogTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
 	if (!self.isBasePODNode) {
+		LogCleanTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
 		CC3Node* parentNode = [nodeArray objectAtIndex: self.podParentIndex];
 		[parentNode addChild: self];
 	}
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3TargetttingNode extensions for PVR POD data
-
-@implementation CC3TargettingNode (PVRPOD)
-
-// Subclasses must override to use instance variable.
--(int) podTargetIndex {return 0;}
-
-// Subclasses must override to use instance variable.
--(void) setPodTargetIndex: (int) aPODIndex {}
-
--(void) linkToPODNodes: (CCArray*) nodeArray {
-	[super linkToPODNodes: nodeArray];
 	if (self.podTargetIndex >= 0) {
+		LogCleanTrace(@"Linking %@ with target index %i", self, self.podTargetIndex);
 		self.target = [nodeArray objectAtIndex: self.podTargetIndex];
 	}
 }

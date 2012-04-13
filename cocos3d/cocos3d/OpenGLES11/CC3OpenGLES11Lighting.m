@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Lighting.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -66,7 +66,7 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ %@ read GL value %.2f (was tracking %@)",
+	LogTrace(@"%@ %@ %@ read GL value %.2f (was tracking %@)",
 			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
 			 originalValue, (valueIsKnown ? [NSString stringWithFormat: @"%.2f", value] : @"UNKNOWN"));
 }
@@ -76,7 +76,7 @@
 }
 
 -(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ %@ = %.2f", [self class], NSStringFromGLEnum(self.glLightIndex),
+	LogTrace(@"%@ %@ %@ %@ = %.2f", [self class], NSStringFromGLEnum(self.glLightIndex),
 			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), value);
 }
 
@@ -116,7 +116,7 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
 			 NSStringFromCCC4F(originalValue), (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"));
 }
@@ -126,7 +126,7 @@
 }
 
 -(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
+	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
 			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCCC4F(value));
 }
 
@@ -166,7 +166,7 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
 			 NSStringFromCC3Vector(originalValue), (valueIsKnown ? NSStringFromCC3Vector(value) : @"UNKNOWN"));
 }
@@ -176,7 +176,7 @@
 }
 
 -(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
+	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
 			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
 }
 
@@ -216,7 +216,7 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
 			 NSStringFromCC3Vector4(originalValue), (valueIsKnown ? NSStringFromCC3Vector4(value) : @"UNKNOWN"));
 }
@@ -226,7 +226,7 @@
 }
 
 -(void) logSetValue: (BOOL) wasSet {
-	LogTrace("%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
+	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
 			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
 }
 
@@ -335,13 +335,11 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerWorldLightColor
+#pragma mark CC3OpenGLES11StateTrackerSceneLightColor
 
-@implementation CC3OpenGLES11StateTrackerWorldLightColor
+@implementation CC3OpenGLES11StateTrackerSceneLightColor
 
--(void) setGLValue {
-	glLightModelfv(name, (GLfloat*)&value);
-}
+-(void) setGLValue { glLightModelfv(name, (GLfloat*)&value); }
 
 @end
 
@@ -351,17 +349,15 @@
 
 @implementation CC3OpenGLES11Lighting
 
-@synthesize worldAmbientLight, lights;
+@synthesize sceneAmbientLight, lights;
 
 -(void) dealloc {
-	[worldAmbientLight release];
+	[sceneAmbientLight release];
 	[lights release];
 	[super dealloc];
 }
 
--(GLuint) lightCount {
-	return lights ? lights.count : 0;
-}
+-(GLuint) lightCount { return lights ? lights.count : 0; }
 
 -(CC3OpenGLES11Light*) lightAt: (GLuint) ltIndx {
 	// If the requested light hasn't been allocated yet, add it.
@@ -382,7 +378,7 @@
 }
 
 -(void) initializeTrackers {
-	self.worldAmbientLight = [CC3OpenGLES11StateTrackerWorldLightColor trackerWithParent: self
+	self.sceneAmbientLight = [CC3OpenGLES11StateTrackerSceneLightColor trackerWithParent: self
 																				forState: GL_LIGHT_MODEL_AMBIENT];
 	self.lights = [CCArray array];		// Start with none. Add them as requested.
 }
@@ -390,7 +386,7 @@
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
 	[desc appendFormat: @"%@:", [self class]];
-	[desc appendFormat: @"\n    %@ ", worldAmbientLight];
+	[desc appendFormat: @"\n    %@ ", sceneAmbientLight];
 	for (id t in lights) {
 		[desc appendFormat: @"\n    %@ ", t];
 	}

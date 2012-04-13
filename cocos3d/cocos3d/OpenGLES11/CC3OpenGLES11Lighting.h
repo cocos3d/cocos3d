@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Lighting.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -342,11 +342,11 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLES11StateTrackerWorldLightColor
+#pragma mark CC3OpenGLES11StateTrackerSceneLightColor
 
 /**
- * CC3OpenGLES11StateTrackerWorldLightColor tracks the color GL state value
- * for the ambient world light.
+ * CC3OpenGLES11StateTrackerSceneLightColor tracks the color GL state value
+ * for the ambient scene light.
  *
  * This implementation uses GL function glLightModelfv to set the value in the GL engine.
  *
@@ -354,7 +354,7 @@
  * which will not read the GL value from the GL engine in the open method, and will
  * not restore the value in the close method.
  */
-@interface CC3OpenGLES11StateTrackerWorldLightColor : CC3OpenGLES11StateTrackerColor {}
+@interface CC3OpenGLES11StateTrackerSceneLightColor : CC3OpenGLES11StateTrackerColor {}
 @end
 
 
@@ -363,12 +363,12 @@
 
 /** CC3OpenGLES11Lighting manages trackers for lighting state. */
 @interface CC3OpenGLES11Lighting : CC3OpenGLES11StateTrackerManager {
-	CC3OpenGLES11StateTrackerWorldLightColor* worldAmbientLight;
+	CC3OpenGLES11StateTrackerSceneLightColor* sceneAmbientLight;
 	CCArray* lights;
 }
 
-/** Tracks world ambient light color (GL name GL_LIGHT_MODEL_AMBIENT). */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerWorldLightColor* worldAmbientLight;
+/** Tracks scene ambient light color (GL name GL_LIGHT_MODEL_AMBIENT). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerSceneLightColor* sceneAmbientLight;
 
 /**
  * Tracks lighting state for each light (GL capability name GL_LIGHTi).

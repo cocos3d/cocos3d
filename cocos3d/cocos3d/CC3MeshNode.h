@@ -1,9 +1,9 @@
 /*
  * CC3MeshNode.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,7 +39,7 @@
 
 /**
  * A CC3Node that draws a 3D mesh.
- * This class forms the base of all visible 3D mesh models in the 3D world.
+ * This class forms the base of all visible 3D mesh models in the 3D scene.
  *
  * CC3MeshNode is a type of CC3Node, and will often participate in a structural
  * node assembly. An instance can be the child of another node, and the mesh node
@@ -51,6 +51,14 @@
  * properties covering the mesh, which are affected by lighting conditions.
  * Alternately, instead of a material, the mesh may be colored by a single pure color
  * via the pureColor property.
+ *
+ * If it is not explicitly set beforehand, the material will automatically be created
+ * and assigned to the mesh node when a texture is added to the mesh node through the
+ * texture property or the addTexture: method, or if any of the material properties
+ * of the mesh node are set or accessed, including color, opacity, ambientColor,
+ * diffuseColor, specularColor, emissionColor, blendFunc, or shouldDrawLowAlpha.
+ * The material will automatically be created if either the isOpaque or
+ * shouldUseLighting property is set, but not if they are simply read.
  *
  * There are a number of populateAs... parametric population methods available in
  * the CC3MeshNode (ParametricShapes) category extension. These methods can be used
@@ -103,7 +111,9 @@
 	CC3Material* material;
 	ccColor4F pureColor;
 	GLenum depthFunction;
-	CC3NormalScaling normalScalingMethod;
+	GLfloat decalOffsetFactor;
+	GLfloat decalOffsetUnits;
+	GLubyte normalScalingMethod;
 	BOOL shouldDisableDepthMask;
 	BOOL shouldDisableDepthTest;
 	BOOL shouldCullFrontFaces;
@@ -122,17 +132,50 @@
 @property(nonatomic, retain) CC3Mesh* mesh;
 
 /** @deprecated CC3MeshModel renamed to CC3Mesh. Use mesh property instead. */
-@property(nonatomic, retain) CC3MeshModel* meshModel DEPRECATED_ATTRIBUTE;
+@property(nonatomic, retain) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
 
-/** The material covering this mesh node. */
+/**
+ * The material covering this mesh node.
+ *
+ * If it is not explicitly set beforehand, the material will automatically be created
+ * and assigned to the mesh node when a texture is added to the mesh node through the
+ * texture property or the addTexture: method, or if any of the material properties
+ * of the mesh node are set or accessed, including color, opacity, ambientColor,
+ * diffuseColor, specularColor, emissionColor, blendFunc, or shouldDrawLowAlpha.
+ * The material will automatically be created if either the isOpaque or
+ * shouldUseLighting property is set, but not if they are simply read.
+ */
 @property(nonatomic, retain) CC3Material* material;
 
 /**
  * The pure, solid color used to paint the mesh if no material is established for this node.
  * This color is not not be affected by the lighting conditions. The mesh will always appear
  * in the same pure, solid color, regardless of the lighting sources.
+ *
+ * If you do not want to use a material with this node, use this pureColor property to
+ * set or access the color and opacity of this node. Setting or accessing any of the
+ * other coloring properties (color, opacity, ambientColor, diffuseColor, specularColor,
+ * or emissionColor) will create a material automatically.
  */
 @property(nonatomic, assign) ccColor4F pureColor;
+
+/**
+ * Returns whether the underlying vertex data has been loaded into GL engine vertex
+ * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
+ */
+@property(nonatomic, readonly) BOOL isUsingGLBuffers;
+
+/**
+ * Returns an allocated, initialized, autorelease instance of the bounding volume to
+ * be used by this node.
+ *
+ * This method is invoked automatically when the mesh property is set if no bounding
+ * volume has been assigned.
+ *
+ * This implementation delegates to the mesh by invoking the same method on the mesh.
+ * Subclasses will override to provide alternate default bounding volumes.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume;
 
 
 #pragma mark Material coloring
@@ -254,10 +297,9 @@
  * to the byte range (0 to 255).
  *
  * When setting this property, the value is converted to a floating point number
- * between 0 and 1, and is set into all of the ambientColor, diffuseColor,
- * specularColor, and emissionColor properties of this node's material, and the
- * pureColor property of this node 
- * The RGB components of each of those properties remains unchanged.
+ * between 0 and 1, and is set into all of the ambientColor, diffuseColor, specularColor,
+ * and emissionColor properties of this node's material, and the pureColor property of
+ * this node. The RGB components of each of those properties remains unchanged.
  *
  * Setting this property also sets the same property on all descendant nodes.
  *
@@ -274,9 +316,8 @@
 /**
  * Indicates whether the material of this mesh node is opaque.
  *
- * If this node has a material, returns the value of the same property on the material.
- * If this node has no material, return YES if the alpha component of the pureColor
- * property is 1.0, otherwise returns NO.
+ * If this node has a material, returns the value of the same property on the material,
+ * otherwise return YES.
  *
  * Setting this property sets the same property in the material and in all descendants,
  * and sets the alpha component of the pureColor property to 1.0.
@@ -330,92 +371,262 @@
 #pragma mark Textures
 
 /**
+ * Returns the number of textures covering this mesh, regardless of whether the
+ * textures were attached using the texture property or the addTexture: method.
+ */
+@property(nonatomic, readonly) GLuint textureCount;
+
+/**
  * When the material covering this mesh contains a single texture, this property
  * references that texture. When multi-texturing is in use, and the material holds
  * more than one texture, this property references the texture that will be processed
  * by GL texture unit zero.
  *
- * This property is a convenience. It simply delegates to the same property on the
- * material covering this mesh node.
+ * If a material does not yet exist in this mesh node, a new material will be
+ * created and the texture will be attached to it.
+ * 
+ * Under iOS, during loading, textures are padded to dimensions of a power-of-two
+ * (POT) and, because vertical OpenGL coordinates are inverted relative to iOS
+ * view coordinates, most texture formats are loaded updside-down.
  *
- * When setting this property, if a material does not yet exist in this mesh node,
- * a new material will be created and the texture will be attached to it.
+ * To compensate, when a texture is attached to a mesh node, the texture coordinates
+ * of the mesh are automatically adjusted to correctly display the texture, taking
+ * into consideration POT padding and vertical orientation.
  */
 @property(nonatomic, retain) CC3Texture* texture;
 
 /**
- * Aligns the texture coordinates of the mesh with the textures held in the material.
+ * In most situations, the material will use a single CC3Texture in the texture property.
+ * However, if multi-texturing is used, additional CC3Texture instances can be provided
+ * by adding them using this method.
  *
- * This method can be useful when the width and height of the textures in the material
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
+ * If a material does not yet exist in this mesh node, a new material will be
+ * created and the texture will be attached to it.
  *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the textures.
+ * When multiple textures are attached to a material, when drawing, the material will
+ * combine these textures together using configurations contained in the textureUnit
+ * property of each texture.
  *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
+ * As a consistency convenience, if the texture property has not yet been set directly,
+ * the first texture added using this method will appear in that property.
  *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This method should only be invoked once on any mesh, and it may cause mapping conflicts
- * if the same mesh is shared by other CC3MeshNodes that use different textures.
+ * Textures are processed by GL texture units in the order they are added to the material.
+ * The first texture added (or set directly into the texture property) will be processed
+ * by GL texture unit zero. Subsequent textures added with this method will be processed
+ * by subsequent texture units, in the order they were added.
  *
- * This method will also invoke the superclass behaviour to invoke the same method on
- * each child node.
+ * The maximum number of texture units available is platform dependent, but will
+ * be at least two. The maximum number of texture units available can be read from
+ * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. If you attempt to
+ * add more than this number of textures to the material, the additional textures
+ * will be ignored, and an informational message to that fact will be logged.
+ * 
+ * Under iOS, during loading, textures are padded to dimensions of a power-of-two
+ * (POT) and, because vertical OpenGL coordinates are inverted relative to iOS
+ * view coordinates, most texture formats are loaded updside-down.
  *
- * To adjust the texture coordinates of only a single mesh, without adjusting the texture
- * coordinates of any descendant nodes, invoke the alignWithTexturesIn: method of the
- * CC3Mesh held in this mesh node. To adjust the texture coordinates of only a single
- * texture coordinates array within the mesh, invoke the alignWithTexture: method on the
- * appropriate instance of CC3VertexTextureCoordinates.
+ * To compensate, when a texture is attached to a mesh node, the texture coordinates
+ * of the mesh are automatically adjusted to correctly display the texture, taking
+ * into consideration POT padding and vertical orientation.
  */
--(void) alignTextures;
+-(void) addTexture: (CC3Texture*) aTexture;
+
+/** Removes all textures from the material covering this mesh. */
+-(void) removeAllTextures;
 
 /**
- * Aligns the texture coordinates of the mesh with the textures held in the material.
+ * Returns the texture that will be processed by the texture unit with the specified
+ * index, which should be a number between zero, and one less than the value of the
+ * textureCount property.
  *
- * The texture coordinates are aligned assuming that the texture is inverted in the
- * Y-direction. Certain texture formats are inverted during loading, and this method
- * can be used to compensate.
+ * The value returned will be nil if this node has no material,
+ * or if that material has no textures.
  *
- * This method can be useful when the width and height of the textures in the material
- * are not a power-of-two. Under iOS, when loading a texture that is not a power-of-two,
- * the texture will be converted to a size whose width and height are a power-of-two.
- * The result is a texture that can have empty space on the top and right sides. If the
- * texture coordinates of the mesh do not take this into consideration, the result will
- * be that only the lower left of the mesh will be covered by the texture.
- *
- * When this occurs, invoking this method will adjust the texture coordinates of the mesh
- * to map to the original width and height of the texturesa.
- *
- * If the mesh is using multi-texturing, this method will adjust the texture coordinates
- * array for each texture unit, using the corresponding texture for that texture unit
- * in the specified material.
- *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This method should only be invoked once on any mesh, and it may cause mapping conflicts
- * if the same mesh is shared by other CC3MeshNodes that use different textures.
- *
- * This method will also invoke the superclass behaviour to invoke the same method on
- * each child node.
- *
- * To adjust the texture coordinates of only a single mesh, without adjusting the texture
- * coordinates of any descendant nodes, invoke the alignWithInvertedTexturesIn: method of
- * the CC3Mesh held in this mesh node. To adjust the texture coordinates of only a single
- * texture coordinates array within the mesh, invoke the alignWithInvertedTexture: method
- * on the appropriate instance of CC3VertexTextureCoordinates.
+ * This method is a convenience. It simply delegates to the same method on the
+ * material covering this mesh node, creating the material first, if needed.
  */
--(void) alignInvertedTextures;
+-(CC3Texture*) textureForTextureUnit: (GLuint) texUnit;
 
 /**
- * Configures the mesh so that a texture applied to this mesh will be repeated the
- * specified number of times across the mesh, in each dimension. The repeatFactor
- * argument contains two numbers, corresponding to how many times in each dimension
- * the texture should be repeated.
+ * Sets the texture that will be processed by the texture unit with the specified index,
+ * which should be a number between zero, and the value of the textureCount property.
+ * 
+ * If the specified index is less than the number of texture units added already, the
+ * specified texture will replace the one assigned to that texture unit. Otherwise, this
+ * implementation will invoke the addTexture: method to add the texture to this material.
+ *
+ * If the specified texture unit index is zero, the value of the texture property will
+ * be changed to the specified texture.
+ *
+ * If a material does not yet exist in this mesh node, a new material will be
+ * created and the texture will be attached to it.
+ * 
+ * Under iOS, during loading, textures are padded to dimensions of a power-of-two
+ * (POT) and, because vertical OpenGL coordinates are inverted relative to iOS
+ * view coordinates, most texture formats are loaded updside-down.
+ *
+ * To compensate, when a texture is attached to a mesh node, the texture coordinates
+ * of the mesh are automatically adjusted to correctly display the texture, taking
+ * into consideration POT padding and vertical orientation.
+ */
+-(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Indicates whether the texture coordinates of this mesh expects that the texture
+ * was flipped upside-down during texture loading.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
+ *
+ * The value of this property is used in combination with the value of the 
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
+ *
+ * When a texture or material is assigned to this mesh node, the value of this
+ * property is compared with the isFlippedVertically property of the texture to
+ * automatically determine whether these texture coordinates need to be flipped
+ * vertically in order to display the texture correctly. If needed, the texture
+ * coordinates will be flipped automatically. As part of that inversion, the
+ * value of this property will also be flipped, to indicate that the texture
+ * coordinates are now aligned differently.
+ *
+ * If you need to adjust the value of this property, you sould do so before
+ * setting a texture or material into this mesh node.
+ *
+ * When multi-texturing is being used on this mesh, you can use the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method for finer control
+ * of orienting textures for each texture unit.
+ *
+ * When multi-texturing is being used, setting this value of this property will
+ * use the expectsVerticallyFlippedTexture:inTextureUnit: method to set
+ * the same value for each texture unit.
+ *
+ * Reading the value of this property will return YES if the property-reading
+ * method expectsVerticallyFlippedTextureInTextureUnit: returns YES for
+ * any texture unit, otherwise this property will return NO.
+ * 
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the same property on the CC3Resource
+ * class to understand how this property is set during mesh resource loading.
+ * 
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR). This avoids the texture
+ * coordinate having to be flipped automatically when a texture or material
+ * is assigned to this mesh node.
+ */
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
+
+/**
+ * Returns whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
+ *
+ * The value of this property is used in combination with the value of the 
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
+ *
+ * When a texture or material is assigned to this mesh node, the value of this
+ * property is compared with the isFlippedVertically property of the texture to
+ * automatically determine whether these texture coordinates need to be flipped
+ * vertically in order to display the texture correctly, and if needed, the
+ * texture coordinates will be flipped automatically. As part of that inversion,
+ * the value of this property will also be flipped, to indicate that the texture
+ * coordinates are now aligned differently.
+ *
+ * If you need to adjust the value of this property, you sould do so before
+ * setting a texture or material into this mesh node.
+ * 
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
+ * property on the CC3Resource class to understand how this property is set
+ * during mesh resource loading from model files.
+ * 
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR).
+ */
+-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ *
+ * See the notes of the expectsVerticallyFlippedTextureInTextureUnit: method
+ * for a discussion of texture coordinate orientation.
+ *
+ * Setting the value of this property will change the way the texture coordinates
+ * are aligned when a texture is assigned to cover this texture unit for this mesh.
+ */
+-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel vertically on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for all texture units. This has the effect of flipping the textures
+ * vertically on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipVerticallyTextureUnit:
+ * method for all texture units.
+ *
+ * This method will also invoke the superclass behaviour to invoke
+ * the same method on each child node.
+ */
+-(void) flipTexturesVertically;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel horizontally on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for all texture units. This has the effect of flipping the textures
+ * horizontally on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipHorizontallyTextureUnit:
+ * method for all texture units.
+ *
+ * This method will also invoke the superclass behaviour to invoke
+ * the same method on each child node.
+ */
+-(void) flipTexturesHorizontally;
+
+/**
+ * Configures the mesh so that a texture applied to the specified texture unit will
+ * be repeated the specified number of times across the mesh, in each dimension.
+ * The repeatFactor argument contains two numbers, corresponding to how many times
+ * in each dimension the texture should be repeated.
  * 
  * As an example, a value of (1, 2) for the repeatValue indicates that the texture
  * should repeat twice vertically, but not repeat horizontally.
@@ -440,22 +651,20 @@
  * property of the CC3Texture should include the GL_REPEAT setting for the
  * corresponding texture dimension.
  *
- * If your texture requires aligning with the mesh (typically if one of the texture
- * dimensions is not a power-of-two), you should invoke either the alignTextures or
- * alignInvertedTextures method before invoking this method.
- *
- * In the example above, you would invoke one of those methods before invoking this
- * method, to first align the mesh with that non-power-of-two side.
- *
- * The dimensions of the repeatFactor are independent of the size derived from the
- * texture by the alignTextures or alignInvertedTextures methods. A value of 1.0 for
- * an element in the specified repeatFactor will automatically take into consideration
- * the adjustment made to the mesh by those methods, and will display only the part of
- * the texture defined by them.
- *
  * You can specify a fractional value for either of the components of the repeatFactor
  * to expand the texture in that dimension so that only part of the texture appears
  * in that dimension, while potentially repeating multiple times in the other dimension.
+ */
+-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Configures the mesh so that the textures in all texture units will be repeated the
+ * specified number of times across the mesh, in each dimension. The repeatFactor
+ * argument contains two numbers, corresponding to how many times in each dimension
+ * the texture should be repeated.
+ *
+ * This has the same effect as invoking the repeatTexture:forTextureUnit: method
+ * for each texture unit.
  */
 -(void) repeatTexture: (ccTex2F) repeatFactor;
 
@@ -482,20 +691,6 @@
  * The bounds of the texture rectangle must fit within a unit rectangle. Both the
  * bottom-left and top-right corners must lie between zero and one in both the
  * X and Y directions.
- *
- * The dimensions of the rectangle in this property are independent of adjustments
- * made by the  alignTextures and alignInvertedTextures methods. A unit rectangle
- * value for this property will automatically take into consideration the adjustment
- * made to the mesh by those methods, and will display only the part of the texture
- * defined by them. Rectangular values for this property that are smaller than the
- * unit rectangle will be relative to the displayable area defined by alignTextures
- * and alignInvertedTextures.
- *
- * As an example, if the alignWithTexturesIn: method was used to limit the mesh
- * to using only 80% of the texture (perhaps when using a non-POT texture), and this
- * property was set to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5),
- * the mesh will be covered by the bottom-right quarter of the usable 80% of the
- * overall texture.
  *
  * This property affects all texture units used by this mesh, to query or change
  * this property for a single texture unit only, use the textureRectangleForTextureUnit:
@@ -527,6 +722,15 @@
 
 
 #pragma mark Drawing
+
+/**
+ * The drawing mode indicating how the vertices are connected (points, lines,
+ * triangles...).
+ *
+ * This must be set with a valid GL drawing mode enumeration.
+ * The default value is GL_TRIANGLE_STRIP.
+ */
+@property(nonatomic, assign) GLenum drawingMode;
 
 /**
  * Draws the local content of this mesh node by following these steps:
@@ -594,14 +798,49 @@
  */
 -(void) movePivotToCenterOfGeometry;
 
-/** Returns the number of vertices in this mesh. */
-@property(nonatomic, readonly) GLsizei vertexCount;
+/**
+ * Indicates the number of vertices in this mesh.
+ *
+ * Usually, you should treat this property as read-only. However, there may be
+ * occasions with meshes that contain dynamic content, such as particle systems,
+ * where it may be appropriate to set the value of this property.
+ *
+ * Setting the value of this property changes the amount of vertex content that
+ * will be submitted to the GL engine during drawing.
+ *
+ * When setting this property, care should be taken to ensure that the value is
+ * not set larger than the number of vertices that were allocated for this mesh.
+ */
+@property(nonatomic, assign) GLsizei vertexCount;
+
+/**
+ * If indexed drawing is used by this mesh, indicates the number of vertex
+ * indices in the mesh.
+ *
+ * If indexed drawing is not used by this mesh, this property has no effect,
+ * and reading it will return zero.
+ *
+ * Usually, you should treat this property as read-only. However, there may be
+ * occasions with meshes that contain dynamic content, such as particle systems,
+ * where it may be appropriate to set the value of this property.
+ *
+ * Setting the value of this property changes the amount of vertex content that
+ * will be submitted to the GL engine during drawing.
+ *
+ * When setting this property, care should be taken to ensure that the value is
+ * not set larger than the number of vertices that were allocated for this mesh.
+ */
+@property(nonatomic, assign) GLsizei vertexIndexCount;
 
 /**
  * Returns the location element at the specified index from the vertex data.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * vertex data. If the dimensionality is 2, the returned vector will contain zero in
+ * the Z component.
  *
  * If the releaseRedundantData method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
@@ -612,11 +851,16 @@
  * Sets the location element at the specified index in the vertex data to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * the elementStride and elementOffset properties to access the correct element.
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * vertex data. If the dimensionality is 2, the Z component of the specified vector
+ * will be ignored. If the dimensionality is 4, the specified vector will be converted
+ * to a 4D vector, with the W component set to one, before storing.
  * 
- * Since the new vertex location may change the bounding box of the mesh, when all
- * vertex changes have been made, be sure to invoke the rebuildBoundingVolume method
- * on this node, to ensure that the boundingVolume encompasses the new vertex locations.
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexLocationsGLBuffer method to ensure that the GL VBO
@@ -626,6 +870,48 @@
  * vertex data has been released, this method will raise an assertion exception.
  */
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index;
+
+/**
+ * Returns the location element at the specified index in the underlying vertex data,
+ * as a four-dimensional location in the 4D homogeneous coordinate space.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the elementSize property. If the
+ * value of the elementSize property is 3, the returned vector will contain one
+ * in the W component. If the value of the elementSize property is 2, the returned
+ * vector will contain zero in the Z component and one in the W component.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector4) vertexHomogeneousLocationAt: (GLsizei) index;
+
+/**
+ * Sets the location element at the specified index in the underlying vertex data to
+ * the specified four-dimensional location in the 4D homogeneous coordinate space.
+ * 
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex data is interleaved to access the correct vertex data component.
+ *
+ * This implementation takes into consideration the dimensionality of the underlying
+ * data. If the dimensionality is 3, the W component of the specified vector will be
+ * ignored. If the dimensionality is 2, both the W and Z components of the specified
+ * vector will be ignored.
+ * 
+ * If this mesh is being used by any mesh nodes, be sure to invoke the
+ * rebuildBoundingVolume method on all nodes that use this mesh, to ensure
+ * that the boundingVolume is recalculated using the new location values.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexLocationsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLsizei) index;
 
 /**
  * Returns the normal element at the specified index from the vertex data.
@@ -823,6 +1109,225 @@
 /** Updates the GL engine buffer with the vertex index data in this mesh. */
 -(void) updateVertexIndicesGLBuffer;
 
+
+#pragma mark Faces
+
+/**
+ * Indicates whether information about the faces of this mesh should be cached.
+ *
+ * If this property is set to NO, accessing information about the faces through the
+ * methods faceAt:, faceIndicesAt:, faceCenterAt:, faceNormalAt:, or facePlaneAt:,
+ * will be calculated dynamically from the mesh data.
+ *
+ * If such data will be accessed frequently, this repeated dynamic calculation may
+ * cause a noticable impact to performance. In such a case, this property can be
+ * set to YES to cause the data to be calculated once and cached, improving the
+ * performance of subsequent accesses to information about the faces.
+ *
+ * However, caching information about the faces will increase the amount of memory
+ * required by the mesh, sometimes significantly. To avoid this additional memory
+ * overhead, in general, you should leave this property set to NO, unless intensive
+ * access to face information is causing a performance impact.
+ *
+ * An example of a situation where the use of this property may be noticable,
+ * is when adding shadow volumes to nodes. Shadow volumes make intense use of
+ * accessing face information about the mesh that is casting the shadow.
+ *
+ * When the value of this property is set to NO, any data cached during previous
+ * access through the indicesAt:, centerAt:, normalAt:, or planeAt:, methods will
+ * be cleared.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldCacheFaces;
+
+/**
+ * Returns the number of faces in this mesh.
+ *
+ * This is calculated from the number of vertices, taking into
+ * consideration the type of primitives that this mesh is drawing.
+ */
+@property(nonatomic, readonly) GLsizei faceCount;
+
+/**
+ * Returns the number of faces to be drawn from the specified number of
+ * vertices, based on the type of primitives that this mesh is drawing.
+ */ 
+-(GLsizei) faceCountFromVertexCount: (GLsizei) vc;
+
+/**
+ * Returns the number of vertices required to draw the specified number
+ * of faces, based on the type of primitives that this mesh is drawing.
+ */ 
+-(GLsizei) vertexCountFromFaceCount: (GLsizei) fc;
+
+/**
+ * Returns the face from the mesh at the specified index.
+ *
+ * The specified faceIndex value refers to the index of the face, not the vertices
+ * themselves. So, a value of 5 will retrieve the three vertices that make up the
+ * fifth triangular face in this mesh. The specified index must be between zero,
+ * inclusive, and the value of the faceCount property, exclusive.
+ *
+ * The returned face structure contains only the locations of the vertices. If the vertex
+ * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * or other padding, that data will not appear in the returned face structure. For that
+ * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex data, and then use the vertex accessor methods to retrieve the individual
+ * vertex data components.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Face) faceAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the mesh face that is made up of the three vertices at the three indices
+ * within the specified face indices structure.
+ *
+ * The returned face structure contains only the locations of the vertices. If the vertex
+ * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * or other padding, that data will not appear in the returned face structure. For that
+ * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex data, and then use the vertex accessor methods to retrieve the individual
+ * vertex data components.
+ */
+-(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices;
+
+/**
+ * Returns the face from the mesh at the specified index, as indices into the mesh vertices.
+ *
+ * The specified faceIndex value refers to the index of the face, not the vertices
+ * themselves. So, a value of 5 will retrieve the three vertices that make up the
+ * fifth triangular face in this mesh. The specified index must be between zero,
+ * inclusive, and the value of the faceCount property, exclusive.
+ *
+ * The returned structure reference contains the indices of the three vertices that
+ * make up the triangular face. These indices index into the actual vertex data within
+ * the layout of the mesh.
+ *
+ * This method takes into consideration any padding (stride) between the vertex indices.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the center of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Vector) faceCenterAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the normal of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Vector) faceNormalAt: (GLsizei) faceIndex;
+
+/**
+ * Returns the plane of the mesh face at the specified index.
+ *
+ * If you will be invoking this method frequently, you can optionally set the
+ * shouldCacheFaces property to YES to speed access, and possibly improve performance.
+ * However, be aware that setting the shouldCacheFaces property to YES can significantly
+ * increase the amount of memory used by the mesh.
+ */
+-(CC3Plane) facePlaneAt: (GLsizei) faceIndex;
+
+/** Returns the indices of the neighbours of the mesh face at the specified index. */
+-(CC3FaceNeighbours) faceNeighboursAt: (GLsizei) faceIndex;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3Node extension for mesh nodes
+
+/** CC3Node category extension to support CC3MeshNodes. */
+@interface CC3Node (CC3MeshNode)
+
+/**
+ * Indicates whether this node has 3D mesh data to be drawn.
+ * Default value is NO. Subclasses that do draw 3D meshes will override to return YES.
+ */
+@property(nonatomic, readonly) BOOL isMeshNode;
+
+/**
+ * Convenience method that retrieves the first node found with the specified name,
+ * anywhere in the structural hierarchy of descendants of this node (not just direct
+ * children), and returns the node cast as a CC3MeshNode. The hierarchy search is
+ * depth-first.
+ *
+ * This implementation simply invokes the getNodeNamed:, and casts the node returned
+ * as a CC3MeshNode. An assertion is raised if the node is not a CC3MeshNode.
+ */
+-(CC3MeshNode*) getMeshNodeNamed: (NSString*) aName;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PlaneNode
+
+/**
+ * CC3PlaneNode is a type of CC3MeshNode that is specialized to display planes and
+ * simple rectanglular meshes.
+ *
+ * Since a plane is a mesh like any other mesh, the functionality required to create
+ * and manipulate plane meshes is present in the CC3MeshNode class, and if you choose,
+ * you can create and manage plane meshes using that class alone. Some plane-specific
+ * functionality is defined within this class.
+ * 
+ * Several convenience methods exist in the CC3MeshNode class to aid in constructing a
+ * CC3PlaneNode instance:
+ *   - populateAsCenteredRectangleWithSize:
+ *   - populateAsRectangleWithSize:andPivot:
+ */
+@interface CC3PlaneNode : CC3MeshNode
+
+/**
+ * Returns a CC3Plane structure corresponding to this plane.
+ *
+ * This structure is built from the location vertices of three of the corners
+ * of the bounding box of the mesh.
+ */
+@property(nonatomic, readonly) CC3Plane plane;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3BoxNode
+
+/**
+ * CC3BoxNode is a type of CC3MeshNode that is specialized to display simple box or cube meshes.
+ *
+ * Since a cube or box is a mesh like any other mesh, the functionality required to create
+ * and manipulate plane meshes is present in the CC3MeshNode class, and if you choose, you
+ * can create and manage box meshes using that class alone. At present, CC3BoxNode exists
+ * for the most part simply to identify box meshes as such. However, in future, additional
+ * state or behaviour may be added to this class.
+ * 
+ * You can use the following convenience method to aid in constructing a CC3BoxNode instance:
+ *   - populateAsSolidBox:
+ *   - populateAsWireBox:
+ *   - populateAsTexturedBox:
+ *   - populateAsTexturedBox:withCorner:
+ */
+@interface CC3BoxNode : CC3MeshNode
 @end
 
 
@@ -955,7 +1460,6 @@
 @end
 
 
-
 #pragma mark -
 #pragma mark CC3DirectionMarkerNode
 
@@ -1007,7 +1511,7 @@
  * pivot point (local origin) of the parent node to the side of the bounding box
  * through which the line is protruding.
  *
- * The default value of this property is 1.5.
+ * The initial value of this property is 1.5.
  */
 +(GLfloat) directionMarkerScale;
 
@@ -1017,62 +1521,44 @@
  * pivot point (local origin) of the parent node to the side of the bounding box
  * through which the line is protruding.
  *
- * The default value of this property is 1.5.
+ * The initial value of this property is 1.5.
  */
 +(void) setDirectionMarkerScale: (GLfloat) scale;
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3PlaneNode
+/**
+ * Returns the minimum length of a direction marker line, expressed in the global
+ * coordinate system.
+ *
+ * Setting a value for this property can be useful for adding direction markers
+ * to very small nodes, or nodes that do not have volume, such as a camera or light.
+ *
+ * The initial value of this property is zero.
+ */
++(GLfloat) directionMarkerMinimumLength;
 
 /**
- * CC3PlaneNode is a type of CC3MeshNode that is specialized to display planes and
- * simple rectanglular meshes.
+ * Sets the minimum length of a direction marker line, expressed in the global
+ * coordinate system.
  *
- * Since a plane is a mesh like any other mesh, the functionality required to create
- * and manipulate plane meshes is present in the CC3MeshNode class, and if you choose,
- * you can create and manage plane meshes using that class alone. Some plane-specific
- * functionality is defined within this class.
- * 
- * Several convenience methods exist in the CC3MeshNode class to aid in constructing a
- * CC3PlaneNode instance:
- *   - populateAsCenteredRectangleWithSize:
- *   - populateAsRectangleWithSize:andPivot:
- */
-@interface CC3PlaneNode : CC3MeshNode
-
-/**
- * Returns a CC3Plane structure corresponding to this plane.
+ * Setting a value for this property can be useful for adding direction markers
+ * to very small nodes, or nodes that do not have volume, such as a camera or light.
  *
- * This structure is built from the location vertices of three of the corners
- * of the bounding box of the mesh.
+ * The initial value of this property is zero.
  */
-@property(nonatomic, readonly) CC3Plane plane;
++(void) setDirectionMarkerMinimumLength: (GLfloat) len;
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3BoxNode
+#pragma mark CC3BoundingVolumeDisplayNode
 
 /**
- * CC3BoxNode is a type of CC3MeshNode that is specialized to display simple box or cube meshes.
- *
- * Since a cube or box is a mesh like any other mesh, the functionality required to create
- * and manipulate plane meshes is present in the CC3MeshNode class, and if you choose, you
- * can create and manage box meshes using that class alone. At present, CC3BoxNode exists
- * for the most part simply to identify box meshes as such. However, in future, additional
- * state or behaviour may be added to this class.
- * 
- * You can use the following convenience method to aid in constructing a CC3BoxNode instance:
- *   - populateAsSolidBox:
- *   - populateAsWireBox:
- *   - populateAsTexturedBox:
- *   - populateAsTexturedBox:withCorner:
+ * CC3BoundingVolumeDisplayNode is a type of CC3MeshNode specialized for displaying
+ * the bounding volume of its parent node. A CC3BoundingVolumeDisplayNode is typically
+ * added as a child node to the node whose bounding volume is to be displayed.
  */
-@interface CC3BoxNode : CC3MeshNode
+@interface CC3BoundingVolumeDisplayNode : CC3MeshNode
 @end
 
 

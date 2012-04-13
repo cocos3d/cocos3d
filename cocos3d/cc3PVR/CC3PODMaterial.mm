@@ -1,9 +1,9 @@
 /*
  * CC3PODMaterial.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,10 +35,6 @@ extern "C" {
 #import "CC3PODMaterial.h"
 #import "CC3PVRTModelPOD.h"
 
-@interface CC3Material (TemplateMethods)
--(void) populateFrom: (CC3Material*) another;
-@end
-
 @interface CC3PODMaterial (TemplateMethods)
 -(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
 -(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
@@ -46,23 +42,15 @@ extern "C" {
 
 @implementation CC3PODMaterial
 
--(int) podIndex {
-	return podIndex;
-}
+-(int) podIndex { return podIndex; }
 
--(void) setPodIndex: (int) aPODIndex {
-	podIndex = aPODIndex;
-}
+-(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
 
 static GLfloat shininessExpansionFactor = 400.0f;
 
-+(GLfloat) shininessExpansionFactor {
-	return shininessExpansionFactor;
-}
++(GLfloat) shininessExpansionFactor { return shininessExpansionFactor; }
 
-+(void) setShininessExpansionFactor: (GLfloat) aFloat {
-	shininessExpansionFactor = aFloat;
-}
++(void) setShininessExpansionFactor: (GLfloat) aFloat { shininessExpansionFactor = aFloat; }
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	SPODMaterial* psm = (SPODMaterial*)[aPODRez materialPODStructAtIndex: aPODIndex];

@@ -1,9 +1,9 @@
 /*
  * CC3PODResource.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -151,19 +151,8 @@
 /** A collection of the CC3Textures extracted from  the POD file. */
 @property(nonatomic, readonly) CCArray* textures;
 
-/**
- * An set of texture parameters used to optimize the display of textures in the GL engine.
- * These parameters will be set in any texture that is extracted from this resource.
- *
- * The initial value of these parameters are:
- *   - Minifying function: GL_LINEAR
- *   - Magnifying function: GL_LINEAR
- *   - Texture wrap S: GL_REPEAT
- *   - Texture wrap T: GL_REPEAT
- *
- * Any changes to this property should be made before invoking the loadFromPODFile: method.
- */
-@property(nonatomic, assign) ccTexParams textureParameters;
+/** @deprecated Use the CC3Texture class-side property defaultTextureParameters instead. */
+@property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;
 
 /** The number of frames of animation in the POD file. */
 @property(nonatomic, readonly) uint animationFrameCount;
@@ -495,5 +484,5 @@
  * the data structure.
  */
 -(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex;
-	
+
 @end

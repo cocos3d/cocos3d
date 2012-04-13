@@ -1,9 +1,9 @@
 /*
  * CC3PODResourceNode.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,17 +34,15 @@
 
 @implementation CC3PODResourceNode
 
--(Class) resourceClass {
-	return [CC3PODResource class];
-}
+-(Class) resourceClass { return [CC3PODResource class]; }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3World extensions to support PVR POD content
+#pragma mark CC3Scene extensions to support PVR POD content
 
-@implementation CC3World (PVRPOD)
+@implementation CC3Scene (PVRPOD)
 
 -(void) addContentFromPODFile: (NSString*) aFilepath {
 	[self addChild: [CC3PODResourceNode nodeFromFile: aFilepath]];
@@ -54,12 +52,14 @@
 	[self addChild: [CC3PODResourceNode nodeWithName: aName fromFile: aFilepath]];
 }
 
+// Deprecated
 -(void) addContentFromPODResourceFile: (NSString*) aRezPath {
-	[self addChild: [CC3PODResourceNode nodeFromResourceFile: aRezPath]];
+	[self addContentFromPODFile: aRezPath];
 }
 
+// Deprecated
 -(void) addContentFromPODResourceFile: (NSString*) aRezPath withName: (NSString*) aName; {
-	[self addChild: [CC3PODResourceNode nodeWithName: aName fromResourceFile: aRezPath]];
+	[self addContentFromPODFile: aRezPath withName: aName];
 }
 
 @end

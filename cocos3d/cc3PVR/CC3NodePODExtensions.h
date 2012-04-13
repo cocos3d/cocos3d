@@ -1,9 +1,9 @@
 /*
  * CC3NodePODExtensions.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,6 @@
 
 
 #import "CC3Node.h"
-#import "CC3TargettingNode.h"
 #import "CC3IdentifiablePODExtensions.h"
 #import "CC3NodeAnimation.h"
 
@@ -51,8 +50,9 @@
  * for the node, which may be of any node type. Once the type is established,
  * the type-specific content is indexed by the podContentIndex property.
  *
- * This abstract implementation does not map this property to an instance variable
- * Concrete subclasses must override to map to an actual instance variable.
+ * This abstract implementation does not map this property to an instance
+ * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
+ * override to map to an actual instance variable.
  */
 @property(nonatomic, assign) int podContentIndex;
 
@@ -60,10 +60,21 @@
  * The index of the parent node of this node.
  * This will be -1 if this node has no parent.
  *
- * This abstract implementation does not map this property to an instance variable
- * Concrete subclasses must override to map to an actual instance variable.
+ * This abstract implementation does not map this property to an instance
+ * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
+ * override to map to an actual instance variable.
  */
 @property(nonatomic, assign) int podParentIndex;
+
+/**
+ * The index of the node that is the target of this node.
+ * This node will be linked to its target in the linkToPODNodes: method.
+ *
+ * This abstract implementation does not map this property to an instance
+ * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
+ * override to map to an actual instance variable.
+ */
+@property(nonatomic, assign) int podTargetIndex;
 
 /** Indicates whether this POD is a base node, meaning that it has no parent. */
 @property(nonatomic, readonly) BOOL isBasePODNode;
@@ -93,24 +104,6 @@
  * podParentIndex property. Subclasses may override to perform other linking.
  */
 -(void) linkToPODNodes: (CCArray*) nodeArray;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3TargettingNode extensions for PVR POD data
-
-/** Extensions to CC3TargettingNode to support PVR POD data. */
-@interface CC3TargettingNode (PVRPOD)
-
-/**
- * The index of the node that is the target of this node.
- * This node will be linked to its target in the linkToPODNodes: method.
- *
- * This abstract implementation does not map this property to an instance variable
- * Concrete subclasses must override to map to an actual instance variable.
- */
-@property(nonatomic, assign) int podTargetIndex;
 
 @end
 

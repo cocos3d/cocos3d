@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Platform.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -81,7 +81,7 @@
 
 // Invoked during initialization to ensure that these values are loaded first
 -(void) open {
-	LogTrace("Opening %@", [self class]);
+	LogTrace(@"@Opening %@", [self class]);
 	[maxLights open];
 	[maxClipPlanes open];
 	[maxPaletteMatrices open];

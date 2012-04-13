@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Textures.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -90,21 +90,21 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %i (was tracking %@) for texture unit %@",
+	LogTrace(@"%@ %@ read GL value %i (was tracking %@) for texture unit %@",
 			 [self class], NSStringFromGLEnum(name), originalValue,
 			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %i for texture unit %@", [self class],
+	LogTrace(@"%@ set %@ = %i for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), value,
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %i for texture unit %@", [self class],
+	LogTrace(@"%@ reuse %@ = %i for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), value,
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 
@@ -143,21 +143,115 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@",
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@",
 			 [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(originalValue),
 			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerTexParameterEnumeration
+
+@implementation CC3OpenGLES11StateTrackerTexParameterEnumeration
+
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit { return (CC3OpenGLES11TextureUnit*)parent; }
+
++(BOOL) defaultShouldAlwaysSetGL { return YES; }
+
+-(void) getGLValue {
+	[self.textureUnit activate];
+	glGetTexParameteriv(GL_TEXTURE_2D, name, (GLint*)&originalValue);
+}
+
+-(void) setGLValue {
+	[self.textureUnit activate];
+	glTexParameteri(GL_TEXTURE_2D, name, value);
+}
+
+-(void) logGetGLValue {
+	LogCleanTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@",
+			 [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(originalValue),
+			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logSetValue {
+	LogCleanTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogCleanTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), NSStringFromGLEnum(value),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat:@"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerTexParameterCapability
+
+@implementation CC3OpenGLES11StateTrackerTexParameterCapability
+
+// The parent cast as the appropriate type
+-(CC3OpenGLES11TextureUnit*) textureUnit { return (CC3OpenGLES11TextureUnit*)parent; }
+
+-(void) getGLValue {
+	[self.textureUnit activate];
+	GLint glValue;
+	glGetTexParameteriv(GL_TEXTURE_2D, name, &glValue);
+	originalValue = (glValue != GL_FALSE);
+}
+
+-(void) setGLValue {
+	[self.textureUnit activate];
+	glTexParameteri(GL_TEXTURE_2D, name, (value ? GL_TRUE : GL_FALSE));
+}
+
+-(void) logGetGLValue {
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@",
+			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
+			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logSetValue {
+	LogTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
+			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
+}
+
+-(void) logReuseValue {
+	LogTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
+			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
@@ -190,20 +284,20 @@
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
 			 [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(originalValue),
 			 (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), NSStringFromCCC4F(value),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), NSStringFromCCC4F(value),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
@@ -237,19 +331,19 @@
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
 			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
 			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
@@ -304,19 +398,19 @@
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ set %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@ for texture unit %@", [self class],
+	LogTrace(@"%@ reuse %@ = %@ for texture unit %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@) for texture unit %@", 
 			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
 			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"),
 			 NSStringFromGLEnum(self.textureUnit.glEnumValue));
@@ -358,7 +452,7 @@
 -(void) logSetGLValues: (BOOL) wasChanged {
 	if (elementSize.value != 0) {
 		// GL function uses element size
-		LogTrace("%@ for texture unit %@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class],
+		LogTrace(@"%@ for texture unit %@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class],
 				 NSStringFromGLEnum(self.textureUnit.glEnumValue),
 				 (wasChanged ? @"applied" : @"reused"),
 				 NSStringFromGLEnum(elementSize.name), elementSize.value,
@@ -367,7 +461,7 @@
 				 @"POINTER", elementPointer.value);
 	} else {
 		// GL function doesn't use element size
-		LogTrace("%@ for texture unit %@ %@ %@ = %@, %@ = %i and %@ = %p", [self class],
+		LogTrace(@"%@ for texture unit %@ %@ %@ = %@, %@ = %i and %@ = %p", [self class],
 				 NSStringFromGLEnum(self.textureUnit.glEnumValue),
 				 (wasChanged ? @"applied" : @"reused"),
 				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
@@ -416,6 +510,11 @@
 @synthesize textureCoordArray;
 @synthesize textureCoordinates;
 @synthesize textureBinding;
+@synthesize minifyingFunction;
+@synthesize magnifyingFunction;
+@synthesize horizontalWrappingFunction;
+@synthesize verticalWrappingFunction;
+@synthesize autoGenerateMipMap;
 @synthesize textureEnvironmentMode;
 @synthesize combineRGBFunction;
 @synthesize rgbSource0;
@@ -440,6 +539,11 @@
 	[textureCoordArray release];
 	[textureCoordinates release];
 	[textureBinding release];
+	[minifyingFunction release];
+	[magnifyingFunction release];
+	[horizontalWrappingFunction release];
+	[verticalWrappingFunction release];
+	[autoGenerateMipMap release];
 	[textureEnvironmentMode release];
 	[combineRGBFunction release];
 	[rgbSource0 release];
@@ -482,6 +586,16 @@
 	self.textureCoordinates = [CC3OpenGLES11StateTrackerVertexTexCoordsPointer trackerWithParent: self];
 	self.textureBinding = [CC3OpenGLES11StateTrackerTextureBinding trackerWithParent: self
 																			forState: GL_TEXTURE_BINDING_2D];
+	self.minifyingFunction = [CC3OpenGLES11StateTrackerTexParameterEnumeration trackerWithParent: self
+																						forState: GL_TEXTURE_MIN_FILTER];
+	self.magnifyingFunction = [CC3OpenGLES11StateTrackerTexParameterEnumeration trackerWithParent: self
+																						 forState: GL_TEXTURE_MAG_FILTER];
+	self.horizontalWrappingFunction = [CC3OpenGLES11StateTrackerTexParameterEnumeration trackerWithParent: self
+																								 forState: GL_TEXTURE_WRAP_S];
+	self.verticalWrappingFunction = [CC3OpenGLES11StateTrackerTexParameterEnumeration trackerWithParent: self
+																							   forState: GL_TEXTURE_WRAP_T];
+	self.autoGenerateMipMap = [CC3OpenGLES11StateTrackerTexParameterCapability trackerWithParent: self
+																					forState: GL_GENERATE_MIPMAP];
 	self.textureEnvironmentMode = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
 																					   forState: GL_TEXTURE_ENV_MODE];
 	self.combineRGBFunction = [CC3OpenGLES11StateTrackerTexEnvEnumeration trackerWithParent: self
@@ -549,6 +663,11 @@
 	[textureCoordArray open];
 	[textureCoordinates open];
 	[textureBinding open];
+	[minifyingFunction open];
+	[magnifyingFunction open];
+	[horizontalWrappingFunction open];
+	[verticalWrappingFunction open];
+	[autoGenerateMipMap open];
 	[textureEnvironmentMode open];
 	[combineRGBFunction open];
 	[rgbSource0 open];
@@ -576,6 +695,11 @@
 	[desc appendFormat: @"\n    %@", textureCoordArray];
 	[desc appendFormat: @"\n    %@", textureCoordinates];
 	[desc appendFormat: @"\n    %@", textureBinding];
+	[desc appendFormat: @"\n    %@", minifyingFunction];
+	[desc appendFormat: @"\n    %@", magnifyingFunction];
+	[desc appendFormat: @"\n    %@", horizontalWrappingFunction];
+	[desc appendFormat: @"\n    %@", verticalWrappingFunction];
+	[desc appendFormat: @"\n    %@", autoGenerateMipMap];
 	[desc appendFormat: @"\n    %@", textureEnvironmentMode];
 	[desc appendFormat: @"\n    %@", combineRGBFunction];
 	[desc appendFormat: @"\n    %@", rgbSource0];

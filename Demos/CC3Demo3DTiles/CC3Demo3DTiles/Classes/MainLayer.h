@@ -1,9 +1,9 @@
 /*
  * MainLayer.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,36 +37,36 @@
  * or remove a square grid of CC3Layers, by clicking buttons to increase
  * or decrease the number of CC3Layers.
  *
- * Each CC3Layer contains a separate 3D world. Each 3D world contains a separate
+ * Each CC3Layer contains a separate 3D scene. Each 3D scene contains a separate
  * camera and light, and so can be controlled independently. The light is
- * positioned differently in each little world.
+ * positioned differently in each little scene.
  *
- * Each world contains a single main object. The object is chosen randomly, from
- * a collection of templates, so each 3D world contains a different object. The
+ * Each scene contains a single main object. The object is chosen randomly, from
+ * a collection of templates, so each 3D scene contains a different object. The
  * overall effect is a grid of tiles, with each tile displaying a single 3D object.
  *
- * Within each little 3D world, the user can touch the main object and then move
+ * Within each little 3D scene, the user can touch the main object and then move
  * a finger to rotate the object. When the user raises the finger, the 3D object
  * briefly glows, demonstrating touch selection and control when multiple separate
- * 3D worlds are displayed.
+ * 3D scenes are displayed.
  *
- * As demonstrated by the touch control, the object in each tile world is a separate
+ * As demonstrated by the touch control, the object in each tile scene is a separate
  * CC3MeshNode, and can be controlled independently of similar objects in other
  * tiles. But since each of these objects is created from a template copy, there
  * is only one copy of the underlying mesh data, thereby preserving memory.
  *
- * When drawing this main layer, each 3D layer and world must be visited to be
+ * When drawing this main layer, each 3D layer and scene must be visited to be
  * drawn. There are several techniques that can be used to optimize performance
  * under these conditions.
  *
  * Of prime importance is reducing the number of times the color and depth buffers
- * are cleared by each 3D world. By default, the depth buffer is cleared on every
- * transition between the 2D and 3D worlds, to ensure that the 2D and 3D artifacts
+ * are cleared by each 3D scene. By default, the depth buffer is cleared on every
+ * transition between the 2D and 3D scenes, to ensure that the 2D and 3D artifacts
  * draw in the order expected.
  *
  * For many app configurations, this is not really needed. Here, we turn off depth
- * testing in the 2D world, so that any 2D nodes will be drawn over the 3D world.
- * We also tell the 3D world not to clear the depth buffer between each transition
+ * testing in the 2D scene, so that any 2D nodes will be drawn over the 3D scene.
+ * We also tell the 3D scene not to clear the depth buffer between each transition
  * between 2D and 3D. Except in the most complicated situations, this should be
  * suitable for most apps.
  */

@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Materials.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,11 +32,11 @@
 #import "CC3OpenGLES11Materials.h"
 
 
-@interface CC3OpenGLES11StateTrackerEnumeration (Materials)
+@interface CC3OpenGLES11StateTrackerEnumeration (TemplateMethods)
 -(void) setValueRaw:(GLenum) value;
 @end
 
-@interface CC3OpenGLES11StateTrackerFloat (Materials)
+@interface CC3OpenGLES11StateTrackerFloat (TemplateMethods)
 -(void) setValueRaw:(GLfloat) value;
 @end
 
@@ -123,7 +123,7 @@
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogTrace("%@ %@ %@ = %@ and %@ = %@", [self class], (shouldSetGL ? @"applied" : @"reused"),
+	LogTrace(@"%@ %@ %@ = %@ and %@ = %@", [self class], (shouldSetGL ? @"applied" : @"reused"),
 			 NSStringFromGLEnum(sourceBlend.name), NSStringFromGLEnum(sourceBlend.value),
 			 NSStringFromGLEnum(destinationBlend.name), NSStringFromGLEnum(destinationBlend.value));
 }
@@ -193,7 +193,7 @@
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogTrace("%@ %@ %@ = %@ and %@ = %.3f", [self class], (shouldSetGL ? @"applied" : @"reused"),
+	LogTrace(@"%@ %@ %@ = %@ and %@ = %.3f", [self class], (shouldSetGL ? @"applied" : @"reused"),
 			 NSStringFromGLEnum(function.name), NSStringFromGLEnum(function.value),
 			 NSStringFromGLEnum(reference.name), reference.value);
 }

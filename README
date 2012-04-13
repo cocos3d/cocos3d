@@ -1,9 +1,9 @@
-README - cocos3d 0.6.4
+README - cocos3d 0.7.0
 ----------------------
 
-cocos3d 0.6.4
+cocos3d 0.7.0
 
-Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
 
 +++++++++++++++++++++++++++++++++++
@@ -40,7 +40,7 @@ directory and run the install-cocos3d script as follows:
 
 For example:
 
-./install-cocos3d.sh -u -f -2 "../../cocos2d/cocos2d-iphone-1.0.0"
+./install-cocos3d.sh -u -f -2 "../../cocos2d/cocos2d-iphone-1.0.1"
 
 The cocos2d source code must be available and identified using the -2 switch
 so that the installer can copy the cocos2d libraries to the cocos3d templates
@@ -52,22 +52,10 @@ That's it!
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.6.4 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d 0.7.0 is compatible with cocos2d versions 0.99.5 through 1.1.
 
 At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
 configured to use that version. This section includes notes on compatibility with other versions.
-
-   cocos2d 1.1
-   -----------
-
-   Version 1.1 of cocos2d introduced a change to the structure used for 2D particles.
-   When running cocos2d 1.1 set the following build setting in your Xcode build configuration:
-
-      CC_USES_2D_PARTICLES=0
-
-   You can set this in your Xcode project build settings in the Preprocessor Macros entry.
-   This applies to any cocos3d project, including the demo projects that are included in the
-   cocos3d distribution and the cocos3d project templates.
 
    cocos2d 0.9.5
    -------------
@@ -87,7 +75,7 @@ configured to use that version. This section includes notes on compatibility wit
 
    Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
    project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
-   will be the cocos2d 1.0.0 project templates, unless you have created cocos2d 0.99.5
+   will be the cocos2d 1.0.1 project templates, unless you have created cocos2d 0.99.5
    Xcode 4 project templates.
 
 
@@ -112,7 +100,7 @@ The cocos3d Programming Guide is online at:
 
 The API documentation is online at:
 
-	http://brenwill.com/docs/cocos3d/0.6.4/api/
+	http://brenwill.com/docs/cocos3d/0.7.0/api/
 
 You can create a local copy of the API documentation using Doxygen to extract the
 documentation from the source files. There is a Doxygen configuration file to output
@@ -123,8 +111,9 @@ the cocos3d distribution.
 Demo Applications
 -----------------
 
-To help get you learn how to work with cocos3d, several demo apps are included in
-the cocos3d distribution. These demos will help you understand how to use cocos3d,
+The best way to understand what cocos3d can do is to look at the examples and code
+in the demo applications that are included in the cocos3d distribution. These demos,
+particularly the CC3DemoMashUp app, will help you understand how to use cocos3d,
 and demonstrate many of the key features and capabilities of cocos3d.
 
 For convenience, to access all of the demos together, open the 'cocos3d.xcworkspace'
@@ -139,7 +128,7 @@ The following demo apps are included in the cocos3d distribution:
    CC3DemoMashUp
    -------------
 
-   Your camera hovers over a virtual world that includes animated robots, bouncing beach-balls,
+   Your camera hovers over a scene that includes animated robots, bouncing beach-balls,
    spinning globes, and a selection of animated teapots. This is a sophisticated demo that
    showcases many interesting features of cocos3d, including:
 
@@ -148,8 +137,8 @@ The following demo apps are included in the cocos3d distribution:
      - sharing mesh data across several nodes with different materials
      - loading 3D models from a POD file converted from a Collada file created in a 3D editor (Blender)
      - assembling nodes into a hierarchical parent-child structual assembly.
+     - programatic creation of spherical, box and plane meshes using parametric definitions.
      - texturing a 3D mesh from a CCTexture2D image
-     - texturing a mesh using UV coordinates exported from a 3D editor
      - transparency and alpha-blending
      - coloring a mesh with a per-vertex color blend
      - multi-texturing an object using texture units by combining several individual textures into overlays
@@ -159,9 +148,9 @@ The following demo apps are included in the cocos3d distribution:
      - Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
        manipulated independently of the skeleton of the original.
      - animating 3D models using a variety of standard cocos2d CCActionIntervals
-     - overlaying the 3D world with 2D cocos2d controls such as joysticks and buttons
-     - embedding 2D cocos2d text labels into the 3D world
-     - incorporating 2D cocos2d CCParticleEmitters into the 3D world (as a sun and explosion fire)
+     - overlaying the 3D scene with 2D cocos2d controls such as joysticks and buttons
+     - embedding 2D cocos2d text labels into the 3D scene
+     - incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
      - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
      - creating a tightly focused spotlight whose intensity attenuates with distance
      - directing the 3D camera to track a particular target object
@@ -169,8 +158,8 @@ The following demo apps are included in the cocos3d distribution:
      - directing an object to track another object, always facing (looking at) that object
      - selecting a 3D object by touching the object on the screen with a finger
      - placing a 3D object on another at a point that was touched with a finger
-     - adding a small CC3Layer/CC3World pair as a child window to a larger CC3Layer/CC3World pair.
-     - moving, scaling and fading a CC3Layer and its CC3World
+     - adding a small CC3Layer/CC3Scene pair as a child window to a larger CC3Layer/CC3Scene pair.
+     - moving, scaling and fading a CC3Layer and its CC3Scene
      - creating parametric boxes and texturing all six sides of the box with a single texture.
      - adding an object as a child of another, but keeping the original orientation of the child
        (addAndLocalizeChild:)
@@ -181,7 +170,7 @@ The following demo apps are included in the cocos3d distribution:
      - creating and deploying many independent copies of a node, while sharing the underlying mesh data
      - drawing a descriptive text label on a node using CC3Node shouldDrawDescriptor property.
      - drawing a wireframe bounding box around a node using CC3Node shouldDrawWireframeBox property.
-     - automatically zooming the camera out to view all objects in the world
+     - automatically zooming the camera out to view all objects in the scene
      - constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode
      - caching mesh data into GL vertex buffer objects and releasing vertex data from application memory
      - retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
@@ -189,9 +178,15 @@ The following demo apps are included in the cocos3d distribution:
      - attaching application-specific userData to any node
      - applying a texture to all six sides of a parametric box
      - displaying direction marker lines on a node to clarify its orientation during development.
+     - displaying a repeating texture pattern across a mesh
+     - creating and displaying shadow volumes to render shadows for selected nodes
+     - detecting the local location of where a node was touched using ray tracing
+     - collision detection between nodes
+     - texturing a node with only a small section of single texture
+     - using the CC3Scene onOpen method to initiate activity when a scene opens
   
    In addition, there are a number of interesting options for you to play with by uncommenting
-   certain lines of code in the methods of this class that build objects in the 3D world,
+   certain lines of code in the methods of this class that build objects in the 3D scene,
    including experimenting with:
      - simple particle generator with multi-colored, light-interactive, particles
      - different options for ordering nodes when drawing, including ordering by mesh or texture
@@ -203,7 +198,7 @@ The following demo apps are included in the cocos3d distribution:
        camera stay focused on the rainbow teapot as both beach ball and teapot move and rotate
      - directing an object to track another object, always facing that object, but only
        rotating in one direction (eg- side-to-side, but not up and down).
-     - displaying 2D labels (eg- health-bars) overlayed on top of the 3D world at locations projected from the position of 3D objects
+     - displaying 2D labels (eg- health-bars) overlayed on top of the 3D scene at locations projected from the position of 3D objects
      - disabling animation for a particular node, in this case the camera and light
      - invading with an army of teapots instead of robots
      - ignore lighting conditions when drawing a node to draw in pure colors and textures
@@ -211,7 +206,24 @@ The following demo apps are included in the cocos3d distribution:
      - displaying descriptive text and wireframe bounding boxes on every node
      - displaying a dynamic bounding box on a 3D particle emitter.
      - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
-     - displaying a repeating texture pattern across a mesh
+
+
+
+   CC3Demo3DTiles
+   --------------
+
+   A simple demo that lays out multiple small cocos3d scenes as layers in a larger cocos2d
+   layer. The effect is a grid of tiles, with each tile displaying a separate 3D scene,
+   each containing its own camera and lighting. The main node in each 3D tile can be rotated
+   under touch control.
+
+   This demonstrates the ability to simply include 3D objects in an otherwise 2D game,
+   and techniques for optimizing under those conditions. It also demonstrates touch control
+   when many 3D scene are visible concurrently, and the ability to add app data to nodes
+   using the userData property.
+
+   The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d RootController with cocos3d.
+
 
 
    CC3Performance
@@ -225,23 +237,6 @@ The following demo apps are included in the cocos3d distribution:
    You can dynamically experiment with how different model types, sizes and quantities
    affects the performance of cocos3d. You can also use this performance demo app to
    compare performance across different device types.
-
-
-
-   CC3Demo3DTiles
-   --------------
-
-   A simple demo that lays out multiple small cocos3d worlds as layers in a larger cocos2d
-   layer. The effect is a grid of tiles, with each tile displaying a separate 3D world,
-   each containing its own camera and lighting. The main node in each 3D tile can be rotated
-   under touch control.
-
-   This demonstrates the ability to simply include 3D objects in an otherwise 2D game,
-   and techniques for optimizing under those conditions. It also demonstrates touch control
-   when many 3D world are visible concurrently, and the ability to add app data to nodes
-   using the userData property.
-
-   The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d RootController with cocos3d.
 
 
 If you are using cocos2d 1.1 or 0.99.5, read the cocos2d Version Compatibility selection below
@@ -284,7 +279,7 @@ the -Z-axis, it is usually more convenient to use the OpenGL orientation in coco
 (although there's nothing to stop you from rotating everything by 90 degrees in cocos3d).
 
 With this in mind, when using Blender, and exporting to POD via Collada, orient your
-model world so that 'up' is along the Z-axis (which is the Blender default anyway).
+model scene so that 'up' is along the Z-axis (which is the Blender default anyway).
 The Collada2POD tool will then rotate the axes so that 'up' is along the Y-axis when
 the model is imported into cocos3d.
 
@@ -294,6 +289,6 @@ PowerVR Library
 
 In order to reduce the size of the cocos3d distribution, several large and
 unused files have been removed from the PVR library. More info can be found
-in the document: 'cocos3d/cc3PVR/PVRT 2.08/PVRT_Removed_Files.txt'.
+in the document: 'cocos3d/cc3PVR/PVRT 2.09/PVRT_Removed_Files.txt'.
 
 

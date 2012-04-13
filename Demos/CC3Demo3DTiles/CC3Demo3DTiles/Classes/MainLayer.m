@@ -1,9 +1,9 @@
 /*
  * MainLayer.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,7 +33,7 @@
 // Import the interfaces
 #import "MainLayer.h"
 #import "TileLayer.h"
-#import "TileWorld.h"
+#import "TileScene.h"
 #import "CC3PODResourceNode.h"
 #import "CC3ParametricMeshNodes.h"
 
@@ -44,12 +44,12 @@
 #define kMascotName				@"cocos2d_3dmodel_unsubdivided"
 
 // File names
-#define kBallsFileName			@"Balls.pod"
+#define kBeachBallFileName		@"BeachBall.pod"
 #define kMascotPODFile			@"cocos3dMascot.pod"
 #define kDieCubePODFile			@"DieCube.pod"
 
-#define kArrowUpButtonFileName @"ArrowUpButton48x48.png"
-#define kButtonRingFileName @"ButtonRing48x48.png"
+#define kArrowUpButtonFileName	@"ArrowUpButton48x48.png"
+#define kButtonRingFileName		@"ButtonRing48x48.png"
 #define kGridPadding 4
 #define kMinTileSideLen 8
 
@@ -64,7 +64,7 @@
 -(void) addTileIn: (CGRect) bounds;
 -(void) removeTiles;
 -(void) initializeTemplates;
--(CC3World*) makeWorld;
+-(CC3Scene*) makeScene;
 -(ccColor3B) pickNodeColor;
 @end
 
@@ -99,8 +99,8 @@
 -(void) initializeControls {
 	
 	// Turn depth testing off for 2D content to improve performance and allow us to reduce
-	// the clearing of the depth buffer when transitioning from the 3D world to the 2D world.
-	// See the notes for the CC3World shouldClearDepthBufferBefore2D property for more info.
+	// the clearing of the depth buffer when transitioning from the 3D scene to the 2D scene.
+	// See the notes for the CC3Scene shouldClearDepthBufferBefore2D property for more info.
 	[[CCDirector sharedDirector] setDepthTest: NO];
 
 	[self addLabel];
@@ -185,6 +185,7 @@
 #pragma mark Model Templates
 
 -(void) initializeTemplates {
+	CC3Node* n;
 	CC3MeshNode* mn;
 	CC3ResourceNode* rezNode;
 
@@ -194,14 +195,13 @@
 	bBox.minimum = cc3v(-1.0, -1.0, -1.0);
 	bBox.maximum = cc3v( 1.0,  1.0,  1.0);
 	[mn populateAsSolidBox: bBox];
-	mn.material = [CC3Material material];
 	mn.isTouchEnabled = YES;
 	mn.shouldColorTile = YES;
 	[templates addObject: mn];
 	
 	// Mascot model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromResourceFile: kMascotPODFile];
-	mn = (CC3MeshNode*)[rezNode getNodeNamed: kMascotName];
+	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
+	mn = [rezNode getMeshNodeNamed: kMascotName];
 	[mn remove];		// Remove from the POD resource
 	[mn movePivotToCenterOfGeometry];
 	mn.rotation = cc3v(0.0, -90.0, 0.0);
@@ -209,21 +209,19 @@
 	[templates addObject: mn];
 	
 	// Die cube model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromResourceFile: kDieCubePODFile];
-	mn = (CC3MeshNode*)[rezNode getNodeNamed: kDieCubeName];
-	[mn remove];		// Remove from the POD resource
-	mn.isTouchEnabled = YES;
-	[templates addObject: mn];
+	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
+	n = [rezNode getNodeNamed: kDieCubeName];
+	[n remove];		// Remove from the POD resource
+	n.isTouchEnabled = YES;
+	[templates addObject: n];
 	
-	// Ball models from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromResourceFile: kBallsFileName];
-	
-	// Beachball with no texture, but with several subnodes
-	mn = (CC3MeshNode*)[rezNode getNodeNamed: kBeachBallName];
-	[mn remove];		// Remove from the POD resource
-	mn.isOpaque = YES;
-	mn.isTouchEnabled = YES;
-	[templates addObject: mn];
+	// Beachball from POD resource with no texture, but with several subnodes
+	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
+	n = [rezNode getNodeNamed: kBeachBallName];
+	[n remove];		// Remove from the POD resource
+	n.isOpaque = YES;
+	n.isTouchEnabled = YES;
+	[templates addObject: n];
 }
 
 
@@ -253,28 +251,24 @@
 }
 
 /**
- * Creates a new CC3Layer with the specified bounds, creates a new CC3World, frames
- * the mainNode of the world in the camera, and adds the CC3Layer to this layer.
+ * Creates a new CC3Layer with the specified bounds, creates a new CC3Scene,
+ * and adds the CC3Layer to this layer.
  */
 -(void) addTileIn: (CGRect) bounds {
-//	CCLayer* tileLayer = [CCLayerColor layerWithColor: ccc4(50, 60, 110, 255)];
 	CC3Layer* tileLayer = [TileLayer layerWithColor: ccc4(50, 60, 110, 255)];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
-	tileLayer.cc3World = [self makeWorld];
-
-	[((TileWorld*)tileLayer.cc3World) frameMainNode];	// Focuses the camera on the main node.
-
+	tileLayer.cc3Scene = [self makeScene];
 	[self addChild: tileLayer];
 	[tiles addObject: tileLayer];
 }
 
 /**
- * Creates a new world and chooses one of the template nodes
- * and sets it as the main node of the world.
+ * Creates a new scene and chooses one of the template nodes
+ * and sets it as the main node of the scene.
  */
--(CC3World*) makeWorld {
-	TileWorld* world = [TileWorld world];		// A new world
+-(CC3Scene*) makeScene {
+	TileScene* scene = [TileScene scene];		// A new scene
 	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.
@@ -285,9 +279,9 @@
 	if (aNode.shouldColorTile) {
 		aNode.color = [self pickNodeColor];
 	}
-	world.mainNode = aNode;
-	[world createGLBuffers];
-	return world;
+	scene.mainNode = aNode;
+	[scene createGLBuffers];
+	return scene;
 }
 
 -(ccColor3B) pickNodeColor {

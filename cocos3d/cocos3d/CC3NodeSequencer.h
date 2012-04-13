@@ -1,9 +1,9 @@
 /*
  * CC3NodeSequencer.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,7 @@
 
 #import "CC3MeshNode.h"
 
-@class CC3World, CC3NodeSequencerVisitor;
+@class CC3Scene, CC3NodeSequencerVisitor;
 
 #pragma mark -
 #pragma mark CC3NodeEvaluator
@@ -56,6 +56,20 @@
 
 /** Allocates and initializes an autoreleased instance. */
 +(id) evaluator;
+
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or
+ * copyWithZone: method. In most situations, the application should use the
+ * copy method, and should never need to invoke this method directly.
+ * 
+ * Subclasses that add additional instance state (instance variables) should extend
+ * copying by overriding this method to copy that additional state. Superclass that
+ * override this method should be sure to invoke the superclass implementation to
+ * ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3NodeEvaluator*) another;
 
 @end
 
@@ -220,6 +234,9 @@
  */
 @property(nonatomic, assign) BOOL shouldUseOnlyForwardDistance;
 
+
+#pragma mark Allocation and initialization
+
 /**
  * Allocates and initializes an autoreleased instance with no evaluator.
  * This sequencer will not accept any nodes until an evaluator is attached.
@@ -231,6 +248,23 @@
 
 /** Allocates and initializes an autoreleased instance with the specified evaluator. */
 +(id) sequencerWithEvaluator: (CC3NodeEvaluator*) anEvaluator;
+
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or
+ * copyWithZone: method. In most situations, the application should use the
+ * copy method, and should never need to invoke this method directly.
+ * 
+ * Subclasses that add additional instance state (instance variables) should extend
+ * copying by overriding this method to copy that additional state. Superclass that
+ * override this method should be sure to invoke the superclass implementation to
+ * ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3NodeSequencer*) another;
+
+
+#pragma mark Sequencing nodes
 
 /**
  * Adds the specified node to this sequencer if the node is accepted by the
@@ -251,7 +285,7 @@
  * nodes back into this sequencer, so that they can be inserted into their correct
  * sequence position.
  *
- * This method is invoked automatically from the CC3World on each drawing frame.
+ * This method is invoked automatically from the CC3Scene on each drawing frame.
  * The application should never need to invoke this method directly.
  */
 -(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerVisitor*) visitor;
@@ -505,8 +539,8 @@
  * This visitor is used to visit CC3NodeSequencers to perform operations on nodes
  * within the sequencers.
  *
- * The visitor maintains a reference to the CC3World, so that the sequencer may
- * use aspects of the world during operations.
+ * The visitor maintains a reference to the CC3Scene, so that the sequencer may
+ * use aspects of the scene during operations.
  *
  * This visitor can be used to visit CC3NodeSequencers to detect and keep track of
  * nodes that are misplaced within the sequencer, using the updateSequenceWithVisitor:
@@ -523,21 +557,30 @@
  * using it to visit a sequencer.
  */
 @interface CC3NodeSequencerVisitor : NSObject {
-	CC3World* world;
+	CC3Scene* scene;
 	CCArray* misplacedNodes;
 }
 
 /**
- * The CC3World instance. The sequencer may use aspects of the world when
+ * The CC3Scene instance. The sequencer may use aspects of the scene when
  * performing sequencing operations with a node.
  */
-@property(nonatomic, assign) CC3World* world;
+@property(nonatomic, assign) CC3Scene* scene;
 
-/** Initializes this instance with the specified CC3World. */
--(id) initWithWorld: (CC3World*) aCC3World;
+/** Initializes this instance with the specified CC3Scene. */
+-(id) initWithScene: (CC3Scene*) aCC3Scene;
 
-/** Allocates and initializes an autoreleased instance with the specified CC3World. */
-+(id) visitorWithWorld: (CC3World*) aCC3World;
+/** Allocates and initializes an autoreleased instance with the specified CC3Scene. */
++(id) visitorWithScene: (CC3Scene*) aCC3Scene;
+
+/** @deprecated Renamed to scene. */
+@property(nonatomic, assign) CC3Scene* world DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to initWithScene:. */
+-(id) initWithWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to visitorWithScene:. */
++(id) visitorWithWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
 
 /** Indicates whether the misplacedNodes property contains nodes. */
 @property(nonatomic, readonly) BOOL hasMisplacedNodes;

@@ -1,9 +1,9 @@
 /*
  * CC3PerformanceLayer.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,16 +34,16 @@
 
 
 /**
- * This application-specific CC3World provides a platform for testing and displaying
+ * This application-specific CC3Scene provides a platform for testing and displaying
  * various performance-related aspects of cocos3d.
  *
  * Using buttons, the user can select one of various node types, and determine how
- * many copies of that node should be added to the 3D world. Those copies are laid
- * out in a square grid within the world. This app then collects various statistics
- * about the performance of the 3D world. This customized CC3Layer extracts these
+ * many copies of that node should be added to the 3D scene. Those copies are laid
+ * out in a square grid within the scene. This app then collects various statistics
+ * about the performance of the 3D scene. This customized CC3Layer extracts these
  * statistics and display them in real-time.
  *
- * Using another button, the user can also select whether the nodes in the world are
+ * Using another button, the user can also select whether the nodes in the scene are
  * animated or not. Animating the nodes adds load because the transformMatrix of each
  * node must be updated during each update.
  *

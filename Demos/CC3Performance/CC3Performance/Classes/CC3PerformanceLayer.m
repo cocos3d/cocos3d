@@ -1,9 +1,9 @@
 /*
  * CC3PerformanceLayer.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@
  */
 
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceWorld.h"
+#import "CC3PerformanceScene.h"
 #import "ccMacros.h"
 
 
@@ -48,7 +48,7 @@
 #define kButtonAdornmentScale 1.5
 
 @interface CC3Layer (TemplateMethods)
--(void) drawWorld;
+-(void) drawScene;
 @end
 
 @interface CC3PerformanceLayer (TemplateMethods)
@@ -58,7 +58,7 @@
 -(void) positionLocationJoystick;
 -(void) positionButtons;
 -(void) positionPerformanceLabels;
-@property(nonatomic, readonly) CC3PerformanceWorld* performanceWorld;
+@property(nonatomic, readonly) CC3PerformanceScene* performanceScene;
 @end
 
 
@@ -87,11 +87,11 @@
 }
 
 /**
- * Returns the contained CC3World, cast into the appropriate type.
+ * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.
  */
--(CC3PerformanceWorld*) performanceWorld {
-	return (CC3PerformanceWorld*) cc3World;
+-(CC3PerformanceScene*) performanceScene {
+	return (CC3PerformanceScene*) cc3Scene;
 }
 
 /** Initialize all the 2D user controls. */
@@ -305,42 +305,42 @@
 
 /**
  * Updates the player (camera) direction and location from the joystick controls
- * and then updates the 3D world.
+ * and then updates the 3D scene.
  */
 -(void) update: (ccTime)dt {
 	
-	// Update the player direction and position in the world from the joystick velocities
-	self.performanceWorld.playerDirectionControl = directionJoystick.velocity;
-	self.performanceWorld.playerLocationControl = locationJoystick.velocity;
+	// Update the player direction and position in the scene from the joystick velocities
+	self.performanceScene.playerDirectionControl = directionJoystick.velocity;
+	self.performanceScene.playerLocationControl = locationJoystick.velocity;
 	[super update: dt];
 }
 
-/** The user has pressed the increase nodes button. Tell the 3D world. */
+/** The user has pressed the increase nodes button. Tell the 3D scene. */
 -(void) increaseNodesSelected: (CCMenuItemToggle*) menuItem {
-	[self.performanceWorld increaseNodes];
+	[self.performanceScene increaseNodes];
 }
 
-/** The user has pressed the decrease nodes button. Tell the 3D world. */
+/** The user has pressed the decrease nodes button. Tell the 3D scene. */
 -(void) decreaseNodesSelected: (CCMenuItemToggle*) menuItem {
-	[self.performanceWorld decreaseNodes];
+	[self.performanceScene decreaseNodes];
 }
 
-/** The user has pressed the button to select the next node type. Tell the 3D world. */
+/** The user has pressed the button to select the next node type. Tell the 3D scene. */
 -(void) nextNodeTypeSelected: (CCMenuItemToggle*) menuItem {
-	[self.performanceWorld nextNodeType];
-	[nodeNameLabel setString: self.performanceWorld.templateNode.name];
+	[self.performanceScene nextNodeType];
+	[nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
-/** The user has pressed the button to select the previous node type. Tell the 3D world. */
+/** The user has pressed the button to select the previous node type. Tell the 3D scene. */
 -(void) prevNodeTypeSelected: (CCMenuItemToggle*) menuItem {
-	[self.performanceWorld prevNodeType];
-	[nodeNameLabel setString: self.performanceWorld.templateNode.name];
+	[self.performanceScene prevNodeType];
+	[nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
-/** The user has pressed the button to toggle between animating the nodes. Tell the 3D world. */
+/** The user has pressed the button to toggle between animating the nodes. Tell the 3D scene. */
 -(void) animateNodesSelected: (CCMenuItemToggle*) menuItem {
-	CC3PerformanceWorld* pWorld = [self performanceWorld];
-	pWorld.shouldAnimateNodes = !pWorld.shouldAnimateNodes;
+	CC3PerformanceScene* pScene = [self performanceScene];
+	pScene.shouldAnimateNodes = !pScene.shouldAnimateNodes;
 }
 
 /**
@@ -357,25 +357,25 @@
 
 #pragma mark Drawing
 
--(void) setCc3World:(CC3World *) world {
-	[super setCc3World: world];
+-(void) setCc3Scene:(CC3Scene *) aCC3Scene {
+	[super setCc3Scene: aCC3Scene];
 
 	// To get histograms of update and drawing rates, use
 	// CC3PerformanceStatisticsHistogram instead of CC3PerformanceStatistics.
 	// The histograms are printed to the log.
-	cc3World.performanceStatistics = [CC3PerformanceStatistics statistics];
-//	cc3World.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
+	cc3Scene.performanceStatistics = [CC3PerformanceStatistics statistics];
+//	cc3Scene.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
 
-	[nodeNameLabel setString: self.performanceWorld.templateNode.name];
+	[nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 //Specifies how often stats should be updated, in seconds
 #define kStatisticsReportingInterval 0.5
 
 /** Overridden to update the performance statistics labels. */
--(void) drawWorld {
-	[super drawWorld];
-	CC3PerformanceStatistics* stats = cc3World.performanceStatistics;
+-(void) drawScene {
+	[super drawScene];
+	CC3PerformanceStatistics* stats = cc3Scene.performanceStatistics;
 	if (stats.accumulatedFrameTime >= kStatisticsReportingInterval) {
 
 		LogTrace(@"%@", stats.fullDescription);	// Log the results as well

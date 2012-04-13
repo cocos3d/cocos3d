@@ -1,9 +1,9 @@
 /*
  * CC3PODMesh.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,11 +34,6 @@
 #import "CC3VertexArraysPODExtensions.h"
 
 
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
-
-
 #pragma mark CC3VertexArrayMesh extensions for PVR POD data
 
 @implementation CC3VertexArrayMesh (PVRPOD)
@@ -55,8 +50,10 @@
 		self.vertexColors = [CC3VertexColors arrayFromSPODMesh: psm];
 		
 		for (GLuint i = 0; i < psm->nNumUVW; i++) {
-			[self addTextureCoordinates: [CC3VertexTextureCoordinates arrayFromSPODMesh: psm
-																		 forTextureUnit: i]];
+			CC3VertexTextureCoordinates* texCoords;
+			texCoords = [CC3VertexTextureCoordinates arrayFromSPODMesh: psm forTextureUnit: i];
+			texCoords.expectsVerticallyFlippedTextures = aPODRez.expectsVerticallyFlippedTextures;
+			[self addTextureCoordinates: texCoords];
 		}
 		
 		self.vertexIndices = [CC3VertexIndices arrayFromSPODMesh: psm];
@@ -68,11 +65,11 @@
 		// bound to a GL buffer in the graphics hardware.
 		// We can't just NULL the interleaved pointer reference, because a NULL indicates to
 		// CPVRTModelPOD that the data is contained within the individual vertex arrays, and
-		// will try to free those instead. So, we create a "dummy" memory allocation for
+		// it will try to free those instead. So, we create a "dummy" memory allocation for
 		// CPVRTModelPOD to free when it needs to. The original pointer is now being managed
 		// by the CC3VertexLocations instance.
 		if (psm->pInterleaved != NULL) {
-			interleaveVertices = YES;
+			shouldInterleaveVertices = YES;
 			psm->pInterleaved = (unsigned char*)calloc(1, sizeof(GLint));
 		}
 		
@@ -103,5 +100,10 @@
 	podIndex = another.podIndex;
 }
 
+// Deprecated texture inversion. When this is invoked on a POD mesh, it does need inversion.
+-(void) deprecatedAlign: (CC3VertexTextureCoordinates*) texCoords
+	withInvertedTexture: (CC3Texture*) aTexture {
+	[texCoords flipVertically];		// Avoid switching expectsVerticallyFlippedTextures
+}
 
 @end

@@ -1,9 +1,9 @@
 /*
  * CC3Material.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,10 +31,6 @@
 
 #import "CC3Material.h"
 #import "CC3OpenGLES11Engine.h"
-
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
 
 @interface CC3Material (TemplateMethods)
 -(void) applyAlphaTest;
@@ -80,18 +76,14 @@
 	shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess);		// clamp to allowed range
 }
 
--(GLenum) sourceBlend {
-	return blendFunc.src;
-}
+-(GLenum) sourceBlend { return blendFunc.src; }
 
 -(void) setSourceBlend: (GLenum) aBlend {
 	blendFunc.src = aBlend;
 	[self checkIsOpaque];
 }
 
--(GLenum) destinationBlend {
-	return blendFunc.dst;
-}
+-(GLenum) destinationBlend { return blendFunc.dst; }
 
 -(void) setDestinationBlend: (GLenum) aBlend {
 	blendFunc.dst = aBlend;
@@ -134,9 +126,7 @@
 #pragma mark CCRGBAProtocol & CCBlendProtocol support
 
 // Return diffuse color
--(ccColor3B) color {
-	return CCC3BFromCCC4F(diffuseColor);
-}
+-(ccColor3B) color { return CCC3BFromCCC4F(diffuseColor); }
 
 // Set both diffuse and ambient colors, retaining the alpha of each
 -(void) setColor: (ccColor3B) color {
@@ -154,9 +144,7 @@
 }
 
 // Return diffuse alpha
--(GLubyte) opacity {
-	return CCColorByteFromFloat(diffuseColor.a);
-}
+-(GLubyte) opacity { return CCColorByteFromFloat(diffuseColor.a); }
 
 /**
  * Set opacity of all colors, retaining the colors of each.
@@ -203,13 +191,9 @@
 
 static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
-+(ccBlendFunc) defaultBlendFunc {
-	return defaultBlendFunc;
-}
++(ccBlendFunc) defaultBlendFunc { return defaultBlendFunc; }
 
-+(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc {
-	defaultBlendFunc = aBlendFunc;
-}
++(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc { defaultBlendFunc = aBlendFunc; }
 
 
 #pragma mark Textures
@@ -267,20 +251,19 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 // If the texture property has not been set yet, set it. Otherwise add as an overlay.
 -(void) addTexture: (CC3Texture*) aTexture {
 	LogTrace(@"Adding %@ to %@", aTexture, self);
-	if (aTexture) {
-		if (!texture) {
-			self.texture = aTexture;
+	if (!texture) {
+		self.texture = aTexture;
+	} else {
+		NSAssert1(aTexture, @"%@ cannot add a nil overlay texture", self);
+		if(!textureOverlays) {
+			textureOverlays = [[CCArray array] retain];
+		}
+		GLint maxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
+		if (self.textureCount < maxTexUnits) {
+			[textureOverlays addObject: aTexture];
 		} else {
-			if(!textureOverlays) {
-				textureOverlays = [[CCArray array] retain];
-			}
-			GLint maxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
-			if (self.textureCount < maxTexUnits) {
-				[textureOverlays addObject: aTexture];
-			} else {
-				LogInfo(@"Attempt to add texture %@ to %@ ignored because platform supports only %i texture units.",
-						aTexture, self, maxTexUnits);
-			}
+			LogInfo(@"Attempt to add texture %@ to %@ ignored because platform supports only %i texture units.",
+					aTexture, self, maxTexUnits);
 		}
 	}
 }
@@ -324,11 +307,11 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
-	NSAssert(aTexture, @"Overlay texture cannot be nil");
 	if (texUnit == 0) {
 		self.texture = aTexture;
 	} else if (texUnit < self.textureCount) {
-		[textureOverlays replaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
+		NSAssert1(aTexture, @"%@ cannot set an overlay texture to nil", self);
+		[textureOverlays fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
 	} else {
 		[self addTexture: aTexture];
 	}
@@ -552,9 +535,7 @@ static GLuint lastAssignedMaterialTag;
 	visitor.textureUnitCount = visitor.textureUnit;
 }
 
--(void) unbind {
-	[[self class] unbind];
-}
+-(void) unbind { [[self class] unbind]; }
 
 +(void) unbind {
 	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;

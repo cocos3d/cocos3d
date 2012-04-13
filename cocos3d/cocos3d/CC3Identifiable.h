@@ -1,9 +1,9 @@
 /*
  * CC3Identifiable.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -293,6 +293,20 @@
  * the populateFrom: method instead.
  */
 -(id) copyWithZone: (NSZone*) zone withName: (NSString*) aName asClass: (Class) aClass;
+
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or
+ * copyWithZone: method. In most situations, the application should use the
+ * copy method, and should never need to invoke this method directly.
+ * 
+ * Subclasses that add additional instance state (instance variables) should extend
+ * copying by overriding this method to copy that additional state. Superclass that
+ * override this method should be sure to invoke the superclass implementation to
+ * ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3Identifiable*) another;
 
 /**
  * Returns whether this instance should be included in a deep copy.

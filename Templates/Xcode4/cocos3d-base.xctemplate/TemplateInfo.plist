@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Standard cocos3d project settings.</string>
 	<key>Identifier</key>
-	<string>com.brenwill.cocos3dBase</string>
+	<string>org.cocos3d.cocos3dBase</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Project</key>
@@ -32,7 +32,9 @@
 		</dict>
 		<key>SharedSettings</key>
 		<dict>
-			<key>GCC_THUMB_SUPPORT</key>
+			<key>GCC_VERSION</key>
+			<string></string>
+			<key>GCC_THUMB_SUPPORT[arch=armv6]</key>
 			<string>NO</string>
 			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
 			<string>3.0</string>
@@ -55,12 +57,8 @@
 		<dict>
 			<key>SharedSettings</key>
 			<dict>
-				<key>OTHER_LDFLAGS</key>
-				<array>
-					<string>-lz</string>
-					<string>-all_load</string>
-					<string>-ObjC</string>
-				</array>
+				<key>GCC_THUMB_SUPPORT[arch=armv6]</key>
+				<string>NO</string>
 			</dict>
 		</dict>
 	</array>

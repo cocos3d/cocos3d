@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11State.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,6 +31,18 @@
 
 #import "CC3OpenGLES11State.h"
 
+
+@interface CC3OpenGLES11StateTrackerEnumeration (TemplateMethods)
+-(void) setValueRaw:(GLenum) value;
+@end
+
+@interface CC3OpenGLES11StateTrackerInteger (TemplateMethods)
+-(void) setValueRaw:(GLint) value;
+@end
+
+@interface CC3OpenGLES11StateTrackerFloat (TemplateMethods)
+-(void) setValueRaw:(GLfloat) value;
+@end
 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerPointParameterFloat
@@ -65,14 +77,263 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerStencilFunction
+
+@implementation CC3OpenGLES11StateTrackerStencilFunction
+
+@synthesize function, reference, mask;
+
+-(void) dealloc {
+	[function release];
+	[reference release];
+	[mask release];
+	[super dealloc];
+}
+
+-(void) initializeTrackers {
+	self.function = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																   forState: GL_STENCIL_FUNC];
+	self.reference = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+																forState: GL_STENCIL_REF];
+	self.mask = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+														   forState: GL_STENCIL_VALUE_MASK];
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueIgnore;
+}
+
+-(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	function.originalValueHandling = origValueHandling;
+	reference.originalValueHandling = origValueHandling;
+	mask.originalValueHandling = origValueHandling;
+	[super setOriginalValueHandling: origValueHandling];
+} 
+
+-(BOOL) valueIsKnown {
+	return function.valueIsKnown &&
+			reference.valueIsKnown &&
+			mask.valueIsKnown;
+}
+
+-(void) setValueIsKnown:(BOOL) aBoolean {
+	function.valueIsKnown = aBoolean;
+	reference.valueIsKnown = aBoolean;
+	mask.valueIsKnown = aBoolean;
+}
+
+-(void) applyFunction: (GLenum) func
+		 andReference: (GLint) refValue
+			  andMask: (GLuint) maskValue {
+	BOOL shouldSetGL = self.shouldAlwaysSetGL;
+	shouldSetGL |= (!function.valueIsKnown || func != function.value);
+	shouldSetGL |= (!reference.valueIsKnown || refValue != reference.value);
+	shouldSetGL |= (!mask.valueIsKnown || maskValue != mask.value);
+	if (shouldSetGL) {
+		[function setValueRaw: func];
+		[reference setValueRaw: refValue];
+		[mask setValueRaw: maskValue];
+		glStencilFunc(func, refValue, maskValue);
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
+	}
+	LogCleanTrace(@"%@ %@ %@ = %@ and %@ = %i and %@ = %u",
+			 [self class], (shouldSetGL ? @"applied" : @"reused"),
+			 NSStringFromGLEnum(function.name), NSStringFromGLEnum(function.value),
+			 NSStringFromGLEnum(reference.name), reference.value,
+			 NSStringFromGLEnum(mask.name), mask.value);
+}
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[function restoreOriginalValue];
+		[reference restoreOriginalValue];
+		[mask restoreOriginalValue];
+		glStencilFunc(function.value, reference.value, mask.value);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@:\n\t    %@\n\t    %@\n\t    %@",
+			[self class], function, reference, mask];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerStencilOperation
+
+@implementation CC3OpenGLES11StateTrackerStencilOperation
+
+@synthesize stencilFail, depthFail, depthPass;
+
+-(void) dealloc {
+	[stencilFail release];
+	[depthFail release];
+	[depthPass release];
+	[super dealloc];
+}
+
+-(void) initializeTrackers {
+	self.stencilFail = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	  forState: GL_STENCIL_FAIL];
+	self.depthFail = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	forState: GL_STENCIL_PASS_DEPTH_FAIL];
+	self.depthPass = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																	forState: GL_STENCIL_PASS_DEPTH_PASS];
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueIgnore;
+}
+
+-(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	stencilFail.originalValueHandling = origValueHandling;
+	depthFail.originalValueHandling = origValueHandling;
+	depthPass.originalValueHandling = origValueHandling;
+	[super setOriginalValueHandling: origValueHandling];
+} 
+
+-(BOOL) valueIsKnown {
+	return stencilFail.valueIsKnown &&
+			depthFail.valueIsKnown &&
+			depthPass.valueIsKnown;
+}
+
+-(void) setValueIsKnown:(BOOL) aBoolean {
+	stencilFail.valueIsKnown = aBoolean;
+	depthFail.valueIsKnown = aBoolean;
+	depthPass.valueIsKnown = aBoolean;
+}
+
+-(void) applyStencilFail: (GLenum) failOp
+			andDepthFail: (GLenum) zFailOp
+			andDepthPass: (GLenum) zPassOp {
+	BOOL shouldSetGL = self.shouldAlwaysSetGL;
+	shouldSetGL |= (!stencilFail.valueIsKnown || failOp != stencilFail.value);
+	shouldSetGL |= (!depthFail.valueIsKnown || zFailOp != depthFail.value);
+	shouldSetGL |= (!depthPass.valueIsKnown || zPassOp != depthPass.value);
+	if (shouldSetGL) {
+		[stencilFail setValueRaw: failOp];
+		[depthFail setValueRaw: zFailOp];
+		[depthPass setValueRaw: zPassOp];
+		glStencilOp(failOp, zFailOp, zPassOp);
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
+	}
+	LogCleanTrace(@"%@ %@ %@ = %@ and %@ = %@ and %@ = %@",
+			 [self class], (shouldSetGL ? @"applied" : @"reused"),
+			 NSStringFromGLEnum(stencilFail.name), NSStringFromGLEnum(stencilFail.value),
+			 NSStringFromGLEnum(depthFail.name), NSStringFromGLEnum(depthFail.value),
+			 NSStringFromGLEnum(depthPass.name), NSStringFromGLEnum(depthPass.value));
+}
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[stencilFail restoreOriginalValue];
+		[depthFail restoreOriginalValue];
+		[depthPass restoreOriginalValue];
+		glStencilOp(stencilFail.value, depthFail.value, depthPass.value);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@:\n\t    %@\n\t    %@\n\t    %@",
+			[self class], stencilFail, depthFail, depthPass];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerPolygonOffset
+
+@implementation CC3OpenGLES11StateTrackerPolygonOffset
+
+@synthesize factor, units;
+
+-(void) dealloc {
+	[factor release];
+	[units release];
+	[super dealloc];
+}
+
+-(void) initializeTrackers {
+	self.factor = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+														   forState: GL_POLYGON_OFFSET_FACTOR];
+	self.units = [CC3OpenGLES11StateTrackerFloat trackerWithParent: self
+														  forState: GL_POLYGON_OFFSET_UNITS];
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
+-(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	factor.originalValueHandling = origValueHandling;
+	units.originalValueHandling = origValueHandling;
+	[super setOriginalValueHandling: origValueHandling];
+} 
+
+-(BOOL) valueIsKnown {
+	return factor.valueIsKnown && units.valueIsKnown;
+}
+
+-(void) setValueIsKnown:(BOOL) aBoolean {
+	factor.valueIsKnown = aBoolean;
+	units.valueIsKnown = aBoolean;
+}
+
+-(void) applyFactor: (GLfloat) factorValue andUnits: (GLfloat) unitsValue {
+	BOOL shouldSetGL = self.shouldAlwaysSetGL;
+	shouldSetGL |= (!factor.valueIsKnown || factorValue != factor.value);
+	shouldSetGL |= (!units.valueIsKnown || unitsValue != units.value);
+	if (shouldSetGL) {
+		[factor setValueRaw: factorValue];
+		[units setValueRaw: unitsValue];
+		glPolygonOffset(factorValue, unitsValue);
+		[self notifyGLChanged];
+		self.valueIsKnown = YES;
+	}
+	LogCleanTrace(@"%@ %@ %@ = %.3f and %@ = %.3f",
+			 [self class], (shouldSetGL ? @"applied" : @"reused"),
+			 NSStringFromGLEnum(factor.name), factor.value,
+			 NSStringFromGLEnum(units.name), units.value);
+}
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[factor restoreOriginalValue];
+		[units restoreOriginalValue];
+		glPolygonOffset(factor.value, units.value);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@:\n\t    %@\n\t    %@",
+			[self class], factor, units];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES11State
 
 @implementation CC3OpenGLES11State
 
-@synthesize color;
 @synthesize clearColor;
 @synthesize clearDepth;
 @synthesize clearStencil;
+@synthesize color;
+@synthesize colorMask;
 @synthesize cullFace;
 @synthesize depthFunction;
 @synthesize depthMask;
@@ -83,15 +344,19 @@
 @synthesize pointSizeFadeThreshold;
 @synthesize pointSizeMaximum;
 @synthesize pointSizeMinimum;
+@synthesize polygonOffset;
 @synthesize scissor;
 @synthesize shadeModel;
+@synthesize stencilFunction;
+@synthesize stencilOperation;
 @synthesize viewport;
 
 -(void) dealloc {
-	[color release];
 	[clearColor release];
 	[clearDepth release];
 	[clearStencil release];
+	[color release];
+	[colorMask release];
 	[cullFace release];
 	[depthFunction release];
 	[depthMask release];
@@ -102,20 +367,17 @@
 	[pointSizeFadeThreshold release];
 	[pointSizeMaximum release];
 	[pointSizeMinimum release];
+	[polygonOffset release];
 	[scissor release];
 	[shadeModel release];
+	[stencilFunction release];
+	[stencilOperation release];
 	[viewport release];
 
 	[super dealloc];
 }
 
 -(void) initializeTrackers {
-	self.color = [CC3OpenGLES11StateTrackerColorFixedAndFloat trackerWithParent: self
-																	   forState: GL_CURRENT_COLOR
-															   andGLSetFunction: glColor4f
-														  andGLSetFunctionFixed: glColor4ub
-													   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
-
 	self.clearColor = [CC3OpenGLES11StateTrackerColor trackerWithParent: self
 															   forState: GL_COLOR_CLEAR_VALUE
 													   andGLSetFunction: glClearColor
@@ -130,6 +392,18 @@
 																   forState: GL_STENCIL_CLEAR_VALUE
 														   andGLSetFunction: glClearStencil
 												   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.color = [CC3OpenGLES11StateTrackerColorFixedAndFloat trackerWithParent: self
+																	   forState: GL_CURRENT_COLOR
+															   andGLSetFunction: glColor4f
+														  andGLSetFunctionFixed: glColor4ub
+													   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
+	
+	self.colorMask = [CC3OpenGLES11StateTrackerColorFixedAndFloat trackerWithParent: self
+																		   forState: GL_DEPTH_WRITEMASK
+																   andGLSetFunction: NULL
+															  andGLSetFunctionFixed: glColorMask
+														   andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	
 	self.cullFace = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																   forState: GL_CULL_FACE_MODE
@@ -172,6 +446,8 @@
 	
 	self.pointSizeMinimum = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
 																				   forState: GL_POINT_SIZE_MIN];
+	
+	self.polygonOffset = [CC3OpenGLES11StateTrackerPolygonOffset trackerWithParent: self];
 
 	self.scissor = [CC3OpenGLES11StateTrackerViewport trackerWithParent: self
 															   forState: GL_SCISSOR_BOX
@@ -183,6 +459,10 @@
 															 andGLSetFunction: glShadeModel
 													 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	
+	self.stencilFunction = [CC3OpenGLES11StateTrackerStencilFunction trackerWithParent: self];
+
+	self.stencilOperation = [CC3OpenGLES11StateTrackerStencilOperation trackerWithParent: self];
+	
 	self.viewport = [CC3OpenGLES11StateTrackerViewport trackerWithParent: self
 																forState: GL_VIEWPORT
 														andGLSetFunction: glViewport
@@ -192,10 +472,11 @@
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
 	[desc appendFormat: @"%@:", [self class]];
-	[desc appendFormat: @"\n    %@ ", color];
 	[desc appendFormat: @"\n    %@ ", clearColor];
 	[desc appendFormat: @"\n    %@ ", clearDepth];
 	[desc appendFormat: @"\n    %@ ", clearStencil];
+	[desc appendFormat: @"\n    %@ ", color];
+	[desc appendFormat: @"\n    %@ ", colorMask];
 	[desc appendFormat: @"\n    %@ ", cullFace];
 	[desc appendFormat: @"\n    %@ ", depthFunction];
 	[desc appendFormat: @"\n    %@ ", depthMask];
@@ -206,8 +487,11 @@
 	[desc appendFormat: @"\n    %@ ", pointSizeFadeThreshold];
 	[desc appendFormat: @"\n    %@ ", pointSizeMaximum];
 	[desc appendFormat: @"\n    %@ ", pointSizeMinimum];
+	[desc appendFormat: @"\n    %@ ", polygonOffset];
 	[desc appendFormat: @"\n    %@ ", scissor];
 	[desc appendFormat: @"\n    %@ ", shadeModel];
+	[desc appendFormat: @"\n    %@ ", stencilFunction];
+	[desc appendFormat: @"\n    %@ ", stencilOperation];
 	[desc appendFormat: @"\n    %@ ", viewport];
 	return desc;
 }

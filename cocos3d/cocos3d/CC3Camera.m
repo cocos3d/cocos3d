@@ -1,9 +1,9 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@
  */
 
 #import "CC3Camera.h"
-#import "CC3World.h"
+#import "CC3Scene.h"
 #import "CC3Math.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CC3ActionInterval.h"
@@ -42,8 +42,8 @@
 
 @interface CC3Node (TemplateMethods)
 -(void) transformMatrixChanged;
+-(void) notifyTransformListeners;
 -(void) updateGlobalScale;
--(void) populateFrom: (CC3Node*) another;
 @property(nonatomic, readonly) CC3GLMatrix* globalRotationMatrix;
 @end
 
@@ -51,28 +51,27 @@
 @property(nonatomic, readonly) CC3ViewportManager* viewportManager;
 -(void) buildModelViewMatrix;
 -(void) buildProjectionMatrix;
--(void) buildFrustumPlanes;
 -(void) openProjection;
 -(void) closeProjection;
 -(void) openModelView;
 -(void) closeModelView;
 -(void) loadProjectionMatrix;
--(void) loadModelViewMatrix;
+-(void) loadModelviewMatrix;
 -(void) ensureAtRootAncestor;
--(void) ensureWorldUpdated: (BOOL) checkWorld;
+-(void) ensureSceneUpdated: (BOOL) checkScene;
 -(void) moveToShowAllOf: (CC3Node*) aNode
 		  fromDirection: (CC3Vector) aDirection
 			withPadding: (GLfloat) padding
-			 checkWorld: (BOOL) checkWorld;
+			 checkScene: (BOOL) checkScene;
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection
 			 withPadding: (GLfloat) padding
-			  checkWorld: (BOOL) checkWorld;
+			  checkScene: (BOOL) checkScene;
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
 							fromDirection: (CC3Vector) aDirection
 							  withPadding: (GLfloat) padding
-							   checkWorld: (BOOL) checkWorld;
+							   checkScene: (BOOL) checkScene;
 @property(nonatomic, readonly) CGSize fovRatios;
 @property(nonatomic, readonly) BOOL isProjectionDirty;
 @end
@@ -80,8 +79,9 @@
 
 @implementation CC3Camera
 
-@synthesize fieldOfView, nearClippingPlane, farClippingPlane;
+@synthesize fieldOfView, nearClippingDistance, farClippingDistance;
 @synthesize frustum, modelviewMatrix;
+@synthesize hasInfiniteDepthOfField, isOpen;
 
 -(void) dealloc {
 	[modelviewMatrix release];
@@ -89,8 +89,18 @@
 	[super dealloc];
 }
 
+/**
+ * Overridden to use a non-reversing directional rotator class that
+ * orients the negative-Z axis of the node along the forwardDirection.
+ */
+-(id) directionalRotatorClass { return [CC3DirectionalRotator class]; }
+
 -(CC3GLMatrix*) projectionMatrix {
 	return frustum.projectionMatrix;
+}
+
+-(CC3GLMatrix*) infiniteProjectionMatrix {
+	return frustum.infiniteProjectionMatrix;
 }
 
 -(void) setFieldOfView:(GLfloat) anAngle {
@@ -98,15 +108,21 @@
 	[self markProjectionDirty];
 }
 
--(void) setNearClippingPlane:(GLfloat) aDistance {
-	nearClippingPlane = aDistance;
+-(void) setNearClippingDistance: (GLfloat) aDistance {
+	nearClippingDistance = aDistance;
 	[self markProjectionDirty];
 }
 
--(void) setFarClippingPlane:(GLfloat) aDistance {
-	farClippingPlane = aDistance;
+-(void) setFarClippingDistance: (GLfloat) aDistance {
+	farClippingDistance = aDistance;
 	[self markProjectionDirty];
 }
+
+// Deprecated
+-(GLfloat) nearClippingPlane { return self.nearClippingDistance; }
+-(void) setNearClippingPlane: (GLfloat) aDistance { self.nearClippingDistance = aDistance; }
+-(GLfloat) farClippingPlane { return self.farClippingDistance; }
+-(void) setFarClippingPlane: (GLfloat) aDistance { self.farClippingDistance = aDistance; }
 
 // Overridden to mark the frustum's projectionMatrix dirty instead of the
 // transformMatrix. This is because for a camera, scale acts as a zoom to change
@@ -125,15 +141,25 @@
 	[self markProjectionDirty];
 }
 
-// The CC3World's viewport manager.
--(CC3ViewportManager*) viewportManager {
-	return self.world.viewportManager;
+-(void) setIsDepthOfFieldInfinite: (BOOL) isInfinite {
+	hasInfiniteDepthOfField = isInfinite;
+	if (isOpen) {
+		[self loadProjectionMatrix];
+	}
 }
+
+// The CC3Scene's viewport manager.
+-(CC3ViewportManager*) viewportManager { return self.scene.viewportManager; }
 
 /** Since scale is not used by cameras, only consider ancestors. */
 -(BOOL) isTransformRigid {
 	return (parent ? parent.isTransformRigid : YES);
 }
+
+// Keep the compiler happy with the additional declaration
+// of this property on this class for documentation purposes
+-(CC3Vector) forwardDirection { return super.forwardDirection; }
+-(void) setForwardDirection: (CC3Vector) aDirection { super.forwardDirection = aDirection; }
 
 
 #pragma mark Allocation and initialization
@@ -141,11 +167,13 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		modelviewMatrix = [[CC3GLMatrix identity] retain];
-		self.frustum = [CC3Frustum frustum];
-		isProjectionDirty = NO;		// start with identity everywhere
+		self.frustum = [CC3Frustum frustumOnModelviewMatrix: modelviewMatrix];
+		isProjectionDirty = YES;
 		fieldOfView = kCC3DefaultFieldOfView;
-		nearClippingPlane = kCC3DefaultNearClippingPlane;
-		farClippingPlane = kCC3DefaultFarClippingPlane;
+		nearClippingDistance = kCC3DefaultNearClippingDistance;
+		farClippingDistance = kCC3DefaultFarClippingDistance;
+		hasInfiniteDepthOfField = NO;
+		isOpen = NO;
 	}
 	return self;
 }
@@ -164,29 +192,28 @@
 	modelviewMatrix = [another.modelviewMatrix copy];		// retained
 
 	fieldOfView = another.fieldOfView;
-	nearClippingPlane = another.nearClippingPlane;
-	farClippingPlane = another.farClippingPlane;
+	nearClippingDistance = another.nearClippingDistance;
+	farClippingDistance = another.farClippingDistance;
 	isProjectionDirty = another.isProjectionDirty;
+	isOpen = another.isOpen;
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, FOV: %.2f, near: %.2f, far: %.2f",
-			[super fullDescription], fieldOfView, nearClippingPlane, farClippingPlane];
+			[super fullDescription], fieldOfView, nearClippingDistance, farClippingDistance];
 }
 
 
 #pragma mark Transformations
 
--(void) markProjectionDirty {
-	isProjectionDirty = YES;
-}
+-(void) markProjectionDirty { isProjectionDirty = YES; }
 
 /**
  * Scaling the camera is a null operation because it scales everything, including the size
  * of objects, but also the distance from the camera to those objects. The effects cancel
  * out, and visually, it appears that nothing has changed. Therefore, the scale property
  * is not applied to the transform matrix of the camera. Instead it is used to adjust the
- * field of view to create a zooming effect. See the description of the fieldOfView property.
+ * field of view to create a zooming effect. See the notes for the fieldOfView property.
  *
  * This implementation sets the globalScale to that of the parent node, or to unit scaling
  * if no parent. The globalScale is then used to unwind all scaling from the camera, globally,
@@ -213,11 +240,6 @@
 	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
 }
 
--(void) buildPerspective {
-	[self buildProjectionMatrix];
-	[self buildFrustumPlanes];
-}
-
 /** Overridden to also build the modelview matrix. */
 -(void) transformMatrixChanged {
 	[super transformMatrixChanged];
@@ -226,7 +248,7 @@
 
 /**
  * Template method to rebuild the modelviewMatrix from the deviceRotationMatrix, which
- * is managed by the CC3World's viewportManager, and the inverse of the transformMatrix.
+ * is managed by the CC3Scene's viewportManager, and the inverse of the transformMatrix.
  * Invoked automatically whenever the transformMatrix or device orientation are changed.
  */
 -(void) buildModelViewMatrix {
@@ -236,44 +258,47 @@
 	[modelviewMatrix multiplyByMatrix: self.transformMatrixInverted];
 	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, modelviewMatrix);
 
-	[frustum markPlanesDirty];
+	// Let the frustum know that the contents of the modelview matrix have changed. 
+	[frustum markDirty];
 }
 
 /**
  * Template method to rebuild the frustum's projectionMatrix if the
  * projection parameters have been changed since the last rebuild.
  */
--(void) buildProjectionMatrix  {
+-(void) buildProjection  {
 	if(isProjectionDirty) {
 		CC3Viewport vp = self.viewportManager.viewport;
 		NSAssert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
 
 		[frustum populateFrom: fieldOfView
 					andAspect: ((GLfloat) vp.w / (GLfloat) vp.h)
-				  andNearClip: nearClippingPlane
-				   andFarClip: farClippingPlane
+				  andNearClip: nearClippingDistance
+				   andFarClip: farClippingDistance
 					  andZoom: self.uniformScale];
 
 		isProjectionDirty = NO;
+		
+		// Notify the transform listeners that the projection has changed
+		[self notifyTransformListeners];
 	}
 }
 
-/** Template method to rebuild the frustum planes. */
--(void) buildFrustumPlanes {
-	[frustum buildPlanes: modelviewMatrix];
-}
+-(void) buildPerspective { [self buildProjection]; }	// Deprecated
 
 
 #pragma mark Drawing
 
 -(void) open {
 	LogTrace(@"Opening %@", self);
+	isOpen = YES;
 	[self openProjection];
 	[self openModelView];
 }
 
 -(void) close {
 	LogTrace(@"Closing %@", self);
+	isOpen = NO;
 	[self closeModelView];
 	[self closeProjection];
 }
@@ -295,7 +320,7 @@
 -(void) openModelView {
 	LogTrace(@"Opening %@ modelview", self);
 	[[CC3OpenGLES11Engine engine].matrices.modelview push];
-	[self loadModelViewMatrix];
+	[self loadModelviewMatrix];
 }
 
 /** Template method that pops the modelviewMatrix from the GL modelview matrix stack. */
@@ -305,15 +330,24 @@
 }
 
 /** Template method that loads the modelviewMatrix into the current GL projection matrix. */
--(void) loadModelViewMatrix {
+-(void) loadModelviewMatrix {
 	LogTrace(@"%@ loading modelview matrix into GL: %@", self, modelviewMatrix);
 	[[CC3OpenGLES11Engine engine].matrices.modelview load: modelviewMatrix.glMatrix];
 }
 
-/** Template method that loads the projectionMatrix into the current GL projection matrix. */
+/**
+ * Template method that loads either the projectionMatrix or the
+ * infiniteProjectionMatrix into the current GL projection matrix,
+ * depending on the currents state of the hasInfiniteDepthOfField property.
+ */
 -(void) loadProjectionMatrix {
-	LogTrace(@"%@ loading projection matrix into GL: %@", self, frustum.projectionMatrix);
-	[[CC3OpenGLES11Engine engine].matrices.projection load: frustum.projectionMatrix.glMatrix];
+	CC3GLMatrix* projMtx = hasInfiniteDepthOfField
+								? frustum.infiniteProjectionMatrix
+								: frustum.projectionMatrix;
+	LogTrace(@"%@ loaded %@finite projection matrix into GL: %@",
+			 self, (hasInfiniteDepthOfField ? @"in" : @""), projMtx);
+	[[CC3OpenGLES11Engine engine].matrices.projection load: projMtx.glMatrix];
+
 }
 
 
@@ -324,9 +358,9 @@
 }
 
 -(void) moveToShowAllOf: (CC3Node*) aNode withPadding: (GLfloat) padding {
-	[self ensureWorldUpdated: YES];
+	[self ensureSceneUpdated: YES];
 	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
-	[self moveToShowAllOf: aNode fromDirection: moveDir withPadding: padding checkWorld: NO];
+	[self moveToShowAllOf: aNode fromDirection: moveDir withPadding: padding checkScene: NO];
 }
 
 -(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection {
@@ -336,17 +370,17 @@
 -(void) moveToShowAllOf: (CC3Node*) aNode
 		  fromDirection: (CC3Vector) aDirection
 			withPadding: (GLfloat) padding {
-	[self moveToShowAllOf: aNode fromDirection: aDirection withPadding: padding checkWorld: YES];
+	[self moveToShowAllOf: aNode fromDirection: aDirection withPadding: padding checkScene: YES];
 }
 
 -(void) moveToShowAllOf: (CC3Node*) aNode
 		  fromDirection: (CC3Vector) aDirection
 			withPadding: (GLfloat) padding
-			 checkWorld: (BOOL) checkWorld {
+			 checkScene: (BOOL) checkScene {
 	self.location = [self calculateLocationToShowAllOf: aNode
 										 fromDirection: aDirection
 										   withPadding: padding
-											checkWorld: checkWorld];
+											checkScene: checkScene];
 	self.forwardDirection = CC3VectorNegate(aDirection);
 	[self ensureAtRootAncestor];
 	[self updateTransformMatrices];
@@ -359,9 +393,9 @@
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
 			 withPadding: (GLfloat) padding {
-	[self ensureWorldUpdated: YES];
+	[self ensureSceneUpdated: YES];
 	CC3Vector moveDir = CC3VectorDifference(self.globalLocation, aNode.globalLocation);
-	[self moveWithDuration: t toShowAllOf: aNode fromDirection: moveDir withPadding: padding checkWorld: NO];
+	[self moveWithDuration: t toShowAllOf: aNode fromDirection: moveDir withPadding: padding checkScene: NO];
 }
 
 -(void) moveWithDuration: (ccTime) t
@@ -381,18 +415,18 @@
 			   toShowAllOf: aNode
 			 fromDirection: aDirection
 			   withPadding: padding
-				checkWorld: YES ];
+				checkScene: YES ];
 }
 
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
 		   fromDirection: (CC3Vector) aDirection
 			 withPadding: (GLfloat) padding
-			  checkWorld: (BOOL) checkWorld {
+			  checkScene: (BOOL) checkScene {
 	CC3Vector newLoc = [self calculateLocationToShowAllOf: aNode
 											fromDirection: aDirection
 											  withPadding: padding
-											   checkWorld: checkWorld];
+											   checkScene: checkScene];
 	CC3Vector newFwdDir = CC3VectorNegate(aDirection);
 	[self ensureAtRootAncestor];
 	[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
@@ -411,24 +445,24 @@
 	return [self calculateLocationToShowAllOf: aNode
 								fromDirection: aDirection
 								  withPadding: padding
-								   checkWorld: YES];
+								   checkScene: YES];
 }
 
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
 							fromDirection: (CC3Vector) aDirection
 							  withPadding: (GLfloat) padding
-							   checkWorld: (BOOL) checkWorld {
+							   checkScene: (BOOL) checkScene {
 
-	[self ensureWorldUpdated: checkWorld];
+	[self ensureSceneUpdated: checkScene];
 	
 	// Complementary unit vectors pointing towards camera from node, and vice versa
 	CC3Vector camDir = CC3VectorNormalize(aDirection);
 	CC3Vector viewDir = CC3VectorNegate(camDir);
 	
 	// The camera's new forward direction will be viewDir. Use a matrix to detrmine
-	// the camera's new up and right directions assuming the same world up direction. 
+	// the camera's new up and right directions assuming the same scene up direction. 
 	CC3GLMatrix* rotMtx = [CC3GLMatrix identity];
-	[rotMtx populateToPointTowards: viewDir withUp: self.worldUpDirection];
+	[rotMtx populateToPointTowards: viewDir withUp: self.sceneUpDirection];
 	CC3Vector upDir = [rotMtx extractUpDirection];
 	CC3Vector rtDir = [rotMtx extractRightDirection];
 	
@@ -489,28 +523,26 @@
 	// Determine if we need to move the far end of the camera frustum farther away
 	GLfloat farClip = CC3VectorLength(CC3VectorScaleUniform(viewDir, maxCtrDist + maxVtxDeltaDist));
 	farClip *= (1 + kCC3FrustumFitFarPadding);		// Include a little bit of padding
-	if (farClip > self.farClippingPlane) {
-		self.farClippingPlane = farClip;
+	if (farClip > self.farClippingDistance) {
+		self.farClippingDistance = farClip;
 	}
 	
 	LogTrace(@"%@ moving to %@ to show %@ at %@ within %@ with new farClip: %.3f", self,
 			 NSStringFromCC3Vector(CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist))),
-			 aNode, NSStringFromCC3Vector(bbCtr), frustum, self.farClippingPlane);
+			 aNode, NSStringFromCC3Vector(bbCtr), frustum, self.farClippingDistance);
 	
 	// Return the new location of the camera,
 	return CC3VectorAdd(bbCtr, CC3VectorScaleUniform(camDir, maxCtrDist));
 }
 
 /**
- * If the checkWorld arg is YES, and the world is not running, force an update
+ * If the checkScene arg is YES, and the scene is not running, force an update
  * to ensure that all nodes are transformed to their global coordinates.
  */
--(void) ensureWorldUpdated: (BOOL) checkWorld {
-	if (checkWorld) {
-		CC3World* myWorld = self.world;
-		if ( !myWorld.isRunning ) {
-			[myWorld updateWorld];
-		}
+-(void) ensureSceneUpdated: (BOOL) checkScene {
+	if (checkScene) {
+		CC3Scene* myScene = self.scene;
+		if ( !myScene.isRunning ) [myScene updateScene];
 	}
 }
 
@@ -533,12 +565,10 @@
 
 /**
  * Ensures that this camera is a direct child of its root ancestor, which in almost all
- * cases will be CC3World. This is done by simply adding this camera to the root ancestor.
+ * cases will be your CC3Scene. This is done by simply adding this camera to the root ancestor.
  * The request will be ignored if this camera is already a direct child of the root ancestor.
  */
--(void) ensureAtRootAncestor {
-	[self.rootAncestor addChild: self];
-}
+-(void) ensureAtRootAncestor { [self.rootAncestor addChild: self]; }
 
 
 #pragma mark 3D <-> 2D mapping functionality
@@ -585,9 +615,9 @@
 	CGPoint ppt = [self.viewportManager cc2PointFromGLPoint: ccp(projectedLoc.x, projectedLoc.y)];
 	CC3Vector orientedLoc = cc3v(ppt.x, ppt.y, projectedLoc.z);
 	
-	LogTrace(@"%@ projecting location %@ to %@ and orienting with device to %@ using viewport %@",
-			 self, NSStringFromCC3Vector(a3DLocation), NSStringFromCC3Vector(projectedLoc),
-			 NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(self.viewportManager.viewport));
+	LogCleanTrace(@"%@ projecting location %@ to %@ and orienting with device to %@ using viewport %@",
+				  self, NSStringFromCC3Vector(a3DLocation), NSStringFromCC3Vector(projectedLoc),
+				  NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(self.viewportManager.viewport));
 	return orientedLoc;
 }
 
@@ -618,9 +648,9 @@
 	GLfloat yNearTopRight = frustum.top * (lb.height / vph);
 	GLfloat zNearTopRight = -frustum.near;
 	
-	LogTrace(@"%@ view point %@ mapped to proportion (%.3f, %.3f) of view bounds %@ and viewport %@",
-			 [self class], NSStringFromCGPoint(glPoint), xp, yp,
-			 NSStringFromCGSize(lb), NSStringFromCC3Viewport(self.viewportManager.viewport));
+	LogCleanTrace(@"%@ view point %@ mapped to proportion (%.3f, %.3f) of top-right corner: (%.3f, %.3f) of view bounds %@ and viewport %@",
+				  [self class], NSStringFromCGPoint(glPoint), xp, yp, xNearTopRight, yNearTopRight,
+				  NSStringFromCGSize(lb), NSStringFromCC3Viewport(self.viewportManager.viewport));
 	
 	// We now have the location of the the top-right corner of the view, at the near
 	// clipping plane, taking into account device orientation. We can now map the glPoint
@@ -651,9 +681,9 @@
 	// Ensure the direction component is normalized before returning.
 	ray.direction = CC3VectorNormalize(ray.direction);
 	
-	LogTrace(@"%@ unprojecting point %@ to near plane location %@ and to ray starting at %@ and pointing towards %@",
-			[self class], NSStringFromCGPoint(glPoint), NSStringFromCC3Vector(pointLocNear),
-			NSStringFromCC3Vector(ray.startLocation), NSStringFromCC3Vector(ray.direction));
+	LogCleanTrace(@"%@ unprojecting point %@ to near plane location %@ and to ray starting at %@ and pointing towards %@",
+				  [self class], NSStringFromCGPoint(glPoint), NSStringFromCC3Vector(pointLocNear),
+				  NSStringFromCC3Vector(ray.startLocation), NSStringFromCC3Vector(ray.direction));
 
 	return ray;
 }
@@ -666,45 +696,156 @@
 
 
 #pragma mark -
-#pragma mark CC3Frustum implementation
+#pragma mark CC3Frustum
+
+// Indices of the six boundary planes
+#define kCC3TopIdx		0
+#define kCC3BotmIdx		1
+#define kCC3LeftIdx		2
+#define kCC3RgtIdx		3
+#define kCC3NearIdx		4
+#define kCC3FarIdx		5
+
+// Indices of the eight boundary vertices
+#define kCC3NearTopLeftIdx	0
+#define kCC3NearTopRgtIdx	1
+#define kCC3NearBtmLeftIdx	2
+#define kCC3NearBtmRgtIdx	3
+#define kCC3FarTopLeftIdx	4
+#define kCC3FarTopRgtIdx	5
+#define kCC3FarBtmLeftIdx	6
+#define kCC3FarBtmRgtIdx	7
+
+@interface CC3BoundingVolume (TemplateMethods)
+-(void) updateIfNeeded;
+@end
 
 @interface CC3Frustum (TemplateMethods)
 -(void) populateProjectionMatrix;
+-(void) buildVertices;
 @end
 
 @implementation CC3Frustum
 
-@synthesize projectionMatrix, top, bottom, left, right, near, far;
-@synthesize topPlane, bottomPlane, leftPlane, rightPlane, nearPlane, farPlane;
-@synthesize isUsingParallelProjection;
+@synthesize top, bottom, left, right, near, far;
+@synthesize modelviewMatrix, isUsingParallelProjection;
 
 -(void) dealloc {
+	[modelviewMatrix release];
 	[projectionMatrix release];
+	[infiniteProjectionMatrix release];
+	[modelviewProjectionMatrix release];
 	[super dealloc];
 }
 
+-(void) setTop: (GLfloat) aValue {
+	top = aValue;
+	[self markDirty];
+}
+
+-(void) setBottom: (GLfloat) aValue {
+	bottom = aValue;
+	[self markDirty];
+}
+
+-(void) setLeft: (GLfloat) aValue {
+	left = aValue;
+	[self markDirty];
+}
+
+-(void) setRight: (GLfloat) aValue {
+	right = aValue;
+	[self markDirty];
+}
+
+-(void) setNear: (GLfloat) aValue {
+	near = aValue;
+	[self markDirty];
+}
+
+-(void) setFar: (GLfloat) aValue {
+	far = aValue;
+	[self markDirty];
+}
+
+-(CC3Plane*) planes {
+	[self updateIfNeeded];
+	return planes;
+}
+
+-(GLushort) planeCount { return 6; }
+
+-(CC3Vector*) vertices {
+	[self updateIfNeeded];
+	return vertices;
+}
+
+-(GLushort) vertexCount { return 8; }
+
+-(CC3Plane) topPlane { return self.planes[kCC3TopIdx]; }
+-(CC3Plane) bottomPlane { return self.planes[kCC3BotmIdx]; }
+-(CC3Plane) leftPlane { return self.planes[kCC3LeftIdx]; }
+-(CC3Plane) rightPlane { return self.planes[kCC3RgtIdx]; }
+-(CC3Plane) nearPlane { return self.planes[kCC3NearIdx]; }
+-(CC3Plane) farPlane { return self.planes[kCC3FarIdx]; }
+
+-(CC3Vector) nearTopLeft { return self.vertices[kCC3NearTopLeftIdx]; }
+-(CC3Vector) nearTopRight { return self.vertices[kCC3NearTopRgtIdx]; }
+-(CC3Vector) nearBottomLeft { return self.vertices[kCC3NearBtmLeftIdx]; }
+-(CC3Vector) nearBottomRight { return self.vertices[kCC3NearBtmRgtIdx]; }
+-(CC3Vector) farTopLeft { return self.vertices[kCC3FarTopLeftIdx]; }
+-(CC3Vector) farTopRight { return self.vertices[kCC3FarTopRgtIdx]; }
+-(CC3Vector) farBottomLeft { return self.vertices[kCC3FarBtmLeftIdx]; }
+-(CC3Vector) farBottomRight { return self.vertices[kCC3FarBtmRgtIdx]; }
+
+-(void) setModelviewMatrix: (CC3GLMatrix*) aMatrix {
+	id oldMtx = modelviewMatrix;
+	modelviewMatrix = [aMatrix retain];
+	[oldMtx release];
+	[self markDirty];
+}
+
+-(CC3GLMatrix*) modelviewProjectionMatrix {
+	[self updateIfNeeded];
+	return modelviewProjectionMatrix;
+}
+
+-(CC3GLMatrix*) projectionMatrix {
+	[self updateIfNeeded];
+	return projectionMatrix;
+}
+
+
+#pragma mark Allocation and initialization
+
 -(id) init {
+	return [self initOnModelviewMatrix: [CC3GLMatrix identity]];
+}
+
+-(id) initOnModelviewMatrix: (CC3GLMatrix*) aMtx {
 	if ( (self = [super init]) ) {
+		top = bottom = left = right = near = far = 0.0f;
+		modelviewMatrix = [aMtx retain];
 		projectionMatrix = [[CC3GLMatrix identity] retain];
+		modelviewProjectionMatrix = [[CC3GLMatrix identity] retain];;
+		infiniteProjectionMatrix = nil;
 		isUsingParallelProjection = NO;
-		[self markPlanesDirty];		// need to calculate this first time
+		isInfiniteProjectionDirty = YES;
 	}
 	return self;
 }
 
-+(id) frustum {
-	return [[[self alloc] init] autorelease];
++(id) frustumOnModelviewMatrix: (CC3GLMatrix*) aMtx {
+	return [[[self alloc] initOnModelviewMatrix: aMtx] autorelease];
 }
 
 // Protected properties for copying
--(BOOL) arePlanesDirty { return arePlanesDirty; }
+-(BOOL) isInfiniteProjectionDirty { return isInfiniteProjectionDirty; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Frustum*) another {
-	
-	[projectionMatrix release];
-	projectionMatrix = [another.projectionMatrix copy];		// retained
+	[super populateFrom: another];
 	
 	top = another.top;
 	bottom = another.bottom;
@@ -713,49 +854,70 @@
 	near = another.near;
 	far = another.far;
 	
-	topPlane = another.topPlane;
-	bottomPlane = another.bottomPlane;
-	leftPlane = another.leftPlane;
-	rightPlane = another.rightPlane;
-	nearPlane = another.nearPlane;
-	farPlane = another.farPlane;
-
+	[projectionMatrix release];
+	projectionMatrix = [another.projectionMatrix copy];		// retained
+	
+	[modelviewProjectionMatrix release];
+	modelviewProjectionMatrix = [another.modelviewProjectionMatrix copy];	// retained
+	
+	[infiniteProjectionMatrix release];
+	infiniteProjectionMatrix = [another.infiniteProjectionMatrix copy];		// retained
+	isInfiniteProjectionDirty = another.isInfiniteProjectionDirty;
+	
 	isUsingParallelProjection = another.isUsingParallelProjection;
-	arePlanesDirty = another.arePlanesDirty;
 }
 
--(id) copyWithZone: (NSZone*) zone {
-	CC3Frustum* aCopy = [[[self class] allocWithZone: zone] init];
-	[aCopy populateFrom: self];
-	return aCopy;
-}
-
--(void) markPlanesDirty {
-	arePlanesDirty = YES;
-}
+/** The maximum allowed effective field of view. */
+#define kMaxEffectiveFOV 179.9
 
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
 		  andFarClip: (GLfloat) farClip
 			 andZoom: (GLfloat) zoomFactor {
-
-	// Field of view measures to the top distance. ZoomFactor modifies the tangent.
+	
+	// The zoomFactor arg modifies the effective field of view.
+	// The effective FOV is clamped to keep it below 180 degrees, because
+	// the scene disappears into the distance as the tangent goes to infinity.
+	GLfloat halfFOV = MIN(fieldOfView / zoomFactor, kMaxEffectiveFOV) / 2.0f;
 	near = nearClip;
-	top = (zoomFactor > 0.0)
-			? (near * tanf(DegreesToRadians((fieldOfView / 2.0) / zoomFactor)))
-			: 0.0;
+	top = near * tanf(DegreesToRadians(halfFOV));
 	bottom = -top;
 	right = top * aspect;
 	left = bottom * aspect;
 	far = farClip;
 	
-	[self populateProjectionMatrix];
-	[self markPlanesDirty];
-
-	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f, Zoom: %.3f",
-			 self, fieldOfView, nearClip, nearClip, farClip, zoomFactor);
+	[self markDirty];
+	
+	LogCleanTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f, Zoom: %.3f",
+				  self, fieldOfView, nearClip, nearClip, farClip, zoomFactor);
 }
+
+-(NSString*) fullDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[desc appendFormat: @"%@", self.description];
+	[desc appendFormat: @"left: %.3f, right: %.3f, ", left, right];
+	[desc appendFormat: @"top: %.3f, bottom: %.3f, ", top, bottom];
+	[desc appendFormat: @"near: %.3f, far: %.3f", near, far];
+	[desc appendFormat: @"\n\tleftPlane: %@", NSStringFromCC3Plane(self.leftPlane)];
+	[desc appendFormat: @"\n\trightPlane: %@", NSStringFromCC3Plane(self.rightPlane)];
+	[desc appendFormat: @"\n\ttopPlane: %@", NSStringFromCC3Plane(self.topPlane)];
+	[desc appendFormat: @"\n\tbottomPlane: %@", NSStringFromCC3Plane(self.bottomPlane)];
+	[desc appendFormat: @"\n\tnearPlane: %@", NSStringFromCC3Plane(self.nearPlane)];
+	[desc appendFormat: @"\n\tfarPlane: %@", NSStringFromCC3Plane(self.farPlane)];
+	[desc appendFormat: @"\n\tnearTopLeft: %@", NSStringFromCC3Vector(self.nearTopLeft)];
+	[desc appendFormat: @"\n\tnearTopRight: %@", NSStringFromCC3Vector(self.nearTopRight)];
+	[desc appendFormat: @"\n\tnearBottomLeft: %@", NSStringFromCC3Vector(self.nearBottomLeft)];
+	[desc appendFormat: @"\n\tnearBottomRight: %@", NSStringFromCC3Vector(self.nearBottomRight)];
+	[desc appendFormat: @"\n\tfarTopLeft: %@", NSStringFromCC3Vector(self.farTopLeft)];
+	[desc appendFormat: @"\n\tfarTopRight: %@", NSStringFromCC3Vector(self.farTopRight)];
+	[desc appendFormat: @"\n\tfarBottomLeft: %@", NSStringFromCC3Vector(self.farBottomLeft)];
+	[desc appendFormat: @"\n\tfarBottomRight: %@", NSStringFromCC3Vector(self.farBottomRight)];
+	return desc;
+}
+
+
+#pragma mark Projection matrices
 
 /**
  * Template method that populates the projection matrix from the frustum.
@@ -772,83 +934,106 @@
 										andBottom: bottom andTop: top  
 										  andNear: near andFar: far];
 	}
+	isInfiniteProjectionDirty = YES;
 }
 
--(void) buildPlanes: (CC3GLMatrix*) aModelViewMatrix {
-	if (arePlanesDirty) {
-		CC3GLMatrix* mvp = [projectionMatrix copyAutoreleased];
-		[mvp multiplyByMatrix: aModelViewMatrix];
-		
-		GLfloat* m = mvp.glMatrix;
-		
-		bottomPlane = CC3PlaneNormalize(CC3PlaneMake(m[3]+m[1], m[7]+m[5], m[11]+m[9], m[15]+m[13]));
-		topPlane    = CC3PlaneNormalize(CC3PlaneMake(m[3]-m[1], m[7]-m[5], m[11]-m[9], m[15]-m[13]));
-		
-		leftPlane   = CC3PlaneNormalize(CC3PlaneMake(m[3]+m[0], m[7]+m[4], m[11]+m[8], m[15]+m[12]));
-		rightPlane  = CC3PlaneNormalize(CC3PlaneMake(m[3]-m[0], m[7]-m[4], m[11]-m[8], m[15]-m[12]));
-		
-		nearPlane   = CC3PlaneNormalize(CC3PlaneMake(m[3]+m[2], m[7]+m[6], m[11]+m[10], m[15]+m[14]));
-		farPlane    = CC3PlaneNormalize(CC3PlaneMake(m[3]-m[2], m[7]-m[6], m[11]-m[10], m[15]-m[14]));
-		
-		arePlanesDirty = NO;
-
-		LogTrace(@"%@ building planes from projection %@ and modelview %@",
-				 self, projectionMatrix, aModelviewMatrix);
+/**
+ * Returns the projection matrix modified to have an infinite depth of view,
+ * by assuming a farClippingDistance set at infinity.
+ *
+ * Since this matrix is not commonly used, it is only calculated when the
+ * projectionMatrix has changed, and then only on demand.
+ *
+ * When the projectionMatrix is recalculated, the infiniteProjectionMatrix
+ * is marked as dirty. It is then recalculated the next time this property
+ * is accessed, and is cached until it is marked dirty again.
+ */
+-(CC3GLMatrix*) infiniteProjectionMatrix {
+	[self updateIfNeeded];		// Make sure properties are up to date
+	if (!infiniteProjectionMatrix) {
+		infiniteProjectionMatrix = [[CC3GLMatrix matrix] retain];
+		isInfiniteProjectionDirty = YES;
 	}
+	if (isInfiniteProjectionDirty) {
+		if (isUsingParallelProjection) {
+			[infiniteProjectionMatrix populateOrthoFromFrustumLeft: left andRight: right
+														 andBottom: bottom andTop: top  
+														   andNear: near];
+		} else {
+			[infiniteProjectionMatrix populateFromFrustumLeft: left andRight: right
+													andBottom: bottom andTop: top  
+													  andNear: near];
+		}
+		isInfiniteProjectionDirty = NO;
+	}
+	return infiniteProjectionMatrix;
 }
 
--(BOOL) doesIntersectPointAt: (CC3Vector) location {
-	// Treat the point as a sphere of zero radius.
-	return [self doesIntersectSphereAt: location withRadius: 0.0];
+
+#pragma mark Updating
+
+/** Make sure projection matrix is current, then create the modelview projection matrix. */
+-(void) buildVolume {
+	[self populateProjectionMatrix];
+	[modelviewProjectionMatrix populateFrom: projectionMatrix];
+	[modelviewProjectionMatrix multiplyByMatrix: modelviewMatrix];
 }
 
--(BOOL) doesIntersectSphereAt: (CC3Vector) location withRadius: (GLfloat) radius {
-	GLfloat dist;
+/**
+ * Builds the six planes that define the frustum volume,
+ * using the modelview matrix and the finite projection matrix.
+ */
+-(void) buildPlanes{
+	GLfloat* m = modelviewProjectionMatrix.glMatrix;
 	
-	// The sphere will be outside the frustum if it lies farther behind any one of the
-	// planes than its radius.
-	// Determine the distance from the location to each plane in the frustum and return NO
-	// if the location is farther behind any of the planes by the length of the radius.
-	// Test planes in order of likeliness to exclude an object.
-	dist = CC3DistanceFromNormalizedPlane(nearPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
-	dist = CC3DistanceFromNormalizedPlane(rightPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
-	dist = CC3DistanceFromNormalizedPlane(leftPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
-	dist = CC3DistanceFromNormalizedPlane(topPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
-	dist = CC3DistanceFromNormalizedPlane(bottomPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
-	dist = CC3DistanceFromNormalizedPlane(farPlane, location);
-	if (dist + radius < 0) {
-		return NO;
-	}
+	planes[kCC3BotmIdx] = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]+m[1], m[7]+m[5], m[11]+m[9], m[15]+m[13])));
+	planes[kCC3TopIdx]  = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]-m[1], m[7]-m[5], m[11]-m[9], m[15]-m[13])));
 	
-	return YES;		// Not behind any of the planes, so must be inside the frustum
+	planes[kCC3LeftIdx] = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]+m[0], m[7]+m[4], m[11]+m[8], m[15]+m[12])));
+	planes[kCC3RgtIdx]  = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]-m[0], m[7]-m[4], m[11]-m[8], m[15]-m[12])));
+	
+	planes[kCC3NearIdx] = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]+m[2], m[7]+m[6], m[11]+m[10], m[15]+m[14])));
+	planes[kCC3FarIdx]  = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake(m[3]-m[2], m[7]-m[6], m[11]-m[10], m[15]-m[14])));
+	
+	[self buildVertices];
+	
+	LogCleanTrace(@"Built planes for %@ from projection: %@ and modelview: %@ combined: %@",
+				  self.fullDescription, projectionMatrix, modelviewMatrix, modelviewProjectionMatrix);
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ top: %.3f, bottom: %.3f, left: %.3f, right: %.3f, near: %.3f, far: %.3f",
-			[self class], top, bottom, left, right, near, far];
+-(void) buildVertices {
+	CC3Plane tp = planes[kCC3TopIdx];
+	CC3Plane bp = planes[kCC3BotmIdx];
+	CC3Plane lp = planes[kCC3LeftIdx];
+	CC3Plane rp = planes[kCC3RgtIdx];
+	CC3Plane np = planes[kCC3NearIdx];
+	CC3Plane fp = planes[kCC3FarIdx];
+	
+	vertices[kCC3NearTopLeftIdx] = CC3TriplePlaneIntersection(np, tp, lp);
+	vertices[kCC3NearTopRgtIdx] = CC3TriplePlaneIntersection(np, tp, rp);
+	
+	vertices[kCC3NearBtmLeftIdx] = CC3TriplePlaneIntersection(np, bp, lp);
+	vertices[kCC3NearBtmRgtIdx] = CC3TriplePlaneIntersection(np, bp, rp);
+	
+	vertices[kCC3FarTopLeftIdx] = CC3TriplePlaneIntersection(fp, tp, lp);
+	vertices[kCC3FarTopRgtIdx] = CC3TriplePlaneIntersection(fp, tp, rp);
+	
+	vertices[kCC3FarBtmLeftIdx] = CC3TriplePlaneIntersection(fp, bp, lp);
+	vertices[kCC3FarBtmRgtIdx] = CC3TriplePlaneIntersection(fp, bp, rp);
 }
 
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ topPlane: %@ bottomPlane: %@ leftPlane: %@ rightPlane: %@ nearPlane: %@ farPlane: %@",
-										[self description],
-										NSStringFromCC3Plane(topPlane), NSStringFromCC3Plane(bottomPlane),
-										NSStringFromCC3Plane(leftPlane), NSStringFromCC3Plane(rightPlane),
-										NSStringFromCC3Plane(nearPlane), NSStringFromCC3Plane(farPlane)];
+// Deprecated method
+-(void) markPlanesDirty { [self markDirty]; }
+
+// Deprecated method
+-(BOOL) doesIntersectPointAt: (CC3Vector) aLocation {
+	return [self doesIntersectLocation: aLocation];
+}
+
+// Deprecated method
+-(BOOL) doesIntersectSphereAt: (CC3Vector) aLocation withRadius: (GLfloat) radius {
+	return [self doesIntersectSphere: CC3SphereMake(aLocation, radius)];
 }
 
 @end
+

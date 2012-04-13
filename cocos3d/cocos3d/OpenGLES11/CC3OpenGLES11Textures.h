@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Textures.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -97,6 +97,43 @@
  * open method, and to be automatically restored on each invocation of the close method.
  */
 @interface CC3OpenGLES11StateTrackerTexEnvEnumeration : CC3OpenGLES11StateTrackerEnumeration
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerTexParameterEnumeration
+
+/**
+ * CC3OpenGLES11StateTrackerTexParameterEnumeration tracks an enumerated GL state value for a texture parameter.
+ *
+ * This implementation uses GL function glGetTexParameteri to read the value from the
+ * GL engine, and GL function glTexParameteri to set the value in the GL engine.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ *
+ * The shouldAlwaysSetGL property is set to YES, which causes the state in the
+ * GL engine to be updated whenever the value is set in the tracker.
+ */
+@interface CC3OpenGLES11StateTrackerTexParameterEnumeration : CC3OpenGLES11StateTrackerEnumeration
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES11StateTrackerTexParameterCapability
+
+/**
+ * CC3OpenGLES11StateTrackerTexParameterCapability tracks a boolean GL capability for a texture parameter.
+ *
+ * This implementation uses GL function glGetTexParameteri to read the value from the
+ * GL engine, and GL function glTexParameteri to set the value in the GL engine.
+ *
+ * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
+ * which will cause the state to be automatically read once, on the first invocation of the
+ * open method, and to be automatically restored on each invocation of the close method.
+ */
+@interface CC3OpenGLES11StateTrackerTexParameterCapability : CC3OpenGLES11StateTrackerCapability
 @end
 
 
@@ -215,6 +252,11 @@
 	CC3OpenGLES11StateTrackerTextureClientCapability* textureCoordArray;
 	CC3OpenGLES11StateTrackerVertexTexCoordsPointer* textureCoordinates;
 	CC3OpenGLES11StateTrackerTextureBinding* textureBinding;
+	CC3OpenGLES11StateTrackerTexParameterEnumeration* minifyingFunction;
+	CC3OpenGLES11StateTrackerTexParameterEnumeration* magnifyingFunction;
+	CC3OpenGLES11StateTrackerTexParameterEnumeration* horizontalWrappingFunction;
+	CC3OpenGLES11StateTrackerTexParameterEnumeration* verticalWrappingFunction;
+	CC3OpenGLES11StateTrackerTexParameterCapability* autoGenerateMipMap;
 	CC3OpenGLES11StateTrackerTexEnvEnumeration* textureEnvironmentMode;
 	CC3OpenGLES11StateTrackerTexEnvEnumeration* combineRGBFunction;
 	CC3OpenGLES11StateTrackerTexEnvEnumeration* rgbSource0;
@@ -251,6 +293,21 @@
 
 /** Tracks texture binding (GL get name GL_TEXTURE_BINDING_2D and set function glBindTexture). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerTextureBinding* textureBinding;
+
+/** Tracks texture minifying function (GL name GL_TEXTURE_MIN_FILTER). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerTexParameterEnumeration* minifyingFunction;
+
+/** Tracks texture magnifying function (GL name GL_TEXTURE_MAG_FILTER). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerTexParameterEnumeration* magnifyingFunction;
+
+/** Tracks texture horizontal (S) wrapping function (GL name GL_TEXTURE_WRAP_S). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerTexParameterEnumeration* horizontalWrappingFunction;
+
+/** Tracks texture vertical (T) wrapping function (GL name GL_TEXTURE_WRAP_T). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerTexParameterEnumeration* verticalWrappingFunction;
+
+/** Tracks whether automatica mipmaps are enabled (GL name GL_GENERATE_MIPMAP). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerTexParameterCapability* autoGenerateMipMap;
 
 /** Tracks texture environment mode (GL name GL_TEXTURE_ENV_MODE). */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerTexEnvEnumeration* textureEnvironmentMode;
@@ -412,7 +469,7 @@
  * should be at least equal to the number of texture units that have been activated
  * by cocos2d.
  *
- * Normally, cocoss2d only uses texture unit GL_TEXTURE0, so the initial value of
+ * Normally, cocos2d only uses texture unit GL_TEXTURE0, so the initial value of
  * this property is one. If your cocos2d application performs multi-texturing and
  * has activated texture unit GL_TEXTURE1 or beyond, make sure that you set the value
  * of this property to the number of texture units used by your cocos2d application.

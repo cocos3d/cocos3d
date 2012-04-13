@@ -1,9 +1,9 @@
 /*
  * CC3Material.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -142,12 +142,18 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * instances may reference the same instance of CC3Material, allowing many objects to
  * be covered by the same material.
  *
+ * Once this material has been assigned to a mesh node, changing a texture to a new
+ * texture should be performed through the mesh node itself, and not through the
+ * material. This is to keep the mesh aligned with the orientation and usable area of
+ * the textures since, under iOS, textures are padded to dimensions of a power-of-two
+ * (POT), and most texture formats are loaded updside-down.
+ *
  * When being drawn, the CC3MeshNode invokes the draw method on the CC3Material
  * instance prior to drawing the associated mesh.
  *
  * When drawing the material to the GL engine, this class remembers which material was
  * last drawn, and only binds the material data to the GL engine when a different material
- * is drawn. This allows the application to organize the CC3MeshNodes within the CC3World
+ * is drawn. This allows the application to organize the CC3MeshNodes within the CC3Scene
  * so that nodes using the same material are drawn together, before moving on to other
  * materials. This strategy can minimize the number of mesh switches in the GL engine,
  * which improves performance. 
@@ -486,6 +492,12 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 #pragma mark Textures
 
 /**
+ * Returns the number of textures attached to this material, regardless of whether
+ * the textures were attached using the texture property or the addTexture: method.
+ */
+@property(nonatomic, readonly) GLuint textureCount;
+
+/**
  * When using a single texture for this material, this property holds that texture.
  *
  * This property may be left nil if no texture is needed.
@@ -499,47 +511,15 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * to be handled the same way.
  *
  * The texture held by this property will be processed by the first GL texture unit
- * (texture unit zero). 
+ * (texture unit zero).
+ *
+ * Once this material has been added to a mesh node, changes to this property should
+ * be made through the same property on the mesh node itself, and not made to this
+ * property directly, in order to keep the mesh aligned with the orientation and
+ * usable area of the textures. See the notes for the same property on CC3MeshNode
+ * for more information.
  */
 @property(nonatomic, retain) CC3Texture* texture;
-
-/**
- * Returns the number of textures attached to this material, regardless of whether
- * the textures were attached using the texture property or the addTexture: method.
- */
-@property(nonatomic, readonly) GLuint textureCount;
-
-/**
- * Returns whether this material contains a texture that is configured as a bump-map.
- *
- * Returns YES only if one of the textures that was added to this material (either
- * through the texture property or the addTexture: method) returns YES from its
- * isBumpMap property. Otherwise, this property returns NO.
- */
-@property(nonatomic, readonly) BOOL hasBumpMap;
-
-/**
- * The direction, in local tangent coordinates, of the light source that is to
- * interact with any texture contained in this material that has been configured
- * as a bump-map.
- *
- * Bump-maps are textures that store a normal vector (XYZ coordinates) in
- * the RGB components of each texture pixel, instead of color information.
- * These per-pixel normals interact with the value of this lightDirection
- * property (through a dot-product), to determine the luminance of the pixel.
- *
- * Setting this property sets the equivalent property in all textures contained
- * within this material.
- *
- * Reading this value returns the value of the equivalent property in the first
- * texture that is configrued as a bump-map. Otherwise kCC3VectorZero is returned.
- *
- * The value of this property must be in the tangent-space coordinates associated
- * with the texture UV space, in practice, this property is typically not set
- * directly. Instead, you can use the globalLightLocation property of the mesh
- * node that is making use of this texture.
- */
-@property(nonatomic, assign) CC3Vector lightDirection;
 
 /**
  * In most situations, the material will use a single CC3Texture in the texture property.
@@ -563,6 +543,11 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. If you attempt to
  * add more than this number of textures to the material, the additional textures
  * will be ignored, and an informational message to that fact will be logged.
+ *
+ * Once this material has been added to a mesh node, new textures should be added
+ * through the same method on the mesh node itself, instead of this method, in order
+ * to keep the mesh aligned with the orientation and usable area of the textures.
+ * See the notes for the same method on CC3MeshNode for more information.
  */
 -(void) addTexture: (CC3Texture*) aTexture;
 
@@ -601,8 +586,45 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  *
  * If the specified texture unit index is zero, the value of the texture property will
  * be changed to the specified texture.
+ *
+ * Once this material has been added to a mesh node, changing a texture should be
+ * performed through the same method on the mesh node itself, instead of this method,
+ * in order to keep the mesh aligned with the orientation and usable area of the
+ * textures. See the notes for the same method on CC3MeshNode for more information.
  */
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Returns whether this material contains a texture that is configured as a bump-map.
+ *
+ * Returns YES only if one of the textures that was added to this material (either
+ * through the texture property or the addTexture: method) returns YES from its
+ * isBumpMap property. Otherwise, this property returns NO.
+ */
+@property(nonatomic, readonly) BOOL hasBumpMap;
+
+/**
+ * The direction, in local tangent coordinates, of the light source that is to
+ * interact with any texture contained in this material that has been configured
+ * as a bump-map.
+ *
+ * Bump-maps are textures that store a normal vector (XYZ coordinates) in
+ * the RGB components of each texture pixel, instead of color information.
+ * These per-pixel normals interact with the value of this lightDirection
+ * property (through a dot-product), to determine the luminance of the pixel.
+ *
+ * Setting this property sets the equivalent property in all textures contained
+ * within this material.
+ *
+ * Reading this value returns the value of the equivalent property in the first
+ * texture that is configrued as a bump-map. Otherwise kCC3VectorZero is returned.
+ *
+ * The value of this property must be in the tangent-space coordinates associated
+ * with the texture UV space, in practice, this property is typically not set
+ * directly. Instead, you can use the globalLightLocation property of the mesh
+ * node that is making use of this texture.
+ */
+@property(nonatomic, assign) CC3Vector lightDirection;
 
 
 #pragma mark Allocation and initialization
@@ -694,7 +716,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 /**
  * Resets the tracking of the material switching functionality.
  *
- * This is invoked automatically by the CC3World at the beginning of each frame
+ * This is invoked automatically by the CC3Scene at the beginning of each frame
  * drawing cycle. Usually, the application never needs to invoke this method directly.
  */
 +(void) resetSwitching;

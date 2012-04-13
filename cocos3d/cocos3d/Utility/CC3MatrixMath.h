@@ -1,17 +1,17 @@
 /*
  * CC3MatrixMath.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Kazmath functions copyright (c) 2008, Luke Benstead. All rights reserved.
  *
  * http://www.kazade.co.uk/kazmath/
  *
- * Augmented and modified for use with Objective-C in cocos3D by Bill Hollings.
- * Additions and modifications copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Augmented and modified for use with Objective-C in cocos3d by Bill Hollings.
+ * Additions and modifications copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -86,7 +86,7 @@ static inline void kmMat4RotationYXZ(GLfloat* m, CC3Vector aRotation) {
 /**
  * Builds a rotation matrix that rotates around all three axes z (roll), y (yaw), and x (pitch),
  * in that order, stores the result in pOut and returns the result
- * This algorithm matches up along the positive Z axis, which is used by some commercial 3D worlds.
+ * This algorithm matches up along the positive Z axis, which is used by some commercial 3D editors.
  */
 static inline void kmMat4RotationZYX(GLfloat* m, CC3Vector aRotation) {
 /*

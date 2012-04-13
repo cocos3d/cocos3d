@@ -1,13 +1,13 @@
-//
-//  ___PROJECTNAMEASIDENTIFIER___Layer.m
-//  ___PROJECTNAME___
-//
-//  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
-//
+/**
+ *  ___PROJECTNAMEASIDENTIFIER___Layer.m
+ *  ___PROJECTNAME___
+ *
+ *  Created by ___FULLUSERNAME___ on ___DATE___.
+ *  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
+ */
 
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
-#import "___PROJECTNAMEASIDENTIFIER___World.h"
+#import "___PROJECTNAMEASIDENTIFIER___Scene.h"
 
 
 @implementation ___PROJECTNAMEASIDENTIFIER___Layer

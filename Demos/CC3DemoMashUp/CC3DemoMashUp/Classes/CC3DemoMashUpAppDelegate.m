@@ -1,9 +1,9 @@
 /*
  * CC3DemoMashUpAppDelegate.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,11 +29,9 @@
  * See header file CC3DemoMashUpAppDelegate.h for full API documentation.
  */
 
-#import "cocos2d.h"
-
 #import "CC3DemoMashUpAppDelegate.h"
 #import "CC3DemoMashUpLayer.h"
-#import "CC3DemoMashUpWorld.h"
+#import "CC3DemoMashUpScene.h"
 #import "CC3EAGLView.h"
 #import "CCAction.h"
 
@@ -70,16 +68,19 @@
 	//  1. Transparency (alpha blending), and device camera overlay requires an alpha channel,
 	//     so must use RGBA8 color format. If not using device overlay or alpha blending
 	//     (transparency) in any 3D or 2D graphics this can be changed to kEAGLColorFormatRGB565.
-	//	2. 3D rendering requires a depth format of 16 bit.
-	//  3. For highest performance, multisampling antialiasing is disabled by default.
+	//	2. 3D rendering requires a depth format of 16 or 24 bits
+	//     (GL_DEPTH_COMPONENT16_OES or GL_DEPTH_COMPONENT24_OES).
+	//  3. If a stencil buffer is required (for shadow volumes, for instance), it must be
+	//     combined with the depth buffer by using a depth format of GL_DEPTH24_STENCIL8_OES.
+	//  4. For highest performance, multisampling antialiasing is disabled by default.
 	//     To enable multisampling antialiasing, set the multiSampling parameter to YES.
 	//     You can also change the number of samples used with the numberOfSamples parameter.
-	//  4. If you are using BOTH multisampling antialiasing AND node picking from touch events,
+	//  5. If you are using BOTH multisampling antialiasing AND node picking from touch events,
 	//     use the CC3EAGLView class instead of EAGLView. When using EAGLView, multisampling
 	//     antialiasing interferes with the color-testing algorithm used for touch-event node picking.
 	EAGLView *glView = [CC3EAGLView viewWithFrame: [window bounds]
 									  pixelFormat: kEAGLColorFormatRGBA8
-									  depthFormat: GL_DEPTH_COMPONENT16_OES
+									  depthFormat: GL_DEPTH24_STENCIL8_OES
 							   preserveBackbuffer: NO
 									   sharegroup: nil
 									multiSampling: NO
@@ -92,8 +93,8 @@
 	[director setOpenGLView:glView];
 						
 	// Enables High Res mode (Retina Display) on iPhone 4 and maintains low res on all other devices
-//	if( ! [director enableRetinaDisplay:YES] )
-//		CCLOG(@"Retina Display Not supported");
+	if( ! [director enableRetinaDisplay:YES] )
+		CCLOG(@"Retina Display Not supported");
 
 	// make the GL view a child of the main window and present it
 	[window addSubview: glView];
@@ -110,10 +111,12 @@
 	// Create the customized CC3Layer that supports 3D rendering,
 	// and schedule it for automatic updates
 	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layerWithColor: ccc4(100, 120, 220, 255)];
+//	CC3Layer* cc3Layer = [CC3DemoMashUpLayer node];		// Use this for AR with device camera
 	[cc3Layer scheduleUpdate];
 	
-	// Create the customized 3D world, attach it to the layer, and start it playing.
-	cc3Layer.cc3World = [CC3DemoMashUpWorld world];
+	// Create the customized 3D scene, attach it to the layer.
+	// Could also just create this inside the customer layer.
+	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
 	
 	ControllableCCLayer* mainLayer = cc3Layer;
 	
@@ -121,15 +124,17 @@
 	// within any standard CCLayer. So you can have a mostly 2D window, with a smaller 3D window
 	// embedded in it. To experiment with this smaller embedded 3D window, uncomment the following lines:
 //	CGSize winSize = [[CCDirector sharedDirector] winSize];
-//	cc3Layer.position = ccp(0.0, 0.0);
+//	cc3Layer.position = ccp(30.0, 30.0);
 //	cc3Layer.contentSize = CGSizeMake(winSize.width - 100.0, winSize.width - 40.0);
 //	cc3Layer.alignContentSizeWithDeviceOrientation = YES;
 //	mainLayer = [ControllableCCLayer layerWithColor: ccc4(0, 0, 0, 255)];
 //	[mainLayer addChild: cc3Layer];
 	
-	// When it is smaller, you can even move the 3D layer around on the screen dyanmically. To see
-	// this in action, uncomment the lines above as described, and also uncomment the following line.
-//	[cc3Layer runAction: [CCMoveTo actionWithDuration: 10.0 position: ccp(500.0, 250.0)]];
+	// When it is smaller, you can even move the 3D layer around on the screen dyanmically.
+	// To see this in action, uncomment the lines above as described, and also uncomment
+	// the following two lines.
+//	cc3Layer.position = ccp(0.0, 0.0);
+//	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
 	// The controller is optional. If you want to auto-rotate the view when the device orientation
 	// changes, or if you want to display a device camera behind a combined 3D & 2D scene
@@ -137,6 +142,8 @@
 	// and uncomment the lines below these lines that uses the traditional CCDirector scene startup.
 	viewController = [[CCNodeController controller] retain];
 	viewController.doesAutoRotate = YES;
+//	viewController.isOverlayingDeviceCamera = YES;	// Uncomment for 3D overlay on device camera for AR...
+													// ...and change way CC3Layer is created above.
 	[viewController runSceneOnNode: mainLayer];		// attach the layer to the controller and run a scene with it
 	
 	// If a controller is NOT used, uncomment the following standard CCDirector scene startup lines,

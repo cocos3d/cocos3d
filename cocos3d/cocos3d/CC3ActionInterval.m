@@ -1,9 +1,9 @@
 /*
  * CC3ActionInterval.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,17 +30,27 @@
  */
 
 #import "CC3ActionInterval.h"
-#import "CC3TargettingNode.h"
+#import "CC3Node.h"
 
 
 #pragma mark -
-#pragma mark CC3TransformBy
+#pragma mark CCActionInterval
 
-@interface CC3TransformBy (TemplateMethods)
+@implementation CCActionInterval (CC3)
+
+-(CC3Node*) targetCC3Node { return (CC3Node*)self.target; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3TransformVectorAction
+
+@interface CC3TransformVectorAction (TemplateMethods)
 @property(nonatomic, assign) CC3Vector targetVector;
 @end
 
-@implementation CC3TransformBy
+@implementation CC3TransformVectorAction
 
 -(id) initWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector {
 	if( (self = [super initWithDuration: t]) ) {
@@ -70,9 +80,7 @@
 	self.targetVector = CC3VectorAdd(startVector, CC3VectorScaleUniform(diffVector, t));
 }
 
--(CC3Vector) targetVector {
-	return kCC3VectorZero;
-}
+-(CC3Vector) targetVector { return kCC3VectorZero; }
 
 -(void) setTargetVector: (CC3Vector) aVector {}
 
@@ -81,6 +89,13 @@
 			NSStringFromCC3Vector(startVector), NSStringFromCC3Vector(diffVector)];
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3TransformBy
+
+@implementation CC3TransformBy
 @end
 
 
@@ -97,13 +112,9 @@
 	return [self actionWithDuration: t differenceVector: aTranslation];
 }
 
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).location;
-}
+-(CC3Vector) targetVector { return self.targetCC3Node.location; }
 
--(void) setTargetVector: (CC3Vector) aLocation {
-	((CC3Node*)self.target).location = aLocation;
-}
+-(void) setTargetVector: (CC3Vector) aLocation { self.targetCC3Node.location = aLocation; }
 
 @end
 
@@ -121,13 +132,52 @@
 	return [self actionWithDuration: t differenceVector: aRotation];
 }
 
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).rotation;
+-(CC3Vector) targetVector { return self.targetCC3Node.rotation; }
+
+-(void) setTargetVector: (CC3Vector) aRotation { self.targetCC3Node.rotation = aRotation; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ScaleBy
+
+@implementation CC3ScaleBy
+
+/**
+ * Scale is multiplicative. Scaling BY 5 means take whatever the current scale is
+ * and multiply it by 5. If the previous scale was 3, then the future scale
+ * will be 15, not 8 if the numbers were simply added as in the superclass.
+ */
+-(void) startWithTarget:(CC3Node*) aTarget {
+	[super startWithTarget: aTarget];
+	CC3Vector endVector = CC3VectorScale(startVector, diffVector);
+	scaledDiffVector = CC3VectorDifference(endVector, startVector);
 }
 
--(void) setTargetVector: (CC3Vector) aRotation {
-	((CC3Node*)self.target).rotation = aRotation;
+-(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
+	return [self initWithDuration: t differenceVector: aScale];
 }
+
++(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
+	return [self actionWithDuration: t differenceVector: aScale];
+}
+
+-(id) initWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale {
+	return [self initWithDuration: t scaleBy: cc3v(aScale, aScale, aScale)];
+}
+
++(id) actionWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale {
+	return [self actionWithDuration: t scaleBy: cc3v(aScale, aScale, aScale)];
+}
+
+-(void) update: (ccTime) t {	
+	self.targetVector = CC3VectorAdd(startVector, CC3VectorScaleUniform(scaledDiffVector, t));
+}
+
+-(CC3Vector) targetVector { return self.targetCC3Node.scale; }
+
+-(void) setTargetVector: (CC3Vector) aScale { self.targetCC3Node.scale = aScale; }
 
 @end
 
@@ -138,66 +188,60 @@
 @implementation CC3RotateByAngle
 
 -(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle {
-	if( (self = [super initWithDuration: t]) ) {
-		diffAngle = anAngle;
-	}
-	return self;
+	return [self initWithDuration: t rotateByAngle: anAngle aroundAxis: kCC3VectorNull];
 }
 
 +(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle {
 	return [[[self alloc] initWithDuration: t rotateByAngle: anAngle] autorelease];
 }
 
+-(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
+	if( (self = [super initWithDuration: t]) ) {
+		diffAngle = anAngle;
+		rotationAxis = anAxis;
+	}
+	return self;
+}
+
++(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
+	return [[[self alloc] initWithDuration: t rotateByAngle: anAngle aroundAxis: anAxis] autorelease];
+}
+
 -(id) copyWithZone: (NSZone*) zone {
 	return [[[self class] allocWithZone: zone] initWithDuration: [self duration]
-												  rotateByAngle: diffAngle];
+												  rotateByAngle: diffAngle
+													 aroundAxis: rotationAxis];
 }
 
 -(id) reverse {
-	return [[self class] actionWithDuration: self.duration rotateByAngle: -diffAngle];
+	return [[self class] actionWithDuration: self.duration
+							  rotateByAngle: -diffAngle
+								 aroundAxis: rotationAxis];
 }
 
+/** If no explicit rotation axis was set, retrieve it from the target node. */
 -(void) startWithTarget:(CC3Node*) aTarget {
 	[super startWithTarget: aTarget];
-	startAngle = aTarget.rotationAngle;
+	activeRotationAxis = CC3VectorIsNull(rotationAxis) ? aTarget.rotationAxis : rotationAxis;
+	prevTime = 0;
 }
 
--(void) update: (ccTime) t {	
-	((CC3Node*)self.target).rotationAngle = startAngle + (diffAngle * t);
+-(void) update: (ccTime) t {
+	GLfloat deltaTime = t - prevTime;
+	GLfloat deltaAngle = diffAngle * deltaTime;
+	[self.targetCC3Node rotateByAngle: deltaAngle aroundAxis: activeRotationAxis];
+	prevTime = t;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ start: %.3f, end: %.3f, diff: %.3f",
-			[self class], startAngle, startAngle + diffAngle, diffAngle];
+	return [NSString stringWithFormat: @"%@ angle: %.3f, axis: %@",
+			[self class], diffAngle, NSStringFromCC3Vector(rotationAxis)];
 }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3ScaleBy
-
-@implementation CC3ScaleBy
-
--(id) initWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
-	return [self initWithDuration: t differenceVector: aScale];
-}
-
-+(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale {
-	return [self actionWithDuration: t differenceVector: aScale];
-}
-
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).scale;
-}
-
--(void) setTargetVector: (CC3Vector) aScale {
-	((CC3Node*)self.target).scale = aScale;
-}
-
-@end
-
-
 #pragma mark CC3TransformTo
 
 @implementation CC3TransformTo
@@ -249,13 +293,9 @@
 	return [self actionWithDuration: t endVector: aLocation];
 }
 
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).location;
-}
+-(CC3Vector) targetVector { return self.targetCC3Node.location; }
 
--(void) setTargetVector: (CC3Vector) aLocation {
-	((CC3Node*)self.target).location = aLocation;
-}
+-(void) setTargetVector: (CC3Vector) aLocation { self.targetCC3Node.location = aLocation; }
 
 @end
 
@@ -282,13 +322,37 @@
 	diffVector = CC3VectorRotationalDifference(endVector, startVector);
 }
 
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).rotation;
+-(CC3Vector) targetVector { return self.targetCC3Node.rotation; }
+
+-(void) setTargetVector: (CC3Vector) aRotation { self.targetCC3Node.rotation = aRotation; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ScaleTo
+
+@implementation CC3ScaleTo
+
+-(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
+	return [self initWithDuration: t endVector: aScale];
 }
 
--(void) setTargetVector: (CC3Vector) aRotation {
-	((CC3Node*)self.target).rotation = aRotation;
++(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
+	return [self actionWithDuration: t endVector: aScale];
 }
+
+-(id) initWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale {
+	return [self initWithDuration: t scaleTo: cc3v(aScale, aScale, aScale)];
+}
+
++(id) actionWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale {
+	return [self actionWithDuration: t scaleTo: cc3v(aScale, aScale, aScale)];
+}
+
+-(CC3Vector) targetVector { return self.targetCC3Node.scale; }
+
+-(void) setTargetVector: (CC3Vector) aScale { self.targetCC3Node.scale = aScale; }
 
 @end
 
@@ -324,7 +388,12 @@
 // that would result from simple subtraction.
 -(void) startWithTarget:(CC3Node*) aTarget {
 	[super startWithTarget: aTarget];
+	startAngle = aTarget.rotationAngle;
 	diffAngle = CC3SemiCyclicAngle(endAngle - startAngle);
+}
+
+-(void) update: (ccTime) t {	
+	self.targetCC3Node.rotationAngle = startAngle + (diffAngle * t);
 }
 
 -(NSString*) description {
@@ -348,13 +417,10 @@
 	return [self actionWithDuration: t endVector: CC3VectorNormalize(aDirection)];
 }
 
--(CC3Vector) targetVector {
-	return ((CC3TargettingNode*)self.target).forwardDirection;
+-(CC3Vector) targetVector { return self.targetCC3Node.forwardDirection;
 }
 
--(void) setTargetVector: (CC3Vector) aDirection {
-	((CC3TargettingNode*)self.target).forwardDirection = aDirection;
-}
+-(void) setTargetVector: (CC3Vector) aDirection { self.targetCC3Node.forwardDirection = aDirection; }
 
 @end
 
@@ -381,25 +447,87 @@
 
 
 #pragma mark -
-#pragma mark CC3ScaleTo
+#pragma mark CC3MoveDirectionallyBy
 
-@implementation CC3ScaleTo
+@interface CC3MoveDirectionallyBy (TemplateMethods)
+@property(nonatomic, readonly) CC3Vector targetDirection;
+@end
 
--(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
-	return [self initWithDuration: t endVector: aScale];
+@implementation CC3MoveDirectionallyBy
+
+-(id) initWithDuration: (ccTime) t moveBy: (GLfloat) aDistance {
+	if( (self = [super initWithDuration: t]) ) {
+		distance = aDistance;
+	}
+	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale {
-	return [self actionWithDuration: t endVector: aScale];
++(id) actionWithDuration: (ccTime) t moveBy: (GLfloat) aDistance {
+	return [[(CC3MoveDirectionallyBy*)[self alloc] initWithDuration: t moveBy: aDistance] autorelease];
 }
 
--(CC3Vector) targetVector {
-	return ((CC3Node*)self.target).scale;
+-(id) copyWithZone: (NSZone*) zone {
+	return [(CC3MoveDirectionallyBy*)[[self class] allocWithZone: zone] initWithDuration: [self duration]
+																				  moveBy: distance];
 }
 
--(void) setTargetVector: (CC3Vector) aScale {
-	((CC3Node*)self.target).scale = aScale;
+-(id) reverse { return [[self class] actionWithDuration: self.duration moveBy: -distance]; }
+
+-(void) startWithTarget:(CC3Node*) aTarget {
+	[super startWithTarget: aTarget];
+	prevTime = 0;
 }
+
+-(void) update: (ccTime) t {
+	GLfloat deltaTime = t - prevTime;
+	GLfloat deltaDist = distance * deltaTime;
+	CC3Vector moveDir = CC3VectorNormalize(self.targetDirection);
+	CC3Vector prevLoc = self.targetCC3Node.location;
+	self.targetCC3Node.location = CC3VectorAdd(prevLoc, CC3VectorScaleUniform(moveDir, deltaDist));
+	prevTime = t;
+	
+	LogCleanTrace(@"%@: time: %.3f, delta time: %.3f, delta dist: %.3f, was at: %@, now at: %@",
+				  self, t, deltaTime, deltaDist,
+				  NSStringFromCC3Vector(prevLoc),
+				  NSStringFromCC3Vector(self.targetCC3Node.location));
+}
+
+/** The direction in which to move. Subclasses will override. */
+-(CC3Vector) targetDirection { return kCC3VectorZero; }
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ distance: %.3f", [self class], distance];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveForwardBy
+
+@implementation CC3MoveForwardBy
+
+-(CC3Vector) targetDirection { return self.targetCC3Node.forwardDirection; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveRightBy
+
+@implementation CC3MoveRightBy
+
+-(CC3Vector) targetDirection { return self.targetCC3Node.rightDirection; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveUpBy
+
+@implementation CC3MoveUpBy
+
+-(CC3Vector) targetDirection { return self.targetCC3Node.upDirection; }
 
 @end
 
@@ -459,13 +587,9 @@
 
 @implementation CC3TintAmbientTo
 
--(ccColor4F) targetColor {
-	return self.targetNode.ambientColor;
-}
+-(ccColor4F) targetColor { return self.targetNode.ambientColor; }
 
--(void) setTargetColor: (ccColor4F) aColor {
-	self.targetNode.ambientColor = aColor;
-}
+-(void) setTargetColor: (ccColor4F) aColor { self.targetNode.ambientColor = aColor; }
 
 @end
 
@@ -475,13 +599,9 @@
 
 @implementation CC3TintDiffuseTo
 
--(ccColor4F) targetColor {
-	return self.targetNode.diffuseColor;
-}
+-(ccColor4F) targetColor { return self.targetNode.diffuseColor; }
 
--(void) setTargetColor: (ccColor4F) aColor {
-	self.targetNode.diffuseColor = aColor;
-}
+-(void) setTargetColor: (ccColor4F) aColor { self.targetNode.diffuseColor = aColor; }
 
 @end
 
@@ -491,13 +611,9 @@
 
 @implementation CC3TintSpecularTo
 
--(ccColor4F) targetColor {
-	return self.targetNode.specularColor;
-}
+-(ccColor4F) targetColor { return self.targetNode.specularColor; }
 
--(void) setTargetColor: (ccColor4F) aColor {
-	self.targetNode.specularColor = aColor;
-}
+-(void) setTargetColor: (ccColor4F) aColor { self.targetNode.specularColor = aColor; }
 
 @end
 
@@ -507,13 +623,9 @@
 
 @implementation CC3TintEmissionTo
 
--(ccColor4F) targetColor {
-	return self.targetNode.emissionColor;
-}
+-(ccColor4F) targetColor { return self.targetNode.emissionColor; }
 
--(void) setTargetColor: (ccColor4F) aColor {
-	self.targetNode.emissionColor = aColor;
-}
+-(void) setTargetColor: (ccColor4F) aColor { self.targetNode.emissionColor = aColor; }
 
 @end
 

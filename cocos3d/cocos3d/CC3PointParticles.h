@@ -1,9 +1,9 @@
 /*
  * CC3PointParticles.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -112,12 +112,12 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
 /**
  * A CC3MeshNode that emits 3D point particles.
  *
- * Particles emitted by CC3PointParticleEmitter live in the 3D world, as distinct from
+ * Particles emitted by CC3PointParticleEmitter live in the 3D scene, as distinct from
  * the 2D particles available through the cocos2d CCParticleSystem class.
  * 
  * For many particle effects, 2D is sufficient, and can be quite effective. You can
  * use a cocos2d CCParticleSystem instance with a CC3Billboard, to embed 2D particle
- * systems within a 3D cocos3d world.
+ * systems within a 3D cocos3d scene.
  *
  * However, for applications that need particles to move in three dimensions, you can
  * use this class. Each particle emitted by CC3PointParticleEmitter has a 3D location,
@@ -191,7 +191,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
  *   - {GL_SRC_ALPHA, GL_ONE} - Additive blending, to have overlapping particles build on,
  *     and intensify, each other
  *
- * For CC3PointParticleEmitter, the iniital value of the shouldDisableDepthMask property
+ * For CC3PointParticleEmitter, the initial value of the shouldDisableDepthMask property
  * is YES, so that the particles do not enage in Z-fighting with each other. You can
  * experiment with changing this to NO if your emitter is better suited to it.
  *
@@ -203,7 +203,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
  * should emit particles using the emissionDuration property.
  *
  * For emitters with finite duration, you can set the shouldRemoveOnFinish to YES to
- * indicate that the emitter should remove itself automatically from the 3D world, once
+ * indicate that the emitter should remove itself automatically from the 3D scene, once
  * all particles have expired, cleaning up all memory usage by the emitter and particles
  * along the way. This features allows you to set a transient particle generator, such
  * as an explosion, going and then forget about it.
@@ -478,7 +478,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
 
 /**
  * Indicates that this emitter should automatically be removed from its parent,
- * and from the 3D world when it is finished (once the isFinished turns to YES).
+ * and from the 3D scene when it is finished (once the isFinished turns to YES).
  *
  * The initial value of this property is NO.
  */
@@ -1046,7 +1046,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
  * realistic real-time behaviour.
  *
  * From within the initializeParticle and update: methods, the parrticle has access
- * to the emitter (and the node hierarchy and world it sits in) through the emitter
+ * to the emitter (and the node hierarchy and scene it sits in) through the emitter
  * property. In addition, the particle can read and manipulate drawable content
  * through the location, normal, color4F/color4B, and size properties. For example,
  * a particle may change its location by changing the location property, or its
@@ -1267,7 +1267,7 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
  *
  * During execution of this method, you can access and set the initial values of the
  * location, normal, color and size properties. The emitter property can be used to
- * access further information in the emitter or other aspects of the 3D world.
+ * access further information in the emitter or other aspects of the 3D scene.
  *
  * The isAlive property is set to YES prior to the invocation of this method.
  * You can set the isAlive property to NO in this method to cause the emission
@@ -1289,14 +1289,14 @@ static const CC3PointParticleVertexContent kCC3PointParticleContentSize		= 1 << 
 
 /**
  * This template callback method is invoked automatically whenever the emitter is
- * updated during a scheduled 3D world update.
+ * updated during a scheduled 3D scene update.
  *
  * You should override this method to control the behaviour of the particle during
  * its lifetime.
  *
  * During execution of this method, you can access and set the values of the location,
  * normal, color and size properties. The emitter property can be used to access further
- * information in the emitter or other aspects of the 3D world.
+ * information in the emitter or other aspects of the 3D scene.
  *
  * It is up to the particle to determine when it expires. Some particles may never
  * expire. For those that do, you might typically define a lifeSpan or timeToLive

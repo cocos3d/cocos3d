@@ -1,9 +1,9 @@
 /*
  * CC3Billboard.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,27 +37,27 @@
 
 
 /**
- * This CC3Node displays a 2D cocos2d CCNode as part of the 3D world.
+ * This CC3Node displays a 2D cocos2d CCNode as part of the 3D scene.
  *
  * The 2D node can be displayed in one of two ways, as determined by the value of
  * the shouldDrawAs2DOverlay property:
  *
  *   - When shouldDrawAs2DOverlay is set to NO (the default), the 2D CCNode will
- *     be embedded in the 3D world and will be drawn at the Z-depth of this node.
+ *     be embedded in the 3D scene and will be drawn at the Z-depth of this node.
  *     Like all 3D nodes, the 2D node will be occluded if other 3D nodes are between
  *     this node and the camera, it can be rotated in 3D to face away from the camera,
  *     and can be selected by touch events.
  *
  *   - When shouldDrawAs2DOverlay is set to YES, the 2D CCNode will be drawn at the
- *     projectedPosition of this node, after the 3D world has completed drawing,
+ *     projectedPosition of this node, after the 3D scene has completed drawing,
  *     and the GL engine has reverted to 2D rendering. The 2D node will ignore 3D
  *     depth testing, and will be drawn on top of all 3D nodes, even if there are
  *     other 3D nodes between this node and the camera. The 2D node will always appear
  *     to face directly towards the camera, and cannot be selected by touch events.
  *
  * CC3Billboards are useful for drawing a label, health-bar, speech-balloon, or some
- * other 2D artifact in or on the 3D world, and have that 2D artifact move along with
- * this node as it moves through the 3D world.
+ * other 2D artifact in or on the 3D scene, and have that 2D artifact move along with
+ * this node as it moves through the 3D scene.
  *
  * CC3Billboard is a type of CC3Node, and can therefore participate in a structural
  * node assembly. An instance can be the child of another node, and the CC3Billboard
@@ -72,11 +72,11 @@
  * maximum limits to which the node will be sized, respectively, relative to a nominal
  * size. This capability is useful when the 2D node is a label, health-bar, or
  * speech-balloon, and it is desirable to keep the text at a readable size, regardless
- * of how near or far the node moves in the 3D world, relative to the camera.
+ * of how near or far the node moves in the 3D scene, relative to the camera.
  *
  * Since the scale of the 2D billboard is often automatically adjusted, you should be
  * careful when setting the scale property of the 2D billboard. In particular, when
- * the 2D node is embedded in the 3D world, (the shouldDrawAs2DOverlay property is set
+ * the 2D node is embedded in the 3D scene, (the shouldDrawAs2DOverlay property is set
  * to the default NO), the scale property of the 2D node will be directly manipulated
  * if the value of the shouldNormalizeScaleToDevice property on this CC3Billboard is
  * set to YES, and any value you set for the 2D node scale property will be ignored.
@@ -89,7 +89,7 @@
  *
  * A CC3Billboard can, and should, have a bounding volume, but the bounding volume
  * must be an instance of a subclass of CC3NodeBoundingArea, which maps the 2D boundary
- * of the 2D node into the 3D world, and when shouldDrawAs2DOverlay is YES, handles
+ * of the 2D node into the 3D scene, and when shouldDrawAs2DOverlay is YES, handles
  * testing the 2D bounds of the 2D node against the bounds of the 2D drawing plane. 
  */
 @interface CC3Billboard : CC3MeshNode {
@@ -111,25 +111,25 @@
 
 /**
  * Indicates whether this instance should be drawn in 2D as an overlay on top of
- * the 3D world, or embedded into the 3D world.
+ * the 3D scene, or embedded into the 3D scene.
  *
  * When set to NO, the 2D CCNode will be drawn at the Z-depth of this node, and
  * will be occluded if other 3D nodes are between this node and the camera.
  * And, like other 3D nodes, it can be rotated in 3D to face away from the camera,
  * and can be selected by touch events.
  *
- * When set to YES, the 2D CCNode will be drawn after the 3D world has completed
+ * When set to YES, the 2D CCNode will be drawn after the 3D scene has completed
  * drawing, and the GL engine has reverted to 2D rendering. The 2D node will ignore
  * 3D depth testing, and will be drawn on top of all 3D nodes, even if there are
  * other 3D nodes between this node and the camera. The CCNode will always appear
  * to face directly towards the camera, and cannot be selected by touch events.
  * 
  * The initial value of this property is NO, indicating that the 2D node will be
- * embedded into the 3D world.
+ * embedded into the 3D scene.
  *
  * In most cases, you will simply want to leave this property with the default NO
  * value. However, there are some cases where you want the 2D node to truly be
- * displayed on top of the whole 3D world. An example might be an identifier label
+ * displayed on top of the whole 3D scene. An example might be an identifier label
  * or speech-balloon attached to a character in the game. You might want to display
  * the label or speech-balloon even when the character is not visible becuase it is
  * behind another object, or inside a building. You can attach this node to the
@@ -166,7 +166,7 @@
  *
  * The choice of how to use this property depends on the type of 2D node being held.
  * If the value of the shouldDrawAs2DOverlay property is set to NO (the default),
- * the 2D node is embedded in the 3D world, and the following applies:
+ * the 2D node is embedded in the 3D scene, and the following applies:
  *  - For static 2D nodes, such as buttons, 2D sprites, or static text labels, the
  *    simplest thing to do is leave this property with the default value and allow
  *    it to be lazily measureed from the 2D node the first time it is accessed, and
@@ -284,17 +284,17 @@
  * depends on the value of the shouldDrawAs2DOverlay property.
  *
  * If the value of the shouldDrawAs2DOverlay property is NO, the 2D node is embedded
- * in the 3D world. As such, like all other nodes, the size of the 2D node
- * automatically changes as this node moves closer to or farther away from the camera.
- * As such, this property has no effect on the size of the 2D node, and is used only
- * as a reference when calculating the effect of the minimumBillboardScale and
- * maximumBillboardScale properties.
+ * in the 3D scene and, like all other nodes, the size of the 2D node naturally changes
+ * as this node moves closer to or farther away from the camera. As such, this property
+ * has no effect on the size of the 2D node, and is used only as a reference when
+ * calculating the effect of the minimumBillboardScale and maximumBillboardScale properties.
  *
- * If the value of the shouldDrawAs2DOverlay property is YES, the 2D node is overlaid
- * on the 3D world. As such, if this node is closer to the camera than the distance
- * value of this property, the 2D artifact will be scaled up proportionally.
- * If this node is farther from the camera than this distance, the 2D artifact
- * will be scaled down proportionally.
+ * If the value of the shouldDrawAs2DOverlay property is YES, the 2D node is overlaid on
+ * the 3D scene. To make it look like this billboard is a part of the scene, the scale of
+ * the 2D node is automatically adjusted. If this node is closer to the camera than the
+ * distance value of this property, the 2D artifact will be scaled up proportionally.
+ * If this node is farther from the camera than this distance, the 2D artifact will be
+ * scaled down proportionally.
  *
  * If the value of this property is zero, the camera's near clip plane distance
  * will be used as the unity scale distance.
@@ -357,7 +357,7 @@
  * artifact.
  *
  * This property only has effect when the shouldDrawAs2DOverlay property is set to YES,
- * indicating that the 2D node is being drawn as a 2D overlay to the 3D world.
+ * indicating that the 2D node is being drawn as a 2D overlay to the 3D scene.
  */
 @property(nonatomic, assign) CGPoint offsetPosition;
 
@@ -382,9 +382,9 @@
  * over the entire 3D scene, all 2D nodes will be adjusted.
  *
  * However, if the shouldDrawAs2DOverlay property is set to NO, indicating that the 2D
- * node is embedded in the 3D world, the 2D node will be scaled by the value of the
+ * node is embedded in the 3D scene, the 2D node will be scaled by the value of the
  * billboardContentScaleFactor property of the 2D node. Most 2D nodes do not require
- * scaling adjustment when being drawn embedded in the 3D world and will return 1.0
+ * scaling adjustment when being drawn embedded in the 3D scene and will return 1.0
  * for this property. However, some 2D nodes, such as text labels and particle systems
  * actively compensate for the screen resolution when drawing to a retina screen,
  * and do need to be adjusted.
@@ -449,31 +449,52 @@
  */
 +(id) nodeWithName: (NSString*) aName withBillboard: (CCNode*) a2DNode;
 
+/**
+ * Populates the underlying mesh so that it tracks the rectangular size of the 2D
+ * billboard CCNode.
+ *
+ * In most cases, an underlying mesh is not necessary, as the 2D node performs
+ * its own drawing. However, there are situations where access to a rectangular
+ * mesh is useful or necessary, including the node picking algorithm, and when
+ * attaching shadow volumes to this node.
+ *
+ * This method is automatically invoked when a shadow volume is added to this
+ * node, or if this node has been made touchable for selection using the node
+ * picking algorithm. This is performed automatically, and the application
+ * does not need to invoke this method when engaging node picking, or using
+ * shadow volumes.
+ *
+ * This method can be used by the application in other circumstancs where access
+ * to an underlying rectangular mesh that is the same size as the 2D billboard
+ * node would be useful.
+ */
+-(void) populateAsBoundingRectangle;
+
 
 #pragma mark Updating
 
 /**
- * Invoked automatically by the CC3World to configure the 2D node relative to
+ * Invoked automatically by the CC3Scene to configure the 2D node relative to
  * the location of the camera, including ensuring the correct perspective.
  *
  * If the value of the shouldDrawAs2DOverlay property is NO, the 2D node is embedded
- * in the 3D world. As such, the 2D node will naturally be drawn with the correct
+ * in the 3D scene. As such, the 2D node will naturally be drawn with the correct
  * perspective projection, but invoking this method enforces the sizing restrictions
  * specified in the minimumBillboardScale and maximumBillboardScale properties.
  *
  * If the value of the shouldDrawAs2DOverlay property is YES, the 2D node is overlaid
- * on the 3D world at a 2D position determined by projecting the location of the node
+ * on the 3D scene at a 2D position determined by projecting the location of the node
  * onto the camera view. This position is cached in the projectedPosition property
  * of this node.
  *
  * In addition, with the shouldDrawAs2DOverlay property set to YES, since the 2D node
- * is drawn over the whole 3D world, As such, the 2D node will not have natural
+ * is drawn over the whole 3D scene, As such, the 2D node will not have natural
  * perspective projection. To mimic perspetive sizing, this method scales the 2D node
  * according to the distance between this node and the camera, relative to a scale of
  * one at the unityScaleDistance, taking into consideration the sizing restrictions
  * specified in the minimumBillboardScale and maximumBillboardScale properties.
  * 
- * This method is invoked automatically by CC3World. Usually, the application never
+ * This method is invoked automatically by CC3Scene. Usually, the application never
  * needs to invoke this method directly.
  */
 -(void) alignToCamera: (CC3Camera*) camera;
@@ -486,7 +507,7 @@
  * within the given bounds, draws the 2D node at the projected 2D position calculated
  * in the alignToCamera: method.
  *
- * This method is invoked automatically by CC3World at the end of each frame drawing
+ * This method is invoked automatically by CC3Scene at the end of each frame drawing
  * cycle. Usually, the application never needs to invoke this method directly.
  */
 -(void) draw2dWithinBounds: (CGRect) bounds;
@@ -527,20 +548,12 @@
  * the doesIntersectBounds: method.
  */
 @interface CC3BillboardBoundingBoxArea : CC3NodeBoundingArea {
-	CC3Vector globalBoundingRectVertices[4];
+	CC3Vector vertices[4];
+	CC3Plane planes[6];
 }
 
-/**
- * An array of the four vertices of the bounding rectangle, in the global coordinate
- * system, after the bounding rectangle has been transformed (translated, rotated and
- * scaled) to match the transformation of the node. For a node to be definitively
- * outside the frustum, all four vertices of the global bounding box must be outside
- * each of the planes of the frustum.
- *
- * This property is used only when the value of the shouldDrawAs2DOverlay property
- * of the CC3Bllboard is NO, and the 2D node is embedded in the 3D world.
- */
-@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices;
+/** @deprecated Use the superclass vertices property instead. */
+@property(nonatomic, readonly) CC3Vector* globalBoundingRectVertices DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -558,7 +571,7 @@
  *     is set to YES, the CC3ParticleSystemBillboard node is automatically removed from
  *     its parent once the particle system has finished emitting.
  *   - In cocos2d, particle systems draw all particles at the same Z-distance.
- *     When undergoing transforms in the 3D world, the result is that the Z-distances
+ *     When undergoing transforms in the 3D scene, the result is that the Z-distances
  *     are very close but not equal, resulting in Z-fighting between the particles.
  *     To avoid this, if the shouldDisableDepthMask property is set to YES, the GL depth
  *     mask is temporarily disabled during drawing so that particles will not update the
@@ -618,7 +631,7 @@
 #pragma mark -
 #pragma mark CCNode extension
 
-/** CCNode extension to support embedding 2D CCNodes in the 3D world. */
+/** CCNode extension to support embedding 2D CCNodes in the 3D scene. */
 @interface CCNode (CC3Billboard)
 
 /**

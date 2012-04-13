@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Utility.c
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,12 +34,20 @@
 
 char* GLEnumName(GLenum gle) {
 	switch (gle) {
+		case GL_ZERO:
+			return "GL_ZERO";
+		case GL_ONE:
+			return "GL_ONE";
+/*		case GL_TRUE:				*/
+/*			return "GL_TRUE";		*/
+/*		case GL_FALSE:				*/
+/*			return "GL_FALSE";		*/
 			
 			/* Drawing Mode */
-			/*		case GL_POINTS:			same as GL_ZERO	*/
-			/*			return "GL_POINTS";					*/
-			/*		case GL_LINES:			same as GL_ONE	*/
-			/*			return "GL_LINES";					*/
+/*		case GL_POINTS:			same as GL_ZERO	*/
+/*			return "GL_POINTS";					*/
+/*		case GL_LINES:			same as GL_ONE	*/
+/*			return "GL_LINES";					*/
 		case GL_LINE_LOOP:
 			return "GL_LINE_LOOP";
 		case GL_LINE_STRIP:
@@ -70,12 +78,17 @@ char* GLEnumName(GLenum gle) {
 			return "GL_GEQUAL";
 		case GL_ALWAYS:
 			return "GL_ALWAYS";
+
+		case GL_POLYGON_OFFSET_FACTOR:
+			return "GL_POLYGON_OFFSET_FACTOR";
+		case GL_POLYGON_OFFSET_UNITS:
+			return "GL_POLYGON_OFFSET_UNITS";
 			
 			/* Blending Factors */
-		case GL_ZERO:
-			return "GL_ZERO";
-		case GL_ONE:
-			return "GL_ONE";
+/*		case GL_ZERO:			*/
+/*			return "GL_ZERO";	*/
+/*		case GL_ONE:			*/
+/*			return "GL_ONE";	*/
 		case GL_SRC_COLOR:
 			return "GL_SRC_COLOR";
 		case GL_ONE_MINUS_SRC_COLOR:
@@ -362,6 +375,38 @@ char* GLEnumName(GLenum gle) {
 			return "GL_TEXTURE7";
 
 			/* Texture Environment parameters */
+		case GL_TEXTURE_MIN_FILTER:
+			return "GL_TEXTURE_MIN_FILTER";
+		case GL_TEXTURE_MAG_FILTER:
+			return "GL_TEXTURE_MAG_FILTER";
+		case GL_NEAREST:
+			return "GL_NEAREST";
+		case GL_LINEAR:
+			return "GL_LINEAR";
+		case GL_NEAREST_MIPMAP_NEAREST:
+			return "GL_NEAREST_MIPMAP_NEAREST";
+		case GL_LINEAR_MIPMAP_NEAREST:
+			return "GL_LINEAR_MIPMAP_NEAREST";
+		case GL_NEAREST_MIPMAP_LINEAR:
+			return "GL_NEAREST_MIPMAP_LINEAR";
+		case GL_LINEAR_MIPMAP_LINEAR:
+			return "GL_LINEAR_MIPMAP_LINEAR";
+		case GL_TEXTURE_WRAP_S:
+			return "GL_TEXTURE_WRAP_S";
+		case GL_TEXTURE_WRAP_T:
+			return "GL_TEXTURE_WRAP_T";
+		case GL_CLAMP_TO_EDGE:
+			return "GL_CLAMP_TO_EDGE";
+		case GL_REPEAT:
+			return "GL_REPEAT";
+		case GL_GENERATE_MIPMAP:
+			return "GL_GENERATE_MIPMAP";
+/*		case GL_TRUE:				*/
+/*			return "GL_TRUE";		*/
+/*		case GL_FALSE:				*/
+/*			return "GL_FALSE";		*/
+			
+			/* Texture Environment parameters */
 		case GL_TEXTURE_ENV:
 			return "GL_TEXTURE_ENV";
 		case GL_TEXTURE_ENV_MODE:
@@ -372,8 +417,8 @@ char* GLEnumName(GLenum gle) {
 			return "GL_MODULATE";
 		case GL_DECAL:
 			return "GL_DECAL";
-//		case GL_BLEND:
-//			return "GL_BLEND";
+/*		case GL_BLEND:				*/
+/*			return "GL_BLEND";		*/
 		case GL_ADD:
 			return "GL_ADD";
 		case GL_REPLACE:
@@ -550,6 +595,30 @@ char* GLEnumName(GLenum gle) {
 			return "GL_DEPTH_CLEAR_VALUE";
 		case GL_STENCIL_CLEAR_VALUE:
 			return "GL_STENCIL_CLEAR_VALUE";
+			
+			/* Stencils */
+		case GL_STENCIL_FUNC:
+			return "GL_STENCIL_FUNC";
+		case GL_STENCIL_REF:
+			return "GL_STENCIL_REF";
+		case GL_STENCIL_VALUE_MASK:
+			return "GL_STENCIL_VALUE_MASK";
+		case GL_STENCIL_FAIL:
+			return "GL_STENCIL_FAIL";
+		case GL_STENCIL_PASS_DEPTH_FAIL:
+			return "GL_STENCIL_PASS_DEPTH_FAIL";
+		case GL_STENCIL_PASS_DEPTH_PASS:
+			return "GL_STENCIL_PASS_DEPTH_PASS";
+		case GL_KEEP:
+			return "GL_KEEP";
+		case GL_INCR:
+			return "GL_INCR";
+		case GL_DECR:
+			return "GL_DECR";
+		case GL_INCR_WRAP_OES:
+			return "GL_INCR_WRAP_OES";
+		case GL_DECR_WRAP_OES:
+			return "GL_DECR_WRAP_OES";
 			
 			/* OES_matrix_palette */
 		case GL_MAX_VERTEX_UNITS_OES:

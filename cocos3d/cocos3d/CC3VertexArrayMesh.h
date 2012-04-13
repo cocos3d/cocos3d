@@ -1,9 +1,9 @@
 /*
  * CC3VertexArrayMesh.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -95,7 +95,7 @@
 	CC3VertexTextureCoordinates* vertexTextureCoordinates;
 	CCArray* overlayTextureCoordinates;
 	CC3VertexIndices* vertexIndices;
-	BOOL interleaveVertices;
+	BOOL shouldInterleaveVertices;
 }
 
 /** The vertex array instance managing the positional data for the vertices. */
@@ -124,13 +124,17 @@
 @property(nonatomic, retain) CC3VertexIndices* vertexIndices;
 
 /**
- * Indicates whether the vertex data is interleaved, or separated by aspect.
- * The initial value is NO, indicating that the vertex data is not interleaved.
+ * Indicates whether the vertex data should be interleaved, or separated by aspect.
  *
  * If the vertex data is interleaved, each of the CC3VertexArray instances will
  * reference the same underlying memory buffer through their individual elements property.
+ * 
+ * The initial value is NO, indicating that the vertex data is not interleaved.
  */
-@property(nonatomic, assign) BOOL interleaveVertices;
+@property(nonatomic, assign) BOOL shouldInterleaveVertices;
+
+/** @deprecated Renamed to shouldInterleaveVertices. */
+@property(nonatomic, assign) BOOL interleaveVertices DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Texture overlays
@@ -196,8 +200,15 @@
 
 /**
  * Returns the texture coordinate array that will be processed by the texture unit
- * with the specified index, which should be a number between zero, and one less
- * than the value of the textureCoordinatesArrayCount property.
+ * with the specified index.
+ *
+ * If the specified texture unit index is equal to or larger than the number of
+ * texture coordinates arrays, as indicated by the value of the
+ * textureCoordinatesArrayCount property, the texture coordinate array with the
+ * highest index is returned.
+ *
+ * This design reuses the texture coordinate array with the highest index
+ * for all texture units higher than that index.
  *
  * The value returned will be nil if there are no texture coordinates.
  */
@@ -218,6 +229,27 @@
  */
 -(void) setTextureCoordinates: (CC3VertexTextureCoordinates*) aTexture
 			   forTextureUnit: (GLuint) texUnit;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Allocates memory for the specified number of textured vertices, and configures this
+ * instance to manage that data.
+ *
+ * Each vertex contains a  is a CC3TexturedVertex structure, which interleaves location,
+ * normal and texture coordinate data. Returns a pointer to the first vertex structure. 
+ */
+-(CC3TexturedVertex*) allocateTexturedVertices: (GLsizei) vertexCount;
+
+/**
+ * Configures this instance to draw triangular faces, and allocates enough memory to
+ * contain vertex indices for the specified number of triangles. Each triangular face
+ * contains three vertex indices.
+ *
+ * Returns a pointer to the first vertex index of the first triangle. 
+ */
+-(GLushort*) allocateIndexedTriangles: (GLsizei) triangleCount;
 
 
 #pragma mark Updating
@@ -275,12 +307,4 @@
  * the vertex location data by the buildVolume method of this instance.
  */
 @interface CC3VertexLocationsBoundingBoxVolume : CC3NodeBoundingBoxVolume
-@end
-
-
-#pragma mark -
-#pragma mark Deprecated CC3VertexArrayMeshModel
-
-/** Deprecated CC3VertexArrayMeshModel renamed to CC3VertexArrayMesh. @deprecated */
-@interface CC3VertexArrayMeshModel : CC3VertexArrayMesh
 @end

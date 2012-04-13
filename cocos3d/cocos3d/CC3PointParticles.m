@@ -1,9 +1,9 @@
 /*
  * CC3PointParticles.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,7 @@
 
 #import "CC3PointParticles.h"
 #import "CC3OpenGLES11Engine.h"
-#import "CC3World.h"
+#import "CC3Scene.h"
 
 
 #pragma mark -
@@ -44,7 +44,6 @@
 @end
 
 @interface CC3MeshNode (TemplateMethods)
--(void) populateFrom: (CC3MeshNode*) another;
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 @property(nonatomic, assign, readwrite) CC3Node* parent;
@@ -229,8 +228,7 @@
  * Subclasses may override if necessary.
  */
 -(void) createMaterial {
-	NSString* matName = [NSString stringWithFormat: @"%@-Material", self.name];
-	CC3Material* mat = [CC3Material materialWithName: matName];
+	CC3Material* mat = [CC3Material material];
 	mat.diffuseColor = kCCC4FWhite;
 	mat.sourceBlend = GL_SRC_ALPHA;
 	mat.destinationBlend = GL_ONE_MINUS_SRC_ALPHA;
@@ -599,9 +597,9 @@
 
 #pragma mark Drawing
 
-/** Overridden to test if active as well. If not active, there is nothing to display. */
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	return self.isActive && [super doesIntersectFrustum: aFrustum];
+/** Overridden to test if active as well. If not active, there is nothing to intersect. */
+-(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume {
+	return self.isActive && [super doesIntersectBoundingVolume: otherBoundingVolume];
 }
 
 /** Overridden to set the particle properties in addition to other configuration. */
@@ -719,7 +717,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark CC3PointParticleMesh
 
 @interface CC3VertexArrayMesh (TemplateMethods)
--(void) populateFrom: (CC3VertexArrayMesh*) another;
 -(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) elemCount;
 @end
 
@@ -733,14 +730,11 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 -(GLsizei) particleCount {
-	return vertexLocations.elementCount;
+	return self.vertexCount;
 }
 
 -(void) setParticleCount: (GLsizei) numParticles {
-	vertexLocations.elementCount = numParticles;
-	vertexNormals.elementCount = numParticles;
-	vertexColors.elementCount = numParticles;
-	vertexPointSizes.elementCount = numParticles;
+	self.vertexCount = numParticles;
 }
 
 -(BOOL) hasPointSizes {
@@ -794,7 +788,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		self.vertexPointSizes = nil;
 	}
 
-	interleaveVertices = YES;		// Interleave the vertex data
+	shouldInterleaveVertices = YES;		// Interleave the vertex data
 
 	// Configure all the vertex arrays for use as updatable point particle data
 	vertexLocations.shouldReleaseRedundantData = NO;	// Retain vertex data in memory.
@@ -835,16 +829,16 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 /**
- * If the interleaveVertices property is set to NO, creates GL vertex buffer object for
+ * If the shouldInterleaveVertices property is set to NO, creates GL vertex buffer object for
  * the point size vertex array by invoking createGLBuffer.
  *
- * If the interleaveVertices property is set to YES, indicating that the underlying data
+ * If the shouldInterleaveVertices property is set to YES, indicating that the underlying data
  * is shared across the contained vertex arrays, the bufferID property of the point sizes
  * vertex array is copied from the vertexLocations vertex array.
  */
 -(void) createGLBuffers {
 	[super createGLBuffers];
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		vertexPointSizes.bufferID = vertexLocations.bufferID;
 	} else {
 		[vertexPointSizes createGLBuffer];
@@ -854,6 +848,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(void) deleteGLBuffers {
 	[super deleteGLBuffers];
 	[vertexPointSizes deleteGLBuffer];
+}
+
+-(BOOL) isUsingGLBuffers {
+	BOOL isUsingVBOs = super.isUsingGLBuffers;
+	isUsingVBOs |= vertexPointSizes.isUsingGLBuffer;
+	return isUsingVBOs;
 }
 
 -(void) releaseRedundantData {
@@ -866,7 +866,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 -(void) doNotBufferVertexPointSizes {
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		[self doNotBufferVertexLocations];
 	} else {
 		vertexPointSizes.shouldAllowVertexBuffering = NO;
@@ -875,6 +875,19 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 #pragma mark Accessing vertex data
+
+-(BOOL) ensureCapacity: (GLsizei) elemCount {
+	BOOL wasExpanded = [super ensureCapacity: elemCount];
+	if ( !shouldInterleaveVertices ) {
+		wasExpanded |= [vertexPointSizes ensureCapacity: elemCount];
+	}
+	return wasExpanded;
+}
+
+-(void) setVertexCount: (GLsizei) vCount {
+	super.vertexCount = vCount;
+	vertexPointSizes.elementCount = vCount;
+}
 
 -(GLfloat) particleSizeAt: (GLsizei) index {
 	return vertexPointSizes ? [vertexPointSizes pointSizeAt: index] : 0.0f;
@@ -893,7 +906,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) vertexCount {
 	[super updateGLBuffersStartingAt: offsetIndex forLength: vertexCount];
-	if (!interleaveVertices) {
+	if (!shouldInterleaveVertices) {
 		[vertexPointSizes updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 	}
 }

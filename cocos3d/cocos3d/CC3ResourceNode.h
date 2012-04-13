@@ -1,9 +1,9 @@
 /*
  * CC3ResourceNode.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,29 +35,50 @@
 
 
 /**
- * A CC3ResourceNode is a CC3Node that that wraps an instance of a subclass of
- * CC3Resource in the resource property, extracts the nodes from that resource,
- * and forms the root of the resulting node structural assembly.
+ * A CC3ResourceNode is a CC3Node that that wraps an instance of CC3Resource in
+ * the resource property, extracts the nodes from that resource, and forms the
+ * root of the resulting node structural assembly.
  *
- * All that is needed is to set the resource property to an instance of a subclass of
- * CC3Resource. Once the resource property has been set, this node can simply be added
- * to a CC3World as a child node. Since the node structural assembly is hierarchical,
- * adding this node to the CC3World will automatically add all the nodes extracted
- * from the 3D data file.
+ * The underlying CC3Resource instance can either be set directly, or subclasses
+ * can override the resourceClass property to allow the resource property to be
+ * lazily created when it is first accessed.
  *
- * There are several ways to instantiate an instance of CC3ResourceNode. The simplest
- * way is to simply use the inherited node class method. Once instantiated, the
- * resource property can be set.
+ * Once this resource node contains a resource, this resource node can be loaded
+ * using the loadFromFile: method.
  *
- * There are also several class and instance initialization methods that will
- * load directly from a file and set the resource property from that file.
- * To make use of these methods, this class must be subclassed, and the subclass
- * must override the resourceClass method to indicate witch resource type is to
- * be loaded.
+ * As shortcuts, for subclasses that override the resourceClass property, there
+ * are also several class and instance initialization methods for this class that
+ * will load the file automatically during instance initialization.
  *
- * When a copy is made of a CC3ResourceNode instance, a copy is not made of the encapsulated
- * CC3Resource instance. Instead, the CC3Resource is retained by reference and shared between
- * both the original CC3ResourceNode, and the new copy.
+ * However, before using any of these shortcut methods, you should take into
+ * consideration whether you need to set the the expectsVerticallyFlippedTextures
+ * property prior to loading, as explained here.
+ *
+ * Under iOS, a texture whose width and height are not each a power-of-two, will be
+ * converted to a size whose width and height are a power-of-two. The result is a
+ * texture that can have empty space on the top and right sides. If the texture
+ * coordinates of the mesh do not take this into consideration, the result will be
+ * that only the lower left of the mesh will be covered by the texture.
+ * 
+ * In addition, the vertical axis of the coordinate system of OpenGL is inverted
+ * relative to the iOS view coordinate system. This results in textures being
+ * displayed upside-down, relative to the OpenGL coordinate system.
+ *
+ * The contained CC3Resource will automatically adjust the meshes to compensate for
+ * this. Meshes loaded by this resource loader will have their texture coordinates
+ * adjusted to align with the usable area of an NPOT texture, and to vertically
+ * flip a texture that has been loaded upside-down.
+ *
+ * To determine whether textures will need to be vertically flipped, the loader
+ * needs to know whether or not the meshes have already been flipped (by the 3D
+ * editor or file exporter). The expectsVerticallyFlippedTextures property
+ * can be set to indicate to the loader whether the texture coordinates have
+ * already been flipped. If the value of that property needs to be changed,
+ * it should be set before the file is loaded.
+ *
+ * When a copy is made of a CC3ResourceNode instance, a copy is not made of the
+ * encapsulated CC3Resource instance. Instead, the CC3Resource is retained by
+ * reference and shared between both the original CC3ResourceNode, and the new copy.
  */
 @interface CC3ResourceNode : CC3Node {
 	CC3Resource* resource;
@@ -68,13 +89,21 @@
  * 
  * Setting this property will remove all child nodes of this CC3ResourceNode
  * and replace them with the nodes extracted from the nodes property of the
- * new CC3Resource instance.
+ * new CC3Resource instance, if they have already been loaded.
  *
  * If this node has not yet been assigned a name, it will be set to the name
  * of the resource when this property is set.
+ *
+ * If the resource has not already been loaded when it is set here, it may
+ * be loaded using the loadFromFile: methods of this resource node instance.
  * 
- * When setting this property to a resource, the resource should already be
- * loaded before setting this property.
+ * For subclasses of CC3ResourceNode that override the resourceClass property,
+ * if this resource property is not explicitly set, it is lazily created, as an
+ * instance of the class identified by the resourceClass property, when this
+ * resource property is first accessed. Since the resourceClass property depends
+ * on the type of resource file format to be loaded, lazy creation of the resource
+ * property from the resourceClass property requires the creation of a subclass
+ * of CC3ResourceNode that defines the appropriate resourceClass value.
  */
 @property(nonatomic, retain) CC3Resource* resource;
 
@@ -89,142 +118,142 @@
 -(Class) resourceClass;
 
 /**
- * Loads the file at the specified path, which must be an absolute path, into
- * an instance of the subclass of CC3Resource specified by the resourceClass
- * method, and sets the resource property to that CC3Resource subclass instance.
+ * Using the contained resource, loads the file at the specified file path,
+ * extracts the loaded CC3Nodes from the contained resource, and adds them
+ * as child nodes to this resource node.
  *
- * If this node has not yet been assigned a name, it will be set to the name
- * of the loaded resource.
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * If not already set, the name of this node will be set to that of the
+ * resource, which is usually the name of the file loaded.
  */
 -(void) loadFromFile: (NSString*) aFilepath;
 
 /**
- * Initializes this instance, loads the file at the specified path, which must
- * be an absolute path, into an instance of the subclass of CC3Resource specified
- * by the resourceClass method, and sets the resource property to that CC3Resource
- * subclass instance.
+ * Initializes this instance and, using the contained resource, loads the file
+ * at the specified file path, extracts the loaded CC3Nodes from the contained
+ * resource, and adds them as child nodes to this resource node.
  *
- * The name of this node will be set to that of the resource.
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * The name of this node will be set to that of the resource, which is
+ * usually the name of the file loaded.
  */
 -(id) initFromFile: (NSString*) aFilepath;
 
 /**
- * Allocates and initializes an autoreleased instance, loads the file at the
- * specified path, which must be an absolute path, into an instance of the
- * subclass of CC3Resource specified by the resourceClass method, and sets the
- * resource property to that CC3Resource subclass instance.
+ * Allocates and initializes an autoreleased instance and, using the contained
+ * resource, loads the file at the specified file path, extracts the loaded CC3Nodes
+ * from the contained resource, and adds them as child nodes to this resource node.
  *
- * The name of this node will be set to that of the resource.
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * The name of this node will be set to that of the resource, which is
+ * usually the name of the file loaded.
  */
 +(id) nodeFromFile: (NSString*) aFilepath;
 
 /**
- * Initializes this instance, loads the file at the specified path, which must
- * be an absolute path, into an instance of the subclass of CC3Resource specified
- * by the resourceClass method, and sets the resource property to that CC3Resource
- * subclass instance.
+ * Initializes this instance and, using the contained resource, loads the file
+ * at the specified file path, extracts the loaded CC3Nodes from the contained
+ * resource, and adds them as child nodes to this resource node.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
  * The name of this node will be set to the specified name.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
  */
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilepath;
 
 /**
- * Allocates and initializes an autoreleased instance, loads the file at the
- * specified path, which must be an absolute path, into an instance of the
- * subclass of CC3Resource specified by the resourceClass method, and sets the
- * resource property to that CC3Resource subclass instance.
+ * Allocates and initializes an autoreleased instance and, using the contained
+ * resource, loads the file at the specified file path, extracts the loaded CC3Nodes
+ * from the contained resource, and adds them as child nodes to this resource node.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
  * The name of this node will be set to the specified name.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
  */
 +(id) nodeWithName: (NSString*) aName fromFile: (NSString*) aFilepath;
 
-/**
- * Loads the file at the specified resource path into an instance of the subclass
- * of CC3Resource specified by the resourceClass method, and sets the resource
- * property to that CC3Resource subclass instance.
- *
- * The specified file path is a path relative to the resource directory.
- * Typically this means that the specified path can just be the name of
- * the file, with no path information.
- *
- * If this node has not yet been assigned a name, it will be set to the name
- * of the loaded resource.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
- */
--(void) loadFromResourceFile: (NSString*) aRezPath;
+
+#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
 
 /**
- * Initializes this instance, loads the file at the specified resource path into
- * an instance of the subclass of CC3Resource specified by the resourceClass
- * method, and sets the resource property to that CC3Resource subclass instance.
+ * Indicates whether the texture coordinates of the meshes that will be loaded
+ * by the CC3Resource loader expect that the texture will be flipped upside-down
+ * during texture loading.
  *
- * The specified file path is a path relative to the resource directory.
- * Typically this means that the specified path can just be the name of
- * the file, with no path information.
+ * This property is a convenience property that simply gets and sets the same
+ * property on the contained CC3Resource instance.
+ * 
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
  *
- * The name of this node will be set to that of the resource.
+ * If the value of this property is YES, the texture coordinates of meshes loaded
+ * by the CC3Resource will be assumed to have already been flipped vertically,
+ * (typically by the 3D editor or file exporter) to align with textures that will
+ * be vertically flipped by the texture loader.
  *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * If the value of this property is NO, the texture coordinates of meshes loaded by
+ * the CC3Resource loader will be assumed to have their original orientation, and
+ * aligned with textures that have not been vertically flipped by the texture loader.
+ *
+ * The value of this property is then used to cause the meshes to automatically
+ * correctly align themselves with the orientation of any texture applied to them.
+ *
+ * For meshes that are based on vertex arrays, this property is used to set the
+ * same property on each CC3VertexTextureCoordinates instance created and loaded
+ * by this resource. When a texture is assigned to cover the mesh, the value of
+ * that CC3VertexTextureCoordinates property is used in combination with the value
+ * of the isFlippedVertically property of a texture to determine whether the texture
+ * coordinates should automatically be reoriented when displaying that texture.
  */
--(id) initFromResourceFile: (NSString*) aRezPath;
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
+
+
+#pragma mark Deprecated file loading methods
 
 /**
- * Allocates and initializes an autoreleased instance, loads the file at the
- * specified resource path into an instance of the subclass of CC3Resource
- * specified by the resourceClass method, and sets the resource property to
- * that CC3Resource subclass instance.
- *
- * The specified file path is a path relative to the resource directory.
- * Typically this means that the specified path can just be the name of
- * the file, with no path information.
- *
- * The name of this node will be set to that of the resource.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * @deprecated Use the loadFromFile: method instead, which supports both absolute
+ * file paths and file paths that are relative to the resources directory.
  */
-+(id) nodeFromResourceFile: (NSString*) aRezPath;
+-(void) loadFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
 
 /**
- * Initializes this instance, loads the file at the specified resource path into
- * an instance of the subclass of CC3Resource specified by the resourceClass
- * method, and sets the resource property to that CC3Resource subclass instance.
- *
- * The specified file path is a path relative to the resource directory.
- * Typically this means that the specified path can just be the name of
- * the file, with no path information.
- *
- * The name of this node will be set to the specified name.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * @deprecated Use the initFromFile: method instead, which supports both absolute
+ * file paths and file paths that are relative to the resources directory.
  */
--(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath;
+-(id) initFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
 
 /**
- * Allocates and initializes an autoreleased instance, loads the file at the
- * specified resource path into an instance of the subclass of CC3Resource
- * specified by the resourceClass method, and sets the resource property to
- * that CC3Resource subclass instance.
- *
- * The specified file path is a path relative to the resource directory.
- * Typically this means that the specified path can just be the name of
- * the file, with no path information.
- *
- * The name of this node will be set to the specified name.
- *
- * To make use of this method, create a subclass that overrides resourceClass.
+ * @deprecated Use the nodeFromFile: method instead, which supports both absolute
+ * file paths and file paths that are relative to the resources directory.
  */
-+(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath;
++(id) nodeFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the initWithName:FromFile: method instead, which supports both
+ * absolute file paths and file paths that are relative to the resources directory.
+ */
+-(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the nodeWithName:FromFile: method instead, which supports both
+ * absolute file paths and file paths that are relative to the resources directory.
+ */
++(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
 
 @end
 

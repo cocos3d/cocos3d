@@ -1,9 +1,9 @@
 /*
  * CC3TextureUnit.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -78,7 +78,7 @@ typedef enum {
  */
 @interface CC3TextureUnit : NSObject <NSCopying, CCRGBAProtocol> {
 	ccColor4F constantColor;
-	CC3DOT3RGB rgbNormalMap;
+	GLubyte rgbNormalMap;
 }
 
 /**

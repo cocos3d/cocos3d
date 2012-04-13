@@ -1,9 +1,9 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -67,15 +67,11 @@ static const id placeHolder = [NSObject new];
 	[meshes release];
 	[materials release];
 	[textures release];
-	if (self.pvrtModel) {
-		delete self.pvrtModelImpl;
-	}
+	if (self.pvrtModel) delete (CPVRTModelPOD*)self.pvrtModelImpl;
 	[super dealloc];
 }
 
--(CPVRTModelPOD*) pvrtModelImpl {
-	return (CPVRTModelPOD*)pvrtModel;
-}
+-(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)pvrtModel; }
 
 
 #pragma mark Allocation and initialization
@@ -87,28 +83,19 @@ static const id placeHolder = [NSObject new];
 		meshes = [[CCArray array] retain];
 		materials = [[CCArray array] retain];
 		textures = [[CCArray array] retain];
-		self.textureParameters = kCC3DefaultTextureParameters;
+		textureParameters = [CC3Texture defaultTextureParameters];
 	}
 	return self;
 }
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
-	[super loadFromFile: aFilePath];	// Perform checks and set name and directory.
-
-	// Make sure we only attempt to load it once.
-	if (!wasLoaded) {
-		wasLoaded = (self.pvrtModelImpl->ReadFromFile([aFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
-		if (wasLoaded) {
-			[self build];
-		} else {
-			LogError(@"Could not load POD file '%@'", aFilePath);
-		}
-	}
+-(BOOL) processFile: (NSString*) anAbsoluteFilePath {
+	wasLoaded = (self.pvrtModelImpl->ReadFromFile([anAbsoluteFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
+	if (wasLoaded) [self build];
 	return wasLoaded;
 }
 
 -(void) build {
-	LogRez(@"Building %@", self.fullDescription);
+	LogCleanRez(@"Building %@", self.fullDescription);
 	[self buildTextures];
 	[self buildMaterials];
 	[self buildMeshes];
@@ -119,9 +106,7 @@ static const id placeHolder = [NSObject new];
 
 #pragma mark Accessing node data and building nodes
 
--(uint) nodeCount {
-	return self.pvrtModelImpl->nNumNode;
-}
+-(uint) nodeCount { return self.pvrtModelImpl->nNumNode; }
 
 -(CC3Node*) nodeAtIndex: (uint) nodeIndex {
 	return (CC3Node*)[allNodes objectAtIndex: nodeIndex];
@@ -257,12 +242,13 @@ static const id placeHolder = [NSObject new];
 }
 
 /** If we are vertex skinning, return a skin mesh node, otherwise return a generic mesh node. */
--(CC3MeshNode*) buildMeshNodeAtIndex: (uint) meshIndex {
-	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: meshIndex];
+-(CC3MeshNode*) buildMeshNodeAtIndex: (uint) meshNodeIndex {
+	SPODNode* psn = (SPODNode*)[self meshNodePODStructAtIndex: meshNodeIndex];
+	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: psn->nIdx];
 	if (psm->sBoneBatches.nBatchCnt) {
-		return [CC3PODSkinMeshNode nodeAtIndex: meshIndex fromPODResource: self];
+		return [CC3PODSkinMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
 	}
-	return [CC3PODMeshNode nodeAtIndex: meshIndex fromPODResource: self];
+	return [CC3PODMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
 }
 
 -(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex {
@@ -420,10 +406,10 @@ static const id placeHolder = [NSObject new];
 	SPODTexture* pst = (SPODTexture*)[self texturePODStructAtIndex: textureIndex];
 	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
 	NSString* texPath = [directory stringByAppendingPathComponent: texFile];
-	CC3Texture* texNode = [CC3Texture textureFromFile: texPath];
-	texNode.textureParameters = self.textureParameters;
-	LogCleanRez(@"Creating %@ at POD index %u from: '%@'", [texNode class], textureIndex, texPath);
-	return texNode;
+	CC3Texture* tex = [CC3Texture textureFromFile: texPath];
+	tex.textureParameters = textureParameters;
+	LogCleanRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
+	return tex;
 }
 
 -(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex {

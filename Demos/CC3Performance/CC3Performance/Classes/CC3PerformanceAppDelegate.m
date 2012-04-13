@@ -1,9 +1,9 @@
 /*
  * CC3PerformanceAppDelegate.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,12 +29,11 @@
  * See header file CC3PerformanceAppDelegate.h for full API documentation.
  */
 
-#import "cocos2d.h"
-
 #import "CC3PerformanceAppDelegate.h"
 #import "CC3PerformanceLayer.h"
-#import "CC3PerformanceWorld.h"
+#import "CC3PerformanceScene.h"
 #import "CC3EAGLView.h"
+#import "CC3Scene.h"
 
 @implementation CC3PerformanceAppDelegate
 
@@ -112,8 +111,9 @@
 	CC3Layer* cc3Layer = [CC3PerformanceLayer node];
 	[cc3Layer scheduleUpdate];
 
-	// Create the customized 3D world, attach it to the layer, and start it playing.
-	cc3Layer.cc3World = [CC3PerformanceWorld world];
+	// Create the customized 3D scene, attach it to the layer.
+	// Could also just create this inside the customer layer.
+	cc3Layer.cc3Scene = [CC3PerformanceScene scene];
 
 	ControllableCCLayer* mainLayer = cc3Layer;
 	

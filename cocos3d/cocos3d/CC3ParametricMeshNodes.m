@@ -1,9 +1,9 @@
 /*
  * CC3ParametricMeshNodes.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +34,6 @@
 #import "CC3VertexArrayMesh.h"
 
 
-
 #pragma mark -
 #pragma mark CC3MeshNode parametric shapes extension
 
@@ -49,10 +48,10 @@
 }
 
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide {
+							andTessellation: (ccGridSize) divsPerAxis {
 	[self populateAsRectangleWithSize: rectSize
 							 andPivot: ccp(rectSize.width / 2.0f, rectSize.height / 2.0f)
-					  andTessellation: facesPerSide];
+					  andTessellation: divsPerAxis];
 }
 
 -(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot {
@@ -61,466 +60,299 @@
 
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide {
-	NSString* itemName;
-	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
+					andTessellation: (ccGridSize) divsPerAxis {
 	
 	// Must be at least one tessellation face per side of the rectangle.
-	facesPerSide.x = MAX(facesPerSide.x, 1);
-	facesPerSide.y = MAX(facesPerSide.y, 1);
+	divsPerAxis.x = MAX(divsPerAxis.x, 1);
+	divsPerAxis.y = MAX(divsPerAxis.y, 1);
 
 	// Move the origin of the rectangle to the pivot point
 	CGPoint botLeft = ccpSub(CGPointZero, pivot);
 	CGPoint topRight = ccpSub(ccpFromSize(rectSize), pivot);
 
-	// The size of each face in the tessellated grid
-	CGSize faceSize = CGSizeMake((topRight.x - botLeft.x) / facesPerSide.x,
-								 (topRight.y - botLeft.y) / facesPerSide.y);
+	// The size and texture span of each face in the tessellated grid
+	CGSize divSize = CGSizeMake((topRight.x - botLeft.x) / divsPerAxis.x,
+								 (topRight.y - botLeft.y) / divsPerAxis.y);
+	CGSize divTexSpan = CGSizeMake((1.0 / divsPerAxis.x), (1.0 / divsPerAxis.y));
 
 	// Get vertices per side.
-	ccGridSize verticesPerSide;
-	verticesPerSide.x = facesPerSide.x + 1;
-	verticesPerSide.y = facesPerSide.y + 1;
-	int vertexCount = verticesPerSide.x * verticesPerSide.y;
+	ccGridSize verticesPerAxis;
+	verticesPerAxis.x = divsPerAxis.x + 1;
+	verticesPerAxis.y = divsPerAxis.y + 1;
+	GLuint vertexCount = verticesPerAxis.x * verticesPerAxis.y;
+	GLuint triangleCount = divsPerAxis.x * divsPerAxis.y * 2;
 	
-	// Interleave the vertex locations, normals and tex coords
-	// Create vertex location array, allocating enough space for the stride of the full structure
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
-	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vertexCount];
-	
-	// Create the normal array interleaved on the same element array
-	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
-	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
-	normArray.elements = vertices;
-	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vertexCount;
-	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
+	// Create the mesh, configure it for texture vertices and drawing
+	// indexed triangles, and allocate space for the vertices and indices.
+	NSString* meshName = [NSString stringWithFormat: @"%@-Mesh", self.name];
+	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh meshWithName: meshName];
+	CC3TexturedVertex* vertices = [vaMesh allocateTexturedVertices: vertexCount];
+	GLushort* indices = [vaMesh allocateIndexedTriangles: triangleCount];
 
-	// Populate vertex locations and normals in the X-Y plane
+	// Populate vertex locations, normals & texture coordinates in the X-Y plane
 	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
 	// and set the location of each vertex to be proportional to its position in the grid,
 	// and set the normal of each vertex to point up the Z-axis.
-	for (int iy = 0; iy < verticesPerSide.y; iy++) {
-		for (int ix = 0; ix < verticesPerSide.x; ix++) {
-			int vIndx = iy * verticesPerSide.x + ix;
-			GLfloat vx = botLeft.x + (faceSize.width * ix);
-			GLfloat vy = botLeft.y + (faceSize.height * iy);
+	for (int iy = 0; iy < verticesPerAxis.y; iy++) {
+		for (int ix = 0; ix < verticesPerAxis.x; ix++) {
+			int vIndx = iy * verticesPerAxis.x + ix;
+
+			// Vertex location
+			GLfloat vx = botLeft.x + (divSize.width * ix);
+			GLfloat vy = botLeft.y + (divSize.height * iy);
 			vertices[vIndx].location = cc3v(vx, vy, 0.0);
+
+			// Vertex normal
 			vertices[vIndx].normal = kCC3VectorUnitZPositive;
+
+			// Vertex texture coordinates, inverted vertically
+			GLfloat u = divTexSpan.width * ix;
+			GLfloat v = divTexSpan.height * iy;
+			vertices[vIndx].texCoord = (ccTex2F){u, (1.0f - v)};
 		}
 	}
-	
-	// Construct the vertex indices that will draw the triangles that make up each
-	// face of the box. Indices are ordered for each of the six faces starting in
-	// the lower left corner and proceeding counter-clockwise.
-	GLuint triangleCount = facesPerSide.x * facesPerSide.y * 2;
-	GLuint indexCount = triangleCount * 3;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_TRIANGLES;
-	indexArray.elementType = GL_UNSIGNED_SHORT;
-	indexArray.elementCount = indexCount;
-	GLushort* indices = [indexArray allocateElements: indexCount];
 	
 	// Iterate through the rows and columns of the faces in the grid, from the bottom left corner,
 	// and specify the indexes of the three vertices in each of the two triangles of each face.
 	int iIndx = 0;
-	for (int iy = 0; iy < facesPerSide.y; iy++) {
-		for (int ix = 0; ix < facesPerSide.x; ix++) {
+	for (int iy = 0; iy < divsPerAxis.y; iy++) {
+		for (int ix = 0; ix < divsPerAxis.x; ix++) {
 			GLushort botLeftOfFace;
 			
 			// First triangle of face wound counter-clockwise
-			botLeftOfFace = iy * verticesPerSide.x + ix;
+			botLeftOfFace = iy * verticesPerAxis.x + ix;
 			indices[iIndx++] = botLeftOfFace;							// Bottom left
 			indices[iIndx++] = botLeftOfFace + 1;						// Bot right
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
+			indices[iIndx++] = botLeftOfFace + verticesPerAxis.x + 1;	// Top right
 
 			// Second triangle of face wound counter-clockwise
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x + 1;	// Top right
-			indices[iIndx++] = botLeftOfFace + verticesPerSide.x;		// Top left
+			indices[iIndx++] = botLeftOfFace + verticesPerAxis.x + 1;	// Top right
+			indices[iIndx++] = botLeftOfFace + verticesPerAxis.x;		// Top left
 			indices[iIndx++] = botLeftOfFace;							// Bottom left
 		}
 	}
-	
-	// Create mesh with interleaved vertex arrays
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.interleaveVertices = YES;
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexNormals = normArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
+	self.mesh = vaMesh;		// Set mesh at end to update bounding volume
 }
 
--(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize {
-	[self populateAsTexturedRectangleWithSize: rectSize
-									 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)];
-}
 
--(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
-									andTessellation: (ccGridSize) facesPerSide {
-	[self populateAsTexturedRectangleWithSize: rectSize
-									 andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-							  andTessellation: facesPerSide];
-}
+#pragma mark Populating parametric circular disk
 
--(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot {
-	[self populateAsTexturedRectangleWithSize: rectSize andPivot: pivot andTessellation: ccg(1, 1)];
-}
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs {
+	
+	// Must be at least one radial tessellation, and three angular tessellation.
+	GLushort numRadialDivs = MAX(radialAndAngleDivs.x, 1);
+	GLushort numAngularDivs = MAX(radialAndAngleDivs.y, 3);
 
--(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
-								   andPivot: (CGPoint) pivot
-							andTessellation: (ccGridSize) facesPerSide {
-	NSString* itemName;
+	// Calculate the spans of each radial and angular division.
+	GLfloat angularDivSpan = 2.0 * M_PI / numAngularDivs;		// Zero to 2PI
+	GLfloat radialDivSpan = radius / numRadialDivs;				// Zero to radius
+	GLfloat radialTexDivSpan = 0.5 / numRadialDivs;				// Zero to 0.5
+
+	// Calculate number of vertices, triangles and indices.
+	GLushort vertexCount = (numRadialDivs * (numAngularDivs + 1)) + 1;
+	GLushort triangleCount = ((2 * numRadialDivs) - 1) * numAngularDivs;
 	
-	// Must be at least one tessellation face per side of the rectangle.
-	facesPerSide.x = MAX(facesPerSide.x, 1);
-	facesPerSide.y = MAX(facesPerSide.y, 1);
+	// Create the mesh, configure it for texture vertices and drawing
+	// indexed triangles, and allocate space for the vertices and indices.
+	NSString* meshName = [NSString stringWithFormat: @"%@-Mesh", self.name];
+	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh meshWithName: meshName];
+	CC3TexturedVertex* vertices = [vaMesh allocateTexturedVertices: vertexCount];
+	GLushort* indices = [vaMesh allocateIndexedTriangles: triangleCount];
 	
-	// The size of each face in the tessellated grid
-	CGSize faceSize = CGSizeMake((1.0 / facesPerSide.x), (1.0 / facesPerSide.y));
+	LogCleanTrace(@"%@ populating as disk with radius: %.3f, %i radial divs, %i angular divs, %i vertices, and %i triangles",
+				  self, radius, numRadialDivs, numAngularDivs, vertexCount, triangleCount);
 	
-	// Get vertices per side.
-	ccGridSize verticesPerSide;
-	verticesPerSide.x = facesPerSide.x + 1;
-	verticesPerSide.y = facesPerSide.y + 1;
+	// Populate vertex locations, normals & texture coordinates.
+	GLushort vIndx = 0;			// Vertex index
+	GLushort iIndx = 0;			// Index index
+
+	// Add the center vertex Vertex location from unit radial scaled by the radial span and ring number
+	vertices[vIndx].location = kCC3VectorZero;
+	vertices[vIndx].normal = kCC3VectorUnitZPositive;
+	vertices[vIndx].texCoord = (ccTex2F){0.5f, 0.5f};
 	
-	// Start as a basic white rectangle of the right size and location.
-	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: facesPerSide];
-	
-	// Get my aMesh model and vertices.
-	CC3VertexArrayMesh* vam = (CC3VertexArrayMesh*)self.mesh; 
-	CC3VertexLocations* locArray = vam.vertexLocations;
-	
-	// Create the tex coord array interleaved on the same element array as the vertex locations
-	CC3VertexTextureCoordinates* tcArray = nil;
-	itemName = [NSString stringWithFormat: @"%@-Texture", self.name];
-	tcArray = [CC3VertexTextureCoordinates vertexArrayWithName: itemName];
-	tcArray.elements = locArray.elements;
-	tcArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	tcArray.elementCount = locArray.elementCount;
-	tcArray.elementOffset = 2 * sizeof(CC3Vector);	// Offset to texcoord element in vertex structure
-	
-	// Add the texture coordinates array to the mesh
-	vam.vertexTextureCoordinates = tcArray;
-	
-	// Populate the texture coordinate array mapping
-	CC3TexturedVertex* vertices = locArray.elements;
-	
-	// Iterate through the rows and columns of the vertex grid, from the bottom left corner,
-	// and set the X & Y texture coordinate of each vertex to be proportional to its position
-	// in the grid.
-	for (int iy = 0; iy < verticesPerSide.y; iy++) {
-		for (int ix = 0; ix < verticesPerSide.x; ix++) {
-			int vIndx = iy * verticesPerSide.x + ix;
-			GLfloat vx = faceSize.width * ix;
-			GLfloat vy = faceSize.height * iy;
-			vertices[vIndx].texCoord = (ccTex2F){vx, vy};
+	for (GLushort ia = 0; ia <= numAngularDivs; ia++) {
+		
+		GLfloat angle = angularDivSpan * ia;
+		CGPoint unitRadial = ccp(cosf(angle), sinf(angle));
+		
+		for (GLushort ir = 1; ir <= numRadialDivs; ir++) {
+
+			vIndx++;	// Move on to the next vertex
+			
+			// Vertex location from unit radial scaled by the radial span and ring number
+			CGPoint locPt = ccpMult(unitRadial, (radialDivSpan * ir));
+			vertices[vIndx].location = cc3v(locPt.x, locPt.y, 0.0f);
+			
+			// Vertex normal always points along positive Z-axis
+			vertices[vIndx].normal = kCC3VectorUnitZPositive;
+
+			// Vertex tex coords from unit radial scaled by the radial texture span and ring
+			// number, then shifted to move range from (-0.5 <-> +0.5) to (0.0 <-> +1.0).
+			CGPoint texPt = ccpAdd(ccpMult(unitRadial, (radialTexDivSpan * ir)), ccp(0.5f, 0.5f));
+			vertices[vIndx].texCoord = (ccTex2F){texPt.x, (1.0f - texPt.y)};
+			
+			// For the first ring, add one triangle rooted at the origin.
+			// For all but the first ring, add two triangles to cover division trapezoid.
+			// We don't create triangles for the last set of radial vertices, since they
+			// overlap the first.
+			if (ia < numAngularDivs) {
+				if (ir == 1) {
+					indices[iIndx++] = 0;							// Center vertex
+					indices[iIndx++] = vIndx;						// Current vertex
+					indices[iIndx++] = vIndx + numRadialDivs;		// Next angular div, same ring
+				} else {
+					indices[iIndx++] = vIndx;						// Current vertex
+					indices[iIndx++] = vIndx + numRadialDivs;		// Next angular div, same ring
+					indices[iIndx++] = vIndx + numRadialDivs - 1;	// Next angular div, prev ring
+					
+					indices[iIndx++] = vIndx;						// Current vertex
+					indices[iIndx++] = vIndx + numRadialDivs - 1;	// Next angular div, prev ring
+					indices[iIndx++] = vIndx - 1;					// Same angular div, prev ring
+				}				
+			}
 		}
 	}
-}
-
-
-#pragma mark Deprecated parametric plane methods
-
--(void) deprecatedPopulateAsRectangleWithSize: (CGSize) rectSize
-									 andPivot: (CGPoint) pivot
-							  andTessellation: (ccGridSize) facesPerSide
-								  withTexture: (CC3Texture*) texture
-								invertTexture: (BOOL) shouldInvert {
 	
-	// Populate the mesh, attach the texture
-	[self populateAsTexturedRectangleWithSize: rectSize
-									 andPivot: pivot
-							  andTessellation: facesPerSide];
-	self.texture = texture;
-	
-	// Align the texture coordinates to the texture
-	if (shouldInvert) {
-		[self alignInvertedTextures];
-	} else {
-		[self alignTextures];
-	}
-}
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert {
-	[self deprecatedPopulateAsRectangleWithSize: rectSize
-									   andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-								andTessellation: ccg(1, 1)
-									withTexture: texture
-								  invertTexture: shouldInvert];
-}
-
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert {
-	[self deprecatedPopulateAsRectangleWithSize: rectSize
-									   andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-								andTessellation: facesPerSide
-									withTexture: texture
-								  invertTexture: shouldInvert];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert {
-	[self deprecatedPopulateAsRectangleWithSize: rectSize
-									   andPivot: pivot
-								andTessellation: ccg(1, 1)
-									withTexture: texture
-								  invertTexture: shouldInvert];
-}
-
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert {
-	[self deprecatedPopulateAsRectangleWithSize: rectSize
-									   andPivot: pivot
-								andTessellation: facesPerSide
-									withTexture: texture
-								  invertTexture: shouldInvert];
+	self.mesh = vaMesh;
 }
 
 
 #pragma mark Populating parametric boxes
 
-// Index data for the triangles covering the six faces of a solid box.
-static const GLubyte solidBoxIndexData[] = {
-	1, 5, 7, 7, 3, 1,
-	0, 1, 3, 3, 2, 0,
-	4, 0, 2, 2, 6, 4,
-	5, 4, 6, 6, 7, 5,
-	3, 7, 6, 6, 2, 3,
-	0, 4, 5, 5, 1, 0,
-};
-
 -(void) populateAsSolidBox: (CC3BoundingBox) box {
-	NSString* itemName;
-	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
-	CC3Vector boxMin = box.minimum;
-	CC3Vector boxMax = box.maximum;
-	GLuint vertexCount = 8;
-	
-	// Create vertexLocation array.
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
-	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vertexCount];
-	
-	// Extract all 8 corner vertices from the box.
-	vertices[0].location = cc3v(boxMin.x, boxMin.y, boxMin.z);
-	vertices[1].location = cc3v(boxMin.x, boxMin.y, boxMax.z);
-	vertices[2].location = cc3v(boxMin.x, boxMax.y, boxMin.z);
-	vertices[3].location = cc3v(boxMin.x, boxMax.y, boxMax.z);
-	vertices[4].location = cc3v(boxMax.x, boxMin.y, boxMin.z);
-	vertices[5].location = cc3v(boxMax.x, boxMin.y, boxMax.z);
-	vertices[6].location = cc3v(boxMax.x, boxMax.y, boxMin.z);
-	vertices[7].location = cc3v(boxMax.x, boxMax.y, boxMax.z);
-	
-	// Create the normal array interleaved on the same element array
-	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
-	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
-	normArray.elements = vertices;
-	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vertexCount;
-	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
-
-	// Since this is a box, and all sides meet at right angles, all components
-	// of all normals will have a value of either positive or negative (1 / sqrt(3)).
-	GLfloat oort = 1.0f / M_SQRT3;		// One-over-root-three
-	
-	// Populate normals diagonally from each corner of the box
-	vertices[0].normal = cc3v(-oort, -oort, -oort);
-	vertices[1].normal = cc3v(-oort, -oort,  oort);
-	vertices[2].normal = cc3v(-oort,  oort, -oort);
-	vertices[3].normal = cc3v(-oort,  oort,  oort);
-	vertices[4].normal = cc3v( oort, -oort, -oort);
-	vertices[5].normal = cc3v( oort, -oort,  oort);
-	vertices[6].normal = cc3v( oort,  oort, -oort);
-	vertices[7].normal = cc3v( oort,  oort,  oort);
-	
-	// Construct the vertex indices that will draw the triangles that make up each
-	// face of the box. Indices are ordered for each of the six faces starting in
-	// the lower left corner and proceeding counter-clockwise.
-	GLuint triangleCount = 12;
-	GLuint indexCount = triangleCount * 3;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_TRIANGLES;
-	indexArray.elementType = GL_UNSIGNED_BYTE;
-	indexArray.elementCount = indexCount;
-	indexArray.elements = (GLvoid*)solidBoxIndexData;
-	
-	// Create mesh with interleaved vertex arrays
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.interleaveVertices = YES;
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexNormals = normArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
+	GLfloat w = box.maximum.x - box.minimum.x;		// Width of the box
+	GLfloat h = box.maximum.y - box.minimum.y;		// Height of the box
+	GLfloat d = box.maximum.z - box.minimum.z;		// Depth of the box
+	GLfloat ufw = d + w + d + w;					// Total width of unfolded flattened box
+	GLfloat ufh = d + h + d;						// Total height of unfolded flattened box
+	[self populateAsSolidBox: box withCorner: ccp((d / ufw), (d / ufh))];
 }
 
--(void) populateAsTexturedBox: (CC3BoundingBox) box {
-	[self populateAsTexturedBox: box withCorner: ccp((1.0 / 4.0), (1.0 / 3.0))];
+-(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box {
+	[self populateAsSolidBox: box withCorner: ccp((1.0 / 4.0), (1.0 / 3.0))];
 }
 
 // Thanks to cocos3d user andyman for contributing the prototype code and texture
 // template file for this method.
--(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
-	NSString* itemName;
-	CC3TexturedVertex* vertices;		// Array of custom structures to hold the interleaved vertex data
+-(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
+
 	CC3Vector boxMin = box.minimum;
 	CC3Vector boxMax = box.maximum;
 	GLuint vertexCount = 24;
+	GLuint triangleCount = 12;
 	
-	// Create vertexLocation array.
-	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
-	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
-	locArray.elementOffset = 0;							// Offset to location element in vertex structure
-	vertices = [locArray allocateElements: vertexCount];
-	
-	// Create the normal array interleaved on the same element array
-	itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
-	CC3VertexNormals* normArray = [CC3VertexNormals vertexArrayWithName: itemName];
-	normArray.elements = vertices;
-	normArray.elementStride = locArray.elementStride;	// Interleaved...so same stride
-	normArray.elementCount = vertexCount;
-	normArray.elementOffset = sizeof(CC3Vector);		// Offset to normal element in vertex structure
-	
-	// Create the tex coord array interleaved on the same element array as the vertex locations
-	CC3VertexTextureCoordinates* tcArray = nil;
-	itemName = [NSString stringWithFormat: @"%@-Texture", self.name];
-	tcArray = [CC3VertexTextureCoordinates vertexArrayWithName: itemName];
-	tcArray.elements = vertices;
-	tcArray.elementStride = locArray.elementStride;		// Interleaved...so same stride
-	tcArray.elementCount = vertexCount;
-	tcArray.elementOffset = 2 * sizeof(CC3Vector);		// Offset to texCoord element in vertex structure
+	// Create the mesh, configure it for texture vertices and drawing
+	// indexed triangles, and allocate space for the vertices and indices.
+	// Since number of vertices is fixed and low, use bytes for indices.
+	NSString* meshName = [NSString stringWithFormat: @"%@-Mesh", self.name];
+	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh meshWithName: meshName];
+	CC3TexturedVertex* vertices = [vaMesh allocateTexturedVertices: vertexCount];
+	GLushort* indices = [vaMesh allocateIndexedTriangles: triangleCount];
 	
 	// Front face, CCW winding:
 	vertices[0].location = cc3v(boxMin.x, boxMin.y, boxMax.z);
 	vertices[0].normal = kCC3VectorUnitZPositive;
-	vertices[0].texCoord = (ccTex2F){corner.x, corner.y};
+	vertices[0].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
 	
 	vertices[1].location = cc3v(boxMax.x, boxMin.y, boxMax.z);
 	vertices[1].normal = kCC3VectorUnitZPositive;
-	vertices[1].texCoord = (ccTex2F){0.5f, corner.y};
+	vertices[1].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
 	
 	vertices[2].location = cc3v(boxMax.x, boxMax.y, boxMax.z);
 	vertices[2].normal = kCC3VectorUnitZPositive;
-	vertices[2].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
+	vertices[2].texCoord = (ccTex2F){0.5f, corner.y};
 	
 	vertices[3].location = cc3v(boxMin.x, boxMax.y, boxMax.z);
 	vertices[3].normal = kCC3VectorUnitZPositive;
-	vertices[3].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
+	vertices[3].texCoord = (ccTex2F){corner.x, corner.y};
 	
 	// Right face, CCW winding:
 	vertices[4].location = cc3v(boxMax.x, boxMin.y, boxMax.z);
 	vertices[4].normal = kCC3VectorUnitXPositive;
-	vertices[4].texCoord = (ccTex2F){0.5f, corner.y};
+	vertices[4].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
 	
 	vertices[5].location = cc3v(boxMax.x, boxMin.y, boxMin.z);
 	vertices[5].normal = kCC3VectorUnitXPositive;
-	vertices[5].texCoord = (ccTex2F){(0.5f + corner.x), corner.y};
+	vertices[5].texCoord = (ccTex2F){(0.5f + corner.x), (1.0f - corner.y)};
 	
 	vertices[6].location = cc3v(boxMax.x, boxMax.y, boxMin.z);
 	vertices[6].normal = kCC3VectorUnitXPositive;
-	vertices[6].texCoord = (ccTex2F){(0.5f + corner.x), (1.0f - corner.y)};
+	vertices[6].texCoord = (ccTex2F){(0.5f + corner.x), corner.y};
 	
 	vertices[7].location = cc3v(boxMax.x, boxMax.y, boxMax.z);
 	vertices[7].normal = kCC3VectorUnitXPositive;
-	vertices[7].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
+	vertices[7].texCoord = (ccTex2F){0.5f, corner.y};
 	
 	// Back face, CCW winding:
 	vertices[8].location = cc3v(boxMax.x, boxMin.y, boxMin.z);
 	vertices[8].normal = kCC3VectorUnitZNegative;
-	vertices[8].texCoord = (ccTex2F){(0.5f + corner.x), corner.y};
+	vertices[8].texCoord = (ccTex2F){(0.5f + corner.x), (1.0f - corner.y)};
 	
 	vertices[9].location = cc3v(boxMin.x, boxMin.y, boxMin.z);
 	vertices[9].normal = kCC3VectorUnitZNegative;
-	vertices[9].texCoord = (ccTex2F){1.0f, corner.y};
+	vertices[9].texCoord = (ccTex2F){1.0f, (1.0f - corner.y)};
 	
 	vertices[10].location = cc3v(boxMin.x, boxMax.y, boxMin.z);
 	vertices[10].normal = kCC3VectorUnitZNegative;
-	vertices[10].texCoord = (ccTex2F){1.0f, (1.0f - corner.y)};
+	vertices[10].texCoord = (ccTex2F){1.0f, corner.y};
 	
 	vertices[11].location = cc3v(boxMax.x, boxMax.y, boxMin.z);
 	vertices[11].normal = kCC3VectorUnitZNegative;
-	vertices[11].texCoord = (ccTex2F){(0.5f + corner.x), (1.0f - corner.y)};
+	vertices[11].texCoord = (ccTex2F){(0.5f + corner.x), corner.y};
 	
 	// Left face, CCW winding:
 	vertices[12].location = cc3v(boxMin.x, boxMin.y, boxMin.z);
 	vertices[12].normal = kCC3VectorUnitXNegative;
-	vertices[12].texCoord = (ccTex2F){0.0f, corner.y};
+	vertices[12].texCoord = (ccTex2F){0.0f, (1.0f - corner.y)};
 	
 	vertices[13].location = cc3v(boxMin.x, boxMin.y, boxMax.z);
 	vertices[13].normal = kCC3VectorUnitXNegative;
-	vertices[13].texCoord = (ccTex2F){corner.x, corner.y};
+	vertices[13].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
 	
 	vertices[14].location = cc3v(boxMin.x, boxMax.y, boxMax.z);
 	vertices[14].normal = kCC3VectorUnitXNegative;
-	vertices[14].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
+	vertices[14].texCoord = (ccTex2F){corner.x, corner.y};
 	
 	vertices[15].location = cc3v(boxMin.x, boxMax.y, boxMin.z);
 	vertices[15].normal = kCC3VectorUnitXNegative;
-	vertices[15].texCoord = (ccTex2F){0.0f, (1.0f - corner.y)};
+	vertices[15].texCoord = (ccTex2F){0.0f, corner.y};
 	
 	// Top face, CCW winding:
 	vertices[16].location = cc3v(boxMin.x, boxMax.y, boxMin.z);
 	vertices[16].normal = kCC3VectorUnitYPositive;
-	vertices[16].texCoord = (ccTex2F){corner.x, 1.0f};
+	vertices[16].texCoord = (ccTex2F){corner.x, 0.0f};
 	
 	vertices[17].location = cc3v(boxMin.x, boxMax.y, boxMax.z);
 	vertices[17].normal = kCC3VectorUnitYPositive;
-	vertices[17].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
+	vertices[17].texCoord = (ccTex2F){corner.x, corner.y};
 	
 	vertices[18].location = cc3v(boxMax.x, boxMax.y, boxMax.z);
 	vertices[18].normal = kCC3VectorUnitYPositive;
-	vertices[18].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
+	vertices[18].texCoord = (ccTex2F){0.5f, corner.y};
 	
 	vertices[19].location = cc3v(boxMax.x, boxMax.y, boxMin.z);
 	vertices[19].normal = kCC3VectorUnitYPositive;
-	vertices[19].texCoord = (ccTex2F){0.5f, 1.0f};
+	vertices[19].texCoord = (ccTex2F){0.5f, 0.0f};
 	
 	// Bottom face, CCW winding:
 	vertices[20].location = cc3v(boxMin.x, boxMin.y, boxMax.z);
 	vertices[20].normal = kCC3VectorUnitYNegative;
-	vertices[20].texCoord = (ccTex2F){corner.x, corner.y};
+	vertices[20].texCoord = (ccTex2F){corner.x, (1.0f - corner.y)};
 	
 	vertices[21].location = cc3v(boxMin.x, boxMin.y, boxMin.z);
 	vertices[21].normal = kCC3VectorUnitYNegative;
-	vertices[21].texCoord = (ccTex2F){corner.x, 0.0f};
+	vertices[21].texCoord = (ccTex2F){corner.x, 1.0f};
 	
 	vertices[22].location = cc3v(boxMax.x, boxMin.y, boxMin.z);
 	vertices[22].normal = kCC3VectorUnitYNegative;
-	vertices[22].texCoord = (ccTex2F){0.5f, 0.0f};
+	vertices[22].texCoord = (ccTex2F){0.5f, 1.0f};
 	
 	vertices[23].location = cc3v(boxMax.x, boxMin.y, boxMax.z);
 	vertices[23].normal = kCC3VectorUnitYNegative;
-	vertices[23].texCoord = (ccTex2F){0.5f, corner.y};
-	
-	// Construct the vertex indices that will draw the triangles that make up each
-	// face of the box. Indices are ordered for each of the six faces starting in
-	// the lower left corner and proceeding counter-clockwise.
-	GLuint triangleCount = 12;
-	GLuint indexCount = triangleCount * 3;
-	itemName = [NSString stringWithFormat: @"%@-Indices", self.name];
-	CC3VertexIndices* indexArray = [CC3VertexIndices vertexArrayWithName: itemName];
-	indexArray.drawingMode = GL_TRIANGLES;
-	indexArray.elementType = GL_UNSIGNED_BYTE;
-	GLubyte* indices = [indexArray allocateElements: indexCount];
-	
+	vertices[23].texCoord = (ccTex2F){0.5f, (1.0f - corner.y)};
+
+	// Populate the vertex indices
 	GLubyte indxIndx = 0;
 	GLubyte vtxIndx = 0;
 	for (int side = 0; side < 6; side++) {
@@ -534,16 +366,7 @@ static const GLubyte solidBoxIndexData[] = {
 		indices[indxIndx++] = vtxIndx++;		// vertex 3
 		indices[indxIndx++] = (vtxIndx - 4);	// vertex 0
 	}
-	
-	// Create mesh with interleaved vertex arrays
-	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
-	aMesh.interleaveVertices = YES;
-	aMesh.vertexLocations = locArray;
-	aMesh.vertexNormals = normArray;
-	aMesh.vertexTextureCoordinates = tcArray;
-	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
+	self.mesh = vaMesh;		// Set mesh at end to update bounding volume
 }
 
 // Vertex index data for the 12 lines of a wire box.
@@ -587,9 +410,103 @@ static const GLubyte wireBoxIndexData[] = {
 	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
 	aMesh.vertexLocations = locArray;
 	aMesh.vertexIndices = indexArray;
-	self.mesh = aMesh;
+	self.mesh = aMesh;		// Set mesh at end to update bounding volume
 }
 
+
+#pragma mark Populating parametric sphere
+
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis {
+	
+	// Must be at least one tessellation face per side of the rectangle.
+	divsPerAxis.x = MAX(divsPerAxis.x, 3);
+	divsPerAxis.y = MAX(divsPerAxis.y, 2);
+	
+	// The division span and texture span of each face in the tessellated grid.
+	CGSize divSpan = CGSizeMake( (2.0 * M_PI / divsPerAxis.x), (M_PI / divsPerAxis.y) );
+	CGSize divTexSpan = CGSizeMake((1.0 / divsPerAxis.x), (1.0 / divsPerAxis.y));
+	GLfloat halfDivTexSpanWidth = divTexSpan.width * 0.5f;
+	
+	// Calculate number of vertices, triangles and indices.
+	ccGridSize verticesPerAxis;
+	verticesPerAxis.x = divsPerAxis.x + 1;
+	verticesPerAxis.y = divsPerAxis.y + 1;
+	GLuint vertexCount = verticesPerAxis.x * verticesPerAxis.y;
+	GLuint triangleCount = divsPerAxis.x * (divsPerAxis.y - 1) * 2;
+
+	// Create the mesh, configure it for texture vertices and drawing
+	// indexed triangles, and allocate space for the vertices and indices.
+	NSString* meshName = [NSString stringWithFormat: @"%@-Mesh", self.name];
+	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh meshWithName: meshName];
+	CC3TexturedVertex* vertices = [vaMesh allocateTexturedVertices: vertexCount];
+	GLushort* indices = [vaMesh allocateIndexedTriangles: triangleCount];
+	
+	LogCleanTrace(@"%@ populating as sphere with radius %.3f, (%i, %i) divisions, %i vertices, and %i triangles",
+				  self, radius, divsPerAxis.x, divsPerAxis.y, vertexCount, triangleCount);
+	
+	// Populate vertex locations, normals & texture coordinates.
+	// The parametric X-axis represents the longtitude (0 to 2PI).
+	// The parametric Y-axis represents the latitude (0 to PI), starting at the north pole.
+	GLushort vIndx = 0;			// Vertex index
+	GLushort iIndx = 0;			// Index index
+	for (GLushort iy = 0; iy < verticesPerAxis.y; iy++) {
+		
+		// Latitude (Y): 0 to PI
+		GLfloat y = divSpan.height * iy;
+		GLfloat sy = sinf(y);
+		GLfloat cy = cosf(y);
+
+		for (GLushort ix = 0; ix < verticesPerAxis.x; ix++) {
+
+			// Longtitude (X): 0 to 2PI
+			GLfloat x = divSpan.width * ix;
+			GLfloat sx = sinf(x);
+			GLfloat cx = cosf(x);
+
+			// Vertex location, starting at negative-Z axis,
+			// and right-hand rotating towards negative-X axis.
+			CC3Vector unitRadial = cc3v( -(sy * sx), cy, -(sy * cx) );
+			vertices[vIndx].location = CC3VectorScaleUniform(unitRadial, radius);
+			
+			// Vertex normal - same as location on unit sphere
+			vertices[vIndx].normal = unitRadial;
+			
+			// Calculate vertex texture coordinate. Offset the texture coordinates at
+			// each vertex at the poles by half of the division span (so triangle is
+			// symetrical. The tex coord at the north pole is moved right and that at
+			// the south pole is moved to the left.
+			GLfloat uOffset = 0.0f;
+			if (iy == 0) uOffset = halfDivTexSpanWidth;							// North pole
+			if (iy == (verticesPerAxis.y - 1)) uOffset = -halfDivTexSpanWidth;	// South pole
+			GLfloat u = divTexSpan.width * ix + uOffset;
+			GLfloat v = divTexSpan.height * iy;
+			vertices[vIndx].texCoord = (ccTex2F){u, v};
+
+			// For each vertex that is at the bottom-right corner of a division, add triangles.
+			if (iy > 0 && ix > 0) {
+				
+				// For all but the first division row, add the triangle that has apex pointing south.
+				if (iy > 1) {
+					indices[iIndx++] = vIndx;							// Bottom right
+					indices[iIndx++] = vIndx - verticesPerAxis.x;		// Top right
+					indices[iIndx++] = vIndx - verticesPerAxis.x - 1;	// Top left
+				}				
+
+				// For all but the last division row, add the triangle that has apex pointing north.
+				if (iy < (verticesPerAxis.y - 1)) {
+					indices[iIndx++] = vIndx - verticesPerAxis.x - 1;	// Top left
+					indices[iIndx++] = vIndx - 1;						// Bottom left
+					indices[iIndx++] = vIndx;							// Bottom right
+				}
+			}
+			vIndx++;	// Move on to the next vertex
+		}
+	}
+
+	// Set spherical bounding volume before setting mesh, then set mesh at end to update it
+	self.boundingVolume = [CC3VertexLocationsSphericalBoundingVolume boundingVolume];
+	self.mesh = vaMesh;
+}
 
 #pragma mark Populating parametric lines
 
@@ -613,7 +530,108 @@ static const GLubyte wireBoxIndexData[] = {
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
 	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
 	aMesh.vertexLocations = locArray;
-	self.mesh = aMesh;
+	self.mesh = aMesh;		// Set mesh at end to update bounding volume
+}
+
+#pragma mark Deprecated parametric methods
+
+// Deprecated
+-(void) deprecatedPopulateAsRectangleWithSize: (CGSize) rectSize
+									 andPivot: (CGPoint) pivot
+							  andTessellation: (ccGridSize) divsPerAxis
+								  withTexture: (CC3Texture*) texture
+								invertTexture: (BOOL) shouldInvert {
+	
+	// Populate the mesh, attach the texture
+	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: divsPerAxis];
+	self.texture = texture;
+	
+	// Align the texture coordinates to the texture.
+	// Texture inversion is now  automatic in population methods, so reverse the logic.
+	if (!shouldInvert) {
+		[self flipTexturesVertically];
+	}
+}
+
+// Deprecated
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+								withTexture: (CC3Texture*) texture
+							  invertTexture: (BOOL) shouldInvert {
+	[self deprecatedPopulateAsRectangleWithSize: rectSize
+									   andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
+								andTessellation: ccg(1, 1)
+									withTexture: texture
+								  invertTexture: shouldInvert];
+}
+
+// Deprecated
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+							andTessellation: (ccGridSize) divsPerAxis
+								withTexture: (CC3Texture*) texture
+							  invertTexture: (BOOL) shouldInvert {
+	[self deprecatedPopulateAsRectangleWithSize: rectSize
+									   andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
+								andTessellation: divsPerAxis
+									withTexture: texture
+								  invertTexture: shouldInvert];
+}
+
+// Deprecated
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+						withTexture: (CC3Texture*) texture
+					  invertTexture: (BOOL) shouldInvert {
+	[self deprecatedPopulateAsRectangleWithSize: rectSize
+									   andPivot: pivot
+								andTessellation: ccg(1, 1)
+									withTexture: texture
+								  invertTexture: shouldInvert];
+}
+
+// Deprecated
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+					andTessellation: (ccGridSize) divsPerAxis
+						withTexture: (CC3Texture*) texture
+					  invertTexture: (BOOL) shouldInvert {
+	[self deprecatedPopulateAsRectangleWithSize: rectSize
+									   andPivot: pivot
+								andTessellation: divsPerAxis
+									withTexture: texture
+								  invertTexture: shouldInvert];
+}
+
+// Deprecated
+-(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize {
+	[self populateAsCenteredRectangleWithSize: rectSize];
+}
+
+// Deprecated
+-(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
+									andTessellation: (ccGridSize) divsPerAxis {
+	[self populateAsCenteredRectangleWithSize: rectSize andTessellation: divsPerAxis];
+}
+
+// Deprecated
+-(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot {
+	[self populateAsRectangleWithSize: rectSize andPivot: pivot];
+}
+
+// Deprecated
+-(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
+								   andPivot: (CGPoint) pivot
+							andTessellation: (ccGridSize) divsPerAxis {
+	[self populateAsRectangleWithSize: rectSize andPivot: pivot andTessellation: divsPerAxis];
+}
+
+// Deprecated
+-(void) populateAsTexturedBox: (CC3BoundingBox) box {
+	[self populateAsSolidBox: box withCorner: ccp((1.0 / 4.0), (1.0 / 3.0))];
+}
+
+// Deprecated
+-(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
+	[self populateAsSolidBox: box withCorner: corner];
 }
 
 @end

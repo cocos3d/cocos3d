@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11StateTracker.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,7 +100,9 @@
 
 @implementation CC3OpenGLES11StateTrackerPrimitive
 
-@synthesize name, originalValueHandling, valueIsKnown;
+@synthesize name, valueIsKnown, shouldAlwaysSetGL;
+
+-(CC3GLESStateOriginalValueHandling) originalValueHandling { return originalValueHandling; }
 
 -(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	originalValueHandling = origValueHandling;
@@ -110,6 +112,13 @@
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueIgnore;
 }
+
+-(void) setShouldAlwaysSetGL: (BOOL) aBoolean {
+	shouldAlwaysSetGL = aBoolean;
+	self.valueIsKnown = NO;
+}
+
++(BOOL) defaultShouldAlwaysSetGL { return NO; }
 
 -(BOOL) shouldAlwaysReadOriginal {
 	return name && (originalValueHandling == kCC3GLESStateOriginalValueReadAlways ||
@@ -148,6 +157,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	if ( (self = [super initWithParent: aTracker]) ) {
 		self.name = aName;
 		self.originalValueHandling = origValueHandling;
+		self.shouldAlwaysSetGL = [[self class] defaultShouldAlwaysSetGL];
 		[self notifyTrackerAdded];
 	}
 	return self;
@@ -285,7 +295,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (BOOL) aValue {
-	if (!valueIsKnown || aValue != value) {
+	if (shouldAlwaysSetGL || !valueIsKnown || aValue != value) {
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
@@ -299,26 +309,26 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 -(void) setGLValue {
 	if( setGLFunction ) {
-		setGLFunction(value ? 1 : 0);
+		setGLFunction(value ? GL_TRUE : GL_FALSE);
 	}
 }
 
 -(void) getGLValue {
 	GLboolean glValue;
 	glGetBooleanv(name, &glValue);
-	originalValue = (glValue != 0);
+	originalValue = (glValue != GL_FALSE);
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
 }
 
 -(void) logReuseValue: (BOOL) wasSet {
-	LogTrace("%@ reused %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
+	LogTrace(@"%@ reused %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), (originalValue ? @"YES" : @"NO"),
 			 (valueIsKnown ? (value ? @"YES" : @"NO") : @"UNKNOWN"));
 }
@@ -353,18 +363,18 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
 			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class],
+	LogTrace(@"%@ set %@ = %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class],
+	LogTrace(@"%@ reuse %@ = %@", [self class],
 			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
 }
 
@@ -429,7 +439,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (GLfloat) aValue {
-	if (!valueIsKnown || aValue != value) {
+	if (shouldAlwaysSetGL || !valueIsKnown || aValue != value) {
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
@@ -452,17 +462,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %.2f (was tracking %@)",
+	LogTrace(@"%@ %@ read GL value %.2f (was tracking %@)",
 			 [self class], NSStringFromGLEnum(name), originalValue,
 			 (valueIsKnown ? [NSString stringWithFormat: @"%.2f", value] : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ set %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ reuse %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) restoreOriginalValue {
@@ -535,7 +545,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (GLint) aValue {
-	if (!valueIsKnown || aValue != value) {
+	if (shouldAlwaysSetGL || !valueIsKnown || aValue != value) {
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
@@ -558,17 +568,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %i (was tracking %@)",
+	LogTrace(@"%@ %@ read GL value %i (was tracking %@)",
 			 [self class], NSStringFromGLEnum(name), originalValue,
 			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %i", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ set %@ = %i", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %i", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ reuse %@ = %i", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) restoreOriginalValue {
@@ -641,7 +651,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (GLenum) aValue {
-	if (!valueIsKnown || aValue != value) {
+	if (shouldAlwaysSetGL || !valueIsKnown || aValue != value) {
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
@@ -664,17 +674,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)",
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)",
 			 [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(originalValue),
 			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
+	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
 }
 
 -(void) restoreOriginalValue {
@@ -747,7 +757,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (ccColor4F) aColor {
-	if (!valueIsKnown || !CCC4FAreEqual(aColor, value)) {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CCC4FAreEqual(aColor, value)) {
 		value = aColor;
 		[self setGLValueAndNotify];
 	} else {
@@ -770,17 +780,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(originalValue),
 			 (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
+	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
 }
 
 -(void) restoreOriginalValue {
@@ -867,7 +877,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (ccColor4F) aColor {
-	if (!valueIsKnown || !CCC4FAreEqual(aColor, value)) {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CCC4FAreEqual(aColor, value)) {
 		value = aColor;
 		[self setGLValueAndNotify];
 		fixedValueIsKnown = NO;
@@ -877,8 +887,12 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setFixedValue: (ccColor4B) aColor {
-	if (!fixedValueIsKnown || fixedValue.r != aColor.r || fixedValue.g != aColor.g
-		|| fixedValue.b != aColor.b || fixedValue.a != aColor.a) {
+	if (!fixedValueIsKnown ||
+		fixedValue.r != aColor.r ||
+		fixedValue.g != aColor.g ||
+		fixedValue.b != aColor.b || 
+		fixedValue.a != aColor.a) {
+
 		fixedValue = aColor;
 		[self setGLFixedValue];
 		[self notifyGLChanged];
@@ -901,12 +915,12 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logSetFixedValue {
-	LogTrace("%@ set %@ = (%u, %u, %u, %u)", [self class],
+	LogTrace(@"%@ set %@ = (%u, %u, %u, %u)", [self class],
 			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
 }
 
 -(void) logReuseFixedValue {
-	LogTrace("%@ reuse %@ = (%u, %u, %u, %u)", [self class],
+	LogTrace(@"%@ reuse %@ = (%u, %u, %u, %u)", [self class],
 			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
 }
 
@@ -971,7 +985,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) setValue: (CC3Viewport) aViewport {
-	if (!valueIsKnown || !CC3ViewportsAreEqual(aViewport, value)) {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CC3ViewportsAreEqual(aViewport, value)) {
 		value = aViewport;
 		[self setGLValueAndNotify];
 	} else {
@@ -994,17 +1008,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(originalValue),
 			 (valueIsKnown ? NSStringFromCC3Viewport(value) : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
+	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
 }
 
 -(void) restoreOriginalValue {
@@ -1027,7 +1041,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (GLvoid*) aValue {
-	if (!valueIsKnown || aValue != value) {
+	if (shouldAlwaysSetGL || !valueIsKnown || aValue != value) {
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
@@ -1044,17 +1058,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %p (was tracking %@)",
+	LogTrace(@"%@ %@ read GL value %p (was tracking %@)",
 			 [self class], NSStringFromGLEnum(name), originalValue,
 			 (valueIsKnown ? [NSString stringWithFormat: @"%p", value] : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %p", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ set %@ = %p", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %p", [self class], NSStringFromGLEnum(name), value);
+	LogTrace(@"%@ reuse %@ = %p", [self class], NSStringFromGLEnum(name), value);
 }
 
 -(void) restoreOriginalValue {
@@ -1077,7 +1091,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (CC3Vector) aVector {
-	if (!valueIsKnown || !CC3VectorsAreEqual(aVector, value)) {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CC3VectorsAreEqual(aVector, value)) {
 		value = aVector;
 		[self setGLValueAndNotify];
 	} else {
@@ -1094,17 +1108,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(originalValue),
 			 (valueIsKnown ? NSStringFromCC3Vector(value) : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
+	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
 }
 
 -(void) restoreOriginalValue {
@@ -1127,7 +1141,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 @synthesize value, originalValue;
 
 -(void) setValue: (CC3Vector4) aVector {
-	if (!valueIsKnown || !CC3Vector4sAreEqual(aVector, value)) {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CC3Vector4sAreEqual(aVector, value)) {
 		value = aVector;
 		[self setGLValueAndNotify];
 	} else {
@@ -1144,17 +1158,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) logGetGLValue {
-	LogTrace("%@ %@ read GL value %@ (was tracking %@)", 
+	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
 			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(originalValue),
 			 (valueIsKnown ? NSStringFromCC3Vector4(value) : @"UNKNOWN"));
 }
 
 -(void) logSetValue {
-	LogTrace("%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
+	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
 }
 
 -(void) logReuseValue {
-	LogTrace("%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
+	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
 }
 
 -(void) restoreOriginalValue {
@@ -1174,7 +1188,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 @implementation CC3OpenGLES11StateTrackerComposite
 
-@synthesize originalValueHandling, shouldAlwaysSetGL;
+@synthesize shouldAlwaysSetGL;
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
 	if ( (self = [super initWithParent: aTracker]) ) {
@@ -1186,6 +1200,8 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(void) initializeTrackers {}
+
+-(CC3GLESStateOriginalValueHandling) originalValueHandling { return originalValueHandling; }
 
 -(void) setOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
 	originalValueHandling = origValueHandling;
@@ -1201,13 +1217,9 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	self.valueIsKnown = NO;
 }
 
-+(BOOL) defaultShouldAlwaysSetGL {
-	return NO;
-}
++(BOOL) defaultShouldAlwaysSetGL { return NO; }
 
--(BOOL) valueIsKnown {
-	return NO;
-}
+-(BOOL) valueIsKnown { return NO; }
 
 -(void) setValueIsKnown:(BOOL) aBoolean {}
 

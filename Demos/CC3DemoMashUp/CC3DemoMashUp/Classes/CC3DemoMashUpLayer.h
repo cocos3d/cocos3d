@@ -1,9 +1,9 @@
 /*
  * CC3DemoMashUpLayer.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,7 +37,7 @@
  * A sample application-specific CC3Layer subclass that contains two joystick controls
  * for controlling the movement of the 3D camera, a button control that rotates the
  * camera to point at different aspects of the scene, and a button control to cause
- * the world to be invaded by an army of robots.
+ * the scene to be invaded by an army of robots.
  */
 @interface CC3DemoMashUpLayer : CC3Layer {
 	Joystick* directionJoystick;
@@ -46,15 +46,33 @@
 	AdornableMenuItemImage* invasionMI;
 	AdornableMenuItemImage* sunlightMI;
 	AdornableMenuItemImage* zoomMI;
+	AdornableMenuItemImage* shadowMI;
 	CC3Layer* hudLayer;
 }
 
+/**
+ * Opens a secondary heads-up-display CC3Layer that holds a CC3Scene that
+ * contains only the globe. The opening of this secondary layer is animated.
+ */
 -(void) openGlobeHUDFromTouchAt: (CGPoint) touchPoint;
 
+/** Closes the secondary HUD layer. The closing is animated. */
 -(void) closeGlobeHUDFromTouchAt: (CGPoint) touchPoint;
 
+/**
+ * If the HUD window is not open, opens it by invoking the openGlobeHUDFromTouchAt:
+ * method. If the HUD window is already open, closes it by invoking the
+ * closeGlobeHUDFromTouchAt: method.
+ *
+ * This is invoked from a touch-handing event when the globe is touched.
+ */
 -(void) toggleGlobeHUDFromTouchAt: (CGPoint) touchPoint;
 
+/**
+ * Removes the secondary HUD window from this layer once it has closed.
+ *
+ * This is invoked automatically from the CCAction that animates the closing of the HUD window.
+ */
 -(void) removeGlobeHUD;
 
 @end

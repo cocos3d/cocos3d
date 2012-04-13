@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11StateTracker.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -190,8 +190,9 @@ typedef enum {
  */
 @interface CC3OpenGLES11StateTrackerPrimitive : CC3OpenGLES11StateTracker {
 	GLenum name;
-	CC3GLESStateOriginalValueHandling originalValueHandling;
+	GLubyte originalValueHandling;
 	BOOL valueIsKnown;
+	BOOL shouldAlwaysSetGL;
 }
 
 /** The enumerated name under which the GL engine identifies this state. */
@@ -230,6 +231,24 @@ typedef enum {
  * kCC3GLESStateOriginalValueIgnore, otherwise returns YES.
  */
 @property(nonatomic, readonly) BOOL valueIsKnownOnClose;
+
+/**
+ * Indicates whether the tracker should always call the GL function to set the GL values,
+ * even if the value has not changed. If this value is NO, if the value has not changed,
+ * the GL function is not called.
+ *
+ * The initial value of this property is set to the value returned by the
+ * defaultShouldAlwaysSetGL method.
+ */
+@property(nonatomic, assign) BOOL shouldAlwaysSetGL;
+
+/**
+ * Default initial value for the shouldAlwaysSetGL property.
+ *
+ * This implementation returns NO, indicating that, by default, the tracker
+ * should only call the GL function if the value has changed.
+ */
++(BOOL) defaultShouldAlwaysSetGL;
 
 /**
  * Returns whether the tracker should read the original value from the GL engine
@@ -863,7 +882,7 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
  * anytime the values are set, even if none of them have changed.
  */
 @interface CC3OpenGLES11StateTrackerComposite : CC3OpenGLES11StateTracker {
-	CC3GLESStateOriginalValueHandling originalValueHandling;
+	GLubyte originalValueHandling;
 	BOOL shouldAlwaysSetGL;
 }
 

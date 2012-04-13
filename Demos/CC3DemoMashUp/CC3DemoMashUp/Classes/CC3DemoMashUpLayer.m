@@ -1,9 +1,9 @@
 /*
  * CC3DemoMashUpLayer.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,27 +30,30 @@
  */
 
 #import "CC3DemoMashUpLayer.h"
-#import "CC3DemoMashUpWorld.h"
+#import "CC3DemoMashUpScene.h"
 #import "CC3ActionInterval.h"
 #import "HUDLayer.h"
+#import "HUDScene.h"
 #import "ccMacros.h"
 
 
 /** Parameters for setting up the joystick and button controls */
-#define kJoystickThumbFileName		@"JoystickThumb.png"
-#define kJoystickSideLength			80.0
-#define kJoystickPadding			8.0
-#define kButtonGrid					40.0
-#define kSwitchViewButtonFileName	@"ArrowLeftButton48x48.png"
-#define kInvasionButtonFileName		@"GridButton48x48.png"
-#define kSunlightButtonFileName		@"SunlightButton48x48.png"
-#define kZoomButtonFileName			@"ZoomButton48x48.png"
-#define kButtonRingFileName			@"ButtonRing48x48.png"
-#define kButtonShineFileName		@"Shine48x48.png"
-#define kPeakShineOpacity			180
-#define kButtonAdornmentScale		1.5
-#define kHUDPadding					8
-#define kGlobeName					@"Globe"
+#define kJoystickThumbFileName			@"JoystickThumb.png"
+#define kJoystickSideLength				80.0
+#define kJoystickPadding				8.0
+#define kButtonGrid						40.0
+#define kSwitchViewButtonFileName		@"ArrowLeftButton48x48.png"
+#define kInvasionButtonFileName			@"GridButton48x48.png"
+#define kSunlightButtonFileName			@"SunlightButton48x48.png"
+#define kZoomButtonFileName				@"ZoomButton48x48.png"
+#define kShadowButtonFileName			@"ShadowButton48x48.png"
+#define kShadowButtonLatchedFileName	@"ShadowButtonLatched48x48.png"
+#define kButtonRingFileName				@"ButtonRing48x48.png"
+#define kButtonShineFileName			@"Shine48x48.png"
+#define kPeakShineOpacity				180
+#define kButtonAdornmentScale			1.5
+#define kHUDPadding						8
+#define kGlobeName						@"Globe"
 
 
 @interface CC3Layer (TemplateMethods)
@@ -63,10 +66,11 @@
 -(void) addInvasionButton;
 -(void) addSunlightButton;
 -(void) addZoomButton;
+-(void) addShadowButton;
 -(void) positionLocationJoystick;
 -(void) positionButtons;
--(CC3World*) makeHUDWorld;
-@property(nonatomic, readonly) CC3DemoMashUpWorld* mashUpWorld;
+-(CC3Scene*) makeHUDScene;
+@property(nonatomic, readonly) CC3DemoMashUpScene* mashUpScene;
 @end
 
 
@@ -78,17 +82,16 @@
 	invasionMI = nil;				// retained as child
 	sunlightMI = nil;				// retained as child
 	zoomMI = nil;					// retained as child
+	shadowMI = nil;					// retained as child
 	hudLayer = nil;					// retained as child
     [super dealloc];
 }
 
 /**
- * Returns the contained CC3World, cast into the appropriate type.
+ * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.
  */
--(CC3DemoMashUpWorld*) mashUpWorld {
-	return (CC3DemoMashUpWorld*) cc3World;
-}
+-(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) cc3Scene; }
 
 -(void) initializeControls {
 	[self addJoysticks];
@@ -96,6 +99,7 @@
 	[self addInvasionButton];
 	[self addSunlightButton];
 	[self addZoomButton];
+	[self addShadowButton];
 	self.isTouchEnabled = YES;		// Enable touch event handling for 3D object picking
 }
 
@@ -246,7 +250,7 @@
 
 /**
  * Creates a button (actually a single-item menu) in the bottom center of the layer
- * that will allow the user to move between viewing the whole world scene and viewing
+ * that will allow the user to move between viewing the whole scene and viewing
  * from the previous position.
  */
 -(void) addZoomButton {
@@ -277,6 +281,42 @@
 }
 
 /**
+ * Creates a button (actually a single-item menu) in the bottom center of the layer
+ * that will allow the user to toggle shadows on and off for a selected node.
+ */
+-(void) addShadowButton {
+	
+	// Set up the menu item and position it in the bottom center of the layer.
+	// We use a toggle button to indicate when the shadow activations are active.
+	CCMenuItem* sb = [CCMenuItemImage itemFromNormalImage: kShadowButtonFileName
+											selectedImage: kShadowButtonFileName];
+	CCMenuItem* sbl = [CCMenuItemImage itemFromNormalImage: kShadowButtonLatchedFileName
+											 selectedImage: kShadowButtonLatchedFileName];
+	shadowMI = [AdornableMenuItemToggle itemWithTarget: self
+											  selector: @selector(toggleShadows:)
+												 items: sb, sbl, nil];
+	[self positionButtons];
+	
+	// Instead of having different normal and selected images, the toggle menu
+	// item uses a shine adornment, which is displayed whenever an item is selected.
+	CCNodeAdornmentBase* adornment;
+	
+	// The adornment is a ring that fades in around the menu item and then fades out when
+	// the menu item is no longer selected.
+	CCSprite* ringSprite = [CCSprite spriteWithFile: kButtonRingFileName];
+	adornment = [CCNodeAdornmentOverlayFader adornmentWithAdornmentNode: ringSprite];
+	adornment.zOrder = kAdornmentUnderZOrder;
+	
+	// Attach the adornment to the menu item and center it on the menu item
+	adornment.position = ccpCompMult(ccpFromSize(shadowMI.contentSize), shadowMI.anchorPoint);
+	shadowMI.adornment = adornment;
+	
+	CCMenu* viewMenu = [CCMenu menuWithItems: shadowMI, nil];
+	viewMenu.position = CGPointZero;
+	[self addChild: viewMenu];
+}
+
+/**
  * Positions the right-side location joystick at the right of the layer.
  * This is called at initialization, and anytime the content size of the layer changes
  * to keep the joystick in the correct location within the new layer dimensions.
@@ -292,12 +332,15 @@
  */
 -(void) positionButtons {
 	GLfloat middle = self.contentSize.width / 2.0;
-	GLfloat btnY = kJoystickPadding + (kJoystickSideLength / 2.0);
-	
-	switchViewMI.position = ccp(middle - (kButtonGrid * 1.5), btnY);
-	invasionMI.position = ccp(middle - (kButtonGrid * 0.5), btnY);
-	sunlightMI.position = ccp(middle + (kButtonGrid * 0.5), btnY);
-	zoomMI.position = ccp(middle + (kButtonGrid * 1.5), btnY);
+	GLfloat btnY = (kJoystickPadding * 0.5) + (kButtonGrid * 0.5);
+
+	shadowMI.position = ccp(middle - (kButtonGrid * 0.5), btnY);
+	zoomMI.position = ccp(middle + (kButtonGrid * 0.5), btnY);
+
+	btnY += kButtonGrid;
+	switchViewMI.position = ccp(middle - (kButtonGrid * 1.0), btnY);
+	invasionMI.position = ccp(middle, btnY);
+	sunlightMI.position = ccp(middle + (kButtonGrid * 1.0), btnY);
 }
 
 
@@ -305,38 +348,41 @@
 
 /**
  * Updates the player (camera) direction and location from the joystick controls
- * and then updates the 3D world.
+ * and then updates the 3D scene.
  */
 -(void) update: (ccTime)dt {
 	
-	// Update the player direction and position in the world from the joystick velocities
-	self.mashUpWorld.playerDirectionControl = directionJoystick.velocity;
-	self.mashUpWorld.playerLocationControl = locationJoystick.velocity;
+	// Update the player direction and position in the scene from the joystick velocities
+	self.mashUpScene.playerDirectionControl = directionJoystick.velocity;
+	self.mashUpScene.playerLocationControl = locationJoystick.velocity;
 	[super update: dt];
 }
 
-/** The user has pressed the switch camera view button. Tell the 3D world so it can move the camera. */
+/** The user has pressed the switch camera view button. Tell the 3D scene so it can move the camera. */
 -(void) switchViewSelected: (CCMenuItemToggle*) svMI {
-	[self.mashUpWorld switchCameraTarget];
+	[self.mashUpScene switchCameraTarget];
 }
 
-/** The user has pressed the invade button. Tell the 3D world. */
+/** The user has pressed the invade button. Tell the 3D scene. */
 -(void) invade: (CCMenuItemToggle*) svMI {
-	[self.mashUpWorld invade];
+	[self.mashUpScene invade];
 }
 
-/** The user has pressed the cycle lights button. Tell the 3D world. */
+/** The user has pressed the cycle lights button. Tell the 3D scene. */
 -(void) cycleLights: (CCMenuItemToggle*) svMI {
-	if ([self.mashUpWorld cycleLights]) {
+	if ([self.mashUpScene cycleLights]) {
 		[self setColor: ccc3(100, 120, 220)];
 	} else {
 		[self setColor: ccBLACK];
 	}
 }
 
-/** The user has pressed the zoom button. Tell the 3D world. */
--(void) cycleZoom: (CCMenuItemToggle*) svMI {
-	[self.mashUpWorld cycleZoom];
+/** The user has pressed the zoom button. Tell the 3D scene. */
+-(void) cycleZoom: (CCMenuItemToggle*) svMI { [self.mashUpScene cycleZoom]; }
+
+/** The user has pressed the shadow button. Tell the 3D scene. */
+-(void) toggleShadows: (CCMenuItemToggle*) svMI {
+	self.mashUpScene.isManagingShadows = !self.mashUpScene.isManagingShadows;
 }
 
 /**
@@ -356,7 +402,7 @@
 /**
  * Opens a small, semi-transparent child HUD (Heads-Up-Display) window on top of the
  * main scene. This HUD window contains a close-up of the rotating globe. This window
- * is a separate CC3Layer containing a separate CC3World that contains a copy of the
+ * is a separate CC3Layer containing a separate CC3Scene that contains a copy of the
  * globe node.
  *
  * The HUD window starts minimized at the point on the globe that was touched, and
@@ -381,11 +427,9 @@
 	hudLayer.scale = 0.1;
 	[hudLayer scheduleUpdate];
 
-	// Create and add a new CC3World, containing just a copy of the rotating globe,
+	// Create and add a new CC3Scene, containing just a copy of the rotating globe,
 	// for the HUD layer, and ensure its camera frames the globe.
-	hudLayer.cc3World = [self makeHUDWorld];
-	[hudLayer.cc3World.activeCamera moveToShowAllOf: [hudLayer.cc3World getNodeNamed: kGlobeName]
-										withPadding: -0.1f];
+	hudLayer.cc3Scene = [self makeHUDScene];
 
 	// Run actions to move and scale the HUD layer from its starting position
 	// and size to its final expanded position and size.
@@ -395,44 +439,35 @@
 }
 
 /**
- * Returns a new CC3World containing a copy of the globe from the main scene,
- * and a new camera and light source. Sets the globe rotating and makes it
- * semi-transparent.
+ * Returns a new CC3Scene containing a copy of the globe from the main scene.
+ * Sets the globe rotating and makes it semi-transparent.
  */
--(CC3World*) makeHUDWorld {
-	CC3World* hudWorld = [CC3World nodeWithName: @"HUDWorld"];
-
-	// Create the camera, place it back a bit, and add it to the world
-	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
-	cam.location = cc3v( 0.0, 0.0, 1.0 );
-	[hudWorld addChild: cam];
+-(CC3Scene*) makeHUDScene {
+	CC3Scene* hudScene = [HUDScene nodeWithName: @"HUDScene"];
 	
-	// Create a light and attach it to the camera.
-	CC3Light* lamp = [CC3Light nodeWithName: @"Lamp"];
-	[cam addChild: lamp];
-	
-	CC3Node* globe = [[self.cc3World getNodeNamed: kGlobeName] copyAutoreleased];
+	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copyAutoreleased];
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
-	[hudWorld addChild: globe];	
+	[hudScene addChild: globe];	
 
-	[hudWorld createGLBuffers];		// Won't really do anything because the Globe mesh...
-									// ...has already been buffered in main world
-	hudWorld.opacity = 200;			// Makes everything in the world somewhat translucent
-	return hudWorld;
+	[hudScene createGLBuffers];		// Won't really do anything because the Globe mesh...
+									// ...has already been buffered in main scene
+	hudScene.opacity = 200;			// Makes everything in the scene somewhat translucent
+
+	return hudScene;
 }
 
-/** Closes the HUD window by fading it and the world out and then removing it using CCActions. */
+/** Closes the HUD window by fading it and the scene out and then removing it using CCActions. */
 -(void) closeGlobeHUDFromTouchAt: (CGPoint) touchPoint {
 	[hudLayer stopAllActions];
 	CCActionInterval* fadeLayer = [CCFadeTo actionWithDuration: 1.0 opacity: 0];
-	CCActionInterval* fadeWorld = [CCFadeTo actionWithDuration: 1.0 opacity: 0];
+	CCActionInterval* fadeScene = [CCFadeTo actionWithDuration: 1.0 opacity: 0];
 	CCActionInstant* removeHUD = [CCCallFunc actionWithTarget: self
 													 selector: @selector(removeGlobeHUD)];
 	[hudLayer runAction: [CCSequence actionOne: fadeLayer two: removeHUD]];
-	[hudLayer.cc3World runAction: fadeWorld];
+	[hudLayer.cc3Scene runAction: fadeScene];
 }
 
 /** Removes the HUD window if it exists. */

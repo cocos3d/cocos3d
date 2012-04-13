@@ -1,9 +1,9 @@
 /*
  * CC3Fog.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,7 +35,7 @@
 
 
 /**
- * CC3Fog controls fog in the 3D world.
+ * CC3Fog controls fog in the 3D scene.
  *
  * Fog color is controlled by the floatColor property, or via support for the CCRGBAProtocol
  * protocol. However, be aware that alpha channels and opacity info are ignored by the OpenGL
@@ -59,7 +59,7 @@
 }
 
 /**
- * Controls whether the fog should be drawn into the world.
+ * Controls whether the fog should be drawn into the scene.
  *
  * The initial value of this property is YES.
  */
@@ -163,13 +163,27 @@
 /** Allocates and initializes an autoreleased instance. */
 +(id) fog;
 
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or
+ * copyWithZone: method. In most situations, the application should use the
+ * copy method, and should never need to invoke this method directly.
+ * 
+ * Subclasses that add additional instance state (instance variables) should extend
+ * copying by overriding this method to copy that additional state. Superclass that
+ * override this method should be sure to invoke the superclass implementation to
+ * ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3Fog*) another;
+
 
 #pragma mark Updating
 
 /**
  * This method is invoked periodically when the fog is to be updated.
  *
- * Typcially this method is invoked automatically from the CC3World instance via a scheduled update,
+ * Typcially this method is invoked automatically from the CC3Scene instance via a scheduled update,
  * but may also be invoked by some other periodic operation, or even directly by the application.
  *
  * This method is invoked asynchronously to the frame rendering animation loop, to keep the

@@ -1,9 +1,9 @@
 /*
  * CC3ResourceNode.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,10 +32,6 @@
 #import "CC3ResourceNode.h"
 
 
-@interface CC3Node (TemplateMethods)
--(void) populateFrom: (CC3Node*) another;
-@end
-
 @implementation CC3ResourceNode
 
 @synthesize resource;
@@ -50,25 +46,35 @@
 	return [CC3Resource class];
 }
 
+-(void) addResourceNodes {
+	for (CC3Node* aNode in self.resource.nodes) {
+		[self addChild: aNode];
+	}
+	LogCleanRez(@"%@ added resource %@ with node structure: %@", self, self.resource,
+				[self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
+										withIndent: 1]);
+}
+
+-(CC3Resource*) resource {
+	if (!resource) self.resource = [[self resourceClass] resource];
+	return resource;
+}
+
 -(void) setResource: (CC3Resource *) aResource {
 	if (aResource != resource) {
 		[self removeAllChildren];
 		[resource release];
 		resource = [aResource retain];
-		if (!name) {
-			self.name = aResource.name;
-		}
-		for (CC3Node* aNode in [aResource nodes]) {
-			[self addChild: aNode];
-		}
-		LogCleanRez(@"%@ added resource %@ with node structure: %@", self, aResource,
-					[self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
-											withIndent: 1]);
+		if (!name) { self.name = self.resource.name; }
+		[self addResourceNodes];
 	}
 }
 
 -(void) loadFromFile: (NSString*) aFilepath {
-	self.resource = [[self resourceClass] resourceFromFile: aFilepath];
+	[self removeAllChildren];
+	[self.resource loadFromFile: aFilepath];
+	if (!name) { self.name = self.resource.name; }
+	[self addResourceNodes];
 }
 
 -(id) initFromFile: (NSString*) aFilepath {
@@ -93,32 +99,6 @@
 	return [[[self alloc] initWithName: aName fromFile: aFilepath] autorelease];
 }
 
--(void) loadFromResourceFile: (NSString*) aRezPath {
-	self.resource = [[self resourceClass] resourceFromResourceFile: aRezPath];
-}
-
--(id) initFromResourceFile: (NSString*) aRezPath {
-	if ( (self = [super init]) ) {
-		[self loadFromResourceFile: aRezPath];
-	}
-	return self;
-}
-
-+(id) nodeFromResourceFile: (NSString*) aRezPath {
-	return [[[self alloc] initFromResourceFile: aRezPath] autorelease];
-}
-
--(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath {
-	if ( (self = [super initWithName: aName]) ) {
-		[self loadFromResourceFile: aRezPath];
-	}
-	return self;
-}
-
-+(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath {
-	return [[[self alloc] initWithName: aName fromResourceFile: aRezPath] autorelease];
-}
-
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // The encapsulated resource instance is not copied, but is retaind and shared between instances.
@@ -127,6 +107,31 @@
 	
 	[resource release];
 	resource = [another.resource retain];		// retained
+}
+
+
+#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
+
+-(BOOL) expectsVerticallyFlippedTextures {
+	return self.resource.expectsVerticallyFlippedTextures;
+}
+
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	self.resource.expectsVerticallyFlippedTextures = expectsFlipped;
+}
+
+
+#pragma mark Deprecated file loading methods
+
+// Deprecated methods
+-(void) loadFromResourceFile: (NSString*) aRezPath { [self loadFromFile: aRezPath]; }
+-(id) initFromResourceFile: (NSString*) aRezPath { return [self initFromFile: aRezPath]; }
++(id) nodeFromResourceFile: (NSString*) aRezPath { return [self nodeFromFile: aRezPath]; }
+-(id) initWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath {
+	return [self initWithName: aName fromFile: aRezPath];
+}
++(id) nodeWithName: (NSString*) aName fromResourceFile: (NSString*) aRezPath {
+	return [self nodeWithName: aName fromFile: aRezPath];
 }
 
 @end

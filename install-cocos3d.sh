@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# cocos3d 0.6.4
+# cocos3d 0.7.0
 
 echo 'cocos3d installer'
 
@@ -175,8 +175,8 @@ copy_xc4_project_templates(){
 
 copy_cocos2d_libs(){
 	echo
-	echo Copying coocs2d libraries to workspace
-	LIBS_DIR=libs
+	echo Copying cocos2d libraries to workspace
+	LIBS_DIR=cocos2d
 	copy_base_files
 	echo done!
 }

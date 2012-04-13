@@ -1,9 +1,9 @@
 /*
  * CC3EAGLView.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,7 @@
 #import "CC3EAGLView.h"
 #import "CC3Logging.h"
 #import "CCConfiguration.h"
+#import "cocos2d.h"
 
 
 #pragma mark -
@@ -60,13 +61,9 @@
 
 @implementation CC3EAGLView
 
--(void) openPicking {
-	[((CC3ES1Renderer*)renderer_) openPicking];
-}
+-(void) openPicking { [((CC3ES1Renderer*)renderer_) openPicking]; }
 
--(void) closePicking {
-	[((CC3ES1Renderer*)renderer_) closePicking];
-}
+-(void) closePicking { [((CC3ES1Renderer*)renderer_) closePicking]; }
 
 /**
  * This template method is an exact copy of the superclass implementation except
@@ -133,7 +130,15 @@
 
 - (BOOL)resizeFromLayer: (CAEAGLLayer*) layer {
 	[self deletePickerBuffers];
-	return [super resizeFromLayer: layer];
+	BOOL wasSuccessful = [super resizeFromLayer: layer];
+
+	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8_OES).
+	// Attach it to the framebuffer.
+	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8_OES ||
+						  depthFormat_ == GL_UNSIGNED_INT_24_8_OES)) {
+		glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBuffer_);
+	}
+	return wasSuccessful;
 }
 
 -(void) deletePickerBuffers {
@@ -155,8 +160,8 @@
 			// Generate a new picker FBO and bind existing resolve color buffer to it
 			glGenFramebuffersOES(1, &pickerFrameBuffer);
 			glBindFramebufferOES(GL_FRAMEBUFFER_OES, pickerFrameBuffer);
-			glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer_);
-			glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer_);
+			glBindRenderbufferOES(GL_RENDERBUFFER_OES, self.colorRenderBuffer);
+			glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, self.colorRenderBuffer);
 			
 			// Generate a new depth render buffer and bind it to picker FBO
 			if (depthFormat_) {
@@ -184,7 +189,7 @@
 
 -(void) closePicking {
 	if (multiSampling_) {
-		glBindFramebufferOES(GL_FRAMEBUFFER_OES, msaaFramebuffer_);
+		glBindFramebufferOES(GL_FRAMEBUFFER_OES, self.msaaFrameBuffer);
 	}
 }
 

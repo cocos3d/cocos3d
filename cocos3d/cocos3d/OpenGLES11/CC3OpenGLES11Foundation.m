@@ -1,9 +1,9 @@
 /*
  * CC3OpenGLES11Foundation.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,6 @@
 
 #import "CC3OpenGLES11Foundation.h"
 #import "CC3OpenGLES11Utility.h"
-#import "CC3Logging.h"
 
 
 #pragma mark -

@@ -1,9 +1,9 @@
 /*
  * CC3ParametricMeshNodes.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -56,11 +56,13 @@
  * Populates this instance as a simple rectangular mesh of the specified size,
  * centered at the origin, and laid out on the X-Y plane.
  *
- * The rectangular mesh contains only one face with two triangles. The result is the same
- * as invoking populateAsCenteredRectangleWithSize:andTessellation: with the facesPerSide
- * argument set to {1,1}.
+ * The rectangular mesh contains only one face with two triangles. The result is
+ * the same as invoking populateAsCenteredRectangleWithSize:andTessellation: with
+ * the divsPerAxis argument set to {1,1}.
  *
- * You can add a material or pureColor as desired to establish how the look of the rectangle.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize;
 
@@ -68,39 +70,43 @@
  * Populates this instance as a simple rectangular mesh of the specified size,
  * centered at the origin, and laid out on the X-Y plane.
  *
- * The large rectangle can be broken down into many smaller faces. Building a rectanglular
- * surface from more than one face can dramatically improve realism when the surface is
+ * The large rectangle can be divided into many smaller divisions. Building a rectanglular
+ * surface from more than one division can dramatically improve realism when the surface is
  * illuminated with specular lighting or a tightly focused spotlight, because increasing the
  * face count increases the number of vertices that interact with the specular or spot lighting.
  *
- * The facesPerSide argument indicates how to break this large rectangle into multiple faces.
- * The X & Y elements of the facesPerSide argument indicate how each axis if the rectangle
+ * The divsPerAxis argument indicates how to break this large rectangle into multiple faces.
+ * The X & Y elements of the divsPerAxis argument indicate how each axis if the rectangle
  * should be divided into faces. The total number of faces in the rectangle will therefore
- * be the multiplicative product of the X & Y elements of the facesPerSide argument.
+ * be the multiplicative product of the X & Y elements of the divsPerAxis argument.
  *
- * For example, a value of {5,5} for the facesPerSide argument will result in the rectangle
+ * For example, a value of {5,5} for the divsPerAxis argument will result in the rectangle
  * being divided into 25 faces, arranged into a 5x5 grid.
  *
- * You can add a material or pureColor as desired to establish how the look of the rectangle.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide;
+							andTessellation: (ccGridSize) divsPerAxis;
 
 /**
  * Populates this instance as a simple rectangular mesh of the specified size,
  * with the specified pivot point at the origin, and laid out on the X-Y plane.
  *
  * The rectangular mesh contains only one face with two triangles. The result is the same
- * as invoking populateAsRectangleWithSize:andPivot:andTessellation: with the facesPerSide
+ * as invoking populateAsRectangleWithSize:andPivot:andTessellation: with the divsPerAxis
  * argument set to {1,1}.
- *
- * You can add a material or pureColor as desired to establish how the look of the rectangle.
  *
  * The pivot point can be any point within the rectangle's size. For example, if the
  * pivot point is {0, 0}, the rectangle will be laid out so that the bottom-left corner
  * is at the origin. Or, if the pivot point is in the center of the rectangle's size,
  * the rectangle will be laid out centered on the origin, as in the
  * populateAsCenteredRectangleWithSize: method.
+ *
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot;
 
@@ -108,236 +114,142 @@
  * Populates this instance as a simple rectangular mesh of the specified size,
  * with the specified pivot point at the origin, and laid out on the X-Y plane.
  *
- * The large rectangle can be broken down into many smaller faces. Building a rectanglular
- * surface from more than one face can dramatically improve realism when the surface is
+ * The large rectangle can be divided into many smaller divisions. Building a rectanglular
+ * surface from more than one division can dramatically improve realism when the surface is
  * illuminated with specular lighting or a tightly focused spotlight, because increasing the
  * face count increases the number of vertices that interact with the specular or spot lighting.
  *
- * The facesPerSide argument indicates how to break this large rectangle into multiple faces.
- * The X & Y elements of the facesPerSide argument indicate how each axis if the rectangle
+ * The divsPerAxis argument indicates how to break this large rectangle into multiple faces.
+ * The X & Y elements of the divsPerAxis argument indicate how each axis if the rectangle
  * should be divided into faces. The total number of faces in the rectangle will therefore
- * be the multiplicative product of the X & Y elements of the facesPerSide argument.
+ * be the multiplicative product of the X & Y elements of the divsPerAxis argument.
  *
- * For example, a value of {5,5} for the facesPerSide argument will result in the rectangle
+ * For example, a value of {5,5} for the divsPerAxis argument will result in the rectangle
  * being divided into 25 faces, arranged into a 5x5 grid.
- *
- * You can add a material or pureColor as desired to establish how the look of the rectangle.
  *
  * The pivot point can be any point within the rectangle's size. For example, if the
  * pivot point is {0, 0}, the rectangle will be laid out so that the bottom-left corner
  * is at the origin. Or, if the pivot point is in the center of the rectangle's size,
  * the rectangle will be laid out centered on the origin, as in the
  * populateAsCenteredRectangleWithSize method.
+ *
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide;
+					andTessellation: (ccGridSize) divsPerAxis;
+
+
+#pragma mark Populating parametric circular disk
 
 /**
- * Populates this instance as a rectangular mesh of the specified size, centered at
- * the origin, laid out on the X-Y plane, and that can be covered by a texture.
+ * Populates this instance as a flat, single-sided circular disk mesh of the specified
+ * radius, centered at the origin, and laid out on the X-Y plane.
  *
- * Use the texture property of this node to set the texture.
+ * The surface of the disk is divided into many smaller divisions, both in the radial and
+ * angular dimensions.
  *
- * If your texture does not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
+ * The radialAndAngleDivs argument indicates how to divide the surface of the disks into
+ * divisions. The X element of the radialAndAngleDivs argument indicates how many radial
+ * divisions will occur from the center and the circuferential edge. A value of one means
+ * that the mesh will consist of a series of radial triangles from the center of the
+ * circle to the edge. A larger value for the X element of the radialAndAngleDivs argument
+ * will structure the mesh as a series of concentric rings. This value must be at least one.
+ * 
+ * The Y element of the radialAndAngleDivs argument indicates how many angular divisions
+ * will occur around the circumference. This value must be at least three, which will
+ * essentially render the circle as a triangle. But, typically, this value will be larger.
+ * 
+ * For example, a value of {4,24} for the radialAndAngleDivs argument will result in the
+ * disk being divided into four concentric rings, each divided into 24 segments around the
+ * circumference of the circle.
+ * 
+ * Each segement, except those in the innermost disk is trapezoidal, and will be constructed
+ * from two triangular mesh faces. Therefore, the number of triangles in the mesh will be
+ * (2X - 1) * Y, where X = radialAndAngleDivs.x and Y = radialAndAngleDivs.y.
  *
- * The rectangular mesh contains only one face with two triangles. The result is the same
- * as invoking populateAsCenteredTexturedRectangleWithSize:andTessellation: with the
- * facesPerSide argument set to {1,1}.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
+ *
+ * The texture is mapped to the tessellated disk as if a tagential square was overlaid over
+ * the circle, starting from the lower left corner, where both X and Y are at a minimum.
+ * The center of the disk maps to the center of the texture.
  */
--(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize;
-
-/**
- * Populates this instance as a rectangular mesh of the specified size, centered at
- * the origin, laid out on the X-Y plane, and that can be covered by a texture.
- *
- * Use the texture property of this node to set the texture.
- *
- * If your texture does not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
- *
- * The large rectangle can be broken down into many smaller faces. Building a rectanglular
- * surface from more than one face can dramatically improve realism when the surface is
- * illuminated with specular lighting or a tightly focused spotlight, because increasing the
- * face count increases the number of vertices that interact with the specular or spot lighting.
- *
- * The facesPerSide argument indicates how to break this large rectangle into multiple faces.
- * The X & Y elements of the facesPerSide argument indicate how each axis if the rectangle
- * should be divided into faces. The total number of faces in the rectangle will therefore
- * be the multiplicative product of the X & Y elements of the facesPerSide argument.
- *
- * For example, a value of {5,5} for the facesPerSide argument will result in the rectangle
- * being divided into 25 faces, arranged into a 5x5 grid.
- */
--(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
-									andTessellation: (ccGridSize) facesPerSide;
-
-/**
- * Populates this instance as a rectangular mesh of the specified size, with the specified
- * pivot point at the origin, laid out on the X-Y plane, and that can be covered by a texture.
- *
- * Use the texture property of this node to set the texture.
- *
- * If your texture does not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
- *
- * The pivot point can be any point within the rectangle's size. For example, if the
- * pivot point is {0, 0}, the rectangle will be laid out so that the bottom-left corner
- * is at the origin. Or, if the pivot point is in the center of the rectangle's size,
- * the rectangle will be laid out centered on the origin, as in the
- * populateAsCenteredTexturedRectangleWithSize: method.
- *
- * The rectangular mesh contains only one face with two triangles. The result is the same
- * as invoking populateAsCenteredTexturedRectangleWithSize:andPivot:andTessellation: with
- * the facesPerSide argument set to {1,1}.
- */
--(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot;
-
-/**
- * Populates this instance as a rectangular mesh of the specified size, with the specified
- * pivot point at the origin, laid out on the X-Y plane, and that can be covered by a texture.
- *
- * Use the texture property of this node to set the texture.
- *
- * If your texture does not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
- *
- * The pivot point can be any point within the rectangle's size. For example, if the
- * pivot point is {0, 0}, the rectangle will be laid out so that the bottom-left corner
- * is at the origin. Or, if the pivot point is in the center of the rectangle's size,
- * the rectangle will be laid out centered on the origin, as in the
- * populateAsCenteredTexturedRectangleWithSize: method.
- *
- * The large rectangle can be broken down into many smaller faces. Building a rectanglular
- * surface from more than one face can dramatically improve realism when the surface is
- * illuminated with specular lighting or a tightly focused spotlight, because increasing the
- * face count increases the number of vertices that interact with the specular or spot lighting.
- *
- * The facesPerSide argument indicates how to break this large rectangle into multiple faces.
- * The X & Y elements of the facesPerSide argument indicate how each axis if the rectangle
- * should be divided into faces. The total number of faces in the rectangle will therefore
- * be the multiplicative product of the X & Y elements of the facesPerSide argument.
- *
- * For example, a value of {5,5} for the facesPerSide argument will result in the rectangle
- * being divided into 25 faces, arranged into a 5x5 grid.
- */
--(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
-								   andPivot: (CGPoint) pivot
-							andTessellation: (ccGridSize) facesPerSide;
-
-
-#pragma mark Deprecated parametric plane methods
-
-/**
- * @deprecated Use the populateAsCenteredTexturedRectangleWithSize: method instead,
- * and then use the texture property of this node to set the texture.
- *
- * When using that replacement method, if your texture does not have both
- * dimensions as power-of-two dimensions, you can use either of the
- * alignTextures or alignInvertedTextures methods to adjust the mesh texture
- * coordinates to make use of only the usable portion of the texture.
- */
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
-
-/**
- * @deprecated Use the populateAsCenteredTexturedRectangleWithSize:andTessellation:
- * method instead, and then use the texture property of this node to set the texture.
- *
- * When using that replacement method, if your texture does not have both
- * dimensions as power-of-two dimensions, you can use either of the
- * alignTextures or alignInvertedTextures methods to adjust the mesh texture
- * coordinates to make use of only the usable portion of the texture.
- */
--(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) facesPerSide
-								withTexture: (CC3Texture*) texture
-							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
-
-/**
- * @deprecated Use the populateAsTexturedRectangleWithSize:andPivot: method instead,
- * and then use the texture property of this node to set the texture.
- *
- * When using that replacement method, if your texture does not have both
- * dimensions as power-of-two dimensions, you can use either of the
- * alignTextures or alignInvertedTextures methods to adjust the mesh texture
- * coordinates to make use of only the usable portion of the texture.
- */
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
-
-/**
- * @deprecated Use the populateAsCenteredTexturedRectangleWithSize:andPivot:andTessellation:
- * method instead, and then use the texture property of this node to set the texture.
- *
- * When using that replacement method, if your texture does not have both
- * dimensions as power-of-two dimensions, you can use either of the
- * alignTextures or alignInvertedTextures methods to adjust the mesh texture
- * coordinates to make use of only the usable portion of the texture.
- */
--(void) populateAsRectangleWithSize: (CGSize) rectSize
-						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) facesPerSide
-						withTexture: (CC3Texture*) texture
-					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs;
 
 
 #pragma mark Populating parametric boxes
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified
- * bounding box, which contains two of the diagonal corners.
+ * bounding box, which contains two of the diagonal corners of the box.
  *
- * You can add a material or pureColor as desired to establish how the color of the box.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  *
- * This is a convenience method for creating a simple, but useful shape, which can be
- * used to create simple structures in your 3D world.
+ * If a texture is to be wrapped around this mesh, since the single texture is wrapped
+ * around all six sides of the box, the texture will be mapped according to the layout
+ * illustrated in the texture file BoxTexture.png, included in the distribution.
+ *
+ * The "front" of the box is the side that faces towards the positive-Z axis, the "top"
+ * of the box is the side that faces towards the positive-Y axis, and the "right" side
+ * of the box is the side that faces towards the positive-X axis.
+ *
+ * For the purposes of wrapping a texture around the box, the texture will wrap
+ * uniformly around all sides, and the texture will not appear stretched between any
+ * two adjacent sides. This is useful when you are texturing the box with a simple
+ * rectangular repeating pattern and want the texture to appear consistent across
+ * the sides, for example, a brick pattern wrapping around all four sides of a house.
+ *
+ * Depending on the relative aspect of the height and width of the box, the texture
+ * may appear distorted horizontal or vertically. If you need to correct that, you
+ * can use the repeatTexture: method, and adjust one of the dimensions.
+ *
+ * For higher fidelity in applying textures to non-cube boxes, so that the texture
+ * will not be stretched to fit, use the populateAsTexturedBox:withCorner: method.
+ *
+ * Thanks to cocos3d user andyman for contributing the prototype code and texture
+ * template file for this method.
  */
 -(void) populateAsSolidBox: (CC3BoundingBox) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified
- * bounding box, which contains two of the diagonal corners of the box, and
- * configures the mesh texture coordinates so that the entire box can be wrapped
- * in a single texture.
+ * bounding box, which contains two of the diagonal corners of the box.
  *
- * Use the texture property of this node to set the texture.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  *
- * Since the single texture is wrapped around all six sides of the box, the texture
- * should have a specific layout, which you can see illustrated in the texture file
- * BoxTexture.png.
+ * If a texture is to be wrapped around this mesh, since the single texture is wrapped
+ * around all six sides of the box, the texture will be mapped according to the layout
+ * illustrated in the texture file BoxTexture.png, included in the distribution.
  *
  * The "front" of the box is the side that faces towards the positive-Z axis, the "top"
  * of the box is the side that faces towards the positive-Y axis, and the "right" side
  * of the box is the side that faces towards the positive-X axis.
  *
  * For the purposes of wrapping the texture around the box, this method assumes that
- * the natural shape of the box is a cube. The box can be created with any relative
- * dimensions, but if it is not a cube, the texture may appear stretched or shrunk
- * on two or more sides. The texture will still fully wrap all six sides of the box,
- * but the texture is stretched or shrunk to fit each side according to its dimension
- * relative to the other sides. The appearance will be as if you had started with a
- * textured cube and then pulled one of the dimensions out further.
+ * the texture is an unfolded cube. The box can be created with any relative dimensions,
+ * but if it is not a cube, the texture may appear stretched or shrunk on two or more
+ * sides. The texture will still fully wrap all six sides of the box, but the texture
+ * is stretched or shrunk to fit each side according to its dimension relative to the
+ * other sides. The appearance will be as if you had started with a textured cube and
+ * then pulled one or two of the dimensions out further.
  *
  * For higher fidelity in applying textures to non-cube boxes, so that the texture
- * will not be stretched to fit, use the populateAsTexturedBox:withCorner: method.
- *
- * If your texture does not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
+ * will not be stretched to fit, use either of the populateAsSolidBox: or
+ * populateAsSolidBox:withCorner: methods, with a texture whose layout is compatible
+ * with the aspect ratio of the box.
  *
  * Thanks to cocos3d user andyman for contributing the prototype code and texture
  * template file for this method.
  */
--(void) populateAsTexturedBox: (CC3BoundingBox) box;
+-(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified
@@ -345,24 +257,26 @@
  * configures the mesh texture coordinates so that the entire box can be wrapped
  * in a single texture.
  *
- * Use the texture property of this node to set the texture.
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
  *
- * Since the single texture is wrapped around all six sides of the box, the texture
- * should have a specific layout, which you can see illustrated in the texture file
- * BoxTexture.png.
+ * If a texture is to be wrapped around this mesh, since the single texture is wrapped
+ * around all six sides of the box, the texture will be mapped according to the layout
+ * illustrated in the texture file BoxTexture.png, included in the distribution.
  *
  * The "front" of the box is the side that faces towards the positive-Z axis, the
  * "top" of the box is the side that faces towards the positive-Y axis, and the
  * "right" side of the box is the side that faces towards the positive-X axis.
  *
- * For the purposes of wrapping the texture around the box, the corner argument is
- * used to indicate the relative dimensions of the box. Specifically, the corner
- * argument specifies the point in the texture that is at the juncture of the "left"
- * "front" and "bottom" sides of the texture (see the BoxTexture.png image for a
- * better understanding of this point), and is specified as a fraction in each of
- * the S & T dimensions of the texture. In the CGPoint that specifies the corner,
- * the x & y elements of the CGPoint correspond to the S & T dimensions of the
- * juncture of the "left", "front" and "bottom" sides in the texture.
+ * For the purposes of wrapping the texture around the box, the corner argument
+ * specifies the relative point in the texture that will map to the corner of the
+ * box that is at the juncture of the "left", "front" and "bottom" sides (see the
+ * BoxTexture.png image for a better understanding of this point). The corner
+ * argument is specified as a fraction in each of the S & T dimensions of the texture.
+ * In the CGPoint that specifies the corner, the x & y elements of the CGPoint
+ * correspond to the S & T dimensions of this left-front-bottom corner mapping,
+ * with each value being between zero and one.
  *
  * Since, by definition, opposite sides of the box have the same dimensions, this
  * single corner point identifies the S & T dimensions of all six of the sides of
@@ -378,16 +292,15 @@
  * The two axes defined by the corner are interrelated, because the sides need to
  * be the same depth as the top and bottom. The best way to determine the values to
  * use in the corner is to use the measure of this point (where the "left", "front",
- * and "bottom" sides meet) from the layout of the texture.
- *
- * If your texture is not have both dimensions as power-of-two dimensions, you can
- * use either of the alignTextures or alignInvertedTextures methods to adjust the
- * mesh texture coordinates to make use of only the usable portion of the texture.
+ * and "bottom" sides meet) from the layout of the texture. If the aspect of the
+ * corner on the texture does not align with the aspect of the width, height and
+ * depth of the box, the texture will appear stretched on one or two sides relative
+ * to the others.
  *
  * Thanks to cocos3d user andyman for contributing the prototype code and texture
  * template file for this method.
  */
--(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner;
+-(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner;
 
 /**
  * Populates this instance as a wire-frame box with the specified dimensions.
@@ -406,7 +319,46 @@
 -(void) populateAsWireBox: (CC3BoundingBox) box;
 
 
-#pragma mark Populating parametric boxes
+#pragma mark Populating parametric sphere
+
+/**
+ * Populates this instance as a spherical mesh of the specified radius, centered at the origin.
+ *
+ * The surface of the sphere is divided into many smaller divisions, similar to latitude and
+ * longtitude divisions. The sphere mesh contains two poles, where the surface intersects the
+ * positive and negative Y-axis.
+ *
+ * The divsPerAxis argument indicates how to divide the surface of the sphere into divisions.
+ * The X element of the divsPerAxis argument indicates how many longtitude divisions will
+ * occur around one circumnavigation of the equator. The Y element of the divsPerAxis argument
+ * indicates how many latitude divisions will occur between the north pole and the south pole.
+ * 
+ * For example, a value of {12,8} for the divsPerAxis argument will result in the sphere being
+ * divided into twelve divisions of longtitude around the equator, and eight divisions of
+ * latitude between the north and south poles.
+ *
+ * Except at the poles, each division is roughly trapezoidal and is drawn as two triangles.
+ * At the poles, each division is a single triangle.
+ *
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
+ *
+ * The texture is mapped to the sphere with a simple cylindrical projection around
+ * the equator (similar to Mercator projection without the north-south stretching).
+ * This type of projection is typical of maps of the earth taken from space, and
+ * results in the smooth curving of any texture around the sphere from the equator
+ * to the poles. Texture wrapping begins at the negative Z-axis, so the center of
+ * the texture will be positioned at the point where the sphere intersects the
+ * positive Z-axis, and the conceptual seam (where the left and right edges of the
+ * texture are stitched together) will occur where the sphere intersects the plane
+ * (X = 0) along the negative-Z axis. This texture orientation means that the center
+ * of the texture will face the forwardDirection of the sphere node.
+ */
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis;
+
+
+#pragma mark Populating parametric lines
 
 /**
  * Populates this instance as a line strip with the specified number of vertex points.
@@ -443,6 +395,81 @@
 -(void) populateAsLineStripWith: (GLshort) vertexCount
 					   vertices: (CC3Vector*) vertices
 					  andRetain: (BOOL) shouldRetainVertices;
+
+
+#pragma mark Deprecated parametric methods
+
+/**
+ * @deprecated Use populateAsCenteredRectangleWithSize:, as it creates a
+ * rectangular mesh that can be covered with either a texture or a solid color.
+ */
+-(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use populateAsCenteredRectangleWithSize:andTessellation:, as it creates
+ * a rectangular mesh that can be covered with either a texture or a solid color.
+ */
+-(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
+									andTessellation: (ccGridSize) divsPerAxis DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use populateAsRectangleWithSize:andPivot:, as it creates a
+ * rectangular mesh that can be covered with either a texture or a solid color.
+ */
+-(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize andPivot: (CGPoint) pivot DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use populateAsRectangleWithSize:andPivot:andTessellation:, as it creates
+ * a rectangular mesh that can be covered with either a texture or a solid color.
+ */
+-(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
+								   andPivot: (CGPoint) pivot
+							andTessellation: (ccGridSize) divsPerAxis DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the populateAsCenteredRectangleWithSize: method instead,
+ * and then use the texture property of this node to set the texture.
+ */
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+								withTexture: (CC3Texture*) texture
+							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the populateAsCenteredRectangleWithSize:andTessellation:
+ * method instead, and then use the texture property of this node to set the texture.
+ */
+-(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
+							andTessellation: (ccGridSize) divsPerAxis
+								withTexture: (CC3Texture*) texture
+							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the populateAsRectangleWithSize:andPivot: method instead,
+ * and then use the texture property of this node to set the texture.
+ */
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+						withTexture: (CC3Texture*) texture
+					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use the populateAsCenteredRectangleWithSize:andPivot:andTessellation:
+ * method instead, and then use the texture property of this node to set the texture.
+ */
+-(void) populateAsRectangleWithSize: (CGSize) rectSize
+						   andPivot: (CGPoint) pivot
+					andTessellation: (ccGridSize) divsPerAxis
+						withTexture: (CC3Texture*) texture
+					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated Use populateAsSolidBox:, as it creates a box mesh
+ * that can be covered with either a texture or a solid color.
+ */
+-(void) populateAsTexturedBox: (CC3BoundingBox) box DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to populateAsSolidBox:withCorner:. */
+-(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner DEPRECATED_ATTRIBUTE;
 
 @end
 

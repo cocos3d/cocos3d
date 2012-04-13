@@ -1,9 +1,9 @@
 /*
  * CC3VertexArrays.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings, Chris Myers
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  *
@@ -31,26 +31,25 @@
  */
 
 #import "CC3VertexArrays.h"
+#import "CC3Mesh.h"
 #import "CC3OpenGLES11Utility.h"
 #import "CC3OpenGLES11Engine.h"
 
-#pragma mark CC3VertexArray
 
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
+#pragma mark CC3VertexArray
 
 @interface CC3VertexArray (TemplateMethods)
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @property(nonatomic, readonly) BOOL switchingArray;
+@property(nonatomic, readonly) GLsizei availableElementCount;
 @end
 
 
 @implementation CC3VertexArray
 
 @synthesize elements, elementCount, elementSize, elementType, elementStride;
-@synthesize bufferID, elementOffset, bufferUsage;
+@synthesize bufferID, elementOffset, bufferUsage, capacityExpansionFactor;
 @synthesize shouldAllowVertexBuffering, shouldReleaseRedundantData;
 
 -(void) dealloc {
@@ -59,13 +58,27 @@
 	[super dealloc];
 }
 
+-(GLsizei) elementLength {
+	return GLElementTypeSize(elementType) * elementSize;
+}
+
 -(GLsizei) elementStride {
-	return elementStride ? elementStride : GLElementTypeSize(elementType) * elementSize;
+	return elementStride ? elementStride : self.elementLength;
+}
+
+/**
+ * The number of available elements. If the elements have been allocated by this
+ * array, that is the number of available elements. Otherwise, if the elements were
+ * allocated elsewhere, it is the number specified by the elementCount value.
+ */
+-(GLsizei) availableElementCount {
+	return (allocatedElementCount > 0) ? allocatedElementCount : elementCount;
 }
 
 -(GLenum) bufferTarget {
 	return GL_ARRAY_BUFFER;
 }
+
 
 #pragma mark Allocation and initialization
 
@@ -73,15 +86,16 @@
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		elements = nil;
 		elementCount = 0;
+		allocatedElementCount = 0;
 		elementType = GL_FLOAT;
 		elementSize = 3;
 		elementStride = 0;
 		bufferID = 0;
 		bufferUsage = GL_STATIC_DRAW;
 		elementOffset = 0;
-		elementsAreRetained = NO;
 		shouldAllowVertexBuffering = YES;
 		shouldReleaseRedundantData = YES;
+		capacityExpansionFactor = 1.25f;
 	}
 	return self;
 }
@@ -102,6 +116,17 @@
 	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
 }
 
+-(GLvoid*) interleaveWith: (CC3VertexArray*) otherVtxArray usingOffset: (GLuint) elemOffset {
+	self.elements = otherVtxArray.elements;
+	self.elementStride = otherVtxArray.elementStride;
+	self.elementCount = otherVtxArray.elementCount;
+	self.elementOffset = elemOffset;
+	return (GLbyte*)elements  + elementOffset;
+}
+
+// Protected property for access during copying
+-(GLsizei) allocatedElementCount { return allocatedElementCount; }
+
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3VertexArray*) another {
@@ -112,16 +137,30 @@
 	elementStride = another.elementStride;
 	bufferUsage = another.bufferUsage;
 	elementOffset = another.elementOffset;
+	capacityExpansionFactor = another.capacityExpansionFactor;
 	shouldAllowVertexBuffering = another.shouldAllowVertexBuffering;
 	shouldReleaseRedundantData = another.shouldReleaseRedundantData;
 
 	[self deleteGLBuffer];		// Data has yet to be buffered. Get rid of old buffer if necessary.
 
-	// Allocate memory and copy the vertex data over.
-	// Watch out! If this array is part of interleaved data, this will result in multiple copies
-	// of the interleaved data, which is probably not what is wanted.
-	[self allocateElements: another.elementCount];
-	memcpy(elements, another.elements, elementCount * elementStride);
+	// If the original has its data stored in memory that it allocated, allocate the
+	// same amount in this copy, and copy the data over. Otherwise, the memory is
+	// being managed externally, so simply copy the elements reference over.
+	if (another.allocatedElementCount) {
+		[self allocateElements: another.allocatedElementCount];
+		memcpy(elements, another.elements, (allocatedElementCount * self.elementStride));
+	} else {
+		elements = another.elements;
+	}
+	elementCount = another.elementCount;
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@ elements: %p, count: %i, allocated: %i, elementSize: %i, type: %@, offset: %i, stride: %i",
+			[self description],
+			elements, elementCount, allocatedElementCount, elementSize,
+			NSStringFromGLEnum(elementType),
+			elementOffset, elementStride];
 }
 
 
@@ -144,9 +183,9 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(GLvoid*) allocateElements: (GLsizei) elemCount {
 	if (elemCount) {
+		self.elements = malloc(elemCount * self.elementStride);	// Safely disposes existing elements
+		allocatedElementCount = elemCount;
 		elementCount = elemCount;
-		self.elements = calloc(elementCount, self.elementStride);	// Safely disposes existing elements
-		elementsAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u elements", self, elementCount);
 	} else {
 		[self deallocateElements];
@@ -154,14 +193,38 @@ static GLuint lastAssignedVertexArrayTag;
 	return elements;
 }
 
+-(GLvoid*) reallocateElements: (GLsizei) elemCount {
+	if (elemCount) {
+		GLvoid* newElems = realloc(elements, (elemCount * self.elementStride));
+		if (newElems) {
+			elements = newElems;
+			allocatedElementCount = elemCount;
+			elementCount = elemCount;
+			LogTrace(@"%@ reallocated space for %u elements", self, elementCount);
+		}
+	} else {
+		[self deallocateElements];
+	}
+	return elements;
+}
+
+// If memory was previously allocated, and its currently too low, reallocate
+-(BOOL) ensureCapacity: (GLsizei) elemCount {
+	if (allocatedElementCount && allocatedElementCount < elemCount) {
+		[self reallocateElements: (elemCount * capacityExpansionFactor)];
+		return YES;
+	}
+	return NO;
+}
+
 // Does not change elementCount, because that is used for drawing.
 -(void) deallocateElements {
-	if (elementsAreRetained && elements) {
+	if (allocatedElementCount) {
 		free(elements);
-		elements = NULL;
-		elementsAreRetained = NO;
+		allocatedElementCount = 0;
 		LogTrace(@"%@ deallocated %u previously allocated elements", self, elementCount);
 	}
+	elements = NULL;
 }
 
 -(void) setElements: (GLvoid*) elems {
@@ -176,7 +239,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 		LogTrace(@"%@ creating GL server buffer", self);
 		bufferID =[gles11Vertices generateBuffer];
-		GLsizeiptr buffSize = self.elementStride * elementCount;
+		GLsizeiptr buffSize = self.elementStride * self.availableElementCount;
 		bufferBinding.value = bufferID;
 		[bufferBinding loadBufferData: elements ofLength: buffSize forUse: bufferUsage];
 		GLenum errCode = glGetError();
@@ -211,16 +274,18 @@ static GLuint lastAssignedVertexArrayTag;
 	[self updateGLBufferStartingAt: 0 forLength: elementCount];
 }
 
--(void) releaseRedundantData {
-	if (bufferID && shouldReleaseRedundantData) {
-		[self deallocateElements];
-	}
-}
-
 -(void) deleteGLBuffer {
 	if (bufferID) {
 		[[CC3OpenGLES11Engine engine].vertices deleteBuffer: bufferID];
 		bufferID = 0;	
+	}
+}
+
+-(BOOL) isUsingGLBuffer { return bufferID != 0; }
+
+-(void) releaseRedundantData {
+	if (bufferID && shouldReleaseRedundantData) {
+		[self deallocateElements];
 	}
 }
 
@@ -265,9 +330,7 @@ static GLuint lastAssignedVertexArrayTag;
  */
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
--(void) unbind {
-	[[self class] unbind];
-}
+-(void) unbind { [[self class] unbind]; }
 
 // Default does nothing. Subclasses will override.
 +(void) unbind {}
@@ -276,9 +339,59 @@ static GLuint lastAssignedVertexArrayTag;
 #pragma mark Accessing elements
 
 -(GLvoid*) addressOfElement: (GLsizei) index {
+	// Check elements still in memory, and if allocated,
+	// that index is less than number of vertices allocated
 	NSAssert(elements, @"Elements are no longer in application memory.");
-	NSAssert2(index < elementCount, @"Requested index %i is greater than number of vertices %i.", index, elementCount);
+	NSAssert2(allocatedElementCount == 0 || index < allocatedElementCount, @"Requested index %i is greater than number of vertices allocated: %i.", index, elementCount);
 	return (GLbyte*)elements + (self.elementStride * index) + elementOffset;
+}
+
+-(NSString*) describeElements {
+	return [self describeElements: elementCount];
+}
+
+-(NSString*) describeElements: (GLsizei) elemCount {
+	return [self describeElements: elemCount startingAt: 0];
+}
+
+-(NSString*) describeElements: (GLsizei) elemCount startingAt: (GLsizei) startElem {
+	GLsizei endElem = MIN(startElem + elemCount, elementCount);
+	NSMutableString* desc = [NSMutableString stringWithCapacity: ((endElem - startElem) * elementSize * 8)];
+	[desc appendFormat: @"Content of %@:", [self fullDescription]];
+	if (elements) {
+		for (int elemIdx = startElem; elemIdx < endElem; elemIdx++) {
+			[desc appendFormat: @"\n\t%i:", elemIdx];
+			GLvoid* elemArray = [self addressOfElement: elemIdx];
+			for (int eaIdx = 0; eaIdx < elementSize; eaIdx++) {
+				switch (elementType) {
+					case GL_FLOAT:
+						[desc appendFormat: @" %.3f,", ((GLfloat*)elemArray)[eaIdx]];
+						break;
+					case GL_BYTE:
+						[desc appendFormat: @" %i,", ((GLbyte*)elemArray)[eaIdx]];
+						break;
+					case GL_UNSIGNED_BYTE:
+						[desc appendFormat: @" %u,", ((GLubyte*)elemArray)[eaIdx]];
+						break;
+					case GL_SHORT:
+						[desc appendFormat: @" %i,", ((GLshort*)elemArray)[eaIdx]];
+						break;
+					case GL_UNSIGNED_SHORT:
+						[desc appendFormat: @" %u,", ((GLushort*)elemArray)[eaIdx]];
+						break;
+					case GL_FIXED:
+						[desc appendFormat: @" %i,", ((GLfixed*)elemArray)[eaIdx]];
+						break;
+					default:
+						[desc appendFormat: @" unknown type (%u),", elementType];
+						break;
+				}
+			}
+		}
+	} else {
+		[desc appendFormat: @" Elements are no longer in memory."];
+	}
+	return desc;
 }
 
 
@@ -289,13 +402,11 @@ static GLuint lastAssignedVertexArrayTag;
  * that was most recently bound to the GL engine. To improve performance, vertex arrays
  * are only bound if they need to be.
  *
- * If appropriate, the application can arrange CC3MeshNodes in the CC3World so that nodes
+ * If appropriate, the application can arrange CC3MeshNodes in the CC3Scene so that nodes
  * using the same vertex arrays are drawn together, to minimize the number of binding
  * changes in the GL engine.
  */
--(BOOL) switchingArray {
-	return YES;
-}
+-(BOOL) switchingArray { return YES; }
 
 +(void) resetSwitching {}
 
@@ -315,6 +426,10 @@ static GLuint lastAssignedVertexArrayTag;
 
 #pragma mark -
 #pragma mark CC3DrawableVertexArray
+
+@interface CC3DrawableVertexArray (TemplateMethods)
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex fromStripOfLength: (GLsizei) stripLen;
+@end
 
 @implementation CC3DrawableVertexArray
 
@@ -412,8 +527,8 @@ static GLuint lastAssignedVertexArrayTag;
 		case GL_POINTS:
 			return vc;
 		default:
-			LogError(@"%@ encountered unknown drawing mode %u", self, self.drawingMode);
-			return vc;
+			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			return 0;
 	}
 }
 
@@ -433,8 +548,104 @@ static GLuint lastAssignedVertexArrayTag;
 		case GL_POINTS:
 			return fc;
 		default:
-			LogError(@"%@ encountered unknown drawing mode %u", self, self.drawingMode);
-			return fc;
+			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			return 0;
+	}
+}
+
+/**
+ * If drawing is being done with strips, accumulate the number of faces per strip
+ * by converting the number of elements in each strip to faces. Otherwise, simply
+ * convert the total number of elements to faces.
+ */
+-(GLsizei) faceCount {
+	if (stripCount) {
+		GLsizei fCnt = 0;
+		for (GLuint i = 0; i < stripCount; i++) {
+			fCnt += [self faceCountFromVertexCount: stripLengths[i]];
+		}
+		return fCnt;
+	} else {
+		return [self faceCountFromVertexCount: elementCount];
+	}
+}
+
+/**
+ * If drawing is being done with strips, accumulate the number of faces per strip
+ * prior to the strip that contains the specified face, then add the offset to
+ * the face within that strip to retrieve the correct face from that strip.
+ * If strips are not in use, simply extract the face from the full element array.
+ */
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex {
+	if (stripCount) {
+		// Mesh is divided into strips. Find the strip that contains the face,
+		// by accumulating faces and element counts until we reach the strip
+		// that contains the face. Then extract the face from that strip and
+		// offset it by the number of elements in all the previous strips.
+		GLsizei currStripStartFaceCnt = 0;
+		GLsizei nextStripStartFaceCnt = 0;
+		GLsizei stripStartVtxCnt = 0;
+		for (GLuint i = 0; i < stripCount; i++) {
+			GLsizei stripLen = stripLengths[i];
+			nextStripStartFaceCnt += [self faceCountFromVertexCount: stripLen];
+			if (nextStripStartFaceCnt > faceIndex) {
+				CC3FaceIndices faceIndices = [self faceIndicesAt: (faceIndex - currStripStartFaceCnt)
+											   fromStripOfLength: stripLen];
+				// Offset the indices of the face by the number of elements
+				// accumulated from all the previous strips and return them.
+				faceIndices.vertices[0] += stripStartVtxCnt;
+				faceIndices.vertices[1] += stripStartVtxCnt;
+				faceIndices.vertices[2] += stripStartVtxCnt;
+				return faceIndices;
+			}
+			currStripStartFaceCnt = nextStripStartFaceCnt;
+			stripStartVtxCnt += stripLen;
+		}
+		NSAssert3(NO, @"%@ requested face index %i is larger than face count %i",
+				  self, faceIndex, [self faceCount]);
+		return kCC3FaceIndicesZero;
+	} else {
+		// Mesh is monolithic. Simply extract the face from the elements array.
+		return [self faceIndicesAt: faceIndex fromStripOfLength: elementCount];
+	}
+}
+
+/**
+ * Returns the indicies for the face at the specified face index,
+ * within an array of vertices of the specified length.
+ */
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex fromStripOfLength: (GLsizei) stripLen {
+	GLsizei firstVtxIdx;			// The first index of the face.
+	switch (self.drawingMode) {
+		case GL_TRIANGLES:
+			firstVtxIdx = faceIndex * 3;
+			return CC3FaceIndicesMake(firstVtxIdx, firstVtxIdx + 1, firstVtxIdx + 2);
+		case GL_TRIANGLE_STRIP:
+			firstVtxIdx = faceIndex;
+			if (CC3IntIsEven(faceIndex)) {		// The winding order alternates
+				return CC3FaceIndicesMake(firstVtxIdx, firstVtxIdx + 1, firstVtxIdx + 2);
+			} else {
+				return CC3FaceIndicesMake(firstVtxIdx, firstVtxIdx + 2, firstVtxIdx + 1);
+			}
+		case GL_TRIANGLE_FAN:
+			firstVtxIdx = faceIndex + 1;
+			return CC3FaceIndicesMake(0, firstVtxIdx, firstVtxIdx + 1);
+		case GL_LINES:
+			firstVtxIdx = faceIndex * 2;
+			return CC3FaceIndicesMake(firstVtxIdx, firstVtxIdx + 1, 0);
+		case GL_LINE_STRIP:
+			firstVtxIdx = faceIndex;
+			return CC3FaceIndicesMake(firstVtxIdx, firstVtxIdx + 1, 0);
+		case GL_LINE_LOOP:
+			firstVtxIdx = faceIndex;
+			GLsizei nextVtxIdx = (faceIndex < stripLen - 1) ? firstVtxIdx + 1 : 0;
+			return CC3FaceIndicesMake(firstVtxIdx, nextVtxIdx, 0);
+		case GL_POINTS:
+			firstVtxIdx = faceIndex;
+			return CC3FaceIndicesMake(firstVtxIdx, 0, 0);
+		default:
+			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			return kCC3FaceIndicesZero;
 	}
 }
 
@@ -500,12 +711,74 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 -(CC3Vector) locationAt: (GLsizei) index {
-	return *(CC3Vector*)[self addressOfElement: index];
+	CC3Vector loc = *(CC3Vector*)[self addressOfElement: index];
+	switch (elementSize) {
+		case 2:
+			loc.z = 0.0f;
+		case 3:
+		case 4:			// Will just read the first three components
+		default:
+			break;
+	}
+	return loc;
 }
 
 -(void) setLocation: (CC3Vector) aLocation at: (GLsizei) index {
-	*(CC3Vector*)[self addressOfElement: index] = aLocation;
+	GLvoid* elemAddr = [self addressOfElement: index];
+	switch (elementSize) {
+		case 2:		// Just store X & Y
+			*(CGPoint*)elemAddr = *(CGPoint*)&aLocation;
+			break;
+		case 4:		// Convert to 4D with w = 1
+			*(CC3Vector4*)elemAddr = CC3Vector4FromCC3Vector(aLocation, 1.0f);
+			break;
+		case 3:
+		default:
+			*(CC3Vector*)elemAddr = aLocation;
+			break;
+	}
 	[self markBoundaryDirty];
+}
+
+-(CC3Vector4) homogeneousLocationAt: (GLsizei) index {
+	CC3Vector4 hLoc = *(CC3Vector4*)[self addressOfElement: index];
+	switch (elementSize) {
+		case 2:
+			hLoc.z = 0.0f;
+		case 3:
+			hLoc.w = 1.0f;
+		case 4:
+		default:
+			break;
+	}
+	return hLoc;
+}
+
+-(void) setHomogeneousLocation: (CC3Vector4) aLocation at: (GLsizei) index {
+	GLvoid* elemAddr = [self addressOfElement: index];
+	switch (elementSize) {
+		case 2:		// Just store X & Y
+			*(CGPoint*)elemAddr = *(CGPoint*)&aLocation;
+			break;
+		case 3:		// Truncate to 3D
+			*(CC3Vector*)elemAddr = *(CC3Vector*)&aLocation;
+			break;
+		case 4:		
+		default:
+			*(CC3Vector4*)elemAddr = aLocation;
+			break;
+	}
+	[self markBoundaryDirty];
+}
+
+-(CC3Face) faceAt: (GLsizei) faceIndex {
+	return [self faceFromIndices: [self faceIndicesAt: faceIndex]];
+}
+
+-(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices {
+	return CC3FaceMake([self locationAt: faceIndices.vertices[0]],
+					   [self locationAt: faceIndices.vertices[1]],
+					   [self locationAt: faceIndices.vertices[2]]);
 }
 
 /** Returns the boundingBox, building it if necessary. */
@@ -575,7 +848,7 @@ static GLuint lastAssignedVertexArrayTag;
  * Calculates and populates the radius property from the vertex locations.
  *
  * This method is invoked automatically when the radius property is accessed
- * for the first time after the elements property has been set.
+ * for the first time after the boundary has been marked dirty.
  */
 -(void) calcRadius {
 	NSAssert1(elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to calculate mesh radius", [self class]);
@@ -591,6 +864,7 @@ static GLuint lastAssignedVertexArrayTag;
 			radiusSq = MAX(radiusSq, distSq);
 		}
 		radius = sqrtf(radiusSq);		// Now finally take the square-root
+		radiusIsDirty = NO;
 		LogTrace(@"%@ setting radius to %.2f", self, radius);
 	}
 }
@@ -612,9 +886,10 @@ static GLuint lastAssignedVertexArrayTag;
 
 #pragma mark Drawing
 
-/** Overridden to ensure the bounding box is built before releasing the vertices. */
+/** Overridden to ensure the bounding box and radius are built before releasing the vertices. */
 -(void) releaseRedundantData {
 	[self buildBoundingBoxIfNecessary];
+	[self calcRadiusIfNecessary];
 	[super releaseRedundantData];
 }
 
@@ -812,15 +1087,16 @@ static GLuint currentColorsTag = 0;
 #pragma mark CC3VertexTextureCoordinates
 
 @interface CC3VertexTextureCoordinates (TemplateMethods)
+@property(nonatomic, readonly) CGSize mapSize;
 @property(nonatomic, readonly) CGSize naturalMapSize;
 -(void) alignWithTextureRectangle: (CGRect) newRect fromOld: (CGRect) oldRect;
 @end
 
 @implementation CC3VertexTextureCoordinates
 
--(CGRect) textureRectangle {
-	return textureRectangle;
-}
+@synthesize expectsVerticallyFlippedTextures;
+
+-(CGRect) textureRectangle { return textureRectangle; }
 
 -(void) setTextureRectangle: (CGRect) aRect {
 	CGRect oldRect = textureRectangle;
@@ -832,19 +1108,36 @@ static GLuint currentColorsTag = 0;
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		elementType = GL_FLOAT;
 		elementSize = 2;
+		mapSize = CGSizeMake(1, 1);
 		naturalMapSize = CGSizeZero;
 		textureRectangle = kCC3UnitTextureRectangle;
+		expectsVerticallyFlippedTextures = [[self class] defaultExpectsVerticallyFlippedTextures];
 	}
 	return self;
 }
 
+// Protected properties for copying.
+-(CGSize) mapSize { return mapSize; }
+	
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3VertexTextureCoordinates*) another {
 	[super populateFrom: another];
 	
+	mapSize = another.mapSize;
 	naturalMapSize = another.naturalMapSize;
 	textureRectangle = another.textureRectangle;
+	expectsVerticallyFlippedTextures = another.expectsVerticallyFlippedTextures;
+}
+
+static BOOL defaultExpectsVerticallyFlippedTextures = YES;
+
++(BOOL) defaultExpectsVerticallyFlippedTextures {
+	return defaultExpectsVerticallyFlippedTextures;
+}
+
++(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	defaultExpectsVerticallyFlippedTextures = expectsFlipped;
 }
 
 -(ccTex2F) texCoord2FAt: (GLsizei) index {
@@ -884,9 +1177,7 @@ static GLuint currentColorsTag = 0;
 	}
 }
 
-+(void) unbind {
-	[self unbindRemainingFrom: 0];
-}
++(void) unbind { [self unbindRemainingFrom: 0]; }
 
 /**
  * Returns the size of the map as a fraction between zero and one in each dimension.
@@ -894,7 +1185,7 @@ static GLuint currentColorsTag = 0;
  * when the texture is simply overlaid on the mesh, before any textureRectangle is applied.
  *
  * If the value of this property has not yet been measured by one of the
- * alignWith...Texture...: methods, it is measured when first accessed here.
+ * alignWith...TextureMapSize: methods, it is measured when first accessed here.
  */
 -(CGSize) naturalMapSize {
 	if (CGSizeEqualToSize(naturalMapSize, CGSizeZero)) {
@@ -943,82 +1234,87 @@ static GLuint currentColorsTag = 0;
 		ptc->v = (ny + ((natV - oy) * sh)) * natHeight;
 	}
 }
-/*
--(void) alignWithTextureMapSize: (ccTex2F) texMapSize {
-	naturalMapSize = CGSizeZero;
+
+-(void) alignWithTextureMapSize: (CGSize) texMapSize {
+	NSAssert2((texMapSize.width && texMapSize.height),
+			  @"%@ mapsize %@ cannot have zero dimension",
+			  self, NSStringFromCGSize(texMapSize));
+
+	// Don't waste time adjusting if nothing is changing
+	// (eg. POT textures, or new texture has same texture map as old).
+	if (CGSizeEqualToSize(texMapSize, mapSize)) return;
 	
-	for (GLsizei i = 0; i < elementCount; i++) {
-		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->u *= texMapSize.u;
-		ptc->v *= texMapSize.v;
-		
-		// While we are remapping, measure the resulting map size at the same time
-		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
-		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
-	}
-}
+	LogCleanTrace(@"%@ aligning and changing map size from %@ to %@ but not flipping vertically",
+				  self, NSStringFromCGSize(mapSize), NSStringFromCGSize(texMapSize));
 
--(void) alignWithInvertedTextureMapSize: (ccTex2F) texMapSize {
-	naturalMapSize = CGSizeZero;
+	CGSize mapRatio = CGSizeMake(texMapSize.width / mapSize.width, texMapSize.height / mapSize.height);
 	
+	naturalMapSize = CGSizeZero;
 	for (GLsizei i = 0; i < elementCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->u *= texMapSize.u;
-		ptc->v = (1.0 - ptc->v) * texMapSize.v;
+		ptc->u *= mapRatio.width;
+		ptc->v *= mapRatio.height;
 		
 		// While we are remapping, measure the resulting map size at the same time
 		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
 		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
 	}
-}
-*/
+	mapSize = texMapSize;	// Remember what we've set the map size to
 
--(void) alignWithTextureMapSize: (ccTex2F) texMapSize {
-	naturalMapSize = CGSizeZero;
-
-	for (GLsizei i = 0; i < elementCount; i++) {
-		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->u *= texMapSize.u;
-		ptc->v *= texMapSize.v;
-
-		// While we are remapping, measure the resulting map size at the same time
-		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
-		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
-	}
 }
 
--(void) alignWithInvertedTextureMapSize: (ccTex2F) texMapSize {
+-(void) alignWithInvertedTextureMapSize: (CGSize) texMapSize {
+	NSAssert2((texMapSize.width && texMapSize.height),
+			  @"%@ mapsize %@ cannot have zero dimension",
+			  self, NSStringFromCGSize(texMapSize));
+	LogCleanTrace(@"%@ aligning and changing map size from %@ to %@ and flipping vertically",
+				  self, NSStringFromCGSize(mapSize), NSStringFromCGSize(texMapSize));
+	
+	CGSize mapRatio = CGSizeMake(texMapSize.width / mapSize.width, texMapSize.height / mapSize.height);
+	
 	naturalMapSize = CGSizeZero;
-
 	for (GLsizei i = 0; i < elementCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->u *= texMapSize.u;
-		ptc->v = (1.0 - ptc->v) * texMapSize.v;
+		ptc->u *= mapRatio.width;
+		ptc->v = texMapSize.height - (ptc->v * mapRatio.height);
 		
 		// While we are remapping, measure the resulting map size at the same time
 		naturalMapSize.width = MAX(ptc->u, naturalMapSize.width);
 		naturalMapSize.height = MAX(ptc->v, naturalMapSize.height);
 	}
+
+	// Remember that we've flipped and what we've set the map size to
+	mapSize = texMapSize;
+	expectsVerticallyFlippedTextures = !expectsVerticallyFlippedTextures;
+	
+	LogCleanTrace(@"%@ aligned and flipped vertically", self);
 }
 
 -(void) alignWithTexture: (CC3Texture*) texture {
-	if (texture) {
+	if (!texture) return;
+	if ( XOR(expectsVerticallyFlippedTextures, texture.isFlippedVertically) ) {
+		[self alignWithInvertedTextureMapSize: texture.mapSize];
+	} else {
 		[self alignWithTextureMapSize: texture.mapSize];
 	}
 }
 
 -(void) alignWithInvertedTexture: (CC3Texture*) texture {
-	if (texture) {
-		[self alignWithInvertedTextureMapSize: texture.mapSize];
-	}
+	if (!texture) return;
+	[self alignWithInvertedTextureMapSize: texture.mapSize];
 }
 
--(void) repeatTexture: (ccTex2F) repeatFactor {
-	[self naturalMapSize];		// Ensure natural size calculated before expanding
+-(void) flipVertically {
+	GLfloat minV = CGFLOAT_MAX;
+	GLfloat maxV = -CGFLOAT_MAX;
 	for (GLsizei i = 0; i < elementCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->u *= repeatFactor.u;
-		ptc->v *= repeatFactor.v;
+		minV = MIN(ptc->v, minV);
+		maxV = MAX(ptc->v, maxV);
+	}
+	for (GLsizei i = 0; i < elementCount; i++) {
+		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
+		ptc->v = minV + maxV - ptc->v;
 	}
 }
 
@@ -1036,19 +1332,14 @@ static GLuint currentColorsTag = 0;
 	}
 }
 
--(void) flipVertically {
-	GLfloat minV = CGFLOAT_MAX;
-	GLfloat maxV = -CGFLOAT_MAX;
-	for (GLsizei i = 0; i < elementCount; i++) {
-		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		minV = MIN(ptc->v, minV);
-		maxV = MAX(ptc->v, maxV);
-	}
-	for (GLsizei i = 0; i < elementCount; i++) {
-		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
-		ptc->v = minV + maxV - ptc->v;
-	}
+-(void) repeatTexture: (ccTex2F) repeatFactor {
+	CGSize repeatSize = CGSizeMake(repeatFactor.u * mapSize.width, repeatFactor.v * mapSize.height);
+	[self alignWithTextureMapSize: repeatSize];
 }
+
+//-(void) repeatTexture: (ccTex2F) repeatFactor {
+//	[self alignWithTextureMapSize: *(CGSize*)&repeatFactor];
+//}
 
 
 #pragma mark Array context switching
@@ -1090,6 +1381,12 @@ static GLuint currentColorsTag = 0;
 	return self;
 }
 
+-(GLushort*) allocateTriangles: (GLsizei) triangleCount {
+	self.drawingMode = GL_TRIANGLES;
+	self.elementType = GL_UNSIGNED_SHORT;
+	return [self allocateElements: (triangleCount * 3)];
+}
+
 -(GLushort) indexAt: (GLsizei) index {
 	GLvoid* ptr = [self addressOfElement: index];
 	return elementType == GL_UNSIGNED_BYTE ? *(GLubyte*)ptr : *(GLushort*)ptr;
@@ -1102,6 +1399,13 @@ static GLuint currentColorsTag = 0;
 	} else {
 		*(GLushort*)ptr = vertexIndex;
 	}
+}
+
+-(CC3FaceIndices) faceIndicesAt: (GLsizei) faceIndex {
+	CC3FaceIndices idxIndices = [super faceIndicesAt: faceIndex];
+	return CC3FaceIndicesMake([self indexAt: idxIndices.vertices[0]],
+							  [self indexAt: idxIndices.vertices[1]],
+							  [self indexAt: idxIndices.vertices[2]]);
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -1132,6 +1436,39 @@ static GLuint currentColorsTag = 0;
 													 as: drawingMode];
 }
 
+-(void) populateFromRunLengthArray: (GLushort*) runLenArray ofLength: (GLsizei) rlaLen {
+	GLsizei elemNum, rlaIdx, runNum;
+	
+	// Iterate through the runs in the array to count
+	// the number of runs and total number of elements
+	runNum = 0;
+	elemNum = 0;
+	rlaIdx = 0;
+	while(rlaIdx < rlaLen) {
+		GLushort runLength = runLenArray[rlaIdx];
+		elemNum += runLength;
+		rlaIdx += runLength + 1;
+		runNum++;
+	}
+	
+	// Allocate space for the elements and the runs
+	[self allocateElements: elemNum];
+	[self allocateStripLengths: runNum];
+	
+	// Iterate through the runs in the array, copying the 
+	// elements and run-lengths to this vertex index array
+	runNum = 0;
+	elemNum = 0;
+	rlaIdx = 0;
+	while(rlaIdx < rlaLen) {
+		GLushort runLength = runLenArray[rlaIdx++];
+		stripLengths[runNum++] = runLength;
+		for (int i = 0; i < runLength; i++) {
+			[self setIndex: runLenArray[rlaIdx++] at: elemNum++];
+		}
+	}
+}
+
 
 #pragma mark Array context switching
 
@@ -1149,44 +1486,6 @@ static GLuint currentIndicesTag = 0;
 
 +(void) resetSwitching {
 	currentIndicesTag = 0;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3IndexRunLengthArray
-
-@implementation CC3VertexRunLengthIndices
-
-// Since we want to use a run-length encoded index array, we need local control, so don't attempt to create a buffer
--(void) createGLBuffer {}
-
-// Since we want to use a run-length encoded index array, we need local control, so remove any buffer binding.
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ using local array", self);
-	[[[CC3OpenGLES11Engine engine].vertices bufferBinding: self.bufferTarget] unbind];
-}
-
-// Draws the mesh using a RLE (run-length encoded) index array
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ drawing %u indices using local run-length array", self, elementCount);
-
-	GLuint vertexCount = 0;
-	for(int i = 0; i < elementCount; i += vertexCount + 1) {
-		switch (elementType) {
-			case GL_UNSIGNED_BYTE:
-				vertexCount = ((GLubyte*)elements)[i];
-				break;
-			case GL_UNSIGNED_SHORT:
-				vertexCount = ((GLushort*)elements)[i];
-				break;
-			default:
-				LogError(@"Illegal index element type in %@: %u", self, elementType);
-				return;
-		}	
-		[self drawFrom: (i + 1) forCount: vertexCount withVisitor: visitor];
-	}
 }
 
 @end
@@ -1273,14 +1572,24 @@ static GLuint currentPointSizesTag = 0;
 	[self resetSwitching];
 }
 
+-(GLfloat*) weightsAt: (GLsizei) index {
+	return (GLfloat*)[self addressOfElement: index];
+}
+
+-(void) setWeights: (GLfloat*) weights at: (GLsizei) index {
+	GLfloat* vertexWeights = [self weightsAt: index];
+	GLint numWts = self.elementSize;
+	for (int i = 0; i < numWts; i++) {
+		vertexWeights[i] = weights[i];
+	}
+}
+
 -(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
-	GLfloat* vertexWeights = (GLfloat*)[self addressOfElement: index];
-	return vertexWeights[vertexUnit];
+	return [self weightsAt: index][vertexUnit];
 }
 
 -(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
-	GLfloat* vertexWeights = (GLfloat*)[self addressOfElement: index];
-	vertexWeights[vertexUnit] = aWeight;
+	[self weightsAt: index][vertexUnit] = aWeight;
 }
 
 
@@ -1331,10 +1640,29 @@ static GLuint currentWeightsTag = 0;
 	[self resetSwitching];
 }
 
+-(GLvoid*) matrixIndicesAt: (GLsizei) index {
+	return [self addressOfElement: index];
+}
+
+-(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLsizei) index {
+	GLint numMtx = self.elementSize;
+	if (elementType == GL_UNSIGNED_BYTE) {
+		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
+		for (int i = 0; i < numMtx; i++) {
+			vertexMatrices[i] = ((GLubyte*)mtxIndices)[i];
+		}
+	} else {
+		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
+		for (int i = 0; i < numMtx; i++) {
+			vertexMatrices[i] = ((GLushort*)mtxIndices)[i];
+		}
+	}
+}
+
 -(GLushort) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLsizei) index {
 	if (elementType == GL_UNSIGNED_BYTE) {
 		GLubyte* vertexMatrices = (GLubyte*)[self addressOfElement: index];
-		return vertexMatrices[vertexUnit];
+		return (GLushort)vertexMatrices[vertexUnit];
 	} else {
 		GLushort* vertexMatrices = (GLushort*)[self addressOfElement: index];
 		return vertexMatrices[vertexUnit];

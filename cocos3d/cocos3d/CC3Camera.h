@@ -1,9 +1,9 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,31 +29,35 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3TargettingNode.h"
+#import "CC3Node.h"
 
-@class CC3Frustum, CC3World;
+@class CC3Scene;
 
 /** Default camera field of view. Measured in degrees. */
-static const GLfloat kCC3DefaultFieldOfView = 45.0;
+static const GLfloat kCC3DefaultFieldOfView = 45.0f;
 
 /** Default distance from the camera to the near clipping plane. */
-static const GLfloat kCC3DefaultNearClippingPlane = 1.0;
+static const GLfloat kCC3DefaultNearClippingDistance = 1.0f;
 
 /** Default distance from the camera to the far clipping plane. */
-static const GLfloat kCC3DefaultFarClippingPlane = 1000.0;
+static const GLfloat kCC3DefaultFarClippingDistance = 1000.0f;
+
+// Deprecated
+static const GLfloat kCC3DefaultNearClippingPlane DEPRECATED_ATTRIBUTE = kCC3DefaultNearClippingDistance;
+static const GLfloat kCC3DefaultFarClippingPlane DEPRECATED_ATTRIBUTE = kCC3DefaultFarClippingDistance;
 
 /**
  * Default padding around a node when framed by the camera using one of the
  * moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of methods.
  */
-static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
+static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 
 #pragma mark -
 #pragma mark CC3Camera interface
 
 /**
- * CC3Camera represents the camera viewing the 3D world.
+ * CC3Camera represents the camera viewing the 3D scene.
  *
  * CC3Camera is a type of CC3Node, and can therefore participate in a structural node assembly.
  * An instance can be the child of another node, and the camera itself can have child nodes.
@@ -70,24 +74,24 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * scaling and is therefore not rigid. If possible, try to avoid applying scaling to the
  * ancestor nodes of this camera.
  *
- * CC3Camera is also a type of CC3TargettingNode, and can be pointed in a particular
- * direction, or can be made to track a target node as that node moves, or the camera moves.
+ * CC3Camera can be pointed in a particular direction, or can be made to track a target
+ * node as that node moves, or the camera moves.
  *
  * The camera can be configured for either perspective or parallel projection, using
  * the isUsingParallelProjection property. By default, the camera will use perspective
  * projection.
  *
  * You can use the projectLocation: and projectNode: methods to project global locations
- * within the 3D world into 2D view coordinates, indicating where on the screen a 3D
+ * within the 3D scene into 2D view coordinates, indicating where on the screen a 3D
  * object appears.
  *
  * You can use the unprojectPoint: and unprojectPoint:ontoPlane: methods to project a
- * 2D screen position into either a ray (a line) in the 3D world, or into a specific 
+ * 2D screen position into either a ray (a line) in the 3D scene, or into a specific 
  * intersection location on a 3D plane.
  *
  * You can use the  moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of
  * methods to have the camera automatically focus on, and display all of, a particular
- * node, or even the whole world itself.
+ * node, or even the whole scene itself.
  *
  * Scaling a camera is a null operation because it scales everything, including the size
  * of objects, but also the distance from the camera to those objects. The effects cancel
@@ -101,14 +105,21 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * If you find that objects in the periphery of your view appear elongated, you can adjust
  * the fieldOfView and/or uniformScale properties to reduce this "fish-eye" effect.
  * See the notes of the fieldOfView property for more on this.
+ *
+ * For cameras, any change in the projection parameters, such as fieldOfView, scale,
+ * near or far clipping distances, is considered a transform change, and the
+ * transformListeners are sent a notification via the nodeWasTransformed: method
+ * when the projection matrix is recalculated.
  */
-@interface CC3Camera : CC3TargettingNode {
+@interface CC3Camera : CC3Node {
 	CC3GLMatrix* modelviewMatrix;
 	CC3Frustum* frustum;
 	GLfloat fieldOfView;
-	GLfloat nearClippingPlane;
-	GLfloat farClippingPlane;
+	GLfloat nearClippingDistance;
+	GLfloat farClippingDistance;
+	BOOL hasInfiniteDepthOfField;
 	BOOL isProjectionDirty;
+	BOOL isOpen;
 }
 
 /**
@@ -117,31 +128,41 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  *
  * The effective field of view is influenced by the value of the uniformScale property,
  * which, for cameras, acts as a zoom factor (as if the camera lens is zoomed in or out).
+ * The effective field of view of this camera is calculated as (fieldOfView / uniformScale).
  *
  * Once a nominal field of view has been set in this property, changing the scale or
  * uniformScale properties will change the effective field of view accordingly (although
  * the value of the fieldOfView property remains the same). Scales greater than one zoom in
  * (objects appear larger), and scales between one and zero zoom out (objects appear smaller).
  *
- * Like real-world cameras, larger values for fieldOfView can sometimes result in a
+ * Like real-world cameras, larger values of the effective field of view can result in a
  * "fish-eye" effect, where objects at the periphery of the view can appear elongated.
  * To reduce this effect, lower the value of fieldOfView property, or increase the value
  * of the uniformScale property. In doing so, you may need to move your camera further
  * away from the scene, so that your view will continue to include the same objects.
+ *
+ * The effective field of view is clamped to keep it below 180 degrees, beyond which
+ * the scene would vanish into the distance.
  */
 @property(nonatomic, assign) GLfloat fieldOfView;
 
 /**
  * The distance from the camera to the clipping plane of the camera's frustrum
- * that is nearest to the camera. Initially set to kCC3DefaultNearClippingPlane.
+ * that is nearest to the camera. Initially set to kCC3DefaultNearClippingDistance.
  */
-@property(nonatomic, assign) GLfloat nearClippingPlane;
+@property(nonatomic, assign) GLfloat nearClippingDistance;
+
+/** @deprecated Renamed to nearClippingDistance. */
+@property(nonatomic, assign) GLfloat nearClippingPlane DEPRECATED_ATTRIBUTE;
 
 /**
  * The distance from the camera to the clipping plane of the camera's frustrum
- * that is farthest from the camera. Initially set to kCC3DefaultFarClippingPlane.
+ * that is farthest from the camera. Initially set to kCC3DefaultFarClippingDistance.
  */
-@property(nonatomic, assign) GLfloat farClippingPlane;
+@property(nonatomic, assign) GLfloat farClippingDistance;
+
+/** @deprecated Renamed to farClippingDistance. */
+@property(nonatomic, assign) GLfloat farClippingPlane DEPRECATED_ATTRIBUTE;
 
 /**
  * The frustum of the camera.
@@ -154,28 +175,95 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 /**
  * The matrix that holds the transform from model space to view space. This matrix is distinct
  * from the camera's transformMatrix, which, like that of all nodes, reflects the location,
- * rotation and scale of the camera node in the 3D world space.
+ * rotation and scale of the camera node in the 3D scene space.
  *
  * In contrast, the modelviewMatrix combines the inverse of the camera's transformMatrix
- * (because any movement of the camera in world space has the opposite effect on the view),
- * with the deviceRotationMatrix from the viewportManager of the CC3World, to account for
+ * (because any movement of the camera in scene space has the opposite effect on the view),
+ * with the deviceRotationMatrix from the viewportManager of the CC3Scene, to account for
  * the impact of device orientation on the view.
  */
 @property(nonatomic, readonly) CC3GLMatrix* modelviewMatrix;
 
-/** The projection matrix that takes the camera's modelview and projects it to the viewport. */
+/**
+ * The projection matrix that takes the camera's modelview and projects it to the viewport.
+ *
+ * This projection matrix takes into account the value of the farClippingDistance property,
+ * and will be finite in depth. This is contrasted by the projection matrix found in the
+ * infiniteProjectionMatrix property.
+ */
 @property(nonatomic, readonly) CC3GLMatrix* projectionMatrix;
+
+/**
+ * The projection matrix modified to have an infinite depth of field,
+ * by assuming a farClippingDistance set at infinity.
+ */
+@property(nonatomic, readonly) CC3GLMatrix* infiniteProjectionMatrix;
+
+/**
+ * Indicates whether, during rendering, this camera uses an infinite depth of field,
+ * with a far clipping plane set at infinity.
+ *
+ * This camera calculates two projection matrices. One has a finite depth of field,
+ * and is held in the projectionMatrix property. The other has an infinite depth of
+ * field and is held in the infiniteProjectionMatrix property.
+ *
+ * If the value of this property is set to YES, the projection matrix in the
+ * infiniteProjectionMatrix property will be applied to the GL engine during
+ * drawing, effectively creating an infinite depth of field.
+ *
+ * If the value of this property is set to NO, the projection matrix in the
+ * projectionMatrix property will be applied to the GL engine during drawing,
+ * creating a finite depth of field.
+ *
+ * The value of this property does not affect the culling of nodes outside the camera's
+ * frustum. During drawing, regardless of the value of this property, the value of the
+ * farClippingDistance property is used to cull objects outside the camera's frustum.
+ * This is done to avoid wasting time rendering objects that are too far away to be seen
+ * (as defined by the value of the farClippingDistance property).
+ *
+ * The initial value of this property is NO, indicating that the camera will have
+ * a finite depth of field, based on the value of the farClippingDistance.
+ *
+ * For the most part, a finite depth of field provides slightly more accurate rendering,
+ * and this property should generally be left set to NO. However, there are a few
+ * circumstances, such as the rendering of infinite shadow volumes, where clipping
+ * at the far clipping plane within the GL engine needs to be avoided. In such
+ * circumstances, setting this property to YES can be useful.
+ *
+ * Because of its use for rendering shadows, whenever a camera is set into the
+ * activeCamera property of the CC3Scene, the value of this property is copied
+ * from the old active camera.
+ */
+@property(nonatomic, assign) BOOL hasInfiniteDepthOfField;
 
 /**
  * Indicates whether this camera uses parallel projection.
  *
  * If this value is set to NO, the projection matrix will be configured for perspective
- * projection, which is typical for 3D worlds. If this value is set to YES, the projection
+ * projection, which is typical for 3D scenes. If this value is set to YES, the projection
  * matrix will be configured for parallel/isometric/orthographic projection.
  *
  * The initial value of this property is NO, indicating that perspective projection will be used.
  */
 @property(nonatomic, assign) BOOL isUsingParallelProjection;
+
+/**
+ * The direction in which this camera is pointing, relative to the coordinate
+ * system of this camera, which is relative to the parent's rotation.
+ *
+ * The initial value of this property is kCC3VectorUnitZNegative, pointing
+ * down the negative Z-axis in the local coordinate system of this camera.
+ * When this camera is rotated, the original negative-Z axis of the camera's
+ * local coordinate system will point in this direction.
+ *
+ * This orientation is opposite that for most other nodes, whose forwardDirection
+ * property orients the positve Z-axis of the node's coordinate system in
+ * the stated direction. This arrangement allows unrotated nodes to face the
+ * camera in a natural stance, and allows the unrotated camera to face the nodes.
+ *
+ * See further notes in the notes for this property in the CC3Node class.
+ */
+@property(nonatomic, assign) CC3Vector forwardDirection;
 
 
 #pragma mark Transformations
@@ -183,20 +271,29 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 /**
  * Indicates that the projection matrix is dirty and needs to be recalculated.
  *
+ * For cameras, a change in projection is considered a transform change, so the
+ * transformListeners are sent a notification via the nodeWasTransformed: method
+ * when the projection matrix is rebuilt.
+ *
  * This method is invoked automatically as needed. Usually the application never needs
  * to invoke this method directly.
  */
 -(void) markProjectionDirty;
 
 /**
- * Updates the transformMatrix and modelviewMatrix if the target has moved, builds the
- * projectionMatrix if needed, and updates the frustum if needed.
+ * Updates the projection matrix if the projection parameters have been changed.
  *
- * This method is invoked automatically from the CC3World after all updates have been
- * made to the models in the 3D world. Usually, the application never needs to invoke
+ * For cameras, a change in projection is considered a transform change, so the
+ * transformListeners are sent a notification via the nodeWasTransformed: method.
+ *
+ * This method is invoked automatically from the CC3Scene after all updates have been
+ * made to the models in the 3D scene. Usually, the application never needs to invoke
  * this method directly.
  */
--(void) buildPerspective;
+-(void) buildProjection;
+
+/** @deprecated Renamed to buildProjection. */
+-(void) buildPerspective DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Drawing
@@ -204,7 +301,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 /**
  * Opens the camera for drawing operations.
  *
- * This method is called automatically by the CC3World at the beginning of each frame
+ * This method is called automatically by the CC3Scene at the beginning of each frame
  * drawing cycle. Usually, the application never needs to invoke this method directly.
  */
 -(void) open;
@@ -212,10 +309,18 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 /**
  * Closes the camera for drawing operations.
  *
- * This method is called automatically by the CC3World at the end of each frame drawing cycle.
+ * This method is called automatically by the CC3Scene at the end of each frame drawing cycle.
  * Usually, the application never needs to invoke this method directly.
  */
 -(void) close;
+
+/**
+ * Indicates whether this camera is open.
+ *
+ * The initial value of this property is NO. It will return YES after the open method
+ * has been invoked, and will revert back to NO when the close method is invoked.
+ */
+@property(nonatomic, readonly) BOOL isOpen;
 
 
 #pragma mark Viewing nodes
@@ -235,14 +340,22 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * around the node when it is framed by the camera. A negative padding value will cause
  * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
- * By setting CC3World as the specified node, you can use this method to determine
+ * By setting CC3Scene as the specified node, you can use this method to determine
  * where to position the camera in order to show the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to determine where to locate your camera to capture the entire scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
 							fromDirection: (CC3Vector) aDirection
@@ -255,10 +368,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * including any descendant nodes, with minimal padding. The camera will point back
  * towards the node along the line between itself and the center of the node.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -266,9 +382,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode;
 
@@ -285,10 +406,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * around the node when it is framed by the camera. A negative padding value will cause
  * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -296,9 +420,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode withPadding: (GLfloat) padding;
 
@@ -308,10 +437,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * content of the node, including any descendant nodes, with minimal padding. The
  * camera will point back towards the center of the node along the specified direction.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -319,9 +451,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode fromDirection: (CC3Vector) aDirection;
 
@@ -338,10 +475,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * around the node when it is framed by the camera. A negative padding value will cause
  * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -349,9 +489,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveToShowAllOf: (CC3Node*) aNode
 		  fromDirection: (CC3Vector) aDirection
@@ -367,10 +512,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * current location and orientation, and ending at the calculated location and
  * oriented to point back towards the center of the node.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -378,9 +526,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode;
 
@@ -401,10 +554,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * around the node when it is framed by the camera. A negative padding value will cause
  * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -412,9 +568,14 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
- * contentSize. This is necessary so that the frustum of the camera has been set from
- * the contentSize of the CC3Layer.
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
+ * contentSize (typically after the layer has been opened in its view). This is
+ * necessary because the frustum of this camera requires the contentSize of the
+ * CC3Layer to determine the projection matrix. Because of this, you cannot invoke
+ * this method when creating this camera, or from the initializeScene method of the
+ * CC3Scene. If you want to open your scene with the camera automatically framing
+ * the entire scene, or a particular node, a good place to invoke this method is in
+ * the onOpen callback method of your customized CC3Scene.
  */
 -(void) moveWithDuration: (ccTime) t
 			 toShowAllOf: (CC3Node*) aNode
@@ -430,10 +591,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * current location and orientation, and ending at the calculated location and
  * oriented to point back towards the center of the node.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -441,7 +605,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
@@ -466,10 +630,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * around the node when it is framed by the camera. A negative padding value will cause
  * the node to expand to more fully fill the camera frame, or even expand beyond it.
  *
- * The specified node may be the CC3World, in which case, the camera will be located
+ * The specified node may be the CC3Scene, in which case, the camera will be located
  * to display the entire scene.
  *
  * This method can be useful during development to troubleshoot scene display issues.
+ * For example, you can invoke this method in the onOpen method of your custom CC3Scene
+ * to ensure that the camera is pointed towards the whole scene, or a particular
+ * node within the scene, when the scene is first drawn.
  *
  * Since the camera points to the center of the node, when displayed, the node may
  * not extend to both sides (or top & bottom) of the scene equally, due to perspective.
@@ -477,7 +644,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * or billboards that rotate as the camera moves into position, one or more corners of
  * the node may extend slightly out of the camera's view.
  *
- * This method requires that the CC3World is attached to a CC3Layer that has a valid
+ * This method requires that the CC3Scene is attached to a CC3Layer that has a valid
  * contentSize. This is necessary so that the frustum of the camera has been set from
  * the contentSize of the CC3Layer.
  */
@@ -496,7 +663,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * about the content of the returned vector.
  *
  * During any frame update, for objects that are moving, the updated globalLocation is
- * available in the updateAfterTransform: method of your customized CC3World.
+ * available in the updateAfterTransform: method of your customized CC3Scene.
  *
  * In addition to returning the projected 2D location, this method also sets that value
  * into the projectedLocation property of the node, for future access.
@@ -504,21 +671,21 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 -(CC3Vector) projectNode: (CC3Node*) aNode;
 
 /**
- * Projects the specified global 3D world location onto a 2D position in the viewport
+ * Projects the specified global 3D scene location onto a 2D position in the viewport
  * coordinate space, indicating where on the screen this 3D location will be seen.
  * The 2D position can be read from the X and Y components of the returned 3D location.
  *
  * The specified location should be in global coordinates. If you are invoking this
  * method to project the location of a CC3Node, you should use the globalLocation property
  * of the node. For objects that are moving, the updated globalLocation is available in the
- * updateAfterTransform: method of your customized CC3World.
+ * updateAfterTransform: method of your customized CC3Scene.
  *
  * The Z-component of the returned location indicates the distance from the camera to the
  * specified location, with a positive value indicating that the specified location is in
  * front of the camera, and a negative value indicating that the specified location is
  * behind the camera.
  *
- * Any 3D world location can be either in front of or behind the camera, and both cases will
+ * Any 3D scene location can be either in front of or behind the camera, and both cases will
  * be projected onto the 2D space of the viewport plane. If you are only interested in
  * the case when the specified location is in front of the camera (potentially visible to
  * the camera), check that the Z-component of the returned location is positive.
@@ -529,7 +696,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 
 /**
  * Projects a 2D point, which is specified in the local coordinates of the CC3Layer,
- * into a ray extending from the camera into the 3D world. The returned ray contains
+ * into a ray extending from the camera into the 3D scene. The returned ray contains
  * a starting location and a direction. 
  *
  * If this camera is using perspective projection, the ray will start at the
@@ -542,8 +709,8 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * forwardDirection.
  * 
  * This method is the compliment to the projectLocation: method. You can use this
- * method to map touch events to the 3D world space for activities such as dropping
- * objects into the 3D world at a location under user finger touch control.
+ * method to map touch events to the 3D scene space for activities such as dropping
+ * objects into the 3D scene at a location under user finger touch control.
  *
  * Any object that lies anywhere along the ray in 3D space will appear at the
  * specified 2D point on the view. If you are trying to place an object at a 3D
@@ -560,7 +727,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  * Projects a 2D point, which is specified in the local coordinates of the CC3Layer,
  * to a 3D location on the specified plane.
  *
- * You can use this method to map touch events to the plane in the 3D world space for
+ * You can use this method to map touch events to the plane in the 3D scene space for
  * activities such as dropping objects onto the plane at a location under user finger
  * touch control.
  *
@@ -574,37 +741,46 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  *
  * You should therefore test the w component value to make sure it is positive and
  * non-zero before proceeding with an activity such as dropping an object on the plane.
- * If the plane has bounds in your world, you should also check whether the returned
+ * If the plane has bounds in your scene, you should also check whether the returned
  * intersection is within those bounds.
  */
 -(CC3Vector4) unprojectPoint:(CGPoint)cc2Point ontoPlane: (CC3Plane) plane;
 
 @end
-	
+
 
 #pragma mark -
-#pragma mark CC3Frustum interface
+#pragma mark CC3Frustum
 
-/** Represents a camera's frustum. Each CC3Camera instance contains an instance of this class. */
-@interface CC3Frustum : NSObject <NSCopying> {
+/**
+ * Represents a camera's frustum. Each CC3Camera instance contains an instance of this class.
+ *
+ * Each frustum has four sides: top, bottom, left and right, and has two caps: near and far.
+ * These sides and caps are represented as six planes.
+ *
+ * The frustum is a truncated pyramid that has the location of the camera as the pyrimid apex.
+ * This frustum manages and populates the projection matrix used by the camera, and builds its
+ * planes from a combination of that projection matrix and the camera's modelview matrix.
+ *
+ * The frustum is a type of bounding volume and therefore supports methods for testing whether
+ * locations, rays, shapes, and other bounding volumes intersect the volume of the frustum.
+ */
+@interface CC3Frustum : CC3BoundingVolume {
+	CC3GLMatrix* modelviewMatrix;
 	CC3GLMatrix* projectionMatrix;
+	CC3GLMatrix* infiniteProjectionMatrix;
+	CC3GLMatrix* modelviewProjectionMatrix;
+	CC3Plane planes[6];
+	CC3Vector vertices[8];
+	GLfloat top;
 	GLfloat bottom;
 	GLfloat left;
 	GLfloat right;
 	GLfloat near;
 	GLfloat far;
-	CC3Plane topPlane;
-	CC3Plane bottomPlane;
-	CC3Plane leftPlane;
-	CC3Plane rightPlane;
-	CC3Plane nearPlane;
-	CC3Plane farPlane;
 	BOOL isUsingParallelProjection;
-	BOOL arePlanesDirty;
+	BOOL isInfiniteProjectionDirty;
 }
-
-/** The projection matrix that takes the camera's modelview and projects it to the viewport. */
-@property(nonatomic, readonly) CC3GLMatrix* projectionMatrix;
 
 /** The distance from view center to the top of this frustum at the near clipping plane. */
 @property(nonatomic, readonly) GLfloat top;
@@ -642,11 +818,70 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 /** The clip plane at the far end of this frustum, in global coordinates. */
 @property(nonatomic, readonly) CC3Plane farPlane;
 
+/** Returns the location of the near top left corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector nearTopLeft;
+
+/** Returns the location of the near top right corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector nearTopRight;
+
+/** Returns the location of the near bottom left corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector nearBottomLeft;
+
+/** Returns the location of the near bottom right corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector nearBottomRight;
+
+/** Returns the location of the far top left corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector farTopLeft;
+
+/** Returns the location of the far top right corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector farTopRight;
+
+/** Returns the location of the far bottom left corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector farBottomLeft;
+
+/** Returns the location of the far bottom right corner of this frustum, in the global coordinate system. */
+@property(nonatomic, assign, readonly) CC3Vector farBottomRight;
+
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance on the specified modelview matrix. */
+-(id) initOnModelviewMatrix: (CC3GLMatrix*) aMtx;
+
+/** Allocates and initializes an autoreleased instance on the specified modelview matrix. */
++(id) frustumOnModelviewMatrix: (CC3GLMatrix*) aMtx;
+
+/**
+ * The modelview matrix of the camera.
+ *
+ * Setting this property will automatically mark the planes as dirty. However, if the
+ * contents of the matrix change, this instance will be unaware, and the application
+ * is responsible for invoking the markPlanesDirty method to let this instance know.
+ */
+@property(nonatomic, retain) CC3GLMatrix* modelviewMatrix;
+
+/** The projection matrix that takes the camera's modelview and projects it to the viewport. */
+@property(nonatomic, readonly) CC3GLMatrix* projectionMatrix;
+
+/**
+ * The projection matrix modified to have an infinite depth of view,
+ * by assuming a farClippingDistance set at infinity.
+ */
+@property(nonatomic, readonly) CC3GLMatrix* infiniteProjectionMatrix;
+
+/**
+ * The combined modelview-projection matrix that projects the scene to the viewport.
+ *
+ * This is simply a multiplicative product of the camera's modelview and projection matrices.
+ * It is calculated as part of the recalculation of the frustum planes.
+ */
+@property(nonatomic, readonly) CC3GLMatrix* modelviewProjectionMatrix;
+
 /**
  * Indicates whether this frustum uses parallel projection.
  *
  * If this value is set to NO, the projection matrix will be configured for
- * perspective projection, which is typical for 3D worlds. If this value is set
+ * perspective projection, which is typical for 3D scenes. If this value is set
  * to YES, the projection matrix will be configured for orthographic projection.
  *
  * The initial value of this property is NO, indicating that perspective
@@ -654,14 +889,8 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
  */
 @property(nonatomic, assign) BOOL isUsingParallelProjection;
 
-/** Allocates and initializes an autorelease instance. */
-+(id) frustum;
-
-/** Marks the planes as dirty and in need of recalculation. */
--(void) markPlanesDirty;
-
 /**
- * Calculates the six frustum dimensions and the projectionMatrix
+ * Sets the six frustum clipping planes and the projectionMatrix
  * from the specified projection parameters.
  */
 -(void) populateFrom: (GLfloat) fieldOfView
@@ -670,26 +899,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02;
 		  andFarClip: (GLfloat) farClip
 			 andZoom: (GLfloat) zoomFactor;
 
-/**
- * Builds the planes in this frustum from the internal projectionMatrix and specified
- * modelviewMatrix by multiplying the two matrices together and extracting the six
- * frustum planes from the resulting model-view-projection matrix.
- */
--(void) buildPlanes: (CC3GLMatrix*) aModelViewMatrix;
+/** @deprecated Renamed to markDirty. */
+-(void) markPlanesDirty DEPRECATED_ATTRIBUTE;
 
-/** Returns whether the specified global location intersects (is inside) this frustum. */
--(BOOL) doesIntersectPointAt: (CC3Vector) location;
+/** @deprecated Renamed to doesIntersectLocation:. */
+-(BOOL) doesIntersectPointAt: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
 
-/**
- * Returns whether a sphere, centered at the specified global location,
- * and with the specified radius, intersects this frustum.
- */
--(BOOL) doesIntersectSphereAt: (CC3Vector) location withRadius: (GLfloat) radius;
-
-/**
- * Returns a string containing a more complete description of this frustum, including
- * a description of each of the six planes that make up this frustum.
- */
--(NSString*) fullDescription;
+/** @deprecated Renamed to doesIntersectLocation:. */
+-(BOOL) doesIntersectSphereAt: (CC3Vector) aLocation withRadius: (GLfloat) radius DEPRECATED_ATTRIBUTE;
 
 @end

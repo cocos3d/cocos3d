@@ -1,9 +1,9 @@
 /*
  * CC3PerformanceStatistics.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,7 +37,7 @@
 #pragma mark CC3PerformanceStatistics
 
 /**
- * Collects statistics about the updating and drawing performance of the 3D world.
+ * Collects statistics about the updating and drawing performance of the 3D scene.
  *
  * To allow flexibility in calculating statistics, this class does not automatically
  * clear the accumulated statistics. It is the responsibility of the application to
@@ -266,7 +266,7 @@
 #define kCC3RateHistogramSize 80
 
 /**
- * Collects statistics about the updating and drawing performance of the 3D world,
+ * Collects statistics about the updating and drawing performance of the 3D scene,
  * including a histogram for each of the raw updateRate and frameRate properties.
  *
  * These histograms provide more detail than the updateRate and frameRate properties,

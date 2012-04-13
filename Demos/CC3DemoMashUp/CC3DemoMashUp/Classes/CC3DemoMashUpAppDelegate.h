@@ -1,9 +1,9 @@
 /*
  * CC3DemoMashUpAppDelegate.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,7 +29,7 @@
 
 #import <UIKit/UIKit.h>
 #import "CCNodeController.h"
-#import "CC3World.h"
+#import "CC3Scene.h"
 
 @interface CC3DemoMashUpAppDelegate : NSObject <UIApplicationDelegate> {
 	UIWindow* window;

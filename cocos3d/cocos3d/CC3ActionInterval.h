@@ -1,9 +1,9 @@
 /*
  * CC3ActionInterval.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,14 +35,26 @@
 
 
 #pragma mark -
-#pragma mark CC3TransformBy
+#pragma mark CCActionInterval
+
+/** Extension category to support cocos3d. */
+@interface CCActionInterval (CC3)
+
+/** The action target cast as a CC3Node. */
+@property(nonatomic, readonly) CC3Node* targetCC3Node;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3TransformVectorAction
 
 /**
- * CC3TransformBy is an abstract subclass of CCActionInterval that is the parent
- * of subclasses that transform the location, rotation, or scale of a target
- * CC3Node by some amount in some way.
+ * CC3TransformVectorAction is an abstract subclass of CCActionInterval that is the
+ * parent of subclasses that transform a vector component of a target CC3Node (such
+ * as the location, rotation, or scale) by some amount, or to some value over time.
  */
-@interface CC3TransformBy : CCActionInterval {
+@interface CC3TransformVectorAction : CCActionInterval {
 	CC3Vector startVector;
 	CC3Vector diffVector;
 }
@@ -59,6 +71,18 @@
  */
 +(id) actionWithDuration: (ccTime) t differenceVector: (CC3Vector) aVector;
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3TransformBy
+
+/**
+ * CC3TransformBy is an abstract subclass of CC3TransformVectorAction that is the
+ * parent of subclasses that transform the location, rotation, or scale of a target
+ * CC3Node by some amount in some way.
+ */
+@interface CC3TransformBy : CC3TransformVectorAction {}
 @end
 
 
@@ -105,40 +129,12 @@
 
 
 #pragma mark -
-#pragma mark CC3RotateByAngle
-
-/**
- * CC3RotateByAngle is a CCActionInterval that rotates a target CC3Node by a specific
- * amount, by updating the rotationAngle propety.
- *
- * The rotationAngle property rotates the node around the axis set in the rotationAxis
- * property of the node. Make sure that you set the rotationAxis property appropriately.
- */
-@interface CC3RotateByAngle : CCActionInterval {
-	GLfloat startAngle;
-	GLfloat diffAngle;
-}
-
-/**
- * Initializes this instance to rotate the target node
- * by the specified angle, within the specified time duration.
- */
--(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
-
-/**
- * Allocates and initializes an autoreleased instance to rotate the target node
- * by the specified angle, within the specified time duration.
- */
-+(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3ScaleBy
 
 /** CC3ScaleBy is a CCActionInterval that scales a target CC3Node by a specific scale factor. */
-@interface CC3ScaleBy : CC3TransformBy {}
+@interface CC3ScaleBy : CC3TransformBy {
+	CC3Vector scaledDiffVector;
+}
 
 /**
  * Initializes this instance to scale the target node
@@ -152,17 +148,73 @@
  */
 +(id) actionWithDuration: (ccTime) t scaleBy: (CC3Vector) aScale;
 
+/**
+ * Initializes this instance to scale the target node uniformly in all dimensions 
+ * by the specified scale factor, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale;
+
+/**
+ * Allocates and initializes an autoreleased instance to scale the target node uniformly
+ * in all dimensions by the specified scale factor, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t scaleUniformlyBy: (GLfloat) aScale;
+
 @end
 
 
+#pragma mark -
+#pragma mark CC3RotateByAngle
+
+/**
+ * CC3RotateByAngle is a CCActionInterval that rotates a target CC3Node by a specific
+ * amount, by repeatedly invoking the rotateByAngle:aroundAxis: method on the target
+ * node as the action runs.
+ */
+@interface CC3RotateByAngle : CCActionInterval {
+	CC3Vector rotationAxis;
+	CC3Vector activeRotationAxis;
+	GLfloat diffAngle;
+	ccTime prevTime;
+}
+
+/**
+ * Initializes this instance to rotate the target node by the specified angle
+ * around the existing rotationAxis of the node, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node
+ * by the specified angle around the existing rotationAxis of the node, within
+ * the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle;
+
+/**
+ * Initializes this instance to rotate the target node by the specified angle
+ * around the specified axis, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
+
+/**
+ * Allocates and initializes an autoreleased instance to rotate the target node by
+ * the specified angle around the specified axis, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3TransformTo
 
 /**
- * CC3TransformTo is an abstract subclass of CCActionInterval that is the parent
- * of subclasses that transform the location, rotation, or scale of a target
+ * CC3TransformTo is an abstract subclass of CC3TransformVectorAction that is the
+ * parent of subclasses that transform the location, rotation, or scale of a target
  * CC3Node to some end value in some way.
  */
-@interface CC3TransformTo : CC3TransformBy {
+@interface CC3TransformTo : CC3TransformVectorAction {
 	CC3Vector endVector;
 }
 
@@ -230,6 +282,39 @@
 
 
 #pragma mark -
+#pragma mark CC3ScaleTo
+
+/** CC3ScaleTo is a CCActionInterval that scales a target CC3Node to a specific scale. */
+@interface CC3ScaleTo : CC3TransformTo {}
+
+/**
+ * Initializes this instance to scale the target node
+ * to the specified scale, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
+
+/**
+ * Allocates and initializes an autoreleased instance to scale the target node
+ * to the specified scale, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
+
+/**
+ * Initializes this instance to scale the target node uniformly in all
+ * dimensions to the specified uniformScale, within the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale;
+
+/**
+ * Allocates and initializes an autoreleased instance to scale the target node uniformly
+ * in all dimensions to the specified uniformScale, within the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t scaleUniformlyTo: (GLfloat) aScale;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3RotateToAngle
 
 /**
@@ -237,14 +322,17 @@
  * rotationAngle, by updating the rotationAngle propety.
  *
  * The rotationAngle property rotates the node around the axis set in the rotationAxis
- * property of the node. Make sure that you set the rotationAxis property appropriately.
+ * property of the node. Make sure that you set the rotationAxis property on the node
+ * appropriately prior to running this action.
  *
  * The rotational travel will be minimized, taking into consideration the cyclical nature
  * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
-@interface CC3RotateToAngle : CC3RotateByAngle {
+@interface CC3RotateToAngle : CCActionInterval {
+	GLfloat startAngle;
 	GLfloat endAngle;
+	GLfloat diffAngle;
 }
 
 /**
@@ -311,23 +399,121 @@
 
 
 #pragma mark -
-#pragma mark CC3ScaleTo
-
-/** CC3ScaleTo is a CCActionInterval that scales a target CC3Node to a specific scale. */
-@interface CC3ScaleTo : CC3TransformTo {}
+#pragma mark CC3MoveDirectionallyBy
 
 /**
- * Initializes this instance to scale the target node
- * to the specified scale, within the specified time duration.
+ * CC3MoveDirectionallyBy is an abstract subclass of CCActionInterval that is
+ * the parent of subclasses that move a target CC3Node by a specific translation
+ * distance in a direction relative to the orientation of the node.
+ *
+ * The direction of movement is evaluated on each update frame. If the node
+ * is also being rotated over time, this action will follow the change in
+ * orientation of the node, and adjust the direction of movement.
+ *
+ * This is an abstract class. Subclasses define the actual direction of
+ * movement by overriding the targetDirection property.
  */
--(id) initWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
+@interface CC3MoveDirectionallyBy : CCActionInterval {
+	ccTime prevTime;
+	GLfloat	distance;
+}
 
 /**
- * Allocates and initializes an autoreleased instance to scale the target node
- * to the specified scale, within the specified time duration.
+ * Initializes this instance to move the target node by the specified distance in
+ * the direction, as indicated by the subclass, within the specified time duration.
+ *
+ * The specified distance may be positive or negative, indicating whether the
+ * node should move forward or backward, relative to the direction of movement.
+ *
+ * The direction of movement is evaluated on each update frame. If the node
+ * is also being rotated over time, this action will follow the change in
+ * direction of movement of the node.
  */
-+(id) actionWithDuration: (ccTime) t scaleTo: (CC3Vector) aScale;
+-(id) initWithDuration: (ccTime) t moveBy: (GLfloat) aDistance;
 
+/**
+ * Allocates and initializes an autoreleased instance  to move the target node
+ * by the specified distance in the direction, as indicated by the subclass,
+ * within the specified time duration.
+ *
+ * The specified distance may be positive or negative, indicating whether the
+ * node should move forward or backward, relative to the direction of movement.
+ *
+ * The direction of movement is evaluated on each update frame. If the node
+ * is also being rotated over time, this action will follow the change in
+ * direction of movement of the node.
+ */
++(id) actionWithDuration: (ccTime) t moveBy: (GLfloat) aDistance;
+
+/**
+ * The direction of movement.
+ *
+ * This property is accessed on each update frame to determine the current
+ * direction of movement. If the node is also being rotated while this
+ * action is active, this direction will be different for each frame.
+ *
+ * The abstract implementation simply returns kCC3VectorZero. Subclasses
+ * will override this property to return the current direction of movement.
+ */
+@property(nonatomic, readonly) CC3Vector targetDirection;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveForwardBy
+
+/**
+ * CC3MoveForwardBy moves a target CC3Node forward by a specific distance.
+ *
+ * The direction of movement is taken from the forwardDirection property 
+ * of the node, and is evaluated on each update frame. If the node is being
+ * separately rotated while this action is active, this action will follow
+ * the changes to the forwardDirection property of the node, and the resulting
+ * path of the node will be a curve instead of a staight line.
+ *
+ * The specified distance may be negative, indicating the node should move
+ * backward, relative to the direction indicated by the forwardDirection property.
+ */
+@interface CC3MoveForwardBy : CC3MoveDirectionallyBy
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveRightBy
+
+/**
+ * CC3MoveRightBy moves a target CC3Node to the right by a specific distance.
+ *
+ * The direction of movement is taken from the rightDirection property of the
+ * node, and is evaluated on each update frame. If the node is being separately
+ * rotated while this action is active, this action will follow the changes to
+ * the rightDirection property of the node, and the resulting path of the node
+ * will be a curve instead of a staight line.
+ *
+ * The specified distance may be negative, indicating the node should move
+ * backward, relative to the direction indicated by the rightDirection property.
+ */
+@interface CC3MoveRightBy : CC3MoveDirectionallyBy
+@end
+
+
+#pragma mark -
+#pragma mark CC3MoveUpBy
+
+/**
+ * CC3MoveUpBy moves a target CC3Node up by a specific distance.
+ *
+ * The direction of movement is taken from the upDirection property of the node,
+ * and is evaluated on each update frame. If the node is being separately rotated
+ * while this action is active, this action will follow the changes to the
+ * upDirection property of the node, and the resulting path of the node will be
+ * a curve instead of a staight line.
+ *
+ * The specified distance may be negative, indicating the node should move
+ * backward, relative to the direction indicated by the upDirection property.
+ */
+@interface CC3MoveUpBy : CC3MoveDirectionallyBy
 @end
 
 
@@ -462,7 +648,7 @@
  * CC3ActionRangeLimit instance.
  *
  * The effective result is an animation action that will perform only part of the animation.
- * This is very useful for an node that contains several different motions in one animation.
+ * This is very useful for a node that contains several different motions in one animation.
  * Using a range-limited CC3Animate, you can animate one of those distinct motions without
  * having to run the full animation. To do this, set the startOfRange and endOfRange values
  * to the fractional positions (between zero and one) of the start and end frames of the

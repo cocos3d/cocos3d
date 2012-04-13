@@ -1,9 +1,9 @@
 /*
  * CCNodeController.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -219,7 +219,7 @@
 		newPicker.toolbarHidden = YES;
 		newPicker.wantsFullScreenLayout = YES;
 		CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-		CGFloat deviceCameraScaleup = screenHeight / (screenHeight - kDeviceCameraToolbarHeight);
+		CGFloat deviceCameraScaleup = screenHeight / (screenHeight - (kDeviceCameraToolbarHeight * [[UIScreen mainScreen] scale]));
 		newPicker.cameraViewTransform = CGAffineTransformScale(newPicker.cameraViewTransform, deviceCameraScaleup, deviceCameraScaleup);
 	}
 	return newPicker;

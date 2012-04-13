@@ -1,9 +1,9 @@
 /*
  * HUDLayer.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,7 +39,7 @@
 }
 
 /**
- * Overridden to handle touch events here, instead of passing them to the CC3World.
+ * Overridden to handle touch events here, instead of passing them to the CC3Scene.
  *
  * When a touch ended event occurs, close this layer.
  */

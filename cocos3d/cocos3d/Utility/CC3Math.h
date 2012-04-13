@@ -1,9 +1,9 @@
 /*
  * CC3Math.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,34 +29,56 @@
 
 /** @file */	// Doxygen marker
 
-/* Base library of definitions and functions for operating in a 3D world. */
-
-#import <math.h>
+/* Base library of definitions and functions for operating in a 3D scene. */
 
 
 #pragma mark Basic math support
 
-#define M_SQRT3  1.732050807568877f							/* sqrt(3) */
-#define kCircleDegrees  360.0f
-#define kSemiCircleDegrees  180.0f
+#define kCC3OneThird			0.33333333333333333333f
+#define kCC3OneOver255			0.00392156862745098f
+#define kCC3Sqrt3				1.732050807568877f							/* sqrt(3) */
+#define kCC3CircleDegrees		360.0f
+#define kCC3SemiCircleDegrees	180.0f
 
 /** Conversion between degrees and radians. */
-#define DegreesToRadiansFactor  0.017453292519943f			// PI / 180
+#define DegreesToRadiansFactor  0.0174532925199433f			// PI / 180
 #define RadiansToDegreesFactor  57.29577951308232f			// 180 / PI
 #define DegreesToRadians(D) ((D) * DegreesToRadiansFactor)
 #define RadiansToDegrees(R) ((R) * RadiansToDegreesFactor)
 
 /** Returns -1, 0 or +1 if the arguement is negative, zero or positive respectively. */
-#define SIGN(A)	((A) < 0 ? -1 :((A) > 0 ? 1 : 0))
+#ifndef SIGN
+	#define SIGN(A)	((A) < 0 ? -1 :((A) > 0 ? 1 : 0))
+#endif
 
 /** Returns the value clamped to be between the min and max values */
-#define CLAMP(val, min, max) (MIN(MAX((val), (min)), (max)))
+#ifndef CLAMP
+	#define CLAMP(val, min, max) (MIN(MAX((val), (min)), (max)))
+#endif
 
 /** Returns a weighted average of the two values, where weight is between zero and one, inclusive. */
-#define WAVG(val1, val2, weight) ((val1) + (((val2) - (val1)) * CLAMP(weight, 0.0, 1.0)))
+#define CC3WAVG(val1, val2, weight) ((val1) + (((val2) - (val1)) * CLAMP(weight, 0.0, 1.0)))
+
+/**
+ * Returns the logical exclusive-OR of the specified two expressions.
+ *
+ * For logical expressions, this is more precise than the bitwise ^ operator,
+ * because it works correctly even if either exp1 or exp2 evaluates to avalue
+ * that is not explicitly either YES (1) or NO (0). Furthermore, it is efficient,
+ * as it evaluates each expression only once.
+ */
+#ifndef XOR
+	#define XOR(exp1, exp2) ((exp1) ? !(exp2) : (exp2))
+#endif
 
 /** Returns the positive or negative modulo remainder of value divided by period. */
 #define CC3Cyclic(value, period) (fmodf((value), (period)))
+
+/** Returns whether the specified integer value is odd. */
+#define CC3IntIsOdd(INT) ((INT) & 1)
+
+/** Returns whether the specified integer value is even. */
+#define CC3IntIsEven(INT) (!CC3IntIsOdd(INT))
 
 /**
  * Returns the positive modulo remainder of value divided by period.
@@ -109,7 +131,7 @@ static inline float CC3CyclicDifference(float minuend, float subtrahend, float p
  *   - CC3CyclicAngle(-535) will return -175
  */
 static inline float CC3CyclicAngle(float angle) {
-	return CC3Cyclic(angle, kCircleDegrees);
+	return CC3Cyclic(angle, kCC3CircleDegrees);
 }
 
 /**
@@ -127,11 +149,11 @@ static inline float CC3SemiCyclicAngle(float angle) {
 	float modAngle = CC3CyclicAngle(angle);
 
 	// Adjust to +/- 180 degrees
-	if(modAngle > kSemiCircleDegrees) {
-		return modAngle - kCircleDegrees;
+	if(modAngle > kCC3SemiCircleDegrees) {
+		return modAngle - kCC3CircleDegrees;
 	}
-	if(modAngle < -kSemiCircleDegrees) {
-		return modAngle + kCircleDegrees;
+	if(modAngle < -kCC3SemiCircleDegrees) {
+		return modAngle + kCC3CircleDegrees;
 	}
 	return modAngle;
 }

@@ -1,16 +1,14 @@
-//
-//  ___PROJECTNAMEASIDENTIFIER___AppDelegate.m
-//  ___PROJECTNAME___
-//
-//  Created by ___FULLUSERNAME___ on ___DATE___.
-//  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
-//
-
-#import "cocos2d.h"
+/**
+ *  ___PROJECTNAMEASIDENTIFIER___AppDelegate.m
+ *  ___PROJECTNAME___
+ *
+ *  Created by ___FULLUSERNAME___ on ___DATE___.
+ *  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
+ */
 
 #import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
-#import "___PROJECTNAMEASIDENTIFIER___World.h"
+#import "___PROJECTNAMEASIDENTIFIER___Scene.h"
 #import "CC3EAGLView.h"
 
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
@@ -46,11 +44,14 @@
 	//  1. Transparency (alpha blending), and device camera overlay requires an alpha channel,
 	//     so must use RGBA8 color format. If not using device overlay or alpha blending
 	//     (transparency) in any 3D or 2D graphics this can be changed to kEAGLColorFormatRGB565.
-	//	2. 3D rendering requires a depth format of 16 bit.
-	//  3. For highest performance, multisampling antialiasing is disabled by default.
+	//	2. 3D rendering requires a depth format of 16 or 24 bits
+	//     (GL_DEPTH_COMPONENT16_OES or GL_DEPTH_COMPONENT24_OES).
+	//  3. If a stencil buffer is required (for shadow volumes, for instance), it must be
+	//     combined with the depth buffer by using a depth format of GL_DEPTH24_STENCIL8_OES.
+	//  4. For highest performance, multisampling antialiasing is disabled by default.
 	//     To enable multisampling antialiasing, set the multiSampling parameter to YES.
 	//     You can also change the number of samples used with the numberOfSamples parameter.
-	//  4. If you are using BOTH multisampling antialiasing AND node picking from touch events,
+	//  5. If you are using BOTH multisampling antialiasing AND node picking from touch events,
 	//     use the CC3EAGLView class instead of EAGLView. When using EAGLView, multisampling
 	//     antialiasing interferes with the color-testing algorithm used for touch-event node picking.
 	EAGLView *glView = [CC3EAGLView viewWithFrame: [window bounds]
@@ -89,8 +90,8 @@
 	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer node];
 	[cc3Layer scheduleUpdate];
 	
-	// Create the customized 3D world, attach it to the layer, and start it playing.
-	cc3Layer.cc3World = [___PROJECTNAMEASIDENTIFIER___World world];
+	// Create the customized 3D scene, attach it to the layer, and start it playing.
+	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
 
 	ControllableCCLayer* mainLayer = cc3Layer;
 	
@@ -107,7 +108,7 @@
 	// When it is smaller, you can even move the 3D layer around on the screen dyanmically.
 	// To see this in action, uncomment the lines above as described, and also uncomment
 	// the following two lines. The shouldAlwaysUpdateViewport property ensures that the
-	// 3D world tracks the updated position of the 3D layer within its parent layer.
+	// 3D scene tracks the updated position of the 3D layer within its parent layer.
 //	cc3Layer.shouldAlwaysUpdateViewport = YES;
 //	[cc3Layer runAction: [CCMoveTo actionWithDuration: 10.0 position: ccp(100.0, 200.0)]];
 	
@@ -117,6 +118,7 @@
 	// and uncomment the lines below these lines that uses the traditional CCDirector scene startup.
 	viewController = [[CCNodeController controller] retain];
 	viewController.doesAutoRotate = YES;
+//	viewController.isOverlayingDeviceCamera = YES;	// Uncomment for 3D overlay on device camera for AR
 	[viewController runSceneOnNode: mainLayer];		// attach the layer to the controller and run a scene with it
 	
 	// If a controller is NOT used, uncomment the following standard CCDirector scene startup lines,

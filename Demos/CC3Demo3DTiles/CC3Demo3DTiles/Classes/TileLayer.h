@@ -1,9 +1,9 @@
 /*
  * TileLayer.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,7 +32,7 @@
 
 /**
  * A sample application-specific CC3Layer subclass that is touch-enabled
- * and forwards touch events, including touch-move events, to the CC3World.
+ * and forwards touch events, including touch-move events, to the CC3Scene.
  */
 @interface TileLayer : CC3Layer
 @end

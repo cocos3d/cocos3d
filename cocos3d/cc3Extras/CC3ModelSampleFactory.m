@@ -1,9 +1,9 @@
 /*
  * CC3ModelSampleFactory.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,7 +42,6 @@
 @synthesize unicoloredTeapotMesh, multicoloredTeapotMesh, texturedTeapotMesh;
 
 -(void) dealloc {
-	[logoTexture release];
 	[teapotVertexLocations release];
 	[teapotVertexNormals release];
 	[teapotVertexIndices release];
@@ -60,20 +59,20 @@
 // Initialize static teapot vertex arrays that can be reused in many teapots.
 -(void) initTeapotVertexArrays {
 	
-	// Vertex locations come from teapot.h header file
+	// Vertex locations come from the teapot.h header file
 	teapotVertexLocations = [CC3VertexLocations vertexArrayWithName: @"TeapotVertices"];
 	teapotVertexLocations.elementCount = num_teapot_vertices;
 	teapotVertexLocations.elements = teapot_vertices;
 	
-	// Vertex normals come from teapot.h header file
+	// Vertex normals come from the teapot.h header file
 	teapotVertexNormals = [CC3VertexNormals vertexArrayWithName: @"TeapotNormals"];
 	teapotVertexNormals.elementCount = num_teapot_normals;
 	teapotVertexNormals.elements = teapot_normals;
 	
-	// Vertex indices come from teapot.h header file
-	teapotVertexIndices = [CC3VertexRunLengthIndices vertexArrayWithName: @"TeapotIndicies"];
-	teapotVertexIndices.elementCount = num_teapot_indices;
-	teapotVertexIndices.elements = (GLushort*)new_teapot_indicies;
+	// Vertex indices populated from the run-length array in the teapot.h header file
+	teapotVertexIndices = [CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"];
+	[teapotVertexIndices populateFromRunLengthArray: (GLushort*)new_teapot_indicies
+										   ofLength: num_teapot_indices];
 	
 	// Scan vertex location array to find the min & max of each vertex dimension.
 	// This can be used below to create both simple color gradient and texture wraps for the mesh.
@@ -115,11 +114,8 @@
 		vTexCoord[i].v = (vLocs[i].y - vlMin.y) / vlRange.y;
 	}
 	
-	// Load the texture that will be used for the textured teapot and
-	// align the teapot texture coordinates to cover the texture's visible area.
-	// This actually changes the values of the texture coordinates.
-	logoTexture = [CC3Texture textureFromFile: @"Default.png"];
-	[teapotVertexTextureCoordinates alignWithInvertedTexture: logoTexture];
+	// Indicate that this texture coord array was built assuming a right-side up image.
+	teapotVertexTextureCoordinates.expectsVerticallyFlippedTextures = NO;
 }
 
 // Initialize several static teapot meshes that can be reused in many teapots.
@@ -173,8 +169,7 @@ static CC3ModelSampleFactory* factory;
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = unicoloredTeapotMesh;
 	teapot.material = [CC3Material shiny];
-	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
-	teapot.material.diffuseColor = color;	
+	teapot.diffuseColor = color;	
 	return teapot;
 }
 
@@ -183,7 +178,6 @@ static CC3ModelSampleFactory* factory;
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = multicoloredTeapotMesh;
 	teapot.material = [CC3Material shiny];
-	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
 	return teapot;
 }
 
@@ -192,8 +186,7 @@ static CC3ModelSampleFactory* factory;
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = texturedTeapotMesh;
 	teapot.material = [CC3Material shiny];
-	teapot.material.name = [NSString stringWithFormat: @"%@-Mat", aName];
-	teapot.material.texture = logoTexture;
+	teapot.texture = [CC3Texture textureFromFile: @"Default.png"];
 	return teapot;
 }
 

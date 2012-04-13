@@ -1,9 +1,9 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,9 +33,6 @@
 #import "CC3MeshNode.h"
 #import "CC3OpenGLES11Engine.h"
 
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
 
 @interface CC3VertexArrayMesh (TemplateMethods)
 -(void) bindLocationsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -52,7 +49,7 @@
 @implementation CC3VertexArrayMesh
 
 @synthesize vertexLocations, vertexNormals, vertexColors, vertexTextureCoordinates;
-@synthesize vertexIndices, interleaveVertices;
+@synthesize vertexIndices, shouldInterleaveVertices;
 
 -(void) dealloc {
 	[vertexLocations release];
@@ -72,10 +69,14 @@
 	return (vertexColors != nil);
 }
 
-/**
- * Returns the boundingBox from the vertexLocation array.
- * If no vertexLocation array has been set, returns a null bounding box.
- */
+// Deprecated property.
+-(BOOL) interleaveVertices { return self.shouldInterleaveVertices; }
+-(void) setInterleaveVertices: (BOOL) shouldInterleave { self.shouldInterleaveVertices = shouldInterleave; }
+
+-(CC3Vector) centerOfGeometry {
+	return vertexLocations ? vertexLocations.centerOfGeometry : [super centerOfGeometry];
+}
+
 -(CC3BoundingBox) boundingBox {
 	return vertexLocations ? vertexLocations.boundingBox : [super boundingBox];
 }
@@ -159,13 +160,17 @@
 	return nil;
 }
 
+// If first texture unit, return vertexTextureCoordinates property.
+// Otherwise, if texUnit within bounds of overlays, get overlay.
+// Otherwise, look up the texture coordinates for the previous texture unit
+// recursively until one is found, or we reach first texture unit.
 -(CC3VertexTextureCoordinates*) textureCoordinatesForTextureUnit: (GLuint) texUnit {
-	// If first texture unit, return vertexTextureCoordinates property
 	if (texUnit == 0) {
 		return vertexTextureCoordinates;
-	} else {
-		// Otherwise retrieve from overlay array
+	} else if (texUnit < self.textureCoordinatesArrayCount) {
 		return [overlayTextureCoordinates objectAtIndex: (texUnit - 1)];
+	} else {
+		return [self textureCoordinatesForTextureUnit: (texUnit - 1)];
 	}
 }
 
@@ -175,43 +180,92 @@
 	if (texUnit == 0) {
 		self.vertexTextureCoordinates = aTexCoords;
 	} else if (texUnit < self.textureCoordinatesArrayCount) {
-		[overlayTextureCoordinates replaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
+		[overlayTextureCoordinates fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
 	} else {
 		[self addTextureCoordinates: aTexCoords];
 	}
 }
 
--(void) alignWithTexturesIn: (CC3Material*) aMaterial {
+-(BOOL) expectsVerticallyFlippedTextures {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint i = 0; i < tcCount; i++) {
-		[[self textureCoordinatesForTextureUnit: i]
-			alignWithTexture: [aMaterial textureForTextureUnit: i]];
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		if ( [self expectsVerticallyFlippedTextureInTextureUnit: texUnit] ) return YES;
+	}
+	return NO;
+}
+
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[self expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
 	}
 }
 
--(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {
+-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit {
+	return [self textureCoordinatesForTextureUnit: texUnit].expectsVerticallyFlippedTextures;
+}
+
+-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {
+	[self textureCoordinatesForTextureUnit: texUnit].expectsVerticallyFlippedTextures = expectsFlipped;
+}
+
+-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {
+	[[self textureCoordinatesForTextureUnit: texUnit] alignWithTexture: aTexture];
+}
+
+// Deprecated
+-(void) deprecatedAlignWithTexturesIn: (CC3Material*) aMaterial {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint i = 0; i < tcCount; i++) {
-		[[self textureCoordinatesForTextureUnit: i]
-			alignWithInvertedTexture: [aMaterial textureForTextureUnit: i]];
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		CC3Texture* tex = [aMaterial textureForTextureUnit: texUnit];
+		[[self textureCoordinatesForTextureUnit: texUnit] alignWithTexture: tex];
 	}
+}
+
+// Deprecated texture inversion template method. Inversion is now automatic.
+-(void) deprecatedAlign: (CC3VertexTextureCoordinates*) texCoords
+	withInvertedTexture: (CC3Texture*) aTexture {
+	[texCoords alignWithTexture: aTexture];
+}
+// Deprecated - invert or not depends on subclass.
+-(void) deprecatedAlignWithInvertedTexturesIn: (CC3Material*) aMaterial {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		CC3Texture* tex = [aMaterial textureForTextureUnit: texUnit];
+		[self deprecatedAlign: [self textureCoordinatesForTextureUnit: texUnit] withInvertedTexture: tex];
+	}
+}
+
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] flipVertically];
+}
+
+-(void) flipTexturesVertically {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] flipVertically];
+	}
+}
+
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] flipHorizontally];
+}
+
+-(void) flipTexturesHorizontally {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] flipHorizontally];
+	}
+}
+
+-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] repeatTexture: repeatFactor];
 }
 
 -(void) repeatTexture: (ccTex2F) repeatFactor {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint i = 0; i < tcCount; i++) {
-		[[self textureCoordinatesForTextureUnit: i] repeatTexture: repeatFactor];
-	}
-}
-
--(CGRect) textureRectangle {
-	return [self textureRectangleForTextureUnit: 0];
-}
-
--(void) setTextureRectangle: (CGRect) aRect {
-	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint i = 0; i < tcCount; i++) {
-		[self textureCoordinatesForTextureUnit: i].textureRectangle = aRect;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] repeatTexture: repeatFactor];
 	}
 }
 
@@ -221,8 +275,16 @@
 }
 
 -(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
-	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
-	texCoords.textureRectangle = aRect;
+	[self textureCoordinatesForTextureUnit: texUnit].textureRectangle = aRect;
+}
+
+-(CGRect) textureRectangle { return [self textureRectangleForTextureUnit: 0]; }
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[self textureCoordinatesForTextureUnit: i].textureRectangle = aRect;
+	}
 }
 
 
@@ -230,7 +292,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		interleaveVertices = NO;
+		shouldInterleaveVertices = NO;
 		vertexLocations = nil;
 		vertexNormals = nil;
 		vertexColors = nil;
@@ -239,6 +301,38 @@
 		vertexIndices = nil;
 	}
 	return self;
+}
+
+-(CC3TexturedVertex*) allocateTexturedVertices: (GLsizei) vertexCount {
+	NSString* vaName;
+	CC3TexturedVertex* vertices;	// Array of structures to hold the interleaved vertex data
+
+	self.shouldInterleaveVertices = YES;
+
+	// Create vertex location array, set the stride for the full textured vertex
+	// structure, and allocating enough space for the specified number of vertices.
+	vaName = [NSString stringWithFormat: @"%@-Locations", self.name];
+	self.vertexLocations = [CC3VertexLocations vertexArrayWithName: vaName];
+	vertexLocations.elementStride = sizeof(CC3TexturedVertex);
+	vertices = [vertexLocations allocateElements: vertexCount];
+	
+	// Create the normal array interleaved on the same vertex data space
+	vaName = [NSString stringWithFormat: @"%@-Normals", self.name];
+	self.vertexNormals = [CC3VertexNormals vertexArrayWithName: vaName];
+	[vertexNormals interleaveWith: vertexLocations usingOffset: sizeof(CC3Vector)];
+	
+	// Create the tex coord array interleaved on the same vertex data space
+	vaName = [NSString stringWithFormat: @"%@-Texture", self.name];
+	self.vertexTextureCoordinates = [CC3VertexTextureCoordinates vertexArrayWithName: vaName];
+	[vertexTextureCoordinates interleaveWith: vertexLocations usingOffset: (2 * sizeof(CC3Vector))];
+
+	return vertices;
+}
+
+-(GLushort*) allocateIndexedTriangles: (GLsizei) triangleCount {
+	NSString* vaName = [NSString stringWithFormat: @"%@-Indices", self.name];
+	self.vertexIndices = [CC3VertexIndices vertexArrayWithName: vaName];
+	return [vertexIndices allocateTriangles: triangleCount];
 }
 
 // Protected properties for copying
@@ -260,26 +354,26 @@
 	CCArray* otherOTCs = another.overlayTextureCoordinates;
 	if (otherOTCs) {
 		for (CC3VertexTextureCoordinates* otc in otherOTCs) {
-			[self addTextureCoordinates: [otc copyAutoreleased]];	// retained by collection
+			[self addTextureCoordinates: [otc copyAutoreleased]];		// retained by collection
 		}
 	}
 
-	self.vertexIndices = another.vertexIndices;							// retained
-	interleaveVertices = another.interleaveVertices;
+	self.vertexIndices = another.vertexIndices;							// retained but not copied
+	shouldInterleaveVertices = another.shouldInterleaveVertices;
 }
 
 /**
  * If the interleavesVertices property is set to NO, creates GL vertex buffer objects for all
  * vertex arrays used by this mesh by invoking createGLBuffer on each contained vertex array.
  *
- * If the interleaveVertices property is set to YES, indicating that the underlying data is
+ * If the shouldInterleaveVertices property is set to YES, indicating that the underlying data is
  * shared across the contained vertex arrays, this method invokes createGLBuffer only on the
  * vertexLocations and vertexIndices vertex arrays, and copies the bufferID property from
  * the vertexLocations vertex array to the other vertex arrays (except vertexIndicies).
  */
 -(void) createGLBuffers {
 	[vertexLocations createGLBuffer];
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		GLuint commonBufferId = vertexLocations.bufferID;
 		vertexNormals.bufferID = commonBufferId;
 		vertexColors.bufferID = commonBufferId;
@@ -307,6 +401,18 @@
 		[otc deleteGLBuffer];
 	}
 	[vertexIndices deleteGLBuffer];
+}
+
+-(BOOL) isUsingGLBuffers {
+	BOOL isUsingVBOs = NO;
+	isUsingVBOs |= vertexLocations.isUsingGLBuffer;
+	isUsingVBOs |= vertexNormals.isUsingGLBuffer;
+	isUsingVBOs |= vertexColors.isUsingGLBuffer;
+	isUsingVBOs |= vertexTextureCoordinates.isUsingGLBuffer;
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		isUsingVBOs |= otc.isUsingGLBuffer;
+	}
+	return isUsingVBOs;
 }
 
 -(void) releaseRedundantData {
@@ -348,7 +454,7 @@
 }
 
 -(void) doNotBufferVertexNormals {
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		[self doNotBufferVertexLocations];
 	} else {
 		vertexNormals.shouldAllowVertexBuffering = NO;
@@ -356,7 +462,7 @@
 }
 
 -(void) doNotBufferVertexColors {
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		[self doNotBufferVertexLocations];
 	} else {
 		vertexColors.shouldAllowVertexBuffering = NO;
@@ -364,7 +470,7 @@
 }
 
 -(void) doNotBufferVertexTextureCoordinates {
-	if (interleaveVertices) {
+	if (shouldInterleaveVertices) {
 		[self doNotBufferVertexLocations];
 	} else {
 		vertexTextureCoordinates.shouldAllowVertexBuffering = NO;
@@ -384,7 +490,7 @@
 
 -(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLsizei) vertexCount {
 	[vertexLocations updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-	if (!interleaveVertices) {
+	if ( !shouldInterleaveVertices ) {
 		[vertexNormals updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[vertexColors updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[vertexTextureCoordinates updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
@@ -400,6 +506,17 @@
 
 
 #pragma mark Drawing
+
+-(GLenum) drawingMode {
+	if (vertexIndices) return vertexIndices.drawingMode;
+	if (vertexLocations) return vertexLocations.drawingMode;
+	return super.drawingMode;
+}
+
+-(void) setDrawingMode: (GLenum) aMode {
+	vertexIndices.drawingMode = aMode;
+	vertexLocations.drawingMode = aMode;
+}
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Binding %@", self);
@@ -556,28 +673,6 @@
 	}
 }
 
--(GLsizei) faceCountFromVertexCount: (GLsizei) vc {
-	if (vertexIndices) {
-		return [vertexIndices faceCountFromVertexCount: vc];
-	}
-	if (vertexLocations) {
-		return [vertexLocations faceCountFromVertexCount: vc];
-	}
-	NSAssert(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.");
-	return 0;
-}
-
--(GLsizei) vertexCountFromFaceCount: (GLsizei) fc {
-	if (vertexIndices) {
-		return [vertexIndices vertexCountFromFaceCount: fc];
-	}
-	if (vertexLocations) {
-		return [vertexLocations vertexCountFromFaceCount: fc];
-	}
-	NSAssert(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.");
-	return 0;
-}
-
 /**
  * Returns a bounding volume that first checks against the spherical boundary,
  * and then checks against a bounding box. The spherical boundary is fast to check,
@@ -604,8 +699,40 @@
 	[vertexLocations movePivotToCenterOfGeometry];
 }
 
+-(BOOL) ensureCapacity: (GLsizei) elemCount {
+	BOOL wasExpanded = NO;
+	wasExpanded |= [vertexLocations ensureCapacity: elemCount];
+	if ( !shouldInterleaveVertices ) {
+		wasExpanded |= [vertexNormals ensureCapacity: elemCount];
+		wasExpanded |= [vertexColors ensureCapacity: elemCount];
+		wasExpanded |= [vertexTextureCoordinates ensureCapacity: elemCount];
+		for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+			wasExpanded |= [otc ensureCapacity: elemCount];
+		}
+	}
+	return wasExpanded;
+}
+
 -(GLsizei) vertexCount {
 	return vertexLocations.elementCount;
+}
+
+-(void) setVertexCount: (GLsizei) vCount {
+	vertexLocations.elementCount = vCount;
+	vertexNormals.elementCount = vCount;
+	vertexColors.elementCount = vCount;
+	vertexTextureCoordinates.elementCount = vCount;
+	for (CC3VertexTextureCoordinates* otc in overlayTextureCoordinates) {
+		otc.elementCount = vCount;
+	}
+}
+
+-(GLsizei) vertexIndexCount {
+	return vertexIndices ? vertexIndices.elementCount : 0;
+}
+
+-(void) setVertexIndexCount: (GLsizei) vCount {
+	vertexIndices.elementCount = vCount;
 }
 
 -(CC3Vector) vertexLocationAt: (GLsizei) index {
@@ -614,6 +741,14 @@
 
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLsizei) index {
 	[vertexLocations setLocation: aLocation at: index];
+}
+
+-(CC3Vector4) vertexHomogeneousLocationAt: (GLsizei) index {
+	return vertexLocations ? [vertexLocations homogeneousLocationAt: index] : kCC3Vector4ZeroLocation;
+}
+
+-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLsizei) index {
+	[vertexLocations setHomogeneousLocation: aLocation at: index];
 }
 
 -(CC3Vector) vertexNormalAt: (GLsizei) index {
@@ -671,12 +806,45 @@
 }
 
 -(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
-	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
-	[texCoords updateGLBuffer];
+	[[self textureCoordinatesForTextureUnit: texUnit] updateGLBuffer];
 }
 
 -(void) updateVertexIndicesGLBuffer {
 	[vertexIndices updateGLBuffer];
+}
+
+
+#pragma mark Faces
+
+-(GLsizei) faceCount {
+	if (vertexIndices) return vertexIndices.faceCount;
+	if (vertexLocations) return vertexLocations.faceCount;
+	return 0;
+}
+
+-(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices {
+	return vertexLocations ? [vertexLocations faceFromIndices: faceIndices] : kCC3FaceZero; 
+}
+
+-(CC3FaceIndices) uncachedFaceIndicesAt: (GLsizei) faceIndex {
+	if (vertexIndices) return [vertexIndices faceIndicesAt: faceIndex];
+	if (vertexLocations) return [vertexLocations faceIndicesAt: faceIndex];
+	NSAssert1(NO, @"%@ has no drawable vertex array and cannot retrieve indices for a face.", self);
+	return kCC3FaceIndicesZero;
+}
+
+-(GLsizei) faceCountFromVertexCount: (GLsizei) vc {
+	if (vertexIndices) return [vertexIndices faceCountFromVertexCount: vc];
+	if (vertexLocations) return [vertexLocations faceCountFromVertexCount: vc];
+	NSAssert1(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.", self);
+	return 0;
+}
+
+-(GLsizei) vertexCountFromFaceCount: (GLsizei) fc {
+	if (vertexIndices) return [vertexIndices vertexCountFromFaceCount: fc];
+	if (vertexLocations) return [vertexLocations vertexCountFromFaceCount: fc];
+	NSAssert1(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.", self);
+	return 0;
 }
 
 
@@ -693,8 +861,20 @@
 #pragma mark -
 #pragma mark Bounding Volumes
 
-@interface CC3NodeBoundingVolume (TemplateMethods)
--(void) buildVolume;
+/** Methods to support bounding volumes based on vertex locations. */
+@interface CC3NodeBoundingVolume (VertexLocationsBoundingVolume)
+
+/** The vertex locations array from the mesh. */
+-(CC3VertexLocations*) vertexLocations;
+
+@end
+
+@implementation CC3NodeBoundingVolume (VertexLocationsBoundingVolume)
+
+-(CC3VertexLocations*) vertexLocations {
+	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
+}
+
 @end
 
 #pragma mark -
@@ -702,14 +882,16 @@
 
 @implementation CC3VertexLocationsBoundingVolume
 
--(CC3VertexLocations*) vertexLocations {
-	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
-}
-
 -(void) buildVolume {
 	centerOfGeometry = self.vertexLocations.centerOfGeometry;
-	[super buildVolume];
 }
+
+
+#pragma mark Drawing bounding volume
+
+-(BOOL) shouldDraw { return shouldDraw; }
+
+-(void) setShouldDraw: (BOOL) shdDraw {}
 
 @end
 
@@ -719,18 +901,15 @@
 
 @implementation CC3VertexLocationsSphericalBoundingVolume
 
--(CC3VertexLocations*) vertexLocations {
-	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
-}
-
 /**
  * Find the sphere that currently encompasses all the vertices. Then, if we should maximize
  * the boundary, find the sphere that is the union of that sphere, and the sphere that
  * previously encompassed all the vertices. Otherwise, just use the new sphere.
  */
 -(void) buildVolume {
-	CC3Vector newCOG = self.vertexLocations.centerOfGeometry;
-	GLfloat newRadius = self.vertexLocations.radius + self.node.boundingVolumePadding;
+	CC3VertexLocations* vtxLocs = self.vertexLocations;
+	CC3Vector newCOG = vtxLocs.centerOfGeometry;
+	GLfloat newRadius = vtxLocs.radius + self.node.boundingVolumePadding;
 	
 	if (shouldMaximize) {
 		CC3Sphere unionSphere = CC3SphereUnion(CC3SphereMake(newCOG, newRadius),
@@ -741,8 +920,6 @@
 		centerOfGeometry = newCOG;
 		radius = newRadius;
 	}
-	
-	[super buildVolume];
 }
 
 @end
@@ -752,10 +929,6 @@
 #pragma mark CC3VertexLocationsBoundingBoxVolume implementation
 
 @implementation CC3VertexLocationsBoundingBoxVolume
-
--(CC3VertexLocations*) vertexLocations {
-	return ((CC3VertexArrayMesh*)((CC3MeshNode*)self.node).mesh).vertexLocations;
-}
 
 /**
  * Find the bounding box that currently encompasses all the vertices. Then, if we should
@@ -773,16 +946,7 @@
 	}
 
 	centerOfGeometry = CC3BoundingBoxCenter(boundingBox);
-
-	[super buildVolume];
 }
 
-@end
-
-
-#pragma mark -
-#pragma mark Deprecated CC3VertexArrayMeshModel
-
-@implementation CC3VertexArrayMeshModel
 @end
 

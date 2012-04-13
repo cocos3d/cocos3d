@@ -1,9 +1,9 @@
 /*
  * CC3Identifiable.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -45,15 +45,12 @@ static GLint instanceCount = 0;
 	[super dealloc];
 }
 
+
 #pragma mark Allocation and initialization
 
--(id) init {
-	return [self initWithName: nil];
-}
+-(id) init { return [self initWithName: nil]; }
 
--(id) initWithTag: (GLuint) aTag {
-	return [self initWithTag: aTag withName: nil];
-}
+-(id) initWithTag: (GLuint) aTag { return [self initWithTag: aTag withName: nil]; }
 
 -(id) initWithName: (NSString*) aName {
 	return [self initWithTag: [self nextTag] withName: aName];
@@ -107,9 +104,7 @@ static GLint instanceCount = 0;
 	return [self copyWithZone: nil withName: aName asClass: aClass];
 }
 
--(BOOL) shouldIncludeInDeepCopy {
-	return YES;
-}
+-(BOOL) shouldIncludeInDeepCopy { return YES; }
 
 // Class variable tracking the most recent tag value assigned. This class variable is 
 // automatically incremented whenever the method nextTag is called.
@@ -124,7 +119,7 @@ static GLuint lastAssignedTag;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ %@-%u", [self class], (name ? name : @"Unnamed"), tag];
+	return [NSString stringWithFormat: @"%@ %@:%u", [self class], (name ? name : @"Unnamed"), tag];
 }
 
 -(NSString*) fullDescription {

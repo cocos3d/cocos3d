@@ -1,9 +1,9 @@
 /*
  * LandingCraft.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,7 +39,7 @@
 @interface LandingCraft : CC3Node
 
 /**
- * Creates many copies of the specified template node, and places them around the world.
+ * Creates many copies of the specified template node, and places them around the scene.
  * Each of the copies is independently animated at different speeds using CCActionIntervals,
  * to demonstrate the individuality of nodes, even though they share the same mesh data.
  *
@@ -48,7 +48,7 @@
  */
 -(void) populateArmyWith: (CC3Node*) templateNode;
 
-/** Removes the invasion army by fading them away and then removing them from the world. */
+/** Removes the invasion army by fading them away and then removing them from the scene. */
 -(void) evaporate;
 	
 @end

@@ -1,9 +1,9 @@
 /*
  * CC3PODLight.mm
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,44 +37,23 @@ extern "C" {
 #import "CC3Math.h"
 
 
-@interface CC3Light (TemplateMethods)
--(void) populateFrom: (CC3Light*) another;
-@end
-
-
 @implementation CC3PODLight
 
--(int) podIndex {
-	return podIndex;
-}
+-(int) podIndex { return podIndex; }
 
--(void) setPodIndex: (int) aPODIndex {
-	podIndex = aPODIndex;
-}
+-(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
 
--(int) podContentIndex {
-	return podContentIndex;
-}
+-(int) podContentIndex { return podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex {
-	podContentIndex = aPODIndex;
-}
+-(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
 
--(int) podParentIndex {
-	return podParentIndex;
-}
+-(int) podParentIndex { return podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex {
-	podParentIndex = aPODIndex;
-}
+-(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
 
--(int) podTargetIndex {
-	return podTargetIndex;
-}
+-(int) podTargetIndex { return podTargetIndex; }
 
--(void) setPodTargetIndex: (int) aPODIndex {
-	podTargetIndex = aPODIndex;
-}
+-(void) setPodTargetIndex: (int) aPODIndex { podTargetIndex = aPODIndex; }
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {

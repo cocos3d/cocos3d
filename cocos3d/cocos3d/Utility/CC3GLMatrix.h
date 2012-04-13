@@ -1,9 +1,9 @@
 /*
  * CC3GLMatrix.h
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,16 @@
 #import "CC3MatrixMath.h"
 
 /**
+ * Enumeration of the options for the starting vector
+ * when orthonormalizing the basis vectors of a matrix.
+ */
+typedef enum {
+	kCC3GLMatrixOrthonormalizationStartX,	/**< Start with the X-axis basis vector. */
+	kCC3GLMatrixOrthonormalizationStartY,	/**< Start with the Y-axis basis vector. */
+	kCC3GLMatrixOrthonormalizationStartZ	/**< Start with the Z-axis basis vector. */
+} CC3GLMatrixOrthonormalizationStart;
+
+/**
  * A wrapper class for a 4x4 OpenGL matrix array.
  *
  * This matrix wrapper is implemented as a class cluster design pattern.
@@ -46,8 +56,17 @@
 /**
  * Returns a pointer to the underlying array of 16 GLfloats stored in column-major order.
  * This can be passed directly into the standard OpenGL ES matrix functions.
+ *
+ * The effect of setting this property depends on how this instance was initialized.
+ *
+ * If this instance was initialized on an existing 4x4 GL matrix array using the
+ * initOnGLMatrix: or matrixOnGLMatrix: methods, this matrix can be reassigned to
+ * wrap a different underlying GL matrix array by setting the value of this property.
+ *
+ * If this instance was initialized with any other method, setting the value of
+ * this property has no effect.
  */
-@property(nonatomic, readonly) GLfloat* glMatrix;
+@property(nonatomic, assign) GLfloat* glMatrix;
 
 /** 
  * Indicates whether this matrix is an identity matrix.
@@ -116,6 +135,13 @@
  * and loaded by some other mechanism, such as a file loader. Rather than copying the data
  * into a new matrix, resulting in two copies of the matrix data, a CC3GLMatrix instance
  * can be initialized to wrap the data.
+ *
+ * Once initialized, this matrix can be reassigned to wrap a different underlying GL matrix
+ * array by setting the value of this property. In this way, a single instance of CC3GLMatrix
+ * can be used to manipulate a number of GL matrices.
+ *
+ * This instance makes no attempt to manage the underlying GL matrix memory. It is up to
+ * the application to manage this memory.
  */
 -(id) initOnGLMatrix: (GLfloat*) aGLMtx;
 
@@ -126,6 +152,13 @@
  * supplied and loaded by some other mechanism, such as a file loader. Rather than copying the
  * data into a new matrix, resulting in two copies of the matrix data, a CC3GLMatrix instance
  * can be initialized to wrap the data.
+ *
+ * Once initialized, this matrix can be reassigned to wrap a different underlying GL matrix
+ * array by setting the value of this property. In this way, a single instance of CC3GLMatrix
+ * can be used to manipulate a number of GL matrices.
+ *
+ * This instance makes no attempt to manage the underlying GL matrix memory. It is up to
+ * the application to manage this memory.
  */
 +(id) matrixOnGLMatrix: (GLfloat*) aGLMtx;
 
@@ -226,6 +259,16 @@
 						andNear: (GLfloat) near
 						 andFar: (GLfloat) far;
 
+/**
+ * Populates this matrix as an infinite-depth perspective projection matrix with the specified
+ * frustum dimensions, where the far clipping plane is set at an infinite distance.
+ */
+-(void) populateFromFrustumLeft: (GLfloat) left
+					   andRight: (GLfloat) right
+					  andBottom: (GLfloat) bottom
+						 andTop: (GLfloat) top  
+						andNear: (GLfloat) near;
+
 /** Populates this matrix as a parallel projection matrix with the specified frustum dimensions. */
 -(void) populateOrthoFromFrustumLeft: (GLfloat) left
 							andRight: (GLfloat) right
@@ -233,6 +276,16 @@
 							  andTop: (GLfloat) top  
 							 andNear: (GLfloat) near
 							  andFar: (GLfloat) far;
+
+/**
+ * Populates this matrix as an infinite-depth parallel projection matrix with the specified
+ * frustum dimensions, where the far clipping plane is set at an infinite distance.
+ */
+-(void) populateOrthoFromFrustumLeft: (GLfloat) left
+							andRight: (GLfloat) right
+						   andBottom: (GLfloat) bottom
+							  andTop: (GLfloat) top  
+							 andNear: (GLfloat) near;
 
 
 #pragma mark Matrix population
@@ -284,6 +337,18 @@
 		  andFar: (GLfloat) far;
 
 /**
+ * Populates the specified matrix as an infinite-depth perspective projection matrix with the
+ * specified frustum dimensions, where the far clipping plane is set at an infinite distance.
+ * The matrix must be a standard 4x4 OpenGL matrix in column-major order.
+ */
++(void) populate: (GLfloat*) aGLMatrix 
+ fromFrustumLeft: (GLfloat) left
+		andRight: (GLfloat) right
+	   andBottom: (GLfloat) bottom
+		  andTop: (GLfloat) top  
+		 andNear: (GLfloat) near;
+
+/**
  * Populates the specified matrix as a parallel projection matrix with the specified
  * frustum dimensions. The matrix must be a standard 4x4 OpenGL matrix in column-major order.
  */
@@ -294,6 +359,18 @@
 			   andTop: (GLfloat) top  
 			  andNear: (GLfloat) near
 			   andFar: (GLfloat) far;
+
+/**
+ * Populates the specified matrix as an infinite-depth parallel projection matrix with the
+ * specified frustum dimensions, where the far clipping plane is set at an infinite distance.
+ * The matrix must be a standard 4x4 OpenGL matrix in column-major order.
+ */
++(void) populateOrtho: (GLfloat*) aGLMatrix 
+	  fromFrustumLeft: (GLfloat) left
+			 andRight: (GLfloat) right
+			andBottom: (GLfloat) bottom
+			   andTop: (GLfloat) top  
+			  andNear: (GLfloat) near;
 
 
 #pragma mark -
@@ -446,6 +523,24 @@
  */
 -(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
 
+/**
+ * Orthonormalizes the three basis vectors of this matrix, using a Gram-Schmidt process.
+ *
+ * Upon completion, each basis vector in this matrix will be a unit vector that
+ * is orthagonal to the other two basis vectors in this matrix.
+ *
+ * For a 4x4 GL matrix, each basis vector is made up of the first three elements of
+ * one of the first three columns. The first, second and third columns are the basis
+ * vector of the X, Y & Z axes, respectively.
+ *
+ * The starting point for orthonormalization is indicated by the specified start vector.
+ * Since the Gram-Schmidt process is biased towards the starting vector, if this method
+ * will be invoked repeatedly on the same matrix, it is recommended that the starting
+ * vector be changed on each invocation of this method, to ensure that the starting
+ * bias be averaged across each of the basis vectors over the long term.
+ */
+-(void) orthonormalizeRotationStartingWith: (CC3GLMatrixOrthonormalizationStart) startVector;
+
 /** Translates this matrix in three dimensions by the specified translation vector. */
 -(void) translateBy: (CC3Vector) aVector;
 
@@ -584,6 +679,25 @@
 +(void) rotate: (GLfloat*) aGLMatrix byQuaternion: (CC3Vector4) aQuaternion;
 
 /**
+ * Orthonormalizes the three basis vectors of the specified matrix, using a Gram-Schmidt process.
+ *
+ * Upon completion, each basis vector in the specified matrix will be a unit vector that
+ * is orthagonal to the other two basis vectors in that matrix.
+ *
+ * For a 4x4 GL matrix, each basis vector is made up of the first three elements of
+ * one of the first three columns. The first, second and third columns are the basis
+ * vector of the X, Y & Z axes, respectively.
+ *
+ * The starting point for orthonormalization is indicated by the specified start vector.
+ * Since the Gram-Schmidt process is biased towards the starting vector, if this method
+ * will be invoked repeatedly on the same matrix, it is recommended that the starting
+ * vector be changed on each invocation of this method, to ensure that the starting
+ * bias be averaged across each of the basis vectors over the long term.
+ */
++(void) orthonormalizeRotationOf: (GLfloat*) aGLMatrix
+					startingWith: (CC3GLMatrixOrthonormalizationStart) startVector;
+
+/**
  * Translates this matrix in three dimensions by the specified translation vector.
  *
  * The matrix must be standard 4x4 OpenGL matrix in column-major order.
@@ -694,6 +808,17 @@
  * This matrix and the original specified homogeneous vector remain unchanged.
  */
 -(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector;
+
+/**
+ * Transforms the specified ray using this matrix, and returns the transformed ray.
+ *
+ * Since a ray is a composite of a location and a direction, this implementation invokes
+ * the transformLocation: method on the location component of the ray, and the
+ * transformDirection: method on the direction component of the ray.
+ *
+ * This matrix and the original specified direction vector remain unchanged.
+ */
+-(CC3Ray) transformRay: (CC3Ray) aRay;
 
 /** Transposes this matrix. The contents of this matrix are changed. */
 -(void) transpose;
@@ -819,6 +944,17 @@
  * The matrix must be a standard 4x4 OpenGL matrix in column-major order.
  */
 +(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector withMatrix: (GLfloat*) aGLMatrix;
+
+/**
+ * Transforms the specified ray using this matrix, and returns the transformed ray.
+ *
+ * Since a ray is a composite of a location and a direction, this implementation invokes
+ * the transformLocation:withMatrix: method on the location component of the ray, and the
+ * transformDirection:withMatrix: method on the direction component of the ray.
+ *
+ * This matrix and the original specified direction vector remain unchanged.
+ */
++(CC3Ray) transformRay: (CC3Ray) aRay withMatrix: (GLfloat*) aGLMatrix;
 
 /**
  * Transposes the specified matrix. The contents of the matrix are changed.

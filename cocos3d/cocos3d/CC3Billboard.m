@@ -1,9 +1,9 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,11 +35,10 @@
 #import "CCParticleSystemQuad.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
-#import "ccMacros.h"
+#import "cocos2d.h"
 
 
 @interface CC3Node (TemplateMethods)
--(void) populateFrom: (CC3Node*) another;
 -(void) resumeActions;
 -(void) pauseActions;
 @end
@@ -54,8 +53,7 @@
 -(CGRect) measureBillboardBoundingRect;
 -(void) align2DToCamera:(CC3Camera*) camera;
 -(void) align3DToCamera:(CC3Camera*) camera;
--(void) populateAsBoundingRectangle;
--(void) updatePickingBoundingRect;
+-(void) updateBoundingMesh;
 -(void) normalizeBillboardScaleToDevice;
 @property(nonatomic, readonly) BOOL hasDynamicBoundingRect;
 @end
@@ -80,7 +78,7 @@
 	[self normalizeBillboardScaleToDevice];
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
 	if ([billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
-		material.blendFunc = ((id<CCBlendProtocol>)billboard).blendFunc;
+		self.blendFunc = ((id<CCBlendProtocol>)billboard).blendFunc;
 	}
 	[self normalizeBillboardScaleToDevice];
 	if (isRunning) [billboard onEnter];	// If running, start scheduled activities on new billboard
@@ -131,9 +129,9 @@
 		CGRect currRect = [self measureBillboardBoundingRect];
 		
 		if (shouldMaximizeBillboardBoundingRect && !CGRectIsNull(billboardBoundingRect)) {
-			billboardBoundingRect = CGRectUnion(billboardBoundingRect, currRect);
+			self.billboardBoundingRect = CGRectUnion(billboardBoundingRect, currRect);
 		} else {
-			billboardBoundingRect = currRect;
+			self.billboardBoundingRect = currRect;
 		}
 		LogTrace(@"%@ billboard bounding rect updated to %@", [self class], NSStringFromCGRect(billboardBoundingRect));
 	}
@@ -150,12 +148,14 @@
 			: billboard.measureBoundingBoxInPixels;
 }
 
+/** If the bounding mesh exists, update it from the new bounding rect. */
 -(void) setBillboardBoundingRect: (CGRect) aRect {
 	billboardBoundingRect = aRect;
+	[self updateBoundingMesh];
 }
 
 -(void) resetBillboardBoundingRect {
-	billboardBoundingRect = CGRectNull;
+	self.billboardBoundingRect = CGRectNull;
 }
 
 /** Calculate bounding box from bounding rect of 2D node. */
@@ -214,8 +214,7 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		self.boundingVolume = [CC3BillboardBoundingBoxArea boundingVolume];
-		self.material = [CC3Material materialWithName: [NSString stringWithFormat: @"%@-Mat", aName]];
-		material.color = ccWHITE;
+		self.color = ccWHITE;
 		self.billboard = nil;
 		billboardBoundingRect = CGRectNull;
 		offsetPosition = CGPointZero;
@@ -290,17 +289,11 @@
 	shouldMaximizeBillboardBoundingRect = another.shouldMaximizeBillboardBoundingRect;
 }
 
-/**
- * If this node is drawing in 3D and is touchable, this method can be used to create
- * a simple rectangle mesh to use when painting the node during node picking.
- *
- * We need to do this because the cocos2d is incompatible with the node picking
- * painting algorithm.
- *
- * This method will be invoked automatically when needed for node picking.
- * The rectangle mesh starts out with unit size, but the vertices are manipulated
- * during picking to size the rectangle to the bounding rectangle of the 2D node.
- */
+/** Ensure that the bounding rectangle mesh has been created. */
+-(void) ensureBoundingMesh {
+	if (!mesh) [self populateAsBoundingRectangle];
+}
+
 -(void) populateAsBoundingRectangle {
 	NSString* itemName;
 	CC3Vector* vertices;		// Array of simple vertex location data
@@ -317,7 +310,7 @@
 	itemName = [NSString stringWithFormat: @"%@-Locations", self.name];
 	CC3VertexLocations* locArray = [CC3VertexLocations vertexArrayWithName: itemName];
 	locArray.drawingMode = GL_TRIANGLE_STRIP;			// Location array will do the drawing as a strip
-	locArray.elementStride = sizeof(CC3TexturedVertex);	// Set stride before allocating elements.
+	locArray.elementStride = 0;							// Tightly packed locations only
 	locArray.elementOffset = 0;							// Only locations
 	vertices = [locArray allocateElements: vCount];
 	
@@ -327,11 +320,13 @@
 	vertices[2] = (CC3Vector){xMax, yMin, 0.0};
 	vertices[3] = (CC3Vector){xMin, yMin, 0.0};
 	
-	// Create mesh model with vertex location array
+	// Create mesh with vertex location array
 	itemName = [NSString stringWithFormat: @"%@-Mesh", self.name];
 	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh meshWithName: itemName];
 	aMesh.vertexLocations = locArray;
 	self.mesh = aMesh;
+
+	[self updateBoundingMesh];
 }
 
 -(NSString*) fullDescription {
@@ -378,7 +373,7 @@
 		// Calc how much to scale the billboard by comparing distance from camera to billboard
 		// and camera to the defined unity-scale distance. Neither may be smaller than the near
 		// clipping plane.
-		GLfloat camNear = camera.nearClippingPlane;
+		GLfloat camNear = camera.nearClippingDistance;
 		GLfloat camDist = MAX(CC3VectorDistance(self.globalLocation, camera.globalLocation), camNear);
 		GLfloat unityDist = MAX(self.unityScaleDistance, camNear);
 		GLfloat distScale = unityDist / camDist;
@@ -417,9 +412,14 @@
  * the minimum and maximum scales.
  */
 -(void) align3DToCamera:(CC3Camera*) camera {
-	GLfloat camNear = camera.nearClippingPlane;
-	GLfloat camDist = MAX(CC3VectorDistance(self.globalLocation, camera.globalLocation), camNear);
+
+	// Don't waste time if no min or max scale has been set.
+	if (CGPointEqualToPoint(minimumBillboardScale, CGPointZero) &&
+		CGPointEqualToPoint(maximumBillboardScale, CGPointZero)) return;
+
+	GLfloat camNear = camera.nearClippingDistance;
 	GLfloat unityDist = MAX(self.unityScaleDistance, camNear);
+	GLfloat camDist = MAX(CC3VectorDistance(self.globalLocation, camera.globalLocation), camNear);
 
 	CGPoint newBBScale = ccp(billboard.scaleX, billboard.scaleY);
 
@@ -448,6 +448,40 @@
 	if (billboard.scaleY != newBBScale.y) billboard.scaleY = newBBScale.y;
 }
 
+/*
+-(void) align3DToCamera:(CC3Camera*) camera {
+	GLfloat camNear = camera.nearClippingDistance;
+	GLfloat unityDist = MAX(self.unityScaleDistance, camNear);
+	GLfloat camDist = MAX(CC3VectorDistance(self.globalLocation, camera.globalLocation), camNear);
+	
+	CGPoint newBBScale = ccp(billboard.scaleX, billboard.scaleY);
+	
+	if (minimumBillboardScale.x > 0.0) {
+		GLfloat minScaleDistX = unityDist / minimumBillboardScale.x;
+		newBBScale.x = (camDist > minScaleDistX) ? (camDist / minScaleDistX) : 1.0f;
+	}
+	
+	if (minimumBillboardScale.y > 0.0) {
+		GLfloat minScaleDistY = unityDist / minimumBillboardScale.y;
+		newBBScale.y = (camDist > minScaleDistY) ? (camDist / minScaleDistY) : 1.0f;
+	}
+	
+	if (maximumBillboardScale.x > 0.0) {
+		GLfloat maxScaleDistX = unityDist / maximumBillboardScale.x;
+		newBBScale.x = (camDist < maxScaleDistX) ? (camDist / maxScaleDistX) : 1.0f;
+	}
+	
+	if (maximumBillboardScale.y > 0.0) {
+		GLfloat maxScaleDistY = unityDist / maximumBillboardScale.y;
+		newBBScale.y = (camDist < maxScaleDistY) ? (camDist / maxScaleDistY) : 1.0f;
+	}
+	
+	// Set the new scale only if it has changed. 
+	if (billboard.scaleX != newBBScale.x) billboard.scaleX = newBBScale.x;
+	if (billboard.scaleY != newBBScale.y) billboard.scaleY = newBBScale.y;
+}
+*/
+
 #define kCC3DeviceScaleFactorBase 480.0f
 static GLfloat deviceScaleFactor = 0.0f;
 
@@ -463,23 +497,11 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark Drawing
 
 /** Overridden to return YES only if this billboard should draw in 3D. */
--(BOOL) hasLocalContent {
-	return !shouldDrawAs2DOverlay;
-}
+-(BOOL) hasLocalContent { return !shouldDrawAs2DOverlay; }
 
 /** Only intersect frustum when drawing in 3D mode. */
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	BOOL intersects = (!shouldDrawAs2DOverlay) && ([super doesIntersectFrustum: aFrustum]);
-	LogTrace(@"%@ bounded by %@ %@\n%@", self, boundingVolume,
-			 (intersects ? @"intersects" : @"does not intersect"), aFrustum);
-
-	// Uncomment and change name to verify culling:
-//	if (!intersects && ([self.name isEqualToString: @"MyNodeName"])) {
-//		LogDebug(@"%@ with anchor: %@ & bounding box: %@ does not intersect\n%@",
-//				 self, NSStringFromCGPoint(billboard.anchorPoint),
-//				 NSStringFromCGRect(billboard.boundingBoxInPixels), aFrustum);
-//	}
-	return intersects;
+-(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume {
+	return (!shouldDrawAs2DOverlay) && [super doesIntersectBoundingVolume: otherBoundingVolume];
 }
 
 /**
@@ -516,7 +538,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		
 		// Clear the texture unit binding so we start afresh on next 3D binding
 		gles11TexUnit.textureBinding.value = 0;
-		
+
 		// Disable all other texture units
 		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
 		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
@@ -562,38 +584,37 @@ static GLfloat deviceScaleFactor = 0.0f;
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that
 		// is sized the same as the 2D node.
-		if (!mesh) {
-			[self populateAsBoundingRectangle];
-		}
-		[self updatePickingBoundingRect];
+		[self ensureBoundingMesh];
 		LogTrace(@"%@ drawing picking rectangle mesh %@", self, mesh);
 		[super drawMeshWithVisitor: visitor];
 	}
 }
 
-/** Update the vertices of the node picking mesh to match the bounding box of the 2D node. */
--(void) updatePickingBoundingRect {
-	CGRect bRect = self.billboardBoundingRect;
-	GLfloat xMin = CGRectGetMinX(bRect);
-	GLfloat xMax = CGRectGetMaxX(bRect);
-	GLfloat yMin = CGRectGetMinY(bRect);
-	GLfloat yMax = CGRectGetMaxY(bRect);
-	[self setVertexLocation: cc3v(xMax, yMax, 0.0) at: 0];
-	[self setVertexLocation: cc3v(xMin, yMax, 0.0) at: 1];
-	[self setVertexLocation: cc3v(xMax, yMin, 0.0) at: 2];
-	[self setVertexLocation: cc3v(xMin, yMin, 0.0) at: 3];
+/** If the bounding mesh exists, update its vertices to match the bounding box of the 2D node. */
+-(void) updateBoundingMesh {
+	if (mesh) {
+		CGRect bRect = self.billboardBoundingRect;
+		GLfloat xMin = CGRectGetMinX(bRect);
+		GLfloat xMax = CGRectGetMaxX(bRect);
+		GLfloat yMin = CGRectGetMinY(bRect);
+		GLfloat yMax = CGRectGetMaxY(bRect);
+		[mesh setVertexLocation: cc3v(xMax, yMax, 0.0) at: 0];
+		[mesh setVertexLocation: cc3v(xMin, yMax, 0.0) at: 1];
+		[mesh setVertexLocation: cc3v(xMax, yMin, 0.0) at: 2];
+		[mesh setVertexLocation: cc3v(xMin, yMin, 0.0) at: 3];
+	}
 }
 
 -(BOOL) doesIntersectBounds: (CGRect) bounds {
 	if (boundingVolume) {
 		BOOL intersects = [((CC3NodeBoundingArea*)boundingVolume) doesIntersectBounds: bounds];
-		LogTrace(@"%@ bounded by %@ %@ %@", self, boundingVolume,
-				 (intersects ? @"intersects" : @"does not intersect"), NSStringFromCGRect(bounds));
+		LogCleanTrace(@"%@ bounded by %@ %@ %@", self, boundingVolume,
+					  (intersects ? @"intersects" : @"does not intersect"), NSStringFromCGRect(bounds));
 
 		// Uncomment and change name to verify culling:
 //		if (!intersects && ([self.name isEqualToString: @"MyNodeName"])) {
-//			LogDebug(@"%@ bounded by %@ does not intersect %@",
-//					self, boundingVolume, NSStringFromCGRect(bounds));
+//			LogCleanDebug(@"%@ bounded by %@ does not intersect %@",
+//						  self, boundingVolume, NSStringFromCGRect(bounds));
 //		}
 		return intersects;
 	}
@@ -633,19 +654,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 	}
 }
 
-
-#pragma mark CC3Targetting wrappers
-
--(CC3TargettingNode*) asTargettingNode {
-	self.rotation = cc3v(0.0, 180.0, 0.0);
-	return [super asTargettingNode];
-}
-
--(CC3TargettingNode*) asLightTracker {
-	self.rotation = cc3v(0.0, 180.0, 0.0);
-	return [super asLightTracker];
-}
-
 @end
 
 
@@ -653,38 +661,38 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark CC3BillboardBoundingBoxArea
 
 @interface CC3NodeBoundingVolume (TemplateMethods)
--(void) populateFrom: (CC3NodeBoundingVolume*) another;
 -(void) transformVolume;
+-(void) updateIfNeeded;
+-(CC3BoundingVolumeDisplayNode*) displayNode;
+-(CC3Plane) buildPlaneFromNormal: (CC3Vector) normal
+						 andFace: (CC3Face) face
+			  andOrientationAxis: (CC3Vector) orientationAxis;
+-(void) appendPlanesTo: (NSMutableString*) desc;
+-(void) appendVerticesTo: (NSMutableString*) desc;
 @end
 
 @interface CC3BillboardBoundingBoxArea (TemplateMethods)
-	@property(nonatomic, readonly) CGRect billboardBoundingRect;
+@property(nonatomic, readonly) CGRect billboardBoundingRect;
 @end
 
 @implementation CC3BillboardBoundingBoxArea
 
--(CC3Vector*) globalBoundingRectVertices {
-	return globalBoundingRectVertices;
+-(CC3Plane*) planes {
+	[self updateIfNeeded];
+	return planes;
 }
 
--(id) init {
-	if ( (self = [super init]) ) {
-		for (int i=0; i < 4; i++) {
-			globalBoundingRectVertices[i] = kCC3VectorZero;
-		}
-	}
-	return self;
+-(GLushort) planeCount { return 6; }
+
+-(CC3Vector*) vertices {
+	[self updateIfNeeded];
+	return vertices;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3BillboardBoundingBoxArea*) another {
-	[super populateFrom: another];
-	
-	for (int i = 0; i < 4; i++) {
-		globalBoundingRectVertices[i] = another.globalBoundingRectVertices[i];
-	}
-}
+-(GLushort) vertexCount { return 4; }
+
+// Deprecated
+-(CC3Vector*) globalBoundingRectVertices { return vertices; }
 
 /**
  * Return the bounding rectangle of the 2D node held in the CC3Billboard node.
@@ -692,7 +700,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(CGRect) billboardBoundingRect {
 	CGRect bRect = ((CC3Billboard*)node).billboardBoundingRect;
-	LogTrace(@"%@ bounding rect: %@", node, NSStringFromCGRect(bRect));
+	LogCleanTrace(@"%@ bounding rect: %@", node, NSStringFromCGRect(bRect));
 	return CGRectIsNull(bRect) ? CGRectZero : bRect;
 }
 
@@ -701,76 +709,102 @@ static GLfloat deviceScaleFactor = 0.0f;
 	[super transformVolume];
 
 	// Get the corners of the CCNode bounding box
-	CGRect bb = [self billboardBoundingRect];
-	CGPoint bbMin = ccp(CGRectGetMinX(bb), CGRectGetMinY(bb));
-	CGPoint bbMax = ccp(CGRectGetMaxX(bb), CGRectGetMaxY(bb));
+	CGRect br = [self billboardBoundingRect];
+	CGPoint bbMin = ccp(CGRectGetMinX(br), CGRectGetMinY(br));
+	CGPoint bbMax = ccp(CGRectGetMaxX(br), CGRectGetMaxY(br));
 	
 	// Construct all 4 corner vertices of the local bounding box and transform each to global coordinates
-	globalBoundingRectVertices[0] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
-	globalBoundingRectVertices[1] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
-	globalBoundingRectVertices[2] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
-	globalBoundingRectVertices[3] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
+	vertices[0] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
+	vertices[1] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
+	vertices[2] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
+	vertices[3] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
 	
 	LogTrace(@"%@ bounding volume transformed %@ MinMax(%@, %@) to (%@, %@, %@, %@)", self.node,
-			 NSStringFromCGRect(bb),
+			 NSStringFromCGRect(br),
 			 NSStringFromCGPoint(bbMin), NSStringFromCGPoint(bbMax), 
-			 NSStringFromCC3Vector(globalBoundingRectVertices[0]), NSStringFromCC3Vector(globalBoundingRectVertices[1]),
-			 NSStringFromCC3Vector(globalBoundingRectVertices[2]), NSStringFromCC3Vector(globalBoundingRectVertices[3]));
-}
-
-/** Returns whether the specified location lies inside the specified plane. */
--(BOOL) isLocation: (CC3Vector) location insidePlane: (CC3Plane) plane {
-	return (CC3DistanceFromNormalizedPlane(plane, location) > 0);
+			 NSStringFromCC3Vector(vertices[0]), NSStringFromCC3Vector(vertices[1]),
+			 NSStringFromCC3Vector(vertices[2]), NSStringFromCC3Vector(vertices[3]));
 }
 
 /**
- * Returns whether this bounding box lies completely outside the specified plane
- * by testing each of the eight verticies of the global bounding box, and returning
- * as soon as one vertex is found to lie inside the plane.
+ * Constructs the six box face planes from normals and vertices.
+ * The plane normals are the transformed face normals of the original box.
+ * The vertices are the transformed min-max corners of the rectangle.
  */
--(BOOL) isOutsidePlane: (CC3Plane) plane {
-	for (int i=0; i < 4; i++) {
-		if ([self isLocation: globalBoundingRectVertices[i] insidePlane: plane]) {
-			return NO;
-		}
-	}
-	return YES;
+-(void) buildPlanes {
+	CC3Vector normal;
+	CC3GLMatrix* tMtx = node.transformMatrix;
+	CC3Vector bbMin = vertices[0];
+	CC3Vector bbMax = vertices[3];
+	
+	// Front plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitZPositive]);
+	planes[0] = CC3PlaneFromNormalAndLocation(normal, bbMax);
+	
+	// Back plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitZNegative]);
+	planes[1] = CC3PlaneFromNormalAndLocation(normal, bbMin);
+	
+	// Right plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitXPositive]);
+	planes[2] = CC3PlaneFromNormalAndLocation(normal, bbMax);
+	
+	// Left plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitXNegative]);
+	planes[3] = CC3PlaneFromNormalAndLocation(normal, bbMin);
+	
+	// Top plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitYPositive]);
+	planes[4] = CC3PlaneFromNormalAndLocation(normal, bbMax);
+	
+	// Bottom plane
+	normal = CC3VectorNormalize([tMtx transformDirection: kCC3VectorUnitYNegative]);
+	planes[5] = CC3PlaneFromNormalAndLocation(normal, bbMin);
 }
 
-/**
- * Rejects quickly, so check in a sensible order of realism.
- * In most scenes, most objects that are outside the frustum will be behind
- * the camera or off to the left or right. Least likely is something that is
- * so far away as to be outside the far clip plane.
- */
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	BOOL isOutside = [self isOutsidePlane: aFrustum.nearPlane] ||
-	[self isOutsidePlane: aFrustum.leftPlane] ||
-	[self isOutsidePlane: aFrustum.rightPlane] ||
-	[self isOutsidePlane: aFrustum.topPlane] ||
-	[self isOutsidePlane: aFrustum.bottomPlane] ||
-	[self isOutsidePlane: aFrustum.farPlane];
-	return !isOutside;
+-(CC3Vector) locationOfRayIntesection: (CC3Ray) localRay {
+	if (shouldIgnoreRayIntersection) return kCC3VectorNull;
+
+	// Get the location where the ray intersects the plane of the billboard,
+	// which is the Z=0 plane, and ensure that the ray is not parallel to that plane.
+	CC3Plane bbPlane = CC3PlaneFromNormalAndLocation(kCC3VectorUnitZPositive, kCC3VectorZero);
+	CC3Vector4 pLoc4 = CC3RayIntersectionWithPlane(localRay, bbPlane);
+	if (CC3Vector4IsNull(pLoc4)) return kCC3VectorNull;
+	
+	// Convert the location to a 2D point on the Z=0 plane, and check
+	// if that point is inside the rectangular bounds of the billboard.
+	BOOL intersects = CGRectContainsPoint([self billboardBoundingRect], ccp(pLoc4.x, pLoc4.y));
+
+	// Return the 3D puncture location, or null if the ray did not intersect the boundary rectangle
+	return intersects ? CC3VectorFromTruncatedCC3Vector4(pLoc4) : kCC3VectorNull;
 }
 
--(BOOL) doesIntersectBounds: (CGRect) bounds {
-	return CGRectIntersectsRect([self billboardBoundingRect], bounds);
+-(NSString*) fullDescription {
+	CCNode* bb = ((CC3Billboard*)node).billboard;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"%@", self.description];
+	[desc appendFormat: @" with 2D bounding rect: %@", (bb ? NSStringFromCGRect(bb.boundingBoxInPixels): @"none")];
+	[self appendPlanesTo: desc];
+	[self appendVerticesTo: desc];
+	return desc;
 }
 
--(NSString*) description {
-	CCNode* billboard = ((CC3Billboard*)node).billboard;
-	CC3Vector gbbv, gbbvMin, gbbvMax;
-	gbbv = globalBoundingRectVertices[0];
-	gbbvMin = gbbv;
-	gbbvMax = gbbv;
-	for (GLsizei i = 1; i < 4; i++) {
-		gbbv = globalBoundingRectVertices[i];
-		gbbvMin = CC3VectorMinimize(gbbvMin, gbbv);
-		gbbvMax = CC3VectorMaximize(gbbvMax, gbbv);
-	}
-	return [NSString stringWithFormat: @"%@ with 2D bounding box: %@ and 3D global bounding box: (%@, %@)",
-			[self class], (billboard ? NSStringFromCGRect(billboard.boundingBoxInPixels): @"none"),
-			NSStringFromCC3Vector(gbbvMin), NSStringFromCC3Vector(gbbvMax)];
+
+#pragma mark Drawing bounding volume
+
+-(NSString*) displayNodeNameSuffix { return @"BV-Billboard"; }
+
+-(ccColor3B) displayNodeColor { return ccc3(0,255,255); }	// Cyan
+
+-(GLubyte) displayNodeOpacity { return 64; }				// Cyan is heavy...reduce to 25% opacity
+
+/** Get the mesh from the rectangular bounding mesh of the billboard node, which is used for node picking. */
+-(void) populateDisplayNode {
+	CC3Billboard* bbNode = (CC3Billboard*)node;
+	[bbNode ensureBoundingMesh];
+	CC3BoundingVolumeDisplayNode* dn = self.displayNode;
+	dn.mesh = bbNode.mesh;
+	dn.shouldCullBackFaces = NO;	// Make it a two-sided rectangle
 }
 
 @end
@@ -807,7 +841,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 /**
  * If the particle system has exhausted and it is set to auto-remove, remove this
- * node from the world so that this node and the particle system will be released.
+ * node from the scene so that this node and the particle system will be released.
  */
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	if (billboard) {
@@ -837,13 +871,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CC3NodeDescriptor
 
--(CC3BoundingBox) localContentBoundingBox {
-	return kCC3BoundingBoxNull;
-}
+-(CC3BoundingBox) localContentBoundingBox { return kCC3BoundingBoxNull; }
 
--(CC3BoundingBox) globalLocalContentBoundingBox {
-	return kCC3BoundingBoxNull;
-}
+-(CC3BoundingBox) globalLocalContentBoundingBox { return kCC3BoundingBoxNull; }
 
 -(BOOL) shouldIncludeInDeepCopy { return NO; }
 
@@ -861,17 +891,16 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(BOOL) shouldContributeToParentBoundingBox { return NO; }
 
+-(BOOL) shouldDrawBoundingVolume { return NO; }
+
+-(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw {}
+
 
 // Overridden so that not touchable unless specifically set as such
--(BOOL) isTouchable {
-	return isTouchEnabled;
-}
+-(BOOL) isTouchable { return isTouchEnabled; }
 
-// Overridden so that will still be visible if parent is invisible,
-// unless explicitly set off.
--(BOOL) visible {
-	return visible;
-}
+// Overridden so that can still be visible if parent is invisible, unless explicitly turned off.
+-(BOOL) visible { return visible; }
 
 
 #pragma mark Allocation and initialization
@@ -892,14 +921,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CCNode (CC3Billboard)
 
--(CGFloat) billboard3DContentScaleFactor {
-	return 1.0;
-}
+-(CGFloat) billboard3DContentScaleFactor { return 1.0; }
 
 /** Simply return the bounding box of this node. */
--(CGRect) measureBoundingBoxInPixels {
-	return self.boundingBoxInPixels;
-}
+-(CGRect) measureBoundingBoxInPixels { return self.boundingBoxInPixels; }
 
 @end
 
@@ -910,16 +935,11 @@ static GLfloat deviceScaleFactor = 0.0f;
 @implementation CCParticleSystemQuad (CC3)
 
 /** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor {
-	return 1.0 / CC_CONTENT_SCALE_FACTOR();
-}
+-(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
 
 // cocos2d 1.0 and below use 2D structures for particle quad vertices
 // cocos2d 1.1 and above use 3D structures for particle quad vertices
-#ifndef CC_USES_2D_PARTICLES
-	#define CC_USES_2D_PARTICLES	1
-#endif
-#if defined(CC_USES_2D_PARTICLES) && CC_USES_2D_PARTICLES
+#if COCOS2D_VERSION < 0x010100
 	#define CC_PARTICLE_QUAD_TYPE ccV2F_C4B_T2F_Quad
 #else
 	#define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
@@ -971,9 +991,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 @implementation CCParticleSystemPoint (CC3)
 
 /** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor {
-	return 1.0 / CC_CONTENT_SCALE_FACTOR();
-}
+-(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
 
 /** Constructs a rectangle whose origin is at the specified vertex, and with zero size. */
 -(CGRect) makeRectFromVertex: (ccVertex2F) aVertex {
@@ -1012,8 +1030,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 @implementation CCLabelTTF (CC3)
 
 /** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor {
-	return 1.0 / CC_CONTENT_SCALE_FACTOR();
-}
+-(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
 
 @end

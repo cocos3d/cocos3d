@@ -1,9 +1,9 @@
 /*
  * CC3PointParticleSamples.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,19 +36,18 @@
 #pragma mark CC3PointParticleHoseEmitter
 
 /** Converts the angular components of the specified dispersion into tangents. */
-CGSize CC3ShapeFromDispersionAngle(CGSize anAngle) {
+static inline CGSize CC3ShapeFromDispersionAngle(CGSize anAngle) {
 	return CGSizeMake(tanf(DegreesToRadians(anAngle.width / 2.0)),
 					  tanf(DegreesToRadians(anAngle.height / 2.0)));
 }
 
 /** Converts the tangential components of the specified aspect into dispersion angles. */
-CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
+static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	return CGSizeMake(RadiansToDegrees(2.0 * atanf(anAspect.width)),
 					  RadiansToDegrees(2.0 * atanf(anAspect.height)));
 }
 
 @interface CC3PointParticleEmitter (TempalteMethods)
--(void) populateFrom: (CC3PointParticleEmitter*) another;
 -(void) checkEmission: (ccTime) dt;
 @end
 
@@ -72,8 +71,6 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	return shouldPrecalculateNozzleTangents
 				? CC3DispersionAngleFromShape(nozzleShape)
 				: nozzleShape;
-//	return CGSizeMake(RadiansToDegrees(2.0 * atanf(nozzleShape.width)),
-//					  RadiansToDegrees(2.0 * atanf(nozzleShape.height)));
 }
 
 -(void) setDispersionAngle: (CGSize) dispAngle {
@@ -82,8 +79,6 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	} else {
 		nozzleShape = dispAngle;
 	}
-//	nozzleShape = CGSizeMake(tanf(DegreesToRadians(dispAngle.width / 2.0)),
-//							  tanf(DegreesToRadians(dispAngle.height / 2.0)));
 }
 
 /** If we're flipping from one to the other, convert the nozzleShape. */
@@ -125,12 +120,9 @@ CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	return [CC3UniformMotionParticle class];
 }
 
-/**
- * The name to use when creating the nozzle node. For uniqueness, includes
- * the tag of this node in case this node has no name, or a very common name.
- */
+/** The name to use when creating the nozzle node. */
 -(NSString*) nozzleName {
-	return [NSString stringWithFormat: @"%@-%u-Nozzle", self.name, self.tag];
+	return [NSString stringWithFormat: @"%@-Nozzle", self.name];
 }
 
 // Protected property for copying

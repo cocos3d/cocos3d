@@ -1,9 +1,9 @@
 /*
  * CCNodeAdornments.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Bill Hollings
- * Copyright (c) 2010 The Brenwill Workshop Ltd.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

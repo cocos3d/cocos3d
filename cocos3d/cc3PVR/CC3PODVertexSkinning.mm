@@ -1,10 +1,10 @@
 /*
  * CC3PODVertexSkinning.m
  *
- * cocos3d 0.6.4
+ * cocos3d 0.7.0
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
- * Copyright (c) 2010-2011 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,11 +37,6 @@
 #import "CC3PODNode.h"
 
 
-@interface CC3Identifiable (TemplateMethods)
--(void) populateFrom: (CC3Identifiable*) another;
-@end
-
-
 #pragma mark -
 #pragma mark CC3PODSkinMeshNode
 
@@ -70,9 +65,9 @@
 			SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: self.podContentIndex];
 			int batchCount = psm->sBoneBatches.nBatchCnt;
 			for (int batchIndex = 0; batchIndex < batchCount; batchIndex++) {
-				[skinSections addObject: [CC3PODSkinSection boneBatchAtIndex: batchIndex
-															 fromSPODMesh: psm
-																  forNode: self]];
+				[skinSections addObject: [CC3PODSkinSection skinSectionFromBatchAtIndex: batchIndex
+																		   fromSPODMesh: psm
+																				forNode: self]];
 			}
 		}
 	}
@@ -94,8 +89,8 @@
 -(void) linkToPODNodes: (CCArray*) nodeArray {
 	[super linkToPODNodes: nodeArray];
 
-	for (CC3PODSkinSection* boneBatch in skinSections) {
-		[boneBatch linkToPODNodes: nodeArray];
+	for (CC3PODSkinSection* skinSctn in skinSections) {
+		[skinSctn linkToPODNodes: nodeArray];
 	}
 }
 
@@ -118,8 +113,16 @@
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
-		self.boneMatrixIndices = [CC3VertexMatrixIndices arrayFromSPODMesh: psm];
-		self.boneWeights = [CC3VertexWeights arrayFromSPODMesh: psm];
+		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromSPODMesh: psm];
+		self.vertexWeights = [CC3VertexWeights arrayFromSPODMesh: psm];
+
+		// If the mesh data is interleaved, the superclass init will have cleared
+		// the pointer to it, so that it can be managed by the vertexLocations array.
+		// So, we need to point the two new vertex arrays to the interleaved data.
+		if (shouldInterleaveVertices) {
+			self.vertexMatrixIndices.elements = self.vertexLocations.elements;
+			self.vertexWeights.elements = self.vertexLocations.elements;
+		}
 	}
 	return self;
 }
@@ -130,6 +133,12 @@
 	[super populateFrom: another];
 	
 	podIndex = another.podIndex;
+}
+
+// Deprecated texture inversion. When this is invoked on a POD mesh, it does need inversion.
+-(void) deprecatedAlign: (CC3VertexTextureCoordinates*) texCoords
+	withInvertedTexture: (CC3Texture*) aTexture {
+	[texCoords flipVertically];		// Avoid switching expectsVerticallyFlippedTextures
 }
 
 @end
@@ -176,7 +185,9 @@
 	return self;
 }
 
--(id) initAtIndex: (int) aBatchIndex fromSPODMesh: (PODStructPtr) aSPODMesh forNode: (CC3SkinMeshNode*) aNode {
+-(id) initFromBatchAtIndex: (int) aBatchIndex
+			  fromSPODMesh: (PODStructPtr) aSPODMesh
+				   forNode: (CC3SkinMeshNode*) aNode {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [self initForNode: aNode]) ) {
 		CPVRTBoneBatches* pBatches = &psm->sBoneBatches;
@@ -196,8 +207,10 @@
 	return self;
 }
 
-+(id) boneBatchAtIndex: (int) aBatchIndex fromSPODMesh: (PODStructPtr) aSPODMesh forNode: (CC3SkinMeshNode*) aNode {
-	return [[[self alloc] initAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode] autorelease];
++(id) skinSectionFromBatchAtIndex: (int) aBatchIndex
+					 fromSPODMesh: (PODStructPtr) aSPODMesh
+						  forNode: (CC3SkinMeshNode*) aNode {
+	return [[[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode] autorelease];
 
 }
 
