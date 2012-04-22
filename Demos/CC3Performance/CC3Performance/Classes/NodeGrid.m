@@ -1,7 +1,7 @@
 /*
  * NodeGrid.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "NodeGrid.h"
+#import "CC3IOSExtensions.h"
 
 
 @implementation NodeGrid

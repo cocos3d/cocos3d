@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Engine.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3OpenGLES11Engine.h"
+#import "CC3CC2Extensions.h"
 
 @implementation CC3OpenGLES11Engine
 

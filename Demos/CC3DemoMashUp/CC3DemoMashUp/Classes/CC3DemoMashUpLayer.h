@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpLayer.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,10 +34,16 @@
 
 
 /**
- * A sample application-specific CC3Layer subclass that contains two joystick controls
- * for controlling the movement of the 3D camera, a button control that rotates the
- * camera to point at different aspects of the scene, and a button control to cause
- * the scene to be invaded by an army of robots.
+ * A sample application-specific CC3Layer subclass that allows the user to interact
+ * with the 3D scene using either gestures or overlay controls such as joysticks
+ * and buttons.
+ * 
+ * By default, this layer uses gestures to interact with the 3D nodes. You can turn gestures
+ * off by setting shouldUseGestures to NO in the initializeControls method of this class.
+ *
+ * With gestures off, this layer and scene revert to using basic touch events to interact
+ * with the 3D scene. Normally, you would use one or the other technique. Both are provided
+ * in this app to demonstrate user interaction using either gestures or touch events.
  */
 @interface CC3DemoMashUpLayer : CC3Layer {
 	Joystick* directionJoystick;
@@ -48,6 +54,7 @@
 	AdornableMenuItemImage* zoomMI;
 	AdornableMenuItemImage* shadowMI;
 	CC3Layer* hudLayer;
+	BOOL shouldUseGestures;
 }
 
 /**

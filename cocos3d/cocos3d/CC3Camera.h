@@ -1,7 +1,7 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,8 +43,8 @@ static const GLfloat kCC3DefaultNearClippingDistance = 1.0f;
 static const GLfloat kCC3DefaultFarClippingDistance = 1000.0f;
 
 // Deprecated
-static const GLfloat kCC3DefaultNearClippingPlane DEPRECATED_ATTRIBUTE = kCC3DefaultNearClippingDistance;
-static const GLfloat kCC3DefaultFarClippingPlane DEPRECATED_ATTRIBUTE = kCC3DefaultFarClippingDistance;
+static const GLfloat kCC3DefaultNearClippingPlane DEPRECATED_ATTRIBUTE = 1.0f;
+static const GLfloat kCC3DefaultFarClippingPlane DEPRECATED_ATTRIBUTE = 1000.0f;
 
 /**
  * Default padding around a node when framed by the camera using one of the

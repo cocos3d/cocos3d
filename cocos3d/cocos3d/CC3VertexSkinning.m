@@ -1,7 +1,7 @@
 /*
  * CC3VertexSkinning.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
@@ -40,6 +40,7 @@
 @interface CC3Node (TemplateMethods)
 -(void) copyChildrenFrom: (CC3Node*) another;
 -(void) cacheRestPoseMatrix;
+-(void) transformMatrixChanged;
 @end
 
 @interface CC3MeshNode (TemplateMethods)
@@ -80,7 +81,7 @@
 
 @implementation CC3SkinMeshNode
 
-@synthesize skinSections, restPoseTransformMatrix, deformedFaces;
+@synthesize skinSections, restPoseTransformMatrix;
 
 -(void) dealloc {
 	[skinSections release];
@@ -293,24 +294,17 @@
 
 #pragma mark Transformations
 
+-(void) transformMatrixChanged {
+	[super transformMatrixChanged];
+	[deformedFaces clearDeformableCaches];		// Avoid creating lazily if not already created.
+}
+
 /** Caches the transform matrix rest pose matrix. */
 -(void) cacheRestPoseMatrix {
 	[restPoseTransformMatrix populateFrom: transformMatrix];
 }
 
--(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
-	[super addTransformListener: aListener];
-	for (CC3SkinSection* skinSctn in skinSections) {
-		[skinSctn addTransformListener: aListener];
-	}
-}
-
--(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
-	[super removeTransformListener: aListener];
-	for (CC3SkinSection* skinSctn in skinSections) {
-		[skinSctn removeTransformListener: aListener];
-	}
-}
+-(void) boneWasTransformed: (CC3Bone*) aBone { [self markTransformDirty]; }
 
 
 #pragma mark Drawing
@@ -646,17 +640,6 @@
 	return defLoc;
 }
 
--(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
-	for (CC3Bone* bone in self.bones) {
-		[bone addTransformListener: aListener];
-	}
-}
-
--(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
-	for (CC3Bone* bone in self.bones) {
-		[bone removeTransformListener: aListener];
-	}
-}
 
 #pragma mark Allocation and initialization
 
@@ -674,20 +657,6 @@
 
 +(id) skinSectionForNode: (CC3SkinMeshNode*) aNode {
 	return [[[self alloc] initForNode: aNode] autorelease];
-}
-
--(id) copyWithZone: (NSZone*) zone {
-	return [self copyForNode: nil withZone: zone];
-}
-
--(id) copyForNode: (CC3SkinMeshNode*) aNode {
-	return [self copyForNode: aNode withZone: nil];
-}
-	
--(id) copyForNode: (CC3SkinMeshNode*) aNode withZone: (NSZone*) zone {
-	CC3SkinSection* aCopy = [[[self class] allocWithZone: zone] initForNode: aNode];
-	[aCopy populateFrom: self];
-	return aCopy;
 }
 
 // Extract the old bones into an array, and for each, look for the
@@ -711,7 +680,21 @@
 	CCArray* otherBones = another.bones;
 	for (CC3Bone* bone in otherBones) {
 		[self addBone: bone];			// Retained but not copied...will be swapped for copied...
-	}									// ...bones via later invocation of reattacheBonesFrom:
+	}									// ...bones via later invocation of reattachBonesFrom:
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	return [self copyForNode: nil withZone: zone];
+}
+
+-(id) copyForNode: (CC3SkinMeshNode*) aNode {
+	return [self copyForNode: aNode withZone: nil];
+}
+
+-(id) copyForNode: (CC3SkinMeshNode*) aNode withZone: (NSZone*) zone {
+	CC3SkinSection* aCopy = [[[self class] allocWithZone: zone] initForNode: aNode];
+	[aCopy populateFrom: self];
+	return aCopy;
 }
 
 
@@ -817,10 +800,10 @@
 
 -(void) dealloc {
 	[skinNode removeTransformListener: self];
-	[skinNode release];
+	skinNode = nil;		// Weak reference
 
 	[bone removeTransformListener: self];
-	[bone release];
+	bone = nil;			// Weak reference
 
 	[drawTransformMatrix release];
 	[skinTransformMatrix release];
@@ -872,10 +855,10 @@
 	NSAssert1(aBone, @"%@ must be initialized with a bone.", self.class);
 	if ( (self = [super init]) ) {
 
-		skinNode = [aNode retain];
+		skinNode = aNode;
 		[skinNode addTransformListener: self];
 
-		bone = [aBone retain];
+		bone = aBone;
 		[bone addTransformListener: self];
 
 		drawTransformMatrix = nil;
@@ -895,6 +878,16 @@
 /** Either the bone or skin node were transformed. Mark the transforms of this skinned bone dirty. */
 -(void) nodeWasTransformed: (CC3Node*) aNode {
 	[self markTransformDirty];
+	if (aNode == bone) [skinNode boneWasTransformed: bone];
+}
+
+/**
+ * If either of the nodes to whom I have registered as a
+ * listener disappears before I do, clear the reference to it.
+ */
+-(void) nodeWasDestroyed: (CC3Node*) aNode {
+	if (aNode == skinNode) skinNode = nil;
+	if (aNode == bone) bone = nil;
 }
 
 @end
@@ -908,8 +901,7 @@
 @synthesize node;
 
 -(void) dealloc {
-	[node removeTransformListener: self];
-	node = nil;					// not retained
+	self.node = nil;		// Will clear this object as a listener to the existing node.
 	[self deallocateDeformedVertexLocations];
 	[super dealloc];
 }
@@ -919,12 +911,7 @@
  * on next access using the new mesh data.
  */
 -(void) setNode: (CC3SkinMeshNode*) aNode {
-	[node removeTransformListener: self];	// Remove this face array as a listener of the old node.
-	node = aNode;							// not retained
-	if (shouldCacheFaces) {
-		[node addTransformListener: self];	// Add this face array as a listener to the new node.
-	}
-
+	node = aNode;							// Weak link
 	self.mesh = aNode.mesh;
 	[self deallocateDeformedVertexLocations];
 }
@@ -935,17 +922,7 @@
  */
 -(void) setShouldCacheFaces: (BOOL) shouldCache {
 	super.shouldCacheFaces = shouldCache;
-	if (shouldCacheFaces) {
-		[node addTransformListener: self];
-	} else {
-		[self deallocateDeformedVertexLocations];
-		[node removeTransformListener: self];
-	}
-}
-
-/** A bone that deforms this mesh was transformed. Clear cached values that depend on it. */
--(void) nodeWasTransformed: (CC3Node*) aNode {
-	[self clearDeformableCaches];
+	if ( !shouldCacheFaces ) [self deallocateDeformedVertexLocations];
 }
 
 -(void) clearDeformableCaches {

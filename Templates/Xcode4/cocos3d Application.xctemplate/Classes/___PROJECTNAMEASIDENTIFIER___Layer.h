@@ -11,6 +11,7 @@
 
 
 /** A sample application-specific CC3Layer subclass. */
-@interface ___PROJECTNAMEASIDENTIFIER___Layer : CC3Layer {}
+@interface ___PROJECTNAMEASIDENTIFIER___Layer : CC3Layer {
+}
 
 @end

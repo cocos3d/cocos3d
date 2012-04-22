@@ -1,7 +1,7 @@
-README - cocos3d 0.7.0
+README - cocos3d 0.7.1
 ----------------------
 
-cocos3d 0.7.0
+cocos3d 0.7.1
 
 Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -36,11 +36,11 @@ otherwise you wouldn't be reading this document).
 Open a Terminal session, navigate to the unzipped cocos3d distribution
 directory and run the install-cocos3d script as follows:
 
-./install-cocos3d.sh -u -f -2 "relative-path-to-cocos2d-sources"
+./install-cocos3d.sh -f -2 "relative-path-to-cocos2d-sources"
 
 For example:
 
-./install-cocos3d.sh -u -f -2 "../../cocos2d/cocos2d-iphone-1.0.1"
+./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-1.0.1"
 
 The cocos2d source code must be available and identified using the -2 switch
 so that the installer can copy the cocos2d libraries to the cocos3d templates
@@ -52,7 +52,7 @@ That's it!
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.7.0 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d 0.7.1 is compatible with cocos2d versions 0.99.5 through 1.1.
 
 At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
 configured to use that version. This section includes notes on compatibility with other versions.
@@ -79,6 +79,19 @@ configured to use that version. This section includes notes on compatibility wit
    Xcode 4 project templates.
 
 
+GCC 4.2 Compiler Warnings
+-------------------------
+
+cocos3d can be compiled by either Apple's recommended 'Apple LLVM Compiler 3.1' (aka Clang),
+or the older 'LLVM GCC 4.2' compiler. However, the 'LLVM GCC 4.2' compiler will generate a
+number of deprecation warnings about the deprecated cocos3d class CC3TargettingNode.
+
+To remove these warnings, we recommend moving to the 'Apple LLVM Compiler 3.1' compiler.
+If that is not possible, you can remove these warnings by removing any dependency in your
+code on the CC3TargettingNode and CC3World classes, and then removing the 'deprecated'
+group from your project in Xcode.
+
+
 Creating Your First cocos3d Project
 -----------------------------------
 
@@ -100,7 +113,7 @@ The cocos3d Programming Guide is online at:
 
 The API documentation is online at:
 
-	http://brenwill.com/docs/cocos3d/0.7.0/api/
+	http://brenwill.com/docs/cocos3d/0.7.1/api/
 
 You can create a local copy of the API documentation using Doxygen to extract the
 documentation from the source files. There is a Doxygen configuration file to output
@@ -127,6 +140,9 @@ The following demo apps are included in the cocos3d distribution:
 
    CC3DemoMashUp
    -------------
+
+   Please read the class notes of the CC3DemoMashUpScene class for a full description of how to
+   run and interact with this demo, and what features it covers.
 
    Your camera hovers over a scene that includes animated robots, bouncing beach-balls,
    spinning globes, and a selection of animated teapots. This is a sophisticated demo that
@@ -184,6 +200,8 @@ The following demo apps are included in the cocos3d distribution:
      - collision detection between nodes
      - texturing a node with only a small section of single texture
      - using the CC3Scene onOpen method to initiate activity when a scene opens
+     - using pinch and pan gestures to control the movement of the 3D camera
+     - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
   
    In addition, there are a number of interesting options for you to play with by uncommenting
    certain lines of code in the methods of this class that build objects in the 3D scene,

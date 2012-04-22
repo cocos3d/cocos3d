@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpScene.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,7 @@
  */
 
 #import "CC3DemoMashUpScene.h"
+#import "CC3IOSExtensions.h"
 #import "CC3Billboard.h"
 #import "CC3ActionInterval.h"
 #import "CC3ModelSampleFactory.h"
@@ -170,6 +171,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) invadeWithArmyOf: (CC3Node*) invaderTemplate;
 -(void) rotateCubeFromSwipeAt: (CGPoint) touchPoint interval: (ccTime) dt;
 -(void) rotate: (SpinningNode*) aNode fromSwipeAt: (CGPoint) touchPoint interval: (ccTime) dt;
+-(void) rotate: (SpinningNode*) aNode fromSwipeVelocity: (CGPoint) swipeVelocity;
 -(void) touchGroundAt: (CGPoint) touchPoint;
 -(void) touchBeachBallAt: (CGPoint) touchPoint;
 -(void) touchBrickWallAt: (CGPoint) touchPoint;
@@ -178,6 +180,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) toggleActiveCamera;
 -(void) cycleShadowFor: (CC3Node*) aNode;
 -(void) markTouchPoint: (CGPoint) touchPoint on: (CC3Node*) touchedNode;
+-(void) checkForCollisions;
 @end
 
 
@@ -207,7 +210,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[embossedStampTex release];
 	[headTex release];
 	[headBumpTex release];
-
+	
 	[super dealloc];
 }
 
@@ -366,7 +369,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	self.shouldDrawAllBoundingVolumes = YES;
 	
 	// The full node structure of the scene is logged using the following line.
-	LogCleanInfo(@"\nThe structure of this scene is: %@", [self structureDescription]);
+	LogCleanInfo(@"The structure of this scene is: %@", [self structureDescription]);
 }
 
 /** Various options for configuring interesting camera behaviours. */
@@ -583,6 +586,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 	[self addChild: globe];
+
+	// For something interesting, uncomment the following lines to make the
+	// globe invisible, but still touchable, and still able to cast a shadow.
+//	globe.visible = NO;
+//	globe.shouldAllowTouchableWhenInvisible = YES;
+//	globe.shouldCastShadowsWhenInvisible = YES;
 }
 
 /**
@@ -1242,9 +1251,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// bounding box of the parent node that includes the anvils, which we can get by logging.
 	// The first two commented lines below were used during development to help determine
 	// the size of the bounding box of the parent node.
-
 //	mallet.shouldDrawLocalContentWireframeBox = YES;
 //	LogCleanDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
+
 	mallet.shouldUseFixedBoundingVolume = YES;
 	CCArray* bvs = ((CC3NodeTighteningBoundingVolumeSequence*)mallet.boundingVolume).boundingVolumes;
 	CC3NodeSphericalBoundingVolume* sbv = [bvs objectAtIndex: 0];
@@ -1867,6 +1876,72 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 
+#pragma mark Gesture handling
+
+-(void) startMovingCamera { cameraMoveStartLocation = activeCamera.location; }
+
+-(void) stopMovingCamera {}
+
+/** Set this parameter to adjust the rate of camera movement during a pinch gesture. */
+#define kCamPinchMovementUnit		250
+
+-(void) moveCameraBy:  (CGFloat) aMovement {
+
+	// Convert to a logarithmic scale, zero is backwards, one is unity, and above one is forward.
+	GLfloat camMoveDist = logf(aMovement) * kCamPinchMovementUnit;
+
+	CC3Vector moveVector = CC3VectorScaleUniform(activeCamera.globalForwardDirection, camMoveDist);
+	activeCamera.location = CC3VectorAdd(cameraMoveStartLocation, moveVector);
+}
+
+-(void) startPanningCamera { cameraPanStartRotation = activeCamera.rotation; }
+
+-(void) stopPanningCamera {}
+
+-(void) panCameraBy:  (CGPoint) aMovement {
+	CC3Vector camRot = cameraPanStartRotation;
+	CGPoint panRot = ccpMult(aMovement, 90);		// Full pan swipe is 90 degrees
+	camRot.y += panRot.x;
+	camRot.x -= panRot.y;
+	activeCamera.rotation = camRot;	
+}
+
+-(void) startDraggingAt: (CGPoint) touchPoint { [self pickNodeFromTapAt: touchPoint]; }
+
+-(void) dragBy: (CGPoint) aMovement atVelocity: (CGPoint) aVelocity {
+	if (selectedNode == dieCube || selectedNode == texCubeSpinner) {
+		[self rotate: ((SpinningNode*)selectedNode) fromSwipeVelocity: aVelocity];
+	}
+}
+
+-(void) stopDragging { selectedNode = nil; }
+
+/** Set this parameter to adjust the rate of rotation from the length of swipe gesture. */
+#define kSwipeVelocityScale		400
+
+/**
+ * Rotates the specified spinning node by setting its rotation axis
+ * and spin speed from the specified 2D drag velocity.
+ */
+-(void) rotate: (SpinningNode*) aNode fromSwipeVelocity: (CGPoint) swipeVelocity {
+	
+	// The 2D rotation axis is perpendicular to the drag velocity.
+	CGPoint axis2d = ccpPerp(swipeVelocity);
+	
+	// Project the 2D rotation axis into a 3D axis by mapping the 2D X & Y screen
+	// coords to the camera's rightDirection and upDirection, respectively.
+	CC3Camera* cam = self.activeCamera;
+	aNode.spinAxis = CC3VectorAdd(CC3VectorScaleUniform(cam.rightDirection, axis2d.x),
+								  CC3VectorScaleUniform(cam.upDirection, axis2d.y));
+
+	// Set the spin speed from the scaled drag velocity.
+	aNode.spinSpeed = ccpLength(swipeVelocity) * kSwipeVelocityScale;
+
+	// Mark the spinning node as free-wheeling, so that it will start spinning.
+	aNode.isFreeWheeling = YES;
+}
+
+
 #pragma mark Touch events
 
 /**
@@ -1877,6 +1952,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  *     occurred while the finger is moving.
  * This is a poor UI. We really should be using the touch-stationary event to mark definitively
  * whether the finger stopped before being lifted. But we're just working with what we have handy.
+ *
+ * If gestures are being used (see the shouldUseGestures variable in the initializeControls method
+ * of CC3DemoMashUpLayer), this method will not be invoked. Instead, the gestures invoke handler
+ * methods on the CC3DemoMashUpLayer, which then issues higher-level control messages to this scene.
+ *
+ * It is generally recommended that you use gestures to provide user interaction with the 3D scene.
  */
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
 	struct timeval now;
@@ -1887,7 +1968,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	switch (touchType) {
 		case kCCTouchBegan:
-			[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+			[self pickNodeFromTouchEvent: touchType at: touchPoint];
 			break;
 		case kCCTouchMoved:
 			if (selectedNode == dieCube || selectedNode == texCubeSpinner) {

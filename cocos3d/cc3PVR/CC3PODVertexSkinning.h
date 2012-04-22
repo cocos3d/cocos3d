@@ -1,7 +1,7 @@
 /*
  * CC3PODVertexSkinning.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.

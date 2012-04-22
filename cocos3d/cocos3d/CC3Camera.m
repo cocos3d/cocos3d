@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,7 @@
 #import "CC3Math.h"
 #import "CC3OpenGLES11Engine.h"
 #import "CC3ActionInterval.h"
+#import "CC3IOSExtensions.h"
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 
@@ -95,13 +96,9 @@
  */
 -(id) directionalRotatorClass { return [CC3DirectionalRotator class]; }
 
--(CC3GLMatrix*) projectionMatrix {
-	return frustum.projectionMatrix;
-}
+-(CC3GLMatrix*) projectionMatrix { return frustum.projectionMatrix; }
 
--(CC3GLMatrix*) infiniteProjectionMatrix {
-	return frustum.infiniteProjectionMatrix;
-}
+-(CC3GLMatrix*) infiniteProjectionMatrix { return frustum.infiniteProjectionMatrix; }
 
 -(void) setFieldOfView:(GLfloat) anAngle {
 	fieldOfView = anAngle;

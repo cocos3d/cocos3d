@@ -133,8 +133,21 @@
 	[[CCDirector sharedDirector] pause];
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-	[[CCDirector sharedDirector] resume];
+/** Resume the cocos3d/cocos2d action. */
+-(void) resumeApp { [[CCDirector sharedDirector] resume]; }
+
+- (void)applicationDidBecomeActive: (UIApplication*) application {
+	
+	// Workaround to fix the issue of drop to 40fps on iOS4.X on app resume.
+	// Adds short delay before resuming the app.
+	[NSTimer scheduledTimerWithTimeInterval: 0.5f
+									 target: self
+								   selector: @selector(resumeApp)
+								   userInfo: nil
+									repeats: NO];
+	
+	// If dropping to 40fps is not an issue, remove above, and uncomment the following to avoid delay.
+	//	[self resumeApp];
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {

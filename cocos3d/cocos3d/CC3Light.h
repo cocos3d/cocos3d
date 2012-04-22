@@ -1,7 +1,7 @@
 /*
  * CC3Light.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -98,6 +98,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 	GLuint lightIndex;
 	BOOL isDirectionalOnly;
 	BOOL shouldCopyLightIndex;
+	BOOL shouldCastShadowsWhenInvisible;
 }
 
 /**
@@ -430,6 +431,21 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 
 
 #pragma mark Shadows
+
+/**
+ * Indicates whether this light should cast shadows even when invisible.
+ *
+ * Normally, when a light is turned off, any shadows cast by that light should
+ * disappear as well. However, there are certain lighting situations where you
+ * might want a light to cast shadows, even when turned off, such as using one
+ * light to accent the shadows cast by another light that has different ambient
+ * or diffuse lighting characteristics.
+ *
+ * The initial value of this propety is NO.
+ *
+ * Setting this value sets the same property on any descendant mesh and light nodes.
+ */
+@property(nonatomic, assign) BOOL shouldCastShadowsWhenInvisible;
 
 /**
  * The shadows cast by this light.

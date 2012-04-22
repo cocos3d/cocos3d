@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,6 +32,8 @@
 #import "CC3VertexArrayMesh.h"
 #import "CC3MeshNode.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 
 
 @interface CC3VertexArrayMesh (TemplateMethods)

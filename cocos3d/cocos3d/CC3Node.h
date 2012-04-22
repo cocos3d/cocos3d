@@ -1,7 +1,7 @@
 /*
  * CC3Node.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -53,6 +53,28 @@ typedef enum {
 
 
 #pragma mark -
+#pragma mark CC3NodeListenerProtocol
+
+/**
+ * This protocol defines the behaviour requirements for objects that wish to be
+ * notified about the basic existence of a node.
+ */
+@protocol CC3NodeListenerProtocol
+
+/**
+ * Callback method that will be invoked when the node has been deallocated.
+ *
+ * Although the sending node is still alive when sending this message, its state is
+ * unpredictable, because all subclass state will have been released or detroyed when
+ * this message is sent. The receiver of this message should not attempt to send any
+ * messages to the sender. Instead, it should simply clear any references to the node.
+ */
+-(void) nodeWasDestroyed: (CC3Node*) aNode;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3NodeTransformListenerProtocol
 
 /**
@@ -62,13 +84,12 @@ typedef enum {
  * This occurs when one of the transform properties (location, rotation & scale)
  * of the node, or any of its structural ancestor nodes, has changed.
  *
- * A transform listener can be registered with a node via the addTransformListener:
- * method.
+ * A transform listener can be registered with a node via the addTransformListener: method.
  *
  * Each listener registered with a node will be sent the nodeWasTransformed: notification
  * message when the transformMatrix of this node is recalculated, or is set directly.
  */
-@protocol CC3NodeTransformListenerProtocol
+@protocol CC3NodeTransformListenerProtocol <CC3NodeListenerProtocol>
 
 /** Callback method that will be invoked when the transformMatrix of the specified node has changed. */
 -(void) nodeWasTransformed: (CC3Node*) aNode;
@@ -215,7 +236,7 @@ typedef enum {
 	BOOL isRunning;
 	BOOL shouldAutoremoveWhenEmpty;
 	BOOL shouldUseFixedBoundingVolume;
-	BOOL shouldCleanupWhenRemoved;
+	BOOL shouldCleanupActionsWhenRemoved;
 }
 
 /**
@@ -786,8 +807,11 @@ typedef enum {
  * The target node at which this node is pointed. If the shouldTrackTarget property
  * is set to YES, this node will track the target so that it always points to the
  * target, regardless of how the target and this node move through the 3D scene.
+ *
+ * The target is not retained. If you destroy the target node, you must remove
+ * it as the target of this node.
  */
-@property(nonatomic, retain) CC3Node* target;
+@property(nonatomic, assign) CC3Node* target;
 
 /**
  * Indicates whether this node is tracking the location of a target node.
@@ -1298,6 +1322,26 @@ typedef enum {
 @property(nonatomic, assign) BOOL shouldUseFixedBoundingVolume;
 
 /**
+ * Indicates whether descendant mesh nodes should cast shadows even when invisible.
+ *
+ * Normally, when a mesh is made invisible, its shadows should disappear as well.
+ * However, there are certain situations where you might want a mesh to cast shadows,
+ * even when it is not being rendered visibly. One situation might be to use an
+ * invisible low-poly mesh to generate the shadows of a more detailed high-poly
+ * mesh, in order to reduce the processing effort required to generate the shadows.
+ * This technique can be particularly useful when using shadow volumes.
+ *
+ * The initial value of this propety is NO.
+ *
+ * Setting this value sets the same property on all descendant mesh and light nodes.
+ *
+ * Querying this property returns the first YES value of this property from any
+ * descendant mesh or light node, or will return NO if no descendant nodes have this
+ * property set to YES.
+ */
+@property(nonatomic, assign) BOOL shouldCastShadowsWhenInvisible;
+
+/**
  * Indicates whether the dynamic behaviour of this node is enabled.
  *
  * Setting this property affects both internal activities driven by the update
@@ -1308,9 +1352,9 @@ typedef enum {
  * Setting this property sets the same property in all descendant nodes.
  *
  * Be aware that when this property is set to NO, any CCActions are just paused,
- * but not stopped, or removed. If you want to fully stop all CCActions on this node,
+ * but not stopped or removed. If you want to fully stop all CCActions on this node,
  * use the stopAllActions method, or if you want to fully stop all CCActions on this
- * node AND all descendant nodes, use the cleanup method.
+ * node AND all descendant nodes, use the cleanupActions method.
  */
 @property(nonatomic, assign) BOOL isRunning;
 
@@ -2009,6 +2053,14 @@ typedef enum {
  *
  * This property will be nil if no objects have been added via addTransformListener:
  * method, or if they have all been subsequently removed.
+ *
+ * Transform listeners are not retained. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method)
+ * when appropriate, such as when being deallocated.
+ *
+ * For the same reason, transform listeners are not automatically copied when a node is
+ * copied. If you copy a node and want its listeners to also listen to the copied node,
+ * you must deliberately add them to the new node.
  */
 @property(nonatomic, readonly) CCArray* transformListeners;
 
@@ -2029,6 +2081,14 @@ typedef enum {
  *
  * It is safe to invoke this method more than once for the same listener, or
  * with a nil listener. In either case, this method simply ignores the request.
+ *
+ * Transform listeners are not retained. Each listener should know who it has subscribed
+ * to, and must remove itself as a listener (using the removeTransformListener: method)
+ * when appropriate, such as when being deallocated.
+ *
+ * For the same reason, transform listeners are not automatically copied when a node is
+ * copied. If you copy a node and want its listeners to also listen to the copied node,
+ * you must deliberately add them to the new node.
  */
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
 
@@ -2046,6 +2106,28 @@ typedef enum {
  * addTransformListener: method, from this node.
  */
 -(void) removeAllTransformListeners;
+
+/**
+ * Nodes can be listeners of the transforms of other nodes.
+ *
+ * If the specified node is the node in the target property of this node, and
+ * the shouldTrackTarget property of this node is YES, the targetLocation property
+ * of this node is set from the globalLocation property of the specified node.
+ *
+ * Subclasses may add additional behaviour, but should invoke this superclass
+ * implementation to ensure basic targetting behaviour is maintained.
+ */
+-(void) nodeWasTransformed: (CC3Node*) aNode;
+
+/**
+ * If the specified node is the node in the target property of this node, the
+ * target property of this node is set to nil.
+ *
+ * Subclasses may add additional behaviour, but should invoke this superclass
+ * implementation to ensure basic targetting behaviour is maintained.
+ */
+-(void) nodeWasDestroyed: (CC3Node*) aNode;
+
 
 /**
  * The transformation matrix derived from the location, rotation and scale transform properties
@@ -2372,9 +2454,9 @@ typedef enum {
  *
  * Does nothing if the specified node is not actually a child of this node.
  *
- * If the shouldCleanupWhenRemoved property of the node being removed is set
+ * If the shouldCleanupActionsWhenRemoved property of the node being removed is set
  * to YES, any CCActions running on that node will be stopped and removed.
- * If the shouldCleanupWhenRemoved property of the node being removed is set
+ * If the shouldCleanupActionsWhenRemoved property of the node being removed is set
  * to NO, any CCActions running on that node will be paused, but not removed.
  *
  * Stopping and removing CCActions is important because the actions running on a
@@ -2382,9 +2464,9 @@ typedef enum {
  * will be retained forever, potentially creating memory leaks of nodes that are
  * invisibly retained by their actions.
  *
- * By default, the shouldCleanupWhenRemoved property is set to YES, and all
+ * By default, the shouldCleanupActionsWhenRemoved property is set to YES, and all
  * CCActions running on the node being removed will be stopped and removed.
- * If the shouldCleanupWhenRemoved is set to NO, it is up to you to clean up any
+ * If the shouldCleanupActionsWhenRemoved is set to NO, it is up to you to clean up any
  * running CCActions when you are done with the node. You can do this using either
  * the stopAllActions or cleahup method.
  *
@@ -2402,8 +2484,8 @@ typedef enum {
  * Convenience method that removes this node from its structural hierarchy
  * by simply invoking removeChild: on the parent of this node.
  *
- * If the shouldCleanupWhenRemoved property of this node is set to YES, any CCActions
- * running on this node will be stopped and removed. If the shouldCleanupWhenRemoved
+ * If the shouldCleanupActionsWhenRemoved property of this node is set to YES, any CCActions
+ * running on this node will be stopped and removed. If the shouldCleanupActionsWhenRemoved
  * property of this node is set to NO, any CCActions running on that node will be
  * paused, but not removed.
  *
@@ -2412,9 +2494,9 @@ typedef enum {
  * will be retained forever, potentially creating memory leaks of nodes that are
  * invisibly retained by their actions.
  *
- * By default, the shouldCleanupWhenRemoved property is set to YES, and all
+ * By default, the shouldCleanupActionsWhenRemoved property is set to YES, and all
  * CCActions running on this node will be stopped and removed. If the
- * shouldCleanupWhenRemoved is set to NO, it is up to you to clean up any running
+ * shouldCleanupActionsWhenRemoved is set to NO, it is up to you to clean up any running
  * CCActions when you are done with this node. You can do this using either the
  * stopAllActions or cleahup method.
  * 
@@ -2433,7 +2515,7 @@ typedef enum {
  * its parent node.
  *
  * This implementation sets the isRunning property to NO. It also checks the value
- * of the shouldCleanupWhenRemoved property and, if it is set to YES, stops and
+ * of the shouldCleanupActionsWhenRemoved property and, if it is set to YES, stops and
  * removes any CCActions running on this node and its descendants.
  */
 -(void) wasRemoved;
@@ -2547,7 +2629,7 @@ typedef enum {
  * descendants should be stopped and removed when this node is removed from its parent.
  *
  * If the value of this property is YES, when this node is removed from its parent,
- * the cleanup method will automatically be invoked. If the value of this method is NO,
+ * the cleanupActions method will automatically be invoked. If the value of this method is NO,
  * when this node is removed from its parent, the isRunning property will be set to NO,
  * which causes all actions to be paused, but not removed.
  *
@@ -2564,12 +2646,18 @@ typedef enum {
  * One example of such a situation might be if you are moving a node from one parent
  * to another. You may want to temporarily set this property to NO during the move
  * so that the actions are paused during the move, but resumed when the node is added
- * to a new parent.
+ * to a new parent. If you do set this property to NO, be sure to set it back to YES
+ * before this node, or the ancestor node assembly that this node belongs to is removed
+ * for good, otherwise this node will continue to be retained by any actions running
+ * on this node, and this node will not be deallocated.
  *
  * If you have this property set to NO, you can manually stop and remove all actions
- * using the cleanup method.
+ * using the cleanupActions method.
  */
-@property(nonatomic, assign) BOOL shouldCleanupWhenRemoved;
+@property(nonatomic, assign) BOOL shouldCleanupActionsWhenRemoved;
+
+/** @deprecated Renamed to shouldCleanupActionsWhenRemoved. */
+@property(nonatomic, assign) BOOL shouldCleanupWhenRemoved DEPRECATED_ATTRIBUTE;
 
 /**
  * Executes an action, and returns the action that is executed.
@@ -2590,12 +2678,6 @@ typedef enum {
 -(CCAction*) getActionByTag:(int) tag;
 
 /**
- * Stops all running CCActions for this node and all descendant nodes.
- * Effectively invokes stopAllActions on this node and all descendant nodes.
- */
--(void) cleanup;
-
-/**
  * Returns the numbers of actions that are running plus the ones that are scheduled to run
  * (actions in actionsToAdd and actions arrays).
  * Composable actions are counted as 1 action. Example:
@@ -2603,6 +2685,15 @@ typedef enum {
  *    If you are running 7 Sequences of 2 actions, it will return 7.
  */
 -(int) numberOfRunningActions;
+
+/**
+ * Stops all running CCActions for this node and all descendant nodes.
+ * Effectively invokes stopAllActions on this node and all descendant nodes.
+ */
+-(void) cleanupActions;
+
+/** @deprecated Renamed to cleanupActions. */
+-(void) cleanup DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Touch handling

@@ -1,7 +1,7 @@
 /*
  * CC3Rotator.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -144,7 +144,7 @@ typedef enum {
  *
  * Always returns nil. Subclasses that support target tracking will override.
  */
-@property(nonatomic, retain, readonly) CC3Node* target;
+@property(nonatomic, assign, readonly) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target
@@ -173,7 +173,7 @@ typedef enum {
 @property(nonatomic, readonly) BOOL shouldRotateToTargetLocation;
 
 /** Marks that the global location of the node has changed. */
--(void) markGlobalLocationChanged;
+//-(void) markGlobalLocationChanged;
 
 /**
  * Indicates how often the basis vectors of the underlying rotation matrix
@@ -435,7 +435,6 @@ typedef enum {
 	BOOL shouldAutotargetCamera;
 	BOOL isTrackingForBumpMapping;
 	BOOL isTargetLocationDirty;
-	BOOL wasGlobalLocationChanged;
 }
 
 /**
@@ -532,15 +531,11 @@ typedef enum {
  * The target node at which this rotator is pointed. If the shouldTrackTarget property
  * is set to YES, the node will track the target so that it always points to the
  * target, regardless of how the target and this node move through the 3D scene.
- */
-@property(nonatomic, retain, readwrite) CC3Node* target;
-
-/**
- * Indicates whether the node has had a new target assigned.
  *
- * The initial value is nil.
+ * The target is not retained. If you destroy the target node, you must remove
+ * it as the target of this rotator.
  */
-//@property(nonatomic, assign) BOOL isNewTarget;
+@property(nonatomic, assign, readwrite) CC3Node* target;
 
 /**
  * Indicates whether the node should track the node set in the target property
@@ -563,21 +558,9 @@ typedef enum {
 /**
  * Returns whether the node should update itself towards the target.
  *
- * Returns YES if the value of either isNewTarget or shouldTrackTarget returns YES.
+ * Returns YES if the target property is set and the shouldTrackTarget returns YES.
  */
 @property(nonatomic, readonly) BOOL shouldUpdateToTarget;
-
-/**
- * Returns whether there has been relative movement between the node holding
- * this rotator and the target node at the specified location, in the global
- * coordinate system.
- *
- * Returns YES if the markGlobalLocationChanged was invoked since the last
- * update cycle, or if the global location of the contained target is different
- * than the current value of targetLocation.
- */
--(BOOL) wasRelativeMovement;
-//-(BOOL) wasRelativeMovement: (CC3Vector) aLocation;
 
 /**
  * Returns whether this node should rotate to face the targetLocation.
@@ -597,9 +580,6 @@ typedef enum {
  * The initial property is set to NO.
  */
 @property(nonatomic, assign) BOOL isTrackingForBumpMapping;
-
-/** Resets the transient internal indicators after the target has been tracked. */
--(void) resetTargetTrackingState;
 
 @end
 

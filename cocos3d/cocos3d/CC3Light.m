@@ -1,7 +1,7 @@
 /*
  * CC3Light.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,8 +33,8 @@
 #import "CC3Camera.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3Scene.h"
-#import "CC3ShadowVolumes.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark CC3Light 
@@ -180,6 +180,7 @@
 		shadowIntensityFactor = 1.0;
 		isDirectionalOnly = YES;
 		shouldCopyLightIndex = NO;
+		shouldCastShadowsWhenInvisible = NO;
 	}
 	return self;
 }
@@ -244,6 +245,7 @@
 	shadowIntensityFactor = another.shadowIntensityFactor;
 	isDirectionalOnly = another.isDirectionalOnly;
 	shouldCopyLightIndex = another.shouldCopyLightIndex;
+	shouldCastShadowsWhenInvisible = another.shouldCastShadowsWhenInvisible;
 }
 
 /**
@@ -364,6 +366,13 @@
 
 #pragma mark Shadows
 
+-(BOOL) shouldCastShadowsWhenInvisible { return shouldCastShadowsWhenInvisible; }
+
+-(void) setShouldCastShadowsWhenInvisible: (BOOL) shouldCast {
+	shouldCastShadowsWhenInvisible = shouldCast;
+	super.shouldCastShadowsWhenInvisible = shouldCast;
+}
+
 -(void) addShadow: (id<CC3ShadowProtocol>) aShadowNode {
 	NSAssert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
 	
@@ -379,6 +388,7 @@
 
 -(void) removeShadow: (id<CC3ShadowProtocol>) aShadowNode {
 	[shadows removeObjectIdenticalTo: aShadowNode];
+	aShadowNode.light = nil;					// So it can't call back here if I'm gone
 	if (shadows && shadows.count == 0) {
 		[shadows release];
 		shadows = nil;
@@ -500,7 +510,7 @@
 
 // TODO - combine with other shadow techniques - how to make polymorphic?
 -(void) drawShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( shadows && self.visible ) {
+	if ( shadows && (self.visible || self.shouldCastShadowsWhenInvisible) ) {
 		LogCleanTrace(@"%@ drawing %u shadows", self, shadows.count);
 		[self configureStencilParameters: visitor];
 		
@@ -574,12 +584,6 @@
 	[myShadows release];
 }
 
-//-(void) cleanupShadows {
-//	for (CC3Node* sv in shadows) {
-//		[sv remove];
-//	}
-//}
-
 
 #pragma mark Managing the pool of available GL lights
 
@@ -607,10 +611,11 @@ static GLuint lightPoolStartIndex = 0;
 -(GLuint) nextLightIndex {
 	BOOL* indexPool = [[self class] lightIndexPool];
 	GLint platformMaxLights = [CC3OpenGLES11Engine engine].platform.maxLights.value;
-	for (int i = lightPoolStartIndex; i < platformMaxLights; i++) {
-		if (!indexPool[i]) {
-			indexPool[i] = YES;
-			return i;
+	for (int lgtIdx = lightPoolStartIndex; lgtIdx < platformMaxLights; lgtIdx++) {
+		if (!indexPool[lgtIdx]) {
+			LogCleanTrace(@"Allocating light index %u", lgtIdx);
+			indexPool[lgtIdx] = YES;
+			return lgtIdx;
 		}
 	}
 	NSAssert1(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
@@ -619,7 +624,7 @@ static GLuint lightPoolStartIndex = 0;
 
 /** Returns the specified light index to the pool. */
 -(void) returnLightIndex: (GLuint) aLightIndex {
-	LogTrace(@"Returning light index %u", aLightIndex);
+	LogCleanTrace(@"Returning light index %u", aLightIndex);
 	BOOL* indexPool = [[self class] lightIndexPool];
 	indexPool[aLightIndex] = NO;
 	[gles11Light.light disable];
@@ -696,6 +701,7 @@ static GLuint lightPoolStartIndex = 0;
 -(id) init {
 	if ( (self = [super init]) ) {
 		light = nil;
+		cameraFrustum = nil;
 	}
 	return self;
 }
@@ -721,6 +727,12 @@ static GLuint lightPoolStartIndex = 0;
 
 	cameraFrustum = ((CC3Camera*)aNode).frustum;
 	[self markDirty];
+}
+
+/** The camera was destroyed. Clear the cached camera frustum. */
+-(void) nodeWasDestroyed: (CC3Node*) aNode {
+	NSAssert1([aNode isKindOfClass: [CC3Camera class]], @"%@ can only be updated by a camera", self);
+	cameraFrustum = nil;
 }
 
 /**

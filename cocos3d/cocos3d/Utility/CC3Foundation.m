@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3Foundation.h"
+#import "CGPointExtension.h"
 
 
 NSString* NSStringFromCC3Vectors(CC3Vector* vectors, GLuint vectorCount) {
@@ -365,140 +366,4 @@ NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
 	if(filePath.isAbsolutePath) return filePath;
 	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
 }
-
-@implementation NSObject (CC3)
--(id) copyAutoreleased { return [[self copy] autorelease]; }
-@end
-
-@implementation UIColor (CC3)
-
--(ccColor4F) asCCColor4F {
-	ccColor4F rgba = kCCC4FWhite;  // initialize to white
-	
-	CGColorRef cgColor= self.CGColor;
-	size_t componentCount = CGColorGetNumberOfComponents(cgColor);
-	const CGFloat* colorComponents = CGColorGetComponents(cgColor);
-	switch(componentCount) {
-		case 4:			// RGB + alpha: set alpha then fall through to RGB 
-			rgba.a = colorComponents[3];
-		case 3:			// RGB: alpha already set
-			rgba.r = colorComponents[0];
-			rgba.g = colorComponents[1];
-			rgba.b = colorComponents[2];
-			break;
-		case 2:			// gray scale + alpha: set alpha then fall through to gray scale
-			rgba.a = colorComponents[1];
-		case 1:		// gray scale: alpha already set
-			rgba.r = colorComponents[0];
-			rgba.g = colorComponents[0];
-			rgba.b = colorComponents[0];
-			break;
-		default:	// if all else fails, return white which is already set
-			break;
-	}
-	return rgba;
-}
-
-+(UIColor*) colorWithCCColor4F: (ccColor4F) rgba {
-	return [UIColor colorWithRed: rgba.r green: rgba.g blue: rgba.b alpha: rgba.a];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CCNode extension
-
-@implementation CCNode (CC3)
-
-- (CGRect) globalBoundingBoxInPixels {
-	CGRect rect = CGRectMake(0, 0, contentSizeInPixels_.width, contentSizeInPixels_.height);
-	return CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
-}
-
--(void) updateViewport {
-	[children_ makeObjectsPerformSelector:@selector(updateViewport)];	
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CCDirector extension
-
-@implementation CCDirector (CC3)
-
--(ccTime) frameInterval {
-	return dt;
-}
--(ccTime) frameRate {
-	return frameRate_;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CCArray extension
-
-@implementation CCArray (CC3)
-
--(NSUInteger) indexOfObjectIdenticalTo: (id) anObject {
-	return [self indexOfObject: anObject];
-}
-
--(void) removeObjectIdenticalTo: (id) anObject {
-	[self removeObject: anObject];
-}
-
--(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
-	NSAssert(index < data->num, @"Invalid index. Out of bounds");
-
-	id oldObj = data->arr[index];
-	data->arr[index] = [anObject retain];
-	[oldObj release];						// Release after in case new is same as old
-}
-
-
-#pragma mark Support for unretained objects
-
-- (void) addUnretainedObject: (id) anObject {
-	ccCArrayAppendValueWithResize(data, anObject);
-}
-
-- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index {
-	ccCArrayEnsureExtraCapacity(data, 1);
-	ccCArrayInsertValueAtIndex(data, anObject, index);
-}
-
-- (void) removeUnretainedObjectIdenticalTo: (id) anObject {
-	ccCArrayRemoveValue(data, anObject);
-}
-
-- (void) removeUnretainedObjectAtIndex: (NSUInteger) index {
-	ccCArrayRemoveValueAtIndex(data, index);
-}
-
-- (void) removeAllObjectsAsUnretained {
-	ccCArrayRemoveAllValues(data);
-}
-
--(void) releaseAsUnretained {
-	[self removeAllObjectsAsUnretained];
-	[self release];
-}
-
-- (NSString*) fullDescription {
-	NSMutableString *desc = [NSMutableString stringWithFormat:@"%@ (", [self class]];
-	if (data->num > 0) {
-		[desc appendFormat:@"\n\t%@", data->arr[0]];
-	}
-	for (NSUInteger i = 1; i < data->num; i++) {
-		[desc appendFormat:@",\n\t%@", data->arr[i]];
-	}
-	[desc appendString:@")"];
-	return desc;
-}
-
-@end
 

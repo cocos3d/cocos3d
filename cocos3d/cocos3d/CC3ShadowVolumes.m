@@ -38,6 +38,7 @@
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
 -(void) transformMatrixChanged;
+@property(nonatomic, assign, readwrite) CC3Node* parent;
 @end
 
 @interface CC3MeshNode (TemplateMethods)
@@ -87,7 +88,8 @@
 @synthesize light, shouldDrawTerminator;
 
 -(void) dealloc {
-	light = nil;			// not retained
+	[light removeShadow: self];		// Will also set light to nil
+	LogCleanTrace(@"Removed %@ from %@ leaving %i shadows", self, light, light.shadows.count);
 	[super dealloc];
 }
 
@@ -95,7 +97,7 @@
 
 /** Create the shadow volume mesh once the parent is attached. */
 -(void) setParent: (CC3Node*) aNode {
-	super.parent = aNode;
+	[super setParent: aNode];
 	[self createShadowMesh];
 }
 
@@ -683,8 +685,10 @@
 
 /** Returns whether the shadow cast by this shadow volume will be visible. */
 -(BOOL) isShadowVisible {
-	return light.visible && (self.shadowCaster.visible || self.visible) &&
-			[self.shadowCaster doesIntersectBoundingVolume: light.shadowCastingVolume];
+	CC3MeshNode* scNode = self.shadowCaster;
+	return (light.visible || light.shouldCastShadowsWhenInvisible) &&
+			(scNode.visible || scNode.shouldCastShadowsWhenInvisible || self.visible) &&
+			[scNode doesIntersectBoundingVolume: light.shadowCastingVolume];
 }
 
 /**
@@ -743,9 +747,9 @@
 }
 
 /** Overridden to remove this shadow node from the light. */
-- (void)cleanup {
+-(void) wasRemoved {
 	[light removeShadow: self];
-	[super cleanup];
+	[super wasRemoved];
 }
 
 
@@ -762,7 +766,8 @@
 }
 
 /** A node that affects this shadow (generally the light) was transformed. Mark the shadow as dirty. */
--(void) nodeWasTransformed: (CC3Node*) aNode {
+-(void) nodeWasTransformed: (CC3Node*) aNode { 
+	[super nodeWasTransformed: aNode];
 	isShadowDirty = YES;
 }
 
@@ -1185,11 +1190,6 @@
 
 -(void) addShadowVolumesForLight: (CC3Light*) aLight {
 	[super addShadowVolumesForLight: aLight];
-	
-	// Register the shadow volume as a transform listener with the bones
-	// so that the shadow will be updated when the bones move, even if
-	// the skin mesh node itself, or the light, has not moved.
-	[self addTransformListener: [self getShadowVolumeForLight: aLight]];
 	
 	// Retain data required to build shadow volume mesh
 	[self retainVertexMatrixIndices];

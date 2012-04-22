@@ -1,7 +1,7 @@
 /*
  * CC3ActionInterval.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -471,7 +471,11 @@
 																				  moveBy: distance];
 }
 
--(id) reverse { return [[self class] actionWithDuration: self.duration moveBy: -distance]; }
+-(id) reverse {
+	return [[(CC3MoveDirectionallyBy*)[[self class] alloc]
+					initWithDuration: self.duration
+					moveBy: -distance] autorelease];
+}
 
 -(void) startWithTarget:(CC3Node*) aTarget {
 	[super startWithTarget: aTarget];

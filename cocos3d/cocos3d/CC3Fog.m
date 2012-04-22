@@ -1,7 +1,7 @@
 /*
  * CC3Fog.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -169,7 +169,7 @@
 }
 
 
-#pragma mark CC3Node Actions
+#pragma mark Actions
 
 -(CCAction*) runAction:(CCAction*) action {
 	NSAssert( action != nil, @"Argument must be non-nil");

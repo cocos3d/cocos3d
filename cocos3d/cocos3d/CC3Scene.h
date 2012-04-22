@@ -1,7 +1,7 @@
 /*
  * CC3Scene.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -775,13 +775,16 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Touch handling
 
 /**
- * This method is invoked from the CC3Layer whenever a touch event occurs, if that
- * layer has indicated that it is interested in receiving touch events, and is
- * handling them.
+ * This method is invoked from the CC3Layer whenever a touch event occurs, if that layer
+ * has indicated that it is interested in receiving touch events, and is handling them.
+ *
+ * This method is not invoked when gestures are used for user interaction. The CC3Layer
+ * processes gestures and invokes higher-level application-defined behaviour on the
+ * application's customized CC3Scene subclass.
  *
  * The touchType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
  * kCCTouchEnded, or kCCTouchCancelled, and may have originated as a single-touch
- * event, a multi-touch event, or a gesture event.
+ * or multi-touch event.
  * 
  * To enable touch events, set the isTouchEnabled property of the CC3Layer. Once
  * the CC3Layer is touch-enabled, this method is invoked automatically whenever a
@@ -793,13 +796,63 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * ccTouchMoved:withEvent: template method implementation in CC3Layer to your
  * customized CC3Layer subclass.
  *
- * This default implementation forwards touch-down events to the node picker held in
- * the touchedNodePicker property, which determines which 3D node is under the touch
- * point, and does nothing with touch-move and touch-up events. For the touch-down
- * events, object picking is handled asynchronously, and once the node is retrieved,
- * the nodeSelected:byTouchEvent:at: callback method will be invoked on this instance.
+ * This default implementation forwards touch-down events to the pickNodeFromTouchEvent:at:
+ * method, which determines which 3D node is under the touch point, and does nothing with
+ * touch-move and touch-up events. For the touch-down events, object picking is handled
+ * asynchronously, and once the node is retrieved, the nodeSelected:byTouchEvent:at:
+ * callback method will be invoked on this instance.
  *
- * Node picking from touch events can also be handled by using the unprojectPoint:
+ * Node picking from touch events is somewhat expensive. If you do not require node
+ * picking, you should override this implementation and avoid forwarding the touch-down
+ * events to this method. You can also override this method to enhance the touch
+ * interaction, such as swipe detection, or dragging & dropping objects. You can use
+ * the implementation of this method as a template for enhancements.
+ *
+ * Node selection from tap events can also be handled by using the unprojectPoint:
+ * method of the active camera to convert the 2D touch-point to a 3D ray, and
+ * then using the nodesIntersectedByGlobalRay: method to detect the nodes whose
+ * bounding volumes are intersected (punctured) by the ray. See the notes of the
+ * pickNodeFromTouchEvent:at: method for further discussion of the relative merits
+ * of these two node selection techniques.
+ */
+-(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
+
+/**
+ * Indicates that a node should be picked for the touch event or tap gesture
+ * that occurred at the specified point, which is the location in the 2D
+ * coordinate system of the CC3Layer where the touch occurred.
+ *
+ * This method can be invoked as a result of a touch event or tap gesture.
+ *
+ * The event is queued internally, and the node is picked asychronously during
+ * the next rendering frame. Once the node has been picked, the application is
+ * notified via the nodeSelected:byTouchEvent:at: callback method of this instance.
+ *
+ * This is a convenience method that invokes the pickNodeFromTouchEvent:at:
+ * method with a kCCTouchEnded touch type.
+ *
+ * Node selection from tap events can also be handled by using the unprojectPoint:
+ * method of the active camera to convert the 2D touch-point to a 3D ray, and
+ * then using the nodesIntersectedByGlobalRay: method to detect the nodes whose
+ * bounding volumes are intersected (punctured) by the ray. See the notes of the
+ * pickNodeFromTouchEvent:at: method for further discussion of the relative merits
+ * of these two node selection techniques.
+ */
+-(void) pickNodeFromTapAt: (CGPoint) tPoint;
+
+/**
+ * Indicates that a node should be picked for the touch event of the specified
+ * type that occurred at the specified point, which is the location in the 2D
+ * coordinate system of the CC3Layer where the touch occurred.
+ *
+ * The tType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
+ * kCCTouchEnded, or kCCTouchCancelled.
+ *
+ * The event is queued internally, and the node is picked asychronously during
+ * the next rendering frame. Once the node has been picked, the application is
+ * notified via the nodeSelected:byTouchEvent:at: callback method of this instance.
+ *
+ * Node selection from touch events can also be handled by using the unprojectPoint:
  * method of the active camera to convert the 2D touch-point to a 3D ray, and then
  * using the nodesIntersectedByGlobalRay: method to detect the nodes whose bounding
  * volumes are intersected (punctured) by the ray.
@@ -810,31 +863,30 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * intersects the bounding volume of the node. For particle systems in particular,
  * that bounding volume will include all the space between the particles as well.
  *
- * However, ray tracing has less impact on performance, and allows you to also
- * detect all objects under the touch point, including those hiding behind the
- * visible objects, plus those that are not visible.
+ * However, ray tracing has less impact on performance, and allows you to also detect
+ * all objects under the touch point, including those hiding behind the visible objects.
  *
  * Node picking from touch events is somewhat expensive. If you do not require node
- * picking, you should override this implementation and avoid forwarding the touch-down
- * events to the node picker. You can also override this method to enhance the touch
- * interaction, such as swipe detection, or dragging & dropping objects. You can use
- * the implementation of this method as a template for enhancements.
+ * picking, you should override the touchEvent:at: implementation and avoid forwarding
+ * the touch-down events to this method. You can also override that method to enhance
+ * the touch interaction, such as swipe detection, or dragging & dropping objects.
  * 
  * For example, if you want to let a user touch an object and move it around with their
  * finger, only the initial touch-down event needs to select a node. Once the node is
  * selected, you can cache the node, and move it and release it by capturing the
- * touch-move and touch-up events in this method.
+ * touch-move and touch-up events in the touchEvent:at: method, or via gesture feedback.
  *
  * To support multi-touch events or gestures, add event-handing behaviour to your
  * customized CC3Layer, as you would for any cocos2d application, and invoke this
  * method from your customized CC3Layer when interaction with 3D objects, such as
  * node-picking, is required.
  */
--(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
+-(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint;
 
 /**
- * This callback template method is invoked automatically from the touchedNodePicker
- * when a node has been picked as a result of a touch event.
+ * This callback template method is invoked automatically when a node has been picked
+ * by the invocation of the pickNodeFromTapAt: or pickNodeFromTouchEvent:at: methods,
+ * as a result of a touch event or tap gesture.
  *
  * The specified node will be one of the visible nodes whose isTouchable property
  * returns YES, or will be nil if the touch event occurred in an area under which
@@ -993,18 +1045,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 +(id) handlerOnWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
 
 /**
- * Indicates that a node should be picked for the touch event of the specified type
- * that occurred at the specified point.
+ * Indicates that a node should be picked for the touch event of the specified
+ * type that occurred at the specified point, which is the location in the 2D
+ * coordinate system of the CC3Layer where the touch occurred.
  *
  * The tType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
- * kCCTouchEnded, or kCCTouchCancelled. The tPoint is the location in 2D coordinate
- * system of the CC3Layer where the touch occurred.
+ * kCCTouchEnded, or kCCTouchCancelled.
  *
- * The event is queued internally, and the node is asychronously picked during the
+ * The event is queued internally, and the node is picked asychronously during the
  * next rendering frame when the pickTouchedNode method is automatically invoked.
- *
- * This method is invoked automatically whenever a touch event occurs. Usually, the
- * application never needs to invoke this method directly.
  */
 -(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint;
 

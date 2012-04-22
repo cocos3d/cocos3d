@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -41,6 +41,7 @@ extern "C" {
 #import "CC3PODMesh.h"
 #import "CC3PODMaterial.h"
 #import "CC3PODVertexSkinning.h"
+#import "CC3CC2Extensions.h"
 #import "CCTextureCache.h"
 
 
@@ -67,7 +68,8 @@ static const id placeHolder = [NSObject new];
 	[meshes release];
 	[materials release];
 	[textures release];
-	if (self.pvrtModel) delete (CPVRTModelPOD*)self.pvrtModelImpl;
+	if (self.pvrtModelImpl) delete (CPVRTModelPOD*)self.pvrtModelImpl;
+	pvrtModel = NULL;
 	[super dealloc];
 }
 

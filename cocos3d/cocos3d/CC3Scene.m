@@ -1,7 +1,7 @@
 /*
  * CC3Scene.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,6 +38,8 @@
 #import "CC3Billboard.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 
@@ -83,33 +85,42 @@
 @synthesize viewportManager, performanceStatistics, fog, lights;
 @synthesize shouldClearDepthBufferBefore3D, shouldClearDepthBufferBefore2D;
 
+/**
+ * Descendant nodes will be removed by superclass. Their removal may invoke
+ * didRemoveDescendant:, which references several of these instance variables.
+ * Make sure they are all made nil in addition to being released here.
+ */
 - (void)dealloc {
-	[drawingSequencer release];
+	cc3Layer = nil;							// Not retained
+	self.viewportManager = nil;				// Use setter to release and make nil
+	self.drawingSequencer = nil;			// Use setter to release and make nil
+	self.activeCamera = nil;				// Use setter to release and make nil
+	self.touchedNodePicker = nil;			// Use setter to release and make nil
+	self.drawVisitor = nil;					// Use setter to release and make nil
+	self.shadowVisitor = nil;				// Use setter to release and make nil
+	self.updateVisitor = nil;				// Use setter to release and make nil
+	self.transformVisitor = nil;			// Use setter to release and make nil
+	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
+	self.fog = nil;							// Use setter to stop any actions
 	[targettingNodes release];
+	targettingNodes = nil;
 	[lights release];
+	lights = nil;
 	[billboards release];
-	cc3Layer = nil;				// not retained
-	[activeCamera release];
-	[touchedNodePicker release];
-	[viewportManager release];
-	[drawVisitor release];
-	[shadowVisitor release];
-	[updateVisitor release];
-	[transformVisitor release];
-	[drawingSequenceVisitor release];
-	[fog release];
+	billboards = nil;
+	
     [super dealloc];
 }
 
--(CC3Camera*) activeCamera {
-	return activeCamera;
-}
+-(CC3Camera*) activeCamera { return activeCamera; }
 
 -(void) setActiveCamera: (CC3Camera*) aCamera {
-	CC3Camera* oldCam = activeCamera;
-	activeCamera = [aCamera retain];
-	[self activeCameraChangedFrom: oldCam];
-	[oldCam release];
+	if (aCamera != activeCamera) {
+		CC3Camera* oldCam = activeCamera;
+		activeCamera = [aCamera retain];
+		[self activeCameraChangedFrom: oldCam];
+		[oldCam release];
+	}
 }
 
 /** The active camera has changed. Update whoever cares. */
@@ -136,6 +147,13 @@
 	activeCamera.hasInfiniteDepthOfField = oldCam.hasInfiniteDepthOfField;
 }
 
+-(void) setFog: (CC3Fog*) aFog {
+	if (aFog != fog) {
+		[fog stopAllActions];		// Ensure all actions stopped before releasing
+		[fog release];
+		fog = [aFog retain];
+	}
+}
 
 #pragma mark Allocation and initialization
 
@@ -538,9 +556,7 @@
 
 #pragma mark Drawing sequencer
 
--(BOOL) isUsingDrawingSequence {
-	return (drawingSequencer != nil);
-}
+-(BOOL) isUsingDrawingSequence { return (drawingSequencer != nil); }
 
 /**
  * Property setter overridden to add all the decendent nodes of this scene
@@ -723,7 +739,7 @@
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
 	switch (touchType) {
 		case kCCTouchBegan:
-			[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+			[self pickNodeFromTouchEvent: touchType at: touchPoint];
 			break;
 		case kCCTouchMoved:
 			break;
@@ -732,6 +748,14 @@
 		default:
 			break;
 	}
+}
+
+-(void) pickNodeFromTapAt: (CGPoint) tPoint {
+	[self pickNodeFromTouchEvent: kCCTouchEnded at: tPoint];
+}
+
+-(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint {
+	[touchedNodePicker pickNodeFromTouchEvent: tType at: tPoint];
 }
 
 /** Default does nothing. Subclasses that handle touch events will override. */

@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,8 @@
 #import "CCTexture2D.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3Scene.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 
 #pragma mark -
 #pragma mark CC3NodeEvaluator
@@ -153,26 +155,18 @@
 	[super dealloc];
 }
 
--(CCArray*) nodes {
-	return [CCArray array];
-}
+-(CCArray*) nodes { return [CCArray array]; }
 
--(BOOL) shouldUseOnlyForwardDistance {
-	return NO;
-}
+-(BOOL) shouldUseOnlyForwardDistance { return NO; }
 
 -(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {}
 
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	return [self initWithEvaluator: nil];
-}
+-(id) init { return [self initWithEvaluator: nil]; }
 
-+(id) sequencer {
-	return [[[self alloc] init] autorelease];
-}
++(id) sequencer { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super init]) ) {
@@ -377,13 +371,10 @@
 
 -(void) dealloc {
 	[nodes releaseAsUnretained];		// Clears without releasing each element.
-	
 	[super dealloc];
 }
 
--(CCArray*) nodes {
-	return [CCArray arrayWithArray: nodes];
-}
+-(CCArray*) nodes { return [CCArray arrayWithArray: nodes]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {

@@ -1,7 +1,7 @@
 /*
  * TileScene.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -119,7 +119,7 @@
 			[self rotateMainNodeFromSwipeAt: touchPoint];
 			break;
 		case kCCTouchEnded:
-			[touchedNodePicker pickNodeFromTouchEvent: touchType at: touchPoint];
+			[self pickNodeFromTouchEvent: touchType at: touchPoint];
 			break;
 		default:
 			break;

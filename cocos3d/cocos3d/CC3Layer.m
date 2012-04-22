@@ -1,7 +1,7 @@
 /*
  * CC3Layer.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,11 +31,14 @@
 
 #import "CC3Layer.h"
 #import "CC3OpenGLES11Foundation.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 
 
 @interface CC3Layer (TemplateMethods)
--(void) openScene;
--(void) closeScene;
+-(void) openCC3Scene;
+-(void) closeCC3Scene;
+-(void) drawBackdrop;
 -(void) drawScene;
 -(int) touchPriority;
 -(void) drawWorld;		// Deprecated legacy
@@ -48,24 +51,24 @@
 @synthesize cc3Scene, shouldAlwaysUpdateViewport;
 
 - (void)dealloc {
-	self.cc3Scene = nil;			// Close, remove & release the scene
-
 	// Legacy iVar cc3World is not cleared here because it is
 	// not retained and setting to nil causes deprecation warning.
-
+	self.cc3Scene = nil;			// Close, remove & release the scene
+	[self cc3RemoveAllGestureRecognizers];
+	[cc3GestureRecognizers release];
     [super dealloc];
 }
 
  -(void) setCc3Scene: (CC3Scene*) aScene {
 	 if (aScene != cc3Scene) {
-		 [self closeScene];						// Close the old scene.
-		 [cc3Scene wasRemoved];					// Stop actions in old scene (if shouldCleanupWhenRemoved set).
+		 [self closeCC3Scene];					// Close the old scene.
+		 [cc3Scene wasRemoved];					// Stop actions in old scene (if shouldCleanupActionsWhenRemoved set).
 		 cc3Scene.cc3Layer = nil;				// Detach this layer from old scene.
 		 [cc3Scene autorelease];				// Release old scene if it's not assigned to another layer first
 
 		 cc3Scene = [aScene retain];			// Retain the new scene.
 		 cc3Scene.cc3Layer = self;				// Point the scene back here
-		 if (self.isRunning) [self openScene];	// If already running, open the new scene right away
+		 if (self.isRunning) [self openCC3Scene];	// If already running, open the new scene right away
 	 }
 }
 
@@ -131,16 +134,58 @@
 
 #pragma mark Updating layer
 
--(void) update: (ccTime)dt { [cc3Scene updateScene: dt]; }
+/** Invoked from cocos2d when this layer is first displayed. Opens the 3D scene. */
+-(void) onEnter {
+	[super onEnter];
+	[self onOpenCC3Layer];
+	[self openCC3Scene];
+}
+
+-(void) onOpenCC3Layer {}
 
 /** Invoked automatically either from onEnter, or if new scene attached and layer is running. */
--(void) openScene {
+-(void) openCC3Scene {
 	[self updateViewport];			// Set the camera viewport
 	[cc3Scene open];				// Open the scene
 }
 
+/** Invoked from cocos2d when this layer is removed. Closes the 3D scene.  */
+-(void) onExit {
+	[self closeCC3Scene];
+	[self onCloseCC3Layer];
+	[self cc3RemoveAllGestureRecognizers];
+	[super onExit];
+}
+
+-(void) onCloseCC3Layer {}
+
 /** Invoked automatically either from onExit, or if old scene removed and layer is running. */
--(void) closeScene { [cc3Scene close]; }
+-(void) closeCC3Scene { [cc3Scene close]; }
+
+-(void) update: (ccTime)dt { [cc3Scene updateScene: dt]; }
+
+// Lazily initialized
+-(CCArray*) cc3GestureRecognizers {
+	if ( !cc3GestureRecognizers ) cc3GestureRecognizers = [[CCArray array] retain];
+	return cc3GestureRecognizers;
+}
+
+-(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
+	[self.cc3GestureRecognizers addObject: gesture];
+	[[CCDirector sharedDirector].openGLView addGestureRecognizer: gesture];
+}
+
+-(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture {
+	[[CCDirector sharedDirector].openGLView removeGestureRecognizer: gesture];
+	[cc3GestureRecognizers removeObjectIdenticalTo: gesture];
+}
+
+-(void) cc3RemoveAllGestureRecognizers {
+	CCArray* myGRs = [cc3GestureRecognizers copyAutoreleased];
+	for (UIGestureRecognizer* gr in myGRs) {
+		[self cc3RemoveGestureRecognizer: gr];
+	}
+}
 
 
 #pragma mark Drawing
@@ -174,18 +219,6 @@
 
 
 #pragma mark ControllableCCLayer support
-
-/** Invoked from cocos2d when this layer is first displayed. Opens the 3D scene. */
--(void) onEnter {
-	[super onEnter];
-	[self openScene];
-}
-
-/** Invoked from cocos2d when this layer is removed. Closes the 3D scene.  */
--(void) onExit {
-	[self closeScene];
-	[super onExit];
-}
 
 /**
  * Invoked automatically when the home content size has changed.
@@ -249,15 +282,15 @@
 	[self handleTouch: touch ofType: kCCTouchCancelled];
 }
 
+/**
+ * The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
+ * The event dispatcher will not dispatch events for which there is no method
+ * implementation. Since the touch-move events are both voluminous and seldom used,
+ * the implementation of ccTouchMoved:withEvent: has been left out of the default
+ * CC3Layer implementation. To receive and handle touch-move events for object
+ * picking, copy the following method implementation to your CC3Layer subclass.
+ */
 /*
-// The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
-// The event dispatcher will not dispatch events for which there is no method
-// implementation. Since the touch-move events are both voluminous and seldom used,
-// the implementation of ccTouchMoved:withEvent: has been left out of the default
-// CC3Layer implementation. To receive and handle touch-move events for object
-// picking, copy the following method implementation to your CC3Layer subclass.
-
-// Handles intermediate finger-moved touch events.
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
 	[self handleTouch: touch ofType: kCCTouchMoved];
 }

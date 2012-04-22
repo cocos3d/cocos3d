@@ -1,7 +1,7 @@
 /*
  * CC3Texture.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -176,7 +176,7 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		texture = nil;
 		textureUnit = nil;
-		self.textureParameters = self.class.defaultTextureParameters;
+		self.textureParameters = [[self class] defaultTextureParameters];
 	}
 	return self;
 }
@@ -288,9 +288,7 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 	}
 }
 
-+(void) unbind {
-	[self unbindRemainingFrom: 0];
-}
++(void) unbind { [self unbindRemainingFrom: 0]; }
 
 
 #pragma mark Tag allocation
@@ -433,11 +431,13 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 #pragma mark CCTexturePVR extension category
 
 /** Extension to support testing for mipmaps. */
-@implementation CCTexturePVR (CC3Texture)
-
+@interface CCTexturePVR (CC3Texture)
 /** Returns whether this instance contains mipmaps. */
--(BOOL) hasMipmap { return (numberOfMipmaps_ > 1); }
+-(BOOL) hasMipmap;
+@end
 
+@implementation CCTexturePVR (CC3Texture)
+-(BOOL) hasMipmap { return (numberOfMipmaps_ > 1); }
 @end
 
 
@@ -477,7 +477,7 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 			width_ = pvr.width;
 			height_ = pvr.height;
 			size_ = CGSizeMake(width_, height_);
-			hasPremultipliedAlpha_ = self.class.PVRImagesHavePremultipliedAlpha;
+			hasPremultipliedAlpha_ = [[self class] PVRImagesHavePremultipliedAlpha];
 			format_ = pvr.format;
 			
 			self.hasMipmap = pvr.hasMipmap;		// Added to support cocos3d texture loading

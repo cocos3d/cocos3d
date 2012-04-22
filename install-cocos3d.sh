@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# cocos3d 0.7.0
+# cocos3d 0.7.1
 
 echo 'cocos3d installer'
 
@@ -9,7 +9,7 @@ BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
 BASE_TEMPLATE_4_USER_DIR="$HOME/Library/Developer/Xcode/Templates"
 
 force=
-user_dir=
+user_dir=1
 
 usage(){
 cat << EOF
@@ -27,7 +27,6 @@ for the following directories within that specified directory:
     external/TouchJSON
  
 OPTIONS:
-   -u	install in user's Library directory instead of global directory
    -f	force overwrite if directories exist
    -h	this help
 EOF

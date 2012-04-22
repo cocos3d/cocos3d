@@ -1743,6 +1743,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGLES11/CC3OpenGLES11VertexArrays.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3CC2Extensions.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Foundation.h</key>
 		<dict>
 			<key>Group</key>
@@ -1790,6 +1814,30 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Utility/CC3GLMatrix.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Logging.h</key>
 		<dict>
@@ -2096,10 +2144,14 @@
 		<string>cocos3d/cocos3d/OpenGLES11/CC3OpenGLES11Utility.h</string>
 		<string>cocos3d/cocos3d/OpenGLES11/CC3OpenGLES11VertexArrays.h</string>
 		<string>cocos3d/cocos3d/OpenGLES11/CC3OpenGLES11VertexArrays.m</string>
+		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>
+		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3GLMatrix.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3GLMatrix.m</string>
+		<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</string>
+		<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Logging.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Math.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3MatrixMath.h</string>

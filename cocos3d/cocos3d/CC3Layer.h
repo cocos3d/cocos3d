@@ -1,7 +1,7 @@
 /*
  * CC3Layer.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -128,7 +128,9 @@
  * To create and use your CC3Layer and CC3Scene pair, follow these steps:
  *   -# Instantiate your CC3Scene class, including creating or loading 3D file resources
  *      in the initializeScene method.
- *   -# Instantiate your CC3Layer subclass, adding any 2D controls in the initializeControls method.
+ *   -# Instantiate your CC3Layer subclass, adding any 2D controls in the initializeControls
+ *      method, and managing event handlers and gesture recognizers in the onOpenCC3Layer
+ *      and onCloseCC3Layer methods.
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
  *   -# Invoke the play method of your CC3Scene to enable dynamic behaviour for the 3D scene.
  *   -# Schedule regular updates in your CC3Layer instance by invoking either the
@@ -141,6 +143,7 @@
 @interface CC3Layer : ControllableCCLayer {
 	CC3Scene* cc3Scene;
 	CC3Scene* cc3World DEPRECATED_ATTRIBUTE;	// Parallel iVar reference for legacy apps that override CC3Layer
+	CCArray* cc3GestureRecognizers;
 	BOOL shouldAlwaysUpdateViewport;
 }
 
@@ -170,6 +173,89 @@
 #pragma mark Updating layer
 
 /**
+ * Template method that is invoked automatically immediately after this layer has
+ * opened on the underlying view, and before the CC3Scene is opened.
+ *
+ * This default implementation does nothing. You can override this method in your
+ * custom subclass to perform set-up activity prior to the scene becoming visible,
+ * such as adding gesture recognizers or event handlers.
+ *
+ * You can invoke the cc3AddGestureRecognizer method from this method to add gesture
+ * recognizers. When creating gesture recognizers, you should use your custom CC3Layer
+ * as the target of the action messages from the recognizers. You can then use the
+ * cc3Convert... family of methods on this instance to convert locations and movements
+ * from the gesture recognizers into the coordinate system of this layer.
+ *
+ * If your application contains several CC3Layers on-screen at once, you may want
+ * to register gesture recongizers within the onEnter method of a parent grouping
+ * CCNode, instead of from within each CC3Layer.
+ */
+-(void) onOpenCC3Layer;
+
+/**
+ * Template method that is invoked automatically immediately after the CC3Scene
+ * has closed, and immediately before this layer is closed.
+ *
+ * This default implementation does nothing. You can override this method in your
+ * custom subclass to perform tear-down activity prior to the scene disappearing.
+ *
+ * Any gesture recognizers added in the onOpenCC3Layer method by invoking
+ * cc3AddGestureRecognizer: will be removed automatically after this method runs.
+ * You do not need to use this method to remove any gesture recognizers that you
+ * added using the cc3AddGestureRecognizer method. However, if you have bypassed
+ * the cc3AddGestureRecognizer method to create and add gesture recognizers, you
+ * can use this method to remove them.
+ */
+-(void) onCloseCC3Layer;
+
+/**
+ * Returns a collection of UIGestureRecognizers that were added
+ * using the cc3AddGestureRecognizer: method.
+ */
+@property(nonatomic, readonly) CCArray* cc3GestureRecognizers;
+
+/**
+ * Adds the specified gesture recognizer to the UIView that is displaying this
+ * layer, and tracks the gesture recognizer in the cc3GestureRecognizers property.
+ *
+ * For applications that use a single CC3Layer to cover the entire UIView, you can
+ * override the onOpenCC3Layer method to create gesture recognizers, and you can
+ * invoke this method to easily add them to the UIView.
+ *
+ * When this layer is removed from the view, the gesture recognizers added using this
+ * method are automatically removed from the view, and from the cc3GestureRecognizers
+ * property. Whenever this layer is displayed again, new gesture recognizers will be
+ * created and attached to the view when the onOpenCC3Layer method runs again.
+ *
+ * For applications that diplay several CC3Layers that support gesture recognizers,
+ * you may want to create centralized gesture recognizers in some other scope, and
+ * bypass adding them using this method.
+ */
+-(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture;
+
+/**
+ * Removes the specified gesture recognizer from the UIView that is displaying this
+ * layer, and removes the gesture recognizer from the cc3GestureRecognizers property.
+ *
+ * When this layer is removed from the view, the gesture recognizers added to the
+ * cc3GestureRecognizers property using the cc3AddGestureRecognizer: method are
+ * automatically removed from the view, and from the cc3GestureRecognizers property.
+ * Usually, the application does not need to invoke this method directly.
+ */
+-(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture;
+
+/**
+ * Removes all gesture recognizers that were previously added using the
+ * cc3AddGestureRecognizer: method, and removes them all from the UIView.
+ * 
+ * This method is invoked automatically when this layer is removed from the view.
+ * Usually, the application does not need to invoke this method directly, but if
+ * you need to remove all gesture recognizers prior to closing the layer, you can
+ * use this method to do so.
+ */
+-(void) cc3RemoveAllGestureRecognizers;
+
+/**
  * The CC3Scene instance that maintains the 3D models and draws the 3D content.
  *
  * If your application contains multiple 3D scenes, you can swap between these scenes
@@ -183,11 +269,11 @@
  * If this layer already has a CC3Scene assigned, the wasRemoved method of the existing
  * CC3Scene to stop and remove any CCActions running on it and the nodes it contains.
  *
- * You can set the shouldCleanupWhenRemoved of the CC3Scene to NO if you want the
+ * You can set the shouldCleanupActionsWhenRemoved of the CC3Scene to NO if you want the
  * CCActions attached to the scene and its nodes to be paused, but not stopped and
  * removed. Be aware that CCActions that are paused, but not stopped, will retain the
  * CC3Scene, and could be cause for memory leaks if not managed correctly. Please see
- * the notes of the CC3Node shouldCleanupWhenRemoved property and the CC3Node wasRemoved
+ * the notes of the CC3Node shouldCleanupActionsWhenRemoved property and the CC3Node wasRemoved
  * method for more information.
  *
  * Setting this property while this layer is being displayed automatically invokes the
@@ -252,14 +338,5 @@
  * the updated layer.
  */
 -(void) updateViewport;
-
-/**
- * If a background color has been specified, and this layer is not overlaying the device
- * camera, draws the background color over the entire layer.
- *
- * This method is invoked automatically when this layer is drawn. The application should
- * never need to invoke this method directly.
- */
--(void) drawBackdrop;
 
 @end

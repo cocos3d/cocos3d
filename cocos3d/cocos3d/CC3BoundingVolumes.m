@@ -1,7 +1,7 @@
 /*
  * CC3BoundingVolumes.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,6 +33,7 @@
 #import "CC3Camera.h"
 #import "CC3ParametricMeshNodes.h"
 #import "CC3Light.h"
+#import "CC3IOSExtensions.h"
 
 
 /**

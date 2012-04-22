@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpLayer.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,6 +32,8 @@
 #import "CC3DemoMashUpLayer.h"
 #import "CC3DemoMashUpScene.h"
 #import "CC3ActionInterval.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 #import "HUDLayer.h"
 #import "HUDScene.h"
 #import "ccMacros.h"
@@ -50,10 +52,10 @@
 #define kShadowButtonLatchedFileName	@"ShadowButtonLatched48x48.png"
 #define kButtonRingFileName				@"ButtonRing48x48.png"
 #define kButtonShineFileName			@"Shine48x48.png"
+#define kGlobeName						@"Globe"
 #define kPeakShineOpacity				180
 #define kButtonAdornmentScale			1.5
 #define kHUDPadding						8
-#define kGlobeName						@"Globe"
 
 
 @interface CC3Layer (TemplateMethods)
@@ -94,13 +96,20 @@
 -(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) cc3Scene; }
 
 -(void) initializeControls {
+	
+	// Set this property to YES to control the scene using UIGestureRecognizers
+	// and to NO to control the scene using lower-level UIEvents.
+	shouldUseGestures = YES;
+	
+	// If not using gestures, enable touch event handling for 3D object picking
+	self.isTouchEnabled = !shouldUseGestures;
+	
 	[self addJoysticks];
 	[self addSwitchViewButton];
 	[self addInvasionButton];
 	[self addSunlightButton];
 	[self addZoomButton];
 	[self addShadowButton];
-	self.isTouchEnabled = YES;		// Enable touch event handling for 3D object picking
 }
 
 /** Creates the two joysticks that control the 3D camera direction and location. */
@@ -364,9 +373,7 @@
 }
 
 /** The user has pressed the invade button. Tell the 3D scene. */
--(void) invade: (CCMenuItemToggle*) svMI {
-	[self.mashUpScene invade];
-}
+-(void) invade: (CCMenuItemToggle*) svMI { [self.mashUpScene invade]; }
 
 /** The user has pressed the cycle lights button. Tell the 3D scene. */
 -(void) cycleLights: (CCMenuItemToggle*) svMI {
@@ -490,14 +497,183 @@
 
 #pragma mark Touch handling
 
-// The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
-// The event dispatcher will not dispatch events for which there is no method
-// implementation. Since the touch-move events are both voluminous and seldom used,
-// the implementation of ccTouchMoved:withEvent: has been left out of the default
-// CC3Layer implementation. To receive and handle touch-move events for object
-// picking, it must be implemented here.
+/**
+ * The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.
+ * The event dispatcher will not dispatch events for which there is no method
+ * implementation. Since the touch-move events are both voluminous and seldom used,
+ * the implementation of ccTouchMoved:withEvent: has been left out of the default
+ * CC3Layer implementation. To receive and handle touch-move events for object
+ * picking, it must be implemented here.
+ *
+ * This method will not be invoked if gestures have been enabled.
+ */
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
 	[self handleTouch: touch ofType: kCCTouchMoved];
+}
+
+
+#pragma mark Gesture support
+
+/**
+ * Invoked when this layer is being opened on the view.
+ *
+ * If we want to use gestures, we add the gesture recognizers here.
+ *
+ * By using the cc3AddGestureRecognizer: method to add the gesture recognizers,
+ * we ensure that they will be torn down when this layer is removed from the view.
+ *
+ * This layer has child buttons on it. To ensure that those buttons receive their
+ * touch events, we set cancelsTouchesInView to NO on the tap gestures recognizer
+ * so that that gesture recognizer allows the touch events to propagate to the buttons.
+ * We do not need to do that for the other recognizers because we don't want buttons
+ * to receive touch events in the middle of a pan or pinch.
+ */
+-(void) onOpenCC3Layer {
+	if ( !shouldUseGestures ) return;
+	
+	// Register for tap gestures to select 3D nodes.
+	// This layer has child buttons on it. To ensure that those buttons receive their
+	// touch events, we set cancelsTouchesInView to NO so that the gesture recognizer
+	// allows the touch events to propagate to the buttons.
+	UITapGestureRecognizer* tapSelector = [[UITapGestureRecognizer alloc] autorelease];
+	[tapSelector initWithTarget: self action: @selector(handleTapSelection:)];
+	tapSelector.numberOfTapsRequired = 1;
+	tapSelector.cancelsTouchesInView = NO;		// Ensures touches are passed to buttons
+	[self cc3AddGestureRecognizer: tapSelector];
+	
+	// Register for single-finger dragging gestures used to spin the two cubes.
+	UIPanGestureRecognizer* dragPanner = [[UIPanGestureRecognizer alloc] autorelease];
+	[dragPanner initWithTarget: self action: @selector(handleDrag:)];
+	dragPanner.minimumNumberOfTouches = 1;
+	dragPanner.maximumNumberOfTouches = 1;
+	[self cc3AddGestureRecognizer: dragPanner];
+
+	// Register for double-finger dragging to pan the camera.
+	UIPanGestureRecognizer* cameraPanner = [[UIPanGestureRecognizer alloc] autorelease];
+	[cameraPanner initWithTarget: self action: @selector(handleCameraPan:)];
+	cameraPanner.minimumNumberOfTouches = 2;
+	cameraPanner.maximumNumberOfTouches = 2;
+	[self cc3AddGestureRecognizer: cameraPanner];
+	
+	// Register for double-finger dragging to pan the camera.
+	UIPinchGestureRecognizer* cameraMover = [[UIPinchGestureRecognizer alloc] autorelease];
+	[cameraMover initWithTarget: self action: @selector(handleCameraMove:)];
+	[self cc3AddGestureRecognizer: cameraMover];
+}
+
+/**
+ * This handler is invoked when a single-tap gesture is recognized.
+ *
+ * If the tap occurs within a descendant CCNode that wants to capture the touch,
+ * such as a menu or button, the gesture is cancelled. Otherwise, the tap is 
+ * forwarded to the CC3Scene to pick the 3D node under the tap.
+ */
+-(void) handleTapSelection: (UITapGestureRecognizer*) gesture {
+
+	// Once the gesture has ended, convert the UI location to a 2D node location and
+	// pick the 3D node under that location. Don't forget to test that the gesture is
+	// valid and does not conflict with touches handled by this layer or its descendants.
+	if ( [self cc3ValidateGesture: gesture] && (gesture.state == UIGestureRecognizerStateEnded) ) {
+		CGPoint touchPoint = [self cc3ConvertUIPointToNodeSpace: gesture.location];
+		[self.mashUpScene pickNodeFromTapAt: touchPoint];
+	}
+}
+
+/**
+ * This handler is invoked when a single-finger drag gesture is recognized.
+ *
+ * If the drag starts within a descendant CCNode that wants to capture the touch,
+ * such as a menu or button, the gesture is cancelled.
+ *
+ * The CC3Scene marks where dragging begins to determine the node that is underneath
+ * the touch point at that time, and is further notified as dragging proceeds.
+ * It uses the velocity of the drag to spin the cube nodes. Finally, the scene is
+ * notified when the dragging gesture finishes.
+ *
+ * The dragging movement is normalized to be specified relative to the size of the
+ * layer, making it independant of the size of the layer.
+ */
+-(void) handleDrag: (UIPanGestureRecognizer*) gesture {
+	switch (gesture.state) {
+		case UIGestureRecognizerStateBegan:
+			if ( [self cc3ValidateGesture: gesture] ) {
+				[self.mashUpScene startDraggingAt: [self cc3ConvertUIPointToNodeSpace: gesture.location]];
+			}
+			break;
+		case UIGestureRecognizerStateChanged:
+			[self.mashUpScene dragBy: [self cc3NormalizeUIMovement: gesture.translation]
+						  atVelocity:[self cc3NormalizeUIMovement: gesture.velocity]];
+			break;
+		case UIGestureRecognizerStateEnded:
+			[self.mashUpScene stopDragging];
+			break;
+		default:
+			break;
+	}
+}
+
+/**
+ * This handler is invoked when a double-finger pan gesture is recognized.
+ *
+ * If the panning starts within a descendant CCNode that wants to capture the touch,
+ * such as a menu or button, the gesture is cancelled.
+ *
+ * The CC3Scene marks the camera orientation when dragging begins, and is notified
+ * as dragging proceeds. It uses the relative translation of the panning movement
+ * to determine the new orientation of the camera. Finally, the scene is notified
+ * when the dragging gesture finishes.
+ *
+ * The dragging movement is normalized to be specified relative to the size of the
+ * layer, making it independant of the size of the layer.
+ */
+-(void) handleCameraPan: (UIPanGestureRecognizer*) gesture {
+	switch (gesture.state) {
+		case UIGestureRecognizerStateBegan:
+			if ( [self cc3ValidateGesture: gesture] ) [self.mashUpScene startPanningCamera];
+			break;
+		case UIGestureRecognizerStateChanged:
+			[self.mashUpScene panCameraBy: [self cc3NormalizeUIMovement: gesture.translation]];
+			break;
+		case UIGestureRecognizerStateEnded:
+			[self.mashUpScene stopPanningCamera];
+			break;
+		default:
+			break;
+	}
+}
+
+
+/**
+ * This handler is invoked when a pinch gesture is recognized.
+ *
+ * If the pinch starts within a descendant CCNode that wants to capture the touch,
+ * such as a menu or button, the gesture is cancelled.
+ *
+ * The CC3Scene marks the camera location when pinching begins, and is notified
+ * as pinching proceeds. It uses the relative scale of the pinch gesture to determine
+ * a new location for the camera. Finally, the scene is notified when the pinching
+ * gesture finishes.
+ *
+ * Note that the pinching does not zoom the camera, although the visual effect is
+ * very similar. For this application, moving the camera is more flexible and useful
+ * than zooming. But other application might prefer to use the pinch gesture scale
+ * to modify the uniformScale or fieldOfView properties of the camera, to perform
+ * a true zooming effect.
+ */
+-(void) handleCameraMove: (UIPinchGestureRecognizer*) gesture {
+	switch (gesture.state) {
+		case UIGestureRecognizerStateBegan:
+			if ( [self cc3ValidateGesture: gesture] ) [self.mashUpScene startMovingCamera];
+			break;
+		case UIGestureRecognizerStateChanged:
+			[self.mashUpScene moveCameraBy: gesture.scale];
+			break;
+		case UIGestureRecognizerStateEnded:
+			[self.mashUpScene stopMovingCamera];
+			break;
+		default:
+			break;
+	}
 }
 
 @end

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -422,13 +422,19 @@
 	LogTrace(@"GL drawing %u vertices as %@ starting from %u",
 			 len, NSStringFromGLEnum(drawMode), start);
 	glDrawArrays(drawMode, start, len);
-} 
+}
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
-	LogTrace(@"GL drawing %u indices of type %@ as %@ starting from %u",
-			 len, NSStringFromGLEnum(type), NSStringFromGLEnum(drawMode), indicies);
+	NSAssert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES 1.1 supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
+	LogGLErrorState(@"%@ after drawing indices", self.class);
 }
+
+//-(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
+//	LogTrace(@"GL drawing %u indices of type %@ as %@ starting from %u",
+//			 len, NSStringFromGLEnum(type), NSStringFromGLEnum(drawMode), indicies);
+//	glDrawElements(drawMode, len, type, indicies);
+//}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];

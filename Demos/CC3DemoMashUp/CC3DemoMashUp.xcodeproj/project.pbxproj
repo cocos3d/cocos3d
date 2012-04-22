@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */; };
+		A907DB13153A07E100A97C02 /* Stamp.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A907DB12153A07E100A97C02 /* Stamp.pvr */; };
 		A9174DCF15069951008A08B3 /* CCAction.m in Sources */ = {isa = PBXBuildFile; fileRef = A9174CFB15069950008A08B3 /* CCAction.m */; };
 		A9174DD015069951008A08B3 /* CCActionCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9174CFD15069950008A08B3 /* CCActionCamera.m */; };
 		A9174DD115069951008A08B3 /* CCActionEase.m in Sources */ = {isa = PBXBuildFile; fileRef = A9174CFF15069950008A08B3 /* CCActionEase.m */; };
@@ -153,89 +154,90 @@
 		A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */; };
 		A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359D14EF2689002A7363 /* MountainGrass.jpg */; };
 		A96B35A414EF2689002A7363 /* Grass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359F14EF2689002A7363 /* Grass.jpg */; };
+		A99FF44E153F19F1005719A8 /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF39B153F19F1005719A8 /* CC3ModelSampleFactory.m */; };
+		A99FF44F153F19F1005719A8 /* CC3PointParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF39D153F19F1005719A8 /* CC3PointParticleSamples.m */; };
+		A99FF450153F19F1005719A8 /* CC3IdentifiablePODExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3A1153F19F1005719A8 /* CC3IdentifiablePODExtensions.m */; };
+		A99FF451153F19F1005719A8 /* CC3NodePODExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3A3153F19F1005719A8 /* CC3NodePODExtensions.mm */; };
+		A99FF452153F19F1005719A8 /* CC3PODCamera.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3A5153F19F1005719A8 /* CC3PODCamera.mm */; };
+		A99FF453153F19F1005719A8 /* CC3PODLight.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3A7153F19F1005719A8 /* CC3PODLight.mm */; };
+		A99FF454153F19F1005719A8 /* CC3PODMaterial.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3A9153F19F1005719A8 /* CC3PODMaterial.mm */; };
+		A99FF455153F19F1005719A8 /* CC3PODMesh.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3AB153F19F1005719A8 /* CC3PODMesh.mm */; };
+		A99FF456153F19F1005719A8 /* CC3PODMeshNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3AD153F19F1005719A8 /* CC3PODMeshNode.mm */; };
+		A99FF457153F19F1005719A8 /* CC3PODNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3AF153F19F1005719A8 /* CC3PODNode.m */; };
+		A99FF458153F19F1005719A8 /* CC3PODResource.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3B1153F19F1005719A8 /* CC3PODResource.mm */; };
+		A99FF459153F19F1005719A8 /* CC3PODResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3B3153F19F1005719A8 /* CC3PODResourceNode.m */; };
+		A99FF45A153F19F1005719A8 /* CC3PODVertexSkinning.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3B5153F19F1005719A8 /* CC3PODVertexSkinning.mm */; };
+		A99FF45B153F19F1005719A8 /* CC3PVRFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3B7153F19F1005719A8 /* CC3PVRFoundation.mm */; };
+		A99FF45C153F19F1005719A8 /* CC3VertexArraysPODExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3BA153F19F1005719A8 /* CC3VertexArraysPODExtensions.mm */; };
+		A99FF45D153F19F1005719A8 /* PVRTglesExt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3BF153F19F1005719A8 /* PVRTglesExt.cpp */; };
+		A99FF45E153F19F1005719A8 /* PVRT_Removed_Files.txt in Resources */ = {isa = PBXBuildFile; fileRef = A99FF3C1153F19F1005719A8 /* PVRT_Removed_Files.txt */; };
+		A99FF45F153F19F1005719A8 /* PVRTBoneBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3C2153F19F1005719A8 /* PVRTBoneBatch.cpp */; };
+		A99FF460153F19F1005719A8 /* PVRTError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3C4153F19F1005719A8 /* PVRTError.cpp */; };
+		A99FF461153F19F1005719A8 /* PVRTFixedPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3C6153F19F1005719A8 /* PVRTFixedPoint.cpp */; };
+		A99FF462153F19F1005719A8 /* PVRTMatrixF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3CA153F19F1005719A8 /* PVRTMatrixF.cpp */; };
+		A99FF463153F19F1005719A8 /* PVRTModelPOD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3CC153F19F1005719A8 /* PVRTModelPOD.cpp */; };
+		A99FF464153F19F1005719A8 /* PVRTQuaternionF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3CF153F19F1005719A8 /* PVRTQuaternionF.cpp */; };
+		A99FF465153F19F1005719A8 /* PVRTResourceFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3D0153F19F1005719A8 /* PVRTResourceFile.cpp */; };
+		A99FF466153F19F1005719A8 /* PVRTString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3D2153F19F1005719A8 /* PVRTString.cpp */; };
+		A99FF467153F19F1005719A8 /* PVRTTrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3D4153F19F1005719A8 /* PVRTTrans.cpp */; };
+		A99FF468153F19F1005719A8 /* PVRTVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3D6153F19F1005719A8 /* PVRTVector.cpp */; };
+		A99FF469153F19F1005719A8 /* PVRTVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3D8153F19F1005719A8 /* PVRTVertex.cpp */; };
+		A99FF46A153F19F1005719A8 /* CCNodeController.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3DC153F19F1005719A8 /* CCNodeController.m */; };
+		A99FF46B153F19F1005719A8 /* ControllableCCLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3DE153F19F1005719A8 /* ControllableCCLayer.m */; };
+		A99FF46C153F19F1005719A8 /* CC3ActionInterval.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3E1153F19F1005719A8 /* CC3ActionInterval.m */; };
+		A99FF46D153F19F1005719A8 /* CC3Billboard.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3E3153F19F1005719A8 /* CC3Billboard.m */; };
+		A99FF46E153F19F1005719A8 /* CC3BoundingVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3E5153F19F1005719A8 /* CC3BoundingVolumes.m */; };
+		A99FF46F153F19F1005719A8 /* CC3Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3E7153F19F1005719A8 /* CC3Camera.m */; };
+		A99FF470153F19F1005719A8 /* CC3Fog.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3E9153F19F1005719A8 /* CC3Fog.m */; };
+		A99FF471153F19F1005719A8 /* CC3Identifiable.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3EB153F19F1005719A8 /* CC3Identifiable.m */; };
+		A99FF472153F19F1005719A8 /* CC3Layer.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3ED153F19F1005719A8 /* CC3Layer.m */; };
+		A99FF473153F19F1005719A8 /* CC3Light.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3EF153F19F1005719A8 /* CC3Light.m */; };
+		A99FF474153F19F1005719A8 /* CC3Material.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3F1153F19F1005719A8 /* CC3Material.m */; };
+		A99FF475153F19F1005719A8 /* CC3Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3F3153F19F1005719A8 /* CC3Mesh.m */; };
+		A99FF476153F19F1005719A8 /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3F5153F19F1005719A8 /* CC3MeshNode.m */; };
+		A99FF477153F19F1005719A8 /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3F7153F19F1005719A8 /* CC3Node.m */; };
+		A99FF478153F19F1005719A8 /* CC3NodeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3F9153F19F1005719A8 /* CC3NodeAnimation.m */; };
+		A99FF479153F19F1005719A8 /* CC3NodeSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3FB153F19F1005719A8 /* CC3NodeSequencer.m */; };
+		A99FF47A153F19F1005719A8 /* CC3NodeVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3FD153F19F1005719A8 /* CC3NodeVisitor.m */; };
+		A99FF47B153F19F1005719A8 /* CC3ParametricMeshNodes.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF3FF153F19F1005719A8 /* CC3ParametricMeshNodes.m */; };
+		A99FF47C153F19F1005719A8 /* CC3PerformanceStatistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF401153F19F1005719A8 /* CC3PerformanceStatistics.m */; };
+		A99FF47D153F19F1005719A8 /* CC3PointParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF403153F19F1005719A8 /* CC3PointParticles.m */; };
+		A99FF47E153F19F1005719A8 /* CC3Resource.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF405153F19F1005719A8 /* CC3Resource.m */; };
+		A99FF47F153F19F1005719A8 /* CC3ResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF407153F19F1005719A8 /* CC3ResourceNode.m */; };
+		A99FF480153F19F1005719A8 /* CC3Scene.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF409153F19F1005719A8 /* CC3Scene.m */; };
+		A99FF481153F19F1005719A8 /* CC3ShadowVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF40B153F19F1005719A8 /* CC3ShadowVolumes.m */; };
+		A99FF482153F19F1005719A8 /* CC3Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF40D153F19F1005719A8 /* CC3Texture.m */; };
+		A99FF483153F19F1005719A8 /* CC3TextureUnit.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF40F153F19F1005719A8 /* CC3TextureUnit.m */; };
+		A99FF484153F19F1005719A8 /* CC3VertexArrayMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF411153F19F1005719A8 /* CC3VertexArrayMesh.m */; };
+		A99FF485153F19F1005719A8 /* CC3VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF413153F19F1005719A8 /* CC3VertexArrays.m */; };
+		A99FF486153F19F1005719A8 /* CC3VertexSkinning.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF415153F19F1005719A8 /* CC3VertexSkinning.m */; };
+		A99FF487153F19F1005719A8 /* CC3EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF418153F19F1005719A8 /* CC3EAGLView.m */; };
+		A99FF488153F19F1005719A8 /* CC3OpenGLES11Capabilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF41A153F19F1005719A8 /* CC3OpenGLES11Capabilities.m */; };
+		A99FF489153F19F1005719A8 /* CC3OpenGLES11Engine.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF41C153F19F1005719A8 /* CC3OpenGLES11Engine.m */; };
+		A99FF48A153F19F1005719A8 /* CC3OpenGLES11Fog.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF41E153F19F1005719A8 /* CC3OpenGLES11Fog.m */; };
+		A99FF48B153F19F1005719A8 /* CC3OpenGLES11Foundation.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF420153F19F1005719A8 /* CC3OpenGLES11Foundation.m */; };
+		A99FF48C153F19F1005719A8 /* CC3OpenGLES11Hints.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF422153F19F1005719A8 /* CC3OpenGLES11Hints.m */; };
+		A99FF48D153F19F1005719A8 /* CC3OpenGLES11Intercept.c in Sources */ = {isa = PBXBuildFile; fileRef = A99FF423153F19F1005719A8 /* CC3OpenGLES11Intercept.c */; };
+		A99FF48E153F19F1005719A8 /* CC3OpenGLES11Lighting.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF426153F19F1005719A8 /* CC3OpenGLES11Lighting.m */; };
+		A99FF48F153F19F1005719A8 /* CC3OpenGLES11Materials.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF428153F19F1005719A8 /* CC3OpenGLES11Materials.m */; };
+		A99FF490153F19F1005719A8 /* CC3OpenGLES11Matrices.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF42A153F19F1005719A8 /* CC3OpenGLES11Matrices.m */; };
+		A99FF491153F19F1005719A8 /* CC3OpenGLES11Platform.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF42C153F19F1005719A8 /* CC3OpenGLES11Platform.m */; };
+		A99FF492153F19F1005719A8 /* CC3OpenGLES11State.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF42E153F19F1005719A8 /* CC3OpenGLES11State.m */; };
+		A99FF493153F19F1005719A8 /* CC3OpenGLES11StateTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF430153F19F1005719A8 /* CC3OpenGLES11StateTracker.m */; };
+		A99FF494153F19F1005719A8 /* CC3OpenGLES11Textures.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF432153F19F1005719A8 /* CC3OpenGLES11Textures.m */; };
+		A99FF495153F19F1005719A8 /* CC3OpenGLES11Utility.c in Sources */ = {isa = PBXBuildFile; fileRef = A99FF433153F19F1005719A8 /* CC3OpenGLES11Utility.c */; };
+		A99FF496153F19F1005719A8 /* CC3OpenGLES11VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF436153F19F1005719A8 /* CC3OpenGLES11VertexArrays.m */; };
+		A99FF497153F19F1005719A8 /* CC3CC2Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF439153F19F1005719A8 /* CC3CC2Extensions.m */; };
+		A99FF498153F19F1005719A8 /* CC3Foundation.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF43B153F19F1005719A8 /* CC3Foundation.m */; };
+		A99FF499153F19F1005719A8 /* CC3GLMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF43D153F19F1005719A8 /* CC3GLMatrix.m */; };
+		A99FF49A153F19F1005719A8 /* CC3IOSExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF43F153F19F1005719A8 /* CC3IOSExtensions.m */; };
+		A99FF49B153F19F1005719A8 /* CC3Rotator.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF444153F19F1005719A8 /* CC3Rotator.m */; };
+		A99FF49C153F19F1005719A8 /* CC3MeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF447153F19F1005719A8 /* CC3MeshModel.m */; };
+		A99FF49D153F19F1005719A8 /* CC3TargettingNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF449153F19F1005719A8 /* CC3TargettingNode.m */; };
+		A99FF49E153F19F1005719A8 /* CC3VertexArrayMeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF44B153F19F1005719A8 /* CC3VertexArrayMeshModel.m */; };
+		A99FF49F153F19F1005719A8 /* CC3World.m in Sources */ = {isa = PBXBuildFile; fileRef = A99FF44D153F19F1005719A8 /* CC3World.m */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
-		A9AE3E2014E8C7B6002805DA /* stamp.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3E1F14E8C7B5002805DA /* stamp.pvr */; };
-		A9B8EA0C152B80CD0058FD25 /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E95D152B80CD0058FD25 /* CC3ModelSampleFactory.m */; };
-		A9B8EA0D152B80CD0058FD25 /* CC3PointParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E95F152B80CD0058FD25 /* CC3PointParticleSamples.m */; };
-		A9B8EA0E152B80CD0058FD25 /* CC3IdentifiablePODExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E963152B80CD0058FD25 /* CC3IdentifiablePODExtensions.m */; };
-		A9B8EA0F152B80CD0058FD25 /* CC3NodePODExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E965152B80CD0058FD25 /* CC3NodePODExtensions.mm */; };
-		A9B8EA10152B80CD0058FD25 /* CC3PODCamera.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E967152B80CD0058FD25 /* CC3PODCamera.mm */; };
-		A9B8EA11152B80CD0058FD25 /* CC3PODLight.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E969152B80CD0058FD25 /* CC3PODLight.mm */; };
-		A9B8EA12152B80CD0058FD25 /* CC3PODMaterial.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E96B152B80CD0058FD25 /* CC3PODMaterial.mm */; };
-		A9B8EA13152B80CD0058FD25 /* CC3PODMesh.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E96D152B80CD0058FD25 /* CC3PODMesh.mm */; };
-		A9B8EA14152B80CD0058FD25 /* CC3PODMeshNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E96F152B80CD0058FD25 /* CC3PODMeshNode.mm */; };
-		A9B8EA15152B80CD0058FD25 /* CC3PODNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E971152B80CD0058FD25 /* CC3PODNode.m */; };
-		A9B8EA16152B80CD0058FD25 /* CC3PODResource.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E973152B80CD0058FD25 /* CC3PODResource.mm */; };
-		A9B8EA17152B80CD0058FD25 /* CC3PODResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E975152B80CD0058FD25 /* CC3PODResourceNode.m */; };
-		A9B8EA18152B80CD0058FD25 /* CC3PODVertexSkinning.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E977152B80CD0058FD25 /* CC3PODVertexSkinning.mm */; };
-		A9B8EA19152B80CD0058FD25 /* CC3PVRFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E979152B80CD0058FD25 /* CC3PVRFoundation.mm */; };
-		A9B8EA1A152B80CD0058FD25 /* CC3VertexArraysPODExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E97C152B80CD0058FD25 /* CC3VertexArraysPODExtensions.mm */; };
-		A9B8EA1B152B80CD0058FD25 /* PVRTglesExt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E981152B80CD0058FD25 /* PVRTglesExt.cpp */; };
-		A9B8EA1C152B80CD0058FD25 /* PVRT_Removed_Files.txt in Resources */ = {isa = PBXBuildFile; fileRef = A9B8E983152B80CD0058FD25 /* PVRT_Removed_Files.txt */; };
-		A9B8EA1D152B80CD0058FD25 /* PVRTBoneBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E984152B80CD0058FD25 /* PVRTBoneBatch.cpp */; };
-		A9B8EA1E152B80CD0058FD25 /* PVRTError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E986152B80CD0058FD25 /* PVRTError.cpp */; };
-		A9B8EA1F152B80CD0058FD25 /* PVRTFixedPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E988152B80CD0058FD25 /* PVRTFixedPoint.cpp */; };
-		A9B8EA20152B80CD0058FD25 /* PVRTMatrixF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E98C152B80CD0058FD25 /* PVRTMatrixF.cpp */; };
-		A9B8EA21152B80CD0058FD25 /* PVRTModelPOD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E98E152B80CD0058FD25 /* PVRTModelPOD.cpp */; };
-		A9B8EA22152B80CD0058FD25 /* PVRTQuaternionF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E991152B80CD0058FD25 /* PVRTQuaternionF.cpp */; };
-		A9B8EA23152B80CD0058FD25 /* PVRTResourceFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E992152B80CD0058FD25 /* PVRTResourceFile.cpp */; };
-		A9B8EA24152B80CD0058FD25 /* PVRTString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E994152B80CD0058FD25 /* PVRTString.cpp */; };
-		A9B8EA25152B80CD0058FD25 /* PVRTTrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E996152B80CD0058FD25 /* PVRTTrans.cpp */; };
-		A9B8EA26152B80CD0058FD25 /* PVRTVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E998152B80CD0058FD25 /* PVRTVector.cpp */; };
-		A9B8EA27152B80CD0058FD25 /* PVRTVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E99A152B80CD0058FD25 /* PVRTVertex.cpp */; };
-		A9B8EA28152B80CD0058FD25 /* CCNodeController.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E99E152B80CD0058FD25 /* CCNodeController.m */; };
-		A9B8EA29152B80CD0058FD25 /* ControllableCCLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9A0152B80CD0058FD25 /* ControllableCCLayer.m */; };
-		A9B8EA2A152B80CD0058FD25 /* CC3ActionInterval.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9A3152B80CD0058FD25 /* CC3ActionInterval.m */; };
-		A9B8EA2B152B80CD0058FD25 /* CC3Billboard.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9A5152B80CD0058FD25 /* CC3Billboard.m */; };
-		A9B8EA2C152B80CD0058FD25 /* CC3BoundingVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9A7152B80CD0058FD25 /* CC3BoundingVolumes.m */; };
-		A9B8EA2D152B80CD0058FD25 /* CC3Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9A9152B80CD0058FD25 /* CC3Camera.m */; };
-		A9B8EA2E152B80CD0058FD25 /* CC3Fog.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9AB152B80CD0058FD25 /* CC3Fog.m */; };
-		A9B8EA2F152B80CD0058FD25 /* CC3Identifiable.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9AD152B80CD0058FD25 /* CC3Identifiable.m */; };
-		A9B8EA30152B80CD0058FD25 /* CC3Layer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9AF152B80CD0058FD25 /* CC3Layer.m */; };
-		A9B8EA31152B80CD0058FD25 /* CC3Light.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9B1152B80CD0058FD25 /* CC3Light.m */; };
-		A9B8EA32152B80CD0058FD25 /* CC3Material.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9B3152B80CD0058FD25 /* CC3Material.m */; };
-		A9B8EA33152B80CD0058FD25 /* CC3Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9B5152B80CD0058FD25 /* CC3Mesh.m */; };
-		A9B8EA34152B80CD0058FD25 /* CC3MeshNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9B7152B80CD0058FD25 /* CC3MeshNode.m */; };
-		A9B8EA35152B80CD0058FD25 /* CC3Node.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9B9152B80CD0058FD25 /* CC3Node.m */; };
-		A9B8EA36152B80CD0058FD25 /* CC3NodeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9BB152B80CD0058FD25 /* CC3NodeAnimation.m */; };
-		A9B8EA37152B80CD0058FD25 /* CC3NodeSequencer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9BD152B80CD0058FD25 /* CC3NodeSequencer.m */; };
-		A9B8EA38152B80CD0058FD25 /* CC3NodeVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9BF152B80CD0058FD25 /* CC3NodeVisitor.m */; };
-		A9B8EA39152B80CD0058FD25 /* CC3ParametricMeshNodes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9C1152B80CD0058FD25 /* CC3ParametricMeshNodes.m */; };
-		A9B8EA3A152B80CD0058FD25 /* CC3PerformanceStatistics.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9C3152B80CD0058FD25 /* CC3PerformanceStatistics.m */; };
-		A9B8EA3B152B80CD0058FD25 /* CC3PointParticles.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9C5152B80CD0058FD25 /* CC3PointParticles.m */; };
-		A9B8EA3C152B80CD0058FD25 /* CC3Resource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9C7152B80CD0058FD25 /* CC3Resource.m */; };
-		A9B8EA3D152B80CD0058FD25 /* CC3ResourceNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9C9152B80CD0058FD25 /* CC3ResourceNode.m */; };
-		A9B8EA3E152B80CD0058FD25 /* CC3Scene.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9CB152B80CD0058FD25 /* CC3Scene.m */; };
-		A9B8EA3F152B80CD0058FD25 /* CC3ShadowVolumes.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9CD152B80CD0058FD25 /* CC3ShadowVolumes.m */; };
-		A9B8EA40152B80CD0058FD25 /* CC3Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9CF152B80CD0058FD25 /* CC3Texture.m */; };
-		A9B8EA41152B80CD0058FD25 /* CC3TextureUnit.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9D1152B80CD0058FD25 /* CC3TextureUnit.m */; };
-		A9B8EA42152B80CD0058FD25 /* CC3VertexArrayMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9D3152B80CD0058FD25 /* CC3VertexArrayMesh.m */; };
-		A9B8EA43152B80CD0058FD25 /* CC3VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9D5152B80CD0058FD25 /* CC3VertexArrays.m */; };
-		A9B8EA44152B80CD0058FD25 /* CC3VertexSkinning.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9D7152B80CD0058FD25 /* CC3VertexSkinning.m */; };
-		A9B8EA45152B80CD0058FD25 /* CC3EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9DA152B80CD0058FD25 /* CC3EAGLView.m */; };
-		A9B8EA46152B80CD0058FD25 /* CC3OpenGLES11Capabilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9DC152B80CD0058FD25 /* CC3OpenGLES11Capabilities.m */; };
-		A9B8EA47152B80CD0058FD25 /* CC3OpenGLES11Engine.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9DE152B80CD0058FD25 /* CC3OpenGLES11Engine.m */; };
-		A9B8EA48152B80CD0058FD25 /* CC3OpenGLES11Fog.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9E0152B80CD0058FD25 /* CC3OpenGLES11Fog.m */; };
-		A9B8EA49152B80CD0058FD25 /* CC3OpenGLES11Foundation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9E2152B80CD0058FD25 /* CC3OpenGLES11Foundation.m */; };
-		A9B8EA4A152B80CD0058FD25 /* CC3OpenGLES11Hints.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9E4152B80CD0058FD25 /* CC3OpenGLES11Hints.m */; };
-		A9B8EA4B152B80CD0058FD25 /* CC3OpenGLES11Intercept.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9E5152B80CD0058FD25 /* CC3OpenGLES11Intercept.c */; };
-		A9B8EA4C152B80CD0058FD25 /* CC3OpenGLES11Lighting.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9E8152B80CD0058FD25 /* CC3OpenGLES11Lighting.m */; };
-		A9B8EA4D152B80CD0058FD25 /* CC3OpenGLES11Materials.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9EA152B80CD0058FD25 /* CC3OpenGLES11Materials.m */; };
-		A9B8EA4E152B80CD0058FD25 /* CC3OpenGLES11Matrices.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9EC152B80CD0058FD25 /* CC3OpenGLES11Matrices.m */; };
-		A9B8EA4F152B80CD0058FD25 /* CC3OpenGLES11Platform.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9EE152B80CD0058FD25 /* CC3OpenGLES11Platform.m */; };
-		A9B8EA50152B80CD0058FD25 /* CC3OpenGLES11State.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9F0152B80CD0058FD25 /* CC3OpenGLES11State.m */; };
-		A9B8EA51152B80CD0058FD25 /* CC3OpenGLES11StateTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9F2152B80CD0058FD25 /* CC3OpenGLES11StateTracker.m */; };
-		A9B8EA52152B80CD0058FD25 /* CC3OpenGLES11Textures.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9F4152B80CD0058FD25 /* CC3OpenGLES11Textures.m */; };
-		A9B8EA53152B80CD0058FD25 /* CC3OpenGLES11Utility.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9F5152B80CD0058FD25 /* CC3OpenGLES11Utility.c */; };
-		A9B8EA54152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9F8152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.m */; };
-		A9B8EA55152B80CD0058FD25 /* CC3Foundation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9FB152B80CD0058FD25 /* CC3Foundation.m */; };
-		A9B8EA56152B80CD0058FD25 /* CC3GLMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8E9FD152B80CD0058FD25 /* CC3GLMatrix.m */; };
-		A9B8EA57152B80CD0058FD25 /* CC3Rotator.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8EA02152B80CD0058FD25 /* CC3Rotator.m */; };
-		A9B8EA58152B80CD0058FD25 /* CC3MeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8EA05152B80CD0058FD25 /* CC3MeshModel.m */; };
-		A9B8EA59152B80CD0058FD25 /* CC3TargettingNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8EA07152B80CD0058FD25 /* CC3TargettingNode.m */; };
-		A9B8EA5A152B80CD0058FD25 /* CC3VertexArrayMeshModel.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8EA09152B80CD0058FD25 /* CC3VertexArrayMeshModel.m */; };
-		A9B8EA5B152B80CD0058FD25 /* CC3World.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B8EA0B152B80CD0058FD25 /* CC3World.m */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9D58DBC14F5B44500C3A778 /* ShadowButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */; };
@@ -252,6 +254,7 @@
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A907DB12153A07E100A97C02 /* Stamp.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Stamp.pvr; sourceTree = "<group>"; };
 		A9174CFA15069950008A08B3 /* CCAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCAction.h; sourceTree = "<group>"; };
 		A9174CFB15069950008A08B3 /* CCAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCAction.m; sourceTree = "<group>"; };
 		A9174CFC15069950008A08B3 /* CCActionCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCActionCamera.h; sourceTree = "<group>"; };
@@ -516,177 +519,180 @@
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
 		A96B359D14EF2689002A7363 /* MountainGrass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = MountainGrass.jpg; sourceTree = "<group>"; };
 		A96B359F14EF2689002A7363 /* Grass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Grass.jpg; sourceTree = "<group>"; };
+		A99FF39A153F19F1005719A8 /* CC3ModelSampleFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ModelSampleFactory.h; sourceTree = "<group>"; };
+		A99FF39B153F19F1005719A8 /* CC3ModelSampleFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ModelSampleFactory.m; sourceTree = "<group>"; };
+		A99FF39C153F19F1005719A8 /* CC3PointParticleSamples.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PointParticleSamples.h; sourceTree = "<group>"; };
+		A99FF39D153F19F1005719A8 /* CC3PointParticleSamples.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PointParticleSamples.m; sourceTree = "<group>"; };
+		A99FF39E153F19F1005719A8 /* teapot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = teapot.h; sourceTree = "<group>"; };
+		A99FF3A0153F19F1005719A8 /* CC3IdentifiablePODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3IdentifiablePODExtensions.h; sourceTree = "<group>"; };
+		A99FF3A1153F19F1005719A8 /* CC3IdentifiablePODExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3IdentifiablePODExtensions.m; sourceTree = "<group>"; };
+		A99FF3A2153F19F1005719A8 /* CC3NodePODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodePODExtensions.h; sourceTree = "<group>"; };
+		A99FF3A3153F19F1005719A8 /* CC3NodePODExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3NodePODExtensions.mm; sourceTree = "<group>"; };
+		A99FF3A4153F19F1005719A8 /* CC3PODCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODCamera.h; sourceTree = "<group>"; };
+		A99FF3A5153F19F1005719A8 /* CC3PODCamera.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODCamera.mm; sourceTree = "<group>"; };
+		A99FF3A6153F19F1005719A8 /* CC3PODLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODLight.h; sourceTree = "<group>"; };
+		A99FF3A7153F19F1005719A8 /* CC3PODLight.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODLight.mm; sourceTree = "<group>"; };
+		A99FF3A8153F19F1005719A8 /* CC3PODMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMaterial.h; sourceTree = "<group>"; };
+		A99FF3A9153F19F1005719A8 /* CC3PODMaterial.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMaterial.mm; sourceTree = "<group>"; };
+		A99FF3AA153F19F1005719A8 /* CC3PODMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMesh.h; sourceTree = "<group>"; };
+		A99FF3AB153F19F1005719A8 /* CC3PODMesh.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMesh.mm; sourceTree = "<group>"; };
+		A99FF3AC153F19F1005719A8 /* CC3PODMeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMeshNode.h; sourceTree = "<group>"; };
+		A99FF3AD153F19F1005719A8 /* CC3PODMeshNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMeshNode.mm; sourceTree = "<group>"; };
+		A99FF3AE153F19F1005719A8 /* CC3PODNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODNode.h; sourceTree = "<group>"; };
+		A99FF3AF153F19F1005719A8 /* CC3PODNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PODNode.m; sourceTree = "<group>"; };
+		A99FF3B0153F19F1005719A8 /* CC3PODResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODResource.h; sourceTree = "<group>"; };
+		A99FF3B1153F19F1005719A8 /* CC3PODResource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODResource.mm; sourceTree = "<group>"; };
+		A99FF3B2153F19F1005719A8 /* CC3PODResourceNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODResourceNode.h; sourceTree = "<group>"; };
+		A99FF3B3153F19F1005719A8 /* CC3PODResourceNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PODResourceNode.m; sourceTree = "<group>"; };
+		A99FF3B4153F19F1005719A8 /* CC3PODVertexSkinning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODVertexSkinning.h; sourceTree = "<group>"; };
+		A99FF3B5153F19F1005719A8 /* CC3PODVertexSkinning.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODVertexSkinning.mm; sourceTree = "<group>"; };
+		A99FF3B6153F19F1005719A8 /* CC3PVRFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRFoundation.h; sourceTree = "<group>"; };
+		A99FF3B7153F19F1005719A8 /* CC3PVRFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PVRFoundation.mm; sourceTree = "<group>"; };
+		A99FF3B8153F19F1005719A8 /* CC3PVRTModelPOD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRTModelPOD.h; sourceTree = "<group>"; };
+		A99FF3B9153F19F1005719A8 /* CC3VertexArraysPODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArraysPODExtensions.h; sourceTree = "<group>"; };
+		A99FF3BA153F19F1005719A8 /* CC3VertexArraysPODExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3VertexArraysPODExtensions.mm; sourceTree = "<group>"; };
+		A99FF3BD153F19F1005719A8 /* PVRTContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTContext.h; sourceTree = "<group>"; };
+		A99FF3BE153F19F1005719A8 /* PVRTFixedPointAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTFixedPointAPI.h; sourceTree = "<group>"; };
+		A99FF3BF153F19F1005719A8 /* PVRTglesExt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTglesExt.cpp; sourceTree = "<group>"; };
+		A99FF3C0153F19F1005719A8 /* PVRTglesExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTglesExt.h; sourceTree = "<group>"; };
+		A99FF3C1153F19F1005719A8 /* PVRT_Removed_Files.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PVRT_Removed_Files.txt; sourceTree = "<group>"; };
+		A99FF3C2153F19F1005719A8 /* PVRTBoneBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTBoneBatch.cpp; sourceTree = "<group>"; };
+		A99FF3C3153F19F1005719A8 /* PVRTBoneBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTBoneBatch.h; sourceTree = "<group>"; };
+		A99FF3C4153F19F1005719A8 /* PVRTError.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTError.cpp; sourceTree = "<group>"; };
+		A99FF3C5153F19F1005719A8 /* PVRTError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTError.h; sourceTree = "<group>"; };
+		A99FF3C6153F19F1005719A8 /* PVRTFixedPoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTFixedPoint.cpp; sourceTree = "<group>"; };
+		A99FF3C7153F19F1005719A8 /* PVRTFixedPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTFixedPoint.h; sourceTree = "<group>"; };
+		A99FF3C8153F19F1005719A8 /* PVRTGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTGlobal.h; sourceTree = "<group>"; };
+		A99FF3C9153F19F1005719A8 /* PVRTMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTMatrix.h; sourceTree = "<group>"; };
+		A99FF3CA153F19F1005719A8 /* PVRTMatrixF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTMatrixF.cpp; sourceTree = "<group>"; };
+		A99FF3CB153F19F1005719A8 /* PVRTMemoryFileSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTMemoryFileSystem.h; sourceTree = "<group>"; };
+		A99FF3CC153F19F1005719A8 /* PVRTModelPOD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTModelPOD.cpp; sourceTree = "<group>"; };
+		A99FF3CD153F19F1005719A8 /* PVRTModelPOD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTModelPOD.h; sourceTree = "<group>"; };
+		A99FF3CE153F19F1005719A8 /* PVRTQuaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTQuaternion.h; sourceTree = "<group>"; };
+		A99FF3CF153F19F1005719A8 /* PVRTQuaternionF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTQuaternionF.cpp; sourceTree = "<group>"; };
+		A99FF3D0153F19F1005719A8 /* PVRTResourceFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTResourceFile.cpp; sourceTree = "<group>"; };
+		A99FF3D1153F19F1005719A8 /* PVRTResourceFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTResourceFile.h; sourceTree = "<group>"; };
+		A99FF3D2153F19F1005719A8 /* PVRTString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTString.cpp; sourceTree = "<group>"; };
+		A99FF3D3153F19F1005719A8 /* PVRTString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTString.h; sourceTree = "<group>"; };
+		A99FF3D4153F19F1005719A8 /* PVRTTrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTTrans.cpp; sourceTree = "<group>"; };
+		A99FF3D5153F19F1005719A8 /* PVRTTrans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTTrans.h; sourceTree = "<group>"; };
+		A99FF3D6153F19F1005719A8 /* PVRTVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTVector.cpp; sourceTree = "<group>"; };
+		A99FF3D7153F19F1005719A8 /* PVRTVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVector.h; sourceTree = "<group>"; };
+		A99FF3D8153F19F1005719A8 /* PVRTVertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTVertex.cpp; sourceTree = "<group>"; };
+		A99FF3D9153F19F1005719A8 /* PVRTVertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVertex.h; sourceTree = "<group>"; };
+		A99FF3DB153F19F1005719A8 /* CCNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeController.h; sourceTree = "<group>"; };
+		A99FF3DC153F19F1005719A8 /* CCNodeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeController.m; sourceTree = "<group>"; };
+		A99FF3DD153F19F1005719A8 /* ControllableCCLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllableCCLayer.h; sourceTree = "<group>"; };
+		A99FF3DE153F19F1005719A8 /* ControllableCCLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ControllableCCLayer.m; sourceTree = "<group>"; };
+		A99FF3E0153F19F1005719A8 /* CC3ActionInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ActionInterval.h; sourceTree = "<group>"; };
+		A99FF3E1153F19F1005719A8 /* CC3ActionInterval.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ActionInterval.m; sourceTree = "<group>"; };
+		A99FF3E2153F19F1005719A8 /* CC3Billboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Billboard.h; sourceTree = "<group>"; };
+		A99FF3E3153F19F1005719A8 /* CC3Billboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Billboard.m; sourceTree = "<group>"; };
+		A99FF3E4153F19F1005719A8 /* CC3BoundingVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3BoundingVolumes.h; sourceTree = "<group>"; };
+		A99FF3E5153F19F1005719A8 /* CC3BoundingVolumes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3BoundingVolumes.m; sourceTree = "<group>"; };
+		A99FF3E6153F19F1005719A8 /* CC3Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Camera.h; sourceTree = "<group>"; };
+		A99FF3E7153F19F1005719A8 /* CC3Camera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Camera.m; sourceTree = "<group>"; };
+		A99FF3E8153F19F1005719A8 /* CC3Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Fog.h; sourceTree = "<group>"; };
+		A99FF3E9153F19F1005719A8 /* CC3Fog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Fog.m; sourceTree = "<group>"; };
+		A99FF3EA153F19F1005719A8 /* CC3Identifiable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Identifiable.h; sourceTree = "<group>"; };
+		A99FF3EB153F19F1005719A8 /* CC3Identifiable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Identifiable.m; sourceTree = "<group>"; };
+		A99FF3EC153F19F1005719A8 /* CC3Layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Layer.h; sourceTree = "<group>"; };
+		A99FF3ED153F19F1005719A8 /* CC3Layer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Layer.m; sourceTree = "<group>"; };
+		A99FF3EE153F19F1005719A8 /* CC3Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Light.h; sourceTree = "<group>"; };
+		A99FF3EF153F19F1005719A8 /* CC3Light.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Light.m; sourceTree = "<group>"; };
+		A99FF3F0153F19F1005719A8 /* CC3Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Material.h; sourceTree = "<group>"; };
+		A99FF3F1153F19F1005719A8 /* CC3Material.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Material.m; sourceTree = "<group>"; };
+		A99FF3F2153F19F1005719A8 /* CC3Mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Mesh.h; sourceTree = "<group>"; };
+		A99FF3F3153F19F1005719A8 /* CC3Mesh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Mesh.m; sourceTree = "<group>"; };
+		A99FF3F4153F19F1005719A8 /* CC3MeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MeshNode.h; sourceTree = "<group>"; };
+		A99FF3F5153F19F1005719A8 /* CC3MeshNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3MeshNode.m; sourceTree = "<group>"; };
+		A99FF3F6153F19F1005719A8 /* CC3Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Node.h; sourceTree = "<group>"; };
+		A99FF3F7153F19F1005719A8 /* CC3Node.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Node.m; sourceTree = "<group>"; };
+		A99FF3F8153F19F1005719A8 /* CC3NodeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeAnimation.h; sourceTree = "<group>"; };
+		A99FF3F9153F19F1005719A8 /* CC3NodeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeAnimation.m; sourceTree = "<group>"; };
+		A99FF3FA153F19F1005719A8 /* CC3NodeSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeSequencer.h; sourceTree = "<group>"; };
+		A99FF3FB153F19F1005719A8 /* CC3NodeSequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeSequencer.m; sourceTree = "<group>"; };
+		A99FF3FC153F19F1005719A8 /* CC3NodeVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeVisitor.h; sourceTree = "<group>"; };
+		A99FF3FD153F19F1005719A8 /* CC3NodeVisitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeVisitor.m; sourceTree = "<group>"; };
+		A99FF3FE153F19F1005719A8 /* CC3ParametricMeshNodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ParametricMeshNodes.h; sourceTree = "<group>"; };
+		A99FF3FF153F19F1005719A8 /* CC3ParametricMeshNodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ParametricMeshNodes.m; sourceTree = "<group>"; };
+		A99FF400153F19F1005719A8 /* CC3PerformanceStatistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceStatistics.h; sourceTree = "<group>"; };
+		A99FF401153F19F1005719A8 /* CC3PerformanceStatistics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceStatistics.m; sourceTree = "<group>"; };
+		A99FF402153F19F1005719A8 /* CC3PointParticles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PointParticles.h; sourceTree = "<group>"; };
+		A99FF403153F19F1005719A8 /* CC3PointParticles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PointParticles.m; sourceTree = "<group>"; };
+		A99FF404153F19F1005719A8 /* CC3Resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Resource.h; sourceTree = "<group>"; };
+		A99FF405153F19F1005719A8 /* CC3Resource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Resource.m; sourceTree = "<group>"; };
+		A99FF406153F19F1005719A8 /* CC3ResourceNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ResourceNode.h; sourceTree = "<group>"; };
+		A99FF407153F19F1005719A8 /* CC3ResourceNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ResourceNode.m; sourceTree = "<group>"; };
+		A99FF408153F19F1005719A8 /* CC3Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Scene.h; sourceTree = "<group>"; };
+		A99FF409153F19F1005719A8 /* CC3Scene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Scene.m; sourceTree = "<group>"; };
+		A99FF40A153F19F1005719A8 /* CC3ShadowVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ShadowVolumes.h; sourceTree = "<group>"; };
+		A99FF40B153F19F1005719A8 /* CC3ShadowVolumes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ShadowVolumes.m; sourceTree = "<group>"; };
+		A99FF40C153F19F1005719A8 /* CC3Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Texture.h; sourceTree = "<group>"; };
+		A99FF40D153F19F1005719A8 /* CC3Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Texture.m; sourceTree = "<group>"; };
+		A99FF40E153F19F1005719A8 /* CC3TextureUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3TextureUnit.h; sourceTree = "<group>"; };
+		A99FF40F153F19F1005719A8 /* CC3TextureUnit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3TextureUnit.m; sourceTree = "<group>"; };
+		A99FF410153F19F1005719A8 /* CC3VertexArrayMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrayMesh.h; sourceTree = "<group>"; };
+		A99FF411153F19F1005719A8 /* CC3VertexArrayMesh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrayMesh.m; sourceTree = "<group>"; };
+		A99FF412153F19F1005719A8 /* CC3VertexArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrays.h; sourceTree = "<group>"; };
+		A99FF413153F19F1005719A8 /* CC3VertexArrays.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrays.m; sourceTree = "<group>"; };
+		A99FF414153F19F1005719A8 /* CC3VertexSkinning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexSkinning.h; sourceTree = "<group>"; };
+		A99FF415153F19F1005719A8 /* CC3VertexSkinning.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexSkinning.m; sourceTree = "<group>"; };
+		A99FF417153F19F1005719A8 /* CC3EAGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3EAGLView.h; sourceTree = "<group>"; };
+		A99FF418153F19F1005719A8 /* CC3EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3EAGLView.m; sourceTree = "<group>"; };
+		A99FF419153F19F1005719A8 /* CC3OpenGLES11Capabilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Capabilities.h; sourceTree = "<group>"; };
+		A99FF41A153F19F1005719A8 /* CC3OpenGLES11Capabilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Capabilities.m; sourceTree = "<group>"; };
+		A99FF41B153F19F1005719A8 /* CC3OpenGLES11Engine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Engine.h; sourceTree = "<group>"; };
+		A99FF41C153F19F1005719A8 /* CC3OpenGLES11Engine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Engine.m; sourceTree = "<group>"; };
+		A99FF41D153F19F1005719A8 /* CC3OpenGLES11Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Fog.h; sourceTree = "<group>"; };
+		A99FF41E153F19F1005719A8 /* CC3OpenGLES11Fog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Fog.m; sourceTree = "<group>"; };
+		A99FF41F153F19F1005719A8 /* CC3OpenGLES11Foundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Foundation.h; sourceTree = "<group>"; };
+		A99FF420153F19F1005719A8 /* CC3OpenGLES11Foundation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Foundation.m; sourceTree = "<group>"; };
+		A99FF421153F19F1005719A8 /* CC3OpenGLES11Hints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Hints.h; sourceTree = "<group>"; };
+		A99FF422153F19F1005719A8 /* CC3OpenGLES11Hints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Hints.m; sourceTree = "<group>"; };
+		A99FF423153F19F1005719A8 /* CC3OpenGLES11Intercept.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CC3OpenGLES11Intercept.c; sourceTree = "<group>"; };
+		A99FF424153F19F1005719A8 /* CC3OpenGLES11Intercept.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Intercept.h; sourceTree = "<group>"; };
+		A99FF425153F19F1005719A8 /* CC3OpenGLES11Lighting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Lighting.h; sourceTree = "<group>"; };
+		A99FF426153F19F1005719A8 /* CC3OpenGLES11Lighting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Lighting.m; sourceTree = "<group>"; };
+		A99FF427153F19F1005719A8 /* CC3OpenGLES11Materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Materials.h; sourceTree = "<group>"; };
+		A99FF428153F19F1005719A8 /* CC3OpenGLES11Materials.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Materials.m; sourceTree = "<group>"; };
+		A99FF429153F19F1005719A8 /* CC3OpenGLES11Matrices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Matrices.h; sourceTree = "<group>"; };
+		A99FF42A153F19F1005719A8 /* CC3OpenGLES11Matrices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Matrices.m; sourceTree = "<group>"; };
+		A99FF42B153F19F1005719A8 /* CC3OpenGLES11Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Platform.h; sourceTree = "<group>"; };
+		A99FF42C153F19F1005719A8 /* CC3OpenGLES11Platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Platform.m; sourceTree = "<group>"; };
+		A99FF42D153F19F1005719A8 /* CC3OpenGLES11State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11State.h; sourceTree = "<group>"; };
+		A99FF42E153F19F1005719A8 /* CC3OpenGLES11State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11State.m; sourceTree = "<group>"; };
+		A99FF42F153F19F1005719A8 /* CC3OpenGLES11StateTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11StateTracker.h; sourceTree = "<group>"; };
+		A99FF430153F19F1005719A8 /* CC3OpenGLES11StateTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11StateTracker.m; sourceTree = "<group>"; };
+		A99FF431153F19F1005719A8 /* CC3OpenGLES11Textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Textures.h; sourceTree = "<group>"; };
+		A99FF432153F19F1005719A8 /* CC3OpenGLES11Textures.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Textures.m; sourceTree = "<group>"; };
+		A99FF433153F19F1005719A8 /* CC3OpenGLES11Utility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CC3OpenGLES11Utility.c; sourceTree = "<group>"; };
+		A99FF434153F19F1005719A8 /* CC3OpenGLES11Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Utility.h; sourceTree = "<group>"; };
+		A99FF435153F19F1005719A8 /* CC3OpenGLES11VertexArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11VertexArrays.h; sourceTree = "<group>"; };
+		A99FF436153F19F1005719A8 /* CC3OpenGLES11VertexArrays.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11VertexArrays.m; sourceTree = "<group>"; };
+		A99FF438153F19F1005719A8 /* CC3CC2Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3CC2Extensions.h; sourceTree = "<group>"; };
+		A99FF439153F19F1005719A8 /* CC3CC2Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3CC2Extensions.m; sourceTree = "<group>"; };
+		A99FF43A153F19F1005719A8 /* CC3Foundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Foundation.h; sourceTree = "<group>"; };
+		A99FF43B153F19F1005719A8 /* CC3Foundation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Foundation.m; sourceTree = "<group>"; };
+		A99FF43C153F19F1005719A8 /* CC3GLMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3GLMatrix.h; sourceTree = "<group>"; };
+		A99FF43D153F19F1005719A8 /* CC3GLMatrix.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3GLMatrix.m; sourceTree = "<group>"; };
+		A99FF43E153F19F1005719A8 /* CC3IOSExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3IOSExtensions.h; sourceTree = "<group>"; };
+		A99FF43F153F19F1005719A8 /* CC3IOSExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3IOSExtensions.m; sourceTree = "<group>"; };
+		A99FF440153F19F1005719A8 /* CC3Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Logging.h; sourceTree = "<group>"; };
+		A99FF441153F19F1005719A8 /* CC3Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Math.h; sourceTree = "<group>"; };
+		A99FF442153F19F1005719A8 /* CC3MatrixMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MatrixMath.h; sourceTree = "<group>"; };
+		A99FF443153F19F1005719A8 /* CC3Rotator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Rotator.h; sourceTree = "<group>"; };
+		A99FF444153F19F1005719A8 /* CC3Rotator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Rotator.m; sourceTree = "<group>"; };
+		A99FF446153F19F1005719A8 /* CC3MeshModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MeshModel.h; sourceTree = "<group>"; };
+		A99FF447153F19F1005719A8 /* CC3MeshModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3MeshModel.m; sourceTree = "<group>"; };
+		A99FF448153F19F1005719A8 /* CC3TargettingNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3TargettingNode.h; sourceTree = "<group>"; };
+		A99FF449153F19F1005719A8 /* CC3TargettingNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3TargettingNode.m; sourceTree = "<group>"; };
+		A99FF44A153F19F1005719A8 /* CC3VertexArrayMeshModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrayMeshModel.h; sourceTree = "<group>"; };
+		A99FF44B153F19F1005719A8 /* CC3VertexArrayMeshModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrayMeshModel.m; sourceTree = "<group>"; };
+		A99FF44C153F19F1005719A8 /* CC3World.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3World.h; sourceTree = "<group>"; };
+		A99FF44D153F19F1005719A8 /* CC3World.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3World.m; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
-		A9AE3E1F14E8C7B5002805DA /* stamp.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = stamp.pvr; sourceTree = "<group>"; };
-		A9B8E95C152B80CD0058FD25 /* CC3ModelSampleFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ModelSampleFactory.h; sourceTree = "<group>"; };
-		A9B8E95D152B80CD0058FD25 /* CC3ModelSampleFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ModelSampleFactory.m; sourceTree = "<group>"; };
-		A9B8E95E152B80CD0058FD25 /* CC3PointParticleSamples.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PointParticleSamples.h; sourceTree = "<group>"; };
-		A9B8E95F152B80CD0058FD25 /* CC3PointParticleSamples.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PointParticleSamples.m; sourceTree = "<group>"; };
-		A9B8E960152B80CD0058FD25 /* teapot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = teapot.h; sourceTree = "<group>"; };
-		A9B8E962152B80CD0058FD25 /* CC3IdentifiablePODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3IdentifiablePODExtensions.h; sourceTree = "<group>"; };
-		A9B8E963152B80CD0058FD25 /* CC3IdentifiablePODExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3IdentifiablePODExtensions.m; sourceTree = "<group>"; };
-		A9B8E964152B80CD0058FD25 /* CC3NodePODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodePODExtensions.h; sourceTree = "<group>"; };
-		A9B8E965152B80CD0058FD25 /* CC3NodePODExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3NodePODExtensions.mm; sourceTree = "<group>"; };
-		A9B8E966152B80CD0058FD25 /* CC3PODCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODCamera.h; sourceTree = "<group>"; };
-		A9B8E967152B80CD0058FD25 /* CC3PODCamera.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODCamera.mm; sourceTree = "<group>"; };
-		A9B8E968152B80CD0058FD25 /* CC3PODLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODLight.h; sourceTree = "<group>"; };
-		A9B8E969152B80CD0058FD25 /* CC3PODLight.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODLight.mm; sourceTree = "<group>"; };
-		A9B8E96A152B80CD0058FD25 /* CC3PODMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMaterial.h; sourceTree = "<group>"; };
-		A9B8E96B152B80CD0058FD25 /* CC3PODMaterial.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMaterial.mm; sourceTree = "<group>"; };
-		A9B8E96C152B80CD0058FD25 /* CC3PODMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMesh.h; sourceTree = "<group>"; };
-		A9B8E96D152B80CD0058FD25 /* CC3PODMesh.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMesh.mm; sourceTree = "<group>"; };
-		A9B8E96E152B80CD0058FD25 /* CC3PODMeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODMeshNode.h; sourceTree = "<group>"; };
-		A9B8E96F152B80CD0058FD25 /* CC3PODMeshNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODMeshNode.mm; sourceTree = "<group>"; };
-		A9B8E970152B80CD0058FD25 /* CC3PODNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODNode.h; sourceTree = "<group>"; };
-		A9B8E971152B80CD0058FD25 /* CC3PODNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PODNode.m; sourceTree = "<group>"; };
-		A9B8E972152B80CD0058FD25 /* CC3PODResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODResource.h; sourceTree = "<group>"; };
-		A9B8E973152B80CD0058FD25 /* CC3PODResource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODResource.mm; sourceTree = "<group>"; };
-		A9B8E974152B80CD0058FD25 /* CC3PODResourceNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODResourceNode.h; sourceTree = "<group>"; };
-		A9B8E975152B80CD0058FD25 /* CC3PODResourceNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PODResourceNode.m; sourceTree = "<group>"; };
-		A9B8E976152B80CD0058FD25 /* CC3PODVertexSkinning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PODVertexSkinning.h; sourceTree = "<group>"; };
-		A9B8E977152B80CD0058FD25 /* CC3PODVertexSkinning.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PODVertexSkinning.mm; sourceTree = "<group>"; };
-		A9B8E978152B80CD0058FD25 /* CC3PVRFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRFoundation.h; sourceTree = "<group>"; };
-		A9B8E979152B80CD0058FD25 /* CC3PVRFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PVRFoundation.mm; sourceTree = "<group>"; };
-		A9B8E97A152B80CD0058FD25 /* CC3PVRTModelPOD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRTModelPOD.h; sourceTree = "<group>"; };
-		A9B8E97B152B80CD0058FD25 /* CC3VertexArraysPODExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArraysPODExtensions.h; sourceTree = "<group>"; };
-		A9B8E97C152B80CD0058FD25 /* CC3VertexArraysPODExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3VertexArraysPODExtensions.mm; sourceTree = "<group>"; };
-		A9B8E97F152B80CD0058FD25 /* PVRTContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTContext.h; sourceTree = "<group>"; };
-		A9B8E980152B80CD0058FD25 /* PVRTFixedPointAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTFixedPointAPI.h; sourceTree = "<group>"; };
-		A9B8E981152B80CD0058FD25 /* PVRTglesExt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTglesExt.cpp; sourceTree = "<group>"; };
-		A9B8E982152B80CD0058FD25 /* PVRTglesExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTglesExt.h; sourceTree = "<group>"; };
-		A9B8E983152B80CD0058FD25 /* PVRT_Removed_Files.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PVRT_Removed_Files.txt; sourceTree = "<group>"; };
-		A9B8E984152B80CD0058FD25 /* PVRTBoneBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTBoneBatch.cpp; sourceTree = "<group>"; };
-		A9B8E985152B80CD0058FD25 /* PVRTBoneBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTBoneBatch.h; sourceTree = "<group>"; };
-		A9B8E986152B80CD0058FD25 /* PVRTError.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTError.cpp; sourceTree = "<group>"; };
-		A9B8E987152B80CD0058FD25 /* PVRTError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTError.h; sourceTree = "<group>"; };
-		A9B8E988152B80CD0058FD25 /* PVRTFixedPoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTFixedPoint.cpp; sourceTree = "<group>"; };
-		A9B8E989152B80CD0058FD25 /* PVRTFixedPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTFixedPoint.h; sourceTree = "<group>"; };
-		A9B8E98A152B80CD0058FD25 /* PVRTGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTGlobal.h; sourceTree = "<group>"; };
-		A9B8E98B152B80CD0058FD25 /* PVRTMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTMatrix.h; sourceTree = "<group>"; };
-		A9B8E98C152B80CD0058FD25 /* PVRTMatrixF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTMatrixF.cpp; sourceTree = "<group>"; };
-		A9B8E98D152B80CD0058FD25 /* PVRTMemoryFileSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTMemoryFileSystem.h; sourceTree = "<group>"; };
-		A9B8E98E152B80CD0058FD25 /* PVRTModelPOD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTModelPOD.cpp; sourceTree = "<group>"; };
-		A9B8E98F152B80CD0058FD25 /* PVRTModelPOD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTModelPOD.h; sourceTree = "<group>"; };
-		A9B8E990152B80CD0058FD25 /* PVRTQuaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTQuaternion.h; sourceTree = "<group>"; };
-		A9B8E991152B80CD0058FD25 /* PVRTQuaternionF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTQuaternionF.cpp; sourceTree = "<group>"; };
-		A9B8E992152B80CD0058FD25 /* PVRTResourceFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTResourceFile.cpp; sourceTree = "<group>"; };
-		A9B8E993152B80CD0058FD25 /* PVRTResourceFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTResourceFile.h; sourceTree = "<group>"; };
-		A9B8E994152B80CD0058FD25 /* PVRTString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTString.cpp; sourceTree = "<group>"; };
-		A9B8E995152B80CD0058FD25 /* PVRTString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTString.h; sourceTree = "<group>"; };
-		A9B8E996152B80CD0058FD25 /* PVRTTrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTTrans.cpp; sourceTree = "<group>"; };
-		A9B8E997152B80CD0058FD25 /* PVRTTrans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTTrans.h; sourceTree = "<group>"; };
-		A9B8E998152B80CD0058FD25 /* PVRTVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTVector.cpp; sourceTree = "<group>"; };
-		A9B8E999152B80CD0058FD25 /* PVRTVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVector.h; sourceTree = "<group>"; };
-		A9B8E99A152B80CD0058FD25 /* PVRTVertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTVertex.cpp; sourceTree = "<group>"; };
-		A9B8E99B152B80CD0058FD25 /* PVRTVertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVertex.h; sourceTree = "<group>"; };
-		A9B8E99D152B80CD0058FD25 /* CCNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeController.h; sourceTree = "<group>"; };
-		A9B8E99E152B80CD0058FD25 /* CCNodeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCNodeController.m; sourceTree = "<group>"; };
-		A9B8E99F152B80CD0058FD25 /* ControllableCCLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllableCCLayer.h; sourceTree = "<group>"; };
-		A9B8E9A0152B80CD0058FD25 /* ControllableCCLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ControllableCCLayer.m; sourceTree = "<group>"; };
-		A9B8E9A2152B80CD0058FD25 /* CC3ActionInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ActionInterval.h; sourceTree = "<group>"; };
-		A9B8E9A3152B80CD0058FD25 /* CC3ActionInterval.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ActionInterval.m; sourceTree = "<group>"; };
-		A9B8E9A4152B80CD0058FD25 /* CC3Billboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Billboard.h; sourceTree = "<group>"; };
-		A9B8E9A5152B80CD0058FD25 /* CC3Billboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Billboard.m; sourceTree = "<group>"; };
-		A9B8E9A6152B80CD0058FD25 /* CC3BoundingVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3BoundingVolumes.h; sourceTree = "<group>"; };
-		A9B8E9A7152B80CD0058FD25 /* CC3BoundingVolumes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3BoundingVolumes.m; sourceTree = "<group>"; };
-		A9B8E9A8152B80CD0058FD25 /* CC3Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Camera.h; sourceTree = "<group>"; };
-		A9B8E9A9152B80CD0058FD25 /* CC3Camera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Camera.m; sourceTree = "<group>"; };
-		A9B8E9AA152B80CD0058FD25 /* CC3Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Fog.h; sourceTree = "<group>"; };
-		A9B8E9AB152B80CD0058FD25 /* CC3Fog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Fog.m; sourceTree = "<group>"; };
-		A9B8E9AC152B80CD0058FD25 /* CC3Identifiable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Identifiable.h; sourceTree = "<group>"; };
-		A9B8E9AD152B80CD0058FD25 /* CC3Identifiable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Identifiable.m; sourceTree = "<group>"; };
-		A9B8E9AE152B80CD0058FD25 /* CC3Layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Layer.h; sourceTree = "<group>"; };
-		A9B8E9AF152B80CD0058FD25 /* CC3Layer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Layer.m; sourceTree = "<group>"; };
-		A9B8E9B0152B80CD0058FD25 /* CC3Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Light.h; sourceTree = "<group>"; };
-		A9B8E9B1152B80CD0058FD25 /* CC3Light.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Light.m; sourceTree = "<group>"; };
-		A9B8E9B2152B80CD0058FD25 /* CC3Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Material.h; sourceTree = "<group>"; };
-		A9B8E9B3152B80CD0058FD25 /* CC3Material.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Material.m; sourceTree = "<group>"; };
-		A9B8E9B4152B80CD0058FD25 /* CC3Mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Mesh.h; sourceTree = "<group>"; };
-		A9B8E9B5152B80CD0058FD25 /* CC3Mesh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Mesh.m; sourceTree = "<group>"; };
-		A9B8E9B6152B80CD0058FD25 /* CC3MeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MeshNode.h; sourceTree = "<group>"; };
-		A9B8E9B7152B80CD0058FD25 /* CC3MeshNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3MeshNode.m; sourceTree = "<group>"; };
-		A9B8E9B8152B80CD0058FD25 /* CC3Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Node.h; sourceTree = "<group>"; };
-		A9B8E9B9152B80CD0058FD25 /* CC3Node.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Node.m; sourceTree = "<group>"; };
-		A9B8E9BA152B80CD0058FD25 /* CC3NodeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeAnimation.h; sourceTree = "<group>"; };
-		A9B8E9BB152B80CD0058FD25 /* CC3NodeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeAnimation.m; sourceTree = "<group>"; };
-		A9B8E9BC152B80CD0058FD25 /* CC3NodeSequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeSequencer.h; sourceTree = "<group>"; };
-		A9B8E9BD152B80CD0058FD25 /* CC3NodeSequencer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeSequencer.m; sourceTree = "<group>"; };
-		A9B8E9BE152B80CD0058FD25 /* CC3NodeVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeVisitor.h; sourceTree = "<group>"; };
-		A9B8E9BF152B80CD0058FD25 /* CC3NodeVisitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeVisitor.m; sourceTree = "<group>"; };
-		A9B8E9C0152B80CD0058FD25 /* CC3ParametricMeshNodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ParametricMeshNodes.h; sourceTree = "<group>"; };
-		A9B8E9C1152B80CD0058FD25 /* CC3ParametricMeshNodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ParametricMeshNodes.m; sourceTree = "<group>"; };
-		A9B8E9C2152B80CD0058FD25 /* CC3PerformanceStatistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceStatistics.h; sourceTree = "<group>"; };
-		A9B8E9C3152B80CD0058FD25 /* CC3PerformanceStatistics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceStatistics.m; sourceTree = "<group>"; };
-		A9B8E9C4152B80CD0058FD25 /* CC3PointParticles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PointParticles.h; sourceTree = "<group>"; };
-		A9B8E9C5152B80CD0058FD25 /* CC3PointParticles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PointParticles.m; sourceTree = "<group>"; };
-		A9B8E9C6152B80CD0058FD25 /* CC3Resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Resource.h; sourceTree = "<group>"; };
-		A9B8E9C7152B80CD0058FD25 /* CC3Resource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Resource.m; sourceTree = "<group>"; };
-		A9B8E9C8152B80CD0058FD25 /* CC3ResourceNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ResourceNode.h; sourceTree = "<group>"; };
-		A9B8E9C9152B80CD0058FD25 /* CC3ResourceNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ResourceNode.m; sourceTree = "<group>"; };
-		A9B8E9CA152B80CD0058FD25 /* CC3Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Scene.h; sourceTree = "<group>"; };
-		A9B8E9CB152B80CD0058FD25 /* CC3Scene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Scene.m; sourceTree = "<group>"; };
-		A9B8E9CC152B80CD0058FD25 /* CC3ShadowVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ShadowVolumes.h; sourceTree = "<group>"; };
-		A9B8E9CD152B80CD0058FD25 /* CC3ShadowVolumes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ShadowVolumes.m; sourceTree = "<group>"; };
-		A9B8E9CE152B80CD0058FD25 /* CC3Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Texture.h; sourceTree = "<group>"; };
-		A9B8E9CF152B80CD0058FD25 /* CC3Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Texture.m; sourceTree = "<group>"; };
-		A9B8E9D0152B80CD0058FD25 /* CC3TextureUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3TextureUnit.h; sourceTree = "<group>"; };
-		A9B8E9D1152B80CD0058FD25 /* CC3TextureUnit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3TextureUnit.m; sourceTree = "<group>"; };
-		A9B8E9D2152B80CD0058FD25 /* CC3VertexArrayMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrayMesh.h; sourceTree = "<group>"; };
-		A9B8E9D3152B80CD0058FD25 /* CC3VertexArrayMesh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrayMesh.m; sourceTree = "<group>"; };
-		A9B8E9D4152B80CD0058FD25 /* CC3VertexArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrays.h; sourceTree = "<group>"; };
-		A9B8E9D5152B80CD0058FD25 /* CC3VertexArrays.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrays.m; sourceTree = "<group>"; };
-		A9B8E9D6152B80CD0058FD25 /* CC3VertexSkinning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexSkinning.h; sourceTree = "<group>"; };
-		A9B8E9D7152B80CD0058FD25 /* CC3VertexSkinning.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexSkinning.m; sourceTree = "<group>"; };
-		A9B8E9D9152B80CD0058FD25 /* CC3EAGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3EAGLView.h; sourceTree = "<group>"; };
-		A9B8E9DA152B80CD0058FD25 /* CC3EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3EAGLView.m; sourceTree = "<group>"; };
-		A9B8E9DB152B80CD0058FD25 /* CC3OpenGLES11Capabilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Capabilities.h; sourceTree = "<group>"; };
-		A9B8E9DC152B80CD0058FD25 /* CC3OpenGLES11Capabilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Capabilities.m; sourceTree = "<group>"; };
-		A9B8E9DD152B80CD0058FD25 /* CC3OpenGLES11Engine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Engine.h; sourceTree = "<group>"; };
-		A9B8E9DE152B80CD0058FD25 /* CC3OpenGLES11Engine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Engine.m; sourceTree = "<group>"; };
-		A9B8E9DF152B80CD0058FD25 /* CC3OpenGLES11Fog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Fog.h; sourceTree = "<group>"; };
-		A9B8E9E0152B80CD0058FD25 /* CC3OpenGLES11Fog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Fog.m; sourceTree = "<group>"; };
-		A9B8E9E1152B80CD0058FD25 /* CC3OpenGLES11Foundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Foundation.h; sourceTree = "<group>"; };
-		A9B8E9E2152B80CD0058FD25 /* CC3OpenGLES11Foundation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Foundation.m; sourceTree = "<group>"; };
-		A9B8E9E3152B80CD0058FD25 /* CC3OpenGLES11Hints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Hints.h; sourceTree = "<group>"; };
-		A9B8E9E4152B80CD0058FD25 /* CC3OpenGLES11Hints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Hints.m; sourceTree = "<group>"; };
-		A9B8E9E5152B80CD0058FD25 /* CC3OpenGLES11Intercept.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CC3OpenGLES11Intercept.c; sourceTree = "<group>"; };
-		A9B8E9E6152B80CD0058FD25 /* CC3OpenGLES11Intercept.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Intercept.h; sourceTree = "<group>"; };
-		A9B8E9E7152B80CD0058FD25 /* CC3OpenGLES11Lighting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Lighting.h; sourceTree = "<group>"; };
-		A9B8E9E8152B80CD0058FD25 /* CC3OpenGLES11Lighting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Lighting.m; sourceTree = "<group>"; };
-		A9B8E9E9152B80CD0058FD25 /* CC3OpenGLES11Materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Materials.h; sourceTree = "<group>"; };
-		A9B8E9EA152B80CD0058FD25 /* CC3OpenGLES11Materials.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Materials.m; sourceTree = "<group>"; };
-		A9B8E9EB152B80CD0058FD25 /* CC3OpenGLES11Matrices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Matrices.h; sourceTree = "<group>"; };
-		A9B8E9EC152B80CD0058FD25 /* CC3OpenGLES11Matrices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Matrices.m; sourceTree = "<group>"; };
-		A9B8E9ED152B80CD0058FD25 /* CC3OpenGLES11Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Platform.h; sourceTree = "<group>"; };
-		A9B8E9EE152B80CD0058FD25 /* CC3OpenGLES11Platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Platform.m; sourceTree = "<group>"; };
-		A9B8E9EF152B80CD0058FD25 /* CC3OpenGLES11State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11State.h; sourceTree = "<group>"; };
-		A9B8E9F0152B80CD0058FD25 /* CC3OpenGLES11State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11State.m; sourceTree = "<group>"; };
-		A9B8E9F1152B80CD0058FD25 /* CC3OpenGLES11StateTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11StateTracker.h; sourceTree = "<group>"; };
-		A9B8E9F2152B80CD0058FD25 /* CC3OpenGLES11StateTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11StateTracker.m; sourceTree = "<group>"; };
-		A9B8E9F3152B80CD0058FD25 /* CC3OpenGLES11Textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Textures.h; sourceTree = "<group>"; };
-		A9B8E9F4152B80CD0058FD25 /* CC3OpenGLES11Textures.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11Textures.m; sourceTree = "<group>"; };
-		A9B8E9F5152B80CD0058FD25 /* CC3OpenGLES11Utility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CC3OpenGLES11Utility.c; sourceTree = "<group>"; };
-		A9B8E9F6152B80CD0058FD25 /* CC3OpenGLES11Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11Utility.h; sourceTree = "<group>"; };
-		A9B8E9F7152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES11VertexArrays.h; sourceTree = "<group>"; };
-		A9B8E9F8152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES11VertexArrays.m; sourceTree = "<group>"; };
-		A9B8E9FA152B80CD0058FD25 /* CC3Foundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Foundation.h; sourceTree = "<group>"; };
-		A9B8E9FB152B80CD0058FD25 /* CC3Foundation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Foundation.m; sourceTree = "<group>"; };
-		A9B8E9FC152B80CD0058FD25 /* CC3GLMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3GLMatrix.h; sourceTree = "<group>"; };
-		A9B8E9FD152B80CD0058FD25 /* CC3GLMatrix.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3GLMatrix.m; sourceTree = "<group>"; };
-		A9B8E9FE152B80CD0058FD25 /* CC3Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Logging.h; sourceTree = "<group>"; };
-		A9B8E9FF152B80CD0058FD25 /* CC3Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Math.h; sourceTree = "<group>"; };
-		A9B8EA00152B80CD0058FD25 /* CC3MatrixMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MatrixMath.h; sourceTree = "<group>"; };
-		A9B8EA01152B80CD0058FD25 /* CC3Rotator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Rotator.h; sourceTree = "<group>"; };
-		A9B8EA02152B80CD0058FD25 /* CC3Rotator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Rotator.m; sourceTree = "<group>"; };
-		A9B8EA04152B80CD0058FD25 /* CC3MeshModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MeshModel.h; sourceTree = "<group>"; };
-		A9B8EA05152B80CD0058FD25 /* CC3MeshModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3MeshModel.m; sourceTree = "<group>"; };
-		A9B8EA06152B80CD0058FD25 /* CC3TargettingNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3TargettingNode.h; sourceTree = "<group>"; };
-		A9B8EA07152B80CD0058FD25 /* CC3TargettingNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3TargettingNode.m; sourceTree = "<group>"; };
-		A9B8EA08152B80CD0058FD25 /* CC3VertexArrayMeshModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3VertexArrayMeshModel.h; sourceTree = "<group>"; };
-		A9B8EA09152B80CD0058FD25 /* CC3VertexArrayMeshModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3VertexArrayMeshModel.m; sourceTree = "<group>"; };
-		A9B8EA0A152B80CD0058FD25 /* CC3World.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3World.h; sourceTree = "<group>"; };
-		A9B8EA0B152B80CD0058FD25 /* CC3World.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3World.m; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowButton48x48.png; sourceTree = "<group>"; };
@@ -733,7 +739,7 @@
 			children = (
 				A94736C8140E58E7006F410C /* Classes */,
 				A92DA78D1427B5980051AFFA /* Resources */,
-				A9B8E95A152B80CD0058FD25 /* cocos3d */,
+				A99FF398153F19F1005719A8 /* cocos3d */,
 				A9174CF815069950008A08B3 /* cocos2d */,
 				A94736C3140E5890006F410C /* Supporting Files */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1102,8 +1108,8 @@
 				A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */,
 				A92DA7A91427B5980051AFFA /* Shine48x48.png */,
 				A92DA7AA1427B5980051AFFA /* Stamp-nm.pvr */,
-				A9AE3E1F14E8C7B5002805DA /* stamp.pvr */,
 				A9AE3D7C14E46118002805DA /* Stamp.png */,
+				A907DB12153A07E100A97C02 /* Stamp.pvr */,
 				A92DA7AC1427B5980051AFFA /* SunlightButton48x48.png */,
 				A92DA7AD1427B5980051AFFA /* tex_arm.pvr */,
 				A92DA7AE1427B5980051AFFA /* tex_base.pvr */,
@@ -1156,250 +1162,254 @@
 			path = Controls;
 			sourceTree = "<group>";
 		};
-		A9B8E95A152B80CD0058FD25 /* cocos3d */ = {
+		A99FF398153F19F1005719A8 /* cocos3d */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E95B152B80CD0058FD25 /* cc3Extras */,
-				A9B8E961152B80CD0058FD25 /* cc3PVR */,
-				A9B8E99C152B80CD0058FD25 /* CCNodeController */,
-				A9B8E9A1152B80CD0058FD25 /* cocos3d */,
-				A9B8EA03152B80CD0058FD25 /* deprecated */,
+				A99FF399153F19F1005719A8 /* cc3Extras */,
+				A99FF39F153F19F1005719A8 /* cc3PVR */,
+				A99FF3DA153F19F1005719A8 /* CCNodeController */,
+				A99FF3DF153F19F1005719A8 /* cocos3d */,
+				A99FF445153F19F1005719A8 /* deprecated */,
 			);
 			name = cocos3d;
 			path = ../../cocos3d;
 			sourceTree = "<group>";
 		};
-		A9B8E95B152B80CD0058FD25 /* cc3Extras */ = {
+		A99FF399153F19F1005719A8 /* cc3Extras */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E95C152B80CD0058FD25 /* CC3ModelSampleFactory.h */,
-				A9B8E95D152B80CD0058FD25 /* CC3ModelSampleFactory.m */,
-				A9B8E95E152B80CD0058FD25 /* CC3PointParticleSamples.h */,
-				A9B8E95F152B80CD0058FD25 /* CC3PointParticleSamples.m */,
-				A9B8E960152B80CD0058FD25 /* teapot.h */,
+				A99FF39A153F19F1005719A8 /* CC3ModelSampleFactory.h */,
+				A99FF39B153F19F1005719A8 /* CC3ModelSampleFactory.m */,
+				A99FF39C153F19F1005719A8 /* CC3PointParticleSamples.h */,
+				A99FF39D153F19F1005719A8 /* CC3PointParticleSamples.m */,
+				A99FF39E153F19F1005719A8 /* teapot.h */,
 			);
 			path = cc3Extras;
 			sourceTree = "<group>";
 		};
-		A9B8E961152B80CD0058FD25 /* cc3PVR */ = {
+		A99FF39F153F19F1005719A8 /* cc3PVR */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E962152B80CD0058FD25 /* CC3IdentifiablePODExtensions.h */,
-				A9B8E963152B80CD0058FD25 /* CC3IdentifiablePODExtensions.m */,
-				A9B8E964152B80CD0058FD25 /* CC3NodePODExtensions.h */,
-				A9B8E965152B80CD0058FD25 /* CC3NodePODExtensions.mm */,
-				A9B8E966152B80CD0058FD25 /* CC3PODCamera.h */,
-				A9B8E967152B80CD0058FD25 /* CC3PODCamera.mm */,
-				A9B8E968152B80CD0058FD25 /* CC3PODLight.h */,
-				A9B8E969152B80CD0058FD25 /* CC3PODLight.mm */,
-				A9B8E96A152B80CD0058FD25 /* CC3PODMaterial.h */,
-				A9B8E96B152B80CD0058FD25 /* CC3PODMaterial.mm */,
-				A9B8E96C152B80CD0058FD25 /* CC3PODMesh.h */,
-				A9B8E96D152B80CD0058FD25 /* CC3PODMesh.mm */,
-				A9B8E96E152B80CD0058FD25 /* CC3PODMeshNode.h */,
-				A9B8E96F152B80CD0058FD25 /* CC3PODMeshNode.mm */,
-				A9B8E970152B80CD0058FD25 /* CC3PODNode.h */,
-				A9B8E971152B80CD0058FD25 /* CC3PODNode.m */,
-				A9B8E972152B80CD0058FD25 /* CC3PODResource.h */,
-				A9B8E973152B80CD0058FD25 /* CC3PODResource.mm */,
-				A9B8E974152B80CD0058FD25 /* CC3PODResourceNode.h */,
-				A9B8E975152B80CD0058FD25 /* CC3PODResourceNode.m */,
-				A9B8E976152B80CD0058FD25 /* CC3PODVertexSkinning.h */,
-				A9B8E977152B80CD0058FD25 /* CC3PODVertexSkinning.mm */,
-				A9B8E978152B80CD0058FD25 /* CC3PVRFoundation.h */,
-				A9B8E979152B80CD0058FD25 /* CC3PVRFoundation.mm */,
-				A9B8E97A152B80CD0058FD25 /* CC3PVRTModelPOD.h */,
-				A9B8E97B152B80CD0058FD25 /* CC3VertexArraysPODExtensions.h */,
-				A9B8E97C152B80CD0058FD25 /* CC3VertexArraysPODExtensions.mm */,
-				A9B8E97D152B80CD0058FD25 /* PVRT 2.10 */,
+				A99FF3A0153F19F1005719A8 /* CC3IdentifiablePODExtensions.h */,
+				A99FF3A1153F19F1005719A8 /* CC3IdentifiablePODExtensions.m */,
+				A99FF3A2153F19F1005719A8 /* CC3NodePODExtensions.h */,
+				A99FF3A3153F19F1005719A8 /* CC3NodePODExtensions.mm */,
+				A99FF3A4153F19F1005719A8 /* CC3PODCamera.h */,
+				A99FF3A5153F19F1005719A8 /* CC3PODCamera.mm */,
+				A99FF3A6153F19F1005719A8 /* CC3PODLight.h */,
+				A99FF3A7153F19F1005719A8 /* CC3PODLight.mm */,
+				A99FF3A8153F19F1005719A8 /* CC3PODMaterial.h */,
+				A99FF3A9153F19F1005719A8 /* CC3PODMaterial.mm */,
+				A99FF3AA153F19F1005719A8 /* CC3PODMesh.h */,
+				A99FF3AB153F19F1005719A8 /* CC3PODMesh.mm */,
+				A99FF3AC153F19F1005719A8 /* CC3PODMeshNode.h */,
+				A99FF3AD153F19F1005719A8 /* CC3PODMeshNode.mm */,
+				A99FF3AE153F19F1005719A8 /* CC3PODNode.h */,
+				A99FF3AF153F19F1005719A8 /* CC3PODNode.m */,
+				A99FF3B0153F19F1005719A8 /* CC3PODResource.h */,
+				A99FF3B1153F19F1005719A8 /* CC3PODResource.mm */,
+				A99FF3B2153F19F1005719A8 /* CC3PODResourceNode.h */,
+				A99FF3B3153F19F1005719A8 /* CC3PODResourceNode.m */,
+				A99FF3B4153F19F1005719A8 /* CC3PODVertexSkinning.h */,
+				A99FF3B5153F19F1005719A8 /* CC3PODVertexSkinning.mm */,
+				A99FF3B6153F19F1005719A8 /* CC3PVRFoundation.h */,
+				A99FF3B7153F19F1005719A8 /* CC3PVRFoundation.mm */,
+				A99FF3B8153F19F1005719A8 /* CC3PVRTModelPOD.h */,
+				A99FF3B9153F19F1005719A8 /* CC3VertexArraysPODExtensions.h */,
+				A99FF3BA153F19F1005719A8 /* CC3VertexArraysPODExtensions.mm */,
+				A99FF3BB153F19F1005719A8 /* PVRT 2.10 */,
 			);
 			path = cc3PVR;
 			sourceTree = "<group>";
 		};
-		A9B8E97D152B80CD0058FD25 /* PVRT 2.10 */ = {
+		A99FF3BB153F19F1005719A8 /* PVRT 2.10 */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E97E152B80CD0058FD25 /* OGLES */,
-				A9B8E983152B80CD0058FD25 /* PVRT_Removed_Files.txt */,
-				A9B8E984152B80CD0058FD25 /* PVRTBoneBatch.cpp */,
-				A9B8E985152B80CD0058FD25 /* PVRTBoneBatch.h */,
-				A9B8E986152B80CD0058FD25 /* PVRTError.cpp */,
-				A9B8E987152B80CD0058FD25 /* PVRTError.h */,
-				A9B8E988152B80CD0058FD25 /* PVRTFixedPoint.cpp */,
-				A9B8E989152B80CD0058FD25 /* PVRTFixedPoint.h */,
-				A9B8E98A152B80CD0058FD25 /* PVRTGlobal.h */,
-				A9B8E98B152B80CD0058FD25 /* PVRTMatrix.h */,
-				A9B8E98C152B80CD0058FD25 /* PVRTMatrixF.cpp */,
-				A9B8E98D152B80CD0058FD25 /* PVRTMemoryFileSystem.h */,
-				A9B8E98E152B80CD0058FD25 /* PVRTModelPOD.cpp */,
-				A9B8E98F152B80CD0058FD25 /* PVRTModelPOD.h */,
-				A9B8E990152B80CD0058FD25 /* PVRTQuaternion.h */,
-				A9B8E991152B80CD0058FD25 /* PVRTQuaternionF.cpp */,
-				A9B8E992152B80CD0058FD25 /* PVRTResourceFile.cpp */,
-				A9B8E993152B80CD0058FD25 /* PVRTResourceFile.h */,
-				A9B8E994152B80CD0058FD25 /* PVRTString.cpp */,
-				A9B8E995152B80CD0058FD25 /* PVRTString.h */,
-				A9B8E996152B80CD0058FD25 /* PVRTTrans.cpp */,
-				A9B8E997152B80CD0058FD25 /* PVRTTrans.h */,
-				A9B8E998152B80CD0058FD25 /* PVRTVector.cpp */,
-				A9B8E999152B80CD0058FD25 /* PVRTVector.h */,
-				A9B8E99A152B80CD0058FD25 /* PVRTVertex.cpp */,
-				A9B8E99B152B80CD0058FD25 /* PVRTVertex.h */,
+				A99FF3BC153F19F1005719A8 /* OGLES */,
+				A99FF3C1153F19F1005719A8 /* PVRT_Removed_Files.txt */,
+				A99FF3C2153F19F1005719A8 /* PVRTBoneBatch.cpp */,
+				A99FF3C3153F19F1005719A8 /* PVRTBoneBatch.h */,
+				A99FF3C4153F19F1005719A8 /* PVRTError.cpp */,
+				A99FF3C5153F19F1005719A8 /* PVRTError.h */,
+				A99FF3C6153F19F1005719A8 /* PVRTFixedPoint.cpp */,
+				A99FF3C7153F19F1005719A8 /* PVRTFixedPoint.h */,
+				A99FF3C8153F19F1005719A8 /* PVRTGlobal.h */,
+				A99FF3C9153F19F1005719A8 /* PVRTMatrix.h */,
+				A99FF3CA153F19F1005719A8 /* PVRTMatrixF.cpp */,
+				A99FF3CB153F19F1005719A8 /* PVRTMemoryFileSystem.h */,
+				A99FF3CC153F19F1005719A8 /* PVRTModelPOD.cpp */,
+				A99FF3CD153F19F1005719A8 /* PVRTModelPOD.h */,
+				A99FF3CE153F19F1005719A8 /* PVRTQuaternion.h */,
+				A99FF3CF153F19F1005719A8 /* PVRTQuaternionF.cpp */,
+				A99FF3D0153F19F1005719A8 /* PVRTResourceFile.cpp */,
+				A99FF3D1153F19F1005719A8 /* PVRTResourceFile.h */,
+				A99FF3D2153F19F1005719A8 /* PVRTString.cpp */,
+				A99FF3D3153F19F1005719A8 /* PVRTString.h */,
+				A99FF3D4153F19F1005719A8 /* PVRTTrans.cpp */,
+				A99FF3D5153F19F1005719A8 /* PVRTTrans.h */,
+				A99FF3D6153F19F1005719A8 /* PVRTVector.cpp */,
+				A99FF3D7153F19F1005719A8 /* PVRTVector.h */,
+				A99FF3D8153F19F1005719A8 /* PVRTVertex.cpp */,
+				A99FF3D9153F19F1005719A8 /* PVRTVertex.h */,
 			);
 			path = "PVRT 2.10";
 			sourceTree = "<group>";
 		};
-		A9B8E97E152B80CD0058FD25 /* OGLES */ = {
+		A99FF3BC153F19F1005719A8 /* OGLES */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E97F152B80CD0058FD25 /* PVRTContext.h */,
-				A9B8E980152B80CD0058FD25 /* PVRTFixedPointAPI.h */,
-				A9B8E981152B80CD0058FD25 /* PVRTglesExt.cpp */,
-				A9B8E982152B80CD0058FD25 /* PVRTglesExt.h */,
+				A99FF3BD153F19F1005719A8 /* PVRTContext.h */,
+				A99FF3BE153F19F1005719A8 /* PVRTFixedPointAPI.h */,
+				A99FF3BF153F19F1005719A8 /* PVRTglesExt.cpp */,
+				A99FF3C0153F19F1005719A8 /* PVRTglesExt.h */,
 			);
 			path = OGLES;
 			sourceTree = "<group>";
 		};
-		A9B8E99C152B80CD0058FD25 /* CCNodeController */ = {
+		A99FF3DA153F19F1005719A8 /* CCNodeController */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E99D152B80CD0058FD25 /* CCNodeController.h */,
-				A9B8E99E152B80CD0058FD25 /* CCNodeController.m */,
-				A9B8E99F152B80CD0058FD25 /* ControllableCCLayer.h */,
-				A9B8E9A0152B80CD0058FD25 /* ControllableCCLayer.m */,
+				A99FF3DB153F19F1005719A8 /* CCNodeController.h */,
+				A99FF3DC153F19F1005719A8 /* CCNodeController.m */,
+				A99FF3DD153F19F1005719A8 /* ControllableCCLayer.h */,
+				A99FF3DE153F19F1005719A8 /* ControllableCCLayer.m */,
 			);
 			path = CCNodeController;
 			sourceTree = "<group>";
 		};
-		A9B8E9A1152B80CD0058FD25 /* cocos3d */ = {
+		A99FF3DF153F19F1005719A8 /* cocos3d */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E9A2152B80CD0058FD25 /* CC3ActionInterval.h */,
-				A9B8E9A3152B80CD0058FD25 /* CC3ActionInterval.m */,
-				A9B8E9A4152B80CD0058FD25 /* CC3Billboard.h */,
-				A9B8E9A5152B80CD0058FD25 /* CC3Billboard.m */,
-				A9B8E9A6152B80CD0058FD25 /* CC3BoundingVolumes.h */,
-				A9B8E9A7152B80CD0058FD25 /* CC3BoundingVolumes.m */,
-				A9B8E9A8152B80CD0058FD25 /* CC3Camera.h */,
-				A9B8E9A9152B80CD0058FD25 /* CC3Camera.m */,
-				A9B8E9AA152B80CD0058FD25 /* CC3Fog.h */,
-				A9B8E9AB152B80CD0058FD25 /* CC3Fog.m */,
-				A9B8E9AC152B80CD0058FD25 /* CC3Identifiable.h */,
-				A9B8E9AD152B80CD0058FD25 /* CC3Identifiable.m */,
-				A9B8E9AE152B80CD0058FD25 /* CC3Layer.h */,
-				A9B8E9AF152B80CD0058FD25 /* CC3Layer.m */,
-				A9B8E9B0152B80CD0058FD25 /* CC3Light.h */,
-				A9B8E9B1152B80CD0058FD25 /* CC3Light.m */,
-				A9B8E9B2152B80CD0058FD25 /* CC3Material.h */,
-				A9B8E9B3152B80CD0058FD25 /* CC3Material.m */,
-				A9B8E9B4152B80CD0058FD25 /* CC3Mesh.h */,
-				A9B8E9B5152B80CD0058FD25 /* CC3Mesh.m */,
-				A9B8E9B6152B80CD0058FD25 /* CC3MeshNode.h */,
-				A9B8E9B7152B80CD0058FD25 /* CC3MeshNode.m */,
-				A9B8E9B8152B80CD0058FD25 /* CC3Node.h */,
-				A9B8E9B9152B80CD0058FD25 /* CC3Node.m */,
-				A9B8E9BA152B80CD0058FD25 /* CC3NodeAnimation.h */,
-				A9B8E9BB152B80CD0058FD25 /* CC3NodeAnimation.m */,
-				A9B8E9BC152B80CD0058FD25 /* CC3NodeSequencer.h */,
-				A9B8E9BD152B80CD0058FD25 /* CC3NodeSequencer.m */,
-				A9B8E9BE152B80CD0058FD25 /* CC3NodeVisitor.h */,
-				A9B8E9BF152B80CD0058FD25 /* CC3NodeVisitor.m */,
-				A9B8E9C0152B80CD0058FD25 /* CC3ParametricMeshNodes.h */,
-				A9B8E9C1152B80CD0058FD25 /* CC3ParametricMeshNodes.m */,
-				A9B8E9C2152B80CD0058FD25 /* CC3PerformanceStatistics.h */,
-				A9B8E9C3152B80CD0058FD25 /* CC3PerformanceStatistics.m */,
-				A9B8E9C4152B80CD0058FD25 /* CC3PointParticles.h */,
-				A9B8E9C5152B80CD0058FD25 /* CC3PointParticles.m */,
-				A9B8E9C6152B80CD0058FD25 /* CC3Resource.h */,
-				A9B8E9C7152B80CD0058FD25 /* CC3Resource.m */,
-				A9B8E9C8152B80CD0058FD25 /* CC3ResourceNode.h */,
-				A9B8E9C9152B80CD0058FD25 /* CC3ResourceNode.m */,
-				A9B8E9CA152B80CD0058FD25 /* CC3Scene.h */,
-				A9B8E9CB152B80CD0058FD25 /* CC3Scene.m */,
-				A9B8E9CC152B80CD0058FD25 /* CC3ShadowVolumes.h */,
-				A9B8E9CD152B80CD0058FD25 /* CC3ShadowVolumes.m */,
-				A9B8E9CE152B80CD0058FD25 /* CC3Texture.h */,
-				A9B8E9CF152B80CD0058FD25 /* CC3Texture.m */,
-				A9B8E9D0152B80CD0058FD25 /* CC3TextureUnit.h */,
-				A9B8E9D1152B80CD0058FD25 /* CC3TextureUnit.m */,
-				A9B8E9D2152B80CD0058FD25 /* CC3VertexArrayMesh.h */,
-				A9B8E9D3152B80CD0058FD25 /* CC3VertexArrayMesh.m */,
-				A9B8E9D4152B80CD0058FD25 /* CC3VertexArrays.h */,
-				A9B8E9D5152B80CD0058FD25 /* CC3VertexArrays.m */,
-				A9B8E9D6152B80CD0058FD25 /* CC3VertexSkinning.h */,
-				A9B8E9D7152B80CD0058FD25 /* CC3VertexSkinning.m */,
-				A9B8E9D8152B80CD0058FD25 /* OpenGLES11 */,
-				A9B8E9F9152B80CD0058FD25 /* Utility */,
+				A99FF3E0153F19F1005719A8 /* CC3ActionInterval.h */,
+				A99FF3E1153F19F1005719A8 /* CC3ActionInterval.m */,
+				A99FF3E2153F19F1005719A8 /* CC3Billboard.h */,
+				A99FF3E3153F19F1005719A8 /* CC3Billboard.m */,
+				A99FF3E4153F19F1005719A8 /* CC3BoundingVolumes.h */,
+				A99FF3E5153F19F1005719A8 /* CC3BoundingVolumes.m */,
+				A99FF3E6153F19F1005719A8 /* CC3Camera.h */,
+				A99FF3E7153F19F1005719A8 /* CC3Camera.m */,
+				A99FF3E8153F19F1005719A8 /* CC3Fog.h */,
+				A99FF3E9153F19F1005719A8 /* CC3Fog.m */,
+				A99FF3EA153F19F1005719A8 /* CC3Identifiable.h */,
+				A99FF3EB153F19F1005719A8 /* CC3Identifiable.m */,
+				A99FF3EC153F19F1005719A8 /* CC3Layer.h */,
+				A99FF3ED153F19F1005719A8 /* CC3Layer.m */,
+				A99FF3EE153F19F1005719A8 /* CC3Light.h */,
+				A99FF3EF153F19F1005719A8 /* CC3Light.m */,
+				A99FF3F0153F19F1005719A8 /* CC3Material.h */,
+				A99FF3F1153F19F1005719A8 /* CC3Material.m */,
+				A99FF3F2153F19F1005719A8 /* CC3Mesh.h */,
+				A99FF3F3153F19F1005719A8 /* CC3Mesh.m */,
+				A99FF3F4153F19F1005719A8 /* CC3MeshNode.h */,
+				A99FF3F5153F19F1005719A8 /* CC3MeshNode.m */,
+				A99FF3F6153F19F1005719A8 /* CC3Node.h */,
+				A99FF3F7153F19F1005719A8 /* CC3Node.m */,
+				A99FF3F8153F19F1005719A8 /* CC3NodeAnimation.h */,
+				A99FF3F9153F19F1005719A8 /* CC3NodeAnimation.m */,
+				A99FF3FA153F19F1005719A8 /* CC3NodeSequencer.h */,
+				A99FF3FB153F19F1005719A8 /* CC3NodeSequencer.m */,
+				A99FF3FC153F19F1005719A8 /* CC3NodeVisitor.h */,
+				A99FF3FD153F19F1005719A8 /* CC3NodeVisitor.m */,
+				A99FF3FE153F19F1005719A8 /* CC3ParametricMeshNodes.h */,
+				A99FF3FF153F19F1005719A8 /* CC3ParametricMeshNodes.m */,
+				A99FF400153F19F1005719A8 /* CC3PerformanceStatistics.h */,
+				A99FF401153F19F1005719A8 /* CC3PerformanceStatistics.m */,
+				A99FF402153F19F1005719A8 /* CC3PointParticles.h */,
+				A99FF403153F19F1005719A8 /* CC3PointParticles.m */,
+				A99FF404153F19F1005719A8 /* CC3Resource.h */,
+				A99FF405153F19F1005719A8 /* CC3Resource.m */,
+				A99FF406153F19F1005719A8 /* CC3ResourceNode.h */,
+				A99FF407153F19F1005719A8 /* CC3ResourceNode.m */,
+				A99FF408153F19F1005719A8 /* CC3Scene.h */,
+				A99FF409153F19F1005719A8 /* CC3Scene.m */,
+				A99FF40A153F19F1005719A8 /* CC3ShadowVolumes.h */,
+				A99FF40B153F19F1005719A8 /* CC3ShadowVolumes.m */,
+				A99FF40C153F19F1005719A8 /* CC3Texture.h */,
+				A99FF40D153F19F1005719A8 /* CC3Texture.m */,
+				A99FF40E153F19F1005719A8 /* CC3TextureUnit.h */,
+				A99FF40F153F19F1005719A8 /* CC3TextureUnit.m */,
+				A99FF410153F19F1005719A8 /* CC3VertexArrayMesh.h */,
+				A99FF411153F19F1005719A8 /* CC3VertexArrayMesh.m */,
+				A99FF412153F19F1005719A8 /* CC3VertexArrays.h */,
+				A99FF413153F19F1005719A8 /* CC3VertexArrays.m */,
+				A99FF414153F19F1005719A8 /* CC3VertexSkinning.h */,
+				A99FF415153F19F1005719A8 /* CC3VertexSkinning.m */,
+				A99FF416153F19F1005719A8 /* OpenGLES11 */,
+				A99FF437153F19F1005719A8 /* Utility */,
 			);
 			path = cocos3d;
 			sourceTree = "<group>";
 		};
-		A9B8E9D8152B80CD0058FD25 /* OpenGLES11 */ = {
+		A99FF416153F19F1005719A8 /* OpenGLES11 */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E9D9152B80CD0058FD25 /* CC3EAGLView.h */,
-				A9B8E9DA152B80CD0058FD25 /* CC3EAGLView.m */,
-				A9B8E9DB152B80CD0058FD25 /* CC3OpenGLES11Capabilities.h */,
-				A9B8E9DC152B80CD0058FD25 /* CC3OpenGLES11Capabilities.m */,
-				A9B8E9DD152B80CD0058FD25 /* CC3OpenGLES11Engine.h */,
-				A9B8E9DE152B80CD0058FD25 /* CC3OpenGLES11Engine.m */,
-				A9B8E9DF152B80CD0058FD25 /* CC3OpenGLES11Fog.h */,
-				A9B8E9E0152B80CD0058FD25 /* CC3OpenGLES11Fog.m */,
-				A9B8E9E1152B80CD0058FD25 /* CC3OpenGLES11Foundation.h */,
-				A9B8E9E2152B80CD0058FD25 /* CC3OpenGLES11Foundation.m */,
-				A9B8E9E3152B80CD0058FD25 /* CC3OpenGLES11Hints.h */,
-				A9B8E9E4152B80CD0058FD25 /* CC3OpenGLES11Hints.m */,
-				A9B8E9E5152B80CD0058FD25 /* CC3OpenGLES11Intercept.c */,
-				A9B8E9E6152B80CD0058FD25 /* CC3OpenGLES11Intercept.h */,
-				A9B8E9E7152B80CD0058FD25 /* CC3OpenGLES11Lighting.h */,
-				A9B8E9E8152B80CD0058FD25 /* CC3OpenGLES11Lighting.m */,
-				A9B8E9E9152B80CD0058FD25 /* CC3OpenGLES11Materials.h */,
-				A9B8E9EA152B80CD0058FD25 /* CC3OpenGLES11Materials.m */,
-				A9B8E9EB152B80CD0058FD25 /* CC3OpenGLES11Matrices.h */,
-				A9B8E9EC152B80CD0058FD25 /* CC3OpenGLES11Matrices.m */,
-				A9B8E9ED152B80CD0058FD25 /* CC3OpenGLES11Platform.h */,
-				A9B8E9EE152B80CD0058FD25 /* CC3OpenGLES11Platform.m */,
-				A9B8E9EF152B80CD0058FD25 /* CC3OpenGLES11State.h */,
-				A9B8E9F0152B80CD0058FD25 /* CC3OpenGLES11State.m */,
-				A9B8E9F1152B80CD0058FD25 /* CC3OpenGLES11StateTracker.h */,
-				A9B8E9F2152B80CD0058FD25 /* CC3OpenGLES11StateTracker.m */,
-				A9B8E9F3152B80CD0058FD25 /* CC3OpenGLES11Textures.h */,
-				A9B8E9F4152B80CD0058FD25 /* CC3OpenGLES11Textures.m */,
-				A9B8E9F5152B80CD0058FD25 /* CC3OpenGLES11Utility.c */,
-				A9B8E9F6152B80CD0058FD25 /* CC3OpenGLES11Utility.h */,
-				A9B8E9F7152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.h */,
-				A9B8E9F8152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.m */,
+				A99FF417153F19F1005719A8 /* CC3EAGLView.h */,
+				A99FF418153F19F1005719A8 /* CC3EAGLView.m */,
+				A99FF419153F19F1005719A8 /* CC3OpenGLES11Capabilities.h */,
+				A99FF41A153F19F1005719A8 /* CC3OpenGLES11Capabilities.m */,
+				A99FF41B153F19F1005719A8 /* CC3OpenGLES11Engine.h */,
+				A99FF41C153F19F1005719A8 /* CC3OpenGLES11Engine.m */,
+				A99FF41D153F19F1005719A8 /* CC3OpenGLES11Fog.h */,
+				A99FF41E153F19F1005719A8 /* CC3OpenGLES11Fog.m */,
+				A99FF41F153F19F1005719A8 /* CC3OpenGLES11Foundation.h */,
+				A99FF420153F19F1005719A8 /* CC3OpenGLES11Foundation.m */,
+				A99FF421153F19F1005719A8 /* CC3OpenGLES11Hints.h */,
+				A99FF422153F19F1005719A8 /* CC3OpenGLES11Hints.m */,
+				A99FF423153F19F1005719A8 /* CC3OpenGLES11Intercept.c */,
+				A99FF424153F19F1005719A8 /* CC3OpenGLES11Intercept.h */,
+				A99FF425153F19F1005719A8 /* CC3OpenGLES11Lighting.h */,
+				A99FF426153F19F1005719A8 /* CC3OpenGLES11Lighting.m */,
+				A99FF427153F19F1005719A8 /* CC3OpenGLES11Materials.h */,
+				A99FF428153F19F1005719A8 /* CC3OpenGLES11Materials.m */,
+				A99FF429153F19F1005719A8 /* CC3OpenGLES11Matrices.h */,
+				A99FF42A153F19F1005719A8 /* CC3OpenGLES11Matrices.m */,
+				A99FF42B153F19F1005719A8 /* CC3OpenGLES11Platform.h */,
+				A99FF42C153F19F1005719A8 /* CC3OpenGLES11Platform.m */,
+				A99FF42D153F19F1005719A8 /* CC3OpenGLES11State.h */,
+				A99FF42E153F19F1005719A8 /* CC3OpenGLES11State.m */,
+				A99FF42F153F19F1005719A8 /* CC3OpenGLES11StateTracker.h */,
+				A99FF430153F19F1005719A8 /* CC3OpenGLES11StateTracker.m */,
+				A99FF431153F19F1005719A8 /* CC3OpenGLES11Textures.h */,
+				A99FF432153F19F1005719A8 /* CC3OpenGLES11Textures.m */,
+				A99FF433153F19F1005719A8 /* CC3OpenGLES11Utility.c */,
+				A99FF434153F19F1005719A8 /* CC3OpenGLES11Utility.h */,
+				A99FF435153F19F1005719A8 /* CC3OpenGLES11VertexArrays.h */,
+				A99FF436153F19F1005719A8 /* CC3OpenGLES11VertexArrays.m */,
 			);
 			path = OpenGLES11;
 			sourceTree = "<group>";
 		};
-		A9B8E9F9152B80CD0058FD25 /* Utility */ = {
+		A99FF437153F19F1005719A8 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8E9FA152B80CD0058FD25 /* CC3Foundation.h */,
-				A9B8E9FB152B80CD0058FD25 /* CC3Foundation.m */,
-				A9B8E9FC152B80CD0058FD25 /* CC3GLMatrix.h */,
-				A9B8E9FD152B80CD0058FD25 /* CC3GLMatrix.m */,
-				A9B8E9FE152B80CD0058FD25 /* CC3Logging.h */,
-				A9B8E9FF152B80CD0058FD25 /* CC3Math.h */,
-				A9B8EA00152B80CD0058FD25 /* CC3MatrixMath.h */,
-				A9B8EA01152B80CD0058FD25 /* CC3Rotator.h */,
-				A9B8EA02152B80CD0058FD25 /* CC3Rotator.m */,
+				A99FF438153F19F1005719A8 /* CC3CC2Extensions.h */,
+				A99FF439153F19F1005719A8 /* CC3CC2Extensions.m */,
+				A99FF43A153F19F1005719A8 /* CC3Foundation.h */,
+				A99FF43B153F19F1005719A8 /* CC3Foundation.m */,
+				A99FF43C153F19F1005719A8 /* CC3GLMatrix.h */,
+				A99FF43D153F19F1005719A8 /* CC3GLMatrix.m */,
+				A99FF43E153F19F1005719A8 /* CC3IOSExtensions.h */,
+				A99FF43F153F19F1005719A8 /* CC3IOSExtensions.m */,
+				A99FF440153F19F1005719A8 /* CC3Logging.h */,
+				A99FF441153F19F1005719A8 /* CC3Math.h */,
+				A99FF442153F19F1005719A8 /* CC3MatrixMath.h */,
+				A99FF443153F19F1005719A8 /* CC3Rotator.h */,
+				A99FF444153F19F1005719A8 /* CC3Rotator.m */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
 		};
-		A9B8EA03152B80CD0058FD25 /* deprecated */ = {
+		A99FF445153F19F1005719A8 /* deprecated */ = {
 			isa = PBXGroup;
 			children = (
-				A9B8EA04152B80CD0058FD25 /* CC3MeshModel.h */,
-				A9B8EA05152B80CD0058FD25 /* CC3MeshModel.m */,
-				A9B8EA06152B80CD0058FD25 /* CC3TargettingNode.h */,
-				A9B8EA07152B80CD0058FD25 /* CC3TargettingNode.m */,
-				A9B8EA08152B80CD0058FD25 /* CC3VertexArrayMeshModel.h */,
-				A9B8EA09152B80CD0058FD25 /* CC3VertexArrayMeshModel.m */,
-				A9B8EA0A152B80CD0058FD25 /* CC3World.h */,
-				A9B8EA0B152B80CD0058FD25 /* CC3World.m */,
+				A99FF446153F19F1005719A8 /* CC3MeshModel.h */,
+				A99FF447153F19F1005719A8 /* CC3MeshModel.m */,
+				A99FF448153F19F1005719A8 /* CC3TargettingNode.h */,
+				A99FF449153F19F1005719A8 /* CC3TargettingNode.m */,
+				A99FF44A153F19F1005719A8 /* CC3VertexArrayMeshModel.h */,
+				A99FF44B153F19F1005719A8 /* CC3VertexArrayMeshModel.m */,
+				A99FF44C153F19F1005719A8 /* CC3World.h */,
+				A99FF44D153F19F1005719A8 /* CC3World.m */,
 			);
 			path = deprecated;
 			sourceTree = "<group>";
@@ -1496,7 +1506,6 @@
 				A933817014E16A9200FCA181 /* BeachBall.pod in Resources */,
 				A95A5C5714E45AC00013359F /* Crate.png in Resources */,
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
-				A9AE3E2014E8C7B6002805DA /* stamp.pvr in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
 				A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */,
 				A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */,
@@ -1504,7 +1513,8 @@
 				A9D58DBC14F5B44500C3A778 /* ShadowButton48x48.png in Resources */,
 				A92D8A0814F6B377009458BE /* ShadowButtonLatched48x48.png in Resources */,
 				A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */,
-				A9B8EA1C152B80CD0058FD25 /* PVRT_Removed_Files.txt in Resources */,
+				A907DB13153A07E100A97C02 /* Stamp.pvr in Resources */,
+				A99FF45E153F19F1005719A8 /* PVRT_Removed_Files.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1618,86 +1628,88 @@
 				A9174E2A15069951008A08B3 /* CJSONDeserializer.m in Sources */,
 				A9174E2B15069951008A08B3 /* CJSONScanner.m in Sources */,
 				A9174E2C15069951008A08B3 /* CJSONSerializer.m in Sources */,
-				A9B8EA0C152B80CD0058FD25 /* CC3ModelSampleFactory.m in Sources */,
-				A9B8EA0D152B80CD0058FD25 /* CC3PointParticleSamples.m in Sources */,
-				A9B8EA0E152B80CD0058FD25 /* CC3IdentifiablePODExtensions.m in Sources */,
-				A9B8EA0F152B80CD0058FD25 /* CC3NodePODExtensions.mm in Sources */,
-				A9B8EA10152B80CD0058FD25 /* CC3PODCamera.mm in Sources */,
-				A9B8EA11152B80CD0058FD25 /* CC3PODLight.mm in Sources */,
-				A9B8EA12152B80CD0058FD25 /* CC3PODMaterial.mm in Sources */,
-				A9B8EA13152B80CD0058FD25 /* CC3PODMesh.mm in Sources */,
-				A9B8EA14152B80CD0058FD25 /* CC3PODMeshNode.mm in Sources */,
-				A9B8EA15152B80CD0058FD25 /* CC3PODNode.m in Sources */,
-				A9B8EA16152B80CD0058FD25 /* CC3PODResource.mm in Sources */,
-				A9B8EA17152B80CD0058FD25 /* CC3PODResourceNode.m in Sources */,
-				A9B8EA18152B80CD0058FD25 /* CC3PODVertexSkinning.mm in Sources */,
-				A9B8EA19152B80CD0058FD25 /* CC3PVRFoundation.mm in Sources */,
-				A9B8EA1A152B80CD0058FD25 /* CC3VertexArraysPODExtensions.mm in Sources */,
-				A9B8EA1B152B80CD0058FD25 /* PVRTglesExt.cpp in Sources */,
-				A9B8EA1D152B80CD0058FD25 /* PVRTBoneBatch.cpp in Sources */,
-				A9B8EA1E152B80CD0058FD25 /* PVRTError.cpp in Sources */,
-				A9B8EA1F152B80CD0058FD25 /* PVRTFixedPoint.cpp in Sources */,
-				A9B8EA20152B80CD0058FD25 /* PVRTMatrixF.cpp in Sources */,
-				A9B8EA21152B80CD0058FD25 /* PVRTModelPOD.cpp in Sources */,
-				A9B8EA22152B80CD0058FD25 /* PVRTQuaternionF.cpp in Sources */,
-				A9B8EA23152B80CD0058FD25 /* PVRTResourceFile.cpp in Sources */,
-				A9B8EA24152B80CD0058FD25 /* PVRTString.cpp in Sources */,
-				A9B8EA25152B80CD0058FD25 /* PVRTTrans.cpp in Sources */,
-				A9B8EA26152B80CD0058FD25 /* PVRTVector.cpp in Sources */,
-				A9B8EA27152B80CD0058FD25 /* PVRTVertex.cpp in Sources */,
-				A9B8EA28152B80CD0058FD25 /* CCNodeController.m in Sources */,
-				A9B8EA29152B80CD0058FD25 /* ControllableCCLayer.m in Sources */,
-				A9B8EA2A152B80CD0058FD25 /* CC3ActionInterval.m in Sources */,
-				A9B8EA2B152B80CD0058FD25 /* CC3Billboard.m in Sources */,
-				A9B8EA2C152B80CD0058FD25 /* CC3BoundingVolumes.m in Sources */,
-				A9B8EA2D152B80CD0058FD25 /* CC3Camera.m in Sources */,
-				A9B8EA2E152B80CD0058FD25 /* CC3Fog.m in Sources */,
-				A9B8EA2F152B80CD0058FD25 /* CC3Identifiable.m in Sources */,
-				A9B8EA30152B80CD0058FD25 /* CC3Layer.m in Sources */,
-				A9B8EA31152B80CD0058FD25 /* CC3Light.m in Sources */,
-				A9B8EA32152B80CD0058FD25 /* CC3Material.m in Sources */,
-				A9B8EA33152B80CD0058FD25 /* CC3Mesh.m in Sources */,
-				A9B8EA34152B80CD0058FD25 /* CC3MeshNode.m in Sources */,
-				A9B8EA35152B80CD0058FD25 /* CC3Node.m in Sources */,
-				A9B8EA36152B80CD0058FD25 /* CC3NodeAnimation.m in Sources */,
-				A9B8EA37152B80CD0058FD25 /* CC3NodeSequencer.m in Sources */,
-				A9B8EA38152B80CD0058FD25 /* CC3NodeVisitor.m in Sources */,
-				A9B8EA39152B80CD0058FD25 /* CC3ParametricMeshNodes.m in Sources */,
-				A9B8EA3A152B80CD0058FD25 /* CC3PerformanceStatistics.m in Sources */,
-				A9B8EA3B152B80CD0058FD25 /* CC3PointParticles.m in Sources */,
-				A9B8EA3C152B80CD0058FD25 /* CC3Resource.m in Sources */,
-				A9B8EA3D152B80CD0058FD25 /* CC3ResourceNode.m in Sources */,
-				A9B8EA3E152B80CD0058FD25 /* CC3Scene.m in Sources */,
-				A9B8EA3F152B80CD0058FD25 /* CC3ShadowVolumes.m in Sources */,
-				A9B8EA40152B80CD0058FD25 /* CC3Texture.m in Sources */,
-				A9B8EA41152B80CD0058FD25 /* CC3TextureUnit.m in Sources */,
-				A9B8EA42152B80CD0058FD25 /* CC3VertexArrayMesh.m in Sources */,
-				A9B8EA43152B80CD0058FD25 /* CC3VertexArrays.m in Sources */,
-				A9B8EA44152B80CD0058FD25 /* CC3VertexSkinning.m in Sources */,
-				A9B8EA45152B80CD0058FD25 /* CC3EAGLView.m in Sources */,
-				A9B8EA46152B80CD0058FD25 /* CC3OpenGLES11Capabilities.m in Sources */,
-				A9B8EA47152B80CD0058FD25 /* CC3OpenGLES11Engine.m in Sources */,
-				A9B8EA48152B80CD0058FD25 /* CC3OpenGLES11Fog.m in Sources */,
-				A9B8EA49152B80CD0058FD25 /* CC3OpenGLES11Foundation.m in Sources */,
-				A9B8EA4A152B80CD0058FD25 /* CC3OpenGLES11Hints.m in Sources */,
-				A9B8EA4B152B80CD0058FD25 /* CC3OpenGLES11Intercept.c in Sources */,
-				A9B8EA4C152B80CD0058FD25 /* CC3OpenGLES11Lighting.m in Sources */,
-				A9B8EA4D152B80CD0058FD25 /* CC3OpenGLES11Materials.m in Sources */,
-				A9B8EA4E152B80CD0058FD25 /* CC3OpenGLES11Matrices.m in Sources */,
-				A9B8EA4F152B80CD0058FD25 /* CC3OpenGLES11Platform.m in Sources */,
-				A9B8EA50152B80CD0058FD25 /* CC3OpenGLES11State.m in Sources */,
-				A9B8EA51152B80CD0058FD25 /* CC3OpenGLES11StateTracker.m in Sources */,
-				A9B8EA52152B80CD0058FD25 /* CC3OpenGLES11Textures.m in Sources */,
-				A9B8EA53152B80CD0058FD25 /* CC3OpenGLES11Utility.c in Sources */,
-				A9B8EA54152B80CD0058FD25 /* CC3OpenGLES11VertexArrays.m in Sources */,
-				A9B8EA55152B80CD0058FD25 /* CC3Foundation.m in Sources */,
-				A9B8EA56152B80CD0058FD25 /* CC3GLMatrix.m in Sources */,
-				A9B8EA57152B80CD0058FD25 /* CC3Rotator.m in Sources */,
-				A9B8EA58152B80CD0058FD25 /* CC3MeshModel.m in Sources */,
-				A9B8EA59152B80CD0058FD25 /* CC3TargettingNode.m in Sources */,
-				A9B8EA5A152B80CD0058FD25 /* CC3VertexArrayMeshModel.m in Sources */,
-				A9B8EA5B152B80CD0058FD25 /* CC3World.m in Sources */,
 				A9EBA32615376A4E007FFE0C /* HUDScene.m in Sources */,
+				A99FF44E153F19F1005719A8 /* CC3ModelSampleFactory.m in Sources */,
+				A99FF44F153F19F1005719A8 /* CC3PointParticleSamples.m in Sources */,
+				A99FF450153F19F1005719A8 /* CC3IdentifiablePODExtensions.m in Sources */,
+				A99FF451153F19F1005719A8 /* CC3NodePODExtensions.mm in Sources */,
+				A99FF452153F19F1005719A8 /* CC3PODCamera.mm in Sources */,
+				A99FF453153F19F1005719A8 /* CC3PODLight.mm in Sources */,
+				A99FF454153F19F1005719A8 /* CC3PODMaterial.mm in Sources */,
+				A99FF455153F19F1005719A8 /* CC3PODMesh.mm in Sources */,
+				A99FF456153F19F1005719A8 /* CC3PODMeshNode.mm in Sources */,
+				A99FF457153F19F1005719A8 /* CC3PODNode.m in Sources */,
+				A99FF458153F19F1005719A8 /* CC3PODResource.mm in Sources */,
+				A99FF459153F19F1005719A8 /* CC3PODResourceNode.m in Sources */,
+				A99FF45A153F19F1005719A8 /* CC3PODVertexSkinning.mm in Sources */,
+				A99FF45B153F19F1005719A8 /* CC3PVRFoundation.mm in Sources */,
+				A99FF45C153F19F1005719A8 /* CC3VertexArraysPODExtensions.mm in Sources */,
+				A99FF45D153F19F1005719A8 /* PVRTglesExt.cpp in Sources */,
+				A99FF45F153F19F1005719A8 /* PVRTBoneBatch.cpp in Sources */,
+				A99FF460153F19F1005719A8 /* PVRTError.cpp in Sources */,
+				A99FF461153F19F1005719A8 /* PVRTFixedPoint.cpp in Sources */,
+				A99FF462153F19F1005719A8 /* PVRTMatrixF.cpp in Sources */,
+				A99FF463153F19F1005719A8 /* PVRTModelPOD.cpp in Sources */,
+				A99FF464153F19F1005719A8 /* PVRTQuaternionF.cpp in Sources */,
+				A99FF465153F19F1005719A8 /* PVRTResourceFile.cpp in Sources */,
+				A99FF466153F19F1005719A8 /* PVRTString.cpp in Sources */,
+				A99FF467153F19F1005719A8 /* PVRTTrans.cpp in Sources */,
+				A99FF468153F19F1005719A8 /* PVRTVector.cpp in Sources */,
+				A99FF469153F19F1005719A8 /* PVRTVertex.cpp in Sources */,
+				A99FF46A153F19F1005719A8 /* CCNodeController.m in Sources */,
+				A99FF46B153F19F1005719A8 /* ControllableCCLayer.m in Sources */,
+				A99FF46C153F19F1005719A8 /* CC3ActionInterval.m in Sources */,
+				A99FF46D153F19F1005719A8 /* CC3Billboard.m in Sources */,
+				A99FF46E153F19F1005719A8 /* CC3BoundingVolumes.m in Sources */,
+				A99FF46F153F19F1005719A8 /* CC3Camera.m in Sources */,
+				A99FF470153F19F1005719A8 /* CC3Fog.m in Sources */,
+				A99FF471153F19F1005719A8 /* CC3Identifiable.m in Sources */,
+				A99FF472153F19F1005719A8 /* CC3Layer.m in Sources */,
+				A99FF473153F19F1005719A8 /* CC3Light.m in Sources */,
+				A99FF474153F19F1005719A8 /* CC3Material.m in Sources */,
+				A99FF475153F19F1005719A8 /* CC3Mesh.m in Sources */,
+				A99FF476153F19F1005719A8 /* CC3MeshNode.m in Sources */,
+				A99FF477153F19F1005719A8 /* CC3Node.m in Sources */,
+				A99FF478153F19F1005719A8 /* CC3NodeAnimation.m in Sources */,
+				A99FF479153F19F1005719A8 /* CC3NodeSequencer.m in Sources */,
+				A99FF47A153F19F1005719A8 /* CC3NodeVisitor.m in Sources */,
+				A99FF47B153F19F1005719A8 /* CC3ParametricMeshNodes.m in Sources */,
+				A99FF47C153F19F1005719A8 /* CC3PerformanceStatistics.m in Sources */,
+				A99FF47D153F19F1005719A8 /* CC3PointParticles.m in Sources */,
+				A99FF47E153F19F1005719A8 /* CC3Resource.m in Sources */,
+				A99FF47F153F19F1005719A8 /* CC3ResourceNode.m in Sources */,
+				A99FF480153F19F1005719A8 /* CC3Scene.m in Sources */,
+				A99FF481153F19F1005719A8 /* CC3ShadowVolumes.m in Sources */,
+				A99FF482153F19F1005719A8 /* CC3Texture.m in Sources */,
+				A99FF483153F19F1005719A8 /* CC3TextureUnit.m in Sources */,
+				A99FF484153F19F1005719A8 /* CC3VertexArrayMesh.m in Sources */,
+				A99FF485153F19F1005719A8 /* CC3VertexArrays.m in Sources */,
+				A99FF486153F19F1005719A8 /* CC3VertexSkinning.m in Sources */,
+				A99FF487153F19F1005719A8 /* CC3EAGLView.m in Sources */,
+				A99FF488153F19F1005719A8 /* CC3OpenGLES11Capabilities.m in Sources */,
+				A99FF489153F19F1005719A8 /* CC3OpenGLES11Engine.m in Sources */,
+				A99FF48A153F19F1005719A8 /* CC3OpenGLES11Fog.m in Sources */,
+				A99FF48B153F19F1005719A8 /* CC3OpenGLES11Foundation.m in Sources */,
+				A99FF48C153F19F1005719A8 /* CC3OpenGLES11Hints.m in Sources */,
+				A99FF48D153F19F1005719A8 /* CC3OpenGLES11Intercept.c in Sources */,
+				A99FF48E153F19F1005719A8 /* CC3OpenGLES11Lighting.m in Sources */,
+				A99FF48F153F19F1005719A8 /* CC3OpenGLES11Materials.m in Sources */,
+				A99FF490153F19F1005719A8 /* CC3OpenGLES11Matrices.m in Sources */,
+				A99FF491153F19F1005719A8 /* CC3OpenGLES11Platform.m in Sources */,
+				A99FF492153F19F1005719A8 /* CC3OpenGLES11State.m in Sources */,
+				A99FF493153F19F1005719A8 /* CC3OpenGLES11StateTracker.m in Sources */,
+				A99FF494153F19F1005719A8 /* CC3OpenGLES11Textures.m in Sources */,
+				A99FF495153F19F1005719A8 /* CC3OpenGLES11Utility.c in Sources */,
+				A99FF496153F19F1005719A8 /* CC3OpenGLES11VertexArrays.m in Sources */,
+				A99FF497153F19F1005719A8 /* CC3CC2Extensions.m in Sources */,
+				A99FF498153F19F1005719A8 /* CC3Foundation.m in Sources */,
+				A99FF499153F19F1005719A8 /* CC3GLMatrix.m in Sources */,
+				A99FF49A153F19F1005719A8 /* CC3IOSExtensions.m in Sources */,
+				A99FF49B153F19F1005719A8 /* CC3Rotator.m in Sources */,
+				A99FF49C153F19F1005719A8 /* CC3MeshModel.m in Sources */,
+				A99FF49D153F19F1005719A8 /* CC3TargettingNode.m in Sources */,
+				A99FF49E153F19F1005719A8 /* CC3VertexArrayMeshModel.m in Sources */,
+				A99FF49F153F19F1005719A8 /* CC3World.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

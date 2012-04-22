@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -120,6 +120,7 @@
 	BOOL shouldCullBackFaces;
 	BOOL shouldUseClockwiseFrontFaceWinding;
 	BOOL shouldUseSmoothShading;
+	BOOL shouldCastShadowsWhenInvisible;
 }
 
 /**
@@ -1134,8 +1135,8 @@
  * accessing face information about the mesh that is casting the shadow.
  *
  * When the value of this property is set to NO, any data cached during previous
- * access through the indicesAt:, centerAt:, normalAt:, or planeAt:, methods will
- * be cleared.
+ * access through the faceIndicesAt:, faceCenterAt:, faceNormalAt:, or facePlaneAt:,
+ * methods will be cleared.
  *
  * The initial value of this property is NO.
  */

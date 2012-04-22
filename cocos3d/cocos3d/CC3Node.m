@@ -1,7 +1,7 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,6 +40,8 @@
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
 #import "CC3ShadowVolumes.h"
+#import "CC3CC2Extensions.h"
+#import "CC3IOSExtensions.h"
 
 
 #pragma mark CC3Node
@@ -59,10 +61,12 @@
 -(void) applyScaling;
 -(void) transformMatrixChanged;
 -(void) notifyTransformListeners;
+-(void) notifyDestructionListeners;
 -(void) updateGlobalOrientation;
 -(void) updateGlobalLocation;
 -(void) updateGlobalRotation;
 -(void) updateGlobalScale;
+-(void) updateTargetLocation;
 -(void) transformBoundingVolume;
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) didAddDescendant: (CC3Node*) aNode;
@@ -89,19 +93,20 @@
 @synthesize transformMatrix, transformListeners, animation, isRunning, isAnimationEnabled;
 @synthesize isTouchEnabled, shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
 @synthesize parent, children, shouldAutoremoveWhenEmpty, shouldUseFixedBoundingVolume;
-@synthesize shouldCleanupWhenRemoved, isTransformDirty;
+@synthesize shouldCleanupActionsWhenRemoved, isTransformDirty;
 
 -(void) dealloc {
-	[self stopAllActions];
-	[children release];
-	parent = nil;						// not retained
+	self.target = nil;							// Removes myself as listener
+	[self removeAllChildren];
+	parent = nil;								// not retained
 	[transformMatrix release];
 	[transformMatrixInverted release];
-	[transformListeners release];
 	[globalRotationMatrix release];
 	[rotator release];
 	[boundingVolume release];
 	[animation release];
+	[self notifyDestructionListeners];			// Must do before releasing listeners.
+	[transformListeners releaseAsUnretained];	// Clears without releasing each element.
 	[super dealloc];
 }
 
@@ -292,7 +297,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 -(CC3Vector) targetLocation {
 	CC3DirectionalRotator* dirRotator = self.directionalRotator;
 	if (dirRotator.isTargetLocationDirty && !self.isTransformDirty) {
-		dirRotator.rawTargetLocation = CC3VectorAdd(self.globalLocation, self.forwardDirection);
+		[dirRotator setRawTargetLocation: CC3VectorAdd(self.globalLocation, self.forwardDirection)];
 	}
 	return dirRotator.targetLocation;
 }
@@ -332,9 +337,11 @@ static GLfloat defaultScaleTolerance = 0.0f;
 -(CC3Node*) target { return rotator.target; }
 
 /** Set the new target and notify that I am now tracking a target. */
--(void) setTarget:(CC3Node *) aNode {
+-(void) setTarget: (CC3Node*) aNode {
 	if (aNode != self.target) {
+		[self.target removeTransformListener: self];
 		self.directionalRotator.target = aNode;
+		[self.target addTransformListener: self];
 		[self didSetTargetInDescendant: self];
 	}
 }
@@ -354,9 +361,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	self.shouldTrackTarget = shouldAutotarg;
 }
 
--(CC3TargettingAxisRestriction) axisRestriction {
-	return self.directionalRotator.axisRestriction;
-}
+-(CC3TargettingAxisRestriction) axisRestriction { return self.directionalRotator.axisRestriction; }
 
 -(void) setAxisRestriction: (CC3TargettingAxisRestriction) axisRestriction {
 	self.directionalRotator.axisRestriction = axisRestriction;
@@ -379,18 +384,9 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	}
 }
 
+/** If the transform is dirty, update this node. */
 -(void) trackTargetWithVisitor: (CC3NodeTransformingVisitor*) visitor {
-	CC3DirectionalRotator* dirRotator = self.directionalRotator;
-	if (dirRotator.shouldUpdateToTarget) {
-		if (self.isTrackingForBumpMapping) {
-			self.globalLightLocation = dirRotator.target.globalLocation;
-		} else if ( [dirRotator wasRelativeMovement] ) {
-			self.targetLocation = dirRotator.target.globalLocation;
-			[visitor visit: self];		// Recalculate transforms
-		}
-		LogCleanTrace(@"%@ tracking adjusted to target", [self fullDescription]);
-	}
-	[dirRotator resetTargetTrackingState];
+	if (self.isTransformDirty) [visitor visit: self];
 }
 
 
@@ -474,9 +470,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldCullBackFaces {
 	for (CC3Node* child in children) {
-		if (child.shouldCullBackFaces == NO) {
-			return NO;
-		}
+		if (child.shouldCullBackFaces == NO) return NO;
 	}
 	return YES;
 }
@@ -489,9 +483,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldCullFrontFaces {
 	for (CC3Node* child in children) {
-		if (child.shouldCullFrontFaces) {
-			return YES;
-		}
+		if (child.shouldCullFrontFaces) return YES;
 	}
 	return NO;
 }
@@ -504,9 +496,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldUseClockwiseFrontFaceWinding {
 	for (CC3Node* child in children) {
-		if (child.shouldUseClockwiseFrontFaceWinding) {
-			return YES;
-		}
+		if (child.shouldUseClockwiseFrontFaceWinding) return YES;
 	}
 	return NO;
 }
@@ -519,9 +509,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldUseSmoothShading {
 	for (CC3Node* child in children) {
-		if (child.shouldUseSmoothShading == NO) {
-			return NO;
-		}
+		if (child.shouldUseSmoothShading == NO) return NO;
 	}
 	return YES;
 }
@@ -535,9 +523,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 -(CC3NormalScaling) normalScalingMethod {
 	for (CC3Node* child in children) {
 		CC3NormalScaling csm = child.normalScalingMethod;
-		if (csm != kCC3NormalScalingNone) {
-			return csm;
-		}
+		if (csm != kCC3NormalScalingNone) return csm;
 	}
 	return kCC3NormalScalingNone;
 }
@@ -550,9 +536,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldCacheFaces {
 	for (CC3Node* child in children) {
-		if (child.shouldCacheFaces) {
-			return YES;
-		}
+		if (child.shouldCacheFaces) return YES;
 	}
 	return NO;
 }
@@ -563,11 +547,22 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	}
 }
 
+-(BOOL) shouldCastShadowsWhenInvisible {
+	for (CC3Node* child in children) {
+		if (child.shouldCastShadowsWhenInvisible) return YES;
+	}
+	return NO;
+}
+
+-(void) setShouldCastShadowsWhenInvisible: (BOOL) shouldCast {
+	for (CC3Node* child in children) {
+		child.shouldCastShadowsWhenInvisible = shouldCast;
+	}
+}
+
 -(BOOL) shouldDisableDepthMask {
 	for (CC3Node* child in children) {
-		if (child.shouldDisableDepthMask) {
-			return YES;
-		}
+		if (child.shouldDisableDepthMask) return YES;
 	}
 	return NO;
 }
@@ -580,9 +575,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 -(BOOL) shouldDisableDepthTest {
 	for (CC3Node* child in children) {
-		if (child.shouldDisableDepthTest) {
-			return YES;
-		}
+		if (child.shouldDisableDepthTest) return YES;
 	}
 	return NO;
 }
@@ -596,9 +589,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 -(GLenum) depthFunction {
 	for (CC3Node* child in children) {
 		GLenum df = child.depthFunction;
-		if (df != GL_NEVER) {
-			return df;
-		}
+		if (df != GL_NEVER) return df;
 	}
 	return GL_NEVER;
 }
@@ -915,14 +906,14 @@ static GLfloat defaultScaleTolerance = 0.0f;
 		scale = kCC3VectorUnitCube;
 		globalScale = kCC3VectorUnitCube;
 		scaleTolerance = [[self class] defaultScaleTolerance];
-		isTransformDirty = NO;			// everything starts out at identity
+		isTransformDirty = YES;			// Force transform notification on first update
 		isTouchEnabled = NO;
 		shouldInheritTouchability = YES;
 		shouldAllowTouchableWhenInvisible = NO;
 		isAnimationEnabled = YES;
 		visible = YES;
 		isRunning = NO;
-		shouldCleanupWhenRemoved = YES;
+		shouldCleanupActionsWhenRemoved = YES;
 		shouldAutoremoveWhenEmpty = NO;
 		self.transformMatrix = [CC3GLMatrix identity];		// Has side effects...so do last (transformMatrixInverted is built in some subclasses)
 	}
@@ -947,7 +938,6 @@ static GLfloat defaultScaleTolerance = 0.0f;
 
 // Protected properties for copying
 -(BOOL) rawVisible { return visible; }
--(CCArray*) transformListeners { return transformListeners; }
 
 /**
  * Populates this instance with content copied from the specified other node.
@@ -993,8 +983,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	[animation release];
 	animation = [another.animation retain];					// retained...not copied
 
-	[transformListeners release];
-	transformListeners = [another.transformListeners copy];
+	// Transform listeners are not copied. Managing listeners must be deliberate.
 
 	isTouchEnabled = another.isTouchEnabled;
 	shouldInheritTouchability = another.shouldInheritTouchability;
@@ -1002,7 +991,7 @@ static GLfloat defaultScaleTolerance = 0.0f;
 	isAnimationEnabled = another.isAnimationEnabled;
 	visible = another.rawVisible;
 	isRunning = another.isRunning;
-	shouldCleanupWhenRemoved = another.shouldCleanupWhenRemoved;
+	shouldCleanupActionsWhenRemoved = another.shouldCleanupActionsWhenRemoved;
 	shouldAutoremoveWhenEmpty = another.shouldAutoremoveWhenEmpty;
 	self.shouldDrawDescriptor = another.shouldDrawDescriptor;		// May create a child node
 	self.shouldDrawWireframeBox = another.shouldDrawWireframeBox;	// May create a child node
@@ -1250,21 +1239,22 @@ static GLuint lastAssignedNodeTag;
 -(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 	
-	if( !transformListeners ) {
-		transformListeners = [[CCArray array] retain];
-	}
+	if( !transformListeners ) transformListeners = [[CCArray array] retain];
+	
 	if ( ![transformListeners containsObject: aListener] ) {
-		[transformListeners addObject: aListener];
-		[aListener nodeWasTransformed: self];
+		[transformListeners addUnretainedObject: aListener];
+		
+		// If the transform has already been calculated, notify immediately.
+		if ( !self.isTransformDirty ) [aListener nodeWasTransformed: self];
 	}
 }
 
 -(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener {
 	if (!aListener) return;
 
-	[transformListeners removeObjectIdenticalTo: aListener];
+	[transformListeners removeUnretainedObjectIdenticalTo: aListener];
 	if (transformListeners && transformListeners.count == 0) {
-		[transformListeners release];
+		[transformListeners releaseAsUnretained];
 		transformListeners = nil;
 	}
 }
@@ -1276,11 +1266,24 @@ static GLuint lastAssignedNodeTag;
 	}
 }
 
-/**
- * Nodes can be listeners of the transforms of other nodes. By default, they do nothing
- * when notified. Subclasses that care about the movemements of other nodes may override.
- */
--(void) nodeWasTransformed: (CC3Node*) aNode {}
+-(void) nodeWasTransformed: (CC3Node*) aNode {
+	if (aNode == self.target) [self updateTargetLocation];
+}
+
+/** Check if target location needs to be updated from target, and do so if needed. */
+-(void) updateTargetLocation {
+	if (self.directionalRotator.shouldUpdateToTarget) {
+		if (self.isTrackingForBumpMapping) {
+			self.globalLightLocation = self.target.globalLocation;
+		} else {
+			self.targetLocation = self.target.globalLocation;
+		}
+	}
+}
+
+-(void) nodeWasDestroyed: (CC3Node*) aNode {
+	if (aNode == self.target) self.target = nil;
+}
 
 -(void) setTransformMatrix: (CC3GLMatrix*) aCC3GLMatrix {
 	if (transformMatrix != aCC3GLMatrix) {
@@ -1296,8 +1299,8 @@ static GLuint lastAssignedNodeTag;
 -(void) markTransformDirty { isTransformDirty = YES; }
 
 -(CC3Node*) dirtiestAncestor {
-	CC3Node* dap = parent.dirtiestAncestor;
-	if (dap) return dap;
+	CC3Node* da = parent.dirtiestAncestor;
+	if (da) return da;
 	return (self.isTransformDirty) ? self : nil;
 }
 
@@ -1324,9 +1327,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(id) transformVisitorClass { return [CC3NodeTransformingVisitor class]; }
 
--(CC3GLMatrix*) parentTransformMatrix {
-	return parent.transformMatrix;
-}
+-(CC3GLMatrix*) parentTransformMatrix { return parent.transformMatrix; }
 
 -(void) buildTransformMatrixWithVisitor: (CC3NodeTransformingVisitor*) visitor {
 	[transformMatrix populateFrom: [visitor parentTansformMatrixFor: self]];
@@ -1459,8 +1460,18 @@ static GLuint lastAssignedNodeTag;
 
 /** Notify the transform listeners that the node has been transformed. */
 -(void) notifyTransformListeners {
+	LogCleanTrace(@"%@ notifying %i transform listeners", self, transformListeners.count);
 	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in transformListeners) {
 		[xfmLisnr nodeWasTransformed: self];
+	}
+}
+
+/** Notify the transform listeners that the node has been destroyed. */
+-(void) notifyDestructionListeners {
+	// Log with super description, because all of the subclass info is invalid.
+	LogCleanTrace(@"%@ notifying %i listeners of destruction", [super description], transformListeners.count);
+	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in transformListeners) {
+		[xfmLisnr nodeWasDestroyed: self];
 	}
 }
 
@@ -1478,21 +1489,13 @@ static GLuint lastAssignedNodeTag;
  * Template method to update the globalLocation property.
  * Keeps track of whether the globalLocation is changed by this method.
  */
--(void) updateGlobalLocation {
-	CC3Vector oldGlobLoc = globalLocation;
-	globalLocation = [transformMatrix transformLocation: kCC3VectorZero];
-	if ( !CC3VectorsAreEqual(globalLocation, oldGlobLoc) ) [rotator markGlobalLocationChanged];
-}
+-(void) updateGlobalLocation { globalLocation = [transformMatrix transformLocation: kCC3VectorZero]; }
 
 /** Template method to update the globalRotation property. */
--(void) updateGlobalRotation {
-	isGlobalRotationDirty = YES;
-}
+-(void) updateGlobalRotation { isGlobalRotationDirty = YES; }
 
 /** Template method to update the globalScale property. */
--(void) updateGlobalScale {
-	globalScale = parent ? CC3VectorScale(parent.globalScale, scale) : scale;
-}
+-(void) updateGlobalScale { globalScale = parent ? CC3VectorScale(parent.globalScale, scale) : scale; }
 
 /**
  * Returns the inverse of the transformMatrix.
@@ -1749,11 +1752,15 @@ static GLuint lastAssignedNodeTag;
 -(void) remove { [parent removeChild: self]; }
 
 -(void) wasRemoved {
-	if (shouldCleanupWhenRemoved) {
-		[self cleanup];
+	if (shouldCleanupActionsWhenRemoved) {
+		[self cleanupActions];
 	}
 	self.isRunning = NO;
 }
+
+// Deprecated property
+-(BOOL) shouldCleanupWhenRemoved { return self.shouldCleanupActionsWhenRemoved; }
+-(void) setShouldCleanupWhenRemoved: (BOOL) shouldCleanup { self.shouldCleanupActionsWhenRemoved = shouldCleanup; }
 
 -(BOOL) isDescendantOf: (CC3Node*) aNode {
 	return parent ? (parent == aNode || [parent isDescendantOf: aNode]) : NO;
@@ -1885,20 +1892,23 @@ static GLuint lastAssignedNodeTag;
 	return [[CCActionManager sharedManager] numberOfRunningActionsInTarget: self];
 }
 
-- (void) resumeActions {
+-(void) resumeActions {
 	[[CCActionManager sharedManager] resumeTarget: self];
 }
 
-- (void) pauseActions {
+-(void) pauseActions {
 	[[CCActionManager sharedManager] pauseTarget: self];
 }
 
-- (void)cleanup {
+-(void) cleanupActions {
 	[self stopAllActions];
 	for (CC3Node* child in children) {
-		[child cleanup];
+		[child cleanupActions];
 	}
 }
+
+// Deprecated
+-(void) cleanup { [self cleanupActions]; }
 
 
 #pragma mark Touch handling

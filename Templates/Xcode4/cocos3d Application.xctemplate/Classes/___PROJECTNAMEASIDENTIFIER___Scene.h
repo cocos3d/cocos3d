@@ -10,6 +10,7 @@
 #import "CC3Scene.h"
 
 /** A sample application-specific CC3Scene subclass.*/
-@interface ___PROJECTNAMEASIDENTIFIER___Scene : CC3Scene {}
+@interface ___PROJECTNAMEASIDENTIFIER___Scene : CC3Scene {
+}
 
 @end

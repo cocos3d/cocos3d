@@ -1,7 +1,7 @@
 /*
  * LandingCraft.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,6 +32,7 @@
 #import "LandingCraft.h"
 #import "CC3ActionInterval.h"
 #import "CCActionInstant.h"
+#import "CC3IOSExtensions.h"
 
 #define kDropHeight 700.0
 

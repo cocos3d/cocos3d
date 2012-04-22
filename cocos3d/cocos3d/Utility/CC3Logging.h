@@ -1,7 +1,7 @@
 /*
  * CC3Logging.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved. 
  * http://www.brenwill.com
@@ -146,7 +146,7 @@
 // Logging formats
 #define LOG_FORMAT_NO_LOCATION(fmt, lvl, ...) NSLog((@"[%@] " fmt), lvl, ##__VA_ARGS__)
 #define LOG_FORMAT_WITH_LOCATION(fmt, lvl, ...) NSLog((@"%s[Line %d] [%@] " fmt), __PRETTY_FUNCTION__, __LINE__, lvl, ##__VA_ARGS__)
-#define LOG_FORMAT_CLEAR(fmt, ...) printf("%s\n", [[NSString stringWithFormat: fmt, ##__VA_ARGS__] UTF8String])
+#define LOG_FORMAT_CLEAN(fmt, lvl, ...) printf("[%s] %s\n", [lvl UTF8String], [[NSString stringWithFormat: fmt, ##__VA_ARGS__] UTF8String])
 
 #if defined(LOGGING_INCLUDE_CODE_LOCATION) && LOGGING_INCLUDE_CODE_LOCATION
 	#define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_WITH_LOCATION(fmt, lvl, ##__VA_ARGS__)
@@ -157,7 +157,7 @@
 // Trace logging - for detailed tracing
 #if defined(LOGGING_LEVEL_TRACE) && LOGGING_LEVEL_TRACE
 	#define LogTrace(fmt, ...) LOG_FORMAT(fmt, @"trace", ##__VA_ARGS__)
-	#define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+	#define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"trace", ##__VA_ARGS__)
 #else
 	#define LogTrace(...)
 	#define LogCleanTrace(...)
@@ -166,7 +166,7 @@
 // Info logging - for general, non-performance affecting information messages
 #if defined(LOGGING_LEVEL_INFO) && LOGGING_LEVEL_INFO
 	#define LogInfo(fmt, ...) LOG_FORMAT(fmt, @"info", ##__VA_ARGS__)
-	#define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+	#define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"info", ##__VA_ARGS__)
 #else
 	#define LogInfo(...)
 	#define LogCleanInfo(...)
@@ -175,7 +175,7 @@
 // Error logging - only when there is an error to be logged
 #if defined(LOGGING_LEVEL_ERROR) && LOGGING_LEVEL_ERROR
 	#define LogError(fmt, ...) LOG_FORMAT(fmt, @"***ERROR***", ##__VA_ARGS__)
-	#define LogCleanError(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+	#define LogCleanError(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"***ERROR***", ##__VA_ARGS__)
 #else
 	#define LogError(...)
 	#define LogCleanError(...)
@@ -183,8 +183,8 @@
 
 // Debug logging - use only temporarily for highlighting and tracking down problems
 #if defined(LOGGING_LEVEL_DEBUG) && LOGGING_LEVEL_DEBUG
-	#define LogDebug(fmt, ...) LOG_FORMAT(fmt, @"DEBUG", ##__VA_ARGS__)
-	#define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+	#define LogDebug(fmt, ...) LOG_FORMAT(fmt, @"debug", ##__VA_ARGS__)
+	#define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"debug", ##__VA_ARGS__)
 #else
 	#define LogDebug(...)
 	#define LogCleanDebug(...)
@@ -193,7 +193,7 @@
 // Resource loading - use only temporarily for information and troubleshooting
 #if defined(LOGGING_REZLOAD) && LOGGING_REZLOAD
 	#define LogRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
-	#define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAR(fmt, ##__VA_ARGS__)
+	#define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"rez", ##__VA_ARGS__)
 #else
 	#define LogRez(...)
 	#define LogCleanRez(...)

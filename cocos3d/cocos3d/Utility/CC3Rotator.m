@@ -1,7 +1,7 @@
 /*
  * CC3Rotator.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -60,7 +60,7 @@
 
 -(BOOL) shouldRotateToTargetLocation { return NO; }
 
--(void) markGlobalLocationChanged {}
+//-(void) markGlobalLocationChanged {}
 
 static GLubyte autoOrthonormalizeCount = 0;
 
@@ -424,7 +424,7 @@ static GLubyte autoOrthonormalizeCount = 0;
 @synthesize shouldAutotargetCamera, targetLocation, isTargetLocationDirty;
 
 -(void) dealloc {
-	[target release];
+	target = nil;			// not retained
 	[super dealloc];
 }
 
@@ -539,24 +539,22 @@ static GLubyte autoOrthonormalizeCount = 0;
  * and the node containing this rotator. Remember that it was set.
  */
 -(void) setTargetLocation: (CC3Vector) aLocation {
-	self.rawTargetLocation = aLocation;
+	[self setRawTargetLocation: aLocation];
 	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByTargetLocation;
 }
 
 -(void) setRawTargetLocation: (CC3Vector) aLocation {
 	targetLocation = aLocation;
 	isTargetLocationDirty = NO;
+	isNewTarget = NO;		// Target is no longer new once the location of it has been set.
 }
 
 -(BOOL) isDirtyByTargetLocation {
 	return matrixIsDirtyBy == kCC3RotationMatrixIsDirtyByTargetLocation;
 }
 
-/** Also mark that the target location is dirty as a result of the global location changing. */
--(void) markGlobalLocationChanged { wasGlobalLocationChanged = YES; }
-
 -(void) rotateToTargetLocationFrom: (CC3Vector) aLocation {
-	if ( self.isDirtyByTargetLocation && !CC3VectorsAreEqual(targetLocation, aLocation) ) {
+	if ( !CC3VectorsAreEqual(targetLocation, aLocation) ) {
 		self.forwardDirection = CC3VectorDifference(targetLocation, aLocation);
 		isTargetLocationDirty = NO;		// Reset after setForwardDirection: sets it
 	}
@@ -564,29 +562,19 @@ static GLubyte autoOrthonormalizeCount = 0;
 
 -(CC3Node*) target { return target; }
 
-/** Set the new target, track whether it has changed. */
--(void) setTarget:(CC3Node *) aNode {
-	if (aNode != target) {
-		[target release];
-		target = [aNode retain];
-		isNewTarget = YES;
-	}
+/**
+ * Set the new target as weak line and mark if it has changed.
+ * Don't mark if not changed, so that a change persists even if the same target is set again.
+ */
+-(void) setTarget: (CC3Node*) aNode {
+	if (aNode != target) isNewTarget = YES;
+	target = aNode;
 }
 
 -(BOOL) shouldUpdateToTarget { return target && (isNewTarget || shouldTrackTarget); }
 
--(BOOL) wasRelativeMovement {
-	return wasGlobalLocationChanged || !CC3VectorsAreEqual(targetLocation, target.globalLocation);
-}
-
 -(BOOL) shouldRotateToTargetLocation {
 	return (self.isDirtyByTargetLocation || shouldTrackTarget) && !isTrackingForBumpMapping;
-}
-
--(void) resetTargetTrackingState {
-	isNewTarget = NO;
-	wasGlobalLocationChanged = NO;
-	isTargetLocationDirty = NO;
 }
 
 
@@ -606,7 +594,6 @@ static GLubyte autoOrthonormalizeCount = 0;
 		shouldTrackTarget = NO;
 		shouldAutotargetCamera = NO;
 		isTrackingForBumpMapping = NO;
-		wasGlobalLocationChanged = NO;
 	}
 	return self;
 }
@@ -624,9 +611,7 @@ static GLubyte autoOrthonormalizeCount = 0;
 	// other instance is also a directional rotator.
 	// All dirty flags are set when matrix set in superclass
 	if( [another isKindOfClass:[CC3DirectionalRotator class]] ) {
-		[target release];
-		target = [another.target retain];						// retained...not copied
-
+		self.target = another.target;		// weak link...not copied
 		CC3DirectionalRotator* anotherDR = (CC3DirectionalRotator*)another;
 		forwardDirection = anotherDR.forwardDirection;
 		sceneUpDirection = anotherDR.sceneUpDirection;
@@ -656,9 +641,7 @@ static GLubyte autoOrthonormalizeCount = 0;
  * By default, this is simply the same as the forwardDirection. Subclasses that need
  * to point the node in another direction can override.
  */
--(void) setMatrixForwardDirection:(CC3Vector) aDirection {
-	forwardDirection = aDirection;
-}
+-(void) setMatrixForwardDirection:(CC3Vector) aDirection { forwardDirection = aDirection; }
 
 /**
  * If needed, extracts and sets the forwardDirection from the encapsulated rotation
@@ -693,9 +676,7 @@ static GLubyte autoOrthonormalizeCount = 0;
  * By default, this is simply the same as the rightDirection. Subclasses that need
  * to point the node in another direction can override.
  */
--(void) setMatrixRightDirection:(CC3Vector) aDirection {
-	rightDirection = aDirection;
-}
+-(void) setMatrixRightDirection:(CC3Vector) aDirection { rightDirection = aDirection; }
 
 /**
  * If needed, extracts and sets the rightDirection from the encapsulated rotation matrix.
@@ -705,7 +686,7 @@ static GLubyte autoOrthonormalizeCount = 0;
  */
 -(void) ensureRightDirectionFromMatrix {
 	if (isRightDirectionDirty) {
-		self.matrixRightDirection = [self.rotationMatrix extractRightDirection];
+		[self setMatrixRightDirection: [self.rotationMatrix extractRightDirection]];
 		isRightDirectionDirty = NO;
 	}
 }
@@ -749,9 +730,7 @@ static GLubyte autoOrthonormalizeCount = 0;
  * This implementation reverses the forward direction, so that the positive-Z axis of
  * the node's local coordinates will point in the fowardDirection.
  */
--(void) setMatrixForwardDirection:(CC3Vector) aDirection {
-	forwardDirection = CC3VectorNegate(aDirection);
-}
+-(void) setMatrixForwardDirection:(CC3Vector) aDirection { forwardDirection = CC3VectorNegate(aDirection); }
 
 /**
  * The right direction, modified for use in the matrix, when setting the direction
@@ -762,9 +741,6 @@ static GLubyte autoOrthonormalizeCount = 0;
  * right direction pointing off to the right, as a result of the inversion of the
  * forwardDirection, pointing down the positive-Z axis.
  */
--(void) setMatrixRightDirection:(CC3Vector) aDirection {
-	rightDirection = CC3VectorNegate(aDirection);
-}
-
+-(void) setMatrixRightDirection:(CC3Vector) aDirection { rightDirection = CC3VectorNegate(aDirection); }
 
 @end

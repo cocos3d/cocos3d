@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-cocos3d 0.7.0
+cocos3d 0.7.1
 
 Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -9,7 +9,40 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++
 
 
-cocos3d 0.7 - 2012/04/12
+cocos3d 0.7.1 - 2012/04/22
+-------------------------------------
+
+- Added explicit support for Gesture Recognizers:
+    - Added CC3Node methods cc3ConvertUIPointToNodeSpace:, cc3ConvertUIMovementToNodeSpace: & cc3NormalizeUIMovement: to make it easy to use gesture location data in a CC3Layer and CC3Scene.
+	- Added CC3Scene pickNodeFromTapAt: and pickNodeFromTouchEvent:at: methods to make it easy to pick nodes from tap & long-press gestures and touch events.
+	- Added CC3Layer cc3AddGestureRecognizer: and cc3RemoveGestureRecognizer: methods to simplify adding a gesture recogizers to a dedicated layer.
+	- Added CC3Node cc3ValidateGesture:, cc3WillConsumeTouchEventAt: and cc3ContainsTouchPoint: methods to help determine whether a gesture should be cancelled because a cocos2d button or control on the layer wants the touch event.
+    - Added CC3Layer onOpenCC3Layer and onCloseCC3Layer callback template methods as convenient place to perform set-up and tear-down activity, including managing gesture recognizers for a dedicated CC3Layer.
+	- CC3DemoMashUp now uses pinch, pan and tap gestures to move or pan the camera, select 3D nodes, and spin the cubes.
+	    - Setting shouldUseGestures variable in CC3DemoMashUpLayer initializeControls method will turn gestures off, and layer and scene will use basic touch events for control. 
+- Added CC3Node shouldCastShadowsWhenInvisible property to allow meshes and lights to cast shadows even when invisible.
+- Corrected the capitalization of the name of the Stamp.pvr texture file.
+- Added short delay to resuming activity in AppDelegate applicationDidBecomeActive: method, to fix issue where performance slowed to 40fps on app resume.
+- Moved cocos2d extensions for cocos3d to CC3CC2Extensions.h from CC3Foundation.h.
+- Moved iOS extensions for cocos3d to CC3IOSExtensions.h from CC3Foundation.h.
+- Added assertion in CC3OpenGLES11VertexArrays drawIndicies:ofLength:andType:as: method to detect models that contain index types other than GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE.
+- Added log level to output of LogClean... logging functions.
+- Added backward compatibility with legacy LLVM GCC 4.2 compiler
+- Changed target tracking to use node transform listener framework.
+- [API change] Extended CC3NodeTransformListenerProtocol to include CC3NodeListenerProtocol, which adds the nodeWasDestroyed: method. This is to help maintain object map integrity when weak links are used.
+- [API change] CC3Node target property is no longer retained. This is to avoid retain cycles.
+- [API change] Transform listeners added to a CC3Node via the addTransformListener: are no longer retained. This is to avoid retain cycles.
+- [API change] Transform listeners added to a CC3Node via the addTransformListener: are now sent immediate notification only if transform is not dirty.
+- [API change] Transform listeners are no longer automatically copied when a node is copied. This is to make adding a listener deliberate, to ensure listeners know who they have subscribed to.
+- [API change] CC3Node isTransformDirty now returns YES on newly created node.
+- Renamed CC3Node cleanup method to cleanupActions to clarify purpose, and deprecated cleanup.
+- Renamed CC3Node shouldCleanupWhenRemoved method to shouldCleanupActionsWhenRemoved to clarify purpose, and deprecated shouldCleanupWhenRemoved.
+- Fixed memory leaks when destroying and recreating CC3Scenes with skinned meshes, shadows, 2D particle systems, or fog.
+- Fixed incorrect override of CC3Scene close method in the CC3Scene subclass in the hello, world template app.
+- Changed install-cocos3d.sh script to remove option to install outside user home directory.
+
+
+cocos3d 0.7.0 - 2012/04/12
 -------------------------------------
 
 - [API change] Renamed CC3World to CC3Scene, and deprecated CC3World, in order to clarify the purpose of that class.
@@ -50,7 +83,7 @@ cocos3d 0.7 - 2012/04/12
 		- CC3Texture defaultTextureParameters class-side property can set defaults during texture loading.
 - CC3Resource & CC3ResourceNode file loading methods now support both absolute file paths and file paths relative to the resources directory.
     - [API change] Deprecated CC3Resource & CC3ResourceNode methods that specifically loaded from files in the resources directory.
-- Added node ray tracing capabilities:
+- Added node ray-casting capabilities:
     - Added CC3Node locationOfGlobalRayIntesection: and globalLocationOfGlobalRayIntesection: methods to indicate where on an object a CC3Ray intersects the node's local bounding box.
 	    - This can be used to locate a touch point on an object from a CC3Ray retrieved from the CC3Camera unprojectPoint: method.
 		- The location is in the local coordinate system of the node, and can be used directly to add other nodes (eg- drag & drop, bullet holes) to the touched node at that location.

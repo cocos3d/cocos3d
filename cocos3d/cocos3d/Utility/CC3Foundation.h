@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -49,13 +49,10 @@
 
 /* Base library of definitions and functions for operating in a 3D scene. */
 
-#import "CCArray.h"
 #import "CC3Math.h"
 #import "CC3Logging.h"
-#import "CCNode.h"
-#import "CCDirector.h"
-#import "CCTouchDispatcher.h"
-#import <AvailabilityMacros.h>
+#import "ccTypes.h"
+#import "CCArray.h"
 
 /**
  * The version of cocos3d, derived from the version format, where each of the
@@ -66,7 +63,7 @@
  *   - 0.7		-> 000700
  *   - 1.7.3	-> 010703
  */
-#define COCOS3D_VERSION 000700
+#define COCOS3D_VERSION 000701
 
 
 #pragma mark -
@@ -1558,22 +1555,6 @@ static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
 /** Returns the string YES or NO, depending on the specified boolean value. */
 static inline NSString* NSStringFromBoolean(BOOL value) { return value ? @"YES" : @"NO"; }
 
-/** Returns the name of the specified touch type. */
-static inline NSString* NSStringFromTouchType(uint tType) {
-	switch (tType) {
-		case kCCTouchBegan:
-			return @"kCCTouchBegan";
-		case kCCTouchMoved:
-			return @"kCCTouchMoved";
-		case kCCTouchEnded:
-			return @"kCCTouchEnded";
-		case kCCTouchCancelled:
-			return @"kCCTouchCancelled";
-		default:
-			return [NSString stringWithFormat: @"unknown touch type (%u)", tType];
-	}
-}
-
 /** 
  * Ensures that the specified file path is absolute, converting it if necessary.
  * 
@@ -1582,153 +1563,3 @@ static inline NSString* NSStringFromTouchType(uint tType) {
  * is prepended to it.
  */
 NSString* CC3EnsureAbsoluteFilePath(NSString* filePath);
-
-/** Extension category to support cocos3d functionality. */
-@interface NSObject (CC3)
-
-/**
- * Convenience method to automatically autorelease when copying objects.
- * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
- */
--(id) copyAutoreleased;
-
-@end
-
-
-/** Extension category to support cocos3d functionality. */
-@interface UIColor(CC3)
-
-/** Returns a transparent ccColor4F struct containing the RGBA values for this color. */
--(ccColor4F) asCCColor4F;
-
-/** Returns an autoreleased UIColor instance created from the RGBA values in the specified ccColor4F. */
-+(UIColor*) colorWithCCColor4F: (ccColor4F) rgba;
-
-@end
-
-
-#pragma mark -
-#pragma mark CCNode extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCNode (CC3)
-
-/** Returns the bounding box of this CCNode, measured in pixels, in the global coordinate system. */
-- (CGRect) globalBoundingBoxInPixels;
-
-/**
- * Updates the viewport of any contained CC3Scene instances with the dimensions
- * of its CC3Layer and the device orientation.
- *
- * This CCNode implementation simply passes the notification along to its children.
- * Descendants that are CC3Layers will update their CC3Scene instances.
- */
--(void) updateViewport;
-
-@end
-
-
-#pragma mark -
-#pragma mark CCDirector extension
-
-/** Extension category to support cocos3d functionality. */
-@interface CCDirector (CC3)
-
-/** Returns the time interval in seconds between the current render frame and the previous frame. */
--(ccTime) frameInterval;
-
-/** Returns the current rendering perfromance in average frames per second. */
--(ccTime) frameRate;
-
-@end
-
-
-#pragma mark -
-#pragma mark CCArray extension
-
-/**
- * Extension category to support cocos3d functionality.
- *
- * This extension includes a number of methods that add or remove objects to and from
- * the array without retaining and releasing them. These methods are identified by the
- * word Unretained in their names, and are faster than their standard equivalent methods
- * that do retain and release objects.
- *
- * It is critical that use of these methods is consistent for any object added. If an
- * object is added using an "Unretained" method, then it must be removed using an
- * "Unretained" method.
- */
-@interface CCArray (CC3)
-
-/** Returns the index of the specified object, by comparing objects using the == operator. */
--(NSUInteger) indexOfObjectIdenticalTo: (id) anObject;
-
-/** Removes the specified object, by comparing objects using the == operator. */
--(void) removeObjectIdenticalTo: (id) anObject;
-
-/**
- * Replaces the object at the specified index with the specified object.
- *
- * This performs a simple replacement, which is faster than the implementation
- * of the replaceObjectAtIndex: method, which adds and then removes.
- */
--(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject;
-
-
-#pragma mark Support for unretained objects
-
-/**
- * Adds the specified object to the end of the array, but does not retain the object.
- *
- * When removing the object, it must not be released. Use one the
- * removeUnretainedObject... methods to remove the object.
- */
-- (void) addUnretainedObject: (id) anObject;
-
-/**
- * Inserts the specified object at the specified index within the array,
- * but does not retain the object. The elements in the array after the
- * specified index position are shuffled up to make room for the new object.
- *
- * When removing the object, it must not be released. Use one the
- * removeUnretainedObject... methods to remove the object.
- */
-- (void) insertUnretainedObject: (id) anObject atIndex: (NSUInteger) index;
-
-/**
- * Removes the specified object from the array, without releasing it,
- * by comparing objects using the == operator.
- *
- * The objects after this object in the array are shuffled down to fill in the gap.
- *
- * The object being removed must not have been retained when added to the array.
- */
-- (void) removeUnretainedObjectIdenticalTo: (id) anObject;
-
-/**
- * Removes the object at the specified index, without releasing it.
- *
- * The objects after this object in the array are shuffled down to fill in the gap.
- *
- * The object being removed must not have been retained when added to the array.
- */
-- (void) removeUnretainedObjectAtIndex: (NSUInteger) index;
-
-/**
- * Removes all objects in the array, without releasing them.
- *
- * All objects being removed must not have been retained when added to the array.
- */
-- (void) removeAllObjectsAsUnretained;
-
-/**
- * Releases the array without releasing each contained object.
- *
- * All contained objects must not have been retained when added to the array.
- */
--(void) releaseAsUnretained;
-
-/** Returns a more detailed description of this instance. */
--(NSString*) fullDescription;
-
-@end

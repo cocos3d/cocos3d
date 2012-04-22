@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpScene.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -102,6 +102,8 @@ typedef enum {
  *   - collision detection between nodes
  *   - texturing a node with only a small section of single texture
  *   - using the CC3Scene onOpen method to initiate activity when a scene opens
+ *   - using pinch and pan gestures to control the movement of the 3D camera
+ *   - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -124,6 +126,7 @@ typedef enum {
  *   - displaying descriptive text and wireframe bounding boxes on every node
  *   - displaying a dynamic bounding box on a 3D particle emitter.
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
+ *   - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
  *
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached
  * to the end of the rotating arm, demonstrating the technique of embedding a 2D CCNode
@@ -132,7 +135,7 @@ typedef enum {
  * 
  * Most of the 3D objects are selectable by touching. Touching any of the 3D objects with
  * your finger will display the location of the touch on the object itself, in the 3D
- * coordinates system of the touched node. This is performed by converting the 2D touch
+ * coordinate system of the touched node. This is performed by converting the 2D touch
  * point to a 3D ray, and tracing the ray to detect the nodes that are punctured by the ray.
  *
  * If the ground plane is touched, a little orange teapot will be placed on the ground
@@ -194,6 +197,10 @@ typedef enum {
  * of the camera, moving forward, back, left and right. By experimenting with these two
  * joysticks, you should be able to navigate the camera all around the 3D scene, looking
  * behind, above, and below objects.
+ *
+ * You can also move the camera using gestures directly on the screen. A double-finger
+ * drag gesture will pan the camera around the scene. And a pinch gesture will move the
+ * camera forwards or backwards.
  *
  * Using the left joystick, you can redirect the camera to look far away in the direction
  * of the light source by extrapolating a line from the base of the robot arm through the
@@ -354,10 +361,10 @@ typedef enum {
  * sides by a single texture. The texture is laid out specifically to wrap around box nodes.
  * See the BoxTexture.png image to see the layout of a texture that will be wrapped around
  * a box. Direction markers have been added to the node to show which side of the box faces
- * each direction in the local coordinate system of the node. The multi-color cube can be
- * rotated like the die cube.
+ * each direction in the local coordinate system of the node. Like the die cube, the
+ * multi-color cube can be rotated with a swipe gesture.
  *
- * Pointing out of the multi-color box are direction marker lines. During development,
+ * Poking out of the multi-color box are direction marker lines. During development,
  * these lines can be added to any node to help track the orientation of the node, by
  * using any of several convenience methods, including addDirectionMarker, 
  * addDirectionMarkerColored:inDirection: and addAxesDirectionMarkers. These direction
@@ -427,6 +434,11 @@ typedef enum {
  * To turn "shadow-mode" off, touch the shadow button a second time.
  *
  * Most of the dynamic motion in this scene is handled by standard cocos2d CCActionIntervals.
+ * User interaction is through buttons, which are 2D child layers on the main CC3DemoMashUpLayer,
+ * and either gestures or touch event handling. You can select whether to use gestures for user
+ * interaction by setting the shouldUseGestures variable in the initializeControls method of
+ * CC3DemoMashUpLayer. If this variable is set to NO, then the layer and scene will use basic
+ * touch events to interact with the user.
  *
  * Vertex arrays and meshes are created only once for each mesh type, and are used by several
  * nodes. For exmample, all of the teapots: textured, colored or multi-colored, use the same
@@ -435,6 +447,8 @@ typedef enum {
 @interface CC3DemoMashUpScene : CC3Scene {
 	CGPoint playerDirectionControl;
 	CGPoint playerLocationControl;
+	CC3Vector cameraMoveStartLocation;
+	CC3Vector cameraPanStartRotation;
 	CC3PlaneNode* ground;
 	CC3MeshNode* teapotWhite;
 	CC3MeshNode* teapotTextured;
@@ -515,6 +529,117 @@ typedef enum {
  * prevous camera position.
  */
 -(void) cycleZoom;
+
+
+#pragma mark Gesture handling
+
+/**
+ * Start moving the camera using the feedback from a UIPinchGestureRecognizer.
+ *
+ * This method is invoked once at the beginning of each pinch gesture.
+ * The current location of the camera is cached. Subsequent invocations of the
+ * moveCameraBy: method will move the camera relative to this starting location.
+ */
+-(void) startMovingCamera;
+
+/**
+ * Moves the camera using the feedback from a UIPinchGestureRecognizer.
+ *
+ * Since the specified movement comes from a pinch gesture, it's value will be a
+ * scale, where one represents the initial pinch size, zero represents a completely
+ * closed pinch, and values larget than one represent an expanded pinch.
+ *
+ * Taking the initial pinch size to reference the initial camera location, the camera
+ * is moved backwards relative to that location as the pinch closes, and forwards as
+ * the pinch opens. Movement is linear and relative to the forwardDirection of the camera.
+ *
+ * This method is invoked repeatedly during a pinching gesture.
+ *
+ * Note that the pinching does not zoom the camera, although the visual effect is
+ * very similar. For this application, moving the camera is more flexible and useful
+ * than zooming. But other application might prefer to use the pinch gesture scale
+ * to modify the uniformScale or fieldOfView properties of the camera, to perform
+ * a true zooming effect.
+ */
+-(void) moveCameraBy: (CGFloat) aMovement;
+
+/**
+ * Stop moving the camera using the feedback from a UIPinchGestureRecognizer.
+ *
+ * This method is invoked once at the end of each pinch gesture.
+ * This method does nothing.
+ */
+-(void) stopMovingCamera;
+
+/**
+ * Start panning the camera using the feedback from a UIPanGestureRecognizer.
+ *
+ * This method is invoked once at the beginning of each double-finger pan gesture.
+ * The current orientation of the camera is cached. Subsequent invocations of the
+ * panCameraBy: method will move the camera relative to this starting orientation.
+ */
+-(void) startPanningCamera;
+
+/**
+ * Pans the camera using the feedback from a UIPanGestureRecognizer.
+ *
+ * Each component of the specified movement has a value of +/-1 if the user drags two
+ * fingers completely across the width or height of the CC3Layer, or a proportionally
+ * smaller value for shorter drags. The value changes as the panning gesture continues.
+ * At any time, it represents the movement from the initial position when the gesture
+ * began, and the startPanningCamera method was invoked. The movement does not represent
+ * a delta movement from the previous invocation of this method.
+ *
+ * This method is invoked repeatedly during a double-finger panning gesture.
+ */
+-(void) panCameraBy: (CGPoint) aMovement;
+
+/**
+ * Stop panning the camera using the feedback from a UIPanGestureRecognizer.
+ *
+ * This method is invoked once at the end of each double-finger pan gesture.
+ * This method does nothing.
+ */
+-(void) stopPanningCamera;
+
+/**
+ * Start dragging whatever object is below the touch point of this gesture.
+ *
+ * This method is invoked once at the beginning of each single-finger gesture.
+ * This method invokes the pickNodeFromTapAt: method to pick the node under the
+ * gesture, and cache that node. If that node is either of the two rotating cubes,
+ * subsequent invocations of the dragBy:atVelocity: method will spin that node.
+ */
+-(void) startDraggingAt: (CGPoint) touchPoint;
+
+/**
+ * Dragging whatever object was below the initial touch point of this gesture.
+ *
+ * If the selected node is either of the spinning cubes, spin it based on the
+ * specified velocity,
+ * 
+ * Each component of the specified movement has a value of +/-1 if the user drags one
+ * finger completely across the width or height of the CC3Layer, or a proportionally
+ * smaller value for shorter drags. The value changes as the panning gesture continues.
+ * At any time, it represents the movement from the initial position when the gesture
+ * began, and the startDraggingAt: method was invoked. The movement does not represent
+ * a delta movement from the previous invocation of this method.
+ * 
+ * Each component of the specified velocity is also normalized to the CC3Layer, so that
+ * a steady drag completely across the layer taking one second would have a value of
+ * +/-1 in the X or Y components.
+ *
+ * This method is invoked repeatedly during a single-finger panning gesture.
+ */
+-(void) dragBy: (CGPoint) aMovement atVelocity: (CGPoint) aVelocity;
+
+/**
+ * Stop dragging whatever object was below the initial touch point of this gesture.
+ *
+ * This method is invoked once at the end of each single-finger pan gesture.
+ * This method simply clears the cached selected node.
+ */
+-(void) stopDragging;
 
 @end
 

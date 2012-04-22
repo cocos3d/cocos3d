@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -66,13 +66,19 @@
 @synthesize shouldAlwaysMeasureBillboardBoundingRect, shouldMaximizeBillboardBoundingRect;
 
 -(void) dealloc {
-	[billboard release];
+	self.billboard = nil;		// Use setter to cleanup and release the 2D billboard.
 	[super dealloc];
 }
 
--(void) setBillboard:(CCNode*) aCCNode {
-	[billboard onExit];					// Stop scheduled activities on old billboard
-	[billboard autorelease];			// Autorelease (not release) in case its same instance
+-(void) setBillboard: (CCNode*)aCCNode {
+	if (aCCNode == billboard) return;	// Don't do anything if it's the same 2D billboard...
+										// ...otherwise it will be detached from scheduler.
+	// Old 2D billboard
+	[billboard onExit];					// Turn off running state and pause activity.
+	[billboard cleanup];				// Detach billboard from scheduler and actions.
+	[billboard release];
+
+	// New 2D billboard
 	billboard = [aCCNode retain];
 	billboard.visible = self.visible;
 	[self normalizeBillboardScaleToDevice];
@@ -82,7 +88,7 @@
 	}
 	[self normalizeBillboardScaleToDevice];
 	if (isRunning) [billboard onEnter];	// If running, start scheduled activities on new billboard
-} 
+}
 
 -(void) setShouldDrawAs2DOverlay: (BOOL) drawAsOverlay {
 	shouldDrawAs2DOverlay = drawAsOverlay;

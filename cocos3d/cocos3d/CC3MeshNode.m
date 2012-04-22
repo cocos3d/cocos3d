@@ -1,7 +1,7 @@
 /*
  * CC3MeshNode.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,7 @@
 #import "CC3OpenGLES11Engine.h"
 #import "CC3VertexArrayMesh.h"
 #import "CC3Light.h"
+#import "CC3IOSExtensions.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -150,6 +151,13 @@
 -(void) setShouldUseSmoothShading: (BOOL) shouldSmooth {
 	shouldUseSmoothShading = shouldSmooth;
 	super.shouldUseSmoothShading = shouldSmooth;
+}
+
+-(BOOL) shouldCastShadowsWhenInvisible { return shouldCastShadowsWhenInvisible; }
+
+-(void) setShouldCastShadowsWhenInvisible: (BOOL) shouldCast {
+	shouldCastShadowsWhenInvisible = shouldCast;
+	super.shouldCastShadowsWhenInvisible = shouldCast;
 }
 
 -(CC3NormalScaling) normalScalingMethod { return normalScalingMethod; }
@@ -449,6 +457,7 @@
 		shouldUseClockwiseFrontFaceWinding = NO;
 		shouldDisableDepthMask = NO;
 		shouldDisableDepthTest = NO;
+		shouldCastShadowsWhenInvisible = NO;
 		depthFunction = GL_LEQUAL;
 		normalScalingMethod = kCC3NormalScalingAutomatic;
 	}
@@ -473,6 +482,7 @@
 	shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
 	shouldDisableDepthMask = another.shouldDisableDepthMask;
 	shouldDisableDepthTest = another.shouldDisableDepthTest;
+	shouldCastShadowsWhenInvisible = another.shouldCastShadowsWhenInvisible;
 	depthFunction = another.depthFunction;
 	normalScalingMethod = another.normalScalingMethod;
 }
@@ -1221,6 +1231,20 @@
 	return MAX(MAX(scaleToMaxSide, scaleToMinSide), minAbsoluteScale);
 }
 
+// The proportional distance that the direction should protrude from the parent node
+static GLfloat directionMarkerScale = 1.5;
+
++(GLfloat) directionMarkerScale { return directionMarkerScale; }
+
++(void) setDirectionMarkerScale: (GLfloat) aScale { directionMarkerScale = aScale; }
+
+// The minimum length of a direction marker, in the global coordinate system.
+static GLfloat directionMarkerMinimumLength = 0;
+
++(GLfloat) directionMarkerMinimumLength { return directionMarkerMinimumLength; }
+
++(void) setDirectionMarkerMinimumLength: (GLfloat) len { directionMarkerMinimumLength = len; }
+
 /**
  * Calculate the end of the directonal marker line.
  *
@@ -1250,20 +1274,6 @@
 			 NSStringFromCC3Vector(lineEnd), NSStringFromCC3Vector(pbbDirScale), dirScale, directionMarkerMinimumLength);
 	return lineEnd;
 }
-
-// The proportional distance that the direction should protrude from the parent node
-static GLfloat directionMarkerScale = 1.5;
-
-+(GLfloat) directionMarkerScale { return directionMarkerScale; }
-
-+(void) setDirectionMarkerScale: (GLfloat) aScale { directionMarkerScale = aScale; }
-
-// The minimum length of a direction marker, in the global coordinate system.
-static GLfloat directionMarkerMinimumLength = 0;
-
-+(GLfloat) directionMarkerMinimumLength { return directionMarkerMinimumLength; }
-
-+(void) setDirectionMarkerMinimumLength: (GLfloat) len { directionMarkerMinimumLength = len; }
 
 @end
 

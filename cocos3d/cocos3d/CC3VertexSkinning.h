@@ -1,7 +1,7 @@
 /*
  * CC3VertexSkinning.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
@@ -432,6 +432,20 @@
  * If this property is not set directly, it will be lazily initialized on first access.
  */
 @property(nonatomic, retain) CC3DeformedFaceArray* deformedFaces;
+
+
+#pragma mark Transformations
+
+/**
+ * Callback method that will be invoked when the transformMatrix of the specified bone has changed.
+ * The transform matrix of this node is marked as dirty, so that the changes are propagated to
+ * descendant nodes, such as shadow volumes, and to update the deformedFaces property.
+ *
+ * This callback is implemented as distinct from the general notification mechanism of the
+ * bone because of its importance, and so that this class and its subclasses do not need to
+ * distiguish this callback from other notifications that this instance might register for.
+ */
+-(void) boneWasTransformed: (CC3Bone*) aBone;
 
 @end
 
@@ -896,12 +910,6 @@
  */
 -(CC3Vector)  deformedVertexLocationAt:  (GLsizei) vtxIdx;
 
-/** Adds the specified transform listener to each bone contained in this skin section. */
--(void) addTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
-
-/** Removes the specified transform listener from each bone contained in this skin section. */
--(void) removeTransformListener: (id<CC3NodeTransformListenerProtocol>) aListener;
-
 
 #pragma mark Allocation and initialization
 
@@ -1104,10 +1112,10 @@
 }
 
 /** Returns the bone whose transforms are being tracked. */
-@property(nonatomic, retain, readonly) CC3Bone* bone;
+@property(nonatomic, assign, readonly) CC3Bone* bone;
 
 /** Returns the skin mesh node whose transforms are being tracked. */
-@property(nonatomic, retain, readonly) CC3SkinMeshNode* skinNode;
+@property(nonatomic, assign, readonly) CC3SkinMeshNode* skinNode;
 
 /**
  * Returns the transform matrix used to draw the deformed nodes during mesh rendering.
@@ -1174,7 +1182,7 @@
  * the instance will register as a transform listener with the skin mesh node,
  * so that the faces can be rebuilt if the skin mesh node or any of the bones move.
  */
-@interface CC3DeformedFaceArray : CC3FaceArray <CC3NodeTransformListenerProtocol> {
+@interface CC3DeformedFaceArray : CC3FaceArray {
 	CC3SkinMeshNode* node;
 	CC3Vector* deformedVertexLocations;
 	BOOL deformedVertexLocationsAreRetained;

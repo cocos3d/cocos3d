@@ -111,106 +111,40 @@
 }
 
 
+#pragma mark Updating custom activity
+
 /**
  * This template method is invoked periodically whenever the 3D nodes are to be updated.
  *
- * This method provides this node with an opportunity to perform update activities before
- * any changes are applied to the transformMatrix of the node. The similar and complimentary
- * method updateAfterTransform: is automatically invoked after the transformMatrix has been
- * recalculated. If you need to make changes to the transform properties (location, rotation,
- * scale) of the node, or any child nodes, you should override this method to perform those
- * changes.
+ * This method provides your app with an opportunity to perform update activities before
+ * any changes are applied to the transformMatrix of the 3D nodes in the scene.
  *
- * The global transform properties of a node (globalLocation, globalRotation, globalScale)
- * will not have accurate values when this method is run, since they are only valid after
- * the transformMatrix has been updated. If you need to make use of the global properties
- * of a node (such as for collision detection), override the udpateAfterTransform: method
- * instead, and access those properties there.
- *
- * The specified visitor encapsulates the CC3Scene instance, to allow this node to interact
- * with other nodes in its scene.
- *
- * The visitor also encapsulates the deltaTime, which is the interval, in seconds, since
- * the previous update. This value can be used to create realistic real-time motion that
- * is independent of specific frame or update rates. Depending on the setting of the
- * maxUpdateInterval property of the CC3Scene instance, the value of dt may be clamped to
- * an upper limit before being passed to this method. See the description of the CC3Scene
- * maxUpdateInterval property for more information about clamping the update interval.
- *
- * As described in the class documentation, in keeping with best practices, updating the
- * model state should be kept separate from frame rendering. Therefore, when overriding
- * this method in a subclass, do not perform any drawing or rending operations. This
- * method should perform model updates only.
- *
- * This method is invoked automatically at each scheduled update. Usually, the application
- * never needs to invoke this method directly.
+ * For more info, read the notes of this method on CC3Node.
  */
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {}
 
 /**
  * This template method is invoked periodically whenever the 3D nodes are to be updated.
  *
- * This method provides this node with an opportunity to perform update activities after
- * the transformMatrix of the node has been recalculated. The similar and complimentary
- * method updateBeforeTransform: is automatically invoked before the transformMatrix
- * has been recalculated.
+ * This method provides your app with an opportunity to perform update activities after
+ * the transformMatrix of the 3D nodes in the scen have been recalculated.
  *
- * The global transform properties of a node (globalLocation, globalRotation, globalScale)
- * will have accurate values when this method is run, since they are only valid after the
- * transformMatrix has been updated. If you need to make use of the global properties
- * of a node (such as for collision detection), override this method.
- *
- * Since the transformMatrix has already been updated when this method is invoked, if
- * you override this method and make any changes to the transform properties (location,
- * rotation, scale) of any node, you should invoke the updateTransformMatrices method of
- * that node, to have its transformMatrix, and those of its child nodes, recalculated.
- *
- * The specified visitor encapsulates the CC3Scene instance, to allow this node to interact
- * with other nodes in its scene.
- *
- * The visitor also encapsulates the deltaTime, which is the interval, in seconds, since
- * the previous update. This value can be used to create realistic real-time motion that
- * is independent of specific frame or update rates. Depending on the setting of the
- * maxUpdateInterval property of the CC3Scene instance, the value of dt may be clamped to
- * an upper limit before being passed to this method. See the description of the CC3Scene
- * maxUpdateInterval property for more information about clamping the update interval.
- *
- * As described in the class documentation, in keeping with best practices, updating the
- * model state should be kept separate from frame rendering. Therefore, when overriding
- * this method in a subclass, do not perform any drawing or rending operations. This
- * method should perform model updates only.
- *
- * This method is invoked automatically at each scheduled update. Usually, the application
- * never needs to invoke this method directly.
+ * For more info, read the notes of this method on CC3Node.
  */
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {}
+
+
+#pragma mark Scene opening and closing
 
 /**
  * Callback template method that is invoked automatically when the CC3Layer that
  * holds this scene is first displayed.
  *
- * Alternately, this callback method is also invoked automatically when this CC3Scene
- * is attached to a CC3Layer, if the layer is already running, as would be the case
- * when 3D scenes are changed by changing the CC3Scene that is attached to the layer.
+ * This method is a good place to invoke one of CC3Camera moveToShowAllOf:... family
+ * of methods, used to cause the camera to automatically focus on and frame a particular
+ * node, or the entire scene.
  *
- * By the time this method is invoked:
- *   - The CC3Layer has been attached to the view environment, has a contentSize,
- *     and is running.
- *   - The play method has been invoked on this CC3Scene, and the isRunning property
- *     of this scene is set to YES.
- *   - The initial updateScene invocation has been performed, and the initial transforms
- *     and global properties (eg- globalLocation) of all nodes have been been established.
- *   - The camera frustum, modelview, and projection transforms have been established.
- * 
- * The default implementation of this method does nothing.
- *
- * The application can override this method to perform any activities associated
- * with the initial display of the scene, that depend on the camera projection
- * or the global properties of any nodes.
- *
- * In particular, if desired, this method is a good place to invoke one of CC3Camera
- * moveToShowAllOf:... family of methods, used to cause the camera to automatically
- * focus on and frame a particular node, or the entire scene.
+ * For more info, read the notes of this method on CC3Scene.
  */
 -(void) onOpen {
 
@@ -224,17 +158,41 @@
 }
 
 /**
- * Closes the scene for viewing. This implementation invokes the pause method to stop
- * update activity and actions within the scene, and then invokes the onClose callback
- * method on this instance, to give the application an opportunity to perform any
- * activities as the scene closes down.
+ * Callback template method that is invoked automatically when the CC3Layer that
+ * holds this scene has been removed from display.
  *
- * This method is automatically invoked by the CC3Layer that holds this scene when
- * that layer has been removed from the display, or when this CC3Scene has been
- * replaced with another CC3Scene in the CC3Layer. The applicaiton should never
- * need to invoke this method directly.
+ * For more info, read the notes of this method on CC3Scene.
  */
--(void) close {}
+-(void) onClose {}
+
+
+#pragma mark Handling touch events 
+
+/**
+ * This method is invoked from the CC3Layer whenever a touch event occurs, if that layer
+ * has indicated that it is interested in receiving touch events, and is handling them.
+ *
+ * Override this method to handle touch events, or remove this method to make use of
+ * the superclass behaviour of selecting 3D nodes on each touch-down event.
+ *
+ * This method is not invoked when gestures are used for user interaction. Your custom
+ * CC3Layer processes gestures and invokes higher-level application-defined behaviour
+ * on this customized CC3Scene subclass.
+ *
+ * For more info, read the notes of this method on CC3Scene.
+ */
+-(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {}
+
+/**
+ * This callback template method is invoked automatically when a node has been picked
+ * by the invocation of the pickNodeFromTapAt: or pickNodeFromTouchEvent:at: methods,
+ * as a result of a touch event or tap gesture.
+ *
+ * Override this method to perform activities on 3D nodes that have been picked by the user.
+ *
+ * For more info, read the notes of this method on CC3Scene.
+ */
+-(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
 
 @end
 

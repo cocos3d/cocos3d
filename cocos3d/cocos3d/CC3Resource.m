@@ -1,7 +1,7 @@
 /*
  * CC3Resource.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -91,9 +91,8 @@
 
 	wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
 	
-	if ( !wasLoaded ) {
-		LogCleanError(@"Could not load resource file '%@'", absFilePath);
-	}
+	if ( !wasLoaded ) LogCleanError(@"Could not load resource file '%@'", absFilePath);
+
 	return wasLoaded;
 }
 

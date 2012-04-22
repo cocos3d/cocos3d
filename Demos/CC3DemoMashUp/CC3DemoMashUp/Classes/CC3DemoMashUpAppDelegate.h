@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpAppDelegate.h
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com

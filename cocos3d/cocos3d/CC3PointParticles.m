@@ -1,7 +1,7 @@
 /*
  * CC3PointParticles.m
  *
- * cocos3d 0.7.0
+ * cocos3d 0.7.1
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -50,7 +50,6 @@
 @end
 
 @interface CC3PointParticleEmitter (TemplateMethods)
-@property(nonatomic, retain, readwrite) CC3Camera* activeCamera;
 -(void) configureParticleProperties: (CC3NodeDrawingVisitor*) visitor;
 -(void) cleanupParticleProperties: (CC3NodeDrawingVisitor*) visitor;
 -(void) createMaterial;
@@ -80,35 +79,25 @@
 
 -(void) dealloc {
 	[particles release];
-	[cachedCamera release];
+	cachedCamera = nil;			// not retained
 	particleClass = nil;		// not retained
 	[super dealloc];
 }
 
-/** Overridden to use cached value if it exists. */
+/**
+ * Overridden to cache for faster access during updates.
+ * The cached camera is cleared at end of each update cycle.
+ */
 -(CC3Camera*) activeCamera {
-	if ( !cachedCamera ) {
-		self.activeCamera = super.activeCamera;
-	}
+	if ( !cachedCamera ) cachedCamera = super.activeCamera;		// not retained
 	return cachedCamera;
 }
 
--(void) setActiveCamera: (CC3Camera*) aCamera {
-	[cachedCamera autorelease];
-	cachedCamera = aCamera;
-}
+-(CC3PointParticleMesh*) particleMesh { return (CC3PointParticleMesh*)mesh; }
 
--(CC3PointParticleMesh*) particleMesh {
-	return (CC3PointParticleMesh*)mesh;
-}
+-(BOOL) isFull { return (particleCount == maxParticles); }
 
--(BOOL) isFull {
-	return particleCount == maxParticles;
-}
-
--(ccTime) emissionInterval {
-	return emissionInterval;
-}
+-(ccTime) emissionInterval { return emissionInterval; }
 
 -(void) setEmissionInterval: (ccTime) anInterval {
 	emissionInterval = MAX(anInterval, 0.0);		// Force it to non-negative.
@@ -144,12 +133,6 @@
 	} else {
 		particleSizeAttenuationCoefficients = kCC3ParticleSizeAttenuationNone;
 	}
-}
-
-/** Overridden to reset the camera so it will be lazily reacquired. */
--(void) setParent: (CC3Node*) aNode {
-	[super setParent: aNode];
-	self.activeCamera = nil;
 }
 
 
@@ -280,9 +263,7 @@
 	[self populateForMaxParticles: numParticles containing: kCC3PointParticleContentLocation];
 }
 	
--(id) particleClass {
-	return [CC3PointParticle class];
-}
+-(id) particleClass { return [CC3PointParticle class]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -293,7 +274,8 @@
 						   ofType: another.particleClass
 					   containing: another.particleContentTypes];
 	
-	self.activeCamera = another.activeCamera;			// retained
+	// cachedCamera is ephemeral and lazily created
+	
 	emissionInterval = another.emissionInterval;
 	emissionDuration = another.emissionDuration;
 	shouldRemoveOnFinish = another.shouldRemoveOnFinish;
@@ -306,13 +288,9 @@
 	particleSizeAttenuationCoefficients = another.particleSizeAttenuationCoefficients;
 }
 
--(void) retainVertexPointSizes {
-	[self.particleMesh retainVertexPointSizes];
-}
+-(void) retainVertexPointSizes { [self.particleMesh retainVertexPointSizes]; }
 
--(void) doNotBufferVertexPointSizes {
-	[self.particleMesh doNotBufferVertexPointSizes];
-}
+-(void) doNotBufferVertexPointSizes { [self.particleMesh doNotBufferVertexPointSizes]; }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ is %@emitting %i of %i particles of type %@ every %@ ms for %.1f of %@ seconds",
@@ -332,9 +310,7 @@
  * any of the the location, normal, color or size of a particle, or by the
  * emission or expiration of a particle.
  */
--(void) markVerticesDirty {
-	verticesAreDirty = YES;
-}
+-(void) markVerticesDirty { verticesAreDirty = YES; }
 
 /**
  * Invoked during node updates.
@@ -361,6 +337,9 @@
 
 	// If any particle was added or changed, update the mesh.
 	[self updateParticleMesh];
+	
+	// Cached cam lazily created if needed during update. Reset it at end of update.
+	cachedCamera = nil;
 	
 	// If emission has stopped and all the particles have been killed off and the
 	// emitter should be removed when finished, remove the emitter from its parent.
@@ -489,8 +468,8 @@
  * direction, depending on how far the particle is from the origin of the emitter.
  */
 -(void) setParticleNormal: (CC3PointParticle*) pointParticle {
-	CC3Camera* cam = self.activeCamera;
-	if (cam && mesh && mesh.hasNormals) {
+	if (mesh && mesh.hasNormals) {
+		CC3Camera* cam = self.activeCamera;
 		CC3Vector camDir = CC3VectorDifference(cam.globalLocation, self.globalLocation);
 		camDir = [self.transformMatrixInverted transformDirection: camDir];
 		[pointParticle pointNormalToCameraAt: camDir];
@@ -508,8 +487,8 @@
  * has changed.
  */
 -(void) updateParticleNormals: (CC3NodeUpdatingVisitor*) visitor {
-	CC3Camera* cam = self.activeCamera;
-	if (cam && mesh && mesh.hasNormals) {
+	if (mesh && mesh.hasNormals) {
+		CC3Camera* cam = self.activeCamera;
 		CC3Vector gCamLoc = cam.globalLocation;
 		if ( visitor.isTransformDirty || !CC3VectorsAreEqual(gCamLoc, globalCameraLocation) ) {
 			globalCameraLocation = gCamLoc;		// Remember the new camera location
@@ -570,13 +549,9 @@
 	isEmitting = shouldEmit;
 }
 
--(void) play {
-	self.isEmitting = YES;
-}
+-(void) play { self.isEmitting = YES; }
 
--(void) pause {
-	self.isEmitting = NO;
-}
+-(void) pause { self.isEmitting = NO; }
 
 -(void) stop {
 	[self pause];						// Stop emitting particles...
@@ -584,9 +559,7 @@
 	particleCount = 0;
 }
 
--(BOOL) isActive {
-	return isEmitting || particleCount > 0;
-}
+-(BOOL) isActive { return isEmitting || particleCount > 0; }
 
 // Check for wasStarted needed so it doesn't indicate finished before it starts.
 // Otherwise, auto-remove would cause the emitter to be removed immediately.
@@ -757,7 +730,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 	vertexLocations.elementOffset = stride;		// Offset to location in vertex structure
 	stride += sizeof(CC3Vector);				// Add size of location element to stride.
 	
-	// If each particle is to have a normal, create a vertex colors array.
+	// If each particle is to have a normal, create a vertex normals array.
 	if (contentTypes & kCC3PointParticleContentNormal) {
 		itemName = [NSString stringWithFormat: @"%@-Normals", self.name];
 		self.vertexNormals = [CC3VertexNormals vertexArrayWithName: itemName];
