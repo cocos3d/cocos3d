@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -161,6 +161,7 @@
 	CC3OpenGLES11StateTrackerEnumeration* mode;
 	CC3OpenGLES11MatrixStack* modelview;
 	CC3OpenGLES11MatrixStack* projection;
+	CC3OpenGLES11StateTrackerEnumeration* activePalette;
 	CCArray* paletteMatrices;
 }
 
@@ -173,6 +174,9 @@
 /** Manages the projection matrix stack. */
 @property(nonatomic, retain) CC3OpenGLES11MatrixStack* projection;
 
+/** Tracks active palette matrix (GL get name not applicable and set function glCurrentPaletteMatrixOES). */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerEnumeration* activePalette;
+
 /**
  * Manages the palette of matrices.
  *
@@ -182,7 +186,7 @@
  * The number of available texture units can be retrieved from
  * [CC3OpenGLES11Engine engine].platform.maxPaletteMatrices.value.
  *
- * To conserve memory and processing, texture units are lazily allocated when
+ * To conserve memory and processing, palette units are lazily allocated when
  * requested by the paletteAt: method. The array returned by this property will
  * initially be empty, and will subsequently contain a number of palette matrices
  * one more than the largest value passed to paletteAt:.

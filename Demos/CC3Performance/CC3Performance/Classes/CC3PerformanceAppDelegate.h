@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceAppDelegate.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
@@ -30,11 +30,5 @@
 #import <UIKit/UIKit.h>
 #import "CCNodeController.h"
 
-@interface CC3PerformanceAppDelegate : NSObject <UIApplicationDelegate> {
-	UIWindow* window;
-	CCNodeController* viewController;
-}
-
-@property (nonatomic, retain) UIWindow* window;
-
+@interface CC3PerformanceAppDelegate : NSObject <UIApplicationDelegate>
 @end

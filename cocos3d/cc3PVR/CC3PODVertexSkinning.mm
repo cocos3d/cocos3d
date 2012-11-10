@@ -1,7 +1,7 @@
 /*
  * CC3PODVertexSkinning.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
@@ -120,8 +120,8 @@
 		// the pointer to it, so that it can be managed by the vertexLocations array.
 		// So, we need to point the two new vertex arrays to the interleaved data.
 		if (shouldInterleaveVertices) {
-			self.vertexMatrixIndices.elements = self.vertexLocations.elements;
-			self.vertexWeights.elements = self.vertexLocations.elements;
+			self.vertexMatrixIndices.vertices = self.vertexLocations.vertices;
+			self.vertexWeights.vertices = self.vertexLocations.vertices;
 		}
 	}
 	return self;
@@ -198,8 +198,8 @@
 									? pBatches->pnBatchOffset[aBatchIndex + 1]
 									: psm->nNumFaces;
 			
-		vertexStart = [aNode.mesh vertexCountFromFaceCount: currFaceOffset];
-		vertexCount =  [aNode.mesh vertexCountFromFaceCount: (nextFaceOffset - currFaceOffset)];
+		vertexStart = [aNode.mesh vertexIndexCountFromFaceCount: currFaceOffset];
+		vertexCount =  [aNode.mesh vertexIndexCountFromFaceCount: (nextFaceOffset - currFaceOffset)];
 			
 		boneCount = pBatches->pnBatchBoneCnt[aBatchIndex];
 		boneNodeIndices = &(pBatches->pnBatches[aBatchIndex * pBatches->nBatchBoneMax]);
@@ -224,7 +224,7 @@
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ from original bone count %i of indices at %x",
+	return [NSString stringWithFormat: @"%@ from original bone count %i of indices at %p",
 			[super fullDescription], boneCount, boneNodeIndices];
 }
 

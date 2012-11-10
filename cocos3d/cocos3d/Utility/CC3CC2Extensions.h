@@ -1,7 +1,7 @@
 /*
  * CC3CC2Extensions.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,6 +37,34 @@
 #import "CCLayer.h"
 #import "CCMenu.h"
 #import "CCDirector.h"
+#import "CCActionInterval.h"
+#import "CCLabelBMFont.h"
+
+
+#pragma mark -
+#pragma mark CC3CCSizeTo action
+
+/** Animates a change to the contentSize of a CCNode. */
+@interface CC3CCSizeTo : CCActionInterval {
+	CGSize startSize_;
+	CGSize endSize_;
+	CGSize sizeChange_;
+}
+
+/**
+ * Initializes this instance to change the contentSize property of the target to the specified
+ * size, within the specified elapsed duration.
+ */
+-(id) initWithDuration: (ccTime) dur sizeTo: (CGSize) endSize;
+
+/**
+ * Allocates and initializes an autoreleased instance to change the contentSize property of
+ * the target to the specified size, within the specified elapsed duration.
+ */
++(id) actionWithDuration: (ccTime) dur sizeTo: (CGSize) endSize;
+
+@end
+
 
 
 #pragma mark -
@@ -58,15 +86,22 @@
 -(void) updateViewport;
 
 /**
- * Returns a point in the coordinate space of this layer that corresponds
- * to the specified point in the coordinate space of the UIView, taking into
- * consideration the orientation of the device.
+ * Returns a point in the coordinate space of this node that corresponds to the specified point
+ * in the coordinate space of the UIView, taking into consideration the orientation of the device.
  *
- * You can use this method to convert locations in a UIView, including those
- * returned by touch events and gestures, such as the locationInView: method
- * on tap and long-press gestures, to a location in this layer.
+ * You can use this method to convert locations in a UIView, including those returned by touch
+ * events and gestures, such as the locationInView: method on tap and long-press gestures, to
+ * a location in this layer.
  */
 -(CGPoint) cc3ConvertUIPointToNodeSpace: (CGPoint) viewPoint;
+
+/**
+ * Returns a point in the coordinate space of the UIView that corresponds to the specified point
+ * in the coordinate space of this node, taking into consideration the orientation of the device.
+ *
+ * This method performs the inverse of the operation provided by the cc3ConvertUIPointToNodeSpace: method.
+ */
+-(CGPoint) cc3ConvertNodePointToUISpace: (CGPoint) glPoint;
 
 /**
  * Returns a movement in the coordinate space of this layer that corresponds
@@ -205,6 +240,39 @@
 
 
 #pragma mark -
+#pragma mark CC3BMFontConfiguration 
+
+/** Extends CC3BMFontConfiguration to support cocos3d functionality. */
+@interface CC3BMFontConfiguration : CCBMFontConfiguration {
+@public
+	ccGridSize textureSize;
+	NSUInteger baseline;
+	GLfloat fontSize;
+}
+
+/** Returns a pointer to the specification of the specified character. */
+-(ccBMFontDef*) characterSpecFor: (unichar) c;
+
+/**
+ * Returns the amount of kerning required when the specified second character follows the
+ * first character in a line of text.
+ */
+-(NSInteger) kerningBetween: (unichar) firstChar and: (unichar) secondChar;
+
+/**
+ * Returns an instance loaded from the specified bitmap font definition file.
+ *
+ * This implementation maintains a cache so that each file is only loaded once.
+ */
++(id) configurationFromFontFile: (NSString*) fontFile;
+
+/** Clears all cached font configurations to conserve memory. */
++(void) clearFontConfigurations;
+
+@end
+
+
+#pragma mark -
 #pragma mark CCArray extension
 
 /**
@@ -234,6 +302,31 @@
  * of the replaceObjectAtIndex: method, which adds and then removes.
  */
 -(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject;
+
+/**
+ * Expands or shrinks the array to the specified capacity.
+ *
+ * If the new capacity is less than the current number of elements, the excess elements are released.
+ * 
+ * Returns whether the size of the array was changed.
+ */
+-(BOOL) setCapacity: (NSUInteger) newCapacity;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance to have zero initial capacity. It will be expanded automatically
+ * when objects are added, or can be expanced explicity using the setCapacity: method.
+ */
+- (id) initWithZeroCapacity;
+
+/**
+ * Allocates and initializes an autoreleased instance to have zero initial capacity.
+ * It will be expanded automatically when objects are added, or can be expanced explicity
+ * using the setCapacity: method.
+ */
++(id) arrayWithZeroCapacity;
 
 
 #pragma mark Support for unretained objects
@@ -296,7 +389,7 @@
 
 
 #pragma mark -
-#pragma mark Miscellaneous extensions and functionality
+#pragma mark Miscellaneous extensions and functions
 
 /** Returns the name of the specified touch type. */
 NSString* NSStringFromTouchType(uint tType);

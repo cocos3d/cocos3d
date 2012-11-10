@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpLayer.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -110,6 +110,7 @@
 	[self addSunlightButton];
 	[self addZoomButton];
 	[self addShadowButton];
+	[self scheduleUpdate];		// Schedule updates on each frame
 }
 
 /** Creates the two joysticks that control the 3D camera direction and location. */
@@ -335,7 +336,7 @@
 }
 
 /**
- * Positions the view switching and invasion buttons between the two joysticks.
+ * Positions the buttons between the two joysticks.
  * This is called at initialization, and anytime the content size of the layer changes
  * to keep the button in the correct location within the new layer dimensions.
  */
@@ -432,7 +433,6 @@
 	hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
 	hudLayer.contentSize = hudSize;
 	hudLayer.scale = 0.1;
-	[hudLayer scheduleUpdate];
 
 	// Create and add a new CC3Scene, containing just a copy of the rotating globe,
 	// for the HUD layer, and ensure its camera frames the globe.
@@ -452,7 +452,7 @@
 -(CC3Scene*) makeHUDScene {
 	CC3Scene* hudScene = [HUDScene nodeWithName: @"HUDScene"];
 	
-	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] copyAutoreleased];
+	CC3Node* globe = [[self.cc3Scene getNodeNamed: kGlobeName] autoreleasedCopy];
 	globe.location = kCC3VectorZero;
 	globe.rotation = kCC3VectorZero;
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
@@ -535,30 +535,34 @@
 	// This layer has child buttons on it. To ensure that those buttons receive their
 	// touch events, we set cancelsTouchesInView to NO so that the gesture recognizer
 	// allows the touch events to propagate to the buttons.
-	UITapGestureRecognizer* tapSelector = [[UITapGestureRecognizer alloc] autorelease];
-	[tapSelector initWithTarget: self action: @selector(handleTapSelection:)];
+	UITapGestureRecognizer* tapSelector = [[UITapGestureRecognizer alloc]
+										   initWithTarget: self action: @selector(handleTapSelection:)];
 	tapSelector.numberOfTapsRequired = 1;
 	tapSelector.cancelsTouchesInView = NO;		// Ensures touches are passed to buttons
 	[self cc3AddGestureRecognizer: tapSelector];
+	[tapSelector release];
 	
 	// Register for single-finger dragging gestures used to spin the two cubes.
-	UIPanGestureRecognizer* dragPanner = [[UIPanGestureRecognizer alloc] autorelease];
-	[dragPanner initWithTarget: self action: @selector(handleDrag:)];
+	UIPanGestureRecognizer* dragPanner = [[UIPanGestureRecognizer alloc]
+										  initWithTarget: self action: @selector(handleDrag:)];
 	dragPanner.minimumNumberOfTouches = 1;
 	dragPanner.maximumNumberOfTouches = 1;
 	[self cc3AddGestureRecognizer: dragPanner];
+    [dragPanner release];
 
 	// Register for double-finger dragging to pan the camera.
-	UIPanGestureRecognizer* cameraPanner = [[UIPanGestureRecognizer alloc] autorelease];
-	[cameraPanner initWithTarget: self action: @selector(handleCameraPan:)];
+	UIPanGestureRecognizer* cameraPanner = [[UIPanGestureRecognizer alloc]
+											initWithTarget: self action: @selector(handleCameraPan:)];
 	cameraPanner.minimumNumberOfTouches = 2;
 	cameraPanner.maximumNumberOfTouches = 2;
 	[self cc3AddGestureRecognizer: cameraPanner];
+    [cameraPanner release];
 	
 	// Register for double-finger dragging to pan the camera.
-	UIPinchGestureRecognizer* cameraMover = [[UIPinchGestureRecognizer alloc] autorelease];
-	[cameraMover initWithTarget: self action: @selector(handleCameraMove:)];
+	UIPinchGestureRecognizer* cameraMover = [[UIPinchGestureRecognizer alloc]
+											 initWithTarget: self action: @selector(handleCameraMove:)];
 	[self cc3AddGestureRecognizer: cameraMover];
+    [cameraMover release];
 }
 
 /**

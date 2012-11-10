@@ -1,7 +1,7 @@
 /*
  * CC3PODLight.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -60,11 +60,13 @@ extern "C" {
 		// Get the light content
 		if (self.podContentIndex >= 0) {
 			SPODLight* psl = (SPODLight*)[aPODRez lightPODStructAtIndex: self.podContentIndex];
-			LogCleanRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODLight(psl));
+			LogRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODLight(psl));
 			self.podTargetIndex = psl->nIdxTarget;
 			self.diffuseColor = CCC4FMake(psl->pfColour[0], psl->pfColour[1], psl->pfColour[2], 1.0);
-			self.ambientColor = kCCC4FBlack;
-			self.specularColor = kCCC4FBlack;
+			self.ambientColor = kCC3DefaultLightColorAmbient;
+			self.specularColor = kCC3DefaultLightColorSpecular;
+//			self.ambientColor = kCCC4FBlack;
+//			self.specularColor = kCCC4FBlack;
 			switch (psl->eType) {
 				case ePODDirectional:
 					self.isDirectionalOnly = YES;

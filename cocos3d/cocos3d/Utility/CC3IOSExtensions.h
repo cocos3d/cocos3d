@@ -1,7 +1,7 @@
 /*
  * CC3IOSExtensions.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,6 +36,12 @@
 #import <UIKit/UIColor.h>
 #import "ccTypes.h"
 
+// Define when compiling with SDK's below iOS6
+#ifndef __IPHONE_6_0
+#	define __IPHONE_6_0     60000
+#endif
+
+
 #pragma mark -
 #pragma mark NSObject extensions
 
@@ -46,7 +52,10 @@
  * Convenience method to automatically autorelease when copying objects.
  * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
  */
--(id) copyAutoreleased;
+-(id) autoreleasedCopy;
+
+/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
+-(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -67,6 +76,9 @@
  * locationInView: with the value of the view property of this recognizer.
  */
 @property(nonatomic, readonly) CGPoint location;
+
+/** Returns the name of the current value of the state property. */
+@property(nonatomic, readonly) NSString* stateName;
 
 @end
 
@@ -93,6 +105,63 @@
 
 
 #pragma mark -
+#pragma mark UIKit extensions
+
+/** For consistency, add compilation support for UIInterfaceOrientationMask for SDK's below iOS 6.0. */
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_6_0
+typedef enum {
+	UIInterfaceOrientationMaskPortrait = (1 << UIInterfaceOrientationPortrait),
+	UIInterfaceOrientationMaskLandscapeLeft = (1 << UIInterfaceOrientationLandscapeLeft),
+	UIInterfaceOrientationMaskLandscapeRight = (1 << UIInterfaceOrientationLandscapeRight),
+	UIInterfaceOrientationMaskPortraitUpsideDown = (1 << UIInterfaceOrientationPortraitUpsideDown),
+	UIInterfaceOrientationMaskLandscape = (UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight),
+	UIInterfaceOrientationMaskAll = (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight | UIInterfaceOrientationMaskPortraitUpsideDown),
+	UIInterfaceOrientationMaskAllButUpsideDown = (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight),
+} UIInterfaceOrientationMask;
+#endif
+
+
+/** Returns the UIInterfaceOrientationMask corresponding to the specified UIInterfaceOrientation. */
+static inline UIInterfaceOrientationMask CC3UIInterfaceOrientationMaskFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientation) {
+	switch (uiOrientation) {
+		case UIInterfaceOrientationLandscapeLeft:
+			return UIInterfaceOrientationMaskLandscapeLeft;
+		case UIInterfaceOrientationLandscapeRight:
+			return UIInterfaceOrientationMaskLandscapeRight;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			return UIInterfaceOrientationMaskPortraitUpsideDown;
+		case UIInterfaceOrientationPortrait:
+		default:
+			return UIInterfaceOrientationMaskPortrait;
+	}
+}
+
+/** Returns whether the specified UIInterfaceOrientationMask includes the specified UIInterfaceOrientation. */
+static inline BOOL CC3UIInterfaceOrientationMaskIncludesUIOrientation(NSUInteger uiOrientationMask,
+																	  UIInterfaceOrientation uiOrientation) {
+	return (uiOrientationMask & CC3UIInterfaceOrientationMaskFromUIInterfaceOrientation(uiOrientation)) != 0;
+}
+
+/**
+ * Returns the UIDeviceOrientation corresponding to the specified UIInterfaceOrientation.
+ *
+ * For landscape mode, device orientation is the opposite to the UI orientation (Left <=> Right),
+ * otherwise the device orientation is the same as the UI orientation.
+ */
+static inline UIDeviceOrientation CC3UIDeviceOrientationFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientation) {
+	switch (uiOrientation) {
+		case UIInterfaceOrientationLandscapeLeft:
+			return UIDeviceOrientationLandscapeRight;
+		case UIInterfaceOrientationLandscapeRight:
+			return UIDeviceOrientationLandscapeLeft;
+		default:
+			return uiOrientation;
+	}
+}
+
+
+
+#pragma mark -
 #pragma mark UIColor extensions
 
 /** Extension category to support cocos3d functionality. */
@@ -105,3 +174,13 @@
 +(UIColor*) colorWithCCColor4F: (ccColor4F) rgba;
 
 @end
+
+
+#pragma mark -
+#pragma mark Miscellaneous extensions and functions
+
+/** Returns a string description of the specified UIInterfaceOrientation. */
+NSString* NSStringFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientation);
+
+/** Returns a string description of the specified UIDeviceOrientation. */
+NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation);

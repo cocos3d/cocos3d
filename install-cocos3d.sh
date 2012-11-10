@@ -1,19 +1,17 @@
 #!/bin/bash
 
-# cocos3d 0.7.1
+# cocos3d 0.7.2
 
 echo 'cocos3d installer'
 
 COCOS3D_TEMPLATE_4_DIR='cocos3d'
 BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
-BASE_TEMPLATE_4_USER_DIR="$HOME/Library/Developer/Xcode/Templates"
 
 force=
-user_dir=1
 
 usage(){
 cat << EOF
-Install / update templates for cocos3d
+Install or update Xcode templates and link external libraries for cocos3d
 
 usage: $0 [options] -2 "cocos2d-dist-dir"
  
@@ -27,7 +25,7 @@ for the following directories within that specified directory:
     external/TouchJSON
  
 OPTIONS:
-   -f	force overwrite if directories exist
+   -f	force overwrite if template directories exist
    -h	this help
 EOF
 }
@@ -40,9 +38,6 @@ while getopts "fhu2:" OPTION; do
 		h)
 			usage
 			exit 0
-			;;
-		u)
-			user_dir=1
 			;;
 		2)
 			c2d_dist_dir=$OPTARG
@@ -64,19 +59,6 @@ if [[ ! -d "$c2d_dist_dir" ]];  then
 	exit 1
 fi
 
-# Make sure only root can run our script
-if [[ ! $user_dir  && "$(id -u)" != "0" ]]; then
-	echo ""
-	echo "This script must be run as root in order to copy templates to ${BASE_TEMPLATE_DIR}" 1>&2
-	echo ""
-	echo "Try running it with 'sudo', or with '-u' to install it only you:" 1>&2
-	echo "   sudo $0" 1>&2
-	echo "or:" 1>&2
-	echo "   $0 -u" 1>&2   
-	exit 1
-fi
-
-
 copy_files(){
 	rsync -r --exclude=.svn "$1" "$2"
 }
@@ -96,31 +78,6 @@ check_dst_dir(){
 	mkdir -p "$DST_DIR"
 }
 
-copy_base_mac_files(){
-	echo ...copying cocos2d files
-	copy_files "$c2d_dist_dir/cocos2d" "$LIBS_DIR"
-
-	echo ...copying CocosDenshion files
-	copy_files "$c2d_dist_dir/CocosDenshion" "$LIBS_DIR"
-}
-
-copy_base_files(){
-	echo ...copying cocos2d files
-	copy_files "$c2d_dist_dir/cocos2d" "$LIBS_DIR"
-
-	echo ...copying cocos2d dependency files
-	copy_files "$c2d_dist_dir/external/FontLabel" "$LIBS_DIR"
-
-	echo ...copying CocosDenshion files
-	copy_files "$c2d_dist_dir/CocosDenshion/CocosDenshion" "$LIBS_DIR"
-
-	echo ...copying cocoslive files
-	copy_files "$c2d_dist_dir/cocoslive" "$LIBS_DIR"
-
-	echo ...copying cocoslive dependency files
-	copy_files "$c2d_dist_dir/external/TouchJSON" "$LIBS_DIR"
-}
-
 print_template_banner(){
 	echo ''
 	echo "$1"
@@ -130,11 +87,7 @@ print_template_banner(){
 
 # copies Xcode 4 project-based templates
 copy_xc4_project_templates(){
-	if [[ $user_dir ]]; then
-		TEMPLATE_DIR="${BASE_TEMPLATE_4_USER_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
-	else
-		TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
-	fi
+	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
 
 	if [[ ! -d "$TEMPLATE_DIR" ]]; then
 		echo '...creating Xcode 4 cocos3d template folder'
@@ -172,15 +125,33 @@ copy_xc4_project_templates(){
 	echo done!
 }
 
-copy_cocos2d_libs(){
+link_cocos2d_libs(){
 	echo
-	echo Copying cocos2d libraries to workspace
-	LIBS_DIR=cocos2d
-	copy_base_files
+	echo Linking cocos2d libraries to workspace
+	CC2_DIR=cocos2d
+
+	rm -rf "$CC2_DIR"
+	mkdir -p "$CC2_DIR"
+
+	echo ...linking cocos2d files
+	ln -s "$c2d_dist_dir/cocos2d" "$CC2_DIR"
+
+	echo ...linking FontLabel files
+	ln -s "$c2d_dist_dir/external/FontLabel" "$CC2_DIR"
+
+	echo ...linking CocosDenshion files
+	ln -s "$c2d_dist_dir/CocosDenshion/CocosDenshion" "$CC2_DIR"
+
+	echo ...linking cocoslive files
+	ln -s "$c2d_dist_dir/cocoslive" "$CC2_DIR"
+
+	echo ...linking cocoslive dependency files
+	ln -s "$c2d_dist_dir/external/TouchJSON" "$CC2_DIR"
+
 	echo done!
 }
 
-copy_cocos2d_libs
+link_cocos2d_libs
 
 copy_xc4_project_templates
 

@@ -1,7 +1,7 @@
 /*
  * CC3NodePODExtensions.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -69,7 +69,7 @@ extern "C" {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex
 											fromPODResource: (CC3PODResource*) aPODRez];
-		LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODNode(psn));
+		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODNode(psn));
 		self.name = [NSString stringWithUTF8String: psn->pszName];
 		self.podContentIndex = psn->nIdx;
 		self.podParentIndex = psn->nIdxParent;
@@ -100,12 +100,12 @@ extern "C" {
 
 -(void) linkToPODNodes: (CCArray*) nodeArray {
 	if (!self.isBasePODNode) {
-		LogCleanTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
+		LogTrace(@"Linking %@ with parent index %i", self, self.podParentIndex);
 		CC3Node* parentNode = [nodeArray objectAtIndex: self.podParentIndex];
 		[parentNode addChild: self];
 	}
 	if (self.podTargetIndex >= 0) {
-		LogCleanTrace(@"Linking %@ with target index %i", self, self.podTargetIndex);
+		LogTrace(@"Linking %@ with target index %i", self, self.podTargetIndex);
 		self.target = [nodeArray objectAtIndex: self.podTargetIndex];
 	}
 }
@@ -180,12 +180,12 @@ extern "C" {
 }
 
 #define kPODAnimationQuaternionStride 4
--(CC3Vector4) quaternionAtFrame: (GLuint) frameIndex {
+-(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, frameCount - 1);
 	int currFrameOffset = animatedQuaternionsIndices
 								? animatedQuaternionsIndices[frameIndex]
 								: (frameIndex * kPODAnimationQuaternionStride);
-	return *(CC3Vector4*)&animatedQuaternions[currFrameOffset];
+	return *(CC3Quaternion*)&animatedQuaternions[currFrameOffset];
 }
 
 #define kPODAnimationScaleStride 7

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -51,32 +51,24 @@
 	return self;
 }
 
--(void) setGLValue {
-	glBindBuffer(name, value);
-}
+-(void) setGLValue { glBindBuffer(name, value); }
 
--(void) getGLValue {
-	glGetIntegerv(queryName, &originalValue);
-}
+-(void) getGLValue { glGetIntegerv(queryName, &originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %i (was tracking %@)",
-			 [self class], NSStringFromGLEnum(queryName), originalValue,
-			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"));
-}
-
--(void) unbind {
-	self.value = 0;
-}
+-(void) unbind { self.value = 0; }
 
 -(void) loadBufferData: (GLvoid*) buffPtr  ofLength: (GLsizeiptr) buffLen forUse: (GLenum) buffUsage {
 	glBufferData(name, buffLen, buffPtr, buffUsage);
+	LogGLErrorTrace(@"while loading buffer data of length %i from %p for use %@ for %@",
+					buffLen, buffPtr, NSStringFromGLEnum(buffUsage), self);
 }
 
 -(void) updateBufferData: (GLvoid*) buffPtr
 			  startingAt: (GLintptr) offset
 			   forLength: (GLsizeiptr) length {
 	glBufferSubData(name, offset, length, buffPtr);
+	LogGLErrorTrace(@"while updating buffer data of length %i at offset %i from %p for",
+					length, offset, buffPtr, self);
 }
 
 @end
@@ -114,13 +106,13 @@
 
 @implementation CC3OpenGLES11StateTrackerVertexPointer
 
-@synthesize elementSize, elementType, elementStride, elementPointer;
+@synthesize elementSize, elementType, vertexStride, vertices;
 
 -(void) dealloc {
 	[elementSize release];
 	[elementType release];
-	[elementStride release];
-	[elementPointer release];
+	[vertexStride release];
+	[vertices release];
 	[super dealloc];
 }
 
@@ -132,13 +124,13 @@
 	[super setOriginalValueHandling: origValueHandling];
 	elementSize.originalValueHandling = origValueHandling;
 	elementType.originalValueHandling = origValueHandling;
-	elementStride.originalValueHandling = origValueHandling;
-	elementPointer.originalValueHandling = origValueHandling;
+	vertexStride.originalValueHandling = origValueHandling;
+	vertices.originalValueHandling = origValueHandling;
 } 
 
 -(BOOL) valueIsKnown {
-	return elementPointer.valueIsKnown
-			&& elementStride.valueIsKnown
+	return vertices.valueIsKnown
+			&& vertexStride.valueIsKnown
 			&& elementSize.valueIsKnown
 			&& elementType.valueIsKnown;
 }
@@ -146,8 +138,8 @@
 -(void) setValueIsKnown:(BOOL) aBoolean {
 	elementSize.valueIsKnown = aBoolean;
 	elementType.valueIsKnown = aBoolean;
-	elementStride.valueIsKnown = aBoolean;
-	elementPointer.valueIsKnown = aBoolean;
+	vertexStride.valueIsKnown = aBoolean;
+	vertices.valueIsKnown = aBoolean;
 }
 
 // Set the values in the GL engine if either we should always do it, or if something has changed
@@ -156,43 +148,24 @@
 			 withType: (GLenum) elemType
 		   withStride: (GLsizei) elemStride {
 	BOOL shouldSetGL = self.shouldAlwaysSetGL;
-	shouldSetGL |= (!elementPointer.valueIsKnown || pData != elementPointer.value);
+	shouldSetGL |= (!vertices.valueIsKnown || pData != vertices.value);
 	shouldSetGL |= (!elementSize.valueIsKnown || elemSize != elementSize.value);
 	shouldSetGL |= (!elementType.valueIsKnown || elemType != elementType.value);
-	shouldSetGL |= (!elementStride.valueIsKnown || elemStride != elementStride.value);
+	shouldSetGL |= (!vertexStride.valueIsKnown || elemStride != vertexStride.value);
 	if (shouldSetGL) {
-		[elementPointer setValueRaw: pData];
+		[vertices setValueRaw: pData];
 		[elementSize setValueRaw: elemSize];
 		[elementType setValueRaw: elemType];
-		[elementStride setValueRaw: elemStride];
+		[vertexStride setValueRaw: elemStride];
 		[self setGLValues];
+		LogGLErrorTrace(@"while setting GL values for %@", self);
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	[self logSetGLValues: shouldSetGL];
 }
 
 -(void) useElementsAt: (GLvoid*) pData withType: (GLenum) elemType withStride: (GLsizei) elemStride {
 	[self useElementsAt: pData withSize: 0 withType: elemType withStride: elemStride];
-}
-
--(void) setGLValues {}
-
--(void) logSetGLValues: (BOOL) wasChanged {
-	if (elementSize.value != 0) {
-		// GL function uses element size
-		LogTrace(@"%@ %@ %@ = %i, %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
-				 NSStringFromGLEnum(elementSize.name), elementSize.value,
-				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
-				 NSStringFromGLEnum(elementStride.name), elementStride.value,
-				 @"POINTER", elementPointer.value);
-	} else {
-		// GL function doesn't use element size
-		LogTrace(@"%@ %@ %@ = %@, %@ = %i and %@ = %p", [self class], (wasChanged ? @"applied" : @"reused"),
-				 NSStringFromGLEnum(elementType.name), NSStringFromGLEnum(elementType.value),
-				 NSStringFromGLEnum(elementStride.name), elementStride.value,
-				 @"POINTER", elementPointer.value);
-	}
 }
 
 /** Invoked when dynamically instantiated (specifically with texture units. */
@@ -200,20 +173,22 @@
 	[super open];
 	[elementSize open];
 	[elementType open];
-	[elementStride open];
-	[elementPointer open];
+	[vertexStride open];
+	[vertices open];
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[elementPointer restoreOriginalValue];
-		[elementSize restoreOriginalValue];
-		[elementType restoreOriginalValue];
-		[elementStride restoreOriginalValue];
-		[self setGLValues];
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(BOOL) valueNeedsRestoration {
+	return (vertices.valueNeedsRestoration ||
+			elementSize.valueNeedsRestoration ||
+			elementType.valueNeedsRestoration ||
+			vertexStride.valueNeedsRestoration);
+}
+
+-(void) restoreOriginalValues {
+	[vertices restoreOriginalValue];
+	[elementSize restoreOriginalValue];
+	[elementType restoreOriginalValue];
+	[vertexStride restoreOriginalValue];
 }
 
 -(NSString*) description {
@@ -221,10 +196,16 @@
 	[desc appendFormat: @"%@:", [self class]];
 	[desc appendFormat: @"\n    %@ ", elementSize];
 	[desc appendFormat: @"\n    %@ ", elementType];
-	[desc appendFormat: @"\n    %@ ", elementStride];
-	[desc appendFormat: @"\n    %@ ", elementPointer];
+	[desc appendFormat: @"\n    %@ ", vertexStride];
+	[desc appendFormat: @"\n    %@ ", vertices];
 	return desc;
 }
+
+// Deprecated methods
+-(CC3OpenGLES11StateTrackerInteger*) elementStride { return self.vertexStride; }
+-(void) setElementStride: (CC3OpenGLES11StateTrackerInteger*) elemStride { self.vertexStride = elemStride; }
+-(CC3OpenGLES11StateTrackerPointer*) elementPointer { return self.vertices; }
+-(void) setElementPointer: (CC3OpenGLES11StateTrackerPointer*) vtxPtr { self.vertices = vtxPtr; }
 
 @end
 
@@ -239,13 +220,13 @@
 																  forState: GL_VERTEX_ARRAY_SIZE];
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_VERTEX_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_VERTEX_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glVertexPointer(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+	glVertexPointer(elementSize.value, elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -260,13 +241,13 @@
 	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self];		// no-op tracker
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_NORMAL_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_NORMAL_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glNormalPointer(elementType.value, elementStride.value, elementPointer.value);
+	glNormalPointer(elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -282,13 +263,13 @@
 																  forState: GL_COLOR_ARRAY_SIZE];
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_COLOR_ARRAY_TYPE];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_COLOR_ARRAY_STRIDE];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glColorPointer(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+	glColorPointer(elementSize.value, elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -303,13 +284,13 @@
 	self.elementSize = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self];		// no-op tracker
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_POINT_SIZE_ARRAY_TYPE_OES];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_POINT_SIZE_ARRAY_STRIDE_OES];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glPointSizePointerOES(elementType.value, elementStride.value, elementPointer.value);
+	glPointSizePointerOES(elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -325,13 +306,13 @@
 																  forState: GL_WEIGHT_ARRAY_SIZE_OES];
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_WEIGHT_ARRAY_TYPE_OES];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_WEIGHT_ARRAY_STRIDE_OES];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glWeightPointerOES(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+	glWeightPointerOES(elementSize.value, elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -347,13 +328,13 @@
 																  forState: GL_MATRIX_INDEX_ARRAY_SIZE_OES];
 	self.elementType = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_MATRIX_INDEX_ARRAY_TYPE_OES];
-	self.elementStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
+	self.vertexStride = [CC3OpenGLES11StateTrackerInteger trackerWithParent: self
 																	forState: GL_MATRIX_INDEX_ARRAY_STRIDE_OES];
-	self.elementPointer = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
+	self.vertices = [CC3OpenGLES11StateTrackerPointer trackerWithParent: self];
 }
 
 -(void) setGLValues {
-	glMatrixIndexPointerOES(elementSize.value, elementType.value, elementStride.value, elementPointer.value);
+	glMatrixIndexPointerOES(elementSize.value, elementType.value, vertexStride.value, vertices.value);
 }
 
 @end
@@ -411,30 +392,26 @@
 -(GLuint) generateBuffer {
 	GLuint buffID;
 	glGenBuffers(1, &buffID);
+	LogGLErrorTrace(@"%@ generate buffer ID", self);
 	return buffID;
 }
 
 -(void) deleteBuffer: (GLuint) buffID  {
 	glDeleteBuffers(1, &buffID);
+	LogGLErrorTrace(@"%@ delete buffer %i", self, buffID);
 }
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
-	LogTrace(@"GL drawing %u vertices as %@ starting from %u",
-			 len, NSStringFromGLEnum(drawMode), start);
 	glDrawArrays(drawMode, start, len);
+	LogGLErrorTrace(@"%@ drawing %u vertices as %@ starting from %u",
+					self, len, NSStringFromGLEnum(drawMode), start);
 }
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
 	NSAssert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES 1.1 supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
-	LogGLErrorState(@"%@ after drawing indices", self.class);
+	LogGLErrorTrace(@"%@ drawing %u vertex indices as %@", self, len, NSStringFromGLEnum(drawMode));
 }
-
-//-(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
-//	LogTrace(@"GL drawing %u indices of type %@ as %@ starting from %u",
-//			 len, NSStringFromGLEnum(type), NSStringFromGLEnum(drawMode), indicies);
-//	glDrawElements(drawMode, len, type, indicies);
-//}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];

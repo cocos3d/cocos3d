@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11State.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -133,26 +133,23 @@
 		[function setValueRaw: func];
 		[reference setValueRaw: refValue];
 		[mask setValueRaw: maskValue];
-		glStencilFunc(func, refValue, maskValue);
+		[self setGLValues];
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogCleanTrace(@"%@ %@ %@ = %@ and %@ = %i and %@ = %u",
-			 [self class], (shouldSetGL ? @"applied" : @"reused"),
-			 NSStringFromGLEnum(function.name), NSStringFromGLEnum(function.value),
-			 NSStringFromGLEnum(reference.name), reference.value,
-			 NSStringFromGLEnum(mask.name), mask.value);
+	LogGLErrorTrace(@"while setting GL values for %@", self);
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[function restoreOriginalValue];
-		[reference restoreOriginalValue];
-		[mask restoreOriginalValue];
-		glStencilFunc(function.value, reference.value, mask.value);
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(void) setGLValues { glStencilFunc(function.value, reference.value, mask.value); }
+
+-(BOOL) valueNeedsRestoration {
+	return (function.valueNeedsRestoration || reference.valueNeedsRestoration || mask.valueNeedsRestoration);
+}
+
+-(void) restoreOriginalValues {
+	[function restoreOriginalValue];
+	[reference restoreOriginalValue];
+	[mask restoreOriginalValue];
 }
 
 -(NSString*) description {
@@ -220,26 +217,23 @@
 		[stencilFail setValueRaw: failOp];
 		[depthFail setValueRaw: zFailOp];
 		[depthPass setValueRaw: zPassOp];
-		glStencilOp(failOp, zFailOp, zPassOp);
+		[self setGLValues];
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogCleanTrace(@"%@ %@ %@ = %@ and %@ = %@ and %@ = %@",
-			 [self class], (shouldSetGL ? @"applied" : @"reused"),
-			 NSStringFromGLEnum(stencilFail.name), NSStringFromGLEnum(stencilFail.value),
-			 NSStringFromGLEnum(depthFail.name), NSStringFromGLEnum(depthFail.value),
-			 NSStringFromGLEnum(depthPass.name), NSStringFromGLEnum(depthPass.value));
+	LogGLErrorTrace(@"while setting GL values for %@", self);
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[stencilFail restoreOriginalValue];
-		[depthFail restoreOriginalValue];
-		[depthPass restoreOriginalValue];
-		glStencilOp(stencilFail.value, depthFail.value, depthPass.value);
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(void) setGLValues { glStencilOp(stencilFail.value, depthFail.value, depthPass.value); }
+
+-(BOOL) valueNeedsRestoration {
+	return (stencilFail.valueNeedsRestoration || depthFail.valueNeedsRestoration || depthPass.valueNeedsRestoration);
+}
+
+-(void) restoreOriginalValues {
+	[stencilFail restoreOriginalValue];
+	[depthFail restoreOriginalValue];
+	[depthPass restoreOriginalValue];
 }
 
 -(NSString*) description {
@@ -296,24 +290,20 @@
 	if (shouldSetGL) {
 		[factor setValueRaw: factorValue];
 		[units setValueRaw: unitsValue];
-		glPolygonOffset(factorValue, unitsValue);
+		[self setGLValues];
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogCleanTrace(@"%@ %@ %@ = %.3f and %@ = %.3f",
-			 [self class], (shouldSetGL ? @"applied" : @"reused"),
-			 NSStringFromGLEnum(factor.name), factor.value,
-			 NSStringFromGLEnum(units.name), units.value);
+	LogGLErrorTrace(@"while setting GL values for %@", self);
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[factor restoreOriginalValue];
-		[units restoreOriginalValue];
-		glPolygonOffset(factor.value, units.value);
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(void) setGLValues { glPolygonOffset(factor.value, units.value); }
+
+-(BOOL) valueNeedsRestoration { return (factor.valueNeedsRestoration || units.valueNeedsRestoration); }
+
+-(void) restoreOriginalValues {
+	[factor restoreOriginalValue];
+	[units restoreOriginalValue];
 }
 
 -(NSString*) description {
@@ -435,17 +425,26 @@
 													  andGLSetFunction: glPointSize
 											  andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	
+	// Crashes OpenGL Analyzer when attempting to read the GL value
 	self.pointSizeAttenuation = [CC3OpenGLES11StateTrackerPointParameterVector trackerWithParent: self
-																						forState: GL_POINT_DISTANCE_ATTENUATION];
+																						forState: GL_POINT_DISTANCE_ATTENUATION
+																		andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+
 	
+	// Crashes OpenGL Analyzer when attempting to read the GL value
 	self.pointSizeFadeThreshold = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
-																						 forState: GL_POINT_FADE_THRESHOLD_SIZE];
+																						 forState: GL_POINT_FADE_THRESHOLD_SIZE
+																		 andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	
+	// Crashes OpenGL Analyzer when attempting to read the GL value
 	self.pointSizeMaximum = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
-																				   forState: GL_POINT_SIZE_MAX];
-	
+																				   forState: GL_POINT_SIZE_MAX
+																   andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+
+	// Crashes OpenGL Analyzer when attempting to read the GL value
 	self.pointSizeMinimum = [CC3OpenGLES11StateTrackerPointParameterFloat trackerWithParent: self
-																				   forState: GL_POINT_SIZE_MIN];
+																				   forState: GL_POINT_SIZE_MIN
+																   andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	
 	self.polygonOffset = [CC3OpenGLES11StateTrackerPolygonOffset trackerWithParent: self];
 
@@ -496,21 +495,13 @@
 	return desc;
 }
 
--(void) clearBuffers: (GLbitfield) mask {
-	glClear(mask);
-}
+-(void) clearBuffers: (GLbitfield) mask { glClear(mask); }
 
--(void) clearColorBuffer {
-	[self clearBuffers: GL_COLOR_BUFFER_BIT];
-}
+-(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
 
--(void) clearDepthBuffer {
-	[self clearBuffers: GL_DEPTH_BUFFER_BIT];
-}
+-(void) clearDepthBuffer { [self clearBuffers: GL_DEPTH_BUFFER_BIT]; }
 
--(void) clearStencilBuffer {
-	[self clearBuffers: GL_STENCIL_BUFFER_BIT];
-}
+-(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
 
 -(ccColor4B) readPixelAt: (CGPoint) pixelPosition {
 	ccColor4B pixColor;

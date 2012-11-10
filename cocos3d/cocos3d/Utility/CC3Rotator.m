@@ -1,7 +1,7 @@
 /*
  * CC3Rotator.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 #import "CC3Rotator.h"
 #import "CC3Node.h"
+#import "CC3LinearMatrix.h"
 
 
 #pragma mark -
@@ -42,15 +43,17 @@
 
 -(BOOL) isDirectional { return NO; }
 
+-(BOOL) isTargettable { return NO; }
+
 -(CC3Vector) rotation { return kCC3VectorZero; }
 
--(CC3Vector4) quaternion { return kCC3Vector4QuaternionIdentity; }
+-(CC3Quaternion) quaternion { return kCC3QuaternionIdentity; }
 
--(CC3Vector) rotationAxis { return kCC3VectorZero; }
+-(CC3Vector) rotationAxis { return kCC3VectorNull; }
 
 -(GLfloat) rotationAngle { return 0.0f; }
 
--(CC3GLMatrix*) rotationMatrix { return nil; }
+-(CC3Matrix*) rotationMatrix { return nil; }
 
 -(CC3Node*) target { return nil; }
 
@@ -59,14 +62,6 @@
 -(BOOL) shouldAutotargetCamera { return NO; }
 
 -(BOOL) shouldRotateToTargetLocation { return NO; }
-
-//-(void) markGlobalLocationChanged {}
-
-static GLubyte autoOrthonormalizeCount = 0;
-
-+(GLubyte) autoOrthonormalizeCount { return autoOrthonormalizeCount; }
-
-+(void) setAutoOrthonormalizeCount: (GLubyte) aCount { autoOrthonormalizeCount = aCount; }
 
 
 #pragma mark Allocation and initialization
@@ -79,15 +74,18 @@ static GLubyte autoOrthonormalizeCount = 0;
 	return aCopy;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Rotator*) another {}
-
--(void) applyRotationTo: (CC3GLMatrix*) aMatrix {}
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 -(NSString*) fullDescription { return self.description; }
+
+
+#pragma mark Transformations
+
+-(void) applyRotationTo: (CC3Matrix*) aMatrix {}
+
+-(CC3Vector) transformDirection: (CC3Vector) aDirection { return aDirection; }
 
 @end
 
@@ -96,18 +94,9 @@ static GLubyte autoOrthonormalizeCount = 0;
 #pragma mark CC3MutableRotator
 
 @interface CC3MutableRotator (TemplateMethods)
--(void) ensureRotationFromMatrix;
--(void) ensureQuaternionFromMatrix;
--(void) ensureQuaternionFromAxisAngle;
--(void) ensureAxisAngleFromQuaternion;
--(void) applyRotation;
+-(CC3Vector4) rotationAxisAngle;
 -(void) autoOrthonormalize;
-@property(nonatomic, readonly) BOOL isRotationDirty;
-@property(nonatomic, readonly) BOOL isMatrixDirtyByRotation;
-@property(nonatomic, readonly) BOOL isQuaternionDirty;
-@property(nonatomic, readonly) BOOL isMatrixDirtyByQuaternion;
-@property(nonatomic, readonly) BOOL isAxisAngleDirty;
-@property(nonatomic, readonly) BOOL isQuaternionDirtyByAxisAngle;
+-(void) applyRotation;
 @end
 
 @implementation CC3MutableRotator
@@ -121,140 +110,109 @@ static GLubyte autoOrthonormalizeCount = 0;
 
 -(BOOL) isDirectional { return NO; }
 
+-(BOOL) isRotationDirty { return isRotationDirty; }
+
+-(void) markRotationDirty { isRotationDirty = YES; }
+
 -(CC3Vector) rotation {
-	[self ensureRotationFromMatrix];
-	return rotation;
+	return (rotationType == kCC3RotationTypeEuler)
+				? CC3VectorFromTruncatedCC3Vector4(rotationVector)
+				: [self.rotationMatrix extractRotation];
 }
 
 -(void) setRotation:(CC3Vector) aRotation {
-	rotation = CC3VectorRotationModulo(aRotation);
-	
-	isRotationDirty = NO;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByRotation;
+	rotationVector = CC3Vector4FromCC3Vector(CC3VectorRotationModulo(aRotation), 0.0f);
+	rotationType = kCC3RotationTypeEuler;
+	[self markRotationDirty];
 }
 
 -(void) rotateBy: (CC3Vector) aRotation {
-	[rotationMatrix rotateBy: CC3VectorRotationModulo(aRotation)];
+	[self.rotationMatrix rotateBy: CC3VectorRotationModulo(aRotation)];
 	[self autoOrthonormalize];
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
+	rotationType = kCC3RotationTypeUnknown;
+	isRotationDirty = NO;
 }
 
--(CC3Vector4) quaternion {
-	[self ensureQuaternionFromAxisAngle];
-	[self ensureQuaternionFromMatrix];
-	return quaternion;
+-(CC3Quaternion) quaternion {
+	switch (rotationType) {
+		case kCC3RotationTypeQuaternion:
+			return rotationVector;
+		case kCC3RotationTypeAxisAngle:
+			return CC3QuaternionFromAxisAngle(self.rotationAxisAngle);
+		default:
+			return [self.rotationMatrix extractQuaternion];
+	}
 }
 
--(void) setQuaternion:(CC3Vector4) aQuaternion {
-	quaternion = aQuaternion;
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByQuaternion;
+-(void) setQuaternion:(CC3Quaternion) aQuaternion {
+	rotationVector = aQuaternion;
+	rotationType = kCC3RotationTypeQuaternion;
+	[self markRotationDirty];
 }
 
--(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
-	[rotationMatrix rotateByQuaternion: aQuaternion];
+-(void) rotateByQuaternion: (CC3Quaternion) aQuaternion {
+	[self.rotationMatrix rotateByQuaternion: aQuaternion];
 	[self autoOrthonormalize];
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
+	rotationType = kCC3RotationTypeUnknown;
+	isRotationDirty = NO;
 }
 
--(CC3Vector) rotationAxis {
-	[self ensureAxisAngleFromQuaternion];
-	return rotationAxis;
+-(CC3Vector4) rotationAxisAngle {
+	return (rotationType == kCC3RotationTypeAxisAngle)
+				? rotationVector
+				: CC3AxisAngleFromQuaternion(self.quaternion);
 }
+
+-(CC3Vector) rotationAxis { return CC3VectorFromTruncatedCC3Vector4(self.rotationAxisAngle); }
 
 -(void) setRotationAxis: (CC3Vector) aDirection {
-	rotationAxis = aDirection;
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = NO;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = YES;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByAxisAngle;
+	rotationVector = CC3Vector4FromCC3Vector(aDirection, self.rotationAngle);
+	rotationType = kCC3RotationTypeAxisAngle;
+	[self markRotationDirty];
 }
 
--(GLfloat) rotationAngle {
-	[self ensureAxisAngleFromQuaternion];
-	return rotationAngle;
-}
+-(GLfloat) rotationAngle { return self.rotationAxisAngle.w; }
 
 -(void) setRotationAngle: (GLfloat) anAngle {
-	rotationAngle = CC3CyclicAngle(anAngle);
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = NO;
-	isQuaternionDirty = NO;
-	isQuaternionDirtyByAxisAngle = YES;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByAxisAngle;
+	rotationVector = CC3Vector4FromCC3Vector(self.rotationAxis, CC3CyclicAngle(anAngle));
+	rotationType = kCC3RotationTypeAxisAngle;
+	[self markRotationDirty];
 }
 
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis {
-	CC3Vector4 q = CC3QuaternionFromAxisAngle(CC3Vector4FromCC3Vector(anAxis, anAngle));
-	[self rotateByQuaternion: q];
+	[self rotateByQuaternion: CC3QuaternionFromAxisAngle(CC3Vector4FromCC3Vector(anAxis, anAngle))];
 }
 
--(CC3GLMatrix*) rotationMatrix {
+-(CC3Matrix*) rotationMatrix {
 	[self applyRotation];
 	return rotationMatrix;
 }
 
--(void) setRotationMatrix:(CC3GLMatrix*) aGLMatrix {
-	id oldMtx = rotationMatrix;
-	rotationMatrix = [aGLMatrix retain];
-	[oldMtx release];
-	
-	isRotationDirty = YES;
-	isQuaternionDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
+-(void) setRotationMatrix:(CC3Matrix*) aMatrix {
+	if (aMatrix == rotationMatrix) return;
+	[rotationMatrix release];
+	rotationMatrix = [aMatrix retain];
+	rotationType = kCC3RotationTypeUnknown;
+	isRotationDirty = NO;
 }
 
+// Orthonormalize the matrix using the current starting basis vector.
+// Then cycle the starting vector, so that the next invocation starts with a different column.
 -(void) orthonormalize {
-	LogCleanTrace(@"Orthonormalizing (starting with %i): %@",
-				  orthonormalizationStartVector, self.rotationMatrix);
+	LogTrace(@"Orthonormalizing (starting with column %i): %@", orthonormalizationStartColumnNumber, self.rotationMatrix);
 	
-	// Orthonormalize the matrix using the current starting basis vector
-	[self.rotationMatrix orthonormalizeRotationStartingWith: orthonormalizationStartVector];
+	[self.rotationMatrix orthonormalizeRotationStartingWith: orthonormalizationStartColumnNumber];
 
-	// Cycle the starting vector, so that the next invocation starts with a different basis vector
-	switch (orthonormalizationStartVector) {
-		case kCC3GLMatrixOrthonormalizationStartX:
-			orthonormalizationStartVector = kCC3GLMatrixOrthonormalizationStartY;
-			break;
-		case kCC3GLMatrixOrthonormalizationStartY:
-			orthonormalizationStartVector = kCC3GLMatrixOrthonormalizationStartZ;
-			break;
-		case kCC3GLMatrixOrthonormalizationStartZ:
-		default:
-			orthonormalizationStartVector = kCC3GLMatrixOrthonormalizationStartX;
-			break;
-	}
-	LogCleanTrace(@"Orthonormalization completed: %@", self.rotationMatrix);
+	orthonormalizationStartColumnNumber = (orthonormalizationStartColumnNumber < 3)
+												? (orthonormalizationStartColumnNumber + 1) : 1;
+	LogTrace(@"Orthonormalization completed: %@", self.rotationMatrix);
 }
+
+static GLubyte autoOrthonormalizeCount = 0;
+
++(GLubyte) autoOrthonormalizeCount { return autoOrthonormalizeCount; }
+
++(void) setAutoOrthonormalizeCount: (GLubyte) aCount { autoOrthonormalizeCount = aCount; }
 
 -(void) autoOrthonormalize {
 	if (autoOrthonormalizeCount) {
@@ -269,24 +227,21 @@ static GLubyte autoOrthonormalizeCount = 0;
 
 #pragma mark Allocation and initialization
 
--(id) init { return [self initOnRotationMatrix: [CC3GLMatrix identity]]; }
+-(id) init { return [self initOnRotationMatrix: [CC3LinearMatrix matrix]]; }
 
--(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
+-(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
 	if ( (self = [super init]) ) {
-		// All dirty flags set by matrix setter
-		self.rotationMatrix = aGLMatrix;
-		rotation = kCC3VectorZero;
-		quaternion = kCC3Vector4QuaternionIdentity;
-		rotationAxis = kCC3VectorZero;
-		rotationAngle = 0.0;
-		orthonormalizationStartVector = kCC3GLMatrixOrthonormalizationStartX;
+		self.rotationMatrix = aMatrix;
+		rotationVector = kCC3Vector4Zero;
+		rotationType = kCC3RotationTypeUnknown;
+		orthonormalizationStartColumnNumber = 1;
 		incrementalRotationCount = 0;
 	}
 	return self;
 }
 
-+(id) rotatorOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
-	return [[[self alloc] initOnRotationMatrix: aGLMatrix] autorelease];
++(id) rotatorOnRotationMatrix: (CC3Matrix*) aMatrix {
+	return [[[self alloc] initOnRotationMatrix: aMatrix] autorelease];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -296,101 +251,25 @@ static GLubyte autoOrthonormalizeCount = 0;
 }
 
 // Protected properties for copying
--(CC3GLMatrixOrthonormalizationStart) orthonormalizationStartVector { return orthonormalizationStartVector; }
+-(CC3Vector4) rotationVector { return rotationVector; }
+-(GLubyte) orthonormalizationStartColumnNumber { return orthonormalizationStartColumnNumber; }
 -(GLubyte) incrementalRotationCount { return incrementalRotationCount; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Rotator*) another {
 	
 	// Copy matrix contents, then set matrix again to reset all dirty flags
 	[rotationMatrix populateFrom: another.rotationMatrix];
 	self.rotationMatrix = self.rotationMatrix;
 	
-	rotation = another.rotation;
-	quaternion = another.quaternion;
-	rotationAxis = another.rotationAxis;
-	rotationAngle = another.rotationAngle;
-	
 	// Only proceed with populating the following properties if the
 	// other instance is also a mutable rotator.
 	if( [another isKindOfClass:[CC3MutableRotator class]] ) {
 		CC3MutableRotator* anotherMR = (CC3MutableRotator*)another;
-		orthonormalizationStartVector = anotherMR.orthonormalizationStartVector;
+		rotationVector = anotherMR.rotationVector;
+		isRotationDirty = anotherMR.isRotationDirty;
+		orthonormalizationStartColumnNumber = anotherMR.orthonormalizationStartColumnNumber;
 		incrementalRotationCount = anotherMR.incrementalRotationCount;
 	}
-}
-
-/** If needed, extracts and sets the rotation Euler angles from the encapsulated rotation matrix. */
--(void) ensureRotationFromMatrix {
-	if (isRotationDirty) {
-		rotation = [self.rotationMatrix extractRotation];
-		isRotationDirty = NO;
-	}
-}
-
-/** If needed, extracts and sets the quaternion from the encapsulated rotation matrix. */
--(void) ensureQuaternionFromMatrix {
-	if (isQuaternionDirty) {
-		quaternion = [self.rotationMatrix extractQuaternion];
-		isQuaternionDirty = NO;
-	}
-}
-
-/** If needed, extracts and sets the quaternion from the encapsulated rotation axis and angle. */
--(void) ensureQuaternionFromAxisAngle {
-	if (isQuaternionDirtyByAxisAngle) {
-		quaternion = CC3QuaternionFromAxisAngle(CC3Vector4FromCC3Vector(rotationAxis, rotationAngle));
-		isQuaternionDirtyByAxisAngle = NO;
-	}
-}
-
-/**
- * If needed, extracts and returns a rotation axis and angle from the encapsulated quaternion.
- * If the rotation angle is zero, the axis is undefined, and will be set to the zero vector.
- *
- * The rotationAxis can point in one of two equally valid directions. THe choice is made to
- * return the direction that is closest to the previous rotation angle. This step is taken
- * for consistency, so that small changes in rotation wont suddenly flip the rotation axis
- * and angle.
- *
- * The rotation angle will be clamped to +/-180 degrees. The rotationAxis can point in one
- */
--(void) ensureAxisAngleFromQuaternion {
-	if (isAxisAngleDirty) {
-		CC3Vector4 axisAngle = CC3AxisAngleFromQuaternion(self.quaternion);
-		CC3Vector qAxis = CC3VectorFromTruncatedCC3Vector4(axisAngle);
-		GLfloat qAngle = CC3SemiCyclicAngle(axisAngle.w);
-		if ( CC3VectorDot(qAxis, rotationAxis) < 0 ) {
-			rotationAxis = CC3VectorNegate(qAxis);
-			rotationAngle = -qAngle;
-		} else {
-			rotationAxis = qAxis;
-			rotationAngle = qAngle;
-		}
-		isAxisAngleDirty = NO;
-	}
-}
-
-/** Recalculates the rotation matrix from the most recently set rotation or quaternion property. */
--(void) applyRotation {
-	switch (matrixIsDirtyBy) {
-		case kCC3RotationMatrixIsDirtyByRotation:
-			[rotationMatrix populateFromRotation: self.rotation];
-			matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
-			break;
-		case kCC3RotationMatrixIsDirtyByQuaternion:
-		case kCC3RotationMatrixIsDirtyByAxisAngle:
-			[rotationMatrix populateFromQuaternion: self.quaternion];
-			matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
-			break;
-		default:
-			break;
-	}
-}
-
--(void) applyRotationTo: (CC3GLMatrix*) aMatrix {
-	[aMatrix multiplyByMatrix: self.rotationMatrix];	// Rotation matrix is built lazily if needed
 }
 
 -(NSString*) fullDescription {
@@ -402,162 +281,200 @@ static GLubyte autoOrthonormalizeCount = 0;
 			self.rotationAngle];
 }
 
+
+#pragma mark Transformations
+
+/** Recalculates the rotation matrix from the most recently set rotation property. */
+-(void) applyRotation {
+	if ( !isRotationDirty ) return;
+
+	switch (rotationType) {
+		case kCC3RotationTypeEuler:
+			[rotationMatrix populateFromRotation: self.rotation];
+			break;
+		case kCC3RotationTypeQuaternion:
+		case kCC3RotationTypeAxisAngle:
+			[rotationMatrix populateFromQuaternion: self.quaternion];
+			break;
+		default:
+			break;
+	}
+	isRotationDirty = NO;
+}
+
+// Rotation matrix is built lazily if needed
+-(void) applyRotationTo: (CC3Matrix*) aMatrix { [aMatrix multiplyBy: self.rotationMatrix]; }
+
+-(CC3Vector) transformDirection: (CC3Vector) aDirection {
+	return [self.rotationMatrix transformDirection: aDirection];
+}
+
 @end
 
 
 #pragma mark -
 #pragma mark CC3DirectionalRotator
 
-@interface CC3DirectionalRotator (TemplateMethods)
--(void) ensureForwardDirectionFromMatrix;
--(void) ensureUpDirectionFromMatrix;
--(void) ensureRightDirectionFromMatrix;
-@property(nonatomic, readonly) BOOL isDirtyByTargetLocation;
-@property(nonatomic, assign) CC3Vector matrixForwardDirection;
--(void) setMatrixRightDirection:(CC3Vector) aDirection;
+@implementation CC3DirectionalRotator
+
+-(BOOL) isDirectional { return YES; }
+
+-(BOOL) shouldReverseForwardDirection { return shouldReverseForwardDirection; }
+
+-(void) setShouldReverseForwardDirection: (BOOL) shouldReverse {
+	shouldReverseForwardDirection = shouldReverse;
+}
+
+-(CC3Vector) forwardDirection {
+	if (rotationType == kCC3RotationTypeDirection) {
+		return CC3VectorFromTruncatedCC3Vector4(rotationVector);
+	} else {
+		CC3Vector mtxFwdDir = [self.rotationMatrix extractForwardDirection];
+		return shouldReverseForwardDirection ? CC3VectorNegate(mtxFwdDir) : mtxFwdDir;
+	}
+}
+
+-(void) setForwardDirection: (CC3Vector) aDirection {
+	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+			 @"The forwardDirection may not be set to the zero vector.");
+	rotationVector = CC3Vector4FromCC3Vector(CC3VectorNormalize(aDirection), 0.0f);
+	rotationType = kCC3RotationTypeDirection;
+	[self markRotationDirty];
+}
+
+-(CC3Vector) referenceUpDirection { return referenceUpDirection; }
+
+/** Does not set the rotation type until the forwardDirection is set. */
+-(void) setReferenceUpDirection: (CC3Vector) aDirection {
+	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+			 @"The referenceUpDirection may not be set to the zero vector.");
+	referenceUpDirection = CC3VectorNormalize(aDirection);
+}
+
+// Deprecated
+-(CC3Vector) sceneUpDirection { return self.referenceUpDirection; }
+-(void) setSceneUpDirection: (CC3Vector) aDirection { self.referenceUpDirection = aDirection; }
+-(CC3Vector) worldUpDirection { return self.referenceUpDirection; }
+-(void) setWorldUpDirection: (CC3Vector) aDirection { self.referenceUpDirection = aDirection; }
+
+-(CC3Vector) upDirection { return [self.rotationMatrix extractUpDirection]; }
+
+-(CC3Vector) rightDirection { return [self.rotationMatrix extractRightDirection]; }
+
+
+#pragma mark Allocation & Initialization
+
+-(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
+	if ( (self = [super initOnRotationMatrix: aMatrix]) ) {
+		referenceUpDirection = kCC3VectorUnitYPositive;
+		shouldReverseForwardDirection = NO;
+	}
+	return self;
+}
+-(void) populateFrom: (CC3Rotator*) another {
+	[super populateFrom: another];
+
+	// Only proceed with populating the directional properties if the
+	// other instance is also a directional rotator.
+	if( [another isKindOfClass:[CC3DirectionalRotator class]] ) {
+		CC3DirectionalRotator* anotherDR = (CC3DirectionalRotator*)another;
+		referenceUpDirection = anotherDR.referenceUpDirection;
+		shouldReverseForwardDirection = anotherDR.shouldReverseForwardDirection;
+	}
+}
+
+// If rotation is defined by the forward direction, apply it to the matrix, taking into
+// consideration whether the foward direction should be inverted. Otherwise, invoke superclass
+// implementation to handle other types of rotation.
+-(void) applyRotation {
+	if ( !isRotationDirty ) return;
+	
+	if (rotationType == kCC3RotationTypeDirection) {
+		CC3Vector mtxFwdDir = shouldReverseForwardDirection
+									? CC3VectorNegate(self.forwardDirection)
+									: self.forwardDirection;
+		[rotationMatrix populateToPointTowards: mtxFwdDir withUp: self.referenceUpDirection];
+		isRotationDirty = NO;
+	} else {
+		[super applyRotation];
+	}
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, direction: %@, up: %@, scene up: %@",
+			super.fullDescription,
+			NSStringFromCC3Vector(self.forwardDirection),
+			NSStringFromCC3Vector(self.upDirection),
+			NSStringFromCC3Vector(self.referenceUpDirection)];
+}
+
 @end
 
 
-@implementation CC3DirectionalRotator
+#pragma mark -
+#pragma mark CC3TargettingRotator
 
-@synthesize isTrackingForBumpMapping, shouldTrackTarget;
-@synthesize shouldAutotargetCamera, targetLocation, isTargetLocationDirty;
+@interface CC3TargettingRotator (TemplateMethods)
+@property(nonatomic, readonly) BOOL isDirtyByTargetLocation;
+@end
+
+@implementation CC3TargettingRotator
 
 -(void) dealloc {
 	target = nil;			// not retained
 	[super dealloc];
 }
 
--(CC3TargettingAxisRestriction) axisRestriction { return axisRestriction; }
+-(BOOL) isTrackingForBumpMapping { return isTrackingForBumpMapping; }
 
--(void) setAxisRestriction: (CC3TargettingAxisRestriction) axisRest {
-	axisRestriction = axisRest;
+-(void) setIsTrackingForBumpMapping: (BOOL)  isBM { isTrackingForBumpMapping = isBM; }
+
+-(BOOL) shouldTrackTarget { return shouldTrackTarget; }
+
+-(void) setShouldTrackTarget: (BOOL) shouldTrack { shouldTrackTarget = shouldTrack; }
+
+-(BOOL) shouldAutotargetCamera { return shouldAutotargetCamera; }
+
+-(void) setShouldAutotargetCamera: (BOOL) shouldAutotarget { shouldAutotargetCamera = shouldAutotarget; }
+
+-(CC3TargettingConstraint) targettingConstraint { return targettingConstraint; }
+
+-(void) setTargettingConstraint: (CC3TargettingConstraint) targContraint { targettingConstraint = targContraint; }
+
+// Deprecated
+-(CC3TargettingConstraint) axisRestriction { return self.targettingConstraint; }
+-(void) setAxisRestriction: (CC3TargettingConstraint) axisRest { self.targettingConstraint = axisRest; }
+
+-(BOOL) isTargettable { return YES; }
+
+-(CC3Vector) targetLocation {
+	return (rotationType == kCC3RotationTypeLocation)
+				? CC3VectorFromTruncatedCC3Vector4(rotationVector)
+				: kCC3VectorNull;
 }
 
--(BOOL) isDirectional { return YES; }
-
--(CC3Vector) forwardDirection {
-	[self ensureForwardDirectionFromMatrix];
-	return forwardDirection;
+-(void) setTargetLocation: (CC3Vector) aLocation {
+	rotationVector = CC3Vector4FromCC3Vector(aLocation, 0.0f);
+	rotationType = kCC3RotationTypeLocation;
+	isNewTarget = NO;		// Target is no longer new once the location of it has been set.
+	[self markRotationDirty];
 }
 
--(void) setForwardDirection: (CC3Vector) aDirection {
-	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
-			 @"The forwardDirection may not be set to the zero vector.");
+-(BOOL) isDirtyByTargetLocation { return isRotationDirty && (rotationType == kCC3RotationTypeLocation); }
 
-	forwardDirection = CC3VectorNormalize(aDirection);
-
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	isForwardDirectionDirty = NO;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByDirection;
-}
-
--(CC3Vector) sceneUpDirection { return sceneUpDirection; }
-
--(void) setSceneUpDirection: (CC3Vector) aDirection {
-	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
-			 @"The sceneUpDirection may not be set to the zero vector.");
-	
-	sceneUpDirection = CC3VectorNormalize(aDirection);
-	
-	isRotationDirty = YES;
-	isAxisAngleDirty = YES;
-	isQuaternionDirty = YES;
-	isQuaternionDirtyByAxisAngle = NO;
-	isForwardDirectionDirty = NO;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-	
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByDirection;
+-(void) rotateToTargetLocation: (CC3Vector) targLoc from: (CC3Vector) eyeLoc withUp: (CC3Vector) upDir {
+	if ( !CC3VectorsAreEqual(targLoc, eyeLoc) ) {
+		CC3Vector mtxDir = shouldReverseForwardDirection
+								? CC3VectorDifference(eyeLoc, targLoc)
+								: CC3VectorDifference(targLoc, eyeLoc);
+		[rotationMatrix populateToPointTowards: mtxDir withUp: upDir];
+		isRotationDirty = NO;
+	}
 }
 
 // Deprecated
--(CC3Vector) worldUpDirection { return self.sceneUpDirection; }
--(void) setWorldUpDirection: (CC3Vector) aDirection { self.sceneUpDirection = aDirection; }
-
--(CC3Vector) upDirection {
-	[self ensureUpDirectionFromMatrix];
-	return upDirection;
-}
-
--(CC3Vector) rightDirection {
-	[self ensureRightDirectionFromMatrix];
-	return rightDirection;
-}
-
--(void) setRotation:(CC3Vector) aRotation {
-	[super setRotation: aRotation];
-	isForwardDirectionDirty = YES;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-}
-
--(void) rotateBy: (CC3Vector) aRotation {
-	[super rotateBy: aRotation];
-	isForwardDirectionDirty = YES;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-}
-
--(void) setQuaternion:(CC3Vector4) aQuaternion {
-	[super setQuaternion: aQuaternion];
-	isForwardDirectionDirty = YES;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-}
-
--(void) rotateByQuaternion: (CC3Vector4) aQuaternion {
-	[super rotateByQuaternion: aQuaternion];
-	isForwardDirectionDirty = YES;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-}
-
--(void) setRotationMatrix:(CC3GLMatrix*) aGLMatrix {
-	[super setRotationMatrix: aGLMatrix];
-	isForwardDirectionDirty = YES;
-	isUpDirectionDirty = YES;
-	isRightDirectionDirty = YES;
-	isTargetLocationDirty = YES;
-}
-
-/**
- * The new target location cannot be applied immediately, because the direction to
- * the target depends on the transformed global location of both the target location
- * and the node containing this rotator. Remember that it was set.
- */
--(void) setTargetLocation: (CC3Vector) aLocation {
-	[self setRawTargetLocation: aLocation];
-	matrixIsDirtyBy = kCC3RotationMatrixIsDirtyByTargetLocation;
-}
-
--(void) setRawTargetLocation: (CC3Vector) aLocation {
-	targetLocation = aLocation;
-	isTargetLocationDirty = NO;
-	isNewTarget = NO;		// Target is no longer new once the location of it has been set.
-}
-
--(BOOL) isDirtyByTargetLocation {
-	return matrixIsDirtyBy == kCC3RotationMatrixIsDirtyByTargetLocation;
-}
-
 -(void) rotateToTargetLocationFrom: (CC3Vector) aLocation {
-	if ( !CC3VectorsAreEqual(targetLocation, aLocation) ) {
-		self.forwardDirection = CC3VectorDifference(targetLocation, aLocation);
-		isTargetLocationDirty = NO;		// Reset after setForwardDirection: sets it
-	}
+	[self rotateToTargetLocation: self.targetLocation from: aLocation withUp: self.referenceUpDirection];
 }
 
 -(CC3Node*) target { return target; }
@@ -580,16 +497,10 @@ static GLubyte autoOrthonormalizeCount = 0;
 
 #pragma mark Allocation & Initialization
 
--(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix {
-	if ( (self = [super initOnRotationMatrix: aGLMatrix]) ) {
-		// All dirty flags set by matrix setter in super init
+-(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
+	if ( (self = [super initOnRotationMatrix: aMatrix]) ) {
 		target = nil;
-		sceneUpDirection = kCC3VectorUnitYPositive;
-		forwardDirection = kCC3VectorNull;		// Calculated
-		upDirection = kCC3VectorNull;			// Calculated
-		rightDirection = kCC3VectorNull;		// Calculated
-		targetLocation = kCC3VectorZero;
-		axisRestriction = kCC3TargettingAxisRestrictionNone;
+		targettingConstraint = kCC3TargettingConstraintGlobalUnconstrained;
 		isNewTarget = NO;
 		shouldTrackTarget = NO;
 		shouldAutotargetCamera = NO;
@@ -601,146 +512,41 @@ static GLubyte autoOrthonormalizeCount = 0;
 // Protected properties used for copying
 -(BOOL) isNewTarget { return isNewTarget; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// This method supports populating from a parent class as well.
 -(void) populateFrom: (CC3Rotator*) another {
 	[super populateFrom: another];
-
+	
 	// Only proceed with populating the directional properties if the
 	// other instance is also a directional rotator.
-	// All dirty flags are set when matrix set in superclass
 	if( [another isKindOfClass:[CC3DirectionalRotator class]] ) {
 		self.target = another.target;		// weak link...not copied
-		CC3DirectionalRotator* anotherDR = (CC3DirectionalRotator*)another;
-		forwardDirection = anotherDR.forwardDirection;
-		sceneUpDirection = anotherDR.sceneUpDirection;
-		upDirection = anotherDR.upDirection;
-		rightDirection = anotherDR.rightDirection;
-		targetLocation = anotherDR.targetLocation;
-		axisRestriction = anotherDR.axisRestriction;
-		isNewTarget = anotherDR.isNewTarget;
-		shouldTrackTarget = anotherDR.shouldTrackTarget;
-		shouldAutotargetCamera = anotherDR.shouldAutotargetCamera;
-		isTrackingForBumpMapping = anotherDR.isTrackingForBumpMapping;
-	}
-}
-
-/**
- * The forward direction, modified for use in the matrix, when setting the direction.
- *
- * By default, this is simply the same as the forwardDirection. Subclasses that need
- * to point the node in another direction can override.
- */
--(CC3Vector) matrixForwardDirection { return self.forwardDirection; }
-
-/**
- * The forward direction, modified for use in the matrix, when setting the direction
- * by extracting it from the matrix.
- *
- * By default, this is simply the same as the forwardDirection. Subclasses that need
- * to point the node in another direction can override.
- */
--(void) setMatrixForwardDirection:(CC3Vector) aDirection { forwardDirection = aDirection; }
-
-/**
- * If needed, extracts and sets the forwardDirection from the encapsulated rotation
- * matrix. This method is invoked automatically when accessing the forwardDirection
- * property, if that property is not current (ie- if the rotation was most recently
- * set with Euler angles or a quaternion).
- */
--(void) ensureForwardDirectionFromMatrix {
-	if (isForwardDirectionDirty) {
-		self.matrixForwardDirection = [self.rotationMatrix extractForwardDirection];
-		isForwardDirectionDirty = NO;
-	}
-}
-
-/**
- * If needed, extracts and sets the upDirection from the encapsulated rotation matrix.
- * This method is invoked automatically when accessing the upDirection property,
- * if that property is not current (ie- if the rotation was most recently set with
- * Euler angles or a quaternion).
- */
--(void) ensureUpDirectionFromMatrix {
-	if (isUpDirectionDirty) {
-		upDirection = [self.rotationMatrix extractUpDirection];
-		isUpDirectionDirty = NO;
-	}
-}
-
-/**
- * The right direction, modified for use in the matrix, when setting the direction
- * by extracting it from the matrix.
- *
- * By default, this is simply the same as the rightDirection. Subclasses that need
- * to point the node in another direction can override.
- */
--(void) setMatrixRightDirection:(CC3Vector) aDirection { rightDirection = aDirection; }
-
-/**
- * If needed, extracts and sets the rightDirection from the encapsulated rotation matrix.
- * This method is invoked automatically when accessing the rightDirection property,
- * if that property is not current (ie- if the rotation was most recently set with
- * Euler angles or a quaternion).
- */
--(void) ensureRightDirectionFromMatrix {
-	if (isRightDirectionDirty) {
-		[self setMatrixRightDirection: [self.rotationMatrix extractRightDirection]];
-		isRightDirectionDirty = NO;
-	}
-}
-
--(void) applyRotation {
-	[super applyRotation];
-	if (matrixIsDirtyBy == kCC3RotationMatrixIsDirtyByDirection) {
-		[rotationMatrix populateToPointTowards: self.matrixForwardDirection withUp: sceneUpDirection];
-		matrixIsDirtyBy = kCC3RotationMatrixIsNotDirty;
+		CC3TargettingRotator* anotherTR = (CC3TargettingRotator*)another;
+		targettingConstraint = anotherTR.targettingConstraint;
+		isNewTarget = anotherTR.isNewTarget;
+		shouldTrackTarget = anotherTR.shouldTrackTarget;
+		shouldAutotargetCamera = anotherTR.shouldAutotargetCamera;
+		isTrackingForBumpMapping = anotherTR.isTrackingForBumpMapping;
 	}
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, direction: %@, up: %@, scene up: %@, targetted at: %@, from target: %@",
-			super.fullDescription,
-			NSStringFromCC3Vector(self.forwardDirection),
-			NSStringFromCC3Vector(self.upDirection),
-			NSStringFromCC3Vector(self.sceneUpDirection),
-			NSStringFromCC3Vector(self.targetLocation), target];
+	return [NSString stringWithFormat: @"%@, targetted at: %@, from target: %@",
+			super.fullDescription, NSStringFromCC3Vector(self.targetLocation), target];
 }
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3ReverseDirectionalRotator
+#pragma mark Deprecated CC3ReverseDirectionalRotator
 
 @implementation CC3ReverseDirectionalRotator
 
-/**
- * The forward direction, modified for use in the matrix, when setting the direction.
- *
- * This implementation reverses the forward direction, so that the positive-Z axis of
- * the node's local coordinates will point in the fowardDirection.
- */
--(CC3Vector) matrixForwardDirection { return CC3VectorNegate(self.forwardDirection); }
-
-/**
- * The forward direction, modified for use in the matrix, when setting the direction.
- *
- * This implementation reverses the forward direction, so that the positive-Z axis of
- * the node's local coordinates will point in the fowardDirection.
- */
--(void) setMatrixForwardDirection:(CC3Vector) aDirection { forwardDirection = CC3VectorNegate(aDirection); }
-
-/**
- * The right direction, modified for use in the matrix, when setting the direction
- * by extracting it from the matrix.
- *
- * This implementation reverses the right direction, so that the negative-X axis of
- * the node's local coordinates will point in the rightDirection. This keeps the
- * right direction pointing off to the right, as a result of the inversion of the
- * forwardDirection, pointing down the positive-Z axis.
- */
--(void) setMatrixRightDirection:(CC3Vector) aDirection { rightDirection = CC3VectorNegate(aDirection); }
+-(id) initOnRotationMatrix: (CC3Matrix*) aMatrix {
+	if ( (self = [super initOnRotationMatrix: aMatrix]) ) {
+		shouldReverseForwardDirection = YES;
+	}
+	return self;
+}
 
 @end
+

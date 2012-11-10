@@ -1,7 +1,7 @@
 /*
  * MainLayer.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -204,7 +204,7 @@
 	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
 	mn = [rezNode getMeshNodeNamed: kMascotName];
 	[mn remove];		// Remove from the POD resource
-	[mn movePivotToCenterOfGeometry];
+	[mn moveMeshOriginToCenterOfGeometry];
 	mn.rotation = cc3v(0.0, -90.0, 0.0);
 	mn.isTouchEnabled = YES;
 	[templates addObject: mn];
@@ -273,8 +273,8 @@
 	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.
-	CC3Node* aNode = [[templates objectAtIndex: CC3RandomUIntBelow(templates.count)] copyAutoreleased];
-//	CC3Node* aNode = [[templates objectAtIndex: 0] copyAutoreleased];
+	CC3Node* aNode = [[templates objectAtIndex: CC3RandomUIntBelow(templates.count)] autoreleasedCopy];
+//	CC3Node* aNode = [[templates objectAtIndex: 0] autoreleasedCopy];
 
 	// The shouldColorTile property is actually tracked by the userData property!
 	if (aNode.shouldColorTile) {

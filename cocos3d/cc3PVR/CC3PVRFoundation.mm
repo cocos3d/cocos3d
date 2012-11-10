@@ -1,7 +1,7 @@
 /*
  * CC3PVRFoundation.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,7 +34,7 @@ extern "C" {
 }
 #import "CC3PVRFoundation.h"
 #import "CC3PVRTModelPOD.h"
-#import "CC3GLMatrix.h"
+#import "CC3Matrix4x4.h"
 
 
 NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
@@ -70,7 +70,7 @@ NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
 	[desc appendFormat: @"\n\tposition: %@", (psn->pfAnimPosition ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimPosition) : @"none")];
 	[desc appendFormat: @", quaternion: %@", (psn->pfAnimRotation ? NSStringFromCC3Vector4(*(CC3Vector4*)psn->pfAnimRotation) : @"none")];
 	[desc appendFormat: @", scale: %@)", (psn->pfAnimScale ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimScale) : @"none")];
-	[desc appendFormat: @", matrix: %@)", (psn->pfAnimMatrix ? [CC3GLMatrix matrixOnGLMatrix: psn->pfAnimMatrix] : @"none")];
+	[desc appendFormat: @", matrix: %@)", (psn->pfAnimMatrix ? NSStringFromCC3Matrix4x4((CC3Matrix4x4*)psn->pfAnimMatrix) : @"none")];
 	return desc;
 }
 
@@ -102,7 +102,7 @@ NSString* NSStringFromSPODMesh(PODStructPtr pSPODNode) {
 	[desc appendFormat: @"\n\tfaces: %u (%@)", psm->nNumFaces, NSStringFromCPODData(&psm->sFaces)];
 	[desc appendFormat: @"\n\tstrips: %u", psm->nNumStrips];
 	[desc appendFormat: @", texture channels: %u", psm->nNumUVW];
-	[desc appendFormat: @", interleaved data: %u", psm->pInterleaved];
+	[desc appendFormat: @", interleaved data: %p", psm->pInterleaved];
 	
 	int batchCount = psm->sBoneBatches.nBatchCnt;
 	[desc appendFormat: @", bone batches: %i", batchCount];
@@ -127,7 +127,7 @@ NSString* NSStringFromCPODData(PODClassPtr aCPODData) {
 	[desc appendFormat: @"CPODData type: %@", NSStringFromEPVRTDataType(pcd->eType)];
 	[desc appendFormat: @", size: %i", pcd->n];
 	[desc appendFormat: @", stride: %i", pcd->nStride];
-	[desc appendFormat: @", data ptr: %u", pcd->pData];
+	[desc appendFormat: @", data ptr: %p", pcd->pData];
 	return desc;
 }
 
@@ -135,7 +135,7 @@ NSString* NSStringFromCPVRTBoneBatches(PODClassPtr aCPVRTBoneBatches) {
 	CPVRTBoneBatches* pbb = (CPVRTBoneBatches*)aCPVRTBoneBatches;
 	int batchCount = pbb->nBatchCnt;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
-	[desc appendFormat: @"CPVRTBoneBatches with %i batches of max %i bones per batch at: %x",
+	[desc appendFormat: @"CPVRTBoneBatches with %i batches of max %i bones per batch at: %p",
 			batchCount, pbb->nBatchBoneMax, pbb->pnBatches];
 
 	if (batchCount) {

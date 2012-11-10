@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Lighting.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,9 +40,7 @@
 
 @synthesize lightIndex;
 
--(GLenum) glLightIndex {
-	return GL_LIGHT0 + lightIndex;
-}
+-(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			forState: (GLenum) qName
@@ -61,23 +59,12 @@
 						   andLightIndex: ltIndx] autorelease];
 }
 
--(void) getGLValue {
-	glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ %@ read GL value %.2f (was tracking %@)",
-			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
-			 originalValue, (valueIsKnown ? [NSString stringWithFormat: @"%.2f", value] : @"UNKNOWN"));
-}
+-(void) setGLValue { glLightf(self.glLightIndex, name, value); }
 
--(void) setGLValue {
-	glLightf(self.glLightIndex, name, value);
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace(@"%@ %@ %@ %@ = %.2f", [self class], NSStringFromGLEnum(self.glLightIndex),
-			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), value);
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
 @end
@@ -90,9 +77,7 @@
 
 @synthesize lightIndex;
 
--(GLenum) glLightIndex {
-	return GL_LIGHT0 + lightIndex;
-}
+-(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			forState: (GLenum) qName
@@ -111,23 +96,12 @@
 						   andLightIndex: ltIndx] autorelease];
 }
 
--(void) getGLValue {
-	glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
-			 NSStringFromCCC4F(originalValue), (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
 
--(void) setGLValue {
-	glLightfv(self.glLightIndex, name, (GLfloat*)&value);
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
-			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCCC4F(value));
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
 @end
@@ -140,9 +114,7 @@
 
 @synthesize lightIndex;
 
--(GLenum) glLightIndex {
-	return GL_LIGHT0 + lightIndex;
-}
+-(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			forState: (GLenum) qName
@@ -161,23 +133,12 @@
 						   andLightIndex: ltIndx] autorelease];
 }
 
--(void) getGLValue {
-	glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
-			 NSStringFromCC3Vector(originalValue), (valueIsKnown ? NSStringFromCC3Vector(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
 
--(void) setGLValue {
-	glLightfv(self.glLightIndex, name, (GLfloat*)&value);
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
-			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
 @end
@@ -190,9 +151,7 @@
 
 @synthesize lightIndex;
 
--(GLenum) glLightIndex {
-	return GL_LIGHT0 + lightIndex;
-}
+-(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
 			forState: (GLenum) qName
@@ -211,23 +170,12 @@
 						   andLightIndex: ltIndx] autorelease];
 }
 
--(void) getGLValue {
-	glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(self.glLightIndex), NSStringFromGLEnum(name),
-			 NSStringFromCC3Vector4(originalValue), (valueIsKnown ? NSStringFromCC3Vector4(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
 
--(void) setGLValue {
-	glLightfv(self.glLightIndex, name, (GLfloat*)&value);
-}
-
--(void) logSetValue: (BOOL) wasSet {
-	LogTrace(@"%@ %@ %@ %@ = %@", [self class], NSStringFromGLEnum(self.glLightIndex),
-			 (wasSet ? @"set" : @"reused"), NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
 @end
@@ -379,7 +327,8 @@
 
 -(void) initializeTrackers {
 	self.sceneAmbientLight = [CC3OpenGLES11StateTrackerSceneLightColor trackerWithParent: self
-																				forState: GL_LIGHT_MODEL_AMBIENT];
+																				forState: GL_LIGHT_MODEL_AMBIENT
+																andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	self.lights = [CCArray array];		// Start with none. Add them as requested.
 }
 

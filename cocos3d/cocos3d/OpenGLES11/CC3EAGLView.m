@@ -1,7 +1,7 @@
 /*
  * CC3EAGLView.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,13 +32,16 @@
 #import "CC3EAGLView.h"
 #import "CC3Logging.h"
 #import "CCConfiguration.h"
+#import "CC3OpenGLES11Engine.h"
 #import "cocos2d.h"
 
 
 #pragma mark -
 #pragma mark EAGLView extensions
 
-@implementation EAGLView (CC3Picking)
+@implementation EAGLView (CC3)
+
+-(GLuint) pixelSamples { return requestedSamples_; }
 
 -(void) openPicking {
 	if (self.multiSampling) {
@@ -60,6 +63,8 @@
 @end
 
 @implementation CC3EAGLView
+
+-(GLuint) pixelSamples { return ((CC3ES1Renderer*)renderer_).pixelSamples; }
 
 -(void) openPicking { [((CC3ES1Renderer*)renderer_) openPicking]; }
 
@@ -94,6 +99,27 @@
 	return YES;
 }
 
+/**
+ * Overridden to read the new viewport GL value after the new window size is set,
+ * and to remove the unnecessary redraw while still in old orientation.
+ */
+-(void) layoutSubviews {
+	size_ = [renderer_ backingSize];
+	
+	[renderer_ resizeFromLayer:(CAEAGLLayer*)self.layer];
+	
+	// Issue #914 #924
+	CCDirector *director = [CCDirector sharedDirector];
+	[director reshapeProjection:size_];
+
+	// Added for cocos3d
+	[CC3OpenGLES11Engine.engine.state.viewport readOriginalValue];
+
+	// REMOVED for cocos3d
+	// Avoid flicker. Issue #350
+//	[director performSelectorOnMainThread:@selector(drawScene) withObject:nil waitUntilDone:YES];
+}	
+
 @end
 
 
@@ -110,6 +136,8 @@
 	[self deletePickerBuffers];
 	[super dealloc];
 }
+
+-(GLuint) pixelSamples { return samplesToUse_; }
 
 -(id) initWithDepthFormat: (GLuint) depthFormat
 		   withPixelFormat: (GLuint) pixelFormat

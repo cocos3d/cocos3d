@@ -1,7 +1,7 @@
 /*
  * CC3Math.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,9 +36,17 @@
 
 #define kCC3OneThird			0.33333333333333333333f
 #define kCC3OneOver255			0.00392156862745098f
-#define kCC3Sqrt3				1.732050807568877f							/* sqrt(3) */
+#define kCC3Sqrt3				1.732050807568877f			/* sqrt(3) */
 #define kCC3CircleDegrees		360.0f
 #define kCC3SemiCircleDegrees	180.0f
+#define kCC3Pi					M_PI
+#define kCC3TwoPi				(2.0 * kCC3Pi)
+
+#define kCC3MaxGLint			INT_MAX
+#define kCC3MaxGLuint			UINT_MAX
+#define kCC3MaxGLushort			0xFFFF
+#define kCC3MaxGLubyte			0xFF
+#define kCC3MaxGLfloat			CGFLOAT_MAX
 
 /** Conversion between degrees and radians. */
 #define DegreesToRadiansFactor  0.0174532925199433f			// PI / 180
@@ -94,33 +102,6 @@ static inline float CC3PositiveCyclic(float value, float period) {
 }
 
 /**
- * Returns the difference between the specified minuend and subtrahend, in terms of the
- * minimum difference within the specified periodic cycle. Therefore, the result may be
- * positive or negative, but will always be between (+period/2) and (-period/2).
- *
- * For example, for the numbers on a compass, the period is 360, and
- * CC3CyclicDifference(350, 10, 360) will yield -20 (ie- the smallest change from 10 degrees
- * to 350 degrees is -20 degrees) rather than +340 (from simple subtraction). Similarly,
- * CC3CyclicDifference(10, 350, 360) will yield +20 (ie- the smallest change from 350 degrees
- * to 10 degrees is +20 degrees) rather than -340 (from simple subtraction).
- *
- * For angles in degrees, consider using CC3SemiCyclicAngle instead.
- */
-static inline float CC3CyclicDifference(float minuend, float subtrahend, float period) {
-	float semiPeriod = period * 0.5f;
-	float diff = CC3Cyclic(minuend - subtrahend, period);
-	// If the difference is outside the range (period/2 >= diff >= -period/2),
-	// adjust it so that it takes the difference in the other direction to
-	// arrive at a smaller change.
-	if(diff > semiPeriod) {
-		diff -= period;
-	} else if(diff < -semiPeriod) {
-		diff += period;
-	}
-	return diff;
-}
-
-/**
  * Converts the specified angle, to an equivalent angle between +/-360 degrees.
  * The result may be positive or negative, but will always be between -360 and +360 degrees.
  *
@@ -156,6 +137,33 @@ static inline float CC3SemiCyclicAngle(float angle) {
 		return modAngle + kCC3CircleDegrees;
 	}
 	return modAngle;
+}
+
+/**
+ * Returns the difference between the specified minuend and subtrahend, in terms of the
+ * minimum difference within the specified periodic cycle. Therefore, the result may be
+ * positive or negative, but will always be between (+period/2) and (-period/2).
+ *
+ * For example, for the numbers on a compass, the period is 360, and
+ * CC3CyclicDifference(350, 10, 360) will yield -20 (ie- the smallest change from 10 degrees
+ * to 350 degrees is -20 degrees) rather than +340 (from simple subtraction). Similarly,
+ * CC3CyclicDifference(10, 350, 360) will yield +20 (ie- the smallest change from 350 degrees
+ * to 10 degrees is +20 degrees) rather than -340 (from simple subtraction).
+ *
+ * For angles in degrees, consider using CC3SemiCyclicAngle instead.
+ */
+static inline float CC3CyclicDifference(float minuend, float subtrahend, float period) {
+	float semiPeriod = period * 0.5f;
+	float diff = CC3Cyclic(minuend - subtrahend, period);
+	// If the difference is outside the range (period/2 >= diff >= -period/2),
+	// adjust it so that it takes the difference in the other direction to
+	// arrive at a smaller change.
+	if(diff > semiPeriod) {
+		diff -= period;
+	} else if(diff < -semiPeriod) {
+		diff += period;
+	}
+	return diff;
 }
 
 /**

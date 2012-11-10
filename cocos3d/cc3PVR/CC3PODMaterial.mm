@@ -1,7 +1,7 @@
 /*
  * CC3PODMaterial.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -46,7 +46,7 @@ extern "C" {
 
 -(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
 
-static GLfloat shininessExpansionFactor = 400.0f;
+static GLfloat shininessExpansionFactor = 128.0f;
 
 +(GLfloat) shininessExpansionFactor { return shininessExpansionFactor; }
 
@@ -54,7 +54,7 @@ static GLfloat shininessExpansionFactor = 400.0f;
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	SPODMaterial* psm = (SPODMaterial*)[aPODRez materialPODStructAtIndex: aPODIndex];
-	LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
+	LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
 	if ( (self = [super initWithName: [NSString stringWithUTF8String: psm->pszName]]) ) {
 		self.podIndex = aPODIndex;
 		self.ambientColor = CCC4FMake(psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2], psm->fMatOpacity);

@@ -1,7 +1,7 @@
-README - cocos3d 0.7.1
+README - cocos3d 0.7.2
 ----------------------
 
-cocos3d 0.7.1
+cocos3d 0.7.2
 
 Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -24,11 +24,13 @@ Table of Contents
 Installation
 ------------
 
-The cocos3d framework is built on cocos2d. Before installing cocos3d,
-you must download and install the cocos2d SDK from
+The cocos3d framework is built on cocos2d 1.x. Before installing cocos3d,
+you must download and install the cocos2d 1.x SDK from:
 
 http://www.cocos2d-iphone.org/download
 
+*** PLEASE NOTE THAT cocos3d 0.7.2 IS NOT COMPATIBLE WITH cocos2d 2.x. ***
+***     BE SURE TO DOWNLOAD cocos2d 1.x FOR USE WITH cocos3d.          ***
 
 Unzip the cocos3d distribution file (which you've probably already done,
 otherwise you wouldn't be reading this document).
@@ -36,15 +38,18 @@ otherwise you wouldn't be reading this document).
 Open a Terminal session, navigate to the unzipped cocos3d distribution
 directory and run the install-cocos3d script as follows:
 
-./install-cocos3d.sh -f -2 "relative-path-to-cocos2d-sources"
+./install-cocos3d.sh -f -2 "path-to-cocos2d-sources"
 
 For example:
 
-./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-1.0.1"
+./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-1.1"
 
-The cocos2d source code must be available and identified using the -2 switch
-so that the installer can copy the cocos2d libraries to the cocos3d templates
-and demo projects.
+The cocos2d source code must be available and identified using the -2 switch so that the
+installer can link the cocos2d libraries to the cocos3d templates and demo projects.
+
+If you encounter 'rsync' errors during installation, it's typically because you are trying
+to run the installer without first navigating to the cocos3d distribution directory.
+Be sure to run the installer from the cocos3d distribution directory.
 
 That's it!
 
@@ -52,31 +57,12 @@ That's it!
 cocos2d Version Compatibility
 -----------------------------
 
-cocos3d 0.7.1 is compatible with cocos2d versions 0.99.5 through 1.1.
+*** PLEASE NOTE THAT cocos3d 0.7.2 IS NOT COMPATIBLE WITH cocos2d 2.x. ***
 
-At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
-configured to use that version. This section includes notes on compatibility with other versions.
+cocos3d 0.7.2 is compatible with all cocos2d 1.x versions.
 
-   cocos2d 0.9.5
-   -------------
-
-   Version 0.99.5 of cocos2d contains several files that were removed in cocos2d 1.0,
-   These files are not included in the cocos3d Xcode demo apps and project templates.
-   When using cocos2d 0.9.5, drag the following files to the cocos2d group within the Xcode project:
-
-      cocos2d/CCCompatibility.h
-      cocos2d/CCCompatibility.m
-      cocos2d/CCSpriteSheet.h
-      cocos2d/CCSpriteSheet.m
-      TouchJSON/Extensions/NSCharacterSet_Extensions.h
-      TouchJSON/Extensions/NSCharacterSet_Extensions.m
-      TouchJSON/Extensions/NSScanner_Extensions.h
-      TouchJSON/Extensions/NSScanner_Extensions.m
-
-   Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
-   project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
-   will be the cocos2d 1.0.1 project templates, unless you have created cocos2d 0.99.5
-   Xcode 4 project templates.
+At the time of this release, the current version of cocos2d is 1.1, and by default, cocos3d is
+configured to use that version.
 
 
 GCC 4.2 Compiler Warnings
@@ -99,9 +85,8 @@ To get started with your first cocos3d project, open Xcode 4, click on the
 File->New->NewProject... menu selection, and select the 'cocos3d Application'
 project template from the cocos3d template group.
 
-The template project starts with a working 3D variation on the familiar
-'hello, world' application, and you can use it as a starting point for
-your own application.
+The template project starts with a working 3D variation on the familiar 'hello, world'
+application, and you can use it as a starting point for your own application.
 
 
 Documentation
@@ -113,7 +98,7 @@ The cocos3d Programming Guide is online at:
 
 The API documentation is online at:
 
-	http://brenwill.com/docs/cocos3d/0.7.1/api/
+	http://brenwill.com/docs/cocos3d/0.7.2/api/
 
 You can create a local copy of the API documentation using Doxygen to extract the
 documentation from the source files. There is a Doxygen configuration file to output
@@ -131,9 +116,6 @@ and demonstrate many of the key features and capabilities of cocos3d.
 
 For convenience, to access all of the demos together, open the 'cocos3d.xcworkspace'
 Xcode workspace. You can also open each demo project individually in the Demos folder.
-
-If you are using cocos2d 0.99.5, read the cocos2d Version Compatibility selection
-below regarding running the demo apps with that version.
 
 The following demo apps are included in the cocos3d distribution:
 
@@ -156,6 +138,7 @@ The following demo apps are included in the cocos3d distribution:
      - programatic creation of spherical, box and plane meshes using parametric definitions.
      - texturing a 3D mesh from a CCTexture2D image
      - transparency and alpha-blending
+     - translucent and transparent textures
      - coloring a mesh with a per-vertex color blend
      - multi-texturing an object using texture units by combining several individual textures into overlays
      - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
@@ -168,6 +151,8 @@ The following demo apps are included in the cocos3d distribution:
      - embedding 2D cocos2d text labels into the 3D scene
      - incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
      - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
+     - emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
+       with each particle moving, rotating, and fading independently
      - creating a tightly focused spotlight whose intensity attenuates with distance
      - directing the 3D camera to track a particular target object
      - directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
@@ -202,13 +187,15 @@ The following demo apps are included in the cocos3d distribution:
      - using the CC3Scene onOpen method to initiate activity when a scene opens
      - using pinch and pan gestures to control the movement of the 3D camera
      - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
+     - bitmapped font text labels
+     - moving individual vertex location programmatically
   
    In addition, there are a number of interesting options for you to play with by uncommenting
    certain lines of code in the methods of this class that build objects in the 3D scene,
    including experimenting with:
      - simple particle generator with multi-colored, light-interactive, particles
+     - simple particle generator with meshes updated less frequently to conserve performance 
      - different options for ordering nodes when drawing, including ordering by mesh or texture
-     - translucent and transparent textures (addFloatingRing)
      - configuring the camera for parallel/isometric/orthographic projection instead of the default
        perpective projection
      - mounting the camera on a moving object, in this case a bouncing ball
@@ -224,7 +211,7 @@ The following demo apps are included in the cocos3d distribution:
      - displaying descriptive text and wireframe bounding boxes on every node
      - displaying a dynamic bounding box on a 3D particle emitter.
      - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
-
+     - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
 
 
    CC3Demo3DTiles
@@ -243,7 +230,6 @@ The following demo apps are included in the cocos3d distribution:
    The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d RootController with cocos3d.
 
 
-
    CC3Performance
    --------------
 
@@ -255,10 +241,6 @@ The following demo apps are included in the cocos3d distribution:
    You can dynamically experiment with how different model types, sizes and quantities
    affects the performance of cocos3d. You can also use this performance demo app to
    compare performance across different device types.
-
-
-If you are using cocos2d 1.1 or 0.99.5, read the cocos2d Version Compatibility selection below
-regarding running the demo apps with that version.
 
 
 Demo Models
@@ -275,31 +257,18 @@ the cocos3d distribution.
 Creating POD 3D Model Files
 ---------------------------
 
-The PowerVR SDK contains tools for converting from a limited number of 3D editor export
-files. The PVR SDK is available free from Imagination Technologies, the supplier of the
-GPU's used in iOS devices. You can download the PowerVR SDK from:
+cocos3d reads 3D model content from POD files. If you are using a 3D editor, you can export
+your 3D model to a file in COLLADA 1.4 format, and then convert the COLLADA file to the POD
+format read by cocos3d.
 
-http://www.imgtec.com/powervr/insider/sdk/KhronosOpenGLES1xMBX.asp
+To convert COLLADA files to POD files, you can use the Collada2POD converter tool available
+in the PowerVR SDK, which is available free from Imagination Technologies, the supplier of
+the GPU's used in iOS devices.
 
-If you are using Blender (or any 3D editor), you can export your 3D model to a file in
-Collada 1.4 format, and used the Collada2POD converter tool (GUI or command line) in the
-PVR SDK to convert the Collada file to POD format.
+Full instructions on where to get the Collada2POD converter, and how to use it to convert
+COLLADA files to POD files, can be found at:
 
-For convenience, when using the Collada2POD tool, you can use the settings in the
-Tools/Collada2PODSettings.txt file in the cocos3d distribution. When using the
-Collada2POD GUI converter, please be aware that the tool does not store the setting
-for the Invert Transparency flag. This flag must be turned on each time you use the
-GUI tool to avoid having all your models disappear.
-
-Please also note that the Collada2POD tool rotates data so that the Z-axis is 'up'.
-Since the OpenGL ES default is to have the Y-axis as up, and the camera looking down
-the -Z-axis, it is usually more convenient to use the OpenGL orientation in cocos3d
-(although there's nothing to stop you from rotating everything by 90 degrees in cocos3d).
-
-With this in mind, when using Blender, and exporting to POD via Collada, orient your
-model scene so that 'up' is along the Z-axis (which is the Blender default anyway).
-The Collada2POD tool will then rotate the axes so that 'up' is along the Y-axis when
-the model is imported into cocos3d.
+http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/
 
 
 PowerVR Library
@@ -307,6 +276,6 @@ PowerVR Library
 
 In order to reduce the size of the cocos3d distribution, several large and
 unused files have been removed from the PVR library. More info can be found
-in the document: 'cocos3d/cc3PVR/PVRT 2.09/PVRT_Removed_Files.txt'.
+in the document: 'cocos3d/cc3PVR/PVRT 2.10/PVRT_Removed_Files.txt'.
 
 

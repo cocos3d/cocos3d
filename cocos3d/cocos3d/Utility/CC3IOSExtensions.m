@@ -1,7 +1,7 @@
 /*
  * CC3IOSExtensions.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,15 +30,19 @@
  */
 
 #import "CC3IOSExtensions.h"
-
-
+#import "CC3Foundation.h"
 
 
 #pragma mark -
 #pragma mark NSObject extensions
 
 @implementation NSObject (CC3)
+
+-(id) autoreleasedCopy { return [[self copy] autorelease]; }
+
+// Deprecated
 -(id) copyAutoreleased { return [[self copy] autorelease]; }
+
 @end
 
 
@@ -53,6 +57,25 @@
 }
 
 -(CGPoint) location { return [self locationInView: self.view]; }
+
+-(NSString*) stateName {
+	switch (self.state) {
+		case UIGestureRecognizerStatePossible:
+			return @"UIGestureRecognizerStatePossible";
+		case UIGestureRecognizerStateBegan:
+			return @"UIGestureRecognizerStateBegan";
+		case UIGestureRecognizerStateChanged:
+			return @"UIGestureRecognizerStateChanged";
+		case UIGestureRecognizerStateEnded:
+			return @"UIGestureRecognizerStateEnded";
+		case UIGestureRecognizerStateCancelled:
+			return @"UIGestureRecognizerStateCancelled";
+		case UIGestureRecognizerStateFailed:
+			return @"UIGestureRecognizerStateFailed";
+		default:
+			return @"GestureRecognizerStateUnknown";
+	}
+}
 
 @end
 
@@ -70,36 +93,51 @@
 
 @implementation UIColor (CC3)
 
--(ccColor4F) asCCColor4F {
-	ccColor4F rgba = (ccColor4F){ 1.0, 1.0, 1.0, 1.0 };  // initialize to white
-	
-	CGColorRef cgColor= self.CGColor;
-	size_t componentCount = CGColorGetNumberOfComponents(cgColor);
-	const CGFloat* colorComponents = CGColorGetComponents(cgColor);
-	switch(componentCount) {
-		case 4:			// RGB + alpha: set alpha then fall through to RGB 
-			rgba.a = colorComponents[3];
-		case 3:			// RGB: alpha already set
-			rgba.r = colorComponents[0];
-			rgba.g = colorComponents[1];
-			rgba.b = colorComponents[2];
-			break;
-		case 2:			// gray scale + alpha: set alpha then fall through to gray scale
-			rgba.a = colorComponents[1];
-		case 1:		// gray scale: alpha already set
-			rgba.r = colorComponents[0];
-			rgba.g = colorComponents[0];
-			rgba.b = colorComponents[0];
-			break;
-		default:	// if all else fails, return white which is already set
-			break;
-	}
-	return rgba;
-}
+-(ccColor4F) asCCColor4F { return CCC4FFromCGColor(self.CGColor); }
 
 +(UIColor*) colorWithCCColor4F: (ccColor4F) rgba {
 	return [UIColor colorWithRed: rgba.r green: rgba.g blue: rgba.b alpha: rgba.a];
 }
 
 @end
+
+
+#pragma mark -
+#pragma mark Miscellaneous extensions and functions
+
+/** Returns a string description of the specified UIInterfaceOrientation. */
+NSString* NSStringFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientation) {
+	switch (uiOrientation) {
+		case UIInterfaceOrientationLandscapeLeft:
+			return @"UIInterfaceOrientationLandscapeLeft";
+		case UIInterfaceOrientationLandscapeRight:
+			return @"UIInterfaceOrientationLandscapeRight";
+		case UIInterfaceOrientationPortraitUpsideDown:
+			return @"UIInterfaceOrientationPortraitUpsideDown";
+		case UIInterfaceOrientationPortrait:
+		default:
+			return @"UIInterfaceOrientationPortrait";
+	}
+}
+
+/** Returns a string description of the specified UIDeviceOrientation. */
+NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation) {
+	switch (deviceOrientation) {
+		case UIDeviceOrientationPortrait:
+			return @"UIDeviceOrientationPortrait";
+		case UIDeviceOrientationPortraitUpsideDown:
+			return @"UIDeviceOrientationPortraitUpsideDown";
+		case UIDeviceOrientationLandscapeLeft:
+			return @"UIDeviceOrientationLandscapeLeft";
+		case UIDeviceOrientationLandscapeRight:
+			return @"UIDeviceOrientationLandscapeRight";
+		case UIDeviceOrientationFaceUp:
+			return @"UIDeviceOrientationFaceUp";
+		case UIDeviceOrientationFaceDown:
+			return @"UIDeviceOrientationFaceDown";
+		case UIDeviceOrientationUnknown:
+		default:
+			return @"UIDeviceOrientationUnknown";
+	}
+}
 

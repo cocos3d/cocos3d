@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Engine.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -104,6 +104,8 @@ static CC3OpenGLES11Engine* engine;
 
 +(CC3OpenGLES11Engine*) engine {
 	if (!engine) {
+		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+		
 		// This rather unconventional distinct separation of alloc and init is intentional.
 		// Initialize AFTER setting the singleton variable so that the initialization code
 		// of the instance itself can access this singleton. For example, when initializing

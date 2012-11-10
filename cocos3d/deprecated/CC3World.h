@@ -1,7 +1,7 @@
 /*
  * CC3World.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -41,7 +41,10 @@
 #define kCC3DefaultLightColorAmbientWorld kCC3DefaultLightColorAmbientScene
 
 DEPRECATED_ATTRIBUTE
-/** @deprecated CC3World renamed to CC3Scene. */
+/**
+ * Deprecated and renamed to CC3Scene.
+ * @deprecated CC3World renamed to CC3Scene.
+ */
 @interface CC3World : CC3Scene
 
 /** @deprecated CC3World renamed to CC3Scene. Use CC3Scene scene instead. */

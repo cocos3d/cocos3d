@@ -1,7 +1,7 @@
 /*
  * CC3TargettingNode.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,6 +37,7 @@
 
 DEPRECATED_ATTRIBUTE
 /**
+ * Deprecated and functionality moved to CC3Node class.
  * @deprecated CC3TargettingNode is deprecated. Its former functionality
  * has been moved into the CC3Node class.
  */
@@ -44,6 +45,7 @@ DEPRECATED_ATTRIBUTE
 @end
 
 /**
+ * Deprecated and functionality moved to CC3Node class.
  * @deprecated CC3LightTracker is deprecated. Its former functionality has been
  * moved into the CC3Node class with the isTrackingForBumpMapping property.
  */

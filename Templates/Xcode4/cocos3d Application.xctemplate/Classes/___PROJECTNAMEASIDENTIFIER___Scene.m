@@ -59,9 +59,11 @@
 	
 	// That's it! The scene is now constructed and is good to go.
 	
-	// If you encounter problems displaying your models, you can uncomment one or
-	// more of the following lines to help you troubleshoot. You can also use these
-	// features on a single node, or a structure of nodes. See the CC3Node notes.
+	// If you encounter problems displaying your models, you can uncomment one or more of the
+	// following lines to help you troubleshoot. You can also use these features on a single node,
+	// or a structure of nodes. See the CC3Node notes for more explanation of these properties.
+	// Also, the onOpen method below contains additional troubleshooting code you can comment
+	// out to move the camera so that it will display the entire scene automatically.
 	
 	// Displays short descriptive text for each node (including class, node name & tag).
 	// The text is displayed centered on the pivot point (origin) of the node.
@@ -73,9 +75,6 @@
 	// Displays bounding boxes around all nodes. The bounding box for each node
 	// will encompass its child nodes.
 //	self.shouldDrawAllWireframeBoxes = YES;
-	
-	// Moves the camera so that it will display the entire scene.
-//	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self];
 	
 	// If you encounter issues creating and adding nodes, or loading models from
 	// files, the following line is used to log the full structure of the scene.
@@ -131,7 +130,12 @@
  *
  * For more info, read the notes of this method on CC3Node.
  */
--(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {}
+-(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
+	// If you have uncommented the moveWithDuration: invocation in the onOpen: method,
+	// you can uncomment the following to track how the camera moves, and where it ends up,
+	// in order to determine where to position the camera to see the entire scene.
+//	LogDebug(@"Camera location is: %@", NSStringFromCC3Vector(activeCamera.globalLocation));
+}
 
 
 #pragma mark Scene opening and closing
@@ -148,9 +152,11 @@
  */
 -(void) onOpen {
 
-	// Uncomment this line to have the camera move to show the entire scene.
-	// This must be done after the CC3Layer has been attached to the view,
-	// because this makes use of the camera frustum and projection.
+	// Uncomment this line to have the camera move to show the entire scene. This must be done after the
+	// CC3Layer has been attached to the view, because this makes use of the camera frustum and projection.
+	// If you uncomment this line, you might also want to uncomment the LogDebug line in the updateAfterTransform:
+	// method to track how the camera moves, and where it ends up, in order to determine where to position
+	// the camera to see the entire scene.
 //	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self];
 
 	// Uncomment this line to draw the bounding box of the scene.

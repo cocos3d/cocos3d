@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceScene.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,6 +37,7 @@
 #import "CGPointExtension.h"
 #import "CC3PODResourceNode.h"
 #import "CC3OpenGLES11Engine.h"
+#import "CC3UIViewController.h"
 
 // Model names
 #define kNodeGridName			@"NodeGrid"
@@ -174,7 +175,7 @@
 	#define kRingLineCount 36
 	CC3Vector ringVertices[kRingLineCount + 1];
 	for (int i = 0; i < kRingLineCount; i++) {
-		GLfloat ra = (GLfloat)i * (2 * M_PI) / kRingLineCount;
+		GLfloat ra = (GLfloat)i * kCC3TwoPi / kRingLineCount;
 		GLfloat rx = cosf(ra);
 		GLfloat ry = sinf(ra);
 		ringVertices[i] = cc3v(rx, ry, 0.0);
@@ -284,7 +285,7 @@
 		// the X-Z plane, for convenience, combine these two axes (scene up and camera right)
 		// into a single control vector by simply adding them. You could also run these
 		// calculations independently instead of combining into one vector.
-		CC3Vector controlVector = CC3VectorAdd(activeCamera.rightDirection, activeCamera.sceneUpDirection);
+		CC3Vector controlVector = CC3VectorAdd(activeCamera.rightDirection, activeCamera.referenceUpDirection);
 		
 		// Scale the control vector by the control delta, using the X-component of the control
 		// delta value for both the X and Z axes of the camera's right vector. This represents

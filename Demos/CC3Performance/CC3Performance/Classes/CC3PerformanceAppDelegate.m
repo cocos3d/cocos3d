@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceAppDelegate.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
@@ -32,76 +32,54 @@
 #import "CC3PerformanceAppDelegate.h"
 #import "CC3PerformanceLayer.h"
 #import "CC3PerformanceScene.h"
-#import "CC3EAGLView.h"
-#import "CC3Scene.h"
 
-@implementation CC3PerformanceAppDelegate
+@implementation CC3PerformanceAppDelegate {
+	UIWindow *window;
+	CCNodeController *viewController;
+}
 
-@synthesize window;
-
-- (void)dealloc {
-	[[CCDirector sharedDirector] release];
+-(void) dealloc {
 	[window release];
 	[viewController release];
 	[super dealloc];
 }
 
-- (void) applicationDidFinishLaunching:(UIApplication*)application {
-	// Init the window
-	window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+-(void) applicationDidFinishLaunching:(UIApplication*)application {
 	
-	// Try to use CADisplayLink director
-	// if it fails (SDK < 3.1) use the default director
-	if( ! [CCDirector setDirectorType:kCCDirectorTypeDisplayLink] )
-		[CCDirector setDirectorType:kCCDirectorTypeDefault];
+	// Establish the type of CCDirector to use.
+	// Try to use CADisplayLink director and if it fails (SDK < 3.1) use the default director.
+	// This must be the first thing we do and must be done before establishing view controller.
+	if( ! [CCDirector setDirectorType: kCCDirectorTypeDisplayLink] )
+		[CCDirector setDirectorType: kCCDirectorTypeDefault];
 	
-	CCDirector *director = [CCDirector sharedDirector];
-
-	// If the rotation is going to be controlled by a UIViewController
-	// then the device orientation should be "Portrait".
-	[director setDeviceOrientation:kCCDeviceOrientationPortrait];
-
-	[director setAnimationInterval:1.0/60];
-//	[director setDisplayFPS:YES];
-	
-	// Alloc & init the EAGLView
-	//  1. Transparency (alpha blending), and device camera overlay requires an alpha channel,
-	//     so must use RGBA8 color format. If not using device overlay or alpha blending
-	//     (transparency) in any 3D or 2D graphics this can be changed to kEAGLColorFormatRGB565.
-	//	2. 3D rendering requires a depth format of 16 bit.
-	//  3. For highest performance, multisampling antialiasing is disabled by default.
-	//     To enable multisampling antialiasing, set the multiSampling parameter to YES.
-	//     You can also change the number of samples used with the numberOfSamples parameter.
-	//  4. If you are using BOTH multisampling antialiasing AND node picking from touch events,
-	//     use the CC3EAGLView class instead of EAGLView. When using EAGLView, multisampling
-	//     antialiasing interferes with the color-testing algorithm used for touch-event node picking.
-	EAGLView *glView = [CC3EAGLView viewWithFrame: [window bounds]
-									  pixelFormat: kEAGLColorFormatRGBA8
-									  depthFormat: GL_DEPTH_COMPONENT16_OES
-							   preserveBackbuffer: NO
-									   sharegroup: nil
-									multiSampling: NO
-								  numberOfSamples: 4];
-	
-	// Turn on multiple touches if needed
-	[glView setMultipleTouchEnabled: YES];
-	
-	// attach the openglView to the director
-	[director setOpenGLView:glView];
-						
-	// Enables High Res mode (Retina Display) on iPhone 4 and maintains low res on all other devices
-//	if( ! [director enableRetinaDisplay:YES] )
-//		CCLOG(@"Retina Display Not supported");
-						
-	
-	// make the GL view a child of the main window and present it
-	[window addSubview: glView];
-	[window makeKeyAndVisible];
-
 	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images
-	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565
-	// You can change anytime.
-	[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA8888];
+	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565. You can change anytime.
+	[CCTexture2D setDefaultAlphaPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+	
+	// Create the view controller for the 3D view.
+	viewController = [CCNodeController new];
+	viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	
+	// Create the CCDirector, set the frame rate, and attach the view.
+	CCDirector *director = CCDirector.sharedDirector;
+	director.runLoopCommon = YES;		// Improves display link integration with UIKit
+	director.animationInterval = (1.0f / 60);
+	director.displayFPS = NO;
+	director.openGLView = viewController.view;
+	
+	// Enables High Res mode on Retina Displays and maintains low res on all other devices
+	// This must be done after the GL view is assigned to the director!
+//	[director enableRetinaDisplay: YES];
+	
+	// Create the window, make the controller (and its view) the root of the window, and present the window
+	window = [[UIWindow alloc] initWithFrame: [[UIScreen mainScreen] bounds]];
+	[window addSubview: viewController.view];
+	window.rootViewController = viewController;
+	[window makeKeyAndVisible];
+	
+	// Set to YES for Augmented Reality 3D overlay on device camera.
+	// This must be done after the window is made visible!
+//	viewController.isOverlayingDeviceCamera = YES;
 	
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
@@ -109,7 +87,6 @@
 	// Create the customized CC3Layer that supports 3D rendering,
 	// and schedule it for automatic updates
 	CC3Layer* cc3Layer = [CC3PerformanceLayer node];
-	[cc3Layer scheduleUpdate];
 
 	// Create the customized 3D scene, attach it to the layer.
 	// Could also just create this inside the customer layer.
@@ -126,31 +103,19 @@
 //	cc3Layer.alignContentSizeWithDeviceOrientation = YES;
 //	mainLayer = [ControllableCCLayer layerWithColor: ccc4(0, 0, 0, 255)];
 //	[mainLayer addChild: cc3Layer];
-	
-	// The controller is optional. If you want to auto-rotate the view when the device orientation
-	// changes, or if you want to display a device camera behind a combined 3D & 2D scene
-	// (augmented reality), use a controller. Otherwise you can simply remove the following lines
-	// and uncomment the lines below these lines that uses the traditional CCDirector scene startup.
-	viewController = [[CCNodeController controller] retain];
-	viewController.doesAutoRotate = YES;
+
+	// Run the layer on the controller.
 	[viewController runSceneOnNode: mainLayer];		// attach the layer to the controller and run a scene with it
-	
-	// If a controller is NOT used, uncomment the following standard CCDirector scene startup lines,
-	// and remove the lines above that reference viewContoller.
-//	CCScene *scene = [CCScene node];
-//	[scene addChild: mainLayer];
-//	[[CCDirector sharedDirector] runWithScene: scene];
-	
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application {
+-(void) applicationWillResignActive:(UIApplication *)application {
 	[[CCDirector sharedDirector] pause];
 }
 
 /** Resume the cocos3d/cocos2d action. */
 -(void) resumeApp { [[CCDirector sharedDirector] resume]; }
 
-- (void)applicationDidBecomeActive: (UIApplication*) application {
+-(void) applicationDidBecomeActive: (UIApplication*) application {
 	
 	// Workaround to fix the issue of drop to 40fps on iOS4.X on app resume.
 	// Adds short delay before resuming the app.
@@ -164,7 +129,7 @@
 	//	[self resumeApp];
 }
 
-- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+-(void) applicationDidReceiveMemoryWarning:(UIApplication *)application {
 	[[CCDirector sharedDirector] purgeCachedData];
 }
 
@@ -176,19 +141,12 @@
 	[[CCDirector sharedDirector] startAnimation];
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application {
-	CCDirector *director = [CCDirector sharedDirector];
-	
-	[[director openGLView] removeFromSuperview];
-	
-	[viewController release];
-	
-	[window release];
-	
-	[director end];	
+-(void) applicationWillTerminate:(UIApplication *)application {
+	[CCDirector.sharedDirector.openGLView removeFromSuperview];
+	[CCDirector.sharedDirector end];
 }
 
-- (void)applicationSignificantTimeChange:(UIApplication *)application {
+-(void) applicationSignificantTimeChange:(UIApplication *)application {
 	[[CCDirector sharedDirector] setNextDeltaTimeZero:YES];
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,6 +30,7 @@
  */
 
 #import "CC3Foundation.h"
+#import "CC3Matrix3x3.h"
 #import "CGPointExtension.h"
 
 
@@ -42,7 +43,7 @@ NSString* NSStringFromCC3Vectors(CC3Vector* vectors, GLuint vectorCount) {
 }
 
 void CC3VectorOrthonormalize(CC3Vector* vectors, GLuint vectorCount) {
-	LogCleanTrace(@"Vectors BEFORE orthonormalization: %@", NSStringFromCC3Vectors(vectors, vectorCount));
+	LogTrace(@"Vectors BEFORE orthonormalization: %@", NSStringFromCC3Vectors(vectors, vectorCount));
 
 	for (GLuint currIdx = 0; currIdx < vectorCount; currIdx++) {
 		// Get the current vector, and subtract any projection from any previously processed vector.
@@ -60,7 +61,7 @@ void CC3VectorOrthonormalize(CC3Vector* vectors, GLuint vectorCount) {
 		vectors[currIdx] = CC3VectorNormalize(cleanedCurrVector);
 	}
 
-	LogCleanTrace(@"Vectors AFTER orthonormalization: %@", NSStringFromCC3Vectors(vectors, vectorCount));
+	LogTrace(@"Vectors AFTER orthonormalization: %@", NSStringFromCC3Vectors(vectors, vectorCount));
 }
 
 
@@ -144,29 +145,38 @@ CC3Vector  CC3RayIntersectionOfBoundingBox(CC3Ray aRay, CC3BoundingBox bb) {
 
 
 #pragma mark -
-#pragma mark Cartesian vector in 4D homogeneous coordinate space structure and functions
+#pragma mark Quaternions
+
+// Simple function, but too much expanded code to make inline
+CC3Quaternion CC3QuaternionFromRotation(CC3Vector aRotation) {
+	CC3Matrix3x3 rotMtx;
+	CC3Matrix3x3PopulateFromRotationYXZ(&rotMtx, aRotation);
+	return CC3Matrix3x3ExtractQuaternion(&rotMtx);
+}
+
+// Simple function, but too much expanded code to make inline
+CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion) {
+	CC3Matrix3x3 rotMtx;
+	CC3Matrix3x3PopulateFromQuaternion(&rotMtx, aQuaternion);
+	return CC3Matrix3x3ExtractRotationYXZ(&rotMtx);
+}
 
 #define kSlerpCosAngleLinearEpsilon 0.01	// about 8 degrees
 
-CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) {
+CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor) {
 	// Short-circuit if we know it's one of the end-points.
-	if (blendFactor == 0.0f) {
-		return v1;
-	} else if (blendFactor == 1.0f) {
-		return v2;
-	}
+	if (blendFactor == 0.0f) return q1;
+	if (blendFactor == 1.0f) return q2;
 	
 	GLfloat theta, cosTheta, oneOverSinTheta, v1Weight, v2Weight;
 	
-	cosTheta = CC3Vector4Dot(v1, v2) / (CC3Vector4Length(v1) * CC3Vector4Length(v2));
+	cosTheta = CC3Vector4Dot(q1, q2) / (CC3Vector4Length(q1) * CC3Vector4Length(q2));
 	
 	// (Q and −Q map to the same rotation), the rotation path may turn either the "short way"
 	// (less than 180°) or the "long way" (more than 180°). Long paths can be prevented by
 	// negating one end if the dot product, cos(theta), is negative, thus ensuring that
 	// −90° ≤ theta ≤ 90°. Taken from http://en.wikipedia.org/wiki/Slerp
-	if (cosTheta < 0.0) {
-		return CC3Vector4Slerp(v1, CC3Vector4Negate(v2), blendFactor);
-	}
+	if (cosTheta < 0.0) { return CC3QuaternionSlerp(q1, CC3QuaternionNegate(q2), blendFactor); }
 	
 	// If angle close to zero (cos() close to one), save cycles by interpolating linearly
 	if ((1.0 - cosTheta) < kSlerpCosAngleLinearEpsilon) {
@@ -178,13 +188,144 @@ CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) {
 		v1Weight = (sinf(theta * (1.0 - blendFactor)) * oneOverSinTheta);
 		v2Weight = (sinf(theta * blendFactor) * oneOverSinTheta);
 	}
-	CC3Vector4 result = CC3Vector4Normalize(CC3Vector4Add(CC3Vector4ScaleUniform(v1, v1Weight),
-														  CC3Vector4ScaleUniform(v2, v2Weight)));
+	CC3Vector4 result = CC3QuaternionNormalize(CC3Vector4Add(CC3QuaternionScaleUniform(q1, v1Weight),
+																CC3QuaternionScaleUniform(q2, v2Weight)));
 	LogTrace(@"SLERP with cos %.3f at %.3f between %@ and %@ is %@", cosTheta, blendFactor, 
-			 NSStringFromCC3Vector4(v1), NSStringFromCC3Vector4(v2),
-			 NSStringFromCC3Vector4(result));
+			 NSStringFromCC3Quaternion(q1), NSStringFromCC3Quaternion(q2),
+			 NSStringFromCC3Quaternion(result));
 	return result;
 }
+
+// Deprecated
+CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) {
+	return CC3QuaternionSlerp(v1, v2, blendFactor);
+}
+
+
+#pragma mark -
+#pragma mark Face structures and functions
+
+/**
+ * Given the corners of the triagular face (c0, c1, c2), the barycentric weights are determined by
+ * transforming the origin of the coordinate system to the first corner of the triangular face (c0).
+ * 
+ * We can write an equation for the specified location of interest (p), using c0 as the origin
+ * and the two sides projecting from c0 as basis vectors:
+ *    p = c0 + b1(c1 - c0) + b2(c2 - c0)
+ *
+ * Subtract c0 from both sides to translate to a coordinate system with c0 at the origin, and
+ * substitute vectors vp, v1 & v2 to represent the the vectors from c0:
+ *    (p - c0) = b1(c1 - c0) + b2(c2 - c0)
+ *    vp = b1(v1) + b2(v2)
+ * 
+ * To solve for b1 & b2, we need two equations, which we can get by dotting both sides of this
+ * equation by v1 to create one equation and by v2 to create the other equation:
+ *    vp.v1 = b1(v1.v1) + b2(v2.v1)
+ *    vp.v2 = b1(v1.v2) + b2(v2.v2)
+ *
+ * Solving for b1 & b2:
+ *    b1 = ((v2.v2)(vp.v1) - (v2.v1)(vp.v2)) / d
+ *    b2 = ((v1.v1)(vp.v2) - (v1.v2)(vp.v1)) / d
+ * where:
+ *    d = (v1.v1)(v2.v2) - (v1.v2)(v2.v1)
+ *
+ * We know have two of the three barycentric coordinates. We can get the third by expanding
+ * the original equation and collecting like terms:
+ *    p = c0 + b1(c1 - c0) + b2(c2 - c0)
+ *    p = c0 + b1(c1) - b2(c0) + b2(c2) - b2(c0)
+ *    p = (1 - b1 - b2)(c0) + b1(c1) + b2(c2)
+ *    p = b0(c0) + b1(c1) + b2(c2)
+ * where:
+ *    b0 = 1 - b1 - b2
+ *
+ * References: Mathematics for 3D Game Programming and Computer Graphics, 3rd ed. book, by Eric Lengyel
+ *        and: http://www.blackpawn.com/texts/pointinpoly/default.html
+ */
+CC3BarycentricWeights CC3FaceBarycentricWeights(CC3Face face, CC3Vector aLocation) {
+	CC3BarycentricWeights bcw;
+	GLfloat* b = bcw.weights;
+	CC3Vector* c = face.vertices;
+	
+	// Create basis vectors using the first face corner (index 0) as the origin
+	CC3Vector vp = CC3VectorDifference(aLocation, c[0]);
+	CC3Vector v1 = CC3VectorDifference(c[1], c[0]);
+	CC3Vector v2 = CC3VectorDifference(c[2], c[0]);
+	
+	// Create dot products required to solve the two equations and two unknowns
+	GLfloat dot11 = CC3VectorDot(v1, v1);
+	GLfloat dot12 = CC3VectorDot(v1, v2);
+	GLfloat dot1p = CC3VectorDot(v1, vp);
+	GLfloat dot22 = CC3VectorDot(v2, v2);
+	GLfloat dot2p = CC3VectorDot(v2, vp);
+	
+	GLfloat invDenom = 1.0f / (dot11 * dot22 - dot12 * dot12);	// Denominator
+	
+	b[1] = (dot22 * dot1p - dot12 * dot2p) * invDenom;
+	b[2] = (dot11 * dot2p - dot12 * dot1p) * invDenom;
+	b[0] = 1.0f - b[1] - b[2];
+	
+	LogTrace(@"The barycentric weights of location %@ in triangle %@ are %@ using basis vectors",
+			 NSStringFromCC3Vector(aLocation), NSStringFromCC3Face(face), NSStringFromCC3BarycentricWeights(bcw));
+	return bcw;
+}
+
+/**
+ * The barycentric weights are determined by calculating the areas of the three sub-triangles,
+ * each defined by the specified location and two of the three corners of the face triangle.
+ * Each barycentric weight is the ratio of the area of the corresponding sub-triangle to the
+ * area of the face triangle.
+ * 
+ * For each corner of the face triangle, determine the opposite edge (e) and the vector from the
+ * corner to the specified location (d). The area of a sub-triangle is given by half the magnitude of
+ * the cross-product of two of its sides (one edge (e) and one vector to the specified location (d)).
+ * Similarly, the area of the face triangle is given by half the magnitude of the cross-product of
+ * two of the edges of the face triangle. To provide an orientation, or sign, to each magnitude,
+ * a dot-product is taken of each cross-product and the normal of the face plane.
+ *
+ * The ratio of the area of a sub-triangle to the face triangle is then the ratio of these two signed
+ * cross-product magnitudes. A negative value for the ratio indicates that the corresponding
+ * barycentric weight is negative, which in turn indicates that the specified location is outside
+ * the triangle on the other side of that corresponding side.
+ * 
+ * Reference: 3D Math Primer for Graphics and Game Development book, by Fletcher Dunn and Ian Parberry.
+ */
+/*
+CC3BarycentricWeights CC3FaceBarycentricWeights(CC3Face face, CC3Vector v) {
+
+	// The three corners of the face triangle
+	CC3Vector v0 = face.vertices[0];
+	CC3Vector v1 = face.vertices[1];
+	CC3Vector v2 = face.vertices[2];
+
+	// The three edges of the triangle, opposite the corresponding corner
+	CC3Vector e0 = CC3VectorDifference(v2, v1);
+	CC3Vector e1 = CC3VectorDifference(v0, v2);
+	CC3Vector e2 = CC3VectorDifference(v1, v0);
+	
+	// The three vectors from each corner to the location of interest
+	CC3Vector d0 = CC3VectorDifference(v, v0);
+	CC3Vector d1 = CC3VectorDifference(v, v1);
+	CC3Vector d2 = CC3VectorDifference(v, v2);
+	
+	// The unnormalized normal of the face plane (also the unsigned area of the face triangle)
+	CC3Vector n = CC3VectorCross(e0, e1);
+
+	// Determine the area of the face triangle and each sub-triangle as the magnitude of the
+	// cross-product of two of its sides, dotted with the normal to give the magnitude a sign.
+	GLfloat af = CC3VectorDot(n, n);	// Since n is also the cross-product to use for the area of the face triangle
+	GLfloat a0 = CC3VectorDot(CC3VectorCross(e0, d2), n);
+	GLfloat a1 = CC3VectorDot(CC3VectorCross(e1, d0), n);
+	GLfloat a2 = CC3VectorDot(CC3VectorCross(e2, d1), n);
+	
+	CC3BarycentricWeights bcw;
+	bcw.weights[0] = a0 / af;
+	bcw.weights[1] = a1 / af;
+	bcw.weights[2] = a2 / af;
+	LogTrace(@"The barycentric weights of location %@ in triangle %@ are %@ using triangle areas",
+			 NSStringFromCC3Vector(v), NSStringFromCC3Face(face), NSStringFromCC3BarycentricWeights(bcw));
+	return bcw;
+}
+*/
 
 
 #pragma mark -
@@ -258,7 +399,7 @@ CC3Sphere CC3SphereUnion(CC3Sphere s1, CC3Sphere s2) {
 	// Unit vector between the centers
 	uc = CC3VectorNormalize(CC3VectorDifference(s2.center, s1.center));
 	
-	// The location midpoint between the centers. This is used as an anchor
+	// The location midpoint between the centers. This is used as an origin
 	// for comparing distances along the line that intersects both centers.
 	mc = CC3VectorAverage(s1.center, s2.center);
 
@@ -317,7 +458,7 @@ CC3Plane CC3RaySphereIntersectionEquation(CC3Ray aRay, CC3Sphere aSphere) {
 	GLfloat d = (b * b) - (4.0f * a * c);
 	
 	// Return the coefficients and discriminant as a plane
-	LogCleanTrace(@"Intersection equation for ray %@ and sphere %@: %@",
+	LogTrace(@"Intersection equation for ray %@ and sphere %@: %@",
 				  NSStringFromCC3Ray(aRay), NSStringFromCC3Spere(aSphere),
 				  NSStringFromCC3Plane(CC3PlaneMake(a, b, c, d)));
 	return CC3PlaneMake(a, b, c, d);

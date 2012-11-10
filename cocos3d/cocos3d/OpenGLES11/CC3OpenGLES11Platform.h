@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -62,6 +62,7 @@
 	CC3OpenGLES11StateTrackerPlatformInteger* maxPaletteMatrices;
 	CC3OpenGLES11StateTrackerPlatformInteger* maxTextureUnits;
 	CC3OpenGLES11StateTrackerPlatformInteger* maxVertexUnits;
+	CC3OpenGLES11StateTrackerPlatformInteger* maxPixelSamples;
 }
 
 /** Reads the number of lights available, through GL parameter GL_MAX_LIGHTS. */
@@ -78,5 +79,8 @@
 
 /** Reads the number of vertex units available, through GL parameter GL_MAX_VERTEX_UNITS_OES. */
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxVertexUnits;
+
+/** Reads the number of vertex units available, through GL parameter GL_MAX_SAMPLES_APPLE. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPlatformInteger* maxPixelSamples;
 
 @end

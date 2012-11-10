@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11VertexArrays.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -129,8 +129,8 @@
 @interface CC3OpenGLES11StateTrackerVertexPointer : CC3OpenGLES11StateTrackerComposite {
 	CC3OpenGLES11StateTrackerInteger* elementSize;
 	CC3OpenGLES11StateTrackerEnumeration* elementType;
-	CC3OpenGLES11StateTrackerInteger* elementStride;
-	CC3OpenGLES11StateTrackerPointer* elementPointer;
+	CC3OpenGLES11StateTrackerInteger* vertexStride;
+	CC3OpenGLES11StateTrackerPointer* vertices;
 }
 
 /** Tracks vertex element size. */
@@ -140,10 +140,16 @@
 @property(nonatomic, retain) CC3OpenGLES11StateTrackerEnumeration* elementType;
 
 /** Tracks vertex element stride. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* elementStride;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* vertexStride;
+
+/** @deprecated Renamed to vertexStride. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerInteger* elementStride DEPRECATED_ATTRIBUTE;
 
 /** Tracks the pointer to the vertex data. */
-@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointer* elementPointer;
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointer* vertices;
+
+/** @deprecated Renamed to vertices. */
+@property(nonatomic, retain) CC3OpenGLES11StateTrackerPointer* elementPointer DEPRECATED_ATTRIBUTE;
 
 /**
  * Sets element pointer, element size, element type and element stride value together.
@@ -177,26 +183,6 @@
 			 withType: (GLenum) elemType
 		   withStride: (GLsizei) elemStride;
 
-/**
- * Template method that sets the values in the GL engine, using one of
- * the gl*Pointer GL functions,
- *
- * This abstract implementation does nothing.
- * Subclasses will override to make the appropriate GL function call.
- *
- * The application should not invoke this method directly.
- */
--(void) setGLValues;
-
-/**
- * Template method to log the values set in the GL engine by the setGLValues
- * method. The wasSet parameter indicates whether the value has changed and
- * was therefore set in the GL engine.
- *
- * The application should not invoke this method directly.
- */
--(void) logSetGLValues: (BOOL) wasChanged;
-
 @end
 
 
@@ -209,7 +195,7 @@
  *   - use the useElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_VERTEX_ARRAY_SIZE.
  *   - elementType uses GL name GL_VERTEX_ARRAY_TYPE.
- *   - elementStride uses GL name GL_VERTEX_ARRAY_STRIDE.
+ *   - vertexStride uses GL name GL_VERTEX_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glVertexPointer method
  */
 @interface CC3OpenGLES11StateTrackerVertexLocationsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
@@ -225,7 +211,7 @@
  *   - use the useElementsAt:withType:withStride: method to set the values
  *   - elementSize is not used.
  *   - elementType uses GL name GL_NORMAL_ARRAY_TYPE.
- *   - elementStride uses GL name GL_NORMAL_ARRAY_STRIDE.
+ *   - vertexStride uses GL name GL_NORMAL_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glNormalPointer method
  */
 @interface CC3OpenGLES11StateTrackerVertexNormalsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
@@ -241,7 +227,7 @@
  *   - use the useElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_COLOR_ARRAY_SIZE.
  *   - elementType uses GL name GL_COLOR_ARRAY_TYPE.
- *   - elementStride uses GL name GL_COLOR_ARRAY_STRIDE.
+ *   - vertexStride uses GL name GL_COLOR_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glColorPointer method
  */
 @interface CC3OpenGLES11StateTrackerVertexColorsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
@@ -257,7 +243,7 @@
  *   - use the useElementsAt:withType:withStride: method to set the values
  *   - elementSize is not used.
  *   - elementType uses GL name GL_POINT_SIZE_ARRAY_TYPE_OES.
- *   - elementStride uses GL name GL_POINT_SIZE_ARRAY_STRIDE_OES.
+ *   - vertexStride uses GL name GL_POINT_SIZE_ARRAY_STRIDE_OES.
  *   - the values are set in the GL engine using the glPointSizePointerOES method
  */
 @interface CC3OpenGLES11StateTrackerVertexPointSizesPointer : CC3OpenGLES11StateTrackerVertexPointer{}
@@ -273,7 +259,7 @@
  *   - use the useElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_WEIGHT_ARRAY_SIZE_OES.
  *   - elementType uses GL name GL_WEIGHT_ARRAY_TYPE_OES.
- *   - elementStride uses GL name GL_WEIGHT_ARRAY_STRIDE_OES.
+ *   - vertexStride uses GL name GL_WEIGHT_ARRAY_STRIDE_OES.
  *   - the values are set in the GL engine using the glWeightPointerOES method
  */
 @interface CC3OpenGLES11StateTrackerVertexWeightsPointer : CC3OpenGLES11StateTrackerVertexPointer{}
@@ -289,7 +275,7 @@
  *   - use the useElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_MATRIX_INDEX_ARRAY_SIZE_OES.
  *   - elementType uses GL name GL_MATRIX_INDEX_ARRAY_TYPE_OES.
- *   - elementStride uses GL name GL_MATRIX_INDEX_ARRAY_STRIDE_OES.
+ *   - vertexStride uses GL name GL_MATRIX_INDEX_ARRAY_STRIDE_OES.
  *   - the values are set in the GL engine using the glMatrixIndexPointerOES method
  */
 @interface CC3OpenGLES11StateTrackerVertexMatrixIndicesPointer : CC3OpenGLES11StateTrackerVertexPointer{}

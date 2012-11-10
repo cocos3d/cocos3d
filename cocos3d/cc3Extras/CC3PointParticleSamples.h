@@ -1,7 +1,7 @@
 /*
  * CC3PointParticleSamples.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -30,199 +30,224 @@
 /** @file */	// Doxygen marker
 
 #import "CC3PointParticles.h"
+#import "CC3ParticleSamples.h"
 
 
 #pragma mark -
-#pragma mark CC3PointParticleHoseEmitter
+#pragma mark CC3MortalPointParticle
 
 /**
- * CC3PointParticleHoseEmitter emits CC3UniformMotionParticle particles in a
- * stream, as if from the nozzle of a hose.
+ * CC3MortalPointParticle is a point particle implementation of the CC3MortalParticleProtocol
+ * that has a finite life.
  *
- * A CC3PointParticleHoseEmitter instance is made up of two parts: the emitter
- * and the nozzle, each of which is a node.
- * 
- * Particles live within the context of the emitter node, and movement of the
- * emitter node affects all of the particles already emitted by that node.
- * For example, if the emitter is rotating, the particles will rotate along
- * with it as they live out their lives.
- *
- * The location and rotation of the nozzle node determine where the particles
- * will be emitted, and in what direction, respectively. Moving the nozzle
- * does not effect the movement of the particles that have already been emitted.
- * 
- * By default, the nozzle node is a child node of this emitter. However, you can
- * change the parent node of the nozzle to some other object, by invoking the
- * addChild: method on the other object, with the nozzle node as the argument.
- *
- * By assigning the nozzle to a different parent node, you can have the nozzle
- * track another node, and emit particles as that node travels. For example,
- * you might attach the nozzle to the tail of a rocket node, to emit a trail
- * of particles behind the rocket as the rocket moves.
- *
- * The parent of the nozzle (the rocket, for example) does not need to be a
- * child or descendant of the emitter. Like any node, the location and rotation
- * properties of the nozzle are specified relative to its parent (the rocket).
- *
- * Note the difference in behaviour of the particles by having the nozzle
- * move instead of the emitter. In the rocket example, if the emitter was
- * attached to the tail of the rocket, the emitted particles would move
- * along with the emitter, making it very difficult to calculate realistic
- * paths for the particles. By making the emitter stationary, and attaching
- * only the nozzle to the rocket, the point of emission moves with the rocket,
- * but the particles move and live out their lives in fixed space, and it
- * becomes much simpler to calculate their movement.
- *
- * You can even combine the two frames of reference for interesting effects.
- * You can put both the emitter and the nozzle in separate motion. For example,
- * to create clouds moving on a rotating globe, you could place the emitter at
- * the center of the globe, so that it and the cloud particles rotate around
- * with the globe, and have the nozzle also moving across the surface of the
- * globe to simulate the clouds travelling across the surface of the globe.
- * 
- * For such a complicated scenario to work, keep in mind that the emitter and
- * the parent of the nozzle should share a common ancestor node (in this example,
- * the globe), to make it easy for the particles to transition from the nozzle
- * frame of reference to that of the emitter.
- *
- * You can set the shape of the nozzle using the dispersionAngle property,
- * which specifies how tight or wide the spray will be, and you can set a
- * range of speeds for the particles as they leave the emitter.
- *
- * CC3PointParticleHoseEmitter inherits from CC3MortalPointParticleEmitter,
- * which allows you to set a range of finite lifespans for the particles.
+ * To make evolutionary changes to this particle, implement the updateBeforeTransform: method.
+ * In doing so, be sure to invoke the superclass implementation, which checks whether this
+ * particle is still alive or has expired. Once the superclass implementation returns, you can
+ * check the isAlive property before spending time making any further modifications.
  */
-@interface CC3PointParticleHoseEmitter : CC3MortalPointParticleEmitter {
-	CC3Node* nozzle;
-	CC3GLMatrix* nozzleMatrix;
-	CGSize nozzleShape;
-	GLfloat minParticleSpeed;
-	GLfloat maxParticleSpeed;
-	BOOL shouldPrecalculateNozzleTangents;
+@interface  CC3MortalPointParticle  : CC3PointParticle <CC3MortalParticleProtocol> {
+	ccTime lifeSpan;
+	ccTime timeToLive;
 }
 
 /**
- * The nozzle of the emitter.
+ * This template callback method is invoked automatically whenever the emitter is updated
+ * during a scheduled 3D scene update.
  *
- * The location and rotation of the nozzle node determine where the particles
- * will be emitted, and in what direction, respectively. Moving the nozzle
- * does not effect the movement of the particles that have already been emitted.
- * 
- * By default, the nozzle node is a child node of this emitter. However, you can
- * change the parent node of the nozzle to some other object, by invoking the
- * addChild: method on the other object, with the nozzle node as the argument.
+ * The CC3MortalPointParticle implementation checks to see if the whether this particle is
+ * still alive or has expired, and sets the isAlive property accordingly.
  *
- * By assigning the nozzle to a different parent node, you can have the nozzle
- * track another node, and emit particles as that node travels. For example,
- * you might attach the nozzle to the tail of a rocket node, to emit a trail
- * of particles behind the rocket as the rocket moves.
+ * You can override this method to update the evolution of the particle. You should invoke this
+ * superclass implementation and test the isAlive property before making any further modifications.
  *
- * The parent of the nozzle does not need to be a child or descendant of the
- * emitter. Like any node, the location and rotation properties of the nozzle
- * are specified relative to its parent (the rocket).
+ * Subclasses that override this method should invoke this superclass implementation first,
+ * and should check the isAlive property prior to making any further modifications..
  */
-@property(nonatomic, retain) CC3Node* nozzle;
+-(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
+
+/** @deprecated
+ * Override the updateBeforeTransform: method, invoke the superclass implementation, and then
+ * test the isAlive property of this particle before any further modifications.
+ */
+-(void) updateLife: (ccTime) dt DEPRECATED_ATTRIBUTE;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MortalPointParticleEmitter
 
 /**
- * The matrix used to transform the initial location and velocity (combining
- * direction and speed) of each particle from the local coordinates of the
- * nozzle to the local coordinates of the emitter.
- *
- * If the nozzle has been assigned a different parent than the emitter, this
- * matrix is recalculated during each update by combining the transformMatrix
- * of the nozzle and the transformMatrixInverted of the emitter.
+ * Deprecated.
+ * @deprecated Do not use this class. This class has been introduced into the hierarchy
+ * strictly to permit the library to maintain the deprecated CC3MortalPointParticleEmitter
+ * as a parent class of other deprecated classes in this library.
  */
-@property(nonatomic, readonly) CC3GLMatrix* nozzleMatrix;
+@interface CC3MortalPointParticleEmitterDeprecated : CC3PointParticleEmitter {}
+
+/** @deprecated Replaced by minParticleLifeSpan property on the CC3RandomMortalParticleNavigator attached to this instance. */
+@property(nonatomic, assign) ccTime minParticleLifeSpan;
+
+/** @deprecated Replaced by maxParticleLifeSpan property on the CC3RandomMortalParticleNavigator attached to this instance. */
+@property(nonatomic, assign) ccTime maxParticleLifeSpan;
+
+/** @deprecated Life-span and trajectory now initialized by the CC3RandomMortalParticleNavigator attached to this instance. */
+-(void) initializeMortalParticle: (CC3MortalPointParticle*) aParticle;
+
+@end
+
+DEPRECATED_ATTRIBUTE
+/**
+ * Deprecated.
+ * @deprecated This functionality has been separated into several more general classes. Use a
+ * CC3PointParticleEmitter configured with a CC3RandomMortalParticleNavigator to emit particles
+ * that support the CC3MortalParticleProtocol, such as particles of type CC3MortalPointParticle.
+ */
+@interface CC3MortalPointParticleEmitter : CC3MortalPointParticleEmitterDeprecated {}
+@end
+
+
+#pragma mark -
+#pragma mark CC3SprayPointParticle
 
 /**
- * Indicates the angle of dispersion of the spray from the nozzle. This is specified
- * as both a width and height, permitting flexible shapes for the nozzle.
- *
- * During the emission of each particle, a random emission direction is chosen within
- * the angles specified by this property.
- *
- * The values are specified in degrees between zero and 180. The lower the angle,
- * the tighter the stream.
- *
- * A different value can be specified for each of the width and height of the
- * nozzle opening. Setting both width and height to small angles will create
- * a tightly focused beam of particles. Setting both width and height to larger
- * angles will result in particles emitted in a wide spray. Setting one or other
- * of the width or height to a small angle and the other to a large angle will
- * create a fan effect, where the particles are tightly constrained in one dimension,
- * but spray widely in the other.
- * 
- * For small dispersion angles, (> 90 degrees), you can avoid two expensive tangent
- * calculations every time a particle is emitted by setting the
- * shouldPrecalculateNozzleTangents to YES. This has the effect of precalculating the
- * tangent of the dispersionAngle, and then randomizing on the value of that tangent
- * instead of randomizing the value of the angle. For small angles, the effect is
- * effectively the same. But for larger angles (approaching 180), randomizing the
- * tangents has a very different effect than randomizing the emission angle, you you
- ( will find that the emission tends to cluster around the edges for large dispersion
- * angles if the shouldPrecalculateNozzleTangents property is set to YES.
+ * CC3SprayPointParticle is a type of CC3MortalPointParticle that implements the
+ * CC3SprayParticleProtocol to configure the particle to move in a straight line at a steady speed.
  */
-@property(nonatomic, assign) CGSize dispersionAngle;
+@interface  CC3SprayPointParticle  : CC3MortalPointParticle <CC3SprayParticleProtocol> {
+	CC3Vector velocity;
+}
 
 /**
- * Indicates whether the emitter should precalculate tangent values for the dispersion
- * angles, and then select a value from that range of tangents in order to detemrine
- * a random direction for a particle.
+ * This template callback method is invoked automatically whenever the emitter is updated
+ * during a scheduled 3D scene update.
  *
- * During the emission of each particle, a random emission direction is chosen within
- * the angles specified by the dispersionAngle property. In order to convert the angles
- * to direction, a tangent calculation must be made for each of the two random angles.
+ * The direction and speed are specified by the velocity property. To produce uniform motion,
+ * this method multiplies this velocity by the interval since the previous update, and the
+ * resulting distance vector is added to the location of this particle
  *
- * For small dispersion angles (typically > 90 degrees), calculating the tangent once
- * for each of the width and height of the dispersionAngle property, and then selecting
- * a random value from the range of tangents provides equivalent randomization to selecting
- * a random angle and then calculating its tangent. But in the first case, a tangent is
- * only calculated once, for the dispersion angle itself, instead of each time a random
- * angle is chosen.
- *
- * However, as the dispersion angle increases (approaching 180 degrees), the equivalent
- * tangent grows exponentially, and the tangent range become ever larger, ending at
- * infinity at 180 degrees. Therefore, as the dispersion angle increases, selecting a
- * random value from the tangent range results in most angles clustering around the limit,
- * resulting in very poor randomization.
- *
- * If this property is set to NO, whenever a particle is emitted, a random angle will
- * be chosen within the range defined by the dispersionAngle property, for each of the
- * width and height. Tangents are then calculated, and the particle direction set.
- *
- * If this property is set to YES, the dispersionAngle property will be converted into
- * tangents, and whenever a particle is emitted, a random tangent value will be chosen
- * within the range of tangents, and the particle direction will be set from that,
- * without having to calculate a tangent from an angle for each particle.
- *
- * The initial value of this property is NO, indicating that two random angles will be
- * chosen for each emitted particle, from which tangents will calculated trigonometrically,
- * and the particle direction will be determined from that. If you are using small
- * dispersion angles (less than 90 degrees), to improve performance, you can set this
- * property to YES to avoid additional trigonometric tangent calculations.
+ * Subclasses that override this method should invoke this superclass implementation first,
+ * and should check the isAlive property prior to making any further modifications..
  */
-@property(nonatomic, assign) BOOL shouldPrecalculateNozzleTangents;
+-(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
+
+@end
+
+DEPRECATED_ATTRIBUTE
+/**
+ * Deprecated and renamed to CC3SprayPointParticle.
+ * @deprecated Renamed to CC3SprayPointParticle to clarify its type.
+ */
+@interface CC3UniformMotionParticle : CC3SprayPointParticle
+@end
+
+
+#pragma mark -
+#pragma mark CC3UniformlyGrowingPointParticleProtocol
 
 /**
- * Indicates the lower bound of the range from which the speed of the particle will be chosen.
+ * CC3UniformlyGrowingPointParticleProtocol defines behaviour required for point particles
+ * whose size grows or shrinks at a steady rate.
  *
- * Whenever a particle is emitted, its speed is determined by choosing a random value
- * between the values specified by the minParticleSpeed and maxParticleSpeed properties.
- * This speed value is then combined with the randomized initial direction to form the
- * initial velocity of the particle.
+ * Size can only be applied to individual particles if the emitter has been configured to
+ * contain vertex point size content (kCC3VertexContentPointSize).
+ *
+ * This protocol can be used with point particles. Mesh particle do not have a point size.
  */
-@property(nonatomic, assign) GLfloat minParticleSpeed;
+@protocol CC3UniformlyGrowingPointParticleProtocol <CC3PointParticleProtocol>
+
+/** Indicates the current size of this point particle.  */
+@property(nonatomic, assign) GLfloat size;
 
 /**
- * Indicates the upper bound of the range from which the speed of the particle will be chosen.
+ * Indicates the rate at which this particle changes size.
  *
- * Whenever a particle is emitted, its speed is determined by choosing a random value
- * between the values specified by the minParticleSpeed and maxParticleSpeed properties.
- * This speed value is then combined with the randomized initial direction to form the
- * initial velocity of the particle.
+ * If this particle has size content, the updateBeforeTransform: method multiplies this velocity
+ * by the interval since the previous update, and adds the result to the size of this particle.
  */
-@property(nonatomic, assign) GLfloat maxParticleSpeed;
+@property(nonatomic, assign) GLfloat sizeVelocity;
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3UniformlyEvolvingPointParticle
+
+/**
+ * CC3UniformlyEvolvingPointParticle is a type of CC3SprayPointParticle that implements the
+ * CC3UniformlyGrowingPointParticleProtocol and CC3UniformlyFadingParticleProtocol protocols
+ * to configure steadily changing color and size that vary linearly from an intitial color
+ * and size to a final color and size.
+ *
+ * The rate of change of the particle's color and size are specified by the colorVelocity 
+ * and sizeVelocity properties respectively.
+ *
+ * To produce uniform evolution, the updateBeforeTransform: method multiplies each of these
+ * velocities by the interval since the previous update, and adds each result, accordingly,
+ * to the color and size properties of this particle. Color and size are only updated if the
+ * underlying mesh supports that content.
+ */
+@interface  CC3UniformlyEvolvingPointParticle : CC3SprayPointParticle
+												<CC3UniformlyGrowingPointParticleProtocol,
+												CC3UniformlyFadingParticleProtocol> {
+	GLfloat sizeVelocity;
+	ccColor4F colorVelocity;
+}
+
+/**
+ * This template callback method is invoked automatically whenever the emitter is updated
+ * during a scheduled 3D scene update.
+ *
+ * The direction and speed are specified by the velocity property. The rate of change of the
+ * particle's color and size are specified by the colorVelocity and sizeVelocity properties respectively.
+ *
+ * To produce uniform evolution, this method multiplies each of these three velocities by the interval
+ * since the previous update, and adds each result, accordingly, to the location, color and size
+ * properties of this particle. Color and size are only updated if this particle supports that content.
+ *
+ * Subclasses that override this method should invoke this superclass implementation first,
+ * and should check the isAlive property prior to making any further modifications..
+ */
+-(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
+
+@end
+
+DEPRECATED_ATTRIBUTE
+/** 
+ * Deprecated and renamed to CC3UniformlyEvolvingPointParticle.
+ * @deprecated Renamed to CC3UniformlyEvolvingPointParticle to clarify its type.
+ */
+@interface CC3UniformEvolutionParticle : CC3UniformlyEvolvingPointParticle
+@end
+
+
+#pragma mark -
+#pragma mark CC3VariegatedPointParticleProtocol
+
+/**
+ * CC3VariegatedPointParticleProtocol is used by the CC3VariegatedPointParticleHoseEmitter,
+ * and combines the CC3UniformlyGrowingPointParticleProtocol and CC3UniformlyFadingParticleProtocol
+ * protocols, and is a particle that steadily changes size and color. It also includes the
+ * CC3MortalParticleProtocol to permit the emitter to extract the lifespan of the particle
+ * in order to calculate the rates at which to evolve the size and color of the particle.
+ *
+ * This protocol can be used with point particles. Mesh particle do not have a point size.
+ */
+@protocol CC3VariegatedPointParticleProtocol <CC3UniformlyGrowingPointParticleProtocol,
+											  CC3UniformlyFadingParticleProtocol,
+											  CC3MortalParticleProtocol>
+@end
+
+
+#pragma mark -
+#pragma mark CC3VariegatedPointParticleHoseEmitter
+
+/**
+ * CC3VariegatedPointParticle is the type of particle emitted by a CC3VariegatedPointParticleHoseEmitter.
+ * It supports the CC3VariegatedPointParticleProtocol and allows the emitter to configure the
+ * particle with a steadily changing color and size, based on the lifespan of the particle.
+ */
+@interface CC3VariegatedPointParticle : CC3UniformlyEvolvingPointParticle <CC3VariegatedPointParticleProtocol> {}
 @end
 
 
@@ -252,9 +277,8 @@ static const ccColor4F kCC3ParticleConstantColor = { kCC3ParticleConstantCompone
 													 kCC3ParticleConstantComponent };
 
 /**
- * When used as the ending color for a CC3VariegatedPointParticleHoseEmitter,
- * indicates that the starting color should simply fade out, rather than
- * change to an ending color.
+ * When used as the ending color for a CC3VariegatedPointParticleHoseEmitter, indicates
+ * that the starting color should simply fade out, rather than change to an ending color.
  */
 static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
 											   kCC3ParticleConstantComponent,
@@ -262,20 +286,14 @@ static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
 											   0.0f };
 
 /**
- * CC3VariegatedPointParticleHoseEmitter is a type of CC3PointParticleHoseEmitter
- * whose particles can have a color and size that evolves during the lifetime of
- * the particle.
+ * CC3VariegatedPointParticleHoseEmitter is a type of CC3PointParticleEmitter whose particles
+ * can have a color and size that evolves during the lifetime of the particle.
  *
- * CC3VariegatedPointParticleHoseEmitter emit particles of type CC3UniformEvolutionParticle,
- * and can set an individual initial and final color and size for each particle, each
- * selected randomly from a range of values.
- *
- * Although each particle is capable of having individual color and size values, you
- * can configure whether either or both of these will be used when configuring this
- * emitter using one of the populateForMaxParticles:... methods. For example, you may
- * want particles with individual color, but not individual size.
+ * CC3VariegatedPointParticleHoseEmitter configures particles of that support the
+ * CC3VariegatedPointParticleProtocol, and can set an individual initial and final color
+ * and size for each particle, each selected randomly from a range of values.
  */
-@interface CC3VariegatedPointParticleHoseEmitter : CC3PointParticleHoseEmitter {
+@interface CC3VariegatedPointParticleHoseEmitter : CC3PointParticleEmitter {
 	GLfloat minParticleStartingSize;
 	GLfloat maxParticleStartingSize;
 	GLfloat minParticleEndingSize;
@@ -287,142 +305,163 @@ static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
 }
 
 /**
- * Indicates the lower bound of the range from which the initial size of the
- * particle will be chosen.
+ * Indicates the lower bound of the range from which the initial size of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting size is determined by choosing
- * a random value between the values specified by the minParticleStartingSize
- * and maxParticleStartingSize properties.
+ * Whenever a particle is emitted, its starting size is determined by choosing a random value between
+ * the values specified by the minParticleStartingSize and maxParticleStartingSize properties.
  */
 @property(nonatomic, assign) GLfloat minParticleStartingSize;
 
 /**
- * Indicates the upper bound of the range from which the initial size of the
- * particle will be chosen.
+ * Indicates the upper bound of the range from which the initial size of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting size is determined by choosing
- * a random value between the values specified by the minParticleStartingSize
- * and maxParticleStartingSize properties.
+ * Whenever a particle is emitted, its starting size is determined by choosing a random value between
+ * the values specified by the minParticleStartingSize and maxParticleStartingSize properties.
  */
 @property(nonatomic, assign) GLfloat maxParticleStartingSize;
 
 /**
- * Indicates the lower bound of the range from which the final size of the
- * particle will be chosen.
+ * Indicates the lower bound of the range from which the final size of the particle will be chosen.
  *
- * Whenever a particle is emitted, its final size is determined by choosing
- * a random value between the values specified by the minParticleEndingSize
- * and maxParticleEndingSize properties. This is used to determine the rate
- * at which the size will change while the particle is alive, and the result
- * is set into the sizeVelocity property of the particle.
+ * Whenever a particle is emitted, its final size is determined by choosing a random value between
+ * the values specified by the minParticleEndingSize and maxParticleEndingSize properties. This is
+ * used to determine the rate at which the size will change while the particle is alive, and the
+ * result is set into the sizeVelocity property of the particle.
  *
- * In addition to a specific size value, you can use the special value
- * kCC3ParticleConstantSize to indicate that the final size of the particle
- * should be the same as the starting size. Using this value for either
- * minParticleEndingSize or maxParticleEndingSize will allow the starting size
- * to be set randomly and to stay constant throughout the life of the particle.
+ * In addition to a specific size value, you can use the special value kCC3ParticleConstantSize to
+ * indicate that the final size of the particle should be the same as the starting size. Using this
+ * value for either minParticleEndingSize or maxParticleEndingSize will allow the starting size to
+ * be set randomly and to stay constant throughout the life of the particle.
  */
 @property(nonatomic, assign) GLfloat minParticleEndingSize;
 
 /**
- * Indicates the upper bound of the range from which the final size of the
- * particle will be chosen.
+ * Indicates the upper bound of the range from which the final size of the particle will be chosen.
  *
- * Whenever a particle is emitted, its final size is determined by choosing
- * a random value between the values specified by the minParticleEndingSize
- * and maxParticleEndingSize properties. This is used to determine the rate
- * at which the size will change while the particle is alive, and the result
- * is set into the sizeVelocity property of the particle.
+ * Whenever a particle is emitted, its final size is determined by choosing a random value between
+ * the values specified by the minParticleEndingSize and maxParticleEndingSize properties. This is
+ * used to determine the rate at which the size will change while the particle is alive, and the
+ * result is set into the sizeVelocity property of the particle.
  *
- * In addition to a specific size value, you can use the special value
- * kCC3ParticleConstantSize to indicate that the final size of the particle
- * should be the same as the starting size. Using this value for either
- * minParticleEndingSize or maxParticleEndingSize will allow the starting size
- * to be set randomly and to stay constant throughout the life of the particle.
+ * In addition to a specific size value, you can use the special value kCC3ParticleConstantSize to
+ * indicate that the final size of the particle should be the same as the starting size. Using this
+ * value for either minParticleEndingSize or maxParticleEndingSize will allow the starting size to
+ * be set randomly and to stay constant throughout the life of the particle.
  */
 @property(nonatomic, assign) GLfloat maxParticleEndingSize;
 
 /**
- * Indicates the lower bound of the range from which the initial color of the
- * particle will be chosen.
+ * Indicates the lower bound of the range from which the initial color of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting color is determined by choosing a
- * random value between the values specified by the minParticleStartingColor and
- * maxParticleStartingColor properties. The color is randomized by choosing a random
- * value for each component from the numerical range defined by the value of that
- * component in the minParticleStartingColor and maxParticleStartingColor properties.
+ * Whenever a particle is emitted, its starting color is determined by choosing a random value between
+ * the values specified by the minParticleStartingColor and maxParticleStartingColor properties. The
+ * color is randomized by choosing a random value for each component from the numerical range defined
+ * by the value of that component in the minParticleStartingColor and maxParticleStartingColor properties.
  */
 @property(nonatomic, assign) ccColor4F minParticleStartingColor;
 
 /**
- * Indicates the upper bound of the range from which the initial color of the
- * particle will be chosen.
+ * Indicates the upper bound of the range from which the initial color of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting color is determined by choosing a
- * random value between the values specified by the minParticleStartingColor and
- * maxParticleStartingColor properties. The color is randomized by choosing a random
- * value for each component from the numerical range defined by the value of that
- * component in the minParticleStartingColor and maxParticleStartingColor properties.
+ * Whenever a particle is emitted, its starting color is determined by choosing a random value between
+ * the values specified by the minParticleStartingColor and maxParticleStartingColor properties. The
+ * color is randomized by choosing a random value for each component from the numerical range defined
+ * by the value of that component in the minParticleStartingColor and maxParticleStartingColor properties.
  */
 @property(nonatomic, assign) ccColor4F maxParticleStartingColor;
 
 /**
- * Indicates the lower bound of the range from which the final color of the
- * particle will be chosen.
+ * Indicates the lower bound of the range from which the final color of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting color is determined by choosing a
- * random value between the values specified by the minParticleStartingColor and
- * maxParticleStartingColor properties. The color is randomized by choosing a random
- * value for each component from the numerical range defined by the value of that
- * component in the minParticleStartingColor and maxParticleStartingColor properties.
+ * Whenever a particle is emitted, its starting color is determined by choosing a random value between
+ * the values specified by the minParticleStartingColor and maxParticleStartingColor properties. The
+ * color is randomized by choosing a random value for each component from the numerical range defined
+ * by the value of that component in the minParticleStartingColor and maxParticleStartingColor properties.
  *
- * This final color is used to determine the rate at which the color will change
- * while the particle is alive, and the result is set into the colorVelocity
- * property of the particle.
+ * This final color is used to determine the rate at which the color will change while the particle
+ * is alive, and the result is set into the colorVelocity property of the particle.
  *
  * In addition to a specific final color value, you can use the special values:
  *   - kCC3ParticleConstantColor
  *   - kCC3ParticleFadeOut
- * to indicate, respectively, that the final color of the particle should be the same
- * as the starting color, or that the final color should be the same as the starting
- * color, except that it should fade away during the lifetime of the particle.
+ * to indicate, respectively, that the final color of the particle should be the same as the starting
+ * color, or that the final color should be the same as the starting color, except that it should fade
+ * away during the lifetime of the particle.
  *
- * In a more general sense, setting any of the component values of either
- * the minParticleEndingColor or maxParticleEndingColor properties to
- * kCC3ParticleConstantComponent will cause the value of that component
- * to stay constant throughout the lifetime of the particle.
+ * In a more general sense, setting any of the component values of either the minParticleEndingColor
+ * or maxParticleEndingColor properties to kCC3ParticleConstantComponent will cause the value of that
+ * component to stay constant throughout the lifetime of the particle.
  */
 @property(nonatomic, assign) ccColor4F minParticleEndingColor;
 
 
 /**
- * Indicates the upper bound of the range from which the final color of the
- * particle will be chosen.
+ * Indicates the upper bound of the range from which the final color of the particle will be chosen.
  *
- * Whenever a particle is emitted, its starting color is determined by choosing a
- * random value between the values specified by the minParticleStartingColor and
- * maxParticleStartingColor properties. The color is randomized by choosing a random
- * value for each component from the numerical range defined by the value of that
- * component in the minParticleStartingColor and maxParticleStartingColor properties.
+ * Whenever a particle is emitted, its starting color is determined by choosing a random value between
+ * the values specified by the minParticleStartingColor and maxParticleStartingColor properties. The
+ * color is randomized by choosing a random value for each component from the numerical range defined
+ * by the value of that component in the minParticleStartingColor and maxParticleStartingColor properties.
  *
- * This final color is used to determine the rate at which the color will change
- * while the particle is alive, and the result is set into the colorVelocity
- * property of the particle.
+ * This final color is used to determine the rate at which the color will change while the particle
+ * is alive, and the result is set into the colorVelocity property of the particle.
  *
  * In addition to a specific final color value, you can use the special values:
  *   - kCC3ParticleConstantColor
  *   - kCC3ParticleFadeOut
- * to indicate, respectively, that the final color of the particle should be the same
- * as the starting color, or that the final color should be the same as the starting
- * color, except that it should fade away during the lifetime of the particle.
+ * to indicate, respectively, that the final color of the particle should be the same as the starting
+ * color, or that the final color should be the same as the starting color, except that it should fade
+ * away during the lifetime of the particle.
  *
- * In a more general sense, setting any of the component values of either
- * the minParticleEndingColor or maxParticleEndingColor properties to
- * kCC3ParticleConstantComponent will cause the value of that component
- * to stay constant throughout the lifetime of the particle.
+ * In a more general sense, setting any of the component values of either the minParticleEndingColor
+ * or maxParticleEndingColor properties to kCC3ParticleConstantComponent will cause the value of that
+ * component to stay constant throughout the lifetime of the particle.
  */
 @property(nonatomic, assign) ccColor4F maxParticleEndingColor;
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3PointParticleHoseEmitter
+
+/**
+ * Deprecated.
+ * @deprecated Do not use this class. This class has been introduced into the hierarchy
+ * strictly to permit the library to maintain the deprecated CC3PointParticleHoseEmitter
+ * as a parent class of other deprecated classes in this library.
+ */
+@interface CC3PointParticleHoseEmitterDeprecated : CC3MortalPointParticleEmitterDeprecated {}
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, retain) CC3Node* nozzle;
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, readonly) CC3Matrix* nozzleMatrix;
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, assign) CGSize dispersionAngle;
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, assign) BOOL shouldPrecalculateNozzleTangents;
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, assign) GLfloat minParticleSpeed;
+
+/** @deprecated This property is now on the contained CC3HoseParticleNavigator. */
+@property(nonatomic, assign) GLfloat maxParticleSpeed;
+
+@end
+
+DEPRECATED_ATTRIBUTE
+/**
+ * Deprecated.
+ * @deprecated This functionality has been separated into several more general classes.
+ * Use a CC3PointParticleEmitter configured with a CC3HoseParticleNavigator to emit
+ * particles that support the CC3UniformlyMovingParticleProtocol, such as particles of
+ * type CC3SprayPointParticle.
+ */
+@interface CC3PointParticleHoseEmitter : CC3PointParticleHoseEmitterDeprecated {}
 @end
 
 

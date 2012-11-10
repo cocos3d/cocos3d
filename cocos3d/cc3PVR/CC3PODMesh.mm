@@ -1,7 +1,7 @@
 /*
  * CC3PODMesh.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -41,7 +41,7 @@
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
-		LogCleanRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
+		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
 		
 		self.vertexLocations = [CC3VertexLocations arrayFromSPODMesh: psm];
 		
@@ -70,7 +70,9 @@
 		// by the CC3VertexLocations instance.
 		if (psm->pInterleaved != NULL) {
 			shouldInterleaveVertices = YES;
-			psm->pInterleaved = (unsigned char*)calloc(1, sizeof(GLint));
+			psm->pInterleaved = (PVRTuint8*)calloc(1, sizeof(PVRTuint8));
+		} else {
+			shouldInterleaveVertices = NO;
 		}
 		
 	}

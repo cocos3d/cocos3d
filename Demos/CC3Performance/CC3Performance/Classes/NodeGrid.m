@@ -1,7 +1,7 @@
 /*
  * NodeGrid.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -48,7 +48,7 @@
 		case 0:				// If we don't want any nodes, just leave
 			break;
 		case 1: {			// For one node, just place the single copy at the origin
-			CC3Node* aNode = [templateNode copyAutoreleased];
+			CC3Node* aNode = [templateNode autoreleasedCopy];
 			aNode.location = kCC3VectorZero;
 			aNode.uniformScale *= 2.0;
 			[self addChild: aNode];
@@ -69,7 +69,7 @@
 					GLfloat xLoc = xOrg + spacing * ix;
 					GLfloat zLoc = zOrg + spacing * iz;
 					
-					CC3Node* aNode = [templateNode copyAutoreleased];
+					CC3Node* aNode = [templateNode autoreleasedCopy];
 					aNode.location = cc3v(xLoc, 0.0f, zLoc);
 					aNode.uniformScale *= scaleFactor;
 					[self addChild: aNode];

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Intercept.c
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -53,6 +53,7 @@ void PrintGLData(GLint elemSize, GLenum dataType, GLsizei stride, GLuint elemCou
 		size_t dataTypeSize = GLElementTypeSize(dataType);
 		if (dataTypeSize == 0) {
 			printf("Illegal GL data type %u", dataType);
+			return;
 		}
 		GLsizei dataTypeStride = stride ? (stride / dataTypeSize) : elemSize; 
 		GLvoid* p = (GLvoid*)pointer;

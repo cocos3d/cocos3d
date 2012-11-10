@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMeshModel.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -36,6 +36,9 @@
 #pragma mark Deprecated CC3VertexArrayMeshModel
 
 DEPRECATED_ATTRIBUTE
-/** @deprecated CC3VertexArrayMeshModel renamed to CC3VertexArrayMesh. */
+/**
+ * Deprecated and renamed to CC3VertexArrayMesh.
+ * @deprecated CC3VertexArrayMeshModel renamed to CC3VertexArrayMesh.
+ */
 @interface CC3VertexArrayMeshModel : CC3VertexArrayMesh
 @end

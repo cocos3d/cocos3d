@@ -1,7 +1,7 @@
 /*
  * CC3PerformanceLayer.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -100,6 +100,7 @@
 	[self addButtons];
 	[self addStatsLabels];
 	[self positionPerformanceLabels];
+	[self scheduleUpdate];
 }
 
 /** Creates the two joysticks that control the 3D camera direction and location. */

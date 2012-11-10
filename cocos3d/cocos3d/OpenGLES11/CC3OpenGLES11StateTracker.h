@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -126,7 +126,7 @@ typedef enum {
  */
 @interface CC3OpenGLES11StateTracker : NSObject {
 	CC3OpenGLES11StateTracker* parent;
-	BOOL isScheduledForClose;
+	BOOL isScheduledForClose : 1;
 }
 
 /** The parent of this tracker. */
@@ -191,8 +191,8 @@ typedef enum {
 @interface CC3OpenGLES11StateTrackerPrimitive : CC3OpenGLES11StateTracker {
 	GLenum name;
 	GLubyte originalValueHandling;
-	BOOL valueIsKnown;
-	BOOL shouldAlwaysSetGL;
+	BOOL valueIsKnown : 1;
+	BOOL shouldAlwaysSetGL : 1;
 }
 
 /** The enumerated name under which the GL engine identifies this state. */
@@ -261,14 +261,19 @@ typedef enum {
 @property(nonatomic, readonly) BOOL shouldAlwaysReadOriginal;
 
 /**
- * Returns whether the tracker should restore the original value back to the GL engine
+ * Returns whether this tracker should restore the original value back to the GL engine
  * when this tracker is closed.
  *
- * Returns YES if the value of the originalValueHandling property is either
- * kCC3GLESStateOriginalValueReadOnceAndRestore or
- * kCC3GLESStateOriginalValueReadAlwaysAndRestore, otherwise returns NO.
+ * This property takes into consideration the value of the valueNeedsRestoration property.
+ *
+ * Returns YES if the value of the originalValueHandling property is one of kCC3GLESStateOriginalValueRestore,
+ * kCC3GLESStateOriginalValueReadOnceAndRestore or kCC3GLESStateOriginalValueReadAlwaysAndRestore, and the
+ * value of the valueNeedsRestoration property is YES, otherwise returns NO.
  */
 @property(nonatomic, readonly) BOOL shouldRestoreOriginalOnClose;
+
+/** Returns whether the GL state of this tracker has changed and needs to be restored to its original value.  */
+@property(nonatomic, readonly) BOOL valueNeedsRestoration;
 
 /** Initializes this instance with the specified enumerated GL name. */
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker forState: (GLenum) qName;
@@ -303,6 +308,9 @@ typedef enum {
  * attempt to restore the GL value back to the value read when the open method was invoked.
  */
 -(void) close;
+
+/** Sets both the originalValue and value properties to the current value as read from the GL engine. */
+-(void) readOriginalValue;
 
 /**
  * Template method that sets the current value of the GL state back to the original value.
@@ -931,6 +939,16 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 +(BOOL) defaultShouldAlwaysSetGL;
 
 /**
+ * Template method to set the enclosed values into the GL engine.
+ *
+ * This abstract implementation does nothing. Subclasses will override to set the values using
+ * a specific GL function.
+ *
+ * The application should not invoke this method directly.
+ */
+-(void) setGLValues;
+
+/**
  * Returns the value to set the valueIsKnown property to when closing this tracker.
  *
  * Returns NO if the value of the originalValueHandling property is
@@ -939,14 +957,33 @@ typedef void( CC3SetGLViewportFunction( GLint, GLint, GLsizei, GLsizei ) );
 @property(nonatomic, readonly) BOOL valueIsKnownOnClose;
 
 /**
- * Returns whether the tracker should restore the original value back to the GL engine
+ * Returns whether this tracker should restore the original value back to the GL engine
  * when this tracker is closed.
  *
- * Returns YES if the value of the originalValueHandling property is either
- * kCC3GLESStateOriginalValueReadOnceAndRestore or
- * kCC3GLESStateOriginalValueReadAlwaysAndRestore, otherwise returns NO.
+ * This property takes into consideration the value of the valueNeedsRestoration property.
+ *
+ * Returns YES if the value of the originalValueHandling property is one of kCC3GLESStateOriginalValueRestore,
+ * kCC3GLESStateOriginalValueReadOnceAndRestore or kCC3GLESStateOriginalValueReadAlwaysAndRestore, and the
+ * value of the valueNeedsRestoration property is YES, otherwise returns NO.
  */
 @property(nonatomic, readonly) BOOL shouldRestoreOriginalOnClose;
+
+/** Returns whether the GL state of this tracker has changed and needs to be restored to its original value.  */
+@property(nonatomic, readonly) BOOL valueNeedsRestoration;
+
+/**
+ * Template method that sets the current values of the GL state back to their original values.
+ *
+ * The values of the contained primitive trackers will only be propagated to the GL engine if
+ * the original values are different than the current GL value, or if the current values in the
+ * GL engine are unknown.
+ *
+ * This abstract implementation does nothing. Subclasses will override to set the contained primitive values.
+ *
+ * This method is invoked automatically when the close method is invoked, and the
+ * original values  are to be restored. The application should not invoke this method directly.
+ */
+-(void) restoreOriginalValues;
 
 /**
  * Initializes the component primitive trackers.

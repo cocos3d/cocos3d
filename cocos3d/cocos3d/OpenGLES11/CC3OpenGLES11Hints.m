@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Hints.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -83,8 +83,12 @@
 -(void) initializeTrackers {
 	self.fog = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
 																  forState: GL_FOG_HINT];
+
+	// OpenGL Analyzer reports illegal GL enum when trying to read GL value.
 	self.generateMipMap = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
-																			 forState: GL_GENERATE_MIPMAP_HINT];
+																			 forState: GL_GENERATE_MIPMAP_HINT
+															 andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+				
 	self.lineSmooth = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self
 																		 forState: GL_LINE_SMOOTH_HINT];
 	self.perspectiveCorrection = [CC3OpenGLES11StateTrackerHintEnumeration trackerWithParent: self

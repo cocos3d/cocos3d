@@ -1,7 +1,7 @@
 /*
  * Joystick.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com
@@ -79,7 +79,7 @@
 }
 
 +(id) joystickWithThumb: (CCNode*) aNode andSize: (CGSize) size {
-	return [[self alloc] initWithThumb: aNode andSize: size];
+	return [[[self alloc] initWithThumb: aNode andSize: size] autorelease];
 }
 
 -(id) initWithThumb: (CCNode*) aNode andBackdrop: (CCNode*) bgNode {
@@ -93,7 +93,7 @@
 }
 
 +(id) joystickWithThumb: (CCNode*) thumbNode andBackdrop: (CCNode*) backgroundNode {
-	return [[self alloc] initWithThumb: thumbNode andBackdrop: backgroundNode];
+	return [[[self alloc] initWithThumb: thumbNode andBackdrop: backgroundNode] autorelease];
 }
 
 /**

@@ -1,7 +1,7 @@
 /*
  * CC3PODCamera.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -57,7 +57,7 @@
 		// Get the camera content
 		if (self.podContentIndex >= 0) {
 			SPODCamera* psc = (SPODCamera*)[aPODRez cameraPODStructAtIndex: self.podContentIndex];
-			LogCleanRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODCamera(psc));
+			LogRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODCamera(psc));
 			self.podTargetIndex = psc->nIdxTarget;
 			self.fieldOfView = RadiansToDegrees(psc->fFOV);
 			self.nearClippingDistance = psc->fNear;

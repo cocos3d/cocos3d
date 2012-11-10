@@ -1,7 +1,7 @@
 /*
  * CC3Rotator.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLMatrix.h"
+#import "CC3Matrix.h"
 
 @class CC3Node;
 
@@ -37,43 +37,40 @@
 #pragma mark -
 #pragma mark CC3Rotator
 
-/** Enumeration of causes for why the transform matrix is dirty and needs to be recalculated. */
+/** Enumeration of rotation types. */
 typedef enum {
-	kCC3RotationMatrixIsNotDirty,				/**< No rotation properties have changed. */
-	kCC3RotationMatrixIsDirtyByRotation,		/**< The rotation property was set. */
-	kCC3RotationMatrixIsDirtyByQuaternion,		/**< The quaternion property was set. */
-	kCC3RotationMatrixIsDirtyByAxisAngle,		/**< The rotationAxis or rotationAngle property was set. */
-	kCC3RotationMatrixIsDirtyByDirection,		/**< The forwardDirection property was set. */
-	kCC3RotationMatrixIsDirtyByTargetLocation,	/**< The targetLocation property was set (only applies to CC3DirectionalRotator). */
-} CC3RotationMatrixDirtyCause;
+	kCC3RotationTypeUnknown,					/**< Unknown rotation type. */
+	kCC3RotationTypeEuler,						/**< Rotation by Euler angles. */
+	kCC3RotationTypeQuaternion,					/**< Rotation by quaternion. */
+	kCC3RotationTypeAxisAngle,					/**< Rotation by angle around arbirary axis. */
+	kCC3RotationTypeDirection,					/**< Rotation by pointing in a specific direction. */
+	kCC3RotationTypeLocation,					/**< Rotation by looking at a particular location. */
+} CC3RotationType;
 
 /**
- * CC3otator encapsulates the various mechanisms of rotating a node, and converts
- * between them. Nodes delegate responsibility for managing their rotation to an
- * encapsulated instance of CC3Rotator.
+ * CC3otator encapsulates the various mechanisms of rotating a node, and converts between them.
+ * Nodes delegate responsibility for managing their rotation to an encapsulated instance of CC3Rotator.
  * 
- * Rotations can be read in any of the following forms:
+ * Depending on the rotator subclass, rotations can be read in any of the following forms:
  *   - three Euler angles
  *   - rotation angle around an arbitrary rotation axis
  *   - quaternion
- *
+ * 
  * This base class represents a read-only rotator and performs only identity rotations.
  * It's primary purpose is to save memory in nodes that do not require any rotation.
  *
- * The CC3MutableRotator class adds the ability to set rotations, and is more commonly
- * used. The CC3DirectionalRotator class further adds directional rotational mechanisms
- * (such as pointing).
- *
- * The rotator maintains an internal rotationMatrix, separate from the node's
- * transformMatrix, and the rotator can use this rotationMatrix to convert between
- * different rotational specifications.
+ * The CC3MutableRotator class adds the ability to set rotations, and is more commonly used.
+ * The CC3DirectionalRotator class further adds directional rotational mechanisms (such as
+ * rotating to look in a particular direction), and the CC3TargetttingRotator extends this to
+ * rotating to look at a particular target location or node, and optionally track that target
+ * location or node as it or the node of the rotator move around.
  */
 @interface CC3Rotator : NSObject <NSCopying> {}
 
 /**
- * Indicates whether this rotator supports changing rotation properties, including
- * rotation, quaternion, rotationAxis, and rotationAngle, and supports incremental
- * rotation through the rotateBy...family of methods.
+ * Indicates whether this rotator supports changing rotation properties, including rotation,
+ * quaternion, rotationAxis, and rotationAngle, and supports incremental rotation through the
+ * rotateBy...family of methods.
  *
  * This implementation always returns NO. Subclasses that support changing rotation
  * properties will override.
@@ -81,13 +78,22 @@ typedef enum {
 @property(nonatomic, readonly) BOOL isMutable;
 
 /**
- * Indicates whether this rotator supports rotating to point towards a specific
- * direction (ie- "look-at").
+ * Indicates whether this rotator supports rotating to point towards a specific direction
+ * (ie- "look-towards").
  *
  * This implementation always returns NO. Subclasses that support pointing towards
  * a specific direction will override.
  */
 @property(nonatomic, readonly) BOOL isDirectional;
+
+/**
+ * Indicates whether this rotator supports rotating to point towards a specific target node
+ * or target location (ie- "look-at"), including 
+ *
+ * This implementation always returns NO. Subclasses that support targetting
+ * a specific direction will override.
+ */
+@property(nonatomic, readonly) BOOL isTargettable;
 
 /**
  * The rotation matrix derived from the rotation or quaternion properties. Rotation can be
@@ -99,7 +105,7 @@ typedef enum {
  *
  * This base class always returns nil. Subclasses that support changing rotation will override.
  */
-@property(nonatomic, retain, readonly) CC3GLMatrix* rotationMatrix;
+@property(nonatomic, retain, readonly) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -118,9 +124,9 @@ typedef enum {
  * The rotation of the node in 3D space, relative to the parent of this node,
  * expressed as a quaternion.
  *
- * This base class always returns kCC3Vector4QuaternionIdentity.
+ * This base class always returns kCC3QuaternionIdentity.
  */
-@property(nonatomic, assign, readonly) CC3Vector4 quaternion;
+@property(nonatomic, assign, readonly) CC3Quaternion quaternion;
 
 /**
  * The axis of rotation of the node in 3D space, relative to the parent of this
@@ -172,49 +178,6 @@ typedef enum {
  */
 @property(nonatomic, readonly) BOOL shouldRotateToTargetLocation;
 
-/** Marks that the global location of the node has changed. */
-//-(void) markGlobalLocationChanged;
-
-/**
- * Indicates how often the basis vectors of the underlying rotation matrix
- * should be orthonormalized.
- *
- * If this property is set to a value greater than zero, this rotator keeps track
- * of how many times one of the rotateBy... family of methods of a CC3MutableRotator
- * has been invoked. When that count reaches the value of this property, the
- * orthonormalize method is invoked to orthonormalize the underlying matrix, and
- * the count is set back to zero to start the cycle again. See the notes for the
- * CC3MutableRotator orthonormalize method for a further discussion of orthonormalization.
- *
- * If this property is set to zero, orthonormalization will not occur automatically.
- * The application can invoke the orthonormalize method to cause the rotation matrix
- * to be orthonormalized manually.
- *
- * The initial value of this property is zero, indicating that orthonormalization
- * will not occur automatically.
- */
-+(GLubyte) autoOrthonormalizeCount;
-
-/**
- * Sets how often the basis vectors of the underlying rotation matrix
- * should be orthonormalized.
- *
- * If this property is set to a value greater than zero, this rotator keeps track
- * of how many times one of the rotateBy... family of methods of a CC3MutableRotator
- * has been invoked. When that count reaches the value of this property, the
- * orthonormalize method is invoked to orthonormalize the underlying matrix, and
- * the count is set back to zero to start the cycle again. See the notes for the
- * CC3MutableRotator orthonormalize method for a further discussion of orthonormalization.
- *
- * If this property is set to zero, orthonormalization will not occur automatically.
- * The application can invoke the orthonormalize method to cause the rotation matrix
- * to be orthonormalized manually.
- *
- * The initial value of this property is zero, indicating that orthonormalization
- * will not occur automatically.
- */
-+(void) setAutoOrthonormalizeCount: (GLubyte) aCount;
-
 
 #pragma mark Allocation and initialization
 
@@ -247,17 +210,26 @@ typedef enum {
 /**
  * Applies the rotationMatrix to the specified transform matrix.
  * This is accomplished by multiplying the transform matrix by the rotationMatrix.
+ *
  * This method is invoked automatically from the applyRotation method of the node.
  * Usually, the application never needs to invoke this method directly.
  */
--(void) applyRotationTo: (CC3GLMatrix*) aMatrix;
+-(void) applyRotationTo: (CC3Matrix*) aMatrix;
+
+/**
+ * Rotates the specified direction vector, and returns the transformed direction.
+ */
+-(CC3Vector) transformDirection: (CC3Vector) aDirection;
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3MutableRotator
+
 /**
- * CC3otator encapsulates the various mechanisms of rotating a node, and converts
- * between them. Nodes delegate responsibility for managing their rotation to an
- * encapsulated instance of CC3Rotator.
+ * CC3MutableRotator encapsulates the various mechanisms for specifiying rotation,
+ * and converts between them.
  * 
  * Rotations can be specified in any of the following methods:
  *   - three Euler angles
@@ -265,24 +237,30 @@ typedef enum {
  *   - quaternion
  * Subclasses may also specify other rotational mechanisms (such as pointing).
  *
+ *
  * The rotator maintains an internal rotationMatrix, separate from the node's transformMatrix,
  * and the rotator can use this rotationMatrix to convert between different rotational
  * specifications. As such, the rotation of a node can be set using any one of the above
  * specifications, and read back as any of the other specifications.
  */
 @interface CC3MutableRotator : CC3Rotator {
-	CC3GLMatrix* rotationMatrix;
-	CC3Vector rotation;
-	CC3Vector4 quaternion;
-	CC3Vector rotationAxis;
-	GLfloat rotationAngle;
-	GLubyte matrixIsDirtyBy;
-	GLubyte orthonormalizationStartVector;
+	CC3Matrix* rotationMatrix;
+	CC3Vector4 rotationVector;
 	GLubyte incrementalRotationCount;
-	BOOL isRotationDirty;
-	BOOL isQuaternionDirty;
-	BOOL isAxisAngleDirty;
-	BOOL isQuaternionDirtyByAxisAngle;
+	GLubyte rotationType : 4;
+	GLubyte orthonormalizationStartColumnNumber : 2;
+	BOOL isRotationDirty : 1;
+	
+	// Allocated for CC3DirectionalRotator subclass to conserve state memory
+	BOOL shouldReverseForwardDirection : 1;
+
+	// Allocated for CC3TargettingRotator subclass to conserve state memory
+	GLubyte targettingConstraint : 4;
+	BOOL isNewTarget : 1;
+	BOOL shouldTrackTarget : 1;
+	BOOL shouldAutotargetCamera : 1;
+	BOOL isTrackingForBumpMapping : 1;
+	BOOL isTargetLocationDirty : 1;
 }
 
 /**
@@ -293,7 +271,7 @@ typedef enum {
  * The rotation matrix for each instance is local to the node and does not include rotational
  * information about the node's ancestors.
  */
-@property(nonatomic, retain, readwrite) CC3GLMatrix* rotationMatrix;
+@property(nonatomic, retain, readwrite) CC3Matrix* rotationMatrix;
 
 /**
  * The rotational orientation of the node in 3D space, relative to the parent of the
@@ -312,7 +290,7 @@ typedef enum {
  * The rotation of the node in 3D space, relative to the parent of this node,
  * expressed as a quaternion.
  */
-@property(nonatomic, assign, readwrite) CC3Vector4 quaternion;
+@property(nonatomic, assign, readwrite) CC3Quaternion quaternion;
 
 /**
  * The axis of rotation of the node in 3D space, relative to the parent of this
@@ -333,7 +311,7 @@ typedef enum {
 -(void) rotateBy: (CC3Vector) aRotation;
 
 /** Rotates this rotator from its current state by the specified quaternion. */
--(void) rotateByQuaternion: (CC3Vector4) aQuaternion;
+-(void) rotateByQuaternion: (CC3Quaternion) aQuaternion;
 
 /**
  * Rotates this rotator from its current state by rotating around
@@ -342,47 +320,93 @@ typedef enum {
 -(void) rotateByAngle: (GLfloat) anAngle aroundAxis: (CC3Vector) anAxis;
 
 /**
- * When a large number of incremental rotations are applied to a rotator using
- * the rotateBy... family of methods, accumulated rounding errors can cause the
- * basis vectors of the underlying rotation matrix to lose mutual orthogonality
- * (no longer be orthogonal to each other), and to become individually unnormalized
- * (no longer be unit vectors).
- * 
- * Although uncommon, it is possible for visible errors to creep into the
- * rotation of this rotator, after many, many incremental rotations.
+ * Indicates whether the rotation matrix is dirty and needs to be recalculated.
  *
- * If this happens, you can invoke this method to orthonormalize the basis vectors of
- * the underlying rotation matrix. You can also set the class-side autoOrthonormalizeCount
- * property to have this method automatically invoked periodically.
+ * This property is automatically set to YES when one of the rotation properties or operations
+ * have been changed, and is reset to NO once the rotationMatrix has been recalculated.
+ */
+@property(nonatomic, readonly) BOOL isRotationDirty;
+
+/**
+ * Indicates that the rotation matrix is dirty and needs to be recalculated.
+ *
+ * This method is invoked automatically as needed. Usually the application never needs
+ * to invoke this method directly.
+ */
+-(void) markRotationDirty;
+
+/**
+ * When a large number of incremental rotations are applied to a rotator using the rotateBy...
+ * family of methods, accumulated rounding errors can cause the basis vectors of the underlying
+ * rotation matrix to lose mutual orthogonality (no longer be orthogonal to each other), and to
+ * become individually unnormalized (no longer be unit vectors).
+ * 
+ * Although uncommon, it is possible for visible errors to creep into the rotation of this rotator,
+ * after many, many incremental rotations.
+ *
+ * If this happens, you can invoke this method to orthonormalize the basis vectors of the underlying
+ * rotation matrix.
+ *
+ * Instead of keeping track of when to invoke this method within the application, you can also set the
+ * class-side autoOrthonormalizeCount property to have this method automatically invoked periodically.
  *
  * Upon completion of this method, each basis vector in the underlying matrix will
  * be a unit vector that is orthagonal to the other two basis vectors in this matrix.
  *
- * Error creep only appears through repeated use of the the rotateBy... family
- * of methods. Error creep does not occur when the rotation is set explicitly
- * through any of the rotation properties (rotation, quaternion,
- * rotationAxis/rotationAngle, etc), as these properties populate the rotation
- * matrix directly in orthonormal form each time then are set. Use of this
- * method is not needed if rotations have been set directly using these
- * properties, even when set many times.
+ * Error creep only appears through repeated use of the the rotateBy... family of methods. Error
+ * creep does not occur when the rotation is set explicitly through any of the rotation properties
+ * (rotation, quaternion, rotationAxis/rotationAngle, etc), as these properties populate the
+ * rotation matrix directly in orthonormal form each time then are set. Use of this method is not
+ * needed if rotations have been set directly using these properties, even when set many times.
  *
- * This method uses using a Gram-Schmidt process to orthonormalize the basis
- * vectors of the underlying rotation matrix. The Gram-Schmidt process is biased
- * towards the basis vector chosen to start the calculation process. To minimize
- * the effect of this, this implementation chooses a different basis vector to
- * start the orthonormalization process each time this method is invoked, to
- * average the bias across all basis vectors over time.
+ * This method uses using a Gram-Schmidt process to orthonormalize the basis vectors of the underlying
+ * rotation matrix. The Gram-Schmidt process is biased towards the basis vector chosen to start the
+ * calculation process. To minimize the effect of this, this implementation chooses a different basis
+ * vector to start the orthonormalization process each time this method is invoked, to average the
+ * bias across all basis vectors over time.
  */
 -(void) orthonormalize;
+
+/**
+ * Indicates how often the basis vectors of the underlying rotation matrix should be orthonormalized.
+ *
+ * If this property is set to a value greater than zero, this rotator keeps track of how many times
+ * one of the rotateBy... family of methods of a CC3MutableRotator has been invoked. When that count
+ * reaches the value of this property, the orthonormalize method is invoked to orthonormalize the
+ * underlying matrix, and the count is set back to zero to start the cycle again. See the notes for
+ * the CC3MutableRotator orthonormalize method for a further discussion of orthonormalization.
+ *
+ * If this property is set to zero, orthonormalization will not occur automatically. The application
+ * can invoke the orthonormalize method to cause the rotation matrix to be orthonormalized manually.
+ *
+ * The initial value of this property is zero, indicating that orthonormalization will not occur automatically.
+ */
++(GLubyte) autoOrthonormalizeCount;
+
+/**
+ * Sets how often the basis vectors of the underlying rotation matrix should be orthonormalized.
+ *
+ * If this property is set to a value greater than zero, this rotator keeps track of how many times
+ * one of the rotateBy... family of methods of a CC3MutableRotator has been invoked. When that count
+ * reaches the value of this property, the orthonormalize method is invoked to orthonormalize the
+ * underlying matrix, and the count is set back to zero to start the cycle again. See the notes for
+ * the CC3MutableRotator orthonormalize method for a further discussion of orthonormalization.
+ *
+ * If this property is set to zero, orthonormalization will not occur automatically. The application
+ * can invoke the orthonormalize method to cause the rotation matrix to be orthonormalized manually.
+ *
+ * The initial value of this property is zero, indicating that orthonormalization will not occur automatically.
+ */
++(void) setAutoOrthonormalizeCount: (GLubyte) aCount;
 
 
 #pragma mark Allocation and initialization
 
 /** Initializes this instance to use the specified matrix as the rotationMatrix. */
--(id) initOnRotationMatrix: (CC3GLMatrix*) aGLMatrix;
+-(id) initOnRotationMatrix: (CC3Matrix*) aMatrix;
 
 /** Allocates and initializes an autoreleased instance to use the specified matrix as the rotationMatrix. */
-+(id) rotatorOnRotationMatrix: (CC3GLMatrix*) aGLMatrix;
++(id) rotatorOnRotationMatrix: (CC3Matrix*) aMatrix;
 
 @end
 
@@ -390,56 +414,32 @@ typedef enum {
 #pragma mark -
 #pragma mark CC3DirectionalRotator
 
-/**
- * Enumeration of options for restricting rotation of a CC3Node to rotate only
- * around a single axis when attempting to point at a target node or targetLocation.
- */
-typedef enum {
-	kCC3TargettingAxisRestrictionNone,		/**< Don't restrict targetting rotations. */
-	kCC3TargettingAxisRestrictionXAxis,		/**< Only rotate around the X-axis. */
-	kCC3TargettingAxisRestrictionYAxis,		/**< Only rotate around the Y-axis. */
-	kCC3TargettingAxisRestrictionZAxis,		/**< Only rotate around the Z-axis. */
-} CC3TargettingAxisRestriction;
 
 /**
- * This CC3MutableRotator subclass adds the ability to set rotation based on directional information.
+ * CC3DirectionalRotator is a subclass of CC3MutableRotator that adds the ability to set
+ * rotation based on directional information.
  * 
- * In addition to specifying rotations in terms of three Euler angles, a rotation axis and
- * a rotation angle, or a quaternion, rotations of this class can be specified in terms of
- * pointing in a particular forwardDirection, and orienting so that 'up' is in a particular
- * sceneUpDirection.
+ * In addition to specifying rotations in terms of three Euler angles, a rotation axis and a
+ * rotation angle, or a quaternion, rotations of this class can be specified in terms of pointing
+ * in a particular forwardDirection, and orienting so that 'up' is in a particular referenceUpDirection.
  *
- * The directional rotator keeps track of a number of properties related to tracking another
- * node, on behalf of the node containing this rotator, particularly when it comes to tracking
- * the location of another node.
+ * The rotationMatrix of this rotator can be used to convert between directional rotation, Euler
+ * angles, and quaternions. As such, the rotation of a node can be specified as a quaternion or
+ * a set of Euler angles, and then read back as a fowardDirection, upDirection, and rightDirection.
+ * Or, conversely, rotation may be specified by pointing to a particular forwardDirection and
+ * referenceUpDirection, and then read as a quaternion or a set of Euler angles.
  *
- * The rotationMatrix of this rotator can be used to convert between directional rotation,
- * Euler angles, and quaternions. As such, the rotation of a node can be specified as a
- * quaternion or a set of Euler angles, and then read back as a fowardDirection, upDirection,
- * and rightDirection. Or, conversely, rotation may be specified by pointing to a particular
- * forwardDirection and sceneUpDirection, and then read as a quaternion or a set of Euler angles.
+ * The shouldReverseForwardDirection property can be used to determine whether rotation should
+ * rotate the negative-Z-axis of the local coordinate system to point in the forwardDirection,
+ * or should rotate the positive-Z-axis to the forwardDirection.
  */
 @interface CC3DirectionalRotator : CC3MutableRotator {
-	CC3Node* target;
-	CC3Vector targetLocation;
-	CC3Vector forwardDirection;
-	CC3Vector sceneUpDirection;
-	CC3Vector upDirection;
-	CC3Vector rightDirection;
-	GLubyte axisRestriction;
-	BOOL isForwardDirectionDirty;
-	BOOL isUpDirectionDirty;
-	BOOL isRightDirectionDirty;
-	BOOL isNewTarget;
-	BOOL shouldTrackTarget;
-	BOOL shouldAutotargetCamera;
-	BOOL isTrackingForBumpMapping;
-	BOOL isTargetLocationDirty;
+	CC3Vector referenceUpDirection;
 }
 
 /**
- * Indicates whether this rotator supports rotating to point towards a specific
- * direction (ie- "look-at").
+ * Indicates whether this rotator supports rotating to point towards a specific direction
+ * (ie- "look-towards").
  *
  * This implementation always returns YES.
  */
@@ -458,7 +458,21 @@ typedef enum {
 @property(nonatomic, assign) CC3Vector forwardDirection;
 
 /**
- * The direction, in the global coordinate system, that is considered to be 'up'.
+ * Indicates whether the effect of setting the forwardDirection property should be reversed.
+ *
+ * Based on the OpenGL default orientation, setting the forwardDirection of a node rotates
+ * the node to align the negative-Z-axis of the node with the defined forward direction.
+ * 
+ * Setting this property to YES will invert that behaviour so that positive-Z-axis of the
+ * node will be aligned with the defined forwardDirection.
+ * 
+ * The initial value of this property is NO, indicating that the negative-Z-axis of the node
+ * will be aligned with the forwardDirection property.
+ */
+@property(nonatomic, assign) BOOL shouldReverseForwardDirection;
+
+/**
+ * The direction that is considered to be 'up'.
  *
  * A valid direction vector is required. Attempting to set this property
  * to the zero vector (kCC3VectorZero) will raise an assertion error.
@@ -467,15 +481,17 @@ typedef enum {
  *
  * The initial value of this property is kCC3VectorUnitYPositive.
  */
-@property(nonatomic, assign) CC3Vector sceneUpDirection;
+@property(nonatomic, assign) CC3Vector referenceUpDirection;
 
-/** @deprecated Renamed to sceneUpDirection. */
+/** @deprecated Renamed to referenceUpDirection. */
+@property(nonatomic, assign) CC3Vector sceneUpDirection DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to referenceUpDirection. */
 @property(nonatomic, assign) CC3Vector worldUpDirection DEPRECATED_ATTRIBUTE;
 
 /**
- * The direction, in the node's coordinate system, that is considered to be 'up'.
- * This corresponds to the sceneUpDirection, after it has been transformed by
- * the rotationMatrix of this instance.
+ * The direction, in the local coordinate system, that is considered to be 'up'. This corresponds
+ * to the referenceUpDirection, after it has been transformed by the rotationMatrix of this instance.
  *
  * See the discussion in the notes of the same property in CC3Node for more info.
  *
@@ -484,14 +500,67 @@ typedef enum {
 @property(nonatomic, assign, readonly) CC3Vector upDirection;
 
 /**
- * The direction in the node's coordinate system that would be considered to be
- * "off to the right" relative to the forwardDirection and upDirection.
+ * The direction in the local coordinate system that is considered to be "off to the right"
+ * relative to the forwardDirection and upDirection.
  * 
  * See the discussion in the notes of the same property in CC3Node for more info.
  *
  * The initial value of this property is kCC3VectorUnitXPositive.
  */
 @property(nonatomic, assign, readonly) CC3Vector rightDirection;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3TargettingRotator
+
+/**
+ * Enumeration of options for constraining the rotation of a CC3Node when attempting to point
+ * at a target node or targetLocation. Targetting can be constrained to use either local or
+ * global coordinates, and can be further constrained to rotate only around a single axis.
+ */
+typedef enum {
+	kCC3TargettingConstraintLocalUnconstrained,		/**< Rotate around all axes in the local coordinate system. */
+	kCC3TargettingConstraintLocalXAxis,				/**< Rotate only around the X-axis in the local coordinate system. */
+	kCC3TargettingConstraintLocalYAxis,				/**< Rotate only around the Y-axis in the local coordinate system. */
+	kCC3TargettingConstraintLocalZAxis,				/**< Rotate only around the Z-axis in the local coordinate system. */
+	kCC3TargettingConstraintGlobalUnconstrained,	/**< Rotate around all axes in the global coordinate system. */
+	kCC3TargettingConstraintGlobalXAxis,			/**< Rotate only around the X-axis in the global coordinate system. */
+	kCC3TargettingConstraintGlobalYAxis,			/**< Rotate only around the Y-axis in the global coordinate system. */
+	kCC3TargettingConstraintGlobalZAxis,			/**< Rotate only around the Z-axis in the global coordinate system. */
+
+	// Deprecated
+	kCC3TargettingAxisRestrictionNone DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalUnconstrained,	/**< @deprecated Renamed to kCC3TargettingConstraintGlobalUnconstrained. */
+	kCC3TargettingAxisRestrictionXAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalXAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalXAxis. */
+	kCC3TargettingAxisRestrictionYAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalYAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalYAxis. */
+	kCC3TargettingAxisRestrictionZAxis DEPRECATED_ATTRIBUTE = kCC3TargettingConstraintGlobalZAxis,			/**< @deprecated Renamed to kCC3TargettingConstraintGlobalZAxis. */
+} CC3TargettingConstraint;
+
+/** @deprecated Renamed to CC3TargettingConstraint. */
+#define CC3TargettingAxisRestriction CC3TargettingConstraint
+
+/**
+ * CC3TargettingRotator is a subclass of CC3DirectionalRotator that can automatically track
+ * the location of another node, or a specific location in 3D space.
+ * 
+ * In addition to specifying rotations in terms of three Euler angles, a rotation axis and a
+ * rotation angle, a quaternion, or a direction, rotations of this class can be specified in
+ * terms of pointing at a specific target location in space, or at a specific target node.
+ * Further, the rotator can optionally be configured to track that target location or node
+ * as the target node, or the node using this rotator, move.
+ */
+@interface CC3TargettingRotator : CC3DirectionalRotator {
+	CC3Node* target;
+}
+
+/**
+ * Indicates whether this rotator supports rotating to point towards a specific target node
+ * or target location (ie- "look-at"), including 
+ *
+ * This implementation always returns YES.
+ */
+@property(nonatomic, readonly) BOOL isTargettable;
 
 /** 
  * The global location towards which this node is facing.
@@ -500,32 +569,28 @@ typedef enum {
  */
 @property(nonatomic, assign) CC3Vector targetLocation;
 
-/** 
- * Sets the targetLocation property without marking this rotator
- * as being dirty and in need of recalculation.
+/**
+ * Indicates whether rotation should be constrained when attempting to rotate the node to
+ * point at the target or targetLocation.
+ *
+ * The initial value of this property is kCC3TargettingConstraintGlobalUnconstrained.
  */
--(void) setRawTargetLocation: (CC3Vector) targLoc;
+@property(nonatomic, assign) CC3TargettingConstraint targettingConstraint;
+
+/** @deprecated Renamed to targettingConstraint. */
+@property(nonatomic, assign) CC3TargettingConstraint axisRestriction DEPRECATED_ATTRIBUTE;
 
 /**
- * Indicates whether rotation should be restricted to a single axis when attempting
- * to rotate the node to point at the target or targetLocation.
+ * Rotates to look at the specified target location as viewed from the specified eye location,
+ * and orienting with reference to the specifie up direction. The direction, and both locations
+ * are specified in the local coordinate system.
  *
- * The initial value of this property is kCC3TargettingAxisRestrictionNone.
+ * This is the classic LookAt rotational function.
  */
-@property(nonatomic, assign) CC3TargettingAxisRestriction axisRestriction;
+-(void) rotateToTargetLocation: (CC3Vector) targLoc from: (CC3Vector) eyeLoc withUp: (CC3Vector) upDir;
 
-/** Returns whether the target location is dirty and needs to be recalculated and reset. */
-@property(nonatomic, readonly) BOOL isTargetLocationDirty;
-
-/**
- * If the targetLocation was recently set, set the forwardDirection to
- * point to it from the specified location, which is the location of
- * the node holding this rotator, in the global coordinate system.
- *
- * If the specified location is the same as the targetLocation, it is
- * not possible to set the foward direcion, and so the request is ignored.
- */
--(void) rotateToTargetLocationFrom: (CC3Vector) aLocation;
+/** @deprecated Use rotateToTargetLocation:from:withUp: instead. */
+-(void) rotateToTargetLocationFrom: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
 
 /**
  * The target node at which this rotator is pointed. If the shouldTrackTarget property
@@ -585,14 +650,15 @@ typedef enum {
 
 
 #pragma mark -
-#pragma mark CC3ReverseDirectionalRotator
+#pragma mark Deprecated CC3ReverseDirectionalRotator
 
+DEPRECATED_ATTRIBUTE
 /**
- * A directional rotator that orients the node such that the positive-Z axis
- * of the node's local coordinates points in the fowardDirection.
- *
- * This is opposite to the parent class behaviour, which orients the node such that
- * the negative-Z axis of the node's local coordinates points in the fowardDirection
+ * Deprecated and functionality moved to CC3DirectionalRotator.
+ * @deprecated Use an instance of CC3DirectionalRotator and set the shouldReverseForwardDirection
+ * property to YES to duplicate the behaviour of this class.
  */
 @interface CC3ReverseDirectionalRotator : CC3DirectionalRotator
 @end
+
+

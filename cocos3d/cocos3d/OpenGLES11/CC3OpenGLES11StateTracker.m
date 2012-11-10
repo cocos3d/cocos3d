@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11StateTracker.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -67,13 +67,9 @@
 
 -(void) open {}
 
--(void) close {
-	isScheduledForClose = NO;
-}
+-(void) close { isScheduledForClose = NO; }
 
--(void) notifyTrackerAdded {
-	[self.engine addTrackerToOpen: self];
-}
+-(void) notifyTrackerAdded { [self.engine addTrackerToOpen: self]; }
 
 -(void) notifyGLChanged {
 	if (!isScheduledForClose) {
@@ -82,21 +78,13 @@
 	}
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@", [self class]];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 @end
 
 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerPrimitive
-
-@interface CC3OpenGLES11StateTrackerPrimitive (TemplateMethods)
--(void) logGetGLValue;
--(void) logSetValue;
--(void) logReuseValue;
-@end
 
 @implementation CC3OpenGLES11StateTrackerPrimitive
 
@@ -128,12 +116,15 @@
 -(BOOL) shouldRestoreOriginalOnClose {
 	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
 			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore ||
-			originalValueHandling == kCC3GLESStateOriginalValueRestore);
+			originalValueHandling == kCC3GLESStateOriginalValueRestore) && self.valueNeedsRestoration;
 }
 
--(BOOL) valueIsKnownOnClose {
-	return originalValueHandling != kCC3GLESStateOriginalValueIgnore;
+-(BOOL) valueNeedsRestoration {
+	NSAssert1(NO, @"%@ does must implement the valueNeedsRestoration property.", self);
+	return NO;
 }
+
+-(BOOL) valueIsKnownOnClose { return originalValueHandling != kCC3GLESStateOriginalValueIgnore; }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker {
 	return [self initWithParent: aTracker forState: 0];
@@ -181,15 +172,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			if (valueIsKnown) break;
 		case kCC3GLESStateOriginalValueReadAlways:
 		case kCC3GLESStateOriginalValueReadAlwaysAndRestore:
-			if (name) {
-				[self getGLValue];
-				[self logGetGLValue];
-				[self restoreOriginalValue];
-				valueIsKnown = YES;
-				LogGLErrorState(@"opening %@", self);
-			} else {
-				valueIsKnown = NO;
-			}
+			[self readOriginalValue];
 			break;
 		case kCC3GLESStateOriginalValueRestore:
 			[self restoreOriginalValue];
@@ -207,30 +190,37 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	if (self.shouldRestoreOriginalOnClose) {
 		[self restoreOriginalValue];
 		[self setGLValue];
+		LogGLErrorTrace(@"while setting GL value for %@", self);
 	}
 	valueIsKnown = self.valueIsKnownOnClose;
+}
+
+-(void) readOriginalValue {
+	if (name) {
+		LogTrace(@"Getting GL value for %@", self);
+		[self getGLValue];
+		LogGLErrorTrace(@"while getting GL value for %@", self);
+		LogTrace(@"Retrieved GL value for %@", self);
+		[self restoreOriginalValue];
+		valueIsKnown = YES;
+	} else {
+		valueIsKnown = NO;
+	}
 }
 
 -(void) restoreOriginalValue {}
 
 -(void) setGLValueAndNotify {
+	LogTrace(@"Setting GL value for %@", self);
 	[self setGLValue];
+	LogGLErrorTrace(@"while setting GL value for %@", self);
 	[self notifyGLChanged];
 	valueIsKnown = YES;
-	[self logSetValue];
 }
 
 -(void) getGLValue {}
 
 -(void) setGLValue {}
-
--(void) logSetValue: (BOOL) wasSet {}
-
--(void) logSetValue {}
-
--(void) logReuseValue {}
-
--(void) logGetGLValue {}
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ %@", [self class], NSStringFromGLEnum(self.name)];
@@ -299,19 +289,13 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (BOOL) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value ? GL_TRUE : GL_FALSE);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
+
+-(void) setValueRaw: (BOOL) aValue { value = aValue; }
+
+-(void) setGLValue { if(setGLFunction) setGLFunction(value ? GL_TRUE : GL_FALSE); }
 
 -(void) getGLValue {
 	GLboolean glValue;
@@ -319,23 +303,9 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	originalValue = (glValue != GL_FALSE);
 }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) logReuseValue: (BOOL) wasSet {
-	LogTrace(@"%@ reused %@ = %@", [self class], NSStringFromGLEnum(name), (value ? @"YES" : @"NO"));
-}
-
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), (originalValue ? @"YES" : @"NO"),
-			 (valueIsKnown ? (value ? @"YES" : @"NO") : @"UNKNOWN"));
-}
-
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return (value != originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)", [super description],
@@ -354,28 +324,14 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	return kCC3GLESStateOriginalValueReadOnceAndRestore;
 }
 
--(void) enable {
-	self.value = YES;
-}
+-(void) enable { self.value = YES; }
 
--(void) disable {
-	self.value = NO;
-}
+-(void) disable { self.value = NO; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), (originalValue ? @"ENABLED" : @"DISABLED"),
-			 (valueIsKnown ? (value ? @"ENABLED" : @"DISABLED") : @"UNKNOWN"));
-}
-
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class],
-			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
-}
-
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class],
-			 NSStringFromGLEnum(name), (value ? @"ENABLED" : @"DISABLED"));
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ %@ = %@ (orig %@)",
+			[self class], NSStringFromGLEnum(self.name),
+			(self.value ? @"ENABLED" : @"DISABLED"), (self.originalValue ? @"ENABLED" : @"DISABLED")];
 }
 
 @end
@@ -443,41 +399,19 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (GLfloat) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
 
--(void) getGLValue {
-	glGetFloatv(name, &originalValue);
-}
+-(void) setValueRaw: (GLfloat) aValue { value = aValue; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %.2f (was tracking %@)",
-			 [self class], NSStringFromGLEnum(name), originalValue,
-			 (valueIsKnown ? [NSString stringWithFormat: @"%.2f", value] : @"UNKNOWN"));
-}
+-(void) setGLValue { if(setGLFunction) setGLFunction(value); }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
-}
+-(void) getGLValue { glGetFloatv(name, &originalValue); }
 
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %.2f", [self class], NSStringFromGLEnum(name), value);
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return (value != originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %.3f (orig %.3f)",
@@ -549,41 +483,19 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (GLint) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
 
--(void) getGLValue {
-	glGetIntegerv(name, &originalValue);
-}
+-(void) setValueRaw: (GLint) aValue { value = aValue; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %i (was tracking %@)",
-			 [self class], NSStringFromGLEnum(name), originalValue,
-			 (valueIsKnown ? [NSString stringWithFormat: @"%i", value] : @"UNKNOWN"));
-}
+-(void) setGLValue { if(setGLFunction) setGLFunction(value); }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %i", [self class], NSStringFromGLEnum(name), value);
-}
+-(void) getGLValue { glGetIntegerv(name, &originalValue); }
 
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %i", [self class], NSStringFromGLEnum(name), value);
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return (value != originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %i (orig %i)",
@@ -655,41 +567,19 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (GLenum) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
 
--(void) getGLValue {
-	glGetIntegerv(name, (GLint*)&originalValue);
-}
+-(void) setValueRaw: (GLenum) aValue { value = aValue; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)",
-			 [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(originalValue),
-			 (valueIsKnown ? NSStringFromGLEnum(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { if(setGLFunction) setGLFunction(value); }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
-}
+-(void) getGLValue { glGetIntegerv(name, (GLint*)&originalValue); }
 
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromGLEnum(value));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return (value != originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
@@ -761,41 +651,19 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aColor;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (ccColor4F) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value.r, value.g, value.b, value.a);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
 
--(void) getGLValue {
-	glGetFloatv(name, (GLfloat*)&originalValue);
-}
+-(void) setValueRaw: (ccColor4F) aValue { value = aValue; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(originalValue),
-			 (valueIsKnown ? NSStringFromCCC4F(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { if(setGLFunction) setGLFunction(value.r, value.g, value.b, value.a); }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
-}
+-(void) getGLValue { glGetFloatv(name, (GLfloat*)&originalValue); }
 
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCCC4F(value));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return !CCC4FAreEqual(value, originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
@@ -807,11 +675,6 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 #pragma mark -
 #pragma mark CC3OpenGLES11StateTrackerColorFixedAndFloat
-
-@interface CC3OpenGLES11StateTrackerColorFixedAndFloat (TemplateMethods)
--(void) logSetFixedValue;
--(void) logReuseFixedValue;
-@end
 
 @implementation CC3OpenGLES11StateTrackerColorFixedAndFloat
 
@@ -882,8 +745,8 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		[self setGLValueAndNotify];
 		fixedValueIsKnown = NO;
 	} else {
-		[self logReuseValue];
-	}	
+		LogTrace(@"Reusing GL value for %@", self);
+	}
 }
 
 -(void) setFixedValue: (ccColor4B) aColor {
@@ -894,34 +757,23 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		fixedValue.a != aColor.a) {
 
 		fixedValue = aColor;
+		LogTrace(@"Setting fixed GL value for %@", self);
 		[self setGLFixedValue];
+		LogGLErrorTrace(@"while setting fixed GL value for %@", self);
 		[self notifyGLChanged];
 		fixedValueIsKnown = YES;
 		valueIsKnown = NO;
-		[self logSetFixedValue];
 	} else {
-		[self logReuseFixedValue];
-	}	
-}
-
--(void) setFixedValueRaw: (ccColor4B) aValue {
-	fixedValue = aValue;
-}
-
--(void) setGLFixedValue {
-	if( setGLFunctionFixed ) {
-		setGLFunctionFixed(fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
+		LogTrace(@"Reusing fixed GL value for %@", self);
 	}
 }
 
--(void) logSetFixedValue {
-	LogTrace(@"%@ set %@ = (%u, %u, %u, %u)", [self class],
-			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
-}
+-(void) setFixedValueRaw: (ccColor4B) aValue { fixedValue = aValue; }
 
--(void) logReuseFixedValue {
-	LogTrace(@"%@ reuse %@ = (%u, %u, %u, %u)", [self class],
-			 NSStringFromGLEnum(name), fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a);
+-(void) setGLFixedValue { if( setGLFunctionFixed ) setGLFunctionFixed(fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a); }
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (as byte color %@)", [super description], NSStringFromCCC4B(fixedValue)];
 }
 
 @end
@@ -989,41 +841,19 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aViewport;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
-}
-
--(void) setValueRaw: (CC3Viewport) aValue {
-	value = aValue;
-}
-
--(void) setGLValue {
-	if( setGLFunction ) {
-		setGLFunction(value.x, value.y, value.w, value.h);
+		LogTrace(@"Reusing GL value for %@", self);
 	}
 }
 
--(void) getGLValue {
-	glGetIntegerv(name, (GLint*)&originalValue);
-}
+-(void) setValueRaw: (CC3Viewport) aValue { value = aValue; }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(originalValue),
-			 (valueIsKnown ? NSStringFromCC3Viewport(value) : @"UNKNOWN"));
-}
+-(void) setGLValue { if( setGLFunction ) setGLFunction(value.x, value.y, value.w, value.h); }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
-}
+-(void) getGLValue { glGetIntegerv(name, (GLint*)&originalValue); }
 
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Viewport(value));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return !CC3ViewportsAreEqual(value, originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
@@ -1045,35 +875,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aValue;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
+		LogTrace(@"Reusing GL value for %@", self);
+	}
 }
 
--(void) setValueRaw: (GLvoid*) aValue {
-	value = aValue;
-}
+-(void) setValueRaw: (GLvoid*) aValue { value = aValue; }
 
--(void) getGLValue {
-	glGetIntegerv(name, (GLint*)&originalValue);
-}
+-(void) getGLValue { glGetIntegerv(name, (GLint*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %p (was tracking %@)",
-			 [self class], NSStringFromGLEnum(name), originalValue,
-			 (valueIsKnown ? [NSString stringWithFormat: @"%p", value] : @"UNKNOWN"));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %p", [self class], NSStringFromGLEnum(name), value);
-}
-
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %p", [self class], NSStringFromGLEnum(name), value);
-}
-
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return (value != originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %p (orig %p)",
@@ -1095,35 +907,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aVector;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
+		LogTrace(@"Reusing GL value for %@", self);
+	}
 }
 
--(void) setValueRaw: (CC3Vector) aValue {
-	value = aValue;
-}
+-(void) setValueRaw: (CC3Vector) aValue { value = aValue; }
 
--(void) getGLValue {
-	glGetFloatv(name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetFloatv(name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(originalValue),
-			 (valueIsKnown ? NSStringFromCC3Vector(value) : @"UNKNOWN"));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
-}
-
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector(value));
-}
-
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return !CC3VectorsAreEqual(value, originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
@@ -1145,35 +939,17 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 		value = aVector;
 		[self setGLValueAndNotify];
 	} else {
-		[self logReuseValue];
-	}	
+		LogTrace(@"Reusing GL value for %@", self); 
+	}
 }
 
--(void) setValueRaw: (CC3Vector4) aValue {
-	value = aValue;
-}
+-(void) setValueRaw: (CC3Vector4) aValue { value = aValue; }
 
--(void) getGLValue {
-	glGetFloatv(name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetFloatv(name, (GLfloat*)&originalValue); }
 
--(void) logGetGLValue {
-	LogTrace(@"%@ %@ read GL value %@ (was tracking %@)", 
-			 [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(originalValue),
-			 (valueIsKnown ? NSStringFromCC3Vector4(value) : @"UNKNOWN"));
-}
+-(void) restoreOriginalValue { value = originalValue; }
 
--(void) logSetValue {
-	LogTrace(@"%@ set %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
-}
-
--(void) logReuseValue {
-	LogTrace(@"%@ reuse %@ = %@", [self class], NSStringFromGLEnum(name), NSStringFromCC3Vector4(value));
-}
-
--(void) restoreOriginalValue {
-	value = originalValue;
-}
+-(BOOL) valueNeedsRestoration { return !CC3Vector4sAreEqual(value, originalValue); }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ = %@ (orig %@)",
@@ -1219,19 +995,36 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 +(BOOL) defaultShouldAlwaysSetGL { return NO; }
 
+-(void) setGLValues {}
+
 -(BOOL) valueIsKnown { return NO; }
 
 -(void) setValueIsKnown:(BOOL) aBoolean {}
 
--(BOOL) valueIsKnownOnClose {
-	return originalValueHandling != kCC3GLESStateOriginalValueIgnore;
+-(BOOL) valueIsKnownOnClose { return originalValueHandling != kCC3GLESStateOriginalValueIgnore; }
+
+-(void) close {
+	[super close];
+	if (self.shouldRestoreOriginalOnClose) {
+		[self restoreOriginalValues];
+		[self setGLValues];
+		LogGLErrorTrace(@"while setting GL values for %@", self);
+	}
+	self.valueIsKnown = self.valueIsKnownOnClose;
 }
 
 -(BOOL) shouldRestoreOriginalOnClose {
 	return (originalValueHandling == kCC3GLESStateOriginalValueReadOnceAndRestore ||
 			originalValueHandling == kCC3GLESStateOriginalValueReadAlwaysAndRestore ||
-			originalValueHandling == kCC3GLESStateOriginalValueRestore);
+			originalValueHandling == kCC3GLESStateOriginalValueRestore) && self.valueNeedsRestoration;
 }
+
+-(BOOL) valueNeedsRestoration {
+	NSAssert1(NO, @"%@ does must implement the valueNeedsRestoration property.", self);
+	return NO;
+}
+
+-(void) restoreOriginalValues { NSAssert1(NO, @"%@ does must implement the restoreOriginalValues method.", self); }
 
 @end
 

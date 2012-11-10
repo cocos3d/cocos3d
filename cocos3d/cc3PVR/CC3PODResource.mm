@@ -1,7 +1,7 @@
 /*
  * CC3PODResource.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -97,7 +97,7 @@ static const id placeHolder = [NSObject new];
 }
 
 -(void) build {
-	LogCleanRez(@"Building %@", self.fullDescription);
+	LogRez(@"Building %@", self.fullDescription);
 	[self buildTextures];
 	[self buildMaterials];
 	[self buildMeshes];
@@ -410,7 +410,7 @@ static const id placeHolder = [NSObject new];
 	NSString* texPath = [directory stringByAppendingPathComponent: texFile];
 	CC3Texture* tex = [CC3Texture textureFromFile: texPath];
 	tex.textureParameters = textureParameters;
-	LogCleanRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
+	LogRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
 	return tex;
 }
 

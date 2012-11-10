@@ -1,7 +1,7 @@
 /*
  * CC3EAGLView.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -42,7 +42,10 @@
  * This extension category adds support for node-picking while multisampling antialiasing
  * is active, by defining the interface required by that support.
  */
-@interface EAGLView (CC3Picking)
+@interface EAGLView (CC3)
+
+/** Returns the number of samples used to define each pixel. */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 /**
  * Invoked before the rendering pass used during node-picking, which uses a specialized
@@ -120,6 +123,9 @@
     GLuint pickerFrameBuffer;
 	GLuint pickerDepthBuffer;
 }
+
+/** Returns the number of samples used to define each pixel. */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 /**
  * Sets up the rendering framework to support rendering custom colors and reading a pixel

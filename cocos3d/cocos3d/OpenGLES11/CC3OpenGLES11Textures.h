@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Textures.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -218,7 +218,7 @@
  *   - use the useElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_TEXTURE_COORD_ARRAY_SIZE.
  *   - elementType uses GL name GL_TEXTURE_COORD_ARRAY_TYPE.
- *   - elementStride uses GL name GL_TEXTURE_COORD_ARRAY_STRIDE.
+ *   - vertexStride uses GL name GL_TEXTURE_COORD_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glTexCoordPointer method
  */
 @interface CC3OpenGLES11StateTrackerVertexTexCoordsPointer : CC3OpenGLES11StateTrackerVertexPointer

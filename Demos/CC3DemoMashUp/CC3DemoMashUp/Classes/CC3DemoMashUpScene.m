@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpScene.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -37,7 +37,6 @@
 #import "CC3Billboard.h"
 #import "CC3ActionInterval.h"
 #import "CC3ModelSampleFactory.h"
-#import "LandingCraft.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
 #import "CCTouchDispatcher.h"
@@ -48,15 +47,21 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3ParametricMeshNodes.h"
 #import "CC3PointParticleSamples.h"
+#import "CC3MeshParticleSamples.h"
+#import "CC3MeshParticles.h"
 #import "CC3DemoMashUpLayer.h"
 #import "CC3VertexSkinning.h"
 #import "CC3ShadowVolumes.h"
-
+#import <objc/runtime.h>
+#import "CC3LinearMatrix.h"
+#import "CC3AffineMatrix.h"
+#import "CC3ProjectionMatrix.h"
+#import "CC3GLMatrix.h"
 
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"
 #define kBeachBallPODFile				@"BeachBall.pod"
-#define kGlobeTextureFile				@"Earth_1024.jpg"
+#define kGlobeTextureFile				@"earthmap1k.jpg"
 #define kMascotPODFile					@"cocos3dMascot.pod"
 #define kDieCubePODFile					@"DieCube.pod"
 #define kGroundTextureFile				@"Grass.jpg"
@@ -71,6 +76,8 @@
 #define kBrickTextureFile				@"Bricks-Red.jpg"
 #define kRunningManPODFile				@"man.pod"
 #define kMalletPODFile					@"mallet.pod"
+#define kPointParticleTextureFile		@"fire.png"
+#define kMeshPartileTextureFile			@"BallBoxTexture.png"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -97,6 +104,7 @@
 #define kTeapotWhiteName				@"TeapotWhite"
 #define kTeapotOrangeName				@"TeapotOrange"
 #define	kBillboardName					@"DizzyLabel"
+#define kBitmapLabelName				@"BitmapLabel"
 #define	kSunName						@"Sun"
 #define kSpotlightName					@"Spotlight"
 #define kBeachName						@"Beach"
@@ -110,7 +118,8 @@
 #define kFloatingHeadName				@"head03low01"
 #define kBumpMapLightTrackerName		@"BumpMapLightTracker"
 #define kExplosionName					@"Explosion"
-#define kHoseEmitterName				@"Hose"
+#define kPointHoseEmitterName			@"PointHose"
+#define kMeshHoseEmitterName			@"MeshHose"
 #define kTexturedCubeName				@"TexturedCube"
 #define kBrickWallName					@"BrickWall"
 #define kMalletName						@"Ellipse01"
@@ -144,6 +153,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addFloatingRing;
 -(void) addAxisMarkers;
 -(void) addLightMarker;
+-(void) addBitmapLabel;
 -(void) addProjectedLabel;
 -(void) addTeapotAndSatellite;
 -(void) addBrickWall;
@@ -157,8 +167,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addSun;
 -(void) addSpotlight;
 -(void) addFog;
--(void) addParticles;
--(void) addHose;
+-(void) addPointParticles;
+-(void) addMeshParticles;
+-(void) addPointHose;
+-(void) addMeshHose;
 -(void) addTexturedCube;
 -(void) addSkinnedMallet;
 -(void) addSkinnedRunners;
@@ -178,6 +190,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) switchWoodenSign;
 -(void) toggleFloatingHeadDefinition;
 -(void) toggleActiveCamera;
+-(void) cycleLabelOf: (CC3BitmapLabelNode*) aNode;
 -(void) cycleShadowFor: (CC3Node*) aNode;
 -(void) markTouchPoint: (CGPoint) touchPoint on: (CC3Node*) touchedNode;
 -(void) checkForCollisions;
@@ -223,19 +236,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	isManagingShadows = NO;
 	playerDirectionControl = CGPointZero;
 	playerLocationControl = CGPointZero;
-}
-
-/**
- * Adds the 3D objects to the scene, loading some models from POD files, and building
- * others algorithmically. The loading of different features within the scene is
- * broken into a sequence of template methods. If you want to play with not loading
- * certain elements, simply comment out one the invocations of these template methods
- * within this method.
- */
--(void) initializeScene {
-
-	// Set up any initial state tracked by this subclass
-	[self initCustomState];
 	
 	// Improve performance by avoiding clearing the depth buffer when transitioning
 	// between 2D content and 3D content. Since we are drawing 2D content on top of
@@ -243,7 +243,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	self.shouldClearDepthBufferBefore2D = NO;
 	self.shouldClearDepthBufferBefore3D = NO;
 	[[CCDirector sharedDirector] setDepthTest: NO];
-
+	
 	// The order in which meshes are drawn to the GL engine can be tailored to your needs.
 	// The default is to draw opaque objects first, then alpha-blended objects in reverse
 	// Z-order. Since this example has lots of similar teapots and robots to draw in this
@@ -261,11 +261,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	//
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
-//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
-//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
+	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
 	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-//	self.drawingSequencer = nil;
+	//	self.drawingSequencer = nil;
+	
+}
 
+/**
+ * Adds the 3D objects to the scene, loading some models from POD files, and building others
+ * algorithmically. The loading of different features within the scene is broken into a sequence
+ * of template methods. If you want to play with not loading certain elements, simply comment
+ * out one the invocations of these template methods within this method.
+ */
+-(void) initializeScene {
+	
+	// Set up any initial state tracked by this subclass
+	[self initCustomState];
 	
 	[self addGround];				// Add a ground plane to provide some perspective to the user
 	
@@ -283,15 +295,26 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[self addRobot];				// Add an animated robot arm, a light, and a camera
 	
+	[self addBitmapLabel];			// Add a bitmapped string label
+	
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 	
-	[self addHose];					// Attach a particle hose to the hand of the animated robot.
+//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
+									// point particles hanging in the scene.
+	
+//	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
+									// hanging in the scene.
+	
+	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-//	[self addFloatingRing];			// Uncomment to add a large yellow band floating above the ground,
-									// using a texture containing transparency. The band as a whole
-									// will fade in and out periodically. This demonstrates managing
-									// opacity and translucency at both the texture and material level.
+	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
+									// The hose is turned on and off when the robot arm is touched.
+	
+	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
+									// containing transparency. The band as a whole fades in and out
+									// periodically. This demonstrates managing opacity and translucency
+									// at both the texture and material level.
 
 	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
 	
@@ -321,9 +344,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 
-//	[self addParticles];			// Uncomment to add a platform of multi-colored, light-interactive,
-									// particles hanging in the scene.
-
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
 	
@@ -340,36 +360,30 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self createGLBuffers];
 	[self releaseRedundantData];
 	
-	// For an interesting effect, to draw text descriptors and/or bounding boxes on
-	// every node during debugging, or to display the bounding volumes, used for
-	// collision detection and visual culling, uncomment one or more of the following
-	// lines. The first line displays short descriptive text for each node (including
-	// class, node name & tag). The second line displays bounding boxes of only those
-	// nodes with local content (eg- meshes). The third line shows the bounding boxes
-	// of all nodes, including those with local content AND structural nodes.
-	// The fourth line displays the bounding volumes of each node. Bounding volumes
-	// are used to determine when a node is within the camera frustum, and thus appears
-	// on-screen. Nodes that are not visible on screen are not rendered. Bounding
-	// volumes are also used for collision detection. You can also turn on any of
-	// these properties at a more granular level by using these and similar methods
-	// on individual nodes or node structures. See the CC3Node class notes.
-	// This family of properties can be particularly useful during development
-	// to track down display issues.
+	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
+	// during debugging, or to display the bounding volumes, used for collision detection and
+	// visual culling, uncomment one or more of the following lines. The first line displays
+	// short descriptive text for each node (including class, node name & tag). The second line
+	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
+	// line shows the bounding boxes of all nodes, including those with local content AND
+	// structural nodes. The fourth line displays the bounding volumes of each node. Bounding
+	// volumes are used to determine when a node is within the camera frustum, and thus appears
+	// on-screen. Nodes that are not visible on screen are not rendered. Bounding volumes are
+	// also used for collision detection. The bounding volume of most nodes (except the globe)
+	// contains both a spherical and bounding-box bounding volume to optimize testing.
+	// For something extra cool, touch the robot arm to see the bounding volume of the particle
+	// emitter grow and shrink dynamically. Use the joystick controls to back the camera away to
+	// get the full effect. You can also turn on any of these properties at a more granular level
+	// by using these and similar methods on individual nodes or node structures. See the CC3Node
+	// class notes. This family of properties can be particularly useful during development to
+	// track down display issues.
 //	self.shouldDrawAllDescriptors = YES;
 //	self.shouldDrawAllLocalContentWireframeBoxes = YES;
 //	self.shouldDrawAllWireframeBoxes = YES;
 //	self.shouldDrawAllBoundingVolumes = YES;
 	
-	// To see the bounding volumes of all the nodes, uncomment the following line.
-	// The bounding volume of most nodes (except the globe) contains both a spherical
-	// and bounding-box bounding volume to optimize testing. For something extra cool,
-	// touch the robot arm to see the bounding volume of the particle emitter grow
-	// and shrink dynamically. Use the joystick controls to back the camera away to
-	// get the full effect.
-//	self.shouldDrawAllBoundingVolumes = YES;
-	
 	// The full node structure of the scene is logged using the following line.
-	LogCleanInfo(@"The structure of this scene is: %@", [self structureDescription]);
+	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
 }
 
 /** Various options for configuring interesting camera behaviours. */
@@ -387,12 +401,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	origCamTarget = cam.target;
 	camTarget = origCamTarget;
 
-	// For cameras, the scale property determines camera zooming, and the effective
-	// field-of-view. You can adjust this value to play with camera zooming.
-	// Conversely, if you find that objects in the periphery of your view appear elongated,
-	// you can adjust the fieldOfView and/or uniformScale properties to reduce this
-	// "fish-eye" effect. See the notes of the CC3Camera fieldOfView property for more on this.
-	cam.uniformScale = 0.7;
+	// For cameras, the scale property determines camera zooming, and the effective field-of-view.
+	// You can adjust this value to play with camera zooming. Conversely, if you find that objects
+	// in the periphery of your view appear elongated, you can adjust the fieldOfView and/or
+	// uniformScale properties to reduce this "fish-eye" effect. See the notes of the CC3Camera
+	// fieldOfView property for more on this.
+	cam.uniformScale = 0.9;
 	
 	// You can configure the camera to use orthographic projection instead of the default
 	// perspective projection by setting the isUsingParallelProjection property to YES.
@@ -408,18 +422,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	cam.location = cc3v(2.0, 1.0, 0.0);		// Relative to the parent beach ball
 //	cam.rotation = cc3v(0.0, 90.0, 0.0);	// Point camera out over the beach ball
 
-	// To see the effect of mounting a camera on a moving object AND having the camera
-	// track a location or object, even as the moving object bounces and rotates, 
-	// uncomment the following lines to mount the camera on a virtual boom attached to
-	// the beach ball, but stay pointed at the moving rainbow teapot, even as the beach
-	// ball that the camera is mounted on bounces and rotates. In this case, you do not
-	// need to comment out the CC3RotateBy action that is run on the beachBall in the
-	// addBeachBall method
+	// To see the effect of mounting a camera on a moving object AND having the camera track a
+	// location or object, even as the moving object bounces and rotates, uncomment the following
+	// lines to mount the camera on a virtual boom attached to the beach ball, but stay pointed at
+	// the moving rainbow teapot, even as the beach ball that the camera is mounted on bounces and
+	// rotates. In this case, you do not need to comment out the CC3RotateBy action that is run on
+	// the beachBall in the addBeachBall method
 //	[beachBall addChild: cam];				// Mount the camera on the beach ball
 //	cam.location = cc3v(2.0, 1.0, 0.0);		// Relative to the parent beach ball
-//	cam.rotation = cc3v(0.0, 90.0, 0.0);	// Point camera out over the beach ball
-//	cam.shouldTrackTarget = YES;
-//	cam.target = teapotSatellite;
+//	cam.target = teapotSatellite;			// Look toward the rainbow teapot...
+//	cam.shouldTrackTarget = YES;			// ...and track it as it moves
+
 }
 
 /** Configure the lighting. */
@@ -469,26 +482,41 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Adds a large yellow band floating above the ground. This band is created from a 
- * plane using a texture that combines transparency and opacity. It demonstrates
- * the use of transparency in textures. You can see through the transparent areas
- * to the scene behind the texture. The texture as a whole fades in and out periodically.
+ * Adds a large rectangular yellow ring floating above the ground. This ring is created from a plane
+ * using a texture that combines transparency and opacity. It demonstrates the use of transparency in
+ * textures. You can see through the transparent areas to the scene behind the texture. The texture
+ * as a whole fades in and out periodically, and rotates around the vertical (Y) axis.
+ *
+ * As the ring rotates, both sides are visible. This is because the shouldCullBackFaces property is
+ * set to NO, so that both sides of each face are rendered. However, one side appears bright and
+ * colorful and the other appears dark. Surprisingly, it is the front sides of the faces that appear
+ * dark and it is the back side of the faces that appear bright and colorful. This is because the
+ * light is located on the opposite side of the ring from the camera, and therefore the side that
+ * faces towards the light is illuminated. However, since the normals of the faces in the rectangular
+ * plane extend out from the front face of the plane, it is when the front face faces towards the
+ * light (and away from the camera) that the plane appears most illuminated. At that time, it is the
+ * back faces of the plane that we see. When the front faces are facing the camera, the normals are
+ * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
+ * to understand the interaction between lighting, faces, and normals in any object.
  */
 -(void) addFloatingRing {
 	CC3MeshNode* floater = [CC3PlaneNode nodeWithName: kFloaterName];
-	[floater populateAsCenteredRectangleWithSize: CGSizeMake(500.0, 500.0)];
+	[floater populateAsCenteredRectangleWithSize: CGSizeMake(250.0, 250.0)];
 	floater.texture = [CC3Texture textureFromFile: kFloaterTextureFile];
-	floater.location = cc3v(0.0, 100.0, 0.0);
-	floater.rotation = cc3v(-90.0, 0.0, 0.0);
-	floater.isOpaque = NO;
-	floater.shouldCullBackFaces = NO;			// Show from below as well.
-	floater.zOrder = -2;
+	floater.location = cc3v(400.0, 150.0, -250.0);
+	floater.shouldCullBackFaces = NO;			// Show from behind as well.
+	floater.isTouchEnabled = YES;
 	[self addChild: floater];
 
-	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 3.0];
-	CCActionInterval* fadeIn = [CCFadeIn actionWithDuration: 3.0];
+	// Fade the floating ring in and out
+	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 5.0];
+	CCActionInterval* fadeIn = [CCFadeIn actionWithDuration: 5.0];
 	CCActionInterval* fadeCycle = [CCSequence actionOne: fadeOut two: fadeIn];
 	[floater runAction: [CCRepeatForever actionWithAction: fadeCycle]];
+	
+	// Rotate the floating ring to see the effect on the orientation of the plane normals
+	[floater runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /** Utility method to copy a file from the resources directory to the Documents directory */
@@ -502,7 +530,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	NSFileManager* fileMgr = [NSFileManager defaultManager];
 	[fileMgr removeItemAtPath: dstPath error: &err];
 	if ( [fileMgr copyItemAtPath: srcPath toPath: dstPath error: &err] ) {
-		LogCleanRez(@"Copied %@ to %@", srcPath, dstPath);
+		LogRez(@"Copied %@ to %@", srcPath, dstPath);
 		return YES;
 	} else {
 		LogError(@"Could not copy %@ to %@ because (%i) in %@: %@",
@@ -579,8 +607,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	globe.texture = [CC3Texture textureFromFile: texPath];
 	globe.location = cc3v(150.0, 200.0, -150.0);
 	globe.uniformScale = 50.0;
-	globe.color = ccWHITE;				// Increase the ambient reflection
-	globe.isTouchEnabled = YES;			// allow this node to be selected by touch events
+	globe.ambientColor = kCCC4FLightGray;		// Increase the ambient reflection
+	globe.isTouchEnabled = YES;				// allow this node to be selected by touch events
 	
 	// Rotate the globe
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
@@ -661,7 +689,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	texCube.uniformScale = 30.0;
 
 	// Add a texture to the textured cube. This creates a material automatically.
-	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];
+	texCube.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	texCube.textureRectangle = CGRectMake(0, 0, 1, 0.75);
+//	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];
+
 	texCube.ambientColor = CCC4FMake(0.6, 0.6, 0.6, 1.0);		// Increase the ambient reflection
 	
 	// Add direction markers to demonstrate how the sides are oriented. In the local coordinate
@@ -760,7 +791,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	podRezNode.resource = [IntroducingPODResource resourceFromFile: kRobotPODFile];
 	
 	// If you want to stop the robot arm from being animated, uncomment the following line.
-	//	[podRezNode disableAllAnimation];
+//	[podRezNode disableAllAnimation];
 	
 	podRezNode.isTouchEnabled = YES;
 	[self addChild: podRezNode];
@@ -818,16 +849,46 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Add a small white teapot that will be used to indicate the current position of the light
+ * Adds a small white teapot that will be used to indicate the current position of the light
  * that illuminates the scene. The light is animated and moves up and down according to
  * animation data from the POD file, and the white teapot tracks its location (actually its
  * direction, since it is a directional light).
  */
 -(void) addLightMarker {
 	teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
-	teapotWhite.uniformScale = 100.0;
+	teapotWhite.uniformScale = 200.0;
 	teapotWhite.isTouchEnabled = YES;		// allow this node to be selected by touch events
 	[self addChild: teapotWhite];
+}
+
+/**
+ * Adds a label created from bitmapped font loaded from a font confguration file.
+ *
+ * The CylinderLabel class is a custom class that further bends the text around the arc of
+ * a circle whose center is behind the text. The effect is like a marquee on a round tower.
+ * This example demonstrates both the use of bitmapped text labels, and the ability to
+ * manipulate the locations of vertices programmatically.
+ */
+-(void) addBitmapLabel {
+	CylinderLabel* bmLabel = [CylinderLabel nodeWithName: kBitmapLabelName];
+	bmLabel.radius = 30;
+	bmLabel.textAlignment = UITextAlignmentCenter;
+	bmLabel.relativeOrigin = ccp(0.5, 0.5);
+	bmLabel.tessellation = ccg(1, 1);
+	bmLabel.fontFileName = @"arial16.fnt";
+	bmLabel.labelString = @"Hello, world.";
+	bmLabelMessageIndex = 0;	// Keep track of which message is being displayed
+	
+	bmLabel.location = cc3v(-150.0, 75.0, 500.0);
+	bmLabel.rotation = cc3v(0.0, 180.0, 0.0);
+	bmLabel.uniformScale = 3.0;
+	bmLabel.color = ccORANGE;
+	bmLabel.shouldUseLighting = NO;
+	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
+	bmLabel.isTouchEnabled = YES;
+	[self addChild: bmLabel];
+	[bmLabel runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																				  rotateBy: cc3v(0, 30, 0)]]];
 }
 
 -(void) addProjectedLabel {
@@ -868,6 +929,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// find the camera and track it, so that it always faces the camera.
 	bb.location = cc3v( 0.0, 90.0, 0.0 );
 	bb.shouldAutotargetCamera = YES;
+
 	[[self getNodeNamed: kRobotTopArm] addChild: bb];
 	
 	// 2) Overlaid above the 3D scene.
@@ -1011,11 +1073,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// of the mesh horizontally.
 	[floatingHead flipTexturesHorizontally];
 
-	// The pivot point of the floating head mesh is at the bottom. It suits our purposes
-	// better to have the mesh pivot around the center of geometry. The method we invoke
-	// here changes the value of every vertex in the mesh. So we should only ever want
-	// to do this once per mesh.
-	[floatingHead movePivotToCenterOfGeometry];
+	// The origin of the floating head mesh is at the bottom. It suits our purposes better to
+	// have the origin of the mesh at the center of geometry. The method we invoke here changes
+	// the value of every vertex in the mesh. So we should only ever want to do this once per mesh.
+	[floatingHead moveMeshOriginToCenterOfGeometry];
 	
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
@@ -1095,7 +1156,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// If you want to restrict the mascot to only rotating side-to-side around the
 	// Y-axis, but not up and down, uncomment the following line.
-//	distractedMascotHolder.axisRestriction = kCC3TargettingAxisRestrictionYAxis;
+//	distractedMascotHolder.targettingConstraint = kCC3TargettingConstraintLocalYAxis;
 	
 	// To see the orientation of the mascot within the orienting wrapper, uncomment
 	// the first line below. This will show that the front of the mascot faces down
@@ -1150,7 +1211,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// How did we determine the billboardBoundingRect? This can be done by trial and
 	// error, by uncommenting culling logging in the CC3Billboard doesIntersectBoundingVolume:
-	// method. Or it is better done by changing LogCleanTrace to LogCleanDebug in the CC3Billboard
+	// method. Or it is better done by changing LogTrace to LogDebug in the CC3Billboard
 	// billboardBoundingRect property accessor method, commenting out the line above this
 	// comment, and uncommenting the following line. Doing so will cause an ever expanding
 	// bounding box to be logged, the maximum size of which can be used as the value to
@@ -1252,15 +1313,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// The first two commented lines below were used during development to help determine
 	// the size of the bounding box of the parent node.
 //	mallet.shouldDrawLocalContentWireframeBox = YES;
-//	LogCleanDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
+//	LogDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
 
 	mallet.shouldUseFixedBoundingVolume = YES;
-	CCArray* bvs = ((CC3NodeTighteningBoundingVolumeSequence*)mallet.boundingVolume).boundingVolumes;
-	CC3NodeSphericalBoundingVolume* sbv = [bvs objectAtIndex: 0];
-	sbv.radius = 1500.0;
-	CC3NodeBoundingBoxVolume* bbbv =  [bvs objectAtIndex: 1];
-	bbbv.boundingBox = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0); 
-	
+	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)mallet.boundingVolume;
+	bv.sphericalBoundingVolume.radius = 1500.0;
+	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
+
 	malletAndAnvils.isTouchEnabled = YES;		// make the mallet touchable
 	
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
@@ -1351,8 +1410,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a platform of 3D particles to the scene, laid out in a grid, and hanging over the
- * back part of the ground. Each particle is displayed in a different color, and the 
+ * Adds a platform of 3D point particles to the scene, laid out in a grid, and hanging over
+ * the back part of the ground. Each particle is displayed in a different color, and the
  * entire platform rotates.
  *
  * Each particle has a normal vector so that it interacts with the light sources.
@@ -1362,21 +1421,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  *
  * You can play with the settings below to understand how particles behave.
  */
--(void) addParticles {
+-(void) addPointParticles {
+	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
 	// Each particle has an individual location, color, size, and normal vector so that it
 	// interacts with light sources. You can change this parameter to see different options.
-	CC3PointParticleVertexContent particleContent = kCC3PointParticleContentColor |
-													kCC3PointParticleContentNormal |
-													kCC3PointParticleContentSize;
-	
-	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
 	CC3PointParticleEmitter* emitter = [CC3PointParticleEmitter nodeWithName: @"Particles"];
-	[emitter populateForMaxParticles: 1000
-							  ofType: [HangingParticle class]
-						  containing: particleContent];
-
+	emitter.particleClass = [HangingPointParticle class];
+	emitter.maximumParticleCapacity = 1000;
+	emitter.vertexContentTypes = kCC3VertexContentLocation |
+								 kCC3VertexContentColor |
+								 kCC3VertexContentNormal |
+								 kCC3VertexContentPointSize;
+	
 	// Set the emission characteristics
-	emitter.texture = [CC3Texture textureFromFile: @"fire.png"];
+	emitter.texture = [CC3Texture textureFromFile: kPointParticleTextureFile];
 	emitter.emissionInterval = 0.01;
 
 	// Combination of particleSize and unity scale distance determine visible size
@@ -1391,7 +1449,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE};	// Additive particles
 
 	// Uncomment to see effect of not using lighting.
-	// Can also get same effect by not including kCC3PointParticleContentNormal in particle content above.
+	// Can also get same effect by not including kCC3VertexContentNormal in particle content above.
 //	emitter.material.shouldUseLighting = NO;
 
 	// Shows the bounding volume. The boundingVolumePadding gives the boundary some depth
@@ -1404,51 +1462,103 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Set the location of the emitter, and set it rotating for effect.
 	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
-	[emitter runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				  rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+//	[emitter runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+//																				  rotateBy: cc3v(0.0, 15.0, 0.0)]]];
 	[self addChild: emitter];
+
+//	[emitter emitParticles: emitter.maximumParticleCapacity];	// Uncomment to get them all out at once
 	[emitter play];
 }
 
 /**
- * Adds a particle emitter, that emits particles as if from a hose, to the end of the robot arm.
- * The emitter is started and paused by touching the top part of the robot arm.
+ * Adds a platform of 3D mesh particles to the scene, laid out in a grid, and hanging over
+ * the back part of the ground. Each particle is displayed in a different color, and the
+ * entire platform can be rotated.
+ *
+ * Each particle is a small mesh cube. You can play with the settings below to understand
+ * how mesh particles behave.
  */
--(void) addHose {
-	// Each particle has an individual location, color and size.
-	// You can change this parameter to see different options.
-	CC3PointParticleVertexContent particleContent = kCC3PointParticleContentColor |
-													kCC3PointParticleContentSize;
+-(void) addMeshParticles {
+
+	#define kMeshParticleCubeExtent 10.0f
+	CC3BoxNode* templateModel = [CC3BoxNode nodeWithName: kTexturedCubeName];
+	[templateModel populateAsSolidBox: CC3BoundingBoxMake(-kMeshParticleCubeExtent,
+														  -kMeshParticleCubeExtent, 
+														  -kMeshParticleCubeExtent,
+														   kMeshParticleCubeExtent,
+														   kMeshParticleCubeExtent,
+														   kMeshParticleCubeExtent)];
+	// We get fancy here for the sake of it!
+	// The texture file is actually a composite of two textures. We're only interested in the
+	// bottom part of the texture, so we assign a texture rectangle to the template mesh.
+	// Each HangingMeshParticle also assigns itself a smaller texture rectangle within the
+	// texture rectangle of this template mesh. This demonstrates that particles can nest
+	// an individual texture rectangle within the texture rectangle of the tempalte mesh.
+	templateModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	templateModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 	
-	// Set up the emitter for CC3VariegatedPointParticleHoseEmitter particles.
-	CC3VariegatedPointParticleHoseEmitter* emitter = [CC3VariegatedPointParticleHoseEmitter nodeWithName: kHoseEmitterName];
-	[emitter populateForMaxParticles: 400 containing: particleContent];
+	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
+	// Each particle has an individual location, color, size, and normal vector so that it
+	// interacts with light sources. You can change this parameter to see different options.
+	CC3MeshParticleEmitter* emitter = [CC3MeshParticleEmitter nodeWithName: @"Particles"];
+	emitter.particleClass = [HangingMeshParticle class];
+	emitter.particleTemplate = templateModel;
+	emitter.maximumParticleCapacity = 1000;
+	emitter.vertexContentTypes = kCC3VertexContentLocation |
+								 kCC3VertexContentNormal |
+								 kCC3VertexContentTextureCoordinates;
 	
 	// Set the emission characteristics
-	emitter.texture = [CC3Texture textureFromFile: @"fire.png"];
-	emitter.emissionRate = 100.0f;								// 100 per second
-	emitter.minParticleLifeSpan = 3.0f;
-	emitter.maxParticleLifeSpan = 4.0f;							// Each lives for 2-3 seconds
-	emitter.minParticleSpeed = 100.0f;
-	emitter.maxParticleSpeed = 200.0f;							// Travelling 100-200 units/second
-	emitter.minParticleStartingSize = 20.0f;
-	emitter.maxParticleStartingSize = 40.0f;					// Starting at 20-40 pixels wide
-	emitter.minParticleEndingSize = kCC3ParticleConstantSize;
-	emitter.maxParticleEndingSize = kCC3ParticleConstantSize;	// Stay same size will alive
-	emitter.minParticleStartingColor = kCCC4FDarkGray;
-	emitter.maxParticleStartingColor = kCCC4FWhite;				// Mix of light colors
-	emitter.minParticleEndingColor = kCC3ParticleFadeOut;
-	emitter.maxParticleEndingColor = kCC3ParticleFadeOut;		// Fade out, but don't change color
+//	emitter.texture = [CC3Texture textureFromFile: kCubeTextureFile];
+	emitter.emissionInterval = 0.01;
 	
-	// Set the emitter to emit a thin stream.
-	// Since it's a small dispersion angle, precalculate the tangent values to
-	// avoid performing two tanf function calls every time a particle is emitted.
-	emitter.dispersionAngle = CGSizeMake(10.0, 10.0);
-	emitter.shouldPrecalculateNozzleTangents = YES;
+	// You can play with the following depth and blending parameters to see the effects
+//	emitter.shouldDisableDepthTest = YES;
+//	emitter.shouldDisableDepthMask = NO;
+//	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
+//	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE};	// Additive particles
 	
-	// Try a wider dispersion...but need to turn tangent precalc off to get good angle randomization.
-//	emitter.dispersionAngle = CGSizeMake(180.0, 180.0);
-//	emitter.shouldPrecalculateNozzleTangents = NO;
+	// Uncomment to see effect of not using lighting.
+	// Can also get same effect by not including kCC3VertexContentNormal in particle content above.
+//	emitter.material.shouldUseLighting = NO;
+	
+	// Shows the bounding volume. The boundingVolumePadding gives the boundary some depth
+	// so that the emitter doesn't disappear if particles are still on-screen.
+	emitter.boundingVolumePadding = 20.0;
+	emitter.shouldDrawLocalContentWireframeBox = YES;
+	emitter.shouldUseFixedBoundingVolume = NO;
+	
+	emitter.isTouchEnabled = YES;		// Shows the emitter name when touched
+	
+	// Set the location of the emitter, and set it rotating for effect.
+	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
+//	[emitter runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+//																				  rotateBy: cc3v(0.0, 15.0, 0.0)]]];
+	[self addChild: emitter];
+	
+//	[emitter emitParticles: emitter.maximumParticleCapacity];	// Uncomment to get them all out at once
+	[emitter play];
+}
+
+/**
+ * Adds a point particle emitter, that emits particles as if from a hose, to the end of the robot arm.
+ * The emitter is started and paused by touching the robot arm.
+ */
+-(void) addPointHose {
+	// Set up the emitter for CC3UniformlyEvolvingPointParticle particles. This specialized emitter
+	// already comes with an appropriate particleNavigator and particleClass, which we do not need
+	// to change for this usage. We don't need to set up a maxiumum capacity, because this emitter
+	// reaches steady-state around 350 particles Each particle has an individual location, color
+	// and size, but have no normal, so they do not interact with lighting. You can change this
+	// property to see different options.
+	CC3VariegatedPointParticleHoseEmitter* emitter = [CC3VariegatedPointParticleHoseEmitter nodeWithName: kPointHoseEmitterName];
+	emitter.vertexContentTypes = kCC3VertexContentLocation |
+								 kCC3VertexContentColor |
+								 kCC3VertexContentPointSize;
+	
+	// Set the emission characteristics
+	emitter.texture = [CC3Texture textureFromFile: kPointParticleTextureFile];
+	emitter.emissionRate = 100.0f;			// Per second
 	
 	// Combination of particleSize and unity scale distance determine visible size
 	// of each particle relative to the distance from the particle to the camera.
@@ -1473,11 +1583,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// dynamic boundary and setting the shouldMaximize property of the bounding volume to YES
 	// in order to determine the maximum range of the particles.
 //	emitter.shouldUseFixedBoundingVolume = YES;
-//	CCArray* bvs = ((CC3NodeTighteningBoundingVolumeSequence*)emitter.boundingVolume).boundingVolumes;
-//	CC3NodeSphericalBoundingVolume* sbv = [bvs objectAtIndex: 0];
-//	sbv.radius = 900.0;
-//	CC3NodeBoundingBoxVolume* bbbv =  [bvs objectAtIndex: 1];
-//	bbbv.boundingBox = CC3BoundingBoxMake(-659.821, -408.596, -657.981, 651.606, 806.223, 637.516); 
+//	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)emitter.boundingVolume;
+//	bv.sphericalBoundingVolume.radius = 900.0;
+//	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-659.821, -408.596, -657.981, 651.606, 806.223, 637.516);
 
 	// Shows the emitter name and location when the particles are touched
 	emitter.isTouchEnabled = YES;
@@ -1486,11 +1594,45 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// participating in any ray tracing.
 	emitter.shouldIgnoreRayIntersection = YES;
 
-	// Place the nozzle at the end of the robot arm so that it moves
-	// with the arm, and point the nozzle out the end of the arm.
-	emitter.nozzle.location = cc3v( 0.0, 90.0, 0.0 );
-	emitter.nozzle.rotation = cc3v( 90.0, 30.0, 0.0 );
-	[[self getNodeNamed: kRobotTopArm] addChild: emitter.nozzle];
+	// Configure the ranges for the beginning and ending particle size and color.
+	emitter.minParticleStartingSize = 20.0f;
+	emitter.maxParticleStartingSize = 40.0f;					// Starting at 20-40 pixels wide
+	emitter.minParticleEndingSize = kCC3ParticleConstantSize;
+	emitter.maxParticleEndingSize = kCC3ParticleConstantSize;	// Stay same size will alive
+	emitter.minParticleStartingColor = kCCC4FDarkGray;
+	emitter.maxParticleStartingColor = kCCC4FWhite;				// Mix of light colors
+	emitter.minParticleEndingColor = kCC3ParticleFadeOut;
+	emitter.maxParticleEndingColor = kCC3ParticleFadeOut;		// Fade out, but don't change color
+	
+	// Emitters can be assigned a particle navigator, which is responsible for configuring the life-cycle
+	// and trajectory of the particle. A particle navigator is only involved in the initial configuration of the
+	// particle. It does not interact with the particle once it has been emitted, unless the particle
+	// accesses it directly. In this case, we establish a particle navigator to configure the starting
+	// and ending state for the life-span, speed, size and color, to establish the evolution of the
+	// particle throughout its life.
+	CC3HoseParticleNavigator* particleNavigator = (CC3HoseParticleNavigator*)emitter.particleNavigator;
+	particleNavigator.minParticleLifeSpan = 3.0f;
+	particleNavigator.maxParticleLifeSpan = 4.0f;			// Each lives for 2-3 seconds
+	particleNavigator.minParticleSpeed = 100.0f;
+	particleNavigator.maxParticleSpeed = 200.0f;			// Travelling 100-200 units/second
+	
+	// Set the emitter to emit a thin stream. Since it's a small dispersion angle, the 
+	// shouldPrecalculateNozzleTangents property will automatically be set to YES to avoid
+	// performing two tanf function calls every time a particle is emitted.
+	particleNavigator.dispersionAngle = CGSizeMake(10.0, 10.0);
+	
+	// Try a wider dispersion. This will automatically set the shouldPrecalculateNozzleTangents to NO.
+//	particleNavigator.dispersionAngle = CGSizeMake(180.0, 180.0);
+	
+	// The hose navigator has a nozzle to direct the flow of the particles. The nozzle is actually
+	// a CC3Node that can be located anywhere in the scene, can be attached to another node, and can
+	// be oriented so as to to direct the stream of particles in a particular direction. In this case,
+	// we'll place the hose navigator nozzle at the end of the robot arm so that it moves with the arm,
+	// and point the nozzle out the end of the arm.
+	CC3Node* nozzle = particleNavigator.nozzle;
+	nozzle.location = cc3v( 0.0, 90.0, 0.0 );
+	nozzle.rotation = cc3v( -90.0, 30.0, 0.0 );
+	[[self getNodeNamed: kRobotTopArm] addChild: nozzle];
 	
 	// Add the emitter to the scene
 	[self addChild: emitter];
@@ -1500,7 +1642,140 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// bounding volume to optimize intersection testing. Touch the robot arm to see
 	// the bounding volume of the particle emitter grow and shrink dynamically.
 	// Use the joystick controls to back the camera away to get the full effect.
-//	emitter.shouldDrawBoundingVolume = YES;
+	emitter.shouldDrawBoundingVolume = NO;
+}
+
+/**
+ * Adds a mesh particle emitter, that emits particles as if from a hose, to the end of the robot arm.
+ * The emitter is started and paused by touching the robot arm.
+ */
+-(void) addMeshHose {
+
+	#define kPartMeshDim 3.0f
+	
+	// The template mesh node defines the mesh (and optionally the material) that is used
+	// for each particle. Each particle is constucted as a transformed copy of the template mesh.
+	// This particle emitter can have multiple template meshes, to allow more than one particle
+	// shape. In this case, we create an emitter that emits both spheres and boxes.
+	
+	// Because an emitter draws all particles with a single GL draw call, both template meshes
+	// must use the same texture. We create a single texture file that is a combination of
+	// two textures, and assign a different textureRectangle to each template mesh. The particles
+	// that use each mesh will inherit their texture rectangle. We can even assign an individual
+	// texture rectangle to each particle (although that is not done in this example), to allow
+	// each particle to use a different part of the textureRectangle assigned to the template mesh,
+	// allowing each partile to appear to be textured individually.
+
+	// Box template mesh
+	CC3BoxNode* boxModel = [CC3BoxNode node];
+	[boxModel populateAsSolidBox: CC3BoundingBoxMake(-kPartMeshDim, -kPartMeshDim, -kPartMeshDim,
+													  kPartMeshDim, kPartMeshDim, kPartMeshDim)];
+	boxModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	boxModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);	// Bottom part of texture is box texture
+	CC3VertexArrayMesh* boxMesh = (CC3VertexArrayMesh*)boxModel.mesh;
+
+	// Sphere template mesh
+	CC3MeshNode* ballModel = [CC3MeshNode node];
+	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: ccg(8, 7)];
+	ballModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
+	CC3VertexArrayMesh* ballMesh = (CC3VertexArrayMesh*)ballModel.mesh;
+	
+	// Set up the emitter to emit mesh particles of type CC3UniformlyEvolvingMeshParticle constructed as
+	// copies of the particle template mesh. We don't need to set up a maxiumum capacity, because this
+	// emitter reaches steady-state after a couple of hundred particles. We include color content type,
+	// and set an alpha-blending function on the emitter material so that the particles can be faded.
+	// We assign two separate template meshes. Each particle will be assigned one of these meshes at
+	// random as it is emitted.
+	CC3MultiTemplateMeshParticleEmitter* emitter = [CC3MultiTemplateMeshParticleEmitter nodeWithName: kMeshHoseEmitterName];
+	emitter.vertexContentTypes = kCC3VertexContentLocation |
+								 kCC3VertexContentNormal |
+								 kCC3VertexContentColor |
+								 kCC3VertexContentTextureCoordinates;
+	emitter.particleClass = [RotatingFadingMeshParticle class];
+	[emitter addParticleTemplateMesh: boxMesh];
+	[emitter addParticleTemplateMesh: ballMesh];
+	emitter.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
+	
+	// Set the emission characteristics
+	emitter.emissionRate = 50.0f;				// Per second
+
+	// The boundingVolumePadding gives the boundary some depth so that the emitter doesn't
+	// disappear if particles are still on-screen.
+	emitter.boundingVolumePadding = 20.0;
+	
+	// Change this to YES to make boundary visible, and watch it change as the particles move around.
+	emitter.shouldDrawLocalContentWireframeBox = NO;
+	
+	// By default, the bounding volume of the emitter is calculated dynamically as the particles
+	// move around. By using a fixed bounding volume, you can improve performance in two ways:
+	// A fixed bounding volume avoids the need to have to calculate the bounding volume on each frame,
+	// as the particles move around, and if the bounding volume is outside the camera's frustum,
+	// the vertices of the paricles do not need to be transformed.
+	// To see the effect, uncomment the following lines. The boundary below was determined by running
+	// with a dynamic boundary and setting the shouldMaximize property of the bounding volume to YES
+	// in order to determine the maximum range of the particles (and logging the result).
+//	emitter.shouldUseFixedBoundingVolume = YES;
+//	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)emitter.boundingVolume;
+//	bv.sphericalBoundingVolume.radius = 750.0;
+//	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-400.0, -100.0, -500.0, 500.0, 750.0, 500.0);
+	
+	// Even without a fixed bounding volume, you can still improve performance when the particles
+	// are not in view of the camera by setting the following property to NO.
+	// However, this can sometimes create a visually jarring effect when the particles come back
+	// into view. See the notes of the shouldTransformUnseenParticles property for more info.
+	emitter.shouldTransformUnseenParticles = YES;
+	
+	// Shows the emitter name and location when the particles are touched
+	emitter.isTouchEnabled = YES;
+	
+	// We don't want the emitter's bounding volume (which will be quite large)
+	// participating in any ray tracing.
+	emitter.shouldIgnoreRayIntersection = YES;
+	
+	// Emitters can be assigned a particle navigator, which is responsible for configuring the
+	// life-cycle and trajectory of the particle. A particle navigator is only involved in the
+	// initial configuration of the particle. It does not interact with the particle once it has
+	// been emitted, unless the particle accesses it directly. In this case, we establish a particle
+	// navigator to configure the starting and ending state for the life-span and speed, to establish
+	// the evolution of the particle throughout its life.
+	CC3HoseParticleNavigator* particleNavigator = [CC3HoseParticleNavigator navigator];
+	particleNavigator.minParticleLifeSpan = 4.0f;
+	particleNavigator.maxParticleLifeSpan = 6.0f;			// Each lives for a few seconds
+	particleNavigator.minParticleSpeed = 50.0f;
+	particleNavigator.maxParticleSpeed = 100.0f;			// Travelling units/second
+	
+	// Set the emitter to emit a thin stream. Since it's a small dispersion angle, the 
+	// shouldPrecalculateNozzleTangents property will automatically be set to YES to avoid
+	// performing two tanf function calls every time a particle is emitted.
+	particleNavigator.dispersionAngle = CGSizeMake(10.0, 10.0);
+	
+	// Try a wider dispersion. This will automatically set the shouldPrecalculateNozzleTangents to NO.
+//	particleNavigator.dispersionAngle = CGSizeMake(180.0, 180.0);
+	
+	// Assign the navigator to the emitter.
+	emitter.particleNavigator = particleNavigator;
+	
+	// The hose navigator has a nozzle to direct the flow of the particles. The nozzle is actually
+	// a CC3Node that can be located anywhere in the scene, can be attached to another node, and can
+	// be oriented so as to to direct the stream of particles in a particular direction. In this case,
+	// we'll place the hose navigator nozzle at the end of the robot arm so that it moves with the arm,
+	// and point the nozzle out the end of the arm.
+	CC3Node* nozzle = particleNavigator.nozzle;
+	nozzle.location = cc3v( 0.0, 90.0, 0.0 );
+	nozzle.rotation = cc3v( -90.0, 30.0, 0.0 );
+	[[self getNodeNamed: kRobotTopArm] addChild: nozzle];
+	
+	// Add the emitter to the scene
+	[self addChild: emitter];
+	
+	// To see the bounding volumes of the emitter, set the shouldDrawBoundingVolume to YES.
+	// The bounding volume of most nodes contains both a spherical and bounding-box
+	// bounding volume to optimize intersection testing. Touch the robot arm to see
+	// the bounding volume of the particle emitter grow and shrink dynamically.
+	// Use the joystick controls to back the camera away to get the full effect.
+	emitter.shouldDrawBoundingVolume = NO;
 }
 
 /**
@@ -1557,7 +1832,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// How did we determine the billboardBoundingRect? This can be done by trial and
 	// error, by uncommenting culling logging in the CC3Billboard doesIntersectBoundingVolume:
-	// method. Or it is better done by changing LogCleanTrace to LogCleanDebug in the CC3Billboard
+	// method. Or it is better done by changing LogTrace to LogDebug in the CC3Billboard
 	// billboardBoundingRect property accessor method, commenting out the line above this
 	// comment, and uncommenting the following line. Doing so will cause an ever expanding
 	// bounding box to be logged, the maximum size of which can be used as the value to
@@ -1628,9 +1903,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  }
 
 /** After all the nodes have been updated, check for collisions. */
--(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
-	[self checkForCollisions];
-}
+-(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor { [self checkForCollisions]; }
 
 /**
  * Check for collisions.
@@ -1661,7 +1934,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		// by getting the current spin action on the teapot holder and replacing it
 		// with the reverse spin.
 		if (CC3VectorDot(teapotSatellite.velocity, tpDir) > 0.0f) {
-			LogCleanInfo(@"BANG! %@ hit %@", teapotSatellite, brickWall);
+			LogInfo(@"BANG! %@ hit %@", teapotSatellite, brickWall);
 			
 			// Get the current spinning action.
 			CCAction* spinAction = [teapotTextured getActionByTag: kTeapotRotationActionTag];
@@ -1759,7 +2032,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// We copy it so we can mofify it.
 	// Remove the camera and light that it includes, and since the billboard
 	// 2D CCNode can't easily be copied, we'll remove the billboard as well.
-	CC3Node* robotTemplate = [[self getNodeNamed: kPODRobotRezNodeName] copyAutoreleased];
+	CC3Node* robotTemplate = [[self getNodeNamed: kPODRobotRezNodeName] autoreleasedCopy];
 	[[robotTemplate getNodeNamed: kPODLightName] remove];
 	[[robotTemplate getNodeNamed: kPODCameraName] remove];
 	[[robotTemplate getNodeNamed: kBillboardName] remove];
@@ -1781,7 +2054,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /** Create a landing craft and populate it with an army of teapots. */
 -(void) invadeWithTeapotArmy {
 	// First create a template node by copying the POD resource node.
-	CC3Node* teapotTemplate = [[self getNodeNamed: kTeapotWhiteName] copyAutoreleased];
+	CC3Node* teapotTemplate = [[self getNodeNamed: kTeapotWhiteName] autoreleasedCopy];
 	teapotTemplate.uniformScale *= 3.0;
 
 	[self invadeWithArmyOf: teapotTemplate];
@@ -2080,6 +2353,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		
 		// For fun, uncomment the following line to draw a wireframe box around the beachball
 //		aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
+		
 	} else if (aNode == brickWall) {
 		[self touchBrickWallAt: touchPoint];
 	} else if (aNode == woodenSign) {
@@ -2092,6 +2366,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self toggleActiveCamera];
 	} else if (aNode == [self getNodeNamed: kLittleBrotherName]) {
 		[self toggleActiveCamera];
+	} else if (aNode == [self getNodeNamed: kBitmapLabelName]) {
+		[self cycleLabelOf: (CC3BitmapLabelNode*)aNode];
 	} else {
 		
 		// If the node is either the textured or rainbow teapot, toggle the display of
@@ -2106,10 +2382,21 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			teapotTextured.shouldDrawWireframeBox = !teapotTextured.shouldDrawWireframeBox;
 		}
 
-		// If the robot was touched, toggle emission from the hose it holds.
+		// If the robot was touched, cycle through three particle hose options.
+		// If no particles are being emitting, turn on the point particle hose.
+		// If the point particle hose is emitting, turn it off and turn on the mesh particle hose.
+		// If the mesh particle hose is emitting, turn it off so neither hose is emitting.
 		if (aNode == [self getNodeNamed: kPODRobotRezNodeName] ) {
-			CC3PointParticleEmitter* hose = (CC3PointParticleEmitter*)[self getNodeNamed: kHoseEmitterName];
-			hose.isEmitting = !hose.isEmitting;
+			CC3ParticleEmitter* pointHose = (CC3ParticleEmitter*)[self getNodeNamed: kPointHoseEmitterName];
+			CC3ParticleEmitter* meshHose = (CC3ParticleEmitter*)[self getNodeNamed: kMeshHoseEmitterName];
+			if (pointHose.isEmitting) {
+				[pointHose pause];
+				[meshHose play];
+			} else if (meshHose.isEmitting) {
+				[meshHose pause];
+			} else {
+				[pointHose play];
+			}
 		}
 		
 		// If the globe was touched, toggle the opening of a HUD window displaying it up close.
@@ -2129,7 +2416,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) markTouchPoint: (CGPoint) touchPoint on: (CC3Node*) aNode {
 
 	if (!aNode) {
-		LogCleanInfo(@"You selected no node.");
+		LogInfo(@"You selected no node.");
 		return;
 	}
 
@@ -2181,7 +2468,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[desc appendFormat: @" at %@ on its boundary.", NSStringFromCC3Vector([puncturedNodes punctureLocationAt: i])];
 		[desc appendFormat: @" (%@ globally).", NSStringFromCC3Vector([puncturedNodes globalPunctureLocationAt: i])];
 	}
-	LogCleanInfo(@"%@", desc);
+	LogInfo(@"%@", desc);
 }
 
 /**
@@ -2200,7 +2487,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	if (touchLoc.w > 0.0) {
 		CC3MeshNode* tp = [[teapotWhite copyWithName: kTeapotOrangeName] autorelease];
 		tp.color = ccORANGE;
-		tp.location = cc3v(touchLoc.x, touchLoc.y, touchLoc.z);
+		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
 		
 		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
 		
@@ -2346,6 +2633,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 }
 
+/** Cycles the specified bitmapped label node through a selection of label strings. */
+-(void) cycleLabelOf: (CC3BitmapLabelNode*) bmLabel {
+	switch (bmLabelMessageIndex) {
+		case 0:
+			bmLabel.labelString = @"Goodbye,\ncruel world.";
+			bmLabel.color = ccRED;
+			bmLabelMessageIndex++;
+			break;
+		default:
+			bmLabel.labelString = @"Why,\nhello again,\nworld!";
+			bmLabel.color = ccYELLOW;
+			bmLabelMessageIndex = 0;
+			break;
+	}
+}
+
 /** Cycles through a variety of shadowing options for the specified node. */
 -(void) cycleShadowFor: (CC3Node*) aNode {
 	
@@ -2355,7 +2658,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// If the node already has a shadow volume, remove it, otherwise add one.
 	if ( [aNode hasShadowVolumesForLight: podLight] ) {
 		[aNode removeShadowVolumesForLight: podLight];
-		LogCleanInfo(@"Removed shadow from: %@", aNode);
+		LogInfo(@"Removed shadow from: %@", aNode);
 	} else {
 		[aNode addShadowVolumesForLight: podLight];
 		
@@ -2367,226 +2670,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			aNode.shadowOffsetUnits = 0;
 			aNode.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;
 		}
-		LogCleanInfo(@"Added shadow to: %@", aNode);
+		LogInfo(@"Added shadow to: %@", aNode);
 	}
 }
 
 @end
-
-
-#pragma mark -
-#pragma mark Specialized POD classes
-
-#pragma mark IntroducingPODResource
-
-@implementation IntroducingPODResource
-
-/**
- * Return a customized light class, to handle the idiosyncracies of the way the original
- * PVR demo app uses the POD file data. This shouldn't usually be necessary.
- */
--(CC3Light*) buildLightAtIndex: (uint) lightIndex {
-	return [IntroducingPODLight nodeAtIndex: lightIndex fromPODResource: self];
-}
-
-/**
- * The PVRT example ignores all but ambient and diffuse material properties from the POD
- * file and uses default values instead. To duplicate...force other properties to defaults.
- */
--(CC3Material*) buildMaterialAtIndex: (uint) materialIndex {
-	CC3Material* mat = [super buildMaterialAtIndex: materialIndex];
-	mat.specularColor = kCC3DefaultMaterialColorSpecular;
-	mat.emissionColor = kCC3DefaultMaterialColorEmission;
-	mat.shininess = kCC3DefaultMaterialShininess;
-	return mat;
-}
-
-@end
-
-
-#pragma mark IntroducingPODLight
-
-@implementation IntroducingPODLight
-
-/** Although the POD file contains direction info, it is ignored in this demo (as in the PVRT example). */
--(void) applyDirection {}
-
-/** 
- * Although the POD file contains light color info, it is ignored in this demo (as in the PVRT example)
- * and the GL default values are used instead.
- */
--(void) applyColor {
-	gles11Light.ambientColor.value = kCC3DefaultLightColorAmbient;
-	gles11Light.diffuseColor.value = kCC3DefaultLightColorDiffuse;
-	gles11Light.specularColor.value = kCC3DefaultLightColorSpecular;
-}
-
-@end
-
-
-#pragma mark HeadPODResource
-
-@implementation HeadPODResource
-
-/**
- * The POD file does not contain any real textures, but does contain a reference
- * to a texture that does not exist. Simply override to skip all texture building.
- * This shouldn't usually be necessary.
- */
--(CC3Texture*) buildTextureAtIndex: (uint) textureIndex { return nil; }
-
-@end
-
-
-#pragma mark -
-#pragma mark PhysicsMeshNode
-
-@implementation PhysicsMeshNode
-
-@synthesize velocity, previousGlobalLocation;
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		velocity = kCC3VectorZero;
-		previousGlobalLocation = kCC3VectorZero;
-	}
-	return self;
-}
-
-/** After the node has been transformed, calculated its new velocity. */
--(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
-	CC3Vector currGlobalLoc = self.globalLocation;
-	CC3Vector movement = CC3VectorDifference(currGlobalLoc, self.previousGlobalLocation);
-	velocity = CC3VectorScaleUniform(movement, 1.0f / visitor.deltaTime);
-	previousGlobalLocation = currGlobalLoc;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark DoorMeshNode
-
-@implementation DoorMeshNode
-
-@synthesize isOpen;
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		isOpen = NO;
-	}
-	return self;
-}
-
-
-@end
-
-#pragma mark -
-#pragma mark SpinningNode
-
-@implementation SpinningNode
-
-@synthesize spinAxis, spinSpeed, friction, isFreeWheeling;
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		spinAxis = kCC3VectorZero;
-		spinSpeed = 0.0f;
-		friction = 0.0f;
-		isFreeWheeling = NO;
-	}
-	return self;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3Node*) another {
-	[super populateFrom: another];
-	
-	// Only copy these properties if the original is of the same class
-	if ( [another isKindOfClass: [SpinningNode class]] ) {
-		SpinningNode* anotherSpinningNode = (SpinningNode*)another;
-		spinAxis = anotherSpinningNode.spinAxis;
-		spinSpeed = anotherSpinningNode.spinSpeed;
-		friction = anotherSpinningNode.friction;
-		isFreeWheeling = anotherSpinningNode.isFreeWheeling;
-	}
-}
-
-// Don't bother continuing to rotate once below this speed (in degrees per second)
-#define kSpinningMinSpeed	6.0
-
-/**
- * On each update, if freewheeling, rotate the node around the spinAxis, by an
- * angle determined by the spinSpeed. Then slow the spinSpeed down based on the
- * friction value and how long the friction has been applied since the last update.
- * Stop rotating altogether once the speed is low enough to be unnoticable, so that
- * we don't continue to perform transforms (and rebuilding shadows) unnecessarily.
- */
--(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
-	GLfloat dt = visitor.deltaTime;
-	if (isFreeWheeling && spinSpeed > kSpinningMinSpeed) {
-		GLfloat deltaAngle = spinSpeed * dt;
-		[self rotateByAngle: deltaAngle aroundAxis: spinAxis];
-		spinSpeed -= (deltaAngle * friction);
-		LogCleanTrace(@"Spinning %@ by %.3f at speed %.3f", self, deltaAngle, spinSpeed);
-	}
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3Node extension for user data
-
-/**
- * Demonstrates the initialization and disposal of application-specific userData by adding
- * custom extension categories to subclasses of CC3Identifiable (nodes, materials, meshes,
- * textures, etc).
- */
-@implementation CC3Node (MashUpUserData)
-
-// Change the LogCleanTrace to LogCleanDebug to see when userData would be initialized for each node
--(void) initUserData {
-	LogCleanTrace(@"%@ initializing userData reference.", self);
-}
-
-// Change the LogCleanTrace to LogCleanDebug and then click the invade button when running the app.
--(void) releaseUserData {
-	LogCleanTrace(@"%@ disposing of userData.", self);
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark HangingParticle
-
-@implementation HangingParticle
-
-/**
- * Uses the index of the particle to determine its location relative to the origin of
- * the emitter. The particles are laid out in a simple rectangular grid in the X-Z plane,
- * with kParticlesPerSide particles on each side of the grid.
- *
- * Each particle is assigned a random color and size.
- */
--(void) initializeParticle {
-	GLint zIndex = index / kParticlesPerSide;
-	GLint xIndex = index % kParticlesPerSide;
-	
-	GLfloat xStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
-	GLfloat zStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
-	
-	self.location = cc3v(xStart + (xIndex * kParticlesSpacing),
-						 0.0,
-						 zStart + (zIndex * kParticlesSpacing) );
-	
-	self.color4F = RandomCCC4FBetween(kCCC4FDarkGray, kCCC4FWhite);
-	
-	GLfloat avgSize = emitter.particleSize;
-	self.size = CC3RandomFloatBetween(avgSize * 0.75, avgSize * 1.25);
-}
-
-@end
-

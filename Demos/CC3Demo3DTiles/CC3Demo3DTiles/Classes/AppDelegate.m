@@ -99,20 +99,18 @@
 	[director setAnimationInterval:1.0/60];
 	[director setDisplayFPS:YES];
 	
-	
 	// make the OpenGLView a child of the view controller
 	[viewController setView:glView];
 	
 	// make the View Controller a child of the main window
 	[window addSubview: viewController.view];
-	
+	window.rootViewController = viewController;
 	[window makeKeyAndVisible];
 	
 	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images
 	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565
 	// You can change anytime.
 	[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA8888];
-
 	
 	// Removes the startup flicker
 	[self removeStartupFlicker];
@@ -158,15 +156,8 @@
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-	CCDirector *director = [CCDirector sharedDirector];
-	
-	[[director openGLView] removeFromSuperview];
-	
-	[viewController release];
-	
-	[window release];
-	
-	[director end];	
+	[CCDirector.sharedDirector.openGLView removeFromSuperview];
+	[CCDirector.sharedDirector end];
 }
 
 - (void)applicationSignificantTimeChange:(UIApplication *)application {
@@ -174,7 +165,7 @@
 }
 
 - (void)dealloc {
-	[[CCDirector sharedDirector] end];
+	[viewController release];
 	[window release];
 	[super dealloc];
 }

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Foundation.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -60,3 +60,20 @@ NSString* GetGLErrorText(GLenum errCode) {
 			return [NSString stringWithFormat: @"Unknown GL error (%i)", errCode];
 	}
 }
+
+void DoLogGLErrorState(NSString* fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	GLenum errCode = glGetError();
+	if (errCode) {
+		NSString* errText = [NSString stringWithFormat: @"[***GL ERROR***] %@, %@.%@",
+							 GetGLErrorText(errCode), [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease],
+							 (GL_ERROR_TRACING_ENABLED ? @"" : @" To investigate further, set the preprocessor macro GL_ERROR_TRACING_ENABLED=1 in your project build settings.")];
+		printf("%s\n", [errText UTF8String]);
+		NSCAssert1(!GL_ERROR_ASSERTION_ENABLED,
+				  @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
+				  errText);
+	}
+	va_end(args);
+}
+

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Capabilities.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -155,7 +155,7 @@
 	self.lineSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																		  forState: GL_LINE_SMOOTH];
 
-	// Crashes when attempting to read the GL value of GL_MATRIX_PALETTE_OES
+	// Crashes when attempting to read the GL value.
 	self.matrixPalette = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																			 forState: GL_MATRIX_PALETTE_OES
 															 andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
@@ -168,7 +168,7 @@
 	self.pointSmooth = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																		   forState: GL_POINT_SMOOTH];
 
-	// Illegal GL enum when trying to read value of GL_POINT_SPRITE_OES.
+	// Illegal GL enum when trying to read GL value.
 	self.pointSprites = [CC3OpenGLES11StateTrackerServerCapability trackerWithParent: self
 																			forState: GL_POINT_SPRITE_OES
 															andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
@@ -262,9 +262,12 @@
 																			  forState: GL_POINT_SIZE_ARRAY_OES];
 	self.vertexArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
 																		   forState: GL_VERTEX_ARRAY];
+
+	// Crashes OpenGL Analyzer when attempting to read the GL value of GL_WEIGHT_ARRAY_OES
 	self.weightArray = [CC3OpenGLES11StateTrackerClientCapability trackerWithParent: self
-																		   forState: GL_WEIGHT_ARRAY_OES];
-}	
+																		   forState: GL_WEIGHT_ARRAY_OES
+														   andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 300];

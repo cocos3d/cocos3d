@@ -1,7 +1,7 @@
 /*
  * CC3VertexArraysPODExtensions.mm
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -50,12 +50,12 @@ extern "C" {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [super init]) ) {
 		GLint elemSize = pcd->n;
-		LogCleanRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
+		LogRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
 		if (elemSize) {
 			self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
 			self.elementSize = elemSize;
-			self.elementStride = pcd->nStride;
-			self.elementCount = psm->nNumVertex;
+			self.vertexStride = pcd->nStride;
+			self.vertexCount = psm->nNumVertex;
 			[self setElementsFromCPODData: pcd fromSPODMesh: psm];
 		} else {
 			[self release];
@@ -77,11 +77,11 @@ extern "C" {
 /** Template method extracts the vertex data from the specified SPODMesh and CPODData structures.  */
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
 	if (aSPODMesh->pInterleaved) {					// vertex data is interleaved
-		self.elements = aSPODMesh->pInterleaved;
+		self.vertices = aSPODMesh->pInterleaved;
 		self.elementOffset = (GLuint)aCPODData->pData;
 	} else {										// not interleaved
-		self.elements = aCPODData->pData;
-		allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
+		self.vertices = aCPODData->pData;
+		allocatedVertexCapacity = vertexCount;	// CC3VertexArray instance will free data when needed.
 		aCPODData->pData = NULL;				// Clear data reference from CPODData so it won't try to free it.
 		self.elementOffset = 0;
 	}
@@ -102,7 +102,7 @@ extern "C" {
 
 		[self allocateStripLengths: psm->nNumStrips];
 		for (uint i = 0; i < psm->nNumStrips; i++) {
-			stripLengths[i] = [self vertexCountFromFaceCount: (psm->pnStripLength[i])];
+			stripLengths[i] = [self vertexIndexCountFromFaceCount: (psm->pnStripLength[i])];
 		}
 	}
 	return self;
@@ -124,7 +124,7 @@ extern "C" {
 /** CC3VertexLocations manages freeing either dedicated or interleaved data */
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
 	[super setElementsFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
-	allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
+	allocatedVertexCapacity = vertexCount;	// CC3VertexArray instance will free data when needed.
 }
 
 @end
@@ -196,17 +196,17 @@ extern "C" {
 	return [self initFromCPODData: &psm->sFaces fromSPODMesh: aSPODMesh];
 }
 
-/** Calc elementCount after drawingMode has been set. */
+/** Calc vertexCount after drawingMode has been set. */
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
 	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
-		self.elementCount = [self vertexCountFromFaceCount: ((SPODMesh*)aSPODMesh)->nNumFaces];
-		allocatedElementCount = elementCount;	// CC3VertexArray instance will free data when needed.
+		self.vertexCount = [self vertexIndexCountFromFaceCount: ((SPODMesh*)aSPODMesh)->nNumFaces];
+		allocatedVertexCapacity = vertexCount;	// CC3VertexArray instance will free data when needed.
 	}
 	return self;
 }
 
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
-	self.elements = aCPODData->pData;
+	self.vertices = aCPODData->pData;
 	aCPODData->pData = NULL;			// Clear data reference from CPODData so it won't try to free it.
 	self.elementOffset = 0;				// Indices are not interleaved.
 }

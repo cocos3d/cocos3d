@@ -1,7 +1,7 @@
 /*
  * TileScene.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -169,7 +169,7 @@
 
 // Tint the node to cyan and back again to provide user feedback to touch
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {
-	LogCleanInfo(@"You selected %@ at %@, or %@ in 2D.", aNode,
+	LogInfo(@"You selected %@ at %@, or %@ in 2D.", aNode,
 				 NSStringFromCC3Vector(aNode ? aNode.globalLocation : kCC3VectorZero),
 				 NSStringFromCC3Vector(aNode ? [activeCamera projectNode: aNode] : kCC3VectorZero));
 	CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.2f colorTo: kCCC4FCyan];

@@ -1,7 +1,7 @@
 /*
  * CC3ModelSampleFactory.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -61,28 +61,29 @@
 	
 	// Vertex locations come from the teapot.h header file
 	teapotVertexLocations = [CC3VertexLocations vertexArrayWithName: @"TeapotVertices"];
-	teapotVertexLocations.elementCount = num_teapot_vertices;
-	teapotVertexLocations.elements = teapot_vertices;
+	teapotVertexLocations.vertexCount = num_teapot_vertices;
+	teapotVertexLocations.vertices = teapot_vertices;
 	
 	// Vertex normals come from the teapot.h header file
 	teapotVertexNormals = [CC3VertexNormals vertexArrayWithName: @"TeapotNormals"];
-	teapotVertexNormals.elementCount = num_teapot_normals;
-	teapotVertexNormals.elements = teapot_normals;
+	teapotVertexNormals.vertexCount = num_teapot_normals;
+	teapotVertexNormals.vertices = teapot_normals;
 	
 	// Vertex indices populated from the run-length array in the teapot.h header file
 	teapotVertexIndices = [CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"];
 	[teapotVertexIndices populateFromRunLengthArray: (GLushort*)new_teapot_indicies
 										   ofLength: num_teapot_indices];
+	teapotVertexIndices.drawingMode = GL_TRIANGLE_STRIP;
 	
 	// Scan vertex location array to find the min & max of each vertex dimension.
 	// This can be used below to create both simple color gradient and texture wraps for the mesh.
 	CC3Vector vl, vlMin, vlMax, vlRange;
-	CC3Vector* vLocs = (CC3Vector*)teapotVertexLocations.elements;
-	GLsizei vCount = teapotVertexLocations.elementCount;
+	CC3Vector* vLocs = (CC3Vector*)teapotVertexLocations.vertices;
+	GLuint vCount = teapotVertexLocations.vertexCount;
 	vl = vLocs[0];
 	vlMin = vl;
 	vlMax = vl;
-	for (GLsizei i = 1; i < vCount; i++) {
+	for (GLuint i = 1; i < vCount; i++) {
 		vl = vLocs[i];
 		vlMin = CC3VectorMinimize(vlMin, vl);
 		vlMax = CC3VectorMaximize(vlMax, vl);
@@ -96,20 +97,22 @@
 	// This would never happen in practice. Normally, the color array would be applied
 	// and extracted as part of the creation of a mesh in a visual editor.
 	teapotVertexColors = [CC3VertexColors vertexArrayWithName: @"TeapotColors"];
-	ccColor4F* vCols = (ccColor4F*)[teapotVertexColors allocateElements: vCount];
-	for (GLsizei i=0; i < vCount; i++) {
-		vCols[i].r = (vLocs[i].x - vlMin.x) / vlRange.x;
-		vCols[i].g = (vLocs[i].y - vlMin.y) / vlRange.y;
-		vCols[i].b = (vLocs[i].z - vlMin.z) / vlRange.z;
-		vCols[i].a = 1.0;
+	teapotVertexColors.allocatedVertexCapacity = vCount;
+	ccColor4B* vCols = (ccColor4B*)teapotVertexColors.vertices;
+	for (GLuint i=0; i < vCount; i++) {
+		vCols[i].r = 255 * (vLocs[i].x - vlMin.x) / vlRange.x;
+		vCols[i].g = 255 * (vLocs[i].y - vlMin.y) / vlRange.y;
+		vCols[i].b = 255 * (vLocs[i].z - vlMin.z) / vlRange.z;
+		vCols[i].a = 255;
 	}
 	
 	// Progamatically create a texture array to map an arbitrary texture to the mesh vertices
 	// in the X-Y plane. This would never happen in practice. Normally, the texture array would
 	// be painted and extracted as part of the creation of a mesh in a 3D visual editor.
 	teapotVertexTextureCoordinates = [CC3VertexTextureCoordinates vertexArrayWithName: @"TeapotTexture"];
-	ccTex2F* vTexCoord = (ccTex2F*)[teapotVertexTextureCoordinates allocateElements: vCount];
-	for (GLsizei i=0; i < vCount; i++) {
+	teapotVertexTextureCoordinates.allocatedVertexCapacity = vCount;
+	ccTex2F* vTexCoord = (ccTex2F*)teapotVertexTextureCoordinates.vertices;
+	for (GLuint i=0; i < vCount; i++) {
 		vTexCoord[i].u = (vLocs[i].x - vlMin.x) / vlRange.x;
 		vTexCoord[i].v = (vLocs[i].y - vlMin.y) / vlRange.y;
 	}
@@ -158,6 +161,7 @@ static CC3ModelSampleFactory* factory;
 // Returns an autoreleased mesh of a teapot named with the specified name
 -(CC3VertexArrayMesh*) makeTeapotMeshNamed: (NSString*) aName {
 	CC3VertexArrayMesh* mesh = [CC3VertexArrayMesh meshWithName: aName];
+	mesh.shouldInterleaveVertices = NO;
 	mesh.vertexLocations = teapotVertexLocations;
 	mesh.vertexNormals = teapotVertexNormals;
 	mesh.vertexIndices = teapotVertexIndices;

@@ -1,7 +1,7 @@
 /*
  * CC3DemoMashUpScene.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -35,8 +35,9 @@
 #import "CC3MeshNode.h"
 #import "CC3PODLight.h"
 #import "CC3PointParticles.h"
+#import "CC3MeshParticles.h"
+#import "Models.h"
 
-@class SpinningNode, PhysicsMeshNode, DoorMeshNode;
 
 #pragma mark -
 #pragma mark CC3DemoMashUpScene
@@ -58,6 +59,7 @@ typedef enum {
  *   - programatic creation of spherical, box and plane meshes using parametric definitions.
  *   - texturing a 3D mesh from a CCTexture2D image
  *   - transparency and alpha-blending
+ *   - translucent and transparent textures
  *   - coloring a mesh with a per-vertex color blend
  *   - multi-texturing an object using texture units by combining several individual textures into overlays
  *   - DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
@@ -70,6 +72,8 @@ typedef enum {
  *   - embedding 2D cocos2d text labels into the 3D scene
  *   - incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
  *   - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
+ *   - emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
+ *     with each particle moving, rotating, and fading independently
  *   - creating a tightly focused spotlight whose intensity attenuates with distance
  *   - directing the 3D camera to track a particular target object
  *   - directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
@@ -104,13 +108,15 @@ typedef enum {
  *   - using the CC3Scene onOpen method to initiate activity when a scene opens
  *   - using pinch and pan gestures to control the movement of the 3D camera
  *   - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
+ *   - bitmapped font text labels
+ *   - moving individual vertex location programmatically
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
  * including experimenting with:
  *   - simple particle generator with multi-colored, light-interactive, particles
+ *   - simple particle generator with meshes updated less frequently to conserve performance 
  *   - different options for ordering nodes when drawing, including ordering by mesh or texture
- *   - translucent and transparent textures (addFloatingRing)
  *   - configuring the camera for parallel/isometric/orthographic projection instead of the default
  *     perpective projection
  *   - mounting the camera on a moving object, in this case a bouncing ball
@@ -128,30 +134,34 @@ typedef enum {
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
  *   - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
  *
- * The camera initially opens on a scene of an animated robot arm with a 2D label attached
- * to the end of the rotating arm, demonstrating the technique of embedding a 2D CCNode
- * into the 3D scene. The robot arm is loaded from a POD file, along with the moving light
- * and the camera.
+ * The camera initially opens on a scene of an animated robot arm with a 2D label attached to the
+ * end of the rotating arm, demonstrating the technique of embedding a 2D CCNode into the 3D scene.
+ * The robot arm is loaded from a POD file, along with the moving light and the camera.
  * 
  * Most of the 3D objects are selectable by touching. Touching any of the 3D objects with
  * your finger will display the location of the touch on the object itself, in the 3D
  * coordinate system of the touched node. This is performed by converting the 2D touch
  * point to a 3D ray, and tracing the ray to detect the nodes that are punctured by the ray.
  *
- * If the ground plane is touched, a little orange teapot will be placed on the ground
- * at the location of the touch point, demonstrating the ability to integrate touch events
- * with object positioning in 3D (sometimes known as unprojecting). For dramatic effect,
- * as the teapot is placed, a fiery explosion is set off using a cocos2d CCParticleSystem,
- * demonstrating the ability to embed dynamic 2D particle systems into a 3D scene. Once
- * the explosion particle system has exhausted, it is automatically removed as a child
- * of the teapot.
+ * If the ground plane is touched, a little orange teapot will be placed on the ground at the
+ * location of the touch point, demonstrating the ability to integrate touch events with object
+ * positioning in 3D (sometimes known as unprojecting). For dramatic effect, as the teapot is
+ * placed, a fiery explosion is set off using a cocos2d CCParticleSystem, demonstrating the
+ * ability to embed dynamic 2D particle systems into a 3D scene. Once the explosion particle
+ * system has exhausted, it is automatically removed as a child of the teapot.
  *
- * Touching the top part of the robot arm, or the label it is carrying, turns on a hose
- * that emits a stream of multi-colored 3D particles from the end of the robot arm.
- * As the robot arm moves, the nozzle moves with it, spraying the stream of particles
- * around the 3D scene. These are true 3D particles. Each particle has a 3D location,
- * and appears smaller the further it is from the camera. Touching the robot arm or
- * label again will turn off the hose.
+ * Touching the robot arm, or the label it is carrying, turns on a hose that emits a stream of
+ * multi-colored 3D point particles from the end of the robot arm. As the robot arm moves, the nozzle
+ * moves with it, spraying the stream of particles around the 3D scene. These are true 3D point
+ * particles. Each particle has a 3D location, and appears smaller the further it is from the camera.
+ *
+ * Touching the robot arm again turns off the point hose and turns on a hose that emits a stream
+ * of small mesh particles, containing spheres and boxes. All meshes emitted by a single particle
+ * emitter must use the same material and texture, but the spheres and boxes use different sections
+ * of a single texture, demonstrating the use of textureRectangle property of a particle (or mesh).
+ * Each mesh particle moves, rotates, and fades independently.
+ *
+ * Touching the robot arm or label again will turn off both the point and mesh hoses.
  *
  * The robot arm is surrounded by three small teapots, one red, one green, and one blue.
  * These teapots are positioned at 100 on each of the X, Y and Z axes respectively (so the
@@ -159,6 +169,14 @@ typedef enum {
  *
  * A fourth teapot, this one white, indicates the position of the light source, which is also
  * animated. You can see the effect on the lighting of the scene as it moves back and forth.
+ *
+ * Behind and to the right of the robot arm is a text label that is wrapped around a circular arc and
+ * rotating around the center of that circular arc, as if it was pasted to an invisible cylinder.
+ * Touching this text label will set a new text string into the label and change its color. This
+ * curved label is different than the label held by the robot arm, in that it is actually constructed
+ * as a 3D mesh (whereas the label held by the robot arm is a 2D cocos2d artifact). Since this rotating
+ * label is a 3D mesh, its vertex content can be manipulated programmatically. This is demonstrated here
+ * by moving the individual vertices so that they appear to be wrapped around an imaginary cylinder.
  *
  * Behind the to the left of the robot arm is a wooden mallet that is animated to alternately
  * hammer two wooden anvils. The hammer bends and flexes as it bounces back and forth,
@@ -192,15 +210,13 @@ typedef enum {
  * larger scene. This demonstrates the ability to have more than one camera in the scene
  * and to switch between them using the activeCamera property of the scene.
  *
- * At any time, you can move the camera using the two joysticks. The left joystick controls
- * the direction that the camera is pointing, and the right joystick controls the location
- * of the camera, moving forward, back, left and right. By experimenting with these two
- * joysticks, you should be able to navigate the camera all around the 3D scene, looking
- * behind, above, and below objects.
+ * At any time, you can move the camera using the two joysticks. The left joystick controls the
+ * direction that the camera is pointing, and the right joystick controls the location of the camera,
+ * moving forward, back, left and right. By experimenting with these two joysticks, you should be
+ * able to navigate the camera all around the 3D scene, looking behind, above, and below objects.
  *
- * You can also move the camera using gestures directly on the screen. A double-finger
- * drag gesture will pan the camera around the scene. And a pinch gesture will move the
- * camera forwards or backwards.
+ * You can also move the camera using gestures directly on the screen. A double-finger drag gesture
+ * will pan the camera around the scene. And a pinch gesture will move the camera forwards or backwards.
  *
  * Using the left joystick, you can redirect the camera to look far away in the direction
  * of the light source by extrapolating a line from the base of the robot arm through the
@@ -209,28 +225,45 @@ typedef enum {
  * into a 3D scene. The sun is quite a large particle emitter, and you should notice a
  * drop in frame rate when it is visible.
  *
- * The scene is given perspective by a ground plane constructed from the cocos2d logo.
- * This ground plane is configured so that, in addition to its front face, its backface
- * will also be drawn. You can verify this by moving the camera down below the ground
- * plane, and looking up.
+ * The scene is given perspective by a ground plane constructed from the cocos2d logo. This ground
+ * plane is configured so that, in addition to its front face, its backface will also be drawn.
+ * You can verify this by moving the camera down below the ground plane, and looking up.
  *
  * Touching the switch-view button (with the green arrow on it) between the two joysticks
  * will point the camera at a second part of the scene, at a rotating globe, illustrating
  * the creation of a sphere mesh programatically from a parametric definition, and the
  * texturing of that mesh using a rectangular texture.
  *
- * Touching the globe will open a child HUD (Heads-Up-Display) window showing a close-up
- * of the globe (actually a copy of the globe) in a child CC3Layer and CC3Scene. The small
- * window contains another CC3Layer and CC3Scene. The scene contains a copy of the globe,
- * and the camera of the scene automatically frames the globe in its field of view invoking
- * one of the CC3Camera moveToShowAllOf:... family of methods, from the onOpen callback
- * method of the HUDScene.
+ * Touching the globe will open a child HUD (Heads-Up-Display) window showing a close-up of
+ * the globe (actually a copy of the globe) in a child CC3Layer and CC3Scene. The small window
+ * contains another CC3Layer and CC3Scene. The scene contains a copy of the globe, and the camera of
+ * the scene automatically frames the globe in its field of view invoking one of the CC3Camera
+ * moveToShowAllOf:... family of methods, from the onOpen callback method of the HUDScene.
  * 
  * This small HUD window opens minimized at the point on the globe that was touched, and
  * then smoothly expands and moves to the top-right corner of the screen. The HUD window,
  * and the globe inside it are semi-transparent. As you move the camera around, you can
  * see the main scene behind it. Touching the HUD window or the globe again will cause
  * the HUD window CC3Layer and CC3Scene to fade away.
+ *
+ * To the left of the globe is a large rotating rectangular yellow ring floating above the ground.
+ * This ring is created from a plane using a texture that combines transparency and opacity. It
+ * demonstrates the use of transparency in textures. You can see through the transparent areas to
+ * the scene behind the texture. This is particularly apparent when the runners run behind the
+ * ring and can be seen through the middle of the ring. The texture as a whole fades in and out
+ * periodically, and rotates around the vertical (Y) axis.
+ *
+ * As the ring rotates, both sides are visible. This is because the shouldCullBackFaces property is
+ * set to NO, so that both sides of each face are rendered. However, one side appears bright and
+ * colorful and the other appears dark. Surprisingly, it is the front sides of the faces that appear
+ * dark and it is the back side of the faces that appear bright and colorful. This is because the
+ * light is located on the opposite side of the ring from the camera, and therefore the side that
+ * faces towards the light is illuminated. However, since the normals of the faces in the rectangular
+ * plane extend out from the front face of the plane, it is when the front face faces towards the
+ * light (and away from the camera) that the plane appears most illuminated. At that time, it is the
+ * back faces of the plane that we see. When the front faces are facing the camera, the normals are
+ * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
+ * to understand the interaction between lighting, faces, and normals in any object.
  *
  * Touching the switch-view button again will point the camera at a bouncing, rotating
  * beach ball. This beach ball is actually semi-transparent, and you can see objects through
@@ -247,49 +280,44 @@ typedef enum {
  * of a node. See the notes for the isOpaque property on CC3Material for more on this property,
  * and its interaction with other material properties.
  * 
- * Although the beach ball is constructed from four separate mesh nodes, touching any part
- * of the beach ball will actually select the node representing the complete beach ball,
- * and the entire beach ball is highlighted.
+ * Although the beach ball is constructed from four separate mesh nodes, touching any part of the
+ * beach ball will actually select the node representing the complete beach ball, and the entire
+ * beach ball is highlighted.
  *
- * Touching the switch-view button again will point the camera at yet another teapot, this
- * one textured with the cocos2d logo, and rotating on it's axis. This textured teapot has
- * another smaller rainbow-colored teapot as a satellite. This satellite is colored with a
- * color gradient using a color array, and orbits around the teapot, and rotates on it's
- * own axes. The satellite teapot is a child node of the textured teapot node, and rotates
- * along with the textured teapot.
+ * Touching the switch-view button again will point the camera at yet another teapot, this one
+ * textured with the cocos2d logo, and rotating on it's axis. This textured teapot has another
+ * smaller rainbow-colored teapot as a satellite. This satellite is colored with a color gradient
+ * using a color array, and orbits around the teapot, and rotates on it's own axes. The rainbow
+ * teapot is a child node of the textured teapot node, and rotates along with the textured teapot.
  *
- * Touching either teapot will toggle the display of a wireframe around the mesh of that
- * teapot (orange), and a wireframe around both teapots (yellow). This easily is done by
- * simply setting the shouldDrawLocalContentWireframeBox and shouldDrawWireframeBox
- * properties, respectively. Notice that the wireframes move, rotate, and scale along
- * with the teapots themselves, and notice that the yellow wireframe that surrounds both
- * teapots grows and shrinks automatically as the rainbow teapot rotates and stretches
- * the box around both teapots.
+ * Touching either teapot will toggle the display of a wireframe around the mesh of that teapot
+ * (orange), and a wireframe around both teapots (yellow). This easily is done by simply setting
+ * the shouldDrawLocalContentWireframeBox and shouldDrawWireframeBox properties, respectively.
+ * Notice that the wireframes move, rotate, and scale along with the teapots themselves, and
+ * notice that the yellow wireframe that surrounds both teapots grows and shrinks automatically
+ * as the rainbow teapot rotates and stretches the box around both teapots.
  *
- * Behind the rotating teapots is a brick wall. Touching the brick wall will animate
- * the wall to move into the path of the rainbow teapot. When the teapot collides with
- * the wall, it bounces off and heads in the opposite direction. As long as the brick
- * wall is there, the rainbow teapot will ping-pong back and forth in its orbit around
- * the textured teapot. Touching the brick wall again will move the wall out of the way
- * of the teapot and back to its original location. This demonstrates the ability to
- * perform simple collision detection between nodes using the doesIntersectNode: method.
+ * Behind the rotating teapots is a brick wall. Touching the brick wall will animate the wall to
+ * move into the path of the rainbow teapot. When the teapot collides with the wall, it bounces off
+ * and heads in the opposite direction. As long as the brick wall is there, the rainbow teapot will
+ * ping-pong back and forth in its orbit around the textured teapot. Touching the brick wall again
+ * will move the wall out of the way of the teapot and back to its original location. This demonstrates
+ * the ability to perform simple collision detection between nodes using the doesIntersectNode: method.
  * See the checkForCollisions method of this class for an example of how to use this feature.
  *
- * Touching the switch-view button again will point the camera at two copies of Alexandru
- * Barbulescu's 3D cocos3d mascot. The mascot on the left stares back at the camera,
- * regardless of where you move the camera in the 3D scene (which you do using the right
- * joystick). This kind of object is also known as a halo object, and can be useful when
- * you always want an object to face the camera.
+ * Touching the switch-view button again will point the camera at two copies of Alexandru Barbulescu's
+ * 3D cocos3d mascot. The mascot on the left stares back at the camera, regardless of where you move
+ * the camera in the 3D scene (which you do using the right joystick). This kind of object is also
+ * known as a halo object, and can be useful when you always want an object to face the camera.
  *
  * The second mascot is distracted by the satellite rainbow teapot. The gaze of this second
  * mascot tracks the location of the rainbow teapot as it orbits the textured teapot.
  *
- * Both mascots make use of targetting behaviour to point themselves at another
- * object. You can add any object as a child to a targetting node, orient the child node
- * so that the side that you consider the front of the object faces in the forwardDirection
- * of the targetting node, and then tell the targetting node to point in a particular
- * direction, or to always point at another node, and track the motion of that other node
- * as it moves around in the scene.
+ * Both mascots make use of targetting behaviour to point themselves at another object. You can
+ * add any object as a child to a targetting node, orient the child node so that the side that you
+ * consider the front of the object faces in the forwardDirection of the targetting node, and then
+ * tell the targetting node to point in a particular direction, or to always point at another node,
+ * and track the motion of that other node as it moves around in the scene.
  *
  * By uncommenting documeted code in the configureCamera method, the camera can be targetted
  * at another node, demonstrating an "orbit camera" by simply giving your camera a target to
@@ -304,10 +332,10 @@ typedef enum {
  * options when the wooden sign is repeated touched: Modulation, Addition, Signed Addition,
  * Simple Replacement, Subtraction, and DOT3 bump-mapping (also known as normal mapping).
  *
- * This wooden sign also demonstrates the use of the textureRectangle property to cover
- * a mesh with a section of a texture. This feature can be used to extract a texture from
- * a texture atlas, so that a single loaded texture can be used to cover multiple meshes,
- * with each mesh covered by a different section fo the texture.
+ * This wooden sign also demonstrates the use of the textureRectangle property to cover a mesh with
+ * a section of a texture. This feature can be used to extract a texture from a texture atlas, so
+ * that a single loaded texture can be used to cover multiple meshes, with each mesh covered by a
+ * different section fo the texture.
  * 
  * Touching the switch-view button again will point the camera at a purple floating head that
  * looks back at the camera, regardless of where the camera moves. This floating head shows
@@ -320,20 +348,18 @@ typedef enum {
  * texture containing the purple featuring is then overlaid on, and combined with, the main
  * bump-map texture, to create the overall textured and shadowed effect.
  *
- * Bump-mapping is a technique used to provide complex surface detail without requiring a
- * large number of mesh vertices. The actual mesh underlying the floating head contains only
- * 153 vertices.
+ * Bump-mapping is a technique used to provide complex surface detail without requiring a large
+ * number of mesh vertices. The actual mesh underlying the floating head contains only 153 vertices.
  * 
  * Touching the purple floating head removes the bump-map texture, and leaves only the purple
  * texture laid on the raw mesh vertices. The surface detail virtually vanishes, leaving a
  * crude model of a head, and demonstrating that the surface detail and shadowing is contained
  * within the bump-mapped texture, not within the mesh vertices. The effect is quite striking.
  *
- * The light direction that is combined with the per-pixel texture normals to peform this
- * bump-mapping is provided by a orienting node, which holds both the wooden sign and
- * the floating head as child nodes. It keeps track of the location of the light, even as
- * both the light and the models move around, and automatically provides the light direction
- * to the bump-mapped wooden sign and floating head nodes.
+ * The light direction that is combined with the per-pixel texture normals to peform this bump-mapping
+ * is provided by a orienting node, which holds both the wooden sign and the floating head as child nodes.
+ * It keeps track of the location of the light, even as both the light and the models move around, and
+ * automatically provides the light direction to the bump-mapped wooden sign and floating head nodes.
  *
  * Touching the purple head also logs an information message using userData that was attached
  * to the floating head an initialization time. The userData property can be used to attach
@@ -458,7 +484,6 @@ typedef enum {
 	CC3MeshNode* globe;
 	SpinningNode* dieCube;
 	SpinningNode* texCubeSpinner;
-	CC3LineNode* axisLine;
 	CC3MeshNode* mascot;
 	CC3Node* bumpMapLightTracker;
 	CC3MeshNode* woodenSign;
@@ -476,6 +501,7 @@ typedef enum {
 	struct timeval lastTouchEventTime;
 	CameraZoomType cameraZoomType;
 	CC3Ray lastCameraOrientation;
+	GLubyte bmLabelMessageIndex;
 	BOOL isManagingShadows;
 }
 
@@ -642,138 +668,3 @@ typedef enum {
 -(void) stopDragging;
 
 @end
-
-
-#pragma mark -
-#pragma mark Specialized POD classes
-
-/**
- * Customized POD resource class to handle the idiosyncracies of how the POD file is
- * handled in the original PVRT demo app. This is not normally necessary. Normally,
- * the POD file should be created accurately to reflect the scene.
- */
-@interface IntroducingPODResource : CC3PODResource {}
-@end
-
-/**
- * Customized light class to handle the idiosyncracies of how lights from the POD file
- * is handled in the original PVRT demo app. This is not normally necessary. Normally,
- * the POD file should be created accurately to reflect the scene.
- */
-@interface IntroducingPODLight : CC3PODLight {}
-@end
-
-
-/**
- * Customized POD resource class to handle the idiosyncracies of the POD file containing
- * the purple floating head. That POD file contains a reference to texture that does not
- * exist, so we override the texture loading behaviour to avoid it, rather than generate
- * spurious errors. This is not normally necessary. Normally, the POD file should be
- * created accurately to reflect the scene.
- */
-@interface HeadPODResource : CC3PODResource {}
-@end
-
-
-#pragma mark -
-#pragma mark PhysicsMeshNode
-
-/**
- * A specialized mesh node that tracks its instantaneous global velocity, even when
- * controlled by a CCAction, and even when moved as part of another larger node.
- *
- * After each update, this node compares its previous global location to the current
- * global location, and calculates an instantaneous velocity.
- */
-@interface PhysicsMeshNode : CC3MeshNode {
-	CC3Vector previousGlobalLocation;
-	CC3Vector velocity;
-}
-
-/** The global location of this node on the previous update. */
-@property(nonatomic, readonly) CC3Vector previousGlobalLocation;
-
-/** The current velocity, as calculated during the previous update. */
-@property(nonatomic, readonly) CC3Vector velocity;
-
-@end
-
-
-#pragma mark -
-#pragma mark DoorMeshNode
-
-/** Simple class that models a door that can be open or closed.  */
-@interface DoorMeshNode : CC3MeshNode {
-	BOOL isOpen;
-}
-
-/** Indicates whether the door is open or closed. */
-@property(nonatomic, assign) BOOL isOpen;
-
-@end
-
-
-#pragma mark -
-#pragma mark SpinningNode
-
-/**
- * A customized node that automatically rotates by adjusting its rotational aspects on
- * each update pass, and can slow the rotation speed over time based on a friction property.
- *
- * To rotate a node using changes in rotation using the rotateBy... family of methods,
- * as is done to this node, does NOT requre a specialized class. This specialized class
- * is required to handle the freewheeling and friction nature of the behaviour after the
- * rotation has begun.
- */
-@interface SpinningNode : CC3Node {
-	CC3Vector spinAxis;
-	GLfloat spinSpeed;
-	GLfloat friction;
-	BOOL isFreeWheeling;
-}
-
-/**
- * The axis that the cube spins around.
- *
- * This is different than the rotationAxis property, because this is the axis around which
- * a CHANGE in rotation will occur. Depending on how the node is already rotated, this may
- * be very different than the rotationAxis.
- */
-@property(nonatomic, assign) CC3Vector spinAxis;
-
-/**
- * The speed of rotation. This value can be directly updated, and then will automatically
- * be slowed down over time according to the value of the friction property.
- */
-@property(nonatomic, assign) GLfloat spinSpeed;
-
-/**
- * The friction value that is applied to the spinSpeed to slow it down over time.
- *
- * A value of zero will not slow rotation down at all and the node will continue
- * spinning indefinitely.
- */
-@property(nonatomic, assign) GLfloat friction;
-
-/** Indicates whether the node is spinning without direct control by touch events. */
-@property(nonatomic, assign) BOOL isFreeWheeling;
-
-@end
-
-
-#pragma mark -
-#pragma mark HangingParticle
-
-#define kParticlesPerSide		30
-#define kParticlesSpacing		40
-
-/**
- * A particle type that simply hangs where it is located. When the particle is
- * initialized, the location is set from the index, so that the particles are
- * laid out in a simple rectangular grid in the X-Z plane, with kParticlesPerSide
- * particles on each side of the grid. This particle type contains no additional
- * state information.
- */
-@interface HangingParticle : CC3PointParticle
-@end
-

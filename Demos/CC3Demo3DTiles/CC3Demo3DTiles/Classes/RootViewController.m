@@ -41,8 +41,40 @@
  }
  */
 
+// these methods are needed for iOS 6
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
 
-// Override to allow orientations other than the default portrait orientation.
+-(NSUInteger) supportedInterfaceOrientations {
+    //Modify for supported orientations, put your masks here, trying to mimic behavior of shouldAutorotate..
+#if GAME_AUTOROTATION==kGameAutorotationNone
+	return UIInterfaceOrientationMaskPortrait;
+#elif GAME_AUTOROTATION==kGameAutorotationCCDirector
+	NSAssert(NO, @"RootviewController: kGameAutorotation isn't supported on iOS6");
+	return UIInterfaceOrientationMaskLandscape;
+#elif GAME_AUTOROTATION == kGameAutorotationUIViewController
+	return UIInterfaceOrientationMaskLandscape;
+#else
+#error Unknown value in GAME_AUTOROTATION
+	
+#endif // GAME_AUTOROTATION
+}
+
+#if GAME_AUTOROTATION==kGameAutorotationUIViewController
+- (BOOL)shouldAutorotate {
+    return YES;
+}
+#else
+- (BOOL)shouldAutorotate {
+    return NO;
+}
+#endif
+
+#endif //__IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
+#endif
+
+// Override to allow orientations other than the default portrait orientation
+//valid for iOS 4 and 5, IMPORTANT, for iOS6 also modify supportedInterfaceOrientations
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	
 	//
@@ -100,6 +132,7 @@
 //
 // This callback only will be called when GAME_AUTOROTATION == kGameAutorotationUIViewController
 //
+/*
 #if GAME_AUTOROTATION == kGameAutorotationUIViewController
 -(void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
@@ -142,7 +175,7 @@
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
-
+*/
 
 - (void)dealloc {
     [super dealloc];

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Materials.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -46,13 +46,9 @@
 
 @implementation CC3OpenGLES11StateTrackerMaterialColor
 
--(void) getGLValue {
-	glGetMaterialfv(GL_FRONT, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetMaterialfv(GL_FRONT, name, (GLfloat*)&originalValue); }
 
--(void) setGLValue {
-	glMaterialfv(GL_FRONT_AND_BACK, name, (GLfloat*)&value);
-}
+-(void) setGLValue { glMaterialfv(GL_FRONT_AND_BACK, name, (GLfloat*)&value); }
 
 @end
 
@@ -62,13 +58,9 @@
 
 @implementation CC3OpenGLES11StateTrackerMaterialFloat
 
--(void) getGLValue {
-	glGetMaterialfv(GL_FRONT, name, (GLfloat*)&originalValue);
-}
+-(void) getGLValue { glGetMaterialfv(GL_FRONT, name, (GLfloat*)&originalValue); }
 
--(void) setGLValue {
-	glMaterialf(GL_FRONT_AND_BACK, name, value);
-}
+-(void) setGLValue { glMaterialf(GL_FRONT_AND_BACK, name, value); }
 
 @end
 
@@ -119,28 +111,26 @@
 	if (shouldSetGL) {
 		[sourceBlend setValueRaw: srcBlend];
 		[destinationBlend setValueRaw: dstBlend];
-		glBlendFunc(srcBlend, dstBlend);
+		[self setGLValues];
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogTrace(@"%@ %@ %@ = %@ and %@ = %@", [self class], (shouldSetGL ? @"applied" : @"reused"),
-			 NSStringFromGLEnum(sourceBlend.name), NSStringFromGLEnum(sourceBlend.value),
-			 NSStringFromGLEnum(destinationBlend.name), NSStringFromGLEnum(destinationBlend.value));
+	LogGLErrorTrace(@"while setting GL values for %@", self);
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[sourceBlend restoreOriginalValue];
-		[destinationBlend restoreOriginalValue];
-		glBlendFunc(sourceBlend.value, destinationBlend.value);
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(void) setGLValues { glBlendFunc(sourceBlend.value, destinationBlend.value); }
+
+-(BOOL) valueNeedsRestoration {
+	return (sourceBlend.valueNeedsRestoration || destinationBlend.valueNeedsRestoration);
+}
+
+-(void) restoreOriginalValues {
+	[sourceBlend restoreOriginalValue];
+	[destinationBlend restoreOriginalValue];
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@:\n    %@\n    %@",
-			[self class], sourceBlend, destinationBlend];
+	return [NSString stringWithFormat: @"%@:\n    %@\n    %@", [self class], sourceBlend, destinationBlend];
 }
 
 @end
@@ -189,28 +179,26 @@
 	if (shouldSetGL) {
 		[function setValueRaw: func];
 		[reference setValueRaw: refValue];
-		glAlphaFunc(func, refValue);
+		[self setGLValues];
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
-	LogTrace(@"%@ %@ %@ = %@ and %@ = %.3f", [self class], (shouldSetGL ? @"applied" : @"reused"),
-			 NSStringFromGLEnum(function.name), NSStringFromGLEnum(function.value),
-			 NSStringFromGLEnum(reference.name), reference.value);
+	LogGLErrorTrace(@"while setting GL values for %@", self);
 }
 
--(void) close {
-	[super close];
-	if (self.shouldRestoreOriginalOnClose) {
-		[function restoreOriginalValue];
-		[reference restoreOriginalValue];
-		glAlphaFunc(function.value, reference.value);
-	}
-	self.valueIsKnown = self.valueIsKnownOnClose;
+-(void) setGLValues { glAlphaFunc(function.value, reference.value); }
+
+-(BOOL) valueNeedsRestoration {
+	return (function.valueNeedsRestoration || reference.valueNeedsRestoration);
+}
+
+-(void) restoreOriginalValues {
+	[function restoreOriginalValue];
+	[reference restoreOriginalValue];
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@:\n    %@\n    %@",
-			[self class], function, reference];
+	return [NSString stringWithFormat: @"%@:\n    %@\n    %@", [self class], function, reference];
 }
 
 @end

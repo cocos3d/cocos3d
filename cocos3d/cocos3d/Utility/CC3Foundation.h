@@ -1,7 +1,7 @@
 /*
  * CC3Foundation.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -53,6 +53,7 @@
 #import "CC3Logging.h"
 #import "ccTypes.h"
 #import "CCArray.h"
+#import <CoreGraphics/CGColor.h>
 
 /**
  * The version of cocos3d, derived from the version format, where each of the
@@ -60,10 +61,20 @@
  * in the format HIMELO.
  *
  * Examples:
- *   - 0.7		-> 000700
- *   - 1.7.3	-> 010703
+ *   - 0.7		-> 0x000700
+ *   - 1.7.3	-> 0x010703
  */
-#define COCOS3D_VERSION 000701
+#define COCOS3D_VERSION 0x000702
+
+/** Returns a string describing the cocos3d version. */
+static inline NSString* NSStringFromCC3Version() {
+	int vFull, vMajor, vMinor, vBuild;
+	vFull = COCOS3D_VERSION;
+	vMajor = (vFull >> 16) & 0xFF;
+	vMinor = (vFull >> 8) & 0xFF;
+	vBuild = vFull & 0xFF;
+	return [NSString stringWithFormat: @"cocos3d v%i.%i.%i", vMajor, vMinor, vBuild];
+}
 
 
 #pragma mark -
@@ -218,12 +229,6 @@ static inline GLfloat CC3VectorDot(CC3Vector v1, CC3Vector v2) {
  * expensive square-root calculation.
  */
 static inline GLfloat CC3VectorLengthSquared(CC3Vector v) { return CC3VectorDot(v, v); }
-
-//static inline GLfloat CC3VectorLengthSquared(CC3Vector v) {
-//	return (v.x * v.x) +
-//		   (v.y * v.y) +
-//		   (v.z * v.z);
-//}
 
 /**
  * Returns the scalar length of the specified CC3Vector from the origin.
@@ -443,6 +448,17 @@ static inline BOOL CC3IsLocationOnRay(CC3Vector aLocation, CC3Ray aRay) {
 #pragma mark -
 #pragma mark Vertex structures
 
+/** Returns a ccTex2F structure constructed from the vector components. */
+static inline ccTex2F CC3TexCoordsMake(GLfloat u, GLfloat v) {
+	ccTex2F tc;
+	tc.u = u;
+	tc.v = v;
+	return tc;
+}
+
+/** Convenience alias macro to create ccTex2F with less keystrokes. */
+#define cc3tc(U,V) CC3TexCoordsMake((U),(V))
+
 /**
  * Defines a simple vertex, containing location and color.
  * Useful for painting solid colors that ignore lighting conditions.
@@ -472,12 +488,13 @@ typedef struct {
 	ccTex2F texCoord;			/**< The 2D coordinate of this vertex on the texture. */
 } CC3TexturedVertex;
 
-typedef CC3TexturedVertex CCTexturedVertex;		//** Deprecated misspelling of CC3TexturedVertex. */
+/** @deprecated Misspelling of CC3TexturedVertex. */
+typedef CC3TexturedVertex CCTexturedVertex DEPRECATED_ATTRIBUTE;
 
 /** Returns a string description of the specified textured vertex. */
 static inline NSString* NSStringFromCC3TexturedVertex(CC3TexturedVertex vertex) {
 	return [NSString stringWithFormat: @"(Location: %@, Normal: %@, TexCoord: (%.3f, %.3f))",
-			NSStringFromCC3Vector(vertex.location), NSStringFromCC3Vector(vertex.normal), vertex.texCoord];
+			NSStringFromCC3Vector(vertex.location), NSStringFromCC3Vector(vertex.normal), vertex.texCoord.u, vertex.texCoord.v];
 	
 }
 
@@ -572,18 +589,55 @@ static inline CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3Bounding
 }
 
 /**
- * Returns a bounding box that has the same dimensions as the specified bounding
- * box, but with each corner expanded outward by the specified amount of padding.
+ * Returns a bounding box that has the same dimensions as the specified bounding box, but with
+ * each corner expanded outward by the specified amount of padding.
  *
- * The padding value is added to all three components of the maximum vector,
- * and subtracted from all three components of the minimum vector.
+ * The padding value is added to the maximum vector, and subtracted from the minimum vector.
  */
-static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, GLfloat padding) {
-	CC3Vector padVector = cc3v(padding, padding, padding);
+static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, CC3Vector padding) {
 	CC3BoundingBox bbPadded;
-	bbPadded.maximum = CC3VectorAdd(bb.maximum, padVector);
-	bbPadded.minimum = CC3VectorDifference(bb.minimum, padVector);
+	bbPadded.maximum = CC3VectorAdd(bb.maximum, padding);
+	bbPadded.minimum = CC3VectorDifference(bb.minimum, padding);
 	return bbPadded;
+}
+
+/**
+ * Returns a bounding box that has the same dimensions as the specified bounding box, but with
+ * each corner expanded outward by the specified amount of padding.
+ *
+ * The padding value is added to all three components of the maximum vector, and subtracted
+ * from all three components of the minimum vector.
+ */
+static inline CC3BoundingBox CC3BoundingBoxAddUniformPadding(CC3BoundingBox bb, GLfloat padding) {
+	return (padding != 0.0f) ? CC3BoundingBoxAddPadding(bb, cc3v(padding, padding, padding)) : bb;
+}
+
+/**
+ * Returns a bounding box constructed by scaling the specified bounding box by the specified
+ * scale value. Scaling can be different along each axis of the box.
+ *
+ * This has the effect of multiplying each component of each of the vectors representing the
+ * minimum and maximum corners of the box by the corresponding component in the scale vector.
+ */
+static inline CC3BoundingBox CC3BoundingBoxScale(CC3BoundingBox bb, CC3Vector scale) {
+	CC3BoundingBox bbScaled;
+	bbScaled.maximum = CC3VectorScale(bb.maximum, scale);
+	bbScaled.minimum = CC3VectorScale(bb.minimum, scale);
+	return bbScaled;
+}
+
+/**
+ * Returns a bounding box constructed by scaling the specified bounding box by the specified
+ * scale value. The same scaling is applied to each axis of the box.
+ *
+ * This has the effect of multiplying each component of each of the vectors representing the
+ * minimum and maximum corners of the box by the scale value.
+ */
+static inline CC3BoundingBox CC3BoundingBoxScaleUniform(CC3BoundingBox bb, GLfloat scale) {
+	CC3BoundingBox bbScaled;
+	bbScaled.maximum = CC3VectorScaleUniform(bb.maximum, scale);
+	bbScaled.minimum = CC3VectorScaleUniform(bb.minimum, scale);
+	return bbScaled;
 }
 
 /**
@@ -704,9 +758,6 @@ static const CC3Vector4 kCC3Vector4ZeroLocation = { 0.0, 0.0, 0.0, 1.0 };
 /** The null CC3Vector4. It cannot be drawn, but is useful for marking an uninitialized vector. */
 static const CC3Vector4 kCC3Vector4Null = {INFINITY, INFINITY, INFINITY, INFINITY};
 
-/** A CC3Vector4 that represents the identity quaternion. */
-static const CC3Vector4 kCC3Vector4QuaternionIdentity = { 0.0, 0.0, 0.0, 1.0 };
-
 /** Returns a string description of the specified CC3Vector4 struct in the form "(x, y, z, w)" */
 static inline NSString* NSStringFromCC3Vector4(CC3Vector4 v) {
 	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", v.x, v.y, v.z, v.w];
@@ -768,11 +819,10 @@ static inline BOOL CC3Vector4IsDirectional(CC3Vector4 v) { return (v.w == 0.0); 
 static inline BOOL CC3Vector4IsLocational(CC3Vector4 v) { return !CC3Vector4IsDirectional(v); }
 
 /**
- * If the specified homogeneous vector represents a location (w is not zero), returns
- * a homoginized copy of the vector, by dividing each component by the w-component
- * (including the w-component itself, leaving it with a value of one). If the specified
- * vector is a direction (w is zero), or is already homogenized (w is one) the vector
- * is returned unchanged.
+ * If the specified homogeneous vector represents a location (w is not zero), returns a 
+ * homoginized copy of the vector, by dividing each component by the w-component (including
+ * the w-component itself, leaving it with a value of one). If the specified vector is a
+ * direction (w is zero), or is already homogenized (w is one) the vector is returned unchanged.
  */
 static inline CC3Vector4 CC3Vector4Homogenize(CC3Vector4 v) {
 	if (v.w == 0.0f || v.w == 1.0f) return v;
@@ -893,12 +943,61 @@ static inline GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
 		   (v1.w * v2.w);
 }
 
+
+#pragma mark -
+#pragma mark Quaternions
+
+/** A struct representing a quaternion. */
+typedef CC3Vector4 CC3Quaternion;
+
+/** A CC3Quaternion that represents the identity quaternion. */
+static const CC3Quaternion kCC3QuaternionIdentity = { 0.0, 0.0, 0.0, 1.0 };
+
+/** @deprecated Replaced by kCC3QuaternionIdentity. */
+static const CC3Vector4 kCC3Vector4QuaternionIdentity DEPRECATED_ATTRIBUTE = { 0.0, 0.0, 0.0, 1.0 };
+
+/** A CC3Vector4 of zero length at the origin. */
+static const CC3Quaternion kCC3QuaternionZero = { 0.0, 0.0, 0.0, 0.0 };
+
+/** The null CC3Quaternion. Useful for marking an uninitialized quaternion. */
+static const CC3Vector4 kCC3QuaternionNull = {INFINITY, INFINITY, INFINITY, INFINITY};
+
+/** Returns a string description of the specified CC3Quaternion struct in the form "(x, y, z, w)" */
+static inline NSString* NSStringFromCC3Quaternion(CC3Quaternion q) { return NSStringFromCC3Vector4(q); }
+
+/** Returns a CC3Quaternion structure constructed from the vector components. */
+static inline CC3Quaternion CC3QuaternionMake(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	return CC3Vector4Make(x, y, z, w);
+}
+
+/** Returns whether the two quaterions are equal by comparing their respective components. */
+static inline BOOL CC3QuaternionsAreEqual(CC3Quaternion q1, CC3Quaternion q2) {
+	return CC3Vector4sAreEqual(q1, q2);
+}
+
+/** Returns whether the specified quaternion is equal to the zero quaternion, specified by kCC3QuaternionZero. */
+static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZero(q); }
+
+/** Returns whether the specified quaternion is equal to the null quaternion, specified by kCC3QuaternionNull. */
+static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
+
+/** Returns a normalized copy of the specified quaternion so that its length is 1.0. The w-component is also normalized. */
+static inline CC3Quaternion CC3QuaternionNormalize(CC3Quaternion q) { return CC3Vector4Normalize(q); }
+
+/** Returns a vector that is the negative of the specified quaterions in all dimensions, including W. */
+static inline CC3Quaternion CC3QuaternionNegate(CC3Vector4 q) { return CC3Vector4Negate(q); }
+
+/** Returns the result of scaling the original quaternion by the corresponding scale factor uniformly along all axes. */
+static inline CC3Quaternion CC3QuaternionScaleUniform(CC3Quaternion q, GLfloat scale) {
+	return CC3Vector4ScaleUniform(q, scale);
+}
+
 /**
  * Converts the specified vector that represents an rotation in axis-angle form
  * to the corresponding quaternion. The X, Y & Z components of the incoming vector
  * contain the rotation axis, and the W component specifies the angle, in degrees.
  */
-static inline CC3Vector4 CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
+static inline CC3Quaternion CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
 	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
 	// the rotation angle (negated for right-handed coordinate system), then:
 	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
@@ -913,7 +1012,7 @@ static inline CC3Vector4 CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
  * axis-angle form. The X, Y & Z components of the returned vector contain the
  * rotation axis, and the W component specifies the angle, in degrees.
  */
-static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Vector4 quaternion) {
+static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Quaternion quaternion) {
 	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
 	// the rotation angle (negated for right-handed coordinate system), then:
 	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
@@ -936,12 +1035,29 @@ static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Vector4 quaternion) {
 }
 
 /**
- * Returns a spherical linear interpolation between two vectors, based on the blendFactor.
- * which should be between zero and one inclusive. The returned value is calculated
- * as v1 + (blendFactor * (v2 - v1)). If the blendFactor is either zero or one
- * exactly, this method short-circuits to simply return v1 or v2 respectively.
+ * Converts the specified Euler angle rotational vector to a quaternion.
+ *
+ * The specified rotation vector contains three Euler angles measured in degrees.
  */
-CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor);
+CC3Quaternion CC3QuaternionFromRotation(CC3Vector aRotation);
+
+/**
+ * Converts the specified quaternion to a Euler angle rotational vector.
+ *
+ * The returned rotation vector contains three Euler angles measured in degrees.
+ */
+CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion);
+
+/**
+ * Returns a spherical linear interpolation between two quaternions, based on the blendFactor.
+ * which should be between zero and one inclusive. The returned quaternion is calculated as
+ * q1 + (blendFactor * (q2 - q1)). If the blendFactor is either zero or one exactly, this
+ * function short-circuits to simply return q1 or q2 respectively.
+ */
+CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor);
+
+/** @deprecated Replaced by CC3QuaternionSlerp. */
+CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark -
@@ -1010,12 +1126,67 @@ static inline CC3Vector CC3FaceNormal(CC3Face face) {
 											 CC3VectorDifference(face.vertices[2], face.vertices[0])));
 }
 
+/** Defines the barycentric weights of the three vertices of a triangle, in the same order as the vertices in a CC3Face. */
+typedef struct {
+	GLfloat weights[3];		/**< The barycentric weights of the three vertices of the face. */
+} CC3BarycentricWeights;
+
+/** Returns a CC3BarycentricWeights structure constructed from the three specified weights. */
+static inline CC3BarycentricWeights CC3BarycentricWeightsMake(GLfloat b0, GLfloat b1, GLfloat b2) {
+	CC3BarycentricWeights bcw;
+	bcw.weights[0] = b0;
+	bcw.weights[1] = b1;
+	bcw.weights[2] = b2;
+	return bcw;
+}
+
+/** Returns a string description of the specified NSStringFromCC3BarycentricWeights struct. */
+static inline NSString* NSStringFromCC3BarycentricWeights(CC3BarycentricWeights bcw) {
+	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f)", bcw.weights[0], bcw.weights[1], bcw.weights[2]];
+}
+
+/**
+ * Returns whether the specified barycentric weights indicate a location inside a triangle.
+ *
+ * To be inside a triangle, none of the weights may be negative. If any of the weights are negative,
+ * the specified barycentric weights represent a location outside a triangle.
+ */
+static inline BOOL CC3BarycentricWeightsAreInsideTriangle(CC3BarycentricWeights bcw) {
+	return bcw.weights[0] >= 0.0f && bcw.weights[1] >= 0.0f && bcw.weights[2] >= 0.0f;
+}
+
+/**
+ * Returns the barycentric weights for the specified location on the plane of the specified face.
+ * The returned weights are specified in the same order as the vertices of the face.
+ * 
+ * The specified location should be on the plane of the specified face. 
+ *
+ * If the location is on the plane of the specified face, the three returned weights will add up to one.
+ * If all three of the returned weights are positive, then the location is inside the triangle
+ * defined by the face, otherwise, at least one of the returned weights will be negative.
+ */
+CC3BarycentricWeights CC3FaceBarycentricWeights(CC3Face face, CC3Vector aLocation);
+
+/**
+ * Returns the 3D cartesian location on the specified face that corresponds to the specified
+ * barycentric coordinate weights.
+ */
+static inline CC3Vector CC3FaceLocationFromBarycentricWeights(CC3Face face, CC3BarycentricWeights bcw) {
+	CC3Vector* c = face.vertices;
+	GLfloat* b = bcw.weights;
+	CC3Vector v;
+	v.x = b[0] * c[0].x + b[1] * c[1].x + b[2] * c[2].x;
+	v.y = b[0] * c[0].y + b[1] * c[1].y + b[2] * c[2].y;
+	v.z = b[0] * c[0].z + b[1] * c[1].z + b[2] * c[2].z;
+	return v;
+}
+
 /**
  * Defines a triangular face of the mesh, comprised of three vertex indices,
- * each a GLushort, stored in winding order.
+ * each a GLuint, stored in winding order.
  */
 typedef struct {
-	GLushort vertices[3];	/**< The indices of the vertices of the face, stored in winding order. */
+	GLuint vertices[3];	/**< The indices of the vertices of the face, stored in winding order. */
 } CC3FaceIndices;
 
 /** A CC3FaceIndices with all vertices set to zero. */
@@ -1031,7 +1202,7 @@ static inline NSString* NSStringFromCC3FaceIndices(CC3FaceIndices faceIndices) {
  * Returns a CC3FaceIndices structure constructed from the three
  * specified vertex indices, which should be supplied in winding order.
  */
-static inline CC3FaceIndices CC3FaceIndicesMake(GLushort i0, GLushort i1, GLushort i2) {
+static inline CC3FaceIndices CC3FaceIndicesMake(GLuint i0, GLuint i1, GLuint i2) {
 	CC3FaceIndices fi;
 	fi.vertices[0] = i0;
 	fi.vertices[1] = i1;
@@ -1181,11 +1352,10 @@ static inline BOOL CC3Vector4IsInFrontOfPlane(CC3Vector4 v, CC3Plane plane) {
 /**
  * Returns the location of the point where the specified ray intersects the specified plane.
  *
- * The returned result is a 4D vector, where the x, y & z components give the intersection
- * location in 3D space, and the w component gives the distance from the startLocation of
- * the ray to the intersection location, in multiples of the ray direction vector. If this
- * value is negative, the intersection point is in the direction opposite to the direction
- * of the ray.
+ * The returned result is a 4D vector, where the x, y & z components give the intersection location
+ * in 3D space, and the w component gives the distance from the startLocation of the ray to the
+ * intersection location, in multiples of the ray direction vector. If this value is negative, the
+ * intersection point is in the direction opposite to the direction of the ray.
  *
  * If the ray is parallel to the plane, no intersection occurs, and the returned 4D vector
  * will be equal to kCC3Vector4Null.
@@ -1374,6 +1544,9 @@ static const ccColor4F kCCC4FOrange = { 1.0, 0.5, 0.0, 1.0 };
 /** Opaque Light Gray */
 static const ccColor4F kCCC4FLightGray = { (2.0 / 3.0), (2.0 / 3.0), (2.0 / 3.0), 1.0 };
 
+/** Opaque Gray */
+static const ccColor4F kCCC4FGray = { 0.5, 0.5, 0.5, 1.0 };
+
 /** Opaque Dark Gray */
 static const ccColor4F kCCC4FDarkGray = { (1.0 / 3.0), (1.0 / 3.0), (1.0 / 3.0), 1.0 };
 
@@ -1404,6 +1577,11 @@ static inline GLubyte CCColorByteFromFloat(GLfloat colorValue) {
 /** Returns a string description of the specified ccColor4F in the form "(r, g, b, a)" */
 static inline NSString* NSStringFromCCC4F(ccColor4F rgba) {
 	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", rgba.r, rgba.g, rgba.b, rgba.a];
+}
+
+/** Returns a string description of the specified ccColor4B in the form "(r, g, b, a)" */
+static inline NSString* NSStringFromCCC4B(ccColor4B rgba) {
+	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", rgba.r, rgba.g, rgba.b, rgba.a];
 }
 
 /** Convenience alias macro to create ccColor4F with less keystrokes. */
@@ -1458,10 +1636,33 @@ static inline ccColor3B CCC3BFromCCC4F(ccColor4F floatColor) {
 	return color;
 }
 
-/**
- * Returns the intensity of the specified color,
- * calculated as the arithmetic mean of the R, G & B components.
- */
+/** Returns a ccColor4F structure constructed from the specified CoreGraphics CGColorRef. */
+static inline ccColor4F CCC4FFromCGColor(CGColorRef cgColor) {
+	ccColor4F rgba = (ccColor4F){ 1.0, 1.0, 1.0, 1.0 };  // initialize to white
+	size_t componentCount = CGColorGetNumberOfComponents(cgColor);
+	const CGFloat* colorComponents = CGColorGetComponents(cgColor);
+	switch(componentCount) {
+		case 4:			// RGB + alpha: set alpha then fall through to RGB 
+			rgba.a = colorComponents[3];
+		case 3:			// RGB: alpha already set
+			rgba.r = colorComponents[0];
+			rgba.g = colorComponents[1];
+			rgba.b = colorComponents[2];
+			break;
+		case 2:			// gray scale + alpha: set alpha then fall through to gray scale
+			rgba.a = colorComponents[1];
+		case 1:		// gray scale: alpha already set
+			rgba.r = colorComponents[0];
+			rgba.g = colorComponents[0];
+			rgba.b = colorComponents[0];
+			break;
+		default:	// if all else fails, return white which is already set
+			break;
+	}
+	return rgba;
+}
+
+/** Returns the intensity of the specified color, calculated as the arithmetic mean of the R, G & B components. */
 static inline GLfloat CCC4FIntensity(ccColor4F color) {
 	return (color.r + color.g + color.b) * kCC3OneThird;
 }
@@ -1523,16 +1724,63 @@ static inline ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
 }
 
 /**
- * Returns an ccColor4F structure whose values are a weighted average of the specified base color
- * and the blend color. The parameter blendWeight should be between zero and one. A value of zero
- * will leave the base color unchanged. A value of one will result in the blend being the same as
- * the blend color.
+ * Returns the result of modulating the specified colors, by multiplying the corresponding
+ * components. Each of the resulting color components is clamped to be between 0.0 and 1.0.
+ */
+static inline ccColor4F CCC4FModulate(ccColor4F rgba, ccColor4F modulation) {
+	ccColor4F result;
+	result.r = CLAMP(rgba.r * modulation.r, 0.0, 1.0);
+	result.g = CLAMP(rgba.g * modulation.g, 0.0, 1.0);
+	result.b = CLAMP(rgba.b * modulation.b, 0.0, 1.0);
+	result.a = CLAMP(rgba.a * modulation.a, 0.0, 1.0);
+	return result;
+}
+
+/**
+ * Returns a ccColor4F structure whose values are a weighted average of the specified base color and
+ * the blend color. The parameter blendWeight should be between zero and one. A value of zero will leave
+ * the base color unchanged. A value of one will result in the blend being the same as the blend color.
  */
 static inline ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GLfloat blendWeight) {
 	return CCC4FMake(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
 					 CC3WAVG(baseColor.g, blendColor.g, blendWeight),
 					 CC3WAVG(baseColor.b, blendColor.b, blendWeight),
 					 CC3WAVG(baseColor.a, blendColor.a, blendWeight));
+}
+
+/**
+ * Returns a ccColor4F color whose R, G & B components are those of the specified color multiplied
+ * by the alpha value of the specified color, clamping to the range between zero and one if needed.
+ * The alpha value remains unchanged.
+ * 
+ * This function performs the same operation on the specified color that is known as pre-multiplied
+ * alpha when applied to the texels of a texture.
+ */
+static inline ccColor4F CCC4FBlendAlpha(ccColor4F rgba) {
+	ccColor4F result;
+	result.r = CLAMP(rgba.r * rgba.a, 0.0, 1.0);
+	result.g = CLAMP(rgba.g * rgba.a, 0.0, 1.0);
+	result.b = CLAMP(rgba.b * rgba.a, 0.0, 1.0);
+	result.a = rgba.a;
+	return result;
+}
+
+/**
+ * Returns a ccColor4B color whose R, G & B components are those of the specified color multiplied
+ * by the alpha value of the specified color, clamping to the range between zero and 255 if needed.
+ * The alpha value remains unchanged.
+ * 
+ * This function performs the same operation on the specified color that is known as pre-multiplied
+ * alpha when applied to the texels of a texture.
+ */
+static inline ccColor4B CCC4BBlendAlpha(ccColor4B rgba) {
+	GLfloat alpha = rgba.a * kCC3OneOver255;
+	ccColor4B result;
+	result.r = CLAMP(rgba.r * alpha, 0.0, 255);
+	result.g = CLAMP(rgba.g * alpha, 0.0, 255);
+	result.b = CLAMP(rgba.b * alpha, 0.0, 255);
+	result.a = rgba.a;
+	return result;
 }
 
 /**
@@ -1546,6 +1794,22 @@ static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
 	result.b = CC3RandomFloatBetween(min.b, max.b);
 	result.a = CC3RandomFloatBetween(min.a, max.a);
 	return result;
+}
+
+
+
+#pragma mark -
+#pragma mark ccColor3B constants and functions
+
+/**
+ * Returns an ccColor3B structure whose values are a weighted average of the specified base color and
+ * the blend color. The parameter blendWeight should be between zero and one. A value of zero will leave
+ * the base color unchanged. A value of one will result in the blend being the same as the blend color.
+ */
+static inline ccColor3B CCC3BBlend(ccColor3B baseColor, ccColor3B blendColor, GLfloat blendWeight) {
+	return ccc3(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
+				CC3WAVG(baseColor.g, blendColor.g, blendWeight),
+				CC3WAVG(baseColor.b, blendColor.b, blendWeight));
 }
 
 

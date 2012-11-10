@@ -1,7 +1,7 @@
 /*
  * CC3PODMaterial.h
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -46,23 +46,26 @@
 +(id) materialAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
 
 /**
- * The shininess of a material as specified in a POD file has a very
- * different scale than the shininess value used by OpenGL ES.
- * To compensate for this, the shininess value extracted from a POD
- * file is multiplied by this factor before being applied to the material.
+ * The shininess of a material as specified in a POD file has a very different scale than the
+ * shininess value used by OpenGL ES. To compensate for this, the shininess value extracted
+ * from a POD file is multiplied by this factor before being applied to the material.
  *
- * The initial value of this factor is 400. It can be changed with the
- * setShininessExpansionFactor: method.
+ * The initial value of this factor assumes the POD shininess range to be between zero and one.
+ * Since the OpenGL range is zero to 128, the initial value of this property is set to 128.
+ * If your POD files use a different range of shininess values, you can modify the value of
+ * this property to bring that range into the standard OpenGL range of zero to 128.
  */
 +(GLfloat) shininessExpansionFactor;
 
 /**
- * The shininess of a material as specified in a POD file has a very
- * different scale than the shininess value used by OpenGL ES.
- * To compensate for this, the shininess value extracted from a POD
- * file is multiplied by this factor before being applied to the material.
+ * The shininess of a material as specified in a POD file has a very different scale than the
+ * shininess value used by OpenGL ES. To compensate for this, the shininess value extracted
+ * from a POD file is multiplied by this factor before being applied to the material.
  *
- * The initial value of this factor is 400. It can be changed using this method.
+ * The initial value of this factor assumes the POD shininess range to be between zero and one.
+ * Since the OpenGL range is zero to 128, the initial value of this property is set to 128.
+ * If your POD files use a different range of shininess values, you can modify the value of
+ * this property to bring that range into the standard OpenGL range of zero to 128.
  */
 +(void) setShininessExpansionFactor: (GLfloat) aFloat;
 

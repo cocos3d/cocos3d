@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Matrices.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,52 +43,50 @@
 	[super dealloc];
 }
 
--(void) activate {
-	modeTracker.value = mode;
-}
+-(void) activate { modeTracker.value = mode; }
 
 -(void) push {
 	[self activate];
 	glPushMatrix();
-	LogTrace(@"%@ pushed", self);
+	LogGLErrorTrace(@"while pushing %@", self);
 }
 
 -(void) pop {
 	[self activate];
 	glPopMatrix();
-	LogTrace(@"%@ popped", self);
+	LogGLErrorTrace(@"while popping %@", self);
 }
 
 -(GLuint) getDepth {
 	[self activate];
 	GLuint depth;
 	glGetIntegerv(depthName, (GLint*)&depth);
-	LogTrace(@"%@ read GL stack depth %u", self, depth);
+	LogGLErrorTrace(@"while reading GL stack depth %u of %@", depth, self);
 	return depth;
 }
 
 -(void) identity {
 	[self activate];
 	glLoadIdentity();
-	LogTrace(@"%@ loaded identity", self);
+	LogGLErrorTrace(@"while loading identity into %@", self);
 }
 
 -(void) load: (GLvoid*) glMatrix {
 	[self activate];
 	glLoadMatrixf(glMatrix);
-	LogTrace(@"%@ loaded matrix at %p", self, glMatrix);
+	LogGLErrorTrace(@"while loading matrix at %p into %@", glMatrix, self);
 }
 
 -(void) getTop: (GLvoid*) glMatrix {
 	[self activate];
 	glGetFloatv(topName, glMatrix);
-	LogTrace(@"%@ read top into %p", self, glMatrix);
+	LogGLErrorTrace(@"while reading top of %@ into matrix at %p", self, glMatrix);
 }
 
 -(void) multiply: (GLvoid*) glMatrix {
 	[self activate];
 	glMultMatrixf(glMatrix);
-	LogTrace(@"%@ multiplied matrix at %p", self, glMatrix);
+	LogGLErrorTrace(@"while multiplied matrix at %p into %@", glMatrix, self);
 }
 
 -(id) initWithParent: (CC3OpenGLES11StateTracker*) aTracker
@@ -129,32 +127,25 @@
 
 @implementation CC3OpenGLES11MatrixPalette
 
--(void) activatePalette {
-	glCurrentPaletteMatrixOES(index);
-	LogTrace(@"%@ activated palette", self);
-}
+-(CC3OpenGLES11Matrices*) matricesState { return (CC3OpenGLES11Matrices*)parent; }
+
+-(void) activatePalette { self.matricesState.activePalette.value = index; }
 
 -(void) activate {
 	[super activate];
 	[self activatePalette];
 }
 
--(void) push {
-	NSAssert1(NO, @"%@ can't be pushed", self);
-}
+-(void) push { NSAssert1(NO, @"%@ can't be pushed", self); }
 
--(void) pop {
-	NSAssert1(NO, @"%@ can't be popped", self);
-}
+-(void) pop { NSAssert1(NO, @"%@ can't be popped", self); }
 
 -(GLuint) getDepth {
 	NSAssert1(NO, @"Can't get depth of %@", self);
 	return 0;
 }
 
--(void) getTop: (GLvoid*) glMatrix {
-	NSAssert1(NO, @"Can't retrieve top of %@", self);
-}
+-(void) getTop: (GLvoid*) glMatrix { NSAssert1(NO, @"Can't retrieve top of %@", self); }
 
 -(void) loadFromModelView {
 	[self activate];
@@ -198,12 +189,14 @@
 @synthesize mode;
 @synthesize modelview;
 @synthesize projection;
+@synthesize activePalette;
 @synthesize paletteMatrices;
 
 -(void) dealloc {
 	[mode release];
 	[modelview release];
 	[projection release];
+	[activePalette release];
 	[paletteMatrices release];
 
 	[super dealloc];
@@ -227,12 +220,16 @@
 													   andTopName: GL_PROJECTION_MATRIX
 													 andDepthName: GL_PROJECTION_STACK_DEPTH
 												   andModeTracker: mode];
+
+	self.activePalette = [CC3OpenGLES11StateTrackerEnumeration trackerWithParent: self
+																		forState: GL_ZERO
+																andGLSetFunction: glCurrentPaletteMatrixOES
+														andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
+
 	self.paletteMatrices = nil;
 }
 
--(GLuint) paletteMatrixCount {
-	return paletteMatrices ? paletteMatrices.count : 0;
-}
+-(GLuint) paletteMatrixCount { return paletteMatrices ? paletteMatrices.count : 0; }
 
 /** Template method returns an autoreleased instance of a palette matrix tracker. */
 -(CC3OpenGLES11MatrixPalette*) makePaletteMatrix: (GLuint) index {
@@ -265,9 +262,8 @@
 	[desc appendFormat: @"\n    %@ ", mode];
 	[desc appendFormat: @"\n    %@ ", modelview];
 	[desc appendFormat: @"\n    %@ ", projection];
-	for (id pm in paletteMatrices) {
-		[desc appendFormat: @"\n%@", pm];
-	}
+	[desc appendFormat: @"\n    %@ ", activePalette];
+	for (id pm in paletteMatrices) [desc appendFormat: @"\n%@", pm];
 	return desc;
 }
 

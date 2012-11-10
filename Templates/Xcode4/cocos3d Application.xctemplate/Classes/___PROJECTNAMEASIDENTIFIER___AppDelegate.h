@@ -7,14 +7,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "CCNodeController.h"
-#import "CC3Scene.h"
+#import "CC3UIViewController.h"
 
-@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <UIApplicationDelegate> {
-	UIWindow* window;
-	CCNodeController* viewController;
-}
-
-@property (nonatomic, retain) UIWindow* window;
-
+@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <UIApplicationDelegate>
 @end

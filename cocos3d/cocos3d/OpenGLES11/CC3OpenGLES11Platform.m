@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES11Platform.m
  *
- * cocos3d 0.7.1
+ * cocos3d 0.7.2
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -54,6 +54,7 @@
 @synthesize maxPaletteMatrices;
 @synthesize maxTextureUnits;
 @synthesize maxVertexUnits;
+@synthesize maxPixelSamples;
 
 -(void) dealloc {
 	[maxLights release];
@@ -61,6 +62,7 @@
 	[maxPaletteMatrices release];
 	[maxTextureUnits release];
 	[maxVertexUnits release];
+	[maxPixelSamples release];
 	[super dealloc];
 }
 
@@ -75,6 +77,8 @@
 																	  forState: GL_MAX_TEXTURE_UNITS];
 	self.maxVertexUnits = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
 																	 forState: GL_MAX_VERTEX_UNITS_OES];
+	self.maxPixelSamples = [CC3OpenGLES11StateTrackerPlatformInteger trackerWithParent: self
+																			  forState: GL_MAX_SAMPLES_APPLE];
 
 	[self open];		// Automatically load the GL values at start-up
 }
@@ -87,6 +91,7 @@
 	[maxPaletteMatrices open];
 	[maxTextureUnits open];
 	[maxVertexUnits open];
+	[maxPixelSamples open];
 }
 
 -(NSString*) description {
@@ -97,6 +102,7 @@
 	[desc appendFormat: @"\n    %@ ", maxPaletteMatrices];
 	[desc appendFormat: @"\n    %@ ", maxTextureUnits];
 	[desc appendFormat: @"\n    %@ ", maxVertexUnits];
+	[desc appendFormat: @"\n    %@ ", maxPixelSamples];
 	return desc;
 }
 
