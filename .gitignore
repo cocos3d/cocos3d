@@ -20,6 +20,9 @@ dsa_priv.pem
 xcuserdata/
 project.xcworkspace/
 
+# cocos2d
+cocos2d/
+
 # Generated files
 VersionX-revision.h
 

@@ -11,18 +11,12 @@
       location = "group:Demos/CC3Demo3DTiles/CC3Demo3DTiles1.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:README">
+      location = "group:README.md">
    </FileRef>
    <FileRef
       location = "group:CHANGELOG">
    </FileRef>
    <FileRef
-      location = "group:LICENSE.cocos3d">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE.cocos2d">
-   </FileRef>
-   <FileRef
-      location = "group:LICENSE.cocosdenshion">
+      location = "group:LICENSE">
    </FileRef>
 </Workspace>
