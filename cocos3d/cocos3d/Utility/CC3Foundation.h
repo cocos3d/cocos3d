@@ -56,15 +56,14 @@
 #import <CoreGraphics/CGColor.h>
 
 /**
- * The version of cocos3d, derived from the version format, where each of the
- * HI.ME.LO components of the version is allocated two digits in this value,
- * in the format HIMELO.
+ * The version of cocos3d, derived from the version format, where each of the HI.ME.LO
+ * components of the version is allocated two digits in this value, in the format HIMELO.
  *
  * Examples:
  *   - 0.7		-> 0x000700
- *   - 1.7.3	-> 0x010703
+ *   - 2.7.3	-> 0x020703
  */
-#define COCOS3D_VERSION 0x000702
+#define COCOS3D_VERSION 0x020000
 
 /** Returns a string describing the cocos3d version. */
 static inline NSString* NSStringFromCC3Version() {

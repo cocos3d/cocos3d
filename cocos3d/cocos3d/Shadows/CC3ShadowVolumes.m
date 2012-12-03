@@ -32,7 +32,7 @@
 #import "CC3ShadowVolumes.h"
 #import "CC3Scene.h"
 #import "CC3ParametricMeshNodes.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -779,7 +779,7 @@
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
 	[super configureDrawingParameters: visitor];
 	if (shouldDrawTerminator) {
-		[CC3OpenGLES11Engine engine].state.lineWidth.value = 1.0f;
+		[CC3OpenGLESEngine engine].state.lineWidth.value = 1.0f;
 	}
 }
 
@@ -792,12 +792,12 @@
 -(void) drawToStencilIncrementing: (BOOL) isIncrementing
 					  withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	
-	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
+	CC3OpenGLESState* glesState = [CC3OpenGLESEngine engine].state;
 	GLenum zFailOp, zPassOp;
 	BOOL useFrontFaces;
 
 	// Set the stencil operation based on whether we are incrementing or decrementing the stencil.
-	GLenum stencilOp = isIncrementing ? GL_INCR_WRAP_OES : GL_DECR_WRAP_OES;
+	GLenum stencilOp = isIncrementing ? GL_INCR_WRAP : GL_DECR_WRAP;
 	
 	// Depending on whether we are using the depth-fail, or depth-pass algorithm, perform the
 	// increment/decrement stencil operation when the depth test fails or passes, respectively,
@@ -815,7 +815,7 @@
 	}
 
 	// Configure the stencil buffer operations
-	[gles11State.stencilOperation applyStencilFail: GL_KEEP andDepthFail: zFailOp andDepthPass: zPassOp];
+	[glesState.stencilOperation applyStencilFail: GL_KEEP andDepthFail: zFailOp andDepthPass: zPassOp];
 	
 	// Remember current culling configuration for this shadow volume
 	BOOL wasCullingBackFaces = self.shouldCullBackFaces;
@@ -861,7 +861,7 @@
 
 // Overridden so that not touchable unless specifically set as such
 -(BOOL) isTouchable {
-	return (self.visible || shouldAllowTouchableWhenInvisible) && isTouchEnabled;
+	return (self.visible || shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
 }
 
 @end

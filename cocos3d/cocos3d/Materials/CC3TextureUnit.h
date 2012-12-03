@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3OpenGLES11Textures.h"
+#import "CC3OpenGLESTextures.h"
 #import "CC3NodeVisitor.h"
 #import "CCProtocols.h"
 
@@ -208,7 +208,7 @@ typedef enum {
  * The visitor provides additional configuration information that can be
  * used by subclass overrides of this method.
  */
--(void) bindTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+-(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit
    withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
@@ -218,7 +218,7 @@ typedef enum {
  * In the GL engine, sets the combining function to the default value of GL_MODULATE,
  * and the texture constant color to the default value of kCCC4FBlackTransparent.
  */
-+(void) bindDefaultTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit;
++(void) bindDefaultTo: (CC3OpenGLESTextureUnit*) glesTexUnit;
 
 @end
 

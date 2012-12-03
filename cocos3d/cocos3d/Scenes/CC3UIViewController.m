@@ -30,6 +30,7 @@
  */
 
 #import "CC3UIViewController.h"
+#import "CC3GLView.h"
 #import "CC3EAGLView.h"
 #import "CC3Logging.h"
 
@@ -41,42 +42,54 @@
 
 @implementation CC3UIViewController
 
-@synthesize controlledNode=controlledNode_, viewColorFormat=viewColorFormat_, viewDepthFormat=viewDepthFormat_;
-@synthesize viewBounds=viewBounds_, viewPixelSamples=viewPixelSamples_;
+@synthesize controlledNode=_controlledNode, viewColorFormat=_viewColorFormat, viewDepthFormat=_viewDepthFormat;
+@synthesize viewBounds=_viewBounds, viewPixelSamples=_viewPixelSamples, viewClass=_viewClass;
 
 -(void) dealloc {
-	[controlledNode_ release];
+	[_controlledNode release];
     [super dealloc];
 }
 
 
 #pragma mark View management
 
--(EAGLView*) view { return (EAGLView*)super.view; }
+#if CC3_CC2_1
+-(CCGLView*) view { return (CCGLView*)super.view; }
+#endif
+#if CC3_CC2_2
+// In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
+-(CCGLView*) view {
+	if ( !view_ ) {
+		[self loadView];
+		[self viewDidLoad];
+	}
+	return (CCGLView*)super.view;
+}
+#endif
 
--(void) setView:(EAGLView *)view {
-	NSAssert2(!view || [view isKindOfClass: [EAGLView class]], @"%@ may only be attached to a EAGLView. %@ is not of that class.", self, view);
+-(void) setView:(CCGLView *)view {
+	NSAssert2(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
 	super.view = view;
 }
 
--(Class) viewClass { return (self.isViewLoaded) ? self.view.class : [CC3EAGLView class]; }
+-(Class) viewClass { return (self.isViewLoaded) ? self.view.class : _viewClass; }
 
--(CGRect) viewBounds { return (self.isViewLoaded) ? self.view.bounds : viewBounds_; }
+-(CGRect) viewBounds { return (self.isViewLoaded) ? self.view.bounds : _viewBounds; }
 
--(NSString*) viewColorFormat { return (self.isViewLoaded) ? self.view.pixelFormat : viewColorFormat_; }
+-(NSString*) viewColorFormat { return (self.isViewLoaded) ? self.view.pixelFormat : _viewColorFormat; }
 
--(GLenum) viewDepthFormat { return (self.isViewLoaded) ? self.view.depthFormat : viewDepthFormat_; }
+-(GLenum) viewDepthFormat { return (self.isViewLoaded) ? self.view.depthFormat : _viewDepthFormat; }
 
 -(BOOL) viewShouldUseStencilBuffer { return (self.viewDepthFormat == GL_DEPTH24_STENCIL8_OES); }
 
 -(void) setViewShouldUseStencilBuffer: (BOOL) viewShouldUseStencilBuffer {
-	self.viewDepthFormat = viewShouldUseStencilBuffer ? GL_DEPTH24_STENCIL8_OES : GL_DEPTH_COMPONENT16_OES;
+	self.viewDepthFormat = viewShouldUseStencilBuffer ? GL_DEPTH24_STENCIL8_OES : GL_DEPTH_COMPONENT16;
 }
 
 -(GLuint) viewPixelSamples {
 	if (self.isViewLoaded) return self.view.pixelSamples;
 	if (self.viewShouldUseStencilBuffer) return 1;
-	return viewPixelSamples_;
+	return _viewPixelSamples;
 }
 
 -(void) loadView {
@@ -94,17 +107,20 @@
 
 #pragma mark Scene management
 
--(CCNode*) controlledNode { return controlledNode_; }
+-(CCNode*) controlledNode { return _controlledNode; }
 
 -(void) setControlledNode: (CCNode*) aNode {
-	id oldNode = controlledNode_;
-	controlledNode_ = [aNode retain];
-	[oldNode release];
+	if (aNode == _controlledNode) return;
+
+	[_controlledNode release];
+	_controlledNode = [aNode retain];
 	aNode.controller = self;
 }
 
 -(void) runSceneOnNode: (CCNode*) aNode {
 	self.controlledNode = aNode;
+
+	if ( !aNode || !_viewWasLaidOut ) return;
 
 	CCScene* scene;
 	if ( [aNode isKindOfClass: [CCScene class]] ) {
@@ -120,6 +136,23 @@
 	} else {
 		[dir runWithScene: scene];
 	}
+}
+
+/**
+ * Invoked from the UIView during layout, to ensure that the CCDirector is running a scene.
+ *
+ * If the CCDirector does not have a running scene, attempt to run a scene on the
+ * CCNode being controlled by this controller.
+ */
+-(void) ensureScene { if ( !CCDirector.sharedDirector.hasScene ) [self runSceneOnNode: self.controlledNode]; }
+
+-(void) viewDidLayoutSubviews {
+	// viewDidLayoutSubviews was introduced in iOS5. Make sure it's okay to propagate upwards
+	if ( [[UIViewController class] instancesRespondToSelector: @selector(viewDidLayoutSubviews)] )
+		[super viewDidLayoutSubviews];
+	LogTrace(@"%@ viewDidLayoutSubviews", self);
+	_viewWasLaidOut = YES;
+	[self ensureScene];
 }
 
 -(void) pauseAnimation { [[CCDirector sharedDirector] pause]; }
@@ -141,13 +174,13 @@
  * This method was introduced in iOS6.
  */
 -(NSUInteger) supportedInterfaceOrientations {
-	LogTrace(@"%@ checking supported UI orientations: %i", self.class, supportedInterfaceOrientations_);
-	return supportedInterfaceOrientations_;
+	LogTrace(@"%@ checking supported UI orientations: %i", self.class, _supportedInterfaceOrientations);
+	return _supportedInterfaceOrientations;
 }
 
 -(void) setSupportedInterfaceOrientations: (NSUInteger) uiOrientationBitMask {
 	NSAssert1(uiOrientationBitMask, @"%@ supportedInterfaceOrientations must contain at least one valid orientation", self);
-	supportedInterfaceOrientations_ = uiOrientationBitMask;
+	_supportedInterfaceOrientations = uiOrientationBitMask;
 }
 
 /**
@@ -160,7 +193,7 @@
  * has more than one orientation configured. This last test is made using a standard "is a power-of-two"
  * test. If the mask is not a power-of-two, then it includes more than one orientation.
  */
--(BOOL) shouldAutorotate { return (supportedInterfaceOrientations_ & (supportedInterfaceOrientations_ - 1)) != 0; }
+-(BOOL) shouldAutorotate { return (_supportedInterfaceOrientations & (_supportedInterfaceOrientations - 1)) != 0; }
 
 /**
  * UIKit callback template method invoked automatically when device rotation is changed.
@@ -172,29 +205,37 @@
  */
  -(BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
 	LogTrace(@"%@ should %@autorotate to UI orientation %@", self.class,
-			 (CC3UIInterfaceOrientationMaskIncludesUIOrientation(supportedInterfaceOrientations_, uiOrientation) ? @"" : @"not "),
+			 (CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation) ? @"" : @"not "),
 			 NSStringFromUIInterfaceOrientation(uiOrientation));
 
-	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(supportedInterfaceOrientations_, uiOrientation);
+	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation);
 }
 
 /** UIKit callback template method invoked automatically when device rotation is changed.  */
 -(void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation duration:(NSTimeInterval)duration {
- 	[controlledNode_ viewDidRotateFrom: self.interfaceOrientation to: uiOrientation];
+ 	[_controlledNode viewDidRotateFrom: self.interfaceOrientation to: uiOrientation];
 }
 
 
 #pragma mark Instance initialization and management
 
+#if CC3_CC2_2
++(id) sharedDirector { return super.sharedDirector; }
+#endif
+
 // CCDirector must be in portrait orientation for autorotation to work
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
+		_viewWasLaidOut = NO;
+		self.viewClass = [CC3GLView class];
 		self.viewBounds = UIScreen.mainScreen.bounds;
 		self.viewColorFormat = kEAGLColorFormatRGBA8;
-		self.viewDepthFormat = GL_DEPTH_COMPONENT16_OES;
+		self.viewDepthFormat = GL_DEPTH_COMPONENT16;
 		self.viewPixelSamples = 1;
 		self.supportedInterfaceOrientations = UIInterfaceOrientationMaskLandscape;
-		CCDirector.sharedDirector.deviceOrientation = kCCDeviceOrientationPortrait;		// Force to portrait
+#if CC3_CC2_1
+		CCDirector.sharedDirector.deviceOrientation = UIDeviceOrientationPortrait;		// Force to portrait
+#endif
 	}
 	return self;
 }
@@ -208,8 +249,8 @@
 
 -(BOOL) doesAutoRotate { return self.shouldAutorotate; }
 -(void) setDoesAutoRotate: (BOOL) doesAutoRotate { self.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll; }
--(ccDeviceOrientation) defaultCCDeviceOrientation { return kCCDeviceOrientationPortrait; }
--(void) setDefaultCCDeviceOrientation: (ccDeviceOrientation) defaultCCDeviceOrientation {}
+-(UIDeviceOrientation) defaultCCDeviceOrientation { return UIDeviceOrientationPortrait; }
+-(void) setDefaultCCDeviceOrientation: (UIDeviceOrientation) defaultCCDeviceOrientation {}
 
 @end
 
@@ -232,8 +273,8 @@
 		if(!aBool || self.isDeviceCameraAvailable) {
 			
 			// Before switching, if the CCNode is running, send it onExit to stop it
-			BOOL nodeRunning = controlledNode_.isRunning;
-			if(nodeRunning) [controlledNode_ onExit];
+			BOOL nodeRunning = _controlledNode.isRunning;
+			if(nodeRunning) [_controlledNode onExit];
 			
 			// Let subclasses of this controller know about the pending change
 			[self willChangeIsOverlayingDeviceCamera];
@@ -255,7 +296,7 @@
 			[self didChangeIsOverlayingDeviceCamera];
 			
 			// After switching, if the CCNode was running, send it onEnter to restart it
-			if(nodeRunning) [controlledNode_ onEnter];
+			if(nodeRunning) [_controlledNode onEnter];
 		}
 	}
 }

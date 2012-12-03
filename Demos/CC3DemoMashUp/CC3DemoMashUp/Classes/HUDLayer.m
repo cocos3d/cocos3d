@@ -35,7 +35,7 @@
 @implementation HUDLayer
 
 -(void) initializeControls {
-	self.isTouchEnabled = YES;		// Enable touch event handling
+	self.touchEnabled = YES;		// Enable touch event handling
 	[self scheduleUpdate];
 }
 

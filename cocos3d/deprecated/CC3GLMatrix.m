@@ -318,7 +318,7 @@
 
 -(void) populateFromRotation: (CC3Vector) aRotation {
 	if ( !CC3VectorsAreEqual(aRotation, kCC3VectorZero) ) {
-		kmMat4RotationYXZ(self.glMatrix, aRotation);
+		CC3KMMat4RotationYXZ(self.glMatrix, aRotation);
 		isIdentity = NO;
 	} else {
 		[self populateIdentity];
@@ -327,7 +327,7 @@
 
 -(void) populateFromQuaternion: (CC3Quaternion) aQuaternion {
 	if ( !CC3QuaternionsAreEqual(aQuaternion, kCC3QuaternionIdentity) ) {
-		kmMat4RotationQuaternion(self.glMatrix, aQuaternion);
+		CC3KMMat4RotationQuaternion(self.glMatrix, aQuaternion);
 		isIdentity = NO;
 	} else {
 		[self populateIdentity];
@@ -442,7 +442,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 
 +(void) populate: (GLfloat*) aGLMatrix fromRotation: (CC3Vector) aRotation {
 	if ( !CC3VectorsAreEqual(aRotation, kCC3VectorZero) ) {
-		kmMat4RotationYXZ(aGLMatrix, aRotation);
+		CC3KMMat4RotationYXZ(aGLMatrix, aRotation);
 	} else {
 		[self populateIdentity: aGLMatrix];
 	}
@@ -450,7 +450,7 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 
 +(void) populate: (GLfloat*) aGLMatrix fromQuaternion: (CC3Quaternion) aQuaternion {
 	if ( !CC3QuaternionsAreEqual(aQuaternion, kCC3QuaternionIdentity) ) {
-		kmMat4RotationQuaternion(aGLMatrix, aQuaternion);
+		CC3KMMat4RotationQuaternion(aGLMatrix, aQuaternion);
 	} else {
 		[self populateIdentity: aGLMatrix];
 	}
@@ -1005,43 +1005,43 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 		  scaleBy: (CC3Vector) aScale {
 
 	GLfloat tmpMtx[16];
-	kmMat4Transformation(tmpMtx, aTranslation, aRotation, aScale);
+	CC3KMMat4Transformation(tmpMtx, aTranslation, aRotation, aScale);
 	[self multiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotateYXZ: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation {
 	GLfloat tmpMtx[16];
-	kmMat4RotationYXZ(tmpMtx, aRotation);
+	CC3KMMat4RotationYXZ(tmpMtx, aRotation);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotateZYX: (GLfloat*) aGLMatrix by: (CC3Vector) aRotation {
 	GLfloat tmpMtx[16];
-	kmMat4RotationZYX(tmpMtx, aRotation);
+	CC3KMMat4RotationZYX(tmpMtx, aRotation);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byX: (GLfloat) degrees {
 	GLfloat tmpMtx[16];
-	kmMat4RotationX(tmpMtx, degrees);
+	CC3KMMat4RotationX(tmpMtx, degrees);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byY: (GLfloat) degrees {
 	GLfloat tmpMtx[16];
-	kmMat4RotationY(tmpMtx, degrees);
+	CC3KMMat4RotationY(tmpMtx, degrees);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byZ: (GLfloat) degrees {
 	GLfloat tmpMtx[16];
-	kmMat4RotationZ(tmpMtx, degrees);
+	CC3KMMat4RotationZ(tmpMtx, degrees);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 
 +(void) rotate: (GLfloat*) aGLMatrix byQuaternion: (CC3Quaternion) aQuaternion {
 	GLfloat tmpMtx[16];
-	kmMat4RotationQuaternion(tmpMtx, aQuaternion);
+	CC3KMMat4RotationQuaternion(tmpMtx, aQuaternion);
 	[self leftMultiply: aGLMatrix byMatrix: tmpMtx];
 }
 

@@ -91,9 +91,9 @@
 	// Edit the RootViewController.m file to edit the supported orientations.
 	//
 #if GAME_AUTOROTATION == kGameAutorotationUIViewController
-	[director setDeviceOrientation:kCCDeviceOrientationPortrait];
+	[director setDeviceOrientation:UIDeviceOrientationPortrait];
 #else
-	[director setDeviceOrientation:kCCDeviceOrientationLandscapeLeft];
+	[director setDeviceOrientation:UIDeviceOrientationLandscapeLeft];
 #endif
 	
 	[director setAnimationInterval:1.0/60];

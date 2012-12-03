@@ -100,9 +100,9 @@
 	// Sample: Autorotate only in landscape mode
 	//
 	if( interfaceOrientation == UIInterfaceOrientationLandscapeLeft ) {
-		[[CCDirector sharedDirector] setDeviceOrientation: kCCDeviceOrientationLandscapeRight];
+		[[CCDirector sharedDirector] setDeviceOrientation: UIDeviceOrientationLandscapeRight];
 	} else if( interfaceOrientation == UIInterfaceOrientationLandscapeRight) {
-		[[CCDirector sharedDirector] setDeviceOrientation: kCCDeviceOrientationLandscapeLeft];
+		[[CCDirector sharedDirector] setDeviceOrientation: UIDeviceOrientationLandscapeLeft];
 	}
 	
 	// Since this method should return YES in at least 1 orientation, 

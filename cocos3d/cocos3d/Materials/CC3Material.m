@@ -30,7 +30,7 @@
  */
 
 #import "CC3Material.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
@@ -174,10 +174,9 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else {
 		NSAssert1(aTexture, @"%@ cannot add a nil overlay texture", self);
-		if(!textureOverlays) {
-			textureOverlays = [[CCArray array] retain];
-		}
-		GLint maxTexUnits = [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value;
+		if(!textureOverlays) textureOverlays = [[CCArray array] retain];
+
+		GLint maxTexUnits = [CC3OpenGLESEngine engine].platform.maxTextureUnits.value;
 		if (self.textureCount < maxTexUnits) {
 			[textureOverlays addObject: aTexture];
 		} else {
@@ -212,9 +211,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	// Remove the overlay textures
 	if (textureOverlays) {
 		CCArray* myOTs = [textureOverlays autoreleasedCopy];
-		for (CC3Texture* ot in myOTs) {
-			[self removeTexture: ot];
-		}
+		for (CC3Texture* ot in myOTs) [self removeTexture: ot];
 	}
 }
 
@@ -428,13 +425,13 @@ static GLuint lastAssignedMaterialTag;
  * alphaTestFunction and alphaTestReference properties.
  */
 -(void) applyAlphaTest {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	BOOL shouldAlphaTest = (alphaTestFunction != GL_ALWAYS);
 
-	gles11Engine.serverCapabilities.alphaTest.value = shouldAlphaTest;
+	glesEngine.capabilities.alphaTest.value = shouldAlphaTest;
 
 	if (shouldAlphaTest) {
-		[gles11Engine.materials.alphaFunc applyFunction: alphaTestFunction
+		[glesEngine.materials.alphaFunc applyFunction: alphaTestFunction
 										   andReference: alphaTestReference];
 	}
 }
@@ -444,13 +441,13 @@ static GLuint lastAssignedMaterialTag;
  * instance is opaque or not, and applies the sourceBlend and destinationBlend properties.
  */
 -(void) applyBlend {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	BOOL shouldBlend = !self.isOpaque;
 
-	gles11Engine.serverCapabilities.blend.value = shouldBlend;
+	glesEngine.capabilities.blend.value = shouldBlend;
 
 	if (shouldBlend) {
-		[gles11Engine.materials.blendFunc applySource: blendFunc.src
+		[glesEngine.materials.blendFunc applySource: blendFunc.src
 									   andDestination: blendFunc.dst];
 	}
 }
@@ -460,9 +457,9 @@ static GLuint lastAssignedMaterialTag;
  * the GL engine, otherwise turns lighting off and applies diffuse color as a flat color.
  */
 -(void) applyColors {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	if (shouldUseLighting) {
-		[gles11Engine.serverCapabilities.lighting enable];
+		[glesEngine.capabilities.lighting enable];
 
 		ccColor4F ambColor = ambientColor;
 		ccColor4F difColor = diffuseColor;
@@ -475,18 +472,18 @@ static GLuint lastAssignedMaterialTag;
 			emsColor = CCC4FBlendAlpha(emsColor);
 		}
 
-		CC3OpenGLES11Materials* gles11Materials = gles11Engine.materials;
-		gles11Materials.ambientColor.value = ambColor;
-		gles11Materials.diffuseColor.value = difColor;
-		gles11Materials.specularColor.value = spcColor;
-		gles11Materials.emissionColor.value = emsColor;
-		gles11Materials.shininess.value = shininess;
+		CC3OpenGLESMaterials* glesMaterials = glesEngine.materials;
+		glesMaterials.ambientColor.value = ambColor;
+		glesMaterials.diffuseColor.value = difColor;
+		glesMaterials.specularColor.value = spcColor;
+		glesMaterials.emissionColor.value = emsColor;
+		glesMaterials.shininess.value = shininess;
 	} else {
 		ccColor4F difColor = diffuseColor;
 		if (self.shouldApplyOpacityToColor) difColor = CCC4FBlendAlpha(difColor);
 
-		[gles11Engine.serverCapabilities.lighting disable];
-		gles11Engine.state.color.value = difColor;
+		[glesEngine.capabilities.lighting disable];
+		glesEngine.state.color.value = difColor;
 	}
 }
 
@@ -497,14 +494,11 @@ static GLuint lastAssignedMaterialTag;
  */
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.textureUnit = 0;
-	if (texture) {
-		[texture drawWithVisitor: visitor];
-	}
-	if (textureOverlays) {
-		for (CC3Texture* ot in textureOverlays) {
-			[ot drawWithVisitor: visitor];
-		}
-	}
+
+	if (texture) [texture drawWithVisitor: visitor];
+
+	for (CC3Texture* ot in textureOverlays) [ot drawWithVisitor: visitor];
+	
 	[CC3Texture	unbindRemainingFrom: visitor.textureUnit];
 	visitor.textureUnitCount = visitor.textureUnit;
 }
@@ -512,10 +506,10 @@ static GLuint lastAssignedMaterialTag;
 -(void) unbind { [[self class] unbind]; }
 
 +(void) unbind {
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
-	[gles11ServCaps.lighting disable];
-	[gles11ServCaps.blend disable];
-	[gles11ServCaps.alphaTest disable];
+	CC3OpenGLESCapabilities* glesServCaps = [CC3OpenGLESEngine engine].capabilities;
+	[glesServCaps.lighting disable];
+	[glesServCaps.blend disable];
+	[glesServCaps.alphaTest disable];
 	[self resetSwitching];
 	[CC3Texture unbind];
 }

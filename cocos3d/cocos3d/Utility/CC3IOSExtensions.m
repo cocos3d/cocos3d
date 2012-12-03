@@ -89,6 +89,29 @@
 
 
 #pragma mark -
+#pragma mark UIView extensions
+
+@implementation UIView (FixedApi)
+
+-(UIViewController*) viewController {
+    id nextResponder = self.nextResponder;
+	return [nextResponder isKindOfClass: [UIViewController class]] ? nextResponder : nil;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark UIViewController extensions
+
+@implementation UIViewController (CC3)
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_5_0
+-(void) viewDidLayoutSubviews {}
+#endif
+@end
+
+
+#pragma mark -
 #pragma mark UIColor extensions
 
 @implementation UIColor (CC3)

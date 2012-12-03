@@ -46,6 +46,8 @@
 @end
 
 
+
+
 @implementation Joystick
 
 @synthesize velocity, angularVelocity;
@@ -63,7 +65,7 @@
 -(id) initWithThumb: (CCNode*) aNode andSize: (CGSize) size {
 	NSAssert(aNode, @"Thumb node must not be nil");
 	if( (self = [super init]) ) {
-		self.isTouchEnabled = YES;
+		self.touchEnabled = YES;
 		isTracking = NO;
 		velocity = CGPointZero;
 		angularVelocity = AngularPointZero;
@@ -110,9 +112,9 @@
 
 /** Handle touch events one at a time. */
 -(void) registerWithTouchDispatcher {
-	[[CCTouchDispatcher sharedDispatcher] addTargetedDelegate: self
-													 priority: kCCMenuTouchPriority
-											  swallowsTouches:YES];
+	[CCDirector.sharedDirector.touchDispatcher addTargetedDelegate: self
+														  priority: kCCMenuTouchPriority
+												   swallowsTouches:YES];
 	// Start with fresh state each time we register.
 	// Certain transitions, such as dynamically overlaying the device camera
 	// can cause abrupt breaks in targeted event state.

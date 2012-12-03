@@ -217,12 +217,12 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * Each CC3Layer may have its own CC3Scene instance, or may share a single instance.
  *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
+ * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
  * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLES11Engine singleton. When adding or overriding functionality
+ * are made through the CC3OpenGLESEngine singleton. When adding or overriding functionality
  * in this framework, do NOT make gl* function calls directly if there is a corresponding
- * state change tracker in the CC3OpenGLES11Engine singleton. Route the state change request
- * through the CC3OpenGLES11Engine singleton instead.
+ * state change tracker in the CC3OpenGLESEngine singleton. Route the state change request
+ * through the CC3OpenGLESEngine singleton instead.
  *
  * You can collect statistics about the performance of your cocos3d application by setting
  * the performanceStatistics property to an appropriate instance of a statistics collector.
@@ -761,12 +761,12 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * OpenGL ES drawing separate from model updates.
  *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
+ * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
  * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLES11Engine singleton. When overriding this method, or any
+ * are made through the CC3OpenGLESEngine singleton. When overriding this method, or any
  * other 3D drawing features, do NOT make gl* function calls directly if there is a
- * corresponding state change tracker in the CC3OpenGLES11Engine singleton. Route the
- * state change request through the CC3OpenGLES11Engine singleton instead.
+ * corresponding state change tracker in the CC3OpenGLESEngine singleton. Route the
+ * state change request through the CC3OpenGLESEngine singleton instead.
  *
  * This method is invoked automatically during each rendering frame. Usually, the application
  * never needs to invoke this method directly.
@@ -1180,7 +1180,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * Template method that closes the viewport for 3D drawing.
  *
  * Default implementation does nothing. The GL viewport and scissor will automatically
- * be reset to their 2D values when CC3OpenGLES11Engine is closed by the 3D scene. If that
+ * be reset to their 2D values when CC3OpenGLESEngine is closed by the 3D scene. If that
  * behaviour is changed by the application, it may be necessary to override this method
  * to handle changing the viewport to what the 2D scene expects. In general, the 2D and
  * 3D scenes have different viewports only when the 3D layer does not cover the window.
@@ -1243,6 +1243,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * This method is invoked automatically by the CC3Layer when the orientation of the
  * device changes. Usually, the application never needs to invoke this method directly.
  */
--(void) updateBounds: (CGRect) bounds withDeviceOrientation: (ccDeviceOrientation) deviceOrientation;
+-(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation;
 
 @end

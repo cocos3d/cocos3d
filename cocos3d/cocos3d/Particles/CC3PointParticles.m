@@ -30,7 +30,7 @@
  */
 
 #import "CC3PointParticles.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CCDirector.h"
 
 
@@ -365,27 +365,27 @@
  * and set GL point size, size attenuation and smoothing.
  */
 -(void) configurePointProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11State* gles11State = gles11Engine.state;
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESState* glesState = glesEngine.state;
 
 	// Enable point sprites
-	[gles11Engine.serverCapabilities.pointSprites enable];
+	[glesEngine.capabilities.pointSprites enable];
 
 	// Enable texture coordinate replacing in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
 	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) {
-		[[gles11Engine.textures textureUnitAt: texUnit].pointSpriteCoordReplace enable];
+		[[glesEngine.textures textureUnitAt: texUnit].pointSpriteCoordReplace enable];
 	}
 
 	// Set default point size
-	gles11State.pointSize.value = [self normalizeParticleSizeToDevice: particleSize];
+	glesState.pointSize.value = [self normalizeParticleSizeToDevice: particleSize];
 	
-	gles11State.pointSizeMinimum.value = [self normalizeParticleSizeToDevice: particleSizeMinimum];
-	gles11State.pointSizeMaximum.value = [self normalizeParticleSizeToDevice: particleSizeMaximum];
+	glesState.pointSizeMinimum.value = [self normalizeParticleSizeToDevice: particleSizeMinimum];
+	glesState.pointSizeMaximum.value = [self normalizeParticleSizeToDevice: particleSizeMaximum];
 	
 	// Cast attenuation coefficients to a vector when setting in state tracker
-	gles11State.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
-	gles11Engine.serverCapabilities.pointSmooth.value = shouldSmoothPoints;
+	glesState.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
+	glesEngine.capabilities.pointSmooth.value = shouldSmoothPoints;
 }
 
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
@@ -395,15 +395,15 @@
 
 /** Disable particles again in each texture unit being used by the material. */
 -(void) cleanupPointProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 
 	// Disable point sprites again
-	[gles11Engine.serverCapabilities.pointSprites disable];
+	[glesEngine.capabilities.pointSprites disable];
 
 	// Disable texture coordinate replacing again in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
 	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) {
-		[[gles11Engine.textures textureUnitAt: texUnit].pointSpriteCoordReplace disable];
+		[[glesEngine.textures textureUnitAt: texUnit].pointSpriteCoordReplace disable];
 	}
 }
 

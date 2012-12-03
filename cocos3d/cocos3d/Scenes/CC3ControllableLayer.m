@@ -113,9 +113,6 @@
 		if (isChangingAspect) {
 			CGSize cs = self.contentSize;
 			self.contentSize = CGSizeMake(cs.height, cs.width);
-			LogTrace(@"%@ changing orientation aspect from %@ to %@", self,
-					 NSStringFromUIDeviceOrientation(oldOrientation),
-					 NSStringFromUIDeviceOrientation(newOrientation));
 		}
 	}
 	

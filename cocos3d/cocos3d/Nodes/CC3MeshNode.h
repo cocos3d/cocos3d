@@ -413,7 +413,7 @@
  *
  * The maximum number of texture units available is platform dependent, but will
  * be at least two. The maximum number of texture units available can be read from
- * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. If you attempt to
+ * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. If you attempt to
  * add more than this number of textures to the material, the additional textures
  * will be ignored, and an informational message to that fact will be logged.
  * 

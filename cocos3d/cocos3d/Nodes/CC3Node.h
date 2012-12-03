@@ -201,12 +201,12 @@ typedef enum {
  * debugging rendering problems.
  *
  * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLES11Engine engine]. CC3OpenGLES11Engine only sends state change calls to the
+ * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
  * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLES11Engine singleton. When adding or overriding functionality
+ * are made through the CC3OpenGLESEngine singleton. When adding or overriding functionality
  * in this framework, do NOT make gl* function calls directly if there is a corresponding
- * state change tracker in the CC3OpenGLES11Engine singleton. Route the state change request
- * through the CC3OpenGLES11Engine singleton instead.
+ * state change tracker in the CC3OpenGLESEngine singleton. Route the state change request
+ * through the CC3OpenGLESEngine singleton instead.
  */
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	CCArray* children;
@@ -227,7 +227,7 @@ typedef enum {
 	BOOL isTransformDirty : 1;
 	BOOL isTransformInvertedDirty : 1;
 	BOOL isGlobalRotationDirty : 1;
-	BOOL isTouchEnabled : 1;
+	BOOL _touchEnabled : 1;
 	BOOL shouldInheritTouchability : 1;
 	BOOL shouldAllowTouchableWhenInvisible : 1;
 	BOOL isAnimationEnabled : 1;
@@ -2814,7 +2814,11 @@ typedef enum {
  * 
  * The initial value of this property is NO.
  */
-@property(nonatomic, assign) BOOL isTouchEnabled;
+@property(nonatomic, assign, getter=isTouchEnabled) BOOL touchEnabled;
+
+/** @deprecated Property renamed to touchEnabled, with getter isTouchEnabled. */
+-(void) setIsTouchEnabled: (BOOL) canTouch;
+//-(void) setIsTouchEnabled: (BOOL) canTouch DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether this node will respond to UI touch events.

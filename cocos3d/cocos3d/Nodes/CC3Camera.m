@@ -32,12 +32,11 @@
 #import "CC3Camera.h"
 #import "CC3Scene.h"
 #import "CC3ProjectionMatrix.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3ActionInterval.h"
 #import "CC3IOSExtensions.h"
-#import "CGPointExtension.h"
+#import "CC3CC2Extensions.h"
 #import "CC3AffineMatrix.h"
-#import "ccMacros.h"
 
 
 #pragma mark CC3Camera implementation
@@ -301,27 +300,27 @@
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
 -(void) openProjection {
 	LogTrace(@"Opening %@ 3D projection", self);
-	[[CC3OpenGLES11Engine engine].matrices.projection push];
+	[[CC3OpenGLESEngine engine].matrices.projection push];
 	[self loadProjectionMatrix];
 }
 
 /** Template method that pops the projectionMatrix from the GL projection matrix stack. */
 -(void) closeProjection {
 	LogTrace(@"Closing %@ 3D projection", self);
-	[[CC3OpenGLES11Engine engine].matrices.projection pop];
+	[[CC3OpenGLESEngine engine].matrices.projection pop];
 }
 
 /** Template method that pushes the GL modelview matrix stack, and loads the modelviewMatrix into it. */
 -(void) openModelView {
 	LogTrace(@"Opening %@ modelview", self);
-	[[CC3OpenGLES11Engine engine].matrices.modelview push];
+	[[CC3OpenGLESEngine engine].matrices.modelview push];
 	[self loadModelviewMatrix];
 }
 
 /** Template method that pops the modelviewMatrix from the GL modelview matrix stack. */
 -(void) closeModelView {
 	LogTrace(@"Closing %@ modelview", self);
-	[[CC3OpenGLES11Engine engine].matrices.modelview pop];
+	[[CC3OpenGLESEngine engine].matrices.modelview pop];
 }
 
 /** Template method that loads the modelviewMatrix into the current GL projection matrix. */
@@ -329,7 +328,7 @@
 	LogTrace(@"%@ loading modelview matrix into GL: %@", self, modelviewMatrix);
 	CC3Matrix4x4 glMtx;
 	[modelviewMatrix populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLES11Engine engine].matrices.modelview load: glMtx.elements];
+	[[CC3OpenGLESEngine engine].matrices.modelview load: glMtx.elements];
 }
 
 /**
@@ -346,7 +345,7 @@
 	
 	CC3Matrix4x4 glMtx;
 	[projMtx populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLES11Engine engine].matrices.projection load: glMtx.elements];
+	[[CC3OpenGLESEngine engine].matrices.projection load: glMtx.elements];
 }
 
 
@@ -668,12 +667,12 @@
  * (width & height) to the near clip distance.
  */
 -(CGSize) fovRatios {
-	switch([[CCDirector sharedDirector]deviceOrientation]) {
-		case kCCDeviceOrientationLandscapeLeft:
-		case kCCDeviceOrientationLandscapeRight:
+	switch(CCDirector.sharedDirector.deviceOrientation) {
+		case UIDeviceOrientationLandscapeLeft:
+		case UIDeviceOrientationLandscapeRight:
 			return CGSizeMake(frustum.top / frustum.near, frustum.right / frustum.near);
-		case kCCDeviceOrientationPortrait:
-			case kCCDeviceOrientationPortraitUpsideDown:
+		case UIDeviceOrientationPortrait:
+			case UIDeviceOrientationPortraitUpsideDown:
 		default:
 			return CGSizeMake(frustum.right / frustum.near, frustum.top / frustum.near);
 	}

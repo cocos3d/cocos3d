@@ -36,7 +36,10 @@
 #import <UIKit/UIColor.h>
 #import "ccTypes.h"
 
-// Define when compiling with SDK's below iOS6
+// Define when compiling with lower SDK's
+#ifndef __IPHONE_5_0
+#	define __IPHONE_5_0     50000
+#endif
 #ifndef __IPHONE_6_0
 #	define __IPHONE_6_0     60000
 #endif
@@ -159,6 +162,27 @@ static inline UIDeviceOrientation CC3UIDeviceOrientationFromUIInterfaceOrientati
 	}
 }
 
+
+#pragma mark -
+#pragma mark UIView extensions
+
+@interface UIView (CC3)
+
+/** Returns this view's controller, or nil if it doesn't have one. */
+@property(nonatomic, readonly) UIViewController* viewController;
+
+@end
+
+
+#pragma mark -
+#pragma mark UIViewController extensions
+
+@interface UIViewController (CC3)
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_5_0
+/** Add to prior versions of iOS to support forward compatibility. */
+-(void) viewDidLayoutSubviews;
+#endif
+@end
 
 
 #pragma mark -

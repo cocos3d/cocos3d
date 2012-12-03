@@ -77,6 +77,7 @@
 
 
 @implementation CC3DemoMashUpLayer
+
 - (void)dealloc {
 	directionJoystick = nil;		// retained as child
 	locationJoystick = nil;			// retained as child
@@ -102,7 +103,7 @@
 	shouldUseGestures = YES;
 	
 	// If not using gestures, enable touch event handling for 3D object picking
-	self.isTouchEnabled = !shouldUseGestures;
+	self.touchEnabled = !shouldUseGestures;
 	
 	[self addJoysticks];
 	[self addSwitchViewButton];
@@ -157,7 +158,7 @@
 -(void) addSwitchViewButton {
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	switchViewMI = [AdornableMenuItemImage itemFromNormalImage: kSwitchViewButtonFileName
+	switchViewMI = [AdornableMenuItemImage itemWithNormalImage: kSwitchViewButtonFileName
 												 selectedImage: kSwitchViewButtonFileName
 														target: self
 													  selector: @selector(switchViewSelected:)];
@@ -201,7 +202,7 @@
 -(void) addInvasionButton {
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	invasionMI = [AdornableMenuItemImage itemFromNormalImage: kInvasionButtonFileName
+	invasionMI = [AdornableMenuItemImage itemWithNormalImage: kInvasionButtonFileName
 											   selectedImage: kInvasionButtonFileName
 													  target: self
 													selector: @selector(invade:)];
@@ -233,7 +234,7 @@
 -(void) addSunlightButton {
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	sunlightMI = [AdornableMenuItemImage itemFromNormalImage: kSunlightButtonFileName
+	sunlightMI = [AdornableMenuItemImage itemWithNormalImage: kSunlightButtonFileName
 											   selectedImage: kSunlightButtonFileName
 													  target: self
 													selector: @selector(cycleLights:)];
@@ -266,7 +267,7 @@
 -(void) addZoomButton {
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	zoomMI = [AdornableMenuItemImage itemFromNormalImage: kZoomButtonFileName
+	zoomMI = [AdornableMenuItemImage itemWithNormalImage: kZoomButtonFileName
 										   selectedImage: kZoomButtonFileName
 												  target: self
 												selector: @selector(cycleZoom:)];
@@ -298,9 +299,9 @@
 	
 	// Set up the menu item and position it in the bottom center of the layer.
 	// We use a toggle button to indicate when the shadow activations are active.
-	CCMenuItem* sb = [CCMenuItemImage itemFromNormalImage: kShadowButtonFileName
+	CCMenuItem* sb = [CCMenuItemImage itemWithNormalImage: kShadowButtonFileName
 											selectedImage: kShadowButtonFileName];
-	CCMenuItem* sbl = [CCMenuItemImage itemFromNormalImage: kShadowButtonLatchedFileName
+	CCMenuItem* sbl = [CCMenuItemImage itemWithNormalImage: kShadowButtonLatchedFileName
 											 selectedImage: kShadowButtonLatchedFileName];
 	shadowMI = [AdornableMenuItemToggle itemWithTarget: self
 											  selector: @selector(toggleShadows:)

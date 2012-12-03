@@ -168,7 +168,7 @@
 													  andTessellation: divsPerChar];
 
 	// Set texture after mesh to avoid mesh setter from clearing texture
-	self.texture = [CC3Texture textureFromFile: fontConfig->atlasName_];
+	self.texture = [CC3Texture textureFromFile: fontConfig.atlasName];
 
 	// By definition, characters have significant transparency, so turn alpha blending on.
 	// Since characters can overlap with kerning, don't draw the transparent parts to avoid Z-fighting

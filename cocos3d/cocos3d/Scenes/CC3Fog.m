@@ -30,8 +30,8 @@
  */
 
 #import "CC3Fog.h"
-#import "CC3OpenGLES11Engine.h"
-#import "CCActionManager.h"
+#import "CC3OpenGLESEngine.h"
+#import "CC3CC2Extensions.h"
 
 
 @implementation CC3Fog
@@ -94,22 +94,22 @@
 -(void) draw {
 	if (visible) {
 		LogTrace(@"Drawing %@", self);
-		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-		CC3OpenGLES11Fog* gles11Fog = gles11Engine.fog;
+		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+		CC3OpenGLESFog* glesFog = glesEngine.fog;
 
-		[gles11Engine.serverCapabilities.fog enable];
-		gles11Engine.hints.fog.value = performanceHint;
-		gles11Fog.mode.value = attenuationMode;
-		gles11Fog.color.value = floatColor;
+		[glesEngine.capabilities.fog enable];
+		glesEngine.hints.fog.value = performanceHint;
+		glesFog.mode.value = attenuationMode;
+		glesFog.color.value = floatColor;
 
 		switch (attenuationMode) {
 			case GL_LINEAR:
-				gles11Fog.start.value = startDistance;
-				gles11Fog.end.value = endDistance;
+				glesFog.start.value = startDistance;
+				glesFog.end.value = endDistance;
 				break;
 			case GL_EXP:
 			case GL_EXP2:
-				gles11Fog.density.value = density;
+				glesFog.density.value = density;
 				break;
 			default:
 				NSAssert2(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
@@ -126,7 +126,7 @@
 
 +(void) unbind {
 	LogTrace(@"Disabling fog");
-	[[CC3OpenGLES11Engine engine].serverCapabilities.fog disable];
+	[[CC3OpenGLESEngine engine].capabilities.fog disable];
 }
 
 
@@ -161,7 +161,7 @@
 
 -(CCAction*) runAction:(CCAction*) action {
 	NSAssert( action != nil, @"Argument must be non-nil");
-	[[CCActionManager sharedManager] addAction: action target: self paused: !isRunning];
+	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !isRunning];
 	return action;
 }
 
@@ -171,26 +171,26 @@
 	return [self runAction: action];
 }
 
--(void) stopAllActions { [[CCActionManager sharedManager] removeAllActionsFromTarget: self]; }
+-(void) stopAllActions { [CCDirector.sharedDirector.actionManager removeAllActionsFromTarget: self]; }
 
--(void) stopAction: (CCAction*) action { [[CCActionManager sharedManager] removeAction: action]; }
+-(void) stopAction: (CCAction*) action { [CCDirector.sharedDirector.actionManager removeAction: action]; }
 
 -(void) stopActionByTag: (NSInteger) aTag {
 	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
-	[[CCActionManager sharedManager] removeActionByTag: aTag target: self];
+	[CCDirector.sharedDirector.actionManager removeActionByTag: aTag target: self];
 }
 
 -(CCAction*) getActionByTag: (NSInteger) aTag {
 	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
-	return [[CCActionManager sharedManager] getActionByTag: aTag target: self];
+	return [CCDirector.sharedDirector.actionManager getActionByTag: aTag target: self];
 }
 
 -(NSInteger) numberOfRunningActions {
-	return [[CCActionManager sharedManager] numberOfRunningActionsInTarget: self];
+	return [CCDirector.sharedDirector.actionManager numberOfRunningActionsInTarget: self];
 }
 
--(void) resumeAllActions { [[CCActionManager sharedManager] resumeTarget: self]; }
+-(void) resumeAllActions { [CCDirector.sharedDirector.actionManager resumeTarget: self]; }
 
--(void) pauseAllActions { [[CCActionManager sharedManager] pauseTarget: self]; }
+-(void) pauseAllActions { [CCDirector.sharedDirector.actionManager pauseTarget: self]; }
 
 @end

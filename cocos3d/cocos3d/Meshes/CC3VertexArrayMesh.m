@@ -31,7 +31,7 @@
 
 #import "CC3VertexArrayMesh.h"
 #import "CC3MeshNode.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
@@ -168,9 +168,9 @@
 -(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
 	NSAssert(vtxTexCoords, @"Overlay texture cannot be nil");
 	NSAssert1(!overlayTextureCoordinates || ((overlayTextureCoordinates.count + 1) <
-											 [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value),
+											 [CC3OpenGLESEngine engine].platform.maxTextureUnits.value),
 			  @"Too many overlaid textures. This platform only supports %i texture units.",
-			  [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value);
+			  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value);
 	LogTrace(@"Adding %@ to %@", vtxTexCoords, self);
 	
 	// Set the first texture coordinates into vertexTextureCoordinates
@@ -655,9 +655,7 @@
 		// For each texture unit that has a texture...
 		while(tu < visitor.textureUnitCount) {
 
-			if (tu < self.textureCoordinatesArrayCount) {
-				vtc = [self textureCoordinatesForTextureUnit: tu];
-			}
+			if (tu < self.textureCoordinatesArrayCount) vtc = [self textureCoordinatesForTextureUnit: tu];
 
 			// Note that vtc at this point will be the most recently assigned array,
 			// and may be the array that was used on the last iteration of this loop

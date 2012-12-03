@@ -34,6 +34,9 @@
 #import "CC3Material.h"
 #import "CC3NodeVisitor.h"
 
+/** Constant indicating that the attributeIndex property is not in use. */
+#define kCC3VertexAttributeIndexNone  ((GLuint)~0)
+
 
 #pragma mark -
 #pragma mark CC3VertexArrayContent
@@ -55,16 +58,16 @@
  */
 @interface CC3VertexArrayContent : NSObject {
 @public
-	GLvoid* vertices;
-	GLuint vertexCount;
-//	GLuint allocatedVertexCapacity;
-	GLuint vertexStride;
-	GLuint bufferID;
-	GLenum bufferUsage;
-	NSRange dirtyVertexRange;
-	BOOL shouldAllowVertexBuffering : 1;
-	BOOL shouldReleaseRedundantData : 1;
-	BOOL wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
+	GLvoid* _vertices;
+	GLuint _vertexCount;
+//	GLuint _allocatedVertexCapacity;
+	GLuint _vertexStride;
+	GLuint _bufferID;
+	GLenum _bufferUsage;
+	NSRange _dirtyVertexRange;
+	BOOL _shouldAllowVertexBuffering : 1;
+	BOOL _shouldReleaseRedundantData : 1;
+	BOOL _wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
 }
 
 @end
@@ -134,21 +137,24 @@
  *     on the new vertex array.
  */
 @interface CC3VertexArray : CC3Identifiable {
-//	CC3VertexArrayContent* vertexContent;
-	GLuint elementOffset;
-	GLint elementSize;
-	GLenum elementType;
-	GLuint allocatedVertexCapacity;
+	CC3OpenGLESStateTrackerVertexPointer* _glesVertexPointer;
+	//	CC3VertexArrayContent* _vertexContent;
+	GLuint _elementOffset;
+	GLint _elementSize;
+	GLenum _elementType;
+	GLuint _allocatedVertexCapacity;
 
-	GLvoid* vertices;
-	GLuint vertexCount;
-	GLuint vertexStride;
-	GLuint bufferID;
-	GLenum bufferUsage;
-//	NSRange dirtyVertexRange;
-	BOOL shouldAllowVertexBuffering : 1;
-	BOOL shouldReleaseRedundantData : 1;
-	BOOL wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
+//	NSRange _dirtyVertexRange;
+	GLvoid* _vertices;
+	GLuint _vertexCount;
+	GLuint _bufferID;
+	GLenum _bufferUsage;
+	GLuint _vertexStride : 8;
+	GLuint _attributeIndex : 8;
+	BOOL _shouldNormalizeContent : 1;
+	BOOL _shouldAllowVertexBuffering : 1;
+	BOOL _shouldReleaseRedundantData : 1;
+	BOOL _wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
 }
 
 /**
@@ -159,6 +165,24 @@
  * to access or set this property.
  */
 //@property(nonatomic, retain) CC3VertexArrayContent* vertexContent;
+
+/**
+ * Indicates the vertex attribute index of this array.
+ *
+ * This value is used to identify this vertex array to the to the GL engine for the purpose
+ * of matching it to a variable name within the vertex shader code.
+ *
+ * This property applies only to OpenGL ES 2. When using OpenGL ES 1, this property can be ignored.
+ *
+ * A value of kCC3VertexAttributeIndexNone indicates that this vertex array is not used by the
+ * shader and should not be enabled in the GL engine.
+ *
+ * The initial value of this property is kCC3VertexAttributeIndexNone. When using OpenGL ES 2, this
+ * property within each vertex array within a single mesh should be set to an individual and unique
+ * number, starting with zero, up to the maximum number of attribute available on the platform,
+ * which may be retrieved from CC3OpenGLESEngine.engine.platform.maxVertexAttributes.value.
+ */
+@property(nonatomic, assign) GLuint attributeIndex;
 
 /**
  * A pointer to the underlying vertex content. If the underlying content memory is assigned
@@ -277,6 +301,24 @@
 
 /** @deprecated Renamed to vertexStride. */
 @property(nonatomic, assign) GLuint elementStride DEPRECATED_ATTRIBUTE;
+
+/**
+ * Indicates whether the vertex content should be normalized during drawing.
+ *
+ * This property applies only to OpenGL ES 2. When using OpenGL ES 1, this property can be ignored.
+ *
+ * Under OpenGL ES 2, vertex content that is provided in an integer format (eg. the elementType property
+ * is set to anything other than GL_FLOAT), this property indicates whether the element content should
+ * be normalized, by being divided by their maximum range, to convert them into floating point variables
+ * between 0 & 1 (for unsigned integer types), or -1 & +1 (for signed integer types).
+ *
+ * If this property is set to YES, the element content will be normalized, otherwise it will be
+ * used as is. The normalization activity takes place in the GL engine.
+ *
+ * The default value of this property is NO, indicating that the element content will not be
+ * normalized during drawing.
+ */
+@property(nonatomic, assign) BOOL shouldNormalizeContent;
 
 /**
  * If the underlying content has been loaded into a GL engine vertex buffer object, this
@@ -728,10 +770,10 @@
  * drawFrom:forCount:withVisitor: method instead of the drawWithVisitor: method.
  */
 @interface CC3DrawableVertexArray : CC3VertexArray {
-	GLenum drawingMode;
-	GLuint stripCount;
-	GLuint* stripLengths;
-	BOOL stripLengthsAreRetained : 1;
+	GLenum _drawingMode;
+	GLuint _stripCount;
+	GLuint* _stripLengths;
+	BOOL _stripLengthsAreRetained : 1;
 }
 
 /**
@@ -875,12 +917,12 @@
  * also responsible for determining the boundingBox of the mesh.
  */
 @interface CC3VertexLocations : CC3DrawableVertexArray {
-	GLuint firstElement;
-	CC3BoundingBox boundingBox;
-	CC3Vector centerOfGeometry;
-	GLfloat radius;
-	BOOL boundaryIsDirty : 1;
-	BOOL radiusIsDirty : 1;
+	GLuint _firstElement;
+	CC3BoundingBox _boundingBox;
+	CC3Vector _centerOfGeometry;
+	GLfloat _radius;
+	BOOL _boundaryIsDirty : 1;
+	BOOL _radiusIsDirty : 1;
 }
 
 /**
@@ -1242,9 +1284,9 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * textures to be used with 3D meshes.
  */
 @interface CC3VertexTextureCoordinates : CC3VertexArray {
-	CGSize mapSize;
-	CGRect textureRectangle;
-	BOOL expectsVerticallyFlippedTextures : 1;
+	CGSize _mapSize;
+	CGRect _textureRectangle;
+	BOOL _expectsVerticallyFlippedTextures : 1;
 }
 
 /**
@@ -1565,7 +1607,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * by disabling texture array handling in the GL engine for that texture unit.
  *
  * The texture unit value should be set to a number between zero and the maximum number
- * of texture units, which can be read from [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value.
+ * of texture units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
  */
 +(void) unbind: (GLuint) textureUnit;
 
@@ -1573,7 +1615,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * Unbinds all texture arrays from the all texture units at or above the specified texture unit.
  *
  * The texture unit value should be set to a number between zero and the maximum number
- * of texture units, which can be read from [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value.
+ * of texture units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
  */
 +(void) unbindRemainingFrom: (GLuint)textureUnit;
 
@@ -1791,7 +1833,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * This vertex array works together with an instace of a CC3VertexMatrixIndices vertex
  * array, and the elementSize property of the two vertex arrays must be equal, and must
  * not be larger than the maximum number of available vertex units for the platform,
- * which can be retreived from [CC3OpenGLES11Engine engine].platform.maxVertexUnits.value.
+ * which can be retreived from [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
  */
 @interface CC3VertexWeights : CC3VertexArray
 
@@ -1876,7 +1918,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * This vertex array works together with an instace of a CC3VertexWeights vertex array,
  * and the elementSize property of the two vertex arrays must be equal, and must
  * not be larger than the maximum number of available vertex units for the platform,
- * which can be retreived from [CC3OpenGLES11Engine engine].platform.maxVertexUnits.value.
+ * which can be retreived from [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
  */
 @interface CC3VertexMatrixIndices : CC3VertexArray
 

@@ -32,12 +32,6 @@
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 #import "CC3Logging.h"
-#import "CCDirectorIOS.h"
-#import "CGPointExtension.h"
-#import "CCTouchDispatcher.h"
-#import "CCConfiguration.h"
-#import "CCFileUtils.h"
-#import "cocos2d.h"
 #import "uthash.h"
 
 
@@ -89,8 +83,17 @@
 
 @implementation CCNode (CC3)
 
-- (CGRect) globalBoundingBoxInPixels {
-	CGRect rect = CGRectMake(0, 0, contentSizeInPixels_.width, contentSizeInPixels_.height);
+#if CC3_CC2_2
+-(CGSize) contentSizeInPixels { return self.contentSize; }
+
+-(CGRect) boundingBoxInPixels { return self.boundingBox; }
+#endif
+
+-(BOOL) isTouchEnabled { return NO; }
+
+-(CGRect) globalBoundingBoxInPixels {
+	CGSize csp = self.contentSizeInPixels;
+	CGRect rect = CGRectMake(0, 0, csp.width, csp.height);
 	return CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
 }
 
@@ -109,14 +112,14 @@
 }
 
 -(CGPoint) cc3ConvertUIMovementToNodeSpace: (CGPoint) uiMovement {
-	switch ( [[CCDirector sharedDirector] deviceOrientation] ) {
-		case CCDeviceOrientationLandscapeLeft:
+	switch ( CCDirector.sharedDirector.deviceOrientation ) {
+		case UIDeviceOrientationLandscapeLeft:
 			return ccp( uiMovement.y, uiMovement.x );
-		case CCDeviceOrientationLandscapeRight:
+		case UIDeviceOrientationLandscapeRight:
 			return ccp( -uiMovement.y, -uiMovement.x );
-		case CCDeviceOrientationPortraitUpsideDown:
+		case UIDeviceOrientationPortraitUpsideDown:
 			return ccp( -uiMovement.x, uiMovement.y );
-		case CCDeviceOrientationPortrait:
+		case UIDeviceOrientationPortrait:
 		default:
 			return ccp( uiMovement.x, -uiMovement.y );
 	}
@@ -128,15 +131,13 @@
 	return ccp(glMovement.x / cs.width, glMovement.y / cs.height);
 }
 
--(BOOL) cc3IsTouchEnabled { return NO; }
-
 /**
  * Based on cocos2d Gesture Recognizer ideas by Krzysztof Zabłocki at:
  * http://www.merowing.info/2012/03/using-gesturerecognizers-in-cocos2d/
  */
 -(BOOL) cc3WillConsumeTouchEventAt: (CGPoint) viewPoint {
 	
-	if (self.cc3IsTouchEnabled &&
+	if (self.isTouchEnabled &&
 		self.visible &&
 		self.isRunning &&
 		[self cc3ContainsTouchPoint: viewPoint] ) return YES;
@@ -182,7 +183,9 @@
 
 @implementation CCLayer (CC3)
 
--(BOOL) cc3IsTouchEnabled { return self.isTouchEnabled; }
+#if CC3_CC2_1
+-(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
+#endif
 
 @end
 
@@ -204,13 +207,46 @@
 
 
 #pragma mark -
+#pragma mark CCMenu extension
+
+@implementation CCMenuItemImage (CC3)
+#if CC3_CC2_1
++(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2 {
+	return [self itemFromNormalImage:value selectedImage:value2];
+}
++(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2 target:(id) r selector:(SEL) s {
+	return [self itemFromNormalImage:value selectedImage:value2 target:r selector:s];
+}
+#endif
+@end
+
+
+#pragma mark -
 #pragma mark CCDirector extension
 
 @implementation CCDirector (CC3)
 
+-(CCGLView*) ccGLView { return (CCGLView*)self.view; }
+
+-(void) setCcGLView: (CCGLView*) ccGLView { self.view = ccGLView; }
+
 -(ccTime) frameInterval { return dt; }
 
 -(ccTime) frameRate { return frameRate_; }
+
+-(BOOL) hasScene { return !((runningScene_ == nil) && (nextScene_ == nil)); }
+
+#if CC3_CC2_1
+-(UIView*) view { return self.openGLView; }
+-(void) setView: (UIView*) view { self.openGLView = (CCGLView*)view; }
+-(CCActionManager*) actionManager { return CCActionManager.sharedManager; }
+-(CCTouchDispatcher*) touchDispatcher { return CCTouchDispatcher.sharedDispatcher; }
+-(CCScheduler*) scheduler { return CCScheduler.sharedScheduler; }
+#endif
+
+#if CC3_CC2_2
+-(UIDeviceOrientation) deviceOrientation { return UIDeviceOrientationPortrait; }
+#endif
 
 @end
 
@@ -218,12 +254,14 @@
 #pragma mark -
 #pragma mark CC3BMFontConfiguration
 
+#if CC3_CC2_1
 /** Structure holding character kerning data. Copied from identical definition in CCLabelBMFont.m. */
 typedef struct _KerningHashElement {	
 	int key;		// key for the hash. 16-bit for 1st element, 16-bit for 2nd element
 	int amount;
 	UT_hash_handle hh;
-} tKerningHashElement;
+} tCCKerningHashElement;
+#endif
 
 @interface CCBMFontConfiguration (TemplateMethods)
 -(void) parseConfigFile:(NSString*)controlFile;
@@ -239,32 +277,43 @@ typedef struct _KerningHashElement {
 
 @implementation CC3BMFontConfiguration
 
+-(NSString*) atlasName { return atlasName_; }
+
+-(void) setAtlasName: (NSString*) atlasName { atlasName_ = atlasName; }
+
 -(ccBMFontDef*) characterSpecFor: (unichar) c {
 // cocos2d 1.0 and below use an array to hold the font definitions.
 // cocos2d 1.1 and above use a hash list.
+// cocos2d 2.x uses a hash list, but with a more complex structure.
 #if COCOS2D_VERSION < 0x010100
 	return (c < kCCBMFontMaxChars) ? &BMFontArray_[c] : NULL;
-#else
+#elif COCOS2D_VERSION < 0x020000
 	ccBMFontDef *charSpec = NULL;
 	unsigned int charKey = c;
 	HASH_FIND_INT(BMFontHash_, &charKey, charSpec);
 	return charSpec;
+#else
+	tCCFontDefHashElement *element = NULL;
+	NSUInteger key = (NSUInteger)c;
+	HASH_FIND_INT(fontDefDictionary_ , &key, element);
+	return element ? &(element->fontDef) : NULL;
 #endif
 }
 
 -(NSInteger) kerningBetween: (unichar) firstChar and: (unichar) secondChar {
 	if(kerningDictionary_) {
 		unsigned int key = (firstChar << 16) | (secondChar & 0xffff);
-		tKerningHashElement* element = NULL;
+		tCCKerningHashElement* element = NULL;
 		HASH_FIND_INT(kerningDictionary_, &key, element);		
 		if(element) return element->amount;
 	}
 	return 0;
 }
 
+#if CC3_CC2_1
 /** Overridden to parse info line. */
 - (void)parseConfigFile: (NSString*) fntFile {	
-	NSString *fullpath = [CCFileUtils fullPathFromRelativePath:fntFile];
+	NSString *fullpath = [CCFileUtils.sharedFileUtils fullPathFromRelativePath: fntFile];
 	NSError *error;
 	NSString *contents = [NSString stringWithContentsOfFile:fullpath encoding:NSUTF8StringEncoding error:&error];
 	
@@ -311,32 +360,40 @@ typedef struct _KerningHashElement {
 
 // cocos2d 1.0 and below use an array to hold the character configs and, from the parseConfigFile:
 // method, invoke the parseCharacterDefinition:charDef: method instead of the parseCharacterDefinition:
-// method. Create a suitable replacement for the parseCharacterDefinition:.
+// method. Create a suitable replacement for the parseCharacterDefinition: method.
 #if COCOS2D_VERSION < 0x010100
 -(void) parseCharacterDefinition: (NSString*) line {
-	ccBMFontDef characterDefinition;
-	[self parseCharacterDefinition:line charDef: &characterDefinition];
-	BMFontArray_[ characterDefinition.charID ] = characterDefinition;
+	ccBMFontDef charDef;
+	[self parseCharacterDefinition:line charDef: &charDef];
+	BMFontArray_[ characterDefinition.charID ] = charDef;
 }
 #endif
+#endif
 
-/*
-- (void)parseConfigFile: (NSString*) fntFile {
-	NSString *fullpath = [CCFileUtils fullPathFromRelativePath:fntFile];
+
+#if CC3_CC2_2
+/** Overridden to parse info line. */
+-(NSMutableString*) parseConfigFile: (NSString*) fntFile {
+	NSString *fullpath = [[CCFileUtils sharedFileUtils] fullPathFromRelativePath:fntFile];
 	NSError *error;
 	NSString *contents = [NSString stringWithContentsOfFile:fullpath encoding:NSUTF8StringEncoding error:&error];
 	
-	NSAssert1( contents, @"cocos2d: Error parsing FNTfile: %@", error);
-	
+	NSMutableString *validCharsString = [[NSMutableString alloc] initWithCapacity:512];
+    
+	if( ! contents ) {
+		NSLog(@"cocos2d: Error parsing FNTfile %@: %@", fntFile, error);
+		return nil;
+	}
+    
 	// Move all lines in the string, which are denoted by \n, into an array
 	NSArray *lines = [[NSArray alloc] initWithArray:[contents componentsSeparatedByString:@"\n"]];
-	
+    
 	// Create an enumerator which we can use to move through the lines read from the control file
 	NSEnumerator *nse = [lines objectEnumerator];
-	
+    
 	// Create a holder for each line we are going to work with
 	NSString *line;
-	
+    
 	// Loop through all the lines in the lines array processing each one
 	while( (line = [nse nextObject]) ) {
 		// parse spacing / padding
@@ -355,23 +412,28 @@ typedef struct _KerningHashElement {
 		}
 		else if([line hasPrefix:@"char"]) {
 			// Parse the current line and create a new CharDef
-			ccBMFontDef characterDefinition;
-			[self parseCharacterDefinition:line charDef:&characterDefinition];
+			tCCFontDefHashElement *element = malloc( sizeof(*element) );
 			
-			// Add the CharDef returned to the charArray
-			BMFontArray_[ characterDefinition.charID ] = characterDefinition;
+			[self parseCharacterDefinition:line charDef:&element->fontDef];
+			
+			element->key = element->fontDef.charID;
+			HASH_ADD_INT(fontDefDictionary_, key, element);
+			
+			[validCharsString appendString:[NSString stringWithFormat:@"%C", element->fontDef.charID]];
 		}
-		else if([line hasPrefix:@"kernings count"]) {
-			[self parseKerningCapacity:line];
-		}
+		//		else if([line hasPrefix:@"kernings count"]) {
+		//			[self parseKerningCapacity:line];
+		//		}
 		else if([line hasPrefix:@"kerning first"]) {
 			[self parseKerningEntry:line];
 		}
 	}
 	// Finished with lines so release it
 	[lines release];
+	
+	return [validCharsString autorelease];
 }
-*/
+#endif
 
 /** Overridden with copied superclass method, modified to parse size into fontSize iVar. */
 -(void) parseInfoArguments: (NSString*) line {
@@ -499,6 +561,19 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 }
 
 +(void) clearFontConfigurations { [cc3BMFontConfigurations removeAllObjects]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CCFileUtils extension
+
+/** Extension category to support cocos3d functionality. */
+@implementation CCFileUtils (CC3)
+
+#if CC3_CC2_1
++(Class) sharedFileUtils { return self; }
+#endif
 
 @end
 

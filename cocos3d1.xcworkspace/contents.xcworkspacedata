@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Demos/CC3DemoMashUp/CC3DemoMashUp1.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Demos/CC3Performance/CC3Performance1.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Demos/CC3Demo3DTiles/CC3Demo3DTiles1.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:README">
+   </FileRef>
+   <FileRef
+      location = "group:CHANGELOG">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE.cocos3d">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE.cocos2d">
+   </FileRef>
+   <FileRef
+      location = "group:LICENSE.cocosdenshion">
+   </FileRef>
+</Workspace>

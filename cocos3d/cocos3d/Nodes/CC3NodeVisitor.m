@@ -33,7 +33,8 @@
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3VertexArrayMesh.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
+#import "CC3GLView.h"
 #import "CC3EAGLView.h"
 #import "CC3NodeSequencer.h"
 
@@ -439,7 +440,7 @@
 	[CC3VertexArrayMesh resetSwitching];
 	
 	if (shouldClearDepthBuffer) {
-		[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+		[[CC3OpenGLESEngine engine].state clearDepthBuffer];
 	}
 }
 
@@ -508,17 +509,17 @@
 	[pickedNode release];
 	pickedNode = nil;
 	
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
-	[gles11ServCaps.lighting disable];
-	[gles11ServCaps.blend disable];
-	[gles11ServCaps.fog disable];
+	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
+	[glesServCaps.lighting disable];
+	[glesServCaps.blend disable];
+	[glesServCaps.fog disable];
 	
-	originalColor = gles11Engine.state.color.value;
+	originalColor = glesEngine.state.color.value;
 	
 	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
-	[[CCDirector sharedDirector].openGLView openPicking];
+	[CCDirector.sharedDirector.ccGLView openPicking];
 }
 
 /**
@@ -532,10 +533,10 @@
  * if the scene has no lighting.
  */
 -(void) close {
-	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
+	CC3OpenGLESState* glesState = [CC3OpenGLESEngine engine].state;
 		
 	// Read the pixel from the framebuffer
-	ccColor4B pixColor = [gles11State readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
+	ccColor4B pixColor = [glesState readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
 	
 	// Fetch the node whose tags is mapped from the pixel color
 	pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
@@ -544,11 +545,11 @@
 			 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
 	
 	// If multisampling antialiasing, rebind the multisampling framebuffer
-	[[CCDirector sharedDirector].openGLView closePicking];
+	[CCDirector.sharedDirector.ccGLView closePicking];
 	
 	[self drawBackdrop];	// Draw the backdrop behind the 3D scene
 
-	gles11State.color.value = originalColor;
+	glesState.color.value = originalColor;
 	[super close];
 }
 
@@ -591,7 +592,7 @@
  * Subclasses can override to do something more sophisticated with the background.
  */
 -(void) drawBackdrop {
-	CC3OpenGLES11State* gles11State = [CC3OpenGLES11Engine engine].state;
+	CC3OpenGLESState* glesState = [CC3OpenGLESEngine engine].state;
 	CC3Layer* cc3Layer = self.scene.cc3Layer;
 	
 	// Only clear the color if the layer is opaque. This is to stop flicker
@@ -604,41 +605,41 @@
 	GLbitfield depthFlag = shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
 
 	// Ensure that the depth buffer is writable (may have been turned off during node drawing)
-	if (depthFlag) gles11State.depthMask.value = YES;
+	if (depthFlag) glesState.depthMask.value = YES;
 	
 	// If the CC3Layer has a background color, use it as the GL clear color
 	if (colorFlag) {
 		if (cc3Layer.isColored) {
 			// Remember the current GL clear color
-			ccColor4F currClearColor = gles11State.clearColor.value;
+			ccColor4F currClearColor = glesState.clearColor.value;
 			
 			// Retrieve the CC3Layer background color
 			ccColor4F layerColor = CCC4FFromColorAndOpacity(cc3Layer.color, cc3Layer.opacity);
 			
 			// Set the GL clear color from the layer color
-			gles11State.clearColor.value = layerColor;
+			glesState.clearColor.value = layerColor;
 			LogTrace(@"%@ clearing background to %@ color: %@ %@ clearing depth buffer to %.3f", self,
 					 cc3Layer, NSStringFromCCC4F(layerColor), (depthFlag ? @"and" : @"but not"),
-					 gles11State.clearDepth.value);
+					 glesState.clearDepth.value);
 			
 			// Clear the color buffer redraw the background, and depth buffer if required
-			[gles11State clearBuffers: (colorFlag | depthFlag)];
+			[glesState clearBuffers: (colorFlag | depthFlag)];
 			
 			// Reinstate the current GL clear color
-			gles11State.clearColor.value = currClearColor;
+			glesState.clearColor.value = currClearColor;
 			
 		} else {
 			// Otherwise use the current clear color
 			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer to %.3f",
-					 self, NSStringFromCCC4F(gles11State.clearColor.value),
-					 (depthFlag ? @"and" : @"but not"), gles11State.clearDepth.value);
+					 self, NSStringFromCCC4F(glesState.clearColor.value),
+					 (depthFlag ? @"and" : @"but not"), glesState.clearDepth.value);
 			
 			// Clear the color buffer redraw the background, and depth buffer if required
-			[gles11State clearBuffers: (colorFlag | depthFlag)];
+			[glesState clearBuffers: (colorFlag | depthFlag)];
 		}
 	} else if (depthFlag) {
 		LogTrace(@"%@ clearing depth buffer", self);
-		[gles11State clearBuffers: depthFlag];		// Clear the depth buffer only
+		[glesState clearBuffers: depthFlag];		// Clear the depth buffer only
 	} else {
 		LogTrace(@"%@ clearing neither color or depth buffer", self);
 	}
@@ -647,7 +648,7 @@
 /** Maps the specified node to a unique color, and paints the node with that color. */
 -(void) paintNode: (CC3Node*) aNode {
 	ccColor4B color = [self colorFromNodeTag: aNode.tag];
-	[CC3OpenGLES11Engine engine].state.color.fixedValue = color;
+	[CC3OpenGLESEngine engine].state.color.fixedValue = color;
 	LogTrace(@"%@ painting %@ with color (%u, %u, %u, %u)",
 			 self, aNode, color.r, color.g, color.b, color.a);
 }

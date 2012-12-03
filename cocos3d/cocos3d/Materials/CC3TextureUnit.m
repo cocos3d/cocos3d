@@ -152,14 +152,14 @@
 
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	gles11TexUnit.textureEnvironmentMode.value = textureEnvironmentMode;
-	gles11TexUnit.color.value = constantColor;
+-(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	glesTexUnit.textureEnvironmentMode.value = textureEnvironmentMode;
+	glesTexUnit.color.value = constantColor;
 }
 
-+(void) bindDefaultTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit {
-	gles11TexUnit.textureEnvironmentMode.value = GL_MODULATE;
-	gles11TexUnit.color.value = kCCC4FBlackTransparent;
++(void) bindDefaultTo: (CC3OpenGLESTextureUnit*) glesTexUnit {
+	glesTexUnit.textureEnvironmentMode.value = GL_MODULATE;
+	glesTexUnit.color.value = kCCC4FBlackTransparent;
 }
 
 @end
@@ -241,25 +241,25 @@
 
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super bindTo: gles11TexUnit withVisitor: visitor];
+-(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super bindTo: glesTexUnit withVisitor: visitor];
 	
-	gles11TexUnit.combineRGBFunction.value = combineRGBFunction;
-	gles11TexUnit.rgbSource0.value = rgbSource0;
-	gles11TexUnit.rgbSource1.value = rgbSource1;
-	gles11TexUnit.rgbSource2.value = rgbSource2;
-	gles11TexUnit.rgbOperand0.value = rgbOperand0;
-	gles11TexUnit.rgbOperand1.value = rgbOperand1;
-	gles11TexUnit.rgbOperand2.value = rgbOperand2;
-	gles11TexUnit.combineAlphaFunction.value = combineAlphaFunction;
-	gles11TexUnit.alphaSource0.value = alphaSource0;
-	gles11TexUnit.alphaSource1.value = alphaSource1;
-	gles11TexUnit.alphaSource2.value = alphaSource2;
-	gles11TexUnit.alphaOperand0.value = alphaOperand0;
-	gles11TexUnit.alphaOperand1.value = alphaOperand1;
-	gles11TexUnit.alphaOperand2.value = alphaOperand2;
+	glesTexUnit.combineRGBFunction.value = combineRGBFunction;
+	glesTexUnit.rgbSource0.value = rgbSource0;
+	glesTexUnit.rgbSource1.value = rgbSource1;
+	glesTexUnit.rgbSource2.value = rgbSource2;
+	glesTexUnit.rgbOperand0.value = rgbOperand0;
+	glesTexUnit.rgbOperand1.value = rgbOperand1;
+	glesTexUnit.rgbOperand2.value = rgbOperand2;
+	glesTexUnit.combineAlphaFunction.value = combineAlphaFunction;
+	glesTexUnit.alphaSource0.value = alphaSource0;
+	glesTexUnit.alphaSource1.value = alphaSource1;
+	glesTexUnit.alphaSource2.value = alphaSource2;
+	glesTexUnit.alphaOperand0.value = alphaOperand0;
+	glesTexUnit.alphaOperand1.value = alphaOperand1;
+	glesTexUnit.alphaOperand2.value = alphaOperand2;
 	
-	LogTrace(@"%@ bound to %@", self, gles11TexUnit);
+	LogTrace(@"%@ bound to %@", self, glesTexUnit);
 }
 
 @end
@@ -275,21 +275,21 @@
 
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	gles11TexUnit.textureEnvironmentMode.value = GL_COMBINE;
-	gles11TexUnit.combineRGBFunction.value = GL_DOT3_RGB;
-	gles11TexUnit.rgbSource0.value = GL_TEXTURE;
-	gles11TexUnit.rgbSource1.value = GL_CONSTANT;
-	gles11TexUnit.rgbOperand0.value = GL_SRC_COLOR;
-	gles11TexUnit.rgbOperand1.value = GL_SRC_COLOR;
-	gles11TexUnit.combineAlphaFunction.value = GL_MODULATE;
-	gles11TexUnit.alphaSource0.value = GL_TEXTURE;
-	gles11TexUnit.alphaSource1.value = GL_CONSTANT;
-	gles11TexUnit.alphaOperand0.value = GL_SRC_ALPHA;
-	gles11TexUnit.alphaOperand1.value = GL_SRC_ALPHA;
-	gles11TexUnit.color.value = constantColor;
+-(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	glesTexUnit.textureEnvironmentMode.value = GL_COMBINE;
+	glesTexUnit.combineRGBFunction.value = GL_DOT3_RGB;
+	glesTexUnit.rgbSource0.value = GL_TEXTURE;
+	glesTexUnit.rgbSource1.value = GL_CONSTANT;
+	glesTexUnit.rgbOperand0.value = GL_SRC_COLOR;
+	glesTexUnit.rgbOperand1.value = GL_SRC_COLOR;
+	glesTexUnit.combineAlphaFunction.value = GL_MODULATE;
+	glesTexUnit.alphaSource0.value = GL_TEXTURE;
+	glesTexUnit.alphaSource1.value = GL_CONSTANT;
+	glesTexUnit.alphaOperand0.value = GL_SRC_ALPHA;
+	glesTexUnit.alphaOperand1.value = GL_SRC_ALPHA;
+	glesTexUnit.color.value = constantColor;
 	
-	LogTrace(@"%@ bound to %@", self, gles11TexUnit);
+	LogTrace(@"%@ bound to %@", self, glesTexUnit);
 }
 
 @end

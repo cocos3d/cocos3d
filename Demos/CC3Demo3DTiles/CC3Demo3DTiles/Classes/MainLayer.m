@@ -196,7 +196,7 @@
 	bBox.minimum = cc3v(-1.0, -1.0, -1.0);
 	bBox.maximum = cc3v( 1.0,  1.0,  1.0);
 	[mn populateAsSolidBox: bBox];
-	mn.isTouchEnabled = YES;
+	mn.touchEnabled = YES;
 	mn.shouldColorTile = YES;
 	[templates addObject: mn];
 	
@@ -206,14 +206,14 @@
 	[mn remove];		// Remove from the POD resource
 	[mn moveMeshOriginToCenterOfGeometry];
 	mn.rotation = cc3v(0.0, -90.0, 0.0);
-	mn.isTouchEnabled = YES;
+	mn.touchEnabled = YES;
 	[templates addObject: mn];
 	
 	// Die cube model from POD resource.
 	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	n = [rezNode getNodeNamed: kDieCubeName];
 	[n remove];		// Remove from the POD resource
-	n.isTouchEnabled = YES;
+	n.touchEnabled = YES;
 	[templates addObject: n];
 	
 	// Beachball from POD resource with no texture, but with several subnodes
@@ -221,7 +221,7 @@
 	n = [rezNode getNodeNamed: kBeachBallName];
 	[n remove];		// Remove from the POD resource
 	n.isOpaque = YES;
-	n.isTouchEnabled = YES;
+	n.touchEnabled = YES;
 	[templates addObject: n];
 }
 

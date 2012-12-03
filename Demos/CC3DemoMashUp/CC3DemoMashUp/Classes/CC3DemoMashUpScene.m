@@ -41,7 +41,7 @@
 #import "CGPointExtension.h"
 #import "CCTouchDispatcher.h"
 #import "CCParticleExamples.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3PODNode.h"
 #import "CC3PODResourceNode.h"
 #import "CC3BoundingVolumes.h"
@@ -473,7 +473,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	ground.location = cc3v(0.0, -100.0, 0.0);
 	ground.rotation = cc3v(-90.0, 180.0, 0.0);
 	ground.shouldCullBackFaces = NO;	// Show the ground from below as well.
-	ground.isTouchEnabled = YES;		// Allow the ground to be selected by touch events.
+	ground.touchEnabled = YES;		// Allow the ground to be selected by touch events.
 	[ground retainVertexLocations];		// Retain location data in main memory, even when it
 										// is buffered to a GL VBO via releaseRedundantData,
 										// so that it may be accessed for further calculations
@@ -505,7 +505,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	floater.texture = [CC3Texture textureFromFile: kFloaterTextureFile];
 	floater.location = cc3v(400.0, 150.0, -250.0);
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
-	floater.isTouchEnabled = YES;
+	floater.touchEnabled = YES;
 	[self addChild: floater];
 
 	// Fade the floating ring in and out
@@ -565,7 +565,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// one for each separately colored mesh. By marking the node assembly as touch-enabled,
 	// and NOT marking each component mesh node as touch-enabled, when any of the component
 	// nodes is touched, the entire beach ball structural node will be selected.
-	beachBall.isTouchEnabled = YES;
+	beachBall.touchEnabled = YES;
 	
 	// Bounce the beach ball...simply...we're not trying for realistic physics here,
 	// but we can still do some fun and interesting stuff with Ease-actions.
@@ -608,7 +608,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	globe.location = cc3v(150.0, 200.0, -150.0);
 	globe.uniformScale = 50.0;
 	globe.ambientColor = kCCC4FLightGray;		// Increase the ambient reflection
-	globe.isTouchEnabled = YES;				// allow this node to be selected by touch events
+	globe.touchEnabled = YES;				// allow this node to be selected by touch events
 	
 	// Rotate the globe
 	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
@@ -665,7 +665,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Now set some properties, including the friction, and add the die cube to the scene
 	dieCube.uniformScale = 30.0;
 	dieCube.location = cc3v(-200.0, 200.0, 0.0);
-	dieCube.isTouchEnabled = YES;
+	dieCube.touchEnabled = YES;
 	dieCube.friction = 1.0;
 	[self addChild: dieCube];
 
@@ -708,7 +708,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	texCubeSpinner = [SpinningNode nodeWithName: itemName];
 	texCubeSpinner.friction = 1.0;
 	texCubeSpinner.location = cc3v(-200.0, 75.0, 0.0);
-	texCubeSpinner.isTouchEnabled = YES;
+	texCubeSpinner.touchEnabled = YES;
 
 	// Add the cube to the spinner and the spinner to the scene.
 	[texCubeSpinner addChild: texCube];
@@ -718,7 +718,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 /** Adds a large textured teapot and a small multicolored teapot orbiting it. */
 -(void) addTeapotAndSatellite {
 	teapotTextured = [[CC3ModelSampleFactory factory] makeLogoTexturedTeapotNamed: kTexturedTeapotName];
-	teapotTextured.isTouchEnabled = YES;		// allow this node to be selected by touch events
+	teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
 	
 	// To experiment with repeating textures, uncomment the following line
 	// Note that the texture does not actually appear repeated 5 times.
@@ -736,7 +736,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	teapotSatellite.material = [CC3Material shiny];
 	teapotSatellite.location = cc3v(0.3, 0.1, 0.0);
 	teapotSatellite.uniformScale = 0.4;
-	teapotSatellite.isTouchEnabled = YES;		// allow this node to be selected by touch events
+	teapotSatellite.touchEnabled = YES;		// allow this node to be selected by touch events
 	
 	teapotTextured.location = cc3v(0.0, 150.0, -650.0);
 	teapotTextured.uniformScale = 500.0;
@@ -765,7 +765,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addBrickWall {
 	// Create a parametric textured box as an open door.
 	brickWall = [DoorMeshNode nodeWithName: kBrickWallName];
-	brickWall.isTouchEnabled = YES;
+	brickWall.touchEnabled = YES;
 	[brickWall populateAsSolidBox: CC3BoundingBoxMake(-1.5, 0, -0.3, 1.5, 2.5, 0.3)];
 	brickWall.uniformScale = 40.0;
 	
@@ -793,7 +793,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// If you want to stop the robot arm from being animated, uncomment the following line.
 //	[podRezNode disableAllAnimation];
 	
-	podRezNode.isTouchEnabled = YES;
+	podRezNode.touchEnabled = YES;
 	[self addChild: podRezNode];
 	
 	// Retrieve the light from the POD resource so we can track its location as it moves via animation
@@ -830,7 +830,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 																		  withColor: CCC4FMake(0.7, 0.0, 0.0, 1.0)];
 	teapotRed.location = cc3v(100.0, 0.0, 0.0);
 	teapotRed.uniformScale = 100.0;
-	teapotRed.isTouchEnabled = YES;		// allow this node to be selected by touch events
+	teapotRed.touchEnabled = YES;		// allow this node to be selected by touch events
 	[self addChild: teapotRed];
 	
 	// Green teapot is at postion 100 on the Y-axis
@@ -857,7 +857,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addLightMarker {
 	teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
 	teapotWhite.uniformScale = 200.0;
-	teapotWhite.isTouchEnabled = YES;		// allow this node to be selected by touch events
+	teapotWhite.touchEnabled = YES;		// allow this node to be selected by touch events
 	[self addChild: teapotWhite];
 }
 
@@ -885,7 +885,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.color = ccORANGE;
 	bmLabel.shouldUseLighting = NO;
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
-	bmLabel.isTouchEnabled = YES;
+	bmLabel.touchEnabled = YES;
 	[self addChild: bmLabel];
 	[bmLabel runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				  rotateBy: cc3v(0, 30, 0)]]];
@@ -1003,7 +1003,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	woodenSign.diffuseColor = kCCC4FCyan;
 	woodenSign.specularColor = kCCC4FLightGray;
-	woodenSign.isTouchEnabled = YES;		// Allow the sign to be selected by touch events.
+	woodenSign.touchEnabled = YES;		// Allow the sign to be selected by touch events.
 	
 	// The sign starts out in the X-Y plane and facing up the positive Z-axis.
 	// Rotate the sign 90 degrees so that it faces the center of the scene.
@@ -1060,7 +1060,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
-	floatingHead.isTouchEnabled = YES;
+	floatingHead.touchEnabled = YES;
 	
 	// Demonstrate the use of applicaiton-specific data attached to a node.
 	floatingHead.userData = kDontPokeMe;
@@ -1128,8 +1128,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3MeshNode* distractedMascot = [[mascot copyWithName: kDistractedMascotName] autorelease];
 	
 	// Allow the mascots to be selected by touch events.
-	mascot.isTouchEnabled = YES;
-	distractedMascot.isTouchEnabled = YES;
+	mascot.touchEnabled = YES;
+	distractedMascot.touchEnabled = YES;
 
 	// Scale the mascots
 	mascot.uniformScale = 22.0;
@@ -1320,7 +1320,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	bv.sphericalBoundingVolume.radius = 1500.0;
 	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
 
-	malletAndAnvils.isTouchEnabled = YES;		// make the mallet touchable
+	malletAndAnvils.touchEnabled = YES;		// make the mallet touchable
 	
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
@@ -1365,7 +1365,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	runnerCam.farClippingDistance = self.activeCamera.farClippingDistance;
 	runnerCam.hasInfiniteDepthOfField = YES;
 
-	runner.isTouchEnabled = YES;		// make the runner touchable
+	runner.touchEnabled = YES;		// make the runner touchable
 	
 	// Create a running track at the scene's center.
 	// This "running track" is really just a structural node on which we can place the man
@@ -1402,7 +1402,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	littleBrother.uniformScale = 0.75f;
 	littleBrother.location = cc3v(0, 0, 800);
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
-	littleBrother.isTouchEnabled = YES;		// make the runner touchable
+	littleBrother.touchEnabled = YES;		// make the runner touchable
 
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
@@ -1458,7 +1458,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.shouldDrawLocalContentWireframeBox = YES;
 	emitter.shouldUseFixedBoundingVolume = NO;
 
-	emitter.isTouchEnabled = YES;		// Shows the emitter name when touched
+	emitter.touchEnabled = YES;		// Shows the emitter name when touched
 	
 	// Set the location of the emitter, and set it rotating for effect.
 	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
@@ -1528,7 +1528,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.shouldDrawLocalContentWireframeBox = YES;
 	emitter.shouldUseFixedBoundingVolume = NO;
 	
-	emitter.isTouchEnabled = YES;		// Shows the emitter name when touched
+	emitter.touchEnabled = YES;		// Shows the emitter name when touched
 	
 	// Set the location of the emitter, and set it rotating for effect.
 	emitter.location = cc3v(0.0, 150.0, kParticlesPerSide * kParticlesSpacing / 2.0f);
@@ -1588,7 +1588,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-659.821, -408.596, -657.981, 651.606, 806.223, 637.516);
 
 	// Shows the emitter name and location when the particles are touched
-	emitter.isTouchEnabled = YES;
+	emitter.touchEnabled = YES;
 	
 	// We don't want the emitter's bounding volume (which will be quite large)
 	// participating in any ray tracing.
@@ -1728,7 +1728,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.shouldTransformUnseenParticles = YES;
 	
 	// Shows the emitter name and location when the particles are touched
-	emitter.isTouchEnabled = YES;
+	emitter.touchEnabled = YES;
 	
 	// We don't want the emitter's bounding volume (which will be quite large)
 	// participating in any ray tracing.
@@ -2043,7 +2043,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// of the robot is touched. This is done by first removing the individual
 	// enablement that we set on the original, and then just enabling the top level.
 	[robotTemplate touchDisableAll];
-	robotTemplate.isTouchEnabled = YES;
+	robotTemplate.touchEnabled = YES;
 
 	// Make these robots smaller to distinguish them from the original
 	robotTemplate.uniformScale = 0.5;
@@ -2534,13 +2534,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Switch the multi-texture displayed on the wooden sign node to the next texture
- * combination function in the cycle. There are two basic examples of texture combining
- * demonstrated here. The first is a series of methods of combining regular RGB textures.
- * The second is DOT3 bump-mapping which uses the main texture as a normal map to
- * interact with the lighting, and then overlaying the wooden sign texture onto it.
- * The effect of this last type of combining is to add perceived embossing to the
- * wooden texture.
+ * Switch the multi-texture displayed on the wooden sign node to the next texture combination
+ * function in the cycle. There are two basic examples of texture combining demonstrated here.
+ * The first is a series of methods of combining regular RGB textures. The second is DOT3
+ * bump-mapping which uses the main texture as a normal map to interact with the lighting,
+ * and then overlaying the wooden sign texture onto it. The effect of this last type of
+ * combining is to add perceived embossing to the wooden texture.
  *
  * Once the multi-texture combining function is determined, the name of it is set in
  * the label that hovers above the wooden sign.

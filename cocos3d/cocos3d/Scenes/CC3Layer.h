@@ -134,10 +134,7 @@
  *   -# Invoke the play method of your CC3Scene to enable dynamic behaviour for the 3D scene.
  *   -# Schedule regular updates in your CC3Layer instance by invoking either the
  *      scheduleUpdate or schedule:interval: method.
- *   -# Optionally create a CC3UIViewController.
- *   -# Run your CC3Layer instance either by invoking the runSceneOnNode: method of the
- *      CC3UIViewController with your CC3Layer, or by wrapping your CC3Layer in a CCScene
- *      and invoking the runWithScene: method of the shared CCDirector instance.
+ *   -# Create a CC3UIViewController and run your CC3Layer instance by invoking the runSceneOnNode: method.
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* cc3Scene;

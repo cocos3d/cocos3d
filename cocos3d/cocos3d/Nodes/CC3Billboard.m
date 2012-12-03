@@ -30,12 +30,9 @@
  */
 
 #import "CC3Billboard.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3VertexArrayMesh.h"
-#import "CCParticleSystemQuad.h"
-#import "CCLabelTTF.h"
-#import "CGPointExtension.h"
-#import "cocos2d.h"
+#import "CC3CC2Extensions.h"
 
 
 @interface CC3MeshNode (TemplateMethods)
@@ -481,10 +478,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 	if (billboard && !_shouldUpdateUnseenBillboard) {
 		if (doesIntersect && _billboardIsPaused) {
-			[[CCScheduler sharedScheduler] resumeTarget: billboard];
+			[CCDirector.sharedDirector.scheduler resumeTarget: billboard];
 			_billboardIsPaused = NO;
 		} else if (!doesIntersect && !_billboardIsPaused) {
-			[[CCScheduler sharedScheduler] pauseTarget: billboard];
+			[CCDirector.sharedDirector.scheduler pauseTarget: billboard];
 			_billboardIsPaused = YES;
 		}
 	}
@@ -510,48 +507,48 @@ static GLfloat deviceScaleFactor = 0.0f;
 		// so force the material to be respecified on next 3D draw
 		[CC3Material resetSwitching];
 
-		CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 		
 		// Set blending to the value expected by cocos2d
-		CC3OpenGLES11StateTrackerServerCapability* gles11Blend = gles11Engine.serverCapabilities.blend;
-		gles11Blend.value = gles11Blend.originalValue;
+		CC3OpenGLESStateTrackerCapability* glesBlend = glesEngine.capabilities.blend;
+		glesBlend.value = glesBlend.originalValue;
 		
 		// Set the blend functions to those expected by cocos2d
-		CC3OpenGLES11StateTrackerMaterialBlend* gles11MatBlend = gles11Engine.materials.blendFunc;
-		[gles11MatBlend applySource: gles11MatBlend.sourceBlend.originalValue
-					 andDestination: gles11MatBlend.destinationBlend.originalValue];
+		CC3OpenGLESStateTrackerMaterialBlend* glesMatBlend = glesEngine.materials.blendFunc;
+		[glesMatBlend applySource: glesMatBlend.sourceBlend.originalValue
+					 andDestination: glesMatBlend.destinationBlend.originalValue];
 		
 		// Enable the texture unit to draw the 2D texture mesh (usually GL_TEXTURE0)
 		// and bind the default texture unit parameters
-		CC3OpenGLES11Textures* gles11Textures = gles11Engine.textures;
-		CC3OpenGLES11TextureUnit* gles11TexUnit = [gles11Textures textureUnitAt: textureUnitIndex];
-		[gles11TexUnit.texture2D enable];
-		[CC3TextureUnit bindDefaultTo: gles11TexUnit];
-		[gles11TexUnit.textureCoordArray enable];
+		CC3OpenGLESTextures* glesTextures = glesEngine.textures;
+		CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: textureUnitIndex];
+		[glesTexUnit.texture2D enable];
+		[CC3TextureUnit bindDefaultTo: glesTexUnit];
+		[glesTexUnit.textureCoordArray enable];
 		
 		// Clear the texture unit binding so we start afresh on next 3D binding
-		gles11TexUnit.textureBinding.value = 0;
+		glesTexUnit.textureBinding.value = 0;
 
 		// Disable all other texture units
 		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
 		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
 		
 		// Make sure the 2D texture unit is active
-		gles11Textures.activeTexture.value = textureUnitIndex;
-		gles11Textures.clientActiveTexture.value = textureUnitIndex;
+		glesTextures.activeTexture.value = textureUnitIndex;
+		glesTextures.clientActiveTexture.value = textureUnitIndex;
 		
-		// Enable vertex and color arrays, and disable normal and point size arrays.
-		CC3OpenGLES11ClientCapabilities* gles11ClientCaps = gles11Engine.clientCapabilities;
-		[gles11ClientCaps.vertexArray enable];
-		[gles11ClientCaps.colorArray enable];
-		[gles11ClientCaps.normalArray disable];
-		[gles11ClientCaps.pointSizeArray disable];
+		// Enable location and color arrays, and disable normal and point size arrays.
+		CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
+		[[glesVtxArrays trackerForVertexArrayType: CC3VertexLocations.class] enable];
+		[[glesVtxArrays trackerForVertexArrayType: CC3VertexColors.class] enable];
+		[[glesVtxArrays trackerForVertexArrayType: CC3VertexNormals.class] disable];
+		[[glesVtxArrays trackerForVertexArrayType: CC3VertexPointSizes.class] disable];
 		
 		// 2D drawing might change buffer properties unbeknownst to cocos3d,
 		// so force the buffers to be respecified on next 3D draw
-		CC3OpenGLES11VertexArrays* gles11Vertices = gles11Engine.vertices;
-		[gles11Vertices.arrayBuffer unbind];
-		[gles11Vertices.indexBuffer unbind];
+		CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
+		[glesVertices.arrayBuffer unbind];
+		[glesVertices.indexBuffer unbind];
 		
 		// 2D drawing might change mesh properties unbeknownst to cocos3d,
 		// so force the mesh to be respecified on next 3D draw
@@ -569,7 +566,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		
 		// If things get weird when drawing some CCNode subclasses, use the following
 		// to log the full GL engine state prior to drawing the 2D node
-		LogTrace(@"%@ drawing 2D node with GL engine state:\n %@", self, gles11Engine);
+		LogTrace(@"%@ drawing 2D node with GL engine state:\n %@", self, glesEngine);
 		
 		[billboard visit];		// Draw the 2D CCNode
 		
@@ -859,7 +856,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
 	[super configureDrawingParameters: visitor];
 
-	[CC3OpenGLES11Engine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
+	[CC3OpenGLESEngine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
 }
 
 @end
@@ -896,7 +893,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 // Overridden so that not touchable unless specifically set as such
--(BOOL) isTouchable { return isTouchEnabled; }
+-(BOOL) isTouchable { return self.isTouchEnabled; }
 
 // Overridden so that can still be visible if parent is invisible, unless explicitly turned off.
 -(BOOL) visible { return visible; }
@@ -998,6 +995,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark -
 #pragma mark CCParticleSystemPoint extensions
 
+#if CC3_CC2_1
 @implementation CCParticleSystemPoint (CC3)
 
 /** Scales by the inverse of the retina content scale factor. */
@@ -1032,6 +1030,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 @end
+#endif
 
 
 #pragma mark -

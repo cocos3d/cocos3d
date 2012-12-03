@@ -30,8 +30,8 @@
  */
 
 #import "CC3Layer.h"
-#import "CC3OpenGLES11Foundation.h"
-#import "CC3CC2Extensions.h"
+#import "CC3OpenGLESFoundation.h"
+#import "CC3Environment.h"
 #import "CC3IOSExtensions.h"
 
 
@@ -109,10 +109,12 @@
 	[self updateViewport];
 }
 
+#if CC3_CC2_1
 -(void) setPositionInPixels: (CGPoint) newPosition {
 	[super setPositionInPixels: newPosition];
 	[self updateViewport];
 }
+#endif
 
 -(void) setScale: (float) s {
 	[super setScale: s];
@@ -172,11 +174,11 @@
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
 	[self.cc3GestureRecognizers addObject: gesture];
-	[[CCDirector sharedDirector].openGLView addGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view addGestureRecognizer: gesture];
 }
 
 -(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture {
-	[[CCDirector sharedDirector].openGLView removeGestureRecognizer: gesture];
+	[CCDirector.sharedDirector.view removeGestureRecognizer: gesture];
 	[cc3GestureRecognizers removeObjectIdenticalTo: gesture];
 }
 
@@ -246,9 +248,9 @@
 
 // Handle touch events one at a time.
 -(void) registerWithTouchDispatcher {
-	[[CCTouchDispatcher sharedDispatcher] addTargetedDelegate: self
-													 priority: self.touchPriority
-											  swallowsTouches:YES];
+	[CCDirector.sharedDirector.touchDispatcher addTargetedDelegate: self
+														  priority: self.touchPriority
+												   swallowsTouches:YES];
 }
 
 /**

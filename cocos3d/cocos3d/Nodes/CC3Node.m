@@ -33,8 +33,8 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3NodeAnimation.h"
 #import "CC3Billboard.h"
-#import "CC3OpenGLES11Foundation.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESFoundation.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3ParametricMeshNodes.h"
 #import "CCActionManager.h"
 #import "CCLabelTTF.h"
@@ -95,7 +95,7 @@
 @synthesize rotator, location, scale, globalLocation, globalScale;
 @synthesize boundingVolume, boundingVolumePadding, projectedLocation, visible;
 @synthesize transformMatrix, transformListeners, animation, isRunning, isAnimationEnabled;
-@synthesize isTouchEnabled, shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
+@synthesize shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
 @synthesize parent, children, shouldAutoremoveWhenEmpty, shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved, isTransformDirty;
 
@@ -948,7 +948,7 @@
 		scale = kCC3VectorUnitCube;
 		globalScale = kCC3VectorUnitCube;
 		isTransformDirty = YES;			// Force transform notification on first update
-		isTouchEnabled = NO;
+		_touchEnabled = NO;
 		shouldInheritTouchability = YES;
 		shouldAllowTouchableWhenInvisible = NO;
 		isAnimationEnabled = YES;
@@ -1025,7 +1025,7 @@
 
 	// Transform listeners are not copied. Managing listeners must be deliberate.
 
-	isTouchEnabled = another.isTouchEnabled;
+	_touchEnabled = another.isTouchEnabled;
 	shouldInheritTouchability = another.shouldInheritTouchability;
 	shouldAllowTouchableWhenInvisible = another.shouldAllowTouchableWhenInvisible;
 	isAnimationEnabled = another.isAnimationEnabled;
@@ -1675,18 +1675,18 @@ static GLuint lastAssignedNodeTag;
 
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
-	CC3OpenGLES11MatrixStack* gles11MatrixStack = [CC3OpenGLES11Engine engine].matrices.modelview;
+	CC3OpenGLESMatrixStack* glesMatrixStack = [CC3OpenGLESEngine engine].matrices.modelview;
 	CC3Matrix4x4 glMtx;
 
-	[gles11MatrixStack push];
+	[glesMatrixStack push];
 
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
 	[transformMatrix populateCC3Matrix4x4: &glMtx];
-	[gles11MatrixStack multiply: glMtx.elements];
+	[glesMatrixStack multiply: glMtx.elements];
 
 	[visitor draw: self];
 
-	[gles11MatrixStack pop];
+	[glesMatrixStack pop];
 }
 
 -(void) checkDrawingOrder {
@@ -1954,7 +1954,7 @@ static GLuint lastAssignedNodeTag;
 
 -(CCAction*) runAction:(CCAction*) action {
 	NSAssert( action != nil, @"Argument must be non-nil");
-	[[CCActionManager sharedManager] addAction: action target: self paused: !isRunning];
+	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !isRunning];
 	return action;
 }
 
@@ -1964,27 +1964,27 @@ static GLuint lastAssignedNodeTag;
 	return [self runAction: action];
 }
 
--(void) stopAllActions { [[CCActionManager sharedManager] removeAllActionsFromTarget: self]; }
+-(void) stopAllActions { [CCDirector.sharedDirector.actionManager removeAllActionsFromTarget: self]; }
 
--(void) stopAction: (CCAction*) action { [[CCActionManager sharedManager] removeAction: action]; }
+-(void) stopAction: (CCAction*) action { [CCDirector.sharedDirector.actionManager removeAction: action]; }
 
 -(void) stopActionByTag: (NSInteger) aTag {
 	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
-	[[CCActionManager sharedManager] removeActionByTag: aTag target: self];
+	[CCDirector.sharedDirector.actionManager removeActionByTag: aTag target: self];
 }
 
 -(CCAction*) getActionByTag: (NSInteger) aTag {
 	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
-	return [[CCActionManager sharedManager] getActionByTag: aTag target: self];
+	return [CCDirector.sharedDirector.actionManager getActionByTag: aTag target: self];
 }
 
 -(NSInteger) numberOfRunningActions {
-	return [[CCActionManager sharedManager] numberOfRunningActionsInTarget: self];
+	return [CCDirector.sharedDirector.actionManager numberOfRunningActionsInTarget: self];
 }
 
--(void) resumeAllActions { [[CCActionManager sharedManager] resumeTarget: self]; }
+-(void) resumeAllActions { [CCDirector.sharedDirector.actionManager resumeTarget: self]; }
 
--(void) pauseAllActions { [[CCActionManager sharedManager] pauseTarget: self]; }
+-(void) pauseAllActions { [CCDirector.sharedDirector.actionManager pauseTarget: self]; }
 
 -(void) cleanupActions {
 	[self stopAllActions];
@@ -1999,27 +1999,28 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Touch handling
 
+-(BOOL) isTouchEnabled { return _touchEnabled; }
+-(void) setTouchEnabled: (BOOL) canTouch { _touchEnabled = canTouch; }
+
+// Deprecated
+-(void) setIsTouchEnabled: (BOOL) canTouch { self.touchEnabled = canTouch; }
+
 -(BOOL) isTouchable {
 	return (self.visible || shouldAllowTouchableWhenInvisible)
-			&& (isTouchEnabled || ((parent && shouldInheritTouchability) ? parent.isTouchable : NO));
+			&& (_touchEnabled || ((parent && shouldInheritTouchability) ? parent.isTouchable : NO));
 }
 
--(CC3Node*) touchableNode {
-	return isTouchEnabled ? self : (parent ? parent.touchableNode : nil);
+-(CC3Node*) touchableNode { return _touchEnabled ? self : (parent ? parent.touchableNode : nil);
 }
 
 -(void) touchEnableAll {
-	isTouchEnabled = YES;
-	for (CC3Node* child in children) {
-		[child touchEnableAll];
-	}
+	_touchEnabled = YES;
+	for (CC3Node* child in children) [child touchEnableAll];
 }
 
 -(void) touchDisableAll {
-	isTouchEnabled = NO;
-	for (CC3Node* child in children) {
-		[child touchDisableAll];
-	}
+	_touchEnabled = NO;
+	for (CC3Node* child in children) [child touchDisableAll];
 }
 
 

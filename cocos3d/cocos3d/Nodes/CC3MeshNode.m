@@ -31,7 +31,7 @@
 
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3VertexArrayMesh.h"
 #import "CC3Light.h"
 #import "CC3IOSExtensions.h"
@@ -695,21 +695,21 @@
  * shouldCullBackFaces, and shouldUseClockwiseFrontFaceWinding properties.
  */
 -(void) configureFaceCulling: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
-	CC3OpenGLES11State* gles11State = gles11Engine.state;
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
+	CC3OpenGLESState* glesState = glesEngine.state;
 
 	// Enable culling if either back or front should be culled.
-	gles11ServCaps.cullFace.value = (shouldCullBackFaces || shouldCullFrontFaces);
+	glesServCaps.cullFace.value = (shouldCullBackFaces || shouldCullFrontFaces);
 
 	// Set whether back, front or both should be culled.
 	// If neither should be culled, handled by capability so leave it as back culling.
-	gles11State.cullFace.value = shouldCullBackFaces
+	glesState.cullFace.value = shouldCullBackFaces
 									? (shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
 									: (shouldCullFrontFaces ? GL_FRONT : GL_BACK);
 
 	// Set the front face winding
-	gles11State.frontFace.value = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
+	glesState.frontFace.value = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
 }
 
 /**
@@ -717,21 +717,21 @@
  * whether the scaling of this node is uniform or not.
  */
 -(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = [CC3OpenGLES11Engine engine].serverCapabilities;
+	CC3OpenGLESCapabilities* glesServCaps = [CC3OpenGLESEngine engine].capabilities;
 
 	if (mesh && mesh.hasVertexNormals) {
 		switch (normalScalingMethod) {
 
 			// Enable normalizing & disable re-scaling
 			case kCC3NormalScalingNormalize:
-				[gles11ServCaps.rescaleNormal disable];
-				[gles11ServCaps.normalize enable];
+				[glesServCaps.rescaleNormal disable];
+				[glesServCaps.normalize enable];
 				break;
 
 			// Enable rescaling & disable normalizing
 			case kCC3NormalScalingRescale:
-				[gles11ServCaps.rescaleNormal enable];
-				[gles11ServCaps.normalize disable];
+				[glesServCaps.rescaleNormal enable];
+				[glesServCaps.normalize disable];
 				break;
 
 			// Choose one of the others, based on scaling characteristics
@@ -739,32 +739,32 @@
 
 				// If no scaling, disable both normalizing and re-scaling
 				if (self.isTransformRigid) {
-					[gles11ServCaps.rescaleNormal disable];
-					[gles11ServCaps.normalize disable];
+					[glesServCaps.rescaleNormal disable];
+					[glesServCaps.normalize disable];
 
 				// If uniform scaling, enable re-scaling & disable normalizing
 				} else if (self.isUniformlyScaledGlobally) {
-					[gles11ServCaps.rescaleNormal enable];
-					[gles11ServCaps.normalize disable];
+					[glesServCaps.rescaleNormal enable];
+					[glesServCaps.normalize disable];
 
 				// If non-uniform scaling, enable normalizing & disable re-scaling
 				} else {
-					[gles11ServCaps.rescaleNormal disable];
-					[gles11ServCaps.normalize enable];
+					[glesServCaps.rescaleNormal disable];
+					[glesServCaps.normalize enable];
 				}
 				break;
 			
 			// Disable both rescaling & normalizing
 			case kCC3NormalScalingNone:
 			default:
-				[gles11ServCaps.rescaleNormal disable];
-				[gles11ServCaps.normalize disable];
+				[glesServCaps.rescaleNormal disable];
+				[glesServCaps.normalize disable];
 				break;
 		}
 	} else {
 		// No normals...so disable both rescaling & normalizing
-		[gles11ServCaps.rescaleNormal disable];
-		[gles11ServCaps.normalize disable];
+		[glesServCaps.rescaleNormal disable];
+		[glesServCaps.normalize disable];
 	}
 }
 
@@ -776,13 +776,13 @@
  * are set, otherwise material colors will not stick.
  */
 -(void) configureColoring: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 
 	// Set the smoothing model
-	gles11Engine.state.shadeModel.value = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
+	glesEngine.state.shadeModel.value = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
 
 	// If per-vertex coloring is being used, attach it to the material
-	gles11Engine.serverCapabilities.colorMaterial.value = (mesh ? mesh.hasVertexColors : NO);
+	glesEngine.capabilities.colorMaterial.value = (mesh ? mesh.hasVertexColors : NO);
 }
 
 /**
@@ -791,11 +791,11 @@
  * and set the depth function.
  */
 -(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11State* gles11State = gles11Engine.state;
-	gles11Engine.serverCapabilities.depthTest.value = !shouldDisableDepthTest;
-	gles11State.depthMask.value = !shouldDisableDepthMask;
-	gles11State.depthFunction.value = depthFunction;
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESState* glesState = glesEngine.state;
+	glesEngine.capabilities.depthTest.value = !shouldDisableDepthTest;
+	glesState.depthMask.value = !shouldDisableDepthMask;
+	glesState.depthFunction.value = depthFunction;
 }
 
 /**
@@ -804,19 +804,19 @@
  * that has already been drawn.
  */
 -(void) configureDecalParameters: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	
 	BOOL hasDecalOffset = decalOffsetFactor || decalOffsetUnits;
-	gles11Engine.serverCapabilities.polygonOffsetFill.value = hasDecalOffset;
-	[gles11Engine.state.polygonOffset applyFactor: decalOffsetFactor andUnits: decalOffsetUnits];
+	glesEngine.capabilities.polygonOffsetFill.value = hasDecalOffset;
+	[glesEngine.state.polygonOffset applyFactor: decalOffsetFactor andUnits: decalOffsetUnits];
 }
 
 /** Template method to configure line drawing properties. */
 -(void) configureLineProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	gles11Engine.state.lineWidth.value = lineWidth;
-	gles11Engine.serverCapabilities.lineSmooth.value = shouldSmoothLines;
-	gles11Engine.hints.lineSmooth.value = lineSmoothingHint;
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	glesEngine.state.lineWidth.value = lineWidth;
+	glesEngine.capabilities.lineSmooth.value = shouldSmoothLines;
+	glesEngine.hints.lineSmooth.value = lineSmoothingHint;
 }
 
 /**
@@ -836,7 +836,7 @@
 			[material drawWithVisitor: visitor];
 		} else {
 			[CC3Material unbind];
-			CC3OpenGLES11Engine.engine.state.color.value = pureColor;
+			CC3OpenGLESEngine.engine.state.color.value = pureColor;
 		}
 	} else {
 		[CC3Material unbind];
@@ -844,16 +844,12 @@
 }
 
 /** Template method to draw the mesh to the GL engine. */
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[mesh drawWithVisitor: visitor];
-}
+-(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [mesh drawWithVisitor: visitor]; }
 
 
 #pragma mark Vertex management
 
--(CC3VertexContent) vertexContentTypes {
-	return mesh ? mesh.vertexContentTypes : kCC3VertexContentNone;
-}
+-(CC3VertexContent) vertexContentTypes { return mesh ? mesh.vertexContentTypes : kCC3VertexContentNone; }
 
 -(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
 	[self ensureMesh];
@@ -1177,7 +1173,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 /** Overridden so that not touchable unless specifically set as such. */
 -(BOOL) isTouchable {
-	return (self.visible || shouldAllowTouchableWhenInvisible) && isTouchEnabled;
+	return (self.visible || shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
 }
 
 /** Overridden so that can still be visible if parent is invisible, unless explicitly turned off. */
@@ -1419,7 +1415,7 @@ static GLfloat directionMarkerMinimumLength = 0;
 
 // Overridden so that not touchable unless specifically set as such
 -(BOOL) isTouchable {
-	return (self.visible || shouldAllowTouchableWhenInvisible) && isTouchEnabled;
+	return (self.visible || shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
 }
 
 // Overridden so that can still be visible if parent is invisible, unless explicitly turned off.

@@ -36,7 +36,7 @@
 #import "CC3ModelSampleFactory.h"
 #import "CGPointExtension.h"
 #import "CC3PODResourceNode.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3UIViewController.h"
 
 // Model names
@@ -129,9 +129,9 @@
 	// In addition, many GL calls will still be made, including those for establishing
 	// lighting, materials, and the loading of all projection and modelview matrices.
 	// Only the final vertex array binding and drawing calls will not be made.
-	// See the class and method notes of CC3OpenGLES11VertexArrays to better
+	// See the class and method notes of CC3OpenGLESVertexArrays to better
 	// understand exactly which GL calls will not be made.
-//	[CC3OpenGLES11Engine engine].vertices = nil;
+//	[CC3OpenGLESEngine engine].vertices = nil;
 
 	shouldAnimateNodes = NO;	// Start with static nodes.
 

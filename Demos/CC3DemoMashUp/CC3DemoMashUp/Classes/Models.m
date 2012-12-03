@@ -33,6 +33,7 @@
 #import "CC3ActionInterval.h"
 #import "CCActionInstant.h"
 #import "CC3IOSExtensions.h"
+#import "CC3CC2Extensions.h"
 
 #define kDropHeight 700.0
 
@@ -78,9 +79,9 @@
  * and the GL default values are used instead.
  */
 -(void) applyColor {
-	gles11Light.ambientColor.value = kCC3DefaultLightColorAmbient;
-	gles11Light.diffuseColor.value = kCC3DefaultLightColorDiffuse;
-	gles11Light.specularColor.value = kCC3DefaultLightColorSpecular;
+	glesLight.ambientColor.value = kCC3DefaultLightColorAmbient;
+	glesLight.diffuseColor.value = kCC3DefaultLightColorDiffuse;
+	glesLight.specularColor.value = kCC3DefaultLightColorSpecular;
 }
 
 @end
@@ -227,11 +228,10 @@
 @implementation LandingCraft
 
 -(void) populateArmyWith: (CC3Node*) templateNode {
-	
 	// To help demonstrate that the hordes of actioned nodes that make up this army are being managed
 	// correctly, log the current number of nodes and actions, before the army has been created.
 	LogInfo(@"Before populating %@ there are %i instances of CC3Identifiable subclasses in existance, and  %u actions running.",
-			self, [CC3Identifiable instanceCount], [[CCActionManager sharedManager] numberOfRunningActions]);
+			self, [CC3Identifiable instanceCount], [CCDirector.sharedDirector.actionManager numberOfRunningActions]);
 	
 	// Create many copies (invadersPerHalfSide * 2) ^ 2,
 	// and space them out throughout the area of the ground plane, in a grid pattern.
@@ -282,7 +282,7 @@
 	// To help demonstrate that the hordes of actioned nodes that make up this army are being managed
 	// correctly, log the current number of nodes and actions, now that the army has been created.
 	LogInfo(@"After populating %@ there are %i instances of CC3Identifiable subclasses in existance, and  %u actions running.",
-			self, [CC3Identifiable instanceCount], [[CCActionManager sharedManager] numberOfRunningActions]);
+			self, [CC3Identifiable instanceCount], [CCDirector.sharedDirector.actionManager numberOfRunningActions]);
 }
 
 /**

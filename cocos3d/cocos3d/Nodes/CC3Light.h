@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Node.h"
-#import "CC3OpenGLES11Lighting.h"
+#import "CC3OpenGLESLighting.h"
 #import "CC3MeshNode.h"
 
 @protocol CC3ShadowProtocol;
@@ -68,7 +68,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * To turn a CC3Light on or off, set the visible property.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  *
  * Lights in different scenes (different instances of CC3Scene) can have the same
@@ -82,7 +82,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * reserved for use by the 2D scene will not be used by the 3D scene.
  */
 @interface CC3Light : CC3Node {
-	CC3OpenGLES11Light* gles11Light;
+	CC3OpenGLESLight* glesLight;
 	CC3ShadowCastingVolume* shadowCastingVolume;
 	CC3CameraShadowVolume* cameraShadowVolume;
 	CC3StencilledShadowPainterNode* stencilledShadowPainter;
@@ -110,7 +110,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * less than the maximium number of available lights, inclusive.
  *
  * The maximum number of lights available is determined by the platform. That number can
- * be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value. All platforms
+ * be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value. All platforms
  * support at least eight lights.
  */
 @property(nonatomic, readonly) GLuint lightIndex;
@@ -207,7 +207,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * to copy this node will fail, returning a nil node.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  *
  * When this property is set to YES, and this light node is copied, the new copy will
@@ -251,7 +251,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * This method will return nil if all GL light indexes have been consumed.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) init;
@@ -263,7 +263,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * This method will return nil if all GL light indexes have been consumed.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithTag: (GLuint) aTag;
@@ -276,7 +276,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * This method will return nil if all GL light indexes have been consumed.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithName: (NSString*) aName;
@@ -288,7 +288,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * This method will return nil if all GL light indexes have been consumed.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName;
@@ -306,7 +306,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithLightIndex: (GLuint) ltIndx;
@@ -323,7 +323,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithTag: (GLuint) aTag withLightIndex: (GLuint) ltIndx;
@@ -341,7 +341,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithName: (NSString*) aName withLightIndex: (GLuint) ltIndx;
@@ -358,7 +358,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLuint) ltIndx;
@@ -376,7 +376,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 +(id) lightWithLightIndex: (GLuint) ltIndx;
@@ -393,7 +393,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 +(id) lightWithTag: (GLuint) aTag withLightIndex: (GLuint) ltIndx;
@@ -411,7 +411,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 +(id) lightWithName: (NSString*) aName withLightIndex: (GLuint) ltIndx;
@@ -428,7 +428,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * maximum number of lights available.
  *
  * The maximum number of lights available is determined by the platform. That number
- * can be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value.
+ * can be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value.
  * All platforms support at least eight lights.
  */
 +(id) lightWithTag: (GLuint) aTag withName: (NSString*) aName withLightIndex: (GLuint) ltIndx;
@@ -602,7 +602,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * Returns the number of lights that have already been instantiated (and not yet deallocated).
  *
  * The maximum number of lights available is determined by the platform. That number can
- * be retrieved from [CC3OpenGLES11Engine engine].platform.maxLights.value. All platforms
+ * be retrieved from [CC3OpenGLESEngine engine].platform.maxLights.value. All platforms
  * support at least eight lights.
  */
 +(GLuint) lightCount;
@@ -616,7 +616,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 
 /**
  * Sets the smallest index number to assign to a 3D light. This value should be between
- * zero inclusive and [CC3OpenGLES11Engine engine].platform.maxLights.value exclusive.
+ * zero inclusive and [CC3OpenGLESEngine engine].platform.maxLights.value exclusive.
  *
  * If the 2D scene uses lights, setting this value to a number above zero will reserve
  * the indexes below this number for the 2D scene and those indexes will not be used in

@@ -38,7 +38,7 @@
 @implementation TileLayer
 
 -(void) initializeControls {
-	self.isTouchEnabled = YES;		// Enable touch event handling for 3D object picking
+	self.touchEnabled = YES;		// Enable touch event handling for 3D object picking
 }
 
 // The ccTouchMoved:withEvent: method is optional for the <CCTouchDelegateProtocol>.

@@ -9,6 +9,27 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
+cocos3d 2.0.0 - 2013/01/31
+-------------------------------------
+
+- Single cocos3d codebase can be used with either cocos2d 2.x/OpenGL ES 2.0, or cocos2d 1.x/OpenGL ES 1.1 frameworks
+- With cocos2d 2.x/OpenGL ES 2.0, use:
+	- Workspace cocos3d2
+	- Demo projects CC3DemoMashUp2, CC3Performance2 & CC3Demo3DTiles2
+	- New Project template cocos3d2 Application
+- With cocos2d 1.x/OpenGL ES 1.1, use:
+	- Workspace cocos3d1
+	- Demo projects CC3DemoMashUp1, CC3Performance1 & CC3Demo3DTiles1
+	- New Project template cocos3d1 Application
+- A single app may not currently mix both OpenGL ES 2.0 & 1.1 capability.
+
+- [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
+	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
+	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
+
+
+
+
 cocos3d 0.7.2 - 2012/11/11
 -------------------------------------
 

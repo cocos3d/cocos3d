@@ -31,7 +31,14 @@
 
 #import <UIKit/UIViewController.h>
 #import "CC3IOSExtensions.h"
-#import "cocos2d.h"
+#import "CC3CC2Extensions.h"
+
+// The superclass of the CC3UIViewController depends on whether we're using cocos2d 2.x or 1.x
+#if CC3_CC2_1
+#	define CC3UIVCSuperclass UIViewController
+#else
+#	define CC3UIVCSuperclass CCDirectorDisplayLink
+#endif
 
 
 #pragma mark -
@@ -54,20 +61,22 @@
  * of the view as the device orientation changes. Although the supportedInterfaceOrientations method is
  * defined in iOS6, for consistency, this property can also be used in iOS versions below iOS6.
  */
-@interface CC3UIViewController : UIViewController {
-	CCNode* controlledNode_;
-	NSString* viewColorFormat_;
-	NSUInteger supportedInterfaceOrientations_;
-	CGRect viewBounds_;
-	GLenum viewDepthFormat_;
-	GLuint viewPixelSamples_;
+@interface CC3UIViewController : CC3UIVCSuperclass {
+	CCNode* _controlledNode;
+	Class _viewClass;
+	NSString* _viewColorFormat;
+	NSUInteger _supportedInterfaceOrientations;
+	CGRect _viewBounds;
+	GLenum _viewDepthFormat;
+	GLuint _viewPixelSamples;
+	BOOL _viewWasLaidOut : 1;
 }
 
 
 #pragma mark View management
 
-/** The view of a CC3UIViewController must be of type EAGLView. */
-@property(nonatomic, retain) EAGLView *view;
+/** The view of a CC3UIViewController must be of type CCGLView. */
+@property(nonatomic, retain) CCGLView* view;
 
 /**
  * Invoked automatically the first time the view property is requested, and is currently nil.
@@ -90,14 +99,11 @@
  * This property is used by the loadView method as it creates the view, when the view property is first
  * accessed and the view property has not already been established.
  *
- * The initial value of this property is CC3EAGLView. You can change the value returned by this property
- * by creating a subclass and overriding the property accesser method.
- *
- * Once the view property has been established, reading this property returns the class property of the
- * view itself. Prior to the view being established, reading this property returns CC3EAGLView, or the
- * value overridden by a subclass.
+ * The initial value of this property is CC3GLView. You can change the value returned by this property
+ * prior to accessing the view property for the first time. Once the view property has been established,
+ * reading this property returns the class property of the view itself.
  */
-@property(nonatomic, readonly) Class viewClass;
+@property(nonatomic, assign) Class viewClass;
 
 /**
  * Indicates the bounds of the view.
@@ -146,24 +152,36 @@
  * This property is used by the loadView method as it creates the view, when the view property is first
  * accessed and the view property has not already been established.
  *
- * The initial value is GL_DEPTH_COMPONENT16_OES. You can set this property prior to referencing the
+ * The initial value is GL_DEPTH_COMPONENT16. You can set this property prior to referencing the
  * view property of this controller in order to have the view created with a different depth format.
  *
- * Valid values for this property are GL_ZERO, GL_DEPTH_COMPONENT16_OES, GL_DEPTH_COMPONENT24_OES,
- * or GL_DEPTH24_STENCIL8_OES.
+ * Valid values for this property are:
+ * - GL_DEPTH_COMPONENT16 (or GL_DEPTH_COMPONENT16_OES)
+ * - GL_DEPTH_COMPONENT24_OES
+ * - GL_DEPTH24_STENCIL8_OES
+ * - GL_ZERO
  *
- * The value GL_DEPTH_COMPONENT24_OES provides higher fidelity in depth testing than GL_DEPTH_COMPONENT16_OES.
- * The value GL_DEPTH24_STENCIL8_OES is required if shadow volumes, or other types of stencilling will be used
- * in your 3D scene. The value GL_ZERO will turn off all depth testing.
+ * GL_DEPTH_COMPONENT16 and GL_DEPTH_COMPONENT16_OES are aliases to each other, and both use
+ * 16 bits per pixel to track depth.
  *
- * As a convenience, if you require a stencil buffer, consider setting the shouldUseStencilBuffer property
- * instead of setting the value of this property.
+ * The value GL_DEPTH_COMPONENT24_OES uses 24 bits per pixel to track depth, and provides higher
+ * fidelity in depth testing GL_DEPTH_COMPONENT16 (or GL_DEPTH_COMPONENT16_OES).
+ *
+ * The value GL_DEPTH24_STENCIL8_OES is required if shadow volumes, or other types of stencilling
+ * will be used in your 3D scene.
+ *
+ * The value GL_ZERO will turn off all depth testing. This is almost never used in a 3D scene.
+ *
+ * As a convenience, if you require a stencil buffer, consider setting the shouldUseStencilBuffer
+ * property instead of setting the value of this property.
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
  * Once the view property has been established, reading this property returns the depthFormat property
  * of the view itself. Prior to the view being established, reading this property returns the value to
- * which it has been set. The initial value of this property is GL_DEPTH_COMPONENT16_OES.
+ * which it has been set.
+ *
+ * The initial value of this property is GL_DEPTH_COMPONENT16.
  */
 @property(nonatomic, assign) GLenum viewDepthFormat;
 
@@ -174,7 +192,7 @@
  * configuration convenience.
  *
  * Setting this property to YES will set the value of the viewDepthFormat property to GL_DEPTH24_STENCIL8_OES.
- * Setting this property to NO will set the value of the viewDepthFormat property to GL_DEPTH_COMPONENT16_OES.
+ * Setting this property to NO will set the value of the viewDepthFormat property to GL_DEPTH_COMPONENT16.
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
@@ -196,10 +214,10 @@
  * this value to a number larger than one will smooth out the lines and edges of your displayed models.
  *
  * The value set will be clamped to the maximum allowable value for the platform. That maximum value
- * can be retrieved from CC3OpenGLES11Engine.engine.platform.maxPixelSamples.value, and generally has
+ * can be retrieved from CC3OpenGLESEngine.engine.platform.maxPixelSamples.value, and generally has
  * a value of four on all current devices that support multisampling.
  *
- * Retrieving the value of the CC3OpenGLES11Engine.engine.platform.maxPixelSamples.value property can
+ * Retrieving the value of the CC3OpenGLESEngine.engine.platform.maxPixelSamples.value property can
  * only be done once the OpenGL ES context has been established, which is generally performed when the
  * view is created. This creates a bit of a chicken-and-egg situation where you might need the maximum
  * pixel samples value before you create the view, but can't retrieve it until the view has been created.
@@ -227,7 +245,18 @@
  * The CCNode that is being controlled by this controller. This is typically an instance of CCLayer.
  *
  * The application should keep this property synchronized with changes in the running scene of the
- * shared CCDirector. The convenience method runSceneOnNode: can be used to enable this.
+ * shared CCDirector. The convenience method runSceneOnNode: can be used to automatically handle
+ * this coordination.
+ *
+ * If the view has not yet been added to the view hierarchy, you can either set this property directly,
+ * or use the runSceneOnNode: to do so. Once the view has been subsequently added to the view hierarchy,
+ * the viewDidAppear: method of this controller will check to see if the CCDirector is running a scene
+ * yet, and if not will invoke the  runSceneOnNode: method of this controller with the value of this
+ * controlledNode property as the argument.
+ *
+ * However, once the CCDirector is running a scene, you should invoke the runSceneOnNode: method
+ * to change both the running scene, and this controlledNode property together, instead of setting
+ * this property directly. If in doubt, use the runSceneOnNode: method instead of this property.
  */
 @property(nonatomic, retain) CCNode* controlledNode;
 
@@ -237,11 +266,41 @@
  * being run by the shared CCDirector.
  *
  * This method sets the controlledNode property of this controller to the specified node, wraps the
- * specified node in a CCScene, if it is not already a CCScene, and runs the new scene by invoking
+ * specified node in a CCScene (if it is not already a CCScene), and runs the new scene by invoking
  * either replaceScene: or runWithScene: on the shared CCDirector, depending on whether the director
  * is already running a scene.
+ *
+ * This method can be invoked either before or after the view associated with this controller has
+ * been added to the view hierarchy. If after, the transition to the CCScene corresponding to the
+ * specified CCNode will occur immediately. However, if this method is invoked before the view has
+ * been added to the view hierarchy, this method has the same effect as setting the controlledNode
+ * property directly, and the running of the CCScene corresponding to the specified CCNode will be
+ * deferred until the view is added to the view hierarchy, at which point it will be run automatically.
+ * This ensures that the view is in place, and the CCScene can derive its corresponding size before
+ * an attempt is made to run that CCScene.
+ *
+ * Consequently, during app startup, when the view has not been loaded and the CCDirector does not
+ * yet have a running scene, you can set the controlledNode property directly instead of invoking
+ * this method. But once a scene is running, you should use this method to both change the scene,
+ * and change the controlledNode property together. When in doubt, use this method instead of
+ * setting the controlledNode property directly.
  */
 -(void) runSceneOnNode: (CCNode*) aNode;
+
+/**
+ * Standard UIViewController callback that is invoked automatically when the view has been laid out.
+ *
+ * If the CCDirector does not have a running scene, and the controlledNode property of this
+ * controller is not nil, the runSceneOnNode: method is automatically invoked, with the
+ * controlledNode of this controller as the argument.
+ *
+ * Subclasses that override this method to perform additional processing on view loading
+ * should be sure to invoke this superclass implementation.
+ *
+ * Although this method was introduced in iOS5, it is invoked automatically from CC3GLView
+ * and CC3EAGLView even when running under iOS4 and below.
+ */
+-(void) viewDidLayoutSubviews;
 
 /**
  * Reduces cocos2d/3d animation to a minimum.
@@ -301,6 +360,11 @@
 /** Allocates and initializes an autoreleased instance. */
 +(id) controller;
 
+#if CC3_CC2_2
+/** Cast the returned object as id to treat this method as an instance initializer. */
++(id) sharedDirector;
+#endif
+
 
 #pragma mark Deprecated functionality left over from CCNodeController
 
@@ -308,7 +372,7 @@
 @property(nonatomic, assign) BOOL doesAutoRotate DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
-@property(nonatomic, assign) ccDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -398,10 +462,10 @@
 @property(nonatomic, readonly) UIImagePickerController* picker;
 
 /**
- * If the device supports a camera, returns a newly allocated and initialized
- * UIImagePickerController, suitable for use in overlaying the EAGLView underlying the CCNode
- * on top of the device camera image. Returns nil if the device does not suport a camera.
- * It is the responsibility of the caller to manage the releasing of the returned picker.
+ * If the device supports a camera, returns a newly allocated and initialized UIImagePickerController,
+ * suitable for use in overlaying the view underlying the CCNode on top of the device camera image.
+ * Returns nil if the device does not suport a camera. It is the responsibility of the caller to
+ * manage the releasing of the returned picker.
  *
  * This method is automatically called when the picker property is first accessed.
  * It should not be called directly otherwise. Subclasses can override this method

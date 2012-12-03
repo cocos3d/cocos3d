@@ -38,7 +38,7 @@
 #import "CC3Billboard.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3AffineMatrix.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 #import "CGPointExtension.h"
@@ -382,16 +382,16 @@
 	LogTrace(@"%@ opening the 3D scene", self);
 
 	// Retrieves the GLES state trackers to set initial state
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	
 	// Open tracking of GL state. Where needed, will cache current 2D GL state items
 	// for later reinstatement in the close3D method.
-	[gles11Engine open];
+	[glesEngine open];
 	
 	// Ensure drawing is not slowed down by unexpected alpha testing and logic ops
-	CC3OpenGLES11ServerCapabilities* gles11ServCaps = gles11Engine.serverCapabilities;
-	[gles11ServCaps.alphaTest disable];
-	[gles11ServCaps.colorLogicOp disable];
+	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
+	[glesServCaps.alphaTest disable];
+	[glesServCaps.colorLogicOp disable];
 }
 
 /**
@@ -404,13 +404,13 @@
 	LogTrace(@"%@ closing the 3D scene", self);
 
 	// Close tracking of GL state, reverting to 2D values where required.
-	[[CC3OpenGLES11Engine engine] close];
+	[[CC3OpenGLESEngine engine] close];
 	
 	// Clear the depth buffer so that subsequent cocos2d rendering will occur
 	// on top of the 3D rendering. We can't simply turn depth testing off
 	// because cocos2d can use depth testing for 3D transition effects.
 	if (shouldClearDepthBufferBefore2D) {
-		[[CC3OpenGLES11Engine engine].state clearDepthBuffer];
+		[[CC3OpenGLESEngine engine].state clearDepthBuffer];
 	}
 }
 
@@ -436,12 +436,12 @@
 	[CC3Light disableReservedLights];		// disable any lights used by 2D scene
 
 	BOOL hasLighting = (lights.count > 0 || !ccc4FEqual(ambientLight, kCCC4FBlackTransparent));
-	[CC3OpenGLES11Engine engine].serverCapabilities.lighting.value = hasLighting;
+	[CC3OpenGLESEngine engine].capabilities.lighting.value = hasLighting;
 
 	LogTrace(@"%@ lighting is %@", self, (hasLighting ? @"on" : @"off"));
 	
 	// Set the ambient light for the whole scene
-	[CC3OpenGLES11Engine engine].lighting.sceneAmbientLight.value = ambientLight;
+	[CC3OpenGLESEngine engine].lighting.sceneAmbientLight.value = ambientLight;
 
 	// Turn on any individual lights
 	for (CC3Light* lgt in lights) [lgt turnOn];
@@ -476,7 +476,7 @@
 /** Template method to draw shadows cast by the lights. */
 -(void) drawShadows {
 	if (self.doesContainShadows) {
-		[CC3OpenGLES11Engine engine].state.clearStencil = 0;
+		[CC3OpenGLESEngine engine].state.clearStencil = 0;
 		for (CC3Light* lgt in lights) {
 			[lgt drawShadowsWithVisitor: shadowVisitor];
 		}
@@ -500,9 +500,9 @@
 	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
 
 	if (activeCamera && (billboards.count > 0)) {
-		CC3OpenGLES11Engine* gles11Engine;
-		CC3OpenGLES11StateTrackerViewport* gles11Scissor;
-		CC3OpenGLES11StateTrackerServerCapability* gles11ScissorTest;
+		CC3OpenGLESEngine* glesEngine;
+		CC3OpenGLESStateTrackerViewport* glesScissor;
+		CC3OpenGLESStateTrackerCapability* glesScissorTest;
 		
 		CC3Viewport vp = viewportManager.viewport;
 		BOOL isFullView = viewportManager.isFullView;
@@ -511,12 +511,12 @@
 		// cover the full screen, billboards can be drawn outside the CC3Layer.
 		// Enable scissoring to the viewport dimensions to clip to the layer bounds.
 		if ( !isFullView ) {
-			gles11Engine = [CC3OpenGLES11Engine engine];
-			gles11Scissor = gles11Engine.state.scissor;
-			gles11ScissorTest = gles11Engine.serverCapabilities.scissorTest;
+			glesEngine = [CC3OpenGLESEngine engine];
+			glesScissor = glesEngine.state.scissor;
+			glesScissorTest = glesEngine.capabilities.scissorTest;
 			
-			[gles11ScissorTest enable];
-			gles11Scissor.value = vp;
+			[glesScissorTest enable];
+			glesScissor.value = vp;
 		}
 		
 		CGRect lb = viewportManager.layerBoundsLocal;
@@ -527,8 +527,8 @@
 		// All done...turn scissoring back off now. This is happening after the
 		// close3D method, so we need to close the scissor trackers manually.
 		if ( !isFullView ) {
-			[gles11ScissorTest close];
-			[gles11Scissor close];
+			[glesScissorTest close];
+			[glesScissor close];
 		}
 	}
 }
@@ -928,14 +928,14 @@
 	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
 			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
 
-	CC3OpenGLES11Engine* gles11Engine = [CC3OpenGLES11Engine engine];
-	CC3OpenGLES11State* gles11State = gles11Engine.state;
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESState* glesState = glesEngine.state;
 	
-	gles11State.viewport.value = viewport;
+	glesState.viewport.value = viewport;
 
 	if ( !isFullView ) {
-		[gles11Engine.serverCapabilities.scissorTest enable];
-		gles11State.scissor.value = viewport;
+		[glesEngine.capabilities.scissorTest enable];
+		glesState.scissor.value = viewport;
 	}
 }
 
@@ -1003,7 +1003,7 @@
  * viewport bounds were unnecessarily being constrained to the window bounds, thereby
  * restricting the movement of the CC3Layer and 3D scene, and for suggesting the fix. 
  */
--(void) updateBounds: (CGRect) bounds withDeviceOrientation: (ccDeviceOrientation) deviceOrientation {
+-(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation {
 	CGSize winSz = [[CCDirector sharedDirector] winSizeInPixels];
 	CC3Viewport vp;
 	CGPoint bOrg = bounds.origin;
@@ -1020,7 +1020,7 @@
 	
 	switch(deviceOrientation) {
 			
-		case kCCDeviceOrientationLandscapeLeft:
+		case UIDeviceOrientationLandscapeLeft:
 			[self updateDeviceRotationAngle: -90.0f];
 			
 			vp.x = (GLint)bOrg.y;
@@ -1038,7 +1038,7 @@
 					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
 			break;
 			
-		case kCCDeviceOrientationLandscapeRight:
+		case UIDeviceOrientationLandscapeRight:
 			[self updateDeviceRotationAngle: 90.0f];
 			
 			vp.x = (GLint)(winSz.height - (bOrg.y + bSz.height));
@@ -1056,7 +1056,7 @@
 					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
 			break;
 			
-		case kCCDeviceOrientationPortraitUpsideDown:
+		case UIDeviceOrientationPortraitUpsideDown:
 			[self updateDeviceRotationAngle: 180.0f];
 			
 			vp.x = (GLint)(winSz.width - (bOrg.x + bSz.width));
@@ -1074,7 +1074,7 @@
 					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
 			break;
 			
-		case kCCDeviceOrientationPortrait:
+		case UIDeviceOrientationPortrait:
 		default:
 			[self updateDeviceRotationAngle: 0.0f];
 			

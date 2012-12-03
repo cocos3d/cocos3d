@@ -9,9 +9,9 @@ BASE_TEMPLATE_4_DIR="$HOME/Library/Developer/Xcode/Templates"
 
 force=
 
-usage(){
+usage() {
 cat << EOF
-Install or update Xcode templates and link external libraries for cocos3d
+Installs or updates cocos3d Xcode templates and links cocos2d libraries
 
 usage: $0 [options] -2 "cocos2d-dist-dir"
  
@@ -20,12 +20,13 @@ the directory containing the cocos2d distribution. This installer looks
 for the following directories within that specified directory:
     cocos2d
     CocosDenshion
-    cocoslive
-    external/FontLabel
-    external/TouchJSON
+    external/kazmath		(cocos2d 2.x only)
+    external/FontLabel		(cocos2d 1.x only)
+    cocoslive				(cocos2d 1.0 only)
+    external/TouchJSON		(cocos2d 1.0 only)
  
 OPTIONS:
-   -f	force overwrite if template directories exist
+   -f	force existing template directories to be ovewritten
    -h	this help
 EOF
 }
@@ -40,22 +41,27 @@ while getopts "fhu2:" OPTION; do
 			exit 0
 			;;
 		2)
-			c2d_dist_dir=$OPTARG
+			CC2_DIST_DIR=$OPTARG
 			;;
 	esac
 done
 
 # Make sure cocos2d distribution directory has been specified
-if [[ ! $c2d_dist_dir ]]; then
+if [[ ! $CC2_DIST_DIR ]]; then
 	echo "Please specify the location of the cocos2d distribution directory using the -2 switch."
 	echo
 	usage
 	exit 1
 fi
 
+# Resolve the cocos2d distribution directory to an absolute path
+if [[ $CC2_DIST_DIR != /* ]]; then
+	CC2_DIST_DIR="$PWD/$CC2_DIST_DIR"
+fi
+
 # Make sure cocos2d distribution directory exists
-if [[ ! -d "$c2d_dist_dir" ]];  then
-	echo "The cocos2d distribution directory '$c2d_dist_dir' couldn't be found!"
+if [[ ! -d "$CC2_DIST_DIR" ]];  then
+	echo "The cocos2d distribution directory '$CC2_DIST_DIR' couldn't be found!"
 	exit 1
 fi
 
@@ -85,10 +91,11 @@ print_template_banner(){
 	echo ''
 }
 
-# copies Xcode 4 project-based templates
+# Copies Xcode 4 project-based templates
 copy_xc4_project_templates(){
 	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
 
+# If the cocos3d template directory does not exist, create it.
 	if [[ ! -d "$TEMPLATE_DIR" ]]; then
 		echo '...creating Xcode 4 cocos3d template folder'
 		echo ''
@@ -98,21 +105,44 @@ copy_xc4_project_templates(){
 	print_template_banner "Installing Xcode 4 cocos3d iOS template"
 
 	TEMPLATE="cocos3d Application"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+
+# Remove any pre-cocos3d-2.0 templates
+	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
+
+# Copy OpenGL ES 1.1 Template
+	DST_DIR="$TEMPLATE_DIR""cocos3d1 Application.xctemplate"
 	check_dst_dir
-	echo ...copying $TEMPLATE template files
+	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo2.plist"
 
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
 	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
 
+# Copy OpenGL ES 1.1 Template
+	DST_DIR="$TEMPLATE_DIR""cocos3d2 Application.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
+	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo1.plist"
+
+	DST_DIR="$DST_DIR""/Resources"
+	check_dst_dir
+	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+
+# Copy Base cocos3d project settings
 	TEMPLATE="cocos3d-base"
 	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
 
+# Copy cocos3d library files references
 	TEMPLATE="cocos3d-lib"
 	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
 	check_dst_dir
@@ -125,28 +155,35 @@ copy_xc4_project_templates(){
 	echo done!
 }
 
+# If it exists, creates a symbolic link inside the dest directory $2 to the source directory $1
+# The third arg is just a description that is echoed
+link_dir(){
+if [[ -d "$1" ]]; then
+	echo "...linking $3"
+	ln -s "$1" "$2"
+fi
+}
+
 link_cocos2d_libs(){
 	echo
-	echo Linking cocos2d libraries to workspace
+	echo "Linking to cocos2d distribution libraries in '$CC2_DIST_DIR'."
+
 	CC2_DIR=cocos2d
 
 	rm -rf "$CC2_DIR"
 	mkdir -p "$CC2_DIR"
 
-	echo ...linking cocos2d files
-	ln -s "$c2d_dist_dir/cocos2d" "$CC2_DIR"
+	link_dir "$CC2_DIST_DIR/cocos2d" "$CC2_DIR" "cocos2d"
 
-	echo ...linking FontLabel files
-	ln -s "$c2d_dist_dir/external/FontLabel" "$CC2_DIR"
+	link_dir "$CC2_DIST_DIR/CocosDenshion/CocosDenshion" "$CC2_DIR" "CocosDenshion"
 
-	echo ...linking CocosDenshion files
-	ln -s "$c2d_dist_dir/CocosDenshion/CocosDenshion" "$CC2_DIR"
+	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.x only)"
 
-	echo ...linking cocoslive files
-	ln -s "$c2d_dist_dir/cocoslive" "$CC2_DIR"
+	link_dir "$CC2_DIST_DIR/external/FontLabel" "$CC2_DIR" "FontLabel (cocos2d 1.x only)"
 
-	echo ...linking cocoslive dependency files
-	ln -s "$c2d_dist_dir/external/TouchJSON" "$CC2_DIR"
+	link_dir "$CC2_DIST_DIR/cocoslive" "$CC2_DIR" "cocoslive (cocos2d 1.0 only)"
+
+	link_dir "$CC2_DIST_DIR/external/TouchJSON" "$CC2_DIR" "cocoslive dependencies (cocos2d 1.0 only))"
 
 	echo done!
 }

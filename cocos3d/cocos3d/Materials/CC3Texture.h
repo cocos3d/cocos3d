@@ -628,7 +628,7 @@
  * Disables the specified texture unit in the GL engine.
  *
  * The texture unit value should be a number between zero and the maximum number of texture
- * units, which can be read from [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value.
+ * units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
  */
 +(void) unbind: (GLuint) texUnit;
 
@@ -702,10 +702,9 @@
 /**
  * Returns whether this texture is flipped vertically.
  *
- * Under iOS, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate 
- * system. This results in textures being displayed upside-down, relative to the OpenGL
- * coordinate system.
+ * Under iOS, most texture formats are loaded updside-down. This is because the vertical axis
+ * of the coordinate system of OpenGL is inverted relative to the iOS view coordinate system.
+ * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
  *
  * This property will return NO if this texture was loaded from a PVR texture file,
  * and will return YES if loaded from any other texture file type.
@@ -716,11 +715,11 @@
  * For instances of the base cluster parent CCTexture2D, you should set this
  * property to the correct value after loading.
  *
- * If you manually set this property to NO for a CCTexture2D, you should set this
- * property back to YES before clearing this texture from the CCTextureCache, in
- * case the GL engine reuses the texture name again.
+ * If you manually set this property to NO for a CCTexture2D, you should set this property
+ * back to YES before clearing this texture from the CCTextureCache, in case the GL engine
+ * reuses the texture name again.
  */
-@property(nonatomic, assign) BOOL isFlippedVertically;
+@property(nonatomic, assign) BOOL cc3IsFlippedVertically;
 
 
 #pragma mark Tracking mipmap generation
@@ -731,36 +730,36 @@
  * For instances of the cluster subclass CC3Texture2D, the value of this property
  * is set to the correct value automatically when the texture file is loaded.
  *
- * For instances of the base cluster parent CCTexture2D, you should set this property
- * to the correct value after loading, and before the generateMipmapIfNeeded method
- * is invoked.
+ * For instances of the base cluster parent CCTexture2D, you should set this property to the
+ * correct value after loading, and before the cc3GenerateMipmapIfNeeded method is invoked.
  *
- * This property will also be set to YES when the generateMipmapIfNeeded is invoked.
+ * This property will also be set to YES when the cc3GenerateMipmapIfNeeded is invoked.
  *
  * If you manually set this property to YES for a CCTexture2D, you should set this
  * property back to NO before clearing this texture from the CCTextureCache, in
  * case the GL engine reuses the texture name again.
  */
-@property(nonatomic, assign) BOOL hasMipmap;
+@property(nonatomic, assign) BOOL cc3HasMipmap;
 
 /**
- * If this texture does not have a mipmap yet, as indicated by the value of the
- * hasMipmap property, this method generates a GL mipmap for this texture, and
- * sets the value of the hasMipmap property to YES.
+ * If this texture does not have a mipmap yet, as indicated by the value of the cc3HasMipmap
+ * property, and the dimensions of this texture are a power-of-two, this method generates a
+ * GL mipmap for this texture, and sets the value of the cc3HasMipmap property to YES.
  *
- * It is safe to invoke this method more than once, or on a texture that was
- * loaded from a file that already contains a mipmap, because it will only
- * generate a mipmap if the texture file does not already contain a mipmap
- * and a mipmap has not yet been generated.
+ * It is safe to invoke this method more than once, or on a texture that was loaded from a file
+ * that already contains a mipmap, because it will only generate a mipmap if the texture file
+ * does not already contain a mipmap and a mipmap has not yet been generated.
  *
- * Be aware that some formats (notably PVR) may already contain mipmaps in the
- * content loaded from file. For instances of the cluster subclass CC3Texture2D,
- * this is tracked automatically, and invoking this method will not overwrite
- * the loaded mipmap. But for instances of the base cluster parent CCTexture2D,
- * you should be sure to set the hasMipmap property to YES before invoking this
- * method, to avoid overwriting the loaded mipmap.
+ * Be aware that some formats (notably PVR) may already contain mipmaps in the content loaded
+ * from file. For instances of the cluster subclass CC3Texture2D, this is tracked automatically,
+ * and invoking this method will not overwrite the loaded mipmap. But for instances of the base
+ * cluster parent CCTexture2D, you should be sure to set the hasMipmap property to YES before
+ * invoking this method, to avoid overwriting the loaded mipmap.
  */
--(BOOL) generateMipmapIfNeeded;
+-(BOOL) cc3GenerateMipmapIfNeeded;
+
+/** Returns whether this texture has dimensions that are a power-of-two. */
+-(BOOL) cc3IsNPOT;
 
 @end
 

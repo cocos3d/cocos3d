@@ -30,11 +30,11 @@
  */
 
 #import "CC3Texture.h"
+#import "CC3CC2Extensions.h"
 #import "CCTextureCache.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 #import "CCFileUtils.h"
 #import "CCTexturePVR.h"
-#import "cocos2d.h"
 
 
 #pragma mark -
@@ -43,9 +43,9 @@
 @interface CC3Texture (TemplateMethods)
 -(void) markTextureParametersDirty;
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) bindTextureParametersTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+-(void) bindTextureParametersTo: (CC3OpenGLESTextureUnit*) glesTexUnit
 					withVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) bindTextureEnvironmentTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+-(void) bindTextureEnvironmentTo: (CC3OpenGLESTextureUnit*) glesTexUnit
 					 withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
@@ -70,9 +70,9 @@
 
 -(BOOL) hasPremultipliedAlpha { return (_texture && _texture.hasPremultipliedAlpha); }
 
--(BOOL) hasMipmap { return (_texture && _texture.hasMipmap); }
+-(BOOL) hasMipmap { return (_texture && _texture.cc3HasMipmap); }
 
--(BOOL) isFlippedVertically { return (_texture && _texture.isFlippedVertically); }
+-(BOOL) isFlippedVertically { return (_texture && _texture.cc3IsFlippedVertically); }
 
 /** Indicates whether Mipmaps should automatically be generated for any loaded textures. */
 static BOOL shouldGenerateMipmaps = YES;
@@ -208,9 +208,9 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
 #endif
 	
-	[CCTexture2D setInstantiationClass: [CC3Texture2D class]];
+	CCTexture2D.instantiationClass = CC3Texture2D.class;
 	self.texture = [[CCTextureCache sharedTextureCache] addImage: absFilePath];
-	[CCTexture2D setInstantiationClass: nil];
+	CCTexture2D.instantiationClass = nil;
 	
 	if (shouldGenerateMipmaps) [self generateMipmap];
 	if (_texture) {
@@ -223,7 +223,7 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 	}
 }
 
--(void) generateMipmap { [_texture generateMipmapIfNeeded]; }
+-(void) generateMipmap { [_texture cc3GenerateMipmapIfNeeded]; }
 
 // Protected methods for copying
 -(GLenum) rawMinifyingFunction { return _minifyingFunction; }
@@ -262,17 +262,17 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11TextureUnit* gles11TexUnit = [[CC3OpenGLES11Engine engine].textures textureUnitAt: visitor.textureUnit];
-	[gles11TexUnit.texture2D enable];
-	gles11TexUnit.textureBinding.value = _texture.name;
-	[self bindTextureParametersTo: gles11TexUnit withVisitor: visitor];
-	[self bindTextureEnvironmentTo: gles11TexUnit withVisitor: visitor];
+	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: visitor.textureUnit];
+	[glesTexUnit.texture2D enable];
+	glesTexUnit.textureBinding.value = _texture.name;
+	[self bindTextureParametersTo: glesTexUnit withVisitor: visitor];
+	[self bindTextureEnvironmentTo: glesTexUnit withVisitor: visitor];
 	
-	LogTrace(@"%@ bound to %@", self, gles11TexUnit);
+	LogTrace(@"%@ bound to %@", self, glesTexUnit);
 }
 
 /** If the texture parameters are dirty, binds them to the GL texture unit state. */
--(void) bindTextureParametersTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+-(void) bindTextureParametersTo: (CC3OpenGLESTextureUnit*) glesTexUnit
 					withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !_texParametersAreDirty ) return;
 
@@ -284,33 +284,31 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 			 NSStringFromGLEnum(self.verticalWrappingFunction));
 	
 	// Use property access to allow adjustments from the raw values
-	gles11TexUnit.minifyingFunction.value = self.minifyingFunction;
-	gles11TexUnit.magnifyingFunction.value = self.magnifyingFunction;
-	gles11TexUnit.horizontalWrappingFunction.value = self.horizontalWrappingFunction;
-	gles11TexUnit.verticalWrappingFunction.value = self.verticalWrappingFunction;
+	glesTexUnit.minifyingFunction.value = self.minifyingFunction;
+	glesTexUnit.magnifyingFunction.value = self.magnifyingFunction;
+	glesTexUnit.horizontalWrappingFunction.value = self.horizontalWrappingFunction;
+	glesTexUnit.verticalWrappingFunction.value = self.verticalWrappingFunction;
 
 	_texParametersAreDirty = NO;
 }
 
 /** Binds the texture unit environment to the specified GL texture unit state. */
--(void) bindTextureEnvironmentTo: (CC3OpenGLES11TextureUnit*) gles11TexUnit
+-(void) bindTextureEnvironmentTo: (CC3OpenGLESTextureUnit*) glesTexUnit
 					 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_textureUnit) {
-		[_textureUnit bindTo: gles11TexUnit withVisitor: visitor];
+		[_textureUnit bindTo: glesTexUnit withVisitor: visitor];
 	} else {
-		[CC3TextureUnit bindDefaultTo: gles11TexUnit];
+		[CC3TextureUnit bindDefaultTo: glesTexUnit];
 	}
 }
 
 +(void) unbind: (GLuint) texUnit {
-	[[[CC3OpenGLES11Engine engine].textures textureUnitAt: texUnit].texture2D disable];
+	[[CC3OpenGLESEngine.engine.textures textureUnitAt: texUnit].texture2D disable];
 }
 
 +(void) unbindRemainingFrom: (GLuint)texUnit {
-	GLuint maxTexUnits = [CC3OpenGLES11Engine engine].textures.textureUnitCount;
-	for (int tu = texUnit; tu < maxTexUnits; tu++) {
-		[self unbind: tu];
-	}
+	GLuint maxTexUnits = [CC3OpenGLESEngine engine].textures.textureUnitCount;
+	for (int tu = texUnit; tu < maxTexUnits; tu++) [self unbind: tu];
 }
 
 +(void) unbind { [self unbindRemainingFrom: 0]; }
@@ -336,14 +334,14 @@ static GLuint lastAssignedTextureTag;
 #pragma mark Allocation and initialization
 
 /** The CC3Texture2D cluster class to be instantiated when the alloc method is invoked. */
-static Class instantiationClass = nil;
+static Class _instantiationClass = nil;
 
-+(Class) instantiationClass { return instantiationClass; }
++(Class) instantiationClass { return _instantiationClass; }
 
 +(void) setInstantiationClass: (Class) aClass  {
-	NSAssert(aClass == nil || [aClass isSubclassOfClass: [CCTexture2D class]],
-			 @"The specified instantiationClass must be a subclass of CCTexture2D.");
-	instantiationClass = aClass;
+	NSAssert1(aClass == nil || [aClass isSubclassOfClass: [CCTexture2D class]],
+			  @"%@ is not a subclass of CCTexture2D.", aClass);
+	_instantiationClass = aClass;
 }
 
 /** Invoke the superclass alloc method, bypassing the alloc method of this class. */
@@ -356,15 +354,13 @@ static Class instantiationClass = nil;
  *
  * If the instantiationClass property is nil, allocates an instance of this class.
  */
-+(id) alloc {
-	return instantiationClass ? [instantiationClass alloc] : [self allocBase];
-}
++(id) alloc { return _instantiationClass ? [_instantiationClass alloc] : [self allocBase]; }
 
--(BOOL) generateMipmapIfNeeded {
-	if (self.hasMipmap) return NO;
+-(BOOL) cc3GenerateMipmapIfNeeded {
+	if (self.cc3HasMipmap || !self.cc3IsNPOT) return NO;
 	
 	[self generateMipmap];
-	self.hasMipmap = YES;
+	self.cc3HasMipmap = YES;
 	return YES;
 }
 
@@ -417,34 +413,48 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 }
 
 /** Returns whether the specified GL texture name has been marked as containing a mipmap. */
-+(BOOL) hasMipmap: (GLuint) glTexName {
++(BOOL) cc3HasMipmap: (GLuint) glTexName {
 	return [self cc3StateAt: glTexName]->hasMipmap;
 }
 
 /** Sets whether the specified GL texture name has been marked as containing a mipmap. */
-+(void) setHasMipmap: (GLuint) glTexName to: (BOOL) hasMm {
++(void) setCc3HasMipmap: (GLuint) glTexName to: (BOOL) hasMm {
 	[self cc3StateAt: glTexName]->hasMipmap = hasMm;
 }
 
 /** Returns whether the specified GL texture name is vertically flipped. */
-+(BOOL) isFlippedVertically: (GLuint) glTexName {
++(BOOL) cc3IsFlippedVertically: (GLuint) glTexName {
 	return [self cc3StateAt: glTexName]->isFlippedVertically;
 }
 
 /** Sets whether the specified GL texture name is vertically flipped. */
-+(void) setIsFlippedVertically: (GLuint) glTexName to: (BOOL) isFlipped {
++(void) setCc3IsFlippedVertically: (GLuint) glTexName to: (BOOL) isFlipped {
 	[self cc3StateAt: glTexName]->isFlippedVertically = isFlipped;
 }
 
--(BOOL) hasMipmap { return [self.class hasMipmap: self.name]; }
-
--(void) setHasMipmap: (BOOL) hasMm { [self.class setHasMipmap: self.name to: hasMm]; }
-
--(BOOL) isFlippedVertically { return [self.class isFlippedVertically: self.name]; }
-
--(void) setIsFlippedVertically: (BOOL) isFlipped {
-	[self.class setIsFlippedVertically: self.name to: isFlipped];
+-(BOOL) cc3HasMipmap {
+#if CC3_CC2_1
+	return [self.class cc3HasMipmap: self.name];
+#else
+	return hasMipmaps_;
+#endif
 }
+
+-(void) setCc3HasMipmap: (BOOL) hasMm {
+#if CC3_CC2_1
+	[self.class setCc3HasMipmap: self.name to: hasMm];
+#else
+	hasMipmaps_ = hasMm;
+#endif
+}
+
+-(BOOL) cc3IsFlippedVertically { return [self.class cc3IsFlippedVertically: self.name]; }
+
+-(void) setCc3IsFlippedVertically: (BOOL) isFlipped {
+	[self.class setCc3IsFlippedVertically: self.name to: isFlipped];
+}
+
+-(BOOL) cc3IsNPOT { return (width_ == ccNextPOT(width_) && height_ == ccNextPOT(height_)); }
 
 @end
 
@@ -454,11 +464,11 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 /** Extension to support testing for mipmaps. */
 @interface CCTexturePVR (CC3Texture)
 /** Returns whether this instance contains mipmaps. */
--(BOOL) hasMipmap;
+-(BOOL) cc3HasMipmap;
 @end
 
 @implementation CCTexturePVR (CC3Texture)
--(BOOL) hasMipmap { return (numberOfMipmaps_ > 1); }
+-(BOOL) cc3HasMipmap { return (numberOfMipmaps_ > 1); }
 @end
 
 
@@ -468,24 +478,20 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 
 /** Overridden to clear the tracking of the mipmap from the global status array. */
 -(void) dealloc {
-	self.hasMipmap = NO;				// Set global marker back to default
-	self.isFlippedVertically = YES;		// Set global marker back to default
+	self.cc3HasMipmap = NO;				// Set global marker back to default
+	self.cc3IsFlippedVertically = YES;		// Set global marker back to default
 	[super dealloc];
 }
 
-/**
- * Overridden to bypass the superclass alloc, which can redirect back here,
- * potentially causing an infinite loop.
- */
+/** Bypass the superclass alloc, which can redirect back here, causing an infinite loop. */
 +(id) alloc { return [self allocBase]; }
-
-#if COCOS2D_VERSION < 0x010100
 
 /**
  * Overridden to mark whether the texture contains a mipmap and is flipped vertically.
  * Since this method is monolithic, this is simply a cut-and-paste of the superclass
  * method, with the extra functionality added.
  */
+#if COCOS2D_VERSION < 0x010100		// cocos2d 1.0
 -(id) initWithPVRFile: (NSString*) file {
 	if( (self = [super init]) ) {
 		CCTexturePVR *pvr = [[CCTexturePVR alloc] initWithContentsOfFile:file];
@@ -501,8 +507,8 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 			hasPremultipliedAlpha_ = [[self class] PVRImagesHavePremultipliedAlpha];
 			format_ = pvr.format;
 			
-			self.hasMipmap = pvr.hasMipmap;		// Added to support cocos3d texture loading
-			self.isFlippedVertically = NO;		// Added to support cocos3d texture loading
+			self.cc3HasMipmap = pvr.hasMipmap;		// Added to support cocos3d texture loading
+			self.cc3IsFlippedVertically = NO;		// Added to support cocos3d texture loading
 			
 			[pvr release];
 			
@@ -517,18 +523,12 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 	return self;
 }
 
-#else
-
-/**
- * Overridden to mark whether the texture contains a mipmap and is flipped vertically.
- * Since this method is monolithic, this is simply a cut-and-paste of the superclass
- * method, with the extra functionality added.
- */
+#elif CC3_CC2_1	// cocos2d 1.1+
 -(id) initWithPVRFile: (NSString*) relPath {
 
 #ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 	ccResolutionType resolution;
-	NSString *fullpath = [CCFileUtils fullPathFromRelativePath:relPath resolutionType:&resolution];
+	NSString *fullpath = [CCFileUtils.sharedFileUtils fullPathFromRelativePath:relPath resolutionType:&resolution];
 #elif defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
 	NSString *fullpath = [CCFileUtils fullPathFromRelativePath:relPath];
 #endif 
@@ -547,8 +547,8 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 			hasPremultipliedAlpha_ = PVRHaveAlphaPremultiplied_;
 			format_ = pvr.format;
 			
-			self.hasMipmap = pvr.hasMipmap;		// Added to support cocos3d texture loading
-			self.isFlippedVertically = NO;		// Added to support cocos3d texture loading
+			self.cc3HasMipmap = pvr.cc3HasMipmap;	// Added to support cocos3d texture loading
+			self.cc3IsFlippedVertically = NO;		// Added to support cocos3d texture loading
 			
 			[pvr release];
 			
@@ -564,6 +564,11 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 #endif
 	}
 	return self;
+}
+#else	// cocos2d 2.x...
+-(id) initWithPVRFile: (NSString*) relPath {
+	self.cc3IsFlippedVertically = NO;
+	return [super initWithPVRFile: (NSString*) relPath];
 }
 #endif
 

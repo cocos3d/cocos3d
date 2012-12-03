@@ -9,57 +9,81 @@
 #import "___PROJECTNAMEASIDENTIFIER___AppDelegate.h"
 #import "___PROJECTNAMEASIDENTIFIER___Layer.h"
 #import "___PROJECTNAMEASIDENTIFIER___Scene.h"
-#import "CC3EAGLView.h"
+#import "CC3CC2Extensions.h"
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate {
-	UIWindow *window;
-	CC3DeviceCameraOverlayUIViewController *viewController;
+	UIWindow* _window;
+	CC3DeviceCameraOverlayUIViewController* _viewController;
 }
 
 -(void) dealloc {
-	[window release];
-	[viewController release];
+	[_window release];
+	[_viewController release];
 	[super dealloc];
 }
 
--(void) applicationDidFinishLaunching: (UIApplication*) application {
-
+#if CC3_CC2_1
+/** In cocos2d 1.x, the view controller and CCDirector are different objects. */
+-(void) establishDirectorController {
+	
 	// Establish the type of CCDirector to use.
 	// Try to use CADisplayLink director and if it fails (SDK < 3.1) use the default director.
 	// This must be the first thing we do and must be done before establishing view controller.
 	if( ! [CCDirector setDirectorType: kCCDirectorTypeDisplayLink] )
 		[CCDirector setDirectorType: kCCDirectorTypeDefault];
 	
-	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images.
-	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565. You can change anytime.
-	CCTexture2D.defaultAlphaPixelFormat = kCCTexture2DPixelFormat_RGBA8888;
-	
 	// Create the view controller for the 3D view.
-	viewController = [CC3DeviceCameraOverlayUIViewController new];
-	viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController = [CC3DeviceCameraOverlayUIViewController new];
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	
 	// Create the CCDirector, set the frame rate, and attach the view.
 	CCDirector *director = CCDirector.sharedDirector;
 	director.runLoopCommon = YES;		// Improves display link integration with UIKit
 	director.animationInterval = (1.0f / kAnimationFrameRate);
 	director.displayFPS = YES;
-	director.openGLView = viewController.view;
+	director.openGLView = _viewController.view;
 	
 	// Enables High Res mode on Retina Displays and maintains low res on all other devices
 	// This must be done after the GL view is assigned to the director!
 	[director enableRetinaDisplay: YES];
+}
+#endif
+
+#if CC3_CC2_2
+/**
+ * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
+ * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
+ * class, this MUST be performed before any other references to the CCDirector singleton!!
+ */
+-(void) establishDirectorController {
+	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
+	_viewController.displayStats = YES;
+	[_viewController enableRetinaDisplay: YES];
+}
+#endif
+
+-(void) applicationDidFinishLaunching: (UIApplication*) application {
+	
+	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images.
+	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565. You can change anytime.
+	CCTexture2D.defaultAlphaPixelFormat = kCCTexture2DPixelFormat_RGBA8888;
+	
+	// Establish the view controller and CCDirector (in cocos2d 2.x, these are one and the same)
+	[self establishDirectorController];
 	
 	// Create the window, make the controller (and its view) the root of the window, and present the window
-	window = [[UIWindow alloc] initWithFrame: [[UIScreen mainScreen] bounds]];
-	[window addSubview: viewController.view];
-	window.rootViewController = viewController;
-	[window makeKeyAndVisible];
+	_window = [[UIWindow alloc] initWithFrame: [[UIScreen mainScreen] bounds]];
+	[_window addSubview: _viewController.view];
+	_window.rootViewController = _viewController;
+	[_window makeKeyAndVisible];
 	
 	// Set to YES for Augmented Reality 3D overlay on device camera.
 	// This must be done after the window is made visible!
-//	viewController.isOverlayingDeviceCamera = YES;
+//	_viewController.isOverlayingDeviceCamera = YES;
 
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
@@ -91,7 +115,12 @@
 //	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
 	// Attach the layer to the controller and run a scene with it.
-	[viewController runSceneOnNode: mainLayer];
+	[_viewController runSceneOnNode: mainLayer];
+}
+
+/** Pause the cocos3d/cocos2d action. */
+-(void) applicationWillResignActive: (UIApplication*) application {
+	[CCDirector.sharedDirector pause];
 }
 
 /** Resume the cocos3d/cocos2d action. */
@@ -124,7 +153,7 @@
 }
 
 -(void)applicationWillTerminate: (UIApplication*) application {
-	[CCDirector.sharedDirector.openGLView removeFromSuperview];
+	[CCDirector.sharedDirector.view removeFromSuperview];
 	[CCDirector.sharedDirector end];
 }
 

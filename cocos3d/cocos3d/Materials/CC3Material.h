@@ -125,7 +125,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * combined with the output of the bump-mapped texture.
  *
  * The maximum number of texture units is platform dependent, and can be read from
- * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. This effectively defines
+ * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. This effectively defines
  * how many textures you can add to a material.
  *
  * You'll notice that there are two ways to assign textures to a material: through the
@@ -538,7 +538,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  *
  * The maximum number of texture units available is platform dependent, but will
  * be at least two. The maximum number of texture units available can be read from
- * [CC3OpenGLES11Engine engine].platform.maxTextureUnits.value. If you attempt to
+ * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. If you attempt to
  * add more than this number of textures to the material, the additional textures
  * will be ignored, and an informational message to that fact will be logged.
  *

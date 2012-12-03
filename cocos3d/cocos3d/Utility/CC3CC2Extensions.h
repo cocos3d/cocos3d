@@ -32,13 +32,25 @@
 
 /* Base library of extensions to cocos2d to support cocos3d. */
 
-#import "CCArray.h"
-#import "CCNode.h"
-#import "CCLayer.h"
-#import "CCMenu.h"
-#import "CCDirector.h"
-#import "CCActionInterval.h"
-#import "CCLabelBMFont.h"
+#import "CC3Environment.h"
+
+
+#pragma mark -
+#pragma mark CCGLView & CC3GLView
+
+/**
+ * Under cocos2d 1.x, create an alias CCGLView for EAGLView under cocos2d 1.x, allowing
+ * EAGLView to be used where CCGLView is under cocos2d 2.x.
+ */
+#if CC3_CC2_1
+#	define CCGLView EAGLView
+#	define CC3GLView CC3EAGLView
+#endif
+
+/** Dummy macro for cocos2d 1.x for compatibility with cocos2d 2.x. */
+#if CC3_CC2_1
+#	define CC_INCREMENT_GL_DRAWS(__n__)
+#endif
 
 
 #pragma mark -
@@ -73,8 +85,24 @@
 /** Extension category to support cocos3d functionality. */
 @interface CCNode (CC3)
 
+#if CC3_CC2_2
+/** cocos2d 2.x compatibility with pixel-based sizing. */
+@property (nonatomic, readonly) CGSize contentSizeInPixels;
+
+/** cocos2d 2.x compatibility with pixel-based sizing. */
+@property (nonatomic, readonly) CGRect boundingBoxInPixels;
+#endif
+
+/**
+ * Returns whether this node will receive touch events.
+ *
+ * This implementation returns NO.
+ */
+@property(nonatomic, readonly, getter=isTouchEnabled) BOOL touchEnabled;
+
+
 /** Returns the bounding box of this CCNode, measured in pixels, in the global coordinate system. */
-- (CGRect) globalBoundingBoxInPixels;
+@property (nonatomic, readonly) CGRect globalBoundingBoxInPixels;
 
 /**
  * Updates the viewport of any contained CC3Scene instances with the dimensions
@@ -137,13 +165,6 @@
  */
 -(CGPoint) cc3NormalizeUIMovement: (CGPoint) uiMovement;
 
-/**
- * Returns whether this node will receive touch events.
- *
- * This implementation returns NO.
- */
--(BOOL) cc3IsTouchEnabled;
-
 /** Returns whether this node contains the specified UI touch location. */
 -(BOOL) cc3ContainsTouchPoint: (CGPoint) viewPoint;
 
@@ -197,12 +218,10 @@
 /** Extension category to support cocos3d functionality. */
 @interface CCLayer (CC3)
 
-/**
- * Returns whether this node will receive touch events.
- *
- * This implementation returns the value of the isTouchEnabled property.
- */
--(BOOL) cc3IsTouchEnabled;
+#if CC3_CC2_1
+/** Backwards compatibility for setter renamed in cocos2d 2.x. */
+-(void) setTouchEnabled: (BOOL) isTouchEnabled;
+#endif
 
 @end
 
@@ -225,16 +244,60 @@
 
 
 #pragma mark -
+#pragma mark CCMenu extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCMenuItemImage (CC3)
+#if CC3_CC2_1
+/** Backwards compatibility for constructor renamed in cocos2d 2.x. */
++(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2;
+
+/** Backwards compatibility for constructor renamed in cocos2d 2.x. */
++(id) itemWithNormalImage: (NSString*)value selectedImage:(NSString*) value2 target:(id) r selector:(SEL) s;
+#endif
+@end
+
+
+#pragma mark -
 #pragma mark CCDirector extension
 
 /** Extension category to support cocos3d functionality. */
 @interface CCDirector (CC3)
+
+/** The OpenGL ES view, cast as the correct class. */
+@property(nonatomic, retain) CCGLView* ccGLView;
 
 /** Returns the time interval in seconds between the current render frame and the previous frame. */
 -(ccTime) frameInterval;
 
 /** Returns the current rendering perfromance in average frames per second. */
 -(ccTime) frameRate;
+
+/** Returns whether this director has a CCScene either running or queued up. */
+-(BOOL) hasScene;
+
+#if CC3_CC2_1
+/** Consistent naming alias for the OpenGL ES view. */
+@property(nonatomic, retain) UIView* view;
+
+/** Returns the CCActionManager sharedManager singleton. */
+@property (nonatomic, readonly) CCActionManager* actionManager;
+
+/** Returns the CCTouchDispatcher sharedDispatcher singleton. */
+@property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
+
+/** Returns the CCScheduler sharedScheduler singleton. */
+@property (nonatomic, readonly) CCScheduler* scheduler;
+#endif
+
+#if CC3_CC2_2
+/**
+ * Adds support under cocos2d 2.x for legacy code that looks for device orientation under cocos2d 1.x.
+ *
+ * Always returns UIDeviceOrientationPortrait.
+ */
+-(UIDeviceOrientation) deviceOrientation;
+#endif
 
 @end
 
@@ -249,6 +312,9 @@
 	NSUInteger baseline;
 	GLfloat fontSize;
 }
+
+/** The name of the font atlas texture. */
+@property (nonatomic, retain) NSString* atlasName;
 
 /** Returns a pointer to the specification of the specified character. */
 -(ccBMFontDef*) characterSpecFor: (unichar) c;
@@ -268,6 +334,23 @@
 
 /** Clears all cached font configurations to conserve memory. */
 +(void) clearFontConfigurations;
+
+@end
+
+
+#pragma mark -
+#pragma mark CCFileUtils extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCFileUtils (CC3)
+
+#if CC3_CC2_1
+/**
+ * As of cocos2d 2.x, CCFileUtils changed from static class methods to a singleton instance.
+ * For cocos2d 1.x, this method mimics the access to the singleton and simply returns this class itself.
+ */
++(Class) sharedFileUtils;
+#endif
 
 @end
 

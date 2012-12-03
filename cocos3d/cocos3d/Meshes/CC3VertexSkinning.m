@@ -35,7 +35,7 @@
 #import "CC3Scene.h"
 #import "CC3NodeAnimation.h"
 #import "CC3AffineMatrix.h"
-#import "CC3OpenGLES11Engine.h"
+#import "CC3OpenGLESEngine.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -325,9 +325,9 @@
  * to draw the mesh in batches, then disables palette matrices again.
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLES11StateTrackerServerCapability* gles11MatrixPalette = [CC3OpenGLES11Engine engine].serverCapabilities.matrixPalette;
+	CC3OpenGLESStateTrackerCapability* glesMatrixPalette = [CC3OpenGLESEngine engine].capabilities.matrixPalette;
 	
-	[gles11MatrixPalette enable];			// Enable the matrix palette
+	[glesMatrixPalette enable];			// Enable the matrix palette
 	
 	[super drawMeshWithVisitor: visitor];	// Bind the arrays
 	
@@ -335,7 +335,7 @@
 		[skinSctn drawVerticesOfMesh: mesh withVisitor: visitor];
 	}
 	
-	[gles11MatrixPalette disable];			// We are finished with the matrix pallete so disable it.
+	[glesMatrixPalette disable];			// We are finished with the matrix pallete so disable it.
 }
 
 @end
@@ -820,17 +820,17 @@
 
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	
-	CC3OpenGLES11Matrices* gles11Matrices = [CC3OpenGLES11Engine engine].matrices;
+	CC3OpenGLESMatrices* glesMatrices = [CC3OpenGLESEngine engine].matrices;
 	CC3Matrix4x4 glMtx;
 	
 	GLuint boneNum = 0;
 	for (CC3SkinnedBone* sb in skinnedBones) {
 
 		// Load this palette matrix from the modelview matrix and the apply the bone draw matrix.
-		CC3OpenGLES11MatrixPalette* gles11PaletteMatrix = [gles11Matrices paletteAt: boneNum++];
-		[gles11PaletteMatrix loadFromModelView];
+		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteAt: boneNum++];
+		[glesPaletteMatrix loadFromModelView];
 		[sb.drawTransformMatrix populateCC3Matrix4x4: &glMtx];
-		[gles11PaletteMatrix multiply: glMtx.elements];
+		[glesPaletteMatrix multiply: glMtx.elements];
 	}
 
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
