@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESEngine.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,6 +39,7 @@
 #import "CC3OpenGLESState.h"
 #import "CC3OpenGLESFog.h"
 #import "CC3OpenGLESHints.h"
+#import "CC3OpenGLESShaders.h"
 
 
 /**
@@ -95,21 +96,22 @@
  *      which is nil, unless your application sets a tracker manager there.
  */
 @interface CC3OpenGLESEngine : CC3OpenGLESStateTracker {
-	CCArray* trackersToOpen;
-	CCArray* trackersToClose;
-	CC3OpenGLESPlatform* platform;
-	CC3OpenGLESCapabilities* capabilities;
-	CC3OpenGLESMaterials* materials;
-	CC3OpenGLESTextures* textures;
-	CC3OpenGLESLighting* lighting;
-	CC3OpenGLESMatrices* matrices;
-	CC3OpenGLESVertexArrays* vertices;
-	CC3OpenGLESState* state;
-	CC3OpenGLESFog* fog;
-	CC3OpenGLESHints* hints;
-	CC3OpenGLESStateTrackerManager* appExtensions;
-	BOOL isClosing;
-	BOOL trackerToOpenWasAdded;
+	CCArray* _trackersToOpen;
+	CCArray* _trackersToClose;
+	CC3OpenGLESPlatform* _platform;
+	CC3OpenGLESCapabilities* _capabilities;
+	CC3OpenGLESMaterials* _materials;
+	CC3OpenGLESTextures* _textures;
+	CC3OpenGLESLighting* _lighting;
+	CC3OpenGLESMatrices* _matrices;
+	CC3OpenGLESVertexArrays* _vertices;
+	CC3OpenGLESState* _state;
+	CC3OpenGLESFog* _fog;
+	CC3OpenGLESHints* _hints;
+	CC3OpenGLESShaders* _shaders;
+	CC3OpenGLESStateTrackerManager* _appExtensions;
+	BOOL _isClosing;
+	BOOL _trackerToOpenWasAdded;
 }
 
 /**
@@ -167,6 +169,9 @@
 
 /** The state tracking manager that tracks GL engine hints.  */
 @property(nonatomic, retain) CC3OpenGLESHints* hints;
+
+/** The state tracking manager that tracks GLSL engine shaders for OpenGL ES 2.  */
+@property(nonatomic, retain) CC3OpenGLESShaders* shaders;
 
 /**
  * Most, but not all GL functionality and state is managed by the trackers attached

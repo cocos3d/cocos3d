@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Engine.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -61,6 +61,7 @@
 	self.state = [CC3OpenGLES1State trackerWithParent: self];
 	self.fog = [CC3OpenGLES1Fog trackerWithParent: self];
 	self.hints = [CC3OpenGLES1Hints trackerWithParent: self];
+	self.shaders = nil;
 	self.appExtensions = nil;
 }
 

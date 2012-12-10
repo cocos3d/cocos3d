@@ -1,7 +1,7 @@
 /**
  * CC3Node.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -1682,7 +1682,7 @@ static GLuint lastAssignedNodeTag;
 
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
 	[transformMatrix populateCC3Matrix4x4: &glMtx];
-	[glesMatrixStack multiply: glMtx.elements];
+	[glesMatrixStack multiply: &glMtx];
 
 	[visitor draw: self];
 

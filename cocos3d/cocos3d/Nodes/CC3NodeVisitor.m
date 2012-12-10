@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -400,6 +400,12 @@
 	return self;
 }
 
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
+			[super fullDescription], drawingSequencer, textureUnit, textureUnitCount,
+			NSStringFromBoolean(shouldDecorateNode), NSStringFromBoolean(shouldClearDepthBuffer)];
+}
+
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) {
@@ -449,11 +455,14 @@
 	[self.performanceStatistics incrementNodesDrawn];
 }
 
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
-			[super fullDescription], drawingSequencer, textureUnit, textureUnitCount,
-			NSStringFromBoolean(shouldDecorateNode), NSStringFromBoolean(shouldClearDepthBuffer)];
-}
+
+#pragma mark Accessing node contents
+
+-(CC3MeshNode*) currentMeshNode { return (CC3MeshNode*)self.currentNode; }
+
+-(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
+
+-(CC3Scene*) scene { return (CC3Scene*)startingNode; }
 
 @end
 
@@ -476,8 +485,6 @@
 	[pickedNode release];
 	[super dealloc];
 }
-
--(CC3Scene*) scene { return (CC3Scene*)startingNode; }
 
 /** Overridden to initially set the shouldDecorateNode to NO. */
 -(id) init {

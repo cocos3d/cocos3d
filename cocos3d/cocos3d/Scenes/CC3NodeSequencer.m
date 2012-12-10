@@ -1,7 +1,7 @@
 /*
  * CC3NodeSequencer.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -229,9 +229,7 @@
 	return [NSString stringWithFormat: @"%@ with evaluator %@", [self class], evaluator];
 }
 
--(NSString*) fullDescription {
-	return self.description;
-}
+-(NSString*) fullDescription { return self.description; }
 
 @end
 

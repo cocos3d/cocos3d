@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1VertexArrays.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -40,7 +40,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexLocationsPointer tracks the parameters
  * of the vertex locations pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_VERTEX_ARRAY_SIZE.
  *   - elementType uses GL name GL_VERTEX_ARRAY_TYPE.
  *   - vertexStride uses GL name GL_VERTEX_ARRAY_STRIDE.
@@ -56,7 +56,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexNormalsPointer tracks the parameters
  * of the vertex normals pointer.
- *   - use the useElementsAt:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize is not used.
  *   - elementType uses GL name GL_NORMAL_ARRAY_TYPE.
  *   - vertexStride uses GL name GL_NORMAL_ARRAY_STRIDE.
@@ -72,7 +72,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexColorsPointer tracks the parameters
  * of the vertex colors pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_COLOR_ARRAY_SIZE.
  *   - elementType uses GL name GL_COLOR_ARRAY_TYPE.
  *   - vertexStride uses GL name GL_COLOR_ARRAY_STRIDE.
@@ -88,7 +88,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexPointSizesPointer tracks the parameters
  * of the vertex point sizes pointer.
- *   - use the useElementsAt:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize is not used.
  *   - elementType uses GL name GL_POINT_SIZE_ARRAY_TYPE_OES.
  *   - vertexStride uses GL name GL_POINT_SIZE_ARRAY_STRIDE_OES.
@@ -104,7 +104,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexWeightsPointer tracks the parameters
  * of the vertex weights pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_WEIGHT_ARRAY_SIZE_OES.
  *   - elementType uses GL name GL_WEIGHT_ARRAY_TYPE_OES.
  *   - vertexStride uses GL name GL_WEIGHT_ARRAY_STRIDE_OES.
@@ -120,7 +120,7 @@
 /**
  * CC3OpenGLES1StateTrackerVertexMatrixIndicesPointer tracks the parameters
  * of the vertex matrix indices pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_MATRIX_INDEX_ARRAY_SIZE_OES.
  *   - elementType uses GL name GL_MATRIX_INDEX_ARRAY_TYPE_OES.
  *   - vertexStride uses GL name GL_MATRIX_INDEX_ARRAY_STRIDE_OES.

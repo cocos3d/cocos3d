@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1VertexArrays.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,13 +31,9 @@
 
 #import "CC3OpenGLES1VertexArrays.h"
 #import "CC3OpenGLESEngine.h"
-#import "CC3VertexArrays.h"
+#import "CC3OpenGLESTextures.h"
 
 #if CC3_OGLES_1
-
-@interface CC3VertexArray (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker;
-@end
 
 #pragma mark -
 #pragma mark CC3OpenGLES1StateTrackerVertexLocationsPointer
@@ -222,13 +218,50 @@
 	self.weights = [CC3OpenGLES1StateTrackerVertexWeightsPointer trackerWithParent: self];
 }
 
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArray: (CC3VertexArray*) vtxArray {
-	return [self trackerForVertexArrayType: vtxArray.class];
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
+	GLuint texUnit;
+	switch (semantic) {
+		case kCC3VertexContentSemanticLocations: return _locations;
+		case kCC3VertexContentSemanticNormals: return _normals;
+		case kCC3VertexContentSemanticColors: return _colors;
+		case kCC3VertexContentSemanticPointSizes: return _pointSizes;
+		case kCC3VertexContentSemanticWeights: return _weights;
+		case kCC3VertexContentSemanticMatrices: return _matrixIndices;
+
+		case kCC3VertexContentSemanticTexture0:
+		case kCC3VertexContentSemanticTexture1:
+		case kCC3VertexContentSemanticTexture2:
+		case kCC3VertexContentSemanticTexture3:
+		case kCC3VertexContentSemanticTexture4:
+		case kCC3VertexContentSemanticTexture5:
+		case kCC3VertexContentSemanticTexture6:
+		case kCC3VertexContentSemanticTexture7:
+			texUnit = semantic - kCC3VertexContentSemanticTexture0;
+			return [self.engine.textures textureUnitAt: texUnit].textureCoordinates;
+			
+		default: return nil;
+	}
 }
 
-// Double-dispatches to the CC3VertexArray class
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArrayType: (Class) vtxArrayClass {
-	return [vtxArrayClass gles1VertexArrayTrackerFrom: self];
+-(void) clearUnboundVertexPointers {
+	_locations.wasBound = NO;
+	_normals.wasBound = NO;
+	_colors.wasBound = NO;
+	_pointSizes.wasBound = NO;
+	_weights.wasBound = NO;
+	_matrixIndices.wasBound = NO;
+	
+	[self.engine.textures clearUnboundVertexPointers];
+}
+
+-(void) disableUnboundVertexPointers {
+	[_locations disableIfUnbound];
+	[_normals disableIfUnbound];
+	[_colors disableIfUnbound];
+	[_pointSizes disableIfUnbound];
+	[_weights disableIfUnbound];
+	[_matrixIndices disableIfUnbound];
+	[self.engine.textures disableUnboundVertexPointers];
 }
 
 -(NSString*) description {
@@ -245,52 +278,6 @@
 	return desc;
 }
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3VertexArray extenions
-
-@implementation CC3VertexArray (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return nil;
-}
-@end
-
-@implementation CC3VertexLocations (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.locations;
-}
-@end
-
-@implementation CC3VertexNormals (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.normals;
-}
-@end
-
-@implementation CC3VertexColors (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.colors;
-}
-@end
-
-@implementation CC3VertexPointSizes (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.pointSizes;
-}
-@end
-
-@implementation CC3VertexWeights (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.weights;
-}
-@end
-
-@implementation CC3VertexMatrixIndices (CC3OpenGLES1)
-+(CC3OpenGLESStateTrackerVertexPointer*) gles1VertexArrayTrackerFrom: (CC3OpenGLES1VertexArrays*) vtxArraysTracker {
-	return vtxArraysTracker.matrixIndices;
-}
 @end
 
 #endif

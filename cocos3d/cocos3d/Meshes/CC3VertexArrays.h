@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings, Chris Myers
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -33,9 +33,7 @@
 #import "CC3Identifiable.h"
 #import "CC3Material.h"
 #import "CC3NodeVisitor.h"
-
-/** Constant indicating that the attributeIndex property is not in use. */
-#define kCC3VertexAttributeIndexNone  ((GLuint)~0)
+#import "CC3GLProgramSemantics.h"
 
 
 #pragma mark -
@@ -137,7 +135,6 @@
  *     on the new vertex array.
  */
 @interface CC3VertexArray : CC3Identifiable {
-	CC3OpenGLESStateTrackerVertexPointer* _glesVertexPointer;
 	//	CC3VertexArrayContent* _vertexContent;
 	GLuint _elementOffset;
 	GLint _elementSize;
@@ -150,7 +147,7 @@
 	GLuint _bufferID;
 	GLenum _bufferUsage;
 	GLuint _vertexStride : 8;
-	GLuint _attributeIndex : 8;
+	GLenum _semantic : 8;
 	BOOL _shouldNormalizeContent : 1;
 	BOOL _shouldAllowVertexBuffering : 1;
 	BOOL _shouldReleaseRedundantData : 1;
@@ -167,22 +164,26 @@
 //@property(nonatomic, retain) CC3VertexArrayContent* vertexContent;
 
 /**
- * Indicates the vertex attribute index of this array.
+ * Indicates the vertex attribute semantic of this array.
  *
- * This value is used to identify this vertex array to the to the GL engine for the purpose
- * of matching it to a variable name within the vertex shader code.
+ * Under OpenGL ES 2, this values are used to match a vertex array to its semantic usage
+ * within a GLSL vertex shader.
  *
- * This property applies only to OpenGL ES 2. When using OpenGL ES 1, this property can be ignored.
+ * The initial value of this property is set by from the defaultSemantic class property,
+ * which subclasses override to provide an appropriate semantic value from the
+ * CC3VertexContentSemantic enumeration, based on the vertex array type.
  *
- * A value of kCC3VertexAttributeIndexNone indicates that this vertex array is not used by the
- * shader and should not be enabled in the GL engine.
- *
- * The initial value of this property is kCC3VertexAttributeIndexNone. When using OpenGL ES 2, this
- * property within each vertex array within a single mesh should be set to an individual and unique
- * number, starting with zero, up to the maximum number of attribute available on the platform,
- * which may be retrieved from CC3OpenGLESEngine.engine.platform.maxVertexAttributes.value.
+ * The app may change this property to a custom value if desired. The custom value should be
+ * kept within the range defined by kCC3VertexContentSemanticAppBase and kCC3VertexContentSemanticMax.
  */
-@property(nonatomic, assign) GLuint attributeIndex;
+@property(nonatomic, assign) GLenum semantic;
+
+/**
+ * The default value for the semantic property.
+ *
+ * Each subclass will provide an appropriate value from the CC3VertexContentSemantic enumeration.
+ */
++(GLenum) defaultSemantic;
 
 /**
  * A pointer to the underlying vertex content. If the underlying content memory is assigned

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Textures.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 
 #import "CC3OpenGLESTextures.h"
+#import "CC3OpenGLES1Matrices.h"
 
 #if CC3_OGLES_1
 
@@ -111,13 +112,28 @@
 /**
  * CC3OpenGLES1StateTrackerVertexTexCoordsPointer tracks the parameters
  * of the vertex texture coordinates pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_TEXTURE_COORD_ARRAY_SIZE.
  *   - elementType uses GL name GL_TEXTURE_COORD_ARRAY_TYPE.
  *   - vertexStride uses GL name GL_TEXTURE_COORD_ARRAY_STRIDE.
  *   - the values are set in the GL engine using the glTexCoordPointer method
  */
 @interface CC3OpenGLES1StateTrackerVertexTexCoordsPointer : CC3OpenGLESStateTrackerVertexPointer
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES1TextureMatrixStack
+
+/**
+ * CC3OpenGLESMatrixStack provides access to several commands that operate
+ * on the texture matrix stacks, none of which require state tracking.
+ *
+ * Even though this class does not track any state, it does rely on the
+ * tracker for the matrix mode, to ensure that the matrix mode associated
+ * with this matrix stack is active before calling a GL function.
+ */
+@interface CC3OpenGLES1TextureMatrixStack : CC3OpenGLES1MatrixStack
 @end
 
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Matrices.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,7 +38,51 @@
 #pragma mark CC3OpenGLES1MatrixStack
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1MatrixStack : CC3OpenGLESMatrixStack
+@interface CC3OpenGLES1MatrixStack : CC3OpenGLESMatrixStack {
+	GLenum _mode;
+	GLenum _topName;
+	GLenum _depthName;
+	CC3OpenGLESStateTrackerEnumeration* _modeTracker;
+}
+
+/**
+ * Activates the matrix mode for this matrix in GL, by setting the
+ * value of the matrix mode tracker to the mode for this matrix stack.
+ *
+ * Most of the command methods will first invoke this method, to ensure that the correct
+ * matrix mode is active before issuing a GL command to operate on a matrix stack.
+ */
+-(void) activate;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance for the specified matrix mode.
+ * The specified tName is used to query the matrix at the top of this matrix stack.
+ * The specified dName is used to query the depth of this matrix stack.
+ * The specified aModeTracker is used to ensure that the matrix mode of this matrix
+ * is active before issuing any commands.
+ */
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+			withMode: (GLenum) matrixMode
+		  andTopName: (GLenum) tName
+		andDepthName: (GLenum) dName
+	  andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker;
+
+/**
+ * Allocates and initializes an autoreleased instance for the specified matrix mode.
+ * The specified tName is used to query the matrix at the top of this matrix stack.
+ * The specified dName is used to query the depth of this matrix stack.
+ * The specified aModeTracker is used to ensure that the matrix mode of this matrix
+ * is active before issuing any commands.
+ */
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+			   withMode: (GLenum) matrixMode
+			 andTopName: (GLenum) tName
+		   andDepthName: (GLenum) dName
+		 andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker;
+
 @end
 
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES2Engine.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -43,6 +43,7 @@
 #import "CC3OpenGLES2State.h"
 #import "CC3OpenGLES2Fog.h"
 #import "CC3OpenGLES2Hints.h"
+#import "CC3OpenGLES2Shaders.h"
 
 @implementation CC3OpenGLES2Engine
 
@@ -61,6 +62,7 @@
 	self.state = [CC3OpenGLES2State trackerWithParent: self];
 	self.fog = [CC3OpenGLES2Fog trackerWithParent: self];
 	self.hints = [CC3OpenGLES2Hints trackerWithParent: self];
+	self.shaders = [CC3OpenGLES2Shaders trackerWithParent: self];
 	self.appExtensions = nil;
 }
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES2VertexArrays.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -129,7 +129,7 @@
 /**
  * CC3OpenGLES2StateTrackerVertexAttributesPointer tracks the parameters
  * of a general OpenGL ES 2 vertex attributes pointer.
- *   - use the useElementsAt:withSize:withType:withStride: method to set the values
+ *   - use the bindElementsAt:withSize:withType:withStride: method to set the values
  *   - elementSize uses GL name GL_VERTEX_ARRAY_SIZE.
  *   - elementType uses GL name GL_VERTEX_ARRAY_TYPE.
  *   - vertexStride uses GL name GL_VERTEX_ARRAY_STRIDE.

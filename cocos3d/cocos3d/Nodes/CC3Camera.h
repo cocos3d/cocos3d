@@ -1,7 +1,7 @@
 /*
  * CC3Camera.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -67,7 +67,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * so that the light will move along with the camera, and point where the camera points.
  *
  * However, when adding a camera to an assembly of nodes, be aware of whether the parent
- * nodes use scaling. To construct the modelviewMatrix, the camera makes heavy use of
+ * nodes use scaling. To construct the viewMatrix, the camera makes heavy use of
  * matrix inversion of the cummulative transform matrix of the camera's transforms and
  * the transforms of all its ancestors. If scaling has not been added to any ancestor
  * nodes, the cummulative transform will be a Rigid transform. Inverting a Rigid transform
@@ -113,7 +113,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * when the projection matrix is recalculated.
  */
 @interface CC3Camera : CC3Node {
-	CC3Matrix* modelviewMatrix;
+	CC3Matrix* _viewMatrix;
 	CC3Frustum* frustum;
 	GLfloat fieldOfView;
 	GLfloat nearClippingDistance;
@@ -181,12 +181,15 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * from the camera's transformMatrix, which, like that of all nodes, reflects the location,
  * rotation and scale of the camera node in the 3D scene space.
  *
- * In contrast, the modelviewMatrix combines the inverse of the camera's transformMatrix
+ * In contrast, the viewMatrix combines the inverse of the camera's transformMatrix
  * (because any movement of the camera in scene space has the opposite effect on the view),
  * with the deviceRotationMatrix from the viewportManager of the CC3Scene, to account for
  * the impact of device orientation on the view.
  */
-@property(nonatomic, readonly) CC3Matrix* modelviewMatrix;
+@property(nonatomic, readonly) CC3Matrix* viewMatrix;
+
+/** @deprecated Renamed to viewMatrix for a more accurate semantic. */
+@property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * The projection matrix that takes the camera's modelview and projects it to the viewport.
@@ -1104,10 +1107,10 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * locations, rays, shapes, and other bounding volumes intersect the volume of the frustum.
  */
 @interface CC3Frustum : CC3BoundingVolume {
-	CC3Matrix* modelviewMatrix;
+	CC3Matrix* _viewMatrix;
 	CC3Matrix* projectionMatrix;
 	CC3Matrix* infiniteProjectionMatrix;
-	CC3Matrix* modelviewProjectionMatrix;
+	CC3Matrix* _viewProjectionMatrix;
 	CC3Plane planes[6];
 	CC3Vector vertices[8];
 	GLfloat top;
@@ -1183,20 +1186,21 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 #pragma mark Allocation and initialization
 
-/** Initializes this instance on the specified modelview matrix. */
--(id) initOnModelviewMatrix: (CC3Matrix*) aMtx;
+/** Initializes this instance on the specified view matrix. */
+-(id) initOnViewMatrix: (CC3Matrix*) aMtx;
 
-/** Allocates and initializes an autoreleased instance on the specified modelview matrix. */
-+(id) frustumOnModelviewMatrix: (CC3Matrix*) aMtx;
+/** Allocates and initializes an autoreleased instance on the specified view matrix. */
++(id) frustumOnViewMatrix: (CC3Matrix*) aMtx;
 
 /**
- * The modelview matrix of the camera.
+ * The view matrix of the camera.
  *
- * Setting this property will automatically mark the planes as dirty. However, if the
- * contents of the matrix change, this instance will be unaware, and the application
- * is responsible for invoking the markPlanesDirty method to let this instance know.
+ * If the contents of the matrix change, invoking the markDirty method to let this instance know.
  */
-@property(nonatomic, retain) CC3Matrix* modelviewMatrix;
+@property(nonatomic, readonly) CC3Matrix* viewMatrix;
+
+/** @deprecated Renamed to viewMatrix for a more accurate semantic. */
+@property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
 
 /** The projection matrix that takes the camera's modelview and projects it to the viewport. */
 @property(nonatomic, readonly) CC3Matrix* projectionMatrix;
@@ -1208,12 +1212,15 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, readonly) CC3Matrix* infiniteProjectionMatrix;
 
 /**
- * The combined modelview-projection matrix that projects the scene to the viewport.
+ * The combined view-projection matrix that projects the scene to the viewport.
  *
- * This is simply a multiplicative product of the camera's modelview and projection matrices.
+ * This is simply a multiplicative product of the viewMatrix and projectionMatrix.
  * It is calculated as part of the recalculation of the frustum planes.
  */
-@property(nonatomic, readonly) CC3Matrix* modelviewProjectionMatrix;
+@property(nonatomic, readonly) CC3Matrix* viewProjectionMatrix;
+
+/** @deprecated Renamed to viewProjectionMatrix for a more accurate semantic. */
+@property(nonatomic, readonly) CC3Matrix* modelviewProjectionMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether this frustum uses parallel projection.

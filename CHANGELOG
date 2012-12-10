@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-cocos3d 0.7.2
+cocos3d 2.0.0
 
 Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
 http://www.brenwill.com
@@ -27,6 +27,8 @@ cocos3d 2.0.0 - 2013/01/31
 	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
 	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
 
+- [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
+- [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
 
 
 

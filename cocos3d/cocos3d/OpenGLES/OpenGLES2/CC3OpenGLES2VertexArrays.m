@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES2VertexArrays.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 #import "CC3OpenGLES2VertexArrays.h"
 #import "CC3OpenGLESEngine.h"
+#import "CC3GLProgram.h"
 #import "CC3VertexArrays.h"
 
 
@@ -132,6 +133,7 @@
 }
 
 -(void) setGLValues {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glVertexAttribPointer(_attributeIndex, _elementSize.value, _elementType.value,
 						  _shouldNormalize.value, _vertexStride.value, _vertices.value);
 }
@@ -151,8 +153,14 @@
 }
 
 -(NSString*) description {
-	NSMutableString* desc = [NSMutableString stringWithString: self.description];
-	[desc appendFormat: @"\n    for attribute index %i", _attributeIndex];
+	GLint glBoundBuffer;
+	GLint vaBoundBuffer;
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &glBoundBuffer);
+	glGetVertexAttribiv(_attributeIndex, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &vaBoundBuffer);
+
+	NSMutableString* desc = [NSMutableString stringWithString: super.description];
+	[desc appendFormat: @"\n    for attribute index %i bound to buffer %i (while GL bound buffer is %i)",
+	 _attributeIndex, vaBoundBuffer, glBoundBuffer];
 	return desc;
 }
 
@@ -171,7 +179,29 @@
 	[super dealloc];
 }
 
+-(GLuint) attributesCount { return _attributes.count; }
+
+/** Template method returns an autoreleased instance of a vertex attribute tracker. */
+-(CC3OpenGLES2StateTrackerVertexAttributesPointer*) makeVertexAttributes: (GLuint) attrIndx {
+	return [CC3OpenGLES2StateTrackerVertexAttributesPointer trackerWithParent: self withAttributeIndex: attrIndx];
+}
+
 -(CC3OpenGLES2StateTrackerVertexAttributesPointer*) attributeAt: (GLuint) attrIndx {
+	// If the requested attribute index hasn't been allocated yet, add it.
+	GLuint vapCnt = self.attributesCount;
+	if (attrIndx >= vapCnt) {
+		// Make sure we don't add beyond the max number of vertex attributes for the platform
+		NSAssert2(attrIndx < self.engine.platform.maxVertexAttributes.value,
+				  @"Request for vertex attribute index %u exceeds maximum of %u vertex attributes",
+				  attrIndx, self.engine.platform.maxVertexAttributes.value);
+		
+		// Add all vertex attribute pointers between the current count and the requested index.
+		for (GLuint i = vapCnt; i <= attrIndx; i++) {
+			CC3OpenGLES2StateTrackerVertexAttributesPointer* vap = [self makeVertexAttributes: i];
+			[_attributes addObject: vap];
+			LogTrace(@"%@ added vertex attributes pointer %u:\n%@", [self class], i, vap);
+		}
+	}
 	return [_attributes objectAtIndex: attrIndx];
 }
 
@@ -180,15 +210,20 @@
 	self.indexBuffer = [CC3OpenGLESStateTrackerElementArrayBufferBinding trackerWithParent: self];
 	
 	self.attributes = [CCArray array];
-	GLint maxVtxAttr = self.engine.platform.maxVertexAttributes.value;
-	for (GLint i = 0; i < maxVtxAttr; i++) {
-		[_attributes addObject: [CC3OpenGLES2StateTrackerVertexAttributesPointer trackerWithParent: self
-																				withAttributeIndex: i]];
-	}
 }
 
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArray: (CC3VertexArray*) vtxArray {
-	return [self attributeAt: vtxArray.attributeIndex];
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
+	CC3GLSLAttribute* attribute = [self.engine.shaders.activeProgram attributeWithSemantic: semantic];
+	GLint attrIdx = attribute.location;		// Negative if not valid attribute
+	return (attribute && (attrIdx >= 0)) ? [self attributeAt: attrIdx] : nil;
+}
+
+-(void) clearUnboundVertexPointers {
+	for (CC3OpenGLES2StateTrackerVertexAttributesPointer* vap in _attributes) vap.wasBound = NO;
+}
+
+-(void) disableUnboundVertexPointers {
+	for (CC3OpenGLES2StateTrackerVertexAttributesPointer* vap in _attributes) [vap disableIfUnbound];
 }
 
 -(NSString*) description {

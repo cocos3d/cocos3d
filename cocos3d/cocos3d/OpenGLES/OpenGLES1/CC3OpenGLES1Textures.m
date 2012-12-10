@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Textures.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -174,6 +174,27 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES1TextureMatrixStack
+
+@implementation CC3OpenGLES1TextureMatrixStack
+
+// The parent cast as the appropriate type
+-(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent; }
+
+-(void) activate {
+	[super activate];
+	[self.textureUnit activate];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for texture unit %@",
+			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES1TextureUnit
 
 @implementation CC3OpenGLES1TextureUnit
@@ -230,11 +251,11 @@
 															   forState: GL_TEXTURE_ENV_COLOR];
 	self.pointSpriteCoordReplace = [CC3OpenGLES1StateTrackerTexEnvPointSpriteCapability trackerWithParent: self
 																								 forState: GL_COORD_REPLACE_OES];
-	self.matrixStack = [CC3OpenGLESTextureMatrixStack trackerWithParent: self
-															   withMode: GL_TEXTURE
-															 andTopName: GL_TEXTURE_MATRIX
-														   andDepthName: GL_TEXTURE_STACK_DEPTH
-														 andModeTracker: self.engine.matrices.mode];
+	self.matrixStack = [CC3OpenGLES1TextureMatrixStack trackerWithParent: self
+																withMode: GL_TEXTURE
+															  andTopName: GL_TEXTURE_MATRIX
+															andDepthName: GL_TEXTURE_STACK_DEPTH
+														  andModeTracker: self.engine.matrices.mode];
 }
 
 @end
