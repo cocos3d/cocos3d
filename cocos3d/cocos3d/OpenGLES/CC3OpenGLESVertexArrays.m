@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESVertexArrays.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -116,6 +116,7 @@
 @synthesize elementType=_elementType;
 @synthesize vertexStride=_vertexStride;
 @synthesize shouldNormalize=_shouldNormalize;
+@synthesize wasBound=_wasBound;
 
 -(void) dealloc {
 	[_capability release];
@@ -160,12 +161,14 @@
 
 -(void) disable { [self.capability disable]; }
 
-// Set the values in the GL engine if either we should always do it, or if something has changed
--(void) useElementsAt: (GLvoid*) pData
-			 withSize: (GLint) elemSize
-			 withType: (GLenum) elemType
-		   withStride: (GLsizei) elemStride
-  withShouldNormalize: (BOOL) shldNorm {
+-(void) disableIfUnbound { if ( !_wasBound ) [self disable]; }
+
+// Bind the values in the GL engine if either we should always do it, or if something has changed
+-(void) bindElementsAt: (GLvoid*) pData
+			  withSize: (GLint) elemSize
+			  withType: (GLenum) elemType
+			withStride: (GLsizei) elemStride
+   withShouldNormalize: (BOOL) shldNorm {
 	BOOL shouldSetGL = self.shouldAlwaysSetGL || !self.valueIsKnown;
 	shouldSetGL |= (pData != _vertices.value);
 	shouldSetGL |= (elemSize != _elementSize.value);
@@ -179,12 +182,14 @@
 		[_vertexStride setValueRaw: elemStride];
 		[_shouldNormalize setValueRaw: shldNorm];
 
+		LogTrace(@"Setting GL value for %@", self);
 		[self setGLValues];
 		LogGLErrorTrace(@"while setting GL values for %@", self);
 		[self notifyGLChanged];
 		self.valueIsKnown = YES;
 	}
 	[self enable];
+	self.wasBound = YES;
 }
 
 /** Invoked when dynamically instantiated (specifically with texture units. */
@@ -216,7 +221,7 @@
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
-	[desc appendFormat: @"%@:", [self class]];
+	[desc appendFormat: @"%@ (%@bound):", [self class], (_wasBound ? @"" : @"un")];
 	[desc appendFormat: @"\n    %@ ", _capability];
 	[desc appendFormat: @"\n    %@ ", _elementSize];
 	[desc appendFormat: @"\n    %@ ", _elementType];
@@ -273,9 +278,11 @@
 	LogGLErrorTrace(@"%@ delete buffer %i", self, buffID);
 }
 
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArray: (CC3VertexArray*) vtxArray { return nil; }
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic { return nil; }
 
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArrayType: (Class) vtxArrayClass { return nil; }
+-(void) clearUnboundVertexPointers {}
+
+-(void) disableUnboundVertexPointers {}
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
 	glDrawArrays(drawMode, start, len);

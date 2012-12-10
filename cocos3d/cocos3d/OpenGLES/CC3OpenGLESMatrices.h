@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESMatrices.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 
 #import "CC3OpenGLESStateTracker.h"
+#import "CC3Matrix4x4.h"
 
 
 #pragma mark -
@@ -44,22 +45,7 @@
  * tracker for the matrix mode, to ensure that the matrix mode associated
  * with this matrix stack is active before calling a GL function.
  */
-@interface CC3OpenGLESMatrixStack : CC3OpenGLESStateTracker {
-	GLenum mode;
-	GLenum topName;
-	GLenum depthName;
-	CC3OpenGLESStateTrackerEnumeration* modeTracker;
-}
-
-/**
- * Activates the matrix mode for this matrix in GL, by setting the
- * value of the matrix mode tracker to the mode for this matrix stack.
- *
- * Most of the command methods will first invoke this method, to ensure
- * that the correct matrix mode is active before issuing a GL command
- * to operate on a matrix stack.
- */
--(void) activate;
+@interface CC3OpenGLESMatrixStack : CC3OpenGLESStateTracker
 
 /** Activates this matrix mode, then pushes this matrix stack. */
 -(void) push;
@@ -67,23 +53,20 @@
 /** Activates this matrix mode, then pops this matrix stack. */
 -(void) pop;
 
-/** Returns the depth this matrix stack. */
--(GLuint) getDepth;
-
 /** Loads the identity matrix onto the top of this matrix stack. */
 -(void) identity;
 
 /** Loads the specified matrix onto the top of this matrix stack. */
--(void) load: (GLvoid*) glMatrix;
+-(void) load: (CC3Matrix4x4*) mtx;
 
 /**
  * Retrieves the matrix at the top of this matrix stack,
  * and populates the specified matrix with its contents.
  */
--(void) getTop: (GLvoid*) glMatrix;
+-(void) getTop: (CC3Matrix4x4*) mtx;
 
 /** Multiplies the matrix at top of this matrix stack with the specified matrix. */
--(void) multiply: (GLvoid*) glMatrix;
+-(void) multiply: (CC3Matrix4x4*) mtx;
 
 /** 
  * If this matrix stack is a palette matrix, loads this matrix palette from the current
@@ -91,31 +74,19 @@
  */
 -(void) loadFromModelView;
 
-/**
- * Initializes this instance for the specified matrix mode.
- * The specified tName is used to query the matrix at the top of this matrix stack.
- * The specified dName is used to query the depth of this matrix stack.
- * The specified aModeTracker is used to ensure that the matrix mode of this matrix
- * is active before issuing any commands.
- */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			withMode: (GLenum) matrixMode
-		  andTopName: (GLenum) tName
-		andDepthName: (GLenum) dName
-	  andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker;
+/** Returns the current depth this matrix stack. */
+@property(nonatomic, readonly) GLuint depth;
 
-/**
- * Allocates and initializes an autoreleased instance for the specified matrix mode.
- * The specified tName is used to query the matrix at the top of this matrix stack.
- * The specified dName is used to query the depth of this matrix stack.
- * The specified aModeTracker is used to ensure that the matrix mode of this matrix
- * is active before issuing any commands.
+/** 
+ * Indicates the maximum depth this matrix stack.
+ *
+ * For OpenGL ES 1, this value is fixed by the platform and attempts to set it will be ignored.
+ * For OpenGL ES 2, this value can be set. The initial value is kCC3OpenGLES2MatrixStackMaxDepth.
  */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   withMode: (GLenum) matrixMode
-			 andTopName: (GLenum) tName
-		   andDepthName: (GLenum) dName
-		 andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker;
+@property(nonatomic, assign) GLuint maxDepth;
+
+/** @deprecated Use depth property instead. */
+-(GLuint) getDepth DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -184,5 +155,19 @@
  * requested by this method.
  */
 -(CC3OpenGLESMatrixStack*) paletteAt: (GLuint) index;
+
+
+/** Populates the specified matrix with the contents of the current modelview matrix. */
+//-(void) getModelViewMatrix: (CC3Matrix4x4*) mtx;
+
+/** Populates the specified matrix with the contents of the current modelview matrix. */
+//-(void) getModelViewMatrix: (CC3Matrix4x4*) mtx;
+
+/** Populates the specified matrix with the contents of the current projection matrix. */
+//-(void) getProjectionMatrix: (CC3Matrix4x4*) mtx;
+
+/** Populates the specified matrix with the contents of the current modelview-projection matrix. */
+//-(void) getModelViewProjMatrix: (CC3Matrix4x4*) mtx;
+
 
 @end

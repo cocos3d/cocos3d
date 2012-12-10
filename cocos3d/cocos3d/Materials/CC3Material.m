@@ -1,7 +1,7 @@
 /*
  * CC3Material.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,6 +31,7 @@
 
 #import "CC3Material.h"
 #import "CC3OpenGLESEngine.h"
+#import "CC3GLProgram.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
@@ -41,34 +42,39 @@
 -(void) applyBlend;
 -(void) applyColors;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(BOOL) switchingMaterial;
 @end
 
 @implementation CC3Material
 
-@synthesize ambientColor, diffuseColor, specularColor, emissionColor, shininess, blendFunc;
-@synthesize shouldUseLighting, alphaTestFunction, alphaTestReference;
+@synthesize ambientColor=_ambientColor, diffuseColor=_diffuseColor;
+@synthesize specularColor=_specularColor, emissionColor=_emissionColor;
+@synthesize shininess=_shininess, blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
+@synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
+@synthesize shaderProgram=_shaderProgram;
 
 -(void) dealloc {
-	[texture release];
-	[textureOverlays release];
+	[_texture release];
+	[_textureOverlays release];
+	[_shaderProgram release];
 	[super dealloc];
 }
 
 -(NSString*) nameSuffix { return @"Material"; }
 
 // Clamp to allowed range
--(void) setShininess: (GLfloat) aValue { shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess); }
+-(void) setShininess: (GLfloat) aValue { _shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess); }
 
--(GLenum) sourceBlend { return blendFunc.src; }
+-(GLenum) sourceBlend { return _blendFunc.src; }
 
--(void) setSourceBlend: (GLenum) aBlend { blendFunc.src = aBlend; }
+-(void) setSourceBlend: (GLenum) aBlend { _blendFunc.src = aBlend; }
 
--(GLenum) destinationBlend { return blendFunc.dst; }
+-(GLenum) destinationBlend { return _blendFunc.dst; }
 
--(void) setDestinationBlend: (GLenum) aBlend { blendFunc.dst = aBlend; }
+-(void) setDestinationBlend: (GLenum) aBlend { _blendFunc.dst = aBlend; }
 
--(BOOL) isOpaque { return (blendFunc.src == GL_ONE && blendFunc.dst == GL_ZERO); }
+-(BOOL) isOpaque { return (_blendFunc.src == GL_ONE && _blendFunc.dst == GL_ZERO); }
 
 /**
  * If I should be opaque, turn off alpha blending. If I should not be opaque and I
@@ -77,21 +83,21 @@
 -(void) setIsOpaque: (BOOL) shouldBeOpaque {
 	if (shouldBeOpaque) {
 		// I should be opaque, so turn off alpha blending altogether.
-		blendFunc.src = GL_ONE;
-		blendFunc.dst = GL_ZERO;
+		_blendFunc.src = GL_ONE;
+		_blendFunc.dst = GL_ZERO;
 	} else {
 		// If a source blend has not yet been set AND the texture does NOT contain pre-multiplied
 		// alpha, set a source alpha blend. If the texture contains pre-multiplied alpha, leave the
 		// source blend at GL_ONE and apply the opacity to the color of the material instead.
-		if ( (blendFunc.src == GL_ONE) && !self.hasPremultipliedAlpha ) blendFunc.src = GL_SRC_ALPHA;
+		if ( (_blendFunc.src == GL_ONE) && !self.hasPremultipliedAlpha ) _blendFunc.src = GL_SRC_ALPHA;
 		
 		// If destination blend has not yet been set, set it a destination alpha blend.
-		if (blendFunc.dst == GL_ZERO) blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
+		if (_blendFunc.dst == GL_ZERO) _blendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
 	}
 }
 
 -(BOOL) shouldDrawLowAlpha {
-	switch (alphaTestFunction) {
+	switch (_alphaTestFunction) {
 		case GL_ALWAYS:
 		case GL_LESS:
 		case GL_LEQUAL:
@@ -102,13 +108,13 @@
 }
 
 -(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
-	alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
+	_alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
 }
 
 
 #pragma mark CCRGBAProtocol & CCBlendProtocol support
 
--(ccColor3B) color { return CCC3BFromCCC4F(diffuseColor); }
+-(ccColor3B) color { return CCC3BFromCCC4F(_diffuseColor); }
 
 // Set both diffuse and ambient colors, retaining the alpha of each
 -(void) setColor: (ccColor3B) color {
@@ -116,16 +122,16 @@
 	GLfloat gf = CCColorFloatFromByte(color.g);
 	GLfloat bf = CCColorFloatFromByte(color.b);
 	
-	ambientColor.r = rf;
-	ambientColor.g = gf;
-	ambientColor.b = bf;
+	_ambientColor.r = rf;
+	_ambientColor.g = gf;
+	_ambientColor.b = bf;
 	
-	diffuseColor.r = rf;
-	diffuseColor.g = gf;
-	diffuseColor.b = bf;
+	_diffuseColor.r = rf;
+	_diffuseColor.g = gf;
+	_diffuseColor.b = bf;
 }
 
--(GLubyte) opacity { return CCColorByteFromFloat(diffuseColor.a); }
+-(GLubyte) opacity { return CCColorByteFromFloat(_diffuseColor.a); }
 
 /**
  * Set opacity of all colors, retaining the colors of each, and sets the isOpaque property
@@ -134,10 +140,10 @@
  */
 -(void) setOpacity: (GLubyte) opacity {
 	GLfloat af = CCColorFloatFromByte(opacity);
-	ambientColor.a = af;
-	diffuseColor.a = af;
-	specularColor.a = af;
-	emissionColor.a = af;
+	_ambientColor.a = af;
+	_diffuseColor.a = af;
+	_specularColor.a = af;
+	_emissionColor.a = af;
 
 	// As a convenience, if we're trying to reduce opacity, make sure the isOpaque
 	// flag is compatible with that. We do NOT force it the other way, because the
@@ -154,31 +160,29 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 #pragma mark Textures
 
--(GLuint) textureCount {
-	return (textureOverlays ? textureOverlays.count : 0) + (texture ? 1 : 0);
-}
+-(GLuint) textureCount { return (_textureOverlays ? _textureOverlays.count : 0) + (_texture ? 1 : 0); }
 
--(CC3Texture*) texture { return texture; }
+-(CC3Texture*) texture { return _texture; }
 
 -(void) setTexture: (CC3Texture*) aTexture {
-	if (aTexture == texture) return;
-	[texture release];
-	texture = [aTexture retain];
+	if (aTexture == _texture) return;
+	[_texture release];
+	_texture = [aTexture retain];
 	[self texturesHaveChanged];
 }
 
 // If the texture property has not been set yet, set it. Otherwise add as an overlay.
 -(void) addTexture: (CC3Texture*) aTexture {
 	LogTrace(@"Adding %@ to %@", aTexture, self);
-	if (!texture) {
+	if (!_texture) {
 		self.texture = aTexture;
 	} else {
 		NSAssert1(aTexture, @"%@ cannot add a nil overlay texture", self);
-		if(!textureOverlays) textureOverlays = [[CCArray array] retain];
+		if(!_textureOverlays) _textureOverlays = [[CCArray array] retain];
 
 		GLint maxTexUnits = [CC3OpenGLESEngine engine].platform.maxTextureUnits.value;
 		if (self.textureCount < maxTexUnits) {
-			[textureOverlays addObject: aTexture];
+			[_textureOverlays addObject: aTexture];
 		} else {
 			LogInfo(@"Attempt to add texture %@ to %@ ignored because platform supports only %i texture units.",
 					aTexture, self, maxTexUnits);
@@ -190,15 +194,15 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 // If it's the texture property, clear it, otherwise remove the overlay.
 -(void) removeTexture: (CC3Texture*) aTexture {
 	LogTrace(@"Removing %@ from %@", aTexture, self);
-	if (texture == aTexture) {
+	if (_texture == aTexture) {
 		self.texture = nil;
 	} else {
-		if (textureOverlays && aTexture) {
-			[textureOverlays removeObjectIdenticalTo: aTexture];
+		if (_textureOverlays && aTexture) {
+			[_textureOverlays removeObjectIdenticalTo: aTexture];
 			[self texturesHaveChanged];
-			if (textureOverlays.count == 0) {
-				[textureOverlays release];
-				textureOverlays = nil;
+			if (_textureOverlays.count == 0) {
+				[_textureOverlays release];
+				_textureOverlays = nil;
 			}
 		}
 	}
@@ -206,22 +210,18 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 -(void) removeAllTextures {
 	// Remove the first texture
-	[self removeTexture: texture];
+	[self removeTexture: _texture];
 
 	// Remove the overlay textures
-	if (textureOverlays) {
-		CCArray* myOTs = [textureOverlays autoreleasedCopy];
+	if (_textureOverlays) {
+		CCArray* myOTs = [_textureOverlays autoreleasedCopy];
 		for (CC3Texture* ot in myOTs) [self removeTexture: ot];
 	}
 }
 
 -(CC3Texture*) textureForTextureUnit: (GLuint) texUnit {
 	// If first texture unit, return texture property, otherwise retrieve from overlay array
-	if (texUnit == 0) {
-		return texture;
-	} else {
-		return [textureOverlays objectAtIndex: (texUnit - 1)];
-	}
+	return (texUnit == 0) ? _texture : [_textureOverlays objectAtIndex: (texUnit - 1)];
 }
 
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
@@ -229,7 +229,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		self.texture = aTexture;
 	} else if (texUnit < self.textureCount) {
 		NSAssert1(aTexture, @"%@ cannot set an overlay texture to nil", self);
-		[textureOverlays fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
+		[_textureOverlays fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
 		[self texturesHaveChanged];
 	} else {
 		[self addTexture: aTexture];
@@ -240,15 +240,15 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	NSString* tcName;
 	
 	// First check if the first texture is the one
-	if (texture) {
-		tcName = texture.name;
+	if (_texture) {
+		tcName = _texture.name;
 		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
-			return texture;
+			return _texture;
 		}
 	}
 	// Then look for it in the overlays array
-	if (textureOverlays) {
-		for (CC3Texture* ot in textureOverlays) {
+	if (_textureOverlays) {
+		for (CC3Texture* ot in _textureOverlays) {
 			tcName = ot.name;
 			if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
 				return ot;
@@ -268,44 +268,44 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 -(BOOL) hasPremultipliedAlpha {
 	// Check the first texture.
-	if (texture && texture.hasPremultipliedAlpha) return YES;
+	if (_texture && _texture.hasPremultipliedAlpha) return YES;
 	
 	// Then check in the overlays array
-	for (CC3Texture* ot in textureOverlays) if (ot.hasPremultipliedAlpha) return YES;
+	for (CC3Texture* ot in _textureOverlays) if (ot.hasPremultipliedAlpha) return YES;
 	
 	return NO;
 }
 
 -(BOOL) shouldApplyOpacityToColor {
-	return blendFunc.src == GL_ONE && self.hasPremultipliedAlpha;
+	return _blendFunc.src == GL_ONE && self.hasPremultipliedAlpha;
 }
 
 -(BOOL) hasBumpMap {
 	// Check the first texture.
-	if (texture && texture.isBumpMap) return YES;
+	if (_texture && _texture.isBumpMap) return YES;
 	
 	// Then check in the overlays array
-	for (CC3Texture* ot in textureOverlays) if (ot.isBumpMap) return YES;
+	for (CC3Texture* ot in _textureOverlays) if (ot.isBumpMap) return YES;
 	
 	return NO;
 }
 
 -(CC3Vector) lightDirection {
 	// Check the first texture.
-	if (texture && texture.isBumpMap) return texture.lightDirection;
+	if (_texture && _texture.isBumpMap) return _texture.lightDirection;
 	
 	// Then check in the overlays array
-	for (CC3Texture* ot in textureOverlays) if (ot.isBumpMap) return ot.lightDirection;
+	for (CC3Texture* ot in _textureOverlays) if (ot.isBumpMap) return ot.lightDirection;
 	
 	return kCC3VectorZero;
 }
 
 -(void) setLightDirection: (CC3Vector) aDirection {
 	// Set the first texture.
-	texture.lightDirection = aDirection;
+	_texture.lightDirection = aDirection;
 	
 	// Then set in the overlays array
-	for (CC3Texture* ot in textureOverlays) ot.lightDirection = aDirection;
+	for (CC3Texture* ot in _textureOverlays) ot.lightDirection = aDirection;
 }
 
 
@@ -313,17 +313,18 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		texture = nil;
-		textureOverlays = nil;
-		ambientColor = kCC3DefaultMaterialColorAmbient;
-		diffuseColor = kCC3DefaultMaterialColorDiffuse;
-		specularColor = kCC3DefaultMaterialColorSpecular;
-		emissionColor = kCC3DefaultMaterialColorEmission;
-		shininess = kCC3DefaultMaterialShininess;
-		blendFunc = [[self class] defaultBlendFunc];
-		alphaTestFunction = GL_ALWAYS;
-		alphaTestReference = 0.0f;
-		shouldUseLighting = YES;
+		_texture = nil;
+		_textureOverlays = nil;
+		_shaderProgram = nil;
+		_ambientColor = kCC3DefaultMaterialColorAmbient;
+		_diffuseColor = kCC3DefaultMaterialColorDiffuse;
+		_specularColor = kCC3DefaultMaterialColorSpecular;
+		_emissionColor = kCC3DefaultMaterialColorEmission;
+		_shininess = kCC3DefaultMaterialShininess;
+		_blendFunc = [[self class] defaultBlendFunc];
+		_alphaTestFunction = GL_ALWAYS;
+		_alphaTestReference = 0.0f;
+		_shouldUseLighting = YES;
 	}
 	return self;
 }
@@ -352,44 +353,43 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 // Protected properties for copying
--(CCArray*) textureOverlays { return textureOverlays; }
+-(CCArray*) textureOverlays { return _textureOverlays; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Material*) another {
 	[super populateFrom: another];
 
-	ambientColor = another.ambientColor;
-	diffuseColor = another.diffuseColor;
-	specularColor = another.specularColor;
-	emissionColor = another.emissionColor;
-	shininess = another.shininess;
-	blendFunc = another.blendFunc;
-	alphaTestFunction = another.alphaTestFunction;
-	alphaTestReference = another.alphaTestReference;
-	shouldUseLighting = another.shouldUseLighting;
+	_ambientColor = another.ambientColor;
+	_diffuseColor = another.diffuseColor;
+	_specularColor = another.specularColor;
+	_emissionColor = another.emissionColor;
+	_shininess = another.shininess;
+	_blendFunc = another.blendFunc;
+	_alphaTestFunction = another.alphaTestFunction;
+	_alphaTestReference = another.alphaTestReference;
+	_shouldUseLighting = another.shouldUseLighting;
 	
-	[texture release];
-	texture = [another.texture copy];			// retained
+	self.shaderProgram = another.shaderProgram;		// retained
+	
+	[_texture release];
+	_texture = [another.texture copy];			// retained - don't want to trigger texturesHaveChanged
 	
 	// Remove any existing overlays and add the overlays from the other material.
-	[textureOverlays removeAllObjects];
+	[_textureOverlays removeAllObjects];
 	CCArray* otherOTs = another.textureOverlays;
-	if (otherOTs) {
-		for (CC3Texture* ot in otherOTs) {
-			[self addTexture: [ot autoreleasedCopy]];	// retained by collection
-		}
+	for (CC3Texture* ot in otherOTs) {
+		[self addTexture: [ot autoreleasedCopy]];	// retained by collection
 	}
-
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
-			[super fullDescription], (shouldUseLighting ? @"" : @"not"),
-			NSStringFromCCC4F(ambientColor), NSStringFromCCC4F(diffuseColor),
-			NSStringFromCCC4F(emissionColor), NSStringFromCCC4F(specularColor), shininess,
-			NSStringFromGLEnum(blendFunc.src), NSStringFromGLEnum(blendFunc.dst),
-			NSStringFromGLEnum(alphaTestFunction), alphaTestReference,
+			[super fullDescription], (_shouldUseLighting ? @"" : @"not"),
+			NSStringFromCCC4F(_ambientColor), NSStringFromCCC4F(_diffuseColor),
+			NSStringFromCCC4F(_emissionColor), NSStringFromCCC4F(_specularColor), _shininess,
+			NSStringFromGLEnum(_blendFunc.src), NSStringFromGLEnum(_blendFunc.dst),
+			NSStringFromGLEnum(_alphaTestFunction), _alphaTestReference,
 			self.textureCount];
 }
 
@@ -417,6 +417,7 @@ static GLuint lastAssignedMaterialTag;
 	} else {
 		LogTrace(@"Reusing currently bound %@", self);
 	}
+	[self applyShaderProgramWithVisitor: visitor];
 }
 
 /**
@@ -426,13 +427,13 @@ static GLuint lastAssignedMaterialTag;
  */
 -(void) applyAlphaTest {
 	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	BOOL shouldAlphaTest = (alphaTestFunction != GL_ALWAYS);
+	BOOL shouldAlphaTest = (_alphaTestFunction != GL_ALWAYS);
 
 	glesEngine.capabilities.alphaTest.value = shouldAlphaTest;
 
 	if (shouldAlphaTest) {
-		[glesEngine.materials.alphaFunc applyFunction: alphaTestFunction
-										   andReference: alphaTestReference];
+		[glesEngine.materials.alphaFunc applyFunction: _alphaTestFunction
+										 andReference: _alphaTestReference];
 	}
 }
 
@@ -447,8 +448,8 @@ static GLuint lastAssignedMaterialTag;
 	glesEngine.capabilities.blend.value = shouldBlend;
 
 	if (shouldBlend) {
-		[glesEngine.materials.blendFunc applySource: blendFunc.src
-									   andDestination: blendFunc.dst];
+		[glesEngine.materials.blendFunc applySource: _blendFunc.src
+									 andDestination: _blendFunc.dst];
 	}
 }
 
@@ -458,13 +459,13 @@ static GLuint lastAssignedMaterialTag;
  */
 -(void) applyColors {
 	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	if (shouldUseLighting) {
+	if (_shouldUseLighting) {
 		[glesEngine.capabilities.lighting enable];
 
-		ccColor4F ambColor = ambientColor;
-		ccColor4F difColor = diffuseColor;
-		ccColor4F spcColor = specularColor;
-		ccColor4F emsColor = emissionColor;
+		ccColor4F ambColor = _ambientColor;
+		ccColor4F difColor = _diffuseColor;
+		ccColor4F spcColor = _specularColor;
+		ccColor4F emsColor = _emissionColor;
 		if (self.shouldApplyOpacityToColor) {
 			ambColor = CCC4FBlendAlpha(ambColor);
 			difColor = CCC4FBlendAlpha(difColor);
@@ -477,9 +478,9 @@ static GLuint lastAssignedMaterialTag;
 		glesMaterials.diffuseColor.value = difColor;
 		glesMaterials.specularColor.value = spcColor;
 		glesMaterials.emissionColor.value = emsColor;
-		glesMaterials.shininess.value = shininess;
+		glesMaterials.shininess.value = _shininess;
 	} else {
-		ccColor4F difColor = diffuseColor;
+		ccColor4F difColor = _diffuseColor;
 		if (self.shouldApplyOpacityToColor) difColor = CCC4FBlendAlpha(difColor);
 
 		[glesEngine.capabilities.lighting disable];
@@ -495,23 +496,28 @@ static GLuint lastAssignedMaterialTag;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.textureUnit = 0;
 
-	if (texture) [texture drawWithVisitor: visitor];
+	[_texture drawWithVisitor: visitor];
 
-	for (CC3Texture* ot in textureOverlays) [ot drawWithVisitor: visitor];
+	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
 	
 	[CC3Texture	unbindRemainingFrom: visitor.textureUnit];
 	visitor.textureUnitCount = visitor.textureUnit;
 }
 
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_shaderProgram bindWithVisitor: visitor];
+}
+
 -(void) unbind { [[self class] unbind]; }
 
 +(void) unbind {
-	CC3OpenGLESCapabilities* glesServCaps = [CC3OpenGLESEngine engine].capabilities;
+	CC3OpenGLESCapabilities* glesServCaps = CC3OpenGLESEngine.engine.capabilities;
 	[glesServCaps.lighting disable];
 	[glesServCaps.blend disable];
 	[glesServCaps.alphaTest disable];
 	[self resetSwitching];
 	[CC3Texture unbind];
+	[CC3OpenGLESEngine.engine.shaders unbind];
 }
 
 

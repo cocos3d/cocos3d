@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESMatrices.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -38,58 +38,28 @@
 
 @implementation CC3OpenGLESMatrixStack
 
--(void) dealloc {
-	[modeTracker release];
-	[super dealloc];
-}
-
--(void) activate { modeTracker.value = mode; }
-
 -(void) push {}
 
 -(void) pop {}
 
--(GLuint) getDepth { return 0; }
+-(GLuint) depth { return 0; }
+
+-(GLuint) maxDepth { return 0; }
+
+-(void) setMaxDepth: (GLuint) maxDepth {}
+
+// Deprecated
+-(GLuint) getDepth { return self.depth; }
 
 -(void) identity {}
 
--(void) load: (GLvoid*) glMatrix {}
+-(void) load: (CC3Matrix4x4*) glMatrix {}
 
--(void) getTop: (GLvoid*) glMatrix {}
+-(void) getTop: (CC3Matrix4x4*) mtx {}
 
--(void) multiply: (GLvoid*) glMatrix {}
+-(void) multiply: (CC3Matrix4x4*) mtx {}
 
 -(void) loadFromModelView {}
-
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			withMode: (GLenum) matrixMode
-		  andTopName: (GLenum) tName
-		andDepthName: (GLenum) dName
-	  andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker {
-	if ( (self = [super initWithParent: aTracker]) ) {
-		mode = matrixMode;
-		topName = tName;
-		depthName = dName;
-		modeTracker = [aModeTracker retain];
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   withMode: (GLenum) matrixMode
-			 andTopName: (GLenum) tName
-		   andDepthName: (GLenum) dName
-		 andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker {
-	return [[[self alloc] initWithParent: aTracker
-								withMode: matrixMode
-							  andTopName: tName
-							andDepthName: dName
-						  andModeTracker: aModeTracker] autorelease];
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ %@", [super description], NSStringFromGLEnum(mode)];
-}
 
 @end
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESEngine.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -42,34 +42,36 @@
 
 @implementation CC3OpenGLESEngine
 
-@synthesize trackersToOpen;
-@synthesize trackersToClose;
-@synthesize platform;
-@synthesize capabilities;
-@synthesize materials;
-@synthesize textures;
-@synthesize lighting;
-@synthesize matrices;
-@synthesize vertices;
-@synthesize state;
-@synthesize fog;
-@synthesize hints;
+@synthesize trackersToOpen=_trackersToOpen;
+@synthesize trackersToClose=_trackersToClose;
+@synthesize platform=_platform;
+@synthesize capabilities=_capabilities;
+@synthesize materials=_materials;
+@synthesize textures=_textures;
+@synthesize lighting=_lighting;
+@synthesize matrices=_matrices;
+@synthesize vertices=_vertices;
+@synthesize state=_state;
+@synthesize fog=_fog;
+@synthesize hints=_hints;
+@synthesize shaders=_shaders;
 @synthesize appExtensions;
 
 -(void) dealloc {
-	[platform release];
-	[capabilities release];
-	[materials release];
-	[textures release];
-	[lighting release];
-	[matrices release];
-	[vertices release];
-	[state release];
-	[fog release];
-	[hints release];
-	[appExtensions release];
-	[trackersToOpen release];
-	[trackersToClose releaseAsUnretained];		// Clears without releasing each element.
+	[_platform release];
+	[_capabilities release];
+	[_materials release];
+	[_textures release];
+	[_lighting release];
+	[_matrices release];
+	[_vertices release];
+	[_state release];
+	[_fog release];
+	[_hints release];
+	[_shaders release];
+	[_appExtensions release];
+	[_trackersToOpen release];
+	[_trackersToClose releaseAsUnretained];		// Clears without releasing each element.
 
 	[super dealloc];
 }
@@ -79,18 +81,18 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		trackersToClose = [[CCArray arrayWithCapacity: 200] retain];
-		isClosing = NO;
-		trackerToOpenWasAdded = NO;
+		_trackersToClose = [[CCArray arrayWithCapacity: 200] retain];
+		_isClosing = NO;
+		_trackerToOpenWasAdded = NO;
 		[self initializeTrackers];
 	}
 	return self;
 }
 
-static CC3OpenGLESEngine* engine;
+static CC3OpenGLESEngine* _engine;
 
 +(CC3OpenGLESEngine*) engine {
-	if (!engine) {
+	if (!_engine) {
 		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
 		
 		// This rather unconventional distinct separation of alloc and init is intentional.
@@ -98,10 +100,10 @@ static CC3OpenGLESEngine* engine;
 		// of the instance itself can access this singleton. For example, when initializing
 		// the light trackers, we need to know how many lights are supported by the platform,
 		// which is accessed from the platform tracker.
-		engine = [CC3OpenGLESEngineClass alloc];
-		[engine init];
+		_engine = [CC3OpenGLESEngineClass alloc];
+		[_engine init];
 	}
-	return engine;
+	return _engine;
 }
 
 -(void) initializeTrackers {}
@@ -109,57 +111,51 @@ static CC3OpenGLESEngine* engine;
 -(void) open {
 	
 	// Open each tracker that is to be opened.
-	LogTrace(@"%@ opening %i trackers", [self class], trackersToOpen.count);
-	for (CC3OpenGLESStateTracker* tracker in trackersToOpen) {
-		[tracker open];
-	}
+	LogTrace(@"%@ opening %i trackers", [self class], _trackersToOpen.count);
+	for (CC3OpenGLESStateTracker* tracker in _trackersToOpen) { [tracker open]; }
 
 	// If the trackersToOpen array is dirty (a tracker has recently been added)
 	// remove all trackers that do not need to be re-opened on each frame.
 	// This is done by copying those that do to another array and then swapping
 	// the new array for the old.
-	if (trackerToOpenWasAdded) {
-		CCArray* oldTrackersToOpen = [trackersToOpen autorelease];
-		trackersToOpen = nil;		// Will be lazily created by addTrackerToOpen if necessary
+	if (_trackerToOpenWasAdded) {
+		CCArray* oldTrackersToOpen = [_trackersToOpen autorelease];
+		_trackersToOpen = nil;		// Will be lazily created by addTrackerToOpen if necessary
 		
 		for (CC3OpenGLESStateTracker* tracker in oldTrackersToOpen) {
 			if ( ((CC3OpenGLESStateTrackerPrimitive*)tracker).shouldAlwaysReadOriginal ) {
 				[self addTrackerToOpen: tracker]; 
 			}
 		}
-		[trackersToOpen reduceMemoryFootprint];
-		trackerToOpenWasAdded = NO;
+		[_trackersToOpen reduceMemoryFootprint];
+		_trackerToOpenWasAdded = NO;
 	}
 }
 
 -(void) close {
-	isClosing = YES;
+	_isClosing = YES;
 
 	// Close each tracker
-	LogTrace(@"%@ closing %i trackers", [self class], trackersToClose.count);
-	for (CC3OpenGLESStateTracker* tracker in trackersToClose) {
-		[tracker close];
-	}
+	LogTrace(@"%@ closing %i trackers", [self class], _trackersToClose.count);
+	for (CC3OpenGLESStateTracker* tracker in _trackersToClose) [tracker close];
 	
 	// Closed after all others, because the value of these can be changed
 	// during the closing of the other trackers.
-	[textures.activeTexture close];				
-	[textures.clientActiveTexture close];
+	[_textures.activeTexture close];
+	[_textures.clientActiveTexture close];
 	
 	// Remove each element without releasing it.
-	[trackersToClose removeAllObjectsAsUnretained];
+	[_trackersToClose removeAllObjectsAsUnretained];
 
-	isClosing = NO;
+	_isClosing = NO;
 }
 
 // Lazily init the trackersToOpen array so that it can be nilled out
 // if it is empty, but recreated if other trackers are added later.
 -(void) addTrackerToOpen: (CC3OpenGLESStateTracker*) aTracker {
-	if (!trackersToOpen) {
-		trackersToOpen = [[CCArray arrayWithCapacity: 100] retain];
-	}
-	[trackersToOpen addObject: aTracker];
-	trackerToOpenWasAdded = YES;
+	if (!_trackersToOpen) _trackersToOpen = [[CCArray arrayWithCapacity: 100] retain];
+	[_trackersToOpen addObject: aTracker];
+	_trackerToOpenWasAdded = YES;
 }
 
 // For speed, elements are not retained in the array.
@@ -167,26 +163,27 @@ static CC3OpenGLESEngine* engine;
 // applies to trackers on which other trackers are dependent, like activeTexture and
 // clientActiveTexture.
 -(void) addTrackerToClose: (CC3OpenGLESStateTracker*) aTracker {
-	if (!isClosing) {
-		LogTrace(@"Adding %@ at %i", aTracker, trackersToClose.count);
-		[trackersToClose addUnretainedObject: aTracker];
+	if (!_isClosing) {
+		LogTrace(@"Adding %@ at %i", aTracker, _trackersToClose.count);
+		[_trackersToClose addUnretainedObject: aTracker];
 	}
 }
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
 	[desc appendFormat: @"%@:", [self class]];
-	[desc appendFormat: @"\n%@ ", platform];
-	[desc appendFormat: @"\n%@ ", capabilities];
-	[desc appendFormat: @"\n%@ ", materials];
-	[desc appendFormat: @"\n%@ ", textures];
-	[desc appendFormat: @"\n%@ ", lighting];
-	[desc appendFormat: @"\n%@ ", matrices];
-	[desc appendFormat: @"\n%@ ", vertices];
-	[desc appendFormat: @"\n%@ ", state];
-	[desc appendFormat: @"\n%@ ", fog];
-	[desc appendFormat: @"\n%@ ", hints];
-	[desc appendFormat: @"\n%@ ", appExtensions];
+	[desc appendFormat: @"\n%@ ", _platform];
+	[desc appendFormat: @"\n%@ ", _capabilities];
+	[desc appendFormat: @"\n%@ ", _materials];
+	[desc appendFormat: @"\n%@ ", _textures];
+	[desc appendFormat: @"\n%@ ", _lighting];
+	[desc appendFormat: @"\n%@ ", _matrices];
+	[desc appendFormat: @"\n%@ ", _vertices];
+	[desc appendFormat: @"\n%@ ", _state];
+	[desc appendFormat: @"\n%@ ", _fog];
+	[desc appendFormat: @"\n%@ ", _hints];
+	[desc appendFormat: @"\n%@ ", _shaders];
+	[desc appendFormat: @"\n%@ ", _appExtensions];
 	return desc;
 }
 

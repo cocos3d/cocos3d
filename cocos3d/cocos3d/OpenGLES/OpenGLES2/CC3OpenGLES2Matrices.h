@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES2Matrices.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -31,8 +31,23 @@
 
 
 #import "CC3OpenGLESMatrices.h"
+#import "CC3Matrix4x4.h"
 
 #if CC3_OGLES_2
+
+/** The initial maximum depth of a matrix stack under OpenGL ES 2. */
+#define kCC3OpenGLES2MatrixStackMaxDepth		8
+
+#pragma mark -
+#pragma mark CC3OpenGLES2MatrixStack
+
+/** Provides specialized behaviour for OpenGL ES 2 implementations. */
+@interface CC3OpenGLES2MatrixStack : CC3OpenGLESMatrixStack {
+	GLuint _depth;
+	GLuint _maxDepth;
+	CC3Matrix4x4* _mtxStack;
+}
+@end
 
 #pragma mark -
 #pragma mark CC3OpenGLES2Matrices

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESTextures.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -134,21 +134,6 @@
  * open method, and to be automatically restored on each invocation of the close method.
  */
 @interface CC3OpenGLESStateTrackerTextureCapability : CC3OpenGLESStateTrackerCapability
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESTextureMatrixStack
-
-/**
- * CC3OpenGLESMatrixStack provides access to several commands that operate
- * on the texture matrix stacks, none of which require state tracking.
- *
- * Even though this class does not track any state, it does rely on the
- * tracker for the matrix mode, to ensure that the matrix mode associated
- * with this matrix stack is active before calling a GL function.
- */
-@interface CC3OpenGLESTextureMatrixStack : CC3OpenGLESMatrixStack
 @end
 
 
@@ -324,9 +309,9 @@
 
 /** CC3OpenGLESTextures manages trackers for texture and texture environment state. */
 @interface CC3OpenGLESTextures : CC3OpenGLESStateTrackerManager {
-	CC3OpenGLESStateTrackerActiveTexture* activeTexture;
-	CC3OpenGLESStateTrackerActiveTexture* clientActiveTexture;
-	CCArray* textureUnits;
+	CC3OpenGLESStateTrackerActiveTexture* _activeTexture;
+	CC3OpenGLESStateTrackerActiveTexture* _clientActiveTexture;
+	CCArray* _textureUnits;
 }
 
 /** Tracks active texture (GL get name GL_ACTIVE_TEXTURE and set function glActiveTexture). */
@@ -375,6 +360,12 @@
  * To conserve memory, texture units are lazily allocated when requested by this method.
  */
 -(CC3OpenGLESTextureUnit*) textureUnitAt: (GLuint) texUnit;
+
+/** Clears the tracking of unbound texture coordinate vertex pointers. */
+-(void) clearUnboundVertexPointers;
+
+/** Disables any texture coordinate vertex pointers that have not been bound to the GL engine. */
+-(void) disableUnboundVertexPointers;
 
 /**
  * The minimum number of GL texture unit trackers to create initially. This value

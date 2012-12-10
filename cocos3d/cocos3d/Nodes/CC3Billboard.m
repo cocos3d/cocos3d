@@ -1,7 +1,7 @@
 /*
  * CC3Billboard.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -539,10 +539,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 		
 		// Enable location and color arrays, and disable normal and point size arrays.
 		CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
-		[[glesVtxArrays trackerForVertexArrayType: CC3VertexLocations.class] enable];
-		[[glesVtxArrays trackerForVertexArrayType: CC3VertexColors.class] enable];
-		[[glesVtxArrays trackerForVertexArrayType: CC3VertexNormals.class] disable];
-		[[glesVtxArrays trackerForVertexArrayType: CC3VertexPointSizes.class] disable];
+		[[glesVtxArrays vertexPointerForSemantic: CC3VertexLocations.defaultSemantic] enable];
+		[[glesVtxArrays vertexPointerForSemantic: CC3VertexColors.defaultSemantic] enable];
+		[[glesVtxArrays vertexPointerForSemantic: CC3VertexNormals.defaultSemantic] disable];
+		[[glesVtxArrays vertexPointerForSemantic: CC3VertexPointSizes.defaultSemantic] disable];
 		
 		// 2D drawing might change buffer properties unbeknownst to cocos3d,
 		// so force the buffers to be respecified on next 3D draw

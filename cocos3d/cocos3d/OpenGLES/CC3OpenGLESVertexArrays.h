@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESVertexArrays.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,8 +32,6 @@
 
 #import "CC3OpenGLESStateTracker.h"
 #import "CC3OpenGLESCapabilities.h"
-
-@class CC3VertexArray;
 
 
 #pragma mark -
@@ -118,7 +116,7 @@
  *
  * The vertex pointer parameters are read from GL individually, using distinct primitive
  * trackers for each parameters. However, all parameters are set together using the
- * useElementsAt:withSize:withType:withStride:withShouldNormalize: method, and the parameters
+ * bindElementsAt:withSize:withType:withStride:withShouldNormalize: method, and the parameters
  * are set into the GL engine together using a single call to one of the gl*Pointer functions.
  *
  * The originalValueHandling property is set to kCC3GLESStateOriginalValueIgnore,
@@ -126,7 +124,7 @@
  *
  * The shouldAlwaysSetGL property is set to YES, which causes the state in the GL engine
  * to be updated on every invocation of the
- * useElementsAt:withSize:withType:withStride:withShouldNormalize: method.
+ * bindElementsAt:withSize:withType:withStride:withShouldNormalize: method.
  */
 @interface CC3OpenGLESStateTrackerVertexPointer : CC3OpenGLESStateTrackerComposite {
 	CC3OpenGLESStateTrackerCapability* _capability;
@@ -135,6 +133,7 @@
 	CC3OpenGLESStateTrackerInteger* _vertexStride;
 	CC3OpenGLESStateTrackerPointer* _vertices;
 	CC3OpenGLESStateTrackerBoolean* _shouldNormalize;
+	BOOL _wasBound : 1;
 }
 
 /** Tracks whether this vertex array is enabled or disabled. */
@@ -166,19 +165,31 @@
  */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerBoolean* shouldNormalize;
 
+/** 
+ * Indicates whether this vertex pointer was bound for the current drawing operation.
+ *
+ * This property is cleared automatically by the parent tracker prior to binding the vertex
+ * pointers for each mesh, and is set automatically by the bindElementsAt:withSize:withType:withStride:withShouldNormalize:
+ * method when this vertex pointer is bound to the GL engine.
+ */
+@property(nonatomic, assign) BOOL wasBound;
+
 /**
  * Enables this vertex array pointer.
  *
  * This method is invoked automatically from the
- * useElementsAt:withSize:withType:withStride:withShouldNormalize: method.
+ * bindElementsAt:withSize:withType:withStride:withShouldNormalize: method.
  */
 -(void) enable;
 
 /** Disables this vertex array pointer. */
 -(void) disable;
 
+/** Disables this vertex array pointer if the wasBound property is NO. */
+-(void) disableIfUnbound;
+
 /**
- * Sets element pointer, size, type, stride, normalization requirements value together
+ * Binds element pointer, size, type, stride, normalization requirements value together
  * for the vertex attribute at the specified index.
  *
  * The values will be set in the GL engine only if at least one of the values has
@@ -189,12 +200,15 @@
  * property is set to NO.
  *
  * Invokes the setGLValues method to set the values in the GL engine.
+ *
+ * This method also invokes the enable method to enable this vertex pointer in the GL engine,
+ * and sets the wasBound property to indicate that this vertex pointer was bound to the GL engine.
  */
--(void) useElementsAt: (GLvoid*) pData
-			 withSize: (GLint) elemSize
-			 withType: (GLenum) elemType
-		   withStride: (GLsizei) elemStride
-  withShouldNormalize: (BOOL) shldNorm;
+-(void) bindElementsAt: (GLvoid*) pData
+			  withSize: (GLint) elemSize
+			  withType: (GLenum) elemType
+			withStride: (GLsizei) elemStride
+   withShouldNormalize: (BOOL) shldNorm;
 
 @end
 
@@ -236,27 +250,14 @@
  */
 -(void) deleteBuffer: (GLuint) buffID;
 
-/**
- * Returns the vertex array pointer tracker that should be used by the specified vertex array.
- *
- * Under OpenGL ES 1, the GL vertex array pointer is tied to the type of vertex array, and this
- * method delegates to the trackerForVertexArrayType: method, passing the class of the specified
- * vertex array.
- *
- * Under OpenGL ES 2, the GL vertex attribute pointers are generic, and is distinguished by the
- * attributeIndex property of the specified vertex array.
- */
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArray: (CC3VertexArray*) vtxArray;
+/** Returns the vertex pointer tracker for the specified vertex array semantic. */
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic;
 
-/** 
- * Returns the vertex array pointer tracker that should be used by the specified type of vertex array.
- *
- * This method only has meaning for OpenGL ES 1, where the GL vertex arrays each have a specific function
- * based on the type of vertex array data. In OpenGL ES 2, the GL vertex attribute arrays are generic
- * and are not tied to a specific vertex array type. When using OpenGL ES 2, this method will always
- * return nil.
- */
--(CC3OpenGLESStateTrackerVertexPointer*) trackerForVertexArrayType: (Class) vtxArrayClass;
+/** Clears the tracking of unbound vertex pointers. */
+-(void) clearUnboundVertexPointers;
+
+/** Disables any vertex pointers that have not been bound to the GL engine. */
+-(void) disableUnboundVertexPointers;
 
 /**
  * Draws vertices bound by the vertex pointers using the specified draw mode,
@@ -275,3 +276,6 @@
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode;
 
 @end
+
+
+

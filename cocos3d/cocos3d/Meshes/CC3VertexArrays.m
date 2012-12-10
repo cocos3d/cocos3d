@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrays.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings, Chris Myers
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -77,13 +77,12 @@
 @implementation CC3VertexArray
 
 @synthesize vertexCount=_vertexCount, bufferID=_bufferID, bufferUsage=_bufferUsage;
-@synthesize elementOffset=_elementOffset;
+@synthesize elementOffset=_elementOffset, semantic=_semantic;
 @synthesize shouldAllowVertexBuffering=_shouldAllowVertexBuffering;
 @synthesize shouldReleaseRedundantData=_shouldReleaseRedundantData;
 @synthesize shouldNormalizeContent=_shouldNormalizeContent;
 
 -(void) dealloc {
-	_glesVertexPointer = nil;			// not retained
 	[self deleteGLBuffer];
 	self.allocatedVertexCapacity = 0;
 //	[_vertexContent release];
@@ -91,14 +90,6 @@
 }
 
 -(GLvoid*) vertices { return _vertices; }
-
--(GLuint) attributeIndex { return _attributeIndex; }
-
-// Updates the OpenGLES tracker for this vertex array
--(void) setAttributeIndex: (GLuint) attributeIndex {
-	_attributeIndex = attributeIndex;
-	_glesVertexPointer = [CC3OpenGLESEngine.engine.vertices trackerForVertexArray: self];
-}
 
 /**
  * Safely disposes of any existing allocated vertex memory, maintaining the existing vertex
@@ -167,6 +158,12 @@
 
 -(GLenum) bufferTarget { return GL_ARRAY_BUFFER; }
 
++(GLenum) defaultSemantic {
+	NSAssert1(NO, @"%@ does not implement the defaultSemantic class property", self);
+	return kCC3VertexContentSemanticNone;
+}
+
+
 // Deprecated properties
 -(GLvoid*) elements { return self.vertices; }
 -(void) setElements: (GLvoid*) elems { self.vertices = elems; }
@@ -193,7 +190,7 @@
 		_shouldNormalizeContent = NO;
 		_shouldAllowVertexBuffering = YES;
 		_shouldReleaseRedundantData = YES;
-		self.attributeIndex = 0;				// Updates _glesVertexPointer as well
+		_semantic = self.class.defaultSemantic;
 	}
 	return self;
 }
@@ -223,7 +220,7 @@
 -(void) populateFrom: (CC3VertexArray*) another {
 	[super populateFrom: another];
 
-	self.attributeIndex = another.attributeIndex;	// Use setter to also set _glesVertexPointer
+	_semantic = another.semantic;
 	_elementType = another.elementType;
 	_elementSize = another.elementSize;
 	_vertexStride = another.vertexStride;
@@ -409,6 +406,9 @@ static GLuint lastAssignedVertexArrayTag;
 	}
 }
 
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor { [self bindGLWithVisitor: visitor]; }
+
+/*
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (self.switchingArray) {
 		[self bindGLWithVisitor: visitor];
@@ -416,6 +416,7 @@ static GLuint lastAssignedVertexArrayTag;
 		LogTrace(@"Reusing currently bound %@", self);
 	}
 }
+*/
 
 /**
  * Template method that binds the GL engine to the underlying vertex data,
@@ -429,15 +430,19 @@ static GLuint lastAssignedVertexArrayTag;
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_bufferID) {											// use GL buffer if it exists
 		LogTrace(@"%@ binding GL buffer containing %u vertices", self, _vertexCount);
-		[[CC3OpenGLESEngine engine].vertices bufferBinding: self.bufferTarget].value = _bufferID;
+		[CC3OpenGLESEngine.engine.vertices bufferBinding: self.bufferTarget].value = _bufferID;
 		[self bindPointer: (GLvoid*)_elementOffset withVisitor: visitor];
 	} else if (_vertexCount && _vertices) {					// use local client array if it exists
 		LogTrace(@"%@ using local array containing %u vertices", self, _vertexCount);
-		[[[CC3OpenGLESEngine engine].vertices bufferBinding: self.bufferTarget] unbind];
+		[[CC3OpenGLESEngine.engine.vertices bufferBinding: self.bufferTarget] unbind];
 		[self bindPointer: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
 	} else {
 		LogTrace(@"%@ no vertices to bind", self);
 	}
+}
+
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
+	return [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: _semantic];
 }
 
 /**
@@ -446,17 +451,17 @@ static GLuint lastAssignedVertexArrayTag;
  * type of aspect managed by this instance (locations, normals...) in the GL engine.
  */
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_glesVertexPointer useElementsAt: pointer
-							 withSize: _elementSize
-							 withType: _elementType
-						   withStride: _vertexStride
-				  withShouldNormalize: _shouldNormalizeContent];
+	[self.vertexPointer bindElementsAt: pointer
+							  withSize: _elementSize
+							  withType: _elementType
+							withStride: _vertexStride
+				   withShouldNormalize: _shouldNormalizeContent];
 }
 
 -(void) unbind { [self.class unbind]; }
 
 +(void) unbind {
-	[[CC3OpenGLESEngine.engine.vertices trackerForVertexArrayType: self.class] disable];
+//	[[CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: self.defaultSemantic] disable];
 	[self resetSwitching];
 }
 
@@ -598,16 +603,6 @@ static GLuint lastAssignedVertexArrayTag;
 	return 0;
 }
 
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_drawingMode = GL_TRIANGLES;
-		_stripCount = 0;
-		_stripLengths = NULL;
-		_stripLengthsAreRetained = NO;
-	}
-	return self;
-}
-
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3DrawableVertexArray*) another {
@@ -641,10 +636,7 @@ static GLuint lastAssignedVertexArrayTag;
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ drawing %u vertices", self, vtxCount);
-	CC3PerformanceStatistics* perfStats = visitor.performanceStatistics;
-	if (perfStats) {
-		[perfStats addSingleCallFacesPresented: [self faceCountFromVertexIndexCount: vtxCount]];
-	}
+	[visitor.performanceStatistics addSingleCallFacesPresented: [self faceCountFromVertexIndexCount: vtxCount]];
 }
 
 -(void) allocateStripLengths: (GLuint) sCount {
@@ -808,6 +800,19 @@ static GLuint lastAssignedVertexArrayTag;
 	}
 }
 
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_drawingMode = GL_TRIANGLES;
+		_stripCount = 0;
+		_stripLengths = NULL;
+		_stripLengthsAreRetained = NO;
+	}
+	return self;
+}
+
 @end
 
 
@@ -826,8 +831,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 @synthesize firstElement=_firstElement;
 
--(NSString*) nameSuffix { return @"Locations"; }
-
 -(void) markBoundaryDirty {
 	_boundaryIsDirty = YES;
 	_radiusIsDirty = YES;
@@ -839,17 +842,6 @@ static GLuint lastAssignedVertexArrayTag;
 -(void) setVertexCount: (GLuint) count {
 	[super setVertexCount: count];
 	[self markBoundaryDirty];
-}
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_firstElement = 0;
-		_centerOfGeometry = kCC3VectorZero;
-		_boundingBox = kCC3BoundingBoxZero;
-		_radius = 0.0;
-		[self markBoundaryDirty];
-	}
-	return self;
 }
 
 // Protected properties used during copying instances of this class
@@ -1029,9 +1021,7 @@ static GLuint lastAssignedVertexArrayTag;
 	[self updateGLBuffer];
 }
 
--(void) moveMeshOriginToCenterOfGeometry {
-	[self moveMeshOriginTo: self.centerOfGeometry];
-}
+-(void) moveMeshOriginToCenterOfGeometry { [self moveMeshOriginTo: self.centerOfGeometry]; }
 
 // Deprecated methods
 -(void) movePivotTo: (CC3Vector) aLocation { [self moveMeshOriginTo: aLocation]; }
@@ -1039,6 +1029,13 @@ static GLuint lastAssignedVertexArrayTag;
 
 
 #pragma mark Drawing
+
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
+	CC3OpenGLESStateTrackerVertexPointer* vtxPtr = super.vertexPointer;
+	NSAssert2(vtxPtr, @"%@ could not retrieve the vertex pointer for semantic %@. Vertex locations are required for drawing.",
+			  self, NSStringFromCC3VertexContentSemantic(_semantic));
+	return vtxPtr;
+}
 
 /** Overridden to ensure the bounding box and radius are built before releasing the vertices. */
 -(void) releaseRedundantData {
@@ -1057,6 +1054,24 @@ static GLuint lastAssignedVertexArrayTag;
 												startingAt: firstVertex
 												withLength: vtxCount];
 }
+
+
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Locations"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_firstElement = 0;
+		_centerOfGeometry = kCC3VectorZero;
+		_boundingBox = kCC3BoundingBoxZero;
+		_radius = 0.0;
+		[self markBoundaryDirty];
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticLocations; }
 
 
 #pragma mark Array context switching
@@ -1083,13 +1098,18 @@ static GLuint currentLocationsTag = 0;
 
 @implementation CC3VertexNormals
 
--(NSString*) nameSuffix { return @"Normals"; }
-
 -(CC3Vector) normalAt: (GLuint) index { return *(CC3Vector*)[self addressOfElement: index]; }
 
 -(void) setNormal: (CC3Vector) aNormal at: (GLuint) index {
 	*(CC3Vector*)[self addressOfElement: index] = aNormal;
 }
+
+
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Normals"; }
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticNormals; }
 
 
 #pragma mark Array context switching
@@ -1115,16 +1135,6 @@ static GLuint currentNormalsTag = 0;
 #pragma mark CC3VertexColors
 
 @implementation CC3VertexColors
-
--(NSString*) nameSuffix { return @"Colors"; }
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_UNSIGNED_BYTE;
-		_elementSize = 4;
-	}
-	return self;
-}
 
 -(ccColor4F) color4FAt: (GLuint) index {
 	switch (_elementType) {
@@ -1219,6 +1229,21 @@ static GLuint currentNormalsTag = 0;
 }
 
 
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Colors"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_elementType = GL_UNSIGNED_BYTE;
+		_elementSize = 4;
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticColors; }
+
+
 #pragma mark Array context switching
 
 // The tag of the array that was most recently drawn to the GL engine.
@@ -1250,8 +1275,6 @@ static GLuint currentColorsTag = 0;
 
 @synthesize expectsVerticallyFlippedTextures=_expectsVerticallyFlippedTextures;
 
--(NSString*) nameSuffix { return @"TexCoords"; }
-
 -(CGRect) textureRectangle { return _textureRectangle; }
 
 -(CGRect) effectiveTextureRectangle {
@@ -1272,17 +1295,6 @@ static GLuint currentColorsTag = 0;
 	CGRect oldRect = _textureRectangle;
 	_textureRectangle = aRect;
 	[self alignWithTextureRectangle: aRect fromOld: oldRect];
-}
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_FLOAT;
-		_elementSize = 2;
-		_mapSize = CGSizeMake(1, 1);
-		_textureRectangle = kCC3UnitTextureRectangle;
-		_expectsVerticallyFlippedTextures = [[self class] defaultExpectsVerticallyFlippedTextures];
-	}
-	return self;
 }
 
 // Protected properties for copying.
@@ -1316,21 +1328,21 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	*(ccTex2F*)[self addressOfElement: index] = aTex2F;
 }
 
-/** Extracts the current texture unit from the visitor and binds this vertex array to that texture unit. */
+/** Offsets the semantic by the texture unit index. */
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: visitor.textureUnit];
-	[glesTexUnit.textureCoordinates useElementsAt: pointer
-										 withSize: _elementSize
-										 withType: _elementType
-									   withStride: _vertexStride
-							  withShouldNormalize: _shouldNormalizeContent];
-	LogTrace(@"%@ bound to %@", self, glesTexUnit);
+	CC3OpenGLESStateTrackerVertexPointer* vtxPtr;
+	vtxPtr = [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: (_semantic + visitor.textureUnit)];
+	[vtxPtr bindElementsAt: pointer
+				  withSize: _elementSize
+				  withType: _elementType
+				withStride: _vertexStride
+	   withShouldNormalize: _shouldNormalizeContent];
 }
 
 +(void) unbind: (GLuint) textureUnit {
-	LogTrace(@"Unbinding texture unit %u", textureUnit);
-	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: textureUnit];
-	[glesTexUnit.textureCoordinates disable];
+//	LogTrace(@"Unbinding texture unit %u", textureUnit);
+//	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: textureUnit];
+//	[glesTexUnit.textureCoordinates disable];
 }
 
 /**
@@ -1480,6 +1492,24 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 }
 
 
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"TexCoords"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_elementType = GL_FLOAT;
+		_elementSize = 2;
+		_mapSize = CGSizeMake(1, 1);
+		_textureRectangle = kCC3UnitTextureRectangle;
+		_expectsVerticallyFlippedTextures = [[self class] defaultExpectsVerticallyFlippedTextures];
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticTexture0; }
+
+
 #pragma mark Array context switching
 
 /**
@@ -1501,19 +1531,9 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 @implementation CC3VertexIndices
 
--(NSString*) nameSuffix { return @"Indices"; }
-
 -(GLenum) bufferTarget { return GL_ELEMENT_ARRAY_BUFFER; }
 
 -(GLuint) firstElement { return _bufferID ? _elementOffset : ((GLuint)_vertices + _elementOffset); }
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_UNSIGNED_SHORT;
-		_elementSize = 1;
-	}
-	return self;
-}
 
 // Deprecated
 -(GLuint*) allocateTriangles: (GLuint) triangleCount {
@@ -1638,6 +1658,21 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 }
 
 
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Indices"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_elementType = GL_UNSIGNED_SHORT;
+		_elementSize = 1;
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticNone; }
+
+
 #pragma mark Array context switching
 
 // The tag of the array that was most recently drawn to the GL engine.
@@ -1662,6 +1697,15 @@ static GLuint currentIndicesTag = 0;
 
 @implementation CC3VertexPointSizes
 
+-(GLfloat) pointSizeAt: (GLuint) index { return *(GLfloat*)[self addressOfElement: index]; }
+
+-(void) setPointSize: (GLfloat) aSize at: (GLuint) index {
+	*(GLfloat*)[self addressOfElement: index] = aSize;
+}
+
+
+#pragma mark Allocation and initialization
+
 -(NSString*) nameSuffix { return @"PointSizes"; }
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -1672,11 +1716,7 @@ static GLuint currentIndicesTag = 0;
 	return self;
 }
 
--(GLfloat) pointSizeAt: (GLuint) index { return *(GLfloat*)[self addressOfElement: index]; }
-
--(void) setPointSize: (GLfloat) aSize at: (GLuint) index {
-	*(GLfloat*)[self addressOfElement: index] = aSize;
-}
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticPointSizes; }
 
 
 #pragma mark Array context switching
@@ -1703,16 +1743,6 @@ static GLuint currentPointSizesTag = 0;
 
 @implementation CC3VertexWeights
 
--(NSString*) nameSuffix { return @"Weights"; }
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_FLOAT;
-		_elementSize = 0;
-	}
-	return self;
-}
-
 -(GLfloat*) weightsAt: (GLuint) index { return (GLfloat*)[self addressOfElement: index]; }
 
 -(void) setWeights: (GLfloat*) weights at: (GLuint) index {
@@ -1730,6 +1760,21 @@ static GLuint currentPointSizesTag = 0;
 -(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
 	[self weightsAt: index][vertexUnit] = aWeight;
 }
+
+
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Weights"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_elementType = GL_FLOAT;
+		_elementSize = 0;
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticWeights; }
 
 
 #pragma mark Array context switching
@@ -1755,16 +1800,6 @@ static GLuint currentWeightsTag = 0;
 #pragma mark CC3VertexMatrixIndices
 
 @implementation CC3VertexMatrixIndices
-
--(NSString*) nameSuffix { return @"MatrixIndices"; }
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_UNSIGNED_BYTE;
-		_elementSize = 0;
-	}
-	return self;
-}
 
 -(GLvoid*) matrixIndicesAt: (GLuint) index { return [self addressOfElement: index]; }
 
@@ -1802,6 +1837,21 @@ static GLuint currentWeightsTag = 0;
 		vertexMatrices[vertexUnit] = aMatrixIndex;
 	}
 }
+
+
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"MatrixIndices"; }
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_elementType = GL_UNSIGNED_BYTE;
+		_elementSize = 0;
+	}
+	return self;
+}
+
++(GLenum) defaultSemantic { return kCC3VertexContentSemanticMatrices; }
 
 
 #pragma mark Array context switching

@@ -1,7 +1,7 @@
 /*
  * CC3Camera.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -84,11 +84,11 @@
 @implementation CC3Camera
 
 @synthesize fieldOfView, nearClippingDistance, farClippingDistance;
-@synthesize frustum, modelviewMatrix;
+@synthesize frustum, viewMatrix=_viewMatrix;
 @synthesize hasInfiniteDepthOfField, isOpen;
 
 -(void) dealloc {
-	[modelviewMatrix release];
+	[_viewMatrix release];
 	[frustum release];
 	[super dealloc];
 }
@@ -155,13 +155,16 @@
 -(CC3Vector) forwardDirection { return super.forwardDirection; }
 -(void) setForwardDirection: (CC3Vector) aDirection { super.forwardDirection = aDirection; }
 
+// Deprecated
+-(CC3Matrix*) modelviewMatrix { return self.viewMatrix; }
+
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		modelviewMatrix = [CC3AffineMatrix new];
-		self.frustum = [CC3Frustum frustumOnModelviewMatrix: modelviewMatrix];
+		_viewMatrix = [CC3AffineMatrix new];
+		self.frustum = [CC3Frustum frustumOnViewMatrix: _viewMatrix];
 		isProjectionDirty = YES;
 		fieldOfView = kCC3DefaultFieldOfView;
 		nearClippingDistance = kCC3DefaultNearClippingDistance;
@@ -182,8 +185,8 @@
 	
 	self.frustum = [another.frustum autoreleasedCopy];		// retained
 
-	[modelviewMatrix release];
-	modelviewMatrix = [another.modelviewMatrix copy];		// retained
+	[_viewMatrix release];
+	_viewMatrix = [another.viewMatrix copy];		// retained
 
 	fieldOfView = another.fieldOfView;
 	nearClippingDistance = another.nearClippingDistance;
@@ -241,16 +244,16 @@
 }
 
 /**
- * Template method to rebuild the modelviewMatrix from the deviceRotationMatrix, which
+ * Template method to rebuild the viewMatrix from the deviceRotationMatrix, which
  * is managed by the CC3Scene's viewportManager, and the inverse of the transformMatrix.
  * Invoked automatically whenever the transformMatrix or device orientation are changed.
  */
 -(void) buildModelViewMatrix {
-	[modelviewMatrix populateFrom: self.viewportManager.deviceRotationMatrix];
-	LogTrace(@"%@ applied device rotation matrix %@", self, modelviewMatrix);
+	[_viewMatrix populateFrom: self.viewportManager.deviceRotationMatrix];
+	LogTrace(@"%@ applied device rotation matrix %@", self, _viewMatrix);
 
-	[modelviewMatrix multiplyBy: self.transformMatrixInverted];
-	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, modelviewMatrix);
+	[_viewMatrix multiplyBy: self.transformMatrixInverted];
+	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, _viewMatrix);
 
 	// Let the frustum know that the contents of the modelview matrix have changed. 
 	[frustum markDirty];
@@ -310,25 +313,25 @@
 	[[CC3OpenGLESEngine engine].matrices.projection pop];
 }
 
-/** Template method that pushes the GL modelview matrix stack, and loads the modelviewMatrix into it. */
+/** Template method that pushes the GL modelview matrix stack, and loads the viewMatrix into it. */
 -(void) openModelView {
 	LogTrace(@"Opening %@ modelview", self);
 	[[CC3OpenGLESEngine engine].matrices.modelview push];
 	[self loadModelviewMatrix];
 }
 
-/** Template method that pops the modelviewMatrix from the GL modelview matrix stack. */
+/** Template method that pops the viewMatrix from the GL modelview matrix stack. */
 -(void) closeModelView {
 	LogTrace(@"Closing %@ modelview", self);
 	[[CC3OpenGLESEngine engine].matrices.modelview pop];
 }
 
-/** Template method that loads the modelviewMatrix into the current GL projection matrix. */
+/** Template method that loads the viewMatrix into the current GL modelview matrix. */
 -(void) loadModelviewMatrix {
-	LogTrace(@"%@ loading modelview matrix into GL: %@", self, modelviewMatrix);
+	LogTrace(@"%@ loading modelview matrix into GL: %@", self, _viewMatrix);
 	CC3Matrix4x4 glMtx;
-	[modelviewMatrix populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLESEngine engine].matrices.modelview load: glMtx.elements];
+	[_viewMatrix populateCC3Matrix4x4: &glMtx];
+	[[CC3OpenGLESEngine engine].matrices.modelview load: &glMtx];
 }
 
 /**
@@ -345,7 +348,7 @@
 	
 	CC3Matrix4x4 glMtx;
 	[projMtx populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLESEngine engine].matrices.projection load: glMtx.elements];
+	[[CC3OpenGLESEngine engine].matrices.projection load: &glMtx];
 }
 
 
@@ -694,7 +697,7 @@
 	// Convert specified location to a 4D homogeneous location vector
 	// and transform it using the modelview and projection matrices.
 	CC3Vector4 hLoc = CC3Vector4FromCC3Vector(a3DLocation, 1.0);
-	hLoc = [modelviewMatrix transformHomogeneousVector: hLoc];
+	hLoc = [_viewMatrix transformHomogeneousVector: hLoc];
 	hLoc = [frustum.projectionMatrix transformHomogeneousVector: hLoc];
 	
 	// Convert projected 4D vector back to 3D.
@@ -848,13 +851,13 @@
 @implementation CC3Frustum
 
 @synthesize top, bottom, left, right, near, far;
-@synthesize modelviewMatrix, isUsingParallelProjection;
+@synthesize viewMatrix=_viewMatrix, isUsingParallelProjection;
 
 -(void) dealloc {
-	[modelviewMatrix release];
+	[_viewMatrix release];
 	[projectionMatrix release];
 	[infiniteProjectionMatrix release];
-	[modelviewProjectionMatrix release];
+	[_viewProjectionMatrix release];
 	[super dealloc];
 }
 
@@ -918,34 +921,33 @@
 -(CC3Vector) farBottomLeft { return self.vertices[kCC3FarBtmLeftIdx]; }
 -(CC3Vector) farBottomRight { return self.vertices[kCC3FarBtmRgtIdx]; }
 
--(void) setModelviewMatrix: (CC3Matrix*) aMatrix {
-	id oldMtx = modelviewMatrix;
-	modelviewMatrix = [aMatrix retain];
-	[oldMtx release];
-	[self markDirty];
-}
-
--(CC3Matrix*) modelviewProjectionMatrix {
-	[self updateIfNeeded];
-	return modelviewProjectionMatrix;
-}
+// Deprecated
+-(CC3Matrix*) modelviewMatrix { return self.viewMatrix; }
 
 -(CC3Matrix*) projectionMatrix {
 	[self updateIfNeeded];
 	return projectionMatrix;
 }
 
+-(CC3Matrix*) viewProjectionMatrix {
+	[self updateIfNeeded];
+	return _viewProjectionMatrix;
+}
+
+// Deprecated
+-(CC3Matrix*) modelviewProjectionMatrix { return self.viewProjectionMatrix; }
+
 
 #pragma mark Allocation and initialization
 
--(id) init { return [self initOnModelviewMatrix: [CC3AffineMatrix matrix]]; }
+-(id) init { return [self initOnViewMatrix: [CC3AffineMatrix matrix]]; }
 
--(id) initOnModelviewMatrix: (CC3Matrix*) aMtx {
+-(id) initOnViewMatrix: (CC3Matrix*) aMtx {
 	if ( (self = [super init]) ) {
 		top = bottom = left = right = near = far = 0.0f;
-		modelviewMatrix = [aMtx retain];
+		_viewMatrix = [aMtx retain];
 		projectionMatrix = [CC3ProjectionMatrix new];
-		modelviewProjectionMatrix = [CC3ProjectionMatrix new];;
+		_viewProjectionMatrix = [CC3ProjectionMatrix new];;
 		infiniteProjectionMatrix = nil;
 		isUsingParallelProjection = NO;
 		isInfiniteProjectionDirty = YES;
@@ -953,8 +955,8 @@
 	return self;
 }
 
-+(id) frustumOnModelviewMatrix: (CC3Matrix*) aMtx {
-	return [[[self alloc] initOnModelviewMatrix: aMtx] autorelease];
++(id) frustumOnViewMatrix: (CC3Matrix*) aMtx {
+	return [[[self alloc] initOnViewMatrix: aMtx] autorelease];
 }
 
 // Protected properties for copying
@@ -973,8 +975,8 @@
 	[projectionMatrix release];
 	projectionMatrix = [another.projectionMatrix copy];		// retained
 	
-	[modelviewProjectionMatrix release];
-	modelviewProjectionMatrix = [another.modelviewProjectionMatrix copy];	// retained
+	[_viewProjectionMatrix release];
+	_viewProjectionMatrix = [another.viewProjectionMatrix copy];	// retained
 	
 	[infiniteProjectionMatrix release];
 	infiniteProjectionMatrix = [another.infiniteProjectionMatrix copy];		// retained
@@ -1098,8 +1100,8 @@
 /** Make sure projection matrix is current, then create the modelview projection matrix. */
 -(void) buildVolume {
 	[self populateProjectionMatrix];
-	[modelviewProjectionMatrix populateFrom: projectionMatrix];
-	[modelviewProjectionMatrix multiplyBy: modelviewMatrix];
+	[_viewProjectionMatrix populateFrom: projectionMatrix];
+	[_viewProjectionMatrix multiplyBy: _viewMatrix];
 }
 
 /**
@@ -1108,7 +1110,7 @@
  */
 -(void) buildPlanes{
 	CC3Matrix4x4 m;
-	[modelviewProjectionMatrix populateCC3Matrix4x4: &m];
+	[_viewProjectionMatrix populateCC3Matrix4x4: &m];
 	
 	planes[kCC3BotmIdx] = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake((m.c1r4 + m.c1r2), (m.c2r4 + m.c2r2),
 																		(m.c3r4 + m.c3r2), (m.c4r4 + m.c4r2))));
@@ -1128,7 +1130,7 @@
 	[self buildVertices];
 	
 	LogTrace(@"Built planes for %@ from projection: %@ and modelview: %@ combined: %@",
-				  self.fullDescription, projectionMatrix, modelviewMatrix, modelviewProjectionMatrix);
+				  self.fullDescription, projectionMatrix, _viewMatrix, _viewProjectionMatrix);
 }
 
 -(void) buildVertices {

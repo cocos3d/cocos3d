@@ -1,7 +1,7 @@
 /*
  * CC3VertexArrayMesh.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -34,6 +34,7 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
+#import "CC3OpenGLESEngine.h"
 
 
 @interface CC3VertexArrayMesh (TemplateMethods)
@@ -582,6 +583,9 @@
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Binding %@", self);
+	CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
+	[glesVtxArrays clearUnboundVertexPointers];
+
 	[self bindLocationsWithVisitor: visitor];
 	[self bindNormalsWithVisitor: visitor];
 	[self bindColorsWithVisitor: visitor];
@@ -590,6 +594,8 @@
 	[self bindIndicesWithVisitor: visitor];
 	[self bindBoneMatrixIndicesWithVisitor: visitor];
 	[self bindBoneWeightsWithVisitor: visitor];
+
+	[glesVtxArrays disableUnboundVertexPointers];
 }
 
 /**

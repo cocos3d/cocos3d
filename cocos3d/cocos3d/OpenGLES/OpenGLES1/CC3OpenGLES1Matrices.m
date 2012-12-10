@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES1Matrices.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,6 +39,13 @@
 
 @implementation CC3OpenGLES1MatrixStack
 
+-(void) dealloc {
+	[_modeTracker release];
+	[super dealloc];
+}
+
+-(void) activate { _modeTracker.value = _mode; }
+
 -(void) push {
 	[self activate];
 	glPushMatrix();
@@ -51,10 +58,10 @@
 	LogGLErrorTrace(@"while popping %@", self);
 }
 
--(GLuint) getDepth {
+-(GLuint) depth {
 	[self activate];
 	GLuint depth;
-	glGetIntegerv(depthName, (GLint*)&depth);
+	glGetIntegerv(_depthName, (GLint*)&depth);
 	LogGLErrorTrace(@"while reading GL stack depth %u of %@", depth, self);
 	return depth;
 }
@@ -65,22 +72,55 @@
 	LogGLErrorTrace(@"while loading identity into %@", self);
 }
 
--(void) load: (GLvoid*) glMatrix {
+-(void) load: (CC3Matrix4x4*) mtx {
 	[self activate];
-	glLoadMatrixf(glMatrix);
+	glLoadMatrixf(mtx->elements);
 	LogGLErrorTrace(@"while loading matrix at %p into %@", glMatrix, self);
 }
 
--(void) getTop: (GLvoid*) glMatrix {
+-(void) getTop: (CC3Matrix4x4*) mtx {
 	[self activate];
-	glGetFloatv(topName, glMatrix);
+	glGetFloatv(_topName, mtx->elements);
 	LogGLErrorTrace(@"while reading top of %@ into matrix at %p", self, glMatrix);
 }
 
--(void) multiply: (GLvoid*) glMatrix {
+-(void) multiply: (CC3Matrix4x4*) mtx {
 	[self activate];
-	glMultMatrixf(glMatrix);
+	glMultMatrixf(mtx->elements);
 	LogGLErrorTrace(@"while multiplied matrix at %p into %@", glMatrix, self);
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+			withMode: (GLenum) matrixMode
+		  andTopName: (GLenum) tName
+		andDepthName: (GLenum) dName
+	  andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker {
+	if ( (self = [super initWithParent: aTracker]) ) {
+		_mode = matrixMode;
+		_topName = tName;
+		_depthName = dName;
+		_modeTracker = [aModeTracker retain];
+	}
+	return self;
+}
+
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+			   withMode: (GLenum) matrixMode
+			 andTopName: (GLenum) tName
+		   andDepthName: (GLenum) dName
+		 andModeTracker: (CC3OpenGLESStateTrackerEnumeration*) aModeTracker {
+	return [[[self alloc] initWithParent: aTracker
+								withMode: matrixMode
+							  andTopName: tName
+							andDepthName: dName
+						  andModeTracker: aModeTracker] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ %@", [super description], NSStringFromGLEnum(_mode)];
 }
 
 @end
@@ -104,12 +144,12 @@
 
 -(void) pop { NSAssert1(NO, @"%@ can't be popped", self); }
 
--(GLuint) getDepth {
+-(GLuint) depth {
 	NSAssert1(NO, @"Can't get depth of %@", self);
 	return 0;
 }
 
--(void) getTop: (GLvoid*) glMatrix { NSAssert1(NO, @"Can't retrieve top of %@", self); }
+-(void) getTop: (CC3Matrix4x4*) mtx { NSAssert1(NO, @"Can't retrieve top of %@", self); }
 
 -(void) loadFromModelView {
 	[self activate];

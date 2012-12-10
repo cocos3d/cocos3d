@@ -1,7 +1,7 @@
 /*
  * CC3VertexSkinning.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Chris Myers, Bill Hollings
  * Copyright (c) 2011 Chris Myers. All rights reserved.
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
@@ -830,7 +830,7 @@
 		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteAt: boneNum++];
 		[glesPaletteMatrix loadFromModelView];
 		[sb.drawTransformMatrix populateCC3Matrix4x4: &glMtx];
-		[glesPaletteMatrix multiply: glMtx.elements];
+		[glesPaletteMatrix multiply: &glMtx];
 	}
 
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
@@ -841,9 +841,7 @@
 			[self class], skinnedBones.count, vertexStart, (vertexStart + vertexCount - 1), node];
 }
 
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ %@", [self description], self.bones];
-}
+-(NSString*) fullDescription { return [NSString stringWithFormat: @"%@ %@", [self description], self.bones]; }
 
 @end
 

@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLES2Utility.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -163,9 +163,53 @@ char* GLEnumName(GLenum gle) {
 		case GL_UNSIGNED_BYTE: return "GL_UNSIGNED_BYTE";
 		case GL_SHORT: return "GL_SHORT";
 		case GL_UNSIGNED_SHORT: return "GL_UNSIGNED_SHORT";
-		case GL_FLOAT: return "GL_FLOAT";
 		case GL_FIXED: return "GL_FIXED";
+		case GL_UNSIGNED_INT: return "GL_UNSIGNED_INT";
 
+		case GL_INT: return "GL_INT";
+		case GL_INT_VEC2: return "GL_INT_VEC2";
+		case GL_INT_VEC3: return "GL_INT_VEC3";
+		case GL_INT_VEC4: return "GL_INT_VEC4";
+			
+		case GL_BOOL: return "GL_BOOL";
+		case GL_BOOL_VEC2: return "GL_BOOL_VEC2";
+		case GL_BOOL_VEC3: return "GL_BOOL_VEC3";
+		case GL_BOOL_VEC4: return "GL_BOOL_VEC4";
+			
+		case GL_FLOAT: return "GL_FLOAT";
+		case GL_FLOAT_VEC2: return "GL_FLOAT_VEC2";
+		case GL_FLOAT_VEC3: return "GL_FLOAT_VEC3";
+		case GL_FLOAT_VEC4: return "GL_FLOAT_VEC4";
+			
+		case GL_FLOAT_MAT2: return "GL_FLOAT_MAT2";
+		case GL_FLOAT_MAT3: return "GL_FLOAT_MAT3";
+		case GL_FLOAT_MAT4: return "GL_FLOAT_MAT4";
+			
+		case GL_SAMPLER_2D: return "GL_SAMPLER_2D";
+		case GL_SAMPLER_CUBE: return "GL_SAMPLER_CUBE";
+			
+			// Shaders
+		case GL_VERTEX_SHADER: return "GL_VERTEX_SHADER";
+		case GL_FRAGMENT_SHADER: return "GL_FRAGMENT_SHADER";
+		case GL_MAX_VERTEX_ATTRIBS: return "GL_MAX_VERTEX_ATTRIBS";
+		case GL_MAX_VERTEX_UNIFORM_VECTORS: return "GL_MAX_VERTEX_UNIFORM_VECTORS";
+		case GL_MAX_VARYING_VECTORS: return "GL_MAX_VARYING_VECTORS";
+		case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: return "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS";
+		case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: return "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS";
+		case GL_MAX_TEXTURE_IMAGE_UNITS: return "GL_MAX_TEXTURE_IMAGE_UNITS";
+		case GL_MAX_FRAGMENT_UNIFORM_VECTORS: return "GL_MAX_FRAGMENT_UNIFORM_VECTORS";
+		case GL_SHADER_TYPE: return "GL_SHADER_TYPE";
+		case GL_DELETE_STATUS: return "GL_DELETE_STATUS";
+		case GL_LINK_STATUS: return "GL_LINK_STATUS";
+		case GL_VALIDATE_STATUS: return "GL_VALIDATE_STATUS";
+		case GL_ATTACHED_SHADERS: return "GL_ATTACHED_SHADERS";
+		case GL_ACTIVE_UNIFORMS: return "GL_ACTIVE_UNIFORMS";
+		case GL_ACTIVE_UNIFORM_MAX_LENGTH: return "GL_ACTIVE_UNIFORM_MAX_LENGTH";
+		case GL_ACTIVE_ATTRIBUTES: return "GL_ACTIVE_ATTRIBUTES";
+		case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: return "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH";
+		case GL_SHADING_LANGUAGE_VERSION: return "GL_SHADING_LANGUAGE_VERSION";
+		case GL_CURRENT_PROGRAM: return "GL_CURRENT_PROGRAM";
+			
 		// LogicOp
 //		case GL_CLEAR: return "GL_CLEAR";
 //		case GL_AND: return "GL_AND";
@@ -314,6 +358,14 @@ char* GLEnumName(GLenum gle) {
 		case GL_BUFFER_USAGE: return "GL_BUFFER_USAGE";
 
 		// Vertex arrays
+		case GL_VERTEX_ATTRIB_ARRAY_ENABLED: return "GL_VERTEX_ATTRIB_ARRAY_ENABLED";
+		case GL_VERTEX_ATTRIB_ARRAY_SIZE: return "GL_VERTEX_ATTRIB_ARRAY_SIZE";
+		case GL_VERTEX_ATTRIB_ARRAY_STRIDE: return "GL_VERTEX_ATTRIB_ARRAY_STRIDE";
+		case GL_VERTEX_ATTRIB_ARRAY_TYPE: return "GL_VERTEX_ATTRIB_ARRAY_TYPE";
+		case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED: return "GL_VERTEX_ATTRIB_ARRAY_NORMALIZED";
+		case GL_VERTEX_ATTRIB_ARRAY_POINTER: return "GL_VERTEX_ATTRIB_ARRAY_POINTER";
+		case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: return "GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING";
+
 //		case GL_VERTEX_ARRAY_SIZE: return "GL_VERTEX_ARRAY_SIZE";
 //		case GL_VERTEX_ARRAY_TYPE: return "GL_VERTEX_ARRAY_TYPE";
 //		case GL_VERTEX_ARRAY_STRIDE: return "GL_VERTEX_ARRAY_STRIDE";
@@ -395,9 +447,47 @@ size_t GLElementTypeSize(GLenum dataType) {
 		case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
 		case GL_SHORT: return sizeof(GLshort);
 		case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-		case GL_FLOAT: return sizeof(GLfloat);
 		case GL_FIXED: return sizeof(GLfixed);
+		case GL_UNSIGNED_INT: return sizeof(GLuint);
+
+		case GL_INT: return sizeof(GLint);
+		case GL_INT_VEC2: return sizeof(GLint) * 2;
+		case GL_INT_VEC3: return sizeof(GLint) * 3;
+		case GL_INT_VEC4: return sizeof(GLint) * 4;
+			
+		case GL_SAMPLER_2D: return sizeof(GLint);		// Uses glUniform1i
+		case GL_SAMPLER_CUBE: return sizeof(GLint);		// Uses glUniform1i
+			
+		case GL_BOOL: return sizeof(GLint);				// Uses glUniform1i or glUniform1f
+		case GL_BOOL_VEC2: return sizeof(GLint) * 2;	// Uses glUniform2i or glUniform2f
+		case GL_BOOL_VEC3: return sizeof(GLint) * 3;	// Uses glUniform3i or glUniform3f
+		case GL_BOOL_VEC4: return sizeof(GLint) * 4;	// Uses glUniform4i or glUniform4f
+			
+		case GL_FLOAT: return sizeof(GLfloat);
+		case GL_FLOAT_VEC2: return sizeof(GLfloat) * 2;
+		case GL_FLOAT_VEC3: return sizeof(GLfloat) * 3;
+		case GL_FLOAT_VEC4: return sizeof(GLfloat) * 4;
+
+		case GL_FLOAT_MAT2: return sizeof(GLfloat) * 2 * 2;
+		case GL_FLOAT_MAT3: return sizeof(GLfloat) * 3 * 3;
+		case GL_FLOAT_MAT4: return sizeof(GLfloat) * 4 * 4;
+			
 		default: return 0;
 	}	
 }
+
+/*
+size_t GLElementTypeSize(GLenum dataType) {
+	switch (dataType) {
+		case GL_BYTE: return sizeof(GLbyte);
+		case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
+		case GL_SHORT: return sizeof(GLshort);
+		case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+		case GL_FLOAT: return sizeof(GLfloat);
+		case GL_FIXED: return sizeof(GLfixed);
+		default: return 0;
+	}
+}
+*/
+
 #endif

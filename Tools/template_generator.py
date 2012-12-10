@@ -22,9 +22,9 @@ _template_open_body = """<?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
 <dict>
 	<key>Description</key>
-	<string>This is a template description.</string>
+	<string>cocos3d code libraries.</string>
 	<key>Identifier</key>
-	<string>com.cocos2d.%s</string>
+	<string>org.cocos3d.%s</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 """
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     directory = None
     group = None
-    identifier = None
+    identifier = "cocos3dLib"
     argv = sys.argv[1:]
     try:                                
         opts, args = getopt.getopt(argv, "d:g:i:", ["directory=","group=","identifier="])

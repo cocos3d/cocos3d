@@ -1,7 +1,7 @@
 /*
  * CC3Material.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -32,6 +32,8 @@
 #import "CC3Texture.h"
 #import "CCProtocols.h"
 #import "CC3NodeVisitor.h"
+#import "CC3GLProgram.h"
+
 
 /** Default material color under ambient lighting. */
 static const ccColor4F kCC3DefaultMaterialColorAmbient = { 0.2, 0.2, 0.2, 1.0 };
@@ -159,17 +161,18 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * which improves performance. 
  */
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
-	CC3Texture* texture;
-	CCArray* textureOverlays;
-	ccColor4F ambientColor;
-	ccColor4F diffuseColor;
-	ccColor4F specularColor;
-	ccColor4F emissionColor;
-	GLfloat shininess;
-	GLenum alphaTestFunction;
-	GLfloat alphaTestReference;
-	ccBlendFunc blendFunc;
-	BOOL shouldUseLighting : 1;
+	CC3Texture* _texture;
+	CCArray* _textureOverlays;
+	CC3GLProgram* _shaderProgram;
+	ccColor4F _ambientColor;
+	ccColor4F _diffuseColor;
+	ccColor4F _specularColor;
+	ccColor4F _emissionColor;
+	GLfloat _shininess;
+	GLenum _alphaTestFunction;
+	GLfloat _alphaTestReference;
+	ccBlendFunc _blendFunc;
+	BOOL _shouldUseLighting : 1;
 }
 
 /**
@@ -651,6 +654,12 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 
 #pragma mark Allocation and initialization
 
+/** The GLSL program containing the vertex and fragment shaders used to decorate this material. */
+@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+
+
+#pragma mark Allocation and initialization
+
 /**
  * Allocates and initializes an autoreleased unnamed instance with an automatically
  * generated unique tag value. The tag value is generated using a call to nextTag.
@@ -714,7 +723,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Unbinds the GL engine from any materials.
+ * Unbinds all materials from the GL engine.
  * 
  * This implementation simply delegates to the unbind class method.
  * Usually, the application never needs to invoke this method directly.
@@ -722,8 +731,8 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 -(void) unbind;
 
 /**
- * Unbinds the GL engine from any materials.
- * 
+ * Unbinds all materials from the GL engine.
+ *
  * Disables material blending in the GL engine, and invokes the unbind class method
  * of CC3Texture to disable all texturing.
  *

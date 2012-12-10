@@ -1,7 +1,7 @@
 /*
  * CC3Scene.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -417,7 +417,7 @@
 /** Template method that opens the 3D camera. */
 -(void) openViewport { [viewportManager openViewport]; }
 
-/** Template method that closes the 3D camera. This is the compliment of the open3DCamera method. */
+/** Template method that closes the 3D camera. This is the compliment of the openViewport method. */
 -(void) closeViewport { [viewportManager closeViewport]; }
 
 

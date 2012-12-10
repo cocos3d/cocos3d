@@ -1,7 +1,7 @@
 /*
  * CC3CC2Extensions.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -469,6 +469,21 @@
 -(NSString*) fullDescription;
 
 @end
+
+
+#pragma mark -
+#pragma mark CCGLProgram replacement
+
+#if CC3_CC2_1
+
+/** Dummy replacement in cocos2d 1.x to keep the comiler happy. */
+@interface CCGLProgram : NSObject
+-(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
+			fragmentShaderByteArray: (const GLchar*) fShaderByteArray;
+-(void) link;
+@end
+
+#endif
 
 
 #pragma mark -

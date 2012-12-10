@@ -1,7 +1,7 @@
 /*
  * CC3ControllableLayer.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2010-2012 The Brenwill Workshop Ltd.
  * http://www.brenwill.com

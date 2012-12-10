@@ -1,7 +1,7 @@
 /*
  * CC3NodeVisitor.h
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -39,7 +39,7 @@
 #pragma mark -
 #pragma mark CC3NodeVisitor
 
-@class CC3Node, CC3Scene;
+@class CC3Node, CC3Scene, CC3MeshNode, CC3Material;
 
 /**
  * A CC3NodeVisitor is a context object that is passed to a node when it is visited
@@ -369,6 +369,41 @@
  * Subclass may override to enhance or modify this behaviour.
  */
 -(void) draw: (CC3Node*) aNode;
+
+
+#pragma mark Accessing node contents
+
+/**
+ * Returns the CC3Scene.
+ *
+ * This is a convenience property that returns the value of the startingNode property,
+ * cast as a CC3Scene. Drawing operations typically start at the CC3Scene, but it is up
+ * to the invoker to make sure that the starting node actually is a CC3Scene.
+ */
+@property(nonatomic, readonly) CC3Scene* scene;
+
+/**
+ * Returns the mesh node that is currently being visited.
+ *
+ * This is a convenience property that returns the value of the currentNode property,
+ * cast as a CC3MeshNode. Drawing operations typically traverse only drawable CC3MeshNodes,
+ * but it is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
+
+/**
+ * Returns the material on the mesh node that is currently being visited.
+ *
+ * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
+ * invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3Material* currentMaterial;
 
 @end
 

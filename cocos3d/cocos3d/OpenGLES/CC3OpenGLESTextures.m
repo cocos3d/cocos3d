@@ -1,7 +1,7 @@
 /*
  * CC3OpenGLESTextures.m
  *
- * cocos3d 0.7.2
+ * cocos3d 2.0.0
  * Author: Bill Hollings
  * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
@@ -170,27 +170,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESTextureMatrixStack
-
-@implementation CC3OpenGLESTextureMatrixStack
-
-// The parent cast as the appropriate type
--(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent; }
-
--(void) activate {
-	[super activate];
-	[self.textureUnit activate];
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for texture unit %@",
-			[super description], NSStringFromGLEnum(self.textureUnit.glEnumValue)];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESTextureUnit
 
 @implementation CC3OpenGLESTextureUnit
@@ -350,19 +329,19 @@
 
 @implementation CC3OpenGLESTextures
 
-@synthesize activeTexture;
-@synthesize clientActiveTexture;
-@synthesize textureUnits;
+@synthesize activeTexture=_activeTexture;
+@synthesize clientActiveTexture=_clientActiveTexture;
+@synthesize textureUnits=_textureUnits;
 
 -(void) dealloc {
-	[activeTexture release];
-	[clientActiveTexture release];
-	[textureUnits release];
+	[_activeTexture release];
+	[_clientActiveTexture release];
+	[_textureUnits release];
 	
 	[super dealloc];
 }
 
--(GLuint) textureUnitCount { return textureUnits ? textureUnits.count : 0; }
+-(GLuint) textureUnitCount { return _textureUnits.count; }
 
 // The minimum number of GL texture unit trackers to create initially.
 // See the description of the class-side minimumTextureUnits property.
@@ -380,21 +359,30 @@ GLuint minimumTextureUnits = 1;
 
 -(CC3OpenGLESTextureUnit*) textureUnitAt: (GLuint) texUnit {
 	// If the requested texture unit hasn't been allocated yet, add it.
-	if (texUnit >= self.textureUnitCount) {
+	GLuint tuCnt = self.textureUnitCount;
+	if (texUnit >= tuCnt) {
 		// Make sure we don't add beyond the max number of texture units for the platform
 		NSAssert2(texUnit < self.engine.platform.maxTextureUnits.value,
 				  @"Request for texture unit %u exceeds maximum of %u texture units",
 				  texUnit, self.engine.platform.maxTextureUnits.value);
 
 		// Add all texture units between the current count and the requested texture unit.
-		for (GLuint i = self.textureUnitCount; i <= texUnit; i++) {
+		for (GLuint i = tuCnt; i <= texUnit; i++) {
 			CC3OpenGLESTextureUnit* tu = [self makeTextureUnit: i];
 			[tu open];		// Read the initial values
-			[textureUnits addObject: tu];
+			[_textureUnits addObject: tu];
 			LogTrace(@"%@ added texture unit %u:\n%@", [self class], i, tu);
 		}
 	}
-	return [textureUnits objectAtIndex: texUnit];
+	return [_textureUnits objectAtIndex: texUnit];
+}
+
+-(void) clearUnboundVertexPointers {
+	for (CC3OpenGLESTextureUnit* tu in _textureUnits) tu.textureCoordinates.wasBound = NO;
+}
+
+-(void) disableUnboundVertexPointers {
+	for (CC3OpenGLESTextureUnit* tu in _textureUnits) [tu.textureCoordinates disableIfUnbound];
 }
 
 -(void) initializeTrackers {
@@ -405,18 +393,16 @@ GLuint minimumTextureUnits = 1;
 	// Start with the min number of texture unit trackers. Add more as requested by textureUnitAt:.
 	self.textureUnits = [CCArray array];
 	for (GLuint i = 0; i < minimumTextureUnits; i++) {
-		[textureUnits addObject: [self makeTextureUnit: i]];
+		[_textureUnits addObject: [self makeTextureUnit: i]];
 	}
 }
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity:10000];
 	[desc appendFormat: @"%@:", [self class]];
-	[desc appendFormat: @"\n    %@", activeTexture];
-	[desc appendFormat: @"\n    %@", clientActiveTexture];
-	for (id tu in textureUnits) {
-		[desc appendFormat: @"\n%@", tu];
-	}
+	[desc appendFormat: @"\n    %@", _activeTexture];
+	[desc appendFormat: @"\n    %@", _clientActiveTexture];
+	for (id tu in _textureUnits) [desc appendFormat: @"\n%@", tu];
 	return desc;
 }
 
