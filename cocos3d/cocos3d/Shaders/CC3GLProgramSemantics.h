@@ -65,35 +65,43 @@ typedef enum {
 
 
 typedef enum {
-	kCC3StateSemanticNone = 0,						/**< No defined semantic usage. */
-	kCC3StateSemanticModelMatrix,					/**< Current model-to-world matrix. */
-	kCC3StateSemanticModelMatrixInv,				/**< Inverse of current model-to-world matrix. */
-	kCC3StateSemanticViewMatrix,					/**< Camera view matrix. */
-	kCC3StateSemanticViewMatrixInv,					/**< Inverse of camera view matrix. */
-	kCC3StateSemanticModelViewMatrix,				/**< Current modelview matrix. */
-	kCC3StateSemanticModelViewMatrixInv,			/**< Inverse of current modelview matrix. */
-	kCC3StateSemanticProjMatrix,					/**< Camera projection matrix. */
-	kCC3StateSemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
-	kCC3StateSemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
-	kCC3StateSemanticModelViewProjMatrixInv,		/**< Inverse of current modelview-projection matrix. */
+	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
+	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
+	kCC3SemanticModelMatrixInv,				/**< Inverse of current model-to-world matrix. */
+	kCC3SemanticViewMatrix,					/**< Camera view matrix. */
+	kCC3SemanticViewMatrixInv,					/**< Inverse of camera view matrix. */
+	kCC3SemanticModelViewMatrix,				/**< Current modelview matrix. */
+	kCC3SemanticModelViewMatrixInv,			/**< Inverse of current modelview matrix. */
+	kCC3SemanticProjMatrix,					/**< Camera projection matrix. */
+	kCC3SemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
+	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInv,		/**< Inverse of current modelview-projection matrix. */
 	
-	kCC3StateSemanticMaterialColorAmbient,			/**< Ambient color of the material. */
-	kCC3StateSemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
-	kCC3StateSemanticMaterialColorSpecular,			/**< Specular color of the material. */
-	kCC3StateSemanticMaterialColorEmission,			/**< Emission color of the material. */
-	kCC3StateSemanticMaterialOpacity,				/**< Opacity of the material. */
-	kCC3StateSemanticMaterialShininess,				/**< Shininess of the material. */
+	kCC3SemanticMaterialColorAmbient,			/**< Ambient color of the material. */
+	kCC3SemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
+	kCC3SemanticMaterialColorSpecular,			/**< Specular color of the material. */
+	kCC3SemanticMaterialColorEmission,			/**< Emission color of the material. */
+	kCC3SemanticMaterialOpacity,				/**< Opacity of the material. */
+	kCC3SemanticMaterialShininess,				/**< Shininess of the material. */
+
+	kCC3SemanticTexture0,						/**< Texture unit 0. */
+	kCC3SemanticTexture1,						/**< Texture unit 1. */
+	kCC3SemanticTexture2,						/**< Texture unit 2. */
+	kCC3SemanticTexture3,						/**< Texture unit 3. */
+	kCC3SemanticTexture4,						/**< Texture unit 4. */
+	kCC3SemanticTexture5,						/**< Texture unit 5. */
+	kCC3SemanticTexture6,						/**< Texture unit 6. */
+	kCC3SemanticTexture7,						/**< Texture unit 7. */
 	
-	
-	kCC3StateSemanticAppBase,					/**< First semantic of app-specific custom semantics. */
-	kCC3StateSemanticMax = 0xFFFF				/**< The maximum value for an app-specific custom semantic. */
-} CC3StateSemantic;
+	kCC3SemanticAppBase,					/**< First semantic of app-specific custom semantics. */
+	kCC3SemanticMax = 0xFFFF				/**< The maximum value for an app-specific custom semantic. */
+} CC3Semantic;
 
 /** Returns a string representation of the specified vertex content semantic. */
 NSString* NSStringFromCC3VertexContentSemantic(CC3VertexContentSemantic semantic);
 
 /** Returns a string representation of the specified state semantic. */
-NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic);
+NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -

@@ -489,6 +489,9 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 /** Sets the default GL material source and destination blend function used for new instances. */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
+/** The GLSL program containing the vertex and fragment shaders used to decorate this material. */
+@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+
 
 #pragma mark Textures
 
@@ -650,12 +653,6 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * node that is making use of this texture.
  */
 @property(nonatomic, assign) CC3Vector lightDirection;
-
-
-#pragma mark Allocation and initialization
-
-/** The GLSL program containing the vertex and fragment shaders used to decorate this material. */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
 
 
 #pragma mark Allocation and initialization

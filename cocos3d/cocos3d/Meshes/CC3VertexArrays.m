@@ -69,7 +69,6 @@
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) verticesWereChanged;
-@property(nonatomic, readonly) BOOL switchingArray;
 @property(nonatomic, readonly) GLuint availableVertexCount;
 @end
 
@@ -408,16 +407,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor { [self bindGLWithVisitor: visitor]; }
 
-/*
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.switchingArray) {
-		[self bindGLWithVisitor: visitor];
-	} else {
-		LogTrace(@"Reusing currently bound %@", self);
-	}
-}
-*/
-
 /**
  * Template method that binds the GL engine to the underlying vertex data,
  * in preparation for drawing.
@@ -456,13 +445,6 @@ static GLuint lastAssignedVertexArrayTag;
 							  withType: _elementType
 							withStride: _vertexStride
 				   withShouldNormalize: _shouldNormalizeContent];
-}
-
--(void) unbind { [self.class unbind]; }
-
-+(void) unbind {
-//	[[CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: self.defaultSemantic] disable];
-	[self resetSwitching];
 }
 
 
@@ -550,34 +532,6 @@ static GLuint lastAssignedVertexArrayTag;
 -(NSString*) describeElements: (GLuint) vtxCount { return [self describeVertices: vtxCount]; }
 -(NSString*) describeElements: (GLuint) vtxCount startingAt: (GLuint) startElem {
 	return [self describeVertices: vtxCount startingAt: startElem];
-}
-
-
-
-#pragma mark Array context switching
-
-/**
- * Returns whether this vertex array is different than the vertex array of the same type
- * that was most recently bound to the GL engine. To improve performance, vertex arrays
- * are only bound if they need to be.
- *
- * If appropriate, the application can arrange CC3MeshNodes in the CC3Scene so that nodes
- * using the same vertex arrays are drawn together, to minimize the number of binding
- * changes in the GL engine.
- */
--(BOOL) switchingArray { return YES; }
-
-+(void) resetSwitching {}
-
-+(void) resetAllSwitching {
-	[CC3VertexLocations resetSwitching];
-	[CC3VertexNormals resetSwitching];
-	[CC3VertexColors resetSwitching];
-	[CC3VertexTextureCoordinates resetSwitching];
-	[CC3VertexIndices resetSwitching];
-	[CC3VertexPointSizes resetSwitching];
-	[CC3VertexMatrixIndices resetSwitching];
-	[CC3VertexWeights resetSwitching];
 }
 
 @end
@@ -1073,23 +1027,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticLocations; }
 
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentLocationsTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentLocationsTag != tag;
-	currentLocationsTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentLocationsTag = 0; }
-
 @end
 
 
@@ -1110,23 +1047,6 @@ static GLuint currentLocationsTag = 0;
 -(NSString*) nameSuffix { return @"Normals"; }
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticNormals; }
-
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentNormalsTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentNormalsTag != tag;
-	currentNormalsTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentNormalsTag = 0; }
 
 @end
 
@@ -1243,23 +1163,6 @@ static GLuint currentNormalsTag = 0;
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticColors; }
 
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentColorsTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentColorsTag != tag;
-	currentColorsTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentColorsTag = 0; }
-
 @end
 
 
@@ -1338,23 +1241,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 				withStride: _vertexStride
 	   withShouldNormalize: _shouldNormalizeContent];
 }
-
-+(void) unbind: (GLuint) textureUnit {
-//	LogTrace(@"Unbinding texture unit %u", textureUnit);
-//	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: textureUnit];
-//	[glesTexUnit.textureCoordinates disable];
-}
-
-/**
- * Unbinds all texture units between the specified texture unit index and the maximum number of texture
- * units supported by the platform. This is a convenience method for disabling unused texture units.
- */
-+(void) unbindRemainingFrom: (GLuint) textureUnit {
-	GLuint maxTexUnits = CC3OpenGLESEngine.engine.textures.textureUnitCount;
-	for (int tu = textureUnit; tu < maxTexUnits; tu++) [self unbind: tu];
-}
-
-+(void) unbind { [self unbindRemainingFrom: 0]; }
 
 /**
  * Aligns the vertex texture coordinates with the area of the texture defined
@@ -1509,20 +1395,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticTexture0; }
 
-
-#pragma mark Array context switching
-
-/**
- * Returns whether this vertex array is different than the vertex array of the same type
- * that was most recently bound to the GL engine. To improve performance, vertex arrays
- * are only bound if they need to be.
- *
- * Because the same instance of CC3VertexTextureCoordinates can be used by multiple
- * texture units, this property always returns YES, so that the texture array will be
- * bound to the GL engine every time.
- */
--(BOOL) switchingArray { return YES; }
-
 @end
 
 
@@ -1672,23 +1544,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticNone; }
 
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentIndicesTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentIndicesTag != tag;
-	currentIndicesTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentIndicesTag = 0; }
-
 @end
 
 
@@ -1717,23 +1572,6 @@ static GLuint currentIndicesTag = 0;
 }
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticPointSizes; }
-
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentPointSizesTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentPointSizesTag != tag;
-	currentPointSizesTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentPointSizesTag = 0; }
 
 @end
 
@@ -1775,23 +1613,6 @@ static GLuint currentPointSizesTag = 0;
 }
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticWeights; }
-
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentWeightsTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentWeightsTag != tag;
-	currentWeightsTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentWeightsTag = 0; }
 
 @end
 
@@ -1852,22 +1673,5 @@ static GLuint currentWeightsTag = 0;
 }
 
 +(GLenum) defaultSemantic { return kCC3VertexContentSemanticMatrices; }
-
-
-#pragma mark Array context switching
-
-// The tag of the array that was most recently drawn to the GL engine.
-// The GL engine is only updated when an array of the same type with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same arrays are drawn together, to minimize context switching within the GL engine.
-static GLuint currentMatrixIndicesTag = 0;
-
--(BOOL) switchingArray {
-	BOOL shouldSwitch = currentMatrixIndicesTag != tag;
-	currentMatrixIndicesTag = tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentMatrixIndicesTag = 0; }
 
 @end

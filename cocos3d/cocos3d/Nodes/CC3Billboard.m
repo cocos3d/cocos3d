@@ -531,7 +531,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 		// Disable all other texture units
 		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
-		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
+//		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
 		
 		// Make sure the 2D texture unit is active
 		glesTextures.activeTexture.value = textureUnitIndex;

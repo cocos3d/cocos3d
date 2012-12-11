@@ -706,18 +706,12 @@
 #pragma mark Matierial coloring
 
 -(BOOL) shouldUseLighting {
-	for (CC3Node* child in children) {
-		if (child.shouldUseLighting) {
-			return YES;
-		}
-	}
+	for (CC3Node* child in children) if (child.shouldUseLighting) return YES;
 	return NO;
 }
 
 -(void) setShouldUseLighting: (BOOL) useLighting {
-	for (CC3Node* child in children) {
-		child.shouldUseLighting = useLighting;
-	}
+	for (CC3Node* child in children) child.shouldUseLighting = useLighting;
 }
 
 -(ccColor4F) ambientColor {
@@ -739,9 +733,7 @@
 }
 
 -(void) setAmbientColor: (ccColor4F) color {
-	for (CC3Node* child in children) {
-		child.ambientColor = color;
-	}
+	for (CC3Node* child in children) child.ambientColor = color;
 }
 
 -(ccColor4F) diffuseColor {
@@ -763,9 +755,7 @@
 }
 
 -(void) setDiffuseColor: (ccColor4F) color {
-	for (CC3Node* child in children) {
-		child.diffuseColor = color;
-	}
+	for (CC3Node* child in children) child.diffuseColor = color;
 }
 
 -(ccColor4F) specularColor {
@@ -787,9 +777,7 @@
 }
 
 -(void) setSpecularColor: (ccColor4F) color {
-	for (CC3Node* child in children) {
-		child.specularColor = color;
-	}
+	for (CC3Node* child in children) child.specularColor = color;
 }
 
 -(ccColor4F) emissionColor {
@@ -811,9 +799,7 @@
 }
 
 -(void) setEmissionColor: (ccColor4F) color {
-	for (CC3Node* child in children) {
-		child.emissionColor = color;
-	}
+	for (CC3Node* child in children) child.emissionColor = color;
 }
 
 -(CC3Vector) globalLightLocation {
@@ -830,6 +816,18 @@
 	for (CC3Node* child in children) {
 		child.globalLightLocation = aDirection;
 	}
+}
+
+-(CC3GLProgram*) shaderProgram {
+	for (CC3Node* child in children) {
+		CC3GLProgram* shaderProgram = child.shaderProgram;
+		if (shaderProgram) return shaderProgram;
+	}
+	return nil;
+}
+
+-(void) setShaderProgram:(CC3GLProgram *)shaderProgram {
+	for (CC3Node* child in children) child.shaderProgram = shaderProgram;
 }
 
 

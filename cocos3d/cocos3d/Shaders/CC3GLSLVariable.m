@@ -93,7 +93,7 @@
 	GLint maxNameLen = [_program maxAttributeNameLength];
 	char* cName = calloc(maxNameLen, sizeof(char));
 
-	glGetActiveAttrib(_program.program, _location, maxNameLen, NULL, &_size, &_type, cName);
+	glGetActiveAttrib(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
 	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
 	
 	_location = glGetAttribLocation(_program.program, cName);

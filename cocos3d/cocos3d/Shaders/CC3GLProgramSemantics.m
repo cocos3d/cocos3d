@@ -62,29 +62,38 @@ NSString* NSStringFromCC3VertexContentSemantic(CC3VertexContentSemantic semantic
 	}
 }
 
-NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic) {
+NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	switch (semantic) {
-		case kCC3StateSemanticNone: return @"kCC3StateSemanticNone";
-		case kCC3StateSemanticModelMatrix: return @"kCC3StateSemanticModelMatrix";
-		case kCC3StateSemanticModelMatrixInv: return @"kCC3StateSemanticModelMatrixInv";
-		case kCC3StateSemanticViewMatrix: return @"kCC3StateSemanticViewMatrix";
-		case kCC3StateSemanticViewMatrixInv: return @"kCC3StateSemanticViewMatrixInv";
-		case kCC3StateSemanticModelViewMatrix: return @"kCC3StateSemanticModelViewMatrix";
-		case kCC3StateSemanticModelViewMatrixInv: return @"kCC3StateSemanticModelViewMatrixInv";
-		case kCC3StateSemanticProjMatrix: return @"kCC3StateSemanticProjMatrix";
-		case kCC3StateSemanticProjMatrixInv: return @"kCC3StateSemanticProjMatrixInv";
-		case kCC3StateSemanticModelViewProjMatrix: return @"kCC3StateSemanticModelViewProjMatrix";
-		case kCC3StateSemanticModelViewProjMatrixInv: return @"kCC3StateSemanticModelViewProjMatrixInv";
+		case kCC3SemanticNone: return @"kCC3SemanticNone";
+		case kCC3SemanticModelMatrix: return @"kCC3SemanticModelMatrix";
+		case kCC3SemanticModelMatrixInv: return @"kCC3SemanticModelMatrixInv";
+		case kCC3SemanticViewMatrix: return @"kCC3SemanticViewMatrix";
+		case kCC3SemanticViewMatrixInv: return @"kCC3SemanticViewMatrixInv";
+		case kCC3SemanticModelViewMatrix: return @"kCC3SemanticModelViewMatrix";
+		case kCC3SemanticModelViewMatrixInv: return @"kCC3SemanticModelViewMatrixInv";
+		case kCC3SemanticProjMatrix: return @"kCC3SemanticProjMatrix";
+		case kCC3SemanticProjMatrixInv: return @"kCC3SemanticProjMatrixInv";
+		case kCC3SemanticModelViewProjMatrix: return @"kCC3SemanticModelViewProjMatrix";
+		case kCC3SemanticModelViewProjMatrixInv: return @"kCC3SemanticModelViewProjMatrixInv";
 			
-		case kCC3StateSemanticMaterialColorAmbient: return @"kCC3StateSemanticMaterialColorAmbient";
-		case kCC3StateSemanticMaterialColorDiffuse: return @"kCC3StateSemanticMaterialColorDiffuse";
-		case kCC3StateSemanticMaterialColorSpecular: return @"kCC3StateSemanticMaterialColorSpecular";
-		case kCC3StateSemanticMaterialColorEmission: return @"kCC3StateSemanticMaterialColorEmission";
-		case kCC3StateSemanticMaterialOpacity: return @"kCC3StateSemanticMaterialOpacity";
-		case kCC3StateSemanticMaterialShininess: return @"kCC3StateSemanticMaterialShininess";
+		case kCC3SemanticMaterialColorAmbient: return @"kCC3SemanticMaterialColorAmbient";
+		case kCC3SemanticMaterialColorDiffuse: return @"kCC3SemanticMaterialColorDiffuse";
+		case kCC3SemanticMaterialColorSpecular: return @"kCC3SemanticMaterialColorSpecular";
+		case kCC3SemanticMaterialColorEmission: return @"kCC3SemanticMaterialColorEmission";
+		case kCC3SemanticMaterialOpacity: return @"kCC3SemanticMaterialOpacity";
+		case kCC3SemanticMaterialShininess: return @"kCC3SemanticMaterialShininess";
+
+		case kCC3SemanticTexture0: return @"kCC3SemanticTexture0";
+		case kCC3SemanticTexture1: return @"kCC3SemanticTexture1";
+		case kCC3SemanticTexture2: return @"kCC3SemanticTexture2";
+		case kCC3SemanticTexture3: return @"kCC3SemanticTexture3";
+		case kCC3SemanticTexture4: return @"kCC3SemanticTexture4";
+		case kCC3SemanticTexture5: return @"kCC3SemanticTexture5";
+		case kCC3SemanticTexture6: return @"kCC3SemanticTexture6";
+		case kCC3SemanticTexture7: return @"kCC3SemanticTexture7";
 			
-		case kCC3StateSemanticAppBase: return @"kCC3StateSemanticAppBase";
-		case kCC3StateSemanticMax: return @"kCC3StateSemanticMax";
+		case kCC3SemanticAppBase: return @"kCC3SemanticAppBase";
+		case kCC3SemanticMax: return @"kCC3SemanticMax";
 		default: return [NSString stringWithFormat: @"Unknown state semantic (%u)", semantic];
 	}
 }
@@ -97,7 +106,7 @@ NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic) {
 
 +(id) semanticsDelegate { return [[[self alloc] init] autorelease]; }
 
--(NSString*) nameOfUniformSemantic: (GLenum) semantic { return NSStringFromCC3StateSemantic(semantic); }
+-(NSString*) nameOfUniformSemantic: (GLenum) semantic { return NSStringFromCC3Semantic(semantic); }
 
 -(NSString*) nameOfAttributeSemantic: (GLenum) semantic { return NSStringFromCC3VertexContentSemantic(semantic); }
 
@@ -106,8 +115,9 @@ NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic) {
 -(BOOL) assignAttributeSemantic: (CC3GLSLAttribute*) attribute { return NO; }
 
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	switch (uniform.semantic) {
-		case kCC3StateSemanticModelViewProjMatrix: {
+	GLenum semantic = uniform.semantic;
+	switch (semantic) {
+		case kCC3SemanticModelViewProjMatrix: {
 			CC3Matrix4x4 mvpMtx;
 			CC3Matrix4x4* pMVP = &mvpMtx;
 			[visitor.camera.frustum.viewProjectionMatrix populateCC3Matrix4x4: pMVP];
@@ -115,8 +125,20 @@ NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic) {
 			[uniform setMatrices4x4: pMVP];
 			return YES;
 		}
-		case kCC3StateSemanticMaterialColorDiffuse:
-			[uniform setColor4F: visitor.currentMaterial.ambientColor];
+
+		case kCC3SemanticTexture0:
+		case kCC3SemanticTexture1:
+		case kCC3SemanticTexture2:
+		case kCC3SemanticTexture3:
+		case kCC3SemanticTexture4:
+		case kCC3SemanticTexture5:
+		case kCC3SemanticTexture6:
+		case kCC3SemanticTexture7:
+			[uniform setInteger: semantic - kCC3SemanticTexture0];
+			return YES;
+
+		case kCC3SemanticMaterialColorDiffuse:
+			[uniform setColor4F: visitor.currentMaterial.diffuseColor];
 			return YES;
 
 		default: return NO;
@@ -138,14 +160,23 @@ NSString* NSStringFromCC3StateSemantic(CC3StateSemantic semantic) {
 	CC3SetSemantic(@"a_weight", kCC3VertexContentSemanticWeights);
 	CC3SetSemantic(@"a_matrixIdx", kCC3VertexContentSemanticMatrices);
 	CC3SetSemantic(@"a_pointSize", kCC3VertexContentSemanticPointSizes);
+	CC3SetSemantic(@"a_texCoord", kCC3VertexContentSemanticTexture0);	// alias to a_texCoord0
+	CC3SetSemantic(@"a_texCoord0", kCC3VertexContentSemanticTexture0);
+	CC3SetSemantic(@"a_texCoord1", kCC3VertexContentSemanticTexture1);
+	CC3SetSemantic(@"a_texCoord2", kCC3VertexContentSemanticTexture2);
+	CC3SetSemantic(@"a_texCoord3", kCC3VertexContentSemanticTexture3);
+	CC3SetSemantic(@"a_texCoord4", kCC3VertexContentSemanticTexture4);
+	CC3SetSemantic(@"a_texCoord5", kCC3VertexContentSemanticTexture5);
+	CC3SetSemantic(@"a_texCoord6", kCC3VertexContentSemanticTexture6);
+	CC3SetSemantic(@"a_texCoord7", kCC3VertexContentSemanticTexture7);
 	
 	return NO;
 }
 
 -(BOOL) assignUniformSemantic: (CC3GLSLUniform*) variable {
-	CC3SetSemantic(@"u_mtxMVP", kCC3StateSemanticModelViewProjMatrix);
+	CC3SetSemantic(@"u_mtxMVP", kCC3SemanticModelViewProjMatrix);
 
-	CC3SetSemantic(@"u_matDiffuseColor", kCC3StateSemanticMaterialColorDiffuse);
+	CC3SetSemantic(@"u_matDiffuseColor", kCC3SemanticMaterialColorDiffuse);
 	
 	return NO;
 }

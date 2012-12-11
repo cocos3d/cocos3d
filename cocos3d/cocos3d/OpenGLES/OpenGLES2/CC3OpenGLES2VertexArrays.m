@@ -33,6 +33,7 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3GLProgram.h"
 #import "CC3VertexArrays.h"
+#import "ccGLStateCache.h"
 
 
 #if CC3_OGLES_2
@@ -108,6 +109,21 @@
 	} else {
 		glDisableVertexAttribArray(self.attributeIndex);
 	}
+}
+
+/**
+ * Overridden to engage cocos2d state management to enable vertex position and color arrays.
+ * In most cases, the 3D scene draws before the 2D nodes such as sprites, so we enable position,
+ * color & texture arrays, which is typical of 2D sprites. Other cocos2d node types will change
+ * the state as needed. The important goal here is to align cocos2d's state with the GL state.
+ */
+-(void) close {
+	isScheduledForClose = NO;
+	if (self.shouldRestoreOriginalOnClose) {
+		[self restoreOriginalValue];
+		ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
+	}
+	valueIsKnown = self.valueIsKnownOnClose;
 }
 
 @end
