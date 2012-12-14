@@ -489,7 +489,15 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 /** Sets the default GL material source and destination blend function used for new instances. */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
-/** The GLSL program containing the vertex and fragment shaders used to decorate this material. */
+/**
+ * The GLSL program containing the vertex and fragment shaders used to decorate this material.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ *
+ * When running under OpenGL ES 2, the initial value of this property is set to the program returned
+ * from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under OpenGL ES 1, the initial
+ * value of this property is nil.
+ */
 @property(nonatomic, retain) CC3GLProgram* shaderProgram;
 
 

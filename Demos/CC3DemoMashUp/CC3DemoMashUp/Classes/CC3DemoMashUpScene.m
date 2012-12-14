@@ -280,19 +280,19 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Set up any initial state tracked by this subclass
 	[self initCustomState];
 	
-//	[self addGround];				// Add a ground plane to provide some perspective to the user
+	[self addGround];				// Add a ground plane to provide some perspective to the user
 	
-//	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
+	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
 	
-//	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
+	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
 	
-//	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
+	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
 	
-//	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
+	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
 	
-//	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
+	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
 	
-//	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
+	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
 
 	[self addRobot];				// Add an animated robot arm, a light, and a camera
 	

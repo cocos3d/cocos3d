@@ -48,37 +48,10 @@
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
 
 -(void) dealloc {
+	[_name release];
 	[_uniforms release];
 	[_attributes release];
 	[super dealloc];
-}
-
-
-#pragma mark Allocation and initialization
-
--(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
-			fragmentShaderByteArray: (const GLchar*) fShaderByteArray {
-	if ( (self = [super initWithVertexShaderByteArray: vShaderByteArray
-							  fragmentShaderByteArray: fShaderByteArray]) ) {
-		_uniforms = [CCArray new];		// retained
-		_attributes = [CCArray new];	// retained
-		_maxUniformNameLength = 0;
-		_maxAttributeNameLength = 0;
-	}
-	return self;
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ GL program: %i, GL vtx shader: %i, GL frag shader: %i",
-			[self class], program_, vertShader_, fragShader_];
-}
-
--(NSString*) fullDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@", self.description];
-	for (id var in _uniforms) [desc appendFormat: @"\n\t %@", var];
-	for (id var in _attributes) [desc appendFormat: @"\n\t %@", var];
-	return desc;
 }
 
 
@@ -98,12 +71,12 @@
 	return nil;
 }
 
--(void) extractVariables {
-	[self extractUniforms];
-	[self extractAttributes];
+-(void) mapVariableSemantics {
+	[self mapUniformSemantics];
+	[self mapAttributeSemantics];
 }
 
--(void) extractUniforms {
+-(void) mapUniformSemantics {
 	[_uniforms removeAllObjects];
 
 	GLint varCnt;
@@ -118,7 +91,7 @@
 	}
 }
 
--(void) extractAttributes {
+-(void) mapAttributeSemantics {
 	[_attributes removeAllObjects];
 	
 	GLint varCnt;
@@ -150,7 +123,6 @@
 
 
 #pragma mark Compiling and linking
-
 
 -(BOOL) compileShader: (GLuint*) shader type: (GLenum) type byteArray: (const GLchar*) source {
     GLint status;
@@ -184,6 +156,89 @@
 	return (status == GL_TRUE);
 }
 
+-(BOOL) link {
+	NSAssert1(_semanticDelegate, @"%@ requires that the semanticDelegate property be set before linking.", self);
+	BOOL wasLinked = [super link];
+	if (wasLinked) {
+		[self mapVariableSemantics];
+		LogRez(@"Linked %@", self.fullDescription);
+	}
+	return wasLinked;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
+	return [self initWithName: [self.class programNameFromVertexShaderFile: vshFilename
+													 andFragmentShaderFile: fshFilename]
+		 fromVertexShaderFile: vshFilename
+		andFragmentShaderFile: fshFilename];
+}
+
+-(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
+	LogRez(@"");
+	LogRez(@"--------------------------------------------------");
+	LogRez(@"Loading GLSL program from vertex shader file '%@' and fragment shader file '%@'", vshFilename, fshFilename);
+		   
+	const GLchar* vshSource = (GLchar*)[[self glslSourceFromFile: vshFilename] UTF8String];
+	const GLchar* fshSource = (GLchar*)[[self glslSourceFromFile: fshFilename] UTF8String];
+	return [self initWithName: name fromVertexShaderBytes: vshSource andFragmentShaderBytes: fshSource];
+}
+
+-(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {
+	
+	NSAssert1(name, @"%@ cannot be created without a name", [self class]);
+
+	if ( (self = [super initWithVertexShaderByteArray: vshBytes
+							  fragmentShaderByteArray: fshBytes]) ) {
+		self.name = name;				// retained
+		_uniforms = [CCArray new];		// retained
+		_attributes = [CCArray new];	// retained
+		_maxUniformNameLength = 0;
+		_maxAttributeNameLength = 0;
+	}
+	return self;
+}
+
+// Override superclass implementation to force nil name, which will be rejected.
+-(id)initWithVertexShaderByteArray: (const GLchar*)vShaderByteArray fragmentShaderByteArray: (const GLchar*)fShaderByteArray {
+	return [self initWithName: nil fromVertexShaderBytes: vShaderByteArray andFragmentShaderBytes: fShaderByteArray];
+}
+
+// Overridden superclass implementation to delegate to updated method
+-(id) initWithVertexShaderFilename: (NSString*) vshFilename fragmentShaderFilename: fshFilename {
+	return [self initFromVertexShaderFile: vshFilename andFragmentShaderFile: fshFilename];
+}
+
++(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename
+					   andFragmentShaderFile: (NSString*) fshFilename {
+	return [NSString stringWithFormat: @"%@-%@", vshFilename, fshFilename];
+}
+
+-(NSString*) glslSourceFromFile:  (NSString*) glslFilename {
+	NSError* err = nil;
+	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
+	NSAssert1([[NSFileManager defaultManager] fileExistsAtPath: filePath],
+			  @"Could not load GLSL file '%@' because it could not be found", filePath);
+	NSString* glslSource = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
+	NSAssert4(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
+			  glslFilename, err.localizedDescription, err.code, err.localizedFailureReason);
+	return glslSource;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ GL program: %i, GL vtx shader: %i, GL frag shader: %i",
+			[self class], program_, vertShader_, fragShader_];
+}
+
+-(NSString*) fullDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[desc appendFormat: @"%@ declaring variables:", self.description];
+	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
+	for (CC3GLSLVariable* var in _uniforms) [desc appendFormat: @"\n\t %@", var.fullDescription];
+	return desc;
+}
 
 @end
 

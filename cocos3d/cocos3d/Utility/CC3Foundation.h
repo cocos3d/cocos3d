@@ -1796,7 +1796,6 @@ static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
 }
 
 
-
 #pragma mark -
 #pragma mark ccColor3B constants and functions
 
@@ -1822,7 +1821,9 @@ static inline NSString* NSStringFromBoolean(BOOL value) { return value ? @"YES" 
  * Ensures that the specified file path is absolute, converting it if necessary.
  * 
  * Relative paths are assumed to be relative to the application resources directory.
- * If the specified file path is not already absolute, the path to that directory
- * is prepended to it.
+ * If the specified file path is not already absolute, the path to that directory is prepended to it.
  */
-NSString* CC3EnsureAbsoluteFilePath(NSString* filePath);
+static inline NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
+	if(filePath.isAbsolutePath) return filePath;
+	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
+}

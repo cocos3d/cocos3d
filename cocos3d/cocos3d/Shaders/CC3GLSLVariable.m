@@ -66,12 +66,18 @@
 
 -(void) populateFromProgram {}
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ named %@ for semantic %@ of type %@ and size %i at index %i and location %i",
-			self.class, _name, self.semanticName, NSStringFromGLEnum(_type), _size, _index, _location];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@ named %@", self.class, _name]; }
 
--(NSString*) fullDescription { return [NSString stringWithFormat: @"%@ in program %@", self, _program]; }
+-(NSString*) fullDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"%@", self.description];
+	[desc appendFormat: @"\n\t\tSemantic: %@", self.semanticName];
+	[desc appendFormat: @"\n\t\tType: %@", NSStringFromGLEnum(_type)];
+	[desc appendFormat: @"\n\t\tSize: %i", _size];
+	[desc appendFormat: @"\n\t\tLocation: %i", _location];
+	[desc appendFormat: @"\n\t\tIndex: %i", _index];
+	return desc;
+}
 
 -(NSString*) semanticName { return nil; }
 

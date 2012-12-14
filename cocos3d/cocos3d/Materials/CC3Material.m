@@ -325,6 +325,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
 		_shouldUseLighting = YES;
+		self.shaderProgram = CC3OpenGLESEngine.engine.shaders.defaultProgram;	// retained
 	}
 	return self;
 }
@@ -505,7 +506,7 @@ static GLuint lastAssignedMaterialTag;
 }
 
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_shaderProgram bindWithVisitor: visitor];
+	[self.shaderProgram bindWithVisitor: visitor];		// use accessor to lazily init if needed
 }
 
 -(void) unbind { [[self class] unbind]; }

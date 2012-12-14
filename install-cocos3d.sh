@@ -1,6 +1,31 @@
 #!/bin/bash
 
-# cocos3d 0.7.2
+#
+# cocos3d 2.0.0
+# Author: Bill Hollings
+# Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
+# http://www.brenwill.com
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# http://en.wikipedia.org/wiki/MIT_License
+#
 
 echo 'cocos3d installer'
 
@@ -109,7 +134,7 @@ copy_xc4_project_templates(){
 # Remove any pre-cocos3d-2.0 templates
 	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
 
-# Copy OpenGL ES 1.1 Template
+# Copy OpenGL ES 1 Template
 	DST_DIR="$TEMPLATE_DIR""cocos3d1 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
@@ -122,7 +147,7 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
 
-# Copy OpenGL ES 1.1 Template
+# Copy OpenGL ES 2 Template
 	DST_DIR="$TEMPLATE_DIR""cocos3d2 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
@@ -141,6 +166,7 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+	copy_files "GLSL" "$DST_DIR"
 
 # Copy cocos3d library files references
 	TEMPLATE="cocos3d-lib"
@@ -150,7 +176,7 @@ copy_xc4_project_templates(){
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
 
 	echo ...copying cocos3d files to $TEMPLATE template
-	copy_files cocos3d "$DST_DIR"
+	copy_files "cocos3d" "$DST_DIR"
 
 	echo done!
 }

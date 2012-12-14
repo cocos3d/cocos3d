@@ -44,6 +44,7 @@
 
 /** CC3GLProgram extends CCGLProgram to provide specialized behaviour for cocos3d. */
 @interface CC3GLProgram : CCGLProgram {
+	NSString* _name;
 	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
 	CCArray* _uniforms;
 	CCArray* _attributes;
@@ -52,8 +53,18 @@
 }
 
 /**
+ * The name of this program.
+ *
+ * This name should be unique, as it is used to retrieve this program in order to attach
+ * it to a node material.
+ */
+@property(nonatomic, retain) NSString* name;
+
+/**
  * On each render loop, this CC3GLProgram delegates to this object to populate
  * the current value of each uniform variable from content within the 3D scene.
+ *
+ * This property must be set prior to invoking the link method.
  */
 @property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
 
@@ -79,12 +90,53 @@
 -(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic;
 
 /**
- * Extracts the uniforms and attributes from the GLSL program.
+ * Links this program and uses the delegate in the semanticDelegate property to map
+ * each uniform and attribute to its semantic meaning.
  *
- * This should be invoked after the semanticDelegate has been assigned, and after
- * this program has been successfully compiled and linked,
+ * The semanticDelegate property must be set prior to invoking this method.
  */
--(void) extractVariables;
+-(BOOL) link;
+
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance with the specified name and compiles the program from the specified
+ * vertex and fragment shader source code.
+ *
+ * The specified filenames may specified as relative or absolute filenames.
+ */
+-(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes;
+
+/**
+ * Initializes this instance with the specified name and compiles the program from vertex
+ * and fragment shader source code loaded from the specified files.
+ *
+ * The specified filenames may specified as relative or absolute filenames.
+ */
+-(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
+
+/**
+ * Initializes this instance and compiles the program from vertex and fragment shader source
+ * code loaded from the specified files.
+ *
+ * The specified filenames may specified as relative or absolute filenames.
+ *
+ * The name property of this program will be set to a name derived from the two filenames via the
+ * programNameFromVertexShaderFile:andFragmentShaderFile: method..
+ */
+-(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
+
+/**
+ * Returns a program name created from the specified vertex and shader filenames.
+ *
+ * This method can be used to determine a suitable name for a program, in a standardized way,
+ * given the two shader files.
+ * 
+ * This method is used by the initFromVertexShaderFile:andFragmentShaderFile: method.
+ */
++(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
 
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;

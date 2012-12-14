@@ -107,6 +107,9 @@
 /** Allocates and initializes an autoreleased instance at the specified index within the specified program. */
 +(id) variableInProgram: (CC3GLProgram*) program atIndex: (GLuint) index;
 
+/** Returns a detailed description of this instance. */
+-(NSString*) fullDescription;
+
 @end
 
 
