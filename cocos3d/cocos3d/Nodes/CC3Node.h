@@ -36,7 +36,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
-#import "CC3GLProgram.h"
+#import "CC3GLProgramContext.h"
 
 @class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum;
 @class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
@@ -1430,7 +1430,7 @@ typedef enum {
  * Querying this property returns the value of the same property from the first descendant
  * node that is a CC3MeshNode and has a non-nil value in the shaderProgram property.
  */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+@property(nonatomic, retain) CC3GLProgramContext* shaderProgram;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

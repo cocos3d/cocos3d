@@ -162,6 +162,7 @@
 		A94736FF140E58E7006F410C /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D5140E58E7006F410C /* Joystick.m */; };
 		A9473700140E58E7006F410C /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D7140E58E7006F410C /* Models.m */; };
 		A95A5C5714E45AC00013359F /* Crate.png in Resources */ = {isa = PBXBuildFile; fileRef = A95A5C5514E45AC00013359F /* Crate.png */; };
+		A9696380167B5E8A00811AA4 /* CC3GLProgramContext.m in Sources */ = {isa = PBXBuildFile; fileRef = A969637F167B5E8A00811AA4 /* CC3GLProgramContext.m */; };
 		A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */; };
 		A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */; };
 		A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359D14EF2689002A7363 /* MountainGrass.jpg */; };
@@ -610,6 +611,8 @@
 		A94736D6140E58E7006F410C /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
 		A94736D7140E58E7006F410C /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A95A5C5514E45AC00013359F /* Crate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Crate.png; sourceTree = "<group>"; };
+		A969637E167B5E8A00811AA4 /* CC3GLProgramContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3GLProgramContext.h; sourceTree = "<group>"; };
+		A969637F167B5E8A00811AA4 /* CC3GLProgramContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3GLProgramContext.m; sourceTree = "<group>"; };
 		A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassCloseUp.jpg; sourceTree = "<group>"; };
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
 		A96B359D14EF2689002A7363 /* MountainGrass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = MountainGrass.jpg; sourceTree = "<group>"; };
@@ -1775,6 +1778,8 @@
 			children = (
 				A9905A9D167905C5005FFAB0 /* CC3GLProgram.h */,
 				A9905A9E167905C5005FFAB0 /* CC3GLProgram.m */,
+				A969637E167B5E8A00811AA4 /* CC3GLProgramContext.h */,
+				A969637F167B5E8A00811AA4 /* CC3GLProgramContext.m */,
 				A9905A9F167905C5005FFAB0 /* CC3GLProgramSemantics.h */,
 				A9905AA0167905C5005FFAB0 /* CC3GLProgramSemantics.m */,
 				A9905AA1167905C5005FFAB0 /* CC3GLSLVariable.h */,
@@ -2189,6 +2194,7 @@
 				A9905B39167905C6005FFAB0 /* CC3TargettingNode.m in Sources */,
 				A9905B3A167905C6005FFAB0 /* CC3VertexArrayMeshModel.m in Sources */,
 				A9905B3B167905C6005FFAB0 /* CC3World.m in Sources */,
+				A9696380167B5E8A00811AA4 /* CC3GLProgramContext.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

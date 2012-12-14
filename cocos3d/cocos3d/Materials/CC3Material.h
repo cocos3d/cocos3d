@@ -32,7 +32,7 @@
 #import "CC3Texture.h"
 #import "CCProtocols.h"
 #import "CC3NodeVisitor.h"
-#import "CC3GLProgram.h"
+#import "CC3GLProgramContext.h"
 
 
 /** Default material color under ambient lighting. */
@@ -163,7 +163,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
 	CCArray* _textureOverlays;
-	CC3GLProgram* _shaderProgram;
+	CC3GLProgramContext* _shaderProgram;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -490,15 +490,15 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
 /**
- * The GLSL program containing the vertex and fragment shaders used to decorate this material.
+ * The GLSL program context containing the vertex and fragment shaders used to decorate this material.
  *
  * This property is used only when running under OpenGL ES 2.
  *
- * When running under OpenGL ES 2, the initial value of this property is set to the program returned
- * from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under OpenGL ES 1, the initial
- * value of this property is nil.
+ * When running under OpenGL ES 2, the initial value of this property is set to a context containing
+ * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
+ * OpenGL ES 1, the initial value of this property is nil.
  */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+@property(nonatomic, retain) CC3GLProgramContext* shaderProgram;
 
 
 #pragma mark Textures

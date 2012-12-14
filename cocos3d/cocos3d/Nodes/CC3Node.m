@@ -818,15 +818,15 @@
 	}
 }
 
--(CC3GLProgram*) shaderProgram {
+-(CC3GLProgramContext*) shaderProgram {
 	for (CC3Node* child in children) {
-		CC3GLProgram* shaderProgram = child.shaderProgram;
+		CC3GLProgramContext* shaderProgram = child.shaderProgram;
 		if (shaderProgram) return shaderProgram;
 	}
 	return nil;
 }
 
--(void) setShaderProgram:(CC3GLProgram *)shaderProgram {
+-(void) setShaderProgram:(CC3GLProgramContext *)shaderProgram {
 	for (CC3Node* child in children) child.shaderProgram = shaderProgram;
 }
 
