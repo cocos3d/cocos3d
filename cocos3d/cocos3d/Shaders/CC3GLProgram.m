@@ -35,8 +35,6 @@
 #pragma mark -
 #pragma mark CC3GLProgram
 
-#if CC3_OGLES_2
-
 @interface CC3OpenGLESShaders (TemplateMethods)
 -(void) setActiveProgram: (CC3GLProgram*) aProgram;
 @end
@@ -57,9 +55,37 @@
 
 #pragma mark Variables
 
+-(CC3GLSLUniform*) uniformNamed: (NSString*) name {
+	for (CC3GLSLUniform* var in _uniforms) {
+		if ( [var.name isEqualToString: name] ) return var;
+	}
+	return nil;
+}
+
+-(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
+	for (CC3GLSLUniform* var in _uniforms) {
+		if (var.location == uniformLocation) return var;
+	}
+	return nil;
+}
+
 -(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
 	for (CC3GLSLUniform* var in _uniforms) {
 		if (var.semantic == semantic) return var;
+	}
+	return nil;
+}
+
+-(CC3GLSLAttribute*) attributeNamed: (NSString*) name {
+	for (CC3GLSLAttribute* var in _attributes) {
+		if ( [var.name isEqualToString: name] ) return var;
+	}
+	return nil;
+}
+
+-(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation {
+	for (CC3GLSLAttribute* var in _attributes) {
+		if (var.location == attrLocation) return var;
 	}
 	return nil;
 }
@@ -71,44 +97,7 @@
 	return nil;
 }
 
--(void) mapVariableSemantics {
-	[self mapUniformSemantics];
-	[self mapAttributeSemantics];
-}
-
--(void) mapUniformSemantics {
-	[_uniforms removeAllObjects];
-
-	GLint varCnt;
-	glGetProgramiv(program_, GL_ACTIVE_UNIFORMS, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active uniforms in %@", self);
-	glGetProgramiv(program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
-	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
-	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLUniform* var = [CC3GLSLUniform variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate assignUniformSemantic: var];
-		[_uniforms addObject: var];
-	}
-}
-
--(void) mapAttributeSemantics {
-	[_attributes removeAllObjects];
-	
-	GLint varCnt;
-	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTES, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active attributes in %@", self);
-	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
-	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
-	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLAttribute* var = [CC3GLSLAttribute variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate assignAttributeSemantic: var];
-		[_attributes addObject: var];
-	}
-}
-
-// Overridden to do nothing
--(void) updateUniforms {}
-
+#if CC3_OGLES_2
 
 #pragma mark Binding
 
@@ -165,6 +154,51 @@
 	}
 	return wasLinked;
 }
+
+-(void) mapVariableSemantics {
+	[self mapUniformSemantics];
+	[self mapAttributeSemantics];
+}
+
+-(void) mapUniformSemantics {
+	[_uniforms removeAllObjects];
+	
+	GLint varCnt;
+	glGetProgramiv(program_, GL_ACTIVE_UNIFORMS, &varCnt);
+	LogGLErrorTrace(@"while retrieving number of active uniforms in %@", self);
+	glGetProgramiv(program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
+	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
+	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
+		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
+		[_semanticDelegate assignUniformSemantic: var];
+		[_uniforms addObject: var];
+	}
+}
+
+-(void) mapAttributeSemantics {
+	[_attributes removeAllObjects];
+	
+	GLint varCnt;
+	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTES, &varCnt);
+	LogGLErrorTrace(@"while retrieving number of active attributes in %@", self);
+	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
+	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
+	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
+		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
+		[_semanticDelegate assignAttributeSemantic: var];
+		[_attributes addObject: var];
+	}
+}
+
+// Overridden to do nothing
+-(void) updateUniforms {}
+
+#endif
+
+#if CC3_OGLES_1
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(BOOL) link { return NO; }
+#endif
 
 
 #pragma mark Allocation and initialization
@@ -227,10 +261,12 @@
 	return glslSource;
 }
 
+#if CC3_OGLES_2
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ GL program: %i, GL vtx shader: %i, GL frag shader: %i",
 			[self class], program_, vertShader_, fragShader_];
 }
+#endif
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
@@ -242,8 +278,7 @@
 
 @end
 
-#endif
-
+/*
 #if CC3_OGLES_1
 
 @implementation CC3GLProgram
@@ -254,7 +289,15 @@
 
 -(void) extractVariables {}
 
+-(CC3GLSLUniform*) uniformNamed: (NSString*) name { return nil; }
+
+-(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation { return nil; }
+
 -(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic { return nil; }
+
+-(CC3GLSLAttribute*) attributeNamed: (NSString*) name { return nil; }
+
+-(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation { return nil; }
 
 -(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic { return nil; }
 
@@ -271,3 +314,4 @@
 @end
 
 #endif
+*/

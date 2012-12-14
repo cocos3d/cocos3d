@@ -43,27 +43,74 @@
 	[super dealloc];
 }
 
+-(CC3GLProgram*) program { return _program; }
+
+-(void) setProgram:(CC3GLProgram*) program {
+	if (program == _program) return;
+	[_program release];
+	_program = [program retain];
+	[self removeAllVariables];
+}
+
 
 #pragma mark Variables
 
 -(CC3GLSLUniform*) uniformNamed: (NSString*) name {
-	CC3GLSLUniform* var = [_uniformsByName objectForKey: name];
-	return var;
+	CC3GLSLUniform* rtnVar = [_uniformsByName objectForKey: name];
+	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformNamed: name]];
 }
 
 -(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
-	for (CC3GLSLUniform* var in _uniformsByName) {
-		if (var.semantic == semantic) return var;
-	}
-	return nil;
+	__block CC3GLSLUniform* rtnVar = nil;
+	[_uniformsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
+		if (((CC3GLSLUniform*)obj).semantic == semantic) {
+			rtnVar = obj;
+			*stop = YES;
+		}
+	}];
+	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformWithSemantic: semantic]];
 }
 
+/*
+-(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
+	for (id key in _uniformsByName) {
+		CC3GLSLUniform* var = [_uniformsByName objectForKey: key];
+		if (var.semantic == semantic) return var;
+	}
+	return [self addUniformCopiedFrom: [_program uniformWithSemantic: semantic]];
+}
+*/
+
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
-	for (CC3GLSLUniform* var in _uniformsByName) {
+	__block CC3GLSLUniform* rtnVar = nil;
+	[_uniformsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
+		if (((CC3GLSLUniform*)obj).location == uniformLocation) {
+			rtnVar = obj;
+			*stop = YES;
+		}
+	}];
+	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformAtLocation: uniformLocation]];
+}
+
+/*
+-(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
+	for (id key in _uniformsByName) {
+		CC3GLSLUniform* var = [_uniformsByName objectForKey: key];
 		if (var.location == uniformLocation) return var;
 	}
-	return nil;
+	return [self addUniformCopiedFrom: [_program uniformAtLocation: uniformLocation]];
 }
+*/
+
+-(CC3GLSLUniform*)	addUniformCopiedFrom: (CC3GLSLUniform*) uniform {
+	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniform.class];
+	[_uniformsByName setObject: newUniform forKey: newUniform.name];
+	[newUniform release];
+	return newUniform;
+}
+
+
+-(void) removeAllVariables { [_uniformsByName removeAllObjects]; }
 
 
 #pragma mark Drawing
@@ -79,7 +126,7 @@
 
 -(id) initForProgram: (CC3GLProgram*) program {
 	if ( (self = [super init]) ) {
-		self.program = program;		// retained
+		self.program = program;								// retained
 		_uniformsByName = [NSMutableDictionary new];		// retained
 	}
 	return self;

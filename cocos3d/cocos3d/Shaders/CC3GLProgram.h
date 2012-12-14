@@ -77,17 +77,23 @@
 /** Binds the program, populates the uniforms and applies them to the program. */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** 
- * Returns the uniform definition for the uniform with the specified semantic,
- * or nil if no uniform is defined for the specified semantic.
- */
+/** Returns the uniform with the specified semantic, or nil if no uniform is defined for the specified semantic. */
 -(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic;
 
-/**
- * Returns the attribute definition for the attribute with the specified semantic,
- * or nil if no attribute is defined for the specified semantic.
- */
+/** Returns the uniform with the specified name, or nil if no uniform is defined for the specified name. */
+-(CC3GLSLUniform*) uniformNamed: (NSString*) name;
+
+/** Returns the uniform at the specified location, or nil if no uniform is defined at the specified location. */
+-(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
+
+/** Returns the attribute with the specified semantic, or nil if no attribute is defined for the specified semantic. */
 -(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic;
+
+/** Returns the attribute with the specified name, or nil if no attribute is defined for the specified name. */
+-(CC3GLSLAttribute*) attributeNamed: (NSString*) name;
+
+/** Returns the attribute at the specified location, or nil if no attribute is defined at the specified location. */
+-(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
 
 /**
  * Links this program and uses the delegate in the semanticDelegate property to map

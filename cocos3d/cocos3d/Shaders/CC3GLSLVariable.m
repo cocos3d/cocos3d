@@ -55,13 +55,34 @@
 	if ( (self = [super init]) ) {
 		_program = program;			// not retained
 		_index = index;
-		[self populateFromProgram];
 	}
 	return self;
 }
 
 +(id) variableInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
 	return [[[self alloc] initInProgram: program atIndex: index] autorelease];
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	return [self copyWithZone: zone asClass: self.class];
+}
+
+-(id) copyAsClass: (Class) aClass { return [self copyWithZone: nil asClass: aClass]; }
+
+-(id) copyWithZone: (NSZone*) zone asClass: (Class) aClass {
+	CC3GLSLVariable* aCopy = [[aClass allocWithZone: zone] initInProgram: _program atIndex: _index];
+	[aCopy populateFrom: self];
+	return aCopy;
+}
+
+-(void) populateFrom: (CC3GLSLVariable*) another {
+	// _program, _index set during init
+	_location = another.location;
+	_type = another.type;
+	_size = another.size;
+
+	[_name release];
+	_name = [another.name retain];
 }
 
 -(void) populateFromProgram {}
@@ -91,26 +112,12 @@
 
 -(NSString*) semanticName { return [_program.semanticDelegate nameOfAttributeSemantic: _semantic]; }
 
-#if CC3_OGLES_2
-
--(void) populateFromProgram {
-	_semantic = kCC3VertexContentSemanticNone;
-
-	GLint maxNameLen = [_program maxAttributeNameLength];
-	char* cName = calloc(maxNameLen, sizeof(char));
-
-	glGetActiveAttrib(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
-	
-	_location = glGetAttribLocation(_program.program, cName);
-	LogGLErrorTrace(@"while retrieving location of attribute named %s at index %i in %@", cName, _index, self);
-
-	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
-	free(cName);
+-(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
+	if ( (self = [super initInProgram: program atIndex: index]) ) {
+		_semantic = kCC3VertexContentSemanticNone;
+	}
+	return self;
 }
-
-#endif
 
 @end
 
@@ -121,71 +128,45 @@
 @implementation CC3GLSLUniform
 
 -(void) dealloc {
-	free(_varState);
+	free(_varValue);
 	[super dealloc];
 }
+
+-(NSString*) semanticName { return [_program.semanticDelegate nameOfUniformSemantic: _semantic]; }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
-	_varState = NULL;		// Init before super because super invokes populateFromProgram:
-	return [super initInProgram: program atIndex: index];
+	if ( (self = [super initInProgram: program atIndex: index]) ) {
+		_varLen = 0;
+		_varValue = NULL;
+		_semantic = kCC3SemanticNone;
+	}
+	return self;
 }
 
--(NSString*) semanticName { return [_program.semanticDelegate nameOfUniformSemantic: _semantic]; }
-
-#if CC3_OGLES_2
-
--(void) populateFromProgram {
-	_semantic = 0;
-	
-	GLint maxNameLen = [_program maxUniformNameLength];
-	char* cName = calloc(maxNameLen, sizeof(char));
-	
-	glGetActiveUniform(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"while retrieving spec for active uniform at index %i in %@", _index, self);
-
+-(void) populateFrom: (CC3GLSLUniform*) another {
+	[super populateFrom: another];
 	_varLen = GLElementTypeSize(_type) * _size;
-	free(_varState);
-	_varState = calloc(_size, GLElementTypeSize(_type));
-
-	_location = glGetUniformLocation(_program.program, cName);
-	LogGLErrorTrace(@"while retrieving location of active uniform named %s at index %i in %@", cName, _index, self);
-	
-	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
-	free(cName);
+	free(_varValue);
+	_varValue = calloc(_varLen, 1);
 }
+
+
+#pragma mark Accessing uniform values
 
 -(void) setFloats: (const GLfloat*) floats {
 	switch (_type) {
 
 		case GL_FLOAT:
-		case GL_BOOL:
-			if ( [self shouldUpdateState: floats] ) glUniform1fv(_location, _size, _varState);
-			return;
 		case GL_FLOAT_VEC2:
-		case GL_BOOL_VEC2:
-			if ( [self shouldUpdateState: floats] ) glUniform2fv(_location, _size, _varState);
-			return;
 		case GL_FLOAT_VEC3:
-		case GL_BOOL_VEC3:
-			if ( [self shouldUpdateState: floats] ) glUniform3fv(_location, _size, _varState);
-			return;
 		case GL_FLOAT_VEC4:
-		case GL_BOOL_VEC4:
-			if ( [self shouldUpdateState: floats] ) glUniform4fv(_location, _size, _varState);
-			return;
-			
 		case GL_FLOAT_MAT2:
-			if ( [self shouldUpdateState: floats] ) glUniformMatrix2fv(_location, _size, GL_FALSE, _varState);
-			return;
 		case GL_FLOAT_MAT3:
-			if ( [self shouldUpdateState: floats] ) glUniformMatrix3fv(_location, _size, GL_FALSE, _varState);
-			return;
 		case GL_FLOAT_MAT4:
-			if ( [self shouldUpdateState: floats] ) glUniformMatrix4fv(_location, _size, GL_FALSE, _varState);
+			[self updateValue: floats];
 			return;
 
 		case GL_INT:
@@ -194,6 +175,10 @@
 		case GL_INT_VEC4:
 		case GL_SAMPLER_2D:
 		case GL_SAMPLER_CUBE:
+		case GL_BOOL:
+		case GL_BOOL_VEC2:
+		case GL_BOOL_VEC3:
+		case GL_BOOL_VEC4:
 			[self setIntegersFromFloats: floats];
 			return;
 
@@ -211,19 +196,13 @@
 		case GL_SAMPLER_2D:
 		case GL_SAMPLER_CUBE:
 		case GL_BOOL:
-			if ( [self shouldUpdateState: ints] ) glUniform1iv(_location, _size, _varState);
-			return;
 		case GL_INT_VEC2:
 		case GL_BOOL_VEC2:
-			if ( [self shouldUpdateState: ints] ) glUniform2iv(_location, _size, _varState);
-			return;
 		case GL_INT_VEC3:
 		case GL_BOOL_VEC3:
-			if ( [self shouldUpdateState: ints] ) glUniform3iv(_location, _size, _varState);
-			return;
 		case GL_INT_VEC4:
 		case GL_BOOL_VEC4:
-			if ( [self shouldUpdateState: ints] ) glUniform4iv(_location, _size, _varState);
+			[self updateValue: ints];
 			return;
 
 		case GL_FLOAT:
@@ -241,6 +220,18 @@
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
+}
+
+/**
+ * Checks whether the specified new content is different than the current cached GL content for this
+ * uniform variable, updates the cached content if it is, and returns whether the content was changed.
+ */
+-(BOOL) updateValue: (const GLvoid*) newValue {
+	if (memcmp(newValue, _varValue, _varLen) != 0) {
+		memcpy(_varValue, newValue, _varLen);
+		return YES;
+	}
+	return NO;
 }
 
 /**
@@ -328,23 +319,11 @@
 	free(floats);
 }
 
-/** 
- * Checks whether the specified new state content is different than the current cached GL state
- * for this uniform variable, updates the cached state content if it is, and returns YES if
- * the new state content was different, or NO if it was not.
- */
--(BOOL) shouldUpdateState: (const GLvoid*) newState {
-	if (memcmp(newState, _varState, _varLen) != 0) {
-		memcpy(_varState, newState, _varLen);
-		return YES;
-	}
-	return NO;
-}
-
 -(void) setFloat: (GLfloat) value { [self setVector4: CC3Vector4Make(value, 0, 0, 1)]; }
 
 -(void) setCGPoint: (CGPoint) value { [self setVector4: CC3Vector4Make(value.x, value.y, 0, 1)]; }
 
+/** Converts the points to the correct type if needed. */
 -(void) setCGPoints: (CGPoint*) values {
 	switch (_type) {
 		case GL_FLOAT:
@@ -396,6 +375,7 @@
 
 -(void) setVector: (CC3Vector) value { [self setVector4: CC3Vector4FromCC3Vector(value, 1)]; }
 
+/** Converts the vectors to the correct type if needed. */
 -(void) setVectors: (CC3Vector*) values {
 	switch (_type) {
 		case GL_FLOAT:
@@ -476,6 +456,7 @@
 	}
 }
 
+/** Converts the vectors to the correct type if needed. */
 -(void) setVector4s: (CC3Vector4*) values {
 	switch (_type) {
 		case GL_FLOAT:
@@ -684,52 +665,155 @@
 	}
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLESStateTrackerGLSLAttribute
+
+@implementation CC3OpenGLESStateTrackerGLSLAttribute
+
+
+#pragma mark Allocation and initialization
+
+-(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
+	if ( (self = [super initInProgram: program atIndex: index]) ) {
+		[self populateFromProgram];
+	}
+	return self;
+}
+
+#if CC3_OGLES_2
+
+-(void) populateFromProgram {
+	_semantic = kCC3VertexContentSemanticNone;
+	
+	GLint maxNameLen = [_program maxAttributeNameLength];
+	char* cName = calloc(maxNameLen, sizeof(char));
+	
+	glGetActiveAttrib(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
+	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
+	
+	_location = glGetAttribLocation(_program.program, cName);
+	LogGLErrorTrace(@"while retrieving location of attribute named %s at index %i in %@", cName, _index, self);
+	
+	[_name release];
+	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	free(cName);
+}
+
 #endif
 
 #if CC3_OGLES_1
 
--(void) setFloats: (const GLfloat*) floats {}
-
--(void) setIntegers: (const GLint*) ints {}
-
--(void) setFloat: (GLfloat) value {}
-
--(void) setCGPoint: (CGPoint) value {}
-
--(void) setCGPoints: (CGPoint*) values {}
-
--(void) setVector: (CC3Vector) value {}
-
--(void) setVectors: (CC3Vector*) values {}
-
--(void) setVector4: (CC3Vector4) value {}
-
--(void) setVector4s: (CC3Vector4*) values {}
-
--(void) setQuaternion: (CC3Quaternion) value {}
-
--(void) setQuaternions: (CC3Quaternion*) values {}
-
--(void) setMatrix3x3: (CC3Matrix3x3) value {}
-
--(void) setMatrices3x3: (CC3Matrix3x3*) values {}
-
--(void) setMatrix4x4: (CC3Matrix4x4) value {}
-
--(void) setMatrices4x4: (CC3Matrix4x4*) values {}
-
--(void) setInteger: (GLint) value {}
-
--(void) setByte: (GLbyte) value {}
-
--(void) setBoolean: (BOOL) value {}
-
--(void) setColor: (ccColor3B) value {}
-
--(void) setColor4B: (ccColor4B) value {}
-
--(void) setColor4F: (ccColor4F) value {}
+-(void) populateFromProgram {}
 
 #endif
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLESStateTrackerGLSLUniform
+
+@implementation CC3OpenGLESStateTrackerGLSLUniform
+
+-(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
+	if ( (self = [super initInProgram: program atIndex: index]) ) {
+		[self populateFromProgram];
+	}
+	return self;
+}
+
+#if CC3_OGLES_2
+
+-(void) populateFromProgram {
+	_semantic = 0;
+	
+	GLint maxNameLen = [_program maxUniformNameLength];
+	char* cName = calloc(maxNameLen, sizeof(char));
+	
+	glGetActiveUniform(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
+	LogGLErrorTrace(@"while retrieving spec for active uniform at index %i in %@", _index, self);
+	
+	_varLen = GLElementTypeSize(_type) * _size;
+	free(_varValue);
+	_varValue = calloc(_varLen, 1);
+	
+	_location = glGetUniformLocation(_program.program, cName);
+	LogGLErrorTrace(@"while retrieving location of active uniform named %s at index %i in %@", cName, _index, self);
+	
+	[_name release];
+	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	free(cName);
+}
+
+/** Overridden to update the GL state engine if the value was changed. */
+-(BOOL) updateValue: (const GLvoid*) newValue {
+	BOOL wasChanged = [super updateValue: newValue];
+	if (wasChanged) [self setGLValue];
+	return wasChanged;
+}
+
+-(void) setGLValue {
+	switch (_type) {
+			
+		case GL_FLOAT:
+			glUniform1fv(_location, _size, _varValue);
+			return;
+		case GL_FLOAT_VEC2:
+			glUniform2fv(_location, _size, _varValue);
+			return;
+		case GL_FLOAT_VEC3:
+			glUniform3fv(_location, _size, _varValue);
+			return;
+		case GL_FLOAT_VEC4:
+			glUniform4fv(_location, _size, _varValue);
+			return;
+			
+		case GL_FLOAT_MAT2:
+			glUniformMatrix2fv(_location, _size, GL_FALSE, _varValue);
+			return;
+		case GL_FLOAT_MAT3:
+			glUniformMatrix3fv(_location, _size, GL_FALSE, _varValue);
+			return;
+		case GL_FLOAT_MAT4:
+			glUniformMatrix4fv(_location, _size, GL_FALSE, _varValue);
+			return;
+
+		case GL_INT:
+		case GL_SAMPLER_2D:
+		case GL_SAMPLER_CUBE:
+		case GL_BOOL:
+			glUniform1iv(_location, _size, _varValue);
+			return;
+		case GL_INT_VEC2:
+		case GL_BOOL_VEC2:
+			glUniform2iv(_location, _size, _varValue);
+			return;
+		case GL_INT_VEC3:
+		case GL_BOOL_VEC3:
+			glUniform3iv(_location, _size, _varValue);
+			return;
+		case GL_INT_VEC4:
+		case GL_BOOL_VEC4:
+			glUniform4iv(_location, _size, _varValue);
+			return;
+			
+		default:
+			NSAssert2(NO, @"%@ could not set GL engine state value because type %@ is not understood",
+					  self, NSStringFromGLEnum(_type));
+			return;
+	}
+}
+
+#endif
+
+
+#if CC3_OGLES_1
+
+-(void) populateFromProgram {}
+
+#endif
+@end
+

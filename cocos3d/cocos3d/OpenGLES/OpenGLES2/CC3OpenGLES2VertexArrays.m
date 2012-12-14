@@ -33,10 +33,10 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3GLProgram.h"
 #import "CC3VertexArrays.h"
-#import "ccGLStateCache.h"
-
 
 #if CC3_OGLES_2
+
+#import "ccGLStateCache.h"
 
 #pragma mark -
 #pragma mark CC3OpenGLESStateTrackerVertexAttributeInteger
