@@ -54,6 +54,7 @@
 */
 @interface CC3GLProgramContext : NSObject {
 	CC3GLProgram* _program;
+	CCArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
 }
 
@@ -68,22 +69,48 @@
 #pragma mark Uniforms
 
 /** 
- * Returns the uniform with the specified name, or nil if no uniform is defined for the specified name.
+ * Returns an override for the program uniform with the specified name.
  *
- * When retrieving a uniform variable using this method, be aware that the content value of any
- * uniform variable with a defined semantic is derived automatically from the environment, and
- * cannot be retrieved or set directly.
+ * The application can use this method to set the value of a uniform directly, either to populate
+ * a program uniform whose content cannot be extracted semantically from the environment, or to
+ * override the value that would be extracted, with an application-specific value.
+ *
+ * Invoking this method more than once will return the same uniform override, and the content of the
+ * returned uniform is sticky, so the application does not need to keep track of the returned uniform,
+ * and only needs to make changes to the content of this uniform when it wants to change that
+ * content. Specifically, the application does not need to access, or set the content of, the uniform
+ * during each frame update or render cycle. Once set, the content of this uniform will automatically
+ * be applied to the GL engine for this context (typically a CC3MeshNode), on each render cycle.
+ *
+ * By invoking this method, an override uniform is created, and the application takes responsibility
+ * for populating the value of this overriden uniform, by invoking any of the set... methods on the
+ * returned uniform. If this method has been used to override a program uniform whose content can be
+ * extracted semantically from the environment, you can remove this override by invoking the 
+ * removeUniformOverride: method with the uniform returned by this method.
  */
--(CC3GLSLUniform*) uniformNamed: (NSString*) name;
+-(CC3GLSLUniform*) uniformOverrideNamed: (NSString*) name;
 
 /**
- * Returns the uniform with the specified semantic, or nil if no uniform is defined for the specified semantic.
+ * Returns an override for the program uniform with the specified name.
  *
- * When retrieving a uniform variable using this method, be aware that the content value of any
- * uniform variable with a defined semantic is derived automatically from the environment, and
- * cannot be retrieved or set directly.
+ * The application can use this method to set the value of a uniform directly, either to populate
+ * a program uniform whose content cannot be extracted semantically from the environment, or to
+ * override the value that would be extracted, with an application-specific value.
+ *
+ * Invoking this method more than once will return the same uniform override, and the content of the
+ * returned uniform is sticky, so the application does not need to keep track of the returned uniform,
+ * and only needs to make changes to the content of this uniform when it wants to change that
+ * content. Specifically, the application does not need to access, or set the content of, the uniform
+ * during each frame update or render cycle. Once set, the content of this uniform will automatically
+ * be applied to the GL engine for this context (typically a CC3MeshNode), on each render cycle.
+ *
+ * By invoking this method, an override uniform is created, and the application takes responsibility
+ * for populating the value of this overriden uniform, by invoking any of the set... methods on the
+ * returned uniform. If this method has been used to override a program uniform whose content can be
+ * extracted semantically from the environment, you can remove this override by invoking the
+ * removeUniformOverride: method with the uniform returned by this method.
  */
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic;
+-(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic;
 
 /** 
  * Returns the uniform at the specified program location, or nil if no uniform is at the specified location.
@@ -96,13 +123,43 @@
  * uniform variable with a defined semantic is derived automatically from the environment, and
  * cannot be retrieved or set directly.
  */
--(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
+-(CC3GLSLUniform*) uniformOverrideAtLocation: (GLint) uniformLocation;
+
+/**
+ * Removes the specified unifrom override from the uniforms being overridden by this context.
+ *
+ * The specified uniform must be have previously been retrieved by one of the uniformOverride...
+ * method of this context.
+ *
+ * Attempting to override a uniform whose semantic property is set to kCC3SemanticNone will
+ * raise an assertion error, since doing so would leave the program uniform with no way of
+ * being populated within the program, which would result in a program execution error.
+ */
+-(void) removeUniformOverride: (CC3GLSLUniform*) uniform;
 
 
 #pragma mark Drawing
 
 /** Binds the program, populates the uniforms and applies them to the program. */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * This callback method is invoked from the bindWithVisitor:fromContext: method of the associated
+ * GL program.
+ *
+ * If this context includes an override uniform that matches the specified program uniform, the
+ * content of the specified uniform is updated from the content held in the matching override uniform
+ * in this context. If no matching override uniform exists within this context, nothing happens.
+ *
+ * Returns whether the specified uniform was updated.
+ *
+ * This context can keep track of content to be used for any uniform in the associated program.
+ * This contextual content can be used for uniforms whose content cannot be extracted from a
+ * standard semantics, or can be used to override the value that would be extracted from the
+ * environment for the semantic of the uniform. To create an override uniform, access it via
+ * one of the uniformOverride... methods.
+ */
+-(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Allocation and initialization

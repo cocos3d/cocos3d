@@ -39,6 +39,7 @@
 
 -(void) dealloc {
 	[_program release];
+	[_uniforms release];
 	[_uniformsByName release];
 	[super dealloc];
 }
@@ -49,74 +50,71 @@
 	if (program == _program) return;
 	[_program release];
 	_program = [program retain];
-	[self removeAllVariables];
+	[self removeAllOverrides];
 }
 
 
 #pragma mark Variables
 
--(CC3GLSLUniform*) uniformNamed: (NSString*) name {
+-(CC3GLSLUniform*) uniformOverrideNamed: (NSString*) name {
 	CC3GLSLUniform* rtnVar = [_uniformsByName objectForKey: name];
-	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformNamed: name]];
+	return rtnVar ? rtnVar : [self addUniformOverrideFor: [_program uniformNamed: name]];
 }
 
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
-	__block CC3GLSLUniform* rtnVar = nil;
-	[_uniformsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-		if (((CC3GLSLUniform*)obj).semantic == semantic) {
-			rtnVar = obj;
-			*stop = YES;
-		}
-	}];
-	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformWithSemantic: semantic]];
+-(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic {
+	for (CC3GLSLUniform* var in _uniforms) if (var.semantic == semantic) return var;
+	return [self addUniformOverrideFor: [_program uniformForSemantic: semantic]];
 }
 
-/*
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
-	for (id key in _uniformsByName) {
-		CC3GLSLUniform* var = [_uniformsByName objectForKey: key];
-		if (var.semantic == semantic) return var;
-	}
-	return [self addUniformCopiedFrom: [_program uniformWithSemantic: semantic]];
-}
-*/
-
--(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
-	__block CC3GLSLUniform* rtnVar = nil;
-	[_uniformsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-		if (((CC3GLSLUniform*)obj).location == uniformLocation) {
-			rtnVar = obj;
-			*stop = YES;
-		}
-	}];
-	return rtnVar ? rtnVar : [self addUniformCopiedFrom: [_program uniformAtLocation: uniformLocation]];
+-(CC3GLSLUniform*) uniformOverrideAtLocation: (GLint) uniformLocation {
+	for (CC3GLSLUniform* var in _uniforms) if (var.location == uniformLocation) return var;
+	return [self addUniformOverrideFor: [_program uniformAtLocation: uniformLocation]];
 }
 
-/*
--(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
-	for (id key in _uniformsByName) {
-		CC3GLSLUniform* var = [_uniformsByName objectForKey: key];
-		if (var.location == uniformLocation) return var;
-	}
-	return [self addUniformCopiedFrom: [_program uniformAtLocation: uniformLocation]];
-}
-*/
+-(CC3GLSLUniform*)	addUniformOverrideFor: (CC3GLSLUniform*) uniform {
+	if( !uniform ) return nil;		// Don't add override for non-existant uniform
+	
+	if ( !_uniforms ) _uniforms = [CCArray new];							// retained
+	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];	// retained
 
--(CC3GLSLUniform*)	addUniformCopiedFrom: (CC3GLSLUniform*) uniform {
 	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniform.class];
 	[_uniformsByName setObject: newUniform forKey: newUniform.name];
+	[_uniforms addObject: newUniform];
 	[newUniform release];
 	return newUniform;
 }
 
+-(void)	removeUniformOverride: (CC3GLSLUniform*) uniform {
+	[_uniforms removeObjectIdenticalTo: uniform];
+	[_uniformsByName removeObjectForKey: uniform.name];
+	NSAssert2(_uniforms.count == _uniformsByName.count,
+			  @"%@ was not completely removed from %@", uniform, self);
+	if (_uniforms.count == 0) [self removeAllOverrides];	// Remove empty collections
+}
 
--(void) removeAllVariables { [_uniformsByName removeAllObjects]; }
+-(void) removeAllOverrides {
+	[_uniformsByName release];
+	_uniformsByName = nil;
+	[_uniforms release];
+	_uniforms = nil;
+}
 
 
 #pragma mark Drawing
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_program bindWithVisitor: visitor];
+	[_program bindWithVisitor: visitor fromContext: self];
+}
+
+// Match based on location
+-(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	for (CC3GLSLUniform* var in _uniforms) {
+		if (var.location == uniform.location) {
+			[var setValueInto: uniform];
+			return YES;
+		}
+	}
+	return NO;
 }
 
 
@@ -127,7 +125,8 @@
 -(id) initForProgram: (CC3GLProgram*) program {
 	if ( (self = [super init]) ) {
 		self.program = program;								// retained
-		_uniformsByName = [NSMutableDictionary new];		// retained
+		_uniforms = nil;
+		_uniformsByName = nil;
 	}
 	return self;
 }

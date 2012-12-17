@@ -30,6 +30,7 @@
  */
 
 #import "CC3GLProgram.h"
+#import "CC3GLProgramContext.h"
 #import "CC3OpenGLESEngine.h"
 
 #pragma mark -
@@ -69,7 +70,7 @@
 	return nil;
 }
 
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic {
+-(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic {
 	for (CC3GLSLUniform* var in _uniforms) {
 		if (var.semantic == semantic) return var;
 	}
@@ -90,7 +91,7 @@
 	return nil;
 }
 
--(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic {
+-(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic {
 	for (CC3GLSLAttribute* var in _attributes) {
 		if (var.semantic == semantic) return var;
 	}
@@ -99,19 +100,17 @@
 
 #if CC3_OGLES_2
 
-#pragma mark Binding
+#pragma mark Binding and linking
 
 // Cache this program in the GL state tracker, bind the program to the GL engine,
-// and populate the uniforms into the GL engine.
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+// and populate the uniforms into the GL engine, allowing the context to override first.
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
 	[self use];
 	for (CC3GLSLUniform* var in _uniforms)
-		[_semanticDelegate populateUniform: var withVisitor: visitor];
+		if ( ![context populateUniform: var withVisitor: visitor] )
+			[_semanticDelegate populateUniform: var withVisitor: visitor];
 }
-
-
-#pragma mark Compiling and linking
 
 -(BOOL) compileShader: (GLuint*) shader type: (GLenum) type byteArray: (const GLchar*) source {
     GLint status;
@@ -196,7 +195,7 @@
 #endif
 
 #if CC3_OGLES_1
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {}
 -(BOOL) link { return NO; }
 #endif
 

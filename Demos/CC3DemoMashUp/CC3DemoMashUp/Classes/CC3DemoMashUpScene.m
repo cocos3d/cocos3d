@@ -296,6 +296,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[self addRobot];				// Add an animated robot arm, a light, and a camera
 	
+	// Override the value of a shader uniform on a single mesh node
+	CC3GLProgramContext* progCtx = [self getMeshNodeNamed: @"GeoSphere01"].material.shaderProgram;
+	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_matDiffuseColor"];
+	progUniform.color4F = kCCC4FMagenta;
+	
 //	[self addBitmapLabel];			// Add a bitmapped string label
 	
 //	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.

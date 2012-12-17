@@ -213,7 +213,7 @@
  * The value of this property must follow the guidelines described in the notes for the
  * CC3ProgramUniformSemantic enumeration.
  *
- * The initial value of this property is kCC3ProgramUniformSemanticNone.
+ * The initial value of this property is kCC3SemanticNone.
  */
 @property(nonatomic, assign) GLenum semantic;
 
@@ -486,6 +486,9 @@
  */
 -(void) setColor4F: (ccColor4F) value;
 
+/** Sets the value of the specified uniform from the value of this uniform. */
+-(void) setValueInto: (CC3GLSLUniform*) uniform;
+
 @end
 
 
@@ -504,6 +507,8 @@
  * Tracks the GL engine state for a uniform variable used in a GLSL shader program.
  *
  * Adds the ability to set the variable value in the GL engine.
+ *
+ * All of the set... methods permit the writing of new state regardless of the semantic.
  */
 @interface CC3OpenGLESStateTrackerGLSLUniform : CC3GLSLUniform
 @end

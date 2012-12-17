@@ -222,6 +222,14 @@
 	}
 }
 
+-(void) setValueInto: (CC3GLSLUniform*) uniform {
+	NSAssert2(uniform.type == _type, @"Cannot update %@ from %@ because uniforms are not of the same type",
+			  uniform.fullDescription, self.fullDescription);
+	NSAssert2(uniform.size == _size, @"Cannot update %@ from %@ because uniforms are not of the same size",
+			  uniform.fullDescription, self.fullDescription);
+	[uniform updateValue: _varValue];
+}
+
 /**
  * Checks whether the specified new content is different than the current cached GL content for this
  * uniform variable, updates the cached content if it is, and returns whether the content was changed.

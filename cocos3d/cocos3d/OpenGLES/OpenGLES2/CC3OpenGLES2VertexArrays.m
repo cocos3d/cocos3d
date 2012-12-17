@@ -229,7 +229,7 @@
 }
 
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
-	CC3GLSLAttribute* attribute = [self.engine.shaders.activeProgram attributeWithSemantic: semantic];
+	CC3GLSLAttribute* attribute = [self.engine.shaders.activeProgram attributeForSemantic: semantic];
 	GLint attrIdx = attribute.location;		// Negative if not valid attribute
 	return (attribute && (attrIdx >= 0)) ? [self attributeAt: attrIdx] : nil;
 }

@@ -38,6 +38,7 @@
 #import "CCGLProgram.h"
 #endif
 
+@class CC3GLProgramContext;
 
 #pragma mark -
 #pragma mark CC3GLProgram
@@ -74,11 +75,8 @@
 /** Returns the length of the largest attribute name in this program. */
 @property(nonatomic, readonly) GLint maxAttributeNameLength;
 
-/** Binds the program, populates the uniforms and applies them to the program. */
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
 /** Returns the uniform with the specified semantic, or nil if no uniform is defined for the specified semantic. */
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic;
+-(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic;
 
 /** Returns the uniform with the specified name, or nil if no uniform is defined for the specified name. */
 -(CC3GLSLUniform*) uniformNamed: (NSString*) name;
@@ -87,13 +85,19 @@
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
 
 /** Returns the attribute with the specified semantic, or nil if no attribute is defined for the specified semantic. */
--(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic;
+-(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic;
 
 /** Returns the attribute with the specified name, or nil if no attribute is defined for the specified name. */
 -(CC3GLSLAttribute*) attributeNamed: (NSString*) name;
 
 /** Returns the attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
+
+
+#pragma mark Binding and linking
+
+/** Binds the program, populates the uniforms and applies them to the program. */
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context;
 
 /**
  * Links this program and uses the delegate in the semanticDelegate property to map
@@ -102,7 +106,6 @@
  * The semanticDelegate property must be set prior to invoking this method.
  */
 -(BOOL) link;
-
 
 
 #pragma mark Allocation and initialization
