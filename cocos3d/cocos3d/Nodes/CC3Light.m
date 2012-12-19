@@ -159,7 +159,7 @@
 			return nil;
 		}
 		lightIndex = ltIndx;
-		glesLight = [[[CC3OpenGLESEngine engine].lighting lightAt: lightIndex] retain];
+		glesLight = [[CC3OpenGLESEngine.engine.lighting lightAt: lightIndex] retain];
 		shadows = nil;
 		shadowCastingVolume = nil;
 		cameraShadowVolume = nil;
@@ -277,8 +277,9 @@
  */
 -(void) updateGlobalLocation {
 	[super updateGlobalLocation];
-	GLfloat w = isDirectionalOnly ? 0.0 : 1.0;
-	homogeneousLocation = CC3Vector4FromCC3Vector(globalLocation, w);
+	homogeneousLocation = isDirectionalOnly
+							? CC3Vector4FromDirection(globalLocation)
+							: CC3Vector4FromLocation(globalLocation);
 }
 
 /**

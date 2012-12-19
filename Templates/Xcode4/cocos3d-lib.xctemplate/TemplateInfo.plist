@@ -2047,84 +2047,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.h</key>
 		<dict>
 			<key>Group</key>
@@ -2753,6 +2675,102 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3UIViewController.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgram.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgram.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgram.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgram.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.h</key>
 		<dict>
 			<key>Group</key>
@@ -3278,12 +3296,6 @@
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Utility.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.h</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgram.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLProgramSemantics.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLSLVariable.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.h</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.h</string>
@@ -3334,6 +3346,14 @@
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3UIViewController.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3UIViewController.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.h</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>

@@ -499,12 +499,3 @@ CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) {
 	return kCC3VectorNull;
 }
 
-
-#pragma mark -
-#pragma mark Miscellaneous extensions and functionality
-
-NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
-	if(filePath.isAbsolutePath) return filePath;
-	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
-}
-

@@ -88,9 +88,8 @@
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
-	// Create the customized CC3Layer that supports 3D rendering and schedule it for automatic updates.
+	// Create the customized CC3Layer that supports 3D rendering.
 	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer node];
-	[cc3Layer scheduleUpdate];
 	
 	// Create the customized 3D scene and attach it to the layer.
 	// Could also just create this inside the customer layer.

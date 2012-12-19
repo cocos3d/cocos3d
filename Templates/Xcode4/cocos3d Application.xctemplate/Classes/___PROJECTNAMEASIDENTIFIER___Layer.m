@@ -12,17 +12,18 @@
 
 @implementation ___PROJECTNAMEASIDENTIFIER___Layer
 
-- (void)dealloc {
+-(void) dealloc {
     [super dealloc];
 }
 
-
 /**
- * Override to set up your 2D controls and other initial state.
+ * Override to set up your 2D controls and other initial state, and to initialize update processing.
  *
  * For more info, read the notes of this method on CC3Layer.
  */
--(void) initializeControls {}
+-(void) initializeControls {
+	[self scheduleUpdate];
+}
 
 
 #pragma mark Updating layer

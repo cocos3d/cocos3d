@@ -662,30 +662,14 @@
 
 #pragma mark Drawing
 
-/**
- * Template method that binds a pointer to the vertex matrix index data to the GL engine.
- * If this mesh has no vertex matrix index data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexMatrixIndices unbind class method.
- */
+/** Template method that binds a pointer to the vertex matrix index data to the GL engine. */
 -(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (vertexMatrixIndices) {
-		[vertexMatrixIndices bindWithVisitor:visitor];
-	} else {
-		[CC3VertexMatrixIndices unbind];
-	}
+	[vertexMatrixIndices bindWithVisitor:visitor];
 }
 
-/**
- * Template method that binds a pointer to the vertex weight data to the GL engine.
- * If this mesh has no vertex weight data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexWeights unbind class method.
- */
+/** Template method that binds a pointer to the vertex weight data to the GL engine. */
 -(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
-	if (vertexWeights) {
-		[vertexWeights bindWithVisitor:visitor];
-	} else {
-		[CC3VertexWeights unbind];
-	}
+	[vertexWeights bindWithVisitor:visitor];
 }
 
 /** Overridden to do nothing. Skinned meshes are drawn by the CC3SkinSections. */

@@ -23,9 +23,27 @@ cocos3d 2.0.0 - 2013/01/31
 	- New Project template cocos3d1 Application
 - A single app may not currently mix both OpenGL ES 2.0 & 1.1 capability.
 
+- Added support for OpenGL ES shaders:
+    - CC3GLProgram added to represent a GL program pairing one vertex shader and one fragment shader under OpenGL ES 2.
+	- Each CC3Material now holds a reference to a CC3GLProgram on behalf of the node, through a CC3GLProgramContext instance.
+	- CC3GLSLUniform and CC3GLSLAttribute represent a shader uniform or attribute.
+	    - CC3GLSLUniforms and CC3GLSLAttributes are extracted automatically from a CC3GLProgram after it is linked.
+		- CC3GLSLUniforms and CC3GLSLAttributes include declare their semantic relationship to the environment,
+          allowing uniforms and attributes to be automatically populated from content automatically extracted from the scene.
+		- CC3GLProgramContext allows arbitrary uniforms to be attached to a shader program and have its value set programatically per node,
+		  and to allow the semantic uniform values to be overridden on a per node basis.
+    - CC3OpenGLESShaders provides glue to the GL engine for CC3GLProgrms.
+    - The CC3OpenGLESShaders defaultProgram assigns default shaders to materials/nodes that do not have a specific shader designated.
+    - Added GLSL folder containing standard GLSL shader source code
+
 - [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
 	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
 	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
+
+- Improved support for NPOT textures
+	- CC3Texture only generates mipmaps if texture is POT
+	- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
+	- Added CCTexture2D cc3IsNPOT, cc3WidthIsNPOT & cc3HeightIsNPOT properties in CC3Texture extension
 
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.

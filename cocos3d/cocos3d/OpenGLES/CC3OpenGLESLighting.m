@@ -34,134 +34,11 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightFloat
-
-@implementation CC3OpenGLESStateTrackerLightFloat
-
-@synthesize lightIndex;
-
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
-		lightIndex = ltIndx;
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initWithParent: aTracker
-								forState: qName
-						   andLightIndex: ltIndx] autorelease];
-}
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightColor
-
-@implementation CC3OpenGLESStateTrackerLightColor
-
-@synthesize lightIndex;
-
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
-		lightIndex = ltIndx;
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initWithParent: aTracker
-								forState: qName
-						   andLightIndex: ltIndx] autorelease];
-}
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightVector
-
-@implementation CC3OpenGLESStateTrackerLightVector
-
-@synthesize lightIndex;
-
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
-		lightIndex = ltIndx;
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initWithParent: aTracker
-								forState: qName
-						   andLightIndex: ltIndx] autorelease];
-}
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightVector4
-
-@implementation CC3OpenGLESStateTrackerLightVector4
-
-@synthesize lightIndex;
-
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx {
-	if ( (self = [super initWithParent: aTracker forState: qName]) ) {
-		lightIndex = ltIndx;
-	}
-	return self;
-}
-
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx {
-	return [[[self alloc] initWithParent: aTracker
-								forState: qName
-						   andLightIndex: ltIndx] autorelease];
-}
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESLight
 
 @implementation CC3OpenGLESLight
 
+@synthesize lightIndex=_lightIndex;
 @synthesize light;
 @synthesize ambientColor;
 @synthesize diffuseColor;
@@ -189,9 +66,11 @@
 	[super dealloc];
 }
 
+-(BOOL) isEnabled { return self.light.value; }
+
 -(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker withLightIndex: (GLuint) ltIndx {
 	if ( (self = [super initMinimalWithParent: aTracker]) ) {
-		lightIndex = ltIndx;
+		_lightIndex = ltIndx;
 		[self initializeTrackers];
 	}
 	return self;

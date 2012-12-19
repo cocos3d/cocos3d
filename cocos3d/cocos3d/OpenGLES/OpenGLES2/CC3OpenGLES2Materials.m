@@ -54,13 +54,12 @@
 @implementation CC3OpenGLES2Materials
 
 -(void) initializeTrackers {
-	self.ambientColor = nil;
-	self.diffuseColor = nil;
-	self.specularColor = nil;
-	self.emissionColor = nil;
-	self.shininess = nil;
+	self.ambientColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
+	self.diffuseColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
+	self.specularColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
+	self.emissionColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
+	self.shininess = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
 	self.alphaFunc = nil;
-	
 	self.blendFunc = [CC3OpenGLES2StateTrackerMaterialBlend trackerWithParent: self];
 }
 

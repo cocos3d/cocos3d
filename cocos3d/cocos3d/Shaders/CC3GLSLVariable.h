@@ -40,10 +40,10 @@
 #pragma mark CC3GLSLVariable
 
 /**
- * Describes a variable used in a GLSL shader program. Different subclasses are used for
+ * Represents a variable used in a GLSL shader program. Different subclasses are used for
  * uniform variables and attribute variables.
  */
-@interface CC3GLSLVariable : NSObject {
+@interface CC3GLSLVariable : NSObject <NSCopying> {
 	CC3GLProgram* _program;
 	NSString* _name;
 	GLuint _index;
@@ -87,14 +87,15 @@
  */
 @property(nonatomic, readonly) GLint size;
 
-@property(nonatomic, readonly) size_t typeSize;
-
 /**
  * A symbolic constant indicating the semantic meaning of this variable.
  *
- * The range of accepable values for this property depends on the type of variable being tracked,
- * as determined by the subclass. See the notes for this property in each subclass for more
- * specific information.
+ * The value of this property is typically one of values in the CC3Semantic enumeration,
+ * but an application can define and use additional semantics beyond the values defined
+ * by CC3Semantic. Additional semantics defined by the application should fall with the
+ * range defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
+ *
+ * The initial value of this property is kCC3SemanticNone.
  */
 @property(nonatomic, assign) GLenum semantic;
 
@@ -107,13 +108,63 @@
 /** Allocates and initializes an autoreleased instance at the specified index within the specified program. */
 +(id) variableInProgram: (CC3GLProgram*) program atIndex: (GLuint) index;
 
+/**
+ * Returns a newly allocated (retained) copy of this instance. The new copy will be an instance
+ * of the specified class, whose content is copied from this instance.
+ *
+ * Care should be taken when choosing the class to be instantiated. If the class is different
+ * than that of this instance, the populateFrom: method of that class must be compatible with
+ * the contents of this instance.
+ *
+ * As with all copy behaviour, the returned instance is retained. It is the responsiblity of the
+ * invoker to manage the lifecycle of the returned instance and perform the corresponding invocation
+ * of the release method at the appropriate time.
+ *
+ * Subclasses that extend copying should not override this method, but should override the
+ * populateFrom: method instead.
+ */
+-(id) copyAsClass: (Class) aClass;
+
+/**
+ * Returns a newly allocated (retained) copy of this instance. The new copy will be an instance
+ * of the specified class, whose content is copied from this instance.
+ *
+ * Care should be taken when choosing the class to be instantiated. If the class is different
+ * than that of this instance, the populateFrom: method of that class must be compatible with
+ * the contents of this instance.
+ *
+ * As with all copy behaviour, the returned instance is retained. It is the responsiblity of the
+ * invoker to manage the lifecycle of the returned instance and perform the corresponding invocation
+ * of the release method at the appropriate time.
+ *
+ * Subclasses that extend copying should not override this method, but should override the
+ * populateFrom: method instead.
+ */
+-(id) copyWithZone: (NSZone*) zone asClass: (Class) aClass;
+
+/**
+ * Template method that populates this instance from the specified other instance.
+ *
+ * This method is invoked automatically during object copying via the copy or copyWithZone: method.
+ * In most situations, the application should use the copy method, and should never need to invoke
+ * this method directly.
+ *
+ * Subclasses that add additional instance state (instance variables) should extend copying by
+ * overriding this method to copy that additional state. Superclass that override this method should
+ * be sure to invoke the superclass implementation to ensure that superclass state is copied as well.
+ */
+-(void) populateFrom: (CC3GLSLVariable*) another;
+
+/** Returns a detailed description of this instance. */
+-(NSString*) fullDescription;
+
 @end
 
 
 #pragma mark -
 #pragma mark CC3GLSLAttribute
 
-/** Describes an attribute variable used in a GLSL shader program.  */
+/** Represents an attribute variable used in a GLSL shader program.  */
 @interface CC3GLSLAttribute : CC3GLSLVariable
 
 /**
@@ -125,26 +176,16 @@
  */
 @property(nonatomic, readonly) GLenum type;
 
-/**
- * A symbolic constant indicating the semantic meaning of this variable.
- *
- * The value of this property must follow the guidelines described in the notes for the
- * CC3VertexContentSemantic enumeration.
- *
- * The initial value of this property is kCC3VertexContentSemanticNone.
- */
-@property(nonatomic, assign) GLenum semantic;
-
 @end
 
 
 #pragma mark -
 #pragma mark CC3GLSLUniform
 
-/** Describes a uniform variable used in a GLSL shader program.  */
+/** Represents a uniform variable used in a GLSL shader program.  */
 @interface CC3GLSLUniform : CC3GLSLVariable {
 	size_t _varLen;
-	GLvoid* _varState;
+	GLvoid* _varValue;
 }
 
 /**
@@ -159,18 +200,8 @@
  */
 @property(nonatomic, readonly) GLenum type;
 
-/**
- * A symbolic constant indicating the semantic meaning of this variable.
- *
- * The value of this property must follow the guidelines described in the notes for the
- * CC3ProgramUniformSemantic enumeration.
- *
- * The initial value of this property is kCC3ProgramUniformSemanticNone.
- */
-@property(nonatomic, assign) GLenum semantic;
 
-
-#pragma mark Setting uniform values
+#pragma mark Accessing uniform values
 
 /**
  * Sets the value of this uniform variable in the GL engine to the specified array of floats.
@@ -438,4 +469,30 @@
  */
 -(void) setColor4F: (ccColor4F) value;
 
+/** Sets the value of the specified uniform from the value of this uniform. */
+-(void) setValueInto: (CC3GLSLUniform*) uniform;
+
 @end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLESStateTrackerGLSLAttribute
+
+/** Tracks the GL engine state for a attribute variable used in a GLSL shader program.  */
+@interface CC3OpenGLESStateTrackerGLSLAttribute : CC3GLSLAttribute
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLESStateTrackerGLSLUniform
+
+/**
+ * Tracks the GL engine state for a uniform variable used in a GLSL shader program.
+ *
+ * Adds the ability to set the variable value in the GL engine.
+ *
+ * All of the set... methods permit the writing of new state regardless of the semantic.
+ */
+@interface CC3OpenGLESStateTrackerGLSLUniform : CC3GLSLUniform
+@end
+

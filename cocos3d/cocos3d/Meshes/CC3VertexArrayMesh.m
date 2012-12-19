@@ -598,43 +598,19 @@
 	[glesVtxArrays disableUnboundVertexPointers];
 }
 
-/**
- * Template method that binds a pointer to the vertex location data to the GL engine.
- * If this mesh has no vertex location data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexLocations unbind class method.
- */
+/** Template method that binds a pointer to the vertex location data to the GL engine. */
 -(void) bindLocationsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (vertexLocations) {
-		[vertexLocations bindWithVisitor: visitor];
-	} else {
-		[CC3VertexLocations unbind];
-	}
+	[vertexLocations bindWithVisitor: visitor];
 }
 
-/**
- * Template method that binds a pointer to the vertex normal data to the GL engine.
- * If this mesh has no vertex normal data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexNormals unbind class method.
- */
+/** Template method that binds a pointer to the vertex normal data to the GL engine. */
 -(void) bindNormalsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (vertexNormals && visitor.shouldDecorateNode) {
-		[vertexNormals bindWithVisitor: visitor];
-	} else {
-		[CC3VertexNormals unbind];
-	}
+	if (visitor.shouldDecorateNode) [vertexNormals bindWithVisitor: visitor];
 }
 
-/**
- * Template method that binds a pointer to the per-vertex color data to the GL engine.
- * If this mesh has no per-vertex color data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexColors unbind class method.
- */
+/** Template method that binds a pointer to the per-vertex color data to the GL engine. */
 -(void) bindColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (vertexColors && visitor.shouldDecorateNode) {
-		[vertexColors bindWithVisitor: visitor];
-	} else {
-		[CC3VertexColors unbind];
-	}
+	if (visitor.shouldDecorateNode) [vertexColors bindWithVisitor: visitor];
 }
 
 /**
@@ -670,42 +646,29 @@
 			if(vtc) {
 				visitor.textureUnit = tu;
 				[vtc bindWithVisitor: visitor];
-			} else {
-				// If we have no tex coord at all, simply disable tex coords in this texture unit.
-				[CC3VertexTextureCoordinates unbind: tu];
 			}
 			tu++;		// Move on to the next texture unit
 		}
 	}
-	[CC3VertexTextureCoordinates unbindRemainingFrom: tu];
 }
 
 /**
  * Template method that binds a pointer to the vertex point size data to the GL engine.
- * Since this mesh has no vertex point size data, the pointer is cleared in the GL engine.
  * Subclasses with vertex point size data will override.
  */
--(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[CC3VertexPointSizes unbind];
-}
+-(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 /**
  * Template method that binds a pointer to the vertex matrix index data to the GL engine.
- * Since this mesh has no vertex matrix index data, the pointer is cleared in the GL engine.
  * Subclasses with vertex matrix index data will override.
  */
--(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[CC3VertexMatrixIndices unbind];
-}
+-(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 /**
  * Template method that binds a pointer to the vertex weight data to the GL engine.
- * Since this mesh has no vertex weight data, the pointer is cleared in the GL engine.
  * Subclasses with vertex weight data will override.
  */
--(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
-	[CC3VertexWeights unbind];
-}
+-(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {}
 
 /** Template method that binds a pointer to the vertex index data to the GL engine. */
 -(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -1088,14 +1051,6 @@
 	if (vertexLocations) return [vertexLocations vertexIndexCountFromFaceCount: fc];
 	NSAssert1(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.", self);
 	return 0;
-}
-
-
-#pragma mark Mesh context switching
-
-+(void) resetSwitching {
-	[super resetSwitching];
-	[CC3VertexArray resetAllSwitching];
 }
 
 @end

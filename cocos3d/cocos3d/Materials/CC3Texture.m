@@ -52,12 +52,21 @@
 
 @implementation CC3Texture
 
-@synthesize texture=_texture, textureUnit=_textureUnit;
+@synthesize textureUnit=_textureUnit;
 
 -(void) dealloc {
 	[_texture release];
 	[_textureUnit release];
 	[super dealloc];
+}
+
+-(CCTexture2D*) texture { return _texture; }
+
+-(void) setTexture:(CCTexture2D *)texture {
+	if (texture == _texture) return;
+	[_texture release];
+	_texture = [texture retain];
+	[self markTextureParametersDirty];		// params depend on texture POT/NPOT
 }
 
 -(CGSize) mapSize { return _texture ? CGSizeMake(_texture.maxS, _texture.maxT) : CGSizeZero; }
@@ -75,11 +84,11 @@
 -(BOOL) isFlippedVertically { return (_texture && _texture.cc3IsFlippedVertically); }
 
 /** Indicates whether Mipmaps should automatically be generated for any loaded textures. */
-static BOOL shouldGenerateMipmaps = YES;
+static BOOL _shouldGenerateMipmaps = YES;
 
-+(BOOL) shouldGenerateMipmaps { return shouldGenerateMipmaps; }
++(BOOL) shouldGenerateMipmaps { return _shouldGenerateMipmaps; }
 
-+(void) setShouldGenerateMipmaps: (BOOL) shouldMipmap  { shouldGenerateMipmaps = shouldMipmap; }
++(void) setShouldGenerateMipmaps: (BOOL) shouldMipmap  { _shouldGenerateMipmaps = shouldMipmap; }
 
 -(GLenum) minifyingFunction {
 	if (self.hasMipmap) return _minifyingFunction;
@@ -91,10 +100,10 @@ static BOOL shouldGenerateMipmaps = YES;
 		case GL_LINEAR_MIPMAP_LINEAR:
 			return GL_LINEAR;
 
-		default:
 		case GL_NEAREST:
 		case GL_NEAREST_MIPMAP_NEAREST:
 		case GL_NEAREST_MIPMAP_LINEAR:
+		default:
 			return GL_NEAREST;
 	}
 }
@@ -111,14 +120,18 @@ static BOOL shouldGenerateMipmaps = YES;
 	[self markTextureParametersDirty];
 }
 
--(GLenum) horizontalWrappingFunction { return _horizontalWrappingFunction; }
+-(GLenum) horizontalWrappingFunction {
+	return _texture.cc3IsNPOT ? GL_CLAMP_TO_EDGE : _horizontalWrappingFunction;
+}
 
 -(void) setHorizontalWrappingFunction: (GLenum) horizontalWrappingFunction {
 	_horizontalWrappingFunction = horizontalWrappingFunction;
 	[self markTextureParametersDirty];
 }
 
--(GLenum) verticalWrappingFunction { return _verticalWrappingFunction; }
+-(GLenum) verticalWrappingFunction {
+	return _texture.cc3IsNPOT ? GL_CLAMP_TO_EDGE : _verticalWrappingFunction;
+}
 
 -(void) setVerticalWrappingFunction: (GLenum) verticalWrappingFunction {
 	_verticalWrappingFunction = verticalWrappingFunction;
@@ -145,11 +158,11 @@ static BOOL shouldGenerateMipmaps = YES;
 -(void) markTextureParametersDirty { _texParametersAreDirty = YES; }
 
 /** Default texture parameters. */
-static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, GL_REPEAT, GL_REPEAT };
+static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, GL_REPEAT, GL_REPEAT };
 
-+(ccTexParams) defaultTextureParameters { return defaultTextureParameters; }
++(ccTexParams) defaultTextureParameters { return _defaultTextureParameters; }
 
-+(void) setDefaultTextureParameters: (ccTexParams) texParams { defaultTextureParameters = texParams; }
++(void) setDefaultTextureParameters: (ccTexParams) texParams { _defaultTextureParameters = texParams; }
 
 
 #pragma mark Allocation and Initialization
@@ -212,7 +225,7 @@ static ccTexParams defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LIN
 	self.texture = [[CCTextureCache sharedTextureCache] addImage: absFilePath];
 	CCTexture2D.instantiationClass = nil;
 	
-	if (shouldGenerateMipmaps) [self generateMipmap];
+	if (_shouldGenerateMipmaps) [self generateMipmap];
 	if (_texture) {
 		LogTrace(@"%@ loaded texture from file %@ in %.4f seconds",
 				 self, aFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
@@ -357,7 +370,7 @@ static Class _instantiationClass = nil;
 +(id) alloc { return _instantiationClass ? [_instantiationClass alloc] : [self allocBase]; }
 
 -(BOOL) cc3GenerateMipmapIfNeeded {
-	if (self.cc3HasMipmap || !self.cc3IsNPOT) return NO;
+	if (self.cc3HasMipmap || self.cc3IsNPOT) return NO;
 	
 	[self generateMipmap];
 	self.cc3HasMipmap = YES;
@@ -454,7 +467,11 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 	[self.class setCc3IsFlippedVertically: self.name to: isFlipped];
 }
 
--(BOOL) cc3IsNPOT { return (width_ == ccNextPOT(width_) && height_ == ccNextPOT(height_)); }
+-(BOOL) cc3WidthIsNPOT { return (width_ != ccNextPOT(width_)); }
+
+-(BOOL) cc3HeightIsNPOT { return (height_ != ccNextPOT(height_)); }
+
+-(BOOL) cc3IsNPOT { return self.cc3WidthIsNPOT || self.cc3HeightIsNPOT; }
 
 @end
 

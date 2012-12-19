@@ -88,6 +88,13 @@
 /** @deprecated Use depth property instead. */
 -(GLuint) getDepth DEPRECATED_ATTRIBUTE;
 
+/**
+ * Callback method invoked automatically when the stack is changed.
+ *
+ * Invokes the stackChanged: method on the parent CC3OpenGLESMatrices instance.
+ */
+-(void) wasChanged;
+
 @end
 
 
@@ -157,17 +164,24 @@
 -(CC3OpenGLESMatrixStack*) paletteAt: (GLuint) index;
 
 
-/** Populates the specified matrix with the contents of the current modelview matrix. */
-//-(void) getModelViewMatrix: (CC3Matrix4x4*) mtx;
+#pragma mark Accessing matrices
 
-/** Populates the specified matrix with the contents of the current modelview matrix. */
-//-(void) getModelViewMatrix: (CC3Matrix4x4*) mtx;
+/** Callback invoked when the specified stack has changed. */
+-(void) stackChanged: (CC3OpenGLESMatrixStack*) stack;
 
-/** Populates the specified matrix with the contents of the current projection matrix. */
-//-(void) getProjectionMatrix: (CC3Matrix4x4*) mtx;
+/** Returns a pointer to the current view matrix. */
+-(CC3Matrix4x4*) viewMatrix;
 
-/** Populates the specified matrix with the contents of the current modelview-projection matrix. */
-//-(void) getModelViewProjMatrix: (CC3Matrix4x4*) mtx;
+/** Returns a pointer to the current model-view matrix. */
+-(CC3Matrix4x4*) modelViewMatrix;
 
+/** Returns a pointer to the inverse-transpose of the current model-view matrix. */
+-(CC3Matrix3x3*) modelViewInverseTransposeMatrix;
+
+/** Returns a pointer to the current projection matrix. */
+-(CC3Matrix4x4*) projectionMatrix;
+
+/** Returns a pointer to the current model-view projection matrix. */
+-(CC3Matrix4x4*) modelViewProjectionMatrix;
 
 @end

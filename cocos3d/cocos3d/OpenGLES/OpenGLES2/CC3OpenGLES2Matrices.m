@@ -36,6 +36,10 @@
 #pragma mark -
 #pragma mark CC3OpenGLES2MatrixStack
 
+/** The depth of the modelview matrix stack when the view matrix is at the top. */
+#define kCC3ViewMatrixDepth			2
+
+
 @implementation CC3OpenGLES2MatrixStack
 
 -(void) dealloc {
@@ -64,18 +68,26 @@
 	NSAssert1(_depth < _maxDepth, @"%@ attempted to push beyond the maximum stack depth.", self);
 	CC3Matrix4x4PopulateFrom4x4(&_mtxStack[_depth], self.top);
 	_depth++;	// Move the stack index to the new top
+	[self wasChanged];
 }
 
 -(void) pop {
 	NSAssert1(_depth > 1, @"%@ attempted to pop beyond the bottom of the stack.", self);
 	_depth--;
+	[self wasChanged];
 }
 
 -(GLuint) depth { return _depth; }
 
--(void) identity { CC3Matrix4x4PopulateIdentity(self.top); }
+-(void) identity {
+	CC3Matrix4x4PopulateIdentity(self.top);
+	[self wasChanged];
+}
 
--(void) load: (CC3Matrix4x4*) mtx { CC3Matrix4x4PopulateFrom4x4(self.top, mtx); }
+-(void) load: (CC3Matrix4x4*) mtx {
+	CC3Matrix4x4PopulateFrom4x4(self.top, mtx);
+	[self wasChanged];
+}
 
 -(void) getTop: (CC3Matrix4x4*) mtx { CC3Matrix4x4PopulateFrom4x4(mtx, self.top); }
 
@@ -83,6 +95,7 @@
 	CC3Matrix4x4 mRslt;
 	CC3Matrix4x4Multiply(&mRslt, self.top, mtx);
 	CC3Matrix4x4PopulateFrom4x4(self.top, &mRslt);
+	[self wasChanged];
 }
 
 
@@ -121,6 +134,53 @@
 /** Template method returns an autoreleased instance of a palette matrix tracker. */
 -(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
 	return [CC3OpenGLES2MatrixStack trackerWithParent: self];
+}
+
+
+#pragma mark Accessing matrices
+
+-(void) stackChanged: (CC3OpenGLESMatrixStack*) stack {
+	GLuint stackDepth = stack.depth;
+	
+	if (stack == modelview) {
+		if (stackDepth <= kCC3ViewMatrixDepth) {
+			[stack getTop: &_viewMatrix];
+		}
+		[stack getTop: &_modelViewMatrix];
+		_modelViewInverseTransposeMatrixIsDirty = YES;
+		_modelViewProjectionMatrixIsDirty = YES;
+	}
+
+	if (stack == projection) {
+		[stack getTop: &_projectionMatrix];
+		_modelViewProjectionMatrixIsDirty = YES;
+	}
+
+}
+
+-(CC3Matrix4x4*) viewMatrix { return &_viewMatrix; }
+
+-(CC3Matrix4x4*) modelViewMatrix { return &_modelViewMatrix; }
+
+-(CC3Matrix3x3*) modelViewInverseTransposeMatrix {
+	CC3Matrix3x3* pMVIT = &_modelViewInverseTransposeMatrix;
+	if (_modelViewInverseTransposeMatrixIsDirty) {
+		CC3Matrix3x3PopulateFrom4x4(pMVIT, &_modelViewMatrix);
+		CC3Matrix3x3InvertAdjoint(pMVIT);
+		CC3Matrix3x3Transpose(pMVIT);
+		_modelViewInverseTransposeMatrixIsDirty = NO;
+	}
+	return pMVIT;
+}
+
+-(CC3Matrix4x4*) projectionMatrix { return &_projectionMatrix; }
+
+-(CC3Matrix4x4*) modelViewProjectionMatrix {
+	if (_modelViewProjectionMatrixIsDirty) {
+		CC3Matrix4x4Multiply(&_modelViewProjectionMatrix, &_projectionMatrix, &_modelViewMatrix);
+		_modelViewProjectionMatrixIsDirty = NO;
+	}
+	return &_modelViewProjectionMatrix;
 }
 
 @end

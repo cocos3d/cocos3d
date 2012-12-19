@@ -31,24 +31,69 @@
 
 #import "CC3OpenGLESShaders.h"
 
+#define kCC3DefaultGLProgramName				@"CC3DefaultGLProgram"
+
 
 #pragma mark -
 #pragma mark CC3OpenGLESShaders
 
 @implementation CC3OpenGLESShaders
 
-@synthesize activeProgram=_activeProgram;
+@synthesize activeProgram=_activeProgram, defaultProgram=_defaultProgram;
+@synthesize defaultVertexShaderSourceFile=_defaultVertexShaderSourceFile;
+@synthesize defaultFragmentShaderSourceFile=_defaultFragmentShaderSourceFile;
 
 -(void) dealloc {
-	[_programs release];
+	[_programsByName release];
+	[_defaultProgram release];
 	_activeProgram = nil;		// retained in collection
+	[_defaultVertexShaderSourceFile release];
+	[_defaultFragmentShaderSourceFile release];
 	[super dealloc];
 }
 
 -(void) setActiveProgram: (CC3GLProgram*) aProgram { _activeProgram = aProgram; }
 
+-(void) addProgram: (CC3GLProgram*) program {
+	NSAssert2( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
+	[_programsByName setObject: program forKey: program.name];
+}
+
+-(CC3GLProgram*) getProgramNamed: (NSString*) name { return [_programsByName objectForKey: name]; }
+
+-(void) removeProgram: (CC3GLProgram*) program { [self removeProgramNamed: program.name]; }
+
+-(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
+
+-(CC3GLProgram*) defaultProgram {
+	if ( !_defaultProgram ) {
+		CC3GLProgram* p = [self makeDefaultProgram];
+		if(p) [self addProgram: p];
+		self.defaultProgram = p;
+	}
+	return _defaultProgram;
+}
+
+-(CC3GLProgram*) makeDefaultProgram {
+	if (_defaultVertexShaderSourceFile && _defaultFragmentShaderSourceFile) {
+		CC3GLProgram *p = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
+										fromVertexShaderFile: _defaultVertexShaderSourceFile
+									   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
+		p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+		[p link];
+		return p;
+	} else {
+		return nil;
+	}
+}
+
+
+#pragma mark Allocation and initialization
+
 -(void) initializeTrackers {
-	_programs = [CCArray new];		// retained
+	_programsByName = [NSMutableDictionary new];		// retained
+	_defaultVertexShaderSourceFile = nil;
+	_defaultFragmentShaderSourceFile = nil;
 }
 
 -(void) unbind {}
@@ -56,7 +101,7 @@
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
 	[desc appendFormat: @"%@:", [self class]];
-	for (id p in _programs) [desc appendFormat: @"\n    %@ ", p];
+	for (id p in _programsByName) [desc appendFormat: @"\n    %@ ", p];
 	return desc;
 }
 
