@@ -151,18 +151,18 @@
 	BOOL wasLinked = [super link];
 	NSAssert1(wasLinked, @"%@ could not be linked. See previously logged error.", self);
 	if (wasLinked) {
-		[self mapVariableSemantics];
+		[self configureVariables];
 		LogRez(@"Linked %@", self.fullDescription);
 	}
 	return wasLinked;
 }
 
--(void) mapVariableSemantics {
-	[self mapUniformSemantics];
-	[self mapAttributeSemantics];
+-(void) configureVariables {
+	[self configureUniforms];
+	[self configureAttributes];
 }
 
--(void) mapUniformSemantics {
+-(void) configureUniforms {
 	[_uniforms removeAllObjects];
 	
 	GLint varCnt;
@@ -172,12 +172,12 @@
 	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate assignUniformSemantic: var];
+		[_semanticDelegate configureVariable: var];
 		[_uniforms addObject: var];
 	}
 }
 
--(void) mapAttributeSemantics {
+-(void) configureAttributes {
 	[_attributes removeAllObjects];
 	
 	GLint varCnt;
@@ -187,7 +187,7 @@
 	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate assignAttributeSemantic: var];
+		[_semanticDelegate configureVariable: var];
 		[_attributes addObject: var];
 	}
 }
@@ -279,41 +279,3 @@
 }
 
 @end
-
-/*
-#if CC3_OGLES_1
-
-@implementation CC3GLProgram
-
--(GLint) maxUniformNameLength { return 0; }
-
--(GLint) maxAttributeNameLength { return 0; }
-
--(void) extractVariables {}
-
--(CC3GLSLUniform*) uniformNamed: (NSString*) name { return nil; }
-
--(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation { return nil; }
-
--(CC3GLSLUniform*) uniformWithSemantic: (GLenum) semantic { return nil; }
-
--(CC3GLSLAttribute*) attributeNamed: (NSString*) name { return nil; }
-
--(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation { return nil; }
-
--(CC3GLSLAttribute*) attributeWithSemantic: (GLenum) semantic { return nil; }
-
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-
--(NSString*) fullDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@", self.description];
-	for (id var in _uniforms) [desc appendFormat: @"\n\t %@", var];
-	for (id var in _attributes) [desc appendFormat: @"\n\t %@", var];
-	return desc;
-}
-
-@end
-
-#endif
-*/

@@ -37,34 +37,25 @@
 #import "CC3Camera.h"
 #import "CC3Light.h"
 
-NSString* NSStringFromCC3VertexContentSemantic(CC3VertexContentSemantic semantic) {
-	switch (semantic) {
-		case kCC3VertexContentSemanticNone: return @"kCC3VertexContentSemanticNone";
-		case kCC3VertexContentSemanticLocations: return @"kCC3VertexContentSemanticLocations";
-		case kCC3VertexContentSemanticNormals: return @"kCC3VertexContentSemanticNormals";
-		case kCC3VertexContentSemanticColors: return @"kCC3VertexContentSemanticColors";
-		case kCC3VertexContentSemanticPointSizes: return @"kCC3VertexContentSemanticPointSizes";
-		case kCC3VertexContentSemanticWeights: return @"kCC3VertexContentSemanticWeights";
-		case kCC3VertexContentSemanticMatrices: return @"kCC3VertexContentSemanticMatrices";
-		case kCC3VertexContentSemanticTexture0: return @"kCC3VertexContentSemanticTexture0";
-		case kCC3VertexContentSemanticTexture1: return @"kCC3VertexContentSemanticTexture1";
-		case kCC3VertexContentSemanticTexture2: return @"kCC3VertexContentSemanticTexture2";
-		case kCC3VertexContentSemanticTexture3: return @"kCC3VertexContentSemanticTexture3";
-		case kCC3VertexContentSemanticTexture4: return @"kCC3VertexContentSemanticTexture4";
-		case kCC3VertexContentSemanticTexture5: return @"kCC3VertexContentSemanticTexture5";
-		case kCC3VertexContentSemanticTexture6: return @"kCC3VertexContentSemanticTexture6";
-		case kCC3VertexContentSemanticTexture7: return @"kCC3VertexContentSemanticTexture7";
-
-		case kCC3VertexContentSemanticAppBase: return @"kCC3VertexContentSemanticAppBase";
-		case kCC3VertexContentSemanticMax: return @"kCC3VertexContentSemanticMax";
-		default: return [NSString stringWithFormat: @"Unknown vertex content semantic (%u)", semantic];
-	}
-}
-
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	switch (semantic) {
 		case kCC3SemanticNone: return @"kCC3SemanticNone";
 
+		case kCC3SemanticVertexLocations: return @"kCC3SemanticVertexLocations";
+		case kCC3SemanticVertexNormals: return @"kCC3SemanticVertexNormals";
+		case kCC3SemanticVertexColors: return @"kCC3SemanticVertexColors";
+		case kCC3SemanticVertexPointSizes: return @"kCC3SemanticVertexPointSizes";
+		case kCC3SemanticVertexWeights: return @"kCC3SemanticVertexWeights";
+		case kCC3SemanticVertexMatrices: return @"kCC3SemanticVertexMatrices";
+		case kCC3SemanticVertexTexture0: return @"kCC3SemanticVertexTexture0";
+		case kCC3SemanticVertexTexture1: return @"kCC3SemanticVertexTexture1";
+		case kCC3SemanticVertexTexture2: return @"kCC3SemanticVertexTexture2";
+		case kCC3SemanticVertexTexture3: return @"kCC3SemanticVertexTexture3";
+		case kCC3SemanticVertexTexture4: return @"kCC3SemanticVertexTexture4";
+		case kCC3SemanticVertexTexture5: return @"kCC3SemanticVertexTexture5";
+		case kCC3SemanticVertexTexture6: return @"kCC3SemanticVertexTexture6";
+		case kCC3SemanticVertexTexture7: return @"kCC3SemanticVertexTexture7";
+			
 		case kCC3SemanticHasVertexNormal: return @"kCC3SemanticHasVertexNormal";
 		case kCC3SemanticShouldNormalizeVertexNormal: return @"kCC3SemanticShouldNormalizeVertexNormal";
 		case kCC3SemanticShouldRescaleVertexNormal: return @"kCC3SemanticShouldRescaleVertexNormal";
@@ -205,19 +196,30 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
+#pragma mark CC3GLSLVariableConfiguration
+
+@implementation CC3GLSLVariableConfiguration
+
+@synthesize name=_name, semantic=_semantic;
+
+-(void) dealloc {
+	[_name release];
+	[super dealloc];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3GLProgramSemanticsDelegateBase
 
 @implementation CC3GLProgramSemanticsDelegateBase
 
 +(id) semanticsDelegate { return [[[self alloc] init] autorelease]; }
 
--(NSString*) nameOfUniformSemantic: (GLenum) semantic { return NSStringFromCC3Semantic(semantic); }
+-(NSString*) nameOfSemantic: (GLenum) semantic { return NSStringFromCC3Semantic(semantic); }
 
--(NSString*) nameOfAttributeSemantic: (GLenum) semantic { return NSStringFromCC3VertexContentSemantic(semantic); }
-
--(BOOL) assignUniformSemantic: (CC3GLSLUniform*) uniform { return NO; }
-
--(BOOL) assignAttributeSemantic: (CC3GLSLAttribute*) attribute { return NO; }
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable { return NO; }
 
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESLight* glesLight;
@@ -449,130 +451,167 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3GLProgramSemanticsDelegateByVarNames
 
--(BOOL) assignAttributeSemantic: (CC3GLSLAttribute*) variable {
-	CC3SetSemantic(@"a_cc3Position", kCC3VertexContentSemanticLocations);
-	CC3SetSemantic(@"a_cc3Normal", kCC3VertexContentSemanticNormals);
-	CC3SetSemantic(@"a_cc3Color", kCC3VertexContentSemanticColors);
-	CC3SetSemantic(@"a_cc3Weight", kCC3VertexContentSemanticWeights);
-	CC3SetSemantic(@"a_cc3MatrixIdx", kCC3VertexContentSemanticMatrices);
-	CC3SetSemantic(@"a_cc3PointSize", kCC3VertexContentSemanticPointSizes);
-	CC3SetSemantic(@"a_cc3TexCoord", kCC3VertexContentSemanticTexture0);	// alias to a_cc3TexCoord0
-	CC3SetSemantic(@"a_cc3TexCoord0", kCC3VertexContentSemanticTexture0);
-	CC3SetSemantic(@"a_cc3TexCoord1", kCC3VertexContentSemanticTexture1);
-	CC3SetSemantic(@"a_cc3TexCoord2", kCC3VertexContentSemanticTexture2);
-	CC3SetSemantic(@"a_cc3TexCoord3", kCC3VertexContentSemanticTexture3);
-	CC3SetSemantic(@"a_cc3TexCoord4", kCC3VertexContentSemanticTexture4);
-	CC3SetSemantic(@"a_cc3TexCoord5", kCC3VertexContentSemanticTexture5);
-	CC3SetSemantic(@"a_cc3TexCoord6", kCC3VertexContentSemanticTexture6);
-	CC3SetSemantic(@"a_cc3TexCoord7", kCC3VertexContentSemanticTexture7);
-	
+-(void) dealloc {
+	[_varConfigsByName release];
+	[super dealloc];
+}
+
+/**
+ * Uses the variable name property to look up a configuration and sets the
+ */
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable {
+	CC3GLSLVariableConfiguration* varConfig = [_varConfigsByName objectForKey: variable.name];
+	if (varConfig) {
+		variable.semantic = varConfig.semantic;
+		return YES;
+	}
 	return NO;
 }
 
--(BOOL) assignUniformSemantic: (CC3GLSLUniform*) variable {
+-(void) addVariableConfiguration: (CC3GLSLVariableConfiguration*) varConfig {
+	if ( !_varConfigsByName ) _varConfigsByName = [NSMutableDictionary new];		// retained
+	[_varConfigsByName setObject: varConfig forKey: varConfig.name];
+}
 
+-(void) mapVariableName: (NSString*) name toSemantic: (GLenum) semantic {
+	CC3GLSLVariableConfiguration* varConfig = [CC3GLSLVariableConfiguration new];
+	varConfig.name = name;
+	varConfig.semantic = semantic;
+	[self addVariableConfiguration: varConfig];
+	[varConfig release];
+}
+
+-(void) populateWithDefaultSemanticMappings {
+	// Vertex attributes
+	[self mapVariableName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
+	[self mapVariableName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormals];
+	[self mapVariableName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColors];
+	[self mapVariableName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeights];
+	[self mapVariableName: @"a_cc3MatrixIdx" toSemantic: kCC3SemanticVertexMatrices];
+	[self mapVariableName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];
+	[self mapVariableName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture0];	// alias to a_cc3TexCoord0
+	[self mapVariableName: @"a_cc3TexCoord0" toSemantic: kCC3SemanticVertexTexture0];
+	[self mapVariableName: @"a_cc3TexCoord1" toSemantic: kCC3SemanticVertexTexture1];
+	[self mapVariableName: @"a_cc3TexCoord2" toSemantic: kCC3SemanticVertexTexture2];
+	[self mapVariableName: @"a_cc3TexCoord3" toSemantic: kCC3SemanticVertexTexture3];
+	[self mapVariableName: @"a_cc3TexCoord4" toSemantic: kCC3SemanticVertexTexture4];
+	[self mapVariableName: @"a_cc3TexCoord5" toSemantic: kCC3SemanticVertexTexture5];
+	[self mapVariableName: @"a_cc3TexCoord6" toSemantic: kCC3SemanticVertexTexture6];
+	[self mapVariableName: @"a_cc3TexCoord7" toSemantic: kCC3SemanticVertexTexture7];
+	
 	// Attribute qualifiers
-	CC3SetSemantic(@"u_cc3HasVertexNormal", kCC3SemanticHasVertexNormal);
-	CC3SetSemantic(@"u_cc3ShouldNormalizeNormal", kCC3SemanticShouldNormalizeVertexNormal);
-	CC3SetSemantic(@"u_cc3ShouldRescaleNormal", kCC3SemanticShouldRescaleVertexNormal);
-	CC3SetSemantic(@"u_cc3HasVertexColor", kCC3SemanticHasVertexColor);
-	CC3SetSemantic(@"u_cc3TexCoordCount", kCC3SemanticTexCoordCount);
+	[self mapVariableName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];
+	[self mapVariableName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];
+	[self mapVariableName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];
+	[self mapVariableName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];
+	[self mapVariableName: @"u_cc3TexCoordCount" toSemantic: kCC3SemanticTexCoordCount];
 	
 	// Environment matrices
-	CC3SetSemantic(@"u_cc3MtxM", kCC3SemanticModelMatrix);
-	CC3SetSemantic(@"u_cc3MtxMI", kCC3SemanticModelMatrixInv);
-	CC3SetSemantic(@"u_cc3MtxMIT", kCC3SemanticModelMatrixInvTran);
-	CC3SetSemantic(@"u_cc3MtxV", kCC3SemanticViewMatrix);
-	CC3SetSemantic(@"u_cc3MtxVI", kCC3SemanticViewMatrixInv);
-	CC3SetSemantic(@"u_cc3MtxVIT", kCC3SemanticViewMatrixInvTran);
-	CC3SetSemantic(@"u_cc3MtxMV", kCC3SemanticModelViewMatrix);
-	CC3SetSemantic(@"u_cc3MtxMVI", kCC3SemanticModelViewMatrixInv);
-	CC3SetSemantic(@"u_cc3MtxMVIT", kCC3SemanticModelViewMatrixInvTran);
-	CC3SetSemantic(@"u_cc3MtxP", kCC3SemanticProjMatrix);
-	CC3SetSemantic(@"u_cc3MtxPI", kCC3SemanticProjMatrixInv);
-	CC3SetSemantic(@"u_cc3MtxPIT", kCC3SemanticProjMatrixInvTran);
-	CC3SetSemantic(@"u_cc3MtxMVP", kCC3SemanticModelViewProjMatrix);
-	CC3SetSemantic(@"u_cc3MtxMVPI", kCC3SemanticModelViewProjMatrixInv);
-	CC3SetSemantic(@"u_cc3MtxMVPIT", kCC3SemanticModelViewProjMatrixInvTran);
+	[self mapVariableName: @"u_cc3MtxM" toSemantic: kCC3SemanticModelMatrix];
+	[self mapVariableName: @"u_cc3MtxMI" toSemantic: kCC3SemanticModelMatrixInv];
+	[self mapVariableName: @"u_cc3MtxMIT" toSemantic: kCC3SemanticModelMatrixInvTran];
+	[self mapVariableName: @"u_cc3MtxV" toSemantic: kCC3SemanticViewMatrix];
+	[self mapVariableName: @"u_cc3MtxVI" toSemantic: kCC3SemanticViewMatrixInv];
+	[self mapVariableName: @"u_cc3MtxVIT" toSemantic: kCC3SemanticViewMatrixInvTran];
+	[self mapVariableName: @"u_cc3MtxMV" toSemantic: kCC3SemanticModelViewMatrix];
+	[self mapVariableName: @"u_cc3MtxMVI" toSemantic: kCC3SemanticModelViewMatrixInv];
+	[self mapVariableName: @"u_cc3MtxMVIT" toSemantic: kCC3SemanticModelViewMatrixInvTran];
+	[self mapVariableName: @"u_cc3MtxP" toSemantic: kCC3SemanticProjMatrix];
+	[self mapVariableName: @"u_cc3MtxPI" toSemantic: kCC3SemanticProjMatrixInv];
+	[self mapVariableName: @"u_cc3MtxPIT" toSemantic: kCC3SemanticProjMatrixInvTran];
+	[self mapVariableName: @"u_cc3MtxMVP" toSemantic: kCC3SemanticModelViewProjMatrix];
+	[self mapVariableName: @"u_cc3MtxMVPI" toSemantic: kCC3SemanticModelViewProjMatrixInv];
+	[self mapVariableName: @"u_cc3MtxMVPIT" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];
 	
 	// Material properties
-	CC3SetSemantic(@"u_cc3MatColorAmbient", kCC3SemanticMaterialColorAmbient);
-	CC3SetSemantic(@"u_cc3MatColorDiffuse", kCC3SemanticMaterialColorDiffuse);
-	CC3SetSemantic(@"u_cc3MatColorSpecular", kCC3SemanticMaterialColorSpecular);
-	CC3SetSemantic(@"u_cc3MatColorEmission", kCC3SemanticMaterialColorEmission);
-	CC3SetSemantic(@"u_cc3MatShininess", kCC3SemanticMaterialShininess);
-
+	[self mapVariableName: @"u_cc3MatColorAmbient" toSemantic: kCC3SemanticMaterialColorAmbient];
+	[self mapVariableName: @"u_cc3MatColorDiffuse" toSemantic: kCC3SemanticMaterialColorDiffuse];
+	[self mapVariableName: @"u_cc3MatColorSpecular" toSemantic: kCC3SemanticMaterialColorSpecular];
+	[self mapVariableName: @"u_cc3MatColorEmission" toSemantic: kCC3SemanticMaterialColorEmission];
+	[self mapVariableName: @"u_cc3MatShininess" toSemantic: kCC3SemanticMaterialShininess];
+	
 	// Texture samplers & properties
-	CC3SetSemantic(@"u_cc3TextureCount", kCC3SemanticTextureCount);
-	CC3SetSemantic(@"s_cc3Texture[0]", kCC3SemanticTexture0);
-	CC3SetSemantic(@"s_cc3Texture[1]", kCC3SemanticTexture1);
-	CC3SetSemantic(@"s_cc3Texture[2]", kCC3SemanticTexture2);
-	CC3SetSemantic(@"s_cc3Texture[3]", kCC3SemanticTexture3);
-	CC3SetSemantic(@"s_cc3Texture[4]", kCC3SemanticTexture4);
-	CC3SetSemantic(@"s_cc3Texture[5]", kCC3SemanticTexture5);
-	CC3SetSemantic(@"s_cc3Texture[6]", kCC3SemanticTexture6);
-	CC3SetSemantic(@"s_cc3Texture[7]", kCC3SemanticTexture7);
-
+	[self mapVariableName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
+	[self mapVariableName: @"s_cc3Texture[0]" toSemantic: kCC3SemanticTexture0];
+	[self mapVariableName: @"s_cc3Texture[1]" toSemantic: kCC3SemanticTexture1];
+	[self mapVariableName: @"s_cc3Texture[2]" toSemantic: kCC3SemanticTexture2];
+	[self mapVariableName: @"s_cc3Texture[3]" toSemantic: kCC3SemanticTexture3];
+	[self mapVariableName: @"s_cc3Texture[4]" toSemantic: kCC3SemanticTexture4];
+	[self mapVariableName: @"s_cc3Texture[5]" toSemantic: kCC3SemanticTexture5];
+	[self mapVariableName: @"s_cc3Texture[6]" toSemantic: kCC3SemanticTexture6];
+	[self mapVariableName: @"s_cc3Texture[7]" toSemantic: kCC3SemanticTexture7];
+	
 	// Lighting
-	CC3SetSemantic(@"u_cc3IsUsingLighting", kCC3SemanticIsUsingLighting);
-	CC3SetSemantic(@"u_cc3SceneLightColorAmbient", kCC3SemanticSceneLightColorAmbient);
+	[self mapVariableName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
+	[self mapVariableName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
+	
+	[self mapVariableName: @"u_cc3Light.isEnabled" toSemantic: kCC3SemanticLightIsEnabled0];		// Aliases for light zero
+	[self mapVariableName: @"u_cc3Light.position" toSemantic: kCC3SemanticLightPosition0];
+	[self mapVariableName: @"u_cc3Light.colorAmbient" toSemantic: kCC3SemanticLightColorAmbient0];
+	[self mapVariableName: @"u_cc3Light.colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse0];
+	[self mapVariableName: @"u_cc3Light.colorSpecular" toSemantic: kCC3SemanticLightColorSpecular0];
+	[self mapVariableName: @"u_cc3Light.attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients0];
+	[self mapVariableName: @"u_cc3Light.spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
+	[self mapVariableName: @"u_cc3Light.spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
+	[self mapVariableName: @"u_cc3Light.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
+	[self mapVariableName: @"u_cc3Light.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine0];
+	
+	[self mapVariableName: @"u_cc3Lights[0].isEnabled" toSemantic: kCC3SemanticLightIsEnabled0];
+	[self mapVariableName: @"u_cc3Lights[0].position" toSemantic: kCC3SemanticLightPosition0];
+	[self mapVariableName: @"u_cc3Lights[0].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient0];
+	[self mapVariableName: @"u_cc3Lights[0].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse0];
+	[self mapVariableName: @"u_cc3Lights[0].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular0];
+	[self mapVariableName: @"u_cc3Lights[0].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients0];
+	[self mapVariableName: @"u_cc3Lights[0].spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
+	[self mapVariableName: @"u_cc3Lights[0].spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
+	[self mapVariableName: @"u_cc3Lights[0].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
+	[self mapVariableName: @"u_cc3Lights[0].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine0];
+	
+	[self mapVariableName: @"u_cc3Lights[1].isEnabled" toSemantic: kCC3SemanticLightIsEnabled1];
+	[self mapVariableName: @"u_cc3Lights[1].position" toSemantic: kCC3SemanticLightPosition1];
+	[self mapVariableName: @"u_cc3Lights[1].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient1];
+	[self mapVariableName: @"u_cc3Lights[1].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse1];
+	[self mapVariableName: @"u_cc3Lights[1].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular1];
+	[self mapVariableName: @"u_cc3Lights[1].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients1];
+	[self mapVariableName: @"u_cc3Lights[1].spotDirection" toSemantic: kCC3SemanticLightSpotDirection1];
+	[self mapVariableName: @"u_cc3Lights[1].spotExponent" toSemantic: kCC3SemanticLightSpotExponent1];
+	[self mapVariableName: @"u_cc3Lights[1].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle1];
+	[self mapVariableName: @"u_cc3Lights[1].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine1];
+	
+	[self mapVariableName: @"u_cc3Lights[2].isEnabled" toSemantic: kCC3SemanticLightIsEnabled2];
+	[self mapVariableName: @"u_cc3Lights[2].position" toSemantic: kCC3SemanticLightPosition2];
+	[self mapVariableName: @"u_cc3Lights[2].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient2];
+	[self mapVariableName: @"u_cc3Lights[2].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse2];
+	[self mapVariableName: @"u_cc3Lights[2].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular2];
+	[self mapVariableName: @"u_cc3Lights[2].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients2];
+	[self mapVariableName: @"u_cc3Lights[2].spotDirection" toSemantic: kCC3SemanticLightSpotDirection2];
+	[self mapVariableName: @"u_cc3Lights[2].spotExponent" toSemantic: kCC3SemanticLightSpotExponent2];
+	[self mapVariableName: @"u_cc3Lights[2].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle2];
+	[self mapVariableName: @"u_cc3Lights[2].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine2];
+	
+	[self mapVariableName: @"u_cc3Lights[3].isEnabled" toSemantic: kCC3SemanticLightIsEnabled3];
+	[self mapVariableName: @"u_cc3Lights[3].position" toSemantic: kCC3SemanticLightPosition3];
+	[self mapVariableName: @"u_cc3Lights[3].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient3];
+	[self mapVariableName: @"u_cc3Lights[3].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse3];
+	[self mapVariableName: @"u_cc3Lights[3].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular3];
+	[self mapVariableName: @"u_cc3Lights[3].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients3];
+	[self mapVariableName: @"u_cc3Lights[3].spotDirection" toSemantic: kCC3SemanticLightSpotDirection3];
+	[self mapVariableName: @"u_cc3Lights[3].spotExponent" toSemantic: kCC3SemanticLightSpotExponent3];
+	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle3];
+	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine3];
+	
+}
 
-	CC3SetSemantic(@"u_cc3Light.isEnabled", kCC3SemanticLightIsEnabled0);		// Aliases for light zero
-	CC3SetSemantic(@"u_cc3Light.position", kCC3SemanticLightPosition0);
-	CC3SetSemantic(@"u_cc3Light.colorAmbient", kCC3SemanticLightColorAmbient0);
-	CC3SetSemantic(@"u_cc3Light.colorDiffuse", kCC3SemanticLightColorDiffuse0);
-	CC3SetSemantic(@"u_cc3Light.colorSpecular", kCC3SemanticLightColorSpecular0);
-	CC3SetSemantic(@"u_cc3Light.attenuationCoefficients", kCC3SemanticLightAttenuationCoefficients0);
-	CC3SetSemantic(@"u_cc3Light.spotDirection", kCC3SemanticLightSpotDirection0);
-	CC3SetSemantic(@"u_cc3Light.spotExponent", kCC3SemanticLightSpotExponent0);
-	CC3SetSemantic(@"u_cc3Light.spotCutoffAngle", kCC3SemanticLightSpotCutoffAngle0);
-	CC3SetSemantic(@"u_cc3Light.spotCutoffAngleCosine", kCC3SemanticLightSpotCutoffAngleCosine0);
+static CC3GLProgramSemanticsDelegateByVarNames* _sharedDefaultDelegate;
 
-	CC3SetSemantic(@"u_cc3Lights[0].isEnabled", kCC3SemanticLightIsEnabled0);
-	CC3SetSemantic(@"u_cc3Lights[0].position", kCC3SemanticLightPosition0);
-	CC3SetSemantic(@"u_cc3Lights[0].colorAmbient", kCC3SemanticLightColorAmbient0);
-	CC3SetSemantic(@"u_cc3Lights[0].colorDiffuse", kCC3SemanticLightColorDiffuse0);
-	CC3SetSemantic(@"u_cc3Lights[0].colorSpecular", kCC3SemanticLightColorSpecular0);
-	CC3SetSemantic(@"u_cc3Lights[0].attenuationCoefficients", kCC3SemanticLightAttenuationCoefficients0);
-	CC3SetSemantic(@"u_cc3Lights[0].spotDirection", kCC3SemanticLightSpotDirection0);
-	CC3SetSemantic(@"u_cc3Lights[0].spotExponent", kCC3SemanticLightSpotExponent0);
-	CC3SetSemantic(@"u_cc3Lights[0].spotCutoffAngle", kCC3SemanticLightSpotCutoffAngle0);
-	CC3SetSemantic(@"u_cc3Lights[0].spotCutoffAngleCosine", kCC3SemanticLightSpotCutoffAngleCosine0);
-	
-	CC3SetSemantic(@"u_cc3Lights[1].isEnabled", kCC3SemanticLightIsEnabled1);
-	CC3SetSemantic(@"u_cc3Lights[1].position", kCC3SemanticLightPosition1);
-	CC3SetSemantic(@"u_cc3Lights[1].colorAmbient", kCC3SemanticLightColorAmbient1);
-	CC3SetSemantic(@"u_cc3Lights[1].colorDiffuse", kCC3SemanticLightColorDiffuse1);
-	CC3SetSemantic(@"u_cc3Lights[1].colorSpecular", kCC3SemanticLightColorSpecular1);
-	CC3SetSemantic(@"u_cc3Lights[1].attenuationCoefficients", kCC3SemanticLightAttenuationCoefficients1);
-	CC3SetSemantic(@"u_cc3Lights[1].spotDirection", kCC3SemanticLightSpotDirection1);
-	CC3SetSemantic(@"u_cc3Lights[1].spotExponent", kCC3SemanticLightSpotExponent1);
-	CC3SetSemantic(@"u_cc3Lights[1].spotCutoffAngle", kCC3SemanticLightSpotCutoffAngle1);
-	CC3SetSemantic(@"u_cc3Lights[1].spotCutoffAngleCosine", kCC3SemanticLightSpotCutoffAngleCosine1);
-	
-	CC3SetSemantic(@"u_cc3Lights[2].isEnabled", kCC3SemanticLightIsEnabled2);
-	CC3SetSemantic(@"u_cc3Lights[2].position", kCC3SemanticLightPosition2);
-	CC3SetSemantic(@"u_cc3Lights[2].colorAmbient", kCC3SemanticLightColorAmbient2);
-	CC3SetSemantic(@"u_cc3Lights[2].colorDiffuse", kCC3SemanticLightColorDiffuse2);
-	CC3SetSemantic(@"u_cc3Lights[2].colorSpecular", kCC3SemanticLightColorSpecular2);
-	CC3SetSemantic(@"u_cc3Lights[2].attenuationCoefficients", kCC3SemanticLightAttenuationCoefficients2);
-	CC3SetSemantic(@"u_cc3Lights[2].spotDirection", kCC3SemanticLightSpotDirection2);
-	CC3SetSemantic(@"u_cc3Lights[2].spotExponent", kCC3SemanticLightSpotExponent2);
-	CC3SetSemantic(@"u_cc3Lights[2].spotCutoffAngle", kCC3SemanticLightSpotCutoffAngle2);
-	CC3SetSemantic(@"u_cc3Lights[2].spotCutoffAngleCosine", kCC3SemanticLightSpotCutoffAngleCosine2);
-	
-	CC3SetSemantic(@"u_cc3Lights[3].isEnabled", kCC3SemanticLightIsEnabled3);
-	CC3SetSemantic(@"u_cc3Lights[3].position", kCC3SemanticLightPosition3);
-	CC3SetSemantic(@"u_cc3Lights[3].colorAmbient", kCC3SemanticLightColorAmbient3);
-	CC3SetSemantic(@"u_cc3Lights[3].colorDiffuse", kCC3SemanticLightColorDiffuse3);
-	CC3SetSemantic(@"u_cc3Lights[3].colorSpecular", kCC3SemanticLightColorSpecular3);
-	CC3SetSemantic(@"u_cc3Lights[3].attenuationCoefficients", kCC3SemanticLightAttenuationCoefficients3);
-	CC3SetSemantic(@"u_cc3Lights[3].spotDirection", kCC3SemanticLightSpotDirection3);
-	CC3SetSemantic(@"u_cc3Lights[3].spotExponent", kCC3SemanticLightSpotExponent3);
-	CC3SetSemantic(@"u_cc3Lights[3].spotCutoffAngle", kCC3SemanticLightSpotCutoffAngle3);
-	CC3SetSemantic(@"u_cc3Lights[3].spotCutoffAngleCosine", kCC3SemanticLightSpotCutoffAngleCosine3);
-	
-	return NO;
++(CC3GLProgramSemanticsDelegateByVarNames*) sharedDefaultDelegate {
+	if ( !_sharedDefaultDelegate ) {
+		_sharedDefaultDelegate = [CC3GLProgramSemanticsDelegateByVarNames new];		// retained
+		[_sharedDefaultDelegate populateWithDefaultSemanticMappings];
+	}
+	return _sharedDefaultDelegate;
 }
 
 @end
+	
+	

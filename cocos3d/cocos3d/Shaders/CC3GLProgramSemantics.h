@@ -30,42 +30,40 @@
 /** @file */	// Doxygen marker
 
 
-@class CC3GLSLUniform, CC3GLSLAttribute, CC3NodeDrawingVisitor;
+@class CC3GLSLVariable, CC3GLSLUniform, CC3NodeDrawingVisitor;
+
+
+#pragma mark Semantic enumerations
 
 /**
- * Indicates the semantic usage for a particular vertex array type.
+ * Indicates the semantic usage for scene content.
  *
- * Under OpenGL ES 2, these values are used to match a vertex array to its semantic usage
- * within a GLSL vertex shader.
+ * Under OpenGL ES 2, these values are used to match an GLSL program variable to its semantic
+ * usage within a GLSL shader.
  *
- * The semantic value kCC3VertexContentSemanticAppBase and kCC3VertexContentSemanticMax define
- * a range of values that can be used by the application to match custom app-specific semantics.
- * The framework will not automatically assign or use values within this range, so it can be
+ * The semantic value kCC3SemanticAppBase and kCC3SemanticMax define a range of values that
+ * can be used by the application to define and match custom app-specific semantics. The
+ * framework will not automatically assign or use values within this range, so it can be
  * used by the app to indicate an app-specific semantic usage.
  */
 typedef enum {
-	kCC3VertexContentSemanticNone = 0,		/**< No defined semantic usage. */
-	kCC3VertexContentSemanticLocations,		/**< Vertex locations. */
-	kCC3VertexContentSemanticNormals,		/**< Vertex normals. */
-	kCC3VertexContentSemanticColors,		/**< Vertex colors. */
-	kCC3VertexContentSemanticPointSizes,	/**< Vertex point sizes. */
-	kCC3VertexContentSemanticWeights,		/**< Vertex skinning weights. */
-	kCC3VertexContentSemanticMatrices,		/**< Vertex skinning matrices. */
-	kCC3VertexContentSemanticTexture0,		/**< Vertex texture coordinates for texture unit 0. */
-	kCC3VertexContentSemanticTexture1,		/**< Vertex texture coordinates for texture unit 1. */
-	kCC3VertexContentSemanticTexture2,		/**< Vertex texture coordinates for texture unit 2. */
-	kCC3VertexContentSemanticTexture3,		/**< Vertex texture coordinates for texture unit 3. */
-	kCC3VertexContentSemanticTexture4,		/**< Vertex texture coordinates for texture unit 4. */
-	kCC3VertexContentSemanticTexture5,		/**< Vertex texture coordinates for texture unit 5. */
-	kCC3VertexContentSemanticTexture6,		/**< Vertex texture coordinates for texture unit 6. */
-	kCC3VertexContentSemanticTexture7,		/**< Vertex texture coordinates for texture unit 7. */
-	kCC3VertexContentSemanticAppBase,		/**< First semantic of app-specific custom semantics. */
-	kCC3VertexContentSemanticMax = 0xFF		/**< The maximum value for an app-specific custom semantic. */
-} CC3VertexContentSemantic;
-
-
-typedef enum {
 	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
+
+	// VERTEX CONTENT --------------
+	kCC3SemanticVertexLocations,				/**< Vertex locations. */
+	kCC3SemanticVertexNormals,					/**< Vertex normals. */
+	kCC3SemanticVertexColors,					/**< Vertex colors. */
+	kCC3SemanticVertexPointSizes,				/**< Vertex point sizes. */
+	kCC3SemanticVertexWeights,					/**< Vertex skinning weights. */
+	kCC3SemanticVertexMatrices,					/**< Vertex skinning matrices. */
+	kCC3SemanticVertexTexture0,					/**< Vertex texture coordinates for texture unit 0. */
+	kCC3SemanticVertexTexture1,					/**< Vertex texture coordinates for texture unit 1. */
+	kCC3SemanticVertexTexture2,					/**< Vertex texture coordinates for texture unit 2. */
+	kCC3SemanticVertexTexture3,					/**< Vertex texture coordinates for texture unit 3. */
+	kCC3SemanticVertexTexture4,					/**< Vertex texture coordinates for texture unit 4. */
+	kCC3SemanticVertexTexture5,					/**< Vertex texture coordinates for texture unit 5. */
+	kCC3SemanticVertexTexture6,					/**< Vertex texture coordinates for texture unit 6. */
+	kCC3SemanticVertexTexture7,					/**< Vertex texture coordinates for texture unit 7. */
 	
 	// ENVIRONMENT MATRICES --------------
 	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
@@ -207,9 +205,6 @@ typedef enum {
 	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */
 } CC3Semantic;
 
-/** Returns a string representation of the specified vertex content semantic. */
-NSString* NSStringFromCC3VertexContentSemantic(CC3VertexContentSemantic semantic);
-
 /** Returns a string representation of the specified state semantic. */
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
@@ -226,39 +221,23 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 @protocol CC3GLProgramSemanticsDelegate <NSObject>
 
 /**
- * Assigns the semantic property for the specified uniform.
+ * Configures the specified GLSL variable.
  *
  * Implementers should attempt to match the specified uniform variable with a semantic and,
- * if found, should set the semantic property on the uniform variable, and return YES. If an
- * impementation cannot determine the appropriate semantic, it should avoid setting the semantic
- * property of the uniform and should return NO.
+ * if found, should set the semantic property on the specified variable, and return YES.
+ * If an impementation cannot determine the appropriate semantic, it should avoid setting
+ * the semantic property of the uniform and should return NO.
  *
- * Returns whether the semantic could be assigned. When delegating to superclasses or other
- * delegates, implementers can use this return code to determine whether or not to continue
- * attempting to determine the semantic for the specified variable.
+ * In addition, implementers may perform additional configuration behaviour for the specified
+ * variable.
  *
- * This method is invoked automatically after the GLSL program has been compiled and linked.
- */
--(BOOL) assignUniformSemantic: (CC3GLSLUniform*) uniform;
-
-/** 
- * Assigns the semantic property for the specified attribute.
- *
- * Implementers should attempt to match the specified attribute variable with a semantic and,
- * if found, should set the semantic property on the attribute variable, and return YES. If an
- * impementation cannot determine the appropriate semantic, it should avoid setting the semantic
- * property of the attribute and should return NO.
- *
- * Returns whether the semantic could be assigned. When delegating to superclasses or other
- * delegates, implementers can use this return code to determine whether or not to continue
- * attempting to determine the semantic for the specified variable.
- *
- * The value set into the semantic property must follow the guidelines described
- * in the notes for the CC3VertexContentSemantic enumeration.
+ * Returns whether the variable was successfully configured. When delegating to superclasses
+ * or other delegates, implementers can use this return code to determine whether or not to
+ * continue attempting to configure the specified variable.
  *
  * This method is invoked automatically after the GLSL program has been compiled and linked.
  */
--(BOOL) assignAttributeSemantic: (CC3GLSLAttribute*) attribute;
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable;
 
 /**
  * Populates the specified uniform.
@@ -268,10 +247,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * content from the GL state caches found via the CC3OpenGLESEngine state machine structures,
  * or from the scene content accessed via the specified visitor.
  *
- * In the specified visitor, the camera property contains the active camera, the currentNode
- * property contains the node currently being drawn, the startingNode property contains the
- * CC3Scene, and the textureUnitCount property contains the number of texture units being
- * drawn for the current node.
+ * The specified visitor can be used to access content within the scene, and contains several
+ * convenience properties for accessing typical content, including currentMeshNode,
+ * currentMaterial, textureUnitCount, camera, and scene properties, and a lightAt: method.
  *
  * Implementers of this method can use the various set... methods on the specified uniform
  * to set the content into the specified uniform variable. The implementor does not need to
@@ -287,11 +265,48 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Returns a string description of the specified uniform semantic. */
--(NSString*) nameOfUniformSemantic: (GLenum) semantic;
+/** Returns a string description of the specified semantic. */
+-(NSString*) nameOfSemantic: (GLenum) semantic;
 
-/** Returns a string description of the specified attribute semantic. */
--(NSString*) nameOfAttributeSemantic: (GLenum) semantic;
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLVariableConfiguration
+
+/**
+ * A CC3GLSLVariableConfiguration carries information for configuring a single CC3GLSLVariable.
+ *
+ * An implementation of the CC3GLProgramSemanticsDelegate protocol will typically contain a
+ * collection of instances of this class, or a subclass, to configure the variables associated
+ * with a CC3GLProgram.
+ *
+ * This base implementation maps a variable name to a semantic value. Subclasses may add
+ * additional variable configuration information.
+ */
+@interface CC3GLSLVariableConfiguration : NSObject {
+	NSString* _name;
+	GLenum _semantic;
+}
+
+/**
+ * The name of the variable.
+ *
+ * Typically this is the name of the variable as declared in the GLSL program source code.
+ */
+@property(nonatomic, retain) NSString* name;
+
+/**
+ * A symbolic constant indicating the semantic meaning of this variable.
+ *
+ * The value of this property is typically one of values in the CC3Semantic enumeration,
+ * but an application can define and use additional semantics beyond the values defined
+ * by CC3Semantic. Additional semantics defined by the application should fall with the
+ * range defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
+ *
+ * The initial value of this property is kCC3SemanticNone.
+ */
+@property(nonatomic, assign) GLenum semantic;
 
 @end
 
@@ -303,21 +318,50 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * CC3GLProgramSemanticsDelegateBase is an abstract implementation of the CC3GLProgramSemanticsDelegate
  * protocol, that retrieves common uniform values from the scene based on those semantics.
  *
- * This implementation does not provide any behaviour for the assignUniformSemantic: and
- * assignAttributeSemantic:. Both method implementations do nothing, and always return NO.
- *
  * This implementation can be used as a superclass for other implementations. Semantic assigment
  * heuristics may be radically different across implementations, but there is much commonality in
- * the retrieval and assignement of uniform variables using the populateUniform:withVisitor: method.
+ * the retrieval and assignment of uniform variables using the populateUniform:withVisitor: method.
  * In many cases, subclassing this implementation, and using the inherited populateUniform:withVisitor:
  * method, possibly overriding to provide additional variable assignment behaviour, can provide
  * significant useful functionality.
+ *
+ * This implementation does not provide any behaviour for the configureVariable: method, which
+ * simply returns NO.
+ *
+ * The nameOfSemantic: method returns a name for each standard semantics defined in the CC3Semantic
+ * enumeration. If a subclass adds additional semantic definitions of its own, it should override
+ * that method to provide a string representation of the semantic value.
  */
-@interface CC3GLProgramSemanticsDelegateBase : NSObject<CC3GLProgramSemanticsDelegate> {
-}
+@interface CC3GLProgramSemanticsDelegateBase : NSObject<CC3GLProgramSemanticsDelegate> {}
 
 /** Allocates and initializes an autoreleased instance. */
 +(id) semanticsDelegate;
+
+/**
+ * Populates the specified uniform from standard content extracted from the scene.
+ *
+ * This implementation provides significant standard behaviour for most standard semantics.
+ * Subclasses can use this as a starting point, and add content extraction for customized
+ * semantics, or can override the behaviour of this method for specific uniforms or semantics.
+ */
+-(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * This implementation does not provide any configuration behaviour, and simply returns NO.
+ *
+ * Subclasses will add behaviour to configure variables according to customized semantic mapping.
+ */
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable;
+
+/**
+ * Returns a string description of the specified semantic.
+ *
+ * This implementation calls the NSStringFromCC3Semantic method to return a name for each of
+ * the standard semantics defined in the CC3Semantic enumeration. If a subclass adds additional
+ * semantic definitions of its own, it should override this method to provide a string
+ * representation of any new semantic values.
+ */
+-(NSString*) nameOfSemantic: (GLenum) semantic;
 
 @end
 
@@ -334,19 +378,68 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * code use very specific attribute and uniform variable names.
  */
 @interface CC3GLProgramSemanticsDelegateByVarNames : CC3GLProgramSemanticsDelegateBase {
+	NSMutableDictionary* _varConfigsByName;
 }
 
-@end
+/**
+ * This implementation uses the name property of the specified variable to look up a
+ * configuration, and sets the semantic property of the specified variable to that of
+ * the retrieved configuration.
+ *
+ * Returns YES if a configuration was found and the semantic was assigned, or NO if
+ * a configuration could not be found for the variable.
+ */
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable;
 
 /**
- * Convenience macro for testing and setting a semantic in a CC3GLSLVariable.
+ * Adds the specified variable configuration to the configuration lookup.
  *
- * Given a CC3GLSLVariable "variable", If the variable's name matches "name", the variable's
- * semantic property is set to "sem", and returns YES all the way out of the method or function
- * that invokes this macro (this last part is why this is a macro and not an inline).
+ * Configurations added via this method are used to configure the variables submitted
+ * to the configureVariable: method.
+ *
+ * Configurations are added to the lookup by name. If a configuration with the same name
+ * already exists in the lookup, it is replaced with the specified configuration.
  */
-#define CC3SetSemantic(_name, _sem)						\
-	if ( [variable.name isEqualToString: (_name)] ) {	\
-		variable.semantic = (_sem);						\
-		return YES;										\
-	}
+-(void) addVariableConfiguration: (CC3GLSLVariableConfiguration*) varConfig;
+
+/**
+ * Adds a variable configruation that maps the specified variable name to the specified semantic.
+ *
+ * This implementation creates an instance of CC3GLSLVariableConfiguration configured with
+ * the specified name and semantic, and invokes the addVariableConfiguration: method.
+ *
+ * The value of the semantic parameter is typically one of values in the CC3Semantic enumeration,
+ * but an application can define and use additional semantics beyond the values defined by
+ * CC3Semantic. Additional semantics defined by the application should fall with the range
+ * defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
+ */
+-(void) mapVariableName: (NSString*) name toSemantic: (GLenum) semantic;
+
+/**
+ * Populates this instance with the default cocos3d mappings between names and semantics.
+ *
+ * An application wishing to add additional semantic mappings, or override any of the default
+ * mappings can invoke this method, and then invoke the addVariableConfiguration: method to
+ * add or change any of the mappings.
+ */
+-(void) populateWithDefaultSemanticMappings;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Returns a shared default semantic delegate, that can be used to map the standard variables
+ * to their default semantics.
+ *
+ * The delegate returned by this property is lazily created and automatically populated using
+ * the populateWithDefaultSemanticMappings method to create the standard default mappings.
+ *
+ * The default CC3DefaultByVarNames.vsh and CC3DefaultByVarNames.fsh shaders are designed to
+ * use the standard default mappings provided by the delegate returned by this property.
+ *
+ * This property returns a shared instance. Making changes to the delegate returned by this
+ * property will affect all CC3GLPrograms that have been assigned this delegate. Handle with care.
+ */
++(CC3GLProgramSemanticsDelegateByVarNames*) sharedDefaultDelegate;
+
+@end

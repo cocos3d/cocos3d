@@ -146,8 +146,8 @@
 	GLuint _vertexCount;
 	GLuint _bufferID;
 	GLenum _bufferUsage;
+	GLenum _semantic;
 	GLuint _vertexStride : 8;
-	GLenum _semantic : 8;
 	BOOL _shouldNormalizeContent : 1;
 	BOOL _shouldAllowVertexBuffering : 1;
 	BOOL _shouldReleaseRedundantData : 1;
@@ -174,7 +174,7 @@
  * CC3VertexContentSemantic enumeration, based on the vertex array type.
  *
  * The app may change this property to a custom value if desired. The custom value should be
- * kept within the range defined by kCC3VertexContentSemanticAppBase and kCC3VertexContentSemanticMax.
+ * kept within the range defined by kCC3SemanticAppBase and kCC3SemanticMax.
  */
 @property(nonatomic, assign) GLenum semantic;
 

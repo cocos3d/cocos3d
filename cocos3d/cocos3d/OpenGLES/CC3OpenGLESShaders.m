@@ -68,7 +68,7 @@
 -(CC3GLProgram*) defaultProgram {
 	if ( !_defaultProgram ) {
 		CC3GLProgram* p = [self makeDefaultProgram];
-		[self addProgram: p];
+		if(p) [self addProgram: p];
 		self.defaultProgram = p;
 	}
 	return _defaultProgram;
@@ -79,7 +79,7 @@
 		CC3GLProgram *p = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
 										fromVertexShaderFile: _defaultVertexShaderSourceFile
 									   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
-		p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames semanticsDelegate];
+		p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
 		[p link];
 		return p;
 	} else {

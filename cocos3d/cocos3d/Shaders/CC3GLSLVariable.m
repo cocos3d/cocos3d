@@ -55,6 +55,7 @@
 	if ( (self = [super init]) ) {
 		_program = program;			// not retained
 		_index = index;
+		_semantic = kCC3SemanticNone;
 	}
 	return self;
 }
@@ -100,7 +101,7 @@
 	return desc;
 }
 
--(NSString*) semanticName { return nil; }
+-(NSString*) semanticName { return [_program.semanticDelegate nameOfSemantic: _semantic]; }
 
 @end
 
@@ -109,16 +110,6 @@
 #pragma mark CC3GLSLAttribute
 
 @implementation CC3GLSLAttribute
-
--(NSString*) semanticName { return [_program.semanticDelegate nameOfAttributeSemantic: _semantic]; }
-
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
-	if ( (self = [super initInProgram: program atIndex: index]) ) {
-		_semantic = kCC3VertexContentSemanticNone;
-	}
-	return self;
-}
-
 @end
 
 
@@ -132,8 +123,6 @@
 	[super dealloc];
 }
 
--(NSString*) semanticName { return [_program.semanticDelegate nameOfUniformSemantic: _semantic]; }
-
 
 #pragma mark Allocation and initialization
 
@@ -141,7 +130,6 @@
 	if ( (self = [super initInProgram: program atIndex: index]) ) {
 		_varLen = 0;
 		_varValue = NULL;
-		_semantic = kCC3SemanticNone;
 	}
 	return self;
 }
@@ -694,7 +682,7 @@
 #if CC3_OGLES_2
 
 -(void) populateFromProgram {
-	_semantic = kCC3VertexContentSemanticNone;
+	_semantic = kCC3SemanticNone;
 	
 	GLint maxNameLen = [_program maxAttributeNameLength];
 	char* cName = calloc(maxNameLen, sizeof(char));

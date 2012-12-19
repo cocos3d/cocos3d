@@ -33,7 +33,8 @@
  *
  * CC3DefaultByVarNames.vsh is the vertex shader associated with this fragment shader.
  *
- * The semantics of the variables in this shader can be mapped using a CC3GLProgramSemanticsDelegateByVarNames.
+ * The semantics of the variables in this shader can be mapped using the
+ * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
  */
 
 #define MAX_TEXTURES				4

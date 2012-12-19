@@ -159,7 +159,7 @@
 
 +(GLenum) defaultSemantic {
 	NSAssert1(NO, @"%@ does not implement the defaultSemantic class property", self);
-	return kCC3VertexContentSemanticNone;
+	return kCC3SemanticNone;
 }
 
 
@@ -987,7 +987,7 @@ static GLuint lastAssignedVertexArrayTag;
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
 	CC3OpenGLESStateTrackerVertexPointer* vtxPtr = super.vertexPointer;
 	NSAssert2(vtxPtr, @"%@ could not retrieve the vertex pointer for semantic %@. Vertex locations are required for drawing.",
-			  self, NSStringFromCC3VertexContentSemantic(_semantic));
+			  self, NSStringFromCC3Semantic(_semantic));
 	return vtxPtr;
 }
 
@@ -1025,7 +1025,7 @@ static GLuint lastAssignedVertexArrayTag;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticLocations; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexLocations; }
 
 @end
 
@@ -1046,7 +1046,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(NSString*) nameSuffix { return @"Normals"; }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticNormals; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexNormals; }
 
 @end
 
@@ -1166,7 +1166,7 @@ static GLuint lastAssignedVertexArrayTag;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticColors; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexColors; }
 
 @end
 
@@ -1398,7 +1398,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticTexture0; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexTexture0; }
 
 @end
 
@@ -1547,7 +1547,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticNone; }
++(GLenum) defaultSemantic { return kCC3SemanticNone; }
 
 @end
 
@@ -1576,7 +1576,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticPointSizes; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexPointSizes; }
 
 @end
 
@@ -1617,7 +1617,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticWeights; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexWeights; }
 
 @end
 
@@ -1677,6 +1677,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3VertexContentSemanticMatrices; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexMatrices; }
 
 @end

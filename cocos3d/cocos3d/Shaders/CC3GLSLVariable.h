@@ -90,9 +90,12 @@
 /**
  * A symbolic constant indicating the semantic meaning of this variable.
  *
- * The range of accepable values for this property depends on the type of variable being tracked,
- * as determined by the subclass. See the notes for this property in each subclass for more
- * specific information.
+ * The value of this property is typically one of values in the CC3Semantic enumeration,
+ * but an application can define and use additional semantics beyond the values defined
+ * by CC3Semantic. Additional semantics defined by the application should fall with the
+ * range defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
+ *
+ * The initial value of this property is kCC3SemanticNone.
  */
 @property(nonatomic, assign) GLenum semantic;
 
@@ -173,16 +176,6 @@
  */
 @property(nonatomic, readonly) GLenum type;
 
-/**
- * A symbolic constant indicating the semantic meaning of this variable.
- *
- * The value of this property must follow the guidelines described in the notes for the
- * CC3VertexContentSemantic enumeration.
- *
- * The initial value of this property is kCC3VertexContentSemanticNone.
- */
-@property(nonatomic, assign) GLenum semantic;
-
 @end
 
 
@@ -206,16 +199,6 @@
  *   - GL_SAMPLER_2D, GL_SAMPLER_CUBE
  */
 @property(nonatomic, readonly) GLenum type;
-
-/**
- * A symbolic constant indicating the semantic meaning of this variable.
- *
- * The value of this property must follow the guidelines described in the notes for the
- * CC3ProgramUniformSemantic enumeration.
- *
- * The initial value of this property is kCC3SemanticNone.
- */
-@property(nonatomic, assign) GLenum semantic;
 
 
 #pragma mark Accessing uniform values

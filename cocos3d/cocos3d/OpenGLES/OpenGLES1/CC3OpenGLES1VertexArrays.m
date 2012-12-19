@@ -221,22 +221,22 @@
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
 	GLuint texUnit;
 	switch (semantic) {
-		case kCC3VertexContentSemanticLocations: return _locations;
-		case kCC3VertexContentSemanticNormals: return _normals;
-		case kCC3VertexContentSemanticColors: return _colors;
-		case kCC3VertexContentSemanticPointSizes: return _pointSizes;
-		case kCC3VertexContentSemanticWeights: return _weights;
-		case kCC3VertexContentSemanticMatrices: return _matrixIndices;
+		case kCC3SemanticVertexLocations: return _locations;
+		case kCC3SemanticVertexNormals: return _normals;
+		case kCC3SemanticVertexColors: return _colors;
+		case kCC3SemanticVertexPointSizes: return _pointSizes;
+		case kCC3SemanticVertexWeights: return _weights;
+		case kCC3SemanticVertexMatrices: return _matrixIndices;
 
-		case kCC3VertexContentSemanticTexture0:
-		case kCC3VertexContentSemanticTexture1:
-		case kCC3VertexContentSemanticTexture2:
-		case kCC3VertexContentSemanticTexture3:
-		case kCC3VertexContentSemanticTexture4:
-		case kCC3VertexContentSemanticTexture5:
-		case kCC3VertexContentSemanticTexture6:
-		case kCC3VertexContentSemanticTexture7:
-			texUnit = semantic - kCC3VertexContentSemanticTexture0;
+		case kCC3SemanticVertexTexture0:
+		case kCC3SemanticVertexTexture1:
+		case kCC3SemanticVertexTexture2:
+		case kCC3SemanticVertexTexture3:
+		case kCC3SemanticVertexTexture4:
+		case kCC3SemanticVertexTexture5:
+		case kCC3SemanticVertexTexture6:
+		case kCC3SemanticVertexTexture7:
+			texUnit = semantic - kCC3SemanticVertexTexture0;
 			return [self.engine.textures textureUnitAt: texUnit].textureCoordinates;
 			
 		default: return nil;
