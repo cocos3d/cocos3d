@@ -281,6 +281,14 @@ typedef enum {
 /** Allocates and initializes an autoreleased instance with the specified enumerated GL name. */
 +(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker forState: (GLenum) qName;
 
+/** Initializes this instance to handle original values as specified. */
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+	  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
+
+/** Allocates and initializes an autoreleased instance to handle original values as specified. */
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+	  andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling;
+
 /**
  * Initializes this instance with the specified enumerated GL name,
  * and to handle original values as specified.

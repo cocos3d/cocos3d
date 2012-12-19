@@ -279,9 +279,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Set up any initial state tracked by this subclass
 	[self initCustomState];
-	
+
 	[self addGround];				// Add a ground plane to provide some perspective to the user
-	
+
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
 	
 	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
@@ -296,14 +296,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[self addRobot];				// Add an animated robot arm, a light, and a camera
 	
-	// Override the value of a shader uniform on a single mesh node
-	CC3GLProgramContext* progCtx = [self getMeshNodeNamed: @"GeoSphere01"].material.shaderProgram;
-	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_matDiffuseColor"];
+	// Example of overriding the value of a shader uniform on a single mesh node.
+	CC3MeshNode* meshNode = [self getMeshNodeNamed: @"GeoSphere01"];
+	CC3GLProgramContext* progCtx = meshNode.material.shaderContext;
+	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_cc3MatColorDiffuse"];
 	progUniform.color4F = kCCC4FMagenta;
 	
 //	[self addBitmapLabel];			// Add a bitmapped string label
 	
-//	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
+	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 	
 //	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
 									// point particles hanging in the scene.
@@ -317,16 +318,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-//	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
+	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
 									// containing transparency. The band as a whole fades in and out
 									// periodically. This demonstrates managing opacity and translucency
 									// at both the texture and material level.
 	
-//	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
+	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
 	
-//	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
+	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
 	
-//	[self addMascots];				// Add the cocos3d mascot.
+	[self addMascots];				// Add the cocos3d mascot.
 									// This must happen after camera is loaded (in addRobot).
 	
 //	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
@@ -341,8 +342,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 //	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
 	
-//	[self addSpotlight];			// Add a spotlight to the camera.
-	// This spotlight will be turned on when the sun is turned off.
+	[self addSpotlight];			// Add a spotlight to the camera.
+									// This spotlight will be turned on when the sun is turned off.
 	
 //	[self addFog];					// Adds fog to the scene. This is initially invisible.
 	

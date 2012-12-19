@@ -315,8 +315,8 @@
 		1D6058910D05DD3D006BFB54 /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A907DB12153A07E100A97C02 /* Stamp.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Stamp.pvr; sourceTree = "<group>"; };
-		A921B0CD16798C88004DAA0F /* CC3DefaultByVarNames.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3DefaultByVarNames.fsh; sourceTree = "<group>"; };
-		A921B0CE16798C88004DAA0F /* CC3DefaultByVarNames.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3DefaultByVarNames.vsh; sourceTree = "<group>"; };
+		A921B0CD16798C88004DAA0F /* CC3DefaultByVarNames.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3DefaultByVarNames.fsh; sourceTree = "<group>"; };
+		A921B0CE16798C88004DAA0F /* CC3DefaultByVarNames.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3DefaultByVarNames.vsh; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.glsl; };
 		A92C6A11144A272900B15941 /* BoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BoxTexture.png; sourceTree = "<group>"; };
 		A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowButtonLatched48x48.png; sourceTree = "<group>"; };
 		A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowLeftButton48x48.png; sourceTree = "<group>"; };

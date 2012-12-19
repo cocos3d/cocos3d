@@ -40,8 +40,7 @@
 
 -(void) initializeTrackers {
 	self.alphaTest = nil;
-	self.blend = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
-															 forState: GL_BLEND];
+	self.blend = [CC3OpenGLESStateTrackerCapability trackerWithParent: self forState: GL_BLEND];
 	self.clipPlanes = nil;
 	self.colorLogicOp = nil;
 	self.colorMaterial = nil;
@@ -53,17 +52,24 @@
 	self.dither = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 															  forState: GL_DITHER];
 	self.fog = nil;
-	self.lighting = nil;
+
+	self.lighting = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
+												andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	self.lineSmooth = nil;
 	self.matrixPalette = nil;
 	self.multisample = nil;
-	self.normalize = nil;
+
+	self.normalize = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
+												 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
 	self.pointSmooth = nil;
 	self.pointSprites = nil;
 	
 	self.polygonOffsetFill = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 																		 forState: GL_POLYGON_OFFSET_FILL];
-	self.rescaleNormal = nil;
+	self.rescaleNormal = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
+													 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
+	
 	self.sampleAlphaToCoverage = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 																			 forState: GL_SAMPLE_ALPHA_TO_COVERAGE];
 	self.sampleAlphaToOne = nil;

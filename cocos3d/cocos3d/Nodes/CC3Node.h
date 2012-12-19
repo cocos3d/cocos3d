@@ -1428,9 +1428,9 @@ typedef enum {
  *
  * Setting this property sets the same property on all child nodes.
  * Querying this property returns the value of the same property from the first descendant
- * node that is a CC3MeshNode and has a non-nil value in the shaderProgram property.
+ * node that is a CC3MeshNode and has a non-nil value in the shaderContext property.
  */
-@property(nonatomic, retain) CC3GLProgramContext* shaderProgram;
+@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

@@ -53,7 +53,15 @@
 #pragma mark CC3OpenGLES2Matrices
 
 /** Provides specialized behaviour for OpenGL ES 2 implementations. */
-@interface CC3OpenGLES2Matrices : CC3OpenGLESMatrices
+@interface CC3OpenGLES2Matrices : CC3OpenGLESMatrices {
+	CC3Matrix4x4 _viewMatrix;
+	CC3Matrix4x4 _modelViewMatrix;
+	CC3Matrix3x3 _modelViewInverseTransposeMatrix;
+	CC3Matrix4x4 _projectionMatrix;
+	CC3Matrix4x4 _modelViewProjectionMatrix;
+	BOOL _modelViewInverseTransposeMatrixIsDirty : 1;
+	BOOL _modelViewProjectionMatrixIsDirty : 1;
+}
 @end
 
 #endif

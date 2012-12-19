@@ -163,7 +163,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
 	CCArray* _textureOverlays;
-	CC3GLProgramContext* _shaderProgram;
+	CC3GLProgramContext* _shaderContext;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -498,7 +498,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
  * OpenGL ES 1, the initial value of this property is nil.
  */
-@property(nonatomic, retain) CC3GLProgramContext* shaderProgram;
+@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
 
 
 #pragma mark Textures

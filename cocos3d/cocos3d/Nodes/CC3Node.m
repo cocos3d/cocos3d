@@ -818,16 +818,16 @@
 	}
 }
 
--(CC3GLProgramContext*) shaderProgram {
+-(CC3GLProgramContext*) shaderContext {
 	for (CC3Node* child in children) {
-		CC3GLProgramContext* shaderProgram = child.shaderProgram;
-		if (shaderProgram) return shaderProgram;
+		CC3GLProgramContext* shaderContext = child.shaderContext;
+		if (shaderContext) return shaderContext;
 	}
 	return nil;
 }
 
--(void) setShaderProgram:(CC3GLProgramContext *)shaderProgram {
-	for (CC3Node* child in children) child.shaderProgram = shaderProgram;
+-(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
+	for (CC3Node* child in children) child.shaderContext = shaderContext;
 }
 
 
@@ -1603,10 +1603,8 @@ static GLuint lastAssignedNodeTag;
 /**
  * Returns the inverse of the transformMatrix.
  *
- * Since this inverse matrix is not commonly used, and is often expensive to compute, it is only
- * calculated when the transformMatrix has changed, and then only on demand. When the transformMatrix
- * is marked as dirty, the tansformMatrixInverted is marke as dirty as well. It is then recalculated
- * the next time this property is accessed, and is cached until it is marked dirty again.
+ * Since this inverse matrix is not commonly used, and is often expensive to compute,
+ * it is only calculated when the transformMatrix has changed, and then only on demand.
  */
 -(CC3Matrix*) transformMatrixInverted {
 	if (!transformMatrixInverted) {

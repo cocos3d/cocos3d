@@ -66,17 +66,25 @@ typedef enum {
 
 typedef enum {
 	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
-	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
-	kCC3SemanticModelMatrixInv,				/**< Inverse of current model-to-world matrix. */
-	kCC3SemanticViewMatrix,					/**< Camera view matrix. */
-	kCC3SemanticViewMatrixInv,					/**< Inverse of camera view matrix. */
-	kCC3SemanticModelViewMatrix,				/**< Current modelview matrix. */
-	kCC3SemanticModelViewMatrixInv,			/**< Inverse of current modelview matrix. */
-	kCC3SemanticProjMatrix,					/**< Camera projection matrix. */
-	kCC3SemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
-	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
-	kCC3SemanticModelViewProjMatrixInv,		/**< Inverse of current modelview-projection matrix. */
 	
+	// ENVIRONMENT MATRICES --------------
+	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
+	kCC3SemanticModelMatrixInv,					/**< Inverse of current model-to-world matrix. */
+	kCC3SemanticModelMatrixInvTran,				/**< Inverse-transpose of current model-to-world matrix. */
+	kCC3SemanticViewMatrix,						/**< Camera view matrix. */
+	kCC3SemanticViewMatrixInv,					/**< Inverse of camera view matrix. */
+	kCC3SemanticViewMatrixInvTran,				/**< Inverse-transpose of camera view matrix. */
+	kCC3SemanticModelViewMatrix,				/**< Current modelview matrix. */
+	kCC3SemanticModelViewMatrixInv,				/**< Inverse of current modelview matrix. */
+	kCC3SemanticModelViewMatrixInvTran,			/**< Inverse-transpose of current modelview matrix. */
+	kCC3SemanticProjMatrix,						/**< Camera projection matrix. */
+	kCC3SemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
+	kCC3SemanticProjMatrixInvTran,				/**< Inverse-transpose of camera projection matrix. */
+	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInv,			/**< Inverse of current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
+	
+	// MATERIALS --------------
 	kCC3SemanticMaterialColorAmbient,			/**< Ambient color of the material. */
 	kCC3SemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
 	kCC3SemanticMaterialColorSpecular,			/**< Specular color of the material. */
@@ -84,6 +92,102 @@ typedef enum {
 	kCC3SemanticMaterialOpacity,				/**< Opacity of the material. */
 	kCC3SemanticMaterialShininess,				/**< Shininess of the material. */
 
+	// LIGHTING - Each category of light enums are consecutive to allow conversion to an index
+	kCC3SemanticIsUsingLighting,				/**< Whether any lighting is enabled. */
+	kCC3SemanticSceneLightColorAmbient,			/**< Ambient light color of the scene. */
+
+	kCC3SemanticLightIsEnabled0,				/**< Whether light 0 is enabled. */
+	kCC3SemanticLightIsEnabled1,				/**< Whether light 1 is enabled. */
+	kCC3SemanticLightIsEnabled2,				/**< Whether light 2 is enabled. */
+	kCC3SemanticLightIsEnabled3,				/**< Whether light 3 is enabled. */
+	kCC3SemanticLightIsEnabled4,				/**< Whether light 4 is enabled. */
+	kCC3SemanticLightIsEnabled5,				/**< Whether light 5 is enabled. */
+	kCC3SemanticLightIsEnabled6,				/**< Whether light 6 is enabled. */
+	kCC3SemanticLightIsEnabled7,				/**< Whether light 7 is enabled. */
+
+	kCC3SemanticLightPosition0,					/**< Position of light 0. */
+	kCC3SemanticLightPosition1,					/**< Position of light 1. */
+	kCC3SemanticLightPosition2,					/**< Position of light 2. */
+	kCC3SemanticLightPosition3,					/**< Position of light 3. */
+	kCC3SemanticLightPosition4,					/**< Position of light 4. */
+	kCC3SemanticLightPosition5,					/**< Position of light 5. */
+	kCC3SemanticLightPosition6,					/**< Position of light 6. */
+	kCC3SemanticLightPosition7,					/**< Position of light 7. */
+	
+	kCC3SemanticLightColorAmbient0,				/**< Ambient color of light 0. */
+	kCC3SemanticLightColorAmbient1,				/**< Ambient color of light 1. */
+	kCC3SemanticLightColorAmbient2,				/**< Ambient color of light 2. */
+	kCC3SemanticLightColorAmbient3,				/**< Ambient color of light 3. */
+	kCC3SemanticLightColorAmbient4,				/**< Ambient color of light 4. */
+	kCC3SemanticLightColorAmbient5,				/**< Ambient color of light 5. */
+	kCC3SemanticLightColorAmbient6,				/**< Ambient color of light 6. */
+	kCC3SemanticLightColorAmbient7,				/**< Ambient color of light 7. */
+
+	kCC3SemanticLightColorDiffuse0,				/**< Diffuse color of light 0. */
+	kCC3SemanticLightColorDiffuse1,				/**< Diffuse color of light 1. */
+	kCC3SemanticLightColorDiffuse2,				/**< Diffuse color of light 2. */
+	kCC3SemanticLightColorDiffuse3,				/**< Diffuse color of light 3. */
+	kCC3SemanticLightColorDiffuse4,				/**< Diffuse color of light 4. */
+	kCC3SemanticLightColorDiffuse5,				/**< Diffuse color of light 5. */
+	kCC3SemanticLightColorDiffuse6,				/**< Diffuse color of light 6. */
+	kCC3SemanticLightColorDiffuse7,				/**< Diffuse color of light 7. */
+
+	kCC3SemanticLightColorSpecular0,			/**< Specular color of light 0. */
+	kCC3SemanticLightColorSpecular1,			/**< Specular color of light 1. */
+	kCC3SemanticLightColorSpecular2,			/**< Specular color of light 2. */
+	kCC3SemanticLightColorSpecular3,			/**< Specular color of light 3. */
+	kCC3SemanticLightColorSpecular4,			/**< Specular color of light 4. */
+	kCC3SemanticLightColorSpecular5,			/**< Specular color of light 5. */
+	kCC3SemanticLightColorSpecular6,			/**< Specular color of light 6. */
+	kCC3SemanticLightColorSpecular7,			/**< Specular color of light 7. */
+
+	kCC3SemanticLightAttenuationCoefficients0,	/**< AttenuationCoefficients for light 0. */
+	kCC3SemanticLightAttenuationCoefficients1,	/**< AttenuationCoefficients for light 1. */
+	kCC3SemanticLightAttenuationCoefficients2,	/**< AttenuationCoefficients for light 2. */
+	kCC3SemanticLightAttenuationCoefficients3,	/**< AttenuationCoefficients for light 3. */
+	kCC3SemanticLightAttenuationCoefficients4,	/**< AttenuationCoefficients for light 4. */
+	kCC3SemanticLightAttenuationCoefficients5,	/**< AttenuationCoefficients for light 5. */
+	kCC3SemanticLightAttenuationCoefficients6,	/**< AttenuationCoefficients for light 6. */
+	kCC3SemanticLightAttenuationCoefficients7,	/**< AttenuationCoefficients for light 7. */
+
+	kCC3SemanticLightSpotDirection0,			/**< Direction of spotlight 0. */
+	kCC3SemanticLightSpotDirection1,			/**< Direction of spotlight 1. */
+	kCC3SemanticLightSpotDirection2,			/**< Direction of spotlight 2. */
+	kCC3SemanticLightSpotDirection3,			/**< Direction of spotlight 3. */
+	kCC3SemanticLightSpotDirection4,			/**< Direction of spotlight 4. */
+	kCC3SemanticLightSpotDirection5,			/**< Direction of spotlight 5. */
+	kCC3SemanticLightSpotDirection6,			/**< Direction of spotlight 6. */
+	kCC3SemanticLightSpotDirection7,			/**< Direction of spotlight 7. */
+	
+	kCC3SemanticLightSpotExponent0,				/**< Fade-off exponent of spotlight 0. */
+	kCC3SemanticLightSpotExponent1,				/**< Fade-off exponent of spotlight 1. */
+	kCC3SemanticLightSpotExponent2,				/**< Fade-off exponent of spotlight 2. */
+	kCC3SemanticLightSpotExponent3,				/**< Fade-off exponent of spotlight 3. */
+	kCC3SemanticLightSpotExponent4,				/**< Fade-off exponent of spotlight 4. */
+	kCC3SemanticLightSpotExponent5,				/**< Fade-off exponent of spotlight 5. */
+	kCC3SemanticLightSpotExponent6,				/**< Fade-off exponent of spotlight 6. */
+	kCC3SemanticLightSpotExponent7,				/**< Fade-off exponent of spotlight 7. */
+	
+	kCC3SemanticLightSpotCutoffAngle0,			/**< Cutoff angle of spotlight 0. */
+	kCC3SemanticLightSpotCutoffAngle1,			/**< Cutoff angle of spotlight 1. */
+	kCC3SemanticLightSpotCutoffAngle2,			/**< Cutoff angle of spotlight 2. */
+	kCC3SemanticLightSpotCutoffAngle3,			/**< Cutoff angle of spotlight 3. */
+	kCC3SemanticLightSpotCutoffAngle4,			/**< Cutoff angle of spotlight 4. */
+	kCC3SemanticLightSpotCutoffAngle5,			/**< Cutoff angle of spotlight 5. */
+	kCC3SemanticLightSpotCutoffAngle6,			/**< Cutoff angle of spotlight 6. */
+	kCC3SemanticLightSpotCutoffAngle7,			/**< Cutoff angle of spotlight 7. */
+	
+	kCC3SemanticLightSpotCutoffAngleCosine0,	/**< Cosine of cutoff angle of spotlight 0. */
+	kCC3SemanticLightSpotCutoffAngleCosine1,	/**< Cosine of cutoff angle of spotlight 1. */
+	kCC3SemanticLightSpotCutoffAngleCosine2,	/**< Cosine of cutoff angle of spotlight 2. */
+	kCC3SemanticLightSpotCutoffAngleCosine3,	/**< Cosine of cutoff angle of spotlight 3. */
+	kCC3SemanticLightSpotCutoffAngleCosine4,	/**< Cosine of cutoff angle of spotlight 4. */
+	kCC3SemanticLightSpotCutoffAngleCosine5,	/**< Cosine of cutoff angle of spotlight 5. */
+	kCC3SemanticLightSpotCutoffAngleCosine6,	/**< Cosine of cutoff angle of spotlight 6. */
+	kCC3SemanticLightSpotCutoffAngleCosine7,	/**< Cosine of cutoff angle of spotlight 7. */
+
+	// TEXTURES --------------
+	kCC3SemanticTextureCount,					/**< Number of active texture units. */
 	kCC3SemanticTexture0,						/**< Texture unit 0. */
 	kCC3SemanticTexture1,						/**< Texture unit 1. */
 	kCC3SemanticTexture2,						/**< Texture unit 2. */
@@ -92,9 +196,15 @@ typedef enum {
 	kCC3SemanticTexture5,						/**< Texture unit 5. */
 	kCC3SemanticTexture6,						/**< Texture unit 6. */
 	kCC3SemanticTexture7,						/**< Texture unit 7. */
+
+	kCC3SemanticHasVertexNormal,				/**< Whether a vertex normal array is available. */
+	kCC3SemanticShouldNormalizeVertexNormal,	/**< Whether vertex normals should be normalized. */
+	kCC3SemanticShouldRescaleVertexNormal,		/**< Whether vertex normals should be rescaled. */
+	kCC3SemanticHasVertexColor,					/**< Whether a vertex normal array is available. */
+	kCC3SemanticTexCoordCount,					/**< Number of texture coordinate attributes. */
 	
-	kCC3SemanticAppBase,					/**< First semantic of app-specific custom semantics. */
-	kCC3SemanticMax = 0xFFFF				/**< The maximum value for an app-specific custom semantic. */
+	kCC3SemanticAppBase,						/**< First semantic of app-specific custom semantics. */
+	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */
 } CC3Semantic;
 
 /** Returns a string representation of the specified vertex content semantic. */

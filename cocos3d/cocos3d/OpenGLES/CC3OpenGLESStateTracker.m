@@ -125,7 +125,7 @@
 -(BOOL) valueIsKnownOnClose { return originalValueHandling != kCC3GLESStateOriginalValueIgnore; }
 
 -(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker {
-	return [self initWithParent: aTracker forState: 0];
+	return [self initWithParent: aTracker forState: GL_ZERO];
 }
 
 -(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
@@ -138,6 +138,19 @@
 +(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
 			   forState: (GLenum) aName {
 	return [[[self alloc] initWithParent: aTracker forState: aName] autorelease];
+}
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: GL_ZERO
+	   andOriginalValueHandling: origValueHandling];
+}
+
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [[[self alloc] initWithParent: aTracker
+				andOriginalValueHandling: origValueHandling] autorelease];
 }
 
 -(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker

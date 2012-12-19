@@ -50,12 +50,14 @@
 	[self activate];
 	glPushMatrix();
 	LogGLErrorTrace(@"while pushing %@", self);
+	[self wasChanged];
 }
 
 -(void) pop {
 	[self activate];
 	glPopMatrix();
 	LogGLErrorTrace(@"while popping %@", self);
+	[self wasChanged];
 }
 
 -(GLuint) depth {
@@ -70,12 +72,14 @@
 	[self activate];
 	glLoadIdentity();
 	LogGLErrorTrace(@"while loading identity into %@", self);
+	[self wasChanged];
 }
 
 -(void) load: (CC3Matrix4x4*) mtx {
 	[self activate];
 	glLoadMatrixf(mtx->elements);
 	LogGLErrorTrace(@"while loading matrix at %p into %@", glMatrix, self);
+	[self wasChanged];
 }
 
 -(void) getTop: (CC3Matrix4x4*) mtx {
@@ -88,6 +92,7 @@
 	[self activate];
 	glMultMatrixf(mtx->elements);
 	LogGLErrorTrace(@"while multiplied matrix at %p into %@", glMatrix, self);
+	[self wasChanged];
 }
 
 

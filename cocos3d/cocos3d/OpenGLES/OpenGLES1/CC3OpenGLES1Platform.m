@@ -49,7 +49,6 @@
 																			forState: GL_MAX_TEXTURE_UNITS];
 
 	self.maxVertexAttributes = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																				forState: GL_ZERO
 																andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxVertexAttributes.originalValue = 0;
 	

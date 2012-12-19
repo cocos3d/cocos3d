@@ -35,15 +35,26 @@
  *
  * The semantics of the variables in this shader can be mapped using a CC3GLProgramSemanticsDelegateByVarNames.
  */
+
+#define MAX_TEXTURES				4
+
 precision mediump float;
 
-uniform sampler2D s_texture;
+//-------------- UNIFORMS ----------------------
 
-varying vec2 v_texCoord;
+uniform lowp int u_cc3TexCoordCount;			/**< Number of texture coordinate attributes. */
+
+//-------------- TEXTURE SAMPLERS ----------------------
+uniform sampler2D s_cc3Texture[MAX_TEXTURES];
+
+//-------------- VARYING VARIABLES INPUTS ----------------------
+varying vec2 v_texCoord[MAX_TEXTURES];
 varying lowp vec4 v_color;
 
 void main() {
-	gl_FragColor = texture2D(s_texture, v_texCoord) * v_color;
-	//	gl_FragColor = v_color;
+	if (u_cc3TexCoordCount > 0)
+		gl_FragColor = texture2D(s_cc3Texture[0], v_texCoord[0]) * v_color;
+	else
+		gl_FragColor = v_color;
 }
 

@@ -337,7 +337,7 @@ static GLubyte autoOrthonormalizeCount = 0;
 -(void) setForwardDirection: (CC3Vector) aDirection {
 	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
 			 @"The forwardDirection may not be set to the zero vector.");
-	rotationVector = CC3Vector4FromCC3Vector(CC3VectorNormalize(aDirection), 0.0f);
+	rotationVector = CC3Vector4FromDirection(CC3VectorNormalize(aDirection));
 	rotationType = kCC3RotationTypeDirection;
 	[self markRotationDirty];
 }

@@ -51,6 +51,10 @@
 	return kCC3GLESStateOriginalValueReadOnce;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
+}
+
 @end
 
 
@@ -65,6 +69,10 @@
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -85,6 +93,10 @@
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -111,19 +123,37 @@
 	}
 }
 
+// Overridden to always restore
+-(BOOL) shouldRestoreOriginalOnClose { return YES; }
+
 /**
- * Overridden to engage cocos2d state management to enable vertex position and color arrays.
+ * Overridden to force vertex position, color & texture on, and all other vertex attributes off,
+ * and ensure that the cocos2d internal state machine is aligned to the same state.
  * In most cases, the 3D scene draws before the 2D nodes such as sprites, so we enable position,
  * color & texture arrays, which is typical of 2D sprites. Other cocos2d node types will change
  * the state as needed. The important goal here is to align cocos2d's state with the GL state.
  */
--(void) close {
-	isScheduledForClose = NO;
-	if (self.shouldRestoreOriginalOnClose) {
-		[self restoreOriginalValue];
-		ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
+-(void) restoreOriginalValue {
+	BOOL attrIdx = self.attributeIndex;
+	switch (attrIdx) {
+		case kCCVertexAttrib_Position:
+			ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);	// Force CC2 then fall through
+		case kCCVertexAttrib_Color:
+		case kCCVertexAttrib_TexCoords:
+			value = YES;
+			break;
+		default:
+			value = NO;
+			break;
 	}
-	valueIsKnown = self.valueIsKnownOnClose;
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueIgnore;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end

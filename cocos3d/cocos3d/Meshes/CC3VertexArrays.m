@@ -835,7 +835,7 @@ static GLuint lastAssignedVertexArrayTag;
 			*(CGPoint*)elemAddr = *(CGPoint*)&aLocation;
 			break;
 		case 4:		// Convert to 4D with w = 1
-			*(CC3Vector4*)elemAddr = CC3Vector4FromCC3Vector(aLocation, 1.0f);
+			*(CC3Vector4*)elemAddr = CC3Vector4FromLocation(aLocation);
 			break;
 		case 3:
 		default:
@@ -1056,6 +1056,11 @@ static GLuint lastAssignedVertexArrayTag;
 
 @implementation CC3VertexColors
 
+-(void) setElementType:(GLenum)elementType {
+	_elementType = elementType;
+	self.shouldNormalizeContent = (_elementType != GL_FLOAT);
+}
+
 -(ccColor4F) color4FAt: (GLuint) index {
 	switch (_elementType) {
 		case GL_FIXED:
@@ -1155,7 +1160,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_elementType = GL_UNSIGNED_BYTE;
+		self.elementType = GL_UNSIGNED_BYTE;	// Use setter, so shouldNormalizeContent also set
 		_elementSize = 4;
 	}
 	return self;

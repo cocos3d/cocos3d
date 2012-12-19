@@ -318,15 +318,15 @@
 	[super setGlobalLightLocation: aLocation];
 }
 
--(CC3GLProgramContext*) shaderProgram {
+-(CC3GLProgramContext*) shaderContext {
 	[self ensureMaterial];
-	return material.shaderProgram;
+	return material.shaderContext;
 }
 
--(void) setShaderProgram: (CC3GLProgramContext*) shaderProgram {
+-(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
 	[self ensureMaterial];
-	material.shaderProgram = shaderProgram;
-	[super setShaderProgram: shaderProgram];	// pass along to any children
+	material.shaderContext = shaderContext;
+	[super setShaderContext: shaderContext];	// pass along to any children
 }
 
 

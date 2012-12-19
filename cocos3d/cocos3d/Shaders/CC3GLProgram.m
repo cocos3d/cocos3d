@@ -104,12 +104,14 @@
 
 // Cache this program in the GL state tracker, bind the program to the GL engine,
 // and populate the uniforms into the GL engine, allowing the context to override first.
+// Raise an assertion error if the uniform cannot be resolved by either context or delegate!
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
 	[self use];
 	for (CC3GLSLUniform* var in _uniforms)
-		if ( ![context populateUniform: var withVisitor: visitor] )
-			[_semanticDelegate populateUniform: var withVisitor: visitor];
+		if ( !([context populateUniform: var withVisitor: visitor] ||
+			   [_semanticDelegate populateUniform: var withVisitor: visitor]) )
+			NSAssert3(NO, @"Could not resolve value of uniform %@ for %@ within context %@", var, self, context);
 }
 
 -(BOOL) compileShader: (GLuint*) shader type: (GLenum) type byteArray: (const GLchar*) source {
@@ -147,6 +149,7 @@
 -(BOOL) link {
 	NSAssert1(_semanticDelegate, @"%@ requires that the semanticDelegate property be set before linking.", self);
 	BOOL wasLinked = [super link];
+	NSAssert1(wasLinked, @"%@ could not be linked. See previously logged error.", self);
 	if (wasLinked) {
 		[self mapVariableSemantics];
 		LogRez(@"Linked %@", self.fullDescription);

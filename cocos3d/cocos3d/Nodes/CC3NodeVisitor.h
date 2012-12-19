@@ -33,7 +33,7 @@
 #import "CC3Matrix.h"
 #import "CC3PerformanceStatistics.h"
 
-@class CC3NodeSequencer, CC3Camera;
+@class CC3NodeSequencer, CC3Camera, CC3Light;
 
 
 #pragma mark -
@@ -404,6 +404,15 @@
  * and will be nil both before and after the visit: method is invoked on the node.
  */
 @property(nonatomic, readonly) CC3Material* currentMaterial;
+
+/**
+ * Returns the light indicated by the index, or nil if the specified index is greater than
+ * the number of lights currently existing in the scene.
+ *
+ * The specified index is an index into the lights array of the scene, and is not necessarily
+ * the same as the lightIndex property of the CC3Light.
+ */
+-(CC3Light*) lightAt: (GLuint) index;
 
 @end
 

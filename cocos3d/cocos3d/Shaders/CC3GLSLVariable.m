@@ -381,7 +381,7 @@
 	}
 }
 
--(void) setVector: (CC3Vector) value { [self setVector4: CC3Vector4FromCC3Vector(value, 1)]; }
+-(void) setVector: (CC3Vector) value { [self setVector4: CC3Vector4FromLocation(value)]; }
 
 /** Converts the vectors to the correct type if needed. */
 -(void) setVectors: (CC3Vector*) values {
@@ -416,7 +416,7 @@
 		case GL_INT_VEC4:
 		case GL_BOOL_VEC4: {
 			CC3Vector4* v4s = malloc(_varLen);
-			for (int i = 0; i < _size; i++) v4s[i] = CC3Vector4FromCC3Vector(values[i], 1);
+			for (int i = 0; i < _size; i++) v4s[i] = CC3Vector4FromLocation(values[i]);
 			[self setFloats: (GLfloat*)v4s];
 			free(v4s);
 			return;
