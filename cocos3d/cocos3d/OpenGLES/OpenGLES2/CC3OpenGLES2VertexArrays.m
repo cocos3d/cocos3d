@@ -34,8 +34,9 @@
 #import "CC3GLProgram.h"
 #import "CC3VertexArrays.h"
 
-
 #if CC3_OGLES_2
+
+#import "ccGLStateCache.h"
 
 #pragma mark -
 #pragma mark CC3OpenGLESStateTrackerVertexAttributeInteger
@@ -48,6 +49,10 @@
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -64,6 +69,10 @@
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -84,6 +93,10 @@
 
 +(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
 	return kCC3GLESStateOriginalValueReadOnce;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -108,6 +121,39 @@
 	} else {
 		glDisableVertexAttribArray(self.attributeIndex);
 	}
+}
+
+// Overridden to always restore
+-(BOOL) shouldRestoreOriginalOnClose { return YES; }
+
+/**
+ * Overridden to force vertex position, color & texture on, and all other vertex attributes off,
+ * and ensure that the cocos2d internal state machine is aligned to the same state.
+ * In most cases, the 3D scene draws before the 2D nodes such as sprites, so we enable position,
+ * color & texture arrays, which is typical of 2D sprites. Other cocos2d node types will change
+ * the state as needed. The important goal here is to align cocos2d's state with the GL state.
+ */
+-(void) restoreOriginalValue {
+	BOOL attrIdx = self.attributeIndex;
+	switch (attrIdx) {
+		case kCCVertexAttrib_Position:
+			ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);	// Force CC2 then fall through
+		case kCCVertexAttrib_Color:
+		case kCCVertexAttrib_TexCoords:
+			value = YES;
+			break;
+		default:
+			value = NO;
+			break;
+	}
+}
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueIgnore;
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for attribute index %i", super.description, self.attributeIndex];
 }
 
 @end
@@ -213,7 +259,7 @@
 }
 
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
-	CC3GLSLAttribute* attribute = [self.engine.shaders.activeProgram attributeWithSemantic: semantic];
+	CC3GLSLAttribute* attribute = [self.engine.shaders.activeProgram attributeForSemantic: semantic];
 	GLint attrIdx = attribute.location;		// Negative if not valid attribute
 	return (attribute && (attrIdx >= 0)) ? [self attributeAt: attrIdx] : nil;
 }

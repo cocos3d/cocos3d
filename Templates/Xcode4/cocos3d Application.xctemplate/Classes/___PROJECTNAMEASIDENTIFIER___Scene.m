@@ -15,31 +15,6 @@
 #import "CC3GLProgram.h"
 
 
-const GLchar* vtxShaderSource =
-"													\n\
-uniform mat4 u_mtxMVP;								\n\
-uniform	vec4 u_matDiffuseColor;						\n\
-													\n\
-attribute vec4 a_position;							\n\
-													\n\
-varying lowp vec4 v_color;							\n\
-													\n\
-void main() {										\n\
-	v_color = u_matDiffuseColor;					\n\
-	gl_Position = u_mtxMVP * a_position;			\n\
-}													\n\
-";
-
-const GLchar* fragShaderSource =
-"													\n\
-varying lowp vec4 v_color;							\n\
-													\n\
-void main() {										\n\
-	gl_FragColor = v_color;							\n\
-}													\n\
-";
-
-
 @implementation ___PROJECTNAMEASIDENTIFIER___Scene
 
 -(void) dealloc {
@@ -60,6 +35,7 @@ void main() {										\n\
  * this template project for your own application, REMOVE the POD file 'hello-world.pod'
  * from the Resources folder of your project!!
  */
+/*
 -(void) initializeScene {
 	
 	// Create the camera, place it back a bit, and add it to the scene
@@ -151,8 +127,7 @@ void main() {										\n\
 	CCActionInterval* tintCycle = [CCSequence actionOne: tintDown two: tintUp];
 	[helloTxt runAction: [CCRepeatForever actionWithAction: tintCycle]];
 }
-
-/*
+*/
 -(void) initializeScene {
 
 	// Create the camera, place it back a bit, and add it to the scene
@@ -227,7 +202,7 @@ void main() {										\n\
 	 CCActionInterval* tintCycle = [CCSequence actionOne: tintDown two: tintUp];
 	[helloTxt runAction: [CCRepeatForever actionWithAction: tintCycle]];
 }
-*/
+
 
 #pragma mark Updating custom activity
 

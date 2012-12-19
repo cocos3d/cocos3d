@@ -464,6 +464,12 @@
 
 -(CC3Scene*) scene { return (CC3Scene*)startingNode; }
 
+-(CC3Light*) lightAt: (GLuint) index {
+	CCArray* lights = self.scene.lights;
+	if (index < lights.count) return [lights objectAtIndex: index];
+	return nil;
+}
+
 @end
 
 

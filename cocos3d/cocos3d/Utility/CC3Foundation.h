@@ -777,6 +777,24 @@ static inline CC3Vector4 CC3Vector4FromCC3Vector(CC3Vector v, GLfloat w) {
 	return CC3Vector4Make(v.x, v.y, v.z, w);
 }
 
+/** 
+ * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D location.
+ *
+ * The W component of the returned vector is set to 1.0.
+ */
+static inline CC3Vector4 CC3Vector4FromLocation(CC3Vector aLocation) {
+	return CC3Vector4FromCC3Vector(aLocation, 1.0f);
+}
+
+/**
+ * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D direction.
+ *
+ * The W component of the returned vector is set to 0.0.
+ */
+static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
+	return CC3Vector4FromCC3Vector(aDirection, 0.0f);
+}
+
 /**
  * Returns a CC3Vector structure constructed from a CC3Vector4,
  * by simply ignoring the w component of the 4D vector.
@@ -1796,7 +1814,6 @@ static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
 }
 
 
-
 #pragma mark -
 #pragma mark ccColor3B constants and functions
 
@@ -1822,7 +1839,9 @@ static inline NSString* NSStringFromBoolean(BOOL value) { return value ? @"YES" 
  * Ensures that the specified file path is absolute, converting it if necessary.
  * 
  * Relative paths are assumed to be relative to the application resources directory.
- * If the specified file path is not already absolute, the path to that directory
- * is prepended to it.
+ * If the specified file path is not already absolute, the path to that directory is prepended to it.
  */
-NSString* CC3EnsureAbsoluteFilePath(NSString* filePath);
+static inline NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
+	if(filePath.isAbsolutePath) return filePath;
+	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
+}

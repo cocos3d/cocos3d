@@ -32,7 +32,7 @@
 #import "CC3Texture.h"
 #import "CCProtocols.h"
 #import "CC3NodeVisitor.h"
-#import "CC3GLProgram.h"
+#import "CC3GLProgramContext.h"
 
 
 /** Default material color under ambient lighting. */
@@ -163,7 +163,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
 	CCArray* _textureOverlays;
-	CC3GLProgram* _shaderProgram;
+	CC3GLProgramContext* _shaderContext;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -489,6 +489,17 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 /** Sets the default GL material source and destination blend function used for new instances. */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
 
+/**
+ * The GLSL program context containing the vertex and fragment shaders used to decorate this material.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ *
+ * When running under OpenGL ES 2, the initial value of this property is set to a context containing
+ * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
+ * OpenGL ES 1, the initial value of this property is nil.
+ */
+@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
+
 
 #pragma mark Textures
 
@@ -650,12 +661,6 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * node that is making use of this texture.
  */
 @property(nonatomic, assign) CC3Vector lightDirection;
-
-
-#pragma mark Allocation and initialization
-
-/** The GLSL program containing the vertex and fragment shaders used to decorate this material. */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
 
 
 #pragma mark Allocation and initialization

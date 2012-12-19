@@ -664,17 +664,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 #pragma mark Drawing
 
-/**
- * Template method that binds a pointer to the vertex point size data to the GL engine.
- * If this mesh has no vertex point size data, the pointer is cleared in the GL engine
- * by invoking the CC3VertexPointSizes unbind class method.
- */
+/** Template method that binds a pointer to the vertex point size data to the GL engine. */
 -(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (vertexPointSizes) {
-		[vertexPointSizes bindWithVisitor: visitor];
-	} else {
-		[CC3VertexPointSizes unbind];
-	}
+	[vertexPointSizes bindWithVisitor: visitor];
 }
 
 @end

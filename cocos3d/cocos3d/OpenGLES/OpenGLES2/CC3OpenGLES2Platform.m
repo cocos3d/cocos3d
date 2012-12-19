@@ -40,22 +40,18 @@
 
 -(void) initializeTrackers {
 	self.maxLights = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																	  forState: GL_ZERO
 													  andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxLights.originalValue = kCC3MaxGL2Lights;
 
 	self.maxClipPlanes = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																		  forState: GL_ZERO
 														  andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxClipPlanes.originalValue = kCC3MaxGL2ClipPlanes;
 	
 	self.maxPaletteMatrices = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																			   forState: GL_ZERO
 															   andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxPaletteMatrices.originalValue = kCC3MaxGL2PaletteMatrices;
 	
 	self.maxTextureUnits = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																			forState: GL_ZERO
 															andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxTextureUnits.originalValue = kCC3MaxGL2TextureUnits;
 
@@ -63,7 +59,6 @@
 																				forState: GL_MAX_VERTEX_ATTRIBS];
 	
 	self.maxVertexUnits = [CC3OpenGLESStateTrackerPlatformInteger trackerWithParent: self
-																		   forState: GL_ZERO
 														   andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 	self.maxVertexUnits.originalValue = kCC3MaxGL2VertexUnits;
 	

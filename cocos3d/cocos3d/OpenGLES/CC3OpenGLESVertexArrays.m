@@ -286,16 +286,16 @@
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
 	glDrawArrays(drawMode, start, len);
-	CC_INCREMENT_GL_DRAWS(1);
 	LogGLErrorTrace(@"%@ drawing %u vertices as %@ starting from %u",
 					self, len, NSStringFromGLEnum(drawMode), start);
+	CC_INCREMENT_GL_DRAWS(1);
 }
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
 	NSAssert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
-	CC_INCREMENT_GL_DRAWS(1);
 	LogGLErrorTrace(@"%@ drawing %u vertex indices as %@", self, len, NSStringFromGLEnum(drawMode));
+	CC_INCREMENT_GL_DRAWS(1);
 }
 
 -(NSString*) description {

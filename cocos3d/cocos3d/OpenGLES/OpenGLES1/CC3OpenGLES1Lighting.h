@@ -38,7 +38,7 @@
 #pragma mark CC3OpenGLES1StateTrackerLightFloat
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerLightFloat : CC3OpenGLESStateTrackerLightFloat
+@interface CC3OpenGLES1StateTrackerLightFloat : CC3OpenGLESStateTrackerFloat
 
 /** The GL enumeration value GL_LIGHTi, where i is determined by the value property. */
 @property(nonatomic, readonly) GLenum glLightIndex;
@@ -50,7 +50,7 @@
 #pragma mark CC3OpenGLES1StateTrackerLightColor
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerLightColor : CC3OpenGLESStateTrackerLightColor
+@interface CC3OpenGLES1StateTrackerLightColor : CC3OpenGLESStateTrackerColor
 
 /** The GL enumeration value GL_LIGHTi, where i is determined by the value property. */
 @property(nonatomic, readonly) GLenum glLightIndex;
@@ -62,7 +62,7 @@
 #pragma mark CC3OpenGLES1StateTrackerLightVector
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerLightVector : CC3OpenGLESStateTrackerLightVector
+@interface CC3OpenGLES1StateTrackerLightVector : CC3OpenGLESStateTrackerVector
 
 /** The GL enumeration value GL_LIGHTi, where i is determined by the value property. */
 @property(nonatomic, readonly) GLenum glLightIndex;
@@ -74,7 +74,7 @@
 #pragma mark CC3OpenGLES1StateTrackerLightVector4
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerLightVector4 : CC3OpenGLESStateTrackerLightVector4
+@interface CC3OpenGLES1StateTrackerLightVector4 : CC3OpenGLESStateTrackerVector4
 
 /** The GL enumeration value GL_LIGHTi, where i is determined by the value property. */
 @property(nonatomic, readonly) GLenum glLightIndex;

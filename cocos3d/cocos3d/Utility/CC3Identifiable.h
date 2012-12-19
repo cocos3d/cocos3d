@@ -233,7 +233,6 @@
  */
 -(id) copyWithName: (NSString*) aName;
 
-
 /**
  * Returns a newly allocated (retained) copy of this instance. The new copy will be an instance
  * of the specified class, will have the same name as this instance, and will have a unique tag.

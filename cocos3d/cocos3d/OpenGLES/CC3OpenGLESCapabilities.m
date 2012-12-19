@@ -46,10 +46,11 @@
 -(void) disable { self.value = NO; }
 
 -(void) setGLValue {
-	if (value) {
-		glEnable(name);
-	} else {
-		glDisable(name);
+	if (name) {
+		if (value)
+			glEnable(name);
+		else
+			glDisable(name);
 	}
 }
 

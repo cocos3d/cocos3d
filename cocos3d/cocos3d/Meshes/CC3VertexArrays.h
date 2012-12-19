@@ -146,8 +146,8 @@
 	GLuint _vertexCount;
 	GLuint _bufferID;
 	GLenum _bufferUsage;
+	GLenum _semantic;
 	GLuint _vertexStride : 8;
-	GLenum _semantic : 8;
 	BOOL _shouldNormalizeContent : 1;
 	BOOL _shouldAllowVertexBuffering : 1;
 	BOOL _shouldReleaseRedundantData : 1;
@@ -174,7 +174,7 @@
  * CC3VertexContentSemantic enumeration, based on the vertex array type.
  *
  * The app may change this property to a custom value if desired. The custom value should be
- * kept within the range defined by kCC3VertexContentSemanticAppBase and kCC3VertexContentSemanticMax.
+ * kept within the range defined by kCC3SemanticAppBase and kCC3SemanticMax.
  */
 @property(nonatomic, assign) GLenum semantic;
 
@@ -600,25 +600,6 @@
  */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/**
- * Unbinds the GL engine from the vertex aspect managed by this instance.
- * 
- * This implementation simply delegates to the unbind class method.
- * Usually, the application never needs to invoke this method directly.
- */
--(void) unbind;
-
-/**
- * Unbinds the GL engine from the vertex aspect managed by this class.
- * 
- * This abstract implementation does nothing. Subclasses will override to handle
- * their particular type of vetex aspect.
- *
- * This method is invoked automatically from the CC3VertexArrayMesh instance.
- * Usually, the application never needs to invoke this method directly.
- */
-+(void) unbind;
-
 
 #pragma mark Accessing vertices
 
@@ -726,26 +707,6 @@
 
 /** @deprecated Renamed to describeVertices:startingAt:. */
 -(NSString*) describeElements: (GLuint) vtxCount startingAt: (GLuint) startElem DEPRECATED_ATTRIBUTE;
-
-
-#pragma mark Array context switching
-
-/**
- * Resets the tracking of the vertex array switching functionality.
- *
- * This is invoked automatically by the resetAllSwitching method at the beginning of each
- * frame drawing cycle. Usually, the application never needs to invoke this method directly.
- */
-+(void) resetSwitching;
-
-/**
- * Resets the tracking of the vertex array switching functionality for all vertex array subclasses.
- *
- * This is invoked automatically by the resetSwitching method in CC3VertexArrayMesh at the
- * beginning of each frame drawing cycle. Usually, the application never needs to invoke
- * this method directly.
- */
-+(void) resetAllSwitching;
 
 @end
 
@@ -1602,29 +1563,6 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * in that dimension, while potentially repeating multiple times in the other dimension.
  */
 -(void) repeatTexture: (ccTex2F) repeatFactor;
-
-/**
- * Unbinds all texture arrays from the specified texture unit in the GL engine
- * by disabling texture array handling in the GL engine for that texture unit.
- *
- * The texture unit value should be set to a number between zero and the maximum number
- * of texture units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
- */
-+(void) unbind: (GLuint) textureUnit;
-
-/**
- * Unbinds all texture arrays from the all texture units at or above the specified texture unit.
- *
- * The texture unit value should be set to a number between zero and the maximum number
- * of texture units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
- */
-+(void) unbindRemainingFrom: (GLuint)textureUnit;
-
-/**
- * Unbinds all texture arrays from all texture units in the GL engine
- * by disabling texture array handling in the GL engine for all texture units.
- */
-+(void) unbind;
 
 @end
 

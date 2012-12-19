@@ -36,6 +36,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
+#import "CC3GLProgramContext.h"
 
 @class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum;
 @class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
@@ -1371,11 +1372,6 @@ typedef enum {
  *
  * Setting this property sets the same property on all child nodes.
  *
- * Before setting this property, for this property to have affect on descendant
- * mesh nodes, you must assign a material to each of those nodes using its material
- * property, or assign a texture to those mesh nodes using the texture property,
- * which will automatically create a material to hold the texture.
- *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -1385,12 +1381,6 @@ typedef enum {
  * The diffuse color of the materials of this node.
  *
  * Setting this property sets the same property on all child nodes.
- *
- * Before setting this property, for this property to have affect on descendant
- * mesh nodes, you must assign a material to each of those nodes using its material
- * property, or assign a texture to those mesh nodes using the texture property,
- * which will automatically create a material to hold the texture.
- *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -1400,12 +1390,6 @@ typedef enum {
  * The specular color of the materials of this node.
  *
  * Setting this property sets the same property on all child nodes.
- *
- * Before setting this property, for this property to have affect on descendant
- * mesh nodes, you must assign a material to each of those nodes using its material
- * property, or assign a texture to those mesh nodes using the texture property,
- * which will automatically create a material to hold the texture.
- *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -1415,12 +1399,6 @@ typedef enum {
  * The emission color of the materials of this node.
  *
  * Setting this property sets the same property on all child nodes.
- *
- * Before setting this property, for this property to have affect on descendant
- * mesh nodes, you must assign a material to each of those nodes using its material
- * property, or assign a texture to those mesh nodes using the texture property,
- * which will automatically create a material to hold the texture.
- *
  * Querying this property returns the average value of querying this property on all child nodes.
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
@@ -1444,6 +1422,15 @@ typedef enum {
  * for bump-mapping. Otherwise, this implementation returns kCC3VectorZero.
  */
 @property(nonatomic, assign) CC3Vector globalLightLocation;
+
+/**
+ * The GLSL program containing the vertex and fragment shaders used to decorate materials.
+ *
+ * Setting this property sets the same property on all child nodes.
+ * Querying this property returns the value of the same property from the first descendant
+ * node that is a CC3MeshNode and has a non-nil value in the shaderContext property.
+ */
+@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

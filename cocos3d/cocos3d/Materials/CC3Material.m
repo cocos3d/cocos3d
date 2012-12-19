@@ -52,12 +52,12 @@
 @synthesize specularColor=_specularColor, emissionColor=_emissionColor;
 @synthesize shininess=_shininess, blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
-@synthesize shaderProgram=_shaderProgram;
+@synthesize shaderContext=_shaderContext;
 
 -(void) dealloc {
 	[_texture release];
 	[_textureOverlays release];
-	[_shaderProgram release];
+	[_shaderContext release];
 	[super dealloc];
 }
 
@@ -315,7 +315,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_texture = nil;
 		_textureOverlays = nil;
-		_shaderProgram = nil;
+		_shaderContext = nil;
 		_ambientColor = kCC3DefaultMaterialColorAmbient;
 		_diffuseColor = kCC3DefaultMaterialColorDiffuse;
 		_specularColor = kCC3DefaultMaterialColorSpecular;
@@ -325,6 +325,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
 		_shouldUseLighting = YES;
+		[self makeShaderProgram];
 	}
 	return self;
 }
@@ -352,6 +353,12 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	return mat;
 }
 
+-(void) makeShaderProgram {
+	CC3GLProgram* prog = CC3OpenGLESEngine.engine.shaders.defaultProgram;
+	self.shaderContext = prog ? [CC3GLProgramContext contextForProgram: prog] : nil;
+}
+
+
 // Protected properties for copying
 -(CCArray*) textureOverlays { return _textureOverlays; }
 
@@ -370,7 +377,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	_alphaTestReference = another.alphaTestReference;
 	_shouldUseLighting = another.shouldUseLighting;
 	
-	self.shaderProgram = another.shaderProgram;		// retained
+	self.shaderContext = another.shaderContext;		// retained
 	
 	[_texture release];
 	_texture = [another.texture copy];			// retained - don't want to trigger texturesHaveChanged
@@ -458,7 +465,7 @@ static GLuint lastAssignedMaterialTag;
  * the GL engine, otherwise turns lighting off and applies diffuse color as a flat color.
  */
 -(void) applyColors {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
 	if (_shouldUseLighting) {
 		[glesEngine.capabilities.lighting enable];
 
@@ -505,7 +512,7 @@ static GLuint lastAssignedMaterialTag;
 }
 
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_shaderProgram bindWithVisitor: visitor];
+	[_shaderContext bindWithVisitor: visitor];
 }
 
 -(void) unbind { [[self class] unbind]; }

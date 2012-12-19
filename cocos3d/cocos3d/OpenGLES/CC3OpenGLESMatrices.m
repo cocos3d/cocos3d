@@ -61,6 +61,8 @@
 
 -(void) loadFromModelView {}
 
+-(void) wasChanged { [((CC3OpenGLESMatrices*)self.parent) stackChanged: self]; }
+
 @end
 
 
@@ -123,5 +125,20 @@
 	for (id pm in paletteMatrices) [desc appendFormat: @"\n%@", pm];
 	return desc;
 }
+
+
+#pragma mark Accessing matrices
+
+-(void) stackChanged: (CC3OpenGLESMatrixStack*) stack {}
+
+-(CC3Matrix4x4*) viewMatrix { return NULL; }
+
+-(CC3Matrix4x4*) modelViewMatrix { return NULL; }
+
+-(CC3Matrix3x3*) modelViewInverseTransposeMatrix { return NULL; }
+
+-(CC3Matrix4x4*) projectionMatrix { return NULL; }
+
+-(CC3Matrix4x4*) modelViewProjectionMatrix { return NULL; }
 
 @end

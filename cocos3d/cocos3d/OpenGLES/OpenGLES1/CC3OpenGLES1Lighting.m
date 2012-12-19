@@ -38,11 +38,15 @@
 
 @implementation CC3OpenGLES1StateTrackerLightFloat
 
--(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
+-(GLenum) glLightIndex { return GL_LIGHT0 + ((CC3OpenGLESLight*)self.parent).lightIndex; }
 
 -(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
 -(void) setGLValue { glLightf(self.glLightIndex, name, value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 
@@ -52,11 +56,15 @@
 
 @implementation CC3OpenGLES1StateTrackerLightColor
 
--(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
+-(GLenum) glLightIndex { return GL_LIGHT0 + ((CC3OpenGLESLight*)self.parent).lightIndex; }
 
 -(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
 -(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 
@@ -66,11 +74,15 @@
 
 @implementation CC3OpenGLES1StateTrackerLightVector
 
--(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
+-(GLenum) glLightIndex { return GL_LIGHT0 + ((CC3OpenGLESLight*)self.parent).lightIndex; }
 
 -(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
 -(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 
@@ -80,11 +92,15 @@
 
 @implementation CC3OpenGLES1StateTrackerLightVector4
 
--(GLenum) glLightIndex { return GL_LIGHT0 + lightIndex; }
+-(GLenum) glLightIndex { return GL_LIGHT0 + ((CC3OpenGLESLight*)self.parent).lightIndex; }
 
 -(void) getGLValue { glGetLightfv(self.glLightIndex, name, (GLfloat*)&originalValue); }
 
 -(void) setGLValue { glLightfv(self.glLightIndex, name, (GLfloat*)&value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 
@@ -96,37 +112,27 @@
 
 -(void) initializeTrackers {
 	self.light = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
-																   forState: GL_LIGHT0 + lightIndex];
+															 forState: GL_LIGHT0 + self.lightIndex];
 	self.ambientColor = [CC3OpenGLES1StateTrackerLightColor trackerWithParent: self
-																	 forState: GL_AMBIENT
-																andLightIndex: lightIndex];
+																	 forState: GL_AMBIENT];
 	self.diffuseColor = [CC3OpenGLES1StateTrackerLightColor trackerWithParent: self
-																	 forState: GL_DIFFUSE
-																andLightIndex: lightIndex];
+																	 forState: GL_DIFFUSE];
 	self.specularColor = [CC3OpenGLES1StateTrackerLightColor trackerWithParent: self
-																	  forState: GL_SPECULAR
-																 andLightIndex: lightIndex];
+																	  forState: GL_SPECULAR];
 	self.position = [CC3OpenGLES1StateTrackerLightVector4 trackerWithParent: self
-																   forState: GL_POSITION
-															  andLightIndex: lightIndex];
+																   forState: GL_POSITION];
 	self.spotDirection = [CC3OpenGLES1StateTrackerLightVector trackerWithParent: self
-																	   forState: GL_SPOT_DIRECTION
-																  andLightIndex: lightIndex];
+																	   forState: GL_SPOT_DIRECTION];
 	self.spotExponent = [CC3OpenGLES1StateTrackerLightFloat trackerWithParent: self
-																	 forState: GL_SPOT_EXPONENT
-																andLightIndex: lightIndex];
+																	 forState: GL_SPOT_EXPONENT];
 	self.spotCutoffAngle = [CC3OpenGLES1StateTrackerLightFloat trackerWithParent: self
-																		forState: GL_SPOT_CUTOFF
-																   andLightIndex: lightIndex];
+																		forState: GL_SPOT_CUTOFF];
 	self.constantAttenuation = [CC3OpenGLES1StateTrackerLightFloat trackerWithParent: self
-																			forState: GL_CONSTANT_ATTENUATION
-																	   andLightIndex: lightIndex];
+																			forState: GL_CONSTANT_ATTENUATION];
 	self.linearAttenuation = [CC3OpenGLES1StateTrackerLightFloat trackerWithParent: self
-																		  forState: GL_LINEAR_ATTENUATION
-																	 andLightIndex: lightIndex];
+																		  forState: GL_LINEAR_ATTENUATION];
 	self.quadraticAttenuation = [CC3OpenGLES1StateTrackerLightFloat trackerWithParent: self
-																			 forState: GL_QUADRATIC_ATTENUATION
-																		andLightIndex: lightIndex];
+																			 forState: GL_QUADRATIC_ATTENUATION];
 }
 
 @end

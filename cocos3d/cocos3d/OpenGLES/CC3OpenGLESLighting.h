@@ -34,218 +34,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightFloat
-
-/**
- * CC3OpenGLESStateTrackerLightFloat tracks a float GL state value for an
- * individual light. The property lightIndex identifies the particular light
- * for which the state is being tracked.
- *
- * This implementation uses GL function glGetLightfv to read the value from
- * the GL engine, and GL function glLightf to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerLightFloat : CC3OpenGLESStateTrackerFloat {
-	GLuint lightIndex;
-}
-
-/** The index of the light being tracked. */
-@property(nonatomic, readonly) GLuint lightIndex;
-
-/**
- * Initialize this instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightColor
-
-/**
- * CC3OpenGLESStateTrackerLightColor tracks a color GL state value for an
- * individual light. The property lightIndex identifies the particular light
- * for which the state is being tracked.
- *
- * This implementation uses GL function glGetLightfv to read the value from
- * the GL engine, and GL function glLightfv to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerLightColor : CC3OpenGLESStateTrackerColor {
-	GLuint lightIndex;
-}
-
-/** The index of the light being tracked. */
-@property(nonatomic, readonly) GLuint lightIndex;
-
-/**
- * Initialize this instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightVector
-
-/**
- * CC3OpenGLESStateTrackerLightVector tracks a 3D vector GL state value for
- * an individual light. The property lightIndex identifies the particular light
- * for which the state is being tracked.
- *
- * This implementation uses GL function glGetLightfv to read the value from
- * the GL engine, and GL function glLightfv to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerLightVector : CC3OpenGLESStateTrackerVector {
-	GLuint lightIndex;
-}
-
-/** The index of the light being tracked. */
-@property(nonatomic, readonly) GLuint lightIndex;
-
-/**
- * Initialize this instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerLightVector4
-
-/**
- * CC3OpenGLESStateTrackerLightVector4 tracks a 4D vector GL state value for
- * an individual light. The property lightIndex identifies the particular light
- * for which the state is being tracked.
- *
- * This implementation uses GL function glGetLightfv to read the value from
- * the GL engine, and GL function glLightfv to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerLightVector4 : CC3OpenGLESStateTrackerVector4 {
-	GLuint lightIndex;
-}
-
-/** The index of the light being tracked. */
-@property(nonatomic, readonly) GLuint lightIndex;
-
-/**
- * Initialize this instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-			forState: (GLenum) qName
-	   andLightIndex: (GLuint) ltIndx;
-
-/**
- * Allocates and initializes an autoreleased instance to track the GL state with
- * the specified name for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-			   forState: (GLenum) qName
-		  andLightIndex: (GLuint) ltIndx;
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESLight
 
 /**
@@ -253,52 +41,63 @@
  * lightIndex identifies the particular light for which state is being tracked.
  */
 @interface CC3OpenGLESLight : CC3OpenGLESStateTrackerManager {
-	GLuint lightIndex;
+	GLuint _lightIndex;
 	CC3OpenGLESStateTrackerCapability* light;
-	CC3OpenGLESStateTrackerLightColor* ambientColor;
-	CC3OpenGLESStateTrackerLightColor* diffuseColor;
-	CC3OpenGLESStateTrackerLightColor* specularColor;
-	CC3OpenGLESStateTrackerLightVector4* position;
-	CC3OpenGLESStateTrackerLightVector* spotDirection;
-	CC3OpenGLESStateTrackerLightFloat* spotExponent;
-	CC3OpenGLESStateTrackerLightFloat* spotCutoffAngle;
-	CC3OpenGLESStateTrackerLightFloat* constantAttenuation;
-	CC3OpenGLESStateTrackerLightFloat* linearAttenuation;
-	CC3OpenGLESStateTrackerLightFloat* quadraticAttenuation;
+	CC3OpenGLESStateTrackerColor* ambientColor;
+	CC3OpenGLESStateTrackerColor* diffuseColor;
+	CC3OpenGLESStateTrackerColor* specularColor;
+	CC3OpenGLESStateTrackerVector4* position;
+	CC3OpenGLESStateTrackerVector* spotDirection;
+	CC3OpenGLESStateTrackerFloat* spotExponent;
+	CC3OpenGLESStateTrackerFloat* spotCutoffAngle;
+	CC3OpenGLESStateTrackerFloat* constantAttenuation;
+	CC3OpenGLESStateTrackerFloat* linearAttenuation;
+	CC3OpenGLESStateTrackerFloat* quadraticAttenuation;
 }
+
+/** The index of the light being tracked. */
+@property(nonatomic, readonly) GLuint lightIndex;
 
 /** Tracks the light capability (GL capability name GL_LIGHTi). */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerCapability* light;
 
 /** Tracks ambient color (GL name GL_AMBIENT). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightColor* ambientColor;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerColor* ambientColor;
 
 /** Tracks diffuse color (GL name GL_DIFFUSE). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightColor* diffuseColor;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerColor* diffuseColor;
 
 /** Tracks specular color (GL name GL_SPECULAR). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightColor* specularColor;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerColor* specularColor;
 
 /** Tracks position (GL name GL_POSITION). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightVector4* position;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerVector4* position;
 
 /** Tracks spot direction (GL name GL_SPOT_DIRECTION). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightVector* spotDirection;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerVector* spotDirection;
 
 /** Tracks spot cutoff angle (GL name GL_SPOT_EXPONENT). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightFloat* spotExponent;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* spotExponent;
 
 /** Tracks spot cutoff angle (GL name GL_SPOT_CUTOFF). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightFloat* spotCutoffAngle;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* spotCutoffAngle;
 
 /** Tracks spot cutoff angle (GL name GL_CONSTANT_ATTENUATION). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightFloat* constantAttenuation;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* constantAttenuation;
 
 /** Tracks spot cutoff angle (GL name GL_LINEAR_ATTENUATION). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightFloat* linearAttenuation;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* linearAttenuation;
 
 /** Tracks spot cutoff angle (GL name GL_QUADRATIC_ATTENUATION). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerLightFloat* quadraticAttenuation;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* quadraticAttenuation;
+
+/**
+ * Returns whether this light is enabled.
+ *
+ * This is a convenience method that simply returns
+ * the value contained in the tracker in the light property.
+ */
+@property(nonatomic, readonly, getter=isEnabled) BOOL enabled;
 
 /**
  * Initializes this instance to track GL state
@@ -310,8 +109,7 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLESEngine engine].platform.maxLights.value.
  */
--(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
-	  withLightIndex: (GLuint) ltIndx;
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker withLightIndex: (GLuint) ltIndx;
 
 /**
  * Allocates and initializes an autoreleased instance to track GL state
@@ -323,8 +121,7 @@
  * The number of available lights can be retrieved from
  * [CC3OpenGLESEngine engine].platform.maxLights.value.
  */
-+(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
-		 withLightIndex: (GLuint) ltIndx;
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker withLightIndex: (GLuint) ltIndx;
 
 @end
 

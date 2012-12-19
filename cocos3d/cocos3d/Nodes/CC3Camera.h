@@ -114,13 +114,15 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  */
 @interface CC3Camera : CC3Node {
 	CC3Matrix* _viewMatrix;
+	CC3Matrix* _viewMatrixInverted;
 	CC3Frustum* frustum;
 	GLfloat fieldOfView;
 	GLfloat nearClippingDistance;
 	GLfloat farClippingDistance;
-	BOOL hasInfiniteDepthOfField : 1;
-	BOOL isProjectionDirty : 1;
 	BOOL isOpen : 1;
+	BOOL hasInfiniteDepthOfField : 1;
+	BOOL _isProjectionDirty : 1;
+	BOOL _isViewMatrixInvertedDirty : 1;
 }
 
 /** Returns whether this node is a camera. Returns YES. */
@@ -190,6 +192,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 /** @deprecated Renamed to viewMatrix for a more accurate semantic. */
 @property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
+
+/** Returns the matrix inversion of the viewMatrix. */
+@property(nonatomic, readonly) CC3Matrix* viewMatrixInverted;
 
 /**
  * The projection matrix that takes the camera's modelview and projects it to the viewport.

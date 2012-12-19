@@ -77,7 +77,6 @@
 							  withPadding: (GLfloat) padding
 							   checkScene: (BOOL) checkScene;
 @property(nonatomic, readonly) CGSize fovRatios;
-@property(nonatomic, readonly) BOOL isProjectionDirty;
 @end
 
 
@@ -89,6 +88,7 @@
 
 -(void) dealloc {
 	[_viewMatrix release];
+	[_viewMatrixInverted release];
 	[frustum release];
 	[super dealloc];
 }
@@ -142,9 +142,7 @@
 
 -(void) setIsDepthOfFieldInfinite: (BOOL) isInfinite {
 	hasInfiniteDepthOfField = isInfinite;
-	if (isOpen) {
-		[self loadProjectionMatrix];
-	}
+	if (isOpen) [self loadProjectionMatrix];
 }
 
 // The CC3Scene's viewport manager.
@@ -164,8 +162,10 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_viewMatrix = [CC3AffineMatrix new];
+		_viewMatrixInverted = nil;
 		self.frustum = [CC3Frustum frustumOnViewMatrix: _viewMatrix];
-		isProjectionDirty = YES;
+		_isProjectionDirty = YES;
+		_isViewMatrixInvertedDirty = YES;
 		fieldOfView = kCC3DefaultFieldOfView;
 		nearClippingDistance = kCC3DefaultNearClippingDistance;
 		farClippingDistance = kCC3DefaultFarClippingDistance;
@@ -176,7 +176,8 @@
 }
 
 // Protected properties for copying
--(BOOL) isProjectionDirty { return isProjectionDirty; }
+-(BOOL) isProjectionDirty { return _isProjectionDirty; }
+-(BOOL) isViewMatrixInvertedDirty { return _isViewMatrixInvertedDirty; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -185,13 +186,13 @@
 	
 	self.frustum = [another.frustum autoreleasedCopy];		// retained
 
-	[_viewMatrix release];
-	_viewMatrix = [another.viewMatrix copy];		// retained
+	[_viewMatrix populateFrom: another.viewMatrix];
 
 	fieldOfView = another.fieldOfView;
 	nearClippingDistance = another.nearClippingDistance;
 	farClippingDistance = another.farClippingDistance;
-	isProjectionDirty = another.isProjectionDirty;
+	_isProjectionDirty = another.isProjectionDirty;
+	_isViewMatrixInvertedDirty = another.isViewMatrixInvertedDirty;
 	isOpen = another.isOpen;
 }
 
@@ -203,7 +204,9 @@
 
 #pragma mark Transformations
 
--(void) markProjectionDirty { isProjectionDirty = YES; }
+-(void) markProjectionDirty { _isProjectionDirty = YES; }
+
+-(void) markViewMatrixInvertedDirty { _isViewMatrixInvertedDirty = YES; }
 
 /**
  * Scaling the camera is a null operation because it scales everything, including the size
@@ -255,8 +258,29 @@
 	[_viewMatrix multiplyBy: self.transformMatrixInverted];
 	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, _viewMatrix);
 
-	// Let the frustum know that the contents of the modelview matrix have changed. 
+	// Mark the inverted view matrix as dirty, and let the frustum know that the contents
+	// of the view matrix have changed.
+	[self markViewMatrixInvertedDirty];
 	[frustum markDirty];
+}
+
+/**
+ * Returns the inverse of the viewMatrix.
+ *
+ * Since this inverse matrix is not commonly used, and is often expensive to compute,
+ * it is only calculated when the viewMatrix has changed, and then only on demand.
+ */
+-(CC3Matrix*) viewMatrixInverted {
+	if (!_viewMatrixInverted) {
+		_viewMatrixInverted = [[CC3AffineMatrix matrix] retain];
+		_isViewMatrixInvertedDirty = YES;
+	}
+	if (_isViewMatrixInvertedDirty) {
+		[_viewMatrixInverted populateFrom: _viewMatrix];
+		[_viewMatrixInverted invert];
+		_isViewMatrixInvertedDirty = NO;
+	}
+	return transformMatrixInverted;
 }
 
 /**
@@ -264,7 +288,7 @@
  * projection parameters have been changed since the last rebuild.
  */
 -(void) buildProjection  {
-	if(isProjectionDirty) {
+	if(_isProjectionDirty) {
 		CC3Viewport vp = self.viewportManager.viewport;
 		NSAssert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
 
@@ -274,7 +298,7 @@
 				   andFarClip: farClippingDistance
 					  andZoom: self.uniformScale];
 
-		isProjectionDirty = NO;
+		_isProjectionDirty = NO;
 		
 		// Notify the transform listeners that the projection has changed
 		[self notifyTransformListeners];
@@ -696,7 +720,7 @@
 	
 	// Convert specified location to a 4D homogeneous location vector
 	// and transform it using the modelview and projection matrices.
-	CC3Vector4 hLoc = CC3Vector4FromCC3Vector(a3DLocation, 1.0);
+	CC3Vector4 hLoc = CC3Vector4FromLocation(a3DLocation);
 	hLoc = [_viewMatrix transformHomogeneousVector: hLoc];
 	hLoc = [frustum.projectionMatrix transformHomogeneousVector: hLoc];
 	

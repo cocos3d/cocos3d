@@ -315,7 +315,7 @@
 	LogTrace(@"%@ nudging vertices by %@", self, NSStringFromCC3Vector(offset));
 
 	// Create and return a 4D directional vector from the offset
-	return CC3Vector4FromCC3Vector(offset, 0.0f);
+	return CC3Vector4FromDirection(offset);
 }
 
 /**
@@ -376,9 +376,9 @@
 		// Retrieve the current face, convert it to 4D homogeneous locations
 		CC3Face face = [scNode deformedFaceAt: faceIdx];
 		CC3Vector4 vertices4d[3];
-		vertices4d[0] = CC3Vector4FromCC3Vector(face.vertices[0], 1.0f);
-		vertices4d[1] = CC3Vector4FromCC3Vector(face.vertices[1], 1.0f);
-		vertices4d[2] = CC3Vector4FromCC3Vector(face.vertices[2], 1.0f);
+		vertices4d[0] = CC3Vector4FromLocation(face.vertices[0]);
+		vertices4d[1] = CC3Vector4FromLocation(face.vertices[1]);
+		vertices4d[2] = CC3Vector4FromLocation(face.vertices[2]);
 		
 		// If needed, nudge the shadow volume face away from the
 		// shadow caster face in the direction away from the light

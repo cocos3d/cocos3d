@@ -318,6 +318,17 @@
 	[super setGlobalLightLocation: aLocation];
 }
 
+-(CC3GLProgramContext*) shaderContext {
+	[self ensureMaterial];
+	return material.shaderContext;
+}
+
+-(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
+	[self ensureMaterial];
+	material.shaderContext = shaderContext;
+	[super setShaderContext: shaderContext];	// pass along to any children
+}
+
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
