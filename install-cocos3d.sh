@@ -166,7 +166,6 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	echo ...copying $TEMPLATE template files
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
-	copy_files "GLSL" "$DST_DIR"
 
 # Copy cocos3d library files references
 	TEMPLATE="cocos3d-lib"

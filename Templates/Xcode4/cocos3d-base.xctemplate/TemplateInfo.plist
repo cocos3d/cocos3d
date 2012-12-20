@@ -9,31 +9,9 @@
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Definitions</key>
-	<dict>
-		<key>GLSL/CC3DefaultByVarNames.fsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>GLSL/CC3DefaultByVarNames.fsh</string>
-		</dict>
-		<key>GLSL/CC3DefaultByVarNames.vsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>GLSL/CC3DefaultByVarNames.vsh</string>
-		</dict>
-	</dict>
+	<dict/>
 	<key>Nodes</key>
-	<array>
-		<string>GLSL/CC3DefaultByVarNames.fsh</string>
-		<string>GLSL/CC3DefaultByVarNames.vsh</string>
-	</array>
+	<array/>
 	<key>Project</key>
 	<dict>
 		<key>Configurations</key>
