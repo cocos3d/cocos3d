@@ -96,7 +96,12 @@
 
 #pragma mark Binding and linking
 
-/** Binds the program, populates the uniforms and applies them to the program. */
+/** 
+ * Binds the program, populates the uniforms and applies them to the program.
+ *
+ * The specified context resolves locally overridden uniform variable values and may be nil
+ * if no uniform variable overrides are to be applied.
+ */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context;
 
 /**

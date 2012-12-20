@@ -848,9 +848,11 @@
 		} else {
 			[CC3Material unbind];
 			CC3OpenGLESEngine.engine.state.color.value = pureColor;
+			[CC3OpenGLESEngine.engine.shaders bindPureColorProgramWithVisitor: visitor];
 		}
-	} else {
+	} else {	// Probably node picking
 		[CC3Material unbind];
+		[CC3OpenGLESEngine.engine.shaders bindPureColorProgramWithVisitor: visitor];
 	}
 }
 

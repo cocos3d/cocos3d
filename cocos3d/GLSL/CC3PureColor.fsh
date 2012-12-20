@@ -1,9 +1,9 @@
 /*
- * CC3OpenGLESShaders.h
+ * CC3PureColor.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2011-2012 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -12,10 +12,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,22 +27,23 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-/** @file */	// Doxygen marker
+/**
+ * When running under OpenGL ES 2, this fragment shader is used to paint a node with a pure color.
+ *
+ * This shader is used during node picking and when a node does not have a material.
+ *
+ * The semantics of the variables in this shader can be mapped using a
+ * CC3GLProgramSemanticsDelegateByVarNames instance created with the
+ * populateWithPureColorSemanticMappings method.
+ */
 
+precision mediump float;
 
-#import "CC3OpenGLESShaders.h"
-#import "CC3GLProgram.h"
-#import "CC3GLSLVariable.h"
+//-------------- UNIFORMS ----------------------
 
-#if CC3_OGLES_2
+uniform vec4 u_cc3Color;						/**< Color when lighting is not in use. */
 
-#pragma mark -
-#pragma mark CC3OpenGLES2Shaders
-
-/** CC3OpenGLES2Shaders manages a tracker for each GLSL program object. */
-@interface CC3OpenGLES2Shaders : CC3OpenGLESShaders {
-	CC3GLProgram* _pureColorProgram;
+void main() {
+	gl_FragColor = u_cc3Color;
 }
-@end
 
-#endif

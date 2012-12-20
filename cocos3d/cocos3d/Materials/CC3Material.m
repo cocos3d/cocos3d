@@ -524,7 +524,6 @@ static GLuint lastAssignedMaterialTag;
 	[glesServCaps.alphaTest disable];
 	[self resetSwitching];
 	[CC3Texture unbind];
-	[CC3OpenGLESEngine.engine.shaders unbind];
 }
 
 

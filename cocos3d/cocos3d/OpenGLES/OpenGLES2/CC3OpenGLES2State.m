@@ -54,7 +54,9 @@
 														 andGLSetFunction: glClearStencil
 												 andOriginalValueHandling: kCC3GLESStateOriginalValueReadOnceAndRestore];
 	
-	self.color = nil;
+	
+	self.color = [CC3OpenGLESStateTrackerColorFixedAndFloat trackerWithParent: self
+													 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	
 	self.colorMask = [CC3OpenGLESStateTrackerColorFixedAndFloat trackerWithParent: self
 																		 forState: GL_DEPTH_WRITEMASK

@@ -83,6 +83,7 @@ typedef enum {
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
 	
 	// MATERIALS --------------
+	kCC3SemanticColor,							/**< Color when lighting is not in use. */
 	kCC3SemanticMaterialColorAmbient,			/**< Ambient color of the material. */
 	kCC3SemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
 	kCC3SemanticMaterialColorSpecular,			/**< Specular color of the material. */
@@ -423,6 +424,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * add or change any of the mappings.
  */
 -(void) populateWithDefaultSemanticMappings;
+
+/** 
+ * Populates this instance with the simple mappings between names and semantics
+ * used for painting nodes in a solid, pure color, including during node picking.
+ */
+-(void) populateWithPureColorSemanticMappings;
 
 
 #pragma mark Allocation and initialization

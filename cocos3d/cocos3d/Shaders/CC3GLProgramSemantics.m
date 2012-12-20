@@ -78,6 +78,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticModelViewProjMatrixInv: return @"kCC3SemanticModelViewProjMatrixInv";
 		case kCC3SemanticModelViewProjMatrixInvTran: return @"kCC3SemanticModelViewProjMatrixInvTran";
 			
+		case kCC3SemanticColor: return @"kCC3SemanticColor";
 		case kCC3SemanticMaterialColorAmbient: return @"kCC3SemanticMaterialColorAmbient";
 		case kCC3SemanticMaterialColorDiffuse: return @"kCC3SemanticMaterialColorDiffuse";
 		case kCC3SemanticMaterialColorSpecular: return @"kCC3SemanticMaterialColorSpecular";
@@ -258,6 +259,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		}
 			
 		// Material properties
+		case kCC3SemanticColor: {
+			[uniform setColor4F: CC3OpenGLESEngine.engine.state.color.value];
+			return YES;
+		}
 		case kCC3SemanticMaterialColorAmbient:
 			[uniform setColor4F: CC3OpenGLESEngine.engine.materials.ambientColor.value];
 			return YES;
@@ -524,6 +529,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3MtxMVPIT" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];
 	
 	// Material properties
+	[self mapVariableName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
 	[self mapVariableName: @"u_cc3MatColorAmbient" toSemantic: kCC3SemanticMaterialColorAmbient];
 	[self mapVariableName: @"u_cc3MatColorDiffuse" toSemantic: kCC3SemanticMaterialColorDiffuse];
 	[self mapVariableName: @"u_cc3MatColorSpecular" toSemantic: kCC3SemanticMaterialColorSpecular];
@@ -601,6 +607,15 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine3];
 	
 }
+
+-(void) populateWithPureColorSemanticMappings {
+	[self mapVariableName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
+	[self mapVariableName: @"u_cc3MtxMVP" toSemantic: kCC3SemanticModelViewProjMatrix];
+	[self mapVariableName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
+}
+
+
+#pragma mark Allocation and initialization
 
 static CC3GLProgramSemanticsDelegateByVarNames* _sharedDefaultDelegate;
 

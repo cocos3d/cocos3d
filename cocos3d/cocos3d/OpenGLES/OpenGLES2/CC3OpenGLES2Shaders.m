@@ -34,8 +34,13 @@
 
 #if CC3_OGLES_2
 
+#define kCC3DefaultGLProgramName				@"CC3DefaultGLProgram"
 #define kCC3DefaultVertexShaderSourceFile		@"CC3DefaultByVarNames.vsh"
 #define kCC3DefaultFragmentShaderSourceFile		@"CC3DefaultByVarNames.fsh"
+
+#define kCC3PureColorGLProgramName				@"CC3PureColorGLProgram"
+#define kCC3PureColorVertexShaderSourceFile		@"CC3PureColor.vsh"
+#define kCC3PureColorFragmentShaderSourceFile	@"CC3PureColor.fsh"
 
 
 #pragma mark -
@@ -43,14 +48,60 @@
 
 @implementation CC3OpenGLES2Shaders
 
-// Overridden to set the default shader source files
+-(void) dealloc {
+	[_pureColorProgram release];
+	[super dealloc];
+}
+
+-(CC3GLProgram*) defaultProgram {
+	if ( !_defaultProgram ) {
+		CC3GLProgram* p = [self makeDefaultProgram];
+		if(p) [self addProgram: p];
+		self.defaultProgram = p;
+	}
+	return _defaultProgram;
+}
+
+-(CC3GLProgram*) makeDefaultProgram {
+	if ( !(_defaultVertexShaderSourceFile && _defaultFragmentShaderSourceFile) ) return nil;
+
+	CC3GLProgram *p = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
+									fromVertexShaderFile: _defaultVertexShaderSourceFile
+								   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
+	p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+	[p link];
+	return p;
+}
+
+-(void) makePureColorProgram {
+	// retained
+	_pureColorProgram = [[CC3GLProgram alloc] initWithName: kCC3PureColorGLProgramName
+										fromVertexShaderFile: kCC3PureColorVertexShaderSourceFile
+									   andFragmentShaderFile: kCC3PureColorFragmentShaderSourceFile];
+	CC3GLProgramSemanticsDelegateByVarNames* semDel = [CC3GLProgramSemanticsDelegateByVarNames semanticsDelegate];
+	[semDel populateWithPureColorSemanticMappings];
+	_pureColorProgram.semanticDelegate = semDel;
+	[_pureColorProgram link];
+}
+
+
+#pragma mark Binding
+
+-(void) bindPureColorProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_pureColorProgram bindWithVisitor: visitor fromContext: nil];
+}
+
+-(void) unbind { ccGLUseProgram(0); }
+
+
+#pragma mark Allocation and initialization
+
 -(void) initializeTrackers {
 	[super initializeTrackers];
 	_defaultVertexShaderSourceFile = kCC3DefaultVertexShaderSourceFile;
 	_defaultFragmentShaderSourceFile = kCC3DefaultFragmentShaderSourceFile;
+	[self makePureColorProgram];
 }
-
--(void) unbind { ccGLUseProgram(0); }
 
 @end
 

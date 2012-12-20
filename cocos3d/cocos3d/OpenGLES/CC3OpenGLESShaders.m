@@ -31,8 +31,6 @@
 
 #import "CC3OpenGLESShaders.h"
 
-#define kCC3DefaultGLProgramName				@"CC3DefaultGLProgram"
-
 
 #pragma mark -
 #pragma mark CC3OpenGLESShaders
@@ -65,27 +63,16 @@
 
 -(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
 
--(CC3GLProgram*) defaultProgram {
-	if ( !_defaultProgram ) {
-		CC3GLProgram* p = [self makeDefaultProgram];
-		if(p) [self addProgram: p];
-		self.defaultProgram = p;
-	}
-	return _defaultProgram;
-}
+-(CC3GLProgram*) defaultProgram { return nil; }
 
--(CC3GLProgram*) makeDefaultProgram {
-	if (_defaultVertexShaderSourceFile && _defaultFragmentShaderSourceFile) {
-		CC3GLProgram *p = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
-										fromVertexShaderFile: _defaultVertexShaderSourceFile
-									   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
-		p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
-		[p link];
-		return p;
-	} else {
-		return nil;
-	}
-}
+-(CC3GLProgram*) makeDefaultProgram { return nil; }
+
+
+#pragma mark Binding
+
+-(void) bindPureColorProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
+-(void) unbind {}
 
 
 #pragma mark Allocation and initialization
@@ -95,8 +82,6 @@
 	_defaultVertexShaderSourceFile = nil;
 	_defaultFragmentShaderSourceFile = nil;
 }
-
--(void) unbind {}
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];

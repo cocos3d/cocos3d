@@ -32,6 +32,7 @@
 
 #import "CC3OpenGLESStateTracker.h"
 #import "CC3GLProgram.h"
+#import "CC3NodeVisitor.h"
 
 
 #pragma mark -
@@ -118,23 +119,10 @@
 @property(nonatomic, retain) NSString* defaultFragmentShaderSourceFile;
 
 
+#pragma mark Binding
 
-/** Tracks state for each GLSL program. */
-//@property(nonatomic, retain) CCArray* programs;
-
-/** Returns the number of active programs. */
-//@property(nonatomic, readonly) GLuint programCount;
-
-/**
- * Returns the tracker for the light with the specified index.
- *
- * Index ltIndx corresponds to i in the GL capability name GL_LIGHTi, and must
- * be between zero and the number of available lights minus one, inclusive.
- *
- * The number of available lights can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxLights.value.
- */
-//-(CC3OpenGLESProgramContext*) programAt: (GLuint) index;
+/** Binds the GL program used for painting nodes with a pure color, including during node picking. */
+-(void) bindPureColorProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Unbinds all GL programs from the GL engine. */
 -(void) unbind;

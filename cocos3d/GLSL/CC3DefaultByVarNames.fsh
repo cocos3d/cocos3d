@@ -44,9 +44,7 @@ precision mediump float;
 //-------------- UNIFORMS ----------------------
 
 uniform lowp int u_cc3TexCoordCount;			/**< Number of texture coordinate attributes. */
-
-//-------------- TEXTURE SAMPLERS ----------------------
-uniform sampler2D s_cc3Texture[MAX_TEXTURES];
+uniform sampler2D s_cc3Texture[MAX_TEXTURES];	/**< Texture samplers. */
 
 //-------------- VARYING VARIABLES INPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];

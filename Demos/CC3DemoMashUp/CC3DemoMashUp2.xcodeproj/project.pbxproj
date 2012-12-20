@@ -61,6 +61,8 @@
 		A971D3101663EC6E00769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30D1663EC6E00769DC5 /* fps_images-hd.png */; };
 		A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */; };
 		A971D3121663EC6E00769DC5 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30F1663EC6E00769DC5 /* fps_images.png */; };
+		A977615A168366F60001503E /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9776158168366F60001503E /* CC3PureColor.fsh */; };
+		A977615B168366F60001503E /* CC3PureColor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9776159168366F60001503E /* CC3PureColor.vsh */; };
 		A994EDE216833EF50042E90A /* CC3MeshParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A994ECCC16833EF50042E90A /* CC3MeshParticleSamples.m */; };
 		A994EDE316833EF50042E90A /* CC3ModelSampleFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = A994ECCE16833EF50042E90A /* CC3ModelSampleFactory.m */; };
 		A994EDE416833EF50042E90A /* CC3ParticleSamples.m in Sources */ = {isa = PBXBuildFile; fileRef = A994ECD016833EF50042E90A /* CC3ParticleSamples.m */; };
@@ -379,6 +381,8 @@
 		A971D30D1663EC6E00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
+		A9776158168366F60001503E /* CC3PureColor.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3PureColor.fsh; sourceTree = "<group>"; };
+		A9776159168366F60001503E /* CC3PureColor.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3PureColor.vsh; sourceTree = "<group>"; };
 		A994ECCB16833EF50042E90A /* CC3MeshParticleSamples.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3MeshParticleSamples.h; sourceTree = "<group>"; };
 		A994ECCC16833EF50042E90A /* CC3MeshParticleSamples.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3MeshParticleSamples.m; sourceTree = "<group>"; };
 		A994ECCD16833EF50042E90A /* CC3ModelSampleFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ModelSampleFactory.h; sourceTree = "<group>"; };
@@ -636,8 +640,8 @@
 		A994EDDC16833EF50042E90A /* CC3World.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3World.m; sourceTree = "<group>"; };
 		A994EDDD16833EF50042E90A /* CCNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeController.h; sourceTree = "<group>"; };
 		A994EDDE16833EF50042E90A /* ControllableCCLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllableCCLayer.h; sourceTree = "<group>"; };
-		A994EDE016833EF50042E90A /* CC3DefaultByVarNames.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3DefaultByVarNames.fsh; sourceTree = "<group>"; };
-		A994EDE116833EF50042E90A /* CC3DefaultByVarNames.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3DefaultByVarNames.vsh; sourceTree = "<group>"; };
+		A994EDE016833EF50042E90A /* CC3DefaultByVarNames.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3DefaultByVarNames.fsh; sourceTree = "<group>"; };
+		A994EDE116833EF50042E90A /* CC3DefaultByVarNames.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3DefaultByVarNames.vsh; sourceTree = "<group>"; };
 		A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BallBoxTexture.png; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
@@ -1495,6 +1499,8 @@
 			children = (
 				A994EDE016833EF50042E90A /* CC3DefaultByVarNames.fsh */,
 				A994EDE116833EF50042E90A /* CC3DefaultByVarNames.vsh */,
+				A9776158168366F60001503E /* CC3PureColor.fsh */,
+				A9776159168366F60001503E /* CC3PureColor.vsh */,
 			);
 			path = GLSL;
 			sourceTree = "<group>";
@@ -1897,6 +1903,8 @@
 			files = (
 				A994EE5B16833EF50042E90A /* CC3DefaultByVarNames.fsh in Resources */,
 				A994EE5C16833EF50042E90A /* CC3DefaultByVarNames.vsh in Resources */,
+				A977615A168366F60001503E /* CC3PureColor.fsh in Resources */,
+				A977615B168366F60001503E /* CC3PureColor.vsh in Resources */,
 				A92DA7B01427B5980051AFFA /* ArrowLeftButton48x48.png in Resources */,
 				A92DA7B21427B5980051AFFA /* ButtonRing48x48.png in Resources */,
 				A92DA7B31427B5980051AFFA /* cocos3dMascot.png in Resources */,

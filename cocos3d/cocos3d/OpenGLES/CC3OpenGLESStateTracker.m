@@ -667,6 +667,120 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 
 @implementation CC3OpenGLESStateTrackerColorFixedAndFloat
 
+@synthesize setGLFunctionFixed;
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+			forState: (GLenum) aName
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: NULL
+		  andGLSetFunctionFixed: NULL
+	   andOriginalValueHandling: origValueHandling];
+}
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed {
+	return [self initWithParent: aTracker
+					   forState: aName
+			   andGLSetFunction: setGLFunc
+		  andGLSetFunctionFixed: setGLFuncFixed
+	   andOriginalValueHandling: [[self class] defaultOriginalValueHandling]];
+}
+
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+  andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed {
+	// cast setGLFunc & setGLFuncFixed to void to remove bogus compiler warning
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				   andGLSetFunctionFixed: (void*)setGLFuncFixed] autorelease];
+}
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
+			forState: (GLenum) aName
+	andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	if ( (self = [super initWithParent: aTracker
+							  forState: aName
+					  andGLSetFunction: setGLFunc
+			  andOriginalValueHandling: origValueHandling]) ) {
+		setGLFunctionFixed = setGLFuncFixed;
+	}
+	return self;
+}
+
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker
+			   forState: (GLenum) aName
+	   andGLSetFunction: (CC3SetGLColorFunction*) setGLFunc
+  andGLSetFunctionFixed:  (CC3SetGLColorFunctionFixed*) setGLFuncFixed
+andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling {
+	// cast setGLFunc to void to remove bogus compiler warning
+	return [[[self alloc] initWithParent: aTracker
+								forState: aName
+						andGLSetFunction: (void*)setGLFunc
+				   andGLSetFunctionFixed: setGLFuncFixed
+				andOriginalValueHandling: origValueHandling] autorelease];
+}
+
+-(void) setValue: (ccColor4F) aColor {
+	if (shouldAlwaysSetGL || !valueIsKnown || !CCC4FAreEqual(aColor, value)) {
+		value = aColor;
+		[self setGLValueAndNotify];
+		fixedValueIsKnown = NO;
+	} else {
+		LogTrace(@"Reusing GL value for %@", self);
+	}
+}
+
+-(ccColor4F) value {
+	if (valueIsKnown) return value;
+	if (fixedValueIsKnown) return CCC4FFromCCC4B(fixedValue);
+	return kCCC4FWhite;
+}
+
+-(ccColor4B) fixedValue {
+	if (fixedValueIsKnown) return fixedValue;
+	return CCC4BFromCCC4F(self.value);
+}
+
+-(void) setFixedValue: (ccColor4B) aColor {
+	if (!fixedValueIsKnown ||
+		fixedValue.r != aColor.r ||
+		fixedValue.g != aColor.g ||
+		fixedValue.b != aColor.b || 
+		fixedValue.a != aColor.a) {
+
+		fixedValue = aColor;
+		LogTrace(@"Setting fixed GL value for %@", self);
+		[self setGLFixedValue];
+		LogGLErrorTrace(@"while setting fixed GL value for %@", self);
+		[self notifyGLChanged];
+		fixedValueIsKnown = YES;
+		valueIsKnown = NO;
+	} else {
+		LogTrace(@"Reusing fixed GL value for %@", self);
+	}
+}
+
+-(void) setFixedValueRaw: (ccColor4B) aValue { fixedValue = aValue; }
+
+-(void) setGLFixedValue { if( setGLFunctionFixed ) setGLFunctionFixed(fixedValue.r, fixedValue.g, fixedValue.b, fixedValue.a); }
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ (as byte color %@)", [super description], NSStringFromCCC4B(fixedValue)];
+}
+
+@end
+
+/*
+@implementation CC3OpenGLESStateTrackerColorFixedAndFloat
+
 @synthesize fixedValue, setGLFunctionFixed;
 
 -(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker
@@ -742,9 +856,9 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 	if (!fixedValueIsKnown ||
 		fixedValue.r != aColor.r ||
 		fixedValue.g != aColor.g ||
-		fixedValue.b != aColor.b || 
+		fixedValue.b != aColor.b ||
 		fixedValue.a != aColor.a) {
-
+		
 		fixedValue = aColor;
 		LogTrace(@"Setting fixed GL value for %@", self);
 		[self setGLFixedValue];
@@ -766,7 +880,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 @end
-
+*/
 
 #pragma mark -
 #pragma mark CC3OpenGLESStateTrackerViewport

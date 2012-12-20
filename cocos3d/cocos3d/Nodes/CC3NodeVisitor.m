@@ -522,7 +522,7 @@
 	[pickedNode release];
 	pickedNode = nil;
 	
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
 	
 	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
 	[glesServCaps.lighting disable];
@@ -546,7 +546,7 @@
  * if the scene has no lighting.
  */
 -(void) close {
-	CC3OpenGLESState* glesState = [CC3OpenGLESEngine engine].state;
+	CC3OpenGLESState* glesState = CC3OpenGLESEngine.engine.state;
 		
 	// Read the pixel from the framebuffer
 	ccColor4B pixColor = [glesState readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
@@ -661,7 +661,7 @@
 /** Maps the specified node to a unique color, and paints the node with that color. */
 -(void) paintNode: (CC3Node*) aNode {
 	ccColor4B color = [self colorFromNodeTag: aNode.tag];
-	[CC3OpenGLESEngine engine].state.color.fixedValue = color;
+	CC3OpenGLESEngine.engine.state.color.fixedValue = color;
 	LogTrace(@"%@ painting %@ with color (%u, %u, %u, %u)",
 			 self, aNode, color.r, color.g, color.b, color.a);
 }
