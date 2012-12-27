@@ -56,7 +56,7 @@ OPTIONS:
 EOF
 }
 
-while getopts "fhu2:" OPTION; do
+while getopts "fh2:" OPTION; do
 	case "$OPTION" in
 		f)
 			force=1
@@ -146,6 +146,7 @@ copy_xc4_project_templates(){
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
 	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+	copy_files "Demos/Common/Resources/fps_images_1.png" "$DST_DIR"
 
 # Copy OpenGL ES 2 Template
 	DST_DIR="$TEMPLATE_DIR""cocos3d2 Application.xctemplate"

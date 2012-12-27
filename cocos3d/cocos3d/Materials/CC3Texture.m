@@ -524,7 +524,7 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 			hasPremultipliedAlpha_ = [[self class] PVRImagesHavePremultipliedAlpha];
 			format_ = pvr.format;
 			
-			self.cc3HasMipmap = pvr.hasMipmap;		// Added to support cocos3d texture loading
+			self.cc3HasMipmap = pvr.cc3HasMipmap;		// Added to support cocos3d texture loading
 			self.cc3IsFlippedVertically = NO;		// Added to support cocos3d texture loading
 			
 			[pvr release];

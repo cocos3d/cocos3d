@@ -109,6 +109,15 @@
 			<key>Path</key>
 			<string>Resources/hello-world.pod</string>
 		</dict>
+		<key>Resources/fps_images_1.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/fps_images_1.png</string>
+		</dict>
 	</dict>
 	<key>Description</key>
 	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 1.1. You can use this as the starting point for any cocos3d application that uses OpenGL ES 1.1. This template requires that cocos2d 1.x is installed.</string>
@@ -128,6 +137,7 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
+		<string>Resources/fps_images_1.png</string>
 	</array>
 	<key>Options</key>
 	<array>

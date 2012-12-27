@@ -25,7 +25,17 @@
 }
 
 #if CC3_CC2_1
-/** In cocos2d 1.x, the view controller and CCDirector are different objects. */
+/**
+ * In cocos2d 1.x, the view controller and CCDirector are different objects.
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
+ */
 -(void) establishDirectorController {
 	
 	// Establish the type of CCDirector to use.
@@ -56,6 +66,14 @@
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
  * class, this MUST be performed before any other references to the CCDirector singleton!!
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
  */
 -(void) establishDirectorController {
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;

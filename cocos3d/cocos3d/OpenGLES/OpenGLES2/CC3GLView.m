@@ -81,8 +81,10 @@
 
 /** Overridden to read the new viewport GL value after the new window size is set. */
 -(void) layoutSubviews {
-	[super layoutSubviews];
-	[CC3OpenGLESEngine.engine.state.viewport readOriginalValue];
+	[renderer_ resizeFromLayer: (CAEAGLLayer*)self.layer];
+	size_ = [renderer_ backingSize];
+	[CCDirector.sharedDirector reshapeProjection: size_];			// Issue #914 #924
+	[CC3OpenGLESEngine.engine.state.viewport readOriginalValue];	// Added for cocos3d
 	
 	// Notify controller...already done in iOS5 & above
 	if(CCConfiguration.sharedConfiguration.OSVersion < kCCiOSVersion_5_0 )

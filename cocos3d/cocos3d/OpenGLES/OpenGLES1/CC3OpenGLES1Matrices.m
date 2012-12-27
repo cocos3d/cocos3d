@@ -78,20 +78,20 @@
 -(void) load: (CC3Matrix4x4*) mtx {
 	[self activate];
 	glLoadMatrixf(mtx->elements);
-	LogGLErrorTrace(@"while loading matrix at %p into %@", glMatrix, self);
+	LogGLErrorTrace(@"while loading matrix at %@ into %@", NSStringFromCC3Matrix4x4(mtx), self);
 	[self wasChanged];
 }
 
 -(void) getTop: (CC3Matrix4x4*) mtx {
 	[self activate];
 	glGetFloatv(_topName, mtx->elements);
-	LogGLErrorTrace(@"while reading top of %@ into matrix at %p", self, glMatrix);
+	LogGLErrorTrace(@"while reading top of %@ into matrix %@", self, NSStringFromCC3Matrix4x4(mtx));
 }
 
 -(void) multiply: (CC3Matrix4x4*) mtx {
 	[self activate];
 	glMultMatrixf(mtx->elements);
-	LogGLErrorTrace(@"while multiplied matrix at %p into %@", glMatrix, self);
+	LogGLErrorTrace(@"while multiplied matrix %@ into %@", NSStringFromCC3Matrix4x4(mtx), self);
 	[self wasChanged];
 }
 

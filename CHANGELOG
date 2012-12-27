@@ -13,15 +13,14 @@ cocos3d 2.0.0 - 2013/01/31
 -------------------------------------
 
 - Single cocos3d codebase can be used with either cocos2d 2.x/OpenGL ES 2.0, or cocos2d 1.x/OpenGL ES 1.1 frameworks
-- With cocos2d 2.x/OpenGL ES 2.0, use:
-	- Workspace cocos3d2
-	- Demo projects CC3DemoMashUp2, CC3Performance2 & CC3Demo3DTiles2
-	- New Project template cocos3d2 Application
-- With cocos2d 1.x/OpenGL ES 1.1, use:
-	- Workspace cocos3d1
-	- Demo projects CC3DemoMashUp1, CC3Performance1 & CC3Demo3DTiles1
-	- New Project template cocos3d1 Application
-- A single app may not currently mix both OpenGL ES 2.0 & 1.1 capability.
+- Two cocos3d Xcode template projects are provided:
+    - cocos3d1 Application - for use with OpenGL ES 1.1 and cocos2d 1.x.
+    - cocos3d2 Application - for use with OpenGL ES 2.0 and cocos2d 2.x.
+- cocos3d Workspace and demo apps: CC3DemoMashUp, CC3Demo3DTiles and CC3Performance are pre-configured to use cocos2d 2.1.
+    - to use cocos2d 2.0, 1.1 or 1.0.1, in any of these projects:
+	    - delete the reference to the cocos2d group in the Xcode Project Navigator panel.
+	    - run the install_cocos3d script and identify the version of cocos2d to be linked.
+		- add the newly linked cocos2d files to the project by dragging the cocos2d folder from the cocos3d distribution folder to the Xcode Project Navigator panel.
 
 - Added support for OpenGL ES shaders:
     - CC3GLProgram added to represent a GL program pairing one vertex shader and one fragment shader under OpenGL ES 2.
@@ -47,6 +46,7 @@ cocos3d 2.0.0 - 2013/01/31
 
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
+- Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 
 
 

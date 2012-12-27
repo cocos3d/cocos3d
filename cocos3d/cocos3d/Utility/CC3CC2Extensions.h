@@ -52,6 +52,11 @@
 #	define CC_INCREMENT_GL_DRAWS(__n__)
 #endif
 
+/** Add state caching alias for compatiblity with 2.1 and above */
+#if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
+#	define ccGLBindVAO(vao) glBindVertexArray(vao)
+#endif
+
 
 #pragma mark -
 #pragma mark CC3CCSizeTo action
@@ -218,8 +223,8 @@
 /** Extension category to support cocos3d functionality. */
 @interface CCLayer (CC3)
 
-#if CC3_CC2_1
-/** Backwards compatibility for setter renamed in cocos2d 2.x. */
+#if COCOS2D_VERSION < 0x020100
+/** Backwards compatibility for setter renamed in cocos2d 2.1. */
 -(void) setTouchEnabled: (BOOL) isTouchEnabled;
 #endif
 
@@ -288,6 +293,18 @@
 
 /** Returns the CCScheduler sharedScheduler singleton. */
 @property (nonatomic, readonly) CCScheduler* scheduler;
+
+#if COCOS2D_VERSION < 0x010100
+/**
+ * Added for runtime compatibility with cocos2d version 1.1 features.
+ *
+ * In cocos2d versions prior to 1.1, this method does nothing.
+ */
+-(void) setRunLoopCommon: (BOOL) common;
+#endif
+
+
+
 #endif
 
 #if CC3_CC2_2
@@ -299,6 +316,14 @@
 -(UIDeviceOrientation) deviceOrientation;
 #endif
 
+@end
+
+
+#pragma mark -
+#pragma mark CCDirectorIOS extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCDirectorIOS (CC3)
 @end
 
 
@@ -472,17 +497,27 @@
 
 
 #pragma mark -
-#pragma mark CCGLProgram replacement
+#pragma mark CCGLProgram
+
+#if CC3_CC2_2
+/** Extension category to support cocos3d functionality. */
+@interface CCGLProgram (CC3)
+
+#if COCOS2D_VERSION < 0x020100
+/** Returns the GL program ID. */
+@property(nonatomic, readonly) GLuint program;
+#endif
+
+@end
+#endif
 
 #if CC3_CC2_1
-
-/** Dummy replacement in cocos2d 1.x to keep the comiler happy. */
+/** Dummy replacement in cocos2d 1.x to keep the compiler happy. */
 @interface CCGLProgram : NSObject
 -(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
 			fragmentShaderByteArray: (const GLchar*) fShaderByteArray;
 -(void) link;
 @end
-
 #endif
 
 
@@ -491,3 +526,11 @@
 
 /** Returns the name of the specified touch type. */
 NSString* NSStringFromTouchType(uint tType);
+
+#if COCOS2D_VERSION < 0x010100
+/** Extend the iOS version enumerations for cocos2d 1.0.1. */
+enum {
+    kCCiOSVersion_5_0_0 = 0x05000000,
+    kCCiOSVersion_6_0_0 = 0x06000000
+};
+#endif

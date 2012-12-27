@@ -35,31 +35,22 @@ When adapting this template project for your own application, don't forget to re
 'hello-world.pod' from the Resources folder of your project!
 
 
-cocos2d Version Compatibility
------------------------------
+cocos2d & OpenGL ES Version Compatibility
+-----------------------------------------
 
-cocos3d 0.7.0 is compatible with cocos2d versions 0.99.5 through 1.1.
+cocos3d is compatible with cocos2d 1.0.1 and 1.1, for using fixed-pipeline OpenGL ES 1.1,
+and is compatible with cocos2d 2.0 and 2.1, for using programmable-pipeline OpenGL ES 2.0,
 
-At the time of this release, the current version of cocos2d is 1.0.1, and by default, cocos3d is
-configured to use that version. This section includes notes on compatibility with other versions.
+This template application will use whichever version of cocos2d you indicated when you ran
+the install_cocos3d.sh script. You can easily change the version of cocos2d that is linked
+to this project by following these steps within Xcode:
 
-   cocos2d 0.9.5
-   -------------
+1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
+2. Run the install_cocos3d script and identify the new version of cocos2d to be linked.
+3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
+   the cocos3d distribution folder to the Xcode Project Navigator panel.
 
-   Version 0.99.5 of cocos2d contains several files that were removed in cocos2d 1.0,
-   These files are not included in the cocos3d Xcode demo apps and project templates.
-   When using cocos2d 0.9.5, drag the following files to the cocos2d group within the Xcode project:
+By linking to cocos2d 2.x, you will automatically be using OpenGL ES 2.0, and by linking to
+cocos2d 1.x, you will automatically be using OpenGL ES 1.1. Because of this, you cannot mix
+the use of OpenGL ES 2.0 and 1.1 within a single application.
 
-      cocos2d/CCCompatibility.h
-      cocos2d/CCCompatibility.m
-      cocos2d/CCSpriteSheet.h
-      cocos2d/CCSpriteSheet.m
-      TouchJSON/Extensions/NSCharacterSet_Extensions.h
-      TouchJSON/Extensions/NSCharacterSet_Extensions.m
-      TouchJSON/Extensions/NSScanner_Extensions.h
-      TouchJSON/Extensions/NSScanner_Extensions.m
-
-   Because of the modular nature of Xcode 4 project templates, the cocos3d Xcode 4 template
-   project uses whichever cocos2d Xcode 4 project templates were installed. Typically this
-   will be the cocos2d 1.0.1 project templates, unless you have created cocos2d 0.99.5
-   Xcode 4 project templates.

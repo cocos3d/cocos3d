@@ -183,7 +183,7 @@
 
 @implementation CCLayer (CC3)
 
-#if CC3_CC2_1
+#if COCOS2D_VERSION < 0x020100
 -(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
 #endif
 
@@ -242,6 +242,10 @@
 -(CCActionManager*) actionManager { return CCActionManager.sharedManager; }
 -(CCTouchDispatcher*) touchDispatcher { return CCTouchDispatcher.sharedDispatcher; }
 -(CCScheduler*) scheduler { return CCScheduler.sharedScheduler; }
+
+#if COCOS2D_VERSION < 0x010100
+-(void) setRunLoopCommon: (BOOL) common {}
+#endif
 #endif
 
 #if CC3_CC2_2
@@ -252,15 +256,53 @@
 
 
 #pragma mark -
+#pragma mark CCDirectorIOS extension
+
+@implementation CCDirectorIOS (CC3)
+
+/**
+ * Overridden to use a different font file (fps_images_1.png) when using cocos2d 1.x.
+ *
+ * Both cocos2d 1.x & 2.x use a font file named fps_images.png, which are different and
+ * incompatible with each other. This allows a project to include both versions of the file,
+ * and use the font file version that is appropriate for the cocos2d version.
+ */
+-(void) setGLDefaultValues {
+
+#if CC_DIRECTOR_FAST_FPS
+    if (!FPSLabel_) {
+		CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
+		[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
+		FPSLabel_ = [[CCLabelAtlas labelWithString:@"00.0" charMapFile:@"fps_images_1.png" itemWidth:16 itemHeight:24 startCharMap:'.'] retain];
+		[CCTexture2D setDefaultAlphaPixelFormat:currentFormat];
+	}
+#endif	// CC_DIRECTOR_FAST_FPS
+
+	[super setGLDefaultValues];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3BMFontConfiguration
 
-#if CC3_CC2_1
+#if COCOS2D_VERSION < 0x020100
 /** Structure holding character kerning data. Copied from identical definition in CCLabelBMFont.m. */
 typedef struct _KerningHashElement {	
 	int key;		// key for the hash. 16-bit for 1st element, 16-bit for 2nd element
 	int amount;
 	UT_hash_handle hh;
 } tCCKerningHashElement;
+#endif
+
+#if COCOS2D_VERSION < 0x020100
+/** Structure holding font character data. Copied from identical definition in CCLabelBMFont.m. */
+typedef struct _FontDefHashElement {
+	NSUInteger		key;		// key. Font Unicode value
+	ccBMFontDef		fontDef;	// font definition
+	UT_hash_handle	hh;
+} tCCFontDefHashElement;
 #endif
 
 @interface CCBMFontConfiguration (TemplateMethods)
@@ -365,7 +407,7 @@ typedef struct _KerningHashElement {
 -(void) parseCharacterDefinition: (NSString*) line {
 	ccBMFontDef charDef;
 	[self parseCharacterDefinition:line charDef: &charDef];
-	BMFontArray_[ characterDefinition.charID ] = charDef;
+	BMFontArray_[charDef.charID ] = charDef;
 }
 #endif
 #endif
@@ -686,10 +728,19 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 
 
 #pragma mark -
-#pragma mark CCGLProgram replacement
+#pragma mark CCGLProgram
+
+#if CC3_CC2_2
+@implementation CCGLProgram (CC3)
+
+#if COCOS2D_VERSION < 0x020100
+-(GLuint) program { return program_; }
+#endif
+
+@end
+#endif
 
 #if CC3_CC2_1
-
 @implementation CCGLProgram
 
 -(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
@@ -698,7 +749,6 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 -(void) link {}
 
 @end
-
 #endif
 
 

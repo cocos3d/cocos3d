@@ -2,13 +2,13 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Demos/CC3DemoMashUp/CC3DemoMashUp1.xcodeproj">
+      location = "group:Demos/CC3DemoMashUp/CC3DemoMashUp.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Demos/CC3Performance/CC3Performance1.xcodeproj">
+      location = "group:Demos/CC3Performance/CC3Performance.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Demos/CC3Demo3DTiles/CC3Demo3DTiles1.xcodeproj">
+      location = "group:Demos/CC3Demo3DTiles/CC3Demo3DTiles.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:README.md">
