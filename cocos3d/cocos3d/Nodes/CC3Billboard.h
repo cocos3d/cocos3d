@@ -603,7 +603,7 @@
  *     be disabled during the drawing of the particles.
  */
 @interface CC3ParticleSystemBillboard : CC3Billboard {
-	CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
+	CC3AttenuationCoefficients _particleSizeAttenuation;
 }
 
 /**
@@ -615,7 +615,10 @@
  * The initial value of this property is kCC3ParticleSizeAttenuationNone, indicating no attenuation
  * with distance.
  */
-@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
+
+/** @deprecated Property renamed to particleSizeAttenuation. */
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether scheduled updates of the contained 2D billboard should continue when this node

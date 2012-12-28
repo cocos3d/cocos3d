@@ -44,29 +44,6 @@
 -(void) setValueRaw:(GLfloat) value;
 @end
 
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerPointParameterFloat
-
-@implementation CC3OpenGLESStateTrackerPointParameterFloat
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerPointParameterVector
-
-@implementation CC3OpenGLESStateTrackerPointParameterVector
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
 
 #pragma mark -
 #pragma mark CC3OpenGLESStateTrackerStencilFunction

@@ -39,14 +39,79 @@
 
 precision mediump float;
 
-//-------------- UNIFORMS ----------------------
+//-------------- STRUCTURES ----------------------
 
+/**
+ * The parameters to use when displaying vertices as points.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Point {
+	float	size;							/**< Default size of points, if not specified per-vertex. */
+	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
+	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
+	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
+	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
+	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
+	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
+	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
+};
+
+
+//-------------- UNIFORMS & VERTEX ATTRIBUTES ----------------------
+
+uniform mat4 u_cc3MtxMV;						/**< Current modelview matrix. */
 uniform mat4 u_cc3MtxMVP;						/**< Current modelview-projection matrix. */
+uniform Point u_cc3Points;						/**< Point parameters. */
 attribute highp vec4 a_cc3Position;				/**< Vertex position. */
+attribute float a_cc3PointSize;					/**< Vertex point size. */
 
+
+//-------------- LOCAL VARIABLES ----------------------
+vec3 vtxPosEye;				/**< The position of the vertex, in eye coordinates. */
+const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
+
+
+//-------------- FUNCTIONS ----------------------
+
+/** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
+vec3 vertexPositionInEyeSpace() {
+	if(u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone)
+		return (u_cc3MtxMV * a_cc3Position).xyz;
+	else
+		return vec3(0.0, 0.0, 0.0);
+}
+
+/**
+ * If this vertices are being drawn as points, returns the size of the point for the current vertex.
+ * If the size is not needed, or if the size cannot be determined, returns the value one.
+ */
+float pointSize() {
+	float size = 1.0;
+	if (u_cc3Points.isDrawingPoints) {
+		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
+		if (u_cc3Points.sizeAttenuation != kAttenuationNone) {
+			vec3 attenuationEquation;
+			attenuationEquation.x = 1.0;
+			attenuationEquation.z = dot(vtxPosEye, vtxPosEye);
+			attenuationEquation.y = sqrt(attenuationEquation.z);
+			size /= dot(attenuationEquation, u_cc3Points.sizeAttenuation);
+		}
+		size = clamp(size, u_cc3Points.minimumSize, u_cc3Points.maximumSize);
+	}
+	return size;
+}
 
 //-------------- ENTRY POINT ----------------------
 void main() {
+
+	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
+	vtxPosEye = vertexPositionInEyeSpace();
+
 	gl_Position = u_cc3MtxMVP * a_cc3Position;
+	
+	gl_PointSize = pointSize();
 }
 

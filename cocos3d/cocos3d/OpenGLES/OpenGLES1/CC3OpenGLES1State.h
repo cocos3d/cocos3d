@@ -38,7 +38,7 @@
 #pragma mark CC3OpenGLES1StateTrackerPointParameterFloat
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerPointParameterFloat : CC3OpenGLESStateTrackerPointParameterFloat
+@interface CC3OpenGLES1StateTrackerPointParameterFloat : CC3OpenGLESStateTrackerFloat
 @end
 
 
@@ -46,7 +46,7 @@
 #pragma mark CC3OpenGLES1StateTrackerPointParameterVector
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerPointParameterVector : CC3OpenGLESStateTrackerPointParameterVector
+@interface CC3OpenGLES1StateTrackerPointParameterVector : CC3OpenGLESStateTrackerVector
 @end
 
 

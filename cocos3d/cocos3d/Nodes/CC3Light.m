@@ -79,7 +79,7 @@
 @synthesize stencilledShadowPainter, shadowIntensityFactor;
 @synthesize ambientColor, diffuseColor, specularColor;
 @synthesize spotExponent, spotCutoffAngle, isDirectionalOnly;
-@synthesize homogeneousLocation, attenuationCoefficients;
+@synthesize homogeneousLocation, attenuation=_attenuation;
 
 -(void) dealloc {
 	[self cleanupShadows];		// Includes releasing the shadows array, camera shadow volume & shadow painter
@@ -116,6 +116,12 @@
 -(void) setVisible: (BOOL) isVisible {
 	super.visible = isVisible;
 	[self.scene updateRelativeLightIntensities];
+}
+
+// Deprecated property
+-(CC3AttenuationCoefficients) attenuationCoefficients { return self.attenuation; }
+-(void) setAttenuationCoefficients: (CC3AttenuationCoefficients) attenuationCoefficients {
+	self.attenuation = attenuationCoefficients;
 }
 
 // Keep the compiler happy with the additional declaration
@@ -170,7 +176,7 @@
 		specularColor = kCC3DefaultLightColorSpecular;
 		spotExponent = 0;
 		spotCutoffAngle = kCC3SpotCutoffNone;
-		attenuationCoefficients = kCC3DefaultLightAttenuationCoefficients;
+		_attenuation = kCC3DefaultLightAttenuationCoefficients;
 		shadowIntensityFactor = 1.0;
 		isDirectionalOnly = YES;
 		shouldCopyLightIndex = NO;
@@ -235,7 +241,7 @@
 	specularColor = another.specularColor;
 	spotExponent = another.spotExponent;
 	spotCutoffAngle = another.spotCutoffAngle;
-	attenuationCoefficients = another.attenuationCoefficients;
+	_attenuation = another.attenuation;
 	shadowIntensityFactor = another.shadowIntensityFactor;
 	isDirectionalOnly = another.isDirectionalOnly;
 	shouldCopyLightIndex = another.shouldCopyLightIndex;
@@ -262,7 +268,7 @@
 	return [NSString stringWithFormat: @"%@, homoLoc: %@, ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, attenuation: %@",
 			[super fullDescription], NSStringFromCC3Vector4(homogeneousLocation), NSStringFromCCC4F(ambientColor),
 			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor), spotCutoffAngle,
-			NSStringFromCC3AttenuationCoefficients(attenuationCoefficients)];
+			NSStringFromCC3AttenuationCoefficients(_attenuation)];
 }
 
 /** Scaling does not apply to lights. */
@@ -338,13 +344,13 @@
 
 /**
  * Template method that sets the light intensity attenuation characteristics
- * in the GL engine from the attenuationCoefficients property of this light.
+ * in the GL engine from the attenuation property of this light.
  */
 -(void) applyAttenuation {
 	if ( !isDirectionalOnly ) {
-		glesLight.constantAttenuation.value = attenuationCoefficients.a;
-		glesLight.linearAttenuation.value = attenuationCoefficients.b;
-		glesLight.quadraticAttenuation.value = attenuationCoefficients.c;
+		glesLight.constantAttenuation.value = _attenuation.a;
+		glesLight.linearAttenuation.value = _attenuation.b;
+		glesLight.quadraticAttenuation.value = _attenuation.c;
 	}
 }
 

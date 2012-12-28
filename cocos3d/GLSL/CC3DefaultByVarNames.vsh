@@ -37,23 +37,48 @@
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
  */
 
-#define MAX_TEXTURES				4
-#define MAX_LIGHTS					4
+#define MAX_TEXTURES			4
+#define MAX_LIGHTS				4
 
 precision mediump float;
 
 //-------------- STRUCTURES ----------------------
 
-struct light {
+/**
+ * The parameters that define a single light.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Light {
 	vec4	position;							/**< Position or normalized direction in eye space. */
 	vec4	colorAmbient;						/**< Ambient color of light. */
 	vec4	colorDiffuse;						/**< Diffuse color of light. */
 	vec4	colorSpecular;						/**< Specular color of light. */
-	vec3	attenuationCoefficients;			/**< Coefficients of the attenuation equation. */
+	vec3	attenuation;						/**< Coefficients of the attenuation equation. */
 	vec3	spotDirection;						/**< Direction if spotlight in eye space. */
 	float	spotExponent;						/**< Directional attenuation factor if spotlight. */
 	float	spotCutoffAngleCosine;				/**< Cosine of spotlight cutoff angle. */
 	bool	isEnabled;							/**< Whether light is enabled. */
+};
+
+/**
+ * The parameters to use when displaying vertices as points.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Point {
+	float	size;							/**< Default size of points, if not specified per-vertex. */
+	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
+	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
+	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
+	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
+	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
+	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
+	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
 };
 
 
@@ -71,46 +96,57 @@ uniform vec4 u_cc3MatColorSpecular;				/**< Specular color of the material. */
 uniform vec4 u_cc3MatColorEmission;				/**< Emission color of the material. */
 uniform float u_cc3MatShininess;					/**< Shininess of the material. */
 
-// Texture properties
-uniform int u_cc3TextureCount;					/**< Number of active texture units. */
-
 // Lighting properties
 uniform bool u_cc3IsUsingLighting;				/**< Indicates whether any lighting is in use. */
 uniform vec4 u_cc3SceneLightColorAmbient;		/**< Ambient light color of the scene. */
-uniform light u_cc3Lights[MAX_LIGHTS];			/**< Array of lights. */
+uniform Light u_cc3Lights[MAX_LIGHTS];			/**< Array of lights. */
 
 // Uniforms describing vertex attributes.
 uniform bool u_cc3HasVertexNormal;				/**< Whether vertex normal attribute is available. */
 uniform bool u_cc3ShouldNormalizeNormal;		/**< Whether vertex normals should be normalized. */
 uniform bool u_cc3ShouldRescaleNormal;			/**< Whether vertex normals should be rescaled. */
 uniform bool u_cc3HasVertexColor;				/**< Whether vertex color attribute is available. */
-uniform lowp int u_cc3TexCoordCount;			/**< Number of texture coordinate attributes. */
+uniform bool u_cc3HasVertexTexCoord;			/**< Whether vertex texture coordinate attribute is available. */
+uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
+uniform Point u_cc3Points;						/**< Point parameters. */
 
 
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4 a_cc3Position;				/**< Vertex position. */
 attribute vec3 a_cc3Normal;						/**< Vertex normal. */
 attribute vec4 a_cc3Color;						/**< Vertex color. */
+attribute float a_cc3PointSize;					/**< Vertex point size. */
 attribute vec2 a_cc3TexCoord0;					/**< Vertex texture coordinate for texture unit 0. */
 attribute vec2 a_cc3TexCoord1;					/**< Vertex texture coordinate for texture unit 1. */
 attribute vec2 a_cc3TexCoord2;					/**< Vertex texture coordinate for texture unit 2. */
 attribute vec2 a_cc3TexCoord3;					/**< Vertex texture coordinate for texture unit 3. */
 
-
 //-------------- VARYING VARIABLES OUTPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];			/**< Fragment texture coordinates. */
 varying lowp vec4 v_color;						/**< Fragment base color. */
 
-
 //-------------- LOCAL VARIABLES ----------------------
 vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
 vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
-vec4 vtxPosEye;				/**< The position of the vertex, in eye coordinates. */
+vec3 vtxPosEye;				/**< The position of the vertex, in eye coordinates. */
 vec3 vtxNormal;				/**< The vertex normal. */
+
+//-------------- CONSTANTS ----------------------
+const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
+
 //-------------- FUNCTIONS ----------------------
+
+/** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
+vec3 vertexPositionInEyeSpace() {
+	if((u_cc3IsUsingLighting && u_cc3HasVertexNormal) ||
+	   (u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone))
+		return (u_cc3MtxMV * a_cc3Position).xyz;
+	else
+		return kVec3Zero;
+}
 
 /** 
  * Returns the portion of vertex color attributed to illumination of
@@ -122,14 +158,12 @@ vec4 illuminateWith(int ltIdx) {
 	
 	if (u_cc3Lights[ltIdx].position.w != 0.0) {
 		// Positional light. Find direction to vertex.
-		ltDir = u_cc3Lights[ltIdx].position.xyz - vtxPosEye.xyz;
+		ltDir = u_cc3Lights[ltIdx].position.xyz - vtxPosEye;
 		
-		if (u_cc3Lights[ltIdx].attenuationCoefficients != kAttenuationNone) {
-			vec3 attenuationEquation;
-			attenuationEquation.x = 1.0;
-			attenuationEquation.z = dot(ltDir, ltDir);
-			attenuationEquation.y = sqrt(attenuationEquation.z);
-			attenuation = 1.0 / dot(attenuationEquation, u_cc3Lights[ltIdx].attenuationCoefficients);
+		if (u_cc3Lights[ltIdx].attenuation != kAttenuationNone) {
+			float ltDist = length(ltDir);
+			vec3 attenuationEquation = vec3(1.0, ltDist, ltDist * ltDist);
+			attenuation = 1.0 / dot(attenuationEquation, u_cc3Lights[ltIdx].attenuation);
 		}
 		ltDir = normalize(ltDir);
 		
@@ -137,9 +171,8 @@ vec4 illuminateWith(int ltIdx) {
 		if (u_cc3Lights[ltIdx].spotCutoffAngleCosine >= 0.0) {
 			float spotAttenuation = dot(-ltDir, u_cc3Lights[ltIdx].spotDirection);
 			spotAttenuation = (spotAttenuation >= u_cc3Lights[ltIdx].spotCutoffAngleCosine)
-			? pow(spotAttenuation, u_cc3Lights[ltIdx].spotExponent)
-			: 0.0;
-			
+									? pow(spotAttenuation, u_cc3Lights[ltIdx].spotExponent)
+									: 0.0;
 			attenuation *= spotAttenuation;
 		}
     } else {
@@ -179,6 +212,25 @@ vec4 illuminate() {
 	return vtxColor;
 }
 
+/** 
+ * If this vertices are being drawn as points, returns the size of the point for the current vertex.
+ * If the size is not needed, or if the size cannot be determined, returns the value one.
+ */
+float pointSize() {
+	float size = 1.0;
+	if (u_cc3Points.isDrawingPoints) {
+		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
+		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
+			float ptDist = length(vtxPosEye);
+			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
+			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));
+		}
+		size = clamp(size, u_cc3Points.minimumSize, u_cc3Points.maximumSize);
+	}
+	return size;
+}
+
+
 //-------------- ENTRY POINT ----------------------
 void main() {
 
@@ -186,8 +238,8 @@ void main() {
 	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3MatColorAmbient;
 	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3MatColorDiffuse;
 
-	if( (u_cc3IsUsingLighting && u_cc3HasVertexNormal) )
-		vtxPosEye = u_cc3MtxMV * a_cc3Position;
+	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
+	vtxPosEye = vertexPositionInEyeSpace();
 
 	// Material & lighting
 	if (u_cc3IsUsingLighting && u_cc3HasVertexNormal) {
@@ -202,12 +254,13 @@ void main() {
 	}
 
 	// Fragment texture coordinates
-	if (u_cc3TexCoordCount > 0) v_texCoord[0] = a_cc3TexCoord0;
-	if (u_cc3TexCoordCount > 1) v_texCoord[1] = a_cc3TexCoord1;
-	if (u_cc3TexCoordCount > 2) v_texCoord[2] = a_cc3TexCoord2;
-	if (u_cc3TexCoordCount > 3) v_texCoord[3] = a_cc3TexCoord3;
+	if (u_cc3TextureCount > 0) v_texCoord[0] = a_cc3TexCoord0;
+	if (u_cc3TextureCount > 1) v_texCoord[1] = a_cc3TexCoord1;
+	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
+	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
 	
 	gl_Position = u_cc3MtxMVP * a_cc3Position;
-
+	
+	gl_PointSize = pointSize();
 }
 

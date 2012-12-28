@@ -91,7 +91,7 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 	ccColor4F ambientColor;
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
-	CC3AttenuationCoefficients attenuationCoefficients;
+	CC3AttenuationCoefficients _attenuation;
 	GLfloat spotExponent;
 	GLfloat spotCutoffAngle;
 	GLfloat shadowIntensityFactor;
@@ -189,7 +189,10 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  *
  * The initial value of this property is kCC3DefaultLightAttenuationCoefficients.
  */
-@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients;
+@property(nonatomic, assign) CC3AttenuationCoefficients attenuation;
+
+/** @deprecated Property renamed to attenuation */
+@property(nonatomic, assign) CC3AttenuationCoefficients attenuationCoefficients DEPRECATED_ATTRIBUTE;
 
 /**
  * When a copy is made of this node, indicates whether this node should copy the value

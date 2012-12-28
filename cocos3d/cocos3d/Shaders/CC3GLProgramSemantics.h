@@ -65,6 +65,14 @@ typedef enum {
 	kCC3SemanticVertexTexture6,					/**< Vertex texture coordinates for texture unit 6. */
 	kCC3SemanticVertexTexture7,					/**< Vertex texture coordinates for texture unit 7. */
 	
+	kCC3SemanticHasVertexNormal,				/**< Whether the vertex normal is available. */
+	kCC3SemanticShouldNormalizeVertexNormal,	/**< Whether vertex normals should be normalized. */
+	kCC3SemanticShouldRescaleVertexNormal,		/**< Whether vertex normals should be rescaled. */
+	kCC3SemanticHasVertexColor,					/**< Whether the vertex color is available. */
+	kCC3SemanticHasVertexTextureCoordinate,		/**< Whether the vertex texture coordinate is available. */
+	kCC3SemanticHasVertexPointSize,				/**< Whether the vertex point size is available. */
+	kCC3SemanticIsDrawingPoints,				/**< Whether the vertices are being drawn as points. */
+	
 	// ENVIRONMENT MATRICES --------------
 	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
 	kCC3SemanticModelMatrixInv,					/**< Inverse of current model-to-world matrix. */
@@ -81,6 +89,9 @@ typedef enum {
 	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInv,			/**< Inverse of current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
+	
+	// CAMERA -----------------
+	kCC3SemanticCameraPosition,					/**< Global position of the camera. */
 	
 	// MATERIALS --------------
 	kCC3SemanticColor,							/**< Color when lighting is not in use. */
@@ -140,14 +151,14 @@ typedef enum {
 	kCC3SemanticLightColorSpecular6,			/**< Specular color of light 6. */
 	kCC3SemanticLightColorSpecular7,			/**< Specular color of light 7. */
 
-	kCC3SemanticLightAttenuationCoefficients0,	/**< AttenuationCoefficients for light 0. */
-	kCC3SemanticLightAttenuationCoefficients1,	/**< AttenuationCoefficients for light 1. */
-	kCC3SemanticLightAttenuationCoefficients2,	/**< AttenuationCoefficients for light 2. */
-	kCC3SemanticLightAttenuationCoefficients3,	/**< AttenuationCoefficients for light 3. */
-	kCC3SemanticLightAttenuationCoefficients4,	/**< AttenuationCoefficients for light 4. */
-	kCC3SemanticLightAttenuationCoefficients5,	/**< AttenuationCoefficients for light 5. */
-	kCC3SemanticLightAttenuationCoefficients6,	/**< AttenuationCoefficients for light 6. */
-	kCC3SemanticLightAttenuationCoefficients7,	/**< AttenuationCoefficients for light 7. */
+	kCC3SemanticLightAttenuation0,				/**< Distance attenuation coefficients for light 0. */
+	kCC3SemanticLightAttenuation1,				/**< Distance attenuation coefficients for light 1. */
+	kCC3SemanticLightAttenuation2,				/**< Distance attenuation coefficients for light 2. */
+	kCC3SemanticLightAttenuation3,				/**< Distance attenuation coefficients for light 3. */
+	kCC3SemanticLightAttenuation4,				/**< Distance attenuation coefficients for light 4. */
+	kCC3SemanticLightAttenuation5,				/**< Distance attenuation coefficients for light 5. */
+	kCC3SemanticLightAttenuation6,				/**< Distance attenuation coefficients for light 6. */
+	kCC3SemanticLightAttenuation7,				/**< Distance attenuation coefficients for light 7. */
 
 	kCC3SemanticLightSpotDirection0,			/**< Direction of spotlight 0. */
 	kCC3SemanticLightSpotDirection1,			/**< Direction of spotlight 1. */
@@ -196,11 +207,13 @@ typedef enum {
 	kCC3SemanticTexture6,						/**< Texture unit 6. */
 	kCC3SemanticTexture7,						/**< Texture unit 7. */
 
-	kCC3SemanticHasVertexNormal,				/**< Whether a vertex normal array is available. */
-	kCC3SemanticShouldNormalizeVertexNormal,	/**< Whether vertex normals should be normalized. */
-	kCC3SemanticShouldRescaleVertexNormal,		/**< Whether vertex normals should be rescaled. */
-	kCC3SemanticHasVertexColor,					/**< Whether a vertex normal array is available. */
-	kCC3SemanticTexCoordCount,					/**< Number of texture coordinate attributes. */
+	// PARTICLES ------------
+	kCC3SemanticPointSize,						/**< Default size of points, if not specified per-vertex in a vertex attribute array. */
+	kCC3SemanticPointSizeAttenuation,			/**< Point size distance attenuation coefficients. */
+	kCC3SemanticPointSizeMinimum,				/**< Minimum size points will be allowed to shrink to. */
+	kCC3SemanticPointSizeMaximum,				/**< Maximum size points will be allowed to grow to. */
+	kCC3SemanticPointSizeFadeThreshold,			/**< Points will be allowed to grow to. */
+	kCC3SemanticPointSpritesIsEnabled,			/**< Whether points should be interpeted as textured sprites. */
 	
 	kCC3SemanticAppBase,						/**< First semantic of app-specific custom semantics. */
 	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */

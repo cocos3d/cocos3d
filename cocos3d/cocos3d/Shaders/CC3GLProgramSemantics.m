@@ -36,11 +36,13 @@
 #import "CC3MeshNode.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
+#import "CC3PointParticles.h"
 
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	switch (semantic) {
 		case kCC3SemanticNone: return @"kCC3SemanticNone";
 
+		// VERTEX CONTENT --------------
 		case kCC3SemanticVertexLocations: return @"kCC3SemanticVertexLocations";
 		case kCC3SemanticVertexNormals: return @"kCC3SemanticVertexNormals";
 		case kCC3SemanticVertexColors: return @"kCC3SemanticVertexColors";
@@ -60,8 +62,11 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticShouldNormalizeVertexNormal: return @"kCC3SemanticShouldNormalizeVertexNormal";
 		case kCC3SemanticShouldRescaleVertexNormal: return @"kCC3SemanticShouldRescaleVertexNormal";
 		case kCC3SemanticHasVertexColor: return @"kCC3SemanticHasVertexColor";
-		case kCC3SemanticTexCoordCount: return @"kCC3SemanticTexCoordCount";
+		case kCC3SemanticHasVertexTextureCoordinate: return @"kCC3SemanticHasVertexTextureCoordinate";
+		case kCC3SemanticHasVertexPointSize: return @"kCC3SemanticHasVertexPointSize";
+		case kCC3SemanticIsDrawingPoints: return @"kCC3SemanticIsDrawingPoints";
 
+		// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelMatrix: return @"kCC3SemanticModelMatrix";
 		case kCC3SemanticModelMatrixInv: return @"kCC3SemanticModelMatrixInv";
 		case kCC3SemanticModelMatrixInvTran: return @"kCC3SemanticModelMatrixInvTran";
@@ -78,6 +83,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticModelViewProjMatrixInv: return @"kCC3SemanticModelViewProjMatrixInv";
 		case kCC3SemanticModelViewProjMatrixInvTran: return @"kCC3SemanticModelViewProjMatrixInvTran";
 			
+		// CAMERA -----------------
+		case kCC3SemanticCameraPosition: return @"kCC3SemanticCameraPosition";
+			
+		// MATERIALS --------------
 		case kCC3SemanticColor: return @"kCC3SemanticColor";
 		case kCC3SemanticMaterialColorAmbient: return @"kCC3SemanticMaterialColorAmbient";
 		case kCC3SemanticMaterialColorDiffuse: return @"kCC3SemanticMaterialColorDiffuse";
@@ -85,7 +94,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticMaterialColorEmission: return @"kCC3SemanticMaterialColorEmission";
 		case kCC3SemanticMaterialOpacity: return @"kCC3SemanticMaterialOpacity";
 		case kCC3SemanticMaterialShininess: return @"kCC3SemanticMaterialShininess";
-			
+
+		// LIGHTING --------------
 		case kCC3SemanticIsUsingLighting: return @"kCC3SemanticIsUsingLighting";
 		case kCC3SemanticSceneLightColorAmbient: return @"kCC3SemanticSceneLightColorAmbient";
 
@@ -134,14 +144,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightColorSpecular6: return @"kCC3SemanticLightColorSpecular6";
 		case kCC3SemanticLightColorSpecular7: return @"kCC3SemanticLightColorSpecular7";
 
-		case kCC3SemanticLightAttenuationCoefficients0: return @"kCC3SemanticLightAttenuationCoefficients0";
-		case kCC3SemanticLightAttenuationCoefficients1: return @"kCC3SemanticLightAttenuationCoefficients1";
-		case kCC3SemanticLightAttenuationCoefficients2: return @"kCC3SemanticLightAttenuationCoefficients2";
-		case kCC3SemanticLightAttenuationCoefficients3: return @"kCC3SemanticLightAttenuationCoefficients3";
-		case kCC3SemanticLightAttenuationCoefficients4: return @"kCC3SemanticLightAttenuationCoefficients4";
-		case kCC3SemanticLightAttenuationCoefficients5: return @"kCC3SemanticLightAttenuationCoefficients5";
-		case kCC3SemanticLightAttenuationCoefficients6: return @"kCC3SemanticLightAttenuationCoefficients6";
-		case kCC3SemanticLightAttenuationCoefficients7: return @"kCC3SemanticLightAttenuationCoefficients7";
+		case kCC3SemanticLightAttenuation0: return @"kCC3SemanticLightAttenuation0";
+		case kCC3SemanticLightAttenuation1: return @"kCC3SemanticLightAttenuation1";
+		case kCC3SemanticLightAttenuation2: return @"kCC3SemanticLightAttenuation2";
+		case kCC3SemanticLightAttenuation3: return @"kCC3SemanticLightAttenuation3";
+		case kCC3SemanticLightAttenuation4: return @"kCC3SemanticLightAttenuation4";
+		case kCC3SemanticLightAttenuation5: return @"kCC3SemanticLightAttenuation5";
+		case kCC3SemanticLightAttenuation6: return @"kCC3SemanticLightAttenuation6";
+		case kCC3SemanticLightAttenuation7: return @"kCC3SemanticLightAttenuation7";
 
 		case kCC3SemanticLightSpotDirection0: return @"kCC3SemanticLightSpotDirection0";
 		case kCC3SemanticLightSpotDirection1: return @"kCC3SemanticLightSpotDirection1";
@@ -179,6 +189,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightSpotCutoffAngleCosine6: return @"kCC3SemanticLightSpotCutoffAngleCosine6";
 		case kCC3SemanticLightSpotCutoffAngleCosine7: return @"kCC3SemanticLightSpotCutoffAngleCosine7";
 			
+		// TEXTURES --------------
 		case kCC3SemanticTextureCount: return @"kCC3SemanticTextureCount";
 		case kCC3SemanticTexture0: return @"kCC3SemanticTexture0";
 		case kCC3SemanticTexture1: return @"kCC3SemanticTexture1";
@@ -188,6 +199,15 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticTexture5: return @"kCC3SemanticTexture5";
 		case kCC3SemanticTexture6: return @"kCC3SemanticTexture6";
 		case kCC3SemanticTexture7: return @"kCC3SemanticTexture7";
+
+		// PARTICLES ------------
+		case kCC3SemanticPointSize: return @"kCC3SemanticPointSize";
+		case kCC3SemanticPointSizeAttenuation: return @"kCC3SemanticPointSizeAttenuation";
+		case kCC3SemanticPointSizeMinimum: return @"kCC3SemanticPointSizeMinimum";
+		case kCC3SemanticPointSizeMaximum: return @"kCC3SemanticPointSizeMaximum";
+		case kCC3SemanticPointSizeFadeThreshold: return @"kCC3SemanticPointSizeFadeThreshold";
+		case kCC3SemanticPointSpritesIsEnabled: return @"kCC3SemanticPointSpritesIsEnabled";
+			
 			
 		case kCC3SemanticAppBase: return @"kCC3SemanticAppBase";
 		case kCC3SemanticMax: return @"kCC3SemanticMax";
@@ -227,9 +247,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	GLenum semantic = uniform.semantic;
 	switch (semantic) {
 		
-		// Attribute qualifiers
+		// ATTRIBUTE QUALIFIERS --------------
 		case kCC3SemanticHasVertexNormal:
-			[uniform setBoolean: visitor.currentMeshNode.mesh.hasVertexNormals];
+			[uniform setBoolean: visitor.currentMesh.hasVertexNormals];
 			return YES;
 		case kCC3SemanticShouldNormalizeVertexNormal:
 			[uniform setBoolean: CC3OpenGLESEngine.engine.capabilities.normalize.value];
@@ -238,13 +258,31 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: CC3OpenGLESEngine.engine.capabilities.rescaleNormal.value];
 			return YES;
 		case kCC3SemanticHasVertexColor:
-			[uniform setBoolean: visitor.currentMeshNode.mesh.hasVertexColors];
+			[uniform setBoolean: visitor.currentMesh.hasVertexColors];
 			return YES;
-		case kCC3SemanticTexCoordCount:
-			[uniform setInteger: visitor.textureUnitCount];
+		case kCC3SemanticHasVertexTextureCoordinate:
+			[uniform setBoolean: visitor.currentMesh.hasVertexTextureCoordinates];
+			return YES;
+		case kCC3SemanticHasVertexPointSize:
+			[uniform setBoolean: visitor.currentMesh.hasVertexPointSizes];
+			return YES;
+		case kCC3SemanticIsDrawingPoints:
+			[uniform setBoolean: visitor.currentMeshNode.drawingMode == GL_POINTS];
 			return YES;
 
-		// Environment matrices
+		// ENVIRONMENT MATRICES --------------
+		case kCC3SemanticModelMatrix: {
+			CC3Matrix4x4 mtx;
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &mtx];
+			[uniform setMatrices4x4: &mtx];
+			return YES;
+		}
+		case kCC3SemanticModelMatrixInv: {
+			CC3Matrix4x4 mtx;
+			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x4: &mtx];
+			[uniform setMatrices4x4: &mtx];
+			return YES;
+		}
 		case kCC3SemanticModelViewMatrix: {
 			[uniform setMatrices4x4: CC3OpenGLESEngine.engine.matrices.modelViewMatrix];
 			return YES;
@@ -258,7 +296,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		}
 			
-		// Material properties
+			// CAMERA -----------------
+		case kCC3SemanticCameraPosition:
+			[uniform setVector: visitor.camera.globalLocation];
+			return YES;
+			
+		// MATERIALS --------------
 		case kCC3SemanticColor: {
 			[uniform setColor4F: CC3OpenGLESEngine.engine.state.color.value];
 			return YES;
@@ -279,7 +322,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setFloat: CC3OpenGLESEngine.engine.materials.shininess.value];
 			return YES;
 			
-		// Lighting
+		// LIGHTING --------------
 		case kCC3SemanticIsUsingLighting:
 			[uniform setBoolean: CC3OpenGLESEngine.engine.capabilities.lighting.value];
 			return YES;
@@ -354,15 +397,15 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			if (glesLight.isEnabled) [uniform setColor4F: glesLight.specularColor.value ];
 			return YES;
 			
-		case kCC3SemanticLightAttenuationCoefficients0:
-		case kCC3SemanticLightAttenuationCoefficients1:
-		case kCC3SemanticLightAttenuationCoefficients2:
-		case kCC3SemanticLightAttenuationCoefficients3:
-		case kCC3SemanticLightAttenuationCoefficients4:
-		case kCC3SemanticLightAttenuationCoefficients5:
-		case kCC3SemanticLightAttenuationCoefficients6:
-		case kCC3SemanticLightAttenuationCoefficients7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightAttenuationCoefficients0)];
+		case kCC3SemanticLightAttenuation0:
+		case kCC3SemanticLightAttenuation1:
+		case kCC3SemanticLightAttenuation2:
+		case kCC3SemanticLightAttenuation3:
+		case kCC3SemanticLightAttenuation4:
+		case kCC3SemanticLightAttenuation5:
+		case kCC3SemanticLightAttenuation6:
+		case kCC3SemanticLightAttenuation7:
+			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightAttenuation0)];
 			if (glesLight.isEnabled) {
 				CC3AttenuationCoefficients ac;
 				ac.a = glesLight.constantAttenuation.value;
@@ -428,7 +471,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			if (glesLight.isEnabled) [uniform setFloat: cosf(DegreesToRadians(glesLight.spotCutoffAngle.value)) ];
 			return YES;
 			
-		// Textures
+		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
 			[uniform setInteger: visitor.textureUnitCount];
 			return YES;
@@ -444,6 +487,27 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setInteger: semantic - kCC3SemanticTexture0];
 			return YES;
 
+		// PARTICLES ------------
+		case kCC3SemanticPointSize:
+			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSize.value];
+			return YES;
+		case kCC3SemanticPointSizeAttenuation:
+			[uniform setVector: CC3OpenGLESEngine.engine.state.pointSizeAttenuation.value];
+			return YES;
+		case kCC3SemanticPointSizeMinimum:
+			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSizeMinimum.value];
+			return YES;
+		case kCC3SemanticPointSizeMaximum:
+			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSizeMaximum.value];
+			return YES;
+		case kCC3SemanticPointSizeFadeThreshold:
+			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSizeFadeThreshold.value];
+			return YES;
+		case kCC3SemanticPointSpritesIsEnabled:
+			[uniform setBoolean: CC3OpenGLESEngine.engine.capabilities.pointSprites.value];
+			return YES;
+
+			
 		default: return NO;
 	}
 }
@@ -487,7 +551,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 }
 
 -(void) populateWithDefaultSemanticMappings {
-	// Vertex attributes
+
+	// VETEX ATTRIBUTES --------------
 	[self mapVariableName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
 	[self mapVariableName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormals];
 	[self mapVariableName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColors];
@@ -504,14 +569,26 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"a_cc3TexCoord6" toSemantic: kCC3SemanticVertexTexture6];
 	[self mapVariableName: @"a_cc3TexCoord7" toSemantic: kCC3SemanticVertexTexture7];
 	
-	// Attribute qualifiers
+	// ATTRIBUTE QUALIFIERS --------------
 	[self mapVariableName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];
 	[self mapVariableName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];
 	[self mapVariableName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];
 	[self mapVariableName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];
-	[self mapVariableName: @"u_cc3TexCoordCount" toSemantic: kCC3SemanticTexCoordCount];
+	[self mapVariableName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];
+	[self mapVariableName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3Points.hasVertexPointSize
+	[self mapVariableName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];		// alias for u_cc3Points.isDrawingPoints
 	
-	// Environment matrices
+	// PARTICLES ------------
+	[self mapVariableName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];			// alias for u_cc3IsDrawingPoints
+	[self mapVariableName: @"u_cc3Points.hasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3HasVertexPointSize
+	[self mapVariableName: @"u_cc3Points.size" toSemantic: kCC3SemanticPointSize];
+	[self mapVariableName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];
+	[self mapVariableName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];
+	[self mapVariableName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];
+	[self mapVariableName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];
+	[self mapVariableName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];
+	
+	// ENVIRONMENT MATRICES --------------
 	[self mapVariableName: @"u_cc3MtxM" toSemantic: kCC3SemanticModelMatrix];
 	[self mapVariableName: @"u_cc3MtxMI" toSemantic: kCC3SemanticModelMatrixInv];
 	[self mapVariableName: @"u_cc3MtxMIT" toSemantic: kCC3SemanticModelMatrixInvTran];
@@ -528,7 +605,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3MtxMVPI" toSemantic: kCC3SemanticModelViewProjMatrixInv];
 	[self mapVariableName: @"u_cc3MtxMVPIT" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];
 	
-	// Material properties
+	// CAMERA -----------------
+	[self mapVariableName: @"u_cc3CameraPosition" toSemantic: kCC3SemanticCameraPosition];
+	
+	// MATERIALS --------------
 	[self mapVariableName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
 	[self mapVariableName: @"u_cc3MatColorAmbient" toSemantic: kCC3SemanticMaterialColorAmbient];
 	[self mapVariableName: @"u_cc3MatColorDiffuse" toSemantic: kCC3SemanticMaterialColorDiffuse];
@@ -536,7 +616,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3MatColorEmission" toSemantic: kCC3SemanticMaterialColorEmission];
 	[self mapVariableName: @"u_cc3MatShininess" toSemantic: kCC3SemanticMaterialShininess];
 	
-	// Texture samplers & properties
+	// TEXTURES --------------
 	[self mapVariableName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
 	[self mapVariableName: @"s_cc3Texture[0]" toSemantic: kCC3SemanticTexture0];
 	[self mapVariableName: @"s_cc3Texture[1]" toSemantic: kCC3SemanticTexture1];
@@ -547,7 +627,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"s_cc3Texture[6]" toSemantic: kCC3SemanticTexture6];
 	[self mapVariableName: @"s_cc3Texture[7]" toSemantic: kCC3SemanticTexture7];
 	
-	// Lighting
+	// LIGHTING --------------
 	[self mapVariableName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
 	[self mapVariableName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
 	
@@ -556,7 +636,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Light.colorAmbient" toSemantic: kCC3SemanticLightColorAmbient0];
 	[self mapVariableName: @"u_cc3Light.colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse0];
 	[self mapVariableName: @"u_cc3Light.colorSpecular" toSemantic: kCC3SemanticLightColorSpecular0];
-	[self mapVariableName: @"u_cc3Light.attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients0];
+	[self mapVariableName: @"u_cc3Light.attenuation" toSemantic: kCC3SemanticLightAttenuation0];
 	[self mapVariableName: @"u_cc3Light.spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
 	[self mapVariableName: @"u_cc3Light.spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
 	[self mapVariableName: @"u_cc3Light.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
@@ -567,7 +647,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[0].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient0];
 	[self mapVariableName: @"u_cc3Lights[0].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse0];
 	[self mapVariableName: @"u_cc3Lights[0].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular0];
-	[self mapVariableName: @"u_cc3Lights[0].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients0];
+	[self mapVariableName: @"u_cc3Lights[0].attenuation" toSemantic: kCC3SemanticLightAttenuation0];
 	[self mapVariableName: @"u_cc3Lights[0].spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
 	[self mapVariableName: @"u_cc3Lights[0].spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
 	[self mapVariableName: @"u_cc3Lights[0].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
@@ -578,7 +658,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[1].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient1];
 	[self mapVariableName: @"u_cc3Lights[1].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse1];
 	[self mapVariableName: @"u_cc3Lights[1].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular1];
-	[self mapVariableName: @"u_cc3Lights[1].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients1];
+	[self mapVariableName: @"u_cc3Lights[1].attenuation" toSemantic: kCC3SemanticLightAttenuation1];
 	[self mapVariableName: @"u_cc3Lights[1].spotDirection" toSemantic: kCC3SemanticLightSpotDirection1];
 	[self mapVariableName: @"u_cc3Lights[1].spotExponent" toSemantic: kCC3SemanticLightSpotExponent1];
 	[self mapVariableName: @"u_cc3Lights[1].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle1];
@@ -589,7 +669,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[2].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient2];
 	[self mapVariableName: @"u_cc3Lights[2].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse2];
 	[self mapVariableName: @"u_cc3Lights[2].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular2];
-	[self mapVariableName: @"u_cc3Lights[2].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients2];
+	[self mapVariableName: @"u_cc3Lights[2].attenuation" toSemantic: kCC3SemanticLightAttenuation2];
 	[self mapVariableName: @"u_cc3Lights[2].spotDirection" toSemantic: kCC3SemanticLightSpotDirection2];
 	[self mapVariableName: @"u_cc3Lights[2].spotExponent" toSemantic: kCC3SemanticLightSpotExponent2];
 	[self mapVariableName: @"u_cc3Lights[2].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle2];
@@ -600,7 +680,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[3].colorAmbient" toSemantic: kCC3SemanticLightColorAmbient3];
 	[self mapVariableName: @"u_cc3Lights[3].colorDiffuse" toSemantic: kCC3SemanticLightColorDiffuse3];
 	[self mapVariableName: @"u_cc3Lights[3].colorSpecular" toSemantic: kCC3SemanticLightColorSpecular3];
-	[self mapVariableName: @"u_cc3Lights[3].attenuationCoefficients" toSemantic: kCC3SemanticLightAttenuationCoefficients3];
+	[self mapVariableName: @"u_cc3Lights[3].attenuation" toSemantic: kCC3SemanticLightAttenuation3];
 	[self mapVariableName: @"u_cc3Lights[3].spotDirection" toSemantic: kCC3SemanticLightSpotDirection3];
 	[self mapVariableName: @"u_cc3Lights[3].spotExponent" toSemantic: kCC3SemanticLightSpotExponent3];
 	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle3];
@@ -610,8 +690,21 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 -(void) populateWithPureColorSemanticMappings {
 	[self mapVariableName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
+	[self mapVariableName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];
+
+	[self mapVariableName: @"u_cc3MtxMV" toSemantic: kCC3SemanticModelViewMatrix];
 	[self mapVariableName: @"u_cc3MtxMVP" toSemantic: kCC3SemanticModelViewProjMatrix];
 	[self mapVariableName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
+	
+	// PARTICLES ------------
+	[self mapVariableName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];			// alias for u_cc3IsDrawingPoints
+	[self mapVariableName: @"u_cc3Points.hasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3HasVertexPointSize
+	[self mapVariableName: @"u_cc3Points.size" toSemantic: kCC3SemanticPointSize];
+	[self mapVariableName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];
+	[self mapVariableName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];
+	[self mapVariableName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];
+	[self mapVariableName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];
+	[self mapVariableName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];
 }
 
 

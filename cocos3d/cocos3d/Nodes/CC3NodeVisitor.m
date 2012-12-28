@@ -462,6 +462,8 @@
 
 -(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
 
+-(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
+
 -(CC3Scene*) scene { return (CC3Scene*)startingNode; }
 
 -(CC3Light*) lightAt: (GLuint) index {

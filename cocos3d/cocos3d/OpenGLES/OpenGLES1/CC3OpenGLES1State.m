@@ -40,6 +40,10 @@
 
 -(void) setGLValue { glPointParameterf(name, value); }
 
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
 @end
 
 
@@ -49,6 +53,10 @@
 @implementation CC3OpenGLES1StateTrackerPointParameterVector
 
 -(void) setGLValue { glPointParameterfv(name, (GLfloat*)&value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 

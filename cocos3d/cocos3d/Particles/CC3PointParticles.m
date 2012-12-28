@@ -77,7 +77,7 @@
 
 @synthesize particleSize, particleSizeMinimum, particleSizeMaximum;
 @synthesize shouldSmoothPoints, shouldNormalizeParticleSizesToDevice;
-@synthesize particleSizeAttenuationCoefficients;
+@synthesize particleSizeAttenuation=_particleSizeAttenuation;
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3PointParticleProtocol); }
 
@@ -93,16 +93,22 @@
 // Deprecated
 -(CC3PointParticleMesh*) particleMesh { return self.mesh; }
 
+// Deprecated property
+-(CC3AttenuationCoefficients) particleSizeAttenuationCoefficients { return self.particleSizeAttenuation; }
+-(void) setParticleSizeAttenuationCoefficients: (CC3AttenuationCoefficients) attenuationCoefficients {
+	self.particleSizeAttenuation = attenuationCoefficients;
+}
+
 -(GLfloat) unityScaleDistance {
-	GLfloat sqDistAtten = particleSizeAttenuationCoefficients.c;
+	GLfloat sqDistAtten = _particleSizeAttenuation.c;
 	return (sqDistAtten > 0.0f) ? sqrt(1.0 / sqDistAtten) : 0.0f;
 }
 
 -(void) setUnityScaleDistance: (GLfloat) aDistance {
 	if (aDistance > 0.0) {
-		particleSizeAttenuationCoefficients = (CC3AttenuationCoefficients){0.0, 0.0, 1.0 / (aDistance * aDistance)};
+		_particleSizeAttenuation = (CC3AttenuationCoefficients){0.0, 0.0, 1.0 / (aDistance * aDistance)};
 	} else {
-		particleSizeAttenuationCoefficients = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
 	}
 }
 
@@ -154,7 +160,7 @@
 		self.particleSize = kCC3DefaultParticleSize;
 		particleSizeMinimum = kCC3ParticleSizeMinimumNone;
 		particleSizeMaximum = kCC3ParticleSizeMaximumNone;
-		particleSizeAttenuationCoefficients = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
 		shouldSmoothPoints = NO;
 		shouldNormalizeParticleSizesToDevice = YES;
 		shouldDisableDepthMask = YES;
@@ -220,7 +226,7 @@
 	particleSizeMaximum = another.particleSizeMaximum;
 	shouldSmoothPoints = another.shouldSmoothPoints;
 	shouldNormalizeParticleSizesToDevice = another.shouldNormalizeParticleSizesToDevice;
-	particleSizeAttenuationCoefficients = another.particleSizeAttenuationCoefficients;
+	_particleSizeAttenuation = another.particleSizeAttenuation;
 }
 
 
@@ -384,7 +390,7 @@
 	glesState.pointSizeMaximum.value = [self normalizeParticleSizeToDevice: particleSizeMaximum];
 	
 	// Cast attenuation coefficients to a vector when setting in state tracker
-	glesState.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
+	glesState.pointSizeAttenuation.value = *(CC3Vector*)&_particleSizeAttenuation;
 	glesEngine.capabilities.pointSmooth.value = shouldSmoothPoints;
 }
 

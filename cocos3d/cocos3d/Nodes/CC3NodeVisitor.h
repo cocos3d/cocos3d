@@ -33,13 +33,12 @@
 #import "CC3Matrix.h"
 #import "CC3PerformanceStatistics.h"
 
-@class CC3NodeSequencer, CC3Camera, CC3Light;
+@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene;
+@class CC3Material, CC3Mesh, CC3NodeSequencer;
 
 
 #pragma mark -
 #pragma mark CC3NodeVisitor
-
-@class CC3Node, CC3Scene, CC3MeshNode, CC3Material;
 
 /**
  * A CC3NodeVisitor is a context object that is passed to a node when it is visited
@@ -395,7 +394,7 @@
 @property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
 
 /**
- * Returns the material on the mesh node that is currently being visited.
+ * Returns the material of the mesh node that is currently being visited.
  *
  * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
  * invoker to make sure that the current node actually is a CC3MeshNode.
@@ -404,6 +403,17 @@
  * and will be nil both before and after the visit: method is invoked on the node.
  */
 @property(nonatomic, readonly) CC3Material* currentMaterial;
+
+/**
+ * Returns the mesh of the mesh node that is currently being visited.
+ *
+ * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
+ * invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3Mesh* currentMesh;
 
 /**
  * Returns the light indicated by the index, or nil if the specified index is greater than

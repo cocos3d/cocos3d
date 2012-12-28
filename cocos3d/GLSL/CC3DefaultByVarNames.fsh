@@ -37,23 +37,50 @@
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
  */
 
-#define MAX_TEXTURES				4
+#define MAX_TEXTURES			4
 
 precision mediump float;
 
+//-------------- STRUCTURES ----------------------
+
+/**
+ * The parameters to use when displaying vertices as points.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Point {
+	float	size;							/**< Default size of points, if not specified per-vertex. */
+	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
+	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
+	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
+	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
+	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
+	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
+	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
+};
+
+
 //-------------- UNIFORMS ----------------------
 
-uniform lowp int u_cc3TexCoordCount;			/**< Number of texture coordinate attributes. */
+uniform bool u_cc3HasVertexTexCoord;			/**< Whether vertex texture coordinate attribute is available. */
+uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
 uniform sampler2D s_cc3Texture[MAX_TEXTURES];	/**< Texture samplers. */
+uniform Point u_cc3Points;						/**< Point parameters. */
+
 
 //-------------- VARYING VARIABLES INPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];
 varying lowp vec4 v_color;
 
 void main() {
-	if (u_cc3TexCoordCount > 0)
+	if (u_cc3HasVertexTexCoord) {
 		gl_FragColor = texture2D(s_cc3Texture[0], v_texCoord[0]) * v_color;
-	else
+	} else if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites) {
+		gl_FragColor = texture2D(s_cc3Texture[0], gl_PointCoord) * v_color;
+	} else {
 		gl_FragColor = v_color;
+	}
 }
 

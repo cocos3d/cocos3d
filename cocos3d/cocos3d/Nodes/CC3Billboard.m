@@ -805,14 +805,20 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CC3ParticleSystemBillboard
 
-@synthesize particleSizeAttenuationCoefficients;
+@synthesize particleSizeAttenuation=_particleSizeAttenuation;
+
+// Deprecated property
+-(CC3AttenuationCoefficients) particleSizeAttenuationCoefficients { return self.particleSizeAttenuation; }
+-(void) setParticleSizeAttenuationCoefficients: (CC3AttenuationCoefficients) attenuationCoefficients {
+	self.particleSizeAttenuation = attenuationCoefficients;
+}
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		particleSizeAttenuationCoefficients = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
 		shouldDisableDepthMask = YES;
 	}
 	return self;
@@ -823,7 +829,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(void) populateFrom: (CC3ParticleSystemBillboard*) another {
 	[super populateFrom: another];
 	
-	particleSizeAttenuationCoefficients = another.particleSizeAttenuationCoefficients;
+	_particleSizeAttenuation = another.particleSizeAttenuation;
 }
 
 
@@ -855,8 +861,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 /** Overridden to add setting the point size attenuation parameters. */
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
 	[super configureDrawingParameters: visitor];
-
-	[CC3OpenGLESEngine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&particleSizeAttenuationCoefficients;
+	[CC3OpenGLESEngine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&_particleSizeAttenuation;
 }
 
 @end

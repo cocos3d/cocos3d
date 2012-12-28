@@ -306,13 +306,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 	
-//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
+	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
 									// point particles hanging in the scene.
 	
 //	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
 									// hanging in the scene.
 	
-//	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
+	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
 //	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
@@ -1367,7 +1367,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	spotLight.visible = NO;
 	spotLight.spotExponent = 30.0;
 	spotLight.spotCutoffAngle = 60.0;
-	spotLight.attenuationCoefficients = CC3AttenuationCoefficientsMake(0.0, 0.002, 0.000001);
+	spotLight.attenuation = CC3AttenuationCoefficientsMake(0.0, 0.002, 0.000001);
 	spotLight.isDirectionalOnly = NO;
 	[self.activeCamera addChild: spotLight];
 }
@@ -1937,7 +1937,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// If the 2D particle system uses point particles instead of quads, attenuate the
 	// particle sizes with distance realistically. This is not needed if the particle
 	// system will always use quads, but it doesn't hurt to set it.
-	bb.particleSizeAttenuationCoefficients = CC3AttenuationCoefficientsMake(0.05, 0.02, 0.0001);
+	bb.particleSizeAttenuation = CC3AttenuationCoefficientsMake(0.05, 0.02, 0.0001);
 	
 	// 2D particle systems do not have a real contentSize and boundingBox, so we need to
 	// calculate it dynamically on each update pass, or assign one that will cover the
@@ -2514,10 +2514,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			if (pointHose.isEmitting) {
 				[pointHose pause];
 				[meshHose play];
+				LogDebug(@"Starting mesh hose");
 			} else if (meshHose.isEmitting) {
 				[meshHose pause];
+				LogDebug(@"Stopping mesh hose");
 			} else {
 				[pointHose play];
+				LogDebug(@"Starting point hose");
 			}
 		}
 		

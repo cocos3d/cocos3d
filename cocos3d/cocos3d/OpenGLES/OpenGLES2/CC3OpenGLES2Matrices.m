@@ -143,10 +143,8 @@
 	GLuint stackDepth = stack.depth;
 	
 	if (stack == modelview) {
-		if (stackDepth <= kCC3ViewMatrixDepth) {
-			[stack getTop: &_viewMatrix];
-		}
 		[stack getTop: &_modelViewMatrix];
+		if (stackDepth <= kCC3ViewMatrixDepth) [stack getTop: &_viewMatrix];
 		_modelViewInverseTransposeMatrixIsDirty = YES;
 		_modelViewProjectionMatrixIsDirty = YES;
 	}

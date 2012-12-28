@@ -265,7 +265,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  *
  * You can control characteristics about the sizes of the particles, and how that size should
  * change with distance from the camera, using the particleSize, particleSizeMinimum,
- * particleSizeMaximum, particleSizeAttenuationCoefficients, and unityScaleDistance properties.
+ * particleSizeMaximum, particleSizeAttenuation, and unityScaleDistance properties.
  *
  * The implementation of this CC3PointParticleEmitter class requires that the mesh property
  * is set with an instance of CC3PointParticleMesh mesh, which is tailored for point particles.
@@ -275,7 +275,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  */
 @interface CC3PointParticleEmitter : CC3CommonVertexArrayParticleEmitter {
 	CC3Vector globalCameraLocation;
-	CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
+	CC3AttenuationCoefficients _particleSizeAttenuation;
 	GLfloat particleSize;
 	GLfloat particleSizeMinimum;
 	GLfloat particleSizeMaximum;
@@ -351,8 +351,8 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * Setting the value of this property to zero indicates that the size of the particles should stay
  * constant, at their natural size, regardless of how far the particle is from the camera.
  *
- * Setting this property replaces the need to set the value of the particleSizeAttenuationCoefficients
- * property, which offers a wider range of distance attenuation options, but is more complicated to use.
+ * Setting this property replaces the need to set the value of the particleSizeAttenuation property,
+ * which offers a wider range of distance attenuation options, but is more complicated to use.
  *
  * The initial value of this property is zero, indicating that distance attenuation is not applied,
  * and each particle will appear at its natural size regardless of how far it is from the camera.
@@ -371,7 +371,10 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * The initial value of this property is kCC3ParticleSizeAttenuationNone, indicating no attenuation
  * with distance.
  */
-@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients;
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
+
+/** @deprecated Property renamed to particleSizeAttenuation. */
+@property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuationCoefficients DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether the particle sizes should be adjusted so that particles appear

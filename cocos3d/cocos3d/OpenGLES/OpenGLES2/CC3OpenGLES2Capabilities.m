@@ -62,8 +62,9 @@
 	self.normalize = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 												 andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	
-	self.pointSmooth = nil;
-	self.pointSprites = nil;
+	self.pointSmooth = [CC3OpenGLESStateTrackerCapability trackerWithParent: self];
+	
+	self.pointSprites = [CC3OpenGLESStateTrackerCapability trackerWithParent: self];
 	
 	self.polygonOffsetFill = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 																		 forState: GL_POLYGON_OFFSET_FILL];

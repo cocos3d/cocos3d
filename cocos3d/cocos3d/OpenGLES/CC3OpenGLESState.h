@@ -34,40 +34,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerPointParameterFloat
-
-/**
- * CC3OpenGLESStateTrackerPointParameterFloat tracks a float GL point parameter state value.
- *
- * This implementation uses GL function glGetFloatv to read the value from the
- * GL engine, and GL function glPointParameterf to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerPointParameterFloat : CC3OpenGLESStateTrackerFloat {}
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerPointParameterVector
-
-/**
- * CC3OpenGLESStateTrackerPointParameterVector tracks a 3D vector GL point parameter state value.
- *
- * This implementation uses GL function glGetFloatv to read the value from the
- * GL engine, and GL function glPointParameterfv to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerPointParameterVector : CC3OpenGLESStateTrackerVector {}
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESStateTrackerStencilFunction
 
 /**
@@ -215,10 +181,10 @@
 	CC3OpenGLESStateTrackerEnumeration* frontFace;
 	CC3OpenGLESStateTrackerFloat* lineWidth;
 	CC3OpenGLESStateTrackerFloat* pointSize;
-	CC3OpenGLESStateTrackerPointParameterVector* pointSizeAttenuation;
-	CC3OpenGLESStateTrackerPointParameterFloat* pointSizeFadeThreshold;
-	CC3OpenGLESStateTrackerPointParameterFloat* pointSizeMaximum;
-	CC3OpenGLESStateTrackerPointParameterFloat* pointSizeMinimum;
+	CC3OpenGLESStateTrackerVector* pointSizeAttenuation;
+	CC3OpenGLESStateTrackerFloat* pointSizeFadeThreshold;
+	CC3OpenGLESStateTrackerFloat* pointSizeMaximum;
+	CC3OpenGLESStateTrackerFloat* pointSizeMinimum;
 	CC3OpenGLESStateTrackerPolygonOffset* polygonOffset;
 	CC3OpenGLESStateTrackerViewport* scissor;
 	CC3OpenGLESStateTrackerEnumeration* shadeModel;
@@ -261,16 +227,16 @@
 @property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* pointSize;
 
 /** Tracks point distance attenuation (GL get name GL_POINT_DISTANCE_ATTENUATION and set function glPointParameterfv). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerPointParameterVector* pointSizeAttenuation;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerVector* pointSizeAttenuation;
 
 /** Tracks point fading threshold (GL get name GL_POINT_FADE_THRESHOLD_SIZE and set function glPointParameterf). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerPointParameterFloat* pointSizeFadeThreshold;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* pointSizeFadeThreshold;
 
 /** Tracks maximum points size (GL get name GL_POINT_SIZE_MAX and set function glPointParameterf). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerPointParameterFloat* pointSizeMaximum;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* pointSizeMaximum;
 
 /** Tracks minimum points size (GL get name GL_POINT_SIZE_MIN and set function glPointParameterf). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerPointParameterFloat* pointSizeMinimum;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* pointSizeMinimum;
 
 /** Tracks polygon offset factor and units using set function glPolygonOffset). */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerPolygonOffset* polygonOffset;
