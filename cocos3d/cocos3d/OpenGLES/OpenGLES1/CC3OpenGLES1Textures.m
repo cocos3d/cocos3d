@@ -119,8 +119,8 @@
 
 @implementation CC3OpenGLES1StateTrackerTextureClientCapability
 
-// The parent cast as the appropriate type
--(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent; }
+// The grandparent cast as the appropriate type
+-(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent.parent; }
 
 -(void) getGLValue {
 	[self.textureUnit clientActivate];
@@ -149,6 +149,8 @@
 -(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent; }
 
 -(void) initializeTrackers {
+	self.capability = [CC3OpenGLES1StateTrackerTextureClientCapability trackerWithParent: self
+																				forState: GL_TEXTURE_COORD_ARRAY];
 	self.elementSize = [CC3OpenGLESStateTrackerInteger trackerWithParent: self
 																forState: GL_TEXTURE_COORD_ARRAY_SIZE];
 	self.elementType = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self
@@ -157,8 +159,6 @@
 																 forState: GL_TEXTURE_COORD_ARRAY_STRIDE];
 	self.vertices = [CC3OpenGLESStateTrackerPointer trackerWithParent: self];
 }
-
--(CC3OpenGLESStateTrackerCapability*) capabilityTracker { return self.textureUnit.textureCoordArray; }
 
 -(void) setGLValues {
 	[self.textureUnit clientActivate];
@@ -202,8 +202,6 @@
 -(void) initializeTrackers {
 	self.texture2D = [CC3OpenGLESStateTrackerTextureCapability trackerWithParent: self
 																		forState: GL_TEXTURE_2D];
-	self.textureCoordArray = [CC3OpenGLES1StateTrackerTextureClientCapability trackerWithParent: self
-																					   forState: GL_TEXTURE_COORD_ARRAY];
 	self.textureCoordinates = [CC3OpenGLES1StateTrackerVertexTexCoordsPointer trackerWithParent: self];
 	self.textureBinding = [CC3OpenGLESStateTrackerTextureBinding trackerWithParent: self
 																		  forState: GL_TEXTURE_BINDING_2D];

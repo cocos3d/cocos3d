@@ -39,10 +39,7 @@
 @implementation CC3OpenGLES2TextureUnit
 
 -(void) initializeTrackers {
-//	self.texture2D = [CC3OpenGLESStateTrackerTextureCapability trackerWithParent: self
-//																		forState: GL_TEXTURE_2D];
 	self.texture2D = nil;
-	self.textureCoordArray = nil;
 	self.textureCoordinates = nil;
 	
 	self.textureBinding = [CC3OpenGLESStateTrackerTextureBinding trackerWithParent: self

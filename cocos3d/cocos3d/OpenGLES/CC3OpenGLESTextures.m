@@ -175,7 +175,6 @@
 @implementation CC3OpenGLESTextureUnit
 
 @synthesize texture2D;
-@synthesize textureCoordArray;
 @synthesize textureCoordinates;
 @synthesize textureBinding;
 @synthesize minifyingFunction;
@@ -204,7 +203,6 @@
 
 -(void) dealloc {
 	[texture2D release];
-	[textureCoordArray release];
 	[textureCoordinates release];
 	[textureBinding release];
 	[minifyingFunction release];
@@ -261,7 +259,6 @@
 -(void) open {
 	[super open];
 	[texture2D open];
-	[textureCoordArray open];
 	[textureCoordinates open];
 	[textureBinding open];
 	[minifyingFunction open];
@@ -293,7 +290,6 @@
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
 	[desc appendFormat: @"%@ for %@:", [self class], NSStringFromGLEnum(self.glEnumValue)];
 	[desc appendFormat: @"\n    %@", texture2D];
-	[desc appendFormat: @"\n    %@", textureCoordArray];
 	[desc appendFormat: @"\n    %@", textureCoordinates];
 	[desc appendFormat: @"\n    %@", textureBinding];
 	[desc appendFormat: @"\n    %@", minifyingFunction];

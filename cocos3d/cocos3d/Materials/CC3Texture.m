@@ -275,7 +275,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESTextureUnit* glesTexUnit = [[CC3OpenGLESEngine engine].textures textureUnitAt: visitor.textureUnit];
+	CC3OpenGLESTextureUnit* glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: visitor.textureUnit];
 	[glesTexUnit.texture2D enable];
 	glesTexUnit.textureBinding.value = _texture.name;
 	[self bindTextureParametersTo: glesTexUnit withVisitor: visitor];

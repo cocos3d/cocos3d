@@ -523,15 +523,14 @@ static GLfloat deviceScaleFactor = 0.0f;
 		CC3OpenGLESTextures* glesTextures = glesEngine.textures;
 		CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: textureUnitIndex];
 		[glesTexUnit.texture2D enable];
+		[glesTexUnit.textureCoordinates enable];
 		[CC3TextureUnit bindDefaultTo: glesTexUnit];
-		[glesTexUnit.textureCoordArray enable];
 		
 		// Clear the texture unit binding so we start afresh on next 3D binding
 		glesTexUnit.textureBinding.value = 0;
 
 		// Disable all other texture units
 		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
-//		[CC3VertexTextureCoordinates unbindRemainingFrom: textureUnitIndex + 1];
 		
 		// Make sure the 2D texture unit is active
 		glesTextures.activeTexture.value = textureUnitIndex;

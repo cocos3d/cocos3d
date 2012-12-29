@@ -630,15 +630,15 @@
 -(void) bindTextureCoordinatesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	GLuint tu = 0;								// The current texture unit
 	CC3VertexTextureCoordinates* vtc = nil;		// The tex coord array to bind to it.
-
+	
 	// Don't do anything if we're not actually drawing textures to the GL engine.
 	if (visitor.shouldDecorateNode) {
-
+		
 		// For each texture unit that has a texture...
 		while(tu < visitor.textureUnitCount) {
-
+			
 			if (tu < self.textureCoordinatesArrayCount) vtc = [self textureCoordinatesForTextureUnit: tu];
-
+			
 			// Note that vtc at this point will be the most recently assigned array,
 			// and may be the array that was used on the last iteration of this loop
 			// if there are less texture coord arrays than there are textures.

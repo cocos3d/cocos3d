@@ -146,7 +146,6 @@
 @interface CC3OpenGLESTextureUnit : CC3OpenGLESStateTrackerManager {
 	GLuint textureUnitIndex;
 	CC3OpenGLESStateTrackerTextureCapability* texture2D;
-	CC3OpenGLESStateTrackerCapability* textureCoordArray;
 	CC3OpenGLESStateTrackerVertexPointer* textureCoordinates;
 	CC3OpenGLESStateTrackerTextureBinding* textureBinding;
 	CC3OpenGLESStateTrackerEnumeration* minifyingFunction;
@@ -181,9 +180,6 @@
 
 /** Tracks the texturing capability (GL capability name GL_TEXTURE_2D). */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerTextureCapability* texture2D;
-
-/** Tracks the texture coordinate array capability (GL capability name GL_TEXTURE_COORD_ARRAY). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerCapability* textureCoordArray;
 
 /** Tracks the vertex texture coordinates pointer. */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerVertexPointer* textureCoordinates;
