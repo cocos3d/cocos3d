@@ -79,7 +79,7 @@ directory and run the install-cocos3d script as follows:
 
 	For example:
 
-		./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-2.1"
+		./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-2.0"
 
 	The cocos2d source code must be available and identified using the -2 switch so that the
 	installer can link the cocos2d libraries to the cocos3d templates and demo projects.
@@ -99,7 +99,7 @@ cocos2d & OpenGL ES Version Compatibility
 -----------------------------------------
 
 cocos3d is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1,
-and is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline OpenGL ES 2.0,
+and is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline OpenGL ES 2.0.
 
 When linking to a cocos2d library version, keep in mind that if you want to use OpenGL ES 2.0,
 you must use a `cocos2d 2.x` version, and if you want to use OpenGL ES 1.1, you must use a
@@ -116,9 +116,9 @@ these steps within any Xcode project (including any of the included demo apps):
 3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
 
-At the time of this release, the current version of cocos2d is `2.1`, and by default, the demo
-apps within the cocos3d distribution are pre-configured to use that version. To build and run
-the demo apps with a different version of cocos2d, follow the steps described above.
+At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
+the demo apps within the cocos3d distribution are pre-configured to use that version. To build
+and run the demo apps with a different version of cocos2d, follow the steps described above.
 
 
 
@@ -143,7 +143,7 @@ Documentation
 -------------
 
 To learn more about cocos3d, please refer to the [cocos3d Programming Guide](http://brenwill.com/2011/cocos3d-programming-guide/)
-and the latest [API documentation] (http://brenwill.com/docs/cocos3d/0.7.2/api/).
+and the latest [API documentation] (http://brenwill.com/docs/cocos3d/2.0.0/api/).
 
 You can create a local copy of the API documentation using Doxygen to extract the documentation
 from the source files. There is a Doxygen configuration file to output the API documents in the
@@ -161,10 +161,10 @@ key features and capabilities of cocos3d.
 For convenience, to access all of the demos together, open the *cocos3d.xcworkspace*
 Xcode workspace. You can also open each demo project individually in the Demos folder.
 
-At the time of this release, the current version of cocos2d is `2.1`, and by default, the demo
-apps within the cocos3d distribution are pre-configured to use that version. To build and run
-the demo apps with a different version of cocos2d, follow the steps described above in the
-section about cocos2d version compatibility.
+At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
+the demo apps within the cocos3d distribution are pre-configured to use that version. To build
+and run the demo apps with a different version of cocos2d, follow the steps described above in
+the section about cocos2d version compatibility.
 
 The following demo apps are included in the cocos3d distribution:
 

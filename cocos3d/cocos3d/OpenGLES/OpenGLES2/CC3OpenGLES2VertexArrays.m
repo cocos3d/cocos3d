@@ -33,10 +33,9 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3GLProgram.h"
 #import "CC3VertexArrays.h"
+#import "CC3CC2Extensions.h"
 
 #if CC3_OGLES_2
-
-#import "ccGLStateCache.h"
 
 #pragma mark -
 #pragma mark CC3OpenGLESStateTrackerVertexAttributeInteger
@@ -179,7 +178,6 @@
 }
 
 -(void) setGLValues {
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glVertexAttribPointer(_attributeIndex, _elementSize.value, _elementType.value,
 						  _shouldNormalize.value, _vertexStride.value, _vertices.value);
 }
@@ -265,6 +263,7 @@
 }
 
 -(void) clearUnboundVertexPointers {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	for (CC3OpenGLES2StateTrackerVertexAttributesPointer* vap in _attributes) vap.wasBound = NO;
 }
 

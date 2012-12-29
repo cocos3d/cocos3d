@@ -306,7 +306,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 	
-	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
+//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
 									// point particles hanging in the scene.
 	
 //	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
@@ -315,7 +315,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
-//	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
+	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
 									// The hose is turned on and off when the robot arm is touched.
 	
 	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
@@ -2490,6 +2490,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self toggleActiveCamera];
 	} else if (aNode == [self getNodeNamed: kBitmapLabelName]) {
 		[self cycleLabelOf: (CC3BitmapLabelNode*)aNode];
+	} else if (aNode == [self getNodeNamed: @"Particles"]) {
+		[((CC3ParticleEmitter*)aNode) emitParticle];
 	} else {
 		
 		// If the node is either the textured or rainbow teapot, toggle the display of
@@ -2514,13 +2516,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			if (pointHose.isEmitting) {
 				[pointHose pause];
 				[meshHose play];
-				LogDebug(@"Starting mesh hose");
 			} else if (meshHose.isEmitting) {
 				[meshHose pause];
-				LogDebug(@"Stopping mesh hose");
 			} else {
 				[pointHose play];
-				LogDebug(@"Starting point hose");
 			}
 		}
 		

@@ -666,8 +666,9 @@
 			newCap = currCap + (partVtxCount * particleCapacityExpansionIncrement);
 			meshVtxIdxCount = vaMesh.vertexIndexCount;
 			vaMesh.allocatedVertexIndexCapacity = newCap;
-			vaMesh.vertexIndexCount = meshVtxIdxCount;		// Leave the vertex count unchanged
-			[vaMesh retainVertexIndices];					// Make sure the indices stick around to be modified
+			vaMesh.vertexIndexCount = meshVtxIdxCount;			// Leave the vertex count unchanged
+			vaMesh.vertexIndices.bufferUsage = GL_DYNAMIC_DRAW;	// Make sure to use dynamic draw
+			[vaMesh retainVertexIndices];						// Make sure the indices stick around to be modified
 			if (vaMesh.allocatedVertexIndexCapacity != newCap) return NO;	// Expansion failed
 			wasVertexCapacityChanged = YES;
 			LogTrace(@"%@ changed capacity to %i vertex indices", self, vaMesh.allocatedVertexIndexCapacity);
@@ -682,6 +683,7 @@
 		meshVtxIdxCount = vaMesh.vertexIndexCount;
 		vaMesh.allocatedVertexIndexCapacity = newCap;
 		vaMesh.vertexIndexCount = meshVtxIdxCount;		// Leave the vertex count unchanged
+		vaMesh.vertexIndices.bufferUsage = GL_DYNAMIC_DRAW;	// Make sure to use dynamic draw
 		[vaMesh retainVertexIndices];					// Make sure the indices stick around to be modified
 		if (vaMesh.allocatedVertexIndexCapacity != newCap) return NO;	// Expansion failed
 		wasVertexCapacityChanged = YES;
@@ -791,16 +793,13 @@
 			[vaMesh updateGLBuffersStartingAt: dirtyVertexRange.location
 									forLength: dirtyVertexRange.length];
 			
-			if (vaMesh.hasVertexIndices && self.vertexIndicesAreDirty) {
+			if (vaMesh.hasVertexIndices && self.vertexIndicesAreDirty)
 				[vaMesh.vertexIndices updateGLBufferStartingAt: dirtyVertexIndexRange.location
 													 forLength: dirtyVertexIndexRange.length];
-				LogTrace(@"%@ updated GL buffers for vertex content range (%i, %i) of %i vertices and index range (%i, %i) of %i indices in %i particles",
-						 self, dirtyVertexRange.location, dirtyVertexRange.length, self.vertexCount,
-						 dirtyVertexIndexRange.location, dirtyVertexIndexRange.length, self.vertexIndexCount, particleCount);
-			} else {
-				LogTrace(@"%@ updated GL buffers for vertex content range (%i, %i) of %i vertices in %i particles",
-						 self, dirtyVertexRange.location, dirtyVertexRange.length, self.vertexCount, particleCount);
-			}
+
+			LogTrace(@"%@ updated vertex content GL buffer (ID %i) range (%i, %i) of %i vertices (out of %i allocated as %@) and index GL buffer (ID %i) range (%i, %i) of %i indices (out of %i allocated as %@) for %i particles",
+					 self, vaMesh.vertexLocations.bufferID, dirtyVertexRange.location, dirtyVertexRange.length, self.vertexCount, vaMesh.allocatedVertexCapacity, NSStringFromGLEnum(vaMesh.vertexLocations.bufferUsage),
+					 vaMesh.vertexIndices.bufferID, dirtyVertexIndexRange.location, dirtyVertexIndexRange.length, self.vertexIndexCount, vaMesh.allocatedVertexIndexCapacity, NSStringFromGLEnum(vaMesh.vertexIndices.bufferUsage), particleCount);
 		}
 	} else {
 		LogTrace(@"%@ not updating GL buffers because they are not in use for this mesh.", self);

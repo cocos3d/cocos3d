@@ -404,13 +404,13 @@
 	LogTrace(@"%@ closing the 3D scene", self);
 
 	// Close tracking of GL state, reverting to 2D values where required.
-	[[CC3OpenGLESEngine engine] close];
+	[CC3OpenGLESEngine.engine close];
 	
 	// Clear the depth buffer so that subsequent cocos2d rendering will occur
 	// on top of the 3D rendering. We can't simply turn depth testing off
 	// because cocos2d can use depth testing for 3D transition effects.
 	if (shouldClearDepthBufferBefore2D) {
-		[[CC3OpenGLESEngine engine].state clearDepthBuffer];
+		[CC3OpenGLESEngine.engine.state clearDepthBuffer];
 	}
 }
 

@@ -58,6 +58,7 @@
 -(void) unbind { self.value = 0; }
 
 -(void) loadBufferData: (GLvoid*) buffPtr  ofLength: (GLsizeiptr) buffLen forUse: (GLenum) buffUsage {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferData(name, buffLen, buffPtr, buffUsage);
 	LogGLErrorTrace(@"while loading buffer data of length %i from %p for use %@ for %@",
 					buffLen, buffPtr, NSStringFromGLEnum(buffUsage), self);
@@ -66,6 +67,7 @@
 -(void) updateBufferData: (GLvoid*) buffPtr
 			  startingAt: (GLintptr) offset
 			   forLength: (GLsizeiptr) length {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferSubData(name, offset, length, buffPtr);
 	LogGLErrorTrace(@"while updating buffer data of length %i at offset %i from %p for",
 					length, offset, buffPtr, self);
@@ -222,12 +224,12 @@
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
 	[desc appendFormat: @"%@ (%@bound):", [self class], (_wasBound ? @"" : @"un")];
-	[desc appendFormat: @"\n    %@ ", _capability];
-	[desc appendFormat: @"\n    %@ ", _elementSize];
-	[desc appendFormat: @"\n    %@ ", _elementType];
-	[desc appendFormat: @"\n    %@ ", _vertexStride];
-	[desc appendFormat: @"\n    %@ ", _shouldNormalize];
-	[desc appendFormat: @"\n    %@ ", _vertices];
+	[desc appendFormat: @"\n        %@ ", _capability];
+	[desc appendFormat: @"\n        %@ ", _elementSize];
+	[desc appendFormat: @"\n        %@ ", _elementType];
+	[desc appendFormat: @"\n        %@ ", _vertexStride];
+	[desc appendFormat: @"\n        %@ ", _shouldNormalize];
+	[desc appendFormat: @"\n        %@ ", _vertices];
 	return desc;
 }
 

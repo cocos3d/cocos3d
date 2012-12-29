@@ -52,8 +52,10 @@
 #	define CC_INCREMENT_GL_DRAWS(__n__)
 #endif
 
-/** Add state caching alias for compatiblity with 2.1 and above */
-#if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
+/** Add state caching aliases for compatiblity with 2.1 and above */
+#if CC3_CC2_1
+#	define ccGLBindVAO(vao)
+#elif CC3_CC2_2 && COCOS2D_VERSION < 0x020100
 #	define ccGLBindVAO(vao) glBindVertexArray(vao)
 #endif
 
