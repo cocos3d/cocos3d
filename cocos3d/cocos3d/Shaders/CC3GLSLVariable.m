@@ -93,7 +93,7 @@
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @"\n\t\tSemantic: %@", self.semanticName];
+	[desc appendFormat: @"\n\t\tSemantic: %@ (%u)", self.semanticName, _semantic];
 	[desc appendFormat: @"\n\t\tType: %@", NSStringFromGLEnum(_type)];
 	[desc appendFormat: @"\n\t\tSize: %i", _size];
 	[desc appendFormat: @"\n\t\tLocation: %i", _location];

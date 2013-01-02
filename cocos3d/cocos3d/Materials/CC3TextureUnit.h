@@ -85,9 +85,8 @@ typedef enum {
  * property to GL_MODULATE replicates the default behaviour of the CC3Texture class.
  *
  * If you want to set this property to GL_COMBINE, to open up significant additional
- * configuration flexibility, use the CC3ConfigurableTextureUnit subclass, which
- * contains the full range of configuration properties associated with the GL_COMBINE
- * functionality.
+ * configuration flexibility, use the CC3ConfigurableTextureUnit subclass, which contains
+ * the full range of configuration properties associated with the GL_COMBINE functionality.
  *
  * The initial value of this property is GL_MODULATE.
  */
@@ -98,10 +97,9 @@ typedef enum {
  * when the value of one of the source properties of a subclass is set to
  * GL_CONSTANT. This is often the case for bump-mapping configurations.
  * 
- * Although this property can be set directly, it is rare to do so. Usually,
- * this property is set indirectly via the lightDirection property, which
- * converts the XYZ coordinates of a lighting direction vector into the RGB
- * components of this property.
+ * Although this property can be set directly, it is rare to do so. Usually, this property
+ * is set indirectly via the lightDirection property, which converts the XYZ coordinates of
+ * a lighting direction vector into the RGB components of this property.
  *
  * This property is not used by this parent class implementation, but is
  * provided for common access by subclasses.
@@ -467,9 +465,8 @@ typedef enum {
 /**
  * Returns whether this texture unit is configured as a bump-map.
  *
- * This implementation always returns YES if the textureEnvironmentMode property
- * is set to GL_COMBINE and the combineRGBFunction property is set to either
- * GL_DOT3_RGB or GL_DOT3_RGBA.
+ * This implementation always returns YES if the textureEnvironmentMode property is set to
+ * GL_COMBINE and the combineRGBFunction property is set to either GL_DOT3_RGB or GL_DOT3_RGBA.
  */
 @property(nonatomic, readonly) BOOL isBumpMap;
 
@@ -480,25 +477,21 @@ typedef enum {
 #pragma mark CC3BumpMapTextureUnit
 
 /**
- * A texture unit configured for DOT3 bump-mapping. It will combine the per-pixel
- * normal vectors found in the texture with the constantColor property to derive
- * per-pixel luminosity.
+ * A texture unit configured for DOT3 bump-mapping. It will combine the per-pixel normal
+ * vectors found in the texture with the constantColor property to derive per-pixel luminosity.
  *
- * Typically, the value of the constantColor property is not set directly, but is
- * established automatically by setting the lightDirection property to indicate the
- * direction of the light source, in tanget-space coordinates. See the notes of the
- * lightDirection property for more information about establishing the direction of
- * the light source.
+ * Typically, the value of the constantColor property is not set directly, but is established
+ * automatically by setting the lightDirection property to indicate the direction of the light
+ * source, in tanget-space coordinates. See the notes of the lightDirection property for more
+ * information about establishing the direction of the light source.
  * 
- * This implementation combines the texture RGB components (rdbSource0) with the
- * value of constantColor (as rgbSource1), using a DOT3 combining function.
- * If you need more flexibility in configuing the bump-mapping, consider using
- * an instance of CC3ConfigurableTextureUnit.
+ * This implementation combines the texture RGB components (rdbSource0) with the value of
+ * constantColor (as rgbSource1), using a DOT3 combining function. If you need more flexibility
+ * in configuing the bump-mapping, consider using an instance of CC3ConfigurableTextureUnit.
  *
- * When using bump-mapping, you should associate this texture unit with the first
- * texture of a material to establish per-pixel luminosity, and then add any
- * additional textures (ie- the visible texture) on the material so they will be
- * combined with the luminosity output.
+ * When using bump-mapping, you should associate this texture unit with the first texture of
+ * a material to establish per-pixel luminosity, and then add any additional textures (ie- the
+ * visible texture) on the material so they will be combined with the luminosity output.
  */
 @interface CC3BumpMapTextureUnit : CC3TextureUnit
 

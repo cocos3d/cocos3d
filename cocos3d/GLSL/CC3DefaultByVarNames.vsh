@@ -106,7 +106,6 @@ uniform bool u_cc3HasVertexNormal;				/**< Whether vertex normal attribute is av
 uniform bool u_cc3ShouldNormalizeNormal;		/**< Whether vertex normals should be normalized. */
 uniform bool u_cc3ShouldRescaleNormal;			/**< Whether vertex normals should be rescaled. */
 uniform bool u_cc3HasVertexColor;				/**< Whether vertex color attribute is available. */
-uniform bool u_cc3HasVertexTexCoord;			/**< Whether vertex texture coordinate attribute is available. */
 uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
 uniform Point u_cc3Points;						/**< Point parameters. */
 

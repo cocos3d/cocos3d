@@ -39,9 +39,59 @@
 
 #define MAX_TEXTURES			4
 
+// Texture constants to support OpenGL ES 1.1 conformant multi-texturing.
+#define GL_REPLACE                        0x1E01
+#define GL_MODULATE                       0x2100
+#define GL_DECAL                          0x2101
+#define GL_BLEND                          0x0BE2
+#define GL_ADD                            0x0104
+#define GL_COMBINE                        0x8570
+#define GL_ADD_SIGNED                     0x8574
+#define GL_INTERPOLATE                    0x8575
+#define GL_SUBTRACT                       0x84E7
+#define GL_DOT3_RGB                       0x86AE
+#define GL_DOT3_RGBA                      0x86AF
+#define GL_TEXTURE                        0x1702
+#define GL_CONSTANT                       0x8576
+#define GL_PREVIOUS                       0x8578
+
+
+
 precision mediump float;
 
 //-------------- STRUCTURES ----------------------
+
+/**
+ * The parameters of a single texture unit used to mimic OpenGL ES 1.1 functionality for
+ * combining textures using texture units. In most advanced shaders, these parameters will
+ * be ignored completely, in favor of customized texture combining shader code.
+ *
+ * The structure here is provided as a reference. When using this structure as the basis of
+ * a simpler implementation, remove any elements that your shader does not use, to reduce the
+ * number of uniforms that need to be retrieved and pased to your shader (uniform structure
+ * elements are passed individually in GLSL).
+ *
+ * This example shader does not use all of the elements of this structure. The compiler will
+ * optimize away any elements of this structure that are not used within the shader source code.
+ */
+struct TextureUnit {
+	vec4	color;								/**< Constant color of this texure unit (often used for normal mapping). */
+	int		mode;								/**< Texture environment mode for this texture unit. */
+	int		combineRGBFunction;					/**< RGB combiner function for this texture unit. */
+	int		rgbSource0;							/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
+	int		rgbSource1;							/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
+	int		rgbSource2;							/**< The source of the RGB components for arg2 of the combiner function in this texture unit. */
+	int		rgbOperand0;						/**< The operand on the RGB components for arg0 of the combiner function in this texture unit. */
+	int		rgbOperand1;						/**< The operand on the RGB components for arg1 of the combiner function in this texture unit. */
+	int		rgbOperand2;						/**< The operand on the RGB components for arg2 of the combiner function in this texture unit. */
+	int		combineAlphaFunction;				/**< Alpha combiner function for this texture unit. */
+	int		alphaSource0;						/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
+	int		alphaSource1;						/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
+	int		alphaSource2;						/**< The source of the alpha components for arg2 of the combiner function in this texture unit. */
+	int		alphaOperand0;						/**< The operand on the alpha components for arg0 of the combiner function in this texture unit. */
+	int		alphaOperand1;						/**< The operand on the alpha components for arg1 of the combiner function in this texture unit. */
+	int		alphaOperand2;						/**< The operand on the alpha components for arg2 of the combiner function in this texture unit. */
+};
 
 /**
  * The parameters to use when displaying vertices as points.
@@ -64,9 +114,12 @@ struct Point {
 
 //-------------- UNIFORMS ----------------------
 
-uniform bool u_cc3HasVertexTexCoord;			/**< Whether vertex texture coordinate attribute is available. */
-uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
-uniform sampler2D s_cc3Texture[MAX_TEXTURES];	/**< Texture samplers. */
+// Textures
+uniform lowp int u_cc3TextureCount;						/**< Number of textures. */
+uniform lowp sampler2D s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
+uniform TextureUnit u_cc3TextureUnits[MAX_TEXTURES];	/**< Texture unit parameters. */
+
+// Points
 uniform Point u_cc3Points;						/**< Point parameters. */
 
 
@@ -74,13 +127,127 @@ uniform Point u_cc3Points;						/**< Point parameters. */
 varying vec2 v_texCoord[MAX_TEXTURES];
 varying lowp vec4 v_color;
 
+//-------------- CONSTANTS ----------------------
+const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
+
+
+//-------------- FUNCTIONS ----------------------
+
+/**
+ * Provide texture combining functionality similar to OpenGL ES 1.1, to combine the texel
+ * from the specified texture unit with the existing fragment color.
+ *
+ * This function is called from applyTexture when the texture unit mode is set to GL_COMBINE.
+ *
+ * The implementation of this function is a simplification of some of the OpenGL ES 1.1
+ * configuration options. It only uses two source channels (and therefore does not support
+ * the triple-source GL_INTERPOLATE function), and assumes that all source operands reference
+ * the source component directly (ie- no (1 - src)).
+ */
+vec4 combineTexture(int tuIdx, vec4 texColor, vec4 fragColor) {
+	int func, src0, src1;
+	
+	// Extract the RGB components from the appropriate sources
+	func = u_cc3TextureUnits[tuIdx].combineRGBFunction;
+	src0 = u_cc3TextureUnits[tuIdx].rgbSource0;
+	src1 = u_cc3TextureUnits[tuIdx].rgbSource1;
+
+	vec3 rgb0 = texColor.rgb;		// GL_TEXTURE
+	if (src0 == GL_PREVIOUS) rgb0 = fragColor.rgb;
+	if (src0 == GL_CONSTANT) rgb0 = u_cc3TextureUnits[tuIdx].color.rgb;
+	
+	vec3 rgb1 = fragColor.rgb;		// GL_PREVIOUS
+	if (src1 == GL_TEXTURE) rgb1 = texColor.rgb;
+	if (src1 == GL_CONSTANT) rgb1 = u_cc3TextureUnits[tuIdx].color.rgb;
+
+	// Combine the RGB components
+	if (func == GL_MODULATE)
+		fragColor.rgb = rgb0 * rgb1;
+	else if (func == GL_DOT3_RGBA)
+		fragColor = vec4(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+	else if (func == GL_DOT3_RGB)
+		fragColor.rgb = vec3(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+	else if (func == GL_ADD)
+		fragColor.rgb = rgb0 + rgb1;
+	else if (func == GL_ADD_SIGNED)
+		fragColor.rgb = rgb0 + rgb1 - 0.5;
+	else if (func == GL_REPLACE)
+		fragColor.rgb = rgb0;
+	else if (func == GL_SUBTRACT)
+		fragColor.rgb = rgb0 - rgb1;
+	
+	// Extract the alpha components from the appropriate sources
+	func = u_cc3TextureUnits[tuIdx].combineAlphaFunction;
+	src0 = u_cc3TextureUnits[tuIdx].alphaSource0;
+	src1 = u_cc3TextureUnits[tuIdx].alphaSource1;
+
+	float a0 = texColor.a;			// GL_TEXTURE
+	if (src0 == GL_PREVIOUS) a0 = fragColor.a;
+	if (src0 == GL_CONSTANT) a0 = u_cc3TextureUnits[tuIdx].color.a;
+	
+	float a1 = fragColor.a;			// GL_PREVIOUS
+	if (src1 == GL_TEXTURE) a1 = texColor.a;
+	if (src1 == GL_CONSTANT) a1 = u_cc3TextureUnits[tuIdx].color.a;
+
+	// Combine the alpha components
+	if (func == GL_MODULATE)
+		fragColor.a = a0 * a1;
+	else if (func == GL_ADD)
+		fragColor.a = a0 + a1;
+	else if (func == GL_ADD_SIGNED)
+		fragColor.a = a0 + a1 - 0.5;
+	else if (func == GL_REPLACE)
+		fragColor.a = a0;
+	else if (func == GL_SUBTRACT)
+		fragColor.a = a0 - a1;
+		
+	return fragColor;
+}
+
+/**
+ * Applies the texture assigned to the specified texture unit index, combining it with
+ * the fragment color already applied as defined by the texture unit parameters.
+ */
+vec4 applyTexture(int tuIdx, vec4 fragColor) {
+	vec4 texColor = texture2D(s_cc3Textures[tuIdx], v_texCoord[tuIdx]);
+	int tuMode = u_cc3TextureUnits[tuIdx].mode;
+	
+	if (tuMode == GL_MODULATE) return fragColor * texColor;
+	if (tuMode == GL_REPLACE) return texColor;
+	if (tuMode == GL_COMBINE) return combineTexture(tuIdx, texColor, fragColor);
+	if (tuMode == GL_ADD) return vec4((fragColor.rgb + texColor.rgb), (fragColor.a * texColor.a));
+	if (tuMode == GL_DECAL) {
+		vec3 fragRGB = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
+		return vec4(fragRGB, fragColor.a);
+	}
+	if (tuMode == GL_BLEND) {
+		vec3 fragRGB =  (fragColor.rgb * (1.0 - texColor.rgb)) + (u_cc3TextureUnits[tuIdx].color.rgb * texColor.rgb);
+		return vec4(fragRGB, (fragColor.a * texColor.a));
+	}
+
+	return fragColor;
+}
+
+/**
+ * Applies any textures to the fragment, combining them as defined by the texture units,
+ * and returns the resulting fragment color. If there are no textures, returns the fragment
+ * color from the v_color varying input variable.
+ */
+vec4 applyTextures() {
+	vec4 fragColor = v_color;
+	for (int tuIdx = 0; tuIdx < MAX_TEXTURES; tuIdx++) {
+		if (tuIdx >= u_cc3TextureCount) return fragColor;	// Break out once we've applied all the textures
+		fragColor = applyTexture(tuIdx, fragColor);
+	}
+	return fragColor;
+}
+
+//-------------- ENTRY POINT ----------------------
 void main() {
-	if (u_cc3HasVertexTexCoord) {
-		gl_FragColor = texture2D(s_cc3Texture[0], v_texCoord[0]) * v_color;
-	} else if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites) {
-		gl_FragColor = texture2D(s_cc3Texture[0], gl_PointCoord) * v_color;
+	if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites) {
+		gl_FragColor = texture2D(s_cc3Textures[0], gl_PointCoord) * v_color;
 	} else {
-		gl_FragColor = v_color;
+		gl_FragColor = applyTextures();
 	}
 }
 

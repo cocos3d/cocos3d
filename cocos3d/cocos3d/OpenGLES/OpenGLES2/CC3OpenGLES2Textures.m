@@ -53,22 +53,23 @@
 	self.verticalWrappingFunction = [CC3OpenGLESStateTrackerTexParameterEnumeration trackerWithParent: self
 																							 forState: GL_TEXTURE_WRAP_T];
 	self.autoGenerateMipMap = nil;
-	self.textureEnvironmentMode = nil;
-	self.combineRGBFunction = nil;
-	self.rgbSource0 = nil;
-	self.rgbSource1 = nil;
-	self.rgbSource2 = nil;
-	self.rgbOperand0 = nil;
-	self.rgbOperand1 = nil;
-	self.rgbOperand2 = nil;
-	self.combineAlphaFunction = nil;
-	self.alphaSource0 = nil;
-	self.alphaSource1 = nil;
-	self.alphaSource2 = nil;
-	self.alphaOperand0 = nil;
-	self.alphaOperand1 = nil;
-	self.alphaOperand2 = nil;
-	self.color = nil;
+	
+	self.textureEnvironmentMode = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.combineRGBFunction = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbSource0 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbSource1 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbSource2 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbOperand0 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbOperand1 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.rgbOperand2 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.combineAlphaFunction = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaSource0 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaSource1 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaSource2 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaOperand0 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaOperand1 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.alphaOperand2 = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.color = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
 	self.pointSpriteCoordReplace = nil;
 	self.matrixStack = nil;
 }

@@ -302,7 +302,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_cc3MatColorDiffuse"];
 	progUniform.color4F = kCCC4FMagenta;
 	
-//	[self addBitmapLabel];			// Add a bitmapped string label
+	[self addBitmapLabel];			// Add a bitmapped string label
 	
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
 	
@@ -330,14 +330,14 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addMascots];				// Add the cocos3d mascot.
 									// This must happen after camera is loaded (in addRobot).
 	
-//	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
-	// and floating head. This must happen after main light is
-	// loaded from the POD file (in addRobot).
+	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
+									// and floating head. This must happen after main light is
+									// loaded from the POD file (in addRobot).
 	
-//	[self addWoodenSign];			// Add the multi-texture wooden sign.
-	// This must happen after camera is loaded (in addRobot).
+	[self addWoodenSign];			// Add the multi-texture wooden sign.
+									// This must happen after camera is loaded (in addRobot).
 	
-//	[self addFloatingHead];			// Add the bump-mapped floating head.
+	[self addFloatingHead];			// Add the bump-mapped floating head.
 									// This must happen after camera is loaded (in addRobot).
 	
 //	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
@@ -1117,10 +1117,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Add the stamp overlay texture
 	[woodenSign addTexture: stampTex];
 
-	// Adjust the mesh to use only a section of the texture.
-	// This feature can be used to extract a texture from a texture atlas,
-	// so that a single loaded texture can be used to cover multiple meshes,
-	// with each mesh covered by a different section fo the texture.
+	// Adjust the mesh to use only a section of the texture. This feature can be used to
+	// extract a texture from a texture atlas, so that a single loaded texture can be used
+	// to cover multiple meshes, with each mesh covered by a different section fo the texture.
 	woodenSign.textureRectangle = CGRectMake(0.4, 0.23, 0.35, 0.35);
 
 	woodenSign.diffuseColor = kCCC4FCyan;
@@ -1221,12 +1220,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[floatingHead.material addTexture: headBumpTex];
 	[floatingHead.material addTexture: headTex];
 	
-	// Put the head node in an orienting wrapper so that we can orient it to face
-	// the camera. First turn the floating head to face right so that it points
-	// towards the side of the wrapper that will be kept facing the camera, and
-	// move the head to the origin of the wrapper.
-	// Add the orienting node to the bump-map light tracker so that the bump-map
-	// in the floating head will interact with the light source.
+	// Put the head node in an orienting wrapper so that we can orient it to face the camera.
+	// First turn the floating head to face right so that it points towards the side of the
+	// wrapper that will be kept facing the camera, and move the head to the origin of the wrapper.
+	// Add the orienting node to the bump-map light tracker so that the bump-map in the floating
+	// head will interact with the light source.
 	floatingHead.rotation = cc3v(0, -90, 0);
 	floatingHead.location = kCC3VectorZero;
 	CC3Node* headHolder = [floatingHead asCameraTrackingWrapper];
@@ -2697,6 +2695,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 				stampTU.combineRGBFunction = GL_SUBTRACT;
 				break;
 			case GL_SUBTRACT:
+				// Switch to the embossed texture showing DOT3. Must reverse the order of the textures.
 				[woodenSign removeAllTextures];
 				[woodenSign addTexture: embossedStampTex];
 				[woodenSign addTexture: signTex];
@@ -2708,7 +2707,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		}
 	}
 	
-	// Get the label on top of the wooden sign, and update its contents to be
+	// Get the label below the wooden sign, and update its contents to be
 	// the name of the new multi-texture combining function, and re-measure the
 	// bounding box of the CC3Billboard from the new size of the label.
 	// Alternately, we could have set the shouldAlwaysMeasureBillboardBoundingRect

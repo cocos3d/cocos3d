@@ -33,6 +33,9 @@
 @class CC3GLSLVariable, CC3GLSLUniform, CC3NodeDrawingVisitor;
 
 
+/** Maximum number of texture units permitted. */
+#define kCC3MaxTextureUnits		8
+
 #pragma mark Semantic enumerations
 
 /**
@@ -196,17 +199,157 @@ typedef enum {
 	kCC3SemanticLightSpotCutoffAngleCosine6,	/**< Cosine of cutoff angle of spotlight 6. */
 	kCC3SemanticLightSpotCutoffAngleCosine7,	/**< Cosine of cutoff angle of spotlight 7. */
 
-	// TEXTURES --------------
-	kCC3SemanticTextureCount,					/**< Number of active texture units. */
-	kCC3SemanticTexture0,						/**< Texture unit 0. */
-	kCC3SemanticTexture1,						/**< Texture unit 1. */
-	kCC3SemanticTexture2,						/**< Texture unit 2. */
-	kCC3SemanticTexture3,						/**< Texture unit 3. */
-	kCC3SemanticTexture4,						/**< Texture unit 4. */
-	kCC3SemanticTexture5,						/**< Texture unit 5. */
-	kCC3SemanticTexture6,						/**< Texture unit 6. */
-	kCC3SemanticTexture7,						/**< Texture unit 7. */
+	// TEXTURES - Each category of texture enums are consecutive to allow conversion to an index
+	kCC3SemanticTextureCount,					/**< Number of active textures. */
+	kCC3SemanticTextureSamplers,				/**< Array of texture samplers of length kCC3SemanticTextureCount. */
+	
+	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
+	// In most shaders, these will be left unused in favor of customized the texture combining in code.
+	kCC3SemanticTexUnitMode0,					/**< Environment mode of texture unit 0. */
+	kCC3SemanticTexUnitMode1,					/**< Environment mode of texture unit 1. */
+	kCC3SemanticTexUnitMode2,					/**< Environment mode of texture unit 2. */
+	kCC3SemanticTexUnitMode3,					/**< Environment mode of texture unit 3. */
+	kCC3SemanticTexUnitMode4,					/**< Environment mode of texture unit 4. */
+	kCC3SemanticTexUnitMode5,					/**< Environment mode of texture unit 5. */
+	kCC3SemanticTexUnitMode6,					/**< Environment mode of texture unit 6. */
+	kCC3SemanticTexUnitMode7,					/**< Environment mode of texture unit 7. */
+	
+	kCC3SemanticTexUnitConstantColor0,			/**< The constant color of texture unit 0. */
+	kCC3SemanticTexUnitConstantColor1,			/**< The constant color of texture unit 1. */
+	kCC3SemanticTexUnitConstantColor2,			/**< The constant color of texture unit 2. */
+	kCC3SemanticTexUnitConstantColor3,			/**< The constant color of texture unit 3. */
+	kCC3SemanticTexUnitConstantColor4,			/**< The constant color of texture unit 4. */
+	kCC3SemanticTexUnitConstantColor5,			/**< The constant color of texture unit 5. */
+	kCC3SemanticTexUnitConstantColor6,			/**< The constant color of texture unit 6. */
+	kCC3SemanticTexUnitConstantColor7,			/**< The constant color of texture unit 7. */
+	
+	kCC3SemanticTexUnitCombineRGBFunction0,		/**< RBG combiner function of texture unit 0. */
+	kCC3SemanticTexUnitCombineRGBFunction1,		/**< RBG combiner function of texture unit 1. */
+	kCC3SemanticTexUnitCombineRGBFunction2,		/**< RBG combiner function of texture unit 2. */
+	kCC3SemanticTexUnitCombineRGBFunction3,		/**< RBG combiner function of texture unit 3. */
+	kCC3SemanticTexUnitCombineRGBFunction4,		/**< RBG combiner function of texture unit 4. */
+	kCC3SemanticTexUnitCombineRGBFunction5,		/**< RBG combiner function of texture unit 5. */
+	kCC3SemanticTexUnitCombineRGBFunction6,		/**< RBG combiner function of texture unit 6. */
+	kCC3SemanticTexUnitCombineRGBFunction7,		/**< RBG combiner function of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource0RGB0,				/**< The RGB of source 0 of texture unit 0. */
+	kCC3SemanticTexUnitSource0RGB1,				/**< The RGB of source 0 of texture unit 1. */
+	kCC3SemanticTexUnitSource0RGB2,				/**< The RGB of source 0 of texture unit 2. */
+	kCC3SemanticTexUnitSource0RGB3,				/**< The RGB of source 0 of texture unit 3. */
+	kCC3SemanticTexUnitSource0RGB4,				/**< The RGB of source 0 of texture unit 4. */
+	kCC3SemanticTexUnitSource0RGB5,				/**< The RGB of source 0 of texture unit 5. */
+	kCC3SemanticTexUnitSource0RGB6,				/**< The RGB of source 0 of texture unit 6. */
+	kCC3SemanticTexUnitSource0RGB7,				/**< The RGB of source 0 of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource1RGB0,				/**< The RGB source 1 of texture unit 0. */
+	kCC3SemanticTexUnitSource1RGB1,				/**< The RGB source 1 of texture unit 1. */
+	kCC3SemanticTexUnitSource1RGB2,				/**< The RGB source 1 of texture unit 2. */
+	kCC3SemanticTexUnitSource1RGB3,				/**< The RGB source 1 of texture unit 3. */
+	kCC3SemanticTexUnitSource1RGB4,				/**< The RGB source 1 of texture unit 4. */
+	kCC3SemanticTexUnitSource1RGB5,				/**< The RGB source 1 of texture unit 5. */
+	kCC3SemanticTexUnitSource1RGB6,				/**< The RGB source 1 of texture unit 6. */
+	kCC3SemanticTexUnitSource1RGB7,				/**< The RGB source 1 of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource2RGB0,				/**< The RGB source 2 of texture unit 0. */
+	kCC3SemanticTexUnitSource2RGB1,				/**< The RGB source 2 of texture unit 1. */
+	kCC3SemanticTexUnitSource2RGB2,				/**< The RGB source 2 of texture unit 2. */
+	kCC3SemanticTexUnitSource2RGB3,				/**< The RGB source 2 of texture unit 3. */
+	kCC3SemanticTexUnitSource2RGB4,				/**< The RGB source 2 of texture unit 4. */
+	kCC3SemanticTexUnitSource2RGB5,				/**< The RGB source 2 of texture unit 5. */
+	kCC3SemanticTexUnitSource2RGB6,				/**< The RGB source 2 of texture unit 6. */
+	kCC3SemanticTexUnitSource2RGB7,				/**< The RGB source 2 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand0RGB0,			/**< The RGB combining operand of source 0 of texture unit 0. */
+	kCC3SemanticTexUnitOperand0RGB1,			/**< The RGB combining operand of source 0 of texture unit 1. */
+	kCC3SemanticTexUnitOperand0RGB2,			/**< The RGB combining operand of source 0 of texture unit 2. */
+	kCC3SemanticTexUnitOperand0RGB3,			/**< The RGB combining operand of source 0 of texture unit 3. */
+	kCC3SemanticTexUnitOperand0RGB4,			/**< The RGB combining operand of source 0 of texture unit 4. */
+	kCC3SemanticTexUnitOperand0RGB5,			/**< The RGB combining operand of source 0 of texture unit 5. */
+	kCC3SemanticTexUnitOperand0RGB6,			/**< The RGB combining operand of source 0 of texture unit 6. */
+	kCC3SemanticTexUnitOperand0RGB7,			/**< The RGB combining operand of source 0 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand1RGB0,			/**< The RGB combining operand of source 1 of texture unit 0. */
+	kCC3SemanticTexUnitOperand1RGB1,			/**< The RGB combining operand of source 1 of texture unit 1. */
+	kCC3SemanticTexUnitOperand1RGB2,			/**< The RGB combining operand of source 1 of texture unit 2. */
+	kCC3SemanticTexUnitOperand1RGB3,			/**< The RGB combining operand of source 1 of texture unit 3. */
+	kCC3SemanticTexUnitOperand1RGB4,			/**< The RGB combining operand of source 1 of texture unit 4. */
+	kCC3SemanticTexUnitOperand1RGB5,			/**< The RGB combining operand of source 1 of texture unit 5. */
+	kCC3SemanticTexUnitOperand1RGB6,			/**< The RGB combining operand of source 1 of texture unit 6. */
+	kCC3SemanticTexUnitOperand1RGB7,			/**< The RGB combining operand of source 1 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand2RGB0,			/**< The RGB combining operand of source 2 of texture unit 0. */
+	kCC3SemanticTexUnitOperand2RGB1,			/**< The RGB combining operand of source 2 of texture unit 1. */
+	kCC3SemanticTexUnitOperand2RGB2,			/**< The RGB combining operand of source 2 of texture unit 2. */
+	kCC3SemanticTexUnitOperand2RGB3,			/**< The RGB combining operand of source 2 of texture unit 3. */
+	kCC3SemanticTexUnitOperand2RGB4,			/**< The RGB combining operand of source 2 of texture unit 4. */
+	kCC3SemanticTexUnitOperand2RGB5,			/**< The RGB combining operand of source 2 of texture unit 5. */
+	kCC3SemanticTexUnitOperand2RGB6,			/**< The RGB combining operand of source 2 of texture unit 6. */
+	kCC3SemanticTexUnitOperand2RGB7,			/**< The RGB combining operand of source 2 of texture unit 7. */
+	
+	kCC3SemanticTexUnitCombineAlphaFunction0,	/**< Alpha combiner function of texture unit 0. */
+	kCC3SemanticTexUnitCombineAlphaFunction1,	/**< Alpha combiner function of texture unit 1. */
+	kCC3SemanticTexUnitCombineAlphaFunction2,	/**< Alpha combiner function of texture unit 2. */
+	kCC3SemanticTexUnitCombineAlphaFunction3,	/**< Alpha combiner function of texture unit 3. */
+	kCC3SemanticTexUnitCombineAlphaFunction4,	/**< Alpha combiner function of texture unit 4. */
+	kCC3SemanticTexUnitCombineAlphaFunction5,	/**< Alpha combiner function of texture unit 5. */
+	kCC3SemanticTexUnitCombineAlphaFunction6,	/**< Alpha combiner function of texture unit 6. */
+	kCC3SemanticTexUnitCombineAlphaFunction7,	/**< Alpha combiner function of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource0Alpha0,			/**< The alpha of source 0 of texture unit 0. */
+	kCC3SemanticTexUnitSource0Alpha1,			/**< The alpha of source 0 of texture unit 1. */
+	kCC3SemanticTexUnitSource0Alpha2,			/**< The alpha of source 0 of texture unit 2. */
+	kCC3SemanticTexUnitSource0Alpha3,			/**< The alpha of source 0 of texture unit 3. */
+	kCC3SemanticTexUnitSource0Alpha4,			/**< The alpha of source 0 of texture unit 4. */
+	kCC3SemanticTexUnitSource0Alpha5,			/**< The alpha of source 0 of texture unit 5. */
+	kCC3SemanticTexUnitSource0Alpha6,			/**< The alpha of source 0 of texture unit 6. */
+	kCC3SemanticTexUnitSource0Alpha7,			/**< The alpha of source 0 of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource1Alpha0,			/**< The alpha of source 1 of texture unit 0. */
+	kCC3SemanticTexUnitSource1Alpha1,			/**< The alpha of source 1 of texture unit 1. */
+	kCC3SemanticTexUnitSource1Alpha2,			/**< The alpha of source 1 of texture unit 2. */
+	kCC3SemanticTexUnitSource1Alpha3,			/**< The alpha of source 1 of texture unit 3. */
+	kCC3SemanticTexUnitSource1Alpha4,			/**< The alpha of source 1 of texture unit 4. */
+	kCC3SemanticTexUnitSource1Alpha5,			/**< The alpha of source 1 of texture unit 5. */
+	kCC3SemanticTexUnitSource1Alpha6,			/**< The alpha of source 1 of texture unit 6. */
+	kCC3SemanticTexUnitSource1Alpha7,			/**< The alpha of source 1 of texture unit 7. */
+	
+	kCC3SemanticTexUnitSource2Alpha0,			/**< The alpha of source 2 of texture unit 0. */
+	kCC3SemanticTexUnitSource2Alpha1,			/**< The alpha of source 2 of texture unit 1. */
+	kCC3SemanticTexUnitSource2Alpha2,			/**< The alpha of source 2 of texture unit 2. */
+	kCC3SemanticTexUnitSource2Alpha3,			/**< The alpha of source 2 of texture unit 3. */
+	kCC3SemanticTexUnitSource2Alpha4,			/**< The alpha of source 2 of texture unit 4. */
+	kCC3SemanticTexUnitSource2Alpha5,			/**< The alpha of source 2 of texture unit 5. */
+	kCC3SemanticTexUnitSource2Alpha6,			/**< The alpha of source 2 of texture unit 6. */
+	kCC3SemanticTexUnitSource2Alpha7,			/**< The alpha of source 2 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand0Alpha0,			/**< The alpha combining operand of source 0 of texture unit 0. */
+	kCC3SemanticTexUnitOperand0Alpha1,			/**< The alpha combining operand of source 0 of texture unit 1. */
+	kCC3SemanticTexUnitOperand0Alpha2,			/**< The alpha combining operand of source 0 of texture unit 2. */
+	kCC3SemanticTexUnitOperand0Alpha3,			/**< The alpha combining operand of source 0 of texture unit 3. */
+	kCC3SemanticTexUnitOperand0Alpha4,			/**< The alpha combining operand of source 0 of texture unit 4. */
+	kCC3SemanticTexUnitOperand0Alpha5,			/**< The alpha combining operand of source 0 of texture unit 5. */
+	kCC3SemanticTexUnitOperand0Alpha6,			/**< The alpha combining operand of source 0 of texture unit 6. */
+	kCC3SemanticTexUnitOperand0Alpha7,			/**< The alpha combining operand of source 0 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand1Alpha0,			/**< The alpha combining operand of source 1 of texture unit 0. */
+	kCC3SemanticTexUnitOperand1Alpha1,			/**< The alpha combining operand of source 1 of texture unit 1. */
+	kCC3SemanticTexUnitOperand1Alpha2,			/**< The alpha combining operand of source 1 of texture unit 2. */
+	kCC3SemanticTexUnitOperand1Alpha3,			/**< The alpha combining operand of source 1 of texture unit 3. */
+	kCC3SemanticTexUnitOperand1Alpha4,			/**< The alpha combining operand of source 1 of texture unit 4. */
+	kCC3SemanticTexUnitOperand1Alpha5,			/**< The alpha combining operand of source 1 of texture unit 5. */
+	kCC3SemanticTexUnitOperand1Alpha6,			/**< The alpha combining operand of source 1 of texture unit 6. */
+	kCC3SemanticTexUnitOperand1Alpha7,			/**< The alpha combining operand of source 1 of texture unit 7. */
+	
+	kCC3SemanticTexUnitOperand2Alpha0,			/**< The alpha combining operand of source 2 of texture unit 0. */
+	kCC3SemanticTexUnitOperand2Alpha1,			/**< The alpha combining operand of source 2 of texture unit 1. */
+	kCC3SemanticTexUnitOperand2Alpha2,			/**< The alpha combining operand of source 2 of texture unit 2. */
+	kCC3SemanticTexUnitOperand2Alpha3,			/**< The alpha combining operand of source 2 of texture unit 3. */
+	kCC3SemanticTexUnitOperand2Alpha4,			/**< The alpha combining operand of source 2 of texture unit 4. */
+	kCC3SemanticTexUnitOperand2Alpha5,			/**< The alpha combining operand of source 2 of texture unit 5. */
+	kCC3SemanticTexUnitOperand2Alpha6,			/**< The alpha combining operand of source 2 of texture unit 6. */
+	kCC3SemanticTexUnitOperand2Alpha7,			/**< The alpha combining operand of source 2 of texture unit 7. */
 
+	
 	// PARTICLES ------------
 	kCC3SemanticPointSize,						/**< Default size of points, if not specified per-vertex in a vertex attribute array. */
 	kCC3SemanticPointSizeAttenuation,			/**< Point size distance attenuation coefficients. */

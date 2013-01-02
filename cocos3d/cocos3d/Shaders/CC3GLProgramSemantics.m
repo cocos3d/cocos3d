@@ -191,15 +191,153 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount: return @"kCC3SemanticTextureCount";
-		case kCC3SemanticTexture0: return @"kCC3SemanticTexture0";
-		case kCC3SemanticTexture1: return @"kCC3SemanticTexture1";
-		case kCC3SemanticTexture2: return @"kCC3SemanticTexture2";
-		case kCC3SemanticTexture3: return @"kCC3SemanticTexture3";
-		case kCC3SemanticTexture4: return @"kCC3SemanticTexture4";
-		case kCC3SemanticTexture5: return @"kCC3SemanticTexture5";
-		case kCC3SemanticTexture6: return @"kCC3SemanticTexture6";
-		case kCC3SemanticTexture7: return @"kCC3SemanticTexture7";
+		case kCC3SemanticTextureSamplers: return @"kCC3SemanticTextureSamplers";
 
+		case kCC3SemanticTexUnitMode0: return @"kCC3SemanticTexUnitMode0";
+		case kCC3SemanticTexUnitMode1: return @"kCC3SemanticTexUnitMode1";
+		case kCC3SemanticTexUnitMode2: return @"kCC3SemanticTexUnitMode2";
+		case kCC3SemanticTexUnitMode3: return @"kCC3SemanticTexUnitMode3";
+		case kCC3SemanticTexUnitMode4: return @"kCC3SemanticTexUnitMode4";
+		case kCC3SemanticTexUnitMode5: return @"kCC3SemanticTexUnitMode5";
+		case kCC3SemanticTexUnitMode6: return @"kCC3SemanticTexUnitMode6";
+		case kCC3SemanticTexUnitMode7: return @"kCC3SemanticTexUnitMode7";
+			
+		case kCC3SemanticTexUnitConstantColor0: return @"kCC3SemanticTexUnitConstantColor0";
+		case kCC3SemanticTexUnitConstantColor1: return @"kCC3SemanticTexUnitConstantColor1";
+		case kCC3SemanticTexUnitConstantColor2: return @"kCC3SemanticTexUnitConstantColor2";
+		case kCC3SemanticTexUnitConstantColor3: return @"kCC3SemanticTexUnitConstantColor3";
+		case kCC3SemanticTexUnitConstantColor4: return @"kCC3SemanticTexUnitConstantColor4";
+		case kCC3SemanticTexUnitConstantColor5: return @"kCC3SemanticTexUnitConstantColor5";
+		case kCC3SemanticTexUnitConstantColor6: return @"kCC3SemanticTexUnitConstantColor6";
+		case kCC3SemanticTexUnitConstantColor7: return @"kCC3SemanticTexUnitConstantColor7";
+			
+		case kCC3SemanticTexUnitCombineRGBFunction0: return @"kCC3SemanticTexUnitCombineRGBFunction0";
+		case kCC3SemanticTexUnitCombineRGBFunction1: return @"kCC3SemanticTexUnitCombineRGBFunction1";
+		case kCC3SemanticTexUnitCombineRGBFunction2: return @"kCC3SemanticTexUnitCombineRGBFunction2";
+		case kCC3SemanticTexUnitCombineRGBFunction3: return @"kCC3SemanticTexUnitCombineRGBFunction3";
+		case kCC3SemanticTexUnitCombineRGBFunction4: return @"kCC3SemanticTexUnitCombineRGBFunction4";
+		case kCC3SemanticTexUnitCombineRGBFunction5: return @"kCC3SemanticTexUnitCombineRGBFunction5";
+		case kCC3SemanticTexUnitCombineRGBFunction6: return @"kCC3SemanticTexUnitCombineRGBFunction6";
+		case kCC3SemanticTexUnitCombineRGBFunction7: return @"kCC3SemanticTexUnitCombineRGBFunction7";
+			
+		case kCC3SemanticTexUnitSource0RGB0: return @"kCC3SemanticTexUnitSource0RGB0";
+		case kCC3SemanticTexUnitSource0RGB1: return @"kCC3SemanticTexUnitSource0RGB1";
+		case kCC3SemanticTexUnitSource0RGB2: return @"kCC3SemanticTexUnitSource0RGB2";
+		case kCC3SemanticTexUnitSource0RGB3: return @"kCC3SemanticTexUnitSource0RGB3";
+		case kCC3SemanticTexUnitSource0RGB4: return @"kCC3SemanticTexUnitSource0RGB4";
+		case kCC3SemanticTexUnitSource0RGB5: return @"kCC3SemanticTexUnitSource0RGB5";
+		case kCC3SemanticTexUnitSource0RGB6: return @"kCC3SemanticTexUnitSource0RGB6";
+		case kCC3SemanticTexUnitSource0RGB7: return @"kCC3SemanticTexUnitSource0RGB7";
+			
+		case kCC3SemanticTexUnitSource1RGB0: return @"kCC3SemanticTexUnitSource1RGB0";
+		case kCC3SemanticTexUnitSource1RGB1: return @"kCC3SemanticTexUnitSource1RGB1";
+		case kCC3SemanticTexUnitSource1RGB2: return @"kCC3SemanticTexUnitSource1RGB2";
+		case kCC3SemanticTexUnitSource1RGB3: return @"kCC3SemanticTexUnitSource1RGB3";
+		case kCC3SemanticTexUnitSource1RGB4: return @"kCC3SemanticTexUnitSource1RGB4";
+		case kCC3SemanticTexUnitSource1RGB5: return @"kCC3SemanticTexUnitSource1RGB5";
+		case kCC3SemanticTexUnitSource1RGB6: return @"kCC3SemanticTexUnitSource1RGB6";
+		case kCC3SemanticTexUnitSource1RGB7: return @"kCC3SemanticTexUnitSource1RGB7";
+			
+		case kCC3SemanticTexUnitSource2RGB0: return @"kCC3SemanticTexUnitSource2RGB0";
+		case kCC3SemanticTexUnitSource2RGB1: return @"kCC3SemanticTexUnitSource2RGB1";
+		case kCC3SemanticTexUnitSource2RGB2: return @"kCC3SemanticTexUnitSource2RGB2";
+		case kCC3SemanticTexUnitSource2RGB3: return @"kCC3SemanticTexUnitSource2RGB3";
+		case kCC3SemanticTexUnitSource2RGB4: return @"kCC3SemanticTexUnitSource2RGB4";
+		case kCC3SemanticTexUnitSource2RGB5: return @"kCC3SemanticTexUnitSource2RGB5";
+		case kCC3SemanticTexUnitSource2RGB6: return @"kCC3SemanticTexUnitSource2RGB6";
+		case kCC3SemanticTexUnitSource2RGB7: return @"kCC3SemanticTexUnitSource2RGB7";
+			
+		case kCC3SemanticTexUnitOperand0RGB0: return @"kCC3SemanticTexUnitOperand0RGB0";
+		case kCC3SemanticTexUnitOperand0RGB1: return @"kCC3SemanticTexUnitOperand0RGB1";
+		case kCC3SemanticTexUnitOperand0RGB2: return @"kCC3SemanticTexUnitOperand0RGB2";
+		case kCC3SemanticTexUnitOperand0RGB3: return @"kCC3SemanticTexUnitOperand0RGB3";
+		case kCC3SemanticTexUnitOperand0RGB4: return @"kCC3SemanticTexUnitOperand0RGB4";
+		case kCC3SemanticTexUnitOperand0RGB5: return @"kCC3SemanticTexUnitOperand0RGB5";
+		case kCC3SemanticTexUnitOperand0RGB6: return @"kCC3SemanticTexUnitOperand0RGB6";
+		case kCC3SemanticTexUnitOperand0RGB7: return @"kCC3SemanticTexUnitOperand0RGB7";
+			
+		case kCC3SemanticTexUnitOperand1RGB0: return @"kCC3SemanticTexUnitOperand1RGB0";
+		case kCC3SemanticTexUnitOperand1RGB1: return @"kCC3SemanticTexUnitOperand1RGB1";
+		case kCC3SemanticTexUnitOperand1RGB2: return @"kCC3SemanticTexUnitOperand1RGB2";
+		case kCC3SemanticTexUnitOperand1RGB3: return @"kCC3SemanticTexUnitOperand1RGB3";
+		case kCC3SemanticTexUnitOperand1RGB4: return @"kCC3SemanticTexUnitOperand1RGB4";
+		case kCC3SemanticTexUnitOperand1RGB5: return @"kCC3SemanticTexUnitOperand1RGB5";
+		case kCC3SemanticTexUnitOperand1RGB6: return @"kCC3SemanticTexUnitOperand1RGB6";
+		case kCC3SemanticTexUnitOperand1RGB7: return @"kCC3SemanticTexUnitOperand1RGB7";
+			
+		case kCC3SemanticTexUnitOperand2RGB0: return @"kCC3SemanticTexUnitOperand2RGB0";
+		case kCC3SemanticTexUnitOperand2RGB1: return @"kCC3SemanticTexUnitOperand2RGB1";
+		case kCC3SemanticTexUnitOperand2RGB2: return @"kCC3SemanticTexUnitOperand2RGB2";
+		case kCC3SemanticTexUnitOperand2RGB3: return @"kCC3SemanticTexUnitOperand2RGB3";
+		case kCC3SemanticTexUnitOperand2RGB4: return @"kCC3SemanticTexUnitOperand2RGB4";
+		case kCC3SemanticTexUnitOperand2RGB5: return @"kCC3SemanticTexUnitOperand2RGB5";
+		case kCC3SemanticTexUnitOperand2RGB6: return @"kCC3SemanticTexUnitOperand2RGB6";
+		case kCC3SemanticTexUnitOperand2RGB7: return @"kCC3SemanticTexUnitOperand2RGB7";
+			
+		case kCC3SemanticTexUnitCombineAlphaFunction0: return @"kCC3SemanticTexUnitCombineAlphaFunction0";
+		case kCC3SemanticTexUnitCombineAlphaFunction1: return @"kCC3SemanticTexUnitCombineAlphaFunction1";
+		case kCC3SemanticTexUnitCombineAlphaFunction2: return @"kCC3SemanticTexUnitCombineAlphaFunction2";
+		case kCC3SemanticTexUnitCombineAlphaFunction3: return @"kCC3SemanticTexUnitCombineAlphaFunction3";
+		case kCC3SemanticTexUnitCombineAlphaFunction4: return @"kCC3SemanticTexUnitCombineAlphaFunction4";
+		case kCC3SemanticTexUnitCombineAlphaFunction5: return @"kCC3SemanticTexUnitCombineAlphaFunction5";
+		case kCC3SemanticTexUnitCombineAlphaFunction6: return @"kCC3SemanticTexUnitCombineAlphaFunction6";
+		case kCC3SemanticTexUnitCombineAlphaFunction7: return @"kCC3SemanticTexUnitCombineAlphaFunction7";
+			
+		case kCC3SemanticTexUnitSource0Alpha0: return @"kCC3SemanticTexUnitSource0Alpha0";
+		case kCC3SemanticTexUnitSource0Alpha1: return @"kCC3SemanticTexUnitSource0Alpha1";
+		case kCC3SemanticTexUnitSource0Alpha2: return @"kCC3SemanticTexUnitSource0Alpha2";
+		case kCC3SemanticTexUnitSource0Alpha3: return @"kCC3SemanticTexUnitSource0Alpha3";
+		case kCC3SemanticTexUnitSource0Alpha4: return @"kCC3SemanticTexUnitSource0Alpha4";
+		case kCC3SemanticTexUnitSource0Alpha5: return @"kCC3SemanticTexUnitSource0Alpha5";
+		case kCC3SemanticTexUnitSource0Alpha6: return @"kCC3SemanticTexUnitSource0Alpha6";
+		case kCC3SemanticTexUnitSource0Alpha7: return @"kCC3SemanticTexUnitSource0Alpha7";
+			
+		case kCC3SemanticTexUnitSource1Alpha0: return @"kCC3SemanticTexUnitSource1Alpha0";
+		case kCC3SemanticTexUnitSource1Alpha1: return @"kCC3SemanticTexUnitSource1Alpha1";
+		case kCC3SemanticTexUnitSource1Alpha2: return @"kCC3SemanticTexUnitSource1Alpha2";
+		case kCC3SemanticTexUnitSource1Alpha3: return @"kCC3SemanticTexUnitSource1Alpha3";
+		case kCC3SemanticTexUnitSource1Alpha4: return @"kCC3SemanticTexUnitSource1Alpha4";
+		case kCC3SemanticTexUnitSource1Alpha5: return @"kCC3SemanticTexUnitSource1Alpha5";
+		case kCC3SemanticTexUnitSource1Alpha6: return @"kCC3SemanticTexUnitSource1Alpha6";
+		case kCC3SemanticTexUnitSource1Alpha7: return @"kCC3SemanticTexUnitSource1Alpha7";
+			
+		case kCC3SemanticTexUnitSource2Alpha0: return @"kCC3SemanticTexUnitSource2Alpha0";
+		case kCC3SemanticTexUnitSource2Alpha1: return @"kCC3SemanticTexUnitSource2Alpha1";
+		case kCC3SemanticTexUnitSource2Alpha2: return @"kCC3SemanticTexUnitSource2Alpha2";
+		case kCC3SemanticTexUnitSource2Alpha3: return @"kCC3SemanticTexUnitSource2Alpha3";
+		case kCC3SemanticTexUnitSource2Alpha4: return @"kCC3SemanticTexUnitSource2Alpha4";
+		case kCC3SemanticTexUnitSource2Alpha5: return @"kCC3SemanticTexUnitSource2Alpha5";
+		case kCC3SemanticTexUnitSource2Alpha6: return @"kCC3SemanticTexUnitSource2Alpha6";
+		case kCC3SemanticTexUnitSource2Alpha7: return @"kCC3SemanticTexUnitSource2Alpha7";
+			
+		case kCC3SemanticTexUnitOperand0Alpha0: return @"kCC3SemanticTexUnitOperand0Alpha0";
+		case kCC3SemanticTexUnitOperand0Alpha1: return @"kCC3SemanticTexUnitOperand0Alpha1";
+		case kCC3SemanticTexUnitOperand0Alpha2: return @"kCC3SemanticTexUnitOperand0Alpha2";
+		case kCC3SemanticTexUnitOperand0Alpha3: return @"kCC3SemanticTexUnitOperand0Alpha3";
+		case kCC3SemanticTexUnitOperand0Alpha4: return @"kCC3SemanticTexUnitOperand0Alpha4";
+		case kCC3SemanticTexUnitOperand0Alpha5: return @"kCC3SemanticTexUnitOperand0Alpha5";
+		case kCC3SemanticTexUnitOperand0Alpha6: return @"kCC3SemanticTexUnitOperand0Alpha6";
+		case kCC3SemanticTexUnitOperand0Alpha7: return @"kCC3SemanticTexUnitOperand0Alpha7";
+			
+		case kCC3SemanticTexUnitOperand1Alpha0: return @"kCC3SemanticTexUnitOperand1Alpha0";
+		case kCC3SemanticTexUnitOperand1Alpha1: return @"kCC3SemanticTexUnitOperand1Alpha1";
+		case kCC3SemanticTexUnitOperand1Alpha2: return @"kCC3SemanticTexUnitOperand1Alpha2";
+		case kCC3SemanticTexUnitOperand1Alpha3: return @"kCC3SemanticTexUnitOperand1Alpha3";
+		case kCC3SemanticTexUnitOperand1Alpha4: return @"kCC3SemanticTexUnitOperand1Alpha4";
+		case kCC3SemanticTexUnitOperand1Alpha5: return @"kCC3SemanticTexUnitOperand1Alpha5";
+		case kCC3SemanticTexUnitOperand1Alpha6: return @"kCC3SemanticTexUnitOperand1Alpha6";
+		case kCC3SemanticTexUnitOperand1Alpha7: return @"kCC3SemanticTexUnitOperand1Alpha7";
+			
+		case kCC3SemanticTexUnitOperand2Alpha0: return @"kCC3SemanticTexUnitOperand2Alpha0";
+		case kCC3SemanticTexUnitOperand2Alpha1: return @"kCC3SemanticTexUnitOperand2Alpha1";
+		case kCC3SemanticTexUnitOperand2Alpha2: return @"kCC3SemanticTexUnitOperand2Alpha2";
+		case kCC3SemanticTexUnitOperand2Alpha3: return @"kCC3SemanticTexUnitOperand2Alpha3";
+		case kCC3SemanticTexUnitOperand2Alpha4: return @"kCC3SemanticTexUnitOperand2Alpha4";
+		case kCC3SemanticTexUnitOperand2Alpha5: return @"kCC3SemanticTexUnitOperand2Alpha5";
+		case kCC3SemanticTexUnitOperand2Alpha6: return @"kCC3SemanticTexUnitOperand2Alpha6";
+		case kCC3SemanticTexUnitOperand2Alpha7: return @"kCC3SemanticTexUnitOperand2Alpha7";
+
+			
 		// PARTICLES ------------
 		case kCC3SemanticPointSize: return @"kCC3SemanticPointSize";
 		case kCC3SemanticPointSizeAttenuation: return @"kCC3SemanticPointSizeAttenuation";
@@ -243,7 +381,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable { return NO; }
 
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Retrieving semantic value for %@", uniform.fullDescription);
 	CC3OpenGLESLight* glesLight;
+	CC3OpenGLESTextureUnit* glesTexUnit;
 	GLenum semantic = uniform.semantic;
 	switch (semantic) {
 		
@@ -476,17 +616,205 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setInteger: visitor.textureUnitCount];
 			return YES;
 
-		case kCC3SemanticTexture0:
-		case kCC3SemanticTexture1:
-		case kCC3SemanticTexture2:
-		case kCC3SemanticTexture3:
-		case kCC3SemanticTexture4:
-		case kCC3SemanticTexture5:
-		case kCC3SemanticTexture6:
-		case kCC3SemanticTexture7:
-			[uniform setInteger: semantic - kCC3SemanticTexture0];
+		case kCC3SemanticTextureSamplers:
+			// Samplers are simply consecutive texture unit indices
+			[uniform setIntegers: (int[]){0, 1, 2, 3, 4, 5, 6, 7}];
 			return YES;
 
+		// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
+		// In most shaders, these will be left unused in favor of customized the texture combining in code.
+		case kCC3SemanticTexUnitMode0:
+		case kCC3SemanticTexUnitMode1:
+		case kCC3SemanticTexUnitMode2:
+		case kCC3SemanticTexUnitMode3:
+		case kCC3SemanticTexUnitMode4:
+		case kCC3SemanticTexUnitMode5:
+		case kCC3SemanticTexUnitMode6:
+		case kCC3SemanticTexUnitMode7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitMode0)];
+			[uniform setInteger: glesTexUnit.textureEnvironmentMode.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitConstantColor0:
+		case kCC3SemanticTexUnitConstantColor1:
+		case kCC3SemanticTexUnitConstantColor2:
+		case kCC3SemanticTexUnitConstantColor3:
+		case kCC3SemanticTexUnitConstantColor4:
+		case kCC3SemanticTexUnitConstantColor5:
+		case kCC3SemanticTexUnitConstantColor6:
+		case kCC3SemanticTexUnitConstantColor7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitConstantColor0)];
+			[uniform setColor4F: glesTexUnit.color.value];
+			return YES;
+
+		case kCC3SemanticTexUnitCombineRGBFunction0:
+		case kCC3SemanticTexUnitCombineRGBFunction1:
+		case kCC3SemanticTexUnitCombineRGBFunction2:
+		case kCC3SemanticTexUnitCombineRGBFunction3:
+		case kCC3SemanticTexUnitCombineRGBFunction4:
+		case kCC3SemanticTexUnitCombineRGBFunction5:
+		case kCC3SemanticTexUnitCombineRGBFunction6:
+		case kCC3SemanticTexUnitCombineRGBFunction7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitCombineRGBFunction0)];
+			[uniform setInteger: glesTexUnit.combineRGBFunction.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource0RGB0:
+		case kCC3SemanticTexUnitSource0RGB1:
+		case kCC3SemanticTexUnitSource0RGB2:
+		case kCC3SemanticTexUnitSource0RGB3:
+		case kCC3SemanticTexUnitSource0RGB4:
+		case kCC3SemanticTexUnitSource0RGB5:
+		case kCC3SemanticTexUnitSource0RGB6:
+		case kCC3SemanticTexUnitSource0RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource0RGB0)];
+			[uniform setInteger: glesTexUnit.rgbSource0.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource1RGB0:
+		case kCC3SemanticTexUnitSource1RGB1:
+		case kCC3SemanticTexUnitSource1RGB2:
+		case kCC3SemanticTexUnitSource1RGB3:
+		case kCC3SemanticTexUnitSource1RGB4:
+		case kCC3SemanticTexUnitSource1RGB5:
+		case kCC3SemanticTexUnitSource1RGB6:
+		case kCC3SemanticTexUnitSource1RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource1RGB0)];
+			[uniform setInteger: glesTexUnit.rgbSource1.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource2RGB0:
+		case kCC3SemanticTexUnitSource2RGB1:
+		case kCC3SemanticTexUnitSource2RGB2:
+		case kCC3SemanticTexUnitSource2RGB3:
+		case kCC3SemanticTexUnitSource2RGB4:
+		case kCC3SemanticTexUnitSource2RGB5:
+		case kCC3SemanticTexUnitSource2RGB6:
+		case kCC3SemanticTexUnitSource2RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource2RGB0)];
+			[uniform setInteger: glesTexUnit.rgbSource2.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand0RGB0:
+		case kCC3SemanticTexUnitOperand0RGB1:
+		case kCC3SemanticTexUnitOperand0RGB2:
+		case kCC3SemanticTexUnitOperand0RGB3:
+		case kCC3SemanticTexUnitOperand0RGB4:
+		case kCC3SemanticTexUnitOperand0RGB5:
+		case kCC3SemanticTexUnitOperand0RGB6:
+		case kCC3SemanticTexUnitOperand0RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand0RGB0)];
+			[uniform setInteger: glesTexUnit.rgbOperand0.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand1RGB0:
+		case kCC3SemanticTexUnitOperand1RGB1:
+		case kCC3SemanticTexUnitOperand1RGB2:
+		case kCC3SemanticTexUnitOperand1RGB3:
+		case kCC3SemanticTexUnitOperand1RGB4:
+		case kCC3SemanticTexUnitOperand1RGB5:
+		case kCC3SemanticTexUnitOperand1RGB6:
+		case kCC3SemanticTexUnitOperand1RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand1RGB0)];
+			[uniform setInteger: glesTexUnit.rgbOperand1.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand2RGB0:
+		case kCC3SemanticTexUnitOperand2RGB1:
+		case kCC3SemanticTexUnitOperand2RGB2:
+		case kCC3SemanticTexUnitOperand2RGB3:
+		case kCC3SemanticTexUnitOperand2RGB4:
+		case kCC3SemanticTexUnitOperand2RGB5:
+		case kCC3SemanticTexUnitOperand2RGB6:
+		case kCC3SemanticTexUnitOperand2RGB7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand2RGB0)];
+			[uniform setInteger: glesTexUnit.rgbOperand2.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitCombineAlphaFunction0:
+		case kCC3SemanticTexUnitCombineAlphaFunction1:
+		case kCC3SemanticTexUnitCombineAlphaFunction2:
+		case kCC3SemanticTexUnitCombineAlphaFunction3:
+		case kCC3SemanticTexUnitCombineAlphaFunction4:
+		case kCC3SemanticTexUnitCombineAlphaFunction5:
+		case kCC3SemanticTexUnitCombineAlphaFunction6:
+		case kCC3SemanticTexUnitCombineAlphaFunction7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitCombineAlphaFunction0)];
+			[uniform setInteger: glesTexUnit.combineAlphaFunction.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource0Alpha0:
+		case kCC3SemanticTexUnitSource0Alpha1:
+		case kCC3SemanticTexUnitSource0Alpha2:
+		case kCC3SemanticTexUnitSource0Alpha3:
+		case kCC3SemanticTexUnitSource0Alpha4:
+		case kCC3SemanticTexUnitSource0Alpha5:
+		case kCC3SemanticTexUnitSource0Alpha6:
+		case kCC3SemanticTexUnitSource0Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource0Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaSource0.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource1Alpha0:
+		case kCC3SemanticTexUnitSource1Alpha1:
+		case kCC3SemanticTexUnitSource1Alpha2:
+		case kCC3SemanticTexUnitSource1Alpha3:
+		case kCC3SemanticTexUnitSource1Alpha4:
+		case kCC3SemanticTexUnitSource1Alpha5:
+		case kCC3SemanticTexUnitSource1Alpha6:
+		case kCC3SemanticTexUnitSource1Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource1Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaSource1.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitSource2Alpha0:
+		case kCC3SemanticTexUnitSource2Alpha1:
+		case kCC3SemanticTexUnitSource2Alpha2:
+		case kCC3SemanticTexUnitSource2Alpha3:
+		case kCC3SemanticTexUnitSource2Alpha4:
+		case kCC3SemanticTexUnitSource2Alpha5:
+		case kCC3SemanticTexUnitSource2Alpha6:
+		case kCC3SemanticTexUnitSource2Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource2Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaSource2.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand0Alpha0:
+		case kCC3SemanticTexUnitOperand0Alpha1:
+		case kCC3SemanticTexUnitOperand0Alpha2:
+		case kCC3SemanticTexUnitOperand0Alpha3:
+		case kCC3SemanticTexUnitOperand0Alpha4:
+		case kCC3SemanticTexUnitOperand0Alpha5:
+		case kCC3SemanticTexUnitOperand0Alpha6:
+		case kCC3SemanticTexUnitOperand0Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand0Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaOperand0.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand1Alpha0:
+		case kCC3SemanticTexUnitOperand1Alpha1:
+		case kCC3SemanticTexUnitOperand1Alpha2:
+		case kCC3SemanticTexUnitOperand1Alpha3:
+		case kCC3SemanticTexUnitOperand1Alpha4:
+		case kCC3SemanticTexUnitOperand1Alpha5:
+		case kCC3SemanticTexUnitOperand1Alpha6:
+		case kCC3SemanticTexUnitOperand1Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand1Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaOperand1.value];
+			return YES;
+			
+		case kCC3SemanticTexUnitOperand2Alpha0:
+		case kCC3SemanticTexUnitOperand2Alpha1:
+		case kCC3SemanticTexUnitOperand2Alpha2:
+		case kCC3SemanticTexUnitOperand2Alpha3:
+		case kCC3SemanticTexUnitOperand2Alpha4:
+		case kCC3SemanticTexUnitOperand2Alpha5:
+		case kCC3SemanticTexUnitOperand2Alpha6:
+		case kCC3SemanticTexUnitOperand2Alpha7:
+			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand2Alpha0)];
+			[uniform setInteger: glesTexUnit.alphaOperand2.value];
+			return YES;
+			
 		// PARTICLES ------------
 		case kCC3SemanticPointSize:
 			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSize.value];
@@ -503,10 +831,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticPointSizeFadeThreshold:
 			[uniform setFloat: CC3OpenGLESEngine.engine.state.pointSizeFadeThreshold.value];
 			return YES;
-		case kCC3SemanticPointSpritesIsEnabled:
+		case kCC3SemanticPointSpritesIsEnabled: {
 			[uniform setBoolean: CC3OpenGLESEngine.engine.capabilities.pointSprites.value];
 			return YES;
-
+		}
 			
 		default: return NO;
 	}
@@ -616,17 +944,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3MatColorEmission" toSemantic: kCC3SemanticMaterialColorEmission];
 	[self mapVariableName: @"u_cc3MatShininess" toSemantic: kCC3SemanticMaterialShininess];
 	
-	// TEXTURES --------------
-	[self mapVariableName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
-	[self mapVariableName: @"s_cc3Texture[0]" toSemantic: kCC3SemanticTexture0];
-	[self mapVariableName: @"s_cc3Texture[1]" toSemantic: kCC3SemanticTexture1];
-	[self mapVariableName: @"s_cc3Texture[2]" toSemantic: kCC3SemanticTexture2];
-	[self mapVariableName: @"s_cc3Texture[3]" toSemantic: kCC3SemanticTexture3];
-	[self mapVariableName: @"s_cc3Texture[4]" toSemantic: kCC3SemanticTexture4];
-	[self mapVariableName: @"s_cc3Texture[5]" toSemantic: kCC3SemanticTexture5];
-	[self mapVariableName: @"s_cc3Texture[6]" toSemantic: kCC3SemanticTexture6];
-	[self mapVariableName: @"s_cc3Texture[7]" toSemantic: kCC3SemanticTexture7];
-	
 	// LIGHTING --------------
 	[self mapVariableName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
 	[self mapVariableName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
@@ -686,6 +1003,82 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle3];
 	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine3];
 	
+	// TEXTURES --------------
+	[self mapVariableName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
+	[self mapVariableName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSamplers];		// alias for s_cc3Textures[0]
+	[self mapVariableName: @"s_cc3Textures[0]" toSemantic: kCC3SemanticTextureSamplers];	// alias for s_cc3Textures
+	
+	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
+	// In most shaders, these will be left unused in favor of customized the texture combining in code.
+	[self mapVariableName: @"u_cc3TextureUnits[0].color" toSemantic: kCC3SemanticTexUnitConstantColor0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].mode" toSemantic: kCC3SemanticTexUnitMode0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha0];
+	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha0];
+	
+	[self mapVariableName: @"u_cc3TextureUnits[1].color" toSemantic: kCC3SemanticTexUnitConstantColor1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].mode" toSemantic: kCC3SemanticTexUnitMode1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha1];
+	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha1];
+	
+	[self mapVariableName: @"u_cc3TextureUnits[2].color" toSemantic: kCC3SemanticTexUnitConstantColor2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].mode" toSemantic: kCC3SemanticTexUnitMode2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha2];
+	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha2];
+	
+	[self mapVariableName: @"u_cc3TextureUnits[3].color" toSemantic: kCC3SemanticTexUnitConstantColor3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].mode" toSemantic: kCC3SemanticTexUnitMode3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha3];
+	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha3];
+	
+	// Applications can add more mappings for shaders that support additional texture units
 }
 
 -(void) populateWithPureColorSemanticMappings {

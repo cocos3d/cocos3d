@@ -495,7 +495,7 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 
 /** Overridden to clear the tracking of the mipmap from the global status array. */
 -(void) dealloc {
-	self.cc3HasMipmap = NO;				// Set global marker back to default
+	self.cc3HasMipmap = NO;					// Set global marker back to default
 	self.cc3IsFlippedVertically = YES;		// Set global marker back to default
 	[super dealloc];
 }
@@ -584,8 +584,10 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 }
 #else	// cocos2d 2.x...
 -(id) initWithPVRFile: (NSString*) relPath {
-	self.cc3IsFlippedVertically = NO;
-	return [super initWithPVRFile: (NSString*) relPath];
+	if( (self = [super initWithPVRFile: relPath]) ) {
+		self.cc3IsFlippedVertically = NO;
+	}
+	return self;
 }
 #endif
 

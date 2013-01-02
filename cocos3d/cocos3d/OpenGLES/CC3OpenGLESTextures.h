@@ -161,7 +161,6 @@
 	CC3OpenGLESStateTrackerEnumeration* rgbOperand0;
 	CC3OpenGLESStateTrackerEnumeration* rgbOperand1;
 	CC3OpenGLESStateTrackerEnumeration* rgbOperand2;
-	CC3OpenGLESStateTrackerEnumeration* rgbScale;
 	CC3OpenGLESStateTrackerEnumeration* combineAlphaFunction;
 	CC3OpenGLESStateTrackerEnumeration* alphaSource0;
 	CC3OpenGLESStateTrackerEnumeration* alphaSource1;
@@ -169,7 +168,6 @@
 	CC3OpenGLESStateTrackerEnumeration* alphaOperand0;
 	CC3OpenGLESStateTrackerEnumeration* alphaOperand1;
 	CC3OpenGLESStateTrackerEnumeration* alphaOperand2;
-	CC3OpenGLESStateTrackerEnumeration* alphaScale;
 	CC3OpenGLESStateTrackerColor* color;
 	CC3OpenGLESStateTrackerCapability* pointSpriteCoordReplace;
 	CC3OpenGLESMatrixStack* matrixStack;

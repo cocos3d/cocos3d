@@ -472,8 +472,7 @@
 }
 
 -(void) alignTextureUnit: (GLuint) texUnit {
-	CC3Texture* tex = [self textureForTextureUnit: texUnit];
-	[mesh alignTextureUnit: texUnit withTexture: tex];
+	[mesh alignTextureUnit: texUnit withTexture: [self textureForTextureUnit: texUnit]];
 }
 
 // Deprecated
