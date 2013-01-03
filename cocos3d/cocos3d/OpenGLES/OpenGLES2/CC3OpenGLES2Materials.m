@@ -49,6 +49,19 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES2StateTrackerAlphaFunction
+
+@implementation CC3OpenGLES2StateTrackerAlphaFunction
+
+-(void) initializeTrackers {
+	self.function = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.reference = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES2Materials
 
 @implementation CC3OpenGLES2Materials
@@ -59,7 +72,7 @@
 	self.specularColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
 	self.emissionColor = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
 	self.shininess = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
-	self.alphaFunc = nil;
+	self.alphaFunc = [CC3OpenGLES2StateTrackerAlphaFunction trackerWithParent: self];
 	self.blendFunc = [CC3OpenGLES2StateTrackerMaterialBlend trackerWithParent: self];
 }
 

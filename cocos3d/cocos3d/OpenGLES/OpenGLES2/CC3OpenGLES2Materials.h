@@ -41,6 +41,13 @@
 @interface CC3OpenGLES2StateTrackerMaterialBlend : CC3OpenGLESStateTrackerMaterialBlend
 @end
 
+#pragma mark -
+#pragma mark CC3OpenGLES2StateTrackerAlphaFunction
+
+/** Provides specialized behaviour for OpenGL ES 2 implementations. */
+@interface CC3OpenGLES2StateTrackerAlphaFunction : CC3OpenGLESStateTrackerAlphaFunction
+@end
+
 
 #pragma mark -
 #pragma mark CC3OpenGLES2Materials

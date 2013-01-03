@@ -435,13 +435,9 @@ static GLuint lastAssignedMaterialTag;
 -(void) applyAlphaTest {
 	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	BOOL shouldAlphaTest = (_alphaTestFunction != GL_ALWAYS);
-
 	glesEngine.capabilities.alphaTest.value = shouldAlphaTest;
-
-	if (shouldAlphaTest) {
-		[glesEngine.materials.alphaFunc applyFunction: _alphaTestFunction
-										 andReference: _alphaTestReference];
-	}
+	if (shouldAlphaTest) [glesEngine.materials.alphaFunc applyFunction: _alphaTestFunction
+														  andReference: _alphaTestReference];
 }
 
 /**
@@ -451,13 +447,9 @@ static GLuint lastAssignedMaterialTag;
 -(void) applyBlend {
 	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	BOOL shouldBlend = !self.isOpaque;
-
 	glesEngine.capabilities.blend.value = shouldBlend;
-
-	if (shouldBlend) {
-		[glesEngine.materials.blendFunc applySource: _blendFunc.src
-									 andDestination: _blendFunc.dst];
-	}
+	if (shouldBlend) [glesEngine.materials.blendFunc applySource: _blendFunc.src
+												  andDestination: _blendFunc.dst];
 }
 
 /**
@@ -479,7 +471,6 @@ static GLuint lastAssignedMaterialTag;
 			spcColor = CCC4FBlendAlpha(spcColor);
 			emsColor = CCC4FBlendAlpha(emsColor);
 		}
-
 		CC3OpenGLESMaterials* glesMaterials = glesEngine.materials;
 		glesMaterials.ambientColor.value = ambColor;
 		glesMaterials.diffuseColor.value = difColor;
@@ -487,10 +478,10 @@ static GLuint lastAssignedMaterialTag;
 		glesMaterials.emissionColor.value = emsColor;
 		glesMaterials.shininess.value = _shininess;
 	} else {
+		[glesEngine.capabilities.lighting disable];
+
 		ccColor4F difColor = _diffuseColor;
 		if (self.shouldApplyOpacityToColor) difColor = CCC4FBlendAlpha(difColor);
-
-		[glesEngine.capabilities.lighting disable];
 		glesEngine.state.color.value = difColor;
 	}
 }

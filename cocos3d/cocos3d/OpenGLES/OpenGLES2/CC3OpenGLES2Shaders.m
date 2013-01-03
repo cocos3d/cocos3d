@@ -35,8 +35,8 @@
 #if CC3_OGLES_2
 
 #define kCC3DefaultGLProgramName				@"CC3DefaultGLProgram"
-#define kCC3DefaultVertexShaderSourceFile		@"CC3DefaultByVarNames.vsh"
-#define kCC3DefaultFragmentShaderSourceFile		@"CC3DefaultByVarNames.fsh"
+#define kCC3DefaultVertexShaderSourceFile		@"CC3ConfigurableWithDefaultVarNames.vsh"
+#define kCC3DefaultFragmentShaderSourceFile		@"CC3ConfigurableWithDefaultVarNames.fsh"
 
 #define kCC3PureColorGLProgramName				@"CC3PureColorGLProgram"
 #define kCC3PureColorVertexShaderSourceFile		@"CC3PureColor.vsh"
@@ -78,9 +78,7 @@
 	_pureColorProgram = [[CC3GLProgram alloc] initWithName: kCC3PureColorGLProgramName
 										fromVertexShaderFile: kCC3PureColorVertexShaderSourceFile
 									   andFragmentShaderFile: kCC3PureColorFragmentShaderSourceFile];
-	CC3GLProgramSemanticsDelegateByVarNames* semDel = [CC3GLProgramSemanticsDelegateByVarNames semanticsDelegate];
-	[semDel populateWithPureColorSemanticMappings];
-	_pureColorProgram.semanticDelegate = semDel;
+	_pureColorProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
 	[_pureColorProgram link];
 }
 

@@ -299,7 +299,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Example of overriding the value of a shader uniform on a single mesh node.
 	CC3MeshNode* meshNode = [self getMeshNodeNamed: @"GeoSphere01"];
 	CC3GLProgramContext* progCtx = meshNode.material.shaderContext;
-	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_cc3MatColorDiffuse"];
+	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_cc3Material.emissionColor"];
 	progUniform.color4F = kCCC4FMagenta;
 	
 	[self addBitmapLabel];			// Add a bitmapped string label
@@ -993,18 +993,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addBitmapLabel {
 	CylinderLabel* bmLabel = [CylinderLabel nodeWithName: kBitmapLabelName];
-	bmLabel.radius = 30;
+	bmLabel.radius = 50;
 	bmLabel.textAlignment = UITextAlignmentCenter;
 	bmLabel.relativeOrigin = ccp(0.5, 0.5);
-	bmLabel.tessellation = ccg(1, 1);
-	bmLabel.fontFileName = @"arial16.fnt";
-	bmLabel.labelString = @"Hello, world.";
+	bmLabel.tessellation = ccg(4, 1);
+	bmLabel.fontFileName = @"Arial32BMGlyph.fnt";
+	bmLabel.labelString = @"Hello, world!";
 	bmLabelMessageIndex = 0;	// Keep track of which message is being displayed
 	
 	bmLabel.location = cc3v(-150.0, 75.0, 500.0);
 	bmLabel.rotation = cc3v(0.0, 180.0, 0.0);
-	bmLabel.uniformScale = 3.0;
-	bmLabel.color = ccORANGE;
+	bmLabel.uniformScale = 2.0;
+	bmLabel.color = ccc3(0, 220, 120);
 	bmLabel.shouldUseLighting = NO;
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
 	bmLabel.touchEnabled = YES;

@@ -1,5 +1,5 @@
 /*
- * CC3DefaultByVarNames.fsh
+ * CC3ConfigurableWithDefaultVarNames.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,10 +28,18 @@
  */
 
 /**
- * When running under OpenGL ES 2, this fragment shader is used as a default when a
- * CC3Material has not been assigned a specific GL shader program.
+ * This fragment shader provides a general configurable shader that replicates much of the
+ * functionality of the fixed-pipeline of OpenGL ES 1.1. As such, this shader is suitable
+ * for use as a default when a CC3Material has not been assigned a specific GL shader
+ * program, and can make use of the configurability of CC3Material and CC3MeshNode.
  *
- * CC3DefaultByVarNames.vsh is the vertex shader associated with this fragment shader.
+ * CC3ConfigurableWithDefaultVarNames.vsh is the vertx shader paired with this fragment shader.
+ *
+ * When using this shader, be aware that the general nature and high-level of configurability
+ * available with this shader means that it cannot be optimized to the same degree that a more
+ * deliberately dedicated shader can be optimized. This shader may be used during early stages
+ * of development, but for optimal performance, it is recommended that the application provide
+ * specialized shaders that have been tuned and optimized to a specific needs of each model.
  *
  * The semantics of the variables in this shader can be mapped using the
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
@@ -56,10 +64,25 @@
 #define GL_PREVIOUS                       0x8578
 
 
-
 precision mediump float;
 
 //-------------- STRUCTURES ----------------------
+
+/**
+ * The parameters that define a material.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Material {
+	vec4	ambientColor;						/**< Ambient color of the material. */
+	vec4	diffuseColor;						/**< Diffuse color of the material. */
+	vec4	specularColor;						/**< Specular color of the material. */
+	vec4	emissionColor;						/**< Emission color of the material. */
+	float	shininess;							/**< Shininess of the material. */
+	float	minimumDrawnAlpha;					/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+};
 
 /**
  * The parameters of a single texture unit used to mimic OpenGL ES 1.1 functionality for
@@ -114,14 +137,16 @@ struct Point {
 
 //-------------- UNIFORMS ----------------------
 
+// Material properties
+uniform Material u_cc3Material;							/**< The material being applied to the mesh. */
+
 // Textures
 uniform lowp int u_cc3TextureCount;						/**< Number of textures. */
-uniform lowp sampler2D s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
+uniform sampler2D s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
 uniform TextureUnit u_cc3TextureUnits[MAX_TEXTURES];	/**< Texture unit parameters. */
 
 // Points
-uniform Point u_cc3Points;						/**< Point parameters. */
-
+uniform Point u_cc3Points;								/**< Point parameters. */
 
 //-------------- VARYING VARIABLES INPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];
@@ -129,6 +154,9 @@ varying lowp vec4 v_color;
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
+
+//-------------- LOCAL VARIABLES ----------------------
+vec4 fragColor;
 
 
 //-------------- FUNCTIONS ----------------------
@@ -144,7 +172,7 @@ const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
  * the triple-source GL_INTERPOLATE function), and assumes that all source operands reference
  * the source component directly (ie- no (1 - src)).
  */
-vec4 combineTexture(int tuIdx, vec4 texColor, vec4 fragColor) {
+void combineTexture(int tuIdx, vec4 texColor) {
 	int func, src0, src1;
 	
 	// Extract the RGB components from the appropriate sources
@@ -200,32 +228,31 @@ vec4 combineTexture(int tuIdx, vec4 texColor, vec4 fragColor) {
 		fragColor.a = a0;
 	else if (func == GL_SUBTRACT)
 		fragColor.a = a0 - a1;
-		
-	return fragColor;
 }
 
 /**
  * Applies the texture assigned to the specified texture unit index, combining it with
  * the fragment color already applied as defined by the texture unit parameters.
  */
-vec4 applyTexture(int tuIdx, vec4 fragColor) {
+void applyTexture(int tuIdx) {
 	vec4 texColor = texture2D(s_cc3Textures[tuIdx], v_texCoord[tuIdx]);
 	int tuMode = u_cc3TextureUnits[tuIdx].mode;
 	
-	if (tuMode == GL_MODULATE) return fragColor * texColor;
-	if (tuMode == GL_REPLACE) return texColor;
-	if (tuMode == GL_COMBINE) return combineTexture(tuIdx, texColor, fragColor);
-	if (tuMode == GL_ADD) return vec4((fragColor.rgb + texColor.rgb), (fragColor.a * texColor.a));
-	if (tuMode == GL_DECAL) {
-		vec3 fragRGB = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
-		return vec4(fragRGB, fragColor.a);
+	if (tuMode == GL_MODULATE) {
+		fragColor *= texColor;
+	} else if (tuMode == GL_REPLACE) {
+		fragColor = texColor;
+	} else if (tuMode == GL_COMBINE) {
+		combineTexture(tuIdx, texColor);
+	} else if (tuMode == GL_ADD) {
+		fragColor.rgb += texColor.rgb;
+		fragColor.a *= texColor.a;
+	} else if (tuMode == GL_DECAL) {
+		fragColor.rgb = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
+	} else if (tuMode == GL_BLEND) {
+		fragColor.rgb =  (fragColor.rgb * (1.0 - texColor.rgb)) + (u_cc3TextureUnits[tuIdx].color.rgb * texColor.rgb);
+		fragColor.a *= texColor.a;
 	}
-	if (tuMode == GL_BLEND) {
-		vec3 fragRGB =  (fragColor.rgb * (1.0 - texColor.rgb)) + (u_cc3TextureUnits[tuIdx].color.rgb * texColor.rgb);
-		return vec4(fragRGB, (fragColor.a * texColor.a));
-	}
-
-	return fragColor;
 }
 
 /**
@@ -233,21 +260,24 @@ vec4 applyTexture(int tuIdx, vec4 fragColor) {
  * and returns the resulting fragment color. If there are no textures, returns the fragment
  * color from the v_color varying input variable.
  */
-vec4 applyTextures() {
-	vec4 fragColor = v_color;
+void applyTextures() {
 	for (int tuIdx = 0; tuIdx < MAX_TEXTURES; tuIdx++) {
-		if (tuIdx >= u_cc3TextureCount) return fragColor;	// Break out once we've applied all the textures
-		fragColor = applyTexture(tuIdx, fragColor);
+		if (tuIdx >= u_cc3TextureCount) return;		// Break out once we've applied all the textures
+		applyTexture(tuIdx);
 	}
-	return fragColor;
 }
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites) {
-		gl_FragColor = texture2D(s_cc3Textures[0], gl_PointCoord) * v_color;
-	} else {
-		gl_FragColor = applyTextures();
-	}
-}
+	fragColor = v_color;
+	if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites)
+		fragColor = texture2D(s_cc3Textures[0], gl_PointCoord) * v_color;
+	else
+		applyTextures();
 
+	// If the fragment passes the alpha test, draw it, otherwise discard
+	if (fragColor.a >= u_cc3Material.minimumDrawnAlpha)
+		gl_FragColor = fragColor;
+	else
+		discard;
+}

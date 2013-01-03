@@ -32,16 +32,15 @@
  *
  * This shader is used during node picking and when a node does not have a material.
  *
- * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsDelegateByVarNames instance created with the
- * populateWithPureColorSemanticMappings method.
+ * The semantics of the variables in this shader can be mapped using the
+ * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
  */
 
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
-uniform vec4 u_cc3Color;						/**< Color when lighting is not in use. */
+uniform vec4 u_cc3Color;						/**< Color when lighting & materials are not in use. */
 
 void main() {
 	gl_FragColor = u_cc3Color;

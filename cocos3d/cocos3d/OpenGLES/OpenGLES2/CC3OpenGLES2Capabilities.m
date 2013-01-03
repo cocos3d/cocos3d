@@ -39,8 +39,10 @@
 @implementation CC3OpenGLES2Capabilities
 
 -(void) initializeTrackers {
-	self.alphaTest = nil;
+	self.alphaTest = [CC3OpenGLESStateTrackerCapability trackerWithParent: self];
+	
 	self.blend = [CC3OpenGLESStateTrackerCapability trackerWithParent: self forState: GL_BLEND];
+
 	self.clipPlanes = nil;
 	self.colorLogicOp = nil;
 	self.colorMaterial = nil;

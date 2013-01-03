@@ -97,13 +97,14 @@ typedef enum {
 	kCC3SemanticCameraPosition,					/**< Global position of the camera. */
 	
 	// MATERIALS --------------
-	kCC3SemanticColor,							/**< Color when lighting is not in use. */
+	kCC3SemanticColor,							/**< Color when lighting & materials are not in use. */
 	kCC3SemanticMaterialColorAmbient,			/**< Ambient color of the material. */
 	kCC3SemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
 	kCC3SemanticMaterialColorSpecular,			/**< Specular color of the material. */
 	kCC3SemanticMaterialColorEmission,			/**< Emission color of the material. */
 	kCC3SemanticMaterialOpacity,				/**< Opacity of the material. */
 	kCC3SemanticMaterialShininess,				/**< Shininess of the material. */
+	kCC3SemanticMinimumDrawnAlpha,				/**< Minimum alpha value to be drawn, otherwise will be discarded. */
 
 	// LIGHTING - Each category of light enums are consecutive to allow conversion to an index
 	kCC3SemanticIsUsingLighting,				/**< Whether any lighting is enabled. */
@@ -573,32 +574,26 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(void) mapVariableName: (NSString*) name toSemantic: (GLenum) semantic;
 
 /**
- * Populates this instance with the default cocos3d mappings between names and semantics.
+ * Populates this instance with the default cocos3d mappings between variable names and semantics.
  *
  * An application wishing to add additional semantic mappings, or override any of the default
- * mappings can invoke this method, and then invoke the addVariableConfiguration: method to
- * add or change any of the mappings.
+ * mappings can invoke this method, and then invoke the mapVariableName:toSemantic: or
+ * addVariableConfiguration: methods to add or change any of the mappings.
  */
--(void) populateWithDefaultSemanticMappings;
-
-/** 
- * Populates this instance with the simple mappings between names and semantics
- * used for painting nodes in a solid, pure color, including during node picking.
- */
--(void) populateWithPureColorSemanticMappings;
+-(void) populateWithDefaultVariableNameMappings;
 
 
 #pragma mark Allocation and initialization
 
 /**
- * Returns a shared default semantic delegate, that can be used to map the standard variables
+ * Returns a shared default semantic delegate, that can be used to map the standard variable names
  * to their default semantics.
  *
  * The delegate returned by this property is lazily created and automatically populated using
- * the populateWithDefaultSemanticMappings method to create the standard default mappings.
+ * the populateWithDefaultVariableNameMappings method to create the standard default mappings.
  *
- * The default CC3DefaultByVarNames.vsh and CC3DefaultByVarNames.fsh shaders are designed to
- * use the standard default mappings provided by the delegate returned by this property.
+ * The default CC3ConfigurableWithDefaultVarNames.vsh and CC3ConfigurableWithDefaultVarNames.fsh shaders
+ * are designed to use the standard default mappings provided by the delegate returned by this property.
  *
  * This property returns a shared instance. Making changes to the delegate returned by this
  * property will affect all CC3GLPrograms that have been assigned this delegate. Handle with care.

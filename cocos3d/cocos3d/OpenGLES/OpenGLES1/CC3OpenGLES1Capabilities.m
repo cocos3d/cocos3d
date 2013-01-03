@@ -57,9 +57,9 @@
 
 -(void) initializeTrackers {
 	self.alphaTest = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
-																	   forState: GL_ALPHA_TEST];
+																 forState: GL_ALPHA_TEST];
 	self.blend = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
-																   forState: GL_BLEND];
+															 forState: GL_BLEND];
 	self.clipPlanes = [CCArray array];
 	GLint platformMaxClipPlanes = self.engine.platform.maxClipPlanes.value;
 	for (int i = 0; i < platformMaxClipPlanes; i++) {

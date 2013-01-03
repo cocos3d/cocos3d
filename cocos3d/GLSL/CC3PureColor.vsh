@@ -32,9 +32,8 @@
  *
  * This shader is used during node picking and when a node does not have a material.
  *
- * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsDelegateByVarNames instance created with the
- * populateWithPureColorSemanticMappings method.
+ * The semantics of the variables in this shader can be mapped using the
+ * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
  */
 
 precision mediump float;
@@ -63,21 +62,25 @@ struct Point {
 //-------------- UNIFORMS & VERTEX ATTRIBUTES ----------------------
 
 uniform mat4 u_cc3MtxMV;						/**< Current modelview matrix. */
-uniform mat4 u_cc3MtxMVP;						/**< Current modelview-projection matrix. */
+uniform highp mat4 u_cc3MtxMVP;					/**< Current modelview-projection matrix. */
 uniform Point u_cc3Points;						/**< Point parameters. */
+
+//-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4 a_cc3Position;				/**< Vertex position. */
 attribute float a_cc3PointSize;					/**< Vertex point size. */
 
+//-------------- CONSTANTS ----------------------
+const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
+const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-vec3 vtxPosEye;				/**< The position of the vertex, in eye coordinates. */
-const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
+highp vec3 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
 
 
 //-------------- FUNCTIONS ----------------------
 
 /** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
-vec3 vertexPositionInEyeSpace() {
+highp vec3 vertexPositionInEyeSpace() {
 	if(u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone)
 		return (u_cc3MtxMV * a_cc3Position).xyz;
 	else
@@ -92,7 +95,7 @@ float pointSize() {
 	float size = 1.0;
 	if (u_cc3Points.isDrawingPoints) {
 		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
-		if (u_cc3Points.sizeAttenuation != kAttenuationNone) {
+		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
 			vec3 attenuationEquation;
 			attenuationEquation.x = 1.0;
 			attenuationEquation.z = dot(vtxPosEye, vtxPosEye);

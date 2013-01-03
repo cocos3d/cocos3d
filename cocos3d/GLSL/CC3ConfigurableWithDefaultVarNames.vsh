@@ -1,5 +1,5 @@
 /*
- * CC3DefaultByVarNames.vsh
+ * CC3ConfigurableWithDefaultVarNames.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,10 +28,18 @@
  */
 
 /**
- * When running under OpenGL ES 2, this vertex shader is used as a default when a
- * CC3Material has not been assigned a specific GL shader program.
+ * This vertex shader provides a general configurable shader that replicates much of the
+ * functionality of the fixed-pipeline of OpenGL ES 1.1. As such, this shader is suitable
+ * for use as a default when a CC3Material has not been assigned a specific GL shader
+ * program, and can make use of the configurability of CC3Material and CC3MeshNode.
  *
- * CC3DefaultByVarNames.fsh is the fragment shader associated with this vertex shader.
+ * CC3ConfigurableWithDefaultVarNames.fsh is the fragment shader paired with this vertex shader.
+ *
+ * When using this shader, be aware that the general nature and high-level of configurability
+ * available with this shader means that it cannot be optimized to the same degree that a more
+ * deliberately dedicated shader can be optimized. This shader may be used during early stages
+ * of development, but for optimal performance, it is recommended that the application provide
+ * specialized shaders that have been tuned and optimized to a specific needs of each model.
  *
  * The semantics of the variables in this shader can be mapped using the
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
@@ -45,6 +53,22 @@ precision mediump float;
 //-------------- STRUCTURES ----------------------
 
 /**
+ * The parameters that define a material.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Material {
+	vec4	ambientColor;						/**< Ambient color of the material. */
+	vec4	diffuseColor;						/**< Diffuse color of the material. */
+	vec4	specularColor;						/**< Specular color of the material. */
+	vec4	emissionColor;						/**< Emission color of the material. */
+	float	shininess;							/**< Shininess of the material. */
+	float	minimumDrawnAlpha;					/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+};
+
+/**
  * The parameters that define a single light.
  *
  * When using this structure as the basis of a simpler implementation, remove any elements
@@ -53,9 +77,9 @@ precision mediump float;
  */
 struct Light {
 	vec4	position;							/**< Position or normalized direction in eye space. */
-	vec4	colorAmbient;						/**< Ambient color of light. */
-	vec4	colorDiffuse;						/**< Diffuse color of light. */
-	vec4	colorSpecular;						/**< Specular color of light. */
+	vec4	ambientColor;						/**< Ambient color of light. */
+	vec4	diffuseColor;						/**< Diffuse color of light. */
+	vec4	specularColor;						/**< Specular color of light. */
 	vec3	attenuation;						/**< Coefficients of the attenuation equation. */
 	vec3	spotDirection;						/**< Direction if spotlight in eye space. */
 	float	spotExponent;						/**< Directional attenuation factor if spotlight. */
@@ -87,14 +111,11 @@ struct Point {
 // Environment matrices
 uniform mat4 u_cc3MtxMV;						/**< Current modelview matrix. */
 uniform mat3 u_cc3MtxMVIT;						/**< Inverse-transpose of current modelview rotation matrix. */
-uniform mat4 u_cc3MtxMVP;						/**< Current modelview-projection matrix. */
+uniform highp mat4 u_cc3MtxMVP;					/**< Current modelview-projection matrix. */
 
 // Material properties
-uniform vec4 u_cc3MatColorAmbient;				/**< Ambient color of the material. */
-uniform vec4 u_cc3MatColorDiffuse;				/**< Diffuse color of the material. */
-uniform vec4 u_cc3MatColorSpecular;				/**< Specular color of the material. */
-uniform vec4 u_cc3MatColorEmission;				/**< Emission color of the material. */
-uniform float u_cc3MatShininess;					/**< Shininess of the material. */
+uniform vec4 u_cc3Color;						/**< Color when lighting & materials are not in use. */
+uniform Material u_cc3Material;					/**< The material being applied to the mesh. */
 
 // Lighting properties
 uniform bool u_cc3IsUsingLighting;				/**< Indicates whether any lighting is in use. */
@@ -124,22 +145,22 @@ attribute vec2 a_cc3TexCoord3;					/**< Vertex texture coordinate for texture un
 varying vec2 v_texCoord[MAX_TEXTURES];			/**< Fragment texture coordinates. */
 varying lowp vec4 v_color;						/**< Fragment base color. */
 
-//-------------- LOCAL VARIABLES ----------------------
-vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
-vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
-vec3 vtxPosEye;				/**< The position of the vertex, in eye coordinates. */
-vec3 vtxNormal;				/**< The vertex normal. */
-
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
+//-------------- LOCAL VARIABLES ----------------------
+highp vec3 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
+vec3 vtxNormal;				/**< The vertex normal. */
+vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
+vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
+
 
 //-------------- FUNCTIONS ----------------------
 
 /** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
-vec3 vertexPositionInEyeSpace() {
+highp vec3 vertexPositionInEyeSpace() {
 	if((u_cc3IsUsingLighting && u_cc3HasVertexNormal) ||
 	   (u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone))
 		return (u_cc3MtxMV * a_cc3Position).xyz;
@@ -182,15 +203,15 @@ vec4 illuminateWith(int ltIdx) {
 	// Employ lighting equation to calculate vertex color
 	vec4 vtxColor = vec4(0.0);
     if(attenuation > 0.0) {
-		vtxColor += (u_cc3Lights[ltIdx].colorAmbient * matColorAmbient);
-		vtxColor += (u_cc3Lights[ltIdx].colorDiffuse * matColorDiffuse * max(0.0, dot(vtxNormal, ltDir)));
+		vtxColor += (u_cc3Lights[ltIdx].ambientColor * matColorAmbient);
+		vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormal, ltDir)));
 		
 		// Project normal onto half-plane vector to determine specular component
 		float specProj = dot(vtxNormal, normalize(ltDir + kHalfPlaneOffset));
 		if (specProj > 0.0) {
-			vtxColor += (pow(specProj, u_cc3MatShininess) *
-						 u_cc3MatColorSpecular *
-						 u_cc3Lights[ltIdx].colorSpecular);
+			vtxColor += (pow(specProj, u_cc3Material.shininess) *
+						 u_cc3Material.specularColor *
+						 u_cc3Lights[ltIdx].specularColor);
 		}
 		vtxColor *= attenuation;
     }
@@ -202,7 +223,7 @@ vec4 illuminateWith(int ltIdx) {
  * and then illuminating the material with each enabled light.
  */
 vec4 illuminate() {
-	vec4 vtxColor = u_cc3MatColorEmission + (matColorAmbient * u_cc3SceneLightColorAmbient);
+	vec4 vtxColor = u_cc3Material.emissionColor + (matColorAmbient * u_cc3SceneLightColorAmbient);
 
 	for (int ltIdx = 0; ltIdx < MAX_LIGHTS; ltIdx++)
 		if (u_cc3Lights[ltIdx].isEnabled) vtxColor += illuminateWith(ltIdx);
@@ -229,13 +250,12 @@ float pointSize() {
 	return size;
 }
 
-
 //-------------- ENTRY POINT ----------------------
 void main() {
 
 	// If vertices have individual colors, use them for ambient and diffuse material colors.
-	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3MatColorAmbient;
-	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3MatColorDiffuse;
+	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.ambientColor;
+	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.diffuseColor;
 
 	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
 	vtxPosEye = vertexPositionInEyeSpace();
@@ -249,7 +269,7 @@ void main() {
 
 		v_color = illuminate();
 	} else {
-		v_color = matColorDiffuse;
+		v_color = u_cc3HasVertexColor ? a_cc3Color : u_cc3Color;
 	}
 
 	// Fragment texture coordinates
