@@ -106,6 +106,7 @@
 // and populate the uniforms into the GL engine, allowing the context to override first.
 // Raise an assertion error if the uniform cannot be resolved by either context or delegate!
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {
+	LogTrace(@"Binding program %@ for %@", self, visitor.currentNode);
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
 	[self use];
 	for (CC3GLSLUniform* var in _uniforms)

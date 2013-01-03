@@ -2464,14 +2464,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Briefly highlight the location where the node was touched.
 	[self markTouchPoint: touchPoint on: aNode];
 	
-	// Don't visually highlight ground or wooden sign when touched. Handle these objects differently.
+	if (!aNode) return;
+
 	if (aNode == ground) {
 		[self touchGroundAt: touchPoint];
 	} else if (aNode == beachBall) {
 		// If the beach ball is touched toggle its opacity.
 		[self touchBeachBallAt: touchPoint];
 		
-		// For fun, uncomment the following line to draw a wireframe box around the beachball
+		// For fun, uncomment the following line to draw wireframe boxes around the beachball
 //		aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
 		
 	} else if (aNode == brickWall) {
@@ -2490,41 +2491,34 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self cycleLabelOf: (CC3BitmapLabelNode*)aNode];
 	} else if (aNode == [self getNodeNamed: @"Particles"]) {
 		[((CC3ParticleEmitter*)aNode) emitParticle];
-	} else {
+	} else if (aNode == teapotTextured || aNode == teapotSatellite) {
 		
-		// If the node is either the textured or rainbow teapot, toggle the display of
-		// a wireframe of its bounding box, plus a wireframe around both teapots.
-		if (aNode == teapotTextured || aNode == teapotSatellite) {
-			
-			// Toggle wireframe box around the touched teapot's mesh
-			CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
-			lcNode.shouldDrawLocalContentWireframeBox = !lcNode.shouldDrawLocalContentWireframeBox;
+		// Toggle wireframe box around the touched teapot's mesh
+		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
+		lcNode.shouldDrawLocalContentWireframeBox = !lcNode.shouldDrawLocalContentWireframeBox;
+		
+		// Toggle the large wireframe box around both teapots
+		teapotTextured.shouldDrawWireframeBox = !teapotTextured.shouldDrawWireframeBox;
 
-			// Toggle the large wireframe box around both teapots
-			teapotTextured.shouldDrawWireframeBox = !teapotTextured.shouldDrawWireframeBox;
-		}
-
-		// If the robot was touched, cycle through three particle hose options.
-		// If no particles are being emitting, turn on the point particle hose.
-		// If the point particle hose is emitting, turn it off and turn on the mesh particle hose.
-		// If the mesh particle hose is emitting, turn it off so neither hose is emitting.
-		if (aNode == [self getNodeNamed: kPODRobotRezNodeName] ) {
-			CC3ParticleEmitter* pointHose = (CC3ParticleEmitter*)[self getNodeNamed: kPointHoseEmitterName];
-			CC3ParticleEmitter* meshHose = (CC3ParticleEmitter*)[self getNodeNamed: kMeshHoseEmitterName];
-			if (pointHose.isEmitting) {
-				[pointHose pause];
-				[meshHose play];
-			} else if (meshHose.isEmitting) {
-				[meshHose pause];
-			} else {
-				[pointHose play];
-			}
+	// If the robot was touched, cycle through three particle hose options.
+	// If no particles are being emitting, turn on the point particle hose.
+	// If the point particle hose is emitting, turn it off and turn on the mesh particle hose.
+	// If the mesh particle hose is emitting, turn it off so neither hose is emitting.
+	} else if (aNode == [self getNodeNamed: kPODRobotRezNodeName] ) {
+		CC3ParticleEmitter* pointHose = (CC3ParticleEmitter*)[self getNodeNamed: kPointHoseEmitterName];
+		CC3ParticleEmitter* meshHose = (CC3ParticleEmitter*)[self getNodeNamed: kMeshHoseEmitterName];
+		if (pointHose.isEmitting) {
+			[pointHose pause];
+			[meshHose play];
+		} else if (meshHose.isEmitting) {
+			[meshHose pause];
+		} else {
+			[pointHose play];
 		}
 		
 		// If the globe was touched, toggle the opening of a HUD window displaying it up close.
-		if (aNode == globe ) {
-			[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
-		}
+	} else if (aNode == globe ) {
+		[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
 	}
 }
 
@@ -2611,7 +2605,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		tp.color = ccORANGE;
 		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
 		
-		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
+//		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
 		
 		// We've set the teapot location to the global 3D point that was derived from the
 		// touch point, and the teapot has a global rotation of zero, and a global scale.

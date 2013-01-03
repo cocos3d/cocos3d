@@ -827,6 +827,7 @@
 
 			[scene nodeSelected: pickedNode.touchableNode byTouchEvent: touchQueue[i] at: touchPoint];
 		}
+		pickedNode = nil;	// Clear the node once it has been dispatched
 	}
 }
 
