@@ -3,7 +3,7 @@
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
- * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
+ * Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
  *
  * Kazmath functions copyright (c) 2008, Luke Benstead. All rights reserved.
@@ -11,7 +11,7 @@
  * http://www.kazade.co.uk/kazmath/
  *
  * Augmented and modified for use with Objective-C in cocos3d by Bill Hollings.
- * Additions and modifications copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
+ * Additions and modifications copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:

@@ -1,5 +1,7 @@
 <img src="http://www.cocos2d-iphone.org/downloads/cocos2d_logo.png">
 
+Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
+
 cocos3d
 =======
 

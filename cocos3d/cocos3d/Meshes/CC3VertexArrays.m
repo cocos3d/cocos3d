@@ -2,10 +2,9 @@
  * CC3VertexArrays.m
  *
  * cocos3d 2.0.0
- * Author: Bill Hollings, Chris Myers
- * Copyright (c) 2010-2012 The Brenwill Workshop Ltd. All rights reserved.
+ * Author: Bill Hollings
+ * Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
  * http://www.brenwill.com
- * Copyright (c) 2011 Chris Myers. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
