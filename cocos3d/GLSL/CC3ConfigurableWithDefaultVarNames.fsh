@@ -43,9 +43,14 @@
  *
  * The semantics of the variables in this shader can be mapped using the
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
+ *
+ * In order to reduce the number of uniform variables, this shader supports two texture units.
+ * This can be increased by changing the MAX_TEXTURES macro definition below.
  */
 
-#define MAX_TEXTURES			4
+// Increase this if more textures are desired. It has been kept low to limit the number
+// of uniforms, in order to improve performance.
+#define MAX_TEXTURES			2
 
 // Texture constants to support OpenGL ES 1.1 conformant multi-texturing.
 #define GL_REPLACE                        0x1E01
@@ -281,3 +286,23 @@ void main() {
 	else
 		discard;
 }
+
+// ------------- ALTERNATE PERFORMANCE TESTING FUNCTIONS --------------
+
+// This is a dummy alternate to the applyTextures function. It deliberately applies zero textures.
+// By pretending to make use of the applyTexture() function, all of the uniforms remain active,
+// allowing the testing of the CPU overhead when setting large numbers of uniforms.
+void applyNoTextures() { for (int tuIdx = 0; tuIdx < 0; tuIdx++) applyTexture(tuIdx); }
+
+// Alternate main function that deliberately applies no textures and directly assigns the fragment
+// color from the varying variable. The applyNoTextures function fools the compiler into thinking
+// that textures will be applied, thereby causing the compiler to keep all of the uniforms active.
+// This permits analysis of the overhead on the CPU of a large number of uniforms. To see the effect,
+// comment out the normal main function and uncomment this version. For even better performance,
+// comment out the call to applyNoTextures below, to avoid the binding of the additional uniforms.
+/*
+void main() {
+	applyNoTextures();
+	gl_FragColor = v_color;
+}
+*/

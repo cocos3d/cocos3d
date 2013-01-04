@@ -3124,7 +3124,7 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/GLSL/CC3DefaultByVarNames.fsh</key>
+		<key>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3132,9 +3132,9 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3DefaultByVarNames.fsh</string>
+			<string>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3DefaultByVarNames.vsh</key>
+		<key>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3142,7 +3142,7 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3DefaultByVarNames.vsh</string>
+			<string>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.vsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3PureColor.fsh</key>
 		<dict>
@@ -3424,8 +3424,8 @@
 		<string>cocos3d/deprecated/CC3World.m</string>
 		<string>cocos3d/deprecated/CCNodeController.h</string>
 		<string>cocos3d/deprecated/ControllableCCLayer.h</string>
-		<string>cocos3d/GLSL/CC3DefaultByVarNames.fsh</string>
-		<string>cocos3d/GLSL/CC3DefaultByVarNames.vsh</string>
+		<string>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.fsh</string>
+		<string>cocos3d/GLSL/CC3ConfigurableWithDefaultVarNames.vsh</string>
 		<string>cocos3d/GLSL/CC3PureColor.fsh</string>
 		<string>cocos3d/GLSL/CC3PureColor.vsh</string>
 	</array>

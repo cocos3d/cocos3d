@@ -43,10 +43,16 @@
  *
  * The semantics of the variables in this shader can be mapped using the
  * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
+ *
+ * In order to reduce the number of uniform variables, this shader supports two texture units
+ * and two lights by default. This can be increased by changing the MAX_TEXTURES and MAX_LIGHTS
+ * macro definitions below.
  */
 
-#define MAX_TEXTURES			4
-#define MAX_LIGHTS				4
+// Increase these if more textures or lights are desired. They have been kept low to limit
+// the number of uniforms, in order to improve performance.
+#define MAX_TEXTURES			2
+#define MAX_LIGHTS				2
 
 precision mediump float;
 
@@ -272,11 +278,11 @@ void main() {
 		v_color = u_cc3HasVertexColor ? a_cc3Color : u_cc3Color;
 	}
 
-	// Fragment texture coordinates
+	// Fragment texture coordinates. Uncomment below or add additional if MAX_TEXTURES is increased.
 	if (u_cc3TextureCount > 0) v_texCoord[0] = a_cc3TexCoord0;
 	if (u_cc3TextureCount > 1) v_texCoord[1] = a_cc3TexCoord1;
-	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
-	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
+//	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
+//	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
 	
 	gl_Position = u_cc3MtxMVP * a_cc3Position;
 	
