@@ -44,6 +44,7 @@ cocos3d 2.0.0 - 2013/01/31
 	- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
 	- Added CCTexture2D cc3IsNPOT, cc3WidthIsNPOT & cc3HeightIsNPOT properties in CC3Texture extension
 
+- CC3Resource instances are now cached through the resourceFromFile: method which can be repeatedly invoked without loading from file more than once
 - Added CC3NodesResource as subclass of CC3Resource and superclass of CC3PODResource
     - [API change] CC3Resource is now the abstract base class for any kind of resource loading.
     - [API change] CC3Resource nodes and expectsVerticallyFlippedTextures properties moved to CC3NodesResource and original CC3Resource properties deprecated.

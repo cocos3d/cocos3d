@@ -229,7 +229,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 
 -(void) addPFXEffect {
-	CC3PFXResource* pfxRez = [CC3PFXResource resourceFromFile: @"effect.pfx"];
+	LogInfo(@"Rez1: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
+	LogInfo(@"Rez2: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
+	LogInfo(@"Rez3: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
+	LogInfo(@"Rez4: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
 }
 
 /**
@@ -1469,15 +1472,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) addSkinnedRunners {
 
-	// Load the first running man from the POD file. Since the meshes were not
-	// specifically created for iOS, the textures will appear upside-down because
-	// it uses a texture type (png) that is loaded upside-down by iOS. We tell
-	// the resource loader that the mesh is not aligned to upside-down textures
-	// so that the texture coordinates will be flipped upside down automatically
-	// so that the textures will appear right-way up.
-	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName];
-	runner.resource.expectsVerticallyFlippedTextures = NO;
-	[runner loadFromFile: kRunningManPODFile];
+	// Load the first running man from the POD file. Since the meshes were not specifically
+	// created for iOS, the textures will appear upside-down because it uses a texture type
+	// (png) that is loaded upside-down by iOS. We tell the resource that the mesh is not
+	// aligned to upside-down textures so that the texture coordinates will be flipped upside
+	// down automatically and the textures will appear right-way up.
+	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
+	runner.resource = [CC3PODResource resourceFromFile:kRunningManPODFile
+					  expectsVerticallyFlippedTextures:NO];
 
 	// Remove the light provided in the POD so that it does not contribute to the
 	// lighting of the scene. We don't remove the POD's camera, but we rename it

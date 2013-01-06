@@ -106,6 +106,29 @@
 @property(nonatomic, readonly) CCArray* nodes;
 
 
+#pragma mark Allocation and initialization
+
+/**
+ * Returns a resource instance loaded from the specified file.
+ *
+ * Resources loaded through this method are cached. If the resource was already loaded and
+ * is in the cache, it is retrieved and returned. If the resource has not in the cache, it
+ * is loaded from the specified file, after being configured for texture orientation, placed
+ * into the cache, and returned.
+ *
+ * See the description of the expectsVerticallyFlippedTextures property for more about texture
+ * orientation. See the description of the resourceFromFile: in the superclass for more about
+ * file loading alternatives.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
+ *
+ * This method will return nil if the file is not in the cache and could not be loaded.
+ */
++(id) resourceFromFile: (NSString*) aFilePath expectsVerticallyFlippedTextures: (BOOL) flipped;
+
+
 #pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
 
 /**

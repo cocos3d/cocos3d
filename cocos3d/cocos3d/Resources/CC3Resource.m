@@ -56,7 +56,7 @@
 +(id) resource { return [[[self alloc] init] autorelease]; }
 
 -(id) initFromFile: (NSString*) aFilePath {
-	if ( (self = [self init]) ) {
+	if ( (self = [self init]) ) {		// Use self so subclasses will init properly
 		if ( ![self loadFromFile: aFilePath] ) {
 			[self release];
 			return nil;
@@ -66,8 +66,36 @@
 }
 
 +(id) resourceFromFile: (NSString*) aFilePath {
-	return [[[self alloc] initFromFile: aFilePath] autorelease];
+	id rez = [_resourcesByName objectForKey: [aFilePath lastPathComponent]];
+	if (rez) return rez;
+
+	rez = [[self alloc] initFromFile: aFilePath];
+	[self addResource: rez];
+	[rez release];
+	return rez;
 }
+
+static NSMutableDictionary* _resourcesByName = nil;
+
+// Protected accessor for subclass use
++(NSMutableDictionary*) resourcesByName { return _resourcesByName; }
+
++(void) addResource: (CC3Resource*) resource {
+	if ( !resource ) return;
+	NSAssert1(resource.name, @"%@ cannot be added to the resource cache because its name property is nil.", resource);
+	if ( !_resourcesByName ) _resourcesByName = [NSMutableDictionary new];		// retained
+	[_resourcesByName setObject: resource forKey: resource.name];
+}
+
++(void) removeResource: (CC3Resource*) resource {
+	if (resource == [_resourcesByName objectForKey: resource.name]) {
+		[_resourcesByName removeObjectForKey: resource.name];
+	} else {
+		LogInfo(@"%@ not removed from the resource cache because it is not the instance that is cached under name %@", resource, resource.name);
+	}
+}
+
++(void) removeAllResources { [_resourcesByName removeAllObjects]; }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
 	if (_wasLoaded) {

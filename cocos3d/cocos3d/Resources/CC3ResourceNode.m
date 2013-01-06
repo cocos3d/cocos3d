@@ -70,10 +70,7 @@
 }
 
 -(void) loadFromFile: (NSString*) aFilepath {
-	[self removeAllChildren];
-	[self.resource loadFromFile: aFilepath];
-	if (!name) { self.name = self.resource.name; }
-	[self addResourceNodes];
+	self.resource = [self.resourceClass resourceFromFile: aFilepath];
 }
 
 -(id) initFromFile: (NSString*) aFilepath {

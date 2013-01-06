@@ -35,16 +35,21 @@
 
 /**
  * CC3Resource is an abstract wrapper class around content loaded from a file containing
- * 3D resources. Concrete subclasses will load files of specific types.
+ * 3D resource content. Concrete subclasses will load files of specific types.
  *
- * The loadFromFile: method is used to load this resource. Once this method has been successfully
- * invoked, access to 3D objects loaded from the file are through properties defined by subclasses.
+ * Typically, the application uses the resourceFromFile: to retrieve an instance. The loaded
+ * instances are automtaically placed in a cache, so that subsequent inocations of the
+ * resourceFromFile: method will not cause the file to be loaded again.
  *
- * As shortcuts, there are also class and instance initialization methods that will
- * invoke the loadFromFile: method automatically during instance initialization.
+ * The application can also bypass the cache by using the alloc and initFromFile: methods to
+ * load an instance without placing it in the cache. It can subsequently be added to the cache
+ * using the addResource: method.
  *
- * However, if this resource can load textures, before using any of these shortcut methods, you
- * should take into consideration whether you need to set the directory property prior to loading.
+ * The application can also use the resource method to create a new instance that is not
+ * automatically loaded, and then use the loadFromFile: method to load the resource from
+ * file. The addResource: method can then be used to add the instance to the cache. This
+ * technique can be used when additional configuration, such as the directory property,
+ * need to be set prior to loading the file.
  *
  * By default, additional resources (for example textures), are loaded from the same directory
  * that the file containing the content of this resource is located. If this is not the case,
@@ -142,7 +147,19 @@
 
 /**
  * Initializes this instance and invokes the loadFromFile: method to populate
- * this instance from the contents of the file at the specified file path. 
+ * this instance from the contents of the file at the specified file path.
+ *
+ * Normally, this method is invoked automatically by the resourceFromFile: if an instance does
+ * not exist in the resource cache, in order to create and load the resource from the file, and
+ * after doing so, the resourceFromFile: method places the newly loaded instance into the cache.
+ *
+ * However, by invoking the alloc method and then invoking this method directly, the application
+ * can load the resource without first checking the resource cache. The resource can then
+ * subsequently be placed in the cache using the addResource: method.
+ *
+ * If you need to set additional configuration info, such as the directory property, prior
+ * to loading the resource, consider using the init or resource methods and then invoking
+ * the loadFromFile: method instead.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
@@ -153,16 +170,43 @@
 -(id) initFromFile: (NSString*) aFilePath;
 
 /**
- * Allocates and initializes an autoreleased instance, and invokes the loadFromFile:
- * method to populate the instance from the contents of the file at the specified file path. 
+ * Returns a resource instance loaded from the specified file.
+ *
+ * Resources loaded through this method are cached. If the resource was already loaded and
+ * is in the cache, it is retrieved and returned. If the resource has not in the cache, it
+ * is loaded from the specified file, placed into the cache, and returned.
+ *
+ * To clear a resource instance from the cache, use the removeResourceFromFile: method.
+ *
+ * To load the file directly, bypassing the cache, use the alloc and initFromFile: methods.
+ * This technique can be used to load the same resource twice, perhaps to configure each separately.
+ * However, when choosing to do so, be aware that resources often consume significant memory.
+ * Consider copying resource components instead in order to configure them distinctly.
+ *
+ * If you need to set additional configuration info, such as the directory property, prior to
+ * loading the resource, consider using the resource method and then invoking the loadFromFile:
+ * method to load the file, and the addResource: method to add that instance to the cache.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
  * resources directory, the specified file path can simply be the name of the file.
  *
- * This method will return nil if the file could not be loaded.
+ * This method will return nil if the file is not in the cache and could not be loaded.
  */
 +(id) resourceFromFile: (NSString*) aFilePath;
+
+/**
+ * Adds the specified resource to the resource cache. Resources are indexed in the cache using
+ * the name property of the resource. If a resource already exists in the cache with the same
+ * name, it is replaced by the specified resource.
+ */
++(void) addResource: (CC3Resource*) resource;
+
+/** Removes the specified resource from the resource cache. */
++(void) removeResource: (CC3Resource*) resource;
+
+/** Removes all resources from the cache. */
++(void) removeAllResources;
 
 
 #pragma mark Deprecated functionality
