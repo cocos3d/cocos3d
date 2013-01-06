@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 
-#import "CC3Resource.h"
+#import "CC3NodesResource.h"
 #import "CC3PVRFoundation.h"
 #import "CC3Camera.h"
 #import "CC3MeshNode.h"
@@ -39,17 +39,16 @@
 
 
 /**
- * CC3PODResource is a CC3Resource that wraps a PVR POD data structure loaded from a file.
- * It handles loading object data from POD files, and creating CC3Nodes from that data.
- * This class is the cornerstone of POD file management, and is typically one of only two
- * POD-based classes that your application needs to be aware of, the other being
- * CC3PODResourceNode, which is a CC3ResourceNode that, in turn, wraps an instance
- * of this class. 
+ * CC3PODResource is a CC3NodesResource that wraps a PVR POD data structure loaded from a file.
+ * It handles loading object data from POD files, and creating CC3Nodes from that data. This
+ * class is the cornerstone of POD file management, and is typically one of only two POD-based
+ * classes that your application needs to be aware of, the other being CC3PODResourceNode,
+ * which is a CC3ResourceNode that, in turn, wraps an instance of this class. 
  *
- * CC3PODResource includes many properties and methods geared towards extracing object
- * data from the underlying complex POD resource structure. However, most of the properties
- * and methods exist as template methods to support internal behaviour and for overriding
- * in subclasses that might customize object creation from the POD data.
+ * CC3PODResource includes many properties and methods geared towards extracing object data
+ * from the underlying complex POD resource structure. However, most of the properties and
+ * methods exist as template methods to support internal behaviour and for overriding in
+ * subclasses that might customize object creation from the POD data.
  *
  * Basic use of this class is straightforward:
  *   -# Allocate and initialize the CC3PODResource instance and load a POD file into the
@@ -92,7 +91,7 @@
  * on this class, and then change the properties of the extracted object. In other cases
  * you may want to extract and return a customized subclass of the object of interest.
  */
-@interface CC3PODResource : CC3Resource {
+@interface CC3PODResource : CC3NodesResource {
 	PODClassPtr pvrtModel;
 	CCArray* allNodes;
 	CCArray* meshes;

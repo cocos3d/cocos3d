@@ -34,16 +34,16 @@
 
 @implementation CC3ResourceNode
 
-@synthesize resource;
+@synthesize resource=_resource;
 
 -(void) dealloc {
-	[resource release];
+	[_resource release];
 	[super dealloc];
 }
 
 -(Class) resourceClass {
 	NSAssert1(NO, @"No resource class has been established for this %@ class. Create a subclass and override the resourceClass method.", [self class]);
-	return [CC3Resource class];
+	return [CC3NodesResource class];
 }
 
 -(void) addResourceNodes {
@@ -55,19 +55,18 @@
 										withIndent: 1]);
 }
 
--(CC3Resource*) resource {
-	if (!resource) self.resource = [[self resourceClass] resource];
-	return resource;
+-(CC3NodesResource*) resource {
+	if (!_resource) self.resource = [self.resourceClass resource];
+	return _resource;
 }
 
--(void) setResource: (CC3Resource *) aResource {
-	if (aResource != resource) {
-		[self removeAllChildren];
-		[resource release];
-		resource = [aResource retain];
-		if (!name) { self.name = self.resource.name; }
-		[self addResourceNodes];
-	}
+-(void) setResource: (CC3NodesResource*) aResource {
+	if (aResource == _resource) return;
+	[self removeAllChildren];
+	[_resource release];
+	_resource = [aResource retain];
+	if (!name) { self.name = self.resource.name; }
+	[self addResourceNodes];
 }
 
 -(void) loadFromFile: (NSString*) aFilepath {
@@ -105,16 +104,14 @@
 -(void) populateFrom: (CC3ResourceNode*) another {
 	[super populateFrom: another];
 	
-	[resource release];
-	resource = [another.resource retain];		// retained
+	[_resource release];
+	_resource = [another.resource retain];		// retained
 }
 
 
 #pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
 
--(BOOL) expectsVerticallyFlippedTextures {
-	return self.resource.expectsVerticallyFlippedTextures;
-}
+-(BOOL) expectsVerticallyFlippedTextures { return self.resource.expectsVerticallyFlippedTextures; }
 
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
 	self.resource.expectsVerticallyFlippedTextures = expectsFlipped;

@@ -31,17 +31,17 @@
 
 
 #import "CC3Node.h"
-#import "CC3Resource.h"
+#import "CC3NodesResource.h"
 
 
 /**
- * A CC3ResourceNode is a CC3Node that that wraps an instance of CC3Resource in
- * the resource property, extracts the nodes from that resource, and forms the
- * root of the resulting node structural assembly.
+ * A CC3ResourceNode is a CC3Node that that wraps an instance of CC3NodesResource in the
+ * resource property, extracts the nodes from that resource, and forms the root of the
+ * resulting node structural assembly.
  *
- * The underlying CC3Resource instance can either be set directly, or subclasses
- * can override the resourceClass property to allow the resource property to be
- * lazily created when it is first accessed.
+ * The underlying CC3NodesResource instance can either be set directly, or subclasses can
+ * override the resourceClass property to allow the resource property to be lazily created
+ * when it is first accessed.
  *
  * Once this resource node contains a resource, this resource node can be loaded
  * using the loadFromFile: method.
@@ -64,32 +64,31 @@
  * relative to the iOS view coordinate system. This results in textures being
  * displayed upside-down, relative to the OpenGL coordinate system.
  *
- * The contained CC3Resource will automatically adjust the meshes to compensate for
- * this. Meshes loaded by this resource loader will have their texture coordinates
- * adjusted to align with the usable area of an NPOT texture, and to vertically
- * flip a texture that has been loaded upside-down.
+ * The contained CC3NodesResource will automatically adjust the meshes to compensate for this.
+ * Meshes loaded by this resource loader will have their texture coordinates adjusted to align
+ * with the usable area of an NPOT texture, and to vertically flip a texture that has been
+ * loaded upside-down.
  *
- * To determine whether textures will need to be vertically flipped, the loader
- * needs to know whether or not the meshes have already been flipped (by the 3D
- * editor or file exporter). The expectsVerticallyFlippedTextures property
- * can be set to indicate to the loader whether the texture coordinates have
- * already been flipped. If the value of that property needs to be changed,
- * it should be set before the file is loaded.
+ * To determine whether textures will need to be vertically flipped, the loader needs to know
+ * whether or not the meshes have already been flipped (by the 3D editor or file exporter).
+ * The expectsVerticallyFlippedTextures property can be set to indicate to the loader whether
+ * the texture coordinates have already been flipped. If the value of that property needs to
+ * be changed, it should be set before the file is loaded.
  *
- * When a copy is made of a CC3ResourceNode instance, a copy is not made of the
- * encapsulated CC3Resource instance. Instead, the CC3Resource is retained by
- * reference and shared between both the original CC3ResourceNode, and the new copy.
+ * When a copy is made of a CC3ResourceNode instance, a copy is not made of the encapsulated
+ * CC3NodesResource instance. Instead, the CC3NodesResource is retained by reference and shared
+ * between both the original CC3ResourceNode, and the new copy.
  */
 @interface CC3ResourceNode : CC3Node {
-	CC3Resource* resource;
+	CC3NodesResource* _resource;
 }
 
 /**
- * The underlying CC3Resource instance containing the 3D nodes.
+ * The underlying CC3NodesResource instance containing the 3D nodes.
  * 
  * Setting this property will remove all child nodes of this CC3ResourceNode
  * and replace them with the nodes extracted from the nodes property of the
- * new CC3Resource instance, if they have already been loaded.
+ * new CC3NodesResource instance, if they have already been loaded.
  *
  * If this node has not yet been assigned a name, it will be set to the name
  * of the resource when this property is set.
@@ -105,14 +104,14 @@
  * property from the resourceClass property requires the creation of a subclass
  * of CC3ResourceNode that defines the appropriate resourceClass value.
  */
-@property(nonatomic, retain) CC3Resource* resource;
+@property(nonatomic, retain) CC3NodesResource* resource;
 
 /**
- * Returns the class of the CC3Resource instance used to load 3D data files.
+ * Returns the class of the CC3NodesResource instance used to load 3D data files.
  * This returned value is used by the initializers that load the file,
  * and must be overridden in a sublcass if those initializers are to be used.
  * 
- * Default implementation triggers and assertion and returns CC3Resource.
+ * Default implementation triggers and assertion and returns CC3NodesResource.
  * Subclasses must override.
  */
 -(Class) resourceClass;
@@ -190,11 +189,11 @@
 
 /**
  * Indicates whether the texture coordinates of the meshes that will be loaded
- * by the CC3Resource loader expect that the texture will be flipped upside-down
+ * by the CC3NodesResource loader expect that the texture will be flipped upside-down
  * during texture loading.
  *
  * This property is a convenience property that simply gets and sets the same
- * property on the contained CC3Resource instance.
+ * property on the contained CC3NodesResource instance.
  * 
  * The vertical axis of the coordinate system of OpenGL is inverted relative to
  * the iOS view coordinate system. This results in textures from most file formats
@@ -202,12 +201,12 @@
  * formats except PVR format will be oriented upside-down after loading.
  *
  * If the value of this property is YES, the texture coordinates of meshes loaded
- * by the CC3Resource will be assumed to have already been flipped vertically,
+ * by the CC3NodesResource will be assumed to have already been flipped vertically,
  * (typically by the 3D editor or file exporter) to align with textures that will
  * be vertically flipped by the texture loader.
  *
  * If the value of this property is NO, the texture coordinates of meshes loaded by
- * the CC3Resource loader will be assumed to have their original orientation, and
+ * the CC3NodesResource loader will be assumed to have their original orientation, and
  * aligned with textures that have not been vertically flipped by the texture loader.
  *
  * The value of this property is then used to cause the meshes to automatically

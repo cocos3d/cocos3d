@@ -593,7 +593,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * 
  * The initial value of this property is set when the underlying mesh texture
  * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
- * property on the CC3Resource class to understand how this property is set
+ * property on the CC3NodesResource class to understand how this property is set
  * during mesh resource loading.
  * 
  * When building meshes programmatically, you should endeavour to design the
@@ -629,7 +629,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * 
  * The initial value of this property is set when the underlying mesh texture
  * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
- * property on the CC3Resource class to understand how this property is set
+ * property on the CC3NodesResource class to understand how this property is set
  * during mesh resource loading.
  * 
  * When building meshes programmatically, you should endeavour to design the

@@ -1302,9 +1302,9 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * this class is created and initialized. If you want all meshes to behave the same
  * way, with respect to this property, set the value of that class-side property.
  * 
- * The value of this property is set when the underlying mesh texture
- * coordinates are built or loaded. See the same property on the CC3Resource
- * class to understand how this property is set during mesh resource loading.
+ * The value of this property is set when the underlying mesh texture coordinates are
+ * built or loaded. See the same property on the CC3NodesResource class to understand
+ * how this property is set during mesh resource loading.
  * 
  * When building meshes programmatically, you should endeavour to design the
  * mesh so that this property will be YES if you will be using vertically-flipped

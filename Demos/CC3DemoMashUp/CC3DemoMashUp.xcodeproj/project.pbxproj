@@ -183,6 +183,9 @@
 		A940ED4E16986E86004F499C /* CC3ConfigurableWithDefaultVarNames.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A940ECC216986E86004F499C /* CC3ConfigurableWithDefaultVarNames.vsh */; };
 		A940ED4F16986E86004F499C /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A940ECC316986E86004F499C /* CC3PureColor.fsh */; };
 		A940ED5016986E86004F499C /* CC3PureColor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A940ECC416986E86004F499C /* CC3PureColor.vsh */; };
+		A940ED8C169875D8004F499C /* CC3PFXResource.mm in Sources */ = {isa = PBXBuildFile; fileRef = A940ED8B169875D8004F499C /* CC3PFXResource.mm */; };
+		A940ED9016987E96004F499C /* CC3NodesResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A940ED8F16987E96004F499C /* CC3NodesResource.m */; };
+		A940ED931698C431004F499C /* effect.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A940ED921698C431004F499C /* effect.pfx */; };
 		A946F067144F765C00E6428B /* man.pod in Resources */ = {isa = PBXBuildFile; fileRef = A946F062144F765C00E6428B /* man.pod */; };
 		A946F071144F992E00E6428B /* belt.png in Resources */ = {isa = PBXBuildFile; fileRef = A946F06E144F992E00E6428B /* belt.png */; };
 		A946F072144F992E00E6428B /* body.png in Resources */ = {isa = PBXBuildFile; fileRef = A946F06F144F992E00E6428B /* body.png */; };
@@ -664,6 +667,12 @@
 		A940ECC216986E86004F499C /* CC3ConfigurableWithDefaultVarNames.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ConfigurableWithDefaultVarNames.vsh; sourceTree = "<group>"; };
 		A940ECC316986E86004F499C /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
 		A940ECC416986E86004F499C /* CC3PureColor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.vsh; sourceTree = "<group>"; };
+		A940ED8A169875D8004F499C /* CC3PFXResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PFXResource.h; sourceTree = "<group>"; };
+		A940ED8B169875D8004F499C /* CC3PFXResource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CC3PFXResource.mm; sourceTree = "<group>"; };
+		A940ED8E16987E96004F499C /* CC3NodesResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodesResource.h; sourceTree = "<group>"; };
+		A940ED8F16987E96004F499C /* CC3NodesResource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodesResource.m; sourceTree = "<group>"; };
+		A940ED911698B476004F499C /* CC3PVRTPFXParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRTPFXParser.h; sourceTree = "<group>"; };
+		A940ED921698C431004F499C /* effect.pfx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = effect.pfx; sourceTree = "<group>"; };
 		A946F062144F765C00E6428B /* man.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = man.pod; sourceTree = "<group>"; };
 		A946F06E144F992E00E6428B /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		A946F06F144F992E00E6428B /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
@@ -1021,6 +1030,7 @@
 				A92DA7961427B5980051AFFA /* DieCube.pod */,
 				A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */,
 				A933812D14E09E9000FCA181 /* Earth_1024.jpg */,
+				A940ED921698C431004F499C /* effect.pfx */,
 				A92DA7971427B5980051AFFA /* fire.png */,
 				A971D30D1663EC6E00769DC5 /* fps_images-hd.png */,
 				A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */,
@@ -1099,6 +1109,8 @@
 				A940EB9216986E86004F499C /* CC3IdentifiablePODExtensions.m */,
 				A940EB9316986E86004F499C /* CC3NodePODExtensions.h */,
 				A940EB9416986E86004F499C /* CC3NodePODExtensions.mm */,
+				A940ED8A169875D8004F499C /* CC3PFXResource.h */,
+				A940ED8B169875D8004F499C /* CC3PFXResource.mm */,
 				A940EB9516986E86004F499C /* CC3PODCamera.h */,
 				A940EB9616986E86004F499C /* CC3PODCamera.mm */,
 				A940EB9716986E86004F499C /* CC3PODLight.h */,
@@ -1120,6 +1132,7 @@
 				A940EBA716986E86004F499C /* CC3PVRFoundation.h */,
 				A940EBA816986E86004F499C /* CC3PVRFoundation.mm */,
 				A940EBA916986E86004F499C /* CC3PVRTModelPOD.h */,
+				A940ED911698B476004F499C /* CC3PVRTPFXParser.h */,
 				A940EBAA16986E86004F499C /* CC3VertexArraysPODExtensions.h */,
 				A940EBAB16986E86004F499C /* CC3VertexArraysPODExtensions.mm */,
 				A940EBAC16986E86004F499C /* PVRT 3.0 */,
@@ -1433,6 +1446,8 @@
 		A940EC8416986E86004F499C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A940ED8E16987E96004F499C /* CC3NodesResource.h */,
+				A940ED8F16987E96004F499C /* CC3NodesResource.m */,
 				A940EC8516986E86004F499C /* CC3Resource.h */,
 				A940EC8616986E86004F499C /* CC3Resource.m */,
 				A940EC8716986E86004F499C /* CC3ResourceNode.h */,
@@ -2027,6 +2042,7 @@
 				A982D5AE1697797B0033B1C7 /* ChangeLog in Resources */,
 				A982D5AF1697797B0033B1C7 /* CMakeLists.txt in Resources */,
 				A940ECDA16986E86004F499C /* PVRT_Removed_Files.txt in Resources */,
+				A940ED931698C431004F499C /* effect.pfx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2282,6 +2298,8 @@
 				A940ED4A16986E86004F499C /* CC3TargettingNode.m in Sources */,
 				A940ED4B16986E86004F499C /* CC3VertexArrayMeshModel.m in Sources */,
 				A940ED4C16986E86004F499C /* CC3World.m in Sources */,
+				A940ED8C169875D8004F499C /* CC3PFXResource.mm in Sources */,
+				A940ED9016987E96004F499C /* CC3NodesResource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

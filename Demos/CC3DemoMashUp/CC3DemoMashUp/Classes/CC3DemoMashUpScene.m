@@ -56,7 +56,7 @@
 #import "CC3LinearMatrix.h"
 #import "CC3AffineMatrix.h"
 #import "CC3ProjectionMatrix.h"
-#import "CC3GLMatrix.h"
+#import "CC3PFXResource.h"
 
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"
@@ -227,6 +227,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[super dealloc];
 }
 
+
+-(void) addPFXEffect {
+	CC3PFXResource* pfxRez = [CC3PFXResource resourceFromFile: @"effect.pfx"];
+}
+
 /**
  * Invoked by the customized initializeScene to set up any initial state for
  * this customized scene. This is broken into a separate method so that the
@@ -350,6 +355,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
 	
 //	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
+	
+	[self addPFXEffect];
 	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.

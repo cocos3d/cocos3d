@@ -33,20 +33,21 @@
 #import "CC3Foundation.h"
 
 
+#pragma mark -
+#pragma mark POD Structures and functions
+
 /** Indicates a POD index that references nil. */
 #define kCC3PODNilIndex -1
 
 /**
- * A pointer to a generic C++ structure containing PVR POD data, defined
- * as a void pointer so that it can be imported into header files without
- * the need for the including file to support C++.
+ * A pointer to a generic C++ structure containing PVR POD data, defined as a void pointer so that
+ * it can be imported into header files without the need for the including file to support C++.
  */
 typedef void* PODStructPtr;
 
 /**
- * A pointer to a generic C++ class containing PVR POD data, defined
- * as a void pointer so that it can be imported into header files
- * without the need for the including file to support C++.
+ * A pointer to a generic C++ class containing PVR POD data, defined as a void pointer so that
+ * it can be imported into header files without the need for the including file to support C++.
  */
 typedef void* PODClassPtr;
 
@@ -103,3 +104,33 @@ NSString* NSStringFromSPODLight(PODStructPtr pSPODLight);
 /** Returns the name of the specified ePODLight light type operation. */
 NSString* NSStringFromEPODLight(uint ePODLight);
 
+
+#pragma mark -
+#pragma mark PFX Structures and functions
+
+/**
+ * A pointer to a generic C++ class containing PVR PFX data, defined as a void pointer so that
+ * it can be imported into header files without the need for the including file to support C++.
+ */
+typedef void* PFXClassPtr;
+
+/** Returns a string description of the specified SPVRTPFXParserEffect class. */
+NSString* NSStringFromSPVRTPFXParserEffect(PFXClassPtr pSPVRTPFXParserEffect);
+
+/**
+ * Returns a string description of the specified SPVRTPFXParserSemantic class.
+ * The typeName is the variable type (typically @"uniform" or @"attribute").
+ */
+NSString* NSStringFromSPVRTPFXParserSemantic(PFXClassPtr pSPVRTPFXParserSemantic, NSString* typeName);
+
+/** Returns a string description of the specified SPVRTPFXParserEffectTexture class. */
+NSString* NSStringFromSPVRTPFXParserEffectTexture(PFXClassPtr pSPVRTPFXParserEffectTexture);
+
+/** Returns a string description of the specified SPVRTPFXParserShader class. */
+NSString* NSStringFromSPVRTPFXParserShader(PFXClassPtr pSPVRTPFXParserShader);
+
+/** Returns a string description of the specified SPVRTPFXParserTexture class. */
+NSString* NSStringFromSPVRTPFXParserTexture(PFXClassPtr pSPVRTPFXParserTexture);
+
+/** Returns a string description of the specified SPVRTPFXRenderPass class. */
+NSString* NSStringFromSPVRTPFXRenderPass(PFXClassPtr pSPVRTPFXRenderPass);

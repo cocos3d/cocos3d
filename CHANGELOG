@@ -44,9 +44,16 @@ cocos3d 2.0.0 - 2013/01/31
 	- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
 	- Added CCTexture2D cc3IsNPOT, cc3WidthIsNPOT & cc3HeightIsNPOT properties in CC3Texture extension
 
+- Added CC3NodesResource as subclass of CC3Resource and superclass of CC3PODResource
+    - [API change] CC3Resource is now the abstract base class for any kind of resource loading.
+    - [API change] CC3Resource nodes and expectsVerticallyFlippedTextures properties moved to CC3NodesResource and original CC3Resource properties deprecated.
+    - [API change] CC3Resource class-side defaultExpectsVerticallyFlippedTextures property moved to CC3NodesResource and original CC3Resource property deprecated.
+    - [API change] CC3ResourceNode resource property now holds onto a CC3NodesResource instance.
+	
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
 - [API change] CC3Light attenuationCoefficients property renamed to attenuation, and attenuationCoefficients deprecated.
+
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 - Upgraded PowerVR POD library to version 3.0.
 

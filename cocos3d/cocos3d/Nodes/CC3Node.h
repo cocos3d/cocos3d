@@ -1890,7 +1890,7 @@ typedef enum {
  * any descendant mesh node returns YES, otherwise this property will return NO.
  *
  * The initial value of this property is set when the underlying mesh texture
- * coordinates are built or loaded. See the same property on the CC3Resource
+ * coordinates are built or loaded. See the same property on the CC3NodesResource
  * class to understand how this property is set during mesh resource loading.
  *
  * Generally, the application never has need to change the value of this property.

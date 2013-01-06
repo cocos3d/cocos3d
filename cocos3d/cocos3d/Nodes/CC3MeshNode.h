@@ -504,7 +504,7 @@
  * any texture unit, otherwise this property will return NO.
  * 
  * The initial value of this property is set when the underlying mesh texture
- * coordinates are built or loaded. See the same property on the CC3Resource
+ * coordinates are built or loaded. See the same property on the CC3NodesResource
  * class to understand how this property is set during mesh resource loading.
  * 
  * When building meshes programmatically, you should endeavour to design the
@@ -541,7 +541,7 @@
  * 
  * The initial value of this property is set when the underlying mesh texture
  * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
- * property on the CC3Resource class to understand how this property is set
+ * property on the CC3NodesResource class to understand how this property is set
  * during mesh resource loading from model files.
  * 
  * When building meshes programmatically, you should endeavour to design the

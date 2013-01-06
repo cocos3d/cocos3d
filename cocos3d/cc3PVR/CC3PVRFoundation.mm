@@ -31,9 +31,11 @@
 
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
+	#import "CC3OpenGLESFoundation.h"
 }
 #import "CC3PVRFoundation.h"
 #import "CC3PVRTModelPOD.h"
+#import "CC3PVRTPFXParser.h"
 #import "CC3Matrix4x4.h"
 
 
@@ -395,4 +397,105 @@ NSString* NSStringFromSPODTexture(PODStructPtr pSPODTexture) {
 			[NSString stringWithUTF8String: pst->pszName]];
 }
 
+
+#pragma mark -
+#pragma mark PFX Structures and functions
+
+NSString* NSStringFromSPVRTPFXParserEffect(PFXClassPtr pSPVRTPFXParserEffect) {
+	SPVRTPFXParserEffect* pfxEffect = (SPVRTPFXParserEffect*)pSPVRTPFXParserEffect;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[desc appendFormat: @"SPVRTPFXParserEffect"];
+	[desc appendFormat: @" named %@", [NSString stringWithUTF8String: pfxEffect->Name.c_str()]];
+	[desc appendFormat: @"\n\tvertex shader: %@", [NSString stringWithUTF8String: pfxEffect->VertexShaderName.c_str()]];
+	[desc appendFormat: @"\n\tfragment shader: %@", [NSString stringWithUTF8String: pfxEffect->FragmentShaderName.c_str()]];
+	
+	CPVRTArray<SPVRTPFXParserSemantic> attributes = pfxEffect->Attributes;
+	NSUInteger attrCount = attributes.GetSize();
+	[desc appendFormat: @"\n\twith %u attributes:", attrCount];
+	for(NSUInteger i = 0; i < attrCount; i++) {
+		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserSemantic(&attributes[i], @"attribute")];
+	}
+
+	CPVRTArray<SPVRTPFXParserSemantic> uniforms = pfxEffect->Uniforms;
+	NSUInteger uniformCount = uniforms.GetSize();
+	[desc appendFormat: @"\n\twith %u uniforms:", uniformCount];
+	for(NSUInteger i = 0; i < uniformCount; i++) {
+		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserSemantic(&uniforms[i], @"uniform")];
+	}
+	
+	CPVRTArray<SPVRTPFXParserEffectTexture> textures = pfxEffect->Textures;
+	NSUInteger texCount = textures.GetSize();
+	[desc appendFormat: @"\n\twith %u textures:", texCount];
+	for(NSUInteger i = 0; i < texCount; i++) {
+		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserEffectTexture(&textures[i])];
+	}
+	
+	CPVRTArray<SPVRTTargetPair> targets = pfxEffect->Targets;
+	NSUInteger targCount = targets.GetSize();
+	[desc appendFormat: @"\n\twith %u targets:", targCount];
+	for(NSUInteger i = 0; i < targCount; i++) {
+		[desc appendFormat: @"\n\t\ttarget named %@ of type %@",
+		 [NSString stringWithUTF8String: targets[i].TargetName.c_str()],
+		 [NSString stringWithUTF8String: targets[i].BufferType.c_str()]];
+	}
+
+	[desc appendFormat: @"\n\tannotation: %@", [NSString stringWithUTF8String: pfxEffect->Annotation.c_str()]];
+	return desc;
+}
+
+NSString* NSStringFromSPVRTPFXParserSemantic(PFXClassPtr pSPVRTPFXParserSemantic, NSString* typeName) {
+	SPVRTPFXParserSemantic* pfxSemantic = (SPVRTPFXParserSemantic*)pSPVRTPFXParserSemantic;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"SPVRTPFXParserSemantic"];
+	[desc appendFormat: @" for GLSL %@ %@", typeName, [NSString stringWithUTF8String: pfxSemantic->pszName]];
+	[desc appendFormat: @" with semantic %@", [NSString stringWithUTF8String: pfxSemantic->pszValue]];
+	[desc appendFormat: @" at %u", pfxSemantic->nIdx];
+	return desc;
+}
+
+NSString* NSStringFromSPVRTPFXParserEffectTexture(PFXClassPtr pSPVRTPFXParserEffectTexture) {
+	SPVRTPFXParserEffectTexture* pfxTex = (SPVRTPFXParserEffectTexture*)pSPVRTPFXParserEffectTexture;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"SPVRTPFXParserEffectTexture"];
+	[desc appendFormat: @" named %@", [NSString stringWithUTF8String: pfxTex->Name.c_str()]];
+	[desc appendFormat: @" in texture unit %u", pfxTex->nNumber];
+	return desc;
+}
+
+NSString* NSStringFromSPVRTPFXParserShader(PFXClassPtr pSPVRTPFXParserShader) {
+	SPVRTPFXParserShader* pfxShader = (SPVRTPFXParserShader*)pSPVRTPFXParserShader;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"SPVRTPFXParserShader"];
+	[desc appendFormat: @" named %@", [NSString stringWithUTF8String: pfxShader->Name.c_str()]];
+	if (pfxShader->bUseFileName) {
+		[desc appendFormat: @" from file %@", [NSString stringWithUTF8String: pfxShader->pszGLSLfile]];
+	} else {
+		[desc appendFormat: @" from embedded GLSL source code"];
+	}
+	return desc;
+}
+
+NSString* NSStringFromSPVRTPFXParserTexture(PFXClassPtr pSPVRTPFXParserTexture) {
+	SPVRTPFXParserTexture* pfxTex = (SPVRTPFXParserTexture*)pSPVRTPFXParserTexture;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 150];
+	[desc appendFormat: @"SPVRTPFXParserTexture"];
+	[desc appendFormat: @" named %@", [NSString stringWithUTF8String: pfxTex->Name.c_str()]];
+	[desc appendFormat: @" from file %@", [NSString stringWithUTF8String: pfxTex->FileName.c_str()]];
+	[desc appendFormat: @" wrap (S,T,R): (%@, %@, %@)", NSStringFromGLEnum(pfxTex->nWrapS),
+														NSStringFromGLEnum(pfxTex->nWrapT),
+														NSStringFromGLEnum(pfxTex->nWrapR)];
+	[desc appendFormat: @" min: %@", NSStringFromGLEnum(pfxTex->nMin)];
+	[desc appendFormat: @" mag: %@", NSStringFromGLEnum(pfxTex->nMag)];
+	[desc appendFormat: @" mipmap: %@", NSStringFromGLEnum(pfxTex->nMIP)];
+	[desc appendFormat: @" is render target: %@", NSStringFromBoolean(pfxTex->bRenderToTexture)];
+	return desc;
+}
+
+NSString* NSStringFromSPVRTPFXRenderPass(PFXClassPtr pSPVRTPFXRenderPass) {
+	SPVRTPFXRenderPass* pfxPass = (SPVRTPFXRenderPass*)pSPVRTPFXRenderPass;
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"SPVRTPFXRenderPass"];
+	[desc appendFormat: @" to texture %@", [NSString stringWithUTF8String: pfxPass->pTexture->Name.c_str()]];
+	return desc;
+}
 

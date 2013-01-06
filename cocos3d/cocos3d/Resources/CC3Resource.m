@@ -30,15 +30,15 @@
  */
 
 #import "CC3Resource.h"
+#import "CC3NodesResource.h"
 
 
 @implementation CC3Resource
 
-@synthesize nodes, directory, wasLoaded, expectsVerticallyFlippedTextures;
+@synthesize directory=_directory, wasLoaded=_wasLoaded;
 
 -(void) dealloc {
-	[nodes release];
-	[directory release];
+	[_directory release];
 	[super dealloc];
 }
 
@@ -47,17 +47,13 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		nodes = [[CCArray array] retain];
-		directory = nil;
-		wasLoaded = NO;
-		expectsVerticallyFlippedTextures = [[self class] defaultExpectsVerticallyFlippedTextures];
+		_directory = nil;
+		_wasLoaded = NO;
 	}
 	return self;
 }
 
-+(id) resource {
-	return [[[self alloc] init] autorelease];
-}
++(id) resource { return [[[self alloc] init] autorelease]; }
 
 -(id) initFromFile: (NSString*) aFilePath {
 	if ( (self = [self init]) ) {
@@ -74,50 +70,42 @@
 }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
-	if (wasLoaded) {
+	if (_wasLoaded) {
 		LogError(@"%@ has already been loaded.", self);
-		return wasLoaded;
+		return _wasLoaded;
 	}
 	
 	// Ensure the path is absolute, converting it if needed.
 	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
 
-	LogRez(@"");
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading resources from file '%@'", absFilePath);
 
 	if (!name) self.name = [absFilePath lastPathComponent];
-	if (!directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
+	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
 	
 #if LOGGING_REZLOAD
 	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
 #endif
 
-	wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
+	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
 	
-	if (wasLoaded)
+	if (_wasLoaded)
 		LogRez(@"Loaded resources from file '%@' in %.4f seconds",
 			   absFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
 	else
 		LogError(@"Could not load resource file '%@'", absFilePath);
 
-	return wasLoaded;
+	LogRez(@"");		// Empty line to separate from next logs
+
+	return _wasLoaded;
 }
 
 // Subclasses should override this method, but invoke this superclass implementation first.
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
 
-
-#pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
-
-static BOOL defaultExpectsVerticallyFlippedTextures = YES;
-
-+(BOOL) defaultExpectsVerticallyFlippedTextures {
-	return defaultExpectsVerticallyFlippedTextures;
-}
-
-+(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
-	defaultExpectsVerticallyFlippedTextures = expectsFlipped;
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name];
 }
 
 
@@ -127,18 +115,18 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 // This class variable is automatically incremented whenever the method nextTag is called.
 static GLuint lastAssignedResourceTag;
 
--(GLuint) nextTag {
-	return ++lastAssignedResourceTag;
-}
+-(GLuint) nextTag { return ++lastAssignedResourceTag; }
 
-+(void) resetTagAllocation {
-	lastAssignedResourceTag = 0;
-}
++(void) resetTagAllocation { lastAssignedResourceTag = 0; }
 
 
-#pragma mark Deprecated file loading methods
+#pragma mark Deprecated functionality
 
-// Deprecated methods
+-(CCArray*) nodes { return nil; }
+-(BOOL) expectsVerticallyFlippedTextures { return YES; }
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsVerticallyFlippedTextures {}
++(BOOL) defaultExpectsVerticallyFlippedTextures { return CC3NodesResource.defaultExpectsVerticallyFlippedTextures; }
++(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped { CC3NodesResource.defaultExpectsVerticallyFlippedTextures = expectsFlipped; }
 -(BOOL) loadFromResourceFile: (NSString*) aRezPath { return [self loadFromFile: aRezPath];}
 -(id) initFromResourceFile: (NSString*) aRezPath { return [self initFromFile: aRezPath]; }
 +(id) resourceFromResourceFile: (NSString*) aRezPath { return [self resourceFromFile: aRezPath]; }

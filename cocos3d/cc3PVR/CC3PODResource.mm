@@ -42,7 +42,6 @@ extern "C" {
 #import "CC3PODMaterial.h"
 #import "CC3PODVertexSkinning.h"
 #import "CC3CC2Extensions.h"
-#import "CCTextureCache.h"
 
 
 /**
@@ -91,9 +90,9 @@ static const id placeHolder = [NSObject new];
 }
 
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath {
-	wasLoaded = (self.pvrtModelImpl->ReadFromFile([anAbsoluteFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
-	if (wasLoaded) [self build];
-	return wasLoaded;
+	_wasLoaded = (self.pvrtModelImpl->ReadFromFile([anAbsoluteFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
+	if (_wasLoaded) [self build];
+	return _wasLoaded;
 }
 
 -(void) build {
@@ -213,8 +212,9 @@ static const id placeHolder = [NSObject new];
 }
 
 -(void) buildSoftBodyNode {
-	CCArray* softBodyComponents = [CCArray arrayWithCapacity: nodes.count];
-	for (CC3Node* baseNode in nodes) {
+	CCArray* myNodes = self.nodes;
+	CCArray* softBodyComponents = [CCArray arrayWithCapacity: myNodes.count];
+	for (CC3Node* baseNode in myNodes) {
 		if (baseNode.hasSoftBodyContent) {
 			[softBodyComponents addObject: baseNode];
 		}
@@ -224,10 +224,10 @@ static const id placeHolder = [NSObject new];
 		CC3SoftBodyNode* sbn = [CC3SoftBodyNode nodeWithName: sbName];
 		for (CC3Node* sbc in softBodyComponents) {
 			[sbn addChild: sbc];
-			[nodes removeObjectIdenticalTo: sbc];
+			[myNodes removeObjectIdenticalTo: sbc];
 		}
 		[sbn bindRestPose];
-		[nodes addObject: sbn];
+		[myNodes addObject: sbn];
 	}
 }
 
@@ -407,7 +407,7 @@ static const id placeHolder = [NSObject new];
 -(CC3Texture*) buildTextureAtIndex: (uint) textureIndex {
 	SPODTexture* pst = (SPODTexture*)[self texturePODStructAtIndex: textureIndex];
 	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
-	NSString* texPath = [directory stringByAppendingPathComponent: texFile];
+	NSString* texPath = [self.directory stringByAppendingPathComponent: texFile];
 	CC3Texture* tex = [CC3Texture textureFromFile: texPath];
 	tex.textureParameters = textureParameters;
 	LogRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
@@ -433,10 +433,6 @@ static const id placeHolder = [NSObject new];
 -(ccColor4F) backgroundColor {
 	GLfloat* bg = self.pvrtModelImpl->pfColourBackground;
 	return CCC4FMake(bg[0], bg[1], bg[2], 1.0);
-}
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ from file %@", [self class], self.name];
 }
 
 -(NSString*) fullDescription {
