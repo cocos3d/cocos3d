@@ -65,8 +65,6 @@
 
 -(CC3GLProgram*) defaultProgram { return nil; }
 
--(CC3GLProgram*) makeDefaultProgram { return nil; }
-
 
 #pragma mark Binding
 

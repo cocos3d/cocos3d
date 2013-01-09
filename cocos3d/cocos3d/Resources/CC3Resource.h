@@ -149,9 +149,9 @@
  * Initializes this instance and invokes the loadFromFile: method to populate
  * this instance from the contents of the file at the specified file path.
  *
- * Normally, this method is invoked automatically by the resourceFromFile: if an instance does
- * not exist in the resource cache, in order to create and load the resource from the file, and
- * after doing so, the resourceFromFile: method places the newly loaded instance into the cache.
+ * Normally, this method is invoked automatically by the resourceFromFile: method if an instance
+ * does not exist in the resource cache, in order to create and load the resource from the file,
+ * and after doing so, the resourceFromFile: method places the newly loaded instance into the cache.
  *
  * However, by invoking the alloc method and then invoking this method directly, the application
  * can load the resource without first checking the resource cache. The resource can then
@@ -176,7 +176,7 @@
  * is in the cache, it is retrieved and returned. If the resource has not in the cache, it
  * is loaded from the specified file, placed into the cache, and returned.
  *
- * To clear a resource instance from the cache, use the removeResourceFromFile: method.
+ * To clear a resource instance from the cache, use the removeResource: method.
  *
  * To load the file directly, bypassing the cache, use the alloc and initFromFile: methods.
  * This technique can be used to load the same resource twice, perhaps to configure each separately.
@@ -194,6 +194,12 @@
  * This method will return nil if the file is not in the cache and could not be loaded.
  */
 +(id) resourceFromFile: (NSString*) aFilePath;
+
+/** 
+ * Returns the cached resource with the specified name,
+ * or nil if a resource with that name has not been cached.
+ */
++(CC3Resource*) getResourceNamed: (NSString*) rezName;
 
 /**
  * Adds the specified resource to the resource cache. Resources are indexed in the cache using

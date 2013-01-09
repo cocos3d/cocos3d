@@ -206,27 +206,8 @@
 
 #pragma mark Allocation and initialization
 
--(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
-	return [self initWithName: [self.class programNameFromVertexShaderFile: vshFilename
-													 andFragmentShaderFile: fshFilename]
-		 fromVertexShaderFile: vshFilename
-		andFragmentShaderFile: fshFilename];
-}
-
--(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
-	LogRez(@"");
-	LogRez(@"--------------------------------------------------");
-	LogRez(@"Loading GLSL program from vertex shader file '%@' and fragment shader file '%@'", vshFilename, fshFilename);
-		   
-	const GLchar* vshSource = (GLchar*)[[self glslSourceFromFile: vshFilename] UTF8String];
-	const GLchar* fshSource = (GLchar*)[[self glslSourceFromFile: fshFilename] UTF8String];
-	return [self initWithName: name fromVertexShaderBytes: vshSource andFragmentShaderBytes: fshSource];
-}
-
 -(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {
-	
 	NSAssert1(name, @"%@ cannot be created without a name", [self class]);
-
 	if ( (self = [super initWithVertexShaderByteArray: vshBytes
 							  fragmentShaderByteArray: fshBytes]) ) {
 		self.name = name;				// retained
@@ -238,6 +219,23 @@
 	return self;
 }
 
+-(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
+	LogRez(@"");
+	LogRez(@"--------------------------------------------------");
+	LogRez(@"Loading GLSL program named %@ from vertex shader file '%@' and fragment shader file '%@'", name, vshFilename, fshFilename);
+		   
+	const GLchar* vshSrc = [self.class glslSourceFromFile: vshFilename];
+	const GLchar* fshSrc = [self.class glslSourceFromFile: fshFilename];
+	return [self initWithName: name fromVertexShaderBytes: vshSrc andFragmentShaderBytes: fshSrc];
+}
+
+-(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
+	return [self initWithName: [self.class programNameFromVertexShaderFile: vshFilename
+													andFragmentShaderFile: fshFilename]
+		 fromVertexShaderFile: vshFilename
+		andFragmentShaderFile: fshFilename];
+}
+
 // Override superclass implementation to force nil name, which will be rejected.
 -(id)initWithVertexShaderByteArray: (const GLchar*)vShaderByteArray fragmentShaderByteArray: (const GLchar*)fShaderByteArray {
 	return [self initWithName: nil fromVertexShaderBytes: vShaderByteArray andFragmentShaderBytes: fShaderByteArray];
@@ -245,7 +243,7 @@
 
 // Overridden superclass implementation to delegate to updated method
 -(id) initWithVertexShaderFilename: (NSString*) vshFilename fragmentShaderFilename: fshFilename {
-	return [self initFromVertexShaderFile: vshFilename andFragmentShaderFile: fshFilename];
+	return [self initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename];
 }
 
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename
@@ -253,15 +251,15 @@
 	return [NSString stringWithFormat: @"%@-%@", vshFilename, fshFilename];
 }
 
--(NSString*) glslSourceFromFile:  (NSString*) glslFilename {
++(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
 	NSError* err = nil;
 	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
 	NSAssert1([[NSFileManager defaultManager] fileExistsAtPath: filePath],
 			  @"Could not load GLSL file '%@' because it could not be found", filePath);
-	NSString* glslSource = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
+	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
 	NSAssert4(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
 			  glslFilename, err.localizedDescription, err.code, err.localizedFailureReason);
-	return glslSource;
+	return (GLchar*)glslSrcStr.UTF8String;
 }
 
 #if CC3_OGLES_2

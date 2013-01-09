@@ -219,8 +219,8 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	}
 }
 
+// If first texture unit, return texture property, otherwise retrieve from overlay array
 -(CC3Texture*) textureForTextureUnit: (GLuint) texUnit {
-	// If first texture unit, return texture property, otherwise retrieve from overlay array
 	return (texUnit == 0) ? _texture : [_textureOverlays objectAtIndex: (texUnit - 1)];
 }
 

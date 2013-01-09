@@ -597,6 +597,7 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 	fontConfig = [cc3BMFontConfigurations objectForKey: fontFile];
 	if(!fontConfig) {
 		fontConfig = [super configurationWithFNTFile: fontFile];
+		NSAssert(fontConfig, @"Font configuration cannot be nil");
 		[cc3BMFontConfigurations setObject: fontConfig forKey: fontFile];
 	}
 	return fontConfig;

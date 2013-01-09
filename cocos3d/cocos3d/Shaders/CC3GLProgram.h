@@ -118,8 +118,6 @@
 /**
  * Initializes this instance with the specified name and compiles the program from the specified
  * vertex and fragment shader source code.
- *
- * The specified filenames may specified as relative or absolute filenames.
  */
 -(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes;
 
@@ -137,8 +135,8 @@
  *
  * The specified filenames may specified as relative or absolute filenames.
  *
- * The name property of this program will be set to a name derived from the two filenames via the
- * programNameFromVertexShaderFile:andFragmentShaderFile: method..
+ * The name property of this program will be set to a name derived from the two filenames via
+ * the programNameFromVertexShaderFile:andFragmentShaderFile: method..
  */
 -(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
 
@@ -151,6 +149,9 @@
  * This method is used by the initFromVertexShaderFile:andFragmentShaderFile: method.
  */
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
+
+/** Returns the GLSL source code loaded from the specified file. */
++(GLchar*) glslSourceFromFile:  (NSString*) glslFilename;
 
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;

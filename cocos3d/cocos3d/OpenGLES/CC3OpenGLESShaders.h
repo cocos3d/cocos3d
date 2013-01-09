@@ -55,8 +55,12 @@
 /** 
  * Returns the program that is used as a default if a material does not specify a specific shader program.
  *
- * If this property is not set directly, it will be lazily initialized from the value returned from the
- * makeDefaultProgram method, the first time this property is accessed.
+ * If this property is not set directly, it will be lazily initialized, the first time this
+ * property is accessed. as follows:
+ *   - The name of the program is kCC3DefaultGLProgramName.
+ *   - The vertex shader source code is loaded from the file named kCC3DefaultVertexShaderSourceFile.
+ *   - The fragment shader source code is loaded from the file named kCC3DefaultFragmentShaderSourceFile.
+ *   - The semanticDelgate of the program is of type CC3GLProgramSemanticsDelegateByVarNames.
  *
  * If this property has not been directly set to another program, this program can also be retrieved
  * using the getProgramNamed: property with the kCC3DefaultGLProgramName name.
@@ -82,21 +86,6 @@
 
 /** Removes the program with the specified name from the collection of loaded programs. */
 -(void) removeProgramNamed: (NSString*) name;
-
-/**
- * Template method that creates and returns a program to be set into the defaultProgram property.
- *
- * This implementation creates and returns a compiled, linked and autoreleased program with the
- * following characteristics:
- *   - The name of the program is kCC3DefaultGLProgramName.
- *   - The vertex shader source code is loaded from the file named kCC3DefaultVertexShaderSourceFile.
- *   - The fragment shader source code is loaded from the file named kCC3DefaultFragmentShaderSourceFile.
- *   - The semanticDelgate of the program is of type CC3GLProgramSemanticsDelegateByVarNames.
- *
- * This method is invoked automatically by the defaultProgram property. The application should
- * never need to invoke this method directly.
- */
--(CC3GLProgram*) makeDefaultProgram;
 
 /**
  * The name of the file containing the GLSL source code for the default vertex shader.

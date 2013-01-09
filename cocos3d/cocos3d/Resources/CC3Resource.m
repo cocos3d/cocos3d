@@ -66,7 +66,7 @@
 }
 
 +(id) resourceFromFile: (NSString*) aFilePath {
-	id rez = [_resourcesByName objectForKey: [aFilePath lastPathComponent]];
+	id rez = [self getResourceNamed: aFilePath.lastPathComponent];
 	if (rez) return rez;
 
 	rez = [[self alloc] initFromFile: aFilePath];
@@ -77,8 +77,7 @@
 
 static NSMutableDictionary* _resourcesByName = nil;
 
-// Protected accessor for subclass use
-+(NSMutableDictionary*) resourcesByName { return _resourcesByName; }
++(CC3Resource*) getResourceNamed: (NSString*) rezName { return [_resourcesByName objectForKey: rezName]; }
 
 +(void) addResource: (CC3Resource*) resource {
 	if ( !resource ) return;
@@ -88,10 +87,11 @@ static NSMutableDictionary* _resourcesByName = nil;
 }
 
 +(void) removeResource: (CC3Resource*) resource {
-	if (resource == [_resourcesByName objectForKey: resource.name]) {
-		[_resourcesByName removeObjectForKey: resource.name];
+	NSString* rezName = resource.name;
+	if (resource == [self getResourceNamed: rezName]) {
+		[_resourcesByName removeObjectForKey: rezName];
 	} else {
-		LogInfo(@"%@ not removed from the resource cache because it is not the instance that is cached under name %@", resource, resource.name);
+		LogInfo(@"%@ was not removed from the resource cache because it is not the instance that is cached under name %@", resource, rezName);
 	}
 }
 
@@ -109,7 +109,7 @@ static NSMutableDictionary* _resourcesByName = nil;
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading resources from file '%@'", absFilePath);
 
-	if (!name) self.name = [absFilePath lastPathComponent];
+	if (!name) self.name = absFilePath.lastPathComponent;
 	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
 	
 #if LOGGING_REZLOAD

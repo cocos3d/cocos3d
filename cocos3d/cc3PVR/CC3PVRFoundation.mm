@@ -481,12 +481,12 @@ NSString* NSStringFromSPVRTPFXParserTexture(PFXClassPtr pSPVRTPFXParserTexture) 
 	[desc appendFormat: @"SPVRTPFXParserTexture"];
 	[desc appendFormat: @" named %@", [NSString stringWithUTF8String: pfxTex->Name.c_str()]];
 	[desc appendFormat: @" from file %@", [NSString stringWithUTF8String: pfxTex->FileName.c_str()]];
-	[desc appendFormat: @" wrap (S,T,R): (%@, %@, %@)", NSStringFromGLEnum(pfxTex->nWrapS),
-														NSStringFromGLEnum(pfxTex->nWrapT),
-														NSStringFromGLEnum(pfxTex->nWrapR)];
-	[desc appendFormat: @" min: %@", NSStringFromGLEnum(pfxTex->nMin)];
-	[desc appendFormat: @" mag: %@", NSStringFromGLEnum(pfxTex->nMag)];
-	[desc appendFormat: @" mipmap: %@", NSStringFromGLEnum(pfxTex->nMIP)];
+	[desc appendFormat: @" wrap (S,T,R): (%@, %@, %@)", NSStringFromETextureWrap(pfxTex->nWrapS),
+														NSStringFromETextureWrap(pfxTex->nWrapT),
+														NSStringFromETextureWrap(pfxTex->nWrapR)];
+	[desc appendFormat: @" min: %@", NSStringFromETextureFilter(pfxTex->nMin)];
+	[desc appendFormat: @" mag: %@", NSStringFromETextureFilter(pfxTex->nMag)];
+	[desc appendFormat: @" mipmap: %@", NSStringFromETextureFilter(pfxTex->nMIP)];
 	[desc appendFormat: @" is render target: %@", NSStringFromBoolean(pfxTex->bRenderToTexture)];
 	return desc;
 }
@@ -497,5 +497,86 @@ NSString* NSStringFromSPVRTPFXRenderPass(PFXClassPtr pSPVRTPFXRenderPass) {
 	[desc appendFormat: @"SPVRTPFXRenderPass"];
 	[desc appendFormat: @" to texture %@", [NSString stringWithUTF8String: pfxPass->pTexture->Name.c_str()]];
 	return desc;
+}
+
+GLenum GLTextureWrapFromETextureWrap(uint eTextureWrap) {
+	switch (eTextureWrap) {
+		case eWrap_Clamp:
+			return GL_CLAMP_TO_EDGE;
+		case eWrap_Repeat:
+			return GL_REPEAT;
+		default:
+			LogError(@"Unknown ETextureWrap '%@'", NSStringFromETextureWrap(eTextureWrap));
+			return GL_REPEAT;
+	}
+}
+
+NSString* NSStringFromETextureWrap(uint eTextureWrap) {
+	switch (eTextureWrap) {
+		case eWrap_Clamp:
+			return @"eWrap_Clamp";
+		case eWrap_Repeat:
+			return @"eWrap_Repeat";
+		default:
+			return [NSString stringWithFormat: @"unknown ETextureWrap (%u)", eTextureWrap];
+	}
+}
+
+GLenum GLMagnifyingFunctionFromETextureFilter(uint eTextureFilter) {
+	switch (eTextureFilter) {
+		case eFilter_Nearest:
+			return GL_NEAREST;
+		case eFilter_Linear:
+			return GL_LINEAR;
+		default:
+			LogError(@"Unknown ETextureFilter '%@'", NSStringFromETextureFilter(eTextureFilter));
+			return GL_LINEAR;
+	}
+}
+
+GLenum GLMinifyingFunctionFromMinAndMipETextureFilters(uint minETextureFilter, uint mipETextureFilter) {
+	switch(mipETextureFilter) {
+			
+		case eFilter_Nearest:							// Standard mipmapping
+			switch(minETextureFilter) {
+				case eFilter_Nearest:
+					return GL_NEAREST_MIPMAP_NEAREST;	// Nearest	- std. Mipmap
+				case eFilter_Linear:
+				default:
+					return GL_LINEAR_MIPMAP_NEAREST;	// Bilinear - std. Mipmap
+		}
+
+		case eFilter_Linear:							// Trilinear mipmapping
+			switch(minETextureFilter) {
+				case eFilter_Nearest:
+					return GL_NEAREST_MIPMAP_LINEAR;	// Nearest - Trilinear
+				case eFilter_Linear:
+				default:
+					return GL_LINEAR_MIPMAP_LINEAR;		// Bilinear - Trilinear
+		}
+
+		case eFilter_None:								// No mipmapping
+		default:
+			switch(minETextureFilter) {
+				case eFilter_Nearest:
+					return GL_NEAREST;					// Nearest - no Mipmap
+				case eFilter_Linear:
+				default:
+					return GL_LINEAR;					// Bilinear - no Mipmap
+			}
+	}
+}
+
+NSString* NSStringFromETextureFilter(uint eTextureFilter) {
+	switch (eTextureFilter) {
+		case eFilter_Nearest:
+			return @"eFilter_Nearest";
+		case eFilter_Linear:
+			return @"eFilter_Linear";
+		case eFilter_None:
+			return @"eFilter_None";
+		default:
+			return [NSString stringWithFormat: @"unknown ETextureFilter (%u)", eTextureFilter];
+	}
 }
 

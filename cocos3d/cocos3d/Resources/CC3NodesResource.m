@@ -31,10 +31,6 @@
 
 #import "CC3NodesResource.h"
 
-@interface CC3Resource (TemplateMethods)
-+(NSMutableDictionary*) resourcesByName;
-@end
-
 @implementation CC3NodesResource
 
 @synthesize nodes=_nodes, expectsVerticallyFlippedTextures=_expectsVerticallyFlippedTextures;
@@ -56,7 +52,7 @@
 }
 
 +(id) resourceFromFile: (NSString*) aFilePath expectsVerticallyFlippedTextures: (BOOL) flipped {
-	CC3NodesResource* rez = [self.resourcesByName objectForKey: [aFilePath lastPathComponent]];
+	CC3NodesResource* rez = (CC3NodesResource*)[self getResourceNamed: aFilePath.lastPathComponent];
 	if (rez) return rez;
 	
 	rez = [self resource];								// autoreleased

@@ -32,78 +32,94 @@
 
 #import "CC3Resource.h"
 #import "CC3PVRFoundation.h"
+#import "CC3Material.h"
+#import "CC3GLProgram.h"
 
 
 /**
  * CC3PFXResource is a CC3Resource that wraps a PVR PFX data structure loaded from a file.
  * It handles loading object data from PFX files, and creating content from that data.
  * This class is the cornerstone of PFX file management.
- *
- // TODO - REWRITE BELOW HERE
- * CC3PODResource includes many properties and methods geared towards extracing object
- * data from the underlying complex POD resource structure. However, most of the properties
- * and methods exist as template methods to support internal behaviour and for overriding
- * in subclasses that might customize object creation from the POD data.
- *
- * Basic use of this class is straightforward:
- *   -# Allocate and initialize the CC3PODResource instance and load a POD file into the
- *      internal structures. This action also builds all the objects from the resource
- *      data structures (depending on the initializer used, loading can be triggered from
- *      the initializer, or can be performed separately).
- *   -# Access the nodes property to retrieve the fully-built node assembly.
- *
- * The array of nodes accessible via the nodes property are the root nodes of a hierarchical
- * structure of nodes. The loading step takes care of assembling this structural assembly.
- *
- * If this resource contains soft-body components such as skinned meshes, the corresponding
- * skinned mesh nodes and skeleton bone nodes are collected together and wrapped in a single
- * soft body node that appears in the nodes array.
- * 
- * In addition to this core functionality, this class includes many methods for accessing
- * data structures within the resource, and extracting object content from those data
- * structures, should the application have the need to do so. However, in almost all cases,
- * the basic two-step process of loading and retrieving the node assembly is all that is needed.
- *
- * Much of the building of the node assembly from the underlying data strucutres is handled
- * in template methods that are identified here in the interface for ease of overriding in
- * a customized subclass. Although not necessary, some applications may find it necessary
- * or convenient to override one or more of these template methods to modify the objects that
- * are extracted from the underlying file data, perhaps customizing them for the application,
- * or correcting idiosyncracies that might have been exported into the POD file from a 3D
- * editor. This capability can be useful if you are using a POD file of a 3D model that you
- * did not create yourself, and cannot edit.
- *
- * When customizing a subclass to change the properties of the objects returned, you will
- * most likely override one or more of the following methods:
- *   - buildMeshNodeAtIndex:
- *   - buildLightAtIndex:
- *   - buildCameraAtIndex:
- *   - buildStructuralNodeAtIndex:
- *   - buildMaterialAtIndex:
- *   - buildTextureAtIndex:
- *
- * In most cases, the overridden method can simply invoke the superclass implementation
- * on this class, and then change the properties of the extracted object. In other cases
- * you may want to extract and return a customized subclass of the object of interest.
  */
 @interface CC3PFXResource : CC3Resource {
-	PFXClassPtr _pvrtPFXParser;
+	NSMutableDictionary* _texturesByName;
+	NSMutableDictionary* _effectsByName;
 }
 
-/** Returns the number of effects (GLSL programs) contained in this PFX resource. */
-@property(nonatomic, readonly) NSUInteger effectCount;
+/** Populates the specfied material from the PFX effect with the specified name. */
+-(void) populateMaterial: (CC3Material*) material fromEffectNamed: (NSString*) effectName;
 
-/** Returns the number of vertex shaders contained in this PFX resource. */
-@property(nonatomic, readonly) NSUInteger vertexShaderCount;
+/**
+ * Populates the specfied material from the PFX effect with the specified name, found in the
+ * cached CC3PFXResource with the specifed name. Raises an assertion error if a PFX resource
+ * with the specified name cannot be found in the cache.
+ */
++(void) populateMaterial: (CC3Material*) material
+		 fromEffectNamed: (NSString*) effectName
+	  inPFXResourceNamed: (NSString*) rezName;
 
-/** Returns the number of fragment shaders contained in this PFX resource. */
-@property(nonatomic, readonly) NSUInteger fragmentShaderCount;
-
-/** Returns the number of textures contained in this PFX resource. */
-@property(nonatomic, readonly) NSUInteger textureCount;
-
-/** Returns the number of render passes contained in this PFX resource. */
-@property(nonatomic, readonly) NSUInteger renderPassCount;
-
+/**
+ * Populates the specfied material from the PFX effect with the specified name, found in the
+ * CC3PFXResource loaded from the specfied file. Raises an assertion error if the PFX resource
+ * file is not already in the resource cache and could not be loaded.
+ */
++(void) populateMaterial: (CC3Material*) material
+		 fromEffectNamed: (NSString*) effectName
+	   inPFXResourceFile: (NSString*) aFilePath;
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3PFXEffect
+
+/**
+ * CC3PFXEffect represents a single effect within a PFX resource file. It combines the shader
+ * code referenced by the effect into a CC3GLProgram, and the textures used by that program.
+ */
+@interface CC3PFXEffect : NSObject {
+	NSString* _name;
+	CC3GLProgram* _glProgram;
+	CCArray* _textures;
+}
+
+/** Returns the name of this effect. */
+@property(nonatomic, retain, readonly) NSString* name;
+
+/** The GL program used to render this effect. */
+@property(nonatomic, retain, readonly) CC3GLProgram* glProgram;
+
+/** The textures used in this effect. */
+@property(nonatomic, retain, readonly) CCArray* textures;
+
+/**
+ * Initializes this instance from the specified SPVRTPFXParserEffect C++ class, retrieved
+ * from the specified CPVRTPFXParser C++ class as loaded from the specfied PFX resource.
+ */
+-(id) initFromSPVRTPFXParserEffect: (PFXClassPtr) pSPVRTPFXParserEffect
+					 fromPFXParser: (PFXClassPtr) pCPVRTPFXParser
+					 inPFXResource: (CC3PFXResource*) pfxRez;
+
+/** Populates the specfied material with the GL program and textures. */
+-(void) populateMaterial: (CC3Material*) material;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PFXEffectTexture
+
+/** CC3PFXEffectTexture is a simple object that links a texture with a particular texture unit. */
+@interface CC3PFXEffectTexture : NSObject {
+	CC3Texture* _texture;
+	NSUInteger _textureUnitIndex;
+}
+
+/** The texture */
+@property(nonatomic, retain) CC3Texture* texture;
+
+/** The index of the texture unit to which the texture should be applied. */
+@property(nonatomic, assign) NSUInteger textureUnitIndex;
+
+@end
+

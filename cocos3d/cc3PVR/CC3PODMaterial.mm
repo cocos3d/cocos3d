@@ -34,6 +34,7 @@ extern "C" {
 }
 #import "CC3PODMaterial.h"
 #import "CC3PVRTModelPOD.h"
+#import "CC3PFXResource.h"
 
 @interface CC3PODMaterial (TemplateMethods)
 -(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
@@ -76,7 +77,13 @@ static GLfloat shininessExpansionFactor = 128.0f;
 		[self addTexture: psm->nIdxTexOpacity fromPODResource: aPODRez];
 		[self addTexture: psm->nIdxTexReflection fromPODResource: aPODRez];
 		[self addTexture: psm->nIdxTexRefraction fromPODResource: aPODRez];
- }
+		
+		if (psm->pszEffectName && psm->pszEffectFile) {
+			[CC3PFXResource populateMaterial: self
+							 fromEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
+						   inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
+		}
+	}
 	return self;
 }
 

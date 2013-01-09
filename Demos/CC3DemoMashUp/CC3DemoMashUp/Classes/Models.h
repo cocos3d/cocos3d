@@ -60,21 +60,6 @@
 @end
 
 
-
-#pragma mark -
-#pragma mark HeadPODResource
-
-/**
- * Customized POD resource class to handle the idiosyncracies of the POD file containing
- * the purple floating head. That POD file contains a reference to texture that does not
- * exist, so we override the texture loading behaviour to avoid it, rather than generate
- * spurious errors. This is not normally necessary. Normally, the POD file should be
- * created accurately to reflect the scene.
- */
-@interface HeadPODResource : CC3PODResource {}
-@end
-
-
 #pragma mark -
 #pragma mark PhysicsMeshNode
 

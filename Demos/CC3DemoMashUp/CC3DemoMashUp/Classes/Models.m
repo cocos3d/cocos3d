@@ -88,21 +88,6 @@
 
 
 #pragma mark -
-#pragma mark HeadPODResource
-
-@implementation HeadPODResource
-
-/**
- * The POD file does not contain any real textures, but does contain a reference
- * to a texture that does not exist. Simply override to skip all texture building.
- * This shouldn't usually be necessary.
- */
--(CC3Texture*) buildTextureAtIndex: (uint) textureIndex { return nil; }
-
-@end
-
-
-#pragma mark -
 #pragma mark PhysicsMeshNode
 
 @implementation PhysicsMeshNode

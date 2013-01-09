@@ -54,32 +54,28 @@
 }
 
 -(CC3GLProgram*) defaultProgram {
-	if ( !_defaultProgram ) {
-		CC3GLProgram* p = [self makeDefaultProgram];
-		if(p) [self addProgram: p];
-		self.defaultProgram = p;
-	}
+	if ( !_defaultProgram ) [self addDefaultProgram];
 	return _defaultProgram;
 }
 
--(CC3GLProgram*) makeDefaultProgram {
-	if ( !(_defaultVertexShaderSourceFile && _defaultFragmentShaderSourceFile) ) return nil;
+-(void) addDefaultProgram {
+	if ( !(_defaultVertexShaderSourceFile && _defaultFragmentShaderSourceFile) ) return;
 
-	CC3GLProgram *p = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
+	_defaultProgram = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
 									fromVertexShaderFile: _defaultVertexShaderSourceFile
 								   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
-	p.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
-	[p link];
-	return p;
+	_defaultProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+	[_defaultProgram link];
+	[self addProgram: _defaultProgram];
 }
 
--(void) makePureColorProgram {
-	// retained
+-(void) addPureColorProgram {
 	_pureColorProgram = [[CC3GLProgram alloc] initWithName: kCC3PureColorGLProgramName
-										fromVertexShaderFile: kCC3PureColorVertexShaderSourceFile
-									   andFragmentShaderFile: kCC3PureColorFragmentShaderSourceFile];
+									  fromVertexShaderFile: kCC3PureColorVertexShaderSourceFile
+									 andFragmentShaderFile: kCC3PureColorFragmentShaderSourceFile];
 	_pureColorProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
 	[_pureColorProgram link];
+	[self addProgram: _pureColorProgram];
 }
 
 
@@ -98,7 +94,7 @@
 	[super initializeTrackers];
 	_defaultVertexShaderSourceFile = kCC3DefaultVertexShaderSourceFile;
 	_defaultFragmentShaderSourceFile = kCC3DefaultFragmentShaderSourceFile;
-	[self makePureColorProgram];
+	[self addPureColorProgram];
 }
 
 @end

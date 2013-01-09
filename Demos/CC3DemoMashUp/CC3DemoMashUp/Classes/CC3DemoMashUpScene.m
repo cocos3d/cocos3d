@@ -147,56 +147,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 @property(nonatomic, readonly) ccColor3B initialDescriptorColor;
 @end
 
-@interface CC3DemoMashUpScene (Private)
--(void) addRobot;
--(void) addGround;
--(void) addFloatingRing;
--(void) addAxisMarkers;
--(void) addLightMarker;
--(void) addBitmapLabel;
--(void) addProjectedLabel;
--(void) addTeapotAndSatellite;
--(void) addBrickWall;
--(void) addBeachBall;
--(void) addGlobe;
--(void) addDieCube;
--(void) addMascots;
--(void) addBumpMapLightTracker;
--(void) addWoodenSign;
--(void) addFloatingHead;
--(void) addSun;
--(void) addSpotlight;
--(void) addFog;
--(void) addPointParticles;
--(void) addMeshParticles;
--(void) addPointHose;
--(void) addMeshHose;
--(void) addTexturedCube;
--(void) addSkinnedMallet;
--(void) addSkinnedRunners;
--(void) addExplosionTo: (CC3Node*) aNode;
--(void) configureCamera;
--(void) configureLighting;
--(void) updateCameraFromControls: (ccTime) dt;
--(void) invadeWithRobotArmy;
--(void) invadeWithTeapotArmy;
--(void) invadeWithArmyOf: (CC3Node*) invaderTemplate;
--(void) rotateCubeFromSwipeAt: (CGPoint) touchPoint interval: (ccTime) dt;
--(void) rotate: (SpinningNode*) aNode fromSwipeAt: (CGPoint) touchPoint interval: (ccTime) dt;
--(void) rotate: (SpinningNode*) aNode fromSwipeVelocity: (CGPoint) swipeVelocity;
--(void) touchGroundAt: (CGPoint) touchPoint;
--(void) touchBeachBallAt: (CGPoint) touchPoint;
--(void) touchBrickWallAt: (CGPoint) touchPoint;
--(void) switchWoodenSign;
--(void) toggleFloatingHeadDefinition;
--(void) toggleActiveCamera;
--(void) cycleLabelOf: (CC3BitmapLabelNode*) aNode;
--(void) cycleShadowFor: (CC3Node*) aNode;
--(void) markTouchPoint: (CGPoint) touchPoint on: (CC3Node*) touchedNode;
--(void) checkForCollisions;
-@end
-
-
 @implementation CC3DemoMashUpScene
 
 @synthesize playerDirectionControl, playerLocationControl, isManagingShadows;
@@ -225,14 +175,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[headBumpTex release];
 	
 	[super dealloc];
-}
-
-
--(void) addPFXEffect {
-	LogInfo(@"Rez1: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
-	LogInfo(@"Rez2: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
-	LogInfo(@"Rez3: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
-	LogInfo(@"Rez4: %@", [CC3PFXResource resourceFromFile: @"effect.pfx"]);
 }
 
 /**
@@ -359,7 +301,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 //	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 	
-	[self addPFXEffect];
+	[self addReflectionMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
@@ -475,6 +418,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 
+	[self addReflectionMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
+	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
 	
@@ -1159,7 +1105,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Add the wooden sign to the bump-map light tracker so that when the bump-map
 	// texture overlay is displayed, it will interact with the light source.
-	woodenSign.location = cc3v(-600.0, 250.0, -300.0);
+	woodenSign.location = cc3v(-600.0, 250.0, -200.0);
 	[bumpMapLightTracker addChild: woodenSign];
 }
 
@@ -1181,13 +1127,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * down, and as you move the camera around, which causes the head to rotate to follow you.
  */
 -(void) addFloatingHead {
-
-	// We introduce a specialized resource subclass, not because it is needed in general,
-	// but because the POD file containing the head model contains an erroneous reference
-	// to a texture file that does not actually exist. This specialized resource subclass
-	// avoids this erroneous reference.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODHeadRezNodeName];
-	podRezNode.resource = [HeadPODResource resourceFromFile: kHeadPODFile];
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODHeadRezNodeName
+															 fromFile: kHeadPODFile];
 
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
@@ -1227,7 +1168,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	headTex.minifyingFunction = GL_LINEAR;
 
 	// Add the bump-map texture and the color texture to the material.
-	[floatingHead.material addTexture: headBumpTex];
+	floatingHead.material.texture = headBumpTex;		// replace the dummy texture
 	[floatingHead.material addTexture: headTex];
 	
 	// Put the head node in an orienting wrapper so that we can orient it to face the camera.
@@ -1908,6 +1849,37 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
+ * Adds a floating mask that uses a PowerVR PFX file to define a GLSL shader program for the
+ * material. The material in the POD file references a PFX effect found in a PFX resource file.
+ * The PFX effect applies two textures to the mask.
+ * 
+ * When running under OpenGL ES 2.0, specialized shaders defined in the PFX effect render the
+ * second texture as an environment reflection.
+ *
+ * When running under OpenGL ES 1.1, only the second texture is visible, due to default
+ * multi-texturing configuration. Under OpenGL ES 1.1, further texture unit configuration
+ * could be applied to allow the two textures to be combined in a more realistic manner.
+ */
+-(void) addReflectionMask {
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: @"ReflectionMask.pod"];
+	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
+	
+	// The mask animation locates the mask at a distant location and scale. Wrap it in a holder
+	// to move it to a more convenient location and scale. Remember that the location of the mask
+	// within the holder (and therefore the required offset) scales as the holder scales!!
+	CC3Node* maskHolder = [mask asOrientingWrapper];
+	maskHolder.uniformScale = 6.0;
+	CC3Vector maskOffset = CC3VectorScaleUniform(mask.location, maskHolder.uniformScale);
+	maskHolder.location = CC3VectorDifference(cc3v(-800.0, 50.0, -500.0), maskOffset);
+
+	[self addChild: maskHolder];
+
+	// Make the mask touchable and animate it.
+	mask.isTouchEnabled = YES;
+	[mask runAction: [CCRepeatForever actionWithAction: [CC3Animate actionWithDuration: 10.0]]];
+}
+
+/**
  * Adds a temporary fiery explosion on top of the specified node, using a cocos2d
  * CCParticleSystem. The explosion is set to a short duration, and when the particle
  * system has exhausted, the CC3ParticleSystem node along with the CCParticleSystem
@@ -2032,7 +2004,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  }
 
 /** After all the nodes have been updated, check for collisions. */
--(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor { [self checkForCollisions]; }
+-(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
+	[self checkForCollisions];
+}
 
 /**
  * Check for collisions.

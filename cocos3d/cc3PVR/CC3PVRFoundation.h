@@ -134,3 +134,19 @@ NSString* NSStringFromSPVRTPFXParserTexture(PFXClassPtr pSPVRTPFXParserTexture);
 
 /** Returns a string description of the specified SPVRTPFXRenderPass class. */
 NSString* NSStringFromSPVRTPFXRenderPass(PFXClassPtr pSPVRTPFXRenderPass);
+
+/** Maps the specified ETextureWrap to a valid GL texture wrap, and returns the GL value. */
+GLenum GLTextureWrapFromETextureWrap(uint eTextureWrap);
+
+/** Returns the name of the specified ETextureWrap enumeration. */
+NSString* NSStringFromETextureWrap(uint eTextureWrap);
+
+/** Maps the specified ETextureFilter to a valid GL texture magnifying function, and returns the GL value. */
+GLenum GLMagnifyingFunctionFromETextureFilter(uint eTextureFilter);
+	
+/** Maps the specified ETextureFilters to a valid GL texture minifying function, and returns the GL value. */
+GLenum GLMinifyingFunctionFromMinAndMipETextureFilters(uint minETextureFilter, uint mipETextureFilter);
+
+/** Returns the name of the specified ETextureFilter enumeration. */
+NSString* NSStringFromETextureFilter(uint eTextureFilter);
+
