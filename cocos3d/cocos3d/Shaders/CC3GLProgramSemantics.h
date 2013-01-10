@@ -262,10 +262,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateBase
+#pragma mark CC3GLProgramSemanticsBase
 
 /**
- * CC3GLProgramSemanticsDelegateBase is an abstract implementation of the CC3GLProgramSemanticsDelegate
+ * CC3GLProgramSemanticsBase is an abstract implementation of the CC3GLProgramSemanticsDelegate
  * protocol, that retrieves common uniform values from the scene based on those semantics.
  *
  * This implementation can be used as a superclass for other implementations. Semantic assigment
@@ -282,7 +282,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * enumeration. If a subclass adds additional semantic definitions of its own, it should override
  * that method to provide a string representation of the semantic value.
  */
-@interface CC3GLProgramSemanticsDelegateBase : NSObject<CC3GLProgramSemanticsDelegate> {}
+@interface CC3GLProgramSemanticsBase : NSObject<CC3GLProgramSemanticsDelegate> {}
 
 /** Allocates and initializes an autoreleased instance. */
 +(id) semanticsDelegate;
@@ -317,17 +317,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateByVarNames
+#pragma mark CC3GLProgramSemanticsByVarName
 
 /**
- * CC3GLProgramSemanticsDelegateByVarNames extends CC3GLProgramSemanticsDelegateBase to add
- * the assignment of semantics to uniform and attribute variables based on matching specific
- * variable names within the GLSL source code.
+ * CC3GLProgramSemanticsByVarName extends CC3GLProgramSemanticsBase to add the assignment of
+ * semantics to uniform and attribute variables based on matching specific variable names
+ * within the GLSL source code.
  *
- * Since the semantics are determined by GLSL variable name, it is critical that the GLSL shader
- * code use very specific attribute and uniform variable names.
+ * Since the semantics are determined by GLSL variable name, it is critical that the GLSL
+ * shader code use very specific attribute and uniform variable names.
  */
-@interface CC3GLProgramSemanticsDelegateByVarNames : CC3GLProgramSemanticsDelegateBase {
+@interface CC3GLProgramSemanticsByVarName : CC3GLProgramSemanticsBase {
 	NSMutableDictionary* _varConfigsByName;
 }
 
@@ -379,17 +379,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateByVarNames default mappings extension
+#pragma mark CC3GLProgramSemanticsByVarName default mappings extension
 
 /**
- * This extension to CC3GLProgramSemanticsDelegateByVarNames establishes a cocos3d default
+ * This extension to CC3GLProgramSemanticsByVarName establishes a cocos3d default
  * mappings between variable names and semantics.
  *
  * An application can use the mappings defined in this extension as the basis for its own mappings
  * and add or change a few of its own additional mappings, or an application may ignore this
  * extension and may instead provide its own extensions to populate completely different mappings.
  */
-@interface CC3GLProgramSemanticsDelegateByVarNames (DefaultMappings)
+@interface CC3GLProgramSemanticsByVarName (DefaultMappings)
 
 /**
  * Populates this instance with the default cocos3d mappings between variable names and semantics.
@@ -475,7 +475,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * mappings to conserve memory or increase shader flexibility. You must set those property prior
  * to the first access of this property (typically on the loading of the default shaders).
  */
-+(CC3GLProgramSemanticsDelegateByVarNames*) sharedDefaultDelegate;
++(CC3GLProgramSemanticsByVarName*) sharedDefaultDelegate;
 
 @end
 

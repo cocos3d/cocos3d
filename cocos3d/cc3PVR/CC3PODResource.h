@@ -97,6 +97,7 @@
 	CCArray* meshes;
 	CCArray* materials;
 	CCArray* textures;
+	Class _pfxResourceClass;
 	ccTexParams textureParameters;
 }
 
@@ -161,6 +162,41 @@
 
 /** The background color of the scene in the POD file. */
 @property(nonatomic, readonly) ccColor4F backgroundColor;
+
+/**
+ * The class used to instantiate CC3PFXResource instances used to read PFX files.
+ * 
+ * PFX effects found in PFX resource files can be used to define the GLSL shaders and textures
+ * that are to be applied to a POD model under OpenGL ES 2.0. Each material in the POD file can
+ * optionally specify a PFX effect and the PFX file in which it is to be found.
+ *
+ * The returned class must be a subclass of CC3PFXResource.
+ *
+ * The initial value is set from the class-side defaultPFXResourceClass property.
+ */
+@property(nonatomic, assign) Class pfxResourceClass;
+
+/**
+ * The default class used to instantiate CC3PFXResource instances used to read PFX files
+ * from within instances of this class. When an instance of this class is created, the
+ * value of the pfxResourceClass property is set from the value of this property.
+ *
+ * The returned class must be a subclass of CC3PFXResource.
+ *
+ * The initial value is the CC3PFXResource class.
+ */
++(Class) defaultPFXResourceClass;
+
+/**
+ * The default class used to instantiate CC3PFXResource instances used to read PFX files
+ * from within instances of this class. When an instance of this class is created, the
+ * value of the pfxResourceClass property is set from the value of this property.
+ *
+ * The set class must be a subclass of CC3PFXResource.
+ *
+ * The initial value is the CC3PFXResource class.
+ */
++(void) setDefaultPFXResourceClass: (Class) aClass;
 
 
 #pragma mark Allocation and initialization

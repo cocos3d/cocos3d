@@ -79,9 +79,9 @@ static GLfloat shininessExpansionFactor = 128.0f;
 		[self addTexture: psm->nIdxTexRefraction fromPODResource: aPODRez];
 		
 		if (psm->pszEffectName && psm->pszEffectFile) {
-			[CC3PFXResource populateMaterial: self
-							 fromEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
-						   inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
+			[aPODRez.pfxResourceClass populateMaterial: self
+									   fromEffectNamed: [NSString stringWithUTF8String: psm->pszEffectName]
+									 inPFXResourceFile: [NSString stringWithUTF8String: psm->pszEffectFile]];
 		}
 	}
 	return self;

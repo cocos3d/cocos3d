@@ -41,6 +41,7 @@ extern "C" {
 #import "CC3PODMesh.h"
 #import "CC3PODMaterial.h"
 #import "CC3PODVertexSkinning.h"
+#import "CC3PFXResource.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -61,6 +62,7 @@ static const id placeHolder = [NSObject new];
 @implementation CC3PODResource
 
 @synthesize pvrtModel, allNodes, meshes, materials, textures, textureParameters;
+@synthesize pfxResourceClass=_pfxResourceClass;
 
 -(void) dealloc {
 	[allNodes release];
@@ -69,10 +71,21 @@ static const id placeHolder = [NSObject new];
 	[textures release];
 	if (self.pvrtModelImpl) delete (CPVRTModelPOD*)self.pvrtModelImpl;
 	pvrtModel = NULL;
+	_pfxResourceClass = nil;		// not retained
 	[super dealloc];
 }
 
 -(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)pvrtModel; }
+
+static Class _defaultPFXResourceClass = nil;
+
++(Class) defaultPFXResourceClass {
+	if ( !_defaultPFXResourceClass)
+		self.defaultPFXResourceClass = [CC3PFXResource class];
+	return _defaultPFXResourceClass;
+}
+
++(void) setDefaultPFXResourceClass: (Class) aClass { _defaultPFXResourceClass = aClass; }
 
 
 #pragma mark Allocation and initialization
@@ -85,6 +98,7 @@ static const id placeHolder = [NSObject new];
 		materials = [[CCArray array] retain];
 		textures = [[CCArray array] retain];
 		textureParameters = [CC3Texture defaultTextureParameters];
+		_pfxResourceClass = [[self class] defaultPFXResourceClass];
 	}
 	return self;
 }

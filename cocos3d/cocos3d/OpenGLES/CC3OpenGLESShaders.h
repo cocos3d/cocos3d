@@ -60,7 +60,7 @@
  *   - The name of the program is kCC3DefaultGLProgramName.
  *   - The vertex shader source code is loaded from the file named kCC3DefaultVertexShaderSourceFile.
  *   - The fragment shader source code is loaded from the file named kCC3DefaultFragmentShaderSourceFile.
- *   - The semanticDelgate of the program is of type CC3GLProgramSemanticsDelegateByVarNames.
+ *   - The semanticDelgate of the program is of type CC3GLProgramSemanticsByVarName.
  *
  * If this property has not been directly set to another program, this program can also be retrieved
  * using the getProgramNamed: property with the kCC3DefaultGLProgramName name.

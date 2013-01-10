@@ -207,6 +207,7 @@
 		A971D3101663EC6E00769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30D1663EC6E00769DC5 /* fps_images-hd.png */; };
 		A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */; };
 		A971D3121663EC6E00769DC5 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30F1663EC6E00769DC5 /* fps_images.png */; };
+		A97434DA169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.m in Sources */ = {isa = PBXBuildFile; fileRef = A97434D9169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.m */; };
 		A9785E75169E442400AD29EB /* CCAction.m in Sources */ = {isa = PBXBuildFile; fileRef = A9785D87169E442400AD29EB /* CCAction.m */; };
 		A9785E76169E442400AD29EB /* CCActionCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = A9785D89169E442400AD29EB /* CCActionCamera.m */; };
 		A9785E77169E442400AD29EB /* CCActionCatmullRom.m in Sources */ = {isa = PBXBuildFile; fileRef = A9785D8B169E442400AD29EB /* CCActionCatmullRom.m */; };
@@ -707,6 +708,8 @@
 		A971D30D1663EC6E00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
+		A97434D8169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PVRShamanGLProgramSemantics.h; sourceTree = "<group>"; };
+		A97434D9169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PVRShamanGLProgramSemantics.m; sourceTree = "<group>"; };
 		A9785D86169E442400AD29EB /* CCAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCAction.h; sourceTree = "<group>"; };
 		A9785D87169E442400AD29EB /* CCAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCAction.m; sourceTree = "<group>"; };
 		A9785D88169E442400AD29EB /* CCActionCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCActionCamera.h; sourceTree = "<group>"; };
@@ -1146,6 +1149,8 @@
 				A940EBA616986E86004F499C /* CC3PODVertexSkinning.mm */,
 				A940EBA716986E86004F499C /* CC3PVRFoundation.h */,
 				A940EBA816986E86004F499C /* CC3PVRFoundation.mm */,
+				A97434D8169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.h */,
+				A97434D9169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.m */,
 				A940EBA916986E86004F499C /* CC3PVRTModelPOD.h */,
 				A940ED911698B476004F499C /* CC3PVRTPFXParser.h */,
 				A940EBAA16986E86004F499C /* CC3VertexArraysPODExtensions.h */,
@@ -2320,6 +2325,7 @@
 				A9785ED8169E442500AD29EB /* vec2.c in Sources */,
 				A9785ED9169E442500AD29EB /* vec3.c in Sources */,
 				A9785EDA169E442500AD29EB /* vec4.c in Sources */,
+				A97434DA169F012B00FB3FF8 /* CC3PVRShamanGLProgramSemantics.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

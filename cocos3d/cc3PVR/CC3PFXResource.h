@@ -44,6 +44,7 @@
 @interface CC3PFXResource : CC3Resource {
 	NSMutableDictionary* _texturesByName;
 	NSMutableDictionary* _effectsByName;
+	Class _semanticDelegateClass;
 }
 
 /** Populates the specfied material from the PFX effect with the specified name. */
@@ -67,6 +68,35 @@
 		 fromEffectNamed: (NSString*) effectName
 	   inPFXResourceFile: (NSString*) aFilePath;
 
+/** 
+ * The class used to instantiate the semantic delegate for the GLSL programs created for
+ * the PFX effects defined in this PFX resource. The returned class must be a subclass of
+ * CC3PFXGLProgramSemantics.
+ *
+ * The initial value is set from the class-side defaultSemanticDelegateClass property.
+ */
+@property(nonatomic, assign) Class semanticDelegateClass;
+
+/**
+ * The default class used to instantiate the semantic delegate for the GLSL programs created
+ * for the PFX effects defined in instances of this class. The value of this property determines
+ * the initial value of the semanticDelegateClass property of any instances. The returned class
+ * must be a subclass of CC3PFXGLProgramSemantics.
+ *
+ * The initial value is the CC3PVRShamanGLProgramSemantics class.
+ */
++(Class) defaultSemanticDelegateClass;
+
+/**
+ * The default class used to instantiate the semantic delegate for the GLSL programs created
+ * for the PFX effects defined in instances of this class. The value of this property determines
+ * the initial value of the semanticDelegateClass property of any instances. The class must be
+ * a subclass of CC3PFXGLProgramSemantics.
+ *
+ * The initial value is the CC3PVRShamanGLProgramSemantics class.
+ */
++(void) setDefaultSemanticDelegateClass: (Class) aClass;
+
 @end
 
 
@@ -81,6 +111,7 @@
 	NSString* _name;
 	CC3GLProgram* _glProgram;
 	CCArray* _textures;
+	CCArray* _variables;
 }
 
 /** Returns the name of this effect. */
@@ -89,8 +120,17 @@
 /** The GL program used to render this effect. */
 @property(nonatomic, retain, readonly) CC3GLProgram* glProgram;
 
-/** The textures used in this effect. */
+/**
+ * The textures used in this effect. Each element of this array is an instance of CC3PFXEffectTexture
+ * that contains the texture and the index of the texture unit to which the texture should be applied.
+ */
 @property(nonatomic, retain, readonly) CCArray* textures;
+
+/**
+ * This array contains a configuration spec for each attribute and uniform variable used in
+ * the shaders. Each element of this array is an instance of CC3PFXGLSLVariableConfiguration.
+ */
+@property(nonatomic, retain, readonly) CCArray* variables;
 
 /**
  * Initializes this instance from the specified SPVRTPFXParserEffect C++ class, retrieved
@@ -102,6 +142,72 @@
 
 /** Populates the specfied material with the GL program and textures. */
 -(void) populateMaterial: (CC3Material*) material;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PFXGLSLVariableConfiguration
+
+/** A CC3PFXGLSLVariableConfiguration that includes a semantic name retrieved from a PFX effect. */
+@interface CC3PFXGLSLVariableConfiguration : CC3GLSLVariableConfiguration {
+	NSString* _pfxSemanticName;
+}
+
+/** The semantic name as retrieved from the PFX effect. */
+@property(nonatomic, retain) NSString* pfxSemanticName;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PFXGLProgramSemantics
+
+/**
+ * CC3PFXGLProgramSemantics provides a mapping from the PFX semantic names declared in a PFX
+ * effect within a PFX effects file, and the standard semantics from the CC3Semantic enumeration.
+ *
+ * This is an abstract implementation. Subclasses can override the semanticForPFXSemanticName:
+ * method for simple name-based mapping, or can override the resolveSemanticForVariableConfiguration:
+ * for more complex mapping.
+ */
+@interface CC3PFXGLProgramSemantics : CC3GLProgramSemanticsByVarName
+
+/**
+ * Populates this instance with the mappings between variable names and semantics defined
+ * in the specified PFX effect. In the process of doing so, the semantic of each variable
+ * is resolved from the PFX semantic name of the variable configuration.
+ *
+ * For each variable configuration in the variables property of the specified PFX effect, this
+ * method invokes the resolveSemanticForVariableConfiguration: and addVariableConfiguration:
+ * methods to resolve the variable configuration and add it to this semantic mapping.
+ *
+ * This method is invoked automatically during the parsing of the PFX file.
+ */
+-(void) populateWithVariableNameMappingsFromPFXEffect: (CC3PFXEffect*) pfxEffect;
+
+/**
+ * If the semantic property of the specified variable configuration has not already been set,
+ * it is set by resolving it from the PFX semantic name of the specified variable configuration.
+ *
+ * Returns whether the semantic has been resolved. Subclasses that override this method can first
+ * invoke this superclass implementation, and then use the return value to resolve any custom semantics.
+ *
+ * The default behaviour is to invoke the semanticForPFXSemanticName: method with the value of
+ * the pfxSemanticName property of the specified variable configuration, and if it returns a
+ * valid semantic value, the semantic value is set in the specified variable configuration and
+ * this method returns YES. If the semanticForPFXSemanticName: method returns kCC3SemanticNone,
+ * the semantic of the specified variable configuration is not set, and this method returns NO.
+ */
+-(BOOL) resolveSemanticForVariableConfiguration: (CC3PFXGLSLVariableConfiguration*) pfxVarConfig;
+
+/**
+ * Returns the semantic value corresponding the the specified PFX semantic name, or returns
+ * kCC3SemanticNone if the semantic could not be determined from the PFX semantic name.
+ *
+ * This implementation does nothing and simply returns kCC3SemanticNone. Subclasses will override.
+ */
+-(GLenum) semanticForPFXSemanticName: (NSString*) semanticName;
 
 @end
 

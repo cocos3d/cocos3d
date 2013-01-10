@@ -152,13 +152,22 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[super dealloc];
 }
 
+-(id) init {
+	if ( (self = [super init]) ) {
+		_name = nil;
+		_semantic = kCC3SemanticNone;
+		_semanticIndex = 0;
+	}
+	return self;
+}
+
 @end
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateBase
+#pragma mark CC3GLProgramSemanticsBase
 
-@implementation CC3GLProgramSemanticsDelegateBase
+@implementation CC3GLProgramSemanticsBase
 
 +(id) semanticsDelegate { return [[[self alloc] init] autorelease]; }
 
@@ -488,14 +497,27 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateByVarNames
+#pragma mark CC3GLProgramSemanticsByVarName
 
-@implementation CC3GLProgramSemanticsDelegateByVarNames
+@implementation CC3GLProgramSemanticsByVarName
 
 -(void) dealloc {
 	[_varConfigsByName release];
 	[super dealloc];
 }
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_varConfigsByName = [NSMutableDictionary new];		// retained
+	}
+	return self;
+}
+
+
+#pragma mark Variable configuration
 
 /**
  * Uses the variable name property to look up a configuration and sets the semantic
@@ -512,7 +534,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 }
 
 -(void) addVariableConfiguration: (CC3GLSLVariableConfiguration*) varConfig {
-	if ( !_varConfigsByName ) _varConfigsByName = [NSMutableDictionary new];		// retained
 	[_varConfigsByName setObject: varConfig forKey: varConfig.name];
 }
 
@@ -533,9 +554,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 
 #pragma mark -
-#pragma mark CC3GLProgramSemanticsDelegateByVarNames default mappings extension
+#pragma mark CC3GLProgramSemanticsByVarName default mappings extension
 
-@implementation CC3GLProgramSemanticsDelegateByVarNames (DefaultMappings)
+@implementation CC3GLProgramSemanticsByVarName (DefaultMappings)
 
 -(void) populateWithDefaultVariableNameMappings {
 	
@@ -670,11 +691,11 @@ static NSUInteger _maxTexUnitVars = 4;
 
 #pragma mark Allocation and initialization
 
-static CC3GLProgramSemanticsDelegateByVarNames* _sharedDefaultDelegate;
+static CC3GLProgramSemanticsByVarName* _sharedDefaultDelegate;
 
-+(CC3GLProgramSemanticsDelegateByVarNames*) sharedDefaultDelegate {
++(CC3GLProgramSemanticsByVarName*) sharedDefaultDelegate {
 	if ( !_sharedDefaultDelegate ) {
-		_sharedDefaultDelegate = [CC3GLProgramSemanticsDelegateByVarNames new];		// retained
+		_sharedDefaultDelegate = [CC3GLProgramSemanticsByVarName new];		// retained
 		[_sharedDefaultDelegate populateWithDefaultVariableNameMappings];
 	}
 	return _sharedDefaultDelegate;

@@ -64,7 +64,7 @@
 	_defaultProgram = [[CC3GLProgram alloc] initWithName: kCC3DefaultGLProgramName
 									fromVertexShaderFile: _defaultVertexShaderSourceFile
 								   andFragmentShaderFile: _defaultFragmentShaderSourceFile];
-	_defaultProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+	_defaultProgram.semanticDelegate = [CC3GLProgramSemanticsByVarName sharedDefaultDelegate];
 	[_defaultProgram link];
 	[self addProgram: _defaultProgram];
 }
@@ -73,7 +73,7 @@
 	_pureColorProgram = [[CC3GLProgram alloc] initWithName: kCC3PureColorGLProgramName
 									  fromVertexShaderFile: kCC3PureColorVertexShaderSourceFile
 									 andFragmentShaderFile: kCC3PureColorFragmentShaderSourceFile];
-	_pureColorProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+	_pureColorProgram.semanticDelegate = [CC3GLProgramSemanticsByVarName sharedDefaultDelegate];
 	[_pureColorProgram link];
 	[self addProgram: _pureColorProgram];
 }

@@ -42,7 +42,7 @@
  * specialized shaders that have been tuned and optimized to a specific needs of each model.
  *
  * The semantics of the variables in this shader can be mapped using the
- * CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate instance.
+ * CC3GLProgramSemanticsByVarName sharedDefaultDelegate instance.
  *
  * In order to reduce the number of uniform variables, this shader supports two texture units
  * and two lights by default. This can be increased by changing the MAX_TEXTURES and MAX_LIGHTS
@@ -51,7 +51,7 @@
 
 // Increase these if more textures or lights are desired.
 // In order to improve performance, they have been kept low to limit the number of uniforms.
-// These definitions should not be set larger than the CC3GLProgramSemanticsDelegateByVarNames
+// These definitions should not be set larger than the CC3GLProgramSemanticsByVarName
 // class-side properties maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables
 // (each defaults to 4). See the description of those properties for more info.
 #define MAX_TEXTURES			2

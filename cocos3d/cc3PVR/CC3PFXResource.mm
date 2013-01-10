@@ -35,13 +35,17 @@ extern "C" {
 #import "CC3PFXResource.h"
 #import "CC3PVRTPFXParser.h"
 #import "CC3OpenGLESEngine.h"
+#import "CC3PVRShamanGLProgramSemantics.h"
 
 
 @implementation CC3PFXResource
 
+@synthesize semanticDelegateClass=_semanticDelegateClass;
+
 -(void) dealloc {
 	[_effectsByName release];
 	[_texturesByName release];
+	_semanticDelegateClass = nil;		// not retained
 	[super dealloc];
 }
 
@@ -89,6 +93,7 @@ extern "C" {
 	if ( (self = [super init]) ) {
 		_effectsByName = [NSMutableDictionary new];		// retained
 		_texturesByName = [NSMutableDictionary new];	// retained
+		_semanticDelegateClass = [self class].defaultSemanticDelegateClass;	// not retained
 	}
 	return self;
 }
@@ -175,6 +180,16 @@ extern "C" {
 	return desc;
 }
 
+static Class _defaultSemanticDelegateClass = nil;
+
++(Class) defaultSemanticDelegateClass {
+	if ( !_defaultSemanticDelegateClass)
+		self.defaultSemanticDelegateClass = [CC3PVRShamanGLProgramSemantics class];
+	return _defaultSemanticDelegateClass;
+}
+
++(void) setDefaultSemanticDelegateClass: (Class) aClass { _defaultSemanticDelegateClass = aClass; }
+
 @end
 
 
@@ -183,12 +198,13 @@ extern "C" {
 
 @implementation CC3PFXEffect
 
-@synthesize name=_name, glProgram=_glProgram, textures=_textures;
+@synthesize name=_name, glProgram=_glProgram, textures=_textures, variables=_variables;
 
 -(void) dealloc {
 	[_name release];
 	[_glProgram release];
 	[_textures release];
+	[_variables release];
 	[super dealloc];
 }
 
@@ -221,11 +237,13 @@ extern "C" {
 		SPVRTPFXParserEffect* pfxEffect = (SPVRTPFXParserEffect*)pSPVRTPFXParserEffect;
 		_name = [[NSString stringWithUTF8String: pfxEffect->Name.c_str()] retain];	// retained
 		[self initTexturesFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
+		[self initVariablesFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 		[self initGLProgramFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 	}
 	return self;
 }
 
+/** Initializes the effect textures in the textures property.  */
 -(void) initTexturesFrom: (SPVRTPFXParserEffect*) pfxEffect
 		   fromPFXParser: (CPVRTPFXParser*) pfxParser
 		   inPFXResource: (CC3PFXResource*) pfxRez  {
@@ -251,6 +269,29 @@ extern "C" {
 	}
 }
 
+/** Initializes the variables configurations in the variables property. */
+-(void) initVariablesFrom: (SPVRTPFXParserEffect*) pfxEffect
+		   fromPFXParser: (CPVRTPFXParser*) pfxParser
+		   inPFXResource: (CC3PFXResource*) pfxRez  {
+	_variables = [CCArray new];		// retained
+	[self addVariablesFrom: pfxEffect->Attributes];
+	[self addVariablesFrom: pfxEffect->Uniforms];
+}
+
+/** Adds a variable configuration for each semantic spec in the specified array. */
+-(void) addVariablesFrom: (CPVRTArray<SPVRTPFXParserSemantic>) pfxVariables {
+	NSUInteger varCount = pfxVariables.GetSize();
+	for(NSUInteger varIdx = 0; varIdx < varCount; varIdx++) {
+		CC3PFXGLSLVariableConfiguration* varConfig = [CC3PFXGLSLVariableConfiguration new];
+		varConfig.name = [NSString stringWithUTF8String: pfxVariables[varIdx].pszName];
+		varConfig.pfxSemanticName = [NSString stringWithUTF8String: pfxVariables[varIdx].pszValue];
+		varConfig.semanticIndex = pfxVariables[varIdx].nIdx;
+		[_variables addObject: varConfig];
+		[varConfig release];
+	}
+}
+
+/** Initializes the CC3GLProgram built from the shaders defined for this effect. */
 -(void) initGLProgramFrom: (SPVRTPFXParserEffect*) pfxEffect
 			fromPFXParser: (CPVRTPFXParser*) pfxParser
 			inPFXResource: (CC3PFXResource*) pfxRez {
@@ -272,12 +313,30 @@ extern "C" {
 		   progName, NSStringFromSPVRTPFXParserShader(vShader), NSStringFromSPVRTPFXParserShader(fShader));
 
 	// Compile, link and cache the program
-	_glProgram = [[CC3GLProgram alloc] initWithName: progName
-							  fromVertexShaderBytes: [self getShaderCode: vShader]
-							 andFragmentShaderBytes: [self getShaderCode: fShader]];	// retained
-	_glProgram.semanticDelegate = [CC3GLProgramSemanticsDelegateByVarNames sharedDefaultDelegate];
+	_glProgram = [[self.glProgramClass alloc] initWithName: progName
+									 fromVertexShaderBytes: [self getShaderCode: vShader]
+									andFragmentShaderBytes: [self getShaderCode: fShader]];	// retained
+
+	[self initGLProgramSemanticDelegateFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
+
 	[_glProgram link];
 	[glesShaders addProgram: _glProgram];		// Add the new program to the cache
+}
+
+/**
+ * Template method to determine the class of GL program to instantiate.
+ * The returned class must be a subclass of CC3GLProgram.
+ */
+-(Class) glProgramClass { return [CC3GLProgram class]; }
+
+/** Template method to create, populate, and set the semantic delegate into the GL program. */
+-(void) initGLProgramSemanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
+							fromPFXParser: (CPVRTPFXParser*) pfxParser
+							inPFXResource: (CC3PFXResource*) pfxRez {
+	CC3PFXGLProgramSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
+	[semanticDelegate populateWithVariableNameMappingsFromPFXEffect: self];
+	_glProgram.semanticDelegate = semanticDelegate;
+	[semanticDelegate release];
 }
 
 /** Returns the vertex shader that was assigned the specified name in the PFX resource file. */
@@ -329,7 +388,6 @@ extern "C" {
 @end
 
 
-
 #pragma mark -
 #pragma mark CC3PFXEffectTexture
 
@@ -341,6 +399,54 @@ extern "C" {
 	[_texture release];
 	[super dealloc];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PFXGLSLVariableConfiguration
+
+@implementation CC3PFXGLSLVariableConfiguration
+
+@synthesize pfxSemanticName=_pfxSemanticName;
+
+-(void) dealloc {
+	[_pfxSemanticName release];
+	[super dealloc];
+}
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_pfxSemanticName = nil;
+	}
+	return self;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3PFXGLProgramSemantics
+
+@implementation CC3PFXGLProgramSemantics
+
+-(void) populateWithVariableNameMappingsFromPFXEffect: (CC3PFXEffect*) pfxEffect {
+	for (CC3PFXGLSLVariableConfiguration* pfxVarConfig in pfxEffect.variables) {
+		[self resolveSemanticForVariableConfiguration: pfxVarConfig];
+		[self addVariableConfiguration: pfxVarConfig];
+	}
+}
+
+-(BOOL) resolveSemanticForVariableConfiguration: (CC3PFXGLSLVariableConfiguration*) pfxVarConfig {
+	if (pfxVarConfig.semantic != kCC3SemanticNone) return YES;		// Only do it once!
+	
+	GLenum semantic = [self semanticForPFXSemanticName: pfxVarConfig.pfxSemanticName];
+	if (semantic == kCC3SemanticNone) return NO;
+	pfxVarConfig.semantic = semantic;
+	return YES;
+}
+
+-(GLenum) semanticForPFXSemanticName: (NSString*) semanticName { return kCC3SemanticNone; }
 
 @end
 
