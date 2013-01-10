@@ -668,8 +668,8 @@
 		A940ECBD16986E86004F499C /* CC3World.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3World.m; sourceTree = "<group>"; };
 		A940ECBE16986E86004F499C /* CCNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCNodeController.h; sourceTree = "<group>"; };
 		A940ECBF16986E86004F499C /* ControllableCCLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllableCCLayer.h; sourceTree = "<group>"; };
-		A940ECC116986E86004F499C /* CC3ConfigurableWithDefaultVarNames.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ConfigurableWithDefaultVarNames.fsh; sourceTree = "<group>"; };
-		A940ECC216986E86004F499C /* CC3ConfigurableWithDefaultVarNames.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ConfigurableWithDefaultVarNames.vsh; sourceTree = "<group>"; };
+		A940ECC116986E86004F499C /* CC3ConfigurableWithDefaultVarNames.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3ConfigurableWithDefaultVarNames.fsh; sourceTree = "<group>"; };
+		A940ECC216986E86004F499C /* CC3ConfigurableWithDefaultVarNames.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3ConfigurableWithDefaultVarNames.vsh; sourceTree = "<group>"; };
 		A940ECC316986E86004F499C /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
 		A940ECC416986E86004F499C /* CC3PureColor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.vsh; sourceTree = "<group>"; };
 		A940ED8A169875D8004F499C /* CC3PFXResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PFXResource.h; sourceTree = "<group>"; };

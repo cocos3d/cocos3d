@@ -49,8 +49,11 @@
  * macro definitions below.
  */
 
-// Increase these if more textures or lights are desired. They have been kept low to limit
-// the number of uniforms, in order to improve performance.
+// Increase these if more textures or lights are desired.
+// In order to improve performance, they have been kept low to limit the number of uniforms.
+// These definitions should not be set larger than the CC3GLProgramSemanticsDelegateByVarNames
+// class-side properties maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables
+// (each defaults to 4). See the description of those properties for more info.
 #define MAX_TEXTURES			2
 #define MAX_LIGHTS				2
 

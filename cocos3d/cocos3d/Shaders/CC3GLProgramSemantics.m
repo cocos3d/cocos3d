@@ -546,15 +546,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeights];
 	[self mapVarName: @"a_cc3MatrixIdx" toSemantic: kCC3SemanticVertexMatrices];
 	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];
-	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];	// alias to a_cc3TexCoord0
-	[self mapVarName: @"a_cc3TexCoord0" toSemantic: kCC3SemanticVertexTexture at: 0];
-	[self mapVarName: @"a_cc3TexCoord1" toSemantic: kCC3SemanticVertexTexture at: 1];
-	[self mapVarName: @"a_cc3TexCoord2" toSemantic: kCC3SemanticVertexTexture at: 2];
-	[self mapVarName: @"a_cc3TexCoord3" toSemantic: kCC3SemanticVertexTexture at: 3];
-	[self mapVarName: @"a_cc3TexCoord4" toSemantic: kCC3SemanticVertexTexture at: 4];
-	[self mapVarName: @"a_cc3TexCoord5" toSemantic: kCC3SemanticVertexTexture at: 5];
-	[self mapVarName: @"a_cc3TexCoord6" toSemantic: kCC3SemanticVertexTexture at: 6];
-	[self mapVarName: @"a_cc3TexCoord7" toSemantic: kCC3SemanticVertexTexture at: 7];
+	
+	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
+	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];
+	for (NSUInteger tuIdx = 0; tuIdx < _maxTexUnitVars; tuIdx++) {
+		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];
+	}
 	
 	// ATTRIBUTE QUALIFIERS --------------
 	[self mapVarName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];
@@ -608,6 +605,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
 	[self mapVarName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
 	
+	// If only one light is used it can be declared as a single variable structure without the index.
 	[self mapVarName: @"u_cc3Light.isEnabled" toSemantic: kCC3SemanticLightIsEnabled];		// Aliases for light zero
 	[self mapVarName: @"u_cc3Light.position" toSemantic: kCC3SemanticLightPosition];
 	[self mapVarName: @"u_cc3Light.ambientColor" toSemantic: kCC3SemanticLightColorAmbient];
@@ -619,53 +617,20 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Light.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle];
 	[self mapVarName: @"u_cc3Light.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];
 	
-	[self mapVarName: @"u_cc3Lights[0].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 0];
-	[self mapVarName: @"u_cc3Lights[0].position" toSemantic: kCC3SemanticLightPosition at: 0];
-	[self mapVarName: @"u_cc3Lights[0].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 0];
-	[self mapVarName: @"u_cc3Lights[0].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 0];
-	[self mapVarName: @"u_cc3Lights[0].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 0];
-	[self mapVarName: @"u_cc3Lights[0].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 0];
-	[self mapVarName: @"u_cc3Lights[0].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 0];
-	[self mapVarName: @"u_cc3Lights[0].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 0];
-	[self mapVarName: @"u_cc3Lights[0].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 0];
-	[self mapVarName: @"u_cc3Lights[0].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 0];
-	
-	[self mapVarName: @"u_cc3Lights[1].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 1];
-	[self mapVarName: @"u_cc3Lights[1].position" toSemantic: kCC3SemanticLightPosition at: 1];
-	[self mapVarName: @"u_cc3Lights[1].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 1];
-	[self mapVarName: @"u_cc3Lights[1].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 1];
-	[self mapVarName: @"u_cc3Lights[1].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 1];
-	[self mapVarName: @"u_cc3Lights[1].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 1];
-	[self mapVarName: @"u_cc3Lights[1].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 1];
-	[self mapVarName: @"u_cc3Lights[1].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 1];
-	[self mapVarName: @"u_cc3Lights[1].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 1];
-	[self mapVarName: @"u_cc3Lights[1].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 1];
-	
-	[self mapVarName: @"u_cc3Lights[2].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 2];
-	[self mapVarName: @"u_cc3Lights[2].position" toSemantic: kCC3SemanticLightPosition at: 2];
-	[self mapVarName: @"u_cc3Lights[2].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 2];
-	[self mapVarName: @"u_cc3Lights[2].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 2];
-	[self mapVarName: @"u_cc3Lights[2].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 2];
-	[self mapVarName: @"u_cc3Lights[2].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 2];
-	[self mapVarName: @"u_cc3Lights[2].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 2];
-	[self mapVarName: @"u_cc3Lights[2].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 2];
-	[self mapVarName: @"u_cc3Lights[2].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 2];
-	[self mapVarName: @"u_cc3Lights[2].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 2];
-	
-	[self mapVarName: @"u_cc3Lights[3].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 3];
-	[self mapVarName: @"u_cc3Lights[3].position" toSemantic: kCC3SemanticLightPosition at: 3];
-	[self mapVarName: @"u_cc3Lights[3].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 3];
-	[self mapVarName: @"u_cc3Lights[3].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 3];
-	[self mapVarName: @"u_cc3Lights[3].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 3];
-	[self mapVarName: @"u_cc3Lights[3].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 3];
-	[self mapVarName: @"u_cc3Lights[3].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 3];
-	[self mapVarName: @"u_cc3Lights[3].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 3];
-	[self mapVarName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 3];
-	[self mapVarName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 3];
-	
-	// APPLICATIONS CAN ADD MORE MAPPINGS FOR SHADERS THAT SUPPORT ADDITIONAL LIGHTS
-	
-	
+	// Multiple lights are indexed
+	for (NSUInteger ltIdx = 0; ltIdx < _maxLightVars; ltIdx++) {
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].isEnabled", ltIdx] toSemantic: kCC3SemanticLightIsEnabled at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].position", ltIdx] toSemantic: kCC3SemanticLightPosition at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].ambientColor", ltIdx] toSemantic: kCC3SemanticLightColorAmbient at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].diffuseColor", ltIdx] toSemantic: kCC3SemanticLightColorDiffuse at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].specularColor", ltIdx] toSemantic: kCC3SemanticLightColorSpecular at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].attenuation", ltIdx] toSemantic: kCC3SemanticLightAttenuation at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotDirection", ltIdx] toSemantic: kCC3SemanticLightSpotDirection at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotExponent", ltIdx] toSemantic: kCC3SemanticLightSpotExponent at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotCutoffAngle", ltIdx] toSemantic: kCC3SemanticLightSpotCutoffAngle at: ltIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotCutoffAngleCosine", ltIdx] toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: ltIdx];
+	}
+
 	// TEXTURES --------------
 	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
 	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSamplers];		// alias for s_cc3Textures[0]
@@ -673,76 +638,34 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	[self mapVarName: @"u_cc3TextureUnits[0].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].mode" toSemantic: kCC3SemanticTexUnitMode at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 0];
-	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 0];
-	
-	[self mapVarName: @"u_cc3TextureUnits[1].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].mode" toSemantic: kCC3SemanticTexUnitMode at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 1];
-	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 1];
-	
-	[self mapVarName: @"u_cc3TextureUnits[2].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].mode" toSemantic: kCC3SemanticTexUnitMode at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 2];
-	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 2];
-	
-	[self mapVarName: @"u_cc3TextureUnits[3].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].mode" toSemantic: kCC3SemanticTexUnitMode at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 3];
-	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 3];
-	
-	// APPLICATIONS CAN ADD MORE MAPPINGS FOR SHADERS THAT SUPPORT ADDITIONAL TEXTURE UNITS
+	for (NSUInteger tuIdx = 0; tuIdx < _maxTexUnitVars; tuIdx++) {
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].color", tuIdx] toSemantic: kCC3SemanticTexUnitConstantColor at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].mode", tuIdx] toSemantic: kCC3SemanticTexUnitMode at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].combineRGBFunction", tuIdx] toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbSource0", tuIdx] toSemantic: kCC3SemanticTexUnitSource0RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbSource1", tuIdx] toSemantic: kCC3SemanticTexUnitSource1RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbSource2", tuIdx] toSemantic: kCC3SemanticTexUnitSource2RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbOperand0", tuIdx] toSemantic: kCC3SemanticTexUnitOperand0RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbOperand1", tuIdx] toSemantic: kCC3SemanticTexUnitOperand1RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].rgbOperand2", tuIdx] toSemantic: kCC3SemanticTexUnitOperand2RGB at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].combineAlphaFunction", tuIdx] toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaSource0", tuIdx] toSemantic: kCC3SemanticTexUnitSource0Alpha at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaSource1", tuIdx] toSemantic: kCC3SemanticTexUnitSource1Alpha at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaSource2", tuIdx] toSemantic: kCC3SemanticTexUnitSource2Alpha at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaOperand0", tuIdx] toSemantic: kCC3SemanticTexUnitOperand0Alpha at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaOperand1", tuIdx] toSemantic: kCC3SemanticTexUnitOperand1Alpha at: tuIdx];
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].alphaOperand2", tuIdx] toSemantic: kCC3SemanticTexUnitOperand2Alpha at: tuIdx];
+	}
+
 }
+
+static NSUInteger _maxLightVars = 4;
++(NSUInteger) maxDefaultMappingLightVariables { return _maxLightVars; }
++(void) setMaxDefaultMappingLightVariables: (NSUInteger) maxLights { _maxLightVars = maxLights; }
+
+static NSUInteger _maxTexUnitVars = 4;
++(NSUInteger) maxDefaultMappingTextureUnitVariables { return _maxTexUnitVars; }
++(void) setMaxDefaultMappingTextureUnitVariables: (NSUInteger) maxTexUnits { _maxTexUnitVars = maxTexUnits; }
 
 
 #pragma mark Allocation and initialization

@@ -48,8 +48,10 @@
  * This can be increased by changing the MAX_TEXTURES macro definition below.
  */
 
-// Increase this if more textures are desired. It has been kept low to limit the number
-// of uniforms, in order to improve performance.
+// Increase this if more textures are desired. In order to improve performance, it has been
+// kept low to limit the number of uniforms. This definition should not be set larger than
+// the CC3GLProgramSemanticsDelegateByVarNames class-side maxDefaultMappingTextureUnitVariables
+// property (defaults to 4). See the description of those properties for more info.
 #define MAX_TEXTURES			2
 
 // Texture constants to support OpenGL ES 1.1 conformant multi-texturing.
