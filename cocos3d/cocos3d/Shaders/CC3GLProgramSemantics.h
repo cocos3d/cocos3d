@@ -59,14 +59,7 @@ typedef enum {
 	kCC3SemanticVertexPointSizes,				/**< Vertex point sizes. */
 	kCC3SemanticVertexWeights,					/**< Vertex skinning weights. */
 	kCC3SemanticVertexMatrices,					/**< Vertex skinning matrices. */
-	kCC3SemanticVertexTexture0,					/**< Vertex texture coordinates for texture unit 0. */
-	kCC3SemanticVertexTexture1,					/**< Vertex texture coordinates for texture unit 1. */
-	kCC3SemanticVertexTexture2,					/**< Vertex texture coordinates for texture unit 2. */
-	kCC3SemanticVertexTexture3,					/**< Vertex texture coordinates for texture unit 3. */
-	kCC3SemanticVertexTexture4,					/**< Vertex texture coordinates for texture unit 4. */
-	kCC3SemanticVertexTexture5,					/**< Vertex texture coordinates for texture unit 5. */
-	kCC3SemanticVertexTexture6,					/**< Vertex texture coordinates for texture unit 6. */
-	kCC3SemanticVertexTexture7,					/**< Vertex texture coordinates for texture unit 7. */
+	kCC3SemanticVertexTexture,					/**< Vertex texture coordinates for one texture unit. */
 	
 	kCC3SemanticHasVertexNormal,				/**< Whether the vertex normal is available. */
 	kCC3SemanticShouldNormalizeVertexNormal,	/**< Whether vertex normals should be normalized. */
@@ -106,251 +99,44 @@ typedef enum {
 	kCC3SemanticMaterialShininess,				/**< Shininess of the material. */
 	kCC3SemanticMinimumDrawnAlpha,				/**< Minimum alpha value to be drawn, otherwise will be discarded. */
 
-	// LIGHTING - Each category of light enums are consecutive to allow conversion to an index
+	// LIGHTING
 	kCC3SemanticIsUsingLighting,				/**< Whether any lighting is enabled. */
 	kCC3SemanticSceneLightColorAmbient,			/**< Ambient light color of the scene. */
 
-	kCC3SemanticLightIsEnabled0,				/**< Whether light 0 is enabled. */
-	kCC3SemanticLightIsEnabled1,				/**< Whether light 1 is enabled. */
-	kCC3SemanticLightIsEnabled2,				/**< Whether light 2 is enabled. */
-	kCC3SemanticLightIsEnabled3,				/**< Whether light 3 is enabled. */
-	kCC3SemanticLightIsEnabled4,				/**< Whether light 4 is enabled. */
-	kCC3SemanticLightIsEnabled5,				/**< Whether light 5 is enabled. */
-	kCC3SemanticLightIsEnabled6,				/**< Whether light 6 is enabled. */
-	kCC3SemanticLightIsEnabled7,				/**< Whether light 7 is enabled. */
+	kCC3SemanticLightIsEnabled,					/**< Whether a light is enabled. */
+	kCC3SemanticLightPosition,					/**< Position of a light. */
+	kCC3SemanticLightColorAmbient,				/**< Ambient color of a light. */
+	kCC3SemanticLightColorDiffuse,				/**< Diffuse color of a light. */
+	kCC3SemanticLightColorSpecular,				/**< Specular color of the light. */
+	kCC3SemanticLightAttenuation,				/**< Distance attenuation coefficients for a light. */
+	kCC3SemanticLightSpotDirection,				/**< Direction of a spotlight. */
+	kCC3SemanticLightSpotExponent,				/**< Fade-off exponent of a spotlight. */
+	kCC3SemanticLightSpotCutoffAngle,			/**< Cutoff angle of a spotlight. */
+	kCC3SemanticLightSpotCutoffAngleCosine,		/**< Cosine of cutoff angle of a spotlight. */
 
-	kCC3SemanticLightPosition0,					/**< Position of light 0. */
-	kCC3SemanticLightPosition1,					/**< Position of light 1. */
-	kCC3SemanticLightPosition2,					/**< Position of light 2. */
-	kCC3SemanticLightPosition3,					/**< Position of light 3. */
-	kCC3SemanticLightPosition4,					/**< Position of light 4. */
-	kCC3SemanticLightPosition5,					/**< Position of light 5. */
-	kCC3SemanticLightPosition6,					/**< Position of light 6. */
-	kCC3SemanticLightPosition7,					/**< Position of light 7. */
-	
-	kCC3SemanticLightColorAmbient0,				/**< Ambient color of light 0. */
-	kCC3SemanticLightColorAmbient1,				/**< Ambient color of light 1. */
-	kCC3SemanticLightColorAmbient2,				/**< Ambient color of light 2. */
-	kCC3SemanticLightColorAmbient3,				/**< Ambient color of light 3. */
-	kCC3SemanticLightColorAmbient4,				/**< Ambient color of light 4. */
-	kCC3SemanticLightColorAmbient5,				/**< Ambient color of light 5. */
-	kCC3SemanticLightColorAmbient6,				/**< Ambient color of light 6. */
-	kCC3SemanticLightColorAmbient7,				/**< Ambient color of light 7. */
-
-	kCC3SemanticLightColorDiffuse0,				/**< Diffuse color of light 0. */
-	kCC3SemanticLightColorDiffuse1,				/**< Diffuse color of light 1. */
-	kCC3SemanticLightColorDiffuse2,				/**< Diffuse color of light 2. */
-	kCC3SemanticLightColorDiffuse3,				/**< Diffuse color of light 3. */
-	kCC3SemanticLightColorDiffuse4,				/**< Diffuse color of light 4. */
-	kCC3SemanticLightColorDiffuse5,				/**< Diffuse color of light 5. */
-	kCC3SemanticLightColorDiffuse6,				/**< Diffuse color of light 6. */
-	kCC3SemanticLightColorDiffuse7,				/**< Diffuse color of light 7. */
-
-	kCC3SemanticLightColorSpecular0,			/**< Specular color of light 0. */
-	kCC3SemanticLightColorSpecular1,			/**< Specular color of light 1. */
-	kCC3SemanticLightColorSpecular2,			/**< Specular color of light 2. */
-	kCC3SemanticLightColorSpecular3,			/**< Specular color of light 3. */
-	kCC3SemanticLightColorSpecular4,			/**< Specular color of light 4. */
-	kCC3SemanticLightColorSpecular5,			/**< Specular color of light 5. */
-	kCC3SemanticLightColorSpecular6,			/**< Specular color of light 6. */
-	kCC3SemanticLightColorSpecular7,			/**< Specular color of light 7. */
-
-	kCC3SemanticLightAttenuation0,				/**< Distance attenuation coefficients for light 0. */
-	kCC3SemanticLightAttenuation1,				/**< Distance attenuation coefficients for light 1. */
-	kCC3SemanticLightAttenuation2,				/**< Distance attenuation coefficients for light 2. */
-	kCC3SemanticLightAttenuation3,				/**< Distance attenuation coefficients for light 3. */
-	kCC3SemanticLightAttenuation4,				/**< Distance attenuation coefficients for light 4. */
-	kCC3SemanticLightAttenuation5,				/**< Distance attenuation coefficients for light 5. */
-	kCC3SemanticLightAttenuation6,				/**< Distance attenuation coefficients for light 6. */
-	kCC3SemanticLightAttenuation7,				/**< Distance attenuation coefficients for light 7. */
-
-	kCC3SemanticLightSpotDirection0,			/**< Direction of spotlight 0. */
-	kCC3SemanticLightSpotDirection1,			/**< Direction of spotlight 1. */
-	kCC3SemanticLightSpotDirection2,			/**< Direction of spotlight 2. */
-	kCC3SemanticLightSpotDirection3,			/**< Direction of spotlight 3. */
-	kCC3SemanticLightSpotDirection4,			/**< Direction of spotlight 4. */
-	kCC3SemanticLightSpotDirection5,			/**< Direction of spotlight 5. */
-	kCC3SemanticLightSpotDirection6,			/**< Direction of spotlight 6. */
-	kCC3SemanticLightSpotDirection7,			/**< Direction of spotlight 7. */
-	
-	kCC3SemanticLightSpotExponent0,				/**< Fade-off exponent of spotlight 0. */
-	kCC3SemanticLightSpotExponent1,				/**< Fade-off exponent of spotlight 1. */
-	kCC3SemanticLightSpotExponent2,				/**< Fade-off exponent of spotlight 2. */
-	kCC3SemanticLightSpotExponent3,				/**< Fade-off exponent of spotlight 3. */
-	kCC3SemanticLightSpotExponent4,				/**< Fade-off exponent of spotlight 4. */
-	kCC3SemanticLightSpotExponent5,				/**< Fade-off exponent of spotlight 5. */
-	kCC3SemanticLightSpotExponent6,				/**< Fade-off exponent of spotlight 6. */
-	kCC3SemanticLightSpotExponent7,				/**< Fade-off exponent of spotlight 7. */
-	
-	kCC3SemanticLightSpotCutoffAngle0,			/**< Cutoff angle of spotlight 0. */
-	kCC3SemanticLightSpotCutoffAngle1,			/**< Cutoff angle of spotlight 1. */
-	kCC3SemanticLightSpotCutoffAngle2,			/**< Cutoff angle of spotlight 2. */
-	kCC3SemanticLightSpotCutoffAngle3,			/**< Cutoff angle of spotlight 3. */
-	kCC3SemanticLightSpotCutoffAngle4,			/**< Cutoff angle of spotlight 4. */
-	kCC3SemanticLightSpotCutoffAngle5,			/**< Cutoff angle of spotlight 5. */
-	kCC3SemanticLightSpotCutoffAngle6,			/**< Cutoff angle of spotlight 6. */
-	kCC3SemanticLightSpotCutoffAngle7,			/**< Cutoff angle of spotlight 7. */
-	
-	kCC3SemanticLightSpotCutoffAngleCosine0,	/**< Cosine of cutoff angle of spotlight 0. */
-	kCC3SemanticLightSpotCutoffAngleCosine1,	/**< Cosine of cutoff angle of spotlight 1. */
-	kCC3SemanticLightSpotCutoffAngleCosine2,	/**< Cosine of cutoff angle of spotlight 2. */
-	kCC3SemanticLightSpotCutoffAngleCosine3,	/**< Cosine of cutoff angle of spotlight 3. */
-	kCC3SemanticLightSpotCutoffAngleCosine4,	/**< Cosine of cutoff angle of spotlight 4. */
-	kCC3SemanticLightSpotCutoffAngleCosine5,	/**< Cosine of cutoff angle of spotlight 5. */
-	kCC3SemanticLightSpotCutoffAngleCosine6,	/**< Cosine of cutoff angle of spotlight 6. */
-	kCC3SemanticLightSpotCutoffAngleCosine7,	/**< Cosine of cutoff angle of spotlight 7. */
-
-	// TEXTURES - Each category of texture enums are consecutive to allow conversion to an index
+	// TEXTURES
 	kCC3SemanticTextureCount,					/**< Number of active textures. */
 	kCC3SemanticTextureSamplers,				/**< Array of texture samplers of length kCC3SemanticTextureCount. */
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	kCC3SemanticTexUnitMode0,					/**< Environment mode of texture unit 0. */
-	kCC3SemanticTexUnitMode1,					/**< Environment mode of texture unit 1. */
-	kCC3SemanticTexUnitMode2,					/**< Environment mode of texture unit 2. */
-	kCC3SemanticTexUnitMode3,					/**< Environment mode of texture unit 3. */
-	kCC3SemanticTexUnitMode4,					/**< Environment mode of texture unit 4. */
-	kCC3SemanticTexUnitMode5,					/**< Environment mode of texture unit 5. */
-	kCC3SemanticTexUnitMode6,					/**< Environment mode of texture unit 6. */
-	kCC3SemanticTexUnitMode7,					/**< Environment mode of texture unit 7. */
-	
-	kCC3SemanticTexUnitConstantColor0,			/**< The constant color of texture unit 0. */
-	kCC3SemanticTexUnitConstantColor1,			/**< The constant color of texture unit 1. */
-	kCC3SemanticTexUnitConstantColor2,			/**< The constant color of texture unit 2. */
-	kCC3SemanticTexUnitConstantColor3,			/**< The constant color of texture unit 3. */
-	kCC3SemanticTexUnitConstantColor4,			/**< The constant color of texture unit 4. */
-	kCC3SemanticTexUnitConstantColor5,			/**< The constant color of texture unit 5. */
-	kCC3SemanticTexUnitConstantColor6,			/**< The constant color of texture unit 6. */
-	kCC3SemanticTexUnitConstantColor7,			/**< The constant color of texture unit 7. */
-	
-	kCC3SemanticTexUnitCombineRGBFunction0,		/**< RBG combiner function of texture unit 0. */
-	kCC3SemanticTexUnitCombineRGBFunction1,		/**< RBG combiner function of texture unit 1. */
-	kCC3SemanticTexUnitCombineRGBFunction2,		/**< RBG combiner function of texture unit 2. */
-	kCC3SemanticTexUnitCombineRGBFunction3,		/**< RBG combiner function of texture unit 3. */
-	kCC3SemanticTexUnitCombineRGBFunction4,		/**< RBG combiner function of texture unit 4. */
-	kCC3SemanticTexUnitCombineRGBFunction5,		/**< RBG combiner function of texture unit 5. */
-	kCC3SemanticTexUnitCombineRGBFunction6,		/**< RBG combiner function of texture unit 6. */
-	kCC3SemanticTexUnitCombineRGBFunction7,		/**< RBG combiner function of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource0RGB0,				/**< The RGB of source 0 of texture unit 0. */
-	kCC3SemanticTexUnitSource0RGB1,				/**< The RGB of source 0 of texture unit 1. */
-	kCC3SemanticTexUnitSource0RGB2,				/**< The RGB of source 0 of texture unit 2. */
-	kCC3SemanticTexUnitSource0RGB3,				/**< The RGB of source 0 of texture unit 3. */
-	kCC3SemanticTexUnitSource0RGB4,				/**< The RGB of source 0 of texture unit 4. */
-	kCC3SemanticTexUnitSource0RGB5,				/**< The RGB of source 0 of texture unit 5. */
-	kCC3SemanticTexUnitSource0RGB6,				/**< The RGB of source 0 of texture unit 6. */
-	kCC3SemanticTexUnitSource0RGB7,				/**< The RGB of source 0 of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource1RGB0,				/**< The RGB source 1 of texture unit 0. */
-	kCC3SemanticTexUnitSource1RGB1,				/**< The RGB source 1 of texture unit 1. */
-	kCC3SemanticTexUnitSource1RGB2,				/**< The RGB source 1 of texture unit 2. */
-	kCC3SemanticTexUnitSource1RGB3,				/**< The RGB source 1 of texture unit 3. */
-	kCC3SemanticTexUnitSource1RGB4,				/**< The RGB source 1 of texture unit 4. */
-	kCC3SemanticTexUnitSource1RGB5,				/**< The RGB source 1 of texture unit 5. */
-	kCC3SemanticTexUnitSource1RGB6,				/**< The RGB source 1 of texture unit 6. */
-	kCC3SemanticTexUnitSource1RGB7,				/**< The RGB source 1 of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource2RGB0,				/**< The RGB source 2 of texture unit 0. */
-	kCC3SemanticTexUnitSource2RGB1,				/**< The RGB source 2 of texture unit 1. */
-	kCC3SemanticTexUnitSource2RGB2,				/**< The RGB source 2 of texture unit 2. */
-	kCC3SemanticTexUnitSource2RGB3,				/**< The RGB source 2 of texture unit 3. */
-	kCC3SemanticTexUnitSource2RGB4,				/**< The RGB source 2 of texture unit 4. */
-	kCC3SemanticTexUnitSource2RGB5,				/**< The RGB source 2 of texture unit 5. */
-	kCC3SemanticTexUnitSource2RGB6,				/**< The RGB source 2 of texture unit 6. */
-	kCC3SemanticTexUnitSource2RGB7,				/**< The RGB source 2 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand0RGB0,			/**< The RGB combining operand of source 0 of texture unit 0. */
-	kCC3SemanticTexUnitOperand0RGB1,			/**< The RGB combining operand of source 0 of texture unit 1. */
-	kCC3SemanticTexUnitOperand0RGB2,			/**< The RGB combining operand of source 0 of texture unit 2. */
-	kCC3SemanticTexUnitOperand0RGB3,			/**< The RGB combining operand of source 0 of texture unit 3. */
-	kCC3SemanticTexUnitOperand0RGB4,			/**< The RGB combining operand of source 0 of texture unit 4. */
-	kCC3SemanticTexUnitOperand0RGB5,			/**< The RGB combining operand of source 0 of texture unit 5. */
-	kCC3SemanticTexUnitOperand0RGB6,			/**< The RGB combining operand of source 0 of texture unit 6. */
-	kCC3SemanticTexUnitOperand0RGB7,			/**< The RGB combining operand of source 0 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand1RGB0,			/**< The RGB combining operand of source 1 of texture unit 0. */
-	kCC3SemanticTexUnitOperand1RGB1,			/**< The RGB combining operand of source 1 of texture unit 1. */
-	kCC3SemanticTexUnitOperand1RGB2,			/**< The RGB combining operand of source 1 of texture unit 2. */
-	kCC3SemanticTexUnitOperand1RGB3,			/**< The RGB combining operand of source 1 of texture unit 3. */
-	kCC3SemanticTexUnitOperand1RGB4,			/**< The RGB combining operand of source 1 of texture unit 4. */
-	kCC3SemanticTexUnitOperand1RGB5,			/**< The RGB combining operand of source 1 of texture unit 5. */
-	kCC3SemanticTexUnitOperand1RGB6,			/**< The RGB combining operand of source 1 of texture unit 6. */
-	kCC3SemanticTexUnitOperand1RGB7,			/**< The RGB combining operand of source 1 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand2RGB0,			/**< The RGB combining operand of source 2 of texture unit 0. */
-	kCC3SemanticTexUnitOperand2RGB1,			/**< The RGB combining operand of source 2 of texture unit 1. */
-	kCC3SemanticTexUnitOperand2RGB2,			/**< The RGB combining operand of source 2 of texture unit 2. */
-	kCC3SemanticTexUnitOperand2RGB3,			/**< The RGB combining operand of source 2 of texture unit 3. */
-	kCC3SemanticTexUnitOperand2RGB4,			/**< The RGB combining operand of source 2 of texture unit 4. */
-	kCC3SemanticTexUnitOperand2RGB5,			/**< The RGB combining operand of source 2 of texture unit 5. */
-	kCC3SemanticTexUnitOperand2RGB6,			/**< The RGB combining operand of source 2 of texture unit 6. */
-	kCC3SemanticTexUnitOperand2RGB7,			/**< The RGB combining operand of source 2 of texture unit 7. */
-	
-	kCC3SemanticTexUnitCombineAlphaFunction0,	/**< Alpha combiner function of texture unit 0. */
-	kCC3SemanticTexUnitCombineAlphaFunction1,	/**< Alpha combiner function of texture unit 1. */
-	kCC3SemanticTexUnitCombineAlphaFunction2,	/**< Alpha combiner function of texture unit 2. */
-	kCC3SemanticTexUnitCombineAlphaFunction3,	/**< Alpha combiner function of texture unit 3. */
-	kCC3SemanticTexUnitCombineAlphaFunction4,	/**< Alpha combiner function of texture unit 4. */
-	kCC3SemanticTexUnitCombineAlphaFunction5,	/**< Alpha combiner function of texture unit 5. */
-	kCC3SemanticTexUnitCombineAlphaFunction6,	/**< Alpha combiner function of texture unit 6. */
-	kCC3SemanticTexUnitCombineAlphaFunction7,	/**< Alpha combiner function of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource0Alpha0,			/**< The alpha of source 0 of texture unit 0. */
-	kCC3SemanticTexUnitSource0Alpha1,			/**< The alpha of source 0 of texture unit 1. */
-	kCC3SemanticTexUnitSource0Alpha2,			/**< The alpha of source 0 of texture unit 2. */
-	kCC3SemanticTexUnitSource0Alpha3,			/**< The alpha of source 0 of texture unit 3. */
-	kCC3SemanticTexUnitSource0Alpha4,			/**< The alpha of source 0 of texture unit 4. */
-	kCC3SemanticTexUnitSource0Alpha5,			/**< The alpha of source 0 of texture unit 5. */
-	kCC3SemanticTexUnitSource0Alpha6,			/**< The alpha of source 0 of texture unit 6. */
-	kCC3SemanticTexUnitSource0Alpha7,			/**< The alpha of source 0 of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource1Alpha0,			/**< The alpha of source 1 of texture unit 0. */
-	kCC3SemanticTexUnitSource1Alpha1,			/**< The alpha of source 1 of texture unit 1. */
-	kCC3SemanticTexUnitSource1Alpha2,			/**< The alpha of source 1 of texture unit 2. */
-	kCC3SemanticTexUnitSource1Alpha3,			/**< The alpha of source 1 of texture unit 3. */
-	kCC3SemanticTexUnitSource1Alpha4,			/**< The alpha of source 1 of texture unit 4. */
-	kCC3SemanticTexUnitSource1Alpha5,			/**< The alpha of source 1 of texture unit 5. */
-	kCC3SemanticTexUnitSource1Alpha6,			/**< The alpha of source 1 of texture unit 6. */
-	kCC3SemanticTexUnitSource1Alpha7,			/**< The alpha of source 1 of texture unit 7. */
-	
-	kCC3SemanticTexUnitSource2Alpha0,			/**< The alpha of source 2 of texture unit 0. */
-	kCC3SemanticTexUnitSource2Alpha1,			/**< The alpha of source 2 of texture unit 1. */
-	kCC3SemanticTexUnitSource2Alpha2,			/**< The alpha of source 2 of texture unit 2. */
-	kCC3SemanticTexUnitSource2Alpha3,			/**< The alpha of source 2 of texture unit 3. */
-	kCC3SemanticTexUnitSource2Alpha4,			/**< The alpha of source 2 of texture unit 4. */
-	kCC3SemanticTexUnitSource2Alpha5,			/**< The alpha of source 2 of texture unit 5. */
-	kCC3SemanticTexUnitSource2Alpha6,			/**< The alpha of source 2 of texture unit 6. */
-	kCC3SemanticTexUnitSource2Alpha7,			/**< The alpha of source 2 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand0Alpha0,			/**< The alpha combining operand of source 0 of texture unit 0. */
-	kCC3SemanticTexUnitOperand0Alpha1,			/**< The alpha combining operand of source 0 of texture unit 1. */
-	kCC3SemanticTexUnitOperand0Alpha2,			/**< The alpha combining operand of source 0 of texture unit 2. */
-	kCC3SemanticTexUnitOperand0Alpha3,			/**< The alpha combining operand of source 0 of texture unit 3. */
-	kCC3SemanticTexUnitOperand0Alpha4,			/**< The alpha combining operand of source 0 of texture unit 4. */
-	kCC3SemanticTexUnitOperand0Alpha5,			/**< The alpha combining operand of source 0 of texture unit 5. */
-	kCC3SemanticTexUnitOperand0Alpha6,			/**< The alpha combining operand of source 0 of texture unit 6. */
-	kCC3SemanticTexUnitOperand0Alpha7,			/**< The alpha combining operand of source 0 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand1Alpha0,			/**< The alpha combining operand of source 1 of texture unit 0. */
-	kCC3SemanticTexUnitOperand1Alpha1,			/**< The alpha combining operand of source 1 of texture unit 1. */
-	kCC3SemanticTexUnitOperand1Alpha2,			/**< The alpha combining operand of source 1 of texture unit 2. */
-	kCC3SemanticTexUnitOperand1Alpha3,			/**< The alpha combining operand of source 1 of texture unit 3. */
-	kCC3SemanticTexUnitOperand1Alpha4,			/**< The alpha combining operand of source 1 of texture unit 4. */
-	kCC3SemanticTexUnitOperand1Alpha5,			/**< The alpha combining operand of source 1 of texture unit 5. */
-	kCC3SemanticTexUnitOperand1Alpha6,			/**< The alpha combining operand of source 1 of texture unit 6. */
-	kCC3SemanticTexUnitOperand1Alpha7,			/**< The alpha combining operand of source 1 of texture unit 7. */
-	
-	kCC3SemanticTexUnitOperand2Alpha0,			/**< The alpha combining operand of source 2 of texture unit 0. */
-	kCC3SemanticTexUnitOperand2Alpha1,			/**< The alpha combining operand of source 2 of texture unit 1. */
-	kCC3SemanticTexUnitOperand2Alpha2,			/**< The alpha combining operand of source 2 of texture unit 2. */
-	kCC3SemanticTexUnitOperand2Alpha3,			/**< The alpha combining operand of source 2 of texture unit 3. */
-	kCC3SemanticTexUnitOperand2Alpha4,			/**< The alpha combining operand of source 2 of texture unit 4. */
-	kCC3SemanticTexUnitOperand2Alpha5,			/**< The alpha combining operand of source 2 of texture unit 5. */
-	kCC3SemanticTexUnitOperand2Alpha6,			/**< The alpha combining operand of source 2 of texture unit 6. */
-	kCC3SemanticTexUnitOperand2Alpha7,			/**< The alpha combining operand of source 2 of texture unit 7. */
+	kCC3SemanticTexUnitMode,					/**< Environment mode of a texture unit. */
+	kCC3SemanticTexUnitConstantColor,			/**< The constant color of a texture unit. */
+	kCC3SemanticTexUnitCombineRGBFunction,		/**< RBG combiner function of a texture unit. */
+	kCC3SemanticTexUnitSource0RGB,				/**< The RGB of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1RGB,				/**< The RGB source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2RGB,				/**< The RGB source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0RGB,				/**< The RGB combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1RGB,				/**< The RGB combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2RGB,				/**< The RGB combining operand of source 2 of a texture unit. */
+	kCC3SemanticTexUnitCombineAlphaFunction,	/**< Alpha combiner function of a texture unit. */
+	kCC3SemanticTexUnitSource0Alpha,			/**< The alpha of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1Alpha,			/**< The alpha of source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2Alpha,			/**< The alpha of source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0Alpha,			/**< The alpha combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1Alpha,			/**< The alpha combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2Alpha,			/**< The alpha combining operand of source 2 of a texture unit. */
 
-	
 	// PARTICLES ------------
 	kCC3SemanticPointSize,						/**< Default size of points, if not specified per-vertex in a vertex attribute array. */
 	kCC3SemanticPointSizeAttenuation,			/**< Point size distance attenuation coefficients. */
@@ -398,12 +184,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable;
 
 /**
- * Populates the specified uniform.
+ * Populates the specified uniform, if possible, and returns whether the uniform was populated.
  *
- * The semantic property of the specified uniform can be used to determine what content is
- * expected by the GLSL program for that uniform. The implementor then retrieves the required
- * content from the GL state caches found via the CC3OpenGLESEngine state machine structures,
- * or from the scene content accessed via the specified visitor.
+ * The semantic, semanticIndex and size properties of the specified uniform can be used to
+ * determine what content is expected by the GLSL program for that uniform. The implementor
+ * then retrieves the required content from the GL state caches found via the CC3OpenGLESEngine
+ * state machine structures, or from the scene content accessed via the specified visitor.
  *
  * The specified visitor can be used to access content within the scene, and contains several
  * convenience properties for accessing typical content, including currentMeshNode,
@@ -416,7 +202,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  *
  * Implementers should return YES if a value was set into the specified uniform variable,
  * and NO if otherwise. When delegating to superclasses or other delegates, implementers
- * can use this return code to determine whether or not to continue attempting to determine
+ * can use this return value to determine whether or not to continue attempting to determine
  * and set the value of the uniform variable.
  *
  * This method is invoked automatically on every rendering loop. Keep it tight.
@@ -444,7 +230,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  */
 @interface CC3GLSLVariableConfiguration : NSObject {
 	NSString* _name;
-	GLenum _semantic;
+	GLenum _semantic : 16;
+	GLuint _semanticIndex : 8;
 }
 
 /**
@@ -455,16 +242,21 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 @property(nonatomic, retain) NSString* name;
 
 /**
- * A symbolic constant indicating the semantic meaning of this variable.
- *
- * The value of this property is typically one of values in the CC3Semantic enumeration,
- * but an application can define and use additional semantics beyond the values defined
- * by CC3Semantic. Additional semantics defined by the application should fall with the
- * range defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
+ * A symbolic constant indicating the semantic meaning of this variable. See the description
+ * of the same property on the CC3GLSLVariable class for a full description.
  *
  * The initial value of this property is kCC3SemanticNone.
  */
 @property(nonatomic, assign) GLenum semantic;
+
+/**
+ * When the semantic refers to an element of a structure that may have multiple instances,
+ * this property indicates to which instance this variable refers. See the description of
+ * the same property on the CC3GLSLVariable class for a full description.
+ *
+ * The initial value of this property is zero.
+ */
+@property(nonatomic, assign) GLuint semanticIndex;
 
 @end
 
@@ -561,24 +353,54 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(void) addVariableConfiguration: (CC3GLSLVariableConfiguration*) varConfig;
 
 /**
- * Adds a variable configruation that maps the specified variable name to the specified semantic.
+ * Adds a variable configruation that maps the specified variable name to the specified semantic
+ * and semantic index.
  *
- * This implementation creates an instance of CC3GLSLVariableConfiguration configured with
- * the specified name and semantic, and invokes the addVariableConfiguration: method.
+ * This implementation creates an instance of CC3GLSLVariableConfiguration configured with the
+ * specified name, semantic and semantic index, and invokes the addVariableConfiguration: method.
  *
  * The value of the semantic parameter is typically one of values in the CC3Semantic enumeration,
  * but an application can define and use additional semantics beyond the values defined by
  * CC3Semantic. Additional semantics defined by the application should fall with the range
  * defined by the kCC3SemanticAppBase and kCC3SemanticMax constants, inclusively.
  */
--(void) mapVariableName: (NSString*) name toSemantic: (GLenum) semantic;
+-(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
+
+/**
+ * Adds a variable configruation that maps the specified variable name to the specified semantic
+ * at semantic index zero.
+ *
+ * This is a convenience method that invokes the mapVarName:toSemantic:at: method, passing a value
+ * of zero for the semanticIndex argument. See the description of that method for more info.
+ */
+-(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLProgramSemanticsDelegateByVarNames default mappings extension
+
+/**
+ * This extension to CC3GLProgramSemanticsDelegateByVarNames establishes a cocos3d default
+ * mappings between variable names and semantics.
+ *
+ * An application can use the mappings defined in this extension as the basis for its own mappings
+ * and add or change a few of its own additional mappings, or an application may ignore this
+ * extension and may instead provide its own extensions to populate completely different mappings.
+ */
+@interface CC3GLProgramSemanticsDelegateByVarNames (DefaultMappings)
 
 /**
  * Populates this instance with the default cocos3d mappings between variable names and semantics.
  *
  * An application wishing to add additional semantic mappings, or override any of the default
- * mappings can invoke this method, and then invoke the mapVariableName:toSemantic: or
+ * mappings can invoke this method, and then invoke the mapVarName:toSemantic: or
  * addVariableConfiguration: methods to add or change any of the mappings.
+ *
+ * An application wishing to define a completely different semantic mapping may instantiate
+ * an instance of this class, will avoid invoking this method, and will typically add its
+ * own population methods in a class extension category.
  */
 -(void) populateWithDefaultVariableNameMappings;
 
@@ -601,3 +423,4 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 +(CC3GLProgramSemanticsDelegateByVarNames*) sharedDefaultDelegate;
 
 @end
+

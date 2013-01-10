@@ -131,7 +131,7 @@
 	if ( ![self allocateVertexCapacity: _allocatedVertexCapacity] ) _elementType = currType;
 }
 
--(GLuint) elementLength { return GLElementTypeSize(_elementType) * _elementSize; }
+-(GLuint) elementLength { return CC3GLElementTypeSize(_elementType) * _elementSize; }
 
 -(GLuint) vertexStride { return _vertexStride ? _vertexStride : self.elementLength; }
 
@@ -1227,9 +1227,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	defaultExpectsVerticallyFlippedTextures = expectsFlipped;
 }
 
--(ccTex2F) texCoord2FAt: (GLuint) index {
-	return *(ccTex2F*)[self addressOfElement: index];
-}
+-(ccTex2F) texCoord2FAt: (GLuint) index { return *(ccTex2F*)[self addressOfElement: index]; }
 
 -(void) setTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index {
 	*(ccTex2F*)[self addressOfElement: index] = aTex2F;
@@ -1238,7 +1236,8 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 /** Offsets the semantic by the texture unit index. */
 -(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESStateTrackerVertexPointer* vtxPtr;
-	vtxPtr = [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: (_semantic + visitor.textureUnit)];
+	vtxPtr = [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: _semantic
+																	  at: visitor.textureUnit];
 	[vtxPtr bindElementsAt: pointer
 				  withSize: _elementSize
 				  withType: _elementType
@@ -1397,7 +1396,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexTexture0; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexTexture; }
 
 @end
 

@@ -61,9 +61,15 @@
 	return rtnVar ? rtnVar : [self addUniformOverrideFor: [_program uniformNamed: name]];
 }
 
+-(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
+	for (CC3GLSLUniform* var in _uniforms)
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex)
+			return var;
+	return [self addUniformOverrideFor: [_program uniformForSemantic: semantic at: semanticIndex]];
+}
+
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic {
-	for (CC3GLSLUniform* var in _uniforms) if (var.semantic == semantic) return var;
-	return [self addUniformOverrideFor: [_program uniformForSemantic: semantic]];
+	return [self uniformOverrideForSemantic: semantic at: 0];
 }
 
 -(CC3GLSLUniform*) uniformOverrideAtLocation: (GLint) uniformLocation {
@@ -110,7 +116,7 @@
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	for (CC3GLSLUniform* var in _uniforms) {
 		if (var.location == uniform.location) {
-			[var setValueInto: uniform];
+			[uniform setValueFromUniform: var];
 			return YES;
 		}
 	}

@@ -47,10 +47,10 @@
 #include <stdio.h>
 
 /** Returns a string containing the name of the specified GL enumeration code. */
-char* GLEnumName(GLenum gle);
+char* CC3GLEnumName(GLenum gle);
 
 /** 
  * Returns the size of the specified GL dataType, which must be one of:
  * GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FLOAT, GL_FIXED.
  */
-size_t GLElementTypeSize(GLenum dataType);
+size_t CC3GLElementTypeSize(GLenum dataType);

@@ -1868,7 +1868,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// to move it to a more convenient location and scale. Remember that the location of the mask
 	// within the holder (and therefore the required offset) scales as the holder scales!!
 	CC3Node* maskHolder = [mask asOrientingWrapper];
-	maskHolder.uniformScale = 6.0;
+	maskHolder.uniformScale = 5.0;
 	CC3Vector maskOffset = CC3VectorScaleUniform(mask.location, maskHolder.uniformScale);
 	maskHolder.location = CC3VectorDifference(cc3v(-800.0, 50.0, -500.0), maskOffset);
 

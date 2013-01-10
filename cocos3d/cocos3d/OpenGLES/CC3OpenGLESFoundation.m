@@ -37,7 +37,7 @@
 #pragma mark GL supporting functions
 
 NSString* NSStringFromGLEnum(GLenum gle) {
-	return [NSString stringWithUTF8String: GLEnumName(gle)];
+	return [NSString stringWithUTF8String: CC3GLEnumName(gle)];
 }
 
 NSString* GetGLErrorText(GLenum errCode) {

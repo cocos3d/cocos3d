@@ -76,7 +76,7 @@
 @property(nonatomic, readonly) GLint maxAttributeNameLength;
 
 /** Returns the uniform with the specified semantic, or nil if no uniform is defined for the specified semantic. */
--(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic;
+-(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
 
 /** Returns the uniform with the specified name, or nil if no uniform is defined for the specified name. */
 -(CC3GLSLUniform*) uniformNamed: (NSString*) name;
@@ -85,7 +85,7 @@
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
 
 /** Returns the attribute with the specified semantic, or nil if no attribute is defined for the specified semantic. */
--(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic;
+-(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
 
 /** Returns the attribute with the specified name, or nil if no attribute is defined for the specified name. */
 -(CC3GLSLAttribute*) attributeNamed: (NSString*) name;

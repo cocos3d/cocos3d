@@ -218,8 +218,8 @@
 	self.weights = [CC3OpenGLES1StateTrackerVertexWeightsPointer trackerWithParent: self];
 }
 
--(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
-	GLuint texUnit;
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic
+															   at: (GLuint) semanticIndex {
 	switch (semantic) {
 		case kCC3SemanticVertexLocations: return _locations;
 		case kCC3SemanticVertexNormals: return _normals;
@@ -227,17 +227,8 @@
 		case kCC3SemanticVertexPointSizes: return _pointSizes;
 		case kCC3SemanticVertexWeights: return _weights;
 		case kCC3SemanticVertexMatrices: return _matrixIndices;
-
-		case kCC3SemanticVertexTexture0:
-		case kCC3SemanticVertexTexture1:
-		case kCC3SemanticVertexTexture2:
-		case kCC3SemanticVertexTexture3:
-		case kCC3SemanticVertexTexture4:
-		case kCC3SemanticVertexTexture5:
-		case kCC3SemanticVertexTexture6:
-		case kCC3SemanticVertexTexture7:
-			texUnit = semantic - kCC3SemanticVertexTexture0;
-			return [self.engine.textures textureUnitAt: texUnit].textureCoordinates;
+		case kCC3SemanticVertexTexture:
+			return [self.engine.textures textureUnitAt: semanticIndex].textureCoordinates;
 			
 		default: return nil;
 	}

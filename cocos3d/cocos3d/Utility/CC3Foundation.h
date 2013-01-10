@@ -76,6 +76,74 @@ static inline NSString* NSStringFromCC3Version() {
 }
 
 
+
+#pragma mark -
+#pragma mark Integer vector structure and functions
+
+/** An integer 2D point. */
+typedef struct {
+	GLint x;			/**< The X-componenent of the point. */
+	GLint y;			/**< The Y-componenent of the point. */
+} CC3IntPoint;
+
+/** Returns a string description of the specified CC3IntPoint struct in the form "(x, y)" */
+static inline NSString* NSStringFromCC3IntPoint(CC3IntPoint v) {
+	return [NSString stringWithFormat: @"(%i, %i)", v.x, v.y];
+}
+
+/** Returns a CC3IntPoint structure constructed from the vector components. */
+static inline CC3IntPoint CC3IntPointMake(GLint x, GLint y) {
+	CC3IntPoint v;
+	v.x = x;
+	v.y = y;
+	return v;
+}
+
+/** An integer 3D vector. */
+typedef struct {
+	GLint x;			/**< The X-componenent of the vector. */
+	GLint y;			/**< The Y-componenent of the vector. */
+	GLint z;			/**< The Z-componenent of the vector. */
+} CC3IntVector;
+
+/** Returns a string description of the specified CC3IntVector struct in the form "(x, y, z)" */
+static inline NSString* NSStringFromCC3IntVector(CC3IntVector v) {
+	return [NSString stringWithFormat: @"(%i, %i, %i)", v.x, v.y, v.z];
+}
+
+/** Returns a CC3IntVector structure constructed from the vector components. */
+static inline CC3IntVector CC3IntVectorMake(GLint x, GLint y, GLint z) {
+	CC3IntVector v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+	return v;
+}
+
+/** An integer 4D vector. */
+typedef struct {
+	GLint x;			/**< The X-componenent of the vector. */
+	GLint y;			/**< The Y-componenent of the vector. */
+	GLint z;			/**< The Z-componenent of the vector. */
+	GLint w;			/**< The W-componenent of the vector. */
+} CC3IntVector4;
+
+/** Returns a string description of the specified CC3IntVector4 struct in the form "(x, y, z, w)" */
+static inline NSString* NSStringFromCC3IntVector4(CC3IntVector4 v) {
+	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", v.x, v.y, v.z, v.w];
+}
+
+/** Returns a CC3IntVector4 structure constructed from the vector components. */
+static inline CC3IntVector4 CC3IntVector4Make(GLint x, GLint y, GLint z, GLint w) {
+	CC3IntVector4 v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+	v.w = w;
+	return v;
+}
+
+
 #pragma mark -
 #pragma mark 3D cartesian vector structure and functions
 

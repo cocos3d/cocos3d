@@ -70,9 +70,9 @@
 	return nil;
 }
 
--(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic {
+-(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
 	for (CC3GLSLUniform* var in _uniforms) {
-		if (var.semantic == semantic) return var;
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
 	}
 	return nil;
 }
@@ -91,9 +91,9 @@
 	return nil;
 }
 
--(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic {
+-(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
 	for (CC3GLSLAttribute* var in _attributes) {
-		if (var.semantic == semantic) return var;
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
 	}
 	return nil;
 }
@@ -110,9 +110,12 @@
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
 	[self use];
 	for (CC3GLSLUniform* var in _uniforms)
-		if ( !([context populateUniform: var withVisitor: visitor] ||
-			   [_semanticDelegate populateUniform: var withVisitor: visitor]) )
+		if ([context populateUniform: var withVisitor: visitor] ||
+			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
+			[var updateGLValue];
+		} else {
 			NSAssert3(NO, @"Could not resolve value of uniform %@ for %@ within context %@", var, self, context);
+		}
 }
 
 -(BOOL) compileShader: (GLuint*) shader type: (GLenum) type byteArray: (const GLchar*) source {
@@ -148,7 +151,7 @@
 }
 
 -(BOOL) link {
-	NSAssert1(_semanticDelegate, @"%@ requires that the semanticDelegate property be set before linking.", self);
+	NSAssert1(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
 	BOOL wasLinked = [super link];
 	NSAssert1(wasLinked, @"%@ could not be linked. See previously logged error.", self);
 	if (wasLinked) {

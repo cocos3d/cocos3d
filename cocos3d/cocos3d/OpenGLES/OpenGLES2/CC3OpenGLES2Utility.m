@@ -32,7 +32,7 @@
 #include "CC3OpenGLESUtility.h"
 
 #if CC3_OGLES_2
-char* GLEnumName(GLenum gle) {
+char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {
 		case GL_ZERO: return "GL_ZERO";
 		case GL_ONE: return "GL_ONE";
@@ -441,7 +441,7 @@ char* GLEnumName(GLenum gle) {
 	}
 }
 
-size_t GLElementTypeSize(GLenum dataType) {
+size_t CC3GLElementTypeSize(GLenum dataType) {
 	switch (dataType) {
 		case GL_BYTE: return sizeof(GLbyte);
 		case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
@@ -475,19 +475,5 @@ size_t GLElementTypeSize(GLenum dataType) {
 		default: return 0;
 	}	
 }
-
-/*
-size_t GLElementTypeSize(GLenum dataType) {
-	switch (dataType) {
-		case GL_BYTE: return sizeof(GLbyte);
-		case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
-		case GL_SHORT: return sizeof(GLshort);
-		case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-		case GL_FLOAT: return sizeof(GLfloat);
-		case GL_FIXED: return sizeof(GLfixed);
-		default: return 0;
-	}
-}
-*/
 
 #endif

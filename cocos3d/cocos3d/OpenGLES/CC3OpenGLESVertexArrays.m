@@ -280,7 +280,14 @@
 	LogGLErrorTrace(@"%@ delete buffer %i", self, buffID);
 }
 
--(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic { return nil; }
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic
+															   at:(GLuint)semanticIndex {
+	return nil;
+}
+
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic {
+	return [self vertexPointerForSemantic: semantic at: 0];
+}
 
 -(void) clearUnboundVertexPointers {}
 

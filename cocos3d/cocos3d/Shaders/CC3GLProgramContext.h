@@ -91,7 +91,16 @@
 -(CC3GLSLUniform*) uniformOverrideNamed: (NSString*) name;
 
 /**
- * Returns an override for the program uniform with the specified name.
+ * Returns an override for the program uniform with the specified semantic and semantic index.
+ *
+ * The semantic describes what type of content the uniform is tracking in the GLSL shader code.
+ * It is usually one of the values from the CC3Semantic, although the application can also define
+ * values outside the range of this enumeration, if needed. The semantic index is used for
+ * semantics that may appear more than once in the scene and in the shader code.
+ *
+ * For example, the shader might support several lights. The semantic kCC3SemanticLightPosition
+ * indicates that the uniform is tracking the position of a light, and the semantic index then
+ * represents the index of a particular light. The index is zero-based.
  *
  * The application can use this method to set the value of a uniform directly, either to populate
  * a program uniform whose content cannot be extracted semantically from the environment, or to
@@ -109,6 +118,14 @@
  * returned uniform. If this method has been used to override a program uniform whose content can be
  * extracted semantically from the environment, you can remove this override by invoking the
  * removeUniformOverride: method with the uniform returned by this method.
+ */
+-(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
+
+/**
+ * Returns an override for the program uniform with the specified semantic and semantic index zero.
+ *
+ * This is a convenience method that invokes the uniformOverrideForSemantic:at: method, passing
+ * zero for the semanticIndex argument. See the description of that method for more info.
  */
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic;
 

@@ -250,7 +250,10 @@
  */
 -(void) deleteBuffer: (GLuint) buffID;
 
-/** Returns the vertex pointer tracker for the specified vertex array semantic. */
+/** Returns the vertex pointer tracker for the specified vertex array semantic at the specified semantic index. */
+-(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
+
+/** Returns the vertex pointer tracker for the specified vertex array semantic at semantic index zero. */
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointerForSemantic: (GLenum) semantic;
 
 /** Clears the tracking of unbound vertex pointers. */

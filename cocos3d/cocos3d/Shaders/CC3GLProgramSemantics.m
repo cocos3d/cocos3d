@@ -49,14 +49,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticVertexPointSizes: return @"kCC3SemanticVertexPointSizes";
 		case kCC3SemanticVertexWeights: return @"kCC3SemanticVertexWeights";
 		case kCC3SemanticVertexMatrices: return @"kCC3SemanticVertexMatrices";
-		case kCC3SemanticVertexTexture0: return @"kCC3SemanticVertexTexture0";
-		case kCC3SemanticVertexTexture1: return @"kCC3SemanticVertexTexture1";
-		case kCC3SemanticVertexTexture2: return @"kCC3SemanticVertexTexture2";
-		case kCC3SemanticVertexTexture3: return @"kCC3SemanticVertexTexture3";
-		case kCC3SemanticVertexTexture4: return @"kCC3SemanticVertexTexture4";
-		case kCC3SemanticVertexTexture5: return @"kCC3SemanticVertexTexture5";
-		case kCC3SemanticVertexTexture6: return @"kCC3SemanticVertexTexture6";
-		case kCC3SemanticVertexTexture7: return @"kCC3SemanticVertexTexture7";
+		case kCC3SemanticVertexTexture: return @"kCC3SemanticVertexTexture";
 			
 		case kCC3SemanticHasVertexNormal: return @"kCC3SemanticHasVertexNormal";
 		case kCC3SemanticShouldNormalizeVertexNormal: return @"kCC3SemanticShouldNormalizeVertexNormal";
@@ -99,244 +92,37 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticIsUsingLighting: return @"kCC3SemanticIsUsingLighting";
 		case kCC3SemanticSceneLightColorAmbient: return @"kCC3SemanticSceneLightColorAmbient";
 
-		case kCC3SemanticLightIsEnabled0: return @"kCC3SemanticLightIsEnabled0";
-		case kCC3SemanticLightIsEnabled1: return @"kCC3SemanticLightIsEnabled1";
-		case kCC3SemanticLightIsEnabled2: return @"kCC3SemanticLightIsEnabled2";
-		case kCC3SemanticLightIsEnabled3: return @"kCC3SemanticLightIsEnabled3";
-		case kCC3SemanticLightIsEnabled4: return @"kCC3SemanticLightIsEnabled4";
-		case kCC3SemanticLightIsEnabled5: return @"kCC3SemanticLightIsEnabled5";
-		case kCC3SemanticLightIsEnabled6: return @"kCC3SemanticLightIsEnabled6";
-		case kCC3SemanticLightIsEnabled7: return @"kCC3SemanticLightIsEnabled7";
-
-		case kCC3SemanticLightPosition0: return @"kCC3SemanticLightPosition0";
-		case kCC3SemanticLightPosition1: return @"kCC3SemanticLightPosition1";
-		case kCC3SemanticLightPosition2: return @"kCC3SemanticLightPosition2";
-		case kCC3SemanticLightPosition3: return @"kCC3SemanticLightPosition3";
-		case kCC3SemanticLightPosition4: return @"kCC3SemanticLightPosition4";
-		case kCC3SemanticLightPosition5: return @"kCC3SemanticLightPosition5";
-		case kCC3SemanticLightPosition6: return @"kCC3SemanticLightPosition6";
-		case kCC3SemanticLightPosition7: return @"kCC3SemanticLightPosition7";
-
-		case kCC3SemanticLightColorAmbient0: return @"kCC3SemanticLightColorAmbient0";
-		case kCC3SemanticLightColorAmbient1: return @"kCC3SemanticLightColorAmbient1";
-		case kCC3SemanticLightColorAmbient2: return @"kCC3SemanticLightColorAmbient2";
-		case kCC3SemanticLightColorAmbient3: return @"kCC3SemanticLightColorAmbient3";
-		case kCC3SemanticLightColorAmbient4: return @"kCC3SemanticLightColorAmbient4";
-		case kCC3SemanticLightColorAmbient5: return @"kCC3SemanticLightColorAmbient5";
-		case kCC3SemanticLightColorAmbient6: return @"kCC3SemanticLightColorAmbient6";
-		case kCC3SemanticLightColorAmbient7: return @"kCC3SemanticLightColorAmbient7";
-			
-		case kCC3SemanticLightColorDiffuse0: return @"kCC3SemanticLightColorDiffuse0";
-		case kCC3SemanticLightColorDiffuse1: return @"kCC3SemanticLightColorDiffuse1";
-		case kCC3SemanticLightColorDiffuse2: return @"kCC3SemanticLightColorDiffuse2";
-		case kCC3SemanticLightColorDiffuse3: return @"kCC3SemanticLightColorDiffuse3";
-		case kCC3SemanticLightColorDiffuse4: return @"kCC3SemanticLightColorDiffuse4";
-		case kCC3SemanticLightColorDiffuse5: return @"kCC3SemanticLightColorDiffuse5";
-		case kCC3SemanticLightColorDiffuse6: return @"kCC3SemanticLightColorDiffuse6";
-		case kCC3SemanticLightColorDiffuse7: return @"kCC3SemanticLightColorDiffuse7";
-			
-		case kCC3SemanticLightColorSpecular0: return @"kCC3SemanticLightColorSpecular0";
-		case kCC3SemanticLightColorSpecular1: return @"kCC3SemanticLightColorSpecular1";
-		case kCC3SemanticLightColorSpecular2: return @"kCC3SemanticLightColorSpecular2";
-		case kCC3SemanticLightColorSpecular3: return @"kCC3SemanticLightColorSpecular3";
-		case kCC3SemanticLightColorSpecular4: return @"kCC3SemanticLightColorSpecular4";
-		case kCC3SemanticLightColorSpecular5: return @"kCC3SemanticLightColorSpecular5";
-		case kCC3SemanticLightColorSpecular6: return @"kCC3SemanticLightColorSpecular6";
-		case kCC3SemanticLightColorSpecular7: return @"kCC3SemanticLightColorSpecular7";
-
-		case kCC3SemanticLightAttenuation0: return @"kCC3SemanticLightAttenuation0";
-		case kCC3SemanticLightAttenuation1: return @"kCC3SemanticLightAttenuation1";
-		case kCC3SemanticLightAttenuation2: return @"kCC3SemanticLightAttenuation2";
-		case kCC3SemanticLightAttenuation3: return @"kCC3SemanticLightAttenuation3";
-		case kCC3SemanticLightAttenuation4: return @"kCC3SemanticLightAttenuation4";
-		case kCC3SemanticLightAttenuation5: return @"kCC3SemanticLightAttenuation5";
-		case kCC3SemanticLightAttenuation6: return @"kCC3SemanticLightAttenuation6";
-		case kCC3SemanticLightAttenuation7: return @"kCC3SemanticLightAttenuation7";
-
-		case kCC3SemanticLightSpotDirection0: return @"kCC3SemanticLightSpotDirection0";
-		case kCC3SemanticLightSpotDirection1: return @"kCC3SemanticLightSpotDirection1";
-		case kCC3SemanticLightSpotDirection2: return @"kCC3SemanticLightSpotDirection2";
-		case kCC3SemanticLightSpotDirection3: return @"kCC3SemanticLightSpotDirection3";
-		case kCC3SemanticLightSpotDirection4: return @"kCC3SemanticLightSpotDirection4";
-		case kCC3SemanticLightSpotDirection5: return @"kCC3SemanticLightSpotDirection5";
-		case kCC3SemanticLightSpotDirection6: return @"kCC3SemanticLightSpotDirection6";
-		case kCC3SemanticLightSpotDirection7: return @"kCC3SemanticLightSpotDirection7";
-			
-		case kCC3SemanticLightSpotExponent0: return @"kCC3SemanticLightSpotExponent0";
-		case kCC3SemanticLightSpotExponent1: return @"kCC3SemanticLightSpotExponent1";
-		case kCC3SemanticLightSpotExponent2: return @"kCC3SemanticLightSpotExponent2";
-		case kCC3SemanticLightSpotExponent3: return @"kCC3SemanticLightSpotExponent3";
-		case kCC3SemanticLightSpotExponent4: return @"kCC3SemanticLightSpotExponent4";
-		case kCC3SemanticLightSpotExponent5: return @"kCC3SemanticLightSpotExponent5";
-		case kCC3SemanticLightSpotExponent6: return @"kCC3SemanticLightSpotExponent6";
-		case kCC3SemanticLightSpotExponent7: return @"kCC3SemanticLightSpotExponent7";
-
-		case kCC3SemanticLightSpotCutoffAngle0: return @"kCC3SemanticLightSpotCutoffAngle0";
-		case kCC3SemanticLightSpotCutoffAngle1: return @"kCC3SemanticLightSpotCutoffAngle1";
-		case kCC3SemanticLightSpotCutoffAngle2: return @"kCC3SemanticLightSpotCutoffAngle2";
-		case kCC3SemanticLightSpotCutoffAngle3: return @"kCC3SemanticLightSpotCutoffAngle3";
-		case kCC3SemanticLightSpotCutoffAngle4: return @"kCC3SemanticLightSpotCutoffAngle4";
-		case kCC3SemanticLightSpotCutoffAngle5: return @"kCC3SemanticLightSpotCutoffAngle5";
-		case kCC3SemanticLightSpotCutoffAngle6: return @"kCC3SemanticLightSpotCutoffAngle6";
-		case kCC3SemanticLightSpotCutoffAngle7: return @"kCC3SemanticLightSpotCutoffAngle7";
-
-		case kCC3SemanticLightSpotCutoffAngleCosine0: return @"kCC3SemanticLightSpotCutoffAngleCosine0";
-		case kCC3SemanticLightSpotCutoffAngleCosine1: return @"kCC3SemanticLightSpotCutoffAngleCosine1";
-		case kCC3SemanticLightSpotCutoffAngleCosine2: return @"kCC3SemanticLightSpotCutoffAngleCosine2";
-		case kCC3SemanticLightSpotCutoffAngleCosine3: return @"kCC3SemanticLightSpotCutoffAngleCosine3";
-		case kCC3SemanticLightSpotCutoffAngleCosine4: return @"kCC3SemanticLightSpotCutoffAngleCosine4";
-		case kCC3SemanticLightSpotCutoffAngleCosine5: return @"kCC3SemanticLightSpotCutoffAngleCosine5";
-		case kCC3SemanticLightSpotCutoffAngleCosine6: return @"kCC3SemanticLightSpotCutoffAngleCosine6";
-		case kCC3SemanticLightSpotCutoffAngleCosine7: return @"kCC3SemanticLightSpotCutoffAngleCosine7";
+		case kCC3SemanticLightIsEnabled: return @"kCC3SemanticLightIsEnabled";
+		case kCC3SemanticLightPosition: return @"kCC3SemanticLightPosition";
+		case kCC3SemanticLightColorAmbient: return @"kCC3SemanticLightColorAmbient";
+		case kCC3SemanticLightColorDiffuse: return @"kCC3SemanticLightColorDiffuse";
+		case kCC3SemanticLightColorSpecular: return @"kCC3SemanticLightColorSpecular";
+		case kCC3SemanticLightAttenuation: return @"kCC3SemanticLightAttenuation";
+		case kCC3SemanticLightSpotDirection: return @"kCC3SemanticLightSpotDirection";
+		case kCC3SemanticLightSpotExponent: return @"kCC3SemanticLightSpotExponent";
+		case kCC3SemanticLightSpotCutoffAngle: return @"kCC3SemanticLightSpotCutoffAngle";
+		case kCC3SemanticLightSpotCutoffAngleCosine: return @"kCC3SemanticLightSpotCutoffAngleCosine";
 			
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount: return @"kCC3SemanticTextureCount";
 		case kCC3SemanticTextureSamplers: return @"kCC3SemanticTextureSamplers";
 
-		case kCC3SemanticTexUnitMode0: return @"kCC3SemanticTexUnitMode0";
-		case kCC3SemanticTexUnitMode1: return @"kCC3SemanticTexUnitMode1";
-		case kCC3SemanticTexUnitMode2: return @"kCC3SemanticTexUnitMode2";
-		case kCC3SemanticTexUnitMode3: return @"kCC3SemanticTexUnitMode3";
-		case kCC3SemanticTexUnitMode4: return @"kCC3SemanticTexUnitMode4";
-		case kCC3SemanticTexUnitMode5: return @"kCC3SemanticTexUnitMode5";
-		case kCC3SemanticTexUnitMode6: return @"kCC3SemanticTexUnitMode6";
-		case kCC3SemanticTexUnitMode7: return @"kCC3SemanticTexUnitMode7";
-			
-		case kCC3SemanticTexUnitConstantColor0: return @"kCC3SemanticTexUnitConstantColor0";
-		case kCC3SemanticTexUnitConstantColor1: return @"kCC3SemanticTexUnitConstantColor1";
-		case kCC3SemanticTexUnitConstantColor2: return @"kCC3SemanticTexUnitConstantColor2";
-		case kCC3SemanticTexUnitConstantColor3: return @"kCC3SemanticTexUnitConstantColor3";
-		case kCC3SemanticTexUnitConstantColor4: return @"kCC3SemanticTexUnitConstantColor4";
-		case kCC3SemanticTexUnitConstantColor5: return @"kCC3SemanticTexUnitConstantColor5";
-		case kCC3SemanticTexUnitConstantColor6: return @"kCC3SemanticTexUnitConstantColor6";
-		case kCC3SemanticTexUnitConstantColor7: return @"kCC3SemanticTexUnitConstantColor7";
-			
-		case kCC3SemanticTexUnitCombineRGBFunction0: return @"kCC3SemanticTexUnitCombineRGBFunction0";
-		case kCC3SemanticTexUnitCombineRGBFunction1: return @"kCC3SemanticTexUnitCombineRGBFunction1";
-		case kCC3SemanticTexUnitCombineRGBFunction2: return @"kCC3SemanticTexUnitCombineRGBFunction2";
-		case kCC3SemanticTexUnitCombineRGBFunction3: return @"kCC3SemanticTexUnitCombineRGBFunction3";
-		case kCC3SemanticTexUnitCombineRGBFunction4: return @"kCC3SemanticTexUnitCombineRGBFunction4";
-		case kCC3SemanticTexUnitCombineRGBFunction5: return @"kCC3SemanticTexUnitCombineRGBFunction5";
-		case kCC3SemanticTexUnitCombineRGBFunction6: return @"kCC3SemanticTexUnitCombineRGBFunction6";
-		case kCC3SemanticTexUnitCombineRGBFunction7: return @"kCC3SemanticTexUnitCombineRGBFunction7";
-			
-		case kCC3SemanticTexUnitSource0RGB0: return @"kCC3SemanticTexUnitSource0RGB0";
-		case kCC3SemanticTexUnitSource0RGB1: return @"kCC3SemanticTexUnitSource0RGB1";
-		case kCC3SemanticTexUnitSource0RGB2: return @"kCC3SemanticTexUnitSource0RGB2";
-		case kCC3SemanticTexUnitSource0RGB3: return @"kCC3SemanticTexUnitSource0RGB3";
-		case kCC3SemanticTexUnitSource0RGB4: return @"kCC3SemanticTexUnitSource0RGB4";
-		case kCC3SemanticTexUnitSource0RGB5: return @"kCC3SemanticTexUnitSource0RGB5";
-		case kCC3SemanticTexUnitSource0RGB6: return @"kCC3SemanticTexUnitSource0RGB6";
-		case kCC3SemanticTexUnitSource0RGB7: return @"kCC3SemanticTexUnitSource0RGB7";
-			
-		case kCC3SemanticTexUnitSource1RGB0: return @"kCC3SemanticTexUnitSource1RGB0";
-		case kCC3SemanticTexUnitSource1RGB1: return @"kCC3SemanticTexUnitSource1RGB1";
-		case kCC3SemanticTexUnitSource1RGB2: return @"kCC3SemanticTexUnitSource1RGB2";
-		case kCC3SemanticTexUnitSource1RGB3: return @"kCC3SemanticTexUnitSource1RGB3";
-		case kCC3SemanticTexUnitSource1RGB4: return @"kCC3SemanticTexUnitSource1RGB4";
-		case kCC3SemanticTexUnitSource1RGB5: return @"kCC3SemanticTexUnitSource1RGB5";
-		case kCC3SemanticTexUnitSource1RGB6: return @"kCC3SemanticTexUnitSource1RGB6";
-		case kCC3SemanticTexUnitSource1RGB7: return @"kCC3SemanticTexUnitSource1RGB7";
-			
-		case kCC3SemanticTexUnitSource2RGB0: return @"kCC3SemanticTexUnitSource2RGB0";
-		case kCC3SemanticTexUnitSource2RGB1: return @"kCC3SemanticTexUnitSource2RGB1";
-		case kCC3SemanticTexUnitSource2RGB2: return @"kCC3SemanticTexUnitSource2RGB2";
-		case kCC3SemanticTexUnitSource2RGB3: return @"kCC3SemanticTexUnitSource2RGB3";
-		case kCC3SemanticTexUnitSource2RGB4: return @"kCC3SemanticTexUnitSource2RGB4";
-		case kCC3SemanticTexUnitSource2RGB5: return @"kCC3SemanticTexUnitSource2RGB5";
-		case kCC3SemanticTexUnitSource2RGB6: return @"kCC3SemanticTexUnitSource2RGB6";
-		case kCC3SemanticTexUnitSource2RGB7: return @"kCC3SemanticTexUnitSource2RGB7";
-			
-		case kCC3SemanticTexUnitOperand0RGB0: return @"kCC3SemanticTexUnitOperand0RGB0";
-		case kCC3SemanticTexUnitOperand0RGB1: return @"kCC3SemanticTexUnitOperand0RGB1";
-		case kCC3SemanticTexUnitOperand0RGB2: return @"kCC3SemanticTexUnitOperand0RGB2";
-		case kCC3SemanticTexUnitOperand0RGB3: return @"kCC3SemanticTexUnitOperand0RGB3";
-		case kCC3SemanticTexUnitOperand0RGB4: return @"kCC3SemanticTexUnitOperand0RGB4";
-		case kCC3SemanticTexUnitOperand0RGB5: return @"kCC3SemanticTexUnitOperand0RGB5";
-		case kCC3SemanticTexUnitOperand0RGB6: return @"kCC3SemanticTexUnitOperand0RGB6";
-		case kCC3SemanticTexUnitOperand0RGB7: return @"kCC3SemanticTexUnitOperand0RGB7";
-			
-		case kCC3SemanticTexUnitOperand1RGB0: return @"kCC3SemanticTexUnitOperand1RGB0";
-		case kCC3SemanticTexUnitOperand1RGB1: return @"kCC3SemanticTexUnitOperand1RGB1";
-		case kCC3SemanticTexUnitOperand1RGB2: return @"kCC3SemanticTexUnitOperand1RGB2";
-		case kCC3SemanticTexUnitOperand1RGB3: return @"kCC3SemanticTexUnitOperand1RGB3";
-		case kCC3SemanticTexUnitOperand1RGB4: return @"kCC3SemanticTexUnitOperand1RGB4";
-		case kCC3SemanticTexUnitOperand1RGB5: return @"kCC3SemanticTexUnitOperand1RGB5";
-		case kCC3SemanticTexUnitOperand1RGB6: return @"kCC3SemanticTexUnitOperand1RGB6";
-		case kCC3SemanticTexUnitOperand1RGB7: return @"kCC3SemanticTexUnitOperand1RGB7";
-			
-		case kCC3SemanticTexUnitOperand2RGB0: return @"kCC3SemanticTexUnitOperand2RGB0";
-		case kCC3SemanticTexUnitOperand2RGB1: return @"kCC3SemanticTexUnitOperand2RGB1";
-		case kCC3SemanticTexUnitOperand2RGB2: return @"kCC3SemanticTexUnitOperand2RGB2";
-		case kCC3SemanticTexUnitOperand2RGB3: return @"kCC3SemanticTexUnitOperand2RGB3";
-		case kCC3SemanticTexUnitOperand2RGB4: return @"kCC3SemanticTexUnitOperand2RGB4";
-		case kCC3SemanticTexUnitOperand2RGB5: return @"kCC3SemanticTexUnitOperand2RGB5";
-		case kCC3SemanticTexUnitOperand2RGB6: return @"kCC3SemanticTexUnitOperand2RGB6";
-		case kCC3SemanticTexUnitOperand2RGB7: return @"kCC3SemanticTexUnitOperand2RGB7";
-			
-		case kCC3SemanticTexUnitCombineAlphaFunction0: return @"kCC3SemanticTexUnitCombineAlphaFunction0";
-		case kCC3SemanticTexUnitCombineAlphaFunction1: return @"kCC3SemanticTexUnitCombineAlphaFunction1";
-		case kCC3SemanticTexUnitCombineAlphaFunction2: return @"kCC3SemanticTexUnitCombineAlphaFunction2";
-		case kCC3SemanticTexUnitCombineAlphaFunction3: return @"kCC3SemanticTexUnitCombineAlphaFunction3";
-		case kCC3SemanticTexUnitCombineAlphaFunction4: return @"kCC3SemanticTexUnitCombineAlphaFunction4";
-		case kCC3SemanticTexUnitCombineAlphaFunction5: return @"kCC3SemanticTexUnitCombineAlphaFunction5";
-		case kCC3SemanticTexUnitCombineAlphaFunction6: return @"kCC3SemanticTexUnitCombineAlphaFunction6";
-		case kCC3SemanticTexUnitCombineAlphaFunction7: return @"kCC3SemanticTexUnitCombineAlphaFunction7";
-			
-		case kCC3SemanticTexUnitSource0Alpha0: return @"kCC3SemanticTexUnitSource0Alpha0";
-		case kCC3SemanticTexUnitSource0Alpha1: return @"kCC3SemanticTexUnitSource0Alpha1";
-		case kCC3SemanticTexUnitSource0Alpha2: return @"kCC3SemanticTexUnitSource0Alpha2";
-		case kCC3SemanticTexUnitSource0Alpha3: return @"kCC3SemanticTexUnitSource0Alpha3";
-		case kCC3SemanticTexUnitSource0Alpha4: return @"kCC3SemanticTexUnitSource0Alpha4";
-		case kCC3SemanticTexUnitSource0Alpha5: return @"kCC3SemanticTexUnitSource0Alpha5";
-		case kCC3SemanticTexUnitSource0Alpha6: return @"kCC3SemanticTexUnitSource0Alpha6";
-		case kCC3SemanticTexUnitSource0Alpha7: return @"kCC3SemanticTexUnitSource0Alpha7";
-			
-		case kCC3SemanticTexUnitSource1Alpha0: return @"kCC3SemanticTexUnitSource1Alpha0";
-		case kCC3SemanticTexUnitSource1Alpha1: return @"kCC3SemanticTexUnitSource1Alpha1";
-		case kCC3SemanticTexUnitSource1Alpha2: return @"kCC3SemanticTexUnitSource1Alpha2";
-		case kCC3SemanticTexUnitSource1Alpha3: return @"kCC3SemanticTexUnitSource1Alpha3";
-		case kCC3SemanticTexUnitSource1Alpha4: return @"kCC3SemanticTexUnitSource1Alpha4";
-		case kCC3SemanticTexUnitSource1Alpha5: return @"kCC3SemanticTexUnitSource1Alpha5";
-		case kCC3SemanticTexUnitSource1Alpha6: return @"kCC3SemanticTexUnitSource1Alpha6";
-		case kCC3SemanticTexUnitSource1Alpha7: return @"kCC3SemanticTexUnitSource1Alpha7";
-			
-		case kCC3SemanticTexUnitSource2Alpha0: return @"kCC3SemanticTexUnitSource2Alpha0";
-		case kCC3SemanticTexUnitSource2Alpha1: return @"kCC3SemanticTexUnitSource2Alpha1";
-		case kCC3SemanticTexUnitSource2Alpha2: return @"kCC3SemanticTexUnitSource2Alpha2";
-		case kCC3SemanticTexUnitSource2Alpha3: return @"kCC3SemanticTexUnitSource2Alpha3";
-		case kCC3SemanticTexUnitSource2Alpha4: return @"kCC3SemanticTexUnitSource2Alpha4";
-		case kCC3SemanticTexUnitSource2Alpha5: return @"kCC3SemanticTexUnitSource2Alpha5";
-		case kCC3SemanticTexUnitSource2Alpha6: return @"kCC3SemanticTexUnitSource2Alpha6";
-		case kCC3SemanticTexUnitSource2Alpha7: return @"kCC3SemanticTexUnitSource2Alpha7";
-			
-		case kCC3SemanticTexUnitOperand0Alpha0: return @"kCC3SemanticTexUnitOperand0Alpha0";
-		case kCC3SemanticTexUnitOperand0Alpha1: return @"kCC3SemanticTexUnitOperand0Alpha1";
-		case kCC3SemanticTexUnitOperand0Alpha2: return @"kCC3SemanticTexUnitOperand0Alpha2";
-		case kCC3SemanticTexUnitOperand0Alpha3: return @"kCC3SemanticTexUnitOperand0Alpha3";
-		case kCC3SemanticTexUnitOperand0Alpha4: return @"kCC3SemanticTexUnitOperand0Alpha4";
-		case kCC3SemanticTexUnitOperand0Alpha5: return @"kCC3SemanticTexUnitOperand0Alpha5";
-		case kCC3SemanticTexUnitOperand0Alpha6: return @"kCC3SemanticTexUnitOperand0Alpha6";
-		case kCC3SemanticTexUnitOperand0Alpha7: return @"kCC3SemanticTexUnitOperand0Alpha7";
-			
-		case kCC3SemanticTexUnitOperand1Alpha0: return @"kCC3SemanticTexUnitOperand1Alpha0";
-		case kCC3SemanticTexUnitOperand1Alpha1: return @"kCC3SemanticTexUnitOperand1Alpha1";
-		case kCC3SemanticTexUnitOperand1Alpha2: return @"kCC3SemanticTexUnitOperand1Alpha2";
-		case kCC3SemanticTexUnitOperand1Alpha3: return @"kCC3SemanticTexUnitOperand1Alpha3";
-		case kCC3SemanticTexUnitOperand1Alpha4: return @"kCC3SemanticTexUnitOperand1Alpha4";
-		case kCC3SemanticTexUnitOperand1Alpha5: return @"kCC3SemanticTexUnitOperand1Alpha5";
-		case kCC3SemanticTexUnitOperand1Alpha6: return @"kCC3SemanticTexUnitOperand1Alpha6";
-		case kCC3SemanticTexUnitOperand1Alpha7: return @"kCC3SemanticTexUnitOperand1Alpha7";
-			
-		case kCC3SemanticTexUnitOperand2Alpha0: return @"kCC3SemanticTexUnitOperand2Alpha0";
-		case kCC3SemanticTexUnitOperand2Alpha1: return @"kCC3SemanticTexUnitOperand2Alpha1";
-		case kCC3SemanticTexUnitOperand2Alpha2: return @"kCC3SemanticTexUnitOperand2Alpha2";
-		case kCC3SemanticTexUnitOperand2Alpha3: return @"kCC3SemanticTexUnitOperand2Alpha3";
-		case kCC3SemanticTexUnitOperand2Alpha4: return @"kCC3SemanticTexUnitOperand2Alpha4";
-		case kCC3SemanticTexUnitOperand2Alpha5: return @"kCC3SemanticTexUnitOperand2Alpha5";
-		case kCC3SemanticTexUnitOperand2Alpha6: return @"kCC3SemanticTexUnitOperand2Alpha6";
-		case kCC3SemanticTexUnitOperand2Alpha7: return @"kCC3SemanticTexUnitOperand2Alpha7";
-
+		case kCC3SemanticTexUnitMode: return @"kCC3SemanticTexUnitMode";
+		case kCC3SemanticTexUnitConstantColor: return @"kCC3SemanticTexUnitConstantColor";
+		case kCC3SemanticTexUnitCombineRGBFunction: return @"kCC3SemanticTexUnitCombineRGBFunction";
+		case kCC3SemanticTexUnitSource0RGB: return @"kCC3SemanticTexUnitSource0RGB";
+		case kCC3SemanticTexUnitSource1RGB: return @"kCC3SemanticTexUnitSource1RGB";
+		case kCC3SemanticTexUnitSource2RGB: return @"kCC3SemanticTexUnitSource2RGB";
+		case kCC3SemanticTexUnitOperand0RGB: return @"kCC3SemanticTexUnitOperand0RGB";
+		case kCC3SemanticTexUnitOperand1RGB: return @"kCC3SemanticTexUnitOperand1RGB";
+		case kCC3SemanticTexUnitOperand2RGB: return @"kCC3SemanticTexUnitOperand2RGB";
+		case kCC3SemanticTexUnitCombineAlphaFunction: return @"kCC3SemanticTexUnitCombineAlphaFunction";
+		case kCC3SemanticTexUnitSource0Alpha: return @"kCC3SemanticTexUnitSource0Alpha";
+		case kCC3SemanticTexUnitSource1Alpha: return @"kCC3SemanticTexUnitSource1Alpha";
+		case kCC3SemanticTexUnitSource2Alpha: return @"kCC3SemanticTexUnitSource2Alpha";
+		case kCC3SemanticTexUnitOperand0Alpha: return @"kCC3SemanticTexUnitOperand0Alpha";
+		case kCC3SemanticTexUnitOperand1Alpha: return @"kCC3SemanticTexUnitOperand1Alpha";
+		case kCC3SemanticTexUnitOperand2Alpha: return @"kCC3SemanticTexUnitOperand2Alpha";
 			
 		// PARTICLES ------------
 		case kCC3SemanticPointSize: return @"kCC3SemanticPointSize";
@@ -359,7 +145,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 @implementation CC3GLSLVariableConfiguration
 
-@synthesize name=_name, semantic=_semantic;
+@synthesize name=_name, semantic=_semantic, semanticIndex=_semanticIndex;
 
 -(void) dealloc {
 	[_name release];
@@ -380,11 +166,23 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable { return NO; }
 
+/**
+ * For semantics that may have more than one target, such as components of lights, or textures,
+ * the iteration loops in this method are designed to deal with two situations:
+ *   - If the uniform is declared as an array of single types (eg- an array of floats, bools, or
+ *     vec3's), the uniform semantic index will be zero and the uniform size will be larger than one.
+ *   - If the uniform is declared as an element of a structure in an array (eg- a vec3 in a structure
+ *     that is itself contained in an array, the uniform size will be one, but the uniform semantic
+ *     index can be larger than zero.
+ */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Retrieving semantic value for %@", uniform.fullDescription);
 	CC3OpenGLESLight* glesLight;
 	CC3OpenGLESTextureUnit* glesTexUnit;
 	GLenum semantic = uniform.semantic;
+	GLuint semanticIndex = uniform.semanticIndex;
+	GLint uniformSize = uniform.size;
+	
 	switch (semantic) {
 		
 		// ATTRIBUTE QUALIFIERS --------------
@@ -414,38 +212,35 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticModelMatrix: {
 			CC3Matrix4x4 mtx;
 			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &mtx];
-			[uniform setMatrices4x4: &mtx];
+			[uniform setMatrix4x4: &mtx];
 			return YES;
 		}
 		case kCC3SemanticModelMatrixInv: {
 			CC3Matrix4x4 mtx;
 			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x4: &mtx];
-			[uniform setMatrices4x4: &mtx];
+			[uniform setMatrix4x4: &mtx];
 			return YES;
 		}
 		case kCC3SemanticModelViewMatrix: {
-			[uniform setMatrices4x4: CC3OpenGLESEngine.engine.matrices.modelViewMatrix];
+			[uniform setMatrix4x4: CC3OpenGLESEngine.engine.matrices.modelViewMatrix];
 			return YES;
 		}
-		case kCC3SemanticModelViewMatrixInvTran: {
-			[uniform setMatrices3x3: CC3OpenGLESEngine.engine.matrices.modelViewInverseTransposeMatrix];
+		case kCC3SemanticModelViewMatrixInvTran:
+			[uniform setMatrix3x3: CC3OpenGLESEngine.engine.matrices.modelViewInverseTransposeMatrix];
 			return YES;
-		}
-		case kCC3SemanticModelViewProjMatrix: {
-			[uniform setMatrices4x4: CC3OpenGLESEngine.engine.matrices.modelViewProjectionMatrix];
+		case kCC3SemanticModelViewProjMatrix:
+			[uniform setMatrix4x4: CC3OpenGLESEngine.engine.matrices.modelViewProjectionMatrix];
 			return YES;
-		}
 			
-			// CAMERA -----------------
+		// CAMERA -----------------
 		case kCC3SemanticCameraPosition:
 			[uniform setVector: visitor.camera.globalLocation];
 			return YES;
 			
 		// MATERIALS --------------
-		case kCC3SemanticColor: {
+		case kCC3SemanticColor:
 			[uniform setColor4F: CC3OpenGLESEngine.engine.state.color.value];
 			return YES;
-		}
 		case kCC3SemanticMaterialColorAmbient:
 			[uniform setColor4F: CC3OpenGLESEngine.engine.materials.ambientColor.value];
 			return YES;
@@ -474,350 +269,194 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticSceneLightColorAmbient:
 			[uniform setColor4F: CC3OpenGLESEngine.engine.lighting.sceneAmbientLight.value];
 			return YES;
-			
-		case kCC3SemanticLightIsEnabled0:
-		case kCC3SemanticLightIsEnabled1:
-		case kCC3SemanticLightIsEnabled2:
-		case kCC3SemanticLightIsEnabled3:
-		case kCC3SemanticLightIsEnabled4:
-		case kCC3SemanticLightIsEnabled5:
-		case kCC3SemanticLightIsEnabled6:
-		case kCC3SemanticLightIsEnabled7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightIsEnabled0)];
-			[uniform setBoolean: glesLight.isEnabled];
-			return YES;
-			
-		case kCC3SemanticLightPosition0:
-		case kCC3SemanticLightPosition1:
-		case kCC3SemanticLightPosition2:
-		case kCC3SemanticLightPosition3:
-		case kCC3SemanticLightPosition4:
-		case kCC3SemanticLightPosition5:
-		case kCC3SemanticLightPosition6:
-		case kCC3SemanticLightPosition7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightPosition0)];
-			if (glesLight.isEnabled) {
-				// Transform global position/direction to eye space and normalize if direction
-				CC3Vector4 ltPos = glesLight.position.value;
-				CC3Matrix4x4* viewMtx = CC3OpenGLESEngine.engine.matrices.viewMatrix;
-				ltPos = CC3Matrix4x4TransformCC3Vector4(viewMtx, ltPos);
-				if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
-				[uniform setVector4: ltPos];
+		case kCC3SemanticLightIsEnabled:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				[uniform setBoolean: glesLight.isEnabled at: i];
 			}
 			return YES;
-			
-		case kCC3SemanticLightColorAmbient0:
-		case kCC3SemanticLightColorAmbient1:
-		case kCC3SemanticLightColorAmbient2:
-		case kCC3SemanticLightColorAmbient3:
-		case kCC3SemanticLightColorAmbient4:
-		case kCC3SemanticLightColorAmbient5:
-		case kCC3SemanticLightColorAmbient6:
-		case kCC3SemanticLightColorAmbient7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightColorAmbient0)];
-			if (glesLight.isEnabled) [uniform setColor4F: glesLight.ambientColor.value ];
-			return YES;
-			
-		case kCC3SemanticLightColorDiffuse0:
-		case kCC3SemanticLightColorDiffuse1:
-		case kCC3SemanticLightColorDiffuse2:
-		case kCC3SemanticLightColorDiffuse3:
-		case kCC3SemanticLightColorDiffuse4:
-		case kCC3SemanticLightColorDiffuse5:
-		case kCC3SemanticLightColorDiffuse6:
-		case kCC3SemanticLightColorDiffuse7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightColorDiffuse0)];
-			if (glesLight.isEnabled) [uniform setColor4F: glesLight.diffuseColor.value ];
-			return YES;
-			
-		case kCC3SemanticLightColorSpecular0:
-		case kCC3SemanticLightColorSpecular1:
-		case kCC3SemanticLightColorSpecular2:
-		case kCC3SemanticLightColorSpecular3:
-		case kCC3SemanticLightColorSpecular4:
-		case kCC3SemanticLightColorSpecular5:
-		case kCC3SemanticLightColorSpecular6:
-		case kCC3SemanticLightColorSpecular7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightColorSpecular0)];
-			if (glesLight.isEnabled) [uniform setColor4F: glesLight.specularColor.value ];
-			return YES;
-			
-		case kCC3SemanticLightAttenuation0:
-		case kCC3SemanticLightAttenuation1:
-		case kCC3SemanticLightAttenuation2:
-		case kCC3SemanticLightAttenuation3:
-		case kCC3SemanticLightAttenuation4:
-		case kCC3SemanticLightAttenuation5:
-		case kCC3SemanticLightAttenuation6:
-		case kCC3SemanticLightAttenuation7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightAttenuation0)];
-			if (glesLight.isEnabled) {
-				CC3AttenuationCoefficients ac;
-				ac.a = glesLight.constantAttenuation.value;
-				ac.b = glesLight.linearAttenuation.value;
-				ac.c = glesLight.quadraticAttenuation.value;
-				[uniform setVector: *(CC3Vector*)&ac];
+		case kCC3SemanticLightPosition:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) {
+					// Transform global position/direction to eye space and normalize if direction
+					CC3Vector4 ltPos = glesLight.position.value;
+					CC3Matrix4x4* viewMtx = CC3OpenGLESEngine.engine.matrices.viewMatrix;
+					ltPos = CC3Matrix4x4TransformCC3Vector4(viewMtx, ltPos);
+					if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
+					[uniform setVector4: ltPos at: i];
+				}
 			}
 			return YES;
-			
-		case kCC3SemanticLightSpotDirection0:
-		case kCC3SemanticLightSpotDirection1:
-		case kCC3SemanticLightSpotDirection2:
-		case kCC3SemanticLightSpotDirection3:
-		case kCC3SemanticLightSpotDirection4:
-		case kCC3SemanticLightSpotDirection5:
-		case kCC3SemanticLightSpotDirection6:
-		case kCC3SemanticLightSpotDirection7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightSpotDirection0)];
-			if (glesLight.isEnabled) {
-				// Transform global direction to eye space and normalize
-				CC3Vector4 ltDir = CC3Vector4FromDirection(glesLight.spotDirection.value);
-				CC3Matrix4x4* viewMtx = CC3OpenGLESEngine.engine.matrices.viewMatrix;
-				ltDir = CC3Matrix4x4TransformCC3Vector4(viewMtx, ltDir);
-				[uniform setVector: CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(ltDir))];
+		case kCC3SemanticLightColorAmbient:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setColor4F: glesLight.ambientColor.value at: i];
 			}
-
-			if (glesLight.isEnabled) [uniform setVector: glesLight.spotDirection.value ];
 			return YES;
-			
-		case kCC3SemanticLightSpotExponent0:
-		case kCC3SemanticLightSpotExponent1:
-		case kCC3SemanticLightSpotExponent2:
-		case kCC3SemanticLightSpotExponent3:
-		case kCC3SemanticLightSpotExponent4:
-		case kCC3SemanticLightSpotExponent5:
-		case kCC3SemanticLightSpotExponent6:
-		case kCC3SemanticLightSpotExponent7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightSpotExponent0)];
-			if (glesLight.isEnabled) [uniform setFloat: glesLight.spotExponent.value ];
+		case kCC3SemanticLightColorDiffuse:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setColor4F: glesLight.diffuseColor.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticLightSpotCutoffAngle0:
-		case kCC3SemanticLightSpotCutoffAngle1:
-		case kCC3SemanticLightSpotCutoffAngle2:
-		case kCC3SemanticLightSpotCutoffAngle3:
-		case kCC3SemanticLightSpotCutoffAngle4:
-		case kCC3SemanticLightSpotCutoffAngle5:
-		case kCC3SemanticLightSpotCutoffAngle6:
-		case kCC3SemanticLightSpotCutoffAngle7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightSpotCutoffAngle0)];
-			if (glesLight.isEnabled) [uniform setFloat: glesLight.spotCutoffAngle.value ];
+		case kCC3SemanticLightColorSpecular:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setColor4F: glesLight.specularColor.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticLightSpotCutoffAngleCosine0:
-		case kCC3SemanticLightSpotCutoffAngleCosine1:
-		case kCC3SemanticLightSpotCutoffAngleCosine2:
-		case kCC3SemanticLightSpotCutoffAngleCosine3:
-		case kCC3SemanticLightSpotCutoffAngleCosine4:
-		case kCC3SemanticLightSpotCutoffAngleCosine5:
-		case kCC3SemanticLightSpotCutoffAngleCosine6:
-		case kCC3SemanticLightSpotCutoffAngleCosine7:
-			glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semantic - kCC3SemanticLightSpotCutoffAngleCosine0)];
-			if (glesLight.isEnabled) [uniform setFloat: cosf(DegreesToRadians(glesLight.spotCutoffAngle.value)) ];
+		case kCC3SemanticLightAttenuation:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) {
+					CC3AttenuationCoefficients ac;
+					ac.a = glesLight.constantAttenuation.value;
+					ac.b = glesLight.linearAttenuation.value;
+					ac.c = glesLight.quadraticAttenuation.value;
+					[uniform setVector: *(CC3Vector*)&ac at: i];
+				}
+			}
+			return YES;
+		case kCC3SemanticLightSpotDirection:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) {
+					// Transform global direction to eye space and normalize
+					CC3Vector4 ltDir = CC3Vector4FromDirection(glesLight.spotDirection.value);
+					CC3Matrix4x4* viewMtx = CC3OpenGLESEngine.engine.matrices.viewMatrix;
+					ltDir = CC3Matrix4x4TransformCC3Vector4(viewMtx, ltDir);
+					[uniform setVector: CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(ltDir)) at: i];
+				}
+				
+				if (glesLight.isEnabled) [uniform setVector: glesLight.spotDirection.value at: i];
+			}
+			return YES;
+		case kCC3SemanticLightSpotExponent:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setFloat: glesLight.spotExponent.value at: i];
+			}
+			return YES;
+		case kCC3SemanticLightSpotCutoffAngle:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setFloat: glesLight.spotCutoffAngle.value at: i];
+			}
+			return YES;
+		case kCC3SemanticLightSpotCutoffAngleCosine:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [CC3OpenGLESEngine.engine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled) [uniform setFloat: cosf(DegreesToRadians(glesLight.spotCutoffAngle.value)) at: i];
+			}
 			return YES;
 			
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
 			[uniform setInteger: visitor.textureUnitCount];
 			return YES;
-
 		case kCC3SemanticTextureSamplers:
 			// Samplers are simply consecutive texture unit indices
-			[uniform setIntegers: (int[]){0, 1, 2, 3, 4, 5, 6, 7}];
+			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: i at: i];
 			return YES;
 
 		// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 		// In most shaders, these will be left unused in favor of customized the texture combining in code.
-		case kCC3SemanticTexUnitMode0:
-		case kCC3SemanticTexUnitMode1:
-		case kCC3SemanticTexUnitMode2:
-		case kCC3SemanticTexUnitMode3:
-		case kCC3SemanticTexUnitMode4:
-		case kCC3SemanticTexUnitMode5:
-		case kCC3SemanticTexUnitMode6:
-		case kCC3SemanticTexUnitMode7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitMode0)];
-			[uniform setInteger: glesTexUnit.textureEnvironmentMode.value];
+		case kCC3SemanticTexUnitMode:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.textureEnvironmentMode.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitConstantColor0:
-		case kCC3SemanticTexUnitConstantColor1:
-		case kCC3SemanticTexUnitConstantColor2:
-		case kCC3SemanticTexUnitConstantColor3:
-		case kCC3SemanticTexUnitConstantColor4:
-		case kCC3SemanticTexUnitConstantColor5:
-		case kCC3SemanticTexUnitConstantColor6:
-		case kCC3SemanticTexUnitConstantColor7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitConstantColor0)];
-			[uniform setColor4F: glesTexUnit.color.value];
+		case kCC3SemanticTexUnitConstantColor:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setColor4F: glesTexUnit.color.value at: i];
+			}
 			return YES;
-
-		case kCC3SemanticTexUnitCombineRGBFunction0:
-		case kCC3SemanticTexUnitCombineRGBFunction1:
-		case kCC3SemanticTexUnitCombineRGBFunction2:
-		case kCC3SemanticTexUnitCombineRGBFunction3:
-		case kCC3SemanticTexUnitCombineRGBFunction4:
-		case kCC3SemanticTexUnitCombineRGBFunction5:
-		case kCC3SemanticTexUnitCombineRGBFunction6:
-		case kCC3SemanticTexUnitCombineRGBFunction7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitCombineRGBFunction0)];
-			[uniform setInteger: glesTexUnit.combineRGBFunction.value];
+		case kCC3SemanticTexUnitCombineRGBFunction:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.combineRGBFunction.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource0RGB0:
-		case kCC3SemanticTexUnitSource0RGB1:
-		case kCC3SemanticTexUnitSource0RGB2:
-		case kCC3SemanticTexUnitSource0RGB3:
-		case kCC3SemanticTexUnitSource0RGB4:
-		case kCC3SemanticTexUnitSource0RGB5:
-		case kCC3SemanticTexUnitSource0RGB6:
-		case kCC3SemanticTexUnitSource0RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource0RGB0)];
-			[uniform setInteger: glesTexUnit.rgbSource0.value];
+		case kCC3SemanticTexUnitSource0RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbSource0.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource1RGB0:
-		case kCC3SemanticTexUnitSource1RGB1:
-		case kCC3SemanticTexUnitSource1RGB2:
-		case kCC3SemanticTexUnitSource1RGB3:
-		case kCC3SemanticTexUnitSource1RGB4:
-		case kCC3SemanticTexUnitSource1RGB5:
-		case kCC3SemanticTexUnitSource1RGB6:
-		case kCC3SemanticTexUnitSource1RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource1RGB0)];
-			[uniform setInteger: glesTexUnit.rgbSource1.value];
+		case kCC3SemanticTexUnitSource1RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbSource1.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource2RGB0:
-		case kCC3SemanticTexUnitSource2RGB1:
-		case kCC3SemanticTexUnitSource2RGB2:
-		case kCC3SemanticTexUnitSource2RGB3:
-		case kCC3SemanticTexUnitSource2RGB4:
-		case kCC3SemanticTexUnitSource2RGB5:
-		case kCC3SemanticTexUnitSource2RGB6:
-		case kCC3SemanticTexUnitSource2RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource2RGB0)];
-			[uniform setInteger: glesTexUnit.rgbSource2.value];
+		case kCC3SemanticTexUnitSource2RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbSource2.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand0RGB0:
-		case kCC3SemanticTexUnitOperand0RGB1:
-		case kCC3SemanticTexUnitOperand0RGB2:
-		case kCC3SemanticTexUnitOperand0RGB3:
-		case kCC3SemanticTexUnitOperand0RGB4:
-		case kCC3SemanticTexUnitOperand0RGB5:
-		case kCC3SemanticTexUnitOperand0RGB6:
-		case kCC3SemanticTexUnitOperand0RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand0RGB0)];
-			[uniform setInteger: glesTexUnit.rgbOperand0.value];
+		case kCC3SemanticTexUnitOperand0RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbOperand0.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand1RGB0:
-		case kCC3SemanticTexUnitOperand1RGB1:
-		case kCC3SemanticTexUnitOperand1RGB2:
-		case kCC3SemanticTexUnitOperand1RGB3:
-		case kCC3SemanticTexUnitOperand1RGB4:
-		case kCC3SemanticTexUnitOperand1RGB5:
-		case kCC3SemanticTexUnitOperand1RGB6:
-		case kCC3SemanticTexUnitOperand1RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand1RGB0)];
-			[uniform setInteger: glesTexUnit.rgbOperand1.value];
+		case kCC3SemanticTexUnitOperand1RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbOperand1.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand2RGB0:
-		case kCC3SemanticTexUnitOperand2RGB1:
-		case kCC3SemanticTexUnitOperand2RGB2:
-		case kCC3SemanticTexUnitOperand2RGB3:
-		case kCC3SemanticTexUnitOperand2RGB4:
-		case kCC3SemanticTexUnitOperand2RGB5:
-		case kCC3SemanticTexUnitOperand2RGB6:
-		case kCC3SemanticTexUnitOperand2RGB7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand2RGB0)];
-			[uniform setInteger: glesTexUnit.rgbOperand2.value];
+		case kCC3SemanticTexUnitOperand2RGB:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.rgbOperand2.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitCombineAlphaFunction0:
-		case kCC3SemanticTexUnitCombineAlphaFunction1:
-		case kCC3SemanticTexUnitCombineAlphaFunction2:
-		case kCC3SemanticTexUnitCombineAlphaFunction3:
-		case kCC3SemanticTexUnitCombineAlphaFunction4:
-		case kCC3SemanticTexUnitCombineAlphaFunction5:
-		case kCC3SemanticTexUnitCombineAlphaFunction6:
-		case kCC3SemanticTexUnitCombineAlphaFunction7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitCombineAlphaFunction0)];
-			[uniform setInteger: glesTexUnit.combineAlphaFunction.value];
+		case kCC3SemanticTexUnitCombineAlphaFunction:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.combineAlphaFunction.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource0Alpha0:
-		case kCC3SemanticTexUnitSource0Alpha1:
-		case kCC3SemanticTexUnitSource0Alpha2:
-		case kCC3SemanticTexUnitSource0Alpha3:
-		case kCC3SemanticTexUnitSource0Alpha4:
-		case kCC3SemanticTexUnitSource0Alpha5:
-		case kCC3SemanticTexUnitSource0Alpha6:
-		case kCC3SemanticTexUnitSource0Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource0Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaSource0.value];
+		case kCC3SemanticTexUnitSource0Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaSource0.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource1Alpha0:
-		case kCC3SemanticTexUnitSource1Alpha1:
-		case kCC3SemanticTexUnitSource1Alpha2:
-		case kCC3SemanticTexUnitSource1Alpha3:
-		case kCC3SemanticTexUnitSource1Alpha4:
-		case kCC3SemanticTexUnitSource1Alpha5:
-		case kCC3SemanticTexUnitSource1Alpha6:
-		case kCC3SemanticTexUnitSource1Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource1Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaSource1.value];
+		case kCC3SemanticTexUnitSource1Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaSource1.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitSource2Alpha0:
-		case kCC3SemanticTexUnitSource2Alpha1:
-		case kCC3SemanticTexUnitSource2Alpha2:
-		case kCC3SemanticTexUnitSource2Alpha3:
-		case kCC3SemanticTexUnitSource2Alpha4:
-		case kCC3SemanticTexUnitSource2Alpha5:
-		case kCC3SemanticTexUnitSource2Alpha6:
-		case kCC3SemanticTexUnitSource2Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitSource2Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaSource2.value];
+		case kCC3SemanticTexUnitSource2Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaSource2.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand0Alpha0:
-		case kCC3SemanticTexUnitOperand0Alpha1:
-		case kCC3SemanticTexUnitOperand0Alpha2:
-		case kCC3SemanticTexUnitOperand0Alpha3:
-		case kCC3SemanticTexUnitOperand0Alpha4:
-		case kCC3SemanticTexUnitOperand0Alpha5:
-		case kCC3SemanticTexUnitOperand0Alpha6:
-		case kCC3SemanticTexUnitOperand0Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand0Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaOperand0.value];
+		case kCC3SemanticTexUnitOperand0Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaOperand0.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand1Alpha0:
-		case kCC3SemanticTexUnitOperand1Alpha1:
-		case kCC3SemanticTexUnitOperand1Alpha2:
-		case kCC3SemanticTexUnitOperand1Alpha3:
-		case kCC3SemanticTexUnitOperand1Alpha4:
-		case kCC3SemanticTexUnitOperand1Alpha5:
-		case kCC3SemanticTexUnitOperand1Alpha6:
-		case kCC3SemanticTexUnitOperand1Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand1Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaOperand1.value];
+		case kCC3SemanticTexUnitOperand1Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaOperand1.value at: i];
+			}
 			return YES;
-			
-		case kCC3SemanticTexUnitOperand2Alpha0:
-		case kCC3SemanticTexUnitOperand2Alpha1:
-		case kCC3SemanticTexUnitOperand2Alpha2:
-		case kCC3SemanticTexUnitOperand2Alpha3:
-		case kCC3SemanticTexUnitOperand2Alpha4:
-		case kCC3SemanticTexUnitOperand2Alpha5:
-		case kCC3SemanticTexUnitOperand2Alpha6:
-		case kCC3SemanticTexUnitOperand2Alpha7:
-			glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semantic - kCC3SemanticTexUnitOperand2Alpha0)];
-			[uniform setInteger: glesTexUnit.alphaOperand2.value];
+		case kCC3SemanticTexUnitOperand2Alpha:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: (semanticIndex + i)];
+				[uniform setInteger: glesTexUnit.alphaOperand2.value at: i];
+			}
 			return YES;
 
 		// PARTICLES ------------
@@ -859,12 +498,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 }
 
 /**
- * Uses the variable name property to look up a configuration and sets the
+ * Uses the variable name property to look up a configuration and sets the semantic
+ * and semanticIndex properties of the specified variable from that configuration.
  */
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable {
 	CC3GLSLVariableConfiguration* varConfig = [_varConfigsByName objectForKey: variable.name];
 	if (varConfig) {
 		variable.semantic = varConfig.semantic;
+		variable.semanticIndex = varConfig.semanticIndex;
 		return YES;
 	}
 	return NO;
@@ -875,216 +516,232 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[_varConfigsByName setObject: varConfig forKey: varConfig.name];
 }
 
--(void) mapVariableName: (NSString*) name toSemantic: (GLenum) semantic {
+-(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
 	CC3GLSLVariableConfiguration* varConfig = [CC3GLSLVariableConfiguration new];
 	varConfig.name = name;
 	varConfig.semantic = semantic;
+	varConfig.semanticIndex = semanticIndex;
 	[self addVariableConfiguration: varConfig];
 	[varConfig release];
 }
 
--(void) populateWithDefaultVariableNameMappings {
+-(void) mapVarName: (NSString*) name toSemantic: (GLenum) semantic {
+	[self mapVarName: name toSemantic: semantic at: 0];
+}
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLProgramSemanticsDelegateByVarNames default mappings extension
+
+@implementation CC3GLProgramSemanticsDelegateByVarNames (DefaultMappings)
+
+-(void) populateWithDefaultVariableNameMappings {
+	
 	// VETEX ATTRIBUTES --------------
-	[self mapVariableName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
-	[self mapVariableName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormals];
-	[self mapVariableName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColors];
-	[self mapVariableName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeights];
-	[self mapVariableName: @"a_cc3MatrixIdx" toSemantic: kCC3SemanticVertexMatrices];
-	[self mapVariableName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];
-	[self mapVariableName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture0];	// alias to a_cc3TexCoord0
-	[self mapVariableName: @"a_cc3TexCoord0" toSemantic: kCC3SemanticVertexTexture0];
-	[self mapVariableName: @"a_cc3TexCoord1" toSemantic: kCC3SemanticVertexTexture1];
-	[self mapVariableName: @"a_cc3TexCoord2" toSemantic: kCC3SemanticVertexTexture2];
-	[self mapVariableName: @"a_cc3TexCoord3" toSemantic: kCC3SemanticVertexTexture3];
-	[self mapVariableName: @"a_cc3TexCoord4" toSemantic: kCC3SemanticVertexTexture4];
-	[self mapVariableName: @"a_cc3TexCoord5" toSemantic: kCC3SemanticVertexTexture5];
-	[self mapVariableName: @"a_cc3TexCoord6" toSemantic: kCC3SemanticVertexTexture6];
-	[self mapVariableName: @"a_cc3TexCoord7" toSemantic: kCC3SemanticVertexTexture7];
+	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];
+	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormals];
+	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColors];
+	[self mapVarName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeights];
+	[self mapVarName: @"a_cc3MatrixIdx" toSemantic: kCC3SemanticVertexMatrices];
+	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];
+	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];	// alias to a_cc3TexCoord0
+	[self mapVarName: @"a_cc3TexCoord0" toSemantic: kCC3SemanticVertexTexture at: 0];
+	[self mapVarName: @"a_cc3TexCoord1" toSemantic: kCC3SemanticVertexTexture at: 1];
+	[self mapVarName: @"a_cc3TexCoord2" toSemantic: kCC3SemanticVertexTexture at: 2];
+	[self mapVarName: @"a_cc3TexCoord3" toSemantic: kCC3SemanticVertexTexture at: 3];
+	[self mapVarName: @"a_cc3TexCoord4" toSemantic: kCC3SemanticVertexTexture at: 4];
+	[self mapVarName: @"a_cc3TexCoord5" toSemantic: kCC3SemanticVertexTexture at: 5];
+	[self mapVarName: @"a_cc3TexCoord6" toSemantic: kCC3SemanticVertexTexture at: 6];
+	[self mapVarName: @"a_cc3TexCoord7" toSemantic: kCC3SemanticVertexTexture at: 7];
 	
 	// ATTRIBUTE QUALIFIERS --------------
-	[self mapVariableName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];
-	[self mapVariableName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];
-	[self mapVariableName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];
-	[self mapVariableName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];
-	[self mapVariableName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];
-	[self mapVariableName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3Points.hasVertexPointSize
-	[self mapVariableName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];		// alias for u_cc3Points.isDrawingPoints
+	[self mapVarName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];
+	[self mapVarName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];
+	[self mapVarName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];
+	[self mapVarName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];
+	[self mapVarName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];
+	[self mapVarName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3Points.hasVertexPointSize
+	[self mapVarName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];		// alias for u_cc3Points.isDrawingPoints
 	
 	// PARTICLES ------------
-	[self mapVariableName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];			// alias for u_cc3IsDrawingPoints
-	[self mapVariableName: @"u_cc3Points.hasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3HasVertexPointSize
-	[self mapVariableName: @"u_cc3Points.size" toSemantic: kCC3SemanticPointSize];
-	[self mapVariableName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];
-	[self mapVariableName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];
-	[self mapVariableName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];
-	[self mapVariableName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];
-	[self mapVariableName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];
+	[self mapVarName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];			// alias for u_cc3IsDrawingPoints
+	[self mapVarName: @"u_cc3Points.hasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];	// alias for u_cc3HasVertexPointSize
+	[self mapVarName: @"u_cc3Points.size" toSemantic: kCC3SemanticPointSize];
+	[self mapVarName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];
+	[self mapVarName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];
+	[self mapVarName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];
+	[self mapVarName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];
+	[self mapVarName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];
 	
 	// ENVIRONMENT MATRICES --------------
-	[self mapVariableName: @"u_cc3MtxM" toSemantic: kCC3SemanticModelMatrix];
-	[self mapVariableName: @"u_cc3MtxMI" toSemantic: kCC3SemanticModelMatrixInv];
-	[self mapVariableName: @"u_cc3MtxMIT" toSemantic: kCC3SemanticModelMatrixInvTran];
-	[self mapVariableName: @"u_cc3MtxV" toSemantic: kCC3SemanticViewMatrix];
-	[self mapVariableName: @"u_cc3MtxVI" toSemantic: kCC3SemanticViewMatrixInv];
-	[self mapVariableName: @"u_cc3MtxVIT" toSemantic: kCC3SemanticViewMatrixInvTran];
-	[self mapVariableName: @"u_cc3MtxMV" toSemantic: kCC3SemanticModelViewMatrix];
-	[self mapVariableName: @"u_cc3MtxMVI" toSemantic: kCC3SemanticModelViewMatrixInv];
-	[self mapVariableName: @"u_cc3MtxMVIT" toSemantic: kCC3SemanticModelViewMatrixInvTran];
-	[self mapVariableName: @"u_cc3MtxP" toSemantic: kCC3SemanticProjMatrix];
-	[self mapVariableName: @"u_cc3MtxPI" toSemantic: kCC3SemanticProjMatrixInv];
-	[self mapVariableName: @"u_cc3MtxPIT" toSemantic: kCC3SemanticProjMatrixInvTran];
-	[self mapVariableName: @"u_cc3MtxMVP" toSemantic: kCC3SemanticModelViewProjMatrix];
-	[self mapVariableName: @"u_cc3MtxMVPI" toSemantic: kCC3SemanticModelViewProjMatrixInv];
-	[self mapVariableName: @"u_cc3MtxMVPIT" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];
+	[self mapVarName: @"u_cc3MtxM" toSemantic: kCC3SemanticModelMatrix];
+	[self mapVarName: @"u_cc3MtxMI" toSemantic: kCC3SemanticModelMatrixInv];
+	[self mapVarName: @"u_cc3MtxMIT" toSemantic: kCC3SemanticModelMatrixInvTran];
+	[self mapVarName: @"u_cc3MtxV" toSemantic: kCC3SemanticViewMatrix];
+	[self mapVarName: @"u_cc3MtxVI" toSemantic: kCC3SemanticViewMatrixInv];
+	[self mapVarName: @"u_cc3MtxVIT" toSemantic: kCC3SemanticViewMatrixInvTran];
+	[self mapVarName: @"u_cc3MtxMV" toSemantic: kCC3SemanticModelViewMatrix];
+	[self mapVarName: @"u_cc3MtxMVI" toSemantic: kCC3SemanticModelViewMatrixInv];
+	[self mapVarName: @"u_cc3MtxMVIT" toSemantic: kCC3SemanticModelViewMatrixInvTran];
+	[self mapVarName: @"u_cc3MtxP" toSemantic: kCC3SemanticProjMatrix];
+	[self mapVarName: @"u_cc3MtxPI" toSemantic: kCC3SemanticProjMatrixInv];
+	[self mapVarName: @"u_cc3MtxPIT" toSemantic: kCC3SemanticProjMatrixInvTran];
+	[self mapVarName: @"u_cc3MtxMVP" toSemantic: kCC3SemanticModelViewProjMatrix];
+	[self mapVarName: @"u_cc3MtxMVPI" toSemantic: kCC3SemanticModelViewProjMatrixInv];
+	[self mapVarName: @"u_cc3MtxMVPIT" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];
 	
 	// CAMERA -----------------
-	[self mapVariableName: @"u_cc3CameraPosition" toSemantic: kCC3SemanticCameraPosition];
+	[self mapVarName: @"u_cc3CameraPosition" toSemantic: kCC3SemanticCameraPosition];
 	
 	// MATERIALS --------------
-	[self mapVariableName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
-	[self mapVariableName: @"u_cc3Material.ambientColor" toSemantic: kCC3SemanticMaterialColorAmbient];
-	[self mapVariableName: @"u_cc3Material.diffuseColor" toSemantic: kCC3SemanticMaterialColorDiffuse];
-	[self mapVariableName: @"u_cc3Material.specularColor" toSemantic: kCC3SemanticMaterialColorSpecular];
-	[self mapVariableName: @"u_cc3Material.emissionColor" toSemantic: kCC3SemanticMaterialColorEmission];
-	[self mapVariableName: @"u_cc3Material.shininess" toSemantic: kCC3SemanticMaterialShininess];
-	[self mapVariableName: @"u_cc3Material.minimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];
-
+	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];
+	[self mapVarName: @"u_cc3Material.ambientColor" toSemantic: kCC3SemanticMaterialColorAmbient];
+	[self mapVarName: @"u_cc3Material.diffuseColor" toSemantic: kCC3SemanticMaterialColorDiffuse];
+	[self mapVarName: @"u_cc3Material.specularColor" toSemantic: kCC3SemanticMaterialColorSpecular];
+	[self mapVarName: @"u_cc3Material.emissionColor" toSemantic: kCC3SemanticMaterialColorEmission];
+	[self mapVarName: @"u_cc3Material.shininess" toSemantic: kCC3SemanticMaterialShininess];
+	[self mapVarName: @"u_cc3Material.minimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];
+	
 	// LIGHTING --------------
-	[self mapVariableName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
-	[self mapVariableName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
+	[self mapVarName: @"u_cc3IsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];
+	[self mapVarName: @"u_cc3SceneLightColorAmbient" toSemantic: kCC3SemanticSceneLightColorAmbient];
 	
-	[self mapVariableName: @"u_cc3Light.isEnabled" toSemantic: kCC3SemanticLightIsEnabled0];		// Aliases for light zero
-	[self mapVariableName: @"u_cc3Light.position" toSemantic: kCC3SemanticLightPosition0];
-	[self mapVariableName: @"u_cc3Light.ambientColor" toSemantic: kCC3SemanticLightColorAmbient0];
-	[self mapVariableName: @"u_cc3Light.diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse0];
-	[self mapVariableName: @"u_cc3Light.specularColor" toSemantic: kCC3SemanticLightColorSpecular0];
-	[self mapVariableName: @"u_cc3Light.attenuation" toSemantic: kCC3SemanticLightAttenuation0];
-	[self mapVariableName: @"u_cc3Light.spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
-	[self mapVariableName: @"u_cc3Light.spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
-	[self mapVariableName: @"u_cc3Light.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
-	[self mapVariableName: @"u_cc3Light.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine0];
+	[self mapVarName: @"u_cc3Light.isEnabled" toSemantic: kCC3SemanticLightIsEnabled];		// Aliases for light zero
+	[self mapVarName: @"u_cc3Light.position" toSemantic: kCC3SemanticLightPosition];
+	[self mapVarName: @"u_cc3Light.ambientColor" toSemantic: kCC3SemanticLightColorAmbient];
+	[self mapVarName: @"u_cc3Light.diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse];
+	[self mapVarName: @"u_cc3Light.specularColor" toSemantic: kCC3SemanticLightColorSpecular];
+	[self mapVarName: @"u_cc3Light.attenuation" toSemantic: kCC3SemanticLightAttenuation];
+	[self mapVarName: @"u_cc3Light.spotDirection" toSemantic: kCC3SemanticLightSpotDirection];
+	[self mapVarName: @"u_cc3Light.spotExponent" toSemantic: kCC3SemanticLightSpotExponent];
+	[self mapVarName: @"u_cc3Light.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle];
+	[self mapVarName: @"u_cc3Light.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];
 	
-	[self mapVariableName: @"u_cc3Lights[0].isEnabled" toSemantic: kCC3SemanticLightIsEnabled0];
-	[self mapVariableName: @"u_cc3Lights[0].position" toSemantic: kCC3SemanticLightPosition0];
-	[self mapVariableName: @"u_cc3Lights[0].ambientColor" toSemantic: kCC3SemanticLightColorAmbient0];
-	[self mapVariableName: @"u_cc3Lights[0].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse0];
-	[self mapVariableName: @"u_cc3Lights[0].specularColor" toSemantic: kCC3SemanticLightColorSpecular0];
-	[self mapVariableName: @"u_cc3Lights[0].attenuation" toSemantic: kCC3SemanticLightAttenuation0];
-	[self mapVariableName: @"u_cc3Lights[0].spotDirection" toSemantic: kCC3SemanticLightSpotDirection0];
-	[self mapVariableName: @"u_cc3Lights[0].spotExponent" toSemantic: kCC3SemanticLightSpotExponent0];
-	[self mapVariableName: @"u_cc3Lights[0].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle0];
-	[self mapVariableName: @"u_cc3Lights[0].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine0];
+	[self mapVarName: @"u_cc3Lights[0].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 0];
+	[self mapVarName: @"u_cc3Lights[0].position" toSemantic: kCC3SemanticLightPosition at: 0];
+	[self mapVarName: @"u_cc3Lights[0].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 0];
+	[self mapVarName: @"u_cc3Lights[0].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 0];
+	[self mapVarName: @"u_cc3Lights[0].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 0];
+	[self mapVarName: @"u_cc3Lights[0].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 0];
+	[self mapVarName: @"u_cc3Lights[0].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 0];
+	[self mapVarName: @"u_cc3Lights[0].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 0];
+	[self mapVarName: @"u_cc3Lights[0].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 0];
+	[self mapVarName: @"u_cc3Lights[0].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 0];
 	
-	[self mapVariableName: @"u_cc3Lights[1].isEnabled" toSemantic: kCC3SemanticLightIsEnabled1];
-	[self mapVariableName: @"u_cc3Lights[1].position" toSemantic: kCC3SemanticLightPosition1];
-	[self mapVariableName: @"u_cc3Lights[1].ambientColor" toSemantic: kCC3SemanticLightColorAmbient1];
-	[self mapVariableName: @"u_cc3Lights[1].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse1];
-	[self mapVariableName: @"u_cc3Lights[1].specularColor" toSemantic: kCC3SemanticLightColorSpecular1];
-	[self mapVariableName: @"u_cc3Lights[1].attenuation" toSemantic: kCC3SemanticLightAttenuation1];
-	[self mapVariableName: @"u_cc3Lights[1].spotDirection" toSemantic: kCC3SemanticLightSpotDirection1];
-	[self mapVariableName: @"u_cc3Lights[1].spotExponent" toSemantic: kCC3SemanticLightSpotExponent1];
-	[self mapVariableName: @"u_cc3Lights[1].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle1];
-	[self mapVariableName: @"u_cc3Lights[1].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine1];
+	[self mapVarName: @"u_cc3Lights[1].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 1];
+	[self mapVarName: @"u_cc3Lights[1].position" toSemantic: kCC3SemanticLightPosition at: 1];
+	[self mapVarName: @"u_cc3Lights[1].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 1];
+	[self mapVarName: @"u_cc3Lights[1].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 1];
+	[self mapVarName: @"u_cc3Lights[1].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 1];
+	[self mapVarName: @"u_cc3Lights[1].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 1];
+	[self mapVarName: @"u_cc3Lights[1].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 1];
+	[self mapVarName: @"u_cc3Lights[1].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 1];
+	[self mapVarName: @"u_cc3Lights[1].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 1];
+	[self mapVarName: @"u_cc3Lights[1].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 1];
 	
-	[self mapVariableName: @"u_cc3Lights[2].isEnabled" toSemantic: kCC3SemanticLightIsEnabled2];
-	[self mapVariableName: @"u_cc3Lights[2].position" toSemantic: kCC3SemanticLightPosition2];
-	[self mapVariableName: @"u_cc3Lights[2].ambientColor" toSemantic: kCC3SemanticLightColorAmbient2];
-	[self mapVariableName: @"u_cc3Lights[2].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse2];
-	[self mapVariableName: @"u_cc3Lights[2].specularColor" toSemantic: kCC3SemanticLightColorSpecular2];
-	[self mapVariableName: @"u_cc3Lights[2].attenuation" toSemantic: kCC3SemanticLightAttenuation2];
-	[self mapVariableName: @"u_cc3Lights[2].spotDirection" toSemantic: kCC3SemanticLightSpotDirection2];
-	[self mapVariableName: @"u_cc3Lights[2].spotExponent" toSemantic: kCC3SemanticLightSpotExponent2];
-	[self mapVariableName: @"u_cc3Lights[2].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle2];
-	[self mapVariableName: @"u_cc3Lights[2].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine2];
+	[self mapVarName: @"u_cc3Lights[2].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 2];
+	[self mapVarName: @"u_cc3Lights[2].position" toSemantic: kCC3SemanticLightPosition at: 2];
+	[self mapVarName: @"u_cc3Lights[2].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 2];
+	[self mapVarName: @"u_cc3Lights[2].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 2];
+	[self mapVarName: @"u_cc3Lights[2].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 2];
+	[self mapVarName: @"u_cc3Lights[2].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 2];
+	[self mapVarName: @"u_cc3Lights[2].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 2];
+	[self mapVarName: @"u_cc3Lights[2].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 2];
+	[self mapVarName: @"u_cc3Lights[2].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 2];
+	[self mapVarName: @"u_cc3Lights[2].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 2];
 	
-	[self mapVariableName: @"u_cc3Lights[3].isEnabled" toSemantic: kCC3SemanticLightIsEnabled3];
-	[self mapVariableName: @"u_cc3Lights[3].position" toSemantic: kCC3SemanticLightPosition3];
-	[self mapVariableName: @"u_cc3Lights[3].ambientColor" toSemantic: kCC3SemanticLightColorAmbient3];
-	[self mapVariableName: @"u_cc3Lights[3].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse3];
-	[self mapVariableName: @"u_cc3Lights[3].specularColor" toSemantic: kCC3SemanticLightColorSpecular3];
-	[self mapVariableName: @"u_cc3Lights[3].attenuation" toSemantic: kCC3SemanticLightAttenuation3];
-	[self mapVariableName: @"u_cc3Lights[3].spotDirection" toSemantic: kCC3SemanticLightSpotDirection3];
-	[self mapVariableName: @"u_cc3Lights[3].spotExponent" toSemantic: kCC3SemanticLightSpotExponent3];
-	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle3];
-	[self mapVariableName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine3];
+	[self mapVarName: @"u_cc3Lights[3].isEnabled" toSemantic: kCC3SemanticLightIsEnabled at: 3];
+	[self mapVarName: @"u_cc3Lights[3].position" toSemantic: kCC3SemanticLightPosition at: 3];
+	[self mapVarName: @"u_cc3Lights[3].ambientColor" toSemantic: kCC3SemanticLightColorAmbient at: 3];
+	[self mapVarName: @"u_cc3Lights[3].diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse at: 3];
+	[self mapVarName: @"u_cc3Lights[3].specularColor" toSemantic: kCC3SemanticLightColorSpecular at: 3];
+	[self mapVarName: @"u_cc3Lights[3].attenuation" toSemantic: kCC3SemanticLightAttenuation at: 3];
+	[self mapVarName: @"u_cc3Lights[3].spotDirection" toSemantic: kCC3SemanticLightSpotDirection at: 3];
+	[self mapVarName: @"u_cc3Lights[3].spotExponent" toSemantic: kCC3SemanticLightSpotExponent at: 3];
+	[self mapVarName: @"u_cc3Lights[3].spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle at: 3];
+	[self mapVarName: @"u_cc3Lights[3].spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: 3];
+	
+	// APPLICATIONS CAN ADD MORE MAPPINGS FOR SHADERS THAT SUPPORT ADDITIONAL LIGHTS
+	
 	
 	// TEXTURES --------------
-	[self mapVariableName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
-	[self mapVariableName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSamplers];		// alias for s_cc3Textures[0]
-	[self mapVariableName: @"s_cc3Textures[0]" toSemantic: kCC3SemanticTextureSamplers];	// alias for s_cc3Textures
+	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];
+	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSamplers];		// alias for s_cc3Textures[0]
+	[self mapVarName: @"s_cc3Textures[0]" toSemantic: kCC3SemanticTextureSamplers];	// alias for s_cc3Texture
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	[self mapVariableName: @"u_cc3TextureUnits[0].color" toSemantic: kCC3SemanticTexUnitConstantColor0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].mode" toSemantic: kCC3SemanticTexUnitMode0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha0];
-	[self mapVariableName: @"u_cc3TextureUnits[0].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha0];
+	[self mapVarName: @"u_cc3TextureUnits[0].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].mode" toSemantic: kCC3SemanticTexUnitMode at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 0];
+	[self mapVarName: @"u_cc3TextureUnits[0].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 0];
 	
-	[self mapVariableName: @"u_cc3TextureUnits[1].color" toSemantic: kCC3SemanticTexUnitConstantColor1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].mode" toSemantic: kCC3SemanticTexUnitMode1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha1];
-	[self mapVariableName: @"u_cc3TextureUnits[1].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha1];
+	[self mapVarName: @"u_cc3TextureUnits[1].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].mode" toSemantic: kCC3SemanticTexUnitMode at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 1];
+	[self mapVarName: @"u_cc3TextureUnits[1].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 1];
 	
-	[self mapVariableName: @"u_cc3TextureUnits[2].color" toSemantic: kCC3SemanticTexUnitConstantColor2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].mode" toSemantic: kCC3SemanticTexUnitMode2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha2];
-	[self mapVariableName: @"u_cc3TextureUnits[2].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha2];
+	[self mapVarName: @"u_cc3TextureUnits[2].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].mode" toSemantic: kCC3SemanticTexUnitMode at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 2];
+	[self mapVarName: @"u_cc3TextureUnits[2].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 2];
 	
-	[self mapVariableName: @"u_cc3TextureUnits[3].color" toSemantic: kCC3SemanticTexUnitConstantColor3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].mode" toSemantic: kCC3SemanticTexUnitMode3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha3];
-	[self mapVariableName: @"u_cc3TextureUnits[3].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha3];
+	[self mapVarName: @"u_cc3TextureUnits[3].color" toSemantic: kCC3SemanticTexUnitConstantColor at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].mode" toSemantic: kCC3SemanticTexUnitMode at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].combineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource0" toSemantic: kCC3SemanticTexUnitSource0RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource1" toSemantic: kCC3SemanticTexUnitSource1RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbSource2" toSemantic: kCC3SemanticTexUnitSource2RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].rgbOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].combineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha at: 3];
+	[self mapVarName: @"u_cc3TextureUnits[3].alphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha at: 3];
 	
-	// Applications can add more mappings for shaders that support additional texture units
+	// APPLICATIONS CAN ADD MORE MAPPINGS FOR SHADERS THAT SUPPORT ADDITIONAL TEXTURE UNITS
 }
 
 
@@ -1101,5 +758,4 @@ static CC3GLProgramSemanticsDelegateByVarNames* _sharedDefaultDelegate;
 }
 
 @end
-	
 	

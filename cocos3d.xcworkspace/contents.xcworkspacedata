@@ -19,4 +19,20 @@
    <FileRef
       location = "group:LICENSE">
    </FileRef>
+   <Group
+      location = "group:../Project Documents/Workspace Documents"
+      name = "Workspace Documents">
+      <FileRef
+         location = "group:Apple GL extensions.txt">
+      </FileRef>
+      <FileRef
+         location = "group:cocos3d Enhancements.txt">
+      </FileRef>
+      <FileRef
+         location = "group:Git Commit Message.txt">
+      </FileRef>
+      <FileRef
+         location = "group:Scratch Pad.txt">
+      </FileRef>
+   </Group>
 </Workspace>

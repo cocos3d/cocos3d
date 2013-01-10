@@ -42,15 +42,19 @@
 /**
  * Represents a variable used in a GLSL shader program. Different subclasses are used for
  * uniform variables and attribute variables.
+ *
+ * A variable may contain an int or float scalar, an int or float vector, a float matrix,
+ * or an array of any of those types, as indicated by the type and size properties.
  */
 @interface CC3GLSLVariable : NSObject <NSCopying> {
 	CC3GLProgram* _program;
 	NSString* _name;
-	GLuint _index;
-	GLint _location;
 	GLenum _type;
-	GLint _size;
-	GLenum _semantic;
+	GLenum _semantic : 16;
+	GLuint _index : 8;
+	GLint _location : 8;
+	GLint _size : 8;
+	GLuint _semanticIndex : 8;
 }
 
 /** The GL program object containing this variable. */
@@ -82,8 +86,8 @@
 /** 
  * Returns the size of the variable content, in units of the type indicated by the type property.
  *
- * If the variable is an array, this property will return the size of that array in the GLSL
- * program, otherwise it will return the value 1.
+ * If the variable is declared as an array in the GLSL program, this property will return
+ * the size of that array, otherwise it will return the value 1.
  */
 @property(nonatomic, readonly) GLint size;
 
@@ -98,6 +102,33 @@
  * The initial value of this property is kCC3SemanticNone.
  */
 @property(nonatomic, assign) GLenum semantic;
+
+/**
+ * When the semantic refers to an element of a structure that may have multiple instances,
+ * this property indicates to which instance this variable refers.
+ *
+ * This property is a zero-based index. For variables that do not appear in multiple structures,
+ * this property will always be zero.
+ *
+ * As an example, there may be mulitple lights in a scene, each tracked in the GLSL by a
+ * structure, one element of which might be the diffuse color property. For the variable
+ * associated with the diffuse color of the third light, the value of the semantic property
+ * would be kCC3SemanticLightColorDiffuse and the value of this property would be 2.
+ *
+ * On the other hand, for variables that represent an array of non-structure values, there will
+ * only be one instance of the variable, but the size property of that variable will indicate
+ * how many values are being managed by that single variable. For these types of variables,
+ * the value of this property will always be zero.
+ * 
+ * As an example of an array of scalar values. If a single GLSL variable is defined to track the
+ * ambient color of multiple lights (ie- defined as an array of vec4), the value of the semantic
+ * property would be kCC3SemanticLightColorDiffuse, the value of the size property would be the
+ * size of the array as defined in the GLSL, and the value of this property would be zero.
+ * In this case, the values of the diffuse colors of all lights will be set as a single array.
+ *
+ * The initial value of this property is zero.
+ */
+@property(nonatomic, assign) GLuint semanticIndex;
 
 
 #pragma mark Allocation and initialization
@@ -204,81 +235,66 @@
 #pragma mark Accessing uniform values
 
 /**
- * Sets the value of this uniform variable in the GL engine to the specified array of floats.
+ * Sets the value of this uniform to the specified value.
  *
- * The number of floats required is determined by the type and size properties of this instance,
- * and the specified array must contain at least that many elements.
- *
- * If the type property indicates that this instance is float-based (including float matrix
- * types) or boolean-based, and the values are different than previously set, the values are
- * sent to the GL engine.
- *
- * If the type property indicates that this instance is integer-based, the values are first
- * converted to integers (on a one-by-one basis) and the setIntegers: method is invoked with
- * the resulting integer array.
- *
- * This is one of two primary setter methods (the other being setIntegers:). All other uniform
- * value setter methods invoke one of these two primary methods.
- */
--(void) setFloats: (const GLfloat*) floats;
-
-/**
- * Sets the value of this uniform variable in the GL engine to the specified array of integers.
- *
- * The number of integers required is determined by the type and size properties of this instance,
- * and the specified array must contain at least that many elements.
- *
- * If the type property indicates that this instance is integers-based or boolean-based, and the
- * values are different than previously set, the values are sent to the GL engine.
- *
- * If the type property indicates that this instance is float-based, the values are first converted
- * to floats (on a one-by-one basis) and the setFloats: method is invoked with the resulting float array.
- *
- * This is one of two primary setter methods (the other being setFloats:). All other uniform
- * value setter methods invoke one of these two primary methods.
- */
--(void) setIntegers: (const GLint*) ints;
-
-/**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the float is converted to an integer.
  * If the type property indicates a vector type with more than one component, the second
  * and third components are set to zero and the fourth component is set to one.
- *
- * The size property of this instance must be 1.
  */
 -(void) setFloat: (GLfloat) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates an integer type, the float is converted to an integer.
+ * If the type property indicates a vector type with more than one component, the second
+ * and third components are set to zero and the fourth component is set to one.
+ */
+-(void) setFloat: (GLfloat) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
  * If the type property indicates a scalar, the X component of the specified point is used.
  * If the type property indicates a vector type with more than two components, the third
  * component is set to zero and the fourth component is set to one.
- *
- * The size property of this instance must be 1.
  */
--(void) setCGPoint: (CGPoint) value;
+-(void) setPoint: (CGPoint) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified array.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
- * If the type property indicates a scalar, the X component of each point is used. If the
- * type property indicates a vector type with more than two components, the third component
- * is set to zero and the fourth component of each vector is set to one, in each vector.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
+ * If the type property indicates a scalar, the X component of the specified point is used.
+ * If the type property indicates a vector type with more than two components, the third
+ * component is set to zero and the fourth component is set to one.
  */
--(void) setCGPoints: (CGPoint*) values;
+-(void) setPoint: (CGPoint) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
@@ -286,191 +302,374 @@
  * If the type property indicates a vector type with fewer than three components, the X & Y
  * components will be used. If the type property indicates a vector type with more than three
  * components, fourth component is set to one.
- *
- * The size property of this instance must be 1.
  */
 -(void) setVector: (CC3Vector) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
- * If the type property indicates a scalar, the X component of each vector is used.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
  * If the type property indicates a vector type with fewer than three components, the X & Y
- * components of each vector are used. If the type property indicates a vector type with
- * more than three components, fourth component of each vector is set to one.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
+ * components will be used. If the type property indicates a vector type with more than three
+ * components, fourth component is set to one.
  */
--(void) setVectors: (CC3Vector*) values;
+-(void) setVector: (CC3Vector) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
  * If the type property indicates a scalar, the X component of the specified vector is used.
  * If the type property indicates a vector type with fewer than four components, the X & Y,
  * or X, Y & Z components are used.
- *
- * The size property of this instance must be 1.
  */
 -(void) setVector4: (CC3Vector4) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
  *
- * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an integer type, the floats are converted to integers.
- * If the type property indicates a scalar, the X component of each vector is used.
- * If the type property indicates a vector type with fewer than four components, the X & Y,
- * or X, Y & Z components of each vector are used.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
- */
--(void) setVector4s: (CC3Vector4*) values;
-
-/**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
  * If the type property indicates a scalar, the X component of the specified vector is used.
  * If the type property indicates a vector type with fewer than four components, the X & Y,
  * or X, Y & Z components are used.
+ */
+-(void) setVector4: (CC3Vector4) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
  *
- * The size property of this instance must be 1.
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates an integer type, the floats are converted to integers.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
+ * If the type property indicates a vector type with fewer than four components, the X & Y,
+ * or X, Y & Z components are used.
  */
 -(void) setQuaternion: (CC3Quaternion) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers.
- * If the type property indicates a scalar, the X component of each vector is used.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
  * If the type property indicates a vector type with fewer than four components, the X & Y,
- * or X, Y & Z components of each vector are used.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
+ * or X, Y & Z components are used.
  */
--(void) setQuaternions: (CC3Quaternion*) values;
+-(void) setQuaternion: (CC3Quaternion) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance must be GL_FLOAT_MAT3.
- *
- * The size property of this instance must be 1.
  */
--(void) setMatrix3x3: (CC3Matrix3x3) value;
+-(void) setMatrix3x3: (CC3Matrix3x3*) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance must be GL_FLOAT_MAT3.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
  */
--(void) setMatrices3x3: (CC3Matrix3x3*) values;
+-(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
- *
- * The size property of this instance must be 1.
  */
--(void) setMatrix4x4: (CC3Matrix4x4) value;
+-(void) setMatrix4x4: (CC3Matrix4x4*) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance must be GL_FLOAT_MAT4.
- *
- * The length of the specified array must be at least as large as the size property of this instance.
  */
--(void) setMatrices4x4: (CC3Matrix4x4*) values;
+-(void) setMatrix4x4: (CC3Matrix4x4*) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an float type, the integer is converted to a float.
- * If the type property indicates a vector type with more than one component, the remaining
- * components are set to zero.
- *
- * The size property of this instance must be 1.
+ * If the type property indicates a float type, the integer is converted to a float.
+ * If the type property indicates a vector type with more than one component, the
+ * remaining components are set to zero.
  */
 -(void) setInteger: (GLint) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an float type, the integer is converted to a float.
- * If the type property indicates a vector type with more than one component, the remaining
- * components are set to zero.
- *
- * The size property of this instance must be 1.
+ * If the type property indicates a float type, the integer is converted to a float.
+ * If the type property indicates a vector type with more than one component, the
+ * remaining components are set to zero.
  */
--(void) setByte: (GLbyte) value;
+-(void) setInteger: (GLint) value at: (GLuint) index;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
- * If the type property indicates an float type, the integer is converted to a float.
- * If the type property indicates a vector type with more than one component, the remaining
- * components are set to GL_FALSE.
+ * If the type property indicates a float type, the integer is converted to a float.
+ * If the type property indicates a scalar, the X component of the specified point is used.
+ * If the type property indicates a vector type with more than two components, the
+ * remaining components are set to zero.
+ */
+-(void) setIntPoint: (CC3IntPoint) value;
+
+/**
+ * Sets the element at the specified index in this uniform to the specified value.
  *
- * The size property of this instance must be 1.
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the integers are converted to floats.
+ * If the type property indicates a scalar, the X component of the specified point is used.
+ * If the type property indicates a vector type with more than two components, the
+ * remaining components are set to zero.
+ */
+-(void) setIntPoint: (CC3IntPoint) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the integers are converted to floats.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
+ * If the type property indicates a vector type with fewer than three components, the X & Y
+ * components will be used. If the type property indicates a vector type with more than three
+ * components, the fourth component is set to zero.
+ */
+-(void) setIntVector: (CC3IntVector) value;
+
+/**
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the integers are converted to floats.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
+ * If the type property indicates a vector type with fewer than three components, the X & Y
+ * components will be used. If the type property indicates a vector type with more than three
+ * components, fourth component is set to zero.
+ */
+-(void) setIntVector: (CC3IntVector) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the integers are converted to floats.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
+ * If the type property indicates a vector type with fewer than four components, the X & Y,
+ * or X, Y & Z components are used.
+ */
+-(void) setIntVector4: (CC3IntVector4) value;
+
+/**
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the integers are converted to floats.
+ * If the type property indicates a scalar, the X component of the specified vector is used.
+ * If the type property indicates a vector type with fewer than four components, the X & Y,
+ * or X, Y & Z components are used.
+ */
+-(void) setIntVector4: (CC3IntVector4) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the boolean is converted to a float.
+ * If the type property indicates a vector type with more than one component, the
+ * remaining components are set to zero.
  */
 -(void) setBoolean: (BOOL) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the boolean is converted to a float.
+ * If the type property indicates a vector type with more than one component, the
+ * remaining components are set to zero.
+ */
+-(void) setBoolean: (BOOL) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an float type, the integers are normalized to floats between
  * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
  * used. If the type property indicates a vector type with fewer than three components, the
  * R & G components are used. If the type property indicates a vector type with four components,
- * the A component is set to 255.
- *
- * The size property of this instance must be 1.
+ * the A component is set to 255 (or 1 if float type).
  */
 -(void) setColor: (ccColor3B) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an float type, the integers are normalized to floats between
- * 0 and 1. If the type property indicates a scalar, the R component of the specified color is used.
- * If the type property indicates a vector type with fewer than four components, the R & G,
- * or R, G & B components are used.
+ * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
+ * used. If the type property indicates a vector type with fewer than three components, the
+ * R & G components are used. If the type property indicates a vector type with four components,
+ * the A component is set to 255 (or 1 if float type).
+ */
+-(void) setColor: (ccColor3B) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
  *
- * The size property of this instance must be 1.
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates an float type, the integers are normalized to floats between
+ * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
+ * used. If the type property indicates a vector type with fewer than four components, the R & G,
+ * or R, G & B components are used.
  */
 -(void) setColor4B: (ccColor4B) value;
 
 /**
- * Sets the value of this uniform in the GL engine to the specified value.
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates an float type, the integers are normalized to floats between
+ * 0 and 1. If the type property indicates a scalar, the R component of the specified color is
+ * used. If the type property indicates a vector type with fewer than four components, the R & G,
+ * or R, G & B components are used.
+ */
+-(void) setColor4B: (ccColor4B) value at: (GLuint) index;
+
+/**
+ * Sets the value of this uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
  *
  * The type property of this instance can be any value other than one of matrix types.
  * If the type property indicates an integer type, the floats are converted to integers
  * in the range 0 to 255. If the type property indicates a scalar, the R component of the
  * specified color is used. If the type property indicates a vector type with fewer than
  * four components, the R & G, or R, G & B components are used.
- *
- * The size property of this instance must be 1.
  */
 -(void) setColor4F: (ccColor4F) value;
 
-/** Sets the value of the specified uniform from the value of this uniform. */
--(void) setValueInto: (CC3GLSLUniform*) uniform;
+/**
+ * Sets the element at the specified index in this uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates an integer type, the floats are converted to integers
+ * in the range 0 to 255. If the type property indicates a scalar, the R component of the
+ * specified color is used. If the type property indicates a vector type with fewer than
+ * four components, the R & G, or R, G & B components are used.
+ */
+-(void) setColor4F: (ccColor4F) value at: (GLuint) index;
+
+/** Sets the value of this uniform from the value of the specified uniform. */
+-(void) setValueFromUniform: (CC3GLSLUniform*) uniform;
+
+/**
+ * Invoked after all of the content of the variable has been set using the set... methods,
+ * in order to have the value of this variable set into the GL engine.
+ *
+ * The GL engine is only updated if the content of this variable has changed.
+ * Returns whether the value has changed and was updated into the GL engine.
+ *
+ * The base implementation does nothing, and simply returns NO. Subclasses that actually
+ * interact with the GL engine will override.
+ *
+ * This method is invoked automatically during uniform population.
+ * The application normally never needs to invoke this method.
+ */
+-(BOOL) updateGLValue;
 
 @end
 
@@ -488,11 +687,12 @@
 
 /**
  * Tracks the GL engine state for a uniform variable used in a GLSL shader program.
- *
- * Adds the ability to set the variable value in the GL engine.
- *
- * All of the set... methods permit the writing of new state regardless of the semantic.
+ * Adds the ability to set the variable value in the GL engine. The GL state is tracked
+ * and the GL engine is only updated if the setting the value actually changes the GL state.
  */
-@interface CC3OpenGLESStateTrackerGLSLUniform : CC3GLSLUniform
+@interface CC3OpenGLESStateTrackerGLSLUniform : CC3GLSLUniform {
+	GLvoid* _glVarValue;
+}
+
 @end
 
