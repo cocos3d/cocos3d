@@ -87,6 +87,8 @@
  * returned uniform. If this method has been used to override a program uniform whose content can be
  * extracted semantically from the environment, you can remove this override by invoking the 
  * removeUniformOverride: method with the uniform returned by this method.
+ *
+ * If the program has no uniform with the specified name, this method does nothing and returns nil.
  */
 -(CC3GLSLUniform*) uniformOverrideNamed: (NSString*) name;
 
@@ -98,9 +100,9 @@
  * values outside the range of this enumeration, if needed. The semantic index is used for
  * semantics that may appear more than once in the scene and in the shader code.
  *
- * For example, the shader might support several lights. The semantic kCC3SemanticLightPosition
- * indicates that the uniform is tracking the position of a light, and the semantic index then
- * represents the index of a particular light. The index is zero-based.
+ * For example, the shader might support several lights. The semantic kCC3SemanticLightLocationEyeSpace
+ * indicates that the uniform is tracking the position of a light in eye space, and the semantic
+ * index then represents the index of a particular light. The index is zero-based.
  *
  * The application can use this method to set the value of a uniform directly, either to populate
  * a program uniform whose content cannot be extracted semantically from the environment, or to
@@ -118,6 +120,9 @@
  * returned uniform. If this method has been used to override a program uniform whose content can be
  * extracted semantically from the environment, you can remove this override by invoking the
  * removeUniformOverride: method with the uniform returned by this method.
+ *
+ * If the program has no uniform that matches the specified semantic and semantic index,
+ * this method does nothing and returns nil.
  */
 -(CC3GLSLUniform*) uniformOverrideForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
 
@@ -139,6 +144,8 @@
  * When retrieving a uniform variable using this method, be aware that the content value of any
  * uniform variable with a defined semantic is derived automatically from the environment, and
  * cannot be retrieved or set directly.
+ *
+ * If the program has no uniform at the specified location, this method does nothing and returns nil.
  */
 -(CC3GLSLUniform*) uniformOverrideAtLocation: (GLint) uniformLocation;
 

@@ -55,6 +55,8 @@ typedef enum {
 	// VERTEX CONTENT --------------
 	kCC3SemanticVertexLocations,				/**< Vertex locations. */
 	kCC3SemanticVertexNormals,					/**< Vertex normals. */
+	kCC3SemanticVertexTangents,					/**< Vertex tangents. */
+	kCC3SemanticVertexBitangents,				/**< Vertex bitangents (aka binormals). */
 	kCC3SemanticVertexColors,					/**< Vertex colors. */
 	kCC3SemanticVertexPointSizes,				/**< Vertex point sizes. */
 	kCC3SemanticVertexWeights,					/**< Vertex skinning weights. */
@@ -70,6 +72,9 @@ typedef enum {
 	kCC3SemanticIsDrawingPoints,				/**< Whether the vertices are being drawn as points. */
 	
 	// ENVIRONMENT MATRICES --------------
+	kCC3SemanticModelLocalMatrix,				/**< Current model-to-parent matrix. */
+	kCC3SemanticModelLocalMatrixInv,			/**< Inverse of current model-to-parent matrix. */
+	kCC3SemanticModelLocalMatrixInvTran,		/**< Inverse-transpose of current model-to-parent matrix. */
 	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
 	kCC3SemanticModelMatrixInv,					/**< Inverse of current model-to-world matrix. */
 	kCC3SemanticModelMatrixInvTran,				/**< Inverse-transpose of current model-to-world matrix. */
@@ -82,12 +87,16 @@ typedef enum {
 	kCC3SemanticProjMatrix,						/**< Camera projection matrix. */
 	kCC3SemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
 	kCC3SemanticProjMatrixInvTran,				/**< Inverse-transpose of camera projection matrix. */
+	kCC3SemanticViewProjMatrix,					/**< Camera view and projection matrix. */
+	kCC3SemanticViewProjMatrixInv,				/**< Inverse of camera view and projection matrix. */
+	kCC3SemanticViewProjMatrixInvTran,			/**< Inverse-transpose of camera view and projection matrix. */
 	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInv,			/**< Inverse of current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
 	
 	// CAMERA -----------------
-	kCC3SemanticCameraPosition,					/**< Global position of the camera. */
+	kCC3SemanticCameraLocationGlobal,			/**< Location of the camera in global coordinates. */
+	kCC3SemanticCameraLocationModelSpace,		/**< Location of the camera in local coordinates of model (not camera). */
 	
 	// MATERIALS --------------
 	kCC3SemanticColor,							/**< Color when lighting & materials are not in use. */
@@ -104,19 +113,23 @@ typedef enum {
 	kCC3SemanticSceneLightColorAmbient,			/**< Ambient light color of the scene. */
 
 	kCC3SemanticLightIsEnabled,					/**< Whether a light is enabled. */
-	kCC3SemanticLightPosition,					/**< Position of a light. */
+	kCC3SemanticLightLocationGlobal,			/**< Location of a light in global coordinates. */
+	kCC3SemanticLightLocationEyeSpace,			/**< Location of a light in eye space. */
+	kCC3SemanticLightLocationModelSpace,		/**< Location of a light in local coordinates of model (not light). */
 	kCC3SemanticLightColorAmbient,				/**< Ambient color of a light. */
 	kCC3SemanticLightColorDiffuse,				/**< Diffuse color of a light. */
 	kCC3SemanticLightColorSpecular,				/**< Specular color of the light. */
 	kCC3SemanticLightAttenuation,				/**< Distance attenuation coefficients for a light. */
-	kCC3SemanticLightSpotDirection,				/**< Direction of a spotlight. */
+	kCC3SemanticLightSpotDirectionGlobal,		/**< Direction of a spotlight in global coordinates. */
+	kCC3SemanticLightSpotDirectionEyeSpace,		/**< Direction of a spotlight in eye space. */
+	kCC3SemanticLightSpotDirectionModelSpace,	/**< Direction of a spotlight in local coordinates of the model (not light). */
 	kCC3SemanticLightSpotExponent,				/**< Fade-off exponent of a spotlight. */
 	kCC3SemanticLightSpotCutoffAngle,			/**< Cutoff angle of a spotlight. */
 	kCC3SemanticLightSpotCutoffAngleCosine,		/**< Cosine of cutoff angle of a spotlight. */
 
 	// TEXTURES
 	kCC3SemanticTextureCount,					/**< Number of active textures. */
-	kCC3SemanticTextureSamplers,				/**< Array of texture samplers of length kCC3SemanticTextureCount. */
+	kCC3SemanticTextureSampler,					/**< Texture sampler. */
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
@@ -136,7 +149,15 @@ typedef enum {
 	kCC3SemanticTexUnitOperand0Alpha,			/**< The alpha combining operand of source 0 of a texture unit. */
 	kCC3SemanticTexUnitOperand1Alpha,			/**< The alpha combining operand of source 1 of a texture unit. */
 	kCC3SemanticTexUnitOperand2Alpha,			/**< The alpha combining operand of source 2 of a texture unit. */
-
+	
+	// MODEL ----------------
+	kCC3SemanticAnimationFraction,				/**< Fraction of the model's animation that has been viewed (range 0-1). */
+	kCC3SemanticCenterOfGeometry,				/**< The center of geometry of the model in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMin,					/**< The minimum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMax,					/**< The maximum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxSize,				/**< The dimensions of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingRadius,					/**< The radius of the model's bounding sphere in the model's local coordinates. */
+	
 	// PARTICLES ------------
 	kCC3SemanticPointSize,						/**< Default size of points, if not specified per-vertex in a vertex attribute array. */
 	kCC3SemanticPointSizeAttenuation,			/**< Point size distance attenuation coefficients. */
@@ -144,12 +165,30 @@ typedef enum {
 	kCC3SemanticPointSizeMaximum,				/**< Maximum size points will be allowed to grow to. */
 	kCC3SemanticPointSizeFadeThreshold,			/**< Points will be allowed to grow to. */
 	kCC3SemanticPointSpritesIsEnabled,			/**< Whether points should be interpeted as textured sprites. */
+
+	// TIME ------------------
+	kCC3SemanticFrameTime,						/**< The time in seconds since the last frame. */
+
+	kCC3SemanticElapsedTime,					/**< The elapsed time in seconds since the app started. */
+	kCC3SemanticElapsedTimeSine,				/**< The sine of the elapsed time. */
+	kCC3SemanticElapsedTimeCosine,				/**< The cosine of the elapsed time. */
+	kCC3SemanticElapsedTimeTangent,				/**< The tangent of the elapsed time. */
+
+	kCC3SemanticElapsedTimeTwoPi,				/**< The elapsed time in seconds since the app started, wrapped to 2 * PI. */
+	kCC3SemanticElapsedTimeTwoPiSine,			/**< The sine of the elapsed time wrapped to 2 * PI. */
+	kCC3SemanticElapsedTimeTwoPiCosine,			/**< The cosine of the elapsed time wrapped to 2 * PI. */
+	kCC3SemanticElapsedTimeTwoPiTangent,		/**< The tangent of the elapsed time wrapped to 2 * PI. */
+	
+	// MISC ENVIRONMENT
+	kCC3SemanticViewport,						/**< The viewport dimensions in pixels. */
+	kCC3SemanticDrawCountCurrentFrame,			/**< The number of draw calls so far in this frame. */
+	kCC3SemanticRandomNumber,					/**< A random number between 0 and 1. */
 	
 	kCC3SemanticAppBase,						/**< First semantic of app-specific custom semantics. */
 	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */
 } CC3Semantic;
 
-/** Returns a string representation of the specified state semantic. */
+/** Returns a string representation of the specified semantic. */
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 
 

@@ -85,12 +85,12 @@ struct Material {
  * and pased to your shader (uniform structure elements are passed individually in GLSL).
  */
 struct Light {
-	vec4	position;							/**< Position or normalized direction in eye space. */
+	vec4	positionEyeSpace;					/**< Position or normalized direction in eye space. */
 	vec4	ambientColor;						/**< Ambient color of light. */
 	vec4	diffuseColor;						/**< Diffuse color of light. */
 	vec4	specularColor;						/**< Specular color of light. */
 	vec3	attenuation;						/**< Coefficients of the attenuation equation. */
-	vec3	spotDirection;						/**< Direction if spotlight in eye space. */
+	vec3	spotDirectionEyeSpace;				/**< Direction if spotlight in eye space. */
 	float	spotExponent;						/**< Directional attenuation factor if spotlight. */
 	float	spotCutoffAngleCosine;				/**< Cosine of spotlight cutoff angle. */
 	bool	isEnabled;							/**< Whether light is enabled. */
@@ -185,9 +185,9 @@ vec4 illuminateWith(int ltIdx) {
 	vec3 ltDir;
 	float attenuation = 1.0;
 	
-	if (u_cc3Lights[ltIdx].position.w != 0.0) {
+	if (u_cc3Lights[ltIdx].positionEyeSpace.w != 0.0) {
 		// Positional light. Find direction to vertex.
-		ltDir = u_cc3Lights[ltIdx].position.xyz - vtxPosEye;
+		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz - vtxPosEye;
 		
 		if (u_cc3Lights[ltIdx].attenuation != kAttenuationNone) {
 			float ltDist = length(ltDir);
@@ -198,7 +198,7 @@ vec4 illuminateWith(int ltIdx) {
 		
 		// Determine attenuation due to spotlight component
 		if (u_cc3Lights[ltIdx].spotCutoffAngleCosine >= 0.0) {
-			float spotAttenuation = dot(-ltDir, u_cc3Lights[ltIdx].spotDirection);
+			float spotAttenuation = dot(-ltDir, u_cc3Lights[ltIdx].spotDirectionEyeSpace);
 			spotAttenuation = (spotAttenuation >= u_cc3Lights[ltIdx].spotCutoffAngleCosine)
 									? pow(spotAttenuation, u_cc3Lights[ltIdx].spotExponent)
 									: 0.0;
@@ -206,7 +206,7 @@ vec4 illuminateWith(int ltIdx) {
 		}
     } else {
 		// Directional light. Vector is expected to be normalized!
-		ltDir = u_cc3Lights[ltIdx].position.xyz;
+		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz;
     }
 	
 	// Employ lighting equation to calculate vertex color

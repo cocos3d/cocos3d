@@ -189,7 +189,8 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set matrix when vector expected.", self);
+			NSAssert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 			
 		case GL_INT:
@@ -225,7 +226,8 @@
 			((CC3Matrix3x3*)_varValue)[index] = *value;
 			return;
 		default:
-			NSAssert(NO, @"%@ attempted to set 3x3 matrix when other type expected.", self);
+			NSAssert(NO, @"%@ attempted to set 3x3 matrix when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 	}
 }
@@ -238,7 +240,8 @@
 			((CC3Matrix4x4*)_varValue)[index] = *value;
 			return;
 		default:
-			NSAssert(NO, @"%@ attempted to set 4x4 matrix when other type expected.", self);
+			NSAssert(NO, @"%@ attempted to set 4x4 matrix when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 	}
 }
@@ -278,7 +281,8 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set matrix when vector expected.", self);
+			NSAssert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 			
 		case GL_INT:
@@ -333,7 +337,8 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set color when matrix expected.", self);
+			NSAssert(NO, @"%@ attempted to set color when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 
 		case GL_INT:
@@ -371,7 +376,8 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set color when matrix expected.", self);
+			NSAssert(NO, @"%@ attempted to set color when matrix type %@ expected.",
+					 self, NSStringFromGLEnum(_type));
 			return;
 
 		case GL_INT:
@@ -473,11 +479,6 @@
 	[super populateFrom: another];
 	free(_glVarValue);
 	_glVarValue = calloc(_varLen, 1);
-}
-
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@\n\t\tValue: %p\n\t\tGLValue: %p",
-			super.fullDescription, _varValue, _glVarValue];
 }
 
 

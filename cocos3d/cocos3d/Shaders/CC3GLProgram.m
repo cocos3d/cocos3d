@@ -114,7 +114,8 @@
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
 			[var updateGLValue];
 		} else {
-			NSAssert3(NO, @"Could not resolve value of uniform %@ for %@ within context %@", var, self, context);
+			NSAssert4(NO, @"%@ could not resolve value of uniform %@ with semantic %@ within program context %@. Consider creating a uniform override on the program context.",
+					  self, var, NSStringFromCC3Semantic(var.semantic), context);
 		}
 }
 

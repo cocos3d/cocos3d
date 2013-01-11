@@ -246,12 +246,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[self addRobot];				// Add an animated robot arm, a light, and a camera
 	
-	// Example of overriding the value of a shader uniform on a single mesh node.
-	CC3MeshNode* meshNode = [self getMeshNodeNamed: @"GeoSphere01"];
-	CC3GLProgramContext* progCtx = meshNode.material.shaderContext;
-	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"u_cc3Material.emissionColor"];
-	progUniform.color4F = kCCC4FMagenta;
-	
 	[self addBitmapLabel];			// Add a bitmapped string label
 	
 	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
@@ -1859,10 +1853,27 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * When running under OpenGL ES 1.1, only the second texture is visible, due to default
  * multi-texturing configuration. Under OpenGL ES 1.1, further texture unit configuration
  * could be applied to allow the two textures to be combined in a more realistic manner.
+ *
+ * This example also demonstrates the ability to define within a shader a customized uniform
+ * variable, that does not have a semantic mapping to content within the environment, and have
+ * the application set the value of such a uniform variable directly.
  */
 -(void) addReflectionMask {
 	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: @"ReflectionMask.pod"];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
+
+	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
+	// 4x4 matrix to adjust the position of the vertices. This "CustomMatrix" does not map
+	// to a standard semantic, so it must be populated directly by the application. This is
+	// done by creating an override uniform on the shader context of a specific mesh node.
+	// Each node can set a different value for the customized variable. This technique can
+	// also be used to override the value of a uniform variable whose content can actually
+	// be retrieved from the environment.
+	CC3Matrix4x4 customMtx;
+	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
+	CC3GLProgramContext* progCtx = mask.material.shaderContext;
+	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"CustomMatrix"];
+	progUniform.matrix4x4 = &customMtx;
 	
 	// The mask animation locates the mask at a distant location and scale. Wrap it in a holder
 	// to move it to a more convenient location and scale. Remember that the location of the mask
