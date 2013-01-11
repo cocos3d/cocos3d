@@ -944,8 +944,8 @@
 -(id) init { return [self initWithSkin: nil onBone: nil]; }
 
 -(id) initWithSkin: (CC3SkinMeshNode*) aNode onBone: (CC3Bone*) aBone {
-	NSAssert1(aNode, @"%@ must be initialized with a skin node.", self.class);
-	NSAssert1(aBone, @"%@ must be initialized with a bone.", self.class);
+	CC3Assert(aNode, @"%@ must be initialized with a skin node.", self.class);
+	CC3Assert(aBone, @"%@ must be initialized with a bone.", self.class);
 	if ( (self = [super init]) ) {
 
 		skinNode = aNode;

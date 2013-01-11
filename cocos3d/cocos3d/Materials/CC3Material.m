@@ -177,7 +177,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	if (!_texture) {
 		self.texture = aTexture;
 	} else {
-		NSAssert1(aTexture, @"%@ cannot add a nil overlay texture", self);
+		CC3Assert(aTexture, @"%@ cannot add a nil overlay texture", self);
 		if(!_textureOverlays) _textureOverlays = [[CCArray array] retain];
 
 		GLint maxTexUnits = [CC3OpenGLESEngine engine].platform.maxTextureUnits.value;
@@ -228,7 +228,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	if (texUnit == 0) {
 		self.texture = aTexture;
 	} else if (texUnit < self.textureCount) {
-		NSAssert1(aTexture, @"%@ cannot set an overlay texture to nil", self);
+		CC3Assert(aTexture, @"%@ cannot set an overlay texture to nil", self);
 		[_textureOverlays fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexture];
 		[self texturesHaveChanged];
 	} else {

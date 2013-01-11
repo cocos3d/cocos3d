@@ -210,7 +210,7 @@
  * using the planes of this bounding volume.
  */
 -(BOOL) doesIntersect: (CC3BoundingVolume*) aBoundingVolume {
-	NSAssert1(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersect:", self);
+	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersect:", self);
 	BOOL intersects = [aBoundingVolume doesIntersectConvexHullOf: self.planeCount
 														  planes: self.planes
 															from: self];
@@ -219,7 +219,7 @@
 }
 
 -(BOOL) doesIntersectLocation: (CC3Vector) aLocation {
-	NSAssert1(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectLocation:", self);
+	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectLocation:", self);
 	GLuint pCnt = self.planeCount;
 	CC3Plane* pArray = self.planes;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
@@ -254,7 +254,7 @@
  * is behind all of the other planes, then the ray intersects this bounding volume.
  */
 -(BOOL) doesIntersectRay: (CC3Ray) aRay {
-	NSAssert1(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectRay:", self);
+	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectRay:", self);
 	if (shouldIgnoreRayIntersection) return NO;
 	GLuint pCnt = self.planeCount;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
@@ -276,7 +276,7 @@
 
 -(BOOL) doesIntersectSphere: (CC3Sphere) aSphere
 					   from: (CC3BoundingVolume*) otherBoundingVolume {
-	NSAssert1(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectSphere:from:", self);
+	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectSphere:from:", self);
 	GLuint pCnt = self.planeCount;
 	CC3Plane* pArray = self.planes;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
@@ -414,7 +414,7 @@
 }
 
 -(CC3Vector) globalLocationOfGlobalRayIntesection: (CC3Ray) aRay {
-	NSAssert1(NO, @"%@ does not yet implement globalLocationOfGlobalRayIntesection:. An implementation needs to be added.", [self class]);
+	CC3Assert(NO, @"%@ does not yet implement globalLocationOfGlobalRayIntesection:. An implementation needs to be added.", [self class]);
 	return kCC3VectorNull;
 }
 
@@ -591,7 +591,7 @@
 #pragma mark Intersection testing
 
 -(CC3Vector) locationOfRayIntesection: (CC3Ray) localRay {
-	NSAssert1(NO, @"%@ does not yet implement locationOfRayIntesection:. An implementation needs to be added.", [self class]);
+	CC3Assert(NO, @"%@ does not yet implement locationOfRayIntesection:. An implementation needs to be added.", [self class]);
 	return kCC3VectorNull;
 }
 
@@ -618,7 +618,7 @@
  * this bounding volume. Different bounding volume types will use different suffixes.
  */
 -(NSString*) displayNodeNameSuffix {
-	NSAssert1(NO, @"%@ has no unique display node suffix. You must override method displayNodeNameSuffix:", self);
+	CC3Assert(NO, @"%@ has no unique display node suffix. You must override method displayNodeNameSuffix:", self);
 	return @"BV";
 }
 

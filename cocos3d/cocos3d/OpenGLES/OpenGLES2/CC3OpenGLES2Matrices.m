@@ -51,7 +51,7 @@
 
 -(void) setMaxDepth: (GLuint) maxDepth {
 	if (maxDepth == _maxDepth) return;
-	NSAssert1(maxDepth > 0, @"%@ maxDepth property must be greater than zero.", self);
+	CC3Assert(maxDepth > 0, @"%@ maxDepth property must be greater than zero.", self);
 	GLvoid* newStack = realloc(_mtxStack, (maxDepth * sizeof(CC3Matrix4x4)));
 	if (newStack) {
 		_mtxStack = newStack;
@@ -65,14 +65,14 @@
 -(CC3Matrix4x4*) top { return &_mtxStack[_depth - 1]; }
 
 -(void) push {
-	NSAssert1(_depth < _maxDepth, @"%@ attempted to push beyond the maximum stack depth.", self);
+	CC3Assert(_depth < _maxDepth, @"%@ attempted to push beyond the maximum stack depth.", self);
 	CC3Matrix4x4PopulateFrom4x4(&_mtxStack[_depth], self.top);
 	_depth++;	// Move the stack index to the new top
 	[self wasChanged];
 }
 
 -(void) pop {
-	NSAssert1(_depth > 1, @"%@ attempted to pop beyond the bottom of the stack.", self);
+	CC3Assert(_depth > 1, @"%@ attempted to pop beyond the bottom of the stack.", self);
 	_depth--;
 	[self wasChanged];
 }

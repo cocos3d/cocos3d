@@ -91,7 +91,7 @@
 
 /** Template method returns an autoreleased instance of a palette matrix tracker. */
 -(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
-	NSAssert1(NO, @"%@ does not implement the makePaletteMatrix: method.", self);
+	CC3Assert(NO, @"%@ does not implement the makePaletteMatrix: method.", self);
 	return nil;
 }
 
@@ -99,7 +99,7 @@
 	// If the requested palette matrix hasn't been allocated yet, add it.
 	if (index >= self.paletteMatrixCount) {
 		// Make sure we don't add beyond the max number of texture units for the platform
-		NSAssert2(index < self.engine.platform.maxPaletteMatrices.value,
+		CC3Assert(index < self.engine.platform.maxPaletteMatrices.value,
 				  @"Request for palette matrix index %u exceeds maximum palette size of %u matrices",
 				  index, self.engine.platform.maxPaletteMatrices.value);
 		

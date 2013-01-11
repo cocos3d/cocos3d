@@ -42,7 +42,7 @@
 }
 
 -(Class) resourceClass {
-	NSAssert1(NO, @"No resource class has been established for this %@ class. Create a subclass and override the resourceClass method.", [self class]);
+	CC3Assert(NO, @"No resource class has been established for this %@ class. Create a subclass and override the resourceClass method.", [self class]);
 	return [CC3NodesResource class];
 }
 

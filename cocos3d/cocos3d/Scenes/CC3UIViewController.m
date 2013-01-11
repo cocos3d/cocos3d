@@ -68,7 +68,7 @@
 #endif
 
 -(void) setView:(CCGLView *)view {
-	NSAssert2(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
+	CC3Assert(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
 	super.view = view;
 }
 
@@ -179,7 +179,7 @@
 }
 
 -(void) setSupportedInterfaceOrientations: (NSUInteger) uiOrientationBitMask {
-	NSAssert1(uiOrientationBitMask, @"%@ supportedInterfaceOrientations must contain at least one valid orientation", self);
+	CC3Assert(uiOrientationBitMask, @"%@ supportedInterfaceOrientations must contain at least one valid orientation", self);
 	_supportedInterfaceOrientations = uiOrientationBitMask;
 }
 

@@ -376,7 +376,7 @@
 }
 
 -(void) addShadow: (id<CC3ShadowProtocol>) aShadowNode {
-	NSAssert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
+	CC3Assert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
 	
 	if(!shadows) shadows = [[CCArray array] retain];
 	[shadows addObject: aShadowNode];
@@ -620,7 +620,7 @@ static GLuint lightPoolStartIndex = 0;
 			return lgtIdx;
 		}
 	}
-	NSAssert1(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
+	CC3Assert(NO, @"Too many lights. Only %u lights may be created.", platformMaxLights);
 	return UINT_MAX;
 }
 

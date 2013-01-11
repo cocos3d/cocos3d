@@ -112,7 +112,7 @@
 }
 
 -(id) init {
-	NSAssert1(NO, @"%@ cannot be initialized without a frame count", self);
+	CC3Assert(NO, @"%@ cannot be initialized without a frame count", self);
 	return nil;
 }
 
@@ -135,7 +135,7 @@
 
 -(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode {
 	LogTrace(@"%@ animating frame at %.3f ms", self, t);
-	NSAssert2(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
+	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
 	currentFrame = t;
 	
 	// Determine the virtual frame index, based on proportional time.

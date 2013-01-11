@@ -167,8 +167,8 @@
 }
 
 -(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
-	NSAssert(vtxTexCoords, @"Overlay texture cannot be nil");
-	NSAssert1(!overlayTextureCoordinates || ((overlayTextureCoordinates.count + 1) <
+	CC3Assert(vtxTexCoords, @"Overlay texture cannot be nil");
+	CC3Assert(!overlayTextureCoordinates || ((overlayTextureCoordinates.count + 1) <
 											 [CC3OpenGLESEngine engine].platform.maxTextureUnits.value),
 			  @"Too many overlaid textures. This platform only supports %i texture units.",
 			  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value);
@@ -255,7 +255,7 @@
 
 -(void) setTextureCoordinates: (CC3VertexTextureCoordinates *) aTexCoords
 			   forTextureUnit: (GLuint) texUnit {
-	NSAssert(aTexCoords, @"Overlay texture coordinates cannot be nil");
+	CC3Assert(aTexCoords, @"Overlay texture coordinates cannot be nil");
 	if (texUnit == 0) {
 		self.vertexTextureCoordinates = aTexCoords;
 	} else if (texUnit < self.textureCoordinatesArrayCount) {
@@ -1035,21 +1035,21 @@
 -(CC3FaceIndices) uncachedFaceIndicesAt: (GLuint) faceIndex {
 	if (vertexIndices) return [vertexIndices faceIndicesAt: faceIndex];
 	if (vertexLocations) return [vertexLocations faceIndicesAt: faceIndex];
-	NSAssert1(NO, @"%@ has no drawable vertex array and cannot retrieve indices for a face.", self);
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot retrieve indices for a face.", self);
 	return kCC3FaceIndicesZero;
 }
 
 -(GLuint) faceCountFromVertexIndexCount: (GLuint) vc {
 	if (vertexIndices) return [vertexIndices faceCountFromVertexIndexCount: vc];
 	if (vertexLocations) return [vertexLocations faceCountFromVertexIndexCount: vc];
-	NSAssert1(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.", self);
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.", self);
 	return 0;
 }
 
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc {
 	if (vertexIndices) return [vertexIndices vertexIndexCountFromFaceCount: fc];
 	if (vertexLocations) return [vertexLocations vertexIndexCountFromFaceCount: fc];
-	NSAssert1(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.", self);
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.", self);
 	return 0;
 }
 

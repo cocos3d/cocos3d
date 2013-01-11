@@ -335,7 +335,7 @@ static GLubyte autoOrthonormalizeCount = 0;
 }
 
 -(void) setForwardDirection: (CC3Vector) aDirection {
-	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+	CC3Assert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
 			 @"The forwardDirection may not be set to the zero vector.");
 	rotationVector = CC3Vector4FromDirection(CC3VectorNormalize(aDirection));
 	rotationType = kCC3RotationTypeDirection;
@@ -346,7 +346,7 @@ static GLubyte autoOrthonormalizeCount = 0;
 
 /** Does not set the rotation type until the forwardDirection is set. */
 -(void) setReferenceUpDirection: (CC3Vector) aDirection {
-	NSAssert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
+	CC3Assert(!CC3VectorsAreEqual(aDirection, kCC3VectorZero),
 			 @"The referenceUpDirection may not be set to the zero vector.");
 	referenceUpDirection = CC3VectorNormalize(aDirection);
 }

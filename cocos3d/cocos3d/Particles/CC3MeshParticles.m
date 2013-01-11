@@ -112,7 +112,7 @@
 -(CC3MeshNode*) particleTemplate { return nil; }
 
 -(void) setParticleTemplate: (CC3MeshNode*) aParticleTemplate {
-	NSAssert2([aParticleTemplate.mesh isKindOfClass: [CC3VertexArrayMesh class]],
+	CC3Assert([aParticleTemplate.mesh isKindOfClass: [CC3VertexArrayMesh class]],
 			  @"%@ is not a CC3VertexArrayMesh. %@ requires that the mesh used for the particle template be a CC3VertexArrayMesh",
 			  aParticleTemplate.mesh, self);
 	self.particleTemplateMesh = (CC3VertexArrayMesh*)aParticleTemplate.mesh;
@@ -186,7 +186,7 @@
 }
 
 -(void) assignTemplateMeshToParticle: (id<CC3MeshParticleProtocol>) aParticle {
-	NSAssert1(particleTemplateMesh, @"The particleTemplateMesh property of %@ must be set before particles can be emitted.", self);
+	CC3Assert(particleTemplateMesh, @"The particleTemplateMesh property of %@ must be set before particles can be emitted.", self);
 	aParticle.templateMesh = particleTemplateMesh;
 }
 
@@ -369,7 +369,7 @@
 -(CC3MeshParticleEmitter*) emitter { return (CC3MeshParticleEmitter*)emitter; }
 
 -(void) setEmitter: (CC3MeshParticleEmitter*) anEmitter {
-	NSAssert1([anEmitter isKindOfClass: [CC3MeshParticleEmitter class]], @"%@ may only be emitted by a CC3MeshParticleEmitter.", self);
+	CC3Assert([anEmitter isKindOfClass: [CC3MeshParticleEmitter class]], @"%@ may only be emitted by a CC3MeshParticleEmitter.", self);
 	super.emitter = anEmitter;
 }
 

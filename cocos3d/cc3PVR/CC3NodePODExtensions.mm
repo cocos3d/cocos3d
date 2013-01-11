@@ -65,7 +65,7 @@ extern "C" {
 #pragma mark Allocation and initialization
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	NSAssert1(![self isMemberOfClass:[CC3Node class]], @"%@ is an abstract class and should not be instantiated directly. Use a subclass instead.", [self class]);
+	CC3Assert(![self isMemberOfClass:[CC3Node class]], @"%@ is an abstract class and should not be instantiated directly. Use a subclass instead.", [self class]);
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex
 											fromPODResource: (CC3PODResource*) aPODRez];

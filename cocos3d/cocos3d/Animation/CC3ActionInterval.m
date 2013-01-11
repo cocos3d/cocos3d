@@ -551,12 +551,12 @@
 }
 
 -(ccColor4F) targetColor {
-	NSAssert1(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
+	CC3Assert(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
 	return kCCC4FBlackTransparent;
 }
 
 -(void) setTargetColor: (ccColor4F) aColor {
-	NSAssert1(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
+	CC3Assert(NO, @"%@ is abstract. Property targetColor must be implemented in a concrete subclass", self);
 }
 
 -(id) initWithDuration: (ccTime) t colorTo: (ccColor4F) aColor {

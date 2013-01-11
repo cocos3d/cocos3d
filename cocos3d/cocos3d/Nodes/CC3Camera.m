@@ -290,7 +290,7 @@
 -(void) buildProjection  {
 	if(_isProjectionDirty) {
 		CC3Viewport vp = self.viewportManager.viewport;
-		NSAssert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
+		CC3Assert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
 
 		[frustum populateFrom: fieldOfView
 					andAspect: ((GLfloat) vp.w / (GLfloat) vp.h)
@@ -762,7 +762,7 @@
 }
 
 -(CC3Vector) projectNode: (CC3Node*) aNode {
-	NSAssert(aNode, @"Camera cannot project a nil node.");
+	CC3Assert(aNode, @"Camera cannot project a nil node.");
 	CC3Vector pLoc = [self projectLocation: aNode.globalLocation];
 	aNode.projectedLocation = pLoc;
 	return pLoc;

@@ -125,13 +125,13 @@ extern "C" {
 		const SPVRTPFXParserTexture* pfxTex = pfxParser->GetTexture(texIdx);
 		LogRez(@"Adding texture %@", NSStringFromSPVRTPFXParserTexture((SPVRTPFXParserTexture*)pfxTex));
 
-		NSAssert1(!pfxTex->bRenderToTexture, @"%@ rendering to a texture is not supported", self);
+		CC3Assert(!pfxTex->bRenderToTexture, @"%@ rendering to a texture is not supported", self);
 		
 		// Load texture
 		NSString* texName = [NSString stringWithUTF8String: pfxTex->Name.c_str()];
 		NSString* texFile = [NSString stringWithUTF8String: pfxTex->FileName.c_str()];
 		CC3Texture* tex = [CC3Texture textureWithName: texName fromFile: texFile];
-		NSAssert3(tex, @"%@ cannot load texture named %@ from file %@", self, texName, texFile);
+		CC3Assert(tex, @"%@ cannot load texture named %@ from file %@", self, texName, texFile);
 		
 		// Set texture parameters
 		tex.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
@@ -258,7 +258,7 @@ static Class _defaultSemanticDelegateClass = nil;
 		
 		// Retrieve the texture from the PFX resource
 		CC3Texture* tex = [pfxRez getTextureNamed: texName];
-		NSAssert2(tex, @"Could not find texture named %@ in %@", texName, pfxRez);
+		CC3Assert(tex, @"Could not find texture named %@ in %@", texName, pfxRez);
 		
 		// Add a CC3PFXEffectTexture linking the texture to the texture unit
 		CC3PFXEffectTexture* effectTex = [CC3PFXEffectTexture new];

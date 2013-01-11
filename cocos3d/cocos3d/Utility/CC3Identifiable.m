@@ -55,7 +55,7 @@ static GLint instanceCount = 0;
 }
 
 -(NSString*) nameSuffix {
-	NSAssert1(NO, @"%@ must override the nameSuffix property.", [self class]);
+	CC3Assert(NO, @"%@ must override the nameSuffix property.", [self class]);
 	return nil;
 }
 

@@ -52,7 +52,7 @@
 -(GLuint) pixelSamples { return requestedSamples_; }
 
 -(void) openPicking {
-	NSAssert2( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
+	CC3Assert( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
 			  [self class], [CC3EAGLView class]);
 }
 
@@ -109,7 +109,7 @@ static Class _instantiationClass = nil;
 +(Class) instantiationClass { return _instantiationClass; }
 
 +(void) setInstantiationClass: (Class) aClass  {
-	NSAssert1(aClass == nil || [aClass isSubclassOfClass: [ES1Renderer class]],
+	CC3Assert(aClass == nil || [aClass isSubclassOfClass: [ES1Renderer class]],
 			  @"%@ is not a subclass of ES1Renderer.", aClass);
 	_instantiationClass = aClass;
 }

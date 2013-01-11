@@ -93,7 +93,7 @@
 -(void)	removeUniformOverride: (CC3GLSLUniform*) uniform {
 	[_uniforms removeObjectIdenticalTo: uniform];
 	[_uniformsByName removeObjectForKey: uniform.name];
-	NSAssert2(_uniforms.count == _uniformsByName.count,
+	CC3Assert(_uniforms.count == _uniformsByName.count,
 			  @"%@ was not completely removed from %@", uniform, self);
 	if (_uniforms.count == 0) [self removeAllOverrides];	// Remove empty collections
 }

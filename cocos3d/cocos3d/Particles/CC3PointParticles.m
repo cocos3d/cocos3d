@@ -86,7 +86,7 @@
 
 /** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
 -(void) setMesh: (CC3PointParticleMesh*) aMesh {
-	NSAssert1([aMesh isKindOfClass: [CC3PointParticleMesh class]], @"The mesh of %@ must be of type CC3PointParticleMesh.", self);
+	CC3Assert([aMesh isKindOfClass: [CC3PointParticleMesh class]], @"The mesh of %@ must be of type CC3PointParticleMesh.", self);
 	super.mesh = aMesh;
 }
 
@@ -691,7 +691,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(CC3PointParticleEmitter*) emitter { return (CC3PointParticleEmitter*)emitter; }
 
 -(void) setEmitter: (CC3PointParticleEmitter*) anEmitter {
-	NSAssert1([anEmitter isKindOfClass: [CC3PointParticleEmitter class]], @"%@ may only be emitted by a CC3PointParticleEmitter.", self);
+	CC3Assert([anEmitter isKindOfClass: [CC3PointParticleEmitter class]], @"%@ may only be emitted by a CC3PointParticleEmitter.", self);
 	super.emitter = anEmitter;
 }
 

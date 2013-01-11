@@ -112,7 +112,7 @@
 				glesFog.density.value = density;
 				break;
 			default:
-				NSAssert2(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
+				CC3Assert(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
 				break;
 		}
 	} else {
@@ -160,7 +160,7 @@
 #pragma mark Actions
 
 -(CCAction*) runAction:(CCAction*) action {
-	NSAssert( action != nil, @"Argument must be non-nil");
+	CC3Assert( action != nil, @"Argument must be non-nil");
 	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !isRunning];
 	return action;
 }
@@ -176,12 +176,12 @@
 -(void) stopAction: (CCAction*) action { [CCDirector.sharedDirector.actionManager removeAction: action]; }
 
 -(void) stopActionByTag: (NSInteger) aTag {
-	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
+	CC3Assert( aTag != kCCActionTagInvalid, @"Invalid tag");
 	[CCDirector.sharedDirector.actionManager removeActionByTag: aTag target: self];
 }
 
 -(CCAction*) getActionByTag: (NSInteger) aTag {
-	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
+	CC3Assert( aTag != kCCActionTagInvalid, @"Invalid tag");
 	return [CCDirector.sharedDirector.actionManager getActionByTag: aTag target: self];
 }
 

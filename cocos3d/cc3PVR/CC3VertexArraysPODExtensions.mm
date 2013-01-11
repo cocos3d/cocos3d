@@ -66,7 +66,7 @@ extern "C" {
 }
 
 -(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	NSAssert(NO, @"CCVertexArrays initFromSPODMesh: must be overridden in subclass");
+	CC3Assert(NO, @"CCVertexArrays initFromSPODMesh: must be overridden in subclass");
 	return NULL;
 }
 

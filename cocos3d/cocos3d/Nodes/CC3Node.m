@@ -1715,7 +1715,7 @@ static GLuint lastAssignedNodeTag;
 /** Adds a child node and invokes didAddDescendant: so action can be taken by subclasses. */
 -(void) addChild: (CC3Node*) aNode {
 	// Don't add if child is nil or is already a child of this node
-	NSAssert(aNode, @"Child CC3Node cannot be nil");
+	CC3Assert(aNode, @"Child CC3Node cannot be nil");
 	if(aNode.parent == self) return;
 
 	// Remove node from its existing parent after temporarily clearing the action cleanup flag.
@@ -1949,7 +1949,7 @@ static GLuint lastAssignedNodeTag;
 #pragma mark CC3Node Actions
 
 -(CCAction*) runAction:(CCAction*) action {
-	NSAssert( action != nil, @"Argument must be non-nil");
+	CC3Assert( action != nil, @"Argument must be non-nil");
 	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !isRunning];
 	return action;
 }
@@ -1965,12 +1965,12 @@ static GLuint lastAssignedNodeTag;
 -(void) stopAction: (CCAction*) action { [CCDirector.sharedDirector.actionManager removeAction: action]; }
 
 -(void) stopActionByTag: (NSInteger) aTag {
-	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
+	CC3Assert( aTag != kCCActionTagInvalid, @"Invalid tag");
 	[CCDirector.sharedDirector.actionManager removeActionByTag: aTag target: self];
 }
 
 -(CCAction*) getActionByTag: (NSInteger) aTag {
-	NSAssert( aTag != kCCActionTagInvalid, @"Invalid tag");
+	CC3Assert( aTag != kCCActionTagInvalid, @"Invalid tag");
 	return [CCDirector.sharedDirector.actionManager getActionByTag: aTag target: self];
 }
 

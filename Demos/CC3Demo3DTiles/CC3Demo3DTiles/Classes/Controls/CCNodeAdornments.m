@@ -92,7 +92,7 @@
 }
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration {
-	NSAssert(aNode, @"CCNodeAdornment node must not be nil");
+	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
 		peakOpacity = opacity;
 		self.contentSize = aNode.contentSize;

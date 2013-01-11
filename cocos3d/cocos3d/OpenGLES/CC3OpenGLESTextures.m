@@ -349,7 +349,7 @@ GLuint minimumTextureUnits = 1;
 
 /** Template method returns an autoreleased instance of a texture unit tracker. */
 -(CC3OpenGLESTextureUnit*) makeTextureUnit: (GLuint) texUnit {
-	NSAssert1(NO, @"%@ does not implement the makeTextureUnit: method.", self);
+	CC3Assert(NO, @"%@ does not implement the makeTextureUnit: method.", self);
 	return nil;
 }
 
@@ -358,7 +358,7 @@ GLuint minimumTextureUnits = 1;
 	GLuint tuCnt = self.textureUnitCount;
 	if (texUnit >= tuCnt) {
 		// Make sure we don't add beyond the max number of texture units for the platform
-		NSAssert2(texUnit < self.engine.platform.maxTextureUnits.value,
+		CC3Assert(texUnit < self.engine.platform.maxTextureUnits.value,
 				  @"Request for texture unit %u exceeds maximum of %u texture units",
 				  texUnit, self.engine.platform.maxTextureUnits.value);
 

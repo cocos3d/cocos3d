@@ -240,7 +240,7 @@
 
 -(void) assignTemplateMeshToParticle: (id<CC3MeshParticleProtocol>) aParticle {
 	NSUInteger tmCount = particleTemplateMeshes.count + (particleTemplateMesh ? 1 : 0);
-	NSAssert1(tmCount > 0, @"No particle template meshes available in %@. Use the addParticleTemplateMesh: method to add template meshes for the particles.", self);
+	CC3Assert(tmCount > 0, @"No particle template meshes available in %@. Use the addParticleTemplateMesh: method to add template meshes for the particles.", self);
 
 	NSUInteger tmIdx = CC3RandomUIntBelow(tmCount);
 	aParticle.templateMesh = (tmIdx < particleTemplateMeshes.count)

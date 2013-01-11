@@ -1035,13 +1035,13 @@
 
 -(GLuint) faceCountFromVertexIndexCount: (GLuint) vc {
 	if (mesh) return [mesh faceCountFromVertexIndexCount: vc];
-	NSAssert(NO, @"%@ has no mesh and cannot convert vertex count to face count.", self);
+	CC3Assert(NO, @"%@ has no mesh and cannot convert vertex count to face count.", self);
 	return 0;
 }
 
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc {
 	if (mesh) return [mesh vertexIndexCountFromFaceCount: fc];
-	NSAssert(NO, @"%@ has no mesh and cannot convert face count to vertex count.", self);
+	CC3Assert(NO, @"%@ has no mesh and cannot convert face count to vertex count.", self);
 	return 0;
 }
 
@@ -1099,7 +1099,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 -(CC3MeshNode*) getMeshNodeNamed: (NSString*) aName {
 	CC3Node* retrievedNode = [self getNodeNamed: aName];
-	NSAssert1( !retrievedNode || retrievedNode.isMeshNode, @"Retrieved node %@ is not a CC3MeshNode.", retrievedNode);
+	CC3Assert( !retrievedNode || retrievedNode.isMeshNode, @"Retrieved node %@ is not a CC3MeshNode.", retrievedNode);
 	return (CC3MeshNode*)retrievedNode;
 }
 

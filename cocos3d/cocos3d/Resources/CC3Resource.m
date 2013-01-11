@@ -81,7 +81,7 @@ static NSMutableDictionary* _resourcesByName = nil;
 
 +(void) addResource: (CC3Resource*) resource {
 	if ( !resource ) return;
-	NSAssert1(resource.name, @"%@ cannot be added to the resource cache because its name property is nil.", resource);
+	CC3Assert(resource.name, @"%@ cannot be added to the resource cache because its name property is nil.", resource);
 	if ( !_resourcesByName ) _resourcesByName = [NSMutableDictionary new];		// retained
 	[_resourcesByName setObject: resource forKey: resource.name];
 }

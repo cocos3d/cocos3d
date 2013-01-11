@@ -53,7 +53,7 @@
 -(void) setActiveProgram: (CC3GLProgram*) aProgram { _activeProgram = aProgram; }
 
 -(void) addProgram: (CC3GLProgram*) program {
-	NSAssert2( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
+	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
 	[_programsByName setObject: program forKey: program.name];
 }
 

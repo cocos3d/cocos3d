@@ -47,7 +47,7 @@
 								   kCC3VertexContentNormal |
 								   kCC3VertexContentTextureCoordinates);
 	}
-	NSAssert1([mesh isKindOfClass: [CC3VertexArrayMesh class]], @"For parametric construction, the mesh property of %@ must be an instance of CC3VertexArrayMesh.", self);
+	CC3Assert([mesh isKindOfClass: [CC3VertexArrayMesh class]], @"For parametric construction, the mesh property of %@ must be an instance of CC3VertexArrayMesh.", self);
 	return (CC3VertexArrayMesh*) mesh;
 }
 

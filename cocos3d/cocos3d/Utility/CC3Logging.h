@@ -34,9 +34,22 @@
 /** @file */	// Doxygen marker
 
 /**
- * For Objective-C code, this library adds flexible, non-intrusive logging capabilities
- * that can be efficiently enabled or disabled via compile switches.
+ * For Objective-C code, this library adds flexible, non-intrusive assertion and logging
+ * capabilities that can be efficiently enabled or disabled via compiler switches.
  *
+ * The CC3Assert() function can be used in place of the standard NSAssert() family of functions.
+ * CC3Assert() improves the NSAssert() family of functions in two ways:
+ *    - CC3Assert ensures that the assertion message is logged to the console.
+ *    - CC3Assert can be used with a variable number of arguments without the need for
+ *      NSAssert1(), NSAssert2(), etc.
+ *
+ * Like the NSAssert() functions, you can turn assertions off in production code by setting
+ * NS_BLOCK_ASSERTIONS to 1 in your compiler build settings. Doing so completely removes the
+ * corresponding assertion invocations from the compiled code, thus eliminating both the
+ * memory and CPU overhead that the assertion calls would add
+ *
+ * This library also adds a sophisticated logging capability.
+ 
  * There are four levels of logging: Trace, Info, Error and Debug, and each can be enabled
  * independently via the LOGGING_LEVEL_TRACE, LOGGING_LEVEL_INFO, LOGGING_LEVEL_ERROR and
  * LOGGING_LEVEL_DEBUG switches, respectively.
@@ -132,7 +145,7 @@
  * in the log entries. This can be set either here or as a compiler build setting.
  */
 #ifndef LOGGING_INCLUDE_CODE_LOCATION
-	#define LOGGING_INCLUDE_CODE_LOCATION	0
+#	define LOGGING_INCLUDE_CODE_LOCATION	0
 #endif
 
 
@@ -141,7 +154,7 @@
 
 /** Use this macro to open a break-point programmatically. */
 #ifndef DEBUGGER
-	#define DEBUGGER() { kill( getpid(), SIGINT ) ; }
+#	define DEBUGGER() { kill( getpid(), SIGINT ) ; }
 #endif
 
 // Logging formats
@@ -150,58 +163,69 @@
 #define LOG_FORMAT_CLEAN(fmt, lvl, ...) printf("[%s] %s\n", [lvl UTF8String], [[NSString stringWithFormat: fmt, ##__VA_ARGS__] UTF8String])
 
 #if LOGGING_INCLUDE_CODE_LOCATION
-	#define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_WITH_LOCATION(fmt, lvl, ##__VA_ARGS__)
+#	define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_WITH_LOCATION(fmt, lvl, ##__VA_ARGS__)
 #else
-	#define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_NO_LOCATION(fmt, lvl, ##__VA_ARGS__)
+#	define LOG_FORMAT(fmt, lvl, ...) LOG_FORMAT_NO_LOCATION(fmt, lvl, ##__VA_ARGS__)
 #endif
 
 // Trace logging - for detailed tracing
 #if LOGGING_LEVEL_TRACE
-	#define LogTimedTrace(fmt, ...) LOG_FORMAT(fmt, @"trace", ##__VA_ARGS__)
-	#define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"trace", ##__VA_ARGS__)
+#	define LogTimedTrace(fmt, ...) LOG_FORMAT(fmt, @"trace", ##__VA_ARGS__)
+#	define LogCleanTrace(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"trace", ##__VA_ARGS__)
 #else
-	#define LogTimedTrace(...)
-	#define LogCleanTrace(...)
+#	define LogTimedTrace(...)
+#	define LogCleanTrace(...)
 #endif
 #define LogTrace(fmt, ...) LogCleanTrace(fmt, ##__VA_ARGS__)
 
 // Info logging - for general, non-performance affecting information messages
 #if LOGGING_LEVEL_INFO
-	#define LogTimedInfo(fmt, ...) LOG_FORMAT(fmt, @"info", ##__VA_ARGS__)
-	#define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"info", ##__VA_ARGS__)
+#	define LogTimedInfo(fmt, ...) LOG_FORMAT(fmt, @"info", ##__VA_ARGS__)
+#	define LogCleanInfo(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"info", ##__VA_ARGS__)
 #else
-	#define LogTimedInfo(...)
-	#define LogCleanInfo(...)
+#	define LogTimedInfo(...)
+#	define LogCleanInfo(...)
 #endif
 #define LogInfo(fmt, ...) LogCleanInfo(fmt, ##__VA_ARGS__)
 
 // Error logging - only when there is an error to be logged
 #if LOGGING_LEVEL_ERROR
-	#define LogTimedError(fmt, ...) LOG_FORMAT(fmt, @"***ERROR***", ##__VA_ARGS__)
-	#define LogCleanError(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"***ERROR***", ##__VA_ARGS__)
+#	define LogTimedError(fmt, ...) LOG_FORMAT(fmt, @"***ERROR***", ##__VA_ARGS__)
+#	define LogCleanError(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"***ERROR***", ##__VA_ARGS__)
 #else
-	#define LogTimedError(...)
-	#define LogCleanError(...)
+#	define LogTimedError(...)
+#	define LogCleanError(...)
 #endif
 #define LogError(fmt, ...) LogCleanError(fmt, ##__VA_ARGS__)
 
 // Debug logging - use only temporarily for highlighting and tracking down problems
 #if LOGGING_LEVEL_DEBUG
-	#define LogTimedDebug(fmt, ...) LOG_FORMAT(fmt, @"debug", ##__VA_ARGS__)
-	#define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"debug", ##__VA_ARGS__)
+#	define LogTimedDebug(fmt, ...) LOG_FORMAT(fmt, @"debug", ##__VA_ARGS__)
+#	define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"debug", ##__VA_ARGS__)
 #else
-	#define LogTimedDebug(...)
-	#define LogCleanDebug(...)
+#	define LogTimedDebug(...)
+#	define LogCleanDebug(...)
 #endif
 #define LogDebug(fmt, ...) LogCleanDebug(fmt, ##__VA_ARGS__)
 
 // Resource loading - use only temporarily for information and troubleshooting
 #if LOGGING_REZLOAD
-	#define LogTimedRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
-	#define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"rez", ##__VA_ARGS__)
+#	define LogTimedRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
+#	define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"rez", ##__VA_ARGS__)
 #else
-	#define LogTimedRez(...)
-	#define LogCleanRez(...)
+#	define LogTimedRez(...)
+#	define LogCleanRez(...)
 #endif
 #define LogRez(fmt, ...) LogCleanRez(fmt, ##__VA_ARGS__)
+
+// Assertions
+#if NS_BLOCK_ASSERTIONS
+#	define CC3Assert(test, fmt, ...)
+#else
+#	define CC3Assert(test, fmt, ...)	\
+	if (!(test)) {						\
+		LogError(fmt, ##__VA_ARGS__);	\
+		NSAssert(NO, @"See previous logged error.");					\
+	}
+#endif
 

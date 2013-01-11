@@ -352,7 +352,7 @@ static Class _instantiationClass = nil;
 +(Class) instantiationClass { return _instantiationClass; }
 
 +(void) setInstantiationClass: (Class) aClass  {
-	NSAssert1(aClass == nil || [aClass isSubclassOfClass: [CCTexture2D class]],
+	CC3Assert(aClass == nil || [aClass isSubclassOfClass: [CCTexture2D class]],
 			  @"%@ is not a subclass of CCTexture2D.", aClass);
 	_instantiationClass = aClass;
 }

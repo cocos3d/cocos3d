@@ -78,10 +78,10 @@
 
 // Ensure that the particle class supports the requiredParticleProtocol of both this emitter and the navigator.
 -(void) setParticleClass: (Class) aParticleClass {
-	NSAssert3(!aParticleClass || [aParticleClass conformsToProtocol: self.requiredParticleProtocol],
+	CC3Assert(!aParticleClass || [aParticleClass conformsToProtocol: self.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles emitted by %@ must conform to that protocol.", aParticleClass,
 			  [NSString stringWithUTF8String: protocol_getName(self.requiredParticleProtocol)], self);
-	NSAssert3(!aParticleClass || !particleNavigator || [aParticleClass conformsToProtocol: particleNavigator.requiredParticleProtocol],
+	CC3Assert(!aParticleClass || !particleNavigator || [aParticleClass conformsToProtocol: particleNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", aParticleClass,
 			  [NSString stringWithUTF8String: protocol_getName(particleNavigator.requiredParticleProtocol)], particleNavigator);
 	particleClass = aParticleClass;
@@ -90,7 +90,7 @@
 -(CC3ParticleNavigator*) particleNavigator { return particleNavigator; }
 
 -(void) setParticleNavigator: (CC3ParticleNavigator*) aNavigator {
-	NSAssert3(!particleClass || !aNavigator || [particleClass conformsToProtocol: aNavigator.requiredParticleProtocol],
+	CC3Assert(!particleClass || !aNavigator || [particleClass conformsToProtocol: aNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", particleClass,
 			  [NSString stringWithUTF8String: protocol_getName(aNavigator.requiredParticleProtocol)], aNavigator);
 	if (aNavigator != particleNavigator) {
@@ -279,10 +279,10 @@
 -(BOOL) emitParticle: (id<CC3ParticleProtocol>) aParticle {
 	if ( !aParticle || self.isFull ) return NO;		// Can't add particles if there's no space
 
-	NSAssert3([aParticle conformsToProtocol: self.requiredParticleProtocol],
+	CC3Assert([aParticle conformsToProtocol: self.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles emitted by %@ must conform to that protocol.", aParticle,
 			  [NSString stringWithUTF8String: protocol_getName(self.requiredParticleProtocol)], self);
-	NSAssert3(!particleNavigator || [aParticle conformsToProtocol: particleNavigator.requiredParticleProtocol],
+	CC3Assert(!particleNavigator || [aParticle conformsToProtocol: particleNavigator.requiredParticleProtocol],
 			  @"%@ does not conform to the %@ protocol. All particles configured by %@ must conform to that protocol.", aParticle,
 			  [NSString stringWithUTF8String: protocol_getName(particleNavigator.requiredParticleProtocol)], particleNavigator);
 	
@@ -416,12 +416,12 @@
 }
 
 -(id<CC3ParticleProtocol>) particleWithVertexAt: (GLuint) vtxIndex {
-	NSAssert1(NO, @"%@ subclass must implement the particleWithVertexAt: method!", self);
+	CC3Assert(NO, @"%@ subclass must implement the particleWithVertexAt: method!", self);
 	return nil;
 }
 
 -(id<CC3ParticleProtocol>) particleWithVertexIndexAt: (GLuint) index {
-	NSAssert1(NO, @"%@ subclass must implement the particleWithVertexIndexAt: method!", self);
+	CC3Assert(NO, @"%@ subclass must implement the particleWithVertexIndexAt: method!", self);
 	return nil;
 }
 
@@ -551,7 +551,7 @@
 
 /** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
 -(void) setMesh: (CC3VertexArrayMesh*) aMesh {
-	NSAssert1(!aMesh || [aMesh isKindOfClass: [CC3VertexArrayMesh class]], @"The mesh of %@ must be of type CC3VertexArrayMesh.", self);
+	CC3Assert(!aMesh || [aMesh isKindOfClass: [CC3VertexArrayMesh class]], @"The mesh of %@ must be of type CC3VertexArrayMesh.", self);
 	super.mesh = aMesh;
 }
 
@@ -867,13 +867,13 @@
 
 // Alloc iVar in subclases to consolidate storage
 -(BOOL) isAlive {
-	NSAssert1(NO, @"%@ does not implement the isAlive property", self);
+	CC3Assert(NO, @"%@ does not implement the isAlive property", self);
 	return NO;
 }
 
 // Alloc iVar in subclases to consolidate storage
 -(void) setIsAlive: (BOOL) alive {
-	NSAssert1(NO, @"%@ does not implement the isAlive property", self);
+	CC3Assert(NO, @"%@ does not implement the isAlive property", self);
 }
 
 -(CC3Vector) location { return kCC3VectorNull; }

@@ -118,7 +118,7 @@
 }
 
 -(BOOL) valueNeedsRestoration {
-	NSAssert1(NO, @"%@ does not implement the valueNeedsRestoration property.", self);
+	CC3Assert(NO, @"%@ does not implement the valueNeedsRestoration property.", self);
 	return NO;
 }
 
@@ -190,7 +190,7 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 			valueIsKnown = YES;
 			break;
 		default:
-			NSAssert3(NO, @"%@ bad original value handling definition %u for capability %@",
+			CC3Assert(NO, @"%@ bad original value handling definition %u for capability %@",
 					  self, originalValueHandling, NSStringFromGLEnum(name));
 			break;
 	}
@@ -1127,11 +1127,11 @@ andOriginalValueHandling: (CC3GLESStateOriginalValueHandling) origValueHandling 
 }
 
 -(BOOL) valueNeedsRestoration {
-	NSAssert1(NO, @"%@ does must implement the valueNeedsRestoration property.", self);
+	CC3Assert(NO, @"%@ does must implement the valueNeedsRestoration property.", self);
 	return NO;
 }
 
--(void) restoreOriginalValues { NSAssert1(NO, @"%@ does must implement the restoreOriginalValues method.", self); }
+-(void) restoreOriginalValues { CC3Assert(NO, @"%@ does must implement the restoreOriginalValues method.", self); }
 
 @end
 

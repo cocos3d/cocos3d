@@ -235,7 +235,7 @@
 	GLuint vapCnt = self.attributesCount;
 	if (attrIndx >= vapCnt) {
 		// Make sure we don't add beyond the max number of vertex attributes for the platform
-		NSAssert2(attrIndx < self.engine.platform.maxVertexAttributes.value,
+		CC3Assert(attrIndx < self.engine.platform.maxVertexAttributes.value,
 				  @"Request for vertex attribute index %u exceeds maximum of %u vertex attributes",
 				  attrIndx, self.engine.platform.maxVertexAttributes.value);
 		

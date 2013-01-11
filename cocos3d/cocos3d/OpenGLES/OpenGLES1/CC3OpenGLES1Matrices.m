@@ -145,16 +145,16 @@
 	[self activatePalette];
 }
 
--(void) push { NSAssert1(NO, @"%@ can't be pushed", self); }
+-(void) push { CC3Assert(NO, @"%@ can't be pushed", self); }
 
--(void) pop { NSAssert1(NO, @"%@ can't be popped", self); }
+-(void) pop { CC3Assert(NO, @"%@ can't be popped", self); }
 
 -(GLuint) depth {
-	NSAssert1(NO, @"Can't get depth of %@", self);
+	CC3Assert(NO, @"Can't get depth of %@", self);
 	return 0;
 }
 
--(void) getTop: (CC3Matrix4x4*) mtx { NSAssert1(NO, @"Can't retrieve top of %@", self); }
+-(void) getTop: (CC3Matrix4x4*) mtx { CC3Assert(NO, @"Can't retrieve top of %@", self); }
 
 -(void) loadFromModelView {
 	[self activate];

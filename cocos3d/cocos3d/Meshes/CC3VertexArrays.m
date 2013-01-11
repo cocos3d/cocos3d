@@ -157,7 +157,7 @@
 -(GLenum) bufferTarget { return GL_ARRAY_BUFFER; }
 
 +(GLenum) defaultSemantic {
-	NSAssert1(NO, @"%@ does not implement the defaultSemantic class property", self);
+	CC3Assert(NO, @"%@ does not implement the defaultSemantic class property", self);
 	return kCC3SemanticNone;
 }
 
@@ -246,7 +246,7 @@
 
 -(void) setAllocatedVertexCapacity: (GLuint) vtxCount {
 	if (vtxCount != _allocatedVertexCapacity) {
-		NSAssert1((vtxCount == 0 || self.vertexStride > 0), @"%@ must have the stride defined before allocating vertices. Set the elementType and elementSize properties before setting the allocatedVertexCapacity property.", self);
+		CC3Assert((vtxCount == 0 || self.vertexStride > 0), @"%@ must have the stride defined before allocating vertices. Set the elementType and elementSize properties before setting the allocatedVertexCapacity property.", self);
 		[self allocateVertexCapacity: vtxCount];
 	}
 }
@@ -452,9 +452,9 @@ static GLuint lastAssignedVertexArrayTag;
 -(GLvoid*) addressOfElement: (GLuint) index {
 	// Check vertices still in memory, and if allocated,
 	// that index is less than number of vertices allocated
-	NSAssert(_vertices || !_bufferID, @"Vertex content is no longer in application memory. To retain mesh data in main memory, invoke the retainVertexContent method on this mesh before invoking the releaseRedundantData method.");
-	NSAssert(_vertices, @"Vertex content is missing.");
-	NSAssert2(_allocatedVertexCapacity == 0 || index < _allocatedVertexCapacity, @"Requested index %i is greater than number of vertices allocated: %i.", index, _allocatedVertexCapacity);
+	CC3Assert(_vertices || !_bufferID, @"Vertex content is no longer in application memory. To retain mesh data in main memory, invoke the retainVertexContent method on this mesh before invoking the releaseRedundantData method.");
+	CC3Assert(_vertices, @"Vertex content is missing.");
+	CC3Assert(_allocatedVertexCapacity == 0 || index < _allocatedVertexCapacity, @"Requested index %i is greater than number of vertices allocated: %i.", index, _allocatedVertexCapacity);
 	return (GLbyte*)_vertices + (self.vertexStride * index) + _elementOffset;
 }
 
@@ -627,7 +627,7 @@ static GLuint lastAssignedVertexArrayTag;
 		case GL_POINTS:
 			return vc;
 		default:
-			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			CC3Assert(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
 			return 0;
 	}
 }
@@ -648,7 +648,7 @@ static GLuint lastAssignedVertexArrayTag;
 		case GL_POINTS:
 			return fc;
 		default:
-			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			CC3Assert(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
 			return 0;
 	}
 }
@@ -705,7 +705,7 @@ static GLuint lastAssignedVertexArrayTag;
 			currStripStartFaceCnt = nextStripStartFaceCnt;
 			stripStartVtxCnt += stripLen;
 		}
-		NSAssert3(NO, @"%@ requested face index %i is larger than face count %i",
+		CC3Assert(NO, @"%@ requested face index %i is larger than face count %i",
 				  self, faceIndex, [self faceCount]);
 		return kCC3FaceIndicesZero;
 	} else {
@@ -748,7 +748,7 @@ static GLuint lastAssignedVertexArrayTag;
 			firstVtxIdx = faceIndex;
 			return CC3FaceIndicesMake(firstVtxIdx, 0, 0);
 		default:
-			NSAssert2(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
+			CC3Assert(NO, @"%@ encountered unknown drawing mode %u", self, self.drawingMode);
 			return kCC3FaceIndicesZero;
 	}
 }
@@ -916,8 +916,8 @@ static GLuint lastAssignedVertexArrayTag;
  */
 -(void) buildBoundingBox {
 	// If we don't have vertices, but do have a non-zero vertexCount, raise an assertion
-	NSAssert1( !( !_vertices && _vertexCount ), @"%@ bounding box requested after vertex data have been released", self);
-	NSAssert1(_elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to build the bounding box", self);
+	CC3Assert( !( !_vertices && _vertexCount ), @"%@ bounding box requested after vertex data have been released", self);
+	CC3Assert(_elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to build the bounding box", self);
 
 	CC3Vector vl, vlMin, vlMax;
 	vl = (_vertexCount > 0) ? [self locationAt: 0] : kCC3VectorZero;
@@ -946,7 +946,7 @@ static GLuint lastAssignedVertexArrayTag;
  * for the first time after the boundary has been marked dirty.
  */
 -(void) calcRadius {
-	NSAssert1(_elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to calculate mesh radius", [self class]);
+	CC3Assert(_elementType == GL_FLOAT, @"%@ must have elementType GLFLOAT to calculate mesh radius", [self class]);
 
 	CC3Vector cog = self.centerOfGeometry;		// Will measure it if necessary
 	if (_vertices && _vertexCount) {
@@ -985,7 +985,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
 	CC3OpenGLESStateTrackerVertexPointer* vtxPtr = super.vertexPointer;
-	NSAssert2(vtxPtr, @"%@ could not retrieve the vertex pointer for semantic %@. Vertex locations are required for drawing.",
+	CC3Assert(vtxPtr, @"%@ could not retrieve the vertex pointer for semantic %@. Vertex locations are required for drawing.",
 			  self, NSStringFromCC3Semantic(_semantic));
 	return vtxPtr;
 }
@@ -1289,7 +1289,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 }
 
 -(void) alignWithTextureMapSize: (CGSize) texMapSize {
-	NSAssert2((texMapSize.width && texMapSize.height),
+	CC3Assert((texMapSize.width && texMapSize.height),
 			  @"%@ mapsize %@ cannot have zero dimension",
 			  self, NSStringFromCGSize(texMapSize));
 
@@ -1312,7 +1312,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 }
 
 -(void) alignWithInvertedTextureMapSize: (CGSize) texMapSize {
-	NSAssert2((texMapSize.width && texMapSize.height),
+	CC3Assert((texMapSize.width && texMapSize.height),
 			  @"%@ mapsize %@ cannot have zero dimension",
 			  self, NSStringFromCGSize(texMapSize));
 	LogTrace(@"%@ aligning and changing map size from %@ to %@ and flipping vertically",

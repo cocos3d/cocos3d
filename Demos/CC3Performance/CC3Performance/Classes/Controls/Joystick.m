@@ -61,7 +61,7 @@
 }
 
 -(id) initWithThumb: (CCNode*) aNode andSize: (CGSize) size {
-	NSAssert(aNode, @"Thumb node must not be nil");
+	CC3Assert(aNode, @"Thumb node must not be nil");
 	if( (self = [super init]) ) {
 		self.touchEnabled = YES;
 		isTracking = NO;
@@ -83,7 +83,7 @@
 }
 
 -(id) initWithThumb: (CCNode*) aNode andBackdrop: (CCNode*) bgNode {
-	NSAssert(bgNode, @"Backdrop node must not be nil");
+	CC3Assert(bgNode, @"Backdrop node must not be nil");
 	if( (self = [self initWithThumb: aNode andSize: bgNode.scaledSize]) ) {
 		// Position the background node at the center and behind the thumb node 
 		[bgNode setPosition: self.anchorPointInPoints];
@@ -135,17 +135,17 @@
 }
 
 -(void) ccTouchEnded: (UITouch *)touch withEvent: (UIEvent *)event {
-	NSAssert(isTracking, @"Touch ended that was never begun");
+	CC3Assert(isTracking, @"Touch ended that was never begun");
 	[self resetVelocity];
 }
 
 -(void) ccTouchCancelled: (UITouch *)touch withEvent: (UIEvent *)event {
-	NSAssert(isTracking, @"Touch cancelled that was never begun");
+	CC3Assert(isTracking, @"Touch cancelled that was never begun");
 	[self resetVelocity];
 }
 
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
-	NSAssert(isTracking, @"Touch moved that was never begun");
+	CC3Assert(isTracking, @"Touch moved that was never begun");
 	[self trackVelocity: [self convertTouchToNodeSpace: touch]];
 }
 

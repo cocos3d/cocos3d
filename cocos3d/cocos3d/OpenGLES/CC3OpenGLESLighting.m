@@ -118,7 +118,7 @@
 -(GLuint) lightCount { return lights ? lights.count : 0; }
 
 -(Class) lightTrackerClass {
-	NSAssert1(NO, @"%@ does not implement the lightTrackerClass method.", self);
+	CC3Assert(NO, @"%@ does not implement the lightTrackerClass method.", self);
 	return nil;
 }
 

@@ -757,7 +757,7 @@ typedef struct {
 		// Get the font specification and for the character, the kerning between the previous
 		// character and this character, and determine a positioning adjustment for the character.
 		ccBMFontDef* charSpec = [fontConfig characterSpecFor: c];
-		NSAssert(charSpec, @"%@: no font specification loaded for character %i", self, c);
+		CC3Assert(charSpec, @"%@: no font specification loaded for character %i", self, c);
 
 		kerningAmount = [fontConfig kerningBetween: prevChar and: c] * fontScale;
 		adjCharPos.x = charPos.x + (charSpec->xOffset * fontScale) + kerningAmount;
@@ -920,7 +920,7 @@ typedef struct {
 	// Iterate through the characters
 	for (NSUInteger i = 0; i < strLen; i++) {
 		unichar c = [lblString characterAtIndex: i];
-		NSAssert( c < kCCBMFontMaxChars, @"LabelBMFont: character outside bounds");
+		CC3Assert( c < kCCBMFontMaxChars, @"LabelBMFont: character outside bounds");
 		
 		// If the character is a newline, don't draw anything and move down a line
 		if (c == '\n') {

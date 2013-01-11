@@ -393,7 +393,7 @@
 		for (NSUInteger i = 0; i < nodeCount; i++) {
 			CC3Node* leftNode = i > 0 ? [nodes objectAtIndex: i - 1] : nil;
 			CC3Node* rightNode = [nodes objectAtIndex: i];
-			NSAssert(aNode != rightNode, @"%@ already contains %@!", self, aNode);
+			CC3Assert(aNode != rightNode, @"%@ already contains %@!", self, aNode);
 			if ( [self shouldInsertNode: aNode
 								between: leftNode
 									and: rightNode

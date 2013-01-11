@@ -114,8 +114,8 @@
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
 			[var updateGLValue];
 		} else {
-			NSAssert4(NO, @"%@ could not resolve value of uniform %@ with semantic %@ within program context %@. Consider creating a uniform override on the program context.",
-					  self, var, NSStringFromCC3Semantic(var.semantic), context);
+			CC3Assert(NO, @"%@ could not resolve the value of uniform %@ with semantic %@. Consider creating a uniform override on the program context in your material to set the value of the uniform directly.",
+					  self, var.name, NSStringFromCC3Semantic(var.semantic));
 		}
 }
 
@@ -147,14 +147,14 @@
 		LogError(@"Compilation error log: %@",
 				 (type == GL_VERTEX_SHADER ? [self vertexShaderLog] : [self fragmentShaderLog]));
 	}
-	 NSAssert2(status, @"Error compiling %@ shader in %@", NSStringFromGLEnum(type), self);
+	 CC3Assert(status, @"Error compiling %@ shader in %@", NSStringFromGLEnum(type), self);
 	return (status == GL_TRUE);
 }
 
 -(BOOL) link {
-	NSAssert1(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
+	CC3Assert(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
 	BOOL wasLinked = [super link];
-	NSAssert1(wasLinked, @"%@ could not be linked. See previously logged error.", self);
+	CC3Assert(wasLinked, @"%@ could not be linked. See previously logged error.", self);
 	if (wasLinked) {
 		[self configureVariables];
 		LogRez(@"Linked %@", self.fullDescription);
@@ -211,7 +211,7 @@
 #pragma mark Allocation and initialization
 
 -(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {
-	NSAssert1(name, @"%@ cannot be created without a name", [self class]);
+	CC3Assert(name, @"%@ cannot be created without a name", [self class]);
 	if ( (self = [super initWithVertexShaderByteArray: vshBytes
 							  fragmentShaderByteArray: fshBytes]) ) {
 		self.name = name;				// retained
@@ -258,19 +258,16 @@
 +(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
 	NSError* err = nil;
 	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
-	NSAssert1([[NSFileManager defaultManager] fileExistsAtPath: filePath],
+	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
 			  @"Could not load GLSL file '%@' because it could not be found", filePath);
 	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
-	NSAssert4(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
+	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
 			  glslFilename, err.localizedDescription, err.code, err.localizedFailureReason);
 	return (GLchar*)glslSrcStr.UTF8String;
 }
 
 #if CC3_OGLES_2
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ GL program: %i, GL vtx shader: %i, GL frag shader: %i",
-			[self class], program_, vertShader_, fragShader_];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@ GL program: %i", [self class], program_]; }
 #endif
 
 -(NSString*) fullDescription {

@@ -169,7 +169,7 @@
 -(void) setVector4: (CC3Vector4) value { [self setVector4: value at: 0]; }
 
 -(void) setVector4: (CC3Vector4) value at: (GLuint) index {
-	NSAssert2(index < _size, @"%@ could not set value because index %u is out of bounds", self, index);
+	CC3Assert(index < _size, @"%@ could not set value because index %u is out of bounds", self, index);
 	
 	switch (_type) {
 			
@@ -189,7 +189,7 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 			
@@ -207,7 +207,7 @@
 			return;
 			
 		default:
-			NSAssert2(NO, @"%@ could not set value because type %@ is not understood",
+			CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
@@ -226,7 +226,7 @@
 			((CC3Matrix3x3*)_varValue)[index] = *value;
 			return;
 		default:
-			NSAssert(NO, @"%@ attempted to set 3x3 matrix when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set 3x3 matrix when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 	}
@@ -240,7 +240,7 @@
 			((CC3Matrix4x4*)_varValue)[index] = *value;
 			return;
 		default:
-			NSAssert(NO, @"%@ attempted to set 4x4 matrix when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set 4x4 matrix when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 	}
@@ -267,7 +267,7 @@
 -(void) setIntVector4: (CC3IntVector4) value { [self setIntVector4: value at: 0]; }
 
 -(void) setIntVector4: (CC3IntVector4) value at: (GLuint) index {
-	NSAssert2(index < _size, @"%@ could not set value because index %u is out of bounds", self, index);
+	CC3Assert(index < _size, @"%@ could not set value because index %u is out of bounds", self, index);
 	
 	switch (_type) {
 			
@@ -281,7 +281,7 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 			
@@ -305,7 +305,7 @@
 			return;
 			
 		default:
-			NSAssert2(NO, @"%@ could not set value because type %@ is not understood",
+			CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
@@ -337,7 +337,7 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set color when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set color when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 
@@ -355,7 +355,7 @@
 			return;
 			
 		default:
-			NSAssert2(NO, @"%@ could not set value because type %@ is not understood",
+			CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
@@ -376,7 +376,7 @@
 		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
-			NSAssert(NO, @"%@ attempted to set color when matrix type %@ expected.",
+			CC3Assert(NO, @"%@ attempted to set color when matrix type %@ expected.",
 					 self, NSStringFromGLEnum(_type));
 			return;
 
@@ -394,16 +394,16 @@
 			return;
 
 		default:
-			NSAssert2(NO, @"%@ could not set value because type %@ is not understood",
+			CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
 }
 
 -(void) setValueFromUniform: (CC3GLSLUniform*) uniform {
-	NSAssert2(_type == uniform.type, @"Cannot update %@ from %@ because uniforms are not of the same type",
+	CC3Assert(_type == uniform.type, @"Cannot update %@ from %@ because uniforms are not of the same type",
 			  uniform.fullDescription, self.fullDescription);
-	NSAssert2(_size == uniform.size, @"Cannot update %@ from %@ because uniforms are not of the same size",
+	CC3Assert(_size == uniform.size, @"Cannot update %@ from %@ because uniforms are not of the same size",
 			  uniform.fullDescription, self.fullDescription);
 	memcpy(_varValue, uniform.varValue, _varLen);
 }
@@ -566,7 +566,7 @@
 			return;
 			
 		default:
-			NSAssert2(NO, @"%@ could not set GL engine state value because type %@ is not understood",
+			CC3Assert(NO, @"%@ could not set GL engine state value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}

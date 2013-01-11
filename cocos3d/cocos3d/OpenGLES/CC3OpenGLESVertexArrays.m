@@ -263,7 +263,7 @@
 		case GL_ELEMENT_ARRAY_BUFFER:
 			return indexBuffer;
 		default:
-			NSAssert1(NO, @"Illegal buffer target %u", bufferTarget);
+			CC3Assert(NO, @"Illegal buffer target %u", bufferTarget);
 			return nil;
 	}
 }
@@ -301,7 +301,7 @@
 }
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
-	NSAssert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
+	CC3Assert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
 	LogGLErrorTrace(@"%@ drawing %u vertex indices as %@", self, len, NSStringFromGLEnum(drawMode));
 	CC_INCREMENT_GL_DRAWS(1);

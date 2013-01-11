@@ -103,7 +103,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateZero {
-	NSAssert1(NO, @"%@ does not implement the implPopulateZero method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateZero method", self);
 }
 
 -(void) populateIdentity {
@@ -116,7 +116,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateIdentity {
-	NSAssert1(NO, @"%@ does not implement the implPopulateIdentity method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateIdentity method", self);
 }
 
 -(void) populateFrom: (CC3Matrix*) aMatrix {
@@ -135,7 +135,7 @@
  * Subclass implementation does not need to set isIdentity or isRigid.
  */
 -(void) implPopulateFrom: (CC3Matrix*) aMatrix {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFrom: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFrom: method", self);
 }
 
 -(void) populateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx {
@@ -145,11 +145,11 @@
 }
 
 -(void) implPopulateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromCC3Matrix3x3: method", self);
 }
 
 -(void) populateCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the populateCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the populateCC3Matrix3x3: method", self);
 }
 
 -(void) populateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx {
@@ -159,11 +159,11 @@
 }
 
 -(void) implPopulateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromCC3Matrix3x3: method", self);
 }
 
 -(void) populateCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the populateCC3Matrix4x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the populateCC3Matrix4x3: method", self);
 }
 
 -(void) populateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx {
@@ -173,11 +173,11 @@
 }
 
 -(void) implPopulateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromCC3Matrix4x4: method", self);
 }
 
 -(void) populateCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the populateCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the populateCC3Matrix4x4: method", self);
 }
 
 -(void) populateFromRotation: (CC3Vector) aRotation {
@@ -192,7 +192,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateFromRotation: (CC3Vector) aRotation {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromRotation: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromRotation: method", self);
 }
 
 -(void) populateFromQuaternion: (CC3Quaternion) aQuaternion {
@@ -207,7 +207,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateFromQuaternion: (CC3Quaternion) aQuaternion {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromQuaternion: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromQuaternion: method", self);
 }
 
 -(void) populateFromScale: (CC3Vector) aScale {
@@ -222,7 +222,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateFromScale: (CC3Vector) aScale {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromScale: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromScale: method", self);
 }
 
 -(void) populateFromTranslation: (CC3Vector) aTranslation {
@@ -237,7 +237,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateFromTranslation: (CC3Vector) aTranslation {
-	NSAssert1(NO, @"%@ does not implement the implPopulateFromTranslation: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateFromTranslation: method", self);
 }
 
 -(void) populateToPointTowards: (CC3Vector) fwdDirection withUp: (CC3Vector) upDirection {
@@ -248,7 +248,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implPopulateToPointTowards: (CC3Vector) fwdDirection withUp: (CC3Vector) upDirection {
-	NSAssert1(NO, @"%@ does not implement the implPopulateToPointTowards:withUp: method", self);
+	CC3Assert(NO, @"%@ does not implement the implPopulateToPointTowards:withUp: method", self);
 }
 
 -(void) populateToLookAt: (CC3Vector) targetLocation
@@ -281,7 +281,7 @@
 						  andBottom: (GLfloat) bottom
 							andNear: (GLfloat) near
 							 andFar: (GLfloat) far {
-	NSAssert1(NO, @"%@ does not support perspective projection. Use the CC3ProjectionMatrix instead", self);
+	CC3Assert(NO, @"%@ does not support perspective projection. Use the CC3ProjectionMatrix instead", self);
 }
 
 -(void) populateFromFrustumLeft: (GLfloat) left
@@ -299,7 +299,7 @@
 							 andTop: (GLfloat) top  
 						  andBottom: (GLfloat) bottom
 							andNear: (GLfloat) near {
-	NSAssert1(NO, @"%@ does not support perspective projection. Use the CC3ProjectionMatrix instead", self);
+	CC3Assert(NO, @"%@ does not support perspective projection. Use the CC3ProjectionMatrix instead", self);
 }
 
 -(void) populateOrthoFromFrustumLeft: (GLfloat) left
@@ -320,7 +320,7 @@
 							   andBottom: (GLfloat) bottom
 								 andNear: (GLfloat) near
 								  andFar: (GLfloat) far {
-	NSAssert1(NO, @"%@ does not support orthographic projection. Use the CC3ProjectionMatrix instead", self);
+	CC3Assert(NO, @"%@ does not support orthographic projection. Use the CC3ProjectionMatrix instead", self);
 }
 
 -(void) populateOrthoFromFrustumLeft: (GLfloat) left
@@ -338,34 +338,34 @@
 								  andTop: (GLfloat) top  
 							   andBottom: (GLfloat) bottom
 								 andNear: (GLfloat) near {
-	NSAssert1(NO, @"%@ does not support orthographic projection. Use the CC3ProjectionMatrix instead", self);
+	CC3Assert(NO, @"%@ does not support orthographic projection. Use the CC3ProjectionMatrix instead", self);
 }
 
 
 #pragma mark Accessing content
 
 -(CC3Vector) extractRotation {
-	NSAssert1(NO, @"%@ does not implement the extractRotation method", self);
+	CC3Assert(NO, @"%@ does not implement the extractRotation method", self);
 	return kCC3VectorNull;
 }
 
 -(CC3Quaternion) extractQuaternion  {
-	NSAssert1(NO, @"%@ does not implement the extractQuaternion method", self);
+	CC3Assert(NO, @"%@ does not implement the extractQuaternion method", self);
 	return kCC3QuaternionNull;
 }
 
 -(CC3Vector) extractForwardDirection  {
-	NSAssert1(NO, @"%@ does not implement the extractForwardDirection method", self);
+	CC3Assert(NO, @"%@ does not implement the extractForwardDirection method", self);
 	return kCC3VectorNull;
 }
 
 -(CC3Vector) extractUpDirection  {
-	NSAssert1(NO, @"%@ does not implement the extractUpDirection method", self);
+	CC3Assert(NO, @"%@ does not implement the extractUpDirection method", self);
 	return kCC3VectorNull;
 }
 
 -(CC3Vector) extractRightDirection  {
-	NSAssert1(NO, @"%@ does not implement the extractRightDirection method", self);
+	CC3Assert(NO, @"%@ does not implement the extractRightDirection method", self);
 	return kCC3VectorNull;
 }
 
@@ -382,7 +382,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implRotateBy: (CC3Vector) aRotation {
-	NSAssert1(NO, @"%@ does not implement the implRotateBy: method", self);
+	CC3Assert(NO, @"%@ does not implement the implRotateBy: method", self);
 }
 
 // Short-circuit the identity transform. isRigid unchanged under rotation.
@@ -395,12 +395,12 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implRotateByQuaternion: (CC3Quaternion) aQuaternion {
-	NSAssert1(NO, @"%@ does not implement the implRotateByQuaternion: method", self);
+	CC3Assert(NO, @"%@ does not implement the implRotateByQuaternion: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) orthonormalizeRotationStartingWith: (NSUInteger) startColNum {
-	NSAssert1(NO, @"%@ does not implement the orthonormalizeRotationStartingWith: method", self);
+	CC3Assert(NO, @"%@ does not implement the orthonormalizeRotationStartingWith: method", self);
 }
 
 // Short-circuit the identity transform
@@ -414,7 +414,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implScaleBy: (CC3Vector) aScale {
-	NSAssert1(NO, @"%@ does not implement the implScaleBy: method", self);
+	CC3Assert(NO, @"%@ does not implement the implScaleBy: method", self);
 }
 
 // Short-circuit the identity transform. isRigid unchanged under translation.
@@ -427,7 +427,7 @@
 
 /** Template method. Subclasses will provide implementation. */
 -(void) implTranslateBy: (CC3Vector) aTranslation {
-	NSAssert1(NO, @"%@ does not implement the implTranslateBy: method", self);
+	CC3Assert(NO, @"%@ does not implement the implTranslateBy: method", self);
 }
 
 
@@ -459,37 +459,37 @@
  * Subclass implementation does not need to set isIdentity or isRigid.
  */
 -(void) implMultiplyBy: (CC3Matrix*) aMatrix {
-	NSAssert1(NO, @"%@ does not implement the implMultiplyBy: method", self);
+	CC3Assert(NO, @"%@ does not implement the implMultiplyBy: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyIntoCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyIntoCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyIntoCC3Matrix3x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyByCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyByCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyByCC3Matrix3x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyIntoCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyIntoCC3Matrix4x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyIntoCC3Matrix4x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyByCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyByCC3Matrix4x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyByCC3Matrix4x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyIntoCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyIntoCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyIntoCC3Matrix4x4: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) multiplyByCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the multiplyByCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the multiplyByCC3Matrix4x4: method", self);
 }
 
 // Includes short-circuits when one of the matrix is an identity matrix
@@ -518,37 +518,37 @@
  * Subclass implementation does not need to set isIdentity or isRigid.
  */
 -(void) implLeftMultiplyBy: (CC3Matrix*) aMatrix {
-	NSAssert1(NO, @"%@ does not implement the implLeftMultiplyBy: method", self);
+	CC3Assert(NO, @"%@ does not implement the implLeftMultiplyBy: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyIntoCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix3x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyByCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyByCC3Matrix3x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyByCC3Matrix3x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyIntoCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix4x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix4x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyByCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyByCC3Matrix4x3: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyByCC3Matrix4x3: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyIntoCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyIntoCC3Matrix4x4: method", self);
 }
 
 /** Template method. Subclasses will provide implementation. */
 -(void) leftMultiplyByCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	NSAssert1(NO, @"%@ does not implement the leftMultiplyByCC3Matrix4x4: method", self);
+	CC3Assert(NO, @"%@ does not implement the leftMultiplyByCC3Matrix4x4: method", self);
 }
 
 
@@ -557,21 +557,21 @@
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformLocation: (CC3Vector) aLocation {
 	if (isIdentity) return aLocation;
-	NSAssert1(NO, @"%@ does not implement the transformLocation: method", self);
+	CC3Assert(NO, @"%@ does not implement the transformLocation: method", self);
 	return kCC3VectorNull;
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformDirection: (CC3Vector) aDirection {
 	if (isIdentity) return aDirection;
-	NSAssert1(NO, @"%@ does not implement the transformDirection: method", self);
+	CC3Assert(NO, @"%@ does not implement the transformDirection: method", self);
 	return kCC3VectorNull;
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector {
 	if (isIdentity) return aVector;
-	NSAssert1(NO, @"%@ does not implement the transformHomogeneousVector: method", self);
+	CC3Assert(NO, @"%@ does not implement the transformHomogeneousVector: method", self);
 	return kCC3Vector4Null;
 }
 
@@ -587,7 +587,7 @@
 // Short-circuit if this is an identity matrix
 -(void) transpose {
 	if (isIdentity) return;
-	NSAssert1(NO, @"%@ does not implement the transpose method", self);
+	CC3Assert(NO, @"%@ does not implement the transpose method", self);
 }
 
 // Short-circuit if this is an identity or rigid matrix
@@ -603,14 +603,14 @@
 // Short-circuit if this is an identity or rigid matrix
 -(BOOL) invertAdjoint {
 	if (isIdentity) return YES;
-	NSAssert1(NO, @"%@ does not implement the invertAdjoint method", self);
+	CC3Assert(NO, @"%@ does not implement the invertAdjoint method", self);
 	return NO;
 }
 
 // Short-circuit if this is an identity matrix
 -(void) invertRigid {
 	if (isIdentity) return;
-	NSAssert1(NO, @"%@ does not implement the invertRigid method", self);
+	CC3Assert(NO, @"%@ does not implement the invertRigid method", self);
 }
 
 @end

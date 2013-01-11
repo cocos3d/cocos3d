@@ -359,7 +359,7 @@ typedef struct _FontDefHashElement {
 	NSError *error;
 	NSString *contents = [NSString stringWithContentsOfFile:fullpath encoding:NSUTF8StringEncoding error:&error];
 	
-	NSAssert1( contents, @"cocos2d: Error parsing FNTfile: %@", error);
+	CC3Assert( contents, @"cocos2d: Error parsing FNTfile: %@", error);
 	
 	// Move all lines in the string, which are denoted by \n, into an array
 	NSArray *lines = [[NSArray alloc] initWithArray:[contents componentsSeparatedByString:@"\n"]];
@@ -572,16 +572,16 @@ typedef struct _FontDefHashElement {
 	// scaleW
 	propertyValue = [nse nextObject];
 	textureSize.x = [propertyValue intValue];
-	NSAssert(textureSize.x <= [[CCConfiguration sharedConfiguration] maxTextureSize], @"CCLabelBMFont: page can't be larger than supported");
+	CC3Assert(textureSize.x <= [[CCConfiguration sharedConfiguration] maxTextureSize], @"CCLabelBMFont: page can't be larger than supported");
 	
 	// scaleH
 	propertyValue = [nse nextObject];
 	textureSize.y = [propertyValue intValue];
-	NSAssert(textureSize.y <= [[CCConfiguration sharedConfiguration] maxTextureSize], @"CCLabelBMFont: page can't be larger than supported");
+	CC3Assert(textureSize.y <= [[CCConfiguration sharedConfiguration] maxTextureSize], @"CCLabelBMFont: page can't be larger than supported");
 	
 	// pages. sanity check
 	propertyValue = [nse nextObject];
-	NSAssert( [propertyValue intValue] == 1, @"CCBitfontAtlas: only supports 1 page");
+	CC3Assert( [propertyValue intValue] == 1, @"CCBitfontAtlas: only supports 1 page");
 	
 	// packed (ignore) What does this mean ??
 }
@@ -597,7 +597,7 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 	fontConfig = [cc3BMFontConfigurations objectForKey: fontFile];
 	if(!fontConfig) {
 		fontConfig = [super configurationWithFNTFile: fontFile];
-		NSAssert(fontConfig, @"Font configuration cannot be nil");
+		CC3Assert(fontConfig, @"Font configuration cannot be nil");
 		[cc3BMFontConfigurations setObject: fontConfig forKey: fontFile];
 	}
 	return fontConfig;
@@ -635,7 +635,7 @@ static NSMutableDictionary* cc3BMFontConfigurations = nil;
 }
 
 -(void) fastReplaceObjectAtIndex: (NSUInteger) index withObject: (id) anObject {
-	NSAssert(index < data->num, @"Invalid index. Out of bounds");
+	CC3Assert(index < data->num, @"Invalid index. Out of bounds");
 
 	id oldObj = data->arr[index];
 	data->arr[index] = [anObject retain];
