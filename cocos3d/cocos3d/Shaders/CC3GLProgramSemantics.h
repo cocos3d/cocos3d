@@ -33,9 +33,6 @@
 @class CC3GLSLVariable, CC3GLSLUniform, CC3NodeDrawingVisitor;
 
 
-/** Maximum number of texture units permitted. */
-#define kCC3MaxTextureUnits		8
-
 #pragma mark Semantic enumerations
 
 /**
@@ -93,7 +90,7 @@ typedef enum {
 	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInv,			/**< Inverse of current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
-	
+
 	// CAMERA -----------------
 	kCC3SemanticCameraLocationGlobal,			/**< Location of the camera in global coordinates. */
 	kCC3SemanticCameraLocationModelSpace,		/**< Location of the camera in local coordinates of model (not camera). */

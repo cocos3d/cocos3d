@@ -90,13 +90,7 @@ typedef union {
 } CC3Matrix4x3;
 
 /** Returns a string description of the specified CC3Matrix4x3, including contents. */
-static inline NSString* NSStringFromCC3Matrix4x3(CC3Matrix4x3* mtxPtr) {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"\n\t[%.6f, %.6f, %.6f, %.6f", mtxPtr->c1r1, mtxPtr->c2r1, mtxPtr->c3r1, mtxPtr->c4r1];
-	[desc appendFormat: @"\n\t %.6f, %.6f, %.6f, %.6f", mtxPtr->c1r2, mtxPtr->c2r2, mtxPtr->c3r2, mtxPtr->c4r2];
-	[desc appendFormat: @"\n\t %.6f, %.6f, %.6f, %.6f]", mtxPtr->c1r3, mtxPtr->c2r3, mtxPtr->c3r3, mtxPtr->c4r3];
-	return desc;
-}
+NSString* NSStringFromCC3Matrix4x3(CC3Matrix4x3* mtxPtr);
 
 
 #pragma mark Heterogeneous matrix population
@@ -231,63 +225,24 @@ static inline void CC3Matrix4x3PopulateFromTranslation(CC3Matrix4x3* mtx, const 
  * Populates the specified matrix as a orthographic projection matrix with the specified
  * frustum dimensions.
  */
-static inline void CC3Matrix4x3PopulateOrthoFrustum(CC3Matrix4x3* mtx,
-													const GLfloat left,
-													const GLfloat right,
-													const GLfloat top,
-													const GLfloat bottom,
-													const GLfloat near,
-													const GLfloat far) {
-	GLfloat ooWidth = 1.0f / (right - left);
-	GLfloat ooHeight = 1.0f / (top - bottom);
-	GLfloat ooDepth = 1.0f / (far - near);
-	
-	mtx->c1r1 = 2.0f * ooWidth;
-	mtx->c1r2 = 0.0f;
-	mtx->c1r3 = 0.0f;
-	
-	mtx->c2r1 = 0.0f;
-	mtx->c2r2 = 2.0f * ooHeight;
-	mtx->c2r3 = 0.0f;
-	
-	mtx->c3r1 = 0.0f;
-	mtx->c3r2 = 0.0f;
-	mtx->c3r3 = -2.0f * ooDepth;
-	
-	mtx->c4r1 = -(right + left) * ooWidth;
-	mtx->c4r2 = -(top + bottom) * ooHeight;
-	mtx->c4r3 = -(far + near) * ooDepth;
-}
+void CC3Matrix4x3PopulateOrthoFrustum(CC3Matrix4x3* mtx,
+									  const GLfloat left,
+									  const GLfloat right,
+									  const GLfloat top,
+									  const GLfloat bottom,
+									  const GLfloat near,
+									  const GLfloat far);
 
 /**
  * Populates the specified matrix as an infinite-depth orthographic projection matrix with the
  * specified frustum dimensions, where the far clipping plane is set at an infinite distance.
  */
-static inline void CC3Matrix4x3PopulateInfiniteOrthoFrustum(CC3Matrix4x3* mtx,
-															const GLfloat left,
-															const GLfloat right,
-															const GLfloat top,
-															const GLfloat bottom,
-															const GLfloat near) {
-	GLfloat ooWidth = 1.0f / (right - left);
-	GLfloat ooHeight = 1.0f / (top - bottom);
-	
-	mtx->c1r1 = 2.0f * ooWidth;
-	mtx->c1r2 = 0.0f;
-	mtx->c1r3 = 0.0f;
-	
-	mtx->c2r1 = 0.0f;
-	mtx->c2r2 = 2.0f * ooHeight;
-	mtx->c2r3 = 0.0f;
-	
-	mtx->c3r1 = 0.0f;
-	mtx->c3r2 = 0.0f;
-	mtx->c3r3 = 0.0f;
-	
-	mtx->c4r1 = -(right + left) * ooWidth;
-	mtx->c4r2 = -(top + bottom) * ooHeight;
-	mtx->c4r3 = -1.0f;
-}
+void CC3Matrix4x3PopulateInfiniteOrthoFrustum(CC3Matrix4x3* mtx,
+											  const GLfloat left,
+											  const GLfloat right,
+											  const GLfloat top,
+											  const GLfloat bottom,
+											  const GLfloat near);
 
 
 #pragma mark Accessing vector content
@@ -398,24 +353,7 @@ static inline CC3Vector CC3Matrix4x3ExtractRightDirection(const CC3Matrix4x3* mt
 #pragma mark Matrix transformations
 
 /** Multiplies mL on the left by mR on the right, and stores the result in mOut. */
-static inline void CC3Matrix4x3Multiply(CC3Matrix4x3* mOut, const CC3Matrix4x3* mL, const CC3Matrix4x3* mR) {
-	
-	mOut->c1r1 = (mL->c1r1 * mR->c1r1) + (mL->c2r1 * mR->c1r2) + (mL->c3r1 * mR->c1r3);
-	mOut->c1r2 = (mL->c1r2 * mR->c1r1) + (mL->c2r2 * mR->c1r2) + (mL->c3r2 * mR->c1r3);
-	mOut->c1r3 = (mL->c1r3 * mR->c1r1) + (mL->c2r3 * mR->c1r2) + (mL->c3r3 * mR->c1r3);
-	
-	mOut->c2r1 = (mL->c1r1 * mR->c2r1) + (mL->c2r1 * mR->c2r2) + (mL->c3r1 * mR->c2r3);
-	mOut->c2r2 = (mL->c1r2 * mR->c2r1) + (mL->c2r2 * mR->c2r2) + (mL->c3r2 * mR->c2r3);
-	mOut->c2r3 = (mL->c1r3 * mR->c2r1) + (mL->c2r3 * mR->c2r2) + (mL->c3r3 * mR->c2r3);
-	
-	mOut->c3r1 = (mL->c1r1 * mR->c3r1) + (mL->c2r1 * mR->c3r2) + (mL->c3r1 * mR->c3r3);
-	mOut->c3r2 = (mL->c1r2 * mR->c3r1) + (mL->c2r2 * mR->c3r2) + (mL->c3r2 * mR->c3r3);
-	mOut->c3r3 = (mL->c1r3 * mR->c3r1) + (mL->c2r3 * mR->c3r2) + (mL->c3r3 * mR->c3r3);
-	
-	mOut->c4r1 = (mL->c1r1 * mR->c4r1) + (mL->c2r1 * mR->c4r2) + (mL->c3r1 * mR->c4r3) + mL->c4r1;
-	mOut->c4r2 = (mL->c1r2 * mR->c4r1) + (mL->c2r2 * mR->c4r2) + (mL->c3r2 * mR->c4r3) + mL->c4r2;
-	mOut->c4r3 = (mL->c1r3 * mR->c4r1) + (mL->c2r3 * mR->c4r2) + (mL->c3r3 * mR->c4r3) + mL->c4r3;
-}
+void CC3Matrix4x3Multiply(CC3Matrix4x3* mOut, const CC3Matrix4x3* mL, const CC3Matrix4x3* mR);
 
 /**
  * Rotates the specified matrix by the specified Euler angles in degrees. Rotation is performed
@@ -498,14 +436,7 @@ static inline void CC3Matrix4x3TranslateBy(CC3Matrix4x3* mtx, CC3Vector aTransla
  *
  * The specified matrix and the original specified vector remain unchanged.
  */
-static inline CC3Vector4 CC3Matrix4x3TransformCC3Vector4(const CC3Matrix4x3* mtx, CC3Vector4 v) {
-	CC3Vector4 vOut;
-	vOut.x = (mtx->c1r1 * v.x) + (mtx->c2r1 * v.y) + (mtx->c3r1 * v.z) + (mtx->c4r1 * v.w);
-	vOut.y = (mtx->c1r2 * v.x) + (mtx->c2r2 * v.y) + (mtx->c3r2 * v.z) + (mtx->c4r2 * v.w);
-	vOut.z = (mtx->c1r3 * v.x) + (mtx->c2r3 * v.y) + (mtx->c3r3 * v.z) + (mtx->c4r3 * v.w);
-	vOut.w = v.w;
-	return vOut;
-}
+CC3Vector4 CC3Matrix4x3TransformCC3Vector4(const CC3Matrix4x3* mtx, CC3Vector4 v);
 
 /**
  * Orthonormalizes the rotation component of the specified matrix, using a Gram-Schmidt process,

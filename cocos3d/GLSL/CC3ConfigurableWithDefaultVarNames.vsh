@@ -118,9 +118,9 @@ struct Point {
 //-------------- UNIFORMS ----------------------
 
 // Environment matrices
-uniform mat4 u_cc3MtxMV;						/**< Current modelview matrix. */
-uniform mat3 u_cc3MtxMVIT;						/**< Inverse-transpose of current modelview rotation matrix. */
-uniform highp mat4 u_cc3MtxMVP;					/**< Current modelview-projection matrix. */
+uniform mat4 u_cc3MtxModelView;						/**< Current modelview matrix. */
+uniform mat3 u_cc3MtxModelViewInvTran;						/**< Inverse-transpose of current modelview rotation matrix. */
+uniform highp mat4 u_cc3MtxModelViewProj;					/**< Current modelview-projection matrix. */
 
 // Material properties
 uniform vec4 u_cc3Color;						/**< Color when lighting & materials are not in use. */
@@ -172,7 +172,7 @@ vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or 
 highp vec3 vertexPositionInEyeSpace() {
 	if((u_cc3IsUsingLighting && u_cc3HasVertexNormal) ||
 	   (u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone))
-		return (u_cc3MtxMV * a_cc3Position).xyz;
+		return (u_cc3MtxModelView * a_cc3Position).xyz;
 	else
 		return kVec3Zero;
 }
@@ -272,7 +272,7 @@ void main() {
 	// Material & lighting
 	if (u_cc3IsUsingLighting && u_cc3HasVertexNormal) {
 		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
-		vtxNormal = u_cc3MtxMVIT * a_cc3Normal;
+		vtxNormal = u_cc3MtxModelViewInvTran * a_cc3Normal;
 		if (u_cc3ShouldRescaleNormal) vtxNormal = normalize(vtxNormal);	// TODO - rescale without having to normalize
 		if (u_cc3ShouldNormalizeNormal) vtxNormal = normalize(vtxNormal);
 
@@ -287,7 +287,7 @@ void main() {
 //	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
 //	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
 	
-	gl_Position = u_cc3MtxMVP * a_cc3Position;
+	gl_Position = u_cc3MtxModelViewProj * a_cc3Position;
 	
 	gl_PointSize = pointSize();
 }

@@ -32,11 +32,11 @@
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
 	#import "CC3OpenGLESFoundation.h"
+	#import "CC3Matrix4x4.h"
 }
 #import "CC3PVRFoundation.h"
 #import "CC3PVRTModelPOD.h"
 #import "CC3PVRTPFXParser.h"
-#import "CC3Matrix4x4.h"
 
 
 NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {

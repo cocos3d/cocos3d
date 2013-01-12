@@ -33,6 +33,47 @@
 #import "CC3OpenGLESStateTracker.h"
 #import "CC3Matrix4x4.h"
 
+/**
+ * Type types of matrices available for retrieval from this state tracker.
+ *
+ * These semantics map to equivalent semantics in CC3Semantics, but are redefined here in
+ * order to create an enumeration that is guaranteed to start at zero and be consecutive,
+ * so that they can be used to index into a matrix cache.
+ */
+typedef enum {
+	kCC3MatrixSemanticModelLocal = 0,			/**< Current model-to-parent matrix. */
+	kCC3MatrixSemanticModelLocalInv,			/**< Inverse of current model-to-parent matrix. */
+	kCC3MatrixSemanticModelLocalInvTran,		/**< Inverse-transpose of current model-to-parent matrix. */
+	kCC3MatrixSemanticModel,					/**< Current model-to-world matrix. */
+	kCC3MatrixSemanticModelInv,					/**< Inverse of current model-to-world matrix. */
+	kCC3MatrixSemanticModelInvTran,				/**< Inverse-transpose of current model-to-world matrix. */
+	kCC3MatrixSemanticView,						/**< Camera view matrix. */
+	kCC3MatrixSemanticViewInv,					/**< Inverse of camera view matrix. */
+	kCC3MatrixSemanticViewInvTran,				/**< Inverse-transpose of camera view matrix. */
+	kCC3MatrixSemanticModelView,				/**< Current modelview matrix. */
+	kCC3MatrixSemanticModelViewInv,				/**< Inverse of current modelview matrix. */
+	kCC3MatrixSemanticModelViewInvTran,			/**< Inverse-transpose of current modelview matrix. */
+	kCC3MatrixSemanticProj,						/**< Camera projection matrix. */
+	kCC3MatrixSemanticProjInv,					/**< Inverse of camera projection matrix. */
+	kCC3MatrixSemanticProjInvTran,				/**< Inverse-transpose of camera projection matrix. */
+	kCC3MatrixSemanticViewProj,					/**< Camera view and projection matrix. */
+	kCC3MatrixSemanticViewProjInv,				/**< Inverse of camera view and projection matrix. */
+	kCC3MatrixSemanticViewProjInvTran,			/**< Inverse-transpose of camera view and projection matrix. */
+	kCC3MatrixSemanticModelViewProj,			/**< Current modelview-projection matrix. */
+	kCC3MatrixSemanticModelViewProjInv,			/**< Inverse of current modelview-projection matrix. */
+	kCC3MatrixSemanticModelViewProjInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
+	kCC3MatrixSemanticCount						/**< Number of matrix semantics. */
+} CC3MatrixSemantic;
+
+/** Returns a string representation of the specified semantic. */
+NSString* NSStringFromCC3MatrixSemantic(CC3MatrixSemantic semantic);
+
+/** Returns whether the specified matrix semantic represents a 3x3 matrix. */
+BOOL CC3MatrixSemanticIs3x3(CC3MatrixSemantic semantic);
+
+/** Returns whether the specified matrix semantic represents a 4x4 matrix. */
+BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
+
 
 #pragma mark -
 #pragma mark CC3OpenGLESMatrixStack
@@ -169,19 +210,18 @@
 /** Callback invoked when the specified stack has changed. */
 -(void) stackChanged: (CC3OpenGLESMatrixStack*) stack;
 
-/** Returns a pointer to the current view matrix. */
--(CC3Matrix4x4*) viewMatrix;
+/**
+ * Returns a pointer to a 3x3 matrix associated with the specified CC3Semantic.
+ *
+ * The inverse transform matrices are 3x3 matrices. All others are 4x4.
+ */
+-(CC3Matrix3x3*) matrix3x3ForSemantic: (CC3MatrixSemantic) semantic;
 
-/** Returns a pointer to the current model-view matrix. */
--(CC3Matrix4x4*) modelViewMatrix;
-
-/** Returns a pointer to the inverse-transpose of the current model-view matrix. */
--(CC3Matrix3x3*) modelViewInverseTransposeMatrix;
-
-/** Returns a pointer to the current projection matrix. */
--(CC3Matrix4x4*) projectionMatrix;
-
-/** Returns a pointer to the current model-view projection matrix. */
--(CC3Matrix4x4*) modelViewProjectionMatrix;
+/**
+ * Returns a pointer to a 4x4 matrix associated with the specified CC3Semantic.
+ *
+ * The inverse transform matrices are 3x3 matrices. All others are 4x4.
+ */
+-(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic;
 
 @end

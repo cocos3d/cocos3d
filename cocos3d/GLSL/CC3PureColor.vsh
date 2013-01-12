@@ -61,8 +61,8 @@ struct Point {
 
 //-------------- UNIFORMS & VERTEX ATTRIBUTES ----------------------
 
-uniform mat4 u_cc3MtxMV;						/**< Current modelview matrix. */
-uniform highp mat4 u_cc3MtxMVP;					/**< Current modelview-projection matrix. */
+uniform mat4 u_cc3MtxModelView;						/**< Current modelview matrix. */
+uniform highp mat4 u_cc3MtxModelViewProj;					/**< Current modelview-projection matrix. */
 uniform Point u_cc3Points;						/**< Point parameters. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
@@ -82,7 +82,7 @@ highp vec3 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High
 /** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
 highp vec3 vertexPositionInEyeSpace() {
 	if(u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone)
-		return (u_cc3MtxMV * a_cc3Position).xyz;
+		return (u_cc3MtxModelView * a_cc3Position).xyz;
 	else
 		return vec3(0.0, 0.0, 0.0);
 }
@@ -113,7 +113,7 @@ void main() {
 	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
 	vtxPosEye = vertexPositionInEyeSpace();
 
-	gl_Position = u_cc3MtxMVP * a_cc3Position;
+	gl_Position = u_cc3MtxModelViewProj * a_cc3Position;
 	
 	gl_PointSize = pointSize();
 }

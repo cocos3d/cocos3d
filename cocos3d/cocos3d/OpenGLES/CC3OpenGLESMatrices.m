@@ -33,6 +33,53 @@
 #import "CC3OpenGLESEngine.h"
 
 
+NSString* NSStringFromCC3MatrixSemantic(CC3MatrixSemantic semantic) {
+	switch (semantic) {
+		case kCC3MatrixSemanticModelLocal: return @"kCC3MatrixSemanticModelLocal";
+		case kCC3MatrixSemanticModelLocalInv: return @"kCC3MatrixSemanticModelLocalInv";
+		case kCC3MatrixSemanticModelLocalInvTran: return @"kCC3MatrixSemanticModelLocalInvTran";
+		case kCC3MatrixSemanticModel: return @"kCC3MatrixSemanticModel";
+		case kCC3MatrixSemanticModelInv: return @"kCC3MatrixSemanticModelInv";
+		case kCC3MatrixSemanticModelInvTran: return @"kCC3MatrixSemanticModelInvTran";
+		case kCC3MatrixSemanticView: return @"kCC3MatrixSemanticView";
+		case kCC3MatrixSemanticViewInv: return @"kCC3MatrixSemanticViewInv";
+		case kCC3MatrixSemanticViewInvTran: return @"kCC3MatrixSemanticViewInvTran";
+		case kCC3MatrixSemanticModelView: return @"kCC3MatrixSemanticModelView";
+		case kCC3MatrixSemanticModelViewInv: return @"kCC3MatrixSemanticModelViewInv";
+		case kCC3MatrixSemanticModelViewInvTran: return @"kCC3MatrixSemanticModelViewInvTran";
+		case kCC3MatrixSemanticProj: return @"kCC3MatrixSemanticProj";
+		case kCC3MatrixSemanticProjInv: return @"kCC3MatrixSemanticProjInv";
+		case kCC3MatrixSemanticProjInvTran: return @"kCC3MatrixSemanticProjInvTran";
+		case kCC3MatrixSemanticViewProj: return @"kCC3MatrixSemanticViewProj";
+		case kCC3MatrixSemanticViewProjInv: return @"kCC3MatrixSemanticViewProjInv";
+		case kCC3MatrixSemanticViewProjInvTran: return @"kCC3MatrixSemanticViewProjInvTran";
+		case kCC3MatrixSemanticModelViewProj: return @"kCC3MatrixSemanticModelViewProj";
+		case kCC3MatrixSemanticModelViewProjInv: return @"kCC3MatrixSemanticModelViewProjInv";
+		case kCC3MatrixSemanticModelViewProjInvTran: return @"kCC3MatrixSemanticModelViewProjInvTran";
+
+		case kCC3MatrixSemanticCount: return @"kCC3MatrixSemanticCount";
+		default: return [NSString stringWithFormat: @"Unknown matrix semantic (%u)", semantic];
+	}
+}
+
+BOOL CC3MatrixSemanticIs3x3(CC3MatrixSemantic semantic) {
+	switch (semantic) {
+		case kCC3MatrixSemanticModelLocalInvTran:
+		case kCC3MatrixSemanticModelInvTran:
+		case kCC3MatrixSemanticViewInvTran:
+		case kCC3MatrixSemanticModelViewInvTran:
+		case kCC3MatrixSemanticProjInvTran:
+		case kCC3MatrixSemanticViewProjInvTran:
+		case kCC3MatrixSemanticModelViewProjInvTran:
+			return YES;
+		default:
+			return NO;
+	}
+}
+
+BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) { return !CC3MatrixSemanticIs3x3(semantic); }
+
+
 #pragma mark -
 #pragma mark CC3OpenGLESMatrixStack
 
@@ -131,14 +178,8 @@
 
 -(void) stackChanged: (CC3OpenGLESMatrixStack*) stack {}
 
--(CC3Matrix4x4*) viewMatrix { return NULL; }
+-(CC3Matrix3x3*) matrix3x3ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
 
--(CC3Matrix4x4*) modelViewMatrix { return NULL; }
-
--(CC3Matrix3x3*) modelViewInverseTransposeMatrix { return NULL; }
-
--(CC3Matrix4x4*) projectionMatrix { return NULL; }
-
--(CC3Matrix4x4*) modelViewProjectionMatrix { return NULL; }
+-(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
 
 @end
