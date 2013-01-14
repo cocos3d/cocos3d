@@ -293,27 +293,16 @@
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformLocation: (CC3Vector) v {
 	if (isIdentity) return v;
-
-	CC3Vector vOut;
-	vOut.x = (contents.c1r1 * v.x) + (contents.c2r1 * v.y) + (contents.c3r1 * v.z) + contents.c4r1;
-	vOut.y = (contents.c1r2 * v.x) + (contents.c2r2 * v.y) + (contents.c3r2 * v.z) + contents.c4r2;
-	vOut.z = (contents.c1r3 * v.x) + (contents.c2r3 * v.y) + (contents.c3r3 * v.z) + contents.c4r3;
-	return vOut;
+	return CC3Matrix4x4TransformLocation(&contents, v);
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformDirection: (CC3Vector) v {
 	if (isIdentity) return v;
-	
-	CC3Vector vOut;
-	vOut.x = (contents.c1r1 * v.x) + (contents.c2r1 * v.y) + (contents.c3r1 * v.z);
-	vOut.y = (contents.c1r2 * v.x) + (contents.c2r2 * v.y) + (contents.c3r2 * v.z);
-	vOut.z = (contents.c1r3 * v.x) + (contents.c2r3 * v.y) + (contents.c3r3 * v.z);
-	return vOut;
+	return CC3Matrix4x4TransformDirection(&contents, v);
 }
 
 // Short-circuit if this is an identity matrix
-// Convert to 3D vector, transform, and then tag the W components on
 -(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector {
 	if (isIdentity) return aVector;
 	return CC3Matrix4x4TransformCC3Vector4(&contents, aVector);

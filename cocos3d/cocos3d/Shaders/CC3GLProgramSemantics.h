@@ -50,136 +50,137 @@ typedef enum {
 	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
 
 	// VERTEX CONTENT --------------
-	kCC3SemanticVertexLocations,				/**< Vertex locations. */
-	kCC3SemanticVertexNormals,					/**< Vertex normals. */
-	kCC3SemanticVertexTangents,					/**< Vertex tangents. */
-	kCC3SemanticVertexBitangents,				/**< Vertex bitangents (aka binormals). */
-	kCC3SemanticVertexColors,					/**< Vertex colors. */
-	kCC3SemanticVertexPointSizes,				/**< Vertex point sizes. */
-	kCC3SemanticVertexWeights,					/**< Vertex skinning weights. */
-	kCC3SemanticVertexMatrices,					/**< Vertex skinning matrices. */
-	kCC3SemanticVertexTexture,					/**< Vertex texture coordinates for one texture unit. */
+	kCC3SemanticVertexLocations,				/**< Vertex location. */
+	kCC3SemanticVertexNormals,					/**< Vertex normal. */
+	kCC3SemanticVertexTangents,					/**< Vertex tangent. */
+	kCC3SemanticVertexBitangents,				/**< Vertex bitangent (aka binormals). */
+	kCC3SemanticVertexColors,					/**< Vertex color. */
+	kCC3SemanticVertexWeights,					/**< Vertex skinning weight. */
+	kCC3SemanticVertexMatrices,					/**< Vertex skinning matrice. */
+	kCC3SemanticVertexPointSizes,				/**< Vertex point size. */
+	kCC3SemanticVertexTexture,					/**< Vertex texture coordinate for one texture unit. */
 	
-	kCC3SemanticHasVertexNormal,				/**< Whether the vertex normal is available. */
-	kCC3SemanticShouldNormalizeVertexNormal,	/**< Whether vertex normals should be normalized. */
-	kCC3SemanticShouldRescaleVertexNormal,		/**< Whether vertex normals should be rescaled. */
-	kCC3SemanticHasVertexColor,					/**< Whether the vertex color is available. */
-	kCC3SemanticHasVertexTextureCoordinate,		/**< Whether the vertex texture coordinate is available. */
-	kCC3SemanticHasVertexPointSize,				/**< Whether the vertex point size is available. */
-	kCC3SemanticIsDrawingPoints,				/**< Whether the vertices are being drawn as points. */
+	kCC3SemanticHasVertexNormal,				/**< (bool) Whether the vertex normal is available. */
+	kCC3SemanticShouldNormalizeVertexNormal,	/**< (bool) Whether vertex normals should be normalized. */
+	kCC3SemanticShouldRescaleVertexNormal,		/**< (bool) Whether vertex normals should be rescaled. */
+	kCC3SemanticHasVertexColor,					/**< (bool) Whether the vertex color is available. */
+	kCC3SemanticHasVertexTextureCoordinate,		/**< (bool) Whether the vertex texture coordinate is available. */
+	kCC3SemanticHasVertexPointSize,				/**< (bool) Whether the vertex point size is available. */
+	kCC3SemanticIsDrawingPoints,				/**< (bool) Whether the vertices are being drawn as points. */
 	
 	// ENVIRONMENT MATRICES --------------
-	kCC3SemanticModelLocalMatrix,				/**< Current model-to-parent matrix. */
-	kCC3SemanticModelLocalMatrixInv,			/**< Inverse of current model-to-parent matrix. */
-	kCC3SemanticModelLocalMatrixInvTran,		/**< Inverse-transpose of current model-to-parent matrix. */
-	kCC3SemanticModelMatrix,					/**< Current model-to-world matrix. */
-	kCC3SemanticModelMatrixInv,					/**< Inverse of current model-to-world matrix. */
-	kCC3SemanticModelMatrixInvTran,				/**< Inverse-transpose of current model-to-world matrix. */
-	kCC3SemanticViewMatrix,						/**< Camera view matrix. */
-	kCC3SemanticViewMatrixInv,					/**< Inverse of camera view matrix. */
-	kCC3SemanticViewMatrixInvTran,				/**< Inverse-transpose of camera view matrix. */
-	kCC3SemanticModelViewMatrix,				/**< Current modelview matrix. */
-	kCC3SemanticModelViewMatrixInv,				/**< Inverse of current modelview matrix. */
-	kCC3SemanticModelViewMatrixInvTran,			/**< Inverse-transpose of current modelview matrix. */
-	kCC3SemanticProjMatrix,						/**< Camera projection matrix. */
-	kCC3SemanticProjMatrixInv,					/**< Inverse of camera projection matrix. */
-	kCC3SemanticProjMatrixInvTran,				/**< Inverse-transpose of camera projection matrix. */
-	kCC3SemanticViewProjMatrix,					/**< Camera view and projection matrix. */
-	kCC3SemanticViewProjMatrixInv,				/**< Inverse of camera view and projection matrix. */
-	kCC3SemanticViewProjMatrixInvTran,			/**< Inverse-transpose of camera view and projection matrix. */
-	kCC3SemanticModelViewProjMatrix,			/**< Current modelview-projection matrix. */
-	kCC3SemanticModelViewProjMatrixInv,			/**< Inverse of current modelview-projection matrix. */
-	kCC3SemanticModelViewProjMatrixInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
+	kCC3SemanticModelLocalMatrix,				/**< (mat4) Current model-to-parent matrix. */
+	kCC3SemanticModelLocalMatrixInv,			/**< (mat4) Inverse of current model-to-parent matrix. */
+	kCC3SemanticModelLocalMatrixInvTran,		/**< (mat3) Inverse-transpose of current model-to-parent matrix. */
+
+	kCC3SemanticModelMatrix,					/**< (mat4) Current model-to-world matrix. */
+	kCC3SemanticModelMatrixInv,					/**< (mat4) Inverse of current model-to-world matrix. */
+	kCC3SemanticModelMatrixInvTran,				/**< (mat3) Inverse-transpose of current model-to-world matrix. */
+
+	kCC3SemanticViewMatrix,						/**< (mat4) Camera view matrix. */
+	kCC3SemanticViewMatrixInv,					/**< (mat4) Inverse of camera view matrix. */
+	kCC3SemanticViewMatrixInvTran,				/**< (mat3) Inverse-transpose of camera view matrix. */
+
+	kCC3SemanticModelViewMatrix,				/**< (mat4) Current modelview matrix. */
+	kCC3SemanticModelViewMatrixInv,				/**< (mat4) Inverse of current modelview matrix. */
+	kCC3SemanticModelViewMatrixInvTran,			/**< (mat3) Inverse-transpose of current modelview matrix. */
+
+	kCC3SemanticProjMatrix,						/**< (mat4) Camera projection matrix. */
+	kCC3SemanticProjMatrixInv,					/**< (mat4) Inverse of camera projection matrix. */
+	kCC3SemanticProjMatrixInvTran,				/**< (mat3) Inverse-transpose of camera projection matrix. */
+
+	kCC3SemanticViewProjMatrix,					/**< (mat4) Camera view and projection matrix. */
+	kCC3SemanticViewProjMatrixInv,				/**< (mat4) Inverse of camera view and projection matrix. */
+	kCC3SemanticViewProjMatrixInvTran,			/**< (mat3) Inverse-transpose of camera view and projection matrix. */
+
+	kCC3SemanticModelViewProjMatrix,			/**< (mat4) Current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInv,			/**< (mat4) Inverse of current modelview-projection matrix. */
+	kCC3SemanticModelViewProjMatrixInvTran,		/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
 
 	// CAMERA -----------------
-	kCC3SemanticCameraLocationGlobal,			/**< Location of the camera in global coordinates. */
-	kCC3SemanticCameraLocationModelSpace,		/**< Location of the camera in local coordinates of model (not camera). */
+	kCC3SemanticCameraLocationGlobal,			/**< (vec3) Location of the camera in global coordinates. */
+	kCC3SemanticCameraLocationModelSpace,		/**< (vec3) Location of the camera in local coordinates of model (not camera). */
+	kCC3SemanticCameraFrustum,					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
+	kCC3SemanticViewport,						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
-	kCC3SemanticColor,							/**< Color when lighting & materials are not in use. */
-	kCC3SemanticMaterialColorAmbient,			/**< Ambient color of the material. */
-	kCC3SemanticMaterialColorDiffuse,			/**< Diffuse color of the material. */
-	kCC3SemanticMaterialColorSpecular,			/**< Specular color of the material. */
-	kCC3SemanticMaterialColorEmission,			/**< Emission color of the material. */
-	kCC3SemanticMaterialOpacity,				/**< Opacity of the material. */
-	kCC3SemanticMaterialShininess,				/**< Shininess of the material. */
-	kCC3SemanticMinimumDrawnAlpha,				/**< Minimum alpha value to be drawn, otherwise will be discarded. */
+	kCC3SemanticColor,							/**< (vec4) Color when lighting & materials are not in use. */
+	kCC3SemanticMaterialColorAmbient,			/**< (vec4) Ambient color of the material. */
+	kCC3SemanticMaterialColorDiffuse,			/**< (vec4) Diffuse color of the material. */
+	kCC3SemanticMaterialColorSpecular,			/**< (vec4) Specular color of the material. */
+	kCC3SemanticMaterialColorEmission,			/**< (vec4) Emission color of the material. */
+	kCC3SemanticMaterialOpacity,				/**< (float) Opacity of the material. */
+	kCC3SemanticMaterialShininess,				/**< (float) Shininess of the material. */
+	kCC3SemanticMinimumDrawnAlpha,				/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
 
 	// LIGHTING
-	kCC3SemanticIsUsingLighting,				/**< Whether any lighting is enabled. */
-	kCC3SemanticSceneLightColorAmbient,			/**< Ambient light color of the scene. */
+	kCC3SemanticIsUsingLighting,				/**< (bool) Whether any lighting is enabled. */
+	kCC3SemanticSceneLightColorAmbient,			/**< (vec4) Ambient light color of the scene. */
 
-	kCC3SemanticLightIsEnabled,					/**< Whether a light is enabled. */
-	kCC3SemanticLightLocationGlobal,			/**< Location of a light in global coordinates. */
-	kCC3SemanticLightLocationEyeSpace,			/**< Location of a light in eye space. */
-	kCC3SemanticLightLocationModelSpace,		/**< Location of a light in local coordinates of model (not light). */
-	kCC3SemanticLightColorAmbient,				/**< Ambient color of a light. */
-	kCC3SemanticLightColorDiffuse,				/**< Diffuse color of a light. */
-	kCC3SemanticLightColorSpecular,				/**< Specular color of the light. */
-	kCC3SemanticLightAttenuation,				/**< Distance attenuation coefficients for a light. */
-	kCC3SemanticLightSpotDirectionGlobal,		/**< Direction of a spotlight in global coordinates. */
-	kCC3SemanticLightSpotDirectionEyeSpace,		/**< Direction of a spotlight in eye space. */
-	kCC3SemanticLightSpotDirectionModelSpace,	/**< Direction of a spotlight in local coordinates of the model (not light). */
-	kCC3SemanticLightSpotExponent,				/**< Fade-off exponent of a spotlight. */
-	kCC3SemanticLightSpotCutoffAngle,			/**< Cutoff angle of a spotlight. */
-	kCC3SemanticLightSpotCutoffAngleCosine,		/**< Cosine of cutoff angle of a spotlight. */
+	kCC3SemanticLightIsEnabled,					/**< (bool) Whether a light is enabled. */
+	kCC3SemanticLightLocationGlobal,			/**< (vec4) Location of a light in global coordinates. */
+	kCC3SemanticLightLocationEyeSpace,			/**< (vec4) Location of a light in eye space. */
+	kCC3SemanticLightLocationModelSpace,		/**< (vec4) Location of a light in local coordinates of model (not light). */
+	kCC3SemanticLightColorAmbient,				/**< (vec4) Ambient color of a light. */
+	kCC3SemanticLightColorDiffuse,				/**< (vec4) Diffuse color of a light. */
+	kCC3SemanticLightColorSpecular,				/**< (vec4) Specular color of a light. */
+	kCC3SemanticLightAttenuation,				/**< (vec3) Distance attenuation coefficients for a light. */
+	kCC3SemanticLightSpotDirectionGlobal,		/**< (vec3) Direction of a spotlight in global coordinates. */
+	kCC3SemanticLightSpotDirectionEyeSpace,		/**< (vec3) Direction of a spotlight in eye space. */
+	kCC3SemanticLightSpotDirectionModelSpace,	/**< (vec3) Direction of a spotlight in local coordinates of the model (not light). */
+	kCC3SemanticLightSpotExponent,				/**< (float) Fade-off exponent of a spotlight. */
+	kCC3SemanticLightSpotCutoffAngle,			/**< (float) Cutoff angle of a spotlight. */
+	kCC3SemanticLightSpotCutoffAngleCosine,		/**< (float) Cosine of cutoff angle of a spotlight. */
 
 	// TEXTURES
-	kCC3SemanticTextureCount,					/**< Number of active textures. */
-	kCC3SemanticTextureSampler,					/**< Texture sampler. */
+	kCC3SemanticTextureCount,					/**< (int) Number of active textures. */
+	kCC3SemanticTextureSampler,					/**< (sampler2D) Texture sampler. */
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	kCC3SemanticTexUnitMode,					/**< Environment mode of a texture unit. */
-	kCC3SemanticTexUnitConstantColor,			/**< The constant color of a texture unit. */
-	kCC3SemanticTexUnitCombineRGBFunction,		/**< RBG combiner function of a texture unit. */
-	kCC3SemanticTexUnitSource0RGB,				/**< The RGB of source 0 of a texture unit. */
-	kCC3SemanticTexUnitSource1RGB,				/**< The RGB source 1 of a texture unit. */
-	kCC3SemanticTexUnitSource2RGB,				/**< The RGB source 2 of a texture unit. */
-	kCC3SemanticTexUnitOperand0RGB,				/**< The RGB combining operand of source 0 of a texture unit. */
-	kCC3SemanticTexUnitOperand1RGB,				/**< The RGB combining operand of source 1 of a texture unit. */
-	kCC3SemanticTexUnitOperand2RGB,				/**< The RGB combining operand of source 2 of a texture unit. */
-	kCC3SemanticTexUnitCombineAlphaFunction,	/**< Alpha combiner function of a texture unit. */
-	kCC3SemanticTexUnitSource0Alpha,			/**< The alpha of source 0 of a texture unit. */
-	kCC3SemanticTexUnitSource1Alpha,			/**< The alpha of source 1 of a texture unit. */
-	kCC3SemanticTexUnitSource2Alpha,			/**< The alpha of source 2 of a texture unit. */
-	kCC3SemanticTexUnitOperand0Alpha,			/**< The alpha combining operand of source 0 of a texture unit. */
-	kCC3SemanticTexUnitOperand1Alpha,			/**< The alpha combining operand of source 1 of a texture unit. */
-	kCC3SemanticTexUnitOperand2Alpha,			/**< The alpha combining operand of source 2 of a texture unit. */
+	kCC3SemanticTexUnitConstantColor,			/**< (vec4) The constant color of a texture unit. */
+	kCC3SemanticTexUnitMode,					/**< (int) Environment mode of a texture unit. */
+	kCC3SemanticTexUnitCombineRGBFunction,		/**< (int) RBG combiner function of a texture unit. */
+	kCC3SemanticTexUnitSource0RGB,				/**< (int) The RGB of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1RGB,				/**< (int) The RGB of source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2RGB,				/**< (int) The RGB of source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0RGB,				/**< (int) The RGB combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1RGB,				/**< (int) The RGB combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2RGB,				/**< (int) The RGB combining operand of source 2 of a texture unit. */
+	kCC3SemanticTexUnitCombineAlphaFunction,	/**< (int) Alpha combiner function of a texture unit. */
+	kCC3SemanticTexUnitSource0Alpha,			/**< (int) The alpha of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1Alpha,			/**< (int) The alpha of source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2Alpha,			/**< (int) The alpha of source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0Alpha,			/**< (int) The alpha combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1Alpha,			/**< (int) The alpha combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2Alpha,			/**< (int) The alpha combining operand of source 2 of a texture unit. */
 	
 	// MODEL ----------------
-	kCC3SemanticAnimationFraction,				/**< Fraction of the model's animation that has been viewed (range 0-1). */
-	kCC3SemanticCenterOfGeometry,				/**< The center of geometry of the model in the model's local coordinates. */
-	kCC3SemanticBoundingBoxMin,					/**< The minimum corner of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingBoxMax,					/**< The maximum corner of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingBoxSize,				/**< The dimensions of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingRadius,					/**< The radius of the model's bounding sphere in the model's local coordinates. */
+	kCC3SemanticCenterOfGeometry,				/**< (vec3) The center of geometry of the model in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMin,					/**< (vec3) The minimum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMax,					/**< (vec3) The maximum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxSize,				/**< (vec3) The dimensions of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingRadius,					/**< (float) The radius of the model's bounding sphere in the model's local coordinates. */
+	kCC3SemanticAnimationFraction,				/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
 	
 	// PARTICLES ------------
-	kCC3SemanticPointSize,						/**< Default size of points, if not specified per-vertex in a vertex attribute array. */
-	kCC3SemanticPointSizeAttenuation,			/**< Point size distance attenuation coefficients. */
-	kCC3SemanticPointSizeMinimum,				/**< Minimum size points will be allowed to shrink to. */
-	kCC3SemanticPointSizeMaximum,				/**< Maximum size points will be allowed to grow to. */
-	kCC3SemanticPointSizeFadeThreshold,			/**< Points will be allowed to grow to. */
-	kCC3SemanticPointSpritesIsEnabled,			/**< Whether points should be interpeted as textured sprites. */
+	kCC3SemanticPointSize,						/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
+	kCC3SemanticPointSizeAttenuation,			/**< (vec3) Point size distance attenuation coefficients. */
+	kCC3SemanticPointSizeMinimum,				/**< (float) Minimum size points will be allowed to shrink to. */
+	kCC3SemanticPointSizeMaximum,				/**< (float) Maximum size points will be allowed to grow to. */
+	kCC3SemanticPointSizeFadeThreshold,			/**< (float) Points will be allowed to grow to. */
+	kCC3SemanticPointSpritesIsEnabled,			/**< (bool) Whether points should be interpeted as textured sprites. */
 
 	// TIME ------------------
-	kCC3SemanticFrameTime,						/**< The time in seconds since the last frame. */
-
-	kCC3SemanticElapsedTime,					/**< The elapsed time in seconds since the app started. */
-	kCC3SemanticElapsedTimeSine,				/**< The sine of the elapsed time. */
-	kCC3SemanticElapsedTimeCosine,				/**< The cosine of the elapsed time. */
-	kCC3SemanticElapsedTimeTangent,				/**< The tangent of the elapsed time. */
-
-	kCC3SemanticElapsedTimeTwoPi,				/**< The elapsed time in seconds since the app started, wrapped to 2 * PI. */
-	kCC3SemanticElapsedTimeTwoPiSine,			/**< The sine of the elapsed time wrapped to 2 * PI. */
-	kCC3SemanticElapsedTimeTwoPiCosine,			/**< The cosine of the elapsed time wrapped to 2 * PI. */
-	kCC3SemanticElapsedTimeTwoPiTangent,		/**< The tangent of the elapsed time wrapped to 2 * PI. */
+	kCC3SemanticFrameTime,						/**< (float) The time in seconds since the last frame. */
+	kCC3SemanticApplicationTime,				/**< (float) The application time in seconds. */
+	kCC3SemanticApplicationTimeSine,			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	kCC3SemanticApplicationTimeCosine,			/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	kCC3SemanticApplicationTimeTangent,			/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 	
 	// MISC ENVIRONMENT
-	kCC3SemanticViewport,						/**< The viewport dimensions in pixels. */
-	kCC3SemanticDrawCountCurrentFrame,			/**< The number of draw calls so far in this frame. */
-	kCC3SemanticRandomNumber,					/**< A random number between 0 and 1. */
+	kCC3SemanticDrawCountCurrentFrame,			/**< (int) The number of draw calls so far in this frame. */
+	kCC3SemanticRandomNumber,					/**< (float) A random number between 0 and 1. */
 	
 	kCC3SemanticAppBase,						/**< First semantic of app-specific custom semantics. */
 	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */

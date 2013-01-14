@@ -132,6 +132,10 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * The nominal field of view of this camera, in degrees. The initial value of this
  * property is set to kCC3DefaultFieldOfView.
  *
+ * Since the device orientation can change at will, the field of view is associated with the
+ * narrower of the two viewport dimensions (width or height), regardless of orientation.
+ * This allows the perspective to stay the same as the device is rotated by the user.
+ *
  * The effective field of view is influenced by the value of the uniformScale property,
  * which, for cameras, acts as a zoom factor (as if the camera lens is zoomed in or out).
  * The effective field of view of this camera is calculated as (fieldOfView / uniformScale).
@@ -151,6 +155,33 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the scene would vanish into the distance.
  */
 @property(nonatomic, assign) GLfloat fieldOfView;
+
+/**
+ * The effective field of view of this camera, in degrees.
+ *
+ * Since the device orientation can change at will, the effective field of view is associated
+ * with the narrower of the two viewport dimensions (width or height), regardless of orientation.
+ * This allows the perspective to stay the same as the device is rotated by the user.
+ *
+ * The effective field of view is influenced by the value of the uniformScale property,
+ * which, for cameras, acts as a zoom factor (as if the camera lens is zoomed in or out).
+ * The effective field of view of this camera is calculated as (fieldOfView / uniformScale).
+ *
+ * Once a nominal field of view has been set in this property, changing the scale or
+ * uniformScale properties will change the effective field of view accordingly (although
+ * the value of the fieldOfView property remains the same). Scales greater than one zoom in
+ * (objects appear larger), and scales between one and zero zoom out (objects appear smaller).
+ *
+ * Like real-world cameras, larger values of the effective field of view can result in a
+ * "fish-eye" effect, where objects at the periphery of the view can appear elongated.
+ * To reduce this effect, lower the value of fieldOfView property, or increase the value
+ * of the uniformScale property. In doing so, you may need to move your camera further
+ * away from the scene, so that your view will continue to include the same objects.
+ *
+ * The effective field of view is clamped to keep it below 180 degrees, beyond which
+ * the scene would vanish into the distance.
+ */
+@property(nonatomic, readonly) GLfloat effectiveFieldOfView;
 
 /**
  * The distance from the camera to the clipping plane of the camera's frustrum
@@ -1240,23 +1271,16 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, assign) BOOL isUsingParallelProjection;
 
 /**
- * Sets the six frustum clipping planes and the projectionMatrix from the specified projection parameters.
+ * Sets the six frustum clipping planes and the projectionMatrix from the specified view parameters.
  *
- * The zoomFactor is applied to the field of view to create an effective field of view. A zoomFactor of
- * greater than one will decrease the effective field of view (zooming-in), and a zoomFactor of less than
- * one will increase the effective field of view (zooming-out). For smaller zoomFactor values, the effective
- * field of view is clamped at slightly less than 180 degrees, to avoid an extreme fish-eye effect that
- * makes the scene completely disappear into the distance.
- *
- * The aspect parameter indicates the width:height ratio of the viewport. The field of view angle is applied
- * to the narrower dimension, to ensure that overall perspective are consistent across a simple transposition
- * of the viewport dimensions (ie- a rotation of the viewport by 90 degrees).
+ * The aspect parameter indicates the width:height ratio of the viewport. The field of view angle
+ * is applied to the narrower dimension, to ensure that overall perspective are consistent across
+ * a simple transposition of the viewport dimensions (ie- a rotation of the viewport by 90 degrees).
  */
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
-		  andFarClip: (GLfloat) farClip
-			 andZoom: (GLfloat) zoomFactor;
+		  andFarClip: (GLfloat) farClip;
 
 /** @deprecated Renamed to markDirty. */
 -(void) markPlanesDirty DEPRECATED_ATTRIBUTE;

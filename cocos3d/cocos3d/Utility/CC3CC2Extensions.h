@@ -47,16 +47,20 @@
 #	define CC3GLView CC3EAGLView
 #endif
 
-/** Dummy macro for cocos2d 1.x for compatibility with cocos2d 2.x. */
-#if CC3_CC2_1
-#	define CC_INCREMENT_GL_DRAWS(__n__)
-#endif
-
 /** Add state caching aliases for compatiblity with 2.1 and above */
 #if CC3_CC2_1
 #	define ccGLBindVAO(vao)
 #elif CC3_CC2_2 && COCOS2D_VERSION < 0x020100
 #	define ccGLBindVAO(vao) glBindVertexArray(vao)
+#endif
+
+/** Draw calls per frame are tracked as of cocos2d 2.x. */
+#if CC3_CC2_2
+#	define CC3GLDraws()		__ccNumberOfDraws
+#endif
+#if CC3_CC2_1
+#	define CC3GLDraws()		0
+#	define CC_INCREMENT_GL_DRAWS(__n__)
 #endif
 
 
@@ -283,6 +287,10 @@
 /** Returns whether this director has a CCScene either running or queued up. */
 -(BOOL) hasScene;
 
+/** Returns the timestamp of this director as derived from the display link that provide animation. */
+@property(nonatomic, readonly) NSTimeInterval displayLinkTime;
+
+
 #if CC3_CC2_1
 /** Consistent naming alias for the OpenGL ES view. */
 @property(nonatomic, retain) UIView* view;
@@ -327,6 +335,15 @@
 /** Extension category to support cocos3d functionality. */
 @interface CCDirectorIOS (CC3)
 @end
+
+
+#pragma mark -
+#pragma mark CCDirectorDisplayLink extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCDirectorDisplayLink (CC3)
+@end
+
 
 
 #pragma mark -

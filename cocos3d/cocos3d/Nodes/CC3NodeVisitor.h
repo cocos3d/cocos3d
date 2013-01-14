@@ -55,11 +55,11 @@
  * nodes, and removing a node during the iteration of a collection raises an error.
  */
 @interface CC3NodeVisitor : NSObject {
-	CC3Node* startingNode;
-	CC3Node* currentNode;
-	CCArray* pendingRemovals;
-	CC3Camera* camera;
-	BOOL shouldVisitChildren : 1;
+	CC3Node* _startingNode;
+	CC3Node* _currentNode;
+	CCArray* _pendingRemovals;
+	CC3Camera* _camera;
+	BOOL _shouldVisitChildren : 1;
 }
 
 /**
@@ -158,9 +158,9 @@
  * determining relative transforms between ancestors and descendants.
  */
 @interface CC3NodeTransformingVisitor : CC3NodeVisitor {
-	BOOL isTransformDirty : 1;
-	BOOL shouldLocalizeToStartingNode : 1;
-	BOOL shouldRestoreTransforms : 1;
+	BOOL _isTransformDirty : 1;
+	BOOL _shouldLocalizeToStartingNode : 1;
+	BOOL _shouldRestoreTransforms : 1;
 }
 
 /**
@@ -243,7 +243,7 @@
  * This visitor encapsulates the time since the previous update.
  */
 @interface CC3NodeUpdatingVisitor : CC3NodeTransformingVisitor {
-	ccTime deltaTime;
+	ccTime _deltaTime;
 }
 
 /**
@@ -272,7 +272,7 @@
  * will be in the global coordinate system of the 3D scene.
  */
 @interface CC3NodeBoundingBoxVisitor : CC3NodeTransformingVisitor {
-	CC3BoundingBox boundingBox;
+	CC3BoundingBox _boundingBox;
 }
 
 /**
@@ -304,11 +304,12 @@
  * will neither be visited nor drawn.
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
-	CC3NodeSequencer* drawingSequencer;
-	GLuint textureUnitCount;
-	GLuint textureUnit;
-	BOOL shouldDecorateNode : 1;
-	BOOL shouldClearDepthBuffer : 1;
+	CC3NodeSequencer* _drawingSequencer;
+	GLuint _textureUnitCount;
+	GLuint _textureUnit;
+	ccTime _deltaTime;
+	BOOL _shouldDecorateNode : 1;
+	BOOL _shouldClearDepthBuffer : 1;
 }
 
 /**
@@ -336,6 +337,14 @@
  * This value is set during drawing when the visitor is passed to the texture coordinates array.
  */
 @property(nonatomic, assign) GLuint textureUnit; 
+
+/**
+ * This property gives the interval, in seconds, since the previous frame.
+ *
+ * See the description of the CC3Scene minUpdateInterval and maxUpdateInterval properties
+ * for more information about clamping the update interval.
+ */
+@property(nonatomic, assign) ccTime deltaTime;
 
 /**
  * Indicates whether nodes should decorate themselves with their configured material,
@@ -450,12 +459,50 @@
  * framebuffer is made active in preparation of normal drawing operations.
  */
 @interface CC3NodePickingVisitor : CC3NodeDrawingVisitor {
-	CC3Node* pickedNode;
-	ccColor4F originalColor;
+	CC3Node* _pickedNode;
+	ccColor4F _originalColor;
 }
 
 /** The node that was most recently picked. */
 @property(nonatomic, readonly) CC3Node* pickedNode;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3NodePuncture
+
+/** Helper class for CC3NodePuncturingVisitor that tracks a node and the location of its puncture. */
+@interface CC3NodePuncture : NSObject {
+	CC3Node* _node;
+	CC3Vector _punctureLocation;
+	CC3Vector _globalPunctureLocation;
+	float _sqGlobalPunctureDistance;
+}
+
+/** The punctured node. */
+@property(nonatomic, retain, readonly) CC3Node* node;
+
+/** The location of the puncture, in the local coordinate system of the punctured node. */
+@property(nonatomic, readonly) CC3Vector punctureLocation;
+
+/** The location of the puncture, in the global coordinate system. */
+@property(nonatomic, readonly) CC3Vector globalPunctureLocation;
+
+/**
+ * The square of the distance from the startLocation of the ray to the puncture.
+ * This is used to sort the punctures by distance from the start of the ray.
+ */
+@property(nonatomic, readonly) float sqGlobalPunctureDistance;
+
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance with the specified node and ray. */
+-(id) initOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay;
+
+/** Allocates and initializes an autoreleased instance with the specified node and ray. */
++(id) punctureOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay;
 
 @end
 
@@ -494,10 +541,10 @@
  * over and over, through different invocations of the visit: method.
  */
 @interface CC3NodePuncturingVisitor : CC3NodeVisitor {
-	CCArray* nodePunctures;
-	CC3Ray ray;
-	BOOL shouldPunctureFromInside : 1;
-	BOOL shouldPunctureInvisibleNodes : 1;
+	CCArray* _nodePunctures;
+	CC3Ray _ray;
+	BOOL _shouldPunctureFromInside : 1;
+	BOOL _shouldPunctureInvisibleNodes : 1;
 }
 
 /**

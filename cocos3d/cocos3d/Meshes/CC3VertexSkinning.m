@@ -1187,8 +1187,8 @@
 /** Initialized to localize to the starting node. */
 -(id) init {
 	if ( (self = [super init]) ) {
-		shouldLocalizeToStartingNode = YES;
-		shouldRestoreTransforms = YES;
+		_shouldLocalizeToStartingNode = YES;
+		_shouldRestoreTransforms = YES;
 	}
 	return self;
 }

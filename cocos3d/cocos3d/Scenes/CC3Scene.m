@@ -181,6 +181,7 @@
 		ambientLight = kCC3DefaultLightColorAmbientScene;
 		minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
 		maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
+		_deltaFrameTime = 0;
 		[self initializeScene];
 	}
 	return self;
@@ -255,22 +256,22 @@
 	// Clamp the specified interval to a range defined by the minimum and maximum
 	// update intervals. If the maximum update interval limit is zero or negative,
 	// its value is ignored, and the dt value is not limited to a maximum value.
-	ccTime dtClamped = CLAMP(dt, minUpdateInterval,
-							 (maxUpdateInterval > 0.0 ? maxUpdateInterval : dt));
+	_deltaFrameTime = CLAMP(dt, minUpdateInterval,
+							(maxUpdateInterval > 0.0 ? maxUpdateInterval : dt));
 	
 	LogTrace(@"******* %@ starting update: %.2f ms (clamped from %.2f ms)",
-			 self, dtClamped * 1000.0, dt * 1000.0);
+			 self, _deltaFrameTime * 1000.0, dt * 1000.0);
 	
 	[touchedNodePicker dispatchPickedNode];
 	
-	updateVisitor.deltaTime = dtClamped;
+	updateVisitor.deltaTime = _deltaFrameTime;
 	[updateVisitor visit: self];
 	
-	[self updateTargets: dtClamped];
-	[self updateCamera: dtClamped];
-	[self updateBillboards: dtClamped];
-	[self updateFog: dtClamped];
-	[self updateShadows: dtClamped];
+	[self updateTargets: _deltaFrameTime];
+	[self updateCamera: _deltaFrameTime];
+	[self updateBillboards: _deltaFrameTime];
+	[self updateFog: _deltaFrameTime];
+	[self updateShadows: _deltaFrameTime];
 	[self updateDrawSequence];
 	
 	LogTrace(@"******* %@ exiting update", self);
@@ -351,7 +352,10 @@
 		[touchedNodePicker pickTouchedNode];
 		[self illuminate];
 		[self drawFog];
+
+		drawVisitor.deltaTime = _deltaFrameTime;
 		[self visitForDrawingWithVisitor: drawVisitor];
+
 		[self drawShadows];
 		[self close3DCamera];
 		[self closeViewport];

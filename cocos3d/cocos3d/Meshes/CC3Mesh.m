@@ -76,6 +76,7 @@
 	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
 }
 
+-(GLfloat) radius { return 0.0; }
 
 #pragma mark Allocation and initialization
 

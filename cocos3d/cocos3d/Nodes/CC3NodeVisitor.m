@@ -63,25 +63,26 @@
 
 @implementation CC3NodeVisitor
 
-@synthesize currentNode, startingNode, shouldVisitChildren, camera;
+@synthesize currentNode=_currentNode, startingNode=_startingNode;
+@synthesize shouldVisitChildren=_shouldVisitChildren, camera=_camera;
 
 -(void) dealloc {
-	currentNode = nil;				// not retained
-	startingNode = nil;				// not retained
-	camera = nil;					// not retained
-	[pendingRemovals release];
+	_currentNode = nil;				// not retained
+	_startingNode = nil;				// not retained
+	_camera = nil;					// not retained
+	[_pendingRemovals release];
 	[super dealloc];
 }
 
--(CC3PerformanceStatistics*) performanceStatistics { return startingNode.performanceStatistics; }
+-(CC3PerformanceStatistics*) performanceStatistics { return _startingNode.performanceStatistics; }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		currentNode = nil;
-		startingNode = nil;
-		camera = nil;
-		pendingRemovals = nil;
-		shouldVisitChildren = YES;
+		_currentNode = nil;
+		_startingNode = nil;
+		_camera = nil;
+		_pendingRemovals = nil;
+		_shouldVisitChildren = YES;
 	}
 	return self;
 }
@@ -91,23 +92,23 @@
 -(void) visit: (CC3Node*) aNode {
 	if (!aNode) return;					// Must have a node to work on
 	
-	currentNode = aNode;				// Make the node being processed available.
+	_currentNode = aNode;				// Make the node being processed available.
 
-	if (!startingNode) {				// If this is the first node, start up
-		startingNode = aNode;			// Not retained
-		if (!camera) camera = aNode.activeCamera;	// Retrieve and cache the camera. Not retained
+	if (!_startingNode) {				// If this is the first node, start up
+		_startingNode = aNode;			// Not retained
+		if (!_camera) _camera = aNode.activeCamera;	// Retrieve and cache the camera. Not retained
 		[self open];					// Open the visitor
 	}
 
 	[self process: aNode];				// Process the node and its children recursively
 
-	if (aNode == startingNode) {		// If we're back to the first node, finish up
+	if (aNode == _startingNode) {		// If we're back to the first node, finish up
 		[self close];					// Close the visitor
-		camera = nil;					// Not retained
-		startingNode = nil;				// Not retained
+		_camera = nil;					// Not retained
+		_startingNode = nil;				// Not retained
 	}
 	
-	currentNode = nil;					// Done with this node now.
+	_currentNode = nil;					// Done with this node now.
 }
 
 /** Template method that is invoked automatically during visitation to process the specified node. */
@@ -116,9 +117,8 @@
 	
 	[self processBeforeChildren: aNode];	// Heavy lifting before visiting children
 	
-	if (shouldVisitChildren) {				// Recurse through the child nodes if required
-		[self processChildrenOf: aNode];
-	}
+	// Recurse through the child nodes if required
+	if (_shouldVisitChildren) [self processChildrenOf: aNode];
 
 	[self processAfterChildren: aNode];		// Heavy lifting after visiting children
 }
@@ -144,14 +144,14 @@
  * Subclasses may override this method to establish a different traversal.
  */
 -(void) processChildrenOf: (CC3Node*) aNode {
-	CC3Node* currNode = currentNode;	// Remember current node
+	CC3Node* currNode = _currentNode;	// Remember current node
 	
 	CCArray* children = aNode.children;
 	for (CC3Node* child in children) {
 		[self visit: child];
 	}
 
-	currentNode = currNode;				// Restore current node
+	_currentNode = currNode;				// Restore current node
 }
 
 /**
@@ -185,32 +185,26 @@
  * state, upon completion of a visitation run, and should invoke this superclass
  * implementation to process any removal requests.
  */
--(void) close {
-	[self processRemovals];
-}
+-(void) close { [self processRemovals]; }
 
 -(void) requestRemovalOf: (CC3Node*) aNode {
-	if (!pendingRemovals) {
-		pendingRemovals = [[CCArray array] retain];
+	if (!_pendingRemovals) {
+		_pendingRemovals = [[CCArray array] retain];
 	}
-	[pendingRemovals addObject: aNode];
+	[_pendingRemovals addObject: aNode];
 }
 
 -(void) processRemovals {
-	for (CC3Node* n in pendingRemovals) {
-		[n remove];
-	}
-	[pendingRemovals removeAllObjects];
+	for (CC3Node* n in _pendingRemovals) [n remove];
+	[_pendingRemovals removeAllObjects];
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@", [self class]];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ visiting %@ %@ children, %i removals",
-			[self description], startingNode, (shouldVisitChildren ? @"and" : @"but not"),
-			pendingRemovals.count];
+			[self description], _startingNode, (_shouldVisitChildren ? @"and" : @"but not"),
+			_pendingRemovals.count];
 }
 
 @end
@@ -221,20 +215,21 @@
 
 @implementation CC3NodeTransformingVisitor
 
-@synthesize shouldLocalizeToStartingNode, shouldRestoreTransforms, isTransformDirty;
+@synthesize shouldLocalizeToStartingNode=_shouldLocalizeToStartingNode;
+@synthesize shouldRestoreTransforms=_shouldRestoreTransforms, isTransformDirty=_isTransformDirty;
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		isTransformDirty = NO;
-		shouldLocalizeToStartingNode = NO;
-		shouldRestoreTransforms = NO;
+		_isTransformDirty = NO;
+		_shouldLocalizeToStartingNode = NO;
+		_shouldRestoreTransforms = NO;
 	}
 	return self;
 }
 
 -(void) open {
 	[super open];
-	isTransformDirty = shouldLocalizeToStartingNode;
+	_isTransformDirty = _shouldLocalizeToStartingNode;
 }
 
 /**
@@ -246,9 +241,9 @@
  * up later siblings of a the parent node.
  */
 -(void) process: (CC3Node*) aNode {
-	BOOL wasAncestorDirty = isTransformDirty;
+	BOOL wasAncestorDirty = _isTransformDirty;
 	[super process: aNode];
-	isTransformDirty = wasAncestorDirty;
+	_isTransformDirty = wasAncestorDirty;
 }
 
 /**
@@ -257,9 +252,9 @@
  */
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	
-	isTransformDirty = isTransformDirty || aNode.isTransformDirty;
+	_isTransformDirty = _isTransformDirty || aNode.isTransformDirty;
 	
-	if (isTransformDirty) {
+	if (_isTransformDirty) {
 		[self.performanceStatistics incrementNodesTransformed];
 		[aNode buildTransformMatrixWithVisitor: self];
 	}
@@ -272,23 +267,23 @@
  */
 -(void) close {
 	[super close];
-	if (shouldLocalizeToStartingNode && shouldRestoreTransforms) {
-		[startingNode markTransformDirty];
-		[startingNode updateTransformMatrices];
+	if (_shouldLocalizeToStartingNode && _shouldRestoreTransforms) {
+		[_startingNode markTransformDirty];
+		[_startingNode updateTransformMatrices];
 	}
 }
 
 -(CC3Matrix*) parentTansformMatrixFor: (CC3Node*) aNode {
 	CC3Node* parentNode = aNode.parent;
-	BOOL localizeToThisNode = shouldLocalizeToStartingNode && (aNode == startingNode ||
-															   parentNode == startingNode);
+	BOOL localizeToThisNode = _shouldLocalizeToStartingNode && (aNode == _startingNode ||
+															   parentNode == _startingNode);
 	return localizeToThisNode ? nil : aNode.parentTransformMatrix;
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, localize: %@, dirty: %@",
-			[super fullDescription], NSStringFromBoolean(shouldLocalizeToStartingNode),
-			NSStringFromBoolean(isTransformDirty)];
+			[super fullDescription], NSStringFromBoolean(_shouldLocalizeToStartingNode),
+			NSStringFromBoolean(_isTransformDirty)];
 }
 
 @end
@@ -299,7 +294,7 @@
 
 @implementation CC3NodeUpdatingVisitor
 
-@synthesize deltaTime;
+@synthesize deltaTime=_deltaTime;
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	LogTrace(@"Updating %@ after %.3f ms", aNode, deltaTime * 1000.0f);
@@ -317,7 +312,7 @@
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, dt: %.3f ms",
-			[super fullDescription], deltaTime * 1000.0f];
+			[super fullDescription], _deltaTime * 1000.0f];
 }
 
 @end
@@ -332,19 +327,19 @@
 
 @implementation CC3NodeBoundingBoxVisitor
 
-@synthesize boundingBox;
+@synthesize boundingBox=_boundingBox;
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		boundingBox = kCC3BoundingBoxNull;
-		shouldRestoreTransforms = YES;
+		_boundingBox = kCC3BoundingBoxNull;
+		_shouldRestoreTransforms = YES;
 	}
 	return self;
 }
 
 -(void) open {
 	[super open];
-	boundingBox = kCC3BoundingBoxNull;
+	_boundingBox = kCC3BoundingBoxNull;
 }
 
 -(void) processAfterChildren: (CC3Node*) aNode {
@@ -355,20 +350,20 @@
 		// is the starting node, don't apply transform to bounding box, because we want
 		// the bounding box in the local coordinate system of the startingNode
 		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
-		CC3BoundingBox nodeBox = (shouldLocalizeToStartingNode && (aNode == startingNode)) 
+		CC3BoundingBox nodeBox = (_shouldLocalizeToStartingNode && (aNode == _startingNode))
 									? lcNode.localContentBoundingBox
 									: lcNode.globalLocalContentBoundingBox;
 
 		// Merge the node's bounding box into the aggregate bounding box
 		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3BoundingBox(nodeBox),
 				 aNode, NSStringFromCC3BoundingBox(boundingBox));
-		boundingBox = CC3BoundingBoxUnion(boundingBox, nodeBox);
+		_boundingBox = CC3BoundingBoxUnion(_boundingBox, nodeBox);
 	}
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, box: %@",
-			[super fullDescription], NSStringFromCC3BoundingBox(boundingBox)];
+			[super fullDescription], NSStringFromCC3BoundingBox(_boundingBox)];
 }
 
 @end
@@ -383,27 +378,27 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize drawingSequencer;
-@synthesize shouldDecorateNode, shouldClearDepthBuffer;
-@synthesize textureUnit, textureUnitCount;
+@synthesize drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
+@synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
+@synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount;
 
 -(void) dealloc {
-	drawingSequencer = nil;		// not retained
+	_drawingSequencer = nil;		// not retained
 	[super dealloc];
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		shouldDecorateNode = YES;
-		shouldClearDepthBuffer = YES;
+		_shouldDecorateNode = YES;
+		_shouldClearDepthBuffer = YES;
 	}
 	return self;
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
-			[super fullDescription], drawingSequencer, textureUnit, textureUnitCount,
-			NSStringFromBoolean(shouldDecorateNode), NSStringFromBoolean(shouldClearDepthBuffer)];
+			[super fullDescription], _drawingSequencer, _textureUnit, _textureUnitCount,
+			NSStringFromBoolean(_shouldDecorateNode), NSStringFromBoolean(_shouldClearDepthBuffer)];
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
@@ -416,19 +411,19 @@
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
 	return aNode.hasLocalContent
 			&& [self isNodeVisibleForDrawing: aNode]
-			&& [aNode doesIntersectFrustum: camera.frustum];
+			&& [aNode doesIntersectFrustum: _camera.frustum];
 }
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode { return aNode.visible; }
 
 -(void) processChildrenOf: (CC3Node*) aNode {
-	if (drawingSequencer) {
-		CC3Node* currNode = currentNode;	// Remember current node
+	if (_drawingSequencer) {
+		CC3Node* currNode = _currentNode;	// Remember current node
 
-		shouldVisitChildren = NO;
-		[drawingSequencer visitNodesWithNodeVisitor: self];
+		_shouldVisitChildren = NO;
+		[_drawingSequencer visitNodesWithNodeVisitor: self];
 
-		currentNode = currNode;				// Restore current node
+		_currentNode = currNode;				// Restore current node
 	} else {
 		[super processChildrenOf: aNode];
 	}
@@ -445,9 +440,7 @@
 	[CC3Material resetSwitching];
 	[CC3VertexArrayMesh resetSwitching];
 	
-	if (shouldClearDepthBuffer) {
-		[[CC3OpenGLESEngine engine].state clearDepthBuffer];
-	}
+	if (_shouldClearDepthBuffer) [[CC3OpenGLESEngine engine].state clearDepthBuffer];
 }
 
 -(void) draw: (CC3Node*) aNode {
@@ -464,7 +457,7 @@
 
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
 
--(CC3Scene*) scene { return (CC3Scene*)startingNode; }
+-(CC3Scene*) scene { return (CC3Scene*)_startingNode; }
 
 -(CC3Light*) lightAt: (GLuint) index {
 	CCArray* lights = self.scene.lights;
@@ -487,17 +480,17 @@
 
 @implementation CC3NodePickingVisitor
 
-@synthesize pickedNode;
+@synthesize pickedNode=_pickedNode;
 
 -(void) dealloc {
-	[pickedNode release];
+	[_pickedNode release];
 	[super dealloc];
 }
 
 /** Overridden to initially set the shouldDecorateNode to NO. */
 -(id) init {
 	if ( (self = [super init]) ) {
-		shouldDecorateNode = NO;
+		_shouldDecorateNode = NO;
 	}
 	return self;
 }
@@ -521,8 +514,8 @@
 -(void) open {
 	[super open];
 	
-	[pickedNode release];
-	pickedNode = nil;
+	[_pickedNode release];
+	_pickedNode = nil;
 	
 	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
 	
@@ -531,7 +524,7 @@
 	[glesServCaps.blend disable];
 	[glesServCaps.fog disable];
 	
-	originalColor = glesEngine.state.color.value;
+	_originalColor = glesEngine.state.color.value;
 	
 	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
 	[CCDirector.sharedDirector.ccGLView openPicking];
@@ -554,7 +547,7 @@
 	ccColor4B pixColor = [glesState readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
 	
 	// Fetch the node whose tags is mapped from the pixel color
-	pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
+	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
 	
 	LogTrace(@"%@ picked %@ from color (%u, %u, %u, %u)", self, pickedNode,
 			 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
@@ -564,7 +557,7 @@
 	
 	[self drawBackdrop];	// Draw the backdrop behind the 3D scene
 
-	glesState.color.value = originalColor;
+	glesState.color.value = _originalColor;
 	[super close];
 }
 
@@ -617,7 +610,7 @@
 	
 	// If the depth buffer will not be cleared as part of normal drawing,
 	// do it now, while we are clearing the color buffer.
-	GLbitfield depthFlag = shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
+	GLbitfield depthFlag = _shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
 
 	// Ensure that the depth buffer is writable (may have been turned off during node drawing)
 	if (depthFlag) glesState.depthMask.value = YES;
@@ -694,7 +687,7 @@
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, picked: %@, orig color: %@",
-			[super fullDescription], pickedNode, NSStringFromCCC4F(originalColor)];
+			[super fullDescription], _pickedNode, NSStringFromCCC4F(_originalColor)];
 }
 
 @end
@@ -703,47 +696,13 @@
 #pragma mark -
 #pragma mark CC3NodePuncture
 
-/** Helper class for CC3NodePuncturingVisitor that tracks a node and the location of its puncture. */
-@interface CC3NodePuncture : NSObject {
-	CC3Node* node;
-	CC3Vector punctureLocation;
-	CC3Vector globalPunctureLocation;
-	float sqGlobalPunctureDistance;
-}
-
-/** The punctured node. */
-@property(nonatomic, retain, readonly) CC3Node* node;
-
-/** The location of the puncture, in the local coordinate system of the punctured node. */
-@property(nonatomic, readonly) CC3Vector punctureLocation;
-
-/** The location of the puncture, in the global coordinate system. */
-@property(nonatomic, readonly) CC3Vector globalPunctureLocation;
-
-/**
- * The square of the distance from the startLocation of the ray to the puncture.
- * This is used to sort the punctures by distance from the start of the ray.
- */
-@property(nonatomic, readonly) float sqGlobalPunctureDistance;
-
-
-#pragma mark Allocation and initialization
-
-/** Initializes this instance with the specified node and ray. */
--(id) initOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay;
-
-/** Allocates and initializes an autoreleased instance with the specified node and ray. */
-+(id) punctureOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay;
-
-@end
-
-
 @implementation CC3NodePuncture
 
-@synthesize node, punctureLocation, globalPunctureLocation, sqGlobalPunctureDistance;
+@synthesize node=_node, sqGlobalPunctureDistance=_sqGlobalPunctureDistance;
+@synthesize punctureLocation=_punctureLocation, globalPunctureLocation=_globalPunctureLocation;
 
 -(void) dealloc {
-	[node release];
+	[_node release];
 	[super dealloc];
 }
 
@@ -752,10 +711,10 @@
 
 -(id) initOnNode: (CC3Node*) aNode fromRay: (CC3Ray) aRay {
 	if ( (self = [super init]) ) {
-		node = [aNode retain];
-		punctureLocation = [aNode locationOfGlobalRayIntesection: aRay];
-		globalPunctureLocation = [aNode.transformMatrix transformLocation: punctureLocation];
-		sqGlobalPunctureDistance = CC3VectorDistanceSquared(globalPunctureLocation, aRay.startLocation);
+		_node = [aNode retain];
+		_punctureLocation = [aNode locationOfGlobalRayIntesection: aRay];
+		_globalPunctureLocation = [aNode.transformMatrix transformLocation: _punctureLocation];
+		_sqGlobalPunctureDistance = CC3VectorDistanceSquared(_globalPunctureLocation, aRay.startLocation);
 	}
 	return self;
 }
@@ -772,18 +731,19 @@
 
 @implementation CC3NodePuncturingVisitor
 
-@synthesize ray, shouldPunctureFromInside, shouldPunctureInvisibleNodes;
+@synthesize ray=_ray, shouldPunctureFromInside=_shouldPunctureFromInside;
+@synthesize shouldPunctureInvisibleNodes=_shouldPunctureInvisibleNodes;
 
 -(void) dealloc {
-	[nodePunctures release];
+	[_nodePunctures release];
 	[super dealloc];
 }
 
 -(CC3NodePuncture*) nodePunctureAt:  (NSUInteger) index {
-	return (CC3NodePuncture*)[nodePunctures objectAtIndex: index];
+	return (CC3NodePuncture*)[_nodePunctures objectAtIndex: index];
 }
 
--(NSUInteger) nodeCount { return nodePunctures.count; }
+-(NSUInteger) nodeCount { return _nodePunctures.count; }
 
 -(CC3Node*) puncturedNodeAt: (NSUInteger) index { return [self nodePunctureAt: index].node; }
 
@@ -807,7 +767,7 @@
 
 -(void) open {
 	[super open];
-	[nodePunctures removeAllObjects];
+	[_nodePunctures removeAllObjects];
 }
 
 /**
@@ -819,23 +779,23 @@
 -(BOOL) doesPuncture: (CC3Node*) aNode {
 	CC3BoundingVolume* bv = aNode.boundingVolume;
 	if ( !bv ) return NO;
-	if ( !shouldPunctureInvisibleNodes && !aNode.visible ) return NO;
-	if ( !shouldPunctureFromInside && [bv doesIntersectLocation: ray.startLocation] ) return NO;
-	return [bv doesIntersectRay: ray];
+	if ( !_shouldPunctureInvisibleNodes && !aNode.visible ) return NO;
+	if ( !_shouldPunctureFromInside && [bv doesIntersectLocation: _ray.startLocation] ) return NO;
+	return [bv doesIntersectRay: _ray];
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	if ( [self doesPuncture: aNode] ) {
-		CC3NodePuncture* np = [CC3NodePuncture punctureOnNode: aNode fromRay: ray];
-		NSUInteger nodeCount = nodePunctures.count;
+		CC3NodePuncture* np = [CC3NodePuncture punctureOnNode: aNode fromRay: _ray];
+		NSUInteger nodeCount = _nodePunctures.count;
 		for (NSUInteger i = 0; i < nodeCount; i++) {
-			CC3NodePuncture* existNP = [nodePunctures objectAtIndex: i];
+			CC3NodePuncture* existNP = [_nodePunctures objectAtIndex: i];
 			if (np.sqGlobalPunctureDistance < existNP.sqGlobalPunctureDistance) {
-				[nodePunctures insertObject: np atIndex: i];
+				[_nodePunctures insertObject: np atIndex: i];
 				return;
 			}
 		}
-		[nodePunctures addObject: np];
+		[_nodePunctures addObject: np];
 	}
 }
 
@@ -845,16 +805,14 @@
 
 -(id) initWithRay: (CC3Ray) aRay {
 	if ( (self = [super init]) ) {
-		ray = aRay;
-		nodePunctures = [[CCArray array] retain];
-		shouldPunctureFromInside = NO;
-		shouldPunctureInvisibleNodes = NO;
+		_ray = aRay;
+		_nodePunctures = [[CCArray array] retain];
+		_shouldPunctureFromInside = NO;
+		_shouldPunctureInvisibleNodes = NO;
 	}
 	return self;
 }
 
-+(id) visitorWithRay: (CC3Ray) aRay {
-	return [[[self alloc] initWithRay: aRay] autorelease];
-}
++(id) visitorWithRay: (CC3Ray) aRay { return [[[self alloc] initWithRay: aRay] autorelease]; }
 
 @end

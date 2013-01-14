@@ -221,7 +221,7 @@
 	NSUInteger _textureUnitIndex;
 }
 
-/** The texture */
+/** The texture being linked to a particular texture unit. */
 @property(nonatomic, retain) CC3Texture* texture;
 
 /** The index of the texture unit to which the texture should be applied. */

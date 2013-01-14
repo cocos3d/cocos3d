@@ -140,13 +140,11 @@
 -(BOOL) interleaveVertices { return self.shouldInterleaveVertices; }
 -(void) setInterleaveVertices: (BOOL) shouldInterleave { self.shouldInterleaveVertices = shouldInterleave; }
 
--(CC3Vector) centerOfGeometry {
-	return vertexLocations ? vertexLocations.centerOfGeometry : [super centerOfGeometry];
-}
+-(CC3Vector) centerOfGeometry { return vertexLocations ? vertexLocations.centerOfGeometry : [super centerOfGeometry]; }
 
--(CC3BoundingBox) boundingBox {
-	return vertexLocations ? vertexLocations.boundingBox : [super boundingBox];
-}
+-(CC3BoundingBox) boundingBox { return vertexLocations ? vertexLocations.boundingBox : [super boundingBox]; }
+
+-(GLfloat) radius { return vertexLocations ? vertexLocations.radius : [super radius]; }
 
 
 #pragma mark CCRGBAProtocol support

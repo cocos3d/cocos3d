@@ -45,10 +45,10 @@
 typedef enum {
 	kCC3PVRShamanSemanticNone = kCC3SemanticAppBase,	/**< No defined semantic usage. */
 
-	kCC3PVRShamanSemanticLightSpotFalloff,			/**< Cutoff angle and exponent of a spotlight (vec2). */
-	kCC3PVRShamanSemanticViewportSize,				/**< Viewport size. */
-	kCC3PVRShamanSemanticViewportClipping,			/**< Near distance, far distance, width angle (radians), height angle (radians). */
-	kCC3PVRShamanSemanticElapsedTimeLastFrame,		/**< The elapsed time since the app started, measured at the last frame, in seconds. */
+	kCC3PVRShamanSemanticLightSpotFalloff,				/**< Cutoff angle and exponent of a spotlight (vec2). */
+	kCC3PVRShamanSemanticViewportSize,					/**< Viewport size. */
+	kCC3PVRShamanSemanticViewportClipping,				/**< Near distance, far distance, width angle (radians), height angle (radians). */
+	kCC3PVRShamanSemanticElapsedTimeLastFrame,			/**< The elapsed time since the app started, measured at the last frame, in seconds. */
 
 	kCC3PVRShamanSemanticAppBase,						/**< First semantic of app-specific custom semantics. */
 } CC3PVRShamanSemantic;

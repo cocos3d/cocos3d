@@ -30,6 +30,9 @@
  */
 
 #import "CC3PVRShamanGLProgramSemantics.h"
+#import "CC3Light.h"
+#import "CC3Scene.h"
+#import "CC3OpenGLESEngine.h"
 
 
 NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
@@ -55,6 +58,62 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 -(GLenum) semanticForPFXSemanticName: (NSString*) semanticName {
 	return [self.class semanticForPVRShamanSemanticName: semanticName];
 }
+
+/** Handles populating PVRShaman-specific content and delegates remainder to the standard population mechanisms.  */
+-(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ retrieving semantic value for %@", self, uniform.fullDescription);
+	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
+	CC3OpenGLESLight* glesLight;
+	GLenum semantic = uniform.semantic;
+	GLuint semanticIndex = uniform.semanticIndex;
+	GLint uniformSize = uniform.size;
+	CC3Viewport vp;
+
+	if ( [super populateUniform: uniform withVisitor: visitor] ) return YES;
+	
+	switch (semantic) {
+
+		// Sets a vec2, specific to PVRShaman, that combines the falloff angle (in degrees) and exponent
+		case kCC3PVRShamanSemanticLightSpotFalloff:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
+				if (glesLight.isEnabled)
+					[uniform setPoint: ccp(glesLight.spotCutoffAngle.value,
+										   glesLight.spotExponent.value)
+								   at: i];
+			}
+			return YES;
+		case kCC3PVRShamanSemanticElapsedTimeLastFrame:
+			// Time of last frame. Just subtract frame time from current time
+			[uniform setFloat: (CCDirector.sharedDirector.displayLinkTime - visitor.deltaTime)];
+			return YES;
+		case kCC3PVRShamanSemanticViewportSize:
+			vp = visitor.scene.viewportManager.viewport;
+			[uniform setPoint: ccp(vp.w, vp.h)];
+			return YES;
+		case kCC3PVRShamanSemanticViewportClipping:
+			// Applies the field of view angle to the narrower aspect.
+			vp = visitor.scene.viewportManager.viewport;
+			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
+			CC3Camera* cam = visitor.camera;
+			GLfloat fovWidth, fovHeight;
+			if (aspect >= 1.0f) {			// Landscape
+				fovHeight = DegreesToRadians(cam.effectiveFieldOfView);
+				fovWidth = fovHeight * aspect;
+			} else {						// Portrait
+				fovWidth = DegreesToRadians(cam.effectiveFieldOfView);
+				fovHeight = fovWidth / aspect;
+			}
+			[uniform setVector4: CC3Vector4Make(cam.nearClippingDistance, cam.farClippingDistance, fovWidth, fovHeight)];
+			return YES;
+			
+		default: return NO;
+	}
+}
+
+
+
+#pragma mark Mapping between PVRShaman semantics and cocos3d semantics
 
 static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 
@@ -144,15 +203,15 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 	[self addSemantic: kCC3PVRShamanSemanticViewportSize forPVRShamanSemanticName: @"VIEWPORTPIXELSIZE"];
 	[self addSemantic: kCC3PVRShamanSemanticViewportClipping forPVRShamanSemanticName: @"VIEWPORTCLIPPING"];
 	
-	[self addSemantic: kCC3SemanticElapsedTime forPVRShamanSemanticName: @"TIME"];
-	[self addSemantic: kCC3SemanticElapsedTimeCosine forPVRShamanSemanticName: @"TIMECOS"];
-	[self addSemantic: kCC3SemanticElapsedTimeSine forPVRShamanSemanticName: @"TIMESIN"];
-	[self addSemantic: kCC3SemanticElapsedTimeTangent forPVRShamanSemanticName: @"TIMETAN"];
+	[self addSemantic: kCC3SemanticApplicationTime forPVRShamanSemanticName: @"TIME"];
+	[self addSemantic: kCC3SemanticApplicationTimeCosine forPVRShamanSemanticName: @"TIMECOS"];
+	[self addSemantic: kCC3SemanticApplicationTimeSine forPVRShamanSemanticName: @"TIMESIN"];
+	[self addSemantic: kCC3SemanticApplicationTimeTangent forPVRShamanSemanticName: @"TIMETAN"];
 
-	[self addSemantic: kCC3SemanticElapsedTimeTwoPi forPVRShamanSemanticName: @"TIME2PI"];
-	[self addSemantic: kCC3SemanticElapsedTimeTwoPiCosine forPVRShamanSemanticName: @"TIME2PICOS"];
-	[self addSemantic: kCC3SemanticElapsedTimeTwoPiSine forPVRShamanSemanticName: @"TIME2PISIN"];
-	[self addSemantic: kCC3SemanticElapsedTimeTwoPiTangent forPVRShamanSemanticName: @"TIME2PITAN"];
+	[self addSemantic: kCC3SemanticApplicationTime forPVRShamanSemanticName: @"TIME2PI"];
+	[self addSemantic: kCC3SemanticApplicationTimeCosine forPVRShamanSemanticName: @"TIME2PICOS"];
+	[self addSemantic: kCC3SemanticApplicationTimeSine forPVRShamanSemanticName: @"TIME2PISIN"];
+	[self addSemantic: kCC3SemanticApplicationTimeTangent forPVRShamanSemanticName: @"TIME2PITAN"];
 
 	[self addSemantic: kCC3PVRShamanSemanticElapsedTimeLastFrame forPVRShamanSemanticName: @"LASTTIME"];
 	[self addSemantic: kCC3SemanticFrameTime forPVRShamanSemanticName: @"ELAPSEDTIME"];

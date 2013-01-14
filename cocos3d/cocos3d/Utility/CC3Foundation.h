@@ -623,6 +623,11 @@ static inline CC3Vector CC3BoundingBoxCenter(CC3BoundingBox bb) {
 	return CC3VectorAverage(bb.minimum, bb.maximum);
 }
 
+/** Returns the size of the specified bounding box, between the minimum to maximum corners. */
+static inline CC3Vector CC3BoundingBoxSize(CC3BoundingBox bb) {
+	return CC3VectorDifference(bb.maximum, bb.minimum);
+}
+
 /** Returns whether the specified bounding box contains the specified location. */
 static inline BOOL CC3BoundingBoxContainsLocation(CC3BoundingBox bb, CC3Vector aLoc) {
 	if (aLoc.x > bb.maximum.x) return NO;

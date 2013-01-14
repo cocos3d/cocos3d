@@ -38,6 +38,9 @@
 #import "CC3CC2Extensions.h"
 #import "CC3AffineMatrix.h"
 
+/** The maximum allowed effective field of view. */
+#define kMaxEffectiveFOV 179.9
+
 
 #pragma mark CC3Camera implementation
 
@@ -117,6 +120,8 @@
 	[self markProjectionDirty];
 }
 
+-(GLfloat) effectiveFieldOfView { return MIN(self.fieldOfView / self.uniformScale, kMaxEffectiveFOV); }
+
 // Deprecated
 -(GLfloat) nearClippingPlane { return self.nearClippingDistance; }
 -(void) setNearClippingPlane: (GLfloat) aDistance { self.nearClippingDistance = aDistance; }
@@ -131,9 +136,7 @@
 	[self markProjectionDirty];
 }
 
--(BOOL) isUsingParallelProjection {
-	return frustum.isUsingParallelProjection;
-}
+-(BOOL) isUsingParallelProjection { return frustum.isUsingParallelProjection; }
 
 -(void) setIsUsingParallelProjection: (BOOL) shouldUseParallelProjection {
 	frustum.isUsingParallelProjection = shouldUseParallelProjection;
@@ -292,11 +295,10 @@
 		CC3Viewport vp = self.viewportManager.viewport;
 		CC3Assert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
 
-		[frustum populateFrom: fieldOfView
+		[frustum populateFrom: self.effectiveFieldOfView
 					andAspect: ((GLfloat) vp.w / (GLfloat) vp.h)
 				  andNearClip: nearClippingDistance
-				   andFarClip: farClippingDistance
-					  andZoom: self.uniformScale];
+				   andFarClip: farClippingDistance];
 
 		_isProjectionDirty = NO;
 		
@@ -1009,20 +1011,12 @@
 	isUsingParallelProjection = another.isUsingParallelProjection;
 }
 
-/** The maximum allowed effective field of view. */
-#define kMaxEffectiveFOV 179.9
-
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
-		  andFarClip: (GLfloat) farClip
-			 andZoom: (GLfloat) zoomFactor {
+		  andFarClip: (GLfloat) farClip {
 	
-	// The zoomFactor arg modifies the effective field of view.
-	// The effective FOV is clamped to keep it below 180 degrees, because
-	// the scene disappears into the distance as the tangent goes to infinity.
-	GLfloat halfFOV = MIN(fieldOfView / zoomFactor, kMaxEffectiveFOV) / 2.0f;
-
+	GLfloat halfFOV = fieldOfView / 2.0f;
 	near = nearClip;
 	far = farClip;
 
@@ -1040,8 +1034,8 @@
 	
 	[self markDirty];
 	
-	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f, Zoom: %.3f",
-			 self, fieldOfView, nearClip, nearClip, farClip, zoomFactor);
+	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
+			 self, fieldOfView, nearClip, nearClip, farClip);
 }
 
 -(NSString*) fullDescription {

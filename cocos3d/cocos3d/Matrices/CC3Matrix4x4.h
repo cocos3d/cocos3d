@@ -514,6 +514,22 @@ static inline void CC3Matrix4x4TranslateBy(CC3Matrix4x4* mtx, CC3Vector aTransla
 CC3Vector4 CC3Matrix4x4TransformCC3Vector4(const CC3Matrix4x4* mtx, CC3Vector4 v);
 
 /**
+ * Transforms the specified 3D location vector using the specified matrix, and returns the
+ * transformed vector. The location is transformed as if it was a 4D vector with a W value of 1.
+ *
+ * The specified matrix and the original specified vector remain unchanged.
+ */
+CC3Vector CC3Matrix4x4TransformLocation(const CC3Matrix4x4* mtx, CC3Vector v);
+
+/**
+ * Transforms the specified 3D location vector using the specified matrix, and returns the
+ * transformed vector. The location is transformed as if it was a 4D vector with a W value of 0.
+ *
+ * The specified matrix and the original specified vector remain unchanged.
+ */
+CC3Vector CC3Matrix4x4TransformDirection(const CC3Matrix4x4* mtx, CC3Vector v);
+
+/**
  * Orthonormalizes the rotation component of the specified matrix, using a Gram-Schmidt process,
  * and using the column indicated by the specified column number as the starting point of the
  * orthonormalization process.

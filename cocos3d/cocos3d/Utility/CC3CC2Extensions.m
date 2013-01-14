@@ -236,6 +236,8 @@
 
 -(BOOL) hasScene { return !((runningScene_ == nil) && (nextScene_ == nil)); }
 
+-(NSTimeInterval) displayLinkTime { return [NSDate timeIntervalSinceReferenceDate]; }
+
 #if CC3_CC2_1
 -(UIView*) view { return self.openGLView; }
 -(void) setView: (UIView*) view { self.openGLView = (CCGLView*)view; }
@@ -280,6 +282,18 @@
 
 	[super setGLDefaultValues];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CCDirectorDisplayLink extension
+
+@implementation CCDirectorDisplayLink (CC3)
+
+#if CC3_CC2_2
+-(NSTimeInterval) displayLinkTime { return lastDisplayTime_; }
+#endif
 
 @end
 

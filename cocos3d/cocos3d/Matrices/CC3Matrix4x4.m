@@ -321,6 +321,22 @@ CC3Vector4 CC3Matrix4x4TransformCC3Vector4(const CC3Matrix4x4* mtx, CC3Vector4 v
 	return vOut;
 }
 
+CC3Vector CC3Matrix4x4TransformLocation(const CC3Matrix4x4* mtx, CC3Vector v) {
+	CC3Vector vOut;
+	vOut.x = (mtx->c1r1 * v.x) + (mtx->c2r1 * v.y) + (mtx->c3r1 * v.z) + mtx->c4r1;
+	vOut.y = (mtx->c1r2 * v.x) + (mtx->c2r2 * v.y) + (mtx->c3r2 * v.z) + mtx->c4r2;
+	vOut.z = (mtx->c1r3 * v.x) + (mtx->c2r3 * v.y) + (mtx->c3r3 * v.z) + mtx->c4r3;
+	return vOut;
+}
+
+CC3Vector CC3Matrix4x4TransformDirection(const CC3Matrix4x4* mtx, CC3Vector v) {
+	CC3Vector vOut;
+	vOut.x = (mtx->c1r1 * v.x) + (mtx->c2r1 * v.y) + (mtx->c3r1 * v.z);
+	vOut.y = (mtx->c1r2 * v.x) + (mtx->c2r2 * v.y) + (mtx->c3r2 * v.z);
+	vOut.z = (mtx->c1r3 * v.x) + (mtx->c2r3 * v.y) + (mtx->c3r3 * v.z);
+	return vOut;
+}
+
 void CC3Matrix4x4Transpose(CC3Matrix4x4* mtx) {
 	GLfloat tmp;
 	tmp = mtx->c1r2;   mtx->c1r2 = mtx->c2r1;   mtx->c2r1 = tmp;

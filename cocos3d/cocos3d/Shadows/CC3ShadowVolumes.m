@@ -924,8 +924,8 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		shouldVisitChildren = NO;
-		shouldClearDepthBuffer = NO;
+		_shouldVisitChildren = NO;
+		_shouldClearDepthBuffer = NO;
 	}
 	return self;
 }

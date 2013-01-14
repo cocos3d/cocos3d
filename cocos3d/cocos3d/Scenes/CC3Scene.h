@@ -248,6 +248,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 	ccColor4F ambientLight;
 	ccTime minUpdateInterval;
 	ccTime maxUpdateInterval;
+	ccTime _deltaFrameTime;
 	BOOL shouldClearDepthBufferBefore3D : 1;
 	BOOL shouldClearDepthBufferBefore2D : 1;
 }

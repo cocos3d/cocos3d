@@ -439,6 +439,22 @@ static inline void CC3Matrix4x3TranslateBy(CC3Matrix4x3* mtx, CC3Vector aTransla
 CC3Vector4 CC3Matrix4x3TransformCC3Vector4(const CC3Matrix4x3* mtx, CC3Vector4 v);
 
 /**
+ * Transforms the specified 3D location vector using the specified matrix, and returns the
+ * transformed vector. The location is transformed as if it was a 4D vector with a W value of 1.
+ *
+ * The specified matrix and the original specified vector remain unchanged.
+ */
+CC3Vector CC3Matrix4x3TransformLocation(const CC3Matrix4x3* mtx, CC3Vector v);
+
+/**
+ * Transforms the specified 3D location vector using the specified matrix, and returns the
+ * transformed vector. The location is transformed as if it was a 4D vector with a W value of 0.
+ *
+ * The specified matrix and the original specified vector remain unchanged.
+ */
+CC3Vector CC3Matrix4x3TransformDirection(const CC3Matrix4x3* mtx, CC3Vector v);
+
+/**
  * Orthonormalizes the rotation component of the specified matrix, using a Gram-Schmidt process,
  * and using the column indicated by the specified column number as the starting point of the
  * orthonormalization process.
@@ -476,13 +492,6 @@ static inline void CC3Matrix4x3Transpose(CC3Matrix4x3* mtx) {
  * Inverts the specified matrix by using the algorithm of calculating the classical
  * adjoint and dividing by the determinant. The contents of the matrix are changed.
  *
- * Not all matrices are invertable. Returns whether the matrix was inverted.
- * If this function returns NO, then the matrix was not inverted, and remains unchanged.
- *
- * Matrix inversion using the classical adjoint algorithm is computationally-expensive. If it is
- * known that the matrix contains only rotation and translation, use the CC3Matrix4x3InvertRigid
- * function instead, which is some 10 to 100 times faster than this function.
- *
  * For an affine matrix, we can invert the 3x3 linear matrix, and use it to transform
  * the negated translation vector:
  * 
@@ -490,6 +499,13 @@ static inline void CC3Matrix4x3Transpose(CC3Matrix4x3* mtx) {
  *
  * where L(-1) is the inverted 3x3 linear matrix, and t is the translation vector,
  * both extracted from the 4x3 matrix.
+ *
+ * Not all matrices are invertable. Returns whether the matrix was inverted.
+ * If this function returns NO, then the matrix was not inverted, and remains unchanged.
+ *
+ * Matrix inversion using the classical adjoint algorithm is computationally-expensive. If it is
+ * known that the matrix contains only rotation and translation, use the CC3Matrix4x3InvertRigid
+ * function instead, which is some 10 to 100 times faster than this function.
  */
 static inline BOOL CC3Matrix4x3InvertAdjoint(CC3Matrix4x3* mtx) {
 	CC3Matrix3x3* linMtx = (CC3Matrix3x3*)mtx;

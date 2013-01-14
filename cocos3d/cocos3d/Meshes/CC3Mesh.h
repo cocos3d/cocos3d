@@ -252,6 +252,12 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Returns the the smallest axis-aligned-bounding-box (AABB) that surrounds the mesh. */
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;
 
+/**
+ * Returns the radius of a spherical boundary, centered on the centerOfGeometry,
+ * that encompasses all the vertices of this mesh.
+ */
+@property(nonatomic, readonly) GLfloat radius;
+
 
 #pragma mark Allocation and initialization
 
