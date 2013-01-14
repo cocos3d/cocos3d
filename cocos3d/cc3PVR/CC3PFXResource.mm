@@ -36,6 +36,7 @@ extern "C" {
 #import "CC3PVRTPFXParser.h"
 #import "CC3OpenGLESEngine.h"
 #import "CC3PVRShamanGLProgramSemantics.h"
+#import "CC3PODResource.h"
 
 
 @implementation CC3PFXResource
@@ -447,6 +448,26 @@ static Class _defaultSemanticDelegateClass = nil;
 }
 
 -(GLenum) semanticForPFXSemanticName: (NSString*) semanticName { return kCC3SemanticNone; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3Material extension to support PFX effects
+
+@implementation CC3Material (PFXEffects)
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
+	[CC3PODResource.defaultPFXResourceClass populateMaterial: self
+											 fromEffectNamed: effectName
+										  inPFXResourceNamed: rezName];
+}
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
+	[CC3PODResource.defaultPFXResourceClass populateMaterial: self
+											 fromEffectNamed: effectName
+										   inPFXResourceFile: aFilePath];
+}
 
 @end
 

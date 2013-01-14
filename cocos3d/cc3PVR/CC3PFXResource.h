@@ -229,3 +229,24 @@
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3Material extension to support PFX effects
+
+@interface CC3Material (PFXEffects)
+
+/**
+ * Applies the PFX effect with the specified name, found in the cached CC3PFXResource with the
+ * specifed name, to this material. Raises an assertion error if a PFX resource with the specified
+ * name cannot be found in the cache.
+ */
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName;
+
+/**
+ * Applys the PFX effect with the specified name, found in the CC3PFXResource loaded from the
+ * specfied file, to this material. Raises an assertion error if the PFX resource file is not
+ * already in the resource cache and could not be loaded.
+ */
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath;
+
+@end

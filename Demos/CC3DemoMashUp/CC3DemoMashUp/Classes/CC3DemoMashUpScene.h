@@ -110,6 +110,7 @@ typedef enum {
  *   - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
  *   - bitmapped font text labels
  *   - moving individual vertex location programmatically
+ *   - Loading PowerVR PFX effects files and applying them to materials
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -322,6 +323,29 @@ typedef enum {
  * By uncommenting documeted code in the configureCamera method, the camera can be targetted
  * at another node, demonstrating an "orbit camera" by simply giving your camera a target to
  * track. As you move the camera around, it will continue to look at the target object.
+ *
+ * Up and to the left of the mascots is a mask. The visual effects applied to this mask are
+ * defined in a PowerVR PFX file loaded as part of the loading of the POD file for the mask.
+ *
+ * Under OpenGL ES 2.0, a PFX file contains "effects" each of which describes the combination
+ * of GLSL shaders and textures that should be applied to the material of a mesh node to
+ * accomplish a particular visual effect or look.
+ *
+ * When running under OpenGL ES 2.0, this mask has a brightly reflective golden appearance that
+ * shimmers as the object moves around. The effect is created by a combination of a base texture,
+ * an environmental reflective texture, and GLSL shaders that combine the two textures and the
+ * scene lighting to create the effect. This combination of textures and GLSL shaders is
+ * automatically applied to the material when the POD file is loaded. The material, as descrbed
+ * in the POD file, contains a reference to an effect in a particular PFX file that, in turn,
+ * describes the GLSL shaders and textures that should be loaded and applied to the material.
+ *
+ * When running under OpenGL ES 1.1, the texture files described in the PFX file are applied to
+ * the mask, but without the associated GLSL shaders to combine the textures, all that is visible
+ * is the second, environmental, texture. Nevertheless, this still demonstrates the ability, under
+ * OpenGL ES 1.1, of using a PFX file to describe the textures that should be applied to a material.
+ * In order to replicate, under OpenGL ES 1.1, the shimmering, reflective appearance supplied by
+ * the GLSL shaders under OpenGL ES 2.0, the texture unit combiners associated with the two textures
+ * applied to the material would need to be configured appropriately.
  *
  * Touching the switch-view button again will point the camera at a wooden sign that is
  * constructed from two separate textures that are loaded separately and applied as a
