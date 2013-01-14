@@ -31,7 +31,7 @@
 
 #import "CC3DemoMashUpLayer.h"
 #import "CC3DemoMashUpScene.h"
-#import "CC3ActionInterval.h"
+#import "CC3Actions.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 #import "HUDLayer.h"

@@ -35,7 +35,7 @@
 #import "CC3DemoMashUpScene.h"
 #import "CC3IOSExtensions.h"
 #import "CC3Billboard.h"
-#import "CC3ActionInterval.h"
+#import "CC3Actions.h"
 #import "CC3ModelSampleFactory.h"
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
@@ -2554,7 +2554,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Use actions to fade the descriptor node in and then out, and remove it when done.
 	CCActionInterval* fadeIn = [CCFadeIn actionWithDuration: 0.3];
 	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 5.0];
-	CCActionInstant* remove = [CCCallFunc actionWithTarget: dn selector: @selector(remove)];
+	CCActionInstant* remove = [CC3Remove action];
 	[dn runAction: [CCSequence actions: fadeIn, fadeOut, remove, nil]];
 	
 	// Set the location of the descriptor node to the touch location,

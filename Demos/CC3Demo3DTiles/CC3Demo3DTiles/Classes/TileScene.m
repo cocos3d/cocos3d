@@ -32,7 +32,7 @@
 #import "TileScene.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
-#import "CC3ActionInterval.h"
+#import "CC3Actions.h"
 #import "CC3OpenGLESEngine.h"
 #import "CCTouchDispatcher.h"
 #import "CGPointExtension.h"

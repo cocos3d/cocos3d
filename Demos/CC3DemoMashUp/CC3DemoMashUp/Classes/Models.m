@@ -270,14 +270,10 @@
 			self, [CC3Identifiable instanceCount], [CCDirector.sharedDirector.actionManager numberOfRunningActions]);
 }
 
-/**
- * Uses a CCSequence action to first fade the army away,
- * and then invokes the cleanUp callback to remove the invaders.
- */
+/** Uses a CCSequence action to first fade the army away and then remove it. */
 -(void) evaporate {
-	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 1.0];
-	CCActionInstant* remove = [CCCallFunc actionWithTarget: self selector: @selector(remove)];
-	[self runAction: [CCSequence actionOne: fadeOut two: remove]];
+	[self runAction: [CCSequence actionOne: [CCFadeOut actionWithDuration: 1.0]
+									   two: [CC3Remove action]]];
 }
 
 @end

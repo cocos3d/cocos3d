@@ -1,5 +1,5 @@
 /*
- * CC3ActionInterval.h
+ * CC3Actions.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -32,6 +32,7 @@
 
 #import "CC3Node.h"
 #import "CCActionEase.h"
+//#import "CCActionInstant.h"
 
 
 /**
@@ -62,10 +63,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CCActionInterval
+#pragma mark CCAction
 
 /** Extension category to support cocos3d. */
-@interface CCActionInterval (CC3)
+@interface CCAction (CC3)
 
 /** The action target cast as a CC3Node. */
 @property(nonatomic, readonly) CC3Node* targetCC3Node;
@@ -725,6 +726,20 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 			 limitFrom: (GLfloat) startOfRange
 					to: (GLfloat) endOfRange;
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3Remove
+
+/**
+ * CC3Remove removes a CC3Node from the scene, by invoking the remove method on the CC3Node.
+ *
+ * This action can be used as part of a CCSequence to remove a node after some other kind
+ * of action has completed. For example, you might create a CCSequence containing a CCFadeOut
+ * and a CC3Remove, to fade a node away and then remove it from the scene.
+ */
+@interface CC3Remove : CCActionInstant {}
 @end
 
 

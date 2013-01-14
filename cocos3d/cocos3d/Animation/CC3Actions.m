@@ -1,5 +1,5 @@
 /*
- * CC3ActionInterval.m
+ * CC3Actions.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,17 +26,17 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3ActionInterval.h for full API documentation.
+ * See header file CC3Actions.h for full API documentation.
  */
 
-#import "CC3ActionInterval.h"
+#import "CC3Actions.h"
 #import "CC3Node.h"
 
 
 #pragma mark -
-#pragma mark CCActionInterval
+#pragma mark CCAction
 
-@implementation CCActionInterval (CC3)
+@implementation CCAction (CC3)
 
 -(CC3Node*) targetCC3Node { return (CC3Node*)self.target; }
 
@@ -698,9 +698,7 @@
 	return [[[self alloc] initWithAction: action limitFrom: startOfRange to: endOfRange] autorelease];
 }
 
--(void) update: (ccTime) t {
-	[other update: (rangeStart + (rangeSpan * t))];
-}
+-(void) update: (ccTime) t { [other update: (rangeStart + (rangeSpan * t))]; }
 
 - (CCActionInterval *) reverse {
 	return [[self class] actionWithAction: other limitFrom: (rangeStart + rangeSpan) to: rangeStart];
@@ -712,3 +710,12 @@
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3Remove
+
+@implementation CC3Remove
+
+-(void) update: (ccTime) t { [self.targetCC3Node remove]; }
+
+@end

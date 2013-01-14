@@ -56,6 +56,7 @@
 		A94736FE140E58E7006F410C /* CCNodeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D3140E58E7006F410C /* CCNodeExtensions.m */; };
 		A94736FF140E58E7006F410C /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D5140E58E7006F410C /* Joystick.m */; };
 		A9473700140E58E7006F410C /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D7140E58E7006F410C /* Models.m */; };
+		A952255816A4890E00751C00 /* CC3Actions.m in Sources */ = {isa = PBXBuildFile; fileRef = A952255716A4890E00751C00 /* CC3Actions.m */; };
 		A95A5C5714E45AC00013359F /* Crate.png in Resources */ = {isa = PBXBuildFile; fileRef = A95A5C5514E45AC00013359F /* Crate.png */; };
 		A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */; };
 		A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */; };
@@ -229,7 +230,6 @@
 		A9F61F0416A0EEA300C15011 /* PVRTUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9F61DF816A0EEA300C15011 /* PVRTUnicode.cpp */; };
 		A9F61F0516A0EEA300C15011 /* PVRTVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9F61DFA16A0EEA300C15011 /* PVRTVector.cpp */; };
 		A9F61F0616A0EEA300C15011 /* PVRTVertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9F61DFC16A0EEA300C15011 /* PVRTVertex.cpp */; };
-		A9F61F0716A0EEA300C15011 /* CC3ActionInterval.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F61E0116A0EEA300C15011 /* CC3ActionInterval.m */; };
 		A9F61F0816A0EEA300C15011 /* CC3NodeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F61E0316A0EEA300C15011 /* CC3NodeAnimation.m */; };
 		A9F61F0916A0EEA300C15011 /* CC3Material.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F61E0616A0EEA300C15011 /* CC3Material.m */; };
 		A9F61F0A16A0EEA300C15011 /* CC3Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F61E0816A0EEA300C15011 /* CC3Texture.m */; };
@@ -399,6 +399,9 @@
 		A94736D5140E58E7006F410C /* Joystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joystick.m; sourceTree = "<group>"; };
 		A94736D6140E58E7006F410C /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
 		A94736D7140E58E7006F410C /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
+		A952255616A4890E00751C00 /* CC3Actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Actions.h; sourceTree = "<group>"; };
+		A952255716A4890E00751C00 /* CC3Actions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3Actions.m; sourceTree = "<group>"; };
+		A952255916A4892500751C00 /* CC3ActionInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ActionInterval.h; sourceTree = "<group>"; };
 		A95A5C5514E45AC00013359F /* Crate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Crate.png; sourceTree = "<group>"; };
 		A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassCloseUp.jpg; sourceTree = "<group>"; };
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
@@ -759,8 +762,6 @@
 		A9F61DFB16A0EEA300C15011 /* PVRTVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVector.h; sourceTree = "<group>"; };
 		A9F61DFC16A0EEA300C15011 /* PVRTVertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTVertex.cpp; sourceTree = "<group>"; };
 		A9F61DFD16A0EEA300C15011 /* PVRTVertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTVertex.h; sourceTree = "<group>"; };
-		A9F61E0016A0EEA300C15011 /* CC3ActionInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3ActionInterval.h; sourceTree = "<group>"; };
-		A9F61E0116A0EEA300C15011 /* CC3ActionInterval.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3ActionInterval.m; sourceTree = "<group>"; };
 		A9F61E0216A0EEA300C15011 /* CC3NodeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3NodeAnimation.h; sourceTree = "<group>"; };
 		A9F61E0316A0EEA300C15011 /* CC3NodeAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3NodeAnimation.m; sourceTree = "<group>"; };
 		A9F61E0516A0EEA300C15011 /* CC3Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3Material.h; sourceTree = "<group>"; };
@@ -1644,8 +1645,8 @@
 		A9F61DFF16A0EEA300C15011 /* Animation */ = {
 			isa = PBXGroup;
 			children = (
-				A9F61E0016A0EEA300C15011 /* CC3ActionInterval.h */,
-				A9F61E0116A0EEA300C15011 /* CC3ActionInterval.m */,
+				A952255616A4890E00751C00 /* CC3Actions.h */,
+				A952255716A4890E00751C00 /* CC3Actions.m */,
 				A9F61E0216A0EEA300C15011 /* CC3NodeAnimation.h */,
 				A9F61E0316A0EEA300C15011 /* CC3NodeAnimation.m */,
 			);
@@ -1928,6 +1929,7 @@
 		A9F61EC516A0EEA300C15011 /* deprecated */ = {
 			isa = PBXGroup;
 			children = (
+				A952255916A4892500751C00 /* CC3ActionInterval.h */,
 				A9F61EC616A0EEA300C15011 /* CC3GLMatrix.h */,
 				A9F61EC716A0EEA300C15011 /* CC3GLMatrix.m */,
 				A9F61EC816A0EEA300C15011 /* CC3MatrixMath.h */,
@@ -2143,7 +2145,6 @@
 				A9F61F0416A0EEA300C15011 /* PVRTUnicode.cpp in Sources */,
 				A9F61F0516A0EEA300C15011 /* PVRTVector.cpp in Sources */,
 				A9F61F0616A0EEA300C15011 /* PVRTVertex.cpp in Sources */,
-				A9F61F0716A0EEA300C15011 /* CC3ActionInterval.m in Sources */,
 				A9F61F0816A0EEA300C15011 /* CC3NodeAnimation.m in Sources */,
 				A9F61F0916A0EEA300C15011 /* CC3Material.m in Sources */,
 				A9F61F0A16A0EEA300C15011 /* CC3Texture.m in Sources */,
@@ -2338,6 +2339,7 @@
 				A9D9E65416A473620030D826 /* vec2.c in Sources */,
 				A9D9E65516A473620030D826 /* vec3.c in Sources */,
 				A9D9E65616A473620030D826 /* vec4.c in Sources */,
+				A952255816A4890E00751C00 /* CC3Actions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
