@@ -355,9 +355,7 @@
 /** Template method that loads the viewMatrix into the current GL modelview matrix. */
 -(void) loadModelviewMatrix {
 	LogTrace(@"%@ loading modelview matrix into GL: %@", self, _viewMatrix);
-	CC3Matrix4x4 glMtx;
-	[_viewMatrix populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLESEngine engine].matrices.modelview load: &glMtx];
+	[[CC3OpenGLESEngine engine].matrices.modelview load: _viewMatrix];
 }
 
 /**
@@ -372,9 +370,7 @@
 	LogTrace(@"%@ loaded %@finite projection matrix into GL: %@",
 			 self, (hasInfiniteDepthOfField ? @"in" : @""), projMtx);
 	
-	CC3Matrix4x4 glMtx;
-	[projMtx populateCC3Matrix4x4: &glMtx];
-	[[CC3OpenGLESEngine engine].matrices.projection load: &glMtx];
+	[[CC3OpenGLESEngine engine].matrices.projection load: projMtx];
 }
 
 

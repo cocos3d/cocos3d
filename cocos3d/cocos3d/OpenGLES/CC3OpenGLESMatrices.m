@@ -77,7 +77,35 @@ BOOL CC3MatrixSemanticIs3x3(CC3MatrixSemantic semantic) {
 	}
 }
 
-BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) { return !CC3MatrixSemanticIs3x3(semantic); }
+BOOL CC3MatrixSemanticIs4x3(CC3MatrixSemantic semantic) {
+	switch (semantic) {
+		case kCC3MatrixSemanticModelLocal:
+		case kCC3MatrixSemanticModelLocalInv:
+		case kCC3MatrixSemanticModel:
+		case kCC3MatrixSemanticModelInv:
+		case kCC3MatrixSemanticView:
+		case kCC3MatrixSemanticViewInv:
+		case kCC3MatrixSemanticModelView:
+		case kCC3MatrixSemanticModelViewInv:
+			return YES;
+		default:
+			return NO;
+	}
+}
+
+BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) {
+	switch (semantic) {
+		case kCC3MatrixSemanticProj:
+		case kCC3MatrixSemanticProjInv:
+		case kCC3MatrixSemanticViewProj:
+		case kCC3MatrixSemanticViewProjInv:
+		case kCC3MatrixSemanticModelViewProj:
+		case kCC3MatrixSemanticModelViewProjInv:
+			return YES;
+		default:
+			return NO;
+	}
+}
 
 
 #pragma mark -
@@ -100,11 +128,11 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) { return !CC3MatrixSeman
 
 -(void) identity {}
 
--(void) load: (CC3Matrix4x4*) glMatrix {}
+-(void) load: (CC3Matrix*) glMatrix {}
 
 -(void) getTop: (CC3Matrix4x4*) mtx {}
 
--(void) multiply: (CC3Matrix4x4*) mtx {}
+-(void) multiply: (CC3Matrix*) mtx {}
 
 -(void) loadFromModelView {}
 
@@ -179,6 +207,8 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) { return !CC3MatrixSeman
 -(void) stackChanged: (CC3OpenGLESMatrixStack*) stack {}
 
 -(CC3Matrix3x3*) matrix3x3ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
+
+-(CC3Matrix4x3*) matrix4x3ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
 
 -(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
 

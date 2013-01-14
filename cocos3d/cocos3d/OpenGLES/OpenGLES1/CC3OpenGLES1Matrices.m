@@ -75,23 +75,27 @@
 	[self wasChanged];
 }
 
--(void) load: (CC3Matrix4x4*) mtx {
+-(void) load: (CC3Matrix*) mtx {
 	[self activate];
-	glLoadMatrixf(mtx->elements);
-	LogGLErrorTrace(@"while loading matrix at %@ into %@", NSStringFromCC3Matrix4x4(mtx), self);
+
+	CC3Matrix4x4 glMtx;
+	[mtx populateCC3Matrix4x4: &glMtx];
+
+	glLoadMatrixf(glMtx.elements);
+	LogGLErrorTrace(@"while loading matrix at %@ into %@", mtx, self);
+
 	[self wasChanged];
 }
 
--(void) getTop: (CC3Matrix4x4*) mtx {
+-(void) multiply: (CC3Matrix*) mtx {
 	[self activate];
-	glGetFloatv(_topName, mtx->elements);
-	LogGLErrorTrace(@"while reading top of %@ into matrix %@", self, NSStringFromCC3Matrix4x4(mtx));
-}
 
--(void) multiply: (CC3Matrix4x4*) mtx {
-	[self activate];
-	glMultMatrixf(mtx->elements);
-	LogGLErrorTrace(@"while multiplied matrix %@ into %@", NSStringFromCC3Matrix4x4(mtx), self);
+	CC3Matrix4x4 glMtx;
+	[mtx populateCC3Matrix4x4: &glMtx];
+
+	glMultMatrixf(glMtx.elements);
+	LogGLErrorTrace(@"while multiplied matrix %@ into %@", mtx, self);
+
 	[self wasChanged];
 }
 
@@ -153,8 +157,6 @@
 	CC3Assert(NO, @"Can't get depth of %@", self);
 	return 0;
 }
-
--(void) getTop: (CC3Matrix4x4*) mtx { CC3Assert(NO, @"Can't retrieve top of %@", self); }
 
 -(void) loadFromModelView {
 	[self activate];

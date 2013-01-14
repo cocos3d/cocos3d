@@ -401,6 +401,28 @@
 -(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index;
 
 /**
+ * Sets the 4x4 value of this uniform from the specified 4x3 value, adding the last identity row.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the first
+ * element in the array.
+ *
+ * The type property of this instance must be GL_FLOAT_MAT4.
+ */
+-(void) setMatrix4x3: (CC3Matrix4x3*) value;
+
+/**
+ * Sets the 4x4 element at the specified index in this uniform to the specified 4x3 value,
+ * adding the last identity row.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance must be GL_FLOAT_MAT4.
+ */
+-(void) setMatrix4x3: (CC3Matrix4x3*) value at: (GLuint) index;
+
+/**
  * Sets the value of this uniform to the specified value.
  *
  * If this uniform has been declared as an array, this method sets the value of the first

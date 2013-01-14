@@ -803,20 +803,16 @@
 #pragma mark Drawing
 
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
 	CC3OpenGLESMatrices* glesMatrices = [CC3OpenGLESEngine engine].matrices;
-	CC3Matrix4x4 glMtx;
-	
-	GLuint boneNum = 0;
-	for (CC3SkinnedBone* sb in skinnedBones) {
+	GLuint boneCnt = skinnedBones.count;
+	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
+		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
 
 		// Load this palette matrix from the modelview matrix and the apply the bone draw matrix.
-		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteAt: boneNum++];
+		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteAt: boneNum];
 		[glesPaletteMatrix loadFromModelView];
-		[sb.drawTransformMatrix populateCC3Matrix4x4: &glMtx];
-		[glesPaletteMatrix multiply: &glMtx];
+		[glesPaletteMatrix multiply: sb.drawTransformMatrix];
 	}
-
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
 }
 

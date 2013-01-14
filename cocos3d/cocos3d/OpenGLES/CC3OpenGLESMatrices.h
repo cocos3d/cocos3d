@@ -31,7 +31,7 @@
 
 
 #import "CC3OpenGLESStateTracker.h"
-#import "CC3Matrix4x4.h"
+#import "CC3Matrix.h"
 
 /**
  * Type types of matrices available for retrieval from this state tracker.
@@ -68,10 +68,25 @@ typedef enum {
 /** Returns a string representation of the specified semantic. */
 NSString* NSStringFromCC3MatrixSemantic(CC3MatrixSemantic semantic);
 
-/** Returns whether the specified matrix semantic represents a 3x3 matrix. */
+/**
+ * Returns whether the specified matrix semantic represents a 3x3 matrix.
+ *
+ * The inverse transpose matrices are 3x3 matrices.
+ */
 BOOL CC3MatrixSemanticIs3x3(CC3MatrixSemantic semantic);
 
-/** Returns whether the specified matrix semantic represents a 4x4 matrix. */
+/**
+ * Returns whether the specified matrix semantic represents a 4x3 matrix.
+ *
+ * The model, view and modelview families of matrices are 4x3.
+ */
+BOOL CC3MatrixSemanticIs4x3(CC3MatrixSemantic semantic);
+
+/**
+ * Returns whether the specified matrix semantic represents a 4x4 matrix.
+ *
+ * Matrices that involve the projection matrix are 4x4 matrices.
+ */
 BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 
 
@@ -98,16 +113,10 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 -(void) identity;
 
 /** Loads the specified matrix onto the top of this matrix stack. */
--(void) load: (CC3Matrix4x4*) mtx;
-
-/**
- * Retrieves the matrix at the top of this matrix stack,
- * and populates the specified matrix with its contents.
- */
--(void) getTop: (CC3Matrix4x4*) mtx;
+-(void) load: (CC3Matrix*) mtx;
 
 /** Multiplies the matrix at top of this matrix stack with the specified matrix. */
--(void) multiply: (CC3Matrix4x4*) mtx;
+-(void) multiply: (CC3Matrix*) mtx;
 
 /** 
  * If this matrix stack is a palette matrix, loads this matrix palette from the current
@@ -213,14 +222,21 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 /**
  * Returns a pointer to a 3x3 matrix associated with the specified CC3Semantic.
  *
- * The inverse transform matrices are 3x3 matrices. All others are 4x4.
+ * The inverse transpose matrices are 3x3 matrices.
  */
 -(CC3Matrix3x3*) matrix3x3ForSemantic: (CC3MatrixSemantic) semantic;
 
 /**
+ * Returns a pointer to a 4x3 matrix associated with the specified CC3Semantic.
+ *
+ * The model, view and modelview families of matrices are 4x3.
+ */
+-(CC3Matrix4x3*) matrix4x3ForSemantic: (CC3MatrixSemantic) semantic;
+
+/**
  * Returns a pointer to a 4x4 matrix associated with the specified CC3Semantic.
  *
- * The inverse transform matrices are 3x3 matrices. All others are 4x4.
+ * Matrices that involve the projection matrix are 4x4 matrices.
  */
 -(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic;
 

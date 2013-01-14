@@ -230,10 +230,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	GLenum semantic = uniform.semantic;
 	GLuint semanticIndex = uniform.semanticIndex;
 	GLint uniformSize = uniform.size;
-	CC3Matrix4x4 mtx4, pntInvMtx4, nodeMtx4;
-	CC3Matrix4x4* pMtx4;
-//	CC3Matrix4x3 mtxAff;
-	CC3Matrix3x3 mtxRot;
+	CC3Matrix4x3 m4x3, pntInvMtx, nodeMtx;
+	CC3Matrix4x3* pMtx4x3;
+	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
 	ccTime appTime;
 	
@@ -264,63 +263,63 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 		// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelLocalMatrix:
-			// Get local matrix into mtx4 by P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x4: &pntInvMtx4];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &nodeMtx4];
-			CC3Matrix4x4Multiply(&mtx4, &pntInvMtx4, &nodeMtx4);
-			[uniform setMatrix4x4: &mtx4];
+			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
+			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
+			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticModelLocalMatrixInv:
-			// Get local matrix into mtx4 by P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x4: &pntInvMtx4];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &nodeMtx4];
-			CC3Matrix4x4Multiply(&mtx4, &pntInvMtx4, &nodeMtx4);
+			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
+			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
 			// Now invert
-			CC3Matrix4x4InvertAdjoint(&mtx4);
-			[uniform setMatrix4x4: &mtx4];
+			CC3Matrix4x3InvertAdjoint(&m4x3);
+			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticModelLocalMatrixInvTran:
-			// Get local matrix into mtx4 by P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x4: &pntInvMtx4];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &nodeMtx4];
-			CC3Matrix4x4Multiply(&mtx4, &pntInvMtx4, &nodeMtx4);
+			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
+			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
 			// Now take inverse-transpose
-			CC3Matrix3x3PopulateFrom4x4(&mtxRot, &mtx4);
-			CC3Matrix3x3InvertAdjoint(&mtxRot);
-			CC3Matrix3x3Transpose(&mtxRot);
-			[uniform setMatrix3x3: &mtxRot];
+			CC3Matrix3x3PopulateFrom4x3(&m3x3, &m4x3);
+			CC3Matrix3x3InvertAdjoint(&m3x3);
+			CC3Matrix3x3Transpose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
 			return YES;
 
 		case kCC3SemanticModelMatrix:
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x4: &mtx4];
-			[uniform setMatrix4x4: &mtx4];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &m4x3];
+			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticModelMatrixInv:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x4: &mtx4];
-			[uniform setMatrix4x4: &mtx4];
+			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticModelMatrixInvTran:
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix3x3: &mtxRot];
-			CC3Matrix3x3InvertAdjoint(&mtxRot);
-			CC3Matrix3x3Transpose(&mtxRot);
-			[uniform setMatrix3x3: &mtxRot];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix3x3: &m3x3];
+			CC3Matrix3x3InvertAdjoint(&m3x3);
+			CC3Matrix3x3Transpose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
 			return YES;
 
 		case kCC3SemanticViewMatrix:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticView]];
+			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView]];
 			return YES;
 		case kCC3SemanticViewMatrixInv:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticViewInv]];
+			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticViewInv]];
 			return YES;
 		case kCC3SemanticViewMatrixInvTran:
 			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticViewInvTran]];
 			return YES;
 
 		case kCC3SemanticModelViewMatrix:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticModelView]];
+			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticModelView]];
 			return YES;
 		case kCC3SemanticModelViewMatrixInv:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticModelViewInv]];
+			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticModelViewInv]];
 			return YES;
 		case kCC3SemanticModelViewMatrixInvTran:
 			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticModelViewInvTran]];
@@ -428,13 +427,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 
 		case kCC3SemanticLightLocationEyeSpace:
-			pMtx4 = [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticView];
+			pMtx4x3 = [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
 				if (glesLight.isEnabled) {
 					// Transform global position/direction to eye space and normalize if direction
-					CC3Vector4 ltPos = glesLight.position.value;
-					ltPos = CC3Matrix4x4TransformCC3Vector4(pMtx4, ltPos);
+					CC3Vector4 ltPos = CC3Matrix4x3TransformCC3Vector4(pMtx4x3, glesLight.position.value);
 					if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
 					[uniform setVector4: ltPos at: i];
 				}
@@ -447,13 +445,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			return YES;
 		case kCC3SemanticLightLocationModelSpace:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x4: &mtx4];
+			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
 				if (glesLight.isEnabled) {
 					// Transform global position/direction to model space and normalize if direction
-					CC3Vector4 ltPos = glesLight.position.value;
-					ltPos = CC3Matrix4x4TransformCC3Vector4(&mtx4, ltPos);
+					CC3Vector4 ltPos = CC3Matrix4x3TransformCC3Vector4(&m4x3, glesLight.position.value);
 					if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
 					[uniform setVector4: ltPos at: i];
 				}
@@ -492,14 +489,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 			
 		case kCC3SemanticLightSpotDirectionEyeSpace:
-			pMtx4 = [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticView];
+			pMtx4x3 = [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
 				if (glesLight.isEnabled) {
 					// Transform global direction to eye space and normalize
-					CC3Vector4 ltDir = CC3Vector4FromDirection(glesLight.spotDirection.value);
-					ltDir = CC3Matrix4x4TransformCC3Vector4(pMtx4, ltDir);
-					[uniform setVector: CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(ltDir)) at: i];
+					CC3Vector ltDir = CC3Matrix4x3TransformDirection(pMtx4x3, glesLight.spotDirection.value);
+					[uniform setVector: CC3VectorNormalize(ltDir) at: i];
 				}
 			}
 			return YES;
@@ -510,14 +506,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			return YES;
 		case kCC3SemanticLightSpotDirectionModelSpace:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x4: &mtx4];
+			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
 				if (glesLight.isEnabled) {
 					// Transform global direction to model space and normalize
-					CC3Vector4 ltDir = CC3Vector4FromDirection(glesLight.spotDirection.value);
-					ltDir = CC3Matrix4x4TransformCC3Vector4(&mtx4, ltDir);
-					[uniform setVector: CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(ltDir)) at: i];
+					CC3Vector ltDir = CC3Matrix4x3TransformDirection(&m4x3, glesLight.spotDirection.value);
+					[uniform setVector: CC3VectorNormalize(ltDir) at: i];
 				}
 			}
 			return YES;

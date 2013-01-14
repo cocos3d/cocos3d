@@ -221,9 +221,10 @@
 -(void) setMatrix3x3: (CC3Matrix3x3*) value { [self setMatrix3x3: value at: 0]; }
 
 -(void) setMatrix3x3: (CC3Matrix3x3*) value at: (GLuint) index {
+	CC3Matrix3x3* varMtx = (CC3Matrix3x3*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT3:
-			((CC3Matrix3x3*)_varValue)[index] = *value;
+			varMtx[index] = *value;
 			return;
 		default:
 			CC3Assert(NO, @"%@ attempted to set 3x3 matrix when matrix type %@ expected.",
@@ -232,12 +233,28 @@
 	}
 }
 
+-(void) setMatrix4x3: (CC3Matrix4x3*) value { [self setMatrix4x3: value at: 0]; }
+
+-(void) setMatrix4x3: (CC3Matrix4x3*) value at: (GLuint) index {
+	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
+	switch (_type) {
+		case GL_FLOAT_MAT4:
+			CC3Matrix4x4PopulateFrom4x3(&(varMtx[index]), value);
+			return;
+		default:
+			CC3Assert(NO, @"%@ attempted to set 4x4 matrix when matrix type %@ expected.",
+					  self, NSStringFromGLEnum(_type));
+			return;
+	}
+}
+
 -(void) setMatrix4x4: (CC3Matrix4x4*) value { [self setMatrix4x4: value at: 0]; }
 
 -(void) setMatrix4x4: (CC3Matrix4x4*) value at: (GLuint) index {
+	CC3Matrix4x4* varMtx = (CC3Matrix4x4*)_varValue;
 	switch (_type) {
 		case GL_FLOAT_MAT4:
-			((CC3Matrix4x4*)_varValue)[index] = *value;
+			varMtx[index] = *value;
 			return;
 		default:
 			CC3Assert(NO, @"%@ attempted to set 4x4 matrix when matrix type %@ expected.",

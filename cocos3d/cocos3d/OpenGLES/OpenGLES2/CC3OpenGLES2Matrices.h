@@ -39,6 +39,7 @@
 /** The initial maximum depth of a matrix stack under OpenGL ES 2. */
 #define kCC3OpenGLES2MatrixStackMaxDepth		8
 
+
 #pragma mark -
 #pragma mark CC3OpenGLES2MatrixStack
 
@@ -48,6 +49,22 @@
 	GLuint _maxDepth;
 	CC3Matrix4x4* _mtxStack;
 }
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES2ModelviewMatrixStack
+
+/** The 4x3 modelview matrix stack. */
+@interface CC3OpenGLES2ModelviewMatrixStack : CC3OpenGLES2MatrixStack
+@end
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES2ProjectionMatrixStack
+
+/** The 4x4 projection matrix stack. */
+@interface CC3OpenGLES2ProjectionMatrixStack : CC3OpenGLES2MatrixStack
 @end
 
 #pragma mark -

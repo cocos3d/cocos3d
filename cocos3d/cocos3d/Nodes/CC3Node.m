@@ -1672,24 +1672,18 @@ static GLuint lastAssignedNodeTag;
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
 	CC3OpenGLESMatrixStack* glesMatrixStack = [CC3OpenGLESEngine engine].matrices.modelview;
-	CC3Matrix4x4 glMtx;
 
 	[glesMatrixStack push];
 
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
-	[transformMatrix populateCC3Matrix4x4: &glMtx];
-	[glesMatrixStack multiply: &glMtx];
+	[glesMatrixStack multiply: transformMatrix];
 
 	[visitor draw: self];
 
 	[glesMatrixStack pop];
 }
 
--(void) checkDrawingOrder {
-	for (CC3Node* child in children) {
-		[child checkDrawingOrder];
-	}
-}
+-(void) checkDrawingOrder { for (CC3Node* child in children) [child checkDrawingOrder]; }
 
 
 #pragma mark Node structural hierarchy
