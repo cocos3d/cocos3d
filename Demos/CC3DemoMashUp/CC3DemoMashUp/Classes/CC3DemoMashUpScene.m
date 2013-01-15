@@ -57,6 +57,7 @@
 #import "CC3AffineMatrix.h"
 #import "CC3ProjectionMatrix.h"
 #import "CC3PFXResource.h"
+#import "CC3BitmapLabelNode.h"
 
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"

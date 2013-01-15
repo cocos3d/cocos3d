@@ -33,7 +33,7 @@
 #import "CC3PODLight.h"
 #import "CC3PointParticles.h"
 #import "CC3MeshParticleSamples.h"
-#import "CC3ParametricMeshNodes.h"
+#import "CC3BitmapLabelNode.h"
 
 
 #pragma mark -

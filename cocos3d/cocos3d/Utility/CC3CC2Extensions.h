@@ -345,43 +345,6 @@
 @end
 
 
-
-#pragma mark -
-#pragma mark CC3BMFontConfiguration 
-
-/** Extends CC3BMFontConfiguration to support cocos3d functionality. */
-@interface CC3BMFontConfiguration : CCBMFontConfiguration {
-@public
-	ccGridSize textureSize;
-	NSUInteger baseline;
-	GLfloat fontSize;
-}
-
-/** The name of the font atlas texture. */
-@property (nonatomic, retain) NSString* atlasName;
-
-/** Returns a pointer to the specification of the specified character. */
--(ccBMFontDef*) characterSpecFor: (unichar) c;
-
-/**
- * Returns the amount of kerning required when the specified second character follows the
- * first character in a line of text.
- */
--(NSInteger) kerningBetween: (unichar) firstChar and: (unichar) secondChar;
-
-/**
- * Returns an instance loaded from the specified bitmap font definition file.
- *
- * This implementation maintains a cache so that each file is only loaded once.
- */
-+(id) configurationFromFontFile: (NSString*) fontFile;
-
-/** Clears all cached font configurations to conserve memory. */
-+(void) clearFontConfigurations;
-
-@end
-
-
 #pragma mark -
 #pragma mark CCFileUtils extension
 

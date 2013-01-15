@@ -56,6 +56,7 @@ cocos3d 2.0.0 - 2013/01/31
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
 - [API change] CC3Light attenuationCoefficients property renamed to attenuation, and attenuationCoefficients deprecated.
+- [API change] CC3BMFontConfiguration renamed to CC3BitmapFontConfiguration, removed as subclass of CCBMFontConfiguration, and file parsing separated from former parent class.
 
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
     - CC3Assert ensures the assertion message is logged to the console prior to raising the assertion exception.
