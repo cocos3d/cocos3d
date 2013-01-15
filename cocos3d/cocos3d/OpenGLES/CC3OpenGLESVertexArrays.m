@@ -293,6 +293,8 @@
 
 -(void) disableUnboundVertexPointers {}
 
+-(void) enable2DVertexPointers {}
+
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
 	glDrawArrays(drawMode, start, len);
 	LogGLErrorTrace(@"%@ drawing %u vertices as %@ starting from %u",

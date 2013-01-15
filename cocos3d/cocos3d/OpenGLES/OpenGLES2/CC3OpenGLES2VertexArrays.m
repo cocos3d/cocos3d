@@ -272,6 +272,25 @@
 	for (CC3OpenGLES2StateTrackerVertexAttributesPointer* vap in _attributes) [vap disableIfUnbound];
 }
 
+// Force alignment of the state tracking between the position, color & texture vertex arrays
+-(void) enable2DVertexPointers {
+	for (CC3OpenGLES2StateTrackerVertexAttributesPointer* vap in _attributes) {
+		BOOL attrIdx = vap.attributeIndex;
+		switch (attrIdx) {
+			case kCCVertexAttrib_Position:
+			case kCCVertexAttrib_Color:
+			case kCCVertexAttrib_TexCoords:
+				[vap enable];
+				break;
+			default:
+				[vap disable];
+				break;
+		}
+	}
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
+}
+
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
 	[desc appendFormat: @"%@:", [self class]];

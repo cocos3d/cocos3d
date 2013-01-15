@@ -285,7 +285,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addFloatingHead];			// Add the bump-mapped floating head.
 									// This must happen after camera is loaded (in addRobot).
 	
-//	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
+	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
 	
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
@@ -2600,7 +2600,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		tp.color = ccORANGE;
 		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
 		
-//		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
+		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed
 		
 		// We've set the teapot location to the global 3D point that was derived from the
 		// touch point, and the teapot has a global rotation of zero, and a global scale.

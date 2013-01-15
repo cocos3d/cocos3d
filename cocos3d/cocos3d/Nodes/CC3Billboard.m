@@ -537,11 +537,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		glesTextures.clientActiveTexture.value = textureUnitIndex;
 		
 		// Enable location and color arrays, and disable normal and point size arrays.
-		CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
-		[[glesVtxArrays vertexPointerForSemantic: CC3VertexLocations.defaultSemantic] enable];
-		[[glesVtxArrays vertexPointerForSemantic: CC3VertexColors.defaultSemantic] enable];
-		[[glesVtxArrays vertexPointerForSemantic: CC3VertexNormals.defaultSemantic] disable];
-		[[glesVtxArrays vertexPointerForSemantic: CC3VertexPointSizes.defaultSemantic] disable];
+		[CC3OpenGLESEngine.engine.vertices enable2DVertexPointers];
 		
 		// 2D drawing might change buffer properties unbeknownst to cocos3d,
 		// so force the buffers to be respecified on next 3D draw

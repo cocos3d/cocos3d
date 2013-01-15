@@ -262,6 +262,9 @@
 /** Disables any vertex pointers that have not been bound to the GL engine. */
 -(void) disableUnboundVertexPointers;
 
+/** Enables the vertex pointers needed for drawing cocos2d 2D artifacts, and disables all the rest. */
+-(void) enable2DVertexPointers;
+
 /**
  * Draws vertices bound by the vertex pointers using the specified draw mode,
  * starting at the specified index, and drawing the specified number of verticies.

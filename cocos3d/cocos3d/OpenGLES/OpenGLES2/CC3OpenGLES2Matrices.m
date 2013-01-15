@@ -33,6 +33,8 @@
 
 #if CC3_OGLES_2
 
+#import "kazmath/GL/matrix.h"
+
 /** The depth of the modelview matrix stack when the view matrix is at the top. */
 #define kCC3ViewMatrixDepth			2
 
@@ -69,6 +71,7 @@
 	[self copyTop];
 	_depth++;	// Move the stack index to the new top
 	[self wasChanged];
+	[self push2D];
 }
 
 -(void) copyTop { CC3Assert(NO, @"%@ does not implement the copyTop method.", self); }
@@ -77,15 +80,46 @@
 	CC3Assert(_depth > 1, @"%@ attempted to pop beyond the bottom of the stack.", self);
 	_depth--;
 	[self wasChanged];
+	[self pop2D];
 }
 
 -(GLuint) depth { return _depth; }
 
--(void) identity { [self wasChanged]; }
+-(void) identity {
+	[self wasChanged];
+	[self load2D];
+}
 
--(void) load: (CC3Matrix*) mtx { [self wasChanged]; }
+-(void) load: (CC3Matrix*) mtx {
+	[self wasChanged];
+	[self load2D];
+}
 
--(void) multiply: (CC3Matrix*) mtx { [self wasChanged]; }
+-(void) multiply: (CC3Matrix*) mtx {
+	[self wasChanged];
+	[self load2D];
+}
+
+
+#pragma mark Managing 2D matrices for CC3Billboards
+
+/** 
+ * Pushes the cocos2d matrix stack to keep it aligned with this stack.
+ * This ensures that the correct 3D matrices will be applied to CC3Billboards.
+ */
+-(void) push2D { kmGLPushMatrix(); }
+
+/**
+ * Pops the cocos2d matrix stack to keep it aligned with this stack.
+ * This ensures that the correct 3D matrices will be applied to CC3Billboards.
+ */
+-(void) pop2D { kmGLPopMatrix(); }
+
+/**
+ * Loads the top of the cocos2d matrix stack with the top of this matrix, to keep it aligned
+ * with this stack. This ensures that the correct 3D matrices will be applied to CC3Billboards.
+ */
+-(void) load2D { kmGLLoadMatrix((kmMat4*)self.top); }
 
 
 #pragma mark Allocation and initialization
@@ -112,24 +146,36 @@
 
 @implementation CC3OpenGLES2ModelviewMatrixStack
 
+-(CC3Matrix4x3*) top4x3 { return (CC3Matrix4x3*)self.top; }
+
 -(void) copyTop { CC3Matrix4x3PopulateFrom4x3((CC3Matrix4x3*)&_mtxStack[_depth], (CC3Matrix4x3*)self.top); }
 
 -(void) identity {
-	CC3Matrix4x3PopulateIdentity((CC3Matrix4x3*)self.top);
-	[self wasChanged];
+	CC3Matrix4x3PopulateIdentity(self.top4x3);
+	[super identity];
 }
 
 -(void) load: (CC3Matrix*) mtx {
-	[mtx populateCC3Matrix4x3: (CC3Matrix4x3*)self.top];
-	[self wasChanged];
+	[mtx populateCC3Matrix4x3: self.top4x3];
+	[super load: mtx];
 }
 
 -(void) multiply: (CC3Matrix*) mtx {
 	CC3Matrix4x3 mRslt, mAffine;
 	[mtx populateCC3Matrix4x3: &mAffine];
-	CC3Matrix4x3Multiply(&mRslt, (CC3Matrix4x3*)self.top, &mAffine);
-	CC3Matrix4x3PopulateFrom4x3((CC3Matrix4x3*)self.top, &mRslt);
-	[self wasChanged];
+	CC3Matrix4x3Multiply(&mRslt, self.top4x3, &mAffine);
+	CC3Matrix4x3PopulateFrom4x3(self.top4x3, &mRslt);
+	[super multiply: mtx];
+}
+
+
+#pragma mark Managing 2D matrices for CC3Billboards
+
+/** Convert 4x3 matrix to a 4x4 matrix before loading 2D stack. */
+-(void) load2D {
+	CC3Matrix4x4 mat4;
+	CC3Matrix4x4PopulateFrom4x3(&mat4, self.top4x3);
+	kmGLLoadMatrix((kmMat4*)&mat4);
 }
 
 @end
@@ -144,12 +190,12 @@
 
 -(void) identity {
 	CC3Matrix4x4PopulateIdentity(self.top);
-	[self wasChanged];
+	[super identity];
 }
 
 -(void) load: (CC3Matrix*) mtx {
 	[mtx populateCC3Matrix4x4: self.top];
-	[self wasChanged];
+	[super load: mtx];
 }
 
 -(void) multiply: (CC3Matrix*) mtx {
@@ -157,7 +203,31 @@
 	[mtx populateCC3Matrix4x4: &mat4];
 	CC3Matrix4x4Multiply(&mRslt, self.top, &mat4);
 	CC3Matrix4x4PopulateFrom4x4(self.top, &mRslt);
-	[self wasChanged];
+	[super multiply: mtx];
+}
+
+
+#pragma mark Managing 2D matrices for CC3Billboards
+
+/** Temporarily switch to the projection stack. */
+-(void) push2D {
+	kmGLMatrixMode(KM_GL_PROJECTION);
+	[super push2D];
+	kmGLMatrixMode(KM_GL_MODELVIEW);
+}
+
+/** Temporarily switch to the projection stack. */
+-(void) pop2D {
+	kmGLMatrixMode(KM_GL_PROJECTION);
+	[super pop2D];
+	kmGLMatrixMode(KM_GL_MODELVIEW);
+}
+
+/** Temporarily switch to the projection stack. */
+-(void) load2D {
+	kmGLMatrixMode(KM_GL_PROJECTION);
+	[super load2D];
+	kmGLMatrixMode(KM_GL_MODELVIEW);
 }
 
 @end

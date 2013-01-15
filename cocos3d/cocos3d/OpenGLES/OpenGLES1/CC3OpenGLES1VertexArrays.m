@@ -255,6 +255,15 @@
 	[self.engine.textures disableUnboundVertexPointers];
 }
 
+-(void) enable2DVertexPointers {
+	[_locations enable];
+	[_colors enable];
+	[_normals disable];
+	[_pointSizes disable];
+	[_weights disable];
+	[_matrixIndices disable];
+}
+
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
 	[desc appendFormat: @"%@:", [self class]];
