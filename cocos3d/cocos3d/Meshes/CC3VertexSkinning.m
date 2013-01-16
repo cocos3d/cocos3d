@@ -48,6 +48,12 @@
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
+@interface CC3Mesh (TemplateMethods)
+-(void) drawVerticesFrom: (GLuint) vertexIndex
+				forCount: (GLuint) vertexCount
+			 withVisitor: (CC3NodeDrawingVisitor*) visitor;
+@end
+
 @interface CC3FaceArray (TemplateMethods)
 -(CC3Face) faceAt: (GLuint) faceIndex;
 @end
@@ -97,108 +103,6 @@
 
 -(CC3SkinSection*) skinSectionForFaceIndex: (GLint) faceIndex {
 	return [self skinSectionForVertexIndexAt: [self vertexIndexCountFromFaceCount: faceIndex]];
-}
-
--(CC3SkinMesh*) skinnedMesh {
-	return (CC3SkinMesh*)mesh;
-}
-
--(void) retainVertexMatrixIndices {
-	[self.skinnedMesh retainVertexMatrixIndices];
-	[super retainVertexMatrixIndices];
-}
-
--(void) doNotBufferVertexMatrixIndices {
-	[self.skinnedMesh doNotBufferVertexMatrixIndices];
-	[super doNotBufferVertexMatrixIndices];
-}
-
--(void) retainVertexWeights {
-	[self.skinnedMesh retainVertexWeights];
-	[super retainVertexWeights];
-}
-
--(void) doNotBufferVertexWeights {
-	[self.skinnedMesh doNotBufferVertexWeights];
-	[super doNotBufferVertexWeights];
-}
-
-
-#pragma mark Accessing vertex data
-
--(GLuint) vertexUnitCount {
-	CC3SkinMesh* sm = self.skinnedMesh;
-	return sm ? sm.vertexUnitCount : 0;
-}
-
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	CC3SkinMesh* sm = self.skinnedMesh;
-	return sm ? [sm vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
-}
-
-// Deprecated
--(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexWeightForVertexUnit: vertexUnit at: index];
-}
-
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self.skinnedMesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
-}
-
-// Deprecated
--(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
-}
-
--(GLfloat*) vertexWeightsAt: (GLuint) index {
-	CC3SkinMesh* sm = self.skinnedMesh;
-	return sm ? [sm vertexWeightsAt: index] : NULL;
-}
-
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
-	[self.skinnedMesh setVertexWeights: weights at: index];
-}
-
--(void) updateVertexWeightsGLBuffer {
-	[self.skinnedMesh updateVertexWeightsGLBuffer];
-}
-
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	CC3SkinMesh* sm = self.skinnedMesh;
-	return sm ? [sm vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
-}
-
-// Deprecated
--(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return [self vertexMatrixIndexForVertexUnit: vertexUnit at: index];
-}
-
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
-			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index {
-	[self.skinnedMesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
-}
-
-// Deprecated
--(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[self setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
-}
-	
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
-	CC3SkinMesh* sm = self.skinnedMesh;
-	return sm ? [sm vertexMatrixIndicesAt: index] : NULL;
-}
-
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
-	[self.skinnedMesh setVertexMatrixIndices: mtxIndices at: index];
-}
-
--(GLenum) matrixIndexType {
-	return self.skinnedMesh.matrixIndexType;
-}
-
--(void) updateVertexMatrixIndicesGLBuffer {
-	[self.skinnedMesh updateVertexMatrixIndicesGLBuffer];
 }
 
 
@@ -311,7 +215,7 @@
  * Vertex skinning does not use the modelview matrix stack. Instead, it uses a
  * palette of matrices that is used to manipulate the vertices of a mesh based
  * on a weighted average of the influence of the position of several bone nodes.
- * This activity is handled through the drawing of the contained CC3SkinMesh.
+ * This activity is handled through the drawing of the contained mesh.
  */
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
@@ -321,15 +225,15 @@
 /** 
  * Draws the mesh vertices to the GL engine.
  *
- * Enables palette matrices, delegates to the contained collection of CC3SkinSections
- * to draw the mesh in batches, then disables palette matrices again.
+ * Enables palette matrices, binds the mesh to the GL engine, delegates to the contained
+ * collection of CC3SkinSections to draw the mesh in batches, then disables palette matrices again.
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESStateTrackerCapability* glesMatrixPalette = [CC3OpenGLESEngine engine].capabilities.matrixPalette;
 	
 	[glesMatrixPalette enable];			// Enable the matrix palette
 	
-	[super drawMeshWithVisitor: visitor];	// Bind the arrays
+	[mesh bindWithVisitor: visitor];	// Bind the arrays
 	
 	for (CC3SkinSection* skinSctn in skinSections) {
 		[skinSctn drawVerticesOfMesh: mesh withVisitor: visitor];
@@ -338,162 +242,12 @@
 	[glesMatrixPalette disable];			// We are finished with the matrix pallete so disable it.
 }
 
-@end
 
-
-#pragma mark -
-#pragma mark CC3SkinMesh
-
-@interface CC3Mesh (TemplateMethods)
--(void) drawVerticesFrom: (GLuint) vertexIndex
-				forCount: (GLuint) vertexCount
-			 withVisitor: (CC3NodeDrawingVisitor*) visitor;
-@end
-
-@interface CC3VertexArrayMesh (TemplateMethods)
--(void) createVertexContent: (CC3VertexContent) vtxContentTypes;
-@end
-
-@implementation CC3SkinMesh
-
--(void) dealloc {
-	[vertexWeights release];
-	[vertexMatrixIndices release];
-	[super dealloc];
-}
-
--(void) setName: (NSString*) aName {
-	super.name = aName;
-	[vertexWeights deriveNameFrom: self];
-	[vertexMatrixIndices deriveNameFrom: self];
-}
-
--(CC3VertexWeights*) vertexWeights { return vertexWeights; }
-
--(void) setVertexWeights: (CC3VertexWeights*) vtxWgts {
-	[vertexWeights autorelease];
-	vertexWeights = [vtxWgts retain];
-	[vertexWeights deriveNameFrom: self];
-}
-
--(BOOL) hasVertexWeights { return (vertexWeights != nil); }
-
--(CC3VertexMatrixIndices*) vertexMatrixIndices { return vertexMatrixIndices; }
-
--(void) setVertexMatrixIndices: (CC3VertexMatrixIndices*) vtxMtxInd {
-	[vertexMatrixIndices autorelease];
-	vertexMatrixIndices = [vtxMtxInd retain];
-	[vertexMatrixIndices deriveNameFrom: self];
-}
-
--(BOOL) hasVertexMatrixIndices { return (vertexMatrixIndices != nil); }
-
-// Deprecated properties.
--(CC3VertexMatrixIndices*) boneMatrixIndices { return self.vertexMatrixIndices; }
--(void) setBoneMatrixIndices: (CC3VertexMatrixIndices*) bmi { self.vertexMatrixIndices = bmi; }
--(CC3VertexWeights*) boneWeights { return self.vertexWeights; }
--(void) setBoneWeights: (CC3VertexWeights*) bw { self.vertexWeights = bw; }
-
-
-#pragma mark Managing vertex data
-
--(CC3VertexContent) vertexContentTypes {
-	CC3VertexContent vtxContent = super.vertexContentTypes;
-	if (self.hasVertexWeights) vtxContent |= kCC3VertexContentWeights;
-	if (self.hasVertexMatrixIndices) vtxContent |= kCC3VertexContentMatrixIndices;
-	return vtxContent;
-}
-
-// Keep the compiler happy with re-declaration for documentation purposes
--(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
-	super.vertexContentTypes = vtxContentTypes;
-}
-
--(void) createVertexContent: (CC3VertexContent) vtxContentTypes {
-	
-	// Construct all the other vertex arrays
-	[super createVertexContent: vtxContentTypes];
-	
-	// Weights
-	if (vtxContentTypes & kCC3VertexContentWeights) {
-		if (!vertexWeights) self.vertexWeights = [CC3VertexWeights vertexArray];
-	} else {
-		self.vertexWeights = nil;
-	}
-	
-	// Matrix indices
-	if (vtxContentTypes & kCC3VertexContentMatrixIndices) {
-		if (!vertexMatrixIndices) self.vertexMatrixIndices = [CC3VertexMatrixIndices vertexArray];
-	} else {
-		self.vertexMatrixIndices = nil;
-	}
-}
-
--(void) setAllocatedVertexCapacity: (GLuint) vtxCount {
-	if (vtxCount == self.allocatedVertexCapacity) return;
-	
-	super.allocatedVertexCapacity = vtxCount;
-	if (self.shouldInterleaveVertices) {
-		[vertexWeights interleaveWith: vertexLocations];
-		[vertexMatrixIndices interleaveWith: vertexLocations];
-	} else {
-		vertexWeights.allocatedVertexCapacity = vtxCount;
-		vertexMatrixIndices.allocatedVertexCapacity = vtxCount;
-	}
-}
-
--(GLuint) vertexStride {
-	GLuint stride = super.vertexStride;
-	if (vertexWeights) stride += vertexWeights.elementLength;
-	if (vertexMatrixIndices) stride += vertexMatrixIndices.elementLength;
-	return stride;
-}
-
--(void) setVertexStride: (GLuint) vtxStride {
-	super.vertexStride = vtxStride;
-	if (shouldInterleaveVertices) {
-		vertexWeights.vertexStride = vtxStride;
-		vertexMatrixIndices.vertexStride = vtxStride;
-	}
-}
-
--(GLuint) updateVertexStride {
-	GLuint stride = [super updateVertexStride];
-	
-	if (vertexWeights) {
-		if (shouldInterleaveVertices) vertexWeights.elementOffset = stride;
-		stride += vertexWeights.elementLength;
-	}
-	if (vertexMatrixIndices) {
-		if (shouldInterleaveVertices) vertexMatrixIndices.elementOffset = stride;
-		stride += vertexMatrixIndices.elementLength;
-	}
-	
-	self.vertexStride = stride;
-	return stride;
-}
-
--(void) setVertexCount: (GLuint) vCount {
-	super.vertexCount = vCount;
-	vertexWeights.vertexCount = vCount;
-	vertexMatrixIndices.vertexCount = vCount;
-}
-
--(GLuint) vertexUnitCount {
-	return vertexWeights ? vertexWeights.elementSize : 0;
-}
-
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return vertexWeights ? [vertexWeights weightForVertexUnit: vertexUnit at: index] : 0.0f;
-}
+#pragma mark Deprecated methods
 
 // Deprecated
 -(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
 	return [self vertexWeightForVertexUnit: vertexUnit at: index];
-}
-
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[vertexWeights setWeight: aWeight forVertexUnit: vertexUnit at: index];
 }
 
 // Deprecated
@@ -501,179 +255,15 @@
 	[self setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
 }
 
--(GLfloat*) vertexWeightsAt: (GLuint) index {
-	return vertexWeights ? [vertexWeights weightsAt: index] : NULL;
-}
-
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
-	[vertexWeights setWeights: weights at: index];
-}
-
--(void) updateVertexWeightsGLBuffer {
-	[vertexWeights updateGLBuffer];
-}
-
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return vertexMatrixIndices ? [vertexMatrixIndices matrixIndexForVertexUnit: vertexUnit at: index] : 0;
-}
-
 // Deprecated
 -(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
 	return [self vertexMatrixIndexForVertexUnit: vertexUnit at: index];
-}
-
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[vertexMatrixIndices setMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
 }
 
 // Deprecated
 -(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
 	[self setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
 }
-
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
-	return vertexMatrixIndices ? [vertexMatrixIndices matrixIndicesAt: index] : NULL;
-}
-
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
-	[vertexMatrixIndices setMatrixIndices: mtxIndices at: index];
-}
-
--(GLenum) matrixIndexType {
-	return vertexMatrixIndices.elementType;
-}
-
--(void) updateVertexMatrixIndicesGLBuffer {
-	[vertexMatrixIndices updateGLBuffer];
-}
-
--(void) copyVertices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx {
-	[super copyVertices: vtxCount from: srcIdx to: dstIdx];
-	if ( !shouldInterleaveVertices ) {
-		[vertexMatrixIndices copyVertices: vtxCount from: srcIdx to: dstIdx];
-		[vertexWeights copyVertices: vtxCount from: srcIdx to: dstIdx];
-	}
-}
-
--(void) copyVertexAt: (GLuint) srcIdx from: (CC3VertexArrayMesh*) srcMesh to: (GLuint) dstIdx {
-	[super copyVertexAt: srcIdx from: srcMesh to: dstIdx];
-	if (self.hasVertexWeights) [self setVertexWeights: [srcMesh vertexWeightsAt: srcIdx] at: dstIdx];
-	if (self.hasVertexMatrixIndices) [self setVertexMatrixIndices: [srcMesh vertexMatrixIndicesAt: srcIdx] at: dstIdx];
-}
-
-
-#pragma mark Allocation and initialization
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		vertexMatrixIndices = nil;
-		vertexWeights = nil;
-	}
-	return self;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3SkinMesh*) another {
-	[super populateFrom: another];
-	
-	self.vertexWeights = another.vertexWeights;						// retained but not copied
-	self.vertexMatrixIndices = another.vertexMatrixIndices;			// retained but not copied
-}
-
--(void) createGLBuffers {
-	[super createGLBuffers];
-	if (shouldInterleaveVertices) {
-		GLuint commonBufferId = vertexLocations.bufferID;
-		vertexMatrixIndices.bufferID = commonBufferId;
-		vertexWeights.bufferID = commonBufferId;
-	} else {
-		[vertexMatrixIndices createGLBuffer];
-		[vertexWeights createGLBuffer];
-	}
-}
-
--(void) deleteGLBuffers {
-	[super deleteGLBuffers];
-	[vertexMatrixIndices deleteGLBuffer];
-	[vertexWeights deleteGLBuffer];
-}
-
--(BOOL) isUsingGLBuffers {
-	if (super.isUsingGLBuffers) return YES;
-	if (vertexMatrixIndices && vertexMatrixIndices.isUsingGLBuffer) return YES;
-	if (vertexWeights && vertexWeights.isUsingGLBuffer) return YES;
-	return NO;
-}
-
--(void) releaseRedundantData {
-	[super releaseRedundantData];
-	[vertexMatrixIndices releaseRedundantData];
-	[vertexWeights releaseRedundantData];
-}
-
--(void) retainVertexContent {
-	[super retainVertexContent];
-	[self retainVertexMatrixIndices];
-	[self retainVertexWeights];
-}
-
--(void) retainVertexMatrixIndices {
-	if ( !self.hasVertexMatrixIndices ) return;
-
-	if (shouldInterleaveVertices) [self retainVertexLocations];
-	vertexMatrixIndices.shouldReleaseRedundantData = NO;
-}
-
--(void) doNotBufferVertexContent {
-	[super doNotBufferVertexContent];
-	[self doNotBufferVertexMatrixIndices];
-	[self doNotBufferVertexWeights];
-}
-
--(void) doNotBufferVertexMatrixIndices {
-	if (shouldInterleaveVertices) [self doNotBufferVertexLocations];
-	vertexMatrixIndices.shouldAllowVertexBuffering = NO;
-}
-
--(void) retainVertexWeights {
-	if ( !self.hasVertexWeights ) return;
-
-	if (shouldInterleaveVertices) [self retainVertexLocations];
-	vertexWeights.shouldReleaseRedundantData = NO;
-}
-
--(void) doNotBufferVertexWeights {
-	if (shouldInterleaveVertices) [self doNotBufferVertexLocations];
-	vertexWeights.shouldAllowVertexBuffering = NO;
-}
-
-
-#pragma mark Updating
-
--(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLuint) vertexCount {
-	[super updateGLBuffersStartingAt: offsetIndex forLength: vertexCount];
-	if (!shouldInterleaveVertices) {
-		[vertexMatrixIndices updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-		[vertexWeights updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-	}
-}
-
-
-#pragma mark Drawing
-
-/** Template method that binds a pointer to the vertex matrix index data to the GL engine. */
--(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[vertexMatrixIndices bindWithVisitor:visitor];
-}
-
-/** Template method that binds a pointer to the vertex weight data to the GL engine. */
--(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
-	[vertexWeights bindWithVisitor:visitor];
-}
-
-/** Overridden to do nothing. Skinned meshes are drawn by the CC3SkinSections. */
--(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 @end
 
@@ -708,7 +298,7 @@
 }
 
 -(CC3Vector)  deformedVertexLocationAt:  (GLuint) vtxIdx {
-	CC3SkinMesh* skinMesh = [node skinnedMesh];
+	CC3Mesh* skinMesh = node.mesh;
 	
 	// The locations of this vertex before and after deformation.
 	// The latter is to be calculated and returned by this method.
@@ -785,13 +375,9 @@
 	}									// ...bones via later invocation of reattachBonesFrom:
 }
 
--(id) copyWithZone: (NSZone*) zone {
-	return [self copyForNode: nil withZone: zone];
-}
+-(id) copyWithZone: (NSZone*) zone { return [self copyForNode: nil withZone: zone]; }
 
--(id) copyForNode: (CC3SkinMeshNode*) aNode {
-	return [self copyForNode: aNode withZone: nil];
-}
+-(id) copyForNode: (CC3SkinMeshNode*) aNode { return [self copyForNode: aNode withZone: nil]; }
 
 -(id) copyForNode: (CC3SkinMeshNode*) aNode withZone: (NSZone*) zone {
 	CC3SkinSection* aCopy = [[[self class] allocWithZone: zone] initForNode: aNode];
@@ -1205,52 +791,18 @@
 
 -(BOOL) isSkeletonRigid { return transformMatrix.isRigid; }
 
--(void) bindRestPose {
-	for (CC3Node* child in children) {
-		[child bindRestPose];
-	}
-}
+-(void) bindRestPose { for (CC3Node* child in children) [child bindRestPose]; }
 
--(void) reattachBonesFrom: (CC3Node*) aNode {
-	for (CC3Node* child in children) {
-		[child reattachBonesFrom: aNode];
-	}
-}
+-(void) reattachBonesFrom: (CC3Node*) aNode { for (CC3Node* child in children) [child reattachBonesFrom: aNode]; }
 
 -(BOOL) hasSoftBodyContent {
-	for (CC3Node* child in children) {
-		if (child.hasSoftBodyContent) return YES;
-	}
+	for (CC3Node* child in children) if (child.hasSoftBodyContent) return YES;
 	return NO;
 }
 
 -(void) cacheRestPoseMatrix {}
 
 -(CC3SoftBodyNode*) softBodyNode { return parent.softBodyNode; }
-
--(void) retainVertexMatrixIndices {
-	for (CC3Node* child in children) {
-		[child retainVertexMatrixIndices];
-	}
-}
-
--(void) doNotBufferVertexMatrixIndices {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexMatrixIndices];
-	}
-}
-
--(void) retainVertexWeights {
-	for (CC3Node* child in children) {
-		[child retainVertexWeights];
-	}
-}
-
--(void) doNotBufferVertexWeights {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexWeights];
-	}
-}
 
 @end
 
@@ -1263,21 +815,13 @@
 
 #pragma mark Faces
 
--(CC3Face) deformedFaceAt: (GLuint) faceIndex {
-	return [self faceAt: faceIndex];
-}
+-(CC3Face) deformedFaceAt: (GLuint) faceIndex { return [self faceAt: faceIndex]; }
 
--(CC3Vector) deformedFaceCenterAt: (GLuint) faceIndex {
-	return [self faceCenterAt: faceIndex];
-}
+-(CC3Vector) deformedFaceCenterAt: (GLuint) faceIndex { return [self faceCenterAt: faceIndex]; }
 
--(CC3Vector) deformedFaceNormalAt: (GLuint) faceIndex {
-	return [self faceNormalAt: faceIndex];
-}
+-(CC3Vector) deformedFaceNormalAt: (GLuint) faceIndex { return [self faceNormalAt: faceIndex]; }
 
--(CC3Plane) deformedFacePlaneAt: (GLuint) faceIndex {
-	return [self facePlaneAt: faceIndex];
-}
+-(CC3Plane) deformedFacePlaneAt: (GLuint) faceIndex { return [self facePlaneAt: faceIndex]; }
 
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex {
 	return [self vertexLocationAt: vertexIndex];
@@ -1287,56 +831,25 @@
 
 
 #pragma mark -
-#pragma mark CC3Mesh skinning extensions
+#pragma mark Deprecated CC3SkinMesh
 
-/** CC3Mesh extension to define polymorphic methods to support vertex skinning. */
-@implementation CC3Mesh (Skinning)
+@implementation CC3SkinMesh
 
--(BOOL) hasVertexWeights { return NO; }
-
-// Deprecated
--(BOOL) hasWeights { return self.hasVertexWeights; }
-
--(BOOL) hasVertexMatrixIndices { return NO; }
-
-// Deprecated
--(BOOL) hasMatrixIndices { return self.hasVertexMatrixIndices; }
-
-
-#pragma mark Accessing vertex data
-
--(void) retainVertexMatrixIndices {}
-
--(void) doNotBufferVertexMatrixIndices {}
-
--(void) retainVertexWeights {}
-
--(void) doNotBufferVertexWeights {}
-
--(GLuint) vertexUnitCount { return 0; }
-
--(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0.0f; }
-
--(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {}
-
--(GLfloat*) vertexWeightsAt: (GLuint) index { return NULL; }
-
--(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {}
-
--(void) updateVertexWeightsGLBuffer {}
-
--(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0; }
-
--(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
-			   forVertexUnit: (GLuint) vertexUnit
-						  at: (GLuint) index {}
-
--(GLvoid*) vertexMatrixIndicesAt: (GLuint) index { return NULL; }
-
--(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {}
-
--(void) updateVertexMatrixIndicesGLBuffer {}
-
--(GLenum) matrixIndexType { return GL_FALSE; }
+-(CC3VertexMatrixIndices*) boneMatrixIndices { return self.vertexMatrixIndices; }
+-(void) setBoneMatrixIndices: (CC3VertexMatrixIndices*) bmi { self.vertexMatrixIndices = bmi; }
+-(CC3VertexWeights*) boneWeights { return self.vertexWeights; }
+-(void) setBoneWeights: (CC3VertexWeights*) bw { self.vertexWeights = bw; }
+-(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return [self vertexWeightForVertexUnit: vertexUnit at: index];
+}
+-(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[self setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
+}
+-(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return [self vertexMatrixIndexForVertexUnit: vertexUnit at: index];
+}
+-(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[self setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+}
 
 @end

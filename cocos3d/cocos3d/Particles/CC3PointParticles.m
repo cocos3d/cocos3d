@@ -81,17 +81,8 @@
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3PointParticleProtocol); }
 
-/** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
--(CC3PointParticleMesh*) mesh { return (CC3PointParticleMesh*)mesh; }
-
-/** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
--(void) setMesh: (CC3PointParticleMesh*) aMesh {
-	CC3Assert([aMesh isKindOfClass: [CC3PointParticleMesh class]], @"The mesh of %@ must be of type CC3PointParticleMesh.", self);
-	super.mesh = aMesh;
-}
-
 // Deprecated
--(CC3PointParticleMesh*) particleMesh { return self.mesh; }
+-(CC3PointParticleMesh*) particleMesh { return (CC3PointParticleMesh*)self.mesh; }
 
 // Deprecated property
 -(CC3AttenuationCoefficients) particleSizeAttenuationCoefficients { return self.particleSizeAttenuation; }
@@ -129,12 +120,11 @@
 #pragma mark Accessing vertex data
 
 -(GLfloat) particleSizeAt: (GLuint) vtxIndex {
-	CC3PointParticleMesh* pm = self.mesh;
-	return pm ? [self denormalizeParticleSizeFromDevice: [pm vertexPointSizeAt: vtxIndex]] : 0.0f;
+	return mesh ? [self denormalizeParticleSizeFromDevice: [mesh vertexPointSizeAt: vtxIndex]] : 0.0f;
 }
 
 -(void) setParticleSize: (GLfloat) aSize at: (GLuint) vtxIndex {
-	[self.mesh setVertexPointSize: [self normalizeParticleSizeToDevice: aSize] at: vtxIndex];
+	[mesh setVertexPointSize: [self normalizeParticleSizeToDevice: aSize] at: vtxIndex];
 	[self addDirtyVertex: vtxIndex];
 }
 
@@ -169,8 +159,6 @@
 	}
 	return self;
 }
-
--(void) makeMesh { self.mesh = [CC3PointParticleMesh mesh]; }
 
 /** Overridden to configure for blending. */
 -(void) makeMaterial {
@@ -464,221 +452,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 #pragma mark -
-#pragma mark CC3PointParticleMesh
-
-@interface CC3VertexArrayMesh (TemplateMethods)
--(void) createVertexContent: (CC3VertexContent) vtxContentTypes;
--(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLuint) elemCount;
-@end
-
-@implementation CC3PointParticleMesh
-
--(void) dealloc {
-	[vertexPointSizes release];
-	[super dealloc];
-}
-
--(void) setName: (NSString*) aName {
-	super.name = aName;
-	[vertexPointSizes deriveNameFrom: self];
-}
-
--(CC3VertexPointSizes*) vertexPointSizes { return vertexPointSizes; }
-
--(void) setVertexPointSizes: (CC3VertexPointSizes*) vtxSizes {
-	[vertexPointSizes autorelease];
-	vertexPointSizes = [vtxSizes retain];
-	[vertexPointSizes deriveNameFrom: self];
-}
-
--(BOOL) hasVertexPointSizes { return (vertexPointSizes != nil); }
-
-// Deprecated
--(GLuint) particleCount { return self.vertexCount; }
--(void) setParticleCount: (GLuint) numParticles { self.vertexCount = numParticles; }
-
-
-#pragma mark Vertex management
-
-// Overridden to check for and add point size content.
--(CC3VertexContent) vertexContentTypes {
-	CC3VertexContent vtxContent = super.vertexContentTypes;
-	if (self.hasVertexPointSizes) vtxContent |= kCC3VertexContentPointSize;
-	return vtxContent;
-}
-
-// Keep the compiler happy with re-declaration for documentation purposes
--(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
-	super.vertexContentTypes = vtxContentTypes;
-}
-
-// Overridden to check for and add point size content.
--(void) createVertexContent: (CC3VertexContent) vtxContentTypes {
-	
-	// Construct all the other vertex arrays
-	[super createVertexContent: vtxContentTypes];
-	
-	// Point sizes
-	if (vtxContentTypes & kCC3VertexContentPointSize) {
-		if (!vertexPointSizes) self.vertexPointSizes = [CC3VertexPointSizes vertexArray];
-	} else {
-		self.vertexPointSizes = nil;
-	}
-}
-
--(GLuint) vertexStride {
-	GLuint stride = super.vertexStride;
-	if (vertexPointSizes) stride += vertexPointSizes.elementLength;
-	return stride;
-}
-
--(void) setVertexStride: (GLuint) vtxStride {
-	super.vertexStride = vtxStride;
-	if (shouldInterleaveVertices) vertexPointSizes.vertexStride = vtxStride;
-}
-
--(GLuint) updateVertexStride {
-	GLuint stride = [super updateVertexStride];
-	
-	if (vertexPointSizes) {
-		if (shouldInterleaveVertices) vertexPointSizes.elementOffset = stride;
-		stride += vertexPointSizes.elementLength;
-	}
-	
-	self.vertexStride = stride;
-	return stride;
-}
-
--(void) populateFrom: (CC3PointParticleMesh*) another {
-	[super populateFrom: another];
-	
-	// Share vertex arrays between copies
-	self.vertexPointSizes = another.vertexPointSizes;		// retained but not copied
-}
-
-/**
- * If the shouldInterleaveVertices property is set to NO, creates GL vertex buffer object for
- * the point size vertex array by invoking createGLBuffer.
- *
- * If the shouldInterleaveVertices property is set to YES, indicating that the underlying data
- * is shared across the contained vertex arrays, the bufferID property of the point sizes
- * vertex array is copied from the vertexLocations vertex array.
- */
--(void) createGLBuffers {
-	[super createGLBuffers];
-	if (shouldInterleaveVertices) {
-		vertexPointSizes.bufferID = vertexLocations.bufferID;
-	} else {
-		[vertexPointSizes createGLBuffer];
-	}
-}
-
--(void) deleteGLBuffers {
-	[super deleteGLBuffers];
-	[vertexPointSizes deleteGLBuffer];
-}
-
--(BOOL) isUsingGLBuffers {
-	if (super.isUsingGLBuffers) return YES;
-	if (vertexPointSizes && vertexPointSizes.isUsingGLBuffer) return YES;
-	return NO;
-}
-
--(void) releaseRedundantData {
-	[super releaseRedundantData];
-	[vertexPointSizes releaseRedundantData];
-}
-
--(void) retainVertexContent {
-	[super retainVertexContent];
-	[self retainVertexPointSizes];
-}
-
--(void) retainVertexPointSizes {
-	if ( !self.hasVertexPointSizes ) return;
-	
-	if (shouldInterleaveVertices) [self retainVertexLocations];
-	vertexPointSizes.shouldReleaseRedundantData = NO;
-}
-
--(void) doNotBufferVertexContent {
-	[super doNotBufferVertexContent];
-	[self doNotBufferVertexPointSizes];
-}
-
--(void) doNotBufferVertexPointSizes {
-	if (shouldInterleaveVertices) [self doNotBufferVertexLocations];
-	vertexPointSizes.shouldAllowVertexBuffering = NO;
-}
-
--(void) copyVertices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx {
-	[super copyVertices: vtxCount from: srcIdx to: dstIdx];
-	if ( !shouldInterleaveVertices ) {
-		[vertexPointSizes copyVertices: self.vertexCount from: srcIdx to: dstIdx];
-	}
-}
-
--(void) copyVertexAt: (GLuint) srcIdx from: (CC3VertexArrayMesh*) srcMesh to: (GLuint) dstIdx {
-	[super copyVertexAt: srcIdx from: srcMesh to: dstIdx];
-	if (self.hasVertexPointSizes) [self setVertexPointSize: [srcMesh vertexPointSizeAt: srcIdx] at: dstIdx];
-}
-
-
-#pragma mark Accessing vertex data
-
--(void) setAllocatedVertexCapacity: (GLuint) vtxCount {
-	if (vtxCount == self.allocatedVertexCapacity) return;
-
-	super.allocatedVertexCapacity = vtxCount;
-	if (self.shouldInterleaveVertices) {
-		[vertexPointSizes interleaveWith: vertexLocations];
-	} else {
-		vertexPointSizes.allocatedVertexCapacity = vtxCount;
-	}
-}
-
--(void) setVertexCount: (GLuint) vCount {
-	super.vertexCount = vCount;
-	vertexPointSizes.vertexCount = vCount;
-}
-
--(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex {
-	return vertexPointSizes ? [vertexPointSizes pointSizeAt: vtxIndex] : 0.0f;
-}
-
--(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex {
-	[vertexPointSizes setPointSize: aSize at: vtxIndex];
-}
-
--(void) updatePointSizesGLBuffer { [vertexPointSizes updateGLBuffer]; }
-
-// Deprecated
--(GLfloat) particleSizeAt: (GLuint) vtxIndex { return [self vertexPointSizeAt: vtxIndex]; }
--(void) setParticleSize: (GLfloat) aSize at: (GLuint) vtxIndex { [self setVertexPointSize: aSize at: vtxIndex]; }
--(void) updateParticleSizesGLBuffer { [self updatePointSizesGLBuffer]; }
-
-
-#pragma mark Updating
-
--(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLuint) vertexCount {
-	[super updateGLBuffersStartingAt: offsetIndex forLength: vertexCount];
-	if (!shouldInterleaveVertices) {
-		[vertexPointSizes updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
-	}
-}
-
-
-#pragma mark Drawing
-
-/** Template method that binds a pointer to the vertex point size data to the GL engine. */
--(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[vertexPointSizes bindWithVisitor: visitor];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3PointParticle
 
 /** Re-declaration of deprecated methods to suppress compiler warnings within this class. */
@@ -816,46 +589,16 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 
 #pragma mark -
-#pragma mark CC3Node point particles extensions
+#pragma mark Deprecated CC3PointParticleMesh
 
-@implementation CC3Node (PointParticles)
-
--(void) retainVertexPointSizes {
-	for (CC3Node* child in children) {
-		[child retainVertexPointSizes];
-	}
-}
-
--(void) doNotBufferVertexPointSizes {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexPointSizes];
-	}
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3Mesh point particles extensions
-
-@implementation CC3Mesh (PointParticles)
-
--(BOOL) hasVertexPointSizes { return NO; }
+@implementation CC3PointParticleMesh
 
 // Deprecated
--(BOOL) hasPointSizes { return self.hasVertexPointSizes; }
-
-
-#pragma mark Managing vertex content
-
--(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex { return 0.0f; }
-
--(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex {}
-
--(void) updatePointSizesGLBuffer {}
-
--(void) retainVertexPointSizes {}
-
--(void) doNotBufferVertexPointSizes {}
+-(GLuint) particleCount { return self.vertexCount; }
+-(void) setParticleCount: (GLuint) numParticles { self.vertexCount = numParticles; }
+-(GLfloat) particleSizeAt: (GLuint) vtxIndex { return [self vertexPointSizeAt: vtxIndex]; }
+-(void) setParticleSize: (GLfloat) aSize at: (GLuint) vtxIndex { [self setVertexPointSize: aSize at: vtxIndex]; }
+-(void) updateParticleSizesGLBuffer { [self updatePointSizesGLBuffer]; }
 
 @end
+

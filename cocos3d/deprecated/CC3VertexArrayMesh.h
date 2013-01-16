@@ -1,5 +1,5 @@
 /*
- * CC3PODMesh.h
+ * CC3VertexArrayMesh.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,32 +29,32 @@
 
 /** @file */	// Doxygen marker
 
-
 #import "CC3Mesh.h"
-#import "CC3IdentifiablePODExtensions.h"
+#import "CC3BoundingVolumes.h"
 
 
 #pragma mark -
-#pragma mark CC3Mesh extensions for PVR POD data
+#pragma mark Deprecated vertex array mesh and vertex locations bounding volumes
 
-/** Extensions to CC3Mesh to support PVR POD data. */
-@interface CC3Mesh (PVRPOD)
+DEPRECATED_ATTRIBUTE
+/** @deprecated Functionality moved into parent CC3Mesh class. */
+@interface CC3VertexArrayMesh : CC3Mesh
+@end
 
-/**
- * Allocates and initializes an autoreleased instance from the data of
- * this type at the specified index within the specified POD resource.
- */
-+(id) meshAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
+DEPRECATED_ATTRIBUTE
+/**@deprecated Functionality moved to parent CC3NodeCenterOfGeometryBoundingVolume class. */
+@interface CC3VertexLocationsBoundingVolume : CC3NodeCenterOfGeometryBoundingVolume
+@end
 
+DEPRECATED_ATTRIBUTE
+/**@deprecated Functionality moved to parent CC3NodeSphericalBoundingVolume class. */
+@interface CC3VertexLocationsSphericalBoundingVolume : CC3NodeSphericalBoundingVolume
+@end
+
+DEPRECATED_ATTRIBUTE
+/**@deprecated Functionality moved to parent CC3NodeBoundingBoxVolume class. */
+@interface CC3VertexLocationsBoundingBoxVolume : CC3NodeBoundingBoxVolume
 @end
 
 
-#pragma mark -
-#pragma mark CC3PODMesh
 
-/** A CC3Mesh whose content originates from POD resource data. */
-@interface CC3PODMesh : CC3Mesh {
-	int podIndex;
-}
-
-@end

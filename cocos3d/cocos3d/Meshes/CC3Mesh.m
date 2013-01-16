@@ -30,6 +30,8 @@
  */
 
 #import "CC3Mesh.h"
+#import "CC3OpenGLESEngine.h"
+#import "CC3IOSExtensions.h"
 
 @interface CC3Mesh (TemplateMethods)
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -43,15 +45,228 @@
 
 @implementation CC3Mesh
 
-@synthesize faces;
+@synthesize faces=_faces, capacityExpansionFactor=_capacityExpansionFactor;
 
 -(void) dealloc {
-	[faces release];
+	[_faces release];
+	[_vertexLocations release];
+	[_vertexNormals release];
+	[_vertexColors release];
+	[_vertexTextureCoordinates release];
+	[_vertexMatrixIndices release];
+	[_vertexWeights release];
+	[_vertexPointSizes release];
+	[_vertexIndices release];
+	[_overlayTextureCoordinates release];
 	[super dealloc];
+}
+
+-(void) setName: (NSString*) aName {
+	super.name = aName;
+	[_vertexLocations deriveNameFrom: self];
+	[_vertexNormals deriveNameFrom: self];
+	[_vertexColors deriveNameFrom: self];
+	[_vertexTextureCoordinates deriveNameFrom: self];
+	[_vertexMatrixIndices deriveNameFrom: self];
+	[_vertexWeights deriveNameFrom: self];
+	[_vertexPointSizes deriveNameFrom: self];
+	[_vertexIndices deriveNameFrom: self];
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		[otc deriveNameFrom: self];
+	}
 }
 
 -(NSString*) nameSuffix { return @"Mesh"; }
 
+
+#pragma mark Vertex arrays
+
+-(CC3VertexLocations*) vertexLocations { return _vertexLocations; }
+
+-(void) setVertexLocations: (CC3VertexLocations*) vtxLocs {
+	[_vertexLocations autorelease];
+	_vertexLocations = [vtxLocs retain];
+	[_vertexLocations deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexLocations { return (_vertexLocations != nil); }
+
+-(CC3VertexNormals*) vertexNormals { return _vertexNormals; }
+
+-(void) setVertexNormals: (CC3VertexNormals*) vtxNorms {
+	[_vertexNormals autorelease];
+	_vertexNormals = [vtxNorms retain];
+	[_vertexNormals deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexNormals { return (_vertexNormals != nil); }
+
+-(CC3VertexColors*) vertexColors { return _vertexColors; }
+
+-(void) setVertexColors: (CC3VertexColors*) vtxCols {
+	[_vertexColors autorelease];
+	_vertexColors = [vtxCols retain];
+	[_vertexColors deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexColors { return (_vertexColors != nil); }
+
+-(GLenum) vertexColorType { return _vertexColors ? _vertexColors.elementType : GL_FALSE; }
+
+-(CC3VertexMatrixIndices*) vertexMatrixIndices { return _vertexMatrixIndices; }
+
+-(void) setVertexMatrixIndices: (CC3VertexMatrixIndices*) vtxMtxInd {
+	[_vertexMatrixIndices autorelease];
+	_vertexMatrixIndices = [vtxMtxInd retain];
+	[_vertexMatrixIndices deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexMatrixIndices { return (_vertexMatrixIndices != nil); }
+
+-(CC3VertexWeights*) vertexWeights { return _vertexWeights; }
+
+-(void) setVertexWeights: (CC3VertexWeights*) vtxWgts {
+	[_vertexWeights autorelease];
+	_vertexWeights = [vtxWgts retain];
+	[_vertexWeights deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexWeights { return (_vertexWeights != nil); }
+
+-(CC3VertexPointSizes*) vertexPointSizes { return _vertexPointSizes; }
+
+-(void) setVertexPointSizes: (CC3VertexPointSizes*) vtxSizes {
+	[_vertexPointSizes autorelease];
+	_vertexPointSizes = [vtxSizes retain];
+	[_vertexPointSizes deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexPointSizes { return (_vertexPointSizes != nil); }
+
+-(CC3VertexIndices*) vertexIndices { return _vertexIndices; }
+
+-(void) setVertexIndices: (CC3VertexIndices*) vtxInd {
+	[_vertexIndices autorelease];
+	_vertexIndices = [vtxInd retain];
+	[_vertexIndices deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexIndices { return (_vertexIndices != nil); }
+
+-(CC3VertexTextureCoordinates*) vertexTextureCoordinates { return _vertexTextureCoordinates; }
+
+-(void) setVertexTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
+	[_vertexTextureCoordinates autorelease];
+	_vertexTextureCoordinates = [vtxTexCoords retain];
+	[_vertexTextureCoordinates deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexTextureCoordinates { return (_vertexTextureCoordinates != nil); }
+
+-(GLuint) textureCoordinatesArrayCount {
+	return (_overlayTextureCoordinates ? _overlayTextureCoordinates.count : 0) + (_vertexTextureCoordinates ? 1 : 0);
+}
+
+-(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
+	CC3Assert(vtxTexCoords, @"Overlay texture cannot be nil");
+	CC3Assert(!_overlayTextureCoordinates || ((_overlayTextureCoordinates.count + 1) <
+											  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value),
+			  @"Too many overlaid textures. This platform only supports %i texture units.",
+			  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value);
+	LogTrace(@"Adding %@ to %@", vtxTexCoords, self);
+	
+	// Set the first texture coordinates into vertexTextureCoordinates
+	if (!_vertexTextureCoordinates) {
+		self.vertexTextureCoordinates = vtxTexCoords;
+	} else {
+		// Add subsequent texture coordinate arrays to the array of overlayTextureCoordinates,
+		// creating it first if necessary
+		if(!_overlayTextureCoordinates) {
+			_overlayTextureCoordinates = [[CCArray array] retain];
+		}
+		[_overlayTextureCoordinates addObject: vtxTexCoords];
+		[vtxTexCoords deriveNameFrom: self];
+	}
+}
+
+-(void) removeTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord {
+	LogTrace(@"Removing %@ from %@", aTexCoord, self);
+	
+	// If the array to be removed is actually the vertexTextureCoordinates, remove it
+	if (_vertexTextureCoordinates == aTexCoord) {
+		self.vertexTextureCoordinates = nil;
+	} else {
+		// Otherwise, find it in the array of overlays and remove it,
+		// and remove the overlay array if it is now empty
+		if (_overlayTextureCoordinates && aTexCoord) {
+			[_overlayTextureCoordinates removeObjectIdenticalTo: aTexCoord];
+			if (_overlayTextureCoordinates.count == 0) {
+				[_overlayTextureCoordinates release];
+				_overlayTextureCoordinates = nil;
+			}
+		}
+	}
+}
+
+-(void) removeAllTextureCoordinates {
+	// Remove the first texture coordinates
+	self.vertexTextureCoordinates = nil;
+	
+	// Remove the overlay texture coordinates
+	CCArray* myOTCs = [_overlayTextureCoordinates copy];
+	for (CC3VertexTextureCoordinates* otc in myOTCs) {
+		[self removeTextureCoordinates: otc];
+	}
+	[myOTCs release];
+}
+
+-(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName {
+	NSString* tcName;
+	
+	// First check if the first texture coordinates is the one
+	if (_vertexTextureCoordinates) {
+		tcName = _vertexTextureCoordinates.name;
+		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+			return _vertexTextureCoordinates;
+		}
+	}
+	// Then look for it in the overlays array
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		tcName = otc.name;
+		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
+			return otc;
+		}
+	}
+	return nil;
+}
+
+// If first texture unit, return vertexTextureCoordinates property.
+// Otherwise, if texUnit within bounds of overlays, get overlay.
+// Otherwise, look up the texture coordinates for the previous texture unit
+// recursively until one is found, or we reach first texture unit.
+-(CC3VertexTextureCoordinates*) textureCoordinatesForTextureUnit: (GLuint) texUnit {
+	if (texUnit == 0) {
+		return _vertexTextureCoordinates;
+	} else if (texUnit < self.textureCoordinatesArrayCount) {
+		return [_overlayTextureCoordinates objectAtIndex: (texUnit - 1)];
+	} else {
+		return [self textureCoordinatesForTextureUnit: (texUnit - 1)];
+	}
+}
+
+-(void) setTextureCoordinates: (CC3VertexTextureCoordinates *) aTexCoords
+			   forTextureUnit: (GLuint) texUnit {
+	CC3Assert(aTexCoords, @"Overlay texture coordinates cannot be nil");
+	if (texUnit == 0) {
+		self.vertexTextureCoordinates = aTexCoords;
+	} else if (texUnit < self.textureCoordinatesArrayCount) {
+		[_overlayTextureCoordinates fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
+	} else {
+		[self addTextureCoordinates: aTexCoords];
+	}
+}
+
+/*
 -(BOOL) hasVertexLocations { return NO; }
 
 -(BOOL) hasVertexNormals { return NO; }
@@ -60,6 +275,21 @@
 
 -(GLenum) vertexColorType { return GL_FALSE; }
 
+-(BOOL) hasVertexWeights { return NO; }
+
+// Deprecated
+-(BOOL) hasWeights { return self.hasVertexWeights; }
+
+-(BOOL) hasVertexMatrixIndices { return NO; }
+
+// Deprecated
+-(BOOL) hasMatrixIndices { return self.hasVertexMatrixIndices; }
+
+-(BOOL) hasVertexPointSizes { return NO; }
+
+// Deprecated
+-(BOOL) hasPointSizes { return self.hasVertexPointSizes; }
+
 -(BOOL) hasVertexTextureCoordinates { return NO; }
 
 -(BOOL) hasVertexIndices { return NO; }
@@ -67,255 +297,410 @@
 // Deprecated
 -(BOOL) hasNormals { return self.hasVertexNormals; }
 -(BOOL) hasColors { return self.hasVertexColors; }
-
-
--(CC3BoundingBox) boundingBox { return kCC3BoundingBoxNull; }
-
--(CC3Vector) centerOfGeometry {
-	CC3BoundingBox bb = self.boundingBox;
-	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
-}
-
--(GLfloat) radius { return 0.0; }
-
-#pragma mark Allocation and initialization
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		faces = nil;
-	}
-	return self;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3Mesh*) another {
-	[super populateFrom: another];
-	
-	self.faces = another.faces;				// retained but not copied
-}
-
-+(id) mesh { return [[[self alloc] init] autorelease]; }
-
-+(id) meshWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
-
-+(id) meshWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
-
-+(id) meshWithTag: (GLuint) aTag withName: (NSString*) aName {
-	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
-}
-
-
-#pragma mark CCRGBAProtocol support
-
--(ccColor3B) color { return ccBLACK; }
-
--(void) setColor: (ccColor3B) aColor {}
-
--(GLubyte) opacity { return 0; }
-
--(void) setOpacity: (GLubyte) opacity {}
-
+*/
 
 #pragma mark Vertex management
 
--(CC3VertexContent) vertexContentTypes { return kCC3VertexContentNone; }
--(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {}
+-(BOOL) shouldInterleaveVertices { return _shouldInterleaveVertices; }
 
--(BOOL) shouldInterleaveVertices { return NO; }
--(void) setShouldInterleaveVertices: (BOOL) shouldInterleave {}
-
--(void) createGLBuffers {}
-
--(void) deleteGLBuffers {}
-
--(BOOL) isUsingGLBuffers { return NO; }
-
--(void) releaseRedundantData {}
-
--(void) retainVertexContent {}
-
--(void) retainVertexLocations {}
-
--(void) retainVertexNormals {}
-
--(void) retainVertexColors {}
-
--(void) retainVertexTextureCoordinates {}
-
--(void) retainVertexIndices {}
-
--(void) doNotBufferVertexContent {}
-
--(void) doNotBufferVertexLocations {}
-
--(void) doNotBufferVertexNormals {}
-
--(void) doNotBufferVertexColors {}
-
--(void) doNotBufferVertexTextureCoordinates {}
-
--(void) doNotBufferVertexIndices {}
-
-
-#pragma mark Texture coordinates
-
--(BOOL) expectsVerticallyFlippedTextures { return YES; }
-
--(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {}
-
--(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit { return YES; }
-
--(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {}
-
--(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {}
-
--(void) flipVerticallyTextureUnit: (GLuint) texUnit {}
-
--(void) flipTexturesVertically {}
-
--(void) flipHorizontallyTextureUnit: (GLuint) texUnit {}
-
--(void) flipTexturesHorizontally {}
-
--(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {}
-
--(void) repeatTexture: (ccTex2F) repeatFactor {}
-
--(CGRect) textureRectangle { return CGRectNull; }
-
--(void) setTextureRectangle: (CGRect) aRect {}
-
--(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit { return CGRectNull; }
-
--(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {}
-
-// Deprecated - delegate to protected method so it can be invoked from other deprecated library methods.
--(void) deprecatedAlignWithTexturesIn: (CC3Material*) aMaterial {}
--(void) alignWithTexturesIn: (CC3Material*) aMaterial {
-	[self deprecatedAlignWithTexturesIn: aMaterial];
+-(void) setShouldInterleaveVertices: (BOOL) shouldInterleave {
+	_shouldInterleaveVertices = shouldInterleave;
+	if (!_shouldInterleaveVertices)
+		LogInfo(@"%@ has been configured to use non-interleaved vertex content. To improve performance, it is recommended that you interleave all vertex content, unless you need to frequently update one type of vertex content without updating the others.", self);
 }
 
-// Deprecated - delegate to protected method so it can be invoked from other deprecated library methods.
--(void) deprecatedAlignWithInvertedTexturesIn: (CC3Material*) aMaterial {}
--(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {
-	[self deprecatedAlignWithInvertedTexturesIn: aMaterial];
+-(CC3VertexContent) vertexContentTypes {
+	CC3VertexContent vtxContent = kCC3VertexContentNone;
+	if (self.hasVertexLocations) vtxContent |= kCC3VertexContentLocation;
+	if (self.hasVertexNormals) vtxContent |= kCC3VertexContentNormal;
+	if (self.hasVertexColors) vtxContent |= kCC3VertexContentColor;
+	if (self.hasVertexTextureCoordinates) vtxContent |= kCC3VertexContentTextureCoordinates;
+	if (self.hasVertexWeights) vtxContent |= kCC3VertexContentWeights;
+	if (self.hasVertexMatrixIndices) vtxContent |= kCC3VertexContentMatrixIndices;
+	if (self.hasVertexPointSizes) vtxContent |= kCC3VertexContentPointSize;
+	return vtxContent;
 }
 
-
-#pragma mark Tag allocation
-
-// Class variable tracking the most recent tag value assigned for CC3Meshs.
-// This class variable is automatically incremented whenever the method nextTag is called.
-static GLuint lastAssignedMeshTag;
-
--(GLuint) nextTag {
-	return ++lastAssignedMeshTag;
+-(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
+	[self createVertexContent: vtxContentTypes];
+	[self updateVertexStride];
 }
 
-+(void) resetTagAllocation {
-	lastAssignedMeshTag = 0;
-}
-
-
-#pragma mark Drawing
-
--(GLenum) drawingMode { return GL_TRIANGLE_STRIP; }
-
--(void) setDrawingMode: (GLenum) aMode {}
-
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.switchingMesh) {
-		[self bindGLWithVisitor: visitor];
+-(void) createVertexContent: (CC3VertexContent) vtxContentTypes {
+	
+	// Always create a new vertex locations
+	if (!_vertexLocations) self.vertexLocations = [CC3VertexLocations vertexArray];
+	
+	// Vertex normals
+	if (vtxContentTypes & kCC3VertexContentNormal) {
+		if (!_vertexNormals) self.vertexNormals = [CC3VertexNormals vertexArray];
 	} else {
-		LogTrace(@"Reusing currently bound %@", self);
+		self.vertexNormals = nil;
 	}
-	[self drawVerticesWithVisitor: visitor];
-}
-
--(void) drawFrom: (GLuint) vertexIndex
-		forCount: (GLuint) vertexCount
-	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.switchingMesh) {
-		[self bindGLWithVisitor: visitor];
+	
+	// Vertex colors
+	if (vtxContentTypes & kCC3VertexContentColor) {
+		if (!_vertexColors) {
+			CC3VertexColors* vCols = [CC3VertexColors vertexArray];
+			vCols.elementType = GL_UNSIGNED_BYTE;
+			self.vertexColors = vCols;
+		}
 	} else {
-		LogTrace(@"Reusing currently bound %@", self);
+		self.vertexColors = nil;
 	}
-	[self drawVerticesFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+	
+	// Vertex texture coordinates
+	if (vtxContentTypes & kCC3VertexContentTextureCoordinates) {
+		if (!_vertexTextureCoordinates) self.vertexTextureCoordinates = [CC3VertexTextureCoordinates vertexArray];
+	} else {
+		[self removeAllTextureCoordinates];
+	}
+	
+	// Weights
+	if (vtxContentTypes & kCC3VertexContentWeights) {
+		if (!_vertexWeights) self.vertexWeights = [CC3VertexWeights vertexArray];
+	} else {
+		self.vertexWeights = nil;
+	}
+	
+	// Matrix indices
+	if (vtxContentTypes & kCC3VertexContentMatrixIndices) {
+		if (!_vertexMatrixIndices) self.vertexMatrixIndices = [CC3VertexMatrixIndices vertexArray];
+	} else {
+		self.vertexMatrixIndices = nil;
+	}
+	
+	// Point sizes
+	if (vtxContentTypes & kCC3VertexContentPointSize) {
+		if (!_vertexPointSizes) self.vertexPointSizes = [CC3VertexPointSizes vertexArray];
+	} else {
+		self.vertexPointSizes = nil;
+	}
+	
 }
 
-/**
- * Template method that binds the mesh arrays to the GL engine prior to drawing.
- * The specified visitor encapsulates the frustum of the currently active camera,
- * and certain drawing options.
- *
- * This method does not create GL buffers, which are created with the createGLBuffers method.
- * This method binds the buffer or data pointers to the GL engine, prior to each draw call.
- */
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-
-/** 
- * Draws the mesh vertices to the GL engine.
- * Default implementation does nothing. Subclasses will override.
- */
--(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-
-/** 
- * Draws a portion of the mesh vertices to the GL engine.
- * Default implementation does nothing. Subclasses will override.
- */
--(void) drawVerticesFrom: (GLuint) vertexIndex
-				forCount: (GLuint) vertexCount
-			 withVisitor: (CC3NodeDrawingVisitor*) visitor {}
-
--(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
-
-
-#pragma mark Accessing vertex data
-
--(void) moveMeshOriginTo: (CC3Vector) aLocation {}
-
--(void) moveMeshOriginToCenterOfGeometry {}
-
-// Deprecated methods
--(void) movePivotTo: (CC3Vector) aLocation { [self moveMeshOriginTo: aLocation]; }
--(void) movePivotToCenterOfGeometry { [self moveMeshOriginToCenterOfGeometry]; }
-
--(BOOL) ensureCapacity: (GLuint) vtxCount { return NO; }
-
--(GLuint) vertexCount { return 0; }
-
--(void) setVertexCount: (GLuint) vCount {}
-
--(GLuint) vertexIndexCount { return 0; }
-
--(void) setVertexIndexCount: (GLuint) vCount {}
-
--(CC3Vector) vertexLocationAt: (GLuint) index { return kCC3VectorZero; }
-
--(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index {}
-
--(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index { return kCC3Vector4ZeroLocation; }
-
--(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index {}
-
--(CC3Vector) vertexNormalAt: (GLuint) index { return kCC3VectorZero; }
-
--(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {}
-
--(ccColor4F) vertexColor4FAt: (GLuint) index { return kCCC4FBlackTransparent; }
-
--(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index {}
-
--(ccColor4B) vertexColor4BAt: (GLuint) index { return (ccColor4B){ 0, 0, 0, 0 }; }
-
--(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index {}
-
--(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
-	return (ccTex2F){ 0.0, 0.0 };
+-(GLuint) vertexStride {
+	GLuint stride = 0;
+	if (_vertexLocations) stride += _vertexLocations.elementLength;
+	if (_vertexNormals) stride += _vertexNormals.elementLength;
+	if (_vertexColors) stride += _vertexColors.elementLength;
+	if (_vertexMatrixIndices) stride += _vertexMatrixIndices.elementLength;
+	if (_vertexWeights) stride += _vertexWeights.elementLength;
+	if (_vertexPointSizes) stride += _vertexPointSizes.elementLength;
+	if (_vertexTextureCoordinates) stride += _vertexTextureCoordinates.elementLength;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		stride += otc.elementLength;
+	}
+	return stride;
 }
 
--(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index {}
+-(void) setVertexStride: (GLuint) vtxStride {
+	if (_shouldInterleaveVertices) {
+		_vertexLocations.vertexStride = vtxStride;
+		_vertexNormals.vertexStride = vtxStride;
+		_vertexColors.vertexStride = vtxStride;
+		_vertexMatrixIndices.vertexStride = vtxStride;
+		_vertexWeights.vertexStride = vtxStride;
+		_vertexPointSizes.vertexStride = vtxStride;
+		_vertexTextureCoordinates.vertexStride = vtxStride;
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			otc.vertexStride = vtxStride;
+		}
+	}
+}
+
+-(GLuint) updateVertexStride {
+	GLuint stride = 0;
+	
+	if (_vertexLocations) {
+		if (_shouldInterleaveVertices) _vertexLocations.elementOffset = stride;
+		stride += _vertexLocations.elementLength;
+	}
+	if (_vertexNormals) {
+		if (_shouldInterleaveVertices) _vertexNormals.elementOffset = stride;
+		stride += _vertexNormals.elementLength;
+	}
+	if (_vertexColors) {
+		if (_shouldInterleaveVertices) _vertexColors.elementOffset = stride;
+		stride += _vertexColors.elementLength;
+	}
+	if (_vertexMatrixIndices) {
+		if (_shouldInterleaveVertices) _vertexMatrixIndices.elementOffset = stride;
+		stride += _vertexMatrixIndices.elementLength;
+	}
+	if (_vertexWeights) {
+		if (_shouldInterleaveVertices) _vertexWeights.elementOffset = stride;
+		stride += _vertexWeights.elementLength;
+	}
+	if (_vertexPointSizes) {
+		if (_shouldInterleaveVertices) _vertexPointSizes.elementOffset = stride;
+		stride += _vertexPointSizes.elementLength;
+	}
+	if (_vertexTextureCoordinates) {
+		if (_shouldInterleaveVertices) _vertexTextureCoordinates.elementOffset = stride;
+		stride += _vertexTextureCoordinates.elementLength;
+	}
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		if (_shouldInterleaveVertices) otc.elementOffset = stride;
+		stride += otc.elementLength;
+	}
+	
+	self.vertexStride = stride;
+	return stride;
+}
+
+-(GLuint) allocatedVertexCapacity { return _vertexLocations ? _vertexLocations.allocatedVertexCapacity : 0; }
+
+-(void) setAllocatedVertexCapacity: (GLuint) vtxCount {
+	if (!_vertexLocations) self.vertexLocations = [CC3VertexLocations vertexArray];
+	_vertexLocations.allocatedVertexCapacity = vtxCount;
+	if (self.shouldInterleaveVertices) {
+		[_vertexNormals interleaveWith: _vertexLocations];
+		[_vertexColors interleaveWith: _vertexLocations];
+		[_vertexMatrixIndices interleaveWith: _vertexLocations];
+		[_vertexWeights interleaveWith: _vertexLocations];
+		[_vertexPointSizes interleaveWith: _vertexLocations];
+		[_vertexTextureCoordinates interleaveWith: _vertexLocations];
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			[otc interleaveWith: _vertexLocations];
+		}
+	} else {
+		_vertexNormals.allocatedVertexCapacity = vtxCount;
+		_vertexColors.allocatedVertexCapacity = vtxCount;
+		_vertexMatrixIndices.allocatedVertexCapacity = vtxCount;
+		_vertexWeights.allocatedVertexCapacity = vtxCount;
+		_vertexPointSizes.allocatedVertexCapacity = vtxCount;
+		_vertexTextureCoordinates.allocatedVertexCapacity = vtxCount;
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			otc.allocatedVertexCapacity = vtxCount;
+		}
+	}
+}
+
+-(BOOL) ensureVertexCapacity: (GLuint) vtxCount {
+	GLuint currVtxCap = self.allocatedVertexCapacity;
+	if (currVtxCap > 0 && currVtxCap < vtxCount) {
+		self.allocatedVertexCapacity = (vtxCount * self.capacityExpansionFactor);
+		return (self.allocatedVertexCapacity > currVtxCap);
+	}
+	return NO;
+}
+
+-(BOOL) ensureCapacity: (GLuint) vtxCount { return [self ensureVertexCapacity: vtxCount]; }
+
+-(GLvoid*) interleavedVertices {
+	return (_shouldInterleaveVertices && _vertexLocations) ? _vertexLocations.vertices : NULL;
+}
+
+-(GLuint) allocatedVertexIndexCapacity { return _vertexIndices ? _vertexIndices.allocatedVertexCapacity : 0; }
+
+-(void) setAllocatedVertexIndexCapacity: (GLuint) vtxCount {
+	if ( !_vertexIndices && vtxCount > 0 ) self.vertexIndices = [CC3VertexIndices vertexArray];
+	_vertexIndices.allocatedVertexCapacity = vtxCount;
+}
+
+-(void) copyVertices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx {
+	[_vertexLocations copyVertices: vtxCount from: srcIdx to: dstIdx];
+	if ( !_shouldInterleaveVertices ) {
+		[_vertexNormals copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexColors copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexMatrixIndices copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexWeights copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexPointSizes copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexTextureCoordinates copyVertices: vtxCount from: srcIdx to: dstIdx];
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			[otc copyVertices: vtxCount from: srcIdx to: dstIdx];
+		}
+	}
+}
+
+-(void) copyVertices: (GLuint) vtxCount
+				from: (GLuint) srcIdx
+			  inMesh: (CC3Mesh*) srcMesh
+				  to: (GLuint) dstIdx {
+	// If both meshes have the same interleaved content,
+	// the copying can be optimized to a memory copy.
+	if ((self.vertexContentTypes == srcMesh.vertexContentTypes) &&
+		self.vertexStride == srcMesh.vertexStride &&
+		(self.shouldInterleaveVertices && srcMesh.shouldInterleaveVertices)) {
+		LogTrace(@"%@ using optimized memory copy from %@ due to identical vertex content.", self, srcMesh);
+		[self.vertexLocations copyVertices: vtxCount
+							   fromAddress: srcMesh.interleavedVertices
+										to: dstIdx];
+	} else {
+		// Can't optimize, so must default to copying vertex element by vertex element
+		LogTrace(@"%@ using vertex-by-vertex copy from %@ due to different vertex content.", self, srcMesh);
+		for (GLuint i = 0; i < vtxCount; i++) {
+			[self copyVertexAt: (srcIdx + i) from: srcMesh to: (dstIdx + i)];
+		}
+	}
+}
+
+-(void) copyVertexAt: (GLuint) srcIdx from: (CC3Mesh*) srcMesh to: (GLuint) dstIdx {
+	if (self.hasVertexLocations) [self setVertexLocation: [srcMesh vertexLocationAt: srcIdx] at: dstIdx];
+	if (self.hasVertexNormals) [self setVertexNormal: [srcMesh vertexNormalAt: srcIdx] at: dstIdx];
+	if (self.hasVertexColors) [self setVertexColor4F: [srcMesh vertexColor4FAt: srcIdx] at: dstIdx];
+	if (self.hasVertexWeights) [self setVertexWeights: [srcMesh vertexWeightsAt: srcIdx] at: dstIdx];
+	if (self.hasVertexMatrixIndices) [self setVertexMatrixIndices: [srcMesh vertexMatrixIndicesAt: srcIdx] at: dstIdx];
+	if (self.hasVertexPointSizes) [self setVertexPointSize: [srcMesh vertexPointSizeAt: srcIdx] at: dstIdx];
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[self setVertexTexCoord2F: [srcMesh vertexTexCoord2FForTextureUnit: i at: srcIdx] forTextureUnit: i at: dstIdx];
+	}
+}
+
+-(void) copyVertexIndices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx offsettingBy: (GLint) offset {
+	[_vertexIndices copyVertices: vtxCount from: srcIdx to: dstIdx offsettingBy: offset];
+}
+
+-(void) copyVertexIndices: (GLuint) vtxCount
+					 from: (GLuint) srcIdx
+				   inMesh: (CC3Mesh*) srcMesh
+					   to: (GLuint) dstIdx
+			 offsettingBy: (GLint) offset {
+	
+	if ( !_vertexIndices ) return;	// If there are no vertex indices, leave
+	
+	CC3VertexIndices* srcVtxIdxs = srcMesh.vertexIndices;
+	if (srcVtxIdxs) {
+		// If the template mesh has vertex indices, copy them over and offset them.
+		// If both vertex index arrays are of the same type, we can optimize to a fast copy.
+		if (srcVtxIdxs.elementType == _vertexIndices.elementType) {
+			[_vertexIndices copyVertices: vtxCount
+							 fromAddress: [srcVtxIdxs addressOfElement: srcIdx]
+									  to: dstIdx
+							offsettingBy: offset];
+		} else {
+			for (GLuint vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++) {
+				GLuint srcVtx = [srcVtxIdxs indexAt: (srcIdx + vtxIdx)];
+				[_vertexIndices setIndex: (srcVtx + offset) at: (dstIdx + vtxIdx)];
+			}
+		}
+	} else {
+		// If the source mesh does NOT have vertex indices, manufacture one for each vertex,
+		// simply pointing directly to that vertex, taking the offset into consideration.
+		// There will be a 1:1 mapping of indices to vertices.
+		for (GLuint vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++) {
+			[_vertexIndices setIndex: (offset + vtxIdx) at: (dstIdx + vtxIdx)];
+		}
+	}
+}
+
+//-(CC3VertexContent) vertexContentTypes { return kCC3VertexContentNone; }
+//-(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {}
+
+//-(BOOL) shouldInterleaveVertices { return NO; }
+//-(void) setShouldInterleaveVertices: (BOOL) shouldInterleave {}
+
+
+#pragma mark Accessing vertex content
+
+-(GLuint) vertexCount { return _vertexLocations ? _vertexLocations.vertexCount : 0; }
+
+-(void) setVertexCount: (GLuint) vCount {
+	// If we're attempting to set too many vertices for indexed drawing, log an error, but don't abort.
+	if(_vertexIndices && (vCount > (kCC3MaxGLushort + 1))) LogError(@"Setting vertexCount property of %@ to %i vertices. This mesh uses indexed drawing, which is limited by OpenGL ES to %i vertices. Vertices beyond that limit will not be drawn.", self, vCount, (kCC3MaxGLushort + 1));
+	
+	_vertexLocations.vertexCount = vCount;
+	_vertexNormals.vertexCount = vCount;
+	_vertexColors.vertexCount = vCount;
+	_vertexMatrixIndices.vertexCount = vCount;
+	_vertexWeights.vertexCount = vCount;
+	_vertexPointSizes.vertexCount = vCount;
+	_vertexTextureCoordinates.vertexCount = vCount;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		otc.vertexCount = vCount;
+	}
+}
+
+-(GLuint) vertexIndexCount { return _vertexIndices ? _vertexIndices.vertexCount : self.vertexCount; }
+
+-(void) setVertexIndexCount: (GLuint) vCount { _vertexIndices.vertexCount = vCount; }
+-(CC3Vector) vertexLocationAt: (GLuint) index {
+	return _vertexLocations ? [_vertexLocations locationAt: index] : kCC3VectorZero;
+}
+
+-(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index {
+	[_vertexLocations setLocation: aLocation at: index];
+}
+
+-(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index {
+	return _vertexLocations ? [_vertexLocations homogeneousLocationAt: index] : kCC3Vector4ZeroLocation;
+}
+
+-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index {
+	[_vertexLocations setHomogeneousLocation: aLocation at: index];
+}
+
+-(CC3Vector) vertexNormalAt: (GLuint) index {
+	return _vertexNormals ? [_vertexNormals normalAt: index] : kCC3VectorUnitZPositive;
+}
+
+-(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {
+	[_vertexNormals setNormal: aNormal at: index];
+}
+
+-(ccColor4F) vertexColor4FAt: (GLuint) index {
+	return _vertexColors ? [_vertexColors color4FAt: index] : kCCC4FBlackTransparent;
+}
+
+-(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index {
+	[_vertexColors setColor4F: aColor at: index];
+}
+
+-(ccColor4B) vertexColor4BAt: (GLuint) index {
+	return _vertexColors ? [_vertexColors color4BAt: index] : (ccColor4B){ 0, 0, 0, 0 };
+}
+
+-(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index {
+	[_vertexColors setColor4B: aColor at: index];
+}
+
+-(GLuint) vertexUnitCount { return _vertexWeights ? _vertexWeights.elementSize : 0; }
+
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return _vertexWeights ? [_vertexWeights weightForVertexUnit: vertexUnit at: index] : 0.0f;
+}
+
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[_vertexWeights setWeight: aWeight forVertexUnit: vertexUnit at: index];
+}
+
+-(GLfloat*) vertexWeightsAt: (GLuint) index {
+	return _vertexWeights ? [_vertexWeights weightsAt: index] : NULL;
+}
+
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
+	[_vertexWeights setWeights: weights at: index];
+}
+
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return _vertexMatrixIndices ? [_vertexMatrixIndices matrixIndexForVertexUnit: vertexUnit at: index] : 0;
+}
+
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[_vertexMatrixIndices setMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+}
+
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
+	return _vertexMatrixIndices ? [_vertexMatrixIndices matrixIndicesAt: index] : NULL;
+}
+
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+	[_vertexMatrixIndices setMatrixIndices: mtxIndices at: index];
+}
+
+-(GLenum) matrixIndexType { return _vertexMatrixIndices.elementType; }
+
+-(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex {
+	return _vertexPointSizes ? [_vertexPointSizes pointSizeAt: vtxIndex] : 0.0f;
+}
+
+-(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex {
+	[_vertexPointSizes setPointSize: aSize at: vtxIndex];
+}
+
+-(void) updatePointSizesGLBuffer { [_vertexPointSizes updateGLBuffer]; }
 
 -(ccTex2F) vertexTexCoord2FAt: (GLuint) index {
 	return [self vertexTexCoord2FForTextureUnit: 0 at: index];
@@ -323,6 +708,16 @@ static GLuint lastAssignedMeshTag;
 
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index {
 	[self setVertexTexCoord2F: aTex2F forTextureUnit: 0 at: index];
+}
+
+-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	return texCoords ? [texCoords texCoord2FAt: index] : (ccTex2F){ 0.0, 0.0 };
+}
+
+-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	[texCoords setTexCoord2F: aTex2F at: index];
 }
 
 // Deprecated
@@ -335,53 +730,66 @@ static GLuint lastAssignedMeshTag;
 	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
--(GLuint) vertexIndexAt: (GLuint) index { return 0; }
-
--(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index {}
-
--(void) updateVertexLocationsGLBuffer {}
-
--(void) updateVertexNormalsGLBuffer {}
-
--(void) updateVertexColorsGLBuffer {}
-
--(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {}
-
--(void) updateVertexTextureCoordinatesGLBuffer {
-	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
+-(GLuint) vertexIndexAt: (GLuint) index {
+	return _vertexIndices ? [_vertexIndices indexAt: index] : 0;
 }
 
--(void) updateVertexIndicesGLBuffer {}
-
--(void) updateGLBuffers {}
+-(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index {
+	[_vertexIndices setIndex: vertexIndex at: index];
+}
 
 
 #pragma mark Faces
 
 -(CC3FaceArray*) faces {
-	if ( !faces ) {
+	if ( !_faces ) {
 		NSString* facesName = [NSString stringWithFormat: @"%@-Faces", self.name];
 		self.faces = [CC3FaceArray faceArrayWithName: facesName];
 	}
-	return faces;
+	return _faces;
 }
 
 -(void) setFaces: (CC3FaceArray*) aFaceArray {
-	id old = faces;
-	faces = [aFaceArray retain];
+	id old = _faces;
+	_faces = [aFaceArray retain];
 	[old release];
-	faces.mesh = self;
+	_faces.mesh = self;
 }
 
--(BOOL) shouldCacheFaces { return faces ? faces.shouldCacheFaces : NO; }
+-(BOOL) shouldCacheFaces { return _faces ? _faces.shouldCacheFaces : NO; }
 
 -(void) setShouldCacheFaces: (BOOL) shouldCache { self.faces.shouldCacheFaces = shouldCache; }
 
--(GLuint) faceCount { return 0; }
+-(GLuint) faceCount {
+	if (_vertexIndices) return _vertexIndices.faceCount;
+	if (_vertexLocations) return _vertexLocations.faceCount;
+	return 0;
+}
 
--(GLuint) faceCountFromVertexIndexCount: (GLuint) vc { return 0; }
+-(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices {
+	return _vertexLocations ? [_vertexLocations faceFromIndices: faceIndices] : kCC3FaceZero;
+}
 
--(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc { return 0; }
+-(CC3FaceIndices) uncachedFaceIndicesAt: (GLuint) faceIndex {
+	if (_vertexIndices) return [_vertexIndices faceIndicesAt: faceIndex];
+	if (_vertexLocations) return [_vertexLocations faceIndicesAt: faceIndex];
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot retrieve indices for a face.", self);
+	return kCC3FaceIndicesZero;
+}
+
+-(GLuint) faceCountFromVertexIndexCount: (GLuint) vc {
+	if (_vertexIndices) return [_vertexIndices faceCountFromVertexIndexCount: vc];
+	if (_vertexLocations) return [_vertexLocations faceCountFromVertexIndexCount: vc];
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot convert vertex count to face count.", self);
+	return 0;
+}
+
+-(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc {
+	if (_vertexIndices) return [_vertexIndices vertexIndexCountFromFaceCount: fc];
+	if (_vertexLocations) return [_vertexLocations vertexIndexCountFromFaceCount: fc];
+	CC3Assert(NO, @"%@ has no drawable vertex array and cannot convert face count to vertex count.", self);
+	return 0;
+}
 
 // Deprecated
 -(GLuint) faceCountFromVertexCount: (GLuint) vc { return [self faceCountFromVertexIndexCount: vc]; }
@@ -391,29 +799,15 @@ static GLuint lastAssignedMeshTag;
 	return [self faceFromIndices: [self faceIndicesAt: faceIndex]];
 }
 
--(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices { return kCC3FaceZero; }
+-(CC3FaceIndices) faceIndicesAt: (GLuint) faceIndex { return [self.faces indicesAt: faceIndex]; }
 
--(CC3FaceIndices) uncachedFaceIndicesAt: (GLuint) faceIndex { return kCC3FaceIndicesZero; }
+-(CC3Vector) faceCenterAt: (GLuint) faceIndex { return [self.faces centerAt: faceIndex]; }
 
--(CC3FaceIndices) faceIndicesAt: (GLuint) faceIndex {
-	return [self.faces indicesAt: faceIndex];
-}
+-(CC3Vector) faceNormalAt: (GLuint) faceIndex { return [self.faces normalAt: faceIndex]; }
 
--(CC3Vector) faceCenterAt: (GLuint) faceIndex {
-	return [self.faces centerAt: faceIndex];
-}
+-(CC3Plane) facePlaneAt: (GLuint) faceIndex { return [self.faces planeAt: faceIndex]; }
 
--(CC3Vector) faceNormalAt: (GLuint) faceIndex {
-	return [self.faces normalAt: faceIndex];
-}
-
--(CC3Plane) facePlaneAt: (GLuint) faceIndex {
-	return [self.faces planeAt: faceIndex];
-}
-
--(CC3FaceNeighbours) faceNeighboursAt: (GLuint) faceIndex {
-	return [self.faces neighboursAt: faceIndex];
-}
+-(CC3FaceNeighbours) faceNeighboursAt: (GLuint) faceIndex { return [self.faces neighboursAt: faceIndex]; }
 
 -(GLuint) findFirst: (GLuint) maxHitCount
 	  intersections: (CC3MeshIntersection*) intersections
@@ -428,13 +822,13 @@ static GLuint lastAssignedMeshTag;
 		hit->faceIndex = faceIdx;
 		hit->face = [self faceAt: faceIdx];
 		hit->facePlane = CC3FacePlane(hit->face);
-
+		
 		// Check if the ray is not parallel to the face, is approaching from the front,
 		// or is approaching from the back and that is okay.
 		GLfloat dirDotNorm = CC3VectorDot(aRay.direction, CC3PlaneNormal(hit->facePlane));
 		hit->wasBackFace = dirDotNorm > 0.0f;
 		if (dirDotNorm < 0.0f || (hit->wasBackFace && acceptBackFaces)) {
-
+			
 			// Find the point of intersection of the ray with the plane
 			// and check that it is not behind the start of the ray.
 			CC3Vector4 loc4 = CC3RayIntersectionWithPlane(aRay, hit->facePlane);
@@ -450,7 +844,631 @@ static GLuint lastAssignedMeshTag;
 }
 
 
-#pragma mark Mesh context switching
+#pragma mark Buffering content to GL engine
+
+/**
+ * If the interleavesVertices property is set to NO, creates GL vertex buffer objects for all
+ * vertex arrays used by this mesh by invoking createGLBuffer on each contained vertex array.
+ *
+ * If the shouldInterleaveVertices property is set to YES, indicating that the underlying data is
+ * shared across the contained vertex arrays, this method invokes createGLBuffer only on the
+ * vertexLocations and vertexIndices vertex arrays, and copies the bufferID property from
+ * the vertexLocations vertex array to the other vertex arrays (except vertexIndicies).
+ */
+-(void) createGLBuffers {
+	[_vertexLocations createGLBuffer];
+	if (_shouldInterleaveVertices) {
+		GLuint commonBufferId = _vertexLocations.bufferID;
+		_vertexNormals.bufferID = commonBufferId;
+		_vertexColors.bufferID = commonBufferId;
+		_vertexMatrixIndices.bufferID = commonBufferId;
+		_vertexWeights.bufferID = commonBufferId;
+		_vertexPointSizes.bufferID = _vertexLocations.bufferID;
+		_vertexTextureCoordinates.bufferID = commonBufferId;
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			otc.bufferID = commonBufferId;
+		}
+	} else {
+		[_vertexNormals createGLBuffer];
+		[_vertexColors createGLBuffer];
+		[_vertexMatrixIndices createGLBuffer];
+		[_vertexWeights createGLBuffer];
+		[_vertexPointSizes createGLBuffer];
+		[_vertexTextureCoordinates createGLBuffer];
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			[otc createGLBuffer];
+		}
+	}
+	[_vertexIndices createGLBuffer];
+}
+
+-(void) deleteGLBuffers {
+	[_vertexLocations deleteGLBuffer];
+	[_vertexNormals deleteGLBuffer];
+	[_vertexColors deleteGLBuffer];
+	[_vertexMatrixIndices deleteGLBuffer];
+	[_vertexWeights deleteGLBuffer];
+	[_vertexPointSizes deleteGLBuffer];
+	[_vertexTextureCoordinates deleteGLBuffer];
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		[otc deleteGLBuffer];
+	}
+	[_vertexIndices deleteGLBuffer];
+}
+
+-(BOOL) isUsingGLBuffers {
+	if (_vertexLocations && _vertexLocations.isUsingGLBuffer) return YES;
+	if (_vertexNormals && _vertexNormals.isUsingGLBuffer) return YES;
+	if (_vertexColors && _vertexColors.isUsingGLBuffer) return YES;
+	if (_vertexMatrixIndices && _vertexMatrixIndices.isUsingGLBuffer) return YES;
+	if (_vertexWeights && _vertexWeights.isUsingGLBuffer) return YES;
+	if (_vertexPointSizes && _vertexPointSizes.isUsingGLBuffer) return YES;
+	if (_vertexTextureCoordinates && _vertexTextureCoordinates.isUsingGLBuffer) return YES;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		if (otc.isUsingGLBuffer) return YES;
+	}
+	return NO;
+}
+
+-(void) releaseRedundantData {
+	[_vertexLocations releaseRedundantData];
+	[_vertexNormals releaseRedundantData];
+	[_vertexColors releaseRedundantData];
+	[_vertexMatrixIndices releaseRedundantData];
+	[_vertexWeights releaseRedundantData];
+	[_vertexPointSizes releaseRedundantData];
+	[_vertexTextureCoordinates releaseRedundantData];
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		[otc releaseRedundantData];
+	}
+	[_vertexIndices releaseRedundantData];
+}
+
+-(void) retainVertexContent {
+	[self retainVertexLocations];
+	[self retainVertexNormals];
+	[self retainVertexColors];
+	[self retainVertexMatrixIndices];
+	[self retainVertexWeights];
+	[self retainVertexPointSizes];
+	[self retainVertexTextureCoordinates];
+}
+
+-(void) retainVertexLocations { _vertexLocations.shouldReleaseRedundantData = NO; }
+
+-(void) retainVertexNormals {
+	if ( !self.hasVertexNormals ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexNormals.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexColors {
+	if ( !self.hasVertexColors ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexColors.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexMatrixIndices {
+	if ( !self.hasVertexMatrixIndices ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexMatrixIndices.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexWeights {
+	if ( !self.hasVertexWeights ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexWeights.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexPointSizes {
+	if ( !self.hasVertexPointSizes ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexPointSizes.shouldReleaseRedundantData = NO;
+}
+
+-(void) retainVertexTextureCoordinates {
+	if ( !self.hasVertexTextureCoordinates ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexTextureCoordinates.shouldReleaseRedundantData = NO;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		otc.shouldReleaseRedundantData = NO;
+	}
+}
+
+-(void) retainVertexIndices { _vertexIndices.shouldReleaseRedundantData = NO; }
+
+-(void) doNotBufferVertexContent {
+	[self doNotBufferVertexLocations];
+	[self doNotBufferVertexNormals];
+	[self doNotBufferVertexColors];
+	[self doNotBufferVertexMatrixIndices];
+	[self doNotBufferVertexWeights];
+	[self doNotBufferVertexPointSizes];
+	[self doNotBufferVertexTextureCoordinates];
+}
+
+-(void) doNotBufferVertexLocations { _vertexLocations.shouldAllowVertexBuffering = NO; }
+
+-(void) doNotBufferVertexNormals {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexNormals.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexColors {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexColors.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexMatrixIndices {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexMatrixIndices.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexWeights {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexWeights.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexPointSizes {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexPointSizes.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexTextureCoordinates {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexTextureCoordinates.shouldAllowVertexBuffering = NO;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+		otc.shouldAllowVertexBuffering = NO;
+	}
+}
+
+-(void) doNotBufferVertexIndices { _vertexIndices.shouldAllowVertexBuffering = NO; }
+
+
+#pragma mark Updating
+
+-(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLuint) vertexCount {
+	[_vertexLocations updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+	if ( !_shouldInterleaveVertices ) {
+		[_vertexNormals updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexColors updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexMatrixIndices updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexWeights updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexPointSizes updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexTextureCoordinates updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
+			[otc updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		}
+	}
+}
+
+-(void) updateGLBuffers { [self updateGLBuffersStartingAt: 0 forLength: self.vertexCount]; }
+
+-(void) updateVertexLocationsGLBuffer { [_vertexLocations updateGLBuffer]; }
+
+-(void) updateVertexNormalsGLBuffer { [_vertexNormals updateGLBuffer]; }
+
+-(void) updateVertexColorsGLBuffer { [_vertexColors updateGLBuffer]; }
+
+-(void) updateVertexWeightsGLBuffer { [_vertexWeights updateGLBuffer]; }
+
+-(void) updateVertexMatrixIndicesGLBuffer { [_vertexMatrixIndices updateGLBuffer]; }
+
+-(void) updateVertexTextureCoordinatesGLBuffer {
+	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
+}
+
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] updateGLBuffer];
+}
+
+-(void) updateVertexIndicesGLBuffer { [_vertexIndices updateGLBuffer]; }
+
+//-(void) createGLBuffers {}
+//
+//-(void) deleteGLBuffers {}
+//
+//-(BOOL) isUsingGLBuffers { return NO; }
+//
+//-(void) releaseRedundantData {}
+//
+//-(void) retainVertexContent {}
+//
+//-(void) retainVertexLocations {}
+//
+//-(void) retainVertexNormals {}
+//
+//-(void) retainVertexColors {}
+//
+//-(void) retainVertexMatrixIndices {}
+//
+//-(void) retainVertexWeights {}
+//
+//-(void) retainVertexPointSizes {}
+//
+//-(void) retainVertexTextureCoordinates {}
+//
+//-(void) retainVertexIndices {}
+//
+//-(void) doNotBufferVertexContent {}
+//
+//-(void) doNotBufferVertexLocations {}
+//
+//-(void) doNotBufferVertexNormals {}
+//
+//-(void) doNotBufferVertexColors {}
+//
+//-(void) doNotBufferVertexMatrixIndices {}
+//
+//-(void) doNotBufferVertexWeights {}
+//
+//-(void) doNotBufferVertexPointSizes {}
+//
+//-(void) doNotBufferVertexTextureCoordinates {}
+//
+//-(void) doNotBufferVertexIndices {}
+
+
+#pragma mark Mesh Geometry
+
+-(CC3Vector) centerOfGeometry { return _vertexLocations ? _vertexLocations.centerOfGeometry : kCC3VectorZero; }
+
+-(CC3BoundingBox) boundingBox { return _vertexLocations ? _vertexLocations.boundingBox : kCC3BoundingBoxNull; }
+
+-(GLfloat) radius { return _vertexLocations ? _vertexLocations.radius : 0.0; }
+
+-(void) moveMeshOriginTo: (CC3Vector) aLocation { [_vertexLocations moveMeshOriginTo: aLocation]; }
+
+-(void) moveMeshOriginToCenterOfGeometry { [_vertexLocations moveMeshOriginToCenterOfGeometry]; }
+
+// Deprecated methods
+-(void) movePivotTo: (CC3Vector) aLocation { [self moveMeshOriginTo: aLocation]; }
+-(void) movePivotToCenterOfGeometry { [self moveMeshOriginToCenterOfGeometry]; }
+
+//-(CC3BoundingBox) boundingBox { return kCC3BoundingBoxNull; }
+//
+//-(CC3Vector) centerOfGeometry {
+//	CC3BoundingBox bb = self.boundingBox;
+//	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
+//}
+//
+//-(GLfloat) radius { return 0.0; }
+//
+//-(void) moveMeshOriginTo: (CC3Vector) aLocation {}
+//
+//-(void) moveMeshOriginToCenterOfGeometry {}
+
+
+#pragma mark CCRGBAProtocol support
+
+-(ccColor3B) color { return _vertexColors ? _vertexColors.color : ccBLACK; }
+
+-(void) setColor: (ccColor3B) aColor { _vertexColors.color = aColor; }
+
+-(GLubyte) opacity { return _vertexColors ? _vertexColors.opacity : 0; }
+
+-(void) setOpacity: (GLubyte) opacity { _vertexColors.opacity = opacity; }
+
+
+//-(ccColor3B) color { return ccBLACK; }
+//
+//-(void) setColor: (ccColor3B) aColor {}
+//
+//-(GLubyte) opacity { return 0; }
+//
+//-(void) setOpacity: (GLubyte) opacity {}
+
+
+#pragma mark Textures
+
+-(BOOL) expectsVerticallyFlippedTextures {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		if ( [self expectsVerticallyFlippedTextureInTextureUnit: texUnit] ) return YES;
+	}
+	return NO;
+}
+
+-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[self expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
+	}
+}
+
+-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit {
+	return [self textureCoordinatesForTextureUnit: texUnit].expectsVerticallyFlippedTextures;
+}
+
+-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {
+	[self textureCoordinatesForTextureUnit: texUnit].expectsVerticallyFlippedTextures = expectsFlipped;
+}
+
+-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {
+	[[self textureCoordinatesForTextureUnit: texUnit] alignWithTexture: aTexture];
+}
+
+// Deprecated - delegate to protected method so it can be invoked from other deprecated library methods.
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial {
+	[self deprecatedAlignWithTexturesIn: aMaterial];
+}
+
+// Deprecated
+-(void) deprecatedAlignWithTexturesIn: (CC3Material*) aMaterial {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		CC3Texture* tex = [aMaterial textureForTextureUnit: texUnit];
+		[[self textureCoordinatesForTextureUnit: texUnit] alignWithTexture: tex];
+	}
+}
+
+// Deprecated - delegate to protected method so it can be invoked from other deprecated library methods.
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial {
+	[self deprecatedAlignWithInvertedTexturesIn: aMaterial];
+}
+// Deprecated - invert or not depends on subclass.
+-(void) deprecatedAlignWithInvertedTexturesIn: (CC3Material*) aMaterial {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		CC3Texture* tex = [aMaterial textureForTextureUnit: texUnit];
+		[self deprecatedAlign: [self textureCoordinatesForTextureUnit: texUnit] withInvertedTexture: tex];
+	}
+}
+
+// Deprecated texture inversion template method. Inversion is now automatic.
+-(void) deprecatedAlign: (CC3VertexTextureCoordinates*) texCoords
+	withInvertedTexture: (CC3Texture*) aTexture {
+	[texCoords alignWithTexture: aTexture];
+}
+
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] flipVertically];
+}
+
+-(void) flipTexturesVertically {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] flipVertically];
+	}
+}
+
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] flipHorizontally];
+}
+
+-(void) flipTexturesHorizontally {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] flipHorizontally];
+	}
+}
+
+-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {
+	[[self textureCoordinatesForTextureUnit: texUnit] repeatTexture: repeatFactor];
+}
+
+-(void) repeatTexture: (ccTex2F) repeatFactor {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+		[[self textureCoordinatesForTextureUnit: texUnit] repeatTexture: repeatFactor];
+	}
+}
+
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
+	CC3VertexTextureCoordinates* texCoords = [self textureCoordinatesForTextureUnit: texUnit];
+	return texCoords ? texCoords.textureRectangle : kCC3UnitTextureRectangle;
+}
+
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
+	[self textureCoordinatesForTextureUnit: texUnit].textureRectangle = aRect;
+}
+
+-(CGRect) textureRectangle { return [self textureRectangleForTextureUnit: 0]; }
+
+-(void) setTextureRectangle: (CGRect) aRect {
+	GLuint tcCount = self.textureCoordinatesArrayCount;
+	for (GLuint i = 0; i < tcCount; i++) {
+		[self textureCoordinatesForTextureUnit: i].textureRectangle = aRect;
+	}
+}
+
+//-(BOOL) expectsVerticallyFlippedTextures { return YES; }
+//
+//-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {}
+//
+//-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit { return YES; }
+//
+//-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {}
+//
+//-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {}
+//
+//-(void) flipVerticallyTextureUnit: (GLuint) texUnit {}
+//
+//-(void) flipTexturesVertically {}
+//
+//-(void) flipHorizontallyTextureUnit: (GLuint) texUnit {}
+//
+//-(void) flipTexturesHorizontally {}
+//
+//-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {}
+//
+//-(void) repeatTexture: (ccTex2F) repeatFactor {}
+//
+//-(CGRect) textureRectangle { return CGRectNull; }
+//
+//-(void) setTextureRectangle: (CGRect) aRect {}
+//
+//-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit { return CGRectNull; }
+//
+//-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {}
+//
+
+
+#pragma mark Drawing
+
+-(GLenum) drawingMode {
+	if (_vertexIndices) return _vertexIndices.drawingMode;
+	if (_vertexLocations) return _vertexLocations.drawingMode;
+	return super.drawingMode;
+}
+
+-(void) setDrawingMode: (GLenum) aMode {
+	_vertexIndices.drawingMode = aMode;
+	_vertexLocations.drawingMode = aMode;
+}
+
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self bindWithVisitor: visitor];
+	[self drawVerticesWithVisitor: visitor];
+}
+
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self bindWithVisitor: visitor];
+	[self drawVerticesFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+}
+
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (self.switchingMesh) {
+		[self bindGLWithVisitor: visitor];
+	} else {
+		LogTrace(@"Reusing currently bound %@", self);
+	}
+}
+
+-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Binding %@", self);
+	CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
+	[glesVtxArrays clearUnboundVertexPointers];
+	
+	[self bindLocationsWithVisitor: visitor];
+	[self bindNormalsWithVisitor: visitor];
+	[self bindColorsWithVisitor: visitor];
+	[self bindTextureCoordinatesWithVisitor: visitor];
+	[self bindPointSizesWithVisitor: visitor];
+	[self bindIndicesWithVisitor: visitor];
+	[self bindBoneMatrixIndicesWithVisitor: visitor];
+	[self bindBoneWeightsWithVisitor: visitor];
+	
+	[glesVtxArrays disableUnboundVertexPointers];
+}
+
+/** Template method that binds a pointer to the vertex location data to the GL engine. */
+-(void) bindLocationsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_vertexLocations bindWithVisitor: visitor];
+}
+
+/** Template method that binds a pointer to the vertex normal data to the GL engine. */
+-(void) bindNormalsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) [_vertexNormals bindWithVisitor: visitor];
+}
+
+/** Template method that binds a pointer to the per-vertex color data to the GL engine. */
+-(void) bindColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) [_vertexColors bindWithVisitor: visitor];
+}
+
+/** Template method that binds a pointer to the vertex matrix index data to the GL engine. */
+-(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_vertexMatrixIndices bindWithVisitor:visitor];
+}
+
+/** Template method that binds a pointer to the vertex weight data to the GL engine. */
+-(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
+	[_vertexWeights bindWithVisitor:visitor];
+}
+
+/** Template method that binds a pointer to the vertex point size data to the GL engine. */
+-(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_vertexPointSizes bindWithVisitor: visitor];
+}
+
+/**
+ * Template method that binds a pointer to the vertex texture mapping data to the GL engine
+ * for each texture unit that has a texture, as indicated by the textureUnitCount of the
+ * specified visitor.
+ *
+ * If there are fewer vertex texture coordinate arrays than indicated by the textureUnitCount,
+ * the last vertex texture coordinate array is reused. In this way, a single vertex texture
+ * coordinate array (in the vertexTextureCoordinates property) can be used for both the primary
+ * texture and multiple texture overlays. Or, one array could be used for the primary texture
+ * and another for all the overlays. Or the primary and each overlay could have their own
+ * texture coordinate arrays.
+ *
+ * Any unused texture coordinate arrays are unbound from the GL engine.
+ */
+-(void) bindTextureCoordinatesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	GLuint tu = 0;								// The current texture unit
+	CC3VertexTextureCoordinates* vtc = nil;		// The tex coord array to bind to it.
+	
+	// Don't do anything if we're not actually drawing textures to the GL engine.
+	if (visitor.shouldDecorateNode) {
+		
+		// For each texture unit that has a texture...
+		while(tu < visitor.textureUnitCount) {
+			
+			if (tu < self.textureCoordinatesArrayCount) vtc = [self textureCoordinatesForTextureUnit: tu];
+			
+			// Note that vtc at this point will be the most recently assigned array,
+			// and may be the array that was used on the last iteration of this loop
+			// if there are less texture coord arrays than there are textures.
+			// In this case, we keep reusing the most recently used texture coord array.
+			if(vtc) {
+				visitor.textureUnit = tu;
+				[vtc bindWithVisitor: visitor];
+			}
+			tu++;		// Move on to the next texture unit
+		}
+	}
+}
+
+/** Template method that binds a pointer to the vertex index data to the GL engine. */
+-(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[_vertexIndices bindWithVisitor: visitor];
+}
+
+/**
+ * Draws the mesh vertices to the GL engine.
+ *
+ * If the vertexIndices property is not nil, the draw method is invoked on that
+ * CC3VertexIndices instance. Otherwise, the draw method is invoked on the
+ * CC3VertexLocations instance in the vertexLocations property.
+ */
+-(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Drawing %@", self);
+	if (_vertexIndices) {
+		[_vertexIndices drawWithVisitor: visitor];
+	} else {
+		[_vertexLocations drawWithVisitor: visitor];
+	}
+}
+
+-(void) drawVerticesFrom: (GLuint) vertexIndex
+				forCount: (GLuint) vertexCount
+			 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Drawing %@ from %u for %u vertices", self, vertexIndex, vertexCount);
+	if (_vertexIndices) {
+		[_vertexIndices drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+	} else {
+		[_vertexLocations drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
+	}
+}
+
+/**
+ * Returns a bounding volume that first checks against the spherical boundary, and then checks
+ * against a bounding box. The spherical boundary is fast to check, but is not as accurate as
+ * the bounding box for many meshes. The bounding box is more accurate, but is more expensive
+ * to check than the spherical boundary. The bounding box is only checked if the spherical
+ * boundary does not indicate that the mesh is outside the frustum.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return [CC3NodeSphereThenBoxBoundingVolume boundingVolume]; }
 
 // The tag of the mesh that was most recently drawn to the GL engine.
 // The GL engine is only updated when a mesh with a different tag is presented.
@@ -475,9 +1493,231 @@ static GLuint currentMeshTag = 0;
 	return shouldSwitch;
 }
 
-+(void) resetSwitching {
-	currentMeshTag = 0;
++(void) resetSwitching { currentMeshTag = 0; }
+
+//-(GLenum) drawingMode { return GL_TRIANGLE_STRIP; }
+//
+//-(void) setDrawingMode: (GLenum) aMode {}
+
+///**
+// * Template method that binds the mesh arrays to the GL engine prior to drawing.
+// * The specified visitor encapsulates the frustum of the currently active camera,
+// * and certain drawing options.
+// *
+// * This method does not create GL buffers, which are created with the createGLBuffers method.
+// * This method binds the buffer or data pointers to the GL engine, prior to each draw call.
+// */
+//-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+//
+///**
+// * Draws the mesh vertices to the GL engine.
+// * Default implementation does nothing. Subclasses will override.
+// */
+//-(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+//
+///**
+// * Draws a portion of the mesh vertices to the GL engine.
+// * Default implementation does nothing. Subclasses will override.
+// */
+//-(void) drawVerticesFrom: (GLuint) vertexIndex
+//				forCount: (GLuint) vertexCount
+//			 withVisitor: (CC3NodeDrawingVisitor*) visitor {}
+//
+//-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_faces = nil;
+		_shouldInterleaveVertices = YES;
+		_vertexLocations = nil;
+		_vertexNormals = nil;
+		_vertexColors = nil;
+		_vertexMatrixIndices = nil;
+		_vertexWeights = nil;
+		_vertexPointSizes = nil;
+		_vertexTextureCoordinates = nil;
+		_overlayTextureCoordinates = nil;
+		_vertexIndices = nil;
+		_capacityExpansionFactor = 1.25;
+	}
+	return self;
 }
+
+// Protected properties for copying
+-(CCArray*) overlayTextureCoordinates { return _overlayTextureCoordinates; }
+
+-(void) populateFrom: (CC3Mesh*) another {
+	[super populateFrom: another];
+	
+	self.faces = another.faces;											// retained but not copied
+	
+	// Share vertex arrays between copies
+	self.vertexLocations = another.vertexLocations;						// retained but not copied
+	self.vertexNormals = another.vertexNormals;							// retained but not copied
+	self.vertexColors = another.vertexColors;							// retained but not copied
+	self.vertexMatrixIndices = another.vertexMatrixIndices;				// retained but not copied
+	self.vertexWeights = another.vertexWeights;							// retained but not copied
+	self.vertexPointSizes = another.vertexPointSizes;					// retained but not copied
+	self.vertexTextureCoordinates = another.vertexTextureCoordinates;	// retained but not copied
+	
+	// Remove any existing overlay textures and add the overlay textures from the other vertex array.
+	[_overlayTextureCoordinates removeAllObjects];
+	CCArray* otherOTCs = another.overlayTextureCoordinates;
+	if (otherOTCs) {
+		for (CC3VertexTextureCoordinates* otc in otherOTCs) {
+			[self addTextureCoordinates: [otc autoreleasedCopy]];		// retained by collection
+		}
+	}
+	
+	self.vertexIndices = another.vertexIndices;							// retained but not copied
+	_shouldInterleaveVertices = another.shouldInterleaveVertices;
+	_capacityExpansionFactor = another.capacityExpansionFactor;
+}
+
+// Template method that populates this instance from the specified other instance.
+// This method is invoked automatically during object copying via the copyWithZone: method.
+//-(void) populateFrom: (CC3Mesh*) another {
+//	[super populateFrom: another];
+//	
+//	self.faces = another.faces;				// retained but not copied
+//}
+
++(id) mesh { return [[[self alloc] init] autorelease]; }
+
++(id) meshWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
+
++(id) meshWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
+
++(id) meshWithTag: (GLuint) aTag withName: (NSString*) aName {
+	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
+}
+
+
+#pragma mark Tag allocation
+
+// Class variable tracking the most recent tag value assigned for CC3Meshs.
+// This class variable is automatically incremented whenever the method nextTag is called.
+static GLuint lastAssignedMeshTag;
+
+-(GLuint) nextTag { return ++lastAssignedMeshTag; }
+
++(void) resetTagAllocation { lastAssignedMeshTag = 0; }
+
+
+
+//#pragma mark Accessing vertex data
+//
+//-(BOOL) ensureCapacity: (GLuint) vtxCount { return NO; }
+//
+//-(GLuint) vertexCount { return 0; }
+//
+//-(void) setVertexCount: (GLuint) vCount {}
+//
+//-(GLuint) vertexIndexCount { return 0; }
+//
+//-(void) setVertexIndexCount: (GLuint) vCount {}
+//
+//-(CC3Vector) vertexLocationAt: (GLuint) index { return kCC3VectorZero; }
+//
+//-(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index {}
+//
+//-(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index { return kCC3Vector4ZeroLocation; }
+//
+//-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index {}
+//
+//-(CC3Vector) vertexNormalAt: (GLuint) index { return kCC3VectorZero; }
+//
+//-(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {}
+//
+//-(ccColor4F) vertexColor4FAt: (GLuint) index { return kCCC4FBlackTransparent; }
+//
+//-(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index {}
+//
+//-(ccColor4B) vertexColor4BAt: (GLuint) index { return (ccColor4B){ 0, 0, 0, 0 }; }
+//
+//-(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index {}
+//
+//-(GLuint) vertexUnitCount { return 0; }
+//
+//-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0.0f; }
+//
+//-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {}
+//
+//-(GLfloat*) vertexWeightsAt: (GLuint) index { return NULL; }
+//
+//-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {}
+//
+//-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0; }
+//
+//-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
+//			   forVertexUnit: (GLuint) vertexUnit
+//						  at: (GLuint) index {}
+//
+//-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index { return NULL; }
+//
+//-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {}
+//
+//-(GLenum) matrixIndexType { return GL_ZERO; }
+//
+//-(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex { return 0.0f; }
+//
+//-(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex {}
+//
+//-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
+//	return (ccTex2F){ 0.0, 0.0 };
+//}
+//
+//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index {}
+//
+//-(ccTex2F) vertexTexCoord2FAt: (GLuint) index {
+//	return [self vertexTexCoord2FForTextureUnit: 0 at: index];
+//}
+//
+//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index {
+//	[self setVertexTexCoord2F: aTex2F forTextureUnit: 0 at: index];
+//}
+//
+//// Deprecated
+//-(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit {
+//	return [self vertexTexCoord2FForTextureUnit: texUnit at: index];
+//}
+//
+//// Deprecated
+//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit {
+//	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
+//}
+
+//
+//-(GLuint) vertexIndexAt: (GLuint) index { return 0; }
+//
+//-(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index {}
+//
+//-(void) updateVertexLocationsGLBuffer {}
+//
+//-(void) updateVertexNormalsGLBuffer {}
+//
+//-(void) updateVertexColorsGLBuffer {}
+//
+//-(void) updateVertexWeightsGLBuffer {}
+//
+//-(void) updateVertexMatrixIndicesGLBuffer {}
+//
+//-(void) updatePointSizesGLBuffer {}
+//
+//-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {}
+//
+//-(void) updateVertexTextureCoordinatesGLBuffer {
+//	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
+//}
+
+//-(void) updateVertexIndicesGLBuffer {}
+//
+//-(void) updateGLBuffers {}
+
+
 
 @end
 

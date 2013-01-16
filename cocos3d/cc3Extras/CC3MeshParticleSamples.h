@@ -176,10 +176,10 @@
  * See the notes for the CC3MeshParticleProtocol templateMesh and CC3MeshParticleEmitter
  * particleTemplateMesh for more information.
  */
--(void) addParticleTemplateMesh: (CC3VertexArrayMesh*) aVtxArrayMesh;
+-(void) addParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh;
 
 /** Removes the specified mesh from the collection of meshes in the particleTemplateMeshes property. */
--(void) removeParticleTemplateMesh: (CC3VertexArrayMesh*) aVtxArrayMesh;
+-(void) removeParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh;
 
 /**
  * Template method that sets the templateMesh property of the specified particle.

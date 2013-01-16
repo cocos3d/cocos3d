@@ -1739,6 +1739,38 @@ typedef enum {
 -(void) retainVertexColors;
 
 /**
+ * Convenience method to cause the vertex matrix index data of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantData is invoked, even if
+ * it has been buffered to a GL VBO.
+ *
+ * Only the vertex matrix index will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexMatrixIndices;
+
+/**
+ * Convenience method to cause the vertex weight data of this node and all descendant
+ * nodes  to be retained in application memory when releaseRedundantData is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex weight will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexWeights;
+
+/**
+ * Convenience method to cause the vertex point size data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex point sizes will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexPointSizes;
+
+/**
  * Convenience method to cause the vertex texture coordinate data of this node and
  * all descendant nodes, for all texture units, used by this mesh to be retained in
  * application memory when releaseRedundantData is invoked, even if it has been
@@ -1827,6 +1859,49 @@ typedef enum {
  * retainVertexColors method.
  */
 -(void) doNotBufferVertexColors;
+
+/**
+ * Convenience method to cause the vertex matrix index data of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex data
+ * is not buffered to a GL VBO, is retained in application memory, and is submitted
+ * to the GL engine on each frame render.
+ *
+ * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex data,
+ * such as locations, or texture coordinates, will be buffered to a GL VBO when
+ * createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexMatrixIndices method.
+ */
+-(void) doNotBufferVertexMatrixIndices;
+
+/**
+ * Convenience method to cause the vertex weight data of this node and all descendant
+ * nodes to be skipped when createGLBuffers is invoked. The vertex data is not buffered
+ * to a GL VBO, is retained in application memory, and is submitted to the GL engine on
+ * each frame render.
+ *
+ * Only the vertex weight will not be buffered to a GL VBO. Any other vertex data, such
+ * as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
+ * is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexWeights method.
+ */
+-(void) doNotBufferVertexWeights;
+
+/**
+ * Convenience method to cause the vertex point size data to be skipped when createGLBuffers
+ * is invoked. The vertex data is not buffered to a GL VBO, is retained in application memory,
+ * and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex point sizes will not be buffered to a GL VBO. Any other vertex content, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexPointSizes method.
+ */
+-(void) doNotBufferVertexPointSizes;
 
 /**
  * Convenience method to cause the vertex texture coordinate data of this

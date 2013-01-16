@@ -31,7 +31,7 @@
 
 #import "CC3Billboard.h"
 #import "CC3OpenGLESEngine.h"
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -326,7 +326,7 @@
 	vertices[3] = (CC3Vector){xMin, yMin, 0.0};
 	
 	// Create mesh with vertex location array
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh mesh];
+	CC3Mesh* aMesh = [CC3Mesh mesh];
 	aMesh.vertexLocations = locArray;
 	self.mesh = aMesh;
 
@@ -547,7 +547,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 		
 		// 2D drawing might change mesh properties unbeknownst to cocos3d,
 		// so force the mesh to be respecified on next 3D draw
-		[CC3VertexArrayMesh resetSwitching];
+		[CC3Mesh resetSwitching];
 	}
 }
 
@@ -684,8 +684,8 @@ static GLfloat deviceScaleFactor = 0.0f;
  * If its not valid, return a zero rectangle.
  */
 -(CGRect) billboardBoundingRect {
-	CGRect bRect = ((CC3Billboard*)node).billboardBoundingRect;
-	LogTrace(@"%@ bounding rect: %@", node, NSStringFromCGRect(bRect));
+	CGRect bRect = ((CC3Billboard*)_node).billboardBoundingRect;
+	LogTrace(@"%@ bounding rect: %@", _node, NSStringFromCGRect(bRect));
 	return CGRectIsNull(bRect) ? CGRectZero : bRect;
 }
 
@@ -699,12 +699,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 	CGPoint bbMax = ccp(CGRectGetMaxX(br), CGRectGetMaxY(br));
 	
 	// Construct all 4 corner vertices of the local bounding box and transform each to global coordinates
-	vertices[0] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
-	vertices[1] = [node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
-	vertices[2] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
-	vertices[3] = [node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
+	vertices[0] = [_node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
+	vertices[1] = [_node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
+	vertices[2] = [_node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
+	vertices[3] = [_node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
 	
-	LogTrace(@"%@ bounding volume transformed %@ MinMax(%@, %@) to (%@, %@, %@, %@)", self.node,
+	LogTrace(@"%@ bounding volume transformed %@ MinMax(%@, %@) to (%@, %@, %@, %@)", _node,
 			 NSStringFromCGRect(br),
 			 NSStringFromCGPoint(bbMin), NSStringFromCGPoint(bbMax), 
 			 NSStringFromCC3Vector(vertices[0]), NSStringFromCC3Vector(vertices[1]),
@@ -718,7 +718,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) buildPlanes {
 	CC3Vector normal;
-	CC3Matrix* tMtx = node.transformMatrix;
+	CC3Matrix* tMtx = _node.transformMatrix;
 	CC3Vector bbMin = vertices[0];
 	CC3Vector bbMax = vertices[3];
 	
@@ -765,7 +765,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 -(NSString*) fullDescription {
-	CCNode* bb = ((CC3Billboard*)node).billboard;
+	CCNode* bb = ((CC3Billboard*)_node).billboard;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self.description];
 	[desc appendFormat: @" with 2D bounding rect: %@", (bb ? NSStringFromCGRect(bb.boundingBoxInPixels): @"none")];
@@ -785,7 +785,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 /** Get the mesh from the rectangular bounding mesh of the billboard node, which is used for node picking. */
 -(void) populateDisplayNode {
-	CC3Billboard* bbNode = (CC3Billboard*)node;
+	CC3Billboard* bbNode = (CC3Billboard*)_node;
 	[bbNode ensureBoundingMesh];
 	CC3BoundingVolumeDisplayNode* dn = self.displayNode;
 	dn.mesh = bbNode.mesh;

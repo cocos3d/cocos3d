@@ -62,7 +62,7 @@
 @end
 
 @interface CC3MeshParticle (TemplateMethods)
-@property(nonatomic, readonly) CC3VertexArrayMesh* mesh;
+@property(nonatomic, readonly) CC3Mesh* mesh;
 @property(nonatomic, readonly) BOOL shouldTrackTarget;
 @property(nonatomic, readonly) CC3MutableRotator* mutableRotator;
 @property(nonatomic, readonly) CC3DirectionalRotator* directionalRotator;
@@ -91,19 +91,19 @@
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3MeshParticleProtocol); }
 
--(CC3VertexArrayMesh*) particleTemplateMesh { return particleTemplateMesh; }
+-(CC3Mesh*) particleTemplateMesh { return particleTemplateMesh; }
 
--(void) setParticleTemplateMesh: (CC3VertexArrayMesh*) aVtxArrayMesh {
-	if (aVtxArrayMesh == particleTemplateMesh) return;
+-(void) setParticleTemplateMesh: (CC3Mesh*) aMesh {
+	if (aMesh == particleTemplateMesh) return;
 	
 	[particleTemplateMesh release];
-	particleTemplateMesh = [aVtxArrayMesh retain];
+	particleTemplateMesh = [aMesh retain];
 
 	// Add vertex content if not already set, and align the drawing mode
-	if (self.vertexContentTypes == kCC3VertexContentNone) {
-		self.vertexContentTypes = aVtxArrayMesh.vertexContentTypes;
-	}
-	self.drawingMode = aVtxArrayMesh.drawingMode;
+	if (self.vertexContentTypes == kCC3VertexContentNone)
+		self.vertexContentTypes = aMesh.vertexContentTypes;
+
+		self.drawingMode = aMesh.drawingMode;
 	LogTrace(@"Particle template mesh of %@ set to %@ drawing %@ with %i vertices and %i vertex indices",
 			 self, aVtxArrayMesh, NSStringFromGLEnum(self.drawingMode),
 			 aVtxArrayMesh.vertexCount, aVtxArrayMesh.vertexIndexCount);
@@ -112,10 +112,7 @@
 -(CC3MeshNode*) particleTemplate { return nil; }
 
 -(void) setParticleTemplate: (CC3MeshNode*) aParticleTemplate {
-	CC3Assert([aParticleTemplate.mesh isKindOfClass: [CC3VertexArrayMesh class]],
-			  @"%@ is not a CC3VertexArrayMesh. %@ requires that the mesh used for the particle template be a CC3VertexArrayMesh",
-			  aParticleTemplate.mesh, self);
-	self.particleTemplateMesh = (CC3VertexArrayMesh*)aParticleTemplate.mesh;
+	self.particleTemplateMesh = aParticleTemplate.mesh;
 	self.material = [aParticleTemplate.material autoreleasedCopy];
 }
 
@@ -146,7 +143,7 @@
 -(void) copyTemplateContentToParticle: (id<CC3MeshParticleProtocol>) aParticle {
 	
 	// Get the particle template mesh
-	CC3VertexArrayMesh* templateMesh = aParticle.templateMesh;
+	CC3Mesh* templateMesh = aParticle.templateMesh;
 	
 	// Copy vertex content
 	GLuint vtxCount = aParticle.vertexCount;
@@ -373,7 +370,7 @@
 	super.emitter = anEmitter;
 }
 
--(CC3VertexArrayMesh*) mesh { return self.emitter.mesh; }
+-(CC3Mesh*) mesh { return self.emitter.mesh; }
 
 -(BOOL) isAlive { return _isAlive; }
 

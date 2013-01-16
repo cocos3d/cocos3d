@@ -1066,137 +1066,69 @@
 -(id) copy { return [super copy]; }
 -(id) copyWithName: (NSString*) aName { return [super copyWithName: aName]; }
 
--(void) createGLBuffers {
-	for (CC3Node* child in children) {
-		[child createGLBuffers];
-	}
-}
+-(void) createGLBuffers { for (CC3Node* child in children) [child createGLBuffers]; }
 
--(void) deleteGLBuffers {
-	for (CC3Node* child in children) {
-		[child deleteGLBuffers];
-	}
-}
+-(void) deleteGLBuffers { for (CC3Node* child in children) [child deleteGLBuffers]; }
 
--(void) releaseRedundantData {
-	for (CC3Node* child in children) {
-		[child releaseRedundantData];
-	}
-}
+-(void) releaseRedundantData { for (CC3Node* child in children) [child releaseRedundantData]; }
 
--(void) retainVertexContent {
-	for (CC3Node* child in children) {
-		[child retainVertexContent];
-	}
-}
+-(void) retainVertexContent { for (CC3Node* child in children) [child retainVertexContent]; }
 
--(void) retainVertexLocations {
-	for (CC3Node* child in children) {
-		[child retainVertexLocations];
-	}
-}
+-(void) retainVertexLocations { for (CC3Node* child in children) [child retainVertexLocations]; }
 
--(void) retainVertexNormals {
-	for (CC3Node* child in children) {
-		[child retainVertexNormals];
-	}
-}
+-(void) retainVertexNormals { for (CC3Node* child in children) [child retainVertexNormals]; }
 
--(void) retainVertexColors {
-	for (CC3Node* child in children) {
-		[child retainVertexColors];
-	}
-}
+-(void) retainVertexColors { for (CC3Node* child in children) [child retainVertexColors]; }
+	
+-(void) retainVertexMatrixIndices { for (CC3Node* child in children) [child retainVertexMatrixIndices]; }
 
--(void) retainVertexTextureCoordinates {
-	for (CC3Node* child in children) {
-		[child retainVertexTextureCoordinates];
-	}
-}
+-(void) retainVertexWeights { for (CC3Node* child in children) [child retainVertexWeights]; }
 
--(void) retainVertexIndices {
-	for (CC3Node* child in children) {
-		[child retainVertexIndices];
-	}
-}
+-(void) retainVertexPointSizes { for (CC3Node* child in children) [child retainVertexPointSizes]; }
 
--(void) doNotBufferVertexContent {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexContent];
-	}
-}
+-(void) retainVertexTextureCoordinates { for (CC3Node* child in children) [child retainVertexTextureCoordinates]; }
 
--(void) doNotBufferVertexLocations {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexLocations];
-	}
-}
+-(void) retainVertexIndices { for (CC3Node* child in children) [child retainVertexIndices]; }
 
--(void) doNotBufferVertexNormals {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexNormals];
-	}
-}
+-(void) doNotBufferVertexContent { for (CC3Node* child in children) [child doNotBufferVertexContent]; }
 
--(void) doNotBufferVertexColors {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexColors];
-	}
-}
+-(void) doNotBufferVertexLocations { for (CC3Node* child in children) [child doNotBufferVertexLocations]; }
 
--(void) doNotBufferVertexTextureCoordinates {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexTextureCoordinates];
-	}
-}
+-(void) doNotBufferVertexNormals { for (CC3Node* child in children) [child doNotBufferVertexNormals]; }
 
--(void) doNotBufferVertexIndices {
-	for (CC3Node* child in children) {
-		[child doNotBufferVertexIndices];
-	}
-}
+-(void) doNotBufferVertexColors { for (CC3Node* child in children) [child doNotBufferVertexColors]; }
+
+-(void) doNotBufferVertexMatrixIndices { for (CC3Node* child in children) [child doNotBufferVertexMatrixIndices]; }
+
+-(void) doNotBufferVertexWeights { for (CC3Node* child in children) [child doNotBufferVertexWeights]; }
+
+-(void) doNotBufferVertexPointSizes { for (CC3Node* child in children) [child doNotBufferVertexPointSizes]; }
+
+-(void) doNotBufferVertexTextureCoordinates { for (CC3Node* child in children) [child doNotBufferVertexTextureCoordinates]; }
+
+-(void) doNotBufferVertexIndices { for (CC3Node* child in children) [child doNotBufferVertexIndices]; }
 
 
 #pragma mark Texture alignment
 
 -(BOOL) expectsVerticallyFlippedTextures {
-	for (CC3Node* child in children) {
-		if (child.expectsVerticallyFlippedTextures) return YES;
-	}
+	for (CC3Node* child in children) if (child.expectsVerticallyFlippedTextures) return YES;
 	return NO;
 }
 
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
-	for (CC3Node* child in children) {
-		child.expectsVerticallyFlippedTextures = expectsFlipped;
-	}
+	for (CC3Node* child in children) child.expectsVerticallyFlippedTextures = expectsFlipped;
 }
 
--(void) flipTexturesVertically {
-	for (CC3Node* child in children) {
-		[child flipTexturesVertically];
-	}
-}
+-(void) flipTexturesVertically { for (CC3Node* child in children) [child flipTexturesVertically]; }
 
--(void) flipTexturesHorizontally {
-	for (CC3Node* child in children) {
-		[child flipTexturesHorizontally];
-	}
-}
+-(void) flipTexturesHorizontally { for (CC3Node* child in children) [child flipTexturesHorizontally]; }
 
 // Deprecated
--(void) alignTextures {
-	for (CC3Node* child in children) {
-		[child alignTextures];
-	}
-}
+-(void) alignTextures { for (CC3Node* child in children) [child alignTextures]; }
 
 // Deprecated
--(void) alignInvertedTextures {
-	for (CC3Node* child in children) {
-		[child alignInvertedTextures];
-	}
-}
+-(void) alignInvertedTextures { for (CC3Node* child in children) [child alignInvertedTextures]; }
 
 
 #pragma mark Tag allocation
@@ -1205,13 +1137,9 @@
 // This class variable is automatically incremented whenever the method nextTag is called.
 static GLuint lastAssignedNodeTag;
 
--(GLuint) nextTag {
-	return ++lastAssignedNodeTag;
-}
+-(GLuint) nextTag { return ++lastAssignedNodeTag; }
 
-+(void) resetTagAllocation {
-	lastAssignedNodeTag = 0;
-}
++(void) resetTagAllocation { lastAssignedNodeTag = 0; }
 
 
 #pragma mark Type testing

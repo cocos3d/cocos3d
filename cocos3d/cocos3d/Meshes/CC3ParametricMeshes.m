@@ -35,9 +35,9 @@
 
 
 #pragma mark -
-#pragma mark CC3VertexArrayMesh parametric shapes extension
+#pragma mark CC3Mesh parametric shapes extension
 
-@implementation CC3VertexArrayMesh (ParametricShapes)
+@implementation CC3Mesh (ParametricShapes)
 
 
 #pragma mark Utility methods
@@ -701,7 +701,7 @@ static const GLubyte wireBoxIndexData[] = {
 // Deprecated
 -(GLushort*) allocateIndexedTriangles: (GLuint) triangleCount {
 	self.allocatedVertexIndexCapacity = (triangleCount * 3);
-	return vertexIndices.vertices;
+	return _vertexIndices.vertices;
 }
 
 @end

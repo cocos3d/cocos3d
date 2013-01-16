@@ -32,7 +32,6 @@
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3MeshNode.h"
-#import "CC3VertexArrayMesh.h"
 #import "CC3Material.h"
 #import "CC3Light.h"
 #import "CC3Billboard.h"

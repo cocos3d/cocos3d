@@ -33,7 +33,7 @@
 #import "teapot.h"
 
 @interface CC3ModelSampleFactory (TemplateMethods)
--(CC3VertexArrayMesh*) makeTeapotMeshNamed: (NSString*) aName;
+-(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName;
 @end
 
 
@@ -159,8 +159,8 @@ static CC3ModelSampleFactory* factory;
 #pragma mark Factory methods
 
 // Returns an autoreleased mesh of a teapot named with the specified name
--(CC3VertexArrayMesh*) makeTeapotMeshNamed: (NSString*) aName {
-	CC3VertexArrayMesh* mesh = [CC3VertexArrayMesh meshWithName: aName];
+-(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName {
+	CC3Mesh* mesh = [CC3Mesh meshWithName: aName];
 	mesh.shouldInterleaveVertices = NO;
 	mesh.vertexLocations = teapotVertexLocations;
 	mesh.vertexNormals = teapotVertexNormals;

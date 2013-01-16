@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3MeshNode.h"
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 #import "uthash.h"
 
 /** Bitmap information for a single character. */
@@ -363,10 +363,10 @@ typedef struct {
 
 
 #pragma mark -
-#pragma mark CC3VertexArrayMesh bitmapped label extension
+#pragma mark CC3Mesh bitmapped label extension
 
 /** CC3MeshNode extension to support bitmapped labels. */
-@interface CC3VertexArrayMesh (BitmapLabel)
+@interface CC3Mesh (BitmapLabel)
 
 /**
  * Populates this instance as a rectangular mesh displaying the text of the specified string,

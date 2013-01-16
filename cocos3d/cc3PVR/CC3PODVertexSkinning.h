@@ -50,17 +50,6 @@
 
 
 #pragma mark -
-#pragma mark CC3PODSkinMesh
-
-/** A CC3SkinMesh extracted from a POD file. */
-@interface CC3PODSkinMesh : CC3SkinMesh {
-	int podIndex;
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3VertexWeights
 
 /** A CC3VertexWeights extension to support extracting from a POD file. */

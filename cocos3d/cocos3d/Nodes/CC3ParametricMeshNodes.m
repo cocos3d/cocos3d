@@ -41,14 +41,13 @@
 
 #pragma mark Utility methods
 
--(CC3VertexArrayMesh*) prepareParametricMesh {
+-(CC3Mesh*) prepareParametricMesh {
 	if (self.vertexContentTypes == kCC3VertexContentNone) {
 		self.vertexContentTypes = (kCC3VertexContentLocation |
 								   kCC3VertexContentNormal |
 								   kCC3VertexContentTextureCoordinates);
 	}
-	CC3Assert([mesh isKindOfClass: [CC3VertexArrayMesh class]], @"For parametric construction, the mesh property of %@ must be an instance of CC3VertexArrayMesh.", self);
-	return (CC3VertexArrayMesh*) mesh;
+	return mesh;
 }
 
 
@@ -110,7 +109,7 @@
 }
 
 -(void) populateAsWireBox: (CC3BoundingBox) box {
-	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh mesh];
+	CC3Mesh* vaMesh = [CC3Mesh mesh];
 	[vaMesh populateAsWireBox: box];
 	self.mesh = vaMesh;		// Set mesh to update bounding volume
 }
@@ -121,7 +120,7 @@
 // After populating, set spherical bounding volume
 -(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis {
 	[[self prepareParametricMesh] populateAsSphereWithRadius: radius andTessellation: divsPerAxis];
-	self.boundingVolume = [CC3VertexLocationsSphericalBoundingVolume boundingVolume];
+	self.boundingVolume = [CC3NodeSphericalBoundingVolume boundingVolume];
 }
 
 
@@ -141,7 +140,7 @@
 -(void) populateAsLineStripWith: (GLuint) vertexCount
 					   vertices: (CC3Vector*) vertices
 					  andRetain: (BOOL) shouldRetainVertices {
-	CC3VertexArrayMesh* vaMesh = [CC3VertexArrayMesh mesh];
+	CC3Mesh* vaMesh = [CC3Mesh mesh];
 	[vaMesh populateAsLineStripWith: vertexCount
 						   vertices: vertices
 						  andRetain: shouldRetainVertices];
@@ -229,7 +228,7 @@
 
 -(void) populateBox: (CC3BoundingBox) aBox {
 	
-	CC3VertexArrayMesh* vaMesh = [self prepareParametricMesh];
+	CC3Mesh* vaMesh = [self prepareParametricMesh];
 	
 	// Now update the vertex locations with the box data
 	GLuint vIdx = 0;
@@ -249,15 +248,15 @@
 }
 
 /** Overridden because we only need vertex locations, and to allocate and populate indices. */
--(CC3VertexArrayMesh*) prepareParametricMesh {
-	if (mesh) return (CC3VertexArrayMesh*)mesh;
+-(CC3Mesh*) prepareParametricMesh {
+	if (mesh) return (CC3Mesh*)mesh;
 	
-	if (self.vertexContentTypes == kCC3VertexContentNone) {
+	if (self.vertexContentTypes == kCC3VertexContentNone)
 		self.vertexContentTypes = kCC3VertexContentLocation;
-	}
-	CC3VertexArrayMesh* vaMesh = (CC3VertexArrayMesh*)mesh;
+
 	
 	// Prepare the vertex content and allocate space for vertices and indices.
+	CC3Mesh* vaMesh = mesh;
 	vaMesh.allocatedVertexCapacity = 8;
 	vaMesh.allocatedVertexIndexCapacity = 36;
 	

@@ -30,7 +30,6 @@
 /** @file */	// Doxygen marker
 
 #import "CC3MeshNode.h"
-#import "CC3VertexArrayMesh.h"
 
 
 @class CC3ParticleEmitter, CC3ParticleNavigator;
@@ -1099,13 +1098,6 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
 	NSRange dirtyVertexIndexRange;
 	BOOL wasVertexCapacityChanged;
 }
-
-/**
- * The mesh that holds the vertex data for this mesh node.
- *
- * CC3CommonVertexArrayParticleEmitter requires that the mesh be of type CC3VertexArrayMesh.
- */
-@property(nonatomic, retain) CC3VertexArrayMesh* mesh;
 
 @end
 

@@ -1737,14 +1737,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													  kPartMeshDim, kPartMeshDim, kPartMeshDim)];
 	boxModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
 	boxModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);	// Bottom part of texture is box texture
-	CC3VertexArrayMesh* boxMesh = (CC3VertexArrayMesh*)boxModel.mesh;
+	CC3Mesh* boxMesh = boxModel.mesh;
 
 	// Sphere template mesh
 	CC3MeshNode* ballModel = [CC3MeshNode node];
 	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: ccg(8, 7)];
 	ballModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
 	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
-	CC3VertexArrayMesh* ballMesh = (CC3VertexArrayMesh*)ballModel.mesh;
+	CC3Mesh* ballMesh = ballModel.mesh;
 	
 	// Set up the emitter to emit mesh particles of type CC3UniformlyEvolvingMeshParticle constructed as
 	// copies of the particle template mesh. We don't need to set up a maxiumum capacity, because this

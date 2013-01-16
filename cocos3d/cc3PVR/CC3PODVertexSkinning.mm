@@ -102,49 +102,6 @@
 
 
 #pragma mark -
-#pragma mark CC3PODSkinMesh
-
-@implementation CC3PODSkinMesh
-
--(int) podIndex { return podIndex; }
-
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
-
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
-		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
-		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromSPODMesh: psm];
-		self.vertexWeights = [CC3VertexWeights arrayFromSPODMesh: psm];
-
-		// If the mesh data is interleaved, the superclass init will have cleared
-		// the pointer to it, so that it can be managed by the vertexLocations array.
-		// So, we need to point the two new vertex arrays to the interleaved data.
-		if (shouldInterleaveVertices) {
-			self.vertexMatrixIndices.vertices = self.vertexLocations.vertices;
-			self.vertexWeights.vertices = self.vertexLocations.vertices;
-		}
-	}
-	return self;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3PODSkinMesh*) another {
-	[super populateFrom: another];
-	
-	podIndex = another.podIndex;
-}
-
-// Deprecated texture inversion. When this is invoked on a POD mesh, it does need inversion.
--(void) deprecatedAlign: (CC3VertexTextureCoordinates*) texCoords
-	withInvertedTexture: (CC3Texture*) aTexture {
-	[texCoords flipVertically];		// Avoid switching expectsVerticallyFlippedTextures
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3VertexWeights
 
 @implementation CC3VertexWeights (PVRPOD)

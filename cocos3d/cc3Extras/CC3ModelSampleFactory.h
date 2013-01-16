@@ -28,7 +28,7 @@
  */
 
 
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 #import "CC3MeshNode.h"
 
 
@@ -52,22 +52,22 @@
 	CC3VertexIndices* teapotVertexIndices;
 	CC3VertexTextureCoordinates* teapotVertexTextureCoordinates;
 	CC3VertexColors* teapotVertexColors;
-	CC3VertexArrayMesh* texturedTeapotMesh;
-	CC3VertexArrayMesh* multicoloredTeapotMesh;
-	CC3VertexArrayMesh* unicoloredTeapotMesh;
+	CC3Mesh* texturedTeapotMesh;
+	CC3Mesh* multicoloredTeapotMesh;
+	CC3Mesh* unicoloredTeapotMesh;
 }
 
 /** Returns the singleton instance. */
 +(CC3ModelSampleFactory*) factory;
 
 /** An instance of a teapot mesh that includes a texture coordinate map. */
-@property(nonatomic, readonly) CC3VertexArrayMesh* texturedTeapotMesh;
+@property(nonatomic, readonly) CC3Mesh* texturedTeapotMesh;
 
 /** An instance of a teapot mesh that will be covered in a single color. */
-@property(nonatomic, readonly) CC3VertexArrayMesh* unicoloredTeapotMesh;
+@property(nonatomic, readonly) CC3Mesh* unicoloredTeapotMesh;
 
 /** An instance of a teapot mesh that includes a vertex color array. */
-@property(nonatomic, readonly) CC3VertexArrayMesh* multicoloredTeapotMesh;
+@property(nonatomic, readonly) CC3Mesh* multicoloredTeapotMesh;
 
 #pragma mark Factory methods
 

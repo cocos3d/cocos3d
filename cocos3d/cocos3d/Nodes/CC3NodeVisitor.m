@@ -32,7 +32,7 @@
 #import "CC3NodeVisitor.h"
 #import "CC3Scene.h"
 #import "CC3Layer.h"
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 #import "CC3OpenGLESEngine.h"
 #import "CC3GLView.h"
 #import "CC3EAGLView.h"
@@ -438,7 +438,7 @@
 	[super open];
 
 	[CC3Material resetSwitching];
-	[CC3VertexArrayMesh resetSwitching];
+	[CC3Mesh resetSwitching];
 	
 	if (_shouldClearDepthBuffer) [[CC3OpenGLESEngine engine].state clearDepthBuffer];
 }

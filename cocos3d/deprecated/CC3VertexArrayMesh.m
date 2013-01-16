@@ -1,5 +1,5 @@
 /*
- * CC3PODMesh.h
+ * CC3VertexArrayMesh.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -25,36 +25,27 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
+ * 
+ * See header file CC3VertexArrayMesh.h for full API documentation.
  */
 
-/** @file */	// Doxygen marker
-
-
-#import "CC3Mesh.h"
-#import "CC3IdentifiablePODExtensions.h"
+#import "CC3VertexArrayMesh.h"
 
 
 #pragma mark -
-#pragma mark CC3Mesh extensions for PVR POD data
+#pragma mark Deprecated vertex array mesh and vertex locations bounding volumes
 
-/** Extensions to CC3Mesh to support PVR POD data. */
-@interface CC3Mesh (PVRPOD)
+@implementation CC3VertexArrayMesh
+@end
 
-/**
- * Allocates and initializes an autoreleased instance from the data of
- * this type at the specified index within the specified POD resource.
- */
-+(id) meshAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
+@implementation CC3VertexLocationsBoundingVolume
+@end
 
+@implementation CC3VertexLocationsSphericalBoundingVolume
+@end
+
+@implementation CC3VertexLocationsBoundingBoxVolume
 @end
 
 
-#pragma mark -
-#pragma mark CC3PODMesh
 
-/** A CC3Mesh whose content originates from POD resource data. */
-@interface CC3PODMesh : CC3Mesh {
-	int podIndex;
-}
-
-@end

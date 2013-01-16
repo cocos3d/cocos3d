@@ -34,9 +34,9 @@
 #import "CC3VertexArraysPODExtensions.h"
 
 
-#pragma mark CC3VertexArrayMesh extensions for PVR POD data
+#pragma mark CC3Mesh extensions for PVR POD data
 
-@implementation CC3VertexArrayMesh (PVRPOD)
+@implementation CC3Mesh (PVRPOD)
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
@@ -44,10 +44,10 @@
 		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
 		
 		self.vertexLocations = [CC3VertexLocations arrayFromSPODMesh: psm];
-		
 		self.vertexNormals = [CC3VertexNormals arrayFromSPODMesh: psm];
-		
 		self.vertexColors = [CC3VertexColors arrayFromSPODMesh: psm];
+		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromSPODMesh: psm];
+		self.vertexWeights = [CC3VertexWeights arrayFromSPODMesh: psm];
 		
 		for (GLuint i = 0; i < psm->nNumUVW; i++) {
 			CC3VertexTextureCoordinates* texCoords;
@@ -69,10 +69,10 @@
 		// CPVRTModelPOD to free when it needs to. The original pointer is now being managed
 		// by the CC3VertexLocations instance.
 		if (psm->pInterleaved != NULL) {
-			shouldInterleaveVertices = YES;
+			_shouldInterleaveVertices = YES;
 			psm->pInterleaved = (PVRTuint8*)calloc(1, sizeof(PVRTuint8));
 		} else {
-			shouldInterleaveVertices = NO;
+			_shouldInterleaveVertices = NO;
 		}
 		
 	}

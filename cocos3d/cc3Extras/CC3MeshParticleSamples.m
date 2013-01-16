@@ -227,14 +227,14 @@
 	[super dealloc];
 }
 
--(void) addParticleTemplateMesh: (CC3VertexArrayMesh*) aVtxArrayMesh {
+-(void) addParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
 	[particleTemplateMeshes addObject: aVtxArrayMesh];
 	LogTrace(@"%@ added particle template mesh %@ with %i vertices and %i vertex indices",
 				  self, aVtxArrayMesh, aVtxArrayMesh.vertexCount, aVtxArrayMesh.vertexIndexCount);
 }
 
 /** Removes the specified mesh from the collection of meshes in the particleTemplateMeshes property. */
--(void) removeParticleTemplateMesh: (CC3VertexArrayMesh*) aVtxArrayMesh {
+-(void) removeParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
 	[particleTemplateMeshes removeObjectIdenticalTo: aVtxArrayMesh];
 }
 

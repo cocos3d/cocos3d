@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 
 
 #pragma mark -
@@ -37,8 +37,8 @@
 
 DEPRECATED_ATTRIBUTE
 /**
- * Deprecated and renamed to CC3VertexArrayMesh.
  * @deprecated CC3VertexArrayMeshModel renamed to CC3VertexArrayMesh.
+ * Former functionality now absorbed into CC3Mesh.
  */
-@interface CC3VertexArrayMeshModel : CC3VertexArrayMesh
+@interface CC3VertexArrayMeshModel : CC3Mesh
 @end

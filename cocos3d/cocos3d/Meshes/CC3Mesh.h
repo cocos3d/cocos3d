@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Node.h"
+#import "CC3VertexArrays.h"
 #import "CC3Material.h"
 
 @class CC3FaceArray;
@@ -49,16 +50,6 @@
  * 
  * All valid meshes must contain a kCC3VertexContentLocation, and a meshes will raise
  * an assertion if an attempt is made to set the vertex content without that component.
- *
- * Not all meshes can contain all of the vertex content itemized above. In general, all
- * meshes can contain the first four vertex content types. Specialized mesh subclasses
- * can contain other combinations as follows:
- *   - kCC3VertexContentPointSize is accepted by CC3PointParticleMesh in support of point particles.
- *   - kCC3VertexContentWeights and kCC3VertexContentMatrixIndices are accepted by CC3SkinMesh
- *     in support of skinned meshes controlled by bone-rigging.
- *
- * Meshes that do not support a particular vertex component type will silently ignore that
- * component in a CC3VertexContent.
  */
 typedef enum {
 	/**
@@ -105,9 +96,9 @@ typedef enum {
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
 	 * each vertex contains point size information.
 	 *
-	 * This component is required if and only if the vertices are part of a point pariticle mesh
-	 * (eg. CC3PointParticleMesh), and each particle will have its own size. If this component
-	 * is not included in a point particle mesh, all particles will have the same size.
+	 * This component is required if and only if the vertices are part of a point pariticle mesh,
+	 * and each particle will have its own size. If this component is not included in a point
+	 * particle mesh, all particles will have the same size.
 	 */
 	kCC3VertexContentPointSize			= 1 << 4,
 	
@@ -116,7 +107,7 @@ typedef enum {
 	 * a series of weights to allow the vertex to be manipulated by a series of weighted
 	 * matrix transforms.
 	 *
-	 * This component is required if and only if the mesh is a vertex skinned mesh (eg. CC3SkinMesh).
+	 * This component is required if and only if the mesh is a vertex skinned mesh.
 	 * This component requires that the kCC3VertexContentMatrixIndices also be specified.
 	 */
 	kCC3VertexContentWeights				= 1 << 5,
@@ -126,7 +117,7 @@ typedef enum {
 	 * a series of matrix indices to allow the vertex to be manipulated by a series of weighted
 	 * matrix transforms.
 	 *
-	 * This component is required if and only if the mesh is a vertex skinned mesh (eg. CC3SkinMesh).
+	 * This component is required if and only if the mesh is a vertex skinned mesh.
 	 * This component requires that the kCC3VertexContentMatrixIndices also be specified.
 	 */
 	kCC3VertexContentMatrixIndices		= 1 << 6
@@ -187,8 +178,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 }
 
 /**
- * A CC3Mesh holds the 3D mesh for a CC3MeshNode. The CC3MeshNode enapsulates a reference
- * to the CC3Mesh.
+ * A CC3Mesh holds the 3D mesh for a CC3MeshNode.
  *
  * In 3D models, the mesh generally remains fixed, and transformations such as translation,
  * rotation, and scaling are applied at the node level. A single CC3Mesh instance, which
@@ -197,8 +187,59 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * With this in mind, and following best practices to consevere memory and processing time,
  * you should strive to create only one CC3Mesh instance for each distinct mesh in your
- * application, and assign that single CC3Mesh instance to any number of separate
- * CC3MeshNode instances that make use of it.
+ * application, and assign that single CC3Mesh instance to any number of separate CC3MeshNode
+ * instances that make use of it.
+
+ *
+ * The vertex content in this mesh is kept in a set of CC3VertexArrays instances. Each of
+ * the contained CC3VertexArray instances manages the data for one aspect of the vertices
+ * (locations, normals, colors, texture mapping, bone weights...).
+ *
+ * Vertex data can be interleaved into a single underlying memory buffer that is shared
+ * between the contained CC3VertexArrays, or it can be separated into distinct memory
+ * buffers for each vertex aspect.
+ *
+ * The only vertex array that is required is the vertexLocations property. The others are
+ * optional, depending on the nature of the mesh. If the vertexIndices property is provided,
+ * it will be used during drawing. If ther vertexIndices property is nil, the vertices will
+ * be drawn in linear order as they appear in the vertexLocations property.
+ *
+ * This class supports multi-texturing. In most situations, the mesh will use the same texture
+ * mapping for all texture units. In this case, the single texture coordinates array in the
+ * vertexTexureCoordinates property will be applied to all textures in the material applied
+ * to a CC3MeshNode using this mesh.
+ *
+ * If multi-texturing is used, and separate texture coordinate mapping is required for each texture
+ * unit, additional texture coordinate arrays can be added using the addTextureCoordinates: method.
+ *
+ * For consistency, the addTextureCoordinates:, removeTextureCoordinates:, and
+ * getTextureCoordinatesNamed: methods all interact with the vertexTextureCoordinates
+ * property. If that property has not been set, the first texture coordinate array that
+ * is added via addTextureCoordinates: will be set into the vertexTextureCoordinates
+ * array. And the removeTextureCoordinates:, and getTextureCoordinatesNamed: methods
+ * each check the vertexTextureCoordinates property as well as the overlayTextureCoordinates
+ * collection. This design can simplify configurations in that all texture coordinate arrays
+ * can be treated the same.
+ *
+ * If there are more textures applied to a node than there are texture coordinate arrays
+ * in the mesh (including the vertexTextureCoordinates and the those in the
+ * overlayTextureCoordinates collection), the last texture coordinate array is reused.
+ *
+ * This class supports covering the mesh with a repeating texture through the repeatTexture: method.
+ *
+ * This class also supports covering the mesh with only a fractional part of the texture
+ * through the use of the textureRectangle property, effectlivly permitting sprite-sheet
+ * textures to be used with 3D meshes.
+ *
+ * When a copy is made of a CC3Mesh instance, copies are not made of the vertex arrays. Instead,
+ * they are retained by reference and shared between both the original mesh, and the new copy.
+ *
+ * CC3Mesh manages data for one contiguous set of vertices that can be drawn with a single call
+ * to the GL engine, or a single set of draw-strip calls to the GL engine, using the same material
+ * properties. To assemble a large, complex mesh containing several distinct vertex groups, assign
+ * each vertex group to its own CC3Mesh instance, wrap each mesh instance in a CC3MeshNode instance,
+ * and create an structural assembly of the nodes. See the class notes for CC3MeshNode for more
+ * information on assembling mesh nodes.
  *
  * When drawing the mesh to the GL engine, this class remembers which mesh was last drawn
  * and only binds the mesh data to the GL engine when a different mesh is drawn. This allows
@@ -210,11 +251,37 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * meshes from different sources and third-party libraries.
  */
 @interface CC3Mesh : CC3Identifiable {
-	CC3FaceArray* faces;
+	CC3FaceArray* _faces;
+	CC3VertexLocations* _vertexLocations;
+	CC3VertexNormals* _vertexNormals;
+	CC3VertexTangents* _vertexTangents;
+	CC3VertexTangents* _vertexBitangents;
+	CC3VertexColors* _vertexColors;
+	CC3VertexTextureCoordinates* _vertexTextureCoordinates;
+	CCArray* _overlayTextureCoordinates;
+	CC3VertexMatrixIndices* _vertexMatrixIndices;
+	CC3VertexWeights* _vertexWeights;
+	CC3VertexPointSizes* _vertexPointSizes;
+	CC3VertexIndices* _vertexIndices;
+	GLfloat _capacityExpansionFactor;
+	BOOL _shouldInterleaveVertices : 1;
 }
+
+
+#pragma mark Vertex arrays
+
+/** The vertex array instance managing the positional content for the vertices. */
+@property(nonatomic, retain) CC3VertexLocations* vertexLocations;
 
 /** Returns whether this mesh contains data for vertex locations. */
 @property(nonatomic, readonly) BOOL hasVertexLocations;
+
+/**
+ * The vertex array instance managing the normal content for the vertices.
+ *
+ * Setting this property is optional. Not all meshes require normals.
+ */
+@property(nonatomic, retain) CC3VertexNormals* vertexNormals;
 
 /** Returns whether this mesh contains data for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
@@ -222,8 +289,32 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** @deprecated Replaced by hasVertexNormals. */
 @property(nonatomic, readonly) BOOL hasNormals DEPRECATED_ATTRIBUTE;
 
+/**
+ * The vertex array instance managing the tangent content for the vertices.
+ *
+ * Setting this property is optional. Not all meshes require tangents.
+ */
+//@property(nonatomic, retain) CC3VertexTangents* vertexTangents;
+
+/**
+ * The vertex array instance managing the bitangent content for the vertices.
+ *
+ * Setting this property is optional. Not all meshes require bitangents.
+ */
+//@property(nonatomic, retain) CC3VertexTangents* vertexBitangents;
+
+/**
+ * The vertex array instance managing the per-vertex color content for the vertices.
+ *
+ * Setting this property is optional. Many meshes do not require per-vertex coloring.
+ */
+@property(nonatomic, retain) CC3VertexColors* vertexColors;
+
 /** Returns whether this mesh contains data for vertex colors.  */
 @property(nonatomic, readonly) BOOL hasVertexColors;
+
+/** @deprecated Replaced by hasVertexColors. */
+@property(nonatomic, readonly) BOOL hasColors DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the symbolic content type of the vertex color, which indicates the range of values
@@ -237,85 +328,180 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic, readonly) GLenum vertexColorType;
 
-/** @deprecated Replaced by hasVertexColors. */
-@property(nonatomic, readonly) BOOL hasColors DEPRECATED_ATTRIBUTE;
+/**
+ * The vertex array that manages the indices of the bones that influence each vertex.
+ *
+ * Each element of the vertex array in this property is a small set of index values that
+ * reference a set of bones that influence the location of that vertex.
+ *
+ * The elementSize property of the vertex arrays in the vertexWeights and vertexMatrixIndices
+ * properties must be the same, and must not be larger than the maximum number of available
+ * vertex units for the platform, which can be retreived from
+ * [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ */
+@property(nonatomic,retain) CC3VertexMatrixIndices* vertexMatrixIndices;
 
-/** Returns whether this mesh contains data for vertex texture coordinates. */
-@property(nonatomic, readonly) BOOL hasVertexTextureCoordinates;
+/** Indicates whether this mesh contains data for vertex matrix indices. */
+@property(nonatomic, readonly) BOOL hasVertexMatrixIndices;
+
+/** @deprecated Replaced by hasVertexMatrixIndices. */
+@property(nonatomic, readonly) BOOL hasMatrixIndices DEPRECATED_ATTRIBUTE;
+
+/**
+ * The vertex array that manages the weighting that each bone has in influencing each vertex.
+ *
+ * Each element of the vertex array in this property contains a small set of weighting values
+ * that determine the relative influence that each of the bones identified for that vertex in
+ * the vertexMatrixIndices property has on transforming the location of the vertex.
+ *
+ * The elementSize property of the vertex arrays in the vertexWeights and vertexMatrixIndices
+ * properties must be the same, and must not be larger than the maximum number of available
+ * vertex units for the platform, which can be retreived from
+ * [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ */
+@property(nonatomic,retain) CC3VertexWeights* vertexWeights;
+
+/** Indicates whether this mesh contains data for vertex weights. */
+@property(nonatomic, readonly) BOOL hasVertexWeights;
+
+/** @deprecated Replaced by hasVertexWeights. */
+@property(nonatomic, readonly) BOOL hasWeights DEPRECATED_ATTRIBUTE;
+
+/**
+ * The vertex array instance managing a point size for each vertex.
+ *
+ * Setting this property is optional. It is used for point particle systems, and even then,
+ * particle systems often do not require individual sizing for each particle.
+ */
+@property(nonatomic, retain) CC3VertexPointSizes* vertexPointSizes;
+
+/** Indicates whether this mesh contains data for vertex point sizes. */
+@property(nonatomic, readonly) BOOL hasVertexPointSizes;
+
+/** @deprecated Replaced by hasVertexPointSizes. */
+@property(nonatomic, readonly) BOOL hasPointSizes DEPRECATED_ATTRIBUTE;
+
+/**
+ * The vertex array instance managing the index content for the vertices.
+ *
+ * Setting this property is optional. If vertex index data is not provided, the vertices
+ * will be drawn in linear order as they appear in the vertexLocations property.
+ */
+@property(nonatomic, retain) CC3VertexIndices* vertexIndices;
 
 /** Returns whether this mesh uses index vertices. */
 @property(nonatomic, readonly) BOOL hasVertexIndices;
 
-/** The center of geometry of this mesh. */
-@property(nonatomic, readonly) CC3Vector centerOfGeometry;
-
-/** Returns the the smallest axis-aligned-bounding-box (AABB) that surrounds the mesh. */
-@property(nonatomic, readonly) CC3BoundingBox boundingBox;
-
 /**
- * Returns the radius of a spherical boundary, centered on the centerOfGeometry,
- * that encompasses all the vertices of this mesh.
- */
-@property(nonatomic, readonly) GLfloat radius;
-
-
-#pragma mark Allocation and initialization
-
-/**
- * Allocates and initializes an autoreleased unnamed instance with an automatically
- * generated unique tag value. The tag value is generated using a call to nextTag.
- */
-+(id) mesh;
-
-/** Allocates and initializes an unnamed autoreleased instance with the specified tag. */
-+(id) meshWithTag: (GLuint) aTag;
-
-/**
- * Allocates and initializes an autoreleased instance with the specified name and an
- * automatically generated unique tag value. The tag value is generated using a call to nextTag.
- */
-+(id) meshWithName: (NSString*) aName;
-
-/** Allocates and initializes an autoreleased instance with the specified tag and name. */
-+(id) meshWithTag: (GLuint) aTag withName: (NSString*) aName;
-
-
-#pragma mark CCRGBAProtocol and CCBlendProtocol support
-
-/**
- * Implementation of the CCRGBAProtocol color property.
+ * The vertex array instance managing the texture mapping content for the vertices.
  *
- * Querying this property returns the RGB components of the first vertex in this mesh, or ccBLACK
- * if this mesh contains no per-vertex color content.
+ * Setting this property is optional. Not all meshes use textures.
  *
- * When setting this property, if this mesh contains per-vertex color content, the RGB values of each
- * vertex in this mesh are set to the specified color, without affecting the opacity value of each
- * individual vertex. If the vertex color content of this mesh has been copied to a GL buffer, that
- * GL buffer is automatically updated.
+ * If multi-texturing is used, and separate texture coordinate mapping is required
+ * for each texture unit, additional texture coordinate arrays can be added using
+ * the addTextureCoordinates: method. If this property has not been set already,
+ * the first texture coordinate array that is added via addTextureCoordinates:
+ * will be placed in this property. This can simplify configurations in that all
+ * texture coordinate arrays can be treated the same.
  */
-@property(nonatomic, assign) ccColor3B color;
+@property(nonatomic, retain) CC3VertexTextureCoordinates* vertexTextureCoordinates;
 
 /**
- * Implementation of the CCRGBAProtocol opacity property.
- *
- * Querying this property returns the alpha component of the first vertex in this mesh, or zero
- * if this mesh contains no per-vertex color content.
- *
- * When setting this property, if this mesh contains per-vertex color content, the alpha values of
- * each vertex in this mesh is set to the specified opacity, without affecting the RGB color value
- * of each individual vertex. If the vertex color content of this mesh has been copied to a GL buffer,
- * that GL buffer is automatically updated.
+ * Returns the number of texture coordinate arrays used by this mesh, regardless of whether
+ * the texture coordinates were attached using the vertexTextureCoordinates property or the
+ * addTextureCoordinates: method.
  */
-@property(nonatomic, assign) GLubyte opacity;
+@property(nonatomic, readonly) GLuint textureCoordinatesArrayCount;
+
+/**
+ * This class supports multi-texturing. In most situations, the mesh will use the same
+ * texture mapping for all texture units. In such a case, the single texture coordinates
+ * array in the vertexTexureCoordinates property will be applied to all texture units.
+ *
+ * However, if multi-texturing is used, and separate texture coordinate mapping is required
+ * for each texture unit, additional texture coordinate arrays can be added using this method.
+ *
+ * If the vertexTextureCoordinates property has not been set already, the first
+ * texture coordinate array that is added via this method will be placed in the
+ * vertexTextureCoordinates property. This can simplify configurations in that all
+ * texture coordinate arrays can be treated the same.
+ *
+ * If there are more textures applied to a node than there are texture coordinate arrays
+ * in the mesh (including the vertexTextureCoordinates and the those in the
+ * overlayTextureCoordinates collection), the last texture coordinate array is reused.
+ */
+-(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord;
+
+/**
+ * Removes the specified texture coordinate array from either the vertexTextureCoordinates
+ * property or from the overlayTextureCoordinates collection.
+ */
+-(void) removeTextureCoordinates: (CC3VertexTextureCoordinates*) aTexCoord;
+
+/**
+ * Removes all texture coordinates arrays from the the vertexTextureCoordinates
+ * property and from the overlayTextureCoordinates collection.
+ */
+-(void) removeAllTextureCoordinates;
+
+/**
+ * Returns the overlay texture coordinate array with the specified name,
+ * or nil if it cannot be found. This checks both the vertexTextureCoordinates
+ * property and the overlayTextureCoordinates collection.
+ */
+-(CC3VertexTextureCoordinates*) getTextureCoordinatesNamed: (NSString*) aName;
+
+/**
+ * Returns the texture coordinate array that will be processed by the texture unit
+ * with the specified index.
+ *
+ * If the specified texture unit index is equal to or larger than the number of
+ * texture coordinates arrays, as indicated by the value of the
+ * textureCoordinatesArrayCount property, the texture coordinate array with the
+ * highest index is returned.
+ *
+ * This design reuses the texture coordinate array with the highest index
+ * for all texture units higher than that index.
+ *
+ * The value returned will be nil if there are no texture coordinates.
+ */
+-(CC3VertexTextureCoordinates*) textureCoordinatesForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the texture coordinates array that will be processed by the texture unit with
+ * the specified index, which should be a number between zero, and the value of the
+ * textureCoordinatesArrayCount property.
+ *
+ * If the specified index is less than the number of texture units added already, the
+ * specified texture coordinates array will replace the one assigned to that texture unit.
+ * Otherwise, this implementation will invoke the addTextureCoordinates: method to add
+ * the texture to this material.
+ *
+ * If the specified texture unit index is zero, the value of the vertexTextureCoordinates
+ * property will be changed to the specified texture.
+ */
+-(void) setTextureCoordinates: (CC3VertexTextureCoordinates*) aTexture
+			   forTextureUnit: (GLuint) texUnit;
+
+/** Returns whether this mesh contains data for vertex texture coordinates. */
+@property(nonatomic, readonly) BOOL hasVertexTextureCoordinates;
 
 
 #pragma mark Vertex management
 
 /**
- * For meshes that store their vertex content in arrays, indicates whether the
- * vertex data should be interleaved, or separated by aspect.
- * 
- * The initial value is NO, indicating that the vertex data is not interleaved.
+ * Indicates whether the vertex content should be interleaved, or separated by type.
+ *
+ * If the vertex data is interleaved, each of the contained CC3VertexArray instances will
+ * reference the same underlying memory buffer through their individual vertices property.
+ *
+ * Interleaving vertex content is recommended, as it improves the GPU's ability to optimize
+ * throughput.
+ *
+ * The value of this property should be set before the values of the vertexContentTypes and
+ * allocatedVertexCapacity are set.
+ *
+ * The initial value is YES, indicating that the vertex data will be interleaved.
  */
 @property(nonatomic, assign) BOOL shouldInterleaveVertices;
 
@@ -340,650 +526,298 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * bitwise-OR combination of one or more of the component types listed above, and set
  * this property to that combined value.
  *
- * This property is a convenience property. You can also construct the mesh by managing the
- * content directly. The effect that this property has on the internal structure of this mesh
- * depends on the subclass. In particular, see notes for this property on the CC3VertexArrayMesh,
- * CC3PointParticleMesh, and CC3SkinMesh subclasses for more details, and specific use cases
- * with those subclasses.
  *
- * Not all meshes can contain all of the vertex content itemized above. In general, all
- * meshes can contain the first four vertex content types. Specialized mesh subclasses
- * can contain other combinations as follows:
- *   - kCC3VertexContentPointSize is accepted by CC3PointParticleMesh in support of point particles.
- *   - kCC3VertexContentWeights and kCC3VertexContentMatrixIndices are accepted by CC3SkinMesh
- *     in support of skinned meshes controlled by bone-rigging.
+ * Setting each bitwise-OR component in this property instructs this instance to
+ * automatically construct the appropriate type of contained vertex array:
+ *   - kCC3VertexContentLocation - automatically constructs a CC3VertexLocations instance in the
+ *     vertexLocations property, that holds 3D vertex locations, in one CC3Vector structure per vertex.
+ *     This component is optional, as the vertexLocations property will be constructed regardless.
+ *   - kCC3VertexContentNormal - automatically constructs a CC3VertexNormals instance in the
+ *     vertexNormals property, that holds 3D vertex normals, in one CC3Vector structure per vertex.
+ *   - kCC3VertexContentColor - automatically constructs a CC3VertexColors instance in the vertexColors
+ *     property, that holds RGBA colors with GLubyte components, in one ccColor4B structure per vertex.
+ *   - kCC3VertexContentTextureCoordinates - automatically constructs a CC3VertexTextureCoordinates
+ *     instance in the vertexTextureCoordinates property, that holds 2D texture coordinates, in one
+ *     ccTex2F structure per vertex.
  *
- * Meshes that do not support a particular vertex component type will silently ignore that
- * component of this property.
- * 
- * When reading this property, if no content has been defined for this mesh, this property
- * will return kCC3VertexContentNone.
+ * This property is a convenience property. Instead of using this property, you can create the
+ * appropriate vertex arrays in those properties directly.
+ *
+ * The vertex arrays constructed by this property will be configured to use interleaved data
+ * if the shouldInterleaveVertices property is set to YES. You should ensure the value of the
+ * shouldInterleaveVertices property to the desired value before setting the value of this property.
+ * The initial value of the shouldInterleaveVertices property is YES.
+ *
+ * If the content is interleaved, for each vertex, the content is held in the structures identified in
+ * the list above, in the order that they appear in the list. You can use this consistent organization
+ * to create an enclosing structure to access all data for a single vertex, if it makes it easier to
+ * access vertex data that way. If vertex content is not specified, it is simply absent, and the content
+ * from the following type will be concatenated directly to the content from the previous type.
+ *
+ * For instance, if color content is not required, you would omit the kCC3VertexContentColor value when
+ * setting this property, and the resulting structure for each vertex would be a location CC3Vector,
+ * followed by a normal CC3Vector, followed immediately by a texture coordinate ccTex2F. You can then
+ * define an enclosing structure to hold and manage all content for a single vertex. In this particular
+ * example, this is already done for you with the CC3TexturedVertex structure.
+ *
+ * You can declare and use such a custom vertex structure even if you have constructed the vertex
+ * arrays directly, without using this property. The structure of the content of a single vertex
+ * is the same in either case.
+ *
+ * The vertex arrays created by this property cover the most common use cases and data formats.
+ * If you require more customized vertex arrays, you can use this property to create the typical
+ * vertex arrays, and then customize them, by accessing the vertex arrays individually through
+ * their respective properties. After doing so, if the vertex data is interleaved, you should
+ * invoke the updateVertexStride method on this instance to automatically align the elementOffset
+ * and vertexStride properties of all of the contained vertex arrays. After setting this property,
+ * you do not need to invoke the updateVertexStride method unless you subsequently make changes
+ * to the constructed vertex arrays.
+ *
+ * It is safe to set this property more than once. Doing so will remove any existing vertex arrays
+ * and replace them with those indicated by this property.
+ *
+ * When reading this property, the appropriate bitwise-OR values are returned, corresponding
+ * to the contained vertex arrays, even if those arrays were constructed directly, instead
+ * of by setting this property. If this mesh contains no vertex arrays, this property will
+ * return kCC3VertexContentNone.
  */
 @property(nonatomic, assign) CC3VertexContent vertexContentTypes;
 
+/**
+ * If the shouldInterleaveVertices property is set to YES, updates the elementOffset and vertexStride
+ * properties of each enclosed vertex array to correctly align them for interleaved data.
+ *
+ * After constructing the vertex arrays in this mesh, and setting the shouldInterleaveVertices property
+ * is set to YES, you can invoke this method to align the vertex arrays for interleaved vertex data.
+ *
+ * If the shouldInterleaveVertices property is set to NO, this method has no effect.
+ *
+ * If you used the vertexContentTypes property to construct the vertex arrays, you do not need to
+ * invoke this method. However, if you subsequently adjusted the elementType or elementSize of any
+ * of the vertex arrays, or if you added additional texture coordinate overlay vertex arrays, you
+ * can invoke this method to align the vertex arrays correctly again.
+ *
+ * The element offsets of the vertex arrays are aligned in the order documented in the notes of the
+ * vertexContentTypes property, even if the vertex arrays were created directly, instead of by setting
+ * the vertexContentTypes property.
+ *
+ * Returns the number of bytes used by the all of the content of one vertex. This value is
+ * calculated and returned regardless of the value of the shouldInterleaveVertices property
+ */
+-(GLuint) updateVertexStride;
 
-/** @deprecated Renamed to ensureVertexCapacity on CC3VertexArrayMesh subclass. */
+/**
+ * Allocates, reallocates, or deallocates underlying memory for the specified number of
+ * vertices, taking into consideration the amount of memory required by each vertex.
+ *
+ * Setting this property affects the value of the vertexCount property. After setting this
+ * property, the vertexCount property will be set to the same value as this property. After
+ * setting this property, if you will not be using all of the allocated vertices immediately,
+ * you should set the value of the vertexCount property to the actual number of vertices in use.
+ *
+ * Use of this property is not required if the vertex data has already been loaded into
+ * memory by a file loader, or defined by a static array. In that situation, you should
+ * set the vertexCount property directly, and avoid using this property.
+ *
+ * If the vertex content consists only of vertex locations, you can set this property without
+ * having to define any content, and the CC3VertexLocations instance in the vertexLocations
+ * property will automatically be created.
+ *
+ * However, if the vertex content contains more than just location data, since memory allocation
+ * is dependent on the content required by each vertex, you should set this property only after
+ * the contained vertex arrays have been constructed and configured, either directly, or via the
+ * the vertexContentTypes property, the shouldInterleaveVertices property has been set, and the
+ * udpateVertexStride method has been invoked, if needed.
+ *
+ * If adding vertex arrays directly, in general, the order of operations is:
+ *   -# set the shouldInterleaveVertices property appropriately
+ *   -# add vertex arrays directly
+ *   -# invoke the updateVertexStride method (if shouldInterleaveVertices set to YES)
+ *   -# set the allocatedVertexCapacity property to allocate memory
+ *   -# populate the vertex content with your data
+ *
+ * If using the vertexContentTypes property to automatically construct the vertex arrays,
+ * the order of operations is:
+ *   -# set the shouldInterleaveVertices property appropriately
+ *   -# set the vertexContentTypes property
+ *   -# set the allocatedVertexCapacity property to allocate memory
+ *   -# populate the vertex content with your data
+ *
+ * This property may be set repeatedly to manage the underlying mesh vertex data as a
+ * dynamically-sized array, growing and shrinking the allocated memory as needed.
+ *
+ * In addition, you can set this property to zero to safely deallocate all memory used
+ * by the vertex content of this mesh. After setting this property to zero, the value of
+ * the vertexCount property will be zero.
+ *
+ * When setting the value of this property to a new non-zero value, all current vertex
+ * content, up to the lesser of the new and old values of this property, will be preserved.
+ *
+ * If the value of this property is increased (including from zero on the first assignement),
+ * vertex content for those vertices beyond the old value of this property will be undefined,
+ * and must be populated by the application before attempting to draw that vertex data.
+ *
+ * If you are not ready to populate the newly allocated vertex content yet, after setting the value
+ * of this property, you can set the value of the vertexCount property to a value less than the
+ * value of this property (including to zero) to stop such undefined vertex content from being drawn.
+ */
+@property(nonatomic, assign) GLuint allocatedVertexCapacity;
+
+/**
+ * Checks to see if the previously-allocated, underlying vertex capacity is large enough to hold
+ * the specified number of vertices, and if not, expands the memory allocations accordingly.
+ *
+ * If exansion is required, vertex capacity is expanded to hold the specified number of vertices,
+ * multiplied by the capacityExpansionFactor property, to provide a buffer for future requirements.
+ *
+ * Returns whether the underlying vertex memory had to be expanded. The application
+ * can use this response value to determine whether or not to reset GL buffers, etc.
+ */
+-(BOOL) ensureVertexCapacity: (GLuint) vtxCount;
+
+/** @deprecated Renamed to ensureVertexCapacity. */
 -(BOOL) ensureCapacity: (GLuint) vtxCount DEPRECATED_ATTRIBUTE;
 
 /**
- * Convenience method to create GL buffers for all vertex arrays used by this mesh.
+ * A factor that is used to provide additional vertex capacity when increasing the
+ * allocated vertex capacity via the ensureVertexCapacity: method.
  *
- * This method may safely be called more than once, or on more than one mesh that shares
- * vertex arrays, since vertex array GL buffers are only created if they don't already exist.
+ * The initial value of this property is 1.25, providing a buffer of 25% whenever
+ * vertex capacity is expanded.
  */
--(void) createGLBuffers;
+@property(nonatomic, assign) GLfloat capacityExpansionFactor;
 
 /**
- * Convenience method to delete any GL buffers for all vertex arrays used by this mesh.
- * The arrays may continue to be used, and the arrays will be passed from the client during
- * each draw instead of bound to the GL server as a vertex buffer.
+ * The number of bytes used by the content of each vertex.
  *
- * This is a convenience method. Because vertex arrays may be shared between arrays, this
- * method should likely be used when it is known that this mesh is the only user of the array,
- * or to clear GL memory for any rarely used meshes. A more general design is to simply release
- * the vertex array. The GL buffer will be deleted when the vertex array is deallocated.
+ * The value of this property is calculated each time it is read, by accumulating the
+ * values of the elementLength property of each enclosed vertex array. If this instance
+ * contains no vertex arrays, this property will return zero.
  *
- * This method may safely be called more than once, or on more than one mesh that shares
- * vertex arrays, since vertex array GL buffers are only deleted if they exist.
+ * If the shouldInterleaveVertices property is set to YES, setting this property will set
+ * the same value in all enclosed vertex arrays. If the shouldInterleaveVertices property
+ * is set to NO, setting this property has no effect.
+ *
+ * The initial value of this property is the same as the value of the elementLength property.
  */
--(void) deleteGLBuffers;
+@property(nonatomic, assign) GLuint vertexStride;
 
 /**
- * Returns whether the underlying vertex data has been loaded into GL engine vertex
- * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
+ * If the shouldInterleaveVertices is set to YES, returns a pointer to the interleaved vertex
+ * content of this mesh. If the shouldInterleaveVertices is set to NO, returns a NULL pointer.
+ *
+ * You must set the allocatedVertexCapacity property, or directly attach vertex storage
+ * to the vertex arrays, prior to accessing this property.
+ *
+ * When populating the interleaved vertex content for this mesh, you can use this pointer
+ * as a starting point to iterate through the vertex content. You can cast the returned
+ * pointer to a custom structure that you declare that matches the content structure of a
+ * single interleaved vertex. The form of that structure depends on the content components
+ * defined for the vertices, is described in the documentation for the vertexContentTypes
+ * property. An enumeration of the vertex content components is available through the
+ * vertexContentTypes property.
  */
-@property(nonatomic, readonly) BOOL isUsingGLBuffers;
+@property(nonatomic, readonly) GLvoid* interleavedVertices;
 
 /**
- * Once the vertex data has been buffered into a GL vertex buffer object (VBO)
- * within the GL engine, via the createGLBuffer method, this method can be used
- * to release the data in main memory that is now redundant.
+ * Allocates, reallocates, or deallocates underlying memory for the specified number of
+ * vertex indices, taking into consideration the amount of memory required by each index.
  *
- * Typically, this method is not invoked directly by the application. Instead, 
- * consider using the same method on a node assembly in order to release as much
- * memory as possible in one simply method invocation.
+ * Setting this property affects the value of the vertexIndexCount property. After setting this
+ * property, the vertexIndexCount property will be set to the same value as this property. After
+ * setting this property, if you will not be using all of the allocated vertex indices immediately,
+ * you should set the value of the vertexIndexCount property to the actual number of vertices in use.
+ *
+ * Use of this property is not required if the vertex data has already been loaded into
+ * memory by a file loader, or defined by a static array. In that situation, you should
+ * set the vertexIndexCount property directly, and avoid using this property.
+ *
+ * This property may be set repeatedly to manage the underlying mesh vertex index data as
+ * a dynamically-sized array, growing and shrinking the allocated memory as needed.
+ *
+ * In addition, you can set this property to zero to safely deallocate all memory used
+ * by the vertex indices of this mesh. After setting this property to zero, the value of
+ * the vertexIndexCount property will be zero.
+ *
+ * When setting the value of this property to a new non-zero value, all current vertex
+ * indices, up to the lesser of the new and old values of this property, will be preserved.
+ *
+ * If the value of this property is increased (including from zero on the first assignement),
+ * those vertex indices beyond the old value of this property will be undefined, and must be
+ * populated by the application before attempting to draw that vertex data.
+ *
+ * If you are not ready to populate the newly allocated vertex indices yet, after setting the value
+ * of this property, you can set the value of the vertexIndexCount property to a value less than the
+ * value of this property (including to zero) to stop such undefined vertices from being drawn.
  */
--(void) releaseRedundantData;
+@property(nonatomic, assign) GLuint allocatedVertexIndexCapacity;
 
 /**
- * Convenience method to cause all vertex content data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Copies vertex content for the specified number of vertices from memory starting at the
+ * specified source vertex index to memory starting at the specified destination vertex index.
  *
- * All vertex content, such as location, normal, color, texture coordinates, point size,
- * weights and matrix indices will be retained.
- * 
- * Invoking this method does NOT cause vertex index data to be retained. To retain vertex
- * index data, use the retainVertexIndices method.
+ * You can use this method to copy data from one area in the mesh to another.
  */
--(void) retainVertexContent;
+-(void) copyVertices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx;
 
 /**
- * Convenience method to cause the vertex location data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Copies vertex content for the specified number of vertices from memory starting at the
+ * specified source vertex index, in the specified source mesh, to memory starting at the
+ * specified destination vertex index in this mesh.
  *
- * Only the vertex locations will be retained. Any other vertex data, such as normals,
- * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * You can use this method to copy data from another mesh to this mesh.
  */
--(void) retainVertexLocations;
+-(void) copyVertices: (GLuint) vtxCount
+				from: (GLuint) srcIdx
+			  inMesh: (CC3Mesh*) srcMesh
+				  to: (GLuint) dstIdx;
 
 /**
- * Convenience method to cause the vertex normal data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Copies the vertex content at the specified vertex index in the specified mesh to
+ * this mesh at the specified vertex index.
  *
- * Only the vertex normals will be retained. Any other vertex data, such as locations,
- * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * It is permissible for the two meshes to have different vertex content types. Only the vertex
+ * content applicable to this mesh will be copied over. If this mesh has vertex content that is
+ * not available in the source mesh, default content is applied to the vertex in this mesh.
  */
--(void) retainVertexNormals;
+-(void) copyVertexAt: (GLuint) srcIdx from: (CC3Mesh*) srcMesh to: (GLuint) dstIdx;
 
 /**
- * Convenience method to cause the vertex color data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Copies vertex indices for the specified number of vertices from memory starting at the specified
+ * source vertex index to memory starting at the specified destination vertex index, and offsets
+ * each value by the specified offset amount. The value at the destination vertex will be that of
+ * the source vertex, plus the specified offset.
  *
- * Only the vertex colors will be retained. Any other vertex data, such as locations,
- * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * You can use this method to copy content from one area in the vertex indices array to another area,
+ * while adjusting for movement of the underlying vertex content pointed to by these vertex indices.
+ *
+ * If this mesh has no vertex indices, this method does nothing.
  */
--(void) retainVertexColors;
+-(void) copyVertexIndices: (GLuint) vtxCount from: (GLuint) srcIdx to: (GLuint) dstIdx offsettingBy: (GLint) offset;
 
 /**
- * Convenience method to cause the vertex texture coordinate data for all texture units
- * used by this mesh to be retained in application memory when releaseRedundantData is
- * invoked, even if it has been buffered to a GL VBO.
+ * Copies vertex content for the specified number of vertices from memory starting at the specified
+ * source vertex index, in the specified source mesh, to memory starting at the specified destination
+ * vertex index in this mesh.
  *
- * Only the vertex texture coordinates will be retained. Any other vertex data, such as
- * locations, or normals, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * You can use this method to copy vertex indices from another mesh to this mesh, while adjusting
+ * for differences in where the vertex content lies in each mesh. This method compensates correctly
+ * if the vertex indices in the source mesh are of a different type (GL_UNSIGNED_BYTE or
+ * GL_UNSIGNED_SHORT) than the vertex indices of this mesh.
+ *
+ * If this mesh has no vertex indices, this method does nothing. If the source mesh has no vertex
+ * indices, the specified offset is taken as the starting index of the vertex content in this mesh,
+ * and vertex indices are manufactured automatically to simply point directly to the corresponding
+ * vertex content, in a 1:1 relationship.
  */
--(void) retainVertexTextureCoordinates;
-
-/**
- * Convenience method to cause the vertex index data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
- *
- * Only the vertex indices will be retained. Any other vertex data, such as locations,
- * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
- */
--(void) retainVertexIndices;
-
-/**
- * Convenience method to cause all vertex content to be skipped when createGLBuffers is invoked.
- * The vertex content is not buffered to a a GL VBO, is retained in application memory, and is
- * submitted to the GL engine on each frame render.
- *
- * This method causes the vertex data to be retained in application memory, so, if you have
- * invoked this method, you do NOT also need to invoke the retainVertexContent method.
- */
--(void) doNotBufferVertexContent;
-
-/**
- * Convenience method to cause the vertex location data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
- *
- * Only the vertex locations will not be buffered to a GL VBO. Any other vertex
- * data, such as normals, or texture coordinates, will be buffered to a GL VBO
- * when createGLBuffers is invoked.
- *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexLocations method.
- */
--(void) doNotBufferVertexLocations;
-
-/**
- * Convenience method to cause the vertex normal data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
- *
- * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
- *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexNormals method.
- */
--(void) doNotBufferVertexNormals;
-
-/**
- * Convenience method to cause the vertex color data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
- *
- * Only the vertex colors will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
- *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexColors method.
- */
--(void) doNotBufferVertexColors;
-
-/**
- * Convenience method to cause the vertex texture coordinate data for all
- * texture units used by this mesh to be skipped when createGLBuffers is
- * invoked. The vertex data is not buffered to a a GL VBO, is retained in
- * application memory, and is submitted to the GL engine on each frame render.
- *
- * Only the vertex texture coordinates will not be buffered to a GL VBO.
- * Any other vertex data, such as locations, or texture coordinates, will
- * be buffered to a GL VBO when createGLBuffers is invoked.
- *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexTextureCoordinates method.
- */
--(void) doNotBufferVertexTextureCoordinates;
-
-/**
- * Convenience method to cause the vertex index data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
- *
- * Only the vertex indices will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
- *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexColors method.
- */
--(void) doNotBufferVertexIndices;
+-(void) copyVertexIndices: (GLuint) vtxCount
+					 from: (GLuint) srcIdx
+				   inMesh: (CC3Mesh*) srcMesh
+					   to: (GLuint) dstIdx
+			 offsettingBy: (GLint) offset;
 
 
-#pragma mark Textures
-
-/**
- * Indicates whether the texture coordinates of this mesh expects that the texture
- * was flipped upside-down during texture loading.
- * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to
- * the iOS view coordinate system. This results in textures from most file formats
- * being oriented upside-down, relative to the OpenGL coordinate system. All file
- * formats except PVR format will be oriented upside-down after loading.
- *
- * The value of this property is used in combination with the value of the 
- * isFlippedVertically property of a texture to determine whether the texture
- * will be oriented correctly when displayed using these texture coordinates.
- *
- * The alignTextureUnit:withTexture: method compares the value of this property
- * with the isFlippedVertically property of the texture to automatically determine
- * whether these texture coordinates need to be flipped vertically in order to
- * display the texture correctly, and will do so if needed. As part of that inversion,
- * the value of this property will also be flipped, to indicate that the texture
- * coordinates are now aligned differently.
- *
- * The alignTextureUnit:withTexture: method is invoked automatically when a
- * texture is assigned to cover this mesh in the mesh node. If you need to
- * adjust the value of this property, you sould do so before setting a texture
- * or material into the mesh node.
- *
- * When multi-texturing is being used on this mesh, you can use the
- * expectsVerticallyFlippedTexture:inTextureUnit: method for finer control
- * of orienting textures for each texture unit. When multi-texturing is
- * being used, setting this value of this property will invoke the
- * expectsVerticallyFlippedTexture:inTextureUnit: method to set the same
- * value for each texture unit.
- *
- * Reading the value of this property will return YES if the property-reading
- * method expectsVerticallyFlippedTextureInTextureUnit: returns YES for
- * any texture unit, otherwise this property will return NO.
- * 
- * The initial value of this property is set when the underlying mesh texture
- * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
- * property on the CC3NodesResource class to understand how this property is set
- * during mesh resource loading.
- * 
- * When building meshes programmatically, you should endeavour to design the
- * mesh so that this property will be YES if you will be using vertically-flipped
- * textures (all texture file formats except PVR).
- */
-@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
-
-/**
- * Returns whether the texture coordinates for the specfied texture unit expects
- * that the texture was flipped upside-down during texture loading.
- * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to
- * the iOS view coordinate system. This results in textures from most file formats
- * being oriented upside-down, relative to the OpenGL coordinate system. All file
- * formats except PVR format will be oriented upside-down after loading.
- *
- * The value of this property is used in combination with the value of the 
- * isFlippedVertically property of a texture to determine whether the texture
- * will be oriented correctly when displayed using these texture coordinates.
- *
- * The alignTextureUnit:withTexture: method compares the value of this property
- * with the isFlippedVertically property of the texture to automatically determine
- * whether these texture coordinates need to be flipped vertically in order to
- * display the texture correctly, and will do so if needed. As part of that inversion,
- * the value of this property for the specified texture unit will also be flipped,
- * to indicate that the texture coordinates are now aligned differently.
- *
- * The alignTextureUnit:withTexture: method is invoked automatically when a
- * texture is assigned to cover this mesh in the mesh node. If you need to
- * adjust the value of this property, you sould do so before setting a texture
- * or material into the mesh node.
- * 
- * The initial value of this property is set when the underlying mesh texture
- * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
- * property on the CC3NodesResource class to understand how this property is set
- * during mesh resource loading.
- * 
- * When building meshes programmatically, you should endeavour to design the
- * mesh so that this property will be YES if you will be using vertically-flipped
- * textures (all texture file formats except PVR).
- */
--(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit;
-
-/**
- * Sets whether the texture coordinates for the specfied texture unit expects
- * that the texture was flipped upside-down during texture loading.
- *
- * See the notes of the expectsVerticallyFlippedTextureInTextureUnit: method
- * for a discussion of texture coordinate orientation.
- *
- * Setting the value of this property will change the way the texture coordinates
- * are aligned when a texture is assigned to cover this texture unit for this mesh.
- */
--(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit;
-
-/**
- * Aligns the texture coordinates of the specified texture unit to the specified texture.
- * 
- * Under iOS, textures that do not have dimensions that are a power-of-two, will
- * be padded to dimensions of a power-of-two on loading. The result is that the
- * texture will be physically larger than is expected by these texture coordinates.
- *
- * The usable area of the texture is indicated by its mapSize property, and invoking
- * this method will align these texture coordinates with the usable size of the
- * specified texture.
- *
- * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property
- * is different than the value of the isFlippedVertically property of the specified
- * texture, the texture coordinates are not oriented vertically for the texture.
- * If so, this method also flips the texture coordinates to align with the texture.
- *
- * Thhis method is invoked automatically when a texture is assigned to cover this
- * mesh in the mesh node. Normally, the application has no need to invoke this
- * method directly. However, you can invoke this method manually if you have
- * changed the texture coordinate alignment using the
- * expectsVerticallyFlippedTexture:inTextureUnit: method.
- *
- * To avoid updating the texture coordinates when no change has occurred, if the
- * coordinates do not need to be flipped vertically, and the specified texture has
- * the same usable area as the texture used on the previous invocation (or has a
- * full usable area on the first invocation), this method does nothing.
- *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This may cause mapping conflicts if the same vertex data is shared by other
- * CC3MeshNodes that use different textures.
- */
--(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture;
-
-/**
- * @deprecated The alignment performed by this method is now performed automatically
- * whenever a texture or material is attached to the mesh node holding this mesh.
- * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
- * to indicate whether the texture  mesh is aligned with vertically-flipped textures
- * prior to setting the texture or material into your mesh node. 
- */
--(void) alignWithTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
-
-/**
- * @deprecated The alignment performed by this method is now performed automatically
- * whenever a texture or material is attached to the mesh node holding this mesh.
- * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
- * to indicate whether the texture  mesh is aligned with vertically-flipped textures
- * prior to setting the texture or material into your mesh node. 
- */
--(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
-
-/**
- * Convenience method that flips the texture coordinate mapping vertically
- * for the specified texture channels. This has the effect of flipping the
- * texture for that texture channel vertically on the model. and can be
- * useful for creating interesting effects, or mirror images.
- *
- * This implementation flips correctly if the mesh is mapped
- * to only a section of the texture (a texture atlas).
- */
--(void) flipVerticallyTextureUnit: (GLuint) texUnit;
-
-/**
- * Convenience method that flips the texture coordinate mapping vertically
- * for all texture units. This has the effect of flipping the textures
- * vertically on the model. and can be useful for creating interesting
- * effects, or mirror images.
- *
- * This implementation flips correctly if the mesh is mapped
- * to only a section of the texture (a texture atlas).
- *
- * This has the same effect as invoking the flipVerticallyTextureUnit:
- * method for all texture units.
- */
--(void) flipTexturesVertically;
-
-/**
- * Convenience method that flips the texture coordinate mapping horizontally
- * for the specified texture channels. This has the effect of flipping the
- * texture for that texture channel horizontally on the model. and can be
- * useful for creating interesting effects, or mirror images.
- *
- * This implementation flips correctly if the mesh is mapped
- * to only a section of the texture (a texture atlas).
- */
--(void) flipHorizontallyTextureUnit: (GLuint) texUnit;
-
-/**
- * Convenience method that flips the texture coordinate mapping horizontally
- * for all texture units. This has the effect of flipping the textures
- * horizontally on the model. and can be useful for creating interesting
- * effects, or mirror images.
- *
- * This implementation flips correctly if the mesh is mapped
- * to only a section of the texture (a texture atlas).
- *
- * This has the same effect as invoking the flipHorizontallyTextureUnit:
- * method for all texture units.
- */
--(void) flipTexturesHorizontally;
-
-/**
- * Configures the mesh so that a texture applied to the specified texture unit will
- * be repeated the specified number of times across the mesh, in each dimension.
- * The repeatFactor argument contains two numbers, corresponding to how many times
- * in each dimension the texture should be repeated.
- * 
- * As an example, a value of (1, 2) for the repeatValue indicates that the texture
- * should repeat twice vertically, but not repeat horizontally.
- * 
- * When a texture is repeated, the corresponding side of the texture covering this
- * mesh must have a length that is a power-of-two, otherwise the padding added by
- * iOS to convert it to a power-of-two length internally will be visible in the
- * repeating pattern across the mesh.
- *
- * For a side that is not repeating, the corresponding side of the texture covering
- * this mesh does not require a length that is a power-of-two.
- *
- * The textureParameters property of any texture covering this mesh should include
- * the GL_REPEAT setting in each of its texture wrap components that correspond to
- * a repeatFactor greater than one. The GL_REPEAT setting is the default setting
- * for CC3Texture.
- *
- * For example, if you want to repeat your texture twice in one dimension, but only
- * once in the other, then you would use a repeatFactor of (1, 2) or (2, 1). For the
- * side that is repeating twice, the length of that side of the texture must be a
- * power-of-two. But the other side may have any dimension. The textureParameters
- * property of the CC3Texture should include the GL_REPEAT setting for the
- * corresponding texture dimension.
- *
- * You can specify a fractional value for either of the components of the repeatFactor
- * to expand the texture in that dimension so that only part of the texture appears
- * in that dimension, while potentially repeating multiple times in the other dimension.
- */
--(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit;
-
-/**
- * Configures the mesh so that the textures in all texture units will be repeated the
- * specified number of times across the mesh, in each dimension. The repeatFactor
- * argument contains two numbers, corresponding to how many times in each dimension
- * the texture should be repeated.
- *
- * This has the same effect as invoking the repeatTexture:forTextureUnit: method
- * for each texture unit.
- */
--(void) repeatTexture: (ccTex2F) repeatFactor;
-
-/**
- * Defines the rectangular area of the textures, for all texture units, that should
- * be mapped to this mesh.
- *
- * This property facilitates the use of sprite-sheets, where the mesh is covered
- * by a small fraction of a larger texture. This technique has many uses, including
- * animating a texture onto a mesh, where each section of the full texture is really
- * a different frame of a texture animation, or simply loading one larger texture
- * and using parts of it to texture many different meshes.
- *
- * The dimensions of this rectangle are taken as fractional portions of the full
- * area of the texture. Therefore, a rectangle with zero origin, and unit size
- * ((0.0, 0.0), (1.0, 1.0)) indicates that the mesh should be covered with the
- * complete texture.
- * 
- * A rectangle of smaller size, and/or a non-zero origin, indicates that the mesh
- * should be covered by a fractional area of the texture. For example, a rectangular
- * value for this property with origin at (0.5, 0.5), and size of (0.5, 0.5) indicates
- * that only the top-right quarter of the texture will be used to cover this mesh.
- *
- * The bounds of the texture rectangle must fit within a unit rectangle. Both the
- * bottom-left and top-right corners must lie between zero and one in both the
- * X and Y directions.
- *
- * The dimensions of the rectangle in this property are independent of adjustments
- * made by the  alignWithTexturesIn: and alignWithInvertedTexturesIn: methods.
- * A unit rectangle value for this property will automatically take into
- * consideration the adjustment made to the mesh by those methods, and will display
- * only the part of the texture defined by them. Rectangular values for this property
- * that are smaller than the unit rectangle will be relative to the displayable area
- * defined by alignWithTexturesIn: and alignWithInvertedTexturesIn:.
- *
- * As an example, if the alignWithTexturesIn: method was used to limit the mesh
- * to using only 80% of the texture (perhaps when using a non-POT texture), and this
- * property was set to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5),
- * the mesh will be covered by the bottom-right quarter of the usable 80% of the
- * overall texture.
- *
- * This property affects all texture units used by this mesh, to query or change
- * this property for a single texture unit only, use the textureRectangleForTextureUnit:
- * and setTextureRectangle:forTextureUnit: methods.
- *
- * The initial value of this property is a rectangle with origin at zero, and unit
- * size, indicating that the mesh will be covered with the complete usable area of
- * the texture.
- */
-@property(nonatomic, assign) CGRect textureRectangle;
-
-/**
- * Returns the textureRectangle property from the texture coordinates that are
- * mapping the specified texture unit index.
- *
- * See the notes for the textureRectangle property of this class for an explanation
- * of the use of this property.
- */
--(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit;
-
-/**
- * Sets the textureRectangle property from the texture coordinates that are
- * mapping the specified texture unit index.
- *
- * See the notes for the textureRectangle property of this class for an explanation
- * of the use of this property.
- */
--(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit;
-
-
-#pragma mark Drawing
-
-/**
- * The drawing mode indicating how the vertices are connected (points, lines,
- * triangles...).
- *
- * This must be set with a valid GL drawing mode enumeration.
- * The default value is GL_TRIANGLES.
- */
-@property(nonatomic, assign) GLenum drawingMode;
-
-/**
- * Draws the mesh data to the GL engine. The specified visitor encapsulates
- * the currently active camera, and certain drawing options.
- *
- * If this mesh is different than the last mesh drawn, this method binds this
- * mesh data to the GL engine. Otherwise, if this mesh is the same as the mesh
- * already bound, it is not bound again, Once binding is complete, this method
- * then performs the GL draw operations.
- * 
- * This is invoked automatically from the draw method of the CC3MeshNode instance that is
- * using this mesh. Usually, the application never needs to invoke this method directly.
- */
--(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Draws a portion of the mesh data to the GL engine, starting at the vertex at the
- * specified index, and drawing the specified number of vertices. The specified visitor
- * encapsulates the currently active camera, and certain drawing options.
- *
- * If this mesh is different than the last mesh drawn, this method binds this
- * mesh data to the GL engine. Otherwise, if this mesh is the same as the mesh
- * already bound, it is not bound again, Once binding is complete, this method
- * then performs the GL draw operations.
- * 
- * This is invoked automatically from the draw method of the CC3MeshNode instance that is
- * using this mesh. Usually, the application never needs to invoke this method directly.
- */
--(void) drawFrom: (GLuint) vertexIndex
-		forCount: (GLuint) vertexCount
-	 withVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Returns an allocated, initialized, autorelease instance of the bounding volume to
- * be used by the CC3MeshNode that wraps this mesh. This method is invoked automatically
- * by the CC3MeshNode instance when this mesh is attached to the CC3MeshNode.
- *
- * This abstract implementation always returns nil, and the node will never be considered
- * to be inside the camera frustum, or to intersect with any other bounding volume.
- * Subclasses will override to provide an appropriate and useful bounding volume instance.
- */
--(CC3NodeBoundingVolume*) defaultBoundingVolume;
-
-
-#pragma mark Managing vertex data
-
-/**
- * Changes the mesh vertices so that the origin of the mesh is at the specified location.
- *
- * The origin of the mesh is the location (0,0,0) in the local coordinate system, and is the
- * location around which all transforms are performed.
- *
- * This method can be used to adjust the mesh structure to make it easier to apply transformations,
- * by moving the origin of the transformations to a more convenient location in the mesh.
- *
- * This method changes the location component of every vertex in the mesh. This can be quite costly,
- * and should only be performed once, to adjust a mesh so that it is easier to manipulate. As an
- * alternate, you should consider changing the origin of the mesh at development time using a 3D editor.
- * 
- * Do not use this method to move your model around. Instead, use the transform properties (location,
- * rotation and scale) of the CC3MeshNode that contains this mesh, and let the GL engine do the heavy
- * lifting of transforming the mesh vertices.
- * 
- * If this mesh is being used by any mesh nodes, be sure to invoke the markBoundingVolumeDirty method
- * on all nodes that use this mesh, to ensure that the boundingVolume is recalculated using the new
- * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
- * markBoundingVolumeDirty method.
- *
- * This method ensures that the GL VBO that holds the vertex data is updated.
- */
--(void) moveMeshOriginTo: (CC3Vector) aLocation;
-
-/**
- * Changes the mesh vertices so that the origin of the mesh is at the center of geometry of the mesh.
- *
- * The origin of the mesh is the location (0,0,0) in the local coordinate system, and is the
- * location around which all transforms are performed.
- *
- * This method can be used to adjust the mesh structure to make it easier to apply transformations,
- * by moving the origin of the transformations to the center of the mesh.
- *
- * This method changes the location component of every vertex in the mesh. This can be quite costly,
- * and should only be performed once, to adjust a mesh so that it is easier to manipulate. As an
- * alternate, you should consider changing the origin of the mesh at development time using a 3D editor.
- * 
- * Do not use this method to move your model around. Instead, use the transform properties (location,
- * rotation and scale) of the CC3MeshNode that contains this mesh, and let the GL engine do the heavy
- * lifting of transforming the mesh vertices.
- * 
- * If this mesh is being used by any mesh nodes, be sure to invoke the markBoundingVolumeDirty method
- * on all nodes that use this mesh, to ensure that the boundingVolume is recalculated using the new
- * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
- * markBoundingVolumeDirty method.
- *
- * This method ensures that the GL VBO that holds the vertex data is updated.
- */
--(void) moveMeshOriginToCenterOfGeometry;
-
-/** @deprecated Renamed to moveMeshOriginTo:. */
--(void) movePivotTo: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to moveMeshOriginToCenterOfGeometry. */
--(void) movePivotToCenterOfGeometry DEPRECATED_ATTRIBUTE;
-
+#pragma mark Accessing vertex content
 
 /**
  * Indicates the number of vertices in this mesh.
@@ -1179,6 +1013,221 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index;
 
 /**
+ * Returns the number of vertex units used by this skin mesh. This value indicates
+ * how many bones influence each vertex, and corresponds to the number of weights
+ * and matrix indices attached to each vertex.
+ */
+@property(nonatomic, readonly) GLuint vertexUnitCount;
+
+/**
+ * Returns the weight element, for the specified vertex unit, at the specified index in
+ * the underlying vertex data.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * Several weights are stored for each vertex, one per vertex unit, corresponding to
+ * one for each bone that influences the location of the vertex. The specified vertexUnit
+ * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+
+/**
+ * Sets the weight element, for the specified vertex unit, at the specified index in
+ * the underlying vertex data, to the specified value.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * Several weights are stored for each vertex, one per vertex unit, corresponding to
+ * one for each bone that influences the location of the vertex. The specified vertexUnit
+ * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
+ * holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+
+/**
+ * Returns a pointer to an array of the weight elements at the specified vertex
+ * index in the underlying vertex data.
+ *
+ * Several weights are stored for each vertex, one per vertex unit, corresponding
+ * to one for each bone that influences the location of the vertex. The number of
+ * elements in the returned array is the same for all vertices in this mesh, and
+ * can be retrieved from the vertexUnitCount property.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct elements.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLfloat*) vertexWeightsAt: (GLuint) index;
+
+/**
+ * Sets the weight elements at the specified vertex index in the underlying vertex data,
+ * to the values in the specified array.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * Several weights are stored for each vertex, one per vertex unit, corresponding
+ * to one for each bone that influences the location of the vertex. The number of
+ * weight elements is the same for all vertices in this mesh, and can be retrieved
+ * from the vertexUnitCount property. The number of elements in the specified input
+ * array must therefore be at least as large as the value of the vertexUnitCount property.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
+ * holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index;
+
+/**
+ * Returns the matrix index element, for the specified vertex unit, at the specified
+ * index in the underlying vertex data.
+ *
+ * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
+ * to one for each bone that influences the location of the vertex. The specified vertexUnit
+ * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
+
+/**
+ * Sets the matrix index element, for the specified vertex unit, at the specified index
+ * in the underlying vertex data, to the specified value.
+ *
+ * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
+ * to one for each bone that influences the location of the vertex. The specified vertexUnit
+ * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
+ * holds the vertex data is updated.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
+			   forVertexUnit: (GLuint) vertexUnit
+						  at: (GLuint) index;
+
+/**
+ * Returns a pointer to an array of the matrix indices at the specified vertex
+ * index in the underlying vertex data.
+ *
+ * Several matrix index values are stored for each vertex, one per vertex unit,
+ * corresponding to one for each bone that influences the location of the vertex.
+ * The number of elements in the returned array is the same for all vertices in
+ * this mesh, and can be retrieved from the vertexUnitCount property.
+ *
+ * The matrix indices can be stored in this mesh as either type GLushort or type
+ * GLubyte. The returned array will be of the type of index stored by this vertex
+ * array, and it is up to the application to know which type will be returned,
+ * and cast the returned array accordingly. The type can be determined by the
+ * matrixIndexType property of this mesh, which will return one of GL_UNSIGNED_SHORT
+ * or GL_UNSIGNED_BYTE, respectively.
+ *
+ * To avoid checking the matrixIndexType property altogether, you can use the
+ * vertexMatrixIndexForVertexUnit:at: method, which retrieves the matrix index
+ * values one at a time, and automatically converts the stored type to GLushort.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct elements.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index;
+
+/**
+ * Sets the matrix index elements at the specified vertex index in the underlying
+ * vertex data, to the values in the specified array.
+ *
+ * Several matrix index values are stored for each vertex, one per vertex unit,
+ * corresponding to one for each bone that influences the location of the vertex.
+ * The number of elements is the same for all vertices in this mesh, and can be
+ * retrieved from the vertexUnitCount property. The number of elements in the specified input
+ * array must therefore be at least as large as the value of the vertexUnitCount property.
+ *
+ * The matrix indices can be stored in this mesh as either type GLushort or type GLubyte.
+ * The specified array must be of the type of index stored by this mesh, and it is up to the
+ * application to know which type is required, and provide that type of array accordingly.
+ * The type can be determined by the matrixIndexType property of this mesh, which will
+ * return one of GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE, respectively.
+ *
+ * To avoid checking the matrixIndexType property altogether, you can use the
+ * setVertexMatrixIndex:forVertexUnit:at: method, which sets the matrix index
+ * values one at a time, and automatically converts the input type to the
+ * correct stored type.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
+ * holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index;
+
+/**
+ * Returns the type of data stored for each bone matrix index.
+ *
+ * The value returned by this property will be either GL_UNSIGNED_SHORT or
+ * GL_UNSIGNED_BYTE, corresponding to each matrix index being stored in either
+ * a type GLushort or type GLubyte, respectively.
+ */
+@property(nonatomic, readonly) GLenum matrixIndexType;
+
+/**
+ * Returns the point size element at the specified index from the vertex data.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex;
+
+/**
+ * Sets the point size element at the specified index in the vertex data to the specified value.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * When all vertex changes have been made, be sure to invoke the updatePointSizesGLBuffer
+ * method to ensure that the GL VBO that holds the vertex data is updated.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex data has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex;
+
+/**
  * Returns the texture coordinate element at the specified index from the vertex data
  * at the specified texture unit index.
  *
@@ -1269,38 +1318,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * vertex data has been released, this method will raise an assertion exception.
  */
 -(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index;
-
-/** Updates the GL engine buffer with the vertex location data in this mesh. */
--(void) updateVertexLocationsGLBuffer;
-
-/** Updates the GL engine buffer with the vertex normal data in this mesh. */
--(void) updateVertexNormalsGLBuffer;
-
-/** Updates the GL engine buffer with the vertex color data in this mesh. */
--(void) updateVertexColorsGLBuffer;
-
-/**
- * Updates the GL engine buffer with the vertex texture coord data from the
- * specified texture unit in this mesh.
- */
--(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit;
-
-/**
- * Updates the GL engine buffer with the vertex texture coord data from
- * texture unit zero in this mesh.
- */
--(void) updateVertexTextureCoordinatesGLBuffer;
-
-/**
- * Convenience method to update the GL engine buffers with the vertex content data in this mesh.
- *
- * This updates the content of each vertex. It does not update the vertex indices. To update
- * the vertex index data to the GL engine, use the updateVertexIndicesGLBuffer method.
- */
--(void) updateGLBuffers;
-
-/** Updates the GL engine buffer with the vertex index data in this mesh. */
--(void) updateVertexIndicesGLBuffer;
 
 
 #pragma mark Faces
@@ -1512,7 +1529,800 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 	acceptBehindRay: (BOOL) acceptBehind;
 
 
-#pragma mark Mesh context switching
+#pragma mark Buffering content to GL engine
+
+/**
+ * Convenience method to create GL buffers for all vertex arrays used by this mesh.
+ *
+ * This method may safely be called more than once, or on more than one mesh that shares
+ * vertex arrays, since vertex array GL buffers are only created if they don't already exist.
+ */
+-(void) createGLBuffers;
+
+/**
+ * Convenience method to delete any GL buffers for all vertex arrays used by this mesh.
+ * The arrays may continue to be used, and the arrays will be passed from the client during
+ * each draw instead of bound to the GL server as a vertex buffer.
+ *
+ * This is a convenience method. Because vertex arrays may be shared between arrays, this
+ * method should likely be used when it is known that this mesh is the only user of the array,
+ * or to clear GL memory for any rarely used meshes. A more general design is to simply release
+ * the vertex array. The GL buffer will be deleted when the vertex array is deallocated.
+ *
+ * This method may safely be called more than once, or on more than one mesh that shares
+ * vertex arrays, since vertex array GL buffers are only deleted if they exist.
+ */
+-(void) deleteGLBuffers;
+
+/**
+ * Returns whether the underlying vertex data has been loaded into GL engine vertex
+ * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
+ */
+@property(nonatomic, readonly) BOOL isUsingGLBuffers;
+
+/**
+ * Once the vertex data has been buffered into a GL vertex buffer object (VBO)
+ * within the GL engine, via the createGLBuffer method, this method can be used
+ * to release the data in main memory that is now redundant.
+ *
+ * Typically, this method is not invoked directly by the application. Instead,
+ * consider using the same method on a node assembly in order to release as much
+ * memory as possible in one simply method invocation.
+ */
+-(void) releaseRedundantData;
+
+/**
+ * Convenience method to cause all vertex content data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * All vertex content, such as location, normal, color, texture coordinates, point size,
+ * weights and matrix indices will be retained.
+ *
+ * Invoking this method does NOT cause vertex index data to be retained. To retain vertex
+ * index data, use the retainVertexIndices method.
+ */
+-(void) retainVertexContent;
+
+/**
+ * Convenience method to cause the vertex location data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex locations will be retained. Any other vertex data, such as normals,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexLocations;
+
+/**
+ * Convenience method to cause the vertex normal data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex normals will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexNormals;
+
+/**
+ * Convenience method to cause the vertex color data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex colors will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexColors;
+
+/**
+ * Convenience method to cause the vertex matrix index data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex matrix index will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexMatrixIndices;
+
+/**
+ * Convenience method to cause the vertex weight data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex weight will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexWeights;
+
+/**
+ * Convenience method to cause the vertex point size data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex point sizes will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexPointSizes;
+
+/**
+ * Convenience method to cause the vertex texture coordinate data for all texture units
+ * used by this mesh to be retained in application memory when releaseRedundantData is
+ * invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex texture coordinates will be retained. Any other vertex data, such as
+ * locations, or normals, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexTextureCoordinates;
+
+/**
+ * Convenience method to cause the vertex index data to be retained in application
+ * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex indices will be retained. Any other vertex data, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantData is invoked.
+ */
+-(void) retainVertexIndices;
+
+/**
+ * Convenience method to cause all vertex content to be skipped when createGLBuffers is invoked.
+ * The vertex content is not buffered to a a GL VBO, is retained in application memory, and is
+ * submitted to the GL engine on each frame render.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexContent method.
+ */
+-(void) doNotBufferVertexContent;
+
+/**
+ * Convenience method to cause the vertex location data to be skipped when
+ * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
+ * is retained in application memory, and is submitted to the GL engine on
+ * each frame render.
+ *
+ * Only the vertex locations will not be buffered to a GL VBO. Any other vertex
+ * data, such as normals, or texture coordinates, will be buffered to a GL VBO
+ * when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexLocations method.
+ */
+-(void) doNotBufferVertexLocations;
+
+/**
+ * Convenience method to cause the vertex normal data to be skipped when
+ * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
+ * is retained in application memory, and is submitted to the GL engine on
+ * each frame render.
+ *
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexNormals method.
+ */
+-(void) doNotBufferVertexNormals;
+
+/**
+ * Convenience method to cause the vertex color data to be skipped when
+ * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
+ * is retained in application memory, and is submitted to the GL engine on
+ * each frame render.
+ *
+ * Only the vertex colors will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexColors method.
+ */
+-(void) doNotBufferVertexColors;
+
+/**
+ * Convenience method to cause the vertex matrix index data to be skipped when
+ * createGLBuffers is invoked. The vertex data is not buffered to a GL VBO, is retained
+ * in application memory, and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex data,
+ * such as locations, or texture coordinates, will be buffered to a GL VBO when
+ * createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexMatrixIndices method.
+ */
+-(void) doNotBufferVertexMatrixIndices;
+
+/**
+ * Convenience method to cause the vertex weight data to be skipped when createGLBuffers
+ * is invoked. The vertex data is not buffered to a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex weight will not be buffered to a GL VBO. Any other vertex data, such
+ * as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
+ * is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexWeights method.
+ */
+-(void) doNotBufferVertexWeights;
+
+/**
+ * Convenience method to cause the vertex point size data to be skipped when createGLBuffers
+ * is invoked. The vertex data is not buffered to a GL VBO, is retained in application memory,
+ * and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex point sizes will not be buffered to a GL VBO. Any other vertex content, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexPointSizes method.
+ */
+-(void) doNotBufferVertexPointSizes;
+
+/**
+ * Convenience method to cause the vertex texture coordinate data for all
+ * texture units used by this mesh to be skipped when createGLBuffers is
+ * invoked. The vertex data is not buffered to a a GL VBO, is retained in
+ * application memory, and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex texture coordinates will not be buffered to a GL VBO.
+ * Any other vertex data, such as locations, or texture coordinates, will
+ * be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexTextureCoordinates method.
+ */
+-(void) doNotBufferVertexTextureCoordinates;
+
+/**
+ * Convenience method to cause the vertex index data to be skipped when
+ * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
+ * is retained in application memory, and is submitted to the GL engine on
+ * each frame render.
+ *
+ * Only the vertex indices will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex data to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexColors method.
+ */
+-(void) doNotBufferVertexIndices;
+
+/** Updates the GL engine buffer with the vertex location data in this mesh. */
+-(void) updateVertexLocationsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex normal data in this mesh. */
+-(void) updateVertexNormalsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex color data in this mesh. */
+-(void) updateVertexColorsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex weight data in this mesh. */
+-(void) updateVertexWeightsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex weight data in this mesh. */
+-(void) updateVertexMatrixIndicesGLBuffer;
+
+/** Updates the GL engine buffer with the point size data in this mesh. */
+-(void) updatePointSizesGLBuffer;
+
+/**
+ * Updates the GL engine buffer with the vertex texture coord data from the
+ * specified texture unit in this mesh.
+ */
+-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Updates the GL engine buffer with the vertex texture coord data from
+ * texture unit zero in this mesh.
+ */
+-(void) updateVertexTextureCoordinatesGLBuffer;
+
+/**
+ * Convenience method to update the GL engine buffers with the vertex content data in this mesh.
+ *
+ * This updates the content of each vertex. It does not update the vertex indices. To update
+ * the vertex index data to the GL engine, use the updateVertexIndicesGLBuffer method.
+ */
+-(void) updateGLBuffers;
+
+/**
+ * Convenience method to update GL buffers for all vertex arrays used by this mesh, except
+ * vertexIndices, starting at the vertex at the specified offsetIndex, and extending for
+ * the specified number of vertices.
+ */
+-(void) updateGLBuffersStartingAt: (GLuint) offsetIndex forLength: (GLuint) vertexCount;
+
+/** Updates the GL engine buffer with the vertex index data in this mesh. */
+-(void) updateVertexIndicesGLBuffer;
+
+
+#pragma mark Mesh Geometry
+
+/** The center of geometry of this mesh. */
+@property(nonatomic, readonly) CC3Vector centerOfGeometry;
+
+/** Returns the the smallest axis-aligned-bounding-box (AABB) that surrounds the mesh. */
+@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+
+/**
+ * Returns the radius of a spherical boundary, centered on the centerOfGeometry,
+ * that encompasses all the vertices of this mesh.
+ */
+@property(nonatomic, readonly) GLfloat radius;
+
+/**
+ * Changes the mesh vertices so that the origin of the mesh is at the specified location.
+ *
+ * The origin of the mesh is the location (0,0,0) in the local coordinate system, and is the
+ * location around which all transforms are performed.
+ *
+ * This method can be used to adjust the mesh structure to make it easier to apply transformations,
+ * by moving the origin of the transformations to a more convenient location in the mesh.
+ *
+ * This method changes the location component of every vertex in the mesh. This can be quite costly,
+ * and should only be performed once, to adjust a mesh so that it is easier to manipulate. As an
+ * alternate, you should consider changing the origin of the mesh at development time using a 3D editor.
+ *
+ * Do not use this method to move your model around. Instead, use the transform properties (location,
+ * rotation and scale) of the CC3MeshNode that contains this mesh, and let the GL engine do the heavy
+ * lifting of transforming the mesh vertices.
+ *
+ * If this mesh is being used by any mesh nodes, be sure to invoke the markBoundingVolumeDirty method
+ * on all nodes that use this mesh, to ensure that the boundingVolume is recalculated using the new
+ * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
+ * markBoundingVolumeDirty method.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
+ */
+-(void) moveMeshOriginTo: (CC3Vector) aLocation;
+
+/**
+ * Changes the mesh vertices so that the origin of the mesh is at the center of geometry of the mesh.
+ *
+ * The origin of the mesh is the location (0,0,0) in the local coordinate system, and is the
+ * location around which all transforms are performed.
+ *
+ * This method can be used to adjust the mesh structure to make it easier to apply transformations,
+ * by moving the origin of the transformations to the center of the mesh.
+ *
+ * This method changes the location component of every vertex in the mesh. This can be quite costly,
+ * and should only be performed once, to adjust a mesh so that it is easier to manipulate. As an
+ * alternate, you should consider changing the origin of the mesh at development time using a 3D editor.
+ *
+ * Do not use this method to move your model around. Instead, use the transform properties (location,
+ * rotation and scale) of the CC3MeshNode that contains this mesh, and let the GL engine do the heavy
+ * lifting of transforming the mesh vertices.
+ *
+ * If this mesh is being used by any mesh nodes, be sure to invoke the markBoundingVolumeDirty method
+ * on all nodes that use this mesh, to ensure that the boundingVolume is recalculated using the new
+ * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
+ * markBoundingVolumeDirty method.
+ *
+ * This method ensures that the GL VBO that holds the vertex data is updated.
+ */
+-(void) moveMeshOriginToCenterOfGeometry;
+
+/** @deprecated Renamed to moveMeshOriginTo:. */
+-(void) movePivotTo: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to moveMeshOriginToCenterOfGeometry. */
+-(void) movePivotToCenterOfGeometry DEPRECATED_ATTRIBUTE;
+
+
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
+
+/**
+ * Implementation of the CCRGBAProtocol color property.
+ *
+ * Querying this property returns the RGB components of the first vertex in this mesh, or ccBLACK
+ * if this mesh contains no per-vertex color content.
+ *
+ * When setting this property, if this mesh contains per-vertex color content, the RGB values of each
+ * vertex in this mesh are set to the specified color, without affecting the opacity value of each
+ * individual vertex. If the vertex color content of this mesh has been copied to a GL buffer, that
+ * GL buffer is automatically updated.
+ */
+@property(nonatomic, assign) ccColor3B color;
+
+/**
+ * Implementation of the CCRGBAProtocol opacity property.
+ *
+ * Querying this property returns the alpha component of the first vertex in this mesh, or zero
+ * if this mesh contains no per-vertex color content.
+ *
+ * When setting this property, if this mesh contains per-vertex color content, the alpha values of
+ * each vertex in this mesh is set to the specified opacity, without affecting the RGB color value
+ * of each individual vertex. If the vertex color content of this mesh has been copied to a GL buffer,
+ * that GL buffer is automatically updated.
+ */
+@property(nonatomic, assign) GLubyte opacity;
+
+
+#pragma mark Textures
+
+/**
+ * Indicates whether the texture coordinates of this mesh expects that the texture
+ * was flipped upside-down during texture loading.
+ *
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
+ *
+ * The value of this property is used in combination with the value of the
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
+ *
+ * The alignTextureUnit:withTexture: method compares the value of this property
+ * with the isFlippedVertically property of the texture to automatically determine
+ * whether these texture coordinates need to be flipped vertically in order to
+ * display the texture correctly, and will do so if needed. As part of that inversion,
+ * the value of this property will also be flipped, to indicate that the texture
+ * coordinates are now aligned differently.
+ *
+ * The alignTextureUnit:withTexture: method is invoked automatically when a
+ * texture is assigned to cover this mesh in the mesh node. If you need to
+ * adjust the value of this property, you sould do so before setting a texture
+ * or material into the mesh node.
+ *
+ * When multi-texturing is being used on this mesh, you can use the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method for finer control
+ * of orienting textures for each texture unit. When multi-texturing is
+ * being used, setting this value of this property will invoke the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method to set the same
+ * value for each texture unit.
+ *
+ * Reading the value of this property will return YES if the property-reading
+ * method expectsVerticallyFlippedTextureInTextureUnit: returns YES for
+ * any texture unit, otherwise this property will return NO.
+ *
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
+ * property on the CC3NodesResource class to understand how this property is set
+ * during mesh resource loading.
+ *
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR).
+ */
+@property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
+
+/**
+ * Returns whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ *
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to
+ * the iOS view coordinate system. This results in textures from most file formats
+ * being oriented upside-down, relative to the OpenGL coordinate system. All file
+ * formats except PVR format will be oriented upside-down after loading.
+ *
+ * The value of this property is used in combination with the value of the
+ * isFlippedVertically property of a texture to determine whether the texture
+ * will be oriented correctly when displayed using these texture coordinates.
+ *
+ * The alignTextureUnit:withTexture: method compares the value of this property
+ * with the isFlippedVertically property of the texture to automatically determine
+ * whether these texture coordinates need to be flipped vertically in order to
+ * display the texture correctly, and will do so if needed. As part of that inversion,
+ * the value of this property for the specified texture unit will also be flipped,
+ * to indicate that the texture coordinates are now aligned differently.
+ *
+ * The alignTextureUnit:withTexture: method is invoked automatically when a
+ * texture is assigned to cover this mesh in the mesh node. If you need to
+ * adjust the value of this property, you sould do so before setting a texture
+ * or material into the mesh node.
+ *
+ * The initial value of this property is set when the underlying mesh texture
+ * coordinates are built or loaded. See the expectsVerticallyFlippedTextures
+ * property on the CC3NodesResource class to understand how this property is set
+ * during mesh resource loading.
+ *
+ * When building meshes programmatically, you should endeavour to design the
+ * mesh so that this property will be YES if you will be using vertically-flipped
+ * textures (all texture file formats except PVR).
+ */
+-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets whether the texture coordinates for the specfied texture unit expects
+ * that the texture was flipped upside-down during texture loading.
+ *
+ * See the notes of the expectsVerticallyFlippedTextureInTextureUnit: method
+ * for a discussion of texture coordinate orientation.
+ *
+ * Setting the value of this property will change the way the texture coordinates
+ * are aligned when a texture is assigned to cover this texture unit for this mesh.
+ */
+-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit;
+
+/**
+ * Aligns the texture coordinates of the specified texture unit to the specified texture.
+ *
+ * Under iOS, textures that do not have dimensions that are a power-of-two, will
+ * be padded to dimensions of a power-of-two on loading. The result is that the
+ * texture will be physically larger than is expected by these texture coordinates.
+ *
+ * The usable area of the texture is indicated by its mapSize property, and invoking
+ * this method will align these texture coordinates with the usable size of the
+ * specified texture.
+ *
+ * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property
+ * is different than the value of the isFlippedVertically property of the specified
+ * texture, the texture coordinates are not oriented vertically for the texture.
+ * If so, this method also flips the texture coordinates to align with the texture.
+ *
+ * Thhis method is invoked automatically when a texture is assigned to cover this
+ * mesh in the mesh node. Normally, the application has no need to invoke this
+ * method directly. However, you can invoke this method manually if you have
+ * changed the texture coordinate alignment using the
+ * expectsVerticallyFlippedTexture:inTextureUnit: method.
+ *
+ * To avoid updating the texture coordinates when no change has occurred, if the
+ * coordinates do not need to be flipped vertically, and the specified texture has
+ * the same usable area as the texture used on the previous invocation (or has a
+ * full usable area on the first invocation), this method does nothing.
+ *
+ * Care should be taken when using this method, as it changes the actual vertex data.
+ * This may cause mapping conflicts if the same vertex data is shared by other
+ * CC3MeshNodes that use different textures.
+ */
+-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture;
+
+/**
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to the mesh node holding this mesh.
+ * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
+ * to indicate whether the texture  mesh is aligned with vertically-flipped textures
+ * prior to setting the texture or material into your mesh node.
+ */
+-(void) alignWithTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+
+/**
+ * @deprecated The alignment performed by this method is now performed automatically
+ * whenever a texture or material is attached to the mesh node holding this mesh.
+ * Use the property-setting method expectsVerticallyFlippedTexture:inTextureUnit:
+ * to indicate whether the texture  mesh is aligned with vertically-flipped textures
+ * prior to setting the texture or material into your mesh node.
+ */
+-(void) alignWithInvertedTexturesIn: (CC3Material*) aMaterial DEPRECATED_ATTRIBUTE;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel vertically on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping vertically
+ * for all texture units. This has the effect of flipping the textures
+ * vertically on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipVerticallyTextureUnit:
+ * method for all texture units.
+ */
+-(void) flipTexturesVertically;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for the specified texture channels. This has the effect of flipping the
+ * texture for that texture channel horizontally on the model. and can be
+ * useful for creating interesting effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ */
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit;
+
+/**
+ * Convenience method that flips the texture coordinate mapping horizontally
+ * for all texture units. This has the effect of flipping the textures
+ * horizontally on the model. and can be useful for creating interesting
+ * effects, or mirror images.
+ *
+ * This implementation flips correctly if the mesh is mapped
+ * to only a section of the texture (a texture atlas).
+ *
+ * This has the same effect as invoking the flipHorizontallyTextureUnit:
+ * method for all texture units.
+ */
+-(void) flipTexturesHorizontally;
+
+/**
+ * Configures the mesh so that a texture applied to the specified texture unit will
+ * be repeated the specified number of times across the mesh, in each dimension.
+ * The repeatFactor argument contains two numbers, corresponding to how many times
+ * in each dimension the texture should be repeated.
+ *
+ * As an example, a value of (1, 2) for the repeatValue indicates that the texture
+ * should repeat twice vertically, but not repeat horizontally.
+ *
+ * When a texture is repeated, the corresponding side of the texture covering this
+ * mesh must have a length that is a power-of-two, otherwise the padding added by
+ * iOS to convert it to a power-of-two length internally will be visible in the
+ * repeating pattern across the mesh.
+ *
+ * For a side that is not repeating, the corresponding side of the texture covering
+ * this mesh does not require a length that is a power-of-two.
+ *
+ * The textureParameters property of any texture covering this mesh should include
+ * the GL_REPEAT setting in each of its texture wrap components that correspond to
+ * a repeatFactor greater than one. The GL_REPEAT setting is the default setting
+ * for CC3Texture.
+ *
+ * For example, if you want to repeat your texture twice in one dimension, but only
+ * once in the other, then you would use a repeatFactor of (1, 2) or (2, 1). For the
+ * side that is repeating twice, the length of that side of the texture must be a
+ * power-of-two. But the other side may have any dimension. The textureParameters
+ * property of the CC3Texture should include the GL_REPEAT setting for the
+ * corresponding texture dimension.
+ *
+ * You can specify a fractional value for either of the components of the repeatFactor
+ * to expand the texture in that dimension so that only part of the texture appears
+ * in that dimension, while potentially repeating multiple times in the other dimension.
+ */
+-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit;
+
+/**
+ * Configures the mesh so that the textures in all texture units will be repeated the
+ * specified number of times across the mesh, in each dimension. The repeatFactor
+ * argument contains two numbers, corresponding to how many times in each dimension
+ * the texture should be repeated.
+ *
+ * This has the same effect as invoking the repeatTexture:forTextureUnit: method
+ * for each texture unit.
+ */
+-(void) repeatTexture: (ccTex2F) repeatFactor;
+
+/**
+ * Defines the rectangular area of the textures, for all texture units, that should
+ * be mapped to this mesh.
+ *
+ * This property facilitates the use of sprite-sheets, where the mesh is covered
+ * by a small fraction of a larger texture. This technique has many uses, including
+ * animating a texture onto a mesh, where each section of the full texture is really
+ * a different frame of a texture animation, or simply loading one larger texture
+ * and using parts of it to texture many different meshes.
+ *
+ * The dimensions of this rectangle are taken as fractional portions of the full
+ * area of the texture. Therefore, a rectangle with zero origin, and unit size
+ * ((0.0, 0.0), (1.0, 1.0)) indicates that the mesh should be covered with the
+ * complete texture.
+ *
+ * A rectangle of smaller size, and/or a non-zero origin, indicates that the mesh
+ * should be covered by a fractional area of the texture. For example, a rectangular
+ * value for this property with origin at (0.5, 0.5), and size of (0.5, 0.5) indicates
+ * that only the top-right quarter of the texture will be used to cover this mesh.
+ *
+ * The bounds of the texture rectangle must fit within a unit rectangle. Both the
+ * bottom-left and top-right corners must lie between zero and one in both the
+ * X and Y directions.
+ *
+ * The dimensions of the rectangle in this property are independent of adjustments
+ * made by the  alignWithTexturesIn: and alignWithInvertedTexturesIn: methods.
+ * A unit rectangle value for this property will automatically take into
+ * consideration the adjustment made to the mesh by those methods, and will display
+ * only the part of the texture defined by them. Rectangular values for this property
+ * that are smaller than the unit rectangle will be relative to the displayable area
+ * defined by alignWithTexturesIn: and alignWithInvertedTexturesIn:.
+ *
+ * As an example, if the alignWithTexturesIn: method was used to limit the mesh
+ * to using only 80% of the texture (perhaps when using a non-POT texture), and this
+ * property was set to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5),
+ * the mesh will be covered by the bottom-right quarter of the usable 80% of the
+ * overall texture.
+ *
+ * This property affects all texture units used by this mesh, to query or change
+ * this property for a single texture unit only, use the textureRectangleForTextureUnit:
+ * and setTextureRectangle:forTextureUnit: methods.
+ *
+ * The initial value of this property is a rectangle with origin at zero, and unit
+ * size, indicating that the mesh will be covered with the complete usable area of
+ * the texture.
+ */
+@property(nonatomic, assign) CGRect textureRectangle;
+
+/**
+ * Returns the textureRectangle property from the texture coordinates that are
+ * mapping the specified texture unit index.
+ *
+ * See the notes for the textureRectangle property of this class for an explanation
+ * of the use of this property.
+ */
+-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit;
+
+/**
+ * Sets the textureRectangle property from the texture coordinates that are
+ * mapping the specified texture unit index.
+ *
+ * See the notes for the textureRectangle property of this class for an explanation
+ * of the use of this property.
+ */
+-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit;
+
+
+#pragma mark Drawing
+
+/**
+ * The drawing mode indicating how the vertices are connected (points, lines, triangles...).
+ *
+ * This must be set with a valid GL drawing mode enumeration.
+ * The default value is GL_TRIANGLES.
+ */
+@property(nonatomic, assign) GLenum drawingMode;
+
+/**
+ * Binds the mesh data to the GL engine without drawing. The specified visitor encapsulates
+ * the currently active camera, and certain drawing options.
+ *
+ * If this mesh is different than the last mesh drawn, this method binds this mesh data to the
+ * GL engine. Otherwise, if this mesh is the same as the mesh already bound, it is not bound again.
+ *
+ * Most drawing operations will use the drawWithVisitor: method instead of this method. This
+ * method can be used for those situations where the binding and drawing operations are manged
+ * separately, such as with vertex skinning.
+ */
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Binds the mesh data to the GL engine and draws the mesh data. The specified visitor
+ * encapsulates the currently active camera, and certain drawing options.
+ *
+ * If this mesh is different than the last mesh drawn, this method binds this mesh data to
+ * the GL engine by invoking the bindWithVisitor: method. Otherwise, if this mesh is the same
+ * as the mesh already bound, it is not bound again,
+ *
+ * Once binding is complete, this method then performs the GL draw operations.
+ *
+ * This is invoked automatically from the draw method of the CC3MeshNode instance that is
+ * using this mesh. Usually, the application never needs to invoke this method directly.
+ */
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Binds the mesh data to the GL engine, and draws a portion of the mesh data, starting
+ * at the vertex at the specified index, and drawing the specified number of vertices. The
+ * specified visitor encapsulates the currently active camera, and certain drawing options.
+ *
+ * If this mesh is different than the last mesh drawn, this method binds this mesh data to
+ * the GL engine by invoking the bindWithVisitor: method. Otherwise, if this mesh is the same
+ * as the mesh already bound, it is not bound again,
+ *
+ * Once binding is complete, this method then performs the GL draw operations.
+ *
+ * This is invoked automatically from the draw method of the CC3MeshNode instance that is
+ * using this mesh. Usually, the application never needs to invoke this method directly.
+ */
+-(void) drawFrom: (GLuint) vertexIndex
+		forCount: (GLuint) vertexCount
+	 withVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Returns an allocated, initialized, autorelease instance of the bounding volume to
+ * be used by the CC3MeshNode that wraps this mesh. This method is invoked automatically
+ * by the CC3MeshNode instance when this mesh is attached to the CC3MeshNode.
+ *
+ * This abstract implementation always returns nil, and the node will never be considered
+ * to be inside the camera frustum, or to intersect with any other bounding volume.
+ * Subclasses will override to provide an appropriate and useful bounding volume instance.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume;
 
 /**
  * Resets the tracking of the mesh switching functionality.
@@ -1521,6 +2331,27 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Usually, the application never needs to invoke this method directly.
  */
 +(void) resetSwitching;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Allocates and initializes an autoreleased unnamed instance with an automatically
+ * generated unique tag value. The tag value is generated using a call to nextTag.
+ */
++(id) mesh;
+
+/** Allocates and initializes an unnamed autoreleased instance with the specified tag. */
++(id) meshWithTag: (GLuint) aTag;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified name and an
+ * automatically generated unique tag value. The tag value is generated using a call to nextTag.
+ */
++(id) meshWithName: (NSString*) aName;
+
+/** Allocates and initializes an autoreleased instance with the specified tag and name. */
++(id) meshWithTag: (GLuint) aTag withName: (NSString*) aName;
 
 @end
 

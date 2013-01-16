@@ -54,8 +54,7 @@
 #pragma mark Utility methods
 
 /**
- * Ensures that the contained mesh has been created, is of type CC3VertexArrayMesh, and has
- * vertexContentType defined, then returns the the mesh, cast as a CC3VertexArrayMesh.
+ * Ensures that the contained mesh has been created and has vertexContentType defined.
  *
  * This method is invoked by each of the populateAs... family of methods, prior to populating
  * the mesh contents.
@@ -70,7 +69,7 @@
  * If you do not need either of the normal or texture coordinates, set the vertexContentTypes
  * property accordingly prior to invoking any of the populateAs... methods.
  */
--(CC3VertexArrayMesh*) prepareParametricMesh;
+-(CC3Mesh*) prepareParametricMesh;
 
 
 #pragma mark Populating parametric triangles
@@ -502,7 +501,7 @@
  * will face the forwardDirection of the sphere node.
  *
  * The boundingVolume of this node is automatically set to a spherical shape (an instance of 
- * CC3VertexLocationsSphericalBoundingVolume) to match the shape of this mesh.
+ * CC3NodeSphericalBoundingVolume) to match the shape of this mesh.
  */
 -(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis;
 

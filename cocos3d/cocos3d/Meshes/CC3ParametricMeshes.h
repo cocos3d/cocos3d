@@ -29,20 +29,20 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 
 
 #pragma mark -
-#pragma mark CC3VertexArrayMesh parametric shapes extension
+#pragma mark CC3Mesh parametric shapes extension
 
 /**
- * This CC3VertexArrayMesh extension adds a number of methods for populating the mesh of
+ * This CC3Mesh extension adds a number of methods for populating the mesh of
  * a mesh programatically to create various parametric shapes and surfaces.
  *
  * To use the methods in this extension, instantiate a CC3Mesh, and then invoke one of
  * the methods in this extension  to populate the mesh vertices.
  */
-@interface CC3VertexArrayMesh (ParametricShapes)
+@interface CC3Mesh (ParametricShapes)
 
 
 #pragma mark Utility methods

@@ -399,19 +399,19 @@
  * Many different shapes of boundaries are available, including points, spheres, bounding
  * boxes, etc, permitting tradeoffs between accuracy and computational processing time.
  *
- * This base bounding volume is simply a single point. When applied to a node, it indicates
- * that the node intersects another bounding volume if the node's center of geometry is
- * within that bounding volume.
+ * This is an abstract class that tracks the center of geometry of the node. Subclasses are
+ * provided to reflect specific shapes around the node and to perform suitable intersection tests.
  *
  * For meshes, the center of geometry is calculated from the vertex locations, via specialized
  * subclasses of CC3NodeBoundingVolume. For other nodes, it can be set directly within the
  * bounding volume via the centerOfGeometry property.
  */
 @interface CC3NodeBoundingVolume : CC3BoundingVolume {
-	CC3Node* node;
+	CC3Node* _node;
 	CC3Vector centerOfGeometry;
 	CC3Vector globalCenterOfGeometry;
 	GLfloat cameraDistanceProduct;
+	BOOL _shouldBuildFromMesh : 1;
 	BOOL shouldMaximize : 1;
 	BOOL isTransformDirty : 1;
 	BOOL shouldDraw : 1;
@@ -419,6 +419,16 @@
 
 /** The node whose boundary this instance is keeping track of. */
 @property(nonatomic, assign) CC3Node* node;
+
+/** 
+ * Indicates whether this instance should build its bounds from the vertex locations within
+ * the mesh held by this bounding volume's node.
+ *
+ * The node must be a CC3MeshNode for this property to be set to YES.
+ *
+ * The initial value of this property is YES if the node is a type of CC3MeshNode, and is NO otherwise.
+ */
+@property(nonatomic, assign) BOOL shouldBuildFromMesh;
 
 /**
  * The center of geometry for the node in the node's local coordinate system.
@@ -1029,9 +1039,18 @@
 /** The box bounding volume that is tested only if the test against the spherical bounding volume passes. */
 @property(nonatomic, readonly) CC3NodeBoundingBoxVolume* boxBoundingVolume;
 
+/**
+ * Allocates and initializes an autoreleased instance containing a standard
+ * CC3NodeSphericalBoundingVolume and a standard CC3NodeBoundingBoxVolume.
+ */
++(id) boundingVolume;
+
 /** Allocates and returns an autoreleased instance containing the specified bounding volumes. */
 +(id) boundingVolumeWithSphere: (CC3NodeSphericalBoundingVolume*) sphereBV
 						andBox: (CC3NodeBoundingBoxVolume*) boxBV;
+
+/**@deprecated Use boundingVolume instead. */
++(id) vertexLocationsSphereandBoxBoundingVolume DEPRECATED_ATTRIBUTE;
 
 @end
 

@@ -546,15 +546,6 @@
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3CommonVertexArrayParticleProtocol); }
 
-/** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
--(CC3VertexArrayMesh*) mesh { return (CC3VertexArrayMesh*)mesh; }
-
-/** Overridden to ensure that the mesh is a CC3VertexArrayMesh. */
--(void) setMesh: (CC3VertexArrayMesh*) aMesh {
-	CC3Assert(!aMesh || [aMesh isKindOfClass: [CC3VertexArrayMesh class]], @"The mesh of %@ must be of type CC3VertexArrayMesh.", self);
-	super.mesh = aMesh;
-}
-
 
 #pragma mark Allocation and initialization
 
@@ -579,8 +570,8 @@
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, using %i of %i vertices and %i of %i vertex indices",
 			[super fullDescription],
-			self.vertexCount, ((CC3VertexArrayMesh*)(self.mesh)).allocatedVertexCapacity, 
-			self.vertexIndexCount, ((CC3VertexArrayMesh*)(self.mesh)).allocatedVertexIndexCapacity];
+			self.vertexCount, self.mesh.allocatedVertexCapacity,
+			self.vertexIndexCount, self.mesh.allocatedVertexIndexCapacity];
 }
 
 
@@ -634,7 +625,7 @@
 	if ( ![super ensureParticleCapacityFor: aParticle] ) return NO;
 	
 	GLuint currCap, newRqmt, newCap, partVtxCount, meshVtxCount, meshVtxIdxCount;
-	CC3VertexArrayMesh* vaMesh = self.mesh;
+	CC3Mesh* vaMesh = self.mesh;
 	meshVtxCount = vaMesh.vertexCount;
 
 	// Ensure that the vertex content arrays have room, and if not, expand them.
@@ -783,7 +774,7 @@
  */
 -(void) updateParticleMeshGLBuffers {
 	if (self.isUsingGLBuffers) {
-		CC3VertexArrayMesh* vaMesh = self.mesh;
+		CC3Mesh* vaMesh = self.mesh;
 		if (wasVertexCapacityChanged) {
 			[vaMesh deleteGLBuffers];
 			[vaMesh createGLBuffers];

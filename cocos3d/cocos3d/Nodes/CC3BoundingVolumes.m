@@ -476,11 +476,24 @@
 
 @implementation CC3NodeBoundingVolume
 
-@synthesize node, shouldMaximize, cameraDistanceProduct;
+@synthesize shouldMaximize, cameraDistanceProduct;
 
 -(void) dealloc {
-	node = nil;			// not retained
+	_node = nil;			// not retained
 	[super dealloc];
+}
+
+-(CC3Node*) node { return _node; }
+
+-(void) setNode: (CC3Node*) node {
+	_node = node;
+	self.shouldBuildFromMesh = YES;		// Actual value will be determined by node type.
+}
+
+-(BOOL) shouldBuildFromMesh { return _shouldBuildFromMesh; }
+
+-(void) setShouldBuildFromMesh: (BOOL) shouldBuildFromMesh {
+	_shouldBuildFromMesh = shouldBuildFromMesh && [_node isKindOfClass: [CC3MeshNode class]];
 }
 
 -(CC3Vector*) vertices {
@@ -506,9 +519,19 @@
 	[self markTransformDirty];
 }
 
+/**
+ * Returns the vertex locations of the CC3MeshNode holding this bounding volume.
+ * If the node is not a CC3MeshNode, an assertion error is raised.
+ */
+-(CC3VertexLocations*) vertexLocations {
+	CC3Assert([_node isKindOfClass: [CC3MeshNode class]], @"%@ can only be assigned to a CC3MeshNode instance.", self.class);
+	return ((CC3MeshNode*)_node).mesh.vertexLocations;
+}
+
 -(id) init {
 	if ( (self = [super init]) ) {
-		node = nil;
+		_node = nil;
+		_shouldBuildFromMesh = NO;
 		centerOfGeometry = kCC3VectorZero;
 		globalCenterOfGeometry = kCC3VectorZero;
 		cameraDistanceProduct = 0.0f;
@@ -536,12 +559,12 @@
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for %@", [super description], node];
+	return [NSString stringWithFormat: @"%@ for %@", [super description], _node];
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ for %@ centered at: %@ (globally: %@)",
-			[super fullDescription], node, NSStringFromCC3Vector(self.centerOfGeometry),
+			[super fullDescription], _node, NSStringFromCC3Vector(self.centerOfGeometry),
 			NSStringFromCC3Vector(self.globalCenterOfGeometry) ];
 }
 
@@ -565,7 +588,7 @@
 		[self markTransformDirty];
 	}
 
-	if ( node && isTransformDirty ) {
+	if (_node && isTransformDirty) {
 		[self transformVolume];
 		[self buildPlanes];
 		isTransformDirty = NO;
@@ -583,8 +606,8 @@
  */
 -(void) transformVolume {
 	globalCenterOfGeometry = CC3VectorsAreEqual(centerOfGeometry, kCC3VectorZero)
-								? node.globalLocation
-								: [node.transformMatrix transformLocation: centerOfGeometry];
+								? _node.globalLocation
+								: [_node.transformMatrix transformLocation: centerOfGeometry];
 }
 
 
@@ -596,13 +619,13 @@
 }
 
 -(CC3Vector) globalLocationOfGlobalRayIntesection: (CC3Ray) aRay {
-	if ( !node || shouldIgnoreRayIntersection ) return kCC3VectorNull;
+	if ( !_node || shouldIgnoreRayIntersection ) return kCC3VectorNull;
 
-	CC3Ray localRay = [node.transformMatrixInverted transformRay: aRay];
+	CC3Ray localRay = [_node.transformMatrixInverted transformRay: aRay];
 	CC3Vector puncture = [self locationOfRayIntesection: localRay];
 	return CC3VectorIsNull(puncture)
 				? puncture
-				: [node.transformMatrix transformLocation: puncture];
+				: [_node.transformMatrix transformLocation: puncture];
 }
 
 // Deprecated and replaced by doesIntersect:
@@ -624,7 +647,7 @@
 
 /** The name to use when creating or retrieving the wireframe child node of this node. */
 -(NSString*) displayNodeName {
-	return [NSString stringWithFormat: @"%@-%@", self.node.name, self.displayNodeNameSuffix];
+	return [NSString stringWithFormat: @"%@-%@", _node.name, self.displayNodeNameSuffix];
 }
 
 /**
@@ -633,7 +656,7 @@
  * is not currently being displayed.
  */
 -(CC3BoundingVolumeDisplayNode*) displayNode {
-	return (CC3BoundingVolumeDisplayNode*)[self.node getNodeNamed: [self displayNodeName]];
+	return (CC3BoundingVolumeDisplayNode*)[_node getNodeNamed: [self displayNodeName]];
 }
 
 /** The color used to display the bounding volume. */
@@ -667,9 +690,7 @@
 	CC3BoundingVolumeDisplayNode* dn = self.displayNode;
 	
 	// If the display node exists, but should not, remove it
-	if (dn && !shouldDraw) {
-		[dn remove];
-	}
+	if (dn && !shouldDraw) [dn remove];
 	
 	// If there is no display node, but there should be, add it by creating a
 	// CC3BoundingVolumeDisplayNode of the correct shape from the properties of
@@ -685,7 +706,7 @@
 
 		dn.shouldDisableDepthMask = YES;	// Don't update depth mask, to allow later...
 											// ..overlapping transparencies to all be drawn
-		[self.node addChild: dn];
+		[_node addChild: dn];
 		[self populateDisplayNode];			// Populate with the right shape
 	}
 }
@@ -698,6 +719,9 @@
 
 @implementation CC3NodeCenterOfGeometryBoundingVolume
 
+-(void) buildVolume {
+	if (_shouldBuildFromMesh) centerOfGeometry = self.vertexLocations.centerOfGeometry;
+}
 
 #pragma mark Intersection testing
 
@@ -750,6 +774,10 @@
 
 -(NSString*) displayNodeNameSuffix { return @"BV-CoG"; }
 
+-(BOOL) shouldDraw { return NO; }			// No shape to draw
+
+-(void) setShouldDraw: (BOOL) shdDraw {}	// No shape to draw
+
 @end
 
 
@@ -757,6 +785,29 @@
 #pragma mark CC3NodeSphericalBoundingVolume implementation
 
 @implementation CC3NodeSphericalBoundingVolume
+
+/**
+ * If building from the mesh, finds the sphere that currently encompasses all the vertices.
+ * Then, if the boundary should be maximized, finds the sphere that is the union of that sphere,
+ * and the sphere that previously encompassed all the vertices, otherwise, uses the new sphere.
+ */
+-(void) buildVolume {
+	if ( !_shouldBuildFromMesh ) return;
+	
+	CC3VertexLocations* vtxLocs = self.vertexLocations;
+	CC3Vector newCOG = vtxLocs.centerOfGeometry;
+	GLfloat newRadius = vtxLocs.radius + self.node.boundingVolumePadding;
+	
+	if (shouldMaximize) {
+		CC3Sphere unionSphere = CC3SphereUnion(CC3SphereMake(newCOG, newRadius),
+											   CC3SphereMake(centerOfGeometry, radius));
+		centerOfGeometry = unionSphere.center;
+		radius = unionSphere.radius;
+	} else {
+		centerOfGeometry = newCOG;
+		radius = newRadius;
+	}
+}
 
 -(GLfloat) radius {
 	[self updateIfNeeded];
@@ -802,7 +853,7 @@
 	// Expand the radius by the global scale of the node.
 	// In case the node's global scale is not uniform, use the largest of the
 	// three scale axes to ensure the scaled object is contained within the sphere.
-	CC3Vector nodeScale = node.globalScale;
+	CC3Vector nodeScale = _node.globalScale;
 	GLfloat maxScale = MAX(MAX(nodeScale.x, nodeScale.y), nodeScale.z);
 	globalRadius = radius * maxScale;
 }
@@ -884,6 +935,20 @@
 
 @implementation CC3NodeBoundingBoxVolume
 
+/**
+ * If building from the mesh, finds the bounding box that currently encompasses all the vertices.
+ * Then, if the boundary should be maximized, finds the bounding box that is the union of that
+ * bounding box, and the bounding box that previously encompassed all the vertices, otherwise,
+ * uses the new bounding box.
+ */
+-(void) buildVolume {
+	if ( !_shouldBuildFromMesh ) return;
+
+	CC3BoundingBox newBB = ((CC3MeshNode*)self.node).localContentBoundingBox;	// Includes possible padding
+	boundingBox = shouldMaximize ? CC3BoundingBoxUnion(newBB, boundingBox) : newBB;
+	centerOfGeometry = CC3BoundingBoxCenter(boundingBox);
+}
+
 -(CC3BoundingBox) boundingBox {
 	[self updateIfNeeded];
 	return boundingBox;
@@ -930,7 +995,7 @@
 -(void) transformVolume {
 	[super transformVolume];
 
-	CC3Matrix* tMtx = node.transformMatrix;
+	CC3Matrix* tMtx = _node.transformMatrix;
 
 	// Get the corners of the local bounding box
 	CC3Vector bbMin = boundingBox.minimum;
@@ -954,7 +1019,7 @@
  */
 -(void) buildPlanes {
 	CC3Vector normal;
-	CC3Matrix* tMtx = node.transformMatrix;
+	CC3Matrix* tMtx = _node.transformMatrix;
 	CC3Vector bbMin = vertices[0];
 	CC3Vector bbMax = vertices[7];
 	
@@ -1071,7 +1136,7 @@
 
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume {
 	[boundingVolumes addObject: aBoundingVolume];
-	aBoundingVolume.node = self.node;
+	aBoundingVolume.node = _node;
 }
 
 -(void) markDirty {
@@ -1260,11 +1325,19 @@
 
 +(id) boundingVolumeWithSphere: (CC3NodeSphericalBoundingVolume*) sphereBV
 						andBox: (CC3NodeBoundingBoxVolume*) boxBV {
-	CC3NodeSphereThenBoxBoundingVolume* sbbv = [self boundingVolume];
+	CC3NodeSphereThenBoxBoundingVolume* sbbv = [super boundingVolume];
 	[sbbv addBoundingVolume: sphereBV];
 	[sbbv addBoundingVolume: boxBV];
 	return sbbv;
 }
+
++(id) boundingVolume {
+	return [self boundingVolumeWithSphere: [CC3NodeSphericalBoundingVolume boundingVolume]
+								   andBox: [CC3NodeBoundingBoxVolume boundingVolume]];
+}
+
+// Deprecated
++(id) vertexLocationsSphereandBoxBoundingVolume { return [self boundingVolume]; }
 
 @end
 

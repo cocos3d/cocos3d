@@ -35,6 +35,14 @@ cocos3d 2.0.0 - 2013/01/31
     - The CC3OpenGLESShaders defaultProgram assigns default shaders to materials/nodes that do not have a specific shader designated.
     - Added GLSL folder containing standard GLSL shader source code
 
+- Added support for tangent and bitangent vertex content
+    - Added CC3VertexTangents vertex array
+	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
+
+- [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
+	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
+	- [API change] Removed CC3PODSkinMesh class. Use CC3PODMesh instead.
+
 - [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
 	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
 	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality

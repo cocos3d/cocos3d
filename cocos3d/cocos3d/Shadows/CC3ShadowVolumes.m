@@ -79,7 +79,6 @@
 -(void) drawToStencilIncrementing: (BOOL) isIncrementing
 					  withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @property(nonatomic, readonly) CC3MeshNode* shadowCaster;
-@property(nonatomic, readonly) CC3VertexArrayMesh* shadowMesh;
 @property(nonatomic, readonly) BOOL isReadyToUpdate;
 @end
 
@@ -252,9 +251,6 @@
 /** Returns this node's parent, cast as a mesh node. */
 -(CC3MeshNode*) shadowCaster { return (CC3MeshNode*)parent; }
 
-/** Returns this node's mesh, cast as a vertex array mesh. */
--(CC3VertexArrayMesh*) shadowMesh { return (CC3VertexArrayMesh*)mesh; }
-
 /** A shadow volume only uses a material when it is to be visible during development. */
 -(void) checkShadowMaterial {
 	if ( !shouldDrawTerminator && self.visible ) {
@@ -279,7 +275,7 @@
 	locArray.vertexCount = 0;						// Will be populated dynamically
 	locArray.shouldReleaseRedundantData = NO;		// Shadow vertex data is dynamic
 	
-	CC3VertexArrayMesh* aMesh = [CC3VertexArrayMesh mesh];
+	CC3Mesh* aMesh = [CC3Mesh mesh];
 	aMesh.vertexLocations = locArray;
 	self.mesh = aMesh;
 }
@@ -517,7 +513,7 @@
 	CC3Vector4 farLoc = CC3Vector4HomogeneousNegate(lightPosition);
 	
 	// Ensure the mesh has enough capacity for another triangle.
-	BOOL wasMeshExpanded = [self.shadowMesh ensureVertexCapacity: (*shdwVtxIdx + 3)];
+	BOOL wasMeshExpanded = [self.mesh ensureVertexCapacity: (*shdwVtxIdx + 3)];
 	
 	// Add a single triangle from the edge to a single point at infinity,
 	// with the same winding as the dark face.
@@ -578,7 +574,7 @@
 	}
 	
 	// Ensure the mesh has enough capacity for another two triangles.
-	BOOL wasMeshExpanded = [self.shadowMesh ensureVertexCapacity: (*shdwVtxIdx + 6)];
+	BOOL wasMeshExpanded = [self.mesh ensureVertexCapacity: (*shdwVtxIdx + 6)];
 	
 	// The shadow volume faces have the same winding as the dark face.
 	// First triangular face:
@@ -631,7 +627,7 @@
 			  startingAtIndex: (GLuint*) shdwVtxIdx {
 	
 	// Ensure the mesh has enough capacity for another triangle.
-	BOOL wasMeshExpanded = [self.shadowMesh ensureVertexCapacity: (*shdwVtxIdx + 3)];
+	BOOL wasMeshExpanded = [self.mesh ensureVertexCapacity: (*shdwVtxIdx + 3)];
 	
 	// Add a single triangle face to the cap at the near end, built from the vertices
 	// of the shadow caster face at the specified index. If the face is lit, use the
@@ -664,7 +660,7 @@
 			  startingAtIndex: (GLuint*) shdwVtxIdx {
 	
 	// Ensure the mesh has enough capacity for another line
-	BOOL wasMeshExpanded = [self.shadowMesh ensureVertexCapacity: (*shdwVtxIdx + 2)];
+	BOOL wasMeshExpanded = [self.mesh ensureVertexCapacity: (*shdwVtxIdx + 2)];
 	
 	// Add just the two end points of the terminator edge
 	[mesh setVertexHomogeneousLocation: edgeStartLoc at: (*shdwVtxIdx)++];

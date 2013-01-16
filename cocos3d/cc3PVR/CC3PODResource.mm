@@ -292,12 +292,7 @@ static Class _defaultPFXResourceClass = nil;
 // Deprecated method.
 -(CC3Mesh*) meshModelAtIndex: (uint) meshIndex { return [self meshAtIndex: meshIndex]; }
 
-/** If we have skinning bones, return a skinned mesh, otherwise return a generic mesh. */
 -(CC3Mesh*) buildMeshAtIndex: (uint) meshIndex {
-	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: meshIndex];
-	if (psm->sBoneBatches.nBatchCnt) {
-		return [CC3PODSkinMesh meshAtIndex:meshIndex fromPODResource:self];
-	}
 	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
 }
 

@@ -1051,6 +1051,27 @@ static GLuint lastAssignedVertexArrayTag;
 
 
 #pragma mark -
+#pragma mark CC3VertexTangents
+
+@implementation CC3VertexTangents
+
+-(CC3Vector) tangentAt: (GLuint) index { return *(CC3Vector*)[self addressOfElement: index]; }
+
+-(void) setTangent: (CC3Vector) aTangent at: (GLuint) index {
+	*(CC3Vector*)[self addressOfElement: index] = aTangent;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(NSString*) nameSuffix { return @"Tangents"; }
+
++(GLenum) defaultSemantic { return kCC3SemanticVertexTangents; }
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3VertexColors
 
 @implementation CC3VertexColors

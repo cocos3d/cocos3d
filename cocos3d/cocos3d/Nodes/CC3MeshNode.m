@@ -32,7 +32,7 @@
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
 #import "CC3OpenGLESEngine.h"
-#import "CC3VertexArrayMesh.h"
+#import "CC3Mesh.h"
 #import "CC3Light.h"
 #import "CC3IOSExtensions.h"
 
@@ -101,7 +101,7 @@
 	}
 }
 
-/** If a mesh does not yet exist, create it as a CC3VertexArrayMesh with interleaved vertices. */
+/** If a mesh does not yet exist, create it as a CC3Mesh with interleaved vertices. */
 -(void) ensureMesh { if ( !mesh ) [self makeMesh]; }
 
 /**
@@ -109,7 +109,7 @@
  *
  * Subclasses may override to provide a different material.
  */
--(void) makeMesh { self.mesh = [CC3VertexArrayMesh mesh]; }
+-(void) makeMesh { self.mesh = [CC3Mesh mesh]; }
 
 /**
  * Sets the name of the material if needed, then checks the vertex content types and
@@ -621,6 +621,16 @@
 	[super retainVertexColors];
 }
 
+-(void) retainVertexMatrixIndices {
+	[mesh retainVertexMatrixIndices];
+	[super retainVertexMatrixIndices];
+}
+
+-(void) retainVertexWeights {
+	[mesh retainVertexWeights];
+	[super retainVertexWeights];
+}
+
 -(void) retainVertexTextureCoordinates {
 	[mesh retainVertexTextureCoordinates];
 	[super retainVertexTextureCoordinates];
@@ -649,6 +659,16 @@
 -(void) doNotBufferVertexColors {
 	[mesh doNotBufferVertexColors];
 	[super doNotBufferVertexColors];
+}
+
+-(void) doNotBufferVertexMatrixIndices {
+	[mesh doNotBufferVertexMatrixIndices];
+	[super doNotBufferVertexMatrixIndices];
+}
+
+-(void) doNotBufferVertexWeights {
+	[mesh doNotBufferVertexWeights];
+	[super doNotBufferVertexWeights];
 }
 
 -(void) doNotBufferVertexTextureCoordinates {
@@ -941,6 +961,42 @@
 	[mesh setVertexColor4B: aColor at: index];
 }
 
+-(GLuint) vertexUnitCount { return mesh ? mesh.vertexUnitCount : 0; }
+
+-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return mesh ? [mesh vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
+}
+
+-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	[mesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
+}
+
+-(GLfloat*) vertexWeightsAt: (GLuint) index { return mesh ? [mesh vertexWeightsAt: index] : NULL; }
+
+-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
+	[mesh setVertexWeights: weights at: index];
+}
+
+-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
+	return mesh ? [mesh vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
+}
+
+-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
+			   forVertexUnit: (GLuint) vertexUnit
+						  at: (GLuint) index {
+	[mesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+}
+
+-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
+	return mesh ? [mesh vertexMatrixIndicesAt: index] : NULL;
+}
+
+-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
+	[mesh setVertexMatrixIndices: mtxIndices at: index];
+}
+
+-(GLenum) matrixIndexType { return mesh.matrixIndexType; }
+
 -(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
 	return mesh ? [mesh vertexTexCoord2FForTextureUnit: texUnit at: index] : (ccTex2F){ 0.0, 0.0 };
 }
@@ -978,6 +1034,10 @@
 -(void) updateVertexNormalsGLBuffer { [mesh updateVertexNormalsGLBuffer]; }
 
 -(void) updateVertexColorsGLBuffer { [mesh updateVertexColorsGLBuffer]; }
+
+-(void) updateVertexMatrixIndicesGLBuffer { [mesh updateVertexMatrixIndicesGLBuffer]; }
+
+-(void) updateVertexWeightsGLBuffer { [mesh updateVertexWeightsGLBuffer]; }
 
 -(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
 	[mesh updateVertexTextureCoordinatesGLBufferForTextureUnit: texUnit];
@@ -1111,8 +1171,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 @implementation CC3PlaneNode
 
 -(CC3Plane) plane {
-	CC3VertexArrayMesh* vam = (CC3VertexArrayMesh*)self.mesh;
-	CC3BoundingBox bb = vam.vertexLocations.boundingBox;
+	CC3BoundingBox bb = self.mesh.boundingBox;
 	
 	// Get three points on the plane by using three corners of the mesh bounding box.
 	CC3Vector p1 = bb.minimum;

@@ -594,7 +594,7 @@
  * engine. If this vertex array is indeed different, this method invokes the bindGL method,
  * otherwise it does nothing.
  * 
- * This is invoked automatically from the draw method of the CC3VertexArrayMesh
+ * This is invoked automatically from the draw method of the CC3Mesh
  * containing this instance. Usually, the application never needs to invoke this method directly.
  */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
@@ -773,7 +773,7 @@
  * Draws the vertices, either in strips, or in a single call, depending on the value
  * of the stripCount property.
  *
- * This method is invoked automatically from the draw method of CC3VertexArrayMesh.
+ * This method is invoked automatically from the draw method of CC3Mesh.
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
@@ -1112,6 +1112,38 @@
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setNormal: (CC3Vector) aNormal at: (GLuint) index;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3VertexTangents
+
+/** A CC3VertexArray that manages the tangent or bitangent aspect of an array of vertices. */
+@interface CC3VertexTangents : CC3VertexArray {}
+
+/**
+ * Returns the tangent element at the specified index in the underlying vertex content.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector) tangentAt: (GLuint) index;
+
+/**
+ * Sets the tangent element at the specified index in the underlying vertex content to
+ * the specified tangent value.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * the vertexStride and elementOffset properties to access the correct element.
+ *
+ * If the releaseRedundantData method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(void) setTangent: (CC3Vector) aTangent at: (GLuint) index;
 
 @end
 

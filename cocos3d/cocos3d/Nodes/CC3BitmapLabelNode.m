@@ -503,7 +503,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 
 #pragma mark -
-#pragma mark CC3VertexArrayMesh bitmapped label extension
+#pragma mark CC3Mesh bitmapped label extension
 
 typedef struct {
 	GLfloat lineWidth;
@@ -511,7 +511,7 @@ typedef struct {
 } CC3BMLineSpec;
 
 /** CC3MeshNode extension to support bitmapped labels. */
-@implementation CC3VertexArrayMesh (BitmapLabel)
+@implementation CC3Mesh (BitmapLabel)
 
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 									andFont: (CC3BitmapFontConfiguration*) fontConfig
