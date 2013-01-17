@@ -35,6 +35,9 @@ cocos3d 2.0.0 - 2013/01/31
     - The CC3OpenGLESShaders defaultProgram assigns default shaders to materials/nodes that do not have a specific shader designated.
     - Added GLSL folder containing standard GLSL shader source code
 
+- Added support for loading PowerVR PFX files describing textures and shaders to be applied to a POD model.
+    - Includes support for PVRShaman semantics. Shaders can be developed in PVRShaman, exported to PFX format and loaded into cocos3d.
+
 - Added support for tangent and bitangent vertex content
     - Added CC3VertexTangents vertex array
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.

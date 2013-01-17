@@ -296,7 +296,6 @@ NSString* NSStringFromSPODMaterial(PODStructPtr pSPODMaterial) {
 	[desc appendFormat: @", blend factor: (%.2f, %.2f, %.2f, %.2f)", psm->pfBlendFactor[0], psm->pfBlendFactor[1], psm->pfBlendFactor[2], psm->pfBlendFactor[3]];
 	[desc appendFormat: @"\n\ttexture indices: (diffuse: %i", psm->nIdxTexDiffuse];
 	[desc appendFormat: @", ambient: %i", psm->nIdxTexAmbient];
-	[desc appendFormat: @", ambient: %i", psm->nIdxTexAmbient];
 	[desc appendFormat: @", specular color: %i", psm->nIdxTexSpecularColour];
 	[desc appendFormat: @", specular level: %i", psm->nIdxTexSpecularLevel];
 	[desc appendFormat: @", bump: %i", psm->nIdxTexBump];

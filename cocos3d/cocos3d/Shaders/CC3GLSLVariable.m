@@ -211,7 +211,7 @@
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
-	LogDebug(@"%@ setting value to %@", self.fullDescription, NSStringFromCC3Vector4( value));
+	LogTrace(@"%@ setting value to %@", self.fullDescription, NSStringFromCC3Vector4( value));
 }
 
 -(void) setQuaternion: (CC3Quaternion) value { [self setQuaternion: value at: 0]; }
@@ -326,7 +326,7 @@
 					  self, NSStringFromGLEnum(_type));
 			return;
 	}
-	LogDebug(@"%@ setting value to (%i, %i, %i, %i)", self.fullDescription, value.x, value.y, value.z, value.w);
+	LogTrace(@"%@ setting value to (%i, %i, %i, %i)", self.fullDescription, value.x, value.y, value.z, value.w);
 }
 
 -(void) setBoolean: (BOOL) value { [self setBoolean: value at: 0]; }
@@ -524,7 +524,7 @@
 	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
 	free(cName);
 	
-	LogDebug(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
+	LogTrace(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
 }
 
 /** Overridden to update the GL state engine if the value was changed. */

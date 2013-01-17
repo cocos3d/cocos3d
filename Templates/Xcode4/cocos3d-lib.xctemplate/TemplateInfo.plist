@@ -156,6 +156,28 @@
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3NodePODExtensions.mm</string>
 		</dict>
+		<key>cocos3d/cc3PVR/CC3PFXResource.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PFXResource.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PFXResource.mm</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PFXResource.mm</string>
+		</dict>
 		<key>cocos3d/cc3PVR/CC3PODCamera.h</key>
 		<dict>
 			<key>Group</key>
@@ -376,6 +398,28 @@
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3PVRFoundation.mm</string>
 		</dict>
+		<key>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.m</string>
+		</dict>
 		<key>cocos3d/cc3PVR/CC3PVRTModelPOD.h</key>
 		<dict>
 			<key>Group</key>
@@ -385,6 +429,18 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3PVRTModelPOD.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PVRTPFXParser.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PVRTPFXParser.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
@@ -410,364 +466,820 @@
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3VertexArraysPODExtensions.mm</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTContext.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/OGLESTools.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTContext.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/OGLESTools.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTFixedPointAPI.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTBackground.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTFixedPointAPI.h</string>
-			<key>TargetIndices</key>
-			<array/>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTBackground.cpp</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTContext.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.cpp</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTContext.h</string>
+			<key>TargetIndices</key>
+			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTFixedPointAPI.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTFixedPointAPI.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRT_Removed_Files.txt</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
+				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRT_Removed_Files.txt</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+				<string>OGLES</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTPrint3DAPI.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
+				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.cpp</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTPrint3DAPI.cpp</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
+				<string>OGLES</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+				<string>OGLES</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTError.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRT_Removed_Files.txt</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTError.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTError.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTError.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRT_Removed_Files.txt</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTArray.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTArray.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTGlobal.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTBackground.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTGlobal.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBackground.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrix.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrix.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrixF.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrixF.cpp</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.cpp</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTMemoryFileSystem.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMemoryFileSystem.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTError.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.cpp</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTError.cpp</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTError.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTError.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternion.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternion.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternionF.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.cpp</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternionF.cpp</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.cpp</string>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTString.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTGlobal.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTString.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTString.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTString.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGlobal.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTHash.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTHash.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMap.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMap.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.cpp</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMathTable.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
+				<string>PVRT 3.0</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.cpp</string>
-		</dict>
-		<key>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-				<string>PVRT 2.10</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.h</string>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMathTable.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/Animation/CC3ActionInterval.h</key>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrix.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrix.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixF.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixF.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixX.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixX.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMemoryFileSystem.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMemoryFileSystem.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTools.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTools.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DArialBold.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DArialBold.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DIMGLogo.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DIMGLogo.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternion.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternion.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionF.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionF.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionX.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionX.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTSingleton.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTSingleton.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTSkipGraph.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTSkipGraph.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTString.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTString.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTString.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTString.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.cpp</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.cpp</string>
+		</dict>
+		<key>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+				<string>PVRT 3.0</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Animation/CC3Actions.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -776,11 +1288,11 @@
 				<string>Animation</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/Animation/CC3ActionInterval.h</string>
+			<string>cocos3d/cocos3d/Animation/CC3Actions.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/Animation/CC3ActionInterval.m</key>
+		<key>cocos3d/cocos3d/Animation/CC3Actions.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -789,7 +1301,7 @@
 				<string>Animation</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/Animation/CC3ActionInterval.m</string>
+			<string>cocos3d/cocos3d/Animation/CC3Actions.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Animation/CC3NodeAnimation.h</key>
 		<dict>
@@ -972,6 +1484,17 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
+		<key>cocos3d/cocos3d/Matrices/CC3Matrix3x3.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Matrices</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Matrices/CC3Matrix3x3.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Matrices/CC3Matrix4x3.h</key>
 		<dict>
 			<key>Group</key>
@@ -985,6 +1508,17 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
+		<key>cocos3d/cocos3d/Matrices/CC3Matrix4x3.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Matrices</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Matrices/CC3Matrix4x3.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Matrices/CC3Matrix4x4.h</key>
 		<dict>
 			<key>Group</key>
@@ -997,6 +1531,17 @@
 			<string>cocos3d/cocos3d/Matrices/CC3Matrix4x4.h</string>
 			<key>TargetIndices</key>
 			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Matrices/CC3Matrix4x4.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Matrices</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Matrices/CC3Matrix4x4.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Matrices/CC3ProjectionMatrix.h</key>
 		<dict>
@@ -1070,30 +1615,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Meshes/CC3ParametricMeshes.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Meshes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Meshes</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Meshes/CC3VertexArrays.h</key>
 		<dict>
 			<key>Group</key>
@@ -1165,6 +1686,30 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3Billboard.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Nodes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Nodes/CC3BoundingVolumes.h</key>
 		<dict>
@@ -2483,6 +3028,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Resources/CC3NodesResource.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Resources/CC3NodesResource.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Resources/CC3NodesResource.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Resources/CC3NodesResource.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Resources/CC3Resource.h</key>
 		<dict>
 			<key>Group</key>
@@ -2978,6 +3547,18 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Utility/CC3Rotator.m</string>
 		</dict>
+		<key>cocos3d/deprecated/CC3ActionInterval.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3ActionInterval.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
 		<key>cocos3d/deprecated/CC3GLMatrix.h</key>
 		<dict>
 			<key>Group</key>
@@ -3055,6 +3636,28 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/deprecated/CC3TargettingNode.m</string>
+		</dict>
+		<key>cocos3d/deprecated/CC3VertexArrayMesh.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3VertexArrayMesh.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/deprecated/CC3VertexArrayMesh.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>deprecated</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/deprecated/CC3VertexArrayMesh.m</string>
 		</dict>
 		<key>cocos3d/deprecated/CC3VertexArrayMeshModel.h</key>
 		<dict>
@@ -3180,6 +3783,8 @@
 		<string>cocos3d/cc3PVR/CC3IdentifiablePODExtensions.m</string>
 		<string>cocos3d/cc3PVR/CC3NodePODExtensions.h</string>
 		<string>cocos3d/cc3PVR/CC3NodePODExtensions.mm</string>
+		<string>cocos3d/cc3PVR/CC3PFXResource.h</string>
+		<string>cocos3d/cc3PVR/CC3PFXResource.mm</string>
 		<string>cocos3d/cc3PVR/CC3PODCamera.h</string>
 		<string>cocos3d/cc3PVR/CC3PODCamera.mm</string>
 		<string>cocos3d/cc3PVR/CC3PODLight.h</string>
@@ -3200,40 +3805,80 @@
 		<string>cocos3d/cc3PVR/CC3PODVertexSkinning.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.mm</string>
+		<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.h</string>
+		<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.m</string>
 		<string>cocos3d/cc3PVR/CC3PVRTModelPOD.h</string>
+		<string>cocos3d/cc3PVR/CC3PVRTPFXParser.h</string>
 		<string>cocos3d/cc3PVR/CC3VertexArraysPODExtensions.h</string>
 		<string>cocos3d/cc3PVR/CC3VertexArraysPODExtensions.mm</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTContext.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTFixedPointAPI.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/OGLES/PVRTglesExt.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRT_Removed_Files.txt</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTBoneBatch.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTError.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTError.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTFixedPoint.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTGlobal.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrix.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMatrixF.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTMemoryFileSystem.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTModelPOD.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternion.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTQuaternionF.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTResourceFile.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTString.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTString.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTTrans.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVector.h</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.cpp</string>
-		<string>cocos3d/cc3PVR/PVRT 2.10/PVRTVertex.h</string>
-		<string>cocos3d/cocos3d/Animation/CC3ActionInterval.h</string>
-		<string>cocos3d/cocos3d/Animation/CC3ActionInterval.m</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/OGLESTools.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTBackground.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTContext.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTFixedPointAPI.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTglesExt.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTPrint3DAPI.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/OGLES/PVRTTextureAPI.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRT_Removed_Files.txt</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTArray.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBackground.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTBoneBatch.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTDecompress.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTError.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTError.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTFixedPoint.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGeometry.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTGlobal.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTHash.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMap.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMathTable.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrix.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixF.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMatrixX.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMemoryFileSystem.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTMisc.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTModelPOD.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTools.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPFXParser.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3D.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DArialBold.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTPrint3DIMGLogo.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternion.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionF.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTQuaternionX.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTResourceFile.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTShadowVol.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTSingleton.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTSkipGraph.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTString.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTString.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTStringHash.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTexture.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTrans.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTTriStrip.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTUnicode.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVector.h</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.cpp</string>
+		<string>cocos3d/cc3PVR/PVRT 3.0/PVRTVertex.h</string>
+		<string>cocos3d/cocos3d/Animation/CC3Actions.h</string>
+		<string>cocos3d/cocos3d/Animation/CC3Actions.m</string>
 		<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.h</string>
 		<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3Material.h</string>
@@ -3249,22 +3894,25 @@
 		<string>cocos3d/cocos3d/Matrices/CC3Matrix.h</string>
 		<string>cocos3d/cocos3d/Matrices/CC3Matrix.m</string>
 		<string>cocos3d/cocos3d/Matrices/CC3Matrix3x3.h</string>
+		<string>cocos3d/cocos3d/Matrices/CC3Matrix3x3.m</string>
 		<string>cocos3d/cocos3d/Matrices/CC3Matrix4x3.h</string>
+		<string>cocos3d/cocos3d/Matrices/CC3Matrix4x3.m</string>
 		<string>cocos3d/cocos3d/Matrices/CC3Matrix4x4.h</string>
+		<string>cocos3d/cocos3d/Matrices/CC3Matrix4x4.m</string>
 		<string>cocos3d/cocos3d/Matrices/CC3ProjectionMatrix.h</string>
 		<string>cocos3d/cocos3d/Matrices/CC3ProjectionMatrix.m</string>
 		<string>cocos3d/cocos3d/Meshes/CC3Mesh.h</string>
 		<string>cocos3d/cocos3d/Meshes/CC3Mesh.m</string>
 		<string>cocos3d/cocos3d/Meshes/CC3ParametricMeshes.h</string>
 		<string>cocos3d/cocos3d/Meshes/CC3ParametricMeshes.m</string>
-		<string>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.h</string>
-		<string>cocos3d/cocos3d/Meshes/CC3VertexArrayMesh.m</string>
 		<string>cocos3d/cocos3d/Meshes/CC3VertexArrays.h</string>
 		<string>cocos3d/cocos3d/Meshes/CC3VertexArrays.m</string>
 		<string>cocos3d/cocos3d/Meshes/CC3VertexSkinning.h</string>
 		<string>cocos3d/cocos3d/Meshes/CC3VertexSkinning.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Billboard.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Billboard.m</string>
+		<string>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.h</string>
+		<string>cocos3d/cocos3d/Nodes/CC3BitmapLabelNode.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3BoundingVolumes.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3BoundingVolumes.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3Camera.h</string>
@@ -3370,6 +4018,8 @@
 		<string>cocos3d/cocos3d/Particles/CC3Particles.m</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.h</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
+		<string>cocos3d/cocos3d/Resources/CC3NodesResource.h</string>
+		<string>cocos3d/cocos3d/Resources/CC3NodesResource.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3Resource.h</string>
 		<string>cocos3d/cocos3d/Resources/CC3Resource.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3ResourceNode.h</string>
@@ -3411,6 +4061,7 @@
 		<string>cocos3d/cocos3d/Utility/CC3PerformanceStatistics.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Rotator.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Rotator.m</string>
+		<string>cocos3d/deprecated/CC3ActionInterval.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.h</string>
 		<string>cocos3d/deprecated/CC3GLMatrix.m</string>
 		<string>cocos3d/deprecated/CC3MatrixMath.h</string>
@@ -3418,6 +4069,8 @@
 		<string>cocos3d/deprecated/CC3MeshModel.m</string>
 		<string>cocos3d/deprecated/CC3TargettingNode.h</string>
 		<string>cocos3d/deprecated/CC3TargettingNode.m</string>
+		<string>cocos3d/deprecated/CC3VertexArrayMesh.h</string>
+		<string>cocos3d/deprecated/CC3VertexArrayMesh.m</string>
 		<string>cocos3d/deprecated/CC3VertexArrayMeshModel.h</string>
 		<string>cocos3d/deprecated/CC3VertexArrayMeshModel.m</string>
 		<string>cocos3d/deprecated/CC3World.h</string>
