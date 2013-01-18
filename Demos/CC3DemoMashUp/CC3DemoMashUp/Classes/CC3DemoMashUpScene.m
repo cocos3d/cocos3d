@@ -79,6 +79,10 @@
 #define kMalletPODFile					@"mallet.pod"
 #define kPointParticleTextureFile		@"fire.png"
 #define kMeshPartileTextureFile			@"BallBoxTexture.png"
+#define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
+#define kEtchedMaskPODFile				@"EtchedMask.pod"
+#define kEtchedMaskPFXFile				@"EtchedMask.pfx"
+#define kEtchedMaskPFXEffect			@"Effect"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -296,7 +300,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 //	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 	
-	[self addReflectionMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
+	
+	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 	
 	[self configureLighting];		// Set up the lighting
@@ -313,7 +320,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self retainVertexWeights];
 	[self retainVertexMatrixIndices];
 	[self createGLBuffers];
-	[self releaseRedundantData];
+	[self releaseRedundantContent];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
 	// during debugging, or to display the bounding volumes, used for collision detection and
@@ -413,7 +420,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 
-	[self addReflectionMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
+	
+	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 	
 	[self configureLighting];		// Set up the lighting
@@ -430,7 +440,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self retainVertexWeights];
 	[self retainVertexMatrixIndices];
 	[self createGLBuffers];
-	[self releaseRedundantData];
+	[self releaseRedundantContent];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
 	// during debugging, or to display the bounding volumes, used for collision detection and
@@ -548,7 +558,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	ground.shouldCullBackFaces = NO;	// Show the ground from below as well.
 	ground.touchEnabled = YES;		// Allow the ground to be selected by touch events.
 	[ground retainVertexLocations];		// Retain location data in main memory, even when it
-										// is buffered to a GL VBO via releaseRedundantData,
+										// is buffered to a GL VBO via releaseRedundantContent,
 										// so that it may be accessed for further calculations
 										// when dropping objects on the ground.
 	[self addChild: ground];
@@ -1108,12 +1118,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 /**
- * Adds a bump-mapped floating purple head to the scene.
- * 
- * Bump mapping works by applying a texture that contains normal data instead of colors.
- * This allows us to apply a different normal to every pixel of the texture, instead of
- * only at the vertices. This allows us to simulate 3D surface at a resolution much
- * higher than the vertices permit.
+ * Adds a bump-mapped floating purple head to the scene, suitable for running under either
+ * OpenGL ES 1.1 or OpenGL ES 2.0.
+ *
+ * Bump-mapping under OpenGL ES 1.1 is much more limited than the techniques available under
+ * OpenGL ES 2.0. This example demonstrates the technique for OpenGL ES 1.1. Under OpenGL ES 1.1,
+ * the normals contained in the bump-mapping texture must be specified in model-space coordinates.
+ *
+ * This example also runs correctly under OpenGL ES 2.0, but is not the recommended technique.
+ * Under OpenGL ES 2.0, your model should include vertex tangent content, and the normals in
+ * your texture should be specified in tangent-space (which is much easier). When using vertex
+ * tangents, none of the texture unit configuration below is required, nor is the light tracker
+ * required, as the GLSL shader code handles the texture lookups and normal mapping directly.
+ * See the addEtchedMask method for an example of using vertex tangent content.
+ *
+ * Bump-mapping works by applying a texture that contains normal data instead of colors. This allows
+ * us to apply a different normal to every pixel of the texture, instead of only at the vertices.
+ * This allows us to simulate 3D surface at a resolution much higher than the vertices permit.
  * 
  * The floating head has much higher 3D definitional resolution that provided by the
  * relatively low vertex count mesh. The mesh only contains 153 vertices.
@@ -1859,8 +1880,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * variable, that does not have a semantic mapping to content within the environment, and have
  * the application set the value of such a uniform variable directly.
  */
--(void) addReflectionMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: @"ReflectionMask.pod"];
+-(void) addReflectiveMask {
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
 
 	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
@@ -1880,15 +1901,61 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// to move it to a more convenient location and scale. Remember that the location of the mask
 	// within the holder (and therefore the required offset) scales as the holder scales!!
 	CC3Node* maskHolder = [mask asOrientingWrapper];
-	maskHolder.uniformScale = 5.0;
+	maskHolder.uniformScale = 4.0;
 	CC3Vector maskOffset = CC3VectorScaleUniform(mask.location, maskHolder.uniformScale);
-	maskHolder.location = CC3VectorDifference(cc3v(-800.0, 50.0, -500.0), maskOffset);
+	maskHolder.location = CC3VectorDifference(cc3v(-750.0, 100.0, -500.0), maskOffset);
 
 	[self addChild: maskHolder];
 
 	// Make the mask touchable and animate it.
 	mask.isTouchEnabled = YES;
 	[mask runAction: [CCRepeatForever actionWithAction: [CC3Animate actionWithDuration: 10.0]]];
+}
+
+/**
+ * Adds a floating mask that uses a PowerVR PFX file to define a GLSL shader program for the
+ * material. The POD itself contains no material definition, so the PFX is loaded manually
+ * and applied to the material.
+ *
+ * The PFX effect applies two textures to the mask. When running under OpenGL ES 2.0, specialized
+ * shaders defined in the PFX effect render the first texture as a tangent-space bump-map.
+ *
+ * When running under OpenGL ES 1.1, only the second (base) texture is visible, due to default
+ * multi-texturing configuration.
+ *
+ * Two techniques for applying bump-mapping GLSL shaders are provided here, and each can be
+ * selected by selectively commenting out code in this method. By default, this method loads
+ * a PFX file that specified dedicated bump-mapping shaders. Alternately, you can add the two
+ * textures manually, configure them for bump-mapping, and let the default shaders perform
+ * the bump-mapping. See the comments in the method body for more on these options.
+ */
+-(void) addEtchedMask {
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
+	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
+	
+	// Create a material, apply a PFX effect to it, and attach it to the model. This will attach
+	// the GL program context and textures as defined in the PFX effect, which will run shaders
+	// dedicated to bump-mapping.
+	CC3Material* maskMat = [CC3Material material];
+	[maskMat applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kEtchedMaskPFXFile];
+	mask.material = maskMat;
+
+	// Instead of applying a dedicated bump-mapping shaders via a PFX file, you can also just load
+	// the textures into the material (bump-mapped texture first), configure it for bump-mapping,
+	// and allow the default shaders to perform the bump-mapping. To illustrate, comment out the
+	// three lines above, and uncomment these:
+//	mask.texture = [CC3Texture textureFromFile: @"NormalMap.png"];
+//	mask.texture.textureUnit = [CC3BumpMapTextureUnit textureUnit];
+//	[mask addTexture: [CC3Texture textureFromFile: @"BaseTex.png"]];
+
+	mask.uniformScale = 4.0;
+	mask.location = cc3v(-750.0, 50.0, -500.0);
+	[self addChild: mask];
+	
+	// Make the mask touchable and animate it.
+	mask.isTouchEnabled = YES;
+	[mask runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																			   rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /**

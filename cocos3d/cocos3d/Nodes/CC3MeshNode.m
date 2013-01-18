@@ -94,11 +94,10 @@
 	if ( !mesh.hasVertexNormals ) self.shouldUseLighting = NO;
 	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
 	
-	if (boundingVolume) {
+	if (boundingVolume)
 		[self markBoundingVolumeDirty];
-	} else {
+	else
 		self.boundingVolume = [self defaultBoundingVolume];
-	}
 }
 
 /** If a mesh does not yet exist, create it as a CC3Mesh with interleaved vertices. */
@@ -112,9 +111,9 @@
 -(void) makeMesh { self.mesh = [CC3Mesh mesh]; }
 
 /**
- * Sets the name of the material if needed, then checks the vertex content types and
- * the alignment of the texture
- * coordinates for each texture unit against the corresponding texture in the material.
+ * Sets the name of the material if needed, then checks the vertex content types and the
+ * alignment of the texture coordinates for each texture unit against the corresponding
+ * texture in the material.
  */
 -(void) setMaterial: (CC3Material*) aMaterial {
 	[material autorelease];
@@ -125,9 +124,7 @@
 	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
 
 	GLuint texCount = self.textureCount;
-	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) {
-		[self alignTextureUnit: texUnit];
-	}
+	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) [self alignTextureUnit: texUnit];
 }
 
 /** If a material does not yet exist, create it by invoking the makeMaterial method. */
@@ -487,18 +484,14 @@
 	[super alignInvertedTextures];
 }
 
--(void) flipVerticallyTextureUnit: (GLuint) texUnit {
-	[mesh flipVerticallyTextureUnit: texUnit];
-}
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit { [mesh flipVerticallyTextureUnit: texUnit]; }
 
 -(void) flipTexturesVertically {
 	[mesh flipTexturesVertically];
 	[super flipTexturesVertically];
 }
 
--(void) flipHorizontallyTextureUnit: (GLuint) texUnit {
-	[mesh flipHorizontallyTextureUnit: texUnit];
-}
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit { [mesh flipHorizontallyTextureUnit: texUnit]; }
 
 -(void) flipTexturesHorizontally {
 	[mesh flipTexturesHorizontally];
@@ -509,17 +502,11 @@
 	[mesh repeatTexture: repeatFactor forTextureUnit: texUnit];
 }
 
--(void) repeatTexture: (ccTex2F) repeatFactor {
-	[mesh repeatTexture: repeatFactor];
-}
+-(void) repeatTexture: (ccTex2F) repeatFactor { [mesh repeatTexture: repeatFactor]; }
 
--(CGRect) textureRectangle {
-	return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle;
-}
+-(CGRect) textureRectangle { return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle; }
 
--(void) setTextureRectangle: (CGRect) aRect {
-	mesh.textureRectangle = aRect;
-}
+-(void) setTextureRectangle: (CGRect) aRect { mesh.textureRectangle = aRect; }
 
 -(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
 	return mesh ? [mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
@@ -596,9 +583,9 @@
 
 -(BOOL) isUsingGLBuffers { return mesh.isUsingGLBuffers; }
 
--(void) releaseRedundantData {
-	[mesh releaseRedundantData];
-	[super releaseRedundantData];
+-(void) releaseRedundantContent {
+	[mesh releaseRedundantContent];
+	[super releaseRedundantContent];
 }
 
 -(void) retainVertexContent {
@@ -614,6 +601,16 @@
 -(void) retainVertexNormals {
 	[mesh retainVertexNormals];
 	[super retainVertexNormals];
+}
+
+-(void) retainVertexTangents {
+	[mesh retainVertexTangents];
+	[super retainVertexTangents];
+}
+
+-(void) retainVertexBitangents {
+	[mesh retainVertexBitangents];
+	[super retainVertexBitangents];
 }
 
 -(void) retainVertexColors {
@@ -654,6 +651,16 @@
 -(void) doNotBufferVertexNormals {
 	[mesh doNotBufferVertexNormals];
 	[super doNotBufferVertexNormals];
+}
+
+-(void) doNotBufferVertexTangents {
+	[mesh doNotBufferVertexTangents];
+	[super doNotBufferVertexTangents];
+}
+
+-(void) doNotBufferVertexBitangents {
+	[mesh doNotBufferVertexBitangents];
+	[super doNotBufferVertexBitangents];
 }
 
 -(void) doNotBufferVertexColors {
@@ -941,6 +948,22 @@
 	[mesh setVertexNormal: aNormal at: index];
 }
 
+-(CC3Vector) vertexTangentAt: (GLuint) index {
+	return mesh ? [mesh vertexTangentAt: index] : kCC3VectorUnitXPositive;
+}
+
+-(void) setVertexTangent: (CC3Vector) aTangent at: (GLuint) index {
+	[mesh setVertexTangent: aTangent at: index];
+}
+
+-(CC3Vector) vertexBitangentAt: (GLuint) index {
+	return mesh ? [mesh vertexBitangentAt: index] : kCC3VectorUnitYPositive;
+}
+
+-(void) setVertexBitangent: (CC3Vector) aTangent at: (GLuint) index {
+	[mesh setVertexBitangent: aTangent at: index];
+}
+
 -(GLenum) vertexColorType { return mesh ? mesh.vertexColorType : GL_FALSE; }
 
 -(ccColor4F) vertexColor4FAt: (GLuint) index {
@@ -1032,6 +1055,10 @@
 -(void) updateVertexLocationsGLBuffer { [mesh updateVertexLocationsGLBuffer]; }
 
 -(void) updateVertexNormalsGLBuffer { [mesh updateVertexNormalsGLBuffer]; }
+
+-(void) updateVertexTangentsGLBuffer { [mesh updateVertexTangentsGLBuffer]; }
+
+-(void) updateVertexBitangentsGLBuffer { [mesh updateVertexBitangentsGLBuffer]; }
 
 -(void) updateVertexColorsGLBuffer { [mesh updateVertexColorsGLBuffer]; }
 
@@ -1274,9 +1301,9 @@ globalIntersections: (CC3MeshIntersection*) intersections
 	shouldAlwaysMeasureParentBoundingBox = another.shouldAlwaysMeasureParentBoundingBox;
 }
 
--(void) releaseRedundantData {
+-(void) releaseRedundantContent {
 	[self retainVertexLocations];
-	[super releaseRedundantData];
+	[super releaseRedundantContent];
 }
 
 
@@ -1332,9 +1359,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 -(CC3BoundingBox) parentBoundingBox {
 	if (parent && parent.hasLocalContent) {
 		CC3BoundingBox pbb = ((CC3LocalContentNode*)parent).localContentBoundingBox;
-		if (!CC3BoundingBoxIsNull(pbb)) {
-			return pbb;
-		}
+		if (!CC3BoundingBoxIsNull(pbb)) return pbb;
 	}
 	return kCC3BoundingBoxZero;
 }
@@ -1353,9 +1378,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 -(CC3Vector) markerDirection { return markerDirection; }
 
--(void) setMarkerDirection: (CC3Vector) aDirection {
-	markerDirection = CC3VectorNormalize(aDirection);
-}
+-(void) setMarkerDirection: (CC3Vector) aDirection { markerDirection = CC3VectorNormalize(aDirection); }
 
 -(void) setParent: (CC3Node*) aNode {
 	[super setParent: aNode];

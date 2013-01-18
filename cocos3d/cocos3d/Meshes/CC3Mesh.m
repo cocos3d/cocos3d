@@ -51,6 +51,8 @@
 	[_faces release];
 	[_vertexLocations release];
 	[_vertexNormals release];
+	[_vertexTangents release];
+	[_vertexBitangents release];
 	[_vertexColors release];
 	[_vertexTextureCoordinates release];
 	[_vertexMatrixIndices release];
@@ -65,6 +67,8 @@
 	super.name = aName;
 	[_vertexLocations deriveNameFrom: self];
 	[_vertexNormals deriveNameFrom: self];
+	[_vertexTangents deriveNameFrom: self];
+	[_vertexBitangents deriveNameFrom: self];
 	[_vertexColors deriveNameFrom: self];
 	[_vertexTextureCoordinates deriveNameFrom: self];
 	[_vertexMatrixIndices deriveNameFrom: self];
@@ -100,6 +104,27 @@
 }
 
 -(BOOL) hasVertexNormals { return (_vertexNormals != nil); }
+
+-(CC3VertexTangents*) vertexTangents { return _vertexTangents; }
+
+-(void) setVertexTangents: (CC3VertexTangents*) vtxTans {
+	[_vertexTangents autorelease];
+	_vertexTangents = [vtxTans retain];
+	[_vertexTangents deriveNameFrom: self];
+}
+
+-(BOOL) hasVertexTangents { return (_vertexTangents != nil); }
+
+-(CC3VertexTangents*) vertexBitangents { return _vertexBitangents; }
+
+-(void) setVertexBitangents: (CC3VertexTangents*) vtxBitans {
+	[_vertexBitangents autorelease];
+	_vertexBitangents = [vtxBitans retain];
+	[_vertexBitangents deriveNameFrom: self usingSuffix: @"Bitangents"];
+	_vertexBitangents.semantic = kCC3SemanticVertexBitangent;
+}
+
+-(BOOL) hasVertexBitangents { return (_vertexBitangents != nil); }
 
 -(CC3VertexColors*) vertexColors { return _vertexColors; }
 
@@ -266,38 +291,6 @@
 	}
 }
 
-/*
--(BOOL) hasVertexLocations { return NO; }
-
--(BOOL) hasVertexNormals { return NO; }
-
--(BOOL) hasVertexColors { return NO; }
-
--(GLenum) vertexColorType { return GL_FALSE; }
-
--(BOOL) hasVertexWeights { return NO; }
-
-// Deprecated
--(BOOL) hasWeights { return self.hasVertexWeights; }
-
--(BOOL) hasVertexMatrixIndices { return NO; }
-
-// Deprecated
--(BOOL) hasMatrixIndices { return self.hasVertexMatrixIndices; }
-
--(BOOL) hasVertexPointSizes { return NO; }
-
-// Deprecated
--(BOOL) hasPointSizes { return self.hasVertexPointSizes; }
-
--(BOOL) hasVertexTextureCoordinates { return NO; }
-
--(BOOL) hasVertexIndices { return NO; }
-
-// Deprecated
--(BOOL) hasNormals { return self.hasVertexNormals; }
--(BOOL) hasColors { return self.hasVertexColors; }
-*/
 
 #pragma mark Vertex management
 
@@ -313,6 +306,8 @@
 	CC3VertexContent vtxContent = kCC3VertexContentNone;
 	if (self.hasVertexLocations) vtxContent |= kCC3VertexContentLocation;
 	if (self.hasVertexNormals) vtxContent |= kCC3VertexContentNormal;
+	if (self.hasVertexTangents) vtxContent |= kCC3VertexContentTangent;
+	if (self.hasVertexBitangents) vtxContent |= kCC3VertexContentBitangent;
 	if (self.hasVertexColors) vtxContent |= kCC3VertexContentColor;
 	if (self.hasVertexTextureCoordinates) vtxContent |= kCC3VertexContentTextureCoordinates;
 	if (self.hasVertexWeights) vtxContent |= kCC3VertexContentWeights;
@@ -336,6 +331,20 @@
 		if (!_vertexNormals) self.vertexNormals = [CC3VertexNormals vertexArray];
 	} else {
 		self.vertexNormals = nil;
+	}
+	
+	// Vertex tangents
+	if (vtxContentTypes & kCC3VertexContentTangent) {
+		if (!_vertexTangents) self.vertexTangents = [CC3VertexTangents vertexArray];
+	} else {
+		self.vertexTangents = nil;
+	}
+	
+	// Vertex bitangents
+	if (vtxContentTypes & kCC3VertexContentBitangent) {
+		if (!_vertexBitangents) self.vertexBitangents = [CC3VertexTangents vertexArray];
+	} else {
+		self.vertexBitangents = nil;
 	}
 	
 	// Vertex colors
@@ -383,30 +392,30 @@
 	GLuint stride = 0;
 	if (_vertexLocations) stride += _vertexLocations.elementLength;
 	if (_vertexNormals) stride += _vertexNormals.elementLength;
+	if (_vertexTangents) stride += _vertexTangents.elementLength;
+	if (_vertexBitangents) stride += _vertexBitangents.elementLength;
 	if (_vertexColors) stride += _vertexColors.elementLength;
 	if (_vertexMatrixIndices) stride += _vertexMatrixIndices.elementLength;
 	if (_vertexWeights) stride += _vertexWeights.elementLength;
 	if (_vertexPointSizes) stride += _vertexPointSizes.elementLength;
 	if (_vertexTextureCoordinates) stride += _vertexTextureCoordinates.elementLength;
-	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-		stride += otc.elementLength;
-	}
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) stride += otc.elementLength;
 	return stride;
 }
 
 -(void) setVertexStride: (GLuint) vtxStride {
-	if (_shouldInterleaveVertices) {
-		_vertexLocations.vertexStride = vtxStride;
-		_vertexNormals.vertexStride = vtxStride;
-		_vertexColors.vertexStride = vtxStride;
-		_vertexMatrixIndices.vertexStride = vtxStride;
-		_vertexWeights.vertexStride = vtxStride;
-		_vertexPointSizes.vertexStride = vtxStride;
-		_vertexTextureCoordinates.vertexStride = vtxStride;
-		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-			otc.vertexStride = vtxStride;
-		}
-	}
+	if ( !_shouldInterleaveVertices ) return;
+
+	_vertexLocations.vertexStride = vtxStride;
+	_vertexNormals.vertexStride = vtxStride;
+	_vertexTangents.vertexStride = vtxStride;
+	_vertexBitangents.vertexStride = vtxStride;
+	_vertexColors.vertexStride = vtxStride;
+	_vertexMatrixIndices.vertexStride = vtxStride;
+	_vertexWeights.vertexStride = vtxStride;
+	_vertexPointSizes.vertexStride = vtxStride;
+	_vertexTextureCoordinates.vertexStride = vtxStride;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) otc.vertexStride = vtxStride;
 }
 
 -(GLuint) updateVertexStride {
@@ -420,21 +429,17 @@
 		if (_shouldInterleaveVertices) _vertexNormals.elementOffset = stride;
 		stride += _vertexNormals.elementLength;
 	}
+	if (_vertexTangents) {
+		if (_shouldInterleaveVertices) _vertexTangents.elementOffset = stride;
+		stride += _vertexTangents.elementLength;
+	}
+	if (_vertexBitangents) {
+		if (_shouldInterleaveVertices) _vertexBitangents.elementOffset = stride;
+		stride += _vertexBitangents.elementLength;
+	}
 	if (_vertexColors) {
 		if (_shouldInterleaveVertices) _vertexColors.elementOffset = stride;
 		stride += _vertexColors.elementLength;
-	}
-	if (_vertexMatrixIndices) {
-		if (_shouldInterleaveVertices) _vertexMatrixIndices.elementOffset = stride;
-		stride += _vertexMatrixIndices.elementLength;
-	}
-	if (_vertexWeights) {
-		if (_shouldInterleaveVertices) _vertexWeights.elementOffset = stride;
-		stride += _vertexWeights.elementLength;
-	}
-	if (_vertexPointSizes) {
-		if (_shouldInterleaveVertices) _vertexPointSizes.elementOffset = stride;
-		stride += _vertexPointSizes.elementLength;
 	}
 	if (_vertexTextureCoordinates) {
 		if (_shouldInterleaveVertices) _vertexTextureCoordinates.elementOffset = stride;
@@ -443,6 +448,18 @@
 	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
 		if (_shouldInterleaveVertices) otc.elementOffset = stride;
 		stride += otc.elementLength;
+	}
+	if (_vertexWeights) {
+		if (_shouldInterleaveVertices) _vertexWeights.elementOffset = stride;
+		stride += _vertexWeights.elementLength;
+	}
+	if (_vertexMatrixIndices) {
+		if (_shouldInterleaveVertices) _vertexMatrixIndices.elementOffset = stride;
+		stride += _vertexMatrixIndices.elementLength;
+	}
+	if (_vertexPointSizes) {
+		if (_shouldInterleaveVertices) _vertexPointSizes.elementOffset = stride;
+		stride += _vertexPointSizes.elementLength;
 	}
 	
 	self.vertexStride = stride;
@@ -456,6 +473,8 @@
 	_vertexLocations.allocatedVertexCapacity = vtxCount;
 	if (self.shouldInterleaveVertices) {
 		[_vertexNormals interleaveWith: _vertexLocations];
+		[_vertexTangents interleaveWith: _vertexLocations];
+		[_vertexBitangents interleaveWith: _vertexLocations];
 		[_vertexColors interleaveWith: _vertexLocations];
 		[_vertexMatrixIndices interleaveWith: _vertexLocations];
 		[_vertexWeights interleaveWith: _vertexLocations];
@@ -466,6 +485,8 @@
 		}
 	} else {
 		_vertexNormals.allocatedVertexCapacity = vtxCount;
+		_vertexTangents.allocatedVertexCapacity = vtxCount;
+		_vertexBitangents.allocatedVertexCapacity = vtxCount;
 		_vertexColors.allocatedVertexCapacity = vtxCount;
 		_vertexMatrixIndices.allocatedVertexCapacity = vtxCount;
 		_vertexWeights.allocatedVertexCapacity = vtxCount;
@@ -503,6 +524,8 @@
 	[_vertexLocations copyVertices: vtxCount from: srcIdx to: dstIdx];
 	if ( !_shouldInterleaveVertices ) {
 		[_vertexNormals copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexTangents copyVertices: vtxCount from: srcIdx to: dstIdx];
+		[_vertexBitangents copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexColors copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexMatrixIndices copyVertices: vtxCount from: srcIdx to: dstIdx];
 		[_vertexWeights copyVertices: vtxCount from: srcIdx to: dstIdx];
@@ -539,6 +562,8 @@
 -(void) copyVertexAt: (GLuint) srcIdx from: (CC3Mesh*) srcMesh to: (GLuint) dstIdx {
 	if (self.hasVertexLocations) [self setVertexLocation: [srcMesh vertexLocationAt: srcIdx] at: dstIdx];
 	if (self.hasVertexNormals) [self setVertexNormal: [srcMesh vertexNormalAt: srcIdx] at: dstIdx];
+	if (self.hasVertexTangents) [self setVertexTangent: [srcMesh vertexTangentAt: srcIdx] at: dstIdx];
+	if (self.hasVertexBitangents) [self setVertexBitangent: [srcMesh vertexBitangentAt: srcIdx] at: dstIdx];
 	if (self.hasVertexColors) [self setVertexColor4F: [srcMesh vertexColor4FAt: srcIdx] at: dstIdx];
 	if (self.hasVertexWeights) [self setVertexWeights: [srcMesh vertexWeightsAt: srcIdx] at: dstIdx];
 	if (self.hasVertexMatrixIndices) [self setVertexMatrixIndices: [srcMesh vertexMatrixIndicesAt: srcIdx] at: dstIdx];
@@ -586,12 +611,6 @@
 	}
 }
 
-//-(CC3VertexContent) vertexContentTypes { return kCC3VertexContentNone; }
-//-(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {}
-
-//-(BOOL) shouldInterleaveVertices { return NO; }
-//-(void) setShouldInterleaveVertices: (BOOL) shouldInterleave {}
-
 
 #pragma mark Accessing vertex content
 
@@ -603,6 +622,8 @@
 	
 	_vertexLocations.vertexCount = vCount;
 	_vertexNormals.vertexCount = vCount;
+	_vertexTangents.vertexCount = vCount;
+	_vertexBitangents.vertexCount = vCount;
 	_vertexColors.vertexCount = vCount;
 	_vertexMatrixIndices.vertexCount = vCount;
 	_vertexWeights.vertexCount = vCount;
@@ -638,6 +659,22 @@
 
 -(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {
 	[_vertexNormals setNormal: aNormal at: index];
+}
+
+-(CC3Vector) vertexTangentAt: (GLuint) index {
+	return _vertexTangents ? [_vertexTangents tangentAt: index] : kCC3VectorUnitXPositive;
+}
+
+-(void) setVertexTangent: (CC3Vector) aTangent at: (GLuint) index {
+	[_vertexTangents setTangent: aTangent at: index];
+}
+
+-(CC3Vector) vertexBitangentAt: (GLuint) index {
+	return _vertexBitangents ? [_vertexBitangents tangentAt: index] : kCC3VectorUnitYPositive;
+}
+
+-(void) setVertexBitangent: (CC3Vector) aTangent at: (GLuint) index {
+	[_vertexBitangents setTangent: aTangent at: index];
 }
 
 -(ccColor4F) vertexColor4FAt: (GLuint) index {
@@ -860,24 +897,24 @@
 	if (_shouldInterleaveVertices) {
 		GLuint commonBufferId = _vertexLocations.bufferID;
 		_vertexNormals.bufferID = commonBufferId;
+		_vertexTangents.bufferID = commonBufferId;
+		_vertexBitangents.bufferID = commonBufferId;
 		_vertexColors.bufferID = commonBufferId;
 		_vertexMatrixIndices.bufferID = commonBufferId;
 		_vertexWeights.bufferID = commonBufferId;
 		_vertexPointSizes.bufferID = _vertexLocations.bufferID;
 		_vertexTextureCoordinates.bufferID = commonBufferId;
-		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-			otc.bufferID = commonBufferId;
-		}
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) otc.bufferID = commonBufferId;
 	} else {
 		[_vertexNormals createGLBuffer];
+		[_vertexTangents createGLBuffer];
+		[_vertexBitangents createGLBuffer];
 		[_vertexColors createGLBuffer];
 		[_vertexMatrixIndices createGLBuffer];
 		[_vertexWeights createGLBuffer];
 		[_vertexPointSizes createGLBuffer];
 		[_vertexTextureCoordinates createGLBuffer];
-		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-			[otc createGLBuffer];
-		}
+		for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc createGLBuffer];
 	}
 	[_vertexIndices createGLBuffer];
 }
@@ -885,48 +922,53 @@
 -(void) deleteGLBuffers {
 	[_vertexLocations deleteGLBuffer];
 	[_vertexNormals deleteGLBuffer];
+	[_vertexTangents deleteGLBuffer];
+	[_vertexBitangents deleteGLBuffer];
 	[_vertexColors deleteGLBuffer];
 	[_vertexMatrixIndices deleteGLBuffer];
 	[_vertexWeights deleteGLBuffer];
 	[_vertexPointSizes deleteGLBuffer];
 	[_vertexTextureCoordinates deleteGLBuffer];
-	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-		[otc deleteGLBuffer];
-	}
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc deleteGLBuffer];
 	[_vertexIndices deleteGLBuffer];
 }
 
 -(BOOL) isUsingGLBuffers {
 	if (_vertexLocations && _vertexLocations.isUsingGLBuffer) return YES;
 	if (_vertexNormals && _vertexNormals.isUsingGLBuffer) return YES;
+	if (_vertexTangents && _vertexTangents.isUsingGLBuffer) return YES;
+	if (_vertexBitangents && _vertexBitangents.isUsingGLBuffer) return YES;
 	if (_vertexColors && _vertexColors.isUsingGLBuffer) return YES;
 	if (_vertexMatrixIndices && _vertexMatrixIndices.isUsingGLBuffer) return YES;
 	if (_vertexWeights && _vertexWeights.isUsingGLBuffer) return YES;
 	if (_vertexPointSizes && _vertexPointSizes.isUsingGLBuffer) return YES;
 	if (_vertexTextureCoordinates && _vertexTextureCoordinates.isUsingGLBuffer) return YES;
-	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-		if (otc.isUsingGLBuffer) return YES;
-	}
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) if (otc.isUsingGLBuffer) return YES;
 	return NO;
 }
 
--(void) releaseRedundantData {
-	[_vertexLocations releaseRedundantData];
-	[_vertexNormals releaseRedundantData];
-	[_vertexColors releaseRedundantData];
-	[_vertexMatrixIndices releaseRedundantData];
-	[_vertexWeights releaseRedundantData];
-	[_vertexPointSizes releaseRedundantData];
-	[_vertexTextureCoordinates releaseRedundantData];
-	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-		[otc releaseRedundantData];
-	}
-	[_vertexIndices releaseRedundantData];
+-(void) releaseRedundantContent {
+	[_vertexLocations releaseRedundantContent];
+	[_vertexNormals releaseRedundantContent];
+	[_vertexTangents releaseRedundantContent];
+	[_vertexBitangents releaseRedundantContent];
+	[_vertexColors releaseRedundantContent];
+	[_vertexMatrixIndices releaseRedundantContent];
+	[_vertexWeights releaseRedundantContent];
+	[_vertexPointSizes releaseRedundantContent];
+	[_vertexTextureCoordinates releaseRedundantContent];
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) [otc releaseRedundantContent];
+	[_vertexIndices releaseRedundantContent];
 }
+
+// Deprecated
+-(void) releaseRedundantData { [self releaseRedundantContent]; }
 
 -(void) retainVertexContent {
 	[self retainVertexLocations];
 	[self retainVertexNormals];
+	[self retainVertexTangents];
+	[self retainVertexBitangents];
 	[self retainVertexColors];
 	[self retainVertexMatrixIndices];
 	[self retainVertexWeights];
@@ -934,58 +976,73 @@
 	[self retainVertexTextureCoordinates];
 }
 
--(void) retainVertexLocations { _vertexLocations.shouldReleaseRedundantData = NO; }
+-(void) retainVertexLocations { _vertexLocations.shouldReleaseRedundantContent = NO; }
 
 -(void) retainVertexNormals {
 	if ( !self.hasVertexNormals ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexNormals.shouldReleaseRedundantData = NO;
+	_vertexNormals.shouldReleaseRedundantContent = NO;
+}
+
+-(void) retainVertexTangents {
+	if ( !self.hasVertexTangents ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexTangents.shouldReleaseRedundantContent = NO;
+}
+
+-(void) retainVertexBitangents {
+	if ( !self.hasVertexBitangents ) return;
+	
+	if (_shouldInterleaveVertices) [self retainVertexLocations];
+	_vertexBitangents.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexColors {
 	if ( !self.hasVertexColors ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexColors.shouldReleaseRedundantData = NO;
+	_vertexColors.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexMatrixIndices {
 	if ( !self.hasVertexMatrixIndices ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexMatrixIndices.shouldReleaseRedundantData = NO;
+	_vertexMatrixIndices.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexWeights {
 	if ( !self.hasVertexWeights ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexWeights.shouldReleaseRedundantData = NO;
+	_vertexWeights.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexPointSizes {
 	if ( !self.hasVertexPointSizes ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexPointSizes.shouldReleaseRedundantData = NO;
+	_vertexPointSizes.shouldReleaseRedundantContent = NO;
 }
 
 -(void) retainVertexTextureCoordinates {
 	if ( !self.hasVertexTextureCoordinates ) return;
 	
 	if (_shouldInterleaveVertices) [self retainVertexLocations];
-	_vertexTextureCoordinates.shouldReleaseRedundantData = NO;
-	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates) {
-		otc.shouldReleaseRedundantData = NO;
-	}
+	_vertexTextureCoordinates.shouldReleaseRedundantContent = NO;
+	for (CC3VertexTextureCoordinates* otc in _overlayTextureCoordinates)
+		otc.shouldReleaseRedundantContent = NO;
 }
 
--(void) retainVertexIndices { _vertexIndices.shouldReleaseRedundantData = NO; }
+-(void) retainVertexIndices { _vertexIndices.shouldReleaseRedundantContent = NO; }
 
 -(void) doNotBufferVertexContent {
 	[self doNotBufferVertexLocations];
 	[self doNotBufferVertexNormals];
+	[self doNotBufferVertexTangents];
+	[self doNotBufferVertexBitangents];
 	[self doNotBufferVertexColors];
 	[self doNotBufferVertexMatrixIndices];
 	[self doNotBufferVertexWeights];
@@ -998,6 +1055,16 @@
 -(void) doNotBufferVertexNormals {
 	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
 	_vertexNormals.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexTangents {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexTangents.shouldAllowVertexBuffering = NO;
+}
+
+-(void) doNotBufferVertexBitangents {
+	if (_shouldInterleaveVertices) [self doNotBufferVertexLocations];
+	_vertexBitangents.shouldAllowVertexBuffering = NO;
 }
 
 -(void) doNotBufferVertexColors {
@@ -1037,6 +1104,8 @@
 	[_vertexLocations updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 	if ( !_shouldInterleaveVertices ) {
 		[_vertexNormals updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexTangents updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
+		[_vertexBitangents updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexColors updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexMatrixIndices updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
 		[_vertexWeights updateGLBufferStartingAt: offsetIndex forLength: vertexCount];
@@ -1054,6 +1123,10 @@
 
 -(void) updateVertexNormalsGLBuffer { [_vertexNormals updateGLBuffer]; }
 
+-(void) updateVertexTangentsGLBuffer { [_vertexTangents updateGLBuffer]; }
+
+-(void) updateVertexBitangentsGLBuffer { [_vertexBitangents updateGLBuffer]; }
+
 -(void) updateVertexColorsGLBuffer { [_vertexColors updateGLBuffer]; }
 
 -(void) updateVertexWeightsGLBuffer { [_vertexWeights updateGLBuffer]; }
@@ -1069,50 +1142,6 @@
 }
 
 -(void) updateVertexIndicesGLBuffer { [_vertexIndices updateGLBuffer]; }
-
-//-(void) createGLBuffers {}
-//
-//-(void) deleteGLBuffers {}
-//
-//-(BOOL) isUsingGLBuffers { return NO; }
-//
-//-(void) releaseRedundantData {}
-//
-//-(void) retainVertexContent {}
-//
-//-(void) retainVertexLocations {}
-//
-//-(void) retainVertexNormals {}
-//
-//-(void) retainVertexColors {}
-//
-//-(void) retainVertexMatrixIndices {}
-//
-//-(void) retainVertexWeights {}
-//
-//-(void) retainVertexPointSizes {}
-//
-//-(void) retainVertexTextureCoordinates {}
-//
-//-(void) retainVertexIndices {}
-//
-//-(void) doNotBufferVertexContent {}
-//
-//-(void) doNotBufferVertexLocations {}
-//
-//-(void) doNotBufferVertexNormals {}
-//
-//-(void) doNotBufferVertexColors {}
-//
-//-(void) doNotBufferVertexMatrixIndices {}
-//
-//-(void) doNotBufferVertexWeights {}
-//
-//-(void) doNotBufferVertexPointSizes {}
-//
-//-(void) doNotBufferVertexTextureCoordinates {}
-//
-//-(void) doNotBufferVertexIndices {}
 
 
 #pragma mark Mesh Geometry
@@ -1131,19 +1160,6 @@
 -(void) movePivotTo: (CC3Vector) aLocation { [self moveMeshOriginTo: aLocation]; }
 -(void) movePivotToCenterOfGeometry { [self moveMeshOriginToCenterOfGeometry]; }
 
-//-(CC3BoundingBox) boundingBox { return kCC3BoundingBoxNull; }
-//
-//-(CC3Vector) centerOfGeometry {
-//	CC3BoundingBox bb = self.boundingBox;
-//	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
-//}
-//
-//-(GLfloat) radius { return 0.0; }
-//
-//-(void) moveMeshOriginTo: (CC3Vector) aLocation {}
-//
-//-(void) moveMeshOriginToCenterOfGeometry {}
-
 
 #pragma mark CCRGBAProtocol support
 
@@ -1154,15 +1170,6 @@
 -(GLubyte) opacity { return _vertexColors ? _vertexColors.opacity : 0; }
 
 -(void) setOpacity: (GLubyte) opacity { _vertexColors.opacity = opacity; }
-
-
-//-(ccColor3B) color { return ccBLACK; }
-//
-//-(void) setColor: (ccColor3B) aColor {}
-//
-//-(GLubyte) opacity { return 0; }
-//
-//-(void) setOpacity: (GLubyte) opacity {}
 
 
 #pragma mark Textures
@@ -1233,9 +1240,8 @@
 
 -(void) flipTexturesVertically {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++)
 		[[self textureCoordinatesForTextureUnit: texUnit] flipVertically];
-	}
 }
 
 -(void) flipHorizontallyTextureUnit: (GLuint) texUnit {
@@ -1244,9 +1250,8 @@
 
 -(void) flipTexturesHorizontally {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++)
 		[[self textureCoordinatesForTextureUnit: texUnit] flipHorizontally];
-	}
 }
 
 -(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {
@@ -1255,9 +1260,8 @@
 
 -(void) repeatTexture: (ccTex2F) repeatFactor {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++)
 		[[self textureCoordinatesForTextureUnit: texUnit] repeatTexture: repeatFactor];
-	}
 }
 
 -(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
@@ -1273,41 +1277,9 @@
 
 -(void) setTextureRectangle: (CGRect) aRect {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint i = 0; i < tcCount; i++) {
+	for (GLuint i = 0; i < tcCount; i++)
 		[self textureCoordinatesForTextureUnit: i].textureRectangle = aRect;
-	}
 }
-
-//-(BOOL) expectsVerticallyFlippedTextures { return YES; }
-//
-//-(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {}
-//
-//-(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit { return YES; }
-//
-//-(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {}
-//
-//-(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {}
-//
-//-(void) flipVerticallyTextureUnit: (GLuint) texUnit {}
-//
-//-(void) flipTexturesVertically {}
-//
-//-(void) flipHorizontallyTextureUnit: (GLuint) texUnit {}
-//
-//-(void) flipTexturesHorizontally {}
-//
-//-(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {}
-//
-//-(void) repeatTexture: (ccTex2F) repeatFactor {}
-//
-//-(CGRect) textureRectangle { return CGRectNull; }
-//
-//-(void) setTextureRectangle: (CGRect) aRect {}
-//
-//-(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit { return CGRectNull; }
-//
-//-(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {}
-//
 
 
 #pragma mark Drawing
@@ -1336,11 +1308,10 @@
 }
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.switchingMesh) {
+	if (self.switchingMesh)
 		[self bindGLWithVisitor: visitor];
-	} else {
+	else
 		LogTrace(@"Reusing currently bound %@", self);
-	}
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -1350,6 +1321,8 @@
 	
 	[self bindLocationsWithVisitor: visitor];
 	[self bindNormalsWithVisitor: visitor];
+	[self bindTangentsWithVisitor: visitor];
+	[self bindBitangentsWithVisitor: visitor];
 	[self bindColorsWithVisitor: visitor];
 	[self bindTextureCoordinatesWithVisitor: visitor];
 	[self bindPointSizesWithVisitor: visitor];
@@ -1360,32 +1333,42 @@
 	[glesVtxArrays disableUnboundVertexPointers];
 }
 
-/** Template method that binds a pointer to the vertex location data to the GL engine. */
+/** Template method that binds a pointer to the vertex location content to the GL engine. */
 -(void) bindLocationsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_vertexLocations bindWithVisitor: visitor];
 }
 
-/** Template method that binds a pointer to the vertex normal data to the GL engine. */
+/** Template method that binds a pointer to the vertex normal content to the GL engine. */
 -(void) bindNormalsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) [_vertexNormals bindWithVisitor: visitor];
 }
 
-/** Template method that binds a pointer to the per-vertex color data to the GL engine. */
+/** Template method that binds a pointer to the vertex tangent content to the GL engine. */
+-(void) bindTangentsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) [_vertexTangents bindWithVisitor: visitor];
+}
+
+/** Template method that binds a pointer to the vertex tangent content to the GL engine. */
+-(void) bindBitangentsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) [_vertexBitangents bindWithVisitor: visitor];
+}
+
+/** Template method that binds a pointer to the per-vertex color content to the GL engine. */
 -(void) bindColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visitor.shouldDecorateNode) [_vertexColors bindWithVisitor: visitor];
 }
 
-/** Template method that binds a pointer to the vertex matrix index data to the GL engine. */
+/** Template method that binds a pointer to the vertex matrix index content to the GL engine. */
 -(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_vertexMatrixIndices bindWithVisitor:visitor];
 }
 
-/** Template method that binds a pointer to the vertex weight data to the GL engine. */
+/** Template method that binds a pointer to the vertex weight content to the GL engine. */
 -(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
 	[_vertexWeights bindWithVisitor:visitor];
 }
 
-/** Template method that binds a pointer to the vertex point size data to the GL engine. */
+/** Template method that binds a pointer to the vertex point size content to the GL engine. */
 -(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_vertexPointSizes bindWithVisitor: visitor];
 }
@@ -1495,36 +1478,6 @@ static GLuint currentMeshTag = 0;
 
 +(void) resetSwitching { currentMeshTag = 0; }
 
-//-(GLenum) drawingMode { return GL_TRIANGLE_STRIP; }
-//
-//-(void) setDrawingMode: (GLenum) aMode {}
-
-///**
-// * Template method that binds the mesh arrays to the GL engine prior to drawing.
-// * The specified visitor encapsulates the frustum of the currently active camera,
-// * and certain drawing options.
-// *
-// * This method does not create GL buffers, which are created with the createGLBuffers method.
-// * This method binds the buffer or data pointers to the GL engine, prior to each draw call.
-// */
-//-(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-//
-///**
-// * Draws the mesh vertices to the GL engine.
-// * Default implementation does nothing. Subclasses will override.
-// */
-//-(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-//
-///**
-// * Draws a portion of the mesh vertices to the GL engine.
-// * Default implementation does nothing. Subclasses will override.
-// */
-//-(void) drawVerticesFrom: (GLuint) vertexIndex
-//				forCount: (GLuint) vertexCount
-//			 withVisitor: (CC3NodeDrawingVisitor*) visitor {}
-//
-//-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
-
 
 #pragma mark Allocation and initialization
 
@@ -1534,6 +1487,8 @@ static GLuint currentMeshTag = 0;
 		_shouldInterleaveVertices = YES;
 		_vertexLocations = nil;
 		_vertexNormals = nil;
+		_vertexTangents = nil;
+		_vertexBitangents = nil;
 		_vertexColors = nil;
 		_vertexMatrixIndices = nil;
 		_vertexWeights = nil;
@@ -1557,6 +1512,8 @@ static GLuint currentMeshTag = 0;
 	// Share vertex arrays between copies
 	self.vertexLocations = another.vertexLocations;						// retained but not copied
 	self.vertexNormals = another.vertexNormals;							// retained but not copied
+	self.vertexTangents = another.vertexTangents;						// retained but not copied
+	self.vertexBitangents = another.vertexBitangents;					// retained but not copied
 	self.vertexColors = another.vertexColors;							// retained but not copied
 	self.vertexMatrixIndices = another.vertexMatrixIndices;				// retained but not copied
 	self.vertexWeights = another.vertexWeights;							// retained but not copied
@@ -1566,24 +1523,14 @@ static GLuint currentMeshTag = 0;
 	// Remove any existing overlay textures and add the overlay textures from the other vertex array.
 	[_overlayTextureCoordinates removeAllObjects];
 	CCArray* otherOTCs = another.overlayTextureCoordinates;
-	if (otherOTCs) {
-		for (CC3VertexTextureCoordinates* otc in otherOTCs) {
+	if (otherOTCs)
+		for (CC3VertexTextureCoordinates* otc in otherOTCs)
 			[self addTextureCoordinates: [otc autoreleasedCopy]];		// retained by collection
-		}
-	}
 	
 	self.vertexIndices = another.vertexIndices;							// retained but not copied
 	_shouldInterleaveVertices = another.shouldInterleaveVertices;
 	_capacityExpansionFactor = another.capacityExpansionFactor;
 }
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-//-(void) populateFrom: (CC3Mesh*) another {
-//	[super populateFrom: another];
-//	
-//	self.faces = another.faces;				// retained but not copied
-//}
 
 +(id) mesh { return [[[self alloc] init] autorelease]; }
 
@@ -1605,119 +1552,6 @@ static GLuint lastAssignedMeshTag;
 -(GLuint) nextTag { return ++lastAssignedMeshTag; }
 
 +(void) resetTagAllocation { lastAssignedMeshTag = 0; }
-
-
-
-//#pragma mark Accessing vertex data
-//
-//-(BOOL) ensureCapacity: (GLuint) vtxCount { return NO; }
-//
-//-(GLuint) vertexCount { return 0; }
-//
-//-(void) setVertexCount: (GLuint) vCount {}
-//
-//-(GLuint) vertexIndexCount { return 0; }
-//
-//-(void) setVertexIndexCount: (GLuint) vCount {}
-//
-//-(CC3Vector) vertexLocationAt: (GLuint) index { return kCC3VectorZero; }
-//
-//-(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index {}
-//
-//-(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index { return kCC3Vector4ZeroLocation; }
-//
-//-(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index {}
-//
-//-(CC3Vector) vertexNormalAt: (GLuint) index { return kCC3VectorZero; }
-//
-//-(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {}
-//
-//-(ccColor4F) vertexColor4FAt: (GLuint) index { return kCCC4FBlackTransparent; }
-//
-//-(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index {}
-//
-//-(ccColor4B) vertexColor4BAt: (GLuint) index { return (ccColor4B){ 0, 0, 0, 0 }; }
-//
-//-(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index {}
-//
-//-(GLuint) vertexUnitCount { return 0; }
-//
-//-(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0.0f; }
-//
-//-(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {}
-//
-//-(GLfloat*) vertexWeightsAt: (GLuint) index { return NULL; }
-//
-//-(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {}
-//
-//-(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index { return 0; }
-//
-//-(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
-//			   forVertexUnit: (GLuint) vertexUnit
-//						  at: (GLuint) index {}
-//
-//-(GLvoid*) vertexMatrixIndicesAt: (GLuint) index { return NULL; }
-//
-//-(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {}
-//
-//-(GLenum) matrixIndexType { return GL_ZERO; }
-//
-//-(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex { return 0.0f; }
-//
-//-(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex {}
-//
-//-(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
-//	return (ccTex2F){ 0.0, 0.0 };
-//}
-//
-//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index {}
-//
-//-(ccTex2F) vertexTexCoord2FAt: (GLuint) index {
-//	return [self vertexTexCoord2FForTextureUnit: 0 at: index];
-//}
-//
-//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index {
-//	[self setVertexTexCoord2F: aTex2F forTextureUnit: 0 at: index];
-//}
-//
-//// Deprecated
-//-(ccTex2F) vertexTexCoord2FAt: (GLuint) index forTextureUnit: (GLuint) texUnit {
-//	return [self vertexTexCoord2FForTextureUnit: texUnit at: index];
-//}
-//
-//// Deprecated
-//-(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit {
-//	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
-//}
-
-//
-//-(GLuint) vertexIndexAt: (GLuint) index { return 0; }
-//
-//-(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index {}
-//
-//-(void) updateVertexLocationsGLBuffer {}
-//
-//-(void) updateVertexNormalsGLBuffer {}
-//
-//-(void) updateVertexColorsGLBuffer {}
-//
-//-(void) updateVertexWeightsGLBuffer {}
-//
-//-(void) updateVertexMatrixIndicesGLBuffer {}
-//
-//-(void) updatePointSizesGLBuffer {}
-//
-//-(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {}
-//
-//-(void) updateVertexTextureCoordinatesGLBuffer {
-//	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
-//}
-
-//-(void) updateVertexIndicesGLBuffer {}
-//
-//-(void) updateGLBuffers {}
-
-
 
 @end
 
@@ -1765,9 +1599,7 @@ static GLuint lastAssignedMeshTag;
 
 -(GLuint) faceCount { return mesh ? mesh.faceCount : 0;}
 
--(CC3Face) faceAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceAt: faceIndex] : kCC3FaceZero;
-}
+-(CC3Face) faceAt: (GLuint) faceIndex { return mesh ? [mesh faceAt: faceIndex] : kCC3FaceZero; }
 
 
 #pragma mark Allocation and initialization
@@ -1795,17 +1627,11 @@ static GLuint lastAssignedMeshTag;
 	return self;
 }
 
-+(id) faceArray {
-	return [[[self alloc] init] autorelease];
-}
++(id) faceArray { return [[[self alloc] init] autorelease]; }
 
-+(id) faceArrayWithTag: (GLuint) aTag {
-	return [[[self alloc] initWithTag: aTag] autorelease];
-}
++(id) faceArrayWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
 
-+(id) faceArrayWithName: (NSString*) aName {
-	return [[[self alloc] initWithName: aName] autorelease];
-}
++(id) faceArrayWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
 
 +(id) faceArrayWithTag: (GLuint) aTag withName: (NSString*) aName {
 	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
@@ -1905,9 +1731,7 @@ static GLuint lastAssignedMeshTag;
 }
 
 -(CC3FaceIndices) indicesAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) {
-		return self.indices[faceIndex];
-	}
+	if (shouldCacheFaces) return self.indices[faceIndex];
 	return [self uncachedIndicesAt: faceIndex];
 }
 
@@ -1951,9 +1775,7 @@ static GLuint lastAssignedMeshTag;
 #pragma mark Centers
 
 -(CC3Vector*) centers {
-	if (centersAreDirty || !centers) {
-		[self populateCenters];
-	}
+	if (centersAreDirty || !centers) [self populateCenters];
 	return centers;
 }
 
@@ -1963,9 +1785,7 @@ static GLuint lastAssignedMeshTag;
 }
 
 -(CC3Vector) centerAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) {
-		return self.centers[faceIndex];
-	}
+	if (shouldCacheFaces) return self.centers[faceIndex];
 	return CC3FaceCenter([self faceAt: faceIndex]);
 }
 
@@ -2010,9 +1830,7 @@ static GLuint lastAssignedMeshTag;
 #pragma mark Normals
 
 -(CC3Vector*) normals {
-	if (normalsAreDirty || !normals) {
-		[self populateNormals];
-	}
+	if (normalsAreDirty || !normals) [self populateNormals];
 	return normals;
 }
 
@@ -2022,9 +1840,7 @@ static GLuint lastAssignedMeshTag;
 }
 
 -(CC3Vector) normalAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) {
-		return self.normals[faceIndex];
-	}
+	if (shouldCacheFaces) return self.normals[faceIndex];
 	return CC3FaceNormal([self faceAt: faceIndex]);
 }
 
@@ -2069,9 +1885,7 @@ static GLuint lastAssignedMeshTag;
 #pragma mark Planes
 
 -(CC3Plane*) planes {
-	if (planesAreDirty || !planes) {
-		[self populatePlanes];
-	}
+	if (planesAreDirty || !planes) [self populatePlanes];
 	return planes;
 }
 
@@ -2081,9 +1895,7 @@ static GLuint lastAssignedMeshTag;
 }
 
 -(CC3Plane) planeAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) {
-		return self.planes[faceIndex];
-	}
+	if (shouldCacheFaces) return self.planes[faceIndex];
 	return CC3FacePlane([self faceAt: faceIndex]);
 }
 
@@ -2128,9 +1940,7 @@ static GLuint lastAssignedMeshTag;
 #pragma mark Neighbours
 
 -(CC3FaceNeighbours*) neighbours {
-	if (neighboursAreDirty || !neighbours) {
-		[self populateNeighbours];
-	}
+	if (neighboursAreDirty || !neighbours) [self populateNeighbours];
 	return neighbours;
 }
 

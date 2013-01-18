@@ -50,19 +50,21 @@ typedef enum {
 	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
 
 	// VERTEX CONTENT --------------
-	kCC3SemanticVertexLocations,				/**< Vertex location. */
-	kCC3SemanticVertexNormals,					/**< Vertex normal. */
-	kCC3SemanticVertexTangents,					/**< Vertex tangent. */
-	kCC3SemanticVertexBitangents,				/**< Vertex bitangent (aka binormals). */
-	kCC3SemanticVertexColors,					/**< Vertex color. */
-	kCC3SemanticVertexWeights,					/**< Vertex skinning weight. */
-	kCC3SemanticVertexMatrices,					/**< Vertex skinning matrice. */
-	kCC3SemanticVertexPointSizes,				/**< Vertex point size. */
+	kCC3SemanticVertexLocation,					/**< Vertex location. */
+	kCC3SemanticVertexNormal,					/**< Vertex normal. */
+	kCC3SemanticVertexTangent,					/**< Vertex tangent. */
+	kCC3SemanticVertexBitangent,				/**< Vertex bitangent (aka binormals). */
+	kCC3SemanticVertexColor,					/**< Vertex color. */
+	kCC3SemanticVertexWeight,					/**< Vertex skinning weight. */
+	kCC3SemanticVertexMatrix,					/**< Vertex skinning matrix. */
+	kCC3SemanticVertexPointSize,				/**< Vertex point size. */
 	kCC3SemanticVertexTexture,					/**< Vertex texture coordinate for one texture unit. */
 	
 	kCC3SemanticHasVertexNormal,				/**< (bool) Whether the vertex normal is available. */
 	kCC3SemanticShouldNormalizeVertexNormal,	/**< (bool) Whether vertex normals should be normalized. */
 	kCC3SemanticShouldRescaleVertexNormal,		/**< (bool) Whether vertex normals should be rescaled. */
+	kCC3SemanticHasVertexTangent,				/**< (bool) Whether the vertex tangent is available. */
+	kCC3SemanticHasVertexBitangent,				/**< (bool) Whether the vertex bitangent is available. */
 	kCC3SemanticHasVertexColor,					/**< (bool) Whether the vertex color is available. */
 	kCC3SemanticHasVertexTextureCoordinate,		/**< (bool) Whether the vertex texture coordinate is available. */
 	kCC3SemanticHasVertexPointSize,				/**< (bool) Whether the vertex point size is available. */

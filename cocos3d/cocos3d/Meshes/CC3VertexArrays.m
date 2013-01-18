@@ -52,7 +52,7 @@
 		_bufferID = 0;
 		_bufferUsage = GL_STATIC_DRAW;
 		_shouldAllowVertexBuffering = YES;
-		_shouldReleaseRedundantData = YES;
+		_shouldReleaseRedundantContent = YES;
 	}
 	return self;
 }
@@ -77,7 +77,7 @@
 @synthesize vertexCount=_vertexCount, bufferID=_bufferID, bufferUsage=_bufferUsage;
 @synthesize elementOffset=_elementOffset, semantic=_semantic;
 @synthesize shouldAllowVertexBuffering=_shouldAllowVertexBuffering;
-@synthesize shouldReleaseRedundantData=_shouldReleaseRedundantData;
+@synthesize shouldReleaseRedundantContent=_shouldReleaseRedundantContent;
 @synthesize shouldNormalizeContent=_shouldNormalizeContent;
 
 -(void) dealloc {
@@ -169,7 +169,10 @@
 -(void) setElementCount: (GLuint) elemCount { self.vertexCount = elemCount; }
 -(GLuint) elementStride { return self.vertexStride; }
 -(void) setElementStride: (GLuint) elemStride { self.vertexStride = elemStride; }
-
+-(BOOL) shouldReleaseRedundantData { return self.shouldReleaseRedundantContent; }
+-(void) setShouldReleaseRedundantData: (BOOL) shouldReleaseRedundantData {
+	self.shouldReleaseRedundantContent = shouldReleaseRedundantData;
+}
 
 #pragma mark Allocation and initialization
 
@@ -187,7 +190,7 @@
 		_elementOffset = 0;
 		_shouldNormalizeContent = NO;
 		_shouldAllowVertexBuffering = YES;
-		_shouldReleaseRedundantData = YES;
+		_shouldReleaseRedundantContent = YES;
 		_semantic = self.class.defaultSemantic;
 	}
 	return self;
@@ -226,7 +229,7 @@
 	_elementOffset = another.elementOffset;
 	_shouldNormalizeContent = another.shouldNormalizeContent;
 	_shouldAllowVertexBuffering = another.shouldAllowVertexBuffering;
-	_shouldReleaseRedundantData = another.shouldReleaseRedundantData;
+	_shouldReleaseRedundantContent = another.shouldReleaseRedundantContent;
 
 	[self deleteGLBuffer];		// Data has yet to be buffered. Get rid of old buffer if necessary.
 
@@ -396,13 +399,16 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(BOOL) isUsingGLBuffer { return _bufferID != 0; }
 
--(void) releaseRedundantData {
-	if (_bufferID && _shouldReleaseRedundantData) {
+-(void) releaseRedundantContent {
+	if (_bufferID && _shouldReleaseRedundantContent) {
 		GLuint currVtxCount = _vertexCount;
 		self.allocatedVertexCapacity = 0;
 		_vertexCount = currVtxCount;		// Maintain vertexCount for drawing
 	}
 }
+
+// Deprecated
+-(void) releaseRedundantData { [self releaseRedundantContent]; }
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor { [self bindGLWithVisitor: visitor]; }
 
@@ -452,7 +458,7 @@ static GLuint lastAssignedVertexArrayTag;
 -(GLvoid*) addressOfElement: (GLuint) index {
 	// Check vertices still in memory, and if allocated,
 	// that index is less than number of vertices allocated
-	CC3Assert(_vertices || !_bufferID, @"Vertex content is no longer in application memory. To retain mesh data in main memory, invoke the retainVertexContent method on this mesh before invoking the releaseRedundantData method.");
+	CC3Assert(_vertices || !_bufferID, @"Vertex content is no longer in application memory. To retain mesh data in main memory, invoke the retainVertexContent method on this mesh before invoking the releaseRedundantContent method.");
 	CC3Assert(_vertices, @"Vertex content is missing.");
 	CC3Assert(_allocatedVertexCapacity == 0 || index < _allocatedVertexCapacity, @"Requested index %i is greater than number of vertices allocated: %i.", index, _allocatedVertexCapacity);
 	return (GLbyte*)_vertices + (self.vertexStride * index) + _elementOffset;
@@ -991,10 +997,10 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 /** Overridden to ensure the bounding box and radius are built before releasing the vertices. */
--(void) releaseRedundantData {
+-(void) releaseRedundantContent {
 	[self buildBoundingBoxIfNecessary];
 	[self calcRadiusIfNecessary];
-	[super releaseRedundantData];
+	[super releaseRedundantContent];
 }
 
 -(void) drawFrom: (GLuint) vtxIdx
@@ -1024,7 +1030,7 @@ static GLuint lastAssignedVertexArrayTag;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexLocations; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexLocation; }
 
 @end
 
@@ -1045,7 +1051,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(NSString*) nameSuffix { return @"Normals"; }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexNormals; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexNormal; }
 
 @end
 
@@ -1066,7 +1072,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(NSString*) nameSuffix { return @"Tangents"; }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexTangents; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexTangent; }
 
 @end
 
@@ -1186,7 +1192,7 @@ static GLuint lastAssignedVertexArrayTag;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexColors; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexColor; }
 
 @end
 
@@ -1595,7 +1601,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexPointSizes; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexPointSize; }
 
 @end
 
@@ -1636,7 +1642,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexWeights; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexWeight; }
 
 @end
 
@@ -1696,6 +1702,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexMatrices; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexMatrix; }
 
 @end

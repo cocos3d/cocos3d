@@ -134,14 +134,14 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 
 	_semanticsByPVRShamanSemanticName = [NSMutableDictionary new];		// retained
 	
-	[self addSemantic: kCC3SemanticVertexLocations forPVRShamanSemanticName: @"POSITION"];
-	[self addSemantic: kCC3SemanticVertexNormals forPVRShamanSemanticName: @"NORMAL"];
-	[self addSemantic: kCC3SemanticVertexTangents forPVRShamanSemanticName: @"TANGENT"];
-	[self addSemantic: kCC3SemanticVertexBitangents forPVRShamanSemanticName: @"BINORMAL"];
+	[self addSemantic: kCC3SemanticVertexLocation forPVRShamanSemanticName: @"POSITION"];
+	[self addSemantic: kCC3SemanticVertexNormal forPVRShamanSemanticName: @"NORMAL"];
+	[self addSemantic: kCC3SemanticVertexTangent forPVRShamanSemanticName: @"TANGENT"];
+	[self addSemantic: kCC3SemanticVertexBitangent forPVRShamanSemanticName: @"BINORMAL"];
 	[self addSemantic: kCC3SemanticVertexTexture forPVRShamanSemanticName: @"UV"];
-	[self addSemantic: kCC3SemanticVertexColors forPVRShamanSemanticName: @"VERTEXCOLOR"];
-	[self addSemantic: kCC3SemanticVertexMatrices forPVRShamanSemanticName: @"BONEINDEX"];
-	[self addSemantic: kCC3SemanticVertexWeights forPVRShamanSemanticName: @"BONEWEIGHT"];
+	[self addSemantic: kCC3SemanticVertexColor forPVRShamanSemanticName: @"VERTEXCOLOR"];
+	[self addSemantic: kCC3SemanticVertexMatrix forPVRShamanSemanticName: @"BONEINDEX"];
+	[self addSemantic: kCC3SemanticVertexWeight forPVRShamanSemanticName: @"BONEWEIGHT"];
 
 	[self addSemantic: kCC3SemanticModelMatrix forPVRShamanSemanticName: @"WORLD"];
 	[self addSemantic: kCC3SemanticModelMatrixInv forPVRShamanSemanticName: @"WORLDI"];

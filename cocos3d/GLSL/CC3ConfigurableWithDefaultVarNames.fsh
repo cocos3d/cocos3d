@@ -144,6 +144,9 @@ struct Point {
 
 //-------------- UNIFORMS ----------------------
 
+// Uniforms describing vertex attributes.
+uniform bool u_cc3HasVertexTangent;						/**< Whether vertex tangent attribute is available. */
+
 // Material properties
 uniform Material u_cc3Material;							/**< The material being applied to the mesh. */
 
@@ -158,6 +161,7 @@ uniform Point u_cc3Points;								/**< Point parameters. */
 //-------------- VARYING VARIABLES INPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];
 varying lowp vec4 v_color;
+varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
@@ -198,10 +202,18 @@ void combineTexture(int tuIdx, vec4 texColor) {
 	// Combine the RGB components
 	if (func == GL_MODULATE)
 		fragColor.rgb = rgb0 * rgb1;
-	else if (func == GL_DOT3_RGBA)
-		fragColor = vec4(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
-	else if (func == GL_DOT3_RGB)
-		fragColor.rgb = vec3(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+	else if (func == GL_DOT3_RGBA) {
+		if (u_cc3HasVertexTangent)		// Bump-map using tangent-space light dir
+			fragColor = vec4(2.0 * dot(rgb0 - kVec3Half, v_bumpMapLightDir));
+		else							// Bump-map using model-space light dir (from const color)
+			fragColor = vec4(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+	}
+	else if (func == GL_DOT3_RGB) {
+		if (u_cc3HasVertexTangent)		// Bump-map using tangent-space light dir
+			fragColor.rgb = vec3(2.0 * dot(rgb0 - kVec3Half, v_bumpMapLightDir));
+		else							// Bump-map using model-space light dir (from const color)
+			fragColor.rgb = vec3(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+	}
 	else if (func == GL_ADD)
 		fragColor.rgb = rgb0 + rgb1;
 	else if (func == GL_ADD_SIGNED)

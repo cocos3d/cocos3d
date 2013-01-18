@@ -63,7 +63,7 @@
 	GLenum _bufferUsage;
 	NSRange _dirtyVertexRange;
 	BOOL _shouldAllowVertexBuffering : 1;
-	BOOL _shouldReleaseRedundantData : 1;
+	BOOL _shouldReleaseRedundantContent : 1;
 	BOOL _wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
 }
 
@@ -92,7 +92,7 @@
  * The CC3VertexArray instance also manages buffering the content to the GL engine, including
  * loading it into a server-side GL vertex buffer object (VBO) if desired. Once loaded into
  * the GL engine buffers, the underlying content can be released from the CC3VertexArray instance,
- * thereby freeing memory, by using the releaseRedundantData method.
+ * thereby freeing memory, by using the releaseRedundantContent method.
  *
  * The CC3DrawableVertexArray abstract subclass adds the functionality to draw the vertex
  * content to the display through the GL engine.
@@ -126,8 +126,8 @@
  *     never what you intend to do, and results in significant redundant content in memory.
  *     Instead, consider creating a copy of one of the vertex arrays, and then manually
  *     populating the others so that the interleaved vertex content can be shared.
- *   - If the value of the shouldReleaseRedundantData property of the original vertex
- *     array is YES and releaseRedundantData has been invoked, there will be no vertex
+ *   - If the value of the shouldReleaseRedundantContent property of the original vertex
+ *     array is YES and releaseRedundantContent has been invoked, there will be no vertex
  *     content to be copied.
  *   - The new vertex array will not have a GL vertex buffer object associated with it.
  *     To buffer the vertex content of the new vertex array, invoke the createGLBuffer method
@@ -149,7 +149,7 @@
 	GLuint _vertexStride : 8;
 	BOOL _shouldNormalizeContent : 1;
 	BOOL _shouldAllowVertexBuffering : 1;
-	BOOL _shouldReleaseRedundantData : 1;
+	BOOL _shouldReleaseRedundantContent : 1;
 	BOOL _wasVertexCapacityChanged : 1;		// Future use to track dirty vertex range
 }
 
@@ -533,7 +533,7 @@
  * It is safe to call this method even if GL buffers have not been created.
  * 
  * This method may be invoked at any time to free up GL memory, but only if this vertex
- * array will not be used again, or if the content was not released by releaseRedundantData.
+ * array will not be used again, or if the content was not released by releaseRedundantContent.
  * This would be the case if the allocatedVertexCapacity property was not set.
  *
  * This method is invoked automatically when this instance is deallocated.
@@ -558,20 +558,23 @@
 
 /**
  * Indicates whether this instance should release the content held in the elments array
- * when the releaseRedundantData method is invoked.
+ * when the releaseRedundantContent method is invoked.
  *
  * The initial value of this property is YES. In most cases, this is appropriate,
  * but in some circumstances it might make sense to retain some content (usually the
  * vertex locations) in main memory for potantial use in collision detection, etc.
  */
-@property(nonatomic, assign) BOOL shouldReleaseRedundantData;
+@property(nonatomic, assign) BOOL shouldReleaseRedundantContent;
+
+/** @deprecated Renamed to shouldReleaseRedundantContent. */
+@property(nonatomic, assign) BOOL shouldReleaseRedundantData DEPRECATED_ATTRIBUTE;
 
 /**
  * Once the vertices content has been buffered into a GL vertex buffer object (VBO)
  * within the GL engine, via the createGLBuffer method, this method can be used
  * to release the content in main memory that is now redundant.
  *
- * If the shouldReleaseRedundantData property is set to NO, or if the vertices
+ * If the shouldReleaseRedundantContent property is set to NO, or if the vertices
  * content has not been successfully buffered to a VBO in the GL engine. this method
  * does nothing. It is safe to invokde this method even if createGLBuffer has not
  * been invoked, and even if VBO buffering was unsuccessful.
@@ -582,9 +585,12 @@
  *
  * Subclasses may extend this behaviour to remove content loaded, for example, from files,
  * but should ensure that content is only released if bufferId is valid (not zero),
- * and the shouldReleaseRedundantData property is set to YES.
+ * and the shouldReleaseRedundantContent property is set to YES.
  */
--(void) releaseRedundantData;
+-(void) releaseRedundantContent;
+
+/** @deprecated Renamed to releaseRedundantContent. */
+-(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
 
 /**
  * Binds the GL engine to the underlying vertex content, if needed, in preparation for drawing.
@@ -607,7 +613,7 @@
  * The implementation takes into consideration the vertexStride and elementOffset
  * properties to locate the aspect of interest in this instance.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, or the index is beyond the vertexCount,
  * this method will raise an assertion exception.
  */
@@ -924,7 +930,7 @@
  * This implementation takes into consideration the elementSize property. If the value
  * of the elementSize property is 2, the returned vector will contain zero in the Z component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector) locationAt: (GLuint) index;
@@ -946,7 +952,7 @@
  * method on all mesh nodes that use this vertex array, to ensure that the boundingVolume
  * encompasses the new vertex location.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setLocation: (CC3Vector) aLocation at: (GLuint) index;
@@ -963,7 +969,7 @@
  * in the W component. If the value of the elementSize property is 2, the returned
  * vector will contain zero in the Z component and one in the W component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector4) homogeneousLocationAt: (GLuint) index;
@@ -985,7 +991,7 @@
  * method on all mesh nodes that use this vertex array, to ensure that the boundingVolume
  * encompasses the new vertex location.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index;
@@ -1096,7 +1102,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector) normalAt: (GLuint) index;
@@ -1108,7 +1114,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setNormal: (CC3Vector) aNormal at: (GLuint) index;
@@ -1128,7 +1134,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector) tangentAt: (GLuint) index;
@@ -1140,7 +1146,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setTangent: (CC3Vector) aTangent at: (GLuint) index;
@@ -1163,7 +1169,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccColor4F) color4FAt: (GLuint) index;
@@ -1179,7 +1185,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setColor4F: (ccColor4F) aColor at: (GLuint) index;
@@ -1193,7 +1199,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccColor4B) color4BAt: (GLuint) index;
@@ -1209,7 +1215,7 @@
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setColor4B: (ccColor4B) aColor at: (GLuint) index;
@@ -1288,7 +1294,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccTex2F) texCoord2FAt: (GLuint) index;
@@ -1300,7 +1306,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index;
@@ -1628,7 +1634,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLuint) indexAt: (GLuint) index;
@@ -1640,7 +1646,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setIndex: (GLuint) vertexIndex at: (GLuint) index;
@@ -1772,7 +1778,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat) pointSizeAt: (GLuint) index;
@@ -1784,7 +1790,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setPointSize: (GLfloat) aSize at: (GLuint) index;
@@ -1818,7 +1824,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * one for each bone that influences the location of the vertex. The specified vertexUnit
  * parameter must be between zero inclusive, and the elementSize property, exclusive.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat) weightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
@@ -1834,7 +1840,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * one for each bone that influences the location of the vertex. The specified vertexUnit
  * parameter must be between zero inclusive, and the elementSize property, exclusive.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
@@ -1851,7 +1857,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct vertices.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat*) weightsAt: (GLuint) index;
@@ -1869,7 +1875,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * from the elementSize property. The number of elements in the specified input
  * array must therefore be at least as large as the value of the elementSize property.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setWeights: (GLfloat*) weights at: (GLuint) index;
@@ -1903,7 +1909,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * to one for each bone that influences the location of the vertex. The specified vertexUnit
  * parameter must be between zero inclusive, and the elementSize property, exclusive.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLuint) matrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
@@ -1919,7 +1925,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setMatrixIndex: (GLuint) aMatrixIndex forVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
@@ -1947,7 +1953,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct vertices.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLvoid*) matrixIndicesAt: (GLuint) index;
@@ -1975,7 +1981,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index;

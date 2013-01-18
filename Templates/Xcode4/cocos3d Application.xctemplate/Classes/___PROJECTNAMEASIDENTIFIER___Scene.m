@@ -53,9 +53,9 @@
 	[self addContentFromPODFile: @"hello-world.pod"];
 	
 	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex data in main memory because it is now redundant.
+	// and to save memory, release the vertex content in main memory because it is now redundant.
 	[self createGLBuffers];
-	[self releaseRedundantData];
+	[self releaseRedundantContent];
 	
 	// That's it! The scene is now constructed and is good to go.
 	

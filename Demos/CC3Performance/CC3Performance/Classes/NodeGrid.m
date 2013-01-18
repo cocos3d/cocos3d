@@ -80,7 +80,7 @@
 	}
 	
 	[self createGLBuffers];			// Copy vertex data to OpenGL VBO's.
-	[self releaseRedundantData];	// Release vertex data from main memory.
+	[self releaseRedundantContent];	// Release vertex data from main memory.
 	
 	// To help demonstrate that the hordes of nodes are being managed correctly,
 	// log the current number of nodes, before the new nodes have been created.

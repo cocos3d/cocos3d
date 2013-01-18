@@ -1272,7 +1272,7 @@ typedef enum {
  * constantly re-measuring the bounding volume may be significant, and it may be more
  * effective to set a fixed bounding volume that encompasses the entire possible range
  * of vertex location data, and set the value of this property to YES to stop the
- * bounding volume from being recalculated every time the vertex data is changed.
+ * bounding volume from being recalculated every time the vertex content is changed.
  *
  * See the note for the various subclasses of CC3NodeBoundingVolume
  * (eg- CC3NodeBoundingBoxVolume and CC3NodeSphericalBoundingVolume) to learn how
@@ -1642,20 +1642,20 @@ typedef enum {
  * If a descendant node did not retain the vertex content locally, then after this method is invoked,
  * no vertex content will be available for the node, and the node will no longer be drawn. For this
  * reason, great care should be taken when using this method in combination with releasing the local
- * copy of the vertex data.
+ * copy of the vertex content.
  *
  * To delete the GL buffers of a particular node without deleting those of any descendant nodes,
  * use this method on the mesh node's mesh, instead of on the mesh node itself.
  *
- * The local copy of the vertex content in main memory can be released via the releaseRedundantData
+ * The local copy of the vertex content in main memory can be released via the releaseRedundantContent
  * method. To retain the local copy of the vertex content for any particular node, invoke one or
- * more of the retainVertex... family of methods. See the notes of the releaseRedundantData for more
+ * more of the retainVertex... family of methods. See the notes of the releaseRedundantContent for more
  * info regarding retaining and releasing the local copy of the vertex content in app memory. 
  */
 -(void) deleteGLBuffers;
 
 /**
- * Once the vertex data has been buffered into a GL vertex buffer object (VBO)
+ * Once the vertex content has been buffered into a GL vertex buffer object (VBO)
  * within the GL engine, via the createGLBuffer method, this method can be used
  * to release the data in main memory that is now redundant from all meshes that
  * have been buffered to the GL engine.
@@ -1665,28 +1665,35 @@ typedef enum {
  * the GL engine. It is safe to invokde this method even if createGLBuffer has not
  * been invoked, and even if VBO buffering was unsuccessful.
  *
- * To exempt vertex data from release, invoke one or more of the following methods
+ * To exempt vertex content from release, invoke one or more of the following methods
  * once on nodes for which data should be retained, before invoking this method:
  *   - retainVertexContent
  *   - retainVertexLocations
  *   - retainVertexNormals
+ *   - retainVertexTangents
+ *   - retainVertexBitangents
  *   - retainVertexColors
  *   - retainVertexTextureCoordinates
+ *   - retainVertexMatrixIndices
+ *   - retainVertexWeights
+ *   - retainVertexPointSizes
  *   - retainVertexIndices
  *
  * For example, sophisticated physics engines and collision detection algorithms may make
  * use of vertex location data in main memory. Or a rippling texture animation might retain
  * texture coordinate data in order to dyamically adjust the texture coordinate data.
  *
- * Normally, you would invoke the retainVertex... methods on specific individual
- * nodes, and then invoke this method on the parent node of a node assembly,
- * or on the CC3Scene.
+ * Normally, you would invoke the retainVertex... methods on specific individual nodes, and
+ * then invoke this method on the parent node of a node assembly, or on the CC3Scene.
  */
--(void) releaseRedundantData;
+-(void) releaseRedundantContent;
+
+/** @deprecated Renamed to releaseRedundantContent. */
+-(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
 
 /**
- * Convenience method to cause all vertex content data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause all vertex content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
  * All vertex content, such as location, normal, color, texture coordinates, point size,
  * weights and matrix indices will be retained.
@@ -1697,105 +1704,133 @@ typedef enum {
 -(void) retainVertexContent;
 
 /**
- * Convenience method to cause the vertex location data of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantData is invoked, even
+ * Convenience method to cause the vertex location content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked, even
  * if it has been buffered to a GL VBO.
  *
- * Use this method if you require access to vertex data after the data has been
+ * Use this method if you require access to vertex content after the data has been
  * buffered to a GL VBO.
  *
- * Only the vertex locations will be retained. Any other vertex data, such as normals,
+ * Only the vertex locations will be retained. Any other vertex content, such as normals,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexLocations;
 
 /**
- * Convenience method to cause the vertex normal data of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * Convenience method to cause the vertex normal content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked,
  * even if it has been buffered to a GL VBO.
  *
- * Use this method if you require access to vertex data after the data has been
+ * Use this method if you require access to vertex content after the data has been
  * buffered to a GL VBO.
  *
- * Only the vertex normals will be retained. Any other vertex data, such as locations,
+ * Only the vertex normals will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexNormals;
 
 /**
- * Convenience method to cause the vertex color data of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * Convenience method to cause the vertex tangent content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked,
  * even if it has been buffered to a GL VBO.
  *
- * Use this method if you require access to vertex data after the data has been
+ * Use this method if you require access to vertex content after the data has been
  * buffered to a GL VBO.
  *
- * Only the vertex colors will be retained. Any other vertex data, such as locations,
+ * Only the vertex normals will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
+ */
+-(void) retainVertexTangents;
+
+/**
+ * Convenience method to cause the vertex bitangent content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex content after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex normals will be retained. Any other vertex content, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantContent is invoked.
+ */
+-(void) retainVertexBitangents;
+
+/**
+ * Convenience method to cause the vertex color content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked,
+ * even if it has been buffered to a GL VBO.
+ *
+ * Use this method if you require access to vertex content after the data has been
+ * buffered to a GL VBO.
+ *
+ * Only the vertex colors will be retained. Any other vertex content, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index data of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantData is invoked, even if
+ * Convenience method to cause the vertex matrix index content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked, even if
  * it has been buffered to a GL VBO.
  *
- * Only the vertex matrix index will be retained. Any other vertex data, such as locations,
+ * Only the vertex matrix index will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexMatrixIndices;
 
 /**
- * Convenience method to cause the vertex weight data of this node and all descendant
- * nodes  to be retained in application memory when releaseRedundantData is invoked,
+ * Convenience method to cause the vertex weight content of this node and all descendant
+ * nodes  to be retained in application memory when releaseRedundantContent is invoked,
  * even if it has been buffered to a GL VBO.
  *
- * Only the vertex weight will be retained. Any other vertex data, such as locations,
+ * Only the vertex weight will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexWeights;
 
 /**
- * Convenience method to cause the vertex point size data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex point size content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex point sizes will be retained. Any other vertex data, such as locations,
+ * Only the vertex point sizes will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexPointSizes;
 
 /**
- * Convenience method to cause the vertex texture coordinate data of this node and
+ * Convenience method to cause the vertex texture coordinate content of this node and
  * all descendant nodes, for all texture units, used by this mesh to be retained in
- * application memory when releaseRedundantData is invoked, even if it has been
+ * application memory when releaseRedundantContent is invoked, even if it has been
  * buffered to a GL VBO.
  *
- * Use this method if you require access to vertex data after the data has been
+ * Use this method if you require access to vertex content after the data has been
  * buffered to a GL VBO.
  *
- * Only the vertex texture coordinates will be retained. Any other vertex data, such as
+ * Only the vertex texture coordinates will be retained. Any other vertex content, such as
  * locations, or normals, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexTextureCoordinates;
 
 /**
- * Convenience method to cause the vertex index data of this node and all descendant
- * nodes to be retained in application memory when releaseRedundantData is invoked,
+ * Convenience method to cause the vertex index content of this node and all descendant
+ * nodes to be retained in application memory when releaseRedundantContent is invoked,
  * even if it has been buffered to a GL VBO.
  *
- * Use this method if you require access to vertex data after the data has been
+ * Use this method if you require access to vertex content after the data has been
  * buffered to a GL VBO.
  *
- * Only the vertex indices will be retained. Any other vertex data, such as locations,
+ * Only the vertex indices will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexIndices;
 
@@ -1807,13 +1842,13 @@ typedef enum {
  * This method does NOT stop vertex index data from being buffered. If you meshes use vertex
  * indices, and you don't want them buffered, use the doNotBufferVertexIndices method as well.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexContent method.
  */
 -(void) doNotBufferVertexContent;
 
 /**
- * Convenience method to cause the vertex location data of this node and all
+ * Convenience method to cause the vertex location content of this node and all
  * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
  * data is not buffered to a a GL VBO, is retained in application memory, and
  * is submitted to the GL engine on each frame render.
@@ -1822,14 +1857,14 @@ typedef enum {
  * data, such as normals, or texture coordinates, will be buffered to a GL VBO
  * when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
+ * This method causes the vertex content to be retained in application memory,
  * so, if you have invoked this method, you do NOT also need to invoke the
  * retainVertexLocations method.
  */
 -(void) doNotBufferVertexLocations;
 
 /**
- * Convenience method to cause the vertex normal data of this node and all
+ * Convenience method to cause the vertex normal content of this node and all
  * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
  * data is not buffered to a a GL VBO, is retained in application memory, and
  * is submitted to the GL engine on each frame render.
@@ -1838,14 +1873,46 @@ typedef enum {
  * data, such as locations, or texture coordinates, will be buffered to a GL
  * VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
+ * This method causes the vertex content to be retained in application memory,
  * so, if you have invoked this method, you do NOT also need to invoke the
  * retainVertexNormals method.
  */
 -(void) doNotBufferVertexNormals;
 
 /**
- * Convenience method to cause the vertex color data of this node and all
+ * Convenience method to cause the vertex tangent content of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex content to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexNormals method.
+ */
+-(void) doNotBufferVertexTangents;
+
+/**
+ * Convenience method to cause the vertex bitangent content of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
+ * data is not buffered to a a GL VBO, is retained in application memory, and
+ * is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
+ * data, such as locations, or texture coordinates, will be buffered to a GL
+ * VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex content to be retained in application memory,
+ * so, if you have invoked this method, you do NOT also need to invoke the
+ * retainVertexNormals method.
+ */
+-(void) doNotBufferVertexBitangents;
+
+/**
+ * Convenience method to cause the vertex color content of this node and all
  * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
  * data is not buffered to a a GL VBO, is retained in application memory, and
  * is submitted to the GL engine on each frame render.
@@ -1854,74 +1921,74 @@ typedef enum {
  * data, such as locations, or texture coordinates, will be buffered to a GL
  * VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
+ * This method causes the vertex content to be retained in application memory,
  * so, if you have invoked this method, you do NOT also need to invoke the
  * retainVertexColors method.
  */
 -(void) doNotBufferVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index data of this node and all
- * descendant nodes to be skipped when createGLBuffers is invoked. The vertex data
+ * Convenience method to cause the vertex matrix index content of this node and all
+ * descendant nodes to be skipped when createGLBuffers is invoked. The vertex content
  * is not buffered to a GL VBO, is retained in application memory, and is submitted
  * to the GL engine on each frame render.
  *
- * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex data,
+ * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex content,
  * such as locations, or texture coordinates, will be buffered to a GL VBO when
  * createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexMatrixIndices method.
  */
 -(void) doNotBufferVertexMatrixIndices;
 
 /**
- * Convenience method to cause the vertex weight data of this node and all descendant
- * nodes to be skipped when createGLBuffers is invoked. The vertex data is not buffered
+ * Convenience method to cause the vertex weight content of this node and all descendant
+ * nodes to be skipped when createGLBuffers is invoked. The vertex content is not buffered
  * to a GL VBO, is retained in application memory, and is submitted to the GL engine on
  * each frame render.
  *
- * Only the vertex weight will not be buffered to a GL VBO. Any other vertex data, such
+ * Only the vertex weight will not be buffered to a GL VBO. Any other vertex content, such
  * as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
  * is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexWeights method.
  */
 -(void) doNotBufferVertexWeights;
 
 /**
- * Convenience method to cause the vertex point size data to be skipped when createGLBuffers
- * is invoked. The vertex data is not buffered to a GL VBO, is retained in application memory,
+ * Convenience method to cause the vertex point size content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a GL VBO, is retained in application memory,
  * and is submitted to the GL engine on each frame render.
  *
  * Only the vertex point sizes will not be buffered to a GL VBO. Any other vertex content, such as
  * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexPointSizes method.
  */
 -(void) doNotBufferVertexPointSizes;
 
 /**
- * Convenience method to cause the vertex texture coordinate data of this
+ * Convenience method to cause the vertex texture coordinate content of this
  * node and all descendant nodes, for all texture units used by those nodes,
- * to be skipped when createGLBuffers is invoked. The vertex data is not
+ * to be skipped when createGLBuffers is invoked. The vertex content is not
  * buffered to a a GL VBO, is retained in application memory, and is submitted
  * to the GL engine on each frame render.
  *
  * Only the vertex texture coordinates will not be buffered to a GL VBO.
- * Any other vertex data, such as locations, or texture coordinates, will
+ * Any other vertex content, such as locations, or texture coordinates, will
  * be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
+ * This method causes the vertex content to be retained in application memory,
  * so, if you have invoked this method, you do NOT also need to invoke the
  * retainVertexTextureCoordinates method.
  */
 -(void) doNotBufferVertexTextureCoordinates;
 
 /**
- * Convenience method to cause the vertex index data of this node and all
+ * Convenience method to cause the vertex index content of this node and all
  * descendant nodes to be skipped when createGLBuffers is invoked. The vertex
  * data is not buffered to a a GL VBO, is retained in application memory, and
  * is submitted to the GL engine on each frame render.
@@ -1930,7 +1997,7 @@ typedef enum {
  * data, such as locations, or texture coordinates, will be buffered to a GL
  * VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
+ * This method causes the vertex content to be retained in application memory,
  * so, if you have invoked this method, you do NOT also need to invoke the
  * retainVertexColors method.
  */

@@ -85,15 +85,16 @@ struct Material {
  * and pased to your shader (uniform structure elements are passed individually in GLSL).
  */
 struct Light {
-	vec4	positionEyeSpace;					/**< Position or normalized direction in eye space. */
-	vec4	ambientColor;						/**< Ambient color of light. */
-	vec4	diffuseColor;						/**< Diffuse color of light. */
-	vec4	specularColor;						/**< Specular color of light. */
-	vec3	attenuation;						/**< Coefficients of the attenuation equation. */
-	vec3	spotDirectionEyeSpace;				/**< Direction if spotlight in eye space. */
-	float	spotExponent;						/**< Directional attenuation factor if spotlight. */
-	float	spotCutoffAngleCosine;				/**< Cosine of spotlight cutoff angle. */
-	bool	isEnabled;							/**< Whether light is enabled. */
+	vec4	positionEyeSpace;				/**< Position or normalized direction in eye space. */
+	vec4	positionModel;					/**< Position or normalized direction in the local coords of the model. */
+	vec4	ambientColor;					/**< Ambient color of light. */
+	vec4	diffuseColor;					/**< Diffuse color of light. */
+	vec4	specularColor;					/**< Specular color of light. */
+	vec3	attenuation;					/**< Coefficients of the attenuation equation. */
+	vec3	spotDirectionEyeSpace;			/**< Direction if spotlight in eye space. */
+	float	spotExponent;					/**< Directional attenuation factor if spotlight. */
+	float	spotCutoffAngleCosine;			/**< Cosine of spotlight cutoff angle. */
+	bool	isEnabled;						/**< Whether light is enabled. */
 };
 
 /**
@@ -118,41 +119,44 @@ struct Point {
 //-------------- UNIFORMS ----------------------
 
 // Environment matrices
-uniform mat4 u_cc3MtxModelView;						/**< Current modelview matrix. */
-uniform mat3 u_cc3MtxModelViewInvTran;						/**< Inverse-transpose of current modelview rotation matrix. */
-uniform highp mat4 u_cc3MtxModelViewProj;					/**< Current modelview-projection matrix. */
+uniform mat4 u_cc3MtxModelView;				/**< Current modelview matrix. */
+uniform mat3 u_cc3MtxModelViewInvTran;		/**< Inverse-transpose of current modelview rotation matrix. */
+uniform highp mat4 u_cc3MtxModelViewProj;		/**< Current modelview-projection matrix. */
 
 // Material properties
-uniform vec4 u_cc3Color;						/**< Color when lighting & materials are not in use. */
-uniform Material u_cc3Material;					/**< The material being applied to the mesh. */
+uniform vec4 u_cc3Color;					/**< Color when lighting & materials are not in use. */
+uniform Material u_cc3Material;				/**< The material being applied to the mesh. */
 
 // Lighting properties
-uniform bool u_cc3IsUsingLighting;				/**< Indicates whether any lighting is in use. */
-uniform vec4 u_cc3SceneLightColorAmbient;		/**< Ambient light color of the scene. */
-uniform Light u_cc3Lights[MAX_LIGHTS];			/**< Array of lights. */
+uniform bool u_cc3IsUsingLighting;			/**< Indicates whether any lighting is in use. */
+uniform vec4 u_cc3SceneLightColorAmbient;	/**< Ambient light color of the scene. */
+uniform Light u_cc3Lights[MAX_LIGHTS];		/**< Array of lights. */
 
 // Uniforms describing vertex attributes.
-uniform bool u_cc3HasVertexNormal;				/**< Whether vertex normal attribute is available. */
-uniform bool u_cc3ShouldNormalizeNormal;		/**< Whether vertex normals should be normalized. */
-uniform bool u_cc3ShouldRescaleNormal;			/**< Whether vertex normals should be rescaled. */
-uniform bool u_cc3HasVertexColor;				/**< Whether vertex color attribute is available. */
-uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
-uniform Point u_cc3Points;						/**< Point parameters. */
+uniform bool u_cc3HasVertexNormal;			/**< Whether vertex normal attribute is available. */
+uniform bool u_cc3ShouldNormalizeNormal;	/**< Whether vertex normals should be normalized. */
+uniform bool u_cc3ShouldRescaleNormal;		/**< Whether vertex normals should be rescaled. */
+uniform bool u_cc3HasVertexTangent;			/**< Whether vertex tangent attribute is available. */
+uniform bool u_cc3HasVertexColor;			/**< Whether vertex color attribute is available. */
+uniform lowp int u_cc3TextureCount;			/**< Number of textures. */
+uniform Point u_cc3Points;					/**< Point parameters. */
 
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;				/**< Vertex position. */
-attribute vec3 a_cc3Normal;						/**< Vertex normal. */
-attribute vec4 a_cc3Color;						/**< Vertex color. */
-attribute float a_cc3PointSize;					/**< Vertex point size. */
-attribute vec2 a_cc3TexCoord0;					/**< Vertex texture coordinate for texture unit 0. */
-attribute vec2 a_cc3TexCoord1;					/**< Vertex texture coordinate for texture unit 1. */
-attribute vec2 a_cc3TexCoord2;					/**< Vertex texture coordinate for texture unit 2. */
-attribute vec2 a_cc3TexCoord3;					/**< Vertex texture coordinate for texture unit 3. */
+attribute highp vec4 a_cc3Position;			/**< Vertex position. */
+attribute vec3 a_cc3Normal;					/**< Vertex normal. */
+attribute vec3 a_cc3Tangent;				/**< Vertex tangent. */
+attribute vec4 a_cc3Color;					/**< Vertex color. */
+attribute float a_cc3PointSize;				/**< Vertex point size. */
+attribute vec2 a_cc3TexCoord0;				/**< Vertex texture coordinate for texture unit 0. */
+attribute vec2 a_cc3TexCoord1;				/**< Vertex texture coordinate for texture unit 1. */
+attribute vec2 a_cc3TexCoord2;				/**< Vertex texture coordinate for texture unit 2. */
+attribute vec2 a_cc3TexCoord3;				/**< Vertex texture coordinate for texture unit 3. */
 
 //-------------- VARYING VARIABLES OUTPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];			/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;						/**< Fragment base color. */
+varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
+varying lowp vec4 v_color;					/**< Fragment base color. */
+varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
@@ -227,6 +231,29 @@ vec4 illuminateWith(int ltIdx) {
     return vtxColor;
 }
 
+/** 
+ * Returns the direction to the specified light in either tangent space coordinates or model-space
+ * coordinates, depending on whether per-vertex tangents have been supplied. The associated normal-map
+ * texture must match this and specify its normals in either tangent-space or model-space.
+ */
+vec3 bumpMapDirectionForLight(int ltIdx) {
+	
+	// Get the light direction in model space. If the light is positional
+	// calculate the normalized direction from the light and vertex positions.
+	vec3 ltDir = u_cc3Lights[ltIdx].positionModel.xyz;
+	if (u_cc3Lights[ltIdx].positionModel.w != 0.0) ltDir = normalize(ltDir - a_cc3Position.xyz);
+	
+	// If we have vertex tangents, create a matrix that transforms from model space to tangent space,
+	// and transform the light direction to tangent space. If no tangents, leave in model-space.
+	if (u_cc3HasVertexTangent) {
+		vec3 bitangent = cross(a_cc3Normal, a_cc3Tangent);
+		mat3 tangentSpaceXfm = mat3(a_cc3Tangent, bitangent, a_cc3Normal);
+		ltDir *= tangentSpaceXfm;
+	}
+
+	return ltDir;
+}
+
 /**
  * Returns the vertex color by starting with material emission and ambient scene lighting,
  * and then illuminating the material with each enabled light.
@@ -238,6 +265,11 @@ vec4 illuminate() {
 		if (u_cc3Lights[ltIdx].isEnabled) vtxColor += illuminateWith(ltIdx);
 	
 	vtxColor.a = matColorDiffuse.a;
+	
+	// If the model uses bump-mapping, we need a variable to track the light direction.
+	// It's a varying because when using tangent-space normals, we need the light direction per fragment.
+	v_bumpMapLightDir = bumpMapDirectionForLight(0);
+	
 	return vtxColor;
 }
 

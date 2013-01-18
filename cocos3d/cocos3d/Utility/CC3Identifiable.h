@@ -109,6 +109,20 @@
 -(BOOL) deriveNameFrom: (CC3Identifiable*) another;
 
 /**
+ * If this instance does not already have a name, it is derived from the name of the specified
+ * other CC3Identifiable, if it has one. If this instance has a name already, or if the other
+ * CC3Identifiable does not have a name, the name of this instance is not changed.
+ *
+ * Typically, this is invoked when one CC3Identifiable is added as a component to another.
+ *
+ * This implementation concatenates the value of the specified suffix onto the name of the
+ * specified CC3Identifiable, and sets that into the name property of this instance.
+ *
+ * Returns whether the name of this instance was changed.
+ */
+-(BOOL) deriveNameFrom: (CC3Identifiable*) another usingSuffix: (NSString*) suffix;
+
+/**
  * Returns a string to concatenate to the name of another CC3Identifiable to automatically
  * create a useful name for this instance.
  *

@@ -278,7 +278,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  *
  * You typically do not use this method directly. Instead, use the size property
@@ -295,7 +295,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * When all vertex changes have been made, be sure to invoke the updateParticleSizesGLBuffer
  * method to ensure that the GL VBO that holds the vertex data is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
+ * If the releaseRedundantContent method has been invoked and the underlying
  * vertex data has been released, this method will raise an assertion exception.
  *
  * You typically do not use this method directly. Instead, use the size property
@@ -314,11 +314,11 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 
 /**
  * Convenience method to cause the vertex point size data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
  * Only the vertex point sizes will be retained. Any other vertex data, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  *
  * This method is invoked automatically when the vertexContentTypes property is set.
  * Usually, the application should never have need to invoke this method directly.

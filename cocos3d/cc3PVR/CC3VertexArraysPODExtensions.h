@@ -39,25 +39,12 @@
 /** Extensions to CC3VertexArray to support PVR POD data. */
 @interface CC3VertexArray (PVRPOD)
 
-/**
- * Initializes this instance from the specified CPODData structure
- * and the specified SPODMesh structure.
- */
--(id) initFromCPODData: (PODClassPtr) aCPODData
-		  fromSPODMesh: (PODStructPtr) aSPODMesh;
+/** Initializes this instance from the specified CPODData and SPODMesh structures. */
+-(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh;
 
-/**
- * Initializes this instance from the  specified SPODMesh structure.
- *
- * This abstract implementation does nothing. Category extensions to the concrete
- * subclasses of CC3VertexArray must override to extract the suitable CPODData
- * structure for the type of array from the specifed SPODMesh structure and then
- * invoke the initFromCPODData:fromSPODMesh: initializer.
- */
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh;
 
-/** Allocates and initializes an autoreleased instance from the  specified SPODMesh structure. */
-+(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh;
+/** Allocates and initialize an autoreleased instance from the specified CPODData and SPODMesh structures. */
++(id) arrayFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh;
 
 @end
 
@@ -79,12 +66,6 @@
  * specified SPODMesh structure, using the specified texture channel.
  */
 +(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit;
-
-/**
- * Initializes this instance from the  specified SPODMesh structure,
- * using texture channel zero.
- */
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh;
 
 @end
 

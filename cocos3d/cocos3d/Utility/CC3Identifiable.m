@@ -45,12 +45,15 @@ static GLint instanceCount = 0;
 }
 
 -(BOOL) deriveNameFrom: (CC3Identifiable*) another {
+	return [self deriveNameFrom: another usingSuffix: self.nameSuffix];
+}
+
+-(BOOL) deriveNameFrom: (CC3Identifiable*) another usingSuffix: (NSString*) suffix {
 	if (name) return NO;
 	NSString* otherName = another.name;
 	if ( !otherName ) return NO;
-	NSString* nameSfx = self.nameSuffix;
-	if ( !nameSfx ) return NO;
-	self.name = [NSString stringWithFormat: @"%@-%@", otherName, nameSfx];
+	if ( !suffix ) return NO;
+	self.name = [NSString stringWithFormat: @"%@-%@", otherName, suffix];
 	return YES;
 }
 

@@ -33,5 +33,6 @@
 /** PVRT C++ header, slightly adjusted for compatibility with Objective-C */
 
 #import "PVRTPFXParser.h"
+#import	"PVRTResourceFile.h"
 
 #undef BOOL						// resolve conflict with PVRT C++ definition of BOOL

@@ -104,7 +104,16 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath {
-	_wasLoaded = (self.pvrtModelImpl->ReadFromFile([anAbsoluteFilePath cStringUsingEncoding:NSUTF8StringEncoding]) == PVR_SUCCESS);
+
+	// Split the path into directory and file names and set the PVR read path to the directory and
+	// pass the unqualified file name to the parser. This allows the parser to locate any additional
+	// files that might be read as part of the parsing.
+	NSString* fileName = anAbsoluteFilePath.lastPathComponent;
+	NSString* dirName = anAbsoluteFilePath.stringByDeletingLastPathComponent;
+
+	CPVRTResourceFile::SetReadPath([dirName stringByAppendingString: @"/"].UTF8String);
+	
+	_wasLoaded = (self.pvrtModelImpl->ReadFromFile(fileName.UTF8String) == PVR_SUCCESS);
 	if (_wasLoaded) [self build];
 	return _wasLoaded;
 }
@@ -356,7 +365,12 @@ static Class _defaultPFXResourceClass = nil;
 	return self.pvrtModelImpl->nNumMaterial;
 }
 
+// Fail safely when node references a material that is not in the POD
 -(CC3Material*) materialAtIndex: (uint) materialIndex {
+	if (materialIndex >= materials.count) {
+		LogRez(@"This POD has no material at index %i", materialIndex);
+		return nil;
+	}
 	return (CC3Material*)[materials objectAtIndex: materialIndex];
 }
 

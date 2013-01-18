@@ -50,22 +50,6 @@
 
 
 #pragma mark -
-#pragma mark CC3VertexWeights
-
-/** A CC3VertexWeights extension to support extracting from a POD file. */
-@interface CC3VertexWeights (PVRPOD)
-@end
-
-
-#pragma mark -
-#pragma mark CC3VertexMatrixIndices
-
-/** A CC3VertexMatrixIndices extension to support extracting from a POD file. */
-@interface CC3VertexMatrixIndices (PVRPOD)
-@end
-
-
-#pragma mark -
 #pragma mark CC3PODSkinSection
 
 /**

@@ -65,13 +65,8 @@ extern "C" {
 	return self;
 }
 
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	CC3Assert(NO, @"CCVertexArrays initFromSPODMesh: must be overridden in subclass");
-	return NULL;
-}
-
-+(id) arrayFromSPODMesh: (PODStructPtr) aSPODMesh {
-	return [[[self alloc] initFromSPODMesh: aSPODMesh] autorelease];
++(id) arrayFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
+	return [[[self alloc] initFromCPODData: aCPODData fromSPODMesh: aSPODMesh] autorelease];
 }
 
 /** Template method extracts the vertex data from the specified SPODMesh and CPODData structures.  */
@@ -116,11 +111,6 @@ extern "C" {
 
 @implementation CC3VertexLocations (PVRPOD)
 
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sVertex fromSPODMesh: aSPODMesh];
-}
-
 /** CC3VertexLocations manages freeing either dedicated or interleaved data */
 -(void) setElementsFromCPODData: (CPODData*) aCPODData fromSPODMesh: (SPODMesh*) aSPODMesh {
 	[super setElementsFromCPODData: aCPODData fromSPODMesh: aSPODMesh];
@@ -131,28 +121,15 @@ extern "C" {
 
 
 #pragma mark -
-#pragma mark CC3VertexNormals PVRPOD extensions
-
-@implementation CC3VertexNormals (PVRPOD)
-
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sNormals fromSPODMesh: aSPODMesh];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3VertexColors PVRPOD extensions
 
 @implementation CC3VertexColors (PVRPOD)
 
+// Element size must be 4 for colors. POD loader sometimes provides incorrect value.
 // Thanks to cocos3d user esmrg who contributed the fix for element size.
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	if ( (self = [self initFromCPODData: &psm->sVtxColours fromSPODMesh: aSPODMesh]) ) {
-		self.elementSize = 4;		// Must be 4 for colors...but POD loader sometimes provides incorrect value.
+-(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {
+	if ( (self = [super initFromCPODData: aCPODData fromSPODMesh: aSPODMesh]) ) {
+		self.elementSize = 4;
 	}
 	return self;
 }
@@ -164,10 +141,6 @@ extern "C" {
 #pragma mark CC3VertexTextureCoordinates PVRPOD extensions
 
 @implementation CC3VertexTextureCoordinates (PVRPOD)
-
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	return [self initFromSPODMesh: aSPODMesh forTextureUnit: 0];
-}
 
 -(id) initFromSPODMesh: (PODStructPtr) aSPODMesh forTextureUnit: (GLuint) texUnit {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
@@ -190,11 +163,6 @@ extern "C" {
 #pragma mark CC3VertexIndices PVRPOD extensions
 
 @implementation CC3VertexIndices (PVRPOD)
-
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sFaces fromSPODMesh: aSPODMesh];
-}
 
 /** Calc vertexCount after drawingMode has been set. */
 -(id) initFromCPODData: (PODClassPtr) aCPODData fromSPODMesh: (PODStructPtr) aSPODMesh {

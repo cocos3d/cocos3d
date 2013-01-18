@@ -273,7 +273,7 @@
 	locArray.elementSize = 4;						// We're using homogeneous coordinates!
 	locArray.allocatedVertexCapacity = vertexCount;
 	locArray.vertexCount = 0;						// Will be populated dynamically
-	locArray.shouldReleaseRedundantData = NO;		// Shadow vertex data is dynamic
+	locArray.shouldReleaseRedundantContent = NO;		// Shadow vertex data is dynamic
 	
 	CC3Mesh* aMesh = [CC3Mesh mesh];
 	aMesh.vertexLocations = locArray;

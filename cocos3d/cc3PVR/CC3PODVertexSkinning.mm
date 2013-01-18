@@ -88,10 +88,7 @@
 /** Link the nodes in the bone batches. */
 -(void) linkToPODNodes: (CCArray*) nodeArray {
 	[super linkToPODNodes: nodeArray];
-
-	for (CC3PODSkinSection* skinSctn in skinSections) {
-		[skinSctn linkToPODNodes: nodeArray];
-	}
+	for (CC3PODSkinSection* skinSctn in skinSections) [skinSctn linkToPODNodes: nodeArray];
 }
 
 -(NSString*) description {
@@ -100,32 +97,6 @@
 
 @end
 
-
-#pragma mark -
-#pragma mark CC3VertexWeights
-
-@implementation CC3VertexWeights (PVRPOD)
-
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sBoneWeight fromSPODMesh: aSPODMesh];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3VertexMatrixIndices
-
-@implementation CC3VertexMatrixIndices (PVRPOD)
-
--(id) initFromSPODMesh: (PODStructPtr) aSPODMesh {
-	SPODMesh* psm = (SPODMesh*)aSPODMesh;
-	return [self initFromCPODData: &psm->sBoneIdx fromSPODMesh: aSPODMesh];
-}
-
-@end
-	
 	
 #pragma mark -
 #pragma mark CC3PODSkinSection

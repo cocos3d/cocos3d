@@ -54,9 +54,8 @@
 		}
 		// If this node has a material, build it
 		self.podMaterialIndex = pmn->nIdxMaterial;
-		if (self.podMaterialIndex >= 0) {
+		if (self.podMaterialIndex >= 0)
 			self.material = [aPODRez materialAtIndex: self.podMaterialIndex];
-		}
 	}
 	return self; 
 }

@@ -212,8 +212,8 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001;
  *
  * If you know that the mesh nodes and light are fixed, after the first update to the scene,
  * you can save memory by retrieving the vertex locations, indices, weights and matrix indices
- * vertex arrays, set the shouldReleaseRedundantData property on each to YES, and invoke the
- * releaseRedundantData method on each.
+ * vertex arrays, set the shouldReleaseRedundantContent property on each to YES, and invoke the
+ * releaseRedundantContent method on each.
  *
  * The internal management of shadow volumes requires intense access to the faces of the mesh
  * that is casting the shadow. For this reason, when a shadow volume is added to a mesh node, the
@@ -253,8 +253,8 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001;
  * shouldCacheFaces property to NO, and will not automatically free up
  * vertex data that was retained to build the shadow volumes. If you no
  * longer need the face or vertex data to be cached, you should explicitly
- * set the shouldCacheFaces property to NO, and the shouldReleaseRedundantData
- * property to YES, and invoke the releaseRedundantData method.
+ * set the shouldCacheFaces property to NO, and the shouldReleaseRedundantContent
+ * property to YES, and invoke the releaseRedundantContent method.
  *
  * It is safe to invoke this method more than once, or even if no shadow
  * volumes have previously been added.

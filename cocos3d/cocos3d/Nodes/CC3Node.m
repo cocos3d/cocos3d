@@ -120,9 +120,7 @@
 	[self markTransformDirty];
 }
 
--(void) translateBy: (CC3Vector) aVector {
-	self.location = CC3VectorAdd(self.location, aVector);
-}
+-(void) translateBy: (CC3Vector) aVector { self.location = CC3VectorAdd(self.location, aVector); }
 
 -(CC3Vector) rotation { return rotator.rotation; }
 
@@ -1055,11 +1053,7 @@
  */
 -(void) copyChildrenFrom: (CC3Node*) another {
 	CCArray* otherKids = another.children;
-	for (CC3Node* n in otherKids) {
-		if (n.shouldIncludeInDeepCopy) {
-			[self addChild: [n autoreleasedCopy]];	// retained by collection
-		}
-	}
+	for (CC3Node* n in otherKids) if (n.shouldIncludeInDeepCopy) [self addChild: [n autoreleasedCopy]];
 }
 
 // Implementations to keep compiler happy so this method can be included in interface for documentation.
@@ -1070,13 +1064,20 @@
 
 -(void) deleteGLBuffers { for (CC3Node* child in children) [child deleteGLBuffers]; }
 
--(void) releaseRedundantData { for (CC3Node* child in children) [child releaseRedundantData]; }
+-(void) releaseRedundantContent { for (CC3Node* child in children) [child releaseRedundantContent]; }
+
+// Deprecated
+-(void) releaseRedundantData { [self releaseRedundantContent]; }
 
 -(void) retainVertexContent { for (CC3Node* child in children) [child retainVertexContent]; }
 
 -(void) retainVertexLocations { for (CC3Node* child in children) [child retainVertexLocations]; }
 
 -(void) retainVertexNormals { for (CC3Node* child in children) [child retainVertexNormals]; }
+
+-(void) retainVertexTangents { for (CC3Node* child in children) [child retainVertexTangents]; }
+
+-(void) retainVertexBitangents { for (CC3Node* child in children) [child retainVertexBitangents]; }
 
 -(void) retainVertexColors { for (CC3Node* child in children) [child retainVertexColors]; }
 	
@@ -1095,6 +1096,10 @@
 -(void) doNotBufferVertexLocations { for (CC3Node* child in children) [child doNotBufferVertexLocations]; }
 
 -(void) doNotBufferVertexNormals { for (CC3Node* child in children) [child doNotBufferVertexNormals]; }
+
+-(void) doNotBufferVertexTangents { for (CC3Node* child in children) [child doNotBufferVertexTangents]; }
+
+-(void) doNotBufferVertexBitangents { for (CC3Node* child in children) [child doNotBufferVertexBitangents]; }
 
 -(void) doNotBufferVertexColors { for (CC3Node* child in children) [child doNotBufferVertexColors]; }
 

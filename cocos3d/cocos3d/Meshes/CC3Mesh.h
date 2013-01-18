@@ -60,7 +60,7 @@ typedef enum {
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
-	 * each vertex contains its own location information.
+	 * each vertex contains location information.
 	 *
 	 * Vertices must always include location info.
 	 */
@@ -68,7 +68,7 @@ typedef enum {
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
-	 * each vertex contains its normal information.
+	 * each vertex contains normal information.
 	 *
 	 * This component is required if and only if the mesh is to interact with light sources.
 	 */
@@ -76,13 +76,29 @@ typedef enum {
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
-	 * each vertex contains its own color information.
+	 * each vertex contains tangent information.
+	 *
+	 * This component is required if and only if the mesh is using tangent-space bump-mapping.
+	 */
+	kCC3VertexContentTangent			= 1 << 2,
+	
+	/**
+	 * Bitwise-OR component of CC3VertexContent variables that indicates
+	 * each vertex contains bitangent information.
+	 *
+	 * This component is optionally included when the mesh is using tangent-space bump-mapping.
+	 */
+	kCC3VertexContentBitangent			= 1 << 3,
+	
+	/**
+	 * Bitwise-OR component of CC3VertexContent variables that indicates
+	 * each vertex contains color information.
 	 *
 	 * This component is required if and only if each vertex on the mesh will have its own color.
 	 * If this component is not included, all vertices in the mesh will have the color specified
 	 * by the coloring properties of the material of the mesh node.
 	 */
-	kCC3VertexContentColor				= 1 << 2,
+	kCC3VertexContentColor				= 1 << 4,
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
@@ -90,7 +106,7 @@ typedef enum {
 	 *
 	 * This component is required if and only if the mesh is covered by a texture.
 	 */
-	kCC3VertexContentTextureCoordinates	= 1 << 3,
+	kCC3VertexContentTextureCoordinates	= 1 << 5,
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates
@@ -100,7 +116,7 @@ typedef enum {
 	 * and each particle will have its own size. If this component is not included in a point
 	 * particle mesh, all particles will have the same size.
 	 */
-	kCC3VertexContentPointSize			= 1 << 4,
+	kCC3VertexContentPointSize			= 1 << 6,
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates each vertex contains
@@ -110,7 +126,7 @@ typedef enum {
 	 * This component is required if and only if the mesh is a vertex skinned mesh.
 	 * This component requires that the kCC3VertexContentMatrixIndices also be specified.
 	 */
-	kCC3VertexContentWeights				= 1 << 5,
+	kCC3VertexContentWeights			= 1 << 7,
 	
 	/**
 	 * Bitwise-OR component of CC3VertexContent variables that indicates each vertex contains
@@ -120,7 +136,7 @@ typedef enum {
 	 * This component is required if and only if the mesh is a vertex skinned mesh.
 	 * This component requires that the kCC3VertexContentMatrixIndices also be specified.
 	 */
-	kCC3VertexContentMatrixIndices		= 1 << 6
+	kCC3VertexContentMatrixIndices		= 1 << 8
 } CC3VertexContent;
 
 /** Indicates that a face has no neighbour over a particular edge. */
@@ -273,7 +289,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** The vertex array instance managing the positional content for the vertices. */
 @property(nonatomic, retain) CC3VertexLocations* vertexLocations;
 
-/** Returns whether this mesh contains data for vertex locations. */
+/** Returns whether this mesh contains content for vertex locations. */
 @property(nonatomic, readonly) BOOL hasVertexLocations;
 
 /**
@@ -283,7 +299,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic, retain) CC3VertexNormals* vertexNormals;
 
-/** Returns whether this mesh contains data for vertex normals. */
+/** Returns whether this mesh contains content for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
 
 /** @deprecated Replaced by hasVertexNormals. */
@@ -294,14 +310,20 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * Setting this property is optional. Not all meshes require tangents.
  */
-//@property(nonatomic, retain) CC3VertexTangents* vertexTangents;
+@property(nonatomic, retain) CC3VertexTangents* vertexTangents;
+
+/** Returns whether this mesh contains content for vertex tangents. */
+@property(nonatomic, readonly) BOOL hasVertexTangents;
 
 /**
  * The vertex array instance managing the bitangent content for the vertices.
  *
  * Setting this property is optional. Not all meshes require bitangents.
  */
-//@property(nonatomic, retain) CC3VertexTangents* vertexBitangents;
+@property(nonatomic, retain) CC3VertexTangents* vertexBitangents;
+
+/** Returns whether this mesh contains content for vertex bitangents. */
+@property(nonatomic, readonly) BOOL hasVertexBitangents;
 
 /**
  * The vertex array instance managing the per-vertex color content for the vertices.
@@ -310,7 +332,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic, retain) CC3VertexColors* vertexColors;
 
-/** Returns whether this mesh contains data for vertex colors.  */
+/** Returns whether this mesh contains content for vertex colors.  */
 @property(nonatomic, readonly) BOOL hasVertexColors;
 
 /** @deprecated Replaced by hasVertexColors. */
@@ -341,7 +363,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic,retain) CC3VertexMatrixIndices* vertexMatrixIndices;
 
-/** Indicates whether this mesh contains data for vertex matrix indices. */
+/** Indicates whether this mesh contains content for vertex matrix indices. */
 @property(nonatomic, readonly) BOOL hasVertexMatrixIndices;
 
 /** @deprecated Replaced by hasVertexMatrixIndices. */
@@ -361,7 +383,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic,retain) CC3VertexWeights* vertexWeights;
 
-/** Indicates whether this mesh contains data for vertex weights. */
+/** Indicates whether this mesh contains content for vertex weights. */
 @property(nonatomic, readonly) BOOL hasVertexWeights;
 
 /** @deprecated Replaced by hasVertexWeights. */
@@ -375,7 +397,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  */
 @property(nonatomic, retain) CC3VertexPointSizes* vertexPointSizes;
 
-/** Indicates whether this mesh contains data for vertex point sizes. */
+/** Indicates whether this mesh contains content for vertex point sizes. */
 @property(nonatomic, readonly) BOOL hasVertexPointSizes;
 
 /** @deprecated Replaced by hasVertexPointSizes. */
@@ -492,7 +514,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /**
  * Indicates whether the vertex content should be interleaved, or separated by type.
  *
- * If the vertex data is interleaved, each of the contained CC3VertexArray instances will
+ * If the vertex content is interleaved, each of the contained CC3VertexArray instances will
  * reference the same underlying memory buffer through their individual vertices property.
  *
  * Interleaving vertex content is recommended, as it improves the GPU's ability to optimize
@@ -501,7 +523,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The value of this property should be set before the values of the vertexContentTypes and
  * allocatedVertexCapacity are set.
  *
- * The initial value is YES, indicating that the vertex data will be interleaved.
+ * The initial value is YES, indicating that the vertex content will be interleaved.
  */
 @property(nonatomic, assign) BOOL shouldInterleaveVertices;
 
@@ -516,16 +538,17 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * Valid component flags of this property include:
  *   - kCC3VertexContentLocation
  *   - kCC3VertexContentNormal
+ *   - kCC3VertexContentTangent
+ *   - kCC3VertexContentBitangent
  *   - kCC3VertexContentColor
  *   - kCC3VertexContentTextureCoordinates
- *   - kCC3VertexContentPointSize
  *   - kCC3VertexContentWeights
  *   - kCC3VertexContentMatrixIndices
+ *   - kCC3VertexContentPointSize
  *
  * To indicate that this mesh should contain particular vertex content, construct a
  * bitwise-OR combination of one or more of the component types listed above, and set
  * this property to that combined value.
- *
  *
  * Setting each bitwise-OR component in this property instructs this instance to
  * automatically construct the appropriate type of contained vertex array:
@@ -534,11 +557,21 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *     This component is optional, as the vertexLocations property will be constructed regardless.
  *   - kCC3VertexContentNormal - automatically constructs a CC3VertexNormals instance in the
  *     vertexNormals property, that holds 3D vertex normals, in one CC3Vector structure per vertex.
+ *   - kCC3VertexContentTangent - automatically constructs a CC3VertexTangents instance in the
+ *     vertexTangents property, that holds 3D vertex tangents, in one CC3Vector structure per vertex.
+ *   - kCC3VertexContentBitangent - automatically constructs a CC3VertexTangents instance in the
+ *     vertexBitangents property, that holds 3D vertex tangents, in one CC3Vector structure per vertex.
  *   - kCC3VertexContentColor - automatically constructs a CC3VertexColors instance in the vertexColors
  *     property, that holds RGBA colors with GLubyte components, in one ccColor4B structure per vertex.
  *   - kCC3VertexContentTextureCoordinates - automatically constructs a CC3VertexTextureCoordinates
  *     instance in the vertexTextureCoordinates property, that holds 2D texture coordinates, in one
  *     ccTex2F structure per vertex.
+ *   - kCC3VertexContentWeights - automatically constructs a CC3VertexWeights instance
+ *     in the vertexWeights property, that holds several GLfloat values per vertex.
+ *   - kCC3VertexContentMatrixIndices - automatically constructs a CC3VertexMatrixIndices instance
+ *     in the vertexMatrixIndices property, that holds several GLubyte values per vertex.
+ *   - kCC3VertexContentPointSize - automatically constructs a CC3VertexPointSizes
+ *     instance in the vertexPointSizes property, that holds one GLfloat per vertex.
  *
  * This property is a convenience property. Instead of using this property, you can create the
  * appropriate vertex arrays in those properties directly.
@@ -551,14 +584,16 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * If the content is interleaved, for each vertex, the content is held in the structures identified in
  * the list above, in the order that they appear in the list. You can use this consistent organization
  * to create an enclosing structure to access all data for a single vertex, if it makes it easier to
- * access vertex data that way. If vertex content is not specified, it is simply absent, and the content
+ * access vertex content that way. If vertex content is not specified, it is simply absent, and the content
  * from the following type will be concatenated directly to the content from the previous type.
  *
- * For instance, if color content is not required, you would omit the kCC3VertexContentColor value when
- * setting this property, and the resulting structure for each vertex would be a location CC3Vector,
- * followed by a normal CC3Vector, followed immediately by a texture coordinate ccTex2F. You can then
- * define an enclosing structure to hold and manage all content for a single vertex. In this particular
- * example, this is already done for you with the CC3TexturedVertex structure.
+ * For instance, in a typical textured and illuminated mesh, you might not require per-vertex
+ * color, tangent and bitangent content. You would therefore omit the kCC3VertexContentColor,
+ * kCC3VertexContentTangent and kCC3VertexContentBitangent values in the bitmask when setting
+ * this property, and the resulting structure for each vertex would be a location CC3Vector,
+ * followed by a normal CC3Vector, followed immediately by a texture coordinate ccTex2F.
+ * You can then define an enclosing structure to hold and manage all content for a single vertex.
+ * In this particular example, this is already done for you with the CC3TexturedVertex structure.
  *
  * You can declare and use such a custom vertex structure even if you have constructed the vertex
  * arrays directly, without using this property. The structure of the content of a single vertex
@@ -567,7 +602,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The vertex arrays created by this property cover the most common use cases and data formats.
  * If you require more customized vertex arrays, you can use this property to create the typical
  * vertex arrays, and then customize them, by accessing the vertex arrays individually through
- * their respective properties. After doing so, if the vertex data is interleaved, you should
+ * their respective properties. After doing so, if the vertex content is interleaved, you should
  * invoke the updateVertexStride method on this instance to automatically align the elementOffset
  * and vertexStride properties of all of the contained vertex arrays. After setting this property,
  * you do not need to invoke the updateVertexStride method unless you subsequently make changes
@@ -588,7 +623,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * properties of each enclosed vertex array to correctly align them for interleaved data.
  *
  * After constructing the vertex arrays in this mesh, and setting the shouldInterleaveVertices property
- * is set to YES, you can invoke this method to align the vertex arrays for interleaved vertex data.
+ * is set to YES, you can invoke this method to align the vertex arrays for interleaved vertex content.
  *
  * If the shouldInterleaveVertices property is set to NO, this method has no effect.
  *
@@ -615,7 +650,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * setting this property, if you will not be using all of the allocated vertices immediately,
  * you should set the value of the vertexCount property to the actual number of vertices in use.
  *
- * Use of this property is not required if the vertex data has already been loaded into
+ * Use of this property is not required if the vertex content has already been loaded into
  * memory by a file loader, or defined by a static array. In that situation, you should
  * set the vertexCount property directly, and avoid using this property.
  *
@@ -643,7 +678,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *   -# set the allocatedVertexCapacity property to allocate memory
  *   -# populate the vertex content with your data
  *
- * This property may be set repeatedly to manage the underlying mesh vertex data as a
+ * This property may be set repeatedly to manage the underlying mesh vertex content as a
  * dynamically-sized array, growing and shrinking the allocated memory as needed.
  *
  * In addition, you can set this property to zero to safely deallocate all memory used
@@ -655,7 +690,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * If the value of this property is increased (including from zero on the first assignement),
  * vertex content for those vertices beyond the old value of this property will be undefined,
- * and must be populated by the application before attempting to draw that vertex data.
+ * and must be populated by the application before attempting to draw that vertex content.
  *
  * If you are not ready to populate the newly allocated vertex content yet, after setting the value
  * of this property, you can set the value of the vertexCount property to a value less than the
@@ -728,7 +763,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * setting this property, if you will not be using all of the allocated vertex indices immediately,
  * you should set the value of the vertexIndexCount property to the actual number of vertices in use.
  *
- * Use of this property is not required if the vertex data has already been loaded into
+ * Use of this property is not required if the vertex content has already been loaded into
  * memory by a file loader, or defined by a static array. In that situation, you should
  * set the vertexIndexCount property directly, and avoid using this property.
  *
@@ -744,7 +779,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * If the value of this property is increased (including from zero on the first assignement),
  * those vertex indices beyond the old value of this property will be undefined, and must be
- * populated by the application before attempting to draw that vertex data.
+ * populated by the application before attempting to draw that vertex content.
  *
  * If you are not ready to populate the newly allocated vertex indices yet, after setting the value
  * of this property, you can set the value of the vertexIndexCount property to a value less than the
@@ -854,28 +889,28 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 @property(nonatomic, assign) GLuint vertexIndexCount;
 
 /**
- * Returns the location element at the specified index from the vertex data.
+ * Returns the location element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * This implementation takes into consideration the dimensionality of the underlying
- * vertex data. If the dimensionality is 2, the returned vector will contain zero in
+ * vertex content. If the dimensionality is 2, the returned vector will contain zero in
  * the Z component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector) vertexLocationAt: (GLuint) index;
 
 /**
- * Sets the location element at the specified index in the vertex data to the specified value.
+ * Sets the location element at the specified index in the vertex content to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * This implementation takes into consideration the dimensionality of the underlying
- * vertex data. If the dimensionality is 2, the Z component of the specified vector
+ * vertex content. If the dimensionality is 2, the Z component of the specified vector
  * will be ignored. If the dimensionality is 4, the specified vector will be converted
  * to a 4D vector, with the W component set to one, before storing.
  * 
@@ -885,36 +920,36 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexLocationsGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index;
 
 /**
- * Returns the location element at the specified index in the underlying vertex data,
+ * Returns the location element at the specified index in the underlying vertex content,
  * as a four-dimensional location in the 4D homogeneous coordinate space.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * This implementation takes into consideration the elementSize property. If the
  * value of the elementSize property is 3, the returned vector will contain one
  * in the W component. If the value of the elementSize property is 2, the returned
  * vector will contain zero in the Z component and one in the W component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index;
 
 /**
- * Sets the location element at the specified index in the underlying vertex data to
+ * Sets the location element at the specified index in the underlying vertex content to
  * the specified four-dimensional location in the 4D homogeneous coordinate space.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * This implementation takes into consideration the dimensionality of the underlying
  * data. If the dimensionality is 3, the W component of the specified vector will be
@@ -927,88 +962,140 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexLocationsGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index;
 
 /**
- * Returns the normal element at the specified index from the vertex data.
+ * Returns the normal element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(CC3Vector) vertexNormalAt: (GLuint) index;
 
 /**
- * Sets the normal element at the specified index in the vertex data to the specified value.
+ * Sets the normal element at the specified index in the vertex content to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexNormalsGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index;
 
 /**
- * Returns the color element at the specified index from the vertex data.
+ * Returns the tangent element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector) vertexTangentAt: (GLuint) index;
+
+/**
+ * Sets the tangent element at the specified index in the vertex content to the specified value.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexTangentsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex content is updated.
+ *
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexTangent: (CC3Vector) aTangent at: (GLuint) index;
+
+/**
+ * Returns the bitangent element at the specified index from the vertex content.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
+ *
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(CC3Vector) vertexBitangentAt: (GLuint) index;
+
+/**
+ * Sets the bitangent element at the specified index in the vertex content to the specified value.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
+ *
+ * When all vertex changes have been made, be sure to invoke the
+ * updateVertexBitangentsGLBuffer method to ensure that the GL VBO
+ * that holds the vertex content is updated.
+ *
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
+ */
+-(void) setVertexBitangent: (CC3Vector) aTangent at: (GLuint) index;
+
+/**
+ * Returns the color element at the specified index from the vertex content.
+ *
+ * The index refers to vertices, not bytes. The implementation takes into consideration
+ * whether the vertex content is interleaved to access the correct vertex content component.
+ *
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccColor4F) vertexColor4FAt: (GLuint) index;
 
 /**
- * Sets the color element at the specified index in the vertex data to the specified value.
+ * Sets the color element at the specified index in the vertex content to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexColorsGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index;
 
 /**
- * Returns the color element at the specified index from the vertex data.
+ * Returns the color element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccColor4B) vertexColor4BAt: (GLuint) index;
 
 /**
- * Sets the color element at the specified index in the vertex data to the specified value.
+ * Sets the color element at the specified index in the vertex content to the specified value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexColorsGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index;
 
@@ -1021,7 +1108,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 
 /**
  * Returns the weight element, for the specified vertex unit, at the specified index in
- * the underlying vertex data.
+ * the underlying vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
@@ -1030,14 +1117,14 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * one for each bone that influences the location of the vertex. The specified vertexUnit
  * parameter must be between zero inclusive, and the vertexUnitCount property, exclusive.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
 
 /**
  * Sets the weight element, for the specified vertex unit, at the specified index in
- * the underlying vertex data, to the specified value.
+ * the underlying vertex content, to the specified value.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
@@ -1048,16 +1135,16 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
- * holds the vertex data is updated.
+ * holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
 
 /**
  * Returns a pointer to an array of the weight elements at the specified vertex
- * index in the underlying vertex data.
+ * index in the underlying vertex content.
  *
  * Several weights are stored for each vertex, one per vertex unit, corresponding
  * to one for each bone that influences the location of the vertex. The number of
@@ -1067,13 +1154,13 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct elements.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat*) vertexWeightsAt: (GLuint) index;
 
 /**
- * Sets the weight elements at the specified vertex index in the underlying vertex data,
+ * Sets the weight elements at the specified vertex index in the underlying vertex content,
  * to the values in the specified array.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
@@ -1087,16 +1174,16 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexWeightsGLBuffer method to ensure that the GL VBO that
- * holds the vertex data is updated.
+ * holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index;
 
 /**
  * Returns the matrix index element, for the specified vertex unit, at the specified
- * index in the underlying vertex data.
+ * index in the underlying vertex content.
  *
  * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
  * to one for each bone that influences the location of the vertex. The specified vertexUnit
@@ -1105,14 +1192,14 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index;
 
 /**
  * Sets the matrix index element, for the specified vertex unit, at the specified index
- * in the underlying vertex data, to the specified value.
+ * in the underlying vertex content, to the specified value.
  *
  * Several matrix indices are stored for each vertex, one per vertex unit, corresponding
  * to one for each bone that influences the location of the vertex. The specified vertexUnit
@@ -1120,13 +1207,13 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
- * holds the vertex data is updated.
+ * holds the vertex content is updated.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
 			   forVertexUnit: (GLuint) vertexUnit
@@ -1134,7 +1221,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 
 /**
  * Returns a pointer to an array of the matrix indices at the specified vertex
- * index in the underlying vertex data.
+ * index in the underlying vertex content.
  *
  * Several matrix index values are stored for each vertex, one per vertex unit,
  * corresponding to one for each bone that influences the location of the vertex.
@@ -1155,14 +1242,14 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct elements.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLvoid*) vertexMatrixIndicesAt: (GLuint) index;
 
 /**
  * Sets the matrix index elements at the specified vertex index in the underlying
- * vertex data, to the values in the specified array.
+ * vertex content, to the values in the specified array.
  *
  * Several matrix index values are stored for each vertex, one per vertex unit,
  * corresponding to one for each bone that influences the location of the vertex.
@@ -1186,10 +1273,10 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexMatrixIndicesGLBuffer method to ensure that the GL VBO that
- * holds the vertex data is updated.
+ * holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index;
 
@@ -1203,89 +1290,89 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 @property(nonatomic, readonly) GLenum matrixIndexType;
 
 /**
- * Returns the point size element at the specified index from the vertex data.
+ * Returns the point size element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLfloat) vertexPointSizeAt: (GLuint) vtxIndex;
 
 /**
- * Sets the point size element at the specified index in the vertex data to the specified value.
+ * Sets the point size element at the specified index in the vertex content to the specified value.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
  * the vertexStride and elementOffset properties to access the correct element.
  *
  * When all vertex changes have been made, be sure to invoke the updatePointSizesGLBuffer
- * method to ensure that the GL VBO that holds the vertex data is updated.
+ * method to ensure that the GL VBO that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexPointSize: (GLfloat) aSize at: (GLuint) vtxIndex;
 
 /**
- * Returns the texture coordinate element at the specified index from the vertex data
+ * Returns the texture coordinate element at the specified index from the vertex content
  * at the specified texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index;
 
 /**
- * Sets the texture coordinate element at the specified index in the vertex data,
+ * Sets the texture coordinate element at the specified index in the vertex content,
  * at the specified texture unit index, to the specified texture coordinate value.
  * 
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexTextureCoordinatesGLBufferForTextureUnit: method
- * to ensure that the GL VBO that holds the vertex data is updated.
+ * to ensure that the GL VBO that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index;
 
 /**
- * Returns the texture coordinate element at the specified index from the vertex data
+ * Returns the texture coordinate element at the specified index from the vertex content
  * at the commonly used texture unit zero.
  *
  * This is a convenience method that is equivalent to invoking the
  * vertexTexCoord2FForTextureUnit:at: method, with zero as the texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(ccTex2F) vertexTexCoord2FAt: (GLuint) index;
 
 /**
- * Sets the texture coordinate element at the specified index in the vertex data,
+ * Sets the texture coordinate element at the specified index in the vertex content,
  * at the commonly used texture unit zero, to the specified texture coordinate value.
  *
  * This is a convenience method that delegates to the setVertexTexCoord2F:forTextureUnit:at:
  * method, passing in zero for the texture unit index.
  *
  * The index refers to vertices, not bytes. The implementation takes into consideration
- * whether the vertex data is interleaved to access the correct vertex data component.
+ * whether the vertex content is interleaved to access the correct vertex content component.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexTextureCoordinatesGLBuffer method to ensure that
- * the GL VBO that holds the vertex data is updated.
+ * the GL VBO that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index;
 
@@ -1296,26 +1383,26 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index forTextureUnit: (GLuint) texUnit DEPRECATED_ATTRIBUTE;
 
 /**
- * Returns the index element at the specified index from the vertex data.
+ * Returns the index element at the specified index from the vertex content.
  *
  * The index refers to vertices, not bytes.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(GLuint) vertexIndexAt: (GLuint) index;
 
 /**
- * Sets the index element at the specified index in the vertex data to the specified value.
+ * Sets the index element at the specified index in the vertex content to the specified value.
  * 
  * The index refers to vertices, not bytes.
  *
  * When all vertex changes have been made, be sure to invoke the
  * updateVertexIndicesGLBuffer method to ensure that the GL VBO
- * that holds the vertex data is updated.
+ * that holds the vertex content is updated.
  *
- * If the releaseRedundantData method has been invoked and the underlying
- * vertex data has been released, this method will raise an assertion exception.
+ * If the releaseRedundantContent method has been invoked and the underlying
+ * vertex content has been released, this method will raise an assertion exception.
  */
 -(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index;
 
@@ -1404,11 +1491,11 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * inclusive, and the value of the faceCount property, exclusive.
  *
  * The returned face structure contains only the locations of the vertices. If the vertex
- * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * locations are interleaved with other vertex content, such as color or texture coordinates,
  * or other padding, that data will not appear in the returned face structure. For that
- * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
- * of the vertex data, and then use the vertex accessor methods to retrieve the individual
- * vertex data components.
+ * remaining vertex content, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex content, and then use the vertex accessor methods to retrieve the individual
+ * vertex content components.
  *
  * If you will be invoking this method frequently, you can optionally set the
  * shouldCacheFaces property to YES to speed access, and possibly improve performance.
@@ -1422,11 +1509,11 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * within the specified face indices structure.
  *
  * The returned face structure contains only the locations of the vertices. If the vertex
- * locations are interleaved with other vertex data, such as color or texture coordinates,
+ * locations are interleaved with other vertex content, such as color or texture coordinates,
  * or other padding, that data will not appear in the returned face structure. For that
- * remaining vertex data, you can use the faceIndicesAt: method to retrieve the indices
- * of the vertex data, and then use the vertex accessor methods to retrieve the individual
- * vertex data components.
+ * remaining vertex content, you can use the faceIndicesAt: method to retrieve the indices
+ * of the vertex content, and then use the vertex accessor methods to retrieve the individual
+ * vertex content components.
  */
 -(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices;
 
@@ -1439,7 +1526,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * inclusive, and the value of the faceCount property, exclusive.
  *
  * The returned structure reference contains the indices of the three vertices that
- * make up the triangular face. These indices index into the actual vertex data within
+ * make up the triangular face. These indices index into the actual vertex content within
  * the layout of the mesh.
  *
  * This method takes into consideration any padding (stride) between the vertex indices.
@@ -1555,13 +1642,13 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) deleteGLBuffers;
 
 /**
- * Returns whether the underlying vertex data has been loaded into GL engine vertex
+ * Returns whether the underlying vertex content has been loaded into GL engine vertex
  * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
  */
 @property(nonatomic, readonly) BOOL isUsingGLBuffers;
 
 /**
- * Once the vertex data has been buffered into a GL vertex buffer object (VBO)
+ * Once the vertex content has been buffered into a GL vertex buffer object (VBO)
  * within the GL engine, via the createGLBuffer method, this method can be used
  * to release the data in main memory that is now redundant.
  *
@@ -1569,11 +1656,14 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * consider using the same method on a node assembly in order to release as much
  * memory as possible in one simply method invocation.
  */
--(void) releaseRedundantData;
+-(void) releaseRedundantContent;
+
+/** @deprecated Renamed to releaseRedundantContent. */
+-(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
 
 /**
- * Convenience method to cause all vertex content data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause all vertex content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
  * All vertex content, such as location, normal, color, texture coordinates, point size,
  * weights and matrix indices will be retained.
@@ -1584,83 +1674,103 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 -(void) retainVertexContent;
 
 /**
- * Convenience method to cause the vertex location data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex location content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex locations will be retained. Any other vertex data, such as normals,
+ * Only the vertex locations will be retained. Any other vertex content, such as normals,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexLocations;
 
 /**
- * Convenience method to cause the vertex normal data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex normal content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex normals will be retained. Any other vertex data, such as locations,
+ * Only the vertex normals will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexNormals;
 
 /**
- * Convenience method to cause the vertex color data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex tangent content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex colors will be retained. Any other vertex data, such as locations,
+ * Only the vertex tangents will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
+ */
+-(void) retainVertexTangents;
+
+/**
+ * Convenience method to cause the vertex bitangent content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex tangents will be retained. Any other vertex content, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantContent is invoked.
+ */
+-(void) retainVertexBitangents;
+
+/**
+ * Convenience method to cause the vertex color content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
+ *
+ * Only the vertex colors will be retained. Any other vertex content, such as locations,
+ * or texture coordinates, that has been buffered to GL VBO's, will be released from
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex matrix index content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex matrix index will be retained. Any other vertex data, such as locations,
+ * Only the vertex matrix index will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexMatrixIndices;
 
 /**
- * Convenience method to cause the vertex weight data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex weight content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex weight will be retained. Any other vertex data, such as locations,
+ * Only the vertex weight will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexWeights;
 
 /**
- * Convenience method to cause the vertex point size data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex point size content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex point sizes will be retained. Any other vertex data, such as locations,
+ * Only the vertex point sizes will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexPointSizes;
 
 /**
- * Convenience method to cause the vertex texture coordinate data for all texture units
- * used by this mesh to be retained in application memory when releaseRedundantData is
+ * Convenience method to cause the vertex texture coordinate content for all texture units
+ * used by this mesh to be retained in application memory when releaseRedundantContent is
  * invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex texture coordinates will be retained. Any other vertex data, such as
+ * Only the vertex texture coordinates will be retained. Any other vertex content, such as
  * locations, or normals, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexTextureCoordinates;
 
 /**
- * Convenience method to cause the vertex index data to be retained in application
- * memory when releaseRedundantData is invoked, even if it has been buffered to a GL VBO.
+ * Convenience method to cause the vertex index content to be retained in application
+ * memory when releaseRedundantContent is invoked, even if it has been buffered to a GL VBO.
  *
- * Only the vertex indices will be retained. Any other vertex data, such as locations,
+ * Only the vertex indices will be retained. Any other vertex content, such as locations,
  * or texture coordinates, that has been buffered to GL VBO's, will be released from
- * application memory when releaseRedundantData is invoked.
+ * application memory when releaseRedundantContent is invoked.
  */
 -(void) retainVertexIndices;
 
@@ -1669,164 +1779,181 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * The vertex content is not buffered to a a GL VBO, is retained in application memory, and is
  * submitted to the GL engine on each frame render.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexContent method.
  */
 -(void) doNotBufferVertexContent;
 
 /**
- * Convenience method to cause the vertex location data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
+ * Convenience method to cause the vertex location content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
  *
- * Only the vertex locations will not be buffered to a GL VBO. Any other vertex
- * data, such as normals, or texture coordinates, will be buffered to a GL VBO
- * when createGLBuffers is invoked.
+ * Only the vertex locations will not be buffered to a GL VBO. Any other vertex data, such as
+ * normals, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexLocations method.
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexLocations method.
  */
 -(void) doNotBufferVertexLocations;
 
 /**
- * Convenience method to cause the vertex normal data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
+ * Convenience method to cause the vertex normal content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
  *
- * Only the vertex normals will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex data, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexNormals method.
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexNormals method.
  */
 -(void) doNotBufferVertexNormals;
 
 /**
- * Convenience method to cause the vertex color data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
+ * Convenience method to cause the vertex tangent content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
  *
- * Only the vertex colors will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex data, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexColors method.
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexTangents method.
+ */
+-(void) doNotBufferVertexTangents;
+
+/**
+ * Convenience method to cause the vertex bitangent content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex normals will not be buffered to a GL VBO. Any other vertex data, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexBitangents method.
+ */
+-(void) doNotBufferVertexBitangents;
+
+/**
+ * Convenience method to cause the vertex color content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
+ *
+ * Only the vertex colors will not be buffered to a GL VBO. Any other vertex data, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
+ *
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexColors method.
  */
 -(void) doNotBufferVertexColors;
 
 /**
- * Convenience method to cause the vertex matrix index data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a GL VBO, is retained
- * in application memory, and is submitted to the GL engine on each frame render.
+ * Convenience method to cause the vertex matrix index content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a GL VBO, is retained in application memory,
+ * and is submitted to the GL engine on each frame render.
  *
- * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex data,
- * such as locations, or texture coordinates, will be buffered to a GL VBO when
- * createGLBuffers is invoked.
+ * Only the vertex matrix index will not be buffered to a GL VBO. Any other vertex content, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexMatrixIndices method.
  */
 -(void) doNotBufferVertexMatrixIndices;
 
 /**
- * Convenience method to cause the vertex weight data to be skipped when createGLBuffers
- * is invoked. The vertex data is not buffered to a GL VBO, is retained in application
+ * Convenience method to cause the vertex weight content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a GL VBO, is retained in application
  * memory, and is submitted to the GL engine on each frame render.
  *
- * Only the vertex weight will not be buffered to a GL VBO. Any other vertex data, such
- * as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
- * is invoked.
+ * Only the vertex weight will not be buffered to a GL VBO. Any other vertex content, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexWeights method.
  */
 -(void) doNotBufferVertexWeights;
 
 /**
- * Convenience method to cause the vertex point size data to be skipped when createGLBuffers
- * is invoked. The vertex data is not buffered to a GL VBO, is retained in application memory,
+ * Convenience method to cause the vertex point size content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a GL VBO, is retained in application memory,
  * and is submitted to the GL engine on each frame render.
  *
  * Only the vertex point sizes will not be buffered to a GL VBO. Any other vertex content, such as
  * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory, so, if you have
+ * This method causes the vertex content to be retained in application memory, so, if you have
  * invoked this method, you do NOT also need to invoke the retainVertexPointSizes method.
  */
 -(void) doNotBufferVertexPointSizes;
 
 /**
- * Convenience method to cause the vertex texture coordinate data for all
- * texture units used by this mesh to be skipped when createGLBuffers is
- * invoked. The vertex data is not buffered to a a GL VBO, is retained in
- * application memory, and is submitted to the GL engine on each frame render.
+ * Convenience method to cause the vertex texture coordinate content for all texture units used
+ * by this mesh to be skipped when createGLBuffers is invoked. The vertex content is not buffered
+ * to a a GL VBO, is retained in application memory, and is submitted to the GL engine on each
+ * frame render.
  *
- * Only the vertex texture coordinates will not be buffered to a GL VBO.
- * Any other vertex data, such as locations, or texture coordinates, will
- * be buffered to a GL VBO when createGLBuffers is invoked.
+ * Only the vertex texture coordinates will not be buffered to a GL VBO. Any other vertex content,
+ * such as locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers
+ * is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexTextureCoordinates method.
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexTextureCoordinates method.
  */
 -(void) doNotBufferVertexTextureCoordinates;
 
 /**
- * Convenience method to cause the vertex index data to be skipped when
- * createGLBuffers is invoked. The vertex data is not buffered to a a GL VBO,
- * is retained in application memory, and is submitted to the GL engine on
- * each frame render.
+ * Convenience method to cause the vertex index content to be skipped when createGLBuffers
+ * is invoked. The vertex content is not buffered to a a GL VBO, is retained in application
+ * memory, and is submitted to the GL engine on each frame render.
  *
- * Only the vertex indices will not be buffered to a GL VBO. Any other vertex
- * data, such as locations, or texture coordinates, will be buffered to a GL
- * VBO when createGLBuffers is invoked.
+ * Only the vertex indices will not be buffered to a GL VBO. Any other vertex data, such as
+ * locations, or texture coordinates, will be buffered to a GL VBO when createGLBuffers is invoked.
  *
- * This method causes the vertex data to be retained in application memory,
- * so, if you have invoked this method, you do NOT also need to invoke the
- * retainVertexColors method.
+ * This method causes the vertex content to be retained in application memory, so, if you have
+ * invoked this method, you do NOT also need to invoke the retainVertexColors method.
  */
 -(void) doNotBufferVertexIndices;
 
-/** Updates the GL engine buffer with the vertex location data in this mesh. */
+/** Updates the GL engine buffer with the vertex location content in this mesh. */
 -(void) updateVertexLocationsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex normal data in this mesh. */
+/** Updates the GL engine buffer with the vertex normal content in this mesh. */
 -(void) updateVertexNormalsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex color data in this mesh. */
+/** Updates the GL engine buffer with the vertex tangent content in this mesh. */
+-(void) updateVertexTangentsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex bitangent content in this mesh. */
+-(void) updateVertexBitangentsGLBuffer;
+
+/** Updates the GL engine buffer with the vertex color content in this mesh. */
 -(void) updateVertexColorsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex weight data in this mesh. */
+/** Updates the GL engine buffer with the vertex weight content in this mesh. */
 -(void) updateVertexWeightsGLBuffer;
 
-/** Updates the GL engine buffer with the vertex weight data in this mesh. */
+/** Updates the GL engine buffer with the vertex weight content in this mesh. */
 -(void) updateVertexMatrixIndicesGLBuffer;
 
-/** Updates the GL engine buffer with the point size data in this mesh. */
+/** Updates the GL engine buffer with the point size content in this mesh. */
 -(void) updatePointSizesGLBuffer;
 
 /**
- * Updates the GL engine buffer with the vertex texture coord data from the
+ * Updates the GL engine buffer with the vertex texture coord content from the
  * specified texture unit in this mesh.
  */
 -(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit;
 
 /**
- * Updates the GL engine buffer with the vertex texture coord data from
+ * Updates the GL engine buffer with the vertex texture coord content from
  * texture unit zero in this mesh.
  */
 -(void) updateVertexTextureCoordinatesGLBuffer;
 
 /**
- * Convenience method to update the GL engine buffers with the vertex content data in this mesh.
+ * Convenience method to update the GL engine buffers with the vertex content in this mesh.
  *
  * This updates the content of each vertex. It does not update the vertex indices. To update
  * the vertex index data to the GL engine, use the updateVertexIndicesGLBuffer method.
@@ -1880,7 +2007,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
  * markBoundingVolumeDirty method.
  *
- * This method ensures that the GL VBO that holds the vertex data is updated.
+ * This method ensures that the GL VBO that holds the vertex content is updated.
  */
 -(void) moveMeshOriginTo: (CC3Vector) aLocation;
 
@@ -1906,7 +2033,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * location values. Invoking this method on the CC3MeshNode instead will automatically invoke the
  * markBoundingVolumeDirty method.
  *
- * This method ensures that the GL VBO that holds the vertex data is updated.
+ * This method ensures that the GL VBO that holds the vertex content is updated.
  */
 -(void) moveMeshOriginToCenterOfGeometry;
 
@@ -2070,8 +2197,8 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * the same usable area as the texture used on the previous invocation (or has a
  * full usable area on the first invocation), this method does nothing.
  *
- * Care should be taken when using this method, as it changes the actual vertex data.
- * This may cause mapping conflicts if the same vertex data is shared by other
+ * Care should be taken when using this method, as it changes the actual vertex content.
+ * This may cause mapping conflicts if the same vertex content is shared by other
  * CC3MeshNodes that use different textures.
  */
 -(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture;

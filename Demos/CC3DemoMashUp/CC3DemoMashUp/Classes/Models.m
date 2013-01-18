@@ -262,7 +262,7 @@
 	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
 	// and to save memory, release the vertex data in main memory because it is now redundant.
 	[self createGLBuffers];
-	[self releaseRedundantData];
+	[self releaseRedundantContent];
 	
 	// To help demonstrate that the hordes of actioned nodes that make up this army are being managed
 	// correctly, log the current number of nodes and actions, now that the army has been created.

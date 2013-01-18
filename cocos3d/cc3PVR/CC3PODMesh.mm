@@ -43,11 +43,13 @@
 		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
 		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
 		
-		self.vertexLocations = [CC3VertexLocations arrayFromSPODMesh: psm];
-		self.vertexNormals = [CC3VertexNormals arrayFromSPODMesh: psm];
-		self.vertexColors = [CC3VertexColors arrayFromSPODMesh: psm];
-		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromSPODMesh: psm];
-		self.vertexWeights = [CC3VertexWeights arrayFromSPODMesh: psm];
+		self.vertexLocations = [CC3VertexLocations arrayFromCPODData: &psm->sVertex fromSPODMesh: psm];
+		self.vertexNormals = [CC3VertexNormals arrayFromCPODData: &psm->sNormals fromSPODMesh: psm];
+		self.vertexTangents = [CC3VertexTangents arrayFromCPODData: &psm->sTangents fromSPODMesh: psm];
+		self.vertexBitangents = [CC3VertexTangents arrayFromCPODData: &psm->sBinormals fromSPODMesh: psm];
+		self.vertexColors = [CC3VertexColors arrayFromCPODData: &psm->sVtxColours fromSPODMesh: psm];
+		self.vertexWeights = [CC3VertexWeights arrayFromCPODData: &psm->sBoneWeight fromSPODMesh: psm];
+		self.vertexMatrixIndices = [CC3VertexMatrixIndices arrayFromCPODData: &psm->sBoneIdx fromSPODMesh: psm];
 		
 		for (GLuint i = 0; i < psm->nNumUVW; i++) {
 			CC3VertexTextureCoordinates* texCoords;
@@ -56,7 +58,7 @@
 			[self addTextureCoordinates: texCoords];
 		}
 		
-		self.vertexIndices = [CC3VertexIndices arrayFromSPODMesh: psm];
+		self.vertexIndices = [CC3VertexIndices arrayFromCPODData: &psm->sFaces fromSPODMesh: psm];
 		
 		// Once all vertex arrays are populated, if the data is interleaved, mark it as such and
 		// swap the reference to the original data within the SPODMesh, so that CC3VertexArray

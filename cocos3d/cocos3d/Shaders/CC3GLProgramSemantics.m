@@ -46,19 +46,21 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticNone: return @"kCC3SemanticNone";
 
 		// VERTEX CONTENT --------------
-		case kCC3SemanticVertexLocations: return @"kCC3SemanticVertexLocations";
-		case kCC3SemanticVertexNormals: return @"kCC3SemanticVertexNormals";
-		case kCC3SemanticVertexTangents: return @"kCC3SemanticVertexTangents";
-		case kCC3SemanticVertexBitangents: return @"kCC3SemanticVertexBitangents";
-		case kCC3SemanticVertexColors: return @"kCC3SemanticVertexColors";
-		case kCC3SemanticVertexPointSizes: return @"kCC3SemanticVertexPointSizes";
-		case kCC3SemanticVertexWeights: return @"kCC3SemanticVertexWeights";
-		case kCC3SemanticVertexMatrices: return @"kCC3SemanticVertexMatrices";
+		case kCC3SemanticVertexLocation: return @"kCC3SemanticVertexLocation";
+		case kCC3SemanticVertexNormal: return @"kCC3SemanticVertexNormal";
+		case kCC3SemanticVertexTangent: return @"kCC3SemanticVertexTangent";
+		case kCC3SemanticVertexBitangent: return @"kCC3SemanticVertexBitangent";
+		case kCC3SemanticVertexColor: return @"kCC3SemanticVertexColor";
+		case kCC3SemanticVertexPointSize: return @"kCC3SemanticVertexPointSize";
+		case kCC3SemanticVertexWeight: return @"kCC3SemanticVertexWeight";
+		case kCC3SemanticVertexMatrix: return @"kCC3SemanticVertexMatrix";
 		case kCC3SemanticVertexTexture: return @"kCC3SemanticVertexTexture";
 			
 		case kCC3SemanticHasVertexNormal: return @"kCC3SemanticHasVertexNormal";
 		case kCC3SemanticShouldNormalizeVertexNormal: return @"kCC3SemanticShouldNormalizeVertexNormal";
 		case kCC3SemanticShouldRescaleVertexNormal: return @"kCC3SemanticShouldRescaleVertexNormal";
+		case kCC3SemanticHasVertexTangent: return @"kCC3SemanticHasVertexTangent";
+		case kCC3SemanticHasVertexBitangent: return @"kCC3SemanticHasVertexBitangent";
 		case kCC3SemanticHasVertexColor: return @"kCC3SemanticHasVertexColor";
 		case kCC3SemanticHasVertexTextureCoordinate: return @"kCC3SemanticHasVertexTextureCoordinate";
 		case kCC3SemanticHasVertexPointSize: return @"kCC3SemanticHasVertexPointSize";
@@ -247,6 +249,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticShouldRescaleVertexNormal:
 			[uniform setBoolean: glesEngine.capabilities.rescaleNormal.value];
+			return YES;
+		case kCC3SemanticHasVertexTangent:
+			[uniform setBoolean: visitor.currentMesh.hasVertexTangents];
+			return YES;
+		case kCC3SemanticHasVertexBitangent:
+			[uniform setBoolean: visitor.currentMesh.hasVertexBitangents];
 			return YES;
 		case kCC3SemanticHasVertexColor:
 			[uniform setBoolean: visitor.currentMesh.hasVertexColors];
@@ -792,14 +800,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(void) populateWithDefaultVariableNameMappings {
 	
 	// VETEX ATTRIBUTES --------------
-	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocations];			/**< Vertex location. */
-	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormals];				/**< Vertex normal. */
-	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexNormals];				/**< Vertex tangent. */
-	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexNormals];				/**< Vertex bitangent (aka binormal). */
-	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColors];					/**< Vertex color. */
-	[self mapVarName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeights];				/**< Vertex skinning weight. */
-	[self mapVarName: @"a_cc3MatrixIndex" toSemantic: kCC3SemanticVertexMatrices];			/**< Vertex skinning matrice. */
-	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSizes];			/**< Vertex point size. */
+	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocation];			/**< Vertex location. */
+	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormal];				/**< Vertex normal. */
+	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];			/**< Vertex tangent. */
+	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];		/**< Vertex bitangent (aka binormal). */
+	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];				/**< Vertex color. */
+	[self mapVarName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeight];				/**< Vertex skinning weight. */
+	[self mapVarName: @"a_cc3MatrixIndex" toSemantic: kCC3SemanticVertexMatrix];		/**< Vertex skinning matrice. */
+	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];		/**< Vertex point size. */
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
@@ -811,6 +819,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether the vertex normal is available. */
 	[self mapVarName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];	/**< (bool) Whether vertex normals should be normalized. */
 	[self mapVarName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];	/**< (bool) Whether vertex normals should be rescaled. */
+	[self mapVarName: @"u_cc3HasVertexTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether the vertex tangent is available. */
+	[self mapVarName: @"u_cc3HasVertexBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether the vertex bitangent is available. */
 	[self mapVarName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether the vertex color is available. */
 	[self mapVarName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether the vertex texture coordinate is available. */
 	[self mapVarName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether the vertex point size is available. */

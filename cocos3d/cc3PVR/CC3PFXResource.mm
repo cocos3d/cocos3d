@@ -101,11 +101,24 @@ extern "C" {
 
 /** Load the file, and if successful build this resource from the contents. */
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath {
+
+	// Split the path into directory and file names and set the PVR read path to the directory and
+	// pass the unqualified file name to the parser. This allows the parser to locate any additional
+	// files that might be read as part of the parsing. For PFX, this will include any shader files
+	// referenced by the PFX file.
+	NSString* fileName = anAbsoluteFilePath.lastPathComponent;
+	NSString* dirName = anAbsoluteFilePath.stringByDeletingLastPathComponent;
+
+	CPVRTResourceFile::SetReadPath([dirName stringByAppendingString: @"/"].UTF8String);
+
 	CPVRTString	error;
 	CPVRTPFXParser* pfxParser = new CPVRTPFXParser();
-
-	_wasLoaded = (pfxParser->ParseFromFile([anAbsoluteFilePath cStringUsingEncoding: NSUTF8StringEncoding], &error) == PVR_SUCCESS);
-	if (_wasLoaded) [self buildFromPFXParser: pfxParser];
+	_wasLoaded = (pfxParser->ParseFromFile(fileName.UTF8String, &error) == PVR_SUCCESS);
+	if (_wasLoaded)
+		[self buildFromPFXParser: pfxParser];
+	else
+		LogError(@"Could not load %@ because %@", anAbsoluteFilePath.lastPathComponent,
+				 [NSString stringWithUTF8String: error.c_str()]);
 
 	delete pfxParser;
 
@@ -218,12 +231,25 @@ static Class _defaultSemanticDelegateClass = nil;
 	if (_glProgram) material.shaderContext = [CC3GLProgramContext contextForProgram: _glProgram];
 
 	// Set each texture into its associated texture unit
-	NSUInteger texCnt = _textures.count;
-	for (NSUInteger texIdx = 0; texIdx < texCnt; texIdx++) {
-		CC3PFXEffectTexture* effectTex = [_textures objectAtIndex: texIdx];
-		[material setTexture: effectTex.texture
-			  forTextureUnit: effectTex.textureUnitIndex];
+	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
+	NSUInteger tuCnt = _textures.count;
+	for (NSUInteger tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
+		CC3Texture* tex = [self getTextureForTextureUnit: tuIdx];
+		if (tex)
+			[material setTexture: tex forTextureUnit: tuIdx];
+		else
+			LogRez(@"%@ contains no texture for texture unit %u", self, tuIdx);
 	}
+}
+
+/**
+ * Returns the texture to be applied to the specified texture unit,
+ * or nil if no texture is defined for that texture unit.
+ */
+-(CC3Texture*) getTextureForTextureUnit: (NSUInteger) texUnitIndex {
+	for (CC3PFXEffectTexture* effectTex in _textures)
+		if (effectTex.textureUnitIndex == texUnitIndex) return effectTex.texture;
+	return nil;
 }
 
 
@@ -376,15 +402,11 @@ static Class _defaultSemanticDelegateClass = nil;
 				: [NSString stringWithFormat: @"%@-%@", self.name, [NSString stringWithUTF8String: pfxShader->Name.c_str()]];
 }
 
-/** 
- * Retrieves the shader code for the specified shader, either
- * loading it from file, or extracting the embedded GLSL code.
- */
--(GLchar*) getShaderCode: (SPVRTPFXParserShader*) pfxShader {
-	return (pfxShader->bUseFileName)
-				? [CC3GLProgram glslSourceFromFile: [NSString stringWithUTF8String: pfxShader->pszGLSLfile]]
-				: pfxShader->pszGLSLcode;
-}
+/** Returns the shader code for the specified shader. */
+-(GLchar*) getShaderCode: (SPVRTPFXParserShader*) pfxShader { return pfxShader->pszGLSLcode; }
+
+/** Returns a string description of this effect. */
+-(NSString*) description { return [NSString stringWithFormat: @"%@ named %@", [self class], _name]; }
 
 @end
 
