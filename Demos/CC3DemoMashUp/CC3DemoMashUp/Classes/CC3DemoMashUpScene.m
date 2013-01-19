@@ -81,8 +81,8 @@
 #define kMeshPartileTextureFile			@"BallBoxTexture.png"
 #define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
-#define kEtchedMaskPFXFile				@"EtchedMask.pfx"
-#define kEtchedMaskPFXEffect			@"Effect"
+#define kMasksPFXFile					@"MaskEffects.pfx"
+#define kEtchedMaskPFXEffect			@"EtchedEffect"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -1937,7 +1937,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the GL program context and textures as defined in the PFX effect, which will run shaders
 	// dedicated to bump-mapping.
 	CC3Material* maskMat = [CC3Material material];
-	[maskMat applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kEtchedMaskPFXFile];
+	[maskMat applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
 	mask.material = maskMat;
 
 	// Instead of applying a dedicated bump-mapping shaders via a PFX file, you can also just load

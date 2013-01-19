@@ -110,6 +110,7 @@ typedef enum {
  *   - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
  *   - bitmapped font text labels
  *   - moving individual vertex location programmatically
+ *   - Using OpenGL ES 2.0 shaders.
  *   - Loading PowerVR PFX effects files and applying them to materials
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
@@ -324,28 +325,35 @@ typedef enum {
  * at another node, demonstrating an "orbit camera" by simply giving your camera a target to
  * track. As you move the camera around, it will continue to look at the target object.
  *
- * Up and to the left of the mascots is a mask. The visual effects applied to this mask are
- * defined in a PowerVR PFX file loaded as part of the loading of the POD file for the mask.
+ * To the left of the mascots are two masks. The visual effects applied to this masks are defined
+ * in a PowerVR PFX file that describe and configures the visual effects. Under OpenGL ES 2.0, a
+ * PFX file contains "effects" each of which describes a combination of GLSL shaders and textures
+ * that should be applied to the material of a mesh node to accomplish a particular visual effect
+ * or look. The PFX file also includes declarations of semantics for the GLSL variables, allowing
+ * cocos3d to automatically populate the uniforms from the shaders with active content from the scene.
  *
- * Under OpenGL ES 2.0, a PFX file contains "effects" each of which describes the combination
- * of GLSL shaders and textures that should be applied to the material of a mesh node to
- * accomplish a particular visual effect or look.
+ * For the upper mask, the PFX file and effect are referenced from the POD file for the mask model,
+ * and the effect is loaded and attached to the model automatically when the POD file is loaded.
+ * For the lower mask, the PFX effect from the PFX file is manually assigned to the model after
+ * the POD model has been loaded.
  *
- * When running under OpenGL ES 2.0, this mask has a brightly reflective golden appearance that
- * shimmers as the object moves around. The effect is created by a combination of a base texture,
- * an environmental reflective texture, and GLSL shaders that combine the two textures and the
- * scene lighting to create the effect. This combination of textures and GLSL shaders is
- * automatically applied to the material when the POD file is loaded. The material, as descrbed
- * in the POD file, contains a reference to an effect in a particular PFX file that, in turn,
- * describes the GLSL shaders and textures that should be loaded and applied to the material.
+ * When running under OpenGL ES 2.0, the upper mask has a brightly reflective golden appearance that
+ * shimmers as the object moves around. The effect is created by a combination of a base texture, a
+ * static environmental reflective texture, and GLSL shaders that combine the two textures and the
+ * scene lighting to create the effect.
  *
- * When running under OpenGL ES 1.1, the texture files described in the PFX file are applied to
- * the mask, but without the associated GLSL shaders to combine the textures, all that is visible
- * is the second, environmental, texture. Nevertheless, this still demonstrates the ability, under
- * OpenGL ES 1.1, of using a PFX file to describe the textures that should be applied to a material.
- * In order to replicate, under OpenGL ES 1.1, the shimmering, reflective appearance supplied by
- * the GLSL shaders under OpenGL ES 2.0, the texture unit combiners associated with the two textures
- * applied to the material would need to be configured appropriately.
+ * When running under OpenGL ES 2.0, the lower mask has an etched surface that appears three-dimensional.
+ * This is accomplished by layering two textures, the first of which is a tangent-space bump-map that
+ * treats the texels in the texture as normals, and uses them in combination with the direction of the
+ * light source to create a detailed three-dimensional effect at a pixel level. This bump-mapping
+ * is a common technique to simulate a very detailed textured surface with relatively few vertices.
+ *
+ * When running under OpenGL ES 1.1, the texture files described in the PFX files are applied to the
+ * masks, but without the associated GLSL shaders to combine the textures, the textures are simply
+ * combined in a standard modulation. Under OpenGL ES 1.1, further configuration would have to be
+ * applied to the texture unit for each texture in order to enhance the appearance. Nevertheless,
+ * this demonstrates the ability, under OpenGL ES 1.1, to use a PFX file to describe the textures
+ * that should be applied to a material.
  *
  * Touching the switch-view button again will point the camera at a wooden sign that is
  * constructed from two separate textures that are loaded separately and applied as a
