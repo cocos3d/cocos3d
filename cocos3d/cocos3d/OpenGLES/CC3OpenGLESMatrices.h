@@ -153,11 +153,12 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 
 /** CC3OpenGLESMatrices manages trackers for matrix state. */
 @interface CC3OpenGLESMatrices : CC3OpenGLESStateTrackerManager {
-	CC3OpenGLESStateTrackerEnumeration* mode;
-	CC3OpenGLESMatrixStack* modelview;
-	CC3OpenGLESMatrixStack* projection;
-	CC3OpenGLESStateTrackerEnumeration* activePalette;
-	CCArray* paletteMatrices;
+	CC3OpenGLESStateTrackerEnumeration* _mode;
+	CC3OpenGLESMatrixStack* _modelview;
+	CC3OpenGLESMatrixStack* _projection;
+	CC3OpenGLESStateTrackerEnumeration* _activePalette;
+	CCArray* _paletteMatrices;
+	GLuint _maxPaletteSize;
 }
 
 /** Tracks matrix mode (GL get name GL_MATRIX_MODE and set function glMatrixMode). */
@@ -168,50 +169,6 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 
 /** Manages the projection matrix stack. */
 @property(nonatomic, retain) CC3OpenGLESMatrixStack* projection;
-
-/** Tracks active palette matrix (GL get name not applicable and set function glCurrentPaletteMatrixOES). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerEnumeration* activePalette;
-
-/**
- * Manages the palette of matrices.
- *
- * Do not access individual texture unit trackers through this property.
- * Use the paletteAt: method instead.
- *
- * The number of available texture units can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxPaletteMatrices.value.
- *
- * To conserve memory and processing, palette units are lazily allocated when
- * requested by the paletteAt: method. The array returned by this property will
- * initially be empty, and will subsequently contain a number of palette matrices
- * one more than the largest value passed to paletteAt:.
- */
-@property(nonatomic, retain) CCArray* paletteMatrices;
-
-/**
- * Returns the number of active palette matrices.
- *
- * This value will be between zero and the maximum number of palette matrices, as
- * determined from [CC3OpenGLESEngine engine].platform.maxPaletteMatrices.value.
- *
- * To conserve memory and processing, palette matrices are lazily allocated when
- * requested by the paletteAt: method. The value of this property will initially
- * be zero, and will subsequently be one more than the largest value passed to
- * paletteAt:.
- */
-@property(nonatomic, readonly) GLuint paletteMatrixCount;
-
-/**
- * Returns the tracker for the palette matrix with the specified index.
- *
- * The index parameter must be between zero and the number of available palette
- * matrices minus one, inclusive. The number of available palette matrices can be
- * retrieved from [CC3OpenGLESEngine engine].platform.maxPaletteMatrices.value.
- *
- * To conserve memory and processing, palette matrices are lazily allocated when
- * requested by this method.
- */
--(CC3OpenGLESMatrixStack*) paletteAt: (GLuint) index;
 
 
 #pragma mark Accessing matrices
@@ -239,5 +196,73 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
  * Matrices that involve the projection matrix are 4x4 matrices.
  */
 -(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic;
+
+
+#pragma mark Matrix palette
+
+/** 
+ * Start tracking changes to the bone matrices.
+ *
+ * This must be invoked for each skin section before accessing the palette matrices to set
+ * the bone matrices for that skin section.
+ */
+-(void) beginSkinSection;
+
+/**
+ * Finish tracking changes to the bone matrices.
+ *
+ * This must be invoked for each skin section after accessing the palette matrices to set
+ * the bone matrices for that skin section.
+ */
+-(void) endSkinSection;
+
+/** Tracks active palette matrix (GL get name not applicable and set function glCurrentPaletteMatrixOES). */
+@property(nonatomic, retain) CC3OpenGLESStateTrackerEnumeration* activePalette;
+
+/**
+ * Indicates the maximum number of palette matrices permitted.
+ *
+ * For OpenGL ES 1, this value is fixed by the platform, as determined from
+ * CC3OpenGLESEngine.engine.platform.maxPaletteMatrices.value, and attempts to set it will be ignored.
+ *
+ * For OpenGL ES 2, this value can be set. The initial value is kCC3OpenGLES2MatrixPaletteSize.
+ */
+@property(nonatomic, assign) GLuint maxPaletteSize;
+
+/**
+ * Returns the number of active palette matrices.
+ *
+ * This value will be between zero and the maximum number of palette matrices,
+ * as determined by the value of the maxPaletteMatrices property.
+ *
+ * To conserve memory and processing, palette matrices are lazily allocated when requested
+ * by the paletteMatrixAt: method. The value of this property will initially be zero, and will
+ * subsequently be one more than the largest value passed to paletteMatrixAt:.
+ */
+@property(nonatomic, readonly) GLuint paletteMatrixCount;
+
+/**
+ * Manages the palette of matrices.
+ *
+ * Do not access individual texture unit trackers through this property.
+ * Use the paletteMatrixAt: method instead.
+ *
+ * The maximum number of available palette matrices is specified by the maxPaletteMatrices property.
+ *
+ * To conserve memory and processing, palette units are lazily allocated when requested by the
+ * paletteMatrixAt: method. The array returned by this property will initially be empty, and will
+ * subsequently contain a number of palette matrices one more than the largest value passed to paletteMatrixAt:.
+ */
+@property(nonatomic, retain) CCArray* paletteMatrices;
+
+/**
+ * Returns the tracker for the palette matrix with the specified index.
+ *
+ * The index parameter must be between zero and the number of available palette matrices minus one,
+ * inclusive. The number of available palette matrices is specified by the maxPaletteMatrices property.
+ *
+ * To conserve memory and processing, palette matrices are lazily allocated when requested by this method.
+ */
+-(CC3OpenGLESMatrixStack*) paletteMatrixAt: (GLuint) index;
 
 @end

@@ -493,3 +493,43 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3Node extension to support PFX effects
+
+@implementation CC3Node (PFXEffects)
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
+	for (CC3Node* child in children) [child applyEffectNamed: effectName inPFXResourceNamed: rezName];
+}
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
+	for (CC3Node* child in children) [child applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3MeshNode extension to support PFX effects
+
+@interface CC3MeshNode (TemplateMethods)
+-(void) ensureMaterial;
+@end
+
+@implementation CC3MeshNode (PFXEffects)
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
+	[self ensureMaterial];
+	[material applyEffectNamed: effectName inPFXResourceNamed: rezName];
+	[super applyEffectNamed: effectName inPFXResourceNamed: rezName];
+}
+
+-(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
+	[self ensureMaterial];
+	[material applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+	[super applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+}
+
+@end
+

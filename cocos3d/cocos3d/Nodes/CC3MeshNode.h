@@ -1147,9 +1147,9 @@
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index;
 
 /**
- * Returns the number of vertex units used by this mesh. This value indicates
- * how many bones influence each vertex, and corresponds to the number of weights
- * and matrix indices attached to each vertex.
+ * Returns the number of vertex units used by this mesh. This value indicates the number of
+ * bones that influence each vertex, and corresponds to the number of weights and matrix
+ * indices attached to each vertex.
  */
 @property(nonatomic, readonly) GLuint vertexUnitCount;
 

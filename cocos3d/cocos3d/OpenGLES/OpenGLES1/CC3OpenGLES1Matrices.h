@@ -98,7 +98,7 @@
  * with this matrix stack is active before calling a GL function.
  */
 @interface CC3OpenGLES1MatrixPalette : CC3OpenGLES1MatrixStack {
-	GLuint index;
+	GLuint _index;
 }
 
 /**

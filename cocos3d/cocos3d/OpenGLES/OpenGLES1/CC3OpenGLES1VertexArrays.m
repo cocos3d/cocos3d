@@ -225,8 +225,8 @@
 		case kCC3SemanticVertexNormal: return _normals;
 		case kCC3SemanticVertexColor: return _colors;
 		case kCC3SemanticVertexPointSize: return _pointSizes;
-		case kCC3SemanticVertexWeight: return _weights;
-		case kCC3SemanticVertexMatrix: return _matrixIndices;
+		case kCC3SemanticVertexWeights: return _weights;
+		case kCC3SemanticVertexMatrixIndices: return _matrixIndices;
 		case kCC3SemanticVertexTexture:
 			return [self.engine.textures textureUnitAt: semanticIndex].textureCoordinates;
 			

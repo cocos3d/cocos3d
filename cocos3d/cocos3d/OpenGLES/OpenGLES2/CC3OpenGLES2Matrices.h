@@ -36,8 +36,14 @@
 
 #if CC3_OGLES_2
 
+@class CC3OpenGLES2Matrices;
+
+
 /** The initial maximum depth of a matrix stack under OpenGL ES 2. */
 #define kCC3OpenGLES2MatrixStackMaxDepth		8
+
+/** The initial maximum size of the matrix palette under OpenGL ES 2. */
+#define kCC3OpenGLES2MatrixPaletteSize			16
 
 
 #pragma mark -
@@ -67,6 +73,30 @@
 @interface CC3OpenGLES2ProjectionMatrixStack : CC3OpenGLES2MatrixStack
 @end
 
+
+#pragma mark -
+#pragma mark CC3OpenGLES2MatrixPalette
+
+/**
+ * CC3OpenGLES2MatrixPalette provides access to several commands that operate on
+ * one matrix the matrix palette. None of these commands require state tracking.
+ */
+@interface CC3OpenGLES2MatrixPalette : CC3OpenGLESMatrixStack {
+	GLuint _index;
+}
+
+/** The parent tracker is an instance of CC3OpenGLES2Matrices. */
+@property(nonatomic, readonly) CC3OpenGLES2Matrices* parent;
+
+/** Initializes this instance for the specified palette index. */
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker forPalette: (GLint) paletteIndex;
+
+/** Allocates and initializes an autoreleased instance for the specified palette index. */
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker forPalette: (GLint) paletteIndex;
+
+@end
+
+
 #pragma mark -
 #pragma mark CC3OpenGLES2Matrices
 
@@ -74,7 +104,14 @@
 @interface CC3OpenGLES2Matrices : CC3OpenGLESMatrices {
 	CC3Matrix4x4 _mtxCache[kCC3MatrixSemanticCount];
 	BOOL _mtxCacheIsDirty[kCC3MatrixSemanticCount];
+	CC3Matrix4x3* _mtxPalette;
+	CC3Matrix3x3* _mtxPaletteInvTran;
+	GLuint _currPaletteSize;
 }
+
+/** Returns a pointer to the 4x3 matrix from the palette matrix at the specified index. */
+-(CC3Matrix4x3*) matrix4x3ForPaletteMatrixAt: (GLuint) paletteIndex;
+
 @end
 
 #endif

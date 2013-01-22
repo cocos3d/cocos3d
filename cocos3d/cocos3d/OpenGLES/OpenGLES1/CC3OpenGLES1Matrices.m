@@ -142,7 +142,7 @@
 
 -(CC3OpenGLESMatrices*) matricesState { return (CC3OpenGLESMatrices*)parent; }
 
--(void) activatePalette { self.matricesState.activePalette.value = index; }
+-(void) activatePalette { self.matricesState.activePalette.value = _index; }
 
 -(void) activate {
 	[super activate];
@@ -172,7 +172,7 @@
 							andTopName: GL_ZERO
 						  andDepthName: GL_ZERO
 						andModeTracker: aModeTracker]) ) {
-		index = paletteIndex;
+		_index = paletteIndex;
 	}
 	return self;
 }
@@ -186,7 +186,7 @@
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for palette %i", [super description], index];
+	return [NSString stringWithFormat: @"%@ for palette %i", [super description], _index];
 }
 
 @end
@@ -208,13 +208,13 @@
 													   withMode: GL_MODELVIEW
 													 andTopName: GL_MODELVIEW_MATRIX
 												   andDepthName: GL_MODELVIEW_STACK_DEPTH
-												 andModeTracker: mode];
+												 andModeTracker: self.mode];
 
 	self.projection = [CC3OpenGLES1MatrixStack trackerWithParent: self
 														withMode: GL_PROJECTION
 													  andTopName: GL_PROJECTION_MATRIX
 													andDepthName: GL_PROJECTION_STACK_DEPTH
-												  andModeTracker: mode];
+												  andModeTracker: self.mode];
 
 	self.activePalette = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self
 																	  forState: GL_ZERO
@@ -222,11 +222,16 @@
 													  andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 
 	self.paletteMatrices = nil;
+	
+	_maxPaletteSize = self.engine.platform.maxPaletteMatrices.value;		// Bypass setter
 }
+
+// Fixed by the platform, so don't allow it to be changed
+-(void) setMaxPaletteSize: (GLuint) paletteSize {}
 
 /** Template method returns an autoreleased instance of a palette matrix tracker. */
 -(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
-	return [CC3OpenGLES1MatrixPalette trackerWithParent: self forPalette: index andModeTracker: mode];
+	return [CC3OpenGLES1MatrixPalette trackerWithParent: self forPalette: index andModeTracker: self.mode];
 }
 
 @end

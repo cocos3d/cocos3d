@@ -403,9 +403,7 @@
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
-	if ([self shouldDrawNode: aNode]) {
-		[aNode transformAndDrawWithVisitor: self];
-	}
+	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];
 }
 
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {

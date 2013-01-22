@@ -1346,7 +1346,7 @@ typedef enum {
 -(NSString*) appendStructureDescriptionTo: (NSMutableString*) desc withIndent: (NSUInteger) indentLevel;
 
 
-#pragma mark Matierial coloring
+#pragma mark Matierial properties
 
 /**
  * If this value is set to YES, current lighting conditions will be taken into consideration
@@ -1424,13 +1424,51 @@ typedef enum {
 @property(nonatomic, assign) CC3Vector globalLightLocation;
 
 /**
- * The GLSL program containing the vertex and fragment shaders used to decorate materials.
+ * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to
+ * decorate the descendant nodes.
  *
- * Setting this property sets the same property on all child nodes.
- * Querying this property returns the value of the same property from the first descendant
- * node that is a CC3MeshNode and has a non-nil value in the shaderContext property.
+ * Setting this property causes each descendant to use the specified program context. Querying
+ * this property returns the value of the same property from the first descendant node that has
+ * a non-nil value in its shaderContext property.
+ *
+ * Within each descendant node, the program is held in the program context in the shaderContext
+ * property. When using this property to set the program context into each descendant, all
+ * descendant nodes will share the same program context. Uniform overrides added to that shared
+ * context will be used by all descendant nodes. As an alternative, the shaderProgram property
+ * of this node can be used to cause each descendant node to use the same program, but each node
+ * will wrap that program in a unique program context. This allows separate uniform overrides to
+ * be used on each descendant node.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ *
+ * When running under OpenGL ES 2, the initial value of this property is set to a context containing
+ * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
+ * OpenGL ES 1, the initial value of this property is nil.
  */
 @property(nonatomic, retain) CC3GLProgramContext* shaderContext;
+
+/**
+ * The GLSL program (vertex & fragment shaders) used to decorate the descendant nodes.
+ *
+ * Setting this property causes each descendant to use the specified program. Querying this
+ * property returns the value of the same property from the first descendant node that has
+ * a non-nil value in its shaderProgram property.
+ *
+ * Within each descendant node, the program is held in the program context in the shaderContext
+ * property. When using this property to set the program into each descendant, a new unique context
+ * will be created in each node that does not already have a context. In this way, each node may
+ * have its own context, which can be customized separately. As an alternative, the shaderContext
+ * property of this node can be used to ensure that each descendant node will not only use the
+ * same program, but will share a shader context as well. That will ensure that customizations and
+ * uniform overrides made to the shader context will be applied to all nodes that share the context.
+ *
+ * This property is used only when running under OpenGL ES 2.
+ *
+ * When running under OpenGL ES 2, the initial value of this property is set to the program
+ * returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
+ * OpenGL ES 1, the initial value of this property is nil.
+ */
+@property(nonatomic, retain) CC3GLProgram* shaderProgram;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

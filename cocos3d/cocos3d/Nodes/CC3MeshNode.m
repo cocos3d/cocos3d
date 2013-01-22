@@ -248,7 +248,7 @@
 }
 
 
-#pragma mark Material coloring
+#pragma mark Material properties
 
 -(BOOL) shouldUseLighting { return material ? material.shouldUseLighting : NO; }
 
@@ -323,7 +323,18 @@
 -(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
 	[self ensureMaterial];
 	material.shaderContext = shaderContext;
-	[super setShaderContext: shaderContext];	// pass along to any children
+	super.shaderContext = shaderContext;	// pass along to any children
+}
+
+-(CC3GLProgram*) shaderProgram {
+	[self ensureMaterial];
+	return material.shaderProgram;
+}
+
+-(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+	[self ensureMaterial];
+	material.shaderProgram = shaderProgram;
+	super.shaderProgram = shaderProgram;	// pass along to any children
 }
 
 

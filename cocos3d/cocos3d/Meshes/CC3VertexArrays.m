@@ -1642,7 +1642,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexWeight; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexWeights; }
 
 @end
 
@@ -1702,6 +1702,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 	return self;
 }
 
-+(GLenum) defaultSemantic { return kCC3SemanticVertexMatrix; }
++(GLenum) defaultSemantic { return kCC3SemanticVertexMatrixIndices; }
 
 @end

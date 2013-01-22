@@ -111,6 +111,29 @@
 	_alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
 }
 
+-(CC3GLProgram*) shaderProgram { return _shaderContext.program; }
+
+-(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+
+	// Do nothing if not changing
+	if (shaderProgram == self.shaderProgram) return;
+
+	// If the shader program is being cleared, clear the context as well
+	if (!shaderProgram) {
+		self.shaderContext = nil;
+		return;
+	}
+	
+	// If the shader context exists, set the specified program into it
+	if (_shaderContext) {
+		_shaderContext.program = shaderProgram;
+		return;
+	}
+	
+	// Shader program does not exist, so create a new one on the program
+	self.shaderContext = [CC3GLProgramContext contextForProgram: shaderProgram];
+}
+
 
 #pragma mark CCRGBAProtocol & CCBlendProtocol support
 

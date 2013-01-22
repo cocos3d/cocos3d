@@ -57,7 +57,7 @@
 -(void) buildProjectionMatrix;
 -(void) openProjection;
 -(void) closeProjection;
--(void) openModelView;
+-(void) openModelview;
 -(void) closeModelView;
 -(void) loadProjectionMatrix;
 -(void) loadModelviewMatrix;
@@ -316,7 +316,7 @@
 	LogTrace(@"Opening %@", self);
 	isOpen = YES;
 	[self openProjection];
-	[self openModelView];
+	[self openModelview];
 }
 
 -(void) close {
@@ -340,7 +340,7 @@
 }
 
 /** Template method that pushes the GL modelview matrix stack, and loads the viewMatrix into it. */
--(void) openModelView {
+-(void) openModelview {
 	LogTrace(@"Opening %@ modelview", self);
 	[[CC3OpenGLESEngine engine].matrices.modelview push];
 	[self loadModelviewMatrix];

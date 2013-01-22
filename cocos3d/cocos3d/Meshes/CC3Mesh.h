@@ -36,17 +36,11 @@
 @class CC3FaceArray;
 
 /**
- * Variable type that holds a bitwise-OR of flags enumerating the types of vertex content
- * contained within a mesh. Valid components of this type include:
- *   - kCC3VertexContentLocation
- *   - kCC3VertexContentNormal
- *   - kCC3VertexContentColor
- *   - kCC3VertexContentTextureCoordinates
- *   - kCC3VertexContentPointSize
- *   - kCC3VertexContentWeights
- *   - kCC3VertexContentMatrixIndices
+ * This enum defines the components of a bitwise-OR of flags enumerating the types of vertex
+ * content contained within a mesh. Valid components of this type include biwise-OR combinations
+ * of the the values in this enum.
  *
- * In addition, an absence of any bitwise-OR components in a CC3VertexContent is represented by kCC3VertexContentNone.
+ * An absence of any bitwise-OR components in a CC3VertexContent is represented by kCC3VertexContentNone.
  * 
  * All valid meshes must contain a kCC3VertexContentLocation, and a meshes will raise
  * an assertion if an attempt is made to set the vertex content without that component.

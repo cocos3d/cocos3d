@@ -30,10 +30,12 @@
  */
 
 #import "CC3OpenGLES2Matrices.h"
+#import "CC3OpenGLESEngine.h"
 
 #if CC3_OGLES_2
 
-#import "kazmath/GL/matrix.h"
+#import "kazmath/GL/matrix.h"	// Only OGLES 2
+#import "CC3GLProgram.h"
 
 /** The depth of the modelview matrix stack when the view matrix is at the top. */
 #define kCC3ViewMatrixDepth			2
@@ -53,7 +55,7 @@
 
 -(void) setMaxDepth: (GLuint) maxDepth {
 	if (maxDepth == _maxDepth) return;
-	CC3Assert(maxDepth > 0, @"%@ maxDepth property must be greater than zero.", self);
+	CC3Assert(maxDepth > 0, @"%@ maxDepth property must be at least one.", self);
 	GLvoid* newStack = realloc(_mtxStack, (maxDepth * sizeof(CC3Matrix4x4)));
 	if (newStack) {
 		_mtxStack = newStack;
@@ -234,9 +236,69 @@
 
 
 #pragma mark -
+#pragma mark CC3OpenGLES2MatrixPalette
+
+@implementation CC3OpenGLES2MatrixPalette
+
+-(CC3OpenGLES2Matrices*) parent { return (CC3OpenGLES2Matrices*)super.parent; }
+
+-(CC3Matrix4x3*) matrix4x3 { return [self.parent matrix4x3ForPaletteMatrixAt: _index]; }
+
+-(void) push { CC3Assert(NO, @"%@ can't be pushed", self); }
+
+-(void) pop { CC3Assert(NO, @"%@ can't be popped", self); }
+
+-(GLuint) depth {
+	CC3Assert(NO, @"Can't get depth of %@", self);
+	return 0;
+}
+
+-(void) identity { CC3Matrix4x3PopulateIdentity(self.matrix4x3); }
+
+-(void) load: (CC3Matrix*) mtx { [mtx populateCC3Matrix4x3: self.matrix4x3]; }
+
+-(void) multiply: (CC3Matrix*) mtx {
+	CC3Matrix4x3* pMtx = self.matrix4x3;
+	CC3Matrix4x3 mRslt, mAffine;
+	[mtx populateCC3Matrix4x3: &mAffine];
+	CC3Matrix4x3Multiply(&mRslt, pMtx, &mAffine);
+	CC3Matrix4x3PopulateFrom4x3(pMtx, &mRslt);
+}
+
+-(void) loadFromModelView {
+	CC3OpenGLES2ModelviewMatrixStack* mv = (CC3OpenGLES2ModelviewMatrixStack*)self.parent.modelview;
+	CC3Matrix4x3PopulateFrom4x3(self.matrix4x3, mv.top4x3);
+	LogTrace(@"Loaded palette matrix %i from modelview %@", _index, NSStringFromCC3Matrix4x3(self.matrix4x3));
+}
+
+-(id) initWithParent: (CC3OpenGLESStateTracker*) aTracker forPalette: (GLint) paletteIndex {
+	if ( (self = [super initWithParent: aTracker]) ) {
+		_index = paletteIndex;
+	}
+	return self;
+}
+
++(id) trackerWithParent: (CC3OpenGLESStateTracker*) aTracker forPalette: (GLint) paletteIndex {
+	return [[[self alloc] initWithParent: aTracker forPalette: paletteIndex] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for palette %i", [super description], _index];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3OpenGLES2Matrices
 
 @implementation CC3OpenGLES2Matrices
+
+-(void) dealloc {
+	free(_mtxPalette);
+	free(_mtxPaletteInvTran);
+	[super dealloc];
+}
 
 -(void) initializeTrackers {
 	self.mode = nil;
@@ -244,11 +306,8 @@
 	self.projection = [CC3OpenGLES2ProjectionMatrixStack trackerWithParent: self];
 	self.activePalette = nil;
 	self.paletteMatrices = nil;
-}
-
-/** Template method returns an autoreleased instance of a palette matrix tracker. */
--(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
-	return [CC3OpenGLES2MatrixStack trackerWithParent: self];
+	_maxPaletteSize = 0;		// Ensure the palette will be allocated
+	self.maxPaletteSize = kCC3OpenGLES2MatrixPaletteSize;
 }
 
 
@@ -256,7 +315,7 @@
 
 -(void) stackChanged: (CC3OpenGLES2MatrixStack*) stack {
 	GLuint stackDepth = stack.depth;
-	if (stack == modelview) {
+	if (stack == _modelview) {
 		// Populate the modelview matrix and mark everything that depends on it dirty.
 		CC3Matrix4x3PopulateFrom4x3([self matrix4x3ForSemantic: kCC3MatrixSemanticModelView],
 									(CC3Matrix4x3*)stack.top);
@@ -293,7 +352,7 @@
 			[self mark: 5 matricesDirty: dirtySemantics];
 		}
 	}
-	if (stack == projection) {
+	if (stack == _projection) {
 		// Populate the projection matrix and mark everything that depends on it dirty.
 		CC3Matrix4x4PopulateFrom4x4([self matrix4x4ForSemantic: kCC3MatrixSemanticProj], stack.top);
 		CC3MatrixSemantic dirtySemantics[] = {
@@ -451,6 +510,126 @@
 		default: return;
 	}
 }
+
+
+#pragma mark Matrix palette
+
+-(CC3Matrix4x3*) matrix4x3ForPaletteMatrixAt: (GLuint) paletteIndex { return &_mtxPalette[paletteIndex]; }
+
+/** Template method returns an autoreleased instance of a palette matrix tracker. */
+-(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
+	return [CC3OpenGLES2MatrixPalette trackerWithParent: self forPalette: index];
+}
+
+-(void) setMaxPaletteSize: (GLuint) paletteSize {
+	if (paletteSize == _maxPaletteSize) return;
+	
+	// Allocate space for the 4x4 matrix palette and 3x3 inverse-transpose matrix palette
+	GLvoid* newPalette = realloc(_mtxPalette, (paletteSize * sizeof(CC3Matrix4x3)));
+	GLvoid* newPaletteInvTran = realloc(_mtxPaletteInvTran, (paletteSize * sizeof(CC3Matrix3x3)));
+	if (newPalette && newPaletteInvTran) {
+		_mtxPalette = newPalette;
+		_mtxPaletteInvTran = newPaletteInvTran;
+		_maxPaletteSize = paletteSize;
+	} else {
+		LogError(@"%@ could not allocate space for a matrix palette of size %u ", self, paletteSize);
+	}
+}
+
+/** Initializes the tracking of the matrix palette size for this skin section. */
+-(void) beginSkinSection { _currPaletteSize = 0; }
+
+/**
+ * Keeps track of the matrix palette size by tracking the largest palette matrix index 
+ * accessed for a skin section. Tracking starts when the beginSkinSection method is
+ * invoked and stops when the endSkinSection method is invoked.
+ */
+-(CC3OpenGLESMatrixStack*) paletteMatrixAt: (GLuint) index {
+	_currPaletteSize = MAX(_currPaletteSize, index + 1);
+	return [super paletteMatrixAt: index];
+}
+
+/**
+ * Populates the bone matrices for the skin section, including the inverse-transpose
+ * matrices if they are available.
+ */
+-(void) endSkinSection {
+	CC3Matrix3x3 mtxInvTran;
+	CC3GLProgram* glProg = self.engine.shaders.activeProgram;
+
+	// Retrieve the bone variables from the GL program.
+	CC3GLSLUniform* boneMtxVar = [glProg uniformForSemantic: kCC3SemanticBoneMatrices];
+	CC3GLSLUniform* boneMtxITVar = [glProg uniformForSemantic: kCC3SemanticBoneMatricesInvTran];
+	CC3GLSLUniform* boneMtxCountVar = [glProg uniformForSemantic: kCC3SemanticBoneMatrixCount];
+
+	if (!boneMtxVar) return;	// The palette is required
+
+	// Set the bone count as the minimum of the current palette size and the length of the GLSL bone array variable
+	GLuint boneMtxCnt = MIN(_currPaletteSize, boneMtxVar.size);
+	[boneMtxCountVar setInteger: boneMtxCnt];
+
+	// Iterate through the bones
+	for (GLuint boneIdx = 0; boneIdx < boneMtxCnt; boneIdx++) {
+		
+		// Set the palette matrix for this bone
+		[boneMtxVar setMatrix4x3: &_mtxPalette[boneIdx] at: boneIdx];
+
+		// Calculate the inverse-transform matrix for the palette matrix
+		if (boneMtxITVar) {
+			CC3Matrix3x3PopulateFrom4x3(&mtxInvTran, &_mtxPalette[boneIdx]);
+			CC3Matrix3x3InvertAdjoint(&mtxInvTran);
+			CC3Matrix3x3Transpose(&mtxInvTran);
+			[boneMtxITVar setMatrix3x3: &mtxInvTran at: boneIdx];
+		}
+	}
+	
+	// Update the variables to the GL engine
+	[boneMtxCountVar updateGLValue];
+	[boneMtxVar updateGLValue];
+	[boneMtxITVar updateGLValue];
+}
+
+/*
+-(void) endSkinSection {
+	CC3Matrix3x3 mtxInvTran;
+	CC3GLSLUniform* var;
+	CC3GLProgram* glProg = self.engine.shaders.activeProgram;
+	GLuint mtxCnt = _maxPaletteSize;		// Clamp to platform maximum
+	
+	// Set the matrix palette into the appropriate uniform in the currently active GL program
+	var = [glProg uniformForSemantic: kCC3SemanticBoneMatrices];
+	if (var) {
+		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBoneMatrices));
+		mtxCnt = MIN(var.size, mtxCnt);
+		for (GLuint mtxIdx = 0; mtxIdx < mtxCnt; mtxIdx++)
+			[var setMatrix4x3: &_mtxPalette[mtxIdx] at: mtxIdx];
+		[var updateGLValue];
+	}
+	
+	// Calculate the inverse-transform matrices for the matrix palette, and set them into the
+	// appropriate uniform in the currently active GL program
+	var = [glProg uniformForSemantic: kCC3SemanticBoneMatricesInvTran];
+	if (var) {
+		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBoneMatricesInvTran));
+		mtxCnt = MIN(var.size, mtxCnt);
+		for (GLuint mtxIdx = 0; mtxIdx < mtxCnt; mtxIdx++) {
+			CC3Matrix3x3PopulateFrom4x3(&mtxInvTran, &_mtxPalette[mtxIdx]);
+			CC3Matrix3x3InvertAdjoint(&mtxInvTran);
+			CC3Matrix3x3Transpose(&mtxInvTran);
+			[var setMatrix3x3: &mtxInvTran at: mtxIdx];
+		}
+		[var updateGLValue];
+	}
+	
+	// Set the matrix count from the minimum length of the two matrix arrays and the platform
+	var = [glProg uniformForSemantic: kCC3SemanticBonesPerVertex];
+	if (var) {
+		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBonesPerVertex));
+		[var setInteger: mtxCnt];
+		[var updateGLValue];
+	}
+}
+*/
 
 @end
 

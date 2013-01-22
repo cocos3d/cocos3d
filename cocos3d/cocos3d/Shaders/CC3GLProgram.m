@@ -64,37 +64,37 @@
 }
 
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
-	for (CC3GLSLUniform* var in _uniforms) {
-		if (var.location == uniformLocation) return var;
-	}
+	for (CC3GLSLUniform* var in _uniforms) if (var.location == uniformLocation) return var;
 	return nil;
 }
 
+-(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic {
+	return [self uniformForSemantic: semantic at: 0];
+}
+
 -(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
-	for (CC3GLSLUniform* var in _uniforms) {
+	for (CC3GLSLUniform* var in _uniforms)
 		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
-	}
 	return nil;
 }
 
 -(CC3GLSLAttribute*) attributeNamed: (NSString*) name {
-	for (CC3GLSLAttribute* var in _attributes) {
-		if ( [var.name isEqualToString: name] ) return var;
-	}
+	for (CC3GLSLAttribute* var in _attributes) if ( [var.name isEqualToString: name] ) return var;
 	return nil;
 }
 
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation {
-	for (CC3GLSLAttribute* var in _attributes) {
-		if (var.location == attrLocation) return var;
-	}
+	for (CC3GLSLAttribute* var in _attributes) if (var.location == attrLocation) return var;
 	return nil;
 }
 
+-(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic {
+	return [self attributeForSemantic: semantic at: 0];
+}
+
 -(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
-	for (CC3GLSLAttribute* var in _attributes) {
+	for (CC3GLSLAttribute* var in _attributes)
 		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
-	}
 	return nil;
 }
 
@@ -177,8 +177,8 @@
 	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate configureVariable: var];
-		[_uniforms addObject: var];
+		if ( [_semanticDelegate configureVariable: var] ) [_uniforms addObject: var];
+		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 	}
 }
 
@@ -192,8 +192,8 @@
 	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate configureVariable: var];
-		[_attributes addObject: var];
+		if ( [_semanticDelegate configureVariable: var] ) [_attributes addObject: var];
+		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
 	}
 }
 

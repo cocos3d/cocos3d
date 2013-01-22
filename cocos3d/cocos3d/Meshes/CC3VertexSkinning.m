@@ -71,9 +71,7 @@
 }
 
 /** Release a visitor to calculate the bind pose transforms relative to this soft-body node. */
--(void) bindRestPose {
-	[[CC3SkeletonRestPoseBindingVisitor visitor] visit: self];
-}
+-(void) bindRestPose { [[CC3SkeletonRestPoseBindingVisitor visitor] visit: self]; }
 
 -(CC3SoftBodyNode*) softBodyNode { return self; }
 
@@ -95,9 +93,8 @@
 }
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
-	for (CC3SkinSection* skinSctn in skinSections) {
+	for (CC3SkinSection* skinSctn in skinSections)
 		if ( [skinSctn containsVertexIndex: index] ) return skinSctn;
-	}
 	return nil;
 }
 
@@ -172,15 +169,12 @@
 
 	[skinSections removeAllObjects];
 	CCArray* otherSkinSections = another.skinSections;
-	for (CC3SkinSection* ss in otherSkinSections) {
+	for (CC3SkinSection* ss in otherSkinSections)
 		[skinSections addObject: [[ss copyForNode: self] autorelease]];		// retained in array
-	}
 }
 
 -(void) reattachBonesFrom: (CC3Node*) aNode {
-	for (CC3SkinSection* skinSctn in skinSections) {
-		[skinSctn reattachBonesFrom: aNode];
-	}
+	for (CC3SkinSection* skinSctn in skinSections) [skinSctn reattachBonesFrom: aNode];
 	[super reattachBonesFrom: aNode];
 }
 
@@ -200,9 +194,7 @@
 }
 
 /** Caches the transform matrix rest pose matrix. */
--(void) cacheRestPoseMatrix {
-	[restPoseTransformMatrix populateFrom: transformMatrix];
-}
+-(void) cacheRestPoseMatrix { [restPoseTransformMatrix populateFrom: transformMatrix]; }
 
 -(void) boneWasTransformed: (CC3Bone*) aBone { [self markTransformDirty]; }
 
@@ -235,11 +227,10 @@
 	
 	[mesh bindWithVisitor: visitor];	// Bind the arrays
 	
-	for (CC3SkinSection* skinSctn in skinSections) {
+	for (CC3SkinSection* skinSctn in skinSections)
 		[skinSctn drawVerticesOfMesh: mesh withVisitor: visitor];
-	}
 	
-	[glesMatrixPalette disable];			// We are finished with the matrix pallete so disable it.
+	[glesMatrixPalette disable];		// We are finished with the matrix pallete so disable it.
 }
 
 
@@ -356,9 +347,7 @@
 -(void) reattachBonesFrom: (CC3Node*) aNode {
 	CCArray* oldBones = self.bones;
 	[skinnedBones removeAllObjects];
-	for (CC3Bone* ob in oldBones) {
-		[self addBone: (CC3Bone*)[aNode getNodeNamed: ob.name]];
-	}
+	for (CC3Bone* ob in oldBones) [self addBone: (CC3Bone*)[aNode getNodeNamed: ob.name]];
 }
 
 // Template method that populates this instance from the specified other instance.
@@ -368,11 +357,10 @@
 	vertexStart = another.vertexStart;
 	vertexCount = another.vertexCount;
 
+	// Each bone is retained but not copied, and will be swapped for copied bones via reattachBonesFrom:
 	[skinnedBones removeAllObjects];
 	CCArray* otherBones = another.bones;
-	for (CC3Bone* bone in otherBones) {
-		[self addBone: bone];			// Retained but not copied...will be swapped for copied...
-	}									// ...bones via later invocation of reattachBonesFrom:
+	for (CC3Bone* bone in otherBones) [self addBone: bone];
 }
 
 -(id) copyWithZone: (NSZone*) zone { return [self copyForNode: nil withZone: zone]; }
@@ -390,15 +378,21 @@
 
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESMatrices* glesMatrices = [CC3OpenGLESEngine engine].matrices;
+
+	[glesMatrices beginSkinSection];
 	GLuint boneCnt = skinnedBones.count;
 	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
 		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
 
 		// Load this palette matrix from the modelview matrix and the apply the bone draw matrix.
-		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteAt: boneNum];
+		// Since the CC3SkinMeshNode does not transform the modelview stack, the modelview will
+		// only contain the view matrix. All other transforms are captured in the bone matrices.
+		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteMatrixAt: boneNum];
 		[glesPaletteMatrix loadFromModelView];
 		[glesPaletteMatrix multiply: sb.drawTransformMatrix];
 	}
+	[glesMatrices endSkinSection];
+
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
 }
 
@@ -491,9 +485,7 @@
 }
 
 -(CC3Matrix*) drawTransformMatrix {
-	if ( !drawTransformMatrix ) {
-		drawTransformMatrix = [CC3AffineMatrix new];
-	}
+	if ( !drawTransformMatrix ) drawTransformMatrix = [CC3AffineMatrix new];
 	if (isDrawTransformDirty) {
 		[bone applyPoseTo: drawTransformMatrix];
 		[drawTransformMatrix multiplyBy: skinNode.restPoseTransformMatrix];
@@ -504,9 +496,7 @@
 }
 
 -(CC3Matrix*) skinTransformMatrix {
-	if ( !skinTransformMatrix ) {
-		skinTransformMatrix = [CC3AffineMatrix new];
-	}
+	if ( !skinTransformMatrix ) skinTransformMatrix = [CC3AffineMatrix new];
 	if (isSkinTransformDirty) {
 		[skinTransformMatrix populateFrom: self.drawTransformMatrix];
 		[skinTransformMatrix leftMultiplyBy: skinNode.transformMatrixInverted];

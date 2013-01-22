@@ -36,6 +36,10 @@
  * CC3GLProgramSemanticsByVarName sharedDefaultDelegate instance.
  */
 
+// Maximum bones per skin section (batch). This is set here to the platform maximum.
+// You can reduce this to improve efficiency if your models need fewer bones in each batch.
+#define MAX_BONES_PER_VERTEX	11
+
 precision mediump float;
 
 //-------------- STRUCTURES ----------------------
@@ -59,32 +63,54 @@ struct Point {
 };
 
 
-//-------------- UNIFORMS & VERTEX ATTRIBUTES ----------------------
+//-------------- UNIFORMS ----------------------
 
-uniform mat4 u_cc3MtxModelView;						/**< Current modelview matrix. */
-uniform highp mat4 u_cc3MtxModelViewProj;					/**< Current modelview-projection matrix. */
-uniform Point u_cc3Points;						/**< Point parameters. */
+uniform mat4 u_cc3MtxModelView;									/**< Current modelview matrix. */
+uniform highp mat4 u_cc3MtxProj;								/**< Current projection matrix. */
+uniform Point u_cc3Points;										/**< Point parameters. */
+uniform lowp int u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
+uniform highp mat4 u_cc3BoneMatrices[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;				/**< Vertex position. */
-attribute float a_cc3PointSize;					/**< Vertex point size. */
+attribute highp vec4 a_cc3Position;		/**< Vertex position. */
+attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
+attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
+attribute float a_cc3PointSize;			/**< Vertex point size. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec3 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
+highp vec4 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
 
 
 //-------------- FUNCTIONS ----------------------
 
-/** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
-highp vec3 vertexPositionInEyeSpace() {
-	if(u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone)
-		return (u_cc3MtxModelView * a_cc3Position).xyz;
-	else
-		return vec3(0.0, 0.0, 0.0);
+/**
+ * Transforms the vertex position to eye space. Sets the vtxPosEye variable.
+ * This function takes into consideration vertex skinning, if it is specified.
+ */
+void vertexToEyeSpace() {
+	if (u_cc3BonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
+		// Copies of the indices and weights attibutes so they can be "rotated"
+		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+		mediump vec4 boneWeights = a_cc3BoneWeights;
+		
+		vtxPosEye = vec4(0.0);		// Start at zero to accumulate weighted values
+		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+			if (i < u_cc3BonesPerVertex) {
+				// Add position contribution from this bone
+				vtxPosEye += u_cc3BoneMatrices[boneIndices.x] * a_cc3Position * boneWeights.x;
+				
+				// "Rotate" the vector components to the next vertex bone index
+				boneIndices = boneIndices.yzwx;
+				boneWeights = boneWeights.yzwx;
+			}
+		}
+	} else {		// No vertex skinning
+		vtxPosEye = u_cc3MtxModelView * a_cc3Position;
+	}
 }
 
 /**
@@ -96,24 +122,23 @@ float pointSize() {
 	if (u_cc3Points.isDrawingPoints) {
 		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
 		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
-			vec3 attenuationEquation;
-			attenuationEquation.x = 1.0;
-			attenuationEquation.z = dot(vtxPosEye, vtxPosEye);
-			attenuationEquation.y = sqrt(attenuationEquation.z);
-			size /= dot(attenuationEquation, u_cc3Points.sizeAttenuation);
+			float ptDist = length(vtxPosEye.xyz);
+			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
+			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));
 		}
 		size = clamp(size, u_cc3Points.minimumSize, u_cc3Points.maximumSize);
 	}
 	return size;
 }
 
+
 //-------------- ENTRY POINT ----------------------
 void main() {
 
-	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
-	vtxPosEye = vertexPositionInEyeSpace();
+	// Transform vertex position to eye space, in vtxPosEye.
+	vertexToEyeSpace();
 
-	gl_Position = u_cc3MtxModelViewProj * a_cc3Position;
+	gl_Position = u_cc3MtxProj * vtxPosEye;
 	
 	gl_PointSize = pointSize();
 }

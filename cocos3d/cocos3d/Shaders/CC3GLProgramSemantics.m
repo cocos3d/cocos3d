@@ -52,8 +52,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticVertexBitangent: return @"kCC3SemanticVertexBitangent";
 		case kCC3SemanticVertexColor: return @"kCC3SemanticVertexColor";
 		case kCC3SemanticVertexPointSize: return @"kCC3SemanticVertexPointSize";
-		case kCC3SemanticVertexWeight: return @"kCC3SemanticVertexWeight";
-		case kCC3SemanticVertexMatrix: return @"kCC3SemanticVertexMatrix";
+		case kCC3SemanticVertexWeights: return @"kCC3SemanticVertexWeights";
+		case kCC3SemanticVertexMatrixIndices: return @"kCC3SemanticVertexMatrixIndices";
 		case kCC3SemanticVertexTexture: return @"kCC3SemanticVertexTexture";
 			
 		case kCC3SemanticHasVertexNormal: return @"kCC3SemanticHasVertexNormal";
@@ -62,6 +62,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticHasVertexTangent: return @"kCC3SemanticHasVertexTangent";
 		case kCC3SemanticHasVertexBitangent: return @"kCC3SemanticHasVertexBitangent";
 		case kCC3SemanticHasVertexColor: return @"kCC3SemanticHasVertexColor";
+		case kCC3SemanticHasVertexWeight: return @"kCC3SemanticHasVertexWeight";
+		case kCC3SemanticHasVertexMatrixIndex: return @"kCC3SemanticHasVertexMatrixIndex";
 		case kCC3SemanticHasVertexTextureCoordinate: return @"kCC3SemanticHasVertexTextureCoordinate";
 		case kCC3SemanticHasVertexPointSize: return @"kCC3SemanticHasVertexPointSize";
 		case kCC3SemanticIsDrawingPoints: return @"kCC3SemanticIsDrawingPoints";
@@ -151,6 +153,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticBoundingBoxMax: return @"kCC3SemanticBoundingBoxMax";
 		case kCC3SemanticBoundingBoxSize: return @"kCC3SemanticBoundingBoxSize";
 		case kCC3SemanticBoundingRadius: return @"kCC3SemanticBoundingRadius";
+			
+		// SKINNING ----------------
+		case kCC3SemanticBonesPerVertex: return @"kCC3SemanticBonesPerVertex";
+		case kCC3SemanticBoneMatrices: return @"kCC3SemanticBoneMatrices";
+		case kCC3SemanticBoneMatricesInvTran: return @"kCC3SemanticBoneMatricesInvTran";
+		case kCC3SemanticBoneMatrixCount: return @"kCC3SemanticBoneMatrixCount";
 
 		// PARTICLES ------------
 		case kCC3SemanticPointSize: return @"kCC3SemanticPointSize";
@@ -258,6 +266,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticHasVertexColor:
 			[uniform setBoolean: visitor.currentMesh.hasVertexColors];
+			return YES;
+		case kCC3SemanticHasVertexWeight:
+			[uniform setBoolean: visitor.currentMesh.hasVertexWeights];
+			return YES;
+		case kCC3SemanticHasVertexMatrixIndex:
+			[uniform setBoolean: visitor.currentMesh.hasVertexMatrixIndices];
 			return YES;
 		case kCC3SemanticHasVertexTextureCoordinate:
 			[uniform setBoolean: visitor.currentMesh.hasVertexTextureCoordinates];
@@ -670,6 +684,17 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticAnimationFraction:
 			[uniform setFloat: visitor.currentMeshNode.animation.currentFrame];
 			return YES;
+			
+		// SKINNING ----------------
+		case kCC3SemanticBonesPerVertex:
+			[uniform setInteger: visitor.currentMeshNode.vertexUnitCount];
+			return YES;
+		case kCC3SemanticBoneMatrices:
+		case kCC3SemanticBoneMatricesInvTran:
+		case kCC3SemanticBoneMatrixCount:
+			// Skinning uniforms for bone matrices are set during mesh skin section drawing.
+			// At this point, return YES to indicate that it will be handled.
+			return YES;
 
 		// PARTICLES ------------
 		case kCC3SemanticPointSize:
@@ -763,13 +788,26 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
  * and semanticIndex properties of the specified variable from that configuration.
  */
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable {
-	CC3GLSLVariableConfiguration* varConfig = [_varConfigsByName objectForKey: variable.name];
+	CC3GLSLVariableConfiguration* varConfig = [_varConfigsByName objectForKey: [self rootNameFrom: variable.name]];
 	if (varConfig) {
 		variable.semantic = varConfig.semantic;
 		variable.semanticIndex = varConfig.semanticIndex;
 		return YES;
 	}
 	return NO;
+}
+
+/** 
+ * If the specified name includes a subscript suffix ([0]) at the end, it is removed and the
+ * resulting root string is returned without the suffix. If the string does not contain a
+ * trailing subscript suffix, the name is returned unchanged.
+ */
+-(NSString*) rootNameFrom: (NSString*) aName {
+	NSString* subStr = @"[0]";
+	NSInteger subStartIdx = aName.length - subStr.length;
+	if ( subStartIdx > 0 && [[aName substringFromIndex: subStartIdx] isEqualToString: subStr] )
+		return [aName substringToIndex: subStartIdx];
+	return aName;
 }
 
 -(void) addVariableConfiguration: (CC3GLSLVariableConfiguration*) varConfig {
@@ -800,30 +838,31 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(void) populateWithDefaultVariableNameMappings {
 	
 	// VETEX ATTRIBUTES --------------
-	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocation];			/**< Vertex location. */
-	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormal];				/**< Vertex normal. */
-	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];			/**< Vertex tangent. */
-	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];		/**< Vertex bitangent (aka binormal). */
-	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];				/**< Vertex color. */
-	[self mapVarName: @"a_cc3Weight" toSemantic: kCC3SemanticVertexWeight];				/**< Vertex skinning weight. */
-	[self mapVarName: @"a_cc3MatrixIndex" toSemantic: kCC3SemanticVertexMatrix];		/**< Vertex skinning matrice. */
-	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];		/**< Vertex point size. */
+	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocation];				/**< Vertex location. */
+	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormal];					/**< Vertex normal. */
+	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];				/**< Vertex tangent. */
+	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];			/**< Vertex bitangent (aka binormal). */
+	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];					/**< Vertex color. */
+	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexWeights];			/**< Vertex skinning bone weights (up to 4). */
+	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexMatrixIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
+	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];			/**< Vertex point size. */
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
-	for (NSUInteger tuIdx = 0; tuIdx < _maxTexUnitVars; tuIdx++) {
+	for (NSUInteger tuIdx = 0; tuIdx < _maxTexUnitVars; tuIdx++)
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
-	}
 	
 	// ATTRIBUTE QUALIFIERS --------------
-	[self mapVarName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether the vertex normal is available. */
+	[self mapVarName: @"u_cc3HasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether a vertex normal is available. */
 	[self mapVarName: @"u_cc3ShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];	/**< (bool) Whether vertex normals should be normalized. */
 	[self mapVarName: @"u_cc3ShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];	/**< (bool) Whether vertex normals should be rescaled. */
-	[self mapVarName: @"u_cc3HasVertexTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether the vertex tangent is available. */
-	[self mapVarName: @"u_cc3HasVertexBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether the vertex bitangent is available. */
-	[self mapVarName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether the vertex color is available. */
-	[self mapVarName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether the vertex texture coordinate is available. */
-	[self mapVarName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether the vertex point size is available. */
+	[self mapVarName: @"u_cc3HasVertexTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether a vertex tangent is available. */
+	[self mapVarName: @"u_cc3HasVertexBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether a vertex bitangent is available. */
+	[self mapVarName: @"u_cc3HasVertexColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether a vertex color is available. */
+	[self mapVarName: @"u_cc3HasVertexWeight" toSemantic: kCC3SemanticHasVertexWeight];					/**< (bool) Whether a vertex weight is available. */
+	[self mapVarName: @"u_cc3HasVertexMatrixIndex" toSemantic: kCC3SemanticHasVertexMatrixIndex];		/**< (bool) Whether a vertex matrix index is available. */
+	[self mapVarName: @"u_cc3HasVertexTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether a vertex texture coordinate is available. */
+	[self mapVarName: @"u_cc3HasVertexPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether a vertex point size is available. */
 	[self mapVarName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];					/**< (bool) Whether the vertices are being drawn as points. */
 	
 	// ENVIRONMENT MATRICES --------------
@@ -910,9 +949,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	}
 
 	// TEXTURES --------------
-	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];				/**< (int) Number of active textures. */
-	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];					/**< (sampler2D) Texture sampler (alias for s_cc3Textures[0]). */
-	[self mapVarName: @"s_cc3Textures[0]" toSemantic: kCC3SemanticTextureSampler];				/**< (sampler2D) Texture sampler (alias for s_cc3Texture). */
+	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];	/**< (int) Number of active textures. */
+	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D) Texture sampler. */
+	[self mapVarName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D[]) Array of texture samplers. */
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
@@ -942,6 +981,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Model.boundingBoxMaximum" toSemantic: kCC3SemanticBoundingBoxMax];		/**< (vec3) The dimensions of the model's bounding box in the model's local coordinates. */
 	[self mapVarName: @"u_cc3Model.boundingBoxSize" toSemantic: kCC3SemanticBoundingBoxSize];		/**< (float) The radius of the model's bounding sphere in the model's local coordinates. */
 	[self mapVarName: @"u_cc3Model.animationFraction" toSemantic: kCC3SemanticAnimationFraction];	/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
+	
+	// SKINNING ----------------
+	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];				/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	[self mapVarName: @"u_cc3BoneMatrices" toSemantic: kCC3SemanticBoneMatrices];					/**< (mat4[]) Array of bone matrices in the current mesh skin section (length of array is specified by u_cc3BoneMatrixCount). */
+	[self mapVarName: @"u_cc3BoneMatricesInvTran" toSemantic: kCC3SemanticBoneMatricesInvTran];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section (length of array is specified by u_cc3BoneMatrixCount). */
+	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneMatrixCount];				/**< (int) Length of the u_cc3BoneMatrices and u_cc3BoneMatricesInvTran arrays. */
 	
 	// PARTICLES ------------
 	[self mapVarName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];				/**< (bool) Whether the vertices are being drawn as points (alias for u_cc3IsDrawingPoints). */

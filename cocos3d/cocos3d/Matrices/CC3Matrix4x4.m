@@ -375,23 +375,21 @@ BOOL CC3Matrix4x4InvertAdjoint(CC3Matrix4x4* m) {
 	GLfloat det = (adj.c1r1 * m->c1r1) + (adj.c1r2 * m->c2r1) + (adj.c1r3 * m->c3r1) + (adj.c1r4 * m->c4r1);
 
 	// If determinant is zero, matrix is not invertable.
-	if (det == 0.0f) {
-		LogError(@"%@ is singular and cannot be inverted", NSStringFromCC3Matrix4x4(m));
-		return NO;
-	}
+	CC3AssertC(det != 0.0f, @"%@ is singular and cannot be inverted", NSStringFromCC3Matrix4x4(m));
+	if (det == 0.0f) return NO;
 	
 	// Divide the classical adjoint matrix by the determinant and set back into original matrix.
 	GLfloat ooDet = 1.0 / det;		// Turn div into mult for speed
-	m->c1r1 = adj.c1r1  * ooDet;
-	m->c1r2 = adj.c1r2  * ooDet;
-	m->c1r3 = adj.c1r3  * ooDet;
-	m->c1r4 = adj.c1r4  * ooDet;
-	m->c2r1 = adj.c2r1  * ooDet;
-	m->c2r2 = adj.c2r2  * ooDet;
-	m->c2r3 = adj.c2r3  * ooDet;
-	m->c2r4 = adj.c2r4  * ooDet;
-	m->c3r1 = adj.c3r1  * ooDet;
-	m->c3r2 = adj.c3r2  * ooDet;
+	m->c1r1 = adj.c1r1 * ooDet;
+	m->c1r2 = adj.c1r2 * ooDet;
+	m->c1r3 = adj.c1r3 * ooDet;
+	m->c1r4 = adj.c1r4 * ooDet;
+	m->c2r1 = adj.c2r1 * ooDet;
+	m->c2r2 = adj.c2r2 * ooDet;
+	m->c2r3 = adj.c2r3 * ooDet;
+	m->c2r4 = adj.c2r4 * ooDet;
+	m->c3r1 = adj.c3r1 * ooDet;
+	m->c3r2 = adj.c3r2 * ooDet;
 	m->c3r3 = adj.c3r3 * ooDet;
 	m->c3r4 = adj.c3r4 * ooDet;
 	m->c4r1 = adj.c4r1 * ooDet;

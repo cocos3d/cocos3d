@@ -55,19 +55,21 @@ typedef enum {
 	kCC3SemanticVertexTangent,					/**< Vertex tangent. */
 	kCC3SemanticVertexBitangent,				/**< Vertex bitangent (aka binormals). */
 	kCC3SemanticVertexColor,					/**< Vertex color. */
-	kCC3SemanticVertexWeight,					/**< Vertex skinning weight. */
-	kCC3SemanticVertexMatrix,					/**< Vertex skinning matrix. */
+	kCC3SemanticVertexWeights,					/**< Vertex skinning bone weights (up to 4). */
+	kCC3SemanticVertexMatrixIndices,			/**< Vertex skinning bone matrix indices (up to 4). */
 	kCC3SemanticVertexPointSize,				/**< Vertex point size. */
 	kCC3SemanticVertexTexture,					/**< Vertex texture coordinate for one texture unit. */
 	
-	kCC3SemanticHasVertexNormal,				/**< (bool) Whether the vertex normal is available. */
+	kCC3SemanticHasVertexNormal,				/**< (bool) Whether a vertex normal is available. */
 	kCC3SemanticShouldNormalizeVertexNormal,	/**< (bool) Whether vertex normals should be normalized. */
 	kCC3SemanticShouldRescaleVertexNormal,		/**< (bool) Whether vertex normals should be rescaled. */
-	kCC3SemanticHasVertexTangent,				/**< (bool) Whether the vertex tangent is available. */
-	kCC3SemanticHasVertexBitangent,				/**< (bool) Whether the vertex bitangent is available. */
-	kCC3SemanticHasVertexColor,					/**< (bool) Whether the vertex color is available. */
-	kCC3SemanticHasVertexTextureCoordinate,		/**< (bool) Whether the vertex texture coordinate is available. */
-	kCC3SemanticHasVertexPointSize,				/**< (bool) Whether the vertex point size is available. */
+	kCC3SemanticHasVertexTangent,				/**< (bool) Whether a vertex tangent is available. */
+	kCC3SemanticHasVertexBitangent,				/**< (bool) Whether a vertex bitangent is available. */
+	kCC3SemanticHasVertexColor,					/**< (bool) Whether a vertex color is available. */
+	kCC3SemanticHasVertexWeight,				/**< (bool) Whether a vertex weight is available. */
+	kCC3SemanticHasVertexMatrixIndex,			/**< (bool) Whether a vertex matrix index is available. */
+	kCC3SemanticHasVertexTextureCoordinate,		/**< (bool) Whether a vertex texture coordinate is available. */
+	kCC3SemanticHasVertexPointSize,				/**< (bool) Whether a vertex point size is available. */
 	kCC3SemanticIsDrawingPoints,				/**< (bool) Whether the vertices are being drawn as points. */
 	
 	// ENVIRONMENT MATRICES --------------
@@ -140,30 +142,36 @@ typedef enum {
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	kCC3SemanticTexUnitConstantColor,			/**< (vec4) The constant color of a texture unit. */
+	kCC3SemanticTexUnitConstantColor,			/**< (vec4) Constant color of a texture unit. */
 	kCC3SemanticTexUnitMode,					/**< (int) Environment mode of a texture unit. */
 	kCC3SemanticTexUnitCombineRGBFunction,		/**< (int) RBG combiner function of a texture unit. */
-	kCC3SemanticTexUnitSource0RGB,				/**< (int) The RGB of source 0 of a texture unit. */
-	kCC3SemanticTexUnitSource1RGB,				/**< (int) The RGB of source 1 of a texture unit. */
-	kCC3SemanticTexUnitSource2RGB,				/**< (int) The RGB of source 2 of a texture unit. */
-	kCC3SemanticTexUnitOperand0RGB,				/**< (int) The RGB combining operand of source 0 of a texture unit. */
-	kCC3SemanticTexUnitOperand1RGB,				/**< (int) The RGB combining operand of source 1 of a texture unit. */
-	kCC3SemanticTexUnitOperand2RGB,				/**< (int) The RGB combining operand of source 2 of a texture unit. */
+	kCC3SemanticTexUnitSource0RGB,				/**< (int) RGB of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1RGB,				/**< (int) RGB of source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2RGB,				/**< (int) RGB of source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0RGB,				/**< (int) RGB combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1RGB,				/**< (int) RGB combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2RGB,				/**< (int) RGB combining operand of source 2 of a texture unit. */
 	kCC3SemanticTexUnitCombineAlphaFunction,	/**< (int) Alpha combiner function of a texture unit. */
-	kCC3SemanticTexUnitSource0Alpha,			/**< (int) The alpha of source 0 of a texture unit. */
-	kCC3SemanticTexUnitSource1Alpha,			/**< (int) The alpha of source 1 of a texture unit. */
-	kCC3SemanticTexUnitSource2Alpha,			/**< (int) The alpha of source 2 of a texture unit. */
-	kCC3SemanticTexUnitOperand0Alpha,			/**< (int) The alpha combining operand of source 0 of a texture unit. */
-	kCC3SemanticTexUnitOperand1Alpha,			/**< (int) The alpha combining operand of source 1 of a texture unit. */
-	kCC3SemanticTexUnitOperand2Alpha,			/**< (int) The alpha combining operand of source 2 of a texture unit. */
+	kCC3SemanticTexUnitSource0Alpha,			/**< (int) Alpha of source 0 of a texture unit. */
+	kCC3SemanticTexUnitSource1Alpha,			/**< (int) Alpha of source 1 of a texture unit. */
+	kCC3SemanticTexUnitSource2Alpha,			/**< (int) Alpha of source 2 of a texture unit. */
+	kCC3SemanticTexUnitOperand0Alpha,			/**< (int) Alpha combining operand of source 0 of a texture unit. */
+	kCC3SemanticTexUnitOperand1Alpha,			/**< (int) Alpha combining operand of source 1 of a texture unit. */
+	kCC3SemanticTexUnitOperand2Alpha,			/**< (int) Alpha combining operand of source 2 of a texture unit. */
 	
 	// MODEL ----------------
-	kCC3SemanticCenterOfGeometry,				/**< (vec3) The center of geometry of the model in the model's local coordinates. */
-	kCC3SemanticBoundingBoxMin,					/**< (vec3) The minimum corner of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingBoxMax,					/**< (vec3) The maximum corner of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingBoxSize,				/**< (vec3) The dimensions of the model's bounding box in the model's local coordinates. */
-	kCC3SemanticBoundingRadius,					/**< (float) The radius of the model's bounding sphere in the model's local coordinates. */
+	kCC3SemanticCenterOfGeometry,				/**< (vec3) Center of geometry of the model in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMin,					/**< (vec3) Minimum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxMax,					/**< (vec3) Maximum corner of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingBoxSize,				/**< (vec3) Dimensions of the model's bounding box in the model's local coordinates. */
+	kCC3SemanticBoundingRadius,					/**< (float) Radius of the model's bounding sphere in the model's local coordinates. */
 	kCC3SemanticAnimationFraction,				/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
+	
+	// SKINNING ----------------
+	kCC3SemanticBonesPerVertex,					/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	kCC3SemanticBoneMatrices,					/**< (mat4[]) Array of bone matrices in the current mesh skin section (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesInvTran,			/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatrixCount,				/**< (int) Length of the kCC3SemanticBoneMatrices and kCC3SemanticBoneMatricesInvTran arrays. */
 	
 	// PARTICLES ------------
 	kCC3SemanticPointSize,						/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
@@ -174,18 +182,18 @@ typedef enum {
 	kCC3SemanticPointSpritesIsEnabled,			/**< (bool) Whether points should be interpeted as textured sprites. */
 
 	// TIME ------------------
-	kCC3SemanticFrameTime,						/**< (float) The time in seconds since the last frame. */
-	kCC3SemanticApplicationTime,				/**< (float) The application time in seconds. */
-	kCC3SemanticApplicationTimeSine,			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
-	kCC3SemanticApplicationTimeCosine,			/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
-	kCC3SemanticApplicationTimeTangent,			/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+	kCC3SemanticFrameTime,						/**< (float) Time in seconds since the last frame. */
+	kCC3SemanticApplicationTime,				/**< (float) Application time in seconds. */
+	kCC3SemanticApplicationTimeSine,			/**< (vec4) Sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	kCC3SemanticApplicationTimeCosine,			/**< (vec4) Cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	kCC3SemanticApplicationTimeTangent,			/**< (vec4) Tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 	
 	// MISC ENVIRONMENT
-	kCC3SemanticDrawCountCurrentFrame,			/**< (int) The number of draw calls so far in this frame. */
+	kCC3SemanticDrawCountCurrentFrame,			/**< (int) Number of draw calls so far in this frame. */
 	kCC3SemanticRandomNumber,					/**< (float) A random number between 0 and 1. */
 	
 	kCC3SemanticAppBase,						/**< First semantic of app-specific custom semantics. */
-	kCC3SemanticMax = 0xFFFF					/**< The maximum value for an app-specific custom semantic. */
+	kCC3SemanticMax = 0xFFFF					/**< Maximum value for an app-specific custom semantic. */
 } CC3Semantic;
 
 /** Returns a string representation of the specified semantic. */

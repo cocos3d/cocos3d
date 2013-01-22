@@ -53,10 +53,11 @@
 
 -(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
 	if ( (self = [super init]) ) {
-		_program = program;			// not retained
 		_index = index;
 		_semantic = kCC3SemanticNone;
 		_semanticIndex = 0;
+		_program = program;			// not retained
+		[self populateFromProgram];
 	}
 	return self;
 }
@@ -131,11 +132,10 @@
 #pragma mark Allocation and initialization
 
 -(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
-	if ( (self = [super initInProgram: program atIndex: index]) ) {
-		_varLen = 0;
-		_varValue = NULL;
-	}
-	return self;
+	// Initialized before populateFromProgram is invoked in parent initializer.
+	_varLen = 0;
+	_varValue = NULL;
+	return [super initInProgram: program atIndex: index];
 }
 
 -(void) populateFrom: (CC3GLSLUniform*) another {
@@ -435,16 +435,6 @@
 
 @implementation CC3OpenGLESStateTrackerGLSLAttribute
 
-
-#pragma mark Allocation and initialization
-
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
-	if ( (self = [super initInProgram: program atIndex: index]) ) {
-		[self populateFromProgram];
-	}
-	return self;
-}
-
 #if CC3_OGLES_2
 
 -(void) populateFromProgram {
@@ -466,12 +456,6 @@
 
 #endif
 
-#if CC3_OGLES_1
-
--(void) populateFromProgram {}
-
-#endif
-
 @end
 
 
@@ -483,13 +467,6 @@
 -(void) dealloc {
 	free(_glVarValue);
 	[super dealloc];
-}
-
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
-	if ( (self = [super initInProgram: program atIndex: index]) ) {
-		[self populateFromProgram];
-	}
-	return self;
 }
 
 -(void) populateFrom: (CC3OpenGLESStateTrackerGLSLUniform*) another {
@@ -542,60 +519,53 @@
 			
 		case GL_FLOAT:
 			glUniform1fv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_FLOAT_VEC2:
 			glUniform2fv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_FLOAT_VEC3:
 			glUniform3fv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_FLOAT_VEC4:
 			glUniform4fv(_location, _size, _glVarValue);
-			return;
+			break;
 			
 		case GL_FLOAT_MAT2:
 			glUniformMatrix2fv(_location, _size, GL_FALSE, _glVarValue);
-			return;
+			break;
 		case GL_FLOAT_MAT3:
 			glUniformMatrix3fv(_location, _size, GL_FALSE, _glVarValue);
-			return;
+			break;
 		case GL_FLOAT_MAT4:
 			glUniformMatrix4fv(_location, _size, GL_FALSE, _glVarValue);
-			return;
+			break;
 
 		case GL_INT:
 		case GL_SAMPLER_2D:
 		case GL_SAMPLER_CUBE:
 		case GL_BOOL:
 			glUniform1iv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_INT_VEC2:
 		case GL_BOOL_VEC2:
 			glUniform2iv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_INT_VEC3:
 		case GL_BOOL_VEC3:
 			glUniform3iv(_location, _size, _glVarValue);
-			return;
+			break;
 		case GL_INT_VEC4:
 		case GL_BOOL_VEC4:
 			glUniform4iv(_location, _size, _glVarValue);
-			return;
+			break;
 			
 		default:
 			CC3Assert(NO, @"%@ could not set GL engine state value because type %@ is not understood",
 					  self, NSStringFromGLEnum(_type));
-			return;
+			break;
 	}
-	LogGLErrorTrace(@"while setting the GL value of %@", self);
+	LogGLErrorTrace(@"while setting the GL value of %@", self.fullDescription);
 }
-
-#endif
-
-
-#if CC3_OGLES_1
-
--(void) populateFromProgram {}
 
 #endif
 

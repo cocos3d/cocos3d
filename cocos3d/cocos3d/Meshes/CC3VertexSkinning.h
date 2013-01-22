@@ -126,9 +126,8 @@
 #pragma mark CC3SkinMeshNode
 
 /**
- * CC3SkinMeshNode is a CC3MeshNode specialized to use vertex skinning to draw the
- * contents of its mesh. It is one of the key structural descendant nodes of a
- * CC3SoftBodyNode instance.
+ * CC3SkinMeshNode is a CC3MeshNode specialized to use vertex skinning to draw the contents
+ * of its mesh. It is one of the key structural descendant nodes of a CC3SoftBodyNode instance.
  *
  * This CC3MeshNode subclass adds a number of methods for accessing and managing the
  * weights and matrix index data associated with each vertex.

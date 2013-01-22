@@ -146,58 +146,31 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) {
 
 @implementation CC3OpenGLESMatrices
 
-@synthesize mode;
-@synthesize modelview;
-@synthesize projection;
-@synthesize activePalette;
-@synthesize paletteMatrices;
+@synthesize mode=_mode;
+@synthesize modelview=_modelview;
+@synthesize projection=_projection;
+@synthesize activePalette=_activePalette;
+@synthesize paletteMatrices=_paletteMatrices;
+@synthesize maxPaletteSize=_maxPaletteSize;
 
 -(void) dealloc {
-	[mode release];
-	[modelview release];
-	[projection release];
-	[activePalette release];
-	[paletteMatrices release];
+	[_mode release];
+	[_modelview release];
+	[_projection release];
+	[_activePalette release];
+	[_paletteMatrices release];
 
 	[super dealloc];
-}
-
--(GLuint) paletteMatrixCount { return paletteMatrices ? paletteMatrices.count : 0; }
-
-/** Template method returns an autoreleased instance of a palette matrix tracker. */
--(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
-	CC3Assert(NO, @"%@ does not implement the makePaletteMatrix: method.", self);
-	return nil;
-}
-
--(CC3OpenGLESMatrixStack*) paletteAt: (GLuint) index {
-	// If the requested palette matrix hasn't been allocated yet, add it.
-	if (index >= self.paletteMatrixCount) {
-		// Make sure we don't add beyond the max number of texture units for the platform
-		CC3Assert(index < self.engine.platform.maxPaletteMatrices.value,
-				  @"Request for palette matrix index %u exceeds maximum palette size of %u matrices",
-				  index, self.engine.platform.maxPaletteMatrices.value);
-		
-		// Add all palette matrices between the current count and the requested index.
-		for (GLuint i = self.paletteMatrixCount; i <= index; i++) {
-			CC3OpenGLESMatrixStack* pm = [self makePaletteMatrix: i];
-			[pm open];		// Read the initial values
-			if (!paletteMatrices) self.paletteMatrices = [CCArray array];
-			[paletteMatrices addObject: pm];
-			LogTrace(@"%@ added palette matrix %u:\n%@", [self class], i, pm);
-		}
-	}
-	return [paletteMatrices objectAtIndex: index];
 }
 
 -(NSString*) description {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 600];
 	[desc appendFormat: @"%@:", [self class]];
-	[desc appendFormat: @"\n    %@ ", mode];
-	[desc appendFormat: @"\n    %@ ", modelview];
-	[desc appendFormat: @"\n    %@ ", projection];
-	[desc appendFormat: @"\n    %@ ", activePalette];
-	for (id pm in paletteMatrices) [desc appendFormat: @"\n%@", pm];
+	[desc appendFormat: @"\n    %@ ", _mode];
+	[desc appendFormat: @"\n    %@ ", _modelview];
+	[desc appendFormat: @"\n    %@ ", _projection];
+	[desc appendFormat: @"\n    %@ ", _activePalette];
+	for (id pm in _paletteMatrices) [desc appendFormat: @"\n%@", pm];
 	return desc;
 }
 
@@ -211,5 +184,40 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic) {
 -(CC3Matrix4x3*) matrix4x3ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
 
 -(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic { return NULL; }
+
+
+#pragma mark Matrix palette
+
+-(GLuint) paletteMatrixCount { return _paletteMatrices ? _paletteMatrices.count : 0; }
+
+/** Template method returns an autoreleased instance of a palette matrix tracker. */
+-(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
+	CC3Assert(NO, @"%@ does not implement the makePaletteMatrix: method.", self);
+	return nil;
+}
+
+-(CC3OpenGLESMatrixStack*) paletteMatrixAt: (GLuint) index {
+	// If the requested palette matrix hasn't been allocated yet, add it.
+	if (index >= self.paletteMatrixCount) {
+		// Make sure we don't add beyond the max number of texture units for the platform
+		CC3Assert(index < self.maxPaletteSize,
+				  @"Request for palette matrix index %u exceeds maximum palette size of %u matrices",
+				  index, self.maxPaletteSize);
+		
+		// Add all palette matrices between the current count and the requested index.
+		for (GLuint i = self.paletteMatrixCount; i <= index; i++) {
+			CC3OpenGLESMatrixStack* pm = [self makePaletteMatrix: i];
+			[pm open];		// Read the initial values
+			if (!_paletteMatrices) self.paletteMatrices = [CCArray array];
+			[_paletteMatrices addObject: pm];
+			LogTrace(@"%@ added palette matrix %u:\n%@", [self class], i, pm);
+		}
+	}
+	return [_paletteMatrices objectAtIndex: index];
+}
+
+-(void) beginSkinSection {}
+
+-(void) endSkinSection {}
 
 @end

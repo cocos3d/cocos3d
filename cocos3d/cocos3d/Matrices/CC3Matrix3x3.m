@@ -482,10 +482,8 @@ BOOL CC3Matrix3x3InvertAdjoint(CC3Matrix3x3* mtx) {
 	GLfloat det = (mtx->c1r1 * adj.c1r1) + (mtx->c2r1 * adj.c1r2) + (mtx->c3r1 * adj.c1r3);
 	
 	// If determinant is zero, matrix is not invertable.
-	if (det == 0.0f) {
-		LogError(@"%@ is singular and cannot be inverted", NSStringFromCC3Matrix3x3(mtx));
-		return NO;
-	}
+	CC3AssertC(det != 0.0f, @"%@ is singular and cannot be inverted", NSStringFromCC3Matrix3x3(mtx));
+	if (det == 0.0f) return NO;
 	
 	// Divide the classical adjoint matrix by the determinant and set back into original matrix.
 	GLfloat ooDet = 1.0 / det;		// Turn div into mult for speed

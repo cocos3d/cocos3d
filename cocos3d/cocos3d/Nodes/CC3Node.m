@@ -701,7 +701,8 @@
 	return desc;
 }
 
-#pragma mark Matierial coloring
+
+#pragma mark Matierial properties
 
 -(BOOL) shouldUseLighting {
 	for (CC3Node* child in children) if (child.shouldUseLighting) return YES;
@@ -826,6 +827,18 @@
 
 -(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
 	for (CC3Node* child in children) child.shaderContext = shaderContext;
+}
+
+-(CC3GLProgram*) shaderProgram {
+	for (CC3Node* child in children) {
+		CC3GLProgram* program = child.shaderProgram;
+		if (program) return program;
+	}
+	return nil;
+}
+
+-(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+	for (CC3Node* child in children) child.shaderProgram = shaderProgram;
 }
 
 

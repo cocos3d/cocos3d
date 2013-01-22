@@ -51,8 +51,8 @@
 	NSString* _name;
 	GLenum _type;
 	GLenum _semantic : 16;
-	GLuint _index : 8;
-	GLint _location : 8;
+	GLint _location : 16;
+	GLuint _index : 16;
 	GLint _size : 8;
 	GLuint _semanticIndex : 8;
 }

@@ -130,9 +130,7 @@
 
 -(id) initForProgram: (CC3GLProgram*) program {
 	if ( (self = [super init]) ) {
-		self.program = program;								// retained
-		_uniforms = nil;
-		_uniformsByName = nil;
+		self.program = program;								// retained & will clear overrides
 	}
 	return self;
 }

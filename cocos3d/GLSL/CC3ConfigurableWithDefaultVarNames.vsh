@@ -57,7 +57,12 @@
 #define MAX_TEXTURES			2
 #define MAX_LIGHTS				2
 
+// Maximum bones per skin section (batch). This is set here to the platform maximum.
+// You can reduce this to improve efficiency if your models need fewer bones in each batch.
+#define MAX_BONES_PER_VERTEX	11
+
 precision mediump float;
+
 
 //-------------- STRUCTURES ----------------------
 
@@ -121,7 +126,7 @@ struct Point {
 // Environment matrices
 uniform mat4 u_cc3MtxModelView;				/**< Current modelview matrix. */
 uniform mat3 u_cc3MtxModelViewInvTran;		/**< Inverse-transpose of current modelview rotation matrix. */
-uniform highp mat4 u_cc3MtxModelViewProj;		/**< Current modelview-projection matrix. */
+uniform highp mat4 u_cc3MtxProj;			/**< Projection matrix. */
 
 // Material properties
 uniform vec4 u_cc3Color;					/**< Color when lighting & materials are not in use. */
@@ -131,6 +136,11 @@ uniform Material u_cc3Material;				/**< The material being applied to the mesh. 
 uniform bool u_cc3IsUsingLighting;			/**< Indicates whether any lighting is in use. */
 uniform vec4 u_cc3SceneLightColorAmbient;	/**< Ambient light color of the scene. */
 uniform Light u_cc3Lights[MAX_LIGHTS];		/**< Array of lights. */
+
+// Vertex skinning properties
+uniform lowp int u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
+uniform highp mat4 u_cc3BoneMatrices[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
+uniform mat3 u_cc3BoneMatricesInvTran[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices. */
 
 // Uniforms describing vertex attributes.
 uniform bool u_cc3HasVertexNormal;			/**< Whether vertex normal attribute is available. */
@@ -143,15 +153,17 @@ uniform Point u_cc3Points;					/**< Point parameters. */
 
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;			/**< Vertex position. */
-attribute vec3 a_cc3Normal;					/**< Vertex normal. */
-attribute vec3 a_cc3Tangent;				/**< Vertex tangent. */
-attribute vec4 a_cc3Color;					/**< Vertex color. */
-attribute float a_cc3PointSize;				/**< Vertex point size. */
-attribute vec2 a_cc3TexCoord0;				/**< Vertex texture coordinate for texture unit 0. */
-attribute vec2 a_cc3TexCoord1;				/**< Vertex texture coordinate for texture unit 1. */
-attribute vec2 a_cc3TexCoord2;				/**< Vertex texture coordinate for texture unit 2. */
-attribute vec2 a_cc3TexCoord3;				/**< Vertex texture coordinate for texture unit 3. */
+attribute highp vec4 a_cc3Position;		/**< Vertex position. */
+attribute vec3 a_cc3Normal;				/**< Vertex normal. */
+attribute vec3 a_cc3Tangent;			/**< Vertex tangent. */
+attribute vec4 a_cc3Color;				/**< Vertex color. */
+attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
+attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
+attribute float a_cc3PointSize;			/**< Vertex point size. */
+attribute vec2 a_cc3TexCoord0;			/**< Vertex texture coordinate for texture unit 0. */
+attribute vec2 a_cc3TexCoord1;			/**< Vertex texture coordinate for texture unit 1. */
+attribute vec2 a_cc3TexCoord2;			/**< Vertex texture coordinate for texture unit 2. */
+attribute vec2 a_cc3TexCoord3;			/**< Vertex texture coordinate for texture unit 3. */
 
 //-------------- VARYING VARIABLES OUTPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
@@ -164,21 +176,41 @@ const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec3 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
-vec3 vtxNormal;				/**< The vertex normal. */
+highp vec4 vtxPosEye;		/**< The vertex position in eye coordinates. High prec required for point sizing calcs. */
+vec3 vtxNormEye;			/**< The vertex normal in eye coordinates. */
 vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
 vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
 
 
 //-------------- FUNCTIONS ----------------------
 
-/** Returns the vertex position in eye space, if it is needed. Otherwise, returns the zero vector. */
-highp vec3 vertexPositionInEyeSpace() {
-	if((u_cc3IsUsingLighting && u_cc3HasVertexNormal) ||
-	   (u_cc3Points.isDrawingPoints && u_cc3Points.sizeAttenuation != kAttenuationNone))
-		return (u_cc3MtxModelView * a_cc3Position).xyz;
-	else
-		return kVec3Zero;
+/** 
+ * Transforms the vertex position and normal to eye space. Sets the vtxPosEye and vtxNormEye
+ * variables. This function takes into consideration vertex skinning, if it is specified.
+ */
+void vertexToEyeSpace() {
+	if (u_cc3BonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
+		// Copies of the indices and weights attibutes so they can be "rotated"
+		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+		mediump vec4 boneWeights = a_cc3BoneWeights;
+
+		vtxPosEye = vec4(0.0);		// Start at zero to accumulate weighted values
+		vtxNormEye = vec3(0.0);
+		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+			if (i < u_cc3BonesPerVertex) {
+				// Add position and normal contribution from this bone
+				vtxPosEye += u_cc3BoneMatrices[boneIndices.x] * a_cc3Position * boneWeights.x;
+				vtxNormEye += u_cc3BoneMatricesInvTran[boneIndices.x] * a_cc3Normal * boneWeights.x;
+				
+				// "Rotate" the vector components to the next vertex bone index
+				boneIndices = boneIndices.yzwx;
+				boneWeights = boneWeights.yzwx;
+			}
+		}
+	} else {		// No vertex skinning
+		vtxPosEye = u_cc3MtxModelView * a_cc3Position;
+		vtxNormEye = u_cc3MtxModelViewInvTran * a_cc3Normal;
+	}
 }
 
 /** 
@@ -191,7 +223,7 @@ vec4 illuminateWith(int ltIdx) {
 	
 	if (u_cc3Lights[ltIdx].positionEyeSpace.w != 0.0) {
 		// Positional light. Find direction to vertex.
-		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz - vtxPosEye;
+		ltDir = (u_cc3Lights[ltIdx].positionEyeSpace - vtxPosEye).xyz;
 		
 		if (u_cc3Lights[ltIdx].attenuation != kAttenuationNone) {
 			float ltDist = length(ltDir);
@@ -217,10 +249,10 @@ vec4 illuminateWith(int ltIdx) {
 	vec4 vtxColor = vec4(0.0);
     if(attenuation > 0.0) {
 		vtxColor += (u_cc3Lights[ltIdx].ambientColor * matColorAmbient);
-		vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormal, ltDir)));
+		vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
 		
 		// Project normal onto half-plane vector to determine specular component
-		float specProj = dot(vtxNormal, normalize(ltDir + kHalfPlaneOffset));
+		float specProj = dot(vtxNormEye, normalize(ltDir + kHalfPlaneOffset));
 		if (specProj > 0.0) {
 			vtxColor += (pow(specProj, u_cc3Material.shininess) *
 						 u_cc3Material.specularColor *
@@ -282,7 +314,7 @@ float pointSize() {
 	if (u_cc3Points.isDrawingPoints) {
 		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
 		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
-			float ptDist = length(vtxPosEye);
+			float ptDist = length(vtxPosEye.xyz);
 			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
 			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));
 		}
@@ -298,15 +330,14 @@ void main() {
 	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.ambientColor;
 	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.diffuseColor;
 
-	// The vertex position in eye space. If not needed, it is simply set to the zero vector.
-	vtxPosEye = vertexPositionInEyeSpace();
-
+	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
+	vertexToEyeSpace();
+	
 	// Material & lighting
 	if (u_cc3IsUsingLighting && u_cc3HasVertexNormal) {
 		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
-		vtxNormal = u_cc3MtxModelViewInvTran * a_cc3Normal;
-		if (u_cc3ShouldRescaleNormal) vtxNormal = normalize(vtxNormal);	// TODO - rescale without having to normalize
-		if (u_cc3ShouldNormalizeNormal) vtxNormal = normalize(vtxNormal);
+		if (u_cc3ShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+		if (u_cc3ShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
 
 		v_color = illuminate();
 	} else {
@@ -319,7 +350,7 @@ void main() {
 //	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
 //	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
 	
-	gl_Position = u_cc3MtxModelViewProj * a_cc3Position;
+	gl_Position = u_cc3MtxProj * vtxPosEye;
 	
 	gl_PointSize = pointSize();
 }

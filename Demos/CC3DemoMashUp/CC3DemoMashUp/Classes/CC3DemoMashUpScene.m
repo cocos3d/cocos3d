@@ -83,6 +83,8 @@
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
 #define kEtchedMaskPFXEffect			@"EtchedEffect"
+#define kRunnerPFXFile					@"man.pfx"
+#define kRunnerPFXEffect				@"SkinEffect"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -296,9 +298,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 //	[self addFog];					// Adds fog to the scene. This is initially invisible.
 	
-//	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
+	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
 	
-//	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
+	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
 	
 	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
@@ -1435,8 +1437,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// aligned to upside-down textures so that the texture coordinates will be flipped upside
 	// down automatically and the textures will appear right-way up.
 	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
-	runner.resource = [CC3PODResource resourceFromFile:kRunningManPODFile
-					  expectsVerticallyFlippedTextures:NO];
+	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
+					  expectsVerticallyFlippedTextures: NO];
 
 	// Remove the light provided in the POD so that it does not contribute to the
 	// lighting of the scene. We don't remove the POD's camera, but we rename it
@@ -1933,12 +1935,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
 	
-	// Create a material, apply a PFX effect to it, and attach it to the model. This will attach
-	// the GL program context and textures as defined in the PFX effect, which will run shaders
-	// dedicated to bump-mapping.
-	CC3Material* maskMat = [CC3Material material];
-	[maskMat applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
-	mask.material = maskMat;
+	// Apply a PFX effect to the mask node. This will attach the GL program and texture
+	// defined in the PFX effect, which will run shaders dedicated to bump-mapping.
+	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
 
 	// Instead of applying a dedicated bump-mapping shaders via a PFX file, you can also just load
 	// the textures into the material (bump-mapped texture first), configure it for bump-mapping,

@@ -221,11 +221,17 @@
 // Assertions
 #if NS_BLOCK_ASSERTIONS
 #	define CC3Assert(test, fmt, ...)
+#	define CC3AssertC(test, fmt, ...)
 #else
-#	define CC3Assert(test, fmt, ...)	\
-	if (!(test)) {						\
-		LogError(fmt, ##__VA_ARGS__);	\
-		NSAssert(NO, @"See previous logged error.");					\
+#	define CC3Assert(test, fmt, ...)					\
+	if (!(test)) {										\
+		LogError(fmt, ##__VA_ARGS__);					\
+		NSAssert(NO, @"See previous logged error.");	\
+	}
+#	define CC3AssertC(test, fmt, ...)					\
+	if (!(test)) {										\
+		LogError(fmt, ##__VA_ARGS__);					\
+		NSCAssert(NO, @"See previous logged error.");	\
 	}
 #endif
 
