@@ -53,6 +53,7 @@ extern "C" {
 		LogRez(@"\t%@ %@ from: %@", (elemSize ? @"Creating" : @"Skipping"), [self class], NSStringFromCPODData(pcd));
 		if (elemSize) {
 			self.elementType = GLElementTypeFromEPVRTDataType(pcd->eType);
+			self.shouldNormalizeContent = CC3ShouldNormalizeEPVRTDataType(pcd->eType);
 			self.elementSize = elemSize;
 			self.vertexStride = pcd->nStride;
 			self.vertexCount = psm->nNumVertex;

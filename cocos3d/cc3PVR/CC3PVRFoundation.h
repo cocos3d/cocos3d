@@ -70,6 +70,13 @@ NSString* NSStringFromCPVRTBoneBatches(PODClassPtr aCPVRTBoneBatches);
  */
 GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType);
 
+/** 
+ * Returns whether the specified is a data type that should be normalized during drawing.
+ *
+ * Optional vertex content normalization is a property of OpenGL ES 2.0 vertex attributes.
+ */
+BOOL CC3ShouldNormalizeEPVRTDataType(uint ePVRTDataType);
+
 /**
  * Returns the name of the specified ePVRTDataType enumeration.
  *

@@ -170,6 +170,7 @@ GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType) {
 		case EPODDataUnsignedByteNorm:
 		case EPODDataARGB:
 		case EPODDataRGBA:
+		case EPODDataUBYTE4:
 			return GL_UNSIGNED_BYTE;
 		case EPODDataShort:
 		case EPODDataShortNorm:
@@ -179,7 +180,21 @@ GLenum GLElementTypeFromEPVRTDataType(uint ePVRTDataType) {
 			return GL_UNSIGNED_SHORT;
 		default:
 			LogError(@"Unknown EPVRTDataType '%@'", NSStringFromEPVRTDataType(ePVRTDataType));
-			return GL_BYTE;
+			return GL_UNSIGNED_BYTE;
+	}
+}
+
+BOOL CC3ShouldNormalizeEPVRTDataType(uint ePVRTDataType) {
+	switch (ePVRTDataType) {
+		case EPODDataByteNorm:
+		case EPODDataUnsignedByteNorm:
+		case EPODDataShortNorm:
+		case EPODDataUnsignedShortNorm:
+		case EPODDataARGB:
+		case EPODDataRGBA:
+			return YES;
+
+		default: return NO;
 	}
 }
 
