@@ -1679,7 +1679,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.touchEnabled = YES;
 	
 	// We don't want the emitter's bounding volume (which will be quite large)
-	// participating in any ray tracing.
+	// participating in any ray casting.
 	emitter.shouldIgnoreRayIntersection = YES;
 
 	// Configure the ranges for the beginning and ending particle size and color.
@@ -1819,7 +1819,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.touchEnabled = YES;
 	
 	// We don't want the emitter's bounding volume (which will be quite large)
-	// participating in any ray tracing.
+	// participating in any ray casting.
 	emitter.shouldIgnoreRayIntersection = YES;
 	
 	// Emitters can be assigned a particle navigator, which is responsible for configuring the

@@ -3123,21 +3123,19 @@ typedef enum {
 -(BOOL) doesIntersectNode: (CC3Node*) otherNode;
 
 /**
- * Indicates whether this bounding volume should ignore intersections from rays.
- * If this property is set to YES, intersections with rays will be ignored, and
- * the doesIntersectGlobalRay: method will always return NO, and the
- * locationOfGlobalRayIntesection: and globalLocationOfGlobalRayIntesection:
- * properties will always return kCC3VectorNull.
+ * Indicates whether this bounding volume should ignore intersections from rays. If this property
+ * is set to YES, intersections with rays will be ignored, and the doesIntersectGlobalRay: method
+ * will always return NO, and the locationOfGlobalRayIntesection: and
+ * globalLocationOfGlobalRayIntesection: properties will always return kCC3VectorNull.
  *
  * The initial value of this property is NO, and most of the time this is sufficient.
  *
- * For some uses, such as the bounding volumes of nodes that should be excluded from
- * puncturing from touch selection rays, such as particle emitters, it might make
- * sense to set this property to YES, so that the bounding volume is not affected
- * by rays from touch events.
+ * For some uses, such as nodes that should be excluded from puncturing from touch selection rays,
+ * such as particle emitters, it might make sense to set this property to YES, so that the bounding
+ * volume is not affected by rays from touch events.
  *
- * This property delegates to the bounding volume. Setting this property will
- * have no effect if this node does not have a bounding volume assigned.
+ * This property delegates to the bounding volume. If this node has no bounding volume,
+ * this property will always return YES, and setting this property will have no effect.
  */
 @property(nonatomic, assign) BOOL shouldIgnoreRayIntersection;
 

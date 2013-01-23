@@ -111,8 +111,7 @@ CC3Vector4 CC3RayIntersectionOfBoundingBoxSide(CC3Ray aRay, CC3BoundingBox bb, C
 	
 	// If ray is parallel to edge plane, or if edge plane is behind the ray
 	// start, we have no intersection, so return the previous intersection.
-	if (CC3Vector4IsNull(sideHit)) return prevHit;
-	if (sideHit.w < 0.0f) return prevHit;
+	if (sideHit.w < 0.0f || CC3Vector4IsNull(sideHit)) return prevHit;
 	
 	// To avoid missed intersections due to rounding errors when checking if the
 	// intersection is within the bounding box, force the side plane intersection

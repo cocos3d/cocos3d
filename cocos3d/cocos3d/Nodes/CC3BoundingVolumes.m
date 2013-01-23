@@ -236,11 +236,11 @@
 -(BOOL) isRay: (CC3Ray) aRay behindAllOtherPlanesAtPunctureOfPlaneAt: (GLuint) planeIndex {
 	CC3Plane* pArray = self.planes;
 	CC3Vector4 pLoc4 = CC3RayIntersectionWithPlane(aRay, pArray[planeIndex]);
-	CC3Vector punctureLoc = CC3VectorFromTruncatedCC3Vector4(pLoc4);
-	
-	// Ray is parallel to plane and won't puncture it.
-	if (CC3VectorIsNull(punctureLoc)) return NO;
 
+	// If ray is pointed away from, or is parallel to the plane, it won't puncture it.
+	if (pLoc4.w < 0.0f || CC3Vector4IsNull(pLoc4)) return NO;
+
+	CC3Vector punctureLoc = CC3VectorFromTruncatedCC3Vector4(pLoc4);
 	GLuint pCnt = self.planeCount;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		if ( (pIdx != planeIndex) &&
@@ -254,8 +254,8 @@
  * is behind all of the other planes, then the ray intersects this bounding volume.
  */
 -(BOOL) doesIntersectRay: (CC3Ray) aRay {
-	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectRay:", self);
 	if (shouldIgnoreRayIntersection) return NO;
+	CC3Assert(self.planes, @"%@ does not use planes. You must add planes or override method doesIntersectRay:", self);
 	GLuint pCnt = self.planeCount;
 	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		if ( [self isRay: aRay behindAllOtherPlanesAtPunctureOfPlaneAt: pIdx] ) {
@@ -1196,62 +1196,44 @@
 #pragma mark Intersection testing
 
 -(BOOL) doesIntersect: (CC3BoundingVolume*) aBoundingVolume {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( ![bv doesIntersect: aBoundingVolume] ) {
-			return NO;
-		}
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
+		if( ![bv doesIntersect: aBoundingVolume] ) return NO;
 	return YES;
 }
 
 -(BOOL) doesIntersectLocation: (CC3Vector) aLocation {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( ![bv doesIntersectLocation: aLocation] ) {
-			return NO;
-		}
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
+		if( ![bv doesIntersectLocation: aLocation] ) return NO;
 	return YES;
 }
 
 -(BOOL) doesIntersectRay: (CC3Ray) aRay {
 	if (shouldIgnoreRayIntersection) return NO;
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( ![bv doesIntersectRay: aRay] ) {
-			return NO;
-		}
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
+		if( ![bv doesIntersectRay: aRay] ) return NO;
 	return YES;
 }
 
 -(BOOL) isInFrontOfPlane: (CC3Plane) aPlane {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( [bv isInFrontOfPlane: aPlane] ) {
-			return YES;
-		}
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
+		if( [bv isInFrontOfPlane: aPlane] ) return YES;
 	return NO;
 }
 
 -(BOOL) doesIntersectSphere: (CC3Sphere) aSphere
 					   from: (CC3BoundingVolume*) otherBoundingVolume {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( ![bv doesIntersectSphere: aSphere from: otherBoundingVolume] ) {
-			return NO;
-		}
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
+		if( ![bv doesIntersectSphere: aSphere from: otherBoundingVolume] ) return NO;
 	return YES;
 }
 
 -(BOOL) doesIntersectConvexHullOf: (GLuint) numOtherPlanes
 						   planes: (CC3Plane*) otherPlanes
 							 from: (CC3BoundingVolume*) otherBoundingVolume {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
 		if( ![bv doesIntersectConvexHullOf: numOtherPlanes
 									planes: otherPlanes
-									  from: otherBoundingVolume] ) {
-			return NO;
-		}
-	}
+									  from: otherBoundingVolume] ) return NO;
 	return YES;
 }
 

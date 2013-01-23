@@ -73,6 +73,8 @@ cocos3d 2.0.0 - 2013/01/31
 
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
     - CC3Assert ensures the assertion message is logged to the console prior to raising the assertion exception.
+- Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.
+    - CC3Node shouldIgnoreRayIntersection property now returns YES if the node has no bounding volume.
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 - Upgraded PowerVR POD library to version 3.0.
 

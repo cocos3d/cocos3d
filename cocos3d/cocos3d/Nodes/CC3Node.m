@@ -1963,7 +1963,7 @@ static GLuint lastAssignedNodeTag;
 #pragma mark Intersections and collision detection
 
 -(BOOL) shouldIgnoreRayIntersection {
-	return boundingVolume ? boundingVolume.shouldIgnoreRayIntersection : NO;
+	return boundingVolume ? boundingVolume.shouldIgnoreRayIntersection : YES;
 }
 
 -(void) setShouldIgnoreRayIntersection: (BOOL) shouldIgnore {
@@ -1983,7 +1983,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(CC3Vector) locationOfGlobalRayIntesection: (CC3Ray) aRay {
-	if ( !boundingVolume || self.shouldIgnoreRayIntersection ) return kCC3VectorNull;
+	if (self.shouldIgnoreRayIntersection) return kCC3VectorNull;
 
 	CC3Ray localRay = [self.transformMatrixInverted transformRay: aRay];
 	return [boundingVolume locationOfRayIntesection: localRay]; 

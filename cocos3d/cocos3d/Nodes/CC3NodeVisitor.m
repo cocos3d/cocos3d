@@ -771,7 +771,9 @@
 /**
  * Utility method that returns whether the specified node is punctured by the ray.
  *   - Returns NO if the node has no bounding volume.
- *   - Returns NO if the ray starts within the bounding volume, unless the
+ *   - Returns NO if the node is invisible, unless the shouldPunctureInvisibleNodes property
+ *     has been set to YES.
+ *   - Returns NO if the ray starts within the bounding volume, unless the 
  *     shouldPunctureFromInside property has been set to YES.
  */
 -(BOOL) doesPuncture: (CC3Node*) aNode {
