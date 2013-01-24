@@ -163,7 +163,14 @@ static Class _instantiationClass = nil;
 
 -(BOOL) resizeFromLayer: (CAEAGLLayer*) layer {
 	[self deletePickerBuffers];
-	return [super resizeFromLayer: layer];
+	BOOL wasSuccessful = [super resizeFromLayer: layer];
+	
+	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8_OES).
+	// Attach it to the framebuffer.
+	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8_OES || depthFormat_ == GL_UNSIGNED_INT_24_8_OES)) {
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
+	}
+	return wasSuccessful;
 }
 
 -(void) deletePickerBuffers {

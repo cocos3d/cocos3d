@@ -469,9 +469,7 @@
 
 -(void) updateRelativeLightIntensities {
 	ccColor4F totLgt = self.totalIllumination;
-	for (CC3Light* lgt in lights) {
-		[lgt updateRelativeIntensityFrom: totLgt];
-	}
+	for (CC3Light* lgt in lights) [lgt updateRelativeIntensityFrom: totLgt];
 }
 
 -(BOOL) doesContainShadows { return shadowVisitor != nil; }
@@ -480,19 +478,14 @@
 -(void) drawShadows {
 	if (self.doesContainShadows) {
 		[CC3OpenGLESEngine engine].state.clearStencil = 0;
-		for (CC3Light* lgt in lights) {
-			[lgt drawShadowsWithVisitor: shadowVisitor];
-		}
+		for (CC3Light* lgt in lights) [lgt drawShadowsWithVisitor: shadowVisitor];
 	}
 }
 
 /** If this scene contains fog, draw it, otherwise unbind fog from the GL engine. */
 -(void) drawFog {
-	if (fog) {
-		[fog draw];
-	} else {
-		[CC3Fog unbind];
-	}
+	if (fog) [fog draw];
+	else [CC3Fog unbind];
 }
 
 /**
@@ -688,15 +681,9 @@
  */
 -(void) checkNeedShadowVisitor {
 	BOOL needsShadowVisitor = NO;
-	for (CC3Light* lgt in lights) {
-		needsShadowVisitor |= lgt.hasShadows;
-	}
-	if (needsShadowVisitor && !shadowVisitor) {
-		self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
-	}
-	if (!needsShadowVisitor && shadowVisitor) {
-		self.shadowVisitor = nil;
-	}
+	for (CC3Light* lgt in lights) needsShadowVisitor |= lgt.hasShadows;
+	if (needsShadowVisitor && !shadowVisitor) self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
+	if (!needsShadowVisitor && shadowVisitor) self.shadowVisitor = nil;
 }
 
 

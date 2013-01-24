@@ -131,11 +131,8 @@
 	}
 
 	CCDirector* dir = CCDirector.sharedDirector;
-	if(dir.runningScene) {
-		[dir replaceScene: scene];
-	} else {
-		[dir runWithScene: scene];
-	}
+	if(dir.runningScene) [dir replaceScene: scene];
+	else [dir runWithScene: scene];
 }
 
 /**

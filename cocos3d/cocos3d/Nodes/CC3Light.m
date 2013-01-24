@@ -516,9 +516,7 @@
 		LogTrace(@"%@ drawing %u shadows", self, shadows.count);
 		[self configureStencilParameters: visitor];
 		
-		for (CC3ShadowVolumeMeshNode* sv in shadows) {
-			[sv drawToStencilWithVisitor: visitor];
-		}
+		for (CC3ShadowVolumeMeshNode* sv in shadows) [sv drawToStencilWithVisitor: visitor];
 		
 		[self paintStenciledShadowsWithVisitor: visitor];
 		[self cleanupStencilParameters: visitor];
@@ -551,9 +549,7 @@
 	
 	// Clear any non-zero values from the stencil buffer as we paint the shadow.
 	// This saves having to make the effort to clear the stencil buffer on the next round.
-	[glesState.stencilOperation applyStencilFail: GL_ZERO
-									  andDepthFail: GL_ZERO
-									  andDepthPass: GL_ZERO];
+	[glesState.stencilOperation applyStencilFail: GL_ZERO andDepthFail: GL_ZERO andDepthPass: GL_ZERO];
 	
 	// Set the projection and modelview matrices to identity to transform the simple
 	// rectangular stenciled shadow painter mesh so that it covers the full viewport.
@@ -580,9 +576,7 @@
  */
 -(void) cleanupShadows {
 	CCArray* myShadows = [shadows copy];
-	for (CC3Node* sv in myShadows) {
-		[sv remove];
-	}
+	for (CC3Node* sv in myShadows) [sv remove];
 	[myShadows release];
 }
 
