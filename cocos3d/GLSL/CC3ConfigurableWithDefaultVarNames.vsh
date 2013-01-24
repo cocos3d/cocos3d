@@ -171,7 +171,8 @@ varying lowp vec4 v_color;					/**< Fragment base color. */
 varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
 
 //-------------- CONSTANTS ----------------------
-const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
+const vec3 kVec3Zero = vec3(0.0);
+const vec4 kVec4Zero = vec4(0.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
@@ -194,7 +195,7 @@ void vertexToEyeSpace() {
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 
-		vtxPosEye = vec4(0.0);		// Start at zero to accumulate weighted values
+		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
 		vtxNormEye = vec3(0.0);
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
@@ -214,56 +215,64 @@ void vertexToEyeSpace() {
 }
 
 /** 
- * Returns the portion of vertex color attributed to illumination of
- * the material by the light at the specified index.
+ * Returns the portion of vertex color attributed to illumination of the material by the light at the
+ * specified index, taking into consideration attenuation due to distance and spotlight dispersion.
  */
 vec4 illuminateWith(int ltIdx) {
-	vec3 ltDir;
-	float attenuation = 1.0;
+	// The use of high precision on most float variables is required due to the nature of the
+	// attenuation calculations!
+	highp vec3 ltDir;
+	highp float intensity = 1.0;
 	
 	if (u_cc3Lights[ltIdx].positionEyeSpace.w != 0.0) {
-		// Positional light. Find direction to vertex.
+		// Positional light. Find the direction from vertex to light.
 		ltDir = (u_cc3Lights[ltIdx].positionEyeSpace - vtxPosEye).xyz;
 		
+		// Calculate intensity due to distance attenuation (must be performed in high precision)
 		if (u_cc3Lights[ltIdx].attenuation != kAttenuationNone) {
-			float ltDist = length(ltDir);
-			vec3 attenuationEquation = vec3(1.0, ltDist, ltDist * ltDist);
-			attenuation = 1.0 / dot(attenuationEquation, u_cc3Lights[ltIdx].attenuation);
+			highp float ltDist = length(ltDir);
+			highp vec3 distAtten = vec3(1.0, ltDist, ltDist * ltDist);
+			highp float distIntensity = 1.0 / dot(distAtten, u_cc3Lights[ltIdx].attenuation);	// needs highp
+			intensity *= min(abs(distIntensity), 1.0);
 		}
 		ltDir = normalize(ltDir);
 		
-		// Determine attenuation due to spotlight component
+		// Determine intensity due to spotlight component
 		if (u_cc3Lights[ltIdx].spotCutoffAngleCosine >= 0.0) {
-			float spotAttenuation = dot(-ltDir, u_cc3Lights[ltIdx].spotDirectionEyeSpace);
-			spotAttenuation = (spotAttenuation >= u_cc3Lights[ltIdx].spotCutoffAngleCosine)
-									? pow(spotAttenuation, u_cc3Lights[ltIdx].spotExponent)
-									: 0.0;
-			attenuation *= spotAttenuation;
+			highp float cosEyeDir = -dot(ltDir, u_cc3Lights[ltIdx].spotDirectionEyeSpace);
+			highp float spotIntensity = (cosEyeDir >= u_cc3Lights[ltIdx].spotCutoffAngleCosine)
+											? pow(cosEyeDir, u_cc3Lights[ltIdx].spotExponent)
+											: 0.0;
+			intensity *= spotIntensity;
 		}
     } else {
 		// Directional light. Vector is expected to be normalized!
 		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz;
     }
 	
+	// If no light intensity, short-circuit and return no color
+	if (intensity <= 0.0) return kVec4Zero;
+	
 	// Employ lighting equation to calculate vertex color
-	vec4 vtxColor = vec4(0.0);
-    if(attenuation > 0.0) {
-		vtxColor += (u_cc3Lights[ltIdx].ambientColor * matColorAmbient);
-		vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
-		
-		// Project normal onto half-plane vector to determine specular component
-		float specProj = dot(vtxNormEye, normalize(ltDir + kHalfPlaneOffset));
-		if (specProj > 0.0) {
-			vtxColor += (pow(specProj, u_cc3Material.shininess) *
-						 u_cc3Material.specularColor *
-						 u_cc3Lights[ltIdx].specularColor);
-		}
-		vtxColor *= attenuation;
-    }
-    return vtxColor;
+	vec4 vtxColor = (u_cc3Lights[ltIdx].ambientColor * matColorAmbient);
+	vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
+	
+	// Project normal onto half-plane vector to determine specular component
+	float specProj = dot(vtxNormEye, normalize(ltDir + kHalfPlaneOffset));
+	if (specProj > 0.0) {
+		vtxColor += (pow(specProj, u_cc3Material.shininess) *
+					 u_cc3Material.specularColor *
+					 u_cc3Lights[ltIdx].specularColor);
+	}
+
+	
+	if (intensity > 1.0) return vec4(1.0, 0.0, 0.0, 1.0);
+
+	// Return the attenuated vertex color
+	return vtxColor * intensity;
 }
 
-/** 
+/**
  * Returns the direction to the specified light in either tangent space coordinates or model-space
  * coordinates, depending on whether per-vertex tangents have been supplied. The associated normal-map
  * texture must match this and specify its normals in either tangent-space or model-space.

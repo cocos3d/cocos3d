@@ -804,17 +804,13 @@
 -(CC3Vector) globalLightLocation {
 	for (CC3Node* child in children) {
 		CC3Vector cgll = child.globalLightLocation;
-		if ( !CC3VectorsAreEqual(cgll, kCC3VectorZero) ) {
-			return cgll;
-		}
+		if ( !CC3VectorsAreEqual(cgll, kCC3VectorZero) ) return cgll;
 	}
 	return kCC3VectorZero;
 }
 
 -(void) setGlobalLightLocation: (CC3Vector) aDirection {
-	for (CC3Node* child in children) {
-		child.globalLightLocation = aDirection;
-	}
+	for (CC3Node* child in children) child.globalLightLocation = aDirection;
 }
 
 -(CC3GLProgramContext*) shaderContext {

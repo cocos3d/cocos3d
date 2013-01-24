@@ -231,7 +231,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * of template methods. If you want to play with not loading certain elements, simply comment
  * out one the invocations of these template methods within this method.
  */
-#if CC3_CC2_2
 -(void) initializeScene {
 	
 	// Set up any initial state tracked by this subclass
@@ -296,126 +295,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addSpotlight];			// Add a spotlight to the camera.
 									// This spotlight will be turned on when the sun is turned off.
 	
-//	[self addFog];					// Adds fog to the scene. This is initially invisible.
-	
-	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
-	
-	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
-	
-	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-	
-	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-	
-	[self configureLighting];		// Set up the lighting
-	[self configureCamera];			// Check out some interesting camera options.
-	
-	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex data in main memory because it is now
-	// redundant. However, because we can add shadow volumes dynamically to any node,
-	// we need to keep the vertex location, index and skinning data of all meshes
-	// around to build shadow volumes. If we had added the shadow volumes before here,
-	// we wouldn't have to retain this data.
-	[self retainVertexLocations];
-	[self retainVertexIndices];
-	[self retainVertexWeights];
-	[self retainVertexMatrixIndices];
-	[self createGLBuffers];
-	[self releaseRedundantContent];
-	
-	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
-	// during debugging, or to display the bounding volumes, used for collision detection and
-	// visual culling, uncomment one or more of the following lines. The first line displays
-	// short descriptive text for each node (including class, node name & tag). The second line
-	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
-	// line shows the bounding boxes of all nodes, including those with local content AND
-	// structural nodes. The fourth line displays the bounding volumes of each node. Bounding
-	// volumes are used to determine when a node is within the camera frustum, and thus appears
-	// on-screen. Nodes that are not visible on screen are not rendered. Bounding volumes are
-	// also used for collision detection. The bounding volume of most nodes (except the globe)
-	// contains both a spherical and bounding-box bounding volume to optimize testing.
-	// For something extra cool, touch the robot arm to see the bounding volume of the particle
-	// emitter grow and shrink dynamically. Use the joystick controls to back the camera away to
-	// get the full effect. You can also turn on any of these properties at a more granular level
-	// by using these and similar methods on individual nodes or node structures. See the CC3Node
-	// class notes. This family of properties can be particularly useful during development to
-	// track down display issues.
-	//	self.shouldDrawAllDescriptors = YES;
-	//	self.shouldDrawAllLocalContentWireframeBoxes = YES;
-	//	self.shouldDrawAllWireframeBoxes = YES;
-	//	self.shouldDrawAllBoundingVolumes = YES;
-	
-	// The full node structure of the scene is logged using the following line.
-	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
-}
-#endif
-
-#if CC3_CC2_1
--(void) initializeScene {
-	
-	// Set up any initial state tracked by this subclass
-	[self initCustomState];
-	
-	[self addGround];				// Add a ground plane to provide some perspective to the user
-	
-	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
-	
-	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
-
-	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
-
-	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
-	
-	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
-	
-	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
-
-	[self addRobot];				// Add an animated robot arm, a light, and a camera
-	
-	[self addBitmapLabel];			// Add a bitmapped string label
-	
-	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
-	
-//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
-									// point particles hanging in the scene.
-	
-//	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
-									// hanging in the scene.
-	
-	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
-									// The hose is turned on and off when the robot arm is touched.
-	
-	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
-									// The hose is turned on and off when the robot arm is touched.
-	
-	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
-									// containing transparency. The band as a whole fades in and out
-									// periodically. This demonstrates managing opacity and translucency
-									// at both the texture and material level.
-
-	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
-	
-	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
-	
-	[self addMascots];				// Add the cocos3d mascot.
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
-									// and floating head. This must happen after main light is
-									// loaded from the POD file (in addRobot).
-
-	[self addWoodenSign];			// Add the multi-texture wooden sign. 
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addFloatingHead];			// Add the bump-mapped floating head. 
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
-
-	[self addSpotlight];			// Add a spotlight to the camera.
-									// This spotlight will be turned on when the sun is turned off.
-
 	[self addFog];					// Adds fog to the scene. This is initially invisible.
 	
 	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
@@ -469,7 +348,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// The full node structure of the scene is logged using the following line.
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
 }
-#endif
 
 /** Various options for configuring interesting camera behaviours. */
 -(void) configureCamera {
@@ -2276,9 +2154,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		fog.visible = NO;
 		sun.visible = YES;
 	}
-	// If the sun is shining, turn on the CC3Light from the POD file, and turn off the
-	// spotlight, and vice-versa if the sun is not shining. Set the target of the bump-map
-	// tracker to be the active light source.
+	// If the sun is shining, turn on the CC3Light from the POD file, and turn off the spotlight,
+	// and vice-versa if the sun is not shining. Set the target of the bump-map tracker to be the
+	// active light source.
 	podLight.visible = sun.visible;
 	spotLight.visible = !podLight.visible;
 	bumpMapLightTracker.target = podLight.visible ? podLight : spotLight;
