@@ -728,7 +728,7 @@
 			bSum += childColor.b;
 			aSum += childColor.a;
 		}
-		col = CCC4FMake(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
+		col = ccc4f(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
 	}
 	return col;
 }
@@ -750,7 +750,7 @@
 			bSum += childColor.b;
 			aSum += childColor.a;
 		}
-		col = CCC4FMake(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
+		col = ccc4f(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
 	}
 	return col;
 }
@@ -772,7 +772,7 @@
 			bSum += childColor.b;
 			aSum += childColor.a;
 		}
-		col = CCC4FMake(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
+		col = ccc4f(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
 	}
 	return col;
 }
@@ -794,7 +794,7 @@
 			bSum += childColor.b;
 			aSum += childColor.a;
 		}
-		col = CCC4FMake(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
+		col = ccc4f(rSum / childCnt, gSum / childCnt, bSum / childCnt, aSum / childCnt);
 	}
 	return col;
 }

@@ -1674,8 +1674,10 @@ static inline NSString* NSStringFromCCC4B(ccColor4B rgba) {
 	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", rgba.r, rgba.g, rgba.b, rgba.a];
 }
 
+#if COCOS2D_VERSION < 0x010100		// cocos2d 1.0 - exists in cocos2d versions above
 /** Convenience alias macro to create ccColor4F with less keystrokes. */
 #define ccc4f(R,G,B,A) CCC4FMake((R),(G),(B),(A))
+#endif
 
 /** Returns a ccColor4F structure constructed from the specified components */
 static inline ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
@@ -1796,7 +1798,7 @@ static inline ccColor4F CCC4FDifference(ccColor4F minuend, ccColor4F subtrahend)
  * Each of the resulting color components is clamped to be between 0.0 and 1.0.
  */
 static inline ccColor4F CCC4FUniformTranslate(ccColor4F rgba, GLfloat offset) {
-	return CCC4FAdd(rgba, CCC4FMake(offset, offset, offset, offset));
+	return CCC4FAdd(rgba, ccc4f(offset, offset, offset, offset));
 }
 
 /**
@@ -1832,10 +1834,10 @@ static inline ccColor4F CCC4FModulate(ccColor4F rgba, ccColor4F modulation) {
  * the base color unchanged. A value of one will result in the blend being the same as the blend color.
  */
 static inline ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GLfloat blendWeight) {
-	return CCC4FMake(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
-					 CC3WAVG(baseColor.g, blendColor.g, blendWeight),
-					 CC3WAVG(baseColor.b, blendColor.b, blendWeight),
-					 CC3WAVG(baseColor.a, blendColor.a, blendWeight));
+	return ccc4f(CC3WAVG(baseColor.r, blendColor.r, blendWeight),
+				 CC3WAVG(baseColor.g, blendColor.g, blendWeight),
+				 CC3WAVG(baseColor.b, blendColor.b, blendWeight),
+				 CC3WAVG(baseColor.a, blendColor.a, blendWeight));
 }
 
 /**

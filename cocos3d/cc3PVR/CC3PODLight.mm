@@ -62,7 +62,7 @@ extern "C" {
 			SPODLight* psl = (SPODLight*)[aPODRez lightPODStructAtIndex: self.podContentIndex];
 			LogRez(@"Setting %@ parameters from %@", [self class], NSStringFromSPODLight(psl));
 			self.podTargetIndex = psl->nIdxTarget;
-			self.diffuseColor = CCC4FMake(psl->pfColour[0], psl->pfColour[1], psl->pfColour[2], 1.0);
+			self.diffuseColor = ccc4f(psl->pfColour[0], psl->pfColour[1], psl->pfColour[2], 1.0);
 			self.ambientColor = kCC3DefaultLightColorAmbient;
 			self.specularColor = kCC3DefaultLightColorSpecular;
 //			self.ambientColor = kCCC4FBlack;

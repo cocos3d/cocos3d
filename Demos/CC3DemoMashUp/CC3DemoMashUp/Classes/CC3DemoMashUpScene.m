@@ -402,11 +402,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) configureLighting {
 
 	// Set the ambient scene lighting.
-	self.ambientLight = CCC4FMake(0.3, 0.3, 0.3, 1.0);
+	self.ambientLight = ccc4f(0.3, 0.3, 0.3, 1.0);
 
 	// Adjust the relative ambient and diffuse lighting of the main light to
 	// improve realisim, particularly on shadow effects.
-	podLight.diffuseColor = CCC4FMake(0.8, 0.8, 0.8, 1.0);
+	podLight.diffuseColor = ccc4f(0.8, 0.8, 0.8, 1.0);
 	
 	// Another mechansim for adjusting shadow intensities is shadowIntensityFactor.
 	// For better effect, set here to a value less than one to lighten the shadows
@@ -656,7 +656,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	texCube.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 //	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];
 
-	texCube.ambientColor = CCC4FMake(0.6, 0.6, 0.6, 1.0);		// Increase the ambient reflection
+	texCube.ambientColor = ccc4f(0.6, 0.6, 0.6, 1.0);		// Increase the ambient reflection
 	
 	// Add direction markers to demonstrate how the sides are oriented. In the local coordinate
 	// system of the cube node, the red marker point in the direction of the positive-X axis,
@@ -790,7 +790,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	// Red teapot is at postion 100 on the X-axis
 	CC3Node* teapotRed = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotRedName
-																		  withColor: CCC4FMake(0.7, 0.0, 0.0, 1.0)];
+																		  withColor: ccc4f(0.7, 0.0, 0.0, 1.0)];
 	teapotRed.location = cc3v(100.0, 0.0, 0.0);
 	teapotRed.uniformScale = 100.0;
 	teapotRed.touchEnabled = YES;		// allow this node to be selected by touch events
@@ -799,14 +799,14 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Green teapot is at postion 100 on the Y-axis
 	// Create it by copying the red teapot.
 	CC3Node* teapotGreen = [[teapotRed copyWithName:  kTeapotGreenName] autorelease];
-	teapotGreen.diffuseColor = CCC4FMake(0.0, 0.7, 0.0, 1.0);
+	teapotGreen.diffuseColor = ccc4f(0.0, 0.7, 0.0, 1.0);
 	teapotGreen.location = cc3v(0.0, 100.0, 0.0);
 	[self addChild: teapotGreen];
 	
 	// Blue teapot is at postion 100 on the Z-axis
 	// Create it by copying the red teapot.
 	CC3Node* teapotBlue = [[teapotRed copyWithName:  kTeapotBlueName] autorelease];
-	teapotBlue.diffuseColor = CCC4FMake(0.0, 0.0, 0.7, 1.0);
+	teapotBlue.diffuseColor = ccc4f(0.0, 0.0, 0.7, 1.0);
 	teapotBlue.location = cc3v(0.0, 0.0, 100.0);
 	[self addChild: teapotBlue];
 }

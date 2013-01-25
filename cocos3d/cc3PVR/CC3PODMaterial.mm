@@ -58,9 +58,9 @@ static GLfloat shininessExpansionFactor = 128.0f;
 	LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
 	if ( (self = [super initWithName: [NSString stringWithUTF8String: psm->pszName]]) ) {
 		self.podIndex = aPODIndex;
-		self.ambientColor = CCC4FMake(psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2], psm->fMatOpacity);
-		self.diffuseColor = CCC4FMake(psm->pfMatDiffuse[0], psm->pfMatDiffuse[1], psm->pfMatDiffuse[2], psm->fMatOpacity);
-		self.specularColor = CCC4FMake(psm->pfMatSpecular[0], psm->pfMatSpecular[1], psm->pfMatSpecular[2], psm->fMatOpacity);
+		self.ambientColor = ccc4f(psm->pfMatAmbient[0], psm->pfMatAmbient[1], psm->pfMatAmbient[2], psm->fMatOpacity);
+		self.diffuseColor = ccc4f(psm->pfMatDiffuse[0], psm->pfMatDiffuse[1], psm->pfMatDiffuse[2], psm->fMatOpacity);
+		self.specularColor = ccc4f(psm->pfMatSpecular[0], psm->pfMatSpecular[1], psm->pfMatSpecular[2], psm->fMatOpacity);
 		self.shininess = psm->fMatShininess * shininessExpansionFactor;
 		self.sourceBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendSrcA);
 		self.destinationBlend = GLBlendFuncFromEPODBlendFunc(psm->eBlendDstA);

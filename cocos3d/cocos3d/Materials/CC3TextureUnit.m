@@ -80,22 +80,22 @@
 	// Set constantColor from normal direction, according to RGB <-> normal mapping
 	switch (rgbNormalMap) {
 		case kCC3DOT3RGB_XYZ:
-			constantColor = CCC4FMake(hv.x, hv.y, hv.z, 1.0f);
+			constantColor = ccc4f(hv.x, hv.y, hv.z, 1.0f);
 			break;
 		case kCC3DOT3RGB_XZY:
-			constantColor = CCC4FMake(hv.x, hv.z, hv.y, 1.0f);
+			constantColor = ccc4f(hv.x, hv.z, hv.y, 1.0f);
 			break;
 		case kCC3DOT3RGB_YXZ:
-			constantColor = CCC4FMake(hv.y, hv.x, hv.z, 1.0f);
+			constantColor = ccc4f(hv.y, hv.x, hv.z, 1.0f);
 			break;
 		case kCC3DOT3RGB_YZX:
-			constantColor = CCC4FMake(hv.y, hv.z, hv.x, 1.0f);
+			constantColor = ccc4f(hv.y, hv.z, hv.x, 1.0f);
 			break;
 		case kCC3DOT3RGB_ZXY:
-			constantColor = CCC4FMake(hv.z, hv.x, hv.y, 1.0f);
+			constantColor = ccc4f(hv.z, hv.x, hv.y, 1.0f);
 			break;
 		case kCC3DOT3RGB_ZYX:
-			constantColor = CCC4FMake(hv.z, hv.y, hv.x, 1.0f);
+			constantColor = ccc4f(hv.z, hv.y, hv.x, 1.0f);
 			break;
 	}
 }

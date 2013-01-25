@@ -450,12 +450,12 @@ static Class _defaultPFXResourceClass = nil;
 
 -(ccColor4F) ambientLight {
 	GLfloat* amb = self.pvrtModelImpl->pfColourAmbient;
-	return CCC4FMake(amb[0], amb[1], amb[2], 1.0);
+	return ccc4f(amb[0], amb[1], amb[2], 1.0);
 }
 
 -(ccColor4F) backgroundColor {
 	GLfloat* bg = self.pvrtModelImpl->pfColourBackground;
-	return CCC4FMake(bg[0], bg[1], bg[2], 1.0);
+	return ccc4f(bg[0], bg[1], bg[2], 1.0);
 }
 
 -(NSString*) fullDescription {

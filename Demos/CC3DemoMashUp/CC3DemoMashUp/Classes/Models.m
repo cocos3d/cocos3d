@@ -454,7 +454,7 @@
 	
 	// Set the color velocity to change only the opacity, to fade the particle away
 	self.color4F = emitter.diffuseColor;
-	self.colorVelocity = CCC4FMake(0.0f, 0.0f, 0.0f, -(1.0 / self.lifeSpan));
+	self.colorVelocity = ccc4f(0.0f, 0.0f, 0.0f, -(1.0 / self.lifeSpan));
 }
 
 @end

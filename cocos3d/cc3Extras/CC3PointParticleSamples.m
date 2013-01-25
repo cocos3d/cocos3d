@@ -177,10 +177,10 @@
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
 		ccColor4F currColor = self.color4F;
-		self.color4F = CCC4FMake(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0, 1.0),
-								 CLAMP(currColor.g + (colorVelocity.g * dt), 0.0, 1.0),
-								 CLAMP(currColor.b + (colorVelocity.b * dt), 0.0, 1.0),
-								 CLAMP(currColor.a + (colorVelocity.a * dt), 0.0, 1.0));
+		self.color4F = ccc4f(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0, 1.0),
+							 CLAMP(currColor.g + (colorVelocity.g * dt), 0.0, 1.0),
+							 CLAMP(currColor.b + (colorVelocity.b * dt), 0.0, 1.0),
+							 CLAMP(currColor.a + (colorVelocity.a * dt), 0.0, 1.0));
 	}
 }
 
@@ -221,10 +221,10 @@
 	[super initializeParticle];
 
 	ccColor4F colVel = self.colorVelocity;
-	self.colorVelocity = CCC4FMake(colVel.r / lifeSpan,
-								   colVel.g / lifeSpan,
-								   colVel.b / lifeSpan,
-								   colVel.a / lifeSpan);
+	self.colorVelocity = ccc4f(colVel.r / lifeSpan,
+							   colVel.g / lifeSpan,
+							   colVel.b / lifeSpan,
+							   colVel.a / lifeSpan);
 	
 	self.sizeVelocity /= lifeSpan;
 }
@@ -307,10 +307,10 @@
 		
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
-		aParticle.colorVelocity = CCC4FMake((endColor.r - startColor.r),
-											(endColor.g - startColor.g),
-											(endColor.b - startColor.b),
-											(endColor.a - startColor.a));
+		aParticle.colorVelocity = ccc4f((endColor.r - startColor.r),
+										(endColor.g - startColor.g),
+										(endColor.b - startColor.b),
+										(endColor.a - startColor.a));
 	}
 	
 	// Set the particle's initial size and size velocity, which is calculated by taking the
