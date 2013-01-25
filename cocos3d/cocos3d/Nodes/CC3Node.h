@@ -254,6 +254,16 @@ typedef enum {
 @property(nonatomic, readonly) CC3Vector globalLocation;
 
 /**
+ * The position of this node in a global 4D homogeneous coordinate space.
+ *
+ * The X, Y & Z components of the returned 4D vector are the same as those in the globalLocation
+ * property, and for most nodes, the W-component will be one, indicating that the returned vector
+ * represents a location. Certain directional subclasses, particularly lights, may optionally return
+ * this vector with a W-component of zero, indicating that the returned vector represents a direction.
+ */
+@property(nonatomic, readonly) CC3Vector4 globalHomogeneousPosition;
+
+/**
  * Translates the location of this node by the specified vector.
  *
  * The incoming vector specify the amount of change in location,
@@ -1405,23 +1415,34 @@ typedef enum {
 @property(nonatomic, assign) ccColor4F emissionColor;
 
 /**
- * When a mesh node is textured with a DOT3 bump-map (normal map), this property indicates
- * the location, in the global coordinate system, of the light that is illuminating the node.
+ * When a mesh node is textured with a DOT3 bump-map (normal map) in object-space, this property
+ * indicates the position, in the global homogeneous coordinate system, of the light that is
+ * illuminating the node.
  * 
  * When setting this property, this implementation sets the same property in all child nodes.
- * Set the value of this property to the globalLocation of the light source. Bump-map textures
- * may interact with only one light source.
+ * Set the value of this property to the globalHomogeneousPosition of the light source.
+ * Object-space bump-map textures may interact with only one light source.
  *
  * This property only needs to be set, and will only have effect when set, on individual
- * CC3MeshNodes whose material is configured for bump-mapping. This property is provided in
- * CC3Node as a convenience to automatically traverse the node structural hierarchy to set
- * this property in all descendant nodes.
+ * CC3MeshNodes whose material is configured for bump-mapping using object-space bump-mapping.
+ * This property is NOT required to be set when using tangent-space bump-mapping using tangent
+ * and/or bitangent vertex attributes under OpenGL ES 2.0.
  *
- * When reading this property, this implementation returns the value of the same property
- * from the first descendant node that is a CC3MeshNode and that contains a texture configured
- * for bump-mapping. Otherwise, this implementation returns kCC3VectorZero.
+ * This property is provided in CC3Node as a convenience to automatically traverse the node
+ * structural hierarchy to set this property in all descendant nodes.
+ *
+ * When reading this property, this implementation returns the value of the same property from
+ * the first descendant node that is a CC3MeshNode and that contains a texture unit configured
+ * for object-space bump-mapping. Otherwise, this implementation returns kCC3Vector4Zero.
+ *
+ * This property is primarily used for setting the global light position. When reading the
+ * value of this property, be aware that the position is converted to a local direction within
+ * each node. When this property is read, it is always returned as a direction (W = 0).
  */
-@property(nonatomic, assign) CC3Vector globalLightLocation;
+@property(nonatomic, assign) CC3Vector4 globalLightPosition;
+
+/** @deprecated Use globalLightPosition instead. */
+@property(nonatomic, assign) CC3Vector globalLightLocation DEPRECATED_ATTRIBUTE;
 
 /**
  * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to

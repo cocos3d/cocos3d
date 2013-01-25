@@ -120,6 +120,8 @@
 	[self markTransformDirty];
 }
 
+-(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
+
 -(void) translateBy: (CC3Vector) aVector { self.location = CC3VectorAdd(self.location, aVector); }
 
 -(CC3Vector) rotation { return rotator.rotation; }
@@ -801,16 +803,22 @@
 	for (CC3Node* child in children) child.emissionColor = color;
 }
 
--(CC3Vector) globalLightLocation {
+-(CC3Vector4) globalLightPosition {
 	for (CC3Node* child in children) {
-		CC3Vector cgll = child.globalLightLocation;
-		if ( !CC3VectorsAreEqual(cgll, kCC3VectorZero) ) return cgll;
+		CC3Vector4 glp = child.globalLightPosition;
+		if ( !CC3Vector4sAreEqual(glp, kCC3Vector4Zero) ) return glp;
 	}
-	return kCC3VectorZero;
+	return kCC3Vector4Zero;
 }
 
--(void) setGlobalLightLocation: (CC3Vector) aDirection {
-	for (CC3Node* child in children) child.globalLightLocation = aDirection;
+-(void) setGlobalLightPosition: (CC3Vector4) aPosition {
+	for (CC3Node* child in children) child.globalLightPosition = aPosition;
+}
+
+-(CC3Vector) globalLightLocation { return CC3VectorFromTruncatedCC3Vector4(self.globalLightPosition); };
+
+-(void) setGlobalLightLocation: (CC3Vector) aLocation {
+	self.globalLightPosition = CC3Vector4FromLocation(aLocation);
 }
 
 -(CC3GLProgramContext*) shaderContext {
@@ -1274,12 +1282,48 @@ static GLuint lastAssignedNodeTag;
 -(void) updateTargetLocation {
 	if (self.shouldUpdateToTarget) {
 		if (self.isTrackingForBumpMapping) {
-			self.globalLightLocation = self.target.globalLocation;
+			self.globalLightPosition = self.target.globalHomogeneousPosition;
 		} else {
 			self.targetLocation = self.target.globalLocation;
 		}
 	}
 }
+//-(void) updateTargetLocation {
+//	if (self.shouldUpdateToTarget) {
+//		if (self.isTrackingForBumpMapping) {
+//			CC3Vector4 ltPos = self.target.globalHomogeneousPosition;
+//			CC3Vector ltVec = CC3VectorFromTruncatedCC3Vector4(ltPos);
+//			if (CC3Vector4IsLocational(ltPos))
+//				ltVec = CC3VectorDifference(ltVec, self.globalLocation);
+//			self.globalLightDirection = ltVec;
+//		} else {
+//			self.targetLocation = self.target.globalLocation;
+//		}
+//	}
+//}
+//-(void) updateTargetLocation {
+//	if (self.shouldUpdateToTarget) {
+//		if (self.isTrackingForBumpMapping) {
+//			CC3Vector4 ltPos = self.target.globalHomogeneousPosition;
+//			CC3Vector ltVec = CC3VectorFromTruncatedCC3Vector4(ltPos);
+//			CC3Vector ltDir = CC3Vector4IsDirectional(ltPos)
+//			? ltVec
+//			: CC3VectorDifference(ltVec, self.globalLocation);
+//			self.globalLightDirection = ltDir;
+//		} else {
+//			self.targetLocation = self.target.globalLocation;
+//		}
+//	}
+//}
+//-(void) updateTargetLocation {
+//	if (self.shouldUpdateToTarget) {
+//		if (self.isTrackingForBumpMapping) {
+//			self.globalLightLocation = self.target.globalLocation;
+//		} else {
+//			self.targetLocation = self.target.globalLocation;
+//		}
+//	}
+//}
 
 -(BOOL) shouldUpdateToTarget { return self.targettingRotator.shouldUpdateToTarget; }
 

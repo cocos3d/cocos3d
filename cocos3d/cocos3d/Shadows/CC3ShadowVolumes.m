@@ -331,7 +331,7 @@
 	BOOL doesRequireCapping = useDepthFailAlgorithm || !shouldAddEndCapsOnlyWhenNeeded;
 	
 	// Transform the 4D position of the light into the local coordinates of the shadow caster.
-	CC3Vector4 lightPosition = light.homogeneousLocation;
+	CC3Vector4 lightPosition = light.globalHomogeneousPosition;
 	CC3Vector4 localLightPosition = [scNode.transformMatrixInverted
 									 transformHomogeneousVector: lightPosition];
 	

@@ -87,7 +87,6 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 	CC3CameraShadowVolume* cameraShadowVolume;
 	CC3StencilledShadowPainterNode* stencilledShadowPainter;
 	CCArray* shadows;
-	CC3Vector4 homogeneousLocation;
 	ccColor4F ambientColor;
 	ccColor4F diffuseColor;
 	ccColor4F specularColor;
@@ -147,13 +146,17 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 @property(nonatomic, assign) BOOL isDirectionalOnly;
 
 /**
- * The location of this light in the 4D homogeneous coordinate space. The x, y and z
- * components of the returned value will be the same as those in the globalLocation
- * property. The w-component will be one if the light is considered to be actually
- * located at the globalLocation property, or zero if the globalLocation property is
- * an indication of the direction the light is coming from, and not an absolute location.
+ * The position of this light in a global 4D homogeneous coordinate space.
+ *
+ * The X, Y & Z components of the returned 4D vector are the same as those in the globalLocation
+ * property. The W-component will be zero if the isDirectionalOnly property is set to YES, indicating
+ * that this position represents a direction. The W-component will be one if the isDirectionalOnly
+ * property is set to NO, indicating that this position represents a specific location.
  */
-@property(nonatomic, readonly) CC3Vector4 homogeneousLocation;
+@property(nonatomic, readonly) CC3Vector4 globalHomogeneousPosition;
+
+/** @deprecated Replaced by the globalHomogeneousPosition property on CC3Node. */
+@property(nonatomic, readonly) CC3Vector4 homogeneousLocation DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates the intensity distribution of the light.

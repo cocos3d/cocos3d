@@ -302,17 +302,17 @@
 	[super setEmissionColor: aColor];	// pass along to any children
 }
 
-/** If the material has a bump-mapped texture, returns the global direction  */
--(CC3Vector) globalLightLocation {
+-(CC3Vector4) globalLightPosition {
 	return (material && material.hasBumpMap)
-			? [self.transformMatrix transformDirection: material.lightDirection]
-			: [super globalLightLocation];
+				? [self.transformMatrix transformHomogeneousVector: CC3Vector4FromDirection(material.lightDirection)]
+				: [super globalLightPosition];
 }
 
--(void) setGlobalLightLocation: (CC3Vector) aLocation {
+-(void) setGlobalLightPosition: (CC3Vector4) aPosition {
 	[self ensureMaterial];
-	material.lightDirection = [self.transformMatrixInverted transformDirection: aLocation];
-	[super setGlobalLightLocation: aLocation];
+	CC3Vector4 localLtPos = [self.transformMatrixInverted transformHomogeneousVector: aPosition];
+	material.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
+	[super setGlobalLightPosition: aPosition];
 }
 
 -(CC3GLProgramContext*) shaderContext {

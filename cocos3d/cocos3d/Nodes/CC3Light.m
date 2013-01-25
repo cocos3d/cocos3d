@@ -51,7 +51,7 @@
 @end
 
 @interface CC3Light (TemplateMethods)
--(void) applyLocation;
+-(void) applyPosition;
 -(void) applyDirection;
 -(void) applyAttenuation;
 -(void) applyColor;
@@ -79,7 +79,7 @@
 @synthesize stencilledShadowPainter, shadowIntensityFactor;
 @synthesize ambientColor, diffuseColor, specularColor;
 @synthesize spotExponent, spotCutoffAngle, isDirectionalOnly;
-@synthesize homogeneousLocation, attenuation=_attenuation;
+@synthesize attenuation=_attenuation;
 
 -(void) dealloc {
 	[self cleanupShadows];		// Includes releasing the shadows array, camera shadow volume & shadow painter
@@ -89,6 +89,12 @@
 }
 
 -(BOOL) isLight { return YES; }
+
+// Overridden to take into consideration the isDirectionalOnly property
+-(CC3Vector4) globalHomogeneousPosition {
+	GLfloat w = self.isDirectionalOnly ? 0.0f : 1.0f;
+	return CC3Vector4FromCC3Vector(self.globalLocation, w);
+}
 
 /** Overridden to return NO so that the forwardDirection aligns with the negative-Z-axis. */
 -(BOOL) shouldReverseForwardDirection { return NO; }
@@ -170,7 +176,6 @@
 		shadowCastingVolume = nil;
 		cameraShadowVolume = nil;
 		stencilledShadowPainter = nil;
-		homogeneousLocation = kCC3Vector4Zero;
 		ambientColor = kCC3DefaultLightColorAmbient;
 		diffuseColor = kCC3DefaultLightColorDiffuse;
 		specularColor = kCC3DefaultLightColorSpecular;
@@ -235,7 +240,6 @@
 	// Shadows are not copied, because each shadow connects
 	// one-and-only-one shadow casting node to one-and-only-one light.
 	
-	homogeneousLocation = another.homogeneousLocation;
 	ambientColor = another.ambientColor;
 	diffuseColor = another.diffuseColor;
 	specularColor = another.specularColor;
@@ -265,36 +269,21 @@
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, homoLoc: %@, ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, attenuation: %@",
-			[super fullDescription], NSStringFromCC3Vector4(homogeneousLocation), NSStringFromCCC4F(ambientColor),
-			NSStringFromCCC4F(diffuseColor), NSStringFromCCC4F(specularColor), spotCutoffAngle,
+	return [NSString stringWithFormat: @"%@, (%@), ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, attenuation: %@",
+			[super fullDescription], (self.isDirectionalOnly ? @"directional" : @"positional"),
+			NSStringFromCCC4F(ambientColor), NSStringFromCCC4F(diffuseColor),
+			NSStringFromCCC4F(specularColor), spotCutoffAngle,
 			NSStringFromCC3AttenuationCoefficients(_attenuation)];
 }
 
 /** Scaling does not apply to lights. */
--(void) applyScaling {
-	[self updateGlobalScale];
-}
-
-/**
- * Overridden to determine the overall absolute location (taking into consideration
- * ancestor location) in the 4D homogeneous coordinates used by GL lights. The w component
- * of the homogeneous location is determined by the value of the isDirectionalOnly property.
- */
--(void) updateGlobalLocation {
-	[super updateGlobalLocation];
-	homogeneousLocation = isDirectionalOnly
-							? CC3Vector4FromDirection(globalLocation)
-							: CC3Vector4FromLocation(globalLocation);
-}
+-(void) applyScaling { [self updateGlobalScale]; }
 
 /**
  * Scaling does not apply to lights. Sets the globalScale to that of the parent node,
  * or to unit scaling if no parent.
  */
--(void) updateGlobalScale {
-	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
-}
+-(void) updateGlobalScale { globalScale = parent ? parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to update the camera shadow frustum with the global location of this light */
 -(void) transformMatrixChanged {
@@ -310,7 +299,7 @@
 	if (self.visible) {
 		LogTrace(@"Turning on %@", self);
 		[glesLight.light enable];
-		[self applyLocation];
+		[self applyPosition];
 		[self applyDirection];
 		[self applyAttenuation];
 		[self applyColor];
@@ -321,9 +310,9 @@
 
 /**
  * Template method that sets the position of this light in the GL engine to the value of
- * the homogeneousLocation property of this node.
+ * the globalHomogeneousPosition property of this node.
  */	
--(void) applyLocation { glesLight.position.value = homogeneousLocation; }
+-(void) applyPosition { glesLight.position.value = self.globalHomogeneousPosition; }
 
 /**
  * Template method that sets the spot direction, spot exponent, and spot cutoff angle of this light
@@ -689,7 +678,7 @@ static GLuint lightPoolStartIndex = 0;
  * This could be a location or direction, depending on whether the
  * 4D homogeneous location has a definite location, or is directional.
  */
--(CC3Vector) lightPosition { return CC3VectorFromTruncatedCC3Vector4(light.homogeneousLocation); }
+-(CC3Vector) lightPosition { return CC3VectorFromTruncatedCC3Vector4(light.globalHomogeneousPosition); }
 
 
 #pragma mark Allocation and initialization
@@ -737,7 +726,7 @@ static GLuint lightPoolStartIndex = 0;
  * of the light, which magically works for both directional and positional lights.
  */
 -(BOOL) isLightInFrontOfPlane: (CC3Plane) aPlane {
-	return CC3Vector4IsInFrontOfPlane(light.homogeneousLocation, aPlane);
+	return CC3Vector4IsInFrontOfPlane(light.globalHomogeneousPosition, aPlane);
 }
 
 
@@ -793,7 +782,7 @@ static GLuint lightPoolStartIndex = 0;
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @" from light at %@", NSStringFromCC3Vector4(light.homogeneousLocation)];
+	[desc appendFormat: @" from light at %@", NSStringFromCC3Vector4(light.globalHomogeneousPosition)];
 	[self appendPlanesTo: desc];
 	[self appendVerticesTo: desc];
 	return desc;
@@ -1034,7 +1023,7 @@ static GLuint lightPoolStartIndex = 0;
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @" from light at %@", NSStringFromCC3Vector4(light.homogeneousLocation)];
+	[desc appendFormat: @" from light at %@", NSStringFromCC3Vector4(light.globalHomogeneousPosition)];
 	[desc appendFormat: @"\n\tleftPlane: %@", NSStringFromCC3Plane(self.leftPlane)];
 	[desc appendFormat: @"\n\trightPlane: %@", NSStringFromCC3Plane(self.rightPlane)];
 	[desc appendFormat: @"\n\ttopPlane: %@", NSStringFromCC3Plane(self.topPlane)];
