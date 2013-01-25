@@ -53,7 +53,7 @@
 																 forState: GL_DEPTH_TEST];
 	self.dither = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 															  forState: GL_DITHER];
-	self.fog = nil;
+	self.fog = [CC3OpenGLESStateTrackerCapability trackerWithParent: self];;
 
 	self.lighting = [CC3OpenGLESStateTrackerCapability trackerWithParent: self
 												andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];

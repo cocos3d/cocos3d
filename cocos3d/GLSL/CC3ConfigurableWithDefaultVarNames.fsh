@@ -55,20 +55,25 @@
 #define MAX_TEXTURES			2
 
 // Texture constants to support OpenGL ES 1.1 conformant multi-texturing.
-#define GL_REPLACE                        0x1E01
-#define GL_MODULATE                       0x2100
-#define GL_DECAL                          0x2101
-#define GL_BLEND                          0x0BE2
-#define GL_ADD                            0x0104
-#define GL_COMBINE                        0x8570
-#define GL_ADD_SIGNED                     0x8574
-#define GL_INTERPOLATE                    0x8575
-#define GL_SUBTRACT                       0x84E7
-#define GL_DOT3_RGB                       0x86AE
-#define GL_DOT3_RGBA                      0x86AF
-#define GL_TEXTURE                        0x1702
-#define GL_CONSTANT                       0x8576
-#define GL_PREVIOUS                       0x8578
+#define GL_REPLACE                0x1E01
+#define GL_MODULATE               0x2100
+#define GL_DECAL                  0x2101
+#define GL_BLEND                  0x0BE2
+#define GL_ADD                    0x0104
+#define GL_COMBINE                0x8570
+#define GL_ADD_SIGNED             0x8574
+#define GL_INTERPOLATE            0x8575
+#define GL_SUBTRACT               0x84E7
+#define GL_DOT3_RGB               0x86AE
+#define GL_DOT3_RGBA              0x86AF
+#define GL_TEXTURE                0x1702
+#define GL_CONSTANT               0x8576
+#define GL_PREVIOUS               0x8578
+
+// Fog modes.
+#define GL_LINEAR                 0x2601
+#define GL_EXP                    0x0800
+#define GL_EXP2                   0x0801
 
 
 precision mediump float;
@@ -83,12 +88,28 @@ precision mediump float;
  * and pased to your shader (uniform structure elements are passed individually in GLSL).
  */
 struct Material {
-	vec4	ambientColor;						/**< Ambient color of the material. */
-	vec4	diffuseColor;						/**< Diffuse color of the material. */
-	vec4	specularColor;						/**< Specular color of the material. */
-	vec4	emissionColor;						/**< Emission color of the material. */
-	float	shininess;							/**< Shininess of the material. */
-	float	minimumDrawnAlpha;					/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+	vec4	ambientColor;					/**< Ambient color of the material. */
+	vec4	diffuseColor;					/**< Diffuse color of the material. */
+	vec4	specularColor;					/**< Specular color of the material. */
+	vec4	emissionColor;					/**< Emission color of the material. */
+	float	shininess;						/**< Shininess of the material. */
+	float	minimumDrawnAlpha;				/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+};
+
+/**
+ * The parameters that define the scene fog.
+ *
+ * When using this structure as the basis of a simpler implementation, remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved
+ * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ */
+struct Fog {
+	bool		isEnabled;					/**< Whether scene fogging is enabled. */
+	lowp vec4	color;						/**< Fog color. */
+	int			attenuationMode;			/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+	highp float	density;					/**< Fog density. */
+	highp float	startDistance;				/**< Distance from camera at which fogging effect starts. */
+	highp float	endDistance;				/**< Distance from camera at which fogging effect ends. */
 };
 
 /**
@@ -105,22 +126,22 @@ struct Material {
  * optimize away any elements of this structure that are not used within the shader source code.
  */
 struct TextureUnit {
-	vec4	color;								/**< Constant color of this texure unit (often used for normal mapping). */
-	int		mode;								/**< Texture environment mode for this texture unit. */
-	int		combineRGBFunction;					/**< RGB combiner function for this texture unit. */
-	int		rgbSource0;							/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
-	int		rgbSource1;							/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
-	int		rgbSource2;							/**< The source of the RGB components for arg2 of the combiner function in this texture unit. */
-	int		rgbOperand0;						/**< The operand on the RGB components for arg0 of the combiner function in this texture unit. */
-	int		rgbOperand1;						/**< The operand on the RGB components for arg1 of the combiner function in this texture unit. */
-	int		rgbOperand2;						/**< The operand on the RGB components for arg2 of the combiner function in this texture unit. */
-	int		combineAlphaFunction;				/**< Alpha combiner function for this texture unit. */
-	int		alphaSource0;						/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
-	int		alphaSource1;						/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
-	int		alphaSource2;						/**< The source of the alpha components for arg2 of the combiner function in this texture unit. */
-	int		alphaOperand0;						/**< The operand on the alpha components for arg0 of the combiner function in this texture unit. */
-	int		alphaOperand1;						/**< The operand on the alpha components for arg1 of the combiner function in this texture unit. */
-	int		alphaOperand2;						/**< The operand on the alpha components for arg2 of the combiner function in this texture unit. */
+	vec4	color;							/**< Constant color of this texure unit (often used for normal mapping). */
+	int		mode;							/**< Texture environment mode for this texture unit. */
+	int		combineRGBFunction;				/**< RGB combiner function for this texture unit. */
+	int		rgbSource0;						/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
+	int		rgbSource1;						/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
+	int		rgbSource2;						/**< The source of the RGB components for arg2 of the combiner function in this texture unit. */
+	int		rgbOperand0;					/**< The operand on the RGB components for arg0 of the combiner function in this texture unit. */
+	int		rgbOperand1;					/**< The operand on the RGB components for arg1 of the combiner function in this texture unit. */
+	int		rgbOperand2;					/**< The operand on the RGB components for arg2 of the combiner function in this texture unit. */
+	int		combineAlphaFunction;			/**< Alpha combiner function for this texture unit. */
+	int		alphaSource0;					/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
+	int		alphaSource1;					/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
+	int		alphaSource2;					/**< The source of the alpha components for arg2 of the combiner function in this texture unit. */
+	int		alphaOperand0;					/**< The operand on the alpha components for arg0 of the combiner function in this texture unit. */
+	int		alphaOperand1;					/**< The operand on the alpha components for arg1 of the combiner function in this texture unit. */
+	int		alphaOperand2;					/**< The operand on the alpha components for arg2 of the combiner function in this texture unit. */
 };
 
 /**
@@ -144,24 +165,21 @@ struct Point {
 
 //-------------- UNIFORMS ----------------------
 
-// Uniforms describing vertex attributes.
-uniform bool u_cc3HasVertexTangent;						/**< Whether vertex tangent attribute is available. */
-
-// Material properties
-uniform Material u_cc3Material;							/**< The material being applied to the mesh. */
+uniform bool u_cc3HasVertexTangent;			/**< Whether vertex tangent attribute is available. */
+uniform Material u_cc3Material;				/**< The material being applied to the mesh. */
+uniform Fog u_cc3Fog;						/**< Scene fog. */
+uniform Point u_cc3Points;					/**< Point parameters. */
 
 // Textures
 uniform lowp int u_cc3TextureCount;						/**< Number of textures. */
 uniform sampler2D s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
 uniform TextureUnit u_cc3TextureUnits[MAX_TEXTURES];	/**< Texture unit parameters. */
 
-// Points
-uniform Point u_cc3Points;								/**< Point parameters. */
-
-//-------------- VARYING VARIABLES INPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];
-varying lowp vec4 v_color;
-varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
+//-------------- VARYING VARIABLE INPUTS ----------------------
+varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
+varying lowp vec4 v_color;					/**< Fragment base color. */
+varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
+varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
@@ -286,17 +304,40 @@ void applyTextures() {
 	}
 }
 
+/** Applies fog to the specified color and returns the adjusted color. */
+vec4 fogify(vec4 aColor) {
+	if (u_cc3Fog.isEnabled) {
+		int mode = u_cc3Fog.attenuationMode;
+		float vtxVisibility = 1.0;
+		
+		if (mode == GL_LINEAR) {
+			vtxVisibility = (u_cc3Fog.endDistance - v_distEye) / (u_cc3Fog.endDistance - u_cc3Fog.startDistance);
+		} else if (mode == GL_EXP) {
+			float d = u_cc3Fog.density * v_distEye;
+			vtxVisibility = exp(-d);
+		} else if (mode == GL_EXP2) {
+			float d = u_cc3Fog.density * v_distEye;
+			vtxVisibility = exp(-(d * d));
+		}
+		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
+		aColor.rgb =  mix(u_cc3Fog.color.rgb, aColor.rgb, vtxVisibility);
+	}
+	return aColor;
+}
+
 //-------------- ENTRY POINT ----------------------
 void main() {
+	
+	// Start with the varying fragment color and add textures
 	fragColor = v_color;
 	if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites)
 		fragColor = texture2D(s_cc3Textures[0], gl_PointCoord) * v_color;
 	else
 		applyTextures();
 
-	// If the fragment passes the alpha test, draw it, otherwise discard
+	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3Material.minimumDrawnAlpha)
-		gl_FragColor = fragColor;
+		gl_FragColor = fogify(fragColor);
 	else
 		discard;
 }

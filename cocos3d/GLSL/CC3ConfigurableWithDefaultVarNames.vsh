@@ -55,7 +55,7 @@
 // class-side properties maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables
 // (each defaults to 4). See the description of those properties for more info.
 #define MAX_TEXTURES			2
-#define MAX_LIGHTS				2
+#define MAX_LIGHTS				3
 
 // Maximum bones per skin section (batch). This is set here to the platform maximum.
 // You can reduce this to improve efficiency if your models need fewer bones in each batch.
@@ -67,7 +67,7 @@ precision mediump float;
 //-------------- STRUCTURES ----------------------
 
 /**
- * The parameters that define a material.
+ * The parameters that define the material covering this vertex.
  *
  * When using this structure as the basis of a simpler implementation, remove any elements
  * that your shader does not use, to reduce the number of uniforms that need to be retrieved
@@ -165,9 +165,10 @@ attribute vec2 a_cc3TexCoord1;			/**< Vertex texture coordinate for texture unit
 attribute vec2 a_cc3TexCoord2;			/**< Vertex texture coordinate for texture unit 2. */
 attribute vec2 a_cc3TexCoord3;			/**< Vertex texture coordinate for texture unit 3. */
 
-//-------------- VARYING VARIABLES OUTPUTS ----------------------
+//-------------- VARYING VARIABLE OUTPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
 varying lowp vec4 v_color;					/**< Fragment base color. */
+varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
 varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
 
 //-------------- CONSTANTS ----------------------
@@ -177,7 +178,7 @@ const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec4 vtxPosEye;		/**< The vertex position in eye coordinates. High prec required for point sizing calcs. */
+highp vec4 vtxPosEye;		/**< The vertex position in eye coordinates. High prec to match vertex attribute. */
 vec3 vtxNormEye;			/**< The vertex normal in eye coordinates. */
 vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
 vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
@@ -339,10 +340,12 @@ void main() {
 	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.ambientColor;
 	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.diffuseColor;
 
-	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
+	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively,
+	// and use these to set the varying distance to the vertex in eye space.
 	vertexToEyeSpace();
+	v_distEye = length(vtxPosEye.xyz);
 	
-	// Material & lighting
+	// Determine the color of the vertex by applying material & lighting, or using a pure color
 	if (u_cc3IsUsingLighting && u_cc3HasVertexNormal) {
 		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
 		if (u_cc3ShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
@@ -352,7 +355,7 @@ void main() {
 	} else {
 		v_color = u_cc3HasVertexColor ? a_cc3Color : u_cc3Color;
 	}
-
+	
 	// Fragment texture coordinates. Uncomment below or add additional if MAX_TEXTURES is increased.
 	if (u_cc3TextureCount > 0) v_texCoord[0] = a_cc3TexCoord0;
 	if (u_cc3TextureCount > 1) v_texCoord[1] = a_cc3TexCoord1;

@@ -95,7 +95,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticCameraLocationModelSpace: return @"kCC3SemanticCameraLocationModelSpace";
 		case kCC3SemanticCameraLocationGlobal: return @"kCC3SemanticCameraLocationGlobal";
 		case kCC3SemanticCameraFrustum: return @"kCC3SemanticCameraFrustum";
-
 			
 		// MATERIALS --------------
 		case kCC3SemanticColor: return @"kCC3SemanticColor";
@@ -124,6 +123,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightSpotExponent: return @"kCC3SemanticLightSpotExponent";
 		case kCC3SemanticLightSpotCutoffAngle: return @"kCC3SemanticLightSpotCutoffAngle";
 		case kCC3SemanticLightSpotCutoffAngleCosine: return @"kCC3SemanticLightSpotCutoffAngleCosine";
+
+		case kCC3SemanticFogIsEnabled: return @"kCC3SemanticFogIsEnabled";
+		case kCC3SemanticFogColor: return @"kCC3SemanticFogColor";
+		case kCC3SemanticFogAttenuationMode: return @"kCC3SemanticFogAttenuationMode";
+		case kCC3SemanticFogDensity: return @"kCC3SemanticFogDensity";
+		case kCC3SemanticFogStartDistance: return @"kCC3SemanticFogStartDistance";
+		case kCC3SemanticFogEndDistance: return @"kCC3SemanticFogEndDistance";
 			
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount: return @"kCC3SemanticTextureCount";
@@ -556,6 +562,25 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 				if (glesLight.isEnabled) [uniform setFloat: cosf(DegreesToRadians(glesLight.spotCutoffAngle.value)) at: i];
 			}
 			return YES;
+
+		case kCC3SemanticFogIsEnabled:
+			[uniform setBoolean: glesEngine.capabilities.fog.value];
+			return YES;
+		case kCC3SemanticFogColor:
+			[uniform setColor4F: glesEngine.fog.color.value];
+			return YES;
+		case kCC3SemanticFogAttenuationMode:
+			[uniform setInteger: glesEngine.fog.mode.value];
+			return YES;
+		case kCC3SemanticFogDensity:
+			[uniform setFloat: glesEngine.fog.density.value];
+			return YES;
+		case kCC3SemanticFogStartDistance:
+			[uniform setFloat: glesEngine.fog.start.value];
+			return YES;
+		case kCC3SemanticFogEndDistance:
+			[uniform setFloat: glesEngine.fog.end.value];
+			return YES;
 			
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
@@ -947,6 +972,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotCutoffAngle", ltIdx] toSemantic: kCC3SemanticLightSpotCutoffAngle at: ltIdx];				/**< (float) Cutoff angle of a spotlight (degrees). */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].spotCutoffAngleCosine", ltIdx] toSemantic: kCC3SemanticLightSpotCutoffAngleCosine at: ltIdx];	/**< (float) Cosine of cutoff angle of a spotlight. */
 	}
+
+	[self mapVarName: @"u_cc3Fog.isEnabled" toSemantic: kCC3SemanticFogIsEnabled];				/**< (bool) Whether scene fogging is enabled. */
+	[self mapVarName: @"u_cc3Fog.color" toSemantic: kCC3SemanticFogColor];						/**< (vec4) Fog color. */
+	[self mapVarName: @"u_cc3Fog.attenuationMode" toSemantic: kCC3SemanticFogAttenuationMode];	/**< (int) Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+	[self mapVarName: @"u_cc3Fog.density" toSemantic: kCC3SemanticFogDensity];					/**< (float) Fog density. */
+	[self mapVarName: @"u_cc3Fog.startDistance" toSemantic: kCC3SemanticFogStartDistance];		/**< (float) Distance from camera at which fogging effect starts. */
+	[self mapVarName: @"u_cc3Fog.endDistance" toSemantic: kCC3SemanticFogEndDistance];			/**< (float) Distance from camera at which fogging effect ends. */
 
 	// TEXTURES --------------
 	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];	/**< (int) Number of active textures. */

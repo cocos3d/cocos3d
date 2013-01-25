@@ -38,7 +38,7 @@
 #pragma mark CC3OpenGLES1StateTrackerFogColor
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerFogColor : CC3OpenGLESStateTrackerFogColor
+@interface CC3OpenGLES1StateTrackerFogColor : CC3OpenGLESStateTrackerColor
 @end
 
 
@@ -46,7 +46,7 @@
 #pragma mark CC3OpenGLES1StateTrackerFogFloat
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerFogFloat : CC3OpenGLESStateTrackerFogFloat
+@interface CC3OpenGLES1StateTrackerFogFloat : CC3OpenGLESStateTrackerFloat
 @end
 
 
@@ -54,7 +54,7 @@
 #pragma mark CC3OpenGLES1StateTrackerFogEnumeration
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1StateTrackerFogEnumeration : CC3OpenGLESStateTrackerFogEnumeration
+@interface CC3OpenGLES1StateTrackerFogEnumeration : CC3OpenGLESStateTrackerEnumeration
 @end
 
 

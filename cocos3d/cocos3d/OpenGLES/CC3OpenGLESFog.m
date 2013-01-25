@@ -33,42 +33,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogColor
-
-@implementation CC3OpenGLESStateTrackerFogColor
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogFloat
-
-@implementation CC3OpenGLESStateTrackerFogFloat
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogEnumeration
-
-@implementation CC3OpenGLESStateTrackerFogEnumeration
-
-+(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
-	return kCC3GLESStateOriginalValueReadOnceAndRestore;
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESFog
 
 @implementation CC3OpenGLESFog

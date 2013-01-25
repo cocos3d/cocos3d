@@ -136,6 +136,13 @@ typedef enum {
 	kCC3SemanticLightSpotCutoffAngle,			/**< (float) Cutoff angle of a spotlight. */
 	kCC3SemanticLightSpotCutoffAngleCosine,		/**< (float) Cosine of cutoff angle of a spotlight. */
 
+	kCC3SemanticFogIsEnabled,					/**< (bool) Whether scene fogging is enabled. */
+	kCC3SemanticFogColor,						/**< (vec4) Fog color. */
+	kCC3SemanticFogAttenuationMode,				/**< (int) Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+	kCC3SemanticFogDensity,						/**< (float) Fog density. */
+	kCC3SemanticFogStartDistance,				/**< (float) Distance from camera at which fogging effect starts. */
+	kCC3SemanticFogEndDistance,					/**< (float) Distance from camera at which fogging effect ends. */
+
 	// TEXTURES
 	kCC3SemanticTextureCount,					/**< (int) Number of active textures. */
 	kCC3SemanticTextureSampler,					/**< (sampler2D) Texture sampler. */

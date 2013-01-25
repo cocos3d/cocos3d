@@ -34,81 +34,30 @@
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogColor
-
-/**
- * CC3OpenGLESStateTrackerFogColor tracks a color GL state value for fog.
- *
- * This implementation uses GL function glGetFloatv to read the value from the
- * GL engine, and GL function glFogfv to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerFogColor : CC3OpenGLESStateTrackerColor {}
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogFloat
-
-/**
- * CC3OpenGLESStateTrackerFogFloat tracks a float GL state value for fog.
- *
- * This implementation uses GL function glGetFloatv to read the value from the
- * GL engine, and GL function glFogf to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerFogFloat : CC3OpenGLESStateTrackerFloat {}
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerFogEnumeration
-
-/**
- * CC3OpenGLESStateTrackerFogEnumeration tracks an enumeration GL state value for fog.
- *
- * This implementation uses GL function glGetFixedv to read the value from the
- * GL engine, and GL function glFogx to set the value in the GL engine.
- *
- * The originalValueHandling property is set to kCC3GLESStateOriginalValueReadOnceAndRestore,
- * which will cause the state to be automatically read once, on the first invocation of the
- * open method, and to be automatically restored on each invocation of the close method.
- */
-@interface CC3OpenGLESStateTrackerFogEnumeration : CC3OpenGLESStateTrackerEnumeration {}
-@end
-
-
-#pragma mark -
 #pragma mark CC3OpenGLESFog
 
 /** CC3OpenGLESFog manages trackers for fog state. */
 @interface CC3OpenGLESFog : CC3OpenGLESStateTrackerManager {
-	CC3OpenGLESStateTrackerFogColor* color;
-	CC3OpenGLESStateTrackerFogEnumeration* mode;
-	CC3OpenGLESStateTrackerFogFloat* density;
-	CC3OpenGLESStateTrackerFogFloat* start;
-	CC3OpenGLESStateTrackerFogFloat* end;
+	CC3OpenGLESStateTrackerColor* color;
+	CC3OpenGLESStateTrackerEnumeration* mode;
+	CC3OpenGLESStateTrackerFloat* density;
+	CC3OpenGLESStateTrackerFloat* start;
+	CC3OpenGLESStateTrackerFloat* end;
 }
 
 /** Tracks fog color (GL name GL_FOG_COLOR). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerFogColor* color;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerColor* color;
 
 /** Tracks fog mode (GL name GL_FOG_MODE). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerFogEnumeration* mode;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerEnumeration* mode;
 
 /** Tracks fog density used in the exponential functions (GL name GL_FOG_DENSITY). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerFogFloat* density;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* density;
 
 /** Tracks fog start distance used in the linear function (GL name GL_FOG_START). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerFogFloat* start;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* start;
 
 /** Tracks fog end distance used in the linear function (GL name GL_FOG_END). */
-@property(nonatomic, retain) CC3OpenGLESStateTrackerFogFloat* end;
+@property(nonatomic, retain) CC3OpenGLESStateTrackerFloat* end;
 
 @end

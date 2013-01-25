@@ -39,11 +39,11 @@
 @implementation CC3OpenGLES2Fog
 
 -(void) initializeTrackers {
-	self.color = nil;
-	self.mode = nil;
-	self.density = nil;
-	self.start = nil;
-	self.end = nil;
+	self.color = [CC3OpenGLESStateTrackerColor trackerWithParent: self];
+	self.mode = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self];
+	self.density = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+	self.start = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+	self.end = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
 }
 
 @end

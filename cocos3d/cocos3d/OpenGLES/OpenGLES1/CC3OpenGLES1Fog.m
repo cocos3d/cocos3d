@@ -40,6 +40,10 @@
 
 -(void) setGLValue { glFogfv(name, (GLfloat*)&value); }
 
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
 @end
 
 
@@ -50,6 +54,10 @@
 
 -(void) setGLValue { glFogf(name, value); }
 
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
+
 @end
 
 
@@ -59,6 +67,10 @@
 @implementation CC3OpenGLES1StateTrackerFogEnumeration
 
 -(void) setGLValue { glFogx(name, value); }
+
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueReadOnceAndRestore;
+}
 
 @end
 
