@@ -32,6 +32,7 @@
 #import "CC3GLProgram.h"
 #import "CC3GLProgramContext.h"
 #import "CC3OpenGLESEngine.h"
+#import "CC3MeshNode.h"
 
 #pragma mark -
 #pragma mark CC3GLProgram
@@ -123,6 +124,9 @@
     GLint status;
 	
     if (!source) return NO;
+
+	NSString* srcStr = [NSString stringWithUTF8String: source];
+	LogDebug(@"Submitting %i bytes for %@ shader source:\n%@", srcStr.length, NSStringFromGLEnum(type), srcStr);
 	
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
@@ -233,21 +237,16 @@
 	return [self initWithName: name fromVertexShaderBytes: vshSrc andFragmentShaderBytes: fshSrc];
 }
 
--(id) initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
-	return [self initWithName: [self.class programNameFromVertexShaderFile: vshFilename
-													andFragmentShaderFile: fshFilename]
-		 fromVertexShaderFile: vshFilename
-		andFragmentShaderFile: fshFilename];
-}
-
-// Override superclass implementation to force nil name, which will be rejected.
+// Overridden superclass implementation to require a name
 -(id)initWithVertexShaderByteArray: (const GLchar*)vShaderByteArray fragmentShaderByteArray: (const GLchar*)fShaderByteArray {
-	return [self initWithName: nil fromVertexShaderBytes: vShaderByteArray andFragmentShaderBytes: fShaderByteArray];
+	CC3Assert(NO, @"%@ instances require a name. Use initWithName:fromVertexShaderBytes:andFragmentShaderBytes: instead", [self class]);
+	return nil;
 }
 
-// Overridden superclass implementation to delegate to updated method
+// Overridden superclass implementation to require a name
 -(id) initWithVertexShaderFilename: (NSString*) vshFilename fragmentShaderFilename: fshFilename {
-	return [self initFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename];
+	CC3Assert(NO, @"%@ instances require a name. Use initWithName:fromVertexShaderFile:andFragmentShaderFile: instead", [self class]);
+	return nil;
 }
 
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename
@@ -267,7 +266,8 @@
 }
 
 #if CC3_OGLES_2
--(NSString*) description { return [NSString stringWithFormat: @"%@ GL program: %i", [self class], program_]; }
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ named: %@ with GL program ID: %i", [self class], self.name, program_]; }
 #endif
 
 -(NSString*) fullDescription {
@@ -276,6 +276,124 @@
 	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	for (CC3GLSLVariable* var in _uniforms) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	return desc;
+}
+
+
+#pragma mark Program cache
+
+static NSMutableDictionary* _programsByName = nil;
+
++(void) addProgram: (CC3GLProgram*) program {
+	if ( !program ) return;
+	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
+	if ( !_programsByName ) _programsByName = [NSMutableDictionary new];		// retained
+	[_programsByName setObject: program forKey: program.name];
+}
+
++(CC3GLProgram*) getProgramNamed: (NSString*) name { return [_programsByName objectForKey: name]; }
+
++(void) removeProgram: (CC3GLProgram*) program { [self removeProgramNamed: program.name]; }
+
++(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
+
+
+#pragma mark Program matching
+
+static id<CC3GLProgramMatcher> _programMatcher = nil;
+
++(id<CC3GLProgramMatcher>) programMatcher {
+	if ( !_programMatcher ) _programMatcher = [CC3GLProgramMatcherBase new];	// retained
+	return _programMatcher;
+}
+
++(void) setProgramMatcher: (id<CC3GLProgramMatcher>) programMatcher {
+	id old = _programMatcher;
+	_programMatcher = [programMatcher retain];
+	[old release];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLProgramMatcherBase
+
+@implementation CC3GLProgramMatcherBase
+
+@synthesize semanticDelegate=_semanticDelegate;
+
+-(void) dealloc {
+	[_semanticDelegate release];
+	[_configugurableProgram release];
+	[_pureColorProgram release];
+	[super dealloc];
+}
+
+-(Class) programClass { return [CC3GLProgram class]; }
+
+-(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+	if (aMeshNode.material) return self.configurableProgram;
+	
+	return self.pureColorProgram;
+}
+
+-(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if ( !visitor.shouldDecorateNode ) return self.pureColorProgram;
+	
+	return [self programForMeshNode: visitor.currentMeshNode];
+}
+
+-(CC3GLProgram*) configurableProgram {
+	if ( !_configugurableProgram )
+		_configugurableProgram = [self programFromVertexShaderFile: @"CC3ConfigurableWithDefaultVarNames.vsh"
+											 andFragmentShaderFile: @"CC3ConfigurableWithDefaultVarNames.fsh"];
+	return _configugurableProgram;
+}
+
+-(CC3GLProgram*) pureColorProgram {
+	if ( !_pureColorProgram )
+		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
+										andFragmentShaderFile: @"CC3PureColor.fsh"];
+	return _pureColorProgram;
+}
+
+-(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
+					   andFragmentShaderFile: (NSString*) fshFilename {
+	Class progClz = self.programClass;
+	
+	// Fetch and return program from cache if it has already been loaded
+	NSString* progName = [progClz programNameFromVertexShaderFile: vshFilename
+											andFragmentShaderFile: fshFilename];
+	CC3GLProgram* prog = [[progClz getProgramNamed: progName] retain];		// retained
+	if (prog) return prog;
+	
+	// Compile, link and cache the program
+	prog = [[progClz alloc] initWithName: progName
+					fromVertexShaderFile: vshFilename
+				   andFragmentShaderFile: fshFilename];
+	prog.semanticDelegate = self.semanticDelegate;
+	[prog link];
+	[progClz addProgram: prog];		// Add the new program to the cache
+	[prog release];
+	return prog;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_configugurableProgram = nil;
+		_pureColorProgram = nil;
+		[self initSemanticDelegate];
+	}
+	return self;
+}
+
+-(void) initSemanticDelegate {
+	CC3GLProgramSemanticsByVarName* sd = [CC3GLProgramSemanticsByVarName new];
+	[sd populateWithDefaultVariableNameMappings];
+	_semanticDelegate = sd;		// retained by "new" above
 }
 
 @end

@@ -879,19 +879,24 @@
 
 /** Template method to configure the material properties in the GL engine. */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) {
-		if (material) {
-			[material drawWithVisitor: visitor];
-		} else {
-			[CC3Material unbind];
-			CC3OpenGLESEngine.engine.state.color.value = pureColor;
-			[CC3OpenGLESEngine.engine.shaders bindPureColorProgramWithVisitor: visitor];
-		}
-	} else {	// Probably node picking
+	if (material && visitor.shouldDecorateNode) {
+		[material drawWithVisitor: visitor];
+	} else {
 		[CC3Material unbind];
-		[CC3OpenGLESEngine.engine.shaders bindPureColorProgramWithVisitor: visitor];
+		if (visitor.shouldDecorateNode) CC3OpenGLESEngine.engine.state.color.value = pureColor;
+		[self applyShaderProgramWithVisitor: visitor];		// Apply shader for pure color or node picking
 	}
 }
+
+#if CC3_OGLES_2
+/** Ensure we have a shader program and bind it. */
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[[CC3GLProgram.programMatcher programForVisitor: visitor] bindWithVisitor: visitor fromContext: nil];
+}
+#endif
+#if CC3_OGLES_1
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+#endif
 
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [mesh drawWithVisitor: visitor]; }

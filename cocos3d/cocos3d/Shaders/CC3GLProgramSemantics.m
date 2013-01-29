@@ -1051,18 +1051,5 @@ static NSUInteger _maxTexUnitVars = 4;
 +(NSUInteger) maxDefaultMappingTextureUnitVariables { return _maxTexUnitVars; }
 +(void) setMaxDefaultMappingTextureUnitVariables: (NSUInteger) maxTexUnits { _maxTexUnitVars = maxTexUnits; }
 
-
-#pragma mark Allocation and initialization
-
-static CC3GLProgramSemanticsByVarName* _sharedDefaultDelegate;
-
-+(CC3GLProgramSemanticsByVarName*) sharedDefaultDelegate {
-	if ( !_sharedDefaultDelegate ) {
-		_sharedDefaultDelegate = [CC3GLProgramSemanticsByVarName new];		// retained
-		[_sharedDefaultDelegate populateWithDefaultVariableNameMappings];
-	}
-	return _sharedDefaultDelegate;
-}
-
 @end
 	

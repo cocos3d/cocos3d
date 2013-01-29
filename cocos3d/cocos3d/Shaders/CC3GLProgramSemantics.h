@@ -457,11 +457,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * own population methods in a class extension category.
  *
  * Memory consumption is minorly affected (~10-20 KB) by the number of mappings defined for
- * the lights and texture units. You may use the maxDefaultMappingLightVariables and
- * maxDefaultMappingTextureUnitVariables class-side properties to balance the number of available
- * mappings to conserve memory or increase shader flexibility. You must set those properties prior
- * to the first access of the sharedDefaultDelegate property (typically on the loading of the
- * default shaders).
+ * the lights and texture units. Prior to invoking this method, you can set the
+ * maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables class-side properties
+ * to establish a balance between conserving memory and increasing shader flexibility.
  */
 -(void) populateWithDefaultVariableNameMappings;
 
@@ -469,8 +467,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Determines the number of mappings available for the lights. This determines the maximum
  * number of lights that can be automatically mapped in the shaders.
  *
- * The initial value of this property is 4. You can adjust this property prior to the first access
- * of the sharedDefaultDelegate property (typically on the loading of the default shaders).
+ * The initial value of this property is 4.
  */
 +(NSUInteger) maxDefaultMappingLightVariables;
 
@@ -478,8 +475,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Determines the number of mappings available for the lights. This determines the maximum
  * number of lights that can be automatically mapped in the shaders.
  *
- * The initial value of this property is 4. You can adjust this property prior to the first access
- * of the sharedDefaultDelegate property (typically on the loading of the default shaders).
+ * The initial value of this property is 4.
  */
 +(void) setMaxDefaultMappingLightVariables: (NSUInteger) maxLights;
 
@@ -487,8 +483,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Determines the number of mappings available for the texture units. This determines the maximum
  * number of configurable texture units that can be automatically mapped in the shaders.
  *
- * The initial value of this property is 4. You can adjust this property prior to the first access
- * of the sharedDefaultDelegate property (typically on the loading of the default shaders).
+ * The initial value of this property is 4.
  *
  * If none of your shaders make use of configurable texture unit variables, set this property
  * to zero to save some memory.
@@ -499,37 +494,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Determines the number of mappings available for the texture units. This determines the maximum
  * number of configurable texture units that can be automatically mapped in the shaders.
  *
- * The initial value of this property is 4. You can adjust this property prior to the first access
- * of the sharedDefaultDelegate property (typically on the loading of the default shaders).
+ * The initial value of this property is 4.
  *
  * If none of your shaders make use of configurable texture unit variables, set this property
  * to zero to save some memory.
  */
 +(void) setMaxDefaultMappingTextureUnitVariables: (NSUInteger) maxTexUnits;
-
-
-#pragma mark Allocation and initialization
-
-/**
- * Returns a shared default semantic delegate, that can be used to map the standard variable names
- * to their default semantics.
- *
- * The delegate returned by this property is lazily created and automatically populated using
- * the populateWithDefaultVariableNameMappings method to create the standard default mappings.
- *
- * The default CC3ConfigurableWithDefaultVarNames.vsh and CC3ConfigurableWithDefaultVarNames.fsh shaders
- * are designed to use the standard default mappings provided by the delegate returned by this property.
- *
- * This property returns a shared instance. Making changes to the delegate returned by this
- * property will affect all CC3GLPrograms that have been assigned this delegate. Handle with care.
- *
- * Memory consumption is minorly affected (~10-20 KB) by the number of mappings defined for
- * the lights and texture units. You may use the maxDefaultMappingLightVariables and
- * maxDefaultMappingTextureUnitVariables class-side properties to balance the number of available
- * mappings to conserve memory or increase shader flexibility. You must set those property prior
- * to the first access of this property (typically on the loading of the default shaders).
- */
-+(CC3GLProgramSemanticsByVarName*) sharedDefaultDelegate;
 
 @end
 

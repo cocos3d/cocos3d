@@ -68,7 +68,7 @@
 
 -(void) dealloc {
 	_currentNode = nil;				// not retained
-	_startingNode = nil;				// not retained
+	_startingNode = nil;			// not retained
 	_camera = nil;					// not retained
 	[_pendingRemovals release];
 	[super dealloc];
@@ -456,6 +456,8 @@
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
 
 -(CC3Scene*) scene { return (CC3Scene*)_startingNode; }
+
+-(NSUInteger) lightCount { return self.scene.lights.count; }
 
 -(CC3Light*) lightAt: (GLuint) index {
 	CCArray* lights = self.scene.lights;

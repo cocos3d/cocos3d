@@ -348,7 +348,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
 		_shouldUseLighting = YES;
-		[self makeShaderProgram];
+		_shaderContext = nil;
 	}
 	return self;
 }
@@ -375,12 +375,6 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	mat.diffuseColor = kCCC4FWhite;
 	return mat;
 }
-
--(void) makeShaderProgram {
-	CC3GLProgram* prog = CC3OpenGLESEngine.engine.shaders.defaultProgram;
-	self.shaderContext = prog ? [CC3GLProgramContext contextForProgram: prog] : nil;
-}
-
 
 // Protected properties for copying
 -(CCArray*) textureOverlays { return _textureOverlays; }
@@ -525,9 +519,16 @@ static GLuint lastAssignedMaterialTag;
 	visitor.textureUnitCount = visitor.textureUnit;
 }
 
+#if CC3_OGLES_2
+/** Ensure we have a shader context and program and bind them. */
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (!_shaderContext) self.shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
 	[_shaderContext bindWithVisitor: visitor];
 }
+#endif
+#if CC3_OGLES_1
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+#endif
 
 -(void) unbind { [[self class] unbind]; }
 

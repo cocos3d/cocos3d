@@ -37,55 +37,13 @@
 
 @implementation CC3OpenGLESShaders
 
-@synthesize activeProgram=_activeProgram, defaultProgram=_defaultProgram;
-@synthesize defaultVertexShaderSourceFile=_defaultVertexShaderSourceFile;
-@synthesize defaultFragmentShaderSourceFile=_defaultFragmentShaderSourceFile;
+@synthesize activeProgram=_activeProgram;
 
 -(void) dealloc {
-	[_programsByName release];
-	[_defaultProgram release];
 	_activeProgram = nil;		// retained in collection
-	[_defaultVertexShaderSourceFile release];
-	[_defaultFragmentShaderSourceFile release];
 	[super dealloc];
 }
 
 -(void) setActiveProgram: (CC3GLProgram*) aProgram { _activeProgram = aProgram; }
-
--(void) addProgram: (CC3GLProgram*) program {
-	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
-	[_programsByName setObject: program forKey: program.name];
-}
-
--(CC3GLProgram*) getProgramNamed: (NSString*) name { return [_programsByName objectForKey: name]; }
-
--(void) removeProgram: (CC3GLProgram*) program { [self removeProgramNamed: program.name]; }
-
--(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
-
--(CC3GLProgram*) defaultProgram { return nil; }
-
-
-#pragma mark Binding
-
--(void) bindPureColorProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-
--(void) unbind {}
-
-
-#pragma mark Allocation and initialization
-
--(void) initializeTrackers {
-	_programsByName = [NSMutableDictionary new];		// retained
-	_defaultVertexShaderSourceFile = nil;
-	_defaultFragmentShaderSourceFile = nil;
-}
-
--(NSString*) description {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 400];
-	[desc appendFormat: @"%@:", [self class]];
-	for (id p in _programsByName) [desc appendFormat: @"\n    %@ ", p];
-	return desc;
-}
 
 @end

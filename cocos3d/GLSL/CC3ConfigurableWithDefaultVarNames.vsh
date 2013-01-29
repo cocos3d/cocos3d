@@ -41,8 +41,8 @@
  * of development, but for optimal performance, it is recommended that the application provide
  * specialized shaders that have been tuned and optimized to a specific needs of each model.
  *
- * The semantics of the variables in this shader can be mapped using the
- * CC3GLProgramSemanticsByVarName sharedDefaultDelegate instance.
+ * The semantics of the variables in this shader can be mapped using a
+ * CC3GLProgramSemanticsByVarName instance.
  *
  * In order to reduce the number of uniform variables, this shader supports two texture units
  * and two lights by default. This can be increased by changing the MAX_TEXTURES and MAX_LIGHTS

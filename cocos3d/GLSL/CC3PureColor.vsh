@@ -32,8 +32,8 @@
  *
  * This shader is used during node picking and when a node does not have a material.
  *
- * The semantics of the variables in this shader can be mapped using the
- * CC3GLProgramSemanticsByVarName sharedDefaultDelegate instance.
+ * The semantics of the variables in this shader can be mapped using a
+ * CC3GLProgramSemanticsByVarName instance.
  */
 
 // Maximum bones per skin section (batch). This is set here to the platform maximum.

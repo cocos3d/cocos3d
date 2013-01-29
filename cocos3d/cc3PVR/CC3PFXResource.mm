@@ -227,8 +227,8 @@ static Class _defaultSemanticDelegateClass = nil;
 
 -(void) populateMaterial: (CC3Material*) material {
 
-	// Set the GL program into a program context with the material
-	if (_glProgram) material.shaderContext = [CC3GLProgramContext contextForProgram: _glProgram];
+	// Set the GL program into the material
+	material.shaderProgram = _glProgram;
 
 	// Set each texture into its associated texture unit
 	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
@@ -327,10 +327,11 @@ static Class _defaultSemanticDelegateClass = nil;
 	SPVRTPFXParserShader* fShader = [self getFragmentShaderNamed: pfxEffect->FragmentShaderName.c_str()
 												   fromPFXParser: pfxParser];
 	NSString* progName = [self getProgramNameFromVertexShader: vShader andFragmentShader: fShader];
-	
+
+	Class progClz = self.glProgramClass;
+
 	// Fetch and return program from cache if it has already been loaded
-	CC3OpenGLESShaders* glesShaders = CC3OpenGLESEngine.engine.shaders;
-	_glProgram = [[glesShaders getProgramNamed: progName] retain];		// retained
+	_glProgram = [[progClz getProgramNamed: progName] retain];		// retained
 	if (_glProgram) {
 		LogRez(@"Attached cached GL program named %@", progName);
 		return;
@@ -340,18 +341,18 @@ static Class _defaultSemanticDelegateClass = nil;
 		   progName, NSStringFromSPVRTPFXParserShader(vShader), NSStringFromSPVRTPFXParserShader(fShader));
 
 	// Compile, link and cache the program
-	_glProgram = [[self.glProgramClass alloc] initWithName: progName
-									 fromVertexShaderBytes: [self getShaderCode: vShader]
-									andFragmentShaderBytes: [self getShaderCode: fShader]];	// retained
+	_glProgram = [[progClz alloc] initWithName: progName
+						 fromVertexShaderBytes: [self getShaderCode: vShader]
+						andFragmentShaderBytes: [self getShaderCode: fShader]];		// retained
 
 	[self initGLProgramSemanticDelegateFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 
 	[_glProgram link];
-	[glesShaders addProgram: _glProgram];		// Add the new program to the cache
+	[progClz addProgram: _glProgram];		// Add the new program to the cache
 }
 
 /**
- * Template method to determine the class of GL program to instantiate.
+ * Template property to determine the class of GL program to instantiate.
  * The returned class must be a subclass of CC3GLProgram.
  */
 -(Class) glProgramClass { return [CC3GLProgram class]; }

@@ -589,48 +589,6 @@
 	[boneMtxITVar updateGLValue];
 }
 
-/*
--(void) endSkinSection {
-	CC3Matrix3x3 mtxInvTran;
-	CC3GLSLUniform* var;
-	CC3GLProgram* glProg = self.engine.shaders.activeProgram;
-	GLuint mtxCnt = _maxPaletteSize;		// Clamp to platform maximum
-	
-	// Set the matrix palette into the appropriate uniform in the currently active GL program
-	var = [glProg uniformForSemantic: kCC3SemanticBoneMatrices];
-	if (var) {
-		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBoneMatrices));
-		mtxCnt = MIN(var.size, mtxCnt);
-		for (GLuint mtxIdx = 0; mtxIdx < mtxCnt; mtxIdx++)
-			[var setMatrix4x3: &_mtxPalette[mtxIdx] at: mtxIdx];
-		[var updateGLValue];
-	}
-	
-	// Calculate the inverse-transform matrices for the matrix palette, and set them into the
-	// appropriate uniform in the currently active GL program
-	var = [glProg uniformForSemantic: kCC3SemanticBoneMatricesInvTran];
-	if (var) {
-		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBoneMatricesInvTran));
-		mtxCnt = MIN(var.size, mtxCnt);
-		for (GLuint mtxIdx = 0; mtxIdx < mtxCnt; mtxIdx++) {
-			CC3Matrix3x3PopulateFrom4x3(&mtxInvTran, &_mtxPalette[mtxIdx]);
-			CC3Matrix3x3InvertAdjoint(&mtxInvTran);
-			CC3Matrix3x3Transpose(&mtxInvTran);
-			[var setMatrix3x3: &mtxInvTran at: mtxIdx];
-		}
-		[var updateGLValue];
-	}
-	
-	// Set the matrix count from the minimum length of the two matrix arrays and the platform
-	var = [glProg uniformForSemantic: kCC3SemanticBonesPerVertex];
-	if (var) {
-		//		CC3Assert(var, @"%@ does not contain a uniform for semantic %@", glProg, NSStringFromCC3Semantic(kCC3SemanticBonesPerVertex));
-		[var setInteger: mtxCnt];
-		[var updateGLValue];
-	}
-}
-*/
-
 @end
 
 #endif

@@ -424,6 +424,9 @@
  */
 @property(nonatomic, readonly) CC3Mesh* currentMesh;
 
+/** The number of lights in the scene. */
+@property(nonatomic, readonly) NSUInteger lightCount;
+
 /**
  * Returns the light indicated by the index, or nil if the specified index is greater than
  * the number of lights currently existing in the scene.

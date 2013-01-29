@@ -43,7 +43,6 @@
 #import "CC3OpenGLES2State.h"
 #import "CC3OpenGLES2Fog.h"
 #import "CC3OpenGLES2Hints.h"
-#import "CC3OpenGLES2Shaders.h"
 
 @implementation CC3OpenGLES2Engine
 
@@ -62,7 +61,7 @@
 	self.state = [CC3OpenGLES2State trackerWithParent: self];
 	self.fog = [CC3OpenGLES2Fog trackerWithParent: self];
 	self.hints = [CC3OpenGLES2Hints trackerWithParent: self];
-	self.shaders = [CC3OpenGLES2Shaders trackerWithParent: self];
+	self.shaders = [CC3OpenGLESShaders trackerWithParent: self];
 	self.appExtensions = nil;
 }
 
