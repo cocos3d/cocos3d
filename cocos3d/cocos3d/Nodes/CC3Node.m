@@ -678,13 +678,12 @@
 -(void) setPerformanceStatistics: (CC3PerformanceStatistics*) aPerfStats {}
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ location: %@, global: %@, %@, scale: %@, bounded by: %@",
+	return [NSString stringWithFormat: @"%@ location: %@, global: %@, %@, scale: %@",
 			[self description],
 			NSStringFromCC3Vector(self.location),
 			NSStringFromCC3Vector(self.globalLocation),
 			rotator.fullDescription,
-			NSStringFromCC3Vector(self.scale),
-			boundingVolume];
+			NSStringFromCC3Vector(self.scale)];
 }
 
 -(NSString*) structureDescription {

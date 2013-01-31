@@ -76,7 +76,6 @@
 	// New 2D billboard
 	billboard = [aCCNode retain];
 	billboard.visible = self.visible;
-	[self normalizeBillboardScaleToDevice];
 	// Retrieve the blend function from the 2D node and align this 3D node's material with it.
 	if ([billboard conformsToProtocol: @protocol(CCBlendProtocol)]) {
 		self.blendFunc = ((id<CCBlendProtocol>)billboard).blendFunc;

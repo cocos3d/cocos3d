@@ -850,12 +850,11 @@
 -(void) transformVolume {
 	[super transformVolume];
 
-	// Expand the radius by the global scale of the node.
-	// In case the node's global scale is not uniform, use the largest of the
-	// three scale axes to ensure the scaled object is contained within the sphere.
-	CC3Vector nodeScale = _node.globalScale;
-	GLfloat maxScale = MAX(MAX(nodeScale.x, nodeScale.y), nodeScale.z);
-	globalRadius = radius * maxScale;
+	// Expand the radius by the global scale of the node. In case the node's global scale is not
+	// uniform, use the largest of the three scale axes to ensure the scaled object is contained
+	// within the sphere, and ensure that the radius is positive even if scale is negative.
+	CC3Vector ngs = _node.globalScale;
+	globalRadius = radius * ABS(MAX(MAX(ngs.x, ngs.y), ngs.z));
 }
 
 
