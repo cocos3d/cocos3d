@@ -49,7 +49,7 @@
  * memory and CPU overhead that the assertion calls would add
  *
  * This library also adds a sophisticated logging capability.
- 
+ *
  * There are four levels of logging: Trace, Info, Error and Debug, and each can be enabled
  * independently via the LOGGING_LEVEL_TRACE, LOGGING_LEVEL_INFO, LOGGING_LEVEL_ERROR and
  * LOGGING_LEVEL_DEBUG switches, respectively.
@@ -104,6 +104,17 @@
  *
  * You can choose to have each logging entry automatically include class, method and line information
  * by enabling the LOGGING_INCLUDE_CODE_LOCATION switch.
+ *
+ * You can determine and log the timing of resource loading operations by using the function pair
+ * MarkRezActivityStart() and GetRezActivityDuration(). Together, these two fuctions work to mark
+ * the beginning and end of a resource loading activity (or any activity actually).
+ *
+ * Call MarkRezActivityStart() before a resource operation to indicate that timing should begin,
+ * and call GetRezActivityDuration() after the operation to retrieve the elapsed time, often
+ * calling it as an argument in a LogRez call. Both macros should appear at the same nesting level
+ * in your function or method, since they define and share a local variable to track the time.
+ * These two macro functions are only defined if LOGGING_REZLOAD is set on, otherwise they are
+ * completely removed from the compiled code.
  *
  * Although you can directly edit this file to turn on or off the switches below, the preferred
  * technique is to set these switches via the compiler build setting GCC_PREPROCESSOR_DEFINITIONS
@@ -212,9 +223,13 @@
 #if LOGGING_REZLOAD
 #	define LogTimedRez(fmt, ...) LOG_FORMAT(fmt, @"rez", ##__VA_ARGS__)
 #	define LogCleanRez(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"rez", ##__VA_ARGS__)
+#	define MarkRezActivityStart() NSTimeInterval _REZ_START_TIME_ = [NSDate timeIntervalSinceReferenceDate]
+#	define GetRezActivityDuration() ([NSDate timeIntervalSinceReferenceDate] - _REZ_START_TIME_)
 #else
 #	define LogTimedRez(...)
 #	define LogCleanRez(...)
+#	define MarkRezActivityStart()
+#	define GetRezActivityDuration() 0.0
 #endif
 #define LogRez(fmt, ...) LogCleanRez(fmt, ##__VA_ARGS__)
 

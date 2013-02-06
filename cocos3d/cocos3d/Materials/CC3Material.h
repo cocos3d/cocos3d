@@ -392,8 +392,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * The value of this property has no effect if the value of the alphaTestFunction
  * property is either GL_ALWAYS or GL_NEVER.
  *
- * See the notes for the alphaTestFunction property for more information on alpha
- * testing.
+ * See the notes for the alphaTestFunction property for more information on alpha testing.
  */
 @property(nonatomic, assign) GLfloat alphaTestReference;
 

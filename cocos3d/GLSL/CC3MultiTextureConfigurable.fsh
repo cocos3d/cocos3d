@@ -1,5 +1,5 @@
 /*
- * CC3ConfigurableWithDefaultVarNames.fsh
+ * CC3MultiTextureConfigurable.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -33,7 +33,7 @@
  * for use as a default when a CC3Material has not been assigned a specific GL shader
  * program, and can make use of the configurability of CC3Material and CC3MeshNode.
  *
- * CC3ConfigurableWithDefaultVarNames.vsh is the vertx shader paired with this fragment shader.
+ * CC3MultiTextureConfigurable.vsh is the vertex shader paired with this fragment shader.
  *
  * When using this shader, be aware that the general nature and high-level of configurability
  * available with this shader means that it cannot be optimized to the same degree that a more
@@ -83,9 +83,10 @@ precision mediump float;
 /**
  * The parameters that define a material.
  *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ * When using this structure as the basis of a simpler implementation, you can remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
+ * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
+ * leave them in for clarity, and let the compiler optimize them away.
  */
 struct Material {
 	vec4	ambientColor;					/**< Ambient color of the material. */
@@ -99,9 +100,10 @@ struct Material {
 /**
  * The parameters that define the scene fog.
  *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ * When using this structure as the basis of a simpler implementation, you can remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
+ * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
+ * leave them in for clarity, and let the compiler optimize them away.
  */
 struct Fog {
 	bool		isEnabled;					/**< Whether scene fogging is enabled. */
@@ -144,31 +146,12 @@ struct TextureUnit {
 	int		alphaOperand2;					/**< The operand on the alpha components for arg2 of the combiner function in this texture unit. */
 };
 
-/**
- * The parameters to use when displaying vertices as points.
- *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
- */
-struct Point {
-	float	size;							/**< Default size of points, if not specified per-vertex. */
-	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
-	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
-	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
-	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
-	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
-	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
-	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
-};
-
 
 //-------------- UNIFORMS ----------------------
 
 uniform bool u_cc3HasVertexTangent;			/**< Whether vertex tangent attribute is available. */
 uniform Material u_cc3Material;				/**< The material being applied to the mesh. */
 uniform Fog u_cc3Fog;						/**< Scene fog. */
-uniform Point u_cc3Points;					/**< Point parameters. */
 
 // Textures
 uniform lowp int u_cc3TextureCount;						/**< Number of textures. */
@@ -298,6 +281,7 @@ void applyTexture(int tuIdx) {
  * color from the v_color varying input variable.
  */
 void applyTextures() {
+	fragColor = v_color;
 	for (int tuIdx = 0; tuIdx < MAX_TEXTURES; tuIdx++) {
 		if (tuIdx >= u_cc3TextureCount) return;		// Break out once we've applied all the textures
 		applyTexture(tuIdx);
@@ -328,12 +312,7 @@ vec4 fogify(vec4 aColor) {
 //-------------- ENTRY POINT ----------------------
 void main() {
 	
-	// Start with the varying fragment color and add textures
-	fragColor = v_color;
-	if (u_cc3Points.isDrawingPoints && u_cc3Points.shouldDisplayAsSprites)
-		fragColor = texture2D(s_cc3Textures[0], gl_PointCoord) * v_color;
-	else
-		applyTextures();
+	applyTextures();
 
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3Material.minimumDrawnAlpha)

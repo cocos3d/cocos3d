@@ -1,5 +1,5 @@
 /*
- * CC3ConfigurableWithDefaultVarNames.vsh
+ * CC3NoTexture.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,33 +28,20 @@
  */
 
 /**
- * This vertex shader provides a general configurable shader that replicates much of the
- * functionality of the fixed-pipeline of OpenGL ES 1.1. As such, this shader is suitable
- * for use as a default when a CC3Material has not been assigned a specific GL shader
- * program, and can make use of the configurability of CC3Material and CC3MeshNode.
+ * This vertex shader handles a material that does not have a texture.
  *
- * CC3ConfigurableWithDefaultVarNames.fsh is the fragment shader paired with this vertex shader.
- *
- * When using this shader, be aware that the general nature and high-level of configurability
- * available with this shader means that it cannot be optimized to the same degree that a more
- * deliberately dedicated shader can be optimized. This shader may be used during early stages
- * of development, but for optimal performance, it is recommended that the application provide
- * specialized shaders that have been tuned and optimized to a specific needs of each model.
+ * This vertex shader can be paired with the following fragment shaders:
+ *   - CC3NoTexture.fsh
+ *   - CC3NoTextureWithAlphaTest.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
- *
- * In order to reduce the number of uniform variables, this shader supports two texture units
- * and two lights by default. This can be increased by changing the MAX_TEXTURES and MAX_LIGHTS
- * macro definitions below.
  */
 
-// Increase these if more textures or lights are desired.
-// In order to improve performance, they have been kept low to limit the number of uniforms.
-// These definitions should not be set larger than the CC3GLProgramSemanticsByVarName
-// class-side properties maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables
-// (each defaults to 4). See the description of those properties for more info.
-#define MAX_TEXTURES			2
+// Increase these if more lights are desired. In order to improve performance, it has been
+// kept low to limit the number of uniforms. This definition should not be set larger than
+// the CC3GLProgramSemanticsByVarName class-side property maxDefaultMappingLightVariables
+// (defaults to 4). See the description of those properties for more info.
 #define MAX_LIGHTS				3
 
 // Maximum bones per skin section (batch). This is set here to the platform maximum.
@@ -69,9 +56,10 @@ precision mediump float;
 /**
  * The parameters that define the material covering this vertex.
  *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ * When using this structure as the basis of a simpler implementation, you can remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
+ * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
+ * leave them in for clarity, and let the compiler optimize them away.
  */
 struct Material {
 	vec4	ambientColor;						/**< Ambient color of the material. */
@@ -85,9 +73,10 @@ struct Material {
 /**
  * The parameters that define a single light.
  *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ * When using this structure as the basis of a simpler implementation, you can remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
+ * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
+ * leave them in for clarity, and let the compiler optimize them away.
  */
 struct Light {
 	vec4	positionEyeSpace;				/**< Position or normalized direction in eye space. */
@@ -105,9 +94,10 @@ struct Light {
 /**
  * The parameters to use when displaying vertices as points.
  *
- * When using this structure as the basis of a simpler implementation, remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved
- * and pased to your shader (uniform structure elements are passed individually in GLSL).
+ * When using this structure as the basis of a simpler implementation, you can remove any elements
+ * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
+ * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
+ * leave them in for clarity, and let the compiler optimize them away.
  */
 struct Point {
 	float	size;							/**< Default size of points, if not specified per-vertex. */
@@ -148,28 +138,19 @@ uniform bool u_cc3ShouldNormalizeNormal;	/**< Whether vertex normals should be n
 uniform bool u_cc3ShouldRescaleNormal;		/**< Whether vertex normals should be rescaled. */
 uniform bool u_cc3HasVertexTangent;			/**< Whether vertex tangent attribute is available. */
 uniform bool u_cc3HasVertexColor;			/**< Whether vertex color attribute is available. */
-uniform lowp int u_cc3TextureCount;			/**< Number of textures. */
-uniform Point u_cc3Points;					/**< Point parameters. */
 
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;		/**< Vertex position. */
-attribute vec3 a_cc3Normal;				/**< Vertex normal. */
-attribute vec3 a_cc3Tangent;			/**< Vertex tangent. */
-attribute vec4 a_cc3Color;				/**< Vertex color. */
-attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
-attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
-attribute float a_cc3PointSize;			/**< Vertex point size. */
-attribute vec2 a_cc3TexCoord0;			/**< Vertex texture coordinate for texture unit 0. */
-attribute vec2 a_cc3TexCoord1;			/**< Vertex texture coordinate for texture unit 1. */
-attribute vec2 a_cc3TexCoord2;			/**< Vertex texture coordinate for texture unit 2. */
-attribute vec2 a_cc3TexCoord3;			/**< Vertex texture coordinate for texture unit 3. */
+attribute highp vec4 a_cc3Position;			/**< Vertex position. */
+attribute vec3 a_cc3Normal;					/**< Vertex normal. */
+attribute vec3 a_cc3Tangent;				/**< Vertex tangent. */
+attribute vec4 a_cc3Color;					/**< Vertex color. */
+attribute vec4 a_cc3BoneWeights;			/**< Vertex skinning bone weights (up to 4). */
+attribute vec4 a_cc3BoneIndices;			/**< Vertex skinning bone matrix indices (up to 4). */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
 varying lowp vec4 v_color;					/**< Fragment base color. */
 varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0);
@@ -218,10 +199,11 @@ void vertexToEyeSpace() {
 /** 
  * Returns the portion of vertex color attributed to illumination of the material by the light at the
  * specified index, taking into consideration attenuation due to distance and spotlight dispersion.
+ *
+ * The use of highp on the floats is required due to the sensitivity of the calculations.
+ * Compiler can crash when attempting to cast back and forth.
  */
 vec4 illuminateWith(int ltIdx) {
-	// The use of high precision on most float variables is required due to the nature of the
-	// attenuation calculations!
 	highp vec3 ltDir;
 	highp float intensity = 1.0;
 	
@@ -239,14 +221,18 @@ vec4 illuminateWith(int ltIdx) {
 		ltDir = normalize(ltDir);
 		
 		// Determine intensity due to spotlight component
-		if (u_cc3Lights[ltIdx].spotCutoffAngleCosine >= 0.0) {
-			highp float cosEyeDir = -dot(ltDir, u_cc3Lights[ltIdx].spotDirectionEyeSpace);
-			highp float spotIntensity = (cosEyeDir >= u_cc3Lights[ltIdx].spotCutoffAngleCosine)
-											? pow(cosEyeDir, u_cc3Lights[ltIdx].spotExponent)
-											: 0.0;
-			intensity *= spotIntensity;
+		highp float spotCutoffCos = u_cc3Lights[ltIdx].spotCutoffAngleCosine;
+		if (spotCutoffCos >= 0.0) {
+			highp vec3  spotDirEye = u_cc3Lights[ltIdx].spotDirectionEyeSpace;
+			highp float cosEyeDir = -dot(ltDir, spotDirEye);
+			if (cosEyeDir >= spotCutoffCos){
+				highp float spotExp = u_cc3Lights[ltIdx].spotExponent;
+				intensity *= pow(cosEyeDir, spotExp);
+			} else {
+				intensity = 0.0;
+			}
 		}
-    } else {
+	} else {
 		// Directional light. Vector is expected to be normalized!
 		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz;
     }
@@ -266,34 +252,8 @@ vec4 illuminateWith(int ltIdx) {
 					 u_cc3Lights[ltIdx].specularColor);
 	}
 
-	
-	if (intensity > 1.0) return vec4(1.0, 0.0, 0.0, 1.0);
-
 	// Return the attenuated vertex color
 	return vtxColor * intensity;
-}
-
-/**
- * Returns the direction to the specified light in either tangent space coordinates or model-space
- * coordinates, depending on whether per-vertex tangents have been supplied. The associated normal-map
- * texture must match this and specify its normals in either tangent-space or model-space.
- */
-vec3 bumpMapDirectionForLight(int ltIdx) {
-	
-	// Get the light direction in model space. If the light is positional
-	// calculate the normalized direction from the light and vertex positions.
-	vec3 ltDir = u_cc3Lights[ltIdx].positionModel.xyz;
-	if (u_cc3Lights[ltIdx].positionModel.w != 0.0) ltDir = normalize(ltDir - a_cc3Position.xyz);
-	
-	// If we have vertex tangents, create a matrix that transforms from model space to tangent space,
-	// and transform the light direction to tangent space. If no tangents, leave in model-space.
-	if (u_cc3HasVertexTangent) {
-		vec3 bitangent = cross(a_cc3Normal, a_cc3Tangent);
-		mat3 tangentSpaceXfm = mat3(a_cc3Tangent, bitangent, a_cc3Normal);
-		ltDir *= tangentSpaceXfm;
-	}
-
-	return ltDir;
 }
 
 /**
@@ -308,29 +268,7 @@ vec4 illuminate() {
 	
 	vtxColor.a = matColorDiffuse.a;
 	
-	// If the model uses bump-mapping, we need a variable to track the light direction.
-	// It's a varying because when using tangent-space normals, we need the light direction per fragment.
-	v_bumpMapLightDir = bumpMapDirectionForLight(0);
-	
 	return vtxColor;
-}
-
-/** 
- * If this vertices are being drawn as points, returns the size of the point for the current vertex.
- * If the size is not needed, or if the size cannot be determined, returns the value one.
- */
-float pointSize() {
-	float size = 1.0;
-	if (u_cc3Points.isDrawingPoints) {
-		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
-		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
-			float ptDist = length(vtxPosEye.xyz);
-			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
-			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));
-		}
-		size = clamp(size, u_cc3Points.minimumSize, u_cc3Points.maximumSize);
-	}
-	return size;
 }
 
 //-------------- ENTRY POINT ----------------------
@@ -356,14 +294,6 @@ void main() {
 		v_color = u_cc3HasVertexColor ? a_cc3Color : u_cc3Color;
 	}
 	
-	// Fragment texture coordinates. Uncomment below or add additional if MAX_TEXTURES is increased.
-	if (u_cc3TextureCount > 0) v_texCoord[0] = a_cc3TexCoord0;
-	if (u_cc3TextureCount > 1) v_texCoord[1] = a_cc3TexCoord1;
-//	if (u_cc3TextureCount > 2) v_texCoord[2] = a_cc3TexCoord2;
-//	if (u_cc3TextureCount > 3) v_texCoord[3] = a_cc3TexCoord3;
-	
 	gl_Position = u_cc3MtxProj * vtxPosEye;
-	
-	gl_PointSize = pointSize();
 }
 

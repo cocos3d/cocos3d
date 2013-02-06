@@ -31,7 +31,7 @@
 
 #import "CC3Material.h"
 #import "CC3OpenGLESEngine.h"
-#import "CC3GLProgram.h"
+#import "CC3GLProgramMatchers.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
@@ -522,7 +522,10 @@ static GLuint lastAssignedMaterialTag;
 #if CC3_OGLES_2
 /** Ensure we have a shader context and program and bind them. */
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (!_shaderContext) self.shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
+	if (!_shaderContext) {
+		self.shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
+		LogRez(@"Shader program %@ automatically selected for %@", self.shaderProgram, visitor.currentMeshNode);
+	}
 	[_shaderContext bindWithVisitor: visitor];
 }
 #endif

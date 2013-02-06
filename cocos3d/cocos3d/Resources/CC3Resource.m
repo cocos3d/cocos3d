@@ -112,15 +112,12 @@ static NSMutableDictionary* _resourcesByName = nil;
 	if (!name) self.name = absFilePath.lastPathComponent;
 	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
 	
-#if LOGGING_REZLOAD
-	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
-#endif
+	MarkRezActivityStart();
 
 	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
 	
 	if (_wasLoaded)
-		LogRez(@"Loaded resources from file '%@' in %.4f seconds",
-			   absFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
+		LogRez(@"Loaded resources from file '%@' in %.4f seconds", aFilePath, GetRezActivityDuration());
 	else
 		LogError(@"Could not load resource file '%@'", absFilePath);
 

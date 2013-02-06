@@ -31,8 +31,8 @@
 
 #import "CC3GLProgram.h"
 #import "CC3GLProgramContext.h"
+#import "CC3GLProgramMatchers.h"
 #import "CC3OpenGLESEngine.h"
-#import "CC3MeshNode.h"
 
 #pragma mark -
 #pragma mark CC3GLProgram
@@ -125,8 +125,7 @@
 	
     if (!source) return NO;
 
-	NSString* srcStr = [NSString stringWithUTF8String: source];
-	LogDebug(@"Submitting %i bytes for %@ shader source:\n%@", srcStr.length, NSStringFromGLEnum(type), srcStr);
+	MarkRezActivityStart();
 	
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
@@ -152,16 +151,19 @@
 				 (type == GL_VERTEX_SHADER ? [self vertexShaderLog] : [self fragmentShaderLog]));
 	}
 	 CC3Assert(status, @"Error compiling %@ shader in %@", NSStringFromGLEnum(type), self);
+	LogRez(@"Compiled %@ %@ in %.4f seconds", self, NSStringFromGLEnum(type), GetRezActivityDuration());
 	return (status == GL_TRUE);
 }
 
 -(BOOL) link {
 	CC3Assert(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
+	MarkRezActivityStart();
 	BOOL wasLinked = [super link];
 	CC3Assert(wasLinked, @"%@ could not be linked. See previously logged error.", self);
 	if (wasLinked) {
+		LogRez(@"Linked %@ in %.4f seconds", self, GetRezActivityDuration());	// Timing before config vars
 		[self configureVariables];
-		LogRez(@"Linked %@", self.fullDescription);
+		LogRez(@"Completed %@", self.fullDescription);
 	}
 	return wasLinked;
 }
@@ -172,6 +174,7 @@
 }
 
 -(void) configureUniforms {
+	MarkRezActivityStart();
 	[_uniforms removeAllObjects];
 	
 	GLint varCnt;
@@ -184,9 +187,11 @@
 		if ( [_semanticDelegate configureVariable: var] ) [_uniforms addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 	}
+	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
 }
 
 -(void) configureAttributes {
+	MarkRezActivityStart();
 	[_attributes removeAllObjects];
 	
 	GLint varCnt;
@@ -199,6 +204,7 @@
 		if ( [_semanticDelegate configureVariable: var] ) [_attributes addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
 	}
+	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
 }
 
 // Overridden to do nothing
@@ -216,9 +222,9 @@
 
 -(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {
 	CC3Assert(name, @"%@ cannot be created without a name", [self class]);
+	self.name = name;				// retained - set name before init for logging during compilation
 	if ( (self = [super initWithVertexShaderByteArray: vshBytes
 							  fragmentShaderByteArray: fshBytes]) ) {
-		self.name = name;				// retained
 		_uniforms = [CCArray new];		// retained
 		_attributes = [CCArray new];	// retained
 		_maxUniformNameLength = 0;
@@ -255,6 +261,7 @@
 }
 
 +(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
+	MarkRezActivityStart();
 	NSError* err = nil;
 	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
 	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
@@ -262,13 +269,11 @@
 	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
 	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
 			  glslFilename, err.localizedDescription, err.code, err.localizedFailureReason);
+	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", glslFilename, GetRezActivityDuration());
 	return (GLchar*)glslSrcStr.UTF8String;
 }
 
-#if CC3_OGLES_2
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ named: %@ with GL program ID: %i", [self class], self.name, program_]; }
-#endif
+-(NSString*) description { return [NSString stringWithFormat: @"%@ named: %@", [self class], self.name]; }
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
@@ -314,86 +319,3 @@ static id<CC3GLProgramMatcher> _programMatcher = nil;
 
 @end
 
-
-#pragma mark -
-#pragma mark CC3GLProgramMatcherBase
-
-@implementation CC3GLProgramMatcherBase
-
-@synthesize semanticDelegate=_semanticDelegate;
-
--(void) dealloc {
-	[_semanticDelegate release];
-	[_configugurableProgram release];
-	[_pureColorProgram release];
-	[super dealloc];
-}
-
--(Class) programClass { return [CC3GLProgram class]; }
-
--(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
-	if (aMeshNode.material) return self.configurableProgram;
-	
-	return self.pureColorProgram;
-}
-
--(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !visitor.shouldDecorateNode ) return self.pureColorProgram;
-	
-	return [self programForMeshNode: visitor.currentMeshNode];
-}
-
--(CC3GLProgram*) configurableProgram {
-	if ( !_configugurableProgram )
-		_configugurableProgram = [self programFromVertexShaderFile: @"CC3ConfigurableWithDefaultVarNames.vsh"
-											 andFragmentShaderFile: @"CC3ConfigurableWithDefaultVarNames.fsh"];
-	return _configugurableProgram;
-}
-
--(CC3GLProgram*) pureColorProgram {
-	if ( !_pureColorProgram )
-		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
-										andFragmentShaderFile: @"CC3PureColor.fsh"];
-	return _pureColorProgram;
-}
-
--(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
-					   andFragmentShaderFile: (NSString*) fshFilename {
-	Class progClz = self.programClass;
-	
-	// Fetch and return program from cache if it has already been loaded
-	NSString* progName = [progClz programNameFromVertexShaderFile: vshFilename
-											andFragmentShaderFile: fshFilename];
-	CC3GLProgram* prog = [[progClz getProgramNamed: progName] retain];		// retained
-	if (prog) return prog;
-	
-	// Compile, link and cache the program
-	prog = [[progClz alloc] initWithName: progName
-					fromVertexShaderFile: vshFilename
-				   andFragmentShaderFile: fshFilename];
-	prog.semanticDelegate = self.semanticDelegate;
-	[prog link];
-	[progClz addProgram: prog];		// Add the new program to the cache
-	[prog release];
-	return prog;
-}
-
-
-#pragma mark Allocation and initialization
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_configugurableProgram = nil;
-		_pureColorProgram = nil;
-		[self initSemanticDelegate];
-	}
-	return self;
-}
-
--(void) initSemanticDelegate {
-	CC3GLProgramSemanticsByVarName* sd = [CC3GLProgramSemanticsByVarName new];
-	[sd populateWithDefaultVariableNameMappings];
-	_semanticDelegate = sd;		// retained by "new" above
-}
-
-@end

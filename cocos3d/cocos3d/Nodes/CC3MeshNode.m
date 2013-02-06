@@ -34,6 +34,7 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3Mesh.h"
 #import "CC3Light.h"
+#import "CC3GLProgramMatchers.h"
 #import "CC3IOSExtensions.h"
 
 
