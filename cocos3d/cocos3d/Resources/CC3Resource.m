@@ -126,11 +126,15 @@ static NSMutableDictionary* _resourcesByName = nil;
 	return _wasLoaded;
 }
 
-// Subclasses should override this method, but invoke this superclass implementation first.
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name];
+}
+
+-(BOOL) saveToFile: (NSString*) aFilePath {
+	CC3Assert(NO, @"%@ does not support saving the resource content back to a file.", self);
+	return NO;
 }
 
 

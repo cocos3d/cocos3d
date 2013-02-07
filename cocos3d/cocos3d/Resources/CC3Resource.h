@@ -133,6 +133,20 @@
  */
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath;
 
+/**
+ * Saves the content of this resource to the file at the specified file path and returns whether
+ * the saving was successful.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * Not all types of resources support saving back to a file. This base implementation raises an
+ * assertion error indicating that saving is not supported, and returns NO. Subclasses that manage
+ * a resource type that can be saved will override this method to perform the saving activity.
+ */
+-(BOOL) saveToFile: (NSString*) aFilePath;
+
 
 #pragma mark Allocation and initialization
 

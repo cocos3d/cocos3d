@@ -74,6 +74,13 @@ cocos3d 2.0.0 - 2013/01/31
 - [API change] Added CC3Node globalHomogeneousPosition property and deprecated CC3Light homogeneousLocation property.
 - [API change] Added CC3Node globalLightPosition property and deprecated globalLightPosition property.
 	- Fixed issue where the globalLightLocation property did not accurately track positional lights for object-space bump mapping.
+	
+- CC3PODResource now releases unneeded internal POD file structures after loading and building, to conserve memory.
+- Added CC3Resource saveToFile: method to allow resource types that support it to save content back to a file:
+	- Added CC3PODResource shouldAutoBuild property to allow POD files to be loaded without being built, so they can later be saved to file.
+	- CC3PODResource supports saving underlying POD content back to a file.
+	- Added CC3PODResource saveAnimationToFile: method to save only the animation to a new POD file.
+		- This can be a useful development utility for creating multiple animation tracks for a single POD file for later blending.
 
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
     - CC3Assert ensures the assertion message is logged to the console prior to raising the assertion exception.

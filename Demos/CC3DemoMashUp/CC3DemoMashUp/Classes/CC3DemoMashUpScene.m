@@ -1315,9 +1315,21 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// aligned to upside-down textures so that the texture coordinates will be flipped upside
 	// down automatically and the textures will appear right-way up.
 	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
-	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
-					  expectsVerticallyFlippedTextures: NO];
+//	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
+//					  expectsVerticallyFlippedTextures: NO];
 
+	// TODO - remove this testing code and uncomment above
+	NSString* animPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents/manOut.pod"];
+	CC3PODResource* podRez = [CC3PODResource resource];
+	podRez.expectsVerticallyFlippedTextures = NO;
+	podRez.shouldAutoBuild = NO;
+	[podRez loadFromFile: kRunningManPODFile];
+	[podRez saveAnimationToFile: animPath];
+	[podRez build];
+	runner.resource = podRez;
+	[CC3PODResourceNode nodeFromFile: animPath];
+
+	
 	// Remove the light provided in the POD so that it does not contribute to the
 	// lighting of the scene. We don't remove the POD's camera, but we rename it
 	// so that we can retrieve it distinctly from the camera loaded with the robot
@@ -1334,9 +1346,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	runner.touchEnabled = YES;		// make the runner touchable
 	
 	// Create a running track at the scene's center.
-	// This "running track" is really just a structural node on which we can place the man
-	// and then rotate the "track" to move the man. It's really just an invisible boom
-	// holding the man.
+	// This "running track" is really just a structural node on which we can place the man and
+	// then rotate the "track" to move the man. It's really just an invisible boom holding the man.
 	CC3Node* runningTrack = [CC3Node nodeWithName: kRunningTrackName];
 	runningTrack.location = ground.location;
 	[self addChild: runningTrack];

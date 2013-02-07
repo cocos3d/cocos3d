@@ -63,13 +63,13 @@
 		// Once all vertex arrays are populated, if the data is interleaved, mark it as such and
 		// swap the reference to the original data within the SPODMesh, so that CC3VertexArray
 		// can take over responsibility for managing the data memory allocated by CPVRTModelPOD.
-		// This allows CC3VertexArray to release the vertex data from memory once it has been
-		// bound to a GL buffer in the graphics hardware.
-		// We can't just NULL the interleaved pointer reference, because a NULL indicates to
-		// CPVRTModelPOD that the data is contained within the individual vertex arrays, and
-		// it will try to free those instead. So, we create a "dummy" memory allocation for
-		// CPVRTModelPOD to free when it needs to. The original pointer is now being managed
-		// by the CC3VertexLocations instance.
+		// This allows CC3VertexArray to release the vertex data from memory once it has been bound
+		// to a GL buffer in the graphics hardware, and allows the CPVRTModelPOD to be released
+		// from memory without it removing the vertex data in the process. We can't just NULL the
+		// interleaved pointer reference, because a NULL indicates to CPVRTModelPOD that the data
+		// is contained within the individual vertex arrays, and it will try to free those instead.
+		// So, we create a "dummy" memory allocation for CPVRTModelPOD to free when it needs to.
+		// The original pointer is now being managed by the CC3VertexLocations instance.
 		if (psm->pInterleaved != NULL) {
 			_shouldInterleaveVertices = YES;
 			psm->pInterleaved = (PVRTuint8*)calloc(1, sizeof(PVRTuint8));

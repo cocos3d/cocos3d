@@ -118,13 +118,10 @@
  * when the establishAnimationFrameAt: method is invoked on the node.
  */
 @interface CC3PODNodeAnimation : CC3NodeAnimation {
-
 	GLuint* animatedLocationIndices;
 	GLfloat* animatedLocations;			// 3 floats per frame of animation.
-	
 	GLuint* animatedQuaternionsIndices;
 	GLfloat* animatedQuaternions;		// 4 floats per frame of animation.
-	
 	GLuint* animatedScaleIndices;
 	GLfloat* animatedScales;			// 7 floats per frame of animation.
 }

@@ -92,13 +92,19 @@
  * you may want to extract and return a customized subclass of the object of interest.
  */
 @interface CC3PODResource : CC3NodesResource {
-	PODClassPtr pvrtModel;
-	CCArray* allNodes;
-	CCArray* meshes;
-	CCArray* materials;
-	CCArray* textures;
+	PODClassPtr _pvrtModel;
+	CCArray* _allNodes;
+	CCArray* _meshes;
+	CCArray* _materials;
+	CCArray* _textures;
 	Class _pfxResourceClass;
-	ccTexParams textureParameters;
+	ccTexParams _textureParameters;
+	ccColor4F _ambientLight;
+	ccColor4F _backgroundColor;
+	GLuint _animationFrameCount;
+	GLfloat _animationFrameRate;
+	BOOL _shouldAutoBuild : 1;
+	
 }
 
 /**
@@ -110,8 +116,10 @@
 @property(nonatomic, readonly) PODClassPtr pvrtModel;
 
 /**
- * The total number of nodes in the POD file.
- * This is also the count of the allNodes array.
+ * The total number of nodes of all types in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
  */
 @property(nonatomic, readonly) uint nodeCount;
 
@@ -121,31 +129,58 @@
  */
 @property(nonatomic, readonly) CCArray* allNodes;
 
-/** The total number of mesh nodes in the POD file. */
+/**
+ * The number of mesh nodes in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
+ */
 @property(nonatomic, readonly) uint meshNodeCount;
 
-/** The total number of lights in the POD file. */
+/**
+ * The number of lights in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
+ */
 @property(nonatomic, readonly) uint lightCount;
 
-/** The total number of cameras in the POD file. */
+/**
+ * The number of cameras in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
+ */
 @property(nonatomic, readonly) uint cameraCount;
 
 /**
- * The total number of meshes in the POD file. This is different than the
- * meshNodeCount because mesh models may be used by more than one mesh node.
+ * The number of meshes in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
  */
 @property(nonatomic, readonly) uint meshCount;
 
 /** A collection of the CC3Meshs extracted from  the POD file. */
 @property(nonatomic, readonly) CCArray* meshes;
 
-/** The number of materials in the POD file. */
+/**
+ * The number of materials in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
+ */
 @property(nonatomic, readonly) uint materialCount;
 
 /** A collection of the CC3Materials extracted from  the POD file. */
 @property(nonatomic, readonly) CCArray* materials;
 
-/** The number of different textures in the POD file. */
+/**
+ * The number of textures in the POD file.
+ *
+ * This is a transient property that returns a valid value only during node building.
+ * Once node building is complete, this property will return zero.
+ */
 @property(nonatomic, readonly) uint textureCount;
 
 /** A collection of the CC3Textures extracted from  the POD file. */
@@ -155,7 +190,10 @@
 @property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;
 
 /** The number of frames of animation in the POD file. */
-@property(nonatomic, readonly) uint animationFrameCount;
+@property(nonatomic, readonly) GLuint animationFrameCount;
+
+/** The frame rate of animation in the POD file, in frames per second. */
+@property(nonatomic, readonly) GLfloat animationFrameRate;
 
 /** The global ambient light of the scene in the POD file. */
 @property(nonatomic, readonly) ccColor4F ambientLight;
@@ -202,9 +240,20 @@
 #pragma mark Allocation and initialization
 
 /**
- * Template method that extracts and builds all components. This is automatically
- * invoked from the loadFromPODFile: method if the POD file was successfully loaded.
- * The application should not invoke this method directly.
+ * Indicates whether the build method should be invoked automatically when the file is loaded.
+ *
+ * The initial value of this property is YES. This property must be set before the loadFromFile:
+ * method is invoked. Be aware that the loadFromFile: method is automatically invoked automatically
+ * by several instance initializers. To use this property, initialize this instance with an
+ * initializer method that does not invoke the loadFromFile: method.
+ */
+@property(nonatomic, assign) BOOL shouldAutoBuild;
+
+/**
+ * Template method that extracts and builds all components. This is automatically invoked from
+ * the loadFromPODFile: method if the POD file was successfully loaded, and the shouldAutoBuild
+ * property is set to YES. Autobuilding is the default behaviour, and usually, the application
+ * should not need to invoke this method directly.
  * 
  * The order of component extraction and building is:
  *   - textures, by invoking the buildTextures template method
@@ -217,6 +266,52 @@
  */
 -(void) build;
 
+/**
+ * Saves the content of this resource to the file at the specified file path and returns whether
+ * the saving was successful.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * The build method releases loaded POD content from memory once the file content has been extracted
+ * and into component objects. As a result, content may not be saved back to file after the build
+ * method has been invoked, and this method will raise an assertion error if this method is invoked
+ * after content has been released.
+ *
+ * The build method is invoked automatically from the loadFromFile: method and several initializer
+ * methods that invoke the loadFromFile: method if the shouldAutoBuild property is set to its default
+ * YES value. To use this method, initialize this instance with an initializer method that does not
+ * invoke the loadFromFile: method, set the shouldAutoBuild property to NO. Then, invoke the
+ * loadFromFile: method, make any changes, and invoke this method to save the content back to a file.
+ * Once saved, the build method can then be invoked to extract the content into component objects.
+ */
+-(BOOL) saveToFile: (NSString*) aFilePath;
+
+/**
+ * Saves the animation content of this resource to the file at the specified file path and
+ * returns whether the saving was successful. Animation content includes the nodes that have
+ * animation defined. All other content, including meshes, materials and textures are stripped
+ * from the POD resource that is saved. The POD content in this instance is not affected.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * The build method releases loaded POD content from memory once the file content has been extracted
+ * and into component objects. As a result, content may not be saved back to file after the build
+ * method has been invoked, and this method will raise an assertion error if this method is invoked
+ * after content has been released.
+ *
+ * The build method is invoked automatically from the loadFromFile: method and several initializer
+ * methods that invoke the loadFromFile: method if the shouldAutoBuild property is set to its default
+ * YES value. To use this method, initialize this instance with an initializer method that does not
+ * invoke the loadFromFile: method, set the shouldAutoBuild property to NO. Then, invoke the
+ * loadFromFile: method, make any changes, and invoke this method to save the content back to a file.
+ * Once saved, the build method can then be invoked to extract the content into component objects.
+ */
+-(BOOL) saveAnimationToFile: (NSString*) aFilePath;
+
 
 #pragma mark Accessing node data and building nodes
 
@@ -225,6 +320,17 @@
 
 /** Returns the node with the specified name from the allNodes array. */
 -(CC3Node*) nodeNamed: (NSString*) aName;
+
+/**
+ * Template method that extracts and sets the scene info, including the following properties:
+ *   - animationFrameCount
+ *   - animationFrameRate
+ *   - ambientLight
+ *   - backgroundColor
+ *
+ * This template method can be overridden in a subclass if specialized processing is required.
+ */
+-(void) buildSceneInfo;
 
 /**
  * Template method that extracts and builds the nodes from the underlying data.

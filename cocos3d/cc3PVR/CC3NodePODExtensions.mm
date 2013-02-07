@@ -73,15 +73,10 @@ extern "C" {
 		self.name = [NSString stringWithUTF8String: psn->pszName];
 		self.podContentIndex = psn->nIdx;
 		self.podParentIndex = psn->nIdxParent;
-		if (psn->pfAnimPosition) {
-			self.location = *(CC3Vector*)psn->pfAnimPosition;
-		}
-		if (psn->pfAnimRotation) {
-			self.quaternion = *(CC3Vector4*)psn->pfAnimRotation;
-		}
-		if (psn->pfAnimScale) {
-			self.scale = *(CC3Vector*)psn->pfAnimScale;
-		}
+		if (psn->pfAnimPosition) self.location = *(CC3Vector*)psn->pfAnimPosition;
+		if (psn->pfAnimRotation) self.quaternion = *(CC3Vector4*)psn->pfAnimRotation;
+		if (psn->pfAnimScale) self.scale = *(CC3Vector*)psn->pfAnimScale;
+
 		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn]) {
 			self.animation = [CC3PODNodeAnimation animationFromSPODNode: (PODStructPtr)psn
 														 withFrameCount: aPODRez.animationFrameCount];
@@ -119,33 +114,48 @@ extern "C" {
 @implementation CC3PODNodeAnimation
 
 -(void) dealloc {
+	free(animatedLocations);
+	free(animatedLocationIndices);
+	free(animatedQuaternions);
+	free(animatedQuaternionsIndices);
+	free(animatedScales);
+	free(animatedScaleIndices);
 	[super dealloc];
 }
 
+// For each type of animation content, this instance assumes responsiblity for managing
+// the memory of 
 -(id) initFromSPODNode: (PODStructPtr) pSPODNode withFrameCount: (GLuint) numFrames {
 	if ( (self = [super initWithFrameCount: numFrames]) ) {
-
+		
 		// Start with no animation
 		animatedLocations = animatedQuaternions = animatedScales = NULL;
+		animatedLocationIndices = animatedQuaternionsIndices = animatedScaleIndices = NULL;
 		
 		SPODNode* psn = (SPODNode*)pSPODNode;
-
+		
 		if (psn->pfAnimPosition && (psn->nAnimFlags & ePODHasPositionAni)) {
 			animatedLocations = psn->pfAnimPosition;
 			animatedLocationIndices = psn->pnAnimPositionIdx;
+			psn->pfAnimPosition = NULL;		// Clear reference so SPODNode won't try to free it.
+			psn->pnAnimPositionIdx = NULL;	// Clear reference so SPODNode won't try to free it.
 		}
 		
 		if (psn->pfAnimRotation && (psn->nAnimFlags & ePODHasRotationAni)) {
 			animatedQuaternions = psn->pfAnimRotation;
 			animatedQuaternionsIndices = psn->pnAnimRotationIdx;
+			psn->pfAnimRotation = NULL;		// Clear reference so SPODNode won't try to free it.
+			psn->pnAnimRotationIdx = NULL;	// Clear reference so SPODNode won't try to free it.
 		}
 		
 		if (psn->pfAnimScale && (psn->nAnimFlags & ePODHasScaleAni)) {
 			animatedScales = psn->pfAnimScale;
 			animatedScaleIndices = psn->pnAnimScaleIdx;
+			psn->pfAnimScale = NULL;		// Clear reference so SPODNode won't try to free it.
+			psn->pnAnimScaleIdx = NULL;		// Clear reference so SPODNode won't try to free it.
 		}
 	}
-	return self; 
+	return self;
 }
 
 +(id) animationFromSPODNode: (PODStructPtr) pSPODNode withFrameCount: (GLuint) numFrames {
@@ -157,17 +167,11 @@ extern "C" {
 	return psn->nAnimFlags & (ePODHasPositionAni | ePODHasRotationAni | ePODHasScaleAni);
 }
 
--(BOOL) isAnimatingLocation {
-	return animatedLocations != NULL;
-}
+-(BOOL) isAnimatingLocation { return animatedLocations != NULL; }
 
--(BOOL) isAnimatingQuaternion {
-	return animatedQuaternions != NULL;
-}
+-(BOOL) isAnimatingQuaternion { return animatedQuaternions != NULL; }
 
--(BOOL) isAnimatingScale {
-	return animatedScales != NULL;
-}
+-(BOOL) isAnimatingScale { return animatedScales != NULL; }
 
 
 #define kPODAnimationLocationStride 3

@@ -51,37 +51,35 @@ extern "C" {
  */
 static const id placeHolder = [NSObject new];
 
-
-@interface CC3PODResource (TemplateMethods)
-
-/** The underlying pvrtModel property, cast to the correct CPVRTModelPOD C++ class. */
-@property(nonatomic, readonly)  CPVRTModelPOD* pvrtModelImpl;
-@end
-
-
 @implementation CC3PODResource
 
-@synthesize pvrtModel, allNodes, meshes, materials, textures, textureParameters;
-@synthesize pfxResourceClass=_pfxResourceClass;
+@synthesize pvrtModel=_pvrtModel, allNodes=_allNodes, meshes=_meshes;
+@synthesize materials=_materials, textures=_textures, textureParameters=_textureParameters;
+@synthesize pfxResourceClass=_pfxResourceClass, shouldAutoBuild = _shouldAutoBuild;
+@synthesize ambientLight=_ambientLight, backgroundColor=_backgroundColor;
+@synthesize animationFrameCount=_animationFrameCount, animationFrameRate=_animationFrameRate;
 
 -(void) dealloc {
-	[allNodes release];
-	[meshes release];
-	[materials release];
-	[textures release];
-	if (self.pvrtModelImpl) delete (CPVRTModelPOD*)self.pvrtModelImpl;
-	pvrtModel = NULL;
+	[_allNodes release];
+	[_meshes release];
+	[_materials release];
+	[_textures release];
+	[self deleteCPVRTModelPOD];
 	_pfxResourceClass = nil;		// not retained
 	[super dealloc];
 }
 
--(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)pvrtModel; }
+-(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)_pvrtModel; }
+
+-(void) deleteCPVRTModelPOD {
+	if (_pvrtModel) delete self.pvrtModelImpl;
+	_pvrtModel = NULL;
+}
 
 static Class _defaultPFXResourceClass = nil;
 
 +(Class) defaultPFXResourceClass {
-	if ( !_defaultPFXResourceClass)
-		self.defaultPFXResourceClass = [CC3PFXResource class];
+	if ( !_defaultPFXResourceClass) self.defaultPFXResourceClass = [CC3PFXResource class];
 	return _defaultPFXResourceClass;
 }
 
@@ -92,13 +90,14 @@ static Class _defaultPFXResourceClass = nil;
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		pvrtModel = new CPVRTModelPOD();
-		allNodes = [[CCArray array] retain];
-		meshes = [[CCArray array] retain];
-		materials = [[CCArray array] retain];
-		textures = [[CCArray array] retain];
-		textureParameters = [CC3Texture defaultTextureParameters];
+		_pvrtModel = new CPVRTModelPOD();
+		_allNodes = [[CCArray array] retain];
+		_meshes = [[CCArray array] retain];
+		_materials = [[CCArray array] retain];
+		_textures = [[CCArray array] retain];
+		_textureParameters = [CC3Texture defaultTextureParameters];
 		_pfxResourceClass = [[self class] defaultPFXResourceClass];
+		_shouldAutoBuild = YES;
 	}
 	return self;
 }
@@ -114,17 +113,145 @@ static Class _defaultPFXResourceClass = nil;
 	CPVRTResourceFile::SetReadPath([dirName stringByAppendingString: @"/"].UTF8String);
 	
 	_wasLoaded = (self.pvrtModelImpl->ReadFromFile(fileName.UTF8String) == PVR_SUCCESS);
-	if (_wasLoaded) [self build];
+	
+	if (_wasLoaded && _shouldAutoBuild) [self build];
+	
 	return _wasLoaded;
 }
 
 -(void) build {
+	[self buildSceneInfo];
 	LogRez(@"Building %@", self.fullDescription);
 	[self buildTextures];
 	[self buildMaterials];
 	[self buildMeshes];
 	[self buildNodes];
 	[self buildSoftBodyNode];
+	[self deleteCPVRTModelPOD];
+}
+
+-(BOOL) saveToFile: (NSString*) aFilePath {
+	
+	CC3Assert(_pvrtModel, @"%@ cannot be saved because the POD file content has been built and released from memory."
+			  " Set the shouldAutoBuild property to NO before loading the POD file content in order to be able to save it back to a file.", self);
+	
+	// Ensure the path is absolute, converting it if needed.
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	
+	MarkRezActivityStart();
+	
+	BOOL wasSaved = (self.pvrtModelImpl->SavePOD(absFilePath.UTF8String) == PVR_SUCCESS);
+	
+	if (wasSaved)
+		LogRez(@"%@ saved resources to file '%@' in %.4f seconds", self, aFilePath, GetRezActivityDuration());
+	else
+		LogError(@"%@ could not save resources to file '%@'", self, absFilePath);
+	
+	return wasSaved;
+}
+
+-(BOOL) saveAnimationToFile: (NSString*) aFilePath {
+	
+	CC3Assert(_pvrtModel, @"%@ could not save animation content because the POD file content has been built and released from memory."
+			  " Set the shouldAutoBuild property to NO before loading the POD file content in order to be able to save the animation content to a file.", self);
+	
+	// Ensure the path is absolute, converting it if needed.
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	
+	MarkRezActivityStart();
+
+	CPVRTModelPOD* myPod = self.pvrtModelImpl;
+	CPVRTModelPOD* pod = new CPVRTModelPOD();
+	
+	// Scene animation content
+	pod->nNumFrame = myPod->nNumFrame;
+	pod->nFPS = myPod->nFPS;
+	pod->nFlags = myPod->nFlags;
+
+	// Allocate enough memory for the nodes and copy them over,
+	// except for the content and material references
+	pod->pNode = NULL;
+	NSUInteger nodeCnt = myPod->nNumNode;
+	pod->nNumNode = nodeCnt;
+	if (nodeCnt) {
+		pod->pNode = (SPODNode*)calloc(nodeCnt, sizeof(SPODNode));
+		for(NSUInteger nodeIdx = 0; nodeIdx < nodeCnt; nodeIdx++) {
+			PVRTModelPODCopyNode(myPod->pNode[nodeIdx], pod->pNode[nodeIdx], myPod->nNumFrame);
+			pod->pNode[nodeIdx].nIdx = -1;
+			pod->pNode[nodeIdx].nIdxMaterial = -1;
+		}
+	}
+	
+	// Ensure remaining content is blank. Constructor does not initialize to safe empty state!!
+	pod->pfColourBackground[0] = pod->pfColourBackground[1] = pod->pfColourBackground[2] = 0.0;
+	pod->pfColourAmbient[0] = pod->pfColourAmbient[1] = pod->pfColourAmbient[2] = 0.0;
+
+	pod->nNumMeshNode = 0;
+	
+	pod->nNumCamera = 0;
+	pod->pCamera = NULL;
+	
+	pod->nNumLight = 0;
+	pod->pLight = NULL;
+	
+	pod->nNumMesh = 0;
+	pod->pMesh = NULL;
+	
+	pod->nNumMaterial = 0;
+	pod->pMaterial = NULL;
+
+	pod->nNumTexture = 0;
+	pod->pTexture = NULL;
+	
+	pod->nUserDataSize = 0;
+	pod->pUserData = NULL;
+	
+	pod->InitImpl();
+	
+	BOOL wasSaved = (pod->SavePOD(absFilePath.UTF8String) == PVR_SUCCESS);
+
+	delete pod;
+	
+	if (wasSaved)
+		LogRez(@"%@ saved animation content to file '%@' in %.4f seconds", self, aFilePath, GetRezActivityDuration());
+	else
+		LogError(@"%@ could not save animation content to file '%@'", self, absFilePath);
+	
+	return wasSaved;
+}
+
+
+#pragma mark Accessing scene info
+
+-(void) buildSceneInfo {
+	CPVRTModelPOD* pod = self.pvrtModelImpl;
+	GLfloat* rgb;
+	
+	rgb = pod->pfColourAmbient;
+	_ambientLight = ccc4f(rgb[0], rgb[1], rgb[2], 1.0);
+
+	rgb = pod->pfColourBackground;
+	_backgroundColor = ccc4f(rgb[0], rgb[1], rgb[2], 1.0);
+
+	_animationFrameCount = pod->nNumFrame;
+	_animationFrameRate = pod->nFPS;
+}
+
+-(NSString*) fullDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
+	[desc appendFormat: @"%@", self];
+	if (self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) [desc appendFormat: @" (FIXED POINT!!)"];
+	[desc appendFormat: @" containing %u nodes", self.nodeCount];
+	[desc appendFormat: @" (%u mesh nodes)", self.meshNodeCount];
+	[desc appendFormat: @", %u meshes", self.meshCount];
+	[desc appendFormat: @", %u cameras", self.cameraCount];
+	[desc appendFormat: @", %u lights", self.lightCount];
+	[desc appendFormat: @", %u materials", self.materialCount];
+	[desc appendFormat: @", %u textures", self.textureCount];
+	[desc appendFormat: @", ambient light %@", NSStringFromCCC4F(self.ambientLight)];
+	[desc appendFormat: @", background color %@", NSStringFromCCC4F(self.backgroundColor)];
+	[desc appendFormat: @", %u frames of animation at %.1f FPS", self.animationFrameCount, self.animationFrameRate];
+	return desc;
 }
 
 
@@ -133,7 +260,7 @@ static Class _defaultPFXResourceClass = nil;
 -(uint) nodeCount { return self.pvrtModelImpl->nNumNode; }
 
 -(CC3Node*) nodeAtIndex: (uint) nodeIndex {
-	return (CC3Node*)[allNodes objectAtIndex: nodeIndex];
+	return (CC3Node*)[_allNodes objectAtIndex: nodeIndex];
 }
 
 -(CC3Node*) nodeNamed: (NSString*) aName {
@@ -141,9 +268,7 @@ static Class _defaultPFXResourceClass = nil;
 	uint nCnt = self.nodeCount;
 	for (uint i = 0; i < nCnt; i++) {
 		CC3Node* aNode = [self nodeAtIndex: i];
-		if ([[aNode.name lowercaseString] isEqualToString: lcName]) {
-			return aNode;
-		}
+		if ([[aNode.name lowercaseString] isEqualToString: lcName]) return aNode;
 	}
 	return nil;
 }
@@ -152,48 +277,39 @@ static Class _defaultPFXResourceClass = nil;
 	uint nCount = self.nodeCount;
 
 	// Build the array containing ALL nodes in the PVRT structure
-	for (uint i = 0; i < nCount; i++) {
-		[allNodes addObject: [self buildNodeAtIndex: i]];
-	}
+	for (uint i = 0; i < nCount; i++) [_allNodes addObject: [self buildNodeAtIndex: i]];
 
 	// Link the nodes with each other. This includes assembling the nodes into a structural
 	// parent-child hierarchy, and connecting targetting nodes with their targets.
 	// Base nodes, which have no parent, form the entries of the nodes array.
-	for (CC3Node* aNode in allNodes) {
-		[aNode linkToPODNodes: allNodes];
-		if (aNode.isBasePODNode) {
-			[self.nodes addObject: aNode];
-		}
+	for (CC3Node* aNode in _allNodes) {
+		[aNode linkToPODNodes: _allNodes];
+		if (aNode.isBasePODNode) [self.nodes addObject: aNode];
 	}
 }
 
 -(CC3Node*) buildNodeAtIndex: (uint) nodeIndex {
 	// Mesh nodes are arranged first
-	if (nodeIndex < self.meshNodeCount) {
-		return [self buildMeshNodeAtIndex: nodeIndex];
-	}
+	if (nodeIndex < self.meshNodeCount) return [self buildMeshNodeAtIndex: nodeIndex];
+
 	// Then light nodes
-	if (nodeIndex < self.meshNodeCount + self.lightCount) {
+	if (nodeIndex < self.meshNodeCount + self.lightCount)
 		return [self buildLightAtIndex: (nodeIndex - self.meshNodeCount)];
-	}
+	
 	// Then camera nodes
-	if (nodeIndex < self.meshNodeCount + self.lightCount + self.cameraCount) {
+	if (nodeIndex < self.meshNodeCount + self.lightCount + self.cameraCount)
 		return [self buildCameraAtIndex: (nodeIndex - (self.meshNodeCount + self.lightCount))];
-	}
+
 	// Finally general nodes, including structural nodes or targets for lights or cameras
 	return [self buildStructuralNodeAtIndex: nodeIndex];
 }
 
 -(CC3Node*) buildStructuralNodeAtIndex: (uint) nodeIndex {
-	if ( [self isBoneNode: nodeIndex] ) {
-		return [CC3PODBone nodeAtIndex: nodeIndex fromPODResource: self];
-	}
+	if ( [self isBoneNode: nodeIndex] ) return [CC3PODBone nodeAtIndex: nodeIndex fromPODResource: self];
 	return [CC3PODNode nodeAtIndex: nodeIndex fromPODResource: self];
 }
 
--(PODStructPtr) nodePODStructAtIndex: (uint) nodeIndex {
-	return &self.pvrtModelImpl->pNode[nodeIndex];
-}
+-(PODStructPtr) nodePODStructAtIndex: (uint) nodeIndex { return &self.pvrtModelImpl->pNode[nodeIndex]; }
 
 -(BOOL) isNodeIndex: (int) aNodeIndex ancestorOfNodeIndex: (int) childIndex {
 
@@ -225,9 +341,7 @@ static Class _defaultPFXResourceClass = nil;
 			// Cycle through the bones of each batch. If the bone node is a child of
 			// the specified node, then the specified node is a bone as well.
 			for (int boneIndex = 0; boneIndex < boneCount; boneIndex++) {
-				if ( [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: boneNodeIndices[boneIndex]] ) {
-					return YES;
-				}
+				if ( [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: boneNodeIndices[boneIndex]] ) return YES;
 			}
 		}
 	}
@@ -237,11 +351,9 @@ static Class _defaultPFXResourceClass = nil;
 -(void) buildSoftBodyNode {
 	CCArray* myNodes = self.nodes;
 	CCArray* softBodyComponents = [CCArray arrayWithCapacity: myNodes.count];
-	for (CC3Node* baseNode in myNodes) {
-		if (baseNode.hasSoftBodyContent) {
-			[softBodyComponents addObject: baseNode];
-		}
-	}
+	for (CC3Node* baseNode in myNodes)
+		if (baseNode.hasSoftBodyContent) [softBodyComponents addObject: baseNode];
+
 	if (softBodyComponents.count > 0) {
 		NSString* sbName = [NSString stringWithFormat: @"%@-SoftBody", self.name];
 		CC3SoftBodyNode* sbn = [CC3SoftBodyNode nodeWithName: sbName];
@@ -257,46 +369,32 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing mesh data and building mesh nodes
 
--(uint) meshNodeCount {
-	return self.pvrtModelImpl->nNumMeshNode;
-}
+-(uint) meshNodeCount { return self.pvrtModelImpl->nNumMeshNode; }
 
--(CC3MeshNode*) meshNodeAtIndex: (uint) meshIndex {
-	// mesh nodes appear first in the node array
-	return (CC3MeshNode*)[self nodeAtIndex: meshIndex];
-}
+// mesh nodes appear first in the node array
+-(CC3MeshNode*) meshNodeAtIndex: (uint) meshIndex { return (CC3MeshNode*)[self nodeAtIndex: meshIndex]; }
 
 /** If we are vertex skinning, return a skin mesh node, otherwise return a generic mesh node. */
 -(CC3MeshNode*) buildMeshNodeAtIndex: (uint) meshNodeIndex {
 	SPODNode* psn = (SPODNode*)[self meshNodePODStructAtIndex: meshNodeIndex];
 	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: psn->nIdx];
-	if (psm->sBoneBatches.nBatchCnt) {
+	if (psm->sBoneBatches.nBatchCnt)
 		return [CC3PODSkinMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
-	}
 	return [CC3PODMeshNode nodeAtIndex: meshNodeIndex fromPODResource: self];
 }
 
--(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex {
-	// mesh nodes appear first in the node array
-	return [self nodePODStructAtIndex: meshIndex];
-}
+// mesh nodes appear first in the node array
+-(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex { return [self nodePODStructAtIndex: meshIndex]; }
 
--(uint) meshCount {
-	return self.pvrtModelImpl->nNumMesh;
-}
+-(uint) meshCount { return self.pvrtModelImpl->nNumMesh; }
 
+// Build the array containing all materials in the PVRT structure
 -(void) buildMeshes {
 	uint mCount = self.meshCount;
-	
-	// Build the array containing all materials in the PVRT structure
-	for (uint i = 0; i < mCount; i++) {
-		[meshes addObject: [self buildMeshAtIndex: i]];
-	}
+	for (uint i = 0; i < mCount; i++) [_meshes addObject: [self buildMeshAtIndex: i]];
 }
 
--(CC3Mesh*) meshAtIndex: (uint) meshIndex {
-	return (CC3Mesh*)[meshes objectAtIndex: meshIndex];
-}
+-(CC3Mesh*) meshAtIndex: (uint) meshIndex { return (CC3Mesh*)[_meshes objectAtIndex: meshIndex]; }
 
 // Deprecated method.
 -(CC3Mesh*) meshModelAtIndex: (uint) meshIndex { return [self meshAtIndex: meshIndex]; }
@@ -305,19 +403,15 @@ static Class _defaultPFXResourceClass = nil;
 	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
 }
 
--(PODStructPtr) meshPODStructAtIndex: (uint) meshIndex {
-	return &self.pvrtModelImpl->pMesh[meshIndex];
-}
+-(PODStructPtr) meshPODStructAtIndex: (uint) meshIndex { return &self.pvrtModelImpl->pMesh[meshIndex]; }
 
 
 #pragma mark Accessing light data and building light nodes
 
--(uint) lightCount {
-	return self.pvrtModelImpl->nNumLight;
-}
+-(uint) lightCount { return self.pvrtModelImpl->nNumLight; }
 
+// light nodes appear after all the mesh nodes in the node array
 -(CC3Light*) lightAtIndex: (uint) lightIndex {
-	// light nodes appear after all the mesh nodes in the node array
 	return (CC3Light*)[self nodeAtIndex: (self.meshNodeCount + lightIndex)];
 }
 
@@ -325,21 +419,17 @@ static Class _defaultPFXResourceClass = nil;
 	return [CC3PODLight nodeAtIndex: lightIndex fromPODResource: self];
 }
 
+// light nodes appear after all the mesh nodes in the node array
 -(PODStructPtr) lightNodePODStructAtIndex: (uint) lightIndex {
-	// light nodes appear after all the mesh nodes in the node array
 	return [self nodePODStructAtIndex: (self.meshNodeCount + lightIndex)];
 }
 
--(PODStructPtr) lightPODStructAtIndex: (uint) lightIndex {
-	return &self.pvrtModelImpl->pLight[lightIndex];
-}
+-(PODStructPtr) lightPODStructAtIndex: (uint) lightIndex { return &self.pvrtModelImpl->pLight[lightIndex]; }
 
 
 #pragma mark Accessing cameras data and building camera nodes
 
--(uint) cameraCount {
-	return self.pvrtModelImpl->nNumCamera;
-}
+-(uint) cameraCount { return self.pvrtModelImpl->nNumCamera; }
 
 -(CC3Camera*) cameraAtIndex: (uint) cameraIndex {
 	return (CC3Camera*)[self nodeAtIndex: (self.meshNodeCount + self.lightCount + cameraIndex)];
@@ -349,8 +439,8 @@ static Class _defaultPFXResourceClass = nil;
 	return [CC3PODCamera nodeAtIndex: cameraIndex fromPODResource: self];
 }
 
+// camera nodes appear after all the mesh nodes and light nodes in the node array
 -(PODStructPtr) cameraNodePODStructAtIndex: (uint) cameraIndex {
-	// camera nodes appear after all the mesh nodes and light nodes in the node array
 	return [self nodePODStructAtIndex: (self.meshNodeCount + self.lightCount + cameraIndex)];
 }
 
@@ -361,17 +451,15 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing material data and building materials
 
--(uint) materialCount {
-	return self.pvrtModelImpl->nNumMaterial;
-}
+-(uint) materialCount { return self.pvrtModelImpl->nNumMaterial; }
 
 // Fail safely when node references a material that is not in the POD
 -(CC3Material*) materialAtIndex: (uint) materialIndex {
-	if (materialIndex >= materials.count) {
+	if (materialIndex >= _materials.count) {
 		LogRez(@"This POD has no material at index %i", materialIndex);
 		return nil;
 	}
-	return (CC3Material*)[materials objectAtIndex: materialIndex];
+	return (CC3Material*)[_materials objectAtIndex: materialIndex];
 }
 
 -(CC3Material*) materialNamed: (NSString*) aName {
@@ -379,20 +467,15 @@ static Class _defaultPFXResourceClass = nil;
 	uint mCnt = self.materialCount;
 	for (uint i = 0; i < mCnt; i++) {
 		CC3Material* aMat = [self materialAtIndex: i];
-		if ([[aMat.name lowercaseString] isEqualToString: lcName]) {
-			return aMat;
-		}
+		if ([[aMat.name lowercaseString] isEqualToString: lcName]) return aMat;
 	}
 	return nil;
 }
 
+// Build the array containing all materials in the PVRT structure
 -(void) buildMaterials {
 	uint mCount = self.materialCount;
-	
-	// Build the array containing all materials in the PVRT structure
-	for (uint i = 0; i < mCount; i++) {
-		[materials addObject: [self buildMaterialAtIndex: i]];
-	}
+	for (uint i = 0; i < mCount; i++) [_materials addObject: [self buildMaterialAtIndex: i]];
 }
 
 -(CC3Material*) buildMaterialAtIndex: (uint) materialIndex {
@@ -406,12 +489,10 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing texture data and building textures
 
--(uint) textureCount {
-	return self.pvrtModelImpl->nNumTexture;
-}
+-(uint) textureCount { return self.pvrtModelImpl->nNumTexture; }
 
 -(CC3Texture*) textureAtIndex: (uint) textureIndex {
-	id tex = [textures objectAtIndex: textureIndex];
+	id tex = [_textures objectAtIndex: textureIndex];
 	return (tex != placeHolder) ? (CC3Texture*)tex : nil;
 }
 
@@ -422,7 +503,7 @@ static Class _defaultPFXResourceClass = nil;
 	for (uint i = 0; i < tCount; i++) {
 		CC3Texture* tex = [self buildTextureAtIndex: i];
 		// Add the texture, or if it couldn't be built, an empty texture
-		[textures addObject: (tex ? tex : placeHolder)];
+		[_textures addObject: (tex ? tex : placeHolder)];
 	}
 }
 
@@ -432,49 +513,13 @@ static Class _defaultPFXResourceClass = nil;
 	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
 	NSString* texPath = [self.directory stringByAppendingPathComponent: texFile];
 	CC3Texture* tex = [CC3Texture textureFromFile: texPath];
-	tex.textureParameters = textureParameters;
+	tex.textureParameters = _textureParameters;
 	LogRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
 	return tex;
 }
 
 -(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex {
 	return &self.pvrtModelImpl->pTexture[textureIndex];
-}
-
-
-#pragma mark Accessing miscellaneuous content
-
--(uint) animationFrameCount {
-	return self.pvrtModelImpl->nNumFrame;
-}
-
--(ccColor4F) ambientLight {
-	GLfloat* amb = self.pvrtModelImpl->pfColourAmbient;
-	return ccc4f(amb[0], amb[1], amb[2], 1.0);
-}
-
--(ccColor4F) backgroundColor {
-	GLfloat* bg = self.pvrtModelImpl->pfColourBackground;
-	return ccc4f(bg[0], bg[1], bg[2], 1.0);
-}
-
--(NSString*) fullDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"%@", self];
-	if (self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) {		// highlight if fixed point
-		[desc appendFormat: @" (FIXED POINT!!)"];
-	}
-	[desc appendFormat: @" containing %u nodes", self.nodeCount];
-	[desc appendFormat: @" (%u mesh nodes)", self.meshNodeCount];
-	[desc appendFormat: @", %u meshes", self.meshCount];
-	[desc appendFormat: @", %u cameras", self.cameraCount];
-	[desc appendFormat: @", %u lights", self.lightCount];
-	[desc appendFormat: @", %u materials", self.materialCount];
-	[desc appendFormat: @", %u textures", self.textureCount];
-	[desc appendFormat: @", %u frames", self.animationFrameCount];
-	[desc appendFormat: @", ambient light %@", NSStringFromCCC4F(self.ambientLight)];
-	[desc appendFormat: @", background color %@", NSStringFromCCC4F(self.backgroundColor)];
-	return desc;
 }
 
 @end
