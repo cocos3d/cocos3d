@@ -12,6 +12,7 @@ http://www.brenwill.com
 cocos3d 2.0.0 - 2013/01/31
 -------------------------------------
 
+- Added support for OpenGL ES 2.0 & cocos2d 2.x.
 - Single cocos3d codebase can be used with either cocos2d 2.x/OpenGL ES 2.0, or cocos2d 1.x/OpenGL ES 1.1 frameworks
 - Two cocos3d Xcode template projects are provided:
     - cocos3d1 Application - for use with OpenGL ES 1.1 and cocos2d 1.x.
