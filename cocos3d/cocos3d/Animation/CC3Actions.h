@@ -32,7 +32,6 @@
 
 #import "CC3Node.h"
 #import "CCActionEase.h"
-//#import "CCActionInstant.h"
 
 
 /**

@@ -35,21 +35,9 @@
 #pragma mark -
 #pragma mark CC3NodeAnimation
 
-@interface CC3NodeAnimation(TemplateMethods)
--(void) establishFrame: (GLuint) frameIndex plusInterpolation: (GLfloat) frameInterpolation forNode: (CC3Node*) aNode;
--(void) establishLocationAtFrame: (GLuint) frameIndex plusInterpolation: (GLfloat) frameInterpolation forNode: (CC3Node*) aNode;
--(void) establishRotationAtFrame: (GLuint) frameIndex plusInterpolation: (GLfloat) frameInterpolation forNode: (CC3Node*) aNode;
--(void) establishQuaternionAtFrame: (GLuint) frameIndex plusInterpolation: (GLfloat) frameInterpolation forNode: (CC3Node*) aNode;
--(void) establishScaleAtFrame: (GLuint) frameIndex plusInterpolation: (GLfloat) frameInterpolation forNode: (CC3Node*) aNode;
--(CC3Vector) locationAtFrame: (GLuint) frameIndex;
--(CC3Vector) rotationAtFrame: (GLuint) frameIndex;
--(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex;
--(CC3Vector) scaleAtFrame: (GLuint) frameIndex;
-@end
-
 @implementation CC3NodeAnimation
 
-@synthesize frameCount, shouldInterpolate, currentFrame;
+@synthesize frameCount=_frameCount, currentFrame=_currentFrame, shouldInterpolate=_shouldInterpolate;
 
 -(void) dealloc {
 	[super dealloc];
@@ -63,53 +51,16 @@
 
 -(BOOL) isAnimatingScale { return NO; }
 
-/**
- * Template method that returns the location at the specified animation frame.
- * Frame index numbering starts at zero.
- *
- * Default returns zero location. Subclasses with animation data should override.
- * Subclasses should ensure that if frameIndex is larger than frameCount,
- * the last frame will be returned.
- */
--(CC3Vector) locationAtFrame: (GLuint) frameIndex {
-	return kCC3VectorZero;
-}
+-(BOOL) hasVariableFrameTiming { return NO; }
 
-/**
- * Template method that returns the rotation at the specified animation frame.
- * Frame index numbering starts at zero.
- *
- * Default returns zero rotation. Subclasses with animation data should override.
- * Subclasses should ensure that if frameIndex is larger than frameCount,
- * the last frame will be returned.
- */
--(CC3Vector) rotationAtFrame: (GLuint) frameIndex {
-	return kCC3VectorZero;
-}
+static ccTime _interpolationEpsilon = 0.1f;
 
-/**
- * Template method that returns the location at the specified animation frame.
- * Frame index numbering starts at zero.
- *
- * Default returns the identity quaternion. Subclasses with animation data should
- * override. Subclasses should ensure that if frameIndex is larger than frameCount,
- * the last frame will be returned.
- */
--(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
-	return kCC3QuaternionIdentity;
-}
++(ccTime) interpolationEpsilon { return _interpolationEpsilon; }
 
-/**
- * Template method that returns the scale at the specified animation frame.
- * Frame index numbering starts at zero.
- *
- * Default returns unit scale. Subclasses with animation data should override.
- * Subclasses should ensure that if frameIndex is larger than frameCount,
- * the last frame will be returned.
- */
--(CC3Vector) scaleAtFrame: (GLuint) frameIndex {
-	return kCC3VectorUnitCube;
-}
++(void) setInterpolationEpsilon: (ccTime) epsilon { _interpolationEpsilon = epsilon; }
+
+
+#pragma mark Allocation and initialization
 
 -(id) init {
 	CC3Assert(NO, @"%@ cannot be initialized without a frame count", self);
@@ -118,8 +69,8 @@
 
 -(id) initWithFrameCount: (GLuint) numFrames {
 	if ( (self = [super init]) ) {
-		frameCount = numFrames;
-		shouldInterpolate = YES;
+		_frameCount = numFrames;
+		_shouldInterpolate = YES;
 	}
 	return self;
 }
@@ -128,38 +79,39 @@
 	return [[[self alloc] initWithFrameCount: numFrames] autorelease];
 }
 
-// If the animation time is less than this fractional distance from a concrete frame,
-// interpolation will not be performed, and the data from that single frame will be
-// used outright.
-#define kCC3AnimationLerpEpsilon 0.1
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ with %u frames", [self class], _frameCount];
+}
+
+
+#pragma mark Updating
 
 -(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode {
-	LogTrace(@"%@ animating frame at %.3f ms", self, t);
+	LogTrace(@"%@ animating frame at %.4f", self, t);
 	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
-	currentFrame = t;
+	_currentFrame = t;
 	
-	// Determine the virtual frame index, based on proportional time.
-	// This is a float to allow interpolating between frames.
-	GLfloat virtualFrameIndex = MIN(t * frameCount, frameCount - 1);
-	
-	// Separate the virtual frame index into a concrete frame index,
-	// plus a fractional interpolation component.
-	GLuint frameIndex = (GLuint)virtualFrameIndex;
+	// Get the index of the frame within which the given time appears,
+	// and declare a possible fractional interpolation within that frame.
+	GLuint frameIndex = [self frameIndexAt: t];
 	GLfloat frameInterpolation = 0.0;
 	
-	// If we should interpolate, and we're not at the last frame, calc interpolation amount.
-	// But only bother interpolating if difference is large enough.
-	// If close enough to this frame or next frame, just use the appropriate frame outright.
-	if (shouldInterpolate && (frameIndex < frameCount - 1)) {
-		frameInterpolation = virtualFrameIndex - frameIndex;
-		if (frameInterpolation < kCC3AnimationLerpEpsilon) {
+	// If we should interpolate, and we're not at the last frame, calc the interpolation amount.
+	// We only bother interpolating if difference is large enough. If close enough to this frame
+	// or the next frame, just use the appropriate frame outright.
+	if (_shouldInterpolate && (frameIndex < _frameCount - 1)) {
+		ccTime frameTime = [self timeAtFrame: frameIndex];
+		ccTime nextFrameTime = [self timeAtFrame: frameIndex + 1];
+		ccTime frameDur = nextFrameTime - frameTime;
+		if (frameDur != 0.0f) frameInterpolation = (t - frameTime) / frameDur;
+		if (frameInterpolation < _interpolationEpsilon) {
 			frameInterpolation = 0.0f;		// use this frame
-		} else if ((1.0f - frameInterpolation) < kCC3AnimationLerpEpsilon) {
+		} else if ((1.0f - frameInterpolation) < _interpolationEpsilon) {
 			frameInterpolation = 0.0f;
 			frameIndex++;					// use next frame
 		}
-		LogTrace(@"%@ separating virtual frame %.3f into concrete frame %u plus interpolation fraction %.3f",
-				 self, virtualFrameIndex, frameIndex, frameInterpolation);
+		LogTrace(@"%@ animating at time %.3f between frame %u at %.3f and next frame at %.3f with interpolation fraction %.3f",
+				 self, t, frameIndex, frameTime, nextFrameTime, frameInterpolation);
 	}
 	[self establishFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
 }
@@ -242,9 +194,58 @@
 	}
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with %u frames", [self class], frameCount];
+-(ccTime) timeAtFrame: (GLuint) frameIndex {
+	GLfloat currIdx = frameIndex;
+	GLfloat lastIdx = _frameCount - 1;
+	return CLAMP(currIdx / lastIdx, 0.0f, 1.0f);
 }
+
+/**
+ * Template method that returns the index of the frame within which the specified time occurs.
+ * The specified time will lie between the time of the animation frame at the returned index
+ * and the time of the animation frame following that frame.
+ */
+-(GLuint) frameIndexAt: (ccTime) t { return (_frameCount - 1) * t; }
+
+/**
+ * Template method that returns the location at the specified animation frame.
+ * Frame index numbering starts at zero.
+ *
+ * Default returns zero location. Subclasses with animation data should override.
+ * Subclasses should ensure that if frameIndex is larger than (frameCount - 1),
+ * the last frame will be returned.
+ */
+-(CC3Vector) locationAtFrame: (GLuint) frameIndex { return kCC3VectorZero; }
+
+/**
+ * Template method that returns the rotation at the specified animation frame.
+ * Frame index numbering starts at zero.
+ *
+ * Default returns zero rotation. Subclasses with animation data should override.
+ * Subclasses should ensure that if frameIndex is larger than (frameCount - 1),
+ * the last frame will be returned.
+ */
+-(CC3Vector) rotationAtFrame: (GLuint) frameIndex { return kCC3VectorZero; }
+
+/**
+ * Template method that returns the location at the specified animation frame.
+ * Frame index numbering starts at zero.
+ *
+ * Default returns the identity quaternion. Subclasses with animation data should override.
+ * Subclasses should ensure that if frameIndex is larger than (frameCount - 1), the last
+ * frame will be returned.
+ */
+-(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex { return kCC3QuaternionIdentity; }
+
+/**
+ * Template method that returns the scale at the specified animation frame.
+ * Frame index numbering starts at zero.
+ *
+ * Default returns unit scale. Subclasses with animation data should override.
+ * Subclasses should ensure that if frameIndex is larger than (frameCount - 1),
+ * the last frame will be returned.
+ */
+-(CC3Vector) scaleAtFrame: (GLuint) frameIndex { return kCC3VectorUnitCube; }
 
 @end
 
@@ -254,9 +255,11 @@
 
 @implementation CC3ArrayNodeAnimation
 
-@synthesize animatedLocations, animatedRotations, animatedQuaternions, animatedScales;
+@synthesize frameTimes=_frameTimes, animatedLocations=_animatedLocations, animatedScales=_animatedScales;
+@synthesize animatedRotations=_animatedRotations, animatedQuaternions=_animatedQuaternions;
 
 -(void) dealloc {
+	[self deallocateFrameTimes];
 	[self deallocateLocations];
 	[self deallocateRotations];
 	[self deallocateQuaternions];
@@ -264,37 +267,28 @@
 	[super dealloc];
 }
 
--(BOOL) isAnimatingLocation {
-	return animatedLocations != NULL;
-}
+-(BOOL) isAnimatingLocation { return _animatedLocations != NULL; }
 
--(BOOL) isAnimatingRotation {
-	return animatedRotations != NULL;
-}
+-(BOOL) isAnimatingRotation { return _animatedRotations != NULL; }
 
--(BOOL) isAnimatingQuaternion {
-	return animatedQuaternions != NULL;
-}
+-(BOOL) isAnimatingQuaternion { return _animatedQuaternions != NULL; }
 
--(BOOL) isAnimatingScale {
-	return animatedScales != NULL;
-}
+-(BOOL) isAnimatingScale { return _animatedScales != NULL; }
 
--(BOOL) locationsAreRetained { return locationsAreRetained; }
--(BOOL) rotationsAreRetained { return rotationsAreRetained; }
--(BOOL) quaternionsAreRetained { return quaternionsAreRetained; }
--(BOOL) scalesAreRetained { return scalesAreRetained; }
+-(BOOL) hasVariableFrameTiming { return _frameTimes != NULL; }
 
 -(id) initWithFrameCount: (GLuint) numFrames {
 	if ( (self = [super initWithFrameCount: numFrames]) ) {
-		animatedLocations = NULL;
-		animatedRotations = NULL;
-		animatedQuaternions = NULL;
-		animatedScales = NULL;
-		locationsAreRetained = NO;
-		rotationsAreRetained = NO;
-		quaternionsAreRetained = NO;
-		scalesAreRetained = NO;
+		_frameTimes = NULL;
+		_animatedLocations = NULL;
+		_animatedRotations = NULL;
+		_animatedQuaternions = NULL;
+		_animatedScales = NULL;
+		_frameTimesAreRetained = NO;
+		_locationsAreRetained = NO;
+		_rotationsAreRetained = NO;
+		_quaternionsAreRetained = NO;
+		_scalesAreRetained = NO;
 	}
 	return self;
 }
@@ -302,124 +296,168 @@
 
 #pragma mark Accessing frame data
 
+-(ccTime) timeAtFrame: (GLuint) frameIndex {
+	if (!_frameTimes) return [super timeAtFrame: frameIndex];
+	return _frameTimes[MIN(frameIndex, _frameCount - 1)];
+}
+
+// Iterate through the frames looking for the first frame whose time is larger than the
+// specified frame time, then return the previous frame. If the specified frame is beyond
+// the last frame, return the last frame.
+//-(GLuint) frameIndexAt: (ccTime) t {
+//	if (!_frameTimes) return [super frameIndexAt: t];
+//	for (GLuint fIdx = 1; fIdx < _frameCount; fIdx++)	// start at second frame
+//		if (_frameTimes[fIdx] > t) return fIdx - 1;		// return previous frame index
+//	return _frameCount - 1;
+//}
+
+// Iterate backwards through the frames looking for the first frame whose time is at or before
+// the specified frame time, and return that frame. If the specified frame is before the first
+// frame, return the first frame.
+-(GLuint) frameIndexAt: (ccTime) t {
+	if (!_frameTimes) return [super frameIndexAt: t];
+	for (GLint fIdx = _frameCount - 1; fIdx >= 0; fIdx--)	// start at last frame
+		if (_frameTimes[fIdx] <= t) return fIdx;			// return frame
+	return 0;
+}
+
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	return animatedLocations[frameIndex];
+	if (!_animatedLocations) return [super locationAtFrame: frameIndex];
+	return _animatedLocations[MIN(frameIndex, _frameCount - 1)];
 }
 
 -(CC3Vector) rotationAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	return animatedRotations[frameIndex];
+	if (!_animatedRotations) return [super rotationAtFrame: frameIndex];
+	return _animatedRotations[MIN(frameIndex, _frameCount - 1)];
 }
 
 -(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	return animatedQuaternions[frameIndex];
+	if (!_animatedQuaternions) return [super quaternionAtFrame: frameIndex];
+	return _animatedQuaternions[MIN(frameIndex, _frameCount - 1)];
 }
 
 -(CC3Vector) scaleAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	return animatedScales[frameIndex];
+	if (!_animatedScales) return [super scaleAtFrame: frameIndex];
+	return _animatedScales[MIN(frameIndex, _frameCount - 1)];
+}
+
+-(void) setFrameTimes: (ccTime*) frameTimes {
+	[self deallocateFrameTimes];			// get rid of any existing array
+	_frameTimes = frameTimes;
 }
 
 -(void) setAnimatedLocations:(CC3Vector*) vectorArray {
-	[self deallocateLocations];			// get rid of any existing array
-	animatedLocations = vectorArray;
+	[self deallocateLocations];				// get rid of any existing array
+	_animatedLocations = vectorArray;
 }
 
 -(void) setAnimatedRotations:(CC3Vector*) vectorArray {
-	[self deallocateRotations];			// get rid of any existing array
-	animatedRotations = vectorArray;
+	[self deallocateRotations];				// get rid of any existing array
+	_animatedRotations = vectorArray;
 }
 
--(void) setAnimatedQuaternions:(CC3Vector4*) vectorArray {
+-(void) setAnimatedQuaternions:(CC3Quaternion*) vectorArray {
 	[self deallocateQuaternions];			// get rid of any existing array
-	animatedQuaternions = vectorArray;
+	_animatedQuaternions = vectorArray;
 }
 
 -(void) setAnimatedScales:(CC3Vector*) vectorArray {
-	[self deallocateScales];			// get rid of any existing array
-	animatedScales= vectorArray;
+	[self deallocateScales];				// get rid of any existing array
+	_animatedScales= vectorArray;
 }
 
 
 #pragma mark Allocation of managed arrays
 
--(CC3Vector*) allocateLocations {
-	if (frameCount) {
-		self.animatedLocations = calloc(frameCount, sizeof(CC3Vector));
-		locationsAreRetained = YES;
-		LogTrace(@"%@ allocated space for %u locations", self, frameCount);
+-(ccTime*) allocateFrameTimes {
+	if (_frameCount) {
+		self.frameTimes = calloc(_frameCount, sizeof(ccTime));
+		_frameTimesAreRetained = YES;
+		LogTrace(@"%@ allocated space for %u frame times", self, _frameCount);
 	}
-	return animatedLocations;
+	return _frameTimes;
+}
+
+-(void) deallocateFrameTimes {
+	if (_frameTimesAreRetained) {
+		free(_frameTimes);
+		_frameTimes = NULL;
+		_frameTimesAreRetained = NO;
+		LogTrace(@"%@ deallocated %u previously allocated frame times", self, _frameCount);
+	}
+}
+
+-(CC3Vector*) allocateLocations {
+	if (_frameCount) {
+		self.animatedLocations = calloc(_frameCount, sizeof(CC3Vector));
+		_locationsAreRetained = YES;
+		LogTrace(@"%@ allocated space for %u locations", self, _frameCount);
+	}
+	return _animatedLocations;
 }
 
 -(void) deallocateLocations {
-	if (locationsAreRetained && animatedLocations) {
-		free(animatedLocations);
-		animatedLocations = NULL;
-		locationsAreRetained = NO;
-		LogTrace(@"%@ deallocated %u previously allocated animated locations", self, frameCount);
+	if (_locationsAreRetained) {
+		free(_animatedLocations);
+		_animatedLocations = NULL;
+		_locationsAreRetained = NO;
+		LogTrace(@"%@ deallocated %u previously allocated animated locations", self, _frameCount);
 	}
 }
 
 -(CC3Vector*) allocateRotations {
-	if (frameCount) {
-		self.animatedRotations = calloc(frameCount, sizeof(CC3Vector));
-		rotationsAreRetained = YES;
-		LogTrace(@"%@ allocated space for %u rotations", self, frameCount);
+	if (_frameCount) {
+		self.animatedRotations = calloc(_frameCount, sizeof(CC3Vector));
+		_rotationsAreRetained = YES;
+		LogTrace(@"%@ allocated space for %u rotations", self, _frameCount);
 	}
-	return animatedRotations;
+	return _animatedRotations;
 }
 
 -(void) deallocateRotations {
-	if (rotationsAreRetained && animatedRotations) {
-		free(animatedRotations);
-		animatedRotations = NULL;
-		rotationsAreRetained = NO;
-		LogTrace(@"%@ deallocated %u previously allocated animated rotations", self, frameCount);
+	if (_rotationsAreRetained) {
+		free(_animatedRotations);
+		_animatedRotations = NULL;
+		_rotationsAreRetained = NO;
+		LogTrace(@"%@ deallocated %u previously allocated animated rotations", self, _frameCount);
 	}
 }
 
--(CC3Vector4*) allocateQuaternions {
-	if (frameCount) {
-		self.animatedQuaternions = calloc(frameCount, sizeof(CC3Vector4));
-		for (int i = 0; i < frameCount; i++) {
-			animatedQuaternions[i] = kCC3QuaternionIdentity;
-		}
-		quaternionsAreRetained = YES;
-		LogTrace(@"%@ allocated space for %u quaternions", self, frameCount);
+-(CC3Quaternion*) allocateQuaternions {
+	if (_frameCount) {
+		self.animatedQuaternions = calloc(_frameCount, sizeof(CC3Quaternion));
+		for (int i = 0; i < _frameCount; i++) _animatedQuaternions[i] = kCC3QuaternionIdentity;
+		_quaternionsAreRetained = YES;
+		LogTrace(@"%@ allocated space for %u quaternions", self, _frameCount);
 	}
-	return animatedQuaternions;
+	return _animatedQuaternions;
 }
 
 -(void) deallocateQuaternions {
-	if (quaternionsAreRetained && animatedQuaternions) {
-		free(animatedQuaternions);
-		animatedQuaternions = NULL;
-		quaternionsAreRetained = NO;
-		LogTrace(@"%@ deallocated %u previously allocated animated quaternions", self, frameCount);
+	if (_quaternionsAreRetained) {
+		free(_animatedQuaternions);
+		_animatedQuaternions = NULL;
+		_quaternionsAreRetained = NO;
+		LogTrace(@"%@ deallocated %u previously allocated animated quaternions", self, _frameCount);
 	}
 }
 
 -(CC3Vector*) allocateScales {
-	if (frameCount) {
-		self.animatedScales =calloc(frameCount, sizeof(CC3Vector));
-		for (int i = 0; i < frameCount; i++) {
-			animatedScales[i] = kCC3VectorUnitCube;
-		}
-		scalesAreRetained = YES;
-		LogTrace(@"%@ allocated space for %u scales", self, frameCount);
+	if (_frameCount) {
+		self.animatedScales =calloc(_frameCount, sizeof(CC3Vector));
+		for (int i = 0; i < _frameCount; i++) _animatedScales[i] = kCC3VectorUnitCube;
+		_scalesAreRetained = YES;
+		LogTrace(@"%@ allocated space for %u scales", self, _frameCount);
 	}
-	return animatedScales;
+	return _animatedScales;
 }
 
 -(void) deallocateScales {
-	if (scalesAreRetained && animatedScales) {
-		free(animatedScales);
-		animatedScales = NULL;
-		scalesAreRetained = NO;
-		LogTrace(@"%@ deallocated %u previously allocated animated scales", self, frameCount);
+	if (_scalesAreRetained) {
+		free(_animatedScales);
+		_animatedScales = NULL;
+		_scalesAreRetained = NO;
+		LogTrace(@"%@ deallocated %u previously allocated animated scales", self, _frameCount);
 	}
 }
 

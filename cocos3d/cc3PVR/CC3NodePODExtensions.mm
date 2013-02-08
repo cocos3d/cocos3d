@@ -114,12 +114,12 @@ extern "C" {
 @implementation CC3PODNodeAnimation
 
 -(void) dealloc {
-	free(animatedLocations);
-	free(animatedLocationIndices);
-	free(animatedQuaternions);
-	free(animatedQuaternionsIndices);
-	free(animatedScales);
-	free(animatedScaleIndices);
+	free(_animatedLocations);
+	free(_animatedLocationIndices);
+	free(_animatedQuaternions);
+	free(_animatedQuaternionsIndices);
+	free(_animatedScales);
+	free(_animatedScaleIndices);
 	[super dealloc];
 }
 
@@ -129,28 +129,28 @@ extern "C" {
 	if ( (self = [super initWithFrameCount: numFrames]) ) {
 		
 		// Start with no animation
-		animatedLocations = animatedQuaternions = animatedScales = NULL;
-		animatedLocationIndices = animatedQuaternionsIndices = animatedScaleIndices = NULL;
+		_animatedLocations = _animatedQuaternions = _animatedScales = NULL;
+		_animatedLocationIndices = _animatedQuaternionsIndices = _animatedScaleIndices = NULL;
 		
 		SPODNode* psn = (SPODNode*)pSPODNode;
 		
 		if (psn->pfAnimPosition && (psn->nAnimFlags & ePODHasPositionAni)) {
-			animatedLocations = psn->pfAnimPosition;
-			animatedLocationIndices = psn->pnAnimPositionIdx;
+			_animatedLocations = psn->pfAnimPosition;
+			_animatedLocationIndices = psn->pnAnimPositionIdx;
 			psn->pfAnimPosition = NULL;		// Clear reference so SPODNode won't try to free it.
 			psn->pnAnimPositionIdx = NULL;	// Clear reference so SPODNode won't try to free it.
 		}
 		
 		if (psn->pfAnimRotation && (psn->nAnimFlags & ePODHasRotationAni)) {
-			animatedQuaternions = psn->pfAnimRotation;
-			animatedQuaternionsIndices = psn->pnAnimRotationIdx;
+			_animatedQuaternions = psn->pfAnimRotation;
+			_animatedQuaternionsIndices = psn->pnAnimRotationIdx;
 			psn->pfAnimRotation = NULL;		// Clear reference so SPODNode won't try to free it.
 			psn->pnAnimRotationIdx = NULL;	// Clear reference so SPODNode won't try to free it.
 		}
 		
 		if (psn->pfAnimScale && (psn->nAnimFlags & ePODHasScaleAni)) {
-			animatedScales = psn->pfAnimScale;
-			animatedScaleIndices = psn->pnAnimScaleIdx;
+			_animatedScales = psn->pfAnimScale;
+			_animatedScaleIndices = psn->pnAnimScaleIdx;
 			psn->pfAnimScale = NULL;		// Clear reference so SPODNode won't try to free it.
 			psn->pnAnimScaleIdx = NULL;		// Clear reference so SPODNode won't try to free it.
 		}
@@ -167,38 +167,38 @@ extern "C" {
 	return psn->nAnimFlags & (ePODHasPositionAni | ePODHasRotationAni | ePODHasScaleAni);
 }
 
--(BOOL) isAnimatingLocation { return animatedLocations != NULL; }
+-(BOOL) isAnimatingLocation { return _animatedLocations != NULL; }
 
--(BOOL) isAnimatingQuaternion { return animatedQuaternions != NULL; }
+-(BOOL) isAnimatingQuaternion { return _animatedQuaternions != NULL; }
 
--(BOOL) isAnimatingScale { return animatedScales != NULL; }
+-(BOOL) isAnimatingScale { return _animatedScales != NULL; }
 
 
 #define kPODAnimationLocationStride 3
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	int currFrameOffset = animatedLocationIndices
-								? animatedLocationIndices[frameIndex]
+	frameIndex = MIN(frameIndex, _frameCount - 1);
+	int currFrameOffset = _animatedLocationIndices
+								? _animatedLocationIndices[frameIndex]
 								: (frameIndex * kPODAnimationLocationStride);
-	return *(CC3Vector*)&animatedLocations[currFrameOffset];
+	return *(CC3Vector*)&_animatedLocations[currFrameOffset];
 }
 
 #define kPODAnimationQuaternionStride 4
 -(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	int currFrameOffset = animatedQuaternionsIndices
-								? animatedQuaternionsIndices[frameIndex]
+	frameIndex = MIN(frameIndex, _frameCount - 1);
+	int currFrameOffset = _animatedQuaternionsIndices
+								? _animatedQuaternionsIndices[frameIndex]
 								: (frameIndex * kPODAnimationQuaternionStride);
-	return *(CC3Quaternion*)&animatedQuaternions[currFrameOffset];
+	return *(CC3Quaternion*)&_animatedQuaternions[currFrameOffset];
 }
 
 #define kPODAnimationScaleStride 7
 -(CC3Vector) scaleAtFrame: (GLuint) frameIndex {
-	frameIndex = MIN(frameIndex, frameCount - 1);
-	int currFrameOffset = animatedScaleIndices
-								? animatedScaleIndices[frameIndex]
+	frameIndex = MIN(frameIndex, _frameCount - 1);
+	int currFrameOffset = _animatedScaleIndices
+								? _animatedScaleIndices[frameIndex]
 								: (frameIndex * kPODAnimationScaleStride);
-	return *(CC3Vector*)&animatedScales[currFrameOffset];
+	return *(CC3Vector*)&_animatedScales[currFrameOffset];
 }
 
 @end

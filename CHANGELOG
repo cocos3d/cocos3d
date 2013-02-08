@@ -9,7 +9,7 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
-cocos3d 2.0.0 - 2013/01/31
+cocos3d 2.0.0 - 2013/03/31
 -------------------------------------
 
 - Added support for OpenGL ES 2.0 & cocos2d 2.x.
@@ -42,6 +42,13 @@ cocos3d 2.0.0 - 2013/01/31
 - Added support for tangent and bitangent vertex content
     - Added CC3VertexTangents vertex array
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
+
+- Added support for time-based key-frame animation.
+	- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
+
+- Added support for blended animation
+
+
 
 - [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
 	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
