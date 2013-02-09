@@ -94,7 +94,7 @@
 
 @synthesize rotator, location, scale, globalLocation, globalScale;
 @synthesize boundingVolume, boundingVolumePadding, projectedLocation, visible;
-@synthesize transformMatrix, transformListeners, animation, isRunning, isAnimationEnabled;
+@synthesize transformMatrix, transformListeners, animationState=_animationState, isRunning, isAnimationEnabled;
 @synthesize shouldInheritTouchability, shouldAllowTouchableWhenInvisible;
 @synthesize parent, children, shouldAutoremoveWhenEmpty, shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved, isTransformDirty;
@@ -108,7 +108,7 @@
 	[globalRotationMatrix release];
 	[rotator release];
 	[boundingVolume release];
-	[animation release];
+	[_animationState release];
 	[self notifyDestructionListeners];			// Must do before releasing listeners.
 	[transformListeners releaseAsUnretained];	// Clears without releasing each element.
 	[super dealloc];
@@ -951,6 +951,7 @@
 		transformMatrixInverted = nil;
 		globalRotationMatrix = nil;
 		self.rotator = [CC3Rotator rotator];
+		_animationState = nil;
 		boundingVolume = nil;
 		boundingVolumePadding = 0.0f;
 		shouldUseFixedBoundingVolume = NO;
@@ -973,17 +974,11 @@
 	return self;
 }
 
-+(id) node {
-	return [[[self alloc] init] autorelease];
-}
++(id) node { return [[[self alloc] init] autorelease]; }
 
-+(id) nodeWithTag: (GLuint) aTag {
-	return [[[self alloc] initWithTag: aTag] autorelease];
-}
++(id) nodeWithTag: (GLuint) aTag { return [[[self alloc] initWithTag: aTag] autorelease]; }
 
-+(id) nodeWithName: (NSString*) aName {
-	return [[[self alloc] initWithName: aName] autorelease];
-}
++(id) nodeWithName: (NSString*) aName { return [[[self alloc] initWithName: aName] autorelease]; }
 
 +(id) nodeWithTag: (GLuint) aTag withName: (NSString*) aName {
 	return [[[self alloc] initWithTag: aTag withName: aName] autorelease];
@@ -1032,8 +1027,7 @@
 	boundingVolumePadding = another.boundingVolumePadding;
 	shouldUseFixedBoundingVolume = another.shouldUseFixedBoundingVolume;
 
-	[animation release];
-	animation = [another.animation retain];					// retained...not copied
+	self.animation = another.animation;
 
 	// Transform listeners are not copied. Managing listeners must be deliberate.
 
@@ -1203,12 +1197,10 @@ static GLuint lastAssignedNodeTag;
 // Deprecated legacy method - supported for backwards compatibility
 -(void) updateAfterChildren: (CC3NodeUpdatingVisitor*) visitor {}
 
-/**
- * Protected template method invoked from the update visitor just before updating
- * the transform.
- */
+/** Protected template method invoked from the update visitor just before updating the transform. */
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[self checkCameraTarget];
+	[self updateFromAnimationState];
 	[self updateBeforeTransform: visitor];
 }
 
@@ -2047,12 +2039,18 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Animation
 
--(BOOL) containsAnimation {
-	if (animation) return YES;
+-(CC3NodeAnimation*) animation { return _animationState.animation; }
 
-	for (CC3Node* child in children) {
-		if (child.containsAnimation) return YES;
-	}
+// animationState is retained. CC3NodeAnimationState initializer returns nil if animation is nil.
+-(void) setAnimation: (CC3NodeAnimation*) animation {
+	if (animation == self.animation) return;
+	[_animationState release];
+	_animationState = [[CC3NodeAnimationState alloc] initWithAnimation: animation forNode: self];
+}
+
+-(BOOL) containsAnimation {
+	if (self.animation) return YES;
+	for (CC3Node* child in children) if (child.containsAnimation) return YES;
 	return NO;
 }
 
@@ -2062,20 +2060,16 @@ static GLuint lastAssignedNodeTag;
 
 -(void) enableAllAnimation {
 	[self enableAnimation];
-	for (CC3Node* child in children) {
-		[child enableAllAnimation];
-	}
+	for (CC3Node* child in children) [child enableAllAnimation];
 }
 
 -(void) disableAllAnimation {
 	[self disableAnimation];
-	for (CC3Node* child in children) {
-		[child disableAllAnimation];
-	}
+	for (CC3Node* child in children) [child disableAllAnimation];
 }
 
 -(GLuint) animationFrameCount {
-	if (animation) return animation.frameCount;
+	if (_animationState) return _animationState.frameCount;
 
 	for (CC3Node* child in children) {
 		GLuint frameCount = child.animationFrameCount;
@@ -2085,13 +2079,28 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(void) establishAnimationFrameAt: (ccTime) t {
-	if (animation && isAnimationEnabled) {
-		LogTrace(@"%@ animating frame at %.3f ms", self, t);
-		[animation establishFrameAt: t forNode: self];
-	}
-	for (CC3Node* child in children) {
-		[child establishAnimationFrameAt: t];
-	}
+	if (isAnimationEnabled) [_animationState establishFrameAt: t];
+	for (CC3Node* child in children) [child establishAnimationFrameAt: t];
+}
+
+/** Updates this node from a blending of any contained animation. */
+-(void) updateFromAnimationState {
+	if ( !(_animationState && isAnimationEnabled) ) return;
+	
+	CC3Vector blendedLocation;
+	CC3Vector blendedRotation;
+	CC3Quaternion blendedQuaternion;
+	CC3Vector blendedScale;
+	
+	if (_animationState.isAnimatingLocation) blendedLocation = _animationState.location;
+	if (_animationState.isAnimatingRotation) blendedRotation = _animationState.rotation;
+	if (_animationState.isAnimatingQuaternion) blendedQuaternion = _animationState.quaternion;
+	if (_animationState.isAnimatingScale) blendedScale = _animationState.scale;
+
+	if (_animationState.isAnimatingLocation) self.location = blendedLocation;
+	if (_animationState.isAnimatingRotation) self.rotation = blendedRotation;
+	if (_animationState.isAnimatingQuaternion) self.quaternion = blendedQuaternion;
+	if (_animationState.isAnimatingScale) self.scale = blendedScale;
 }
 
 

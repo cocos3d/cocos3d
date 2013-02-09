@@ -39,7 +39,7 @@
 #import "CC3GLProgramContext.h"
 
 @class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum;
-@class CC3NodeAnimation, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
+@class CC3NodeAnimation, CC3NodeAnimationState, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
 
 /**
  * Enumeration of options for scaling normals after they have been transformed during
@@ -180,9 +180,9 @@ typedef enum {
  * See the notes at the copy method for more details about copying nodes.
  *
  * You can animate this class with animation data held in a subclass of CC3NodeAnimation.
- * To animate this node using animation data, set the animation property to an instance of
- * a subclass of the abstract CC3NodeAnimation class, populated with animation data, and
- * then create an instance of a CC3Animate action, and run it on this node.
+ * To animate this node using animation data, set the animation property to an instance
+ * of a subclass of the abstract CC3NodeAnimation class, populated with animation content,
+ * and then create an instance of a CC3Animate action, and run it on this node.
  *
  * Nodes can respond to iOS touch events. The property isTouchEnabled can be set to YES
  * to allow a node to be selected by a touch event. If the shouldInheritTouchability
@@ -218,7 +218,7 @@ typedef enum {
 	CC3Matrix* globalRotationMatrix;
 	CC3Rotator* rotator;
 	CC3NodeBoundingVolume* boundingVolume;
-	CC3NodeAnimation* animation;
+	CC3NodeAnimationState* _animationState;
 	CC3Vector location;
 	CC3Vector globalLocation;
 	CC3Vector projectedLocation;
@@ -3291,28 +3291,54 @@ typedef enum {
  * the direction of a CC3Animate action.
  *
  * To animate this node, set this property to an instance of a subclass of the
- * abstract CC3NodeAnimation class, populated with animation data, and then
+ * abstract CC3NodeAnimation class, populated with animation content, and then
  * create an instance of a CC3Animate action, and run it on this node. 
  */
 @property(nonatomic, retain) CC3NodeAnimation* animation;
+
+/**
+ * The animation state wrapper that holds the CC3NodeAnimation of the animation property.
+ *
+ * A single CC3Animation may animate many nodes. The CC3NodeAnimationState in this property
+ * keeps track of the current animation state of this node.
+ *
+ * This wrapper is created automatically when the animation property is set.
+ */
+@property(nonatomic, retain, readonly) CC3NodeAnimationState* animationState;
 
 /** Indicates whether this node, or any of its descendants, contains an instance of an animation. */
 @property(nonatomic, readonly) BOOL containsAnimation;
 
 /**
- * Indicates whether animation is enabled for this node.
- * This property only has effect if there the animation property is not nil.
+ * The number of frames of animation supported by this node, or its descendants.
  *
- * The value of this property only applies to this node, not its child nodes.
- * Child nodes that have this property set to YES will be animated even if
- * this node has this property set to NO, and vice-versa.
- 
- * Use the methods enableAllAnimation and disableAllAnimation to turn animation
- * on or off for all the nodes in a node assembly.
+ * If this node is animated, returns the frame count from this node's animation.
+ * Otherwise, a depth-first traversal of the descendants is performed, and the
+ * first non-zero animation frame count value is returned.
  *
- * The initial value of this property is YES.
+ * Returns zero if none of this node and its descendants contains any animation.
  */
-@property(nonatomic, assign) BOOL isAnimationEnabled;
+@property(nonatomic, readonly) GLuint animationFrameCount;
+
+/** 
+ * Updates the location, rotation and scale of this node based on the animation frame
+ * located at the specified time, which should be a value between zero and one, with
+ * zero indicating the first animation frame, and one indicating the last animation frame.
+ * Only those properties of this node for which there is animation data will be changed.
+ *
+ * This implementation delegates to the CC3NodeAnimationState instance held in the animationState
+ * property, then passes this notification along to child nodes to align them with the same
+ * animation frame. Linear interpolation of the frame content may be performed, based on the
+ * number of frames and the specified time.
+ *
+ * If disableAnimation or disableAllAnimation has been invoked on this node,
+ * it will be excluded from animation, and this method will not have any affect
+ * on this node. However, this method will be propagated to child nodes.
+ *
+ * This method is invoked automatically from an instance of CC3Animate that is animating
+ * this node. Usually, the application never needs to invoke this method directly.
+ */
+-(void) establishAnimationFrameAt: (ccTime) t;
 
 /**
  * Enables animation of this node from animation data held in the animation property.
@@ -3341,35 +3367,19 @@ typedef enum {
 -(void) disableAllAnimation;
 
 /**
- * The number of frames of animation supported by this node, or its descendants.
+ * Indicates whether animation is enabled for this node.
+ * This property only has effect if there the animation property is not nil.
  *
- * If this node is animated, returns the frame count from this node's animation.
- * Otherwise, a depth-first traversal of the descendants is performed, and the
- * first non-zero animation frame count value is returned.
+ * The value of this property only applies to this node, not its child nodes.
+ * Child nodes that have this property set to YES will be animated even if
+ * this node has this property set to NO, and vice-versa.
+ 
+ * Use the methods enableAllAnimation and disableAllAnimation to turn animation
+ * on or off for all the nodes in a node assembly.
  *
- * Returns zero if none of this node and its descendants contains any animation.
+ * The initial value of this property is YES.
  */
-@property(nonatomic, readonly) GLuint animationFrameCount;
-
-/** 
- * Updates the location, rotation and scale of this node based on the animation frame
- * located at the specified time, which should be a value between zero and one, with
- * zero indicating the first animation frame, and one indicating the last animation frame.
- * Only those properties of this node for which there is animation data will be changed.
- *
- * This implementation delegates to the CC3NodeAnimation instance held in the animation
- * property, then passes this notification along to child nodes to align them with the
- * same animation frame. Linear interpolation of the frame data may be performed, based
- * on the number of frames and the specified time.
- *
- * If disableAnimation or disableAllAnimation has been invoked on this node,
- * it will be excluded from animation, and this method will not have any affect
- * on this node. However, this method will be propagated to child nodes.
- *
- * This method is invoked automatically from an instance of CC3Animate that is animating
- * this node. Usually, the application never needs to invoke this method directly.
- */
--(void) establishAnimationFrameAt: (ccTime) t;
+@property(nonatomic, assign) BOOL isAnimationEnabled;
 
 
 #pragma mark Developer support

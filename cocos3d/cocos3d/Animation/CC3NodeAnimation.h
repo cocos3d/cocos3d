@@ -32,6 +32,8 @@
 
 #import "CC3Node.h"
 
+@class CC3NodeAnimationState;
+
 
 #pragma mark -
 #pragma mark CC3NodeAnimation
@@ -54,7 +56,6 @@
  */
 @interface CC3NodeAnimation : NSObject {
 	GLuint _frameCount;
-	ccTime _currentFrame;
 	BOOL _shouldInterpolate : 1;
 }
 
@@ -73,12 +74,6 @@
  * and realistic animation.
  */
 @property(nonatomic, readonly) GLuint frameCount;
-
-/**
- * Returns the current frame. This is the value submitted to the most recent invocation of
- * the establishFrameAt:forNode: method, or zero if that method has not yet been invoked.
- */
-@property (assign,readonly) ccTime currentFrame;
 
 /**
  * Indicates whether this animation should interpolate between frames, to ensure smooth
@@ -163,16 +158,19 @@
 
 #pragma mark Updating
 
-/** 
- * Updates the location, rotation, quaternion, and scale of the specified node based on the
- * animation frame located at the specified time, which should be a value between zero and one,
+/**
+ * Updates the location, rotation, quaternion, and scale of the specified animation state based on
+ * the animation frame located at the specified time, which should be a value between zero and one,
  * with zero indicating the first animation frame, and one indicating the last animation frame.
  *
- * Only those properties of the node for which there is animation data will be changed.
+ * Only those properties of the animation state for which there is animation data will be changed.
  * If the shouldInterpolate property is set to YES, linear interpolation of the frame
  * data is performed, based on the frameCount and the specified time.
  */
--(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode;
+-(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState;
+
+/** @deprecated Use establishFrameAt:inNodeAnimationState: instead. */
+-(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the time at which the frame at the specified index occurs. The returned time
@@ -413,4 +411,146 @@
 -(void) deallocateScales;
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3NodeAnimationState
+
+/**
+ * CC3NodeAnimationState holds the state associated with the animation of a single node.
+ *
+ * Each instance of this class bridges a CC3Node with an CC3NodeAnimation that is animating it,
+ * and keeps track of the animation state on behalf of the node.
+ */
+@interface CC3NodeAnimationState : NSObject {
+	CC3Node* _node;
+	CC3NodeAnimation* _animation;
+	ccTime _animationTime;
+	CC3Vector _location;
+	CC3Vector _rotation;
+	CC3Quaternion _quaternion;
+	CC3Vector _scale;
+	BOOL _isDirty : 1;
+}
+
+/** The node whose animation state is being tracked by this instance.  */
+@property (nonatomic, assign, readonly) CC3Node* node;
+
+/** The animation whose state is being tracked by this instance. */
+@property (nonatomic, retain, readonly) CC3NodeAnimation* animation;
+
+/**
+ * Returns the current animation time. This is the value submitted to the most recent invocation
+ * of the establishFrameAt: method, or zero if that method has not yet been invoked.
+ */
+@property(nonatomic, readonly) ccTime animationTime;
+
+/**
+ * The current animated location.
+ *
+ * The value of this property is updated by the animation when the establishFrameAt: is invoked.
+ */
+@property(nonatomic, assign) CC3Vector location;
+
+/**
+ * The current animated rotation.
+ *
+ * The value of this property is updated by the animation when the establishFrameAt: is invoked.
+ */
+@property(nonatomic, assign) CC3Vector rotation;
+
+/**
+ * The current animated rotation quaternion.
+ *
+ * The value of this property is updated by the animation when the establishFrameAt: is invoked.
+ */
+@property(nonatomic, assign) CC3Quaternion quaternion;
+
+/**
+ * The current animated scale.
+ *
+ * The value of this property is updated by the animation when the establishFrameAt: is invoked.
+ */
+@property(nonatomic, assign) CC3Vector scale;
+
+/**
+ * The number of frames of animated content.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) GLuint frameCount;
+
+/** 
+ * Indicates whether location animated content is being tracked.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) BOOL isAnimatingLocation;
+
+/**
+ * Indicates whether rotation animated content is being tracked.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) BOOL isAnimatingRotation;
+
+/**
+ * Indicates whether roatation quaternion animated content is being tracked.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) BOOL isAnimatingQuaternion;
+
+/**
+ * Indicates whether scale animated content is being tracked.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) BOOL isAnimatingScale;
+
+/**
+ * Indicates whether the time interval between frames can vary from frame to frame, or whether
+ * the time interval between frames is constant across all frames.
+ *
+ * If this property returns NO, the frames of this animation are equally spaced in time.
+ *
+ * The value of this property is retrieved from the same property on the contained animation instance.
+ */
+@property(nonatomic, readonly) BOOL hasVariableFrameTiming;
+
+/** Indicates that the animated content has been updated by the animation since the last time the node was updated. */
+@property(nonatomic, readonly) BOOL isDirty;
+
+
+#pragma mark Updating
+
+/**
+ * Updates the currentFrame, location, rotation, quaternion, and scale of this instance based on the
+ * animation content found in the contained animation at the specified time, which should be a value
+ * between zero and one, with zero indicating the first animation frame, and one indicating the last
+ * animation frame.
+ */
+-(void) establishFrameAt: (ccTime) t;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance tracking the animation state for the specified animation
+ * on behalf of the specified node.
+ *
+ * Returns nil if either the animation or the node are nil.
+ */
+-(id) initWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node;
+
+/**
+ * Allocates and initializes an autoreleased instance tracking the animation state for the
+ * specified animation on behalf of the specified node.
+ *
+ * Returns nil if either the animation or the node are nil.
+ */
++(id) animationStateWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node;
+
+@end
+
 

@@ -47,6 +47,8 @@ cocos3d 2.0.0 - 2013/03/31
 	- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
 
 - Added support for blended animation
+    - Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for a single node.
+	- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
 
 
 

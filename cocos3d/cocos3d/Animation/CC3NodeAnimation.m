@@ -37,7 +37,7 @@
 
 @implementation CC3NodeAnimation
 
-@synthesize frameCount=_frameCount, currentFrame=_currentFrame, shouldInterpolate=_shouldInterpolate;
+@synthesize frameCount=_frameCount, shouldInterpolate=_shouldInterpolate;
 
 -(void) dealloc {
 	[super dealloc];
@@ -86,10 +86,12 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 #pragma mark Updating
 
--(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode {
+// Deprecated
+-(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode { [aNode.animationState establishFrameAt: t]; }
+
+-(void) establishFrameAt: (ccTime) t inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	LogTrace(@"%@ animating frame at %.4f", self, t);
 	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
-	_currentFrame = t;
 	
 	// Get the index of the frame within which the given time appears,
 	// and declare a possible fractional interpolation within that frame.
@@ -113,86 +115,193 @@ static ccTime _interpolationEpsilon = 0.1f;
 		LogTrace(@"%@ animating at time %.3f between frame %u at %.3f and next frame at %.3f with interpolation fraction %.3f",
 				 self, t, frameIndex, frameTime, nextFrameTime, frameInterpolation);
 	}
-	[self establishFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+	[self establishFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
 }
 
-/** 
- * Updates the location, rotation, quaternion, and scale of the specified node based
- * on the animation frame located at the specified frame, plus an interpolation amount
+/**
+ * Updates the location, rotation, quaternion, and scale of the specified node animation state
+ * based on the animation frame located at the specified frame, plus an interpolation amount
  * towards the next frame.
  */
 -(void) establishFrame: (GLuint) frameIndex
 	 plusInterpolation: (GLfloat) frameInterpolation
-			   forNode: (CC3Node*) aNode {
-	[self establishLocationAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
-	[self establishRotationAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
-	[self establishQuaternionAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
-	[self establishScaleAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+  inNodeAnimationState: (CC3NodeAnimationState*) animState {
+	[self establishLocationAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
+	[self establishRotationAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
+	[self establishQuaternionAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
+	[self establishScaleAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
 }
 
 /**
- * Updates the location of the node by interpolating between the the animation data
- * at the specified frame index and that at the next frame index, using the specified
+ * Updates the location of the node animation state by interpolating between the animation
+ * content at the specified frame index and that at the next frame index, using the specified
  * interpolation fraction value, which will be between zero and one.
  */
 -(void) establishLocationAtFrame: (GLuint) frameIndex
 			   plusInterpolation: (GLfloat) frameInterpolation
-						 forNode: (CC3Node*) aNode {
+			inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	if(self.isAnimatingLocation) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		aNode.location = CC3VectorLerp([self locationAtFrame: frameIndex],
-									  [self locationAtFrame: frameIndex + 1],
-									  frameInterpolation);
+		animState.location = CC3VectorLerp([self locationAtFrame: frameIndex],
+										   [self locationAtFrame: frameIndex + 1],
+										   frameInterpolation);
 	}
 }
 
 /**
- * Updates the rotation of the node by interpolating between the the animation data
- * at the specified frame index and that at the next frame index, using the specified
- * interpolation fraction value, which will be between zero and one. 
+ * Updates the rotation of the node animation state by interpolating between the animation
+ * content at the specified frame index and that at the next frame index, using the specified
+ * interpolation fraction value, which will be between zero and one.
  */
 -(void) establishRotationAtFrame: (GLuint) frameIndex
 			   plusInterpolation: (GLfloat) frameInterpolation
-						 forNode: (CC3Node*) aNode {
+			inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	if(self.isAnimatingRotation) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		aNode.rotation = CC3VectorLerp([self rotationAtFrame: frameIndex],
-									  [self rotationAtFrame: frameIndex + 1],
-									  frameInterpolation);
+		animState.rotation = CC3VectorLerp([self rotationAtFrame: frameIndex],
+										   [self rotationAtFrame: frameIndex + 1],
+										   frameInterpolation);
 	}
 }
 
 /**
- * Updates the rotation quaternion of the node by interpolating between the the animation
- * data at the specified frame index and that at the next frame index, using the specified
- * interpolation fraction value, which will be between zero and one. 
+ * Updates the rotation quaternion of the node animation state by interpolating between the
+ * animation content at the specified frame index and that at the next frame index, using
+ * the specified interpolation fraction value, which will be between zero and one.
  */
 -(void) establishQuaternionAtFrame: (GLuint) frameIndex
 				 plusInterpolation: (GLfloat) frameInterpolation
-						   forNode: (CC3Node*) aNode {
+			  inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	if(self.isAnimatingQuaternion) {
 		// If frameInterpolation is zero, Slerp function will immediately return first frame.
-		aNode.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
-											  [self quaternionAtFrame: frameIndex + 1],
-											  frameInterpolation);
+		animState.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
+												  [self quaternionAtFrame: frameIndex + 1],
+												  frameInterpolation);
 	}
 }
 
 /**
- * Updates the scale of the node by interpolating between the the animation data
- * at the specified frame index and that at the next frame index, using the specified
- * interpolation fraction value, which will be between zero and one. 
+ * Updates the scale of the node animation state by interpolating between the the animation
+ * content at the specified frame index and that at the next frame index, using the specified
+ * interpolation fraction value, which will be between zero and one.
  */
 -(void) establishScaleAtFrame: (GLuint) frameIndex
 			plusInterpolation: (GLfloat) frameInterpolation
-					  forNode: (CC3Node*) aNode {
+		 inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	if(self.isAnimatingScale) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		aNode.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
-								   [self scaleAtFrame: frameIndex + 1],
-								   frameInterpolation);
+		animState.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
+										[self scaleAtFrame: frameIndex + 1],
+										frameInterpolation);
 	}
 }
+
+//-(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode {
+//	LogTrace(@"%@ animating frame at %.4f", self, t);
+//	CC3Assert(t >= 0.0 && t <= 1.0, @"%@ animation frame time %f must be between 0.0 and 1.0", self, t);
+//	
+//	// Get the index of the frame within which the given time appears,
+//	// and declare a possible fractional interpolation within that frame.
+//	GLuint frameIndex = [self frameIndexAt: t];
+//	GLfloat frameInterpolation = 0.0;
+//	
+//	// If we should interpolate, and we're not at the last frame, calc the interpolation amount.
+//	// We only bother interpolating if difference is large enough. If close enough to this frame
+//	// or the next frame, just use the appropriate frame outright.
+//	if (_shouldInterpolate && (frameIndex < _frameCount - 1)) {
+//		ccTime frameTime = [self timeAtFrame: frameIndex];
+//		ccTime nextFrameTime = [self timeAtFrame: frameIndex + 1];
+//		ccTime frameDur = nextFrameTime - frameTime;
+//		if (frameDur != 0.0f) frameInterpolation = (t - frameTime) / frameDur;
+//		if (frameInterpolation < _interpolationEpsilon) {
+//			frameInterpolation = 0.0f;		// use this frame
+//		} else if ((1.0f - frameInterpolation) < _interpolationEpsilon) {
+//			frameInterpolation = 0.0f;
+//			frameIndex++;					// use next frame
+//		}
+//		LogTrace(@"%@ animating at time %.3f between frame %u at %.3f and next frame at %.3f with interpolation fraction %.3f",
+//				 self, t, frameIndex, frameTime, nextFrameTime, frameInterpolation);
+//	}
+//	[self establishFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+//}
+//
+///** 
+// * Updates the location, rotation, quaternion, and scale of the specified node based
+// * on the animation frame located at the specified frame, plus an interpolation amount
+// * towards the next frame.
+// */
+//-(void) establishFrame: (GLuint) frameIndex
+//	 plusInterpolation: (GLfloat) frameInterpolation
+//			   forNode: (CC3Node*) aNode {
+//	[self establishLocationAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+//	[self establishRotationAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+//	[self establishQuaternionAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+//	[self establishScaleAtFrame: frameIndex plusInterpolation: frameInterpolation forNode: aNode];
+//}
+//
+///**
+// * Updates the location of the node by interpolating between the the animation data
+// * at the specified frame index and that at the next frame index, using the specified
+// * interpolation fraction value, which will be between zero and one.
+// */
+//-(void) establishLocationAtFrame: (GLuint) frameIndex
+//			   plusInterpolation: (GLfloat) frameInterpolation
+//						 forNode: (CC3Node*) aNode {
+//	if(self.isAnimatingLocation) {
+//		// If frameInterpolation is zero, Lerp function will immediately return first frame.
+//		aNode.location = CC3VectorLerp([self locationAtFrame: frameIndex],
+//									  [self locationAtFrame: frameIndex + 1],
+//									  frameInterpolation);
+//	}
+//}
+//
+///**
+// * Updates the rotation of the node by interpolating between the the animation data
+// * at the specified frame index and that at the next frame index, using the specified
+// * interpolation fraction value, which will be between zero and one. 
+// */
+//-(void) establishRotationAtFrame: (GLuint) frameIndex
+//			   plusInterpolation: (GLfloat) frameInterpolation
+//						 forNode: (CC3Node*) aNode {
+//	if(self.isAnimatingRotation) {
+//		// If frameInterpolation is zero, Lerp function will immediately return first frame.
+//		aNode.rotation = CC3VectorLerp([self rotationAtFrame: frameIndex],
+//									  [self rotationAtFrame: frameIndex + 1],
+//									  frameInterpolation);
+//	}
+//}
+//
+///**
+// * Updates the rotation quaternion of the node by interpolating between the the animation
+// * data at the specified frame index and that at the next frame index, using the specified
+// * interpolation fraction value, which will be between zero and one. 
+// */
+//-(void) establishQuaternionAtFrame: (GLuint) frameIndex
+//				 plusInterpolation: (GLfloat) frameInterpolation
+//						   forNode: (CC3Node*) aNode {
+//	if(self.isAnimatingQuaternion) {
+//		// If frameInterpolation is zero, Slerp function will immediately return first frame.
+//		aNode.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
+//											  [self quaternionAtFrame: frameIndex + 1],
+//											  frameInterpolation);
+//	}
+//}
+//
+///**
+// * Updates the scale of the node by interpolating between the the animation data
+// * at the specified frame index and that at the next frame index, using the specified
+// * interpolation fraction value, which will be between zero and one. 
+// */
+//-(void) establishScaleAtFrame: (GLuint) frameIndex
+//			plusInterpolation: (GLfloat) frameInterpolation
+//					  forNode: (CC3Node*) aNode {
+//	if(self.isAnimatingScale) {
+//		// If frameInterpolation is zero, Lerp function will immediately return first frame.
+//		aNode.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
+//								   [self scaleAtFrame: frameIndex + 1],
+//								   frameInterpolation);
+//	}
+//}
 
 -(ccTime) timeAtFrame: (GLuint) frameIndex {
 	GLfloat currIdx = frameIndex;
@@ -300,16 +409,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 	if (!_frameTimes) return [super timeAtFrame: frameIndex];
 	return _frameTimes[MIN(frameIndex, _frameCount - 1)];
 }
-
-// Iterate through the frames looking for the first frame whose time is larger than the
-// specified frame time, then return the previous frame. If the specified frame is beyond
-// the last frame, return the last frame.
-//-(GLuint) frameIndexAt: (ccTime) t {
-//	if (!_frameTimes) return [super frameIndexAt: t];
-//	for (GLuint fIdx = 1; fIdx < _frameCount; fIdx++)	// start at second frame
-//		if (_frameTimes[fIdx] > t) return fIdx - 1;		// return previous frame index
-//	return _frameCount - 1;
-//}
 
 // Iterate backwards through the frames looking for the first frame whose time is at or before
 // the specified frame time, and return that frame. If the specified frame is before the first
@@ -463,3 +562,74 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3NodeAnimationState
+
+@implementation CC3NodeAnimationState
+
+@synthesize node=_node, animation=_animation, isDirty=_isDirty, animationTime=_animationTime;
+@synthesize location=_location, rotation=_rotation, quaternion=_quaternion, scale=_scale;
+
+-(void) dealloc {
+	_node = nil;			// not retained
+	[_animation release];
+	[super dealloc];
+}
+
+-(GLuint) frameCount { return _animation.frameCount; }
+
+-(BOOL) isAnimatingLocation { return _animation.isAnimatingLocation; }
+
+-(BOOL) isAnimatingRotation { return _animation.isAnimatingRotation; }
+
+-(BOOL) isAnimatingQuaternion { return _animation.isAnimatingQuaternion; }
+
+-(BOOL) isAnimatingScale { return _animation.isAnimatingScale; }
+
+-(BOOL) hasVariableFrameTiming { return _animation.hasVariableFrameTiming; }
+
+
+#pragma mark Updating
+
+-(void) establishFrameAt: (ccTime) t {
+	_animationTime = t;
+	[_animation establishFrameAt: t inNodeAnimationState: self];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	CC3Assert(NO, @"%@ cannot be initialized without a node and animation", self);
+	return nil;
+}
+
+-(id) initWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node {
+	if ( (self = [super init]) ) {
+		_node = node;						// not retained
+		_animation = [animation retain];
+		_animationTime = 0.0f;
+		_location = kCC3VectorZero;
+		_rotation = kCC3VectorZero;
+		_quaternion = kCC3QuaternionIdentity;
+		_scale = kCC3VectorUnitCube;
+		_isDirty = NO;
+		if ( !(animation && node) ) {
+			[self release];
+			return nil;
+		}
+	}
+	return self;
+}
+
++(id) animationStateWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node {
+	return [[[self alloc] initWithAnimation: animation forNode: node] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for node %@ with animation %@", [self class], _node, _animation];
+}
+
+
+@end
