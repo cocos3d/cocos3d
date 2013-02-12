@@ -77,10 +77,9 @@ extern "C" {
 		if (psn->pfAnimRotation) self.quaternion = *(CC3Vector4*)psn->pfAnimRotation;
 		if (psn->pfAnimScale) self.scale = *(CC3Vector*)psn->pfAnimScale;
 
-		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn]) {
+		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn])
 			self.animation = [CC3PODNodeAnimation animationFromSPODNode: (PODStructPtr)psn
 														 withFrameCount: aPODRez.animationFrameCount];
-		}
 	}
 	return self; 
 }

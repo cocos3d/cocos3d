@@ -188,7 +188,7 @@ CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat ble
 		v2Weight = (sinf(theta * blendFactor) * oneOverSinTheta);
 	}
 	CC3Vector4 result = CC3QuaternionNormalize(CC3Vector4Add(CC3QuaternionScaleUniform(q1, v1Weight),
-																CC3QuaternionScaleUniform(q2, v2Weight)));
+															CC3QuaternionScaleUniform(q2, v2Weight)));
 	LogTrace(@"SLERP with cos %.3f at %.3f between %@ and %@ is %@", cosTheta, blendFactor, 
 			 NSStringFromCC3Quaternion(q1), NSStringFromCC3Quaternion(q2),
 			 NSStringFromCC3Quaternion(result));

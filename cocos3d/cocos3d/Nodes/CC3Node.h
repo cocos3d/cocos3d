@@ -218,7 +218,7 @@ typedef enum {
 	CC3Matrix* globalRotationMatrix;
 	CC3Rotator* rotator;
 	CC3NodeBoundingVolume* boundingVolume;
-	CC3NodeAnimationState* _animationState;
+	CCArray* _animationStates;
 	CC3Vector location;
 	CC3Vector globalLocation;
 	CC3Vector projectedLocation;
@@ -231,7 +231,6 @@ typedef enum {
 	BOOL _touchEnabled : 1;
 	BOOL shouldInheritTouchability : 1;
 	BOOL shouldAllowTouchableWhenInvisible : 1;
-	BOOL isAnimationEnabled : 1;
 	BOOL visible : 1;
 	BOOL isRunning : 1;
 	BOOL shouldAutoremoveWhenEmpty : 1;
@@ -3286,100 +3285,192 @@ typedef enum {
 
 #pragma mark Animation
 
-/**
- * The animation content of this node, which manages animating the node under
- * the direction of a CC3Animate action.
- *
- * To animate this node, set this property to an instance of a subclass of the
- * abstract CC3NodeAnimation class, populated with animation content, and then
- * create an instance of a CC3Animate action, and run it on this node. 
+/** 
+ * Returns the animation state wrapper for the specified animation track, or nil if no
+ * animation has been defined for this node on that animation track.
  */
-@property(nonatomic, retain) CC3NodeAnimation* animation;
+-(CC3NodeAnimationState*) getAnimationStateForTrack: (NSUInteger) trackID;
 
 /**
- * The animation state wrapper that holds the CC3NodeAnimation of the animation property.
+ * Adds the specified animation state wrapper, containing animation and track information.
  *
- * A single CC3Animation may animate many nodes. The CC3NodeAnimationState in this property
- * keeps track of the current animation state of this node.
+ * A node may contain only one animation per animation track. If an animation already exists
+ * for the track represented in the specified animation state, it is replaced with the animation
+ * in the specified animation state.
+ *
+ * Typically, to add animation to a node, the application would use the addAnimation:asTrack:
+ * method, rather than this method.
+ */
+-(void) addAnimationState: (CC3NodeAnimationState*) animationState;
+
+/**
+ * Removes the specified animation state wrapper from this node.
+ *
+ * Typically, to remove animation from a node, the application would use the removeAnimation:
+ * or removeAnimationOnTrack: methods, rather than this method.
+ */
+-(void) removeAnimationState: (CC3NodeAnimationState*) animationState;
+
+/**
+ * The animation state wrapper for animation track zero. This is a convenience property for
+ * accessing the animation when only a single animation track is used.
  *
  * This wrapper is created automatically when the animation property is set.
  */
 @property(nonatomic, retain, readonly) CC3NodeAnimationState* animationState;
 
-/** Indicates whether this node, or any of its descendants, contains an instance of an animation. */
+/**
+ * Returns the animation for the specified animation track, or nil if no animation
+ * has been defined for this node on that animation track.
+ */
+-(CC3NodeAnimation*) getAnimationOnTrack: (NSUInteger) trackID;
+
+/**
+ * Adds the specified animation as the specified animation track.
+ *
+ * A node may contain only one animation per animation track. If an animation already
+ * exists on the specified track, it is replaced with the specified animation.
+ *
+ * To animate this node, use this method to add one or more instances of a subclass of the
+ * abstract CC3NodeAnimation class, populated with animation content, and then create an
+ * instance of a CC3Animate action for each track, and selectively run them on this node.
+ */
+-(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (NSUInteger) trackID;
+
+/** Removes the specified animation from this node. */
+-(void) removeAnimation: (CC3NodeAnimation*) animation;
+
+/** Removes the animation on the specified animation track from this node. */
+-(void) removeAnimationOnTrack: (NSUInteger) trackID;
+
+/**
+ * The animation content of animation track zero of this node.
+ *
+ * Setting this property is the same as invoking addAnimation:asTrack: and specifying track zero.
+ * Querying this property is the same as invoking getAnimationOnTrack: and specifying track zero.
+ *
+ * To animate this node, set this property to an instance of a subclass of the abstract
+ * CC3NodeAnimation class, populated with animation content, and then create an instance
+ * of a CC3Animate action, and run it on this node.
+ */
+@property(nonatomic, retain) CC3NodeAnimation* animation;
+
+/** Indicates whether this node, or any of its descendants, contains animation on the specified animation track. */
+-(BOOL) containsAnimationOnTrack: (NSUInteger) trackID;
+
+/** Indicates whether this node, or any of its descendants, contains animation on any tracks. */
 @property(nonatomic, readonly) BOOL containsAnimation;
 
-/**
- * The number of frames of animation supported by this node, or its descendants.
- *
- * If this node is animated, returns the frame count from this node's animation.
- * Otherwise, a depth-first traversal of the descendants is performed, and the
- * first non-zero animation frame count value is returned.
- *
- * Returns zero if none of this node and its descendants contains any animation.
- */
-@property(nonatomic, readonly) GLuint animationFrameCount;
-
-/** 
- * Updates the location, rotation and scale of this node based on the animation frame
- * located at the specified time, which should be a value between zero and one, with
- * zero indicating the first animation frame, and one indicating the last animation frame.
- * Only those properties of this node for which there is animation data will be changed.
- *
- * This implementation delegates to the CC3NodeAnimationState instance held in the animationState
- * property, then passes this notification along to child nodes to align them with the same
- * animation frame. Linear interpolation of the frame content may be performed, based on the
- * number of frames and the specified time.
- *
- * If disableAnimation or disableAllAnimation has been invoked on this node,
- * it will be excluded from animation, and this method will not have any affect
- * on this node. However, this method will be propagated to child nodes.
- *
- * This method is invoked automatically from an instance of CC3Animate that is animating
- * this node. Usually, the application never needs to invoke this method directly.
- */
--(void) establishAnimationFrameAt: (ccTime) t;
+/** Returns the animation blending weight for the animation in the specified track. */
+-(GLfloat) animationBlendingWeightForTrack: (NSUInteger) trackID;
 
 /**
- * Enables animation of this node from animation data held in the animation property.
+ * Sets the animation blending weight for the animation in the specified track, and sets the
+ * same weight into all descendants.
+ *
+ * When multiple animation tracks are active, the blending weight of a track determines the
+ * relative influence the animation track has on the properties of this node. Animation tracks
+ * with larger weights relative to the other tracks will have a proportionally larger influence
+ * on the transform properties of the node. An animation track with a blending weight of zero
+ * will have no influence on the properties of the node.
+ *
+ * The absolute value of the weights does not matter, nor do the weights across all animation
+ * tracks have to add up to unity. Therefore, a blending weight of 0.2 on one track and a blending
+ * weight of 0.1 on a second track will have exactly the same affect as a weight of 1.2 on the
+ * first track and a weight of 0.6 on the second track. In both cases, the first animation track
+ * will have twice the influence as the second animation track.
+ *
+ * When only one animation track is active, the blending weight has no effect unless it is zero.
+ */
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight forTrack: (NSUInteger) trackID;
+
+/**
+ * Enables the animation on the specified track of this node.
+ *
+ * This will not enable animation of child nodes.
+ */
+-(void) enableAnimationOnTrack: (NSUInteger) trackID;
+
+/**
+ * Disables the animation on the specified track of this node.
+ *
+ * This will not disable animation of child nodes.
+ */
+-(void) disableAnimationOnTrack: (NSUInteger) trackID;
+
+/**
+ * Indicates whether the animation on the specified animation track is enabled.
+ *
+ * The value returned by this method applies only to this node, not its child nodes. Child nodes
+ * that return YES to this method will be animated even if this node returns NO, and vice-versa.
+ *
+ * The initial value of this property is YES.
+ */
+-(BOOL) isAnimationEnabledOnTrack: (NSUInteger) trackID;
+
+/**
+ * Enables the animation on all animation tracks of this node.
  *
  * This will not enable animation of child nodes.
  */
 -(void) enableAnimation;
 
 /**
- * Disables animation of this node from animation data held in the animation property.
+ * Disables the animation on all animation tracks of this node.
  *
  * This will not disable animation of child nodes.
  */
 -(void) disableAnimation;
 
 /**
- * Enables animation of this node, and all descendant nodes, from animation
- * data held in the animation property of this node and each descendant node.
- */
--(void) enableAllAnimation;
-
-/**
- * Disables animation of this node, and all descendant nodes, from animation
- * data held in the animation property of this node and each descendant node.
- */
--(void) disableAllAnimation;
-
-/**
- * Indicates whether animation is enabled for this node.
- * This property only has effect if there the animation property is not nil.
+ * Indicates whether the animation on any animation track in this node is enabled.
  *
- * The value of this property only applies to this node, not its child nodes.
- * Child nodes that have this property set to YES will be animated even if
- * this node has this property set to NO, and vice-versa.
- 
- * Use the methods enableAllAnimation and disableAllAnimation to turn animation
- * on or off for all the nodes in a node assembly.
+ * The value returned by this method applies only to this node, not its child nodes. Child nodes
+ * that return YES to this method will be animated even if this node returns NO, and vice-versa.
  *
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL isAnimationEnabled;
+
+/** Enables all animation tracks of this node, and all descendant nodes. */
+-(void) enableAllAnimation;
+
+/** Disables all animation tracks of this node, and all descendant nodes. */
+-(void) disableAllAnimation;
+
+/**
+ * Updates the location, rotation and scale properties on the animation state wrapper associated
+ * with the animation on the specified track, based on the animation frame located at the specified
+ * time, which should be a value between zero and one, with zero indicating the first animation frame,
+ * and one indicating the last animation frame. Only those transform properties for which there
+ * is animation content will be changed.
+ *
+ * This method is usually invoked automatically from an active CC3Animate action during each update
+ * cycle. Once all animation tracks have been updated accordingly, the node automatically blends the
+ * weighted animation from each track to determine the corresponding values of the location, rotation
+ * and scale properties of this node.
+ *
+ * This implementation delegates to the CC3NodeAnimationState instance that is managing the animation
+ * for the specified track, then passes this notification along to child nodes to align them with the
+ * same animation time. Linear interpolation of the frame content may be performed, based on the
+ * number of frames and the specified time.
+ *
+ * If disableAnimation or disableAllAnimation has been invoked on this node, it will be excluded
+ * from animation, and this method will not have any affect on this node. However, this method will
+ * be propagated to child nodes.
+ *
+ * This method is invoked automatically from an instance of CC3Animate that is animating
+ * this node. Usually, the application never needs to invoke this method directly.
+ */
+-(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID;
+
+/** @deprecated Replaced with establishAnimationFrameAt:onTrack:. */
+-(void) establishAnimationFrameAt: (ccTime) t DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Instead of accessing this property, retrieve the appropriate animation using the
+ * animation property or the getAnimationForTrack: method, and access the frameCount property.
+ */
+@property(nonatomic, readonly) GLuint animationFrameCount DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Developer support

@@ -417,10 +417,13 @@
 #pragma mark CC3NodeAnimationState
 
 /**
- * CC3NodeAnimationState holds the state associated with the animation of a single node.
+ * CC3NodeAnimationState holds the state associated with the animation of a single node on a single track.
  *
- * Each instance of this class bridges a CC3Node with an CC3NodeAnimation that is animating it,
- * and keeps track of the animation state on behalf of the node.
+ * Each node can participate in multiple tracks of animation, and during animation, these tracks
+ * can be mixed to perform sophisticated animation blending techniques.
+ *
+ * Each instance of this class bridges a single CC3Node with an CC3NodeAnimation running on
+ * on a particular track, and keeps track of the animation state on behalf of the node.
  */
 @interface CC3NodeAnimationState : NSObject {
 	CC3Node* _node;
@@ -430,6 +433,9 @@
 	CC3Vector _rotation;
 	CC3Quaternion _quaternion;
 	CC3Vector _scale;
+	NSUInteger _trackID;
+	GLfloat _blendingWeight;
+	BOOL _isEnabled : 1;
 	BOOL _isDirty : 1;
 }
 
@@ -438,6 +444,30 @@
 
 /** The animation whose state is being tracked by this instance. */
 @property (nonatomic, retain, readonly) CC3NodeAnimation* animation;
+
+/** The animation track on which the animation runs. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
+
+/** 
+ * The relative weight to use when blending this animation track with the other tracks.
+ *
+ * The initial value of this property is one.
+ */
+@property (nonatomic, assign) GLfloat blendingWeight;
+
+/**
+ * Indicates whether this animation is enabled, and will participate in animating the
+ * contained node if an animate action is run on the node.
+ *
+ * The initial value of this property is YES.
+ */
+@property(nonatomic, assign) BOOL isEnabled;
+
+/** Sets the isEnabled property to YES. */
+-(void) enable;
+
+/** Sets the isEnabled property to NO. */
+-(void) disable;
 
 /**
  * Returns the current animation time. This is the value submitted to the most recent invocation
@@ -536,20 +566,20 @@
 #pragma mark Allocation and initialization
 
 /**
- * Initializes this instance tracking the animation state for the specified animation
- * on behalf of the specified node.
+ * Initializes this instance tracking the animation state for the specified animation running on
+ * the specified track for the specified node.
  *
  * Returns nil if either the animation or the node are nil.
  */
--(id) initWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node;
+-(id) initWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node;
 
 /**
  * Allocates and initializes an autoreleased instance tracking the animation state for the
- * specified animation on behalf of the specified node.
+ * specified animation running on the specified track for the specified node.
  *
  * Returns nil if either the animation or the node are nil.
  */
-+(id) animationStateWithAnimation: (CC3NodeAnimation*) animation forNode: (CC3Node*) node;
++(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node;
 
 @end
 

@@ -639,40 +639,94 @@
 
 @implementation CC3Animate
 
-@synthesize isReversed;
+@synthesize trackID = _trackID, isReversed=_isReversed;
 
--(id) initWithDuration: (ccTime) d {
-	if ( (self = [super initWithDuration: d]) ) {
-		isReversed = NO;
+-(id) initWithDuration: (ccTime) t { return [self initWithDuration: t onTrack: 0]; }
+
++(id) actionWithDuration: (ccTime) t { return [self actionWithDuration: t onTrack: 0]; }
+
+-(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID {
+	CC3Assert(trackID <= 65535, @"%@ trackID %u exceeds the maximum value of 65535.", self, trackID);
+	if ( (self = [super initWithDuration: t]) ) {
+		_trackID = trackID;
+		_isReversed = NO;
 	}
 	return self;
+}
+
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID {
+	return [[[self alloc] initWithDuration: t onTrack: trackID] autorelease];
+}
+
++(id) actionWithDuration: (ccTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
+	return [self actionWithDuration: t onTrack: 0 limitFrom: startOfRange to: endOfRange];
+}
+
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
+	return [[self actionWithDuration: t onTrack: trackID] asActionLimitedFrom: startOfRange to: endOfRange];
 }
 
 -(CCActionInterval*) asActionLimitedFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
 	return [CC3ActionRangeLimit actionWithAction: self limitFrom: startOfRange to: endOfRange];
 }
 
-+(id) actionWithDuration: (ccTime) d limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
-	return [[self actionWithDuration: d] asActionLimitedFrom: startOfRange to: endOfRange];
-}
-
 -(void) update: (ccTime) t {
 	CC3Node* node = target_;
-	[node establishAnimationFrameAt: (isReversed ? (1.0 - t) : t)];
+	[node establishAnimationFrameAt: (_isReversed ? (1.0 - t) : t) onTrack: _trackID];
 }
 
-- (CCActionInterval *) reverse {
-	CC3Animate* newAnim = [[self class] actionWithDuration: duration_];
+-(CCActionInterval*) reverse {
+	CC3Animate* newAnim = [[self class] actionWithDuration: self.duration];
 	newAnim.isReversed = !self.isReversed;
 	return newAnim;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	CC3Animate* newAnim = [[[self class] allocWithZone:zone] initWithDuration: duration_];
+	CC3Animate* newAnim = [[[self class] allocWithZone:zone] initWithDuration: self.duration];
 	newAnim.isReversed = self.isReversed;
 	return newAnim;
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3AnimationBlendingFadeTo
+
+@implementation CC3AnimationBlendingFadeTo
+
+@synthesize trackID = _trackID;
+
+-(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+	CC3Assert(trackID <= 65535, @"%@ trackID %u exceeds the maximum value of 65535.", self, trackID);
+	if ( (self = [super initWithDuration: t]) ) {
+		_trackID = trackID;
+		_endWeight = blendingWeight;
+	}
+	return self;
+}
+
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+	return [[[self alloc] initWithDuration: t onTrack: trackID] autorelease];
+}
+
+-(void) startWithTarget:(CC3Node*) aTarget {
+	[super startWithTarget: aTarget];
+	_startWeight = [aTarget animationBlendingWeightForTrack: _trackID];
+}
+
+-(void) update: (ccTime) t {
+	CC3Node* node = target_;
+	[node setAnimationBlendingWeight: ((_endWeight - _startWeight) * t) forTrack: _trackID];
+}
+
+-(CCActionInterval*) reverse {
+	return [[self class] actionWithDuration: self.duration onTrack: _trackID blendingWeight: _startWeight];
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	return [[self class] actionWithDuration: self.duration onTrack: _trackID blendingWeight: _endWeight];
+}
 
 @end
 

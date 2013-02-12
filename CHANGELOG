@@ -46,11 +46,13 @@ cocos3d 2.0.0 - 2013/03/31
 - Added support for time-based key-frame animation.
 	- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
 
-- Added support for blended animation
-    - Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for a single node.
+- Added support for multi-track blended animation
+    - Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for single track on a single node.
+	- Added track-based animation methods to CC3Node
+		- CC3Node animation property is now a convenience property for referencing animation on track zero.
+	- Added CC3Animate trackID property to animate a single track of node animation.
 	- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
-
-
+	- Multi-track animation can be specified and loaded onto nodes using animation files specified in CAF format.
 
 - [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
 	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.

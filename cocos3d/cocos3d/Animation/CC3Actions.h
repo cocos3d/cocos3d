@@ -81,7 +81,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * parent of subclasses that transform a vector component of a target CC3Node (such
  * as the location, rotation, or scale) by some amount, or to some value over time.
  */
-@interface CC3TransformVectorAction : CCActionInterval {
+@interface CC3TransformVectorAction : CCActionInterval <NSCopying> {
 	CC3Vector startVector;
 	CC3Vector diffVector;
 }
@@ -198,7 +198,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * amount, by repeatedly invoking the rotateByAngle:aroundAxis: method on the target
  * node as the action runs.
  */
-@interface CC3RotateByAngle : CCActionInterval {
+@interface CC3RotateByAngle : CCActionInterval <NSCopying> {
 	CC3Vector rotationAxis;
 	CC3Vector activeRotationAxis;
 	GLfloat diffAngle;
@@ -356,7 +356,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * of rotation. For exmaple, a rotation from 10 degrees to 350 degrees in any axis should
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
-@interface CC3RotateToAngle : CCActionInterval {
+@interface CC3RotateToAngle : CCActionInterval <NSCopying> {
 	GLfloat startAngle;
 	GLfloat endAngle;
 	GLfloat diffAngle;
@@ -440,7 +440,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * This is an abstract class. Subclasses define the actual direction of
  * movement by overriding the targetDirection property.
  */
-@interface CC3MoveDirectionallyBy : CCActionInterval {
+@interface CC3MoveDirectionallyBy : CCActionInterval <NSCopying> {
 	ccTime prevTime;
 	GLfloat	distance;
 }
@@ -637,8 +637,12 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * those two values here will result in an animation containing only the punch.
  */
 @interface CC3Animate : CCActionInterval <NSCopying> {
-	BOOL isReversed;
+	NSUInteger _trackID : 16;
+	BOOL _isReversed : 1;
 }
+
+/** The animation track on which the animation runs. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
 
 /**
  * Indicates whether this action is running in reverse. Setting this to YES
@@ -651,16 +655,74 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 @property(nonatomic, assign) BOOL isReversed;
 
 /**
- * Wraps this instance in an autoreleased CC3ActionRangeLimit instance that maps
- * the normal zero-to-one update range to the specified range, and returns the
- * CC3ActionRangeLimit instance
+ * Initializes this instance to animate animation track zero on the target node,
+ * over the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate animation track zero
+ * on the target node, over the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t;
+
+/**
+ * Initializes this instance to animate the specified animation track on the target node,
+ * over the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate the specified animation
+ * track on the target node, over the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate animation track zero on the
+ * target node, over the specified time duration, then wraps that instance in an autoreleased
+ * CC3ActionRangeLimit instance that maps the normal zero-to-one update range to the specified
+ * range, and returns the CC3ActionRangeLimit instance.
+ *
+ * The effective result is an animation action that will perform only part of the animation.
+ * This is very useful for a node that contains several different motions in one animation.
+ * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * to run the full animation. To do this, set the startOfRange and endOfRange values
+ * to the fractional positions (between zero and one) of the start and end frames of the sub-animation.
+ *
+ * For example, if a character animation contains a punch animation that starts and stops
+ * at relative positions 0.67 and 0.78 respectively within the full animation, setting
+ * those two values here will result in an animation containing only the punch.
+ */
++(id) actionWithDuration: (ccTime) t limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate the specified animation track on
+ * the target node, over the specified time duration, then wraps that instance in an autoreleased
+ * CC3ActionRangeLimit instance that maps the normal zero-to-one update range to the specified
+ * range, and returns the CC3ActionRangeLimit instance.
+ *
+ * The effective result is an animation action that will perform only part of the animation.
+ * This is very useful for a node that contains several different motions in one animation.
+ * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * to run the full animation. To do this, set the startOfRange and endOfRange values
+ * to the fractional positions (between zero and one) of the start and end frames of the sub-animation.
+ *
+ * For example, if a character animation contains a punch animation that starts and stops
+ * at relative positions 0.67 and 0.78 respectively within the full animation, setting
+ * those two values here will result in an animation containing only the punch.
+ */
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
+
+/**
+ * Wraps this instance in an autoreleased CC3ActionRangeLimit instance that maps the normal
+ * zero-to-one update range to the specified range, and returns the CC3ActionRangeLimit instance
  *
  * The effective result is an animation action that will perform only part of the animation.
  * This is very useful for an node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without
- * having to run the full animation. To do this, set the startOfRange and endOfRange values
- * to the fractional positions (between zero and one) of the start and end frames of the
- * sub-animation.
+ * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * to run the full animation. To do this, set the startOfRange and endOfRange values of the
+ * fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
  * For example, if a character animation contains a punch animation that starts and stops
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
@@ -668,25 +730,37 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  */
 -(CCActionInterval*) asActionLimitedFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
 
-/**
- * Allocates and initializes an autoreleased instance with the specified duration,
- * then wraps that instance in an autoreleased CC3ActionRangeLimit instance that maps
- * the normal zero-to-one update range to the specified range, and returns the
- * CC3ActionRangeLimit instance.
- *
- * The effective result is an animation action that will perform only part of the animation.
- * This is very useful for a node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without
- * having to run the full animation. To do this, set the startOfRange and endOfRange values
- * to the fractional positions (between zero and one) of the start and end frames of the
- * sub-animation.
- *
- * For example, if a character animation contains a punch animation that starts and stops
- * at relative positions 0.67 and 0.78 respectively within the full animation, setting
- * those two values here will result in an animation containing only the punch.
- */
+@end
 
-+(id) actionWithDuration: (ccTime) d limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
+
+#pragma mark -
+#pragma mark CC3AnimationBlendingFadeTo
+
+/**
+ * CC3AnimationBlendingFadeTo fades the animation blending weight of an animation track in the
+ * target CC3Node from its current value to and end value. This allows the animation track to
+ * be faded in or out smoothly.
+ */
+@interface CC3AnimationBlendingFadeTo : CCActionInterval <NSCopying> {
+	GLfloat _startWeight;
+	GLfloat _endWeight;
+	NSUInteger _trackID : 16;
+}
+
+/** The animation track on which the animation runs. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
+
+/**
+ * Initializes this instance to fade the animation blending weight of the specified animation
+ * track on the target node to the specified value, over the specified time duration.
+ */
+-(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+
+/**
+ * Allocates and initializes an autoreleased instance to fade the animation blending weight of the
+ * specified animation track on the target node to the specified value, over the specified time duration.
+ */
++(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
 
 @end
 
@@ -695,9 +769,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3ActionRangeLimit
 
 /**
- * A CC3ActionRangeLimit holds another action, and serves to modify the normal
- * zero-to-one range of update values to a smaller range that is presented to the
- * contained action.
+ * A CC3ActionRangeLimit holds another action, and serves to modify the normal zero-to-one
+ * range of update values to a smaller range that is presented to the contained action.
  *
  * For example, for an instance that is limited to a range of 0.5 to 0.75, as the 
  * input update value changes from zero to one, the value that is forwarded to the
@@ -717,9 +790,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 				  to: (GLfloat) endOfRange;
 
 /**
- * Allocates and initializes an autoreleased instance that modify the update
- * values that are forwarded to the specified action so that they remain
- * within the specified range.
+ * Allocates and initializes an autoreleased instance that modify the update values that are
+ * forwarded to the specified action so that they remain within the specified range.
  */
 +(id) actionWithAction: (CCActionInterval*) action
 			 limitFrom: (GLfloat) startOfRange

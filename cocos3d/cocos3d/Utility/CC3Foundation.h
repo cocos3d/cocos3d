@@ -452,13 +452,8 @@ static inline void CC3VectorOrthonormalizeTriple(CC3Vector* triVector) { return 
  * exactly, this method short-circuits to simply return v1 or v2 respectively.
  */
 static inline CC3Vector CC3VectorLerp(CC3Vector v1, CC3Vector v2, GLfloat blendFactor) {
-	// Short-circuit if we know it's one of the end-points.
-	if (blendFactor == 0.0f) {
-		return v1;
-	} else if (blendFactor == 1.0f) {
-		return v2;
-	}
-	// Return: v1 + (blendFactor * (v2 - v1))
+	if (blendFactor == 0.0f) return v1;
+	if (blendFactor == 1.0f) return v2;
 	return CC3VectorAdd(v1, CC3VectorScaleUniform(CC3VectorDifference(v2, v1), blendFactor));
 }
 
