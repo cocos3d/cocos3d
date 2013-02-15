@@ -67,14 +67,13 @@ extern "C" {
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	CC3Assert(![self isMemberOfClass:[CC3Node class]], @"%@ is an abstract class and should not be instantiated directly. Use a subclass instead.", [self class]);
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
-		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex
-											fromPODResource: (CC3PODResource*) aPODRez];
+		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex fromPODResource: aPODRez];
 		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODNode(psn));
 		self.name = [NSString stringWithUTF8String: psn->pszName];
 		self.podContentIndex = psn->nIdx;
 		self.podParentIndex = psn->nIdxParent;
 		if (psn->pfAnimPosition) self.location = *(CC3Vector*)psn->pfAnimPosition;
-		if (psn->pfAnimRotation) self.quaternion = *(CC3Vector4*)psn->pfAnimRotation;
+		if (psn->pfAnimRotation) self.quaternion = *(CC3Quaternion*)psn->pfAnimRotation;
 		if (psn->pfAnimScale) self.scale = *(CC3Vector*)psn->pfAnimScale;
 
 		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn])
@@ -173,7 +172,6 @@ extern "C" {
 -(BOOL) isAnimatingScale { return _animatedScales != NULL; }
 
 
-#define kPODAnimationLocationStride 3
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
 	int currFrameOffset = _animatedLocationIndices
@@ -182,7 +180,6 @@ extern "C" {
 	return *(CC3Vector*)&_animatedLocations[currFrameOffset];
 }
 
-#define kPODAnimationQuaternionStride 4
 -(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
 	int currFrameOffset = _animatedQuaternionsIndices
@@ -191,7 +188,6 @@ extern "C" {
 	return *(CC3Quaternion*)&_animatedQuaternions[currFrameOffset];
 }
 
-#define kPODAnimationScaleStride 7
 -(CC3Vector) scaleAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
 	int currFrameOffset = _animatedScaleIndices

@@ -283,9 +283,9 @@ static inline CC3Vector CC3VectorMaximize(CC3Vector v1, CC3Vector v2) {
 
 /** Returns the dot-product of the two given vectors (v1 . v2). */
 static inline GLfloat CC3VectorDot(CC3Vector v1, CC3Vector v2) {
-	return (v1.x * v2.x) +
-		   (v1.y * v2.y) +
-		   (v1.z * v2.z);
+	return ((v1.x * v2.x) +
+			(v1.y * v2.y) +
+			(v1.z * v2.z));
 }
 
 /**
@@ -867,16 +867,14 @@ static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
  * Returns a CC3Vector structure constructed from a CC3Vector4,
  * by simply ignoring the w component of the 4D vector.
  */
-static inline CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) {
-	return *(CC3Vector*)&v;
-}
+static inline CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) { return *(CC3Vector*)&v; }
 
 /** Returns whether the two vectors are equal by comparing their respective components. */
 static inline BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
-	return v1.x == v2.x
-	&& v1.y == v2.y
-	&& v1.z == v2.z
-	&& v1.w == v2.w;
+	return (v1.x == v2.x &&
+			v1.y == v2.y &&
+			v1.z == v2.z &&
+			v1.w == v2.w);
 }
 
 /** Returns whether the specified vector is equal to the zero vector, specified by kCC3Vector4Zero. */
@@ -948,20 +946,22 @@ static inline CC3Vector4 CC3Vector4HomogeneousScaleUniform(CC3Vector4 v, GLfloat
 						  v.w);
 }
 
-/**
- * Returns the square of the scalar length of the specified vector from the origin,
- * including the w-component
- * This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
- *
- * This function is useful for comparing vector sizes without having to run an
- * expensive square-root calculation.
- */
-static inline GLfloat CC3Vector4LengthSquared(CC3Vector4 v) {
-	return (v.x * v.x) +
-		   (v.y * v.y) +
-		   (v.z * v.z) +
-		   (v.w * v.w);
+/** Returns the dot-product of the two given vectors (v1 . v2). */
+static inline GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
+	return	((v1.x * v2.x) +
+			 (v1.y * v2.y) +
+			 (v1.z * v2.z) +
+			 (v1.w * v2.w));
 }
+
+/**
+ * Returns the square of the scalar length of the specified vector from the origin, including
+ * the w-component. This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
+ *
+ * This function is useful for comparing vector sizes without having to run an expensive
+ * square-root calculation.
+ */
+static inline GLfloat CC3Vector4LengthSquared(CC3Vector4 v) { return CC3Vector4Dot(v, v); }
 
 /**
  * Returns the scalar length of the specified vector from the origin, including the w-component
@@ -1020,14 +1020,6 @@ static inline CC3Vector4 CC3Vector4Difference(CC3Vector4 minuend, CC3Vector4 sub
 						  minuend.w - subtrahend.w);
 }
 
-/** Returns the dot-product of the two given vectors (v1 . v2). */
-static inline GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
-	return (v1.x * v2.x) +
-		   (v1.y * v2.y) +
-		   (v1.z * v2.z) +
-		   (v1.w * v2.w);
-}
-
 
 #pragma mark -
 #pragma mark Quaternions
@@ -1066,15 +1058,67 @@ static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZer
 /** Returns whether the specified quaternion is equal to the null quaternion, specified by kCC3QuaternionNull. */
 static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
 
+/** Returns the vector component (X, Y, Z) of the specified quaternion. */
+static inline CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) {
+	return CC3VectorFromTruncatedCC3Vector4(q);
+}
+
+/** Returns a quaternion that is the negative of the specified quaterion in all dimensions, including W. */
+static inline CC3Quaternion CC3QuaternionNegate(CC3Quaternion q) { return CC3Vector4Negate(q); }
+
 /** Returns a normalized copy of the specified quaternion so that its length is 1.0. The w-component is also normalized. */
 static inline CC3Quaternion CC3QuaternionNormalize(CC3Quaternion q) { return CC3Vector4Normalize(q); }
 
-/** Returns a vector that is the negative of the specified quaterions in all dimensions, including W. */
-static inline CC3Quaternion CC3QuaternionNegate(CC3Vector4 q) { return CC3Vector4Negate(q); }
+/** 
+ * Returns a quaternion that is the conjugate of the specified quaterion.
+ * The X, Y, Z dimensions are negated, but the W is not.
+ */
+static inline CC3Quaternion CC3QuaternionConjugate(CC3Quaternion q) {
+	return CC3QuaternionMake(-q.x, -q.y, -q.z, q.w);
+}
 
 /** Returns the result of scaling the original quaternion by the corresponding scale factor uniformly along all axes. */
 static inline CC3Quaternion CC3QuaternionScaleUniform(CC3Quaternion q, GLfloat scale) {
 	return CC3Vector4ScaleUniform(q, scale);
+}
+
+/** Returns the dot-product of the two given quaternions (q1 . q2). */
+static inline GLfloat CC3QuaternionDot(CC3Quaternion q1, CC3Quaternion q2) { return CC3Vector4Dot(q1, q2); }
+
+/**
+ * Returns the square of the scalar length (or magnitude) of the specified quaternion.
+ * This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
+ *
+ * This function is useful for comparing vector sizes without having to run an expensive
+ * square-root calculation.
+ */
+static inline GLfloat CC3QuaternionLengthSquared(CC3Quaternion q) { return CC3Vector4LengthSquared(q); }
+
+/**
+ * Returns the scalar length (or magnitude) of the specified quaternion.
+ * This is calculated as sqrt(x*x + y*y + z*z + w*w) and will always be positive.
+ */
+static inline GLfloat CC3QuaternionLength(CC3Quaternion q) { return CC3Vector4Length(q); }
+
+/**
+ * Returns the inverse of the specified quaterion.
+ *
+ * The inverse of a quaternion is another quaternion such that multiplying a quaternion by
+ * its inverse results in the identity quaternion.
+ * 
+ * The returned inverse quaternion is calculated as the conjugate of the specified quaternion
+ * divided by the square of the length of the specified quaternion.
+ */
+static inline CC3Quaternion CC3QuaternionInvert(CC3Quaternion q) {
+	return CC3QuaternionScaleUniform(CC3QuaternionConjugate(q), 1.0f / CC3QuaternionLengthSquared(q));
+}
+
+/** Returns the result of multiplying qL on the left by qR on the right. */
+static inline CC3Quaternion CC3QuaternionMultiply(CC3Quaternion qL, CC3Quaternion qR) {
+	return CC3QuaternionMake((qL.w * qR.x) + (qL.x * qR.w) + (qL.y * qR.z) - (qL.z * qR.y),
+							 (qL.w * qR.y) - (qL.x * qR.z) + (qL.y * qR.w) + (qL.z * qR.x),
+							 (qL.w * qR.z) + (qL.x * qR.y) - (qL.y * qR.x) + (qL.z * qR.w),
+							 (qL.w * qR.w) - (qL.x * qR.x) - (qL.y * qR.y) - (qL.z * qR.z));
 }
 
 /**
@@ -1110,12 +1154,11 @@ static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Quaternion quaternion) {
 	
 	// If angle is zero, rotation axis is undefined. Use zero vector.
 	CC3Vector axis;
-	if (halfAngle != 0.0f) {
-		axis = CC3VectorScaleUniform(CC3VectorFromTruncatedCC3Vector4(q),
-									 (1.0 / sinf(halfAngle)));
-	} else {
+	if (halfAngle != 0.0f)
+		axis = CC3VectorScaleUniform(CC3VectorFromQuaternion(q), 1.0 / sinf(halfAngle));
+	else
 		axis = kCC3VectorZero;
-	}
+
 	return CC3Vector4FromCC3Vector(axis, angle);
 }
 

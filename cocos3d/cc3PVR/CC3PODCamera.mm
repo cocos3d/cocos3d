@@ -53,6 +53,11 @@
 -(void) setPodTargetIndex: (int) aPODIndex { podTargetIndex = aPODIndex; }
 
 -(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+
+	// Adjust the quaternions to compensate for different camera orientation axis in the exporter.
+	SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex fromPODResource: aPODRez];
+	[self adjustQuaternionsIn: psn withAnimationFrameCount: aPODRez.animationFrameCount];
+
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		// Get the camera content
 		if (self.podContentIndex >= 0) {
@@ -69,6 +74,46 @@
 
 -(PODStructPtr) nodePODStructAtIndex: (uint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [aPODRez cameraNodePODStructAtIndex: aPODIndex];
+}
+
+/**
+ * The camera is aligned along a different axis in the exporter than in cocos3d. This method runs
+ * through the quaternions in the rotation animation array (including the initial rotation setting
+ * in the first element even if rotation animation is not used), and rotates each by a fixed offset
+ * (90 degrees around the X-axis).
+ */
+-(void) adjustQuaternionsIn: (SPODNode*) psn withAnimationFrameCount: (GLuint) numFrames {
+	if ( !psn->pfAnimRotation ) return;
+	
+	// Determine how many quaternions we need to convert. This depends on whether they are animated.
+	GLuint qCnt = 1;	// Assume no animation. The first quaternion is just the initial rotation.
+	
+	// If rotation is animated, determine how many quaternions it includes
+	if (psn->nAnimFlags & ePODHasRotationAni) {
+		qCnt = numFrames;		// Assume animation not index and uses numFrames frames
+
+		// If using indexed animation, find the largest index to determine number of quaternions.
+		// Animation indices are by floats, not quaternions.
+		if(psn->pnAnimRotationIdx) {
+			GLuint maxFloatIdx = 0;
+			for (GLuint frameIdx = 0; frameIdx < numFrames; frameIdx++)
+				maxFloatIdx = MAX(maxFloatIdx, psn->pnAnimRotationIdx[frameIdx]);
+			
+			// Quaternion count is one more than the largest float index found
+			// divided by the quaternion stride.
+			qCnt = (maxFloatIdx / kPODAnimationQuaternionStride) +  1;
+		}
+	}
+	
+	// Offset each quaternion by a 90 degree rotation around X-axis.
+	CC3Vector4 axisAngle = CC3Vector4FromCC3Vector(kCC3VectorUnitXPositive, 90.0f);
+	CC3Quaternion offsetQuat = CC3QuaternionFromAxisAngle(axisAngle);
+	
+	CC3Quaternion* quaternions = (CC3Quaternion*)psn->pfAnimRotation;
+	for (GLuint qIdx = 0; qIdx < qCnt; qIdx++)
+		quaternions[qIdx] = CC3QuaternionMultiply(quaternions[qIdx], offsetQuat);
+	
+	LogRez(@"%@ adjusted %i rotation quaternions by %@", self, qCnt, NSStringFromCC3Quaternion(offsetQuat));
 }
 
 // Template method that populates this instance from the specified other instance.

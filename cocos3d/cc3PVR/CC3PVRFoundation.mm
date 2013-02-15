@@ -262,6 +262,7 @@ NSString* NSStringFromSPODCamera(PODStructPtr pSPODCamera) {
 	[desc appendFormat: @", near: %.2f", psc->fNear];
 	[desc appendFormat: @", far: %.2f", psc->fFar];
 	[desc appendFormat: @", target index: %i", psc->nIdxTarget];
+	[desc appendFormat: @", FOV is %@animated", (psc->pfAnimFOV ? @"" : @"not ")];
 	return desc;
 }
 

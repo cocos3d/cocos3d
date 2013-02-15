@@ -111,6 +111,11 @@
 #pragma mark -
 #pragma mark CC3PODNodeAnimation
 
+// The stride for each type of animation content
+#define kPODAnimationLocationStride 3
+#define kPODAnimationQuaternionStride 4
+#define kPODAnimationScaleStride 7
+
 /** 
  * POD files can contain information to animate the nodes.
  * A CC3PODNodeAnimation instance manages the animation of a single node.
