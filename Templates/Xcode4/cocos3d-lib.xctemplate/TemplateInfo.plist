@@ -12,6 +12,72 @@
 
 	<key>Definitions</key>
 	<dict>
+		<key>cocos3d/cc3CAL/CC3CAFResource.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CAFResource.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3CAL/CC3CAFResource.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CAFResource.m</string>
+		</dict>
+		<key>cocos3d/cc3CAL/CC3CALNode.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CALNode.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3CAL/CC3CALNode.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CALNode.m</string>
+		</dict>
+		<key>cocos3d/cc3CAL/CC3CSFResource.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CSFResource.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3CAL/CC3CSFResource.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/CC3CSFResource.m</string>
+		</dict>
 		<key>cocos3d/cc3Extras/CC3MeshParticleSamples.h</key>
 		<dict>
 			<key>Group</key>
@@ -3002,6 +3068,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Resources/CC3DataStreams.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Resources/CC3DataStreams.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Resources/CC3DataStreams.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Resources/CC3DataStreams.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Resources/CC3NodesResource.h</key>
 		<dict>
 			<key>Group</key>
@@ -3858,6 +3948,12 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
+		<string>cocos3d/cc3CAL/CC3CAFResource.h</string>
+		<string>cocos3d/cc3CAL/CC3CAFResource.m</string>
+		<string>cocos3d/cc3CAL/CC3CALNode.h</string>
+		<string>cocos3d/cc3CAL/CC3CALNode.m</string>
+		<string>cocos3d/cc3CAL/CC3CSFResource.h</string>
+		<string>cocos3d/cc3CAL/CC3CSFResource.m</string>
 		<string>cocos3d/cc3Extras/CC3MeshParticleSamples.h</string>
 		<string>cocos3d/cc3Extras/CC3MeshParticleSamples.m</string>
 		<string>cocos3d/cc3Extras/CC3ModelSampleFactory.h</string>
@@ -4104,6 +4200,8 @@
 		<string>cocos3d/cocos3d/Particles/CC3Particles.m</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.h</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
+		<string>cocos3d/cocos3d/Resources/CC3DataStreams.h</string>
+		<string>cocos3d/cocos3d/Resources/CC3DataStreams.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3NodesResource.h</string>
 		<string>cocos3d/cocos3d/Resources/CC3NodesResource.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3Resource.h</string>

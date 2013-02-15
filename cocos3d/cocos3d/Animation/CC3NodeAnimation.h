@@ -240,7 +240,7 @@
 
 /**
  * An array of frame times. Each ccTime in the array indicates the time for one frame. All values
- * should be within the range from zero and one inclusive. For accurate animation, the value of
+ * must be within the range from zero and one inclusive. For accurate animation, the value of
  * the first element of this array should be zero, and the value of the last element should be one.
  * The array must have at least frameCount elements.
  *

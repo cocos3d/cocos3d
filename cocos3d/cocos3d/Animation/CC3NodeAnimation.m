@@ -298,6 +298,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 #pragma mark Accessing frame data
 
+// All times should be in range between zero and one
 -(ccTime) timeAtFrame: (GLuint) frameIndex {
 	if (!_frameTimes) return [super timeAtFrame: frameIndex];
 	return _frameTimes[MIN(frameIndex, _frameCount - 1)];

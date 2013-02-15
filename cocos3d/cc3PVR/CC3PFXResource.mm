@@ -113,8 +113,8 @@ extern "C" {
 
 	CPVRTString	error;
 	CPVRTPFXParser* pfxParser = new CPVRTPFXParser();
-	_wasLoaded = (pfxParser->ParseFromFile(fileName.UTF8String, &error) == PVR_SUCCESS);
-	if (_wasLoaded)
+	BOOL wasLoaded = (pfxParser->ParseFromFile(fileName.UTF8String, &error) == PVR_SUCCESS);
+	if (wasLoaded)
 		[self buildFromPFXParser: pfxParser];
 	else
 		LogError(@"Could not load %@ because %@", anAbsoluteFilePath.lastPathComponent,
@@ -122,7 +122,7 @@ extern "C" {
 
 	delete pfxParser;
 
-	return _wasLoaded;
+	return wasLoaded;
 }
 
 /** Build this instance from the contents of the resource. */

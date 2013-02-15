@@ -112,11 +112,11 @@ static Class _defaultPFXResourceClass = nil;
 
 	CPVRTResourceFile::SetReadPath([dirName stringByAppendingString: @"/"].UTF8String);
 	
-	_wasLoaded = (self.pvrtModelImpl->ReadFromFile(fileName.UTF8String) == PVR_SUCCESS);
+	BOOL wasLoaded = (self.pvrtModelImpl->ReadFromFile(fileName.UTF8String) == PVR_SUCCESS);
 	
-	if (_wasLoaded && _shouldAutoBuild) [self build];
+	if (wasLoaded && _shouldAutoBuild) [self build];
 	
-	return _wasLoaded;
+	return wasLoaded;
 }
 
 -(void) build {
@@ -240,7 +240,7 @@ static Class _defaultPFXResourceClass = nil;
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self];
-	if (self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) [desc appendFormat: @" (FIXED POINT!!)"];
+	if (_pvrtModel && self.pvrtModelImpl->nFlags & PVRTMODELPODSF_FIXED) [desc appendFormat: @" (FIXED POINT!!)"];
 	[desc appendFormat: @" containing %u nodes", self.nodeCount];
 	[desc appendFormat: @" (%u mesh nodes)", self.meshNodeCount];
 	[desc appendFormat: @", %u meshes", self.meshCount];
@@ -257,7 +257,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing node data and building nodes
 
--(uint) nodeCount { return self.pvrtModelImpl->nNumNode; }
+-(uint) nodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumNode : 0; }
 
 -(CC3Node*) nodeAtIndex: (uint) nodeIndex {
 	return (CC3Node*)[_allNodes objectAtIndex: nodeIndex];
@@ -369,7 +369,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing mesh data and building mesh nodes
 
--(uint) meshNodeCount { return self.pvrtModelImpl->nNumMeshNode; }
+-(uint) meshNodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumMeshNode : 0; }
 
 // mesh nodes appear first in the node array
 -(CC3MeshNode*) meshNodeAtIndex: (uint) meshIndex { return (CC3MeshNode*)[self nodeAtIndex: meshIndex]; }
@@ -386,7 +386,7 @@ static Class _defaultPFXResourceClass = nil;
 // mesh nodes appear first in the node array
 -(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex { return [self nodePODStructAtIndex: meshIndex]; }
 
--(uint) meshCount { return self.pvrtModelImpl->nNumMesh; }
+-(uint) meshCount { return _pvrtModel ? self.pvrtModelImpl->nNumMesh : 0; }
 
 // Build the array containing all materials in the PVRT structure
 -(void) buildMeshes {
@@ -408,7 +408,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing light data and building light nodes
 
--(uint) lightCount { return self.pvrtModelImpl->nNumLight; }
+-(uint) lightCount { return _pvrtModel ? self.pvrtModelImpl->nNumLight : 0; }
 
 // light nodes appear after all the mesh nodes in the node array
 -(CC3Light*) lightAtIndex: (uint) lightIndex {
@@ -429,7 +429,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing cameras data and building camera nodes
 
--(uint) cameraCount { return self.pvrtModelImpl->nNumCamera; }
+-(uint) cameraCount { return _pvrtModel ? self.pvrtModelImpl->nNumCamera : 0; }
 
 -(CC3Camera*) cameraAtIndex: (uint) cameraIndex {
 	return (CC3Camera*)[self nodeAtIndex: (self.meshNodeCount + self.lightCount + cameraIndex)];
@@ -451,7 +451,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing material data and building materials
 
--(uint) materialCount { return self.pvrtModelImpl->nNumMaterial; }
+-(uint) materialCount { return _pvrtModel ? self.pvrtModelImpl->nNumMaterial : 0; }
 
 // Fail safely when node references a material that is not in the POD
 -(CC3Material*) materialAtIndex: (uint) materialIndex {
@@ -489,7 +489,7 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing texture data and building textures
 
--(uint) textureCount { return self.pvrtModelImpl->nNumTexture; }
+-(uint) textureCount { return _pvrtModel ? self.pvrtModelImpl->nNumTexture : 0; }
 
 -(CC3Texture*) textureAtIndex: (uint) textureIndex {
 	id tex = [_textures objectAtIndex: textureIndex];

@@ -35,7 +35,7 @@
 
 @implementation CC3Resource
 
-@synthesize directory=_directory, wasLoaded=_wasLoaded;
+@synthesize directory=_directory, isBigEndian=_isBigEndian, wasLoaded=_wasLoaded;
 
 -(void) dealloc {
 	[_directory release];
@@ -48,6 +48,7 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_directory = nil;
+		_isBigEndian = NO;
 		_wasLoaded = NO;
 	}
 	return self;

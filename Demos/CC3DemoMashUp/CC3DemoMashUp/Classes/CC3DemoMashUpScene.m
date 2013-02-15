@@ -59,6 +59,10 @@
 #import "CC3PFXResource.h"
 #import "CC3BitmapLabelNode.h"
 
+#import "CC3CSFResource.h"
+#import "CC3CAFResource.h"
+
+
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"
 #define kBeachBallPODFile				@"BeachBall.pod"
@@ -347,7 +351,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// The full node structure of the scene is logged using the following line.
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
+
+
+// TODO - remove
+//	[self readCalFiles];
+
 }
+
+// TODO - remove
+//-(void) readCalFiles {
+//	CC3ResourceNode* csfRezNode = [CC3ResourceNode nodeWithName: @"DragonCSFRezNode"];
+//	csfRezNode.resource = [CC3CSFResource resourceFromFile: @"DragonFlightNoSpine_Skel.CSF"];
+//
+//	CC3ResourceNode* cafRezNode = [CC3ResourceNode nodeWithName: @"DragonCAFRezNode"];
+//	cafRezNode.resource = [CC3CAFResource resourceFromFile: @"dragonFlightNoSpine_Anim.CAF"];
+//}
+
+
 
 /** Various options for configuring interesting camera behaviours. */
 -(void) configureCamera {
@@ -1315,20 +1335,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// aligned to upside-down textures so that the texture coordinates will be flipped upside
 	// down automatically and the textures will appear right-way up.
 	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
-//	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
-//					  expectsVerticallyFlippedTextures: NO];
-
-	// TODO - remove this testing code and uncomment above
-	NSString* animPath = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents/manOut.pod"];
-	CC3PODResource* podRez = [CC3PODResource resource];
-	podRez.expectsVerticallyFlippedTextures = NO;
-	podRez.shouldAutoBuild = NO;
-	[podRez loadFromFile: kRunningManPODFile];
-	[podRez saveAnimationToFile: animPath];
-	[podRez build];
-	runner.resource = podRez;
-	[CC3PODResourceNode nodeFromFile: animPath];
-
+	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
+					  expectsVerticallyFlippedTextures: NO];
 	
 	// Remove the light provided in the POD so that it does not contribute to the
 	// lighting of the scene. We don't remove the POD's camera, but we rename it

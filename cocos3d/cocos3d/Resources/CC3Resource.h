@@ -65,6 +65,7 @@
 @interface CC3Resource : CC3Identifiable {
 	NSString* _directory;
 	BOOL _wasLoaded : 1;
+	BOOL _isBigEndian : 1;
 }
 
 /**
@@ -86,6 +87,18 @@
  * loadFromFile: method successfully loads the resource.
  */
 @property(nonatomic, readonly) BOOL wasLoaded;
+
+/**
+ * Indicates whether the source content was encoded on a big-endian platform.
+ *
+ * Many resource file formats encode their content in a platform-independant manner,
+ * so not all resource file types will be affected by the value of this property.
+ *
+ * Most OSX and iOS platforms are little-endian, so this property defaults to NO. You can set the
+ * value of this property to YES prior to reading any content from resource file types whose content
+ * is dependent on platform endianess if you know the data was encoded on a big-endian platform.
+ */
+@property(nonatomic, assign) BOOL isBigEndian;
 
 /**
  * Loads the resources from the file at the specified file path and returns whether the loading

@@ -251,7 +251,7 @@
 
 /**
  * Template method that extracts and builds all components. This is automatically invoked from
- * the loadFromPODFile: method if the POD file was successfully loaded, and the shouldAutoBuild
+ * the loadFromFile: method if the POD file was successfully loaded, and the shouldAutoBuild
  * property is set to YES. Autobuilding is the default behaviour, and usually, the application
  * should not need to invoke this method directly.
  * 

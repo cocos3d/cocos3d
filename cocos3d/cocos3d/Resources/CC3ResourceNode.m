@@ -47,9 +47,7 @@
 }
 
 -(void) addResourceNodes {
-	for (CC3Node* aNode in self.resource.nodes) {
-		[self addChild: aNode];
-	}
+	for (CC3Node* aNode in self.resource.nodes) [self addChild: aNode];
 	LogRez(@"%@ added resource %@ with node structure: %@", self, self.resource,
 				[self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
 										withIndent: 1]);
