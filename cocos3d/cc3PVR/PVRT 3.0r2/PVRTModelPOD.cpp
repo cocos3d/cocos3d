@@ -20,7 +20,7 @@
 
 #include "PVRTGlobal.h"
 #if defined(BUILD_DX9) || defined(BUILD_DX10) || defined(BUILD_DX11)
-#include "PVRTContext.h"
+//#include "PVRTContext.h"			// patched for cocos3d by Bill Hollings
 #endif
 #include "PVRTFixedPoint.h"
 #include "PVRTMatrix.h"
@@ -28,7 +28,7 @@
 #include "PVRTVertex.h"
 #include "PVRTBoneBatch.h"
 #include "PVRTModelPOD.h"
-#include "PVRTMisc.h"
+//#include "PVRTMisc.h"				// patched for cocos3d by Bill Hollings
 #include "PVRTResourceFile.h"
 #include "PVRTTrans.h"
 
@@ -1956,7 +1956,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Nodes
-	if(scene.nNumNode && SafeAlloc(pNode, sizeof(SPODNode) * scene.nNumNode))
+	if(scene.nNumNode && SafeAlloc(pNode, scene.nNumNode))
 	{
 		nNumNode     = scene.nNumNode;
 		nNumMeshNode = scene.nNumMeshNode;
@@ -1966,7 +1966,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Meshes
-	if(scene.nNumMesh && SafeAlloc(pMesh, sizeof(SPODMesh) * scene.nNumMesh))
+	if(scene.nNumMesh && SafeAlloc(pMesh, scene.nNumMesh))
 	{
 		nNumMesh = scene.nNumMesh;
 
@@ -1975,7 +1975,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Cameras
-	if(scene.nNumCamera && SafeAlloc(pCamera, sizeof(SPODCamera) * scene.nNumCamera))
+	if(scene.nNumCamera && SafeAlloc(pCamera, scene.nNumCamera))
 	{
 		nNumCamera = scene.nNumCamera;
 
@@ -1984,7 +1984,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Lights
-	if(scene.nNumLight && SafeAlloc(pLight, sizeof(SPODLight) * scene.nNumLight))
+	if(scene.nNumLight && SafeAlloc(pLight, scene.nNumLight))
 	{
 		nNumLight = scene.nNumLight;
 
@@ -1993,7 +1993,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Textures
-	if(scene.nNumTexture && SafeAlloc(pTexture, sizeof(SPODTexture) * scene.nNumTexture))
+	if(scene.nNumTexture && SafeAlloc(pTexture, scene.nNumTexture))
 	{
 		nNumTexture = scene.nNumTexture;
 
@@ -2002,7 +2002,7 @@ EPVRTError CPVRTModelPOD::CopyFromMemory(const SPODScene &scene)
 	}
 
 	// Materials
-	if(scene.nNumMaterial && SafeAlloc(pMaterial, sizeof(SPODMaterial) * scene.nNumMaterial))
+	if(scene.nNumMaterial && SafeAlloc(pMaterial, scene.nNumMaterial))
 	{
 		nNumMaterial = scene.nNumMaterial;
 
@@ -3822,37 +3822,37 @@ void PVRTModelPODCopyNode(const SPODNode &in, SPODNode &out, int nNumFrames)
 	// Position
 	i32Size = in.nAnimFlags & ePODHasPositionAni ? PVRTModelPODGetAnimArraySize(in.pnAnimPositionIdx, nNumFrames, 3) : 3;
 
-	if(in.pnAnimPositionIdx && SafeAlloc(out.pnAnimPositionIdx, sizeof(*out.pnAnimPositionIdx) * nNumFrames))
+	if(in.pnAnimPositionIdx && SafeAlloc(out.pnAnimPositionIdx, nNumFrames))
 		memcpy(out.pnAnimPositionIdx, in.pnAnimPositionIdx, sizeof(*out.pnAnimPositionIdx) * nNumFrames);
 
-	if(in.pfAnimPosition && SafeAlloc(out.pfAnimPosition, sizeof(*out.pfAnimPosition) * i32Size))
+	if(in.pfAnimPosition && SafeAlloc(out.pfAnimPosition, i32Size))
 		memcpy(out.pfAnimPosition, in.pfAnimPosition, sizeof(*out.pfAnimPosition) * i32Size);
 
 	// Rotation
 	i32Size = in.nAnimFlags & ePODHasRotationAni ? PVRTModelPODGetAnimArraySize(in.pnAnimRotationIdx, nNumFrames, 4) : 4;
 
-	if(in.pnAnimRotationIdx && SafeAlloc(out.pnAnimRotationIdx, sizeof(*out.pnAnimRotationIdx) * nNumFrames))
+	if(in.pnAnimRotationIdx && SafeAlloc(out.pnAnimRotationIdx, nNumFrames))
 		memcpy(out.pnAnimRotationIdx, in.pnAnimRotationIdx, sizeof(*out.pnAnimRotationIdx) * nNumFrames);
 
-	if(in.pfAnimRotation && SafeAlloc(out.pfAnimRotation, sizeof(*out.pfAnimRotation) * i32Size))
+	if(in.pfAnimRotation && SafeAlloc(out.pfAnimRotation, i32Size))
 		memcpy(out.pfAnimRotation, in.pfAnimRotation, sizeof(*out.pfAnimRotation) * i32Size);
 
 	// Scale
 	i32Size = in.nAnimFlags & ePODHasScaleAni ? PVRTModelPODGetAnimArraySize(in.pnAnimScaleIdx, nNumFrames, 7) : 7;
 
-	if(in.pnAnimScaleIdx && SafeAlloc(out.pnAnimScaleIdx, sizeof(*out.pnAnimScaleIdx) * nNumFrames))
+	if(in.pnAnimScaleIdx && SafeAlloc(out.pnAnimScaleIdx, nNumFrames))
 		memcpy(out.pnAnimScaleIdx, in.pnAnimScaleIdx, sizeof(*out.pnAnimScaleIdx) * nNumFrames);
 
-	if(in.pfAnimScale && SafeAlloc(out.pfAnimScale, sizeof(*out.pfAnimScale) * i32Size))
+	if(in.pfAnimScale && SafeAlloc(out.pfAnimScale, i32Size))
 		memcpy(out.pfAnimScale, in.pfAnimScale, sizeof(*out.pfAnimScale) * i32Size);
 
 	// Matrix
 	i32Size = in.nAnimFlags & ePODHasMatrixAni ? PVRTModelPODGetAnimArraySize(in.pnAnimMatrixIdx, nNumFrames, 16) : 16;
 
-	if(in.pnAnimMatrixIdx && SafeAlloc(out.pnAnimMatrixIdx, sizeof(*out.pnAnimMatrixIdx) * nNumFrames))
+	if(in.pnAnimMatrixIdx && SafeAlloc(out.pnAnimMatrixIdx, nNumFrames))
 		memcpy(out.pnAnimMatrixIdx, in.pnAnimMatrixIdx, sizeof(*out.pnAnimMatrixIdx) * nNumFrames);
 
-	if(in.pfAnimMatrix && SafeAlloc(out.pfAnimMatrix, sizeof(*out.pfAnimMatrix) * i32Size))
+	if(in.pfAnimMatrix && SafeAlloc(out.pfAnimMatrix, i32Size))
 		memcpy(out.pfAnimMatrix, in.pfAnimMatrix, sizeof(*out.pfAnimMatrix) * i32Size);
 
 	if(in.pUserData && SafeAlloc(out.pUserData, in.nUserDataSize))
@@ -3871,7 +3871,6 @@ void PVRTModelPODCopyNode(const SPODNode &in, SPODNode &out, int nNumFrames)
 void PVRTModelPODCopyMesh(const SPODMesh &in, SPODMesh &out)
 {
 	unsigned int i;
-	size_t  i32Stride = 0;
 	bool bInterleaved = in.pInterleaved != 0;
 	out.nNumVertex = in.nNumVertex;
 	out.nNumFaces  = in.nNumFaces;
@@ -3881,42 +3880,28 @@ void PVRTModelPODCopyMesh(const SPODMesh &in, SPODMesh &out)
 
 	// Vertex data
 	PVRTModelPODCopyCPODData(in.sVertex	 , out.sVertex	 , out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sVertex);
-
 	PVRTModelPODCopyCPODData(in.sNormals	 , out.sNormals	 , out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sNormals);
-
 	PVRTModelPODCopyCPODData(in.sTangents	 , out.sTangents	 , out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sTangents);
-
 	PVRTModelPODCopyCPODData(in.sBinormals , out.sBinormals , out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sBinormals);
-
 	PVRTModelPODCopyCPODData(in.sVtxColours, out.sVtxColours, out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sVtxColours);
-
 	PVRTModelPODCopyCPODData(in.sBoneIdx	 , out.sBoneIdx	 , out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sBoneIdx);
-
 	PVRTModelPODCopyCPODData(in.sBoneWeight, out.sBoneWeight, out.nNumVertex, bInterleaved);
-	i32Stride += PVRTModelPODDataStride(out.sBoneWeight);
 
-	if(in.nNumUVW && SafeAlloc(out.psUVW, sizeof(CPODData) * in.nNumUVW))
+	if(in.nNumUVW && SafeAlloc(out.psUVW, in.nNumUVW))
 	{
 		out.nNumUVW = in.nNumUVW;
 
 		for(i = 0; i < out.nNumUVW; ++i)
 		{
 			PVRTModelPODCopyCPODData(in.psUVW[i], out.psUVW[i], out.nNumVertex, bInterleaved);
-			i32Stride += PVRTModelPODDataStride(out.psUVW[i]);
 		}
 	}
 
 	// Allocate and copy interleaved array
-	if(bInterleaved && SafeAlloc(out.pInterleaved, out.nNumVertex * i32Stride))
-		memcpy(out.pInterleaved, in.pInterleaved, out.nNumVertex * i32Stride);
+	if(bInterleaved && SafeAlloc(out.pInterleaved, out.nNumVertex * in.sVertex.nStride))
+		memcpy(out.pInterleaved, in.pInterleaved, out.nNumVertex * in.sVertex.nStride);
 
-	if(in.pnStripLength && SafeAlloc(out.pnStripLength, sizeof(*out.pnStripLength) * out.nNumFaces))
+	if(in.pnStripLength && SafeAlloc(out.pnStripLength, out.nNumFaces))
 	{
 		memcpy(out.pnStripLength, in.pnStripLength, sizeof(*out.pnStripLength) * out.nNumFaces);
 		out.nNumStrips = in.nNumStrips;
@@ -4016,7 +4001,7 @@ void PVRTModelPODCopyCamera(const SPODCamera &in, SPODCamera &out, int nNumFrame
 
 	out.pfAnimFOV = 0;
 
-	if(in.pfAnimFOV && SafeAlloc(out.pfAnimFOV, sizeof(*out.pfAnimFOV) * nNumFrames))
+	if(in.pfAnimFOV && SafeAlloc(out.pfAnimFOV, nNumFrames))
 		memcpy(out.pfAnimFOV, in.pfAnimFOV, sizeof(*out.pfAnimFOV) * nNumFrames);
 }
 
@@ -4110,8 +4095,8 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 	out.Destroy();
 
 	// Init mesh and node arrays
-	SafeAlloc(out.pNode, sizeof(SPODNode) * in.nNumNode);
-	SafeAlloc(out.pMesh, sizeof(SPODMesh) * in.nNumMeshNode);
+	SafeAlloc(out.pNode, in.nNumNode);
+	SafeAlloc(out.pMesh, in.nNumMeshNode);
 
 	out.nNumNode = in.nNumNode;
 	out.nNumMesh = out.nNumMeshNode = in.nNumMeshNode;
@@ -4201,9 +4186,9 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 			unsigned int ui32Offset = 0, ui32Strip = 0;
 			bool *pbTransformed = 0;
 
-			SafeAlloc(pPalette, sizeof(PVRTMATRIX) * inMesh.sBoneBatches.nBatchBoneMax);
-			SafeAlloc(pPaletteInvTrans, sizeof(PVRTMATRIX) * inMesh.sBoneBatches.nBatchBoneMax);
-			SafeAlloc(pbTransformed, sizeof(bool) * inMesh.nNumVertex);
+			SafeAlloc(pPalette, inMesh.sBoneBatches.nBatchBoneMax);
+			SafeAlloc(pPaletteInvTrans, inMesh.sBoneBatches.nBatchBoneMax);
+			SafeAlloc(pbTransformed, inMesh.nNumVertex);
 
 			for(j = 0; j < (unsigned int) inMesh.sBoneBatches.nBatchCnt; ++j)
 			{
@@ -4348,17 +4333,16 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 		FREE(out.pNode[i].pfAnimScale);
 		FREE(out.pNode[i].pnAnimScaleIdx);
 
-
 		// Get world transformation matrix....
 		in.GetWorldMatrix(mWorld, in.pNode[i]);
 
 		// ...set the out node transformation matrix
-		if(SafeAlloc(out.pNode[i].pfAnimMatrix, sizeof(PVRTMATRIX)))
+		if(SafeAlloc(out.pNode[i].pfAnimMatrix, 16))
 			memcpy(out.pNode[i].pfAnimMatrix, mWorld.f, sizeof(PVRTMATRIX));
 	}
 
 	// Copy camera, lights
-	if(in.nNumCamera && SafeAlloc(out.pCamera, sizeof(SPODCamera) * in.nNumCamera))
+	if(in.nNumCamera && SafeAlloc(out.pCamera, in.nNumCamera))
 	{
 		out.nNumCamera = in.nNumCamera;
 
@@ -4366,7 +4350,7 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 			PVRTModelPODCopyCamera(in.pCamera[i], out.pCamera[i], in.nNumFrame);
 	}
 
-	if(in.nNumLight && SafeAlloc(out.pLight, sizeof(SPODLight) * in.nNumLight))
+	if(in.nNumLight && SafeAlloc(out.pLight, in.nNumLight))
 	{
 		out.nNumLight = in.nNumLight;
 
@@ -4375,7 +4359,7 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 	}
 
 	// Copy textures
-	if(in.nNumTexture && SafeAlloc(out.pTexture, sizeof(SPODTexture) * in.nNumTexture))
+	if(in.nNumTexture && SafeAlloc(out.pTexture, in.nNumTexture))
 	{
 		out.nNumTexture = in.nNumTexture;
 
@@ -4384,7 +4368,7 @@ EPVRTError PVRTModelPODFlattenToWorldSpace(CPVRTModelPOD &in, CPVRTModelPOD &out
 	}
 
 	// Copy materials
-	if(in.nNumMaterial && SafeAlloc(out.pMaterial, sizeof(SPODMaterial) * in.nNumMaterial))
+	if(in.nNumMaterial && SafeAlloc(out.pMaterial, in.nNumMaterial))
 	{
 		out.nNumMaterial = in.nNumMaterial;
 

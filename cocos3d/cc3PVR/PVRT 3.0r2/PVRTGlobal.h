@@ -16,12 +16,6 @@
 #ifndef _PVRTGLOBAL_H_
 #define _PVRTGLOBAL_H_
 
-// Ensure BUILD_OGLES directive is defined, instead of
-// requiring all projects to set this compiler directive.
-#ifndef BUILD_OGLES				// patched for cocos3d by Bill Hollings
-#	define BUILD_OGLES			// patched for cocos3d by Bill Hollings
-#endif							// patched for cocos3d by Bill Hollings
-
 /*!***************************************************************************
  Macros
 *****************************************************************************/

@@ -22,14 +22,15 @@
 #include <stdlib.h>
 
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
+//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
 #include "PVRTMatrix.h"
 #include "PVRTFixedPoint.h"
-#include "PVRTMisc.h"
+//#include "PVRTMisc.h"					// patched for cocos3d by Bill Hollings
 #include "PVRTPFXParser.h"
 #include "PVRTResourceFile.h"
 #include "PVRTString.h"
-#include "PVRTMisc.h"		// Used for POT functions
+//#include "PVRTMisc.h"		// Used for POT functions	// patched for cocos3d by Bill Hollings
+
 
 /****************************************************************************
 ** Constants

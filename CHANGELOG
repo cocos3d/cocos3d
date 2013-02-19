@@ -107,7 +107,7 @@ cocos3d 2.0.0 - 2013/03/31
 - Added guard code to CC3NodeSphericalBoundingVolume to ensure that its globalRadius property will always be a positive value.
 - Removed bounding volume contents from the output of the CC3Node fullDescription method.
 - Removed redundant invocation of normalizeBillboardScaleToDevice in CC3Billboard setBillboard: method.
-- Upgraded PowerVR POD library to version 3.0.
+- Upgraded PowerVR POD/PFX library to version 3.0r2 and stripped it to minimum required files.
 
 
 

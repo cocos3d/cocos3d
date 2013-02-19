@@ -18,7 +18,7 @@
 ** Includes
 ****************************************************************************/
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
+//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
 
 #include <vector>
 #include <list>
