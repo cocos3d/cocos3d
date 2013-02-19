@@ -59,9 +59,6 @@
 #import "CC3PFXResource.h"
 #import "CC3BitmapLabelNode.h"
 
-#import "CC3CSFResource.h"
-#import "CC3CAFResource.h"
-
 
 // File names
 #define kRobotPODFile					@"IntroducingPOD_float.pod"
@@ -351,23 +348,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// The full node structure of the scene is logged using the following line.
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
-
-
-// TODO - remove
-//	[self readCalFiles];
-
 }
-
-// TODO - remove
-//-(void) readCalFiles {
-//	CC3ResourceNode* csfRezNode = [CC3ResourceNode nodeWithName: @"DragonCSFRezNode"];
-//	csfRezNode.resource = [CC3CSFResource resourceFromFile: @"DragonFlightNoSpine_Skel.CSF"];
-//
-//	CC3ResourceNode* cafRezNode = [CC3ResourceNode nodeWithName: @"DragonCAFRezNode"];
-//	cafRezNode.resource = [CC3CAFResource resourceFromFile: @"dragonFlightNoSpine_Anim.CAF"];
-//}
-
-
 
 /** Various options for configuring interesting camera behaviours. */
 -(void) configureCamera {

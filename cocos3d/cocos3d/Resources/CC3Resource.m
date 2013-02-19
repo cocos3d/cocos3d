@@ -42,6 +42,42 @@
 	[super dealloc];
 }
 
+-(BOOL) loadFromFile: (NSString*) aFilePath {
+	if (_wasLoaded) {
+		LogError(@"%@ has already been loaded.", self);
+		return _wasLoaded;
+	}
+	
+	// Ensure the path is absolute, converting it if needed.
+	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
+	
+	LogRez(@"--------------------------------------------------");
+	LogRez(@"Loading resources from file '%@'", absFilePath);
+	
+	if (!name) self.name = absFilePath.lastPathComponent;
+	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
+	
+	MarkRezActivityStart();
+	
+	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
+	
+	if (_wasLoaded)
+		LogRez(@"Loaded resources from file '%@' in %.4f seconds", aFilePath, GetRezActivityDuration());
+	else
+		LogError(@"Could not load resource file '%@'", absFilePath);
+	
+	LogRez(@"");		// Empty line to separate from next logs
+	
+	return _wasLoaded;
+}
+
+-(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
+
+-(BOOL) saveToFile: (NSString*) aFilePath {
+	CC3Assert(NO, @"%@ does not support saving the resource content back to a file.", self);
+	return NO;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -76,6 +112,11 @@
 	return rez;
 }
 
+-(NSString*) description { return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name]; }
+
+
+#pragma mark Resource cache
+
 static NSMutableDictionary* _resourcesByName = nil;
 
 +(CC3Resource*) getResourceNamed: (NSString*) rezName { return [_resourcesByName objectForKey: rezName]; }
@@ -98,45 +139,7 @@ static NSMutableDictionary* _resourcesByName = nil;
 
 +(void) removeAllResources { [_resourcesByName removeAllObjects]; }
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
-	if (_wasLoaded) {
-		LogError(@"%@ has already been loaded.", self);
-		return _wasLoaded;
-	}
-	
-	// Ensure the path is absolute, converting it if needed.
-	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
-
-	LogRez(@"--------------------------------------------------");
-	LogRez(@"Loading resources from file '%@'", absFilePath);
-
-	if (!name) self.name = absFilePath.lastPathComponent;
-	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
-	
-	MarkRezActivityStart();
-
-	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
-	
-	if (_wasLoaded)
-		LogRez(@"Loaded resources from file '%@' in %.4f seconds", aFilePath, GetRezActivityDuration());
-	else
-		LogError(@"Could not load resource file '%@'", absFilePath);
-
-	LogRez(@"");		// Empty line to separate from next logs
-
-	return _wasLoaded;
-}
-
--(BOOL) processFile: (NSString*) anAbsoluteFilePath { return NO; }
-
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name];
-}
-
--(BOOL) saveToFile: (NSString*) aFilePath {
-	CC3Assert(NO, @"%@ does not support saving the resource content back to a file.", self);
-	return NO;
-}
+-(void) remove { [[self class] removeResource: self]; }
 
 
 #pragma mark Tag allocation

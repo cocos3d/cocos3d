@@ -43,24 +43,16 @@ cocos3d 2.0.0 - 2013/03/31
     - Added CC3VertexTangents vertex array
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
 
-- Added support for time-based key-frame animation.
-	- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
-
-- Added support for multi-track blended animation
-    - Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for single track on a single node.
-	- Added track-based animation methods to CC3Node
-		- CC3Node animation property is now a convenience property for referencing animation on track zero.
-	- Added CC3Animate trackID property to animate a single track of node animation.
-	- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
-	- Multi-track animation can be specified and loaded onto nodes using animation files specified in CAF format.
-
-- [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
-	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
-	- [API change] Removed CC3PODSkinMesh class. Use CC3PODMesh instead.
-
-- [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
-	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
-	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
+- Animation enhancements:
+	- Added support for time-based key-frame animation.
+		- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
+	- Added support for multi-track blended animation
+		- Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for single track on a single node.
+		- Added track-based animation methods to CC3Node
+			- CC3Node animation property is now a convenience property for referencing animation on track zero.
+		- Added CC3Animate trackID property to animate a single track of node animation.
+		- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
+		- Multi-track animation can be specified and loaded onto nodes using animation files specified in CAF format.
 
 - Improved support for NPOT textures
 	- CC3Texture only generates mipmaps if texture is POT
@@ -75,7 +67,15 @@ cocos3d 2.0.0 - 2013/03/31
     - [API change] CC3Resource nodes and expectsVerticallyFlippedTextures properties moved to CC3NodesResource and original CC3Resource properties deprecated.
     - [API change] CC3Resource class-side defaultExpectsVerticallyFlippedTextures property moved to CC3NodesResource and original CC3Resource property deprecated.
     - [API change] CC3ResourceNode resource property now holds onto a CC3NodesResource instance.
-	
+
+- [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
+	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
+	- [API change] Removed CC3PODSkinMesh class. Use CC3PODMesh instead.
+
+- [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
+	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
+	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
+
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
 - [API change] CC3Light attenuationCoefficients property renamed to attenuation, and attenuationCoefficients deprecated.
@@ -95,6 +95,7 @@ cocos3d 2.0.0 - 2013/03/31
 		- This can be a useful development utility for creating multiple animation tracks for a single POD file for later blending.
 
 - Added several additional quaternion functions in CC3Foundation files, including quaternion multiplication, conjucation, and inversion.
+- Added CC3Node texture property as a convenience for changing the primary texture for all descendant mesh nodes.
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
     - CC3Assert ensures the assertion message is logged to the console prior to raising the assertion exception.
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.

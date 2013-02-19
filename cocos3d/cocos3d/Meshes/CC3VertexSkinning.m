@@ -274,9 +274,7 @@
 
 -(CCArray*) bones {
 	CCArray* bones = [CCArray array];
-	for (CC3SkinnedBone* sb in skinnedBones) {
-		[bones addObject: sb.bone];
-	}
+	for (CC3SkinnedBone* sb in skinnedBones) [bones addObject: sb.bone];
 	return bones;
 }
 

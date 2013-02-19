@@ -462,15 +462,61 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 @implementation CC3NodeAnimationState
 
-@synthesize node=_node, animation=_animation, trackID=_trackID, isEnabled=_isEnabled;
-@synthesize location=_location, rotation=_rotation, quaternion=_quaternion, scale=_scale;
-@synthesize blendingWeight=_blendingWeight, isDirty=_isDirty, animationTime=_animationTime;
+@synthesize node=_node, animation=_animation, trackID=_trackID, animationTime=_animationTime;
 
 -(void) dealloc {
 	_node = nil;			// not retained
 	[_animation release];
 	[super dealloc];
 }
+
+-(BOOL) isEnabled { return _isEnabled; }
+
+-(void) setIsEnabled: (BOOL) isEnabled {
+	_isEnabled = isEnabled;
+	[self markDirty];
+}
+
+-(void) enable { self.isEnabled = YES; }
+
+-(void) disable { self.isEnabled = NO; }
+
+-(GLfloat) blendingWeight { return _blendingWeight; }
+
+-(void) setBlendingWeight: (GLfloat) blendingWeight {
+	_blendingWeight = blendingWeight;
+	[self markDirty];
+}
+
+-(CC3Vector) location { return _location; }
+
+-(void) setLocation: (CC3Vector) location {
+	_location = location;
+	[self markDirty];
+}
+
+-(CC3Vector) rotation { return _rotation; }
+
+-(void) setRotation: (CC3Vector) rotation {
+	_rotation = rotation;
+	[self markDirty];
+}
+
+-(CC3Quaternion) quaternion { return _quaternion; }
+
+-(void) setQuaternion: (CC3Quaternion) quaternion {
+	_quaternion = quaternion;
+	[self markDirty];
+}
+
+-(CC3Vector) scale { return _scale; }
+
+-(void) setScale: (CC3Vector) scale {
+	_scale = scale;
+	[self markDirty];
+}
+
+-(void) markDirty { [_node markAnimationDirty]; }
 
 -(GLuint) frameCount { return _animation.frameCount; }
 
@@ -484,16 +530,12 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 -(BOOL) hasVariableFrameTiming { return _animation.hasVariableFrameTiming; }
 
--(void) enable { self.isEnabled = YES; }
-
--(void) disable { self.isEnabled = NO; }
-
-
+  
 #pragma mark Updating
 
 -(void) establishFrameAt: (ccTime) t {
 	_animationTime = t;
-	[_animation establishFrameAt: t inNodeAnimationState: self];
+	if (_isEnabled) [_animation establishFrameAt: t inNodeAnimationState: self];
 }
 
 
@@ -518,7 +560,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 		_quaternion = kCC3QuaternionIdentity;
 		_scale = kCC3VectorUnitCube;
 		_isEnabled = YES;
-		_isDirty = NO;
+		[self establishFrameAt: 0.0f];		// Start on the initial frame
 	}
 	return self;
 }
@@ -528,8 +570,14 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for node %@ with animation %@", [self class], _node, _animation];
+	return [NSString stringWithFormat: @"%@ for node %@ with animation %@ on track %u",
+			[self class], _node, _animation, _trackID];
 }
+
+static NSUInteger _lastTrackID = 0;
+
+// Pre-increment to start with one. Zero reserved for default track.
++(NSUInteger) generateTrackID { return ++_lastTrackID; }
 
 
 @end

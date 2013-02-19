@@ -38,7 +38,7 @@
 #import "CCProtocols.h"
 #import "CC3GLProgramContext.h"
 
-@class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum;
+@class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum, CC3Texture;
 @class CC3NodeAnimation, CC3NodeAnimationState, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
 
 /**
@@ -236,6 +236,7 @@ typedef enum {
 	BOOL shouldAutoremoveWhenEmpty : 1;
 	BOOL shouldUseFixedBoundingVolume : 1;
 	BOOL shouldStopActionsWhenRemoved : 1;
+	BOOL _isAnimationDirty : 1;
 }
 
 /**
@@ -1412,6 +1413,14 @@ typedef enum {
  * When querying this value on a large node assembly, be aware that this may be time-consuming.
  */
 @property(nonatomic, assign) ccColor4F emissionColor;
+
+/**
+ * Convenience property for setting the texture covering all descendant mesh nodes.
+ *
+ * Setting the value of this property sets the same property in all descendant mesh nodes.
+ * Querying the value of this property returns the first non-nil texture from a descendant mesh node.
+ */
+@property(nonatomic, retain) CC3Texture* texture;
 
 /**
  * When a mesh node is textured with a DOT3 bump-map (normal map) in object-space, this property
@@ -3286,10 +3295,10 @@ typedef enum {
 #pragma mark Animation
 
 /** 
- * Returns the animation state wrapper for the specified animation track, or nil if no
+ * Returns the animation state wrapper on the specified animation track, or nil if no
  * animation has been defined for this node on that animation track.
  */
--(CC3NodeAnimationState*) getAnimationStateForTrack: (NSUInteger) trackID;
+-(CC3NodeAnimationState*) getAnimationStateOnTrack: (NSUInteger) trackID;
 
 /**
  * Adds the specified animation state wrapper, containing animation and track information.
@@ -3307,13 +3316,13 @@ typedef enum {
  * Removes the specified animation state wrapper from this node.
  *
  * Typically, to remove animation from a node, the application would use the removeAnimation:
- * or removeAnimationOnTrack: methods, rather than this method.
+ * or removeAnimationTrack: methods, rather than this method.
  */
 -(void) removeAnimationState: (CC3NodeAnimationState*) animationState;
 
 /**
- * The animation state wrapper for animation track zero. This is a convenience property for
- * accessing the animation when only a single animation track is used.
+ * The animation state wrapper for animation track zero. This is a convenience property
+ * for accessing the animation when only a single animation track is used.
  *
  * This wrapper is created automatically when the animation property is set.
  */
@@ -3340,8 +3349,8 @@ typedef enum {
 /** Removes the specified animation from this node. */
 -(void) removeAnimation: (CC3NodeAnimation*) animation;
 
-/** Removes the animation on the specified animation track from this node. */
--(void) removeAnimationOnTrack: (NSUInteger) trackID;
+/** Removes the animation on the specified animation track from this node and all descendant nodes. */
+-(void) removeAnimationTrack: (NSUInteger) trackID;
 
 /**
  * The animation content of animation track zero of this node.
@@ -3432,11 +3441,27 @@ typedef enum {
  */
 @property(nonatomic, assign) BOOL isAnimationEnabled;
 
+/** Enables the animation on the specified track of this node, and all descendant nodes. */
+-(void) enableAllAnimationOnTrack: (NSUInteger) trackID;
+
+/** Disables the animation on the specified track of this node, and all descendant nodes. */
+-(void) disableAllAnimationOnTrack: (NSUInteger) trackID;
+
 /** Enables all animation tracks of this node, and all descendant nodes. */
 -(void) enableAllAnimation;
 
 /** Disables all animation tracks of this node, and all descendant nodes. */
 -(void) disableAllAnimation;
+
+/**
+ * Marks the animation state of this node as dirty, indicating that the animated properties
+ * of this node should be updated on the next update cycle.
+ *
+ * This method is invoked automatically if a animated property has been changed on any
+ * animation track as a result of the invocation of the establishAnimationFrameAt:onTrack:
+ * method. Normally, the application never needs to invoke this method.
+ */
+-(void) markAnimationDirty;
 
 /**
  * Updates the location, rotation and scale properties on the animation state wrapper associated

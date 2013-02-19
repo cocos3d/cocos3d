@@ -536,10 +536,9 @@
  * skinTransformMatrix, which is used to deform a vertex into the local coordinate
  * system of the skin mesh node, so that it can be used programmatically.
  *
- * The CC3SkinnedBone instance registers as a transform listener with both the
- * bone and the skin mesh node, and lazily recalculates the drawTransformMatrix
- * and skinTransformMatrix whenever the transform of either the bone or the skin
- * mesh node changes.
+ * The CC3SkinnedBone instance registers as a transform listener with both the bone and the
+ * skin mesh node, and lazily recalculates the drawTransformMatrix and skinTransformMatrix
+ * whenever the transform of either the bone or the skin mesh node changes.
  */
 @interface CC3SkinnedBone : NSObject <CC3NodeTransformListenerProtocol> {
 	CC3Bone* bone;

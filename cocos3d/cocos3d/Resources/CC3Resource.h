@@ -176,13 +176,16 @@
  * Initializes this instance and invokes the loadFromFile: method to populate
  * this instance from the contents of the file at the specified file path.
  *
- * Normally, this method is invoked automatically by the resourceFromFile: method if an instance
- * does not exist in the resource cache, in order to create and load the resource from the file,
- * and after doing so, the resourceFromFile: method places the newly loaded instance into the cache.
+ * Normally, you should use the resourceFromFile: method to reuse the cached instance instead of
+ * creating and initializing a new instance. The resourceFromFile: method automatically invokes
+ * this method if an instance does not exist in the resource cache, in order to create and load
+ * the resource from the file, and after doing so, places the newly loaded instance into the cache.
  *
  * However, by invoking the alloc method and then invoking this method directly, the application
- * can load the resource without first checking the resource cache. The resource can then
- * subsequently be placed in the cache using the addResource: method.
+ * can load the resource without first checking the resource cache. The resource can then be placed
+ * in the cache using the addResource: method. If you load two separate resources from the same
+ * file, be sure to set a distinct name for each before adding both resources to the cache.
+ * By default, the name of the resource is the file name.
  *
  * If you need to set additional configuration info, such as the directory property, prior
  * to loading the resource, consider using the init or resource methods and then invoking
@@ -199,16 +202,20 @@
 /**
  * Returns a resource instance loaded from the specified file.
  *
- * Resources loaded through this method are cached. If the resource was already loaded and
- * is in the cache, it is retrieved and returned. If the resource has not in the cache, it
- * is loaded from the specified file, placed into the cache, and returned.
+ * Resources loaded through this method are cached. If the resource was already loaded and is in
+ * the cache, it is retrieved and returned. If the resource has not in the cache, it is loaded
+ * from the specified file, placed into the cache, and returned. It is therefore safe to invoke
+ * this method any time the resource is needed, without having to worry that the resource will
+ * be repeatedly loaded from file.
  *
  * To clear a resource instance from the cache, use the removeResource: method.
  *
  * To load the file directly, bypassing the cache, use the alloc and initFromFile: methods.
  * This technique can be used to load the same resource twice, perhaps to configure each separately.
+ * Each distinct resource can then be given its own name, and added to the cache separately.
  * However, when choosing to do so, be aware that resources often consume significant memory.
- * Consider copying resource components instead in order to configure them distinctly.
+ * Consider copying resource components instead of loading the entire resource, if you need
+ * to create multiple instances of a few resource components.
  *
  * If you need to set additional configuration info, such as the directory property, prior to
  * loading the resource, consider using the resource method and then invoking the loadFromFile:
@@ -221,6 +228,9 @@
  * This method will return nil if the file is not in the cache and could not be loaded.
  */
 +(id) resourceFromFile: (NSString*) aFilePath;
+
+
+#pragma mark Resource cache
 
 /** 
  * Returns the cached resource with the specified name,
@@ -241,6 +251,9 @@
 /** Removes all resources from the cache. */
 +(void) removeAllResources;
 
+/** Removes this resource instance from the cache. */
+-(void) remove;
+
 
 #pragma mark Deprecated functionality
 
@@ -249,12 +262,6 @@
 
 /** @deprecated Property moved to CC3NodesResource subclass. */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Property moved to CC3NodesResource subclass. */
-+(BOOL) defaultExpectsVerticallyFlippedTextures;
-
-/** @deprecated Property moved to CC3NodesResource subclass. */
-+(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
 
 /**
  * @deprecated Use the loadFromFile: method instead, which supports both absolute
@@ -273,5 +280,11 @@
  * absolute file paths and file paths that are relative to the resources directory.
  */
 +(id) resourceFromResourceFile: (NSString*) aRezPath DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Property moved to CC3NodesResource subclass. */
++(BOOL) defaultExpectsVerticallyFlippedTextures;
+
+/** @deprecated Property moved to CC3NodesResource subclass. */
++(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
 
 @end

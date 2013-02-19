@@ -44,6 +44,7 @@
 #import "CC3LinearMatrix.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
+#import "CC3Texture.h"
 
 
 #pragma mark CC3Node
@@ -802,6 +803,18 @@
 	for (CC3Node* child in children) child.emissionColor = color;
 }
 
+-(CC3Texture*) texture {
+	for (CC3Node* child in children) {
+		CC3Texture* tex = child.texture;
+		if (tex) return tex;
+	}
+	return nil;
+}
+
+-(void) setTexture: (CC3Texture*) texture {
+	for (CC3Node* child in children) child.texture = texture;
+}
+
 -(CC3Vector4) globalLightPosition {
 	for (CC3Node* child in children) {
 		CC3Vector4 glp = child.globalLightPosition;
@@ -952,6 +965,7 @@
 		globalRotationMatrix = nil;
 		self.rotator = [CC3Rotator rotator];
 		_animationStates = nil;
+		_isAnimationDirty = NO;
 		boundingVolume = nil;
 		boundingVolumePadding = 0.0f;
 		shouldUseFixedBoundingVolume = NO;
@@ -1029,9 +1043,10 @@
 	boundingVolumePadding = another.boundingVolumePadding;
 	shouldUseFixedBoundingVolume = another.shouldUseFixedBoundingVolume;
 
+	_isAnimationDirty = NO;
 	for (CC3NodeAnimationState* as in another.animationStates)
 		[self addAnimation: as.animation asTrack: as.trackID];
-
+	
 	// Transform listeners are not copied. Managing listeners must be deliberate.
 
 	_touchEnabled = another.isTouchEnabled;
@@ -1817,27 +1832,21 @@ static GLuint lastAssignedNodeTag;
 -(void) didSetTargetInDescendant: (CC3Node*) aNode { [parent didSetTargetInDescendant: aNode]; }
 
 -(CC3Node*) getNodeNamed: (NSString*) aName {
-	if ([name isEqual: aName] || (!name && !aName)) {	// my name equal or both nil
-		return self;
-	}
+	// First see if it's me
+	if ([name isEqual: aName] || (!name && !aName)) return self;
+
 	for (CC3Node* child in children) {
 		CC3Node* childResult = [child getNodeNamed: aName];
-		if (childResult) {
-			return childResult;
-		}
+		if (childResult) return childResult;
 	}
 	return nil;
 }
 
 -(CC3Node*) getNodeTagged: (GLuint) aTag {
-	if (tag == aTag) {
-		return self;
-	}
+	if (tag == aTag) return self;
 	for (CC3Node* child in children) {
 		CC3Node* childResult = [child getNodeTagged: aTag];
-		if (childResult) {
-			return childResult;
-		}
+		if (childResult) return childResult;
 	}
 	return nil;
 }
@@ -1850,9 +1859,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) flattenInto: (CCArray*) anArray {
 	[anArray addObject: self];
-	for (CC3Node* child in children) {
-		[child flattenInto: anArray];
-	}
+	for (CC3Node* child in children) [child flattenInto: anArray];
 }
 
 -(CC3Node*) asOrientingWrapper {
@@ -2003,13 +2010,13 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Animation
 
--(CC3NodeAnimationState*) getAnimationStateForTrack: (NSUInteger) trackID {
+-(CC3NodeAnimationState*) getAnimationStateOnTrack: (NSUInteger) trackID {
 	for (CC3NodeAnimationState* as in _animationStates) if (as.trackID == trackID) return as;
 	return nil;
 }
 
 -(void) addAnimationState: (CC3NodeAnimationState*) animationState {
-	CC3NodeAnimationState* currAnim = [self getAnimationStateForTrack: animationState.trackID];
+	CC3NodeAnimationState* currAnim = [self getAnimationStateOnTrack: animationState.trackID];
 	if ( !animationState || animationState == currAnim ) return;	// leave if not changing
 	
 	if ( !_animationStates ) _animationStates = [CCArray new];		// ensure array exists - retained
@@ -2025,10 +2032,10 @@ static GLuint lastAssignedNodeTag;
 	}
 }
 
--(CC3NodeAnimationState*) animationState { return [self getAnimationStateForTrack: 0]; }
+-(CC3NodeAnimationState*) animationState { return [self getAnimationStateOnTrack: 0]; }
 
 -(CC3NodeAnimation*) getAnimationOnTrack: (NSUInteger) trackID {
-	return [self getAnimationStateForTrack: trackID].animation;
+	return [self getAnimationStateOnTrack: trackID].animation;
 }
 
 -(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (NSUInteger) trackID {
@@ -2048,8 +2055,9 @@ static GLuint lastAssignedNodeTag;
 	[self removeAnimationState: [self getAnimationStateForAnimation: animation]];
 }
 
--(void) removeAnimationOnTrack: (NSUInteger) trackID {
-	[self removeAnimationState: [self getAnimationStateForTrack: trackID]];
+-(void) removeAnimationTrack: (NSUInteger) trackID {
+	[self removeAnimationState: [self getAnimationStateOnTrack: trackID]];
+	for (CC3Node* child in children) [child removeAnimationTrack: trackID];
 }
 
 -(CC3NodeAnimation*) animation { return [self getAnimationOnTrack: 0]; }
@@ -2057,7 +2065,7 @@ static GLuint lastAssignedNodeTag;
 -(void) setAnimation: (CC3NodeAnimation*) animation { [self addAnimation: animation asTrack: 0]; }
 
 -(BOOL) containsAnimationOnTrack: (NSUInteger) trackID {
-	if ([self getAnimationStateForTrack: trackID] != nil) return YES;
+	if ([self getAnimationStateOnTrack: trackID] != nil) return YES;
 	for (CC3Node* child in children) if ( [child containsAnimationOnTrack: trackID] ) return YES;
 	return NO;
 }
@@ -2069,25 +2077,25 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(GLfloat) animationBlendingWeightForTrack: (NSUInteger) trackID {
-	CC3NodeAnimationState* as = [self getAnimationStateForTrack: trackID];
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	return as ? as.blendingWeight : 0.0f;
 }
 
 -(void) setAnimationBlendingWeight: (GLfloat) blendWeight forTrack: (NSUInteger) trackID {
-	[self getAnimationStateForTrack: trackID].blendingWeight = blendWeight;
+	[self getAnimationStateOnTrack: trackID].blendingWeight = blendWeight;
 	for (CC3Node* child in children) [child setAnimationBlendingWeight: blendWeight forTrack: trackID];
 }
 
 -(void) enableAnimationOnTrack: (NSUInteger) trackID {
-	[[self getAnimationStateForTrack: trackID] enable];
+	[[self getAnimationStateOnTrack: trackID] enable];
 }
 
 -(void) disableAnimationOnTrack: (NSUInteger) trackID {
-	[[self getAnimationStateForTrack: trackID] disable];
+	[[self getAnimationStateOnTrack: trackID] disable];
 }
 
 -(BOOL) isAnimationEnabledOnTrack: (NSUInteger) trackID {
-	CC3NodeAnimationState* as = [self getAnimationStateForTrack: trackID];
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	return as ? as.isEnabled : NO;
 }
 
@@ -2104,6 +2112,16 @@ static GLuint lastAssignedNodeTag;
 	for (CC3NodeAnimationState* as in _animationStates) as.isEnabled = isAnimationEnabled;
 }
 
+-(void) enableAllAnimationOnTrack: (NSUInteger) trackID {
+	[self enableAnimationOnTrack: trackID];
+	for (CC3Node* child in children) [child enableAllAnimationOnTrack: trackID];
+}
+
+-(void) disableAllAnimationOnTrack: (NSUInteger) trackID {
+	[self disableAnimationOnTrack: trackID];
+	for (CC3Node* child in children) [child disableAllAnimationOnTrack: trackID];
+}
+
 -(void) enableAllAnimation {
 	[self enableAnimation];
 	for (CC3Node* child in children) [child enableAllAnimation];
@@ -2115,13 +2133,16 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID {
-	[[self getAnimationStateForTrack: trackID] establishFrameAt: t];
+	[[self getAnimationStateOnTrack: trackID] establishFrameAt: t];
 	for (CC3Node* child in children) [child establishAnimationFrameAt: t onTrack: trackID];
 }
 
+-(void) markAnimationDirty { _isAnimationDirty = YES; }
+
 /** Updates this node from a blending of any contained animation. */
 -(void) updateFromAnimationState {
-	if ( !self.isAnimationEnabled ) return;
+	if ( !_isAnimationDirty ) return;
+//	if ( !self.isAnimationEnabled ) return;
 	
 	// Start with identity transforms
 	CC3Vector blendedLoc = kCC3VectorZero;
@@ -2136,30 +2157,32 @@ static GLuint lastAssignedNodeTag;
 	GLfloat totWtS = 0.0f;		// Accumulated scale weight
 
 	for (CC3NodeAnimationState* as in _animationStates) {
-		GLfloat currWt = as.blendingWeight;
-		
-		// Blend the location
-		if (as.isAnimatingLocation) {
-			totWtL += currWt;
-			blendedLoc = CC3VectorLerp(blendedLoc, as.location, (currWt / totWtL));
-		}
-		
-		// Blend the rotation
-		if (as.isAnimatingRotation) {
-			totWtR += currWt;
-			blendedRot = CC3VectorLerp(blendedRot, as.rotation, (currWt / totWtR));
-		}
-		
-		// Blend the quaternion
-		if (as.isAnimatingQuaternion) {
-			totWtQ += currWt;
-			blendedQuat = CC3QuaternionSlerp(blendedQuat, as.quaternion, (currWt / totWtQ));
-		}
-		
-		// Blend the scale
-		if (as.isAnimatingScale) {
-			totWtS += currWt;
-			blendedScale = CC3VectorLerp(blendedScale, as.scale, (currWt / totWtS));
+		if (as.isEnabled) {
+			GLfloat currWt = as.blendingWeight;
+			
+			// Blend the location
+			if (as.isAnimatingLocation) {
+				totWtL += currWt;
+				blendedLoc = CC3VectorLerp(blendedLoc, as.location, (currWt / totWtL));
+			}
+			
+			// Blend the rotation
+			if (as.isAnimatingRotation) {
+				totWtR += currWt;
+				blendedRot = CC3VectorLerp(blendedRot, as.rotation, (currWt / totWtR));
+			}
+			
+			// Blend the quaternion
+			if (as.isAnimatingQuaternion) {
+				totWtQ += currWt;
+				blendedQuat = CC3QuaternionSlerp(blendedQuat, as.quaternion, (currWt / totWtQ));
+			}
+			
+			// Blend the scale
+			if (as.isAnimatingScale) {
+				totWtS += currWt;
+				blendedScale = CC3VectorLerp(blendedScale, as.scale, (currWt / totWtS));
+			}
 		}
 	}
 	
@@ -2167,6 +2190,8 @@ static GLuint lastAssignedNodeTag;
 	if (totWtR) self.rotation = blendedRot;
 	if (totWtQ) self.quaternion = blendedQuat;
 	if (totWtS) self.scale = blendedScale;
+	
+	_isAnimationDirty = NO;
 }
 
 // Deprecated

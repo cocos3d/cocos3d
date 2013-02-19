@@ -436,7 +436,6 @@
 	NSUInteger _trackID;
 	GLfloat _blendingWeight;
 	BOOL _isEnabled : 1;
-	BOOL _isDirty : 1;
 }
 
 /** The node whose animation state is being tracked by this instance.  */
@@ -548,9 +547,6 @@
  */
 @property(nonatomic, readonly) BOOL hasVariableFrameTiming;
 
-/** Indicates that the animated content has been updated by the animation since the last time the node was updated. */
-@property(nonatomic, readonly) BOOL isDirty;
-
 
 #pragma mark Updating
 
@@ -580,6 +576,19 @@
  * Returns nil if either the animation or the node are nil.
  */
 +(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node;
+
+/**
+ * Returns the next available trackID value. The value returned is guaranteed to be different
+ * each time this method is invoked.
+ *
+ * When using multi-track animation in a node assembly, the trackID identifies a particular
+ * animation track within that node assembly. Since any particular track may only affect a
+ * few nodes within the entire node assembly, when adding a new animation track to the node
+ * assembly, it can be difficult to know how to select a track ID that will not conflict with
+ * any existing tracks within that node assembly. This method can be used to generate a unique
+ * track ID to use when adding a new track of animation to a node assembly.
+ */
++(NSUInteger) generateTrackID;
 
 @end
 

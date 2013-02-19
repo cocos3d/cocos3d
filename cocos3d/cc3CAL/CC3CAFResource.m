@@ -36,7 +36,22 @@
 
 @implementation CC3CAFResource
 
-@synthesize animationDuration=_animationDuration;
+@synthesize animationDuration=_animationDuration, wasCSFResourceAttached=_wasCSFResourceAttached;
+
+-(void) addAnimationTo: (CC3Node*) aNode asTrack: (NSUInteger) trackID {
+	CC3Assert(_wasCSFResourceAttached, @"%@ has not been linked to the corresponding CSF file.", self);
+	for (CC3CALNode* cafNode in _nodes) {
+		CC3Node* matchingNode = [aNode getNodeNamed: cafNode.name];
+		[matchingNode addAnimation: cafNode.animation asTrack: trackID];
+	}
+	LogRez(@"Added animation from %@ to node assembly below %@ as animation track %u", self, aNode, trackID);
+}
+
+-(NSUInteger) addAnimationTo: (CC3Node*) aNode {
+	NSUInteger trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationTo: aNode asTrack: trackID];
+	return trackID;
+}
 
 
 #pragma mark Allocation and initialization
@@ -45,9 +60,34 @@
 	if ( (self = [super init]) ) {
 		_nodeCount = 0;
 		_animationDuration = 0;
+		_wasCSFResourceAttached = NO;
 	}
 	return self;
 }
+
+-(id) initFromFile: (NSString*) cafFilePath linkedToCSFFile: (NSString*) csfFilePath {
+	if ( (self = [self initFromFile: cafFilePath]) ) {
+		[self linkToCSFResource: [CC3CSFResource resourceFromFile: csfFilePath]];
+	}
+	return self;
+}
+
++(id) resourceFromFile: (NSString*) cafFilePath linkedToCSFFile: (NSString*) csfFilePath {
+	CC3CAFResource* rez = (CC3CAFResource*)[self getResourceNamed: cafFilePath.lastPathComponent];
+	if (rez) {
+		if (!rez.wasCSFResourceAttached)
+			[rez linkToCSFResource: [CC3CSFResource resourceFromFile: csfFilePath]];
+		return rez;
+	}
+	
+	rez = [[self alloc] initFromFile: cafFilePath linkedToCSFFile: csfFilePath];
+	[self addResource: rez];
+	[rez release];
+	return rez;
+}
+
+
+#pragma mark File reading
 
 -(BOOL) processFile: (NSString*) anAbsoluteFilePath {
 	
@@ -62,9 +102,6 @@
 		return NO;
 	}
 }
-
-
-#pragma mark File reading
 
 /** Populates this resource from the content of the specified reader. */
 -(BOOL)	readFrom: (CC3DataReader*) reader {
@@ -170,9 +207,64 @@
 		quaternions[fIdx].y = reader.readFloat;
 		quaternions[fIdx].z = reader.readFloat;
 		quaternions[fIdx].w = reader.readFloat;
+		
+		LogTrace(@"Added animated location %@ and quaternion %@ at time %.4f in frame %i",
+			   NSStringFromCC3Vector(locations[fIdx]),
+			   NSStringFromCC3Quaternion(quaternions[fIdx]),
+			   frameTimes[fIdx], fIdx);
 	}
 	
 	return !reader.wasReadBeyondEOF;
 }
 
+
+#pragma mark Linking to other CAL files
+
+-(void) linkToCSFResource: (CC3CSFResource*) csfRez {
+	// Leave if the CSF doesn't exist, it has already been attached, or I haven't been loaded yet.
+	if (!csfRez || _wasCSFResourceAttached || !self.wasLoaded) return;
+	
+	for (CC3CALNode* cafNode in _nodes) {
+		CC3CALNode* csfNode = [csfRez getNodeWithCALIndex: cafNode.calIndex];
+		if (csfNode) cafNode.name = csfNode.name;
+	}
+	_wasCSFResourceAttached = YES;
+}
+
 @end
+
+
+#pragma mark Adding animation to nodes
+
+@implementation CC3Node (CAF)
+
+-(void) addCAFAnimation: (CC3CAFResource*) cafRez asTrack: (NSUInteger) trackID {
+	[cafRez addAnimationTo: self asTrack: trackID];
+}
+
+-(void) addCAFAnimationFromFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID {
+	[self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath ] asTrack: trackID];
+}
+
+-(void) addCAFAnimationFromFile: (NSString*) cafFilePath
+				linkedToCSFFile: (NSString*) csfFilePath
+						asTrack: (NSUInteger) trackID {
+	[self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath
+											linkedToCSFFile: csfFilePath]
+				  asTrack: trackID];
+}
+
+-(NSUInteger) addCAFAnimation: (CC3CAFResource*) cafRez { return [cafRez addAnimationTo: self]; }
+
+-(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath {
+	return [self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath ]];
+}
+
+-(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath
+					  linkedToCSFFile: (NSString*) csfFilePath {
+	return [self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath
+												   linkedToCSFFile: csfFilePath]];
+}
+
+@end
+

@@ -46,4 +46,10 @@
  */
 @property(nonatomic, readonly) CCArray* allNodes;
 
+/**
+ * Retrieves the first node found with the specified calIndex, anywhere in the nodes contained
+ * in this resource. This performs a simple linear search through the all-nodes collection..
+ */
+-(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex;
+
 @end

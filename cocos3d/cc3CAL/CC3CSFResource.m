@@ -41,6 +41,11 @@
 	[super dealloc];
 }
 
+-(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex {
+	for (CC3CALNode* calNode in _allNodes) if (calNode.calIndex == calIndex) return calNode;
+	return nil;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -185,8 +190,8 @@
 	// Add the node to the collection of unstructured nodes
 	[_allNodes addObject: calNode];
 
-	LogRez(@"Loaded node named %@ with CAL index %i, parent index %i, location %@, rotation quaternion %@",
-		   nodeName, nodeIdx, parentIndex, NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion));
+	LogTrace(@"Loaded node named %@ with CAL index %i, parent index %i, location %@, rotation quaternion %@",
+			 nodeName, nodeIdx, parentIndex, NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion));
 
 	return !reader.wasReadBeyondEOF;
 }
@@ -201,6 +206,15 @@
 		[aNode linkToCALNodes: _allNodes];
 		if (aNode.isBaseCALNode) [self.nodes addObject: aNode];
 	}
+	[self logBuild];
+}
+
+-(void) logBuild {
+#if LOGGING_REZLOAD
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
+	for (CC3CALNode* calNode in self.nodes) [calNode appendStructureDescriptionTo: desc withIndent: 1];
+	LogRez(@"Built %@ with nodes:%@", self, desc);
+#endif
 }
 
 @end

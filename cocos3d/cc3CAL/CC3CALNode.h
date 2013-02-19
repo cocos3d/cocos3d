@@ -58,4 +58,10 @@
  */
 -(void) linkToCALNodes: (CCArray*) nodeArray;
 
+/**
+ * Retrieves the first node found with the specified calIndex, anywhere in the structural hierarchy
+ * of descendants of this node (not just direct children). The hierarchy search is depth-first.
+ */
+-(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex;
+
 @end
