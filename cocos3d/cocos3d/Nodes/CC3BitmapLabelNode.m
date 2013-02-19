@@ -297,8 +297,8 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	propertyValue = [nse nextObject];				// Height scale
 	_textureSize.y = [propertyValue intValue];
 
-	GLint maxTexSize = CCConfiguration.sharedConfiguration.maxTextureSize;
-	CC3Assert(_textureSize.x <= maxTexSize && _textureSize.y <= maxTexSize,
+	CC3Assert(_textureSize.x <= CCConfiguration.sharedConfiguration.maxTextureSize &&
+			  _textureSize.y <= CCConfiguration.sharedConfiguration.maxTextureSize,
 			  @"Font texture can't be larger than supported");
 	
 	propertyValue = [nse nextObject];				// Pages sanity check

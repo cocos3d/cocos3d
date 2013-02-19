@@ -43,8 +43,12 @@
 @interface CC3CAFResource : CC3NodesResource {
 	NSInteger _nodeCount;
 	ccTime _animationDuration;
+	NSInteger _fileVersion;
 	BOOL _wasCSFResourceAttached : 1;
 }
+
+/** The file format version, extracted from the file. */
+@property(nonatomic, readonly) NSInteger fileVersion;
 
 /** The animation duration in seconds. */
 @property(nonatomic, readonly) ccTime animationDuration;

@@ -38,7 +38,11 @@
 @interface CC3CSFResource : CC3NodesResource {
 	CCArray* _allNodes;
 	NSInteger _nodeCount;
+	NSInteger _fileVersion;
 }
+
+/** The file format version, extracted from the file. */
+@property(nonatomic, readonly) NSInteger fileVersion;
 
 /**
  * A collection of all of the nodes extracted from the CSF file.

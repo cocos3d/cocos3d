@@ -36,7 +36,8 @@
 
 @implementation CC3CAFResource
 
-@synthesize animationDuration=_animationDuration, wasCSFResourceAttached=_wasCSFResourceAttached;
+@synthesize animationDuration=_animationDuration, fileVersion=_fileVersion;
+@synthesize wasCSFResourceAttached=_wasCSFResourceAttached;
 
 -(void) addAnimationTo: (CC3Node*) aNode asTrack: (NSUInteger) trackID {
 	CC3Assert(_wasCSFResourceAttached, @"%@ has not been linked to the corresponding CSF file.", self);
@@ -58,6 +59,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		_fileVersion = -1;
 		_nodeCount = 0;
 		_animationDuration = 0;
 		_wasCSFResourceAttached = NO;
@@ -131,17 +133,14 @@
 	if (reader.readByte != 'F') return NO;
 	if (reader.readByte != '\0') return NO;
 	
-	// File version
-	NSInteger version = reader.readInteger;
-
-	// Animation duration
-	_animationDuration = reader.readFloat;
+	_fileVersion = reader.readInteger;		// File version
+	_animationDuration = reader.readFloat;	// Animation duration
 	
 	// Number of nodes (tracks)
 	_nodeCount = reader.readInteger;
 
 	LogRez(@"Read header CAF version %i with duration %.3f seconds and containing %i nodes",
-		   version, _animationDuration, _nodeCount);
+		   _fileVersion, _animationDuration, _nodeCount);
 
 	return !reader.wasReadBeyondEOF;
 }

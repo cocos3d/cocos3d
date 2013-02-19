@@ -34,7 +34,7 @@
 
 @implementation CC3CSFResource
 
-@synthesize allNodes=_allNodes;
+@synthesize allNodes=_allNodes, fileVersion=_fileVersion;
 
 -(void) dealloc {
 	[_allNodes release];
@@ -52,6 +52,7 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_allNodes = [[CCArray array] retain];
+		_fileVersion = -1;
 		_nodeCount = 0;
 	}
 	return self;
@@ -103,13 +104,10 @@
 	if (reader.readByte != 'F') return NO;
 	if (reader.readByte != '\0') return NO;
 	
-	// File version
-	NSInteger version = reader.readInteger;
-	
-	// Number of nodes
-	_nodeCount = reader.readInteger;
+	_fileVersion = reader.readInteger;		// File version
+	_nodeCount = reader.readInteger;	// Number of nodes
 
-	LogRez(@"Read header CSF version %i containing %i nodes", version, _nodeCount);
+	LogRez(@"Read header CSF version %i containing %i nodes", _fileVersion, _nodeCount);
 
 	return !reader.wasReadBeyondEOF;
 }
