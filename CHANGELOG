@@ -53,6 +53,7 @@ cocos3d 2.0.0 - 2013/03/31
 		- Added CC3Animate trackID property to animate a single track of node animation.
 		- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
 		- Multi-track animation can be specified and loaded onto nodes using animation files specified in CAF format.
+	- Allow animation of node properties to be individually enabled or disabled.
 
 - Improved support for NPOT textures
 	- CC3Texture only generates mipmaps if texture is POT

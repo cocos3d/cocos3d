@@ -133,6 +133,9 @@ typedef enum {
 	kCC3VertexContentMatrixIndices		= 1 << 8
 } CC3VertexContent;
 
+/** Returns a string description of the specified vertex content components. */
+NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent);
+	
 /** Indicates that a face has no neighbour over a particular edge. */
 #define kCC3FaceNoNeighbour  ((GLuint)~0)
 
@@ -186,6 +189,9 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 	}
 	return nearestHit;
 }
+
+
+#pragma mark CC3Mesh
 
 /**
  * A CC3Mesh holds the 3D mesh for a CC3MeshNode.

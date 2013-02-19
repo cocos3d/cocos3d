@@ -3434,7 +3434,7 @@ typedef enum {
 /**
  * Indicates whether the animation on any animation track in this node is enabled.
  *
- * The value returned by this method applies only to this node, not its child nodes. Child nodes
+ * The value of this property applies only to this node, not the descendant nodes. Descendant nodes
  * that return YES to this method will be animated even if this node returns NO, and vice-versa.
  *
  * The initial value of this property is YES.
@@ -3452,6 +3452,182 @@ typedef enum {
 
 /** Disables all animation tracks of this node, and all descendant nodes. */
 -(void) disableAllAnimation;
+
+/**
+ * Enables the animation of the location property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the location
+ * property to be animated, both location animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the location property of child nodes.
+ */
+-(void) enableLocationAnimation;
+
+/**
+ * Disables the animation of the location property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the location
+ * property to be animated, both location animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the location property of child nodes.
+ */
+-(void) disableLocationAnimation;
+
+/**
+ * Enables the animation of the rotation property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the rotation
+ * property to be animated, both rotation animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the rotation property of child nodes.
+ */
+-(void) enableRotationAnimation;
+
+/**
+ * Disables the animation of the rotation property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the rotation
+ * property to be animated, both rotation animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the rotation property of child nodes.
+ */
+-(void) disableRotationAnimation;
+
+/**
+ * Enables the animation of the quaternion property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the quaternion
+ * property to be animated, both quaternion animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the quaternion property of child nodes.
+ */
+-(void) enableQuaternionAnimation;
+
+/**
+ * Disables the animation of the quaternion property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the quaternion
+ * property to be animated, both quaternion animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the quaternion property of child nodes.
+ */
+-(void) disableQuaternionAnimation;
+
+/**
+ * Enables the animation of the scale property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the scale
+ * property to be animated, both scale animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the scale property of child nodes.
+ */
+-(void) enableScaleAnimation;
+
+/**
+ * Disables the animation of the scale property, without affecting the animation of the
+ * other properties.
+ *
+ * This method works together with the enable/disableAnimation methods. For the scale
+ * property to be animated, both scale animation and node animation must be enabled.
+ * Both are enabled by default.
+ *
+ * This will not affect the animation of the scale property of child nodes.
+ */
+-(void) disableScaleAnimation;
+
+/**
+ * Enables the animation of the location property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the location
+ * property to be animated, both location animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) enableAllLocationAnimation;
+
+/**
+ * Disables the animation of the location property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the location
+ * property to be animated, both location animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) disableAllLocationAnimation;
+
+/**
+ * Enables the animation of the rotation property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the rotation
+ * property to be animated, both rotation animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) enableAllRotationAnimation;
+
+/**
+ * Disables the animation of the rotation property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the rotation
+ * property to be animated, both rotation animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) disableAllRotationAnimation;
+
+/**
+ * Enables the animation of the quaternion property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the quaternion
+ * property to be animated, both quaternion animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) enableAllQuaternionAnimation;
+
+/**
+ * Disables the animation of the quaternion property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the quaternion
+ * property to be animated, both quaternion animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) disableAllQuaternionAnimation;
+
+/**
+ * Enables the animation of the scale property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the scale
+ * property to be animated, both scale animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) enableAllScaleAnimation;
+
+/**
+ * Disables the animation of the scale property, without affecting the animation of the
+ * other properties, on this node and all descendant nodes.
+ *
+ * This method works together with the enable/disableAnimation methods. For the scale
+ * property to be animated, both scale animation and node animation must be enabled.
+ * Both are enabled by default.
+ */
+-(void) disableAllScaleAnimation;
 
 /**
  * Marks the animation state of this node as dirty, indicating that the animated properties

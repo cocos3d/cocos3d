@@ -2132,12 +2132,84 @@ static GLuint lastAssignedNodeTag;
 	for (CC3Node* child in children) [child disableAllAnimation];
 }
 
+-(void) enableLocationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isLocationAnimationEnabled = YES;
+}
+
+-(void) disableLocationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isLocationAnimationEnabled = NO;
+}
+
+-(void) enableRotationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isRotationAnimationEnabled = YES;
+}
+
+-(void) disableRotationAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isRotationAnimationEnabled = NO;
+}
+
+-(void) enableQuaternionAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isQuaternionAnimationEnabled = YES;
+}
+
+-(void) disableQuaternionAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isQuaternionAnimationEnabled = NO;
+}
+
+-(void) enableScaleAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isScaleAnimationEnabled = YES;
+}
+
+-(void) disableScaleAnimation {
+	for (CC3NodeAnimationState* as in _animationStates) as.isScaleAnimationEnabled = NO;
+}
+
+-(void) enableAllLocationAnimation {
+	[self enableLocationAnimation];
+	for (CC3Node* child in children) [child enableAllLocationAnimation];
+}
+
+-(void) disableAllLocationAnimation {
+	[self disableLocationAnimation];
+	for (CC3Node* child in children) [child disableAllLocationAnimation];
+}
+
+-(void) enableAllRotationAnimation {
+	[self enableRotationAnimation];
+	for (CC3Node* child in children) [child enableAllRotationAnimation];
+}
+
+-(void) disableAllRotationAnimation {
+	[self disableRotationAnimation];
+	for (CC3Node* child in children) [child disableAllRotationAnimation];
+}
+
+-(void) enableAllQuaternionAnimation {
+	[self enableQuaternionAnimation];
+	for (CC3Node* child in children) [child enableAllQuaternionAnimation];
+}
+
+-(void) disableAllQuaternionAnimation {
+	[self disableQuaternionAnimation];
+	for (CC3Node* child in children) [child disableAllQuaternionAnimation];
+}
+
+-(void) enableAllScaleAnimation {
+	[self enableScaleAnimation];
+	for (CC3Node* child in children) [child enableAllScaleAnimation];
+}
+
+-(void) disableAllScaleAnimation {
+	[self disableScaleAnimation];
+	for (CC3Node* child in children) [child disableAllScaleAnimation];
+}
+
+-(void) markAnimationDirty { _isAnimationDirty = YES; }
+
 -(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID {
 	[[self getAnimationStateOnTrack: trackID] establishFrameAt: t];
 	for (CC3Node* child in children) [child establishAnimationFrameAt: t onTrack: trackID];
 }
-
--(void) markAnimationDirty { _isAnimationDirty = YES; }
 
 /** Updates this node from a blending of any contained animation. */
 -(void) updateFromAnimationState {

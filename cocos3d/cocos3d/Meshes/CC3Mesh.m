@@ -33,6 +33,61 @@
 #import "CC3OpenGLESEngine.h"
 #import "CC3IOSExtensions.h"
 
+NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	BOOL first = YES;
+	if (vtxContent & kCC3VertexContentLocation) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Location"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentNormal) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Normal"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentTangent) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Tangent"];
+		first = NO;
+	}
+	if (vtxContent >= kCC3VertexContentBitangent) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Bitangent"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentColor) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Color"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentTextureCoordinates) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"TexCoords"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentPointSize) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"PointSize"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentWeights) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"Weights"];
+		first = NO;
+	}
+	if (vtxContent & kCC3VertexContentMatrixIndices) {
+		[desc appendFormat: @"%@", first ? @" (" : @" + "];
+		[desc appendFormat: @"MatrixIndices"];
+		first = NO;
+	}
+	[desc appendFormat: @"%@", first ? @"(None)" : @")"];
+	return desc;
+}
+
+
+#pragma mark CC3Mesh
+
 @interface CC3Mesh (TemplateMethods)
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;

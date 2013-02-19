@@ -39,10 +39,6 @@
 
 @synthesize frameCount=_frameCount, shouldInterpolate=_shouldInterpolate;
 
--(void) dealloc {
-	[super dealloc];
-}
-
 -(BOOL) isAnimatingLocation { return NO; }
 
 -(BOOL) isAnimatingRotation { return NO; }
@@ -140,7 +136,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(void) establishLocationAtFrame: (GLuint) frameIndex
 			   plusInterpolation: (GLfloat) frameInterpolation
 			inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(self.isAnimatingLocation) {
+	if(animState.isAnimatingLocation) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
 		animState.location = CC3VectorLerp([self locationAtFrame: frameIndex],
 										   [self locationAtFrame: frameIndex + 1],
@@ -156,7 +152,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(void) establishRotationAtFrame: (GLuint) frameIndex
 			   plusInterpolation: (GLfloat) frameInterpolation
 			inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(self.isAnimatingRotation) {
+	if(animState.isAnimatingRotation) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
 		animState.rotation = CC3VectorLerp([self rotationAtFrame: frameIndex],
 										   [self rotationAtFrame: frameIndex + 1],
@@ -172,7 +168,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(void) establishQuaternionAtFrame: (GLuint) frameIndex
 				 plusInterpolation: (GLfloat) frameInterpolation
 			  inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(self.isAnimatingQuaternion) {
+	if(animState.isAnimatingQuaternion) {
 		// If frameInterpolation is zero, Slerp function will immediately return first frame.
 		animState.quaternion = CC3QuaternionSlerp([self quaternionAtFrame: frameIndex],
 												  [self quaternionAtFrame: frameIndex + 1],
@@ -188,7 +184,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(void) establishScaleAtFrame: (GLuint) frameIndex
 			plusInterpolation: (GLfloat) frameInterpolation
 		 inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(self.isAnimatingScale) {
+	if(animState.isAnimatingScale) {
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
 		animState.scale = CC3VectorLerp([self scaleAtFrame: frameIndex],
 										[self scaleAtFrame: frameIndex + 1],
@@ -463,6 +459,10 @@ static ccTime _interpolationEpsilon = 0.1f;
 @implementation CC3NodeAnimationState
 
 @synthesize node=_node, animation=_animation, trackID=_trackID, animationTime=_animationTime;
+@synthesize isLocationAnimationEnabled=_isLocationAnimationEnabled;
+@synthesize isRotationAnimationEnabled=_isRotationAnimationEnabled;
+@synthesize isQuaternionAnimationEnabled=_isQuaternionAnimationEnabled;
+@synthesize isScaleAnimationEnabled=_isScaleAnimationEnabled;
 
 -(void) dealloc {
 	_node = nil;			// not retained
@@ -520,13 +520,13 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 -(GLuint) frameCount { return _animation.frameCount; }
 
--(BOOL) isAnimatingLocation { return _animation.isAnimatingLocation; }
+-(BOOL) isAnimatingLocation { return _isLocationAnimationEnabled && _animation.isAnimatingLocation; }
 
--(BOOL) isAnimatingRotation { return _animation.isAnimatingRotation; }
+-(BOOL) isAnimatingRotation { return _isRotationAnimationEnabled && _animation.isAnimatingRotation; }
 
--(BOOL) isAnimatingQuaternion { return _animation.isAnimatingQuaternion; }
+-(BOOL) isAnimatingQuaternion { return _isQuaternionAnimationEnabled && _animation.isAnimatingQuaternion; }
 
--(BOOL) isAnimatingScale { return _animation.isAnimatingScale; }
+-(BOOL) isAnimatingScale { return _isScaleAnimationEnabled && _animation.isAnimatingScale; }
 
 -(BOOL) hasVariableFrameTiming { return _animation.hasVariableFrameTiming; }
 
@@ -560,6 +560,10 @@ static ccTime _interpolationEpsilon = 0.1f;
 		_quaternion = kCC3QuaternionIdentity;
 		_scale = kCC3VectorUnitCube;
 		_isEnabled = YES;
+		_isLocationAnimationEnabled = YES;
+		_isRotationAnimationEnabled = YES;
+		_isQuaternionAnimationEnabled = YES;
+		_isScaleAnimationEnabled = YES;
 		[self establishFrameAt: 0.0f];		// Start on the initial frame
 	}
 	return self;

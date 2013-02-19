@@ -436,6 +436,10 @@
 	NSUInteger _trackID;
 	GLfloat _blendingWeight;
 	BOOL _isEnabled : 1;
+	BOOL _isLocationAnimationEnabled : 1;
+	BOOL _isRotationAnimationEnabled : 1;
+	BOOL _isQuaternionAnimationEnabled : 1;
+	BOOL _isScaleAnimationEnabled : 1;
 }
 
 /** The node whose animation state is being tracked by this instance.  */
@@ -461,6 +465,38 @@
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL isEnabled;
+
+/**
+ * Indicates whether animation of the location property of the node is enabled.
+ *
+ * The initial value of this property is YES. Setting this property to NO will disable animation
+ * of the node's location property, but will permit other properties to be animated.
+ */
+@property(nonatomic, assign) BOOL isLocationAnimationEnabled;
+
+/**
+ * Indicates whether animation of the rotation property of the node is enabled.
+ *
+ * The initial value of this property is YES. Setting this property to NO will disable animation
+ * of the node's rotation property, but will permit other properties to be animated.
+ */
+@property(nonatomic, assign) BOOL isRotationAnimationEnabled;
+
+/**
+ * Indicates whether animation of the quaternion property of the node is enabled.
+ *
+ * The initial value of this property is YES. Setting this property to NO will disable animation
+ * of the node's quaternion property, but will permit other properties to be animated.
+ */
+@property(nonatomic, assign) BOOL isQuaternionAnimationEnabled;
+
+/**
+ * Indicates whether animation of the scale property of the node is enabled.
+ *
+ * The initial value of this property is YES. Setting this property to NO will disable animation
+ * of the node's scale property, but will permit other properties to be animated.
+ */
+@property(nonatomic, assign) BOOL isScaleAnimationEnabled;
 
 /** Sets the isEnabled property to YES. */
 -(void) enable;
@@ -510,30 +546,30 @@
 @property(nonatomic, readonly) GLuint frameCount;
 
 /** 
- * Indicates whether location animated content is being tracked.
- *
- * The value of this property is retrieved from the same property on the contained animation instance.
+ * Indicates whether the location property of the node is being animated. It is if both the
+ * isLocationAnimationEnabled property of this instance, and the isAnimatingLocation property
+ * of the contained animation, are set to YES.
  */
 @property(nonatomic, readonly) BOOL isAnimatingLocation;
 
 /**
- * Indicates whether rotation animated content is being tracked.
- *
- * The value of this property is retrieved from the same property on the contained animation instance.
+ * Indicates whether the location property of the node is being animated. It is if both the
+ * isRotationAnimationEnabled property of this instance, and the isAnimatingRotation property
+ * of the contained animation, are set to YES.
  */
 @property(nonatomic, readonly) BOOL isAnimatingRotation;
 
 /**
- * Indicates whether roatation quaternion animated content is being tracked.
- *
- * The value of this property is retrieved from the same property on the contained animation instance.
+ * Indicates whether the quaternion property of the node is being animated. It is if both the
+ * isQuaternionAnimationEnabled property of this instance, and the isAnimatingQuaternion property
+ * of the contained animation, are set to YES.
  */
 @property(nonatomic, readonly) BOOL isAnimatingQuaternion;
 
 /**
- * Indicates whether scale animated content is being tracked.
- *
- * The value of this property is retrieved from the same property on the contained animation instance.
+ * Indicates whether the scale property of the node is being animated. It is if both the
+ * isScaleAnimationEnabled property of this instance, and the isAnimatingScale property
+ * of the contained animation, are set to YES.
  */
 @property(nonatomic, readonly) BOOL isAnimatingScale;
 
