@@ -2140,14 +2140,6 @@ static GLuint lastAssignedNodeTag;
 	for (CC3NodeAnimationState* as in _animationStates) as.isLocationAnimationEnabled = NO;
 }
 
--(void) enableRotationAnimation {
-	for (CC3NodeAnimationState* as in _animationStates) as.isRotationAnimationEnabled = YES;
-}
-
--(void) disableRotationAnimation {
-	for (CC3NodeAnimationState* as in _animationStates) as.isRotationAnimationEnabled = NO;
-}
-
 -(void) enableQuaternionAnimation {
 	for (CC3NodeAnimationState* as in _animationStates) as.isQuaternionAnimationEnabled = YES;
 }
@@ -2172,16 +2164,6 @@ static GLuint lastAssignedNodeTag;
 -(void) disableAllLocationAnimation {
 	[self disableLocationAnimation];
 	for (CC3Node* child in children) [child disableAllLocationAnimation];
-}
-
--(void) enableAllRotationAnimation {
-	[self enableRotationAnimation];
-	for (CC3Node* child in children) [child enableAllRotationAnimation];
-}
-
--(void) disableAllRotationAnimation {
-	[self disableRotationAnimation];
-	for (CC3Node* child in children) [child disableAllRotationAnimation];
 }
 
 -(void) enableAllQuaternionAnimation {
@@ -2236,12 +2218,6 @@ static GLuint lastAssignedNodeTag;
 			if (as.isAnimatingLocation) {
 				totWtL += currWt;
 				blendedLoc = CC3VectorLerp(blendedLoc, as.location, (currWt / totWtL));
-			}
-			
-			// Blend the rotation
-			if (as.isAnimatingRotation) {
-				totWtR += currWt;
-				blendedRot = CC3VectorLerp(blendedRot, as.rotation, (currWt / totWtR));
 			}
 			
 			// Blend the quaternion

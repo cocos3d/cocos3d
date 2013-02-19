@@ -41,8 +41,6 @@
 
 -(BOOL) isAnimatingLocation { return NO; }
 
--(BOOL) isAnimatingRotation { return NO; }
-
 -(BOOL) isAnimatingQuaternion { return NO; }
 
 -(BOOL) isAnimatingScale { return NO; }
@@ -115,15 +113,13 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 /**
- * Updates the location, rotation, quaternion, and scale of the specified node animation state
- * based on the animation frame located at the specified frame, plus an interpolation amount
- * towards the next frame.
+ * Updates the location, quaternion, and scale of the specified node animation state based on the
+ * animation frame located at the specified frame, plus an interpolation amount towards the next frame.
  */
 -(void) establishFrame: (GLuint) frameIndex
 	 plusInterpolation: (GLfloat) frameInterpolation
   inNodeAnimationState: (CC3NodeAnimationState*) animState {
 	[self establishLocationAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
-	[self establishRotationAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
 	[self establishQuaternionAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
 	[self establishScaleAtFrame: frameIndex plusInterpolation: frameInterpolation inNodeAnimationState: animState];
 }
@@ -140,22 +136,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 		// If frameInterpolation is zero, Lerp function will immediately return first frame.
 		animState.location = CC3VectorLerp([self locationAtFrame: frameIndex],
 										   [self locationAtFrame: frameIndex + 1],
-										   frameInterpolation);
-	}
-}
-
-/**
- * Updates the rotation of the node animation state by interpolating between the animation
- * content at the specified frame index and that at the next frame index, using the specified
- * interpolation fraction value, which will be between zero and one.
- */
--(void) establishRotationAtFrame: (GLuint) frameIndex
-			   plusInterpolation: (GLfloat) frameInterpolation
-			inNodeAnimationState: (CC3NodeAnimationState*) animState {
-	if(animState.isAnimatingRotation) {
-		// If frameInterpolation is zero, Lerp function will immediately return first frame.
-		animState.rotation = CC3VectorLerp([self rotationAtFrame: frameIndex],
-										   [self rotationAtFrame: frameIndex + 1],
 										   frameInterpolation);
 	}
 }
@@ -216,16 +196,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex { return kCC3VectorZero; }
 
 /**
- * Template method that returns the rotation at the specified animation frame.
- * Frame index numbering starts at zero.
- *
- * Default returns zero rotation. Subclasses with animation data should override.
- * Subclasses should ensure that if frameIndex is larger than (frameCount - 1),
- * the last frame will be returned.
- */
--(CC3Vector) rotationAtFrame: (GLuint) frameIndex { return kCC3VectorZero; }
-
-/**
  * Template method that returns the location at the specified animation frame.
  * Frame index numbering starts at zero.
  *
@@ -253,21 +223,18 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 @implementation CC3ArrayNodeAnimation
 
-@synthesize frameTimes=_frameTimes, animatedLocations=_animatedLocations, animatedScales=_animatedScales;
-@synthesize animatedRotations=_animatedRotations, animatedQuaternions=_animatedQuaternions;
+@synthesize frameTimes=_frameTimes, animatedLocations=_animatedLocations;
+@synthesize animatedQuaternions=_animatedQuaternions, animatedScales=_animatedScales;
 
 -(void) dealloc {
 	[self deallocateFrameTimes];
 	[self deallocateLocations];
-	[self deallocateRotations];
 	[self deallocateQuaternions];
 	[self deallocateScales];
 	[super dealloc];
 }
 
 -(BOOL) isAnimatingLocation { return _animatedLocations != NULL; }
-
--(BOOL) isAnimatingRotation { return _animatedRotations != NULL; }
 
 -(BOOL) isAnimatingQuaternion { return _animatedQuaternions != NULL; }
 
@@ -279,12 +246,10 @@ static ccTime _interpolationEpsilon = 0.1f;
 	if ( (self = [super initWithFrameCount: numFrames]) ) {
 		_frameTimes = NULL;
 		_animatedLocations = NULL;
-		_animatedRotations = NULL;
 		_animatedQuaternions = NULL;
 		_animatedScales = NULL;
 		_frameTimesAreRetained = NO;
 		_locationsAreRetained = NO;
-		_rotationsAreRetained = NO;
 		_quaternionsAreRetained = NO;
 		_scalesAreRetained = NO;
 	}
@@ -315,11 +280,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return _animatedLocations[MIN(frameIndex, _frameCount - 1)];
 }
 
--(CC3Vector) rotationAtFrame: (GLuint) frameIndex {
-	if (!_animatedRotations) return [super rotationAtFrame: frameIndex];
-	return _animatedRotations[MIN(frameIndex, _frameCount - 1)];
-}
-
 -(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
 	if (!_animatedQuaternions) return [super quaternionAtFrame: frameIndex];
 	return _animatedQuaternions[MIN(frameIndex, _frameCount - 1)];
@@ -338,11 +298,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(void) setAnimatedLocations:(CC3Vector*) vectorArray {
 	[self deallocateLocations];				// get rid of any existing array
 	_animatedLocations = vectorArray;
-}
-
--(void) setAnimatedRotations:(CC3Vector*) vectorArray {
-	[self deallocateRotations];				// get rid of any existing array
-	_animatedRotations = vectorArray;
 }
 
 -(void) setAnimatedQuaternions:(CC3Quaternion*) vectorArray {
@@ -394,24 +349,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 	}
 }
 
--(CC3Vector*) allocateRotations {
-	if (_frameCount) {
-		self.animatedRotations = calloc(_frameCount, sizeof(CC3Vector));
-		_rotationsAreRetained = YES;
-		LogTrace(@"%@ allocated space for %u rotations", self, _frameCount);
-	}
-	return _animatedRotations;
-}
-
--(void) deallocateRotations {
-	if (_rotationsAreRetained) {
-		free(_animatedRotations);
-		_animatedRotations = NULL;
-		_rotationsAreRetained = NO;
-		LogTrace(@"%@ deallocated %u previously allocated animated rotations", self, _frameCount);
-	}
-}
-
 -(CC3Quaternion*) allocateQuaternions {
 	if (_frameCount) {
 		self.animatedQuaternions = calloc(_frameCount, sizeof(CC3Quaternion));
@@ -460,7 +397,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 @synthesize node=_node, animation=_animation, trackID=_trackID, animationTime=_animationTime;
 @synthesize isLocationAnimationEnabled=_isLocationAnimationEnabled;
-@synthesize isRotationAnimationEnabled=_isRotationAnimationEnabled;
 @synthesize isQuaternionAnimationEnabled=_isQuaternionAnimationEnabled;
 @synthesize isScaleAnimationEnabled=_isScaleAnimationEnabled;
 
@@ -495,13 +431,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 	[self markDirty];
 }
 
--(CC3Vector) rotation { return _rotation; }
-
--(void) setRotation: (CC3Vector) rotation {
-	_rotation = rotation;
-	[self markDirty];
-}
-
 -(CC3Quaternion) quaternion { return _quaternion; }
 
 -(void) setQuaternion: (CC3Quaternion) quaternion {
@@ -521,8 +450,6 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(GLuint) frameCount { return _animation.frameCount; }
 
 -(BOOL) isAnimatingLocation { return _isLocationAnimationEnabled && _animation.isAnimatingLocation; }
-
--(BOOL) isAnimatingRotation { return _isRotationAnimationEnabled && _animation.isAnimatingRotation; }
 
 -(BOOL) isAnimatingQuaternion { return _isQuaternionAnimationEnabled && _animation.isAnimatingQuaternion; }
 
@@ -556,12 +483,10 @@ static ccTime _interpolationEpsilon = 0.1f;
 		_blendingWeight = 1.0f;
 		_animationTime = 0.0f;
 		_location = kCC3VectorZero;
-		_rotation = kCC3VectorZero;
 		_quaternion = kCC3QuaternionIdentity;
 		_scale = kCC3VectorUnitCube;
 		_isEnabled = YES;
 		_isLocationAnimationEnabled = YES;
-		_isRotationAnimationEnabled = YES;
 		_isQuaternionAnimationEnabled = YES;
 		_isScaleAnimationEnabled = YES;
 		[self establishFrameAt: 0.0f];		// Start on the initial frame

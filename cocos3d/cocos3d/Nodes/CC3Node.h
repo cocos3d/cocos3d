@@ -3478,30 +3478,6 @@ typedef enum {
 -(void) disableLocationAnimation;
 
 /**
- * Enables the animation of the rotation property, without affecting the animation of the
- * other properties.
- *
- * This method works together with the enable/disableAnimation methods. For the rotation
- * property to be animated, both rotation animation and node animation must be enabled.
- * Both are enabled by default.
- *
- * This will not affect the animation of the rotation property of child nodes.
- */
--(void) enableRotationAnimation;
-
-/**
- * Disables the animation of the rotation property, without affecting the animation of the
- * other properties.
- *
- * This method works together with the enable/disableAnimation methods. For the rotation
- * property to be animated, both rotation animation and node animation must be enabled.
- * Both are enabled by default.
- *
- * This will not affect the animation of the rotation property of child nodes.
- */
--(void) disableRotationAnimation;
-
-/**
  * Enables the animation of the quaternion property, without affecting the animation of the
  * other properties.
  *
@@ -3570,26 +3546,6 @@ typedef enum {
 -(void) disableAllLocationAnimation;
 
 /**
- * Enables the animation of the rotation property, without affecting the animation of the
- * other properties, on this node and all descendant nodes.
- *
- * This method works together with the enable/disableAnimation methods. For the rotation
- * property to be animated, both rotation animation and node animation must be enabled.
- * Both are enabled by default.
- */
--(void) enableAllRotationAnimation;
-
-/**
- * Disables the animation of the rotation property, without affecting the animation of the
- * other properties, on this node and all descendant nodes.
- *
- * This method works together with the enable/disableAnimation methods. For the rotation
- * property to be animated, both rotation animation and node animation must be enabled.
- * Both are enabled by default.
- */
--(void) disableAllRotationAnimation;
-
-/**
  * Enables the animation of the quaternion property, without affecting the animation of the
  * other properties, on this node and all descendant nodes.
  *
@@ -3640,16 +3596,16 @@ typedef enum {
 -(void) markAnimationDirty;
 
 /**
- * Updates the location, rotation and scale properties on the animation state wrapper associated
+ * Updates the location, quaternion and scale properties on the animation state wrapper associated
  * with the animation on the specified track, based on the animation frame located at the specified
  * time, which should be a value between zero and one, with zero indicating the first animation frame,
  * and one indicating the last animation frame. Only those transform properties for which there
  * is animation content will be changed.
  *
  * This method is usually invoked automatically from an active CC3Animate action during each update
- * cycle. Once all animation tracks have been updated accordingly, the node automatically blends the
- * weighted animation from each track to determine the corresponding values of the location, rotation
- * and scale properties of this node.
+ * cycle. Once all animation tracks have been updated accordingly, the node automatically blends
+ * the weighted animation from each track to determine the corresponding values of the location,
+ * quaternion and scale properties of this node.
  *
  * This implementation delegates to the CC3NodeAnimationState instance that is managing the animation
  * for the specified track, then passes this notification along to child nodes to align them with the

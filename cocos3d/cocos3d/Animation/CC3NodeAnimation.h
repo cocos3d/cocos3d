@@ -86,9 +86,6 @@
 /** Indicates whether location animated content is available.  */
 @property(nonatomic, readonly) BOOL isAnimatingLocation;
 
-/** Indicates whether rotation animated content is available. */
-@property(nonatomic, readonly) BOOL isAnimatingRotation;
-
 /** Indicates whether rotation quaternion animated content is available. */
 @property(nonatomic, readonly) BOOL isAnimatingQuaternion;
 
@@ -159,8 +156,8 @@
 #pragma mark Updating
 
 /**
- * Updates the location, rotation, quaternion, and scale of the specified animation state based on
- * the animation frame located at the specified time, which should be a value between zero and one,
+ * Updates the location, quaternion, and scale of the specified animation state based on the
+ * animation frame located at the specified time, which should be a value between zero and one,
  * with zero indicating the first animation frame, and one indicating the last animation frame.
  *
  * Only those properties of the animation state for which there is animation data will be changed.
@@ -194,9 +191,8 @@
  * A concrete CC3NodeAnimation that holds animation data in simple arrays.
  * The arrays can be allocated and managed either by the instance, or externally.
  *
- * There are four properties that hold the animated content:
+ * There are three properties that hold the animated content:
  *   - animatedLocations - location animation content
- *   - animatedRotations - rotation animation content
  *   - animatedQuaternions - rotation quaternion animation content
  *   - animatedScales - scale animation content
  *
@@ -205,10 +201,10 @@
  * NULL (the default). If you do not set an animation data property, the corresponding property
  * on the node will not be animated, and will retain its originally set value.
  *
- * For instance, if you set only the animatedLocations property, and run a CC3Animate on the node,
- * only the location of the node will move around during the animation. The remaining node properties
- * (rotation, quaternion, scale) will remain unchanged by the animation. The effect will be that the
- * node moves around, but remains at a fixed size, and oriented in a fixed rotation.
+ * For example, if you set only the animatedLocations property, and run a CC3Animate on the node,
+ * only the location of the node will move around during the animation. The remaining node
+ * properties (quaternion & scale) will remain unchanged by the animation. The effect will be
+ * that the node moves around, but remains at a fixed size, and oriented in a fixed rotation.
  *
  * This animation can be configured so that time interval between frames can vary from frame
  * to frame, or that the time interval between frames is constant. To configure for variable
@@ -219,21 +215,19 @@
  *   - Allocate the arrays outside this class and simply assign them to this instance using the
  *     property accessors. In this case, it is up to you to allocate and deallocate the memory
  *     used by the arrays.
- *   - Invoke one or more of the methods allocateFrameTimes, allocateLocations, allocateRotations,
- *     allocateQuaternions, and allocateScales to instruct this instance to allocate and manage the
- *     memory for the content array. You can then access the associated array via the frameTimes,
- *     animatedLocations, animatedRotations, animatedQuaternions, and animatedScales properties
- *     respectively. This instance will take care of releasing the arrays when appropriate.
+ *   - Invoke one or more of the methods allocateFrameTimes, allocateLocations, allocateQuaternions,
+ *     and allocateScales to instruct this instance to allocate and manage the memory for the content
+ *     array. You can then access the associated array via the frameTimes, animatedLocations,
+ *     animatedQuaternions, and animatedScales properties respectively. This instance will take
+ *     care of releasing the arrays when appropriate.
  */
 @interface CC3ArrayNodeAnimation : CC3NodeAnimation {
 	ccTime* _frameTimes;
 	CC3Vector* _animatedLocations;
-	CC3Vector* _animatedRotations;
 	CC3Quaternion* _animatedQuaternions;
 	CC3Vector* _animatedScales;
 	BOOL _frameTimesAreRetained : 1;
 	BOOL _locationsAreRetained : 1;
-	BOOL _rotationsAreRetained : 1;
 	BOOL _quaternionsAreRetained : 1;
 	BOOL _scalesAreRetained : 1;
 }
@@ -267,20 +261,6 @@
  * The initial value of this property is NULL.
  */
 @property(nonatomic, assign) CC3Vector* animatedLocations;
-
-/**
- * An array of animated rotation content. Each CC3Vector in the array holds the location content
- * for one frame of animation. The array must have at least frameCount elements.
- *
- * This property can be set to NULL to indicate that the rotation is not animated.
- *
- * The isAnimatingRotation property will return YES if this property is not NULL, and NO otherwise.
- *
- * Setting this property will safely free any memory allocated by the allocateRotations method.
- *
- * The initial value of this property is NULL.
- */
-@property(nonatomic, assign) CC3Vector* animatedRotations;
 
 /**
  * An array of animated rotation quaternion content. Each CC3Quaternion in the array holds the
@@ -333,17 +313,6 @@
 -(CC3Vector*) allocateLocations;
 
 /**
- * Allocates underlying memory for an array of rotation vectors.
- * All elements of the array are initialized to zero rotation.
- * The amount of memory allocated will be (frameCount * sizeof(CC3Vector)) bytes.
- *
- * It is safe to invoke this method more than once, but understand that any previously
- * allocated memory will be safely freed prior to the allocation of the new memory.
- * The memory allocated earlier will therefore be lost and should not be referenced.
- */
--(CC3Vector*) allocateRotations;
-
-/**
  * Allocates underlying memory for an array of quaternions vectors.
  * All elements of the array are initialized to the identity quaternion.
  * The amount of memory allocated will be (frameCount * sizeof(CC3Quaternion)) bytes.
@@ -384,15 +353,6 @@
 -(void) deallocateLocations;
 
 /**
- * Deallocates the underlying rotation array allocated with the allocateRotations method.
- * It is safe to invoke this method more than once, or even if allocateRotations was not
- * previously invoked.
- *
- * This method is invoked automatically when this instance is deallocated.
- */
--(void) deallocateRotations;
-
-/**
  * Deallocates the underlying quaternion array allocated with the allocateQuaternions method.
  * It is safe to invoke this method more than once, or even if allocateQuaternions was not
  * previously invoked.
@@ -430,14 +390,12 @@
 	CC3NodeAnimation* _animation;
 	ccTime _animationTime;
 	CC3Vector _location;
-	CC3Vector _rotation;
 	CC3Quaternion _quaternion;
 	CC3Vector _scale;
 	NSUInteger _trackID;
 	GLfloat _blendingWeight;
 	BOOL _isEnabled : 1;
 	BOOL _isLocationAnimationEnabled : 1;
-	BOOL _isRotationAnimationEnabled : 1;
 	BOOL _isQuaternionAnimationEnabled : 1;
 	BOOL _isScaleAnimationEnabled : 1;
 }
@@ -475,14 +433,6 @@
 @property(nonatomic, assign) BOOL isLocationAnimationEnabled;
 
 /**
- * Indicates whether animation of the rotation property of the node is enabled.
- *
- * The initial value of this property is YES. Setting this property to NO will disable animation
- * of the node's rotation property, but will permit other properties to be animated.
- */
-@property(nonatomic, assign) BOOL isRotationAnimationEnabled;
-
-/**
  * Indicates whether animation of the quaternion property of the node is enabled.
  *
  * The initial value of this property is YES. Setting this property to NO will disable animation
@@ -518,13 +468,6 @@
 @property(nonatomic, assign) CC3Vector location;
 
 /**
- * The current animated rotation.
- *
- * The value of this property is updated by the animation when the establishFrameAt: is invoked.
- */
-@property(nonatomic, assign) CC3Vector rotation;
-
-/**
  * The current animated rotation quaternion.
  *
  * The value of this property is updated by the animation when the establishFrameAt: is invoked.
@@ -551,13 +494,6 @@
  * of the contained animation, are set to YES.
  */
 @property(nonatomic, readonly) BOOL isAnimatingLocation;
-
-/**
- * Indicates whether the location property of the node is being animated. It is if both the
- * isRotationAnimationEnabled property of this instance, and the isAnimatingRotation property
- * of the contained animation, are set to YES.
- */
-@property(nonatomic, readonly) BOOL isAnimatingRotation;
 
 /**
  * Indicates whether the quaternion property of the node is being animated. It is if both the
@@ -587,10 +523,10 @@
 #pragma mark Updating
 
 /**
- * Updates the currentFrame, location, rotation, quaternion, and scale of this instance based on the
- * animation content found in the contained animation at the specified time, which should be a value
- * between zero and one, with zero indicating the first animation frame, and one indicating the last
- * animation frame.
+ * Updates the currentFrame, location, quaternion, and scale of this instance based on the
+ * animation content found in the contained animation at the specified time, which should
+ * be a value between zero and one, with zero indicating the first animation frame, and one
+ * indicating the last animation frame.
  */
 -(void) establishFrameAt: (ccTime) t;
 
