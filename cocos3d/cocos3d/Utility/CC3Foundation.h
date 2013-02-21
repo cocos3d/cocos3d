@@ -76,7 +76,6 @@ static inline NSString* NSStringFromCC3Version() {
 }
 
 
-
 #pragma mark -
 #pragma mark Integer vector structure and functions
 
@@ -98,6 +97,15 @@ static inline CC3IntPoint CC3IntPointMake(GLint x, GLint y) {
 	v.y = y;
 	return v;
 }
+
+/** A struct representing an integer tessellation. */
+typedef CC3IntPoint CC3Tessellation;
+
+/** Returns a CC3Tessellation structure constructed from the specified components. */
+static inline CC3Tessellation CC3TessellationMake(GLint x, GLint y) { return CC3IntPointMake(x, y); }
+
+/** Returns a string description of the specified CC3Tessellation struct in the form "(x, y)" */
+static inline NSString* NSStringFromCC3Tessellation(CC3Tessellation t) { return NSStringFromCC3IntPoint(t); }
 
 /** An integer 3D vector. */
 typedef struct {

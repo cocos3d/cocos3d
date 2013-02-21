@@ -341,13 +341,13 @@ static Class _defaultSemanticDelegateClass = nil;
 		   progName, NSStringFromSPVRTPFXParserShader(vShader), NSStringFromSPVRTPFXParserShader(fShader));
 
 	// Compile, link and cache the program
+	CC3PFXGLProgramSemantics* semanticDelegate = [self semanticDelegateFrom: pfxEffect
+															  fromPFXParser: pfxParser
+															  inPFXResource: pfxRez];
 	_glProgram = [[progClz alloc] initWithName: progName
+						   andSemanticDelegate: semanticDelegate
 						 fromVertexShaderBytes: [self getShaderCode: vShader]
 						andFragmentShaderBytes: [self getShaderCode: fShader]];		// retained
-
-	[self initGLProgramSemanticDelegateFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
-
-	[_glProgram link];
 	[progClz addProgram: _glProgram];		// Add the new program to the cache
 }
 
@@ -357,14 +357,13 @@ static Class _defaultSemanticDelegateClass = nil;
  */
 -(Class) glProgramClass { return [CC3GLProgram class]; }
 
-/** Template method to create, populate, and set the semantic delegate into the GL program. */
--(void) initGLProgramSemanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
-							fromPFXParser: (CPVRTPFXParser*) pfxParser
-							inPFXResource: (CC3PFXResource*) pfxRez {
+/** Template method to create, populate, and return the semantic delegate to use in the GL program. */
+-(CC3PFXGLProgramSemantics*) semanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
+									fromPFXParser: (CPVRTPFXParser*) pfxParser
+									inPFXResource: (CC3PFXResource*) pfxRez {
 	CC3PFXGLProgramSemantics* semanticDelegate = [pfxRez.semanticDelegateClass new];
 	[semanticDelegate populateWithVariableNameMappingsFromPFXEffect: self];
-	_glProgram.semanticDelegate = semanticDelegate;
-	[semanticDelegate release];
+	return [semanticDelegate autorelease];
 }
 
 /** Returns the vertex shader that was assigned the specified name in the PFX resource file. */

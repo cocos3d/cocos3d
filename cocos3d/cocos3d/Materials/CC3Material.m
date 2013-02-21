@@ -174,6 +174,22 @@
 	if (opacity < 255) self.isOpaque = NO;
 }
 
+-(ccColor3B) displayedColor { return self.color; }
+
+-(BOOL) isCascadeColorEnabled { return NO; }
+
+-(void) setCascadeColorEnabled:(BOOL)cascadeColorEnabled {}
+
+-(void) updateDisplayedColor: (ccColor3B) color {}
+
+-(GLubyte) displayedOpacity { return self.opacity; }
+
+-(BOOL) isCascadeOpacityEnabled { return NO; }
+
+-(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
+
+-(void) updateDisplayedOpacity: (GLubyte) opacity {}
+
 static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 +(ccBlendFunc) defaultBlendFunc { return defaultBlendFunc; }
@@ -558,8 +574,8 @@ static GLuint currentMaterialTag = 0;
 }
 
 -(BOOL) switchingMaterial {
-	BOOL shouldSwitch = currentMaterialTag != tag;
-	currentMaterialTag = tag;		// Set anyway - either it changes or it doesn't.
+	BOOL shouldSwitch = currentMaterialTag != _tag;
+	currentMaterialTag = _tag;		// Set anyway - either it changes or it doesn't.
 	return shouldSwitch;
 }
 

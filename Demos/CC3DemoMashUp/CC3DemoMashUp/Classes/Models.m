@@ -510,7 +510,7 @@
 							  andLineHeight: (GLfloat) lineHt
 						   andTextAlignment: (UITextAlignment) textAlign
 						  andRelativeOrigin: (CGPoint) origin
-							andTessellation: (ccGridSize) divsPerChar {
+							andTessellation: (CC3Tessellation) divsPerChar {
 	[super populateAsBitmapFontLabelFromString: lblString
 								  fromFontFile: fontFile
 								 andLineHeight: lineHt

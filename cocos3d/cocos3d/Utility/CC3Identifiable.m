@@ -33,13 +33,13 @@
 
 @implementation CC3Identifiable
 
-@synthesize tag, name, userData;
+@synthesize tag=_tag, name=_name, userData=_userData;
 
 static GLint instanceCount = 0;
 
 -(void) dealloc {
 	[self releaseUserData];
-	[name release];
+	[_name release];
 	instanceCount--;
 	[super dealloc];
 }
@@ -49,7 +49,7 @@ static GLint instanceCount = 0;
 }
 
 -(BOOL) deriveNameFrom: (CC3Identifiable*) another usingSuffix: (NSString*) suffix {
-	if (name) return NO;
+	if (_name) return NO;
 	NSString* otherName = another.name;
 	if ( !otherName ) return NO;
 	if ( !suffix ) return NO;
@@ -125,24 +125,16 @@ static GLint instanceCount = 0;
 // automatically incremented whenever the method nextTag is called.
 static GLuint lastAssignedTag;
 
--(GLuint) nextTag {
-	return ++lastAssignedTag;
-}
+-(GLuint) nextTag { return ++lastAssignedTag; }
 
-+(void) resetTagAllocation {
-	lastAssignedTag = 0;
-}
++(void) resetTagAllocation { lastAssignedTag = 0; }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ %@:%u", [self class], (name ? name : @"Unnamed"), tag];
+	return [NSString stringWithFormat: @"%@ %@:%u", [self class], (_name ? _name : @"Unnamed"), _tag];
 }
 
--(NSString*) fullDescription {
-	return [self description];
-}
+-(NSString*) fullDescription { return [self description]; }
 
-+(GLint) instanceCount {
-	return instanceCount;
-}
++(GLint) instanceCount { return instanceCount; }
 
 @end

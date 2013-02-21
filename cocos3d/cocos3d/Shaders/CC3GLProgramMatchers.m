@@ -155,10 +155,9 @@
 	
 	// Compile, link and cache the program
 	prog = [[progClz alloc] initWithName: progName
+					 andSemanticDelegate: self.semanticDelegate
 					fromVertexShaderFile: vshFilename
 				   andFragmentShaderFile: fshFilename];
-	prog.semanticDelegate = self.semanticDelegate;
-	[prog link];
 	[progClz addProgram: prog];		// Add the new program to the cache
 	[prog release];
 	return prog;

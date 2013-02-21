@@ -1526,8 +1526,8 @@ static GLuint currentMeshTag = 0;
  * to be bound to the GL engine before drawing.
  */
 -(BOOL) switchingMesh {
-	BOOL shouldSwitch = currentMeshTag != tag;
-	currentMeshTag = tag;		// Set anyway - either it changes or it doesn't.
+	BOOL shouldSwitch = currentMeshTag != _tag;
+	currentMeshTag = _tag;		// Set anyway - either it changes or it doesn't.
 	return shouldSwitch;
 }
 

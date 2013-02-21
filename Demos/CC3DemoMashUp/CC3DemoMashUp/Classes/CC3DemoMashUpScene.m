@@ -427,7 +427,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addGround {
 	ground = [CC3PlaneNode nodeWithName: kGroundName];
-	[ground populateAsDiskWithRadius: 1500 andTessellation: ccg(8, 32)];
+	[ground populateAsDiskWithRadius: 1500 andTessellation: CC3TessellationMake(8, 32)];
 	ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
 
 	// To experiment with repeating textures, uncomment the following line
@@ -567,7 +567,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Configure the rotating globe
 	globe = [CC3MeshNode nodeWithName: kGlobeName];		// not retained
-	[globe populateAsSphereWithRadius: 1.0f andTessellation: ccg(32, 32)];
+	[globe populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
 	globe.texture = [CC3Texture textureFromFile: texPath];
 	globe.location = cc3v(150.0, 200.0, -150.0);
 	globe.uniformScale = 50.0;
@@ -838,7 +838,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.radius = 50;
 	bmLabel.textAlignment = UITextAlignmentCenter;
 	bmLabel.relativeOrigin = ccp(0.5, 0.5);
-	bmLabel.tessellation = ccg(4, 1);
+	bmLabel.tessellation = CC3TessellationMake(4, 1);
 	bmLabel.fontFileName = @"Arial32BMGlyph.fnt";
 	bmLabel.labelString = @"Hello, world!";
 	bmLabelMessageIndex = 0;	// Keep track of which message is being displayed
@@ -953,7 +953,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Create wooden sign, starting with wood sign texture
 	woodenSign = [CC3PlaneNode nodeWithName: kSignName];
 	[woodenSign populateAsCenteredRectangleWithSize: CGSizeMake(150.0, 150.0)
-									andTessellation: ccg(4, 4)];
+									andTessellation: CC3TessellationMake(4, 4)];
 	woodenSign.texture = signTex;
 
 	// Add the stamp overlay texture
@@ -1642,7 +1642,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Sphere template mesh
 	CC3MeshNode* ballModel = [CC3MeshNode node];
-	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: ccg(8, 7)];
+	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: CC3TessellationMake(8, 7)];
 	ballModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
 	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
 	CC3Mesh* ballMesh = ballModel.mesh;
@@ -2497,9 +2497,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	dn.color = localNode.initialDescriptorColor;
 
 	// Use actions to fade the descriptor node in and then out, and remove it when done.
-	CCActionInterval* fadeIn = [CCFadeIn actionWithDuration: 0.3];
+	CCActionInterval* fadeIn = [CCFadeIn actionWithDuration: 0.2];
 	CCActionInterval* fadeOut = [CCFadeOut actionWithDuration: 5.0];
 	CCActionInstant* remove = [CC3Remove action];
+	dn.opacity = 0;		// Start invisible
 	[dn runAction: [CCSequence actions: fadeIn, fadeOut, remove, nil]];
 	
 	// Set the location of the descriptor node to the touch location,

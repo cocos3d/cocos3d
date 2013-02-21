@@ -63,7 +63,7 @@
 	[self removeAllChildren];
 	[_resource release];
 	_resource = [aResource retain];
-	if (!name) { self.name = self.resource.name; }
+	if (!_name) { self.name = self.resource.name; }
 	[self addResourceNodes];
 }
 

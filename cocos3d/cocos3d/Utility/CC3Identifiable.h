@@ -43,9 +43,9 @@
  * initializer, initWithTag:withName:.
  */
 @interface CC3Identifiable : NSObject <NSCopying> {
-	GLuint tag;
-	NSString* name;
-	void* userData;
+	GLuint _tag;
+	NSString* _name;
+	void* _userData;
 }
 
 /**

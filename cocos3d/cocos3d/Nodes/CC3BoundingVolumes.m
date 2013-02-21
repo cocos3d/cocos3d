@@ -921,7 +921,7 @@
 
 -(void) populateDisplayNode {
 	CC3BoundingVolumeDisplayNode* dn = self.displayNode;
-	[dn populateAsSphereWithRadius: self.radius andTessellation: ccg(24, 24)];
+	[dn populateAsSphereWithRadius: self.radius andTessellation: CC3TessellationMake(24, 24)];
 	[dn doNotBufferVertexContent];
 	dn.location = self.centerOfGeometry;
 }

@@ -139,19 +139,21 @@
 }
 
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis {
+							andTessellation: (CC3Tessellation) divsPerAxis {
 	[self populateAsRectangleWithSize: rectSize
 					andRelativeOrigin: ccp(0.5f, 0.5f)
 					  andTessellation: divsPerAxis];
 }
 
 -(void) populateAsRectangleWithSize: (CGSize) rectSize andRelativeOrigin: (CGPoint) origin {
-	[self populateAsRectangleWithSize: rectSize andRelativeOrigin: origin andTessellation: ccg(1, 1)];
+	[self populateAsRectangleWithSize: rectSize
+					andRelativeOrigin: origin
+					  andTessellation: CC3TessellationMake(1, 1)];
 }
 
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 				  andRelativeOrigin: (CGPoint) origin
-					andTessellation: (ccGridSize) divsPerAxis {
+					andTessellation: (CC3Tessellation) divsPerAxis {
 	
 	// Must be at least one tessellation face per side of the rectangle.
 	divsPerAxis.x = MAX(divsPerAxis.x, 1);
@@ -169,7 +171,7 @@
 	CGSize divTexSpan = CGSizeMake((1.0 / divsPerAxis.x), (1.0 / divsPerAxis.y));
 
 	// Get vertices per side.
-	ccGridSize verticesPerAxis;
+	CC3Tessellation verticesPerAxis;
 	verticesPerAxis.x = divsPerAxis.x + 1;
 	verticesPerAxis.y = divsPerAxis.y + 1;
 	GLuint vertexCount = verticesPerAxis.x * verticesPerAxis.y;
@@ -230,7 +232,7 @@
 
 #pragma mark Populating parametric circular disk
 
--(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs {
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) radialAndAngleDivs {
 	
 	// Must be at least one radial tessellation, and three angular tessellation.
 	GLuint numRadialDivs = MAX(radialAndAngleDivs.x, 1);
@@ -506,7 +508,7 @@ static const GLubyte wireBoxIndexData[] = {
 
 #pragma mark Populating parametric sphere
 
--(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis {
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) divsPerAxis {
 	
 	// Must be at least one tessellation face per side of the rectangle.
 	divsPerAxis.x = MAX(divsPerAxis.x, 3);
@@ -518,7 +520,7 @@ static const GLubyte wireBoxIndexData[] = {
 	GLfloat halfDivTexSpanWidth = divTexSpan.width * 0.5f;
 	
 	// Calculate number of vertices, triangles and indices.
-	ccGridSize verticesPerAxis;
+	CC3Tessellation verticesPerAxis;
 	verticesPerAxis.x = divsPerAxis.x + 1;
 	verticesPerAxis.y = divsPerAxis.y + 1;
 	GLuint vertexCount = verticesPerAxis.x * verticesPerAxis.y;
@@ -601,7 +603,7 @@ static const GLubyte wireBoxIndexData[] = {
 
 -(void) populateAsHollowConeWithRadius: (GLfloat) radius
 								height: (GLfloat) height
-					   andTessellation: (ccGridSize) angleAndHeightDivs {
+					   andTessellation: (CC3Tessellation) angleAndHeightDivs {
 	
 	// Must be at least one height tessellation, and three angular tessellation.
 	GLuint numAngularDivs = MAX(angleAndHeightDivs.x, 3);

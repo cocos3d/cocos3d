@@ -34,6 +34,20 @@
 #import "CC3Logging.h"
 #import "uthash.h"
 
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_DT dt
+#	define CC2_FRAME_RATE frameRate_
+#	define CC2_RUNNING_SCENE runningScene_
+#	define CC2_NEXT_SCENE nextScene_
+#	define CC2_LAST_DISPLAY_TIME lastDisplayTime_
+#else
+#	define CC2_DT _dt
+#	define CC2_FRAME_RATE _frameRate
+#	define CC2_RUNNING_SCENE _runningScene
+#	define CC2_NEXT_SCENE _nextScene
+#	define CC2_LAST_DISPLAY_TIME _lastDisplayTime
+#endif
+
 
 #pragma mark -
 #pragma mark CC3CCSizeTo action
@@ -97,9 +111,7 @@
 	return CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
 }
 
--(void) updateViewport {
-	[children_ makeObjectsPerformSelector:@selector(updateViewport)];	
-}
+-(void) updateViewport { [self.children makeObjectsPerformSelector:@selector(updateViewport)]; }
 
 -(CGPoint) cc3ConvertUIPointToNodeSpace: (CGPoint) viewPoint {
 	CGPoint glPoint = [[CCDirector sharedDirector] convertToGL: viewPoint];
@@ -230,11 +242,11 @@
 
 -(void) setCcGLView: (CCGLView*) ccGLView { self.view = ccGLView; }
 
--(ccTime) frameInterval { return dt; }
+-(ccTime) frameInterval { return CC2_DT; }
 
--(ccTime) frameRate { return frameRate_; }
+-(ccTime) frameRate { return CC2_FRAME_RATE; }
 
--(BOOL) hasScene { return !((runningScene_ == nil) && (nextScene_ == nil)); }
+-(BOOL) hasScene { return !((CC2_RUNNING_SCENE == nil) && (CC2_NEXT_SCENE == nil)); }
 
 -(NSTimeInterval) displayLinkTime { return [NSDate timeIntervalSinceReferenceDate]; }
 
@@ -292,7 +304,7 @@
 @implementation CCDirectorDisplayLink (CC3)
 
 #if CC3_CC2_2
--(NSTimeInterval) displayLinkTime { return lastDisplayTime_; }
+-(NSTimeInterval) displayLinkTime { return CC2_LAST_DISPLAY_TIME; }
 #endif
 
 @end
@@ -416,31 +428,6 @@
 }
 
 @end
-
-
-#pragma mark -
-#pragma mark CCGLProgram
-
-#if CC3_CC2_2
-@implementation CCGLProgram (CC3)
-
-#if COCOS2D_VERSION < 0x020100
--(GLuint) program { return program_; }
-#endif
-
-@end
-#endif
-
-#if CC3_CC2_1
-@implementation CCGLProgram
-
--(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
-			fragmentShaderByteArray: (const GLchar*) fShaderByteArray { return nil; }
-
--(void) link {}
-
-@end
-#endif
 
 
 #pragma mark -

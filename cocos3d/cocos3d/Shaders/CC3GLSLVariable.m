@@ -443,10 +443,10 @@
 	GLint maxNameLen = [_program maxAttributeNameLength];
 	char* cName = calloc(maxNameLen, sizeof(char));
 	
-	glGetActiveAttrib(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
+	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
 	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
 	
-	_location = glGetAttribLocation(_program.program, cName);
+	_location = glGetAttribLocation(_program.programID, cName);
 	LogGLErrorTrace(@"while retrieving location of attribute named %s at index %i in %@", cName, _index, self);
 	
 	[_name release];
@@ -485,7 +485,7 @@
 	GLint maxNameLen = [_program maxUniformNameLength];
 	char* cName = calloc(maxNameLen, sizeof(char));
 	
-	glGetActiveUniform(_program.program, _index, maxNameLen, NULL, &_size, &_type, cName);
+	glGetActiveUniform(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
 	LogGLErrorTrace(@"while retrieving spec for active uniform at index %i in %@", _index, self);
 	
 	_varLen = CC3GLElementTypeSize(_type) * _size;
@@ -494,7 +494,7 @@
 	free(_glVarValue);
 	_glVarValue = calloc(_varLen, 1);
 	
-	_location = glGetUniformLocation(_program.program, cName);
+	_location = glGetUniformLocation(_program.programID, cName);
 	LogGLErrorTrace(@"while retrieving location of active uniform named %s at index %i in %@", cName, _index, self);
 	
 	[_name release];

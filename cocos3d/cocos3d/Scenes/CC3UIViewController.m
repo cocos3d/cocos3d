@@ -53,13 +53,19 @@
 
 #pragma mark View management
 
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_VIEW view_
+#else
+#	define CC2_VIEW __view
+#endif
+
 #if CC3_CC2_1
 -(CCGLView*) view { return (CCGLView*)super.view; }
 #endif
 #if CC3_CC2_2
 // In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
 -(CCGLView*) view {
-	if ( !view_ ) {
+	if ( !CC2_VIEW ) {
 		[self loadView];
 		[self viewDidLoad];
 	}

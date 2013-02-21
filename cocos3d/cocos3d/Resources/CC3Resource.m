@@ -54,7 +54,7 @@
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading resources from file '%@'", absFilePath);
 	
-	if (!name) self.name = absFilePath.lastPathComponent;
+	if (!_name) self.name = absFilePath.lastPathComponent;
 	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
 	
 	MarkRezActivityStart();

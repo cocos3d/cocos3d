@@ -671,7 +671,7 @@
 }
 
 -(void) update: (ccTime) t {
-	CC3Node* node = target_;
+	CC3Node* node = self.target;
 	[node establishAnimationFrameAt: (_isReversed ? (1.0 - t) : t) onTrack: _trackID];
 }
 
@@ -716,7 +716,7 @@
 }
 
 -(void) update: (ccTime) t {
-	CC3Node* node = target_;
+	CC3Node* node = self.target;
 	[node setAnimationBlendingWeight: ((_endWeight - _startWeight) * t) forTrack: _trackID];
 }
 
@@ -752,15 +752,19 @@
 	return [[[self alloc] initWithAction: action limitFrom: startOfRange to: endOfRange] autorelease];
 }
 
--(void) update: (ccTime) t { [other update: (rangeStart + (rangeSpan * t))]; }
+-(void) update: (ccTime) t { [self.inner update: (rangeStart + (rangeSpan * t))]; }
 
 - (CCActionInterval *) reverse {
-	return [[self class] actionWithAction: other limitFrom: (rangeStart + rangeSpan) to: rangeStart];
+	return [[self class] actionWithAction: self.inner limitFrom: (rangeStart + rangeSpan) to: rangeStart];
 }
 
 -(id) copyWithZone: (NSZone*) zone {
-	return [[[self class] allocWithZone:zone] initWithAction: other limitFrom: rangeStart to: (rangeStart + rangeSpan)];
+	return [[[self class] allocWithZone:zone] initWithAction: self.inner limitFrom: rangeStart to: (rangeStart + rangeSpan)];
 }
+
+#if COCOS2D_VERSION < 0x020100
+-(CCActionInterval*) inner { return other; }
+#endif
 
 @end
 

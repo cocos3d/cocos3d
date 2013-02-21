@@ -38,12 +38,20 @@
 
 @implementation CC3OpenGLES2StateTrackerMaterialBlend
 
++(CC3GLESStateOriginalValueHandling) defaultOriginalValueHandling {
+	return kCC3GLESStateOriginalValueIgnore;
+}
+
++(BOOL) defaultShouldAlwaysSetGL { return YES; }
+
 -(void) initializeTrackers {
 	self.sourceBlend = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self
 																	forState: GL_BLEND_SRC_RGB];
 	self.destinationBlend = [CC3OpenGLESStateTrackerEnumeration trackerWithParent: self
 																		 forState: GL_BLEND_DST_RGB];
 }
+
+-(void) setGLValues { ccGLBlendFunc(sourceBlend.value, destinationBlend.value); }
 
 @end
 

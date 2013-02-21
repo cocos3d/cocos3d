@@ -34,6 +34,7 @@
 #import "CC3GLProgramMatchers.h"
 #import "CC3OpenGLESEngine.h"
 
+
 #pragma mark -
 #pragma mark CC3GLProgram
 
@@ -43,12 +44,13 @@
 
 @implementation CC3GLProgram
 
+@synthesize programID=_programID;
 @synthesize semanticDelegate=_semanticDelegate;
 @synthesize maxUniformNameLength=_maxUniformNameLength;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
 
 -(void) dealloc {
-	[_name release];
+	[self deleteGLProgram];
 	[_uniforms release];
 	[_attributes release];
 	[super dealloc];
@@ -57,10 +59,8 @@
 
 #pragma mark Variables
 
--(CC3GLSLUniform*) uniformNamed: (NSString*) name {
-	for (CC3GLSLUniform* var in _uniforms) {
-		if ( [var.name isEqualToString: name] ) return var;
-	}
+-(CC3GLSLUniform*) uniformNamed: (NSString*) varName {
+	for (CC3GLSLUniform* var in _uniforms) if ( [var.name isEqualToString: varName] ) return var;
 	return nil;
 }
 
@@ -79,8 +79,8 @@
 	return nil;
 }
 
--(CC3GLSLAttribute*) attributeNamed: (NSString*) name {
-	for (CC3GLSLAttribute* var in _attributes) if ( [var.name isEqualToString: name] ) return var;
+-(CC3GLSLAttribute*) attributeNamed: (NSString*) varName {
+	for (CC3GLSLAttribute* var in _attributes) if ( [var.name isEqualToString: varName] ) return var;
 	return nil;
 }
 
@@ -101,7 +101,182 @@
 
 #if CC3_OGLES_2
 
-#pragma mark Binding and linking
+#pragma mark Compiling and linking
+
+/**
+ * Compiles and links the underlying GL program from the specified vertex and fragment
+ * shader GLSL source code.
+ */
+-(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes
+				 andFragmentShaderBytes: (const GLchar*) fshBytes {
+	CC3Assert( !_programID, @"%@ already compliled and linked.", self);
+
+	_programID = glCreateProgram();
+	LogGLErrorTrace(@"while creating GL program in %@", self);
+
+	[self compileShader: GL_VERTEX_SHADER fromBytes: vshBytes];
+	[self compileShader: GL_FRAGMENT_SHADER fromBytes: fshBytes];
+	
+	[self link];
+}
+
+/** 
+ * Compiles the specified shader type from the specified GLSL source code, and returns the
+ * ID of the GL shader object.
+ */
+-(void) compileShader: (GLenum) shaderType fromBytes: (const GLchar*) source {
+	CC3Assert(source, @"%@ cannot complile empty GLSL source.", self);
+	
+	MarkRezActivityStart();
+	
+    GLuint shaderID = glCreateShader(shaderType);
+    glShaderSource(shaderID, 1, &source, NULL);
+	LogGLErrorTrace(@"while specifying shader %@ source in %@", NSStringFromGLEnum(shaderType), self);
+	
+    glCompileShader(shaderID);
+	LogGLErrorTrace(@"while compiling shader %@ in %@", NSStringFromGLEnum(shaderType), self);
+
+	CC3Assert([self getWasCompiled: shaderID], @"%@ failed to compile shader %@ because:\n%@",
+			  self, NSStringFromGLEnum(shaderType), [self getShaderLog: shaderID]);
+
+	glAttachShader(_programID, shaderID);
+	LogGLErrorTrace(@"while attaching shader %@ to GL program in %@", NSStringFromGLEnum(shaderType), self);
+
+    glDeleteShader(shaderID);
+	LogGLErrorTrace(@"while deleting shader %@ in %@", NSStringFromGLEnum(shaderType), self);
+	
+	LogRez(@"Compiled and attached %@ shader %@ in %.4f seconds", self, NSStringFromGLEnum(shaderType), GetRezActivityDuration());
+}
+
+/** Queries the GL engine and returns whether the shader with the specified GL ID was successfully compiled. */
+-(BOOL) getWasCompiled: (GLuint) shaderID {
+    GLint status;
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
+	LogGLErrorTrace(@"while retrieving shader compile status in %@", self);
+	return (status > 0);
+}
+
+/** Links the compiled vertex and fragment shaders into the GL program. */
+-(void) link {
+	CC3Assert(_programID, @"%@ requires the shaders to be compiled before linking.", self);
+	CC3Assert(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
+
+	MarkRezActivityStart();
+	
+    glLinkProgram(_programID);
+	LogGLErrorTrace(@"while linking %@", self);
+	
+	CC3Assert(self.getWasLinked, @"%@ could not be linked because:\n%@", self, self.getProgramLog);
+
+	LogRez(@"Linked %@ in %.4f seconds", self, GetRezActivityDuration());	// Timing before config vars
+
+	[self configureUniforms];
+	[self configureAttributes];
+
+	LogRez(@"Completed %@", self.fullDescription);
+}
+
+/** Queries the GL engine and returns whether the program was successfully linked. */
+-(BOOL) getWasLinked {
+    GLint status;
+    glGetProgramiv(_programID, GL_LINK_STATUS, &status);
+	LogGLErrorTrace(@"while retrieving link status in %@", self);
+	return (status > 0);
+}
+
+/** 
+ * Extracts information about the program uniform variables from the GL engine
+ * and creates a configuration instance for each.
+ */
+-(void) configureUniforms {
+	MarkRezActivityStart();
+	[_uniforms removeAllObjects];
+	
+	GLint varCnt;
+	glGetProgramiv(_programID, GL_ACTIVE_UNIFORMS, &varCnt);
+	LogGLErrorTrace(@"while retrieving number of active uniforms in %@", self);
+	glGetProgramiv(_programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
+	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
+	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
+		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
+		if ( [_semanticDelegate configureVariable: var] ) [_uniforms addObject: var];
+		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
+	}
+	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
+}
+
+/**
+ * Extracts information about the program vertex attribute variables from the GL engine
+ * and creates a configuration instance for each.
+ */
+-(void) configureAttributes {
+	MarkRezActivityStart();
+	[_attributes removeAllObjects];
+	
+	GLint varCnt;
+	glGetProgramiv(_programID, GL_ACTIVE_ATTRIBUTES, &varCnt);
+	LogGLErrorTrace(@"while retrieving number of active attributes in %@", self);
+	glGetProgramiv(_programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
+	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
+	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
+		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
+		if ( [_semanticDelegate configureVariable: var] ) [_attributes addObject: var];
+		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
+	}
+	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
+}
+
+// GL functions for retrieving log info
+typedef void ( GLInfoFunction (GLuint program, GLenum pname, GLint* params) );
+typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog) );
+
+/**
+ * Returns a string retrieved from the specified object, using the specified functions
+ * and length parameter name to retrieve the length and content.
+ */
+-(NSString*) getGLStringFor: (GLuint) glObjID
+		usingLengthFunction: (GLInfoFunction*) lengthFunc
+		 andLengthParameter: (GLenum) lenParamName
+		 andContentFunction: (GLLogFunction*) contentFunc {
+	GLint strLength = 0, charsRetrieved = 0;
+	
+	lengthFunc(glObjID, lenParamName, &strLength);
+	LogGLErrorTrace(@"while retrieving GL string length in %@", self);
+	if (strLength < 1) return nil;
+	
+	GLchar contentBytes[strLength];
+	contentFunc(glObjID, strLength, &charsRetrieved, contentBytes);
+	LogGLErrorTrace(@"while retrieving GL string content in %@", self);
+	
+	return [NSString stringWithUTF8String: contentBytes];
+}
+
+/** Returns the GL source for the specified shader. */
+-(NSString*) getShaderSource: (GLuint) shaderID {
+	return [self getGLStringFor: shaderID
+			usingLengthFunction: glGetShaderiv
+			 andLengthParameter: GL_SHADER_SOURCE_LENGTH
+			 andContentFunction: glGetShaderSource];
+}
+
+/** Returns the GL log for the specified shader. */
+-(NSString*) getShaderLog: (GLuint) shaderID {
+	return [self getGLStringFor: shaderID
+			usingLengthFunction: glGetShaderiv
+			 andLengthParameter: GL_INFO_LOG_LENGTH
+			 andContentFunction: glGetShaderInfoLog];
+}
+
+/** Returns the GL status log for the GL program. */
+-(NSString*) getProgramLog {
+	return [self getGLStringFor: _programID
+			usingLengthFunction: glGetProgramiv
+			 andLengthParameter: GL_INFO_LOG_LENGTH
+			 andContentFunction: glGetProgramInfoLog];
+}
+
+
+#pragma mark Binding
 
 // Cache this program in the GL state tracker, bind the program to the GL engine,
 // and populate the uniforms into the GL engine, allowing the context to override first.
@@ -109,7 +284,9 @@
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {
 	LogTrace(@"Binding program %@ for %@", self, visitor.currentNode);
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
-	[self use];
+	
+	ccGLUseProgram(_programID);
+
 	for (CC3GLSLUniform* var in _uniforms)
 		if ([context populateUniform: var withVisitor: visitor] ||
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
@@ -120,139 +297,47 @@
 		}
 }
 
--(BOOL) compileShader: (GLuint*) shader type: (GLenum) type byteArray: (const GLchar*) source {
-    GLint status;
-	
-    if (!source) return NO;
-
-	MarkRezActivityStart();
-	
-    *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &source, NULL);
-	LogGLErrorTrace(@"while specifying %@ shader source in %@", NSStringFromGLEnum(type), self);
-
-    glCompileShader(*shader);
-	LogGLErrorTrace(@"while compiling %@ shader in %@", NSStringFromGLEnum(type), self);
-	
-    glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
-	LogGLErrorTrace(@"while retrieving %@ shader status in %@", NSStringFromGLEnum(type), self);
-	
-	if( !status ) {
-		GLsizei length;
-		glGetShaderiv(*shader, GL_SHADER_SOURCE_LENGTH, &length);
-		LogGLErrorTrace(@"while retrieving %@ shader source length in %@", NSStringFromGLEnum(type), self);
-
-		GLchar src[length];
-		glGetShaderSource(*shader, length, NULL, src);
-		LogGLErrorTrace(@"while retrieving %@ shader source in %@", NSStringFromGLEnum(type), self);
-
-		LogError(@"Failed to compile %@ shader in %@:\n%s", NSStringFromGLEnum(type), self, src);
-		LogError(@"Compilation error log: %@",
-				 (type == GL_VERTEX_SHADER ? [self vertexShaderLog] : [self fragmentShaderLog]));
-	}
-	 CC3Assert(status, @"Error compiling %@ shader in %@", NSStringFromGLEnum(type), self);
-	LogRez(@"Compiled %@ %@ in %.4f seconds", self, NSStringFromGLEnum(type), GetRezActivityDuration());
-	return (status == GL_TRUE);
-}
-
--(BOOL) link {
-	CC3Assert(_semanticDelegate, @"%@ requires the semanticDelegate property be set before linking.", self);
-	MarkRezActivityStart();
-	BOOL wasLinked = [super link];
-	CC3Assert(wasLinked, @"%@ could not be linked. See previously logged error.", self);
-	if (wasLinked) {
-		LogRez(@"Linked %@ in %.4f seconds", self, GetRezActivityDuration());	// Timing before config vars
-		[self configureVariables];
-		LogRez(@"Completed %@", self.fullDescription);
-	}
-	return wasLinked;
-}
-
--(void) configureVariables {
-	[self configureUniforms];
-	[self configureAttributes];
-}
-
--(void) configureUniforms {
-	MarkRezActivityStart();
-	[_uniforms removeAllObjects];
-	
-	GLint varCnt;
-	glGetProgramiv(program_, GL_ACTIVE_UNIFORMS, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active uniforms in %@", self);
-	glGetProgramiv(program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
-	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
-	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
-		if ( [_semanticDelegate configureVariable: var] ) [_uniforms addObject: var];
-		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
-	}
-	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
-}
-
--(void) configureAttributes {
-	MarkRezActivityStart();
-	[_attributes removeAllObjects];
-	
-	GLint varCnt;
-	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTES, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active attributes in %@", self);
-	glGetProgramiv(program_, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
-	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
-	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
-		if ( [_semanticDelegate configureVariable: var] ) [_attributes addObject: var];
-		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
-	}
-	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
-}
-
-// Overridden to do nothing
--(void) updateUniforms {}
+-(void) deleteGLProgram { if (_programID) ccGLDeleteProgram(_programID); }
 
 #endif
 
 #if CC3_OGLES_1
+-(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {}
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {}
--(BOOL) link { return NO; }
+-(void) deleteGLProgram {}
 #endif
 
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {
+-(id) initWithName: (NSString*) name
+andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
+fromVertexShaderBytes: (const GLchar*) vshBytes
+andFragmentShaderBytes: (const GLchar*) fshBytes {
 	CC3Assert(name, @"%@ cannot be created without a name", [self class]);
-	self.name = name;				// retained - set name before init for logging during compilation
-	if ( (self = [super initWithVertexShaderByteArray: vshBytes
-							  fragmentShaderByteArray: fshBytes]) ) {
+	if ( (self = [super initWithName: name]) ) {
 		_uniforms = [CCArray new];		// retained
 		_attributes = [CCArray new];	// retained
 		_maxUniformNameLength = 0;
 		_maxAttributeNameLength = 0;
+		_semanticDelegate = [semanticDelegate retain];
+		[self compileAndLinkVertexShaderBytes: vshBytes andFragmentShaderBytes: fshBytes];
 	}
 	return self;
 }
 
--(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {
+-(id) initWithName: (NSString*) name
+andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
+fromVertexShaderFile: (NSString*) vshFilename
+andFragmentShaderFile: (NSString*) fshFilename {
 	LogRez(@"");
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading GLSL program named %@ from vertex shader file '%@' and fragment shader file '%@'", name, vshFilename, fshFilename);
-		   
-	const GLchar* vshSrc = [self.class glslSourceFromFile: vshFilename];
-	const GLchar* fshSrc = [self.class glslSourceFromFile: fshFilename];
-	return [self initWithName: name fromVertexShaderBytes: vshSrc andFragmentShaderBytes: fshSrc];
-}
 
-// Overridden superclass implementation to require a name
--(id)initWithVertexShaderByteArray: (const GLchar*)vShaderByteArray fragmentShaderByteArray: (const GLchar*)fShaderByteArray {
-	CC3Assert(NO, @"%@ instances require a name. Use initWithName:fromVertexShaderBytes:andFragmentShaderBytes: instead", [self class]);
-	return nil;
-}
-
-// Overridden superclass implementation to require a name
--(id) initWithVertexShaderFilename: (NSString*) vshFilename fragmentShaderFilename: fshFilename {
-	CC3Assert(NO, @"%@ instances require a name. Use initWithName:fromVertexShaderFile:andFragmentShaderFile: instead", [self class]);
-	return nil;
+	return [self initWithName: name
+		  andSemanticDelegate: semanticDelegate
+		fromVertexShaderBytes: [self.class glslSourceFromFile: vshFilename]
+	   andFragmentShaderBytes: [self.class glslSourceFromFile: fshFilename]];
 }
 
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename
@@ -282,6 +367,15 @@
 	for (CC3GLSLVariable* var in _uniforms) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	return desc;
 }
+
+
+#pragma mark Tag allocation
+
+static GLuint _lastAssignedProgramTag = 0;
+
+-(GLuint) nextTag { return ++_lastAssignedProgramTag; }
+
++(void) resetTagAllocation { _lastAssignedProgramTag = 0; }
 
 
 #pragma mark Program cache

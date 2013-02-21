@@ -209,7 +209,7 @@
 	
 	// Globe with texture
 	CC3MeshNode* meshNode = [CC3MeshNode nodeWithName: kGlobeName];
-	[meshNode populateAsSphereWithRadius: 1.0f andTessellation: ccg(32, 32)];
+	[meshNode populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
 	meshNode.texture = [CC3Texture textureFromFile: kGlobeTextureFile];
 	meshNode.name = @"Textured sphere with high face-count";
 	meshNode.rotation = cc3v(0.0, -90.0, 0.0);	// starting rotation

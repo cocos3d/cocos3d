@@ -237,6 +237,8 @@ typedef enum {
 	BOOL shouldUseFixedBoundingVolume : 1;
 	BOOL shouldStopActionsWhenRemoved : 1;
 	BOOL _isAnimationDirty : 1;
+	BOOL _cascadeColorEnabled;
+	BOOL _cascadeOpacityEnabled;
 }
 
 /**

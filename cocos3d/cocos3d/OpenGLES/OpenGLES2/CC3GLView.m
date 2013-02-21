@@ -33,6 +33,28 @@
 
 #if CC3_CC2_2
 
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_REQUESTED_SAMPLES requestedSamples_
+#	define CC2_RENDERER renderer_
+#	define CC2_SIZE size_
+#	define CC2_BACKING_WIDTH backingWidth_
+#	define CC2_BACKING_HEIGHT backingHeight_
+#	define CC2_SAMPLES_TO_USE samplesToUse_
+#	define CC2_DEPTH_BUFFER depthBuffer_
+#	define CC2_DEPTH_FORMAT depthFormat_
+#	define CC2_MULTISAMPLING multiSampling_
+#else
+#	define CC2_REQUESTED_SAMPLES _requestedSamples
+#	define CC2_RENDERER _renderer
+#	define CC2_SIZE _size
+#	define CC2_BACKING_WIDTH _backingWidth
+#	define CC2_BACKING_HEIGHT _backingHeight
+#	define CC2_SAMPLES_TO_USE _samplesToUse
+#	define CC2_DEPTH_BUFFER _depthBuffer
+#	define CC2_DEPTH_FORMAT _depthFormat
+#	define CC2_MULTISAMPLING _multiSampling
+#endif
+
 #import "CC3Logging.h"
 #import "CCConfiguration.h"
 #import "CC3OpenGLESEngine.h"
@@ -44,7 +66,7 @@
 
 @implementation CCGLView (CC3)
 
--(GLuint) pixelSamples { return requestedSamples_; }
+-(GLuint) pixelSamples { return CC2_REQUESTED_SAMPLES; }
 
 -(void) openPicking {
 	CC3Assert( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
@@ -65,11 +87,11 @@
 
 @implementation CC3GLView
 
--(GLuint) pixelSamples { return ((CC3ES2Renderer*)renderer_).pixelSamples; }
+-(GLuint) pixelSamples { return ((CC3ES2Renderer*)CC2_RENDERER).pixelSamples; }
 
--(void) openPicking { [((CC3ES2Renderer*)renderer_) openPicking]; }
+-(void) openPicking { [((CC3ES2Renderer*)CC2_RENDERER) openPicking]; }
 
--(void) closePicking { [((CC3ES2Renderer*)renderer_) closePicking]; }
+-(void) closePicking { [((CC3ES2Renderer*)CC2_RENDERER) closePicking]; }
 
 /** Forces the underlying renderer to be created as a CC3ES2Renderer. */
 -(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
@@ -81,9 +103,9 @@
 
 /** Overridden to read the new viewport GL value after the new window size is set. */
 -(void) layoutSubviews {
-	[renderer_ resizeFromLayer: (CAEAGLLayer*)self.layer];
-	size_ = [renderer_ backingSize];
-	[CCDirector.sharedDirector reshapeProjection: size_];			// Issue #914 #924
+	[CC2_RENDERER resizeFromLayer: (CAEAGLLayer*)self.layer];
+	CC2_SIZE = [CC2_RENDERER backingSize];
+	[CCDirector.sharedDirector reshapeProjection: CC2_SIZE];		// Issue #914 #924
 	[CC3OpenGLESEngine.engine.state.viewport readOriginalValue];	// Added for cocos3d
 	
 	// Notify controller...already done in iOS5 & above
@@ -142,7 +164,7 @@ static Class _instantiationClass = nil;
 /** Bypass the superclass alloc, which can redirect back here, causing an infinite loop. */
 +(id) alloc { return [self allocBase]; }
 
--(GLuint) pixelSamples { return samplesToUse_; }
+-(GLuint) pixelSamples { return CC2_SAMPLES_TO_USE; }
 
 -(id) initWithDepthFormat: (GLuint) depthFormat
 		   withPixelFormat: (GLuint) pixelFormat
@@ -167,8 +189,8 @@ static Class _instantiationClass = nil;
 	
 	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8_OES).
 	// Attach it to the framebuffer.
-	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8_OES || depthFormat_ == GL_UNSIGNED_INT_24_8_OES)) {
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
+	if (wasSuccessful && (CC2_DEPTH_FORMAT == GL_DEPTH24_STENCIL8_OES || CC2_DEPTH_FORMAT == GL_UNSIGNED_INT_24_8_OES)) {
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, CC2_DEPTH_BUFFER);
 	}
 	return wasSuccessful;
 }
@@ -185,7 +207,7 @@ static Class _instantiationClass = nil;
 }
 
 -(void) openPicking {
-	if ( !multiSampling_ ) return;
+	if ( !CC2_MULTISAMPLING ) return;
 
 	if ( !_pickerFrameBuffer ) {
 		
@@ -196,12 +218,12 @@ static Class _instantiationClass = nil;
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, self.colorRenderBuffer);
 		
 		// Generate a new depth render buffer and bind it to picker FBO
-		if (depthFormat_) {
+		if (CC2_DEPTH_FORMAT) {
 			glGenRenderbuffers(1, &_pickerDepthBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, _pickerDepthBuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, depthFormat_, backingWidth_, backingHeight_);
+			glRenderbufferStorage(GL_RENDERBUFFER, CC2_DEPTH_FORMAT, CC2_BACKING_WIDTH, CC2_BACKING_HEIGHT);
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _pickerDepthBuffer);
-			LogTrace(@"Picker depth buffer %u format: %x, w: %i h: %i", _pickerDepthBuffer, depthFormat_, backingWidth_, backingHeight_);
+			LogTrace(@"Picker depth buffer %u format: %x, w: %i h: %i", _pickerDepthBuffer, CC2_DEPTH_FORMAT, CC2_BACKING_WIDTH, CC2_BACKING_HEIGHT);
 		}
 		// Verify the framebuffer
 		GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -219,7 +241,7 @@ static Class _instantiationClass = nil;
 	}
 }
 
--(void) closePicking { if (multiSampling_) glBindFramebuffer(GL_FRAMEBUFFER, self.msaaFrameBuffer); }
+-(void) closePicking { if (CC2_MULTISAMPLING) glBindFramebuffer(GL_FRAMEBUFFER, self.msaaFrameBuffer); }
 
 @end
 

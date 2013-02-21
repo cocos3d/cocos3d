@@ -292,13 +292,13 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	_baseline = [propertyValue intValue];
 	
 	propertyValue = [nse nextObject];				// Width scale
-	_textureSize.x = [propertyValue intValue];
+	_textureSize.width = [propertyValue intValue];
 	
 	propertyValue = [nse nextObject];				// Height scale
-	_textureSize.y = [propertyValue intValue];
+	_textureSize.height = [propertyValue intValue];
 
-	CC3Assert(_textureSize.x <= CCConfiguration.sharedConfiguration.maxTextureSize &&
-			  _textureSize.y <= CCConfiguration.sharedConfiguration.maxTextureSize,
+	CC3Assert(_textureSize.width <= CCConfiguration.sharedConfiguration.maxTextureSize &&
+			  _textureSize.height <= CCConfiguration.sharedConfiguration.maxTextureSize,
 			  @"Font texture can't be larger than supported");
 	
 	propertyValue = [nse nextObject];				// Pages sanity check
@@ -345,7 +345,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 							  andLineHeight: (GLfloat) lineHeight
 						   andTextAlignment: (UITextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
-							andTessellation: (ccGridSize) divsPerChar {
+							andTessellation: (CC3Tessellation) divsPerChar {
 	
 	CC3BitmapFontConfiguration* fontConfig = [CC3BitmapFontConfiguration configurationFromFontFile: fontFileName];
 	
@@ -434,9 +434,9 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	}
 }
 
--(ccGridSize) tessellation { return tessellation; }
+-(CC3Tessellation) tessellation { return tessellation; }
 
--(void) setTessellation: (ccGridSize) aGrid {
+-(void) setTessellation: (CC3Tessellation) aGrid {
 	if ( !((aGrid.x == tessellation.x) && (aGrid.y == tessellation.y)) ) {
 		tessellation = aGrid;
 		[self populateLabelMesh];
@@ -479,7 +479,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 		lineHeight = 0;
 		textAlignment = UITextAlignmentLeft;
 		relativeOrigin = ccp(0,0);
-		tessellation = ccg(1,1);
+		tessellation = CC3TessellationMake(1,1);
 	}
 	return self;
 }
@@ -518,7 +518,7 @@ typedef struct {
 							  andLineHeight: (GLfloat) lineHeight
 						   andTextAlignment: (UITextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
-							andTessellation: (ccGridSize) divsPerChar {
+							andTessellation: (CC3Tessellation) divsPerChar {
 	
 	CGPoint charPos, adjCharPos;
 	CGSize layoutSize;
@@ -613,9 +613,9 @@ typedef struct {
 				[self setVertexNormal: kCC3VectorUnitZPositive at: vIdx];
 				
 				// Vertex texture coordinates, inverted vertically, because we're working top-down.
-				ccGridSize texSize = fontConfig.textureSize;
-				GLfloat u = (charSpec->rect.origin.x + (divSize.width * ix)) / texSize.x;
-				GLfloat v = (charSpec->rect.origin.y + (divSize.height * iy)) / texSize.y;
+				CGSize texSize = fontConfig.textureSize;
+				GLfloat u = (charSpec->rect.origin.x + (divSize.width * ix)) / texSize.width;
+				GLfloat v = (charSpec->rect.origin.y + (divSize.height * iy)) / texSize.height;
 				[self setVertexTexCoord2F: cc3tc(u, v) at: vIdx];
 				
 				// In the grid of division quads for each character, each vertex that is not

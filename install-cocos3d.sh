@@ -201,7 +201,13 @@ link_cocos2d_libs(){
 
 	link_dir "$CC2_DIST_DIR/cocos2d" "$CC2_DIR" "cocos2d"
 
-	link_dir "$CC2_DIST_DIR/CocosDenshion/CocosDenshion" "$CC2_DIR" "CocosDenshion"
+	# Depending on cocos2d release, CocosDenshion might be in subdirectory
+	CDEN_DIST_DIR="$CC2_DIST_DIR/CocosDenshion"
+	if [[ -d "$CDEN_DIST_DIR/CocosDenshion" ]]; then
+		link_dir "$CDEN_DIST_DIR/CocosDenshion" "$CC2_DIR" "CocosDenshion"
+	else
+		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
+	fi
 
 	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.x only)"
 

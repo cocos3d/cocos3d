@@ -69,7 +69,7 @@
 }
 
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis {
+							andTessellation: (CC3Tessellation) divsPerAxis {
 	[[self prepareParametricMesh] populateAsCenteredRectangleWithSize: rectSize
 													  andTessellation: divsPerAxis];
 }
@@ -80,7 +80,7 @@
 
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 				  andRelativeOrigin: (CGPoint) origin
-					andTessellation: (ccGridSize) divsPerAxis {
+					andTessellation: (CC3Tessellation) divsPerAxis {
 	[[self prepareParametricMesh] populateAsRectangleWithSize: rectSize
 											andRelativeOrigin: origin
 											  andTessellation: divsPerAxis];
@@ -89,7 +89,7 @@
 
 #pragma mark Populating parametric circular disk
 
--(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs {
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) radialAndAngleDivs {
 	[[self prepareParametricMesh] populateAsDiskWithRadius: radius andTessellation: radialAndAngleDivs];
 }
 
@@ -118,7 +118,7 @@
 #pragma mark Populating parametric sphere
 
 // After populating, set spherical bounding volume
--(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis {
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) divsPerAxis {
 	[[self prepareParametricMesh] populateAsSphereWithRadius: radius andTessellation: divsPerAxis];
 	self.boundingVolume = [CC3NodeSphericalBoundingVolume boundingVolume];
 }
@@ -128,7 +128,7 @@
 
 -(void) populateAsHollowConeWithRadius: (GLfloat) radius
 								height: (GLfloat) height
-					   andTessellation: (ccGridSize) angleAndHeightDivs {
+					   andTessellation: (CC3Tessellation) angleAndHeightDivs {
 	[[self prepareParametricMesh] populateAsHollowConeWithRadius: radius
 														  height: height
 												 andTessellation: angleAndHeightDivs];
@@ -351,7 +351,7 @@
 // Deprecated
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) divsPerAxis {
+					andTessellation: (CC3Tessellation) divsPerAxis {
 	[self populateAsRectangleWithSize: rectSize
 					andRelativeOrigin: CC3RelOrigin(pivot, rectSize)
 					  andTessellation: divsPerAxis];
@@ -360,7 +360,7 @@
 // Deprecated
 -(void) deprecatedPopulateAsRectangleWithSize: (CGSize) rectSize
 									 andPivot: (CGPoint) pivot
-							  andTessellation: (ccGridSize) divsPerAxis
+							  andTessellation: (CC3Tessellation) divsPerAxis
 								  withTexture: (CC3Texture*) texture
 								invertTexture: (BOOL) shouldInvert {
 	
@@ -383,14 +383,14 @@
 							  invertTexture: (BOOL) shouldInvert {
 	[self deprecatedPopulateAsRectangleWithSize: rectSize
 									   andPivot: ccp(rectSize.width / 2.0, rectSize.height / 2.0)
-								andTessellation: ccg(1, 1)
+								andTessellation: CC3TessellationMake(1, 1)
 									withTexture: texture
 								  invertTexture: shouldInvert];
 }
 
 // Deprecated
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis
+							andTessellation: (CC3Tessellation) divsPerAxis
 								withTexture: (CC3Texture*) texture
 							  invertTexture: (BOOL) shouldInvert {
 	[self deprecatedPopulateAsRectangleWithSize: rectSize
@@ -407,7 +407,7 @@
 					  invertTexture: (BOOL) shouldInvert {
 	[self deprecatedPopulateAsRectangleWithSize: rectSize
 									   andPivot: pivot
-								andTessellation: ccg(1, 1)
+								andTessellation: CC3TessellationMake(1, 1)
 									withTexture: texture
 								  invertTexture: shouldInvert];
 }
@@ -415,7 +415,7 @@
 // Deprecated
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) divsPerAxis
+					andTessellation: (CC3Tessellation) divsPerAxis
 						withTexture: (CC3Texture*) texture
 					  invertTexture: (BOOL) shouldInvert {
 	[self deprecatedPopulateAsRectangleWithSize: rectSize
@@ -432,7 +432,7 @@
 
 // Deprecated
 -(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
-									andTessellation: (ccGridSize) divsPerAxis {
+									andTessellation: (CC3Tessellation) divsPerAxis {
 	[self populateAsCenteredRectangleWithSize: rectSize andTessellation: divsPerAxis];
 }
 
@@ -444,7 +444,7 @@
 // Deprecated
 -(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
 								   andPivot: (CGPoint) pivot
-							andTessellation: (ccGridSize) divsPerAxis {
+							andTessellation: (CC3Tessellation) divsPerAxis {
 	[self populateAsRectangleWithSize: rectSize
 					andRelativeOrigin: CC3RelOrigin(pivot, rectSize)
 					  andTessellation: divsPerAxis];

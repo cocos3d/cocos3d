@@ -878,7 +878,7 @@
 }
 
 -(void) setColor: (ccColor3B) color {
-	for (CC3Node* child in children) child.color = color;
+	if (_cascadeColorEnabled) for (CC3Node* child in children) child.color = color;
 }
 
 -(GLubyte) opacity {
@@ -895,8 +895,28 @@
 }
 
 -(void) setOpacity: (GLubyte) opacity {
-	for (CC3Node* child in children) child.opacity = opacity;
+	if (_cascadeOpacityEnabled) for (CC3Node* child in children) child.opacity = opacity;
 }
+
+-(ccColor3B) displayedColor { return self.color; }
+
+-(BOOL) isCascadeColorEnabled { return _cascadeColorEnabled; }
+
+-(void) setCascadeColorEnabled: (BOOL) cascadeColorEnabled {
+	_cascadeColorEnabled = cascadeColorEnabled;
+}
+
+-(void) updateDisplayedColor: (ccColor3B) color {}
+
+-(GLubyte) displayedOpacity { return self.opacity; }
+
+-(BOOL) isCascadeOpacityEnabled { return _cascadeOpacityEnabled; }
+
+-(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {
+	_cascadeOpacityEnabled = cascadeOpacityEnabled;
+}
+
+-(void) updateDisplayedOpacity: (GLubyte) opacity {}
 
 -(BOOL) isOpaque {
 	for (CC3Node* child in children) if(!child.isOpaque) return NO;
@@ -982,6 +1002,8 @@
 		isRunning = NO;
 		shouldStopActionsWhenRemoved = YES;
 		shouldAutoremoveWhenEmpty = NO;
+		_cascadeColorEnabled = YES;
+		_cascadeOpacityEnabled = YES;
 		self.transformMatrix = [CC3AffineMatrix matrix];		// Has side effects...so do last (transformMatrixInverted is built in some subclasses)
 	}
 	return self;
@@ -1056,6 +1078,9 @@
 	isRunning = another.isRunning;
 	shouldStopActionsWhenRemoved = another.shouldStopActionsWhenRemoved;
 	shouldAutoremoveWhenEmpty = another.shouldAutoremoveWhenEmpty;
+	_cascadeColorEnabled = another.isCascadeColorEnabled;
+	_cascadeOpacityEnabled = another.isCascadeOpacityEnabled;
+	
 	self.shouldDrawDescriptor = another.shouldDrawDescriptor;		// May create a child node
 	self.shouldDrawWireframeBox = another.shouldDrawWireframeBox;	// May create a child node
 }
@@ -1833,7 +1858,7 @@ static GLuint lastAssignedNodeTag;
 
 -(CC3Node*) getNodeNamed: (NSString*) aName {
 	// First see if it's me
-	if ([name isEqual: aName] || (!name && !aName)) return self;
+	if ([_name isEqual: aName] || (!_name && !aName)) return self;
 
 	for (CC3Node* child in children) {
 		CC3Node* childResult = [child getNodeNamed: aName];
@@ -1843,7 +1868,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 -(CC3Node*) getNodeTagged: (GLuint) aTag {
-	if (tag == aTag) return self;
+	if (_tag == aTag) return self;
 	for (CC3Node* child in children) {
 		CC3Node* childResult = [child getNodeTagged: aTag];
 		if (childResult) return childResult;

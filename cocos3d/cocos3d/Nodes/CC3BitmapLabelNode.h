@@ -76,7 +76,7 @@ typedef struct {
 	NSString* _atlasName;
 	NSInteger _commonHeight;
 	CC3BitmapFontPadding _padding;
-	ccGridSize _textureSize;
+	CGSize _textureSize;
 	GLfloat _fontSize;
 	NSUInteger _baseline;
 }
@@ -96,8 +96,8 @@ typedef struct {
 /** Returns the padding for the font. */
 @property (nonatomic, readonly) CC3BitmapFontPadding padding;
 
-/** Returns the size of the texture. */
-@property (nonatomic, readonly) ccGridSize textureSize;
+/** Returns the size of the texture in pixels. */
+@property (nonatomic, readonly) CGSize textureSize;
 
 /** Returns a pointer to the specification of the specified character. */
 -(CC3BitmapCharDef*) characterSpecFor: (unichar) c;
@@ -202,7 +202,7 @@ typedef struct {
 							  andLineHeight: (GLfloat) lineHeight
 						   andTextAlignment: (UITextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
-							andTessellation: (ccGridSize) divsPerChar;
+							andTessellation: (CC3Tessellation) divsPerChar;
 
 @end
 
@@ -254,7 +254,7 @@ typedef struct {
 	CC3BitmapFontConfiguration* fontConfig;
 	UITextAlignment textAlignment;
 	CGPoint relativeOrigin;
-	ccGridSize tessellation;
+	CC3Tessellation tessellation;
 	GLfloat lineHeight;
 }
 
@@ -338,7 +338,7 @@ typedef struct {
  *
  * This property can be changed at any time.
  */
-@property(nonatomic, assign) ccGridSize tessellation;
+@property(nonatomic, assign) CC3Tessellation tessellation;
 
 /**
  * Returns the nominal size of the font, in points or pixels.
@@ -426,7 +426,7 @@ typedef struct {
 							  andLineHeight: (GLfloat) lineHeight
 						   andTextAlignment: (UITextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
-							andTessellation: (ccGridSize) divsPerChar;
+							andTessellation: (CC3Tessellation) divsPerChar;
 
 @end
 

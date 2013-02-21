@@ -168,7 +168,7 @@
  * and the mesh will be populated with location, normal and texture coordinates for each vertex.
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis;
+							andTessellation: (CC3Tessellation) divsPerAxis;
 
 /**
  * Populates this instance as a simple rectangular mesh of the specified size, with the specified
@@ -245,7 +245,7 @@
  */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 				  andRelativeOrigin: (CGPoint) origin
-					andTessellation: (ccGridSize) divsPerAxis;
+					andTessellation: (CC3Tessellation) divsPerAxis;
 
 
 #pragma mark Populating parametric circular disk
@@ -292,7 +292,7 @@
  * of (kCC3VertexContentLocation | kCC3VertexContentNormal | kCC3VertexContentTextureCoordinate).
  * and the mesh will be populated with location, normal and texture coordinates for each vertex.
  */
--(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs;
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) radialAndAngleDivs;
 
 
 #pragma mark Populating parametric boxes
@@ -503,7 +503,7 @@
  * The boundingVolume of this node is automatically set to a spherical shape (an instance of 
  * CC3NodeSphericalBoundingVolume) to match the shape of this mesh.
  */
--(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis;
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) divsPerAxis;
 
 
 #pragma mark Populating parametric cone
@@ -548,7 +548,7 @@
  */
 -(void) populateAsHollowConeWithRadius: (GLfloat) radius
 								height: (GLfloat) height
-					   andTessellation: (ccGridSize) angleAndHeightDivs;
+					   andTessellation: (CC3Tessellation) angleAndHeightDivs;
 
 
 #pragma mark Populating parametric lines
@@ -712,7 +712,7 @@
 /** @deprecated Renamed to populateAsRectangleWithSize:andRelativeOrigin:andTessellation. */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) divsPerAxis DEPRECATED_ATTRIBUTE;
+					andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated Use populateAsCenteredRectangleWithSize:, as it creates a
@@ -725,7 +725,7 @@
  * a rectangular mesh that can be covered with either a texture or a solid color.
  */
 -(void) populateAsCenteredTexturedRectangleWithSize: (CGSize) rectSize
-									andTessellation: (ccGridSize) divsPerAxis DEPRECATED_ATTRIBUTE;
+									andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated Use populateAsRectangleWithSize:andRelativeOrigin:, as it creates a
@@ -739,7 +739,7 @@
  */
 -(void) populateAsTexturedRectangleWithSize: (CGSize) rectSize
 								   andPivot: (CGPoint) pivot
-							andTessellation: (ccGridSize) divsPerAxis DEPRECATED_ATTRIBUTE;
+							andTessellation: (CC3Tessellation) divsPerAxis DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated Use the populateAsCenteredRectangleWithSize: method instead,
@@ -754,7 +754,7 @@
  * method instead, and then use the texture property of this node to set the texture.
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis
+							andTessellation: (CC3Tessellation) divsPerAxis
 								withTexture: (CC3Texture*) texture
 							  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
 
@@ -773,7 +773,7 @@
  */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 						   andPivot: (CGPoint) pivot
-					andTessellation: (ccGridSize) divsPerAxis
+					andTessellation: (CC3Tessellation) divsPerAxis
 						withTexture: (CC3Texture*) texture
 					  invertTexture: (BOOL) shouldInvert DEPRECATED_ATTRIBUTE;
 

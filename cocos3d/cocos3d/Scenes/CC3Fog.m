@@ -154,6 +154,22 @@
 /** Sets the alpha component of the color property by converting the specified integer opacity to a float. */
 -(void) setOpacity: (GLubyte) opacity { floatColor.a = CCColorFloatFromByte(opacity); }
 
+-(ccColor3B) displayedColor { return self.color; }
+
+-(BOOL) isCascadeColorEnabled { return NO; }
+
+-(void) setCascadeColorEnabled:(BOOL)cascadeColorEnabled {}
+
+-(void) updateDisplayedColor: (ccColor3B) color {}
+
+-(GLubyte) displayedOpacity { return self.opacity; }
+
+-(BOOL) isCascadeOpacityEnabled { return NO; }
+
+-(void) setCascadeOpacityEnabled: (BOOL) cascadeOpacityEnabled {}
+
+-(void) updateDisplayedOpacity: (GLubyte) opacity {}
+
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 

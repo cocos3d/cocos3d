@@ -479,31 +479,6 @@
 
 
 #pragma mark -
-#pragma mark CCGLProgram
-
-#if CC3_CC2_2
-/** Extension category to support cocos3d functionality. */
-@interface CCGLProgram (CC3)
-
-#if COCOS2D_VERSION < 0x020100
-/** Returns the GL program ID. */
-@property(nonatomic, readonly) GLuint program;
-#endif
-
-@end
-#endif
-
-#if CC3_CC2_1
-/** Dummy replacement in cocos2d 1.x to keep the compiler happy. */
-@interface CCGLProgram : NSObject
--(id) initWithVertexShaderByteArray: (const GLchar*) vShaderByteArray
-			fragmentShaderByteArray: (const GLchar*) fShaderByteArray;
--(void) link;
-@end
-#endif
-
-
-#pragma mark -
 #pragma mark Miscellaneous extensions and functions
 
 /** Returns the name of the specified touch type. */

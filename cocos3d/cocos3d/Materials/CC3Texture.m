@@ -215,7 +215,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	// Ensure the path is absolute, converting it if needed.
 	NSString* absFilePath = CC3EnsureAbsoluteFilePath(aFilePath);
 	
-	if (!name) self.name = absFilePath.lastPathComponent;
+	if (!_name) self.name = absFilePath.lastPathComponent;
 	
 #if LOGGING_LEVEL_TRACE
 	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
@@ -342,6 +342,12 @@ static GLuint lastAssignedTextureTag;
 
 #pragma mark CCTexture2D extension category
 
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_HAS_MIPMAPS hasMipmaps_
+#else
+#	define CC2_HAS_MIPMAPS _hasMipmaps
+#endif
+
 @implementation CCTexture2D (CC3Texture)
 
 #pragma mark Allocation and initialization
@@ -449,7 +455,7 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 #if CC3_CC2_1
 	return [self.class cc3HasMipmap: self.name];
 #else
-	return hasMipmaps_;
+	return CC2_HAS_MIPMAPS;
 #endif
 }
 
@@ -457,7 +463,7 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 #if CC3_CC2_1
 	[self.class setCc3HasMipmap: self.name to: hasMm];
 #else
-	hasMipmaps_ = hasMm;
+	CC2_HAS_MIPMAPS = hasMm;
 #endif
 }
 
@@ -467,9 +473,9 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 	[self.class setCc3IsFlippedVertically: self.name to: isFlipped];
 }
 
--(BOOL) cc3WidthIsNPOT { return (width_ != ccNextPOT(width_)); }
+-(BOOL) cc3WidthIsNPOT { return (self.pixelsWide != ccNextPOT(self.pixelsWide)); }
 
--(BOOL) cc3HeightIsNPOT { return (height_ != ccNextPOT(height_)); }
+-(BOOL) cc3HeightIsNPOT { return (self.pixelsHigh != ccNextPOT(self.pixelsHigh)); }
 
 -(BOOL) cc3IsNPOT { return self.cc3WidthIsNPOT || self.cc3HeightIsNPOT; }
 
@@ -485,7 +491,13 @@ static CC3CCTexture2DState kCC3InitialCCTexture2DState = { NO, YES };
 @end
 
 @implementation CCTexturePVR (CC3Texture)
--(BOOL) cc3HasMipmap { return (numberOfMipmaps_ > 1); }
+-(BOOL) cc3HasMipmap {
+#if CC3_CC2_1
+	return (numberOfMipmaps_ > 1);
+#else
+	return (self.numberOfMipmaps > 1);
+#endif
+}
 @end
 
 

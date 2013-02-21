@@ -29,6 +29,7 @@
 
 /** @file */	// Doxygen marker
 
+#import "CC3Identifiable.h"
 #import "CC3Environment.h"
 #import "CC3CC2Extensions.h"
 #import "CC3GLSLVariable.h"
@@ -46,30 +47,23 @@
 #pragma mark CC3GLProgram
 
 /** CC3GLProgram extends CCGLProgram to provide specialized behaviour for cocos3d. */
-@interface CC3GLProgram : CCGLProgram {
-	NSString* _name;
+@interface CC3GLProgram : CC3Identifiable {
 	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
 	CCArray* _uniforms;
 	CCArray* _attributes;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
+	GLuint _programID;
 }
 
-/**
- * The name of this program.
- *
- * This name should be unique, as it is used to retrieve this program in order to attach
- * it to a node material.
- */
-@property(nonatomic, retain) NSString* name;
+/** Returns the GL program ID. */
+@property(nonatomic, readonly) GLuint programID;
 
 /**
  * On each render loop, this CC3GLProgram delegates to this object to populate
  * the current value of each uniform variable from content within the 3D scene.
- *
- * This property must be set prior to invoking the link method.
  */
-@property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
+@property(nonatomic, retain, readonly) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
 
 /** Returns the length of the largest uniform name in this program. */
 @property(nonatomic, readonly) GLint maxUniformNameLength;
@@ -124,44 +118,44 @@
  */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context;
 
-/**
- * Links this program and uses the delegate in the semanticDelegate property to map
- * each uniform and attribute to its semantic meaning.
- *
- * The semanticDelegate property must be set prior to invoking this method.
- */
--(BOOL) link;
-
 
 #pragma mark Allocation and initialization
 
 /**
- * Initializes this instance with the specified name and compiles the program from the specified
- * vertex and fragment shader source code.
+ * Initializes this instance with the specified name, attaches the specified semantic delegate,
+ * and compiles the program from the specified vertex and fragment shader source code.
  *
- * Since a single shader can be used by many nodes and materials, shaders are cached. Before invoking
- * this method, you should invoke the class-side getProgramNamed: method to detemine whether a GL program
- * with the specified name exists already, and after invoking this method, you should use the class-side
- * addProgram: method to add the new GL program instance to the program cache.
+ * Since a single GL program can be used by many nodes and materials, shaders are cached.
+ * Before invoking this method, you should invoke the class-side getProgramNamed: method to
+ * detemine whether a GL program with the specified name exists already, and after invoking
+ * this method, you should use the class-side addProgram: method to add the new GL program
+ * instance to the program cache.
  */
--(id) initWithName: (NSString*) name fromVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes;
+-(id) initWithName: (NSString*) name
+andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
+fromVertexShaderBytes: (const GLchar*) vshBytes
+andFragmentShaderBytes: (const GLchar*) fshBytes;
 
 /**
- * Initializes this instance with the specified name and compiles the program from vertex
- * and fragment shader source code loaded from the specified files.
+ * Initializes this instance with the specified name, attaches the specified semantic delegate, and
+ * compiles the program from vertex and fragment shader source code loaded from the specified files.
  *
  * The specified filenames may specified as relative or absolute filenames.
  *
- * Since a single shader can be used by many nodes and materials, shaders are cached. Before invoking
- * this method, you should invoke the class-side getProgramNamed: method to detemine whether a GL program
- * with the specified name exists already, and after invoking this method, you should use the class-side
- * addProgram: method to add the new GL program instance to the program cache.
+ * Since a single GL program can be used by many nodes and materials, shaders are cached.
+ * Before invoking this method, you should invoke the class-side getProgramNamed: method to
+ * detemine whether a GL program with the specified name exists already, and after invoking
+ * this method, you should use the class-side addProgram: method to add the new GL program
+ * instance to the program cache.
  *
  * To make use of a standardized naming scheme, you can use the class-side
  * programNameFromVertexShaderFile:andFragmentShaderFile: method to determine the name to use when
  * invoking this method (and when invoking the getProgramNamed: method prior to this method).
  */
--(id) initWithName: (NSString*) name fromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
+-(id) initWithName: (NSString*) name
+andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
+fromVertexShaderFile: (NSString*) vshFilename
+andFragmentShaderFile: (NSString*) fshFilename;
 
 /** Returns a program name created as a simple hyphenated concatenation of the specified vertex and shader filenames. */
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;

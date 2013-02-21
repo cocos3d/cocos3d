@@ -161,7 +161,7 @@
  * the mesh will be populated with location, normal and texture coordinates for each vertex.
  */
 -(void) populateAsCenteredRectangleWithSize: (CGSize) rectSize
-							andTessellation: (ccGridSize) divsPerAxis;
+							andTessellation: (CC3Tessellation) divsPerAxis;
 
 /**
  * Populates this instance as a simple rectangular mesh of the specified size, with the specified
@@ -238,7 +238,7 @@
  */
 -(void) populateAsRectangleWithSize: (CGSize) rectSize
 				  andRelativeOrigin: (CGPoint) origin
-					andTessellation: (ccGridSize) divsPerAxis;
+					andTessellation: (CC3Tessellation) divsPerAxis;
 
 
 #pragma mark Populating parametric circular disk
@@ -283,7 +283,7 @@
  * (kCC3VertexContentLocation | kCC3VertexContentNormal | kCC3VertexContentTextureCoordinate), and
  * the mesh will be populated with location, normal and texture coordinates for each vertex.
  */
--(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (ccGridSize) radialAndAngleDivs;
+-(void) populateAsDiskWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) radialAndAngleDivs;
 
 
 #pragma mark Populating parametric boxes
@@ -475,7 +475,7 @@
  * (X = 0) along the negative-Z axis. This texture orientation means that the center of the texture
  * will face the forwardDirection of the sphere node.
  */
--(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (ccGridSize) divsPerAxis;
+-(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) divsPerAxis;
 
 
 #pragma mark Populating parametric cone
@@ -520,7 +520,7 @@
  */
 -(void) populateAsHollowConeWithRadius: (GLfloat) radius
 								height: (GLfloat) height
-					   andTessellation: (ccGridSize) angleAndHeightDivs;
+					   andTessellation: (CC3Tessellation) angleAndHeightDivs;
 
 
 #pragma mark Populating parametric lines

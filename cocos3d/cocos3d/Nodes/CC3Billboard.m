@@ -951,6 +951,24 @@ static GLfloat deviceScaleFactor = 0.0f;
 	#define CC_PARTICLE_QUAD_TYPE ccV3F_C4B_T2F_Quad
 #endif
 
+/** Returns a pointer to the internal quads. */
+-(CC_PARTICLE_QUAD_TYPE*) cc3Quads {
+#if COCOS2D_VERSION < 0x020100
+	return quads_;
+#else
+	return _quads;
+#endif
+}
+
+/** Returns the particle index. */
+-(NSUInteger) cc3ParticleIndex {
+#if COCOS2D_VERSION < 0x020100
+	return particleIdx;
+#else
+	return _particleIdx;
+#endif
+}
+
 /**
  * Find the absolute bottom left and top right from all four vertices in the quad,
  * assuming that the bl and tr of the quad are nominal representations and do not
@@ -968,15 +986,18 @@ static GLfloat deviceScaleFactor = 0.0f;
 /** Build the bounding box to encompass the locations of all of the particles. */
 -(CGRect) measureBoundingBoxInPixels {
 	// Must have at least one quad
-	if (quads_ && particleIdx > 0) {
+	NSUInteger partCnt = self.cc3ParticleIndex;
+	CC_PARTICLE_QUAD_TYPE* pQuads = self.cc3Quads;
+
+	if (pQuads && partCnt > 0) {
 		// Get the first quad as a starting point
-		CGRect boundingRect = [self makeRectFromQuad: quads_[0]];
+		CGRect boundingRect = [self makeRectFromQuad: self.cc3Quads[0]];
 		
 		// Iterate through all the remaining quads, taking the union of the
 		// current bounding rect and each quad to find the rectangle that
 		// bounds all the quads.
-		for(NSUInteger i = 1; i < particleIdx; i++) {
-			CGRect quadRect = [self makeRectFromQuad: quads_[i]];
+		for(NSUInteger i = 1; i < partCnt; i++) {
+			CGRect quadRect = [self makeRectFromQuad: pQuads[i]];
 			boundingRect = CGRectUnion(boundingRect, quadRect);
 		}
 		LogTrace(@"%@ bounding rect measured as %@ across %u active of %u possible particles",
