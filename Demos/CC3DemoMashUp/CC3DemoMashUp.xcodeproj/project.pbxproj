@@ -42,12 +42,6 @@
 		A9306A851445B23C0004EB5A /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9306A841445B23C0004EB5A /* HUDLayer.m */; };
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
 		A933817014E16A9200FCA181 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A933816F14E16A9200FCA181 /* BeachBall.pod */; };
-		A93936E516CFDBA3003CC7F0 /* diffuse001.png in Resources */ = {isa = PBXBuildFile; fileRef = A93936DC16CFDBA3003CC7F0 /* diffuse001.png */; };
-		A93936E716CFDBA3003CC7F0 /* DragonFlightNoSpine.pod in Resources */ = {isa = PBXBuildFile; fileRef = A93936DE16CFDBA3003CC7F0 /* DragonFlightNoSpine.pod */; };
-		A93936E816CFDBA3003CC7F0 /* dragonFlightNoSpine_Anim.CAF in Resources */ = {isa = PBXBuildFile; fileRef = A93936E016CFDBA3003CC7F0 /* dragonFlightNoSpine_Anim.CAF */; };
-		A93936E916CFDBA3003CC7F0 /* dragonFlightNoSpine_Mat.CRF in Resources */ = {isa = PBXBuildFile; fileRef = A93936E116CFDBA3003CC7F0 /* dragonFlightNoSpine_Mat.CRF */; };
-		A93936EA16CFDBA3003CC7F0 /* dragonFlightNoSpine_Mesh.CMF in Resources */ = {isa = PBXBuildFile; fileRef = A93936E216CFDBA3003CC7F0 /* dragonFlightNoSpine_Mesh.CMF */; };
-		A93936EB16CFDBA3003CC7F0 /* DragonFlightNoSpine_Skel.CSF in Resources */ = {isa = PBXBuildFile; fileRef = A93936E316CFDBA3003CC7F0 /* DragonFlightNoSpine_Skel.CSF */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
 		A94736C7140E58C7006F410C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736C6140E58C7006F410C /* main.m */; };
@@ -390,12 +384,6 @@
 		A9306A841445B23C0004EB5A /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
 		A933812D14E09E9000FCA181 /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
 		A933816F14E16A9200FCA181 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeachBall.pod; sourceTree = "<group>"; };
-		A93936DC16CFDBA3003CC7F0 /* diffuse001.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = diffuse001.png; sourceTree = "<group>"; };
-		A93936DE16CFDBA3003CC7F0 /* DragonFlightNoSpine.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = DragonFlightNoSpine.pod; sourceTree = "<group>"; };
-		A93936E016CFDBA3003CC7F0 /* dragonFlightNoSpine_Anim.CAF */ = {isa = PBXFileReference; lastKnownFileType = file; path = dragonFlightNoSpine_Anim.CAF; sourceTree = "<group>"; };
-		A93936E116CFDBA3003CC7F0 /* dragonFlightNoSpine_Mat.CRF */ = {isa = PBXFileReference; lastKnownFileType = file; path = dragonFlightNoSpine_Mat.CRF; sourceTree = "<group>"; };
-		A93936E216CFDBA3003CC7F0 /* dragonFlightNoSpine_Mesh.CMF */ = {isa = PBXFileReference; lastKnownFileType = file; path = dragonFlightNoSpine_Mesh.CMF; sourceTree = "<group>"; };
-		A93936E316CFDBA3003CC7F0 /* DragonFlightNoSpine_Skel.CSF */ = {isa = PBXFileReference; lastKnownFileType = file; path = DragonFlightNoSpine_Skel.CSF; sourceTree = "<group>"; };
 		A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Arial32BMGlyph.png; sourceTree = "<group>"; };
 		A94736C5140E58C7006F410C /* CC3DemoMashUp_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CC3DemoMashUp_Prefix.pch; path = CC3DemoMashUp/CC3DemoMashUp_Prefix.pch; sourceTree = "<group>"; };
@@ -1040,7 +1028,6 @@
 		A92DA78D1427B5980051AFFA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A93936DB16CFDBA3003CC7F0 /* DragonFlightNoSpine */,
 				A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */,
 				A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */,
 				A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */,
@@ -1102,28 +1089,6 @@
 			);
 			name = Resources;
 			path = ../Common/Resources;
-			sourceTree = "<group>";
-		};
-		A93936DB16CFDBA3003CC7F0 /* DragonFlightNoSpine */ = {
-			isa = PBXGroup;
-			children = (
-				A93936DC16CFDBA3003CC7F0 /* diffuse001.png */,
-				A93936DE16CFDBA3003CC7F0 /* DragonFlightNoSpine.pod */,
-				A93936DF16CFDBA3003CC7F0 /* DragonFlightNoSpineCal */,
-			);
-			name = DragonFlightNoSpine;
-			path = "../../../../Forum Testing/2013/PocketGems/Models/DragonFlightNoSpine";
-			sourceTree = "<group>";
-		};
-		A93936DF16CFDBA3003CC7F0 /* DragonFlightNoSpineCal */ = {
-			isa = PBXGroup;
-			children = (
-				A93936E016CFDBA3003CC7F0 /* dragonFlightNoSpine_Anim.CAF */,
-				A93936E116CFDBA3003CC7F0 /* dragonFlightNoSpine_Mat.CRF */,
-				A93936E216CFDBA3003CC7F0 /* dragonFlightNoSpine_Mesh.CMF */,
-				A93936E316CFDBA3003CC7F0 /* DragonFlightNoSpine_Skel.CSF */,
-			);
-			path = DragonFlightNoSpineCal;
 			sourceTree = "<group>";
 		};
 		A94736C3140E5890006F410C /* Supporting Files */ = {
@@ -2133,12 +2098,6 @@
 				A9E9EE6B16AD7A1D0086F025 /* body.png in Resources */,
 				A9E9EE6C16AD7A1D0086F025 /* legs.png in Resources */,
 				A9E9EE6F16AD7A1D0086F025 /* man.pod in Resources */,
-				A93936E516CFDBA3003CC7F0 /* diffuse001.png in Resources */,
-				A93936E716CFDBA3003CC7F0 /* DragonFlightNoSpine.pod in Resources */,
-				A93936E816CFDBA3003CC7F0 /* dragonFlightNoSpine_Anim.CAF in Resources */,
-				A93936E916CFDBA3003CC7F0 /* dragonFlightNoSpine_Mat.CRF in Resources */,
-				A93936EA16CFDBA3003CC7F0 /* dragonFlightNoSpine_Mesh.CMF in Resources */,
-				A93936EB16CFDBA3003CC7F0 /* DragonFlightNoSpine_Skel.CSF in Resources */,
 				A9D2385816D410B200AB3B92 /* PVRT_Removed_Files.txt in Resources */,
 				A99B03FE16D5AC8A00B695A4 /* ChangeLog in Resources */,
 				A99B03FF16D5AC8A00B695A4 /* CMakeLists.txt in Resources */,
