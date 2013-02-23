@@ -560,10 +560,10 @@
 }
 
 /**
- * Padding to add to the far clipping plane when it is adjusted as a result of showing
+ * Padding to add to the near & far clipping plane when it is adjusted as a result of showing
  * all of a node, to ensure that all of the node is within the far end of the frustum.
  */
-#define kCC3FrustumFitFarPadding 0.01
+#define kCC3FrustumFitPadding 0.01
 
 -(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
 							fromDirection: (CC3Vector) aDirection
@@ -604,8 +604,7 @@
 	CC3Vector upDir = CC3Matrix3x3ExtractUpDirection(&rotMtx);
 	CC3Vector rtDir = CC3Matrix3x3ExtractRightDirection(&rotMtx);
 	
-	// Determine the eight vertices, of the node's
-	// bounding box, in the global coordinate system
+	// Determine the eight vertices, of the node's bounding box, in the global coordinate system
 	CC3BoundingBox gbb = aNode.globalBoundingBox;
 
 	// If a target location has not been specified, use the center of the node's global bounding box
@@ -635,6 +634,7 @@
 	// vertices will fall within the frustum's far end.
 	GLfloat maxCtrDist = 0;
 	GLfloat maxVtxDeltaDist = 0;
+	GLfloat minVtxDeltaDist = 0;
 	for (int i = 0; i < 8; i++) {
 		
 		// Get a vector from the target location to the vertex 
@@ -656,6 +656,7 @@
 		// center to the vertex that will be farthest away from the camera. 
 		maxCtrDist = MAX(maxCtrDist, ctrDist);
 		maxVtxDeltaDist = MAX(maxVtxDeltaDist, vtxDeltaDist);
+		minVtxDeltaDist = MIN(minVtxDeltaDist, vtxDeltaDist);
 	}
 	
 	// Add some padding so we will have a bit of space around the node when it fills the view.
@@ -663,10 +664,13 @@
 	
 	// Determine if we need to move the far end of the camera frustum farther away
 	GLfloat farClip = CC3VectorLength(CC3VectorScaleUniform(viewDir, maxCtrDist + maxVtxDeltaDist));
-	farClip *= (1 + kCC3FrustumFitFarPadding);		// Include a little bit of padding
-	if (farClip > self.farClippingDistance) {
-		self.farClippingDistance = farClip;
-	}
+	farClip *= (1 + kCC3FrustumFitPadding);		// Include a little bit of padding
+	if (farClip > self.farClippingDistance) self.farClippingDistance = farClip;
+	
+	// Determine if we need to move the near end of the camera frustum closer
+	GLfloat nearClip = CC3VectorLength(CC3VectorScaleUniform(viewDir, maxCtrDist + minVtxDeltaDist));
+	nearClip *= (1 - kCC3FrustumFitPadding);		// Include a little bit of padding
+	if (nearClip < self.nearClippingDistance) self.nearClippingDistance = nearClip;
 	
 	LogTrace(@"%@ moving to %@ to show %@ at %@ within %@ with new farClip: %.3f", self,
 				  NSStringFromCC3Vector(CC3VectorAdd(targLoc, CC3VectorScaleUniform(camDir, maxCtrDist))),
@@ -697,7 +701,7 @@
 		case UIDeviceOrientationLandscapeRight:
 			return CGSizeMake(frustum.top / frustum.near, frustum.right / frustum.near);
 		case UIDeviceOrientationPortrait:
-			case UIDeviceOrientationPortraitUpsideDown:
+		case UIDeviceOrientationPortraitUpsideDown:
 		default:
 			return CGSizeMake(frustum.right / frustum.near, frustum.top / frustum.near);
 	}

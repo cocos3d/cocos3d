@@ -421,8 +421,6 @@
 
 #pragma mark Intersection logging
 
-#if LOGGING_ENABLED
-
 -(BOOL) shouldLogIntersections { return shouldLogIntersections; }
 
 -(void) setShouldLogIntersections: (BOOL) shouldLog { shouldLogIntersections = shouldLog; }
@@ -430,18 +428,6 @@
 -(BOOL) shouldLogIntersectionMisses { return shouldLogIntersectionMisses; }
 
 -(void) setShouldLogIntersectionMisses: (BOOL) shouldLog { shouldLogIntersectionMisses = shouldLog; }
-
-#else
-
--(BOOL) shouldLogIntersections { return NO; }
-
--(void) setShouldLogIntersections: (BOOL) shouldLog {}
-
--(BOOL) shouldLogIntersectionMisses { return NO; }
-
--(void) setShouldLogIntersectionMisses: (BOOL) shouldLog {}
-
-#endif
 
 /**
  * If the shouldLogIntersections or shouldLogIntersectionMisses property is set to YES
@@ -1096,24 +1082,18 @@
 
 -(void) setShouldMaximize: (BOOL) shouldMax {
 	shouldMaximize = shouldMax;
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.shouldMaximize = shouldMax;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.shouldMaximize = shouldMax;
 }
 
 -(void) setNode:(CC3Node*) aNode {
 	[super setNode: aNode];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.node = aNode;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.node = aNode;
 }
 
 /** Overridden to keep the COG consistent for all BV's.  */
 -(void) setCenterOfGeometry: (CC3Vector) aLocation {
 	[super setCenterOfGeometry: aLocation];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.centerOfGeometry = aLocation;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.centerOfGeometry = aLocation;
 }
 
 -(id) init {
@@ -1127,10 +1107,8 @@
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3NodeTighteningBoundingVolumeSequence*) another {
 	[super populateFrom: another];
-	
-	for(CC3NodeBoundingVolume* bv in another.boundingVolumes) {
+	for(CC3NodeBoundingVolume* bv in another.boundingVolumes)
 		[boundingVolumes addObject: [bv autoreleasedCopy]];		// retained through collection
-	}
 }
 
 -(void) addBoundingVolume: (CC3NodeBoundingVolume*) aBoundingVolume {
@@ -1140,16 +1118,12 @@
 
 -(void) markDirty {
 	[super markDirty];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		[bv markDirty];
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) [bv markDirty];
 }
 
 -(void) markTransformDirty {
 	[super markTransformDirty];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		[bv markTransformDirty];
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) [bv markTransformDirty];
 }
 
 /** Builds each contained bounding volume, if needed, and sets the local centerOfGeometry from the last one. */
@@ -1162,21 +1136,16 @@
 
 -(void) transformVolume {
 	[super transformVolume];
-
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		[bv transformVolume];
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) [bv transformVolume];
 }
 
 -(NSString*) description {
-	if (boundingVolumes.count == 0) {
+	if (boundingVolumes.count == 0)
 		return [NSString stringWithFormat: @"%@ containing nothing", [self class]];
-	}
+
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@ containing:", [self class]];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		[desc appendFormat: @"\n\t%@", bv];
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) [desc appendFormat: @"\n\t%@", bv];
 	return desc;
 }
 
@@ -1185,9 +1154,8 @@
 	
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@ containing:", [self class]];
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
+	for (CC3NodeBoundingVolume* bv in boundingVolumes)
 		[desc appendFormat: @"\n\t%@", bv.fullDescription];
-	}
 	return desc;
 }
 
@@ -1219,8 +1187,7 @@
 	return NO;
 }
 
--(BOOL) doesIntersectSphere: (CC3Sphere) aSphere
-					   from: (CC3BoundingVolume*) otherBoundingVolume {
+-(BOOL) doesIntersectSphere: (CC3Sphere) aSphere from: (CC3BoundingVolume*) otherBoundingVolume {
 	for (CC3NodeBoundingVolume* bv in boundingVolumes)
 		if( ![bv doesIntersectSphere: aSphere from: otherBoundingVolume] ) return NO;
 	return YES;
@@ -1246,50 +1213,34 @@
 
 #pragma mark Intersection logging
 
-#if LOGGING_ENABLED
-
 -(BOOL) shouldLogIntersections {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( bv.shouldLogIntersections ) return YES;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) if( bv.shouldLogIntersections ) return YES;
 	return NO;
 }
 
 -(void) setShouldLogIntersections: (BOOL) shouldLog {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.shouldLogIntersections = shouldLog;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.shouldLogIntersections = shouldLog;
 }
 
 -(BOOL) shouldLogIntersectionMisses {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( bv.shouldLogIntersectionMisses ) return YES;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) if( bv.shouldLogIntersectionMisses ) return YES;
 	return NO;
 }
 
 -(void) setShouldLogIntersectionMisses: (BOOL) shouldLog {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.shouldLogIntersectionMisses = shouldLog;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.shouldLogIntersectionMisses = shouldLog;
 }
-
-#endif
 
 
 #pragma mark Drawing bounding volume
 
 -(BOOL) shouldDraw {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		if( bv.shouldDraw ) return YES;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) if( bv.shouldDraw ) return YES;
 	return NO;
 }
 
 -(void) setShouldDraw: (BOOL) shdDraw {
-	for (CC3NodeBoundingVolume* bv in boundingVolumes) {
-		bv.shouldDraw = shdDraw;
-	}
+	for (CC3NodeBoundingVolume* bv in boundingVolumes) bv.shouldDraw = shdDraw;
 }
 
 @end

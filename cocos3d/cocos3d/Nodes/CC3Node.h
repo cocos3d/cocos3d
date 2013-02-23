@@ -3623,6 +3623,18 @@ typedef enum {
  */
 -(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID;
 
+/** Returns a description of the current animation state, including time and animated location, quaternion and scale. */
+-(NSString*) describeCurrentAnimationState;
+
+/** Returns a description of the state at each of frameCount animation frames over the entire animation. */
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount;
+
+/**
+ * Returns a description of the state at each of frameCount animation frames between the
+ * specified start and end times, which should each be in the range between zero and one.
+ */
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime;
+
 /** @deprecated Replaced with establishAnimationFrameAt:onTrack:. */
 -(void) establishAnimationFrameAt: (ccTime) t DEPRECATED_ATTRIBUTE;
 

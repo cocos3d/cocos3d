@@ -52,14 +52,10 @@
  * time when testing intersections.
  */
 @interface CC3BoundingVolume : NSObject <NSCopying> {
-	BOOL isDirty;
-	BOOL shouldIgnoreRayIntersection;
-
-#if LOGGING_ENABLED
-	BOOL shouldLogIntersections;
-	BOOL shouldLogIntersectionMisses;
-#endif
-
+	BOOL isDirty : 1;
+	BOOL shouldIgnoreRayIntersection : 1;
+	BOOL shouldLogIntersections : 1;
+	BOOL shouldLogIntersectionMisses : 1;
 }
 
 /**

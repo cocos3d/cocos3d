@@ -145,15 +145,17 @@ extern "C" {
 		NSString* texName = [NSString stringWithUTF8String: pfxTex->Name.c_str()];
 		NSString* texFile = [NSString stringWithUTF8String: pfxTex->FileName.c_str()];
 		CC3Texture* tex = [CC3Texture textureWithName: texName fromFile: texFile];
-		CC3Assert(tex, @"%@ cannot load texture named %@ from file %@", self, texName, texFile);
 		
 		// Set texture parameters
 		tex.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
 		tex.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
 		tex.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
 		tex.magnifyingFunction = GLMagnifyingFunctionFromETextureFilter(pfxTex->nMag);
-		
-		[_texturesByName setObject: tex forKey: texName];	// Add to texture dictionary
+
+		if (tex)
+			[_texturesByName setObject: tex forKey: texName];	// Add to texture dictionary
+		else
+			LogError(@"%@ cannot load texture named %@ from file %@", self, texName, texFile);
 	}
 }
 
@@ -283,16 +285,18 @@ static Class _defaultSemanticDelegateClass = nil;
 		NSString* texName = [NSString stringWithUTF8String: effectTextures[texIdx].Name.c_str()];
 		NSUInteger tuIdx = effectTextures[texIdx].nNumber;
 		
-		// Retrieve the texture from the PFX resource
+		// Retrieve the texture from the PFX resource and add a CC3PFXEffectTexture
+		// linking the texture to the texture unit
 		CC3Texture* tex = [pfxRez getTextureNamed: texName];
-		CC3Assert(tex, @"Could not find texture named %@ in %@", texName, pfxRez);
-		
-		// Add a CC3PFXEffectTexture linking the texture to the texture unit
-		CC3PFXEffectTexture* effectTex = [CC3PFXEffectTexture new];
-		effectTex.texture = tex;
-		effectTex.textureUnitIndex = tuIdx;
-		[_textures addObject: effectTex];
-		[effectTex release];
+		if (tex) {
+			CC3PFXEffectTexture* effectTex = [CC3PFXEffectTexture new];
+			effectTex.texture = tex;
+			effectTex.textureUnitIndex = tuIdx;
+			[_textures addObject: effectTex];
+			[effectTex release];
+		} else {
+			LogError(@"%@ could not find texture named %@ in %@", self, texName, pfxRez);
+		}
 	}
 }
 

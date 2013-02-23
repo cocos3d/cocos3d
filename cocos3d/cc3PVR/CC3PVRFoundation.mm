@@ -71,8 +71,8 @@ NSString* NSStringFromSPODNode(PODStructPtr pSPODNode) {
 	[desc appendFormat: @"%@", first ? @"" : @")"];
 	[desc appendFormat: @"\n\tposition: %@", (psn->pfAnimPosition ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimPosition) : @"none")];
 	[desc appendFormat: @", quaternion: %@", (psn->pfAnimRotation ? NSStringFromCC3Vector4(*(CC3Vector4*)psn->pfAnimRotation) : @"none")];
-	[desc appendFormat: @", scale: %@)", (psn->pfAnimScale ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimScale) : @"none")];
-	[desc appendFormat: @", matrix: %@)", (psn->pfAnimMatrix ? NSStringFromCC3Matrix4x4((CC3Matrix4x4*)psn->pfAnimMatrix) : @"none")];
+	[desc appendFormat: @", scale: %@", (psn->pfAnimScale ? NSStringFromCC3Vector(*(CC3Vector*)psn->pfAnimScale) : @"none")];
+	[desc appendFormat: @", matrix: %@", (psn->pfAnimMatrix ? NSStringFromCC3Matrix4x4((CC3Matrix4x4*)psn->pfAnimMatrix) : @"none")];
 	return desc;
 }
 

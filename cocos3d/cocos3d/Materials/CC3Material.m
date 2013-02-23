@@ -275,23 +275,20 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	}
 }
 
+// Returns a texture if name is equal or both are nil.
 -(CC3Texture*) getTextureNamed: (NSString*) aName {
 	NSString* tcName;
 	
 	// First check if the first texture is the one
 	if (_texture) {
 		tcName = _texture.name;
-		if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
-			return _texture;
-		}
+		if ([tcName isEqual: aName] || (!tcName && !aName)) return _texture;
 	}
 	// Then look for it in the overlays array
 	if (_textureOverlays) {
 		for (CC3Texture* ot in _textureOverlays) {
 			tcName = ot.name;
-			if ([tcName isEqual: aName] || (!tcName && !aName)) {		// Name equal or both nil.
-				return ot;
-			}
+			if ([tcName isEqual: aName] || (!tcName && !aName)) return ot;
 		}
 	}
 	return nil;

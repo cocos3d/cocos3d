@@ -45,6 +45,10 @@
 
 -(BOOL) isAnimatingScale { return NO; }
 
+-(BOOL) isAnimating { return (self.isAnimatingLocation ||
+							  self.isAnimatingQuaternion ||
+							  self.isAnimatingScale); }
+
 -(BOOL) hasVariableFrameTiming { return NO; }
 
 static ccTime _interpolationEpsilon = 0.1f;
@@ -455,6 +459,10 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 -(BOOL) isAnimatingScale { return _isScaleAnimationEnabled && _animation.isAnimatingScale; }
 
+-(BOOL) isAnimating { return (self.isEnabled && (self.isAnimatingLocation ||
+												 self.isAnimatingQuaternion ||
+												 self.isAnimatingScale)); }
+
 -(BOOL) hasVariableFrameTiming { return _animation.hasVariableFrameTiming; }
 
   
@@ -462,7 +470,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 -(void) establishFrameAt: (ccTime) t {
 	_animationTime = t;
-	if (_isEnabled) [_animation establishFrameAt: t inNodeAnimationState: self];
+	if (self.isEnabled) [_animation establishFrameAt: t inNodeAnimationState: self];
 }
 
 
@@ -498,15 +506,61 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return [[[self alloc] initWithAnimation: animation onTrack: trackID forNode: node] autorelease];
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for node %@ with animation %@ on track %u",
-			[self class], _node, _animation, _trackID];
-}
-
 static NSUInteger _lastTrackID = 0;
 
 // Pre-increment to start with one. Zero reserved for default track.
 +(NSUInteger) generateTrackID { return ++_lastTrackID; }
 
+
+#pragma mark Descriptions
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ for node %@ with animation %@ on track %u",
+			[self class], _node, _animation, _trackID];
+}
+
+#define kAnimStateDescLen 100
+
+-(NSString*) describeCurrentState {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: kAnimStateDescLen];
+	[desc appendFormat: @"Time: %.4f", _animationTime];
+	if (self.isAnimatingLocation) [desc appendFormat: @" Loc: %@", NSStringFromCC3Vector(self.location)];
+	if (self.isAnimatingQuaternion) [desc appendFormat: @" Quat: %@", NSStringFromCC3Quaternion(self.quaternion)];
+	if (self.isAnimatingScale) [desc appendFormat: @" Scale: %@", NSStringFromCC3Vector(self.scale)];
+	if ( !self.isAnimating) [desc appendFormat: @" No animation enabled."];
+	return desc;
+}
+
+-(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime {
+	startTime = CLAMP(startTime, 0.0f, 1.0f);
+	endTime = CLAMP(endTime, 0.0f, 1.0f);
+
+	// Generating the description changes current state, so cache it for resortation below
+	ccTime currTime = _animationTime;
+	BOOL wasCurrentlyEnabled = self.isEnabled;
+	self.isEnabled = YES;
+	
+	ccTime frameDur = 0.0f;
+	if (frameCount > 1) frameDur = (endTime - startTime) / (GLfloat)(frameCount - 1);
+	NSMutableString* desc = [NSMutableString stringWithCapacity: (kAnimStateDescLen * frameCount + 200)];
+	[desc appendFormat: @"%@ animated state on track %u over %u frames from %.4f to %.4f:", _node, _trackID, frameCount, startTime, endTime];
+	if (self.isAnimating && frameCount > 0)
+		for (GLuint fIdx = 0; fIdx < frameCount; fIdx++) {
+			[self establishFrameAt: (startTime + (frameDur * fIdx))];
+			[desc appendFormat: @"\n\t%@", self.describeCurrentState];
+		}
+	else
+		[desc appendFormat: @" No animation enabled."];
+	
+	// Return to where we were before the description was generated
+	[self establishFrameAt: currTime];
+	self.isEnabled = wasCurrentlyEnabled;
+
+	return desc;
+}
+
+-(NSString*) describeStateForFrames: (GLuint) frameCount {
+	return [self describeStateForFrames: frameCount fromTime: 0.0f toTime: 1.0f];
+}
 
 @end

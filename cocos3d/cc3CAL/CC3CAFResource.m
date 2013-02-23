@@ -156,6 +156,8 @@
 	NSInteger frameCount = reader.readInteger;
 	if (reader.wasReadBeyondEOF) return NO;
 
+	LogRez(@"Loading node with CAL index %i with %i keyframes of animation", calNodeIdx, frameCount);
+
 	// If no animation content, skip this node
 	if (frameCount <= 0) return YES;
 
@@ -169,7 +171,6 @@
 	calNode.animation = anim;
 	[self.nodes addObject: calNode];
 
-	LogRez(@"Loaded node with CAL index %i with %i keyframes of animation", calNodeIdx, frameCount);
 	return YES;
 }
 
@@ -206,11 +207,10 @@
 		quaternions[fIdx].y = reader.readFloat;
 		quaternions[fIdx].z = reader.readFloat;
 		quaternions[fIdx].w = reader.readFloat;
-		
-		LogTrace(@"Added animated location %@ and quaternion %@ at time %.4f in frame %i",
-			   NSStringFromCC3Vector(locations[fIdx]),
-			   NSStringFromCC3Quaternion(quaternions[fIdx]),
-			   frameTimes[fIdx], fIdx);
+
+		LogTrace(@"Time: %.4f Loc: %@ Quat: %@ in frame %i",
+				 frameTimes[fIdx], NSStringFromCC3Vector(locations[fIdx]),
+				 NSStringFromCC3Quaternion(quaternions[fIdx]), fIdx);
 	}
 	
 	return !reader.wasReadBeyondEOF;

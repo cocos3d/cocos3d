@@ -693,13 +693,9 @@
 
 -(NSString*) appendStructureDescriptionTo: (NSMutableString*) desc withIndent: (NSUInteger) indentLevel {
 	[desc appendFormat: @"\n"];
-	for (int i = 0; i < indentLevel; i++) {
-		[desc appendFormat: @"  "];
-	}
+	for (int i = 0; i < indentLevel; i++) [desc appendFormat: @"  "];
 	[desc appendFormat: @"%@", self];
-	for (CC3Node* child in children) {
-		[child appendStructureDescriptionTo: desc withIndent: indentLevel + 1];
-	}
+	for (CC3Node* child in children) [child appendStructureDescriptionTo: desc withIndent: indentLevel + 1];
 	return desc;
 }
 
@@ -2267,6 +2263,25 @@ static GLuint lastAssignedNodeTag;
 	_isAnimationDirty = NO;
 }
 
+#define kAnimStateDescLen 100
+
+-(NSString*) describeCurrentAnimationState {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: (_animationStates.count * kAnimStateDescLen)];
+	for (CC3NodeAnimationState* as in _animationStates) [desc appendFormat: @"\n%@ ", as.describeCurrentState];
+	return desc;
+}
+
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: (_animationStates.count * kAnimStateDescLen * frameCount + 200)];
+	for (CC3NodeAnimationState* as in _animationStates)
+		[desc appendFormat: @"\n%@ ", [as describeStateForFrames: frameCount fromTime: startTime toTime: endTime]];
+	return desc;
+}
+
+-(NSString*) describeAnimationStateForFrames: (GLuint) frameCount {
+	return [self describeAnimationStateForFrames: frameCount fromTime: 0.0f toTime: 1.0f];
+}
+
 // Deprecated
 -(GLuint) animationFrameCount { return self.animation.frameCount; }
 -(void) establishAnimationFrameAt: (ccTime) t { [self establishAnimationFrameAt: t onTrack: 0]; }
@@ -2331,7 +2346,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 // Initial font size for any new descriptors
-static CGFloat descriptorFontSize = 14.0;
+static CGFloat descriptorFontSize = 8.0;
 
 +(CGFloat) descriptorFontSize { return descriptorFontSize; }
 

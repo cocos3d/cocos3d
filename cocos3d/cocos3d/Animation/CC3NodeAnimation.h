@@ -83,14 +83,20 @@
  */
 @property(nonatomic, assign) BOOL shouldInterpolate;
 
-/** Indicates whether location animated content is available.  */
+/** Indicates whether location animated content is available and is enabled.  */
 @property(nonatomic, readonly) BOOL isAnimatingLocation;
 
-/** Indicates whether rotation quaternion animated content is available. */
+/** Indicates whether rotation quaternion animated content is available and is enabled. */
 @property(nonatomic, readonly) BOOL isAnimatingQuaternion;
 
-/** Indicates whether scale animated content is available. */
+/** Indicates whether scale animated content is available and is enabled. */
 @property(nonatomic, readonly) BOOL isAnimatingScale;
+
+/** 
+ * Indicates whether animation is enabled and any animated content (location, quaternion,
+ * or scale) is available and enabled.
+ */
+@property(nonatomic, readonly) BOOL isAnimating;
 
 /**
  * Indicates whether the time interval between frames can vary from frame to frame, or whether
@@ -510,6 +516,12 @@
 @property(nonatomic, readonly) BOOL isAnimatingScale;
 
 /**
+ * Indicates whether any of the properties of the node are being animated. Returns YES if any of
+ * the isAnimatingLocation, isAnimatingQuaternion or isAnimatingScale properties returns YES.
+ */
+@property(nonatomic, readonly) BOOL isAnimating;
+
+/**
  * Indicates whether the time interval between frames can vary from frame to frame, or whether
  * the time interval between frames is constant across all frames.
  *
@@ -561,6 +573,21 @@
  * track ID to use when adding a new track of animation to a node assembly.
  */
 +(NSUInteger) generateTrackID;
+
+
+#pragma mark Descriptions
+
+/** Returns a description of the current state, including time and animated location, quaternion and scale. */
+-(NSString*) describeCurrentState;
+
+/** Returns a description of the state at each of frameCount frames over the entire animation. */
+-(NSString*) describeStateForFrames: (GLuint) frameCount;
+
+/**
+ * Returns a description of the state at each of frameCount frames between the specified
+ * start and end times, which should each be in the range between zero and one.
+ */
+-(NSString*) describeStateForFrames: (GLuint) frameCount fromTime: (ccTime) startTime toTime: (ccTime) endTime;
 
 @end
 
