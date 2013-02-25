@@ -45,6 +45,7 @@
 	ccTime _animationDuration;
 	NSInteger _fileVersion;
 	BOOL _wasCSFResourceAttached : 1;
+	BOOL _shouldSwapQuaternionYZ : 1;
 }
 
 /** The file format version, extracted from the file. */
@@ -54,24 +55,35 @@
 @property(nonatomic, readonly) ccTime animationDuration;
 
 /**
- * Adds the contained animation to the specified node and all its descendants. The animation is
- * added to each node as the specified track.
+ * Indicates whether the Y & Z elements of animated quaternions loaded by this resource
+ * should be swapped during loading. When swapped, the new Z value is also negated.
  *
- * For each of the nodes loaded into in this resource, this implementation retrieves the descendant
- * of the specified node that has the same name, and adds its animation to the retrieved node in
- * the specified animation track.
+ * If set to YES, for each quaternion in the animation content, the Z value will be set from
+ * the negated Y value of the loaded quaternion, and the Y value will be set from the Z value.
+ *
+ * This setting can be used to correct possible coordinate system orientation discrepancies
+ * between the CAF exporters and cocos3d.
+ *
+ * The initial value of this property is set from the value of the class-side
+ * defaultShouldSwapQuaternionYZ property.
  */
--(void) addAnimationTo: (CC3Node*) aNode asTrack: (NSUInteger) trackID;
+@property(nonatomic, assign) BOOL shouldSwapQuaternionYZ;
 
 /**
- * Adds the contained animation to the specified node and all its descendants. The animation is
- * added to each node in a new track, whose ID is returned from this method.
+ * Indicates the value that the shouldSwapQuaternionYZ property should be initially set to
+ * when any new instance of this class is created.
  *
- * For each of the nodes loaded into in this resource, this implementation retrieves the descendant
- * of the specified node that has the same name, and adds its animation to the retrieved node in
- * the new track.
+ * The initial value of this property is YES.
  */
--(NSUInteger) addAnimationTo: (CC3Node*) aNode;
++(BOOL) defaultShouldSwapQuaternionYZ;
+
+/**
+ * Indicates the value that the shouldSwapQuaternionYZ property should be initially set to
+ * when any new instance of this class is created.
+ *
+ * The initial value of this property is YES.
+ */
++(void) setDefaultShouldSwapQuaternionYZ: (BOOL) shouldSwap;
 
 
 #pragma mark Allocation and initialization
@@ -185,13 +197,7 @@
 #pragma mark Adding animation to nodes
 
 /** Extension category to provide support for CAF animation. */
-@interface CC3Node (CAF)
-
-/**
- * Adds the animation contained in the specified CAF resource to this node and all its descendants.
- * The animation is added as the specified track.
- */
--(void) addCAFAnimation: (CC3CAFResource*) cafRez asTrack: (NSUInteger) trackID;
+@interface CC3Node (CAFAnimation)
 
 /**
  * Adds the animation contained in the specified CAF file to this node and all its descendants.
@@ -202,9 +208,9 @@
  * However, the adding of the animation will fail, because the CAF file requires linking to
  * an associated CSF file. Only use this method if you know that the CAF file has already been
  * loaded and linked to a CSF file. If you are not sure, use the
- * addCAFAnimationFromFile:linkedToCSFFile:asTrack: method instead.
+ * addAnimationFromCAFFile:linkedToCSFFile:asTrack: method instead.
  */
--(void) addCAFAnimationFromFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID;
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID;
 
 /**
  * Adds the animation contained in the specified CAF file, which is linked to the specified CSF
@@ -218,15 +224,9 @@
  * and it has already been loaded, it is retrieved from the resource cache. If the CSF resource has
  * not been loaded, it will be loaded from the specified CSF file and placed in the resource cache.
  */
--(void) addCAFAnimationFromFile: (NSString*) cafFilePath
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath
 				linkedToCSFFile: (NSString*) csfFilePath
 						asTrack: (NSUInteger) trackID;
-
-/**
- * Adds the animation contained in the specified CAF resource to this node and all its descendants.
- * The animation is added in a new track, whose ID is returned from this method.
- */
--(NSUInteger) addCAFAnimation: (CC3CAFResource*) cafRez;
 
 /**
  * Adds the animation contained in the specified CAF file to this node and all its descendants.
@@ -236,9 +236,9 @@
  * the CAF file has not been loaded, it will be loaded and placed in the resource cache. However, 
  * the adding of the animation will fail, because the CAF file requires linking to an associated CSF
  * file. Only use this method if you know that the CAF file has already been loaded and linked to
- * a CSF file. If you are not sure, use the addCAFAnimationFromFile:linkedToCSFFile: method instead.
+ * a CSF file. If you are not sure, use the addAnimationFromCAFFile:linkedToCSFFile: method instead.
  */
--(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath;
+-(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath;
 
 /**
  * Adds the animation contained in the specified CAF file to this node and all its descendants.
@@ -252,7 +252,7 @@
  * and it has already been loaded, it is retrieved from the resource cache. If the CSF resource has
  * not been loaded, it will be loaded from the specified CSF file and placed in the resource cache.
  */
--(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath
+-(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath
 					  linkedToCSFFile: (NSString*) csfFilePath;
 
 @end

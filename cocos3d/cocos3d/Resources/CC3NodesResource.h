@@ -31,6 +31,7 @@
 
 
 #import "CC3Resource.h"
+#import "CC3NodeAnimation.h"
 
 
 /**
@@ -104,6 +105,18 @@
  * Each of these nodes will usually contain child nodes.
  */
 @property(nonatomic, readonly) CCArray* nodes;
+
+/**
+ * Returns a node from the hierarchy under the nodes in the nodes array, that matches the
+ * specified node, or returns nil if no match is found.
+ *
+ * The criteria used to match the node against the contained nodes depends on this resource
+ * and the type of nodes it has loaded. This implementation invokes the getNodeNamed: method
+ * on each node in the nodes array to recursively fetch the node that has the same name as
+ * the specified node. Subclasses that load other types of nodes may be able to define more
+ * efficient searching and matching algorithms.
+ */
+-(CC3Node*) getNodeMatching: (CC3Node*) node;
 
 
 #pragma mark Allocation and initialization
@@ -185,3 +198,30 @@
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
 
 @end
+
+
+#pragma mark Adding animation to nodes
+
+/** Extension category to provide support for adding animation in a resource to existing nodes. */
+@interface CC3Node (CC3NodesResource)
+
+/**
+ * Adds the animation contained in the nodes in the specified nodes resource to this node
+ * and all its descendants. The animation is added as the specified track.
+ *
+ * The getNodeMatching: method of the specified resource is used to match each node in this
+ * hierarchy to the corresponding node in the specified resource.
+ */
+-(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (NSUInteger) trackID;
+
+/**
+ * Adds the animation contained in the nodes in the specified nodes resource to this node and all
+ * its descendants. The animation is added in a new track, whose ID is returned from this method.
+ *
+ * The getNodeMatching: method of the specified resource is used to match each node in this
+ * hierarchy to the corresponding node in the specified resource.
+ */
+-(NSUInteger) addAnimationInResource: (CC3NodesResource*) rez;
+
+@end
+

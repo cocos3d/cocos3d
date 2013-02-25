@@ -523,3 +523,20 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 @end
+
+
+#pragma mark Adding animation to nodes
+
+@implementation CC3Node (PODAnimation)
+
+-(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (NSUInteger) trackID {
+	[self addAnimationInResource: [CC3PODResource resourceFromFile: podFilePath ] asTrack: trackID];
+}
+
+-(NSUInteger) addAnimationFromPODFile: (NSString*) podFilePath {
+	return [self addAnimationInResource: [CC3PODResource resourceFromFile: podFilePath ]];
+}
+
+@end
+
+

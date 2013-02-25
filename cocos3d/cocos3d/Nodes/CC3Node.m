@@ -2217,7 +2217,6 @@ static GLuint lastAssignedNodeTag;
 /** Updates this node from a blending of any contained animation. */
 -(void) updateFromAnimationState {
 	if ( !_isAnimationDirty ) return;
-//	if ( !self.isAnimationEnabled ) return;
 	
 	// Start with identity transforms
 	CC3Vector blendedLoc = kCC3VectorZero;

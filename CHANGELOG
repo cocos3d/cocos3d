@@ -45,15 +45,18 @@ cocos3d 2.0.0 - 2013/03/31
 
 - Animation enhancements:
 	- Added support for time-based key-frame animation.
-		- CC3Animation now supports the ability to have true key-frame animation with variable frame timing and automatic interpolation between frames.
+		- CC3Animation now supports the ability to have timed key-frame animation with variable frame timing and automatic interpolation between frames.
 	- Added support for multi-track blended animation
 		- Added CC3NodeAnimationState to bridge between CC3Node and CC3NodeAnimation and to track animation state for single track on a single node.
 		- Added track-based animation methods to CC3Node
 			- CC3Node animation property is now a convenience property for referencing animation on track zero.
 		- Added CC3Animate trackID property to animate a single track of node animation.
 		- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
-		- Multi-track animation can be specified and loaded onto nodes using animation files specified in CAF format.
-	- Allow animation of node properties to be individually enabled or disabled.
+		- Additional animation tracks can be loaded in secondary POD files and added to existing models:
+		    - Added CC3Node addAnimationFromPODFile: and addAnimationFromPODFile:asTrack: methods to add additional animation tracks.
+		- Added support for loading animation from CAF files that are compatible with the Cal3D character animation library animation format:
+		    - Added CC3Node addAnimationFromCAFFile: and addAnimationFromCAFFile:asTrack: methods to add additional animation tracks.
+	- Allow animation of node transform properties to be individually enabled or disabled.
 	- Removed animation of Euler rotation angles as unsuitable for interpolation.
 
 - Improved support for NPOT textures

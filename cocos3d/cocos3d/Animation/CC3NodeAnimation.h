@@ -417,6 +417,22 @@
 
 /** 
  * The relative weight to use when blending this animation track with the other tracks.
+ * For each animation state in a node, this value can be set to a value between zero and one.
+ * During animation, the animated node properties (location, quaternion, scale) are derived
+ * from a weighted average of the contributions from each animation track, as determined by
+ * the relative weights assigned to each animation track, as specified by this property.
+ *
+ * For each track, the blending weight is relative to the blending weights of the other tracks,
+ * and the absolute values used for this property are unimportant. So, for instance, setting the
+ * value of this property to 0.2 on one track and 0.1 on another is equivalent to setting the value
+ * of this property to 1.0 and 0.5 respectively. In both cases, the first animation track will
+ * contribute twice the effect on the node's animated properties than the second animation track.
+ *
+ * It is important to understand that with multi-track animation, each animation track will
+ * contribute to the node's animated properties according to its weight even in the absence of
+ * a CC3Animate action running on that track. This is to ensure smooth transitions before and
+ * after a CC3Animate is run. To stop a track from contributing to the animated properties of
+ * the node, either set the value of this property to zero, or set the isEnabled property to NO.
  *
  * The initial value of this property is one.
  */

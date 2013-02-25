@@ -627,3 +627,30 @@
 -(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex;
 
 @end
+
+
+#pragma mark Adding animation to nodes
+
+/** Extension category to provide support for POD animation. */
+@interface CC3Node (PODAnimation)
+
+/**
+ * Adds the animation contained in the specified POD file to this node and all its descendants.
+ * The animation is added as the specified track.
+ *
+ * If the specified POD file has already been loaded, it is retrieved from the resource cache.
+ * If the POD file has not been loaded, it will be loaded and placed in the resource cache.
+ */
+-(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (NSUInteger) trackID;
+
+/**
+ * Adds the animation contained in the specified POD file to this node and all its descendants.
+ * The animation is added in a new track, whose ID is returned from this method.
+ *
+ * If the specified POD file has already been loaded, it is retrieved from the resource cache.
+ * If the POD file has not been loaded, it will be loaded and placed in the resource cache.
+ */
+-(NSUInteger) addAnimationFromPODFile: (NSString*) podFilePath;
+
+@end
+

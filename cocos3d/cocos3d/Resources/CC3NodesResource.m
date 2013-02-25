@@ -40,6 +40,15 @@
 	[super dealloc];
 }
 
+-(CC3Node*) getNodeMatching: (CC3Node*) node {
+	NSString* nodeName = node.name;
+	for (CC3Node* rezNode in self.nodes) {
+		CC3Node* matchedNode = [rezNode getNodeNamed: nodeName];
+		if (matchedNode) return matchedNode;
+	}
+	return nil;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -74,3 +83,24 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 }
 
 @end
+
+
+#pragma mark Adding animation to nodes
+
+@implementation CC3Node (CC3NodesResource)
+
+-(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (NSUInteger) trackID {
+	CC3Node* matchingRezNode = [rez getNodeMatching: self];
+	if (matchingRezNode) [self addAnimation: matchingRezNode.animation asTrack: trackID];
+
+	for (CC3Node* child in self.children) [child addAnimationInResource: rez asTrack: trackID];
+}
+
+-(NSUInteger) addAnimationInResource: (CC3NodesResource*) rez {
+	NSUInteger trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationInResource: rez asTrack: trackID];
+	return trackID;
+}
+
+@end
+

@@ -31,28 +31,19 @@
 
 #import "CC3CAFResource.h"
 #import "CC3DataStreams.h"
-#import "CC3NodeAnimation.h"
 
 
 @implementation CC3CAFResource
 
 @synthesize animationDuration=_animationDuration, fileVersion=_fileVersion;
 @synthesize wasCSFResourceAttached=_wasCSFResourceAttached;
+@synthesize shouldSwapQuaternionYZ=_shouldSwapQuaternionYZ;
 
--(void) addAnimationTo: (CC3Node*) aNode asTrack: (NSUInteger) trackID {
-	CC3Assert(_wasCSFResourceAttached, @"%@ has not been linked to the corresponding CSF file.", self);
-	for (CC3CALNode* cafNode in _nodes) {
-		CC3Node* matchingNode = [aNode getNodeNamed: cafNode.name];
-		[matchingNode addAnimation: cafNode.animation asTrack: trackID];
-	}
-	LogRez(@"Added animation from %@ to node assembly below %@ as animation track %u", self, aNode, trackID);
-}
+static BOOL _defaultShouldSwapQuaternionYZ = YES;
 
--(NSUInteger) addAnimationTo: (CC3Node*) aNode {
-	NSUInteger trackID = [CC3NodeAnimationState generateTrackID];
-	[self addAnimationTo: aNode asTrack: trackID];
-	return trackID;
-}
++(BOOL) defaultShouldSwapQuaternionYZ { return _defaultShouldSwapQuaternionYZ; }
+
++(void) setDefaultShouldSwapQuaternionYZ: (BOOL) shouldSwap { _defaultShouldSwapQuaternionYZ = shouldSwap; }
 
 
 #pragma mark Allocation and initialization
@@ -63,6 +54,7 @@
 		_nodeCount = 0;
 		_animationDuration = 0;
 		_wasCSFResourceAttached = NO;
+		_shouldSwapQuaternionYZ = self.class.defaultShouldSwapQuaternionYZ;
 	}
 	return self;
 }
@@ -186,6 +178,8 @@
 	//		rotation z             4       float
 	//		rotation w             4       float
 
+	BOOL swapYZ = self.shouldSwapQuaternionYZ;		// Should we swap Y & Z?
+
 	// Allocate the animation content arrays
 	ccTime* frameTimes = anim.allocateFrameTimes;
 	CC3Vector* locations = anim.allocateLocations;
@@ -203,10 +197,18 @@
 		locations[fIdx].z = reader.readFloat;
 
 		// Rotation at frame
-		quaternions[fIdx].x = reader.readFloat;
-		quaternions[fIdx].y = reader.readFloat;
-		quaternions[fIdx].z = reader.readFloat;
-		quaternions[fIdx].w = reader.readFloat;
+		
+		if (swapYZ) {
+			quaternions[fIdx].x = reader.readFloat;
+			quaternions[fIdx].z = -reader.readFloat;	// Swap for negated Y
+			quaternions[fIdx].y = reader.readFloat;		// Swap for Z
+			quaternions[fIdx].w = reader.readFloat;
+		} else {
+			quaternions[fIdx].x = reader.readFloat;
+			quaternions[fIdx].y = reader.readFloat;
+			quaternions[fIdx].z = reader.readFloat;
+			quaternions[fIdx].w = reader.readFloat;
+		}
 
 		LogTrace(@"Time: %.4f Loc: %@ Quat: %@ in frame %i",
 				 frameTimes[fIdx], NSStringFromCC3Vector(locations[fIdx]),
@@ -235,34 +237,28 @@
 
 #pragma mark Adding animation to nodes
 
-@implementation CC3Node (CAF)
+@implementation CC3Node (CAFAnimation)
 
--(void) addCAFAnimation: (CC3CAFResource*) cafRez asTrack: (NSUInteger) trackID {
-	[cafRez addAnimationTo: self asTrack: trackID];
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID {
+	[self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath ] asTrack: trackID];
 }
 
--(void) addCAFAnimationFromFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID {
-	[self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath ] asTrack: trackID];
-}
-
--(void) addCAFAnimationFromFile: (NSString*) cafFilePath
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath
 				linkedToCSFFile: (NSString*) csfFilePath
 						asTrack: (NSUInteger) trackID {
-	[self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath
-											linkedToCSFFile: csfFilePath]
+	[self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath
+												   linkedToCSFFile: csfFilePath]
 				  asTrack: trackID];
 }
 
--(NSUInteger) addCAFAnimation: (CC3CAFResource*) cafRez { return [cafRez addAnimationTo: self]; }
-
--(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath {
-	return [self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath ]];
+-(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath {
+	return [self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath ]];
 }
 
--(NSUInteger) addCAFAnimationFromFile: (NSString*) cafFilePath
+-(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath
 					  linkedToCSFFile: (NSString*) csfFilePath {
-	return [self addCAFAnimation: [CC3CAFResource resourceFromFile: cafFilePath
-												   linkedToCSFFile: csfFilePath]];
+	return [self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath
+														  linkedToCSFFile: csfFilePath]];
 }
 
 @end
