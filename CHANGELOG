@@ -51,6 +51,7 @@ cocos3d 2.0.0 - 2013/03/31
 		- Added track-based animation methods to CC3Node
 			- CC3Node animation property is now a convenience property for referencing animation on track zero.
 		- Added CC3Animate trackID property to animate a single track of node animation.
+		- Added animation blending transition actions CC3AnimationCrossFade, CC3AnimationBlendingFadeTrackTo, CC3AnimationBlendingSetTrackTo, CC3EnableAnimationTrack & CC3DisableAnimationTrack.
 		- Animation actions update CC3NodeAnimationState state and CC3Node extracts and blends animation changes during processUpdateBeforeTransform:.
 		- Additional animation tracks can be loaded in secondary POD files and added to existing models:
 		    - Added CC3Node addAnimationFromPODFile: and addAnimationFromPODFile:asTrack: methods to add additional animation tracks.

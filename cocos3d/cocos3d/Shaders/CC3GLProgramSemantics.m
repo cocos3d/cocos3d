@@ -707,7 +707,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setVector: CC3BoundingBoxSize(visitor.currentMeshNode.mesh.boundingBox)];
 			return YES;
 		case kCC3SemanticAnimationFraction:
-			[uniform setFloat: visitor.currentMeshNode.animationState.animationTime];
+			[uniform setFloat: [visitor.currentMeshNode animationTimeOnTrack: 0]];
 			return YES;
 			
 		// SKINNING ----------------

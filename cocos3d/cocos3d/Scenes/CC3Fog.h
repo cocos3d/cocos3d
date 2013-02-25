@@ -224,8 +224,8 @@
  * assigns the tag to the specified new action, starts that new action, returns it. This fog
  * becomes the action's target.
  *
- * When using this method, you can use the CC3ActionTag enumeration as a convenience for consistently
- * assigning tags by action type.
+ * When using this method, you can use the CC3ActionTag enumeration as a convenience for
+ * consistently assigning tags by action type.
  */
 -(CCAction*) runAction: (CCAction*) action withTag: (NSInteger) tag;
 

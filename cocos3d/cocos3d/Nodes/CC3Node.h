@@ -2947,8 +2947,8 @@ typedef enum {
  * action to be stopped and replaced with a new movement action, through a second invocation of
  * this method with the same tag, without affecting the fade action.
  *
- * When using this method, you can use the CC3ActionTag enumeration as a convenience for consistently
- * assigning tags by action type.
+ * When using this method, you can use the CC3ActionTag enumeration as a convenience for
+ * consistently assigning tags by action type.
  */
 -(CCAction*) runAction: (CCAction*) action withTag: (NSInteger) tag;
 
@@ -3372,11 +3372,27 @@ typedef enum {
 /** Indicates whether this node, or any of its descendants, contains animation on any tracks. */
 @property(nonatomic, readonly) BOOL containsAnimation;
 
-/** Returns the animation blending weight for the animation in the specified track. */
--(GLfloat) animationBlendingWeightForTrack: (NSUInteger) trackID;
+/**
+ * Returns the current elapsed animation time for the animation on the specified track,
+ * as a value between zero and one.
+ *
+ * If this node does not contain animation, returns the animation time from the first descendant
+ * node that contains animation and has a non-zero animation time. Returns zero if no descendant
+ * nodes contain animation, or all descendant animation times are zero.
+ */
+-(ccTime) animationTimeOnTrack: (NSUInteger) trackID;
 
 /**
- * Sets the animation blending weight for the animation in the specified track, and sets the
+ * Returns the animation blending weight for the animation on the specified track.
+ *
+ * If this node does not contain animation, returns the blending weight from the first descendant
+ * node that contains animation and has a non-zero blending weight. Returns zero if no descendant
+ * nodes contain animation, or all descendant blending weights are zero.
+ */
+-(GLfloat) animationBlendingWeightOnTrack: (NSUInteger) trackID;
+
+/**
+ * Sets the animation blending weight for the animation on the specified track, and sets the
  * same weight into all descendants.
  *
  * When multiple animation tracks are active, the blending weight of a track determines the
@@ -3393,7 +3409,7 @@ typedef enum {
  *
  * When only one animation track is active, the blending weight has no effect unless it is zero.
  */
--(void) setAnimationBlendingWeight: (GLfloat) blendWeight forTrack: (NSUInteger) trackID;
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (NSUInteger) trackID;
 
 /**
  * Enables the animation on the specified track of this node.
@@ -3639,7 +3655,7 @@ typedef enum {
 -(void) establishAnimationFrameAt: (ccTime) t DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Instead of accessing this property, retrieve the appropriate animation using the
- * animation property or the getAnimationForTrack: method, and access the frameCount property.
+ * animation property or the getAnimationOnTrack: method, and access the frameCount property.
  */
 @property(nonatomic, readonly) GLuint animationFrameCount DEPRECATED_ATTRIBUTE;
 

@@ -424,7 +424,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(GLfloat) blendingWeight { return _blendingWeight; }
 
 -(void) setBlendingWeight: (GLfloat) blendingWeight {
-	_blendingWeight = blendingWeight;
+	_blendingWeight = CLAMP(blendingWeight, 0.0f, 1.0f);
 	[self markDirty];
 }
 

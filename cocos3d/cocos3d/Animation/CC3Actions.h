@@ -49,6 +49,7 @@
  */
 typedef enum {							// Don't start at zero to avoid possible confusion with defaults or other action tags
 	kCC3ActionTagAnimation = 314,		/**< Use for animation that may combine move, rotate, and scale type actions. */
+	kCC3ActionTagAnimationBlending,		/**< Use for changes to animation track blending. */
 	kCC3ActionTagMove,					/**< Use for movement type actions. */
 	kCC3ActionTagRotation,				/**< Use for rotation type actions. */
 	kCC3ActionTagScale,					/**< Use for scaling type actions. */
@@ -611,33 +612,31 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 #pragma mark CC3Animate
 
 /**
- * A CCActionInterval that animates a CC3Node.
+ * A CCActionInterval that animates a single track of animation on a CC3Node and its descendants.
  *
- * To animate a node, CC3Animate invokes the establishAnimationFrameAt: method
- * of the CC3Node it is animating. The heavy lifting is performed by the
- * CC3NodeAnimation instance held in the animation property of the node.
+ * To animate a node, CC3Animate invokes the establishAnimationFrameAt:onTrack: method of the
+ * target CC3Node. The heavy lifting is performed by the CC3NodeAnimation instance held in the
+ * animation property of the node.
  *
- * The establishAnimationFrameAt: method of the CC3Node also takes care of
- * propagating the animation to its child nodes. A complete assembly of nodes
- * can therefore be animated in concert using a single CC3Animate instance.
+ * The establishAnimationFrameAt:onTrack: method of the CC3Node also takes care of propagating
+ * the animation to its descendant nodes. A complete assembly of nodes can therefore be animated
+ * in concert for one track of information using a single CC3Animate instance.
  *
- * It is possible to animate only a fraction of the full animation. This can be done
- * using either the actionWithDuration:limitFrom:to: or asActionLimitedFrom:to:
- * methods.
+ * It is possible to animate only a fraction of the full animation. This can be done using
+ * either the actionWithDuration:onTrack:limitFrom:to: or asActionLimitedFrom:to: methods.
  *
  * Doing so will result is an animation action that will perform only part of the animation.
  * This is very useful for an node that contains several different motions in one animation.
- * Using a range-limited CC3Animate, you can animate one of those distinct motions without
- * having to run the full animation. To do this, set the startOfRange and endOfRange values
- * to the fractional positions (between zero and one) of the start and end frames of the
- * sub-animation.
+ * Using a range-limited CC3Animate, you can animate one of those distinct motions without having
+ * to run the full animation. To do this, set the startOfRange and endOfRange values to the
+ * fractional positions (between zero and one) of the start and end frames of the sub-animation.
  *
  * For example, if a character animation contains a punch animation that starts and stops
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
  * those two values here will result in an animation containing only the punch.
  */
 @interface CC3Animate : CCActionInterval <NSCopying> {
-	NSUInteger _trackID : 16;
+	NSUInteger _trackID;
 	BOOL _isReversed : 1;
 }
 
@@ -734,17 +733,17 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingFadeTo
+#pragma mark CC3AnimationBlendingFadeTrackTo
 
 /**
- * CC3AnimationBlendingFadeTo fades the animation blending weight of an animation track in the
- * target CC3Node from its current value to and end value. This allows the animation track to
+ * CC3AnimationBlendingFadeTrackTo fades the animation blending weight of an animation track in the
+ * target CC3Node from its current value to an end value. This allows the animation track to
  * be faded in or out smoothly.
  */
-@interface CC3AnimationBlendingFadeTo : CCActionInterval <NSCopying> {
+@interface CC3AnimationBlendingFadeTrackTo : CCActionInterval <NSCopying> {
 	GLfloat _startWeight;
 	GLfloat _endWeight;
-	NSUInteger _trackID : 16;
+	NSUInteger _trackID;
 }
 
 /** The animation track on which the animation runs. */
@@ -761,6 +760,156 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * specified animation track on the target node to the specified value, over the specified time duration.
  */
 +(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3AnimationCrossFade
+
+/** CC3AnimationCrossFade fades smoothly from one animation track to another. */
+@interface CC3AnimationCrossFade : CCActionInterval <NSCopying> {
+	NSUInteger _fromTrackID;
+	NSUInteger _toTrackID;
+	GLfloat _startWeight;
+	GLfloat _endWeight;
+}
+
+/** The animation track to fade from. */
+@property (nonatomic, assign, readonly) NSUInteger fromTrackID;
+
+/** The animation track to fade to. */
+@property (nonatomic, assign, readonly) NSUInteger toTrackID;
+
+/**
+ * Initializes this instance to fade from the specified track to the specified track, over
+ * the specified time duration, and leaving the final track with a blending weight of one.
+ */
+-(id) initWithDuration: (ccTime) t
+			 fromTrack: (NSUInteger) fromTrackID
+			   toTrack: (NSUInteger) toTrackID;
+
+/**
+ * Initializes this instance to fade from the specified track to the specified track, over the
+ * specified time duration, and leaving the final track with the specified blending weight.
+ */
+-(id) initWithDuration: (ccTime) t
+			 fromTrack: (NSUInteger) fromTrackID
+			   toTrack: (NSUInteger) toTrackID
+	withBlendingWeight: (GLfloat) toBlendingWeight;
+
+/**
+ * Allocates and initializes an autoreleased instance to fade from the specified track to
+ * the specified track, over the specified time duration, and leaving the final track with
+ *  a blending weight of one.
+ */
++(id) actionWithDuration: (ccTime) t
+			   fromTrack: (NSUInteger) fromTrackID
+				 toTrack: (NSUInteger) toTrackID;
+
+/**
+ * Allocates and initializes an autoreleased instance to fade from the specified track to
+ * the specified track, over the specified time duration, and leaving the final track with
+ * the specified blending weight.
+ */
++(id) actionWithDuration: (ccTime) t
+			   fromTrack: (NSUInteger) fromTrackID
+				 toTrack: (NSUInteger) toTrackID
+	  withBlendingWeight: (GLfloat) toBlendingWeight;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3AnimationBlendingSetTrackTo
+
+/**
+ * CC3AnimationBlendingSetTrackTo immediately sets the animation blending weight of an animation
+ * track in the target CC3Node to a specified value.
+ *
+ * By setting the blending weight to zero, the animation track can be effectively turned off.
+ */
+@interface CC3AnimationBlendingSetTrackTo : CCActionInstant {
+	GLfloat _endWeight;
+	NSUInteger _trackID;
+}
+
+/** The animation track on which the animation runs. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
+
+/**
+ * Initializes this instance to set the animation blending weight of the specified animation
+ * track on the target node to the specified value.
+ *
+ * By setting the blending weight to zero, the animation track can be effectively turned off.
+ */
+-(id) initOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+
+/**
+ * Allocates and initializes an autoreleased instance to set the animation blending weight of the
+ * specified animation track on the target node to the specified value.
+ *
+ * By setting the blending weight to zero, the animation track can be effectively turned off.
+ */
++(id) actionOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3EnableAnimationTrack
+
+/**
+ * CC3EnableAnimation immediately enables a specified animation track on the target node
+ * and all of its descendants.
+ */
+@interface CC3EnableAnimationTrack : CCActionInstant {
+	NSUInteger _trackID;
+}
+
+/** The animation track to be enabled. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
+
+/**
+ * Initializes this instance to enable the specified animation track on the target node
+ * and all of its descendants.
+ */
+-(id) initOnTrack: (NSUInteger) trackID;
+
+/** 
+ * Allocates and initializes an autoreleased instance to enable the specified animation
+ * track on the target node and all of its descendants.
+ */
++(id) actionOnTrack: (NSUInteger) trackID;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3DisableAnimationTrack
+
+/**
+ * CC3DisableAnimation immediately disables a specified animation track on the target node
+ * and all of its descendants.
+ */
+@interface CC3DisableAnimationTrack : CCActionInstant {
+	NSUInteger _trackID;
+}
+
+/** The animation track to be enabled. */
+@property (nonatomic, assign, readonly) NSUInteger trackID;
+
+/**
+ * Initializes this instance to disable the specified animation track on the target node
+ * and all of its descendants.
+ */
+-(id) initOnTrack: (NSUInteger) trackID;
+
+/**
+ * Allocates and initializes an autoreleased instance to disable the specified animation
+ * track on the target node and all of its descendants.
+ */
++(id) actionOnTrack: (NSUInteger) trackID;
 
 @end
 

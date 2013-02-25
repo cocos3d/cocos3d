@@ -2097,14 +2097,29 @@ static GLuint lastAssignedNodeTag;
 	return NO;
 }
 
--(GLfloat) animationBlendingWeightForTrack: (NSUInteger) trackID {
+-(ccTime) animationTimeOnTrack: (NSUInteger) trackID {
 	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
-	return as ? as.blendingWeight : 0.0f;
+	if (as) return as.animationTime;
+	for (CC3Node* child in children) {
+		ccTime animTime = [child animationTimeOnTrack: trackID];
+		if (animTime) return animTime;
+	}
+	return 0.0f;
 }
 
--(void) setAnimationBlendingWeight: (GLfloat) blendWeight forTrack: (NSUInteger) trackID {
+-(GLfloat) animationBlendingWeightOnTrack: (NSUInteger) trackID {
+	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
+	if (as) return as.blendingWeight;
+	for (CC3Node* child in children) {
+		GLfloat animBlend = [child animationBlendingWeightOnTrack: trackID];
+		if (animBlend) return animBlend;
+	}
+	return 0.0f;
+}
+
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (NSUInteger) trackID {
 	[self getAnimationStateOnTrack: trackID].blendingWeight = blendWeight;
-	for (CC3Node* child in children) [child setAnimationBlendingWeight: blendWeight forTrack: trackID];
+	for (CC3Node* child in children) [child setAnimationBlendingWeight: blendWeight onTrack: trackID];
 }
 
 -(void) enableAnimationOnTrack: (NSUInteger) trackID {
@@ -2231,8 +2246,8 @@ static GLuint lastAssignedNodeTag;
 	GLfloat totWtS = 0.0f;		// Accumulated scale weight
 
 	for (CC3NodeAnimationState* as in _animationStates) {
-		if (as.isEnabled) {
-			GLfloat currWt = as.blendingWeight;
+		GLfloat currWt = as.blendingWeight;
+		if (currWt && as.isEnabled) {		// Don't blend if disabled or zero weight
 			
 			// Blend the location
 			if (as.isAnimatingLocation) {

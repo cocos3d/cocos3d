@@ -646,7 +646,6 @@
 +(id) actionWithDuration: (ccTime) t { return [self actionWithDuration: t onTrack: 0]; }
 
 -(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID {
-	CC3Assert(trackID <= 65535, @"%@ trackID %u exceeds the maximum value of 65535.", self, trackID);
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_isReversed = NO;
@@ -671,8 +670,7 @@
 }
 
 -(void) update: (ccTime) t {
-	CC3Node* node = self.target;
-	[node establishAnimationFrameAt: (_isReversed ? (1.0 - t) : t) onTrack: _trackID];
+	[self.targetCC3Node establishAnimationFrameAt: (_isReversed ? (1.0 - t) : t) onTrack: _trackID];
 }
 
 -(CCActionInterval*) reverse {
@@ -691,14 +689,13 @@
 
 
 #pragma mark -
-#pragma mark CC3AnimationBlendingFadeTo
+#pragma mark CC3AnimationBlendingFadeTrackTo
 
-@implementation CC3AnimationBlendingFadeTo
+@implementation CC3AnimationBlendingFadeTrackTo
 
-@synthesize trackID = _trackID;
+@synthesize trackID=_trackID;
 
 -(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
-	CC3Assert(trackID <= 65535, @"%@ trackID %u exceeds the maximum value of 65535.", self, trackID);
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_endWeight = blendingWeight;
@@ -707,17 +704,17 @@
 }
 
 +(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
-	return [[[self alloc] initWithDuration: t onTrack: trackID] autorelease];
+	return [[[self alloc] initWithDuration: t onTrack: trackID blendingWeight: blendingWeight] autorelease];
 }
 
--(void) startWithTarget:(CC3Node*) aTarget {
+-(void) startWithTarget: (CC3Node*) aTarget {
 	[super startWithTarget: aTarget];
-	_startWeight = [aTarget animationBlendingWeightForTrack: _trackID];
+	_startWeight = [aTarget animationBlendingWeightOnTrack: _trackID];
 }
 
 -(void) update: (ccTime) t {
-	CC3Node* node = self.target;
-	[node setAnimationBlendingWeight: ((_endWeight - _startWeight) * t) forTrack: _trackID];
+	[self.targetCC3Node setAnimationBlendingWeight: (_startWeight + (t * (_endWeight - _startWeight)))
+										  onTrack: _trackID];
 }
 
 -(CCActionInterval*) reverse {
@@ -729,6 +726,144 @@
 }
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3AnimationCrossFade
+
+@implementation CC3AnimationCrossFade
+
+@synthesize fromTrackID=_fromTrackID, toTrackID=_toTrackID;
+
+-(id) initWithDuration: (ccTime) t
+			 fromTrack: (NSUInteger) fromTrackID
+			   toTrack: (NSUInteger) toTrackID {
+	return [self initWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
+}
+
+-(id) initWithDuration: (ccTime) t
+			 fromTrack: (NSUInteger) fromTrackID
+			   toTrack: (NSUInteger) toTrackID
+	withBlendingWeight: (GLfloat) toBlendingWeight {
+	if ( (self = [super initWithDuration: t]) ) {
+		_fromTrackID = fromTrackID;
+		_toTrackID = toTrackID;
+		_endWeight = toBlendingWeight;
+	}
+	return self;
+}
+
++(id) actionWithDuration: (ccTime) t
+			   fromTrack: (NSUInteger) fromTrackID
+				 toTrack: (NSUInteger) toTrackID {
+	return [self actionWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
+}
+
++(id) actionWithDuration: (ccTime) t
+			   fromTrack: (NSUInteger) fromTrackID
+				 toTrack: (NSUInteger) toTrackID
+	  withBlendingWeight: (GLfloat) toBlendingWeight {
+	return [[[self alloc] initWithDuration: t
+								 fromTrack: fromTrackID
+								   toTrack: toTrackID
+						withBlendingWeight: toBlendingWeight] autorelease];
+}
+
+-(void) startWithTarget: (CC3Node*) aTarget {
+	[super startWithTarget: aTarget];
+	_startWeight = [aTarget animationBlendingWeightOnTrack: _fromTrackID];
+}
+
+-(void) update: (ccTime) t {
+	CC3Node* node = self.targetCC3Node;
+	[node setAnimationBlendingWeight: ((1 - t) * _startWeight) onTrack: _fromTrackID];
+	[node setAnimationBlendingWeight: (t * _endWeight) onTrack: _toTrackID];
+}
+
+-(CCActionInterval*) reverse {
+	return [[self class] actionWithDuration: self.duration
+								  fromTrack: self.toTrackID
+									toTrack: self.fromTrackID
+						 withBlendingWeight: _startWeight];
+}
+
+-(id) copyWithZone: (NSZone*) zone {
+	return [[self class] actionWithDuration: self.duration
+								  fromTrack: self.fromTrackID
+									toTrack: self.toTrackID
+						 withBlendingWeight: _endWeight];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3AnimationBlendingSetTrackTo
+
+@implementation CC3AnimationBlendingSetTrackTo
+
+@synthesize trackID=_trackID;
+
+-(id) initOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+	if ( (self = [super init]) ) {
+		_trackID = trackID;
+		_endWeight = blendingWeight;
+	}
+	return self;
+}
+
++(id) actionOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+	return [[[self alloc] initOnTrack: trackID blendingWeight: blendingWeight] autorelease];
+}
+
+-(void) update: (ccTime) t {
+	[self.targetCC3Node setAnimationBlendingWeight: _endWeight onTrack: _trackID];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3EnableAnimationTrack
+
+@implementation CC3EnableAnimationTrack
+
+@synthesize trackID=_trackID;
+
+-(id) initOnTrack: (NSUInteger) trackID {
+	if ( (self = [super init]) ) {
+		_trackID = trackID;
+	}
+	return self;
+}
+
++(id) actionOnTrack: (NSUInteger) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
+
+-(void) update: (ccTime) t { [self.targetCC3Node enableAllAnimationOnTrack: _trackID]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3DisableAnimationTrack
+
+@implementation CC3DisableAnimationTrack
+
+@synthesize trackID=_trackID;
+
+-(id) initOnTrack: (NSUInteger) trackID {
+	if ( (self = [super init]) ) {
+		_trackID = trackID;
+	}
+	return self;
+}
+
++(id) actionOnTrack: (NSUInteger) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
+
+-(void) update: (ccTime) t { [self.targetCC3Node disableAllAnimationOnTrack: _trackID]; }
+
+@end
+
 
 
 #pragma mark -
