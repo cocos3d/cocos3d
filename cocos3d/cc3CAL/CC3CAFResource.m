@@ -31,19 +31,27 @@
 
 #import "CC3CAFResource.h"
 #import "CC3DataStreams.h"
+#import "CC3VertexSkinning.h"
 
 
 @implementation CC3CAFResource
 
 @synthesize animationDuration=_animationDuration, fileVersion=_fileVersion;
 @synthesize wasCSFResourceAttached=_wasCSFResourceAttached;
-@synthesize shouldSwapQuaternionYZ=_shouldSwapQuaternionYZ;
+@synthesize shouldSwapYZ=_shouldSwapYZ;
 
-static BOOL _defaultShouldSwapQuaternionYZ = YES;
+static BOOL _defaultShouldSwapYZ = YES;
 
-+(BOOL) defaultShouldSwapQuaternionYZ { return _defaultShouldSwapQuaternionYZ; }
++(BOOL) defaultShouldSwapYZ { return _defaultShouldSwapYZ; }
 
-+(void) setDefaultShouldSwapQuaternionYZ: (BOOL) shouldSwap { _defaultShouldSwapQuaternionYZ = shouldSwap; }
++(void) setDefaultShouldSwapYZ: (BOOL) shouldSwap { _defaultShouldSwapYZ = shouldSwap; }
+
+-(CC3Node*) getNodeMatching: (CC3Node*) node {
+	CC3CALNode* matchedNode = (CC3CALNode*)[super getNodeMatching:node];
+	if ( !matchedNode.isAnimationCorrectedForScale )
+		[matchedNode correctAnimationToSkeletalScale: node.skeletalScale];
+	return matchedNode;
+}
 
 
 #pragma mark Allocation and initialization
@@ -54,7 +62,7 @@ static BOOL _defaultShouldSwapQuaternionYZ = YES;
 		_nodeCount = 0;
 		_animationDuration = 0;
 		_wasCSFResourceAttached = NO;
-		_shouldSwapQuaternionYZ = self.class.defaultShouldSwapQuaternionYZ;
+		_shouldSwapYZ = self.class.defaultShouldSwapYZ;
 	}
 	return self;
 }
@@ -178,8 +186,6 @@ static BOOL _defaultShouldSwapQuaternionYZ = YES;
 	//		rotation z             4       float
 	//		rotation w             4       float
 
-	BOOL swapYZ = self.shouldSwapQuaternionYZ;		// Should we swap Y & Z?
-
 	// Allocate the animation content arrays
 	ccTime* frameTimes = anim.allocateFrameTimes;
 	CC3Vector* locations = anim.allocateLocations;
@@ -191,23 +197,29 @@ static BOOL _defaultShouldSwapQuaternionYZ = YES;
 		// Frame time, normalized to range between 0 and 1.
 		frameTimes[fIdx] = CLAMP(reader.readFloat / _animationDuration, 0.0f, 1.0f);
 
-		// Location at frame
-		locations[fIdx].x = reader.readFloat;
-		locations[fIdx].y = reader.readFloat;
-		locations[fIdx].z = reader.readFloat;
+		// Location and rotation at frame
+		if (_shouldSwapYZ) {
+			
+			locations[fIdx].x = reader.readFloat;
+			locations[fIdx].z = -reader.readFloat;		// Swap for negated Y
+			locations[fIdx].y = reader.readFloat;		// Swap for Z
 
-		// Rotation at frame
-		
-		if (swapYZ) {
 			quaternions[fIdx].x = reader.readFloat;
 			quaternions[fIdx].z = -reader.readFloat;	// Swap for negated Y
 			quaternions[fIdx].y = reader.readFloat;		// Swap for Z
 			quaternions[fIdx].w = reader.readFloat;
+
 		} else {
+
+			locations[fIdx].x = reader.readFloat;
+			locations[fIdx].y = reader.readFloat;
+			locations[fIdx].z = reader.readFloat;
+
 			quaternions[fIdx].x = reader.readFloat;
 			quaternions[fIdx].y = reader.readFloat;
 			quaternions[fIdx].z = reader.readFloat;
 			quaternions[fIdx].w = reader.readFloat;
+
 		}
 
 		LogTrace(@"Time: %.4f Loc: %@ Quat: %@ in frame %i",

@@ -30,11 +30,14 @@
  */
 
 #import "CC3CALNode.h"
+#import "CC3NodeAnimation.h"
+#import "CC3VertexSkinning.h"
 
 
 @implementation CC3CALNode
 
 @synthesize calIndex=_calIndex, calParentIndex=_calParentIndex;
+@synthesize isAnimationCorrectedForScale=_isAnimationCorrectedForScale;
 
 -(BOOL) isBaseCALNode { return self.calParentIndex < 0; }
 
@@ -46,7 +49,6 @@
 	}
 }
 
-
 -(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex {
 	if (_calIndex == calIndex) return self;
 	for (CC3Node* child in children) {
@@ -54,6 +56,23 @@
 		if (childResult) return childResult;
 	}
 	return nil;
+}
+
+-(void)	correctAnimationToSkeletalScale: (CC3Vector) aScale {
+	if (self.isAnimationCorrectedForScale) return;
+	if ( CC3VectorsAreEqual(aScale, kCC3VectorUnitCube) ) return;
+	
+	CC3Vector invScale = CC3VectorInvert(aScale);
+	for (CC3NodeAnimationState* animState in _animationStates) {
+		CC3ArrayNodeAnimation* anim = (CC3ArrayNodeAnimation*)animState.animation;
+		CC3Vector* locations = anim.animatedLocations;
+		if (locations) {
+			GLuint fCnt = anim.frameCount;
+			for (GLuint fIdx = 0; fIdx < fCnt; fIdx++)
+				locations[fIdx] = CC3VectorScale(locations[fIdx], invScale);
+		}
+	}
+	_isAnimationCorrectedForScale = YES;
 }
 
 
@@ -64,6 +83,7 @@
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_calIndex = -1;
 		_calParentIndex = -1;
+		_isAnimationCorrectedForScale = NO;
 	}
 	return self;
 }

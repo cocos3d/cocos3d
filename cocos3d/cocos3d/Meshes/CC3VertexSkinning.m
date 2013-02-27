@@ -75,6 +75,8 @@
 
 -(CC3SoftBodyNode*) softBodyNode { return self; }
 
+-(CC3Vector) skeletalScale { return kCC3VectorUnitCube; }
+
 @end
 
 
@@ -776,6 +778,8 @@
 #pragma mark CC3Node skinning extensions
 
 @implementation CC3Node (Skinning)
+
+-(CC3Vector) skeletalScale { return parent ? CC3VectorScale(parent.skeletalScale, scale) : scale; }
 
 -(BOOL) isSkeletonRigid { return transformMatrix.isRigid; }
 

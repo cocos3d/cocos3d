@@ -45,7 +45,7 @@
 	ccTime _animationDuration;
 	NSInteger _fileVersion;
 	BOOL _wasCSFResourceAttached : 1;
-	BOOL _shouldSwapQuaternionYZ : 1;
+	BOOL _shouldSwapYZ : 1;
 }
 
 /** The file format version, extracted from the file. */
@@ -55,35 +55,35 @@
 @property(nonatomic, readonly) ccTime animationDuration;
 
 /**
- * Indicates whether the Y & Z elements of animated quaternions loaded by this resource
- * should be swapped during loading. When swapped, the new Z value is also negated.
+ * Indicates whether the Y & Z elements of animated locations and quaternions loaded by this
+ * resource should be swapped during loading. When swapped, the new Z value is also negated.
  *
- * If set to YES, for each quaternion in the animation content, the Z value will be set from
- * the negated Y value of the loaded quaternion, and the Y value will be set from the Z value.
+ * If set to YES, for each location and quaternion in the animation content, the Z value will be set
+ * from the negated Y value of the loaded quaternion, and the Y value will be set from the Z value.
  *
  * This setting can be used to correct possible coordinate system orientation discrepancies
  * between the CAF exporters and cocos3d.
  *
  * The initial value of this property is set from the value of the class-side
- * defaultShouldSwapQuaternionYZ property.
+ * defaultShouldSwapYZ property.
  */
-@property(nonatomic, assign) BOOL shouldSwapQuaternionYZ;
+@property(nonatomic, assign) BOOL shouldSwapYZ;
 
 /**
- * Indicates the value that the shouldSwapQuaternionYZ property should be initially set to
+ * Indicates the value that the shouldSwapYZ property should be initially set to
  * when any new instance of this class is created.
  *
  * The initial value of this property is YES.
  */
-+(BOOL) defaultShouldSwapQuaternionYZ;
++(BOOL) defaultShouldSwapYZ;
 
 /**
- * Indicates the value that the shouldSwapQuaternionYZ property should be initially set to
+ * Indicates the value that the shouldSwapYZ property should be initially set to
  * when any new instance of this class is created.
  *
  * The initial value of this property is YES.
  */
-+(void) setDefaultShouldSwapQuaternionYZ: (BOOL) shouldSwap;
++(void) setDefaultShouldSwapYZ: (BOOL) shouldSwap;
 
 
 #pragma mark Allocation and initialization
@@ -194,6 +194,7 @@
 @end
 
 
+#pragma mark -
 #pragma mark Adding animation to nodes
 
 /** Extension category to provide support for CAF animation. */

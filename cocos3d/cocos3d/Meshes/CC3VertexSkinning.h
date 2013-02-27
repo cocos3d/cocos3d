@@ -810,6 +810,9 @@
  */
 @property(nonatomic, readonly) CC3SoftBodyNode* softBodyNode;
 
+/** Returns the aggregate scale of this node relative to its closest soft-body ancestor. */
+@property(nonatomic, readonly) CC3Vector skeletalScale;
+
 @end
 
 

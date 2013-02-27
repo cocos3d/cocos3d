@@ -188,8 +188,9 @@
 	// Add the node to the collection of unstructured nodes
 	[_allNodes addObject: calNode];
 
-	LogTrace(@"Loaded node named %@ with CAL index %i, parent index %i, location %@, rotation quaternion %@",
-			 nodeName, nodeIdx, parentIndex, NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion));
+	LogTrace(@"Loaded node named %@ with CAL index %i, parent index %i, location %@, quaternion %@, vertex translation %@, vertex quaternion %@",
+			 nodeName, nodeIdx, parentIndex, NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion),
+			 NSStringFromCC3Vector(vtxTranslation), NSStringFromCC3Quaternion(vtxQuaternion));
 
 	return !reader.wasReadBeyondEOF;
 }
