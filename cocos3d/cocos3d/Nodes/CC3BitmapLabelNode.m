@@ -536,7 +536,7 @@ typedef struct {
 		([lblString characterAtIndex: i] == '\n') ? lineCount++ : charCount++;
 	
 	// Create a local array to hold the dimensional characteristics of each line of text
-	CC3BMLineSpec* lineSpecs = calloc(lineCount, sizeof(CC3BMLineSpec));
+	CC3BMLineSpec lineSpecs[lineCount];
 	
 	// We now know the height of the layout. Width will be determined as the lines are laid out.
 	layoutSize.width =  0;
@@ -587,6 +587,10 @@ typedef struct {
 		// This is specified in terms of the unscaled font config. It will be scaled later.
 		CGSize divSize = CGSizeMake(charSpec->rect.size.width / divsPerChar.x,
 									charSpec->rect.size.height / divsPerChar.y);
+		
+		// Initialize the current line spec
+		lineSpecs[lineIndx].lastVertexIndex = 0;
+		lineSpecs[lineIndx].lineWidth = 0.0f;
 		
 		// Populate the tesselated vertex locations, normals & texture coordinates for a single
 		// character. Iterate through the rows and columns of the tesselation grid, from the top-left
@@ -684,9 +688,6 @@ typedef struct {
 		CC3Vector locNew = CC3VectorDifference(locOld, originLoc);
 		[self setVertexLocation: locNew at: vIdx];
 	}
-	
-	free(lineSpecs);	// Release the array of line widths
 }
-
 
 @end

@@ -140,10 +140,9 @@
 	NSString* nodeName = nil;
 	NSInteger nameLen = reader.readInteger;
 	if (nameLen > 0) {
-		char* cNodeName = calloc(nameLen, sizeof(char));
+		char cNodeName[nameLen];
 		[reader read: nameLen bytes: cNodeName];
 		nodeName = [NSString stringWithUTF8String: cNodeName];
-		free(cNodeName);
 	}
 
 	// Node location

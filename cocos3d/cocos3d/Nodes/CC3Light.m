@@ -576,15 +576,9 @@
 // When a new instance is instantiated, it's lightIndex property is assigned from the pool
 // of indexes. When the instance is deallocated, its index is returned to the pool for use
 // by any subsequently instantiated lights.
-static BOOL* _lightIndexPool = NULL;
+static BOOL _lightIndexPool[32] = {NO};
 
-+(BOOL*) lightIndexPool {
-	if (!_lightIndexPool) {
-		GLint platformMaxLights = [CC3OpenGLESEngine engine].platform.maxLights.value;
-		_lightIndexPool = calloc(platformMaxLights, sizeof(BOOL));
-	}
-	return _lightIndexPool;
-}
++(BOOL*) lightIndexPool { return _lightIndexPool; }
 
 // Indicates the staring index to use when instantiating new lights.
 static GLuint lightPoolStartIndex = 0;

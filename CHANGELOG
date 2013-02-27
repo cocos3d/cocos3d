@@ -116,7 +116,7 @@ cocos3d 2.0.0 - 2013/03/31
 - Removed bounding volume contents from the output of the CC3Node fullDescription method.
 - Removed redundant invocation of normalizeBillboardScaleToDevice in CC3Billboard setBillboard: method.
 - Upgraded PowerVR POD/PFX library to version 3.0r2 and stripped it to minimum required files.
-
+- The cocos3d Application template project (hello, world) now automatically moves the camera to frame the scene by default.
 
 
 cocos3d 0.7.2 - 2012/11/11

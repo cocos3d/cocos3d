@@ -441,7 +441,7 @@
 	_semantic = kCC3SemanticNone;
 	
 	GLint maxNameLen = [_program maxAttributeNameLength];
-	char* cName = calloc(maxNameLen, sizeof(char));
+	char cName[maxNameLen];
 	
 	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
 	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
@@ -451,7 +451,6 @@
 	
 	[_name release];
 	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
-	free(cName);
 }
 
 #endif
@@ -483,7 +482,7 @@
 	_semanticIndex = 0;
 	
 	GLint maxNameLen = [_program maxUniformNameLength];
-	char* cName = calloc(maxNameLen, sizeof(char));
+	char cName[maxNameLen];
 	
 	glGetActiveUniform(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
 	LogGLErrorTrace(@"while retrieving spec for active uniform at index %i in %@", _index, self);
@@ -499,7 +498,6 @@
 	
 	[_name release];
 	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
-	free(cName);
 	
 	LogTrace(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
 }

@@ -59,6 +59,10 @@
 	
 	// That's it! The scene is now constructed and is good to go.
 	
+	// To help you find your scene content once it is loaded, the onOpen method below contains
+	// code to automatically move the camera so that it frames the scene. You can remove that
+	// code once you know where you want to place your camera.
+	
 	// If you encounter problems displaying your models, you can uncomment one or more of the
 	// following lines to help you troubleshoot. You can also use these features on a single node,
 	// or a structure of nodes. See the CC3Node notes for more explanation of these properties.
@@ -82,11 +86,10 @@
 	
 	// ------------------------------------------
 
-	// But to add some dynamism, we'll animate the 'hello, world' message
-	// using a couple of cocos2d actions...
+	// And to add some dynamism, we'll animate the 'hello, world' message
+	// using a couple of actions...
 	
-	// Fetch the 'hello, world' 3D text object that was loaded from the
-	// POD file and start it rotating
+	// Fetch the 'hello, world' object that was loaded from the POD file and start it rotating
 	CC3MeshNode* helloTxt = (CC3MeshNode*)[self getNodeNamed: @"Hello"];
 	CCActionInterval* partialRot = [CC3RotateBy actionWithDuration: 1.0
 														  rotateBy: cc3v(0.0, 30.0, 0.0)];
@@ -153,13 +156,11 @@
  */
 -(void) onOpen {
 
-	// Uncomment this line to have the camera move to show the entire scene. This must be done
-	// after the CC3Layer has been attached to the view, because this makes use of the camera
-	// frustum and projection. If you uncomment this line, you might also want to uncomment the
-	// LogDebug line in the updateAfterTransform: method to track how the camera moves, where
-	// it ends up, and what the camera's clipping distances are, in order to determine how to
-	// position and configure the camera to view the entire scene.
-//	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self];
+	// Move the camera to frame the scene. You can uncomment the LogDebug line in the
+	// updateAfterTransform: method to track how the camera moves, where it ends up, and
+	// what the camera's clipping distances are, in order to determine how to position
+	// and configure the camera to view your entire scene. Then you can remove this code.
+	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self withPadding: 0.5f];
 
 	// Uncomment this line to draw the bounding box of the scene.
 //	self.shouldDrawWireframeBox = YES;
