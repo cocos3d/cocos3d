@@ -57,8 +57,7 @@
 #define MAX_TEXTURES			2
 #define MAX_LIGHTS				3
 
-// Maximum bones per skin section (batch). This is set here to the platform maximum.
-// You can reduce this to improve efficiency if your models need fewer bones in each batch.
+// Maximum bones per skin section (batch).
 #define MAX_BONES_PER_VERTEX	11
 
 precision mediump float;
@@ -123,8 +122,8 @@ uniform Light u_cc3Lights[MAX_LIGHTS];		/**< Array of lights. */
 
 // Vertex skinning properties
 uniform lowp int u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
-uniform highp mat4 u_cc3BoneMatrices[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
-uniform mat3 u_cc3BoneMatricesInvTran[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices. */
+uniform highp mat4 u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
+uniform mat3 u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices. */
 
 // Uniforms describing vertex attributes.
 uniform bool u_cc3HasVertexNormal;			/**< Whether vertex normal attribute is available. */
@@ -183,8 +182,8 @@ void vertexToEyeSpace() {
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
 				// Add position and normal contribution from this bone
-				vtxPosEye += u_cc3BoneMatrices[boneIndices.x] * a_cc3Position * boneWeights.x;
-				vtxNormEye += u_cc3BoneMatricesInvTran[boneIndices.x] * a_cc3Normal * boneWeights.x;
+				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
+				vtxNormEye += u_cc3BoneMatricesInvTranEyeSpace[boneIndices.x] * a_cc3Normal * boneWeights.x;
 				
 				// "Rotate" the vector components to the next vertex bone index
 				boneIndices = boneIndices.yzwx;

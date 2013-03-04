@@ -519,6 +519,7 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @interface CC3MeshNode (TemplateMethods)
 -(void) ensureMaterial;
+-(void) alignTextureUnits;
 @end
 
 @implementation CC3MeshNode (PFXEffects)
@@ -526,12 +527,14 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
 	[self ensureMaterial];
 	[material applyEffectNamed: effectName inPFXResourceNamed: rezName];
+	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceNamed: rezName];
 }
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
 	[self ensureMaterial];
 	[material applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceFile: aFilePath];
 }
 

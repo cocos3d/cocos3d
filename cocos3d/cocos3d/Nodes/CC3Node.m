@@ -84,7 +84,6 @@
 -(void) updateGlobalScale;
 -(void) updateTargetLocation;
 -(void) transformBoundingVolume;
--(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) didAddDescendant: (CC3Node*) aNode;
 -(void) didRemoveDescendant: (CC3Node*) aNode;
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode;
@@ -1655,6 +1654,7 @@ static GLuint lastAssignedNodeTag;
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
 	[glesMatrixStack multiply: transformMatrix];
 
+	[visitor populateModelMatrixFrom: transformMatrix];
 	[visitor draw: self];
 
 	[glesMatrixStack pop];
@@ -2530,47 +2530,35 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 
 -(BOOL) shouldDrawAllBoundingVolumes {
 	if (self.shouldDrawBoundingVolume) return YES;
-	for (CC3Node* child in children) {
-		if (child.shouldDrawAllBoundingVolumes) return YES;
-	}
+	for (CC3Node* child in children) if (child.shouldDrawAllBoundingVolumes) return YES;
 	return NO;
 }
 
 -(void) setShouldDrawAllBoundingVolumes: (BOOL) shouldDraw {
 	self.shouldDrawBoundingVolume = YES;
-	for (CC3Node* child in children) {
-		child.shouldDrawAllBoundingVolumes = YES;
-	}
+	for (CC3Node* child in children) child.shouldDrawAllBoundingVolumes = YES;
 }
 
 -(BOOL) shouldLogIntersections {
 	if (boundingVolume && boundingVolume.shouldLogIntersections) return YES;
-	for (CC3Node* child in children) {
-		if (child.shouldLogIntersections) return YES;
-	}
+	for (CC3Node* child in children) if (child.shouldLogIntersections) return YES;
 	return NO;
 }
 
 -(void) setShouldLogIntersections: (BOOL) shouldLog {
 	boundingVolume.shouldLogIntersections = shouldLog;
-	for (CC3Node* child in children) {
-		child.shouldLogIntersections = shouldLog;
-	}
+	for (CC3Node* child in children) child.shouldLogIntersections = shouldLog;
 }
 
 -(BOOL) shouldLogIntersectionMisses {
 	if (boundingVolume && boundingVolume.shouldLogIntersectionMisses) return YES;
-	for (CC3Node* child in children) {
-		if (child.shouldLogIntersectionMisses) return YES;
-	}
+	for (CC3Node* child in children) if (child.shouldLogIntersectionMisses) return YES;
 	return NO;
 }
 
 -(void) setShouldLogIntersectionMisses: (BOOL) shouldLog {
 	boundingVolume.shouldLogIntersectionMisses = shouldLog;
-	for (CC3Node* child in children) {
-		child.shouldLogIntersectionMisses = shouldLog;
-	}
+	for (CC3Node* child in children) child.shouldLogIntersectionMisses = shouldLog;
 }
 
 @end

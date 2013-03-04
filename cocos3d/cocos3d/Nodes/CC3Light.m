@@ -47,7 +47,7 @@
 
 @interface CC3Camera (TemplateMethods)
 -(void) loadProjectionMatrix;
--(void) loadModelviewMatrix;
+-(void) loadViewMatrix;
 @end
 
 @interface CC3Light (TemplateMethods)
@@ -551,7 +551,7 @@
 	
 	// Restore the projection and modelview matrices back to those of the camera
 	CC3Camera* cam = visitor.camera;
-	[cam loadModelviewMatrix];
+	[cam loadViewMatrix];
 	[cam loadProjectionMatrix];
 }
 

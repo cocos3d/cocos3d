@@ -99,7 +99,7 @@
 	if (aDistance > 0.0) {
 		_particleSizeAttenuation = (CC3AttenuationCoefficients){0.0, 0.0, 1.0 / (aDistance * aDistance)};
 	} else {
-		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3AttenuationNone;
 	}
 }
 
@@ -150,7 +150,7 @@
 		self.particleSize = kCC3DefaultParticleSize;
 		particleSizeMinimum = kCC3ParticleSizeMinimumNone;
 		particleSizeMaximum = kCC3ParticleSizeMaximumNone;
-		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3AttenuationNone;
 		shouldSmoothPoints = NO;
 		shouldNormalizeParticleSizesToDevice = YES;
 		shouldDisableDepthMask = YES;

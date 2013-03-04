@@ -812,7 +812,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_particleSizeAttenuation = kCC3ParticleSizeAttenuationNone;
+		_particleSizeAttenuation = kCC3AttenuationNone;
 		shouldDisableDepthMask = YES;
 	}
 	return self;

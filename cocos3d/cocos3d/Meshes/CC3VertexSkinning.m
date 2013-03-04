@@ -210,9 +210,12 @@
  * palette of matrices that is used to manipulate the vertices of a mesh based
  * on a weighted average of the influence of the position of several bone nodes.
  * This activity is handled through the drawing of the contained mesh.
+ *
+ * Set model transform to identity.
  */
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
+	[visitor populateModelMatrixFrom: nil];
 	[visitor draw: self];
 }
 
@@ -273,6 +276,8 @@
 	node = nil;				// not retained
 	[super dealloc];
 }
+
+-(GLuint) boneCount { return skinnedBones.count; }
 
 -(CCArray*) bones {
 	CCArray* bones = [CCArray array];
@@ -350,8 +355,6 @@
 	for (CC3Bone* ob in oldBones) [self addBone: (CC3Bone*)[aNode getNodeNamed: ob.name]];
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3SkinSection*) another {
 
 	vertexStart = another.vertexStart;
@@ -373,14 +376,22 @@
 	return aCopy;
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ with %i bones, vertices from %u to %u for %@",
+			[self class], self.boneCount, vertexStart, (vertexStart + vertexCount - 1), node];
+}
+
+-(NSString*) fullDescription { return [NSString stringWithFormat: @"%@ %@", [self description], self.bones]; }
+
 
 #pragma mark Drawing
 
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+#if CC3_OGLES_1
 	CC3OpenGLESMatrices* glesMatrices = [CC3OpenGLESEngine engine].matrices;
 
-	[glesMatrices beginSkinSection];
-	GLuint boneCnt = skinnedBones.count;
+	GLuint boneCnt = self.boneCount;
 	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
 		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
 
@@ -391,17 +402,15 @@
 		[glesPaletteMatrix loadFromModelView];
 		[glesPaletteMatrix multiply: sb.drawTransformMatrix];
 	}
-	[glesMatrices endSkinSection];
-
+#endif
+	
+	visitor.currentSkinSection = self;
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with %i bones, vertices from %u to %u for %@",
-			[self class], skinnedBones.count, vertexStart, (vertexStart + vertexCount - 1), node];
+-(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx {
+	return ((CC3SkinnedBone*)[skinnedBones objectAtIndex: boneIdx]).drawTransformMatrix;
 }
-
--(NSString*) fullDescription { return [NSString stringWithFormat: @"%@ %@", [self description], self.bones]; }
 
 @end
 

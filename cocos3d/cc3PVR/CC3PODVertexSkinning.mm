@@ -103,12 +103,10 @@
 
 @implementation CC3PODSkinSection
 
-@synthesize boneCount, boneNodeIndices;
-
 -(id) init {
 	if ( (self = [super init]) ) {
-		boneCount = 0;
-		boneNodeIndices = NULL;
+		_podBoneCount = 0;
+		_podBoneNodeIndices = NULL;
 	}
 	return self;
 }
@@ -129,8 +127,8 @@
 		vertexStart = [aNode.mesh vertexIndexCountFromFaceCount: currFaceOffset];
 		vertexCount =  [aNode.mesh vertexIndexCountFromFaceCount: (nextFaceOffset - currFaceOffset)];
 			
-		boneCount = pBatches->pnBatchBoneCnt[aBatchIndex];
-		boneNodeIndices = &(pBatches->pnBatches[aBatchIndex * pBatches->nBatchBoneMax]);
+		_podBoneCount = pBatches->pnBatchBoneCnt[aBatchIndex];
+		_podBoneNodeIndices = &(pBatches->pnBatches[aBatchIndex * pBatches->nBatchBoneMax]);
 	}
 	return self;
 }
@@ -143,17 +141,19 @@
 }
 
 -(void) linkToPODNodes: (CCArray*) nodeArray {
-	for (int boneNum = 0; boneNum < boneCount; boneNum++) {
-		int boneIndex = boneNodeIndices[boneNum];
+	for (int boneNum = 0; boneNum < _podBoneCount; boneNum++) {
+		int boneIndex = _podBoneNodeIndices[boneNum];
 		CC3Bone* boneNode = [nodeArray objectAtIndex: boneIndex];
 		LogTrace(@"Adding bone node %@ at index %i to %@", boneNode, boneIndex, self);
 		[self addBone: boneNode];
 	}
+	_podBoneNodeIndices = NULL;		// Remove reference since this array will be released
+	_podBoneCount = 0;
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ from original bone count %i of indices at %p",
-			[super fullDescription], boneCount, boneNodeIndices];
+			[super fullDescription], _podBoneCount, _podBoneNodeIndices];
 }
 
 @end

@@ -612,8 +612,7 @@
  * 1/sqrt(a + b * r + c * r * r), where r is the radial distance from the particle to the camera,
  * and a, b and c are the coefficients from this property.
  *
- * The initial value of this property is kCC3ParticleSizeAttenuationNone, indicating no attenuation
- * with distance.
+ * The initial value of this property is kCC3AttenuationNone, indicating no attenuation with distance.
  */
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
 

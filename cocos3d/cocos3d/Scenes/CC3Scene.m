@@ -351,10 +351,7 @@
 		[touchedNodePicker pickTouchedNode];
 		[self illuminate];
 		[self drawFog];
-
-		drawVisitor.deltaTime = _deltaFrameTime;
 		[self visitForDrawingWithVisitor: drawVisitor];
-
 		[self drawShadows];
 		[self close3DCamera];
 		[self closeViewport];
@@ -423,7 +420,6 @@
 /** Template method that closes the 3D camera. This is the compliment of the openViewport method. */
 -(void) closeViewport { [viewportManager closeViewport]; }
 
-
 /** Template method that opens the 3D camera. */
 -(void) open3DCamera { [activeCamera open]; }
 
@@ -438,16 +434,21 @@
 -(void) illuminate {
 	[CC3Light disableReservedLights];		// disable any lights used by 2D scene
 
-	BOOL hasLighting = (lights.count > 0 || !ccc4FEqual(ambientLight, kCCC4FBlackTransparent));
-	[CC3OpenGLESEngine engine].capabilities.lighting.value = hasLighting;
+	[CC3OpenGLESEngine engine].capabilities.lighting.value = self.isIlluminated;
 
-	LogTrace(@"%@ lighting is %@", self, (hasLighting ? @"on" : @"off"));
+	LogTrace(@"%@ lighting is %@", self, (self.isIlluminated ? @"on" : @"off"));
 	
 	// Set the ambient light for the whole scene
 	[CC3OpenGLESEngine engine].lighting.sceneAmbientLight.value = ambientLight;
 
 	// Turn on any individual lights
 	for (CC3Light* lgt in lights) [lgt turnOn];
+}
+
+-(BOOL) isIlluminated {
+	return (lights.count > 0 ||
+			!(ccc4FEqual(ambientLight, kCCC4FBlack) ||
+			  ccc4FEqual(ambientLight, kCCC4FBlackTransparent)));
 }
 
 -(ccColor4F) totalIllumination {
@@ -531,15 +532,14 @@
 
 /** Visits this scene for drawing (or picking) using the specified visitor. */
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	visitor.deltaTime = _deltaFrameTime;
 	visitor.shouldClearDepthBuffer = shouldClearDepthBufferBefore3D;
 	visitor.drawingSequencer = drawingSequencer;
 	visitor.shouldVisitChildren = YES;
 	[visitor visit: self];
 }
 
--(id) drawVisitorClass {
-	return [CC3NodeDrawingVisitor class];
-}
+-(id) drawVisitorClass { return [CC3NodeDrawingVisitor class]; }
 
 
 #pragma mark Drawing sequencer

@@ -333,4 +333,31 @@ BOOL CC3Matrix3x3InvertAdjoint(CC3Matrix3x3* mtx);
  */
 static inline void CC3Matrix3x3InvertRigid(CC3Matrix3x3* mtx) { CC3Matrix3x3Transpose(mtx); }
 
+/**
+ * Inverts the specified matrix by using the algorithm of calculating the classical adjoint and
+ * dividing by the determinant, and then transposes the result. The contents of the matrix are changed.
+ *
+ * Not all matrices are invertable. Returns whether the matrix was inverted.
+ * If this function returns NO, then the matrix was not inverted, and remains unchanged.
+ *
+ * Matrix inversion using the classical adjoint algorithm is computationally-expensive.
+ * If it is known that the matrix contains only rotation, the inverse of the matrix is
+ * equal to its transpose. In this case, use the CC3Matrix3x3InvertRigid function instead,
+ * which is some 10 to 100 times faster than this function.
+ */
+static inline BOOL CC3Matrix3x3InvertAdjointTranspose(CC3Matrix3x3* mtx) {
+	BOOL rslt = CC3Matrix3x3InvertAdjoint(mtx);
+	if (rslt) CC3Matrix3x3Transpose(mtx);
+	return rslt;
+}
+
+/**
+ * Inverts the specified matrix using transposition, and then transposes the result.
+ *
+ * Since rigid inversion uses transposition, this operation amounts to two consecutive
+ * transpositions, which leaves the original matrix as the result. Because of this,
+ * this function actually does nothing to the specified matrix.
+ */
+static inline void CC3Matrix3x3InvertRigidTranspose(CC3Matrix3x3* mtx)  {}
+
 

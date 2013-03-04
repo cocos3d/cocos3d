@@ -239,8 +239,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * As an alternate to setting this property, you can set the unityScaleDistance property to establish
  * standard proportional distance attenuation.
  *
- * The initial value of this property is kCC3ParticleSizeAttenuationNone, indicating no attenuation
- * with distance.
+ * The initial value of this property is kCC3AttenuationNone, indicating no attenuation with distance.
  */
 @property(nonatomic, assign) CC3AttenuationCoefficients particleSizeAttenuation;
 

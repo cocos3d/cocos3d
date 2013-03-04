@@ -32,6 +32,8 @@
 #import "CC3GLProgram.h"
 #import "CC3GLProgramContext.h"
 #import "CC3GLProgramMatchers.h"
+#import "CC3NodeVisitor.h"
+#import "CC3Material.h"
 #import "CC3OpenGLESEngine.h"
 
 
@@ -51,7 +53,9 @@
 
 -(void) dealloc {
 	[self deleteGLProgram];
-	[_uniforms release];
+	[_uniformsSceneScope release];
+	[_uniformsNodeScope release];
+	[_uniformsDrawScope release];
 	[_attributes release];
 	[super dealloc];
 }
@@ -60,12 +64,16 @@
 #pragma mark Variables
 
 -(CC3GLSLUniform*) uniformNamed: (NSString*) varName {
-	for (CC3GLSLUniform* var in _uniforms) if ( [var.name isEqualToString: varName] ) return var;
+	for (CC3GLSLUniform* var in _uniformsSceneScope) if ( [var.name isEqualToString: varName] ) return var;
+	for (CC3GLSLUniform* var in _uniformsNodeScope) if ( [var.name isEqualToString: varName] ) return var;
+	for (CC3GLSLUniform* var in _uniformsDrawScope) if ( [var.name isEqualToString: varName] ) return var;
 	return nil;
 }
 
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation {
-	for (CC3GLSLUniform* var in _uniforms) if (var.location == uniformLocation) return var;
+	for (CC3GLSLUniform* var in _uniformsSceneScope) if (var.location == uniformLocation) return var;
+	for (CC3GLSLUniform* var in _uniformsNodeScope) if (var.location == uniformLocation) return var;
+	for (CC3GLSLUniform* var in _uniformsDrawScope) if (var.location == uniformLocation) return var;
 	return nil;
 }
 
@@ -74,7 +82,11 @@
 }
 
 -(CC3GLSLUniform*) uniformForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
-	for (CC3GLSLUniform* var in _uniforms)
+	for (CC3GLSLUniform* var in _uniformsSceneScope)
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
+	for (CC3GLSLUniform* var in _uniformsNodeScope)
+		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
+	for (CC3GLSLUniform* var in _uniformsDrawScope)
 		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
 	return nil;
 }
@@ -98,6 +110,11 @@
 		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
 	return nil;
 }
+
+-(void) markSceneScopeDirty { _isSceneScopeDirty = YES; }
+
+-(void) willBeginDrawingScene { [self markSceneScopeDirty]; }
+
 
 #if CC3_OGLES_2
 
@@ -190,7 +207,9 @@
  */
 -(void) configureUniforms {
 	MarkRezActivityStart();
-	[_uniforms removeAllObjects];
+	[_uniformsSceneScope removeAllObjects];
+	[_uniformsNodeScope removeAllObjects];
+	[_uniformsDrawScope removeAllObjects];
 	
 	GLint varCnt;
 	glGetProgramiv(_programID, GL_ACTIVE_UNIFORMS, &varCnt);
@@ -199,10 +218,25 @@
 	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
-		if ( [_semanticDelegate configureVariable: var] ) [_uniforms addObject: var];
+		if ( [_semanticDelegate configureVariable: var] ) [self addUniform: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 	}
 	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
+}
+
+/** Adds the specified uniform to the appropriate internal collection, based on variable scope. */
+-(void) addUniform: (CC3GLSLUniform*) var {
+	switch (var.scope) {
+		case kCC3GLSLVariableScopeScene:
+			[_uniformsSceneScope addObject: var];
+			return;
+		case kCC3GLSLVariableScopeDraw:
+			[_uniformsDrawScope addObject: var];
+			return;
+		default:
+			[_uniformsNodeScope addObject: var];
+			return;
+	}
 }
 
 /**
@@ -278,17 +312,36 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 #pragma mark Binding
 
-// Cache this program in the GL state tracker, bind the program to the GL engine,
-// and populate the uniforms into the GL engine, allowing the context to override first.
-// Raise an assertion error if the uniform cannot be resolved by either context or delegate!
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Binding program %@ for %@", self, visitor.currentNode);
+	visitor.currentShaderProgram = self;
 	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
-	
 	ccGLUseProgram(_programID);
+}
 
-	for (CC3GLSLUniform* var in _uniforms)
-		if ([context populateUniform: var withVisitor: visitor] ||
+-(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (_isSceneScopeDirty) {
+		LogTrace(@"%@ populating scene scope", self);
+		[self populateUniforms: _uniformsSceneScope withVisitor: visitor];
+		_isSceneScopeDirty = NO;
+	}
+}
+
+-(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self populateSceneScopeUniformsWithVisitor: visitor];
+	LogTrace(@"%@ populating node scope", self);
+	[self populateUniforms: _uniformsNodeScope withVisitor: visitor];
+}
+
+-(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ populating draw scope", self);
+	[self populateUniforms: _uniformsDrawScope withVisitor: visitor];
+}
+
+-(void) populateUniforms: (CCArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3GLProgramContext* progCtx = visitor.currentMaterial.shaderContext;
+	for (CC3GLSLUniform* var in uniforms)
+		if ([progCtx populateUniform: var withVisitor: visitor] ||
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
 			[var updateGLValue];
 		} else {
@@ -299,13 +352,16 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 -(void) deleteGLProgram { if (_programID) ccGLDeleteProgram(_programID); }
 
-#endif
+#endif		// CC3_OGLES_2
 
 #if CC3_OGLES_1
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {}
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context {}
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) deleteGLProgram {}
-#endif
+-(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+#endif	// CC3_OGLES_1
 
 
 #pragma mark Allocation and initialization
@@ -316,10 +372,13 @@ fromVertexShaderBytes: (const GLchar*) vshBytes
 andFragmentShaderBytes: (const GLchar*) fshBytes {
 	CC3Assert(name, @"%@ cannot be created without a name", [self class]);
 	if ( (self = [super initWithName: name]) ) {
-		_uniforms = [CCArray new];		// retained
-		_attributes = [CCArray new];	// retained
+		_uniformsSceneScope = [CCArray new];	// retained
+		_uniformsNodeScope = [CCArray new];		// retained
+		_uniformsDrawScope = [CCArray new];		// retained
+		_attributes = [CCArray new];			// retained
 		_maxUniformNameLength = 0;
 		_maxAttributeNameLength = 0;
+		_isSceneScopeDirty = NO;
 		_semanticDelegate = [semanticDelegate retain];
 		[self compileAndLinkVertexShaderBytes: vshBytes andFragmentShaderBytes: fshBytes];
 	}
@@ -362,9 +421,12 @@ andFragmentShaderFile: (NSString*) fshFilename {
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@ declaring %i attributes and %i uniforms:", self.description, _attributes.count, _uniforms.count];
+	[desc appendFormat: @"%@ declaring %i attributes and %i uniforms:",
+	 self.description, _attributes.count, (_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count)];
 	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
-	for (CC3GLSLVariable* var in _uniforms) [desc appendFormat: @"\n\t %@", var.fullDescription];
+	for (CC3GLSLVariable* var in _uniformsSceneScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
+	for (CC3GLSLVariable* var in _uniformsNodeScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
+	for (CC3GLSLVariable* var in _uniformsDrawScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	return desc;
 }
 
@@ -394,6 +456,12 @@ static NSMutableDictionary* _programsByName = nil;
 +(void) removeProgram: (CC3GLProgram*) program { [self removeProgramNamed: program.name]; }
 
 +(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
+
++(void) willBeginDrawingScene {
+	[_programsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
+		[obj willBeginDrawingScene];
+	}];
+}
 
 
 #pragma mark Program matching

@@ -126,7 +126,9 @@
 #pragma mark CC3OpenGLES1Matrices
 
 /** Provides specialized behaviour for OpenGL ES 1 implementations. */
-@interface CC3OpenGLES1Matrices : CC3OpenGLESMatrices
+@interface CC3OpenGLES1Matrices : CC3OpenGLESMatrices {
+	GLuint _maxPaletteSize;
+}
 @end
 
 #endif

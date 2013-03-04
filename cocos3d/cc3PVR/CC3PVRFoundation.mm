@@ -270,12 +270,12 @@ NSString* NSStringFromSPODLight(PODStructPtr pSPODLight) {
 	SPODLight* psl = (SPODLight*)pSPODLight;
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
 	[desc appendFormat: @"SPODLight type: %@", NSStringFromEPODLight(psl->eType)];
-	[desc appendFormat: @", color: (%.2f, %.2f, %.2f)", psl->pfColour[0], psl->pfColour[1], psl->pfColour[2]];
-	[desc appendFormat: @", falloff angle: %.2f", psl->fFalloffAngle];
-	[desc appendFormat: @", falloff expo: %.2f", psl->fFalloffExponent];
-	[desc appendFormat: @", const atten: %.2f", psl->fConstantAttenuation];
-	[desc appendFormat: @", linear atten: %.2f", psl->fLinearAttenuation];
-	[desc appendFormat: @", quad atten: %.2f", psl->fQuadraticAttenuation];
+	[desc appendFormat: @", color: (%.3f, %.3f, %.3f)", psl->pfColour[0], psl->pfColour[1], psl->pfColour[2]];
+	[desc appendFormat: @", falloff angle: %.3f", psl->fFalloffAngle];
+	[desc appendFormat: @", falloff expo: %.3f", psl->fFalloffExponent];
+	[desc appendFormat: @", const atten: %.3f", psl->fConstantAttenuation];
+	[desc appendFormat: @", linear atten: %.3f", psl->fLinearAttenuation];
+	[desc appendFormat: @", quad atten: %3f", psl->fQuadraticAttenuation];
 	[desc appendFormat: @", target index: %i", psl->nIdxTarget];
 	return desc;
 }

@@ -39,6 +39,7 @@
 #import "CC3Scene.h"
 #import "CC3PointParticles.h"
 #import "CC3NodeAnimation.h"
+#import "CC3VertexSkinning.h"
 
 
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
@@ -110,9 +111,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticSceneLightColorAmbient: return @"kCC3SemanticSceneLightColorAmbient";
 
 		case kCC3SemanticLightIsEnabled: return @"kCC3SemanticLightIsEnabled";
-		case kCC3SemanticLightLocationModelSpace: return @"kCC3SemanticLightLocationModelSpace";
-		case kCC3SemanticLightLocationGlobal: return @"kCC3SemanticLightLocationGlobal";
-		case kCC3SemanticLightLocationEyeSpace: return @"kCC3SemanticLightLocationEyeSpace";
+		case kCC3SemanticLightPositionGlobal: return @"kCC3SemanticLightPositionGlobal";
+		case kCC3SemanticLightPositionEyeSpace: return @"kCC3SemanticLightPositionEyeSpace";
+		case kCC3SemanticLightPositionModelSpace: return @"kCC3SemanticLightPositionModelSpace";
+		case kCC3SemanticLightInvertedPositionGlobal: return @"kCC3SemanticLightInvertedPositionGlobal";
+		case kCC3SemanticLightInvertedPositionEyeSpace: return @"kCC3SemanticLightInvertedPositionEyeSpace";
+		case kCC3SemanticLightInvertedPositionModelSpace: return @"kCC3SemanticLightInvertedPositionModelSpace";
 		case kCC3SemanticLightColorAmbient: return @"kCC3SemanticLightColorAmbient";
 		case kCC3SemanticLightColorDiffuse: return @"kCC3SemanticLightColorDiffuse";
 		case kCC3SemanticLightColorSpecular: return @"kCC3SemanticLightColorSpecular";
@@ -162,9 +166,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 		// SKINNING ----------------
 		case kCC3SemanticBonesPerVertex: return @"kCC3SemanticBonesPerVertex";
-		case kCC3SemanticBoneMatrices: return @"kCC3SemanticBoneMatrices";
-		case kCC3SemanticBoneMatricesInvTran: return @"kCC3SemanticBoneMatricesInvTran";
 		case kCC3SemanticBoneMatrixCount: return @"kCC3SemanticBoneMatrixCount";
+		case kCC3SemanticBoneMatricesGlobal: return @"kCC3SemanticBoneMatricesGlobal";
+		case kCC3SemanticBoneMatricesInvTranGlobal: return @"kCC3SemanticBoneMatricesInvTranGlobal";
+		case kCC3SemanticBoneMatricesEyeSpace: return @"kCC3SemanticBoneMatricesEyeSpace";
+		case kCC3SemanticBoneMatricesInvTranEyeSpace: return @"kCC3SemanticBoneMatricesInvTranEyeSpace";
+		case kCC3SemanticBoneMatricesModelSpace: return @"kCC3SemanticBoneMatricesModelSpace";
+		case kCC3SemanticBoneMatricesInvTranModelSpace: return @"kCC3SemanticBoneMatricesInvTranModelSpace";
 
 		// PARTICLES ------------
 		case kCC3SemanticPointSize: return @"kCC3SemanticPointSize";
@@ -189,6 +197,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 		case kCC3SemanticAppBase: return @"kCC3SemanticAppBase";
 		case kCC3SemanticMax: return @"kCC3SemanticMax";
+
 		default: return [NSString stringWithFormat: @"Unknown state semantic (%u)", semantic];
 	}
 }
@@ -230,6 +239,80 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable { return NO; }
 
 /**
+ * Returns a variable scope derived from the specified semantic.
+ *
+ * Subclasses that permit application-specific semantics should override this method to
+ * handle those additional semantics if they should not default to kCC3GLSLVariableScopeNode.
+ */
+-(CC3GLSLVariableScope) variableScopeForSemantic: (GLenum) semantic {
+	switch (semantic) {
+
+		case kCC3SemanticDrawCountCurrentFrame:
+		case kCC3SemanticRandomNumber:
+
+		case kCC3SemanticBoneMatrixCount:
+		case kCC3SemanticBoneMatricesGlobal:
+		case kCC3SemanticBoneMatricesInvTranGlobal:
+		case kCC3SemanticBoneMatricesEyeSpace:
+		case kCC3SemanticBoneMatricesInvTranEyeSpace:
+		case kCC3SemanticBoneMatricesModelSpace:
+		case kCC3SemanticBoneMatricesInvTranModelSpace:
+			
+			return kCC3GLSLVariableScopeDraw;
+
+		case kCC3SemanticViewMatrix:
+		case kCC3SemanticViewMatrixInv:
+		case kCC3SemanticViewMatrixInvTran:
+		case kCC3SemanticProjMatrix:
+		case kCC3SemanticProjMatrixInv:
+		case kCC3SemanticProjMatrixInvTran:
+		case kCC3SemanticViewProjMatrix:
+		case kCC3SemanticViewProjMatrixInv:
+		case kCC3SemanticViewProjMatrixInvTran:
+			
+		case kCC3SemanticCameraLocationGlobal:
+		case kCC3SemanticCameraFrustum:
+		case kCC3SemanticViewport:
+
+		case kCC3SemanticIsUsingLighting:
+		case kCC3SemanticSceneLightColorAmbient:
+
+		case kCC3SemanticLightIsEnabled:
+		case kCC3SemanticLightPositionGlobal:
+		case kCC3SemanticLightPositionEyeSpace:
+		case kCC3SemanticLightInvertedPositionGlobal:
+		case kCC3SemanticLightInvertedPositionEyeSpace:
+		case kCC3SemanticLightColorAmbient:
+		case kCC3SemanticLightColorDiffuse:
+		case kCC3SemanticLightColorSpecular:
+		case kCC3SemanticLightAttenuation:
+		case kCC3SemanticLightSpotDirectionGlobal:
+		case kCC3SemanticLightSpotDirectionEyeSpace:
+		case kCC3SemanticLightSpotExponent:
+		case kCC3SemanticLightSpotCutoffAngle:
+		case kCC3SemanticLightSpotCutoffAngleCosine:
+
+		case kCC3SemanticFogIsEnabled:
+		case kCC3SemanticFogColor:
+		case kCC3SemanticFogAttenuationMode:
+		case kCC3SemanticFogDensity:
+		case kCC3SemanticFogStartDistance:
+		case kCC3SemanticFogEndDistance:
+			
+		case kCC3SemanticFrameTime:
+		case kCC3SemanticApplicationTime:
+		case kCC3SemanticApplicationTimeSine:
+		case kCC3SemanticApplicationTimeCosine:
+		case kCC3SemanticApplicationTimeTangent:
+			
+			return kCC3GLSLVariableScopeScene;
+			
+		default:
+			return kCC3GLSLVariableScopeNode;
+	}
+}
+
+/**
  * For semantics that may have more than one target, such as components of lights, or textures,
  * the iteration loops in this method are designed to deal with two situations:
  *   - If the uniform is declared as an array of single types (eg- an array of floats, bools, or
@@ -241,19 +324,23 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ retrieving semantic value for %@", self, uniform.fullDescription);
 	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
-	CC3OpenGLESLight* glesLight;
 	CC3OpenGLESTextureUnit* glesTexUnit;
 	GLenum semantic = uniform.semantic;
 	GLuint semanticIndex = uniform.semanticIndex;
 	GLint uniformSize = uniform.size;
-	CC3Matrix4x3 m4x3, pntInvMtx, nodeMtx;
-	CC3Matrix4x3* pMtx4x3;
+	
+	CC3SkinSection* skin;
+	CC3Matrix4x4 m4x4;
+	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
 	ccTime appTime;
+	GLuint boneCnt;
+	BOOL isInverted = NO;
 	
 	switch (semantic) {
 		
+#pragma mark Setting attribute semantics
 		// ATTRIBUTE QUALIFIERS --------------
 		case kCC3SemanticHasVertexNormal:
 			[uniform setBoolean: visitor.currentMesh.hasVertexNormals];
@@ -289,100 +376,212 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: visitor.currentMeshNode.drawingMode == GL_POINTS];
 			return YES;
 
+#pragma mark Setting Environment matrix semantics
 		// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelLocalMatrix:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
-			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
-			[uniform setMatrix4x3: &m4x3];
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
+			[uniform setMatrix4x3: &mRslt4x3];
 			return YES;
 		case kCC3SemanticModelLocalMatrixInv:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
-			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
 			// Now invert
-			CC3Matrix4x3InvertAdjoint(&m4x3);
-			[uniform setMatrix4x3: &m4x3];
+			CC3Matrix4x3InvertAdjoint(&mRslt4x3);
+			[uniform setMatrix4x3: &mRslt4x3];
 			return YES;
 		case kCC3SemanticModelLocalMatrixInvTran:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &pntInvMtx];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &nodeMtx];
-			CC3Matrix4x3Multiply(&m4x3, &pntInvMtx, &nodeMtx);
-			// Now take inverse-transpose
-			CC3Matrix3x3PopulateFrom4x3(&m3x3, &m4x3);
-			CC3Matrix3x3InvertAdjoint(&m3x3);
-			CC3Matrix3x3Transpose(&m3x3);
+			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
+			CC3Matrix3x3PopulateFrom4x3(&m3x3, &mRslt4x3);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
 			[uniform setMatrix3x3: &m3x3];
 			return YES;
-
+			
 		case kCC3SemanticModelMatrix:
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &m4x3];
-			[uniform setMatrix4x3: &m4x3];
+			[uniform setMatrix4x3: visitor.modelMatrix];
 			return YES;
 		case kCC3SemanticModelMatrixInv:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			CC3Matrix4x3PopulateFrom4x3(&m4x3, visitor.modelMatrix);
+			CC3Matrix4x3InvertAdjoint(&m4x3);
 			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticModelMatrixInvTran:
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix3x3: &m3x3];
-			CC3Matrix3x3InvertAdjoint(&m3x3);
-			CC3Matrix3x3Transpose(&m3x3);
+			CC3Matrix3x3PopulateFrom4x3(&m3x3, visitor.modelMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
 			[uniform setMatrix3x3: &m3x3];
 			return YES;
-
+			
 		case kCC3SemanticViewMatrix:
-			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView]];
+			[uniform setMatrix4x3: visitor.viewMatrix];
 			return YES;
 		case kCC3SemanticViewMatrixInv:
-			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticViewInv]];
+			CC3Matrix4x3PopulateFrom4x3(&m4x3, visitor.viewMatrix);
+			CC3Matrix4x3InvertAdjoint(&m4x3);
+			[uniform setMatrix4x3: &m4x3];
 			return YES;
 		case kCC3SemanticViewMatrixInvTran:
-			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticViewInvTran]];
-			return YES;
-
-		case kCC3SemanticModelViewMatrix:
-			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticModelView]];
-			return YES;
-		case kCC3SemanticModelViewMatrixInv:
-			[uniform setMatrix4x3: [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticModelViewInv]];
-			return YES;
-		case kCC3SemanticModelViewMatrixInvTran:
-			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticModelViewInvTran]];
-			return YES;
-
-		case kCC3SemanticProjMatrix:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticProj]];
-			return YES;
-		case kCC3SemanticProjMatrixInv:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticProjInv]];
-			return YES;
-		case kCC3SemanticProjMatrixInvTran:
-			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticProjInvTran]];
-			return YES;
-
-		case kCC3SemanticViewProjMatrix:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticViewProj]];
-			return YES;
-		case kCC3SemanticViewProjMatrixInv:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticViewProjInv]];
-			return YES;
-		case kCC3SemanticViewProjMatrixInvTran:
-			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticViewProjInvTran]];
-			return YES;
-
-		case kCC3SemanticModelViewProjMatrix:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticModelViewProj]];
-			return YES;
-		case kCC3SemanticModelViewProjMatrixInv:
-			[uniform setMatrix4x4: [glesEngine.matrices matrix4x4ForSemantic: kCC3MatrixSemanticModelViewProjInv]];
-			return YES;
-		case kCC3SemanticModelViewProjMatrixInvTran:
-			[uniform setMatrix3x3: [glesEngine.matrices matrix3x3ForSemantic: kCC3MatrixSemanticModelViewProjInvTran]];
+			CC3Matrix3x3PopulateFrom4x3(&m3x3, visitor.viewMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
 			return YES;
 			
+		case kCC3SemanticModelViewMatrix:
+			[uniform setMatrix4x3: visitor.modelViewMatrix];
+			return YES;
+		case kCC3SemanticModelViewMatrixInv:
+			CC3Matrix4x3PopulateFrom4x3(&m4x3, visitor.modelViewMatrix);
+			CC3Matrix4x3InvertAdjoint(&m4x3);
+			[uniform setMatrix4x3: &m4x3];
+			return YES;
+		case kCC3SemanticModelViewMatrixInvTran:
+			CC3Matrix3x3PopulateFrom4x3(&m3x3, visitor.modelViewMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
+			return YES;
+			
+		case kCC3SemanticProjMatrix:
+			[uniform setMatrix4x4: visitor.projMatrix];
+			return YES;
+		case kCC3SemanticProjMatrixInv:
+			CC3Matrix4x4PopulateFrom4x4(&m4x4, visitor.projMatrix);
+			CC3Matrix4x4InvertAdjoint(&m4x4);
+			[uniform setMatrix4x4: &m4x4];
+			return YES;
+		case kCC3SemanticProjMatrixInvTran:
+			CC3Matrix3x3PopulateFrom4x4(&m3x3, visitor.projMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
+			return YES;
+			
+		case kCC3SemanticViewProjMatrix:
+			[uniform setMatrix4x4: visitor.viewProjMatrix];
+			return YES;
+		case kCC3SemanticViewProjMatrixInv:
+			CC3Matrix4x4PopulateFrom4x4(&m4x4, visitor.viewProjMatrix);
+			CC3Matrix4x4InvertAdjoint(&m4x4);
+			[uniform setMatrix4x4: &m4x4];
+			return YES;
+		case kCC3SemanticViewProjMatrixInvTran:
+			CC3Matrix3x3PopulateFrom4x4(&m3x3, visitor.viewProjMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
+			return YES;
+			
+		case kCC3SemanticModelViewProjMatrix:
+			[uniform setMatrix4x4: visitor.modelViewProjMatrix];
+			return YES;
+		case kCC3SemanticModelViewProjMatrixInv:
+			CC3Matrix4x4PopulateFrom4x4(&m4x4, visitor.modelViewProjMatrix);
+			CC3Matrix4x4InvertAdjoint(&m4x4);
+			[uniform setMatrix4x4: &m4x4];
+			return YES;
+		case kCC3SemanticModelViewProjMatrixInvTran:
+			CC3Matrix3x3PopulateFrom4x4(&m3x3, visitor.modelViewProjMatrix);
+			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+			[uniform setMatrix3x3: &m3x3];
+			return YES;
+			
+#pragma mark Setting skinning matrix semantics
+		// SKINNING MATRICES ----------------
+		case kCC3SemanticBonesPerVertex:
+			[uniform setInteger: visitor.currentMeshNode.vertexUnitCount];
+			return YES;
+		case kCC3SemanticBoneMatrixCount:
+			[uniform setInteger: visitor.currentSkinSection.boneCount];
+			return YES;
+		case kCC3SemanticBoneMatricesGlobal:
+			pm4x3 = visitor.modelMatrix;
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix4x3: &m4x3];
+				CC3Matrix4x3Multiply(&mRslt4x3, pm4x3, &m4x3);
+				[uniform setMatrix4x3: &mRslt4x3 at: boneIdx];
+			}
+			return YES;
+		case kCC3SemanticBoneMatricesInvTranGlobal:
+			pm4x3 = visitor.modelMatrix;
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix4x3: &m4x3];
+				CC3Matrix4x3Multiply(&mRslt4x3, pm4x3, &m4x3);
+				// Now take inverse-transpose
+				CC3Matrix3x3PopulateFrom4x3(&m3x3, &mRslt4x3);
+				CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+				[uniform setMatrix3x3: &m3x3 at: boneIdx];
+			}
+			return YES;
+		case kCC3SemanticBoneMatricesEyeSpace:
+			pm4x3 = visitor.modelViewMatrix;
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix4x3: &m4x3];
+				CC3Matrix4x3Multiply(&mRslt4x3, pm4x3, &m4x3);
+				[uniform setMatrix4x3: &mRslt4x3 at: boneIdx];
+				[visitor.camera.viewMatrix populateCC3Matrix4x3: &m4x3];
+
+			}
+			return YES;
+		case kCC3SemanticBoneMatricesInvTranEyeSpace:
+			pm4x3 = visitor.modelViewMatrix;
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix4x3: &m4x3];
+				CC3Matrix4x3Multiply(&mRslt4x3, pm4x3, &m4x3);
+				// Now take inverse-transpose
+				CC3Matrix3x3PopulateFrom4x3(&m3x3, &mRslt4x3);
+				CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+				[uniform setMatrix3x3: &m3x3 at: boneIdx];
+			}
+			return YES;
+		case kCC3SemanticBoneMatricesModelSpace:
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix4x3: &m4x3];
+				[uniform setMatrix4x3: &m4x3 at: boneIdx];
+			}
+			return YES;
+		case kCC3SemanticBoneMatricesInvTranModelSpace:
+			skin = visitor.currentSkinSection;
+			boneCnt = skin.boneCount;
+			CC3Assert(boneCnt <= uniformSize, @"%@ in %@ supports %i bones, which is not enough for %@.",
+					  uniform, uniform.program, uniformSize, skin);
+			for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+				CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+				[boneMtx populateCC3Matrix3x3: &m3x3];
+				// Now take inverse-transpose
+				CC3Matrix3x3InvertAdjointTranspose(&m3x3);
+				[uniform setMatrix3x3: &m3x3 at: boneIdx];
+			}
+			return YES;
+			
+#pragma mark Setting camera semantics
 		// CAMERA -----------------
 		case kCC3SemanticCameraLocationGlobal:
 			[uniform setVector: visitor.camera.globalLocation];
@@ -412,6 +611,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setIntVector4: CC3IntVector4Make(vp.x, vp.y, vp.w, vp.h)];
 			return YES;
 			
+#pragma mark Setting material semantics
 		// MATERIALS --------------
 		case kCC3SemanticColor:
 			[uniform setColor4F: glesEngine.state.color.value];
@@ -440,129 +640,133 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 									: 0.0f)];
 			return YES;
 			
+#pragma mark Setting lighting semantics
 		// LIGHTING --------------
 		case kCC3SemanticIsUsingLighting:
-			[uniform setBoolean: glesEngine.capabilities.lighting.value];
+			[uniform setBoolean: visitor.currentNode.shouldUseLighting];
 			return YES;
 		case kCC3SemanticSceneLightColorAmbient:
-			[uniform setColor4F: glesEngine.lighting.sceneAmbientLight.value];
+			[uniform setColor4F: visitor.scene.ambientLight];
 			return YES;
 		case kCC3SemanticLightIsEnabled:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				[uniform setBoolean: glesLight.isEnabled at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setBoolean: light.visible at: i];
 			}
 			return YES;
 
-		case kCC3SemanticLightLocationEyeSpace:
-			pMtx4x3 = [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView];
+		case kCC3SemanticLightInvertedPositionGlobal:
+			isInverted = YES;
+		case kCC3SemanticLightPositionGlobal:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) {
-					// Transform global position/direction to eye space and normalize if direction
-					CC3Vector4 ltPos = CC3Matrix4x3TransformCC3Vector4(pMtx4x3, glesLight.position.value);
-					if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
-					[uniform setVector4: ltPos at: i];
-				}
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3Vector4 ltPos = light.globalHomogeneousPosition;
+				if (isInverted) ltPos = CC3Vector4HomogeneousNegate(ltPos);
+				[uniform setVector4: ltPos at: i];
 			}
 			return YES;
-		case kCC3SemanticLightLocationGlobal:
+		case kCC3SemanticLightInvertedPositionEyeSpace:
+			isInverted = YES;
+		case kCC3SemanticLightPositionEyeSpace:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setVector4: glesLight.position.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3Vector4 ltPos = light.globalHomogeneousPosition;
+				if (isInverted) ltPos = CC3Vector4HomogeneousNegate(ltPos);
+				// Transform global position/direction to eye space and normalize if direction
+				ltPos = CC3Matrix4x3TransformCC3Vector4(visitor.viewMatrix, ltPos);
+				if (light.isDirectionalOnly) ltPos = CC3Vector4Normalize(ltPos);
+				[uniform setVector4: ltPos at: i];
 			}
 			return YES;
-		case kCC3SemanticLightLocationModelSpace:
+		case kCC3SemanticLightInvertedPositionModelSpace:
+			isInverted = YES;
+		case kCC3SemanticLightPositionModelSpace:
 			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) {
-					// Transform global position/direction to model space and normalize if direction
-					CC3Vector4 ltPos = CC3Matrix4x3TransformCC3Vector4(&m4x3, glesLight.position.value);
-					if (ltPos.w == 0.0f) ltPos = CC3Vector4Normalize(ltPos);
-					[uniform setVector4: ltPos at: i];
-				}
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3Vector4 ltPos = light.globalHomogeneousPosition;
+				if (isInverted) ltPos = CC3Vector4HomogeneousNegate(ltPos);
+				// Transform global position/direction to model space and normalize if direction
+				ltPos = CC3Matrix4x3TransformCC3Vector4(&m4x3, ltPos);
+				if (light.isDirectionalOnly) ltPos = CC3Vector4Normalize(ltPos);
+				[uniform setVector4: ltPos at: i];
 			}
 			return YES;
 
 		case kCC3SemanticLightColorAmbient:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setColor4F: glesLight.ambientColor.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				ccColor4F ltColor = light.visible ? light.ambientColor : kCCC4FBlackTransparent;
+				[uniform setColor4F: ltColor at: i];
 			}
 			return YES;
 		case kCC3SemanticLightColorDiffuse:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setColor4F: glesLight.diffuseColor.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				ccColor4F ltColor = light.visible ? light.diffuseColor : kCCC4FBlackTransparent;
+				[uniform setColor4F: ltColor at: i];
 			}
 			return YES;
 		case kCC3SemanticLightColorSpecular:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setColor4F: glesLight.specularColor.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				ccColor4F ltColor = light.visible ? light.specularColor : kCCC4FBlackTransparent;
+				[uniform setColor4F: ltColor at: i];
 			}
 			return YES;
 		case kCC3SemanticLightAttenuation:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) {
-					CC3AttenuationCoefficients ac;
-					ac.a = glesLight.constantAttenuation.value;
-					ac.b = glesLight.linearAttenuation.value;
-					ac.c = glesLight.quadraticAttenuation.value;
-					[uniform setVector: *(CC3Vector*)&ac at: i];
-				}
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3AttenuationCoefficients ac = light.attenuation;
+				if (CC3AttenuationCoefficientsIsIllegalZero(ac)) ac = kCC3AttenuationNone;	// Ensure legal value
+				[uniform setVector: *(CC3Vector*)&ac at: i];
 			}
 			return YES;
-			
-		case kCC3SemanticLightSpotDirectionEyeSpace:
-			pMtx4x3 = [glesEngine.matrices matrix4x3ForSemantic: kCC3MatrixSemanticView];
-			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) {
-					// Transform global direction to eye space and normalize
-					CC3Vector ltDir = CC3Matrix4x3TransformDirection(pMtx4x3, glesLight.spotDirection.value);
-					[uniform setVector: CC3VectorNormalize(ltDir) at: i];
-				}
-			}
-			return YES;
+
 		case kCC3SemanticLightSpotDirectionGlobal:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setVector: glesLight.spotDirection.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setVector: light.globalForwardDirection at: i];
+			}
+			return YES;
+		case kCC3SemanticLightSpotDirectionEyeSpace:
+			for (GLuint i = 0; i < uniformSize; i++) {
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3Vector spotDir = light.globalForwardDirection;
+				// Transform global direction to eye space and normalize
+				spotDir = CC3Matrix4x3TransformDirection(visitor.viewMatrix, spotDir);
+				[uniform setVector: CC3VectorNormalize(spotDir) at: i];
 			}
 			return YES;
 		case kCC3SemanticLightSpotDirectionModelSpace:
 			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) {
-					// Transform global direction to model space and normalize
-					CC3Vector ltDir = CC3Matrix4x3TransformDirection(&m4x3, glesLight.spotDirection.value);
-					[uniform setVector: CC3VectorNormalize(ltDir) at: i];
-				}
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				CC3Vector spotDir = light.globalForwardDirection;
+				// Transform global direction to model space and normalize
+				spotDir = CC3Matrix4x3TransformDirection(&m4x3, spotDir);
+				[uniform setVector: CC3VectorNormalize(spotDir) at: i];
 			}
 			return YES;
 		case kCC3SemanticLightSpotExponent:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setFloat: glesLight.spotExponent.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setFloat: light.spotExponent at: i];
 			}
 			return YES;
 		case kCC3SemanticLightSpotCutoffAngle:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setFloat: glesLight.spotCutoffAngle.value at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setFloat: light.spotCutoffAngle at: i];
 			}
 			return YES;
 		case kCC3SemanticLightSpotCutoffAngleCosine:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled) [uniform setFloat: cosf(DegreesToRadians(glesLight.spotCutoffAngle.value)) at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setFloat: cosf(DegreesToRadians(light.spotCutoffAngle)) at: i];
 			}
 			return YES;
-
+			
 		case kCC3SemanticFogIsEnabled:
 			[uniform setBoolean: glesEngine.capabilities.fog.value];
 			return YES;
@@ -582,6 +786,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setFloat: glesEngine.fog.end.value];
 			return YES;
 			
+#pragma mark Setting texture semantics
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
 			[uniform setInteger: visitor.textureUnitCount];
@@ -690,6 +895,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			return YES;
 			
+#pragma mark Setting model semantics
 		// MODEL ----------------
 		case kCC3SemanticCenterOfGeometry:
 			[uniform setVector: visitor.currentMeshNode.mesh.centerOfGeometry];
@@ -709,25 +915,19 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticAnimationFraction:
 			[uniform setFloat: [visitor.currentMeshNode animationTimeOnTrack: 0]];
 			return YES;
-			
-		// SKINNING ----------------
-		case kCC3SemanticBonesPerVertex:
-			[uniform setInteger: visitor.currentMeshNode.vertexUnitCount];
-			return YES;
-		case kCC3SemanticBoneMatrices:
-		case kCC3SemanticBoneMatricesInvTran:
-		case kCC3SemanticBoneMatrixCount:
-			// Skinning uniforms for bone matrices are set during mesh skin section drawing.
-			// At this point, return YES to indicate that it will be handled.
-			return YES;
 
+#pragma mark Setting particle semantics
 		// PARTICLES ------------
 		case kCC3SemanticPointSize:
 			[uniform setFloat: glesEngine.state.pointSize.value];
 			return YES;
-		case kCC3SemanticPointSizeAttenuation:
-			[uniform setVector: glesEngine.state.pointSizeAttenuation.value];
+		case kCC3SemanticPointSizeAttenuation: {
+			CC3Vector acVec = glesEngine.state.pointSizeAttenuation.value;
+			CC3AttenuationCoefficients ac = *(CC3AttenuationCoefficients*)&acVec;
+			if (CC3AttenuationCoefficientsIsIllegalZero(ac)) ac = kCC3AttenuationNone;	// Ensure legal value
+			[uniform setVector: *(CC3Vector*)&ac];
 			return YES;
+		}
 		case kCC3SemanticPointSizeMinimum:
 			[uniform setFloat: glesEngine.state.pointSizeMinimum.value];
 			return YES;
@@ -741,6 +941,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: glesEngine.capabilities.pointSprites.value];
 			return YES;
 			
+#pragma mark Setting time semantics
 		// TIME ------------------
 		case kCC3SemanticFrameTime:
 			[uniform setFloat: visitor.deltaTime];
@@ -770,6 +971,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 												tanf(appTime/8.0f))];
 			return YES;
 			
+#pragma mark Setting miscellaneous semantics
 		// MISC ENVIRONMENT ---------
 		case kCC3SemanticDrawCountCurrentFrame:
 			[uniform setInteger: CC3GLDraws()];
@@ -817,6 +1019,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	if (varConfig) {
 		variable.semantic = varConfig.semantic;
 		variable.semanticIndex = varConfig.semanticIndex;
+		variable.scope = [self variableScopeForSemantic: varConfig.semantic];
 		return YES;
 	}
 	return NO;
@@ -941,9 +1144,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// If only one light is used it can be declared as a single variable structure without the index.
 	[self mapVarName: @"u_cc3Light.isEnabled" toSemantic: kCC3SemanticLightIsEnabled];					/**< (bool) Whether the first light is enabled. */
-	[self mapVarName: @"u_cc3Light.positionEyeSpace" toSemantic: kCC3SemanticLightLocationEyeSpace];	/**< (vec4) Location of the first light in eye space. */
-	[self mapVarName: @"u_cc3Light.positionGlobal" toSemantic: kCC3SemanticLightLocationGlobal];		/**< (vec4) Location of the first light in global coordinates. */
-	[self mapVarName: @"u_cc3Light.positionModel" toSemantic: kCC3SemanticLightLocationModelSpace];		/**< (vec4) Location of the first light in local coordinates of model (not light). */
+	[self mapVarName: @"u_cc3Light.positionEyeSpace" toSemantic: kCC3SemanticLightPositionEyeSpace];	/**< (vec4) Location of the first light in eye space. */
+	[self mapVarName: @"u_cc3Light.positionGlobal" toSemantic: kCC3SemanticLightPositionGlobal];		/**< (vec4) Location of the first light in global coordinates. */
+	[self mapVarName: @"u_cc3Light.positionModel" toSemantic: kCC3SemanticLightPositionModelSpace];		/**< (vec4) Location of the first light in local coordinates of model (not light). */
 	[self mapVarName: @"u_cc3Light.ambientColor" toSemantic: kCC3SemanticLightColorAmbient];			/**< (vec4) Ambient color of the first light. */
 	[self mapVarName: @"u_cc3Light.diffuseColor" toSemantic: kCC3SemanticLightColorDiffuse];			/**< (vec4) Diffuse color of the first light. */
 	[self mapVarName: @"u_cc3Light.specularColor" toSemantic: kCC3SemanticLightColorSpecular];			/**< (vec4) Specular color of the first light. */
@@ -958,9 +1161,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	// Multiple lights are indexed
 	for (NSUInteger ltIdx = 0; ltIdx < _maxLightVars; ltIdx++) {
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].isEnabled", ltIdx] toSemantic: kCC3SemanticLightIsEnabled at: ltIdx];						/**< (bool) Whether a light is enabled. */
-		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionEyeSpace", ltIdx] toSemantic: kCC3SemanticLightLocationEyeSpace at: ltIdx];			/**< (vec4) Location of a light in eye space. */
-		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionGlobal", ltIdx] toSemantic: kCC3SemanticLightLocationGlobal at: ltIdx];				/**< (vec4) Location of a light in global coordinates. */
-		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionModel", ltIdx] toSemantic: kCC3SemanticLightLocationModelSpace at: ltIdx];			/**< (vec4) Location of a light in local coordinates of model (not light). */
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionEyeSpace", ltIdx] toSemantic: kCC3SemanticLightPositionEyeSpace at: ltIdx];			/**< (vec4) Homogeneous position (location or direction) of a light in eye space. */
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionGlobal", ltIdx] toSemantic: kCC3SemanticLightPositionGlobal at: ltIdx];				/**< (vec4) Homogeneous position (location or direction) of a light in global coordinates. */
+		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionModel", ltIdx] toSemantic: kCC3SemanticLightPositionModelSpace at: ltIdx];			/**< (vec4) Homogeneous position (location or direction) of a light in local coordinates of model (not light). */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].ambientColor", ltIdx] toSemantic: kCC3SemanticLightColorAmbient at: ltIdx];					/**< (vec4) Ambient color of a light. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].diffuseColor", ltIdx] toSemantic: kCC3SemanticLightColorDiffuse at: ltIdx];					/**< (vec4) Diffuse color of a light. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].specularColor", ltIdx] toSemantic: kCC3SemanticLightColorSpecular at: ltIdx];				/**< (vec4) Specular color of a light. */
@@ -1015,10 +1218,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Model.animationFraction" toSemantic: kCC3SemanticAnimationFraction];	/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
 	
 	// SKINNING ----------------
-	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];				/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	[self mapVarName: @"u_cc3BoneMatrices" toSemantic: kCC3SemanticBoneMatrices];					/**< (mat4[]) Array of bone matrices in the current mesh skin section (length of array is specified by u_cc3BoneMatrixCount). */
-	[self mapVarName: @"u_cc3BoneMatricesInvTran" toSemantic: kCC3SemanticBoneMatricesInvTran];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section (length of array is specified by u_cc3BoneMatrixCount). */
-	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneMatrixCount];				/**< (int) Length of the u_cc3BoneMatrices and u_cc3BoneMatricesInvTran arrays. */
+	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneMatrixCount];							/**< (int) Length of the u_cc3BoneMatricesEyeSpace and u_cc3BoneMatricesInvTranEyeSpace arrays. */
+	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section  in eye space. */
+	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranGlobal" toSemantic: kCC3SemanticBoneMatricesInvTranGlobal];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates. */
 	
 	// PARTICLES ------------
 	[self mapVarName: @"u_cc3Points.isDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];				/**< (bool) Whether the vertices are being drawn as points (alias for u_cc3IsDrawingPoints). */

@@ -1473,7 +1473,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 }
 
 /**
- * Draws the mesh vertices to the GL engine.
+ * Populates any shader program uniform variables that have draw scope,
+ * and then draws the mesh vertices to the GL engine.
  *
  * If the vertexIndices property is not nil, the draw method is invoked on that
  * CC3VertexIndices instance. Otherwise, the draw method is invoked on the
@@ -1481,6 +1482,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
  */
 -(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
+
+	[visitor.currentShaderProgram populateDrawScopeUniformsWithVisitor: visitor];
+	
 	if (_vertexIndices) {
 		[_vertexIndices drawWithVisitor: visitor];
 	} else {
@@ -1488,10 +1492,21 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	}
 }
 
+/**
+ * Populates any shader program uniform variables that have draw scope,
+ * and then draws the specified range of mesh vertices to the GL engine.
+ *
+ * If the vertexIndices property is not nil, the draw method is invoked on that
+ * CC3VertexIndices instance. Otherwise, the draw method is invoked on the
+ * CC3VertexLocations instance in the vertexLocations property.
+ */
 -(void) drawVerticesFrom: (GLuint) vertexIndex
 				forCount: (GLuint) vertexCount
 			 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@ from %u for %u vertices", self, vertexIndex, vertexCount);
+
+	[visitor.currentShaderProgram populateDrawScopeUniformsWithVisitor: visitor];
+
 	if (_vertexIndices) {
 		[_vertexIndices drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
 	} else {

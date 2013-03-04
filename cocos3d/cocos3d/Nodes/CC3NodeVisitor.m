@@ -37,6 +37,7 @@
 #import "CC3GLView.h"
 #import "CC3EAGLView.h"
 #import "CC3NodeSequencer.h"
+#import "CC3VertexSkinning.h"
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
@@ -96,7 +97,7 @@
 
 	if (!_startingNode) {				// If this is the first node, start up
 		_startingNode = aNode;			// Not retained
-		if (!_camera) _camera = aNode.activeCamera;	// Retrieve and cache the camera. Not retained
+		if (!_camera) self.camera = aNode.activeCamera;	// Retrieve and cache the camera using setter. Not retained
 		[self open];					// Open the visitor
 	}
 
@@ -381,14 +382,20 @@
 @synthesize drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
 @synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
 @synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount;
+@synthesize currentSkinSection=_currentSkinSection, currentShaderProgram=_currentShaderProgram;
 
 -(void) dealloc {
 	_drawingSequencer = nil;		// not retained
+	_currentSkinSection = nil;		// not retained
+	_currentShaderProgram = nil;	// not retained
 	[super dealloc];
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		_drawingSequencer = nil;
+		_currentSkinSection = nil;
+		_currentShaderProgram = nil;
 		_shouldDecorateNode = YES;
 		_shouldClearDepthBuffer = YES;
 	}
@@ -404,6 +411,7 @@
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];
+	_currentSkinSection = nil;		// not retained
 }
 
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
@@ -427,16 +435,24 @@
 	}
 }
 
+/** Populates the cached view and projection matrices. */
+-(void) setCamera:(CC3Camera *)camera {
+	super.camera = camera;
+	[self populateProjMatrixFrom: camera.projectionMatrix];
+	[self populateViewMatrixFrom: camera.viewMatrix];
+}
+
 /**
- * Initializes mesh and material context switching, and optionally clears the depth
- * buffer every time drawing begins so that 3D rendering will occur over top of any
- * previously rendered 3D or 2D artifacts.
+ * Initializes mesh and material context switching, prepares GL programs for rendering,
+ * and optionally clears the depth buffer every time drawing begins so that 3D rendering
+ * will occur over top of any previously rendered 3D or 2D artifacts.
  */
 -(void) open {
 	[super open];
 
 	[CC3Material resetSwitching];
 	[CC3Mesh resetSwitching];
+	[CC3GLProgram willBeginDrawingScene];
 	
 	if (_shouldClearDepthBuffer) [[CC3OpenGLESEngine engine].state clearDepthBuffer];
 }
@@ -449,13 +465,13 @@
 
 #pragma mark Accessing node contents
 
+-(CC3Scene*) scene { return _startingNode.scene; }
+
 -(CC3MeshNode*) currentMeshNode { return (CC3MeshNode*)self.currentNode; }
 
 -(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
 
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
-
--(CC3Scene*) scene { return (CC3Scene*)_startingNode; }
 
 -(NSUInteger) lightCount { return self.scene.lights.count; }
 
@@ -463,6 +479,74 @@
 	CCArray* lights = self.scene.lights;
 	if (index < lights.count) return [lights objectAtIndex: index];
 	return nil;
+}
+
+
+#pragma mark Environmental matrices
+
+-(CC3Matrix4x4*) projMatrix { return &_projMatrix; }
+
+-(CC3Matrix4x3*) viewMatrix { return &_viewMatrix; }
+
+-(CC3Matrix4x3*) modelMatrix { return &_modelMatrix; }
+
+-(CC3Matrix4x3*) modelViewMatrix {
+	if (_isMVMtxDirty) {
+		CC3Matrix4x3Multiply(&_modelViewMatrix, &_viewMatrix, &_modelMatrix);
+		_isMVMtxDirty = NO;
+	}
+	return &_modelViewMatrix;
+}
+
+-(CC3Matrix4x4*) viewProjMatrix {
+	if (_isVPMtxDirty) {
+		CC3Matrix4x4 v4x4;
+		CC3Matrix4x4PopulateFrom4x3(&v4x4, &_viewMatrix);
+		CC3Matrix4x4Multiply(&_viewProjMatrix, &_projMatrix, &v4x4);
+		_isVPMtxDirty = NO;
+	}
+	return &_viewProjMatrix;
+}
+
+-(CC3Matrix4x4*) modelViewProjMatrix {
+	if (_isMVPMtxDirty) {
+		CC3Matrix4x4 m4x4;
+		CC3Matrix4x4PopulateFrom4x3(&m4x4, self.modelViewMatrix);
+		CC3Matrix4x4Multiply(&_modelViewProjMatrix, &_projMatrix, &m4x4);
+		_isMVPMtxDirty = NO;
+	}
+	return &_modelViewProjMatrix;
+}
+
+-(void) populateProjMatrixFrom: (CC3Matrix*) projMtx {
+	if (projMtx)
+		[projMtx populateCC3Matrix4x4: &_projMatrix];
+	else
+		CC3Matrix4x4PopulateIdentity(&_projMatrix);
+
+	_isVPMtxDirty = YES;
+	_isMVPMtxDirty = YES;
+}
+
+-(void) populateViewMatrixFrom: (CC3Matrix*) viewMtx {
+	if (viewMtx)
+		[viewMtx populateCC3Matrix4x3: &_viewMatrix];
+	else
+		CC3Matrix4x3PopulateIdentity(&_viewMatrix);
+
+	_isVPMtxDirty = YES;
+	_isMVMtxDirty = YES;
+	_isMVPMtxDirty = YES;
+}
+
+-(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx {
+	if (modelMtx)
+		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
+	else
+		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
+
+	_isMVMtxDirty = YES;
+	_isMVPMtxDirty = YES;
 }
 
 @end

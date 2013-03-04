@@ -34,7 +34,7 @@
 #import "CC3PerformanceStatistics.h"
 
 @class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene;
-@class CC3Material, CC3Mesh, CC3NodeSequencer;
+@class CC3Material, CC3Mesh, CC3NodeSequencer, CC3SkinSection, CC3GLProgram;
 
 
 #pragma mark -
@@ -305,11 +305,22 @@
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
+	CC3SkinSection* _currentSkinSection;
+	CC3GLProgram* _currentShaderProgram;
+	CC3Matrix4x4 _projMatrix;
+	CC3Matrix4x3 _viewMatrix;
+	CC3Matrix4x3 _modelMatrix;
+	CC3Matrix4x4 _viewProjMatrix;
+	CC3Matrix4x3 _modelViewMatrix;
+	CC3Matrix4x4 _modelViewProjMatrix;
 	GLuint _textureUnitCount;
 	GLuint _textureUnit;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _shouldClearDepthBuffer : 1;
+	BOOL _isVPMtxDirty : 1;
+	BOOL _isMVMtxDirty : 1;
+	BOOL _isMVPMtxDirty : 1;
 }
 
 /**
@@ -384,9 +395,7 @@
 /**
  * Returns the CC3Scene.
  *
- * This is a convenience property that returns the value of the startingNode property,
- * cast as a CC3Scene. Drawing operations typically start at the CC3Scene, but it is up
- * to the invoker to make sure that the starting node actually is a CC3Scene.
+ * This is a convenience property that returns the scene property of the startingNode property.
  */
 @property(nonatomic, readonly) CC3Scene* scene;
 
@@ -424,6 +433,22 @@
  */
 @property(nonatomic, readonly) CC3Mesh* currentMesh;
 
+/**
+ * During the drawing of nodes that use vertex skinning, this property holds the skin
+ * section that is currently being drawn.
+ *
+ * The value of this property is set by the skin section itself and is only valid
+ * during the drawing of that skin section.
+ */
+@property(nonatomic, assign) CC3SkinSection* currentSkinSection;
+
+/**
+ * The currently active shader program.
+ *
+ * This property is set automatically by the program when it binds to the GL engine.
+ */
+@property(nonatomic, assign) CC3GLProgram* currentShaderProgram;
+
 /** The number of lights in the scene. */
 @property(nonatomic, readonly) NSUInteger lightCount;
 
@@ -435,6 +460,44 @@
  * the same as the lightIndex property of the CC3Light.
  */
 -(CC3Light*) lightAt: (GLuint) index;
+
+
+#pragma mark Environmental matrices
+
+/** Returns the current projection matrix. */
+@property(nonatomic, readonly) CC3Matrix4x4* projMatrix;
+
+/** Returns the current view matrix. */
+@property(nonatomic, readonly) CC3Matrix4x3* viewMatrix;
+
+/** Returns the current model-to-global transform matrix. */
+@property(nonatomic, readonly) CC3Matrix4x3* modelMatrix;
+
+/** Returns the current view-projection matrix. */
+@property(nonatomic, readonly) CC3Matrix4x4* viewProjMatrix;
+
+/** Returns the current model-view matrix. */
+@property(nonatomic, readonly) CC3Matrix4x3* modelViewMatrix;
+
+/** Returns the current model-view-projection matrix. */
+@property(nonatomic, readonly) CC3Matrix4x4* modelViewProjMatrix;
+
+/**
+ * Populates the current projection matrix from the specified matrix.
+ *
+ * This method is invoked automatically when the camera property is set.
+ */
+-(void) populateProjMatrixFrom: (CC3Matrix*) projMtx;
+
+/**
+ * Populates the current view matrix from the specified matrix.
+ *
+ * This method is invoked automatically when the camera property is set.
+ */
+-(void) populateViewMatrixFrom: (CC3Matrix*) viewMtx;
+
+/** Populates the current model-to-global matrix from the specified matrix. */
+-(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx;
 
 @end
 

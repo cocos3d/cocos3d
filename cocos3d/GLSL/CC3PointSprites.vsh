@@ -44,10 +44,6 @@
 // (defaults to 4). See the description of those properties for more info.
 #define MAX_LIGHTS				3
 
-// Maximum bones per skin section (batch). This is set here to the platform maximum.
-// You can reduce this to improve efficiency if your models need fewer bones in each batch.
-#define MAX_BONES_PER_VERTEX	11
-
 precision mediump float;
 
 
@@ -249,7 +245,7 @@ float pointSize() {
 	float size = 1.0;
 	if (u_cc3Points.isDrawingPoints) {
 		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
-		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
+		if (u_cc3Points.sizeAttenuation != kAttenuationNone) {
 			float ptDist = length(vtxPosEye.xyz);
 			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
 			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));

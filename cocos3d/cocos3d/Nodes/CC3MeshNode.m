@@ -56,6 +56,7 @@
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) alignTextureUnit: (GLuint) texUnit;
+-(void) alignTextureUnits;
 -(void) ensureMaterial;
 -(void) makeMaterial;
 -(void) ensureMesh;
@@ -124,8 +125,7 @@
 	if ( !mesh.hasVertexNormals ) self.shouldUseLighting = NO;
 	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
 
-	GLuint texCount = self.textureCount;
-	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) [self alignTextureUnit: texUnit];
+	[self alignTextureUnits];
 }
 
 /** If a material does not yet exist, create it by invoking the makeMaterial method. */
@@ -480,6 +480,11 @@
 	[mesh expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
 }
 
+-(void) alignTextureUnits {
+	GLuint texCount = self.textureCount;
+	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) [self alignTextureUnit: texUnit];
+}
+
 -(void) alignTextureUnit: (GLuint) texUnit {
 	[mesh alignTextureUnit: texUnit withTexture: [self textureForTextureUnit: texUnit]];
 }
@@ -719,9 +724,10 @@
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[self configureDrawingParameters: visitor];		// Before material is configured.
 	[self configureMaterialWithVisitor: visitor];
+	[self applyShaderProgramWithVisitor: visitor];
 
 	[self drawMeshWithVisitor: visitor];
-	
+
 	[self cleanupDrawingParameters: visitor];
 }
 
@@ -885,14 +891,34 @@
 	} else {
 		[CC3Material unbind];
 		if (visitor.shouldDecorateNode) CC3OpenGLESEngine.engine.state.color.value = pureColor;
-		[self applyShaderProgramWithVisitor: visitor];		// Apply shader for pure color or node picking
 	}
 }
 
 #if CC3_OGLES_2
-/** Ensure we have a shader program and bind it. */
+/** 
+ * If this node has a material and should be decorated, ensure that the material has a shader
+ * program and bind it. If the material does not have a shader program yet, select an appropriate
+ * program using the program matcher and assign it to the material.
+ *
+ * If this node does not have a material or should not be decorated, select a basic shader program
+ * using the program matcher and bind it. Typically this will be a simple solid-color shader.
+ *
+ * After binding the shader program, populate the program uniform variables that have node scope.
+ */
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[[CC3GLProgram.programMatcher programForVisitor: visitor] bindWithVisitor: visitor fromContext: nil];
+	CC3GLProgram* shaderProgram;
+	if (material && visitor.shouldDecorateNode) {
+		shaderProgram = material.shaderProgram;
+		if (!shaderProgram) {
+			shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
+			material.shaderProgram = shaderProgram;
+			LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, self);
+		}
+	} else {
+		shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
+	}
+	[shaderProgram bindWithVisitor: visitor];
+	[shaderProgram populateNodeScopeUniformsWithVisitor: visitor];
 }
 #endif
 #if CC3_OGLES_1

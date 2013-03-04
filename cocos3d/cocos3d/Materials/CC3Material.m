@@ -42,7 +42,6 @@
 -(void) applyBlend;
 -(void) applyColors;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(BOOL) switchingMaterial;
 @end
 
@@ -424,7 +423,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
 			[super fullDescription], (_shouldUseLighting ? @"" : @"not"),
 			NSStringFromCCC4F(_ambientColor), NSStringFromCCC4F(_diffuseColor),
-			NSStringFromCCC4F(_emissionColor), NSStringFromCCC4F(_specularColor), _shininess,
+			NSStringFromCCC4F(_specularColor), NSStringFromCCC4F(_emissionColor), _shininess,
 			NSStringFromGLEnum(_blendFunc.src), NSStringFromGLEnum(_blendFunc.dst),
 			NSStringFromGLEnum(_alphaTestFunction), _alphaTestReference,
 			self.textureCount];
@@ -454,7 +453,6 @@ static GLuint lastAssignedMaterialTag;
 	} else {
 		LogTrace(@"Reusing currently bound %@", self);
 	}
-	[self applyShaderProgramWithVisitor: visitor];
 }
 
 /**
@@ -531,20 +529,6 @@ static GLuint lastAssignedMaterialTag;
 	[CC3Texture	unbindRemainingFrom: visitor.textureUnit];
 	visitor.textureUnitCount = visitor.textureUnit;
 }
-
-#if CC3_OGLES_2
-/** Ensure we have a shader context and program and bind them. */
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (!_shaderContext) {
-		self.shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
-		LogRez(@"Shader program %@ automatically selected for %@", self.shaderProgram, visitor.currentMeshNode);
-	}
-	[_shaderContext bindWithVisitor: visitor];
-}
-#endif
-#if CC3_OGLES_1
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif
 
 -(void) unbind { [[self class] unbind]; }
 

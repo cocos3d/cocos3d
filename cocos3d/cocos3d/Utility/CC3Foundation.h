@@ -1574,18 +1574,29 @@ CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere);
 #pragma mark Attenuation function structures
 
 /**
- * The coefficients of the equation for an attenuation function: (a + b*r + c*r*r),
- * where r is the radial distance between a the source (light or camera) and the 3D
- * location at which we want to calculate attenuation.
+ * The constant, linear, and quadratic coefficients of the attenuation function equation:
+ * (a + b*r + c*r*r), where r is the radial distance between a the source (light or camera)
+ * and the 3D location at which we want to calculate attenuation.
  */
 typedef struct {
-	GLfloat a;				/**< The a coefficient in the attenuation function. */
-	GLfloat b;				/**< The b coefficient in the attenuation function. */
-	GLfloat c;				/**< The c coefficient in the attenuation function. */
+	GLfloat a;				/**< The constant coefficient in the attenuation function. */
+	GLfloat b;				/**< The linear coefficient in the attenuation function. */
+	GLfloat c;				/**< The quadratic coefficient in the attenuation function. */
 } CC3AttenuationCoefficients;
 
-/** Point size attenuation coefficients corresponding to no attenuation with distance (constant size). */
-static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone = {1.0, 0.0, 0.0};
+/** Attenuation coefficients corresponding to no attenuation with distance (constant size). */
+static const CC3AttenuationCoefficients kCC3AttenuationNone = {1.0, 0.0, 0.0};
+
+/** 
+ * Attenuation coefficients corresponding to an illegal attenuation.
+ *
+ * Since attenuation involves a division, attenuation cooefficients that are all zero will result
+ * in an attempt to divide by zero. This constant can be used to test for and avoid this situation.
+ */
+static const CC3AttenuationCoefficients kCC3AttenuationIllegalZero = {0.0, 0.0, 0.0};
+
+/** Deprecated. Use kCC3AttenuationNone instead. */
+static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone DEPRECATED_ATTRIBUTE = {1.0, 0.0, 0.0};
 
 /**
  * Returns a string description of the specified CC3AttenuationCoefficients struct
@@ -1596,12 +1607,21 @@ static inline NSString* NSStringFromCC3AttenuationCoefficients(CC3AttenuationCoe
 }
 
 /** Returns a CC3AttenuationCoefficients structure constructed from the specified coefficients. */
-static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat a, GLfloat b, GLfloat c) {
+static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat constant,
+																		GLfloat linear,
+																		GLfloat quadratic) {
 	CC3AttenuationCoefficients coeffs;
-	coeffs.a = a;
-	coeffs.b = b;
-	coeffs.c = c;
+	coeffs.a = constant;
+	coeffs.b = linear;
+	coeffs.c = quadratic;
 	return coeffs;
+}
+
+/** Returns whether the specified attenuation coefficients are all zero and therefore illegal. */
+static inline BOOL CC3AttenuationCoefficientsIsIllegalZero(CC3AttenuationCoefficients coeffs) {
+	return (coeffs.a == kCC3AttenuationIllegalZero.a &&
+			coeffs.b == kCC3AttenuationIllegalZero.b &&
+			coeffs.c == kCC3AttenuationIllegalZero.c);
 }
 
 

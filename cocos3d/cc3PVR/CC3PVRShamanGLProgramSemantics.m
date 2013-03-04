@@ -112,7 +112,6 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 }
 
 
-
 #pragma mark Mapping between PVRShaman semantics and cocos3d semantics
 
 static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
@@ -180,16 +179,16 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 	[self addSemantic: kCC3SemanticMaterialColorSpecular forPVRShamanSemanticName: @"MATERIALCOLORSPECULAR"];
 	
 	[self addSemantic: kCC3SemanticBonesPerVertex forPVRShamanSemanticName: @"BONECOUNT"];
-	[self addSemantic: kCC3SemanticBoneMatrices forPVRShamanSemanticName: @"BONEMATRIXARRAY"];
-	[self addSemantic: kCC3SemanticBoneMatricesInvTran forPVRShamanSemanticName: @"BONEMATRIXARRAYIT"];
+	[self addSemantic: kCC3SemanticBoneMatricesGlobal forPVRShamanSemanticName: @"BONEMATRIXARRAY"];
+	[self addSemantic: kCC3SemanticBoneMatricesInvTranGlobal forPVRShamanSemanticName: @"BONEMATRIXARRAYIT"];
 	
 	[self addSemantic: kCC3SemanticLightColorDiffuse forPVRShamanSemanticName: @"LIGHTCOLOR"];
-	[self addSemantic: kCC3SemanticLightLocationModelSpace forPVRShamanSemanticName: @"LIGHTPOSMODEL"];
-	[self addSemantic: kCC3SemanticLightLocationGlobal forPVRShamanSemanticName: @"LIGHTPOSWORLD"];
-	[self addSemantic: kCC3SemanticLightLocationEyeSpace forPVRShamanSemanticName: @"LIGHTPOSEYE"];
-	[self addSemantic: kCC3SemanticLightLocationModelSpace forPVRShamanSemanticName: @"LIGHTDIRMODEL"];
-	[self addSemantic: kCC3SemanticLightLocationGlobal forPVRShamanSemanticName: @"LIGHTDIRWORLD"];
-	[self addSemantic: kCC3SemanticLightLocationEyeSpace forPVRShamanSemanticName: @"LIGHTDIREYE"];
+	[self addSemantic: kCC3SemanticLightPositionGlobal forPVRShamanSemanticName: @"LIGHTPOSWORLD"];
+	[self addSemantic: kCC3SemanticLightPositionEyeSpace forPVRShamanSemanticName: @"LIGHTPOSEYE"];
+	[self addSemantic: kCC3SemanticLightPositionModelSpace forPVRShamanSemanticName: @"LIGHTPOSMODEL"];
+	[self addSemantic: kCC3SemanticLightInvertedPositionGlobal forPVRShamanSemanticName: @"LIGHTDIRWORLD"];
+	[self addSemantic: kCC3SemanticLightInvertedPositionEyeSpace forPVRShamanSemanticName: @"LIGHTDIREYE"];
+	[self addSemantic: kCC3SemanticLightInvertedPositionModelSpace forPVRShamanSemanticName: @"LIGHTDIRMODEL"];
 	[self addSemantic: kCC3SemanticLightAttenuation forPVRShamanSemanticName: @"LIGHTATTENUATION"];
 	[self addSemantic: kCC3PVRShamanSemanticLightSpotFalloff forPVRShamanSemanticName: @"LIGHTFALLOFF"];
 

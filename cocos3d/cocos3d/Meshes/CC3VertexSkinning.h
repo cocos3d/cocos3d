@@ -258,6 +258,9 @@
 	GLint vertexCount;
 }
 
+/** Returns the number of bones in this skin section. */
+@property(nonatomic, assign, readonly) GLuint boneCount;
+
 /**
  * The collection of bones from the skeleton that influence the mesh vertices that are
  * managed and drawn by this skin section.
@@ -275,10 +278,9 @@
  * of bones, the number of bones in the collection in this property will generally be larger
  * than the number of bones used per vertex.
  *
- * However, when the vertices are drawn, all of the vertices in this skin section are drawn
- * with a single call to the GL engine. All of the bone transforms that affect any of the
- * vertices being drawn are loaded into the GL engine by this skin section prior to drawing
- * the vertices.
+ * However, when the vertices are drawn, all of the vertices in this skin section are drawn with
+ * a single call to the GL engine. All of the bone transforms that affect any of the vertices
+ * being drawn are loaded into the GL engine by this skin section prior to drawing the vertices.
  * 
  * The number of transform matrices that can be simultaneously loaded into the GL engine
  * matrix palette is limited by the platform, and that limit defines the maximum number
@@ -393,6 +395,9 @@
  */
 -(void) reattachBonesFrom: (CC3Node*) aNode;
 
+/** Returns a description of this skin section that includes a list of the bones. */
+-(NSString*) fullDescription;
+
 
 #pragma mark Drawing
 
@@ -457,8 +462,11 @@
  */
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Returns a description of this skin section that includes a list of the bones. */
--(NSString*) fullDescription;
+/**
+ * Returns the matrix used to transform the bone at the specified index within this skin
+ * section into global coordinates.
+ */
+-(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx;
 
 @end
 

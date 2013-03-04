@@ -49,11 +49,14 @@
 /** CC3GLProgram extends CCGLProgram to provide specialized behaviour for cocos3d. */
 @interface CC3GLProgram : CC3Identifiable {
 	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
-	CCArray* _uniforms;
+	CCArray* _uniformsSceneScope;
+	CCArray* _uniformsNodeScope;
+	CCArray* _uniformsDrawScope;
 	CCArray* _attributes;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
 	GLuint _programID;
+	BOOL _isSceneScopeDirty : 1;
 }
 
 /** Returns the GL program ID. */
@@ -108,15 +111,43 @@
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
 
 
-#pragma mark Binding and linking
+#pragma mark Binding
+
+/** Binds the program to the GL engine and to the specified visitor. */
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** 
- * Binds the program, populates the uniforms and applies them to the program.
+ * If the scene scope was previously marked dirty by an invocation of the markSceneScopeDirty
+ * method, this method populates all uniform variables that have scene scope, and marks the
+ * scene scope as no longer dirty. Further invocations of this method will not re-populate
+ * the scene scope variables until markSceneScopeDirty is invoked.
  *
- * The specified context resolves locally overridden uniform variable values and may be nil
- * if no uniform variable overrides are to be applied.
+ * This method is lazily invoked by the populateNodeScopeUniformsWithVisitor method. Therefore,
+ * scene scope will be populated on each render pass when the first node that uses this program
+ * is rendered. Under normal operations, this method need never be explicitly invoked.
  */
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor fromContext: (CC3GLProgramContext*) context;
+-(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/** Populates all uniform variables that have node scope. */
+-(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/** Populates all uniform variables that have draw scope. */
+-(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Marks the scene scope variables as dirty and in need of re-populating.
+ *
+ * Invoked automatically at the beginning of scene rendering.
+ */
+-(void) markSceneScopeDirty;
+
+/**
+ * Invoked automatically at the beginning of scene rendering.
+ *
+ * Invokes the markSceneScopeDirty method to mark the scene scope variables as dirty
+ * and in need of re-populating.
+ */
+-(void) willBeginDrawingScene;
 
 
 #pragma mark Allocation and initialization
@@ -188,6 +219,13 @@ andFragmentShaderFile: (NSString*) fshFilename;
 
 /** Removes the program with the specified name from the collection of loaded programs. */
 +(void) removeProgramNamed: (NSString*) name;
+
+/**
+ * Invoked to indicate that scene drawing is about to begin.
+ *
+ * This method invokes the same method on each instance in the cache.
+ */
++(void) willBeginDrawingScene;
 
 
 #pragma mark Program matching

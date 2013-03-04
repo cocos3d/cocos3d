@@ -516,8 +516,8 @@ static GLubyte autoOrthonormalizeCount = 0;
 	[super populateFrom: another];
 	
 	// Only proceed with populating the directional properties if the
-	// other instance is also a directional rotator.
-	if( [another isKindOfClass:[CC3DirectionalRotator class]] ) {
+	// other instance is also a targetting rotator.
+	if( [another isKindOfClass:[CC3TargettingRotator class]] ) {
 		self.target = another.target;		// weak link...not copied
 		CC3TargettingRotator* anotherTR = (CC3TargettingRotator*)another;
 		targettingConstraint = anotherTR.targettingConstraint;

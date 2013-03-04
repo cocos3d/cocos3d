@@ -36,9 +36,10 @@
  * CC3GLProgramSemanticsByVarName instance.
  */
 
-// Maximum bones per skin section (batch). This is set here to the platform maximum.
-// You can reduce this to improve efficiency if your models need fewer bones in each batch.
-#define MAX_BONES_PER_VERTEX	11
+// Maximum bones per skin section (batch).
+// Set this fairly high because this shader is used for touch detection painting
+// for all other shaders. Apps with large skinned models might use many bones.
+#define MAX_BONES_PER_VERTEX	20
 
 precision mediump float;
 
@@ -69,7 +70,7 @@ uniform mat4 u_cc3MtxModelView;									/**< Current modelview matrix. */
 uniform highp mat4 u_cc3MtxProj;								/**< Current projection matrix. */
 uniform Point u_cc3Points;										/**< Point parameters. */
 uniform lowp int u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
-uniform highp mat4 u_cc3BoneMatrices[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
+uniform highp mat4 u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4 a_cc3Position;		/**< Vertex position. */
@@ -101,7 +102,7 @@ void vertexToEyeSpace() {
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
 				// Add position contribution from this bone
-				vtxPosEye += u_cc3BoneMatrices[boneIndices.x] * a_cc3Position * boneWeights.x;
+				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
 				
 				// "Rotate" the vector components to the next vertex bone index
 				boneIndices = boneIndices.yzwx;
@@ -121,7 +122,7 @@ float pointSize() {
 	float size = 1.0;
 	if (u_cc3Points.isDrawingPoints) {
 		size = u_cc3Points.hasVertexPointSize ? a_cc3PointSize : u_cc3Points.size;
-		if (u_cc3Points.sizeAttenuation != kAttenuationNone && u_cc3Points.sizeAttenuation != kVec3Zero) {
+		if (u_cc3Points.sizeAttenuation != kAttenuationNone) {
 			float ptDist = length(vtxPosEye.xyz);
 			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
 			size /= sqrt(dot(attenuationEquation, u_cc3Points.sizeAttenuation));

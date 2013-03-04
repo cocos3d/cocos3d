@@ -34,13 +34,25 @@
 #import "CC3OpenGLESVertexArrays.h"
 
 
+NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
+	switch (scope) {
+		case kCC3GLSLVariableScopeUnknown: return @"kCC3GLSLVariableScopeUnknown";
+		case kCC3GLSLVariableScopeScene: return @"kCC3GLSLVariableScopeScene";
+		case kCC3GLSLVariableScopeNode: return @"kCC3GLSLVariableScopeNode";
+		case kCC3GLSLVariableScopeDraw: return @"kCC3GLSLVariableScopeDraw";
+			
+		default: return [NSString stringWithFormat: @"Unknown variable scope (%u)", scope];
+	}
+}
+
+
 #pragma mark -
 #pragma mark CC3GLSLVariable
 
 @implementation CC3GLSLVariable
 
 @synthesize program=_program, index=_index, location=_location, name=_name;
-@synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex;
+@synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex, scope=_scope;
 
 -(void) dealloc {
 	_program = nil;			// not retained
@@ -56,6 +68,7 @@
 		_index = index;
 		_semantic = kCC3SemanticNone;
 		_semanticIndex = 0;
+		_scope = kCC3GLSLVariableScopeUnknown;
 		_program = program;			// not retained
 		[self populateFromProgram];
 	}
@@ -86,6 +99,7 @@
 	_size = another.size;
 	_semantic = another.semantic;
 	_semanticIndex = another.semanticIndex;
+	_scope = another.scope;
 }
 
 -(void) populateFromProgram {}
@@ -101,6 +115,7 @@
 	[desc appendFormat: @"\n\t\tSize: %i", _size];
 	[desc appendFormat: @"\n\t\tSemantic: %@ (%u)", self.semanticName, _semantic];
 	[desc appendFormat: @"\n\t\tSemantic index: %u", _semanticIndex];
+	[desc appendFormat: @"\n\t\tScope: %@", NSStringFromCC3GLSLVariableScope(_scope)];
 	return desc;
 }
 

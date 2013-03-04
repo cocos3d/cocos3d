@@ -33,62 +33,6 @@
 #import "CC3OpenGLESStateTracker.h"
 #import "CC3Matrix.h"
 
-/**
- * Type types of matrices available for retrieval from this state tracker.
- *
- * These semantics map to equivalent semantics in CC3Semantics, but are redefined here in
- * order to create an enumeration that is guaranteed to start at zero and be consecutive,
- * so that they can be used to index into a matrix cache.
- */
-typedef enum {
-	kCC3MatrixSemanticModelLocal = 0,			/**< Current model-to-parent matrix. */
-	kCC3MatrixSemanticModelLocalInv,			/**< Inverse of current model-to-parent matrix. */
-	kCC3MatrixSemanticModelLocalInvTran,		/**< Inverse-transpose of current model-to-parent matrix. */
-	kCC3MatrixSemanticModel,					/**< Current model-to-world matrix. */
-	kCC3MatrixSemanticModelInv,					/**< Inverse of current model-to-world matrix. */
-	kCC3MatrixSemanticModelInvTran,				/**< Inverse-transpose of current model-to-world matrix. */
-	kCC3MatrixSemanticView,						/**< Camera view matrix. */
-	kCC3MatrixSemanticViewInv,					/**< Inverse of camera view matrix. */
-	kCC3MatrixSemanticViewInvTran,				/**< Inverse-transpose of camera view matrix. */
-	kCC3MatrixSemanticModelView,				/**< Current modelview matrix. */
-	kCC3MatrixSemanticModelViewInv,				/**< Inverse of current modelview matrix. */
-	kCC3MatrixSemanticModelViewInvTran,			/**< Inverse-transpose of current modelview matrix. */
-	kCC3MatrixSemanticProj,						/**< Camera projection matrix. */
-	kCC3MatrixSemanticProjInv,					/**< Inverse of camera projection matrix. */
-	kCC3MatrixSemanticProjInvTran,				/**< Inverse-transpose of camera projection matrix. */
-	kCC3MatrixSemanticViewProj,					/**< Camera view and projection matrix. */
-	kCC3MatrixSemanticViewProjInv,				/**< Inverse of camera view and projection matrix. */
-	kCC3MatrixSemanticViewProjInvTran,			/**< Inverse-transpose of camera view and projection matrix. */
-	kCC3MatrixSemanticModelViewProj,			/**< Current modelview-projection matrix. */
-	kCC3MatrixSemanticModelViewProjInv,			/**< Inverse of current modelview-projection matrix. */
-	kCC3MatrixSemanticModelViewProjInvTran,		/**< Inverse-transpose of current modelview-projection matrix. */
-	kCC3MatrixSemanticCount						/**< Number of matrix semantics. */
-} CC3MatrixSemantic;
-
-/** Returns a string representation of the specified semantic. */
-NSString* NSStringFromCC3MatrixSemantic(CC3MatrixSemantic semantic);
-
-/**
- * Returns whether the specified matrix semantic represents a 3x3 matrix.
- *
- * The inverse transpose matrices are 3x3 matrices.
- */
-BOOL CC3MatrixSemanticIs3x3(CC3MatrixSemantic semantic);
-
-/**
- * Returns whether the specified matrix semantic represents a 4x3 matrix.
- *
- * The model, view and modelview families of matrices are 4x3.
- */
-BOOL CC3MatrixSemanticIs4x3(CC3MatrixSemantic semantic);
-
-/**
- * Returns whether the specified matrix semantic represents a 4x4 matrix.
- *
- * Matrices that involve the projection matrix are 4x4 matrices.
- */
-BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
-
 
 #pragma mark -
 #pragma mark CC3OpenGLESMatrixStack
@@ -127,23 +71,8 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 /** Returns the current depth this matrix stack. */
 @property(nonatomic, readonly) GLuint depth;
 
-/** 
- * Indicates the maximum depth this matrix stack.
- *
- * For OpenGL ES 1, this value is fixed by the platform and attempts to set it will be ignored.
- * For OpenGL ES 2, this value can be set. The initial value is kCC3OpenGLES2MatrixStackMaxDepth.
- */
-@property(nonatomic, assign) GLuint maxDepth;
-
 /** @deprecated Use depth property instead. */
 -(GLuint) getDepth DEPRECATED_ATTRIBUTE;
-
-/**
- * Callback method invoked automatically when the stack is changed.
- *
- * Invokes the stackChanged: method on the parent CC3OpenGLESMatrices instance.
- */
--(void) wasChanged;
 
 @end
 
@@ -158,7 +87,6 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 	CC3OpenGLESMatrixStack* _projection;
 	CC3OpenGLESStateTrackerEnumeration* _activePalette;
 	CCArray* _paletteMatrices;
-	GLuint _maxPaletteSize;
 }
 
 /** Tracks matrix mode (GL get name GL_MATRIX_MODE and set function glMatrixMode). */
@@ -171,63 +99,10 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
 @property(nonatomic, retain) CC3OpenGLESMatrixStack* projection;
 
 
-#pragma mark Accessing matrices
-
-/** Callback invoked when the specified stack has changed. */
--(void) stackChanged: (CC3OpenGLESMatrixStack*) stack;
-
-/**
- * Returns a pointer to a 3x3 matrix associated with the specified CC3Semantic.
- *
- * The inverse transpose matrices are 3x3 matrices.
- */
--(CC3Matrix3x3*) matrix3x3ForSemantic: (CC3MatrixSemantic) semantic;
-
-/**
- * Returns a pointer to a 4x3 matrix associated with the specified CC3Semantic.
- *
- * The model, view and modelview families of matrices are 4x3.
- */
--(CC3Matrix4x3*) matrix4x3ForSemantic: (CC3MatrixSemantic) semantic;
-
-/**
- * Returns a pointer to a 4x4 matrix associated with the specified CC3Semantic.
- *
- * Matrices that involve the projection matrix are 4x4 matrices.
- */
--(CC3Matrix4x4*) matrix4x4ForSemantic: (CC3MatrixSemantic) semantic;
-
-
 #pragma mark Matrix palette
-
-/** 
- * Start tracking changes to the bone matrices.
- *
- * This must be invoked for each skin section before accessing the palette matrices to set
- * the bone matrices for that skin section.
- */
--(void) beginSkinSection;
-
-/**
- * Finish tracking changes to the bone matrices.
- *
- * This must be invoked for each skin section after accessing the palette matrices to set
- * the bone matrices for that skin section.
- */
--(void) endSkinSection;
 
 /** Tracks active palette matrix (GL get name not applicable and set function glCurrentPaletteMatrixOES). */
 @property(nonatomic, retain) CC3OpenGLESStateTrackerEnumeration* activePalette;
-
-/**
- * Indicates the maximum number of palette matrices permitted.
- *
- * For OpenGL ES 1, this value is fixed by the platform, as determined from
- * CC3OpenGLESEngine.engine.platform.maxPaletteMatrices.value, and attempts to set it will be ignored.
- *
- * For OpenGL ES 2, this value can be set. The initial value is kCC3OpenGLES2MatrixPaletteSize.
- */
-@property(nonatomic, assign) GLuint maxPaletteSize;
 
 /**
  * Returns the number of active palette matrices.
@@ -240,20 +115,6 @@ BOOL CC3MatrixSemanticIs4x4(CC3MatrixSemantic semantic);
  * subsequently be one more than the largest value passed to paletteMatrixAt:.
  */
 @property(nonatomic, readonly) GLuint paletteMatrixCount;
-
-/**
- * Manages the palette of matrices.
- *
- * Do not access individual texture unit trackers through this property.
- * Use the paletteMatrixAt: method instead.
- *
- * The maximum number of available palette matrices is specified by the maxPaletteMatrices property.
- *
- * To conserve memory and processing, palette units are lazily allocated when requested by the
- * paletteMatrixAt: method. The array returned by this property will initially be empty, and will
- * subsequently contain a number of palette matrices one more than the largest value passed to paletteMatrixAt:.
- */
-@property(nonatomic, retain) CCArray* paletteMatrices;
 
 /**
  * Returns the tracker for the palette matrix with the specified index.

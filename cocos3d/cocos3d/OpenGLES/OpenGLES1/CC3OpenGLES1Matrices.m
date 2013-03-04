@@ -50,14 +50,12 @@
 	[self activate];
 	glPushMatrix();
 	LogGLErrorTrace(@"while pushing %@", self);
-	[self wasChanged];
 }
 
 -(void) pop {
 	[self activate];
 	glPopMatrix();
 	LogGLErrorTrace(@"while popping %@", self);
-	[self wasChanged];
 }
 
 -(GLuint) depth {
@@ -72,7 +70,6 @@
 	[self activate];
 	glLoadIdentity();
 	LogGLErrorTrace(@"while loading identity into %@", self);
-	[self wasChanged];
 }
 
 -(void) load: (CC3Matrix*) mtx {
@@ -83,8 +80,6 @@
 
 	glLoadMatrixf(glMtx.elements);
 	LogGLErrorTrace(@"while loading matrix at %@ into %@", mtx, self);
-
-	[self wasChanged];
 }
 
 -(void) multiply: (CC3Matrix*) mtx {
@@ -95,8 +90,6 @@
 
 	glMultMatrixf(glMtx.elements);
 	LogGLErrorTrace(@"while multiplied matrix %@ into %@", mtx, self);
-
-	[self wasChanged];
 }
 
 
@@ -221,17 +214,34 @@
 															  andGLSetFunction: glCurrentPaletteMatrixOES
 													  andOriginalValueHandling: kCC3GLESStateOriginalValueRestore];
 
-	self.paletteMatrices = nil;
+	_paletteMatrices = nil;
 	
-	_maxPaletteSize = self.engine.platform.maxPaletteMatrices.value;		// Bypass setter
+	_maxPaletteSize = self.engine.platform.maxPaletteMatrices.value;
 }
-
-// Fixed by the platform, so don't allow it to be changed
--(void) setMaxPaletteSize: (GLuint) paletteSize {}
 
 /** Template method returns an autoreleased instance of a palette matrix tracker. */
 -(CC3OpenGLESMatrixStack*) makePaletteMatrix: (GLuint) index {
 	return [CC3OpenGLES1MatrixPalette trackerWithParent: self forPalette: index andModeTracker: self.mode];
+}
+
+-(CC3OpenGLESMatrixStack*) paletteMatrixAt: (GLuint) index {
+	// If the requested palette matrix hasn't been allocated yet, add it.
+	if (index >= self.paletteMatrixCount) {
+		// Make sure we don't add beyond the max number of texture units for the platform
+		CC3Assert(index < _maxPaletteSize,
+				  @"Request for palette matrix index %u exceeds maximum palette size of %u matrices",
+				  index, _maxPaletteSize);
+		
+		// Add all palette matrices between the current count and the requested index.
+		for (GLuint i = self.paletteMatrixCount; i <= index; i++) {
+			CC3OpenGLESMatrixStack* pm = [self makePaletteMatrix: i];
+			[pm open];		// Read the initial values
+			if (!_paletteMatrices) _paletteMatrices = [[CCArray array] retain];		// retained
+			[_paletteMatrices addObject: pm];
+			LogTrace(@"%@ added palette matrix %u:\n%@", [self class], i, pm);
+		}
+	}
+	return [_paletteMatrices objectAtIndex: index];
 }
 
 @end

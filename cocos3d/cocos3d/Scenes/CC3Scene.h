@@ -325,6 +325,14 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  */
 @property(nonatomic, retain) CC3ViewportManager* viewportManager;
 
+/** 
+ * Returns whether this scene is illuminated.
+ *
+ * The scene is illuminated if the scene contains at least one light, or the value of
+ * the ambientLight property is not black.
+ */
+@property(nonatomic, readonly) BOOL isIlluminated;
+
 /**
  * The color of the ambient light of the scene. This is independent of any CC3Light
  * nodes that are added as child nodes. You can use this to provide general flat

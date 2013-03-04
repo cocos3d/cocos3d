@@ -108,10 +108,6 @@
 
 #pragma mark Drawing
 
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_program bindWithVisitor: visitor fromContext: self];
-}
-
 // Match based on location
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	for (CC3GLSLUniform* var in _uniforms) {

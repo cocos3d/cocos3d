@@ -433,10 +433,8 @@
  * If the shouldLogIntersections or shouldLogIntersectionMisses property is set to YES
  * in both this bounding volume and the specified bounding volume, a message is logged.
  *
- * Since this method is conditionally compiled, you should not invoke this method
- * directly from code that is not likewise conditionally compiled. Instead, you
- * can use the CC3LogBVIntersection macro function to invoke this method from
- * unconditionally compiled code.
+ * You can use the CC3LogBVIntersection macro function to invoke this method in a way that
+ * will be removed from the code when logging is disabled.
  */
 -(void) logIntersection: (BOOL) intersects with: (CC3BoundingVolume*) aBoundingVolume {
 	if (intersects && self.shouldLogIntersections && aBoundingVolume.shouldLogIntersections) {

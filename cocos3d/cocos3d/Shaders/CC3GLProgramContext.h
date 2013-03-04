@@ -100,7 +100,7 @@
  * values outside the range of this enumeration, if needed. The semantic index is used for
  * semantics that may appear more than once in the scene and in the shader code.
  *
- * For example, the shader might support several lights. The semantic kCC3SemanticLightLocationEyeSpace
+ * For example, the shader might support several lights. The semantic kCC3SemanticLightPositionEyeSpace
  * indicates that the uniform is tracking the position of a light in eye space, and the semantic
  * index then represents the index of a particular light. The index is zero-based.
  *
@@ -164,12 +164,8 @@
 
 #pragma mark Drawing
 
-/** Binds the program, populates the uniforms and applies them to the program. */
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
 /**
- * This callback method is invoked from the bindWithVisitor:fromContext: method of the associated
- * GL program.
+ * This callback method is invoked from the bindWithVisitor: method of the associated GL program.
  *
  * If this context includes an override uniform that matches the specified program uniform, the
  * content of the specified uniform is updated from the content held in the matching override uniform

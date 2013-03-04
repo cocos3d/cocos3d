@@ -108,10 +108,16 @@ cocos3d 2.0.0 - 2013/03/31
 - Added CC3Node texture property as a convenience for changing the primary texture for all descendant mesh nodes.
 - Added CC3Assert macro function as an improvement to the NSAssert() family of function macros:
     - CC3Assert ensures the assertion message is logged to the console prior to raising the assertion exception.
+- Simpilfied & consolidated camera matrix management:
+	- [API change] CC3Frustum projectionMatrix property renamed to finiteProjectionMatrix
+	- [API change] CC3Camera projectionMatrix property now returns either finite or infinite projection matrix depending on value of hasInfin.
+	- [API change] Removed CC3Camera infiniteProjectionMatrix property.
+	- [API change] Removed CC3Frustum viewProjectionMatrix property. 
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.
     - CC3Node shouldIgnoreRayIntersection property now returns YES if the node has no bounding volume.
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 - Fixed issue where CC3PODCamera animation pointed camera in an incorrect direction due to difference in coordinate systems expected by POD camera data.
+- Fixed bad access when copying CC3TargettingRotator from CC3DirectionalRotator due to miscasting.
 - Added guard code to CC3NodeSphericalBoundingVolume to ensure that its globalRadius property will always be a positive value.
 - Removed bounding volume contents from the output of the CC3Node fullDescription method.
 - Removed redundant invocation of normalizeBillboardScaleToDevice in CC3Billboard setBillboard: method.

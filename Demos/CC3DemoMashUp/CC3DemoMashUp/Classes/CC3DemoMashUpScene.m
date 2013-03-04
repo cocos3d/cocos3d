@@ -1348,7 +1348,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Run, man, run!
 	// The POD node contains animation to move the skinned character through a running stride.
-	// Make each stride 1.2 seconds in duration.
 	CCActionInterval* stride = [CC3Animate actionWithDuration: 2.4];
 	[runner runAction: [CCRepeatForever actionWithAction: stride]];
 
@@ -1761,7 +1760,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * the application set the value of such a uniform variable directly.
  */
 -(void) addReflectiveMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
+	podRezNode.resource = [CC3PODResource resourceFromFile: kReflectiveMaskPODFile
+						  expectsVerticallyFlippedTextures: NO];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
 
 	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
@@ -1810,7 +1811,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * the bump-mapping. See the comments in the method body for more on these options.
  */
 -(void) addEtchedMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
+	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
+	podRezNode.resource = [CC3PODResource resourceFromFile: kEtchedMaskPODFile
+						  expectsVerticallyFlippedTextures: NO];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
 	
 	// Apply a PFX effect to the mask node. This will attach the GL program and texture
@@ -1953,9 +1956,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	[self updateCameraFromControls: visitor.deltaTime];
 	
-	// To show where the POD light is, track the small white teapot to the current location
-	// of the light. The actual direction vector is of unit length, so scale it to show the
-	// direction of the light (through the white teapot towards the origin).
+	// To show where the POD light is, track the small white teapot to the light location.
 	teapotWhite.location = podLight.location;
  }
 

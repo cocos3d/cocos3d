@@ -61,15 +61,9 @@
  * to the bones once the entire POD has been loaded.
  */
 @interface CC3PODSkinSection : CC3SkinSection {
-	GLint boneCount;
-	GLint* boneNodeIndices;
+	GLuint _podBoneCount;
+	GLint* _podBoneNodeIndices;
 }
-
-/** Indicates the number of bone indices contained in the boneNodeIndices property. */
-@property(nonatomic, readonly) GLint boneCount;
-
-/** An array of indices to bone nodes extracted from the POD file. */
-@property(nonatomic, readonly) GLint* boneNodeIndices;
 
 /**
  * Initializes an instance from the specified POD SPODMesh structure, 

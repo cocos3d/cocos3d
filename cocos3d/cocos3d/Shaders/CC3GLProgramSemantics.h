@@ -100,6 +100,16 @@ typedef enum {
 	kCC3SemanticModelViewProjMatrix,			/**< (mat4) Current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInv,			/**< (mat4) Inverse of current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	
+	// SKINNING MATRICES ----------------
+	kCC3SemanticBonesPerVertex,					/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	kCC3SemanticBoneMatrixCount,				/**< (int) Length of the bone matrix arrays. */
+	kCC3SemanticBoneMatricesGlobal,				/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesInvTranGlobal,		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesEyeSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesInvTranEyeSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesModelSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneMatricesInvTranModelSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneMatrixCount). */
 
 	// CAMERA -----------------
 	kCC3SemanticCameraLocationGlobal,			/**< (vec3) Location of the camera in global coordinates. */
@@ -122,9 +132,12 @@ typedef enum {
 	kCC3SemanticSceneLightColorAmbient,			/**< (vec4) Ambient light color of the scene. */
 
 	kCC3SemanticLightIsEnabled,					/**< (bool) Whether a light is enabled. */
-	kCC3SemanticLightLocationGlobal,			/**< (vec4) Location of a light in global coordinates. */
-	kCC3SemanticLightLocationEyeSpace,			/**< (vec4) Location of a light in eye space. */
-	kCC3SemanticLightLocationModelSpace,		/**< (vec4) Location of a light in local coordinates of model (not light). */
+	kCC3SemanticLightPositionGlobal,			/**< (vec4) Homogeneous position (location or direction) of a light in global coordinates. */
+	kCC3SemanticLightPositionEyeSpace,			/**< (vec4) Homogeneous position (location or direction) of a light in eye space. */
+	kCC3SemanticLightPositionModelSpace,		/**< (vec4) Homogeneous position (location or direction) of a light in local coordinates of model (not light). */
+	kCC3SemanticLightInvertedPositionGlobal,	/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in global coordinates. */
+	kCC3SemanticLightInvertedPositionEyeSpace,	/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in eye space. */
+	kCC3SemanticLightInvertedPositionModelSpace,/**< (vec4) Inverted homogeneous position (from opposite direction) of a light in local coordinates of model (not light). */
 	kCC3SemanticLightColorAmbient,				/**< (vec4) Ambient color of a light. */
 	kCC3SemanticLightColorDiffuse,				/**< (vec4) Diffuse color of a light. */
 	kCC3SemanticLightColorSpecular,				/**< (vec4) Specular color of a light. */
@@ -174,12 +187,6 @@ typedef enum {
 	kCC3SemanticBoundingRadius,					/**< (float) Radius of the model's bounding sphere in the model's local coordinates. */
 	kCC3SemanticAnimationFraction,				/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
 	
-	// SKINNING ----------------
-	kCC3SemanticBonesPerVertex,					/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	kCC3SemanticBoneMatrices,					/**< (mat4[]) Array of bone matrices in the current mesh skin section (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesInvTran,			/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatrixCount,				/**< (int) Length of the kCC3SemanticBoneMatrices and kCC3SemanticBoneMatricesInvTran arrays. */
-	
 	// PARTICLES ------------
 	kCC3SemanticPointSize,						/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
 	kCC3SemanticPointSizeAttenuation,			/**< (vec3) Point size distance attenuation coefficients. */
@@ -225,6 +232,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * if found, should set the semantic property on the specified variable, and return YES.
  * If an impementation cannot determine the appropriate semantic, it should avoid setting
  * the semantic property of the uniform and should return NO.
+ *
+ * Implementers should also set the scope property of the specified variable. Typically this
+ * is derived from the semantic.
  *
  * In addition, implementers may perform additional configuration behaviour for the specified
  * variable.

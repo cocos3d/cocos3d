@@ -36,6 +36,28 @@
 
 @class CC3GLProgram;
 
+
+/**
+ * Indicates the scope of a GLSL variable.
+ *
+ * GLSL variable are automatically populated prior to drawing. This enumeration indicates
+ * when and how often the variable needs to be populated.
+ *
+ * Most GLSL variables need to be populated anew as each node is drawn. But some variables, such
+ * as lighting or camera content only needs to be populated once each time the scene is drawn,
+ * and some other variables, such as bone matrices, need to be populated on each draw call.
+ */
+typedef enum {
+	kCC3GLSLVariableScopeUnknown = 0,	/**< The scope of the variable is unknown. */
+	kCC3GLSLVariableScopeScene,			/**< The scope of the variable is the entire scene. */
+	kCC3GLSLVariableScopeNode,			/**< The scope of the variable is the current node. */
+	kCC3GLSLVariableScopeDraw,			/**< The scope of the variable is the current draw call. */
+} CC3GLSLVariableScope;
+
+/** Returns a string representation of the specified GLSL variable scope. */
+NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
+
+
 #pragma mark -
 #pragma mark CC3GLSLVariable
 
@@ -52,7 +74,8 @@
 	GLenum _type;
 	GLenum _semantic : 16;
 	GLint _location : 16;
-	GLuint _index : 16;
+	GLuint _index : 12;
+	CC3GLSLVariableScope _scope : 4;
 	GLint _size : 8;
 	GLuint _semanticIndex : 8;
 }
@@ -129,6 +152,18 @@
  * The initial value of this property is zero.
  */
 @property(nonatomic, assign) GLuint semanticIndex;
+
+/**
+ * Indicates the scope of a GLSL variable.
+ *
+ * GLSL variable are automatically populated prior to drawing. This property indicates
+ * when and how often the variable needs to be populated.
+ *
+ * Most GLSL variables need to be populated anew as each node is drawn. But some variables, such
+ * as lighting or camera content only needs to be populated once each time the scene is drawn,
+ * and some other variables, such as bone matrices, need to be populated on each draw call.
+ */
+@property(nonatomic, assign) CC3GLSLVariableScope scope;
 
 
 #pragma mark Allocation and initialization

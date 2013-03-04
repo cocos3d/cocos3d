@@ -114,13 +114,13 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  */
 @interface CC3Camera : CC3Node {
 	CC3Matrix* _viewMatrix;
-	CC3Matrix* _viewMatrixInverted;
-	CC3Frustum* frustum;
-	GLfloat fieldOfView;
-	GLfloat nearClippingDistance;
-	GLfloat farClippingDistance;
-	BOOL isOpen : 1;
-	BOOL hasInfiniteDepthOfField : 1;
+//	CC3Matrix* _viewMatrixInverted;
+	CC3Frustum* _frustum;
+	GLfloat _fieldOfView;
+	GLfloat _nearClippingDistance;
+	GLfloat _farClippingDistance;
+	BOOL _isOpen : 1;
+	BOOL _hasInfiniteDepthOfField : 1;
 	BOOL _isProjectionDirty : 1;
 	BOOL _isViewMatrixInvertedDirty : 1;
 }
@@ -224,9 +224,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 /** @deprecated Renamed to viewMatrix for a more accurate semantic. */
 @property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
 
-/** Returns the matrix inversion of the viewMatrix. */
-@property(nonatomic, readonly) CC3Matrix* viewMatrixInverted;
-
 /**
  * The projection matrix that takes the camera's modelview and projects it to the viewport.
  *
@@ -237,45 +234,35 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, readonly) CC3Matrix* projectionMatrix;
 
 /**
- * The projection matrix modified to have an infinite depth of field,
- * by assuming a farClippingDistance set at infinity.
- */
-@property(nonatomic, readonly) CC3Matrix* infiniteProjectionMatrix;
-
-/**
- * Indicates whether, during rendering, this camera uses an infinite depth of field,
- * with a far clipping plane set at infinity.
+ * Indicates whether, during rendering, this camera uses an infinite depth of field, with a far
+ * clipping plane set at infinity. The setting of this property affects the value of the
+ * projectionMatrix property.
  *
- * This camera calculates two projection matrices. One has a finite depth of field,
- * and is held in the projectionMatrix property. The other has an infinite depth of
- * field and is held in the infiniteProjectionMatrix property.
+ * The frustum of this camera calculates two projection matrices. One has a finite depth of field,
+ * and is held in the frustum finiteProjectionMatrix property. The other has an infinite depth of
+ * field and is held in the frustum infiniteProjectionMatrix property.
  *
- * If the value of this property is set to YES, the projection matrix in the
- * infiniteProjectionMatrix property will be applied to the GL engine during
- * drawing, effectively creating an infinite depth of field.
+ * If the value of this property is set to NO, the projectionMatix property of this camera
+ * returns the value of the finiateProjectionMatrix of the frustum. If the value of this
+ * property is set to YES, the projectionMatix property of this camera returns the value of the
+ * infiniateProjectionMatrix of the frustum, effectively creating an infinite depth of field.
  *
- * If the value of this property is set to NO, the projection matrix in the
- * projectionMatrix property will be applied to the GL engine during drawing,
- * creating a finite depth of field.
- *
- * The value of this property does not affect the culling of nodes outside the camera's
- * frustum. During drawing, regardless of the value of this property, the value of the
- * farClippingDistance property is used to cull objects outside the camera's frustum.
- * This is done to avoid wasting time rendering objects that are too far away to be seen
- * (as defined by the value of the farClippingDistance property).
+ * The value of this property does not affect the culling of nodes outside the camera's frustum.
+ * During drawing, regardless of the value of this property, the value of the farClippingDistance
+ * property is used to cull objects outside the camera's frustum. This is done to avoid wasting
+ * time rendering objects that are too far away to be seen (as defined by the value of the
+ * farClippingDistance property).
  *
  * The initial value of this property is NO, indicating that the camera will have
  * a finite depth of field, based on the value of the farClippingDistance.
  *
- * For the most part, a finite depth of field provides slightly more accurate rendering,
- * and this property should generally be left set to NO. However, there are a few
- * circumstances, such as the rendering of infinite shadow volumes, where clipping
- * at the far clipping plane within the GL engine needs to be avoided. In such
- * circumstances, setting this property to YES can be useful.
+ * For the most part, a finite depth of field provides slightly more accurate rendering, and this
+ * property should generally be left set to NO. However, there are a few circumstances, such as
+ * the rendering of infinite shadow volumes, where clipping at the far clipping plane within the
+ * GL engine needs to be avoided. In such circumstances, setting this property to YES can be useful.
  *
- * Because of its use for rendering shadows, whenever a camera is set into the
- * activeCamera property of the CC3Scene, the value of this property is copied
- * from the old active camera.
+ * Because of its use for rendering shadows, whenever a camera is set into the activeCamera property
+ * of the CC3Scene, the value of this property is copied from the old active camera.
  */
 @property(nonatomic, assign) BOOL hasInfiniteDepthOfField;
 
@@ -329,9 +316,8 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * For cameras, a change in projection is considered a transform change, so the
  * transformListeners are sent a notification via the nodeWasTransformed: method.
  *
- * This method is invoked automatically from the CC3Scene after all updates have been
- * made to the models in the 3D scene. Usually, the application never needs to invoke
- * this method directly.
+ * This method is invoked automatically from the CC3Scene after all updates have been made to the
+ * models in the 3D scene. Usually, the application never needs to invoke this method directly.
  */
 -(void) buildProjection;
 
@@ -1144,19 +1130,18 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  */
 @interface CC3Frustum : CC3BoundingVolume {
 	CC3Matrix* _viewMatrix;
-	CC3Matrix* projectionMatrix;
-	CC3Matrix* infiniteProjectionMatrix;
-	CC3Matrix* _viewProjectionMatrix;
-	CC3Plane planes[6];
-	CC3Vector vertices[8];
-	GLfloat top;
-	GLfloat bottom;
-	GLfloat left;
-	GLfloat right;
-	GLfloat near;
-	GLfloat far;
-	BOOL isUsingParallelProjection : 1;
-	BOOL isInfiniteProjectionDirty : 1;
+	CC3Matrix* _finiteProjectionMatrix;
+	CC3Matrix* _infiniteProjectionMatrix;
+	CC3Plane _planes[6];
+	CC3Vector _vertices[8];
+	GLfloat _top;
+	GLfloat _bottom;
+	GLfloat _left;
+	GLfloat _right;
+	GLfloat _near;
+	GLfloat _far;
+	BOOL _isUsingParallelProjection : 1;
+	BOOL _isInfiniteProjectionDirty : 1;
 }
 
 /** The distance from view center to the top of this frustum at the near clipping plane. */
@@ -1238,25 +1223,11 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 /** @deprecated Renamed to viewMatrix for a more accurate semantic. */
 @property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
 
-/** The projection matrix that takes the camera's modelview and projects it to the viewport. */
-@property(nonatomic, readonly) CC3Matrix* projectionMatrix;
+/** A finite projection matrix with the far end at the distance given by the far property. */
+@property(nonatomic, readonly) CC3Matrix* finiteProjectionMatrix;
 
-/**
- * The projection matrix modified to have an infinite depth of view,
- * by assuming a farClippingDistance set at infinity.
- */
+/** An infinite projection matrix with the far end at infinity. */
 @property(nonatomic, readonly) CC3Matrix* infiniteProjectionMatrix;
-
-/**
- * The combined view-projection matrix that projects the scene to the viewport.
- *
- * This is simply a multiplicative product of the viewMatrix and projectionMatrix.
- * It is calculated as part of the recalculation of the frustum planes.
- */
-@property(nonatomic, readonly) CC3Matrix* viewProjectionMatrix;
-
-/** @deprecated Renamed to viewProjectionMatrix for a more accurate semantic. */
-@property(nonatomic, readonly) CC3Matrix* modelviewProjectionMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether this frustum uses parallel projection.
