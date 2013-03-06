@@ -34,6 +34,15 @@
 
 #if CC3_OGLES_2
 
+
+#pragma mark -
+#pragma mark CC3OpenGLES2StateTrackerTextureBinding
+
+/** Provides specialized behaviour for OpenGL ES 2 implementations. */
+@interface CC3OpenGLES2StateTrackerTextureBinding : CC3OpenGLESStateTrackerTextureBinding
+
+@end
+
 #pragma mark -
 #pragma mark CC3OpenGLES2TextureUnit
 

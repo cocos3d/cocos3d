@@ -29,10 +29,15 @@
  * When adapting this template to your application, remove all of the content
  * of this method, and add your own to construct your 3D model scene.
  *
- * NOTE: The POD file used for the 'hello, world' message model is fairly large,
- * because converting a font to a mesh results in a LOT of triangles. When adapting
- * this template project for your own application, REMOVE the POD file 'hello-world.pod'
- * from the Resources folder of your project!!
+ * NOTES:
+ *
+ * 1) To help you find your scene content once it is loaded, the onOpen method below contains
+ *    code to automatically move the camera so that it frames the scene. You can remove that
+ *    code once you know where you want to place your camera.
+ *
+ * 2) The POD file used for the 'hello, world' message model is fairly large, because converting a
+ *    font to a mesh results in a LOT of triangles. When adapting this template project for your own
+ *    application, REMOVE the POD file 'hello-world.pod' from the Resources folder of your project.
  */
 -(void) initializeScene {
 

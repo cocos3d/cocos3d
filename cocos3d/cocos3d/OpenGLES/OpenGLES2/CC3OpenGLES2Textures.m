@@ -30,8 +30,26 @@
  */
 
 #import "CC3OpenGLES2Textures.h"
+#import "CC3CC2Extensions.h"
 
 #if CC3_OGLES_2
+
+
+#pragma mark -
+#pragma mark CC3OpenGLES2StateTrackerTextureBinding
+
+@implementation CC3OpenGLES2StateTrackerTextureBinding
+
+// The parent cast as the appropriate type
+-(CC3OpenGLESTextureUnit*) textureUnit { return (CC3OpenGLESTextureUnit*)parent; }
+
+-(void) close {
+	[super close];
+	ccGLBindTexture2DN(self.textureUnit.textureUnitIndex, 0);
+}
+
+@end
+
 
 #pragma mark -
 #pragma mark CC3OpenGLES2TextureUnit
@@ -42,8 +60,8 @@
 	self.texture2D = nil;
 	self.textureCoordinates = nil;
 	
-	self.textureBinding = [CC3OpenGLESStateTrackerTextureBinding trackerWithParent: self
-																		  forState: GL_TEXTURE_BINDING_2D];
+	self.textureBinding = [CC3OpenGLES2StateTrackerTextureBinding trackerWithParent: self
+																		   forState: GL_TEXTURE_BINDING_2D];
 	self.minifyingFunction = [CC3OpenGLESStateTrackerTexParameterEnumeration trackerWithParent: self
 																					  forState: GL_TEXTURE_MIN_FILTER];
 	self.magnifyingFunction = [CC3OpenGLESStateTrackerTexParameterEnumeration trackerWithParent: self

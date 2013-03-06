@@ -35,6 +35,9 @@
  * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
  * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
  * landscape orientations. These settings can also be set on the Summary page of your project.
+ *
+ * Multisampling and stencil buffers cannot be used together. Setting the viewShouldUseStencilBuffer
+ * property to YES will force the viewPixelSamples property to be 1.
  */
 -(void) establishDirectorController {
 	
@@ -47,6 +50,8 @@
 	// Create the view controller for the 3D view.
 	_viewController = [CC3DeviceCameraOverlayUIViewController new];
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.viewShouldUseStencilBuffer = NO;		// Set to YES if using shadow volumes
+	_viewController.viewPixelSamples = 1;					// Set to 4 for antialiasing multisampling
 	
 	// Create the CCDirector, set the frame rate, and attach the view.
 	CCDirector *director = CCDirector.sharedDirector;
@@ -74,10 +79,15 @@
  * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
  * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
  * landscape orientations. These settings can also be set on the Summary page of your project.
+ *
+ * Multisampling and stencil buffers cannot be used together. Setting the viewShouldUseStencilBuffer
+ * property to YES will force the viewPixelSamples property to be 1.
  */
 -(void) establishDirectorController {
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
+	_viewController.viewShouldUseStencilBuffer = NO;		// Set to YES if using shadow volumes
+	_viewController.viewPixelSamples = 1;					// Set to 4 for antialiasing multisampling
 	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];

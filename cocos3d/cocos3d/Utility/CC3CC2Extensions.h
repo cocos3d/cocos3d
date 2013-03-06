@@ -54,6 +54,10 @@
 #	define ccGLBindVAO(vao) glBindVertexArray(vao)
 #endif
 
+#if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
+#	define ccGLBindTexture2DN(texUnit, texID)
+#endif
+
 /** Draw calls per frame are tracked as of cocos2d 2.x. */
 #if CC3_CC2_2
 #	define CC3GLDraws()		__ccNumberOfDraws

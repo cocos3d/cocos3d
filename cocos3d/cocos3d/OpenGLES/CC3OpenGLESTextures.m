@@ -174,6 +174,7 @@
 
 @implementation CC3OpenGLESTextureUnit
 
+@synthesize textureUnitIndex;
 @synthesize texture2D;
 @synthesize textureCoordinates;
 @synthesize textureBinding;

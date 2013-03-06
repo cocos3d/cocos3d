@@ -173,6 +173,9 @@
 	CC3OpenGLESMatrixStack* matrixStack;
 }
 
+/** The GL texture unit index. */
+@property(nonatomic, readonly) GLuint textureUnitIndex;
+
 /** The GL enumeration value for this texture unit in the form GL_TEXTUREi. */
 @property(nonatomic, readonly) GLenum glEnumValue;
 
