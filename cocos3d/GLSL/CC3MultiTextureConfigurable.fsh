@@ -179,7 +179,7 @@ uniform TextureUnits u_cc3TextureUnits;			/**< Parameters for each of the textur
 varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
 varying lowp vec4 v_color;					/**< Fragment base color. */
 varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in either tangent space or model space. */
+varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);

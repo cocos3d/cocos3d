@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */; };
 		A907DB13153A07E100A97C02 /* Stamp.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A907DB12153A07E100A97C02 /* Stamp.pvr */; };
+		A908FD7916E971E800E0EFE7 /* CC3BumpMapObjectSpaceWithAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A908FD7716E971E800E0EFE7 /* CC3BumpMapObjectSpaceWithAlphaTest.fsh */; };
+		A908FD7A16E971E800E0EFE7 /* CC3BumpMapObjectSpace.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A908FD7816E971E800E0EFE7 /* CC3BumpMapObjectSpace.vsh */; };
+		A908FD7C16E9964100E0EFE7 /* CC3BumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A908FD7B16E9964100E0EFE7 /* CC3BumpMapObjectSpace.fsh */; };
 		A9271F7416CD71EE0038753A /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9271F7316CD71EE0038753A /* CC3CAFResource.m */; };
 		A92C6A12144A272900B15941 /* BoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A92C6A11144A272900B15941 /* BoxTexture.png */; };
 		A92D8A0814F6B377009458BE /* ShadowButtonLatched48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */; };
@@ -190,6 +193,7 @@
 		A9935EB216BB39ED000C8168 /* CC3SingleTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9935E1616BB39EC000C8168 /* CC3SingleTexture.vsh */; };
 		A9935EB316BB39ED000C8168 /* CC3SingleTextureWithAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9935E1716BB39EC000C8168 /* CC3SingleTextureWithAlphaTest.fsh */; };
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
+		A9A5165416EA5CEA00F268F7 /* CC3BumpMapTangentSpace.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A5165316EA5CEA00F268F7 /* CC3BumpMapTangentSpace.vsh */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
 		A9BCABCE169CD89400384EB6 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A9BCABCD169CD89400384EB6 /* tex_base.bmp */; };
@@ -298,6 +302,7 @@
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
+		A9CDDF4916EAAA6600E1BF9D /* CC3BumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9CDDF4816EAAA6600E1BF9D /* CC3BumpMapTangentSpace.fsh */; };
 		A9D2385816D410B200AB3B92 /* PVRT_Removed_Files.txt in Resources */ = {isa = PBXBuildFile; fileRef = A9D2383516D410B200AB3B92 /* PVRT_Removed_Files.txt */; };
 		A9D2385916D410B200AB3B92 /* PVRTBoneBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9D2383716D410B200AB3B92 /* PVRTBoneBatch.cpp */; };
 		A9D2385A16D410B200AB3B92 /* PVRTError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9D2383916D410B200AB3B92 /* PVRTError.cpp */; };
@@ -333,6 +338,7 @@
 		A9F73FCE16CBF67E00D6F157 /* CC3CALNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F73FCB16CBF67E00D6F157 /* CC3CALNode.m */; };
 		A9F73FCF16CBF67E00D6F157 /* CC3CSFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F73FCD16CBF67E00D6F157 /* CC3CSFResource.m */; };
 		A9F73FD216CC18B300D6F157 /* CC3DataStreams.m in Sources */ = {isa = PBXBuildFile; fileRef = A9F73FD116CC18B300D6F157 /* CC3DataStreams.m */; };
+		A9F8144116EA614F00548FAE /* CC3BumpMapTangentSpaceWithAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9F8144016EA614F00548FAE /* CC3BumpMapTangentSpaceWithAlphaTest.fsh */; };
 		DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */; };
 		DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640040F83B3EA000B3E49 /* OpenAL.framework */; };
 		DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */; };
@@ -346,6 +352,9 @@
 		1D6058910D05DD3D006BFB54 /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A907DB12153A07E100A97C02 /* Stamp.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Stamp.pvr; sourceTree = "<group>"; };
+		A908FD7716E971E800E0EFE7 /* CC3BumpMapObjectSpaceWithAlphaTest.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapObjectSpaceWithAlphaTest.fsh; sourceTree = "<group>"; };
+		A908FD7816E971E800E0EFE7 /* CC3BumpMapObjectSpace.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapObjectSpace.vsh; sourceTree = "<group>"; };
+		A908FD7B16E9964100E0EFE7 /* CC3BumpMapObjectSpace.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapObjectSpace.fsh; sourceTree = "<group>"; };
 		A9271F7216CD71EE0038753A /* CC3CAFResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3CAFResource.h; sourceTree = "<group>"; };
 		A9271F7316CD71EE0038753A /* CC3CAFResource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3CAFResource.m; sourceTree = "<group>"; };
 		A92C6A11144A272900B15941 /* BoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BoxTexture.png; sourceTree = "<group>"; };
@@ -664,6 +673,7 @@
 		A9935E1616BB39EC000C8168 /* CC3SingleTexture.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3SingleTexture.vsh; sourceTree = "<group>"; };
 		A9935E1716BB39EC000C8168 /* CC3SingleTextureWithAlphaTest.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3SingleTextureWithAlphaTest.fsh; sourceTree = "<group>"; };
 		A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BallBoxTexture.png; sourceTree = "<group>"; };
+		A9A5165316EA5CEA00F268F7 /* CC3BumpMapTangentSpace.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapTangentSpace.vsh; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
 		A9BCABCD169CD89400384EB6 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = tex_base.bmp; sourceTree = "<group>"; };
@@ -898,6 +908,7 @@
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
+		A9CDDF4816EAAA6600E1BF9D /* CC3BumpMapTangentSpace.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapTangentSpace.fsh; sourceTree = "<group>"; };
 		A9D2383516D410B200AB3B92 /* PVRT_Removed_Files.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PVRT_Removed_Files.txt; sourceTree = "<group>"; };
 		A9D2383616D410B200AB3B92 /* PVRTArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTArray.h; sourceTree = "<group>"; };
 		A9D2383716D410B200AB3B92 /* PVRTBoneBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTBoneBatch.cpp; sourceTree = "<group>"; };
@@ -957,6 +968,7 @@
 		A9F73FCD16CBF67E00D6F157 /* CC3CSFResource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3CSFResource.m; sourceTree = "<group>"; };
 		A9F73FD016CC18B300D6F157 /* CC3DataStreams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DataStreams.h; sourceTree = "<group>"; };
 		A9F73FD116CC18B300D6F157 /* CC3DataStreams.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DataStreams.m; sourceTree = "<group>"; };
+		A9F8144016EA614F00548FAE /* CC3BumpMapTangentSpaceWithAlphaTest.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3BumpMapTangentSpaceWithAlphaTest.fsh; sourceTree = "<group>"; };
 		DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DC6640040F83B3EA000B3E49 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		DCCBF1B60F6022AE0040855A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -1530,6 +1542,12 @@
 		A9935E0A16BB39EC000C8168 /* GLSL */ = {
 			isa = PBXGroup;
 			children = (
+				A908FD7B16E9964100E0EFE7 /* CC3BumpMapObjectSpace.fsh */,
+				A908FD7716E971E800E0EFE7 /* CC3BumpMapObjectSpaceWithAlphaTest.fsh */,
+				A908FD7816E971E800E0EFE7 /* CC3BumpMapObjectSpace.vsh */,
+				A9CDDF4816EAAA6600E1BF9D /* CC3BumpMapTangentSpace.fsh */,
+				A9A5165316EA5CEA00F268F7 /* CC3BumpMapTangentSpace.vsh */,
+				A9F8144016EA614F00548FAE /* CC3BumpMapTangentSpaceWithAlphaTest.fsh */,
 				A9935E0B16BB39EC000C8168 /* CC3MultiTextureConfigurable.fsh */,
 				A9935E0C16BB39EC000C8168 /* CC3MultiTextureConfigurable.vsh */,
 				A9935E0D16BB39EC000C8168 /* CC3NoTexture.fsh */,
@@ -2013,6 +2031,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9CDDF4916EAAA6600E1BF9D /* CC3BumpMapTangentSpace.fsh in Resources */,
+				A9F8144116EA614F00548FAE /* CC3BumpMapTangentSpaceWithAlphaTest.fsh in Resources */,
+				A9A5165416EA5CEA00F268F7 /* CC3BumpMapTangentSpace.vsh in Resources */,
+				A908FD7C16E9964100E0EFE7 /* CC3BumpMapObjectSpace.fsh in Resources */,
+				A908FD7916E971E800E0EFE7 /* CC3BumpMapObjectSpaceWithAlphaTest.fsh in Resources */,
+				A908FD7A16E971E800E0EFE7 /* CC3BumpMapObjectSpace.vsh in Resources */,
 				A9935EA716BB39ED000C8168 /* CC3MultiTextureConfigurable.fsh in Resources */,
 				A9935EA816BB39ED000C8168 /* CC3MultiTextureConfigurable.vsh in Resources */,
 				A9935EA916BB39ED000C8168 /* CC3NoTexture.fsh in Resources */,

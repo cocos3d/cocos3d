@@ -109,13 +109,6 @@
  */
 @interface CC3GLProgramMatcherBase : NSObject <CC3GLProgramMatcher> {
 	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
-	CC3GLProgram* _configugurableProgram;
-	CC3GLProgram* _singleTextureProgram;
-	CC3GLProgram* _singleTextureAlphaTestProgram;
-	CC3GLProgram* _noTextureProgram;
-	CC3GLProgram* _noTextureAlphaTestProgram;
-	CC3GLProgram* _pointSpriteProgram;
-	CC3GLProgram* _pointSpriteAlphaTestProgram;
 	CC3GLProgram* _pureColorProgram;
 }
 

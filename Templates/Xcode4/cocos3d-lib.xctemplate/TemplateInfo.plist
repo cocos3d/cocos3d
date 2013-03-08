@@ -3403,6 +3403,26 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</string>
+		</dict>
 		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -3818,6 +3838,8 @@
 		<string>cocos3d/deprecated/CC3World.m</string>
 		<string>cocos3d/deprecated/CCNodeController.h</string>
 		<string>cocos3d/deprecated/ControllableCCLayer.h</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.vsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>

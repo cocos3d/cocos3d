@@ -1030,6 +1030,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
 	floatingHead.touchEnabled = YES;
+	floatingHead.diffuseColor = kCCC4FWhite;
+	floatingHead.ambientColor = kCCC4FGray;
 	
 	// Demonstrate the use of applicaiton-specific data attached to a node.
 	floatingHead.userData = kDontPokeMe;
@@ -1794,21 +1796,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds a floating mask that uses a PowerVR PFX file to define a GLSL shader program for the
- * material. The POD itself contains no material definition, so the PFX is loaded manually
- * and applied to the material.
- *
- * The PFX effect applies two textures to the mask. When running under OpenGL ES 2.0, specialized
- * shaders defined in the PFX effect render the first texture as a tangent-space bump-map.
+ * Adds a floating mask that uses two textures to create a tangent-space bump-mapped surface
+ * when running under OpenGL ES 2.0.
  *
  * When running under OpenGL ES 1.1, only the second (base) texture is visible, due to default
  * multi-texturing configuration.
  *
  * Two techniques for applying bump-mapping GLSL shaders are provided here, and each can be
- * selected by selectively commenting out code in this method. By default, this method loads
- * a PFX file that specified dedicated bump-mapping shaders. Alternately, you can add the two
- * textures manually, configure them for bump-mapping, and let the default shaders perform
- * the bump-mapping. See the comments in the method body for more on these options.
+ * selected by selectively commenting out code in this method. By default, this method applies
+ * the bump-map and visible textures to the mask and allows the default tanget-space bump-map
+ * shaders to be applied to the mask.
+ *
+ * Alternately, you can apply the textures and specific shaders to the mask by applying a
+ * PowerVR PFX file to determine apply the textures and shaders. The shaders assigned in the
+ * PFX file are different than the default bump-map shaders, and the mask will look different.
  */
 -(void) addEtchedMask {
 	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
@@ -1816,17 +1817,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 						  expectsVerticallyFlippedTextures: NO];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
 	
-	// Apply a PFX effect to the mask node. This will attach the GL program and texture
-	// defined in the PFX effect, which will run shaders dedicated to bump-mapping.
-	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
-
-	// Instead of applying a dedicated bump-mapping shaders via a PFX file, you can also just load
-	// the textures into the material (bump-mapped texture first), configure it for bump-mapping,
-	// and allow the default shaders to perform the bump-mapping. To illustrate, comment out the
-	// three lines above, and uncomment these:
-//	mask.texture = [CC3Texture textureFromFile: @"NormalMap.png"];
-//	mask.texture.textureUnit = [CC3BumpMapTextureUnit textureUnit];
-//	[mask addTexture: [CC3Texture textureFromFile: @"BaseTex.png"]];
+	// Load the textures into the material (bump-mapped texture first), and allow the default shaders
+	// to perform the bump-mapping. The default shaders include lighting and material coloring,
+	// and so are more realistic than the shaders defined in the PFX file.
+	[mask addTexture: [CC3Texture textureFromFile: @"NormalMap.png"]];
+	[mask addTexture: [CC3Texture textureFromFile: @"BaseTex.png"]];
+	
+	// Alternately, you can apply a PFX effect to the mask node. This will attach the GL program and
+	// texture defined in the PFX effect file, which will run shaders dedicated to tangent-space
+	// bump-mapping. The shaders in the PFX file are simpler than the default shaders and do not
+	// interact with material and lighting as effectively, and are therefore not as accurate.
+	// To load the PFX file, uncomment the following line.
+//	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
 
 	mask.uniformScale = 4.0;
 	mask.location = cc3v(-750.0, 50.0, -500.0);
@@ -2420,7 +2422,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	} else if (aNode == woodenSign) {
 		[self switchWoodenSign];
 	} else if (aNode == floatingHead) {
-		[self toggleFloatingHeadDefinition];
+		[self toggleFloatingHeadConfiguration];
 	} else if (aNode == dieCube || aNode == texCubeSpinner) {
 		// These are spun by touch movement. Do nothing...and don't highlight
 	} else if (aNode == [self getNodeNamed: kRunnerName]) {
@@ -2656,20 +2658,27 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[bbSign resetBillboardBoundingRect];
 }
 
--(void) toggleFloatingHeadDefinition; {
-	if (floatingHead.texture == headBumpTex) {
-		[floatingHead.material removeAllTextures];
-		[floatingHead.material addTexture: headTex];
-	} else {
-		[floatingHead.material removeAllTextures];
-		[floatingHead.material addTexture: headBumpTex];
-		[floatingHead.material addTexture: headTex];
-	}
+/** 
+ * Toggle the floating head between a detailed bump-mapped texture and a mesh-only texture,
+ * illustrating the use of bump-mapping to increase the visbible surface detail on a very
+ * low-poly mesh.
+ */
+-(void) toggleFloatingHeadConfiguration; {
+
+	// Clear all textures then, if moving to bump-mapping, add the bump-map texture first,
+	// then add the visible texture. Otherwise, skip the bump-map texture and just add the
+	// visible texture.
+	BOOL shouldBumpMap = (floatingHead.texture != headBumpTex);
+	[floatingHead removeAllTextures];
+	if (shouldBumpMap) [floatingHead addTexture: headBumpTex];
+	[floatingHead addTexture: headTex];
+
+	// If running shaders under OpenGL ES 2.0, clear the shader program so that a different
+	// shader program will automatically be selected for the new texture configuration.
+	floatingHead.shaderProgram = nil;
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
-	if (floatingHead.userData) {
-		LogInfo(@"%@ says '%@'", floatingHead, floatingHead.userData);
-	}
+	if (floatingHead.userData) LogInfo(@"%@ says '%@'", floatingHead, floatingHead.userData);
 }
 
 /** 

@@ -42,13 +42,6 @@
 
 -(void) dealloc {
 	[_semanticDelegate release];
-	[_configugurableProgram release];
-	[_singleTextureProgram release];
-	[_singleTextureAlphaTestProgram release];
-	[_noTextureProgram release];
-	[_noTextureAlphaTestProgram release];
-	[_pointSpriteProgram release];
-	[_pointSpriteAlphaTestProgram release];
 	[_pureColorProgram release];
 	[super dealloc];
 }
@@ -64,19 +57,27 @@
 	GLuint texCnt = mat.textureCount;
 	BOOL shouldAlphaTest = !mat.shouldDrawLowAlpha;
 	
+	// Material without texture
+	if (texCnt == 0) return [self noTextureProgram: shouldAlphaTest];
+	
 	// Point sprites
 	if (texCnt > 0 && aMeshNode.drawingMode == GL_POINTS)
-		return shouldAlphaTest ? self.pointSpriteAlphaTestProgram :  self.pointSpriteProgram;
+		return [self pointSpriteProgram: shouldAlphaTest];
 	
-	// Material without texture
-	if (texCnt == 0)
-		return shouldAlphaTest ? self.noTextureAlphaTestProgram :  self.noTextureProgram;
-
+	// Bump-mapping using a tangent-space normal map texture.
+	if (texCnt > 0 && aMeshNode.mesh.hasVertexTangents)
+		return [self bumpMapTangentSpaceProgram: shouldAlphaTest];
+	
+	// Bump-mapping using an object-space normal map texture.
+	if (texCnt > 0 && mat.hasBumpMap)
+		return [self bumpMapObjectSpaceProgram: shouldAlphaTest];
+	
 	// Single texture with no configurable texture unit
 	if (texCnt == 1 && !mat.texture.textureUnit)
-		return shouldAlphaTest ? self.singleTextureAlphaTestProgram :  self.singleTextureProgram;
+		return [self singleTextureProgram: shouldAlphaTest];
 
-	return self.configurableProgram;
+	// Default to the most flexible, but least efficient shaders
+	return [self configurableProgram: shouldAlphaTest];
 }
 
 -(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -87,60 +88,52 @@
 
 #pragma mark Program options
 
--(CC3GLProgram*) configurableProgram {
-	if ( !_configugurableProgram )
-		_configugurableProgram = [self programFromVertexShaderFile: @"CC3MultiTextureConfigurable.vsh"
-											 andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
-	return _configugurableProgram;
-}
-
--(CC3GLProgram*) singleTextureProgram {
-	if ( !_singleTextureProgram )
-		_singleTextureProgram = [self programFromVertexShaderFile: @"CC3SingleTexture.vsh"
-											andFragmentShaderFile: @"CC3SingleTexture.fsh"];
-	return _singleTextureProgram;
-}
-
--(CC3GLProgram*) singleTextureAlphaTestProgram {
-	if ( !_singleTextureAlphaTestProgram )
-		_singleTextureAlphaTestProgram = [self programFromVertexShaderFile: @"CC3SingleTexture.vsh"
-													 andFragmentShaderFile: @"CC3SingleTextureWithAlphaTest.fsh"];
-	return _singleTextureAlphaTestProgram;
-}
-
--(CC3GLProgram*) noTextureProgram {
-	if ( !_noTextureProgram )
-		_noTextureProgram = [self programFromVertexShaderFile: @"CC3NoTexture.vsh"
-										andFragmentShaderFile: @"CC3NoTexture.fsh"];
-	return _noTextureProgram;
-}
-
--(CC3GLProgram*) noTextureAlphaTestProgram {
-	if ( !_noTextureAlphaTestProgram )
-		_noTextureAlphaTestProgram = [self programFromVertexShaderFile: @"CC3NoTexture.vsh"
-												 andFragmentShaderFile: @"CC3NoTextureWithAlphaTest.fsh"];
-	return _noTextureAlphaTestProgram;
-}
-
--(CC3GLProgram*) pointSpriteProgram {
-	if ( !_pointSpriteProgram )
-		_pointSpriteProgram = [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
-										  andFragmentShaderFile: @"CC3PointSprites.fsh"];
-	return _pointSpriteProgram;
-}
-
--(CC3GLProgram*) pointSpriteAlphaTestProgram {
-	if ( !_pointSpriteAlphaTestProgram )
-		_pointSpriteAlphaTestProgram = [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
-												   andFragmentShaderFile: @"CC3PointSpritesWithAlphaTest.fsh"];
-	return _pointSpriteAlphaTestProgram;
-}
-
+/** This property is accessed quite frequently for activities like node picking, so cache the program here. */
 -(CC3GLProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
 		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
 										andFragmentShaderFile: @"CC3PureColor.fsh"];
 	return _pureColorProgram;
+}
+
+-(CC3GLProgram*) configurableProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3MultiTextureConfigurable.vsh"
+					   andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
+}
+
+-(CC3GLProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3SingleTexture.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3SingleTextureWithAlphaTest.fsh"
+											   : @"CC3SingleTexture.fsh")];
+}
+
+-(CC3GLProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3NoTexture.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3NoTextureWithAlphaTest.fsh"
+											   : @"CC3NoTexture.fsh")];
+}
+
+-(CC3GLProgram*) pointSpriteProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3PointSpritesWithAlphaTest.fsh"
+											   : @"CC3PointSprites.fsh")];
+}
+
+-(CC3GLProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3BumpMapObjectSpace.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3BumpMapObjectSpaceWithAlphaTest.fsh"
+											   : @"CC3BumpMapObjectSpace.fsh")];
+}
+
+-(CC3GLProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3BumpMapTangentSpace.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3BumpMapTangentSpaceWithAlphaTest.fsh"
+											   : @"CC3BumpMapTangentSpace.fsh")];
 }
 
 -(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
@@ -168,7 +161,6 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_configugurableProgram = nil;
 		_pureColorProgram = nil;
 		[self initSemanticDelegate];
 	}

@@ -113,6 +113,7 @@ cocos3d 2.0.0 - 2013/03/31
 	- [API change] CC3Camera projectionMatrix property now returns either finite or infinite projection matrix depending on value of hasInfin.
 	- [API change] Removed CC3Camera infiniteProjectionMatrix property.
 	- [API change] Removed CC3Frustum viewProjectionMatrix property. 
+- Changed values of kCCC4FLightGray and kCCC4FDarkGray to evenly divide luminosity over the range (kCCC4FBlack, kCCC4FDarkGray, kCCC4FGray, kCCC4FLightGray, kCCC4FWhite) in four even steps.
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.
     - CC3Node shouldIgnoreRayIntersection property now returns YES if the node has no bounding volume.
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
