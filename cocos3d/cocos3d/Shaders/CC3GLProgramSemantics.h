@@ -465,51 +465,26 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * An application wishing to define a completely different semantic mapping may instantiate
  * an instance of this class, will avoid invoking this method, and will typically add its
  * own population methods in a class extension category.
- *
- * Memory consumption is minorly affected (~10-20 KB) by the number of mappings defined for
- * the lights and texture units. Prior to invoking this method, you can set the
- * maxDefaultMappingLightVariables and maxDefaultMappingTextureUnitVariables class-side properties
- * to establish a balance between conserving memory and increasing shader flexibility.
  */
 -(void) populateWithDefaultVariableNameMappings;
 
 /**
- * Determines the number of mappings available for the lights. This determines the maximum
- * number of lights that can be automatically mapped in the shaders.
+ * @deprecated
+ * Populates this instance with the default cocos3d mappings initially included with early
+ * versions of cocos3d 2.0.
  *
- * The initial value of this property is 4.
+ * These legacy mappings use less efficient uniform mappings, including use of the
+ * array-of-structures paradigm. For GLSL under OpenGL ES, each element of each structure in
+ * an array of structures is assigned to its own uniform variable for the purpose of managing
+ * and populating the uniforms. This can significantly increase the number of actual uniforms,
+ * and results in a corresponding increase in the overhead of managing and populating the
+ * larger number of uniforms.
+ *
+ * It recommended that the array-of-structure approach offered by this method be avoided.
+ * It is provided here to provide backwards compatibility for shaders already developed
+ * using these legacy mappings.
  */
-+(NSUInteger) maxDefaultMappingLightVariables;
-
-/**
- * Determines the number of mappings available for the lights. This determines the maximum
- * number of lights that can be automatically mapped in the shaders.
- *
- * The initial value of this property is 4.
- */
-+(void) setMaxDefaultMappingLightVariables: (NSUInteger) maxLights;
-
-/**
- * Determines the number of mappings available for the texture units. This determines the maximum
- * number of configurable texture units that can be automatically mapped in the shaders.
- *
- * The initial value of this property is 4.
- *
- * If none of your shaders make use of configurable texture unit variables, set this property
- * to zero to save some memory.
- */
-+(NSUInteger) maxDefaultMappingTextureUnitVariables;
-
-/**
- * Determines the number of mappings available for the texture units. This determines the maximum
- * number of configurable texture units that can be automatically mapped in the shaders.
- *
- * The initial value of this property is 4.
- *
- * If none of your shaders make use of configurable texture unit variables, set this property
- * to zero to save some memory.
- */
-+(void) setMaxDefaultMappingTextureUnitVariables: (NSUInteger) maxTexUnits;
+-(void) populateWithLegacyVariableNameMappings DEPRECATED_ATTRIBUTE;
 
 @end
 

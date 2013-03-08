@@ -676,7 +676,7 @@
 		A97899C916CEE40D00A3F2FF /* CC3PointSprites.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.vsh; sourceTree = "<group>"; };
 		A97899CA16CEE40D00A3F2FF /* CC3PointSpritesWithAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSpritesWithAlphaTest.fsh; sourceTree = "<group>"; };
 		A97899CB16CEE40D00A3F2FF /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
-		A97899CC16CEE40D00A3F2FF /* CC3PureColor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.vsh; sourceTree = "<group>"; };
+		A97899CC16CEE40D00A3F2FF /* CC3PureColor.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = CC3PureColor.vsh; sourceTree = "<group>"; };
 		A97899CD16CEE40D00A3F2FF /* CC3SingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.fsh; sourceTree = "<group>"; };
 		A97899CE16CEE40D00A3F2FF /* CC3SingleTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.vsh; sourceTree = "<group>"; };
 		A97899CF16CEE40D00A3F2FF /* CC3SingleTextureWithAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureWithAlphaTest.fsh; sourceTree = "<group>"; };

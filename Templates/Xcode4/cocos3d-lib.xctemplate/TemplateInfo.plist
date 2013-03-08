@@ -2052,32 +2052,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.h</key>
 		<dict>
 			<key>Group</key>
@@ -3734,8 +3708,6 @@
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.h</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Intercept.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.h</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.m</string>
 		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.h</string>

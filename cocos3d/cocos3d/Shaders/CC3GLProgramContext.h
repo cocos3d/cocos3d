@@ -178,6 +178,10 @@
  * standard semantics, or can be used to override the value that would be extracted from the
  * environment for the semantic of the uniform. To create an override uniform, access it via
  * one of the uniformOverride... methods.
+ *
+ * If the specified uniform is from a program that is not the same as the program controlled
+ * by this context, the override is not populated, and this method returns NO. This can occur
+ * when drawing with a different program, such as during node picking.
  */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor;
 

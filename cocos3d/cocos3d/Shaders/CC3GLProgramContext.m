@@ -110,6 +110,11 @@
 
 // Match based on location
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	// If the program is not the same, don't look up the override.
+	// This can occur when drawing with a different program, such as during node picking.
+	if (uniform.program != _program) return NO;
+
+	// Find the matching 
 	for (CC3GLSLUniform* var in _uniforms) {
 		if (var.location == uniform.location) {
 			[uniform setValueFromUniform: var];

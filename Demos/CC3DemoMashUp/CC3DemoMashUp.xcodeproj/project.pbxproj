@@ -125,7 +125,6 @@
 		A9935E7016BB39EC000C8168 /* CC3OpenGLES1Engine.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D8F16BB39EC000C8168 /* CC3OpenGLES1Engine.m */; };
 		A9935E7116BB39EC000C8168 /* CC3OpenGLES1Fog.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9116BB39EC000C8168 /* CC3OpenGLES1Fog.m */; };
 		A9935E7216BB39EC000C8168 /* CC3OpenGLES1Hints.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9316BB39EC000C8168 /* CC3OpenGLES1Hints.m */; };
-		A9935E7316BB39EC000C8168 /* CC3OpenGLES1Intercept.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9516BB39EC000C8168 /* CC3OpenGLES1Intercept.m */; };
 		A9935E7416BB39EC000C8168 /* CC3OpenGLES1Lighting.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9716BB39EC000C8168 /* CC3OpenGLES1Lighting.m */; };
 		A9935E7516BB39EC000C8168 /* CC3OpenGLES1Materials.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9916BB39EC000C8168 /* CC3OpenGLES1Materials.m */; };
 		A9935E7616BB39EC000C8168 /* CC3OpenGLES1Matrices.m in Sources */ = {isa = PBXBuildFile; fileRef = A9935D9B16BB39EC000C8168 /* CC3OpenGLES1Matrices.m */; };
@@ -543,8 +542,6 @@
 		A9935D9116BB39EC000C8168 /* CC3OpenGLES1Fog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES1Fog.m; sourceTree = "<group>"; };
 		A9935D9216BB39EC000C8168 /* CC3OpenGLES1Hints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES1Hints.h; sourceTree = "<group>"; };
 		A9935D9316BB39EC000C8168 /* CC3OpenGLES1Hints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES1Hints.m; sourceTree = "<group>"; };
-		A9935D9416BB39EC000C8168 /* CC3OpenGLES1Intercept.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES1Intercept.h; sourceTree = "<group>"; };
-		A9935D9516BB39EC000C8168 /* CC3OpenGLES1Intercept.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES1Intercept.m; sourceTree = "<group>"; };
 		A9935D9616BB39EC000C8168 /* CC3OpenGLES1Lighting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES1Lighting.h; sourceTree = "<group>"; };
 		A9935D9716BB39EC000C8168 /* CC3OpenGLES1Lighting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3OpenGLES1Lighting.m; sourceTree = "<group>"; };
 		A9935D9816BB39EC000C8168 /* CC3OpenGLES1Materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3OpenGLES1Materials.h; sourceTree = "<group>"; };
@@ -1360,8 +1357,6 @@
 				A9935D9116BB39EC000C8168 /* CC3OpenGLES1Fog.m */,
 				A9935D9216BB39EC000C8168 /* CC3OpenGLES1Hints.h */,
 				A9935D9316BB39EC000C8168 /* CC3OpenGLES1Hints.m */,
-				A9935D9416BB39EC000C8168 /* CC3OpenGLES1Intercept.h */,
-				A9935D9516BB39EC000C8168 /* CC3OpenGLES1Intercept.m */,
 				A9935D9616BB39EC000C8168 /* CC3OpenGLES1Lighting.h */,
 				A9935D9716BB39EC000C8168 /* CC3OpenGLES1Lighting.m */,
 				A9935D9816BB39EC000C8168 /* CC3OpenGLES1Materials.h */,
@@ -2184,7 +2179,6 @@
 				A9935E7016BB39EC000C8168 /* CC3OpenGLES1Engine.m in Sources */,
 				A9935E7116BB39EC000C8168 /* CC3OpenGLES1Fog.m in Sources */,
 				A9935E7216BB39EC000C8168 /* CC3OpenGLES1Hints.m in Sources */,
-				A9935E7316BB39EC000C8168 /* CC3OpenGLES1Intercept.m in Sources */,
 				A9935E7416BB39EC000C8168 /* CC3OpenGLES1Lighting.m in Sources */,
 				A9935E7516BB39EC000C8168 /* CC3OpenGLES1Materials.m in Sources */,
 				A9935E7616BB39EC000C8168 /* CC3OpenGLES1Matrices.m in Sources */,

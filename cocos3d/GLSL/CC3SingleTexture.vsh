@@ -40,11 +40,8 @@
  * CC3GLProgramSemanticsByVarName instance.
  */
 
-// Increase these if more lights are desired. In order to improve performance, it has been
-// kept low to limit the number of uniforms. This definition should not be set larger than
-// the CC3GLProgramSemanticsByVarName class-side property maxDefaultMappingLightVariables
-// (defaults to 4). See the description of those properties for more info.
-#define MAX_LIGHTS				3
+// Increase these if more lights are desired.
+#define MAX_LIGHTS				4
 
 // Maximum bones per skin section (batch).
 #define MAX_BONES_PER_VERTEX	11
@@ -55,12 +52,63 @@ precision mediump float;
 //-------------- STRUCTURES ----------------------
 
 /**
+ * The various transform matrices.
+ *
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
+ */
+struct Matrices {
+//	highp mat4	modelLocal;				/**< Current model-to-parent matrix. */
+//	mat4		modelLocalInv;			/**< Inverse of current model-to-parent matrix. */
+//	mat3		modelLocalInvTran;		/**< Inverse-transpose of current model-to-parent rotation matrix. */
+	
+//	highp mat4	model;					/**< Current model-to-world matrix. */
+//	mat4		modelInv;				/**< Inverse of current model-to-world matrix. */
+//	mat3		modelInvTran;			/**< Inverse-transpose of current model-to-world rotation matrix. */
+	
+//	highp mat4	view;					/**< Camera view matrix. */
+//	mat4		viewInv;				/**< Inverse of camera view matrix. */
+//	mat3		viewInvTran;			/**< Inverse-transpose of camera view rotation matrix. */
+	
+	highp mat4	modelView;				/**< Current modelview matrix. */
+//	mat4		modelViewInv;			/**< Inverse of current modelview matrix. */
+	mat3		modelViewInvTran;		/**< Inverse-transpose of current modelview rotation matrix. */
+	
+	highp mat4	proj;					/**< Projection matrix. */
+//	mat4		projInv;				/**< Inverse of projection matrix. */
+//	mat3		projInvTran;			/**< Inverse-transpose of projection rotation matrix. */
+	
+//	highp mat4	viewProj;				/**< Camera view and projection matrix. */
+//	mat4		viewProjInv;			/**< Inverse of camera view and projection matrix. */
+//	mat3		viewProjInvTran;		/**< Inverse-transpose of camera view and projection rotation matrix. */
+	
+//	highp mat4	modelViewProj;			/**< Current modelview-projection matrix. */
+//	mat4		modelViewProjInv;		/**< Inverse of current modelview-projection matrix. */
+//	mat3		modelViewProjInvTran;	/**< Inverse-transpose of current modelview-projection rotation matrix. */
+};
+
+/**
+ * The parameters to use when deforming vertices using bones.
+ *
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
+ */
+struct Bones {
+	lowp int	bonesPerVertex;									/**< Number of bones influencing each vertex. */
+	highp mat4	matricesEyeSpace[MAX_BONES_PER_VERTEX];			/**< Array of bone matrices in the current mesh skin section in eye space. */
+	mat3		matricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
+//	highp mat4	matricesGlobal[MAX_BONES_PER_VERTEX];			/**< Array of bone matrices in the current mesh skin section in global coordinates. */
+//	mat3		matricesInvTranGlobal[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates. */
+};
+
+/**
  * The parameters that define the material covering this vertex.
  *
- * When using this structure as the basis of a simpler implementation, you can remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
- * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
- * leave them in for clarity, and let the compiler optimize them away.
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
  */
 struct Material {
 	vec4	ambientColor;						/**< Ambient color of the material. */
@@ -72,88 +120,78 @@ struct Material {
 };
 
 /**
- * The parameters that define a single light.
+ * The parameters that define the lighting.
  *
- * When using this structure as the basis of a simpler implementation, you can remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
- * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
- * leave them in for clarity, and let the compiler optimize them away.
+ * Many of the elements in this structure is an array containing the value of that element for each
+ * light. This structure-of-arrays organization is much more efficient than the alternate of defining
+ * the structure to hold the values for a single light and then assembling an array-of-structures.
+ * The reason is because under GLSL, the compiler creates a distinct uniform for each element in
+ * each structure. The result is that an array-of-structures requires a much larger number of
+ * compiled uniforms than the corresponding structure-of-arrays.
+ *
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
  */
-struct Light {
-	vec4	positionEyeSpace;				/**< Position or normalized direction in eye space. */
-	vec4	positionModel;					/**< Position or normalized direction in the local coords of the model. */
-	vec4	ambientColor;					/**< Ambient color of light. */
-	vec4	diffuseColor;					/**< Diffuse color of light. */
-	vec4	specularColor;					/**< Specular color of light. */
-	vec3	attenuation;					/**< Coefficients of the attenuation equation. */
-	vec3	spotDirectionEyeSpace;			/**< Direction if spotlight in eye space. */
-	float	spotExponent;					/**< Directional attenuation factor if spotlight. */
-	float	spotCutoffAngleCosine;			/**< Cosine of spotlight cutoff angle. */
-	bool	isEnabled;						/**< Whether light is enabled. */
+struct Lighting {
+	bool		isUsingLighting;					/**< Indicates whether any lighting is enabled */
+	lowp vec4	sceneAmbientLightColor;				/**< Ambient light color of the scene. */
+	bool		isLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
+	vec4		positionEyeSpace[MAX_LIGHTS];		/**< Position or normalized direction in eye space of each light. */
+//	vec4		positionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
+	lowp vec4	ambientColor[MAX_LIGHTS];			/**< Ambient color of each light. */
+	lowp vec4	diffuseColor[MAX_LIGHTS];			/**< Diffuse color of each light. */
+	lowp vec4	specularColor[MAX_LIGHTS];			/**< Specular color of each light. */
+	vec3		attenuation[MAX_LIGHTS];			/**< Coefficients of the attenuation equation of each light. */
+	vec3		spotDirectionEyeSpace[MAX_LIGHTS];	/**< Direction of spotlight in eye space of each light. */
+	float		spotExponent[MAX_LIGHTS];			/**< Directional attenuation factor, if spotlight, of each light. */
+	float		spotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 };
 
 /**
- * The parameters to use when displaying vertices as points.
+ * Vertex state. This contains info about the vertex, other than vertex attributes.
  *
- * When using this structure as the basis of a simpler implementation, you can remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
- * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
- * leave them in for clarity, and let the compiler optimize them away.
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
  */
-struct Point {
-	float	size;							/**< Default size of points, if not specified per-vertex. */
-	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
-	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
-	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
-	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
-	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
-	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
-	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
+struct VertexState {
+	bool hasVertexNormal;		/**< Whether the vertex normal is available. */
+//	bool hasVertexTangent;		/**< Whether the vertex tangent is available. */
+//	bool hasVertexBitangent;	/**< Whether the vertex bitangent is available. */
+	bool hasVertexColor;		/**< Whether the vertex color is available. */
+//	bool hasVertexWeight;		/**< Whether the vertex weight is available. */
+//	bool hasVertexMatrixIndex;	/**< Whether the vertex matrix index is available. */
+//	bool hasVertexTexCoord;		/**< Whether the vertex texture coordinate is available. */
+//	bool hasVertexPointSize;	/**< Whether the vertex point size is available. */
+//	bool isDrawingPoints;		/**< Whether the vertices are being drawn as points. */
+	bool shouldNormalizeNormal;	/**< Whether the vertex normal should be normalized. */
+	bool shouldRescaleNormal;	/**< Whether the vertex normal should be rescaled. */
 };
-
 
 //-------------- UNIFORMS ----------------------
 
-// Environment matrices
-uniform mat4 u_cc3MtxModelView;				/**< Current modelview matrix. */
-uniform mat3 u_cc3MtxModelViewInvTran;		/**< Inverse-transpose of current modelview rotation matrix. */
-uniform highp mat4 u_cc3MtxProj;			/**< Projection matrix. */
-
-// Material properties
-uniform vec4 u_cc3Color;					/**< Color when lighting & materials are not in use. */
-uniform Material u_cc3Material;				/**< The material being applied to the mesh. */
-
-// Lighting properties
-uniform bool u_cc3IsUsingLighting;			/**< Indicates whether any lighting is in use. */
-uniform vec4 u_cc3SceneLightColorAmbient;	/**< Ambient light color of the scene. */
-uniform Light u_cc3Lights[MAX_LIGHTS];		/**< Array of lights. */
-
-// Vertex skinning properties
-uniform lowp int u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
-uniform highp mat4 u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices. */
-uniform mat3 u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices. */
-
-// Uniforms describing vertex attributes.
-uniform bool u_cc3HasVertexNormal;			/**< Whether vertex normal attribute is available. */
-uniform bool u_cc3ShouldNormalizeNormal;	/**< Whether vertex normals should be normalized. */
-uniform bool u_cc3ShouldRescaleNormal;		/**< Whether vertex normals should be rescaled. */
-uniform bool u_cc3HasVertexTangent;			/**< Whether vertex tangent attribute is available. */
-uniform bool u_cc3HasVertexColor;			/**< Whether vertex color attribute is available. */
+uniform Matrices u_cc3Matrices;			/**< The transform matrices. */
+uniform vec4 u_cc3Color;				/**< Color when lighting & materials are not in use. */
+uniform Material u_cc3Material;			/**< The material being applied to the mesh. */
+uniform Lighting u_cc3Lighting;			/**< Lighting configuration. */
+uniform Bones u_cc3Bones;				/**< Bone transforms. */
+uniform VertexState u_cc3Vertex;		/**< The vertex state (excluding vertex attributes). */
 
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;			/**< Vertex position. */
-attribute vec3 a_cc3Normal;					/**< Vertex normal. */
-attribute vec3 a_cc3Tangent;				/**< Vertex tangent. */
-attribute vec4 a_cc3Color;					/**< Vertex color. */
-attribute vec4 a_cc3BoneWeights;			/**< Vertex skinning bone weights (up to 4). */
-attribute vec4 a_cc3BoneIndices;			/**< Vertex skinning bone matrix indices (up to 4). */
-attribute vec2 a_cc3TexCoord;				/**< Vertex texture coordinate. */
+attribute highp vec4 a_cc3Position;		/**< Vertex position. */
+attribute vec3 a_cc3Normal;				/**< Vertex normal. */
+attribute vec3 a_cc3Tangent;			/**< Vertex tangent. */
+attribute vec4 a_cc3Color;				/**< Vertex color. */
+attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
+attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
+attribute vec2 a_cc3TexCoord;			/**< Vertex texture coordinate. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
-varying vec2 v_texCoord;					/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
+varying vec2 v_texCoord;				/**< Fragment texture coordinates. */
+varying lowp vec4 v_color;				/**< Fragment base color. */
+varying highp float v_distEye;			/**< Fragment distance in eye coordinates. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0);
@@ -175,7 +213,7 @@ vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or 
  * variables. This function takes into consideration vertex skinning, if it is specified.
  */
 void vertexToEyeSpace() {
-	if (u_cc3BonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
+	if (u_cc3Bones.bonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
 		// Copies of the indices and weights attibutes so they can be "rotated"
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
@@ -183,10 +221,10 @@ void vertexToEyeSpace() {
 		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
 		vtxNormEye = vec3(0.0);
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
-			if (i < u_cc3BonesPerVertex) {
+			if (i < u_cc3Bones.bonesPerVertex) {
 				// Add position and normal contribution from this bone
-				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
-				vtxNormEye += u_cc3BoneMatricesInvTranEyeSpace[boneIndices.x] * a_cc3Normal * boneWeights.x;
+				vtxPosEye += u_cc3Bones.matricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
+				vtxNormEye += u_cc3Bones.matricesInvTranEyeSpace[boneIndices.x] * a_cc3Normal * boneWeights.x;
 				
 				// "Rotate" the vector components to the next vertex bone index
 				boneIndices = boneIndices.yzwx;
@@ -194,8 +232,8 @@ void vertexToEyeSpace() {
 			}
 		}
 	} else {		// No vertex skinning
-		vtxPosEye = u_cc3MtxModelView * a_cc3Position;
-		vtxNormEye = u_cc3MtxModelViewInvTran * a_cc3Normal;
+		vtxPosEye = u_cc3Matrices.modelView * a_cc3Position;
+		vtxNormEye = u_cc3Matrices.modelViewInvTran * a_cc3Normal;
 	}
 }
 
@@ -210,26 +248,26 @@ vec4 illuminateWith(int ltIdx) {
 	highp vec3 ltDir;
 	highp float intensity = 1.0;
 	
-	if (u_cc3Lights[ltIdx].positionEyeSpace.w != 0.0) {
+	if (u_cc3Lighting.positionEyeSpace[ltIdx].w != 0.0) {
 		// Positional light. Find the direction from vertex to light.
-		ltDir = (u_cc3Lights[ltIdx].positionEyeSpace - vtxPosEye).xyz;
+		ltDir = (u_cc3Lighting.positionEyeSpace[ltIdx] - vtxPosEye).xyz;
 		
 		// Calculate intensity due to distance attenuation (must be performed in high precision)
-		if (u_cc3Lights[ltIdx].attenuation != kAttenuationNone) {
+		if (u_cc3Lighting.attenuation[ltIdx] != kAttenuationNone) {
 			highp float ltDist = length(ltDir);
 			highp vec3 distAtten = vec3(1.0, ltDist, ltDist * ltDist);
-			highp float distIntensity = 1.0 / dot(distAtten, u_cc3Lights[ltIdx].attenuation);	// needs highp
+			highp float distIntensity = 1.0 / dot(distAtten, u_cc3Lighting.attenuation[ltIdx]);	// needs highp
 			intensity *= min(abs(distIntensity), 1.0);
 		}
 		ltDir = normalize(ltDir);
 		
 		// Determine intensity due to spotlight component
-		highp float spotCutoffCos = u_cc3Lights[ltIdx].spotCutoffAngleCosine;
+		highp float spotCutoffCos = u_cc3Lighting.spotCutoffAngleCosine[ltIdx];
 		if (spotCutoffCos >= 0.0) {
-			highp vec3  spotDirEye = u_cc3Lights[ltIdx].spotDirectionEyeSpace;
+			highp vec3  spotDirEye = u_cc3Lighting.spotDirectionEyeSpace[ltIdx];
 			highp float cosEyeDir = -dot(ltDir, spotDirEye);
 			if (cosEyeDir >= spotCutoffCos){
-				highp float spotExp = u_cc3Lights[ltIdx].spotExponent;
+				highp float spotExp = u_cc3Lighting.spotExponent[ltIdx];
 				intensity *= pow(cosEyeDir, spotExp);
 			} else {
 				intensity = 0.0;
@@ -237,24 +275,24 @@ vec4 illuminateWith(int ltIdx) {
 		}
     } else {
 		// Directional light. Vector is expected to be normalized!
-		ltDir = u_cc3Lights[ltIdx].positionEyeSpace.xyz;
+		ltDir = u_cc3Lighting.positionEyeSpace[ltIdx].xyz;
     }
 	
 	// If no light intensity, short-circuit and return no color
 	if (intensity <= 0.0) return kVec4Zero;
 	
 	// Employ lighting equation to calculate vertex color
-	vec4 vtxColor = (u_cc3Lights[ltIdx].ambientColor * matColorAmbient);
-	vtxColor += (u_cc3Lights[ltIdx].diffuseColor * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
+	vec4 vtxColor = (u_cc3Lighting.ambientColor[ltIdx] * matColorAmbient);
+	vtxColor += (u_cc3Lighting.diffuseColor[ltIdx] * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
 	
 	// Project normal onto half-plane vector to determine specular component
 	float specProj = dot(vtxNormEye, normalize(ltDir + kHalfPlaneOffset));
 	if (specProj > 0.0) {
 		vtxColor += (pow(specProj, u_cc3Material.shininess) *
 					 u_cc3Material.specularColor *
-					 u_cc3Lights[ltIdx].specularColor);
+					 u_cc3Lighting.specularColor[ltIdx]);
 	}
-
+	
 	// Return the attenuated vertex color
 	return vtxColor * intensity;
 }
@@ -264,10 +302,10 @@ vec4 illuminateWith(int ltIdx) {
  * and then illuminating the material with each enabled light.
  */
 vec4 illuminate() {
-	vec4 vtxColor = u_cc3Material.emissionColor + (matColorAmbient * u_cc3SceneLightColorAmbient);
+	vec4 vtxColor = u_cc3Material.emissionColor + (matColorAmbient * u_cc3Lighting.sceneAmbientLightColor);
 
 	for (int ltIdx = 0; ltIdx < MAX_LIGHTS; ltIdx++)
-		if (u_cc3Lights[ltIdx].isEnabled) vtxColor += illuminateWith(ltIdx);
+		if (u_cc3Lighting.isLightEnabled[ltIdx]) vtxColor += illuminateWith(ltIdx);
 	
 	vtxColor.a = matColorDiffuse.a;
 	
@@ -278,8 +316,8 @@ vec4 illuminate() {
 void main() {
 
 	// If vertices have individual colors, use them for ambient and diffuse material colors.
-	matColorAmbient = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.ambientColor;
-	matColorDiffuse = u_cc3HasVertexColor ? a_cc3Color : u_cc3Material.diffuseColor;
+	matColorAmbient = u_cc3Vertex.hasVertexColor ? a_cc3Color : u_cc3Material.ambientColor;
+	matColorDiffuse = u_cc3Vertex.hasVertexColor ? a_cc3Color : u_cc3Material.diffuseColor;
 
 	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively,
 	// and use these to set the varying distance to the vertex in eye space.
@@ -287,18 +325,18 @@ void main() {
 	v_distEye = length(vtxPosEye.xyz);
 	
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
-	if (u_cc3IsUsingLighting && u_cc3HasVertexNormal) {
+	if (u_cc3Lighting.isUsingLighting && u_cc3Vertex.hasVertexNormal) {
 		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
-		if (u_cc3ShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
-		if (u_cc3ShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
+		if (u_cc3Vertex.shouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+		if (u_cc3Vertex.shouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
 
 		v_color = illuminate();
 	} else {
-		v_color = u_cc3HasVertexColor ? a_cc3Color : u_cc3Color;
+		v_color = u_cc3Vertex.hasVertexColor ? a_cc3Color : u_cc3Color;
 	}
 	
 	v_texCoord = a_cc3TexCoord;		// Fragment texture coordinates.
 	
-	gl_Position = u_cc3MtxProj * vtxPosEye;
+	gl_Position = u_cc3Matrices.proj * vtxPosEye;
 }
 

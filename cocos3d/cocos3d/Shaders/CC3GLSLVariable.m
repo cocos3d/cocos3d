@@ -104,6 +104,20 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) populateFromProgram {}
 
+/**
+ * Returns a valid variable name constructed from the specified null-terminated C string.
+ * If the name includes a subscript suffix ([0]) at the end, it is removed and the resulting
+ * string is returned without the suffix.
+ */
+-(NSString*) variableNameFrom: (const char *) cName {
+	NSString* name = [NSString stringWithUTF8String: cName];
+	NSString* subStr = @"[0]";
+	NSInteger subStartIdx = name.length - subStr.length;
+	if ( subStartIdx > 0 && [[name substringFromIndex: subStartIdx] isEqualToString: subStr] )
+		return [name substringToIndex: subStartIdx];
+	return name;
+}
+
 -(NSString*) description { return [NSString stringWithFormat: @"%@ named %@", self.class, _name]; }
 
 -(NSString*) fullDescription {
@@ -465,7 +479,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	LogGLErrorTrace(@"while retrieving location of attribute named %s at index %i in %@", cName, _index, self);
 	
 	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	_name = [[self variableNameFrom: cName] retain];	// retained
 }
 
 #endif
@@ -512,7 +526,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	LogGLErrorTrace(@"while retrieving location of active uniform named %s at index %i in %@", cName, _index, self);
 	
 	[_name release];
-	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+	_name = [[self variableNameFrom: cName] retain];	// retained
 	
 	LogTrace(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
 }

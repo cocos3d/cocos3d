@@ -218,7 +218,8 @@
 	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
-		if ( [_semanticDelegate configureVariable: var] ) [self addUniform: var];
+		[_semanticDelegate configureVariable: var];
+		[self addUniform: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 	}
 	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
@@ -254,7 +255,8 @@
 	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
-		if ( [_semanticDelegate configureVariable: var] ) [_attributes addObject: var];
+		[_semanticDelegate configureVariable: var];
+		[_attributes addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
 	}
 	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
@@ -345,7 +347,9 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
 			[var updateGLValue];
 		} else {
-			CC3Assert(NO, @"%@ could not resolve the value of uniform %@ with semantic %@. Consider creating a uniform override on the program context in your material to set the value of the uniform directly.",
+			CC3Assert(NO, @"%@ could not resolve the value of uniform %@ with semantic %@."
+					  " If this is a valid uniform, you should create a uniform override in the"
+					  " program context in your material in order to set the value of the uniform directly.",
 					  self, var.name, NSStringFromCC3Semantic(var.semantic));
 		}
 }

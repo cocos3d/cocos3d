@@ -49,10 +49,9 @@ precision mediump float;
 /**
  * The parameters that define a material.
  *
- * When using this structure as the basis of a simpler implementation, you can remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
- * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
- * leave them in for clarity, and let the compiler optimize them away.
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
  */
 struct Material {
 	vec4	ambientColor;					/**< Ambient color of the material. */
@@ -66,10 +65,9 @@ struct Material {
 /**
  * The parameters that define the scene fog.
  *
- * When using this structure as the basis of a simpler implementation, you can remove any elements
- * that your shader does not use, to reduce the number of uniforms that need to be retrieved and
- * pased to your shader (uniform structure elements are passed individually in GLSL), or you can
- * leave them in for clarity, and let the compiler optimize them away.
+ * When using this structure as the basis of a simpler implementation, you can comment-out
+ * or remove any elements that are not used by either your vertex or fragment shaders, to
+ * reduce the number of values that need to be retrieved and passed to your shader.
  */
 struct Fog {
 	bool		isEnabled;					/**< Whether scene fogging is enabled. */

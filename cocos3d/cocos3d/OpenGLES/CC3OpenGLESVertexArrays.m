@@ -303,7 +303,7 @@
 }
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
-	CC3Assert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
+	CC3Assert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE), @"OpenGL ES permits drawing a maximum of 65536 indexed vertices, and supports only GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
 	LogGLErrorTrace(@"%@ drawing %u vertex indices as %@", self, len, NSStringFromGLEnum(drawMode));
 	CC_INCREMENT_GL_DRAWS(1);
