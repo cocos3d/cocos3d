@@ -79,6 +79,19 @@
 @synthesize shouldSmoothPoints, shouldNormalizeParticleSizesToDevice;
 @synthesize particleSizeAttenuation=_particleSizeAttenuation;
 
+-(GLfloat) normalizedParticleSize {
+	return [self normalizeParticleSizeToDevice: self.particleSize];
+}
+
+-(GLfloat) normalizedParticleSizeMinimum {
+	return [self normalizeParticleSizeToDevice: self.particleSizeMinimum];
+}
+
+-(GLfloat) normalizedParticleSizeMaximum {
+	return [self normalizeParticleSizeToDevice: self.particleSizeMaximum];
+}
+
+
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3PointParticleProtocol); }
 
 // Deprecated
@@ -367,15 +380,13 @@
 
 	// Enable texture coordinate replacing in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
-	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < texCount; texUnit++)
 		[[glesEngine.textures textureUnitAt: texUnit].pointSpriteCoordReplace enable];
-	}
 
 	// Set default point size
-	glesState.pointSize.value = [self normalizeParticleSizeToDevice: particleSize];
-	
-	glesState.pointSizeMinimum.value = [self normalizeParticleSizeToDevice: particleSizeMinimum];
-	glesState.pointSizeMaximum.value = [self normalizeParticleSizeToDevice: particleSizeMaximum];
+	glesState.pointSize.value = self.normalizedParticleSize;
+	glesState.pointSizeMinimum.value = self.normalizedParticleSizeMinimum;
+	glesState.pointSizeMaximum.value = self.normalizedParticleSizeMaximum;
 	
 	// Cast attenuation coefficients to a vector when setting in state tracker
 	glesState.pointSizeAttenuation.value = *(CC3Vector*)&_particleSizeAttenuation;

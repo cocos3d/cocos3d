@@ -179,7 +179,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticPointSizeAttenuation: return @"kCC3SemanticPointSizeAttenuation";
 		case kCC3SemanticPointSizeMinimum: return @"kCC3SemanticPointSizeMinimum";
 		case kCC3SemanticPointSizeMaximum: return @"kCC3SemanticPointSizeMaximum";
-		case kCC3SemanticPointSizeFadeThreshold: return @"kCC3SemanticPointSizeFadeThreshold";
 		case kCC3SemanticPointSpritesIsEnabled: return @"kCC3SemanticPointSpritesIsEnabled";
 			
 		// TIME ------------------
@@ -317,19 +316,18 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
  * the iteration loops in this method are designed to deal with two situations:
  *   - If the uniform is declared as an array of single types (eg- an array of floats, bools, or
  *     vec3's), the uniform semantic index will be zero and the uniform size will be larger than one.
- *   - If the uniform is declared as an element of a structure in an array (eg- a vec3 in a structure
- *     that is itself contained in an array, the uniform size will be one, but the uniform semantic
- *     index can be larger than zero.
+ *   - If the uniform is declared as a scalar (eg- distinct uniforms for each light, etc), the
+ *     uniform size will be one, but the uniform semantic index can be larger than zero.
  */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ retrieving semantic value for %@", self, uniform.fullDescription);
-	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
-	CC3OpenGLESTextureUnit* glesTexUnit;
 	GLenum semantic = uniform.semantic;
 	GLuint semanticIndex = uniform.semanticIndex;
 	GLint uniformSize = uniform.size;
 	
+	CC3Material* mat;
 	CC3SkinSection* skin;
+	CC3PointParticleEmitter* emitter;
 	CC3Matrix4x4 m4x4;
 	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
 	CC3Matrix3x3 m3x3;
@@ -337,6 +335,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	ccTime appTime;
 	GLuint boneCnt;
 	BOOL isInverted = NO;
+	BOOL isPtEmitter = NO;
 	
 	switch (semantic) {
 		
@@ -346,10 +345,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: visitor.currentMesh.hasVertexNormals];
 			return YES;
 		case kCC3SemanticShouldNormalizeVertexNormal:
-			[uniform setBoolean: glesEngine.capabilities.normalize.value];
+			[uniform setBoolean: (visitor.currentMeshNode.effectiveNormalScalingMethod == kCC3NormalScalingNormalize)];
 			return YES;
 		case kCC3SemanticShouldRescaleVertexNormal:
-			[uniform setBoolean: glesEngine.capabilities.rescaleNormal.value];
+			[uniform setBoolean: (visitor.currentMeshNode.effectiveNormalScalingMethod == kCC3NormalScalingRescale)];
 			return YES;
 		case kCC3SemanticHasVertexTangent:
 			[uniform setBoolean: visitor.currentMesh.hasVertexTangents];
@@ -614,30 +613,29 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 #pragma mark Setting material semantics
 		// MATERIALS --------------
 		case kCC3SemanticColor:
-			[uniform setColor4F: glesEngine.state.color.value];
+			[uniform setColor4F: visitor.currentColor];
 			return YES;
 		case kCC3SemanticMaterialColorAmbient:
-			[uniform setColor4F: glesEngine.materials.ambientColor.value];
+			[uniform setColor4F: visitor.currentMaterial.effectiveAmbientColor];
 			return YES;
 		case kCC3SemanticMaterialColorDiffuse:
-			[uniform setColor4F: glesEngine.materials.diffuseColor.value];
+			[uniform setColor4F: visitor.currentMaterial.effectiveDiffuseColor];
 			return YES;
 		case kCC3SemanticMaterialColorSpecular:
-			[uniform setColor4F: glesEngine.materials.specularColor.value];
+			[uniform setColor4F: visitor.currentMaterial.effectiveSpecularColor];
 			return YES;
 		case kCC3SemanticMaterialColorEmission:
-			[uniform setColor4F: glesEngine.materials.emissionColor.value];
+			[uniform setColor4F: visitor.currentMaterial.effectiveEmissionColor];
 			return YES;
 		case kCC3SemanticMaterialOpacity:
-			[uniform setFloat: glesEngine.materials.diffuseColor.value.a];
+			[uniform setFloat: visitor.currentMaterial.effectiveDiffuseColor.a];
 			return YES;
 		case kCC3SemanticMaterialShininess:
-			[uniform setFloat: glesEngine.materials.shininess.value];
+			[uniform setFloat: visitor.currentMaterial.shininess];
 			return YES;
 		case kCC3SemanticMinimumDrawnAlpha:
-			[uniform setFloat: (glesEngine.capabilities.alphaTest.value
-									? glesEngine.materials.alphaFunc.reference.value
-									: 0.0f)];
+			mat = visitor.currentMaterial;
+			[uniform setFloat: (mat.shouldDrawLowAlpha ? 0.0f : mat.alphaTestReference)];
 			return YES;
 			
 #pragma mark Setting lighting semantics
@@ -717,8 +715,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightAttenuation:
 			for (GLuint i = 0; i < uniformSize; i++) {
 				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
-				CC3AttenuationCoefficients ac = light.attenuation;
-				if (CC3AttenuationCoefficientsIsIllegalZero(ac)) ac = kCC3AttenuationNone;	// Ensure legal value
+				CC3AttenuationCoefficients ac = CC3AttenuationCoefficientsLegalize(light.attenuation);
 				[uniform setVector: *(CC3Vector*)&ac at: i];
 			}
 			return YES;
@@ -768,22 +765,22 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 			
 		case kCC3SemanticFogIsEnabled:
-			[uniform setBoolean: glesEngine.capabilities.fog.value];
+			[uniform setBoolean: visitor.scene.fog.visible];
 			return YES;
 		case kCC3SemanticFogColor:
-			[uniform setColor4F: glesEngine.fog.color.value];
+			[uniform setColor4F: visitor.scene.fog.floatColor];
 			return YES;
 		case kCC3SemanticFogAttenuationMode:
-			[uniform setInteger: glesEngine.fog.mode.value];
+			[uniform setInteger: visitor.scene.fog.attenuationMode];
 			return YES;
 		case kCC3SemanticFogDensity:
-			[uniform setFloat: glesEngine.fog.density.value];
+			[uniform setFloat: visitor.scene.fog.density];
 			return YES;
 		case kCC3SemanticFogStartDistance:
-			[uniform setFloat: glesEngine.fog.start.value];
+			[uniform setFloat: visitor.scene.fog.startDistance];
 			return YES;
 		case kCC3SemanticFogEndDistance:
-			[uniform setFloat: glesEngine.fog.end.value];
+			[uniform setFloat: visitor.scene.fog.endDistance];
 			return YES;
 			
 #pragma mark Setting texture semantics
@@ -800,101 +797,115 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// In most shaders, these will be left unused in favor of customized the texture combining in code.
 		case kCC3SemanticTexUnitMode:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.textureEnvironmentMode.value at: i];
+				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				[uniform setInteger: (tu ? tu.textureEnvironmentMode :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitConstantColor:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setColor4F: glesTexUnit.color.value at: i];
+				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				[uniform setColor4F: (tu ? tu.constantColor :  kCCC4FBlackTransparent) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineRGBFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.combineRGBFunction.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.combineRGBFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbSource0.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbSource1.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbSource2.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbOperand0.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbOperand0 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbOperand1.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbOperand1 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.rgbOperand2.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.rgbOperand2 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineAlphaFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.combineAlphaFunction.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.combineAlphaFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaSource0.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaSource1.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaSource2.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaOperand0.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaOperand0 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaOperand1.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaOperand1 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesTexUnit = [glesEngine.textures textureUnitAt: (semanticIndex + i)];
-				[uniform setInteger: glesTexUnit.alphaOperand2.value at: i];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
+				[uniform setInteger: (isCTU ? ctu.alphaOperand2 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
-			
+
 #pragma mark Setting model semantics
 		// MODEL ----------------
 		case kCC3SemanticCenterOfGeometry:
@@ -919,26 +930,31 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 #pragma mark Setting particle semantics
 		// PARTICLES ------------
 		case kCC3SemanticPointSize:
-			[uniform setFloat: glesEngine.state.pointSize.value];
+			emitter = (CC3PointParticleEmitter*)visitor.currentNode;
+			isPtEmitter = [emitter isKindOfClass: [CC3PointParticleEmitter class]];
+			[uniform setFloat: (isPtEmitter ? emitter.normalizedParticleSize : 0.0f)];
 			return YES;
 		case kCC3SemanticPointSizeAttenuation: {
-			CC3Vector acVec = glesEngine.state.pointSizeAttenuation.value;
-			CC3AttenuationCoefficients ac = *(CC3AttenuationCoefficients*)&acVec;
-			if (CC3AttenuationCoefficientsIsIllegalZero(ac)) ac = kCC3AttenuationNone;	// Ensure legal value
+			emitter = (CC3PointParticleEmitter*)visitor.currentNode;
+			isPtEmitter = [emitter isKindOfClass: [CC3PointParticleEmitter class]];
+			CC3AttenuationCoefficients ac = (isPtEmitter)
+												? CC3AttenuationCoefficientsLegalize(emitter.particleSizeAttenuation)
+												: kCC3AttenuationNone;
 			[uniform setVector: *(CC3Vector*)&ac];
 			return YES;
 		}
 		case kCC3SemanticPointSizeMinimum:
-			[uniform setFloat: glesEngine.state.pointSizeMinimum.value];
+			emitter = (CC3PointParticleEmitter*)visitor.currentNode;
+			isPtEmitter = [emitter isKindOfClass: [CC3PointParticleEmitter class]];
+			[uniform setFloat: (isPtEmitter ? emitter.normalizedParticleSizeMinimum : 0.0f)];
 			return YES;
 		case kCC3SemanticPointSizeMaximum:
-			[uniform setFloat: glesEngine.state.pointSizeMaximum.value];
-			return YES;
-		case kCC3SemanticPointSizeFadeThreshold:
-			[uniform setFloat: glesEngine.state.pointSizeFadeThreshold.value];
+			emitter = (CC3PointParticleEmitter*)visitor.currentNode;
+			isPtEmitter = [emitter isKindOfClass: [CC3PointParticleEmitter class]];
+			[uniform setFloat: (isPtEmitter ? emitter.normalizedParticleSizeMaximum : 0.0f)];
 			return YES;
 		case kCC3SemanticPointSpritesIsEnabled:
-			[uniform setBoolean: glesEngine.capabilities.pointSprites.value];
+			[uniform setBoolean: visitor.currentMeshNode.isDrawingPointSprites];
 			return YES;
 			
 #pragma mark Setting time semantics
@@ -1199,7 +1215,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];			/**< (vec3) Point size distance attenuation coefficients. */
 	[self mapVarName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];					/**< (float) Minimum size points will be allowed to shrink to. */
 	[self mapVarName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];					/**< (float) Maximum size points will be allowed to grow to. */
-	[self mapVarName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];		/**< (float) Points will be allowed to grow to. */
 	[self mapVarName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];	/**< (bool) Whether points should be interpeted as textured sprites. */
 	
 	// TIME ------------------
@@ -1385,7 +1400,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Points.sizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];			/**< (vec3) Point size distance attenuation coefficients. */
 	[self mapVarName: @"u_cc3Points.minimumSize" toSemantic: kCC3SemanticPointSizeMinimum];					/**< (float) Minimum size points will be allowed to shrink to. */
 	[self mapVarName: @"u_cc3Points.maximumSize" toSemantic: kCC3SemanticPointSizeMaximum];					/**< (float) Maximum size points will be allowed to grow to. */
-	[self mapVarName: @"u_cc3Points.sizeFadeThreshold" toSemantic: kCC3SemanticPointSizeFadeThreshold];		/**< (float) Points will be allowed to grow to. */
 	[self mapVarName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];	/**< (bool) Whether points should be interpeted as textured sprites. */
 	
 	// TIME ------------------

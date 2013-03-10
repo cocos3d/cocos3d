@@ -229,6 +229,46 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 @property(nonatomic, assign) ccColor4F emissionColor;
 
 /**
+ * The ambient colour currently used by this material during rendering.
+ *
+ * The value of this property is influenced by the value of the shouldApplyOpacityToColor property.
+ * If the shouldApplyOpacityToColor property is set to YES, this property scales each of the red,
+ * green & blue componenents of the ambientColor property by its alpha component and returns the
+ * result. Otherwise, this property returns the unaltered value of the ambientColor property.
+ */
+@property(nonatomic, readonly) ccColor4F effectiveAmbientColor;
+
+/**
+ * The diffuse colour currently used by this material during rendering.
+ *
+ * The value of this property is influenced by the value of the shouldApplyOpacityToColor property.
+ * If the shouldApplyOpacityToColor property is set to YES, this property scales each of the red,
+ * green & blue componenents of the diffuseColor property by its alpha component and returns the
+ * result. Otherwise, this property returns the unaltered value of the diffuseColor property.
+ */
+@property(nonatomic, readonly) ccColor4F effectiveDiffuseColor;
+
+/**
+ * The specular colour currently used by this material during rendering.
+ *
+ * The value of this property is influenced by the value of the shouldApplyOpacityToColor property.
+ * If the shouldApplyOpacityToColor property is set to YES, this property scales each of the red,
+ * green & blue componenents of the specularColor property by its alpha component and returns the
+ * result. Otherwise, this property returns the unaltered value of the specularColor property.
+ */
+@property(nonatomic, readonly) ccColor4F effectiveSpecularColor;
+
+/**
+ * The emission colour currently used by this material during rendering.
+ *
+ * The value of this property is influenced by the value of the shouldApplyOpacityToColor property.
+ * If the shouldApplyOpacityToColor property is set to YES, this property scales each of the red,
+ * green & blue componenents of the emissionColor property by its alpha component and returns the
+ * result. Otherwise, this property returns the unaltered value of the emissionColor property.
+ */
+@property(nonatomic, readonly) ccColor4F effectiveEmissionColor;
+
+/**
  * The shininess of this material.
  * 
  * This value is clamped to between zero and kCC3MaximumMaterialShininess.

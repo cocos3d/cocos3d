@@ -533,6 +533,8 @@
 	[mesh setTextureRectangle: aRect forTextureUnit: texUnit];
 }
 
+-(BOOL) isDrawingPointSprites { return (self.drawingMode == GL_POINTS) && (self.textureCount > 0); }
+
 -(BOOL) hasPremultipliedAlpha { return material ? material.hasPremultipliedAlpha : NO; }
 
 -(BOOL) shouldApplyOpacityToColor { return material ? material.shouldApplyOpacityToColor : NO; }
@@ -773,53 +775,36 @@
  */
 -(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESCapabilities* glesServCaps = [CC3OpenGLESEngine engine].capabilities;
+	switch (self.effectiveNormalScalingMethod) {
+		case kCC3NormalScalingNormalize:		// Enable normalizing & disable re-scaling
+			[glesServCaps.rescaleNormal disable];
+			[glesServCaps.normalize enable];
+			break;
+		case kCC3NormalScalingRescale:			// Enable rescaling & disable normalizing
+			[glesServCaps.rescaleNormal enable];
+			[glesServCaps.normalize disable];
+			break;
+		case kCC3NormalScalingNone:				// Disable both rescaling & normalizing
+		default:
+			[glesServCaps.rescaleNormal disable];
+			[glesServCaps.normalize disable];
+			break;
+	}
+}
 
-	if (mesh && mesh.hasVertexNormals) {
-		switch (normalScalingMethod) {
+-(CC3NormalScaling) effectiveNormalScalingMethod {
+	if ( !(mesh && mesh.hasVertexNormals) ) return kCC3NormalScalingNone;
 
-			// Enable normalizing & disable re-scaling
-			case kCC3NormalScalingNormalize:
-				[glesServCaps.rescaleNormal disable];
-				[glesServCaps.normalize enable];
-				break;
-
-			// Enable rescaling & disable normalizing
-			case kCC3NormalScalingRescale:
-				[glesServCaps.rescaleNormal enable];
-				[glesServCaps.normalize disable];
-				break;
-
-			// Choose one of the others, based on scaling characteristics
-			case kCC3NormalScalingAutomatic:	
-
-				// If no scaling, disable both normalizing and re-scaling
-				if (self.isTransformRigid) {
-					[glesServCaps.rescaleNormal disable];
-					[glesServCaps.normalize disable];
-
-				// If uniform scaling, enable re-scaling & disable normalizing
-				} else if (self.isUniformlyScaledGlobally) {
-					[glesServCaps.rescaleNormal enable];
-					[glesServCaps.normalize disable];
-
-				// If non-uniform scaling, enable normalizing & disable re-scaling
-				} else {
-					[glesServCaps.rescaleNormal disable];
-					[glesServCaps.normalize enable];
-				}
-				break;
-			
-			// Disable both rescaling & normalizing
-			case kCC3NormalScalingNone:
-			default:
-				[glesServCaps.rescaleNormal disable];
-				[glesServCaps.normalize disable];
-				break;
-		}
-	} else {
-		// No normals...so disable both rescaling & normalizing
-		[glesServCaps.rescaleNormal disable];
-		[glesServCaps.normalize disable];
+	switch (normalScalingMethod) {
+		case kCC3NormalScalingNormalize: return kCC3NormalScalingNormalize;
+		case kCC3NormalScalingRescale: return kCC3NormalScalingRescale;
+		case kCC3NormalScalingAutomatic:
+			if (self.isTransformRigid) return kCC3NormalScalingNone;
+			else if (self.isUniformlyScaledGlobally) return kCC3NormalScalingRescale;
+			else return kCC3NormalScalingNormalize;
+		case kCC3NormalScalingNone:
+		default:
+			return kCC3NormalScalingNone;
 	}
 }
 
@@ -890,8 +875,10 @@
 		[material drawWithVisitor: visitor];
 	} else {
 		[CC3Material unbind];
-		if (visitor.shouldDecorateNode) CC3OpenGLESEngine.engine.state.color.value = pureColor;
+		if (visitor.shouldDecorateNode) visitor.currentColor = pureColor;
 	}
+	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
+	CC3OpenGLESEngine.engine.state.color.value = visitor.currentColor;
 }
 
 #if CC3_OGLES_2

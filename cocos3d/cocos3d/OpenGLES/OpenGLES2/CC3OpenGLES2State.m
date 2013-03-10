@@ -89,11 +89,11 @@
 													andGLSetFunction: glLineWidth
 											andOriginalValueHandling: kCC3GLESStateOriginalValueIgnore];
 	
-	self.pointSize = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];;
-	self.pointSizeAttenuation = [CC3OpenGLESStateTrackerVector trackerWithParent: self];;
-	self.pointSizeFadeThreshold = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];;
-	self.pointSizeMaximum = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];;
-	self.pointSizeMinimum = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];;
+	self.pointSize = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+	self.pointSizeAttenuation = [CC3OpenGLESStateTrackerVector trackerWithParent: self];
+	self.pointSizeFadeThreshold = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+	self.pointSizeMaximum = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
+	self.pointSizeMinimum = [CC3OpenGLESStateTrackerFloat trackerWithParent: self];
 	
 	self.polygonOffset = [CC3OpenGLESStateTrackerPolygonOffset trackerWithParent: self];
 

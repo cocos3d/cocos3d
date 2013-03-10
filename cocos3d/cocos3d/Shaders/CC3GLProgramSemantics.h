@@ -192,7 +192,6 @@ typedef enum {
 	kCC3SemanticPointSizeAttenuation,			/**< (vec3) Point size distance attenuation coefficients. */
 	kCC3SemanticPointSizeMinimum,				/**< (float) Minimum size points will be allowed to shrink to. */
 	kCC3SemanticPointSizeMaximum,				/**< (float) Maximum size points will be allowed to grow to. */
-	kCC3SemanticPointSizeFadeThreshold,			/**< (float) Points will be allowed to grow to. */
 	kCC3SemanticPointSpritesIsEnabled,			/**< (bool) Whether points should be interpeted as textured sprites. */
 
 	// TIME ------------------

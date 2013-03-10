@@ -102,9 +102,9 @@
 	GLenum depthFunction;
 	GLfloat decalOffsetFactor;
 	GLfloat decalOffsetUnits;
-	GLubyte normalScalingMethod;
 	GLfloat lineWidth;
 	GLenum lineSmoothingHint;
+	CC3NormalScaling normalScalingMethod : 4;
 	BOOL shouldSmoothLines : 1;
 	BOOL shouldDisableDepthMask : 1;
 	BOOL shouldDisableDepthTest : 1;
@@ -160,6 +160,20 @@
  * buffer objects. Vertex buffer objects are engaged via the createGLBuffers method.
  */
 @property(nonatomic, readonly) BOOL isUsingGLBuffers;
+
+/**
+ * The normal scaling method that is currently in use for this mesh node.
+ *
+ * This property differs from the normalScalingMethod. The normalScalingMethod is a settable
+ * property that is used to indicate the desired scaling method to be used for normals, and
+ * can include a setting of kCC3NormalScalingAutomatic, to allow the mesh node to resolve
+ * which method to use. This property returns that resolved value.
+ *
+ * If the mesh has vertex normals, this property will match the normalScalingMethod for values
+ * kCC3NormalScalingNone, kCC3NormalScalingRescale & kCC3NormalScalingNormalize. If the mesh
+ * does not contain vertex normals, this property will always return kCC3NormalScalingNone.
+ */
+@property(nonatomic, readonly) CC3NormalScaling effectiveNormalScalingMethod;
 
 /**
  * Returns an allocated, initialized, autorelease instance of the bounding volume to
@@ -717,7 +731,15 @@
 -(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated textures
+ * Returns whether this mesh is being drawn as point sprites.
+ *
+ * This property returns YES if this mesh node has a texture and the drawingMode property
+ * is set to GL_POINTS, otherwise this property returns NO.
+ */
+@property(nonatomic, readonly) BOOL isDrawingPointSprites;
+
+/**
+ * Returns whether the RGB components of each pixel of the encapsulated textures
  * have had the corresponding alpha component applied already.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.

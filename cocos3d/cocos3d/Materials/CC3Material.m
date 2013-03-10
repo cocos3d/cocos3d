@@ -40,7 +40,6 @@
 -(void) texturesHaveChanged;
 -(void) applyAlphaTest;
 -(void) applyBlend;
--(void) applyColors;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(BOOL) switchingMaterial;
 @end
@@ -108,6 +107,26 @@
 
 -(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
 	_alphaTestFunction = shouldDraw ? GL_ALWAYS : GL_GREATER;
+}
+
+-(BOOL) shouldApplyOpacityToColor {
+	return _blendFunc.src == GL_ONE && self.hasPremultipliedAlpha;
+}
+
+-(ccColor4F) effectiveAmbientColor {
+	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.ambientColor) : self.ambientColor;
+}
+
+-(ccColor4F) effectiveDiffuseColor {
+	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.diffuseColor) : self.diffuseColor;
+}
+
+-(ccColor4F) effectiveSpecularColor {
+	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.specularColor) : self.specularColor;
+}
+
+-(ccColor4F) effectiveEmissionColor {
+	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.emissionColor) : self.emissionColor;
 }
 
 -(CC3GLProgram*) shaderProgram { return _shaderContext.program; }
@@ -311,10 +330,6 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	return NO;
 }
 
--(BOOL) shouldApplyOpacityToColor {
-	return _blendFunc.src == GL_ONE && self.hasPremultipliedAlpha;
-}
-
 -(BOOL) hasBumpMap {
 	// Check the first texture.
 	if (_texture && _texture.isBumpMap) return YES;
@@ -448,7 +463,7 @@ static GLuint lastAssignedMaterialTag;
 		LogTrace(@"Drawing %@", self);
 		[self applyAlphaTest];
 		[self applyBlend];
-		[self applyColors];
+		[self applyColorsWithVisitor: visitor];
 		[self drawTexturesWithVisitor: visitor];
 	} else {
 		LogTrace(@"Reusing currently bound %@", self);
@@ -484,33 +499,19 @@ static GLuint lastAssignedMaterialTag;
  * If the shouldUseLighting property is YES, applies the color and shininess properties to
  * the GL engine, otherwise turns lighting off and applies diffuse color as a flat color.
  */
--(void) applyColors {
+-(void) applyColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
 	if (_shouldUseLighting) {
 		[glesEngine.capabilities.lighting enable];
-
-		ccColor4F ambColor = _ambientColor;
-		ccColor4F difColor = _diffuseColor;
-		ccColor4F spcColor = _specularColor;
-		ccColor4F emsColor = _emissionColor;
-		if (self.shouldApplyOpacityToColor) {
-			ambColor = CCC4FBlendAlpha(ambColor);
-			difColor = CCC4FBlendAlpha(difColor);
-			spcColor = CCC4FBlendAlpha(spcColor);
-			emsColor = CCC4FBlendAlpha(emsColor);
-		}
 		CC3OpenGLESMaterials* glesMaterials = glesEngine.materials;
-		glesMaterials.ambientColor.value = ambColor;
-		glesMaterials.diffuseColor.value = difColor;
-		glesMaterials.specularColor.value = spcColor;
-		glesMaterials.emissionColor.value = emsColor;
-		glesMaterials.shininess.value = _shininess;
+		glesMaterials.ambientColor.value = self.effectiveAmbientColor;
+		glesMaterials.diffuseColor.value = self.effectiveDiffuseColor;
+		glesMaterials.specularColor.value = self.effectiveSpecularColor;
+		glesMaterials.emissionColor.value = self.effectiveEmissionColor;
+		glesMaterials.shininess.value = self.shininess;
 	} else {
 		[glesEngine.capabilities.lighting disable];
-
-		ccColor4F difColor = _diffuseColor;
-		if (self.shouldApplyOpacityToColor) difColor = CCC4FBlendAlpha(difColor);
-		glesEngine.state.color.value = difColor;
+		visitor.currentColor = self.effectiveDiffuseColor;
 	}
 }
 

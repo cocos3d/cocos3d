@@ -61,8 +61,7 @@
 	if (texCnt == 0) return [self noTextureProgram: shouldAlphaTest];
 	
 	// Point sprites
-	if (texCnt > 0 && aMeshNode.drawingMode == GL_POINTS)
-		return [self pointSpriteProgram: shouldAlphaTest];
+	if (aMeshNode.isDrawingPointSprites) return [self pointSpriteProgram: shouldAlphaTest];
 	
 	// Bump-mapping using a tangent-space normal map texture.
 	if (texCnt > 0 && aMeshNode.mesh.hasVertexTangents)

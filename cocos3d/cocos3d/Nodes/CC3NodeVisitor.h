@@ -33,8 +33,8 @@
 #import "CC3Matrix.h"
 #import "CC3PerformanceStatistics.h"
 
-@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene;
-@class CC3Material, CC3Mesh, CC3NodeSequencer, CC3SkinSection, CC3GLProgram;
+@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3GLProgram;
+@class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
 
 
 #pragma mark -
@@ -313,6 +313,7 @@
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
+	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
 	GLuint _textureUnit;
 	ccTime _deltaTime;
@@ -407,20 +408,34 @@
  * but it is up to the invoker to make sure that the current node actually is a CC3MeshNode.
  *
  * This property is only valid during the traversal of the node returned by this property,
- * and will be nil both before and after the visit: method is invoked on the node.
+ * and will be nil both before and after the visit: method is invoked on that node.
  */
 @property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
 
 /**
- * Returns the material of the mesh node that is currently being visited.
+ * Returns the material of the mesh node that is currently being visited, or returns nil
+ * if that mesh node has no material.
  *
  * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
  * invoker to make sure that the current node actually is a CC3MeshNode.
  *
- * This property is only valid during the traversal of the node returned by this property,
- * and will be nil both before and after the visit: method is invoked on the node.
+ * This property is only valid during the traversal of the node returned by the currentMeshNode
+ * property, and will be nil both before and after the visit: method is invoked on that node.
  */
 @property(nonatomic, readonly) CC3Material* currentMaterial;
+
+/**
+ * Returns the texture unit at the specified index from the mesh node that is currently being
+ * visited, or returns nil if the material covering the node has no corresponding texture unit.
+ *
+ * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
+ * invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * The value returned by this method is only valid during the traversal of the node returned
+ * by the currentMeshNode property, and will be nil both before and after the visit: method
+ * is invoked on that node.
+ */
+-(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit;
 
 /**
  * Returns the mesh of the mesh node that is currently being visited.
@@ -448,6 +463,20 @@
  * This property is set automatically by the program when it binds to the GL engine.
  */
 @property(nonatomic, assign) CC3GLProgram* currentShaderProgram;
+
+/**
+ * The current color used during drawing if no materials or lighting are engaged.
+ *
+ * Each of the RGBA components of this color are floating point values between 0 and 1.
+ */
+@property(nonatomic, assign) ccColor4F currentColor;
+
+/**
+ * The current color used during drawing if no materials or lighting are engaged.
+ *
+ * Each of the RGBA components of this color are integer values between 0 and 255.
+ */
+@property(nonatomic, assign) ccColor4B currentColor4B;
 
 /** The number of lights in the scene. */
 @property(nonatomic, readonly) NSUInteger lightCount;
@@ -526,7 +555,6 @@
  */
 @interface CC3NodePickingVisitor : CC3NodeDrawingVisitor {
 	CC3Node* _pickedNode;
-	ccColor4F _originalColor;
 }
 
 /** The node that was most recently picked. */

@@ -1587,14 +1587,6 @@ typedef struct {
 /** Attenuation coefficients corresponding to no attenuation with distance (constant size). */
 static const CC3AttenuationCoefficients kCC3AttenuationNone = {1.0, 0.0, 0.0};
 
-/** 
- * Attenuation coefficients corresponding to an illegal attenuation.
- *
- * Since attenuation involves a division, attenuation cooefficients that are all zero will result
- * in an attempt to divide by zero. This constant can be used to test for and avoid this situation.
- */
-static const CC3AttenuationCoefficients kCC3AttenuationIllegalZero = {0.0, 0.0, 0.0};
-
 /** Deprecated. Use kCC3AttenuationNone instead. */
 static const CC3AttenuationCoefficients kCC3ParticleSizeAttenuationNone DEPRECATED_ATTRIBUTE = {1.0, 0.0, 0.0};
 
@@ -1617,11 +1609,14 @@ static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat 
 	return coeffs;
 }
 
-/** Returns whether the specified attenuation coefficients are all zero and therefore illegal. */
-static inline BOOL CC3AttenuationCoefficientsIsIllegalZero(CC3AttenuationCoefficients coeffs) {
-	return (coeffs.a == kCC3AttenuationIllegalZero.a &&
-			coeffs.b == kCC3AttenuationIllegalZero.b &&
-			coeffs.c == kCC3AttenuationIllegalZero.c);
+/**
+ * If at least one of the coefficients in the specified attenuation is not zero, the specified
+ * attenuation coefficients is returned unchanged. However, if all three coefficients of the
+ * specified attenuation coefficients are zero, the value is illegal (and will cause divide-by-zero
+ * errors). If that is the case, this function returns kCC3AttenuationNone. 
+ */
+static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsLegalize(CC3AttenuationCoefficients ac) {
+	return (ac.a != 0.0f || ac.b != 0.0f || ac.c != 0.0f) ? ac : kCC3AttenuationNone;
 }
 
 

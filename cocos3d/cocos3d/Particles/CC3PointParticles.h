@@ -265,6 +265,27 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  */
 @property(nonatomic, assign) BOOL shouldNormalizeParticleSizesToDevice;
 
+/**
+ * Returns the value of the particleSize property. If the shouldNormalizeParticleSizesToDevice
+ * property is set to YES, the returned value will be normalized. For further explanation, see
+ * the notes for the shouldNormalizeParticleSizesToDevice property.
+ */
+@property(nonatomic, readonly) GLfloat normalizedParticleSize;
+
+/**
+ * Returns the value of the particleSizeMinimum property. If the shouldNormalizeParticleSizesToDevice
+ * property is set to YES, the returned value will be normalized. For further explanation, see
+ * the notes for the shouldNormalizeParticleSizesToDevice property.
+ */
+@property(nonatomic, readonly) GLfloat normalizedParticleSizeMinimum;
+
+/**
+ * Returns the value of the particleSizeMaximum property. If the shouldNormalizeParticleSizesToDevice
+ * property is set to YES, the returned value will be normalized. For further explanation, see
+ * the notes for the shouldNormalizeParticleSizesToDevice property.
+ */
+@property(nonatomic, readonly) GLfloat normalizedParticleSizeMaximum;
+
 /** Indicates whether points should be smoothed (antialiased). The initial value is NO. */
 @property(nonatomic, assign) BOOL shouldSmoothPoints;
 

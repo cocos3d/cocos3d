@@ -381,7 +381,7 @@
 
 @synthesize drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
 @synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
-@synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount;
+@synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount, currentColor=_currentColor;
 @synthesize currentSkinSection=_currentSkinSection, currentShaderProgram=_currentShaderProgram;
 
 -(void) dealloc {
@@ -471,7 +471,15 @@
 
 -(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
 
+-(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit {
+	return [self.currentMaterial textureForTextureUnit: texUnit].textureUnit;
+}
+
 -(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
+
+-(ccColor4B) currentColor4B { return CCC4BFromCCC4F(self.currentColor); }
+
+-(void) setCurrentColor4B: (ccColor4B) color4B { self.currentColor = CCC4FFromCCC4B(color4B); }
 
 -(NSUInteger) lightCount { return self.scene.lights.count; }
 
@@ -608,8 +616,6 @@
 	[glesServCaps.blend disable];
 	[glesServCaps.fog disable];
 	
-	_originalColor = glesEngine.state.color.value;
-	
 	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
 	[CCDirector.sharedDirector.ccGLView openPicking];
 }
@@ -641,7 +647,6 @@
 	
 	[self drawBackdrop];	// Draw the backdrop behind the 3D scene
 
-	glesState.color.value = _originalColor;
 	[super close];
 }
 
@@ -739,10 +744,8 @@
 
 /** Maps the specified node to a unique color, and paints the node with that color. */
 -(void) paintNode: (CC3Node*) aNode {
-	ccColor4B color = [self colorFromNodeTag: aNode.tag];
-	CC3OpenGLESEngine.engine.state.color.fixedValue = color;
-	LogTrace(@"%@ painting %@ with color (%u, %u, %u, %u)",
-			 self, aNode, color.r, color.g, color.b, color.a);
+	self.currentColor4B = [self colorFromNodeTag: aNode.tag];
+	LogTrace(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
 }
 
 /**
@@ -758,7 +761,6 @@
 	GLubyte g = (tag >> 8) & mask;
 	GLubyte b = tag & mask;
 	return ccc4(r, g, b, 0);	// Zero alpha to ensure coloring is not visible
-	
 }
 
 /**
@@ -770,8 +772,7 @@
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, picked: %@, orig color: %@",
-			[super fullDescription], _pickedNode, NSStringFromCCC4F(_originalColor)];
+	return [NSString stringWithFormat: @"%@, picked: %@", super.fullDescription, _pickedNode];
 }
 
 @end

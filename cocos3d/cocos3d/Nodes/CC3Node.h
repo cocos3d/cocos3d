@@ -46,7 +46,7 @@
  * vertex drawing.
  */
 typedef enum {
-	kCC3NormalScalingNone,			/**< Don't resize normals. */
+	kCC3NormalScalingNone = 0,		/**< Don't resize normals. */
 	kCC3NormalScalingRescale,		/**< Uniformly rescale normals using model-view matrix. */
 	kCC3NormalScalingNormalize,		/**< Normalize each normal after tranformation. */
 	kCC3NormalScalingAutomatic,		/**< Automatically determine optimal normal scaling method. */

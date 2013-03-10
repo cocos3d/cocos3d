@@ -158,7 +158,6 @@ struct Point {
 	float	minimumSize;					/**< Minimum size to which points will be allowed to shrink. */
 	float	maximumSize;					/**< Maximum size to which points will be allowed to grow. */
 	vec3	sizeAttenuation;				/**< Coefficients of the size attenuation equation. */
-	float	sizeFadeThreshold;				/**< Alpha fade threshold for smaller points. */
 	bool	isDrawingPoints;				/**< Whether the vertices are being drawn as points. */
 	bool	hasVertexPointSize;				/**< Whether vertex point size attribute is available. */
 	bool	shouldDisplayAsSprites;			/**< Whether points should be interpeted as textured sprites. */
