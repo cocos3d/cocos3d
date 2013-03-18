@@ -32,6 +32,7 @@
 #import "CC3Billboard.h"
 #import "CC3OpenGLESEngine.h"
 #import "CC3Mesh.h"
+#import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -39,6 +40,7 @@
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @interface CC3Billboard (TemplateMethods)
@@ -171,9 +173,7 @@
 }
 
 /** Only touchable if drawing in 3D. */
--(BOOL) isTouchable {
-	return (!shouldDrawAs2DOverlay) && [super isTouchable];
-}
+-(BOOL) isTouchable { return (!shouldDrawAs2DOverlay) && [super isTouchable]; }
 
 
 #pragma mark CCRGBAProtocol support
@@ -344,11 +344,10 @@
 
 -(void) alignToCamera:(CC3Camera*) camera {
 	if (camera && billboard) {
-		if (shouldDrawAs2DOverlay) {
+		if (shouldDrawAs2DOverlay)
 			[self align2DToCamera: camera];
-		} else {
+		else
 			[self align3DToCamera: camera];
-		}
 	}
 }
 
@@ -400,9 +399,7 @@
 	
 	// If consistency across devices is desired, adjust size of 2D billboard so that
 	// it appears the same size relative to 3D artifacts across all device resolutions
-	if (shouldNormalizeScaleToDevice) {
-		newBBScale = ccpMult(newBBScale, [[self class] deviceScaleFactor]);
-	}
+	if (shouldNormalizeScaleToDevice) newBBScale = ccpMult(newBBScale, [[self class] deviceScaleFactor]);
 	
 	// Set the new scale only if it has changed. 
 	if (billboard.scaleX != newBBScale.x) billboard.scaleX = newBBScale.x;
@@ -494,60 +491,12 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 /**
- * During normal drawing, configure the material, texture, and vertex arrays environments
- * for cocos2d node drawing. Don't configure anything if painting for node picking.
+ * During normal drawing, establish 2D drawing environment.
+ * Don't configure anything if painting for node picking.
  */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super configureMaterialWithVisitor: visitor];
-
-	if (visitor.shouldDecorateNode) {
-		
-		// 2D drawing might change material properties unbeknownst to cocos3d,
-		// so force the material to be respecified on next 3D draw
-		[CC3Material resetSwitching];
-
-		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-		
-		// Set blending to the value expected by cocos2d
-		CC3OpenGLESStateTrackerCapability* glesBlend = glesEngine.capabilities.blend;
-		glesBlend.value = glesBlend.originalValue;
-		
-		// Set the blend functions to those expected by cocos2d
-		CC3OpenGLESStateTrackerMaterialBlend* glesMatBlend = glesEngine.materials.blendFunc;
-		[glesMatBlend applySource: glesMatBlend.sourceBlend.originalValue
-					 andDestination: glesMatBlend.destinationBlend.originalValue];
-		
-		// Enable the texture unit to draw the 2D texture mesh (usually GL_TEXTURE0)
-		// and bind the default texture unit parameters
-		CC3OpenGLESTextures* glesTextures = glesEngine.textures;
-		CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: textureUnitIndex];
-		[glesTexUnit.texture2D enable];
-		[glesTexUnit.textureCoordinates enable];
-		[CC3TextureUnit bindDefaultTo: glesTexUnit];
-		
-		// Clear the texture unit binding so we start afresh on next 3D binding
-		glesTexUnit.textureBinding.value = 0;
-
-		// Disable all other texture units
-		[CC3Texture unbindRemainingFrom: textureUnitIndex + 1];
-		
-		// Make sure the 2D texture unit is active
-		glesTextures.activeTexture.value = textureUnitIndex;
-		glesTextures.clientActiveTexture.value = textureUnitIndex;
-		
-		// Enable location and color arrays, and disable normal and point size arrays.
-		[CC3OpenGLESEngine.engine.vertices enable2DVertexPointers];
-		
-		// 2D drawing might change buffer properties unbeknownst to cocos3d,
-		// so force the buffers to be respecified on next 3D draw
-		CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
-		[glesVertices.arrayBuffer unbind];
-		[glesVertices.indexBuffer unbind];
-		
-		// 2D drawing might change mesh properties unbeknownst to cocos3d,
-		// so force the mesh to be respecified on next 3D draw
-		[CC3Mesh resetSwitching];
-	}
+	if (visitor.shouldDecorateNode) [visitor.scene close3D];
 }
 
 /**
@@ -572,6 +521,15 @@ static GLfloat deviceScaleFactor = 0.0f;
 		LogTrace(@"%@ drawing picking rectangle mesh %@", self, mesh);
 		[super drawMeshWithVisitor: visitor];
 	}
+}
+
+/**
+ * During normal drawing, restore 3D drawing environment.
+ * Don't configure anything if painting for node picking.
+ */
+-(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
+	[super cleanupDrawingParameters: visitor];
+	if (visitor.shouldDecorateNode) [visitor.scene open3D];
 }
 
 /** If the bounding mesh exists, update its vertices to match the bounding box of the 2D node. */
@@ -606,9 +564,8 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 -(void) draw2dWithinBounds: (CGRect) bounds {
-	if(shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ]) {
+	if(shouldDrawAs2DOverlay && self.visible && [self doesIntersectBounds: bounds ])
 		[billboard visit];
-	}
 }
 
 

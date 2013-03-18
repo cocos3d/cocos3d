@@ -198,9 +198,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Improve performance by avoiding clearing the depth buffer when transitioning
 	// between 2D content and 3D content. Since we are drawing 2D content on top of
 	// the 3D content, we must also turn off depth testing when drawing 2D content.
-	self.shouldClearDepthBufferBefore2D = NO;
-	self.shouldClearDepthBufferBefore3D = NO;
-	[[CCDirector sharedDirector] setDepthTest: NO];
+	[CCDirector.sharedDirector setDepthTest: NO];
+	self.shouldClearDepthBuffer = NO;
 	
 	// The order in which meshes are drawn to the GL engine can be tailored to your needs.
 	// The default is to draw opaque objects first, then alpha-blended objects in reverse
@@ -2708,8 +2707,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			bmLabelMessageIndex++;
 			break;
 		default:
-			bmLabel.labelString = @"Why,\nhello again,\nworld!";
-			bmLabel.color = ccYELLOW;
+			bmLabel.labelString = @"Hello, world!";
+			bmLabel.color = ccc3(0, 220, 120);
 			bmLabelMessageIndex = 0;
 			break;
 	}
@@ -2727,6 +2726,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		LogInfo(@"Removed shadow from: %@", aNode);
 	} else {
 		[aNode addShadowVolumesForLight: podLight];
+		
+		// In case we've added a shadow to the robot arm structure, make sure we remove
+		// the shadow on the billboard label it's carrying, because billboards with
+		// transparency don't shadow well.
+		[[self getNodeNamed: kBillboardName] removeShadowVolumes];
 		
 		// The wooden sign is a planar mesh with no "other side", so it requires special
 		// configuration. We indicate that we want to shadow back faces as well as front

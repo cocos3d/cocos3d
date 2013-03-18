@@ -112,8 +112,16 @@ cocos3d 2.0.0 - 2013/03/31
 	- [API change] CC3Frustum projectionMatrix property renamed to finiteProjectionMatrix
 	- [API change] CC3Camera projectionMatrix property now returns either finite or infinite projection matrix depending on value of hasInfin.
 	- [API change] Removed CC3Camera infiniteProjectionMatrix property.
-	- [API change] Removed CC3Frustum viewProjectionMatrix property. 
-- Changed values of kCCC4FLightGray and kCCC4FDarkGray to evenly divide luminosity over the range (kCCC4FBlack, kCCC4FDarkGray, kCCC4FGray, kCCC4FLightGray, kCCC4FWhite) in four even steps.
+	- [API change] Removed CC3Frustum viewProjectionMatrix property.
+- [API change] Changed values of kCCC4FLightGray and kCCC4FDarkGray to evenly divide luminosity over the range (kCCC4FBlack, kCCC4FDarkGray, kCCC4FGray, kCCC4FLightGray, kCCC4FWhite) in four even steps.
+- [API change] Combined the shouldClearDepthBufferBefore2D & shouldClearDepthBufferBefore3D properties of CC3Scene into a single shouldClearDepthBuffer property and deprecated the originals.
+- [API change] Renamed CC3ViewportManager openViewport & closeViewport methods to open & close respectively.
+
+- [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler function-based state management:
+	- State management no longer queries the GL engine for current state during initialization.
+	- CC3Scene open3D and close3D methods now manually control GL state configuration transition between 2D and 3D environments.
+		- override these methods to alter GL state transitions between 2D & 3D.
+
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.
     - CC3Node shouldIgnoreRayIntersection property now returns YES if the node has no bounding volume.
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
@@ -124,6 +132,7 @@ cocos3d 2.0.0 - 2013/03/31
 - Removed redundant invocation of normalizeBillboardScaleToDevice in CC3Billboard setBillboard: method.
 - Upgraded PowerVR POD/PFX library to version 3.0r2 and stripped it to minimum required files.
 - Removed files CC3OpenGLES1Intercept.h/m as redundant. Xcode GL frame capture provides a much more useful GL trace capability.
+
 - The cocos3d Application template project (hello, world) now automatically moves the camera to frame the scene by default.
 
 

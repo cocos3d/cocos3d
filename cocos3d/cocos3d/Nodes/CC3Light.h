@@ -601,6 +601,14 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  */
 -(void) turnOn;
 
+/**
+ * Turns this light off on by disabling this light in the GL engine.
+ *
+ * This method is invoked automatically by CC3Scene at the end of each frame drawing cycle.
+ * Usually, the application never needs to invoke this method directly.
+ */
+-(void) turnOff;
+
 
 #pragma mark Managing the pool of available GL lights
 

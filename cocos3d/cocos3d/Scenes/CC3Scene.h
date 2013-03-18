@@ -249,8 +249,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 	ccTime minUpdateInterval;
 	ccTime maxUpdateInterval;
 	ccTime _deltaFrameTime;
-	BOOL shouldClearDepthBufferBefore3D : 1;
-	BOOL shouldClearDepthBufferBefore2D : 1;
+	BOOL _shouldClearDepthBuffer : 1;
 }
 
 /**
@@ -649,57 +648,37 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Drawing
 
 /**
- * Indicates whether the OpenGL depth buffer should be cleared before drawing
- * the 3D scene.
+ * Indicates whether the OpenGL depth buffer should be cleared when transitioning between
+ * 2D and 3D drawing (in either direction).
  *
- * If the CC3Layer, or other 2D nodes that the CC3Layer may be contained within,
- * have drawn 2D content on which the 3D scene is to be drawn on top of, AND is
- * using depth testing, then this property should be set to YES to ensure that
- * the 3D content will not conflict with the previously drawn 2D content, and
- * will be drawn on top of that 2D content.
+ * If 2D content, such as menus and buttons, is being drawn using depth testing, then this property
+ * should be set to YES. If 2D content is being drawn without depth testing, then this property can
+ * be set to NO to skip the overhead of clearing of the depth buffer during transitions between 2D
+ * and 3D drawing on each frame.
  *
- * However, if this is not the case, then this property can be set to NO to skip
- * the overhead of clearing of the depth buffer when transitioning from 2D to 3D.
- * 
- * Clearing the depth buffer is a relatively expensive operation, and avoiding it
- * when it is not necessary can result in a performance improvement. Because of
- * this, it is recommended that this property be set to NO unless conflicts arise
- * when drawing 3D content over previously drawn 2D content.
+ * Clearing the depth buffer is a relatively expensive operation, and avoiding it when it is not
+ * necessary can result in a performance improvement. Because of this, it is recommended that depth
+ * testing be turned off during the drawing of 2D content, and this property be set to NO.
  *
- * The initial value of this property is YES. Set this property to NO to improve
- * performance if 3D content is not being drawn on top of 2D content.
+ * Initially, depth testing is enabled when drawing 2D content. You can turn depth testing off for
+ * the 2D content by invoking the following code once during the initialization of your application
+ * after the CC3GLView has been created:
+ *
+ *   [CCDirector.sharedDirector setDepthTest: NO];
+ *
+ * By doing so, you will then be able to set this property to NO to avoid clearing the depth
+ * buffer when transitioning between 2D and 3D drawing.
+ *
+ * Since depth testing is initially enabled for 2D content, the initial value of this property is YES.
+ * After disabling depth testing for 2D content as described above, you can set this property to NO.
  */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D;
+@property(nonatomic, assign) BOOL shouldClearDepthBuffer;
 
-/**
- * Indicates whether the OpenGL depth buffer should be cleared before reverting
- * back to the 2D scene.
- *
- * If 2D content will be drawn on top of the 3D content, AND it is being drawn
- * with depth testing enabled, then this property should be set to YES.
- *
- * However, if this is not the case, then this property can be set to NO to skip the
- * overhead of clearing of the depth buffer when transitioning from 3D back to 2D.
- * 
- * Clearing the depth buffer is a relatively expensive operation, and avoiding it
- * when it is not necessary can result in a performance improvement. Because of
- * this, it is recommended that this property be set to NO, and turn depth testing
- * off during drawing of the 2D content on top of the 3D scene.
- *
- * You can turn depth testing off for the 2D content by invoking the following
- * code once during the initialization of your application after the EAGLView
- * has been created:
- *
- *   [[CCDirector sharedDirector] setDepthTest: NO];
- *
- * By doing so, you will then be able to set this property to NO and still be able
- * to draw 2D content on top of the 3D scene, while avoiding an unnecessary clearing
- * of the depth buffer.
- *
- * The initial value of this property is YES. Set this property to NO to improve
- * performance if depth-testing 2D content is not being drawn on top of 3D content.
- */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D;
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D DEPRECATED_ATTRIBUTE;
 
 /**
  * The node sequencer being used by this instance to order the drawing of child nodes.
@@ -781,6 +760,23 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * never needs to invoke this method directly.
  */
 -(void) drawScene;
+
+/** 
+ * Template method that opens the GL drawing environment for 3D drawing.
+ *
+ * This method is invoked automatically during the transition between 2D and 3D drawing.
+ * Normally the application never needs to invoke this method directly.
+ */
+-(void) open3D;
+
+/**
+ * Template method that reverts the GL drawing environment back to the configuration
+ * needed for 2D drawing.
+ *
+ * This method is invoked automatically during the transition back to 2D drawing.
+ * Normally the application never needs to invoke this method directly.
+ */
+-(void) close3D;
 
 
 #pragma mark Touch handling
@@ -1177,24 +1173,30 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Drawing
 
 /**
- * Template method that opens the viewport for 3D drawing
+ * Template method that opens the viewport for 3D drawing by setting the viewport to the
+ * dimensions of the layer.
  *
- * Sets the GL viewport to the contained viewport, and if the viewport does not cover
- * the screen, applies GL scissors to the viewport so that GL drawing for this scene
- * does not extend beyond the layer bounds.
+ * Also invokes the openClipping method so that GL drawing for this scene does not extend
+ * beyond the layer bounds.
  */
--(void) openViewport;
+-(void) open;
 
 /**
- * Template method that closes the viewport for 3D drawing.
+ * Template method that closes the viewport for 3D drawing by setting the viewport
+ * dimensions back to the window bounds.
  *
- * Default implementation does nothing. The GL viewport and scissor will automatically
- * be reset to their 2D values when CC3OpenGLESEngine is closed by the 3D scene. If that
- * behaviour is changed by the application, it may be necessary to override this method
- * to handle changing the viewport to what the 2D scene expects. In general, the 2D and
- * 3D scenes have different viewports only when the 3D layer does not cover the window.
+ * Also invokes the closeClipping method.
  */
--(void) closeViewport;
+-(void) close;
+
+/**
+ * If the viewport does not cover the entire window, a scissor rectangle is defined to cover
+ * the viewport area so that GL drawing of the scene does not extend beyond the viewport bounds.
+ */
+-(void) openClipping;
+
+/** Disables any scissor testing to the viewport bounds that was enabled by the openClipping method. */
+-(void) closeClipping;
 
 
 #pragma mark Converting points

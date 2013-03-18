@@ -369,11 +369,10 @@
 @property(nonatomic, assign) BOOL shouldDecorateNode;
 
 /**
- * Indicates whether the OpenGL depth buffer should be cleared before drawing
- * the 3D scene.
+ * Indicates whether the OpenGL depth buffer should be cleared before drawing the 3D scene.
  * 
- * This property is automatically set to the value of the
- * shouldClearDepthBufferBefore3D property of the CC3Scene.
+ * This property is automatically set to the value of the shouldClearDepthBuffer property
+ * of the CC3Scene.
  */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
 

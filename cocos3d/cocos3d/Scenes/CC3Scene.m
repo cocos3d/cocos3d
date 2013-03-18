@@ -59,8 +59,6 @@
 -(void) updateShadows: (ccTime) dt;
 -(void) updateBillboards: (ccTime) dt;
 -(void) collectFrameInterval;
--(void) open3D;
--(void) close3D;
 -(void) openViewport;
 -(void) closeViewport;
 -(void) open3DCamera;
@@ -83,7 +81,7 @@
 @synthesize touchedNodePicker, drawingSequencer, drawingSequenceVisitor;
 @synthesize drawVisitor, shadowVisitor, updateVisitor, transformVisitor;
 @synthesize viewportManager, performanceStatistics, fog, lights;
-@synthesize shouldClearDepthBufferBefore3D, shouldClearDepthBufferBefore2D;
+@synthesize shouldClearDepthBuffer=_shouldClearDepthBuffer;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -158,6 +156,13 @@
 	}
 }
 
+// Deprecated
+-(BOOL) shouldClearDepthBufferBefore2D { return self.shouldClearDepthBuffer; }
+-(void) setShouldClearDepthBufferBefore2D: (BOOL) shouldClear { self.shouldClearDepthBuffer = shouldClear; }
+-(BOOL) shouldClearDepthBufferBefore3D { return self.shouldClearDepthBuffer; }
+-(void) setShouldClearDepthBufferBefore3D: (BOOL) shouldClear { self.shouldClearDepthBuffer = shouldClear; }
+
+
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -165,8 +170,7 @@
 		targettingNodes = [[CCArray array] retain];
 		lights = [[CCArray array] retain];
 		billboards = [[CCArray array] retain];
-		shouldClearDepthBufferBefore3D = YES;
-		shouldClearDepthBufferBefore2D = YES;
+		_shouldClearDepthBuffer = YES;
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
@@ -220,6 +224,7 @@
 	ambientLight = another.ambientLight;
 	minUpdateInterval = another.minUpdateInterval;
 	maxUpdateInterval = another.maxUpdateInterval;
+	_shouldClearDepthBuffer = another.shouldClearDepthBuffer;
 }
 
 
@@ -356,6 +361,7 @@
 		[self close3DCamera];
 		[self closeViewport];
 		[self close3D];
+		[self clearDepthTesting];
 		[self draw2DBillboards];	// Back to 2D now
 	}
 	
@@ -369,56 +375,124 @@
  * and add it to the performance statistics.
  */
 -(void) collectFrameInterval {
-	if (performanceStatistics) {
+	if (performanceStatistics)
 		[performanceStatistics addFrameTime: [[CCDirector sharedDirector] frameInterval]];
-	}
 }
 
-/**
- * Template method that opens the GL drawing environment for 3D drawing. This is invoked
- * on each frame. Using state trackers, GL state is only changed when state really has changed.
- */
 -(void) open3D {
 	LogTrace(@"%@ opening the 3D scene", self);
 
-	// Retrieves the GLES state trackers to set initial state
+	// Ensure that the first material and mesh will be rendered, even if same as last one
+	// that was rendered on the previous cycle.
+	[CC3Material resetSwitching];
+	[CC3Mesh resetSwitching];
+	
 	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	
-	// Open tracking of GL state. Where needed, will cache current 2D GL state items
-	// for later reinstatement in the close3D method.
-	[glesEngine open];
+	// Ensure blending state tracking is initialized to that left by 2D drawing
+	[glesEngine.capabilities.blend enable];
+	[glesEngine.materials.blendFunc applySource: CC_BLEND_SRC andDestination: CC_BLEND_DST];
 	
-	// Ensure drawing is not slowed down by unexpected alpha testing and logic ops
-	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
-	[glesServCaps.alphaTest disable];
-	[glesServCaps.colorLogicOp disable];
+	// Enable location and color arrays, and disable normal and point size arrays.
+	[glesEngine.vertices enable2DVertexPointers];
+	
+	// Ensure no buffers are currently bound
+	CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
+	[glesVertices.arrayBuffer unbind];
+	[glesVertices.indexBuffer unbind];
+	
+	CC3OpenGLESTextures* glesTextures = glesEngine.textures;
+	CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: 0];
+	glesTexUnit.textureBinding.value = 0;
+	
+}
+
+-(void) close3D {
+	LogTrace(@"%@ closing the 3D scene", self);
+	
+	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+	
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+
+	// Disable lighting and materials
+	[glesEngine.capabilities.lighting disable];
+	for (CC3Light* lgt in lights) [lgt turnOff];
+	
+	// Restore 2D standard blending
+	[glesEngine.capabilities.blend enable];	// if director setAlphaBlending: NO, needs to be overridden
+	[glesEngine.materials.blendFunc applySource: CC_BLEND_SRC andDestination: CC_BLEND_DST];
+	
+	// Ensure texture unit 0 is active and enabled
+	CC3OpenGLESTextures* glesTextures = glesEngine.textures;
+	CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: 0];
+	[glesTexUnit.texture2D enable];
+	[glesTexUnit.textureCoordinates enable];
+	[glesTexUnit.textureBinding close];		// Temp needed for ccGLBindTexture2DN in CC2 2.1
+	[CC3TextureUnit bindDefaultTo: glesTexUnit];
+	
+	// Unbind all other texture units
+	[CC3Texture unbindRemainingFrom: 1];
+	
+	// Make sure the 2D texture unit is active
+	glesTextures.activeTexture.value = 0;
+	glesTextures.clientActiveTexture.value = 0;
+	
+	// Enable location and color arrays, and disable normal and point size arrays.
+	// Ensure no GL buffers are currently bound
+	CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
+	[glesVertices enable2DVertexPointers];
+	[glesVertices.arrayBuffer unbind];
+	[glesVertices.indexBuffer unbind];
+	
+	// Ensure GL_MODELVIEW matrix is active
+	glesEngine.matrices.mode.value = GL_MODELVIEW;
+
 }
 
 /**
- * Template method that reverts the GL drawing environment back to the configuration
- * needed for 2D drawing. This is the compliment of the open3D method. Where needed,
- * reverts any GL state back to what is needed for 2D. Using state trackers, GL state
- * is only changed when state really has changed.
+ * This method is invoked when 3D content drawing has been completed.
+ *
+ * Configures depth testing parameters for 2D. If the depth buffer should be cleared, do so.
+ * Otherwise, disable depth testing for 2D.
  */
--(void) close3D {
-	LogTrace(@"%@ closing the 3D scene", self);
-
-	// Close tracking of GL state, reverting to 2D values where required.
-	[CC3OpenGLESEngine.engine close];
+-(void) clearDepthTesting {
+	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 	
-	// Clear the depth buffer so that subsequent cocos2d rendering will occur
-	// on top of the 3D rendering. We can't simply turn depth testing off
-	// because cocos2d can use depth testing for 3D transition effects.
-	if (shouldClearDepthBufferBefore2D) {
-		[CC3OpenGLESEngine.engine.state clearDepthBuffer];
-	}
+	// Ensure depth function and masking is what 2D expects
+	CC3OpenGLESState* glesState = glesEngine.state;
+	glesState.depthFunction.value = GL_LEQUAL;
+	glesState.depthMask.value = YES;
+
+	if (_shouldClearDepthBuffer)
+		[glesEngine.state clearDepthBuffer];
+	else
+		[glesEngine.serverCapabilities.depthTest disable];
 }
 
-/** Template method that opens the 3D camera. */
--(void) openViewport { [viewportManager openViewport]; }
+//-(void) close3D {
+//	LogTrace(@"%@ closing the 3D scene", self);
+//	
+//	// Close tracking of GL state, reverting to 2D values where required.
+//	//	[CC3OpenGLESEngine.engine close];
+//	
+//	CC3GLClose3D();	// Return GL engine state to 2D rendering.
+//	
+//	// Clear the depth buffer so that subsequent cocos2d rendering will occur
+//	// on top of the 3D rendering. We can't simply turn depth testing off
+//	// because cocos2d can use depth testing for 3D transition effects.
+//	if (_shouldClearDepthBuffer)
+//		[CC3OpenGLESEngine.engine.state clearDepthBuffer];
+//	else {
+//		[CC3OpenGLESEngine.engine.serverCapabilities.depthTest disable];
+//		CC3OpenGLESEngine.engine.state.depthFunction.value = GL_LEQUAL;
+//	}
+//}
 
-/** Template method that closes the 3D camera. This is the compliment of the openViewport method. */
--(void) closeViewport { [viewportManager closeViewport]; }
+/** Template method that opens the 3D viewport. */
+-(void) openViewport { [viewportManager open]; }
+
+/** Template method that closes the 3D viewport. This is the compliment of the openViewport method. */
+-(void) closeViewport { [viewportManager close]; }
 
 /** Template method that opens the 3D camera. */
 -(void) open3DCamera { [activeCamera open]; }
@@ -434,12 +508,12 @@
 -(void) illuminate {
 	[CC3Light disableReservedLights];		// disable any lights used by 2D scene
 
-	[CC3OpenGLESEngine engine].capabilities.lighting.value = self.isIlluminated;
+	CC3OpenGLESEngine.engine.capabilities.lighting.value = self.isIlluminated;
 
 	LogTrace(@"%@ lighting is %@", self, (self.isIlluminated ? @"on" : @"off"));
 	
 	// Set the ambient light for the whole scene
-	[CC3OpenGLESEngine engine].lighting.sceneAmbientLight.value = ambientLight;
+	CC3OpenGLESEngine.engine.lighting.sceneAmbientLight.value = ambientLight;
 
 	// Turn on any individual lights
 	for (CC3Light* lgt in lights) [lgt turnOn];
@@ -496,44 +570,18 @@
 -(void) draw2DBillboards {
 	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
 
-	if (activeCamera && (billboards.count > 0)) {
-		CC3OpenGLESEngine* glesEngine;
-		CC3OpenGLESStateTrackerViewport* glesScissor;
-		CC3OpenGLESStateTrackerCapability* glesScissorTest;
-		
-		CC3Viewport vp = viewportManager.viewport;
-		BOOL isFullView = viewportManager.isFullView;
-		
-		// Since billboards draw outside the 3D environment, if the CC3Layer does not
-		// cover the full screen, billboards can be drawn outside the CC3Layer.
-		// Enable scissoring to the viewport dimensions to clip to the layer bounds.
-		if ( !isFullView ) {
-			glesEngine = [CC3OpenGLESEngine engine];
-			glesScissor = glesEngine.state.scissor;
-			glesScissorTest = glesEngine.capabilities.scissorTest;
-			
-			[glesScissorTest enable];
-			glesScissor.value = vp;
-		}
-		
-		CGRect lb = viewportManager.layerBoundsLocal;
-		for (CC3Billboard* bb in billboards) {
-			[bb draw2dWithinBounds: lb];
-		}
-		
-		// All done...turn scissoring back off now. This is happening after the
-		// close3D method, so we need to close the scissor trackers manually.
-		if ( !isFullView ) {
-			[glesScissorTest close];
-			[glesScissor close];
-		}
-	}
+	[viewportManager openClipping];
+
+	CGRect lb = viewportManager.layerBoundsLocal;
+	for (CC3Billboard* bb in billboards) [bb draw2dWithinBounds: lb];
+	
+	[viewportManager closeClipping];
 }
 
 /** Visits this scene for drawing (or picking) using the specified visitor. */
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.deltaTime = _deltaFrameTime;
-	visitor.shouldClearDepthBuffer = shouldClearDepthBufferBefore3D;
+	visitor.shouldClearDepthBuffer = self.shouldClearDepthBuffer;
 	visitor.drawingSequencer = drawingSequencer;
 	visitor.shouldVisitChildren = YES;
 	[visitor visit: self];
@@ -915,22 +963,30 @@
 
 #pragma mark Drawing
 
--(void) openViewport {
+-(void) open {
 	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
 			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
+	CC3OpenGLESEngine.engine.state.viewport.value = viewport;
+	[self openClipping];
+}
 
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESState* glesState = glesEngine.state;
-	
-	glesState.viewport.value = viewport;
+-(void) close {
+	LogTrace(@"%@ closing 3D viewport %@ as %@fullscreen", self,
+			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
+	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+	CC3OpenGLESEngine.engine.state.viewport.value = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+	[self closeClipping];
+}
 
+-(void) openClipping {
 	if ( !isFullView ) {
+		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
 		[glesEngine.capabilities.scissorTest enable];
-		glesState.scissor.value = viewport;
+		glesEngine.state.scissor.value = viewport;
 	}
 }
 
--(void) closeViewport {}
+-(void) closeClipping { [CC3OpenGLESEngine.engine.capabilities.scissorTest disable]; }
 
 
 #pragma mark Converting points
@@ -995,7 +1051,7 @@
  * restricting the movement of the CC3Layer and 3D scene, and for suggesting the fix. 
  */
 -(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation {
-	CGSize winSz = [[CCDirector sharedDirector] winSizeInPixels];
+	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
 	CC3Viewport vp;
 	CGPoint bOrg = bounds.origin;
 	CGSize bSz = bounds.size;

@@ -454,7 +454,7 @@
 	[CC3Mesh resetSwitching];
 	[CC3GLProgram willBeginDrawingScene];
 	
-	if (_shouldClearDepthBuffer) [[CC3OpenGLESEngine engine].state clearDepthBuffer];
+	if (_shouldClearDepthBuffer) [CC3OpenGLESEngine.engine.state clearDepthBuffer];
 }
 
 -(void) draw: (CC3Node*) aNode {
@@ -689,7 +689,7 @@
  * Subclasses can override to do something more sophisticated with the background.
  */
 -(void) drawBackdrop {
-	CC3OpenGLESState* glesState = [CC3OpenGLESEngine engine].state;
+	CC3OpenGLESState* glesState = CC3OpenGLESEngine.engine.state;
 	CC3Layer* cc3Layer = self.scene.cc3Layer;
 	
 	// Only clear the color if the layer is opaque. This is to stop flicker

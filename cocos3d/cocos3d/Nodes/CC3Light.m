@@ -308,6 +308,8 @@
 	}
 }
 
+-(void) turnOff { [glesLight.light disable]; }
+
 /**
  * Template method that sets the position of this light in the GL engine to the value of
  * the globalHomogeneousPosition property of this node.

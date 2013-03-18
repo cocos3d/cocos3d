@@ -67,13 +67,10 @@
 
 -(void) close { isScheduledForClose = NO; }
 
--(void) notifyTrackerAdded { [self.engine addTrackerToOpen: self]; }
+-(void) notifyTrackerAdded {}
 
 -(void) notifyGLChanged {
-	if (!isScheduledForClose) {
-		isScheduledForClose = YES;
-		[self.engine addTrackerToClose: self];
-	}
+	if (!isScheduledForClose) isScheduledForClose = YES;
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
