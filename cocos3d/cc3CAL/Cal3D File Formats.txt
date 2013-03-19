@@ -1,0 +1,361 @@
+o------------------------------------------------------------------------------o
+|                                                                              |
+|                       cal3d fileformat description                           |
+|                                                                              |
+|                                Version @VERSION@                                |
+|                                                                              |
+|        Copyright (C) 2001, 2002, 2003 Bruno 'Beosil' Heidelberger            |
+|        Copyright (C) 2006 Loic Dachary <loic@gnu.org>                        |
+|        Copyright (C) 2013 The Brenwill Workshop Ltd. <support@brenwill.org>  |
+|                                                                              |
+o------------------------------------------------------------------------------o
+
+o------------------------------------------------------------------------------o
+| Table of Contents                                                            |
+o------------------------------------------------------------------------------o
+
+  1 What is this document for?
+  2 cal3d skeleton file (.csf)
+  3 cal3d animation file (.caf)
+  4 cal3d mesh file (.cmf)
+  5 cal3d material file (.crf)
+  6 cal3d skeleton xml file (.xsf)
+  7 cal3d animation xml file (.xaf)
+  8 cal3d mesh xml file (.xmf)
+  9 cal3d material xml file (.xrf)
+  10 Website
+  11 Author
+
+
+o------------------------------------------------------------------------------o
+| 1 What is this document for?                                                 |
+o------------------------------------------------------------------------------o
+
+This document describes the format of the different files used in the cal3d
+character animation library version @VERSION@
+
+********************************************************************************
+********************************************************************************
+********************************************************************************
+
+ IMPORTANT: As the cal3d library is still in heavy development, the fileformats
+ described in this document will most likely become obsolete as soon as a new
+ version of the library is released. Furthermore, the fileformat itself is not
+ yet big-/little-endian independent and may contain fields that are either
+ ignored or misinterpreted by the library.
+
+********************************************************************************
+********************************************************************************
+********************************************************************************
+
+
+o------------------------------------------------------------------------------o
+| 2 cal3d skeleton file (.csf) - read by cocos3d                               |
+o------------------------------------------------------------------------------o
+
+Stored in this file is the hierarchy of bones that composes the skeleton.
+
+
+description                length  type      comments
+-------------------------  ------  --------  -----------------------------------
+[header]
+  magic token              4       const     "CSF\0"
+  file version             4       integer   1300
+  number of bones          4       integer
+  ambient light red        4       float     scene ambient light color red (version 1300 and above)
+  ambient light green      4       float     scene ambient light color green (version 1300 and above)
+  ambient light blue       4       float     scene ambient light color blue (version 1300 and above)
+
+[first bone]
+  length of bone name      4       integer
+  bone name                var     string
+  translation x            4       float     relative translation to parent bone
+  translation y            4       float
+  translation z            4       float
+  rotation x               4       float     relative rotation to parent bone
+  rotation y               4       float     stored as a quaternion
+  rotation z               4       float
+  rotation w               4       float
+  local translation x      4       float     translation to bring a vertex from
+  local translation y      4       float     model space into bone space
+  local translation z      4       float
+  local rotation x         4       float     rotation to bring a vertex from
+  local rotation y         4       float     model space into bone space
+  local rotation z         4       float
+  local rotation w         4       float
+  parent bone id           4       integer   index to parent bone
+  lighting type            4       integer   lighting type (version 1300 and above)
+  bone color red           4       float     bone color red (version 1300 and above)
+  bone color green         4       float     bone color green (version 1300 and above)
+  bone color blue          4       float     bone color blue (version 1300 and above)
+  number of children       4       integer
+
+  [first child]
+    child bone id          4       integer   index to child bone
+
+  [all other children]
+    ...
+
+[all other bones]
+  ...
+
+
+o------------------------------------------------------------------------------o
+| 3 cal3d animation file (.caf) - read by cocos3d                              |
+o------------------------------------------------------------------------------o
+
+All the keyframes of an animation are stored in this file. They are grouped by
+tracks (one track per animated bone) and contain the time, the relative position
+and the relative rotation to the parent bone.
+
+
+description                length  type      comments
+-------------------------  ------  --------  -----------------------------------
+[header]
+  magic token              4       const     "CAF\0"
+  file version             4       integer   1300
+  is compressed            4       integer   whether animation content is compressed (version 1300 and above)
+  duration                 4       float     length of animation in seconds
+  number of tracks         4       integer
+  flags                    4       integer   bit-wise OR flags (version 1300 and above)
+
+[first track]
+  bone id                  4       integer   index to bone
+  number of keyframes      4       integer
+
+  [first keyframe]
+    time                   4       float     time of keyframe in seconds
+    translation x          4       float     relative translation to parent bone
+    translation y          4       float
+    translation z          4       float
+    rotation x             4       float     relative rotation to parent bone
+    rotation y             4       float     stored as a quaternion
+    rotation z             4       float
+    rotation w             4       float
+
+  [all other keyframes]
+    ...
+
+[all other tracks]
+  ...
+
+
+o------------------------------------------------------------------------------o
+| 4 cal3d mesh file (.cmf) - not read by cocos3d                               |
+o------------------------------------------------------------------------------o
+
+This file contains all the mesh data, such as the weighted influences of the
+bones on each vertex. The mesh is splitted into submeshes to group faces with
+the same material thread.
+
+
+description                length  type      comments
+-------------------------  ------  --------  -----------------------------------
+[header]
+  magic token              4       const     "CMF\0"
+  file version             4       integer   700
+  number of submeshes      4       integer
+
+[first submesh]
+  material thread id       4       integer
+  number of vertices       4       integer
+  number of faces          4       integer
+  number of lod steps      4       integer   number of vertices to collapse
+  number of springs        4       integer   number of springs
+  number of maps           4       integer
+
+  [first vertex]
+    position x             4       float     position in model space
+    position y             4       float
+    position z             4       float
+    normal x               4       float     normal in model space
+    normal y               4       float
+    normal z               4       float
+    collapse id            4       integer   index to vertex to collapse to
+    face collapse count    4       integer   number of collapsing faces when
+                                             this vertex gets collapsed
+
+    [first map]
+      u coordinate         4       float     map coordinates
+      v coordinate         4       float
+
+    [all other maps]
+      ...
+
+    number of influences   4       integer
+
+    [first influence]
+      bone id              4       integer   index to bone
+      weight               4       float     weight of influence (1.0 == 100%)
+
+    [all other influences]
+      ...
+
+    {physical property (only stored when #springs > 0 !)]
+      weight               4       float     weight of vertex for cloth-/hair-
+                                             animation (0.0 == rigid)
+
+  [all other vertices]
+    ...
+
+  [first spring]
+    vertex id 1            4       integer   index to vertex
+    vertex id 2            4       integer   "
+    spring coefficient     4       float
+    idle length            4       float     rest length of the spring
+
+  [all other springs]
+    ...
+
+  [first face]
+    vertex id 1            4       integer   index to vertex
+    vertex id 2            4       integer   "
+    vertex id 3            4       integer   "
+
+  [all other faces]
+    ...
+
+[all other submeshes]
+  ...
+
+
+o------------------------------------------------------------------------------o
+| 5 cal3d material file (.crf) - not read by cocos3d                           |
+o------------------------------------------------------------------------------o
+
+Material properties like ambient, diffuse and specular color and the shininess
+factor are stored in this file. If the material contains texture maps, the
+(file-)names of the textures are stored here too.
+
+
+description                length  type      comments
+-------------------------  ------  --------  -----------------------------------
+[header]
+  magic token              4       const     "CRF\0"
+  file version             4       integer   700
+  ambient color red        1       byte
+  ambient color green      1       byte
+  ambient color blue       1       byte
+  ambient color alpha      1       byte
+  diffuse color red        1       byte
+  diffuse color green      1       byte
+  diffuse color blue       1       byte
+  diffuse color alpha      1       byte
+  specular color red       1       byte
+  specular color green     1       byte
+  specular color blue      1       byte
+  specular color alpha     1       byte
+  shininess                4       float
+  number of maps           4       integer
+
+  [first map]
+    length of texture name 4       integer
+    texture name           var     string    most likely a filename
+
+  {all other maps]
+    ...
+
+o-----------------------------------------------------------------------------o
+| 6 skeleton Xml file (.xsf) - not read by cocos3d                            |
+o-----------------------------------------------------------------------------o
+
+this is the text/Xml file format of cal3d skeleton file, 
+see cal3d skeleton file (.csf) for more information
+
+<HEADER MAGIC="XFS" VERSION="900"/>
+<SKELETON NUMBONES="INT">
+   <BONE ID="INT" NAME="STRING" NUMCHILD="INT">
+      <TRANSLATION>FLOAT FLOAT FLOAT</TRANSLATION>
+      <ROTATION>FLOAT FLOAT FLOAT FLOAT</ROTATION>
+      <LOCALTRANSLATION>FLOAT FLOAT FLOAT</LOCALTRANSLATION>
+      <LOCALROTATION>FLOAT FLOAT FLOAT FLOAT</LOCALROTATION>
+      <PARENTID>INT</PARENTID>
+      <CHILDID>INT</CHILDID>
+      ...             		{all other childs}
+    </BONE>
+    ...				{all other bones}
+</SKELETON>
+
+
+o-----------------------------------------------------------------------------o
+| 7 cal3d xml animation file (.xaf) - not read by cocos3d                     |
+o-----------------------------------------------------------------------------o
+
+this is the text/Xml file format of cal3d animation file, 
+see cal3d skeleton file (.csf) for more information
+
+<ANIMATION VERSION="1000" DURATION="FLOAT" NUMTRACKS="INT">
+   <TRACK BONEID="INT" NUMKEYFRAMES="INT">
+      <KEYFRAME TIME="FLOAT">
+         <TRANSLATION>FLOAT FLOAT FLOAT</TRANSLATION>
+         <ROTATION>FLOAT FLOAT FLOAT FLOAT</ROTATION>
+      </KEYFRAME>
+      ....                      {all other keyframes}
+   </TRACK>
+   ....                         {all other animation}
+</ANIMATION>
+
+o-----------------------------------------------------------------------------o
+| 8 cal3d xml mesh file (.xmf) - not read by cocos3d                          |
+o-----------------------------------------------------------------------------o
+
+this is the text/Xml file format of cal3d mesh file, 
+see cal3d mesh file (.cmf) for more information
+
+<MESH VERSION="1000" NUMSUBMESH="INT">
+   <SUBMESH MATERIAL="INT" NUMVERTICES="INT" NUMFACES="INT" NUMLODSTEPS="INT" NUMSPRINGS="INT" NUMTEXCOORDS="INT">
+       <VERTEX ID="INT" NUMINFLUENCES="INT">
+          <POS>FLOAT FLOAT FLOAT</POS>
+          <NORMFLOAT FLOAT FLOAT</NORM>
+          [<COLLAPSEID>INT</COLLAPSEID>]
+          [<COLLAPSECOUNT>INT</COLLAPSECOUNT>]
+          <TEXCOORD>FLOAT FLOAT</TEXCOORD>
+          ...                                 {all the other texture coordinates}
+          <INFLUENCE ID="INT">FLOAT FLOAT FLOAT</INFLUENCE>
+          ...                                 {all the other bone influances}
+          [<PHYSIQUE>FLOAT</PHYSIQUE>]
+       </VERTEX>
+       ....                                   {all the other vertices}
+       <SPRING VERTEXID="INT INT" COEF="FLOAT" LENGTH ="FLOAT"/>
+       ...                                    {all the other springs}
+       <FACE VERTEXID="INT INT INT"/>
+       ...                                    {all the other faces}
+    </SUBMESH>
+    ...
+</MESH>
+
+o-----------------------------------------------------------------------------o
+| 9 cal3d xml material file (.xrf) - not read by cocos3d                      |
+o-----------------------------------------------------------------------------o
+
+this is the text/Xml file format of cal3d material file, 
+see cal3d material file (.crf) for more information
+
+<MATERIAL VERSION="1000" NUMMAPS="INT">
+   <AMBIENT>FLOAT FLOAT FLOAT FLOAT</AMBIENT>
+   <DIFFUSE>FLOAT FLOAT FLOAT FLOAT</DIFFUSE>
+   <SPECULAR>FLOAT FLOAT FLOAT FLOAT</SPECULAR>
+   <SHININESS>FLOAT</SHININESS>
+   <MAP>STRING</MAP>
+   ...                     {all other maps}
+</MATERIAL>
+
+o-----------------------------------------------------------------------------o
+| 10 Website                                                                  |
+o-----------------------------------------------------------------------------o
+
+  The official website of cal3d can be found at: http://gna.org/projects/cal3d/
+
+
+o-----------------------------------------------------------------------------o
+| 11 Author                                                                   |
+o-----------------------------------------------------------------------------o
+
+  This document was written by Bruno 'Beosil' Heidelberger.
+  The XML format has been added by Laurent Desmecht.
+  Formats updated, and additional notes relevant to cocos3d added, by Bill Hollings.
+
+
+o-----------------------------------------------------------------------------o
+
+

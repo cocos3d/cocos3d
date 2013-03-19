@@ -32,9 +32,12 @@
 #import "CC3CSFResource.h"
 #import "CC3DataStreams.h"
 
+#define kCC3MaxCSFFileVersion		1300
+
+
 @implementation CC3CSFResource
 
-@synthesize allNodes=_allNodes, fileVersion=_fileVersion;
+@synthesize fileVersion=_fileVersion, allNodes=_allNodes, ambientLight=_ambientLight;
 
 -(void) dealloc {
 	[_allNodes release];
@@ -54,6 +57,7 @@
 		_allNodes = [[CCArray array] retain];
 		_fileVersion = -1;
 		_nodeCount = 0;
+		_ambientLight = kCCC4FBlack;
 	}
 	return self;
 }
@@ -94,9 +98,12 @@
 /** Reads and validates the content header. */
 -(BOOL)	readHeaderFrom: (CC3DataReader*) reader {
 	//	[header]
-	//		magic token              4       const     "CSF\0"
-	//		file version             4       integer   eg. 1000
-	//		number of bones          4       integer
+	//		magic token				   4       const     "CSF\0"
+	//		file version               4       integer   eg. 1300
+	//		number of bones            4       integer
+	//		ambient light red          4       float     scene ambient light color red (version 1300 and above)
+	//		ambient light green        4       float     scene ambient light color green (version 1300 and above)
+	//		ambient light blue         4       float     scene ambient light color blue (version 1300 and above)
 	
 	// Verify ile type
 	if (reader.readByte != 'C') return NO;
@@ -105,9 +112,20 @@
 	if (reader.readByte != '\0') return NO;
 	
 	_fileVersion = reader.readInteger;		// File version
-	_nodeCount = reader.readInteger;	// Number of nodes
+	CC3Assert(_fileVersion <= kCC3MaxCSFFileVersion,
+			  @"%@ cannot read CSF file format version %i. The maximum supported version is %i",
+			  self, _fileVersion, kCC3MaxCSFFileVersion);
+	
+	_nodeCount = reader.readInteger;		// Number of nodes
 
-	LogRez(@"Read header CSF version %i containing %i nodes", _fileVersion, _nodeCount);
+	if (_fileVersion >= 1300) {
+		_ambientLight.r = reader.readFloat;
+		_ambientLight.g = reader.readFloat;
+		_ambientLight.b = reader.readFloat;
+	}
+
+	LogRez(@"Read header CSF version %i containing %i nodes and ambient light color %@",
+		   _fileVersion, _nodeCount, NSStringFromCCC4F(_ambientLight));
 
 	return !reader.wasReadBeyondEOF;
 }
@@ -132,6 +150,10 @@
 	//		local rotation z         4       float
 	//		local rotation w         4       float
 	//		parent bone id           4       integer   index to parent bone
+	//		lighting type            4       integer   lighting type (version 1300 and above)
+	//		bone color red           4       float     bone color red (version 1300 and above)
+	//		bone color green         4       float     bone color green (version 1300 and above)
+	//		bone color blue          4       float     bone color blue (version 1300 and above)
 	//		number of children       4       integer
 	//		[children]
 	//			child bone id        4       integer   index to child bone
@@ -180,6 +202,16 @@
 	calNode.quaternion = quaternion;
 	calNode.calParentIndex = parentIndex;
 
+	// Bone color
+	ccColor4F boneColor = kCCC4FBlack;
+	if (_fileVersion >= 1300) {
+		[reader readInteger];				// Lighting type - ignored
+		boneColor.r = reader.readFloat;
+		boneColor.g = reader.readFloat;
+		boneColor.b = reader.readFloat;
+		calNode.diffuseColor = boneColor;
+	}
+
 	// Skip through the indexes of all the children. This content is ignored.
 	NSInteger childCount = reader.readInteger;
 	for (NSInteger i = 0; i < childCount; i++) [reader readInteger];
@@ -187,8 +219,8 @@
 	// Add the node to the collection of unstructured nodes
 	[_allNodes addObject: calNode];
 
-	LogTrace(@"Loaded node named %@ with CAL index %i, parent index %i, location %@, quaternion %@, vertex translation %@, vertex quaternion %@",
-			 nodeName, nodeIdx, parentIndex, NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion),
+	LogTrace(@"Loaded node named %@ with CAL index %i, parent index %i, color %@, location %@, quaternion %@, vertex translation %@, vertex quaternion %@",
+			 nodeName, nodeIdx, parentIndex, NSStringFromCCC4F(boneColor), NSStringFromCC3Vector(location), NSStringFromCC3Quaternion(quaternion),
 			 NSStringFromCC3Vector(vtxTranslation), NSStringFromCC3Quaternion(vtxQuaternion));
 
 	return !reader.wasReadBeyondEOF;

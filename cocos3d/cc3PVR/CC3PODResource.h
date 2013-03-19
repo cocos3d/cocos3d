@@ -195,10 +195,10 @@
 /** The frame rate of animation in the POD file, in frames per second. */
 @property(nonatomic, readonly) GLfloat animationFrameRate;
 
-/** The global ambient light of the scene in the POD file. */
+/** The color of the ambient light in the scene. */
 @property(nonatomic, readonly) ccColor4F ambientLight;
 
-/** The background color of the scene in the POD file. */
+/** The background color of the scene. */
 @property(nonatomic, readonly) ccColor4F backgroundColor;
 
 /**

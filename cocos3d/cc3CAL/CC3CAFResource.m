@@ -33,10 +33,13 @@
 #import "CC3DataStreams.h"
 #import "CC3VertexSkinning.h"
 
+#define kCC3MaxCAFFileVersion		1300
+
 
 @implementation CC3CAFResource
 
-@synthesize animationDuration=_animationDuration, fileVersion=_fileVersion;
+@synthesize fileVersion=_fileVersion, animationDuration=_animationDuration;
+@synthesize isCompressed=_isCompressed, flags=_flags;
 @synthesize wasCSFResourceAttached=_wasCSFResourceAttached;
 @synthesize shouldSwapYZ=_shouldSwapYZ;
 
@@ -63,6 +66,8 @@ static BOOL _defaultShouldSwapYZ = YES;
 		_animationDuration = 0;
 		_wasCSFResourceAttached = NO;
 		_shouldSwapYZ = self.class.defaultShouldSwapYZ;
+		_isCompressed = NO;
+		_flags = 0;
 	}
 	return self;
 }
@@ -124,8 +129,10 @@ static BOOL _defaultShouldSwapYZ = YES;
 	//	[header]
 	//		magic token              4       const     "CAF\0"
 	//		file version             4       integer   eg. 1000
+	//		is compressed            4       integer   whether animation content is compressed (version 1300 and above)
 	//		duration                 4       float     length of animation in seconds
 	//		number of tracks         4       integer
+	//		flags                    4       integer   bit-wise OR flags (version 1300 and above)
 	
 	// Verify ile type
 	if (reader.readByte != 'C') return NO;
@@ -134,13 +141,24 @@ static BOOL _defaultShouldSwapYZ = YES;
 	if (reader.readByte != '\0') return NO;
 	
 	_fileVersion = reader.readInteger;		// File version
-	_animationDuration = reader.readFloat;	// Animation duration
+	CC3Assert(_fileVersion <= kCC3MaxCAFFileVersion,
+			  @"%@ cannot read CAF file format version %i. The maximum supported version is %i",
+			  self, _fileVersion, kCC3MaxCAFFileVersion);
 	
+	if (_fileVersion >= 1300) _isCompressed = reader.readInteger;
+	CC3Assert( !_isCompressed, @"%@ cannot read compressed animation content."
+			  @" Re-export the CAF file with uncompressed animation content.", self);
+
+	_animationDuration = reader.readFloat;	// Animation duration
+
 	// Number of nodes (tracks)
 	_nodeCount = reader.readInteger;
+	
+	if (_fileVersion >= 1300) _flags = reader.readInteger;		// Flags - ignored
 
-	LogRez(@"Read header CAF version %i with duration %.3f seconds and containing %i nodes",
-		   _fileVersion, _animationDuration, _nodeCount);
+	LogRez(@"Read header CAF version %i with %@compressed animation of duration %.3f seconds"
+		   @" and containing %i nodes and format flags %d",
+		   _fileVersion, (_isCompressed ? @"" : @"un"), _animationDuration, _nodeCount, _flags);
 
 	return !reader.wasReadBeyondEOF;
 }

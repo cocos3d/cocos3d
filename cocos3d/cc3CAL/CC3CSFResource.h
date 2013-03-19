@@ -39,10 +39,14 @@
 	CCArray* _allNodes;
 	NSInteger _nodeCount;
 	NSInteger _fileVersion;
+	ccColor4F _ambientLight;
 }
 
 /** The file format version, extracted from the file. */
 @property(nonatomic, readonly) NSInteger fileVersion;
+
+/** The color of the ambient light in the scene. */
+@property(nonatomic, readonly) ccColor4F ambientLight;
 
 /**
  * A collection of all of the nodes extracted from the CSF file.
