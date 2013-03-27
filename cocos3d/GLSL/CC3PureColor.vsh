@@ -92,7 +92,7 @@ struct Matrices {
 struct Bones {
 	lowp int	bonesPerVertex;									/**< Number of bones influencing each vertex. */
 	highp mat4	matricesEyeSpace[MAX_BONES_PER_VERTEX];			/**< Array of bone matrices in the current mesh skin section in eye space. */
-	mat3		matricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
+//	mat3		matricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 //	highp mat4	matricesGlobal[MAX_BONES_PER_VERTEX];			/**< Array of bone matrices in the current mesh skin section in global coordinates. */
 //	mat3		matricesInvTranGlobal[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates. */
 };

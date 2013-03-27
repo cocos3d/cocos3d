@@ -32,7 +32,6 @@
 #import "CC3PVRShamanGLProgramSemantics.h"
 #import "CC3Light.h"
 #import "CC3Scene.h"
-#import "CC3OpenGLESEngine.h"
 
 
 NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
@@ -62,8 +61,6 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 /** Handles populating PVRShaman-specific content and delegates remainder to the standard population mechanisms.  */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ retrieving semantic value for %@", self, uniform.fullDescription);
-	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
-	CC3OpenGLESLight* glesLight;
 	GLenum semantic = uniform.semantic;
 	GLuint semanticIndex = uniform.semanticIndex;
 	GLint uniformSize = uniform.size;
@@ -76,11 +73,8 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 		// Sets a vec2, specific to PVRShaman, that combines the falloff angle (in degrees) and exponent
 		case kCC3PVRShamanSemanticLightSpotFalloff:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				glesLight = [glesEngine.lighting lightAt: (semanticIndex + i)];
-				if (glesLight.isEnabled)
-					[uniform setPoint: ccp(glesLight.spotCutoffAngle.value,
-										   glesLight.spotExponent.value)
-								   at: i];
+				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
+				[uniform setPoint: ccp(light.spotCutoffAngle, light.spotExponent) at: i];
 			}
 			return YES;
 		case kCC3PVRShamanSemanticElapsedTimeLastFrame:

@@ -629,23 +629,15 @@
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Disables the specified texture unit in the GL engine.
- *
- * The texture unit value should be a number between zero and the maximum number of texture
- * units, which can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
- */
-+(void) unbind: (GLuint) texUnit;
-
-/**
  * Disables all texture units between the specified texture unit index and the number of
  * texture units that are in use in this application. This method is automatically invoked
  * by the material to disable all texture units that are not used by the texture or textures
  * contained within the material.
  */
-+(void) unbindRemainingFrom: (GLuint)textureUnit;
++(void) unbindRemainingFrom: (GLuint) texUnit  withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Disables all texture units in the GL engine */
-+(void) unbind;
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 @end
 

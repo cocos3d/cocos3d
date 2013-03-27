@@ -126,9 +126,9 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * the material, with a texture unit that defines how that addtional texture is to be
  * combined with the output of the bump-mapped texture.
  *
- * The maximum number of texture units is platform dependent, and can be read from
- * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. This effectively defines
- * how many textures you can add to a material.
+ * The maximum number of texture units is platform dependent, and can be read from the
+ * CC3OpenGL.sharedGL.maxNumberOfTextureUnits property. This effectively defines how many
+ * textures you can add to a material.
  *
  * You'll notice that there are two ways to assign textures to a material: through the
  * texture propety, and through the addTexture: method. The texture property exists for
@@ -533,10 +533,6 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * decorate this material.
  *
  * This property is used only when running under OpenGL ES 2.
- *
- * When running under OpenGL ES 2, the initial value of this property is set to a context containing
- * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
- * OpenGL ES 1, the initial value of this property is nil.
  */
 @property(nonatomic, retain) CC3GLProgramContext* shaderContext;
 
@@ -551,10 +547,6 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * to nil will set the shaderContext property to nil as well.
  *
  * This property is used only when running under OpenGL ES 2.
- *
- * When running under OpenGL ES 2, the initial value of this property is set to the program
- * returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
- * OpenGL ES 1, the initial value of this property is nil.
  */
 @property(nonatomic, retain) CC3GLProgram* shaderProgram;
 
@@ -608,11 +600,11 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * by GL texture unit zero. Subsequent textures added with this method will be processed
  * by subsequent texture units, in the order they were added.
  *
- * The maximum number of texture units available is platform dependent, but will
- * be at least two. The maximum number of texture units available can be read from
- * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. If you attempt to
- * add more than this number of textures to the material, the additional textures
- * will be ignored, and an informational message to that fact will be logged.
+ * The maximum number of texture units available is platform dependent, but will be
+ * at least two. The maximum number of texture units available can be read from the
+ * CC3OpenGL.sharedGL.maxNumberOfTextureUnits property. If you attempt to add more than
+ * this number of textures to the material, the additional textures will be ignored,
+ * and an informational message to that fact will be logged.
  *
  * Once this material has been added to a mesh node, new textures should be added
  * through the same method on the mesh node itself, instead of this method, in order
@@ -791,7 +783,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * This implementation simply delegates to the unbind class method.
  * Usually, the application never needs to invoke this method directly.
  */
--(void) unbind;
+-(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Unbinds all materials from the GL engine.
@@ -802,7 +794,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
  * This method is invoked automatically from the CC3Node instance.
  * Usually, the application never needs to invoke this method directly.
  */
-+(void) unbind;
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Material context switching

@@ -41,7 +41,6 @@
 #import "CGPointExtension.h"
 #import "CCTouchDispatcher.h"
 #import "CCParticleExamples.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3PODNode.h"
 #import "CC3PODResourceNode.h"
 #import "CC3BoundingVolumes.h"

@@ -250,11 +250,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * Populates the specified uniform, if possible, and returns whether the uniform was populated.
  *
  * The semantic, semanticIndex and size properties of the specified uniform can be used to
- * determine what content is expected by the GLSL program for that uniform. The implementor
- * then retrieves the required content from the GL state caches found via the CC3OpenGLESEngine
- * state machine structures, or from the scene content accessed via the specified visitor.
+ * determine what content is expected by the GLSL program for that uniform. The implementation
+ * then retrieves the required content from the scene content accessed via the specified visitor.
  *
- * The specified visitor can be used to access content within the scene, and contains several
+ * To permit access to content within the scene, the specified visitor contains several 
  * convenience properties for accessing typical content, including currentMeshNode,
  * currentMaterial, textureUnitCount, camera, and scene properties, and a lightAt: method.
  *

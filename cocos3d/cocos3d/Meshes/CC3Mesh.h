@@ -357,9 +357,8 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * reference a set of bones that influence the location of that vertex.
  *
  * The elementSize property of the vertex arrays in the vertexWeights and vertexMatrixIndices
- * properties must be the same, and must not be larger than the maximum number of available
- * vertex units for the platform, which can be retreived from
- * [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ * properties must be the same, and must not be larger than the maximum number of available vertex
+ * units for the platform, which can be retreived from CC3OpenGL.sharedGL.maxNumberOfVertexUnits.
  */
 @property(nonatomic,retain) CC3VertexMatrixIndices* vertexMatrixIndices;
 
@@ -377,9 +376,8 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * the vertexMatrixIndices property has on transforming the location of the vertex.
  *
  * The elementSize property of the vertex arrays in the vertexWeights and vertexMatrixIndices
- * properties must be the same, and must not be larger than the maximum number of available
- * vertex units for the platform, which can be retreived from
- * [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ * properties must be the same, and must not be larger than the maximum number of available vertex
+ * units for the platform, which can be retreived from CC3OpenGL.sharedGL.maxNumberOfVertexUnits.
  */
 @property(nonatomic,retain) CC3VertexWeights* vertexWeights;
 

@@ -31,7 +31,7 @@
 
 extern "C" {
 	#import "CC3Foundation.h"	// extern must be first, since foundation also imported via other imports
-	#import "CC3OpenGLESFoundation.h"
+	#import "CC3OpenGLFoundation.h"
 	#import "CC3Matrix4x4.h"
 }
 #import "CC3PVRFoundation.h"

@@ -200,14 +200,6 @@ typedef enum {
  * You can also cause the name of the node to be displayed where the node is by setting 
  * the shouldDrawDescriptor property to YES. This is also useful for locating a node when
  * debugging rendering problems.
- *
- * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
- * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLESEngine singleton. When adding or overriding functionality
- * in this framework, do NOT make gl* function calls directly if there is a corresponding
- * state change tracker in the CC3OpenGLESEngine singleton. Route the state change request
- * through the CC3OpenGLESEngine singleton instead.
  */
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	CCArray* children;
@@ -1471,10 +1463,6 @@ typedef enum {
  * be used on each descendant node.
  *
  * This property is used only when running under OpenGL ES 2.
- *
- * When running under OpenGL ES 2, the initial value of this property is set to a context containing
- * the program returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
- * OpenGL ES 1, the initial value of this property is nil.
  */
 @property(nonatomic, retain) CC3GLProgramContext* shaderContext;
 
@@ -1494,10 +1482,6 @@ typedef enum {
  * uniform overrides made to the shader context will be applied to all nodes that share the context.
  *
  * This property is used only when running under OpenGL ES 2.
- *
- * When running under OpenGL ES 2, the initial value of this property is set to the program
- * returned from CC3OpenGLESEngine.engine.shaders.defaultProgram. When running under
- * OpenGL ES 1, the initial value of this property is nil.
  */
 @property(nonatomic, retain) CC3GLProgram* shaderProgram;
 

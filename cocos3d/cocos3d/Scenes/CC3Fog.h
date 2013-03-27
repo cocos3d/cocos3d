@@ -30,6 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Foundation.h"
+#import "CC3NodeVisitor.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
 
@@ -205,13 +206,13 @@
 #pragma mark Drawing
 
 /** If the visible property is set to YES, draws the fog to the GL engine. */
--(void) draw;
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Disables the rendering of fog in the GL engine. */
--(void) unbind;
+-(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Disables the rendering of fog in the GL engine. */
-+(void) unbind;
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark CC3Node actions

@@ -32,7 +32,6 @@
 #import "CC3ShadowVolumes.h"
 #import "CC3Scene.h"
 #import "CC3ParametricMeshNodes.h"
-#import "CC3OpenGLESEngine.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -765,7 +764,7 @@
 /** Overridden to set the line properties in addition to other configuration. */
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
 	[super configureDrawingParameters: visitor];
-	if (shouldDrawTerminator) [CC3OpenGLESEngine engine].state.lineWidth.value = 1.0f;
+	if (shouldDrawTerminator) visitor.gl.lineWidth = 1.0f;
 }
 
 -(void) drawToStencilWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -798,7 +797,7 @@
 	}
 
 	// Configure the stencil buffer operations
-	[CC3OpenGLESEngine.engine.state.stencilOperation applyStencilFail: GL_KEEP andDepthFail: zFailOp andDepthPass: zPassOp];
+	[visitor.gl setOpOnStencilFail: GL_KEEP onDepthFail: zFailOp onDepthPass: zPassOp];
 	
 	// Remember current culling configuration for this shadow volume
 	BOOL wasCullingBackFaces = self.shouldCullBackFaces;

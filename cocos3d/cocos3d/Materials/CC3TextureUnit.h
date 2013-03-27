@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3OpenGLESTextures.h"
+//#import "CC3OpenGLESTextures.h"
 #import "CC3NodeVisitor.h"
 #import "CCProtocols.h"
 
@@ -194,20 +194,12 @@ typedef enum {
 #pragma mark Drawing
 
 /**
- * Template method that binds the configuration of this texture unit to the
- * specified GL texture unit.
- *
- * This implementation simply sets the combining function to the default value of
- * GL_MODULATE, and sets the texture constant color to that of the constantColor
- * property. This is the same functionality provided by the unbindFrom: method when
- * no texture unit configuration is present. Subclasses will override to provide
- * more interesting combining techniques.
+ * Template method that binds the configuration of this texture unit to the GL engine.
  *
  * The visitor provides additional configuration information that can be
  * used by subclass overrides of this method.
  */
--(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit
-   withVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Automatically invoked from CC3Texture when no texture unit configuration is
@@ -216,7 +208,7 @@ typedef enum {
  * In the GL engine, sets the combining function to the default value of GL_MODULATE,
  * and the texture constant color to the default value of kCCC4FBlackTransparent.
  */
-+(void) bindDefaultTo: (CC3OpenGLESTextureUnit*) glesTexUnit;
++(void) bindDefaultWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 @end
 

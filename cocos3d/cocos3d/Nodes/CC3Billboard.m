@@ -30,7 +30,6 @@
  */
 
 #import "CC3Billboard.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3Mesh.h"
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
@@ -187,9 +186,8 @@
 
 /** Also sets color of billboard if it can be set. */
 -(void) setColor: (ccColor3B) color {
-	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)]) {
+	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 		[((id<CCRGBAProtocol>)billboard) setColor: color];
-	}
 	[super setColor: color];
 }
 
@@ -202,9 +200,8 @@
 
 /** Also sets opacity of billboard if it can be set. */
 -(void) setOpacity: (GLubyte) opacity {
-	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)]) {
+	if ([billboard conformsToProtocol: @protocol(CCRGBAProtocol)])
 		[((id<CCRGBAProtocol>)billboard) setOpacity: opacity];
-	}
 	[super setOpacity: opacity];
 }
 
@@ -491,12 +488,15 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 /**
- * During normal drawing, establish 2D drawing environment.
+ * During normal drawing, establish 2D drawing environment. This is done befoe
  * Don't configure anything if painting for node picking.
  */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super configureMaterialWithVisitor: visitor];
-	if (visitor.shouldDecorateNode) [visitor.scene close3D];
+	if (visitor.shouldDecorateNode) {
+		[visitor.scene close3DWithVisitor: visitor];
+		visitor.gl.depthMask = !shouldDisableDepthMask;
+	}
 }
 
 /**
@@ -528,8 +528,8 @@ static GLfloat deviceScaleFactor = 0.0f;
  * Don't configure anything if painting for node picking.
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) [visitor.scene open3DWithVisitor: visitor];	// Before super
 	[super cleanupDrawingParameters: visitor];
-	if (visitor.shouldDecorateNode) [visitor.scene open3D];
 }
 
 /** If the bounding mesh exists, update its vertices to match the bounding box of the 2D node. */
@@ -812,7 +812,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 /** Overridden to add setting the point size attenuation parameters. */
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
 	[super configureDrawingParameters: visitor];
-	[CC3OpenGLESEngine engine].state.pointSizeAttenuation.value = *(CC3Vector*)&_particleSizeAttenuation;
+	visitor.gl.pointSizeAttenuation = _particleSizeAttenuation;
 }
 
 @end

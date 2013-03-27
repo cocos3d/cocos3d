@@ -30,7 +30,6 @@
  */
 
 #import "CC3Mesh.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3IOSExtensions.h"
 
 NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
@@ -250,9 +249,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {
 	CC3Assert(vtxTexCoords, @"Overlay texture cannot be nil");
 	CC3Assert(!_overlayTextureCoordinates || ((_overlayTextureCoordinates.count + 1) <
-											  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value),
+											  CC3OpenGL.sharedGL.maxNumberOfTextureUnits),
 			  @"Too many overlaid textures. This platform only supports %i texture units.",
-			  [CC3OpenGLESEngine engine].platform.maxTextureUnits.value);
+			  CC3OpenGL.sharedGL.maxNumberOfTextureUnits);
 	LogTrace(@"Adding %@ to %@", vtxTexCoords, self);
 	
 	// Set the first texture coordinates into vertexTextureCoordinates
@@ -1371,8 +1370,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Binding %@", self);
-	CC3OpenGLESVertexArrays* glesVtxArrays = CC3OpenGLESEngine.engine.vertices;
-	[glesVtxArrays clearUnboundVertexPointers];
+	CC3OpenGL* gl = visitor.gl;
+	[gl clearUnboundVertexAttributes];
 	
 	[self bindLocationsWithVisitor: visitor];
 	[self bindNormalsWithVisitor: visitor];
@@ -1385,7 +1384,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	[self bindBoneMatrixIndicesWithVisitor: visitor];
 	[self bindBoneWeightsWithVisitor: visitor];
 	
-	[glesVtxArrays disableUnboundVertexPointers];
+	[gl disableUnboundVertexAttributes];
 }
 
 /** Template method that binds a pointer to the vertex location content to the GL engine. */

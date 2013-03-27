@@ -30,19 +30,10 @@
  */
 
 #import "CC3Material.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3GLProgramMatchers.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
-
-@interface CC3Material (TemplateMethods)
--(void) texturesHaveChanged;
--(void) applyAlphaTest;
--(void) applyBlend;
--(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(BOOL) switchingMaterial;
-@end
 
 @implementation CC3Material
 
@@ -237,7 +228,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		CC3Assert(aTexture, @"%@ cannot add a nil overlay texture", self);
 		if(!_textureOverlays) _textureOverlays = [[CCArray array] retain];
 
-		GLint maxTexUnits = [CC3OpenGLESEngine engine].platform.maxTextureUnits.value;
+		GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 		if (self.textureCount < maxTexUnits) {
 			[_textureOverlays addObject: aTexture];
 		} else {
@@ -461,8 +452,8 @@ static GLuint lastAssignedMaterialTag;
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ([self switchingMaterial]) {
 		LogTrace(@"Drawing %@", self);
-		[self applyAlphaTest];
-		[self applyBlend];
+		[self applyAlphaTestWithVisitor: visitor];
+		[self applyBlendWithVisitor: visitor];
 		[self applyColorsWithVisitor: visitor];
 		[self drawTexturesWithVisitor: visitor];
 	} else {
@@ -475,24 +466,22 @@ static GLuint lastAssignedMaterialTag;
  * the alphaTestFunction indicates that alpha testing should occur, and applies the
  * alphaTestFunction and alphaTestReference properties.
  */
--(void) applyAlphaTest {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+-(void) applyAlphaTestWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
 	BOOL shouldAlphaTest = (_alphaTestFunction != GL_ALWAYS);
-	glesEngine.capabilities.alphaTest.value = shouldAlphaTest;
-	if (shouldAlphaTest) [glesEngine.materials.alphaFunc applyFunction: _alphaTestFunction
-														  andReference: _alphaTestReference];
+	[gl enableAlphaTesting: shouldAlphaTest];
+	if (shouldAlphaTest) [gl setAlphaFunc: _alphaTestFunction reference: _alphaTestReference];
 }
 
 /**
  * Enables or disables blending in the GL engine, depending on the whether or not this
  * instance is opaque or not, and applies the sourceBlend and destinationBlend properties.
  */
--(void) applyBlend {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+-(void) applyBlendWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
 	BOOL shouldBlend = !self.isOpaque;
-	glesEngine.capabilities.blend.value = shouldBlend;
-	if (shouldBlend) [glesEngine.materials.blendFunc applySource: _blendFunc.src
-												  andDestination: _blendFunc.dst];
+	[gl enableBlend: shouldBlend];
+	if (shouldBlend) [gl setBlendFuncSrc: _blendFunc.src dst: _blendFunc.dst];
 }
 
 /**
@@ -500,19 +489,18 @@ static GLuint lastAssignedMaterialTag;
  * the GL engine, otherwise turns lighting off and applies diffuse color as a flat color.
  */
 -(void) applyColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
+	CC3OpenGL* gl = visitor.gl;
 	if (_shouldUseLighting) {
-		[glesEngine.capabilities.lighting enable];
-		CC3OpenGLESMaterials* glesMaterials = glesEngine.materials;
-		glesMaterials.ambientColor.value = self.effectiveAmbientColor;
-		glesMaterials.diffuseColor.value = self.effectiveDiffuseColor;
-		glesMaterials.specularColor.value = self.effectiveSpecularColor;
-		glesMaterials.emissionColor.value = self.effectiveEmissionColor;
-		glesMaterials.shininess.value = self.shininess;
+		[gl enableLighting: YES];
+		gl.materialAmbientColor = self.effectiveAmbientColor;
+		gl.materialDiffuseColor = self.effectiveDiffuseColor;
+		gl.materialSpecularColor = self.effectiveSpecularColor;
+		gl.materialEmissionColor = self.effectiveEmissionColor;
+		gl.materialShininess = self.shininess;
 	} else {
-		[glesEngine.capabilities.lighting disable];
-		visitor.currentColor = self.effectiveDiffuseColor;
+		[gl enableLighting: NO];
 	}
+	visitor.currentColor = self.effectiveDiffuseColor;
 }
 
 /**
@@ -527,19 +515,21 @@ static GLuint lastAssignedMaterialTag;
 
 	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
 	
-	[CC3Texture	unbindRemainingFrom: visitor.textureUnit];
+	[CC3Texture	unbindRemainingFrom: visitor.textureUnit withVisitor: visitor];
 	visitor.textureUnitCount = visitor.textureUnit;
 }
 
--(void) unbind { [[self class] unbind]; }
+-(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self.class unbindWithVisitor: visitor];
+}
 
-+(void) unbind {
-	CC3OpenGLESCapabilities* glesServCaps = CC3OpenGLESEngine.engine.capabilities;
-	[glesServCaps.lighting disable];
-	[glesServCaps.blend disable];
-	[glesServCaps.alphaTest disable];
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableLighting: NO];
+	[gl enableBlend: NO];
+	[gl enableAlphaTesting: NO];
 	[self resetSwitching];
-	[CC3Texture unbind];
+	[CC3Texture unbindWithVisitor: visitor];
 }
 
 

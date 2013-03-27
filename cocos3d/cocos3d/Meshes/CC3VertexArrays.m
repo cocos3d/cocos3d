@@ -32,7 +32,6 @@
 #import "CC3VertexArrays.h"
 #import "CC3Mesh.h"
 #import "CC3OpenGLESUtility.h"
-#import "CC3OpenGLESEngine.h"
 
 
 #pragma mark -
@@ -62,15 +61,6 @@
 
 #pragma mark -
 #pragma mark CC3VertexArray
-
-@interface CC3VertexArray (TemplateMethods)
--(BOOL) allocateVertexCapacity: (GLuint) vtxCount;
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) verticesWereChanged;
-@property(nonatomic, readonly) GLuint availableVertexCount;
-@end
-
 
 @implementation CC3VertexArray
 
@@ -351,21 +341,21 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) createGLBuffer {
 	if (_shouldAllowVertexBuffering && !_bufferID) {
-		CC3OpenGLESVertexArrays* glesVertices = [CC3OpenGLESEngine engine].vertices;
-		CC3OpenGLESStateTrackerArrayBufferBinding* bufferBinding = [glesVertices bufferBinding: self.bufferTarget];
-		
-		_bufferID = [glesVertices generateBuffer];
-		LogTrace(@"%@ creating GL server buffer with ID %i", self, _bufferID);
+		CC3OpenGL* gl = CC3OpenGL.sharedGL;
+		GLenum targBuf = self.bufferTarget;
 		GLsizeiptr buffSize = self.vertexStride * self.availableVertexCount;
-		bufferBinding.value = _bufferID;
-		[bufferBinding loadBufferData: _vertices ofLength: buffSize forUse: _bufferUsage];
+		
+		_bufferID = [gl generateBuffer];
+		[gl bindBuffer: _bufferID toTarget: targBuf];
+		[gl loadBufferTarget: targBuf withData: _vertices ofLength: buffSize forUse: _bufferUsage];
+		
 		GLenum errCode = glGetError();
 		if (errCode) {
 			LogInfo(@"%@ could not create GL buffer with ID %i of type %@ because of %@. Using local memory arrays instead.",
 					self, self.bufferID, NSStringFromGLEnum(self.bufferTarget), GetGLErrorText(errCode));
 			[self deleteGLBuffer];
 		}
-		[bufferBinding unbind];
+		[gl unbindBufferTarget: targBuf];
 	} else {
 		LogTrace(@"%@ NOT creating GL server buffer because shouldAllowVertexBuffering is %@ or buffer ID already set to %i",
 				 self, NSStringFromBoolean(_shouldAllowVertexBuffering), _bufferID);
@@ -374,14 +364,17 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) updateGLBufferStartingAt: (GLuint) offsetIndex forLength: (GLuint) vtxCount {
 	if (_bufferID) {
-		CC3OpenGLESStateTrackerArrayBufferBinding* bufferBinding;
+		CC3OpenGL* gl = CC3OpenGL.sharedGL;
+		GLenum targBuf = self.bufferTarget;
 		GLuint vtxStride = self.vertexStride;
-		bufferBinding = [[CC3OpenGLESEngine engine].vertices bufferBinding: self.bufferTarget];
-		bufferBinding.value = _bufferID;
-		[bufferBinding updateBufferData: _vertices
-							 startingAt: (offsetIndex * vtxStride)
-							  forLength: (vtxCount * vtxStride)];
-		[bufferBinding unbind];
+
+		[gl bindBuffer: _bufferID toTarget: targBuf];
+		[gl updateBufferTarget: targBuf
+					  withData: _vertices
+					startingAt: (offsetIndex * vtxStride)
+					 forLength: (vtxCount * vtxStride)];
+		[gl unbindBufferTarget: targBuf];
+
 		LogTrace(@"%@ updated GL server buffer with %i bytes starting at %i",
 				 self, (vtxCount * vtxStride), (offsetIndex * vtxStride));
 	}
@@ -392,7 +385,7 @@ static GLuint lastAssignedVertexArrayTag;
 -(void) deleteGLBuffer {
 	if (_bufferID) {
 		LogTrace(@"%@ deleting GL server buffer ID %i", self, bufferID);
-		[[CC3OpenGLESEngine engine].vertices deleteBuffer: _bufferID];
+		[CC3OpenGL.sharedGL deleteBuffer: _bufferID];
 		_bufferID = 0;
 	}
 }
@@ -416,27 +409,23 @@ static GLuint lastAssignedVertexArrayTag;
  * Template method that binds the GL engine to the underlying vertex data,
  * in preparation for drawing.
  *
- * If the data has been copied into a VBO in GL memory, binds the GL engine to the bufferID
- * property, and invokes bindPointer: with the value of the elementOffset property.
- * If a VBO is not used, unbinds the GL from any VBO's, and invokes bindPointer: with a pointer
- * to the first data element managed by this vertex array instance.
+ * If the data has been copied into a VBO in GL memory, binds the GL engine to the bufferID property,
+ * and invokes bindVertexAttributes:withVisitor: with the value of the elementOffset property. If a
+ * VBO is not used, unbinds the GL from any VBO's, and invokes bindVertexAttributes:withVisitor: with
+ * a pointer to the first data element managed by this vertex array instance.
  */
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_bufferID) {											// use GL buffer if it exists
 		LogTrace(@"%@ binding GL buffer containing %u vertices", self, _vertexCount);
-		[CC3OpenGLESEngine.engine.vertices bufferBinding: self.bufferTarget].value = _bufferID;
-		[self bindPointer: (GLvoid*)_elementOffset withVisitor: visitor];
+		[visitor.gl bindBuffer: _bufferID toTarget: self.bufferTarget];
+		[self bindVertexAttributes: (GLvoid*)_elementOffset withVisitor: visitor];
 	} else if (_vertexCount && _vertices) {					// use local client array if it exists
 		LogTrace(@"%@ using local array containing %u vertices", self, _vertexCount);
-		[[CC3OpenGLESEngine.engine.vertices bufferBinding: self.bufferTarget] unbind];
-		[self bindPointer: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
+		[visitor.gl unbindBufferTarget: self.bufferTarget];
+		[self bindVertexAttributes: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
 	} else {
 		LogTrace(@"%@ no vertices to bind", self);
 	}
-}
-
--(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
-	return [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: _semantic];
 }
 
 /**
@@ -444,12 +433,16 @@ static GLuint lastAssignedVertexArrayTag;
  * and vertexStride properties, along with the specified data pointer, and enables the
  * type of aspect managed by this instance (locations, normals...) in the GL engine.
  */
--(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self.vertexPointer bindElementsAt: pointer
-							  withSize: _elementSize
-							  withType: _elementType
-							withStride: _vertexStride
-				   withShouldNormalize: _shouldNormalizeContent];
+-(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	GLuint vaIdx = [gl vertexAttributeIndexForSemantic: _semantic withVisitor: visitor];
+	[gl enableVertexAttribute: YES at: vaIdx];
+	[gl bindVertexAttributes: pointer
+					withSize: _elementSize
+					withType: _elementType
+				  withStride: _vertexStride
+		 withShouldNormalize: _shouldNormalizeContent
+						  at: vaIdx];
 }
 
 
@@ -583,6 +576,7 @@ static GLuint lastAssignedVertexArrayTag;
 		GLuint startOfStrip = 0;
 		for (GLuint i = 0; i < _stripCount; i++) {
 			GLuint stripLen = _stripLengths[i];
+			LogTrace(@"%@ drawing strip %u of %u starting at %u for length %u", self, i, _stripCount, startOfStrip, stripLen);
 			[self drawFrom: startOfStrip forCount: stripLen withVisitor: visitor];
 			startOfStrip += stripLen;
 		}
@@ -989,11 +983,12 @@ static GLuint lastAssignedVertexArrayTag;
 
 #pragma mark Drawing
 
--(CC3OpenGLESStateTrackerVertexPointer*) vertexPointer {
-	CC3OpenGLESStateTrackerVertexPointer* vtxPtr = super.vertexPointer;
-	CC3Assert(vtxPtr, @"%@ could not retrieve the vertex pointer for semantic %@. Vertex locations are required for drawing.",
+/** Ensure that vertex locations can be bound. */
+-(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3Assert([visitor.gl vertexAttributeIndexForSemantic: _semantic withVisitor: visitor] >= 0,
+			  @"%@ could not retrieve the vertex attributes for semantic %@. Vertex locations are required for drawing.",
 			  self, NSStringFromCC3Semantic(_semantic));
-	return vtxPtr;
+	[super bindVertexAttributes: pointer withVisitor: visitor];
 }
 
 /** Overridden to ensure the bounding box and radius are built before releasing the vertices. */
@@ -1009,9 +1004,7 @@ static GLuint lastAssignedVertexArrayTag;
 	[super drawFrom: vtxIdx forCount: vtxCount withVisitor: visitor];
 
 	GLuint firstVertex = self.firstElement + (self.vertexStride * vtxIdx);
-	[[CC3OpenGLESEngine engine].vertices drawVerticiesAs: _drawingMode
-												startingAt: firstVertex
-												withLength: vtxCount];
+	[visitor.gl drawVerticiesAs: _drawingMode startingAt: firstVertex withLength: vtxCount];
 }
 
 
@@ -1138,12 +1131,12 @@ static GLuint lastAssignedVertexArrayTag;
  * the covers, we won't really know what the ambient and diffuse material color values will
  * be when we get back to setting them...so indicate that to the corresponding trackers.
  */
--(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super bindPointer:pointer withVisitor:visitor];
+-(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super bindVertexAttributes:pointer withVisitor:visitor];
 	
-	CC3OpenGLESMaterials* glesMaterials = CC3OpenGLESEngine.engine.materials;
-	glesMaterials.ambientColor.valueIsKnown = NO;
-	glesMaterials.diffuseColor.valueIsKnown = NO;
+	CC3OpenGL* gl = visitor.gl;
+	gl->isKnownMat_GL_AMBIENT = NO;
+	gl->isKnownMat_GL_DIFFUSE = NO;
 }
 
 
@@ -1258,18 +1251,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 -(void) setTexCoord2F: (ccTex2F) aTex2F at: (GLuint) index {
 	*(ccTex2F*)[self addressOfElement: index] = aTex2F;
-}
-
-/** Offsets the semantic by the texture unit index. */
--(void) bindPointer: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESStateTrackerVertexPointer* vtxPtr;
-	vtxPtr = [CC3OpenGLESEngine.engine.vertices vertexPointerForSemantic: _semantic
-																	  at: visitor.textureUnit];
-	[vtxPtr bindElementsAt: pointer
-				  withSize: _elementSize
-				  withType: _elementType
-				withStride: _vertexStride
-	   withShouldNormalize: _shouldNormalizeContent];
 }
 
 /**
@@ -1469,26 +1450,24 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_bufferID) {									// use GL buffer if it exists
 		LogTrace(@"%@ binding GL buffer", self);
-		[[CC3OpenGLESEngine engine].vertices bufferBinding: self.bufferTarget].value = _bufferID;
+		[visitor.gl bindBuffer: _bufferID toTarget: self.bufferTarget];
 	} else if (_vertexCount && _vertices) {			// use local client array if it exists
 		LogTrace(@"%@ using local array", self);
-		[[[CC3OpenGLESEngine engine].vertices bufferBinding: self.bufferTarget] unbind];
+		[visitor.gl unbindBufferTarget: self.bufferTarget];
 	} else {
 		LogTrace(@"%@ no vertices to bind", self);
 	}
 }
-
-//+(void) unbind { [self resetSwitching]; }
 
 -(void) drawFrom: (GLuint) vtxIdx
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super drawFrom: vtxIdx forCount: vtxCount withVisitor: visitor];
 	GLuint firstVertex = self.firstElement + (self.vertexStride * vtxIdx);
-	[[CC3OpenGLESEngine engine].vertices drawIndicies: (GLvoid*)firstVertex
-											   ofLength: vtxCount
-												andType: _elementType
-													 as: _drawingMode];
+	[visitor.gl drawIndicies: (GLvoid*)firstVertex
+					ofLength: vtxCount
+					 andType: _elementType
+						  as: _drawingMode];
 }
 
 -(void) populateFromRunLengthArray: (GLushort*) runLenArray ofLength: (GLuint) rlaLen {

@@ -37,7 +37,6 @@
 #import "CC3Billboard.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3AffineMatrix.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 #import "CGPointExtension.h"
@@ -59,14 +58,6 @@
 -(void) updateShadows: (ccTime) dt;
 -(void) updateBillboards: (ccTime) dt;
 -(void) collectFrameInterval;
--(void) openViewport;
--(void) closeViewport;
--(void) open3DCamera;
--(void) close3DCamera;
--(void) illuminate;
--(void) drawFog;
--(void) drawShadows;
--(void) draw2DBillboards;
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) checkNeedShadowVisitor;
 -(void) updateDrawSequence;
@@ -301,20 +292,14 @@
 }
 
 /** Template method to update the camera's projection. */
--(void) updateCamera: (ccTime) dt {
-	[activeCamera buildProjection];
-}
+-(void) updateCamera: (ccTime) dt { [activeCamera buildProjection]; }
 
 /** Template method to update any fog characteristics. */
--(void) updateFog: (ccTime) dt {
-	[fog update: dt];
-}
+-(void) updateFog: (ccTime) dt { [fog update: dt]; }
 
 /** Template method to update shadows cast by the lights. */
 -(void) updateShadows: (ccTime) dt {
-	for (CC3Light* lgt in lights) {
-		[lgt updateShadows];
-	}
+	for (CC3Light* lgt in lights) [lgt updateShadows];
 }
 
 /**
@@ -322,9 +307,7 @@
  * Iterates through all billboards, instructing them to align with the camera if needed.
  */
 -(void) updateBillboards: (ccTime) dt {
-	for (CC3Billboard* bb in billboards) {
-		[bb alignToCamera: activeCamera];
-	}
+	for (CC3Billboard* bb in billboards) [bb alignToCamera: activeCamera];
 	LogTrace(@"%@ updated %u billboards", self, billboards.count);
 }
 
@@ -350,19 +333,23 @@
 	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 	
 	if (self.visible) {
-		[self open3D];
-		[self openViewport];
-		[self open3DCamera];
+		[self open3DWithVisitor: drawVisitor];
+		[self openViewportWithVisitor: drawVisitor];
+		[self open3DCameraWithVisitor: drawVisitor];
+
 		[touchedNodePicker pickTouchedNode];
-		[self illuminate];
-		[self drawFog];
+		
+		[self illuminateWithVisitor: drawVisitor];
+		
 		[self visitForDrawingWithVisitor: drawVisitor];
-		[self drawShadows];
-		[self close3DCamera];
-		[self closeViewport];
-		[self close3D];
-		[self clearDepthTesting];
-		[self draw2DBillboards];	// Back to 2D now
+		[self drawShadowsWithVisitor: drawVisitor];
+		
+		[self darkenWithVisitor: drawVisitor];
+		[self close3DCameraWithVisitor: drawVisitor];
+		[self closeViewportWithVisitor: drawVisitor];
+		[self close3DWithVisitor: drawVisitor];
+		[self clearDepthTestingWithVisitor: drawVisitor];
+		[self draw2DBillboardsWithVisitor: drawVisitor];	// Back to 2D now
 	}
 	
 	// Check and clear any GL error that occurred during 3D code
@@ -379,74 +366,54 @@
 		[performanceStatistics addFrameTime: [[CCDirector sharedDirector] frameInterval]];
 }
 
--(void) open3D {
+-(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
+
+	CC3OpenGL* gl = visitor.gl;
 
 	// Ensure that the first material and mesh will be rendered, even if same as last one
 	// that was rendered on the previous cycle.
 	[CC3Material resetSwitching];
 	[CC3Mesh resetSwitching];
 	
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	
-	// Ensure blending state tracking is initialized to that left by 2D drawing
-	[glesEngine.capabilities.blend enable];
-	[glesEngine.materials.blendFunc applySource: CC_BLEND_SRC andDestination: CC_BLEND_DST];
-	
-	// Enable location and color arrays, and disable normal and point size arrays.
-	[glesEngine.vertices enable2DVertexPointers];
-	
-	// Ensure no buffers are currently bound
-	CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
-	[glesVertices.arrayBuffer unbind];
-	[glesVertices.indexBuffer unbind];
-	
-	CC3OpenGLESTextures* glesTextures = glesEngine.textures;
-	CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: 0];
-	glesTexUnit.textureBinding.value = 0;
-	
+	// Align the 3D GL state cache with current 2D settings
+	[gl align3DStateCache];
 }
 
--(void) close3D {
+-(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ closing the 3D scene", self);
 	
 	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
 	
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGL* gl = visitor.gl;
 
-	// Disable lighting and materials
-	[glesEngine.capabilities.lighting disable];
-	for (CC3Light* lgt in lights) [lgt turnOff];
-	
 	// Restore 2D standard blending
-	[glesEngine.capabilities.blend enable];	// if director setAlphaBlending: NO, needs to be overridden
-	[glesEngine.materials.blendFunc applySource: CC_BLEND_SRC andDestination: CC_BLEND_DST];
+	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
+	[gl setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
 	
-	// Ensure texture unit 0 is active and enabled
-	CC3OpenGLESTextures* glesTextures = glesEngine.textures;
-	CC3OpenGLESTextureUnit* glesTexUnit = [glesTextures textureUnitAt: 0];
-	[glesTexUnit.texture2D enable];
-	[glesTexUnit.textureCoordinates enable];
-	[glesTexUnit.textureBinding close];		// Temp needed for ccGLBindTexture2DN in CC2 2.1
-	[CC3TextureUnit bindDefaultTo: glesTexUnit];
-	
-	// Unbind all other texture units
-	[CC3Texture unbindRemainingFrom: 1];
-	
-	// Make sure the 2D texture unit is active
-	glesTextures.activeTexture.value = 0;
-	glesTextures.clientActiveTexture.value = 0;
-	
-	// Enable location and color arrays, and disable normal and point size arrays.
-	// Ensure no GL buffers are currently bound
-	CC3OpenGLESVertexArrays* glesVertices = glesEngine.vertices;
-	[glesVertices enable2DVertexPointers];
-	[glesVertices.arrayBuffer unbind];
-	[glesVertices.indexBuffer unbind];
+	// Ensure texture unit 0 is active and enable, but not bound to any texture,
+	// disable all other texture units, and set texture unit to zero.
+	visitor.textureUnit = 0;
+	[gl enableTexture2D: YES at: 0];
+	[gl bindTexture: 0 at: 0];
+	[CC3TextureUnit bindDefaultWithVisitor: visitor];
+	[CC3Texture unbindRemainingFrom: 1 withVisitor: visitor];
+	[gl activateTextureUnit: 0];
+
+	// Enable vertex attributes needed for 2D, disable all others,
+	// unbind GL buffers, and set client texture unit to zero,
+	[gl enable2DVertexAttributes];
+	[gl unbindBufferTarget: GL_ARRAY_BUFFER];
+	[gl unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
+	[gl activateClientTextureUnit: 0];
 	
 	// Ensure GL_MODELVIEW matrix is active
-	glesEngine.matrices.mode.value = GL_MODELVIEW;
-
+	[gl activateMatrixStack: GL_MODELVIEW];
+	
+	gl.cullFace = GL_BACK;
+	gl.frontFace = GL_CCW;
+	
+	[gl align2DStateCache];		// Align the 2D GL state cache with current settings
 }
 
 /**
@@ -455,69 +422,69 @@
  * Configures depth testing parameters for 2D. If the depth buffer should be cleared, do so.
  * Otherwise, disable depth testing for 2D.
  */
--(void) clearDepthTesting {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	
-	// Ensure depth function and masking is what 2D expects
-	CC3OpenGLESState* glesState = glesEngine.state;
-	glesState.depthFunction.value = GL_LEQUAL;
-	glesState.depthMask.value = YES;
+-(void) clearDepthTestingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	gl.depthFunc = GL_LEQUAL;
+	gl.depthMask = YES;
+
+	[gl enableFog: NO];
 
 	if (_shouldClearDepthBuffer)
-		[glesEngine.state clearDepthBuffer];
+		[gl clearDepthBuffer];
 	else
-		[glesEngine.serverCapabilities.depthTest disable];
+		[gl enableDepthTest: NO];
 }
 
-//-(void) close3D {
-//	LogTrace(@"%@ closing the 3D scene", self);
-//	
-//	// Close tracking of GL state, reverting to 2D values where required.
-//	//	[CC3OpenGLESEngine.engine close];
-//	
-//	CC3GLClose3D();	// Return GL engine state to 2D rendering.
-//	
-//	// Clear the depth buffer so that subsequent cocos2d rendering will occur
-//	// on top of the 3D rendering. We can't simply turn depth testing off
-//	// because cocos2d can use depth testing for 3D transition effects.
-//	if (_shouldClearDepthBuffer)
-//		[CC3OpenGLESEngine.engine.state clearDepthBuffer];
-//	else {
-//		[CC3OpenGLESEngine.engine.serverCapabilities.depthTest disable];
-//		CC3OpenGLESEngine.engine.state.depthFunction.value = GL_LEQUAL;
-//	}
-//}
-
 /** Template method that opens the 3D viewport. */
--(void) openViewport { [viewportManager open]; }
+-(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[viewportManager openWithVisitor: visitor];
+}
 
-/** Template method that closes the 3D viewport. This is the compliment of the openViewport method. */
--(void) closeViewport { [viewportManager close]; }
+/** Template method that closes the 3D viewport. */
+-(void) closeViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[viewportManager closeWithVisitor: visitor];
+}
 
 /** Template method that opens the 3D camera. */
--(void) open3DCamera { [activeCamera open]; }
+-(void) open3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[activeCamera openWithVisitor: visitor];
+}
 
 /** Template method that closes the 3D camera. This is the compliment of the open3DCamera method. */
--(void) close3DCamera { [activeCamera close]; }
+-(void) close3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[activeCamera closeWithVisitor: visitor];
+}
 
 /**
  * Template method that turns on lighting of the 3D scene. Turns on global ambient lighting,
  * and iterates through the CC3Light instances, turning them on. If the 2D scene uses any
  * lights, they are disabled.
  */
--(void) illuminate {
-	[CC3Light disableReservedLights];		// disable any lights used by 2D scene
+-(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[CC3Light disableReservedLightsWithVisitor: visitor];	// disable any lights used by 2D scene
 
-	CC3OpenGLESEngine.engine.capabilities.lighting.value = self.isIlluminated;
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableLighting: self.isIlluminated];
 
 	LogTrace(@"%@ lighting is %@", self, (self.isIlluminated ? @"on" : @"off"));
 	
 	// Set the ambient light for the whole scene
-	CC3OpenGLESEngine.engine.lighting.sceneAmbientLight.value = ambientLight;
+	gl.sceneAmbientLightColor = ambientLight;
 
 	// Turn on any individual lights
-	for (CC3Light* lgt in lights) [lgt turnOn];
+	for (CC3Light* lgt in lights) [lgt turnOnWithVisitor: visitor];
+
+	[self drawFogWithVisitor: drawVisitor];
 }
+
+/** Template method that turns off lighting of the 3D scene. */
+-(void) darkenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableLighting: NO];
+	for (CC3Light* lgt in lights) [lgt turnOffWithVisitor: visitor];
+	[gl enableFog: NO];
+}
+
 
 -(BOOL) isIlluminated {
 	return (lights.count > 0 ||
@@ -550,32 +517,32 @@
 -(BOOL) doesContainShadows { return shadowVisitor != nil; }
 
 /** Template method to draw shadows cast by the lights. */
--(void) drawShadows {
+-(void) drawShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (self.doesContainShadows) {
-		[CC3OpenGLESEngine engine].state.clearStencil = 0;
+		visitor.gl.clearStencil = 0;
 		for (CC3Light* lgt in lights) [lgt drawShadowsWithVisitor: shadowVisitor];
 	}
 }
 
 /** If this scene contains fog, draw it, otherwise unbind fog from the GL engine. */
--(void) drawFog {
-	if (fog) [fog draw];
-	else [CC3Fog unbind];
+-(void) drawFogWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (fog) [fog drawWithVisitor: visitor];
+	else [CC3Fog unbindWithVisitor: visitor];
 }
 
 /**
  * Draws any 2D overlay billboards.
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
--(void) draw2DBillboards {
+-(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
 
-	[viewportManager openClipping];
+	[viewportManager openClippingWithVisitor: visitor];
 
 	CGRect lb = viewportManager.layerBoundsLocal;
 	for (CC3Billboard* bb in billboards) [bb draw2dWithinBounds: lb];
 	
-	[viewportManager closeClipping];
+	[viewportManager closeClippingWithVisitor: visitor];
 }
 
 /** Visits this scene for drawing (or picking) using the specified visitor. */
@@ -963,30 +930,32 @@
 
 #pragma mark Drawing
 
--(void) open {
+-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
 			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
-	CC3OpenGLESEngine.engine.state.viewport.value = viewport;
-	[self openClipping];
+	visitor.gl.viewport = viewport;
+	[self openClippingWithVisitor: visitor];
 }
 
--(void) close {
+-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ closing 3D viewport %@ as %@fullscreen", self,
 			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
 	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-	CC3OpenGLESEngine.engine.state.viewport.value = CC3ViewportMake(0, 0, winSz.width, winSz.height);
-	[self closeClipping];
+	visitor.gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+	[self closeClippingWithVisitor: visitor];
 }
 
--(void) openClipping {
+-(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !isFullView ) {
-		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-		[glesEngine.capabilities.scissorTest enable];
-		glesEngine.state.scissor.value = viewport;
+		CC3OpenGL* gl = visitor.gl;
+		[gl enableScissorTest: YES];
+		gl.scissor = viewport;
 	}
 }
 
--(void) closeClipping { [CC3OpenGLESEngine.engine.capabilities.scissorTest disable]; }
+-(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl enableScissorTest: NO];
+}
 
 
 #pragma mark Converting points

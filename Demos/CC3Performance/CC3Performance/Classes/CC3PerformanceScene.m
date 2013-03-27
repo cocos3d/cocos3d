@@ -36,7 +36,6 @@
 #import "CC3ModelSampleFactory.h"
 #import "CGPointExtension.h"
 #import "CC3PODResourceNode.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3UIViewController.h"
 
 // Model names
@@ -119,19 +118,6 @@
 	// There are no translucent nodes that need to be reordered.
 	self.drawingSequencer = [CC3NodeArraySequencer sequencerWithEvaluator: [CC3LocalContentNodeAcceptor evaluator]];
 	self.drawingSequencer.allowSequenceUpdates = NO;
-
-	// To compare the performance cost of the GL drawing activity, uncomment the
-	// following line. Uncommenting this line will cause the vertex array binding
-	// and drawing calls to be skipped. The application will perform all updating
-	// and drawing activities except the final vertex binding and drawing GL calls.
-	// The application will perform all model updates, animation, matrix
-	// transformations, culling, node sequencing, and other normal activities. 
-	// In addition, many GL calls will still be made, including those for establishing
-	// lighting, materials, and the loading of all projection and modelview matrices.
-	// Only the final vertex array binding and drawing calls will not be made.
-	// See the class and method notes of CC3OpenGLESVertexArrays to better
-	// understand exactly which GL calls will not be made.
-//	[CC3OpenGLESEngine engine].vertices = nil;
 
 	shouldAnimateNodes = NO;	// Start with static nodes.
 

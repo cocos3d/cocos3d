@@ -117,9 +117,13 @@ cocos3d 2.0.0 - 2013/03/31
 - [API change] Combined the shouldClearDepthBufferBefore2D & shouldClearDepthBufferBefore3D properties of CC3Scene into a single shouldClearDepthBuffer property and deprecated the originals.
 - [API change] Renamed CC3ViewportManager openViewport & closeViewport methods to open & close respectively.
 
-- [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler function-based state management:
+- [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler state management:
+	- Added CC3OpenGL class to handle state management, with subclasses for specific OpenGL ES or OpenGL versions.
+	- CC3OpenGL includes a corresponding method for each OpenGL/OpenGL ES function supported by cocos3d.
+		- This organization is easier to adapt by users and override for different versions of OpenGL & OpenGL ES than previous state management via CC3OpenGLESEngine object assemblies.
+	- CC3NodeDrawingVisitor carries an instance of CC3OpenGL.
 	- State management no longer queries the GL engine for current state during initialization.
-	- CC3Scene open3D and close3D methods now manually control GL state configuration transition between 2D and 3D environments.
+	- CC3Scene open3DWithVisitor: and close3DWithVisitor: methods now manually control GL state configuration transition between 2D and 3D environments.
 		- override these methods to alter GL state transitions between 2D & 3D.
 
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.

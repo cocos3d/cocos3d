@@ -34,15 +34,10 @@
 #import "CC3GLProgramMatchers.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Material.h"
-#import "CC3OpenGLESEngine.h"
 
 
 #pragma mark -
 #pragma mark CC3GLProgram
-
-@interface CC3OpenGLESShaders (TemplateMethods)
--(void) setActiveProgram: (CC3GLProgram*) aProgram;
-@end
 
 @implementation CC3GLProgram
 
@@ -317,7 +312,6 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Binding program %@ for %@", self, visitor.currentNode);
 	visitor.currentShaderProgram = self;
-	CC3OpenGLESEngine.engine.shaders.activeProgram = self;
 	ccGLUseProgram(_programID);
 }
 

@@ -48,6 +48,11 @@
  * corresponding assertion invocations from the compiled code, thus eliminating both the
  * memory and CPU overhead that the assertion calls would add
  *
+ * A special CC3AssertUnimplemented(name) assertion function is provided to conveniently raise
+ * an assertion exception when some expected functionality is unimplemented. This might be used
+ * in a method body by a superclass that requires each subclass to implement that method, or it
+ * might be used as a temporary placeholder for functionalty that will be added at a later time.
+ *
  * This library also adds a sophisticated logging capability.
  *
  * There are four levels of logging: Trace, Info, Error and Debug, and each can be enabled
@@ -250,3 +255,4 @@
 	}
 #endif
 
+#define CC3AssertUnimplemented(name) CC3Assert(NO, @"%@ is not implemented!", name)

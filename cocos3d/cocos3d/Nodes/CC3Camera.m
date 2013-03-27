@@ -32,7 +32,6 @@
 #import "CC3Camera.h"
 #import "CC3Scene.h"
 #import "CC3ProjectionMatrix.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3Actions.h"
 #import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
@@ -287,50 +286,52 @@
 
 #pragma mark Drawing
 
--(void) open {
+-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Opening %@", self);
 	_isOpen = YES;
-	[self openProjection];
-	[self openView];
+	[self openProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor];
+	[self openViewWithVisitor: (CC3NodeDrawingVisitor*) visitor];
 }
 
--(void) close {
+-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Closing %@", self);
 	_isOpen = NO;
-	[self closeView];
-	[self closeProjection];
+	[self closeViewWithVisitor: visitor];
+	[self closeProjectionWithVisitor: visitor];
 }
 
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
--(void) openProjection {
+-(void) openProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Opening %@ 3D projection", self);
-	[[CC3OpenGLESEngine engine].matrices.projection push];
-	[self loadProjectionMatrix];
+	[visitor.gl pushProjectionMatrixStack];
+	[self loadProjectionMatrixWithVisitor: visitor];
 }
 
 /** Template method that pops the projectionMatrix from the GL projection matrix stack. */
--(void) closeProjection {
+-(void) closeProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Closing %@ 3D projection", self);
-	[[CC3OpenGLESEngine engine].matrices.projection pop];
+	[visitor.gl popProjectionMatrixStack];
 }
 
 /** Template method that pushes the GL modelview matrix stack, and loads the viewMatrix into it. */
--(void) openView {
+-(void) openViewWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Opening %@ modelview", self);
-	[[CC3OpenGLESEngine engine].matrices.modelview push];
-	[self loadViewMatrix];
+	[visitor.gl pushModelviewMatrixStack];
+	[self loadViewMatrixWithVisitor: visitor];
 }
 
 /** Template method that pops the viewMatrix from the GL modelview matrix stack. */
--(void) closeView {
+-(void) closeViewWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Closing %@ modelview", self);
-	[[CC3OpenGLESEngine engine].matrices.modelview pop];
+	[visitor.gl popModelviewMatrixStack];
 }
 
 /** Template method that loads the viewMatrix into the current GL modelview matrix. */
--(void) loadViewMatrix {
+-(void) loadViewMatrixWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ loading modelview matrix into GL: %@", self, _viewMatrix);
-	[[CC3OpenGLESEngine engine].matrices.modelview load: _viewMatrix];
+	CC3Matrix4x3 mtx;
+	[self.viewMatrix populateCC3Matrix4x3: &mtx];
+	[visitor.gl loadModelviewMatrix: &mtx];
 }
 
 /**
@@ -338,10 +339,12 @@
  * infiniteProjectionMatrix into the current GL projection matrix,
  * depending on the currents state of the hasInfiniteDepthOfField property.
  */
--(void) loadProjectionMatrix {
+-(void) loadProjectionMatrixWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ loading %@finite projection matrix into GL: %@",
 			 self, (_hasInfiniteDepthOfField ? @"in" : @""), self.projectionMatrix);
-	[[CC3OpenGLESEngine engine].matrices.projection load: self.projectionMatrix];
+	CC3Matrix4x4 mtx;
+	[self.projectionMatrix populateCC3Matrix4x4: &mtx];
+	[visitor.gl loadProjectionMatrix: &mtx];
 }
 
 

@@ -31,7 +31,6 @@
 
 #import "CC3MeshNode.h"
 #import "CC3BoundingVolumes.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3Mesh.h"
 #import "CC3Light.h"
 #import "CC3GLProgramMatchers.h"
@@ -752,21 +751,19 @@
  * shouldCullBackFaces, and shouldUseClockwiseFrontFaceWinding properties.
  */
 -(void) configureFaceCulling: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
-	CC3OpenGLESState* glesState = glesEngine.state;
+	CC3OpenGL* gl = visitor.gl;
 
 	// Enable culling if either back or front should be culled.
-	glesServCaps.cullFace.value = (shouldCullBackFaces || shouldCullFrontFaces);
+	[gl enableCullFace: (shouldCullBackFaces || shouldCullFrontFaces)];
 
 	// Set whether back, front or both should be culled.
 	// If neither should be culled, handled by capability so leave it as back culling.
-	glesState.cullFace.value = shouldCullBackFaces
-									? (shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
-									: (shouldCullFrontFaces ? GL_FRONT : GL_BACK);
+	gl.cullFace = shouldCullBackFaces
+						? (shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
+						: (shouldCullFrontFaces ? GL_FRONT : GL_BACK);
 
 	// Set the front face winding
-	glesState.frontFace.value = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
+	gl.frontFace = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
 }
 
 /**
@@ -774,20 +771,20 @@
  * whether the scaling of this node is uniform or not.
  */
 -(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESCapabilities* glesServCaps = [CC3OpenGLESEngine engine].capabilities;
+	CC3OpenGL* gl = visitor.gl;
 	switch (self.effectiveNormalScalingMethod) {
 		case kCC3NormalScalingNormalize:		// Enable normalizing & disable re-scaling
-			[glesServCaps.rescaleNormal disable];
-			[glesServCaps.normalize enable];
+			[gl enableNormalize: YES];
+			[gl enableRescaleNormal: NO];
 			break;
 		case kCC3NormalScalingRescale:			// Enable rescaling & disable normalizing
-			[glesServCaps.rescaleNormal enable];
-			[glesServCaps.normalize disable];
+			[gl enableNormalize: NO];
+			[gl enableRescaleNormal: YES];
 			break;
 		case kCC3NormalScalingNone:				// Disable both rescaling & normalizing
 		default:
-			[glesServCaps.rescaleNormal disable];
-			[glesServCaps.normalize disable];
+			[gl enableNormalize: NO];
+			[gl enableRescaleNormal: NO];
 			break;
 	}
 }
@@ -816,13 +813,13 @@
  * are set, otherwise material colors will not stick.
  */
 -(void) configureColoring: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGL* gl = visitor.gl;
 
 	// Set the smoothing model
-	glesEngine.state.shadeModel.value = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
+	gl.shadeModel = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
 
 	// If per-vertex coloring is being used, attach it to the material
-	glesEngine.capabilities.colorMaterial.value = (mesh ? mesh.hasVertexColors : NO);
+	[gl enableColorMaterial: (mesh ? mesh.hasVertexColors : NO)];
 }
 
 /**
@@ -831,11 +828,10 @@
  * and set the depth function.
  */
 -(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESState* glesState = glesEngine.state;
-	glesEngine.capabilities.depthTest.value = !shouldDisableDepthTest;
-	glesState.depthMask.value = !shouldDisableDepthMask;
-	glesState.depthFunction.value = depthFunction;
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableDepthTest: !shouldDisableDepthTest];
+	gl.depthMask = !shouldDisableDepthMask;
+	gl.depthFunc = depthFunction;
 }
 
 /**
@@ -844,19 +840,18 @@
  * that has already been drawn.
  */
 -(void) configureDecalParameters: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	
+	CC3OpenGL* gl = visitor.gl;
 	BOOL hasDecalOffset = decalOffsetFactor || decalOffsetUnits;
-	glesEngine.capabilities.polygonOffsetFill.value = hasDecalOffset;
-	[glesEngine.state.polygonOffset applyFactor: decalOffsetFactor andUnits: decalOffsetUnits];
+	[gl enablePolygonOffset: hasDecalOffset];
+	[gl setPolygonOffsetFactor: decalOffsetFactor units: decalOffsetUnits];
 }
 
 /** Template method to configure line drawing properties. */
 -(void) configureLineProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	glesEngine.state.lineWidth.value = lineWidth;
-	glesEngine.capabilities.lineSmooth.value = shouldSmoothLines;
-	glesEngine.hints.lineSmooth.value = lineSmoothingHint;
+	CC3OpenGL* gl = visitor.gl;
+	gl.lineWidth = lineWidth;
+	[gl enableLineSmoothing: shouldSmoothLines];
+	gl.lineSmoothingHint = lineSmoothingHint;
 }
 
 /**
@@ -874,11 +869,11 @@
 	if (material && visitor.shouldDecorateNode) {
 		[material drawWithVisitor: visitor];
 	} else {
-		[CC3Material unbind];
+		[CC3Material unbindWithVisitor: visitor];
 		if (visitor.shouldDecorateNode) visitor.currentColor = pureColor;
 	}
 	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
-	CC3OpenGLESEngine.engine.state.color.value = visitor.currentColor;
+	visitor.gl.color = visitor.currentColor;
 }
 
 #if CC3_OGLES_2

@@ -216,13 +216,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * Similarly, the application may have a single CC3Layer, or multiple CC3Layers.
  * Each CC3Layer may have its own CC3Scene instance, or may share a single instance.
  *
- * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
- * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLESEngine singleton. When adding or overriding functionality
- * in this framework, do NOT make gl* function calls directly if there is a corresponding
- * state change tracker in the CC3OpenGLESEngine singleton. Route the state change request
- * through the CC3OpenGLESEngine singleton instead.
+ * To maximize GL throughput, all OpenGL ES state is tracked by an instance of CC3OpenGL.
+ * During drawing, the CC3OpenGL instance is available through the gl property of the
+ * CC3NodeDrawingVisitor. During other activities, a singleton instance of CC3OpenGL can
+ * be retrieved from CC3OpenGL.sharedGL.
+ * 
+ * It is critical that all changes to GL state are made through the CC3OpenGL instance.
+ * When adding or overriding functionality in this framework, do NOT make gl* function
+ * calls directly if there is a corresponding method defined on the CC3OpenGL class.
+ * Instead, route the state change request through the appropriate CC3OpenGL method.
  *
  * You can collect statistics about the performance of your cocos3d application by setting
  * the performanceStatistics property to an appropriate instance of a statistics collector.
@@ -748,14 +750,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * This method is invoked asynchronously to the model updating loop, to keep the processing of
  * OpenGL ES drawing separate from model updates.
  *
- * To maximize GL throughput, all OpenGL ES 1.1 state is tracked by the singleton instance
- * [CC3OpenGLESEngine engine]. CC3OpenGLESEngine only sends state change calls to the
- * GL engine if GL state really is changing. It is critical that all changes to GL state
- * are made through the CC3OpenGLESEngine singleton. When overriding this method, or any
- * other 3D drawing features, do NOT make gl* function calls directly if there is a
- * corresponding state change tracker in the CC3OpenGLESEngine singleton. Route the
- * state change request through the CC3OpenGLESEngine singleton instead.
- *
  * This method is invoked automatically during each rendering frame. Usually, the application
  * never needs to invoke this method directly.
  */
@@ -767,7 +761,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * This method is invoked automatically during the transition between 2D and 3D drawing.
  * Normally the application never needs to invoke this method directly.
  */
--(void) open3D;
+-(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that reverts the GL drawing environment back to the configuration
@@ -776,7 +770,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * This method is invoked automatically during the transition back to 2D drawing.
  * Normally the application never needs to invoke this method directly.
  */
--(void) close3D;
+-(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Touch handling
@@ -1176,27 +1170,27 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * Template method that opens the viewport for 3D drawing by setting the viewport to the
  * dimensions of the layer.
  *
- * Also invokes the openClipping method so that GL drawing for this scene does not extend
- * beyond the layer bounds.
+ * Also invokes the openClippingWithVisitor: method so that GL drawing for this scene
+ * does not extend beyond the layer bounds.
  */
--(void) open;
+-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that closes the viewport for 3D drawing by setting the viewport
  * dimensions back to the window bounds.
  *
- * Also invokes the closeClipping method.
+ * Also invokes the closeClippingWithVisitor: method.
  */
--(void) close;
+-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * If the viewport does not cover the entire window, a scissor rectangle is defined to cover
  * the viewport area so that GL drawing of the scene does not extend beyond the viewport bounds.
  */
--(void) openClipping;
+-(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Disables any scissor testing to the viewport bounds that was enabled by the openClipping method. */
--(void) closeClipping;
+-(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Converting points

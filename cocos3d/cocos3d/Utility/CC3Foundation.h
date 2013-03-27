@@ -1571,7 +1571,7 @@ CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere);
 
 
 #pragma mark -
-#pragma mark Attenuation function structures
+#pragma mark Attenuation functions & structures
 
 /**
  * The constant, linear, and quadratic coefficients of the attenuation function equation:
@@ -1607,6 +1607,12 @@ static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsMake(GLfloat 
 	coeffs.b = linear;
 	coeffs.c = quadratic;
 	return coeffs;
+}
+
+/** Returns whether the two attenuation coefficents are equal by comparing their respective components. */
+static inline BOOL CC3AttenuationCoefficientsAreEqual(CC3AttenuationCoefficients ac1,
+													  CC3AttenuationCoefficients ac2) {
+	return (ac1.a == ac2.a) && (ac1.b == ac2.b) && (ac1.c == ac2.c);
 }
 
 /**
@@ -1648,7 +1654,7 @@ static inline CC3Viewport CC3ViewportMake(GLint x, GLint y, GLint w, GLint h) {
 
 /** Returns whether the two viewports are equal by comparing their respective components. */
 static inline BOOL CC3ViewportsAreEqual(CC3Viewport vp1, CC3Viewport vp2) {
-	return vp1.x == vp2.x && vp1.y == vp2.y && vp1.w == vp2.w && vp1.h == vp2.h;
+	return (vp1.x == vp2.x) && (vp1.y == vp2.y) && (vp1.w == vp2.w) && (vp1.h == vp2.h);
 }
 
 /**
@@ -1825,6 +1831,11 @@ static inline BOOL CCC4FAreEqual(ccColor4F c1, ccColor4F c2) {
 	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
 }
 
+/** Returns whether the two colors are equal by comparing their respective components. */
+static inline BOOL CCC4BAreEqual(ccColor4B c1, ccColor4B c2) {
+	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
+}
+
 /**
  * Returns the result of adding the two specified colors, by adding the corresponding components.
  * Each of the resulting color components is clamped to be between 0.0 and 1.0.
@@ -1953,6 +1964,11 @@ static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
 #pragma mark -
 #pragma mark ccColor3B constants and functions
 
+/** Returns whether the two colors are equal by comparing their respective components. */
+static inline BOOL CCC3BAreEqual(ccColor3B c1, ccColor3B c2) {
+	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
+}
+
 /**
  * Returns an ccColor3B structure whose values are a weighted average of the specified base color and
  * the blend color. The parameter blendWeight should be between zero and one. A value of zero will leave
@@ -1968,6 +1984,14 @@ static inline ccColor3B CCC3BBlend(ccColor3B baseColor, ccColor3B blendColor, GL
 #pragma mark -
 #pragma mark Miscellaneous extensions and functionality
 
+/** 
+ * Returns whether the two boolean values are in equal state.
+ *
+ * This test will work if the two booleans each contain different non-zero content to indicate
+ * logical YES, whereas a simple == comparison would give an erroneous result in that situation.
+ */
+static inline BOOL CC3BooleansAreEqual(BOOL b1, BOOL b2) { return (b1 && b2) || (!b1 && !b2); }
+
 /** Returns the string YES or NO, depending on the specified boolean value. */
 static inline NSString* NSStringFromBoolean(BOOL value) { return value ? @"YES" : @"NO"; }
 
@@ -1981,3 +2005,30 @@ static inline NSString* CC3EnsureAbsoluteFilePath(NSString* filePath) {
 	if(filePath.isAbsolutePath) return filePath;
 	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: filePath];
 }
+
+/** Returns whether the specified bit in the specified bitfield is set to one. */
+static inline BOOL CC3IsBitSet(GLbitfield bits, GLuint bitIdx) {
+	CC3AssertC(bitIdx < (8 * sizeof(bits)), @"Bit index %u is too large for the bitfield.", bitIdx);
+	GLbitfield marker = 1;
+	marker <<= bitIdx;
+	return (bits & marker) ? YES : NO;
+}
+
+/** Returns whether the specified bit in the specified bitfield is set to zero. */
+static inline BOOL CC3IsBitClear(GLbitfield bits, GLuint bitIdx) { return !CC3IsBitSet(bits, bitIdx); }
+
+/** 
+ * Sets the specified bit in the specified bitfield is to one if the specified value is YES,
+ * or to zero if the specified value is NO.
+ */
+static inline void CC3SetBit(GLbitfield* bits, GLuint bitIdx, BOOL val) {
+	CC3AssertC(bitIdx < (8 * sizeof(*bits)), @"Bit index %u is too large for the bitfield.", bitIdx);
+	GLbitfield marker = 1;
+	marker <<= bitIdx;
+	if (val) {
+		*bits |= marker;
+	} else {
+		*bits &= ~marker;
+	}
+}
+

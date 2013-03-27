@@ -423,7 +423,7 @@
  *
  * The value of this property must be between zero and one less than the maximum number
  * of supported texture units. The maximum number of texture units is platform dependent,
- * and can be read from [CC3OpenGLESEngine engine].platform.maxTextureUnits.value.
+ * and can be read from the CC3OpenGL.sharedGL.maxNumberOfTextureUnits property.
  */
 @property(nonatomic, assign) GLuint textureUnitIndex;
 

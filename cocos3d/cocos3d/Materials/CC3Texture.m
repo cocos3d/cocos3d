@@ -32,22 +32,12 @@
 #import "CC3Texture.h"
 #import "CC3CC2Extensions.h"
 #import "CCTextureCache.h"
-#import "CC3OpenGLESEngine.h"
 #import "CCFileUtils.h"
 #import "CCTexturePVR.h"
 
 
 #pragma mark -
 #pragma mark CC3Texture 
-
-@interface CC3Texture (TemplateMethods)
--(void) markTextureParametersDirty;
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) bindTextureParametersTo: (CC3OpenGLESTextureUnit*) glesTexUnit
-					withVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) bindTextureEnvironmentTo: (CC3OpenGLESTextureUnit*) glesTexUnit
-					 withVisitor: (CC3NodeDrawingVisitor*) visitor;
-@end
 
 
 @implementation CC3Texture
@@ -275,20 +265,30 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESTextureUnit* glesTexUnit = [CC3OpenGLESEngine.engine.textures textureUnitAt: visitor.textureUnit];
-	[glesTexUnit.texture2D enable];
-	glesTexUnit.textureBinding.value = _texture.name;
-	[self bindTextureParametersTo: glesTexUnit withVisitor: visitor];
-	[self bindTextureEnvironmentTo: glesTexUnit withVisitor: visitor];
+	CC3OpenGL* gl = visitor.gl;
+	GLuint tuIdx = visitor.textureUnit;
+	[gl enableTexture2D: YES at: tuIdx];
+	[gl bindTexture: _texture.name at: tuIdx];
+
+	[self bindTextureParametersWithVisitor: visitor];
+	[self bindTextureEnvironmentWithVisitor: visitor];
 	
 	LogTrace(@"%@ bound to %@", self, glesTexUnit);
 }
 
 /** If the texture parameters are dirty, binds them to the GL texture unit state. */
--(void) bindTextureParametersTo: (CC3OpenGLESTextureUnit*) glesTexUnit
-					withVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) bindTextureParametersWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !_texParametersAreDirty ) return;
 
+	CC3OpenGL* gl = visitor.gl;
+	GLuint tuIdx = visitor.textureUnit;
+	
+	// Use property access to allow adjustments from the raw values
+	[gl setTextureMinifyFunc: self.minifyingFunction at: tuIdx];
+	[gl setTextureMagnifyFunc: self.magnifyingFunction at: tuIdx];
+	[gl setTextureHorizWrapFunc: self.horizontalWrappingFunction at: tuIdx];
+	[gl setTextureVertWrapFunc: self.verticalWrappingFunction at: tuIdx];
+	
 	LogTrace(@"Setting parameters for %@ minifying: %@, magnifying: %@, horiz wrap: %@, vert wrap: %@, ",
 			 self.fullDescription,
 			 NSStringFromGLEnum(self.minifyingFunction),
@@ -296,35 +296,26 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 			 NSStringFromGLEnum(self.horizontalWrappingFunction),
 			 NSStringFromGLEnum(self.verticalWrappingFunction));
 	
-	// Use property access to allow adjustments from the raw values
-	glesTexUnit.minifyingFunction.value = self.minifyingFunction;
-	glesTexUnit.magnifyingFunction.value = self.magnifyingFunction;
-	glesTexUnit.horizontalWrappingFunction.value = self.horizontalWrappingFunction;
-	glesTexUnit.verticalWrappingFunction.value = self.verticalWrappingFunction;
-
 	_texParametersAreDirty = NO;
 }
 
 /** Binds the texture unit environment to the specified GL texture unit state. */
--(void) bindTextureEnvironmentTo: (CC3OpenGLESTextureUnit*) glesTexUnit
-					 withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (_textureUnit) {
-		[_textureUnit bindTo: glesTexUnit withVisitor: visitor];
-	} else {
-		[CC3TextureUnit bindDefaultTo: glesTexUnit];
-	}
+-(void) bindTextureEnvironmentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (_textureUnit)
+		[_textureUnit bindWithVisitor: visitor];
+	else
+		[CC3TextureUnit bindDefaultWithVisitor: visitor];
 }
 
-+(void) unbind: (GLuint) texUnit {
-	[[CC3OpenGLESEngine.engine.textures textureUnitAt: texUnit].texture2D disable];
++(void) unbindRemainingFrom: (GLuint) texUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	GLuint maxTexUnits = gl.maxNumberOfTextureUnits;
+	for (GLuint tuIdx = texUnit; tuIdx < maxTexUnits; tuIdx++) [gl enableTexture2D: NO at: tuIdx];
 }
 
-+(void) unbindRemainingFrom: (GLuint)texUnit {
-	GLuint maxTexUnits = [CC3OpenGLESEngine engine].textures.textureUnitCount;
-	for (int tu = texUnit; tu < maxTexUnits; tu++) [self unbind: tu];
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self unbindRemainingFrom: 0 withVisitor: visitor];
 }
-
-+(void) unbind { [self unbindRemainingFrom: 0]; }
 
 
 #pragma mark Tag allocation

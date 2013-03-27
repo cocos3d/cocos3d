@@ -168,14 +168,18 @@
 
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	glesTexUnit.textureEnvironmentMode.value = textureEnvironmentMode;
-	glesTexUnit.color.value = constantColor;
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	GLuint tuIdx = visitor.textureUnit;
+	[gl setTextureEnvMode: textureEnvironmentMode at: tuIdx];
+	[gl setTextureEnvColor: constantColor at: tuIdx];
 }
 
-+(void) bindDefaultTo: (CC3OpenGLESTextureUnit*) glesTexUnit {
-	glesTexUnit.textureEnvironmentMode.value = GL_MODULATE;
-	glesTexUnit.color.value = kCCC4FBlackTransparent;
++(void) bindDefaultWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	GLuint tuIdx = visitor.textureUnit;
+	[gl setTextureEnvMode: GL_MODULATE at: tuIdx];
+	[gl setTextureEnvColor: kCCC4FBlackTransparent at: tuIdx];
 }
 
 @end
@@ -257,26 +261,29 @@
 
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super bindTo: glesTexUnit withVisitor: visitor];
+#if CC3_OGLES_1
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super bindWithVisitor: visitor];
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, combineRGBFunction);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, rgbSource0);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, rgbSource1);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, rgbSource2);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, rgbOperand0);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, rgbOperand1);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, rgbOperand2);
 	
-	glesTexUnit.combineRGBFunction.value = combineRGBFunction;
-	glesTexUnit.rgbSource0.value = rgbSource0;
-	glesTexUnit.rgbSource1.value = rgbSource1;
-	glesTexUnit.rgbSource2.value = rgbSource2;
-	glesTexUnit.rgbOperand0.value = rgbOperand0;
-	glesTexUnit.rgbOperand1.value = rgbOperand1;
-	glesTexUnit.rgbOperand2.value = rgbOperand2;
-	glesTexUnit.combineAlphaFunction.value = combineAlphaFunction;
-	glesTexUnit.alphaSource0.value = alphaSource0;
-	glesTexUnit.alphaSource1.value = alphaSource1;
-	glesTexUnit.alphaSource2.value = alphaSource2;
-	glesTexUnit.alphaOperand0.value = alphaOperand0;
-	glesTexUnit.alphaOperand1.value = alphaOperand1;
-	glesTexUnit.alphaOperand2.value = alphaOperand2;
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, combineAlphaFunction);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, alphaSource0);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, alphaSource1);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_ALPHA, alphaSource2);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, alphaOperand0);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, alphaOperand1);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, alphaOperand2);
 	
-	LogTrace(@"%@ bound to %@", self, glesTexUnit);
+	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
+#endif
 
 @end
 
@@ -289,23 +296,36 @@
 -(BOOL) isBumpMap { return YES; }
 
 
+#pragma mark Allocation and Initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		textureEnvironmentMode = GL_COMBINE;
+	}
+	return self;
+}
+
+
 #pragma mark Drawing
 
--(void) bindTo: (CC3OpenGLESTextureUnit*) glesTexUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	glesTexUnit.textureEnvironmentMode.value = GL_COMBINE;
-	glesTexUnit.combineRGBFunction.value = GL_DOT3_RGB;
-	glesTexUnit.rgbSource0.value = GL_TEXTURE;
-	glesTexUnit.rgbSource1.value = GL_CONSTANT;
-	glesTexUnit.rgbOperand0.value = GL_SRC_COLOR;
-	glesTexUnit.rgbOperand1.value = GL_SRC_COLOR;
-	glesTexUnit.combineAlphaFunction.value = GL_MODULATE;
-	glesTexUnit.alphaSource0.value = GL_TEXTURE;
-	glesTexUnit.alphaSource1.value = GL_CONSTANT;
-	glesTexUnit.alphaOperand0.value = GL_SRC_ALPHA;
-	glesTexUnit.alphaOperand1.value = GL_SRC_ALPHA;
-	glesTexUnit.color.value = constantColor;
+#if CC3_OGLES_1
+-(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super bindWithVisitor: visitor];
 	
-	LogTrace(@"%@ bound to %@", self, glesTexUnit);
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_CONSTANT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+	
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_CONSTANT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
+	
+	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
+#endif
 
 @end

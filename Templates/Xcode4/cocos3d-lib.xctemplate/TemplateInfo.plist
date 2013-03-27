@@ -12,6 +12,18 @@
 
 	<key>Definitions</key>
 	<dict>
+		<key>cocos3d/cc3CAL/Cal3D File Formats.txt</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3CAL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3CAL/Cal3D File Formats.txt</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
 		<key>cocos3d/cc3CAL/CC3CAFResource.h</key>
 		<dict>
 			<key>Group</key>
@@ -1559,1030 +1571,248 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.h</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.h</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.m</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.m</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.h</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLESUtility.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.h</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLESUtility.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.m</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.h</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.m</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.m</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
+				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESUtility.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESUtility.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Compatibility.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Utility.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES1</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Utility.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+				<string>OpenGLES2</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
+				<string>OpenGL</string>
+				<string>OpenGLES2</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
+				<string>OpenGL</string>
+				<string>OpenGLES2</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
+				<string>OpenGL</string>
+				<string>OpenGLES2</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Compatibility.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
+				<string>OpenGL</string>
+				<string>OpenGLES2</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Compatibility.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Utility.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
 				<string>cocos3d</string>
 				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Utility.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Utility.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES1</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
+				<string>OpenGL</string>
 				<string>OpenGLES2</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Compatibility.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Compatibility.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Utility.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Utility.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>OpenGLES</string>
-				<string>OpenGLES2</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Utility.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Particles/CC3MeshParticles.h</key>
 		<dict>
@@ -3403,7 +2633,7 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</key>
+		<key>cocos3d/GLSL/CC3BumpMapObjectSpace.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3411,9 +2641,9 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</string>
+			<string>cocos3d/GLSL/CC3BumpMapObjectSpace.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</key>
+		<key>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3421,7 +2651,47 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</string>
+			<string>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
 		<dict>
@@ -3556,6 +2826,7 @@
 	</dict>
 	<key>Nodes</key>
 	<array>
+		<string>cocos3d/cc3CAL/Cal3D File Formats.txt</string>
 		<string>cocos3d/cc3CAL/CC3CAFResource.h</string>
 		<string>cocos3d/cc3CAL/CC3CAFResource.m</string>
 		<string>cocos3d/cc3CAL/CC3CALNode.h</string>
@@ -3688,87 +2959,25 @@
 		<string>cocos3d/cocos3d/Nodes/CC3NodeVisitor.m</string>
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.h</string>
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESCapabilities.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESEngine.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFog.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESFoundation.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESHints.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESLighting.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMaterials.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESMatrices.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESPlatform.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESShaders.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESState.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESStateTracker.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESTextures.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESUtility.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/CC3OpenGLESVertexArrays.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3EAGLView.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Capabilities.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Engine.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Fog.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Hints.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Lighting.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Materials.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Matrices.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Platform.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1State.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Textures.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1Utility.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES1/CC3OpenGLES1VertexArrays.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3GLView.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Capabilities.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Compatibility.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Engine.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Fog.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Hints.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Lighting.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Materials.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Matrices.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Platform.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2State.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Textures.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2Utility.m</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.h</string>
-		<string>cocos3d/cocos3d/OpenGLES/OpenGLES2/CC3OpenGLES2VertexArrays.m</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLESUtility.h</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.h</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3EAGLView.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Compatibility.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3OpenGLES1Utility.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3GLView.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Compatibility.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGLES2/CC3OpenGLES2Utility.m</string>
 		<string>cocos3d/cocos3d/Particles/CC3MeshParticles.h</string>
 		<string>cocos3d/cocos3d/Particles/CC3MeshParticles.m</string>
 		<string>cocos3d/cocos3d/Particles/CC3Particles.h</string>
@@ -3838,8 +3047,12 @@
 		<string>cocos3d/deprecated/CC3World.m</string>
 		<string>cocos3d/deprecated/CCNodeController.h</string>
 		<string>cocos3d/deprecated/ControllableCCLayer.h</string>
-		<string>cocos3d/GLSL/CC3BumpMapObjSpace.fsh</string>
-		<string>cocos3d/GLSL/CC3BumpMapObjSpace.vsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjectSpace.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.vsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>

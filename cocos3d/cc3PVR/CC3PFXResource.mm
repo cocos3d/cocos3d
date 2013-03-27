@@ -34,7 +34,6 @@ extern "C" {
 }
 #import "CC3PFXResource.h"
 #import "CC3PVRTPFXParser.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3PVRShamanGLProgramSemantics.h"
 #import "CC3PODResource.h"
 

@@ -30,7 +30,6 @@
  */
 
 #import "CC3PointParticles.h"
-#import "CC3OpenGLESEngine.h"
 #import "CCDirector.h"
 
 
@@ -372,25 +371,22 @@
  * and set GL point size, size attenuation and smoothing.
  */
 -(void) configurePointProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESState* glesState = glesEngine.state;
+	CC3OpenGL* gl = visitor.gl;
 
 	// Enable point sprites
-	[glesEngine.capabilities.pointSprites enable];
+	[gl enablePointSprites: YES];
 
 	// Enable texture coordinate replacing in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
 	for (GLuint texUnit = 0; texUnit < texCount; texUnit++)
-		[[glesEngine.textures textureUnitAt: texUnit].pointSpriteCoordReplace enable];
-
-	// Set default point size
-	glesState.pointSize.value = self.normalizedParticleSize;
-	glesState.pointSizeMinimum.value = self.normalizedParticleSizeMinimum;
-	glesState.pointSizeMaximum.value = self.normalizedParticleSizeMaximum;
+		[gl enablePointSpriteCoordReplace: YES at: texUnit];
 	
-	// Cast attenuation coefficients to a vector when setting in state tracker
-	glesState.pointSizeAttenuation.value = *(CC3Vector*)&_particleSizeAttenuation;
-	glesEngine.capabilities.pointSmooth.value = shouldSmoothPoints;
+	// Set default point size
+	gl.pointSize = self.normalizedParticleSize;
+	gl.pointSizeMinimum = self.normalizedParticleSizeMinimum;
+	gl.pointSizeMaximum = self.normalizedParticleSizeMaximum;
+	gl.pointSizeAttenuation = _particleSizeAttenuation;
+	[gl enablePointSmoothing: shouldSmoothPoints];
 }
 
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
@@ -400,16 +396,15 @@
 
 /** Disable particles again in each texture unit being used by the material. */
 -(void) cleanupPointProperties: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
+	CC3OpenGL* gl = visitor.gl;
 
 	// Disable point sprites again
-	[glesEngine.capabilities.pointSprites disable];
+	[gl enablePointSprites: NO];
 
 	// Disable texture coordinate replacing again in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
-	for (GLuint texUnit = 0; texUnit < texCount; texUnit++) {
-		[[glesEngine.textures textureUnitAt: texUnit].pointSpriteCoordReplace disable];
-	}
+	for (GLuint texUnit = 0; texUnit < texCount; texUnit++)
+		[gl enablePointSpriteCoordReplace: NO at: texUnit];
 }
 
 #define kCC3DeviceScaleFactorBase 480.0f

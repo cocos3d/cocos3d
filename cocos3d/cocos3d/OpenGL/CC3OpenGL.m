@@ -1,0 +1,698 @@
+/*
+ * CC3OpenGL.m
+ *
+ * cocos3d 2.0.0
+ * Author: Bill Hollings
+ * Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
+ * http://www.brenwill.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * http://en.wikipedia.org/wiki/MIT_License
+ *
+ * See header file CC3OpenGL.h for full API documentation.
+ */
+
+#import "CC3OpenGL.h"
+#import "CC3CC2Extensions.h"
+
+#if CC3_OGLES_2
+#	import "CC3OpenGLES2.h"
+#	define CC3OpenGLClass	CC3OpenGLES2
+#elif CC3_OGLES_1
+#	import "CC3OpenGLES1.h"
+#	define CC3OpenGLClass	CC3OpenGLES1
+#endif
+
+@implementation CC3OpenGL
+
+-(void) dealloc {
+	free(vertexAttributes);
+	free(value_GL_TEXTURE_BINDING_2D);
+	[super dealloc];
+}
+
+
+#pragma mark Capabilities
+
+-(void) enableAlphaTesting: (BOOL) onOff {}
+
+-(void) enableBlend: (BOOL) onOff { cc3_SetGLCap(GL_BLEND, onOff, valueCap_GL_BLEND, isKnownCap_GL_BLEND); }
+
+-(void) enableClipPlane: (BOOL) onOff at: (GLuint) clipIdx {}
+
+-(void) enableColorLogicOp: (BOOL) onOff {}
+
+-(void) enableColorMaterial: (BOOL) onOff {}
+
+-(void) enableCullFace: (BOOL) onOff { cc3_SetGLCap(GL_CULL_FACE, onOff, valueCap_GL_CULL_FACE, isKnownCap_GL_CULL_FACE); }
+
+-(void) enableDepthTest: (BOOL) onOff { cc3_SetGLCap(GL_DEPTH_TEST, onOff, valueCap_GL_DEPTH_TEST, isKnownCap_GL_DEPTH_TEST); }
+
+-(void) enableDither: (BOOL) onOff { cc3_SetGLCap(GL_DITHER, onOff, valueCap_GL_DITHER, isKnownCap_GL_DITHER); }
+
+-(void) enableFog: (BOOL) onOff {}
+
+-(void) enableLineSmoothing: (BOOL) onOff {}
+
+-(void) enableMatrixPalette: (BOOL) onOff {}
+
+-(void) enableMultisampling: (BOOL) onOff {}
+
+-(void) enableNormalize: (BOOL) onOff {}
+
+-(void) enablePointSmoothing: (BOOL) onOff {}
+
+-(void) enablePointSprites: (BOOL) onOff {}
+
+-(void) enablePolygonOffset: (BOOL) onOff { cc3_SetGLCap(GL_POLYGON_OFFSET_FILL, onOff, valueCap_GL_POLYGON_OFFSET_FILL, isKnownCap_GL_POLYGON_OFFSET_FILL); }
+
+-(void) enableRescaleNormal: (BOOL) onOff {}
+
+-(void) enableSampleAlphaToCoverage: (BOOL) onOff { cc3_SetGLCap(GL_SAMPLE_ALPHA_TO_COVERAGE, onOff, valueCap_GL_SAMPLE_ALPHA_TO_COVERAGE, isKnownCap_GL_SAMPLE_ALPHA_TO_COVERAGE); }
+
+-(void) enableSampleAlphaToOne: (BOOL) onOff {}
+
+-(void) enableSampleCoverage: (BOOL) onOff { cc3_SetGLCap(GL_SAMPLE_COVERAGE, onOff, valueCap_GL_SAMPLE_COVERAGE, isKnownCap_GL_SAMPLE_COVERAGE); }
+
+-(void) enableScissorTest: (BOOL) onOff { cc3_SetGLCap(GL_SCISSOR_TEST, onOff, valueCap_GL_SCISSOR_TEST, isKnownCap_GL_SCISSOR_TEST); }
+
+-(void) enableStencilTest: (BOOL) onOff { cc3_SetGLCap(GL_STENCIL_TEST, onOff, valueCap_GL_STENCIL_TEST, isKnownCap_GL_STENCIL_TEST); }
+
+
+#pragma mark Vertex attribute arrays
+
+-(GLint) vertexAttributeIndexForSemantic: (GLenum) semantic
+							 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3AssertUnimplemented(@"vertexAttributeIndexForSemantic:withVisitor:");
+	return 0;
+}
+
+-(void) enableVertexAttribute: (BOOL) onOff at: (GLint) vaIdx {
+	if (vaIdx < 0) return;
+	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
+	
+	// If we know the state and it is not changing, do nothing.
+	if (vaPtr->isEnabledKnown && CC3BooleansAreEqual(vaPtr->isEnabled, onOff)) return;
+	
+	vaPtr->isEnabled = onOff;
+	vaPtr->isEnabledKnown = YES;
+	
+	[self setVertexAttributeEnablementAt: vaIdx];
+}
+
+-(void) setVertexAttributeEnablementAt: (GLint) vaIdx {
+	CC3AssertUnimplemented(@"setVertexAttributeEnablementAt:");
+}
+
+-(void) bindVertexAttributes: (GLvoid*) pData
+					withSize: (GLint) elemSize
+					withType: (GLenum) elemType
+				  withStride: (GLsizei) vtxStride
+		 withShouldNormalize: (BOOL) shldNorm
+						  at: (GLint) vaIdx {
+	if (vaIdx < 0) return;
+	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
+	
+	BOOL shouldSetGL = YES;		// TODO - fix errors drawing multiple line strips when not bound every time (eg teapots)
+//	BOOL shouldSetGL = !vaPtr->isKnown;
+	shouldSetGL |= (pData != vaPtr->vertices);
+	shouldSetGL |= (elemSize != vaPtr->elementSize);
+	shouldSetGL |= (elemType != vaPtr->elementType);
+	shouldSetGL |= (vtxStride != vaPtr->vertexStride);
+	shouldSetGL |= (shldNorm != vaPtr->shouldNormalize);
+	if (shouldSetGL) {
+		vaPtr->vertices = pData;
+		vaPtr->elementSize = elemSize;
+		vaPtr->elementType = elemType;
+		vaPtr->vertexStride = vtxStride;
+		vaPtr->shouldNormalize = shldNorm;
+		vaPtr->isKnown = YES;
+		[self bindVertexAttributesAt: vaIdx];
+	}
+	vaPtr->wasBound = YES;
+}
+
+-(void) bindVertexAttributesAt: (GLint) vaIdx { CC3AssertUnimplemented(@"bindVertexAttributesAt:"); }
+
+-(void) clearUnboundVertexAttributes {
+	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
+		vertexAttributes[vaIdx].wasBound = NO;
+}
+
+-(void) disableUnboundVertexAttributes {
+	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
+		if ( !vertexAttributes[vaIdx].wasBound ) [self enableVertexAttribute: NO at: vaIdx];
+}
+
+-(void) enable2DVertexAttributes { CC3AssertUnimplemented(@"enable2DVertexAttributes"); }
+
+-(GLuint) generateBuffer {
+	GLuint buffID;
+	glGenBuffers(1, &buffID);
+	LogGLErrorTrace(@"while generating a GL buffer ID");
+	return buffID;
+}
+
+-(void) deleteBuffer: (GLuint) buffID  {
+	glDeleteBuffers(1, &buffID);
+	LogGLErrorTrace(@"while deleting a GL buffer ID");
+}
+
+-(void) bindBuffer: (GLuint) buffId  toTarget: (GLenum) target {
+	if (target == GL_ELEMENT_ARRAY_BUFFER) {
+		cc3_CheckGLPrim(buffId, value_GL_ELEMENT_ARRAY_BUFFER_BINDING, isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING);
+		if ( !needsUpdate ) return;
+	} else {
+		cc3_CheckGLPrim(buffId, value_GL_ARRAY_BUFFER_BINDING, isKnown_GL_ARRAY_BUFFER_BINDING);
+		if ( !needsUpdate ) return;
+	}
+	glBindBuffer(target, buffId);
+	LogGLErrorTrace(@"while binding GL buffer %u to target %@", buffId, NSStringFromGLEnum(target));
+}
+
+-(void) unbindBufferTarget: (GLenum) target { [self bindBuffer: 0 toTarget: target]; }
+
+-(void) loadBufferTarget: (GLenum) target
+				withData: (GLvoid*) buffPtr
+				ofLength: (GLsizeiptr) buffLen
+				  forUse: (GLenum) buffUsage {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
+	glBufferData(target, buffLen, buffPtr, buffUsage);
+	LogGLErrorTrace(@"while loading buffer target %@ with data of length %i from %p for use %@",
+					NSStringFromGLEnum(buffUsage), buffLen, buffPtr, NSStringFromGLEnum(buffUsage));
+}
+
+-(void) updateBufferTarget: (GLenum) target
+				  withData: (GLvoid*) buffPtr
+				startingAt: (GLintptr) offset
+				 forLength: (GLsizeiptr) length {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
+	glBufferSubData(target, offset, length, buffPtr);
+	LogGLErrorTrace(@"while updating buffer target %@ with data of length %i at offset %i from %p",
+					NSStringFromGLEnum(target), length, offset, buffPtr);
+}
+
+-(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
+	glDrawArrays(drawMode, start, len);
+	LogGLErrorTrace(@"while drawing %u vertices as %@ starting from %u", len, NSStringFromGLEnum(drawMode), start);
+	CC_INCREMENT_GL_DRAWS(1);
+}
+
+-(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
+	CC3Assert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE),
+			  @"OpenGL ES permits drawing a maximum of 65536 indexed vertices, and supports only"
+			  @" GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
+	glDrawElements(drawMode, len, type, indicies);
+	LogGLErrorTrace(@"while drawing %u vertex indices as %@", len, NSStringFromGLEnum(drawMode));
+	CC_INCREMENT_GL_DRAWS(1);
+}
+
+
+#pragma mark State
+
+-(void) setClearColor: (ccColor4F) color {
+	cc3_CheckGLValue(color, CCC4FAreEqual(color, value_GL_COLOR_CLEAR_VALUE),
+					 value_GL_COLOR_CLEAR_VALUE, isKnown_GL_COLOR_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearColor(color.r, color.g, color.b, color.a);
+	LogGLErrorTrace(@"while setting color clearing value to %@", NSStringFromCCC4F(color));
+}
+
+-(void) setClearDepth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearDepthf(val);
+	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
+}
+
+-(void) setClearStencil: (GLint) val {
+	cc3_CheckGLPrim(val, value_GL_STENCIL_CLEAR_VALUE, isKnown_GL_STENCIL_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearStencil(val);
+	LogGLErrorTrace(@"while setting stencil clearing value to %i", val);
+}
+
+-(void) setColor: (ccColor4F) color {}
+
+-(void) setColorMask: (ccColor4B) mask {
+	// Normalize the mask to strictly 0 or 1 in each component.
+	ccColor4B maskBools = ccc4(mask.r != 0, mask.g != 0, mask.b != 0, mask.a != 0);
+	cc3_CheckGLValue(maskBools, CCC4BAreEqual(maskBools, value_GL_COLOR_WRITEMASK),
+					 value_GL_COLOR_WRITEMASK, isKnown_GL_COLOR_WRITEMASK);
+	if ( !needsUpdate ) return;
+	glColorMask(maskBools.r, maskBools.g, maskBools.b, maskBools.a);
+	LogGLErrorTrace(@"while setting color mask to %@", NSStringFromCCC4B(mask));
+}
+
+-(void) setCullFace: (GLenum) val {
+	cc3_CheckGLPrim(val, value_GL_CULL_FACE_MODE, isKnown_GL_CULL_FACE_MODE);
+	if ( !needsUpdate ) return;
+	glCullFace(val);
+	LogGLErrorTrace(@"while setting face culling to %@", NSStringFromGLEnum(val));
+}
+
+-(void) setDepthFunc: (GLenum) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_FUNC, isKnown_GL_DEPTH_FUNC);
+	if ( !needsUpdate ) return;
+	glDepthFunc(val);
+	LogGLErrorTrace(@"while setting depth function to %@", NSStringFromGLEnum(val));
+}
+
+-(void) setDepthMask: (BOOL) writable {
+	BOOL val = (writable != 0);
+	cc3_CheckGLPrim(val, value_GL_DEPTH_WRITEMASK, isKnown_GL_DEPTH_WRITEMASK);
+	if ( !needsUpdate ) return;
+	glDepthMask(val);
+	LogGLErrorTrace(@"while setting depth mask to %@", NSStringFromBoolean(writable));
+}
+
+-(void) setFrontFace: (GLenum) val {
+	cc3_CheckGLPrim(val, value_GL_FRONT_FACE, isKnown_GL_FRONT_FACE);
+	if ( !needsUpdate ) return;
+	glFrontFace(val);
+	LogGLErrorTrace(@"while setting front face winding to %@", NSStringFromGLEnum(val));
+}
+
+-(void) setLineWidth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_LINE_WIDTH, isKnown_GL_LINE_WIDTH);
+	if ( !needsUpdate ) return;
+	glLineWidth(val);
+	LogGLErrorTrace(@"while setting line width %.3f", val);
+}
+
+-(void) setPointSize: (GLfloat) val {}
+
+-(void) setPointSizeAttenuation: (CC3AttenuationCoefficients) ac {}
+
+-(void) setPointSizeFadeThreshold: (GLfloat) val {}
+
+-(void) setPointSizeMinimum: (GLfloat) val {}
+
+-(void) setPointSizeMaximum: (GLfloat) val {}
+
+-(void) setPolygonOffsetFactor: (GLfloat) factor units: (GLfloat) units {
+	if ((factor != value_GL_POLYGON_OFFSET_FACTOR) ||
+		(units != value_GL_POLYGON_OFFSET_UNITS) ||
+		!isKnownPolygonOffset) {
+		value_GL_POLYGON_OFFSET_FACTOR = factor;
+		value_GL_POLYGON_OFFSET_UNITS = units;
+		isKnownPolygonOffset = YES;
+		glPolygonOffset(factor, units);
+		LogGLErrorTrace(@"while setting polygon offset factor to %.3f and offset to %.3f", factor, units);
+	}
+}
+
+-(void) setScissor: (CC3Viewport) vp {
+	cc3_CheckGLValue(vp, CC3ViewportsAreEqual(vp, value_GL_SCISSOR_BOX),
+					 value_GL_SCISSOR_BOX, isKnown_GL_SCISSOR_BOX);
+	if ( !needsUpdate ) return;
+	glScissor(vp.x, vp.y, vp.w, vp.h);
+	LogGLErrorTrace(@"while setting scissor rect to %@", NSStringFromCC3Viewport(vp));
+}
+
+-(void) setShadeModel: (GLenum) val {}
+
+-(void) setStencilFunc: (GLenum) func reference: (GLint) ref mask: (GLuint) mask {
+	if ((func != value_GL_STENCIL_FUNC) ||
+		(ref != value_GL_STENCIL_REF) ||
+		(mask != value_GL_STENCIL_VALUE_MASK) ||
+		!isKnownStencilFunc) {
+		value_GL_STENCIL_FUNC = func;
+		value_GL_STENCIL_REF = ref;
+		value_GL_STENCIL_VALUE_MASK = mask;
+		isKnownStencilFunc = YES;
+		glStencilFunc(func, ref, mask);
+		LogGLErrorTrace(@"while setting stencil function to %@ reference to %i and mask to %u",
+						NSStringFromGLEnum(func), ref, mask);
+	}
+}
+
+-(void) setStencilMask: (GLuint) mask {
+	cc3_CheckGLPrim(mask, value_GL_STENCIL_WRITEMASK, isKnown_GL_STENCIL_WRITEMASK);
+	if ( !needsUpdate ) return;
+	glStencilMask(mask);
+	LogGLErrorTrace(@"while setting stencil mask to %u", mask);
+}
+
+-(void) setOpOnStencilFail: (GLenum) sFail onDepthFail: (GLenum) zFail onDepthPass: (GLenum) zPass {
+	if ((sFail != value_GL_STENCIL_FAIL) ||
+		(zFail != value_GL_STENCIL_PASS_DEPTH_FAIL) ||
+		(zPass != value_GL_STENCIL_PASS_DEPTH_PASS) ||
+		!isKnownStencilOp) {
+		value_GL_STENCIL_FAIL = sFail;
+		value_GL_STENCIL_PASS_DEPTH_FAIL = zFail;
+		value_GL_STENCIL_PASS_DEPTH_PASS = zPass;
+		isKnownStencilOp = YES;
+		glStencilOp(sFail, zFail, zPass);
+		LogGLErrorTrace(@"while setting stencil operations to stencil fail: %@, Z-fail: %@, Z-pass: %@",
+						NSStringFromGLEnum(sFail), NSStringFromGLEnum(zFail), NSStringFromGLEnum(zPass));
+	}
+}
+
+-(void) setViewport: (CC3Viewport) vp {
+	cc3_CheckGLValue(vp, CC3ViewportsAreEqual(vp, value_GL_VIEWPORT),
+					 value_GL_VIEWPORT, isKnown_GL_VIEWPORT);
+	if ( !needsUpdate ) return;
+	glViewport(vp.x, vp.y, vp.w, vp.h);
+	LogGLErrorTrace(@"while setting viewport to %@", NSStringFromCC3Viewport(vp));
+}
+
+-(void) clearBuffers: (GLbitfield) mask {
+	glClear(mask);
+	LogGLErrorTrace(@"while clearing buffers %x", mask);
+}
+
+-(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
+
+-(void) clearDepthBuffer { [self clearBuffers: GL_DEPTH_BUFFER_BIT]; }
+
+-(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
+
+-(ccColor4B) readPixelAt: (CGPoint) pixelPos {
+	ccColor4B pixColor;
+	glReadPixels((GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixColor);
+	LogGLErrorTrace(@"while reading pixels at %@", NSStringFromCGPoint(pixelPos));
+	return pixColor;
+}
+
+
+#pragma mark Lighting
+
+-(void) enableLighting: (BOOL) onOff {}
+
+-(void) setSceneAmbientLightColor: (ccColor4F) color {}
+
+-(void) enableLight: (BOOL) onOff at: (GLuint) ltIdx {}
+
+-(void) setLightAmbientColor: (ccColor4F) color at: (GLuint) ltIdx {}
+
+-(void) setLightDiffuseColor: (ccColor4F) color at: (GLuint) ltIdx {}
+
+-(void) setLightSpecularColor: (ccColor4F) color at: (GLuint) ltIdx {}
+
+-(void) setLightPosition: (CC3Vector4) pos at: (GLuint) ltIdx {}
+
+-(void) setLightAttenuation: (CC3AttenuationCoefficients) ac at: (GLuint) ltIdx {}
+
+-(void) setSpotlightDirection: (CC3Vector) dir at: (GLuint) ltIdx {}
+
+-(void) setSpotlightFadeExponent: (GLfloat) val at: (GLuint) ltIdx {}
+
+-(void) setSpotlightCutoffAngle: (GLfloat) val at: (GLuint) ltIdx {}
+
+-(void) setFogColor: (ccColor4F) color {}
+
+-(void) setFogMode: (GLenum) mode {}
+
+-(void) setFogDensity: (GLfloat) val {}
+
+-(void) setFogStart: (GLfloat) val {}
+
+-(void) setFogEnd: (GLfloat) val {}
+
+
+#pragma mark Materials
+
+-(void) setMaterialAmbientColor: (ccColor4F) color {}
+
+-(void) setMaterialDiffuseColor: (ccColor4F) color {}
+
+-(void) setMaterialSpecularColor: (ccColor4F) color {}
+
+-(void) setMaterialEmissionColor: (ccColor4F) color {}
+
+-(void) setMaterialShininess: (GLfloat) val {}
+
+-(void) setAlphaFunc: (GLenum) func reference: (GLfloat) ref {}
+
+-(void) setBlendFuncSrc: (GLenum) src dst: (GLenum) dst {
+	if ((src != value_GL_BLEND_SRC) || (dst != value_GL_BLEND_DST) || !isKnownBlendFunc) {
+		value_GL_BLEND_SRC = src;
+		value_GL_BLEND_DST = dst;
+		isKnownBlendFunc = YES;
+		glBlendFunc(src, dst);
+		LogGLErrorTrace(@"while setting src/dest blend function to %@/%@",
+						NSStringFromGLEnum(src), NSStringFromGLEnum(dst));
+	}
+}
+
+
+#pragma mark Textures
+
+-(void) activateTextureUnit: (GLuint) tuIdx {
+	cc3_CheckGLPrim(tuIdx, value_GL_ACTIVE_TEXTURE, isKnown_GL_ACTIVE_TEXTURE);
+	if ( !needsUpdate ) return;
+	glActiveTexture(GL_TEXTURE0 + tuIdx);
+	LogGLErrorTrace(@"while setting active texture unit to %u", tuIdx);
+}
+
+-(void) activateClientTextureUnit: (GLuint) tuIdx {}
+
+-(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(void) bindTexture: (GLuint) texID at: (GLuint) tuIdx {
+	if (CC3CheckGLuintAt(tuIdx, texID, value_GL_TEXTURE_BINDING_2D, &isKnown_GL_TEXTURE_BINDING_2D)) {
+		[self activateTextureUnit: tuIdx];
+		glBindTexture(GL_TEXTURE_2D, texID);
+		LogGLErrorTrace(@"while binding texture %u to texture unit %u", texID, tuIdx);
+	}
+}
+
+/** Sets the specified texture parameter for the specified texture unit, without checking a cache. */
+-(void) setTexParamEnum: (GLenum) pName to: (GLenum) val at: (GLuint) tuIdx {
+	[self activateTextureUnit: tuIdx];
+	glTexParameteri(GL_TEXTURE_2D, pName, val);
+	LogGLErrorTrace(@"while setting texture parameter %@ to %@ in texture unit %u",
+					NSStringFromGLEnum(pName), NSStringFromGLEnum(val), tuIdx);
+}
+
+-(void) setTextureMinifyFunc: (GLenum) func at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MIN_FILTER to: func at: tuIdx];
+}
+
+-(void) setTextureMagnifyFunc: (GLenum) func at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MAG_FILTER to: func at: tuIdx];
+}
+
+-(void) setTextureHorizWrapFunc: (GLenum) func at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_S to: func at: tuIdx];
+}
+
+-(void) setTextureVertWrapFunc: (GLenum) func at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_T to: func at: tuIdx];
+}
+
+-(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {}
+
+-(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
+
+
+#pragma mark Matrices
+
+-(void) activateMatrixStack: (GLenum) mode {}
+
+-(void) activatePaletteMatrixStack: (GLuint) pmIdx {}
+
+-(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {}
+
+-(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {}
+
+-(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {}
+
+-(void) pushModelviewMatrixStack {}
+
+-(void) popModelviewMatrixStack {}
+
+-(void) pushProjectionMatrixStack {}
+
+-(void) popProjectionMatrixStack {}
+
+
+#pragma mark Hints
+
+-(void) setFogHint: (GLenum) hint {}
+
+-(void) setGenerateMipmapHint: (GLenum) hint {
+	cc3_CheckGLPrim(hint, value_GL_GENERATE_MIPMAP_HINT, isKnown_GL_GENERATE_MIPMAP_HINT);
+	if ( !needsUpdate ) return;
+	glHint(GL_GENERATE_MIPMAP_HINT, hint);
+	LogGLErrorTrace(@"while setting mipmap hint to %@", NSStringFromGLEnum(hint));
+}
+
+-(void) setLineSmoothingHint: (GLenum) hint {}
+
+-(void) setPerspectiveCorrectionHint: (GLenum) hint {}
+
+-(void) setPointSmoothingHint: (GLenum) hint {}
+
+
+#pragma mark Platform limits
+
+-(GLuint) maxNumberOfLights { return value_GL_MAX_LIGHTS; }
+
+-(GLuint) maxNumberOfClipPlanes { return value_GL_MAX_CLIP_PLANES; }
+
+-(GLuint) maxNumberOfPaletteMatrices { return value_GL_MAX_PALETTE_MATRICES; }
+
+-(GLuint) maxNumberOfTextureUnits { return value_GL_MAX_TEXTURE_UNITS; }
+
+-(GLuint) maxNumberOfVertexAttributes { return value_GL_MAX_VERTEX_ATTRIBS; }
+
+-(GLuint) maxNumberOfVertexUnits { return value_GL_MAX_VERTEX_UNITS; }
+
+-(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES_APPLE; }
+
+
+#pragma mark Aligning 2D & 3D caches
+
+-(void) align2DStateCache {}
+
+-(void) align3DStateCache {
+	isKnownCap_GL_BLEND = NO;
+	isKnownBlendFunc = NO;
+	isKnown_GL_ARRAY_BUFFER_BINDING = NO;
+	isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING = NO;
+	CC3SetBit(&isKnown_GL_TEXTURE_BINDING_2D, 0, NO);	// Unknown texture in tex unit zero
+
+	// Mark all vertex attributes as unknown state
+	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+		vertexAttributes[vaIdx].isEnabledKnown = NO;
+		vertexAttributes[vaIdx].isKnown = NO;
+	}
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+
+		[self initPlatformLimits];
+		[self initVertexAttributes];
+		[self initTextureUnits];
+		
+	}
+	return self;
+}
+
+/** Template method to retrieve the GL platform limits. */
+-(void) initPlatformLimits {}
+
+/** Allocates and initializes the vertex attributes. This must be invoked after the initPlatformLimits. */
+-(void) initVertexAttributes {
+	vertexAttributes = calloc(value_GL_MAX_VERTEX_ATTRIBS, sizeof(CC3VertexAttr));
+}
+
+/** Allocates and initializes the texture units. This must be invoked after the initPlatformLimits. */
+-(void) initTextureUnits {
+	value_GL_TEXTURE_BINDING_2D = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
+}
+
+/** Returns the appropriate class cluster subclass instance. */
++(id) alloc {
+	if (self == [CC3OpenGL class]) return [CC3OpenGLClass alloc];
+	return [super alloc];
+}
+
+static CC3OpenGL* _sharedGL;
+
++(CC3OpenGL*) sharedGL {
+	if (!_sharedGL) {
+		_sharedGL = [self alloc];
+		[_sharedGL init];
+	}
+	return _sharedGL;
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark State management functions
+
+BOOL CC3CheckGLBooleanAt(GLuint idx, BOOL val, GLbitfield* stateBits, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = (!CC3BooleansAreEqual(CC3IsBitSet(*stateBits, idx), val)) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		CC3SetBit(stateBits, idx, val);
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+BOOL CC3CheckGLuintAt(GLuint idx, GLuint val, GLuint* stateArray, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = (stateArray[idx] != val) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		stateArray[idx] = val;
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+BOOL CC3CheckGLfloatAt(GLuint idx, GLfloat val, GLfloat* stateArray, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = (stateArray[idx] != val) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		stateArray[idx] = val;
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+BOOL CC3CheckGLVectorAt(GLuint idx, CC3Vector val, CC3Vector* stateArray, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = !CC3VectorsAreEqual(stateArray[idx], val) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		stateArray[idx] = val;
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+BOOL CC3CheckGLVector4At(GLuint idx, CC3Vector4 val, CC3Vector4* stateArray, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = !CC3Vector4sAreEqual(stateArray[idx], val) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		stateArray[idx] = val;
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+BOOL CC3CheckGLColorAt(GLuint idx, ccColor4F val, ccColor4F* stateArray, GLbitfield* isKnownBits) {
+	BOOL needsUpdate = !CCC4FAreEqual(stateArray[idx], val) || CC3IsBitClear(*isKnownBits, idx);
+	if (needsUpdate) {
+		stateArray[idx] = val;
+		CC3SetBit(isKnownBits, idx, YES);
+	}
+	return needsUpdate;
+}
+
+void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL onOff, GLbitfield* stateBits, GLbitfield* isKnownBits) {
+	if (CC3CheckGLBooleanAt(idx, onOff, stateBits, isKnownBits)) {
+		if (onOff)
+			glEnable(cap + idx);
+		else
+			glDisable(cap + idx);
+		LogGLErrorTrace(@"while %@abling capability %@ at index %u", (onOff ? @"en" : @"dis"), NSStringFromGLEnum(cap), idx);
+	}
+}
+

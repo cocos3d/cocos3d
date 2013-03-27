@@ -33,7 +33,6 @@
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3Mesh.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3GLView.h"
 #import "CC3EAGLView.h"
 #import "CC3NodeSequencer.h"
@@ -76,19 +75,6 @@
 }
 
 -(CC3PerformanceStatistics*) performanceStatistics { return _startingNode.performanceStatistics; }
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_currentNode = nil;
-		_startingNode = nil;
-		_camera = nil;
-		_pendingRemovals = nil;
-		_shouldVisitChildren = YES;
-	}
-	return self;
-}
-
-+(id) visitor { return [[[self alloc] init] autorelease]; }
 
 -(void) visit: (CC3Node*) aNode {
 	if (!aNode) return;					// Must have a node to work on
@@ -199,6 +185,45 @@
 	for (CC3Node* n in _pendingRemovals) [n remove];
 	[_pendingRemovals removeAllObjects];
 }
+
+
+#pragma mark Accessing node contents
+
+-(CC3Scene*) scene { return _startingNode.scene; }
+
+-(CC3MeshNode*) currentMeshNode { return (CC3MeshNode*)self.currentNode; }
+
+-(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
+
+-(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit {
+	return [self.currentMaterial textureForTextureUnit: texUnit].textureUnit;
+}
+
+-(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
+
+-(NSUInteger) lightCount { return self.scene.lights.count; }
+
+-(CC3Light*) lightAt: (GLuint) index {
+	CCArray* lights = self.scene.lights;
+	if (index < lights.count) return [lights objectAtIndex: index];
+	return nil;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_currentNode = nil;
+		_startingNode = nil;
+		_camera = nil;
+		_pendingRemovals = nil;
+		_shouldVisitChildren = YES;
+	}
+	return self;
+}
+
++(id) visitor { return [[[self alloc] init] autorelease]; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
@@ -369,6 +394,7 @@
 
 @end
 
+
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
@@ -379,33 +405,22 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
+@synthesize gl=_gl, drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
 @synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
 @synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount, currentColor=_currentColor;
 @synthesize currentSkinSection=_currentSkinSection, currentShaderProgram=_currentShaderProgram;
 
 -(void) dealloc {
+	[_gl release];
 	_drawingSequencer = nil;		// not retained
 	_currentSkinSection = nil;		// not retained
 	_currentShaderProgram = nil;	// not retained
 	[super dealloc];
 }
 
--(id) init {
-	if ( (self = [super init]) ) {
-		_drawingSequencer = nil;
-		_currentSkinSection = nil;
-		_currentShaderProgram = nil;
-		_shouldDecorateNode = YES;
-		_shouldClearDepthBuffer = YES;
-	}
-	return self;
-}
-
--(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
-			[super fullDescription], _drawingSequencer, _textureUnit, _textureUnitCount,
-			NSStringFromBoolean(_shouldDecorateNode), NSStringFromBoolean(_shouldClearDepthBuffer)];
+-(CC3OpenGL*) gl {
+	if ( !_gl) self.gl = CC3OpenGL.sharedGL;
+	return _gl;
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
@@ -443,9 +458,9 @@
 }
 
 /**
- * Initializes mesh and material context switching, prepares GL programs for rendering,
- * and optionally clears the depth buffer every time drawing begins so that 3D rendering
- * will occur over top of any previously rendered 3D or 2D artifacts.
+ * Attaches the CC3OpenGL instance, initializes mesh and material context switching, prepares
+ * GL programs for rendering, and optionally clears the depth buffer every time drawing begins
+ * so that 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
  */
 -(void) open {
 	[super open];
@@ -454,7 +469,7 @@
 	[CC3Mesh resetSwitching];
 	[CC3GLProgram willBeginDrawingScene];
 	
-	if (_shouldClearDepthBuffer) [CC3OpenGLESEngine.engine.state clearDepthBuffer];
+	if (_shouldClearDepthBuffer) [self.gl clearDepthBuffer];
 }
 
 -(void) draw: (CC3Node*) aNode {
@@ -465,29 +480,9 @@
 
 #pragma mark Accessing node contents
 
--(CC3Scene*) scene { return _startingNode.scene; }
-
--(CC3MeshNode*) currentMeshNode { return (CC3MeshNode*)self.currentNode; }
-
--(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
-
--(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit {
-	return [self.currentMaterial textureForTextureUnit: texUnit].textureUnit;
-}
-
--(CC3Mesh*) currentMesh { return self.currentMeshNode.mesh; }
-
 -(ccColor4B) currentColor4B { return CCC4BFromCCC4F(self.currentColor); }
 
 -(void) setCurrentColor4B: (ccColor4B) color4B { self.currentColor = CCC4FFromCCC4B(color4B); }
-
--(NSUInteger) lightCount { return self.scene.lights.count; }
-
--(CC3Light*) lightAt: (GLuint) index {
-	CCArray* lights = self.scene.lights;
-	if (index < lights.count) return [lights objectAtIndex: index];
-	return nil;
-}
 
 
 #pragma mark Environmental matrices
@@ -557,6 +552,26 @@
 	_isMVPMtxDirty = YES;
 }
 
+
+#pragma mark Allocation and initialization
+
+-(id) init {
+	if ( (self = [super init]) ) {
+		_drawingSequencer = nil;
+		_currentSkinSection = nil;
+		_currentShaderProgram = nil;
+		_shouldDecorateNode = YES;
+		_shouldClearDepthBuffer = YES;
+	}
+	return self;
+}
+
+-(NSString*) fullDescription {
+	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
+			[super fullDescription], _drawingSequencer, _textureUnit, _textureUnitCount,
+			NSStringFromBoolean(_shouldDecorateNode), NSStringFromBoolean(_shouldClearDepthBuffer)];
+}
+
 @end
 
 
@@ -609,12 +624,10 @@
 	[_pickedNode release];
 	_pickedNode = nil;
 	
-	CC3OpenGLESEngine* glesEngine = CC3OpenGLESEngine.engine;
-	
-	CC3OpenGLESCapabilities* glesServCaps = glesEngine.capabilities;
-	[glesServCaps.lighting disable];
-	[glesServCaps.blend disable];
-	[glesServCaps.fog disable];
+	CC3OpenGL* gl = self.gl;
+	[gl enableLighting: NO];
+	[gl enableBlend: NO];
+	[gl enableFog: NO];
 	
 	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
 	[CCDirector.sharedDirector.ccGLView openPicking];
@@ -627,20 +640,19 @@
  * If antialiasing multisampling is active, after reading the color of the touched pixel,
  * the multisampling framebuffer is made active in preparation of normal drawing operations.
  *
- * Also restores the original GL color value, to avoid flicker on materials and textures
- * if the scene has no lighting.
+ * Draws the backdrop to avoid flicker.
  */
 -(void) close {
-	CC3OpenGLESState* glesState = CC3OpenGLESEngine.engine.state;
 		
 	// Read the pixel from the framebuffer
-	ccColor4B pixColor = [glesState readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
+	ccColor4B pixColor = [self.gl readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
 	
 	// Fetch the node whose tags is mapped from the pixel color
 	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
-	
-	LogTrace(@"%@ picked %@ from color (%u, %u, %u, %u)", self, pickedNode,
-			 pixColor.r, pixColor.g, pixColor.b, pixColor.a);
+
+	LogTrace(@"%@ picked %@ from color %@ at position %@",
+			 self, _pickedNode, NSStringFromCCC4B(pixColor),
+			 NSStringFromCGPoint(self.scene.touchedNodePicker.glTouchPoint));
 	
 	// If multisampling antialiasing, rebind the multisampling framebuffer
 	[CCDirector.sharedDirector.ccGLView closePicking];
@@ -689,7 +701,7 @@
  * Subclasses can override to do something more sophisticated with the background.
  */
 -(void) drawBackdrop {
-	CC3OpenGLESState* glesState = CC3OpenGLESEngine.engine.state;
+	CC3OpenGL* gl = self.gl;
 	CC3Layer* cc3Layer = self.scene.cc3Layer;
 	
 	// Only clear the color if the layer is opaque. This is to stop flicker
@@ -702,41 +714,40 @@
 	GLbitfield depthFlag = _shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
 
 	// Ensure that the depth buffer is writable (may have been turned off during node drawing)
-	if (depthFlag) glesState.depthMask.value = YES;
+	if (depthFlag) gl.depthMask = YES;
 	
 	// If the CC3Layer has a background color, use it as the GL clear color
 	if (colorFlag) {
 		if (cc3Layer.isColored) {
 			// Remember the current GL clear color
-			ccColor4F currClearColor = glesState.clearColor.value;
+			ccColor4F currClearColor = gl->value_GL_COLOR_CLEAR_VALUE;
 			
 			// Retrieve the CC3Layer background color
 			ccColor4F layerColor = CCC4FFromColorAndOpacity(cc3Layer.color, cc3Layer.opacity);
 			
 			// Set the GL clear color from the layer color
-			glesState.clearColor.value = layerColor;
-			LogTrace(@"%@ clearing background to %@ color: %@ %@ clearing depth buffer to %.3f", self,
-					 cc3Layer, NSStringFromCCC4F(layerColor), (depthFlag ? @"and" : @"but not"),
-					 glesState.clearDepth.value);
+			gl.clearColor = layerColor;
+			LogTrace(@"%@ clearing background to %@ color: %@ %@ clearing depth buffer", self,
+					 cc3Layer, NSStringFromCCC4F(layerColor), (depthFlag ? @"and" : @"but not"));
 			
 			// Clear the color buffer redraw the background, and depth buffer if required
-			[glesState clearBuffers: (colorFlag | depthFlag)];
+			[gl clearBuffers: (colorFlag | depthFlag)];
 			
 			// Reinstate the current GL clear color
-			glesState.clearColor.value = currClearColor;
+			gl.clearColor = currClearColor;
 			
 		} else {
 			// Otherwise use the current clear color
-			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer to %.3f",
+			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer",
 					 self, NSStringFromCCC4F(glesState.clearColor.value),
-					 (depthFlag ? @"and" : @"but not"), glesState.clearDepth.value);
+					 (depthFlag ? @"and" : @"but not"));
 			
 			// Clear the color buffer redraw the background, and depth buffer if required
-			[glesState clearBuffers: (colorFlag | depthFlag)];
+			[gl clearBuffers: (colorFlag | depthFlag)];
 		}
 	} else if (depthFlag) {
 		LogTrace(@"%@ clearing depth buffer", self);
-		[glesState clearBuffers: depthFlag];		// Clear the depth buffer only
+		[gl clearBuffers: depthFlag];		// Clear the depth buffer only
 	} else {
 		LogTrace(@"%@ clearing neither color or depth buffer", self);
 	}

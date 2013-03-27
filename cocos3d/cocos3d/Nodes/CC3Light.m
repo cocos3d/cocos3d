@@ -33,8 +33,8 @@
 #import "CC3Camera.h"
 #import "CC3ShadowVolumes.h"
 #import "CC3Scene.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
+#import	"CC3ProjectionMatrix.h"
 
 
 #pragma mark CC3Light 
@@ -48,23 +48,6 @@
 @interface CC3Camera (TemplateMethods)
 -(void) loadProjectionMatrix;
 -(void) loadViewMatrix;
-@end
-
-@interface CC3Light (TemplateMethods)
--(void) applyPosition;
--(void) applyDirection;
--(void) applyAttenuation;
--(void) applyColor;
--(GLuint) nextLightIndex;
--(void) returnLightIndex: (GLuint) aLightIndex;
-+(BOOL*) lightIndexPool;
--(void) cleanupShadows;
--(void) configureStencilParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) paintStenciledShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) checkShadowCastingVolume;
--(void) checkCameraShadowVolume;
--(void) checkStencilledShadowPainter;
 @end
 
 @interface CC3LightCameraBridgeVolume (TemplateMethods)
@@ -83,7 +66,7 @@
 
 -(void) dealloc {
 	[self cleanupShadows];		// Includes releasing the shadows array, camera shadow volume & shadow painter
-	[glesLight release];
+//	[glesLight release];
 	[self returnLightIndex: lightIndex];
 	[super dealloc];
 }
@@ -171,7 +154,6 @@
 			return nil;
 		}
 		lightIndex = ltIndx;
-		glesLight = [[CC3OpenGLESEngine.engine.lighting lightAt: lightIndex] retain];
 		shadows = nil;
 		shadowCastingVolume = nil;
 		cameraShadowVolume = nil;
@@ -295,26 +277,35 @@
 
 #pragma mark Drawing
 
--(void) turnOn {
+-(void) turnOnWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
 	if (self.visible) {
 		LogTrace(@"Turning on %@", self);
-		[glesLight.light enable];
-		[self applyPosition];
-		[self applyDirection];
-		[self applyAttenuation];
-		[self applyColor];
+		[gl enableLight: YES at: lightIndex];
+//		[glesLight.light enable];
+		[self applyPositionWithVisitor: visitor];
+		[self applyDirectionWithVisitor: visitor];
+		[self applyAttenuationWithVisitor: visitor];
+		[self applyColorWithVisitor: visitor];
 	} else {
-		[glesLight.light disable];
+		[gl enableLight: NO at: lightIndex];
+//		[glesLight.light disable];
 	}
 }
 
--(void) turnOff { [glesLight.light disable]; }
+-(void) turnOffWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl enableLight: NO at: lightIndex];
+//	[glesLight.light disable];
+}
 
 /**
  * Template method that sets the position of this light in the GL engine to the value of
  * the globalHomogeneousPosition property of this node.
  */	
--(void) applyPosition { glesLight.position.value = self.globalHomogeneousPosition; }
+-(void) applyPositionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl setLightPosition: self.globalHomogeneousPosition at: lightIndex];
+//	glesLight.position.value = self.globalHomogeneousPosition;
+}
 
 /**
  * Template method that sets the spot direction, spot exponent, and spot cutoff angle of this light
@@ -323,26 +314,41 @@
  * been specified and less than 90 degrees, otherwise the light is treated as omnidirectional.
  * OpenGL ES only supports angles less than 90 degrees, so anything above is treated as omnidirectional.
  */
--(void) applyDirection {
+-(void) applyDirectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
 	if (spotCutoffAngle <= 90.0f) {
-		glesLight.spotCutoffAngle.value = spotCutoffAngle;
-		glesLight.spotDirection.value = self.globalForwardDirection;
-		glesLight.spotExponent.value = spotExponent;
+		[gl setSpotlightDirection: self.globalForwardDirection at: lightIndex];
+		[gl setSpotlightCutoffAngle: spotCutoffAngle at: lightIndex];
+		[gl setSpotlightFadeExponent: spotExponent at: lightIndex];
+//		glesLight.spotCutoffAngle.value = spotCutoffAngle;
+//		glesLight.spotDirection.value = self.globalForwardDirection;
+//		glesLight.spotExponent.value = spotExponent;
 	} else {
-		glesLight.spotCutoffAngle.value = kCC3SpotCutoffNone;
+		[gl setSpotlightCutoffAngle: kCC3SpotCutoffNone at: lightIndex];
+//		glesLight.spotCutoffAngle.value = kCC3SpotCutoffNone;
 	}
 }
+//-(void) applyDirectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	if (spotCutoffAngle <= 90.0f) {
+//		glesLight.spotCutoffAngle.value = spotCutoffAngle;
+//		glesLight.spotDirection.value = self.globalForwardDirection;
+//		glesLight.spotExponent.value = spotExponent;
+//	} else {
+//		glesLight.spotCutoffAngle.value = kCC3SpotCutoffNone;
+//	}
+//}
 
 /**
  * Template method that sets the light intensity attenuation characteristics
  * in the GL engine from the attenuation property of this light.
  */
--(void) applyAttenuation {
-	if ( !isDirectionalOnly ) {
-		glesLight.constantAttenuation.value = _attenuation.a;
-		glesLight.linearAttenuation.value = _attenuation.b;
-		glesLight.quadraticAttenuation.value = _attenuation.c;
-	}
+-(void) applyAttenuationWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if ( !isDirectionalOnly ) [visitor.gl setLightAttenuation: _attenuation at: lightIndex];
+//	if ( !isDirectionalOnly ) {
+//		glesLight.constantAttenuation.value = _attenuation.a;
+//		glesLight.linearAttenuation.value = _attenuation.b;
+//		glesLight.quadraticAttenuation.value = _attenuation.c;
+//	}
 }
 
 /**
@@ -350,10 +356,14 @@
  * in the GL engine to the values of the ambientColor, diffuseColor and specularColor
  * properties of this node, respectively.
  */
--(void) applyColor {
-	glesLight.ambientColor.value = ambientColor;
-	glesLight.diffuseColor.value = diffuseColor;
-	glesLight.specularColor.value = specularColor;
+-(void) applyColorWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	[gl setLightAmbientColor: ambientColor at: lightIndex];
+	[gl setLightDiffuseColor: diffuseColor at: lightIndex];
+	[gl setLightSpecularColor: specularColor at: lightIndex];
+//	glesLight.ambientColor.value = ambientColor;
+//	glesLight.diffuseColor.value = diffuseColor;
+//	glesLight.specularColor.value = specularColor;
 }
 
 
@@ -515,38 +525,36 @@
 }
 
 -(void) configureStencilParameters: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESState* glesState = glesEngine.state;
-	
-	[glesEngine.capabilities.stencilTest enable];
-	glesState.colorMask.fixedValue = ccc4(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	[glesState.stencilFunction applyFunction: GL_ALWAYS andReference: 0 andMask: ~0];
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableStencilTest: YES];
+	gl.colorMask = ccc4(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	[gl setStencilFunc: GL_ALWAYS reference: 0 mask: ~0];
 }
 
 -(void) paintStenciledShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-	CC3OpenGLESState* glesState = glesEngine.state;
-	CC3OpenGLESMatrices* glesMatrices = glesEngine.matrices;
-	CC3OpenGLESMatrixStack* glesProjMtx = glesMatrices.projection;
-	CC3OpenGLESMatrixStack* glesMVMtx = glesMatrices.modelview;
+	CC3OpenGL* gl = visitor.gl;
 	
 	// Turn color masking back on so that shadow will be painted on the scene.
 	// The depth mask will be turned on by the mesh node
-	glesState.colorMask.fixedValue = ccc4(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	gl.colorMask = ccc4(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
 	// Set the stencil function so that only those pixels that have a non-zero
 	// value in the stencil (and that pass the depth test) will be painted.
-	[glesState.stencilFunction applyFunction: GL_NOTEQUAL andReference: 0 andMask: ~0];
+	[gl setStencilFunc: GL_NOTEQUAL reference: 0 mask: ~0];
 	
 	// Clear any non-zero values from the stencil buffer as we paint the shadow.
 	// This saves having to make the effort to clear the stencil buffer on the next round.
-	[glesState.stencilOperation applyStencilFail: GL_ZERO andDepthFail: GL_ZERO andDepthPass: GL_ZERO];
+	[gl setOpOnStencilFail: GL_ZERO onDepthFail: GL_ZERO onDepthPass: GL_ZERO];
 	
 	// Set the projection and modelview matrices to identity to transform the simple
 	// rectangular stenciled shadow painter mesh so that it covers the full viewport.
-	[glesProjMtx identity];
-	[glesMVMtx identity];
-	
+	CC3Matrix4x3 mvMtx;
+	CC3Matrix4x3PopulateIdentity(&mvMtx);
+	[gl loadModelviewMatrix: &mvMtx];
+	CC3Matrix4x4 projMtx;
+	CC3Matrix4x4PopulateIdentity(&projMtx);
+	[gl loadProjectionMatrix: &projMtx];
+
 	// Paint the shadow to the screen. Only areas that have been marked as being
 	// in the stencil buffer as being in the shadow of this light will be shaded.
 	[visitor visit: stencilledShadowPainter];
@@ -558,7 +566,7 @@
 }
 
 -(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor {
-	[[CC3OpenGLESEngine engine].capabilities.stencilTest disable];
+	[visitor.gl enableStencilTest: NO];
 }
 
 /**
@@ -591,7 +599,7 @@ static GLuint lightPoolStartIndex = 0;
  */
 -(GLuint) nextLightIndex {
 	BOOL* indexPool = [[self class] lightIndexPool];
-	GLint platformMaxLights = [CC3OpenGLESEngine engine].platform.maxLights.value;
+	GLuint platformMaxLights = CC3OpenGL.sharedGL.maxNumberOfLights;
 	for (int lgtIdx = lightPoolStartIndex; lgtIdx < platformMaxLights; lgtIdx++) {
 		if (!indexPool[lgtIdx]) {
 			LogTrace(@"Allocating light index %u", lgtIdx);
@@ -608,33 +616,23 @@ static GLuint lightPoolStartIndex = 0;
 	LogTrace(@"Returning light index %u", aLightIndex);
 	BOOL* indexPool = [[self class] lightIndexPool];
 	indexPool[aLightIndex] = NO;
-	[glesLight.light disable];
+//	[glesLight.light disable];
 }
 
 +(GLuint) lightCount {
 	GLuint count = 0;
 	BOOL* indexPool = [self lightIndexPool];
-	GLint platformMaxLights = [CC3OpenGLESEngine engine].platform.maxLights.value;
-	for (int i = lightPoolStartIndex; i < platformMaxLights; i++) {
-		if (indexPool[i]) {
-			count++;
-		}
-	}
+	GLuint platformMaxLights = CC3OpenGL.sharedGL.maxNumberOfLights;
+	for (int i = lightPoolStartIndex; i < platformMaxLights; i++) if (indexPool[i]) count++;
 	return lightPoolStartIndex + count;
 }
 
-+(GLuint) lightPoolStartIndex {
-	return lightPoolStartIndex;
-}
++(GLuint) lightPoolStartIndex { return lightPoolStartIndex; }
 
-+(void) setLightPoolStartIndex: (GLuint) newStartIndex {
-	lightPoolStartIndex = newStartIndex;
-}
++(void) setLightPoolStartIndex: (GLuint) newStartIndex { lightPoolStartIndex = newStartIndex; }
 
-+(void) disableReservedLights {
-	for (int i = 0; i < lightPoolStartIndex; i++) {
-		[[[CC3OpenGLESEngine engine].lighting lightAt: i].light disable];
-	}
++(void) disableReservedLightsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	for (int ltIdx = 0; ltIdx < lightPoolStartIndex; ltIdx++) [visitor.gl enableLight: NO at: ltIdx];
 }
 
 @end

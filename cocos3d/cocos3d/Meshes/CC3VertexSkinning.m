@@ -35,7 +35,6 @@
 #import "CC3Scene.h"
 #import "CC3NodeAnimation.h"
 #import "CC3AffineMatrix.h"
-#import "CC3OpenGLESEngine.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -226,16 +225,16 @@
  * collection of CC3SkinSections to draw the mesh in batches, then disables palette matrices again.
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGLESStateTrackerCapability* glesMatrixPalette = [CC3OpenGLESEngine engine].capabilities.matrixPalette;
+	CC3OpenGL* gl = visitor.gl;
 	
-	[glesMatrixPalette enable];			// Enable the matrix palette
+	[gl enableMatrixPalette: YES];		// Enable the matrix palette
 	
 	[mesh bindWithVisitor: visitor];	// Bind the arrays
 	
 	for (CC3SkinSection* skinSctn in skinSections)
 		[skinSctn drawVerticesOfMesh: mesh withVisitor: visitor];
 	
-	[glesMatrixPalette disable];		// We are finished with the matrix pallete so disable it.
+	[gl enableMatrixPalette: NO];		// We are finished with the matrix pallete so disable it.
 }
 
 
@@ -389,8 +388,6 @@
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
 
 #if CC3_OGLES_1
-	CC3OpenGLESMatrices* glesMatrices = [CC3OpenGLESEngine engine].matrices;
-
 	GLuint boneCnt = self.boneCount;
 	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
 		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
@@ -398,12 +395,13 @@
 		// Load this palette matrix from the modelview matrix and the apply the bone draw matrix.
 		// Since the CC3SkinMeshNode does not transform the modelview stack, the modelview will
 		// only contain the view matrix. All other transforms are captured in the bone matrices.
-		CC3OpenGLESMatrixStack* glesPaletteMatrix = [glesMatrices paletteMatrixAt: boneNum];
-		[glesPaletteMatrix loadFromModelView];
-		[glesPaletteMatrix multiply: sb.drawTransformMatrix];
+		CC3Matrix4x3 mtx;
+		CC3Matrix4x3PopulateFrom4x3(&mtx, visitor.modelViewMatrix);
+		[sb.drawTransformMatrix multiplyIntoCC3Matrix4x3: &mtx];
+		[visitor.gl loadPaletteMatrix: &mtx at: boneNum];
 	}
 #endif
-	
+
 	visitor.currentSkinSection = self;
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
 }

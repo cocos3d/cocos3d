@@ -33,8 +33,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3NodeAnimation.h"
 #import "CC3Billboard.h"
-#import "CC3OpenGLESFoundation.h"
-#import "CC3OpenGLESEngine.h"
+#import "CC3OpenGLFoundation.h"
 #import "CC3ParametricMeshNodes.h"
 #import "CCActionManager.h"
 #import "CCLabelTTF.h"
@@ -1647,17 +1646,18 @@ static GLuint lastAssignedNodeTag;
 
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
-	CC3OpenGLESMatrixStack* glesMatrixStack = [CC3OpenGLESEngine engine].matrices.modelview;
+	CC3OpenGL* gl = visitor.gl;
 
-	[glesMatrixStack push];
+	[gl pushModelviewMatrixStack];
 
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
-	[glesMatrixStack multiply: transformMatrix];
-
 	[visitor populateModelMatrixFrom: transformMatrix];
+
+	[gl loadModelviewMatrix: visitor.modelViewMatrix];
+
 	[visitor draw: self];
 
-	[glesMatrixStack pop];
+	[gl popModelviewMatrixStack];
 }
 
 -(void) checkDrawingOrder { for (CC3Node* child in children) [child checkDrawingOrder]; }

@@ -49,6 +49,7 @@
 -(Class) programClass { return [CC3GLProgram class]; }
 
 -(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+		
 	CC3Material* mat = aMeshNode.material;
 
 	// No material

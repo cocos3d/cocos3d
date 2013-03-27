@@ -214,13 +214,13 @@
  * this value to a number larger than one will smooth out the lines and edges of your displayed models.
  *
  * The value set will be clamped to the maximum allowable value for the platform. That maximum value
- * can be retrieved from CC3OpenGLESEngine.engine.platform.maxPixelSamples.value, and generally has
- * a value of four on all current devices that support multisampling.
+ * can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples, and generally has a value of
+ * four on all current devices that support multisampling.
  *
- * Retrieving the value of the CC3OpenGLESEngine.engine.platform.maxPixelSamples.value property can
- * only be done once the OpenGL ES context has been established, which is generally performed when the
- * view is created. This creates a bit of a chicken-and-egg situation where you might need the maximum
- * pixel samples value before you create the view, but can't retrieve it until the view has been created.
+ * Retrieving the value of the CC3OpenGL.sharedGL.maxNumberOfPixelSamples property can only be done
+ * once the OpenGL ES context has been established, which is generally performed when the view is
+ * created. This creates a bit of a chicken-and-egg situation where you might need the maximum pixel
+ * samples value before you create the view, but can't retrieve it until the view has been created.
  * This particular value does not vary much from device to device, so the work-around is to determine
  * the maximum value at development time, and then select a pixel samples value accordingly.
  *

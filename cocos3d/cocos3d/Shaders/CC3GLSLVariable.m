@@ -31,7 +31,8 @@
 
 #import "CC3GLSLVariable.h"
 #import "CC3GLProgram.h"
-#import "CC3OpenGLESVertexArrays.h"
+#import "CC3OpenGLFoundation.h"
+//#import "CC3OpenGLESVertexArrays.h"
 
 
 NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {

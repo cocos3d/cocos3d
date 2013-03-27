@@ -30,7 +30,7 @@
  */
 
 #import "CC3Layer.h"
-#import "CC3OpenGLESFoundation.h"
+#import "CC3OpenGLFoundation.h"
 #import "CC3Environment.h"
 #import "CC3IOSExtensions.h"
 

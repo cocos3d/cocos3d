@@ -31,7 +31,6 @@
 
 #import "CC3GLProgramSemantics.h"
 #import "CC3GLSLVariable.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3NodeVisitor.h"
 #import "CC3MeshNode.h"
 #import "CC3Camera.h"
@@ -40,6 +39,7 @@
 #import "CC3PointParticles.h"
 #import "CC3NodeAnimation.h"
 #import "CC3VertexSkinning.h"
+#import "CC3OpenGL.h"
 
 
 NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
@@ -432,6 +432,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 			
 		case kCC3SemanticModelViewMatrix:
+//			if ( [visitor.currentNode.name isEqualToString: @"TexturedCube"] ) {
+//				LogDebug(@"%@ retieving modelview: %@", visitor.currentNode.name, NSStringFromCC3Matrix4x3(visitor.modelViewMatrix));
+//			}
 			[uniform setMatrix4x3: visitor.modelViewMatrix];
 			return YES;
 		case kCC3SemanticModelViewMatrixInv:
@@ -1080,7 +1083,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
-	GLuint maxTexUnits = CC3OpenGLESEngine.engine.platform.maxTextureUnits.value;
+	GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 	for (NSUInteger tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	
@@ -1244,7 +1247,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
-	GLuint maxTexUnits = CC3OpenGLESEngine.engine.platform.maxTextureUnits.value;
+	GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
 	for (NSUInteger tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	

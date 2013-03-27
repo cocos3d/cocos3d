@@ -1809,7 +1809,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * This vertex array works together with an instace of a CC3VertexMatrixIndices vertex
  * array, and the elementSize property of the two vertex arrays must be equal, and must
  * not be larger than the maximum number of available vertex units for the platform,
- * which can be retreived from [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ * which can be retreived from the CC3OpenGL.sharedGL.maxNumberOfVertexUnits property.
  */
 @interface CC3VertexWeights : CC3VertexArray
 
@@ -1894,7 +1894,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * This vertex array works together with an instace of a CC3VertexWeights vertex array,
  * and the elementSize property of the two vertex arrays must be equal, and must
  * not be larger than the maximum number of available vertex units for the platform,
- * which can be retreived from [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ * which can be retreived from the CC3OpenGL.sharedGL.maxNumberOfVertexUnits property
  */
 @interface CC3VertexMatrixIndices : CC3VertexArray
 

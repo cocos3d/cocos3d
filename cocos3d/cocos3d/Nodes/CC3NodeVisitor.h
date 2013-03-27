@@ -32,6 +32,7 @@
 
 #import "CC3Matrix.h"
 #import "CC3PerformanceStatistics.h"
+#import "CC3OpenGL.h"
 
 @class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3GLProgram;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
@@ -70,32 +71,6 @@
 @property(nonatomic, assign) BOOL shouldVisitChildren;
 
 /**
- * The CC3Node that is currently being visited. 
- *
- * This property is only valid during the traversal of the node returned by this property,
- * and will be nil both before and after the visit: method is invoked on the node.
- */
-@property(nonatomic, readonly) CC3Node* currentNode;
-
-/**
- * The CC3Node on which this visitation traversal was intitiated. This is the node
- * on which the visit: method was first invoked to begin a traversal of the node
- * structural hierarchy. 
- *
- * This property is only valid during the traversal, and will be nil both before
- * and after the visit: method is invoked.
- */
-@property(nonatomic, readonly) CC3Node* startingNode;
-
-/**
- * The performanceStatistics being accumulated during the visitation runs.
- *
- * This is extracted from the startingNode, and may be nil if that node
- * is not collecting statistics.
- */
-@property(nonatomic, readonly) CC3PerformanceStatistics* performanceStatistics;
-
-/**
  * Visits the specified node, then if the shouldVisitChildren property is set to YES,
  * invokes this visit: method on each child node as well.
  *
@@ -105,7 +80,7 @@
 
 /**
  * Requests the removal of the specfied node.
- * 
+ *
  * During a visitation run, to remove a node from the hierarchy, you must use this method
  * instead of directly invoking the remove method on the node itself. Visitation involves
  * iterating through collections of child nodes, and removing a node during the iteration
@@ -116,6 +91,26 @@
  * method, once the visitation of the full node assembly is finished.
  */
 -(void) requestRemovalOf: (CC3Node*) aNode;
+
+
+#pragma mark Accessing node contents
+
+/**
+ * The CC3Node on which this visitation traversal was intitiated. This is the node
+ * on which the visit: method was first invoked to begin a traversal of the node
+ * structural hierarchy.
+ *
+ * This property is only valid during the traversal, and will be nil both before
+ * and after the visit: method is invoked.
+ */
+@property(nonatomic, readonly) CC3Node* startingNode;
+
+/**
+ * Returns the CC3Scene.
+ *
+ * This is a convenience property that returns the scene property of the startingNode property.
+ */
+@property(nonatomic, readonly) CC3Scene* scene;
 
 /**
  * The camera that is viewing the 3D scene.
@@ -128,6 +123,79 @@
  * currently active is always used.
  */
 @property(nonatomic, assign) CC3Camera* camera;
+
+/**
+ * The CC3Node that is currently being visited.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3Node* currentNode;
+
+/**
+ * Returns the mesh node that is currently being visited.
+ *
+ * This is a convenience property that returns the value of the currentNode property,
+ * cast as a CC3MeshNode. It is up to the invoker to make sure that the current node
+ * actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on that node.
+ */
+@property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
+
+/**
+ * Returns the mesh of the mesh node that is currently being visited.
+ *
+ * It is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by this property,
+ * and will be nil both before and after the visit: method is invoked on the node.
+ */
+@property(nonatomic, readonly) CC3Mesh* currentMesh;
+
+/**
+ * Returns the material of the mesh node that is currently being visited, or returns nil
+ * if that mesh node has no material.
+ *
+ * It is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * This property is only valid during the traversal of the node returned by the currentMeshNode
+ * property, and will be nil both before and after the visit: method is invoked on that node.
+ */
+@property(nonatomic, readonly) CC3Material* currentMaterial;
+
+/**
+ * Returns the texture unit at the specified index from the mesh node that is currently being
+ * visited, or returns nil if the material covering the node has no corresponding texture unit.
+ *
+ * It is up to the invoker to make sure that the current node actually is a CC3MeshNode.
+ *
+ * The value returned by this method is only valid during the traversal of the node returned
+ * by the currentMeshNode property, and will be nil both before and after the visit: method
+ * is invoked on that node.
+ */
+-(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit;
+
+/** The number of lights in the scene. */
+@property(nonatomic, readonly) NSUInteger lightCount;
+
+/**
+ * Returns the light indicated by the index, or nil if the specified index is greater than
+ * the number of lights currently existing in the scene.
+ *
+ * The specified index is an index into the lights array of the scene, and is not necessarily
+ * the same as the lightIndex property of the CC3Light.
+ */
+-(CC3Light*) lightAt: (GLuint) index;
+
+/**
+ * The performanceStatistics being accumulated during the visitation runs.
+ *
+ * This is extracted from the startingNode, and may be nil if that node
+ * is not collecting statistics.
+ */
+@property(nonatomic, readonly) CC3PerformanceStatistics* performanceStatistics;
 
 
 #pragma mark Allocation and initialization
@@ -302,11 +370,16 @@
  * The visitor uses the camera property to determine which nodes to visit. Only nodes that
  * are within the camera's field of view will be visited. Nodes outside the camera's frustum
  * will neither be visited nor drawn.
+ *
+ * Drawing operations only visit drawable mesh nodes, so the node access properties defined on
+ * the CC3NodeVisitor superclass that rely on the current node being a CC3MeshNode containing
+ * a mesh and material will be valid.
  */
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
 	CC3GLProgram* _currentShaderProgram;
+	CC3OpenGL* _gl;
 	CC3Matrix4x4 _projMatrix;
 	CC3Matrix4x3 _viewMatrix;
 	CC3Matrix4x3 _modelMatrix;
@@ -323,6 +396,13 @@
 	BOOL _isMVMtxDirty : 1;
 	BOOL _isMVPMtxDirty : 1;
 }
+
+/** 
+ * The OpenGL state. During drawing, all OpenGL commands are called through this instance.
+ *
+ * If not set directly, this is lazily initialized to the CC3OpenGL.sharedGL singleton.
+ */
+@property(nonatomic, retain) CC3OpenGL* gl;
 
 /**
  * The node sequencer that contains the drawable nodes, in the sequence in which
@@ -393,61 +473,6 @@
 #pragma mark Accessing node contents
 
 /**
- * Returns the CC3Scene.
- *
- * This is a convenience property that returns the scene property of the startingNode property.
- */
-@property(nonatomic, readonly) CC3Scene* scene;
-
-/**
- * Returns the mesh node that is currently being visited.
- *
- * This is a convenience property that returns the value of the currentNode property,
- * cast as a CC3MeshNode. Drawing operations typically traverse only drawable CC3MeshNodes,
- * but it is up to the invoker to make sure that the current node actually is a CC3MeshNode.
- *
- * This property is only valid during the traversal of the node returned by this property,
- * and will be nil both before and after the visit: method is invoked on that node.
- */
-@property(nonatomic, readonly) CC3MeshNode* currentMeshNode;
-
-/**
- * Returns the material of the mesh node that is currently being visited, or returns nil
- * if that mesh node has no material.
- *
- * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
- * invoker to make sure that the current node actually is a CC3MeshNode.
- *
- * This property is only valid during the traversal of the node returned by the currentMeshNode
- * property, and will be nil both before and after the visit: method is invoked on that node.
- */
-@property(nonatomic, readonly) CC3Material* currentMaterial;
-
-/**
- * Returns the texture unit at the specified index from the mesh node that is currently being
- * visited, or returns nil if the material covering the node has no corresponding texture unit.
- *
- * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
- * invoker to make sure that the current node actually is a CC3MeshNode.
- *
- * The value returned by this method is only valid during the traversal of the node returned
- * by the currentMeshNode property, and will be nil both before and after the visit: method
- * is invoked on that node.
- */
--(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit;
-
-/**
- * Returns the mesh of the mesh node that is currently being visited.
- *
- * Drawing operations typically traverse only drawable CC3MeshNodes, but it is up to the
- * invoker to make sure that the current node actually is a CC3MeshNode.
- *
- * This property is only valid during the traversal of the node returned by this property,
- * and will be nil both before and after the visit: method is invoked on the node.
- */
-@property(nonatomic, readonly) CC3Mesh* currentMesh;
-
-/**
  * During the drawing of nodes that use vertex skinning, this property holds the skin
  * section that is currently being drawn.
  *
@@ -476,18 +501,6 @@
  * Each of the RGBA components of this color are integer values between 0 and 255.
  */
 @property(nonatomic, assign) ccColor4B currentColor4B;
-
-/** The number of lights in the scene. */
-@property(nonatomic, readonly) NSUInteger lightCount;
-
-/**
- * Returns the light indicated by the index, or nil if the specified index is greater than
- * the number of lights currently existing in the scene.
- *
- * The specified index is an index into the lights array of the scene, and is not necessarily
- * the same as the lightIndex property of the CC3Light.
- */
--(CC3Light*) lightAt: (GLuint) index;
 
 
 #pragma mark Environmental matrices

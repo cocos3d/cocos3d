@@ -333,7 +333,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * This method is called automatically by the CC3Scene at the beginning of each frame
  * drawing cycle. Usually, the application never needs to invoke this method directly.
  */
--(void) open;
+-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Closes the camera for drawing operations.
@@ -341,7 +341,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * This method is called automatically by the CC3Scene at the end of each frame drawing cycle.
  * Usually, the application never needs to invoke this method directly.
  */
--(void) close;
+-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Indicates whether this camera is open.

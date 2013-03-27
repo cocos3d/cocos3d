@@ -425,12 +425,12 @@
  * by GL texture unit zero. Subsequent textures added with this method will be processed
  * by subsequent texture units, in the order they were added.
  *
- * The maximum number of texture units available is platform dependent, but will
- * be at least two. The maximum number of texture units available can be read from
- * [CC3OpenGLESEngine engine].platform.maxTextureUnits.value. If you attempt to
- * add more than this number of textures to the material, the additional textures
- * will be ignored, and an informational message to that fact will be logged.
- * 
+ * The maximum number of texture units available is platform dependent, but will be
+ * at least two. The maximum number of texture units available can be read from the
+ * CC3OpenGL.sharedGL.maxNumberOfTextureUnits property. If you attempt to add more than
+ * this number of textures to the material, the additional textures will be ignored,
+ * and an informational message to that fact will be logged.
+ *
  * Under iOS, during loading, textures are padded to dimensions of a power-of-two
  * (POT) and, because vertical OpenGL coordinates are inverted relative to iOS
  * view coordinates, most texture formats are loaded updside-down.

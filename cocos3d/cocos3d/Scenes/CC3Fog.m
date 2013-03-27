@@ -30,7 +30,6 @@
  */
 
 #import "CC3Fog.h"
-#import "CC3OpenGLESEngine.h"
 #import "CC3CC2Extensions.h"
 
 
@@ -91,42 +90,41 @@
 
 #pragma mark Drawing
 
--(void) draw {
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (visible) {
 		LogTrace(@"Drawing %@", self);
-		CC3OpenGLESEngine* glesEngine = [CC3OpenGLESEngine engine];
-		CC3OpenGLESFog* glesFog = glesEngine.fog;
+		CC3OpenGL* gl = visitor.gl;
 
-		[glesEngine.capabilities.fog enable];
-		glesEngine.hints.fog.value = performanceHint;
-		glesFog.mode.value = attenuationMode;
-		glesFog.color.value = floatColor;
-
+		[gl enableFog: YES];
+		gl.fogMode = attenuationMode;
+		gl.fogColor = floatColor;
+		gl.fogHint = performanceHint;
+		
 		switch (attenuationMode) {
 			case GL_LINEAR:
-				glesFog.start.value = startDistance;
-				glesFog.end.value = endDistance;
+				gl.fogStart = startDistance;
+				gl.fogEnd = endDistance;
 				break;
 			case GL_EXP:
 			case GL_EXP2:
-				glesFog.density.value = density;
+				gl.fogDensity = density;
 				break;
 			default:
 				CC3Assert(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
 				break;
 		}
 	} else {
-		[self unbind];
+		[self unbindWithVisitor: visitor];
 	}
 }
 
--(void) unbind {
-	[[self class] unbind];
+-(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[[self class] unbindWithVisitor: visitor];
 }
 
-+(void) unbind {
++(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Disabling fog");
-	[[CC3OpenGLESEngine engine].capabilities.fog disable];
+	[visitor.gl enableFog: NO];
 }
 
 

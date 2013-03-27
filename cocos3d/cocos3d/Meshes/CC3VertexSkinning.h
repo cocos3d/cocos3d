@@ -272,7 +272,7 @@
  * Any particular vertex will typically only be directly influenced by two or three bones.
  * The maximum number of bones that any vertex can be directly influenced by is determined
  * by the number of vertex units supported by the platform. This limit can be retreived
- * from [CC3OpenGLESEngine engine].platform.maxVertexUnits.value.
+ * from the CC3OpenGL.sharedGL.maxNumberOfVertexUnits property.
  * 
  * Because different vertices of the skin section may be influenced by different combinations
  * of bones, the number of bones in the collection in this property will generally be larger
@@ -285,7 +285,7 @@
  * The number of transform matrices that can be simultaneously loaded into the GL engine
  * matrix palette is limited by the platform, and that limit defines the maximum number
  * of bones in the collection in this property. This platform limit can be retrieved from
- * [CC3OpenGLESEngine engine].platform.maxPaletteMatrices.value.
+ * the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  *
  * The array returned by this property is created anew for each read. Do not add or remove
  * bones from the returned array directly. To add a bone, use the addBone: method.
@@ -330,7 +330,7 @@
  * The number of transform matrices that can be simultaneously loaded into the
  * GL engine matrix palette is limited by the platform, and that limit defines the maximum
  * number of bones in the collection in this property. This platform limit can be retrieved
- * from [CC3OpenGLESEngine engine].platform.maxPaletteMatrices.value.
+ * from the CC3OpenGL.sharedGL.maxNumberOfPaletteMatrices property.
  */
 -(void) addBone: (CC3Bone*) aNode;
 
