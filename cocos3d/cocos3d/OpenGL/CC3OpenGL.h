@@ -109,7 +109,7 @@ typedef struct {
 	GLint value_GL_MAX_CLIP_PLANES;
 	GLint value_GL_MAX_LIGHTS;
 	GLint value_GL_MAX_PALETTE_MATRICES;
-	GLint value_GL_MAX_SAMPLES_APPLE;
+	GLint value_GL_MAX_SAMPLES;
 	GLint value_GL_MAX_TEXTURE_UNITS;
 	GLint value_GL_MAX_VERTEX_ATTRIBS;
 	GLint value_GL_MAX_VERTEX_UNITS;

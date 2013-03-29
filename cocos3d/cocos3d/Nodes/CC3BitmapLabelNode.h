@@ -200,7 +200,7 @@ typedef struct {
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 							   fromFontFile: (NSString*) fontFileName
 							  andLineHeight: (GLfloat) lineHeight
-						   andTextAlignment: (UITextAlignment) textAlignment
+						   andTextAlignment: (NSTextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
 							andTessellation: (CC3Tessellation) divsPerChar;
 
@@ -252,7 +252,7 @@ typedef struct {
 	NSString* labelString;
 	NSString* fontFileName;
 	CC3BitmapFontConfiguration* fontConfig;
-	UITextAlignment textAlignment;
+	NSTextAlignment textAlignment;
 	CGPoint relativeOrigin;
 	CC3Tessellation tessellation;
 	GLfloat lineHeight;
@@ -288,12 +288,12 @@ typedef struct {
 /**
  * For multi-line labels, indicates how the lines should be aligned.
  *
- * The initial value of this property is UITextAlignmentLeft, indicating that multi-line text will
- * be left-aligned.
+ * The initial value of this property is NSTextAlignmentLeft, indicating that multi-line
+ * text will be left-aligned.
  *
  * This property can be changed at any time.
  */
-@property(nonatomic, assign) UITextAlignment textAlignment;
+@property(nonatomic, assign) NSTextAlignment textAlignment;
 
 /**
  * Indicates the location of the origin of the mesh, and is specified as a fraction of the size of
@@ -424,7 +424,7 @@ typedef struct {
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 									andFont: (CC3BitmapFontConfiguration*) fontConfig
 							  andLineHeight: (GLfloat) lineHeight
-						   andTextAlignment: (UITextAlignment) textAlignment
+						   andTextAlignment: (NSTextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
 							andTessellation: (CC3Tessellation) divsPerChar;
 

@@ -481,7 +481,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return nil;
 }
 
--(id) initWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node {
+-(id) initWithAnimation: (CC3NodeAnimation*) animation onTrack: (GLuint) trackID forNode: (CC3Node*) node {
 	CC3Assert(animation, @"%@ must be created with a valid animation.", [self class]);
 	CC3Assert(node, @"%@ must be created with a valid node.", [self class]);
 	if ( (self = [super init]) ) {
@@ -502,14 +502,14 @@ static ccTime _interpolationEpsilon = 0.1f;
 	return self;
 }
 
-+(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node {
++(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (GLuint) trackID forNode: (CC3Node*) node {
 	return [[[self alloc] initWithAnimation: animation onTrack: trackID forNode: node] autorelease];
 }
 
-static NSUInteger _lastTrackID = 0;
+static GLuint _lastTrackID = 0;
 
 // Pre-increment to start with one. Zero reserved for default track.
-+(NSUInteger) generateTrackID { return ++_lastTrackID; }
++(GLuint) generateTrackID { return ++_lastTrackID; }
 
 
 #pragma mark Descriptions

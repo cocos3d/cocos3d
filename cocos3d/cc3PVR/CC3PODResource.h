@@ -641,7 +641,7 @@
  * If the specified POD file has already been loaded, it is retrieved from the resource cache.
  * If the POD file has not been loaded, it will be loaded and placed in the resource cache.
  */
--(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (NSUInteger) trackID;
+-(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (GLuint) trackID;
 
 /**
  * Adds the animation contained in the specified POD file to this node and all its descendants.
@@ -650,7 +650,7 @@
  * If the specified POD file has already been loaded, it is retrieved from the resource cache.
  * If the POD file has not been loaded, it will be loaded and placed in the resource cache.
  */
--(NSUInteger) addAnimationFromPODFile: (NSString*) podFilePath;
+-(GLuint) addAnimationFromPODFile: (NSString*) podFilePath;
 
 @end
 

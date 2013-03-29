@@ -170,8 +170,8 @@ static BOOL _defaultShouldSwapYZ = YES;
 	//		number of keyframes      4       integer
 
 	// Node index and keyframe count
-	NSInteger calNodeIdx = reader.readInteger;
-	NSInteger frameCount = reader.readInteger;
+	GLint calNodeIdx = reader.readInteger;
+	GLint frameCount = reader.readInteger;
 	if (reader.wasReadBeyondEOF) return NO;
 
 	LogRez(@"Loading node with CAL index %i with %i keyframes of animation", calNodeIdx, frameCount);
@@ -269,23 +269,23 @@ static BOOL _defaultShouldSwapYZ = YES;
 
 @implementation CC3Node (CAFAnimation)
 
--(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID {
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (GLuint) trackID {
 	[self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath ] asTrack: trackID];
 }
 
 -(void) addAnimationFromCAFFile: (NSString*) cafFilePath
 				linkedToCSFFile: (NSString*) csfFilePath
-						asTrack: (NSUInteger) trackID {
+						asTrack: (GLuint) trackID {
 	[self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath
 												   linkedToCSFFile: csfFilePath]
 				  asTrack: trackID];
 }
 
--(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath {
+-(GLuint) addAnimationFromCAFFile: (NSString*) cafFilePath {
 	return [self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath ]];
 }
 
--(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath
+-(GLuint) addAnimationFromCAFFile: (NSString*) cafFilePath
 					  linkedToCSFFile: (NSString*) csfFilePath {
 	return [self addAnimationInResource: [CC3CAFResource resourceFromFile: cafFilePath
 														  linkedToCSFFile: csfFilePath]];

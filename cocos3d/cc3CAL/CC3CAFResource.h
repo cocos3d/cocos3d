@@ -219,7 +219,7 @@
  * loaded and linked to a CSF file. If you are not sure, use the
  * addAnimationFromCAFFile:linkedToCSFFile:asTrack: method instead.
  */
--(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (NSUInteger) trackID;
+-(void) addAnimationFromCAFFile: (NSString*) cafFilePath asTrack: (GLuint) trackID;
 
 /**
  * Adds the animation contained in the specified CAF file, which is linked to the specified CSF
@@ -235,7 +235,7 @@
  */
 -(void) addAnimationFromCAFFile: (NSString*) cafFilePath
 				linkedToCSFFile: (NSString*) csfFilePath
-						asTrack: (NSUInteger) trackID;
+						asTrack: (GLuint) trackID;
 
 /**
  * Adds the animation contained in the specified CAF file to this node and all its descendants.
@@ -247,7 +247,7 @@
  * file. Only use this method if you know that the CAF file has already been loaded and linked to
  * a CSF file. If you are not sure, use the addAnimationFromCAFFile:linkedToCSFFile: method instead.
  */
--(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath;
+-(GLuint) addAnimationFromCAFFile: (NSString*) cafFilePath;
 
 /**
  * Adds the animation contained in the specified CAF file to this node and all its descendants.
@@ -261,7 +261,7 @@
  * and it has already been loaded, it is retrieved from the resource cache. If the CSF resource has
  * not been loaded, it will be loaded from the specified CSF file and placed in the resource cache.
  */
--(NSUInteger) addAnimationFromCAFFile: (NSString*) cafFilePath
-					  linkedToCSFFile: (NSString*) csfFilePath;
+-(GLuint) addAnimationFromCAFFile: (NSString*) cafFilePath
+				  linkedToCSFFile: (NSString*) csfFilePath;
 
 @end

@@ -30,9 +30,12 @@
  */
 
 #import "CC3UIViewController.h"
-#import "CC3GLView.h"
-#import "CC3EAGLView.h"
 #import "CC3Logging.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"
+
+#if CC3_IOS
 
 // The height of the device camera toolbar
 #define kDeviceCameraToolbarHeight 54.0
@@ -151,7 +154,7 @@
 
 -(void) viewDidLayoutSubviews {
 	// viewDidLayoutSubviews was introduced in iOS5. Make sure it's okay to propagate upwards
-	if ( [[UIViewController class] instancesRespondToSelector: @selector(viewDidLayoutSubviews)] )
+	if ( [[super class] instancesRespondToSelector: @selector(viewDidLayoutSubviews)] )
 		[super viewDidLayoutSubviews];
 	LogTrace(@"%@ viewDidLayoutSubviews", self);
 	_viewWasLaidOut = YES;
@@ -219,6 +222,8 @@
  	[_controlledNode viewDidRotateFrom: self.interfaceOrientation to: uiOrientation];
 }
 
+-(BOOL) isOverlayingDeviceCamera { return NO; }
+
 
 #pragma mark Instance initialization and management
 
@@ -256,7 +261,6 @@
 -(void) setDefaultCCDeviceOrientation: (UIDeviceOrientation) defaultCCDeviceOrientation {}
 
 @end
-
 
 
 #pragma mark -
@@ -369,24 +373,23 @@
 
 @end
 
+#endif // CC3_IOS
+
 
 #pragma mark -
 #pragma mark CCNode extension to support controlling nodes from a CC3UIViewController
 
 @implementation CCNode (CC3UIViewController)
 
--(UIViewController*) controller { return self.parent.controller; }
+-(CC3UIViewController*) controller { return self.parent.controller; }
 
--(void) setController: (UIViewController*) aController {
-	for (CCNode* child in self.children) {
-		child.controller = aController;
-	}
+-(void) setController: (CC3UIViewController*) aController {
+	for (CCNode* child in self.children) child.controller = aController;
 }
 
 -(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation {
-	for (CCNode* child in self.children) {
+	for (CCNode* child in self.children)
 		[child viewDidRotateFrom: oldOrientation to: newOrientation];
-	}
 }
 
 @end

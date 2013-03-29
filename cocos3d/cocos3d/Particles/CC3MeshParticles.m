@@ -48,7 +48,7 @@
 @interface CC3ParticleEmitter (TemplateMethods)
 -(void) addDirtyVertexRange: (NSRange) aRange;
 -(void) addDirtyVertexIndexRange: (NSRange) aRange;
--(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex;
+-(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex;
 @end
 
 @interface CC3CommonVertexArrayParticleEmitter (TemplateMethods)
@@ -203,7 +203,7 @@
 
 #pragma mark Accessing particles
 
--(id<CC3MeshParticleProtocol>) meshParticleAt: (NSUInteger) aParticleIndex {
+-(id<CC3MeshParticleProtocol>) meshParticleAt: (GLuint) aParticleIndex {
 	return (id<CC3MeshParticleProtocol>)[self particleAt: aParticleIndex];
 }
 
@@ -221,10 +221,10 @@
  * particle. The vertex indices must also be copied down to fill in the gap and, in addition, must
  * be adjusted to point to the newly moved vertex content.
  */
--(void) removeParticle: (id<CC3MeshParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex {
+-(void) removeParticle: (id<CC3MeshParticleProtocol>) aParticle atIndex: (GLuint) anIndex {
 	[super removeParticle: aParticle atIndex: anIndex];		// Decrements particleCount and vertexCount
 	
-	NSUInteger partCount = self.particleCount;	// Get the decremented particleCount
+	GLuint partCount = self.particleCount;	// Get the decremented particleCount
 	
 	// Particle being removed
 	id<CC3MeshParticleProtocol> deadParticle = aParticle;
@@ -303,7 +303,7 @@
 		// Adjust the firstVertexOffset and firstVertexIndexOffset properties of each remaining
 		// particle to fill in the gap created by removing the particle from the mesh arrays.
 		// Do this after the dead particle has been removed from the collection.
-		for (NSUInteger partIdx = anIndex; partIdx < partCount; partIdx++) {
+		for (GLuint partIdx = anIndex; partIdx < partCount; partIdx++) {
 			id<CC3MeshParticleProtocol> mp = [self meshParticleAt: partIdx];
 			mp.firstVertexOffset -= deadVtxCount;
 			mp.firstVertexIndexOffset -= deadVtxIdxCount;
@@ -337,10 +337,10 @@
 }
 
 -(void) transformParticles {
-	NSUInteger partCount = self.particleCount;
+	GLuint partCount = self.particleCount;
 	LogTrace(@"%@ transforming %i particles", self, particleCount);
 
-	for (NSUInteger partIdx = 0; partIdx < partCount; partIdx++) {
+	for (GLuint partIdx = 0; partIdx < partCount; partIdx++) {
 		id<CC3MeshParticleProtocol> mp = [particles objectAtIndex: partIdx];
 		[mp transformVertices];
 	}

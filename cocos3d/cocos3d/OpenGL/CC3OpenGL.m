@@ -38,7 +38,11 @@
 #elif CC3_OGLES_1
 #	import "CC3OpenGLES1.h"
 #	define CC3OpenGLClass	CC3OpenGLES1
+#elif CC3_OGL
+#	import "CC3OpenGL3.h"
+#	define CC3OpenGLClass	CC3OpenGL3
 #endif
+
 
 @implementation CC3OpenGL
 
@@ -238,7 +242,7 @@
 -(void) setClearDepth: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
 	if ( !needsUpdate ) return;
-	glClearDepthf(val);
+	glClearDepth(val);
 	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
 }
 
@@ -561,7 +565,7 @@
 
 -(GLuint) maxNumberOfVertexUnits { return value_GL_MAX_VERTEX_UNITS; }
 
--(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES_APPLE; }
+-(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES; }
 
 
 #pragma mark Aligning 2D & 3D caches

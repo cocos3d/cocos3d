@@ -65,7 +65,7 @@
  *
  * At any time, this value is unique across all current living particles managed by the emitter.
  */
-@property(nonatomic, assign) NSUInteger particleIndex;
+@property(nonatomic, assign) GLuint particleIndex;
 
 /**
  * Invoked automatically, if the particle has vertex normal content, to point the normal vector
@@ -169,7 +169,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 @property(nonatomic, readonly) CC3VertexContent particleContentTypes DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced by maximumParticleCapacity. */
-@property(nonatomic, readonly) NSUInteger maxParticles DEPRECATED_ATTRIBUTE;
+@property(nonatomic, readonly) GLuint maxParticles DEPRECATED_ATTRIBUTE;
 
 /**
  * If the kCC3VertexContentPointSize component was not specified in the vertexContentTypes
@@ -362,25 +362,25 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 #pragma mark Accessing particles
 
 /** Returns the particle at the specified index within the particles array, cast as a point particle. */
--(id<CC3PointParticleProtocol>) pointParticleAt: (NSUInteger) aParticleIndex;
+-(id<CC3PointParticleProtocol>) pointParticleAt: (GLuint) aParticleIndex;
 
 
 #pragma mark Vertex management
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (NSUInteger) numParticles
+-(void) populateForMaxParticles: (GLuint) numParticles
 						 ofType: (id) aParticleClass
 					 containing: (CC3VertexContent) contentTypes DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (NSUInteger) maxParticles ofType: (id) aParticleClass DEPRECATED_ATTRIBUTE;
+-(void) populateForMaxParticles: (GLuint) maxParticles ofType: (id) aParticleClass DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (NSUInteger) numParticles
+-(void) populateForMaxParticles: (GLuint) numParticles
 					 containing: (CC3VertexContent) contentTypes DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the particleClass, vertexContentTypes & maximumParticleCapacity properties instead. */
--(void) populateForMaxParticles: (NSUInteger) maxParticles DEPRECATED_ATTRIBUTE;
+-(void) populateForMaxParticles: (GLuint) maxParticles DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -394,7 +394,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * CC3PointParticle provides accessors for the particle normal and size.
  */
 @interface CC3PointParticle : CC3ParticleBase <CC3PointParticleProtocol> {
-	NSUInteger particleIndex;
+	GLuint particleIndex;
 	BOOL isAlive : 1;
 }
 
@@ -450,7 +450,7 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 @property(nonatomic, readonly) BOOL hasSize;
 
 /** @deprecated Replaced by the particleIndex property. */
-@property(nonatomic, assign) NSUInteger index DEPRECATED_ATTRIBUTE;
+@property(nonatomic, assign) GLuint index DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Replaced by the updateBeforeTransform: method. */
 -(void) update: (ccTime) dt DEPRECATED_ATTRIBUTE;

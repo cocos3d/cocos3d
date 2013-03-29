@@ -636,12 +636,12 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * those two values here will result in an animation containing only the punch.
  */
 @interface CC3Animate : CCActionInterval <NSCopying> {
-	NSUInteger _trackID;
+	GLuint _trackID;
 	BOOL _isReversed : 1;
 }
 
 /** The animation track on which the animation runs. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /**
  * Indicates whether this action is running in reverse. Setting this to YES
@@ -669,13 +669,13 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Initializes this instance to animate the specified animation track on the target node,
  * over the specified time duration.
  */
--(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID;
+-(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID;
 
 /**
  * Allocates and initializes an autoreleased instance to animate the specified animation
  * track on the target node, over the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID;
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID;
 
 /**
  * Allocates and initializes an autoreleased instance to animate animation track zero on the
@@ -711,7 +711,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * at relative positions 0.67 and 0.78 respectively within the full animation, setting
  * those two values here will result in an animation containing only the punch.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange;
 
 /**
  * Wraps this instance in an autoreleased CC3ActionRangeLimit instance that maps the normal
@@ -743,23 +743,23 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 @interface CC3AnimationBlendingFadeTrackTo : CCActionInterval <NSCopying> {
 	GLfloat _startWeight;
 	GLfloat _endWeight;
-	NSUInteger _trackID;
+	GLuint _trackID;
 }
 
 /** The animation track on which the animation runs. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /**
  * Initializes this instance to fade the animation blending weight of the specified animation
  * track on the target node to the specified value, over the specified time duration.
  */
--(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+-(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 /**
  * Allocates and initializes an autoreleased instance to fade the animation blending weight of the
  * specified animation track on the target node to the specified value, over the specified time duration.
  */
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 @end
 
@@ -769,33 +769,33 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 /** CC3AnimationCrossFade fades smoothly from one animation track to another. */
 @interface CC3AnimationCrossFade : CCActionInterval <NSCopying> {
-	NSUInteger _fromTrackID;
-	NSUInteger _toTrackID;
+	GLuint _fromTrackID;
+	GLuint _toTrackID;
 	GLfloat _startWeight;
 	GLfloat _endWeight;
 }
 
 /** The animation track to fade from. */
-@property (nonatomic, assign, readonly) NSUInteger fromTrackID;
+@property (nonatomic, assign, readonly) GLuint fromTrackID;
 
 /** The animation track to fade to. */
-@property (nonatomic, assign, readonly) NSUInteger toTrackID;
+@property (nonatomic, assign, readonly) GLuint toTrackID;
 
 /**
  * Initializes this instance to fade from the specified track to the specified track, over
  * the specified time duration, and leaving the final track with a blending weight of one.
  */
 -(id) initWithDuration: (ccTime) t
-			 fromTrack: (NSUInteger) fromTrackID
-			   toTrack: (NSUInteger) toTrackID;
+			 fromTrack: (GLuint) fromTrackID
+			   toTrack: (GLuint) toTrackID;
 
 /**
  * Initializes this instance to fade from the specified track to the specified track, over the
  * specified time duration, and leaving the final track with the specified blending weight.
  */
 -(id) initWithDuration: (ccTime) t
-			 fromTrack: (NSUInteger) fromTrackID
-			   toTrack: (NSUInteger) toTrackID
+			 fromTrack: (GLuint) fromTrackID
+			   toTrack: (GLuint) toTrackID
 	withBlendingWeight: (GLfloat) toBlendingWeight;
 
 /**
@@ -804,8 +804,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *  a blending weight of one.
  */
 +(id) actionWithDuration: (ccTime) t
-			   fromTrack: (NSUInteger) fromTrackID
-				 toTrack: (NSUInteger) toTrackID;
+			   fromTrack: (GLuint) fromTrackID
+				 toTrack: (GLuint) toTrackID;
 
 /**
  * Allocates and initializes an autoreleased instance to fade from the specified track to
@@ -813,8 +813,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * the specified blending weight.
  */
 +(id) actionWithDuration: (ccTime) t
-			   fromTrack: (NSUInteger) fromTrackID
-				 toTrack: (NSUInteger) toTrackID
+			   fromTrack: (GLuint) fromTrackID
+				 toTrack: (GLuint) toTrackID
 	  withBlendingWeight: (GLfloat) toBlendingWeight;
 
 @end
@@ -831,11 +831,11 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  */
 @interface CC3AnimationBlendingSetTrackTo : CCActionInstant {
 	GLfloat _endWeight;
-	NSUInteger _trackID;
+	GLuint _trackID;
 }
 
 /** The animation track on which the animation runs. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /**
  * Initializes this instance to set the animation blending weight of the specified animation
@@ -843,7 +843,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *
  * By setting the blending weight to zero, the animation track can be effectively turned off.
  */
--(id) initOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
+-(id) initOnTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 /**
  * Allocates and initializes an autoreleased instance to set the animation blending weight of the
@@ -851,7 +851,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  *
  * By setting the blending weight to zero, the animation track can be effectively turned off.
  */
-+(id) actionOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight;
++(id) actionOnTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight;
 
 @end
 
@@ -864,23 +864,23 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * and all of its descendants.
  */
 @interface CC3EnableAnimationTrack : CCActionInstant {
-	NSUInteger _trackID;
+	GLuint _trackID;
 }
 
 /** The animation track to be enabled. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /**
  * Initializes this instance to enable the specified animation track on the target node
  * and all of its descendants.
  */
--(id) initOnTrack: (NSUInteger) trackID;
+-(id) initOnTrack: (GLuint) trackID;
 
 /** 
  * Allocates and initializes an autoreleased instance to enable the specified animation
  * track on the target node and all of its descendants.
  */
-+(id) actionOnTrack: (NSUInteger) trackID;
++(id) actionOnTrack: (GLuint) trackID;
 
 @end
 
@@ -893,23 +893,23 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * and all of its descendants.
  */
 @interface CC3DisableAnimationTrack : CCActionInstant {
-	NSUInteger _trackID;
+	GLuint _trackID;
 }
 
 /** The animation track to be enabled. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /**
  * Initializes this instance to disable the specified animation track on the target node
  * and all of its descendants.
  */
--(id) initOnTrack: (NSUInteger) trackID;
+-(id) initOnTrack: (GLuint) trackID;
 
 /**
  * Allocates and initializes an autoreleased instance to disable the specified animation
  * track on the target node and all of its descendants.
  */
-+(id) actionOnTrack: (NSUInteger) trackID;
++(id) actionOnTrack: (GLuint) trackID;
 
 @end
 

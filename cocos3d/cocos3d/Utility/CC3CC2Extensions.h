@@ -33,6 +33,7 @@
 /* Base library of extensions to cocos2d to support cocos3d. */
 
 #import "CC3Environment.h"
+#import "CC3OSXExtensions.h"
 
 
 #pragma mark -
@@ -44,7 +45,6 @@
  */
 #if CC3_CC2_1
 #	define CCGLView EAGLView
-#	define CC3GLView CC3EAGLView
 #endif
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
@@ -60,7 +60,7 @@
 
 /** Draw calls per frame are tracked as of cocos2d 2.x. */
 #if CC3_CC2_2
-#	define CC3GLDraws()		__ccNumberOfDraws
+#	define CC3GLDraws()		((GLuint)__ccNumberOfDraws)
 #endif
 #if CC3_CC2_1
 #	define CC3GLDraws()		0
@@ -196,6 +196,7 @@
  */
 -(BOOL) cc3WillConsumeTouchEventAt: (CGPoint) viewPoint;
 
+#if CC3_IOS
 /**
  * Validates that the specified gesture is okay to proceed, and cancels the gesture
  * if not. Returns YES if the gesture is valid and okay to proceed. Returns NO if
@@ -223,6 +224,7 @@
  * the gesture is cancelled and this method returns NO.
  */
 -(BOOL) cc3ValidateGesture: (UIGestureRecognizer*) gesture;
+#endif	// CC3_IOS
 
 @end
 
@@ -328,10 +330,11 @@
  * Always returns UIDeviceOrientationPortrait.
  */
 -(UIDeviceOrientation) deviceOrientation;
-#endif
+#endif	// CC3_CC2_2 && CC3_IOS
 
 @end
 
+#if CC3_IOS
 
 #pragma mark -
 #pragma mark CCDirectorIOS extension
@@ -339,6 +342,8 @@
 /** Extension category to support cocos3d functionality. */
 @interface CCDirectorIOS (CC3)
 @end
+
+#endif		// CC3_IOS
 
 
 #pragma mark -
@@ -495,3 +500,32 @@ enum {
     kCCiOSVersion_6_0_0 = 0x06000000
 };
 #endif
+
+
+#if !CC3_IOS
+
+#pragma mark -
+#pragma mark Extensions for non-IOS environments
+
+enum {
+	kCCTouchBegan,
+	kCCTouchMoved,
+	kCCTouchEnded,
+	kCCTouchCancelled,
+	
+	kCCTouchMax,
+};
+
+@interface CCTouchDispatcher : NSObject
+-(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches;
+@end
+
+@interface CCDirector (NonIOS)
+@property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
+@end
+
+@interface CCNode (NonIOS)
+-(CGPoint) convertTouchToNodeSpace: (UITouch*) touch;
+@end
+
+#endif		// !CC3_IOS

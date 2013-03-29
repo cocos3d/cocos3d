@@ -212,7 +212,7 @@
  * The getNodeMatching: method of the specified resource is used to match each node in this
  * hierarchy to the corresponding node in the specified resource.
  */
--(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (NSUInteger) trackID;
+-(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (GLuint) trackID;
 
 /**
  * Adds the animation contained in the nodes in the specified nodes resource to this node and all
@@ -221,7 +221,7 @@
  * The getNodeMatching: method of the specified resource is used to match each node in this
  * hierarchy to the corresponding node in the specified resource.
  */
--(NSUInteger) addAnimationInResource: (CC3NodesResource*) rez;
+-(GLuint) addAnimationInResource: (CC3NodesResource*) rez;
 
 @end
 

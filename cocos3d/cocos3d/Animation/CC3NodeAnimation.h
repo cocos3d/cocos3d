@@ -398,7 +398,7 @@
 	CC3Vector _location;
 	CC3Quaternion _quaternion;
 	CC3Vector _scale;
-	NSUInteger _trackID;
+	GLuint _trackID;
 	GLfloat _blendingWeight;
 	BOOL _isEnabled : 1;
 	BOOL _isLocationAnimationEnabled : 1;
@@ -413,7 +413,7 @@
 @property (nonatomic, retain, readonly) CC3NodeAnimation* animation;
 
 /** The animation track on which the animation runs. */
-@property (nonatomic, assign, readonly) NSUInteger trackID;
+@property (nonatomic, assign, readonly) GLuint trackID;
 
 /** 
  * The relative weight to use when blending this animation track with the other tracks.
@@ -567,7 +567,7 @@
  *
  * Returns nil if either the animation or the node are nil.
  */
--(id) initWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node;
+-(id) initWithAnimation: (CC3NodeAnimation*) animation onTrack: (GLuint) trackID forNode: (CC3Node*) node;
 
 /**
  * Allocates and initializes an autoreleased instance tracking the animation state for the
@@ -575,7 +575,7 @@
  *
  * Returns nil if either the animation or the node are nil.
  */
-+(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (NSUInteger) trackID forNode: (CC3Node*) node;
++(id) animationStateWithAnimation: (CC3NodeAnimation*) animation onTrack: (GLuint) trackID forNode: (CC3Node*) node;
 
 /**
  * Returns the next available trackID value. The value returned is guaranteed to be different
@@ -588,7 +588,7 @@
  * any existing tracks within that node assembly. This method can be used to generate a unique
  * track ID to use when adding a new track of animation to a node assembly.
  */
-+(NSUInteger) generateTrackID;
++(GLuint) generateTrackID;
 
 
 #pragma mark Descriptions

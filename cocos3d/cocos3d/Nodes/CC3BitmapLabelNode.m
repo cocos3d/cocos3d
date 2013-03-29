@@ -73,7 +73,7 @@
 
 -(CC3BitmapCharDef*) characterSpecFor: (unichar) c {
 	CC3BitmapCharDefHashElement *element = NULL;
-	NSUInteger key = (NSUInteger)c;
+	GLuint key = (GLuint)c;
 	HASH_FIND_INT(_charDefDictionary , &key, element);
 	return element ? &(element->charDef) : NULL;
 }
@@ -343,7 +343,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 							   fromFontFile: (NSString*) fontFileName
 							  andLineHeight: (GLfloat) lineHeight
-						   andTextAlignment: (UITextAlignment) textAlignment
+						   andTextAlignment: (NSTextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
 							andTessellation: (CC3Tessellation) divsPerChar {
 	
@@ -416,9 +416,9 @@ static NSMutableDictionary* _fontConfigurations = nil;
 	}
 }
 
--(UITextAlignment) textAlignment { return textAlignment; }
+-(NSTextAlignment) textAlignment { return textAlignment; }
 
--(void) setTextAlignment: (UITextAlignment) alignment {
+-(void) setTextAlignment: (NSTextAlignment) alignment {
 	if (alignment != textAlignment) {
 		textAlignment = alignment;
 		[self populateLabelMesh];
@@ -477,7 +477,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 		fontFileName = nil;
 		fontConfig = nil;
 		lineHeight = 0;
-		textAlignment = UITextAlignmentLeft;
+		textAlignment = NSTextAlignmentLeft;
 		relativeOrigin = ccp(0,0);
 		tessellation = CC3TessellationMake(1,1);
 	}
@@ -507,7 +507,7 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 typedef struct {
 	GLfloat lineWidth;
-	NSUInteger lastVertexIndex;
+	GLuint lastVertexIndex;
 } CC3BMLineSpec;
 
 /** CC3MeshNode extension to support bitmapped labels. */
@@ -516,7 +516,7 @@ typedef struct {
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 									andFont: (CC3BitmapFontConfiguration*) fontConfig
 							  andLineHeight: (GLfloat) lineHeight
-						   andTextAlignment: (UITextAlignment) textAlignment
+						   andTextAlignment: (NSTextAlignment) textAlignment
 						  andRelativeOrigin: (CGPoint) origin
 							andTessellation: (CC3Tessellation) divsPerChar {
 	
@@ -530,8 +530,8 @@ typedef struct {
 	GLfloat fontScale = lineHeight / (GLfloat)fontConfig.commonHeight;
 	
 	// Line count needs to be calculated before parsing the lines to get Y position
-	NSUInteger charCount = 0;
-	NSUInteger lineCount = 1;
+	GLuint charCount = 0;
+	GLuint lineCount = 1;
 	for(NSUInteger i = 0; i < strLen; i++)
 		([lblString characterAtIndex: i] == '\n') ? lineCount++ : charCount++;
 	
@@ -558,9 +558,9 @@ typedef struct {
 	charPos.x = 0;
 	charPos.y = lineCount * lineHeight;
 	
-	NSUInteger lineIndx = 0;
-	NSUInteger vIdx = 0;
-	NSUInteger iIdx = 0;
+	GLuint lineIndx = 0;
+	GLuint vIdx = 0;
+	GLuint iIdx = 0;
 	
 	// Iterate through the characters
 	for (NSUInteger i = 0; i < strLen; i++) {
@@ -597,8 +597,8 @@ typedef struct {
 		// corner downwards. This orientation aligns with the texture coords in the font file.
 		// Set the location of each vertex and tex coords to be proportional to its position in the
 		// grid, and set the normal of each vertex to point up the Z-axis.
-		for (NSUInteger iy = 0; iy <= divsPerChar.y; iy++) {
-			for (NSUInteger ix = 0; ix <= divsPerChar.x; ix++, vIdx++) {
+		for (GLuint iy = 0; iy <= divsPerChar.y; iy++) {
+			for (GLuint ix = 0; ix <= divsPerChar.x; ix++, vIdx++) {
 				
 				// Cache the index of the last vertex of this line. Since the vertices are accessed
 				// in consecutive, ascending order, this is done by simply setting it each time.
@@ -649,26 +649,26 @@ typedef struct {
 	// Iterate through the lines, calculating the width adjustment to correctly align each line,
 	// and applying that adjustment to the X-component of the location of each vertex that is
 	// contained within that text line.
-	for (NSUInteger i = 0; i < lineCount; i++) {
+	for (GLuint i = 0; i < lineCount; i++) {
 		GLfloat widthAdj;
 		switch (textAlignment) {
-			case UITextAlignmentCenter:
+			case NSTextAlignmentCenter:
 				// Adjust vertices so half the white space is on each side
 				widthAdj = (layoutSize.width - lineSpecs[i].lineWidth) * 0.5f;
 				break;
-			case UITextAlignmentRight:
+			case NSTextAlignmentRight:
 				// Adjust vertices so all the white space is on the left side
 				widthAdj = layoutSize.width - lineSpecs[i].lineWidth;
 				break;
-			case UITextAlignmentLeft:
+			case NSTextAlignmentLeft:
 			default:
 				// Leave all vertices where they are
 				widthAdj = 0.0f;
 				break;
 		}
 		if (widthAdj) {
-			NSUInteger startVtxIdx = (i > 0) ? (lineSpecs[i - 1].lastVertexIndex + 1) : 0;
-			NSUInteger endVtxIdx = lineSpecs[i].lastVertexIndex;
+			GLuint startVtxIdx = (i > 0) ? (lineSpecs[i - 1].lastVertexIndex + 1) : 0;
+			GLuint endVtxIdx = lineSpecs[i].lastVertexIndex;
 			LogTrace(@"%@ adjusting line %i by %.3f (from line width %i in layout width %i) from vertex %i to %i",
 					 self, i, widthAdj, lineSpecs[i].lineWidth, layoutSize.width, startVtxIdx, endVtxIdx);
 			for (vIdx = startVtxIdx; vIdx <= endVtxIdx; vIdx++) {
@@ -681,7 +681,7 @@ typedef struct {
 	
 	// Move all vertices so that the origin of the vertex coordinate system is aligned
 	// with a location derived from the origin factor.
-	NSUInteger vtxCnt = self.vertexCount;
+	GLuint vtxCnt = self.vertexCount;
 	CC3Vector originLoc = cc3v((layoutSize.width * origin.x), (layoutSize.height * origin.y), 0);
 	for (vIdx = 0; vIdx < vtxCnt; vIdx++) {
 		CC3Vector locOld = [self vertexLocationAt: vIdx];

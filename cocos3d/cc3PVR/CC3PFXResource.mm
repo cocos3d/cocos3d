@@ -133,8 +133,8 @@ extern "C" {
 
 /** Extracts the texture definitions and loads them from files. */
 -(void) buildTexturesFromPFXParser: (CPVRTPFXParser*) pfxParser {
-	NSUInteger texCnt = pfxParser->GetNumberTextures();
-	for (NSUInteger texIdx = 0; texIdx < texCnt; texIdx++) {
+	GLuint texCnt = pfxParser->GetNumberTextures();
+	for (GLuint texIdx = 0; texIdx < texCnt; texIdx++) {
 		const SPVRTPFXParserTexture* pfxTex = pfxParser->GetTexture(texIdx);
 		LogRez(@"Adding texture %@", NSStringFromSPVRTPFXParserTexture((SPVRTPFXParserTexture*)pfxTex));
 
@@ -160,8 +160,8 @@ extern "C" {
 
 /** Builds the effects from the shaders and textures defined in this resource. */
 -(void) buildEffectsFromPFXParser: (CPVRTPFXParser*) pfxParser {
-	NSUInteger eCnt = pfxParser->GetNumberEffects();
-	for (NSUInteger eIdx = 0; eIdx < eCnt; eIdx++) {
+	GLuint eCnt = pfxParser->GetNumberEffects();
+	for (GLuint eIdx = 0; eIdx < eCnt; eIdx++) {
 		const SPVRTPFXParserEffect& pfxEffect = pfxParser->GetEffect(eIdx);
 		CC3PFXEffect* effect = [[CC3PFXEffect alloc] initFromSPVRTPFXParserEffect: (SPVRTPFXParserEffect*)&pfxEffect
 																	fromPFXParser: pfxParser
@@ -180,8 +180,8 @@ extern "C" {
  * For now, just log the render passes described by this PFX resource.
  */
 -(void) buildRenderPassesFromPFXParser: (CPVRTPFXParser*) pfxParser {
-	NSUInteger rpCnt = pfxParser->GetNumberRenderPasses();
-	for (NSUInteger rpIdx = 0; rpIdx < rpCnt; rpIdx++) {
+	GLuint rpCnt = pfxParser->GetNumberRenderPasses();
+	for (GLuint rpIdx = 0; rpIdx < rpCnt; rpIdx++) {
 		const SPVRTPFXRenderPass rendPass = pfxParser->GetRenderPass(rpIdx);
 		LogRez(@"Describing render pass %@", NSStringFromSPVRTPFXRenderPass((SPVRTPFXRenderPass*)&rendPass));
 	}
@@ -190,8 +190,8 @@ extern "C" {
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
 	[desc appendFormat: @"%@", self];
-	[desc appendFormat: @" containing %u effects", _effectsByName.count];
-	[desc appendFormat: @", %u textures", _texturesByName.count];
+	[desc appendFormat: @" containing %lu effects", (unsigned long)_effectsByName.count];
+	[desc appendFormat: @", %lu textures", (unsigned long)_texturesByName.count];
 	return desc;
 }
 
@@ -234,7 +234,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	// Set each texture into its associated texture unit
 	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
 	NSUInteger tuCnt = _textures.count;
-	for (NSUInteger tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
+	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
 		CC3Texture* tex = [self getTextureForTextureUnit: tuIdx];
 		if (tex)
 			[material setTexture: tex forTextureUnit: tuIdx];
@@ -247,7 +247,7 @@ static Class _defaultSemanticDelegateClass = nil;
  * Returns the texture to be applied to the specified texture unit,
  * or nil if no texture is defined for that texture unit.
  */
--(CC3Texture*) getTextureForTextureUnit: (NSUInteger) texUnitIndex {
+-(CC3Texture*) getTextureForTextureUnit: (GLuint) texUnitIndex {
 	for (CC3PFXEffectTexture* effectTex in _textures)
 		if (effectTex.textureUnitIndex == texUnitIndex) return effectTex.texture;
 	return nil;
@@ -278,11 +278,11 @@ static Class _defaultSemanticDelegateClass = nil;
 	_textures = [CCArray new];	// retained
 	
 	CPVRTArray<SPVRTPFXParserEffectTexture> effectTextures = pfxEffect->Textures;
-	NSUInteger texCount = effectTextures.GetSize();
-	for(NSUInteger texIdx = 0; texIdx < texCount; texIdx++) {
+	GLuint texCount = effectTextures.GetSize();
+	for(GLuint texIdx = 0; texIdx < texCount; texIdx++) {
 		// Extract the texture and texture unit index from the SPVRTPFXParserEffectTexture
 		NSString* texName = [NSString stringWithUTF8String: effectTextures[texIdx].Name.c_str()];
-		NSUInteger tuIdx = effectTextures[texIdx].nNumber;
+		GLuint tuIdx = effectTextures[texIdx].nNumber;
 		
 		// Retrieve the texture from the PFX resource and add a CC3PFXEffectTexture
 		// linking the texture to the texture unit
@@ -310,8 +310,8 @@ static Class _defaultSemanticDelegateClass = nil;
 
 /** Adds a variable configuration for each semantic spec in the specified array. */
 -(void) addVariablesFrom: (CPVRTArray<SPVRTPFXParserSemantic>) pfxVariables {
-	NSUInteger varCount = pfxVariables.GetSize();
-	for(NSUInteger varIdx = 0; varIdx < varCount; varIdx++) {
+	GLuint varCount = pfxVariables.GetSize();
+	for(GLuint varIdx = 0; varIdx < varCount; varIdx++) {
 		CC3PFXGLSLVariableConfiguration* varConfig = [CC3PFXGLSLVariableConfiguration new];
 		varConfig.name = [NSString stringWithUTF8String: pfxVariables[varIdx].pszName];
 		varConfig.pfxSemanticName = [NSString stringWithUTF8String: pfxVariables[varIdx].pszValue];
@@ -371,8 +371,8 @@ static Class _defaultSemanticDelegateClass = nil;
 
 /** Returns the vertex shader that was assigned the specified name in the PFX resource file. */
 -(SPVRTPFXParserShader*) getVertexShaderNamed: (const char*) cName fromPFXParser: (CPVRTPFXParser*) pfxParser {
-	NSUInteger sCnt = pfxParser->GetNumberVertexShaders();
-	for (NSUInteger sIdx = 0; sIdx < sCnt; sIdx++) {
+	GLuint sCnt = pfxParser->GetNumberVertexShaders();
+	for (GLuint sIdx = 0; sIdx < sCnt; sIdx++) {
 		const SPVRTPFXParserShader& pfxShader = pfxParser->GetVertexShader(sIdx);
 		if (strcmp(pfxShader.Name.c_str(), cName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
 	}
@@ -381,8 +381,8 @@ static Class _defaultSemanticDelegateClass = nil;
 
 /** Returns the fragment shader that was assigned the specified name in the PFX resource file. */
 -(SPVRTPFXParserShader*) getFragmentShaderNamed: (const char*) cName fromPFXParser: (CPVRTPFXParser*) pfxParser  {
-	NSUInteger sCnt = pfxParser->GetNumberFragmentShaders();
-	for (NSUInteger sIdx = 0; sIdx < sCnt; sIdx++) {
+	GLuint sCnt = pfxParser->GetNumberFragmentShaders();
+	for (GLuint sIdx = 0; sIdx < sCnt; sIdx++) {
 		const SPVRTPFXParserShader& pfxShader = pfxParser->GetFragmentShader(sIdx);
 		if (strcmp(pfxShader.Name.c_str(), cName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
 	}

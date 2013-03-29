@@ -243,7 +243,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(BOOL) hasVertexTextureCoordinates { return (_vertexTextureCoordinates != nil); }
 
 -(GLuint) textureCoordinatesArrayCount {
-	return (_overlayTextureCoordinates ? _overlayTextureCoordinates.count : 0) + (_vertexTextureCoordinates ? 1 : 0);
+	return (_overlayTextureCoordinates ? (GLuint)_overlayTextureCoordinates.count : 0) + (_vertexTextureCoordinates ? 1 : 0);
 }
 
 -(void) addTextureCoordinates: (CC3VertexTextureCoordinates*) vtxTexCoords {

@@ -310,7 +310,7 @@
 #pragma mark Accessing particles
 
 /** Returns the particle at the specified index within the particles array, cast as a mesh particle. */
--(id<CC3MeshParticleProtocol>) meshParticleAt: (NSUInteger) aParticleIndex;
+-(id<CC3MeshParticleProtocol>) meshParticleAt: (GLuint) aParticleIndex;
 
 
 #pragma mark Transformations

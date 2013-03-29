@@ -578,9 +578,9 @@
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_PALETTE_MATRICES_OES));
 	LogInfo(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES_APPLE);
+	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE));
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES_APPLE);
+	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS));

@@ -1,5 +1,5 @@
 /*
- * CC3Environment.h
+ * CC3OpenGLUtility.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -30,27 +30,33 @@
 /** @file */	// Doxygen marker
 
 
-#import "cocos2d.h"
+#include "CC3Environment.h"
 
-/** OS platform macros */
-# define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-# define CC3_MAC			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
-
-/** Create convenience tests for whether we are linking to cocos2d 1.x or 2.x. */
-#ifndef CC3_CC2_1
-#	define CC3_CC2_1		(COCOS2D_VERSION < 0x020000)
-#endif
-#ifndef CC3_CC2_2
-#	define CC3_CC2_2		!CC3_CC2_1
+#if CC3_OGLES_1
+#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES1/glext.h>
+#include "CC3OpenGLES1Compatibility.h"
 #endif
 
-/** Create convenience tests for whether we are linking to OpenGL ES 2.0, OpenGL ES 1.1, or OpenGL. */
-#ifndef CC3_OGLES_1
-#	define CC3_OGLES_1		CC3_CC2_1
+#if CC3_OGLES_2
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#include "CC3OpenGLES2Compatibility.h"
 #endif
-#ifndef CC3_OGLES_2
-#	define CC3_OGLES_2		(CC3_CC2_2 && CC3_IOS)
+
+#if CC3_OGL
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
+#import "CC3OpenGLCompatibility.h"
 #endif
-#ifndef CC3_OGL
-#	define CC3_OGL			(CC3_CC2_2 && CC3_MAC)
-#endif
+
+#include <stdio.h>
+
+/** Returns a string containing the name of the specified GL enumeration code. */
+char* CC3GLEnumName(GLenum gle);
+
+/** 
+ * Returns the size of the specified GL dataType, which must be one of:
+ * GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FLOAT, GL_FIXED.
+ */
+size_t CC3GLElementTypeSize(GLenum dataType);

@@ -89,15 +89,15 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 @implementation CC3Node (CC3NodesResource)
 
--(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (NSUInteger) trackID {
+-(void) addAnimationInResource: (CC3NodesResource*) rez asTrack: (GLuint) trackID {
 	CC3Node* matchingRezNode = [rez getNodeMatching: self];
 	if (matchingRezNode) [self addAnimation: matchingRezNode.animation asTrack: trackID];
 
 	for (CC3Node* child in self.children) [child addAnimationInResource: rez asTrack: trackID];
 }
 
--(NSUInteger) addAnimationInResource: (CC3NodesResource*) rez {
-	NSUInteger trackID = [CC3NodeAnimationState generateTrackID];
+-(GLuint) addAnimationInResource: (CC3NodesResource*) rez {
+	GLuint trackID = [CC3NodeAnimationState generateTrackID];
 	[self addAnimationInResource: rez asTrack: trackID];
 	return trackID;
 }

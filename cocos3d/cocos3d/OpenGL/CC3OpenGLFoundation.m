@@ -30,7 +30,7 @@
  */
 
 #import "CC3OpenGLFoundation.h"
-#import "CC3OpenGLESUtility.h"
+#import "CC3OpenGLUtility.h"
 
 
 #pragma mark -

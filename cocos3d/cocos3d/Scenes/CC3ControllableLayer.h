@@ -51,7 +51,7 @@
  * black as the GL clear color, and will draw a backdrop color blend if it has been configured with one.
  */
 @interface CC3ControllableLayer : CCLayerColor {
-	UIViewController* controller_;
+	CC3UIViewController* controller_;
 	BOOL isColored_ : 1;
 	BOOL alignContentSizeWithDeviceOrientation_ : 1;
 }
@@ -128,23 +128,6 @@
  * this superclass implementation first, before performing any customized activities.
  */
 -(void) onExit;
-
-@end
-
-
-#pragma mark -
-#pragma mark UIViewController extension support
-
-/** UIViewController extension to support CC3ControllableLayer nodes. */
-@interface UIViewController (CC3ControllableLayer)
-
-/**
- * Indicates whether this controller is overlaying the view of the device camera.
- *
- * This base implementation always returns NO, indicating that the device camera is not being displayed.
- * Subclasses of UIViewController that support device camera overlay can override.
- */
-@property(nonatomic, assign, readonly) BOOL isOverlayingDeviceCamera;
 
 @end
 

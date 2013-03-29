@@ -711,7 +711,7 @@
 
 -(ccColor4F) ambientColor {
 	ccColor4F col = kCCC4FBlackTransparent;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLfloat rSum, bSum, gSum, aSum;
 		rSum = bSum = gSum = aSum = 0.0f;
@@ -733,7 +733,7 @@
 
 -(ccColor4F) diffuseColor {
 	ccColor4F col = kCCC4FBlackTransparent;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLfloat rSum, bSum, gSum, aSum;
 		rSum = bSum = gSum = aSum = 0.0f;
@@ -755,7 +755,7 @@
 
 -(ccColor4F) specularColor {
 	ccColor4F col = kCCC4FBlackTransparent;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLfloat rSum, bSum, gSum, aSum;
 		rSum = bSum = gSum = aSum = 0.0f;
@@ -777,7 +777,7 @@
 
 -(ccColor4F) emissionColor {
 	ccColor4F col = kCCC4FBlackTransparent;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLfloat rSum, bSum, gSum, aSum;
 		rSum = bSum = gSum = aSum = 0.0f;
@@ -856,7 +856,7 @@
 
 -(ccColor3B) color {
 	ccColor3B col = ccBLACK;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLuint rSum, bSum, gSum;
 		rSum = bSum = gSum = 0;
@@ -877,7 +877,7 @@
 
 -(GLubyte) opacity {
 	GLubyte opc = 0;
-	int childCnt = 0;
+	NSUInteger childCnt = 0;
 	if (children && (childCnt = children.count) > 0) {
 		GLuint oSum = 0;
 		for (CC3Node* child in children) {
@@ -1204,7 +1204,7 @@ static GLuint lastAssignedNodeTag;
 -(void) hide { self.visible = NO; }
 
 -(GLint) zOrder {
-	GLint childCount = children ? children.count : 0;
+	NSUInteger childCount = children ? children.count : 0;
 	if (childCount > 0) {
 		GLint zoSum = 0;
 		for (CC3Node* child in children) zoSum += child.zOrder;
@@ -2031,7 +2031,7 @@ static GLuint lastAssignedNodeTag;
 
 #pragma mark Animation
 
--(CC3NodeAnimationState*) getAnimationStateOnTrack: (NSUInteger) trackID {
+-(CC3NodeAnimationState*) getAnimationStateOnTrack: (GLuint) trackID {
 	for (CC3NodeAnimationState* as in _animationStates) if (as.trackID == trackID) return as;
 	return nil;
 }
@@ -2055,11 +2055,11 @@ static GLuint lastAssignedNodeTag;
 
 -(CC3NodeAnimationState*) animationState { return [self getAnimationStateOnTrack: 0]; }
 
--(CC3NodeAnimation*) getAnimationOnTrack: (NSUInteger) trackID {
+-(CC3NodeAnimation*) getAnimationOnTrack: (GLuint) trackID {
 	return [self getAnimationStateOnTrack: trackID].animation;
 }
 
--(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (NSUInteger) trackID {
+-(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (GLuint) trackID {
 	CC3NodeAnimation* currAnim = [self getAnimationOnTrack: trackID];
 	if ( !animation || animation == currAnim) return;		// leave if not changing
 	[self addAnimationState: [CC3NodeAnimationState animationStateWithAnimation: animation
@@ -2076,7 +2076,7 @@ static GLuint lastAssignedNodeTag;
 	[self removeAnimationState: [self getAnimationStateForAnimation: animation]];
 }
 
--(void) removeAnimationTrack: (NSUInteger) trackID {
+-(void) removeAnimationTrack: (GLuint) trackID {
 	[self removeAnimationState: [self getAnimationStateOnTrack: trackID]];
 	for (CC3Node* child in children) [child removeAnimationTrack: trackID];
 }
@@ -2085,7 +2085,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) setAnimation: (CC3NodeAnimation*) animation { [self addAnimation: animation asTrack: 0]; }
 
--(BOOL) containsAnimationOnTrack: (NSUInteger) trackID {
+-(BOOL) containsAnimationOnTrack: (GLuint) trackID {
 	if ([self getAnimationStateOnTrack: trackID] != nil) return YES;
 	for (CC3Node* child in children) if ( [child containsAnimationOnTrack: trackID] ) return YES;
 	return NO;
@@ -2097,7 +2097,7 @@ static GLuint lastAssignedNodeTag;
 	return NO;
 }
 
--(ccTime) animationTimeOnTrack: (NSUInteger) trackID {
+-(ccTime) animationTimeOnTrack: (GLuint) trackID {
 	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	if (as) return as.animationTime;
 	for (CC3Node* child in children) {
@@ -2107,7 +2107,7 @@ static GLuint lastAssignedNodeTag;
 	return 0.0f;
 }
 
--(GLfloat) animationBlendingWeightOnTrack: (NSUInteger) trackID {
+-(GLfloat) animationBlendingWeightOnTrack: (GLuint) trackID {
 	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	if (as) return as.blendingWeight;
 	for (CC3Node* child in children) {
@@ -2117,20 +2117,20 @@ static GLuint lastAssignedNodeTag;
 	return 0.0f;
 }
 
--(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (NSUInteger) trackID {
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (GLuint) trackID {
 	[self getAnimationStateOnTrack: trackID].blendingWeight = blendWeight;
 	for (CC3Node* child in children) [child setAnimationBlendingWeight: blendWeight onTrack: trackID];
 }
 
--(void) enableAnimationOnTrack: (NSUInteger) trackID {
+-(void) enableAnimationOnTrack: (GLuint) trackID {
 	[[self getAnimationStateOnTrack: trackID] enable];
 }
 
--(void) disableAnimationOnTrack: (NSUInteger) trackID {
+-(void) disableAnimationOnTrack: (GLuint) trackID {
 	[[self getAnimationStateOnTrack: trackID] disable];
 }
 
--(BOOL) isAnimationEnabledOnTrack: (NSUInteger) trackID {
+-(BOOL) isAnimationEnabledOnTrack: (GLuint) trackID {
 	CC3NodeAnimationState* as = [self getAnimationStateOnTrack: trackID];
 	return as ? as.isEnabled : NO;
 }
@@ -2148,12 +2148,12 @@ static GLuint lastAssignedNodeTag;
 	for (CC3NodeAnimationState* as in _animationStates) as.isEnabled = isAnimationEnabled;
 }
 
--(void) enableAllAnimationOnTrack: (NSUInteger) trackID {
+-(void) enableAllAnimationOnTrack: (GLuint) trackID {
 	[self enableAnimationOnTrack: trackID];
 	for (CC3Node* child in children) [child enableAllAnimationOnTrack: trackID];
 }
 
--(void) disableAllAnimationOnTrack: (NSUInteger) trackID {
+-(void) disableAllAnimationOnTrack: (GLuint) trackID {
 	[self disableAnimationOnTrack: trackID];
 	for (CC3Node* child in children) [child disableAllAnimationOnTrack: trackID];
 }
@@ -2224,7 +2224,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) markAnimationDirty { _isAnimationDirty = YES; }
 
--(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID {
+-(void) establishAnimationFrameAt: (ccTime) t onTrack: (GLuint) trackID {
 	[[self getAnimationStateOnTrack: trackID] establishFrameAt: t];
 	for (CC3Node* child in children) [child establishAnimationFrameAt: t onTrack: trackID];
 }

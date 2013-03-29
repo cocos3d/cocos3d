@@ -53,8 +53,8 @@
 -(void) acceptParticle: (id<CC3ParticleProtocol>) aParticle;
 -(void) updateParticlesBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
 -(void) updateParticlesAfterTransform: (CC3NodeUpdatingVisitor*) visitor;
--(void) finalizeAndRemoveParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex;
--(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex;
+-(void) finalizeAndRemoveParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex;
+-(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex;
 @end
 
 @implementation CC3ParticleEmitter
@@ -131,7 +131,7 @@
 
 #pragma mark Allocation and initialization
 
--(NSUInteger) currentParticleCapacity { return particles.capacity; }
+-(GLuint) currentParticleCapacity { return (GLuint)particles.capacity; }
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
@@ -252,9 +252,9 @@
 
 #pragma mark Emitting particles
 
--(NSUInteger) emitParticles: (NSUInteger) count {
-	NSUInteger emitCount = 0;
-	for (NSUInteger i = 0; i < count; i++) {
+-(GLuint) emitParticles: (GLuint) count {
+	GLuint emitCount = 0;
+	for (GLuint i = 0; i < count; i++) {
 		if ( [self emitParticle] ) emitCount++;
 	}
 	return emitCount;
@@ -306,9 +306,9 @@
 -(BOOL) ensureParticleCapacityFor: (id<CC3ParticleProtocol>) aParticle {
 	if (aParticle.emitter == self) return YES;			// Reusing a particle so we're good
 	
-	NSUInteger currCap = self.currentParticleCapacity;
+	GLuint currCap = self.currentParticleCapacity;
 	if (particleCount == currCap) {
-		NSUInteger newCap = MIN(currCap + self.particleCapacityExpansionIncrement, self.maximumParticleCapacity);
+		GLuint newCap = MIN(currCap + self.particleCapacityExpansionIncrement, self.maximumParticleCapacity);
 		return [particles setCapacity: newCap];
 	}
 	return YES;
@@ -411,7 +411,7 @@
 
 #pragma mark Accessing particles
 
--(id<CC3ParticleProtocol>) particleAt: (NSUInteger) aParticleIndex {
+-(id<CC3ParticleProtocol>) particleAt: (GLuint) aParticleIndex {
 	return [particles objectAtIndex: aParticleIndex];
 }
 
@@ -430,7 +430,7 @@
 }
 
 -(void) removeParticle: (id<CC3ParticleProtocol>) aParticle {
-	NSUInteger pIdx = [particles indexOfObjectIdenticalTo: aParticle];
+	GLuint pIdx = (GLuint)[particles indexOfObjectIdenticalTo: aParticle];
 	if (pIdx < particleCount) {
 		aParticle.isAlive = NO;
 		[self finalizeAndRemoveParticle: aParticle atIndex: pIdx];
@@ -442,7 +442,7 @@
  * particle may be removed to create space, which can result in its deallocation if this emitter
  * is all that is holding onto it.
  */
--(void) finalizeAndRemoveParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex {
+-(void) finalizeAndRemoveParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex {
 	[aParticle finalizeParticle];
 	[self removeParticle: aParticle atIndex: anIndex];
 }
@@ -453,13 +453,13 @@
  * This basic implementation simply decrements the particleCount. Subclasses will define behaviour
  * for removing the particle from the particles collection, and for moving the underlying vertex content.
  */
--(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex {
+-(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex {
 	particleCount--;
 }
 
 -(void) removeAllParticles {
-	NSUInteger pCnt = self.particleCount;
-	for (NSUInteger pIdx = 0; pIdx < pCnt; pIdx++) {
+	GLuint pCnt = self.particleCount;
+	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		id<CC3ParticleProtocol> aParticle = [self particleAt: pIdx];
 		aParticle.isAlive = NO;
 		[aParticle finalizeParticle];
@@ -534,9 +534,9 @@
 -(void) updateParticleMeshWithVisitor: (CC3NodeUpdatingVisitor*) visitor;
 -(void) updateParticleMeshGLBuffers;
 -(void) addDirtyVertexRange: (NSRange) aRange;
--(void) addDirtyVertex: (NSUInteger) vtxIdx;
+-(void) addDirtyVertex: (GLuint) vtxIdx;
 -(void) addDirtyVertexIndexRange: (NSRange) aRange;
--(void) addDirtyVertexIndex: (NSUInteger) vtxIdx;
+-(void) addDirtyVertexIndex: (GLuint) vtxIdx;
 -(void) clearDirtyVertexRanges;
 -(BOOL) verticesAreDirty;
 -(BOOL) vertexIndicesAreDirty;
@@ -701,7 +701,7 @@
  * Adds the specified vertex to the range of dirty vertices.
  * The result is to form a union of the specified vertex and the current range.
  */
--(void) addDirtyVertex: (NSUInteger) vtxIdx { [self addDirtyVertexRange: NSMakeRange(vtxIdx, 1)]; }
+-(void) addDirtyVertex: (GLuint) vtxIdx { [self addDirtyVertexRange: NSMakeRange(vtxIdx, 1)]; }
 
 /**
  * Adds the specified range to the range of dirty vertex indices.
@@ -715,7 +715,7 @@
  * Adds the specified vertex index to the range of dirty vertex indices.
  * The result is to form a union of the specified vertex index and the current range.
  */
--(void) addDirtyVertexIndex: (NSUInteger) vtxIdx { [self addDirtyVertexIndexRange: NSMakeRange(vtxIdx, 1)]; }
+-(void) addDirtyVertexIndex: (GLuint) vtxIdx { [self addDirtyVertexIndexRange: NSMakeRange(vtxIdx, 1)]; }
 
 /** Returns whether any vertices are dirty, by being either expanded or changed. */
 -(BOOL) verticesAreDirty { return wasVertexCapacityChanged || (dirtyVertexRange.length > 0); }
@@ -781,12 +781,12 @@
 			LogTrace(@"%@ re-created GL buffers because buffer capacity has changed to %i vertices and %i vertex indices.",
 					 self, vaMesh.allocatedVertexCapacity, vaMesh.allocatedVertexIndexCapacity);
 		} else {
-			[vaMesh updateGLBuffersStartingAt: dirtyVertexRange.location
-									forLength: dirtyVertexRange.length];
+			[vaMesh updateGLBuffersStartingAt: (GLuint)dirtyVertexRange.location
+									forLength: (GLuint)dirtyVertexRange.length];
 			
 			if (vaMesh.hasVertexIndices && self.vertexIndicesAreDirty)
-				[vaMesh.vertexIndices updateGLBufferStartingAt: dirtyVertexIndexRange.location
-													 forLength: dirtyVertexIndexRange.length];
+				[vaMesh.vertexIndices updateGLBufferStartingAt: (GLuint)dirtyVertexIndexRange.location
+													 forLength: (GLuint)dirtyVertexIndexRange.length];
 
 			LogTrace(@"%@ updated vertex content GL buffer (ID %i) range (%i, %i) of %i vertices (out of %i allocated as %@) and index GL buffer (ID %i) range (%i, %i) of %i indices (out of %i allocated as %@) for %i particles",
 					 self, vaMesh.vertexLocations.bufferID, dirtyVertexRange.location, dirtyVertexRange.length, self.vertexCount, vaMesh.allocatedVertexCapacity, NSStringFromGLEnum(vaMesh.vertexLocations.bufferUsage),
@@ -800,13 +800,13 @@
 
 #pragma mark Accessing particles
 
--(id<CC3CommonVertexArrayParticleProtocol>) commonVertexArrayParticleAt: (NSUInteger) aParticleIndex {
+-(id<CC3CommonVertexArrayParticleProtocol>) commonVertexArrayParticleAt: (GLuint) aParticleIndex {
 	return (id<CC3CommonVertexArrayParticleProtocol>)[self particleAt: aParticleIndex];
 }
 
 -(id<CC3ParticleProtocol>) particleWithVertexAt: (GLuint) vtxIndex {
-	NSUInteger pCnt = self.particleCount;
-	for (NSUInteger pIdx = 0; pIdx < pCnt; pIdx++) {
+	GLuint pCnt = self.particleCount;
+	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		id<CC3CommonVertexArrayParticleProtocol> cvap = [self commonVertexArrayParticleAt: pIdx];
 		if (NSLocationInRange(vtxIndex, cvap.vertexRange)) return cvap;
 	}
@@ -814,8 +814,8 @@
 }
 
 -(id<CC3ParticleProtocol>) particleWithVertexIndexAt: (GLuint) index {
-	NSUInteger pCnt = self.particleCount;
-	for (NSUInteger pIdx = 0; pIdx < pCnt; pIdx++) {
+	GLuint pCnt = self.particleCount;
+	for (GLuint pIdx = 0; pIdx < pCnt; pIdx++) {
 		id<CC3CommonVertexArrayParticleProtocol> cvap = [self commonVertexArrayParticleAt: pIdx];
 		if (NSLocationInRange(index, cvap.vertexIndexRange)) return cvap;
 	}
@@ -823,7 +823,7 @@
 }
 
 /** Shrinks the mesh vertex count by the vertex count of the particle. */
--(void) removeParticle: (id<CC3CommonVertexArrayParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex {
+-(void) removeParticle: (id<CC3CommonVertexArrayParticleProtocol>) aParticle atIndex: (GLuint) anIndex {
 	[super removeParticle: aParticle atIndex: anIndex];		// Decrements particleCount
 	self.vertexCount -= aParticle.vertexCount;
 	self.vertexIndexCount -= aParticle.vertexIndexCount;

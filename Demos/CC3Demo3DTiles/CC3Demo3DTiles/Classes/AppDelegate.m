@@ -10,7 +10,9 @@
 #import "GameConfig.h"
 #import "MainLayer.h"
 #import "RootViewController.h"
-#import "CC3EAGLView.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"
 
 @implementation AppDelegate
 
@@ -64,15 +66,15 @@
 	//     To enable multisampling antialiasing, set the multiSampling parameter to YES.
 	//     You can also change the number of samples used with the numberOfSamples parameter.
 	//  4. If you are using BOTH multisampling antialiasing AND node picking from touch events,
-	//     use the CC3EAGLView class instead of EAGLView. When using EAGLView, multisampling
+	//     use the CC3GLView class instead of EAGLView. When using EAGLView, multisampling
 	//     antialiasing interferes with the color-testing algorithm used for touch-event node picking.
-	EAGLView *glView = [CC3EAGLView viewWithFrame: [window bounds]
-									  pixelFormat: kEAGLColorFormatRGBA8
-									  depthFormat: GL_DEPTH_COMPONENT16_OES
-							   preserveBackbuffer: NO
-									   sharegroup: nil
-									multiSampling: NO
-								  numberOfSamples: 4];
+	EAGLView *glView = [CC3GLView viewWithFrame: [window bounds]
+									pixelFormat: kEAGLColorFormatRGBA8
+									depthFormat: GL_DEPTH_COMPONENT16_OES
+							 preserveBackbuffer: NO
+									 sharegroup: nil
+								  multiSampling: NO
+								numberOfSamples: 4];
 	
 	// attach the openglView to the director
 	[director setOpenGLView:glView];

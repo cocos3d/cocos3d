@@ -645,7 +645,7 @@
 
 +(id) actionWithDuration: (ccTime) t { return [self actionWithDuration: t onTrack: 0]; }
 
--(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID {
+-(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID {
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_isReversed = NO;
@@ -653,7 +653,7 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID {
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID {
 	return [[[self alloc] initWithDuration: t onTrack: trackID] autorelease];
 }
 
@@ -661,7 +661,7 @@
 	return [self actionWithDuration: t onTrack: 0 limitFrom: startOfRange to: endOfRange];
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID limitFrom: (GLfloat) startOfRange to: (GLfloat) endOfRange {
 	return [[self actionWithDuration: t onTrack: trackID] asActionLimitedFrom: startOfRange to: endOfRange];
 }
 
@@ -695,7 +695,7 @@
 
 @synthesize trackID=_trackID;
 
--(id) initWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+-(id) initWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	if ( (self = [super initWithDuration: t]) ) {
 		_trackID = trackID;
 		_endWeight = blendingWeight;
@@ -703,7 +703,7 @@
 	return self;
 }
 
-+(id) actionWithDuration: (ccTime) t onTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
++(id) actionWithDuration: (ccTime) t onTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	return [[[self alloc] initWithDuration: t onTrack: trackID blendingWeight: blendingWeight] autorelease];
 }
 
@@ -736,14 +736,14 @@
 @synthesize fromTrackID=_fromTrackID, toTrackID=_toTrackID;
 
 -(id) initWithDuration: (ccTime) t
-			 fromTrack: (NSUInteger) fromTrackID
-			   toTrack: (NSUInteger) toTrackID {
+			 fromTrack: (GLuint) fromTrackID
+			   toTrack: (GLuint) toTrackID {
 	return [self initWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
 }
 
 -(id) initWithDuration: (ccTime) t
-			 fromTrack: (NSUInteger) fromTrackID
-			   toTrack: (NSUInteger) toTrackID
+			 fromTrack: (GLuint) fromTrackID
+			   toTrack: (GLuint) toTrackID
 	withBlendingWeight: (GLfloat) toBlendingWeight {
 	if ( (self = [super initWithDuration: t]) ) {
 		_fromTrackID = fromTrackID;
@@ -754,14 +754,14 @@
 }
 
 +(id) actionWithDuration: (ccTime) t
-			   fromTrack: (NSUInteger) fromTrackID
-				 toTrack: (NSUInteger) toTrackID {
+			   fromTrack: (GLuint) fromTrackID
+				 toTrack: (GLuint) toTrackID {
 	return [self actionWithDuration: t fromTrack: fromTrackID toTrack: toTrackID withBlendingWeight: 1.0f];
 }
 
 +(id) actionWithDuration: (ccTime) t
-			   fromTrack: (NSUInteger) fromTrackID
-				 toTrack: (NSUInteger) toTrackID
+			   fromTrack: (GLuint) fromTrackID
+				 toTrack: (GLuint) toTrackID
 	  withBlendingWeight: (GLfloat) toBlendingWeight {
 	return [[[self alloc] initWithDuration: t
 								 fromTrack: fromTrackID
@@ -804,7 +804,7 @@
 
 @synthesize trackID=_trackID;
 
--(id) initOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
+-(id) initOnTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	if ( (self = [super init]) ) {
 		_trackID = trackID;
 		_endWeight = blendingWeight;
@@ -812,7 +812,7 @@
 	return self;
 }
 
-+(id) actionOnTrack: (NSUInteger) trackID blendingWeight: (GLfloat) blendingWeight {
++(id) actionOnTrack: (GLuint) trackID blendingWeight: (GLfloat) blendingWeight {
 	return [[[self alloc] initOnTrack: trackID blendingWeight: blendingWeight] autorelease];
 }
 
@@ -830,14 +830,14 @@
 
 @synthesize trackID=_trackID;
 
--(id) initOnTrack: (NSUInteger) trackID {
+-(id) initOnTrack: (GLuint) trackID {
 	if ( (self = [super init]) ) {
 		_trackID = trackID;
 	}
 	return self;
 }
 
-+(id) actionOnTrack: (NSUInteger) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
++(id) actionOnTrack: (GLuint) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
 
 -(void) update: (ccTime) t { [self.targetCC3Node enableAllAnimationOnTrack: _trackID]; }
 
@@ -851,14 +851,14 @@
 
 @synthesize trackID=_trackID;
 
--(id) initOnTrack: (NSUInteger) trackID {
+-(id) initOnTrack: (GLuint) trackID {
 	if ( (self = [super init]) ) {
 		_trackID = trackID;
 	}
 	return self;
 }
 
-+(id) actionOnTrack: (NSUInteger) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
++(id) actionOnTrack: (GLuint) trackID { return [[[self alloc] initOnTrack: trackID] autorelease]; }
 
 -(void) update: (ccTime) t { [self.targetCC3Node disableAllAnimationOnTrack: _trackID]; }
 

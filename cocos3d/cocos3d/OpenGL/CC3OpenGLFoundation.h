@@ -43,6 +43,12 @@
 #import "CC3OpenGLES2Compatibility.h"
 #endif
 
+#if CC3_OGL
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
+#import "CC3OpenGLCompatibility.h"
+#endif
+
 #pragma mark -
 #pragma mark GL supporting structures & functions
 

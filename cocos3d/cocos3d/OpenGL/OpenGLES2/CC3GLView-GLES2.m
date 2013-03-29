@@ -1,5 +1,5 @@
 /*
- * CC3GLView.m
+ * CC3GLView-GLES2.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,12 +26,12 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3GLView.h for full API documentation.
+ * See header file CC3GLView-GLES2.h for full API documentation.
  */
 
-#import "CC3GLView.h"
+#import "CC3GLView-GLES2.h"
 
-#if CC3_CC2_2
+#if CC3_OGLES_2
 
 #if COCOS2D_VERSION < 0x020100
 #	define CC2_REQUESTED_SAMPLES requestedSamples_
@@ -243,4 +243,4 @@ static Class _instantiationClass = nil;
 
 @end
 
-#endif
+#endif	// CC3_OGLES_2

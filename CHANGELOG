@@ -43,6 +43,8 @@ cocos3d 2.0.0 - 2013/03/31
     - Added CC3VertexTangents vertex array
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
 
+- Added support for Mac OSX.
+
 - Animation enhancements:
 	- Added support for time-based key-frame animation.
 		- CC3Animation now supports the ability to have timed key-frame animation with variable frame timing and automatic interpolation between frames.
@@ -116,6 +118,7 @@ cocos3d 2.0.0 - 2013/03/31
 - [API change] Changed values of kCCC4FLightGray and kCCC4FDarkGray to evenly divide luminosity over the range (kCCC4FBlack, kCCC4FDarkGray, kCCC4FGray, kCCC4FLightGray, kCCC4FWhite) in four even steps.
 - [API change] Combined the shouldClearDepthBufferBefore2D & shouldClearDepthBufferBefore3D properties of CC3Scene into a single shouldClearDepthBuffer property and deprecated the originals.
 - [API change] Renamed CC3ViewportManager openViewport & closeViewport methods to open & close respectively.
+- [API change] Renamed CC3EAGLView to CC3GLView for consistency between views used between OpenGL ES 2, OpenGL ES 1.1 & OpenGL.
 
 - [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler state management:
 	- Added CC3OpenGL class to handle state management, with subclasses for specific OpenGL ES or OpenGL versions.

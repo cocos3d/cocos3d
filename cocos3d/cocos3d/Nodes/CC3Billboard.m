@@ -504,15 +504,8 @@ static GLfloat deviceScaleFactor = 0.0f;
  * When painting for node picking, update the bounding box mesh vertices and draw it.
  */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
 	if (visitor.shouldDecorateNode) {
-		
-		// If things get weird when drawing some CCNode subclasses, use the following
-		// to log the full GL engine state prior to drawing the 2D node
-		LogTrace(@"%@ drawing 2D node with GL engine state:\n %@", self, glesEngine);
-		
 		[billboard visit];		// Draw the 2D CCNode
-		
 	} else {
 		// We're drawing a colored box to allow this node to be picked by a touch.
 		// This is done by creating and drawing an underlying rectangle mesh that

@@ -32,9 +32,13 @@
 
 /* Base library of extensions to iOS frameworks to support cocos3d. */
 
+#import "CC3Environment.h"
+#import "CC3OSExtensions.h"
+
+#if CC3_IOS
+
 #import <UIKit/UIGestureRecognizer.h>
 #import <UIKit/UIColor.h>
-#import "ccTypes.h"
 
 // Define when compiling with lower SDK's
 #ifndef __IPHONE_5_0
@@ -43,24 +47,6 @@
 #ifndef __IPHONE_6_0
 #	define __IPHONE_6_0     60000
 #endif
-
-
-#pragma mark -
-#pragma mark NSObject extensions
-
-/** Extension category to support cocos3d functionality. */
-@interface NSObject (CC3)
-
-/**
- * Convenience method to automatically autorelease when copying objects.
- * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
- */
--(id) autoreleasedCopy;
-
-/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
-
-@end
 
 
 #pragma mark -
@@ -208,3 +194,5 @@ NSString* NSStringFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientatio
 
 /** Returns a string description of the specified UIDeviceOrientation. */
 NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation);
+
+#endif	// CC3_IOS

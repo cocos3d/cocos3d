@@ -31,7 +31,7 @@
 
 #import "CC3VertexArrays.h"
 #import "CC3Mesh.h"
-#import "CC3OpenGLESUtility.h"
+#import "CC3OpenGLUtility.h"
 
 
 #pragma mark -
@@ -121,7 +121,7 @@
 	if ( ![self allocateVertexCapacity: _allocatedVertexCapacity] ) _elementType = currType;
 }
 
--(GLuint) elementLength { return CC3GLElementTypeSize(_elementType) * _elementSize; }
+-(GLuint) elementLength { return (GLuint)CC3GLElementTypeSize(_elementType) * _elementSize; }
 
 -(GLuint) vertexStride { return _vertexStride ? _vertexStride : self.elementLength; }
 

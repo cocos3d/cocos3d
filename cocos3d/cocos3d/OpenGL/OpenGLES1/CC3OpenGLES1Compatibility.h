@@ -38,6 +38,10 @@
 
 #if CC3_OGLES_1
 
+// GL functions
+#define glClearDepth					glClearDepthf
+
+
 // General symbolic constants
 
 #ifndef GL_DEPTH_COMPONENT16

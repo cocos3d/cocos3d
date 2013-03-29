@@ -834,7 +834,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addBitmapLabel {
 	CylinderLabel* bmLabel = [CylinderLabel nodeWithName: kBitmapLabelName];
 	bmLabel.radius = 50;
-	bmLabel.textAlignment = UITextAlignmentCenter;
+	bmLabel.textAlignment = NSTextAlignmentCenter;
 	bmLabel.relativeOrigin = ccp(0.5, 0.5);
 	bmLabel.tessellation = CC3TessellationMake(4, 1);
 	bmLabel.fontFileName = @"Arial32BMGlyph.fnt";

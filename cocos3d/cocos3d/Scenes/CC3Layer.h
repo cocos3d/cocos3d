@@ -137,10 +137,9 @@
  *   -# Create a CC3UIViewController and run your CC3Layer instance by invoking the runSceneOnNode: method.
  */
 @interface CC3Layer : CC3ControllableLayer {
-	CC3Scene* cc3Scene;
-	CC3Scene* cc3World DEPRECATED_ATTRIBUTE;	// Parallel iVar reference for legacy apps that override CC3Layer
-	CCArray* cc3GestureRecognizers;
-	BOOL shouldAlwaysUpdateViewport : 1;
+	CC3Scene* _cc3Scene;
+	CCArray* _cc3GestureRecognizers;
+	BOOL _shouldAlwaysUpdateViewport : 1;
 }
 
 /**
@@ -150,6 +149,58 @@
  * the opacity property returns 255, otherwise returns NO.
  */
 @property(nonatomic, readonly) BOOL isOpaque;
+
+
+#pragma mark iOS Gesture recognizers
+
+/**
+ * Returns a collection of iOS UIGestureRecognizers that were added using the 
+ * cc3AddGestureRecognizer: method. This property is only available under iOS.
+ */
+@property(nonatomic, readonly) CCArray* cc3GestureRecognizers;
+
+/**
+ * Adds the specified iOS gesture recognizer to the UIView that is displaying this
+ * layer, and tracks the gesture recognizer in the cc3GestureRecognizers property.
+ *
+ * For applications that use a single CC3Layer to cover the entire UIView, you can
+ * override the onOpenCC3Layer method to create gesture recognizers, and you can
+ * invoke this method to easily add them to the UIView.
+ *
+ * When this layer is removed from the view, the gesture recognizers added using this
+ * method are automatically removed from the view, and from the cc3GestureRecognizers
+ * property. Whenever this layer is displayed again, new gesture recognizers will be
+ * created and attached to the view when the onOpenCC3Layer method runs again.
+ *
+ * For applications that diplay several CC3Layers that support gesture recognizers,
+ * you may want to create centralized gesture recognizers in some other scope, and
+ * bypass adding them using this method.
+ */
+-(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture;
+
+/**
+ * Removes the specified iOS gesture recognizer from the UIView that is displaying this
+ * layer, and removes the gesture recognizer from the cc3GestureRecognizers property.
+ *
+ * When this layer is removed from the view, the gesture recognizers added to the
+ * cc3GestureRecognizers property using the cc3AddGestureRecognizer: method are
+ * automatically removed from the view, and from the cc3GestureRecognizers property.
+ * Usually, the application does not need to invoke this method directly.
+ */
+-(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture;
+
+/**
+ * Removes all iOS gesture recognizers that were previously added using the
+ * cc3AddGestureRecognizer: method, and removes them all from the UIView.
+ *
+ * This method is invoked automatically when this layer is removed from the view.
+ * Usually, the application does not need to invoke this method directly, but if
+ * you need to remove all gesture recognizers prior to closing the layer, you can
+ * use this method to do so.
+ *
+ * This method is only available under 
+ */
+-(void) cc3RemoveAllGestureRecognizers;
 
 
 #pragma mark Allocation and initialization
@@ -205,53 +256,6 @@
 -(void) onCloseCC3Layer;
 
 /**
- * Returns a collection of UIGestureRecognizers that were added
- * using the cc3AddGestureRecognizer: method.
- */
-@property(nonatomic, readonly) CCArray* cc3GestureRecognizers;
-
-/**
- * Adds the specified gesture recognizer to the UIView that is displaying this
- * layer, and tracks the gesture recognizer in the cc3GestureRecognizers property.
- *
- * For applications that use a single CC3Layer to cover the entire UIView, you can
- * override the onOpenCC3Layer method to create gesture recognizers, and you can
- * invoke this method to easily add them to the UIView.
- *
- * When this layer is removed from the view, the gesture recognizers added using this
- * method are automatically removed from the view, and from the cc3GestureRecognizers
- * property. Whenever this layer is displayed again, new gesture recognizers will be
- * created and attached to the view when the onOpenCC3Layer method runs again.
- *
- * For applications that diplay several CC3Layers that support gesture recognizers,
- * you may want to create centralized gesture recognizers in some other scope, and
- * bypass adding them using this method.
- */
--(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture;
-
-/**
- * Removes the specified gesture recognizer from the UIView that is displaying this
- * layer, and removes the gesture recognizer from the cc3GestureRecognizers property.
- *
- * When this layer is removed from the view, the gesture recognizers added to the
- * cc3GestureRecognizers property using the cc3AddGestureRecognizer: method are
- * automatically removed from the view, and from the cc3GestureRecognizers property.
- * Usually, the application does not need to invoke this method directly.
- */
--(void) cc3RemoveGestureRecognizer: (UIGestureRecognizer*) gesture;
-
-/**
- * Removes all gesture recognizers that were previously added using the
- * cc3AddGestureRecognizer: method, and removes them all from the UIView.
- * 
- * This method is invoked automatically when this layer is removed from the view.
- * Usually, the application does not need to invoke this method directly, but if
- * you need to remove all gesture recognizers prior to closing the layer, you can
- * use this method to do so.
- */
--(void) cc3RemoveAllGestureRecognizers;
-
-/**
  * The CC3Scene instance that maintains the 3D models and draws the 3D content.
  *
  * If your application contains multiple 3D scenes, you can swap between these scenes
@@ -276,9 +280,6 @@
  * next frame is rendered.
  */
 @property(nonatomic, retain) CC3Scene* cc3Scene;	
-
-/** @deprecated Renamed to cc3Scene. */
-@property(nonatomic, retain) CC3Scene* cc3World DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether this layer should update the 3D viewport on each rendering frame.

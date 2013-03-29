@@ -1084,7 +1084,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
 	GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
-	for (NSUInteger tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
+	for (GLuint tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	
 	// VERTEX STATE --------------
@@ -1248,7 +1248,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
 	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
 	GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
-	for (NSUInteger tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
+	for (GLuint tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	
 	// ATTRIBUTE QUALIFIERS --------------
@@ -1330,7 +1330,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Light.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];	/**< (float) Cosine of cutoff angle of the first spotlight. */
 	
 	// Multiple lights are indexed
-	for (NSUInteger ltIdx = 0; ltIdx < 4; ltIdx++) {
+	for (GLuint ltIdx = 0; ltIdx < 4; ltIdx++) {
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].isEnabled", ltIdx] toSemantic: kCC3SemanticLightIsEnabled at: ltIdx];						/**< (bool) Whether a light is enabled. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionEyeSpace", ltIdx] toSemantic: kCC3SemanticLightPositionEyeSpace at: ltIdx];			/**< (vec4) Homogeneous position (location or direction) of a light in eye space. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3Lights[%u].positionGlobal", ltIdx] toSemantic: kCC3SemanticLightPositionGlobal at: ltIdx];				/**< (vec4) Homogeneous position (location or direction) of a light in global coordinates. */
@@ -1361,7 +1361,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.
-	for (NSUInteger tuIdx = 0; tuIdx < 4; tuIdx++) {
+	for (GLuint tuIdx = 0; tuIdx < 4; tuIdx++) {
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].color", tuIdx] toSemantic: kCC3SemanticTexUnitConstantColor at: tuIdx];						/**< (vec4) The constant color of a texture unit. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].mode", tuIdx] toSemantic: kCC3SemanticTexUnitMode at: tuIdx];									/**< (int) Environment mode of a texture unit. */
 		[self mapVarName: [NSString stringWithFormat: @"u_cc3TextureUnits[%u].combineRGBFunction", tuIdx] toSemantic: kCC3SemanticTexUnitCombineRGBFunction at: tuIdx];		/**< (int) RBG combiner function of a texture unit. */

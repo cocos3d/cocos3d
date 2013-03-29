@@ -1,5 +1,5 @@
 /*
- * CC3EAGLView.m
+ * CC3GLView-GLES1.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,11 +26,11 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3EAGLView.h for full API documentation.
+ * See header file CC3GLView-GLES1.h for full API documentation.
  */
 
 
-#import "CC3EAGLView.h"
+#import "CC3GLView-GLES1.h"
 
 #if CC3_CC2_1
 #import "CC3Logging.h"
@@ -52,7 +52,7 @@
 
 -(void) openPicking {
 	CC3Assert( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
-			  [self class], [CC3EAGLView class]);
+			  [self class], [CC3GLView class]);
 }
 
 -(void) closePicking {}
@@ -61,9 +61,9 @@
 
 
 #pragma mark -
-#pragma mark CC3EAGLView
+#pragma mark CC3GLView
 
-@implementation CC3EAGLView
+@implementation CC3GLView
 
 -(GLuint) pixelSamples { return ((CC3ES1Renderer*)renderer_).pixelSamples; }
 
@@ -220,6 +220,10 @@ static Class _instantiationClass = nil;
 
 -(void) closePicking { if (multiSampling_) glBindFramebufferOES(GL_FRAMEBUFFER_OES, self.msaaFrameBuffer); }
 
+@end
+
+// Deprecated
+@implementation CC3EAGLView
 @end
 
 #endif

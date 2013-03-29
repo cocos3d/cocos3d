@@ -44,8 +44,8 @@
  * build setting, or by setting the value of the value_GL_MAX_LIGHTS public instance variable
  * of the CC3OpenGL instance.
  */
-#ifndef kCC3MaxGL2Lights
-#	define kCC3MaxGL2Lights					8
+#ifndef kCC3MaxGLLights
+#	define kCC3MaxGLLights					8
 #endif
 
 /**
@@ -60,8 +60,8 @@
  * build setting, or by setting the value of the value_GL_MAX_CLIP_PLANES public instance
  * variable of the CC3OpenGL instance.
  */
-#ifndef kCC3MaxGL2ClipPlanes
-#	define kCC3MaxGL2ClipPlanes				6
+#ifndef kCC3MaxGLClipPlanes
+#	define kCC3MaxGLClipPlanes				6
 #endif
 
 /**
@@ -76,8 +76,8 @@
  * build setting, or by setting the value of the value_GL_MAX_PALETTE_MATRICES public instance
  * variable of the CC3OpenGL instance.
  */
-#ifndef kCC3MaxGL2PaletteMatrices
-#	define kCC3MaxGL2PaletteMatrices		11
+#ifndef kCC3MaxGLPaletteMatrices
+#	define kCC3MaxGLPaletteMatrices		11
 #endif
 
 /** 
@@ -87,11 +87,11 @@
  * build setting, or by setting the value of the value_GL_MAX_VERTEX_UNITS public instance
  * variable of the CC3OpenGL instance.
  */
-#ifndef kCC3MaxGL2VertexUnits
-#	define kCC3MaxGL2VertexUnits			4
+#ifndef kCC3MaxGLVertexUnits
+#	define kCC3MaxGLVertexUnits			4
 #endif
 
-/** CC3OpenGLES1 manages the OpenGLES 2.0 state for a single GL context. */
+/** CC3OpenGLES2 manages the OpenGLES 2.0 state for a single GL context. */
 @interface CC3OpenGLES2 : CC3OpenGL {}
 @end
 

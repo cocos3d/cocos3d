@@ -94,7 +94,7 @@
  * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.
  */
--(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) cc3Scene; }
+-(CC3DemoMashUpScene*) mashUpScene { return (CC3DemoMashUpScene*) self.cc3Scene; }
 
 -(void) initializeControls {
 	

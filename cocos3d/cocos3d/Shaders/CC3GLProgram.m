@@ -111,7 +111,7 @@
 -(void) willBeginDrawingScene { [self markSceneScopeDirty]; }
 
 
-#if CC3_OGLES_2
+#if CC3_OGLES_2 || CC3_OGL
 
 #pragma mark Compiling and linking
 
@@ -350,7 +350,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 -(void) deleteGLProgram { if (_programID) ccGLDeleteProgram(_programID); }
 
-#endif		// CC3_OGLES_2
+#endif		// CC3_OGLES_2 || CC3_OGL
 
 #if CC3_OGLES_1
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {}
@@ -419,8 +419,8 @@ andFragmentShaderFile: (NSString*) fshFilename {
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@ declaring %i attributes and %i uniforms:",
-	 self.description, _attributes.count, (_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count)];
+	[desc appendFormat: @"%@ declaring %lu attributes and %lu uniforms:",
+	 self.description, (unsigned long)_attributes.count, (unsigned long)(_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count)];
 	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	for (CC3GLSLVariable* var in _uniformsSceneScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	for (CC3GLSLVariable* var in _uniformsNodeScope) [desc appendFormat: @"\n\t %@", var.fullDescription];

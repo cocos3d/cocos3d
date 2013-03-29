@@ -1,5 +1,5 @@
 /*
- * CC3Environment.h
+ * CC3OSXExtensions.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -25,32 +25,21 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
+ * 
+ * See header file CC3OSXExtensions.h for full API documentation.
  */
 
-/** @file */	// Doxygen marker
+#import "CC3OSXExtensions.h"
+#import "CC3Foundation.h"
 
 
-#import "cocos2d.h"
+#if CC3_MAC
 
-/** OS platform macros */
-# define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-# define CC3_MAC			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+@implementation CC3UIViewController
+-(BOOL) isOverlayingDeviceCamera { return NO; }
+-(CCGLView*) view { return nil; }
+-(void) setView: (CCGLView*) view {}
+@end
 
-/** Create convenience tests for whether we are linking to cocos2d 1.x or 2.x. */
-#ifndef CC3_CC2_1
-#	define CC3_CC2_1		(COCOS2D_VERSION < 0x020000)
-#endif
-#ifndef CC3_CC2_2
-#	define CC3_CC2_2		!CC3_CC2_1
-#endif
+#endif	// CC3_MAC
 
-/** Create convenience tests for whether we are linking to OpenGL ES 2.0, OpenGL ES 1.1, or OpenGL. */
-#ifndef CC3_OGLES_1
-#	define CC3_OGLES_1		CC3_CC2_1
-#endif
-#ifndef CC3_OGLES_2
-#	define CC3_OGLES_2		(CC3_CC2_2 && CC3_IOS)
-#endif
-#ifndef CC3_OGL
-#	define CC3_OGL			(CC3_CC2_2 && CC3_MAC)
-#endif

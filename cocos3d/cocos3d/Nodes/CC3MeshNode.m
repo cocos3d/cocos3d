@@ -876,7 +876,7 @@
 	visitor.gl.color = visitor.currentColor;
 }
 
-#if CC3_OGLES_2
+#if CC3_OGLES_2 || CC3_OGL
 /** 
  * If this node has a material and should be decorated, ensure that the material has a shader
  * program and bind it. If the material does not have a shader program yet, select an appropriate

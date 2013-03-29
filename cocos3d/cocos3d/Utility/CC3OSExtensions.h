@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLESUtility.h
+ * CC3OSExtensions.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -30,27 +30,21 @@
 /** @file */	// Doxygen marker
 
 
-#include "CC3Environment.h"
+/* Base library of extensions to operating system frameworks to support cocos3d. */
 
-#if CC3_OGLES_1
-#include <OpenGLES/ES1/gl.h>
-#include <OpenGLES/ES1/glext.h>
-#include "CC3OpenGLES1Compatibility.h"
-#endif
+#pragma mark -
+#pragma mark NSObject extensions
 
-#if CC3_OGLES_2
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#include "CC3OpenGLES2Compatibility.h"
-#endif
+/** Extension category to support cocos3d functionality. */
+@interface NSObject (CC3)
 
-#include <stdio.h>
-
-/** Returns a string containing the name of the specified GL enumeration code. */
-char* CC3GLEnumName(GLenum gle);
-
-/** 
- * Returns the size of the specified GL dataType, which must be one of:
- * GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FLOAT, GL_FIXED.
+/**
+ * Convenience method to automatically autorelease when copying objects.
+ * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
  */
-size_t CC3GLElementTypeSize(GLenum dataType);
+-(id) autoreleasedCopy;
+
+/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
+-(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
+
+@end

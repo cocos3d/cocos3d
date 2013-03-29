@@ -182,8 +182,8 @@
 -(BOOL) hasSoftBodyContent  { return YES; }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with %i skin sections",
-			super.description, skinSections.count];
+	return [NSString stringWithFormat: @"%@ with %lu skin sections",
+			super.description, (unsigned long)skinSections.count];
 }
 
 
@@ -276,7 +276,7 @@
 	[super dealloc];
 }
 
--(GLuint) boneCount { return skinnedBones.count; }
+-(GLuint) boneCount { return (GLuint)skinnedBones.count; }
 
 -(CCArray*) bones {
 	CCArray* bones = [CCArray array];

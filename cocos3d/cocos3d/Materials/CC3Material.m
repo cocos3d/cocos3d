@@ -208,7 +208,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 
 #pragma mark Textures
 
--(GLuint) textureCount { return (_textureOverlays ? _textureOverlays.count : 0) + (_texture ? 1 : 0); }
+-(GLuint) textureCount { return (_textureOverlays ? (GLuint)_textureOverlays.count : 0) + (_texture ? 1 : 0); }
 
 -(CC3Texture*) texture { return _texture; }
 

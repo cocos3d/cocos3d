@@ -83,9 +83,6 @@
 	[gl setLightAmbientColor: kCC3DefaultLightColorAmbient at: lightIndex];
 	[gl setLightDiffuseColor: kCC3DefaultLightColorDiffuse at: lightIndex];
 	[gl setLightSpecularColor: kCC3DefaultLightColorSpecular at: lightIndex];
-//	glesLight.ambientColor.value = kCC3DefaultLightColorAmbient;
-//	glesLight.diffuseColor.value = kCC3DefaultLightColorDiffuse;
-//	glesLight.specularColor.value = kCC3DefaultLightColorSpecular;
 }
 
 @end
@@ -512,7 +509,7 @@
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString
 							   fromFontFile: (NSString*) fontFile
 							  andLineHeight: (GLfloat) lineHt
-						   andTextAlignment: (UITextAlignment) textAlign
+						   andTextAlignment: (NSTextAlignment) textAlign
 						  andRelativeOrigin: (CGPoint) origin
 							andTessellation: (CC3Tessellation) divsPerChar {
 	[super populateAsBitmapFontLabelFromString: lblString

@@ -425,30 +425,30 @@ NSString* NSStringFromSPVRTPFXParserEffect(PFXClassPtr pSPVRTPFXParserEffect) {
 	[desc appendFormat: @"\n\tfragment shader: %@", [NSString stringWithUTF8String: pfxEffect->FragmentShaderName.c_str()]];
 	
 	CPVRTArray<SPVRTPFXParserSemantic> attributes = pfxEffect->Attributes;
-	NSUInteger attrCount = attributes.GetSize();
+	GLuint attrCount = attributes.GetSize();
 	[desc appendFormat: @"\n\twith %u attributes:", attrCount];
-	for(NSUInteger i = 0; i < attrCount; i++) {
+	for(GLuint i = 0; i < attrCount; i++) {
 		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserSemantic(&attributes[i], @"attribute")];
 	}
 
 	CPVRTArray<SPVRTPFXParserSemantic> uniforms = pfxEffect->Uniforms;
-	NSUInteger uniformCount = uniforms.GetSize();
+	GLuint uniformCount = uniforms.GetSize();
 	[desc appendFormat: @"\n\twith %u uniforms:", uniformCount];
-	for(NSUInteger i = 0; i < uniformCount; i++) {
+	for(GLuint i = 0; i < uniformCount; i++) {
 		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserSemantic(&uniforms[i], @"uniform")];
 	}
 	
 	CPVRTArray<SPVRTPFXParserEffectTexture> textures = pfxEffect->Textures;
-	NSUInteger texCount = textures.GetSize();
+	GLuint texCount = textures.GetSize();
 	[desc appendFormat: @"\n\twith %u textures:", texCount];
-	for(NSUInteger i = 0; i < texCount; i++) {
+	for(GLuint i = 0; i < texCount; i++) {
 		[desc appendFormat: @"\n\t\t%@:", NSStringFromSPVRTPFXParserEffectTexture(&textures[i])];
 	}
 	
 	CPVRTArray<SPVRTTargetPair> targets = pfxEffect->Targets;
-	NSUInteger targCount = targets.GetSize();
+	GLuint targCount = targets.GetSize();
 	[desc appendFormat: @"\n\twith %u targets:", targCount];
-	for(NSUInteger i = 0; i < targCount; i++) {
+	for(GLuint i = 0; i < targCount; i++) {
 		[desc appendFormat: @"\n\t\ttarget named %@ of type %@",
 		 [NSString stringWithUTF8String: targets[i].TargetName.c_str()],
 		 [NSString stringWithUTF8String: targets[i].BufferType.c_str()]];

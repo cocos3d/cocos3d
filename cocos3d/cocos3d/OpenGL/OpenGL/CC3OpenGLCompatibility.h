@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLES2Compatibility.h
+ * CC3OpenGLCompatibility.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -30,19 +30,19 @@
 /** @file */	// Doxygen marker
 
 /**
- * When compiling against OpenGL ES 2, this file adds backward compatiblity to declarations
- * and functionality provided by OpenGL ES 1 under cocos3d.
+ * When compiling against OpenGL, this file adds backward compatiblity to declarations
+ * and functionality provided by OpenGL ES 1 & 2 under cocos3d.
  */
 
 #import "CC3Environment.h"
 
-#if CC3_OGLES_2
-
-// GL functions
-#define glClearDepth					glClearDepthf
-
+#if CC3_OGL
 
 // General symbolic constants
+
+#ifndef GL_FIXED
+#define GL_FIXED						GL_INT
+#endif
 
 #ifndef GL_STACK_OVERFLOW
 #define GL_STACK_OVERFLOW                 0x0503

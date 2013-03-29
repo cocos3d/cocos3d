@@ -45,8 +45,8 @@
 }
 
 // Override to store the controller in the unretained iVar
--(UIViewController*) controller { return controller_; }
--(void) setController: (UIViewController*) aController { controller_ = aController; }
+-(CC3UIViewController*) controller { return controller_; }
+-(void) setController: (CC3UIViewController*) aController { controller_ = aController; }
 
 
 #pragma mark Drawing
@@ -140,18 +140,6 @@
 -(void) onExit { [super onExit]; }
 
 @end
-
-
-
-#pragma mark -
-#pragma mark UIViewController extension support
-
-@implementation UIViewController (CC3ControllableLayer)
-
--(BOOL) isOverlayingDeviceCamera { return NO; }
-
-@end
-
 
 
 

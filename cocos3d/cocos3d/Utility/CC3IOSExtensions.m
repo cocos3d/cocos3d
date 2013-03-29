@@ -33,18 +33,7 @@
 #import "CC3Foundation.h"
 
 
-#pragma mark -
-#pragma mark NSObject extensions
-
-@implementation NSObject (CC3)
-
--(id) autoreleasedCopy { return [[self copy] autorelease]; }
-
-// Deprecated
--(id) copyAutoreleased { return [[self copy] autorelease]; }
-
-@end
-
+#if CC3_IOS
 
 #pragma mark -
 #pragma mark Gesture Recognizer extensions
@@ -163,4 +152,6 @@ NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation)
 			return @"UIDeviceOrientationUnknown";
 	}
 }
+
+#endif	// CC3_IOS
 

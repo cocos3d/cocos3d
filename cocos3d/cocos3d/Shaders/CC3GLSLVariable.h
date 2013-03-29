@@ -31,7 +31,6 @@
 
 
 #import "CC3Foundation.h"
-#import "CC3OpenGLESUtility.h"
 #import "CC3Matrix4x4.h"
 
 @class CC3GLProgram;

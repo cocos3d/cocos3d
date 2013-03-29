@@ -3284,7 +3284,7 @@ typedef enum {
  * Returns the animation state wrapper on the specified animation track, or nil if no
  * animation has been defined for this node on that animation track.
  */
--(CC3NodeAnimationState*) getAnimationStateOnTrack: (NSUInteger) trackID;
+-(CC3NodeAnimationState*) getAnimationStateOnTrack: (GLuint) trackID;
 
 /**
  * Adds the specified animation state wrapper, containing animation and track information.
@@ -3318,7 +3318,7 @@ typedef enum {
  * Returns the animation for the specified animation track, or nil if no animation
  * has been defined for this node on that animation track.
  */
--(CC3NodeAnimation*) getAnimationOnTrack: (NSUInteger) trackID;
+-(CC3NodeAnimation*) getAnimationOnTrack: (GLuint) trackID;
 
 /**
  * Adds the specified animation as the specified animation track.
@@ -3330,13 +3330,13 @@ typedef enum {
  * abstract CC3NodeAnimation class, populated with animation content, and then create an
  * instance of a CC3Animate action for each track, and selectively run them on this node.
  */
--(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (NSUInteger) trackID;
+-(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (GLuint) trackID;
 
 /** Removes the specified animation from this node. */
 -(void) removeAnimation: (CC3NodeAnimation*) animation;
 
 /** Removes the animation on the specified animation track from this node and all descendant nodes. */
--(void) removeAnimationTrack: (NSUInteger) trackID;
+-(void) removeAnimationTrack: (GLuint) trackID;
 
 /**
  * The animation content of animation track zero of this node.
@@ -3351,7 +3351,7 @@ typedef enum {
 @property(nonatomic, retain) CC3NodeAnimation* animation;
 
 /** Indicates whether this node, or any of its descendants, contains animation on the specified animation track. */
--(BOOL) containsAnimationOnTrack: (NSUInteger) trackID;
+-(BOOL) containsAnimationOnTrack: (GLuint) trackID;
 
 /** Indicates whether this node, or any of its descendants, contains animation on any tracks. */
 @property(nonatomic, readonly) BOOL containsAnimation;
@@ -3364,7 +3364,7 @@ typedef enum {
  * node that contains animation and has a non-zero animation time. Returns zero if no descendant
  * nodes contain animation, or all descendant animation times are zero.
  */
--(ccTime) animationTimeOnTrack: (NSUInteger) trackID;
+-(ccTime) animationTimeOnTrack: (GLuint) trackID;
 
 /**
  * Returns the animation blending weight for the animation on the specified track.
@@ -3373,7 +3373,7 @@ typedef enum {
  * node that contains animation and has a non-zero blending weight. Returns zero if no descendant
  * nodes contain animation, or all descendant blending weights are zero.
  */
--(GLfloat) animationBlendingWeightOnTrack: (NSUInteger) trackID;
+-(GLfloat) animationBlendingWeightOnTrack: (GLuint) trackID;
 
 /**
  * Sets the animation blending weight for the animation on the specified track, and sets the
@@ -3393,21 +3393,21 @@ typedef enum {
  *
  * When only one animation track is active, the blending weight has no effect unless it is zero.
  */
--(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (NSUInteger) trackID;
+-(void) setAnimationBlendingWeight: (GLfloat) blendWeight onTrack: (GLuint) trackID;
 
 /**
  * Enables the animation on the specified track of this node.
  *
  * This will not enable animation of child nodes.
  */
--(void) enableAnimationOnTrack: (NSUInteger) trackID;
+-(void) enableAnimationOnTrack: (GLuint) trackID;
 
 /**
  * Disables the animation on the specified track of this node.
  *
  * This will not disable animation of child nodes.
  */
--(void) disableAnimationOnTrack: (NSUInteger) trackID;
+-(void) disableAnimationOnTrack: (GLuint) trackID;
 
 /**
  * Indicates whether the animation on the specified animation track is enabled.
@@ -3417,7 +3417,7 @@ typedef enum {
  *
  * The initial value of this property is YES.
  */
--(BOOL) isAnimationEnabledOnTrack: (NSUInteger) trackID;
+-(BOOL) isAnimationEnabledOnTrack: (GLuint) trackID;
 
 /**
  * Enables the animation on all animation tracks of this node.
@@ -3444,10 +3444,10 @@ typedef enum {
 @property(nonatomic, assign) BOOL isAnimationEnabled;
 
 /** Enables the animation on the specified track of this node, and all descendant nodes. */
--(void) enableAllAnimationOnTrack: (NSUInteger) trackID;
+-(void) enableAllAnimationOnTrack: (GLuint) trackID;
 
 /** Disables the animation on the specified track of this node, and all descendant nodes. */
--(void) disableAllAnimationOnTrack: (NSUInteger) trackID;
+-(void) disableAllAnimationOnTrack: (GLuint) trackID;
 
 /** Enables all animation tracks of this node, and all descendant nodes. */
 -(void) enableAllAnimation;
@@ -3621,7 +3621,7 @@ typedef enum {
  * This method is invoked automatically from an instance of CC3Animate that is animating
  * this node. Usually, the application never needs to invoke this method directly.
  */
--(void) establishAnimationFrameAt: (ccTime) t onTrack: (NSUInteger) trackID;
+-(void) establishAnimationFrameAt: (ccTime) t onTrack: (GLuint) trackID;
 
 /** Returns a description of the current animation state, including time and animated location, quaternion and scale. */
 -(NSString*) describeCurrentAnimationState;

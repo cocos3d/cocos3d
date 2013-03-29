@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLES2Utility.m
+ * CC3OpenGLUtility.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,12 +26,12 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3OpenGLUtility.h for full API documentation.
+ * See header file CC3OpenGLESUtility.h for full API documentation.
  */
 
 #include "CC3OpenGLUtility.h"
 
-#if CC3_OGLES_2
+#if CC3_OGL
 char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {
 		case GL_ZERO: return "GL_ZERO";
@@ -163,7 +163,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_UNSIGNED_BYTE: return "GL_UNSIGNED_BYTE";
 		case GL_SHORT: return "GL_SHORT";
 		case GL_UNSIGNED_SHORT: return "GL_UNSIGNED_SHORT";
-		case GL_FIXED: return "GL_FIXED";
+//		case GL_FIXED: return "GL_FIXED";
 		case GL_UNSIGNED_INT: return "GL_UNSIGNED_INT";
 
 		case GL_INT: return "GL_INT";
@@ -192,12 +192,12 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_VERTEX_SHADER: return "GL_VERTEX_SHADER";
 		case GL_FRAGMENT_SHADER: return "GL_FRAGMENT_SHADER";
 		case GL_MAX_VERTEX_ATTRIBS: return "GL_MAX_VERTEX_ATTRIBS";
-		case GL_MAX_VERTEX_UNIFORM_VECTORS: return "GL_MAX_VERTEX_UNIFORM_VECTORS";
-		case GL_MAX_VARYING_VECTORS: return "GL_MAX_VARYING_VECTORS";
+		case GL_MAX_VERTEX_UNIFORM_COMPONENTS: return "GL_MAX_VERTEX_UNIFORM_COMPONENTS";
+		case GL_MAX_VARYING_FLOATS: return "GL_MAX_VARYING_FLOATS";
 		case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: return "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS";
 		case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: return "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS";
 		case GL_MAX_TEXTURE_IMAGE_UNITS: return "GL_MAX_TEXTURE_IMAGE_UNITS";
-		case GL_MAX_FRAGMENT_UNIFORM_VECTORS: return "GL_MAX_FRAGMENT_UNIFORM_VECTORS";
+		case GL_MAX_FRAGMENT_UNIFORM_COMPONENTS: return "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS";
 		case GL_SHADER_TYPE: return "GL_SHADER_TYPE";
 		case GL_DELETE_STATUS: return "GL_DELETE_STATUS";
 		case GL_LINK_STATUS: return "GL_LINK_STATUS";
@@ -433,7 +433,7 @@ char* CC3GLEnumName(GLenum gle) {
 //		case GL_WEIGHT_ARRAY_BUFFER_BINDING_OES: return "GL_WEIGHT_ARRAY_BUFFER_BINDING_OES";
 
 		// Miscellaneous & extensions
-		case GL_MAX_SAMPLES_APPLE: return "GL_MAX_SAMPLES_APPLE";
+		case GL_MAX_SAMPLES: return "GL_MAX_SAMPLES";
 			
 		default:
 			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);
@@ -447,7 +447,7 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 		case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
 		case GL_SHORT: return sizeof(GLshort);
 		case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-		case GL_FIXED: return sizeof(GLfixed);
+//		case GL_FIXED: return sizeof(GLfixed);		// Same as GL_INT
 		case GL_UNSIGNED_INT: return sizeof(GLuint);
 
 		case GL_INT: return sizeof(GLint);

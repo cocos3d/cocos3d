@@ -171,11 +171,11 @@ static Class _defaultPFXResourceClass = nil;
 	// Allocate enough memory for the nodes and copy them over,
 	// except for the content and material references
 	pod->pNode = NULL;
-	NSUInteger nodeCnt = myPod->nNumNode;
+	GLuint nodeCnt = myPod->nNumNode;
 	pod->nNumNode = nodeCnt;
 	if (nodeCnt) {
 		pod->pNode = (SPODNode*)calloc(nodeCnt, sizeof(SPODNode));
-		for(NSUInteger nodeIdx = 0; nodeIdx < nodeCnt; nodeIdx++) {
+		for(GLuint nodeIdx = 0; nodeIdx < nodeCnt; nodeIdx++) {
 			PVRTModelPODCopyNode(myPod->pNode[nodeIdx], pod->pNode[nodeIdx], myPod->nNumFrame);
 			pod->pNode[nodeIdx].nIdx = -1;
 			pod->pNode[nodeIdx].nIdxMaterial = -1;
@@ -529,11 +529,11 @@ static Class _defaultPFXResourceClass = nil;
 
 @implementation CC3Node (PODAnimation)
 
--(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (NSUInteger) trackID {
+-(void) addAnimationFromPODFile: (NSString*) podFilePath asTrack: (GLuint) trackID {
 	[self addAnimationInResource: [CC3PODResource resourceFromFile: podFilePath ] asTrack: trackID];
 }
 
--(NSUInteger) addAnimationFromPODFile: (NSString*) podFilePath {
+-(GLuint) addAnimationFromPODFile: (NSString*) podFilePath {
 	return [self addAnimationInResource: [CC3PODResource resourceFromFile: podFilePath ]];
 }
 

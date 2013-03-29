@@ -66,7 +66,6 @@
 
 -(void) dealloc {
 	[self cleanupShadows];		// Includes releasing the shadows array, camera shadow volume & shadow painter
-//	[glesLight release];
 	[self returnLightIndex: lightIndex];
 	[super dealloc];
 }
@@ -282,20 +281,17 @@
 	if (self.visible) {
 		LogTrace(@"Turning on %@", self);
 		[gl enableLight: YES at: lightIndex];
-//		[glesLight.light enable];
 		[self applyPositionWithVisitor: visitor];
 		[self applyDirectionWithVisitor: visitor];
 		[self applyAttenuationWithVisitor: visitor];
 		[self applyColorWithVisitor: visitor];
 	} else {
 		[gl enableLight: NO at: lightIndex];
-//		[glesLight.light disable];
 	}
 }
 
 -(void) turnOffWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.gl enableLight: NO at: lightIndex];
-//	[glesLight.light disable];
 }
 
 /**
@@ -304,7 +300,6 @@
  */	
 -(void) applyPositionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.gl setLightPosition: self.globalHomogeneousPosition at: lightIndex];
-//	glesLight.position.value = self.globalHomogeneousPosition;
 }
 
 /**
@@ -320,23 +315,10 @@
 		[gl setSpotlightDirection: self.globalForwardDirection at: lightIndex];
 		[gl setSpotlightCutoffAngle: spotCutoffAngle at: lightIndex];
 		[gl setSpotlightFadeExponent: spotExponent at: lightIndex];
-//		glesLight.spotCutoffAngle.value = spotCutoffAngle;
-//		glesLight.spotDirection.value = self.globalForwardDirection;
-//		glesLight.spotExponent.value = spotExponent;
 	} else {
 		[gl setSpotlightCutoffAngle: kCC3SpotCutoffNone at: lightIndex];
-//		glesLight.spotCutoffAngle.value = kCC3SpotCutoffNone;
 	}
 }
-//-(void) applyDirectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	if (spotCutoffAngle <= 90.0f) {
-//		glesLight.spotCutoffAngle.value = spotCutoffAngle;
-//		glesLight.spotDirection.value = self.globalForwardDirection;
-//		glesLight.spotExponent.value = spotExponent;
-//	} else {
-//		glesLight.spotCutoffAngle.value = kCC3SpotCutoffNone;
-//	}
-//}
 
 /**
  * Template method that sets the light intensity attenuation characteristics
@@ -344,11 +326,6 @@
  */
 -(void) applyAttenuationWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !isDirectionalOnly ) [visitor.gl setLightAttenuation: _attenuation at: lightIndex];
-//	if ( !isDirectionalOnly ) {
-//		glesLight.constantAttenuation.value = _attenuation.a;
-//		glesLight.linearAttenuation.value = _attenuation.b;
-//		glesLight.quadraticAttenuation.value = _attenuation.c;
-//	}
 }
 
 /**
@@ -361,9 +338,6 @@
 	[gl setLightAmbientColor: ambientColor at: lightIndex];
 	[gl setLightDiffuseColor: diffuseColor at: lightIndex];
 	[gl setLightSpecularColor: specularColor at: lightIndex];
-//	glesLight.ambientColor.value = ambientColor;
-//	glesLight.diffuseColor.value = diffuseColor;
-//	glesLight.specularColor.value = specularColor;
 }
 
 
@@ -616,7 +590,6 @@ static GLuint lightPoolStartIndex = 0;
 	LogTrace(@"Returning light index %u", aLightIndex);
 	BOOL* indexPool = [[self class] lightIndexPool];
 	indexPool[aLightIndex] = NO;
-//	[glesLight.light disable];
 }
 
 +(GLuint) lightCount {

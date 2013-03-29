@@ -32,7 +32,7 @@
 #import "CC3GLSLVariable.h"
 #import "CC3GLProgram.h"
 #import "CC3OpenGLFoundation.h"
-//#import "CC3OpenGLESVertexArrays.h"
+#import "CC3OpenGLUtility.h"
 
 
 NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
@@ -465,7 +465,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 @implementation CC3OpenGLESStateTrackerGLSLAttribute
 
-#if CC3_OGLES_2
+#if CC3_OGLES_2 || CC3_OGL
 
 -(void) populateFromProgram {
 	_semantic = kCC3SemanticNone;
@@ -505,7 +505,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 
-#if CC3_OGLES_2
+#if CC3_OGLES_2 || CC3_OGL
 
 -(void) populateFromProgram {
 	_semantic = 0;

@@ -48,6 +48,10 @@
 #	define CC2_LAST_DISPLAY_TIME _lastDisplayTime
 #endif
 
+#if !CC3_IOS
+#	undef CC2_LAST_DISPLAY_TIME
+#	define CC2_LAST_DISPLAY_TIME 0
+#endif
 
 #pragma mark -
 #pragma mark CC3CCSizeTo action
@@ -178,6 +182,7 @@
 	return NO;
 }
 
+#if CC3_IOS
 -(BOOL) cc3ValidateGesture: (UIGestureRecognizer*) gesture {
 	if ( [self cc3WillConsumeTouchEventAt: gesture.location] ) {
 		[gesture cancel];
@@ -186,6 +191,7 @@
 		return YES;
 	}
 }
+#endif	// CC3_IOS
 
 @end
 
@@ -269,6 +275,8 @@
 @end
 
 
+#if CC3_IOS
+
 #pragma mark -
 #pragma mark CCDirectorIOS extension
 
@@ -297,6 +305,7 @@
 
 @end
 
+#endif		// CC3_IOS
 
 #pragma mark -
 #pragma mark CCDirectorDisplayLink extension
@@ -447,4 +456,24 @@ NSString* NSStringFromTouchType(uint tType) {
 			return [NSString stringWithFormat: @"unknown touch type (%u)", tType];
 	}
 }
+
+
+#if !CC3_IOS
+
+#pragma mark -
+#pragma mark Extensions for non-IOS environments
+
+@implementation CCTouchDispatcher
+-(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches {}
+@end
+
+@implementation CCDirector (NonIOS)
+-(CCTouchDispatcher*) touchDispatcher { return nil; }
+@end
+
+@implementation CCNode (NonIOS)
+-(CGPoint) convertTouchToNodeSpace: (UITouch*) touch { return CGPointZero; }
+@end
+
+#endif		// !CC3_IOS
 

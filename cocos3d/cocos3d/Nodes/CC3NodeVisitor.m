@@ -33,10 +33,11 @@
 #import "CC3Scene.h"
 #import "CC3Layer.h"
 #import "CC3Mesh.h"
-#import "CC3GLView.h"
-#import "CC3EAGLView.h"
 #import "CC3NodeSequencer.h"
 #import "CC3VertexSkinning.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"
 
 @interface CC3Node (TemplateMethods)
 -(void) processUpdateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
@@ -228,9 +229,9 @@
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ visiting %@ %@ children, %i removals",
+	return [NSString stringWithFormat: @"%@ visiting %@ %@ children, %lu removals",
 			[self description], _startingNode, (_shouldVisitChildren ? @"and" : @"but not"),
-			_pendingRemovals.count];
+			(unsigned long)_pendingRemovals.count];
 }
 
 @end
@@ -739,7 +740,7 @@
 		} else {
 			// Otherwise use the current clear color
 			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer",
-					 self, NSStringFromCCC4F(glesState.clearColor.value),
+					 self, NSStringFromCCC4F(gl->value_GL_COLOR_CLEAR_VALUE),
 					 (depthFlag ? @"and" : @"but not"));
 			
 			// Clear the color buffer redraw the background, and depth buffer if required

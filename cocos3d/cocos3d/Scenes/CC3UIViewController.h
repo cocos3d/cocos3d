@@ -29,9 +29,11 @@
 
 /** @file */	// Doxygen marker
 
-#import <UIKit/UIViewController.h>
 #import "CC3IOSExtensions.h"
+#import "CC3OSXExtensions.h"
 #import "CC3CC2Extensions.h"
+
+#if CC3_IOS
 
 // The superclass of the CC3UIViewController depends on whether we're using cocos2d 2.x or 1.x
 #if CC3_CC2_1
@@ -298,7 +300,7 @@
  * should be sure to invoke this superclass implementation.
  *
  * Although this method was introduced in iOS5, it is invoked automatically from CC3GLView
- * and CC3EAGLView even when running under iOS4 and below.
+ * and CC3GLView even when running under iOS4 and below.
  */
 -(void) viewDidLayoutSubviews;
 
@@ -354,6 +356,14 @@
  */
 @property(nonatomic, assign) NSUInteger supportedInterfaceOrientations;
 
+/**
+ * Indicates whether this controller is overlaying the view of the device camera.
+ *
+ * This base implementation always returns NO, indicating that the device camera is not being
+ * displayed. Subclasses of UIViewController that support device camera overlay can override.
+ */
+@property(nonatomic, assign, readonly) BOOL isOverlayingDeviceCamera;
+
 
 #pragma mark Instance initialization and management
 
@@ -375,7 +385,6 @@
 @property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
 
 @end
-
 
 
 #pragma mark -
@@ -474,7 +483,9 @@
 -(UIImagePickerController*) newDeviceCameraPicker;
 
 @end
-	
+
+#endif // CC3_IOS
+
 
 #pragma mark -
 #pragma mark CCNode extension to support controlling nodes from a CC3UIViewController
@@ -491,7 +502,7 @@
  * property in each child CCNode to the same value. Reading the value of this property returns the value
  * of the same property from the parent of this CCNode, or returns nil if this node has no parent.
  */
-@property(nonatomic, assign) UIViewController* controller;
+@property(nonatomic, assign) CC3UIViewController* controller;
 
 /**
  * Invoked automatically by a CC3UIViewController when the orientation of the view (portrait, landscape,

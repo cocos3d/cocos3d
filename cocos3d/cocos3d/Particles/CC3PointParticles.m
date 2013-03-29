@@ -51,9 +51,9 @@
 
 @interface CC3ParticleEmitter (TemplateMethods)
 -(void) updateParticlesBeforeTransform: (CC3NodeUpdatingVisitor*) visitor;
--(void) addDirtyVertex: (NSUInteger) vtxIdx;
--(void) addDirtyVertexIndex: (NSUInteger) vtxIdx;
--(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex;
+-(void) addDirtyVertex: (GLuint) vtxIdx;
+-(void) addDirtyVertexIndex: (GLuint) vtxIdx;
+-(void) removeParticle: (id<CC3ParticleProtocol>) aParticle atIndex: (GLuint) anIndex;
 -(void) acceptParticle: (id<CC3ParticleProtocol>) aParticle;
 @end
 
@@ -117,7 +117,7 @@
 
 // Deprecated
 -(CC3VertexContent) particleContentTypes { return self.vertexContentTypes; }
--(NSUInteger) maxParticles { return self.maximumParticleCapacity; }
+-(GLuint) maxParticles { return self.maximumParticleCapacity; }
 
 
 #pragma mark Vertex management
@@ -324,7 +324,7 @@
 
 #pragma mark Accessing particles
 
--(id<CC3PointParticleProtocol>) pointParticleAt: (NSUInteger) aParticleIndex {
+-(id<CC3PointParticleProtocol>) pointParticleAt: (GLuint) aParticleIndex {
 	return (id<CC3PointParticleProtocol>)[self particleAt: aParticleIndex];
 }
 
@@ -336,7 +336,7 @@
  * The previously-last particle is now in the slot that the removed particle was taken from,
  * and vice-versa. Update their indices, and move the underlying vertex data.
  */
--(void) removeParticle: (id<CC3PointParticleProtocol>) aParticle atIndex: (NSUInteger) anIndex {
+-(void) removeParticle: (id<CC3PointParticleProtocol>) aParticle atIndex: (GLuint) anIndex {
 	[super removeParticle: aParticle atIndex: anIndex];		// Decrements particleCount and vertexCount
 	
 	// Get the last living particle
@@ -478,10 +478,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(void) setIsAlive: (BOOL) alive { isAlive = alive; }
 
--(NSUInteger) particleIndex { return particleIndex; }
+-(GLuint) particleIndex { return particleIndex; }
 
 /** Overridden to update the underlying vertex indices array, if it exists. */
--(void) setParticleIndex: (NSUInteger) anIndex {
+-(void) setParticleIndex: (GLuint) anIndex {
 	particleIndex = anIndex;
 	[emitter setVertexIndex: anIndex at: anIndex];	// Ignored if not using indexed drawing
 }
@@ -527,8 +527,8 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(BOOL) hasVertexIndices { return NO; }
 
 // Deprecated property
--(NSUInteger) index { return self.particleIndex; }
--(void) setIndex: (NSUInteger) anIdx { self.particleIndex = anIdx; }
+-(GLuint) index { return self.particleIndex; }
+-(void) setIndex: (GLuint) anIdx { self.particleIndex = anIdx; }
 
 // Deprecated
 -(void) update: (ccTime) dt {}

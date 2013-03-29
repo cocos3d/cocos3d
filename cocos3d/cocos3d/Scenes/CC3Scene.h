@@ -33,7 +33,7 @@
 #import "CC3NodeSequencer.h"
 #import "CC3PerformanceStatistics.h"
 #import "CC3Fog.h"
-#import "CCDirectorIOS.h"
+#import "CC3UIViewController.h"
 
 
 /** Default value of the minUpdateInterval property. */
@@ -268,7 +268,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * This property is retrieved from the same property on the CC3Layer holding this scene,
  * and is made available to support delegation from this 3D scene.
  */
-@property(nonatomic, readonly) UIViewController* controller;
+@property(nonatomic, readonly) CC3UIViewController* controller;
 
 /**
  * The 3D camera that is currently displaying the scene of this scene.

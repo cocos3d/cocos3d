@@ -273,7 +273,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	[self bindTextureParametersWithVisitor: visitor];
 	[self bindTextureEnvironmentWithVisitor: visitor];
 	
-	LogTrace(@"%@ bound to %@", self, glesTexUnit);
+	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 
 /** If the texture parameters are dirty, binds them to the GL texture unit state. */

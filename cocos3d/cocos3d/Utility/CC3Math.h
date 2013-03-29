@@ -185,12 +185,12 @@ static inline bool CC3IsWithinTolerance(float value, float benchmarkValue, float
 #define kRandomUIntMax 0x100000000LL
 
 /** Returns a random unsigned integer over the full unsigned interger range (between 0 and 0xFFFFFFFF). */
-static inline unsigned int CC3RandomUInt() {
+static inline NSUInteger CC3RandomUInt() {
 	return arc4random();
 }
 
 /** Returns a random unsigned integer between 0 inclusive and the specified max exclusive. */
-static inline unsigned int CC3RandomUIntBelow(unsigned int max) {
+static inline NSUInteger CC3RandomUIntBelow(NSUInteger max) {
 	return CC3RandomUInt() % max;
 }
 

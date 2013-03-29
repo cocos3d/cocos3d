@@ -165,15 +165,15 @@
 }
 
 -(void) initPlatformLimits {
-	value_GL_MAX_CLIP_PLANES = kCC3MaxGL2ClipPlanes;
+	value_GL_MAX_CLIP_PLANES = kCC3MaxGLClipPlanes;
 
-	value_GL_MAX_LIGHTS = kCC3MaxGL2Lights;
+	value_GL_MAX_LIGHTS = kCC3MaxGLLights;
 	
-	value_GL_MAX_PALETTE_MATRICES = kCC3MaxGL2PaletteMatrices;
+	value_GL_MAX_PALETTE_MATRICES = kCC3MaxGLPaletteMatrices;
 	
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES_APPLE);
+	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE));
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES_APPLE);
+	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
@@ -183,7 +183,7 @@
 	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS));
 	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 	
-	value_GL_MAX_VERTEX_UNITS = kCC3MaxGL2VertexUnits;
+	value_GL_MAX_VERTEX_UNITS = kCC3MaxGLVertexUnits;
 }
 
 

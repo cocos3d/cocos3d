@@ -1,5 +1,5 @@
 /*
- * CC3EAGLView.h
+ * CC3GLView-GLES2.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -31,21 +31,21 @@
 
 #import "CC3Environment.h"
 
-#if CC3_CC2_1
+#if CC3_OGLES_2
 
 #import "CC3OpenGLFoundation.h"
-#import "EAGLView.h"
-#import "ES1Renderer.h"
+#import "CCGLView.h"
+#import "CCES2Renderer.h"
 
 
 #pragma mark -
-#pragma mark EAGLView extensions
+#pragma mark CCGLView extensions
 
 /**
  * This extension category adds support for node-picking while multisampling antialiasing
  * is active, by defining the interface required by that support.
  */
-@interface EAGLView (CC3)
+@interface CCGLView (CC3)
 
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
@@ -73,7 +73,7 @@
 
 
 #pragma mark -
-#pragma mark CC3EAGLView
+#pragma mark CC3GLView
 
 /**
  * If your application supports BOTH multisampling AND node-picking from touch events,
@@ -97,42 +97,42 @@
  * The heavy lifting of this mechanism is handled by a specialized CC3ES1Renderer, which this
  * class creates and wraps.
  */
-@interface CC3EAGLView : EAGLView
+@interface CC3GLView : CCGLView
 @end
 
 
 #pragma mark -
-#pragma mark ES1Renderer extension
+#pragma mark CCES2Renderer extension
 
 /** Extension to support cocos3d subclassing. */
-@interface ES1Renderer (CC3ES1Renderer)
+@interface CCES2Renderer (CC3ES2Renderer)
 
 /**
  * Returns the cluster class that will be instantiated and returned when the alloc
- * method is invoked. The returned class will be a subclass of ES1Renderer, or nil.
+ * method is invoked. The returned class will be a subclass of CCES2Renderer, or nil.
  *
- * If this property is not nil, subsequent invocations of the ES1Renderer
+ * If this property is not nil, subsequent invocations of the CCES2Renderer
  * alloc method will instantiate and return an instance of that class.
  *
- * If this property is nil, subsequent invocations of the ES1Renderer
- * alloc method will instantiate and return an instance of ES1Renderer.
+ * If this property is nil, subsequent invocations of the CCES2Renderer
+ * alloc method will instantiate and return an instance of CCES2Renderer.
  *
- * This property will temporarily be set to ES1Renderer by CC3EAGLView when establishing
+ * This property will temporarily be set to CC3ES2Renderer by CC3GLView when establishing
  * the rendering surface.
  */
 +(Class) instantiationClass;
 
 /**
  * Sets the cluster class that will be instantiated and returned when the alloc
- * method is invoked. The returned class will be a subclass of ES1Renderer, or nil.
+ * method is invoked. The returned class will be a subclass of CCES2Renderer, or nil.
  *
- * If this property is not nil, subsequent invocations of the ES1Renderer
+ * If this property is not nil, subsequent invocations of the CCES2Renderer
  * alloc method will instantiate and return an instance of that class.
  *
- * If this property is nil, subsequent invocations of the ES1Renderer
- * alloc method will instantiate and return an instance of ES1Renderer.
+ * If this property is nil, subsequent invocations of the CCES2Renderer
+ * alloc method will instantiate and return an instance of CCES2Renderer.
  *
- * This property will temporarily be set to ES1Renderer by CC3EAGLView when establishing
+ * This property will temporarily be set to CC3ES2Renderer by CC3GLView when establishing
  * the rendering surface.
  */
 +(void) setInstantiationClass: (Class) aClass;
@@ -141,7 +141,7 @@
 
 
 #pragma mark -
-#pragma mark CC3ES1Renderer
+#pragma mark CC3ES2Renderer
 
 /**
  * Specialized renderer that supports node-picking while multisampling antialiasing is active.
@@ -161,9 +161,9 @@
  * node-picking is being used. To preserve memory, the additional buffers will not be created
  * unless both multisampling and node-picking are active.
  */
-@interface CC3ES1Renderer : ES1Renderer {
-    GLuint pickerFrameBuffer;
-	GLuint pickerDepthBuffer;
+@interface CC3ES2Renderer : CCES2Renderer {
+    GLuint _pickerFrameBuffer;
+	GLuint _pickerDepthBuffer;
 }
 
 /** Returns the number of samples used to define each pixel. */
@@ -195,4 +195,4 @@
 
 @end
 
-#endif
+#endif	// CC3_OGLES_2

@@ -35,7 +35,7 @@
 #import "CC3GLSLVariable.h"
 #import "CC3GLProgramSemantics.h"
 
-#if CC3_OGLES_2
+#if CC3_OGLES_2 || CC3_OGL
 #import "CCGLProgram.h"
 #endif
 

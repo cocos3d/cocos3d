@@ -257,7 +257,7 @@ static const ccTime kCC3ParticleInfiniteEmissionRate = kCC3MaxGLfloat;
  * This can be used with the maximumParticleCapacity property, and indicates that there
  * is no pre-defined maximum limit to the number of particles that will be emitted.
  */
-static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
+static const GLuint kCC3ParticlesNoMax = UINT_MAX;
 
 /**
  * A CC3MeshNode that emits 3D particles.
@@ -383,9 +383,9 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
 	CCArray* particles;
 	CC3ParticleNavigator* particleNavigator;
 	Class particleClass;
-	NSUInteger maximumParticleCapacity;
-	NSUInteger particleCapacityExpansionIncrement;
-	NSUInteger particleCount;
+	GLuint maximumParticleCapacity;
+	GLuint particleCapacityExpansionIncrement;
+	GLuint particleCount;
 	ccTime emissionDuration;
 	ccTime elapsedTime;
 	ccTime emissionInterval;
@@ -552,7 +552,7 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
  * The initial value of this property is kCC3ParticlesNoMax, indicating that there is no
  * pre-defined maximum limit to the number of particles that will be emitted.
  */
-@property(nonatomic, assign) NSUInteger maximumParticleCapacity;
+@property(nonatomic, assign) GLuint maximumParticleCapacity;
 
 /**
  * Indicates the current maximum number of particles that can be alive at any one time in the
@@ -572,7 +572,7 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
  * updateAfterTransform: methods of the particle. This frees that particle to be re-initialized
  * and re-emitted at a later time.
  */
-@property(nonatomic, readonly) NSUInteger currentParticleCapacity;
+@property(nonatomic, readonly) GLuint currentParticleCapacity;
 
 /**
  * The amount of additional particle capacity that will be allocated each time space for
@@ -591,7 +591,7 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
  *
  * The initial value of this property is 100.
  */
-@property(nonatomic, assign) NSUInteger particleCapacityExpansionIncrement;
+@property(nonatomic, assign) GLuint particleCapacityExpansionIncrement;
 
 /**
  * Returns whether the maximum number of particles has been reached. This occurs when the value
@@ -749,7 +749,7 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
  * the maximum number of particles, as defined by the maximumParticleCapacity property is
  * reached, the returned number may be less that the specified count.
  */
--(NSUInteger) emitParticles: (NSUInteger) count;
+-(GLuint) emitParticles: (GLuint) count;
 
 /**
  * Adds the specified particle to the emitter and emits it.
@@ -852,10 +852,10 @@ static const NSUInteger kCC3ParticlesNoMax = UINT_MAX;
  * The number of particles that are currently alive and being displayed by this emitter. The value of
  * this property will increase as particles are emitted, and will decrease as particles age and expire.
  */
-@property(nonatomic, readonly) NSUInteger particleCount;
+@property(nonatomic, readonly) GLuint particleCount;
 
 /** Returns the particle at the specified index within the particles array. */
--(id<CC3ParticleProtocol>) particleAt: (NSUInteger) aParticleIndex;
+-(id<CC3ParticleProtocol>) particleAt: (GLuint) aParticleIndex;
 
 /**
  * Returns the particle that contains the vertex at the specified index, or nil if no particle

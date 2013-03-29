@@ -26,10 +26,10 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3OpenGLESUtility.h for full API documentation.
+ * See header file CC3OpenGLUtility.h for full API documentation.
  */
 
-#include "CC3OpenGLESUtility.h"
+#include "CC3OpenGLUtility.h"
 
 #if CC3_OGLES_1
 char* CC3GLEnumName(GLenum gle) {
