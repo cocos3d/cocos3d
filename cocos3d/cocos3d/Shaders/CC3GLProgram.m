@@ -115,16 +115,29 @@
 -(void) willBeginDrawingScene { [self markSceneScopeDirty]; }
 
 
-#if CC3_OGLES_2 || CC3_OGL
-
 #pragma mark Compiling and linking
+
+-(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
+	MarkRezActivityStart();
+	NSError* err = nil;
+	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
+	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
+			  @"Could not load GLSL file '%@' because it could not be found", filePath);
+	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
+	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
+			  glslFilename, err.localizedDescription, (long)err.code, err.localizedFailureReason);
+	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", glslFilename, GetRezActivityDuration());
+	return (GLchar*)glslSrcStr.UTF8String;
+}
+
+#if CC3_OGLES_2 || CC3_OGL
 
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes
 				 andFragmentShaderBytes: (const GLchar*) fshBytes {
 	CC3Assert( !_programID, @"%@ already compliled and linked.", self);
 
 	_programID = glCreateProgram();
-	LogGLErrorTrace(@"while creating GL program in %@", self);
+	LogGLErrorTrace(@"glCreateProgram() in %@", self);
 
 	[self compileShader: GL_VERTEX_SHADER
 			  fromBytes: vshBytes
@@ -143,19 +156,6 @@
 				   andFragmentShaderBytes: [self glslSourceFromFile: fshFilename]];
 }
 
--(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
-	MarkRezActivityStart();
-	NSError* err = nil;
-	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
-	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
-			  @"Could not load GLSL file '%@' because it could not be found", filePath);
-	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
-	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
-			  glslFilename, err.localizedDescription, (long)err.code, err.localizedFailureReason);
-	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", glslFilename, GetRezActivityDuration());
-	return (GLchar*)glslSrcStr.UTF8String;
-}
-
 /** 
  * Compiles the specified shader type from the specified GLSL source code plus the specified
  * source code preamble, and returns the ID of the GL shader object. Neither the source or
@@ -170,22 +170,23 @@
 	MarkRezActivityStart();
 	
     GLuint shaderID = glCreateShader(shaderType);
+	LogGLErrorTrace(@"glCreateShader(%@) in %@", NSStringFromGLEnum(shaderType), self);
 
 	const GLchar* sources[] = {preambleSource, source};
     glShaderSource(shaderID, 2, sources, NULL);
-	LogGLErrorTrace(@"while specifying shader %@ source in %@", NSStringFromGLEnum(shaderType), self);
+	LogGLErrorTrace(@"glShaderSource(%u, %u, %p, %p)", shaderID, 2, sources, NULL);
 	
     glCompileShader(shaderID);
-	LogGLErrorTrace(@"while compiling shader %@ in %@", NSStringFromGLEnum(shaderType), self);
+	LogGLErrorTrace(@"glCompileShader(%u)", shaderID);
 
 	CC3Assert([self getWasCompiled: shaderID], @"%@ failed to compile shader %@ because:\n%@",
 			  self, NSStringFromGLEnum(shaderType), [self getShaderLog: shaderID]);
 
 	glAttachShader(_programID, shaderID);
-	LogGLErrorTrace(@"while attaching shader %@ to GL program in %@", NSStringFromGLEnum(shaderType), self);
+	LogGLErrorTrace(@"glAttachShader(%u, %u)", _programID, shaderID);
 
     glDeleteShader(shaderID);
-	LogGLErrorTrace(@"while deleting shader %@ in %@", NSStringFromGLEnum(shaderType), self);
+	LogGLErrorTrace(@"glDeleteShader(%u)", shaderID);
 	
 	LogRez(@"Compiled and attached %@ shader %@ in %.4f seconds", self, NSStringFromGLEnum(shaderType), GetRezActivityDuration());
 }
@@ -206,7 +207,7 @@
 -(BOOL) getWasCompiled: (GLuint) shaderID {
     GLint status;
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
-	LogGLErrorTrace(@"while retrieving shader compile status in %@", self);
+	LogGLErrorTrace(@"glGetShaderiv(%u, %@, %i) in %@", shaderID, NSStringFromGLEnum(GL_COMPILE_STATUS), status, self);
 	return (status > 0);
 }
 
@@ -218,7 +219,7 @@
 	MarkRezActivityStart();
 	
     glLinkProgram(_programID);
-	LogGLErrorTrace(@"while linking %@", self);
+	LogGLErrorTrace(@"glLinkProgram(%u) in %@", _programID, self);
 	
 	CC3Assert(self.getWasLinked, @"%@ could not be linked because:\n%@", self, self.getProgramLog);
 
@@ -234,7 +235,7 @@
 -(BOOL) getWasLinked {
     GLint status;
     glGetProgramiv(_programID, GL_LINK_STATUS, &status);
-	LogGLErrorTrace(@"while retrieving link status in %@", self);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i) in %@", _programID, NSStringFromGLEnum(GL_LINK_STATUS), status, self);
 	return (status > 0);
 }
 
@@ -250,9 +251,9 @@
 	
 	GLint varCnt;
 	glGetProgramiv(_programID, GL_ACTIVE_UNIFORMS, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active uniforms in %@", self);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i) in %@", _programID, NSStringFromGLEnum(GL_ACTIVE_UNIFORMS), varCnt, self);
 	glGetProgramiv(_programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
-	LogGLErrorTrace(@"while retrieving max uniform name length in %@", self);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i)", _programID, NSStringFromGLEnum(GL_ACTIVE_UNIFORM_MAX_LENGTH), _maxUniformNameLength);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
 		[_semanticDelegate configureVariable: var];
@@ -287,9 +288,9 @@
 	
 	GLint varCnt;
 	glGetProgramiv(_programID, GL_ACTIVE_ATTRIBUTES, &varCnt);
-	LogGLErrorTrace(@"while retrieving number of active attributes in %@", self);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i) in %@", _programID, NSStringFromGLEnum(GL_ACTIVE_ATTRIBUTES), varCnt, self);
 	glGetProgramiv(_programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
-	LogGLErrorTrace(@"while retrieving max attribute name length in %@", self);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i)", _programID, NSStringFromGLEnum(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH), _maxAttributeNameLength);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
 		[_semanticDelegate configureVariable: var];
@@ -309,17 +310,19 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
  */
 -(NSString*) getGLStringFor: (GLuint) glObjID
 		usingLengthFunction: (GLInfoFunction*) lengthFunc
+					  named: (NSString*) lenFuncName
 		 andLengthParameter: (GLenum) lenParamName
-		 andContentFunction: (GLLogFunction*) contentFunc {
+		 andContentFunction: (GLLogFunction*) contentFunc
+					  named: (NSString*) contentFuncName {
 	GLint strLength = 0, charsRetrieved = 0;
 	
 	lengthFunc(glObjID, lenParamName, &strLength);
-	LogGLErrorTrace(@"while retrieving GL string length in %@", self);
+	LogGLErrorTrace(@"%@(%u, %@, %i)", lenFuncName, glObjID, NSStringFromGLEnum(lenParamName), strLength);
 	if (strLength < 1) return nil;
 	
 	GLchar contentBytes[strLength];
 	contentFunc(glObjID, strLength, &charsRetrieved, contentBytes);
-	LogGLErrorTrace(@"while retrieving GL string content in %@", self);
+	LogGLErrorTrace(@"%@(%u, %i, %i, \"%s\")", contentFuncName, glObjID, strLength, charsRetrieved, contentBytes);
 	
 	return [NSString stringWithUTF8String: contentBytes];
 }
@@ -327,25 +330,25 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 /** Returns the GL source for the specified shader. */
 -(NSString*) getShaderSource: (GLuint) shaderID {
 	return [self getGLStringFor: shaderID
-			usingLengthFunction: glGetShaderiv
+			usingLengthFunction: glGetShaderiv named: @"glGetShaderiv"
 			 andLengthParameter: GL_SHADER_SOURCE_LENGTH
-			 andContentFunction: glGetShaderSource];
+			 andContentFunction: glGetShaderSource named: @"glGetShaderSource"];
 }
 
 /** Returns the GL log for the specified shader. */
 -(NSString*) getShaderLog: (GLuint) shaderID {
 	return [self getGLStringFor: shaderID
-			usingLengthFunction: glGetShaderiv
+			usingLengthFunction: glGetShaderiv named: @"glGetShaderiv"
 			 andLengthParameter: GL_INFO_LOG_LENGTH
-			 andContentFunction: glGetShaderInfoLog];
+			 andContentFunction: glGetShaderInfoLog named: @"glGetShaderInfoLog"];
 }
 
 /** Returns the GL status log for the GL program. */
 -(NSString*) getProgramLog {
 	return [self getGLStringFor: _programID
-			usingLengthFunction: glGetProgramiv
+			usingLengthFunction: glGetProgramiv named: @"glGetProgramiv"
 			 andLengthParameter: GL_INFO_LOG_LENGTH
-			 andContentFunction: glGetProgramInfoLog];
+			 andContentFunction: glGetProgramInfoLog named: @"glGetProgramInfoLog"];
 }
 
 

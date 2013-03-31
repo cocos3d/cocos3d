@@ -170,13 +170,13 @@
 -(GLuint) generateBuffer {
 	GLuint buffID;
 	glGenBuffers(1, &buffID);
-	LogGLErrorTrace(@"while generating a GL buffer ID");
+	LogGLErrorTrace(@"glGenBuffers(%i, %u)", 1, buffID);
 	return buffID;
 }
 
 -(void) deleteBuffer: (GLuint) buffID  {
 	glDeleteBuffers(1, &buffID);
-	LogGLErrorTrace(@"while deleting a GL buffer ID");
+	LogGLErrorTrace(@"glDeleteBuffers(%i, %u)", 1, buffID);
 }
 
 -(void) bindBuffer: (GLuint) buffId  toTarget: (GLenum) target {
@@ -188,7 +188,7 @@
 		if ( !needsUpdate ) return;
 	}
 	glBindBuffer(target, buffId);
-	LogGLErrorTrace(@"while binding GL buffer %u to target %@", buffId, NSStringFromGLEnum(target));
+	LogGLErrorTrace(@"glBindBuffer(%@, %u)", NSStringFromGLEnum(target), buffId);
 }
 
 -(void) unbindBufferTarget: (GLenum) target { [self bindBuffer: 0 toTarget: target]; }
@@ -199,8 +199,7 @@
 				  forUse: (GLenum) buffUsage {
 	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferData(target, buffLen, buffPtr, buffUsage);
-	LogGLErrorTrace(@"while loading buffer target %@ with data of length %i from %p for use %@",
-					NSStringFromGLEnum(buffUsage), buffLen, buffPtr, NSStringFromGLEnum(buffUsage));
+	LogGLErrorTrace(@"glBufferData(%@, %i, %p, %@)", NSStringFromGLEnum(target), buffLen, buffPtr, NSStringFromGLEnum(buffUsage));
 }
 
 -(void) updateBufferTarget: (GLenum) target
@@ -209,13 +208,12 @@
 				 forLength: (GLsizeiptr) length {
 	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferSubData(target, offset, length, buffPtr);
-	LogGLErrorTrace(@"while updating buffer target %@ with data of length %i at offset %i from %p",
-					NSStringFromGLEnum(target), length, offset, buffPtr);
+	LogGLErrorTrace(@"glBufferSubData(%@, %i, %i, %p)", NSStringFromGLEnum(target), offset, length, buffPtr);
 }
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
 	glDrawArrays(drawMode, start, len);
-	LogGLErrorTrace(@"while drawing %u vertices as %@ starting from %u", len, NSStringFromGLEnum(drawMode), start);
+	LogGLErrorTrace(@"glDrawArrays(%@, %u, %u)", NSStringFromGLEnum(drawMode), start, len);
 	CC_INCREMENT_GL_DRAWS(1);
 }
 
@@ -224,7 +222,7 @@
 			  @"OpenGL ES permits drawing a maximum of 65536 indexed vertices, and supports only"
 			  @" GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
 	glDrawElements(drawMode, len, type, indicies);
-	LogGLErrorTrace(@"while drawing %u vertex indices as %@", len, NSStringFromGLEnum(drawMode));
+	LogGLErrorTrace(@"glDrawElements(%@, %u, %@, %p)", NSStringFromGLEnum(drawMode), len, NSStringFromGLEnum(type), indicies);
 	CC_INCREMENT_GL_DRAWS(1);
 }
 
@@ -236,7 +234,7 @@
 					 value_GL_COLOR_CLEAR_VALUE, isKnown_GL_COLOR_CLEAR_VALUE);
 	if ( !needsUpdate ) return;
 	glClearColor(color.r, color.g, color.b, color.a);
-	LogGLErrorTrace(@"while setting color clearing value to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glClearColor%@", NSStringFromCCC4F(color));
 }
 
 -(void) setClearDepth: (GLfloat) val { CC3AssertUnimplemented(@"setClearDepth:"); }
@@ -245,7 +243,7 @@
 	cc3_CheckGLPrim(val, value_GL_STENCIL_CLEAR_VALUE, isKnown_GL_STENCIL_CLEAR_VALUE);
 	if ( !needsUpdate ) return;
 	glClearStencil(val);
-	LogGLErrorTrace(@"while setting stencil clearing value to %i", val);
+	LogGLErrorTrace(@"glClearStencil(%i)", val);
 }
 
 -(void) setColor: (ccColor4F) color {}
@@ -257,21 +255,21 @@
 					 value_GL_COLOR_WRITEMASK, isKnown_GL_COLOR_WRITEMASK);
 	if ( !needsUpdate ) return;
 	glColorMask(maskBools.r, maskBools.g, maskBools.b, maskBools.a);
-	LogGLErrorTrace(@"while setting color mask to %@", NSStringFromCCC4B(mask));
+	LogGLErrorTrace(@"glColorMask%@", NSStringFromCCC4B(mask));
 }
 
 -(void) setCullFace: (GLenum) val {
 	cc3_CheckGLPrim(val, value_GL_CULL_FACE_MODE, isKnown_GL_CULL_FACE_MODE);
 	if ( !needsUpdate ) return;
 	glCullFace(val);
-	LogGLErrorTrace(@"while setting face culling to %@", NSStringFromGLEnum(val));
+	LogGLErrorTrace(@"glCullFace(%@)", NSStringFromGLEnum(val));
 }
 
 -(void) setDepthFunc: (GLenum) val {
 	cc3_CheckGLPrim(val, value_GL_DEPTH_FUNC, isKnown_GL_DEPTH_FUNC);
 	if ( !needsUpdate ) return;
 	glDepthFunc(val);
-	LogGLErrorTrace(@"while setting depth function to %@", NSStringFromGLEnum(val));
+	LogGLErrorTrace(@"glDepthFunc(%@)", NSStringFromGLEnum(val));
 }
 
 -(void) setDepthMask: (BOOL) writable {
@@ -279,21 +277,21 @@
 	cc3_CheckGLPrim(val, value_GL_DEPTH_WRITEMASK, isKnown_GL_DEPTH_WRITEMASK);
 	if ( !needsUpdate ) return;
 	glDepthMask(val);
-	LogGLErrorTrace(@"while setting depth mask to %@", NSStringFromBoolean(writable));
+	LogGLErrorTrace(@"glDepthMask(%@)", NSStringFromBoolean(val));
 }
 
 -(void) setFrontFace: (GLenum) val {
 	cc3_CheckGLPrim(val, value_GL_FRONT_FACE, isKnown_GL_FRONT_FACE);
 	if ( !needsUpdate ) return;
 	glFrontFace(val);
-	LogGLErrorTrace(@"while setting front face winding to %@", NSStringFromGLEnum(val));
+	LogGLErrorTrace(@"glFrontFace(%@)", NSStringFromGLEnum(val));
 }
 
 -(void) setLineWidth: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_LINE_WIDTH, isKnown_GL_LINE_WIDTH);
 	if ( !needsUpdate ) return;
 	glLineWidth(val);
-	LogGLErrorTrace(@"while setting line width %.3f", val);
+	LogGLErrorTrace(@"glLineWidth(%.3f)", val);
 }
 
 -(void) setPointSize: (GLfloat) val {}
@@ -314,7 +312,7 @@
 		value_GL_POLYGON_OFFSET_UNITS = units;
 		isKnownPolygonOffset = YES;
 		glPolygonOffset(factor, units);
-		LogGLErrorTrace(@"while setting polygon offset factor to %.3f and offset to %.3f", factor, units);
+		LogGLErrorTrace(@"glPolygonOffset(%.3f, %.3f)", factor, units);
 	}
 }
 
@@ -323,7 +321,7 @@
 					 value_GL_SCISSOR_BOX, isKnown_GL_SCISSOR_BOX);
 	if ( !needsUpdate ) return;
 	glScissor(vp.x, vp.y, vp.w, vp.h);
-	LogGLErrorTrace(@"while setting scissor rect to %@", NSStringFromCC3Viewport(vp));
+	LogGLErrorTrace(@"glScissor%@", NSStringFromCC3Viewport(vp));
 }
 
 -(void) setShadeModel: (GLenum) val {}
@@ -338,7 +336,7 @@
 		value_GL_STENCIL_VALUE_MASK = mask;
 		isKnownStencilFunc = YES;
 		glStencilFunc(func, ref, mask);
-		LogGLErrorTrace(@"while setting stencil function to %@ reference to %i and mask to %u",
+		LogGLErrorTrace(@"glStencilFunc(%@, %i, %u)",
 						NSStringFromGLEnum(func), ref, mask);
 	}
 }
@@ -347,7 +345,7 @@
 	cc3_CheckGLPrim(mask, value_GL_STENCIL_WRITEMASK, isKnown_GL_STENCIL_WRITEMASK);
 	if ( !needsUpdate ) return;
 	glStencilMask(mask);
-	LogGLErrorTrace(@"while setting stencil mask to %u", mask);
+	LogGLErrorTrace(@"glStencilMask(%x)", mask);
 }
 
 -(void) setOpOnStencilFail: (GLenum) sFail onDepthFail: (GLenum) zFail onDepthPass: (GLenum) zPass {
@@ -360,8 +358,7 @@
 		value_GL_STENCIL_PASS_DEPTH_PASS = zPass;
 		isKnownStencilOp = YES;
 		glStencilOp(sFail, zFail, zPass);
-		LogGLErrorTrace(@"while setting stencil operations to stencil fail: %@, Z-fail: %@, Z-pass: %@",
-						NSStringFromGLEnum(sFail), NSStringFromGLEnum(zFail), NSStringFromGLEnum(zPass));
+		LogGLErrorTrace(@"glStencilOp(%@, %@, %@)", NSStringFromGLEnum(sFail), NSStringFromGLEnum(zFail), NSStringFromGLEnum(zPass));
 	}
 }
 
@@ -370,12 +367,12 @@
 					 value_GL_VIEWPORT, isKnown_GL_VIEWPORT);
 	if ( !needsUpdate ) return;
 	glViewport(vp.x, vp.y, vp.w, vp.h);
-	LogGLErrorTrace(@"while setting viewport to %@", NSStringFromCC3Viewport(vp));
+	LogGLErrorTrace(@"glViewport%@", NSStringFromCC3Viewport(vp));
 }
 
 -(void) clearBuffers: (GLbitfield) mask {
 	glClear(mask);
-	LogGLErrorTrace(@"while clearing buffers %x", mask);
+	LogGLErrorTrace(@"glClear(%x)", mask);
 }
 
 -(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
@@ -387,7 +384,8 @@
 -(ccColor4B) readPixelAt: (CGPoint) pixelPos {
 	ccColor4B pixColor;
 	glReadPixels((GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixColor);
-	LogGLErrorTrace(@"while reading pixels at %@", NSStringFromCGPoint(pixelPos));
+	LogGLErrorTrace(@"glReadPixels(%i, %i, %i, %i, %@, %@, %@)", (GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1,
+					NSStringFromGLEnum(GL_RGBA), NSStringFromGLEnum(GL_UNSIGNED_BYTE), NSStringFromCCC4B(pixColor));
 	return pixColor;
 }
 
@@ -447,8 +445,7 @@
 		value_GL_BLEND_DST = dst;
 		isKnownBlendFunc = YES;
 		glBlendFunc(src, dst);
-		LogGLErrorTrace(@"while setting src/dest blend function to %@/%@",
-						NSStringFromGLEnum(src), NSStringFromGLEnum(dst));
+		LogGLErrorTrace(@"glBlendFunc(%@, %@)", NSStringFromGLEnum(src), NSStringFromGLEnum(dst));
 	}
 }
 
@@ -459,7 +456,7 @@
 	cc3_CheckGLPrim(tuIdx, value_GL_ACTIVE_TEXTURE, isKnown_GL_ACTIVE_TEXTURE);
 	if ( !needsUpdate ) return;
 	glActiveTexture(GL_TEXTURE0 + tuIdx);
-	LogGLErrorTrace(@"while setting active texture unit to %u", tuIdx);
+	LogGLErrorTrace(@"glActiveTexture(%@)", NSStringFromGLEnum(GL_TEXTURE0 + tuIdx));
 }
 
 -(void) activateClientTextureUnit: (GLuint) tuIdx {}
@@ -474,7 +471,7 @@
 	if (CC3CheckGLuintAt(tuIdx, texID, value_GL_TEXTURE_BINDING_2D, &isKnown_GL_TEXTURE_BINDING_2D)) {
 		[self activateTextureUnit: tuIdx];
 		glBindTexture(GL_TEXTURE_2D, texID);
-		LogGLErrorTrace(@"while binding texture %u to texture unit %u", texID, tuIdx);
+		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(GL_TEXTURE_2D), tuIdx);
 	}
 }
 
@@ -482,8 +479,8 @@
 -(void) setTexParamEnum: (GLenum) pName to: (GLenum) val at: (GLuint) tuIdx {
 	[self activateTextureUnit: tuIdx];
 	glTexParameteri(GL_TEXTURE_2D, pName, val);
-	LogGLErrorTrace(@"while setting texture parameter %@ to %@ in texture unit %u",
-					NSStringFromGLEnum(pName), NSStringFromGLEnum(val), tuIdx);
+	LogGLErrorTrace(@"glTexParameteri(GL_TEXTURE_2D, pName, val)", NSStringFromGLEnum(GL_TEXTURE_2D),
+					NSStringFromGLEnum(pName), NSStringFromGLEnum(val));
 }
 
 -(void) setTextureMinifyFunc: (GLenum) func at: (GLuint) tuIdx {
@@ -536,7 +533,7 @@
 	cc3_CheckGLPrim(hint, value_GL_GENERATE_MIPMAP_HINT, isKnown_GL_GENERATE_MIPMAP_HINT);
 	if ( !needsUpdate ) return;
 	glHint(GL_GENERATE_MIPMAP_HINT, hint);
-	LogGLErrorTrace(@"while setting mipmap hint to %@", NSStringFromGLEnum(hint));
+	LogGLErrorTrace(@"glHint(%@, %@)", NSStringFromGLEnum(GL_GENERATE_MIPMAP_HINT), NSStringFromGLEnum(hint));
 }
 
 -(void) setLineSmoothingHint: (GLenum) hint {}
@@ -586,13 +583,10 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-//		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
-		LogInfo(@"Third dimension provided by %@ via %@", NSStringFromCC3Version(), self);
-
+		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
-		
 	}
 	return self;
 }
@@ -692,7 +686,7 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL onOff, GLbitfield* stateBits, GL
 			glEnable(cap + idx);
 		else
 			glDisable(cap + idx);
-		LogGLErrorTrace(@"while %@abling capability %@ at index %u", (onOff ? @"en" : @"dis"), NSStringFromGLEnum(cap), idx);
+		LogGLErrorTrace(@"gl%@able(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(cap + idx));
 	}
 }
 

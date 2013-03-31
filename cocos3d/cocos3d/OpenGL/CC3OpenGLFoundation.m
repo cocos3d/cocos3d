@@ -69,7 +69,7 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 	va_start(args, fmt);
 	GLenum errCode = glGetError();
 	if (errCode) {
-		NSString* errText = [NSString stringWithFormat: @"[***GL ERROR***] %@, %@.%@",
+		NSString* errText = [NSString stringWithFormat: @"[***GL ERROR***] %@ from %@.%@",
 							 GetGLErrorText(errCode), [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease],
 							 (GL_ERROR_TRACING_ENABLED ? @"" : @" To investigate further, set the preprocessor macro GL_ERROR_TRACING_ENABLED=1 in your project build settings.")];
 		printf("%s\n", [errText UTF8String]);
@@ -78,7 +78,7 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 				  errText);
 	} else {
 		// Change this to LogDebug to log all GL calls
-		LogTrace(@"GL okay %@", [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease]);
+		LogTrace(@"%@", [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease]);
 	}
 	va_end(args);
 }

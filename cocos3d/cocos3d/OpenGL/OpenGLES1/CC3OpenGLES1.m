@@ -104,7 +104,7 @@
 		glEnableClientState(vaPtr->glName);
 	else
 		glDisableClientState(vaPtr->glName);
-	LogGLErrorTrace(@"while enabling vertex attribute %@ at %i", NSStringFromGLEnum(vaPtr->glName), vaIdx);
+	LogGLErrorTrace(@"gl%@ableClientState(%@)", (vaPtr->isEnabled ? @"En" : @"Dis"), NSStringFromGLEnum(vaPtr->glName));
 }
 
 -(void) bindVertexAttributesAt: (GLint) vaIdx {
@@ -113,39 +113,32 @@
 	switch (vaPtr->semantic) {
 		case kCC3SemanticVertexLocation:
 			glVertexPointer(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex locations to size: %i, type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glVertexPointer(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexNormal:
 			glNormalPointer(vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex normals to type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glNormalPointer(%@, %i, %p)", NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexColor:
 			glColorPointer(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex colors to size: %i, type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glColorPointer(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexWeights:
 			glWeightPointerOES(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex weights to size: %i, type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glWeightPointerOES(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexMatrixIndices:
 			glMatrixIndexPointerOES(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex matrix indices to size: %i, type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glMatrixIndexPointerOES(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexPointSize:
 			glPointSizePointerOES(vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex point sizes to type: %@, stride: %i, content: %p",
-							vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glPointSizePointerOES(%@, %i, %p)", NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexTexture:
 			[self activateClientTextureUnit: vaIdx];
 			glTexCoordPointer(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
-			LogGLErrorTrace(@"while binding vertex texture coordinates for texture unit %u to size: %i, type: %@, stride: %i, content: %p",
-							vaIdx, vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+			LogGLErrorTrace(@"glTexCoordPointer(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		default:
 			CC3Assert(NO, @"Semantic %@ is not a vertex attribute semantic.", NSStringFromCC3Semantic(vaPtr->semantic));
@@ -177,7 +170,7 @@
 	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
 	if ( !needsUpdate ) return;
 	glClearDepthf(val);
-	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
+	LogGLErrorTrace(@"glClearDepthf(%.3f)", val);
 }
 
 -(void) setColor: (ccColor4F) color {
@@ -185,14 +178,14 @@
 					 value_GL_CURRENT_COLOR, isKnown_GL_CURRENT_COLOR);
 	if ( !needsUpdate ) return;
 	glColor4f(color.r, color.g, color.b, color.a);
-	LogGLErrorTrace(@"while setting color to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glColor4f%@", NSStringFromCCC4F(color));
 }
 
 -(void) setPointSize: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_POINT_SIZE, isKnown_GL_POINT_SIZE);
 	if ( !needsUpdate ) return;
 	glPointSize(val);
-	LogGLErrorTrace(@"while setting point size to %.3f", val);
+	LogGLErrorTrace(@"glPointSize(%.3f)", val);
 }
 
 -(void) setPointSizeAttenuation: (CC3AttenuationCoefficients) ac {
@@ -200,35 +193,35 @@
 					 value_GL_POINT_DISTANCE_ATTENUATION, isKnown_GL_POINT_DISTANCE_ATTENUATION);
 	if ( !needsUpdate ) return;
 	glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, (GLfloat*)&ac);
-	LogGLErrorTrace(@"while setting point distance attenuation to %@", NSStringFromCC3AttenuationCoefficients(ac));
+	LogGLErrorTrace(@"glPointParameterfv(%@, %@)", NSStringFromGLEnum(GL_POINT_DISTANCE_ATTENUATION), NSStringFromCC3AttenuationCoefficients(ac));
 }
 
 -(void) setPointSizeFadeThreshold: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_POINT_FADE_THRESHOLD_SIZE, isKnown_GL_POINT_FADE_THRESHOLD_SIZE);
 	if ( !needsUpdate ) return;
 	glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, val);
-	LogGLErrorTrace(@"while setting point fade threshold to %.3f", val);
+	LogGLErrorTrace(@"glPointParameterfv(%@, %.3f)", NSStringFromGLEnum(GL_POINT_FADE_THRESHOLD_SIZE), val);
 }
 
 -(void) setPointSizeMinimum: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_POINT_SIZE_MIN, isKnown_GL_POINT_SIZE_MIN);
 	if ( !needsUpdate ) return;
 	glPointParameterf(GL_POINT_SIZE_MIN, val);
-	LogGLErrorTrace(@"while setting minimum point size to %.3f", val);
+	LogGLErrorTrace(@"glPointParameterfv(%@, %.3f)", NSStringFromGLEnum(GL_POINT_SIZE_MIN), val);
 }
 
 -(void) setPointSizeMaximum: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_POINT_SIZE_MAX, isKnown_GL_POINT_SIZE_MAX);
 	if ( !needsUpdate ) return;
 	glPointParameterf(GL_POINT_SIZE_MAX, val);
-	LogGLErrorTrace(@"while setting maximum point size to %.3f", val);
+	LogGLErrorTrace(@"glPointParameterfv(%@, %.3f)", NSStringFromGLEnum(GL_POINT_SIZE_MAX), val);
 }
 
 -(void) setShadeModel: (GLenum) val {
 	cc3_CheckGLPrim(val, value_GL_SHADE_MODEL, isKnown_GL_SHADE_MODEL);
 	if ( !needsUpdate ) return;
 	glShadeModel(val);
-	LogGLErrorTrace(@"while setting shading model to %@", NSStringFromGLEnum(val));
+	LogGLErrorTrace(@"glShadeModel(%@)", NSStringFromGLEnum(val));
 }
 
 
@@ -241,7 +234,7 @@
 					 value_GL_LIGHT_MODEL_AMBIENT, isKnown_GL_LIGHT_MODEL_AMBIENT);
 	if ( !needsUpdate ) return;
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting scene ambient light color to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glLightModelfv(%@, %@)", NSStringFromGLEnum(GL_LIGHT_MODEL_AMBIENT), NSStringFromCCC4F(color));
 }
 
 -(void) enableLight: (BOOL) onOff at: (GLuint) ltIdx {
@@ -251,64 +244,64 @@
 -(void) setLightAmbientColor: (ccColor4F) color at: (GLuint) ltIdx {
 	if (CC3CheckGLColorAt(ltIdx, color, valueLight_GL_AMBIENT, &isKnownLight_GL_AMBIENT)) {
 		glLightfv((GL_LIGHT0 + ltIdx), GL_AMBIENT, (GLfloat*)&color);
-		LogGLErrorTrace(@"while setting ambient color of light at %u to %@", ltIdx, NSStringFromCCC4F(color));
+		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_AMBIENT), NSStringFromCCC4F(color));
 	}
 }
 
 -(void) setLightDiffuseColor: (ccColor4F) color at: (GLuint) ltIdx {
 	if (CC3CheckGLColorAt(ltIdx, color, valueLight_GL_DIFFUSE, &isKnownLight_GL_DIFFUSE)) {
 		glLightfv((GL_LIGHT0 + ltIdx), GL_DIFFUSE, (GLfloat*)&color);
-		LogGLErrorTrace(@"while setting diffuse color of light at %u to %@", ltIdx, NSStringFromCCC4F(color));
+		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_DIFFUSE), NSStringFromCCC4F(color));
 	}
 }
 
 -(void) setLightSpecularColor: (ccColor4F) color at: (GLuint) ltIdx {
 	if (CC3CheckGLColorAt(ltIdx, color, valueLight_GL_SPECULAR, &isKnownLight_GL_SPECULAR)) {
 		glLightfv((GL_LIGHT0 + ltIdx), GL_SPECULAR, (GLfloat*)&color);
-		LogGLErrorTrace(@"while setting specular color of light at %u to %@", ltIdx, NSStringFromCCC4F(color));
+		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPECULAR), NSStringFromCCC4F(color));
 	}
 }
 
 -(void) setLightPosition: (CC3Vector4) pos at: (GLuint) ltIdx {
 	if (CC3CheckGLVector4At(ltIdx, pos, valueLight_GL_POSITION, &isKnownLight_GL_POSITION)) {
 		glLightfv((GL_LIGHT0 + ltIdx), GL_POSITION, (GLfloat*)&pos);
-		LogGLErrorTrace(@"while setting position of light at %u to %@", ltIdx, NSStringFromCC3Vector4(pos));
+		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_POSITION), NSStringFromCC3Vector4(pos));
 	}
 }
 
 -(void) setLightAttenuation: (CC3AttenuationCoefficients) ac at: (GLuint) ltIdx {
 	if (CC3CheckGLfloatAt(ltIdx, ac.a, valueLight_GL_CONSTANT_ATTENUATION, &isKnownLight_GL_CONSTANT_ATTENUATION)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_CONSTANT_ATTENUATION, ac.a);
-		LogGLErrorTrace(@"while setting constant attenuation of light at %u to %.3f", ltIdx, ac.a);
+		LogGLErrorTrace(@"glLightf(%@, %@, %.3f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_CONSTANT_ATTENUATION), ac.a);
 	}
 	if (CC3CheckGLfloatAt(ltIdx, ac.b, valueLight_GL_LINEAR_ATTENUATION, &isKnownLight_GL_LINEAR_ATTENUATION)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_LINEAR_ATTENUATION, ac.b);
-		LogGLErrorTrace(@"while setting linear attenuation of light at %u to %.3f", ltIdx, ac.c);
+		LogGLErrorTrace(@"glLightf(%@, %@, %.4f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_LINEAR_ATTENUATION), ac.b);
 	}
 	if (CC3CheckGLfloatAt(ltIdx, ac.c, valueLight_GL_QUADRATIC_ATTENUATION, &isKnownLight_GL_QUADRATIC_ATTENUATION)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_QUADRATIC_ATTENUATION, ac.c);
-		LogGLErrorTrace(@"while setting quadratic attenuation of light at %u to %.3f", ltIdx, ac.c);
+		LogGLErrorTrace(@"glLightf(%@, %@, %.6f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_QUADRATIC_ATTENUATION), ac.c);
 	}
 }
 
 -(void) setSpotlightDirection: (CC3Vector) dir at: (GLuint) ltIdx {
 	if (CC3CheckGLVectorAt(ltIdx, dir, valueLight_GL_SPOT_DIRECTION, &isKnownLight_GL_SPOT_DIRECTION)) {
 		glLightfv((GL_LIGHT0 + ltIdx), GL_SPOT_DIRECTION, (GLfloat*)&dir);
-		LogGLErrorTrace(@"while setting direction of spotlight at %u to %@", ltIdx, NSStringFromCC3Vector(dir));
+		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_DIRECTION), NSStringFromCC3Vector(dir));
 	}
 }
 
 -(void) setSpotlightFadeExponent: (GLfloat) val at: (GLuint) ltIdx {
 	if (CC3CheckGLfloatAt(ltIdx, val, valueLight_GL_SPOT_EXPONENT, &isKnownLight_GL_SPOT_EXPONENT)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_SPOT_EXPONENT, val);
-		LogGLErrorTrace(@"while setting fade exponent of spotlight at %u to %.3f", ltIdx, val);
+		LogGLErrorTrace(@"glLightf(%@, %@, %.3f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_EXPONENT), val);
 	}
 }
 
 -(void) setSpotlightCutoffAngle: (GLfloat) val at: (GLuint) ltIdx {
 	if (CC3CheckGLfloatAt(ltIdx, val, valueLight_GL_SPOT_CUTOFF, &isKnownLight_GL_SPOT_CUTOFF)) {
 		glLightf((GL_LIGHT0 + ltIdx), GL_SPOT_CUTOFF, val);
-		LogGLErrorTrace(@"while setting cutoff angle of spotlight at %u to %.3f", ltIdx, val);
+		LogGLErrorTrace(@"glLightf(%@, %@, %.3f)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_CUTOFF), val);
 	}
 }
 
@@ -317,35 +310,35 @@
 					 value_GL_FOG_COLOR, isKnown_GL_FOG_COLOR);
 	if ( !needsUpdate ) return;
 	glFogfv(GL_FOG_COLOR, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting fog color to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glFogfv(%@, %@)", NSStringFromGLEnum(GL_FOG_COLOR), NSStringFromCCC4F(color));
 }
 
 -(void) setFogMode: (GLenum) mode {
 	cc3_CheckGLPrim(mode, value_GL_FOG_MODE, isKnown_GL_FOG_MODE);
 	if ( !needsUpdate ) return;
 	glFogx(GL_FOG_MODE, mode);
-	LogGLErrorTrace(@"while setting fog density mode to %@", NSStringFromGLEnum(mode));
+	LogGLErrorTrace(@"glFogfv(%@, %@)", NSStringFromGLEnum(GL_FOG_MODE), NSStringFromGLEnum(mode));
 }
 
 -(void) setFogDensity: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_FOG_DENSITY, isKnown_GL_FOG_DENSITY);
 	if ( !needsUpdate ) return;
 	glFogf(GL_FOG_DENSITY, val);
-	LogGLErrorTrace(@"while setting fog density to %.3f", val);
+	LogGLErrorTrace(@"glFogfv(%@, %.3f)", NSStringFromGLEnum(GL_FOG_DENSITY), val);
 }
 
 -(void) setFogStart: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_FOG_START, isKnown_GL_FOG_START);
 	if ( !needsUpdate ) return;
 	glFogf(GL_FOG_START, val);
-	LogGLErrorTrace(@"while setting fog start to %.3f", val);
+	LogGLErrorTrace(@"glFogfv(%@, %.3f)", NSStringFromGLEnum(GL_FOG_START), val);
 }
 
 -(void) setFogEnd: (GLfloat) val {
 	cc3_CheckGLPrim(val, value_GL_FOG_END, isKnown_GL_FOG_END);
 	if ( !needsUpdate ) return;
 	glFogf(GL_FOG_END, val);
-	LogGLErrorTrace(@"while setting fog end to %.3f", val);
+	LogGLErrorTrace(@"glFogfv(%@, %.3f)", NSStringFromGLEnum(GL_FOG_END), val);
 }
 
 
@@ -356,7 +349,7 @@
 					 valueMat_GL_AMBIENT, isKnownMat_GL_AMBIENT);
 	if ( !needsUpdate ) return;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting ambient color of material to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glMaterialfv(%@, %@, %@)", NSStringFromGLEnum(GL_FRONT_AND_BACK), NSStringFromGLEnum(GL_AMBIENT), NSStringFromCCC4F(color));
 }
 
 -(void) setMaterialDiffuseColor: (ccColor4F) color {
@@ -364,7 +357,7 @@
 					 valueMat_GL_DIFFUSE, isKnownMat_GL_DIFFUSE);
 	if ( !needsUpdate ) return;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting diffuse color of material to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glMaterialfv(%@, %@, %@)", NSStringFromGLEnum(GL_FRONT_AND_BACK), NSStringFromGLEnum(GL_DIFFUSE), NSStringFromCCC4F(color));
 }
 
 -(void) setMaterialSpecularColor: (ccColor4F) color {
@@ -372,7 +365,7 @@
 					 valueMat_GL_SPECULAR, isKnownMat_GL_SPECULAR);
 	if ( !needsUpdate ) return;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting specular color of material to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glMaterialfv(%@, %@, %@)", NSStringFromGLEnum(GL_FRONT_AND_BACK), NSStringFromGLEnum(GL_SPECULAR), NSStringFromCCC4F(color));
 }
 
 -(void) setMaterialEmissionColor: (ccColor4F) color {
@@ -380,14 +373,14 @@
 					 valueMat_GL_EMISSION, isKnownMat_GL_EMISSION);
 	if ( !needsUpdate ) return;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (GLfloat*)&color);
-	LogGLErrorTrace(@"while setting emission color of material to %@", NSStringFromCCC4F(color));
+	LogGLErrorTrace(@"glMaterialfv(%@, %@, %@)", NSStringFromGLEnum(GL_FRONT_AND_BACK), NSStringFromGLEnum(GL_EMISSION), NSStringFromCCC4F(color));
 }
 
 -(void) setMaterialShininess: (GLfloat) val {
 	cc3_CheckGLPrim(val, valueMat_GL_SHININESS, isKnownMat_GL_SHININESS);
 	if ( !needsUpdate ) return;
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, val);
-	LogGLErrorTrace(@"while setting shininess of material to %.3f", val);
+	LogGLErrorTrace(@"glMaterialf(%@, %@, %.3f)", NSStringFromGLEnum(GL_FRONT_AND_BACK), NSStringFromGLEnum(GL_SHININESS), val);
 }
 
 -(void) setAlphaFunc: (GLenum) func reference: (GLfloat) ref {
@@ -396,7 +389,7 @@
 		value_GL_ALPHA_TEST_REF = ref;
 		isKnownAlphaFunc = YES;
 		glAlphaFunc(func, ref);
-		LogGLErrorTrace(@"while setting alpha function to %@ and reference to %.3f", NSStringFromGLEnum(func), ref);
+		LogGLErrorTrace(@"glAlphaFunc(%@, %.3f)", NSStringFromGLEnum(func), ref);
 	}
 }
 
@@ -407,7 +400,7 @@
 	cc3_CheckGLPrim(tuIdx, value_GL_CLIENT_ACTIVE_TEXTURE, isKnown_GL_CLIENT_ACTIVE_TEXTURE);
 	if ( !needsUpdate ) return;
 	glClientActiveTexture(GL_TEXTURE0 + tuIdx);
-	LogGLErrorTrace(@"while setting active client texture unit to %u", tuIdx);
+	LogGLErrorTrace(@"glClientActiveTexture(%@)", NSStringFromGLEnum(GL_TEXTURE0 + tuIdx));
 }
 
 -(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx {
@@ -417,7 +410,7 @@
 			glEnable(GL_TEXTURE_2D);
 		else
 			glDisable(GL_TEXTURE_2D);
-		LogGLErrorTrace(@"while %@abling capability %@ of texture unit %u", (onOff ? @"en" : @"dis"), NSStringFromGLEnum(GL_TEXTURE_2D), tuIdx);
+		LogGLErrorTrace(@"gl%@sable(GL_TEXTURE_2D)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_2D));
 	}
 }
 
@@ -428,7 +421,7 @@
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		else
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		LogGLErrorTrace(@"while %@abling texture coordinates in texture unit %u", (onOff ? @"en" : @"dis"), tuIdx);
+		LogGLErrorTrace(@"gl%@sableClientState(GL_TEXTURE_2D)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_COORD_ARRAY));
 	}
 }
 
@@ -436,21 +429,21 @@
 	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_COORD_REPLACE_OES, &isKnownCap_GL_COORD_REPLACE_OES)) {
 		[self activateTextureUnit: tuIdx];
 		glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, (onOff ? GL_TRUE : GL_FALSE));
-		LogGLErrorTrace(@"while %@abling point sprite coordinate replace in texture unit %u", (onOff ? @"en" : @"dis"), tuIdx);
+		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_POINT_SPRITE_OES), NSStringFromGLEnum(GL_COORD_REPLACE_OES), (onOff ? @"GL_TRUE" : @"GL_FALSE"));
 	}
 }
 
 -(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {
 	if (CC3CheckGLuintAt(tuIdx, mode, values_GL_TEXTURE_ENV_MODE, &isKnown_GL_TEXTURE_ENV_MODE)) {
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode);
-		LogGLErrorTrace(@"while setting environment mode of texture unit %u to %@", tuIdx, NSStringFromGLEnum(mode));
+		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_ENV), NSStringFromGLEnum(GL_TEXTURE_ENV_MODE), NSStringFromGLEnum(mode));
 	}
 }
 
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {
 	if (CC3CheckGLColorAt(tuIdx, color, values_GL_TEXTURE_ENV_COLOR, &isKnown_GL_TEXTURE_ENV_COLOR)) {
 		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, (GLfloat*)&color);
-		LogGLErrorTrace(@"while setting constant color of texture unit %u to %@", tuIdx, NSStringFromCCC4F(color));
+		LogGLErrorTrace(@"glTexEnvfv(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_ENV), NSStringFromGLEnum(GL_TEXTURE_ENV_COLOR), NSStringFromCCC4F(color));
 	}
 }
 
@@ -461,7 +454,7 @@
 	cc3_CheckGLPrim(mode, value_GL_MATRIX_MODE, isKnown_GL_MATRIX_MODE);
 	if ( !needsUpdate ) return;
 	glMatrixMode(mode);
-	LogGLErrorTrace(@"while setting active matrix stack to %@", NSStringFromGLEnum(mode));
+	LogGLErrorTrace(@"glMatrixMode(%@)", NSStringFromGLEnum(mode));
 }
 
 -(void) activatePaletteMatrixStack: (GLuint) pmIdx {
@@ -471,7 +464,7 @@
 	cc3_CheckGLPrim(pmIdx, value_GL_MATRIX_PALETTE_OES, isKnown_GL_MATRIX_PALETTE_OES);
 	if ( !needsUpdate ) return;
 	glCurrentPaletteMatrixOES(pmIdx);
-	LogGLErrorTrace(@"while setting active palette matrix to %u", pmIdx);
+	LogGLErrorTrace(@"glCurrentPaletteMatrixOES(%u)", pmIdx);
 }
 
 -(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
@@ -479,13 +472,13 @@
 	CC3Matrix4x4 glMtx;
 	CC3Matrix4x4PopulateFrom4x3(&glMtx, mtx);
 	glLoadMatrixf(glMtx.elements);
-	LogGLErrorTrace(@"while loading modelview matrix from %@", NSStringFromCC3Matrix4x4(&glMtx));
+	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(&glMtx));
 }
 
 -(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
 	[self activateMatrixStack: GL_PROJECTION];
 	glLoadMatrixf(mtx->elements);
-	LogGLErrorTrace(@"while loading projection matrix from %@", NSStringFromCC3Matrix4x4(mtx));
+	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(mtx));
 }
 
 -(void) loadPaletteMatrix: (CC3Matrix4x3*) mtx at: (GLuint) pmIdx {
@@ -493,31 +486,31 @@
 	CC3Matrix4x4 glMtx;
 	CC3Matrix4x4PopulateFrom4x3(&glMtx, mtx);
 	glLoadMatrixf(glMtx.elements);
-	LogGLErrorTrace(@"while loading palette matrix %u from %@", pmIdx, NSStringFromCC3Matrix4x4(&glMtx));
+	LogGLErrorTrace(@"glLoadMatrixf(%@)", NSStringFromCC3Matrix4x4(&glMtx));
 }
 
 -(void) pushModelviewMatrixStack {
 	[self activateMatrixStack: GL_MODELVIEW];
 	glPushMatrix();
-	LogGLErrorTrace(@"while pushing modelview matrix stack");
+	LogGLErrorTrace(@"glPushMatrix()");
 }
 
 -(void) popModelviewMatrixStack {
 	[self activateMatrixStack: GL_MODELVIEW];
 	glPopMatrix();
-	LogGLErrorTrace(@"while popping modelview matrix stack");
+	LogGLErrorTrace(@"glPopMatrix()");
 }
 
 -(void) pushProjectionMatrixStack {
 	[self activateMatrixStack: GL_PROJECTION];
 	glPushMatrix();
-	LogGLErrorTrace(@"while pushing projection matrix stack");
+	LogGLErrorTrace(@"glPushMatrix()");
 }
 
 -(void) popProjectionMatrixStack {
 	[self activateMatrixStack: GL_PROJECTION];
 	glPopMatrix();
-	LogGLErrorTrace(@"while popping projection matrix stack");
+	LogGLErrorTrace(@"glPopMatrix()");
 }
 
 
@@ -527,28 +520,28 @@
 	cc3_CheckGLPrim(hint, value_GL_FOG_HINT, isKnown_GL_FOG_HINT);
 	if ( !needsUpdate ) return;
 	glHint(GL_FOG_HINT, hint);
-	LogGLErrorTrace(@"while setting fog hint to %@", NSStringFromGLEnum(hint));
+	LogGLErrorTrace(@"glHint(%@, %@)", NSStringFromGLEnum(GL_FOG_HINT), NSStringFromGLEnum(hint));
 }
 
 -(void) setLineSmoothingHint: (GLenum) hint {
 	cc3_CheckGLPrim(hint, value_GL_LINE_SMOOTH_HINT, isKnown_GL_LINE_SMOOTH_HINT);
 	if ( !needsUpdate ) return;
 	glHint(GL_LINE_SMOOTH_HINT, hint);
-	LogGLErrorTrace(@"while setting line smoothing hint to %@", NSStringFromGLEnum(hint));
+	LogGLErrorTrace(@"glHint(%@, %@)", NSStringFromGLEnum(GL_LINE_SMOOTH_HINT), NSStringFromGLEnum(hint));
 }
 
 -(void) setPerspectiveCorrectionHint: (GLenum) hint {
 	cc3_CheckGLPrim(hint, value_GL_PERSPECTIVE_CORRECTION_HINT, isKnown_GL_PERSPECTIVE_CORRECTION_HINT);
 	if ( !needsUpdate ) return;
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, hint);
-	LogGLErrorTrace(@"while setting perspective correction hint to %@", NSStringFromGLEnum(hint));
+	LogGLErrorTrace(@"glHint(%@, %@)", NSStringFromGLEnum(GL_PERSPECTIVE_CORRECTION_HINT), NSStringFromGLEnum(hint));
 }
 
 -(void) setPointSmoothingHint: (GLenum) hint {
 	cc3_CheckGLPrim(hint, value_GL_POINT_SMOOTH_HINT, isKnown_GL_POINT_SMOOTH_HINT);
 	if ( !needsUpdate ) return;
 	glHint(GL_POINT_SMOOTH_HINT, hint);
-	LogGLErrorTrace(@"while setting point smoothing hint to %@", NSStringFromGLEnum(hint));
+	LogGLErrorTrace(@"glHint(%@, %@)", NSStringFromGLEnum(GL_POINT_SMOOTH_HINT), NSStringFromGLEnum(hint));
 }
 
 
@@ -566,38 +559,36 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-
 	}
 	return self;
 }
 
-/** */
 -(void) initPlatformLimits {
 	glGetIntegerv(GL_MAX_CLIP_PLANES, &value_GL_MAX_CLIP_PLANES);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_CLIP_PLANES));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_CLIP_PLANES), value_GL_MAX_CLIP_PLANES);
 	LogInfo(@"Maximum clip planes: %u", value_GL_MAX_CLIP_PLANES);
 
 	glGetIntegerv(GL_MAX_LIGHTS, &value_GL_MAX_LIGHTS);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_LIGHTS));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_LIGHTS), value_GL_MAX_LIGHTS);
 	LogInfo(@"Maximum lights: %u", value_GL_MAX_LIGHTS);
 
 	glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES, &value_GL_MAX_PALETTE_MATRICES);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_PALETTE_MATRICES_OES));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_PALETTE_MATRICES_OES), value_GL_MAX_PALETTE_MATRICES);
 	LogInfo(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
 	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
 	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 
 	// Initial estimate for allocating space. The actual value is set by the initVertexAttributes method.
 	value_GL_MAX_VERTEX_ATTRIBS = value_GL_MAX_TEXTURE_UNITS + kMAX_VTX_ATTRS_EX_TEXCOORD;
 
 	glGetIntegerv(GL_MAX_VERTEX_UNITS_OES, &value_GL_MAX_VERTEX_UNITS);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_VERTEX_UNITS_OES));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_UNITS_OES), value_GL_MAX_VERTEX_UNITS);
 	LogInfo(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
 }
 

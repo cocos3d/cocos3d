@@ -474,10 +474,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	char cName[maxNameLen];
 	
 	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"while retrieving spec for attribute at index %i in %@", _index, self);
+	LogGLErrorTrace(@"glGetActiveAttrib(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
 	
 	_location = glGetAttribLocation(_program.programID, cName);
-	LogGLErrorTrace(@"while retrieving location of attribute named %s at index %i in %@", cName, _index, self);
+	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
 	
 	[_name release];
 	_name = [[self variableNameFrom: cName] retain];	// retained
@@ -515,7 +515,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	char cName[maxNameLen];
 	
 	glGetActiveUniform(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"while retrieving spec for active uniform at index %i in %@", _index, self);
+	LogGLErrorTrace(@"glGetActiveUniform(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
 	
 	_varLen = CC3GLElementTypeSize(_type) * _size;
 	free(_varValue);
@@ -524,7 +524,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	_glVarValue = calloc(_varLen, 1);
 	
 	_location = glGetUniformLocation(_program.programID, cName);
-	LogGLErrorTrace(@"while retrieving location of active uniform named %s at index %i in %@", cName, _index, self);
+	LogGLErrorTrace(@"glGetUniformLocation(%u, \"%s\")", _program.programID, cName);
 	
 	[_name release];
 	_name = [[self variableNameFrom: cName] retain];	// retained
@@ -547,25 +547,32 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 			
 		case GL_FLOAT:
 			glUniform1fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform1fv(%i, %i, %.3f) to set %@", _location, _size, *(GLfloat*)_glVarValue, self.name);
 			break;
 		case GL_FLOAT_VEC2:
 			glUniform2fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform2fv(%i, %i, %@) to set %@", _location, _size, NSStringFromCGPoint(*(CGPoint*)_glVarValue), self.name);
 			break;
 		case GL_FLOAT_VEC3:
 			glUniform3fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform3fv(%i, %i, %@) to set %@", _location, _size, NSStringFromCC3Vector(*(CC3Vector*)_glVarValue), self.name);
 			break;
 		case GL_FLOAT_VEC4:
 			glUniform4fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform4fv(%i, %i, %@) to set %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
 			break;
 			
 		case GL_FLOAT_MAT2:
 			glUniformMatrix2fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix2fv(%i, %i, GL_FALSE, %@) to set %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
 			break;
 		case GL_FLOAT_MAT3:
 			glUniformMatrix3fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix3fv(%i, %i, GL_FALSE, %@) to set %@", _location, _size, NSStringFromCC3Matrix3x3((CC3Matrix3x3*)_glVarValue), self.name);
 			break;
 		case GL_FLOAT_MAT4:
 			glUniformMatrix4fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix4fv(%i, %i, GL_FALSE, %@) to set %@", _location, _size, NSStringFromCC3Matrix4x4((CC3Matrix4x4*)_glVarValue), self.name);
 			break;
 
 		case GL_INT:
@@ -573,18 +580,22 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 		case GL_SAMPLER_CUBE:
 		case GL_BOOL:
 			glUniform1iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform1iv(%i, %i, %i) to set %@", _location, _size, *(GLint*)_glVarValue, self.name);
 			break;
 		case GL_INT_VEC2:
 		case GL_BOOL_VEC2:
 			glUniform2iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform2iv(%i, %i, %@) to set %@", _location, _size, NSStringFromCC3IntPoint(*(CC3IntPoint*)_glVarValue), self.name);
 			break;
 		case GL_INT_VEC3:
 		case GL_BOOL_VEC3:
 			glUniform3iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform3iv(%i, %i, %@) to set %@", _location, _size, NSStringFromCC3IntVector(*(CC3IntVector*)_glVarValue), self.name);
 			break;
 		case GL_INT_VEC4:
 		case GL_BOOL_VEC4:
 			glUniform4iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform4iv(%i, %i, %@) to set %@", _location, _size, NSStringFromCC3IntVector4(*(CC3IntVector4*)_glVarValue), self.name);
 			break;
 			
 		default:
@@ -592,7 +603,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 					  self, NSStringFromGLEnum(_type));
 			break;
 	}
-	LogGLErrorTrace(@"while setting the GL value of %@", self.fullDescription);
 }
 
 #endif

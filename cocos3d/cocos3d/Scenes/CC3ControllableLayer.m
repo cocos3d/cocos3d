@@ -32,6 +32,7 @@
 #import "CC3ControllableLayer.h"
 #import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
+#import "CC3OpenGL.h"
 #import "CC3Logging.h"
 
 
@@ -129,11 +130,7 @@
 // set to transparent black, otherwise it is set to opaque black.
 -(void) onEnter {
 	[super onEnter];
-	if(self.isOverlayingDeviceCamera) {
-		glClearColor(0.0, 0.0, 0.0, 0.0);		// Transparent black
-	} else {
-		glClearColor(0.0, 0.0, 0.0, 1.0);		// Opaque black
-	}
+	CC3OpenGL.sharedGL.clearColor = self.isOverlayingDeviceCamera ? kCCC4FBlackTransparent : kCCC4FBlack;
 }
 
 // Keep the compiler happy with method re-declaration for documentation

@@ -69,7 +69,7 @@
 		glEnableVertexAttribArray(vaIdx);
 	else
 		glDisableVertexAttribArray(vaIdx);
-	LogGLErrorTrace(@"while enabling vertex attribute at %u", vaIdx);
+	LogGLErrorTrace(@"gl%@ableVertexAttribArray(%u)", (vertexAttributes[vaIdx].isEnabled ? @"En" : @"Dis"), vaIdx);
 }
 
 -(void) bindVertexAttributesAt: (GLint) vaIdx {
@@ -77,8 +77,8 @@
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	glVertexAttribPointer(vaIdx, vaPtr->elementSize, vaPtr->elementType,
 						  vaPtr->shouldNormalize, vaPtr->vertexStride, vaPtr->vertices);
-	LogGLErrorTrace(@"while binding vertex attributes at %u to size: %i, type: %@, stride: %i, content: %p",
-					vaIdx, vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+	LogGLErrorTrace(@"glVertexAttribPointer(%i, %i, %@, %i, %p)", vaIdx, vaPtr->elementSize,
+					NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 }
 
 -(void) clearUnboundVertexAttributes {
@@ -108,7 +108,7 @@
 	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
 	if ( !needsUpdate ) return;
 	glClearDepthf(val);
-	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
+	LogGLErrorTrace(@"glClearDepthf(%.3f)", val);
 }
 
 
@@ -169,7 +169,6 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-
 	}
 	return self;
 }
@@ -182,15 +181,15 @@
 	value_GL_MAX_PALETTE_MATRICES = kCC3MaxGLPaletteMatrices;
 	
 	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);
 	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value_GL_MAX_VERTEX_ATTRIBS);
-	LogGLErrorTrace(@"while getting platform limit for %@", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS), value_GL_MAX_VERTEX_ATTRIBS);
 	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 	
 	value_GL_MAX_VERTEX_UNITS = kCC3MaxGLVertexUnits;

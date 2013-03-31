@@ -898,7 +898,7 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
 		var = val;									\
 		if (val) glEnable(cap);						\
 		else glDisable(cap);						\
-		LogGLErrorTrace(@"while %@abling capability %@", (onOff ? @"en" : @"dis"), NSStringFromGLEnum(cap));	\
+		LogGLErrorTrace(@"gl%@able(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(cap));	\
 	}
 
 /** Macro for returning the state of a capability, retriving it from the GL engine if needed. */
