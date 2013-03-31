@@ -41,23 +41,23 @@
  * extracted from a CSF resource, using the populateNodesFromCSFResource: method.
  */
 @interface CC3CAFResource : CC3NodesResource {
-	NSInteger _nodeCount;
+	int _nodeCount;
 	ccTime _animationDuration;
-	NSInteger _fileVersion;
-	NSInteger _flags;
+	int _fileVersion;
+	int _flags;
 	BOOL _isCompressed : 1;
 	BOOL _wasCSFResourceAttached : 1;
 	BOOL _shouldSwapYZ : 1;
 }
 
 /** Returns the file format version, extracted from the file. */
-@property(nonatomic, readonly) NSInteger fileVersion;
+@property(nonatomic, readonly) int fileVersion;
 
 /** Returns whether the file contains compressed animation content. */
 @property(nonatomic, readonly) BOOL isCompressed;
 
 /** Returns file content format flags. */
-@property(nonatomic, readonly) NSInteger flags;
+@property(nonatomic, readonly) int flags;
 
 /** Returns the animation duration in seconds. */
 @property(nonatomic, readonly) ccTime animationDuration;

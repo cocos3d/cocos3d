@@ -37,13 +37,13 @@
 /** CC3CSFResource is a CC3NodesResource that loads a node hierarchy from a Cal3D-compatible CSF file. */
 @interface CC3CSFResource : CC3NodesResource {
 	CCArray* _allNodes;
-	NSInteger _nodeCount;
-	NSInteger _fileVersion;
+	int _nodeCount;
+	int _fileVersion;
 	ccColor4F _ambientLight;
 }
 
 /** The file format version, extracted from the file. */
-@property(nonatomic, readonly) NSInteger fileVersion;
+@property(nonatomic, readonly) int fileVersion;
 
 /** The color of the ambient light in the scene. */
 @property(nonatomic, readonly) ccColor4F ambientLight;

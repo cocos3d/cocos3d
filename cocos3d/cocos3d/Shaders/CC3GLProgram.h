@@ -53,6 +53,8 @@
 	CCArray* _uniformsNodeScope;
 	CCArray* _uniformsDrawScope;
 	CCArray* _attributes;
+	NSString* _vertexShaderPreamble;
+	NSString* _fragmentShaderPreamble;
 	GLint _maxUniformNameLength;
 	GLint _maxAttributeNameLength;
 	GLuint _programID;
@@ -65,8 +67,10 @@
 /**
  * On each render loop, this CC3GLProgram delegates to this object to populate
  * the current value of each uniform variable from content within the 3D scene.
+ *
+ * This property must be set prior to the program being compiled.
  */
-@property(nonatomic, retain, readonly) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
+@property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
 
 /** Returns the length of the largest uniform name in this program. */
 @property(nonatomic, readonly) GLint maxUniformNameLength;
@@ -109,6 +113,67 @@
 
 /** Returns the attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
+
+
+#pragma mark Compiling
+
+/**
+ * Compiles and links the underlying GL program from the specified vertex and fragment
+ * shader GLSL source code.
+ */
+-(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes
+				 andFragmentShaderBytes: (const GLchar*) fshBytes;
+
+/**
+ * Compiles and links the underlying GL program from the vertex and fragment shader GLSL
+ * source code contained in the specified files.
+ */
+-(void) compileAndLinkVertexShaderFile: (NSString*) vshFilename
+				 andFragmentShaderFile: (NSString*) fshFilename;
+
+/** Returns the GLSL source code loaded from the specified file. */
+-(GLchar*) glslSourceFromFile:  (NSString*) glslFilename;
+
+/**
+ * A string containing GLSL source code to be used as a preamble for the vertex shader
+ * source code when compiling the vertex shader.
+ *
+ * The value of this property can be set prior to invoking one of the compileAndLink... methods.
+ * The content of this propery will be prepended to the source code of the vertex shader source
+ * code. You can use this property to include compiler builds settings, and other delarations.
+ *
+ * The initial value of this property is set to the value of the platformPreamble property.
+ * If you change this property, you should concatenate the value of the platformPreamble to
+ * the additional preamble content that you require.
+ */
+@property(nonatomic, retain) NSString* vertexShaderPreamble;
+
+/**
+ * A string containing GLSL source code to be used as a preamble for the fragment shader
+ * source code when compiling the fragment shader.
+ *
+ * The value of this property can be set prior to invoking one of the compileAndLink... methods.
+ * The content of this propery will be prepended to the source code of the fragment shader source
+ * code. You can use this property to include compiler builds settings, and other delarations.
+ *
+ * The initial value of this property is set to the value of the platformPreamble property.
+ * If you change this property, you should concatenate the value of the platformPreamble to
+ * the additional preamble content that you require.
+ */
+@property(nonatomic, retain) NSString* fragmentShaderPreamble;
+
+/**
+ * A string containing additional platform-specific GLSL source code to be used as a preamble
+ * for the vertex and fragment shader source code when compiling the shaders.
+ *
+ * The value of this property defines the initial value of both the vertexShaderPreamble and
+ * vertexShaderPreamble properties.
+ *
+ * On the OSX platform, this property contains define statements to remove the precision
+ * qualifiers of all variables in the GLSL source code. On the iOS platform, this property
+ * returns an empty string.
+ */
+@property(nonatomic, readonly) NSString* platformPreamble;
 
 
 #pragma mark Binding
@@ -161,7 +226,12 @@
  * detemine whether a GL program with the specified name exists already, and after invoking
  * this method, you should use the class-side addProgram: method to add the new GL program
  * instance to the program cache.
- */
+ *
+ * If you want to set properties prior to compiling code, you can create an instance without compiled
+ * code by using one of the initialization methods defined by the superclass (eg- initWithName:),
+ * set properties including semanticDelegate and possibly the shader preambles, and then invoke the
+ * compileAndLinkVertexShaderBytes:andFragmentShaderBytes: method to compile and link the program.
+*/
 -(id) initWithName: (NSString*) name
 andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
 fromVertexShaderBytes: (const GLchar*) vshBytes
@@ -182,6 +252,11 @@ andFragmentShaderBytes: (const GLchar*) fshBytes;
  * To make use of a standardized naming scheme, you can use the class-side
  * programNameFromVertexShaderFile:andFragmentShaderFile: method to determine the name to use when
  * invoking this method (and when invoking the getProgramNamed: method prior to this method).
+ *
+ * If you want to set properties prior to compiling code, you can create an instance without compiled
+ * code by using one of the initialization methods defined by the superclass (eg- initWithName:), 
+ * set properties including semanticDelegate and possibly the shader preambles, and then invoke the
+ * compileAndLinkVertexShaderFile:andFragmentShaderFile: method to compile and link the program.
  */
 -(id) initWithName: (NSString*) name
 andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
@@ -190,9 +265,6 @@ andFragmentShaderFile: (NSString*) fshFilename;
 
 /** Returns a program name created as a simple hyphenated concatenation of the specified vertex and shader filenames. */
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename;
-
-/** Returns the GLSL source code loaded from the specified file. */
-+(GLchar*) glslSourceFromFile:  (NSString*) glslFilename;
 
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;

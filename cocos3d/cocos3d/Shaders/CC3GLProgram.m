@@ -45,6 +45,8 @@
 @synthesize semanticDelegate=_semanticDelegate;
 @synthesize maxUniformNameLength=_maxUniformNameLength;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
+@synthesize vertexShaderPreamble=_vertexShaderPreamble;
+@synthesize fragmentShaderPreamble=_fragmentShaderPreamble;
 
 -(void) dealloc {
 	[self deleteGLProgram];
@@ -52,6 +54,8 @@
 	[_uniformsNodeScope release];
 	[_uniformsDrawScope release];
 	[_attributes release];
+	[_vertexShaderPreamble release];
+	[_fragmentShaderPreamble release];
 	[super dealloc];
 }
 
@@ -115,10 +119,6 @@
 
 #pragma mark Compiling and linking
 
-/**
- * Compiles and links the underlying GL program from the specified vertex and fragment
- * shader GLSL source code.
- */
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes
 				 andFragmentShaderBytes: (const GLchar*) fshBytes {
 	CC3Assert( !_programID, @"%@ already compliled and linked.", self);
@@ -126,23 +126,53 @@
 	_programID = glCreateProgram();
 	LogGLErrorTrace(@"while creating GL program in %@", self);
 
-	[self compileShader: GL_VERTEX_SHADER fromBytes: vshBytes];
-	[self compileShader: GL_FRAGMENT_SHADER fromBytes: fshBytes];
+	[self compileShader: GL_VERTEX_SHADER
+			  fromBytes: vshBytes
+			withPremble: self.vertexShaderPreamble.UTF8String];
+	
+	[self compileShader: GL_FRAGMENT_SHADER
+			  fromBytes: fshBytes
+			withPremble: self.fragmentShaderPreamble.UTF8String];
 	
 	[self link];
 }
 
+-(void) compileAndLinkVertexShaderFile: (NSString*) vshFilename
+				 andFragmentShaderFile: (NSString*) fshFilename {
+	[self compileAndLinkVertexShaderBytes: [self glslSourceFromFile: vshFilename]
+				   andFragmentShaderBytes: [self glslSourceFromFile: fshFilename]];
+}
+
+-(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
+	MarkRezActivityStart();
+	NSError* err = nil;
+	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
+	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
+			  @"Could not load GLSL file '%@' because it could not be found", filePath);
+	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
+	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
+			  glslFilename, err.localizedDescription, (long)err.code, err.localizedFailureReason);
+	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", glslFilename, GetRezActivityDuration());
+	return (GLchar*)glslSrcStr.UTF8String;
+}
+
 /** 
- * Compiles the specified shader type from the specified GLSL source code, and returns the
- * ID of the GL shader object.
+ * Compiles the specified shader type from the specified GLSL source code plus the specified
+ * source code preamble, and returns the ID of the GL shader object. Neither the source or
+ * the preamble may be NULL.
  */
--(void) compileShader: (GLenum) shaderType fromBytes: (const GLchar*) source {
-	CC3Assert(source, @"%@ cannot complile empty GLSL source.", self);
-	
+-(void) compileShader: (GLenum) shaderType
+			fromBytes: (const GLchar*) source
+		  withPremble: (const GLchar*) preambleSource {
+	CC3Assert(source, @"%@ cannot complile NULL GLSL source.", self);
+	CC3Assert(source, @"%@ cannot complile NULL GLSL source preamble.", self);
+
 	MarkRezActivityStart();
 	
     GLuint shaderID = glCreateShader(shaderType);
-    glShaderSource(shaderID, 1, &source, NULL);
+
+	const GLchar* sources[] = {preambleSource, source};
+    glShaderSource(shaderID, 2, sources, NULL);
 	LogGLErrorTrace(@"while specifying shader %@ source in %@", NSStringFromGLEnum(shaderType), self);
 	
     glCompileShader(shaderID);
@@ -158,6 +188,18 @@
 	LogGLErrorTrace(@"while deleting shader %@ in %@", NSStringFromGLEnum(shaderType), self);
 	
 	LogRez(@"Compiled and attached %@ shader %@ in %.4f seconds", self, NSStringFromGLEnum(shaderType), GetRezActivityDuration());
+}
+
+-(NSString*) platformPreamble {
+#if CC3_OGL
+	return
+		@"#define precision //precision\n"
+		@"#define highp\n"
+		@"#define mediump\n"
+		@"#define lowp\n";
+#else
+	return @"";
+#endif
 }
 
 /** Queries the GL engine and returns whether the shader with the specified GL ID was successfully compiled. */
@@ -354,6 +396,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 #if CC3_OGLES_1
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {}
+-(void) compileAndLinkVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {}
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) deleteGLProgram {}
 -(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
@@ -364,20 +407,29 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 #pragma mark Allocation and initialization
 
--(id) initWithName: (NSString*) name
-andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
-fromVertexShaderBytes: (const GLchar*) vshBytes
-andFragmentShaderBytes: (const GLchar*) fshBytes {
-	CC3Assert(name, @"%@ cannot be created without a name", [self class]);
-	if ( (self = [super initWithName: name]) ) {
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_uniformsSceneScope = [CCArray new];	// retained
 		_uniformsNodeScope = [CCArray new];		// retained
 		_uniformsDrawScope = [CCArray new];		// retained
 		_attributes = [CCArray new];			// retained
+		self.vertexShaderPreamble = self.platformPreamble;
+		self.fragmentShaderPreamble = self.platformPreamble;
 		_maxUniformNameLength = 0;
 		_maxAttributeNameLength = 0;
 		_isSceneScopeDirty = NO;
-		_semanticDelegate = [semanticDelegate retain];
+		_semanticDelegate = nil;
+	}
+	return self;
+}
+
+-(id) initWithName: (NSString*) name
+andSemanticDelegate: (id<CC3GLProgramSemanticsDelegate>) semanticDelegate
+fromVertexShaderBytes: (const GLchar*) vshBytes
+andFragmentShaderBytes: (const GLchar*) fshBytes {
+	if ( (self = [super initWithName: name]) ) {
+		self.semanticDelegate = semanticDelegate;
 		[self compileAndLinkVertexShaderBytes: vshBytes andFragmentShaderBytes: fshBytes];
 	}
 	return self;
@@ -393,26 +445,13 @@ andFragmentShaderFile: (NSString*) fshFilename {
 
 	return [self initWithName: name
 		  andSemanticDelegate: semanticDelegate
-		fromVertexShaderBytes: [self.class glslSourceFromFile: vshFilename]
-	   andFragmentShaderBytes: [self.class glslSourceFromFile: fshFilename]];
+		fromVertexShaderBytes: [self glslSourceFromFile: vshFilename]
+	   andFragmentShaderBytes: [self glslSourceFromFile: fshFilename]];
 }
 
 +(NSString*) programNameFromVertexShaderFile: (NSString*) vshFilename
 					   andFragmentShaderFile: (NSString*) fshFilename {
 	return [NSString stringWithFormat: @"%@-%@", vshFilename, fshFilename];
-}
-
-+(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
-	MarkRezActivityStart();
-	NSError* err = nil;
-	NSString* filePath = CC3EnsureAbsoluteFilePath(glslFilename);
-	CC3Assert([[NSFileManager defaultManager] fileExistsAtPath: filePath],
-			  @"Could not load GLSL file '%@' because it could not be found", filePath);
-	NSString* glslSrcStr = [NSString stringWithContentsOfFile: filePath encoding: NSUTF8StringEncoding error: &err];
-	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %i), failure reason %@",
-			  glslFilename, err.localizedDescription, err.code, err.localizedFailureReason);
-	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", glslFilename, GetRezActivityDuration());
-	return (GLchar*)glslSrcStr.UTF8String;
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ named: %@", [self class], self.name]; }

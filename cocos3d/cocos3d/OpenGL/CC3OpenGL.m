@@ -239,12 +239,7 @@
 	LogGLErrorTrace(@"while setting color clearing value to %@", NSStringFromCCC4F(color));
 }
 
--(void) setClearDepth: (GLfloat) val {
-	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
-	if ( !needsUpdate ) return;
-	glClearDepth(val);
-	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
-}
+-(void) setClearDepth: (GLfloat) val { CC3AssertUnimplemented(@"setClearDepth:"); }
 
 -(void) setClearStencil: (GLint) val {
 	cc3_CheckGLPrim(val, value_GL_STENCIL_CLEAR_VALUE, isKnown_GL_STENCIL_CLEAR_VALUE);
@@ -591,7 +586,8 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+//		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+		LogInfo(@"Third dimension provided by %@ via %@", NSStringFromCC3Version(), self);
 
 		[self initPlatformLimits];
 		[self initVertexAttributes];

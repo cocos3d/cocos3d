@@ -78,7 +78,7 @@
 	glVertexAttribPointer(vaIdx, vaPtr->elementSize, vaPtr->elementType,
 						  vaPtr->shouldNormalize, vaPtr->vertexStride, vaPtr->vertices);
 	LogGLErrorTrace(@"while binding vertex attributes at %u to size: %i, type: %@, stride: %i, content: %p",
-					vaIdx, vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
+					vaIdx, vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 }
 
 -(void) clearUnboundVertexAttributes {
@@ -99,6 +99,16 @@
 				break;
 		}
 	}
+}
+
+
+#pragma mark State
+
+-(void) setClearDepth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearDepth(val);
+	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
 }
 
 

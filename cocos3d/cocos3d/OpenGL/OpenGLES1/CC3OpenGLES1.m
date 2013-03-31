@@ -173,6 +173,13 @@
 
 #pragma mark State
 
+-(void) setClearDepth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearDepthf(val);
+	LogGLErrorTrace(@"while setting depth clearing value to %.3f", val);
+}
+
 -(void) setColor: (ccColor4F) color {
 	cc3_CheckGLValue(color, CCC4FAreEqual(color, value_GL_CURRENT_COLOR),
 					 value_GL_CURRENT_COLOR, isKnown_GL_CURRENT_COLOR);

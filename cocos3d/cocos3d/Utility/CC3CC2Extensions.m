@@ -369,7 +369,7 @@
 
 	// If we wanted to allocate, but it failed, log an error and return without changing anything.
 	if ( (newCapacity != 0) && !newArr ) {
-		LogError(@"Could not change %@ to a capacity of %u elements", self, newCapacity);
+		LogError(@"Could not change %@ to a capacity of %lu elements", self, (unsigned long)newCapacity);
 		return NO;
 	}
 	

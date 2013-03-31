@@ -31,6 +31,7 @@
 
 #import "CC3OpenGLFoundation.h"
 #import "CC3OpenGLUtility.h"
+#import "CC3Logging.h"
 
 
 #pragma mark -
@@ -72,9 +73,12 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 							 GetGLErrorText(errCode), [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease],
 							 (GL_ERROR_TRACING_ENABLED ? @"" : @" To investigate further, set the preprocessor macro GL_ERROR_TRACING_ENABLED=1 in your project build settings.")];
 		printf("%s\n", [errText UTF8String]);
-		NSCAssert1(!GL_ERROR_ASSERTION_ENABLED,
+		CC3AssertC(!GL_ERROR_ASSERTION_ENABLED,
 				  @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
 				  errText);
+	} else {
+		// Change this to LogDebug to log all GL calls
+		LogTrace(@"GL okay %@", [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease]);
 	}
 	va_end(args);
 }

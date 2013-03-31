@@ -320,7 +320,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
  *     uniform size will be one, but the uniform semantic index can be larger than zero.
  */
 -(BOOL) populateUniform: (CC3GLSLUniform*) uniform withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ retrieving semantic value for %@", self, uniform.fullDescription);
+	LogTrace(@"%@ drawing %@ retrieving semantic value for %@", self, visitor.currentNode, uniform.fullDescription);
 	GLenum semantic = uniform.semantic;
 	GLuint semanticIndex = uniform.semanticIndex;
 	GLint uniformSize = uniform.size;
@@ -432,9 +432,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 			
 		case kCC3SemanticModelViewMatrix:
-//			if ( [visitor.currentNode.name isEqualToString: @"TexturedCube"] ) {
-//				LogDebug(@"%@ retieving modelview: %@", visitor.currentNode.name, NSStringFromCC3Matrix4x3(visitor.modelViewMatrix));
-//			}
 			[uniform setMatrix4x3: visitor.modelViewMatrix];
 			return YES;
 		case kCC3SemanticModelViewMatrixInv:
