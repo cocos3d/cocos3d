@@ -768,12 +768,8 @@
  */
 @property(nonatomic, assign) GLuint* stripLengths;
 
-/**
- * An index reference to the first element that will be drawn.
- *
- * This abstract implementation always returns zero. Subclasses will override.
- */
-@property(nonatomic, readonly) GLuint firstElement;
+/** @deprecated Renamed to firstVertex on CC3VertexLocations. */
+@property(nonatomic, readonly) GLuint firstElement DEPRECATED_ATTRIBUTE;
 
 /**
  * Draws the vertices, either in strips, or in a single call, depending on the value
@@ -884,7 +880,7 @@
  * also responsible for determining the boundingBox of the mesh.
  */
 @interface CC3VertexLocations : CC3DrawableVertexArray {
-	GLuint _firstElement;
+	GLuint _firstVertex;
 	CC3BoundingBox _boundingBox;
 	CC3Vector _centerOfGeometry;
 	GLfloat _radius;
@@ -895,16 +891,18 @@
 /**
  * An index reference to the first element that will be drawn.
  *
- * Typically, all vertices are to be drawn, and this property will be zero.
- * In some applications, large sets of underlying content may be used for the vertex arrays
- * of more than one mesh. In such a case, it may be desirable to start drawing from
- * an element that is not the first element of the array. This property can be set to
- * indicate at which element index to start drawing. If drawing is being performed in
- * strips, this will be the index of the start of the first strip to be drawn.
+ * Typically, all vertices are to be drawn, and this property will be zero. In some applications,
+ * large sets of underlying content may be used for the vertex arrays of more than one mesh.
+ * In such a case, it may be desirable to start drawing from an vertex that is not the first
+ * vertex of the array. This property can be set to indicate at which element index to start drawing.
+ * If drawing is being performed in strips, this will be the index of the start of the first strip to be drawn.
  *
  * The initial value is zero.
  */
-@property(nonatomic, assign) GLuint firstElement;
+@property(nonatomic, assign) GLuint firstVertex;
+
+/** @deprecated Renamed to firstVertex. */
+@property(nonatomic, assign) GLuint firstElement DEPRECATED_ATTRIBUTE;
 
 /** Returns the axially-aligned bounding box of this mesh. */
 @property(nonatomic, readonly) CC3BoundingBox boundingBox;

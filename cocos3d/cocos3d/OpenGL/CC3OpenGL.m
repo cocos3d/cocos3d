@@ -218,9 +218,11 @@
 }
 
 -(void) drawIndicies: (GLvoid*) indicies ofLength: (GLuint) len andType: (GLenum) type as: (GLenum) drawMode {
+#if CC3_OGLES
 	CC3Assert((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_BYTE),
 			  @"OpenGL ES permits drawing a maximum of 65536 indexed vertices, and supports only"
 			  @" GL_UNSIGNED_SHORT or GL_UNSIGNED_BYTE types for vertex indices");
+#endif
 	glDrawElements(drawMode, len, type, indicies);
 	LogGLErrorTrace(@"glDrawElements(%@, %u, %@, %p)", NSStringFromGLEnum(drawMode), len, NSStringFromGLEnum(type), indicies);
 	CC_INCREMENT_GL_DRAWS(1);
@@ -273,11 +275,11 @@
 }
 
 -(void) setDepthMask: (BOOL) writable {
-	BOOL val = (writable != 0);
-	cc3_CheckGLPrim(val, value_GL_DEPTH_WRITEMASK, isKnown_GL_DEPTH_WRITEMASK);
+	cc3_CheckGLValue(writable, CC3BooleansAreEqual(writable, value_GL_DEPTH_WRITEMASK),
+					 value_GL_DEPTH_WRITEMASK, isKnown_GL_DEPTH_WRITEMASK);
 	if ( !needsUpdate ) return;
-	glDepthMask(val);
-	LogGLErrorTrace(@"glDepthMask(%@)", NSStringFromBoolean(val));
+	glDepthMask(writable);
+	LogGLErrorTrace(@"glDepthMask(%@)", NSStringFromBoolean(writable));
 }
 
 -(void) setFrontFace: (GLenum) val {

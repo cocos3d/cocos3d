@@ -422,7 +422,8 @@ static GLuint lastAssignedVertexArrayTag;
 	} else if (_vertexCount && _vertices) {					// use local client array if it exists
 		LogTrace(@"%@ using local array containing %u vertices", self, _vertexCount);
 		[visitor.gl unbindBufferTarget: self.bufferTarget];
-		[self bindVertexAttributes: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
+		[self bindVertexAttributes: ((GLbyte*)_vertices + _elementOffset) withVisitor: visitor];
+//		[self bindVertexAttributes: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
 	} else {
 		LogTrace(@"%@ no vertices to bind", self);
 	}
@@ -551,9 +552,8 @@ static GLuint lastAssignedVertexArrayTag;
 	[super dealloc];
 }
 
--(GLuint) firstElement {
-	return 0;
-}
+// Deprecated
+-(GLuint) firstElement { return 0; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -772,17 +772,13 @@ static GLuint lastAssignedVertexArrayTag;
 #pragma mark -
 #pragma mark CC3VertexLocations
 
-@interface CC3VertexLocations (TemplateMethods)
--(void) buildBoundingBox;
--(void) buildBoundingBoxIfNecessary;
--(void) calcRadius;
--(void) calcRadiusIfNecessary;
-@end
-
-
 @implementation CC3VertexLocations
 
-@synthesize firstElement=_firstElement;
+@synthesize firstVertex=_firstVertex;
+
+// Deprecated
+-(GLuint) firstElement { return self.firstVertex; }
+-(void) setFirstElement: (GLuint) firstElement { self.firstVertex = firstElement; }
 
 -(void) markBoundaryDirty {
 	_boundaryIsDirty = YES;
@@ -806,7 +802,7 @@ static GLuint lastAssignedVertexArrayTag;
 -(void) populateFrom: (CC3VertexLocations*) another {
 	[super populateFrom: another];
 
-	_firstElement = another.firstElement;
+	_firstVertex = another.firstVertex;
 	_boundingBox = another.boundingBox;
 	_centerOfGeometry = another.centerOfGeometry;
 	_radius = another.radius;
@@ -1002,9 +998,9 @@ static GLuint lastAssignedVertexArrayTag;
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super drawFrom: vtxIdx forCount: vtxCount withVisitor: visitor];
-
-	GLuint firstVertex = self.firstElement + (self.vertexStride * vtxIdx);
-	[visitor.gl drawVerticiesAs: _drawingMode startingAt: firstVertex withLength: vtxCount];
+	[visitor.gl drawVerticiesAs: _drawingMode
+					 startingAt: (_firstVertex + vtxIdx)
+					 withLength: vtxCount];
 }
 
 
@@ -1014,7 +1010,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_firstElement = 0;
+		_firstVertex = 0;
 		_centerOfGeometry = kCC3VectorZero;
 		_boundingBox = kCC3BoundingBoxZero;
 		_radius = 0.0;
@@ -1416,8 +1412,6 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 
 -(GLenum) bufferTarget { return GL_ELEMENT_ARRAY_BUFFER; }
 
--(GLuint) firstElement { return _bufferID ? _elementOffset : ((GLuint)_vertices + _elementOffset); }
-
 // Deprecated
 -(GLuint*) allocateTriangles: (GLuint) triangleCount {
 	self.drawingMode = GL_TRIANGLES;
@@ -1463,8 +1457,12 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super drawFrom: vtxIdx forCount: vtxCount withVisitor: visitor];
-	GLuint firstVertex = self.firstElement + (self.vertexStride * vtxIdx);
-	[visitor.gl drawIndicies: (GLvoid*)firstVertex
+
+	GLbyte* firstVtx = _bufferID ? 0 : _vertices;
+	firstVtx += (self.vertexStride * vtxIdx);
+	firstVtx += _elementOffset;
+	
+	[visitor.gl drawIndicies: firstVtx
 					ofLength: vtxCount
 					 andType: _elementType
 						  as: _drawingMode];

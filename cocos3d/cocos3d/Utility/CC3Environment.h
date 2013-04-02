@@ -41,7 +41,7 @@
 #	define CC3_CC2_1		(COCOS2D_VERSION < 0x020000)
 #endif
 #ifndef CC3_CC2_2
-#	define CC3_CC2_2		!CC3_CC2_1
+#	define CC3_CC2_2		!(CC3_CC2_1)
 #endif
 
 /** Create convenience tests for whether we are linking to OpenGL ES 2.0, OpenGL ES 1.1, or OpenGL. */
@@ -49,8 +49,11 @@
 #	define CC3_OGLES_1		CC3_CC2_1
 #endif
 #ifndef CC3_OGLES_2
-#	define CC3_OGLES_2		(CC3_CC2_2 && CC3_IOS)
+#	define CC3_OGLES_2		((CC3_CC2_2) && (CC3_IOS))
+#endif
+#ifndef CC3_OGLES
+#	define CC3_OGLES		((CC3_OGLES_1) || (CC3_OGLES_2))
 #endif
 #ifndef CC3_OGL
-#	define CC3_OGL			(CC3_CC2_2 && CC3_MAC)
+#	define CC3_OGL			((CC3_CC2_2) && (CC3_MAC))
 #endif

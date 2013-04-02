@@ -119,6 +119,7 @@ cocos3d 2.0.0 - 2013/03/31
 - [API change] Combined the shouldClearDepthBufferBefore2D & shouldClearDepthBufferBefore3D properties of CC3Scene into a single shouldClearDepthBuffer property and deprecated the originals.
 - [API change] Renamed CC3ViewportManager openViewport & closeViewport methods to open & close respectively.
 - [API change] Renamed CC3EAGLView to CC3GLView for consistency between views used between OpenGL ES 2, OpenGL ES 1.1 & OpenGL.
+- [API change] Renamed CC3VertexLocations firstElement to firstVertex and deprecated the CC3DrawableVertexArray firstElement property.
 
 - [API change] Replaced CC3OpenGLESEngine state management object hierarchy with simpler state management:
 	- Added CC3OpenGL class to handle state management, with subclasses for specific OpenGL ES or OpenGL versions.

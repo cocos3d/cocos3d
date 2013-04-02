@@ -64,13 +64,35 @@
 	return (vaIdx < 0) ? kCC3VertexAttributeIndexUnavailable : vaIdx;
 }
 
+-(void) enableVertexAttribute: (BOOL) onOff at: (GLint) vaIdx {
+	if (vaIdx < 0) return;
+	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
+	
+	// If we know the state and it is not changing, do nothing.
+//	if (vaPtr->isEnabledKnown && CC3BooleansAreEqual(vaPtr->isEnabled, onOff)) return;
+	
+	vaPtr->isEnabled = onOff;
+	vaPtr->isEnabledKnown = YES;
+	
+	[self setVertexAttributeEnablementAt: vaIdx];
+}
+
 -(void) setVertexAttributeEnablementAt: (GLint) vaIdx {
 	if (vertexAttributes[vaIdx].isEnabled)
 		glEnableVertexAttribArray(vaIdx);
-	else
+	else {
 		glDisableVertexAttribArray(vaIdx);
+		glVertexAttrib4f(vaIdx, 0.0f, 0.0f, 0.0f, 1.0f);
+	}
 	LogGLErrorTrace(@"gl%@ableVertexAttribArray(%u)", (vertexAttributes[vaIdx].isEnabled ? @"En" : @"Dis"), vaIdx);
 }
+//-(void) setVertexAttributeEnablementAt: (GLint) vaIdx {
+//	if (vertexAttributes[vaIdx].isEnabled)
+//		glEnableVertexAttribArray(vaIdx);
+//	else
+//		glDisableVertexAttribArray(vaIdx);
+//	LogGLErrorTrace(@"gl%@ableVertexAttribArray(%u)", (vertexAttributes[vaIdx].isEnabled ? @"En" : @"Dis"), vaIdx);
+//}
 
 -(void) bindVertexAttributesAt: (GLint) vaIdx {
 	if (vaIdx < 0) return;

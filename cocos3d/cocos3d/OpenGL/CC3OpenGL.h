@@ -892,12 +892,12 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
 #define cc3_CheckGLPrim(val, var, isKnown)  cc3_CheckGLValue((val), ((var) == (val)), var, isKnown)
 
 /** Macro for checking the state of a single capability and setting it in GL engine if needed. */
-#define cc3_SetGLCap(cap, val, var, isKnown)		\
-	if ((var != val) || !isKnown) {					\
-		isKnown = YES;								\
-		var = val;									\
-		if (val) glEnable(cap);						\
-		else glDisable(cap);						\
+#define cc3_SetGLCap(cap, val, var, isKnown)				\
+	if ( !CC3BooleansAreEqual(val, var) || !isKnown) {		\
+		isKnown = YES;										\
+		var = val;											\
+		if (val) glEnable(cap);								\
+		else glDisable(cap);								\
 		LogGLErrorTrace(@"gl%@able(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(cap));	\
 	}
 

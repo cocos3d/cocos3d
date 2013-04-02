@@ -28,7 +28,6 @@
 					<string>GL_ERROR_LOGGING_ENABLED=1</string>
 					<string>GL_ERROR_TRACING_ENABLED=0</string>
 					<string>GL_ERROR_ASSERTION_ENABLED=0</string>
-					<string>GL_LOGGING_ENABLED=0</string>
 				</array>
 			</dict>
 			<key>Release</key>

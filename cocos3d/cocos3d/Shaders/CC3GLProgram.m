@@ -421,7 +421,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 		self.fragmentShaderPreamble = self.platformPreamble;
 		_maxUniformNameLength = 0;
 		_maxAttributeNameLength = 0;
-		_isSceneScopeDirty = NO;
+		_isSceneScopeDirty = YES;	// start out dirty for auto-loaded programs
 		_semanticDelegate = nil;
 	}
 	return self;
