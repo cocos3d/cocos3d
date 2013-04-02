@@ -44,6 +44,8 @@ cocos3d 2.0.0 - 2013/03/31
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
 
 - Added support for Mac OSX.
+	- cocos3d can now be run under OSX
+	- Added cocos3d2 Mac Application template in the OS X/cocos3d template area
 
 - Animation enhancements:
 	- Added support for time-based key-frame animation.

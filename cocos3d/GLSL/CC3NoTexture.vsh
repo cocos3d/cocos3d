@@ -132,9 +132,7 @@ struct Material {
  * reduce the number of values that need to be retrieved and passed to your shader.
  */
 struct Lighting {
-	bool		isUsingLighting;					/**< Indicates whether any lighting is enabled */
 	lowp vec4	sceneAmbientLightColor;				/**< Ambient light color of the scene. */
-	bool		isLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
 	vec4		positionEyeSpace[MAX_LIGHTS];		/**< Position or normalized direction in eye space of each light. */
 //	vec4		positionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
 	lowp vec4	ambientColor[MAX_LIGHTS];			/**< Ambient color of each light. */
@@ -144,6 +142,8 @@ struct Lighting {
 	vec3		spotDirectionEyeSpace[MAX_LIGHTS];	/**< Direction of spotlight in eye space of each light. */
 	float		spotExponent[MAX_LIGHTS];			/**< Directional attenuation factor, if spotlight, of each light. */
 	float		spotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
+	bool		isLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
+	bool		isUsingLighting;					/**< Indicates whether any lighting is enabled */
 };
 
 /**

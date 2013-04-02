@@ -129,12 +129,11 @@ copy_xc4_project_templates(){
 
 	print_template_banner "Installing Xcode 4 cocos3d iOS template"
 
-	TEMPLATE="cocos3d Application"
-
 # Remove any pre-cocos3d-2.0 templates
 	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
 
 # Copy OpenGL ES 1 Template
+	TEMPLATE="cocos3d Application"
 	DST_DIR="$TEMPLATE_DIR""cocos3d1 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
@@ -149,6 +148,7 @@ copy_xc4_project_templates(){
 	copy_files "Demos/Common/Resources/fps_images_1.png" "$DST_DIR"
 
 # Copy OpenGL ES 2 Template
+	TEMPLATE="cocos3d Application"
 	DST_DIR="$TEMPLATE_DIR""cocos3d2 Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
@@ -161,8 +161,29 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
 
+# Copy OpenGL Mac Template (cocos2d 2.x)
+	TEMPLATE="cocos3d Mac Application"
+	DST_DIR="$TEMPLATE_DIR""cocos3d2 Mac Application.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files for use with OpenGL under OSX
+	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo1.plist"
+
+	DST_DIR="$DST_DIR""/Resources"
+	check_dst_dir
+	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+
 # Copy Base cocos3d project settings
 	TEMPLATE="cocos3d-base"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+# Copy Base cocos3d Mac project settings
+	TEMPLATE="cocos3d-base-mac"
 	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files

@@ -54,12 +54,12 @@ precision mediump float;
  * reduce the number of values that need to be retrieved and passed to your shader.
  */
 struct Fog {
-	bool		isEnabled;					/**< Whether scene fogging is enabled. */
 	lowp vec4	color;						/**< Fog color. */
-	int			attenuationMode;			/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
 	highp float	density;					/**< Fog density. */
 	highp float	startDistance;				/**< Distance from camera at which fogging effect starts. */
 	highp float	endDistance;				/**< Distance from camera at which fogging effect ends. */
+	int			attenuationMode;			/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+	bool		isEnabled;					/**< Whether scene fogging is enabled. */
 };
 
 //-------------- UNIFORMS ----------------------

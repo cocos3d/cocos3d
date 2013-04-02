@@ -20,10 +20,9 @@ ___PROJECTNAMEASIDENTIFIER___Scene.m file. To add your own 3D content, edit that
 The ___PROJECTNAMEASIDENTIFIER___Scene.m file is also where you add interactive behaviour,
 typically in the updateBeforeTransform: method.
 
-You can also edit the applicationDidFinishLaunching: method in the
-___PROJECTNAMEASIDENTIFIER___AppDelegate.m file to tweak the basic setup of your
-cocos3d application. This method is where the cocos3d framework is hooked into the
-cocos2d framework, and Apple's OpenGL ES framework.
+You can also edit the applicationDidFinishLaunching: method in the AppDelegate.m file to
+tweak the basic setup of your cocos3d application. This method is where the cocos3d framework
+is hooked into the cocos2d framework, and Apple's OpenGL ES framework.
 
 For a complete demonstration of almost all cocos3d capabilities, see the fully-documented
 CC3DemoMashUp demo app, which is your best tool for learning the capabilities of cocos3d,
