@@ -53,66 +53,19 @@
 
 precision mediump float;
 
-//-------------- STRUCTURES ----------------------
-
-/**
- * The parameters that define the scene fog.
- *
- * When using this structure as the basis of a simpler implementation, you can comment-out
- * or remove any elements that are not used by either your vertex or fragment shaders, to
- * reduce the number of values that need to be retrieved and passed to your shader.
- */
-struct Fog {
-	bool		isEnabled;					/**< Whether scene fogging is enabled. */
-	lowp vec4	color;						/**< Fog color. */
-	int			attenuationMode;			/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
-	highp float	density;					/**< Fog density. */
-	highp float	startDistance;				/**< Distance from camera at which fogging effect starts. */
-	highp float	endDistance;				/**< Distance from camera at which fogging effect ends. */
-};
-
-/**
- * The parameters of the texture units, used to mimic OpenGL ES 1.1 functionality for combining
- * textures using texture units. In most advanced shaders, these parameters will be ignored
- * completely, in favor of customized texture combining shader code.
- *
- * Each element in this structure is an array containing the value of that element for each
- * texture unit. This structure-of-arrays organization is much more efficient than the alternate
- * of defining the structure to hold the values for a single light and then assembling an
- * array-of-structures. The reason is because under GLSL, the compiler creates a distinct
- * uniform for each element in each structure. The result is that an array-of-structures 
- * requires a much larger number of compiled uniforms than the corresponding structure-of-arrays.
- *
- * When using this structure as the basis of a simpler implementation, you can comment-out
- * or remove any elements that are not used by either your vertex or fragment shaders, to
- * reduce the number of values that need to be retrieved and passed to your shader.
- */
-struct TextureUnits {
-	lowp vec4	color[MAX_TEXTURES];				/**< Constant color of this texure unit (often used for normal mapping). */
-//	highp int	mode[MAX_TEXTURES];					/**< Texture environment mode for this texture unit. */
-//	highp int	combineRGBFunction[MAX_TEXTURES];	/**< RGB combiner function for this texture unit. */
-//	highp int	rgbSource0[MAX_TEXTURES];			/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
-//	highp int	rgbSource1[MAX_TEXTURES];			/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
-//	highp int	rgbSource2[MAX_TEXTURES];			/**< The source of the RGB components for arg2 of the combiner function in this texture unit. */
-//	highp int	rgbOperand0[MAX_TEXTURES];			/**< The operand on the RGB components for arg0 of the combiner function in this texture unit. */
-//	highp int	rgbOperand1[MAX_TEXTURES];			/**< The operand on the RGB components for arg1 of the combiner function in this texture unit. */
-//	highp int	rgbOperand2[MAX_TEXTURES];			/**< The operand on the RGB components for arg2 of the combiner function in this texture unit. */
-//	highp int	combineAlphaFunction[MAX_TEXTURES];	/**< Alpha combiner function for this texture unit. */
-//	highp int	alphaSource0[MAX_TEXTURES];			/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
-//	highp int	alphaSource1[MAX_TEXTURES];			/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
-//	highp int	alphaSource2[MAX_TEXTURES];			/**< The source of the alpha components for arg2 of the combiner function in this texture unit. */
-//	highp int	alphaOperand0[MAX_TEXTURES];		/**< The operand on the alpha components for arg0 of the combiner function in this texture unit. */
-//	highp int	alphaOperand1[MAX_TEXTURES];		/**< The operand on the alpha components for arg1 of the combiner function in this texture unit. */
-//	highp int	alphaOperand2[MAX_TEXTURES];		/**< The operand on the alpha components for arg2 of the combiner function in this texture unit. */
-};
-
-
 //-------------- UNIFORMS ----------------------
 
-uniform Fog u_cc3Fog;							/**< Scene fog. */
-uniform lowp int u_cc3TextureCount;				/**< Number of textures. */
-uniform sampler2D s_cc3Textures[MAX_TEXTURES];	/**< Texture samplers. */
-uniform TextureUnits u_cc3TextureUnits;			/**< Parameters for each of the texture units. */
+uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
+uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
+uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+uniform highp float	u_cc3FogDensity;			/**< Fog density. */
+uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
+uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
+
+uniform lowp int	u_cc3TextureCount;						/**< Number of textures. */
+uniform sampler2D	s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
+uniform lowp vec4	u_cc3TextureUnitColor[MAX_TEXTURES];	/**< Constant color of this texure unit (often used for normal mapping). */
+
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
 varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
@@ -146,21 +99,21 @@ void applyVisibleTexel(vec4 texColor) { fragColor *= texColor; }
 
 /** Applies fog to the specified color and returns the adjusted color. */
 vec4 fogify(vec4 aColor) {
-	if (u_cc3Fog.isEnabled) {
-		int mode = u_cc3Fog.attenuationMode;
+	if (u_cc3FogIsEnabled) {
+		int mode = u_cc3FogAttenuationMode;
 		float vtxVisibility = 1.0;
 		
 		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3Fog.endDistance - v_distEye) / (u_cc3Fog.endDistance - u_cc3Fog.startDistance);
+			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
 		} else if (mode == GL_EXP) {
-			float d = u_cc3Fog.density * v_distEye;
+			float d = u_cc3FogDensity * v_distEye;
 			vtxVisibility = exp(-d);
 		} else if (mode == GL_EXP2) {
-			float d = u_cc3Fog.density * v_distEye;
+			float d = u_cc3FogDensity * v_distEye;
 			vtxVisibility = exp(-(d * d));
 		}
 		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3Fog.color.rgb, aColor.rgb, vtxVisibility);
+		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
 	}
 	return aColor;
 }
@@ -170,7 +123,7 @@ void main() {
 	fragColor = v_color;
 
 	if (u_cc3TextureCount > 0)
-		applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]), u_cc3TextureUnits.color[0]);
+		applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]), u_cc3TextureUnitColor[0]);
 
 	if (u_cc3TextureCount > 1)
 		applyVisibleTexel(texture2D(s_cc3Textures[1], v_texCoord[1]));

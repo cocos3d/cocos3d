@@ -467,6 +467,21 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(void) populateWithDefaultVariableNameMappings;
 
 /**
+ * Populates this instance with the default cocos3d mappings between variable names and
+ * semantics that are based on uniforms collected together into structures.
+ *
+ * Structure-based mapping provides an organized approach to managing uniform names, but are
+ * not compatible with current OSX implementations of GLSL. Current OSX drivers do not handle
+ * structure-based uniforms correctly.
+ *
+ * If you have developed GLSL shaders under iOS, that use this structure-based approach to
+ * uniform naming, you can use this method to populate a semantic mapping that supports this
+ * approach. For new iOS applications, and for all OSX applications, you should use the semantic
+ * uniform name mappings defined by the populateWithDefaultVariableNameMappings method.
+ */
+-(void) populateWithStructuredVariableNameMappings;
+
+/**
  * @deprecated
  * Populates this instance with the default cocos3d mappings initially included with early
  * versions of cocos3d 2.0.

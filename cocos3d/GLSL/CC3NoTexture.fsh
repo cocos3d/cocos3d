@@ -44,26 +44,13 @@
 
 precision mediump float;
 
-//-------------- STRUCTURES ----------------------
-
-/**
- * The parameters that define the scene fog.
- *
- * When using this structure as the basis of a simpler implementation, you can comment-out
- * or remove any elements that are not used by either your vertex or fragment shaders, to
- * reduce the number of values that need to be retrieved and passed to your shader.
- */
-struct Fog {
-	lowp vec4	color;						/**< Fog color. */
-	highp float	density;					/**< Fog density. */
-	highp float	startDistance;				/**< Distance from camera at which fogging effect starts. */
-	highp float	endDistance;				/**< Distance from camera at which fogging effect ends. */
-	int			attenuationMode;			/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
-	bool		isEnabled;					/**< Whether scene fogging is enabled. */
-};
-
 //-------------- UNIFORMS ----------------------
-uniform Fog u_cc3Fog;						/**< Scene fog. */
+uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
+uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
+uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+uniform highp float	u_cc3FogDensity;			/**< Fog density. */
+uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
+uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
 varying lowp vec4 v_color;					/**< Fragment base color. */
@@ -82,21 +69,21 @@ vec4 fragColor;
  * its invocation should be removed by most apps.
  */
 vec4 fogify(vec4 aColor) {
-	if (u_cc3Fog.isEnabled) {
-		int mode = u_cc3Fog.attenuationMode;
+	if (u_cc3FogIsEnabled) {
+		int mode = u_cc3FogAttenuationMode;
 		float vtxVisibility = 1.0;
 		
 		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3Fog.endDistance - v_distEye) / (u_cc3Fog.endDistance - u_cc3Fog.startDistance);
+			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
 		} else if (mode == GL_EXP) {
-			float d = u_cc3Fog.density * v_distEye;
+			float d = u_cc3FogDensity * v_distEye;
 			vtxVisibility = exp(-d);
 		} else if (mode == GL_EXP2) {
-			float d = u_cc3Fog.density * v_distEye;
+			float d = u_cc3FogDensity * v_distEye;
 			vtxVisibility = exp(-(d * d));
 		}
 		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3Fog.color.rgb, aColor.rgb, vtxVisibility);
+		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
 	}
 	return aColor;
 }

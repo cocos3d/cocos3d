@@ -1085,6 +1085,168 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	
 	// VERTEX STATE --------------
+	[self mapVarName: @"u_cc3VertexHasNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether a vertex normal is available. */
+	[self mapVarName: @"u_cc3VertexHasTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether a vertex tangent is available. */
+	[self mapVarName: @"u_cc3VertexHasBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether a vertex bitangent is available. */
+	[self mapVarName: @"u_cc3VertexHasColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether a vertex color is available. */
+	[self mapVarName: @"u_cc3VertexHasWeights" toSemantic: kCC3SemanticHasVertexWeight];					/**< (bool) Whether a vertex weight is available. */
+	[self mapVarName: @"u_cc3VertexHasMatrixIndices" toSemantic: kCC3SemanticHasVertexMatrixIndex];		/**< (bool) Whether a vertex matrix index is available. */
+	[self mapVarName: @"u_cc3VertexHasTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether a vertex texture coordinate is available. */
+	[self mapVarName: @"u_cc3VertexHasPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether a vertex point size is available. */
+	[self mapVarName: @"u_cc3VertexShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];	/**< (bool) Whether vertex normals should be normalized. */
+	[self mapVarName: @"u_cc3VertexShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];	/**< (bool) Whether vertex normals should be rescaled. */
+	
+	// ENVIRONMENT MATRICES --------------
+	[self mapVarName: @"u_cc3MatrixModelLocal" toSemantic: kCC3SemanticModelLocalMatrix];					/**< (mat4) Current model-to-parent matrix. */
+	[self mapVarName: @"u_cc3MatrixModelLocalInv" toSemantic: kCC3SemanticModelLocalMatrixInv];				/**< (mat4) Inverse of current model-to-parent matrix. */
+	[self mapVarName: @"u_cc3MatrixModelLocalInvTran" toSemantic: kCC3SemanticModelLocalMatrixInvTran];		/**< (mat3) Inverse-transpose of current model-to-parent matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixModel" toSemantic: kCC3SemanticModelMatrix];								/**< (mat4) Current model-to-world matrix. */
+	[self mapVarName: @"u_cc3MatrixModelInv" toSemantic: kCC3SemanticModelMatrixInv];						/**< (mat4) Inverse of current model-to-world matrix. */
+	[self mapVarName: @"u_cc3MatrixModelInvTran" toSemantic: kCC3SemanticModelMatrixInvTran];				/**< (mat3) Inverse-transpose of current model-to-world matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixView" toSemantic: kCC3SemanticViewMatrix];								/**< (mat4) Camera view matrix. */
+	[self mapVarName: @"u_cc3MatrixViewInv" toSemantic: kCC3SemanticViewMatrixInv];							/**< (mat4) Inverse of camera view matrix. */
+	[self mapVarName: @"u_cc3MatrixViewInvTran" toSemantic: kCC3SemanticViewMatrixInvTran];					/**< (mat3) Inverse-transpose of camera view matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixModelView" toSemantic: kCC3SemanticModelViewMatrix];						/**< (mat4) Current modelview matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewInv" toSemantic: kCC3SemanticModelViewMatrixInv];				/**< (mat4) Inverse of current modelview matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewInvTran" toSemantic: kCC3SemanticModelViewMatrixInvTran];		/**< (mat3) Inverse-transpose of current modelview matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixProj" toSemantic: kCC3SemanticProjMatrix];								/**< (mat4) Camera projection matrix. */
+	[self mapVarName: @"u_cc3MatrixProjInv" toSemantic: kCC3SemanticProjMatrixInv];							/**< (mat4) Inverse of camera projection matrix. */
+	[self mapVarName: @"u_cc3MatrixProjInvTran" toSemantic: kCC3SemanticProjMatrixInvTran];					/**< (mat3) Inverse-transpose of camera projection matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixViewProj" toSemantic: kCC3SemanticViewProjMatrix];						/**< (mat4) Camera view and projection matrix. */
+	[self mapVarName: @"u_cc3MatrixViewProjInv" toSemantic: kCC3SemanticViewProjMatrixInv];					/**< (mat4) Inverse of camera view and projection matrix. */
+	[self mapVarName: @"u_cc3MatrixViewProjInvTran" toSemantic: kCC3SemanticViewProjMatrixInvTran];			/**< (mat3) Inverse-transpose of camera view and projection matrix. */
+	
+	[self mapVarName: @"u_cc3MatrixModelViewProj" toSemantic: kCC3SemanticModelViewProjMatrix];				/**< (mat4) Current modelview-projection matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewProjInv" toSemantic: kCC3SemanticModelViewProjMatrixInv];		/**< (mat4) Inverse of current modelview-projection matrix. */
+	[self mapVarName: @"u_cc3MatrixModelViewProjInvTran" toSemantic: kCC3SemanticModelViewProjMatrixInvTran];/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
+	
+	// SKINNING ----------------
+	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
+	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneMatrixCount];							/**< (int) Number of matrices in the matrix arrays in this structure. */
+	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
+	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];						/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranGlobal" toSemantic: kCC3SemanticBoneMatricesInvTranGlobal];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates. */
+	
+	// CAMERA -----------------
+	[self mapVarName: @"u_cc3CameraPositionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
+	[self mapVarName: @"u_cc3CameraPositionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
+	[self mapVarName: @"u_cc3CameraFrustum" toSemantic: kCC3SemanticCameraFrustum];					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
+	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	
+	// MATERIALS --------------
+	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];										/**< (vec4) Color when lighting & materials are not in use. */
+	[self mapVarName: @"u_cc3MaterialAmbientColor" toSemantic: kCC3SemanticMaterialColorAmbient];		/**< (vec4) Ambient color of the material. */
+	[self mapVarName: @"u_cc3MaterialDiffuseColor" toSemantic: kCC3SemanticMaterialColorDiffuse];		/**< (vec4) Diffuse color of the material. */
+	[self mapVarName: @"u_cc3MaterialSpecularColor" toSemantic: kCC3SemanticMaterialColorSpecular];	/**< (vec4) Specular color of the material. */
+	[self mapVarName: @"u_cc3MaterialEmissionColor" toSemantic: kCC3SemanticMaterialColorEmission];	/**< (vec4) Emission color of the material. */
+	[self mapVarName: @"u_cc3MaterialOpacity" toSemantic: kCC3SemanticMaterialOpacity];				/**< (float) Opacity of the material. */
+	[self mapVarName: @"u_cc3MaterialShininess" toSemantic: kCC3SemanticMaterialShininess];			/**< (float) Shininess of the material. */
+	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
+	
+	// LIGHTING --------------
+	// With multiple lights, most of the structure elements is an array.
+	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether any lighting is enabled. */
+	[self mapVarName: @"u_cc3LightSceneAmbientLightColor" toSemantic: kCC3SemanticSceneLightColorAmbient];		/**< (vec4) Ambient light color of the scene. */
+	[self mapVarName: @"u_cc3LightIsLightEnabled" toSemantic: kCC3SemanticLightIsEnabled];						/**< (bool[]) Whether each light is enabled. */
+	[self mapVarName: @"u_cc3LightPositionEyeSpace" toSemantic: kCC3SemanticLightPositionEyeSpace];				/**< (vec4[]) Location of each light in eye space. */
+	[self mapVarName: @"u_cc3LightPositionGlobal" toSemantic: kCC3SemanticLightPositionGlobal];					/**< (vec4[]) Location of each light in global coordinates. */
+	[self mapVarName: @"u_cc3LightPositionModel" toSemantic: kCC3SemanticLightPositionModelSpace];				/**< (vec4[]) Location of each light in local coordinates of model (not light). */
+	[self mapVarName: @"u_cc3LightAmbientColor" toSemantic: kCC3SemanticLightColorAmbient];						/**< (vec4[]) Ambient color of each light. */
+	[self mapVarName: @"u_cc3LightDiffuseColor" toSemantic: kCC3SemanticLightColorDiffuse];						/**< (vec4[]) Diffuse color of each light. */
+	[self mapVarName: @"u_cc3LightSpecularColor" toSemantic: kCC3SemanticLightColorSpecular];					/**< (vec4[]) Specular color of each light. */
+	[self mapVarName: @"u_cc3LightAttenuation" toSemantic: kCC3SemanticLightAttenuation];						/**< (vec3[]) Distance attenuation coefficients for each light. */
+	[self mapVarName: @"u_cc3LightSpotDirectionEyeSpace" toSemantic: kCC3SemanticLightSpotDirectionEyeSpace];	/**< (vec3[]) Direction of each spotlight in eye space. */
+	[self mapVarName: @"u_cc3LightSpotDirectionGlobal" toSemantic: kCC3SemanticLightSpotDirectionGlobal];		/**< (vec3[]) Direction of each spotlight in global coordinates. */
+	[self mapVarName: @"u_cc3LightSpotDirectionModel" toSemantic: kCC3SemanticLightSpotDirectionModelSpace];	/**< (vec3[]) Direction of each spotlight in local coordinates of the model (not light). */
+	[self mapVarName: @"u_cc3LightSpotExponent" toSemantic: kCC3SemanticLightSpotExponent];						/**< (float[]) Fade-off exponent of each spotlight. */
+	[self mapVarName: @"u_cc3LightSpotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle];				/**< (float[]) Cutoff angle of each spotlight (degrees). */
+	[self mapVarName: @"u_cc3LightSpotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];	/**< (float[]) Cosine of cutoff angle of each spotlight. */
+
+	[self mapVarName: @"u_cc3FogIsEnabled" toSemantic: kCC3SemanticFogIsEnabled];				/**< (bool) Whether scene fogging is enabled. */
+	[self mapVarName: @"u_cc3FogColor" toSemantic: kCC3SemanticFogColor];						/**< (vec4) Fog color. */
+	[self mapVarName: @"u_cc3FogAttenuationMode" toSemantic: kCC3SemanticFogAttenuationMode];	/**< (int) Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+	[self mapVarName: @"u_cc3FogDensity" toSemantic: kCC3SemanticFogDensity];					/**< (float) Fog density. */
+	[self mapVarName: @"u_cc3FogStartDistance" toSemantic: kCC3SemanticFogStartDistance];		/**< (float) Distance from camera at which fogging effect starts. */
+	[self mapVarName: @"u_cc3FogEndDistance" toSemantic: kCC3SemanticFogEndDistance];			/**< (float) Distance from camera at which fogging effect ends. */
+
+	// TEXTURES --------------
+	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];	/**< (int) Number of active textures. */
+	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D) Single texture sampler (texture unit 0). */
+	[self mapVarName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D[]) Array of texture samplers. */
+	
+	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
+	// In most shaders, these will be left unused in favor of customized the texture combining in GLSL code.
+	[self mapVarName: @"u_cc3TextureUnitColor" toSemantic: kCC3SemanticTexUnitConstantColor];							/**< (vec4[]) The constant color of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitMode" toSemantic: kCC3SemanticTexUnitMode];									/**< (int[]) Environment mode of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitCombineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction];		/**< (int[]) RBG combiner function of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBSource0" toSemantic: kCC3SemanticTexUnitSource0RGB];						/**< (int[]) The RGB of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBSource1" toSemantic: kCC3SemanticTexUnitSource1RGB];						/**< (int[]) The RGB of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBSource2" toSemantic: kCC3SemanticTexUnitSource2RGB];						/**< (int[]) The RGB of source 2 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB];						/**< (int[]) The RGB combining operand of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB];						/**< (int[]) The RGB combining operand of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB];						/**< (int[]) The RGB combining operand of source 2 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitCombineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction];	/**< (int[]) Alpha combiner function of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha];					/**< (int[]) The alpha of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha];					/**< (int[]) The alpha of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha];					/**< (int[]) The alpha of source 2 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha];					/**< (int[]) The alpha combining operand of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha];					/**< (int[]) The alpha combining operand of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha];					/**< (int[]) The alpha combining operand of source 2 of each texture unit. */
+	
+	// MODEL ----------------
+	[self mapVarName: @"u_cc3ModelCenterOfGeometry" toSemantic: kCC3SemanticCenterOfGeometry];		/**< (vec3) The center of geometry of the model in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelBoundingRadius" toSemantic: kCC3SemanticBoundingRadius];			/**< (vec3) The minimum corner of the model's bounding box in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelBoundingBoxMinimum" toSemantic: kCC3SemanticBoundingBoxMin];		/**< (vec3) The maximum corner of the model's bounding box in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelBoundingBoxMaximum" toSemantic: kCC3SemanticBoundingBoxMax];		/**< (vec3) The dimensions of the model's bounding box in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelBoundingBoxSize" toSemantic: kCC3SemanticBoundingBoxSize];		/**< (float) The radius of the model's bounding sphere in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelAnimationFraction" toSemantic: kCC3SemanticAnimationFraction];	/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
+	
+	// PARTICLES ------------
+	[self mapVarName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];				/**< (bool) Whether the vertices are being drawn as points. */
+	[self mapVarName: @"u_cc3PointSize" toSemantic: kCC3SemanticPointSize];								/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
+	[self mapVarName: @"u_cc3PointSizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];			/**< (vec3) Point size distance attenuation coefficients. */
+	[self mapVarName: @"u_cc3PointMinimumSize" toSemantic: kCC3SemanticPointSizeMinimum];					/**< (float) Minimum size points will be allowed to shrink to. */
+	[self mapVarName: @"u_cc3PointMaximumSize" toSemantic: kCC3SemanticPointSizeMaximum];					/**< (float) Maximum size points will be allowed to grow to. */
+	[self mapVarName: @"u_cc3PointShouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];	/**< (bool) Whether points should be interpeted as textured sprites. */
+	
+	// TIME ------------------
+	[self mapVarName: @"u_cc3FrameTime" toSemantic: kCC3SemanticFrameTime];						/**< (float) The time in seconds since the last frame. */
+	[self mapVarName: @"u_cc3AppTime" toSemantic: kCC3SemanticApplicationTime];					/**< (float) The application time in seconds. */
+	[self mapVarName: @"u_cc3AppTimeSine" toSemantic: kCC3SemanticApplicationTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	[self mapVarName: @"u_cc3AppTimeCosine" toSemantic: kCC3SemanticApplicationTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	[self mapVarName: @"u_cc3AppTimeTangent" toSemantic: kCC3SemanticApplicationTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+
+	// MISC ENVIRONMENT ---------
+	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */
+	[self mapVarName: @"u_cc3Random" toSemantic: kCC3SemanticRandomNumber];					/**< (float) A random number between 0 and 1. */
+
+}
+
+-(void) populateWithStructuredVariableNameMappings {
+	
+	// VETEX ATTRIBUTES --------------
+	[self mapVarName: @"a_cc3Position" toSemantic: kCC3SemanticVertexLocation];				/**< Vertex location. */
+	[self mapVarName: @"a_cc3Normal" toSemantic: kCC3SemanticVertexNormal];					/**< Vertex normal. */
+	[self mapVarName: @"a_cc3Tangent" toSemantic: kCC3SemanticVertexTangent];				/**< Vertex tangent. */
+	[self mapVarName: @"a_cc3Bitangent" toSemantic: kCC3SemanticVertexBitangent];			/**< Vertex bitangent (aka binormal). */
+	[self mapVarName: @"a_cc3Color" toSemantic: kCC3SemanticVertexColor];					/**< Vertex color. */
+	[self mapVarName: @"a_cc3BoneWeights" toSemantic: kCC3SemanticVertexWeights];			/**< Vertex skinning bone weights (up to 4). */
+	[self mapVarName: @"a_cc3BoneIndices" toSemantic: kCC3SemanticVertexMatrixIndices];		/**< Vertex skinning bone matrix indices (up to 4). */
+	[self mapVarName: @"a_cc3PointSize" toSemantic: kCC3SemanticVertexPointSize];			/**< Vertex point size. */
+	
+	// If only one texture coordinate attribute is used, the index suffix ("a_cc3TexCoordN") is optional.
+	[self mapVarName: @"a_cc3TexCoord" toSemantic: kCC3SemanticVertexTexture];				/**< Vertex texture coordinate for the first texture unit. */
+	GLuint maxTexUnits = CC3OpenGL.sharedGL.maxNumberOfTextureUnits;
+	for (GLuint tuIdx = 0; tuIdx < maxTexUnits; tuIdx++)
+		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
+	
+	// VERTEX STATE --------------
 	[self mapVarName: @"u_cc3Vertex.hasVertexNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether a vertex normal is available. */
 	[self mapVarName: @"u_cc3Vertex.hasVertexTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether a vertex tangent is available. */
 	[self mapVarName: @"u_cc3Vertex.hasVertexBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether a vertex bitangent is available. */
@@ -1168,14 +1330,14 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Lighting.spotExponent" toSemantic: kCC3SemanticLightSpotExponent];						/**< (float[]) Fade-off exponent of each spotlight. */
 	[self mapVarName: @"u_cc3Lighting.spotCutoffAngle" toSemantic: kCC3SemanticLightSpotCutoffAngle];				/**< (float[]) Cutoff angle of each spotlight (degrees). */
 	[self mapVarName: @"u_cc3Lighting.spotCutoffAngleCosine" toSemantic: kCC3SemanticLightSpotCutoffAngleCosine];	/**< (float[]) Cosine of cutoff angle of each spotlight. */
-
+	
 	[self mapVarName: @"u_cc3Fog.isEnabled" toSemantic: kCC3SemanticFogIsEnabled];				/**< (bool) Whether scene fogging is enabled. */
 	[self mapVarName: @"u_cc3Fog.color" toSemantic: kCC3SemanticFogColor];						/**< (vec4) Fog color. */
 	[self mapVarName: @"u_cc3Fog.attenuationMode" toSemantic: kCC3SemanticFogAttenuationMode];	/**< (int) Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
 	[self mapVarName: @"u_cc3Fog.density" toSemantic: kCC3SemanticFogDensity];					/**< (float) Fog density. */
 	[self mapVarName: @"u_cc3Fog.startDistance" toSemantic: kCC3SemanticFogStartDistance];		/**< (float) Distance from camera at which fogging effect starts. */
 	[self mapVarName: @"u_cc3Fog.endDistance" toSemantic: kCC3SemanticFogEndDistance];			/**< (float) Distance from camera at which fogging effect ends. */
-
+	
 	// TEXTURES --------------
 	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];	/**< (int) Number of active textures. */
 	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D) Single texture sampler (texture unit 0). */
@@ -1223,11 +1385,11 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Time.appTimeSine" toSemantic: kCC3SemanticApplicationTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
 	[self mapVarName: @"u_cc3Time.appTimeCosine" toSemantic: kCC3SemanticApplicationTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
 	[self mapVarName: @"u_cc3Time.appTimeTangent" toSemantic: kCC3SemanticApplicationTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
-
+	
 	// MISC ENVIRONMENT ---------
 	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */
 	[self mapVarName: @"u_cc3Random" toSemantic: kCC3SemanticRandomNumber];					/**< (float) A random number between 0 and 1. */
-
+	
 }
 
 -(void) populateWithLegacyVariableNameMappings {
