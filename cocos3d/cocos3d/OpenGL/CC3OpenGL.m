@@ -102,11 +102,9 @@
 
 #pragma mark Vertex attribute arrays
 
--(GLint) vertexAttributeIndexForSemantic: (GLenum) semantic
-							 withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3AssertUnimplemented(@"vertexAttributeIndexForSemantic:withVisitor:");
-	return 0;
-}
+-(void) bindMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
+-(void) bindVertexAttribute: (CC3GLSLAttribute*) attribute withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(void) enableVertexAttribute: (BOOL) onOff at: (GLint) vaIdx {
 	if (vaIdx < 0) return;
@@ -125,12 +123,12 @@
 	CC3AssertUnimplemented(@"setVertexAttributeEnablementAt:");
 }
 
--(void) bindVertexAttributes: (GLvoid*) pData
-					withSize: (GLint) elemSize
-					withType: (GLenum) elemType
-				  withStride: (GLsizei) vtxStride
-		 withShouldNormalize: (BOOL) shldNorm
-						  at: (GLint) vaIdx {
+-(void) bindVertexContent: (GLvoid*) pData
+				 withSize: (GLint) elemSize
+				 withType: (GLenum) elemType
+			   withStride: (GLsizei) vtxStride
+	  withShouldNormalize: (BOOL) shldNorm
+			toAttributeAt: (GLint) vaIdx {
 	if (vaIdx < 0) return;
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	
@@ -148,21 +146,21 @@
 		vaPtr->vertexStride = vtxStride;
 		vaPtr->shouldNormalize = shldNorm;
 		vaPtr->isKnown = YES;
-		[self bindVertexAttributesAt: vaIdx];
+		[self bindVertexContentToAttributeAt: vaIdx];
 	}
 	vaPtr->wasBound = YES;
 }
 
--(void) bindVertexAttributesAt: (GLint) vaIdx { CC3AssertUnimplemented(@"bindVertexAttributesAt:"); }
+-(void) bindVertexContentToAttributeAt: (GLint) vaIdx { CC3AssertUnimplemented(@"bindVertexContentToAttributeAt:"); }
 
 -(void) clearUnboundVertexAttributes {
 	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
 		vertexAttributes[vaIdx].wasBound = NO;
 }
 
--(void) disableUnboundVertexAttributes {
+-(void) enableBoundVertexAttributes {
 	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
-		if ( !vertexAttributes[vaIdx].wasBound ) [self enableVertexAttribute: NO at: vaIdx];
+		[self enableVertexAttribute: (vertexAttributes[vaIdx].wasBound) at: vaIdx];
 }
 
 -(void) enable2DVertexAttributes { CC3AssertUnimplemented(@"enable2DVertexAttributes"); }
@@ -481,7 +479,7 @@
 -(void) setTexParamEnum: (GLenum) pName to: (GLenum) val at: (GLuint) tuIdx {
 	[self activateTextureUnit: tuIdx];
 	glTexParameteri(GL_TEXTURE_2D, pName, val);
-	LogGLErrorTrace(@"glTexParameteri(GL_TEXTURE_2D, pName, val)", NSStringFromGLEnum(GL_TEXTURE_2D),
+	LogGLErrorTrace(@"glTexParameteri(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_2D),
 					NSStringFromGLEnum(pName), NSStringFromGLEnum(val));
 }
 
@@ -560,6 +558,11 @@
 -(GLuint) maxNumberOfVertexUnits { return value_GL_MAX_VERTEX_UNITS; }
 
 -(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES; }
+
+
+#pragma mark Shaders
+
+-(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 
 #pragma mark Aligning 2D & 3D caches

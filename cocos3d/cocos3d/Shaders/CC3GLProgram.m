@@ -360,6 +360,12 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 	ccGLUseProgram(_programID);
 }
 
+-(void) populateVertexAttributesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	for (CC3GLSLAttribute* var in _attributes)
+		[gl bindVertexAttribute: var withVisitor: visitor];
+}
+
 -(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_isSceneScopeDirty) {
 		LogTrace(@"%@ populating scene scope", self);
@@ -402,6 +408,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 -(void) compileAndLinkVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {}
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) deleteGLProgram {}
+-(void) populateVertexAttributesWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}

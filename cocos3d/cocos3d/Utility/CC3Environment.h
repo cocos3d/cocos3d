@@ -44,16 +44,27 @@
 #	define CC3_CC2_2		!(CC3_CC2_1)
 #endif
 
-/** Create convenience tests for whether we are linking to OpenGL ES 2.0, OpenGL ES 1.1, or OpenGL. */
+/** Running OpenGL ES 1 under iOS. */
 #ifndef CC3_OGLES_1
-#	define CC3_OGLES_1		CC3_CC2_1
+#	define CC3_OGLES_1		(CC3_CC2_1)
 #endif
+
+/** Running OpenGL ES 2 under iOS. */
 #ifndef CC3_OGLES_2
 #	define CC3_OGLES_2		((CC3_CC2_2) && (CC3_IOS))
 #endif
+
+/** Running either OpenGL ES 1 or 2 under iOS. */
 #ifndef CC3_OGLES
 #	define CC3_OGLES		((CC3_OGLES_1) || (CC3_OGLES_2))
 #endif
+
+/** Running OpenGL under OSX on the Mac. */
 #ifndef CC3_OGL
 #	define CC3_OGL			((CC3_CC2_2) && (CC3_MAC))
+#endif
+
+/** Running an OpenGL that supports GLSL (either OpenGL ES 2 or OpenGL). */
+#ifndef CC3_GLSL
+#	define CC3_GLSL			((CC3_OGLES_2) || (CC3_OGL))
 #endif

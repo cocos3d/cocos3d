@@ -32,6 +32,7 @@
 #import "CC3OpenGLES1.h"
 #import "CC3GLProgramSemantics.h"
 #import "CC3NodeVisitor.h"
+#import "CC3Mesh.h"
 
 #if CC3_OGLES_1
 
@@ -80,8 +81,42 @@
 
 #pragma mark Vertex attribute arrays
 
+-(void) bindMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self clearUnboundVertexAttributes];
+	
+	[self bindVertexArray: mesh.vertexLocations withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexMatrixIndices withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexWeights withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexPointSizes withVisitor: visitor];
+	[self bindVertexArray: mesh.vertexIndices withVisitor: visitor];
+	
+	if (visitor.shouldDecorateNode) {
+		[self bindVertexArray: mesh.vertexNormals withVisitor: visitor];
+		[self bindVertexArray: mesh.vertexTangents withVisitor: visitor];
+		[self bindVertexArray: mesh.vertexBitangents withVisitor: visitor];
+		[self bindVertexArray: mesh.vertexColors withVisitor: visitor];
+		
+		GLuint tuCnt = visitor.textureUnitCount;
+		for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
+			visitor.textureUnit = tuIdx;
+			[self bindVertexArray: [mesh textureCoordinatesForTextureUnit: tuIdx]
+					  withVisitor: visitor];
+		}
+	}
+	
+	[self enableBoundVertexAttributes];
+}
+
+-(void) bindVertexArray: (CC3VertexArray*) vtxArray withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	GLint vaIdx = [self vertexAttributeIndexForSemantic: vtxArray.semantic withVisitor: visitor];
+	[vtxArray bindContentToAttributeAt: vaIdx withVisitor: visitor];
+}
+
 -(GLint) vertexAttributeIndexForSemantic: (GLenum) semantic
-							  withVisitor: (CC3NodeDrawingVisitor*) visitor {
+							 withVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	// If no semantic (eg- vertex indices), short circuit to no index available.
+	if (semantic == kCC3SemanticNone) return kCC3VertexAttributeIndexUnavailable;
 
 	// Texture coordinate attribute arrays come first and are indexed by texture unit
 	if (semantic == kCC3SemanticVertexTexture) return visitor.textureUnit;
@@ -90,7 +125,7 @@
 	for (GLuint vaIdx = value_GL_MAX_TEXTURE_UNITS; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
 		if (semantic == vertexAttributes[vaIdx].semantic) return vaIdx;
 
-	// The semantic is not supported by OGLES 1.1 (eg- tangents & bitangents)
+	// The semantic is not supported by OGLES 1.1 (eg- tangents & bitangents).
 	return kCC3VertexAttributeIndexUnavailable;
 }
 
@@ -107,7 +142,7 @@
 	LogGLErrorTrace(@"gl%@ableClientState(%@)", (vaPtr->isEnabled ? @"En" : @"Dis"), NSStringFromGLEnum(vaPtr->glName));
 }
 
--(void) bindVertexAttributesAt: (GLint) vaIdx {
+-(void) bindVertexContentToAttributeAt: (GLint) vaIdx {
 	if (vaIdx < 0) return;
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	switch (vaPtr->semantic) {

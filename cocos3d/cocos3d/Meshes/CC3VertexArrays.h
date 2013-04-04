@@ -593,17 +593,12 @@
 -(void) releaseRedundantData DEPRECATED_ATTRIBUTE;
 
 /**
- * Binds the GL engine to the underlying vertex content, if needed, in preparation for drawing.
+ * Binds the vertex content to the vertex attribute at the specified index in the GL engine.
  *
- * This implementation first invokes the switchingArray method on this instance to determine
- * if this vertex array is different than the vertex array that was last bound to the GL
- * engine. If this vertex array is indeed different, this method invokes the bindGL method,
- * otherwise it does nothing.
- * 
- * This is invoked automatically from the draw method of the CC3Mesh
- * containing this instance. Usually, the application never needs to invoke this method directly.
+ * This is invoked automatically from the CC3Mesh containing this instance.
+ * Usually, the application never needs to invoke this method directly.
  */
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindContentToAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Accessing vertices

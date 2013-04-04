@@ -506,6 +506,24 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Returns whether this mesh contains data for vertex texture coordinates. */
 @property(nonatomic, readonly) BOOL hasVertexTextureCoordinates;
 
+/**
+ * Returns the contained vertex array that contains the vertex content for the specified semantic
+ * and semantic meaning.
+ *
+ * Based on the value of the specified semantic, this method returns the following:
+ *   - 
+ *   - kCC3SemanticVertexLocation:		self.vertexLocations
+ *   - kCC3SemanticVertexNormal:		self.vertexNormals
+ *   - kCC3SemanticVertexTangent:		self.vertexTangents
+ *   - kCC3SemanticVertexBitangent:		self.vertexBitangents
+ *   - kCC3SemanticVertexColor:			self.vertexColors
+ *   - kCC3SemanticVertexWeights:		self.vertexWeights
+ *   - kCC3SemanticVertexMatrixIndices:	self.vertexMatrixIndices
+ *   - kCC3SemanticVertexPointSize:		self.vertexPointSizes
+ *   - kCC3SemanticVertexTexture:		[self textureCoordinatesForTextureUnit: semanticIndex]
+ */
+-(CC3VertexArray*) vertexArrayForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
+
 
 #pragma mark Vertex management
 

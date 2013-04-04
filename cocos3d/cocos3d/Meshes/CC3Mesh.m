@@ -87,16 +87,6 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 #pragma mark CC3Mesh
 
-@interface CC3Mesh (TemplateMethods)
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) drawVerticesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) drawVerticesFrom: (GLuint) vertexIndex
-				forCount: (GLuint) vertexCount
-			 withVisitor: (CC3NodeDrawingVisitor*) visitor;
--(CC3FaceIndices) uncachedFaceIndicesAt: (GLuint) faceIndex;
--(BOOL) switchingMesh;
-@end
-
 @implementation CC3Mesh
 
 @synthesize faces=_faces, capacityExpansionFactor=_capacityExpansionFactor;
@@ -342,6 +332,21 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 		[_overlayTextureCoordinates fastReplaceObjectAtIndex: (texUnit - 1) withObject: aTexCoords];
 	} else {
 		[self addTextureCoordinates: aTexCoords];
+	}
+}
+
+-(CC3VertexArray*) vertexArrayForSemantic: (GLenum) semantic at: (GLuint) semanticIndex {
+	switch (semantic) {
+		case kCC3SemanticVertexLocation: return self.vertexLocations;
+		case kCC3SemanticVertexNormal: return self.vertexNormals;
+		case kCC3SemanticVertexTangent: return self.vertexTangents;
+		case kCC3SemanticVertexBitangent: return self.vertexBitangents;
+		case kCC3SemanticVertexColor: return self.vertexColors;
+		case kCC3SemanticVertexWeights: return self.vertexWeights;
+		case kCC3SemanticVertexMatrixIndices: return self.vertexMatrixIndices;
+		case kCC3SemanticVertexPointSize: return self.vertexPointSizes;
+		case kCC3SemanticVertexTexture: return [self textureCoordinatesForTextureUnit: semanticIndex];
+		default: return nil;
 	}
 }
 
@@ -1363,112 +1368,9 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (self.switchingMesh)
-		[self bindGLWithVisitor: visitor];
+		[visitor.gl bindMesh: self withVisitor: visitor];
 	else
 		LogTrace(@"Reusing currently bound %@", self);
-}
-
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Binding %@", self);
-	CC3OpenGL* gl = visitor.gl;
-	[gl clearUnboundVertexAttributes];
-	
-	[self bindLocationsWithVisitor: visitor];
-	[self bindNormalsWithVisitor: visitor];
-	[self bindTangentsWithVisitor: visitor];
-	[self bindBitangentsWithVisitor: visitor];
-	[self bindColorsWithVisitor: visitor];
-	[self bindTextureCoordinatesWithVisitor: visitor];
-	[self bindPointSizesWithVisitor: visitor];
-	[self bindIndicesWithVisitor: visitor];
-	[self bindBoneMatrixIndicesWithVisitor: visitor];
-	[self bindBoneWeightsWithVisitor: visitor];
-	
-	[gl disableUnboundVertexAttributes];
-}
-
-/** Template method that binds a pointer to the vertex location content to the GL engine. */
--(void) bindLocationsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_vertexLocations bindWithVisitor: visitor];
-}
-
-/** Template method that binds a pointer to the vertex normal content to the GL engine. */
--(void) bindNormalsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [_vertexNormals bindWithVisitor: visitor];
-}
-
-/** Template method that binds a pointer to the vertex tangent content to the GL engine. */
--(void) bindTangentsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [_vertexTangents bindWithVisitor: visitor];
-}
-
-/** Template method that binds a pointer to the vertex tangent content to the GL engine. */
--(void) bindBitangentsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [_vertexBitangents bindWithVisitor: visitor];
-}
-
-/** Template method that binds a pointer to the per-vertex color content to the GL engine. */
--(void) bindColorsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [_vertexColors bindWithVisitor: visitor];
-}
-
-/** Template method that binds a pointer to the vertex matrix index content to the GL engine. */
--(void) bindBoneMatrixIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_vertexMatrixIndices bindWithVisitor:visitor];
-}
-
-/** Template method that binds a pointer to the vertex weight content to the GL engine. */
--(void) bindBoneWeightsWithVisitor:(CC3NodeDrawingVisitor*) visitor {
-	[_vertexWeights bindWithVisitor:visitor];
-}
-
-/** Template method that binds a pointer to the vertex point size content to the GL engine. */
--(void) bindPointSizesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_vertexPointSizes bindWithVisitor: visitor];
-}
-
-/**
- * Template method that binds a pointer to the vertex texture mapping data to the GL engine
- * for each texture unit that has a texture, as indicated by the textureUnitCount of the
- * specified visitor.
- *
- * If there are fewer vertex texture coordinate arrays than indicated by the textureUnitCount,
- * the last vertex texture coordinate array is reused. In this way, a single vertex texture
- * coordinate array (in the vertexTextureCoordinates property) can be used for both the primary
- * texture and multiple texture overlays. Or, one array could be used for the primary texture
- * and another for all the overlays. Or the primary and each overlay could have their own
- * texture coordinate arrays.
- *
- * Any unused texture coordinate arrays are unbound from the GL engine.
- */
--(void) bindTextureCoordinatesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	GLuint tu = 0;								// The current texture unit
-	CC3VertexTextureCoordinates* vtc = nil;		// The tex coord array to bind to it.
-	
-	// Don't do anything if we're not actually drawing textures to the GL engine.
-	if (visitor.shouldDecorateNode) {
-		
-		// For each texture unit that has a texture...
-		while(tu < visitor.textureUnitCount) {
-			
-			if (tu < self.textureCoordinatesArrayCount) vtc = [self textureCoordinatesForTextureUnit: tu];
-			
-			// Note that vtc at this point will be the most recently assigned array,
-			// and may be the array that was used on the last iteration of this loop
-			// if there are less texture coord arrays than there are textures.
-			// In this case, we keep reusing the most recently used texture coord array.
-			if(vtc) {
-				visitor.textureUnit = tu;
-				[vtc bindWithVisitor: visitor];
-			}
-			tu++;		// Move on to the next texture unit
-		}
-	}
-}
-
-/** Template method that binds a pointer to the vertex index data to the GL engine. */
--(void) bindIndicesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[_vertexIndices bindWithVisitor: visitor];
 }
 
 /**

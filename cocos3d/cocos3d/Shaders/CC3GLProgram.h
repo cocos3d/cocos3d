@@ -181,6 +181,9 @@
 /** Binds the program to the GL engine and to the specified visitor. */
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
+/** Populates the vertex attribute variables. */
+-(void) populateVertexAttributesWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
 /** 
  * If the scene scope was previously marked dirty by an invocation of the markSceneScopeDirty
  * method, this method populates all uniform variables that have scene scope, and marks the
@@ -193,10 +196,10 @@
  */
 -(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Populates all uniform variables that have node scope. */
+/** Populates the uniform variables that have node scope. */
 -(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Populates all uniform variables that have draw scope. */
+/** Populates the uniform variables that have draw scope. */
 -(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**

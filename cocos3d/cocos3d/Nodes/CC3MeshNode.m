@@ -899,8 +899,7 @@
 	} else {
 		shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
 	}
-	[shaderProgram bindWithVisitor: visitor];
-	[shaderProgram populateNodeScopeUniformsWithVisitor: visitor];
+	[visitor.gl bindProgram: shaderProgram  withVisitor: visitor];
 }
 #endif
 #if CC3_OGLES_1

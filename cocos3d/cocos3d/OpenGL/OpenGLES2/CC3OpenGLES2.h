@@ -29,70 +29,12 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3OpenGL.h"
+#import "CC3OpenGLSL.h"
 
 #if CC3_OGLES_2
 
-/**
- * Maximum number of lights under OpenGL ES 2.
- *
- * Although under OpenGL ES 2, there is no explicit maximum number of lights available, this setting
- * defines the number of possible lights that will be allocated and tracked within cocos3d, and can
- * be set by the application to confirm the maximum number of lights programmed into the shaders.
- *
- * The default value is 8. This can be changed by either setting the value of this compiler
- * build setting, or by setting the value of the value_GL_MAX_LIGHTS public instance variable
- * of the CC3OpenGL instance.
- */
-#ifndef kCC3MaxGLLights
-#	define kCC3MaxGLLights					8
-#endif
-
-/**
- * Maximum number of user clip planes under OpenGL ES 2.
- *
- * Although under OpenGL ES 2, there is no explicit maximum number of clip planes available, this
- * setting defines the number of possible user clip planes that will be allocated and tracked
- * within cocos3d, and can be set by the application to confirm the maximum number of user clip
- * planes programmed into the shaders.
- *
- * The default value is 6. This can be changed by either setting the value of this compiler
- * build setting, or by setting the value of the value_GL_MAX_CLIP_PLANES public instance
- * variable of the CC3OpenGL instance.
- */
-#ifndef kCC3MaxGLClipPlanes
-#	define kCC3MaxGLClipPlanes				6
-#endif
-
-/**
- * Maximum number of palette matrices used for vertex skinning under OpenGL ES 2.
- *
- * Although under OpenGL ES 2, there is no explicit maximum number of palette matrices available,
- * this setting defines the number of possible matrices that will be allocated and tracked within
- * cocos3d, and can be set by the application to confirm the maximum number of palettes programmed
- * into the shaders.
- *
- * The default value is 11. This can be changed by either setting the value of this compiler
- * build setting, or by setting the value of the value_GL_MAX_PALETTE_MATRICES public instance
- * variable of the CC3OpenGL instance.
- */
-#ifndef kCC3MaxGLPaletteMatrices
-#	define kCC3MaxGLPaletteMatrices		11
-#endif
-
-/** 
- * Maximum number of vertex units used for vertex skinning under OpenGL ES 2. 
- *
- * The default value is 4. This can be changed by either setting the value of this compiler
- * build setting, or by setting the value of the value_GL_MAX_VERTEX_UNITS public instance
- * variable of the CC3OpenGL instance.
- */
-#ifndef kCC3MaxGLVertexUnits
-#	define kCC3MaxGLVertexUnits			4
-#endif
-
 /** CC3OpenGLES2 manages the OpenGLES 2.0 state for a single GL context. */
-@interface CC3OpenGLES2 : CC3OpenGL {}
+@interface CC3OpenGLES2 : CC3OpenGLSL {}
 @end
 
 #endif

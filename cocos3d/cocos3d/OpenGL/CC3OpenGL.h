@@ -32,7 +32,7 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3NodeDrawingVisitor;
+@class CC3NodeDrawingVisitor, CC3Mesh, CC3GLProgram, CC3GLSLAttribute;
 
 /** Indicates that vertex attribute array is not available. */
 #define kCC3VertexAttributeIndexUnavailable		-1
@@ -245,24 +245,15 @@ typedef struct {
 
 #pragma mark Vertex attribute arrays
 
+/** Binds the vertex attributes in the specified mesh to the GL engine. */
+-(void) bindMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor;
+
 /**
- * Returns the index of the vertex attribute array for the specified semantic, or the special value
- * kCC3VertexAttributeIndexUnavailable if no vertex attributes are available for the specified semantic.
- *
- * Under a fixed rendering pipeline (ie- OpenGL ES 1.1), the semantic might describe a type of vertex
- * attribute that is not supported by the fixed rendering pipeline (eg- tangents). Under a programmable
- * pipeline (OpenGL or OpenGL ES 2.0), the GLSL shader program may not make use the vertex attributes
- * for a particular semantic, even though the vertex attributes exist in the mesh. In each of these
- * cases, this method will return kCC3VertexAttributeIndexUnavailable.
- *
- * The returned value can subsequently be used to identify the vertex attribute array in methods that
- * take the vertex attribute array index as a parameter. Those methods accept a negative attribute index,
- * including kCC3VertexAttributeIndexUnavailable, and will simply ignore it. When using those methods,
- * you do not need to check if the value returned by this method is kCC3VertexAttributeIndexUnavailable,
- * or any other negative value, before invoking one of those methods.
+ * Retrieves the vertex array that should be bound to the specified attribute from the mesh
+ * of the current node and binds the content of the vertex array to the GLSL attribute. Does
+ * nothing if the mesh does not contain vertex content for the specified attribute.
  */
--(GLint) vertexAttributeIndexForSemantic: (GLenum) semantic
-							 withVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) bindVertexAttribute: (CC3GLSLAttribute*) attribute withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Enable/disable the vertex attributes at the specified index, which must be a value
@@ -281,18 +272,18 @@ typedef struct {
  *
  * It is safe to submit a negative index. It will be ignored, and no changes will be made.
  */
--(void) bindVertexAttributes: (GLvoid*) pData
-					withSize: (GLint) elemSize
-					withType: (GLenum) elemType
-				  withStride: (GLsizei) vtxStride
-		 withShouldNormalize: (BOOL) shldNorm
-						  at: (GLint) vaIdx;
+-(void) bindVertexContent: (GLvoid*) pData
+				 withSize: (GLint) elemSize
+				 withType: (GLenum) elemType
+			   withStride: (GLsizei) vtxStride
+	  withShouldNormalize: (BOOL) shldNorm
+			toAttributeAt: (GLint) vaIdx;
 
 /** Clears the tracking of unbound vertex attribute arrays. */
 -(void) clearUnboundVertexAttributes;
 
-/** Disables any vertex pointers that have not been bound to the GL engine. */
--(void) disableUnboundVertexAttributes;
+/** Enables the vertex attributes that have been bound and disables the rest. */
+-(void) enableBoundVertexAttributes;
 
 /** Enables the vertex attribute needed for drawing cocos2d 2D artifacts, and disables all the rest. */
 -(void) enable2DVertexAttributes;
@@ -749,6 +740,12 @@ typedef struct {
  * or zero if the platform does not impose a limit.
  */
 @property(nonatomic, readonly) GLuint maxNumberOfPixelSamples;
+
+
+#pragma mark Shaders
+
+/** Binds the specified GLSL program. */
+-(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Aligning 2D & 3D caches

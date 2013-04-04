@@ -508,7 +508,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 #if CC3_OGLES_2 || CC3_OGL
 
 -(void) populateFromProgram {
-	_semantic = 0;
+	_semantic = kCC3SemanticNone;
 	_semanticIndex = 0;
 	
 	GLint maxNameLen = [_program maxUniformNameLength];

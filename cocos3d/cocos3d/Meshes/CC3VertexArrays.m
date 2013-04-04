@@ -403,27 +403,15 @@ static GLuint lastAssignedVertexArrayTag;
 // Deprecated
 -(void) releaseRedundantData { [self releaseRedundantContent]; }
 
--(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor { [self bindGLWithVisitor: visitor]; }
-
-/**
- * Template method that binds the GL engine to the underlying vertex data,
- * in preparation for drawing.
- *
- * If the data has been copied into a VBO in GL memory, binds the GL engine to the bufferID property,
- * and invokes bindVertexAttributes:withVisitor: with the value of the elementOffset property. If a
- * VBO is not used, unbinds the GL from any VBO's, and invokes bindVertexAttributes:withVisitor: with
- * a pointer to the first data element managed by this vertex array instance.
- */
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) bindContentToAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_bufferID) {											// use GL buffer if it exists
 		LogTrace(@"%@ binding GL buffer containing %u vertices", self, _vertexCount);
 		[visitor.gl bindBuffer: _bufferID toTarget: self.bufferTarget];
-		[self bindVertexAttributes: (GLvoid*)_elementOffset withVisitor: visitor];
+		[self bindContent: (GLvoid*)_elementOffset toAttributeAt: vaIdx withVisitor: visitor];
 	} else if (_vertexCount && _vertices) {					// use local client array if it exists
 		LogTrace(@"%@ using local array containing %u vertices", self, _vertexCount);
 		[visitor.gl unbindBufferTarget: self.bufferTarget];
-		[self bindVertexAttributes: ((GLbyte*)_vertices + _elementOffset) withVisitor: visitor];
-//		[self bindVertexAttributes: (GLvoid*)((GLuint)_vertices + _elementOffset) withVisitor: visitor];
+		[self bindContent: ((GLbyte*)_vertices + _elementOffset) toAttributeAt: vaIdx withVisitor: visitor];
 	} else {
 		LogTrace(@"%@ no vertices to bind", self);
 	}
@@ -434,16 +422,13 @@ static GLuint lastAssignedVertexArrayTag;
  * and vertexStride properties, along with the specified data pointer, and enables the
  * type of aspect managed by this instance (locations, normals...) in the GL engine.
  */
--(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGL* gl = visitor.gl;
-	GLuint vaIdx = [gl vertexAttributeIndexForSemantic: _semantic withVisitor: visitor];
-	[gl enableVertexAttribute: YES at: vaIdx];
-	[gl bindVertexAttributes: pointer
-					withSize: _elementSize
-					withType: _elementType
-				  withStride: _vertexStride
-		 withShouldNormalize: _shouldNormalizeContent
-						  at: vaIdx];
+-(void) bindContent: (GLvoid*) pointer toAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl bindVertexContent: pointer
+						 withSize: _elementSize
+						 withType: _elementType
+					   withStride: _vertexStride
+			  withShouldNormalize: _shouldNormalizeContent
+					toAttributeAt: vaIdx];
 }
 
 
@@ -979,14 +964,6 @@ static GLuint lastAssignedVertexArrayTag;
 
 #pragma mark Drawing
 
-/** Ensure that vertex locations can be bound. */
--(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3Assert([visitor.gl vertexAttributeIndexForSemantic: _semantic withVisitor: visitor] >= 0,
-			  @"%@ could not retrieve the vertex attributes for semantic %@. Vertex locations are required for drawing.",
-			  self, NSStringFromCC3Semantic(_semantic));
-	[super bindVertexAttributes: pointer withVisitor: visitor];
-}
-
 /** Overridden to ensure the bounding box and radius are built before releasing the vertices. */
 -(void) releaseRedundantContent {
 	[self buildBoundingBoxIfNecessary];
@@ -1127,8 +1104,8 @@ static GLuint lastAssignedVertexArrayTag;
  * the covers, we won't really know what the ambient and diffuse material color values will
  * be when we get back to setting them...so indicate that to the corresponding trackers.
  */
--(void) bindVertexAttributes: (GLvoid*) pointer withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[super bindVertexAttributes:pointer withVisitor:visitor];
+-(void) bindContent: (GLvoid*) pointer toAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[super bindContent: pointer toAttributeAt: vaIdx withVisitor: visitor];
 	
 	CC3OpenGL* gl = visitor.gl;
 	gl->isKnownMat_GL_AMBIENT = NO;
@@ -1441,17 +1418,8 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 							  [self indexAt: idxIndices.vertices[2]]);
 }
 
--(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (_bufferID) {									// use GL buffer if it exists
-		LogTrace(@"%@ binding GL buffer", self);
-		[visitor.gl bindBuffer: _bufferID toTarget: self.bufferTarget];
-	} else if (_vertexCount && _vertices) {			// use local client array if it exists
-		LogTrace(@"%@ using local array", self);
-		[visitor.gl unbindBufferTarget: self.bufferTarget];
-	} else {
-		LogTrace(@"%@ no vertices to bind", self);
-	}
-}
+/** Vertex indices are not part of vertex content. */
+-(void) bindContent: (GLvoid*) pointer toAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(void) drawFrom: (GLuint) vtxIdx
 		forCount: (GLuint) vtxCount

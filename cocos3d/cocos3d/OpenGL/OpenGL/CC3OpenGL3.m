@@ -32,14 +32,14 @@
 #import "CC3OpenGL3.h"
 #import "CC3GLProgram.h"
 #import "CC3NodeVisitor.h"
+#import "CC3Mesh.h"
 
 #if CC3_OGL
 
-#import "kazmath/GL/matrix.h"	// Only OGL
-#import "CC3GLProgram.h"
-
-@interface CC3OpenGL (TemplateMethods)
--(void) clearUnboundVertexAttributes;
+@interface CC3OpenGLSL (TemplateMethods)
+-(void) initPlatformLimits;
+-(CC3VertexArray*) vertexArrayForAttribute: (CC3GLSLAttribute*) attribute
+							   withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3OpenGL3
@@ -47,82 +47,18 @@
 
 #pragma mark Vertex attribute arrays
 
-/**
- * Retrieve the program attribute that matches the specified semantic. Return the special
- * value kCC3VertexAttributeIndexUnavailable if either the program has no attribute with
- * the specified semantic or the attribute location is not valid.
+/** 
+ * Returns the vertex array that should be bound to the specified attribute.
+ *
+ * Overridden to return the vertex locations array as a default if the real vertex array is
+ * not available. This is to bypass failures in GLSL under OSX when attribute content is not
+ * bound, even if the attribute is not accessed during the execution of the shader.
  */
--(GLint) vertexAttributeIndexForSemantic: (GLenum) semantic
-							 withVisitor: (CC3NodeDrawingVisitor*) visitor {
-
-	GLuint semIdx = (semantic == kCC3SemanticVertexTexture) ? visitor.textureUnit : 0;
-	CC3GLSLAttribute* attribute = [visitor.currentShaderProgram attributeForSemantic: semantic at: semIdx];
-	
-	if ( !attribute ) return kCC3VertexAttributeIndexUnavailable;
-
-	GLint vaIdx = attribute.location;
-	return (vaIdx < 0) ? kCC3VertexAttributeIndexUnavailable : vaIdx;
+-(CC3VertexArray*) vertexArrayForAttribute: (CC3GLSLAttribute*) attribute
+							   withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3VertexArray* va = [super vertexArrayForAttribute: attribute withVisitor: visitor];
+	return va ? va : visitor.currentMesh.vertexLocations;
 }
-
--(void) enableVertexAttribute: (BOOL) onOff at: (GLint) vaIdx {
-	if (vaIdx < 0) return;
-	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
-	
-	// If we know the state and it is not changing, do nothing.
-//	if (vaPtr->isEnabledKnown && CC3BooleansAreEqual(vaPtr->isEnabled, onOff)) return;
-	
-	vaPtr->isEnabled = onOff;
-	vaPtr->isEnabledKnown = YES;
-	
-	[self setVertexAttributeEnablementAt: vaIdx];
-}
-
--(void) setVertexAttributeEnablementAt: (GLint) vaIdx {
-	if (vertexAttributes[vaIdx].isEnabled)
-		glEnableVertexAttribArray(vaIdx);
-	else {
-		glDisableVertexAttribArray(vaIdx);
-		glVertexAttrib4f(vaIdx, 0.0f, 0.0f, 0.0f, 1.0f);
-	}
-	LogGLErrorTrace(@"gl%@ableVertexAttribArray(%u)", (vertexAttributes[vaIdx].isEnabled ? @"En" : @"Dis"), vaIdx);
-}
-//-(void) setVertexAttributeEnablementAt: (GLint) vaIdx {
-//	if (vertexAttributes[vaIdx].isEnabled)
-//		glEnableVertexAttribArray(vaIdx);
-//	else
-//		glDisableVertexAttribArray(vaIdx);
-//	LogGLErrorTrace(@"gl%@ableVertexAttribArray(%u)", (vertexAttributes[vaIdx].isEnabled ? @"En" : @"Dis"), vaIdx);
-//}
-
--(void) bindVertexAttributesAt: (GLint) vaIdx {
-	if (vaIdx < 0) return;
-	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
-	glVertexAttribPointer(vaIdx, vaPtr->elementSize, vaPtr->elementType,
-						  vaPtr->shouldNormalize, vaPtr->vertexStride, vaPtr->vertices);
-	LogGLErrorTrace(@"glVertexAttribPointer(%i, %i, %@, %i, %p)", vaIdx, vaPtr->elementSize,
-					NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
-}
-
--(void) clearUnboundVertexAttributes {
-	[super clearUnboundVertexAttributes];
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
-}
-
--(void) enable2DVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
-		switch (vaIdx) {
-			case kCCVertexAttrib_Position:
-			case kCCVertexAttrib_Color:
-			case kCCVertexAttrib_TexCoords:
-				[self enableVertexAttribute: YES at: vaIdx];
-				break;
-			default:
-				[self enableVertexAttribute: NO at: vaIdx];
-				break;
-		}
-	}
-}
-
 
 #pragma mark State
 
@@ -134,90 +70,15 @@
 }
 
 
-#pragma mark Matrices
-
--(void) activateMatrixStack: (GLenum) mode { kmGLMatrixMode(mode); }
-
--(void) loadModelviewMatrix: (CC3Matrix4x3*) mtx {
-	[self activateMatrixStack: GL_MODELVIEW];
-	CC3Matrix4x4 glMtx;
-	CC3Matrix4x4PopulateFrom4x3(&glMtx, mtx);
-	kmGLLoadMatrix((kmMat4*)&glMtx);
-}
-
--(void) loadProjectionMatrix: (CC3Matrix4x4*) mtx {
-	[self activateMatrixStack: GL_PROJECTION];
-	kmGLLoadMatrix((kmMat4*)mtx);
-}
-
--(void) pushModelviewMatrixStack {
-	[self activateMatrixStack: GL_MODELVIEW];
-	kmGLPushMatrix();
-}
-
--(void) popModelviewMatrixStack {
-	[self activateMatrixStack: GL_MODELVIEW];
-	kmGLPopMatrix();
-}
-
--(void) pushProjectionMatrixStack {
-	[self activateMatrixStack: GL_PROJECTION];
-	kmGLPushMatrix();
-}
-
--(void) popProjectionMatrixStack {
-	[self activateMatrixStack: GL_PROJECTION];
-	kmGLPopMatrix();
-}
-
-
-#pragma mark Aligning 2D & 3D caches
-
--(void) align2DStateCache {
-	ccGLBlendFunc(value_GL_BLEND_SRC, value_GL_BLEND_DST);
-	ccGLBindTexture2DN(0, 0);
-	
-#if COCOS2D_VERSION < 0x020100
-	if (valueCap_GL_BLEND) ccGLEnable(CC_GL_BLEND);
-	else ccGLEnable(0);
-#endif
-
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
-}
-
-
 #pragma mark Allocation and initialization
 
--(id) init {
-	if ( (self = [super init]) ) {
-	}
-	return self;
-}
-
 -(void) initPlatformLimits {
-	value_GL_MAX_CLIP_PLANES = kCC3MaxGLClipPlanes;
-
-	value_GL_MAX_LIGHTS = kCC3MaxGLLights;
-	
-	value_GL_MAX_PALETTE_MATRICES = kCC3MaxGLPaletteMatrices;
+	[super initPlatformLimits];
 	
 	glGetIntegerv(GL_MAX_SAMPLES, &value_GL_MAX_SAMPLES);
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES), value_GL_MAX_SAMPLES);
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
-	
-	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);
-	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
-
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value_GL_MAX_VERTEX_ATTRIBS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS), value_GL_MAX_VERTEX_ATTRIBS);
-	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
-	
-	value_GL_MAX_VERTEX_UNITS = kCC3MaxGLVertexUnits;
 }
-
-
 
 @end
 
