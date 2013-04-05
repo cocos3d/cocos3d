@@ -287,4 +287,4 @@
 #define GL_PROJECTION                     0x1701
 #endif
 
-#endif
+#endif	// CC3_OGLES_2

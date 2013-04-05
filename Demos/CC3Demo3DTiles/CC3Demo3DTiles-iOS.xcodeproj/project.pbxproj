@@ -1713,7 +1713,7 @@
 			attributes = {
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles" */;
+			buildConfigurationList = A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles-iOS" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -2087,7 +2087,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles" */ = {
+		A9473C0714100DA5006F410C /* Build configuration list for PBXProject "CC3Demo3DTiles-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A9473D7D14100DA7006F410C /* Debug */,

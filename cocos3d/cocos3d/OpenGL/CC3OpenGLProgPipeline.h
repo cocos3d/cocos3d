@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLSL.h
+ * CC3OpenGLProgPipeline.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -92,10 +92,10 @@
 #endif
 
 /** 
- * CC3OpenGLSL is an abstract class that manages the OpenGL state for a single GL context
+ * CC3OpenGLProgPipeline is an abstract class that manages the OpenGL state for a single GL context
  * that supports a programmable pipeline running GLSL.
  */
-@interface CC3OpenGLSL : CC3OpenGL {}
+@interface CC3OpenGLProgPipeline : CC3OpenGL {}
 @end
 
 #endif	// CC3_GLSL

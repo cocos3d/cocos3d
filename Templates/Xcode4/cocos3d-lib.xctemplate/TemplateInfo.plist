@@ -1595,6 +1595,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>OpenGL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.h</key>
 		<dict>
 			<key>Group</key>
@@ -1619,7 +1643,7 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.h</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -1628,11 +1652,11 @@
 				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.h</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.m</key>
+		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -1641,7 +1665,7 @@
 				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.m</string>
+			<string>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/OpenGL/CC3OpenGLUtility.h</key>
 		<dict>
@@ -1682,7 +1706,7 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -1692,11 +1716,11 @@
 				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</key>
+		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -1706,7 +1730,7 @@
 				<string>OpenGL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</string>
+			<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGLCompatibility.h</key>
 		<dict>
@@ -3085,15 +3109,17 @@
 		<string>cocos3d/cocos3d/Nodes/CC3ParametricMeshNodes.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGL.m</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.h</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFixedPipeline.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.h</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLFoundation.m</string>
-		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.h</string>
-		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLSL.m</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.h</string>
+		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLProgPipeline.m</string>
 		<string>cocos3d/cocos3d/OpenGL/CC3OpenGLUtility.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3GLView-GL.m</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.h</string>
-		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL3.m</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.h</string>
+		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGL2.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGLCompatibility.h</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGL/CC3OpenGLUtility.m</string>
 		<string>cocos3d/cocos3d/OpenGL/OpenGLES1/CC3GLView-GLES1.h</string>

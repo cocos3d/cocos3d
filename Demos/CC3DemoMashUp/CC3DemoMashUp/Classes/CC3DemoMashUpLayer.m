@@ -512,7 +512,7 @@
 	[self handleTouch: touch ofType: kCCTouchMoved];
 }
 
-
+#if CC3_IOS
 #pragma mark Gesture support
 
 /**
@@ -680,5 +680,6 @@
 			break;
 	}
 }
+#endif	// CC3_IOS
 
 @end

@@ -34,8 +34,7 @@
 #if CC3_OGL
 
 #import "CC3OpenGLFoundation.h"
-#import "CC3OSXExtensions.h"
-#import "CCGLView.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark -

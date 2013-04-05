@@ -13,7 +13,7 @@
 @implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
 @synthesize window=window_, glView=glView_;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+-(void) applicationDidFinishLaunching: (NSNotification*) aNotification {
 	CCDirectorMac *director = (CCDirectorMac*)CCDirector.sharedDirector;
 	
 	// enable FPS and SPF
@@ -41,7 +41,7 @@
 	[director runWithScene: scene];
 }
 
-- (BOOL) applicationShouldTerminateAfterLastWindowClosed: (NSApplication*) theApplication {
+-(BOOL) applicationShouldTerminateAfterLastWindowClosed: (NSApplication*) theApplication {
 	return YES;
 }
 

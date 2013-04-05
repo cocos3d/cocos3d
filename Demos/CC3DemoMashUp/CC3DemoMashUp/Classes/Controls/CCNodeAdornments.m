@@ -46,9 +46,9 @@
 
 @synthesize actionDuration;
 
--(int) zOrder { return [super zOrder]; }
+-(NSInteger) zOrder { return [super zOrder]; }
 
--(void) setZOrder: (int) z {
+-(void) setZOrder: (NSInteger) z {
 	CC2_ZORDER = z;
 }
 

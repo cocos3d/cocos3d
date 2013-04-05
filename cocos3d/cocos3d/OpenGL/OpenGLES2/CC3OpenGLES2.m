@@ -61,4 +61,4 @@
 
 @end
 
-#endif
+#endif	// CC3_OGLES_2

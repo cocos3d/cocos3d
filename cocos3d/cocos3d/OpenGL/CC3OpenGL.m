@@ -39,8 +39,8 @@
 #	import "CC3OpenGLES1.h"
 #	define CC3OpenGLClass	CC3OpenGLES1
 #elif CC3_OGL
-#	import "CC3OpenGL3.h"
-#	define CC3OpenGLClass	CC3OpenGL3
+#	import "CC3OpenGL2.h"
+#	define CC3OpenGLClass	CC3OpenGL2
 #endif
 
 
@@ -185,6 +185,7 @@
 		cc3_CheckGLPrim(buffId, value_GL_ARRAY_BUFFER_BINDING, isKnown_GL_ARRAY_BUFFER_BINDING);
 		if ( !needsUpdate ) return;
 	}
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBindBuffer(target, buffId);
 	LogGLErrorTrace(@"glBindBuffer(%@, %u)", NSStringFromGLEnum(target), buffId);
 }
@@ -195,7 +196,6 @@
 				withData: (GLvoid*) buffPtr
 				ofLength: (GLsizeiptr) buffLen
 				  forUse: (GLenum) buffUsage {
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferData(target, buffLen, buffPtr, buffUsage);
 	LogGLErrorTrace(@"glBufferData(%@, %i, %p, %@)", NSStringFromGLEnum(target), buffLen, buffPtr, NSStringFromGLEnum(buffUsage));
 }
@@ -204,7 +204,6 @@
 				  withData: (GLvoid*) buffPtr
 				startingAt: (GLintptr) offset
 				 forLength: (GLsizeiptr) length {
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBufferSubData(target, offset, length, buffPtr);
 	LogGLErrorTrace(@"glBufferSubData(%@, %i, %i, %p)", NSStringFromGLEnum(target), offset, length, buffPtr);
 }

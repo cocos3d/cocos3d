@@ -43,30 +43,10 @@
 @property(nonatomic, assign, readwrite) CC3Node* parent;
 @end
 
-@interface CC3MeshNode (TemplateMethods)
--(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) configureFaceCulling: (CC3NodeDrawingVisitor*) visitor;
--(void) configureNormalization: (CC3NodeDrawingVisitor*) visitor;
--(void) configureColoring: (CC3NodeDrawingVisitor*) visitor;
--(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor;
--(void) configureDecalParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
--(void) configureLineProperties: (CC3NodeDrawingVisitor*) visitor;
--(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) alignTextureUnit: (GLuint) texUnit;
--(void) alignTextureUnits;
--(void) ensureMaterial;
--(void) makeMaterial;
--(void) ensureMesh;
--(void) makeMesh;
-@end
-
 @interface CC3Mesh (TemplateMethods)
 -(void) deprecatedAlignWithTexturesIn: (CC3Material*) aMaterial;
 -(void) deprecatedAlignWithInvertedTexturesIn: (CC3Material*) aMaterial;
 @end
-
 
 @implementation CC3MeshNode
 
@@ -876,7 +856,7 @@
 	visitor.gl.color = visitor.currentColor;
 }
 
-#if CC3_OGLES_2 || CC3_OGL
+#if CC3_GLSL
 /** 
  * If this node has a material and should be decorated, ensure that the material has a shader
  * program and bind it. If the material does not have a shader program yet, select an appropriate
@@ -901,10 +881,9 @@
 	}
 	[visitor.gl bindProgram: shaderProgram  withVisitor: visitor];
 }
-#endif
-#if CC3_OGLES_1
+#else
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif
+#endif	// CC3_GLSL
 
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [mesh drawWithVisitor: visitor]; }

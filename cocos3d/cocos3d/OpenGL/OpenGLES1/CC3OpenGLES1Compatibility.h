@@ -56,4 +56,4 @@
 #define GL_DECR_WRAP					GL_DECR_WRAP_OES
 #endif
 
-#endif
+#endif	// CC3_OGLES_1

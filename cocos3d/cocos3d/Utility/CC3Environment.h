@@ -34,7 +34,7 @@
 
 /** OS platform macros */
 # define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-# define CC3_MAC			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+# define CC3_OSX			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
 
 /** Create convenience tests for whether we are linking to cocos2d 1.x or 2.x. */
 #ifndef CC3_CC2_1
@@ -44,27 +44,27 @@
 #	define CC3_CC2_2		!(CC3_CC2_1)
 #endif
 
+/** Running some form of OpenGL ES under iOS. */
+#ifndef CC3_OGLES
+#	define CC3_OGLES		(CC3_IOS)
+#endif
+
 /** Running OpenGL ES 1 under iOS. */
 #ifndef CC3_OGLES_1
-#	define CC3_OGLES_1		(CC3_CC2_1)
+#	define CC3_OGLES_1		((CC3_CC2_1) && (CC3_OGLES))
 #endif
 
 /** Running OpenGL ES 2 under iOS. */
 #ifndef CC3_OGLES_2
-#	define CC3_OGLES_2		((CC3_CC2_2) && (CC3_IOS))
-#endif
-
-/** Running either OpenGL ES 1 or 2 under iOS. */
-#ifndef CC3_OGLES
-#	define CC3_OGLES		((CC3_OGLES_1) || (CC3_OGLES_2))
+#	define CC3_OGLES_2		((CC3_CC2_2) && (CC3_OGLES))
 #endif
 
 /** Running OpenGL under OSX on the Mac. */
 #ifndef CC3_OGL
-#	define CC3_OGL			((CC3_CC2_2) && (CC3_MAC))
+#	define CC3_OGL			(CC3_OSX)
 #endif
 
-/** Running an OpenGL that supports GLSL (either OpenGL ES 2 or OpenGL). */
+/** Running an OpenGL version that supports GLSL (either OpenGL ES 2 or OpenGL). */
 #ifndef CC3_GLSL
-#	define CC3_GLSL			((CC3_OGLES_2) || (CC3_OGL))
+#	define CC3_GLSL			(CC3_CC2_2)
 #endif

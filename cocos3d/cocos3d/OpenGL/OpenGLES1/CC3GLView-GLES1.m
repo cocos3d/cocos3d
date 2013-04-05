@@ -32,7 +32,7 @@
 
 #import "CC3GLView-GLES1.h"
 
-#if CC3_CC2_1
+#if CC3_OGLES_1
 #import "CC3Logging.h"
 #import "CCConfiguration.h"
 #import "CC3IOSExtensions.h"
@@ -226,4 +226,4 @@ static Class _instantiationClass = nil;
 @implementation CC3EAGLView
 @end
 
-#endif
+#endif	// CC3_OGLES_1

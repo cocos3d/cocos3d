@@ -343,7 +343,7 @@
 -(void) initializeParticle {
 	[super initializeParticle];
 
-	NSUInteger particleIndex = emitter.particleCount;
+	GLuint particleIndex = emitter.particleCount;
 	GLint zIndex = particleIndex / kParticlesPerSide;
 	GLint xIndex = particleIndex % kParticlesPerSide;
 	

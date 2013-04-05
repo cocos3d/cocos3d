@@ -12,7 +12,8 @@ http://www.brenwill.com
 Getting Started
 ---------------
 
-This starter application presents a 3D take on the ubiquitous "hello, world" application.
+This starter application presents a 3D take on the ubiquitous "hello, world" application,
+and can be compiled to run on any iOS devices.
 
 The content of the scene is constructed in the initializeScene method in the
 ___PROJECTNAMEASIDENTIFIER___Scene.m file. To add your own 3D content, edit that method.
@@ -39,7 +40,7 @@ cocos2d & OpenGL ES Version Compatibility
 -----------------------------------------
 
 cocos3d is compatible with cocos2d 1.0.1 and 1.1, for using fixed-pipeline OpenGL ES 1.1,
-and is compatible with cocos2d 2.0 and 2.1, for using programmable-pipeline OpenGL ES 2.0,
+and is compatible with cocos2d 2.0 and 2.1, for using programmable-pipeline OpenGL ES 2.0.
 
 This template application will use whichever version of cocos2d you indicated when you ran
 the install_cocos3d.sh script. You can easily change the version of cocos2d that is linked
@@ -50,7 +51,7 @@ to this project by following these steps within Xcode:
 3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
 
-By linking to cocos2d 2.x, you will automatically be using OpenGL ES 2.0, and by linking to
-cocos2d 1.x, you will automatically be using OpenGL ES 1.1. Because of this, you cannot mix
+By linking to cocos2d 2.x, you will automatically use OpenGL ES 2.0, and by linking to
+cocos2d 1.x, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
 the use of OpenGL ES 2.0 and 1.1 within a single application.
 

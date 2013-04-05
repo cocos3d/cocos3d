@@ -67,12 +67,12 @@
 #define kDieCubePODFile					@"DieCube.pod"
 #define kGroundTextureFile				@"Grass.jpg"
 #define kFloaterTextureFile				@"ButtonRing48x48.png"
-#define kSignTextureFile				@"Crate.pvr"
-#define kSignStampTextureFile			@"Stamp.pvr"
-#define kSignStampNormalsTextureFile	@"Stamp-nm.pvr"
+#define kSignTextureFile				@"Crate.png"
+#define kSignStampTextureFile			@"Stamp.png"
+#define kSignStampNormalsTextureFile	@"Stamp-nm.png"
 #define kHeadPODFile					@"Head.pod"
-#define kHeadTextureFile				@"Head_diffuse.pvr"
-#define kHeadBumpFile					@"Head_clonespacePVRTC.pvr"
+#define kHeadTextureFile				@"Head_diffuse.png"
+#define kHeadBumpFile					@"Head_clonespace.png"
 #define kCubeTextureFile				@"BoxTexture.png"
 #define kBrickTextureFile				@"Bricks-Red.jpg"
 #define kRunningManPODFile				@"man.pod"
@@ -495,8 +495,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 		LogRez(@"Copied %@ to %@", srcPath, dstPath);
 		return YES;
 	} else {
-		LogError(@"Could not copy %@ to %@ because (%i) in %@: %@",
-					  srcPath, dstPath, err.code, err.domain, err.userInfo);
+		LogError(@"Could not copy %@ to %@ because (%li) in %@: %@",
+					  srcPath, dstPath, (long)err.code, err.domain, err.userInfo);
 		return NO;
 	}
 }
@@ -1022,8 +1022,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * down, and as you move the camera around, which causes the head to rotate to follow you.
  */
 -(void) addFloatingHead {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODHeadRezNodeName
-															 fromFile: kHeadPODFile];
+	CC3PODResourceNode* podRezNode = [CC3ResourceNode nodeWithName: kPODHeadRezNodeName];
+	podRezNode.resource = [CC3PODResource resourceFromFile: kHeadPODFile
+						  expectsVerticallyFlippedTextures: NO];
 
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];

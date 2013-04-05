@@ -1235,17 +1235,15 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(BOOL) expectsVerticallyFlippedTextures {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++)
 		if ( [self expectsVerticallyFlippedTextureInTextureUnit: texUnit] ) return YES;
-	}
 	return NO;
 }
 
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
 	GLuint tcCount = self.textureCoordinatesArrayCount;
-	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++) {
+	for (GLuint texUnit = 0; texUnit < tcCount; texUnit++)
 		[self expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
-	}
 }
 
 -(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit {

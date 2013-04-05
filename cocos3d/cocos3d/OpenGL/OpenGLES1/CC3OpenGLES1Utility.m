@@ -399,4 +399,4 @@ size_t CC3GLElementTypeSize(GLenum dataType) {
 	}	
 }
 
-#endif
+#endif	// CC3_OGLES_1

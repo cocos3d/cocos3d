@@ -499,6 +499,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 	}
 }
 
+/** The cocos2d CCNode will supply its own shaders. */
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
 /**
  * During normal drawing, draw the cocos2d node.
  * When painting for node picking, update the bounding box mesh vertices and draw it.
@@ -965,7 +968,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark -
 #pragma mark CCParticleSystemPoint extensions
 
-#if CC3_CC2_1
+#if CC3_CC2_1 && CC3_IOS
 @implementation CCParticleSystemPoint (CC3)
 
 /** Scales by the inverse of the retina content scale factor. */

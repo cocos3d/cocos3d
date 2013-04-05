@@ -29,11 +29,12 @@
  * See header file CC3OSXExtensions.h for full API documentation.
  */
 
+#import "CC3CC2Extensions.h"
 #import "CC3OSXExtensions.h"
 #import "CC3Foundation.h"
 
 
-#if CC3_MAC
+#if CC3_OSX
 
 @implementation CC3UIViewController
 -(BOOL) isOverlayingDeviceCamera { return NO; }
@@ -41,5 +42,5 @@
 -(void) setView: (CCGLView*) view {}
 @end
 
-#endif	// CC3_MAC
+#endif	// CC3_OSX
 

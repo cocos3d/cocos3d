@@ -130,7 +130,7 @@
 	return (GLchar*)glslSrcStr.UTF8String;
 }
 
-#if CC3_OGLES_2 || CC3_OGL
+#if CC3_GLSL
 
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes
 				 andFragmentShaderBytes: (const GLchar*) fshBytes {
@@ -198,9 +198,10 @@
 		@"#define highp\n"
 		@"#define mediump\n"
 		@"#define lowp\n";
-#else
+#else	// !CC3_OGL
 	return @"";
-#endif
+#endif	// CC3_OGL
+
 }
 
 /** Queries the GL engine and returns whether the shader with the specified GL ID was successfully compiled. */
@@ -401,9 +402,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 
 -(void) deleteGLProgram { if (_programID) ccGLDeleteProgram(_programID); }
 
-#endif		// CC3_OGLES_2 || CC3_OGL
-
-#if CC3_OGLES_1
+#else		// !CC3_GLSL
 -(void) compileAndLinkVertexShaderBytes: (const GLchar*) vshBytes andFragmentShaderBytes: (const GLchar*) fshBytes {}
 -(void) compileAndLinkVertexShaderFile: (NSString*) vshFilename andFragmentShaderFile: (NSString*) fshFilename {}
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
@@ -412,7 +411,7 @@ typedef void ( GLLogFunction (GLuint program, GLsizei bufsize, GLsizei* length, 
 -(void) populateSceneScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) populateNodeScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 -(void) populateDrawScopeUniformsWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif	// CC3_OGLES_1
+#endif		// CC3_GLSL
 
 
 #pragma mark Allocation and initialization

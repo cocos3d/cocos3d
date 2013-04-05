@@ -465,7 +465,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 @implementation CC3OpenGLESStateTrackerGLSLAttribute
 
-#if CC3_OGLES_2 || CC3_OGL
+#if CC3_GLSL
 
 -(void) populateFromProgram {
 	_semantic = kCC3SemanticNone;
@@ -505,7 +505,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 }
 
 
-#if CC3_OGLES_2 || CC3_OGL
+#if CC3_GLSL
 
 -(void) populateFromProgram {
 	_semantic = kCC3SemanticNone;

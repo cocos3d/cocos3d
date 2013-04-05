@@ -36,19 +36,19 @@
 #include <OpenGLES/ES1/gl.h>
 #include <OpenGLES/ES1/glext.h>
 #include "CC3OpenGLES1Compatibility.h"
-#endif
+#endif	// CC3_OGLES_1
 
 #if CC3_OGLES_2
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 #include "CC3OpenGLES2Compatibility.h"
-#endif
+#endif	// CC3_OGLES_2
 
 #if CC3_OGL
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 #import "CC3OpenGLCompatibility.h"
-#endif
+#endif	// CC3_OGL
 
 #include <stdio.h>
 

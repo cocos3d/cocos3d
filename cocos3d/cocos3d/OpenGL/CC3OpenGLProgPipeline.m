@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLSL.m
+ * CC3OpenGLProgPipeline.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,10 +26,10 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  *
- * See header file CC3OpenGLSL.h for full API documentation.
+ * See header file CC3OpenGLProgPipeline.h for full API documentation.
  */
 
-#import "CC3OpenGLSL.h"
+#import "CC3OpenGLProgPipeline.h"
 #import "CC3GLProgram.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Mesh.h"
@@ -44,7 +44,7 @@
 -(void) initPlatformLimits;
 @end
 
-@implementation CC3OpenGLSL
+@implementation CC3OpenGLProgPipeline
 
 
 #pragma mark Vertex attribute arrays
@@ -191,6 +191,8 @@
 	value_GL_MAX_LIGHTS = kCC3MaxGLSLLights;
 	
 	value_GL_MAX_PALETTE_MATRICES = kCC3MaxGLSLPaletteMatrices;
+	
+	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
 	
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);

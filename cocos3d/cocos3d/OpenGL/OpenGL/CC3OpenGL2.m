@@ -1,5 +1,5 @@
 /*
- * CC3OpenGL3.m
+ * CC3OpenGL2.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,25 +29,26 @@
  * See header file CC3OpenGLES2.h for full API documentation.
  */
 
-#import "CC3OpenGL3.h"
+#import "CC3OpenGL2.h"
 #import "CC3GLProgram.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Mesh.h"
 
 #if CC3_OGL
 
-@interface CC3OpenGLSL (TemplateMethods)
+@interface CC3OGL3_PARENT (TemplateMethods)
 -(void) initPlatformLimits;
 -(CC3VertexArray*) vertexArrayForAttribute: (CC3GLSLAttribute*) attribute
 							   withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
-@implementation CC3OpenGL3
+@implementation CC3OpenGL2
 
 
 #pragma mark Vertex attribute arrays
 
-/** 
+#if CC3_GLSL
+/**
  * Returns the vertex array that should be bound to the specified attribute.
  *
  * Overridden to return the vertex locations array as a default if the real vertex array is
@@ -59,6 +60,8 @@
 	CC3VertexArray* va = [super vertexArrayForAttribute: attribute withVisitor: visitor];
 	return va ? va : visitor.currentMesh.vertexLocations;
 }
+#endif	// CC3_OGL
+
 
 #pragma mark State
 
@@ -82,4 +85,4 @@
 
 @end
 
-#endif
+#endif	// CC3_OGL && CC3_GLSL

@@ -387,7 +387,7 @@
 
 -(void) drawVerticesOfMesh: (CC3Mesh*) mesh withVisitor: (CC3NodeDrawingVisitor*) visitor {
 
-#if CC3_OGLES_1
+#if !CC3_GLSL
 	GLuint boneCnt = self.boneCount;
 	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
 		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
@@ -400,7 +400,7 @@
 		[sb.drawTransformMatrix multiplyIntoCC3Matrix4x3: &mtx];
 		[visitor.gl loadPaletteMatrix: &mtx at: boneNum];
 	}
-#endif
+#endif	// !CC3_GLSL
 
 	visitor.currentSkinSection = self;
 	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];

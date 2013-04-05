@@ -29,12 +29,12 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3OpenGLSL.h"
+#import "CC3OpenGLProgPipeline.h"
 
 #if CC3_OGLES_2
 
-/** CC3OpenGLES2 manages the OpenGLES 2.0 state for a single GL context. */
-@interface CC3OpenGLES2 : CC3OpenGLSL {}
+/** Manages the OpenGLES 2.0 state for a single GL context. */
+@interface CC3OpenGLES2 : CC3OpenGLProgPipeline {}
 @end
 
-#endif
+#endif	// CC3_OGLES_2

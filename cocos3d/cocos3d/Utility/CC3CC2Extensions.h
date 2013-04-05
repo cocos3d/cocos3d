@@ -32,7 +32,6 @@
 
 /* Base library of extensions to cocos2d to support cocos3d. */
 
-#import "CC3Environment.h"
 #import "CC3OSXExtensions.h"
 
 
@@ -40,12 +39,22 @@
 #pragma mark CCGLView & CC3GLView
 
 /**
- * Under cocos2d 1.x, create an alias CCGLView for EAGLView under cocos2d 1.x, allowing
- * EAGLView to be used where CCGLView is under cocos2d 2.x.
+ * Under cocos2d 1.x, create an alias CCGLView for EAGLView in iOS, allowing EAGLView to be
+ * used where CCGLView is under cocos2d 2.x. Under OSX, create CCGLView as a subclass of
+ * MacGLView, so it will be created by the NIB.
  */
 #if CC3_CC2_1
+
+#if CC3_IOS
 #	define CCGLView EAGLView
-#endif
+#endif	// CC3_IOS
+
+#if CC3_OSX
+@interface CCGLView : MacGLView
+@end
+#endif	// CC3_OSX
+
+#endif	// CC3_CC2_1
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
 #if CC3_CC2_1
@@ -66,6 +75,36 @@
 #	define CC3GLDraws()		0
 #	define CC_INCREMENT_GL_DRAWS(__n__)
 #endif
+
+
+#if !CC3_IOS
+
+#pragma mark -
+#pragma mark Extensions for non-IOS environments
+
+enum {
+	kCCTouchBegan,
+	kCCTouchMoved,
+	kCCTouchEnded,
+	kCCTouchCancelled,
+	
+	kCCTouchMax,
+};
+
+@interface CCTouchDispatcher : NSObject
+-(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches;
++(id) sharedDispatcher;
+@end
+
+@interface CCDirector (NonIOS)
+@property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
+@end
+
+@interface CCNode (NonIOS)
+-(CGPoint) convertTouchToNodeSpace: (UITouch*) touch;
+@end
+
+#endif		// !CC3_IOS
 
 
 #pragma mark -
@@ -298,14 +337,20 @@
 
 
 #if CC3_CC2_1
+
+/** Alias to setDisplayFPS: */
+-(void) setDisplayStats: (BOOL) displayFPS;
+
 /** Consistent naming alias for the OpenGL ES view. */
-@property(nonatomic, retain) UIView* view;
+@property(nonatomic, retain) CCGLView* view;
 
 /** Returns the CCActionManager sharedManager singleton. */
 @property (nonatomic, readonly) CCActionManager* actionManager;
 
+#if CC3_IOS
 /** Returns the CCTouchDispatcher sharedDispatcher singleton. */
 @property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
+#endif	// CC3_IOS
 
 /** Returns the CCScheduler sharedScheduler singleton. */
 @property (nonatomic, readonly) CCScheduler* scheduler;
@@ -319,11 +364,9 @@
 -(void) setRunLoopCommon: (BOOL) common;
 #endif
 
+#endif	// CC3_CC2_1
 
-
-#endif
-
-#if CC3_CC2_2
+#if CC3_CC2_2 || CC3_OSX
 /**
  * Adds support under cocos2d 2.x for legacy code that looks for device orientation under cocos2d 1.x.
  *
@@ -500,32 +543,3 @@ enum {
     kCCiOSVersion_6_0_0 = 0x06000000
 };
 #endif
-
-
-#if !CC3_IOS
-
-#pragma mark -
-#pragma mark Extensions for non-IOS environments
-
-enum {
-	kCCTouchBegan,
-	kCCTouchMoved,
-	kCCTouchEnded,
-	kCCTouchCancelled,
-	
-	kCCTouchMax,
-};
-
-@interface CCTouchDispatcher : NSObject
--(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches;
-@end
-
-@interface CCDirector (NonIOS)
-@property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
-@end
-
-@interface CCNode (NonIOS)
--(CGPoint) convertTouchToNodeSpace: (UITouch*) touch;
-@end
-
-#endif		// !CC3_IOS

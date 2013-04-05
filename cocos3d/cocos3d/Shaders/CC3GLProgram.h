@@ -35,9 +35,9 @@
 #import "CC3GLSLVariable.h"
 #import "CC3GLProgramSemantics.h"
 
-#if CC3_OGLES_2 || CC3_OGL
+#if CC3_GLSL
 #import "CCGLProgram.h"
-#endif
+#endif	// CC3_GLSL
 
 @class CC3GLProgramContext, CC3NodeDrawingVisitor;
 @protocol CC3GLProgramMatcher;

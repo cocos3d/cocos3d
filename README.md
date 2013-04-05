@@ -10,7 +10,7 @@ Table of Contents
 
 - About cocos3d
 - Installation
-- cocos2d & OpenGL ES Version Compatibility
+- cocos2d & OpenGL Version Compatibility
 - Creating Your First cocos3d Project
 - Documentation
 - Demo Applications
@@ -26,6 +26,9 @@ About cocos3d
 
 cocos3d is a sophisticated, yet intuitive and easy-to-use, 3D application development framework for the iOS platform. With cocos3d, you can build sophisticated, dynamic 3D games and applications using Objective-C.
 
+- Build 3D apps for iOS devices or Mac computers running OSX. The same 3D content and game logic will run unchanged under iOS or Mac OSX.
+- Use OpenGL programmable pipelines for sophisticated GLSL shader rendering, or use OpenGL fixed pipelines for simpler configurable rendering.
+- Supports OpenGL ES 2.0 or OpenGL ES 1.1 on iOS devices, and OpenGL programmable or fixed pipelines on Mac OSX.
 - Seamless integration with cocos2d. Rendering of all 3D model objects occurs within a special cocos2d layer, which fits seamlessly into the cocos2d node hierarchy, allowing 2D nodes such as controls, labels, and health bars to be drawn under, over, or beside 3D model objects. With this design, 2D objects, 3D objects, and sound can interact with each other to create a rich, synchronized audio-visual experience.
 - Seamless integration with the iOS UIViewController framework.
 - Pluggable loading framework for 3D models exported from familiar 3D editors such as Blender, 3ds Max or Cheetah3D, or through industry standard 3D object files such as Collada or PowerVR POD, or even from your own customized object file formats.
@@ -64,13 +67,13 @@ Installation
 1. The cocos3d framework works with [cocos2d](http://www.cocos2d-iphone.org). Before installing
 cocos3d, you must [download](http://www.cocos2d-iphone.org/download) and install cocos2d.
 
-The same cocos3d distribution can be used with either OpenGL ES 2.0 and `cocos2d 2.x`,
-or OpenGL ES 1.1 and `cocos2d 1.x`. Choose the first combination to use the more advanced
-programmable-pipeline and shaders of OpenGL ES 2.0, or choose the second combination to
-use the simpler and configurable fixed-pipeline and avoid the need to write GLSL shaders.
+The same cocos3d distribution can be used with either `cocos2d 2.x` or `cocos2d 1.x`. Link to
+`cocos2d 2.x` to make use of the more advanced shader-based programmable-pipeline available with
+OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to `cocos2d 1.x` to use the simpler configurable
+fixed-pipeline of OpenGL ES 1.1 (iOS) or OpenGL (OSX), and avoid the need to write GLSL shaders.
 
-2. Download the latest [stable cocos3d release](http://cocos3d.org),
-or clone the [cocos3d github repository](http://github.com/cocos3d/cocos3d).
+2. Download the latest [stable cocos3d release](http://cocos3d.org), or clone the
+[cocos3d github repository](http://github.com/cocos3d/cocos3d).
 
 3. Unzip the cocos3d distribution file.
 
@@ -100,21 +103,25 @@ directory and run the install-cocos3d script as follows:
 cocos2d & OpenGL ES Version Compatibility
 -----------------------------------------
 
-cocos3d is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1,
-and is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline OpenGL ES 2.0.
+cocos3d is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1 (iOS)
+or OpenGL (OSX), and is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
+OpenGL ES 2.0 (iOS) or OpenGL (OSX).
 
-When linking to a cocos2d library version, keep in mind that if you want to use OpenGL ES 2.0,
-you must use a `cocos2d 2.x` version, and if you want to use OpenGL ES 1.1, you must use a
-`cocos2d 1.x` version.
+When linking to a cocos2d library version, keep in mind that if you want to use shaders and a
+programmable pipeline using OpenGL ES 2.0 (iOS) or OpenGL (OSX), you must use a `cocos2d 2.x`
+version, and if you want to use a fixed pipeline using OpenGL ES 1.1 (iOS) or OpenGL (OSX),
+you must use a `cocos2d 1.x` version.
 
-Because of this, you cannot use both OpenGL ES 2.0 and OpenGL ES 1.1 within a single cocos3d app.
-However, you can easily change whether an app uses OpenGL ES 2.0 or OpenGL ES 1.1 by folliwng
-these steps within any Xcode project (including any of the included demo apps):
+Because of this, you cannot mix the use of fixed and programmable pipelines within a single app.
+However, you can easily change whether an app uses a programmable or fixed rendering pipeline
+by changing the version of `cocos2d` that is linked, by following these steps within any Xcode
+project (including any of the included demo apps):
 
 1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
 2. Run the install_cocos3d script again and identify the new version of cocos2d to be linked.
-   Keep in mind that you must link `cocos2d 2.x` if you want to use OpenGL ES 2.0, and you
-   must link `cocos2d 1.x` if you want to use OpenGL ES 1.x.
+   Keep in mind that you must link `cocos2d 2.x` if you want to use OpenGL ES 2.0 (iOS) or
+   OpenGL (OSX) with a programmable rendering pipeline, and you must link `cocos2d 1.x` if
+   you want to use OpenGL ES 1.x (iOS) or OpenGL (OSX) with a fixed rendering pipeline.
 3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
 
@@ -160,8 +167,9 @@ applications that are included in the cocos3d distribution. These demos, particu
 `CC3DemoMashUp` app, will help you understand how to use cocos3d, and demonstrate many of the
 key features and capabilities of cocos3d.
 
-For convenience, to access all of the demos together, open the *cocos3d.xcworkspace*
-Xcode workspace. You can also open each demo project individually in the Demos folder.
+For convenience, to access all of the demos together, open either the *cocos3d-iOS.xcworkspace*
+or *cocos3d-Mac.xcworkspace* Xcode workspace. You can also open each demo project individually
+in the Demos folder.
 
 At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build

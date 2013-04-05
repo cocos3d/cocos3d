@@ -1,5 +1,5 @@
 /*
- * CC3OpenGL3.h
+ * CC3OpenGL2.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,12 +29,19 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3OpenGLSL.h"
+#import "CC3OpenGLProgPipeline.h"
+#import "CC3OpenGLFixedPipeline.h"
 
 #if CC3_OGL
 
-/** CC3OpenGL3 manages the OpenGL 3.0 state for a single GL context. */
-@interface CC3OpenGL3 : CC3OpenGLSL {}
+#if CC3_GLSL
+#define CC3OGL3_PARENT	CC3OpenGLProgPipeline
+#else
+#define CC3OGL3_PARENT	CC3OpenGLFixedPipeline
+#endif	// CC3_GLSL
+
+/** Manages the OpenGL state for a single GL context. */
+@interface CC3OpenGL2 : CC3OGL3_PARENT {}
 @end
 
-#endif
+#endif	// CC3_OGL

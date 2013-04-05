@@ -45,10 +45,8 @@ the directory containing the cocos2d distribution. This installer looks
 for the following directories within that specified directory:
     cocos2d
     CocosDenshion
+    CocosDenshionExtras
     external/kazmath		(cocos2d 2.x only)
-    external/FontLabel		(cocos2d 1.x only)
-    cocoslive				(cocos2d 1.0 only)
-    external/TouchJSON		(cocos2d 1.0 only)
  
 OPTIONS:
    -f	force existing template directories to be ovewritten
@@ -161,11 +159,25 @@ copy_xc4_project_templates(){
 	check_dst_dir
 	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
 
+# Copy OpenGL Mac Template (cocos2d 1.x)
+	TEMPLATE="cocos3d Mac Application"
+	DST_DIR="$TEMPLATE_DIR""cocos3d1 Mac Application.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 1.x
+	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	mv "$DST_DIR/TemplateInfo1.plist" "$DST_DIR/TemplateInfo.plist"
+	rm "$DST_DIR/TemplateInfo2.plist"
+
+	DST_DIR="$DST_DIR""/Resources"
+	check_dst_dir
+	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+
 # Copy OpenGL Mac Template (cocos2d 2.x)
 	TEMPLATE="cocos3d Mac Application"
 	DST_DIR="$TEMPLATE_DIR""cocos3d2 Mac Application.xctemplate"
 	check_dst_dir
-	echo ...copying $TEMPLATE template files for use with OpenGL under OSX
+	echo ...copying $TEMPLATE template files for use with OpenGL under OSX and cocos2d 2.x
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
 
 	mv "$DST_DIR/TemplateInfo2.plist" "$DST_DIR/TemplateInfo.plist"
@@ -226,17 +238,12 @@ link_cocos2d_libs(){
 	CDEN_DIST_DIR="$CC2_DIST_DIR/CocosDenshion"
 	if [[ -d "$CDEN_DIST_DIR/CocosDenshion" ]]; then
 		link_dir "$CDEN_DIST_DIR/CocosDenshion" "$CC2_DIR" "CocosDenshion"
+		link_dir "$CDEN_DIST_DIR/CocosDenshionExtras" "$CC2_DIR" "CocosDenshionExtras"
 	else
 		link_dir "$CDEN_DIST_DIR" "$CC2_DIR" "CocosDenshion"
 	fi
 
 	link_dir "$CC2_DIST_DIR/external/kazmath" "$CC2_DIR" "kazmath (cocos2d 2.x only)"
-
-	link_dir "$CC2_DIST_DIR/external/FontLabel" "$CC2_DIR" "FontLabel (cocos2d 1.x only)"
-
-	link_dir "$CC2_DIST_DIR/cocoslive" "$CC2_DIR" "cocoslive (cocos2d 1.0 only)"
-
-	link_dir "$CC2_DIST_DIR/external/TouchJSON" "$CC2_DIR" "cocoslive dependencies (cocos2d 1.0 only))"
 
 	echo done!
 }

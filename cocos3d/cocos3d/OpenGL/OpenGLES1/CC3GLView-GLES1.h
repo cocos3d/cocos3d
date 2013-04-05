@@ -31,7 +31,7 @@
 
 #import "CC3Environment.h"
 
-#if CC3_CC2_1
+#if CC3_OGLES_1
 
 #import "CC3OpenGLFoundation.h"
 #import "EAGLView.h"
@@ -200,4 +200,4 @@ DEPRECATED_ATTRIBUTE
 @interface CC3EAGLView : CC3GLView
 @end
 
-#endif
+#endif	// CC3_OGLES_1

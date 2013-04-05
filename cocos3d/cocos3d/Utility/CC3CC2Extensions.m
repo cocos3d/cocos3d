@@ -34,6 +34,33 @@
 #import "CC3Logging.h"
 #import "uthash.h"
 
+#if ((CC3_CC2_1) && (CC3_OSX))
+@implementation CCGLView
+@end
+#endif	// CC3_CC2_1 && CC3_OSX
+
+
+#if !CC3_IOS
+
+#pragma mark -
+#pragma mark Extensions for non-IOS environments
+
+@implementation CCTouchDispatcher
+-(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches {}
++(id) sharedDispatcher { return nil; }
+@end
+
+@implementation CCDirector (NonIOS)
+-(CCTouchDispatcher*) touchDispatcher { return nil; }
+@end
+
+@implementation CCNode (NonIOS)
+-(CGPoint) convertTouchToNodeSpace: (UITouch*) touch { return CGPointZero; }
+@end
+
+#endif		// !CC3_IOS
+
+
 #if COCOS2D_VERSION < 0x020100
 #	define CC2_DT dt
 #	define CC2_FRAME_RATE frameRate_
@@ -257,18 +284,27 @@
 -(NSTimeInterval) displayLinkTime { return [NSDate timeIntervalSinceReferenceDate]; }
 
 #if CC3_CC2_1
--(UIView*) view { return self.openGLView; }
--(void) setView: (UIView*) view { self.openGLView = (CCGLView*)view; }
+-(void) setDisplayStats: (BOOL) displayFPS { [self setDisplayFPS: displayFPS]; }
+
+-(CCGLView*) view { return (CCGLView*)self.openGLView; }
+
+-(void) setView: (CCGLView*) view { self.openGLView = (CCGLView*)view; }
+
 -(CCActionManager*) actionManager { return CCActionManager.sharedManager; }
+
+#if CC3_IOS
 -(CCTouchDispatcher*) touchDispatcher { return CCTouchDispatcher.sharedDispatcher; }
+#endif	// CC3_IOS
+
 -(CCScheduler*) scheduler { return CCScheduler.sharedScheduler; }
 
 #if COCOS2D_VERSION < 0x010100
 -(void) setRunLoopCommon: (BOOL) common {}
 #endif
-#endif
 
-#if CC3_CC2_2
+#endif	// CC3_CC2_1
+
+#if CC3_CC2_2 || CC3_OSX
 -(UIDeviceOrientation) deviceOrientation { return UIDeviceOrientationPortrait; }
 #endif
 
@@ -456,24 +492,4 @@ NSString* NSStringFromTouchType(uint tType) {
 			return [NSString stringWithFormat: @"unknown touch type (%u)", tType];
 	}
 }
-
-
-#if !CC3_IOS
-
-#pragma mark -
-#pragma mark Extensions for non-IOS environments
-
-@implementation CCTouchDispatcher
--(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches {}
-@end
-
-@implementation CCDirector (NonIOS)
--(CCTouchDispatcher*) touchDispatcher { return nil; }
-@end
-
-@implementation CCNode (NonIOS)
--(CGPoint) convertTouchToNodeSpace: (UITouch*) touch { return CGPointZero; }
-@end
-
-#endif		// !CC3_IOS
 

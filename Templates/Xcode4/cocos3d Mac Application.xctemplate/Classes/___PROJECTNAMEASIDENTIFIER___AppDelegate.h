@@ -6,7 +6,7 @@
 //  Copyright ___ORGANIZATIONNAME___ ___YEAR___. All rights reserved.
 //
 
-#import "cocos2d.h"
+#import "CC3CC2Extensions.h"
 
 @interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <NSApplicationDelegate>
 {

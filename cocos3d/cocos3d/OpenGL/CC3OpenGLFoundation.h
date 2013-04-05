@@ -35,19 +35,19 @@
 #import <OpenGLES/ES1/gl.h>
 #import <OpenGLES/ES1/glext.h>
 #include "CC3OpenGLES1Compatibility.h"
-#endif
+#endif	// CC3_OGLES_1
 
 #if CC3_OGLES_2
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import "CC3OpenGLES2Compatibility.h"
-#endif
+#endif	// CC3_OGLES_2
 
 #if CC3_OGL
 #import <OpenGL/gl.h>
 #import <OpenGL/glu.h>
 #import "CC3OpenGLCompatibility.h"
-#endif
+#endif	// CC3_OGL
 
 #pragma mark -
 #pragma mark GL supporting structures & functions

@@ -261,7 +261,7 @@
 
 #pragma mark Drawing
 
-#if CC3_OGLES_1
+#if !CC3_GLSL
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super bindWithVisitor: visitor];
 
@@ -283,7 +283,7 @@
 	
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
-#endif
+#endif	// !CC3_GLSL
 
 @end
 
@@ -308,7 +308,7 @@
 
 #pragma mark Drawing
 
-#if CC3_OGLES_1
+#if !CC3_GLSL
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super bindWithVisitor: visitor];
 	
@@ -326,6 +326,6 @@
 	
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
-#endif
+#endif	// !CC3_GLSL
 
 @end
