@@ -24,7 +24,9 @@ Table of Contents
 About cocos3d
 -------------
 
-cocos3d is a sophisticated, yet intuitive and easy-to-use, 3D application development framework for the iOS platform. With cocos3d, you can build sophisticated, dynamic 3D games and applications using Objective-C.
+cocos3d is a sophisticated, yet intuitive and easy-to-use, 3D application development 
+framework for the iOS platform. With cocos3d, you can build sophisticated, dynamic 3D
+games and applications using Objective-C.
 
 - Build 3D apps for iOS devices or Mac computers running OSX. The same 3D content and game logic will run unchanged under iOS or Mac OSX.
 - Use OpenGL programmable pipelines for sophisticated GLSL shader rendering, or use OpenGL fixed pipelines for simpler configurable rendering.
@@ -40,7 +42,7 @@ cocos3d is a sophisticated, yet intuitive and easy-to-use, 3D application develo
 - 3D objects can be covered with dynamic materials and textures to create rich, realistic imagery.
 - Multi-texturing and bump-mapped textures are available, allowing you to create sophisticated surface effects.
 - Vertex skinning, also often referred to as bone rigging, allowing soft-body meshes to be realistically deformed based on the movement of an underlying skeleton constructed of bones and joints.
-- Automatic shadowing using shadow volumes.
+- Automatic shadowing of models using shadow volumes.
 - Collision detection between nodes.
 - Ray-casting for nodes intersected by a ray, and the local location of intersection on a node or mesh, right down to the exact mesh intersection location and face.
 - The 3D camera supports both perspective and orthographic projection options.
@@ -65,12 +67,13 @@ Installation
 ------------
 
 1. The cocos3d framework works with [cocos2d](http://www.cocos2d-iphone.org). Before installing
-cocos3d, you must [download](http://www.cocos2d-iphone.org/download) and install cocos2d.
+cocos3d, you must [download](http://www.cocos2d-iphone.org/download) and install cocos2d.<br/><br/>
 
-The same cocos3d distribution can be used with either `cocos2d 2.x` or `cocos2d 1.x`. Link to
-`cocos2d 2.x` to make use of the more advanced shader-based programmable-pipeline available with
-OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to `cocos2d 1.x` to use the simpler configurable
-fixed-pipeline of OpenGL ES 1.1 (iOS) or OpenGL (OSX), and avoid the need to write GLSL shaders.
+	The same cocos3d distribution can be used with either `cocos2d 2.x` or `cocos2d 1.x`.
+	Link to `cocos2d 2.x` to make use of the more advanced shader-based programmable-pipeline
+	available with OpenGL ES 2.0 (iOS) or OpenGL (OSX). Or link to `cocos2d 1.x` to use the
+	simpler configurable fixed-pipeline of OpenGL ES 1.1 (iOS) or OpenGL (OSX), and avoid
+	the need to write GLSL shaders.
 
 2. Download the latest [stable cocos3d release](http://cocos3d.org), or clone the
 [cocos3d github repository](http://github.com/cocos3d/cocos3d).
@@ -80,27 +83,45 @@ fixed-pipeline of OpenGL ES 1.1 (iOS) or OpenGL (OSX), and avoid the need to wri
 4. Open a Terminal session, navigate to the unzipped cocos3d distribution
 directory and run the install-cocos3d script as follows:
 
-		./install-cocos3d.sh -f -2 "path-to-cocos2d-sources"
+		./install-cocos3d.sh -f -2 "path-to-cocos2d"
 
 	For example:
 
-		./install-cocos3d.sh -f -2 "../../cocos2d/cocos2d-iphone-2.0"
+		./install-cocos3d.sh -f -2 "../cocos2d-iphone-2.0"
 
-	The cocos2d source code must be available and identified using the -2 switch so that the
-	installer can link the cocos2d libraries to the cocos3d templates and demo projects.
+	The cocos2d distribution must be available and identified using the -2 switch so the
+	installer can link the cocos2d libraries to the cocos3d templates and demo projects.<br/><br/>
 	
-	You may use either a relative path (as above), or an absolute path. If for some reason the
-	relative path cannot be correctly resolved on your system, or the resulting links to the
-	cocos2d library are not accurate, try again using the full absolute path.
+	You may use either a relative path (as above), or an absolute path. If for some reason
+	the relative path cannot be correctly resolved on your system, or the resulting links 
+	to the cocos2d library are not accurate, try again using the full absolute path.
 
-	If you encounter `rsync` errors during installation, it's typically because you are trying
-	to run the installer without first navigating to the cocos3d distribution directory.
+	If you encounter `rsync` errors during installation, it's typically because you are
+	trying to run the installer without first navigating to the cocos3d distribution directory.
 	Be sure to run the installer from the cocos3d distribution directory.
 
 5. That's it!
 
+Keep in mind that cocos3d does not "patch" your cocos2d installation. Instead, you install
+cocos3d alongside cocos2d, and link to it using the installation script. As a concrete 
+example, let's say you have a development directory named `MyCocosDev`, into which you 
+download and unzip both cocos2d and cocos3d. You'll end up with a directory structure like:
 
-cocos2d & OpenGL ES Version Compatibility
+	MyCocosDev
+		cocos2d-iphone-2.0
+		cocos3d-2.0.0
+
+First, in a Terminal session, install cocos2d by navigating to the `cocos2d-iphone-2.0`
+directory and running:
+
+	./install-templates.sh -f -u
+
+Then, navigate to the `cocos3d-2.0.0` directory and install cocos3d by running:
+
+	./install-cocos3d.sh -f -2 "../cocos2d-iphone-2.0"
+
+
+cocos2d & OpenGL Version Compatibility
 -----------------------------------------
 
 cocos3d is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1 (iOS)
@@ -118,7 +139,7 @@ by changing the version of `cocos2d` that is linked, by following these steps wi
 project (including any of the included demo apps):
 
 1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
-2. Run the install_cocos3d script again and identify the new version of cocos2d to be linked.
+2. Run the `install-cocos3d.sh` script again and identify the new version of cocos2d to be linked.
    Keep in mind that you must link `cocos2d 2.x` if you want to use OpenGL ES 2.0 (iOS) or
    OpenGL (OSX) with a programmable rendering pipeline, and you must link `cocos2d 1.x` if
    you want to use OpenGL ES 1.x (iOS) or OpenGL (OSX) with a fixed rendering pipeline.
@@ -130,19 +151,30 @@ the demo apps within the cocos3d distribution are pre-configured to use that ver
 and run the demo apps with a different version of cocos2d, follow the steps described above.
 
 
-
 Creating Your First cocos3d Project
 -----------------------------------
 
-To get started with your first cocos3d project, open Xcode 4, click on the File->New->NewProject...
-menu selection, and select either the *cocos3d2 Application* or the *cocos3d1 Application* project
-template from the cocos3d template group, depending on whether you want to use OpenGL ES 2.0, or
-OpenGL ES 1.1, respectively.
+The `install-cocos3d.sh` script also installs several convenient Xcode project templates.
 
-Remember that if you want to use the *cocos3d2 Application* template and OpenGL ES 2.0, your
+To get started with your first cocos3d iOS project, open Xcode 4, click on the File->New->NewProject...
+menu selection, and select either the *cocos3d2 iOS Application* or the *cocos3d1 iOS Application*
+project template from the cocos3d template group in the iOS section, depending on whether you want to
+use OpenGL ES 2.0, or OpenGL ES 1.1, respectively.
+
+Remember that if you want to use the *cocos3d2 iOS Application* template and OpenGL ES 2.0, your
 cocos3d installation must be linked to a `cocos2d 2.x` version, as described above, and if you
-want to use the *cocos3d1 Application* template and OpenGL ES 1.1, your cocos3d installation
+want to use the *cocos3d1 iOS Application* template and OpenGL ES 1.1, your cocos3d installation
 must be linked to a `cocos2d 1.x` version, as described above.
+
+To get started with your first cocos3d Mac OSX project, open Xcode 4, click on the File->New->NewProject...
+menu selection, and select either the *cocos3d2 Mac Application* or the *cocos3d1 Mac Application* project
+template from the cocos3d template group in the OS X section, depending on whether you want to use
+OpenGL with a programmable rendering pipeline, or a configurable fixed rendering pipeline, respectively.
+
+Remember that if you want to use the *cocos3d2 Mac Application* template and OpenGL with a programmable
+pipeline, your cocos3d installation must be linked to a `cocos2d 2.x` version, as described above, and
+if you want to use the *cocos3d1 Mac Application* template and OpenGL with a fixed pipeline, your cocos3d
+installation must be linked to a `cocos2d 1.x` version, as described above.
 
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.

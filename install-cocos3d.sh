@@ -131,8 +131,8 @@ copy_xc4_project_templates(){
 	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
 
 # Copy OpenGL ES 1 Template
-	TEMPLATE="cocos3d Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d1 Application.xctemplate"
+	TEMPLATE="cocos3d iOS Application"
+	DST_DIR="$TEMPLATE_DIR""cocos3d1 iOS Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 1.1
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"
@@ -146,8 +146,8 @@ copy_xc4_project_templates(){
 	copy_files "Demos/Common/Resources/fps_images_1.png" "$DST_DIR"
 
 # Copy OpenGL ES 2 Template
-	TEMPLATE="cocos3d Application"
-	DST_DIR="$TEMPLATE_DIR""cocos3d2 Application.xctemplate"
+	TEMPLATE="cocos3d iOS Application"
+	DST_DIR="$TEMPLATE_DIR""cocos3d2 iOS Application.xctemplate"
 	check_dst_dir
 	echo ...copying $TEMPLATE template files for use with OpenGL ES 2.0
 	copy_files "Templates/Xcode4/$TEMPLATE.xctemplate/" "$DST_DIR"

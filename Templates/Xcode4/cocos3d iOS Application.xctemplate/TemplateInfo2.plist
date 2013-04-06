@@ -110,9 +110,9 @@
 		</dict>
 	</dict>
 	<key>Description</key>
-	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0. This template requires that cocos2d 2.x is installed.</string>
+	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS device. This template requires that cocos2d 2.x is installed.</string>
 	<key>Identifier</key>
-	<string>org.cocos3d.cocos3d2Template</string>
+	<string>org.cocos3d.cocos3d2iOSTemplate</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Nodes</key>

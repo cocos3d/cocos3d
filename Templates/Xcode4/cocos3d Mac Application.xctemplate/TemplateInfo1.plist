@@ -110,7 +110,7 @@
 		</dict>
 	</dict>
 	<key>Description</key>
-	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL on a Mac. You can use this as the starting point for any cocos3d application that uses OpenGL on a Mac. This template requires that cocos2d 1.x is installed.</string>
+	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL on a Mac running OSX. You can use this as the starting point for any cocos3d application that uses OpenGL on a Mac running OSX. This template requires that cocos2d 1.x is installed.</string>
 	<key>Identifier</key>
 	<string>org.cocos3d.cocos3d1MacTemplate</string>
 	<key>Kind</key>
