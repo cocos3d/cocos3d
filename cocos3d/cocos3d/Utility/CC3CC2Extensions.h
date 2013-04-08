@@ -82,6 +82,7 @@
 #pragma mark -
 #pragma mark Extensions for non-IOS environments
 
+/** Added for iOS functionality in non-iOS environment. */
 enum {
 	kCCTouchBegan,
 	kCCTouchMoved,
@@ -91,15 +92,18 @@ enum {
 	kCCTouchMax,
 };
 
+/** Add stub class for iOS functionality in non-iOS environment. */
 @interface CCTouchDispatcher : NSObject
 -(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches;
 +(id) sharedDispatcher;
 @end
 
+/** Extension category to add stubs for iOS functionality in non-iOS environment. */
 @interface CCDirector (NonIOS)
 @property (nonatomic, readonly) CCTouchDispatcher* touchDispatcher;
 @end
 
+/** Extension category to add stubs for iOS functionality in non-iOS environment. */
 @interface CCNode (NonIOS)
 -(CGPoint) convertTouchToNodeSpace: (UITouch*) touch;
 @end

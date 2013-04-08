@@ -143,6 +143,27 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 #pragma mark CC3GLSLAttribute
 
 @implementation CC3GLSLAttribute
+
+#if CC3_GLSL
+
+-(void) populateFromProgram {
+	_semantic = kCC3SemanticNone;
+	
+	GLint maxNameLen = [_program maxAttributeNameLength];
+	char cName[maxNameLen];
+	
+	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
+	LogGLErrorTrace(@"glGetActiveAttrib(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
+	
+	_location = glGetAttribLocation(_program.programID, cName);
+	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
+	
+	[_name release];
+	_name = [[self variableNameFrom: cName] retain];	// retained
+}
+
+#endif	// CC3_GLSL
+
 @end
 
 
@@ -153,6 +174,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) dealloc {
 	free(_varValue);
+	free(_glVarValue);
 	[super dealloc];
 }
 
@@ -173,6 +195,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	_varLen = CC3GLElementTypeSize(_type) * _size;
 	free(_varValue);
 	_varValue = calloc(_varLen, 1);
+	free(_glVarValue);
+	_glVarValue = calloc(_varLen, 1);
 }
 
 
@@ -455,54 +479,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	memcpy(_varValue, uniform.varValue, _varLen);
 }
 
--(BOOL) updateGLValue { return NO; }
 
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerGLSLAttribute
-
-@implementation CC3OpenGLESStateTrackerGLSLAttribute
-
-#if CC3_GLSL
-
--(void) populateFromProgram {
-	_semantic = kCC3SemanticNone;
-	
-	GLint maxNameLen = [_program maxAttributeNameLength];
-	char cName[maxNameLen];
-	
-	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"glGetActiveAttrib(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
-	
-	_location = glGetAttribLocation(_program.programID, cName);
-	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
-	
-	[_name release];
-	_name = [[self variableNameFrom: cName] retain];	// retained
-}
-
-#endif
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerGLSLUniform
-
-@implementation CC3OpenGLESStateTrackerGLSLUniform
-
--(void) dealloc {
-	free(_glVarValue);
-	[super dealloc];
-}
-
--(void) populateFrom: (CC3OpenGLESStateTrackerGLSLUniform*) another {
-	[super populateFrom: another];
-	free(_glVarValue);
-	_glVarValue = calloc(_varLen, 1);
-}
+#pragma mark Updating the GL engine
 
 
 #if CC3_GLSL
@@ -605,7 +583,22 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	}
 }
 
-#endif
+#else
+
+-(BOOL) updateGLValue { return NO; }
+
+#endif	// CC3_GLSL
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLUniformOverride
+
+@implementation CC3GLSLUniformOverride
+
+-(BOOL) updateGLValue { return NO; }
+-(void) setGLValue {}
 
 @end
 

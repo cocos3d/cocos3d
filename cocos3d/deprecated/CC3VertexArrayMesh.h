@@ -37,22 +37,34 @@
 #pragma mark Deprecated vertex array mesh and vertex locations bounding volumes
 
 DEPRECATED_ATTRIBUTE
-/** @deprecated Functionality moved into parent CC3Mesh class. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to CC3Mesh.
+ */
 @interface CC3VertexArrayMesh : CC3Mesh
 @end
 
 DEPRECATED_ATTRIBUTE
-/**@deprecated Functionality moved to parent CC3NodeCenterOfGeometryBoundingVolume class. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to parent CC3NodeCenterOfGeometryBoundingVolume class.
+ */
 @interface CC3VertexLocationsBoundingVolume : CC3NodeCenterOfGeometryBoundingVolume
 @end
 
 DEPRECATED_ATTRIBUTE
-/**@deprecated Functionality moved to parent CC3NodeSphericalBoundingVolume class. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to parent CC3NodeSphericalBoundingVolume class.
+ */
 @interface CC3VertexLocationsSphericalBoundingVolume : CC3NodeSphericalBoundingVolume
 @end
 
 DEPRECATED_ATTRIBUTE
-/**@deprecated Functionality moved to parent CC3NodeBoundingBoxVolume class. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to parent CC3NodeBoundingBoxVolume class.
+ */
 @interface CC3VertexLocationsBoundingBoxVolume : CC3NodeBoundingBoxVolume
 @end
 

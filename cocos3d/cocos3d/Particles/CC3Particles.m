@@ -30,7 +30,6 @@
  */
 
 #import "CC3Particles.h"
-#import "CC3VertexArrayMesh.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 #import "CC3Scene.h"

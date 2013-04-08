@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A924D160171307500061DDA0 /* tex_arm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15D171307500061DDA0 /* tex_arm.pvr */; };
+		A924D161171307500061DDA0 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A924D15E171307500061DDA0 /* tex_base.bmp */; };
+		A924D162171307500061DDA0 /* tex_base.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D15F171307500061DDA0 /* tex_base.pvr */; };
 		A9363F88170EF34E0010931B /* Cal3D File Formats.txt in Resources */ = {isa = PBXBuildFile; fileRef = A9363E77170EF34E0010931B /* Cal3D File Formats.txt */; };
 		A9363F89170EF34E0010931B /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A9363E79170EF34E0010931B /* CC3CAFResource.m */; };
 		A9363F8A170EF34E0010931B /* CC3CALNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A9363E7B170EF34E0010931B /* CC3CALNode.m */; };
@@ -325,6 +328,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A924D15D171307500061DDA0 /* tex_arm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_arm.pvr; path = ../Common/Resources/tex_arm.pvr; sourceTree = "<group>"; };
+		A924D15E171307500061DDA0 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = tex_base.bmp; path = ../Common/Resources/tex_base.bmp; sourceTree = "<group>"; };
+		A924D15F171307500061DDA0 /* tex_base.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = tex_base.pvr; path = ../Common/Resources/tex_base.pvr; sourceTree = "<group>"; };
 		A9363E77170EF34E0010931B /* Cal3D File Formats.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Cal3D File Formats.txt"; sourceTree = "<group>"; };
 		A9363E78170EF34E0010931B /* CC3CAFResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3CAFResource.h; sourceTree = "<group>"; };
 		A9363E79170EF34E0010931B /* CC3CAFResource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3CAFResource.m; sourceTree = "<group>"; };
@@ -1807,7 +1813,10 @@
 				A9742DCB170DD72B001FD5A2 /* Stamp.png */,
 				A9742DCD170DD72B001FD5A2 /* SunlightButton48x48.png */,
 				A9FF6E06170DED6600FC35C8 /* tex_arm.png */,
+				A924D15D171307500061DDA0 /* tex_arm.pvr */,
+				A924D15E171307500061DDA0 /* tex_base.bmp */,
 				A9FF6E07170DED6600FC35C8 /* tex_base.png */,
+				A924D15F171307500061DDA0 /* tex_base.pvr */,
 				A9742DD1170DD72B001FD5A2 /* ZoomButton48x48.png */,
 			);
 			name = Resources;
@@ -2015,6 +2024,9 @@
 				A9363F9F170EF34E0010931B /* PVRT_Removed_Files.txt in Resources */,
 				A96B0050170F1D330067245C /* ChangeLog in Resources */,
 				A96B0051170F1D330067245C /* CMakeLists.txt in Resources */,
+				A924D160171307500061DDA0 /* tex_arm.pvr in Resources */,
+				A924D161171307500061DDA0 /* tex_base.bmp in Resources */,
+				A924D162171307500061DDA0 /* tex_base.pvr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

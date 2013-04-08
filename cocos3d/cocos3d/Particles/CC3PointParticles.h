@@ -468,7 +468,10 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 #pragma mark Deprecated CC3PointParticleMesh
 
 DEPRECATED_ATTRIBUTE
-/** @deprecated Functionality moved to CC3Mesh. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to CC3Mesh.
+ */
 @interface CC3PointParticleMesh : CC3Mesh
 
 /** @deprecated Use vertexCount instead. Point particles have one vertex per particle. */

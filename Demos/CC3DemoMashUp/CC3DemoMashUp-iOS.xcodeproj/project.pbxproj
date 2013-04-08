@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */; };
+		A924D15A171306F20061DDA0 /* tex_arm.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D157171306F20061DDA0 /* tex_arm.pvr */; };
+		A924D15B171306F20061DDA0 /* tex_base.bmp in Resources */ = {isa = PBXBuildFile; fileRef = A924D158171306F20061DDA0 /* tex_base.bmp */; };
+		A924D15C171306F20061DDA0 /* tex_base.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A924D159171306F20061DDA0 /* tex_base.pvr */; };
 		A92C6A12144A272900B15941 /* BoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A92C6A11144A272900B15941 /* BoxTexture.png */; };
 		A92D8A0814F6B377009458BE /* ShadowButtonLatched48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */; };
 		A92DA7B01427B5980051AFFA /* ArrowLeftButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */; };
@@ -325,6 +328,9 @@
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* CC3DemoMashUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3DemoMashUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506EDBA4102F4C9F00A389B3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A924D157171306F20061DDA0 /* tex_arm.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tex_arm.pvr; sourceTree = "<group>"; };
+		A924D158171306F20061DDA0 /* tex_base.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = tex_base.bmp; sourceTree = "<group>"; };
+		A924D159171306F20061DDA0 /* tex_base.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tex_base.pvr; sourceTree = "<group>"; };
 		A92C6A11144A272900B15941 /* BoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BoxTexture.png; sourceTree = "<group>"; };
 		A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ShadowButtonLatched48x48.png; sourceTree = "<group>"; };
 		A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ArrowLeftButton48x48.png; sourceTree = "<group>"; };
@@ -1013,7 +1019,10 @@
 				A9AE3D7C14E46118002805DA /* Stamp.png */,
 				A92DA7AC1427B5980051AFFA /* SunlightButton48x48.png */,
 				A9FF6E16170DF7B100FC35C8 /* tex_arm.png */,
+				A924D157171306F20061DDA0 /* tex_arm.pvr */,
+				A924D158171306F20061DDA0 /* tex_base.bmp */,
 				A9FF6E17170DF7B100FC35C8 /* tex_base.png */,
+				A924D159171306F20061DDA0 /* tex_base.pvr */,
 				A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */,
 			);
 			name = Resources;
@@ -2010,6 +2019,9 @@
 				A9364132170EF3FF0010931B /* PVRT_Removed_Files.txt in Resources */,
 				A96BFEF2170F1BEA0067245C /* ChangeLog in Resources */,
 				A96BFEF3170F1BEA0067245C /* CMakeLists.txt in Resources */,
+				A924D15A171306F20061DDA0 /* tex_arm.pvr in Resources */,
+				A924D15B171306F20061DDA0 /* tex_base.bmp in Resources */,
+				A924D15C171306F20061DDA0 /* tex_base.pvr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

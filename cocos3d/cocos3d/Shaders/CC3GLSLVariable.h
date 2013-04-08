@@ -247,10 +247,16 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 #pragma mark -
 #pragma mark CC3GLSLUniform
 
-/** Represents a uniform variable used in a GLSL shader program.  */
+/** 
+ * Represents a uniform variable used in a GLSL shader program.
+ *
+ * The value of the uniform in the GL engine is tracked and is only set within the GL engine
+ * if the value has changed from its current value.
+ */
 @interface CC3GLSLUniform : CC3GLSLVariable {
 	size_t _varLen;
 	GLvoid* _varValue;
+	GLvoid* _glVarValue;
 }
 
 /**
@@ -731,24 +737,15 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 
 
 #pragma mark -
-#pragma mark CC3OpenGLESStateTrackerGLSLAttribute
-
-/** Tracks the GL engine state for a attribute variable used in a GLSL shader program.  */
-@interface CC3OpenGLESStateTrackerGLSLAttribute : CC3GLSLAttribute
-@end
-
-
-#pragma mark -
-#pragma mark CC3OpenGLESStateTrackerGLSLUniform
+#pragma mark CC3GLSLUniformOverride
 
 /**
- * Tracks the GL engine state for a uniform variable used in a GLSL shader program.
- * Adds the ability to set the variable value in the GL engine. The GL state is tracked
- * and the GL engine is only updated if the setting the value actually changes the GL state.
+ * Instances of this class are held in the CC3GLProgramContext to allow the value of a uniform
+ * to be set directly by the application, on a node-by-node basis, to override the value retrieved
+ * automatically from the scene via the semantic context of the uniform variable.
+ *
+ * An instance of this class does not set the state of the GL engine directly. Instead, it sets
+ * the value of the actual uniform within the program that it overrides.
  */
-@interface CC3OpenGLESStateTrackerGLSLUniform : CC3GLSLUniform {
-	GLvoid* _glVarValue;
-}
-
+@interface CC3GLSLUniformOverride : CC3GLSLUniform
 @end
-

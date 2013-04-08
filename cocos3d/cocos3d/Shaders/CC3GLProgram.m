@@ -256,7 +256,7 @@
 	glGetProgramiv(_programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &_maxUniformNameLength);
 	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i)", _programID, NSStringFromGLEnum(GL_ACTIVE_UNIFORM_MAX_LENGTH), _maxUniformNameLength);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLUniform* var = [CC3OpenGLESStateTrackerGLSLUniform variableInProgram: self atIndex: varIdx];
+		CC3GLSLUniform* var = [CC3GLSLUniform variableInProgram: self atIndex: varIdx];
 		[_semanticDelegate configureVariable: var];
 		[self addUniform: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
@@ -293,7 +293,7 @@
 	glGetProgramiv(_programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &_maxAttributeNameLength);
 	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i)", _programID, NSStringFromGLEnum(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH), _maxAttributeNameLength);
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
-		CC3GLSLAttribute* var = [CC3OpenGLESStateTrackerGLSLAttribute variableInProgram: self atIndex: varIdx];
+		CC3GLSLAttribute* var = [CC3GLSLAttribute variableInProgram: self atIndex: varIdx];
 		[_semanticDelegate configureVariable: var];
 		[_attributes addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);

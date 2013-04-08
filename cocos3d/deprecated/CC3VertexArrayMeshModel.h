@@ -37,8 +37,8 @@
 
 DEPRECATED_ATTRIBUTE
 /**
- * @deprecated CC3VertexArrayMeshModel renamed to CC3VertexArrayMesh.
- * Former functionality now absorbed into CC3Mesh.
+ * Deprecated.
+ * @deprecated Functionality moved to CC3Mesh.
  */
 @interface CC3VertexArrayMeshModel : CC3Mesh
 @end

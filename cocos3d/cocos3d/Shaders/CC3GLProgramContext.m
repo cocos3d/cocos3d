@@ -83,7 +83,7 @@
 	if ( !_uniforms ) _uniforms = [CCArray new];							// retained
 	if ( !_uniformsByName ) _uniformsByName = [NSMutableDictionary new];	// retained
 
-	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniform.class];
+	CC3GLSLUniform* newUniform = [uniform copyAsClass: CC3GLSLUniformOverride.class];
 	[_uniformsByName setObject: newUniform forKey: newUniform.name];
 	[_uniforms addObject: newUniform];
 	[newUniform release];

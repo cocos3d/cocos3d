@@ -932,7 +932,10 @@
 #pragma mark Deprecated CC3SkinMesh
 
 DEPRECATED_ATTRIBUTE
-/** @deprecated Former functionality moved to CC3Mesh. */
+/**
+ * Deprecated.
+ * @deprecated Functionality moved to CC3Mesh.
+ */
 @interface CC3SkinMesh : CC3Mesh
 
 /** @deprecated Renamed to vertexMatrixIndices. */
