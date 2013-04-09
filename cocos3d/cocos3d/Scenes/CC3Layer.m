@@ -236,7 +236,7 @@
  */
 -(void) updateViewport {
 	[_cc3Scene.viewportManager updateBounds: self.globalBoundingBoxInPixels
-					 withDeviceOrientation: [[CCDirector sharedDirector] deviceOrientation]];
+					  withDeviceOrientation: CCDirector.sharedDirector.deviceOrientation];
 	[super updateViewport];
 }
 

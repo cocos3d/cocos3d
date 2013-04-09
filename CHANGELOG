@@ -138,6 +138,8 @@ cocos3d 2.0.0 - 2013/05/31
 	- CC3Scene open3DWithVisitor: and close3DWithVisitor: methods now manually control GL state configuration transition between 2D and 3D environments.
 		- override these methods to alter GL state transitions between 2D & 3D.
 
+- CC3DeviceCameraOverlayUIViewController now uses AVFounation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
+
 - Fixed issue where punctured nodes request sometimes incorrectly included nodes that were behind the ray.
     - CC3Node shouldIgnoreRayIntersection property now returns YES if the node has no bounding volume.
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.

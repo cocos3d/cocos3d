@@ -37,6 +37,11 @@
 
 #if CC3_IOS
 
+#import <AVFoundation/AVCaptureInput.h>
+#import <AVFoundation/AVCaptureDevice.h>
+#import <AVFoundation/AVMediaFormat.h>
+
+
 // The height of the device camera toolbar
 #define kDeviceCameraToolbarHeight 54.0
 
@@ -64,7 +69,7 @@
 
 #if CC3_CC2_1
 -(CCGLView*) view { return (CCGLView*)super.view; }
-#endif
+#endif	// CC3_CC2_1
 #if CC3_CC2_2
 // In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
 -(CCGLView*) view {
@@ -74,11 +79,13 @@
 	}
 	return (CCGLView*)super.view;
 }
-#endif
+#endif	// CC3_CC2_2
 
+/** Ensure that retina display is established if required. */
 -(void) setView:(CCGLView *)view {
 	CC3Assert(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
 	super.view = view;
+	[self checkRetinaDisplay];
 }
 
 -(Class) viewClass { return (self.isViewLoaded) ? self.view.class : _viewClass; }
@@ -112,6 +119,24 @@
 }
 
 -(CGRect) viewCreationBounds { return UIScreen.mainScreen.bounds; }
+
+-(BOOL) enableRetinaDisplay: (BOOL) enable {
+	_shouldUseRetina = enable;
+	return [self checkRetinaDisplay];
+}
+
+-(BOOL) checkRetinaDisplay {
+#if CC3_IOS
+#if CC3_CC2_2
+	return [super enableRetinaDisplay: _shouldUseRetina];
+#endif	// CC3_CC2_2
+#if CC3_CC2_1
+	return [CCDirector.sharedDirector enableRetinaDisplay: _shouldUseRetina];
+#endif	// CC3_CC2_1
+#else
+	return NO;
+#endif	// CC3_IOS
+}
 
 
 #pragma mark Scene management
@@ -235,6 +260,7 @@
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
 		_viewWasLaidOut = NO;
+		_shouldUseRetina = NO;
 		self.viewClass = [CC3GLView class];
 		self.viewBounds = UIScreen.mainScreen.bounds;
 		self.viewColorFormat = kEAGLColorFormatRGBA8;
@@ -269,39 +295,44 @@
 @implementation CC3DeviceCameraOverlayUIViewController
 
 -(void) dealloc {
-	[picker release];
+	[_deviceCameraView release];
     [super dealloc];
 }
 
--(BOOL) isOverlayingDeviceCamera { return isOverlayingDeviceCamera; }
+-(BOOL) isOverlayingDeviceCamera { return _isOverlayingDeviceCamera; }
 
 -(void) setIsOverlayingDeviceCamera: (BOOL) aBool {
 	if(aBool != self.isOverlayingDeviceCamera) {
 		if(!aBool || self.isDeviceCameraAvailable) {
-			
+
 			// Before switching, if the CCNode is running, send it onExit to stop it
 			BOOL nodeRunning = _controlledNode.isRunning;
 			if(nodeRunning) [_controlledNode onExit];
-			
+
 			// Let subclasses of this controller know about the pending change
 			[self willChangeIsOverlayingDeviceCamera];
-			
+
 			// Update the value
-			isOverlayingDeviceCamera = aBool;
-			
+			_isOverlayingDeviceCamera = aBool;
+
 			if(aBool) {
-				// If overlaying, set the background color to clear, and present the picker modally.
-				self.view.backgroundColor = [UIColor clearColor];
-				[self presentModalViewController: self.picker animated: NO];
+				// If overlaying, set the background color to clear, and add the picker view.
+				UIView* myView = self.view;
+				UIWindow* window = myView.window;
+				myView.backgroundColor = [UIColor clearColor];
+				[window addSubview: self.deviceCameraView];
+				[window bringSubviewToFront: myView];
+				[_deviceCameraView.layer.session startRunning];
 			} else {
-				// If reverting, remove the clear background color, and dismiss the modal picker.
+				// If reverting, remove the clear background color, and remove the picker view from the window.
 				self.view.backgroundColor = nil;
-				[self dismissModalViewControllerAnimated: NO];
+				[_deviceCameraView.layer.session stopRunning];
+				[_deviceCameraView removeFromSuperview];
 			}
-			
+
 			// Let subclasses of this controller know that the change has happened
 			[self didChangeIsOverlayingDeviceCamera];
-			
+
 			// After switching, if the CCNode was running, send it onEnter to restart it
 			if(nodeRunning) [_controlledNode onEnter];
 		}
@@ -314,37 +345,24 @@
 // Default does nothing, subclasses can override
 -(void) didChangeIsOverlayingDeviceCamera {}
 
+// Check view first as simple shortcut...we'll only have a view if device camera is actually avaiable
 -(BOOL) isDeviceCameraAvailable {
-	// Check picker first as simple shortcut...we'll only have a picker if device camera is actually avaiable
-	return picker || [UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera];
+	return _deviceCameraView || [UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera];
 }
 
--(UIImagePickerController*) picker {
-	if(!picker && self.isDeviceCameraAvailable) picker = [self newDeviceCameraPicker];
-	return picker;
-}
-
-// Allocates and initializes a picker controller for the device camera.
-// Will return nil if the device does not support a camera.
--(UIImagePickerController*) newDeviceCameraPicker {
-	UIImagePickerController* newPicker = nil;
-	if(self.isDeviceCameraAvailable) {
-		newPicker = [UIImagePickerController new];
-		newPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-		newPicker.delegate = nil;
-		newPicker.cameraOverlayView = self.view;
+-(CC3AVCameraView*) deviceCameraView {
+	if ( !_deviceCameraView && self.isDeviceCameraAvailable ) {
+		AVCaptureDevice* camDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
+		AVCaptureInput* avInput = [AVCaptureDeviceInput deviceInputWithDevice: camDevice error: nil];
+		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
+		[avSession addInput: avInput];
 		
-		// Hide the camera and navigation controls, force full screen,
-		// and scale the device camera image to cover the full screen
-		newPicker.showsCameraControls = NO;
-		newPicker.navigationBarHidden = YES;
-		newPicker.toolbarHidden = YES;
-		newPicker.wantsFullScreenLayout = YES;
-		CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-		CGFloat deviceCameraScaleup = screenHeight / (screenHeight - (kDeviceCameraToolbarHeight * [[UIScreen mainScreen] scale]));
-		newPicker.cameraViewTransform = CGAffineTransformScale(newPicker.cameraViewTransform, deviceCameraScaleup, deviceCameraScaleup);
+		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];
+		AVCaptureVideoPreviewLayer* avLayer = _deviceCameraView.layer;
+		avLayer.session = avSession;
+		avLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
 	}
-	return newPicker;
+	return _deviceCameraView;
 }
 
 
@@ -352,24 +370,35 @@
 
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
-		picker = nil;
-		isOverlayingDeviceCamera = NO;
+		_deviceCameraView = nil;
+		_isOverlayingDeviceCamera = NO;
 	}
 	return self;
 }
 
 +(id) controller { return [[[self alloc] init] autorelease]; }
 
-- (void)didReceiveMemoryWarning {
+-(void) didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
 	
-	// If picker exists, and we're not currently overlaying the device camera, release the picker
-	if(picker && !self.isOverlayingDeviceCamera) {
-		UIImagePickerController* p = picker;
-		picker = nil;
-		[p release];
+	// If overlay view exists, and we're not currently overlaying the device camera, release it
+	if( !self.isOverlayingDeviceCamera ) {
+		[_deviceCameraView release];
+		_deviceCameraView = nil;
 	}
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3AVCameraView
+
+@implementation CC3AVCameraView
+
+-(AVCaptureVideoPreviewLayer*) layer { return (AVCaptureVideoPreviewLayer*)super.layer; }
+
++(Class) layerClass { return [AVCaptureVideoPreviewLayer class]; }
 
 @end
 

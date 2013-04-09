@@ -129,9 +129,9 @@
 @implementation CCNode (CC3)
 
 #if CC3_CC2_2
--(CGSize) contentSizeInPixels { return self.contentSize; }
+-(CGSize) contentSizeInPixels { return CC_SIZE_POINTS_TO_PIXELS(self.contentSize); }
 
--(CGRect) boundingBoxInPixels { return self.boundingBox; }
+-(CGRect) boundingBoxInPixels { return CC_RECT_POINTS_TO_PIXELS(self.boundingBox); }
 #endif
 
 -(BOOL) isTouchEnabled { return NO; }

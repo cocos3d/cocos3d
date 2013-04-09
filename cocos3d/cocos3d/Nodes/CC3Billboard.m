@@ -100,9 +100,8 @@
  * to a factor determined by the type of billboard.
  */
 -(void) normalizeBillboardScaleToDevice {
-	if (!shouldDrawAs2DOverlay && shouldNormalizeScaleToDevice) {
+	if (!shouldDrawAs2DOverlay && shouldNormalizeScaleToDevice)
 		billboard.scale = billboard.billboard3DContentScaleFactor;
-	}
 }
 
 // Overridden to enable or disable the CCNode
@@ -880,7 +879,14 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CCNode (CC3Billboard)
 
--(CGFloat) billboard3DContentScaleFactor { return 1.0; }
+-(CGFloat) billboard3DContentScaleFactor {
+#if CC3_CC2_2
+	return 1.0f;
+#endif	// CC3_CC2_2
+#if CC3_CC2_1
+	return 1.0f / CC_CONTENT_SCALE_FACTOR();
+#endif	// CC3_CC2_1
+}
 
 /** Simply return the bounding box of this node. */
 -(CGRect) measureBoundingBoxInPixels { return self.boundingBoxInPixels; }
@@ -892,9 +898,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 #pragma mark CCParticleSystemQuad extensions
 
 @implementation CCParticleSystemQuad (CC3)
-
-/** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
 
 // cocos2d 1.0 and below use 2D structures for particle quad vertices
 // cocos2d 1.1 and above use 3D structures for particle quad vertices
@@ -971,9 +974,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 #if CC3_CC2_1 && CC3_IOS
 @implementation CCParticleSystemPoint (CC3)
 
-/** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
-
 /** Constructs a rectangle whose origin is at the specified vertex, and with zero size. */
 -(CGRect) makeRectFromVertex: (ccVertex2F) aVertex {
 	return CGRectMake(aVertex.x, aVertex.y, 0.0, 0.0);
@@ -1003,15 +1003,5 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 @end
-#endif
+#endif	// CC3_CC2_1 && CC3_IOS
 
-
-#pragma mark -
-#pragma mark CCLabelTTF extensions
-
-@implementation CCLabelTTF (CC3)
-
-/** Scales by the inverse of the retina content scale factor. */
--(CGFloat) billboard3DContentScaleFactor { return 1.0 / CC_CONTENT_SCALE_FACTOR(); }
-
-@end

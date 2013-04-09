@@ -690,8 +690,13 @@
  * Returns a scaling factor to be applied to this node when it is set as the
  * 2D billboard in a CC3Billboard.
  *
- * The default value is 1.0, indicating no scaling will occur.
- * Subclasses will override where necessary.
+ * The value returned depends on the version of cocos2d that is linked and whether
+ * the app is rendering in high-resolution for a Retina display on iOS.
+ *
+ * If the app is using cocos2d 1.x and is rendering in high-resolution to a Retina
+ * display on an iOS device, this property returns 0.5. Otherwise it returns 1.0.
+ *
+ * Subclasses may override.
  */
 @property(nonatomic, readonly) CGFloat billboard3DContentScaleFactor;
 
