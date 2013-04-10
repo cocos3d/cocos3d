@@ -98,12 +98,10 @@
 
 -(void) initializeControls {
 	
-	// Set this property to YES to control the scene using UIGestureRecognizers
-	// and to NO to control the scene using lower-level UIEvents.
-	shouldUseGestures = YES;
-	
-	// If not using gestures, enable touch event handling for 3D object picking
-	self.touchEnabled = !shouldUseGestures;
+	// Set the touchEnabled property to NO to control the scene using iOS gestures,
+	// and to YES to control the scene using lower-level touch events.
+	self.touchEnabled = NO;
+	self.mouseEnabled = YES;	// Under OSX, use mouse events since gestures are not supported.
 	
 	[self addJoysticks];
 	[self addSwitchViewButton];
@@ -530,7 +528,7 @@
  * to receive touch events in the middle of a pan or pinch.
  */
 -(void) onOpenCC3Layer {
-	if ( !shouldUseGestures ) return;
+	if ( [self isTouchEnabled] ) return;
 	
 	// Register for tap gestures to select 3D nodes.
 	// This layer has child buttons on it. To ensure that those buttons receive their

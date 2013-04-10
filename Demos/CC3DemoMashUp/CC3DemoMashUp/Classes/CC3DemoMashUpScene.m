@@ -2287,8 +2287,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * This is a poor UI. We really should be using the touch-stationary event to mark definitively
  * whether the finger stopped before being lifted. But we're just working with what we have handy.
  *
- * If gestures are being used (see the shouldUseGestures variable in the initializeControls method
- * of CC3DemoMashUpLayer), this method will not be invoked. Instead, the gestures invoke handler
+ * If gestures are being used (see the setting of the touchEnabled property in the initializeControls
+ * method of CC3DemoMashUpLayer), this method will not be invoked. Instead, the gestures invoke handler
  * methods on the CC3DemoMashUpLayer, which then issues higher-level control messages to this scene.
  *
  * It is generally recommended that you use gestures to provide user interaction with the 3D scene.

@@ -493,10 +493,14 @@ typedef enum {
  *
  * Most of the dynamic motion in this scene is handled by standard cocos2d CCActionIntervals.
  * User interaction is through buttons, which are 2D child layers on the main CC3DemoMashUpLayer,
- * and either gestures or touch event handling. You can select whether to use gestures for user
- * interaction by setting the shouldUseGestures variable in the initializeControls method of
- * CC3DemoMashUpLayer. If this variable is set to NO, then the layer and scene will use basic
- * touch events to interact with the user.
+ * and either gestures or touch and mouse event handling.
+ *
+ * Under iOS, you can select to use gestures for user interaction by setting the touchEnabled
+ * property of the CC3DemoMashUpLayer to NO in its initializeControls method. If that property
+ * is set to NO, the layer will use gestures for input, and if YES, the layer and scene will
+ * use basic touch events to interact with the user.
+ *
+ * Under OSX, gestures are not supported, and so mouse events are used for user control.
  *
  * Vertex arrays and meshes are created only once for each mesh type, and are used by several
  * nodes. For exmample, all of the teapots: textured, colored or multi-colored, use the same

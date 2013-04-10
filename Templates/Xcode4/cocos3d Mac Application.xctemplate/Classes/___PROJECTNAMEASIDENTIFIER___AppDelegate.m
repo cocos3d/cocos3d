@@ -22,10 +22,9 @@
 	// connect the OpenGL view with the director
 	[director setView:glView_];
 	
-	// EXPERIMENTAL stuff.
-	// 'Effects' don't work correctly when autoscale is turned on.
-	// Use kCCDirectorResize_NoScale if you don't want auto-scaling.
-	[director setResizeMode: kCCDirectorResize_AutoScale];
+	// Must use kCCDirectorResize_NoScale to allow the CC3Layer to automatically fill
+	// the window as the window is resized, and to accurately track mouse events.
+	[director setResizeMode: kCCDirectorResize_NoScale];
 	
 	// Enable "moving" mouse event. Default no.
 	[window_ setAcceptsMouseMovedEvents: NO];

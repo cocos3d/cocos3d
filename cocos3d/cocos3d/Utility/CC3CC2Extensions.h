@@ -33,6 +33,7 @@
 /* Base library of extensions to cocos2d to support cocos3d. */
 
 #import "CC3OSXExtensions.h"
+#import "CC3IOSExtensions.h"
 
 
 #pragma mark -
@@ -94,7 +95,7 @@ enum {
 
 /** Add stub class for iOS functionality in non-iOS environment. */
 @interface CCTouchDispatcher : NSObject
--(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches;
+-(void) addTargetedDelegate: (id) delegate priority: (NSInteger) priority swallowsTouches: (BOOL) swallowsTouches;
 +(id) sharedDispatcher;
 @end
 
@@ -269,6 +270,16 @@ enum {
 -(BOOL) cc3ValidateGesture: (UIGestureRecognizer*) gesture;
 #endif	// CC3_IOS
 
+/** Converts an NSEvent (typically a mouse event) to the local coordinates of this node. */
+-(CGPoint) cc3ConvertNSEventToNodeSpace: (NSEvent*) event;
+
+/**
+ * Invoked automatically when the window has been resized while running in OSX.
+ * This implementation simply propagates the same method to the children.
+ * Subclasses may override to actually do something when the window resizes.
+ */
+-(void) reshapeProjection: (CGSize) newWindowSize;
+
 @end
 
 
@@ -282,6 +293,22 @@ enum {
 /** Backwards compatibility for setter renamed in cocos2d 2.1. */
 -(void) setTouchEnabled: (BOOL) isTouchEnabled;
 #endif
+
+#if CC3_IOS
+/** Dummy property for compatibility with apps that run both OSX and IOS. */
+@property (nonatomic, readwrite, getter=isMouseEnabled) BOOL mouseEnabled;
+/** Dummy property for compatibility with apps that run both OSX and IOS. */
+@property (nonatomic, assign) NSInteger mousePriority;
+#endif	// CC3_IOS
+
+#if CC3_OSX
+#if COCOS2D_VERSION < 0x020100
+/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+-(void) setMouseEnabled: (BOOL) isMouseEnabled;
+/** Backwards compatibility for setter renamed in cocos2d 2.1. */
+@property (nonatomic, assign) NSInteger mousePriority;
+#endif
+#endif	// CC3_OSX
 
 @end
 
@@ -391,6 +418,18 @@ enum {
 @end
 
 #endif		// CC3_IOS
+
+
+#if CC3_OSX
+
+#pragma mark -
+#pragma mark CCDirectorMac extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCDirectorMac (CC3)
+@end
+
+#endif		// CC3_OSX
 
 
 #pragma mark -

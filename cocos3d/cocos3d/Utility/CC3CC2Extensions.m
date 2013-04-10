@@ -46,7 +46,7 @@
 #pragma mark Extensions for non-IOS environments
 
 @implementation CCTouchDispatcher
--(void) addTargetedDelegate: (id) delegate priority: (int) priority swallowsTouches: (BOOL) swallowsTouches {}
+-(void) addTargetedDelegate: (id) delegate priority: (NSInteger) priority swallowsTouches: (BOOL) swallowsTouches {}
 +(id) sharedDispatcher { return nil; }
 @end
 
@@ -220,6 +220,18 @@
 }
 #endif	// CC3_IOS
 
+-(CGPoint) cc3ConvertNSEventToNodeSpace: (NSEvent*) event {
+#if CC3_OSX
+	return [self convertToNodeSpace: [CCDirector.sharedDirector convertEventToGL: event]];
+#else
+	return CGPointZero;
+#endif	// CC3_OSX
+}
+
+-(void) reshapeProjection: (CGSize) newWindowSize {
+	for (CCNode* child in self.children) [child reshapeProjection: newWindowSize];
+}
+
 @end
 
 
@@ -231,6 +243,21 @@
 #if COCOS2D_VERSION < 0x020100
 -(void) setTouchEnabled: (BOOL) isTouchEnabled { self.isTouchEnabled = isTouchEnabled; }
 #endif
+
+#if CC3_IOS
+-(BOOL) isMouseEnabled { return NO; }
+-(void) setMouseEnabled: (BOOL) isMouseEnabled {}
+-(NSInteger) mousePriority { return 0; }
+-(void) setMousePriority: (NSInteger) priority {}
+#endif	// CC3_IOS
+
+#if CC3_OSX
+#if COCOS2D_VERSION < 0x020100
+-(void) setMouseEnabled: (BOOL) isMouseEnabled { self.isMouseEnabled = isMouseEnabled; }
+-(NSInteger) mousePriority { return 0; }
+-(void) setMousePriority: (NSInteger) priority {}
+#endif
+#endif	// CC3_OSX
 
 @end
 
@@ -342,6 +369,25 @@
 @end
 
 #endif		// CC3_IOS
+
+
+#if CC3_OSX
+
+#pragma mark -
+#pragma mark CCDirectorMac extension
+
+@implementation CCDirectorMac (CC3)
+
+-(void) reshapeProjection: (CGSize) newWindowSize {
+	[super reshapeProjection: newWindowSize];
+	if (self.resizeMode == kCCDirectorResize_NoScale)
+		[self.runningScene reshapeProjection: newWindowSize];
+}
+
+@end
+
+#endif		// CC3_OSX
+
 
 #pragma mark -
 #pragma mark CCDirectorDisplayLink extension

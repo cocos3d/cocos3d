@@ -776,45 +776,54 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Touch handling
 
 /**
- * This method is invoked from the CC3Layer whenever a touch event occurs, if that layer
- * has indicated that it is interested in receiving touch events, and is handling them.
+ * This method is invoked from the CC3Layer whenever a touch event occurs, if that layer has
+ * indicated that it is interested in receiving touch events, and is handling them, or, under OSX,
+ * whenever a mouse event occurs, if that layer has indicated that it is interested in receiving
+ * mouse events, and is handling them
  *
- * This method is not invoked when gestures are used for user interaction. The CC3Layer
- * processes gestures and invokes higher-level application-defined behaviour on the
- * application's customized CC3Scene subclass.
+ * This method is not invoked when gestures are used for user interaction. The CC3Layer processes
+ * gestures and invokes higher-level application-defined behaviour on the application's customized
+ * CC3Scene subclass.
  *
- * The touchType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved,
- * kCCTouchEnded, or kCCTouchCancelled, and may have originated as a single-touch
- * or multi-touch event.
- * 
- * To enable touch events, set the isTouchEnabled property of the CC3Layer. Once
- * the CC3Layer is touch-enabled, this method is invoked automatically whenever a
- * single-touch event occurs.
+ * The touchType is one of the enumerated touch types: kCCTouchBegan, kCCTouchMoved, kCCTouchEnded,
+ * or kCCTouchCancelled, and may have originated as a single-touch or multi-touch event.
  *
- * Since the touch-move events are both voluminous and seldom used, the handling of
- * ccTouchMoved:withEvent: has been left out of the default CC3Layer implementation.
- * To receive and handle touch-move events for object picking, copy the commented-out
- * ccTouchMoved:withEvent: template method implementation in CC3Layer to your
- * customized CC3Layer subclass.
+ * When running under OSX, this mouse events are treated as the corresponding touch event.
+ * The specified touchType will be one of the following:
+ *   - kCCTouchBegan:	a mouse-down event has occurred
+ *   - kCCTouchMoved:	a mouse-drag event has occurred (with the button down)
+ *   - kCCTouchEnded:	a mouse-up event has occurred
  *
- * This default implementation forwards touch-down events to the pickNodeFromTouchEvent:at:
- * method, which determines which 3D node is under the touch point, and does nothing with
- * touch-move and touch-up events. For the touch-down events, object picking is handled
- * asynchronously, and once the node is retrieved, the nodeSelected:byTouchEvent:at:
- * callback method will be invoked on this instance.
+ * To enable touch events, set the touchEnabled property of the CC3Layer. Once the CC3Layer is
+ * touch-enabled, this method is invoked automatically whenever a single-touch event occurs.
  *
- * Node picking from touch events is somewhat expensive. If you do not require node
- * picking, you should override this implementation and avoid forwarding the touch-down
- * events to this method. You can also override this method to enhance the touch
- * interaction, such as swipe detection, or dragging & dropping objects. You can use
- * the implementation of this method as a template for enhancements.
+ * To enable mouse events when running under OSX, set the mouseEnabled property of the CC3Layer. Once
+ * the CC3Layer is mouse-enabled, this method is invoked automatically whenever a mouse event occurs.
  *
- * Node selection from tap events can also be handled by using the unprojectPoint:
- * method of the active camera to convert the 2D touch-point to a 3D ray, and
- * then using the nodesIntersectedByGlobalRay: method to detect the nodes whose
- * bounding volumes are intersected (punctured) by the ray. See the notes of the
- * pickNodeFromTouchEvent:at: method for further discussion of the relative merits
- * of these two node selection techniques.
+ * Since the touch-move or mouse-move (hover) events are both voluminous and seldom used, the
+ * handling of the ccTouchMoved:withEvent: and mouseMoved: methods have been left out of the
+ * default CC3Layer implementation. To receive and handle touch-move events, copy the commented-out
+ * ccTouchMoved:withEvent: template method implementation in CC3Layer to your customized CC3Layer
+ * subclass. To receive and handle mouse-move events while hovering, implement the ccMouseMoved:
+ * method in your customized CC3Layer, and set the acceptsMouseMovedEvents property of the main
+ * window to YES during app initialization
+ *
+ * This default implementation forwards touch-down events to the pickNodeFromTouchEvent:at: method,
+ * which determines which 3D node is under the touch point, and does nothing with touch-move and
+ * touch-up events. For the touch-down events, object picking is handled asynchronously, and once the
+ * node is retrieved, the nodeSelected:byTouchEvent:at: callback method will be invoked on this instance.
+ *
+ * Node picking from touch events is somewhat expensive. If you do not require node picking, you
+ * should override this implementation and avoid forwarding the touch-down events to this method.
+ * You can also override this method to enhance the touch interaction, such as swipe detection,
+ * or dragging & dropping objects. You can use the implementation of this method as a template
+ * for enhancements.
+ *
+ * Node selection from tap events can also be handled by using the unprojectPoint: method of the
+ * active camera to convert the 2D touch-point to a 3D ray, and then using the 
+ * nodesIntersectedByGlobalRay: method to detect the nodes whose bounding volumes are intersected
+ * (punctured) by the ray. See the notes of the pickNodeFromTouchEvent:at: method for further
+ * discussion of the relative merits of these two node selection techniques.
  */
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint;
 

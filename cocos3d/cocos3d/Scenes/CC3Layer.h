@@ -151,7 +151,7 @@
 @property(nonatomic, readonly) BOOL isOpaque;
 
 
-#pragma mark iOS Gesture recognizers
+#pragma mark iOS Gesture recognizers and touch handling
 
 /**
  * Returns a collection of iOS UIGestureRecognizers that were added using the 
@@ -197,10 +197,30 @@
  * Usually, the application does not need to invoke this method directly, but if
  * you need to remove all gesture recognizers prior to closing the layer, you can
  * use this method to do so.
- *
- * This method is only available under 
  */
 -(void) cc3RemoveAllGestureRecognizers;
+
+/**
+ * Invoked automatically when the touchEnabled property or mouseEnabled is set to YES, and
+ * a touch or mouse event of the specified type occurs within the bounds of this layer.
+ * The specified touchPoint indicates where the touch event occurred, in the local coordinate
+ * system of this layer.
+ *
+ * Under iOS, the event originates from a finger touch event. Under OSX, the event may have
+ * originated as either a finger touch event on a touch pad, or an equivalent mouse event.
+ *
+ * When running under OSX, this layer treats mouse events as the corresponding touch event.
+ * The specified touchType will be one of the following:
+ *   - kCCTouchBegan:	a mouse-down event has occurred
+ *   - kCCTouchMoved:	a mouse-drag event has occurred (with the button down)
+ *   - kCCTouchEnded:	a mouse-up event has occurred
+ *
+ * Returns whether the event was handled.
+ *
+ * This implementation forwards all events to the CC3Scene touchEvent:at: method, and always
+ * returns YES. Subclasses may override this method to handle some events here instead.
+ */
+-(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint;
 
 
 #pragma mark Allocation and initialization

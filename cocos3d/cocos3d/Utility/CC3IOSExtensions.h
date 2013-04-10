@@ -49,6 +49,10 @@
 #endif
 
 
+// iOS equivalents for OSX declarations
+#define NSEvent						NSObject
+
+
 #pragma mark -
 #pragma mark Gesture Recognizer extensions
 

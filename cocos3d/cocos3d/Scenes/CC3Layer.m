@@ -39,17 +39,6 @@
 #import "CC3GLView-GLES1.h"
 
 
-@interface CC3Layer (TemplateMethods)
--(void) openCC3Scene;
--(void) closeCC3Scene;
--(void) drawBackdrop;
--(void) drawScene;
--(int) touchPriority;
--(void) drawWorld;		// Deprecated legacy
--(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
--(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint;
-@end
-
 @implementation CC3Layer
 
 @synthesize cc3Scene=_cc3Scene, shouldAlwaysUpdateViewport=_shouldAlwaysUpdateViewport;
@@ -85,6 +74,7 @@
 -(void) initInitialState {
 	[super initInitialState];
 	_shouldAlwaysUpdateViewport = NO;
+	self.mousePriority = 0;
 	[self initializeControls];
 }
 
@@ -240,6 +230,12 @@
 	[super updateViewport];
 }
 
+/**
+ * Invoked automatically when the window has been resized while running in OSX.
+ * Resize this layer to fill the window.
+ */
+-(void) reshapeProjection: (CGSize) newWindowSize { self.contentSize = newWindowSize; }
+
 
 #pragma mark Touch handling
 
@@ -254,19 +250,25 @@
  * The priority at which touch events are delegated to this layer.
  * Default is zero. Subclasses may override.
  */
--(int) touchPriority { return 0; }
+-(NSInteger) touchPriority { return 0; }
 
-// Handles the initial finger-down touch events.
+/**
+ * The priority at which mouse events are delegated to this layer.
+ * Default is zero. Subclasses may override.
+ */
+-(NSInteger) mouseDelegatePriority { return 0; }
+
+/** Handles the initial finger-down touch events. */
 -(BOOL) ccTouchBegan: (UITouch *)touch withEvent: (UIEvent *)event {
 	return [self handleTouch: touch ofType: kCCTouchBegan];
 }
 
-// Handles the final finger-up touch events.
+/** Handles the final finger-up touch events. */
 -(void) ccTouchEnded: (UITouch *)touch withEvent: (UIEvent *)event {
 	[self handleTouch: touch ofType: kCCTouchEnded];
 }
 
-// Handles cancelled touch events.
+/** Handles cancelled touch events. */
 -(void) ccTouchCancelled: (UITouch *)touch withEvent: (UIEvent *)event {
 	[self handleTouch: touch ofType: kCCTouchCancelled];
 }
@@ -279,11 +281,32 @@
  * CC3Layer implementation. To receive and handle touch-move events for object
  * picking, copy the following method implementation to your CC3Layer subclass.
  */
-/*
--(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
-	[self handleTouch: touch ofType: kCCTouchMoved];
+//-(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
+//	[self handleTouch: touch ofType: kCCTouchMoved];
+//}
+
+/** Handles mouse down events under OSX. */
+-(BOOL) ccMouseDown:(NSEvent*) event {
+	return [self handleMouseEvent: event ofType: kCCTouchBegan];
 }
-*/
+
+/** Handles mouse drag events under OSX. */
+-(BOOL) ccMouseDragged: (NSEvent*) event {
+	return [self handleMouseEvent: event ofType: kCCTouchMoved];
+}
+
+/** Handles mouse up events under OSX. */
+-(BOOL) ccMouseUp: (NSEvent*) event {
+	return [self handleMouseEvent: event ofType: kCCTouchEnded];
+}
+
+/**
+ * Handles mouse hover movement events under OSX
+ * By default, "mouseMoved" is disabled. To enable it, uncomment this method, and set the
+ * acceptsMouseMovedEvents property of the main window to YES during app initialization.
+ */
+//-(BOOL) ccMouseMoved:(NSEvent*)event {}
+
 
 /**
  * Invoked when any of the touch event handler methods are invoked.
@@ -293,24 +316,39 @@
  * layer and, if it is, forwards the event to the handleTouchType:at: method.
  */
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType {
+	return [self validateAndProcessTouchAt: [self convertTouchToNodeSpace: touch]
+									ofType: touchType];
+}
+
+/**
+ * Invoked when any of the mouse event handler methods are invoked.
+ * Returns whether the event was handled by this layer.
+ *
+ * This implementation checks that the mouse event is within the bounds of this
+ * layer and, if it is, forwards the event to the handleTouchType:at: method.
+ */
+-(BOOL) handleMouseEvent: (NSEvent*) event ofType: (uint) touchType {
+	return [self validateAndProcessTouchAt: [self cc3ConvertNSEventToNodeSpace: event]
+									ofType: touchType];
+}
+
+/** 
+ * Processes an iOS touch or OSX mouse event at the specified point and returns whether
+ * the touch event was handled or not.
+ *
+ * Verifies that the specified touch point is within the bounds of this layer,
+ * then invokes the handleTouchType:at: method.
+ */
+-(BOOL) validateAndProcessTouchAt: (CGPoint) touchPoint ofType: (uint) touchType {
 	CGSize cs = self.contentSize;
 	CGRect nodeBounds = CGRectMake(0, 0, cs.width, cs.height);
-	CGPoint nodeTouchPoint = [self convertTouchToNodeSpace: touch];
-	if(CGRectContainsPoint(nodeBounds, nodeTouchPoint)) {
-		LogTrace(@"%@ touched at: %@", self, NSStringFromCGPoint(nodeTouchPoint));
-		return [self handleTouchType: touchType at: nodeTouchPoint];
+	if(CGRectContainsPoint(nodeBounds, touchPoint)) {
+		LogTrace(@"%@ touched at: %@", self, NSStringFromCGPoint(touchPoint));
+		return [self handleTouchType: touchType at: touchPoint];
 	}
 	return NO;
 }
 
-/**
- * Invoked when any of the touch event handler methods are invoked, and the touchEvent
- * occurred within the bounds of this layer. Returns whether the event was handled.
- *
- * This implementation forwards all events to the CC3Scene and always returns YES.
- * Subclasses may override this method to handle some events here instead of in
- * the CC3Scene.
- */
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint {
 	[_cc3Scene touchEvent: touchType at: touchPoint];
 	return YES;
