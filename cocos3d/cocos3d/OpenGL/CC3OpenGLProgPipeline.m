@@ -46,6 +46,10 @@
 
 @implementation CC3OpenGLProgPipeline
 
+-(void) dealloc {
+	[value_GL_SHADING_LANGUAGE_VERSION release];
+	[super dealloc];
+}
 
 #pragma mark Vertex attribute arrays
 
@@ -177,14 +181,12 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	if ( (self = [super init]) ) {
-	}
-	return self;
-}
-
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+
+	value_GL_SHADING_LANGUAGE_VERSION = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_SHADING_LANGUAGE_VERSION)];
+	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_SHADING_LANGUAGE_VERSION));
+	LogInfo(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
 	
 	value_GL_MAX_CLIP_PLANES = kCC3MaxGLSLClipPlanes;
 

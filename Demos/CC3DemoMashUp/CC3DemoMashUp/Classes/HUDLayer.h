@@ -34,5 +34,7 @@
  * A sample application-specific CC3Layer subclass that is specialized to
  * be displayed as a small Heads-Up-Display within another main CC3Layer.
  */
-@interface HUDLayer : CC3Layer
+@interface HUDLayer : CC3Layer {
+	BOOL _isTracking : 1;
+}
 @end

@@ -75,11 +75,18 @@ typedef struct {
  */
 @interface CC3OpenGL : NSObject {
 @public
+
+	NSString* value_GL_VENDOR;
+	NSString* value_GL_RENDERER;
+	NSString* value_GL_VERSION;
 	
 	CC3VertexAttr* vertexAttributes;
 	
 	GLuint* value_GL_TEXTURE_BINDING_2D;
 	GLbitfield isKnown_GL_TEXTURE_BINDING_2D;		// Track up to 32 texture units
+	
+	GLbitfield value_GL_COORD_REPLACE;				// Track up to 32 texture units
+	GLbitfield isKnownCap_GL_COORD_REPLACE;			// Track up to 32 texture units
 	
 	GLenum value_GL_BLEND_SRC;
 	GLenum value_GL_BLEND_DST;
@@ -128,6 +135,7 @@ typedef struct {
 	BOOL valueCap_GL_SAMPLE_COVERAGE : 1;
 	BOOL valueCap_GL_SCISSOR_TEST : 1;
 	BOOL valueCap_GL_STENCIL_TEST : 1;
+	BOOL valueCap_GL_POINT_SPRITE : 1;
 
 	BOOL value_GL_DEPTH_WRITEMASK : 1;
 
@@ -141,6 +149,7 @@ typedef struct {
 	BOOL isKnownCap_GL_SAMPLE_COVERAGE : 1;
 	BOOL isKnownCap_GL_SCISSOR_TEST : 1;
 	BOOL isKnownCap_GL_STENCIL_TEST : 1;
+	BOOL isKnownCap_GL_POINT_SPRITE : 1;
 
 	BOOL isKnown_GL_COLOR_CLEAR_VALUE : 1;
 	BOOL isKnown_GL_DEPTH_CLEAR_VALUE : 1;
@@ -220,6 +229,9 @@ typedef struct {
 
 /** Enable/disable displaying points as textured point sprites. */
 -(void) enablePointSprites: (BOOL) onOff;
+
+/** Enable/disable displaying points as textured point sprites. */
+-(void) enableShaderPointSize: (BOOL) onOff;
 
 /** Enable/disable offsetting fragment depth when comparing depths. */
 -(void) enablePolygonOffset: (BOOL) onOff;
@@ -746,6 +758,12 @@ typedef struct {
 
 /** Binds the specified GLSL program. */
 -(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Returns a string containing platform-specific GLSL source code to be used as a
+ * preamble for the vertex and fragment shader source code when compiling the shaders.
+ */
+-(NSString*) defaultShaderPreamble;
 
 
 #pragma mark Aligning 2D & 3D caches

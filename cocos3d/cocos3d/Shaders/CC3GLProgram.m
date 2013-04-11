@@ -191,18 +191,7 @@
 	LogRez(@"Compiled and attached %@ shader %@ in %.4f seconds", self, NSStringFromGLEnum(shaderType), GetRezActivityDuration());
 }
 
--(NSString*) platformPreamble {
-#if CC3_OGL
-	return
-		@"#define precision //precision\n"
-		@"#define highp\n"
-		@"#define mediump\n"
-		@"#define lowp\n";
-#else	// !CC3_OGL
-	return @"";
-#endif	// CC3_OGL
-
-}
+-(NSString*) platformPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
 
 /** Queries the GL engine and returns whether the shader with the specified GL ID was successfully compiled. */
 -(BOOL) getWasCompiled: (GLuint) shaderID {

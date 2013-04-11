@@ -94,7 +94,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_DEPTH_TEST: return "GL_DEPTH_TEST";
 		case GL_DEPTH_WRITEMASK: return "GL_DEPTH_WRITEMASK";
 //		case GL_POINT_SMOOTH: return "GL_POINT_SMOOTH";
-//		case GL_POINT_SPRITE_OES: return "GL_POINT_SPRITE_OES";
+		case GL_POINT_SPRITE: return "GL_POINT_SPRITE";
 //		case GL_LINE_SMOOTH: return "GL_LINE_SMOOTH";
 		case GL_SCISSOR_TEST: return "GL_SCISSOR_TEST";
 //		case GL_COLOR_MATERIAL: return "GL_COLOR_MATERIAL";
@@ -209,6 +209,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: return "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH";
 		case GL_SHADING_LANGUAGE_VERSION: return "GL_SHADING_LANGUAGE_VERSION";
 		case GL_CURRENT_PROGRAM: return "GL_CURRENT_PROGRAM";
+		case GL_VERTEX_PROGRAM_POINT_SIZE: return "GL_VERTEX_PROGRAM_POINT_SIZE";
 			
 		// LogicOp
 //		case GL_CLEAR: return "GL_CLEAR";
@@ -321,7 +322,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_OPERAND1_ALPHA: return "GL_OPERAND1_ALPHA";
 		case GL_OPERAND2_ALPHA: return "GL_OPERAND2_ALPHA";
 		case GL_ALPHA_SCALE: return "GL_ALPHA_SCALE";
-//		case GL_COORD_REPLACE_OES: return "GL_COORD_REPLACE_OES";
+		case GL_COORD_REPLACE: return "GL_COORD_REPLACE";
 
 		// Lights
 //		case GL_MAX_LIGHTS: return "GL_MAX_LIGHTS";

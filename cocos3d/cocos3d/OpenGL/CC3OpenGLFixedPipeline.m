@@ -545,12 +545,6 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	if ( (self = [super init]) ) {
-	}
-	return self;
-}
-
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 

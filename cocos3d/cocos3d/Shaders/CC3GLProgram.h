@@ -163,15 +163,16 @@
 @property(nonatomic, retain) NSString* fragmentShaderPreamble;
 
 /**
- * A string containing additional platform-specific GLSL source code to be used as a preamble
+ * Returns a string containing platform-specific GLSL source code to be used as a preamble
  * for the vertex and fragment shader source code when compiling the shaders.
  *
- * The value of this property defines the initial value of both the vertexShaderPreamble and
- * vertexShaderPreamble properties.
+ * The value of this property defines the initial value of both the vertexShaderPreamble
+ * and vertexShaderPreamble properties.
  *
- * On the OSX platform, this property contains define statements to remove the precision
- * qualifiers of all variables in the GLSL source code. On the iOS platform, this property
- * returns an empty string.
+ * The value of this property is retrieved from CC3OpenGL.sharedGL.defaultShaderPreamble.
+ * For OpenGL on the OSX platform, this property contains define statements to remove precision
+ * qualifiers of all variables in the GLSL source code and to set the #version declaration.
+ * For OpenGL ES 2.0 on the iOS platform, this property returns an empty string.
  */
 @property(nonatomic, readonly) NSString* platformPreamble;
 

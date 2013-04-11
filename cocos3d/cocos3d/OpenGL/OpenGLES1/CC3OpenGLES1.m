@@ -45,9 +45,9 @@
 
 #pragma mark Capabilities
 
--(void) enableMatrixPalette: (BOOL) onOff { cc3_SetGLCap(GL_MATRIX_PALETTE_OES, onOff, valueCap_GL_MATRIX_PALETTE_OES, isKnownCap_GL_MATRIX_PALETTE_OES); }
+-(void) enableMatrixPalette: (BOOL) onOff { cc3_SetGLCap(GL_MATRIX_PALETTE_OES, onOff, valueCap_GL_MATRIX_PALETTE, isKnownCap_GL_MATRIX_PALETTE); }
 
--(void) enablePointSprites: (BOOL) onOff { cc3_SetGLCap(GL_POINT_SPRITE_OES, onOff, value_GL_POINT_SPRITE_OES, isKnownCap_GL_POINT_SPRITE_OES); }
+-(void) enablePointSprites: (BOOL) onOff { cc3_SetGLCap(GL_POINT_SPRITE_OES, onOff, valueCap_GL_POINT_SPRITE, isKnownCap_GL_POINT_SPRITE); }
 
 
 #pragma mark Vertex attribute arrays
@@ -98,7 +98,7 @@
 #pragma mark Textures
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {
-	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_COORD_REPLACE_OES, &isKnownCap_GL_COORD_REPLACE_OES)) {
+	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_COORD_REPLACE, &isKnownCap_GL_COORD_REPLACE)) {
 		[self activateTextureUnit: tuIdx];
 		glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, (onOff ? GL_TRUE : GL_FALSE));
 		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_POINT_SPRITE_OES), NSStringFromGLEnum(GL_COORD_REPLACE_OES), (onOff ? @"GL_TRUE" : @"GL_FALSE"));
@@ -112,7 +112,7 @@
 	CC3Assert(pmIdx < value_GL_MAX_PALETTE_MATRICES, @"The palette index %u exceeds the maximum number of"
 			  @" %u palette matrices available on this platform", pmIdx, value_GL_MAX_PALETTE_MATRICES);
 	[self activateMatrixStack: GL_MATRIX_PALETTE_OES];
-	cc3_CheckGLPrim(pmIdx, value_GL_MATRIX_PALETTE_OES, isKnown_GL_MATRIX_PALETTE_OES);
+	cc3_CheckGLPrim(pmIdx, value_GL_MATRIX_PALETTE, isKnown_GL_MATRIX_PALETTE);
 	if ( !needsUpdate ) return;
 	glCurrentPaletteMatrixOES(pmIdx);
 	LogGLErrorTrace(@"glCurrentPaletteMatrixOES(%u)", pmIdx);
@@ -163,50 +163,6 @@
 	
 	value_GL_MAX_VERTEX_ATTRIBS = vaIdx;
 }
-
-///**
-// * Under OGLES 1.1, the vertex attribute arrays each have a fixed purpose. Invokes super
-// * to allocate the trackers, and then initializes the semantic and GL name of each. Texture
-// * coordinate arrays come first, followed by the other vertex attribute arrays.
-// *
-// * This method updates the value_GL_MAX_VERTEX_ATTRIBS property.
-// */
-//-(void) initVertexAttributes {
-//	[super initVertexAttributes];
-//	
-//	GLuint vaIdx = 0;
-//	while (vaIdx < value_GL_MAX_TEXTURE_UNITS) {
-//		vertexAttributes[vaIdx].semantic = kCC3SemanticVertexTexture;
-//		vertexAttributes[vaIdx].glName = GL_TEXTURE_COORD_ARRAY;
-//		vaIdx++;
-//	}
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexLocation;
-//	vertexAttributes[vaIdx].glName = GL_VERTEX_ARRAY;
-//	vaIdx++;
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexNormal;
-//	vertexAttributes[vaIdx].glName = GL_NORMAL_ARRAY;
-//	vaIdx++;
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexColor;
-//	vertexAttributes[vaIdx].glName = GL_COLOR_ARRAY;
-//	vaIdx++;
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexWeights;
-//	vertexAttributes[vaIdx].glName = GL_WEIGHT_ARRAY_OES;
-//	vaIdx++;
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexMatrixIndices;
-//	vertexAttributes[vaIdx].glName = GL_MATRIX_INDEX_ARRAY_OES;
-//	vaIdx++;
-//	
-//	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexPointSize;
-//	vertexAttributes[vaIdx].glName = GL_POINT_SIZE_ARRAY_OES;
-//	vaIdx++;
-//	
-//	value_GL_MAX_VERTEX_ATTRIBS = vaIdx;
-//}
 
 @end
 

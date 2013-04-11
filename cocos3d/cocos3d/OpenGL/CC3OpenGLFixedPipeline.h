@@ -49,12 +49,6 @@
 	GLbitfield value_GL_TEXTURE_COORD_ARRAY;		// Track up to 32 texture units
 	GLbitfield isKnownCap_GL_TEXTURE_COORD_ARRAY;	// Track up to 32 texture units
 	
-	GLbitfield value_GL_POINT_SPRITE_OES;			// Track up to 32 texture units
-	GLbitfield isKnownCap_GL_POINT_SPRITE_OES;		// Track up to 32 texture units
-	
-	GLbitfield value_GL_COORD_REPLACE_OES;			// Track up to 32 texture units
-	GLbitfield isKnownCap_GL_COORD_REPLACE_OES;		// Track up to 32 texture units
-	
 	GLenum* values_GL_TEXTURE_ENV_MODE;
 	GLbitfield isKnown_GL_TEXTURE_ENV_MODE : 1;		// Track up to 32 texture units
 
@@ -117,7 +111,7 @@
 	GLuint value_GL_CLIENT_ACTIVE_TEXTURE;
 	
 	GLenum value_GL_MATRIX_MODE;
-	GLuint value_GL_MATRIX_PALETTE_OES;
+	GLuint value_GL_MATRIX_PALETTE;
 
 	BOOL valueCap_GL_ALPHA_TEST : 1;
 	BOOL valueCap_GL_COLOR_LOGIC_OP : 1;
@@ -125,7 +119,7 @@
 	BOOL valueCap_GL_FOG : 1;
 	BOOL valueCap_GL_LIGHTING : 1;
 	BOOL valueCap_GL_LINE_SMOOTH : 1;
-	BOOL valueCap_GL_MATRIX_PALETTE_OES : 1;
+	BOOL valueCap_GL_MATRIX_PALETTE : 1;
 	BOOL valueCap_GL_MULTISAMPLE : 1;
 	BOOL valueCap_GL_NORMALIZE : 1;
 	BOOL valueCap_GL_POINT_SMOOTH : 1;
@@ -138,7 +132,7 @@
 	BOOL isKnownCap_GL_FOG : 1;
 	BOOL isKnownCap_GL_LIGHTING : 1;
 	BOOL isKnownCap_GL_LINE_SMOOTH : 1;
-	BOOL isKnownCap_GL_MATRIX_PALETTE_OES : 1;
+	BOOL isKnownCap_GL_MATRIX_PALETTE : 1;
 	BOOL isKnownCap_GL_MULTISAMPLE : 1;
 	BOOL isKnownCap_GL_NORMALIZE : 1;
 	BOOL isKnownCap_GL_POINT_SMOOTH : 1;
@@ -173,7 +167,7 @@
 	BOOL isKnown_GL_CLIENT_ACTIVE_TEXTURE : 1;
 	
 	BOOL isKnown_GL_MATRIX_MODE : 1;
-	BOOL isKnown_GL_MATRIX_PALETTE_OES : 1;
+	BOOL isKnown_GL_MATRIX_PALETTE : 1;
 
 }
 

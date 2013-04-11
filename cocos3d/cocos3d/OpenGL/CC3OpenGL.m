@@ -47,6 +47,9 @@
 @implementation CC3OpenGL
 
 -(void) dealloc {
+	[value_GL_VENDOR release];
+	[value_GL_RENDERER release];
+	[value_GL_VERSION release];
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
 	[super dealloc];
@@ -84,6 +87,8 @@
 -(void) enablePointSmoothing: (BOOL) onOff {}
 
 -(void) enablePointSprites: (BOOL) onOff {}
+
+-(void) enableShaderPointSize: (BOOL) onOff {}
 
 -(void) enablePolygonOffset: (BOOL) onOff { cc3_SetGLCap(GL_POLYGON_OFFSET_FILL, onOff, valueCap_GL_POLYGON_OFFSET_FILL, isKnownCap_GL_POLYGON_OFFSET_FILL); }
 
@@ -563,6 +568,8 @@
 
 -(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
+-(NSString*) defaultShaderPreamble { return @""; }
+
 
 #pragma mark Aligning 2D & 3D caches
 
@@ -596,7 +603,19 @@
 }
 
 /** Template method to retrieve the GL platform limits. */
--(void) initPlatformLimits {}
+-(void) initPlatformLimits {
+	value_GL_VENDOR = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_VENDOR)];
+	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_VENDOR));
+	LogInfo(@"GL vendor: %@", value_GL_VENDOR);
+
+	value_GL_RENDERER = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_RENDERER)];
+	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_RENDERER));
+	LogInfo(@"GL engine: %@", value_GL_RENDERER);
+	
+	value_GL_VERSION = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_VERSION)];
+	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_VERSION));
+	LogInfo(@"GL version: %@", value_GL_VERSION);
+}
 
 /** Allocates and initializes the vertex attributes. This must be invoked after the initPlatformLimits. */
 -(void) initVertexAttributes {

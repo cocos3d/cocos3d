@@ -36,13 +36,22 @@
 
 #if CC3_OGL
 
-@interface CC3OGL3_PARENT (TemplateMethods)
+@interface CC3OGL2_SUPERCLASS (TemplateMethods)
 -(void) initPlatformLimits;
 -(CC3VertexArray*) vertexArrayForAttribute: (CC3GLSLAttribute*) attribute
 							   withVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3OpenGL2
+
+
+#pragma mark Capabilities
+
+-(void) enableShaderPointSize: (BOOL) onOff { cc3_SetGLCap(GL_VERTEX_PROGRAM_POINT_SIZE, onOff,
+														   valueCap_GL_VERTEX_PROGRAM_POINT_SIZE,
+														   isKnownCap_GL_VERTEX_PROGRAM_POINT_SIZE); }
+
+-(void) enablePointSprites: (BOOL) onOff { cc3_SetGLCap(GL_POINT_SPRITE, onOff, valueCap_GL_POINT_SPRITE, isKnownCap_GL_POINT_SPRITE); }
 
 
 #pragma mark Vertex attribute arrays
@@ -70,6 +79,29 @@
 	if ( !needsUpdate ) return;
 	glClearDepth(val);
 	LogGLErrorTrace(@"glClearDepth(%.3f)", val);
+}
+
+
+#pragma mark Textures
+
+-(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {
+	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_COORD_REPLACE, &isKnownCap_GL_COORD_REPLACE)) {
+		[self activateTextureUnit: tuIdx];
+		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, (onOff ? GL_TRUE : GL_FALSE));
+		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_POINT_SPRITE), NSStringFromGLEnum(GL_COORD_REPLACE), (onOff ? @"GL_TRUE" : @"GL_FALSE"));
+	}
+}
+
+
+#pragma mark Shaders
+
+-(NSString*) defaultShaderPreamble {
+	return
+		@"#version 120\n"
+		@"#define precision //precision\n"
+		@"#define highp\n"
+		@"#define mediump\n"
+		@"#define lowp\n";
 }
 
 

@@ -95,7 +95,9 @@
  * CC3OpenGLProgPipeline is an abstract class that manages the OpenGL state for a single GL context
  * that supports a programmable pipeline running GLSL.
  */
-@interface CC3OpenGLProgPipeline : CC3OpenGL {}
+@interface CC3OpenGLProgPipeline : CC3OpenGL {
+	NSString* value_GL_SHADING_LANGUAGE_VERSION;
+}
 @end
 
 #endif	// CC3_GLSL

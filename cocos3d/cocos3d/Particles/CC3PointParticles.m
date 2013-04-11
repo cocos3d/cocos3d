@@ -373,8 +373,9 @@
 -(void) configurePointProperties: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
 
-	// Enable point sprites
+	// Enable point sprites and shader point sizing (gl_PointSize) for OGL
 	[gl enablePointSprites: YES];
+	[gl enableShaderPointSize: YES];
 
 	// Enable texture coordinate replacing in each texture unit used by the material.
 	GLuint texCount = material ? material.textureCount : 0;
@@ -398,7 +399,7 @@
 -(void) cleanupPointProperties: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
 
-	// Disable point sprites again
+	// Disable point sprites again, but leave point sizing enabled
 	[gl enablePointSprites: NO];
 
 	// Disable texture coordinate replacing again in each texture unit used by the material.

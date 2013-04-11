@@ -32,12 +32,20 @@
 #import "HUDLayer.h"
 #import "CC3DemoMashUpLayer.h"
 
+
+#define kHUDEventPriority	-64
+
 @implementation HUDLayer
 
 -(void) initializeControls {
+	_isTracking = NO;
 	self.touchEnabled = YES;		// Enable touch event handling
+	self.mousePriority = kHUDEventPriority;
+	self.mouseEnabled = YES;		// Enable mouse event handling under OSX
 	[self scheduleUpdate];
 }
+
+-(NSInteger) mouseDelegatePriority { return kHUDEventPriority; }
 
 /**
  * Overridden to handle touch events here, instead of passing them to the CC3Scene.
@@ -46,13 +54,19 @@
  */
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint {
 	switch (touchType) {
+		case kCCTouchBegan:
+			_isTracking = YES;
+			return YES;
 		case kCCTouchEnded:
-			[((CC3DemoMashUpLayer*)self.parent) toggleGlobeHUDFromTouchAt: touchPoint];
-			break;
+			if (_isTracking) {
+				[((CC3DemoMashUpLayer*)self.parent) toggleGlobeHUDFromTouchAt: touchPoint];
+				_isTracking = NO;
+				return YES;
+			}
+			return NO;
 		default:
-			break;
+			return NO;
 	}
-	return YES;
 }
 
 @end

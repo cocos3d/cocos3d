@@ -35,13 +35,16 @@
 #if CC3_OGL
 
 #if CC3_GLSL
-#define CC3OGL3_PARENT	CC3OpenGLProgPipeline
+#define CC3OGL2_SUPERCLASS	CC3OpenGLProgPipeline
 #else
-#define CC3OGL3_PARENT	CC3OpenGLFixedPipeline
+#define CC3OGL2_SUPERCLASS	CC3OpenGLFixedPipeline
 #endif	// CC3_GLSL
 
 /** Manages the OpenGL state for a single GL context. */
-@interface CC3OpenGL2 : CC3OGL3_PARENT {}
+@interface CC3OpenGL2 : CC3OGL2_SUPERCLASS {
+	BOOL valueCap_GL_VERTEX_PROGRAM_POINT_SIZE : 1;
+	BOOL isKnownCap_GL_VERTEX_PROGRAM_POINT_SIZE : 1;
+}
 @end
 
 #endif	// CC3_OGL
