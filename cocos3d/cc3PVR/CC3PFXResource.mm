@@ -146,10 +146,11 @@ extern "C" {
 		CC3Texture* tex = [CC3Texture textureWithName: texName fromFile: texFile];
 		
 		// Set texture parameters
-		tex.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
-		tex.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
-		tex.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
-		tex.magnifyingFunction = GLMagnifyingFunctionFromETextureFilter(pfxTex->nMag);
+		CC3GLTexture* texGL = tex.texture;
+		texGL.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
+		texGL.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
+		texGL.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
+		texGL.magnifyingFunction = GLMagnifyingFunctionFromETextureFilter(pfxTex->nMag);
 
 		if (tex)
 			[_texturesByName setObject: tex forKey: texName];	// Add to texture dictionary

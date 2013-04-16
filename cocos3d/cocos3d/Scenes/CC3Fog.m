@@ -110,7 +110,7 @@
 				gl.fogDensity = density;
 				break;
 			default:
-				CC3Assert(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
+				CC3Assert(NO, @"%@ encountered bad attenuation mode (%04X)", self, attenuationMode);
 				break;
 		}
 	} else {

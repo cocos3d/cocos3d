@@ -98,6 +98,25 @@ static inline CC3IntPoint CC3IntPointMake(GLint x, GLint y) {
 	return v;
 }
 
+/** An integer 2D size. */
+typedef struct {
+	GLint width;			/**< The width measurement. */
+	GLint height;			/**< The height measurement. */
+} CC3IntSize;
+
+/** Returns a string description of the specified CC3IntSize struct in the form "(width, height)" */
+static inline NSString* NSStringFromCC3IntSize(CC3IntSize size) {
+	return [NSString stringWithFormat: @"(%i, %i)", size.width, size.height];
+}
+
+/** Returns a CC3IntSize structure constructed from the dimensional components. */
+static inline CC3IntSize CC3IntSizeMake(GLint w, GLint h) {
+	CC3IntSize sz;
+	sz.width = w;
+	sz.height = h;
+	return sz;
+}
+
 /** A struct representing an integer tessellation. */
 typedef CC3IntPoint CC3Tessellation;
 

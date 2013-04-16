@@ -72,16 +72,6 @@
 #endif	// CC3_OGL
 
 
-#pragma mark State
-
--(void) setClearDepth: (GLfloat) val {
-	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
-	if ( !needsUpdate ) return;
-	glClearDepth(val);
-	LogGLErrorTrace(@"glClearDepth(%.3f)", val);
-}
-
-
 #pragma mark Textures
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {

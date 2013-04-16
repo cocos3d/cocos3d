@@ -577,6 +577,24 @@ typedef struct {
 
 #pragma mark Textures
 
+/** Generates and returns a new texture ID. */
+-(GLuint) generateTextureID;
+
+/** Deletes the texture with the specified texture ID from the GL engine. */
+-(void) deleteTextureID: (GLuint) texID;
+
+/**
+ * Loads the specified texture image data, with the specified characteristics,
+ * into the specified target at the specified texture unit, in GL memory.
+ */
+-(void) loadTexureImage: (const GLvoid*) imageData
+			 intoTarget: (GLenum) target
+			   withSize: (CC3IntSize) size
+			 withFormat: (GLenum) texelFormat
+			   withType: (GLenum) texelType
+	  withByteAlignment: (GLint) byteAlignment
+					 at: (GLuint) tuIdx;
+
 /** 
  * Sets the specified texture unit as the active texture unit. Subsequent changes made to
  * texture unit properties will affect only this texture unit. The specified texture unit must
@@ -659,6 +677,9 @@ typedef struct {
  * be a value between zero and the maximum number of texture units supported by the platform.
  */
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx;
+
+/** Generates a mipmap for the specified target for the texture bound to the specified texture unit. */
+-(void) generateMipmapForTarget: (GLenum)target  at: (GLuint) tuIdx;
 
 
 #pragma mark Matrices

@@ -440,9 +440,14 @@ char* CC3GLEnumName(GLenum gle) {
 
 		// Miscellaneous & extensions
 		case GL_MAX_SAMPLES: return "GL_MAX_SAMPLES";
+		case GL_VENDOR: return "GL_VENDOR";
+		case GL_RENDERER: return "GL_RENDERER";
+		case GL_VERSION: return "GL_VERSION";
+		case GL_EXTENSIONS: return "GL_EXTENSIONS";
+		case GL_UNPACK_ALIGNMENT: return "GL_UNPACK_ALIGNMENT";
 			
 		default:
-			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);
+			printf("***ERROR: UNKNOWN_GLENUM (0x%04X)\n", gle);
 			return "UNKNOWN_GLENUM";
 	}
 }

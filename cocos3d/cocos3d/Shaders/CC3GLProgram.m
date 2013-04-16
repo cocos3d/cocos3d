@@ -481,7 +481,7 @@ static NSMutableDictionary* _programsByName = nil;
 
 +(void) addProgram: (CC3GLProgram*) program {
 	if ( !program ) return;
-	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@", self, program.name);
+	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@. Remove it first before adding another.", self, program.name);
 	if ( !_programsByName ) _programsByName = [NSMutableDictionary new];		// retained
 	[_programsByName setObject: program forKey: program.name];
 }

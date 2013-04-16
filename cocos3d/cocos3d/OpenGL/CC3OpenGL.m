@@ -241,7 +241,12 @@
 	LogGLErrorTrace(@"glClearColor%@", NSStringFromCCC4F(color));
 }
 
--(void) setClearDepth: (GLfloat) val { CC3AssertUnimplemented(@"setClearDepth:"); }
+-(void) setClearDepth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearDepth(val);
+	LogGLErrorTrace(@"glClearDepth(%.3f)", val);
+}
 
 -(void) setClearStencil: (GLint) val {
 	cc3_CheckGLPrim(val, value_GL_STENCIL_CLEAR_VALUE, isKnown_GL_STENCIL_CLEAR_VALUE);
@@ -456,6 +461,37 @@
 
 #pragma mark Textures
 
+-(GLuint) generateTextureID {
+	GLuint texID;
+	glGenTextures(1, &texID);
+	LogGLErrorTrace(@"glGenTextures(%i, %u)", 1, texID);
+	return texID;
+}
+
+-(void) deleteTextureID: (GLuint) texID {
+	if (!texID) return;		// Silently ignore zero texture ID
+	glDeleteTextures(1, &texID);
+	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
+}
+
+-(void) loadTexureImage: (const GLvoid*) imageData
+			 intoTarget: (GLenum) target
+			   withSize: (CC3IntSize) size
+			 withFormat: (GLenum) texelFormat
+			   withType: (GLenum) texelType
+	  withByteAlignment: (GLint) byteAlignment
+					 at: (GLuint) tuIdx {
+	[self activateTextureUnit: tuIdx];
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, byteAlignment);
+	LogGLErrorTrace(@"glPixelStorei(%@, %i)", NSStringFromGLEnum(GL_UNPACK_ALIGNMENT), byteAlignment);
+	
+	glTexImage2D(target, 0, texelFormat, size.width, size.height, 0, texelFormat, texelType, imageData);
+	LogGLErrorTrace(@"glTexImage2D(%@, %i, %@, %i, %i, %i, %@, %@, %p)",
+					NSStringFromGLEnum(target), 0, NSStringFromGLEnum(texelFormat), size.width, size.height,
+					0, NSStringFromGLEnum(texelFormat), NSStringFromGLEnum(texelType), imageData);
+}
+
 -(void) activateTextureUnit: (GLuint) tuIdx {
 	cc3_CheckGLPrim(tuIdx, value_GL_ACTIVE_TEXTURE, isKnown_GL_ACTIVE_TEXTURE);
 	if ( !needsUpdate ) return;
@@ -506,6 +542,12 @@
 -(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {}
 
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
+
+-(void) generateMipmapForTarget: (GLenum)target at: (GLuint) tuIdx {
+	[self activateTextureUnit: tuIdx];
+	glGenerateMipmap(target);
+	LogGLErrorTrace(@"glGenerateMipmap(%@)", NSStringFromGLEnum(target));
+}
 
 
 #pragma mark Matrices

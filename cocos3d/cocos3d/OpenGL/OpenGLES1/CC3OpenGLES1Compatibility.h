@@ -40,6 +40,7 @@
 
 // GL functions
 #define glClearDepth					glClearDepthf
+#define glGenerateMipmap				glGenerateMipmapOES
 
 
 // General symbolic constants

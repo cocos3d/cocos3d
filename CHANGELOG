@@ -74,10 +74,13 @@ cocos3d 2.0.0 - 2013/05/31
 	- Allow animation of node transform properties to be individually enabled or disabled.
 	- Removed animation of Euler rotation angles as unsuitable for interpolation.
 
-- Improved support for NPOT textures
-	- CC3Texture only generates mipmaps if texture is POT
-	- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
-	- Added CCTexture2D cc3IsNPOT, cc3WidthIsNPOT & cc3HeightIsNPOT properties in CC3Texture extension
+- Improvements to texture loading
+	- Added CC3GLTexture class cluster to represent loaded textures:
+		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
+		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
+	- Improved support for NPOT textures
+		- CC3GLTexture only generates mipmaps if texture is POT
+		- CC3GLTexture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
 
 - Added CC3Remove action to remove a node as part of an action sequence. Can be used as part of a CCSequence to remove a node after some other action, such as CCFadeOut, has finished.
 

@@ -651,9 +651,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	texCube.uniformScale = 30.0;
 
 	// Add a texture to the textured cube. This creates a material automatically.
+	// For kicks, we use a texture that contains two distinct images, one for a box and
+	// one for a ball, and set a texture rectangle on the node so it will use only one
+	// part of the texture to cover the box.
 	texCube.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
 	texCube.textureRectangle = CGRectMake(0, 0, 1, 0.75);
-//	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];
+//	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];	// Alternately, use a full texture
 
 	texCube.ambientColor = ccc4f(0.6, 0.6, 0.6, 1.0);		// Increase the ambient reflection
 	
@@ -1062,8 +1065,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// However, using the mipmap for this mesh creates a visual artifact around the
 	// fringe of the model. So we'll just use linear filtering on the main texture.
 	// Comment out these two lines if you want to see the difference.
-	headBumpTex.minifyingFunction = GL_LINEAR;
-	headTex.minifyingFunction = GL_LINEAR;
+	headBumpTex.texture.minifyingFunction = GL_LINEAR;
+	headTex.texture.minifyingFunction = GL_LINEAR;
 
 	// Add the bump-map texture and the color texture to the material.
 	floatingHead.material.texture = headBumpTex;		// replace the dummy texture
