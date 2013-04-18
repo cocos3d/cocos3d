@@ -196,7 +196,7 @@
 
 -(CC3Material*) currentMaterial { return self.currentMeshNode.material; }
 
--(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit {
+-(CC3TextureUnit*) currentTextureUnitAt: (GLuint) texUnit {
 	return [self.currentMaterial textureForTextureUnit: texUnit].textureUnit;
 }
 
@@ -408,8 +408,9 @@
 
 @synthesize gl=_gl, drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
 @synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
-@synthesize textureUnit=_textureUnit, textureUnitCount=_textureUnitCount, currentColor=_currentColor;
-@synthesize currentSkinSection=_currentSkinSection, currentShaderProgram=_currentShaderProgram;
+@synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
+@synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
+@synthesize currentShaderProgram=_currentShaderProgram;
 
 -(void) dealloc {
 	[_gl release];
@@ -476,6 +477,11 @@
 -(void) draw: (CC3Node*) aNode {
 	[aNode drawWithVisitor: self];
 	[self.performanceStatistics incrementNodesDrawn];
+}
+
+-(void) disableUnusedTextureUnits {
+	_textureUnitCount = _currentTextureUnitIndex;
+	[_gl disableTexturingFrom: _currentTextureUnitIndex];
 }
 
 
@@ -569,7 +575,7 @@
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
-			[super fullDescription], _drawingSequencer, _textureUnit, _textureUnitCount,
+			[super fullDescription], _drawingSequencer, _currentTextureUnitIndex, _textureUnitCount,
 			NSStringFromBoolean(_shouldDecorateNode), NSStringFromBoolean(_shouldClearDepthBuffer)];
 }
 

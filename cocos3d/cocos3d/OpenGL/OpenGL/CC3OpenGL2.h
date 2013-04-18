@@ -42,6 +42,10 @@
 
 /** Manages the OpenGL state for a single GL context. */
 @interface CC3OpenGL2 : CC3OGL2_SUPERCLASS {
+	
+	GLbitfield value_GL_TEXTURE_CUBE_MAP;				// Track up to 32 texture units
+	GLbitfield isKnownCap_GL_TEXTURE_CUBE_MAP;			// Track up to 32 texture units
+
 	BOOL valueCap_GL_VERTEX_PROGRAM_POINT_SIZE : 1;
 	BOOL isKnownCap_GL_VERTEX_PROGRAM_POINT_SIZE : 1;
 }

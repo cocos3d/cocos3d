@@ -128,8 +128,9 @@
 	if ( self.hasMipmap || !self.isPOT) return;
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;	// Choose the texture unit to work in
-	[gl bindTexture: _textureID at: tuIdx];
-	[gl generateMipmapForTarget: self.textureTarget at: tuIdx];
+	GLenum target = self.textureTarget;
+	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl generateMipmapForTarget: target at: tuIdx];
 	_hasMipmap = YES;
 }
 
@@ -224,10 +225,11 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	CC3Assert(_textureID, @"%@ cannot be bound to the GL engine because it has not been loaded.", self);
 
 	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.textureUnit;
-	[gl enableTexture2D: YES at: tuIdx];
-	[gl bindTexture: _textureID at: tuIdx];
+	GLuint tuIdx = visitor.currentTextureUnitIndex;
+	GLenum target = self.textureTarget;
 
+	[gl enableTexturing: YES inTarget: target at: tuIdx];
+	[gl bindTexture: _textureID toTarget: target at: tuIdx];
 	[self bindTextureParametersWithVisitor: visitor];
 	
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
@@ -238,13 +240,14 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	if ( !_texParametersAreDirty ) return;
 
 	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.textureUnit;
+	GLuint tuIdx = visitor.currentTextureUnitIndex;
+	GLenum target = self.textureTarget;
 	
 	// Use property access to allow adjustments from the raw values
-	[gl setTextureMinifyFunc: self.minifyingFunction at: tuIdx];
-	[gl setTextureMagnifyFunc: self.magnifyingFunction at: tuIdx];
-	[gl setTextureHorizWrapFunc: self.horizontalWrappingFunction at: tuIdx];
-	[gl setTextureVertWrapFunc: self.verticalWrappingFunction at: tuIdx];
+	[gl setTextureMinifyFunc: self.minifyingFunction inTarget: target at: tuIdx];
+	[gl setTextureMagnifyFunc: self.magnifyingFunction inTarget: target at: tuIdx];
+	[gl setTextureHorizWrapFunc: self.horizontalWrappingFunction inTarget: target at: tuIdx];
+	[gl setTextureVertWrapFunc: self.verticalWrappingFunction inTarget: target at: tuIdx];
 	
 	LogTrace(@"Setting parameters for %@ minifying: %@, magnifying: %@, horiz wrap: %@, vert wrap: %@, ",
 			 self.fullDescription,
@@ -402,8 +405,9 @@ static NSMutableDictionary* _texturesByName = nil;
 
 	if (!_textureID) _textureID = gl.generateTextureID;
 
-	[gl bindTexture: _textureID at: tuIdx];
-	[self bindTextureContent: content toTarget: self.textureTarget at: tuIdx];
+	GLenum target = self.textureTarget;
+	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[self bindTextureContent: content toTarget: target at: tuIdx];
 
 	if (_shouldGenerateMipmaps) [self generateMipmap];
 }

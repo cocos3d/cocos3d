@@ -85,6 +85,9 @@ typedef struct {
 	GLuint* value_GL_TEXTURE_BINDING_2D;
 	GLbitfield isKnown_GL_TEXTURE_BINDING_2D;		// Track up to 32 texture units
 	
+	GLuint* value_GL_TEXTURE_BINDING_CUBE_MAP;
+	GLbitfield isKnown_GL_TEXTURE_BINDING_CUBE_MAP;	// Track up to 32 texture units
+	
 	GLbitfield value_GL_COORD_REPLACE;				// Track up to 32 texture units
 	GLbitfield isKnownCap_GL_COORD_REPLACE;			// Track up to 32 texture units
 	
@@ -619,52 +622,55 @@ typedef struct {
 -(void) activateClientTextureUnit: (GLuint) tuIdx;
 
 /**
- * Enable/disable 2D texturing for the specified texture unit index, which must be a
- * value between zero and the maximum number of texture units supported by the platform.
+ * Enable/disable texturing for the specified target in the specified texture unit index, which
+ * must be a value between zero and the maximum number of texture units supported by the platform.
  */
--(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx;
+-(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /**
- * Enable/disable texture coordinates for the specified texture unit index, which must be a
- * value between zero and the maximum number of texture units supported by the platform.
+ * Disables texturing for all targets in all texture units starting at, and above, the specified
+ * texture unit index, which must be a value between zero and the maximum number of texture units
+ * supported by the platform.
  */
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx;
+-(void) disableTexturingFrom: (GLuint) tuIdx;
 
 /**
- * Enable/disable point sprite texture coordinate replacement for the specified texture unit index,
- * which must be a value between zero and the maximum number of texture units supported by the platform.
+ * Binds the texture with the specified ID to the specified target at the specified texture
+ * unit index, which must be a value between zero and the maximum number of texture units
+ * supported by the platform.
  */
--(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx;
-
-/**
- * Binds the texture with the specified ID to the specified texture unit index, which must
- * be a value between zero and the maximum number of texture units supported by the platform.
- */
--(void) bindTexture: (GLuint) texID at: (GLuint) tuIdx;
+-(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /** 
- * Sets the texture minifying function of the specified texture unit index, which must be
- * a value between zero and the maximum number of texture units supported by the platform.
+ * Sets the texture minifying function in the specified target of the specified texture
+ * unit index, which must be a value between zero and the maximum number of texture units
+ * supported by the platform.
  */
--(void) setTextureMinifyFunc: (GLenum) func at: (GLuint) tuIdx;
+-(void) setTextureMinifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /**
- * Sets the texture magnifying function of the specified texture unit index, which must be
- * a value between zero and the maximum number of texture units supported by the platform.
+ * Sets the texture magnifying function in the specified target of the specified texture
+ * unit index, which must be a value between zero and the maximum number of texture units 
+ * supported by the platform.
  */
--(void) setTextureMagnifyFunc: (GLenum) func at: (GLuint) tuIdx;
+-(void) setTextureMagnifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /**
- * Sets the texture horizontal wrapping function of the specified texture unit index, which must
- * be a value between zero and the maximum number of texture units supported by the platform.
+ * Sets the texture horizontal wrapping function in the specified target of the specified
+ * texture unit index, which must be a value between zero and the maximum number of texture
+ * units supported by the platform.
  */
--(void) setTextureHorizWrapFunc: (GLenum) func at: (GLuint) tuIdx;
+-(void) setTextureHorizWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /**
- * Sets the texture vertical wrapping function of the specified texture unit index, which must
- * be a value between zero and the maximum number of texture units supported by the platform.
+ * Sets the texture vertical wrapping function in the specified target of the specified
+ * texture unit index, which must be a value between zero and the maximum number of texture
+ * units supported by the platform.
  */
--(void) setTextureVertWrapFunc: (GLenum) func at: (GLuint) tuIdx;
+-(void) setTextureVertWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx;
+
+/** Generates a mipmap for the specified target for the texture bound to the specified texture unit. */
+-(void) generateMipmapForTarget: (GLenum)target  at: (GLuint) tuIdx;
 
 /**
  * Sets the texture environment mode of the specified texture unit index, which must
@@ -678,8 +684,17 @@ typedef struct {
  */
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx;
 
-/** Generates a mipmap for the specified target for the texture bound to the specified texture unit. */
--(void) generateMipmapForTarget: (GLenum)target  at: (GLuint) tuIdx;
+/**
+ * Enable/disable texture coordinates for the specified texture unit index, which must be a
+ * value between zero and the maximum number of texture units supported by the platform.
+ */
+-(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx;
+
+/**
+ * Enable/disable point sprite texture coordinate replacement for the specified texture unit index,
+ * which must be a value between zero and the maximum number of texture units supported by the platform.
+ */
+-(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx;
 
 
 #pragma mark Matrices

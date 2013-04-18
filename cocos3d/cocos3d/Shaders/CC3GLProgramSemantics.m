@@ -797,110 +797,110 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// In most shaders, these will be left unused in favor of customized the texture combining in code.
 		case kCC3SemanticTexUnitMode:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				CC3TextureUnit* tu = [visitor currentTextureUnitAt: (semanticIndex + i)];
 				[uniform setInteger: (tu ? tu.textureEnvironmentMode :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitConstantColor:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				CC3TextureUnit* tu = [visitor currentTextureUnitAt: (semanticIndex + i)];
 				[uniform setColor4F: (tu ? tu.constantColor :  kCCC4FBlackTransparent) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineRGBFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.combineRGBFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand0 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand1 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand2 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineAlphaFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.combineAlphaFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand0 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand1 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand2 :  GL_SRC_ALPHA) at: i];
 			}

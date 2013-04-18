@@ -120,7 +120,7 @@
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_texture) {
 		[self bindGLWithVisitor: visitor];
-		visitor.textureUnit += 1;
+		visitor.currentTextureUnitIndex += 1;
 	}
 }
 
@@ -136,16 +136,6 @@
 		[_textureUnit bindWithVisitor: visitor];
 	else
 		[CC3TextureUnit bindDefaultWithVisitor: visitor];
-}
-
-+(void) unbindRemainingFrom: (GLuint) texUnit withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGL* gl = visitor.gl;
-	GLuint maxTexUnits = gl.maxNumberOfTextureUnits;
-	for (GLuint tuIdx = texUnit; tuIdx < maxTexUnits; tuIdx++) [gl enableTexture2D: NO at: tuIdx];
-}
-
-+(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self unbindRemainingFrom: 0 withVisitor: visitor];
 }
 
 

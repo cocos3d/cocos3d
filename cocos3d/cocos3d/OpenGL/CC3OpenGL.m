@@ -501,53 +501,72 @@
 
 -(void) activateClientTextureUnit: (GLuint) tuIdx {}
 
--(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {}
 
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) disableTexturingFrom: (GLuint) tuIdx {}
 
--(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
+	GLuint* stateArray;
+	GLbitfield* isKnownBits;
 
--(void) bindTexture: (GLuint) texID at: (GLuint) tuIdx {
-	if (CC3CheckGLuintAt(tuIdx, texID, value_GL_TEXTURE_BINDING_2D, &isKnown_GL_TEXTURE_BINDING_2D)) {
+	switch (target) {
+		case GL_TEXTURE_2D:
+			stateArray = value_GL_TEXTURE_BINDING_2D;
+			isKnownBits = &isKnown_GL_TEXTURE_BINDING_2D;
+			break;
+		case GL_TEXTURE_CUBE_MAP:
+			stateArray = value_GL_TEXTURE_BINDING_CUBE_MAP;
+			isKnownBits = &isKnown_GL_TEXTURE_BINDING_CUBE_MAP;
+			break;
+		default:
+			CC3Assert(NO, @"Texture target %@ is not a valid binding target.", NSStringFromGLEnum(target));
+			return;
+	}
+
+	if (CC3CheckGLuintAt(tuIdx, texID, stateArray, isKnownBits)) {
 		[self activateTextureUnit: tuIdx];
-		glBindTexture(GL_TEXTURE_2D, texID);
-		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(GL_TEXTURE_2D), tuIdx);
+		glBindTexture(target, texID);
+		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), tuIdx);
 	}
 }
 
 /** Sets the specified texture parameter for the specified texture unit, without checking a cache. */
--(void) setTexParamEnum: (GLenum) pName to: (GLenum) val at: (GLuint) tuIdx {
+-(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx {
 	[self activateTextureUnit: tuIdx];
-	glTexParameteri(GL_TEXTURE_2D, pName, val);
-	LogGLErrorTrace(@"glTexParameteri(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_2D),
+	glTexParameteri(target, pName, val);
+	LogGLErrorTrace(@"glTexParameteri(%@, %@, %@)", NSStringFromGLEnum(target),
 					NSStringFromGLEnum(pName), NSStringFromGLEnum(val));
 }
 
--(void) setTextureMinifyFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_MIN_FILTER to: func at: tuIdx];
+-(void) setTextureMinifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MIN_FILTER inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureMagnifyFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_MAG_FILTER to: func at: tuIdx];
+-(void) setTextureMagnifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MAG_FILTER inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureHorizWrapFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_WRAP_S to: func at: tuIdx];
+-(void) setTextureHorizWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_S inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureVertWrapFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_WRAP_T to: func at: tuIdx];
+-(void) setTextureVertWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_T inTarget: target to: func at: tuIdx];
 }
-
--(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {}
-
--(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
 
 -(void) generateMipmapForTarget: (GLenum)target at: (GLuint) tuIdx {
 	[self activateTextureUnit: tuIdx];
 	glGenerateMipmap(target);
 	LogGLErrorTrace(@"glGenerateMipmap(%@)", NSStringFromGLEnum(target));
 }
+
+-(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {}
+
+-(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
+
+-(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
 
 
 #pragma mark Matrices

@@ -57,4 +57,9 @@
 #define GL_DECR_WRAP					GL_DECR_WRAP_OES
 #endif
 
+// Allow code to referenc the following enums, even though they are not usable under OpenGL ES 1.1.
+#ifndef GL_TEXTURE_CUBE_MAP
+#define GL_TEXTURE_CUBE_MAP               0x8513
+#endif
+
 #endif	// CC3_OGLES_1
