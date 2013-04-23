@@ -32,10 +32,6 @@
 #import "CC3ModelSampleFactory.h"
 #import "teapot.h"
 
-@interface CC3ModelSampleFactory (TemplateMethods)
--(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName;
-@end
-
 
 @implementation CC3ModelSampleFactory
 
@@ -149,16 +145,13 @@
 static CC3ModelSampleFactory* factory;
 
 +(CC3ModelSampleFactory*) factory {
-	if (!factory) {
-		factory = [self new];	// statically retained
-	}
+	if (!factory) factory = [self new];	// statically retained
 	return factory;
 }
 
 
 #pragma mark Factory methods
 
-// Returns an autoreleased mesh of a teapot named with the specified name
 -(CC3Mesh*) makeTeapotMeshNamed: (NSString*) aName {
 	CC3Mesh* mesh = [CC3Mesh meshWithName: aName];
 	mesh.shouldInterleaveVertices = NO;
@@ -168,7 +161,6 @@ static CC3ModelSampleFactory* factory;
 	return mesh;
 }
 
-// Returns an autoreleased mesh node displaying a teapot in a particular color
 -(CC3MeshNode*) makeUniColoredTeapotNamed: (NSString*) aName withColor: (ccColor4F) color {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = unicoloredTeapotMesh;
@@ -177,7 +169,6 @@ static CC3ModelSampleFactory* factory;
 	return teapot;
 }
 
-// Returns an autoreleased mesh node displaying a teapot painted with a color gradient...very funky
 -(CC3MeshNode*) makeMultiColoredTeapotNamed: (NSString*) aName {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = multicoloredTeapotMesh;
@@ -185,14 +176,10 @@ static CC3ModelSampleFactory* factory;
 	return teapot;
 }
 
-// Returns an autoreleased mesh node displaying a teapot covered by a cocos2d logo texture
--(CC3MeshNode*) makeLogoTexturedTeapotNamed: (NSString*) aName {
+-(CC3MeshNode*) makeTexturableTeapotNamed: (NSString*) aName {
 	CC3MeshNode* teapot = [CC3MeshNode nodeWithName: aName];
 	teapot.mesh = texturedTeapotMesh;
-	teapot.material = [CC3Material shiny];
-	teapot.texture = [CC3Texture textureFromFile: @"Default.png"];
 	return teapot;
 }
-
 
 @end

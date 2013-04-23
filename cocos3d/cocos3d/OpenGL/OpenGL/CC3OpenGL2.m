@@ -72,16 +72,6 @@
 #endif	// CC3_OGL
 
 
-#pragma mark State
-
--(void) setClearDepth: (GLfloat) val {
-	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
-	if ( !needsUpdate ) return;
-	glClearDepth(val);
-	LogGLErrorTrace(@"glClearDepth(%.3f)", val);
-}
-
-
 #pragma mark Textures
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {
@@ -89,6 +79,34 @@
 		[self activateTextureUnit: tuIdx];
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, (onOff ? GL_TRUE : GL_FALSE));
 		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_POINT_SPRITE), NSStringFromGLEnum(GL_COORD_REPLACE), (onOff ? @"GL_TRUE" : @"GL_FALSE"));
+	}
+}
+
+-(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {
+	if (target == GL_TEXTURE_CUBE_MAP) {
+		if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_TEXTURE_CUBE_MAP, &isKnownCap_GL_TEXTURE_CUBE_MAP)) {
+			[self activateTextureUnit: tuIdx];
+			if (onOff)
+				glEnable(target);
+			else
+				glDisable(target);
+			LogGLErrorTrace(@"gl%@sable(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
+		}
+		return;
+	}
+
+	// If one of the other targets is being enabled, cube-mapping must be disabled, because it has higher priority
+	if (onOff) [self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+
+	// If not cube-map, allow superclass to handle other targets
+	[super enableTexturing: onOff inTarget: target at: tuIdx];
+}
+
+-(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
+	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
+		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+		[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 	}
 }
 

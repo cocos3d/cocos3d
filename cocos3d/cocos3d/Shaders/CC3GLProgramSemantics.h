@@ -124,7 +124,8 @@ typedef enum {
 	kCC3SemanticMaterialColorSpecular,			/**< (vec4) Specular color of the material. */
 	kCC3SemanticMaterialColorEmission,			/**< (vec4) Emission color of the material. */
 	kCC3SemanticMaterialOpacity,				/**< (float) Opacity of the material. */
-	kCC3SemanticMaterialShininess,				/**< (float) Shininess of the material. */
+	kCC3SemanticMaterialShininess,				/**< (float) Shininess of the material (0 <> 128). */
+	kCC3SemanticMaterialReflectivity,			/**< (float) Reflectivity of the material (0 <> 1). */
 	kCC3SemanticMinimumDrawnAlpha,				/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
 
 	// LIGHTING
@@ -157,8 +158,12 @@ typedef enum {
 	kCC3SemanticFogEndDistance,					/**< (float) Distance from camera at which fogging effect ends. */
 
 	// TEXTURES
-	kCC3SemanticTextureCount,					/**< (int) Number of active textures. */
-	kCC3SemanticTextureSampler,					/**< (sampler2D) Texture sampler. */
+	kCC3SemanticTextureCount,					/**< (int) Number of active textures of any types. */
+	kCC3SemanticTextureSampler,					/**< (sampler2D/sampler3D) Texture sampler of any type. */
+	kCC3SemanticTexture2DCount,					/**< (int) Number of active 2D textures. */
+	kCC3SemanticTexture2DSampler,				/**< (sampler2D) 2D texture sampler. */
+	kCC3SemanticTextureCubeCount,				/**< (int) Number of active cube-map textures. */
+	kCC3SemanticTextureCubeSampler,				/**< (sampler2D) Cube-map texture sampler. */
 	
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in code.

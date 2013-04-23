@@ -167,6 +167,13 @@
  * CC3PFXGLProgramSemantics provides a mapping from the PFX semantic names declared in a PFX
  * effect within a PFX effects file, and the standard semantics from the CC3Semantic enumeration.
  *
+ * GLSL shader code loaded from a PFX effect can mix custom semantics defined within the PFX effect
+ * with standard default semantics defined by the semantic delegate associated with the program matcher.
+ * If a GLSL variable cannot be configured based on a semantic definition for its name within the
+ * PFX effect, configuration of the variable is delegated to the standard semantic delegate at
+ * CC3GLProgram.programMatcher.semanticDelegate. It is even possible to load shaders that use only
+ * standard semantic naming, without having to define any semantics within the PFX effect.
+ *
  * This is an abstract implementation. Subclasses can override the semanticForPFXSemanticName:
  * method for simple name-based mapping, or can override the resolveSemanticForVariableConfiguration:
  * for more complex mapping.

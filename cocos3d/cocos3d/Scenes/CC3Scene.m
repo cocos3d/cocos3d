@@ -177,6 +177,7 @@
 		maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
 		_deltaFrameTime = 0;
 		[self initializeScene];
+		LogGLErrorState(@"after initializing %@", self);
 	}
 	return self;
 }
@@ -391,14 +392,12 @@
 	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
 	[gl setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
 	
-	// Ensure texture unit 0 is active and enable, but not bound to any texture,
-	// disable all other texture units, and set texture unit to zero.
-	visitor.textureUnit = 0;
-	[gl enableTexture2D: YES at: 0];
-	[gl bindTexture: 0 at: 0];
+	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
+	[visitor.gl disableTexturingFrom: 1];
+	visitor.currentTextureUnitIndex = 0;
+	[gl enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
+	[gl bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
 	[CC3TextureUnit bindDefaultWithVisitor: visitor];
-	[CC3Texture unbindRemainingFrom: 1 withVisitor: visitor];
-	[gl activateTextureUnit: 0];
 
 	// Enable vertex attributes needed for 2D, disable all others,
 	// unbind GL buffers, and set client texture unit to zero,
@@ -527,7 +526,7 @@
 /** If this scene contains fog, draw it, otherwise unbind fog from the GL engine. */
 -(void) drawFogWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (fog) [fog drawWithVisitor: visitor];
-	else [CC3Fog unbindWithVisitor: visitor];
+	else [visitor.gl enableFog: NO];
 }
 
 /**

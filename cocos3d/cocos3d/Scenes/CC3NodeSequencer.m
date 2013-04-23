@@ -607,9 +607,9 @@
 	
 	// If the left texture is the same, but the right one isn't,
 	// this is where we want to insert to keep like textures together.
-	CCTexture2D* tex = aNode.texture.texture;
-	CCTexture2D* leftTex = leftNode.texture.texture;
-	CCTexture2D* rightTex = rightNode.texture.texture;
+	CC3GLTexture* tex = aNode.texture.texture;
+	CC3GLTexture* leftTex = leftNode.texture.texture;
+	CC3GLTexture* rightTex = rightNode.texture.texture;
 	return (tex == leftTex && tex != rightTex);
 }
 

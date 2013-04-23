@@ -1317,15 +1317,15 @@ static BOOL defaultExpectsVerticallyFlippedTextures = YES;
 -(void) alignWithTexture: (CC3Texture*) texture {
 	if (!texture) return;
 	if ( XOR(_expectsVerticallyFlippedTextures, texture.isFlippedVertically) ) {
-		[self alignWithInvertedTextureMapSize: texture.mapSize];
+		[self alignWithInvertedTextureMapSize: texture.coverage];
 	} else {
-		[self alignWithTextureMapSize: texture.mapSize];
+		[self alignWithTextureMapSize: texture.coverage];
 	}
 }
 
 -(void) alignWithInvertedTexture: (CC3Texture*) texture {
 	if (!texture) return;
-	[self alignWithInvertedTextureMapSize: texture.mapSize];
+	[self alignWithInvertedTextureMapSize: texture.coverage];
 }
 
 -(void) flipVertically {

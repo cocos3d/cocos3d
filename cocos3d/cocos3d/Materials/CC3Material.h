@@ -53,6 +53,9 @@ static const GLfloat kCC3DefaultMaterialShininess = 0.0;
 /** Maximum material shininess allowed by OpenGL ES. */
 static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 
+/** Default material reflectivity. */
+static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
+
 
 #pragma mark -
 #pragma mark CC3Material
@@ -169,6 +172,7 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 	ccColor4F _specularColor;
 	ccColor4F _emissionColor;
 	GLfloat _shininess;
+	GLfloat _reflectivity;
 	GLenum _alphaTestFunction;
 	GLfloat _alphaTestReference;
 	ccBlendFunc _blendFunc;
@@ -271,10 +275,26 @@ static const GLfloat kCC3MaximumMaterialShininess = 128.0;
 /**
  * The shininess of this material.
  * 
- * This value is clamped to between zero and kCC3MaximumMaterialShininess.
- * Initially set to kCC3DefaultMaterialShininess.
+ * The value of this property is clamped to between zero and kCC3MaximumMaterialShininess.
+ * The initial value of this property is kCC3DefaultMaterialShininess (zero).
  */
 @property(nonatomic, assign) GLfloat shininess;
+
+/**
+ * The reflectivity of this material.
+ *
+ * This property can be used when the material is covered by an environmental reflection cube-map
+ * texture to indicate the weighting that should be applied to the reflection texture, relative to
+ * any other textures on the material. A value of zero indicates that the surface should be 
+ * completely unreflective, and a value of one indicates that the surface is entirely reflective.
+ *
+ * This property requires a programmable pipeline and has no effect when running OpenGL ES 1.1
+ * on iOS, or a fixed rendering pipeline when running OpenGL on OSX.
+ *
+ * The value of this property is clamped to between zero and one.
+ * The initial value of this property is kCC3DefaultMaterialReflectivity (zero).
+ */
+@property(nonatomic, assign) GLfloat reflectivity;
 
 /**
  * The blending function to be applied to the source material (this material). This property must

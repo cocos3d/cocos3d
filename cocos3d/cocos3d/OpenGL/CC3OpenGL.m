@@ -52,6 +52,7 @@
 	[value_GL_VERSION release];
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
+	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
 	[super dealloc];
 }
 
@@ -241,7 +242,12 @@
 	LogGLErrorTrace(@"glClearColor%@", NSStringFromCCC4F(color));
 }
 
--(void) setClearDepth: (GLfloat) val { CC3AssertUnimplemented(@"setClearDepth:"); }
+-(void) setClearDepth: (GLfloat) val {
+	cc3_CheckGLPrim(val, value_GL_DEPTH_CLEAR_VALUE, isKnown_GL_DEPTH_CLEAR_VALUE);
+	if ( !needsUpdate ) return;
+	glClearDepth(val);
+	LogGLErrorTrace(@"glClearDepth(%.3f)", val);
+}
 
 -(void) setClearStencil: (GLint) val {
 	cc3_CheckGLPrim(val, value_GL_STENCIL_CLEAR_VALUE, isKnown_GL_STENCIL_CLEAR_VALUE);
@@ -456,6 +462,37 @@
 
 #pragma mark Textures
 
+-(GLuint) generateTextureID {
+	GLuint texID;
+	glGenTextures(1, &texID);
+	LogGLErrorTrace(@"glGenTextures(%i, %u)", 1, texID);
+	return texID;
+}
+
+-(void) deleteTextureID: (GLuint) texID {
+	if ( !texID ) return;		// Silently ignore zero texture ID
+	glDeleteTextures(1, &texID);
+	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
+}
+
+-(void) loadTexureImage: (const GLvoid*) imageData
+			 intoTarget: (GLenum) target
+			   withSize: (CC3IntSize) size
+			 withFormat: (GLenum) texelFormat
+			   withType: (GLenum) texelType
+	  withByteAlignment: (GLint) byteAlignment
+					 at: (GLuint) tuIdx {
+	[self activateTextureUnit: tuIdx];
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, byteAlignment);
+	LogGLErrorTrace(@"glPixelStorei(%@, %i)", NSStringFromGLEnum(GL_UNPACK_ALIGNMENT), byteAlignment);
+	
+	glTexImage2D(target, 0, texelFormat, size.width, size.height, 0, texelFormat, texelType, imageData);
+	LogGLErrorTrace(@"glTexImage2D(%@, %i, %@, %i, %i, %i, %@, %@, %p)",
+					NSStringFromGLEnum(target), 0, NSStringFromGLEnum(texelFormat), size.width, size.height,
+					0, NSStringFromGLEnum(texelFormat), NSStringFromGLEnum(texelType), imageData);
+}
+
 -(void) activateTextureUnit: (GLuint) tuIdx {
 	cc3_CheckGLPrim(tuIdx, value_GL_ACTIVE_TEXTURE, isKnown_GL_ACTIVE_TEXTURE);
 	if ( !needsUpdate ) return;
@@ -465,47 +502,72 @@
 
 -(void) activateClientTextureUnit: (GLuint) tuIdx {}
 
--(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {}
 
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) disableTexturingFrom: (GLuint) tuIdx {}
 
--(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
+-(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
+	GLuint* stateArray;
+	GLbitfield* isKnownBits;
 
--(void) bindTexture: (GLuint) texID at: (GLuint) tuIdx {
-	if (CC3CheckGLuintAt(tuIdx, texID, value_GL_TEXTURE_BINDING_2D, &isKnown_GL_TEXTURE_BINDING_2D)) {
+	switch (target) {
+		case GL_TEXTURE_2D:
+			stateArray = value_GL_TEXTURE_BINDING_2D;
+			isKnownBits = &isKnown_GL_TEXTURE_BINDING_2D;
+			break;
+		case GL_TEXTURE_CUBE_MAP:
+			stateArray = value_GL_TEXTURE_BINDING_CUBE_MAP;
+			isKnownBits = &isKnown_GL_TEXTURE_BINDING_CUBE_MAP;
+			break;
+		default:
+			CC3Assert(NO, @"Texture target %@ is not a valid binding target.", NSStringFromGLEnum(target));
+			return;
+	}
+
+	if (CC3CheckGLuintAt(tuIdx, texID, stateArray, isKnownBits)) {
 		[self activateTextureUnit: tuIdx];
-		glBindTexture(GL_TEXTURE_2D, texID);
-		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(GL_TEXTURE_2D), tuIdx);
+		glBindTexture(target, texID);
+		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), tuIdx);
 	}
 }
 
 /** Sets the specified texture parameter for the specified texture unit, without checking a cache. */
--(void) setTexParamEnum: (GLenum) pName to: (GLenum) val at: (GLuint) tuIdx {
+-(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx {
 	[self activateTextureUnit: tuIdx];
-	glTexParameteri(GL_TEXTURE_2D, pName, val);
-	LogGLErrorTrace(@"glTexParameteri(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_2D),
+	glTexParameteri(target, pName, val);
+	LogGLErrorTrace(@"glTexParameteri(%@, %@, %@)", NSStringFromGLEnum(target),
 					NSStringFromGLEnum(pName), NSStringFromGLEnum(val));
 }
 
--(void) setTextureMinifyFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_MIN_FILTER to: func at: tuIdx];
+-(void) setTextureMinifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MIN_FILTER inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureMagnifyFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_MAG_FILTER to: func at: tuIdx];
+-(void) setTextureMagnifyFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_MAG_FILTER inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureHorizWrapFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_WRAP_S to: func at: tuIdx];
+-(void) setTextureHorizWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_S inTarget: target to: func at: tuIdx];
 }
 
--(void) setTextureVertWrapFunc: (GLenum) func at: (GLuint) tuIdx {
-	[self setTexParamEnum: GL_TEXTURE_WRAP_T to: func at: tuIdx];
+-(void) setTextureVertWrapFunc: (GLenum) func inTarget: (GLenum) target at: (GLuint) tuIdx {
+	[self setTexParamEnum: GL_TEXTURE_WRAP_T inTarget: target to: func at: tuIdx];
+}
+
+-(void) generateMipmapForTarget: (GLenum)target at: (GLuint) tuIdx {
+	[self activateTextureUnit: tuIdx];
+	glGenerateMipmap(target);
+	LogGLErrorTrace(@"glGenerateMipmap(%@)", NSStringFromGLEnum(target));
 }
 
 -(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {}
 
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
+
+-(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
+
+-(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
 
 
 #pragma mark Matrices
@@ -625,6 +687,7 @@
 /** Allocates and initializes the texture units. This must be invoked after the initPlatformLimits. */
 -(void) initTextureUnits {
 	value_GL_TEXTURE_BINDING_2D = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
+	value_GL_TEXTURE_BINDING_CUBE_MAP = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
 }
 
 /** Returns the appropriate class cluster subclass instance. */

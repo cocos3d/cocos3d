@@ -46,7 +46,15 @@
 #pragma mark -
 #pragma mark CC3GLProgram
 
-/** CC3GLProgram extends CCGLProgram to provide specialized behaviour for cocos3d. */
+/** 
+ * CC3GLProgram represents an OpenGL shader program, containing one vertex shader and one
+ * fragment shader, each compiled from GLSL source code.
+ *
+ * Since a single GL program can be used by many nodes and materials, shaders are cached.
+ * The application can use the class-side getProgramNamed: method to retrieve a compiled program
+ * from the cache, and the class-side addProgram: method to add a new program to the cache.
+ * See the notes of those two methods for more details.
+ */
 @interface CC3GLProgram : CC3Identifiable {
 	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
 	CCArray* _uniformsSceneScope;
@@ -277,7 +285,7 @@ andFragmentShaderFile: (NSString*) fshFilename;
 #pragma mark Program cache
 
 /**
- * Adds the specified program to the collection of loaded progams.
+ * Adds the specified program to the collection of loaded programs.
  *
  * The specified program should be compiled and linked prior to being added here.
  *

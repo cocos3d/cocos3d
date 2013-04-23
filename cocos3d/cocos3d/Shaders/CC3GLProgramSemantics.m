@@ -105,6 +105,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticMaterialColorEmission: return @"kCC3SemanticMaterialColorEmission";
 		case kCC3SemanticMaterialOpacity: return @"kCC3SemanticMaterialOpacity";
 		case kCC3SemanticMaterialShininess: return @"kCC3SemanticMaterialShininess";
+		case kCC3SemanticMaterialReflectivity: return @"kCC3SemanticMaterialReflectivity";
 
 		// LIGHTING --------------
 		case kCC3SemanticIsUsingLighting: return @"kCC3SemanticIsUsingLighting";
@@ -138,6 +139,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount: return @"kCC3SemanticTextureCount";
 		case kCC3SemanticTextureSampler: return @"kCC3SemanticTextureSampler";
+		case kCC3SemanticTexture2DCount: return @"kCC3SemanticTexture2DCount";
+		case kCC3SemanticTexture2DSampler: return @"kCC3SemanticTexture2DSampler";
+		case kCC3SemanticTextureCubeCount: return @"kCC3SemanticTextureCubeCount";
+		case kCC3SemanticTextureCubeSampler: return @"kCC3SemanticTextureCubeSampler";
 
 		case kCC3SemanticTexUnitMode: return @"kCC3SemanticTexUnitMode";
 		case kCC3SemanticTexUnitConstantColor: return @"kCC3SemanticTexUnitConstantColor";
@@ -333,9 +338,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
 	ccTime appTime;
-	GLuint boneCnt;
-	BOOL isInverted = NO;
-	BOOL isPtEmitter = NO;
+	GLuint boneCnt = 0, tuCnt = 0, texCnt = 0;
+	BOOL isInverted = NO, isPtEmitter = NO;
 	
 	switch (semantic) {
 		
@@ -633,6 +637,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticMaterialShininess:
 			[uniform setFloat: visitor.currentMaterial.shininess];
 			return YES;
+		case kCC3SemanticMaterialReflectivity:
+			[uniform setFloat: visitor.currentMaterial.reflectivity];
+			return YES;
 		case kCC3SemanticMinimumDrawnAlpha:
 			mat = visitor.currentMaterial;
 			[uniform setFloat: (mat.shouldDrawLowAlpha ? 0.0f : mat.alphaTestReference)];
@@ -786,121 +793,166 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 #pragma mark Setting texture semantics
 		// TEXTURES --------------
 		case kCC3SemanticTextureCount:
+			// Count all textures of any type
 			[uniform setInteger: visitor.textureUnitCount];
 			return YES;
 		case kCC3SemanticTextureSampler:
-			// Samplers are simply consecutive texture unit indices
+			// Samplers that can be any type are simply consecutive texture unit indices
+			// starting at the semanticIndex of the uniform. Typically, semanticIndex > 0
+			// and uniformSize > 1 are mutually exclusive.
 			for (GLuint i = 0; i < uniformSize; i++) [uniform setInteger: (semanticIndex + i) at: i];
+			return YES;
+
+		case kCC3SemanticTexture2DCount:
+			// Count just the 2D textures
+			mat = visitor.currentMaterial;
+			tuCnt = visitor.textureUnitCount;
+			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
+				if ( [mat textureForTextureUnit: tuIdx].isTexture2D ) texCnt++;
+			[uniform setInteger: texCnt];
+			return YES;
+		case kCC3SemanticTexture2DSampler:
+			mat = visitor.currentMaterial;
+			tuCnt = visitor.textureUnitCount;
+			for (GLuint tuIdx = 0, uIdx = 0; (tuIdx < tuCnt) && (uIdx < uniformSize); tuIdx++) {
+				// Add only the 2D texture units above semantic index.
+				// Typically, semanticIndex > 0 and uniformSize > 1 are mutually exclusive.
+				if ( [mat textureForTextureUnit: tuIdx].isTexture2D && tuIdx >= semanticIndex ) {
+					[uniform setInteger: tuIdx at: uIdx];
+					uIdx++;
+				}
+			}
+			return YES;
+			
+		case kCC3SemanticTextureCubeCount:
+			// Count just the cube textures
+			mat = visitor.currentMaterial;
+			tuCnt = visitor.textureUnitCount;
+			for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++)
+				if ( [mat textureForTextureUnit: tuIdx].isTextureCube ) texCnt++;
+			[uniform setInteger: texCnt];
+			return YES;
+		case kCC3SemanticTextureCubeSampler:
+			mat = visitor.currentMaterial;
+			tuCnt = visitor.textureUnitCount;
+			for (GLuint tuIdx = 0, uIdx = 0; (tuIdx < tuCnt) && (uIdx < uniformSize); tuIdx++) {
+				// Add only the cube texture units above semantic index.
+				// Typically, semanticIndex > 0 and uniformSize > 1 are mutually exclusive.
+				if ( [mat textureForTextureUnit: tuIdx].isTextureCube && tuIdx >= semanticIndex ) {
+					[uniform setInteger: tuIdx at: uIdx];
+					uIdx++;
+				}
+			}
 			return YES;
 
 		// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 		// In most shaders, these will be left unused in favor of customized the texture combining in code.
 		case kCC3SemanticTexUnitMode:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				CC3TextureUnit* tu = [visitor currentTextureUnitAt: (semanticIndex + i)];
 				[uniform setInteger: (tu ? tu.textureEnvironmentMode :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitConstantColor:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3TextureUnit* tu = [visitor currentTextureUnit: (semanticIndex + i)];
+				CC3TextureUnit* tu = [visitor currentTextureUnitAt: (semanticIndex + i)];
 				[uniform setColor4F: (tu ? tu.constantColor :  kCCC4FBlackTransparent) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineRGBFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.combineRGBFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand0 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand1 :  GL_SRC_COLOR) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2RGB:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.rgbOperand2 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitCombineAlphaFunction:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.combineAlphaFunction :  GL_MODULATE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource0 :  GL_TEXTURE) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource1 :  GL_PREVIOUS) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitSource2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaSource2 :  GL_CONSTANT) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand0Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand0 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand1Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand1 :  GL_SRC_ALPHA) at: i];
 			}
 			return YES;
 		case kCC3SemanticTexUnitOperand2Alpha:
 			for (GLuint i = 0; i < uniformSize; i++) {
-				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnit: (semanticIndex + i)];
+				CC3ConfigurableTextureUnit* ctu = (CC3ConfigurableTextureUnit*)[visitor currentTextureUnitAt: (semanticIndex + i)];
 				BOOL isCTU = [ctu isKindOfClass: [CC3ConfigurableTextureUnit class]];
 				[uniform setInteger: (isCTU ? ctu.alphaOperand2 :  GL_SRC_ALPHA) at: i];
 			}
@@ -1140,19 +1192,22 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
-	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];										/**< (vec4) Color when lighting & materials are not in use. */
-	[self mapVarName: @"u_cc3MaterialAmbientColor" toSemantic: kCC3SemanticMaterialColorAmbient];		/**< (vec4) Ambient color of the material. */
-	[self mapVarName: @"u_cc3MaterialDiffuseColor" toSemantic: kCC3SemanticMaterialColorDiffuse];		/**< (vec4) Diffuse color of the material. */
+	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];									/**< (vec4) Color when lighting & materials are not in use. */
+	[self mapVarName: @"u_cc3MaterialAmbientColor" toSemantic: kCC3SemanticMaterialColorAmbient];	/**< (vec4) Ambient color of the material. */
+	[self mapVarName: @"u_cc3MaterialDiffuseColor" toSemantic: kCC3SemanticMaterialColorDiffuse];	/**< (vec4) Diffuse color of the material. */
 	[self mapVarName: @"u_cc3MaterialSpecularColor" toSemantic: kCC3SemanticMaterialColorSpecular];	/**< (vec4) Specular color of the material. */
 	[self mapVarName: @"u_cc3MaterialEmissionColor" toSemantic: kCC3SemanticMaterialColorEmission];	/**< (vec4) Emission color of the material. */
 	[self mapVarName: @"u_cc3MaterialOpacity" toSemantic: kCC3SemanticMaterialOpacity];				/**< (float) Opacity of the material. */
-	[self mapVarName: @"u_cc3MaterialShininess" toSemantic: kCC3SemanticMaterialShininess];			/**< (float) Shininess of the material. */
+	[self mapVarName: @"u_cc3MaterialShininess" toSemantic: kCC3SemanticMaterialShininess];			/**< (float) Shininess of the material (0 <> 128). */
+	[self mapVarName: @"u_cc3MaterialReflectivity" toSemantic: kCC3SemanticMaterialReflectivity];	/**< (float) Reflectivity of the material (0 <> 1). */
 	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
 	
 	// LIGHTING --------------
-	// With multiple lights, most of the structure elements is an array.
+	// With multiple lights, each elements is an array.
 	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether any lighting is enabled. */
 	[self mapVarName: @"u_cc3LightSceneAmbientLightColor" toSemantic: kCC3SemanticSceneLightColorAmbient];		/**< (vec4) Ambient light color of the scene. */
+	
+	// With multiple lights, each element in the following is an array.
 	[self mapVarName: @"u_cc3LightIsLightEnabled" toSemantic: kCC3SemanticLightIsEnabled];						/**< (bool[]) Whether each light is enabled. */
 	[self mapVarName: @"u_cc3LightPositionEyeSpace" toSemantic: kCC3SemanticLightPositionEyeSpace];				/**< (vec4[]) Location of each light in eye space. */
 	[self mapVarName: @"u_cc3LightPositionGlobal" toSemantic: kCC3SemanticLightPositionGlobal];					/**< (vec4[]) Location of each light in global coordinates. */
@@ -1176,10 +1231,18 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3FogEndDistance" toSemantic: kCC3SemanticFogEndDistance];			/**< (float) Distance from camera at which fogging effect ends. */
 
 	// TEXTURES --------------
-	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];	/**< (int) Number of active textures. */
-	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D) Single texture sampler (texture unit 0). */
-	[self mapVarName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSampler];		/**< (sampler2D[]) Array of texture samplers. */
-	
+	[self mapVarName: @"u_cc3TextureCount" toSemantic: kCC3SemanticTextureCount];			/**< (int) Number of active textures of any type. */
+	[self mapVarName: @"s_cc3Texture" toSemantic: kCC3SemanticTextureSampler];				/**< (sampler2D/sampler3D) Single texture sampler of any type. */
+	[self mapVarName: @"s_cc3Textures" toSemantic: kCC3SemanticTextureSampler];				/**< (sampler2D[]/sampler3D) Array of texture samplers of any single type. */
+
+	[self mapVarName: @"u_cc3Texture2DCount" toSemantic: kCC3SemanticTexture2DCount];		/**< (int) Number of active textures of all types. */
+	[self mapVarName: @"s_cc3Texture2D" toSemantic: kCC3SemanticTexture2DSampler];			/**< (sampler2D) Single 2D texture sampler. */
+	[self mapVarName: @"s_cc3Texture2Ds" toSemantic: kCC3SemanticTexture2DSampler];			/**< (sampler2D[]) Array of 2D texture samplers. */
+
+	[self mapVarName: @"u_cc3TextureCubeCount" toSemantic: kCC3SemanticTextureCubeCount];	/**< (int) Number of active textures of all types. */
+	[self mapVarName: @"s_cc3TextureCube" toSemantic: kCC3SemanticTextureCubeSampler];		/**< (samplerCube) Single cube texture sampler. */
+	[self mapVarName: @"s_cc3TextureCubes" toSemantic: kCC3SemanticTextureCubeSampler];		/**< (samplerCube[]) Array of cube texture samplers. */
+
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in GLSL code.
 	[self mapVarName: @"u_cc3TextureUnitColor" toSemantic: kCC3SemanticTexUnitConstantColor];							/**< (vec4[]) The constant color of each texture unit. */

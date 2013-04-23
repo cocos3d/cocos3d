@@ -91,11 +91,10 @@
 #pragma mark Drawing
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGL* gl = visitor.gl;
+	[gl enableFog: visible];
 	if (visible) {
 		LogTrace(@"Drawing %@", self);
-		CC3OpenGL* gl = visitor.gl;
-
-		[gl enableFog: YES];
 		gl.fogMode = attenuationMode;
 		gl.fogColor = floatColor;
 		gl.fogHint = performanceHint;
@@ -110,21 +109,10 @@
 				gl.fogDensity = density;
 				break;
 			default:
-				CC3Assert(NO, @"%@ encountered bad attenuation mode (%x)", self, attenuationMode);
+				CC3Assert(NO, @"%@ encountered bad attenuation mode (%04X)", self, attenuationMode);
 				break;
 		}
-	} else {
-		[self unbindWithVisitor: visitor];
 	}
-}
-
--(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[[self class] unbindWithVisitor: visitor];
-}
-
-+(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Disabling fog");
-	[visitor.gl enableFog: NO];
 }
 
 

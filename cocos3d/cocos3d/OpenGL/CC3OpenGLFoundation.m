@@ -60,7 +60,7 @@ NSString* GetGLErrorText(GLenum errCode) {
 		case GL_INVALID_FRAMEBUFFER_OPERATION:
 			return @"GL_INVALID_FRAMEBUFFER_OPERATION: Operation not allowed on frame buffer";
 		default:
-			return [NSString stringWithFormat: @"Unknown GL error (0x%x)", errCode];
+			return [NSString stringWithFormat: @"Unknown GL error (0x%04X)", errCode];
 	}
 }
 
