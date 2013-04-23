@@ -250,10 +250,10 @@
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, (%@), ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, attenuation: %@",
+	return [NSString stringWithFormat: @"%@, (%@), ambient: %@, diffuse: %@, specular: %@, spotAngle: %.2f, spotExponent: %.6f, attenuation: %@",
 			[super fullDescription], (self.isDirectionalOnly ? @"directional" : @"positional"),
 			NSStringFromCCC4F(ambientColor), NSStringFromCCC4F(diffuseColor),
-			NSStringFromCCC4F(specularColor), spotCutoffAngle,
+			NSStringFromCCC4F(specularColor), spotCutoffAngle, spotExponent,
 			NSStringFromCC3AttenuationCoefficients(_attenuation)];
 }
 

@@ -175,7 +175,7 @@
  * by the currentMeshNode property, and will be nil both before and after the visit: method
  * is invoked on that node.
  */
--(CC3TextureUnit*) currentTextureUnit: (GLuint) texUnit;
+-(CC3TextureUnit*) currentTextureUnitAt: (GLuint) texUnit;
 
 /** The number of lights in the scene. */
 @property(nonatomic, readonly) NSUInteger lightCount;
@@ -388,7 +388,7 @@
 	CC3Matrix4x4 _modelViewProjMatrix;
 	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
-	GLuint _textureUnit;
+	GLuint _currentTextureUnitIndex;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _shouldClearDepthBuffer : 1;
@@ -416,19 +416,26 @@
 @property(nonatomic, assign) CC3NodeSequencer* drawingSequencer;
 
 /**
- * The number of texture units being drawn.
- *
- * This value is set by the texture contained in the node's material,
- * and is then consumed by the mesh when binding texture coordinates.
- */
-@property(nonatomic, assign) GLuint textureUnitCount; 
-
-/**
- * The current texture unit being drawn.
+ * The index of the current texture unit being drawn.
  *
  * This value is set during drawing when the visitor is passed to the texture coordinates array.
  */
-@property(nonatomic, assign) GLuint textureUnit; 
+@property(nonatomic, assign) GLuint currentTextureUnitIndex;
+
+/**
+ * Set the value of the textureUnitCount to that of the currentTextureUnitIndex property,
+ * and disables all texture units whose index is at or above the current value of the
+ * currentTextureUnitIndex property.
+ */
+-(void) disableUnusedTextureUnits;
+
+/**
+ * The number of texture units being drawn.
+ *
+ * The value of this property is set by the disableUnusedTextureUnits method, which is invoked
+ * by the node's material, and is then consumed by the mesh when binding texture coordinates.
+ */
+@property(nonatomic, readonly) GLuint textureUnitCount;
 
 /**
  * This property gives the interval, in seconds, since the previous frame.

@@ -93,6 +93,9 @@
  */
 -(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor;
 
+/** The semantic delegate that will be attached to any program created by this matcher. */
+@property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
+
 @end
 
 
@@ -138,13 +141,6 @@
  * This property returns the CC3GLProgram class. Subclasses may override.
  */
 @property(nonatomic, readonly) Class programClass;
-
-/**
- * The semantic delegate that will be attached to any program created by this instance.
- *
- * This initial value of this property is set to an instance of CC3GLProgramSemanticsByVarName.
- */
-@property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
 
 @end
 

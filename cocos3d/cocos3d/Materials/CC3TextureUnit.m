@@ -170,14 +170,14 @@
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.textureUnit;
+	GLuint tuIdx = visitor.currentTextureUnitIndex;
 	[gl setTextureEnvMode: textureEnvironmentMode at: tuIdx];
 	[gl setTextureEnvColor: constantColor at: tuIdx];
 }
 
 +(void) bindDefaultWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.textureUnit;
+	GLuint tuIdx = visitor.currentTextureUnitIndex;
 	[gl setTextureEnvMode: GL_MODULATE at: tuIdx];
 	[gl setTextureEnvColor: kCCC4FBlackTransparent at: tuIdx];
 }

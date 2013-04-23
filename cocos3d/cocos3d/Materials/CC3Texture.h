@@ -33,36 +33,24 @@
 #import "CC3Identifiable.h"
 #import "CC3NodeVisitor.h"
 #import "CC3TextureUnit.h"
-#import "CCTexture2D.h"
-#import "CCTextureCache.h"
+#import "CC3GLTexture.h"
 
 
 #pragma mark -
 #pragma mark CC3Texture
 
 /** 
- * Each instance of CC3Texture wraps a cocos2d CCTexture2D instance, and manages
- * various texture settings, and applying that texture to the GL engine.
+ * Each instance of CC3Texture wraps a CC3GLTexture instance and a CC3TextureUnit instance,
+ * and manages applying the texture and texture unit settings to the GL engine.
  *
- * To improve both performance and texture quality, by default, instances generate
- * a mipmap of the underlying CCTexture2D when a texture is loaded through this
- * instance. If you do not want mipmaps to be automatically generated, set the
- * class-side shouldGenerateMipmaps property to NO. With automatic mipmap generation
- * turned off, you can selectively generate a mipmap by using the generateMipmap
- * method on any single CC3Texture instance. In addition, textures that contain
- * mipmaps within the file content (PVR files may contain mipmaps) will retain and
- * use this mipmap. See the shouldGenerateMipmaps and hasMipmap properties, and the
- * generateMipmap method for more information.
+ * To conserve memory and improve texture loading performance, CC3GLTexture instances are
+ * cached, and many CC3Texture instances can share the same underlying CC3GLTexture instance.
+ * You can therefore create many CC3Texture instances loaded from the same texture file,
+ * without having to worry about the texture contents being loaded multiple times.
  *
- * Under iOS, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate 
- * system. The isFlippedVerically property can be used to ensure that textures are
- * displayed with the correct orientation. When a CC3Texture is applied to a mesh,
- * the mesh will be adjusted automatically if the texture is vertically flipped.
- *
- * In most cases, a material will hold a single instance of CC3Texture in the texture
- * property to provide a simple single-texture surface. This is the most common application
- * of textures to a material.
+ * In most cases, a material will hold a single instance of CC3Texture in the texture property
+ * to provide a simple single-texture surface. This is the most common application of textures
+ * to a material.
  *
  * For more sophisticated surfaces, materials also support multi-texturing, where more than
  * one instance of CC3Texture is added to the material. With multi-texturing, several textures
@@ -73,46 +61,38 @@
  * textures held in the material are processed by subsequent texture units, in the order in
  * which the textures were added to the material.
  * 
- * Each texture unit combines its texture with the output of the previous texture unit
- * in the chain. Combining textures is quite flexible under OpenGL, and there are many
- * ways that each texture can be combined with the output of the previous texture unit.
- * The way that a particular texture combines with the previous textures is defined by
- * an instance of CC3TextureUnit, held in the textureUnit property of each texture that
- * was added to the material.
+ * Under OpenGL ES 1.1, or OpenGL using a fixed-function pipeline, each texture unit combines
+ * its texture with the output of the previous texture unit in the chain. Combining textures
+ * is quite flexible under OpenGL, and there are many ways that each texture can be combined
+ * with the output of the previous texture unit. The way that a particular texture combines
+ * with the previous textures is defined by an instance of CC3TextureUnit, held in the
+ * textureUnit property of each texture that was added to the material.
  *
  * For example, to configure a material for bump-mapping, add a texture that contains a
  * normal vector at each pixel instead of a color, and set the textureUnit property of
  * the texture to a CC3BumpMapTextureUnit. Then add another texture, containing the image
  * that will be visible, to the material. The material will combine these two textures,
  * as specified by the CC3TextureUnit held by the second texture.
+ *
+ * Under OpenGL ES 2.0 or OpenGL with a programmable pipeline, you will generally handle
+ * multitexturing in the shader code.
  */
 @interface CC3Texture : CC3Identifiable {
-	CCTexture2D* _texture;
+	CC3GLTexture* _texture;
 	CC3TextureUnit* _textureUnit;
-	GLenum _minifyingFunction;
-	GLenum _magnifyingFunction;
-	GLenum _horizontalWrappingFunction;
-	GLenum _verticalWrappingFunction;
-	BOOL _texParametersAreDirty : 1;
 }
 
 /**
- * The CCTexture2D texture being managed by this instance.
+ * The CC3GLTexture texture being managed by this instance.
  *
  * This property is populated automatically by the loadTextureFile: method, or one
  * of the file-loading initialization methods, but it can also be set directly to
- * a CCTexture2D that has already been loaded.
- * 
- * When setting this property directly, be aware that doing so does not automatically generate
- * a mipmap for the texture, even if the class-side property shouldGenerateMipmaps is set to YES.
- * You can use the generateMipmap method of this instance to do so once this property is set.
+ * a CC3GLTexture that has already been loaded.
  *
- * If this property is set to an instance of CC3Texture2D, the hasMipmap and
- * isFlippedVertically of that instance will be set correctly. However, if this
- * property is set to an instance of CCTexture2D, you should ensure that the
- * hasMipmap and isFlippedVertically properties of that instance are set correctly.
+ * If this instance does not yet have a name, it is set to the name of the specified
+ * CC3GLTexture instance.
  */
-@property(nonatomic, retain) CCTexture2D* texture;
+@property(nonatomic, retain) CC3GLTexture* texture;
 
 /**
  * The texture environment settings that are applied to the texture unit that draws this
@@ -126,36 +106,60 @@
  * texture should contain a texture unit that describes how the GL engine should combine
  * that texture with the textures that have already been applied.
  *
- * Different subclasses of CC3TextureUnit provide different customizations for combining
- * textures. The CC3BumpMapTextureUnit provides easy settings for DOT3 bump-mapping, and
- * CC3ConfigurableTextureUnit provides complete flexibility in setting texture environment
- * settings.
+ * Different subclasses of CC3TextureUnit provide different customizations for combining textures. The
+ * CC3BumpMapTextureUnit provides easy settings for DOT3 bump-mapping, and CC3ConfigurableTextureUnit
+ * provides complete flexibility in setting texture environment settings.
  */
 @property(nonatomic, retain) CC3TextureUnit* textureUnit;
-
-/**
- * Returns the proportional size of the usable image in the contained CCTexture2D,
- * relative to its physical size.
- *
- * The physical size of most textures is some power-of-two (POT), whereas the usable image
- * size is the actual portion of it that contains the image. The value returned by this
- * method contains two fractional floats (u & v), each between zero and one, representing
- * the proportional size of the usable image
- *
- * As an example, an image whose dimensions are actually 320 x 480 pixels will result in
- * a texture that is 512 x 512 pixels, and the mapSize returned by this method will be
- * {0.625, 0.9375}, calculated from {320/512, 480/512}.
- */
-@property(nonatomic, readonly) CGSize mapSize;
 
 /**
  * Indicates whether the RGB components of each pixel of the encapsulated texture
  * have had the corresponding alpha component applied already.
  *
- * Returns YES if this instance contains a CCTexture2D instance, and that texture
+ * Returns YES if this instance contains a CC3GLTexture instance, and that texture
  * instance indicates that it contains pre-mulitiplied alpha.
+ *
+ * This is a convenience property that simply returns the value of the same property on the
+ * underlying CC3GLTexture instance.
  */
 @property(nonatomic,readonly) BOOL hasPremultipliedAlpha;
+
+/**
+ * Returns whether this texture is flipped vertically.
+ *
+ * Under iOS and OSX, most texture formats are loaded updside-down. This is because the vertical
+ * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate  system.
+ * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
+ *
+ * This property will return NO if this texture was loaded from a PVR texture file,
+ * and will return YES if loaded from any other texture file type.
+ *
+ * This is a convenience property that simply returns the value of the same property on the
+ * underlying CC3GLTexture instance.
+ */
+@property(nonatomic, readonly) BOOL isFlippedVertically;
+
+/** Returns whether this texture is a standard two-dimentional texture. */
+@property(nonatomic, readonly) BOOL isTexture2D;
+
+/** Returns whether this texture is a six-sided cube-map texture. */
+@property(nonatomic, readonly) BOOL isTextureCube;
+
+/**
+ * Returns the proportional size of the usable image in the texture, relative to its physical size.
+ *
+ * The physical size of most textures is some power-of-two (POT), whereas the usable image size is
+ * the actual portion of it that contains the image. The returned value contains two fractional floats
+ * (width & height), each between zero and one, representing the proportional size of the usable image
+ *
+ * As an example, an image whose dimensions are actually 320 x 480 pixels will result in a texture
+ * that is 512 x 512 pixels, and the mapSize returned by this method will be {0.625, 0.9375},
+ * calculated from {320/512, 480/512}.
+ *
+ * This is a convenience property that simply returns the value of the same property on the
+ * underlying CC3GLTexture instance.
+ */
+@property(nonatomic, readonly) CGSize coverage;
 
 /**
  * The direction, in local tangent coordinates, of the light source that is to
@@ -186,215 +190,108 @@
  */
 @property(nonatomic, readonly) BOOL isBumpMap;
 
-/**
- * Returns whether this texture is flipped vertically.
- *
- * Under iOS, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate 
- * system. This results in textures being displayed upside-down, relative to the OpenGL
- * coordinate system.
- *
- * This property simply returns the value of the same property on the contained CCTexture2D.
- *
- * This property will return NO if this texture was loaded from a PVR texture file,
- * and will return YES if loaded from any other texture file type.
- */
-@property(nonatomic, readonly) BOOL isFlippedVertically;
 
-
-#pragma mark Mipmaps
+#pragma mark Texture file loading
 
 /**
- * Returns whether a mipmap has been generated for the underlying CCTexture2D instance.
+ * Loads the texture file at the specified file path into the texture property,
+ * and returns whether the loading was successful.
  *
- * This property simply returns the value of the same property on the contained CCTexture2D.
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
  *
- * If the class-side shouldGenerateMipmaps property is YES, mipmaps are generated automatically
- * whenever a CC3Texture2D is loaded via the loadTextureFile: method of this instance, or through
- * one of the instance initialization methods that load a texture.
+ * If this instance does not yet have a name, it is set to the unqualified file name from
+ * the specified file path.
  *
- * Mipmaps can also be generated by invoking the generateMipmap method, which
- * delegates to the generateMipmapIfNeeded method of the underlying CCTexture2D.
+ * If the instance is instantiated with either initFromFile: or textureFromFile:, this method will
+ * be invoked automatically during instance initialization. If the instance is instantiated without
+ * using one of the file-loading methods, this method can be invoked directly to load the file.
  *
- * Once a mipmap is generated for a particular underlying CCTexture2D, all instances
- * of CC3Texture that share that CCTexture2D will return YES from this property.
+ * Each texture file is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same file path will only load the file once.
+ * All instances that have invoked this method on the same file path will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
  *
- * If the underlying CCTexture2D was assigned via the texture property, and if a mipmap has
- * been generated for a CCTexture2D before it was assigned to any CC3Texture instance, or you
- * know that the CCTexture2D was loaded with a mipmap, you should mark it as such by setting
- * its hasMipmap property to YES. This is not required if the texture is a CC3Texture2D, since
- * it already tracks whether the mimmap was loaded or generated.
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, and the texture files do
+ * not already contain a mipmap, a mipmap will be generated for the texture automatically.
  */
-@property(nonatomic, readonly) BOOL hasMipmap;
+-(BOOL) loadTextureFile: (NSString*) aFilePath;
 
 /**
- * Generates a mipmap for the contained CCTexture2D, if needed, by invoking the
- * generateMipmapIfNeeded method on the contained CCTexture2D.
+ * Loads the six cube face textures at the specified file paths, and returns whether all
+ * six files were successfully loaded.
  *
- * It is safe to invoke this method more than once, because it will only generate
- * a mipmap if a mipmap has not yet been generated.
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * of the specified posXFilePath file path.
  *
- * If the contained texture is an instance of CCTexture2D that was assigned to this instance
- * via the texture property, be aware that some formats (notably PVR) may already contain
- * mipmaps in the content loaded from file. In this case, it is up to the application to set
- * the hasMipmap property of the CCTexture2D to YES before invoking this method.
+ * If the instance is instantiated via initFromFilesPosX:negX:posY:negY:posZ:negZ: or
+ * textureFromFilesPosX:negX:posY:negY:posZ:negZ:, this method is invoked automatically
+ * during instance initialization. If the instance is instantiated without using one of
+ * those file-loading initializers, this method can be invoked directly to load the files.
  *
- * If the contained texture is an instance of the CC3Texture2D subclass, its
- * hasMipmap property will have been accurately set during loading, and there
- * is no need for the application to set it prior to invoking this method.
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
+ *
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same posXFilePath file name will only load the textures
+ * once. All instances that have invoked this method on the same posXFilePath file path will
+ * share the same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
  */
--(void) generateMipmap;
+-(BOOL) loadCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+							posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+							posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
 
 /**
- * Returns whether a mipmap should be generated for any textures that are loaded
- * via the loadTextureFile: method of this instance, or through one of the instance
- * initialization methods that load a texture.
+ * Loads the six cube face textures using the specified pattern string as a string format
+ * template to derive the names of the six textures, and returns whether all six files were
+ * successfully loaded.
  *
- * If this property is set to YES, mipmap will only be generated if the texture
- * file does not already contain a mipmap.
+ * If the instance is instantiated via initFromFilePattern: or textureFromFilePattern:,
+ * this method is invoked automatically during instance initialization. If the instance
+ * is instantiated without using one of those file-loading initializers, this method can
+ * be invoked directly to load the files.
  *
- * This property affects all textures loaded through CC3Texture. You can set this
- * property to the desired value prior to loading one or more textures.
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
  *
- * The default value of this class-side property is YES, indicating that mipmaps
- * will be generated for any textures loaded through CC3Texture.
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
+ *
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * derived from substituting an empty string into the format marker in the specified file
+ * path pattern string.
+ *
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same file path pattern will only load the textures once.
+ * All instances that have invoked this method on the same file path pattern will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
  */
-+(BOOL) shouldGenerateMipmaps;
-
-/**
- * Sets whether a mipmap should be generated for any textures that are loaded
- * via the loadTextureFile: method of this instance, or through one of the instance
- * initialization methods that load a texture.
- *
- * If this property is set to YES, mipmap will only be generated if the texture
- * file does not already contain a mipmap.
- *
- * This property affects all textures loaded through CC3Texture. You can set this
- * property to the desired value prior to loading one or more textures.
- *
- * The default value of this class-side property is YES, indicating that mipmaps
- * will be generated for any textures loaded through CC3Texture.
- */
-+(void) setShouldGenerateMipmaps: (BOOL) shouldMipmap;
-
-
-#pragma mark Texture parameters
-
-/**
- * The minifying function to be used whenever a pixel being textured maps
- * to an area greater than one texel.
- *
- * This property must be one of the following values:
- *   - GL_NEAREST:                Uses the texel nearest to the center of the pixel.
- *   - GL_LINEAR:                 Uses a weighted average of the four closest texels.
- *   - GL_NEAREST_MIPMAP_NEAREST: Uses GL_NEAREST on the mipmap that is closest in size.
- *   - GL_LINEAR_MIPMAP_NEAREST:  Uses GL_LINEAR on the mipmap that is closest in size.
- *   - GL_NEAREST_MIPMAP_LINEAR:  Uses GL_NEAREST on the two mipmaps that are closest in size,
- *                                then uses the weighted average of the two results.
- *   - GL_LINEAR_MIPMAP_LINEAR:   Uses GL_LINEAR on the two mipmaps that are closest in size,
- *                                then uses the weighted average of the two results.
- *
- * The last four values above require that a mipmap be available, as indicated
- * by the hasMipmap property. If one of those value is set in this property,
- * this property will only return either GL_NEAREST (for all GL_NEAREST... values)
- * or GL_LINEAR (for all GL_LINEAR... values) until a mipmap has been created for
- * the underlying CCTexture2D instance, and has been marked as such for this class.
- * See the hasMipmap property for more information about how that property is updated.
- *
- * The initial value of this property is set by the defaultTextureParameters
- * class-side property, and defaults to GL_LINEAR_MIPMAP_NEAREST, or GL_LINEAR
- * if the underlying CCTexture2D does not have a generated mipmap.
- */
-@property(nonatomic, assign) GLenum minifyingFunction;
-
-/**
- * The magnifying function to be used whenever a pixel being textured maps
- * to an area less than or equal to one texel.
- *
- * This property must be one of the following values:
- *   - GL_NEAREST: Uses the texel nearest to the center of the pixel.
- *   - GL_LINEAR:  Uses a weighted average of the four closest texels.
- *
- * The initial value of this property is set by the defaultTextureParameters
- * class-side property, and defaults to GL_LINEAR.
- */
-@property(nonatomic, assign) GLenum magnifyingFunction;
-
-/**
- * The method used to detemine the texel to use when a texture coordinate has
- * a value less than zero or greater than one in the horizontal (S) direction.
- *
- * This property must be one of the following values:
- *   - GL_CLAMP_TO_EDGE:   Uses the nearest texel from the nearest edge, effectively
- *                         extending this texel across the mesh.
- *   - GL_REPEAT:          Repeats the texture across the mesh.
- *   - GL_MIRRORED_REPEAT: Repeats the texture across the mesh, altering between
- *                         the texture and a mirror-image of the texture.
- *
- * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the width of this texture
- * is a power-of-two. If the width is not a power-of-two, attempts to set this property to
- * one of those values will be ignored.
- *
- * The initial value of this property is set by the defaultTextureParameters
- * class-side property, and defaults to GL_REPEAT.
- */
-@property(nonatomic, assign) GLenum horizontalWrappingFunction;
-
-/**
- * The method used to detemine the texel to use when a texture coordinate has
- * a value less than zero or greater than one in the vertical (T) direction.
- *
- * This property must be one of the following values:
- *   - GL_CLAMP_TO_EDGE:   Uses the nearest texel from the nearest edge, effectively
- *                         extending this texel across the mesh.
- *   - GL_REPEAT:          Repeats the texture across the mesh.
- *   - GL_MIRRORED_REPEAT: Repeats the texture across the mesh, altering between
- *                         the texture and a mirror-image of the texture.
- *
- * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the height of this texture
- * is a power-of-two. If the height is not a power-of-two, attempts to set this property to
- * one of those values will be ignored.
- *
- * The initial value of this property is set by the defaultTextureParameters
- * class-side property, and defaults to GL_REPEAT.
- */
-@property(nonatomic, assign) GLenum verticalWrappingFunction;
-
-/**
- * A convenience method to accessing the following four texture parameters
- * using a cocos2d ccTexParams structure:
- *   - minifyingFunction
- *   - magnifyingFunction
- *   - horizontalWrappingFunction
- *   - shouldRepeatVertically
- *
- * The initial value of this property is set by the defaultTextureParameters
- * class-side property.
- */
-@property(nonatomic, assign) ccTexParams textureParameters;
-
-/**
- * The default values for the textureParameters property
- * (with the initial values of this class-side property):
- *   - minifyingFunction (GL_LINEAR_MIPMAP_NEAREST)
- *   - magnifyingFunction (GL_LINEAR)
- *   - horizontalWrappingFunction (GL_REPEAT)
- *   - shouldRepeatVertically (GL_REPEAT)
- */
-+(ccTexParams) defaultTextureParameters;
-
-/**
- * The default values for the textureParameters property
- * (with the initial values of this class-side property):
- *   - minifyingFunction (GL_LINEAR_MIPMAP_NEAREST)
- *   - magnifyingFunction (GL_LINEAR)
- *   - horizontalWrappingFunction (GL_REPEAT)
- *   - shouldRepeatVertically (GL_REPEAT)
- *
- * You can change the value of this class-side property to affect
- * any textures subsequently created or loaded from a file.
- */
-+(void) setDefaultTextureParameters: (ccTexParams) texParams;
+-(BOOL) loadCubeMapFromFilePattern: (NSString*) aFilePathPattern;
 
 
 #pragma mark Allocation and Initialization
@@ -409,22 +306,18 @@
  * The name of this instance is set to the unqualified file name from the specified
  * file path and the tag is set to an automatically generated unique tag value.
  *
- * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
  * Each texture file is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path will only load the file once.
  * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * Returns nil if the file could not be loaded.
  */
 -(id) initFromFile: (NSString*) aFilePath;
 
 /**
- * Allocates and initializes an autoreleased instance instance by loading the
- * texture file at the specified file path.
+ * Allocates and initializes an autoreleased instance loaded from the texture file at
+ * the specified file path.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
@@ -433,183 +326,185 @@
  * The name of this instance is set to the unqualified file name from the specified
  * file path and the tag is set to an automatically generated unique tag value.
  *
- * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
  * Each texture file is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * All instances created by invoking this method on the same file path will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * Returns nil if the file could not be loaded.
  */
 +(id) textureFromFile: (NSString*) aFilePath;
 
 /**
- * Initializes this instance by loading the texture file at the specified file path.
+ * Initializes this instance with the specified name and loaded from the texture file
+ * at the specified file path.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
  * resources directory, the specified file path can simply be the name of the file.
  *
- * The name of this instance is set to the unqualified file name from the specified
- * file path and the tag is set to the specified value.
- *
- * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
  * Each texture file is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path will only load the file once.
  * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
- */
--(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath;
-
-/**
- * Allocates and initializes an autoreleased instance instance by loading the
- * texture file at the specified file path.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * The name of this instance is set to the unqualified file name from the specified
- * file path and the tag is set to the specified value.
+ * same instance of the underlying CC3GLTexture held in the texture property.
  *
  * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
- */
-+(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath;
-
-/**
- * Initializes this instance by loading the texture file at the specified file path.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * The name of this instance is set to the specified name and the tag is set to
- * an automatically generated unique tag value.
- *
- * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
  */
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
- * Allocates and initializes an autoreleased instance instance by loading the
- * texture file at the specified file path.
+ * Allocates and initializes an autoreleased instance with the specified name and loaded
+ * from the texture file at the specified file path.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
  * resources directory, the specified file path can simply be the name of the file.
  *
- * The name of this instance is set to the specified name and the tag is set to
- * an automatically generated unique tag value.
- *
- * Returns nil if the file could not be loaded.
- *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
- *
  * Each texture file is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * All instances created by invoking this method on the same name will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * Returns nil if the file could not be loaded.
  */
 +(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
 
 /**
- * Initializes this instance by loading the texture file at the specified file path.
+ * Initializes this instance by loading the six cube face textures at the specified file paths,
+ * and returns whether all six files were successfully loaded.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
  *
- * The name of this instance is set to the specified name and the tag is set
- * to the specified value.
+ * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
  *
- * Returns nil if the file could not be loaded.
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same posXFilePath file name will only load the textures
+ * once. All instances that have invoked this method on the same posXFilePath file name will
+ * share the same instance of the underlying CC3GLTexture held in the texture property.
  *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
  *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * Returns nil if any of the six files could not be loaded.
  */
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath;
+-(id) initCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+						  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+						  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
 
 /**
- * Allocates and initializes an autoreleased instance instance by loading the
- * texture file at the specified file path.
+ * Returns an instance initialized by loading the six cube face textures at the specified
+ * file paths, and returns whether all six files were successfully loaded.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
  *
- * The name of this instance is set to the specified name and the tag is set
- * to the specified value.
+ * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
  *
- * Returns nil if the file could not be loaded.
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same posXFilePath file name will only load the textures
+ * once. All instances created by invoking this method on the same posXFilePath file name will
+ * share the same instance of the underlying CC3GLTexture held in the texture property.
  *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
- * for the texture automatically.
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
  *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * Returns nil if any of the six files could not be loaded.
  */
-+(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath;
++(id) textureCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+							 posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+							 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
 
 /**
- * Loads the texture file at the specified file path into the texture property,
- * and returns whether the loading was successful.
+ * Initializes this instance by loading the six cube face textures using the specified pattern
+ * string as a string format template to derive the names of the six textures, and returns whether
+ * all six files were successfully loaded.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
  *
- * If the instance is instantiated with one of the file-loading initialization method,
- * this method will be invoked automatically during instance initialization. If the
- * instance is instantiated without using one of the file-loading methods, this method
- * can be invoked directly to load the file.
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
  *
- * If the class-side shouldGenerateMipmaps property is set to YES, and the
- * texture file does not already contain a mipmap, a mipmap will be generated
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * The name of this instance is set to the unqualified file name derived from substituting
+ * an empty string into the format marker in the specified file path pattern string.
+ *
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same file path pattern will only load the textures once.
+ * All instances that have invoked this method on the same file path pattern will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
+ *
+ * Returns nil if any of the six files could not be loaded.
+ */
+-(id) initCubeMapFromFilePattern: (NSString*) aFilePathPattern;
+
+/**
+ * Returns an instance initialized by loading the six cube face textures using the specified pattern
+ * string as a string format template to derive the names of the six textures, and returns whether
+ * all six files were successfully loaded.
+ *
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
+ *
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
+ *
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
  * for the texture automatically.
  *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CCTexture2D held in the texture property.
+ * The name of this instance is set to the unqualified file name derived from substituting
+ * an empty string into the format marker in the specified file path pattern string.
+ *
+ * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * instances of CC3Texture with the same file path pattern will only load the textures once.
+ * All instances created by invoking this method on the same file path pattern will share the
+ * same instance of the underlying CC3GLTexture held in the texture property.
+ *
+ * If the CC3GLTexture.shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the underlying texture automatically.
+ *
+ * Returns nil if any of the six files could not be loaded.
  */
--(BOOL) loadTextureFile: (NSString*) aFilePath;
++(id) textureCubeMapFromFilePattern: (NSString*) aFilePathPattern;
 
 
 #pragma mark Drawing
@@ -628,181 +523,64 @@
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/**
- * Disables all texture units between the specified texture unit index and the number of
- * texture units that are in use in this application. This method is automatically invoked
- * by the material to disable all texture units that are not used by the texture or textures
- * contained within the material.
- */
-+(void) unbindRemainingFrom: (GLuint) texUnit  withVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/** Disables all texture units in the GL engine */
-+(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
 @end
 
 
 #pragma mark -
-#pragma mark CCTexture2D extension category
+#pragma mark Deprecated functionality
 
-/**
- * This extension adds behaviour to support the use of a CCTexture2D
- * instance as a component of a CC3Texture.
- *
- * Adds the capability to track whether the texture contains a mipmap.
- *
- * Adds the capability to track whether the texture was flipped vertically
- * by the iOS during loading.
- *
- * Adds the ability to use CCTexture2D as the top of a class cluster, and in
- * particular, to force a particular subclass of CCTexture2D to be instantiated
- * and returned when the CCTexture2D alloc method is invoked.
- */
-@interface CCTexture2D (CC3Texture)
+/** Extension category to support deprecated functionality. */
+@interface CC3Texture (Deprecated)
 
-#pragma mark Allocation and initialization
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, readonly) GLuint textureID DEPRECATED_ATTRIBUTE;
 
-/**
- * Returns the cluster class that will be instantiated and returned when the alloc
- * method is invoked. The returned class will be a subclass of CCTexture2D, or nil.
- *
- * If this property is not nil, subsequent invocations of the CCTexture2D
- * alloc method will instantiate and return an instance of that class.
- *
- * If this property is nil, subsequent invocations of the CCTexture2D
- * alloc method will instantiate and return an instance of CCTexture2D.
- * 
- * This property will temporarily be set to CC3Texture2D by CC3Texture when
- * loading the underlying CCTexture2D instance.
- */
-+(Class) instantiationClass;
+/** @deprecated Renamed to coverage. */
+@property(nonatomic, readonly) CGSize mapSize DEPRECATED_ATTRIBUTE;
 
-/**
- * Sets the cluster class that will be instantiated and returned when the alloc
- * method is invoked. The specified class must be a subclass of CCTexture2D, or nil.
- *
- * If the specified class is not nil, subsequent invocations of the CCTexture2D
- * alloc method will instantiate and return an instance of that class.
- *
- * If the specified class is nil, subsequent invocations of the CCTexture2D
- * alloc method will instantiate and return an instance of CCTexture2D.
- * 
- * This property will temporarily be set to CC3Texture2D by CC3Texture when
- * loading the underlying CCTexture2D instance.
- */
-+(void) setInstantiationClass: (Class) aClass;
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, readonly) BOOL hasMipmap DEPRECATED_ATTRIBUTE;
 
+/** @deprecated Access this method on the contained CC3GLTexture. */
+-(void) generateMipmap DEPRECATED_ATTRIBUTE;
 
-#pragma mark Tracking vertical orientation
+/** @deprecated Access this property on the CC3GLTexture class. */
++(BOOL) shouldGenerateMipmaps DEPRECATED_ATTRIBUTE;
 
-/**
- * Returns whether this texture is flipped vertically.
- *
- * Under iOS, most texture formats are loaded updside-down. This is because the vertical axis
- * of the coordinate system of OpenGL is inverted relative to the iOS view coordinate system.
- * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
- *
- * This property will return NO if this texture was loaded from a PVR texture file,
- * and will return YES if loaded from any other texture file type.
- *
- * For instances of the cluster subclass CC3Texture2D, the value of this property
- * is set to the correct value automatically when the texture file is loaded.
- *
- * For instances of the base cluster parent CCTexture2D, you should set this
- * property to the correct value after loading.
- *
- * If you manually set this property to NO for a CCTexture2D, you should set this property
- * back to YES before clearing this texture from the CCTextureCache, in case the GL engine
- * reuses the texture name again.
- */
-@property(nonatomic, assign) BOOL cc3IsFlippedVertically;
+/** @deprecated Access this property on the CC3GLTexture class. */
++(void) setShouldGenerateMipmaps: (BOOL) shouldMipmap DEPRECATED_ATTRIBUTE;
 
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, assign) GLenum minifyingFunction DEPRECATED_ATTRIBUTE;
 
-#pragma mark Tracking mipmap generation
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, assign) GLenum magnifyingFunction DEPRECATED_ATTRIBUTE;
 
-/**
- * Indicates whether this texture contains a mipmap.
- *
- * For instances of the cluster subclass CC3Texture2D, the value of this property
- * is set to the correct value automatically when the texture file is loaded.
- *
- * For instances of the base cluster parent CCTexture2D, you should set this property to the
- * correct value after loading, and before the cc3GenerateMipmapIfNeeded method is invoked.
- *
- * This property will also be set to YES when the cc3GenerateMipmapIfNeeded is invoked.
- *
- * If you manually set this property to YES for a CCTexture2D, you should set this
- * property back to NO before clearing this texture from the CCTextureCache, in
- * case the GL engine reuses the texture name again.
- */
-@property(nonatomic, assign) BOOL cc3HasMipmap;
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, assign) GLenum horizontalWrappingFunction DEPRECATED_ATTRIBUTE;
 
-/** Returns whether the width of this texture is not a power-of-two. */
-@property(nonatomic, readonly) BOOL cc3WidthIsNPOT;
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, assign) GLenum verticalWrappingFunction DEPRECATED_ATTRIBUTE;
 
-/** Returns whether the height of this texture is not a power-of-two. */
-@property(nonatomic, readonly) BOOL cc3HeightIsNPOT;
+/** @deprecated Access this property on the contained CC3GLTexture. */
+@property(nonatomic, assign) ccTexParams textureParameters DEPRECATED_ATTRIBUTE;
 
-/** Returns whether either the width or the height of this texture is not a power-of-two. */
-@property(nonatomic, readonly) BOOL cc3IsNPOT;
+/** @deprecated Access this property on the contained CC3GLTexture. */
++(ccTexParams) defaultTextureParameters DEPRECATED_ATTRIBUTE;
 
-/**
- * If this texture does not have a mipmap yet, as indicated by the value of the cc3HasMipmap
- * property, and the dimensions of this texture are a power-of-two, this method generates a
- * GL mipmap for this texture, and sets the value of the cc3HasMipmap property to YES.
- *
- * It is safe to invoke this method more than once, or on a texture that was loaded from a file
- * that already contains a mipmap, because it will only generate a mipmap if the texture file
- * does not already contain a mipmap and a mipmap has not yet been generated.
- *
- * Be aware that some formats (notably PVR) may already contain mipmaps in the content loaded
- * from file. For instances of the cluster subclass CC3Texture2D, this is tracked automatically,
- * and invoking this method will not overwrite the loaded mipmap. But for instances of the base
- * cluster parent CCTexture2D, you should be sure to set the hasMipmap property to YES before
- * invoking this method, to avoid overwriting the loaded mipmap.
- */
--(BOOL) cc3GenerateMipmapIfNeeded;
+/** @deprecated Access this property on the contained CC3GLTexture. */
++(void) setDefaultTextureParameters: (ccTexParams) texParams DEPRECATED_ATTRIBUTE;
 
-@end
+/** @deprecated Use the initWithTag: and then loadFromFile: methods. */
+-(id) initWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
 
+/** @deprecated Use the initWithTag: and then loadFromFile: methods. */
++(id) textureWithTag: (GLuint) aTag fromFile: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
 
-#pragma mark -
-#pragma mark CC3Texture2D
+/** @deprecated Use the initWithTag:withName: and then loadFromFile: methods. */
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
 
-/**
- * CC3Texture2D is a cluster subclass of CCTexture2D.
- *
- * CC3Texture2D provides more automated tracking of mipmaps and texture orienation.
- * In particular, by instantiating a CC3Texture2D instead of the CCTexture2D superclass:
- *   - The hasMipmap property will correctly indicate the presence of a mipmap
- *     in a texture loaded from a PVR file that already contains a mipmap, so
- *     that a subsequent invocation of generateMipmapIfNeeded will not overwrite
- *     this loaded mipmap, and that loaded mipmap can be used by the CC3Texture
- *     even if the shouldGenerateMipmaps is set to NO.
- *   - The isFlippedVertically property is automatically set to NO when the
- *     instance was loaded from a PVR file, and set to YES otherwise.
- *   - When an instance of CC3Texture2D is deallocated, it automatically sets
- *     the hasMipmap property to NO, and the isFlippedVertically to YES, before
- *     deallocation. This avoids potential confusion if the same texture name
- *     is reused by the GL engine for a CCTexture2D instance.
- *
- * CC3Texture automatically causes an instance of CC3Texture2D to be
- * instantiated by CCTextureCache when the CC3Texture is loaded from a file.
- */
-@interface CC3Texture2D : CCTexture2D
-
-/**
- * This is a replication of the same class-side property of the CCTexture2D
- * superclass. If you change the value of the superclass property, you should
- * also change the value of this property to match.
- */
-+(BOOL) PVRImagesHavePremultipliedAlpha;
-
-/**
- * This is a replication of the same class-side property of the CCTexture2D
- * superclass. If you change the value of the superclass property, you should
- * also change the value of this property to match.
- */
-+(void) PVRImagesHavePremultipliedAlpha: (BOOL) haveAlphaPremultiplied;
+/** @deprecated Use the initWithTag:withName: and then loadFromFile: methods. */
++(id) textureWithTag: (GLuint) aTag withName: (NSString*) aName fromFile: (NSString*) aFilePath DEPRECATED_ATTRIBUTE;
 
 @end

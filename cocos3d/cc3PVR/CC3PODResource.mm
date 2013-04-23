@@ -95,7 +95,7 @@ static Class _defaultPFXResourceClass = nil;
 		_meshes = [[CCArray array] retain];
 		_materials = [[CCArray array] retain];
 		_textures = [[CCArray array] retain];
-		_textureParameters = [CC3Texture defaultTextureParameters];
+		_textureParameters = [CC3GLTexture defaultTextureParameters];
 		_pfxResourceClass = [[self class] defaultPFXResourceClass];
 		_shouldAutoBuild = YES;
 	}
@@ -513,7 +513,7 @@ static Class _defaultPFXResourceClass = nil;
 	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
 	NSString* texPath = [self.directory stringByAppendingPathComponent: texFile];
 	CC3Texture* tex = [CC3Texture textureFromFile: texPath];
-	tex.textureParameters = _textureParameters;
+	tex.texture.textureParameters = _textureParameters;
 	LogRez(@"Creating %@ at POD index %u from: '%@'", tex, textureIndex, texPath);
 	return tex;
 }

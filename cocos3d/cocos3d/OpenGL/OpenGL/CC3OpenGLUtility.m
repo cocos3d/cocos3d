@@ -323,6 +323,16 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_OPERAND2_ALPHA: return "GL_OPERAND2_ALPHA";
 		case GL_ALPHA_SCALE: return "GL_ALPHA_SCALE";
 		case GL_COORD_REPLACE: return "GL_COORD_REPLACE";
+			
+			// Cube maps
+		case GL_TEXTURE_CUBE_MAP: return "GL_TEXTURE_CUBE_MAP";
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X: return "GL_TEXTURE_CUBE_MAP_POSITIVE_X";
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X: return "GL_TEXTURE_CUBE_MAP_NEGATIVE_X";
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y: return "GL_TEXTURE_CUBE_MAP_POSITIVE_Y";
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y: return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Y";
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z: return "GL_TEXTURE_CUBE_MAP_POSITIVE_Z";
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z";
+		case GL_MAX_CUBE_MAP_TEXTURE_SIZE: return "GL_MAX_CUBE_MAP_TEXTURE_SIZE";
 
 		// Lights
 //		case GL_MAX_LIGHTS: return "GL_MAX_LIGHTS";
@@ -440,9 +450,14 @@ char* CC3GLEnumName(GLenum gle) {
 
 		// Miscellaneous & extensions
 		case GL_MAX_SAMPLES: return "GL_MAX_SAMPLES";
+		case GL_VENDOR: return "GL_VENDOR";
+		case GL_RENDERER: return "GL_RENDERER";
+		case GL_VERSION: return "GL_VERSION";
+		case GL_EXTENSIONS: return "GL_EXTENSIONS";
+		case GL_UNPACK_ALIGNMENT: return "GL_UNPACK_ALIGNMENT";
 			
 		default:
-			printf("***ERROR: UNKNOWN_GLENUM (0x%x)\n", gle);
+			printf("***ERROR: UNKNOWN_GLENUM (0x%04X)\n", gle);
 			return "UNKNOWN_GLENUM";
 	}
 }

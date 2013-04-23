@@ -39,7 +39,8 @@
 
 @synthesize ambientColor=_ambientColor, diffuseColor=_diffuseColor;
 @synthesize specularColor=_specularColor, emissionColor=_emissionColor;
-@synthesize shininess=_shininess, blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
+@synthesize shininess=_shininess, reflectivity=_reflectivity;
+@synthesize blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
 @synthesize shaderContext=_shaderContext;
 
@@ -53,7 +54,10 @@
 -(NSString*) nameSuffix { return @"Material"; }
 
 // Clamp to allowed range
--(void) setShininess: (GLfloat) aValue { _shininess = CLAMP(aValue, 0.0, kCC3MaximumMaterialShininess); }
+-(void) setShininess: (GLfloat) shininess { _shininess = CLAMP(shininess, 0.0, kCC3MaximumMaterialShininess); }
+
+// Clamp to allowed range
+-(void) setReflectivity: (GLfloat) reflectivity { _reflectivity = CLAMP(reflectivity, 0.0, 1.0); }
 
 -(GLenum) sourceBlend { return _blendFunc.src; }
 
@@ -362,6 +366,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_specularColor = kCC3DefaultMaterialColorSpecular;
 		_emissionColor = kCC3DefaultMaterialColorEmission;
 		_shininess = kCC3DefaultMaterialShininess;
+		_reflectivity = kCC3DefaultMaterialReflectivity;
 		_blendFunc = [[self class] defaultBlendFunc];
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
@@ -407,6 +412,7 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	_specularColor = another.specularColor;
 	_emissionColor = another.emissionColor;
 	_shininess = another.shininess;
+	_reflectivity = another.reflectivity;
 	_blendFunc = another.blendFunc;
 	_alphaTestFunction = another.alphaTestFunction;
 	_alphaTestReference = another.alphaTestReference;
@@ -426,10 +432,11 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
+	return [NSString stringWithFormat: @"%@ %@using lighting, ambient: %@, diffuse: %@, specular: %@, emission: %@, shininess: %.2f, reflectivity: %.3f, blend: (%@, %@), alpha test: (%@, %.3f), with %u textures",
 			[super fullDescription], (_shouldUseLighting ? @"" : @"not"),
 			NSStringFromCCC4F(_ambientColor), NSStringFromCCC4F(_diffuseColor),
-			NSStringFromCCC4F(_specularColor), NSStringFromCCC4F(_emissionColor), _shininess,
+			NSStringFromCCC4F(_specularColor), NSStringFromCCC4F(_emissionColor),
+			_shininess, _reflectivity,
 			NSStringFromGLEnum(_blendFunc.src), NSStringFromGLEnum(_blendFunc.dst),
 			NSStringFromGLEnum(_alphaTestFunction), _alphaTestReference,
 			self.textureCount];
@@ -506,17 +513,17 @@ static GLuint lastAssignedMaterialTag;
 /**
  * Draw the texture property and the texture overlays using separate GL texture units
  * The visitor keeps track of which texture unit is being processed, with each texture
- * incrementing the texture unit index as it draws.
+ * incrementing the current texture unit index as it draws. GL texture units that were
+ * not used by the texture and texture overlays are disabled.
  */
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.textureUnit = 0;
+	visitor.currentTextureUnitIndex = 0;
 
 	[_texture drawWithVisitor: visitor];
 
 	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
 	
-	[CC3Texture	unbindRemainingFrom: visitor.textureUnit withVisitor: visitor];
-	visitor.textureUnitCount = visitor.textureUnit;
+	[visitor disableUnusedTextureUnits];
 }
 
 -(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -528,8 +535,8 @@ static GLuint lastAssignedMaterialTag;
 	[gl enableLighting: NO];
 	[gl enableBlend: NO];
 	[gl enableAlphaTesting: NO];
+	[gl disableTexturingFrom: 0];
 	[self resetSwitching];
-	[CC3Texture unbindWithVisitor: visitor];
 }
 
 

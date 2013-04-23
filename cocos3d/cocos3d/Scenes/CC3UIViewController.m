@@ -179,7 +179,7 @@
 
 -(void) viewDidLayoutSubviews {
 	// viewDidLayoutSubviews was introduced in iOS5. Make sure it's okay to propagate upwards
-	if ( [[super class] instancesRespondToSelector: @selector(viewDidLayoutSubviews)] )
+	if ( [[self superclass] respondsToSelector: @selector(viewDidLayoutSubviews)] )
 		[super viewDidLayoutSubviews];
 	LogTrace(@"%@ viewDidLayoutSubviews", self);
 	_viewWasLaidOut = YES;

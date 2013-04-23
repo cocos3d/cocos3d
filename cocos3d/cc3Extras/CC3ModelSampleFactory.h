@@ -77,8 +77,7 @@
 /** Returns an allocated, initialized, autoreleased instance of a teapot  painted with a funky color gradient. */
 -(CC3MeshNode*) makeMultiColoredTeapotNamed: (NSString*) aName;
 
-/** Returns an allocated, initialized, autoreleased instance of a teapot in a particular color. */
--(CC3MeshNode*) makeLogoTexturedTeapotNamed: (NSString*) aName;
-
+/** Returns an allocated, initialized, autoreleased instance of a teapot suitable for covering with a texture. */
+-(CC3MeshNode*) makeTexturableTeapotNamed: (NSString*) aName;
 
 @end

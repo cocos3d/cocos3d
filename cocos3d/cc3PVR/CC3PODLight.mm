@@ -80,6 +80,7 @@ extern "C" {
 				case ePODSpot:
 					self.isDirectionalOnly = NO;
 					self.spotCutoffAngle = RadiansToDegrees(psl->fFalloffAngle);
+					self.spotExponent = psl->fFalloffExponent;
 					break;
 				default:
 					break;
@@ -102,6 +103,12 @@ extern "C" {
 	podContentIndex = another.podContentIndex;
 	podParentIndex = another.podParentIndex;
 	podTargetIndex = another.podTargetIndex;
+}
+
+// The direction of a light in a POD file is taken from the transform of the up direction!
+-(CC3Vector4) globalHomogeneousPosition {
+	if (self.isDirectionalOnly) return CC3Vector4FromCC3Vector(self.globalUpDirection, 0.0f);
+	return super.globalHomogeneousPosition;
 }
 
 -(NSString*) description {

@@ -208,12 +208,6 @@
 /** If the visible property is set to YES, draws the fog to the GL engine. */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Disables the rendering of fog in the GL engine. */
--(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/** Disables the rendering of fog in the GL engine. */
-+(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
 
 #pragma mark CC3Node actions
 

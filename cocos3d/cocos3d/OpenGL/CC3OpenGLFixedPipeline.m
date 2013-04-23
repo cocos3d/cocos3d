@@ -95,7 +95,7 @@
 		
 		GLuint tuCnt = visitor.textureUnitCount;
 		for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
-			visitor.textureUnit = tuIdx;
+			visitor.currentTextureUnitIndex = tuIdx;
 			[self bindVertexArray: [mesh textureCoordinatesForTextureUnit: tuIdx]
 					  withVisitor: visitor];
 		}
@@ -116,7 +116,7 @@
 	if (semantic == kCC3SemanticNone) return kCC3VertexAttributeIndexUnavailable;
 
 	// Texture coordinate attribute arrays come first and are indexed by texture unit
-	if (semantic == kCC3SemanticVertexTexture) return visitor.textureUnit;
+	if (semantic == kCC3SemanticVertexTexture) return visitor.currentTextureUnitIndex;
 	
 	// Other vertex attributes come after and are compared by semantic
 	for (GLuint vaIdx = value_GL_MAX_TEXTURE_UNITS; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
@@ -409,15 +409,23 @@
 	LogGLErrorTrace(@"glClientActiveTexture(%@)", NSStringFromGLEnum(GL_TEXTURE0 + tuIdx));
 }
 
--(void) enableTexture2D: (BOOL) onOff at: (GLuint) tuIdx {
-	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_TEXTURE_2D, &isKnownCap_GL_TEXTURE_2D)) {
-		[self activateTextureUnit: tuIdx];
-		if (onOff)
-			glEnable(GL_TEXTURE_2D);
-		else
-			glDisable(GL_TEXTURE_2D);
-		LogGLErrorTrace(@"gl%@sable(GL_TEXTURE_2D)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_2D));
+-(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {
+	if (target == GL_TEXTURE_2D) {
+		if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_TEXTURE_2D, &isKnownCap_GL_TEXTURE_2D)) {
+			[self activateTextureUnit: tuIdx];
+			if (onOff)
+				glEnable(target);
+			else
+				glDisable(target);
+			LogGLErrorTrace(@"gl%@sable(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
+		}
 	}
+}
+
+-(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
+	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
+		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
 }
 
 -(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {
@@ -427,7 +435,7 @@
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		else
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		LogGLErrorTrace(@"gl%@sableClientState(GL_TEXTURE_2D)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_COORD_ARRAY));
+		LogGLErrorTrace(@"gl%@sableClientState(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_COORD_ARRAY));
 	}
 }
 
