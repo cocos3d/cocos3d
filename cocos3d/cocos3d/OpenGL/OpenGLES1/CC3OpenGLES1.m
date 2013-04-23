@@ -35,6 +35,7 @@
 #if CC3_OGLES_1
 
 @interface CC3OpenGL (TemplateMethods)
+-(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx;
 -(void) bindVertexContentToAttributeAt: (GLint) vaIdx;
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
@@ -86,6 +87,46 @@
 
 
 #pragma mark Textures
+
+/** 
+ * If target is not GL_TEXTURE_2D, we're trying to bind the texture to an illegal target.
+ * In that case, just bind the GL_TEXTURE_2D to no texture.
+ */
+-(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
+	if (target != GL_TEXTURE_2D) {
+		target = GL_TEXTURE_2D;
+		texID = 0;
+	}
+	[super bindTexture: texID toTarget: target at: tuIdx];
+}
+
+/** Ensure target is GL_TEXTURE_2D. */
+-(void) loadTexureImage: (const GLvoid*) imageData
+			 intoTarget: (GLenum) target
+			   withSize: (CC3IntSize) size
+			 withFormat: (GLenum) texelFormat
+			   withType: (GLenum) texelType
+	  withByteAlignment: (GLint) byteAlignment
+					 at: (GLuint) tuIdx {
+	if (target == GL_TEXTURE_2D)
+		[super loadTexureImage: imageData
+					intoTarget: target
+					  withSize: size
+					withFormat: texelFormat
+					  withType: texelType
+			 withByteAlignment: byteAlignment
+							at: tuIdx];
+}
+
+/** Ensure target is GL_TEXTURE_2D. */
+-(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx {
+	if (target == GL_TEXTURE_2D) [super setTexParamEnum: pName inTarget: target to: val at: tuIdx];
+}
+
+/** Ensure target is GL_TEXTURE_2D. */
+-(void) generateMipmapForTarget: (GLenum)target at: (GLuint) tuIdx {
+	if (target == GL_TEXTURE_2D) [super generateMipmapForTarget: target at: tuIdx];
+}
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {
 	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_COORD_REPLACE, &isKnownCap_GL_COORD_REPLACE)) {

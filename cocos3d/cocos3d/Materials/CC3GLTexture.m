@@ -46,13 +46,22 @@
 	[super dealloc];
 }
 
--(void) deleteGLTexture { [CC3OpenGL.sharedGL deleteTextureID: _textureID]; }
+-(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTextureID; }
+
+-(void) deleteGLTexture {
+	[CC3OpenGL.sharedGL deleteTextureID: _textureID];
+	_textureID = 0;
+}
 
 -(BOOL) isPOTWidth { return (_size.width == ccNextPOT(_size.width)); }
 
 -(BOOL) isPOTHeight { return (_size.height == ccNextPOT(_size.height)); }
 
 -(BOOL) isPOT { return self.isPOTWidth && self.isPOTHeight; }
+
+-(BOOL) isTexture2D { return NO; }
+
+-(BOOL) isTextureCube { return NO; }
 
 -(GLenum) textureTarget {
 	CC3AssertUnimplemented(@"textureTarget");
@@ -61,7 +70,7 @@
 
 #pragma mark Binding content
 
--(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target at: (GLuint) tuIdx {
+-(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
 
 	_size = CC3IntSizeMake((GLint)texContent.pixelsWide, (GLint)texContent.pixelsHigh);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
@@ -112,6 +121,9 @@
 			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", texContent.pixelFormat);
 	}
 	
+	GLuint tuIdx = 0;		// Choose the texture unit to work in
+	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
+
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
 			   withSize: _size
@@ -262,7 +274,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Texture file loading
 
--(BOOL) loadFromFile: (NSString*) aFilePath {
+-(BOOL) loadFromFile: (NSString*) aFilePath toTarget: (GLenum) target {
 	
 	if (!_name) self.name = aFilePath.lastPathComponent;
 	
@@ -276,22 +288,22 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 		return NO;
 	}
 	
-	[self bindTextureContent: content];
+	[self bindTextureContent: content toTarget: target];
 	
 	[content release];		// Could be big, so get rid of it immediately
 	
 	LogRez(@"%@ loaded from file %@ in %.4f seconds",
-			 self, aFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
+		   self, aFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
 	return YES;
+}
+
+-(BOOL) loadFromFile: (NSString*) aFilePath {
+	return [self loadFromFile: aFilePath toTarget: self.textureTarget];
 }
 
 -(Class) textureContentClass {
 	CC3AssertUnimplemented(@"textureContentClass");
 	return nil;
-}
-
--(void) bindTextureContent: (id) content {
-	CC3AssertUnimplemented(@"bindTextureContent:");
 }
 
 
@@ -393,22 +405,15 @@ static NSMutableDictionary* _texturesByName = nil;
 
 @implementation CC3GLTexture2D
 
+-(BOOL) isTexture2D { return YES; }
+
 -(GLenum) textureTarget { return GL_TEXTURE_2D; }
 
 -(Class) textureContentClass { return CC3TextureContent.class; }
 
--(void) bindTextureContent: (CC3TextureContent*) content {
-	if (!content) return;
-
-	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	GLuint tuIdx = 0;	// Choose the texture unit to work in
-
-	if (!_textureID) _textureID = gl.generateTextureID;
-
-	GLenum target = self.textureTarget;
-	[gl bindTexture: _textureID toTarget: target at: tuIdx];
-	[self bindTextureContent: content toTarget: target at: tuIdx];
-
+-(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+	[self ensureGLTexture];
+	[super bindTextureContent: texContent toTarget: target];
 	if (_shouldGenerateMipmaps) [self generateMipmap];
 }
 
@@ -420,7 +425,24 @@ static NSMutableDictionary* _texturesByName = nil;
 
 @implementation CC3GLTextureCube
 
+-(BOOL) isTextureCube { return YES; }
+
 -(GLenum) textureTarget { return GL_TEXTURE_CUBE_MAP; }
+
+-(Class) textureContentClass { return CC3TextureContent.class; }
+
+-(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+	[texContent flipVertically];
+	[self ensureGLTexture];
+	[super bindTextureContent: texContent toTarget: target];
+}
+
+/** Default texture parameters for cube maps are different. */
+static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE };
+
++(ccTexParams) defaultTextureParameters { return _defaultCubeMapTextureParameters; }
+
++(void) setDefaultTextureParameters: (ccTexParams) texParams { _defaultCubeMapTextureParameters = texParams; }
 
 
 #pragma mark Texture file loading
@@ -428,6 +450,93 @@ static NSMutableDictionary* _texturesByName = nil;
 -(BOOL) loadFromFile: (NSString*) aFilePath {
 	CC3Assert(NO, @"%@ is used to load six cube textures. It cannot load a single texture.", self);
 	return NO;
+}
+
+-(BOOL) loadFromFile: (NSString*) aFilePath toCubeFace: (GLenum) faceTarget {
+	return [self loadFromFile: aFilePath toTarget: faceTarget];
+}
+
+-(BOOL) loadFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					 posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+	BOOL success = YES;
+
+	success &= [self loadFromFile: posXFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
+	success &= [self loadFromFile: negXFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
+	success &= [self loadFromFile: posYFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
+	success &= [self loadFromFile: negYFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
+	success &= [self loadFromFile: posZFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
+	success &= [self loadFromFile: negZFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
+
+	if (success && _shouldGenerateMipmaps) [self generateMipmap];
+	return success;
+}
+
+-(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern {
+	
+	if (!_name) self.name = ((NSString*)[NSString stringWithFormat: aFilePathPattern, @""]).lastPathComponent;
+
+	return [self loadFromFilesPosX: [NSString stringWithFormat: aFilePathPattern, @"PosX"]
+							  negX: [NSString stringWithFormat: aFilePathPattern, @"NegX"]
+							  posY: [NSString stringWithFormat: aFilePathPattern, @"PosY"]
+							  negY: [NSString stringWithFormat: aFilePathPattern, @"NegY"]
+							  posZ: [NSString stringWithFormat: aFilePathPattern, @"PosZ"]
+							  negZ: [NSString stringWithFormat: aFilePathPattern, @"NegZ"]];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					 posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+	
+	if ( (self = [self init]) ) {
+		if ( ![self loadFromFilesPosX: posXFilePath negX: negXFilePath
+								 posY: posYFilePath negY: negYFilePath
+								 posZ: posZFilePath negZ: negZFilePath] ) {
+			[self release];
+			return nil;
+		}
+	}
+	return self;
+}
+
++(id) textureFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+
+	id tex = [self getGLTextureNamed: posXFilePath.lastPathComponent];
+	if (tex) return tex;
+	
+	tex = [[self alloc] initFromFilesPosX: posXFilePath negX: negXFilePath
+									 posY: posYFilePath negY: negYFilePath
+									 posZ: posZFilePath negZ: negZFilePath];
+	[self addGLTexture: tex];
+	[tex release];
+	return tex;
+}
+
+-(id) initFromFilePattern: (NSString*) aFilePathPattern {
+	if ( (self = [self init]) ) {
+		if ( ![self loadFromFilePattern: aFilePathPattern] ) {
+			[self release];
+			return nil;
+		}
+	}
+	return self;
+}
+
++(id) textureFromFilePattern: (NSString*) aFilePathPattern {
+	NSString* texName = ((NSString*)[NSString stringWithFormat: aFilePathPattern, @""]).lastPathComponent;
+
+	id tex = [self getGLTextureNamed: texName];
+	if (tex) return tex;
+	
+	tex = [[self alloc] initFromFilePattern: aFilePathPattern];
+	[self addGLTexture: tex];
+	[tex release];
+	return tex;
 }
 
 @end
@@ -438,24 +547,26 @@ static NSMutableDictionary* _texturesByName = nil;
 
 @implementation CC3PVRGLTexture
 
+-(BOOL) isTexture2D { return YES; }
+
 -(GLenum) textureTarget { return GL_TEXTURE_2D; }
 
 -(Class) textureContentClass { return CC3PVRTextureContent.class; }
 
--(void) bindTextureContent: (CC3PVRTextureContent*) content {
-	if (!content) return;
-
+-(void) bindTextureContent: (CC3PVRTextureContent*) texContent toTarget: (GLenum) target {
+	if (!texContent) return;
+	
 	[self deleteGLTexture];		// Delete any existing texture in the GL engine
 	
-	_textureID = content.name;
-	_size = CC3IntSizeMake(content.width, content.height);
+	_textureID = texContent.name;
+	_size = CC3IntSizeMake(texContent.width, texContent.height);
 	_coverage = CGSizeMake(1.0, 1.0);				// Always POT
-	_hasMipmap = (content.numberOfMipmaps > 1);
+	_hasMipmap = (texContent.numberOfMipmaps > 1);
 	_isFlippedVertically = NO;						// PVR textures are not flipped
 	_hasPremultipliedAlpha = self.class.defaultHasPremultipliedAlpha;
 	
 	LogDebug(@"Binding PVR texture ID %u", _textureID);
-
+	
 	if (_shouldGenerateMipmaps) [self generateMipmap];
 }
 
@@ -509,6 +620,47 @@ static BOOL _defaultHasPremultipliedAlpha = NO;
 
 /** Overridden to do nothing so that texture data is retained until bound to the GL engine. */
 -(void) releaseData: (void*) data {}
+
+-(void) flipVertically {
+	GLuint bytesPerTexel = 0;
+	switch(self.pixelFormat) {
+		case kCCTexture2DPixelFormat_RGBA8888:
+			bytesPerTexel = 4;
+			break;
+		case kCCTexture2DPixelFormat_RGB565:
+		case kCCTexture2DPixelFormat_RGBA4444:
+		case kCCTexture2DPixelFormat_RGB5A1:
+			bytesPerTexel = 2;
+			break;
+		case kCCTexture2DPixelFormat_RGB888:
+			bytesPerTexel = 3;
+			break;
+		case kCCTexture2DPixelFormat_AI88:
+			bytesPerTexel = 2;
+			break;
+		case kCCTexture2DPixelFormat_A8:
+			bytesPerTexel = 1;
+			break;
+		default:
+			CC3Assert(NO, @"Couldn't flip texture data in unexpected format %u", self.pixelFormat);
+	}
+
+	GLuint bytesPerRow = (GLuint)self.pixelsWide * bytesPerTexel;
+	GLubyte tmpRow[bytesPerRow];
+	
+	GLuint rowCnt = (GLuint)CC2_TEX_HEIGHT;
+	GLuint lastRowIdx = rowCnt - 1;
+	GLuint halfRowCnt = rowCnt / 2;
+	for (GLuint rowIdx = 0; rowIdx < halfRowCnt; rowIdx++) {
+		GLubyte* lowerRow = (GLubyte*)_imageData + (bytesPerRow * rowIdx);
+		GLubyte* upperRow = (GLubyte*)_imageData + (bytesPerRow * (lastRowIdx - rowIdx));
+		memcpy(tmpRow, upperRow, bytesPerRow);
+		memcpy(upperRow, lowerRow, bytesPerRow);
+		memcpy(lowerRow, tmpRow, bytesPerRow);
+		LogTrace(@"Swapped %u bytes in %p between row %u at %p and row %u at %p",
+				 bytesPerRow, _imageData, rowIdx, lowerRow, (lastRowIdx - rowIdx), upperRow);
+	}
+}
 
 
 #pragma mark Allocation and Initialization

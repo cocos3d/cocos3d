@@ -75,9 +75,12 @@ cocos3d 2.0.0 - 2013/05/31
 	- Removed animation of Euler rotation angles as unsuitable for interpolation.
 
 - Improvements to texture loading
+	- Added support for cube-mapped textures when using GLSL in OpenGL ES 2.0 on iOS and OpenGL on OSX.
+		- CC3DemoMashUp now includes a rotating teapot that reflects the surrounding environment.
 	- Added CC3GLTexture class cluster to represent loaded textures:
 		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
 		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
+		- [API change] A number of CC3Texture properties have been deprecated and moved to the contained CC3GLTexture.
 	- Improved support for NPOT textures
 		- CC3GLTexture only generates mipmaps if texture is POT
 		- CC3GLTexture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
@@ -94,10 +97,6 @@ cocos3d 2.0.0 - 2013/05/31
 - [API change] Consolidated CC3VertexArrayMesh, CC3SkinMesh & CC3PointParticleMesh subclasses into parent CC3Mesh and deprecated the originals.
 	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
 	- [API change] Removed CC3PODSkinMesh class. Use CC3PODMesh instead.
-
-- [API change] OpenGLES11... GL engine state management classes renamed to OpenGLES... and now support both OpenGL ES 1.1 and OpenGL ES 2.0 functionality.
-	-[API change] OpenGLESEngine serverCapabilities and clientCapabilities properties combined into a single capabilities property, and originals are deprecated.
-	- The OpenGLES... state management classes provide a superset of both OpenGL ES 2.0 & 1.1 functionality
 
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
@@ -150,6 +149,7 @@ cocos3d 2.0.0 - 2013/05/31
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 - Fixed issue where CC3PODCamera animation pointed camera in an incorrect direction due to difference in coordinate systems expected by POD camera data.
 - Fixed bad access when copying CC3TargettingRotator from CC3DirectionalRotator due to miscasting.
+- Fixed iOS 4.0 runtime issue in CC3UIViewController viewDidLayoutSubviews.
 - Added guard code to CC3NodeSphericalBoundingVolume to ensure that its globalRadius property will always be a positive value.
 - Removed bounding volume contents from the output of the CC3Node fullDescription method.
 - Removed redundant invocation of normalizeBillboardScaleToDevice in CC3Billboard setBillboard: method.

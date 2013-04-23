@@ -112,6 +112,7 @@ typedef enum {
  *   - moving individual vertex location programmatically
  *   - Using OpenGL ES 2.0 shaders.
  *   - Loading PowerVR PFX effects files and applying them to materials
+ *   - Environmental reflections using a cube mapped texture.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -135,6 +136,7 @@ typedef enum {
  *   - displaying a dynamic bounding box on a 3D particle emitter.
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
  *   - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
+ *   - Skybox using a cube mapped texture.
  *
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached to the
  * end of the rotating arm, demonstrating the technique of embedding a 2D CCNode into the 3D scene.
@@ -287,10 +289,16 @@ typedef enum {
  * beach ball is highlighted.
  *
  * Touching the switch-view button again will point the camera at yet another teapot, this one
- * textured with the cocos2d logo, and rotating on it's axis. This textured teapot has another
- * smaller rainbow-colored teapot as a satellite. This satellite is colored with a color gradient
- * using a color array, and orbits around the teapot, and rotates on it's own axes. The rainbow
- * teapot is a child node of the textured teapot node, and rotates along with the textured teapot.
+ * textured with a metallic texture, and rotating on it's axis. When running GLSL shaders, under
+ * either OpenGL ES 2.0 on iOS or OpenGL on OSX, this teapot reflects a static shot of the
+ * environment. This reflection effect is created by applying a static cube-mapped texture to
+ * the teapot. To see the environment that is being reflected, uncomment the addSkyBox invocation
+ * in the initializeScene method.
+ 
+ * This reflective teapot has another smaller rainbow-colored teapot as a satellite. This satellite
+ * is colored with a color gradient using a color array, and orbits around the teapot, and rotates
+ * on it's own axes. The rainbow teapot is a child node of the textured teapot node, and rotates
+ * along with the textured teapot.
  *
  * Touching either teapot will toggle the display of a wireframe around the mesh of that teapot
  * (orange), and a wireframe around both teapots (yellow). This easily is done by simply setting

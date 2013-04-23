@@ -52,6 +52,7 @@
 	[value_GL_VERSION release];
 	free(vertexAttributes);
 	free(value_GL_TEXTURE_BINDING_2D);
+	free(value_GL_TEXTURE_BINDING_CUBE_MAP);
 	[super dealloc];
 }
 
@@ -469,7 +470,7 @@
 }
 
 -(void) deleteTextureID: (GLuint) texID {
-	if (!texID) return;		// Silently ignore zero texture ID
+	if ( !texID ) return;		// Silently ignore zero texture ID
 	glDeleteTextures(1, &texID);
 	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
 }
@@ -686,6 +687,7 @@
 /** Allocates and initializes the texture units. This must be invoked after the initPlatformLimits. */
 -(void) initTextureUnits {
 	value_GL_TEXTURE_BINDING_2D = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
+	value_GL_TEXTURE_BINDING_CUBE_MAP = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
 }
 
 /** Returns the appropriate class cluster subclass instance. */

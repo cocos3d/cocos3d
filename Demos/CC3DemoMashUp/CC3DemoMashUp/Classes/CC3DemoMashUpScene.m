@@ -83,8 +83,6 @@
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
 #define kEtchedMaskPFXEffect			@"EtchedEffect"
-#define kRunnerPFXFile					@"man.pfx"
-#define kRunnerPFXEffect				@"SkinEffect"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -235,6 +233,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Set up any initial state tracked by this subclass
 	[self initCustomState];
 
+//	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
+									// in the textured teapot added in the addTeapotAndSatellite method
+	
 	[self addGround];				// Add a ground plane to provide some perspective to the user
 
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
@@ -680,32 +681,52 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addChild: texCubeSpinner];
 }
 
-/** Adds a large textured teapot and a small multicolored teapot orbiting it. */
+/** 
+ * Adds a large textured teapot and a small multicolored teapot orbiting it.
+ * 
+ * When running with GLSL shaders under OpenGL ES 2.0 on iOS, or OpenGL on OSX, the textured
+ * teapot reflects the surrounding environment. This is performed by adding a cube-map texture
+ * to the teapot. A cube-map texture actually consists of six textures, each representing a view
+ * of the scene from one of the six scene axes. As a convenience, the six textures are loaded
+ * using a file-name pattern.
+ *
+ * In this example, the six cube-map textures include markers to illustrate which texture is which.
+ *
+ * The reflectivity property of the material covering the mesh node can be used to control how
+ * reflective the surface is.
+ *
+ * Cube maps can also be used to draw skyboxes. To see the environment that is being reflected
+ * into the teapot, uncommend the addSkyBox invocation in the initializeScene method.
+ *
+ * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
+ * A representation of how the six textures appear related to each other after being loaded into
+ * the GL engine can be found in the diagram Docs/Diagrams/EnvCubeMap.jpg.
+ */
 -(void) addTeapotAndSatellite {
-	teapotTextured = [[CC3ModelSampleFactory factory] makeLogoTexturedTeapotNamed: kTexturedTeapotName];
+	teapotTextured = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: kTexturedTeapotName];
 	teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
 	
-	// To experiment with repeating textures, uncomment the following line
-	// Note that the texture does not actually appear repeated 5 times.
-	// This is because it is an NPOT texture. POT textures will repeat accurately.
-//	[teapotTextured repeatTexture: (ccTex2F){5, 1}];
-	
-	// Uncomment the following two lines to experiment with a material that does not
-	// interact with the current lighting conditions. In fact, you can turn lighting
-	// completely off and this node will still be visible.
-//	teapotTextured.shouldUseLighting = NO;
-//	teapotTextured.emissionColor = kCCC4FLightGray;
-	
+	// Add two textures to the teapot. The first is a cube-map texture showing the six sides of
+	// an environmental cube surrounding the teapot, viewed from the teapot's perspective. Also
+	// add an effect loaded from a PFX file to render these textures. The six cube-map textures
+	// are loaded by specifying a file name substitution pattern. See the notes of the
+	// textureCubeMapFromFilePattern: method for more info.
+	[teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
+	[teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
+	[teapotTextured applyEffectNamed: @"CubeReflection" inPFXResourceFile: @"EnvMap.pfx"];
+	teapotTextured.material.reflectivity = 0.6;		// Adjust up and down between zero and one.
+
+	// Add a second rainbow-colored teapot as a satellite of the textured teapot.
 	teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
-	teapotSatellite.mesh = [CC3ModelSampleFactory factory].multicoloredTeapotMesh;
+	teapotSatellite.mesh = CC3ModelSampleFactory.factory.multicoloredTeapotMesh;
 	teapotSatellite.material = [CC3Material shiny];
 	teapotSatellite.location = cc3v(0.3, 0.1, 0.0);
 	teapotSatellite.uniformScale = 0.4;
 	teapotSatellite.touchEnabled = YES;		// allow this node to be selected by touch events
+	[teapotTextured addChild: teapotSatellite];
 	
 	teapotTextured.location = cc3v(0.0, 150.0, -650.0);
 	teapotTextured.uniformScale = 500.0;
-	[teapotTextured addChild: teapotSatellite];
 	[self addChild: teapotTextured];
 	
 	// Rotate the teapots. The satellite orbits the textured teapot because it is
@@ -720,6 +741,31 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	 // For effect, also rotate the satellite around its own axes.
 	[teapotSatellite runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																						  rotateBy: cc3v(30.0, 0.0, 45.0)]]];
+}
+
+/**
+ * When running with GLSL shaders under OpenGL ES 2.0 on iOS, or OpenGL on OSX, adds a large skybox
+ * surrounding the scene, using a cube-map texture. A cube-map texture actually consists of six
+ * textures, each representing a view of the scene from one of the six scene axes. As a convenience,
+ * the six textures are loaded using a file-name pattern.
+ *
+ * In this example, the six cube-map textures include markers to illustrate which texture is which.
+ *
+ * Cube maps can also be used to render environmental reflections on objects. This skybox is reflected
+ * into the reflective teapot added in the addTeapotAndSatellite method. The teapot will reflect
+ * this skybox texture even if the skybox itself is not added.
+ *
+ * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
+ * A representation of how the six textures appear related to each other after being loaded into
+ * the GL engine can be found in the diagram Docs/Diagrams/EnvCubeMap.jpg.
+ */
+-(void) addSkyBox {
+	CC3MeshNode* skyBox = [CC3MeshNode nodeWithName: @"SkyBox"];
+	[skyBox populateAsSphereWithRadius: 1600.0f andTessellation: CC3TessellationMake(24, 24)];
+	skyBox.shouldCullBackFaces = NO;
+	skyBox.texture = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	[skyBox applyEffectNamed: @"SkyBox" inPFXResourceFile: @"EnvMap.pfx"];
+	[self addChild: skyBox];
 }
 
 /**

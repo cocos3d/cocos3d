@@ -177,6 +177,7 @@
 		maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
 		_deltaFrameTime = 0;
 		[self initializeScene];
+		LogGLErrorState(@"after initializing %@", self);
 	}
 	return self;
 }

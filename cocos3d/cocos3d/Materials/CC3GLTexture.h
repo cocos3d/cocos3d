@@ -102,6 +102,12 @@
 /** Returns whether both the width and the height of this texture is a power-of-two. */
 @property(nonatomic, readonly) BOOL isPOT;
 
+/** Returns whether this texture is a standard two-dimentional texture. */
+@property(nonatomic, readonly) BOOL isTexture2D;
+
+/** Returns whether this texture is a six-sided cube-map texture. */
+@property(nonatomic, readonly) BOOL isTextureCube;
+
 /**
  * Returns the proportional size of the usable image in the texture, relative to its physical size.
  *
@@ -336,6 +342,9 @@
  * application resource directory. If the file is located directly in the application
  * resources directory, the specified file path can simply be the name of the file.
  *
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * from the specified file path.
+ *
  * If the class-side shouldGenerateMipmaps property is set to YES, and the texture file does
  * not already contain a mipmap, a mipmap will be generated for the texture automatically.
  *
@@ -485,11 +494,250 @@
 #pragma mark CC3GLTextureCube
 
 /** 
- * The representation of a 3D cube-map texture loaded into the GL engine. 
+ * The representation of a 3D cube-map texture loaded into the GL engine.
  *
  * This class is used for all cube-map texture types except PVR.
  */
 @interface CC3GLTextureCube : CC3GLTexture
+
+
+#pragma mark Texture file loading
+
+/**
+ * Loads the texture file at the specified file path into the specified cube face target,
+ * and returns whether the loading was successful.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the
+ * application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path can simply be the name of the file.
+ *
+ * The specified cube face target can be one of the following:
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ *
+ * In order to complete this cube texture, this method should be invoked once for each
+ * of these six face targets.
+ *
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * from the specified file path.
+ *
+ * This method does not automatically generate a mipmap. If you want a mipmap, you should
+ * invoke the generateMipmap method once all six faces have been loaded.
+ */
+-(BOOL) loadFromFile: (NSString*) aFilePath toCubeFace: (GLenum) faceTarget;
+
+/**
+ * Loads the six cube face textures at the specified file paths, and returns whether all
+ * six files were successfully loaded.
+ *
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * of the specified posXFilePath file path.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * If the instance is instantiated via initFromFilesPosX:negX:posY:negY:posZ:negZ: or
+ * textureFromFilesPosX:negX:posY:negY:posZ:negZ:, this method is invoked automatically
+ * during instance initialization. If the instance is instantiated without using one of
+ * those file-loading initializers, this method can be invoked directly to load the files.
+ *
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
+ */
+-(BOOL) loadFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					 posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
+
+/**
+ * Loads the six cube face textures using the specified pattern string as a string format
+ * template to derive the names of the six textures, and returns whether all six files were
+ * successfully loaded.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * If the instance is instantiated via initFromFilePattern: or textureFromFilePattern:, 
+ * this method is invoked automatically during instance initialization. If the instance
+ * is instantiated without using one of those file-loading initializers, this method can
+ * be invoked directly to load the files.
+ *
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
+ *
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
+ *
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to 
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * If this instance has not been assigned a name, it is set to the unqualified file name
+ * derived from substituting an empty string into the format marker in the specified file
+ * path pattern string.
+ */
+-(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance by loading the six cube face textures at the specified file paths,
+ * and returns whether all six files were successfully loaded.
+ *
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
+ *
+ * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * Returns nil if any of the six files could not be loaded.
+ */
+-(id) initFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+				   posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+				   posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
+
+/**
+ * Returns an instance initialized by loading the six cube face textures at the specified 
+ * file paths, and returns whether all six files were successfully loaded.
+ *
+ * Each of the specified file paths may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the corresponding file path can simply be the name of the file.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
+ *
+ * Textures loaded through this method are cached. If the texture was already loaded and is in
+ * the cache, it is retrieved and returned. If the texture has not in the cache, it is loaded,
+ * placed into the cache, indexed by its name, and returned. It is therefore safe to invoke this
+ * method any time the texture is needed, without having to worry that the texture will be
+ * repeatedly loaded from file.
+ *
+ * To clear a texture instance from the cache, use the removeGLTexture: method.
+ *
+ * To load the file directly, bypassing the cache, use the alloc and initFromFilesPosX:negX:posY:negY:posZ:negZ:
+ * methods. This technique can be used to load the same texture twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ * However, when choosing to do so, be aware that textures often consume significant memory.
+ *
+ * Returns nil if the texture is not in the cache and any of the six files could not be loaded.
+ */
++(id) textureFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath;
+
+/**
+ * Initializes this instance by loading the six cube face textures using the specified pattern
+ * string as a string format template to derive the names of the six textures, and returns whether
+ * all six files were successfully loaded.
+ *
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
+ *
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
+ *
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * The name of this instance is set to the unqualified file name derived from substituting
+ * an empty string into the format marker in the specified file path pattern string.
+ *
+ * Returns nil if any of the six files could not be loaded.
+ */
+-(id) initFromFilePattern: (NSString*) aFilePathPattern;
+
+/**
+ * Returns an instance initialized by loading the six cube face textures using the specified pattern
+ * string as a string format template to derive the names of the six textures, and returns whether
+ * all six files were successfully loaded.
+ *
+ * This method expects the six required files to have identical paths and names, except that
+ * each should contain one of the following character substrings in the same place in each
+ * file path: "PosX", "NegX", "PosY", "NegY", "PosZ", "NegZ".
+ *
+ * The specified file path pattern should include one standard NSString format marker %@ at
+ * the point where one of the substrings in the list above should be substituted.
+ *
+ * As an example, the file path pattern MyCubeTex%@.png would be expanded by this method
+ * to load the following six textures:
+ *  - MyCubeTexPosX.png
+ *  - MyCubeTexNegX.png
+ *  - MyCubeTexPosY.png
+ *  - MyCubeTexNegY.png
+ *  - MyCubeTexPosZ.png
+ *  - MyCubeTexNegZ.png
+ *
+ * The format marker can occur anywhere in the file name. It does not need to occur at the
+ * end as in this example.
+ *
+ * The specified file path pattern may be either an absolute path, or a path relative to
+ * the application resource directory. If the file is located directly in the application
+ * resources directory, the specified file path pattern can simply be the file name pattern.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * The name of this instance is set to the unqualified file name derived from substituting
+ * an empty string into the format marker in the specified file path pattern string.
+ *
+ * Textures loaded through this method are cached. If the texture was already loaded and is in
+ * the cache, it is retrieved and returned. If the texture has not in the cache, it is loaded,
+ * placed into the cache, indexed by its name, and returned. It is therefore safe to invoke this
+ * method any time the texture is needed, without having to worry that the texture will be
+ * repeatedly loaded from file.
+ *
+ * To clear a texture instance from the cache, use the removeGLTexture: method.
+ *
+ * To load the file directly, bypassing the cache, use the alloc and initFromFilePattern: 
+ * methods. This technique can be used to load the same texture twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ * However, when choosing to do so, be aware that textures often consume significant memory.
+ *
+ * Returns nil if the texture is not in the cache and any of the six files could not be loaded.
+ */
++(id) textureFromFilePattern: (NSString*) aFilePathPattern;
+
 @end
 
 
@@ -536,6 +784,12 @@
 
 /** Returns a pointer to the texture image data. */
 @property(nonatomic, readonly) const GLvoid* imageData;
+
+/** 
+ * Flips this texture vertically, to compensate for the opposite orientation
+ * of vertical graphical coordinates between OpenGL and iOS & OSX.
+ */
+-(void) flipVertically;
 
 
 #pragma mark Allocation and Initialization

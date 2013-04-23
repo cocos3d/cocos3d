@@ -59,6 +59,10 @@
 
 -(BOOL) isFlippedVertically { return (_texture && _texture.isFlippedVertically); }
 
+-(BOOL) isTexture2D { return (_texture && _texture.isTexture2D); }
+
+-(BOOL) isTextureCube { return (_texture && _texture.isTextureCube); }
+
 -(CGSize) coverage { return _texture ? _texture.coverage : CGSizeZero; }
 
 -(CC3Vector) lightDirection { return _textureUnit ? _textureUnit.lightDirection : kCC3VectorZero; }
@@ -66,6 +70,28 @@
 -(void) setLightDirection: (CC3Vector) aDirection { _textureUnit.lightDirection = aDirection; }
 
 -(BOOL) isBumpMap { return (_textureUnit && _textureUnit.isBumpMap); }
+
+
+#pragma mark Texture file loading
+
+-(BOOL) loadTextureFile: (NSString*) aFilePath {
+	self.texture = [CC3GLTexture textureFromFile: aFilePath];
+	return (_texture != nil);
+}
+
+-(BOOL) loadCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+							posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+							posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+	self.texture = [CC3GLTextureCube textureFromFilesPosX: posXFilePath negX: negXFilePath
+													 posY: posYFilePath negY: negYFilePath
+													 posZ: posZFilePath negZ: negZFilePath];
+	return (_texture != nil);
+}
+
+-(BOOL) loadCubeMapFromFilePattern: (NSString*) aFilePathPattern {
+	self.texture = [CC3GLTextureCube textureFromFilePattern: aFilePathPattern];
+	return (_texture != nil);
+}
 
 
 #pragma mark Allocation and Initialization
@@ -88,17 +114,49 @@
 	return [[[self alloc] initWithName: aName fromFile: aFilePath] autorelease];
 }
 
+-(id) initCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+				   posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+				   posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+	
+	if ( (self = [self init]) ) {
+		if ( ![self loadCubeMapFromFilesPosX: posXFilePath negX: negXFilePath
+								 posY: posYFilePath negY: negYFilePath
+								 posZ: posZFilePath negZ: negZFilePath] ) {
+			[self release];
+			return nil;
+		}
+	}
+	return self;
+}
+
++(id) textureCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
+					  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+					  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+	return [[[self alloc] initCubeMapFromFilesPosX: posXFilePath negX: negXFilePath
+											  posY: posYFilePath negY: negYFilePath
+											  posZ: posZFilePath negZ: negZFilePath] autorelease];
+}
+
+-(id) initCubeMapFromFilePattern: (NSString*) aFilePathPattern {
+	if ( (self = [self init]) ) {
+		if ( ![self loadCubeMapFromFilePattern: aFilePathPattern] ) {
+			[self release];
+			return nil;
+		}
+	}
+	return self;
+}
+
++(id) textureCubeMapFromFilePattern: (NSString*) aFilePathPattern {
+	return [[[self alloc] initCubeMapFromFilePattern: aFilePathPattern] autorelease];
+}
+
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_texture = nil;
 		_textureUnit = nil;
 	}
 	return self;
-}
-
--(BOOL) loadTextureFile: (NSString*) aFilePath {
-	self.texture = [CC3GLTexture textureFromFile: aFilePath];
-	return (_texture != nil);
 }
 
 -(void) populateFrom: (CC3Texture*) another {

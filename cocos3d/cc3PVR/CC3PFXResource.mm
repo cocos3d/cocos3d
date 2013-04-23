@@ -36,6 +36,7 @@ extern "C" {
 #import "CC3PVRTPFXParser.h"
 #import "CC3PVRShamanGLProgramSemantics.h"
 #import "CC3PODResource.h"
+#import "CC3GLProgramMatchers.h"
 
 
 @implementation CC3PFXResource
@@ -456,6 +457,12 @@ static Class _defaultSemanticDelegateClass = nil;
 #pragma mark CC3PFXGLProgramSemantics
 
 @implementation CC3PFXGLProgramSemantics
+
+/** Overridden to allow default naming semantics to be combined with PFX-defined semantics. */
+-(BOOL) configureVariable: (CC3GLSLVariable*) variable {
+	return ([super configureVariable: variable] ||
+			[CC3GLProgram.programMatcher.semanticDelegate configureVariable: variable]);
+}
 
 -(void) populateWithVariableNameMappingsFromPFXEffect: (CC3PFXEffect*) pfxEffect {
 	for (CC3PFXGLSLVariableConfiguration* pfxVarConfig in pfxEffect.variables) {
