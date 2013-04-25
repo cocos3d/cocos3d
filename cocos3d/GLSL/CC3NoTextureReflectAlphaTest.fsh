@@ -1,5 +1,5 @@
 /*
- * CC3NoTexture.fsh
+ * CC3NoTextureReflectAlphaTest.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,7 +28,10 @@
  */
 
 /**
- * This fragment shader handles a material that does not have a texture.
+ * This fragment shader creates an environmental reflection on a model that has no visible texture.
+ *
+ * Even though there is not visible texture, the shader expects one cube-map texture used to
+ * provide the environmental reflection.
  *
  * CC3TexturableMaterial.vsh is the vertex shader paired with this fragment shader.
  *
@@ -45,6 +48,8 @@
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
+uniform float		u_cc3MaterialReflectivity;	/**< Reflectivity of the material (0 <> 1). */
+
 uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
 uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
 uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
@@ -52,12 +57,15 @@ uniform highp float	u_cc3FogDensity;			/**< Fog density. */
 uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
 uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
-//-------------- VARYING VARIABLE INPUTS ----------------------
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
+// Textures
+uniform sampler2D	s_cc3Texture2D;				/**< Texture sampler. */
+uniform samplerCube	s_cc3TextureCube;			/**< Reflection cube-map texture sampler. */
 
-//-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
+//-------------- VARYING VARIABLE INPUTS ----------------------
+varying vec2			v_texCoord;			/**< Fragment texture coordinates. */
+varying lowp vec4		v_color;			/**< Fragment base color. */
+varying highp float		v_distEye;			/**< Fragment distance in eye coordinates. */
+varying mediump	vec3	v_reflectDirGlobal;	/**< Fragment reflection vector direction in global coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
@@ -90,5 +98,11 @@ vec4 fogify(vec4 aColor) {
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	gl_FragColor = fogify(v_color);
+	vec4 fragColor = textureCube(s_cc3TextureCube, v_reflectDirGlobal) * v_color;
+	
+	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
+	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
+		gl_FragColor = fogify(fragColor);
+	else
+		discard;
 }

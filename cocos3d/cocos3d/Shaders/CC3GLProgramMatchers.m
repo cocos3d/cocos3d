@@ -64,6 +64,14 @@
 	// Point sprites
 	if (aMeshNode.isDrawingPointSprites) return [self pointSpriteProgram: shouldAlphaTest];
 	
+	// Reflection using cube-map texture
+	if (mat.hasTextureCube) {
+		if (texCnt > 1)
+			return [self singleTextureReflectiveProgram: shouldAlphaTest];
+		else
+			return [self noTextureReflectiveProgram: shouldAlphaTest];
+	}
+	
 	// Bump-mapping using a tangent-space normal map texture.
 	if (texCnt > 0 && aMeshNode.mesh.hasVertexTangents)
 		return [self bumpMapTangentSpaceProgram: shouldAlphaTest];
@@ -97,42 +105,56 @@
 }
 
 -(CC3GLProgram*) configurableProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3MultiTextureConfigurable.vsh"
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
 					   andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
 }
 
 -(CC3GLProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3SingleTexture.vsh"
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3SingleTextureWithAlphaTest.fsh"
+											   ? @"CC3SingleTextureAlphaTest.fsh"
 											   : @"CC3SingleTexture.fsh")];
 }
 
--(CC3GLProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3NoTexture.vsh"
+-(CC3GLProgram*) singleTextureReflectiveProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3NoTextureWithAlphaTest.fsh"
+											   ? @"CC3SingleTextureReflectAlphaTest.fsh"
+											   : @"CC3SingleTextureReflect.fsh")];
+}
+
+-(CC3GLProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3NoTextureAlphaTest.fsh"
 											   : @"CC3NoTexture.fsh")];
+}
+
+-(CC3GLProgram*) noTextureReflectiveProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+					   andFragmentShaderFile: (shouldAlphaTest
+											   ? @"CC3NoTextureReflectAlphaTest.fsh"
+											   : @"CC3NoTextureReflect.fsh")];
 }
 
 -(CC3GLProgram*) pointSpriteProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3PointSpritesWithAlphaTest.fsh"
+											   ? @"CC3PointSpritesAlphaTest.fsh"
 											   : @"CC3PointSprites.fsh")];
 }
 
 -(CC3GLProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3BumpMapObjectSpace.vsh"
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3BumpMapObjectSpaceWithAlphaTest.fsh"
+											   ? @"CC3BumpMapObjectSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapObjectSpace.fsh")];
 }
 
 -(CC3GLProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3BumpMapTangentSpace.vsh"
+	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
-											   ? @"CC3BumpMapTangentSpaceWithAlphaTest.fsh"
+											   ? @"CC3BumpMapTangentSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapTangentSpace.fsh")];
 }
 

@@ -1,5 +1,5 @@
 /*
- * CC3BumpMapTangentSpaceWithAlphaTest.fsh
+ * CC3SingleTextureReflectAlphaTest.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,21 +28,18 @@
  */
 
 /**
- * This fragment shader performs tangent-space bump-mapping.
+ * This fragment shader creates an environmental reflection on a model that has a single visible texture.
  *
- * The texture in texture unit 0 contains a map of tangent-space normals, encoded in the
- * texel RGB colors.
+ * The shader actually expects two textures. One is the visible texture. The other is a cube-map
+ * textures used to provide the environmental reflection.
  *
- * An optional second texture in texture unit 1 contains the visible texture to be applied on
- * top of the bump-mapped texture. If this texture is not available, the fragment color is used.
- *
- * CC3BumpMapTangentSpace.vsh is the vertex shader paired with this fragment shader.
+ * CC3TexturableMaterial.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
  */
 
-// Increase this if more textures are desired.
+// Increase this if more textures are desired. Must match vertex shader declaration.
 #define MAX_TEXTURES			2
 
 // Fog modes.
@@ -54,50 +51,34 @@
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
+uniform float		u_cc3MaterialReflectivity;	/**< Reflectivity of the material (0 <> 1). */
 
-uniform float		u_cc3MaterialMinimumDrawnAlpha;	/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
+uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
+uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+uniform highp float	u_cc3FogDensity;			/**< Fog density. */
+uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
+uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
-uniform bool		u_cc3FogIsEnabled;				/**< Whether scene fogging is enabled. */
-uniform lowp vec4	u_cc3FogColor;					/**< Fog color. */
-uniform int			u_cc3FogAttenuationMode;		/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
-uniform highp float	u_cc3FogDensity;				/**< Fog density. */
-uniform highp float	u_cc3FogStartDistance;			/**< Distance from camera at which fogging effect starts. */
-uniform highp float	u_cc3FogEndDistance;			/**< Distance from camera at which fogging effect ends. */
-
-uniform lowp int	u_cc3TextureCount;				/**< Number of textures. */
-uniform sampler2D	s_cc3Textures[MAX_TEXTURES];	/**< Texture samplers. */
+// Textures
+uniform sampler2D	s_cc3Texture2D;				/**< Texture sampler. */
+uniform samplerCube	s_cc3TextureCube;			/**< Reflection cube-map texture sampler. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
-
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
-
-//-------------- CONSTANTS ----------------------
-const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
-
-//-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
+varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4		v_color;					/**< Fragment base color. */
+varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
+varying mediump	vec3	v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
 
-/** 
- * Applies the texel from the bump map texture.
+/**
+ * Applies fog to the specified color and returns the adjusted color.
  *
- * Transforms the normal from range [0, 1] to [-1, 1], takes dot product with light direction
- * for interaction between normal and light vector, sets it into each of the RGB components,
- * and modulates the fragment color.
+ * Most apps will not use fog, or will have more specific fogging needs, so this method and
+ * its invocation should be removed by most apps.
  */
-void applyBumpMapTexel(vec4 texColor) {
-	fragColor.rgb *= vec3(2.0 * dot(texColor.rgb - kVec3Half, v_bumpMapLightDir));
-}
-
-/** Applies the texel from the visible texture by applying simple modulation. */
-void applyVisibleTexel(vec4 texColor) { fragColor *= texColor; }
-
-/** Applies fog to the specified color and returns the adjusted color. */
 vec4 fogify(vec4 aColor) {
 	if (u_cc3FogIsEnabled) {
 		int mode = u_cc3FogAttenuationMode;
@@ -120,11 +101,11 @@ vec4 fogify(vec4 aColor) {
 
 //-------------- ENTRY POINT ----------------------
 void main() {
+	// Mix the texture color with the reflection color in proportion to the material reflectivity
+	vec4 fragColor = texture2D(s_cc3Texture2D, v_texCoord[0]);
+	vec4 reflectColor = textureCube(s_cc3TextureCube, v_reflectDirGlobal);
+	fragColor = mix(fragColor, reflectColor, u_cc3MaterialReflectivity) * v_color;
 	
-	fragColor = v_color;
-	if (u_cc3TextureCount > 0) applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]));
-	if (u_cc3TextureCount > 1) applyVisibleTexel(texture2D(s_cc3Textures[1], v_texCoord[1]));
-
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
 		gl_FragColor = fogify(fragColor);

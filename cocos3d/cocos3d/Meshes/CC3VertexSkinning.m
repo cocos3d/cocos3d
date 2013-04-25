@@ -204,17 +204,20 @@
 
 /**
  * Overridden to skip the manipulation of the modelview matrix stack.
- * 
- * Vertex skinning does not use the modelview matrix stack. Instead, it uses a
- * palette of matrices that is used to manipulate the vertices of a mesh based
- * on a weighted average of the influence of the position of several bone nodes.
- * This activity is handled through the drawing of the contained mesh.
  *
- * Set model transform to identity.
+ * Vertex skinning does not use the modelview matrix stack. Instead, it uses a palette of
+ * matrices that is used to manipulate the vertices of a mesh based on a weighted average
+ * of the influence of the position of several bone nodes. This activity is handled through
+ * the drawing of the contained mesh.
+ *
+ * The model transform matrix is not applied to the fixed pipeline matrix stack. However,
+ * it is made available to shaders in the programmable pipeline. The shader may then choose
+ * to use or ignore it.
  */
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
 	[visitor populateModelMatrixFrom: nil];
+//	[visitor populateModelMatrixFrom: transformMatrix];
 	[visitor draw: self];
 }
 

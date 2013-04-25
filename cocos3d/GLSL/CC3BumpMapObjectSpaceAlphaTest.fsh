@@ -1,5 +1,5 @@
 /*
- * CC3BumpMapObjectSpace.fsh
+ * CC3BumpMapObjectSpaceAlphaTest.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -55,12 +55,14 @@ precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
-uniform bool		u_cc3FogIsEnabled;			/**< Whether scene fogging is enabled. */
-uniform lowp vec4	u_cc3FogColor;				/**< Fog color. */
-uniform int			u_cc3FogAttenuationMode;	/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
-uniform highp float	u_cc3FogDensity;			/**< Fog density. */
-uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
-uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
+uniform float		u_cc3MaterialMinimumDrawnAlpha;	/**< Minimum alpha value to be drawn, otherwise fragment will be discarded. */
+
+uniform bool		u_cc3FogIsEnabled;				/**< Whether scene fogging is enabled. */
+uniform lowp vec4	u_cc3FogColor;					/**< Fog color. */
+uniform int			u_cc3FogAttenuationMode;		/**< Fog attenuation mode (one of GL_LINEAR, GL_EXP or GL_EXP2). */
+uniform highp float	u_cc3FogDensity;				/**< Fog density. */
+uniform highp float	u_cc3FogStartDistance;			/**< Distance from camera at which fogging effect starts. */
+uniform highp float	u_cc3FogEndDistance;			/**< Distance from camera at which fogging effect ends. */
 
 uniform lowp int	u_cc3TextureCount;						/**< Number of textures. */
 uniform sampler2D	s_cc3Textures[MAX_TEXTURES];			/**< Texture samplers. */
@@ -120,13 +122,18 @@ vec4 fogify(vec4 aColor) {
 
 //-------------- ENTRY POINT ----------------------
 void main() {
+	
 	fragColor = v_color;
-
+	
 	if (u_cc3TextureCount > 0)
 		applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]), u_cc3TextureUnitColor[0]);
-
+	
 	if (u_cc3TextureCount > 1)
 		applyVisibleTexel(texture2D(s_cc3Textures[1], v_texCoord[1]));
 
-	gl_FragColor = fogify(fragColor);
+	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
+	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
+		gl_FragColor = fogify(fragColor);
+	else
+		discard;
 }

@@ -1,5 +1,5 @@
 /*
- * CC3SingleTexture.vsh
+ * CC3TexturableMaterial.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,19 +28,29 @@
  */
 
 /**
- * This vertex shader provides a general single-texture shader.
+ * This vertex shader provides a general shader for covering a mesh with an optional texture.
  *
  * This vertex shader can be paired with the following fragment shaders:
  *   - CC3SingleTexture.fsh
- *   - CC3SingleTextureWithAlphaTest.fsh
+ *   - CC3SingleTextureAlphaTest.fsh
+ *   - CC3SingleTextureReflect.fsh
+ *   - CC3SingleTextureReflectAlphaTest.fsh
  *   - CC3NoTexture.fsh
- *   - CC3NoTextureWithAlphaTest.fsh
+ *   - CC3NoTextureAlphaTest.fsh
+ *   - CC3NoTextureReflect.fsh
+ *   - CC3NoTextureReflectAlphaTest.fsh
+ *   - CC3BumpMapObjectSpace.fsh
+ *   - CC3BumpMapObjectSpaceAlphaTest.fsh
+ *   - CC3BumpMapTangentSpace.fsh
+ *   - CC3BumpMapTangentSpaceAlphaTest.fsh
+ *   - CC3MultiTextureConfigurable.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
  */
 
-// Increase these if more lights are desired.
+// Increase these if more textures or lights are desired.
+#define MAX_TEXTURES			2
 #define MAX_LIGHTS				4
 
 // Maximum bones per skin section (batch).
@@ -50,6 +60,7 @@ precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
+uniform mat4		u_cc3MatrixViewInv;				/**< Inverse of camera view matrix. */
 uniform highp mat4	u_cc3MatrixModelView;			/**< Current modelview matrix. */
 uniform mat3		u_cc3MatrixModelViewInvTran;	/**< Inverse-transpose of current modelview rotation matrix. */
 uniform highp mat4	u_cc3MatrixProj;				/**< Projection matrix. */
@@ -65,6 +76,7 @@ uniform bool		u_cc3LightIsUsingLighting;						/**< Indicates whether any lightin
 uniform lowp vec4	u_cc3LightSceneAmbientLightColor;				/**< Ambient light color of the scene. */
 uniform bool		u_cc3LightIsLightEnabled[MAX_LIGHTS];			/**< Indicates whether each light is enabled. */
 uniform vec4		u_cc3LightPositionEyeSpace[MAX_LIGHTS];			/**< Position or normalized direction in eye space of each light. */
+uniform vec4		u_cc3LightPositionModel[MAX_LIGHTS];			/**< Position or normalized direction in the local coords of the model of each light. */
 uniform lowp vec4	u_cc3LightAmbientColor[MAX_LIGHTS];				/**< Ambient color of each light. */
 uniform lowp vec4	u_cc3LightDiffuseColor[MAX_LIGHTS];				/**< Diffuse color of each light. */
 uniform lowp vec4	u_cc3LightSpecularColor[MAX_LIGHTS];			/**< Specular color of each light. */
@@ -78,6 +90,7 @@ uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array 
 uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 
 uniform bool u_cc3VertexHasNormal;				/**< Whether the vertex normal is available. */
+uniform bool u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
 uniform bool u_cc3VertexHasColor;				/**< Whether the vertex color is available. */
 uniform bool u_cc3VertexShouldNormalizeNormal;	/**< Whether the vertex normal should be normalized. */
 uniform bool u_cc3VertexShouldRescaleNormal;	/**< Whether the vertex normal should be rescaled. */
@@ -89,12 +102,17 @@ attribute vec3 a_cc3Tangent;			/**< Vertex tangent. */
 attribute vec4 a_cc3Color;				/**< Vertex color. */
 attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
 attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
-attribute vec2 a_cc3TexCoord;			/**< Vertex texture coordinate. */
+attribute vec2 a_cc3TexCoord0;			/**< Vertex texture coordinate for texture unit 0. */
+attribute vec2 a_cc3TexCoord1;			/**< Vertex texture coordinate for texture unit 1. */
+attribute vec2 a_cc3TexCoord2;			/**< Vertex texture coordinate for texture unit 2. */
+attribute vec2 a_cc3TexCoord3;			/**< Vertex texture coordinate for texture unit 3. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
-varying vec2 v_texCoord;				/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;				/**< Fragment base color. */
-varying highp float v_distEye;			/**< Fragment distance in eye coordinates. */
+varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4		v_color;					/**< Fragment base color. */
+varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
+varying vec3			v_bumpMapLightDir;			/**< Direction to the first light in either tangent space or model space. */
+varying mediump	vec3	v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0);
@@ -138,6 +156,8 @@ void vertexToEyeSpace() {
 		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
 	}
+	if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+	if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
 }
 
 /** 
@@ -201,6 +221,27 @@ vec4 illuminateWith(int ltIdx) {
 }
 
 /**
+ * If mesh has per-vertex tangents, returns the direction to the specified light in tangent
+ * space coordinates. The associated normal-map texture must match this and specify its
+ * normals in tangent-space. If no per-vertex tangents, simply return a zero vector.
+ */
+vec3 bumpMapDirectionForLight(int ltIdx) {
+	if ( !u_cc3VertexHasTangent ) return kVec3Zero;
+	
+	// Get the light direction in model space. If the light is positional
+	// calculate the normalized direction from the light and vertex positions.
+	vec3 ltDir = u_cc3LightPositionModel[ltIdx].xyz;
+	if (u_cc3LightPositionModel[ltIdx].w != 0.0) ltDir = normalize(ltDir - a_cc3Position.xyz);
+	
+	// Create a matrix that transforms from model space to tangent space, and transform light direction.
+	vec3 bitangent = cross(a_cc3Normal, a_cc3Tangent);
+	mat3 tangentSpaceXfm = mat3(a_cc3Tangent, bitangent, a_cc3Normal);
+	ltDir *= tangentSpaceXfm;
+
+	return ltDir;
+}
+
+/**
  * Returns the vertex color by starting with material emission and ambient scene lighting,
  * and then illuminating the material with each enabled light.
  */
@@ -212,6 +253,10 @@ vec4 illuminate() {
 	
 	vtxColor.a = matColorDiffuse.a;
 	
+	// If the model uses tanget-space bump-mapping, we need a variable to track the light direction.
+	// It's a varying because when using tangent-space normals, we need the light direction per fragment.
+	v_bumpMapLightDir = bumpMapDirectionForLight(0);
+	
 	return vtxColor;
 }
 
@@ -222,23 +267,26 @@ void main() {
 	matColorAmbient = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialAmbientColor;
 	matColorDiffuse = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialDiffuseColor;
 
-	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively,
-	// and use these to set the varying distance to the vertex in eye space.
+	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
 	vertexToEyeSpace();
+	
+	// Distance from vertex to eye. Used for fog effect.
 	v_distEye = length(vtxPosEye.xyz);
 	
-	// Determine the color of the vertex by applying material & lighting, or using a pure color
-	if (u_cc3LightIsUsingLighting && u_cc3VertexHasNormal) {
-		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
-		if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
-		if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
-
-		v_color = illuminate();
-	} else {
-		v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
-	}
+	// Environmental mapping reflection vector, transformed to global coordinates
+	v_reflectDirGlobal = (u_cc3MatrixViewInv * vec4(reflect(-vtxPosEye.xyz, vtxNormEye), 0.0)).xyz;
 	
-	v_texCoord = a_cc3TexCoord;		// Fragment texture coordinates.
+	// Determine the color of the vertex by applying material & lighting, or using a pure color
+	if (u_cc3LightIsUsingLighting)
+		v_color = illuminate();
+	else
+		v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
+	
+	// Fragment texture coordinates.
+	v_texCoord[0] = a_cc3TexCoord0;
+	v_texCoord[1] = a_cc3TexCoord1;
+//	v_texCoord[2] = a_cc3TexCoord2;		// Uncomment if MAX_TEXTURES increased
+//	v_texCoord[3] = a_cc3TexCoord3;		// Uncomment if MAX_TEXTURES increased
 	
 	gl_Position = u_cc3MatrixProj * vtxPosEye;
 }

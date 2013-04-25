@@ -1,5 +1,5 @@
 /*
- * CC3SingleTexture.fsh
+ * CC3BumpMapTangentSpaceAlphaTest.fsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -28,13 +28,22 @@
  */
 
 /**
- * This fragment shader provides a general single-texture shader.
+ * This fragment shader performs tangent-space bump-mapping.
  *
- * CC3SingleTexture.vsh is the vertex shader paired with this fragment shader.
+ * The texture in texture unit 0 contains a map of tangent-space normals, encoded in the
+ * texel RGB colors.
+ *
+ * An optional second texture in texture unit 1 contains the visible texture to be applied on
+ * top of the bump-mapped texture. If this texture is not available, the fragment color is used.
+ *
+ * CC3BumpMapTangentSpace.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
  */
+
+// Increase this if more textures are desired.
+#define MAX_TEXTURES			2
 
 // Fog modes.
 #define GL_LINEAR                 0x2601
@@ -55,13 +64,18 @@ uniform highp float	u_cc3FogDensity;				/**< Fog density. */
 uniform highp float	u_cc3FogStartDistance;			/**< Distance from camera at which fogging effect starts. */
 uniform highp float	u_cc3FogEndDistance;			/**< Distance from camera at which fogging effect ends. */
 
-// Textures
-uniform sampler2D	s_cc3Texture;					/**< Texture sampler. */
+uniform lowp int	u_cc3TextureCount;				/**< Number of textures. */
+uniform sampler2D	s_cc3Textures[MAX_TEXTURES];	/**< Texture samplers. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2 v_texCoord;					/**< Fragment texture coordinates. */
+varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
+
 varying lowp vec4 v_color;					/**< Fragment base color. */
 varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
+varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
+
+//-------------- CONSTANTS ----------------------
+const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
 
 //-------------- LOCAL VARIABLES ----------------------
 vec4 fragColor;
@@ -69,12 +83,21 @@ vec4 fragColor;
 
 //-------------- FUNCTIONS ----------------------
 
-/**
- * Applies fog to the specified color and returns the adjusted color.
+/** 
+ * Applies the texel from the bump map texture.
  *
- * Most apps will not use fog, or will have more specific fogging needs, so this method and
- * its invocation should be removed by most apps.
+ * Transforms the normal from range [0, 1] to [-1, 1], takes dot product with light direction
+ * for interaction between normal and light vector, sets it into each of the RGB components,
+ * and modulates the fragment color.
  */
+void applyBumpMapTexel(vec4 texColor) {
+	fragColor.rgb *= vec3(2.0 * dot(texColor.rgb - kVec3Half, v_bumpMapLightDir));
+}
+
+/** Applies the texel from the visible texture by applying simple modulation. */
+void applyVisibleTexel(vec4 texColor) { fragColor *= texColor; }
+
+/** Applies fog to the specified color and returns the adjusted color. */
 vec4 fogify(vec4 aColor) {
 	if (u_cc3FogIsEnabled) {
 		int mode = u_cc3FogAttenuationMode;
@@ -98,8 +121,10 @@ vec4 fogify(vec4 aColor) {
 //-------------- ENTRY POINT ----------------------
 void main() {
 	
-	fragColor = texture2D(s_cc3Texture, v_texCoord) * v_color;
-	
+	fragColor = v_color;
+	if (u_cc3TextureCount > 0) applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]));
+	if (u_cc3TextureCount > 1) applyVisibleTexel(texture2D(s_cc3Textures[1], v_texCoord[1]));
+
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
 		gl_FragColor = fogify(fragColor);

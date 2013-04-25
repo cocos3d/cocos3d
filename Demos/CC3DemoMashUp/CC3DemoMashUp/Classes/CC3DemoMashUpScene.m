@@ -690,13 +690,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * of the scene from one of the six scene axes. As a convenience, the six textures are loaded
  * using a file-name pattern.
  *
+ * The default program matcher assigns the GLSL shaders CC3SingleTextureReflect.vsh and
+ * CC3SingleTextureReflect.fsh to the reflective teapot.
+ *
  * In this example, the six cube-map textures include markers to illustrate which texture is which.
  *
  * The reflectivity property of the material covering the mesh node can be used to control how
  * reflective the surface is.
  *
  * Cube maps can also be used to draw skyboxes. To see the environment that is being reflected
- * into the teapot, uncommend the addSkyBox invocation in the initializeScene method.
+ * into the teapot, uncomment the addSkyBox invocation in the initializeScene method.
  *
  * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
  * A representation of how the six textures appear related to each other after being loaded into
@@ -713,8 +716,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// textureCubeMapFromFilePattern: method for more info.
 	[teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
 	[teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	[teapotTextured applyEffectNamed: @"CubeReflection" inPFXResourceFile: @"EnvMap.pfx"];
-	teapotTextured.material.reflectivity = 0.6;		// Adjust up and down between zero and one.
+	teapotTextured.material.reflectivity = 0.7;		// Adjust up and down between zero and one.
 
 	// Add a second rainbow-colored teapot as a satellite of the textured teapot.
 	teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
@@ -1356,9 +1358,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds two running men to the scene. The men runs endless laps around the scene.
- * The men's meshes employ vertex skinning and an animated bone skeleton to
- * simulate smooth motion and realistic joint flexibility.
+ * Adds two running men to the scene. The men runs endless laps around the scene. The men's meshes
+ * employ vertex skinning and an animated bone skeleton to simulate smooth motion and realistic
+ * joint flexibility. Under a programmable rendering pipeline, the smaller man also sports a
+ * reflective skin that reflects the environment, using a cube-map texture. 
+ *
+ * For a more complete explanation of cube-mapping, see the notes for the addTeapotAndSatellite method.
  */
 -(void) addSkinnedRunners {
 
@@ -1370,13 +1375,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
 													  fromFile: kRunningManPODFile];
 	
-	// Remove the light provided in the POD so that it does not contribute to the
-	// lighting of the scene. We don't remove the POD's camera, but we rename it
-	// so that we can retrieve it distinctly from the camera loaded with the robot
-	// arm POD. All SDK POD files seem to use the same name for their included cameras.
-	// We also adjust the far clipping distance of the runner camera to match the
-	// main camera, and we set the depth of field to infinite so that it will display
-	// shadow volumes correctly.
+	// Remove the light provided in the POD so that it does not contribute to the lighting of
+	// the scene. We don't remove the POD's camera, but we rename it so that we can retrieve it
+	// distinctly from the camera loaded with the robot arm POD. All SDK POD files seem to use
+	// the same name for their included cameras. We also adjust the far clipping distance of the
+	// runner camera to match the main camera, and we set the depth of field to infinite so that
+	// it will display shadow volumes correctly.
 	[runner getNodeNamed: kRunnerLampName].visible = NO;
 	CC3Camera* runnerCam = (CC3Camera*)[runner getNodeNamed: @"Camera01"];
 	runnerCam.name = kRunnerCameraName;
@@ -1418,7 +1422,23 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	littleBrother.uniformScale = 0.75f;
 	littleBrother.location = cc3v(0, 0, 800);
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
-	littleBrother.touchEnabled = YES;		// make the runner touchable
+	littleBrother.touchEnabled = YES;			// make the runner touchable
+	
+	// Turn the smaller runner into a little liquid-metal Terminator 2!
+	// This is done by locating the mesh nodes within the figure, adding a cube-map environment
+	// texture to each, and setting the reflectivity of each mesh node.
+	CC3Material* mat;
+	GLfloat lbReflect = 1.0;	// Lower the reflectivity property towards zero to show some of the runner's suit.
+	CC3Texture* envMapTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	mat = [littleBrother getMeshNodeNamed: @"BodyLowPoly"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"LegsLowPoly"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
 
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
