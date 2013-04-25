@@ -306,6 +306,10 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return nil;
 }
 
+-(void) flipTextureContentVertically: (CC3TextureContent*) texContent {
+	[texContent flipVertically];
+	_isFlippedVertically = !_isFlippedVertically;
+}
 
 #pragma mark Allocation and initialization
 
@@ -315,7 +319,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 		_size = CC3IntSizeMake(0, 0);
 		_coverage = CGSizeZero;
 		_hasMipmap = NO;
-		_isFlippedVertically = YES;		// All but PVR textures are flipped
+		_isFlippedVertically = YES;		// All but PVR textures start out flipped
 		_hasPremultipliedAlpha = NO;
 		self.textureParameters = [[self class] defaultTextureParameters];
 	}
@@ -412,9 +416,34 @@ static NSMutableDictionary* _texturesByName = nil;
 -(Class) textureContentClass { return CC3TextureContent.class; }
 
 -(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
 	[self ensureGLTexture];
 	[super bindTextureContent: texContent toTarget: target];
 	if (_shouldGenerateMipmaps) [self generateMipmap];
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
+	}
+	return self;
+}
+
+-(BOOL) shouldFlipVerticallyOnLoad { return _shouldFlipVerticallyOnLoad; }
+
+-(void) setShouldFlipVerticallyOnLoad:(BOOL)shouldFlipVerticallyOnLoad {
+	_shouldFlipVerticallyOnLoad = shouldFlipVerticallyOnLoad;
+}
+
+static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
+
++(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlip2DVerticallyOnLoad; }
+
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlip2DVerticallyOnLoad = shouldFlip;
 }
 
 @end
@@ -432,7 +461,7 @@ static NSMutableDictionary* _texturesByName = nil;
 -(Class) textureContentClass { return CC3TextureContent.class; }
 
 -(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
-	[texContent flipVertically];
+	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
 	[self ensureGLTexture];
 	[super bindTextureContent: texContent toTarget: target];
 }
@@ -488,8 +517,8 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 #pragma mark Allocation and initialization
 
 -(id) initFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
-					 posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
-					 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
+				   posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
+				   posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
 	
 	if ( (self = [self init]) ) {
 		if ( ![self loadFromFilesPosX: posXFilePath negX: negXFilePath
@@ -537,6 +566,27 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[self addGLTexture: tex];
 	[tex release];
 	return tex;
+}
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
+	}
+	return self;
+}
+
+-(BOOL) shouldFlipVerticallyOnLoad { return _shouldFlipVerticallyOnLoad; }
+
+-(void) setShouldFlipVerticallyOnLoad:(BOOL)shouldFlipVerticallyOnLoad {
+	_shouldFlipVerticallyOnLoad = shouldFlipVerticallyOnLoad;
+}
+
+static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
+
++(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlipCubeVerticallyOnLoad; }
+
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlipCubeVerticallyOnLoad = shouldFlip;
 }
 
 @end

@@ -47,9 +47,9 @@
  * As shortcuts, there are also class and instance initialization methods that will
  * invoke the loadFromFile: method automatically during instance initialization.
  *
- * However, before using any of these shortcut methods, you should take into
- * consideration whether you need to set the directory or expectsVerticallyFlippedTextures
- * properties prior to loading, as explained here.
+ * However, before using any of these shortcut methods, you should take into consideration
+ * whether you need to set the directory or expectsVerticallyFlippedTextures properties
+ * prior to loading, as explained here.
  *
  * By default, additional resources (typically textures), are loaded from the same
  * directory that the file containing the content of this resource is located.
@@ -60,27 +60,25 @@
  * You do not need to set the directory property if these additional resources
  * are in the same directory as the file loaded by this resource.
  *
- * Under iOS, a texture whose width and height are not each a power-of-two, will be
- * converted to a size whose width and height are a power-of-two. The result is a
- * texture that can have empty space on the top and right sides. If the texture
- * coordinates of the mesh do not take this into consideration, the result will be
- * that only the lower left of the mesh will be covered by the texture.
+ * Under iOS, a texture whose width and height are not each a power-of-two, will be converted
+ * to a size whose width and height are a power-of-two. The result is a texture that can have
+ * empty space on the top and right sides. If the texture coordinates of the mesh do not take
+ * this into consideration, the result will be that only the lower left of the mesh will be
+ * covered by the texture.
  * 
  * In addition, the vertical axis of the coordinate system of OpenGL is inverted
  * relative to the iOS view coordinate system. This results in textures being
  * displayed upside-down, relative to the OpenGL coordinate system.
  *
- * This instance will automatically adjust the meshes to compensate for this.
- * Meshes loaded by this resource loader will have their texture coordinates
- * adjusted to align with the usable area of an NPOT texture, and to vertically
- * flip a texture that has been loaded upside-down.
+ * This instance will automatically adjust the meshes to compensate for this. Meshes loaded
+ * by this resource loader will have their texture coordinates adjusted to align with the usable
+ * area of an NPOT texture, and to vertically flip a texture that has been loaded upside-down.
  *
- * To determine whether textures will need to be vertically flipped, the loader
- * needs to know whether or not the meshes have already been flipped (by the 3D
- * editor or file exporter). The expectsVerticallyFlippedTextures property
- * can be set to indicate to the loader whether the texture coordinates have
- * already been flipped. If the value of this property needs to be changed,
- * it should be set before the file is loaded.
+ * To determine whether textures will need to be vertically flipped, the loader needs to know
+ * whether or not the meshes have already been flipped (by the 3D editor or file exporter).
+ * The expectsVerticallyFlippedTextures property can be set to indicate to the loader whether
+ * the texture coordinates have already been flipped. If the value of this property needs to
+ * be changed, it should be set before the file is loaded.
  *
  * The class-side property defaultExpectsVerticallyFlippedTextures can be
  * used to set all instances to load one way or the other.
@@ -148,10 +146,10 @@
  * Indicates whether the texture coordinates of the meshes that will be loaded by this
  * resource loader expect that the texture will be flipped upside-down during texture loading.
  * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to the iOS view
- * coordinate system. This results in textures from most file formats being oriented upside-down,
- * relative to the OpenGL coordinate system. All file formats except PVR format will be oriented
- * upside-down after loading.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the  CoreGraphics
+ * view coordinate system. As a result, some texture file formats may be loaded upside down. Most
+ * common file formats, including JPG, PNG & PVR are loaded right-way up, but using proprietary
+ * texture formats developed for other platforms may result in textures being loaded upside-down.
  *
  * If the value of this property is YES, the texture coordinates of meshes loaded by this resource
  * loader will be assumed to have already been flipped vertically, (typically by the 3D editor or
@@ -183,7 +181,7 @@
  *
  * See the notes for that property for more information.
  *
- * The initial value of this class-side property is YES.
+ * The initial value of this class-side property is NO.
  */
 +(BOOL) defaultExpectsVerticallyFlippedTextures;
 
@@ -193,7 +191,7 @@
  *
  * See the notes for that property for more information.
  *
- * The initial value of this class-side property is YES.
+ * The initial value of this class-side property is NO.
  */
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
 

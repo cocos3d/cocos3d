@@ -84,6 +84,7 @@
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isFlippedVertically : 1;
+	BOOL _shouldFlipVerticallyOnLoad : 1;		// Used by some subclasses
 	BOOL _hasPremultipliedAlpha : 1;
 }
 
@@ -487,6 +488,43 @@
  * This class is used for all 2D texture types except PVR.
  */
 @interface CC3GLTexture2D : CC3GLTexture
+
+/**
+ * Indicates whether this instance will flip texture vertically during loading.
+ *
+ * Under iOS and OSX, most textures are loaded into memory upside-down because of the difference
+ * in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
+ *
+ * If this property is set to YES during loading, the texture will be flipped in memory so
+ * that is is oriented the right way up.
+ *
+ * It is possible to compensate for an upside-down using texture coordinates. You can set
+ * this property to NO prior to loading in order to leave the texture upside-down and use
+ * texture coordinates to compensate.
+ *
+ * The initial value of this property is set to the value of the class-side
+ * defaultShouldFlipVerticallyOnLoad property.
+ */
+@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
+
 @end
 
 

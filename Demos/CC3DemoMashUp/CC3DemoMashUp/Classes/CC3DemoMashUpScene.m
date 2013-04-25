@@ -616,7 +616,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addDieCube {
 
 	// Fetch the die cube model from the POD file.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	CC3Node* podDieCube = [podRezNode getNodeNamed: kDieCubePODName];
 	
 	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
@@ -798,7 +798,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// but because the original PVR demo app ignores some data in the POD file. To replicate
 	// the PVR demo faithfully, we must do the same, by tweaking the loader to act accordingly
 	// by creating a specialized subclass.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODRobotRezNodeName];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODRobotRezNodeName];
 	podRezNode.resource = [IntroducingPODResource resourceFromFile: kRobotPODFile];
 	
 	// If you want to stop the robot arm from being animated, uncomment the following line.
@@ -1071,9 +1071,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * down, and as you move the camera around, which causes the head to rotate to follow you.
  */
 -(void) addFloatingHead {
-	CC3PODResourceNode* podRezNode = [CC3ResourceNode nodeWithName: kPODHeadRezNodeName];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kHeadPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODHeadRezNodeName
+														  fromFile: kHeadPODFile];
 
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
@@ -1141,7 +1140,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addMascots {
 
 	// Create the mascots. Load the first from file, then copy to create the second.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
+	// The texture coordinates of the mascot POD file expect the texture to be loaded
+	// upside down. By telling the resource this, it will compensate during loading.
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
+								  expectsVerticallyFlippedTextures: YES];
 	mascot = [podRezNode getMeshNodeNamed: kMascotName];
 	CC3MeshNode* distractedMascot = [[mascot copyWithName: kDistractedMascotName] autorelease];
 	
@@ -1314,7 +1316,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// This is not actually necessary, but demonstrates that the resources loaded from
 	// a POD file, including the resource node, are just nodes that can be manipulated
 	// like any other node assembly.
-	CC3PODResourceNode* malletAndAnvils = [CC3PODResourceNode nodeFromFile: kMalletPODFile];
+	CC3ResourceNode* malletAndAnvils = [CC3PODResourceNode nodeFromFile: kMalletPODFile];
 	[[malletAndAnvils getNodeNamed: @"Camera01"] remove];
 	[[malletAndAnvils getNodeNamed: @"Camera01Target"] remove];
 
@@ -1365,9 +1367,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// (png) that is loaded upside-down by iOS. We tell the resource that the mesh is not
 	// aligned to upside-down textures so that the texture coordinates will be flipped upside
 	// down automatically and the textures will appear right-way up.
-	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
-	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
-					  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
+													  fromFile: kRunningManPODFile];
 	
 	// Remove the light provided in the POD so that it does not contribute to the
 	// lighting of the scene. We don't remove the POD's camera, but we rename it
@@ -1810,9 +1811,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * the application set the value of such a uniform variable directly.
  */
 -(void) addReflectiveMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kReflectiveMaskPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
 
 	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
@@ -1860,9 +1859,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * PFX file are different than the default bump-map shaders, and the mask will look different.
  */
 -(void) addEtchedMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kEtchedMaskPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
 	
 	// Load the textures into the material (bump-mapped texture first), and allow the default shaders

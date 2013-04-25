@@ -117,46 +117,101 @@
 -(Class) resourceClass;
 
 /**
- * Using the contained resource, loads the file at the specified file path,
- * extracts the loaded CC3Nodes from the contained resource, and adds them
- * as child nodes to this resource node.
+ * Loads the file at the specified file path, extracts the loaded CC3Nodes from the contained
+ * resource, and adds them as child nodes to this resource node.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
  *
- * If not already set, the name of this node will be set to that of the
- * resource, which is usually the name of the file loaded.
+ * This method invokes the resourceFromFile: class method on the class returned by the resourceClass
+ * property, and sets the resource property of this node to the returned instance.
+ *
+ * If not already set, the name of this node will be set to that of the resource, which is
+ * usually the name of the file loaded.
  */
 -(void) loadFromFile: (NSString*) aFilepath;
 
 /**
- * Initializes this instance and, using the contained resource, loads the file
- * at the specified file path, extracts the loaded CC3Nodes from the contained
+ * Loads the file at the specified file path, extracts the loaded CC3Nodes from the contained
  * resource, and adds them as child nodes to this resource node.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
  *
- * The name of this node will be set to that of the resource, which is
+ * This method invokes the resourceFromFile:expectsVerticallyFlippedTextures: class method
+ * on the class returned by the resourceClass property, and sets the resource property of 
+ * this node to the returned instance.
+ *
+ * If not already set, the name of this node will be set to that of the resource, which is
  * usually the name of the file loaded.
+ */
+-(void) loadFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
+
+/**
+ * Initializes this instance and, using the contained resource, loads the file at the specified
+ * file path, extracts the loaded CC3Nodes from the contained resource, and adds them as child
+ * nodes to this resource node.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * This method invokes the loadFromFile: method to load the file.
+ *
+ * The name of this node will be set to that of the resource, which is usually the name of
+ * the file loaded.
  */
 -(id) initFromFile: (NSString*) aFilepath;
 
 /**
- * Allocates and initializes an autoreleased instance and, using the contained
- * resource, loads the file at the specified file path, extracts the loaded CC3Nodes
- * from the contained resource, and adds them as child nodes to this resource node.
+ * Allocates and initializes an autoreleased instance and, using the contained resource, loads
+ * the file at the specified file path, extracts the loaded CC3Nodes from the contained resource,
+ * and adds them as child nodes to this resource node.
  *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
  *
- * The name of this node will be set to that of the resource, which is
- * usually the name of the file loaded.
+ * This method invokes the loadFromFile: method to load the file.
+ *
+ * The name of this node will be set to that of the resource, which is usually the name of
+ * the file loaded.
  */
 +(id) nodeFromFile: (NSString*) aFilepath;
+
+/**
+ * Initializes this instance and, using the contained resource, loads the file at the specified
+ * file path, extracts the loaded CC3Nodes from the contained resource, and adds them as child
+ * nodes to this resource node.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * This method invokes the loadFromFile:expectsVerticallyFlippedTextures: method to load the file.
+ *
+ * The name of this node will be set to that of the resource, which is usually the name of
+ * the file loaded.
+ */
+-(id) initFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
+
+/**
+ * Allocates and initializes an autoreleased instance and, using the contained resource, loads
+ * the file at the specified file path, extracts the loaded CC3Nodes from the contained resource,
+ * and adds them as child nodes to this resource node.
+ *
+ * The specified file path may be either an absolute path, or a path relative to the application
+ * resource directory. If the file is located directly in the application resources directory,
+ * the specified file path can simply be the name of the file.
+ *
+ * This method invokes the loadFromFile:expectsVerticallyFlippedTextures: method to load the file.
+ *
+ * The name of this node will be set to that of the resource, which is usually the name of
+ * the file loaded.
+ */
++(id) nodeFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped;
 
 /**
  * Initializes this instance and, using the contained resource, loads the file
@@ -195,10 +250,11 @@
  * This property is a convenience property that simply gets and sets the same
  * property on the contained CC3NodesResource instance.
  * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to
- * the iOS view coordinate system. This results in textures from most file formats
- * being oriented upside-down, relative to the OpenGL coordinate system. All file
- * formats except PVR format will be oriented upside-down after loading.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
  * If the value of this property is YES, the texture coordinates of meshes loaded
  * by the CC3NodesResource will be assumed to have already been flipped vertically,

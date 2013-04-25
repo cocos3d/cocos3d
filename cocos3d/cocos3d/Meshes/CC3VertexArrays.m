@@ -1210,7 +1210,7 @@ static GLuint lastAssignedVertexArrayTag;
 	_expectsVerticallyFlippedTextures = another.expectsVerticallyFlippedTextures;
 }
 
-static BOOL defaultExpectsVerticallyFlippedTextures = YES;
+static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 +(BOOL) defaultExpectsVerticallyFlippedTextures {
 	return defaultExpectsVerticallyFlippedTextures;

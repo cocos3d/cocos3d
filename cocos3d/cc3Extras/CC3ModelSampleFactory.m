@@ -112,9 +112,6 @@
 		vTexCoord[i].u = (vLocs[i].x - vlMin.x) / vlRange.x;
 		vTexCoord[i].v = (vLocs[i].y - vlMin.y) / vlRange.y;
 	}
-	
-	// Indicate that this texture coord array was built assuming a right-side up image.
-	teapotVertexTextureCoordinates.expectsVerticallyFlippedTextures = NO;
 }
 
 // Initialize several static teapot meshes that can be reused in many teapots.

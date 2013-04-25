@@ -106,11 +106,11 @@
 			// Vertex normal is constant. Will do nothing if this mesh does not include normals.
 			[self setVertexNormal: vtxNml at: vIdx];
 			
-			// Vertex texture coordinates derived from the barycentric coordinates and inverted vertically.
+			// Vertex texture coordinates derived from the barycentric coordinates.
 			// Will do nothing if this mesh does not include texture coordinates.
 			GLfloat u = bw0 * tc[0].u + bw1 * tc[1].u + bw2 * tc[2].u;
 			GLfloat v = bw0 * tc[0].v + bw1 * tc[1].v + bw2 * tc[2].v;
-			[self setVertexTexCoord2F: cc3tc(u, (1.0f - v)) at: vIdx];
+			[self setVertexTexCoord2F: cc3tc(u, v) at: vIdx];
 
 			// First tessellated triangle starting at the vertex and opening away from corner 0.
 			if (i1 < divsSimSide1) {
@@ -198,11 +198,11 @@
 			// Vertex normal. Will do nothing if this mesh does not include normals.
 			[self setVertexNormal: kCC3VectorUnitZPositive at: vIndx];
 
-			// Vertex texture coordinates, inverted vertically
+			// Vertex texture coordinates.
 			// Will do nothing if this mesh does not include texture coordinates.
 			GLfloat u = divTexSpan.width * ix;
 			GLfloat v = divTexSpan.height * iy;
-			[self setVertexTexCoord2F: cc3tc(u, (1.0f - v)) at: vIndx];
+			[self setVertexTexCoord2F: cc3tc(u, v) at: vIndx];
 		}
 	}
 	
@@ -287,7 +287,7 @@
 			// number, then shifted to move range from (-0.5 <-> +0.5) to (0.0 <-> +1.0).
 			// Will do nothing if this mesh does not include texture coordinates.
 			CGPoint texPt = ccpAdd(ccpMult(unitRadial, (radialTexDivSpan * ir)), ccp(0.5f, 0.5f));
-			[self setVertexTexCoord2F: cc3tc(texPt.x, (1.0f - texPt.y)) at: vIndx];
+			[self setVertexTexCoord2F: cc3tc(texPt.x, texPt.y) at: vIndx];
 			
 			// Since the index array is a simple array, just access the array directly.
 			// For the first ring, add one triangle rooted at the origin.
@@ -350,104 +350,104 @@
 	// Front face, CCW winding:
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMax.z) at: 0];
 	[self setVertexNormal: kCC3VectorUnitZPositive at: 0];
-	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 0];
+	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 0];
 
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMax.z) at: 1];
 	[self setVertexNormal: kCC3VectorUnitZPositive at: 1];
-	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 1];
+	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 1];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMax.z) at: 2];
 	[self setVertexNormal: kCC3VectorUnitZPositive at: 2];
-	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 2];
+	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 2];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMax.z) at: 3];
 	[self setVertexNormal: kCC3VectorUnitZPositive at: 3];
-	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 3];
+	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 3];
 	
 	// Right face, CCW winding:
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMax.z) at: 4];
 	[self setVertexNormal: kCC3VectorUnitXPositive at: 4];
-	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 4];
+	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 4];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMin.z) at: 5];
 	[self setVertexNormal: kCC3VectorUnitXPositive at: 5];
-	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), (1.0f - corner.y)) at: 5];
+	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), corner.y) at: 5];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMin.z) at: 6];
 	[self setVertexNormal: kCC3VectorUnitXPositive at: 6];
-	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), corner.y) at: 6];
+	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), (1.0f - corner.y)) at: 6];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMax.z) at: 7];
 	[self setVertexNormal: kCC3VectorUnitXPositive at: 7];
-	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 7];
+	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 7];
 	
 	// Back face, CCW winding:
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMin.z) at: 8];
 	[self setVertexNormal: kCC3VectorUnitZNegative at: 8];
-	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), (1.0f - corner.y)) at: 8];
+	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), corner.y) at: 8];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMin.z) at: 9];
 	[self setVertexNormal: kCC3VectorUnitZNegative at: 9];
-	[self setVertexTexCoord2F: cc3tc(1.0f, (1.0f - corner.y)) at: 9];
+	[self setVertexTexCoord2F: cc3tc(1.0f, corner.y) at: 9];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMin.z) at: 10];
 	[self setVertexNormal: kCC3VectorUnitZNegative at: 10];
-	[self setVertexTexCoord2F: cc3tc(1.0f, corner.y) at: 10];
+	[self setVertexTexCoord2F: cc3tc(1.0f, (1.0f - corner.y)) at: 10];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMin.z) at: 11];
 	[self setVertexNormal: kCC3VectorUnitZNegative at: 11];
-	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), corner.y) at: 11];
+	[self setVertexTexCoord2F: cc3tc((0.5f + corner.x), (1.0f - corner.y)) at: 11];
 	
 	// Left face, CCW winding:
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMin.z) at: 12];
 	[self setVertexNormal: kCC3VectorUnitXNegative at: 12];
-	[self setVertexTexCoord2F: cc3tc(0.0f, (1.0f - corner.y)) at: 12];
+	[self setVertexTexCoord2F: cc3tc(0.0f, corner.y) at: 12];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMax.z) at: 13];
 	[self setVertexNormal: kCC3VectorUnitXNegative at: 13];
-	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 13];
+	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 13];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMax.z) at: 14];
 	[self setVertexNormal: kCC3VectorUnitXNegative at: 14];
-	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 14];
+	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 14];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMin.z) at: 15];
 	[self setVertexNormal: kCC3VectorUnitXNegative at: 15];
-	[self setVertexTexCoord2F: cc3tc(0.0f, corner.y) at: 15];
+	[self setVertexTexCoord2F: cc3tc(0.0f, (1.0f - corner.y)) at: 15];
 	
 	// Top face, CCW winding:
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMin.z) at: 16];
 	[self setVertexNormal: kCC3VectorUnitYPositive at: 16];
-	[self setVertexTexCoord2F: cc3tc(corner.x, 0.0f) at: 16];
+	[self setVertexTexCoord2F: cc3tc(corner.x, 1.0f) at: 16];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMax.y, boxMax.z) at: 17];
 	[self setVertexNormal: kCC3VectorUnitYPositive at: 17];
-	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 17];
+	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 17];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMax.z) at: 18];
 	[self setVertexNormal: kCC3VectorUnitYPositive at: 18];
-	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 18];
+	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 18];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMax.y, boxMin.z) at: 19];
 	[self setVertexNormal: kCC3VectorUnitYPositive at: 19];
-	[self setVertexTexCoord2F: cc3tc(0.5f, 0.0f) at: 19];
+	[self setVertexTexCoord2F: cc3tc(0.5f, 1.0f) at: 19];
 	
 	// Bottom face, CCW winding:
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMax.z) at: 20];
 	[self setVertexNormal: kCC3VectorUnitYNegative at: 20];
-	[self setVertexTexCoord2F: cc3tc(corner.x, (1.0f - corner.y)) at: 20];
+	[self setVertexTexCoord2F: cc3tc(corner.x, corner.y) at: 20];
 	
 	[self setVertexLocation: cc3v(boxMin.x, boxMin.y, boxMin.z) at: 21];
 	[self setVertexNormal: kCC3VectorUnitYNegative at: 21];
-	[self setVertexTexCoord2F: cc3tc(corner.x, 1.0f) at: 21];
+	[self setVertexTexCoord2F: cc3tc(corner.x, 0.0f) at: 21];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMin.z) at: 22];
 	[self setVertexNormal: kCC3VectorUnitYNegative at: 22];
-	[self setVertexTexCoord2F: cc3tc(0.5f, 1.0f) at: 22];
+	[self setVertexTexCoord2F: cc3tc(0.5f, 0.0f) at: 22];
 	
 	[self setVertexLocation: cc3v(boxMax.x, boxMin.y, boxMax.z) at: 23];
 	[self setVertexNormal: kCC3VectorUnitYNegative at: 23];
-	[self setVertexTexCoord2F: cc3tc(0.5f, (1.0f - corner.y)) at: 23];
+	[self setVertexTexCoord2F: cc3tc(0.5f, corner.y) at: 23];
 
 	// Populate the vertex indices
 	// Since the index array is a simple array, just access the array directly.
@@ -573,7 +573,7 @@ static const GLubyte wireBoxIndexData[] = {
 			if (iy == (verticesPerAxis.y - 1)) uOffset = -halfDivTexSpanWidth;	// South pole
 			GLfloat u = divTexSpan.width * ix + uOffset;
 			GLfloat v = divTexSpan.height * iy;
-			[self setVertexTexCoord2F: cc3tc(u, v) at: vIndx];
+			[self setVertexTexCoord2F: cc3tc(u, (1.0f - v)) at: vIndx];
 			
 			// Since the index array is a simple array, just access the array directly.
 			// For each vertex that is at the bottom-right corner of a division, add triangles.
@@ -649,7 +649,7 @@ static const GLubyte wireBoxIndexData[] = {
 			
 			// Vertex tex coords wrapped around and projected horizontally to the cone surface.
 			// Will do nothing if this mesh does not include texture coordinates.
-			ccTex2F texCoord = cc3tc(texAngularDivSpan * ia, (1.0f - texHeightDivSpan * ih));
+			ccTex2F texCoord = cc3tc(texAngularDivSpan * ia, texHeightDivSpan * ih);
 			[self setVertexTexCoord2F: texCoord at: vIdx];
 			
 			// First triangular face

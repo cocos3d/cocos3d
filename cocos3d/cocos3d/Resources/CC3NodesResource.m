@@ -74,7 +74,7 @@
 
 #pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
 
-static BOOL defaultExpectsVerticallyFlippedTextures = YES;
+static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 +(BOOL) defaultExpectsVerticallyFlippedTextures { return defaultExpectsVerticallyFlippedTextures; }
 

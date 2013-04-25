@@ -620,7 +620,7 @@ typedef struct {
 				CGSize texSize = fontConfig.textureSize;
 				GLfloat u = (charSpec->rect.origin.x + (divSize.width * ix)) / texSize.width;
 				GLfloat v = (charSpec->rect.origin.y + (divSize.height * iy)) / texSize.height;
-				[self setVertexTexCoord2F: cc3tc(u, v) at: vIdx];
+				[self setVertexTexCoord2F: cc3tc(u, (1.0f - v)) at: vIdx];
 				
 				// In the grid of division quads for each character, each vertex that is not
 				// in either the top-most row or the right-most column is the bottom-left corner
@@ -628,14 +628,14 @@ typedef struct {
 				if (iy < divsPerChar.y && ix < divsPerChar.x) {
 					
 					// First triangle of face wound counter-clockwise
-					[self setVertexIndex: vIdx at: iIdx++];						// TL
+					[self setVertexIndex: vIdx at: iIdx++];							// TL
 					[self setVertexIndex: (vIdx + divsPerChar.x + 1) at: iIdx++];	// BL
 					[self setVertexIndex: (vIdx + divsPerChar.x + 2) at: iIdx++];	// BR
 					
 					// Second triangle of face wound counter-clockwise
 					[self setVertexIndex: (vIdx + divsPerChar.x + 2) at: iIdx++];	// BR
 					[self setVertexIndex: (vIdx + 1) at: iIdx++];					// TR
-					[self setVertexIndex: vIdx at: iIdx++];						// TL
+					[self setVertexIndex: vIdx at: iIdx++];							// TL
 				}
 			}
 		}

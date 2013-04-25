@@ -156,7 +156,7 @@ static GLuint lastAssignedResourceTag;
 #pragma mark Deprecated functionality
 
 -(CCArray*) nodes { return nil; }
--(BOOL) expectsVerticallyFlippedTextures { return YES; }
+-(BOOL) expectsVerticallyFlippedTextures { return NO; }
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsVerticallyFlippedTextures {}
 +(BOOL) defaultExpectsVerticallyFlippedTextures { return CC3NodesResource.defaultExpectsVerticallyFlippedTextures; }
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped { CC3NodesResource.defaultExpectsVerticallyFlippedTextures = expectsFlipped; }
