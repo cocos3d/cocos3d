@@ -39,7 +39,7 @@
 // Maximum bones per skin section (batch).
 // Set this fairly high because this shader is used for touch detection painting
 // for all other shaders. Apps with large skinned models might use many bones.
-#define MAX_BONES_PER_VERTEX	24
+#define MAX_BONES_PER_BATCH		24
 
 precision mediump float;
 
@@ -55,8 +55,8 @@ uniform float		u_cc3PointMinimumSize;		/**< Minimum size to which points will be
 uniform float		u_cc3PointMaximumSize;		/**< Maximum size to which points will be allowed to grow. */
 uniform vec3		u_cc3PointSizeAttenuation;	/**< Coefficients of the size attenuation equation. */
 
-uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing each vertex. */
-uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices in the current mesh skin section in eye space. */
+uniform lowp int	u_cc3BonesPerVertex;							/**< Number of bones influencing each vertex. */
+uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of bone matrices in the current mesh skin section in eye space. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4 a_cc3Position;		/**< Vertex position. */

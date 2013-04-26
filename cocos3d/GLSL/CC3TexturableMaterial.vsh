@@ -28,17 +28,26 @@
  */
 
 /**
- * This vertex shader provides a general shader for covering a mesh with an optional texture.
+ * This vertex shader provides a general shader for covering a mesh with a material.
+ *
+ * This shader supports the following features:
+ *   - Up to two textures (more can be added by increasing MAX_TEXTURES, v_texCoord[] & a_cc3TexCoord1. See below).
+ *   - Realistic interaction with up to four lights (more can be added by increasing MAX_LIGHTS below).
+ *   - Positional, directional, or spot lighting with attenuation.
+ *   - Vertex skinning (bone rigged characters).
+ *   - Tangent-space or object-space bump-mapping.
+ *   - Environmental reflection mapping using a cube-mapped texture (in addition to the 2 visible textures).
+ *   - Fog effects.
  *
  * This vertex shader can be paired with the following fragment shaders:
- *   - CC3SingleTexture.fsh
- *   - CC3SingleTextureAlphaTest.fsh
- *   - CC3SingleTextureReflect.fsh
- *   - CC3SingleTextureReflectAlphaTest.fsh
  *   - CC3NoTexture.fsh
  *   - CC3NoTextureAlphaTest.fsh
  *   - CC3NoTextureReflect.fsh
  *   - CC3NoTextureReflectAlphaTest.fsh
+ *   - CC3SingleTexture.fsh
+ *   - CC3SingleTextureAlphaTest.fsh
+ *   - CC3SingleTextureReflect.fsh
+ *   - CC3SingleTextureReflectAlphaTest.fsh
  *   - CC3BumpMapObjectSpace.fsh
  *   - CC3BumpMapObjectSpaceAlphaTest.fsh
  *   - CC3BumpMapTangentSpace.fsh
@@ -49,12 +58,10 @@
  * CC3GLProgramSemanticsByVarName instance.
  */
 
-// Increase these if more textures or lights are desired.
+// Increase these if more textures, lights, or bones per skin section are required.
 #define MAX_TEXTURES			2
 #define MAX_LIGHTS				4
-
-// Maximum bones per skin section (batch).
-#define MAX_BONES_PER_VERTEX	12
+#define MAX_BONES_PER_BATCH		12
 
 precision mediump float;
 
@@ -86,8 +93,8 @@ uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuati
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
 uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing each vertex. */
-uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_VERTEX];		/**< Array of bone matrices in the current mesh skin section in eye space. */
-uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_VERTEX];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
+uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];			/**< Array of bone matrices in the current mesh skin section in eye space. */
+uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 
 uniform bool u_cc3VertexHasNormal;				/**< Whether the vertex normal is available. */
 uniform bool u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
@@ -156,6 +163,7 @@ void vertexToEyeSpace() {
 		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
 	}
+
 	if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
 	if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
 }
@@ -282,7 +290,7 @@ void main() {
 	else
 		v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
 	
-	// Fragment texture coordinates.
+	// Fragment texture coordinates. Add more as needed.
 	v_texCoord[0] = a_cc3TexCoord0;
 	v_texCoord[1] = a_cc3TexCoord1;
 //	v_texCoord[2] = a_cc3TexCoord2;		// Uncomment if MAX_TEXTURES increased

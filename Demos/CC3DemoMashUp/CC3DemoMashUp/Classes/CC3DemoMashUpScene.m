@@ -464,7 +464,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addFloatingRing {
 	CC3MeshNode* floater = [CC3PlaneNode nodeWithName: kFloaterName];
-	[floater populateAsCenteredRectangleWithSize: CGSizeMake(250.0, 250.0)];
+	[floater populateAsCenteredRectangleWithSize: CGSizeMake(120.0, 120.0)];
 	floater.texture = [CC3Texture textureFromFile: kFloaterTextureFile];
 	floater.location = cc3v(400.0, 150.0, -250.0);
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
@@ -1430,10 +1430,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Material* mat;
 	GLfloat lbReflect = 1.0;	// Lower the reflectivity property towards zero to show some of the runner's suit.
 	CC3Texture* envMapTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
-	mat = [littleBrother getMeshNodeNamed: @"BodyLowPoly"].material;
+	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
 	[mat addTexture: envMapTex];
 	mat.reflectivity = lbReflect;
-	mat = [littleBrother getMeshNodeNamed: @"LegsLowPoly"].material;
+	mat = [littleBrother getMeshNodeNamed: @"Legs_LowPoly"].material;
 	[mat addTexture: envMapTex];
 	mat.reflectivity = lbReflect;
 	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;

@@ -167,15 +167,15 @@
 
 -(void) align2DStateCache {
 	ccGLBlendFunc(value_GL_BLEND_SRC, value_GL_BLEND_DST);
-	ccGLBindTexture2DN(0, 0);
+	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D);
+	
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
 	
 #if COCOS2D_VERSION < 0x020100
 	if (valueCap_GL_BLEND) ccGLEnable(CC_GL_BLEND);
 	else ccGLEnable(0);
 #endif
-
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
 }
 
 

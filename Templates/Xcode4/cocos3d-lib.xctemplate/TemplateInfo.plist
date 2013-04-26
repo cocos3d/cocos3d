@@ -2815,7 +2815,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3BumpMapObjectSpace.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</key>
+		<key>cocos3d/GLSL/CC3BumpMapObjectSpaceAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2823,17 +2823,7 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</string>
-		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</string>
+			<string>cocos3d/GLSL/CC3BumpMapObjectSpaceAlphaTest.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</key>
 		<dict>
@@ -2845,7 +2835,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</key>
+		<key>cocos3d/GLSL/CC3BumpMapTangentSpaceAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2853,17 +2843,7 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</string>
-		</dict>
-		<key>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</string>
+			<string>cocos3d/GLSL/CC3BumpMapTangentSpaceAlphaTest.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
 		<dict>
@@ -2875,16 +2855,6 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.vsh</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>GLSL</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/GLSL/CC3MultiTextureConfigurable.vsh</string>
-		</dict>
 		<key>cocos3d/GLSL/CC3NoTexture.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -2895,7 +2865,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3NoTexture.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3NoTexture.vsh</key>
+		<key>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2903,9 +2873,9 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3NoTexture.vsh</string>
+			<string>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3NoTextureWithAlphaTest.fsh</key>
+		<key>cocos3d/GLSL/CC3NoTextureReflect.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2913,7 +2883,17 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3NoTextureWithAlphaTest.fsh</string>
+			<string>cocos3d/GLSL/CC3NoTextureReflect.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3NoTextureReflectAlphaTest.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3NoTextureReflectAlphaTest.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3PointSprites.fsh</key>
 		<dict>
@@ -2935,7 +2915,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3PointSprites.vsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3PointSpritesWithAlphaTest.fsh</key>
+		<key>cocos3d/GLSL/CC3PointSpritesAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2943,7 +2923,7 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3PointSpritesWithAlphaTest.fsh</string>
+			<string>cocos3d/GLSL/CC3PointSpritesAlphaTest.fsh</string>
 		</dict>
 		<key>cocos3d/GLSL/CC3PureColor.fsh</key>
 		<dict>
@@ -2975,7 +2955,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3SingleTexture.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3SingleTexture.vsh</key>
+		<key>cocos3d/GLSL/CC3SingleTextureAlphaTest.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2983,9 +2963,9 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3SingleTexture.vsh</string>
+			<string>cocos3d/GLSL/CC3SingleTextureAlphaTest.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3SingleTextureWithAlphaTest.fsh</key>
+		<key>cocos3d/GLSL/CC3SingleTextureReflect.fsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2993,7 +2973,27 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3SingleTextureWithAlphaTest.fsh</string>
+			<string>cocos3d/GLSL/CC3SingleTextureReflect.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3TexturableMaterial.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3TexturableMaterial.vsh</string>
 		</dict>
 	</dict>
 	<key>Nodes</key>
@@ -3234,24 +3234,24 @@
 		<string>cocos3d/deprecated/CCNodeController.h</string>
 		<string>cocos3d/deprecated/ControllableCCLayer.h</string>
 		<string>cocos3d/GLSL/CC3BumpMapObjectSpace.fsh</string>
-		<string>cocos3d/GLSL/CC3BumpMapObjectSpace.vsh</string>
-		<string>cocos3d/GLSL/CC3BumpMapObjectSpaceWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapObjectSpaceAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</string>
-		<string>cocos3d/GLSL/CC3BumpMapTangentSpace.vsh</string>
-		<string>cocos3d/GLSL/CC3BumpMapTangentSpaceWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3BumpMapTangentSpaceAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
-		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.vsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>
-		<string>cocos3d/GLSL/CC3NoTexture.vsh</string>
-		<string>cocos3d/GLSL/CC3NoTextureWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3NoTextureReflect.fsh</string>
+		<string>cocos3d/GLSL/CC3NoTextureReflectAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3PointSprites.fsh</string>
 		<string>cocos3d/GLSL/CC3PointSprites.vsh</string>
-		<string>cocos3d/GLSL/CC3PointSpritesWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3PointSpritesAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3PureColor.fsh</string>
 		<string>cocos3d/GLSL/CC3PureColor.vsh</string>
 		<string>cocos3d/GLSL/CC3SingleTexture.fsh</string>
-		<string>cocos3d/GLSL/CC3SingleTexture.vsh</string>
-		<string>cocos3d/GLSL/CC3SingleTextureWithAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3SingleTextureAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3SingleTextureReflect.fsh</string>
+		<string>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3TexturableMaterial.vsh</string>
 	</array>
 </dict>
 </plist>
