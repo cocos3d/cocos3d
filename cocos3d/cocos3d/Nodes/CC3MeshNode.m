@@ -879,6 +879,7 @@
 	} else {
 		shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
 	}
+	LogTrace(@"Drawing %@ with %@", self, shaderProgram);
 	[visitor.gl bindProgram: shaderProgram  withVisitor: visitor];
 }
 #else

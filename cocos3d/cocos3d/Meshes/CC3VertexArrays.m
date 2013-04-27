@@ -1249,6 +1249,8 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	GLfloat nw = newRect.size.width;
 	GLfloat nh = newRect.size.height;
 	
+	GLfloat hx = 1.0f - _mapSize.height;	// Height translation due to texture inversion
+	
 	// For each texture coordinate, convert to the original coordinate, taking into consideration
 	// the mapSize and the old texture rectangle. Then, convert to the new coordinate, taking into
 	// consideration the mapSize and the new texture rectangle.
@@ -1263,8 +1265,8 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 			GLfloat origV = (1.0f - (ptc->v / mh) - oy) / oh;	// Revert to original value
 			ptc->v = (1.0f - (ny + (origV * nh))) * mh;			// Calc new value
 		} else {
-			GLfloat origV = ((ptc->v / mh) - oy) / oh;			// Revert to original value
-			ptc->v = (ny + (origV * nh)) * mh;					// Calc new value
+			GLfloat origV = (((ptc->v - hx) / mh) - oy) / oh;	// Revert to original value
+			ptc->v = (ny + (origV * nh)) * mh + hx;				// Calc new value
 		}
 	}
 }
@@ -1279,14 +1281,19 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	if (CGSizeEqualToSize(texMapSize, _mapSize)) return;
 	
 	LogTrace(@"%@ aligning and changing map size from %@ to %@ but not flipping vertically",
-				  self, NSStringFromCGSize(mapSize), NSStringFromCGSize(texMapSize));
+				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texMapSize));
 
+	// The scale factor
 	CGSize mapRatio = CGSizeMake(texMapSize.width / _mapSize.width, texMapSize.height / _mapSize.height);
+	
+	// The amount by which to translate the image vertically
+	GLfloat currVertXln = 1.0f - _mapSize.height;
+	GLfloat newVertXln = 1.0f - texMapSize.height;
 	
 	for (GLuint i = 0; i < _vertexCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u *= mapRatio.width;
-		ptc->v *= mapRatio.height;
+		ptc->v = (ptc->v - currVertXln) * mapRatio.height + newVertXln;
 	}
 	_mapSize = texMapSize;	// Remember what we've set the map size to
 
@@ -1297,7 +1304,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 			  @"%@ mapsize %@ cannot have zero dimension",
 			  self, NSStringFromCGSize(texMapSize));
 	LogTrace(@"%@ aligning and changing map size from %@ to %@ and flipping vertically",
-				  self, NSStringFromCGSize(mapSize), NSStringFromCGSize(texMapSize));
+				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texMapSize));
 	
 	CGSize mapRatio = CGSizeMake(texMapSize.width / _mapSize.width, texMapSize.height / _mapSize.height);
 	

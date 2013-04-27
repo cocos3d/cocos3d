@@ -125,14 +125,13 @@
 @property(nonatomic,readonly) BOOL hasPremultipliedAlpha;
 
 /**
- * Returns whether this texture is flipped vertically.
+ * Returns whether this texture is flipped upside-down.
  *
- * Under iOS and OSX, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate  system.
- * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
- *
- * This property will return NO if this texture was loaded from a PVR texture file,
- * and will return YES if loaded from any other texture file type.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
  * This is a convenience property that simply returns the value of the same property on the
  * underlying CC3GLTexture instance.

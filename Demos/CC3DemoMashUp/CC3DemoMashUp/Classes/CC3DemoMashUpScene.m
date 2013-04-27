@@ -461,6 +461,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * back faces of the plane that we see. When the front faces are facing the camera, the normals are
  * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
  * to understand the interaction between lighting, faces, and normals in any object.
+ *
+ * A border is drawn around the bounding box of the mesh to highlight the extent of the
+ * transparency in the texture.
  */
 -(void) addFloatingRing {
 	CC3MeshNode* floater = [CC3PlaneNode nodeWithName: kFloaterName];
@@ -469,6 +472,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	floater.location = cc3v(400.0, 150.0, -250.0);
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
 	floater.touchEnabled = YES;
+	floater.shouldDrawLocalContentWireframeBox = YES;
 	[self addChild: floater];
 
 	// Fade the floating ring in and out
@@ -479,7 +483,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Rotate the floating ring to see the effect on the orientation of the plane normals
 	[floater runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+																				  rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /** Utility method to copy a file from the resources directory to the Documents directory */

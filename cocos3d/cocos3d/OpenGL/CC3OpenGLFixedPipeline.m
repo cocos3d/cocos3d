@@ -183,6 +183,28 @@
 	}
 }
 
+// Mark position, color & first tex coords as unknown
+-(void) align3DVertexAttributeState {
+	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+		CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
+		switch (vaPtr->semantic) {
+			case kCC3SemanticVertexLocation:
+			case kCC3SemanticVertexColor:
+				vertexAttributes[vaIdx].isEnabledKnown = NO;
+				vertexAttributes[vaIdx].isKnown = NO;
+				break;
+			case kCC3SemanticVertexTexture:
+				if (vaIdx == 0) {		// First  texture unit only. Texture units come first in array.
+					vertexAttributes[vaIdx].isEnabledKnown = NO;
+					vertexAttributes[vaIdx].isKnown = NO;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
+
 
 #pragma mark State
 

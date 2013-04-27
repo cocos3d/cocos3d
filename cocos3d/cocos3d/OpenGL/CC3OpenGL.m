@@ -644,11 +644,11 @@
 	isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING = NO;
 	CC3SetBit(&isKnown_GL_TEXTURE_BINDING_2D, 0, NO);	// Unknown texture in tex unit zero
 
-	// Mark all vertex attributes as unknown state
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
-		vertexAttributes[vaIdx].isEnabledKnown = NO;
-		vertexAttributes[vaIdx].isKnown = NO;
-	}
+	[self align3DVertexAttributeState];
+}
+
+-(void) align3DVertexAttributeState {
+	CC3AssertUnimplemented(@"align3DVertexAttributeState");
 }
 
 

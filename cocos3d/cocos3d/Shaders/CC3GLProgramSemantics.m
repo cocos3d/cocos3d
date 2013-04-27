@@ -251,6 +251,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 -(CC3GLSLVariableScope) variableScopeForSemantic: (GLenum) semantic {
 	switch (semantic) {
 
+		// Draw scope semantics
+
 		case kCC3SemanticDrawCountCurrentFrame:
 		case kCC3SemanticRandomNumber:
 
@@ -264,6 +266,9 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 			return kCC3GLSLVariableScopeDraw;
 
+			
+		// Scene scope semantics
+			
 		case kCC3SemanticViewMatrix:
 		case kCC3SemanticViewMatrixInv:
 		case kCC3SemanticViewMatrixInvTran:
@@ -278,7 +283,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticCameraFrustum:
 		case kCC3SemanticViewport:
 
-		case kCC3SemanticIsUsingLighting:
 		case kCC3SemanticSceneLightColorAmbient:
 
 		case kCC3SemanticLightIsEnabled:
@@ -311,6 +315,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			
 			return kCC3GLSLVariableScopeScene;
 			
+			
+		// Node scope semantics
 		default:
 			return kCC3GLSLVariableScopeNode;
 	}
@@ -1203,7 +1209,6 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3MaterialMinimumDrawnAlpha" toSemantic: kCC3SemanticMinimumDrawnAlpha];	/**< (float) Minimum alpha value to be drawn, otherwise will be discarded. */
 	
 	// LIGHTING --------------
-	// With multiple lights, each elements is an array.
 	[self mapVarName: @"u_cc3LightIsUsingLighting" toSemantic: kCC3SemanticIsUsingLighting];					/**< (bool) Whether any lighting is enabled. */
 	[self mapVarName: @"u_cc3LightSceneAmbientLightColor" toSemantic: kCC3SemanticSceneLightColorAmbient];		/**< (vec4) Ambient light color of the scene. */
 	

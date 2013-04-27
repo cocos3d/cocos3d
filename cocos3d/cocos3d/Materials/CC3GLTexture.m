@@ -308,7 +308,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(void) flipTextureContentVertically: (CC3TextureContent*) texContent {
 	[texContent flipVertically];
-	_isFlippedVertically = !_isFlippedVertically;
+	_isFlippedVertically = NO;
 }
 
 #pragma mark Allocation and initialization
@@ -615,7 +615,7 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 	_isFlippedVertically = NO;						// PVR textures are not flipped
 	_hasPremultipliedAlpha = self.class.defaultHasPremultipliedAlpha;
 	
-	LogDebug(@"Binding PVR texture ID %u", _textureID);
+	LogTrace(@"Binding PVR texture ID %u", _textureID);
 	
 	if (_shouldGenerateMipmaps) [self generateMipmap];
 }

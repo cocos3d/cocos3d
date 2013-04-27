@@ -112,6 +112,22 @@
 	}
 }
 
+// Mark position, color & tex coords as unknown
+-(void) align3DVertexAttributeState {
+	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+		switch (vaIdx) {
+			case kCCVertexAttrib_Position:
+			case kCCVertexAttrib_Color:
+			case kCCVertexAttrib_TexCoords:
+				vertexAttributes[vaIdx].isEnabledKnown = NO;
+				vertexAttributes[vaIdx].isKnown = NO;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
 
 #pragma mark Matrices
 
