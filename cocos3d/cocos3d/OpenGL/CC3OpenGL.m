@@ -504,7 +504,7 @@
 
 -(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {}
 
--(void) disableTexturingFrom: (GLuint) tuIdx {}
+-(void) disableTexturingFrom: (GLuint) tuIdx { CC3AssertUnimplemented(@"disableTexturingFrom:"); }
 
 -(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
 	GLuint* stateArray;

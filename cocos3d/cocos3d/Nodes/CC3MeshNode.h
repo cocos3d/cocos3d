@@ -740,8 +740,8 @@
 @property(nonatomic, readonly) BOOL isDrawingPointSprites;
 
 /**
- * Returns whether the RGB components of each pixel of the encapsulated textures
- * have had the corresponding alpha component applied already.
+ * Returns whether the alpha channel has already been multiplied into each of the RGB
+ * color channels, in any of the textures used by this node.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.
  * 

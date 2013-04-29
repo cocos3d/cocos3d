@@ -106,7 +106,9 @@
 	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
 	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
 		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
 		[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 	}
 }
 

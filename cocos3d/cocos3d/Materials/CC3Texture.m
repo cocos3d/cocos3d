@@ -178,13 +178,14 @@
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_texture) {
 		[self bindGLWithVisitor: visitor];
+		[self bindTextureEnvironmentWithVisitor: visitor];
+		
 		visitor.currentTextureUnitIndex += 1;
 	}
 }
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_texture bindGLWithVisitor: visitor];
-	[self bindTextureEnvironmentWithVisitor: visitor];
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 

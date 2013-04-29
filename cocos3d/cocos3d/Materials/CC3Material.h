@@ -677,8 +677,8 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated textures
- * have had the corresponding alpha component applied already.
+ * Returns whether the alpha channel has already been multiplied into each of the RGB
+ * color channels, in any of the textures used by this material.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.
  * 

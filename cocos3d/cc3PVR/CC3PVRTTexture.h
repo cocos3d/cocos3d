@@ -1,5 +1,5 @@
 /*
- * CC3OpenGLES2.m
+ * CC3PVRTTexture.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -25,42 +25,22 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
- *
- * See header file CC3OpenGLES2.h for full API documentation.
  */
 
-#import "CC3OpenGLES2.h"
+/** @file */	// Doxygen marker
+
+
+/** PVRT C++ header, slightly adjusted for compatibility with Objective-C */
+
+#import	"PVRTResourceFile.h"
+#import "PVRTTexture.h"
+
+#if CC3_OGLES_1
+#import "PVRT 3.1/OGLES/PVRTTextureAPI.h"
+#endif
 
 #if CC3_OGLES_2
+#import "PVRT 3.1/OGLES2/PVRTTextureAPI.h"
+#endif
 
-@interface CC3OpenGL (TemplateMethods)
--(void) initPlatformLimits;
-@end
-
-@implementation CC3OpenGLES2
-
-
-#pragma mark Textures
-
--(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
-	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
-	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
-		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
-		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
-	}
-}
-
-
-#pragma mark Allocation and initialization
-
--(void) initPlatformLimits {
-	[super initPlatformLimits];
-
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
-}
-
-@end
-
-#endif	// CC3_OGLES_2
+#undef BOOL						// resolve conflict with PVRT C++ definition of BOOL

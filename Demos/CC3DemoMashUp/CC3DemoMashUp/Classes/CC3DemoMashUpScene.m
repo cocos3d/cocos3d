@@ -78,7 +78,7 @@
 #define kRunningManPODFile				@"man.pod"
 #define kMalletPODFile					@"mallet.pod"
 #define kPointParticleTextureFile		@"fire.png"
-#define kMeshPartileTextureFile			@"BallBoxTexture.png"
+#define kMeshParticleTextureFile		@"BallBoxTexture.png"
 #define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
@@ -659,7 +659,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// For kicks, we use a texture that contains two distinct images, one for a box and
 	// one for a ball, and set a texture rectangle on the node so it will use only one
 	// part of the texture to cover the box.
-	texCube.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	texCube.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	texCube.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 //	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];	// Alternately, use a full texture
 
@@ -772,6 +772,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	skyBox.texture = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
 	[skyBox applyEffectNamed: @"SkyBox" inPFXResourceFile: @"EnvMap.pfx"];
 	[self addChild: skyBox];
+
+	// PVR files can contain an entire cube-map in a single file (and all the mipmaps too).
+	// To try it out, if you have downloaded the PowerVr SDK, add the file found at
+	// "Examples/Advanced/Skybox2/OGLES2/Skybox.pvr" in the SDK to this project, and
+	// uncomment the following line. To get the full effect of that skybox, you might also
+	// want to comment out the invocation of the addGround method in the initializeScene method.
+	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
 }
 
 /**
@@ -1534,7 +1541,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Each HangingMeshParticle also assigns itself a smaller texture rectangle within the
 	// texture rectangle of this template mesh. This demonstrates that particles can nest
 	// an individual texture rectangle within the texture rectangle of the tempalte mesh.
-	templateModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	templateModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	templateModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 	
 	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
@@ -1710,14 +1717,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3BoxNode* boxModel = [CC3BoxNode node];
 	[boxModel populateAsSolidBox: CC3BoundingBoxMake(-kPartMeshDim, -kPartMeshDim, -kPartMeshDim,
 													  kPartMeshDim, kPartMeshDim, kPartMeshDim)];
-	boxModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	boxModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	boxModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);	// Bottom part of texture is box texture
 	CC3Mesh* boxMesh = boxModel.mesh;
 
 	// Sphere template mesh
 	CC3MeshNode* ballModel = [CC3MeshNode node];
 	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: CC3TessellationMake(8, 7)];
-	ballModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	ballModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
 	CC3Mesh* ballMesh = ballModel.mesh;
 	
@@ -1735,7 +1742,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.particleClass = [RotatingFadingMeshParticle class];
 	[emitter addParticleTemplateMesh: boxMesh];
 	[emitter addParticleTemplateMesh: ballMesh];
-	emitter.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	emitter.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
 	
 	// Set the emission characteristics

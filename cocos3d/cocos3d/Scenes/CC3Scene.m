@@ -393,18 +393,19 @@
 	[gl setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
 	
 	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
+	// Ensure texture unit zero is the active texture unit (in case binding doesn't need to activate tex unit zero).
 	[visitor.gl disableTexturingFrom: 1];
 	visitor.currentTextureUnitIndex = 0;
 	[gl enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
 	[gl bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
 	[CC3TextureUnit bindDefaultWithVisitor: visitor];
+	[gl activateTextureUnit: 0];
+	[gl activateClientTextureUnit: 0];
 
-	// Enable vertex attributes needed for 2D, disable all others,
-	// unbind GL buffers, and set client texture unit to zero,
+	// Enable vertex attributes needed for 2D, disable all others, unbind GL buffers.
 	[gl enable2DVertexAttributes];
 	[gl unbindBufferTarget: GL_ARRAY_BUFFER];
 	[gl unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
-	[gl activateClientTextureUnit: 0];
 	
 	// Ensure GL_MODELVIEW matrix is active
 	[gl activateMatrixStack: GL_MODELVIEW];

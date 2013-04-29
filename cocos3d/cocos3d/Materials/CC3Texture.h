@@ -113,11 +113,8 @@
 @property(nonatomic, retain) CC3TextureUnit* textureUnit;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated texture
- * have had the corresponding alpha component applied already.
- *
- * Returns YES if this instance contains a CC3GLTexture instance, and that texture
- * instance indicates that it contains pre-mulitiplied alpha.
+ * Returns whether the alpha channel of this texture has already been multiplied
+ * into each of the RGB color channels.
  *
  * This is a convenience property that simply returns the value of the same property on the
  * underlying CC3GLTexture instance.

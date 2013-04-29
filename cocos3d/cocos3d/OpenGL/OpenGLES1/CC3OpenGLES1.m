@@ -136,6 +136,12 @@
 	}
 }
 
+-(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
+	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
+		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+}
+
 
 #pragma mark Matrices
 

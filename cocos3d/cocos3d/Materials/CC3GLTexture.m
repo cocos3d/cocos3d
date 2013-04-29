@@ -1,5 +1,5 @@
 /*
- * CC3Texture.m
+ * CC3GLTexture.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -30,6 +30,7 @@
  */
 
 #import "CC3GLTexture.h"
+#import "CC3PVRGLTexture.h"
 
 
 #pragma mark -
@@ -70,7 +71,7 @@
 
 #pragma mark Binding content
 
--(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+-(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 
 	_size = CC3IntSizeMake((GLint)texContent.pixelsWide, (GLint)texContent.pixelsHigh);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
@@ -274,7 +275,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 #pragma mark Texture file loading
 
--(BOOL) loadFromFile: (NSString*) aFilePath toTarget: (GLenum) target {
+-(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) aFilePath {
 	
 	if (!_name) self.name = aFilePath.lastPathComponent;
 	
@@ -298,7 +299,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
-	return [self loadFromFile: aFilePath toTarget: self.textureTarget];
+	return [self loadTarget: self.textureTarget fromFile: aFilePath];
 }
 
 -(Class) textureContentClass {
@@ -306,7 +307,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return nil;
 }
 
--(void) flipTextureContentVertically: (CC3TextureContent*) texContent {
+-(void) flipTextureContentVertically: (CC3Texture2DContent*) texContent {
 	[texContent flipVertically];
 	_isFlippedVertically = NO;
 }
@@ -413,13 +414,13 @@ static NSMutableDictionary* _texturesByName = nil;
 
 -(GLenum) textureTarget { return GL_TEXTURE_2D; }
 
--(Class) textureContentClass { return CC3TextureContent.class; }
+-(Class) textureContentClass { return CC3Texture2DContent.class; }
 
--(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+-(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
 	[self ensureGLTexture];
 	[super bindTextureContent: texContent toTarget: target];
-	if (_shouldGenerateMipmaps) [self generateMipmap];
+	if (self.class.shouldGenerateMipmaps) [self generateMipmap];
 }
 
 
@@ -458,9 +459,9 @@ static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
 
 -(GLenum) textureTarget { return GL_TEXTURE_CUBE_MAP; }
 
--(Class) textureContentClass { return CC3TextureContent.class; }
+-(Class) textureContentClass { return CC3Texture2DContent.class; }
 
--(void) bindTextureContent: (CC3TextureContent*) texContent toTarget: (GLenum) target {
+-(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
 	[self ensureGLTexture];
 	[super bindTextureContent: texContent toTarget: target];
@@ -481,8 +482,8 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	return NO;
 }
 
--(BOOL) loadFromFile: (NSString*) aFilePath toCubeFace: (GLenum) faceTarget {
-	return [self loadFromFile: aFilePath toTarget: faceTarget];
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath {
+	return [self loadTarget: faceTarget fromFile: aFilePath];
 }
 
 -(BOOL) loadFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -490,14 +491,14 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 					 posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
 	BOOL success = YES;
 
-	success &= [self loadFromFile: posXFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
-	success &= [self loadFromFile: negXFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
-	success &= [self loadFromFile: posYFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
-	success &= [self loadFromFile: negYFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
-	success &= [self loadFromFile: posZFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
-	success &= [self loadFromFile: negZFilePath toCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_X fromFile: posXFilePath];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_X fromFile: negXFilePath];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Y fromFile: posYFilePath];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y fromFile: negYFilePath];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_POSITIVE_Z fromFile: posZFilePath];
+	success &= [self loadCubeFace: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z fromFile: negZFilePath];
 
-	if (success && _shouldGenerateMipmaps) [self generateMipmap];
+	if (success && self.class.shouldGenerateMipmaps) [self generateMipmap];
 	return success;
 }
 
@@ -593,47 +594,7 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 
 #pragma mark -
-#pragma mark CC3PVRGLTexture
-
-@implementation CC3PVRGLTexture
-
--(BOOL) isTexture2D { return YES; }
-
--(GLenum) textureTarget { return GL_TEXTURE_2D; }
-
--(Class) textureContentClass { return CC3PVRTextureContent.class; }
-
--(void) bindTextureContent: (CC3PVRTextureContent*) texContent toTarget: (GLenum) target {
-	if (!texContent) return;
-	
-	[self deleteGLTexture];		// Delete any existing texture in the GL engine
-	
-	_textureID = texContent.name;
-	_size = CC3IntSizeMake(texContent.width, texContent.height);
-	_coverage = CGSizeMake(1.0, 1.0);				// Always POT
-	_hasMipmap = (texContent.numberOfMipmaps > 1);
-	_isFlippedVertically = NO;						// PVR textures are not flipped
-	_hasPremultipliedAlpha = self.class.defaultHasPremultipliedAlpha;
-	
-	LogTrace(@"Binding PVR texture ID %u", _textureID);
-	
-	if (_shouldGenerateMipmaps) [self generateMipmap];
-}
-
-// By default PVR images are treated as if they don't have the alpha channel premultiplied
-static BOOL _defaultHasPremultipliedAlpha = NO;
-
-+(BOOL) defaultHasPremultipliedAlpha { return _defaultHasPremultipliedAlpha; }
-
-+(void) setDefaultHasPremultipliedAlpha: (BOOL) hasAlphaPremultiplied {
-	_defaultHasPremultipliedAlpha = hasAlphaPremultiplied;
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3TextureContent
+#pragma mark CC3Texture2DContent
 
 #if COCOS2D_VERSION < 0x020100
 #	define CC2_TEX_SIZE size_
@@ -653,7 +614,7 @@ static BOOL _defaultHasPremultipliedAlpha = NO;
 #	define CC2_TEX_HAS_PREMULT_ALPHA _hasPremultipliedAlpha
 #endif
 
-@implementation CC3TextureContent
+@implementation CC3Texture2DContent
 
 @synthesize imageData=_imageData;
 
@@ -732,7 +693,7 @@ static BOOL _defaultHasPremultipliedAlpha = NO;
 		CC2_TEX_FORMAT = pixelFormat;
 		CC2_TEX_MAXS = size.width / (float)width;
 		CC2_TEX_MAXT = size.height / (float)height;
-		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;		// will be set by invoking method after
 	}
 	return self;
 }
@@ -770,40 +731,6 @@ static BOOL _defaultHasPremultipliedAlpha = NO;
 
 #endif	// CC_OSX
 
-}
-
-+(id) textureFromFile: (NSString*) aFilePath {
-	return [[[self alloc] initFromFile: aFilePath] autorelease];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3PVRTextureContent
-
-@implementation CC3PVRTextureContent
-
--(NSUInteger) numberOfMipmaps {
-#if CC3_CC2_1
-	return numberOfMipmaps_;
-#else
-	return super.numberOfMipmaps;
-#endif
-}
-
-#pragma mark Allocation and Initialization
-
-/** Init from superclass loading method, and allow the texture ID to be managed externally. */
--(id) initFromFile: (NSString*) aFilePath {
-	if ( (self = [self initWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)]) ) {
-		self.retainName = YES;
-	}
-	return self;
-}
-
-+(id) textureFromFile: (NSString*) aFilePath {
-	return [[[self alloc] initFromFile: aFilePath] autorelease];
 }
 
 @end
