@@ -639,7 +639,7 @@ typedef enum {
  * can be tracked by the node for the purpose of updating the lighting of a contained
  * bump-map texture, instead of rotating to face the light, as normally occurs with tracking.
  * 
- * This property indicates whether the node should update its globalLightLocation
+ * This property indicates whether the node should update its globalLightPosition
  * from the tracked location of the light, instead of rotating to face the light.
  *
  * The initial property is set to NO.

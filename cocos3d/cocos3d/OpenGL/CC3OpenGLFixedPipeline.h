@@ -40,6 +40,9 @@
 /** CC3OpenGLFixedPipeline manages the OpenGLES 1.1 state for a single GL context. */
 @interface CC3OpenGLFixedPipeline : CC3OpenGL {
 @public
+	
+	GLuint value_NumNonTexVertexAttribs;
+
 	GLbitfield value_GL_CLIP_PLANE;					// Track up to 32 clip planes
 	GLbitfield isKnownCap_GL_CLIP_PLANE;			// Track up to 32 clip planes
 

@@ -42,15 +42,17 @@
 #define UIEvent						NSObject
 #define UIGestureRecognizer			NSObject
 
-#define NSStringFromCGPoint			NSStringFromPoint
-#define NSStringFromCGSize			NSStringFromSize
-#define NSStringFromCGRect			NSStringFromRect
-
 #define NSTextAlignmentLeft			NSLeftTextAlignment
 #define NSTextAlignmentCenter		NSCenterTextAlignment
 #define NSTextAlignmentRight		NSRightTextAlignment
 #define NSTextAlignmentJustified	NSJustifiedTextAlignment
 #define NSTextAlignmentNatural		NSNaturalTextAlignment
+
+static inline NSString* NSStringFromCGPoint(CGPoint pt) { return NSStringFromPoint(*(NSPoint*)&pt); }
+
+static inline NSString* NSStringFromCGSize(CGSize sz) { return NSStringFromSize(*(NSSize*)&sz); }
+
+static inline NSString* NSStringFromCGRect(CGRect rect) { return NSStringFromRect(*(NSRect*)&rect); }
 
 typedef enum {
     UIDeviceOrientationUnknown,

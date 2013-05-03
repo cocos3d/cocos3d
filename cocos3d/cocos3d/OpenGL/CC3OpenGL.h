@@ -32,7 +32,7 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3NodeDrawingVisitor, CC3Mesh, CC3GLProgram, CC3GLSLAttribute;
+@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode, CC3GLProgram, CC3GLSLAttribute;
 
 /** Indicates that vertex attribute array is not available. */
 #define kCC3VertexAttributeIndexUnavailable		-1
@@ -81,6 +81,7 @@ typedef struct {
 	NSString* value_GL_VERSION;
 	
 	CC3VertexAttr* vertexAttributes;
+	GLuint value_MaxVertexAttribsUsed;
 	
 	GLuint* value_GL_TEXTURE_BINDING_2D;
 	GLbitfield isKnown_GL_TEXTURE_BINDING_2D;		// Track up to 32 texture units
@@ -128,6 +129,7 @@ typedef struct {
 	GLuint value_GL_ELEMENT_ARRAY_BUFFER_BINDING;
 	
 	GLuint value_GL_ACTIVE_TEXTURE;
+	GLuint value_MaxTextureUnitsUsed;
 
 	BOOL valueCap_GL_BLEND : 1;
 	BOOL valueCap_GL_CULL_FACE : 1;
@@ -685,12 +687,6 @@ typedef struct {
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx;
 
 /**
- * Enable/disable texture coordinates for the specified texture unit index, which must be a
- * value between zero and the maximum number of texture units supported by the platform.
- */
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx;
-
-/**
  * Enable/disable point sprite texture coordinate replacement for the specified texture unit index,
  * which must be a value between zero and the maximum number of texture units supported by the platform.
  */
@@ -791,6 +787,12 @@ typedef struct {
 
 
 #pragma mark Shaders
+
+/** Selects and returns the shader program suitable for drawing the specified mesh node. */
+-(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode;
+
+/** Binds the GL program associated with the mesh node being drawn by the specified visitor. */
+-(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Binds the specified GLSL program. */
 -(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor;

@@ -77,6 +77,13 @@ cocos3d 2.0.0 - 2013/05/31
 - Improvements to texture loading
 	- Added support for cube-mapped textures when using GLSL in OpenGL ES 2.0 on iOS and OpenGL on OSX.
 		- CC3DemoMashUp now includes a rotating teapot that reflects the surrounding environment.
+	- All textures are now loaded right-way up.
+		- [API change] All CC3Mesh populateAs... parametric population methods now create texture coordinates assuming the texture will be right-side up.
+			- if you have a mesh that was created programmatically assuming upside-down textures, set the expectsVerticallyFlippedTextures property to YES prior to assigning the texture to it.
+		- [API change] CC3VertexTextureCoordinates expectsVerticallyFlippedTextures property now defaults to NO.
+		- [API change] CC3NodesResource expectsVerticallyFlippedTextures property now defaults to NO.
+			- if you have a POD model that expects the texture to be upside down, use the CC3PODResourceNode nodeFromFile:expectsVerticallyFlippedTextures: method, passing YES to indicate that the mesh expects the texture to be upside-down.
+				- see the addMascots method in CC3DemoMashUpScene for an example of this use.
 	- Added CC3GLTexture class cluster to represent loaded textures:
 		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
 		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
@@ -106,8 +113,8 @@ cocos3d 2.0.0 - 2013/05/31
     - [API change] Renamed CC3VertexArray shouldReleaseRedundantData property to shouldReleaseRedundantContent and deprecated original.
 
 - [API change] Added CC3Node globalHomogeneousPosition property and deprecated CC3Light homogeneousLocation property.
-- [API change] Added CC3Node globalLightPosition property and deprecated globalLightPosition property.
-	- Fixed issue where the globalLightLocation property did not accurately track positional lights for object-space bump mapping.
+- [API change] Added CC3Node globalLightPosition property and deprecated globalLightLocation property.
+	- Fixed issue where the globalLightPosition property did not accurately track positional lights for object-space bump mapping.
 	
 - CC3PODResource now releases unneeded internal POD file structures after loading and building, to conserve memory.
 - Added CC3Resource saveToFile: method to allow resource types that support it to save content back to a file:

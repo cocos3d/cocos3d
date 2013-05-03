@@ -32,7 +32,6 @@
 
 #import "CC3Identifiable.h"
 #import "CC3NodeVisitor.h"
-#import "CCTexturePVR.h"
 
 
 #pragma mark -
@@ -84,6 +83,7 @@
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
 	BOOL _isFlippedVertically : 1;
+	BOOL _shouldFlipVerticallyOnLoad : 1;		// Used by some subclasses
 	BOOL _hasPremultipliedAlpha : 1;
 }
 
@@ -123,8 +123,8 @@
 @property(nonatomic, readonly) CGSize coverage;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated texture
- * have had the corresponding alpha component applied already.
+ * Indicates whether the alpha channel of this texture has already been multiplied
+ * into each of the RGB color channels.
  *
  * The value of this property is determined from the contents of the texture file,
  * but you can set this property directly to override the value determined from the file.
@@ -132,17 +132,16 @@
 @property(nonatomic, assign) BOOL hasPremultipliedAlpha;
 
 /**
- * Returns whether this texture is flipped vertically.
+ * Indicates whether this texture is flipped upside-down.
  *
- * Under iOS and OSX, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate  system.
- * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
- * This property will return NO if this texture was loaded from a PVR texture file,
- * and will return YES if loaded from any other texture file type.
- *
- * The value of this property is determined from the contents of the texture file,
- * but you can set this property directly to override the value determined from the file.
+ * The value of this property is determined from the contents of the texture file, but
+ * you can set this property directly to override the value determined from the file.
  */
 @property(nonatomic, assign) BOOL isFlippedVertically;
 
@@ -487,6 +486,43 @@
  * This class is used for all 2D texture types except PVR.
  */
 @interface CC3GLTexture2D : CC3GLTexture
+
+/**
+ * Indicates whether this instance will flip texture vertically during loading.
+ *
+ * Under iOS and OSX, most textures are loaded into memory upside-down because of the difference
+ * in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
+ *
+ * If this property is set to YES during loading, the texture will be flipped in memory so
+ * that is is oriented the right way up.
+ *
+ * It is possible to compensate for an upside-down using texture coordinates. You can set
+ * this property to NO prior to loading in order to leave the texture upside-down and use
+ * texture coordinates to compensate.
+ *
+ * The initial value of this property is set to the value of the class-side
+ * defaultShouldFlipVerticallyOnLoad property.
+ */
+@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
+
 @end
 
 
@@ -528,7 +564,7 @@
  * This method does not automatically generate a mipmap. If you want a mipmap, you should
  * invoke the generateMipmap method once all six faces have been loaded.
  */
--(BOOL) loadFromFile: (NSString*) aFilePath toCubeFace: (GLenum) faceTarget;
+-(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath;
 
 /**
  * Loads the six cube face textures at the specified file paths, and returns whether all
@@ -742,43 +778,14 @@
 
 
 #pragma mark -
-#pragma mark CC3PVRGLTexture
-
-/** 
- * The representation of a PVR texture that has been loaded into the GL engine.
- *
- * This class is used for all 2D and cube-map textures loaded from a PVR file type.
- */
-@interface CC3PVRGLTexture : CC3GLTexture
-
-/**
- * Indicates whether PVR files have premultiplied by default. This property is used to set
- * the initial value of the hasPremultipliedAlpha property.
- *
- * The initial value of this property is NO.
- */
-+(BOOL) defaultHasPremultipliedAlpha;
-
-/**
- * Indicates whether PVR files have premultiplied by default. This property is used to set
- * the initial value of the hasPremultipliedAlpha property.
- *
- * The initial value of this property is NO.
- */
-+(void) setDefaultHasPremultipliedAlpha: (BOOL) hasAlphaPremultiplied;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3TextureContent
+#pragma mark CC3Texture2DContent
 
 /**
  * A helper class used by the CC3GLTexture class cluster during the loading of a 2D texture.
  *
  * PVR texture files cannot be loaded using this class.
  */
-@interface CC3TextureContent : CCTexture2D {
+@interface CC3Texture2DContent : CCTexture2D {
 	const GLvoid* _imageData;
 }
 
@@ -804,56 +811,5 @@
  * Returns nil if the file could not be loaded.
  */
 -(id) initFromFile: (NSString*) aFilePath;
-
-/**
- * Allocates and initializes an autoreleased instance loaded from the specified file.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Returns nil if the file could not be loaded.
- */
-+(id) textureFromFile: (NSString*) aFilePath;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3PVRTextureContent
-
-/**
- * A helper class used by the CC3GLTexture class cluster during the loading of a
- * texture from a PVR file.
- */
-@interface CC3PVRTextureContent : CCTexturePVR
-
-/** Returns the number of mipmaps, including the full image, in the texture. */
-@property (nonatomic, readonly) NSUInteger numberOfMipmaps;
-
-
-#pragma mark Allocation and Initialization
-
-/**
- * Initializes this instance by loaded content from the specified PVR file.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Returns nil if the file could not be loaded.
- */
--(id) initFromFile: (NSString*) aFilePath;
-
-/**
- * Allocates and initializes an autoreleased instance loaded from the specified PVR file.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Returns nil if the file could not be loaded.
- */
-+(id) textureFromFile: (NSString*) aFilePath;
 
 @end

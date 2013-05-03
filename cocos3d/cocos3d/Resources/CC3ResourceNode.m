@@ -71,6 +71,11 @@
 	self.resource = [self.resourceClass resourceFromFile: aFilepath];
 }
 
+-(void) loadFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
+	self.resource = [self.resourceClass resourceFromFile: aFilepath
+						expectsVerticallyFlippedTextures: flipped];
+}
+
 -(id) initFromFile: (NSString*) aFilepath {
 	if ( (self = [super init]) ) {
 		[self loadFromFile: aFilepath];
@@ -80,6 +85,17 @@
 
 +(id) nodeFromFile: (NSString*) aFilepath {
 	return [[[self alloc] initFromFile: aFilepath] autorelease];
+}
+
+-(id) initFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
+	if ( (self = [super init]) ) {
+		[self loadFromFile: aFilepath expectsVerticallyFlippedTextures: flipped];
+	}
+	return self;
+}
+
++(id) nodeFromFile: (NSString*) aFilepath expectsVerticallyFlippedTextures: (BOOL) flipped {
+	return [[[self alloc] initFromFile: aFilepath expectsVerticallyFlippedTextures: flipped] autorelease];
 }
 
 -(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilepath {

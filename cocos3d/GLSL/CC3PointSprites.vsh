@@ -32,7 +32,7 @@
  *
  * This vertex shader can be paired with the following fragment shaders:
  *   - CC3PointSprites.fsh
- *   - CC3PointSpritesWithAlphaTest.fsh
+ *   - CC3PointSpritesAlphaTest.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
@@ -110,6 +110,8 @@ vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or 
 void vertexToEyeSpace() {
 	vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 	vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+	if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+	if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
 }
 
 /** 
@@ -212,21 +214,17 @@ void main() {
 	matColorAmbient = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialAmbientColor;
 	matColorDiffuse = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialDiffuseColor;
 
-	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively,
-	// and use these to set the varying distance to the vertex in eye space.
+	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
 	vertexToEyeSpace();
+	
+	// Distance from vertex to eye. Used for fog effect.
 	v_distEye = length(vtxPosEye.xyz);
 	
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
-	if (u_cc3LightIsUsingLighting && u_cc3VertexHasNormal) {
-		// Transform vertex normal using inverse-transpose of modelview and renormalize if needed.
-		if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
-		if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
-
+	if (u_cc3LightIsUsingLighting)
 		v_color = illuminate();
-	} else {
+	else
 		v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
-	}
 	
 	gl_Position = u_cc3MatrixProj * vtxPosEye;
 	

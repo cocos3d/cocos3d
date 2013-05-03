@@ -90,7 +90,7 @@
 				glEnable(target);
 			else
 				glDisable(target);
-			LogGLErrorTrace(@"gl%@sable(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
+			LogGLErrorTrace(@"gl%@able(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
 		}
 		return;
 	}
@@ -103,10 +103,12 @@
 }
 
 -(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
-	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
+	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
 	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
 		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
 		[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 	}
 }
 
@@ -127,6 +129,12 @@
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+
+	// Ensure texture units not larger than the fixed pipeline texture units,
+	// regardless of whether fixed or programmable pipeline is in effect.
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 	
 	glGetIntegerv(GL_MAX_SAMPLES, &value_GL_MAX_SAMPLES);
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES), value_GL_MAX_SAMPLES);

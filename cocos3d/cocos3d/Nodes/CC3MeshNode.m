@@ -799,7 +799,7 @@
 	gl.shadeModel = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
 
 	// If per-vertex coloring is being used, attach it to the material
-	[gl enableColorMaterial: (mesh ? mesh.hasVertexColors : NO)];
+	[gl enableColorMaterial: (visitor.shouldDecorateNode && mesh && mesh.hasVertexColors)];
 }
 
 /**
@@ -856,34 +856,17 @@
 	visitor.gl.color = visitor.currentColor;
 }
 
-#if CC3_GLSL
-/** 
- * If this node has a material and should be decorated, ensure that the material has a shader
- * program and bind it. If the material does not have a shader program yet, select an appropriate
- * program using the program matcher and assign it to the material.
- *
- * If this node does not have a material or should not be decorated, select a basic shader program
- * using the program matcher and bind it. Typically this will be a simple solid-color shader.
- *
- * After binding the shader program, populate the program uniform variables that have node scope.
- */
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3GLProgram* shaderProgram;
-	if (material && visitor.shouldDecorateNode) {
-		shaderProgram = material.shaderProgram;
-		if (!shaderProgram) {
-			shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
-			material.shaderProgram = shaderProgram;
-			LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, self);
-		}
-	} else {
-		shaderProgram = [CC3GLProgram.programMatcher programForVisitor: visitor];
-	}
-	[visitor.gl bindProgram: shaderProgram  withVisitor: visitor];
+	[visitor.gl bindProgramWithVisitor: visitor];
 }
-#else
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
-#endif	// CC3_GLSL
+
+-(void) selectShaderProgram { [CC3OpenGL.sharedGL selectProgramForMeshNode: self]; }
+
+-(void) selectShaderPrograms {
+	[self selectShaderProgram];
+	[super selectShaderPrograms];
+}
+
 
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [mesh drawWithVisitor: visitor]; }

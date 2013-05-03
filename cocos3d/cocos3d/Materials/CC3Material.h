@@ -677,8 +677,8 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated textures
- * have had the corresponding alpha component applied already.
+ * Returns whether the alpha channel has already been multiplied into each of the RGB
+ * color channels, in any of the textures used by this material.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.
  * 
@@ -709,6 +709,15 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
  */
 @property(nonatomic, readonly) BOOL hasBumpMap;
 
+/** 
+ * Returns whether this material contains a texture that is a six-sided cube-map texture.
+ *
+ * Returns YES only if one of the textures that was added to this material (either through the
+ * texture property or the addTexture: method) returns YES from its isTextureCube property.
+ * Otherwise, this property returns NO.
+ */
+@property(nonatomic, readonly) BOOL hasTextureCube;
+
 /**
  * The direction, in local tangent coordinates, of the light source that is to
  * interact with any texture contained in this material that has been configured
@@ -727,7 +736,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
  *
  * The value of this property must be in the tangent-space coordinates associated
  * with the texture UV space, in practice, this property is typically not set
- * directly. Instead, you can use the globalLightLocation property of the mesh
+ * directly. Instead, you can use the globalLightPosition property of the mesh
  * node that is making use of this texture.
  */
 @property(nonatomic, assign) CC3Vector lightDirection;

@@ -78,7 +78,7 @@
 #define kRunningManPODFile				@"man.pod"
 #define kMalletPODFile					@"mallet.pod"
 #define kPointParticleTextureFile		@"fire.png"
-#define kMeshPartileTextureFile			@"BallBoxTexture.png"
+#define kMeshParticleTextureFile		@"BallBoxTexture.png"
 #define kReflectiveMaskPODFile			@"ReflectiveMask.pod"
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
@@ -310,18 +310,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
 	
-	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex data in main memory because it is now
-	// redundant. However, because we can add shadow volumes dynamically to any node,
-	// we need to keep the vertex location, index and skinning data of all meshes
-	// around to build shadow volumes. If we had added the shadow volumes before here,
-	// we wouldn't have to retain this data.
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
+	// to save memory, release the vertex data in main memory because it is now redundant.
+	// However, because we can add shadow volumes dynamically to any node, we need to keep the
+	// vertex location, index and skinning data of all meshes around to build shadow volumes.
+	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
 	[self retainVertexLocations];
 	[self retainVertexIndices];
 	[self retainVertexWeights];
 	[self retainVertexMatrixIndices];
 	[self createGLBuffers];
 	[self releaseRedundantContent];
+
+	// Select an appropriate shader program for each mesh node in this scene now. If this step
+	// is omitted, a shader program will be selected for each mesh node the first time that mesh
+	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
+	// as each shader program is loaded as needed the first time it is needed during drawing.
+	[self selectShaderPrograms];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
 	// during debugging, or to display the bounding volumes, used for collision detection and
@@ -461,14 +466,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * back faces of the plane that we see. When the front faces are facing the camera, the normals are
  * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
  * to understand the interaction between lighting, faces, and normals in any object.
+ *
+ * A border is drawn around the bounding box of the mesh to highlight the extent of the
+ * transparency in the texture.
  */
 -(void) addFloatingRing {
 	CC3MeshNode* floater = [CC3PlaneNode nodeWithName: kFloaterName];
-	[floater populateAsCenteredRectangleWithSize: CGSizeMake(250.0, 250.0)];
+	[floater populateAsCenteredRectangleWithSize: CGSizeMake(120.0, 120.0)];
 	floater.texture = [CC3Texture textureFromFile: kFloaterTextureFile];
 	floater.location = cc3v(400.0, 150.0, -250.0);
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
 	floater.touchEnabled = YES;
+	floater.shouldDrawLocalContentWireframeBox = YES;
 	[self addChild: floater];
 
 	// Fade the floating ring in and out
@@ -479,7 +488,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Rotate the floating ring to see the effect on the orientation of the plane normals
 	[floater runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+																				  rotateBy: cc3v(0.0, 30.0, 0.0)]]];
 }
 
 /** Utility method to copy a file from the resources directory to the Documents directory */
@@ -616,7 +625,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) addDieCube {
 
 	// Fetch the die cube model from the POD file.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	CC3Node* podDieCube = [podRezNode getNodeNamed: kDieCubePODName];
 	
 	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
@@ -655,7 +664,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// For kicks, we use a texture that contains two distinct images, one for a box and
 	// one for a ball, and set a texture rectangle on the node so it will use only one
 	// part of the texture to cover the box.
-	texCube.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	texCube.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	texCube.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 //	texCube.texture = [CC3Texture textureFromFile: kCubeTextureFile];	// Alternately, use a full texture
 
@@ -690,13 +699,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * of the scene from one of the six scene axes. As a convenience, the six textures are loaded
  * using a file-name pattern.
  *
+ * The default program matcher assigns the GLSL shaders CC3SingleTextureReflect.vsh and
+ * CC3SingleTextureReflect.fsh to the reflective teapot.
+ *
  * In this example, the six cube-map textures include markers to illustrate which texture is which.
  *
  * The reflectivity property of the material covering the mesh node can be used to control how
  * reflective the surface is.
  *
  * Cube maps can also be used to draw skyboxes. To see the environment that is being reflected
- * into the teapot, uncommend the addSkyBox invocation in the initializeScene method.
+ * into the teapot, uncomment the addSkyBox invocation in the initializeScene method.
  *
  * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
  * A representation of how the six textures appear related to each other after being loaded into
@@ -713,8 +725,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// textureCubeMapFromFilePattern: method for more info.
 	[teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
 	[teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	[teapotTextured applyEffectNamed: @"CubeReflection" inPFXResourceFile: @"EnvMap.pfx"];
-	teapotTextured.material.reflectivity = 0.6;		// Adjust up and down between zero and one.
+	teapotTextured.material.reflectivity = 0.7;		// Adjust up and down between zero and one.
 
 	// Add a second rainbow-colored teapot as a satellite of the textured teapot.
 	teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
@@ -766,6 +777,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	skyBox.texture = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
 	[skyBox applyEffectNamed: @"SkyBox" inPFXResourceFile: @"EnvMap.pfx"];
 	[self addChild: skyBox];
+
+	// PVR files can contain an entire cube-map in a single file (and all the mipmaps too).
+	// To try it out, if you have downloaded the PowerVr SDK, add the file found at
+	// "Examples/Advanced/Skybox2/OGLES2/Skybox.pvr" in the SDK to this project, and
+	// uncomment the following line. To get the full effect of that skybox, you might also
+	// want to comment out the invocation of the addGround method in the initializeScene method.
+	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
 }
 
 /**
@@ -798,7 +816,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// but because the original PVR demo app ignores some data in the POD file. To replicate
 	// the PVR demo faithfully, we must do the same, by tweaking the loader to act accordingly
 	// by creating a specialized subclass.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODRobotRezNodeName];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODRobotRezNodeName];
 	podRezNode.resource = [IntroducingPODResource resourceFromFile: kRobotPODFile];
 	
 	// If you want to stop the robot arm from being animated, uncomment the following line.
@@ -1071,9 +1089,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * down, and as you move the camera around, which causes the head to rotate to follow you.
  */
 -(void) addFloatingHead {
-	CC3PODResourceNode* podRezNode = [CC3ResourceNode nodeWithName: kPODHeadRezNodeName];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kHeadPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeWithName: kPODHeadRezNodeName
+														  fromFile: kHeadPODFile];
 
 	// Extract the floating head mesh node and set it to be touch enabled
 	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
@@ -1141,7 +1158,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addMascots {
 
 	// Create the mascots. Load the first from file, then copy to create the second.
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
+	// The texture coordinates of the mascot POD file expect the texture to be loaded
+	// upside down. By telling the resource this, it will compensate during loading.
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
+								  expectsVerticallyFlippedTextures: YES];
 	mascot = [podRezNode getMeshNodeNamed: kMascotName];
 	CC3MeshNode* distractedMascot = [[mascot copyWithName: kDistractedMascotName] autorelease];
 	
@@ -1314,7 +1334,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// This is not actually necessary, but demonstrates that the resources loaded from
 	// a POD file, including the resource node, are just nodes that can be manipulated
 	// like any other node assembly.
-	CC3PODResourceNode* malletAndAnvils = [CC3PODResourceNode nodeFromFile: kMalletPODFile];
+	CC3ResourceNode* malletAndAnvils = [CC3PODResourceNode nodeFromFile: kMalletPODFile];
 	[[malletAndAnvils getNodeNamed: @"Camera01"] remove];
 	[[malletAndAnvils getNodeNamed: @"Camera01Target"] remove];
 
@@ -1354,9 +1374,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds two running men to the scene. The men runs endless laps around the scene.
- * The men's meshes employ vertex skinning and an animated bone skeleton to
- * simulate smooth motion and realistic joint flexibility.
+ * Adds two running men to the scene. The men runs endless laps around the scene. The men's meshes
+ * employ vertex skinning and an animated bone skeleton to simulate smooth motion and realistic
+ * joint flexibility. Under a programmable rendering pipeline, the smaller man also sports a
+ * reflective skin that reflects the environment, using a cube-map texture. 
+ *
+ * For a more complete explanation of cube-mapping, see the notes for the addTeapotAndSatellite method.
  */
 -(void) addSkinnedRunners {
 
@@ -1365,17 +1388,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// (png) that is loaded upside-down by iOS. We tell the resource that the mesh is not
 	// aligned to upside-down textures so that the texture coordinates will be flipped upside
 	// down automatically and the textures will appear right-way up.
-	CC3ResourceNode* runner = [CC3ResourceNode nodeWithName: kRunnerName];
-	runner.resource = [CC3PODResource resourceFromFile: kRunningManPODFile
-					  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
+													  fromFile: kRunningManPODFile];
 	
-	// Remove the light provided in the POD so that it does not contribute to the
-	// lighting of the scene. We don't remove the POD's camera, but we rename it
-	// so that we can retrieve it distinctly from the camera loaded with the robot
-	// arm POD. All SDK POD files seem to use the same name for their included cameras.
-	// We also adjust the far clipping distance of the runner camera to match the
-	// main camera, and we set the depth of field to infinite so that it will display
-	// shadow volumes correctly.
+	// Remove the light provided in the POD so that it does not contribute to the lighting of
+	// the scene. We don't remove the POD's camera, but we rename it so that we can retrieve it
+	// distinctly from the camera loaded with the robot arm POD. All SDK POD files seem to use
+	// the same name for their included cameras. We also adjust the far clipping distance of the
+	// runner camera to match the main camera, and we set the depth of field to infinite so that
+	// it will display shadow volumes correctly.
 	[runner getNodeNamed: kRunnerLampName].visible = NO;
 	CC3Camera* runnerCam = (CC3Camera*)[runner getNodeNamed: @"Camera01"];
 	runnerCam.name = kRunnerCameraName;
@@ -1417,7 +1438,23 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	littleBrother.uniformScale = 0.75f;
 	littleBrother.location = cc3v(0, 0, 800);
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
-	littleBrother.touchEnabled = YES;		// make the runner touchable
+	littleBrother.touchEnabled = YES;			// make the runner touchable
+	
+	// Turn the smaller runner into a little liquid-metal Terminator 2!
+	// This is done by locating the mesh nodes within the figure, adding a cube-map environment
+	// texture to each, and setting the reflectivity of each mesh node.
+	CC3Material* mat;
+	GLfloat lbReflect = 1.0;	// Lower the reflectivity property towards zero to show some of the runner's suit.
+	CC3Texture* envMapTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"Legs_LowPoly"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
+	[mat addTexture: envMapTex];
+	mat.reflectivity = lbReflect;
 
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
@@ -1509,7 +1546,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Each HangingMeshParticle also assigns itself a smaller texture rectangle within the
 	// texture rectangle of this template mesh. This demonstrates that particles can nest
 	// an individual texture rectangle within the texture rectangle of the tempalte mesh.
-	templateModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	templateModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	templateModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);
 	
 	// Set up the emitter for 1000 particle, each an instance of the HangingParticle class.
@@ -1685,14 +1722,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3BoxNode* boxModel = [CC3BoxNode node];
 	[boxModel populateAsSolidBox: CC3BoundingBoxMake(-kPartMeshDim, -kPartMeshDim, -kPartMeshDim,
 													  kPartMeshDim, kPartMeshDim, kPartMeshDim)];
-	boxModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	boxModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	boxModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);	// Bottom part of texture is box texture
 	CC3Mesh* boxMesh = boxModel.mesh;
 
 	// Sphere template mesh
 	CC3MeshNode* ballModel = [CC3MeshNode node];
 	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: CC3TessellationMake(8, 7)];
-	ballModel.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	ballModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
 	CC3Mesh* ballMesh = ballModel.mesh;
 	
@@ -1710,7 +1747,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.particleClass = [RotatingFadingMeshParticle class];
 	[emitter addParticleTemplateMesh: boxMesh];
 	[emitter addParticleTemplateMesh: ballMesh];
-	emitter.texture = [CC3Texture textureFromFile: kMeshPartileTextureFile];
+	emitter.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	emitter.blendFunc = (ccBlendFunc){GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
 	
 	// Set the emission characteristics
@@ -1810,9 +1847,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * the application set the value of such a uniform variable directly.
  */
 -(void) addReflectiveMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kReflectiveMaskPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kReflectiveMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"maskmain"];
 
 	// The vertex shader defines a uniform named "CustomMatrix" which uses an app-supplied
@@ -1860,9 +1895,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * PFX file are different than the default bump-map shaders, and the mask will look different.
  */
 -(void) addEtchedMask {
-	CC3PODResourceNode* podRezNode = [CC3PODResourceNode node];
-	podRezNode.resource = [CC3PODResource resourceFromFile: kEtchedMaskPODFile
-						  expectsVerticallyFlippedTextures: NO];
+	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kEtchedMaskPODFile];
 	CC3MeshNode* mask = [podRezNode getMeshNodeNamed: @"objmaskmain"];
 	
 	// Load the textures into the material (bump-mapped texture first), and allow the default shaders

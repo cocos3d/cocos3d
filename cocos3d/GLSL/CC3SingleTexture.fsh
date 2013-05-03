@@ -30,11 +30,14 @@
 /**
  * This fragment shader provides a general single-texture shader.
  *
- * CC3SingleTexture.vsh is the vertex shader paired with this fragment shader.
+ * CC3TexturableMaterial.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
  */
+
+// Increase this if more textures are desired. Must match vertex shader declaration.
+#define MAX_TEXTURES			2
 
 // Fog modes.
 #define GL_LINEAR                 0x2601
@@ -53,15 +56,12 @@ uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which f
 uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
 // Textures
-uniform sampler2D	s_cc3Texture;				/**< Texture sampler. */
+uniform sampler2D	s_cc3Texture2D;				/**< Texture sampler. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2 v_texCoord;					/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-
-//-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
+varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4		v_color;					/**< Fragment base color. */
+varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
@@ -94,5 +94,5 @@ vec4 fogify(vec4 aColor) {
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	gl_FragColor = fogify(texture2D(s_cc3Texture, v_texCoord) * v_color);
+	gl_FragColor = fogify(texture2D(s_cc3Texture2D, v_texCoord[0]) * v_color);
 }

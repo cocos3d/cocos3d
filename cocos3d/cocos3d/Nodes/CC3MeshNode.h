@@ -255,28 +255,29 @@
 @property(nonatomic, assign) ccColor4F emissionColor;
 
 /**
- * When this mesh node is textured with a DOT3 bump-map (normal map), this property
- * indicates the location, in the global coordinate system, of the light that is
- * illuminating the node.
+ * Selects an appropriate shader program for this mesh node.
  *
- * This global light location is tranformed from a loction in the global coordinate
- * system to a direction in the local coordinate system of this node. This local
- * direction is then applied to the texture of this node, where it interacts with
- * the normals stored in the bump-map texture to determine surface illumination.
+ * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
+ * all mesh nodes require a shader program to be assigned. This can be done directly using
+ * the shaderProgram property. Or a shader program can be selected automatically based on
+ * the characteristics of the mesh node by invoking this method.
  *
- * This property only needs to be set, and will only have effect when set, when one
- * of the textures of this node is configured as a bump-map. Set the value of this
- * property to the globalLocation of the light source. Bump-map textures may interact
- * with only one light source.
+ * Since all mesh nodes require shader programs, if this method is not invoked, and a shader
+ * program is not manually assigned via the shaderProgram property, a shader program will be
+ * automatically assigned the first time this mesh node is drawn. The automatic selection is
+ * the same, whether this method is invoked, or the selection is made lazily. However, if the
+ * shader program must be loaded and compiled, there can be a noticable pause in drawing a
+ * mesh node for the first time if lazy assignment is used.
  *
- * When setting this property, this implementation also sets the same property in all
- * child nodes. When reading this property, this implementation returns a value if
- * this node contains a texture configured for bump-mapping, or the value of the same
- * property from the first descendant node that is a CC3MeshNode and that contains a
- * texture configured for bump-mapping. Otherwise, this implementation returns
- * kCC3VectorZero.
+ * Shader selection is handled by an implementation of the CC3GLProgramMatcher held in the
+ * CC3GLProgram programMatcher class-side property. The application can therefore customize
+ * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
+ * class-side property
+ *
+ * This method differs from the selectShaderPrograms method in that this method does not
+ * propagate to any descendant nodes.
  */
-@property(nonatomic, assign) CC3Vector globalLightLocation;
+-(void) selectShaderProgram;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -485,10 +486,11 @@
  * Indicates whether the texture coordinates of this mesh expects that the texture
  * was flipped upside-down during texture loading.
  * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to
- * the iOS view coordinate system. This results in textures from most file formats
- * being oriented upside-down, relative to the OpenGL coordinate system. All file
- * formats except PVR format will be oriented upside-down after loading.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the 
  * isFlippedVertically property of a texture to determine whether the texture
@@ -739,8 +741,8 @@
 @property(nonatomic, readonly) BOOL isDrawingPointSprites;
 
 /**
- * Returns whether the RGB components of each pixel of the encapsulated textures
- * have had the corresponding alpha component applied already.
+ * Returns whether the alpha channel has already been multiplied into each of the RGB
+ * color channels, in any of the textures used by this node.
  *
  * Returns YES if any of the textures contained in this instance has pre-mulitiplied alpha.
  * 

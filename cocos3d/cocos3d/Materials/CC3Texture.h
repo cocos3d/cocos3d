@@ -113,11 +113,8 @@
 @property(nonatomic, retain) CC3TextureUnit* textureUnit;
 
 /**
- * Indicates whether the RGB components of each pixel of the encapsulated texture
- * have had the corresponding alpha component applied already.
- *
- * Returns YES if this instance contains a CC3GLTexture instance, and that texture
- * instance indicates that it contains pre-mulitiplied alpha.
+ * Returns whether the alpha channel of this texture has already been multiplied
+ * into each of the RGB color channels.
  *
  * This is a convenience property that simply returns the value of the same property on the
  * underlying CC3GLTexture instance.
@@ -125,14 +122,13 @@
 @property(nonatomic,readonly) BOOL hasPremultipliedAlpha;
 
 /**
- * Returns whether this texture is flipped vertically.
+ * Returns whether this texture is flipped upside-down.
  *
- * Under iOS and OSX, most texture formats are loaded updside-down. This is because the vertical
- * axis of the coordinate system of OpenGL is inverted relative to the iOS view coordinate  system.
- * This results in textures being displayed upside-down, relative to the OpenGL coordinate system.
- *
- * This property will return NO if this texture was loaded from a PVR texture file,
- * and will return YES if loaded from any other texture file type.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
  * This is a convenience property that simply returns the value of the same property on the
  * underlying CC3GLTexture instance.
@@ -177,7 +173,7 @@
  *
  * The value of this property must be in the tangent-space coordinates associated
  * with the texture UV space, in practice, this property is typically not set
- * directly. Instead, you can use the globalLightLocation property of the mesh
+ * directly. Instead, you can use the globalLightPosition property of the mesh
  * node that is making use of this texture.
  */
 @property(nonatomic, assign) CC3Vector lightDirection;

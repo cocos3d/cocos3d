@@ -53,45 +53,36 @@
 @protocol CC3GLProgramMatcher <NSObject>
 
 /**
- * Returns the CC3GLProgram to use for the specified mesh node. The application can use this as
- * a convenient way to determine a suitable program to attach to the material of each mesh node.
+ * Returns a shader program suitable for painting mesh nodes in a solid color.
+ *
+ * This shader program is used when a mesh node does not have a material, or when
+ * painting a mesh node for node picking during user interaction.
+ */
+@property(nonatomic, readonly) CC3GLProgram* pureColorProgram;
+
+/**
+ * Returns the shader program to use to draw the specified mesh node.
+ *
+ * If the specified mesh node does not have a material, the shader identified by the
+ * pureColorProgram property is returned.
+ *
+ * If the specified mesh node has a material that already has a shader program assigned,
+ * that shader program is returned. 
+ *
+ * If the material covering the specified mesh node does not have a shader program assigned
+ * already, a shader program is selected, based on the characteristics of the mesh node and
+ * the material, the selected shader program is set into the material, and is returned.
  *
  * The returned program will be compiled and linked, and will have a semantics delegate assigned
  * in the semanticDelegate property.
  *
- * The implementation is responsible for determining how to match the specified mesh node to an 
+ * The implementation is responsible for determining how to match the specified mesh node to an
  * appropriate GL program, and each implementations may have a different matching methodology.
  *
- * This method does not have each access to scene content such as lighting conditions. Because of
- * this, the application may choose to avoid using this method, and allow a suitable program to
- * be selected by the programForVisitor: method. 
- *
- * Implementations are also responsible for compiling, linking, and assigning a semantics
+ * Implementations are responsible for compiling, linking, and assigning a semantics
  * delegate to the program.
  */
 -(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
-
-/**
- * Returns the CC3GLProgram to use for the specified node drawing visitor.
- *
- * The returned program will be compiled and linked, and will have a semantics delegate
- * assigned in the semanticDelegate property.
- *
- * Implementations are responsible for selecting the appropriate GL program for the current
- * state of the specified visitor. The implementation can query the visitor for current state
- * such as the currentMaterial, currentMeshNode, lightCount, or shouldDecorateNode properties,
- * etc, to determine the appropriate program to return.
- *
- * This method is invoked automatically the first time a mesh node is rendered if it does not
- * have a program assigned to its material. Since the attached visitor has access to scene state,
- * in addition to information about the mesh node, the application may choose to skip setting the
- * program into the mesh node material at initialization time, and may instead allow this method
- * to determine the most suitable program the first time the node is rendered.
- *
- * Implementations are also responsible for compiling, linking, and assigning a semantics
- * delegate to the program.
- */
--(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** The semantic delegate that will be attached to any program created by this matcher. */
 @property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;

@@ -30,9 +30,9 @@
  */
 
 #import "CC3OpenGLProgPipeline.h"
-#import "CC3GLProgram.h"
+#import "CC3GLProgramMatchers.h"
 #import "CC3NodeVisitor.h"
-#import "CC3Mesh.h"
+#import "CC3MeshNode.h"
 
 #if CC3_GLSL
 
@@ -42,6 +42,7 @@
 @interface CC3OpenGL (TemplateMethods)
 -(void) clearUnboundVertexAttributes;
 -(void) initPlatformLimits;
+-(void) initVertexAttributes;
 @end
 
 @implementation CC3OpenGLProgPipeline
@@ -98,7 +99,7 @@
 }
 
 -(void) enable2DVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		switch (vaIdx) {
 			case kCCVertexAttrib_Position:
 			case kCCVertexAttrib_Color:
@@ -107,6 +108,22 @@
 				break;
 			default:
 				[self enableVertexAttribute: NO at: vaIdx];
+				break;
+		}
+	}
+}
+
+// Mark position, color & tex coords as unknown
+-(void) align3DVertexAttributeState {
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
+		switch (vaIdx) {
+			case kCCVertexAttrib_Position:
+			case kCCVertexAttrib_Color:
+			case kCCVertexAttrib_TexCoords:
+				vertexAttributes[vaIdx].isEnabledKnown = NO;
+				vertexAttributes[vaIdx].isKnown = NO;
+				break;
+			default:
 				break;
 		}
 	}
@@ -152,7 +169,21 @@
 
 #pragma mark Shaders
 
+-(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode {
+	return [CC3GLProgram.programMatcher programForMeshNode: aMeshNode];
+}
+
+-(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3GLProgram* shaderProgram;
+	if (visitor.shouldDecorateNode)
+		shaderProgram = [self selectProgramForMeshNode: visitor.currentMeshNode];
+	else
+		shaderProgram = CC3GLProgram.programMatcher.pureColorProgram;
+	[self bindProgram: shaderProgram  withVisitor: visitor];
+}
+
 -(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Drawing %@ with %@", visitor.currentMeshNode, program);
 	[program bindWithVisitor: visitor];
 
 	[self clearUnboundVertexAttributes];
@@ -167,15 +198,15 @@
 
 -(void) align2DStateCache {
 	ccGLBlendFunc(value_GL_BLEND_SRC, value_GL_BLEND_DST);
-	ccGLBindTexture2DN(0, 0);
+	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D);
+	
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
+	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
 	
 #if COCOS2D_VERSION < 0x020100
 	if (valueCap_GL_BLEND) ccGLEnable(CC_GL_BLEND);
 	else ccGLEnable(0);
 #endif
-
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
-	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
 }
 
 
@@ -183,6 +214,14 @@
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+	
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
+	
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value_GL_MAX_VERTEX_ATTRIBS);
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS), value_GL_MAX_VERTEX_ATTRIBS);
+	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 
 	value_GL_SHADING_LANGUAGE_VERSION = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_SHADING_LANGUAGE_VERSION)];
 	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_SHADING_LANGUAGE_VERSION));
@@ -196,15 +235,13 @@
 	
 	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
 	
-	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);
-	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
-
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value_GL_MAX_VERTEX_ATTRIBS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS), value_GL_MAX_VERTEX_ATTRIBS);
-	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
-	
 	value_GL_MAX_VERTEX_UNITS = kCC3MaxGLSLVertexUnits;
+}
+
+// Start with at least the cocos2d attributes so they can be enabled and disabled
+-(void) initVertexAttributes {
+	[super initVertexAttributes];
+	value_MaxVertexAttribsUsed = kCCVertexAttrib_MAX;
 }
 
 @end

@@ -65,7 +65,9 @@
 #endif
 
 #if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
-#	define ccGLBindTexture2DN(texUnit, texID)
+#	define ccGLBindTexture2DN(texUnit, texID)		\
+	ccGLActiveTexture(GL_TEXTURE0 + (texUnit));		\
+	ccGLBindTexture2D(texID);
 #endif
 
 /** Draw calls per frame are tracked as of cocos2d 2.x. */

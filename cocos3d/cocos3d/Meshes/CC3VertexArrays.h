@@ -1308,10 +1308,11 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * Indicates whether the texture coordinates of this mesh expects that the texture
  * was flipped upside-down during texture loading.
  * 
- * The vertical axis of the coordinate system of OpenGL is inverted relative to
- * the iOS view coordinate system. This results in textures from most file formats
- * being oriented upside-down, relative to the OpenGL coordinate system. All file
- * formats except PVR format will be oriented upside-down after loading.
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the
+ * CoreGraphics view coordinate system. As a result, some texture file formats may be
+ * loaded upside down. Most common file formats, including JPG, PNG & PVR are loaded
+ * right-way up, but using proprietary texture formats developed for other platforms
+ * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the 
  * isFlippedVertically property of a texture to determine whether the texture
@@ -1336,10 +1337,6 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The value of this property is set when the underlying mesh texture coordinates are
  * built or loaded. See the same property on the CC3NodesResource class to understand
  * how this property is set during mesh resource loading.
- * 
- * When building meshes programmatically, you should endeavour to design the
- * mesh so that this property will be YES if you will be using vertically-flipped
- * textures (all texture file formats except PVR).
  */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;
 
@@ -1350,7 +1347,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  *
  * See the notes for that property for more information.
  *
- * The initial value of this class-side property is YES.
+ * The initial value of this class-side property is NO.
  */
 +(BOOL) defaultExpectsVerticallyFlippedTextures;
 
@@ -1361,7 +1358,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  *
  * See the notes for that property for more information.
  *
- * The initial value of this class-side property is YES.
+ * The initial value of this class-side property is NO.
  */
 +(void) setDefaultExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped;
 

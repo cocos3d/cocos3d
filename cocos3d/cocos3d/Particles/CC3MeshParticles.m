@@ -82,7 +82,8 @@
 
 @implementation CC3MeshParticleEmitter
 
-@synthesize isParticleTransformDirty, shouldTransformUnseenParticles;
+@synthesize isParticleTransformDirty=_isParticleTransformDirty;
+@synthesize shouldTransformUnseenParticles=_shouldTransformUnseenParticles;
 
 -(void) dealloc {
 	[particleTemplateMesh release];
@@ -123,8 +124,8 @@
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		self.particleClass = [CC3MeshParticle class];
 		particleTemplateMesh = nil;
-		isParticleTransformDirty = NO;
-		shouldTransformUnseenParticles = YES;
+		_isParticleTransformDirty = NO;
+		_shouldTransformUnseenParticles = YES;
 	}
 	return self;
 }
@@ -133,8 +134,8 @@
 	[super populateFrom: another];
 	
 	self.particleTemplateMesh = another.particleTemplateMesh;
-	isParticleTransformDirty = another.isParticleTransformDirty;
-	shouldTransformUnseenParticles = another.shouldTransformUnseenParticles;
+	_isParticleTransformDirty = another.isParticleTransformDirty;
+	_shouldTransformUnseenParticles = another.shouldTransformUnseenParticles;
 }
 
 
@@ -317,7 +318,7 @@
 /** Overridden so that the transform is considered dirty if any of the particles need to be transformed. */
 -(BOOL) isTransformDirty { return super.isTransformDirty || self.isParticleTransformDirty; }
 
--(void) markParticleTransformDirty { isParticleTransformDirty = YES; }
+-(void) markParticleTransformDirty { _isParticleTransformDirty = YES; }
 
 /**
  * Template method that returns whether the particles should be tranformed.
@@ -344,7 +345,7 @@
 		id<CC3MeshParticleProtocol> mp = [particles objectAtIndex: partIdx];
 		[mp transformVertices];
 	}
-	isParticleTransformDirty = NO;
+	_isParticleTransformDirty = NO;
 }
 
 @end

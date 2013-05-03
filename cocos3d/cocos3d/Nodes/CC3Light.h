@@ -151,9 +151,6 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  */
 @property(nonatomic, readonly) CC3Vector4 globalHomogeneousPosition;
 
-/** @deprecated Replaced by the globalHomogeneousPosition property on CC3Node. */
-@property(nonatomic, readonly) CC3Vector4 homogeneousLocation DEPRECATED_ATTRIBUTE;
-
 /**
  * Indicates the intensity distribution of the light.
  *

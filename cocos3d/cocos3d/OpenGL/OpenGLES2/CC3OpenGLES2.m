@@ -40,6 +40,17 @@
 @implementation CC3OpenGLES2
 
 
+#pragma mark Textures
+
+-(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
+	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
+		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+	}
+}
+
+
 #pragma mark Allocation and initialization
 
 -(void) initPlatformLimits {

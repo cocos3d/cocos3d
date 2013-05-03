@@ -602,7 +602,9 @@
  * When using this class, you do not need to use any of the populateAs... methods to generate
  * and populate the mesh.
  */
-@interface CC3SimpleLineNode : CC3LineNode
+@interface CC3SimpleLineNode : CC3LineNode {
+	CC3Vector lineVertices[2];
+}
 
 /**
  * Indicates the start of the line in the local coordinate system of this node.
