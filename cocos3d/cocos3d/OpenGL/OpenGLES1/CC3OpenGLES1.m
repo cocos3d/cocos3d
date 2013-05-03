@@ -34,11 +34,11 @@
 
 #if CC3_OGLES_1
 
-@interface CC3OpenGL (TemplateMethods)
+@interface CC3OpenGLFixedPipeline (TemplateMethods)
 -(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx;
 -(void) bindVertexContentToAttributeAt: (GLint) vaIdx;
 -(void) initPlatformLimits;
--(void) initVertexAttributes;
+-(void) initNonTextureVertexAttributes;
 @end
 
 @implementation CC3OpenGLES1
@@ -137,7 +137,7 @@
 }
 
 -(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
-	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
+	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
 	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
 		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
 }
@@ -165,24 +165,18 @@
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_PALETTE_MATRICES_OES), value_GL_MAX_PALETTE_MATRICES);
 	LogInfo(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
-	
 	glGetIntegerv(GL_MAX_VERTEX_UNITS_OES, &value_GL_MAX_VERTEX_UNITS);
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_UNITS_OES), value_GL_MAX_VERTEX_UNITS);
 	LogInfo(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
+	
+	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
+	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 
-/**
- * Under OGLES 1.1, the vertex attribute arrays each have a fixed purpose. Invokes super
- * to allocate the trackers and initialize the semantic and GL name of each common tracker.
- * Then adds semantics and GL names for trackers that are specific to OGLES 1.1.
- *
- * This method updates the value_GL_MAX_VERTEX_ATTRIBS property.
- */
--(void) initVertexAttributes {
-	[super initVertexAttributes];
+/** Initialize the vertex attributes that are not texture coordinates. */
+-(void) initNonTextureVertexAttributes {
+	[super initNonTextureVertexAttributes];
 	
 	GLuint vaIdx = value_GL_MAX_VERTEX_ATTRIBS;
 	

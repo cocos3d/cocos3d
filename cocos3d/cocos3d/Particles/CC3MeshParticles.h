@@ -185,8 +185,8 @@
  */
 @interface CC3MeshParticleEmitter : CC3CommonVertexArrayParticleEmitter {
 	CC3Mesh* particleTemplateMesh;
-	BOOL isParticleTransformDirty : 1;
-	BOOL shouldNotTransformInvisibleParticles : 1;
+	BOOL _isParticleTransformDirty : 1;
+	BOOL _shouldTransformUnseenParticles : 1;
 }
 
 /**

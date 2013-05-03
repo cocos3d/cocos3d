@@ -117,6 +117,8 @@
 
 #pragma mark Compiling and linking
 
+-(NSString*) platformPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
+
 -(GLchar*) glslSourceFromFile: (NSString*) glslFilename {
 	MarkRezActivityStart();
 	NSError* err = nil;
@@ -190,8 +192,6 @@
 	
 	LogRez(@"Compiled and attached %@ shader %@ in %.4f seconds", self, NSStringFromGLEnum(shaderType), GetRezActivityDuration());
 }
-
--(NSString*) platformPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
 
 /** Queries the GL engine and returns whether the shader with the specified GL ID was successfully compiled. */
 -(BOOL) getWasCompiled: (GLuint) shaderID {

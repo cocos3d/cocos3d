@@ -113,8 +113,8 @@ cocos3d 2.0.0 - 2013/05/31
     - [API change] Renamed CC3VertexArray shouldReleaseRedundantData property to shouldReleaseRedundantContent and deprecated original.
 
 - [API change] Added CC3Node globalHomogeneousPosition property and deprecated CC3Light homogeneousLocation property.
-- [API change] Added CC3Node globalLightPosition property and deprecated globalLightPosition property.
-	- Fixed issue where the globalLightLocation property did not accurately track positional lights for object-space bump mapping.
+- [API change] Added CC3Node globalLightPosition property and deprecated globalLightLocation property.
+	- Fixed issue where the globalLightPosition property did not accurately track positional lights for object-space bump mapping.
 	
 - CC3PODResource now releases unneeded internal POD file structures after loading and building, to conserve memory.
 - Added CC3Resource saveToFile: method to allow resource types that support it to save content back to a file:

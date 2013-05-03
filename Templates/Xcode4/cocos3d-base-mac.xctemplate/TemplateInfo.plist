@@ -24,13 +24,7 @@
 			<string>YES</string>
 		</dict>
 		<key>Configurations</key>
-		<dict>
-			<key>Debug</key>
-			<dict>
-				<key>ONLY_ACTIVE_ARCH</key>
-				<string>YES</string>
-			</dict>
-		</dict>
+		<dict/>
 	</dict>
 	<key>Targets</key>
 	<array>

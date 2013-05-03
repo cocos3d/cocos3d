@@ -114,15 +114,16 @@
 
 	// If no semantic (eg- vertex indices), short circuit to no index available.
 	if (semantic == kCC3SemanticNone) return kCC3VertexAttributeIndexUnavailable;
-
-	// Texture coordinate attribute arrays come first and are indexed by texture unit
-	if (semantic == kCC3SemanticVertexTexture) return visitor.currentTextureUnitIndex;
 	
-	// Other vertex attributes come after and are compared by semantic
-	for (GLuint vaIdx = value_GL_MAX_TEXTURE_UNITS; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
+	// Texture coordinate attribute arrays come after the others and are indexed by texture unit
+	if (semantic == kCC3SemanticVertexTexture)
+		return [self attributeIndexForTextureUnit: visitor.currentTextureUnitIndex];
+	
+	// Other vertex attributes are compared by semantic
+	for (GLuint vaIdx = 0; vaIdx < value_NumNonTexVertexAttribs; vaIdx++)
 		if (semantic == vertexAttributes[vaIdx].semantic) return vaIdx;
-
-	// The semantic is not supported by OGLES 1.1 (eg- tangents & bitangents).
+	
+	// The semantic is not supported by fixed pipeline (eg- tangents & bitangents).
 	return kCC3VertexAttributeIndexUnavailable;
 }
 
@@ -143,12 +144,12 @@
 			LogGLErrorTrace(@"glColorPointer(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		case kCC3SemanticVertexTexture:
-			[self activateClientTextureUnit: vaIdx];
+			[self activateClientTextureUnit: [self textureUnitFromAttributeIndex: vaIdx]];
 			glTexCoordPointer(vaPtr->elementSize, vaPtr->elementType, vaPtr->vertexStride, vaPtr->vertices);
 			LogGLErrorTrace(@"glTexCoordPointer(%i, %@, %i, %p)", vaPtr->elementSize, NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
 			break;
 		default:
-			CC3Assert(NO, @"Semantic %@ is not a vertex attribute semantic.", NSStringFromCC3Semantic(vaPtr->semantic));
+			CC3Assert(NO, @"Semantic %@ of vertex attribute index %i is not a vertex attribute semantic.", NSStringFromCC3Semantic(vaPtr->semantic), vaIdx);
 			break;
 	}
 }
@@ -157,7 +158,8 @@
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	
 	// If enabling texture coordinates, activate the appropriate texture unit first
-	if (vaPtr->semantic == kCC3SemanticVertexTexture) [self activateClientTextureUnit: vaIdx];
+	if (vaPtr->semantic == kCC3SemanticVertexTexture)
+		[self activateClientTextureUnit: [self textureUnitFromAttributeIndex: vaIdx]];
 	
 	if (vaPtr->isEnabled)
 		glEnableClientState(vaPtr->glName);
@@ -166,15 +168,22 @@
 	LogGLErrorTrace(@"gl%@ableClientState(%@)", (vaPtr->isEnabled ? @"En" : @"Dis"), NSStringFromGLEnum(vaPtr->glName));
 }
 
+/** Texture unit attributes come after the others and are indexed by texture unit. */
+-(GLuint) textureUnitFromAttributeIndex: (GLint) vaIdx { return vaIdx - value_NumNonTexVertexAttribs; }
+
+/** Texture unit attributes come after the others and are indexed by texture unit. */
+-(GLint) attributeIndexForTextureUnit: (GLuint) tuIdx { return tuIdx + value_NumNonTexVertexAttribs; }
+
 -(void) enable2DVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		switch (vertexAttributes[vaIdx].semantic) {
 			case kCC3SemanticVertexLocation:
 			case kCC3SemanticVertexColor:
 				[self enableVertexAttribute: YES at: vaIdx];
 				break;
 			case kCC3SemanticVertexTexture:
-				[self enableVertexAttribute: (vaIdx == 0) at: vaIdx];	// Only enable the first VU
+				// Only enable texture unit zero
+				[self enableVertexAttribute: ([self textureUnitFromAttributeIndex: vaIdx] == 0) at: vaIdx];
 				break;
 			default:
 				[self enableVertexAttribute: NO at: vaIdx];
@@ -185,7 +194,7 @@
 
 // Mark position, color & first tex coords as unknown
 -(void) align3DVertexAttributeState {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++) {
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 		switch (vaPtr->semantic) {
 			case kCC3SemanticVertexLocation:
@@ -194,7 +203,8 @@
 				vertexAttributes[vaIdx].isKnown = NO;
 				break;
 			case kCC3SemanticVertexTexture:
-				if (vaIdx == 0) {		// First  texture unit only. Texture units come first in array.
+				// First  texture unit only.
+				if ([self textureUnitFromAttributeIndex: vaIdx] == 0) {
 					vertexAttributes[vaIdx].isEnabledKnown = NO;
 					vertexAttributes[vaIdx].isKnown = NO;
 				}
@@ -439,25 +449,8 @@
 				glEnable(target);
 			else
 				glDisable(target);
-			LogGLErrorTrace(@"gl%@sable(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
+			LogGLErrorTrace(@"gl%@able(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(target));
 		}
-	}
-}
-
--(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
-	GLuint maxTexUnits = self.maxNumberOfTextureUnits;
-	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
-		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
-}
-
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {
-	if (CC3CheckGLBooleanAt(tuIdx, onOff, &value_GL_TEXTURE_COORD_ARRAY, &isKnownCap_GL_TEXTURE_COORD_ARRAY)) {
-		[self activateClientTextureUnit: tuIdx];
-		if (onOff)
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		else
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		LogGLErrorTrace(@"gl%@sableClientState(%@)", (onOff ? @"En" : @"Dis"), NSStringFromGLEnum(GL_TEXTURE_COORD_ARRAY));
 	}
 }
 
@@ -577,6 +570,13 @@
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+	
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
+	
+	// Initial estimate for allocating space. The actual value is set by the initVertexAttributes method.
+	value_GL_MAX_VERTEX_ATTRIBS = value_GL_MAX_TEXTURE_UNITS + kMAX_VTX_ATTRS_EX_TEXCOORD;
 
 	glGetIntegerv(GL_MAX_CLIP_PLANES, &value_GL_MAX_CLIP_PLANES);
 	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_CLIP_PLANES), value_GL_MAX_CLIP_PLANES);
@@ -588,16 +588,9 @@
 
 	value_GL_MAX_PALETTE_MATRICES = 0;		// Assume no bone skinning support
 	
-	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
-	
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
-	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
-
-	// Initial estimate for allocating space. The actual value is set by the initVertexAttributes method.
-	value_GL_MAX_VERTEX_ATTRIBS = value_GL_MAX_TEXTURE_UNITS + kMAX_VTX_ATTRS_EX_TEXCOORD;
-
 	value_GL_MAX_VERTEX_UNITS = 0;			// Assume no bone skinning support
+	
+	value_GL_MAX_SAMPLES = 1;				// Assume no multi-sampling support
 }
 
 /**
@@ -605,17 +598,29 @@
  * super to allocate the trackers, and then initializes the semantic and GL name of each. 
  * Texture coordinate arrays come first, followed by the other vertex attribute arrays.
  *
- * This method updates the value_GL_MAX_VERTEX_ATTRIBS property.
+ * This method updates the value_NumNonTexVertexAttribs, value_MaxVertexAttribsUsed,
+ * and value_GL_MAX_VERTEX_ATTRIBS properties.
  */
 -(void) initVertexAttributes {
 	[super initVertexAttributes];
+
+	value_GL_MAX_VERTEX_ATTRIBS = 0;
 	
-	GLuint vaIdx = 0;
-	while (vaIdx < value_GL_MAX_TEXTURE_UNITS) {
-		vertexAttributes[vaIdx].semantic = kCC3SemanticVertexTexture;
-		vertexAttributes[vaIdx].glName = GL_TEXTURE_COORD_ARRAY;
-		vaIdx++;
-	}
+	[self initNonTextureVertexAttributes];
+
+	value_NumNonTexVertexAttribs = value_GL_MAX_VERTEX_ATTRIBS;
+
+	[self initTextureVertexAttributes];
+	
+	// Assume that only the single texture unit used by cocos2d will be used by cocos3d.
+	// This will be increased automatically as needed.
+	value_MaxVertexAttribsUsed = value_NumNonTexVertexAttribs + 1;
+}
+
+/** Initialize the vertex attributes that are not texture coordinates. */
+-(void) initNonTextureVertexAttributes {
+	
+	GLuint vaIdx = value_GL_MAX_VERTEX_ATTRIBS;
 	
 	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexLocation;
 	vertexAttributes[vaIdx].glName = GL_VERTEX_ARRAY;
@@ -628,6 +633,20 @@
 	vertexAttributes[vaIdx].semantic = kCC3SemanticVertexColor;
 	vertexAttributes[vaIdx].glName = GL_COLOR_ARRAY;
 	vaIdx++;
+	
+	value_GL_MAX_VERTEX_ATTRIBS = vaIdx;
+}
+
+/** Initialize the vertex attributes that are texture coordinates. */
+-(void) initTextureVertexAttributes {
+
+	GLuint vaIdx = value_GL_MAX_VERTEX_ATTRIBS;
+
+	for (GLuint tuIdx = 0; tuIdx < value_GL_MAX_TEXTURE_UNITS; tuIdx++) {
+		vertexAttributes[vaIdx].semantic = kCC3SemanticVertexTexture;
+		vertexAttributes[vaIdx].glName = GL_TEXTURE_COORD_ARRAY;
+		vaIdx++;
+	}
 	
 	value_GL_MAX_VERTEX_ATTRIBS = vaIdx;
 }

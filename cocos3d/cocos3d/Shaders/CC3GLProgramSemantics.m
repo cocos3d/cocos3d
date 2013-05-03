@@ -1186,10 +1186,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	// SKINNING ----------------
 	[self mapVarName: @"u_cc3BonesPerVertex" toSemantic: kCC3SemanticBonesPerVertex];							/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
 	[self mapVarName: @"u_cc3BoneMatrixCount" toSemantic: kCC3SemanticBoneMatrixCount];							/**< (int) Number of matrices in the matrix arrays in this structure. */
-	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
+	[self mapVarName: @"u_cc3BoneMatricesEyeSpace" toSemantic: kCC3SemanticBoneMatricesEyeSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space. */
 	[self mapVarName: @"u_cc3BoneMatricesInvTranEyeSpace" toSemantic: kCC3SemanticBoneMatricesInvTranEyeSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
-	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];						/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */
+	[self mapVarName: @"u_cc3BoneMatricesGlobal" toSemantic: kCC3SemanticBoneMatricesGlobal];					/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates. */
 	[self mapVarName: @"u_cc3BoneMatricesInvTranGlobal" toSemantic: kCC3SemanticBoneMatricesInvTranGlobal];		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates. */
+	[self mapVarName: @"u_cc3BoneMatricesModel" toSemantic: kCC3SemanticBoneMatricesModelSpace];				/**< (mat4[]) Array of bone matrices in the current mesh skin section in model space. */
+	[self mapVarName: @"u_cc3BoneMatricesInvTranModel" toSemantic: kCC3SemanticBoneMatricesInvTranModelSpace];	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in model space. */
 	
 	// CAMERA -----------------
 	[self mapVarName: @"u_cc3CameraPositionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */

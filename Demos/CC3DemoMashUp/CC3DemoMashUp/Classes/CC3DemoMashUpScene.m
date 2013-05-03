@@ -310,18 +310,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
 	
-	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex data in main memory because it is now
-	// redundant. However, because we can add shadow volumes dynamically to any node,
-	// we need to keep the vertex location, index and skinning data of all meshes
-	// around to build shadow volumes. If we had added the shadow volumes before here,
-	// we wouldn't have to retain this data.
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
+	// to save memory, release the vertex data in main memory because it is now redundant.
+	// However, because we can add shadow volumes dynamically to any node, we need to keep the
+	// vertex location, index and skinning data of all meshes around to build shadow volumes.
+	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
 	[self retainVertexLocations];
 	[self retainVertexIndices];
 	[self retainVertexWeights];
 	[self retainVertexMatrixIndices];
 	[self createGLBuffers];
 	[self releaseRedundantContent];
+
+	// Select an appropriate shader program for each mesh node in this scene now. If this step
+	// is omitted, a shader program will be selected for each mesh node the first time that mesh
+	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
+	// as each shader program is loaded as needed the first time it is needed during drawing.
+	[self selectShaderPrograms];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
 	// during debugging, or to display the bounding volumes, used for collision detection and

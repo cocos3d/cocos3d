@@ -34,6 +34,14 @@
 
 @implementation CC3PODResourceNode
 
+-(GLuint) animationFrameCount {
+	return _resource ? ((CC3PODResource*)_resource).animationFrameCount : 0;
+}
+
+-(GLfloat) animationFrameRate {
+	return _resource ? ((CC3PODResource*)_resource).animationFrameRate : 0.0f;
+}
+
 -(Class) resourceClass { return [CC3PODResource class]; }
 
 @end

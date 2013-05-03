@@ -736,7 +736,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
  *
  * The value of this property must be in the tangent-space coordinates associated
  * with the texture UV space, in practice, this property is typically not set
- * directly. Instead, you can use the globalLightLocation property of the mesh
+ * directly. Instead, you can use the globalLightPosition property of the mesh
  * node that is making use of this texture.
  */
 @property(nonatomic, assign) CC3Vector lightDirection;

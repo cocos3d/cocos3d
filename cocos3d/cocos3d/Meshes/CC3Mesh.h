@@ -302,9 +302,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Returns whether this mesh contains content for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
 
-/** @deprecated Replaced by hasVertexNormals. */
-@property(nonatomic, readonly) BOOL hasNormals DEPRECATED_ATTRIBUTE;
-
 /**
  * The vertex array instance managing the tangent content for the vertices.
  *
@@ -335,9 +332,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Returns whether this mesh contains content for vertex colors.  */
 @property(nonatomic, readonly) BOOL hasVertexColors;
 
-/** @deprecated Replaced by hasVertexColors. */
-@property(nonatomic, readonly) BOOL hasColors DEPRECATED_ATTRIBUTE;
-
 /**
  * Returns the symbolic content type of the vertex color, which indicates the range of values
  * stored for each vertex color.
@@ -365,9 +359,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Indicates whether this mesh contains content for vertex matrix indices. */
 @property(nonatomic, readonly) BOOL hasVertexMatrixIndices;
 
-/** @deprecated Replaced by hasVertexMatrixIndices. */
-@property(nonatomic, readonly) BOOL hasMatrixIndices DEPRECATED_ATTRIBUTE;
-
 /**
  * The vertex array that manages the weighting that each bone has in influencing each vertex.
  *
@@ -384,9 +375,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Indicates whether this mesh contains content for vertex weights. */
 @property(nonatomic, readonly) BOOL hasVertexWeights;
 
-/** @deprecated Replaced by hasVertexWeights. */
-@property(nonatomic, readonly) BOOL hasWeights DEPRECATED_ATTRIBUTE;
-
 /**
  * The vertex array instance managing a point size for each vertex.
  *
@@ -397,9 +385,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 
 /** Indicates whether this mesh contains content for vertex point sizes. */
 @property(nonatomic, readonly) BOOL hasVertexPointSizes;
-
-/** @deprecated Replaced by hasVertexPointSizes. */
-@property(nonatomic, readonly) BOOL hasPointSizes DEPRECATED_ATTRIBUTE;
 
 /**
  * The vertex array instance managing the index content for the vertices.

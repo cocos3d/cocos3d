@@ -184,7 +184,7 @@ typedef enum {
  * of a subclass of the abstract CC3NodeAnimation class, populated with animation content,
  * and then create an instance of a CC3Animate action, and run it on this node.
  *
- * Nodes can respond to iOS touch events. The property isTouchEnabled can be set to YES
+ * Nodes can respond to iOS touch events. The property touchEnabled can be set to YES
  * to allow a node to be selected by a touch event. If the shouldInheritTouchability
  * property is also set to YES, then this touchable capability can also be inherited from
  * a parent node. Selection of nodes based on touch events is handled by CC3Scene. The
@@ -854,12 +854,12 @@ typedef enum {
  * by this node for the purpose of updating the lighting of a contained bump-map
  * texture, instead of rotating to face the light, as normally occurs with tracking.
  * 
- * This property indicates whether this node should update its globalLightLocation
+ * This property indicates whether this node should update its globalLightPosition
  * from the tracked location of the light, instead of rotating to face the light.
  *
  * The initial property is set to NO, indicating that this node will rotate to face
  * the target as it or this node moves. If you have set the target property to a
- * CC3Light instance, and want the bump-map lighting property globalLightLocation
+ * CC3Light instance, and want the bump-map lighting property globalLightPosition
  * to be updated as the light is tracked instead, set this property to YES.
  */
 @property(nonatomic, assign) BOOL isTrackingForBumpMapping;
@@ -1484,6 +1484,33 @@ typedef enum {
  * This property is used only when running under OpenGL ES 2.
  */
 @property(nonatomic, retain) CC3GLProgram* shaderProgram;
+
+/**
+ * Selects an appropriate shader program for each descendant mesh node.
+ *
+ * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
+ * all mesh nodes require a shader program to be assigned. This can be done directly using
+ * the shaderProgram property. Or a shader program can be selected automatically based on
+ * the characteristics of the mesh node.
+ *
+ * You can use this method to cause a shader program to be automatically selected for each
+ * descendant mesh node that does not already have a shader program assigned. You can assign
+ * shader programs to some specific mesh nodes, and then invoke this method on the CC3Scene
+ * to have shader programs assigned to the remaining mesh nodes.
+ *
+ * Since all mesh nodes require shader programs, if this method is not invoked, and a shader
+ * program is not manually assigned via the shaderProgram property, a shader program will be
+ * automatically assigned to each mesh node the first time it is rendered. The automatic
+ * selection is the same, whether this method is invoked, or the selection is made lazily.
+ * However, if the shader program must be loaded and compiled, there can be a noticable
+ * pause in drawing a mesh node for the first time if lazy assignment is used.
+ *
+ * Shader selection is handled by an implementation of the CC3GLProgramMatcher held in the
+ * CC3GLProgram programMatcher class-side property. The application can therefore customize
+ * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
+ * class-side property
+ */
+-(void) selectShaderPrograms;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
@@ -2867,7 +2894,7 @@ typedef enum {
  *
  * The isTrackingForBumpMapping of the returned wrapper is set to YES, so that
  * if the target that is assigned is a CC3Light, the wrapper will update the
- * globalLightLocation of the wrapped node from the tracked location of the light,
+ * globalLightPosition of the wrapped node from the tracked location of the light,
  * instead of rotating to face the light. This allows the normals embedded in any
  * bump-mapped texture on the wrapped node to interact with the direction of the
  * light source to create per-pixel luminosity that appears realistic
@@ -2981,13 +3008,13 @@ typedef enum {
  * Indicates if this node, or any of its descendants, will respond to UI touch events.
  *
  * This property also affects which node will be returned by the touchableNode property.
- * If the isTouchEnabled property is explicitly set for a parent node, but not for a
+ * If the touchEnabled property is explicitly set for a parent node, but not for a
  * child node, both the parent and the child can be touchable, but it will be the
  * parent that is returned by the touchableNode property of either the parent or child.
  *
  * This design simplifies identifying the node that is of interest when a touch event
  * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
- * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
+ * wheels, body, etc). If touchEnabled is set for the car structural node, but not
  * each wheel, it will be the parent car node that will be returned by the touchableNode
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
@@ -3006,17 +3033,17 @@ typedef enum {
 /**
  * Indicates whether this node will respond to UI touch events.
  *
- * A node may often be touchable even if the isTouchEnabled flag is set to NO.
+ * A node may often be touchable even if the touchEnabled flag is set to NO.
  *
  * When the node is visible, this property returns YES under either of the
  * following conditions:
- *   - The isTouchEnabled property of this node is set to YES.
+ *   - The touchEnabled property of this node is set to YES.
  *   - The shouldInheritTouchability property of this node is set to YES,
  *     AND the isTouchable property of the parent of this node returns YES.
  *
  * When the node is NOT visible, this property returns YES under either of the
  * following conditions:
- *   - The isTouchEnabled property of this node is set to YES
+ *   - The touchEnabled property of this node is set to YES
  *     AND the shouldAllowTouchableWhenInvisible is set to YES.
  *   - The shouldInheritTouchability property of this node is set to YES,
  *     AND the isTouchable property of the parent of this node returns YES.
@@ -3024,7 +3051,7 @@ typedef enum {
  *
  * This design simplifies identifying the node that is of interest when a touch event
  * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
- * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
+ * wheels, body, etc). If touchEnabled is set for the car structural node, but not
  * each wheel, it will be the parent car node that will be returned by the touchableNode
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
@@ -3035,13 +3062,13 @@ typedef enum {
  * Indicates the node that is of interest if this node is selected by a touch event.
  * The value of this property is not always this node, but may be an ancestor node instead.
  *
- * The value returned by this property is this node if the isTouchEnabled property of this
- * node is set to YES, or the nearest ancestor whose isTouchEnabled property is set to YES,
- * or nil if neither this node, nor any ancestor has the isTouchEnabled property set to YES.
+ * The value returned by this property is this node if the touchEnabled property of this
+ * node is set to YES, or the nearest ancestor whose touchEnabled property is set to YES,
+ * or nil if neither this node, nor any ancestor has the touchEnabled property set to YES.
  *
  * This design simplifies identifying the node that is of interest when a touch event
  * occurs. Thus, a car may be drawn as a node assembly of many descendant nodes (doors,
- * wheels, body, etc). If isTouchEnabled is set for the car structural node, but not
+ * wheels, body, etc). If touchEnabled is set for the car structural node, but not
  * each wheel, it will be the parent car node that will be returned by the touchableNode
  * property of the car structural node, or each wheel node. This allows the user to
  * touch a wheel, but still have the car identified as the object of interest.
@@ -3055,16 +3082,16 @@ typedef enum {
  * By using this property, you can turn off touchability on a child node, even when
  * the parent node is touchable.
  *
- * Normally, a node will be touchable if its isTouchEnabled property is set to YES
+ * Normally, a node will be touchable if its touchEnabled property is set to YES
  * on the node itself, or on one of its ancestors. You can change this behaviour by
- * setting this property to NO on the child node. With the isTouchEnabled property
+ * setting this property to NO on the child node. With the touchEnabled property
  * and this property both set to NO, the isTouchable property will return NO, even
  * if the isTouchable property of the parent returns YES, and the node will not
  * respond to touch events even if the parent node does.
  *
  * The initial value of this property is YES, indicating that this node will return
  * YES in the isTouchable property if the parent node returns YES in its isTouchable
- * property, even if the isTouchEnabled property of this node is set to NO.
+ * property, even if the touchEnabled property of this node is set to NO.
  */
 @property(nonatomic, assign) BOOL shouldInheritTouchability;
 
@@ -3081,15 +3108,15 @@ typedef enum {
 @property(nonatomic, assign) BOOL shouldAllowTouchableWhenInvisible;
 
 /**
- * Sets the isTouchEnabled property to YES on this node and all descendant nodes.
+ * Sets the touchEnabled property to YES on this node and all descendant nodes.
  *
  * This is a convenience method that will make all descendants individually touchable
  * and selectable, which is not usually what is wanted. Usually, you would set
- * isTouchEnabled on specific parent nodes that are of interest to select a sub-assembly
+ * touchEnabled on specific parent nodes that are of interest to select a sub-assembly
  * as a whole. However, making all components individually selectable can sometimes be
  * desired, and is useful for testing.
  *
- * For more info see the notes for the isTouchEnabled and touchableNode properties.
+ * For more info see the notes for the touchEnabled and touchableNode properties.
  *
  * This is a convenience method that can find use in testing, where it might be of
  * interest to be able to individually select small components of a larger assembly. 
@@ -3097,10 +3124,10 @@ typedef enum {
 -(void) touchEnableAll;
 
 /**
- * Sets the isTouchEnabled property to NO on this node and all descendant nodes.
+ * Sets the touchEnabled property to NO on this node and all descendant nodes.
  *
  * This is a convenience method that will make this node and all its decendants
- * unresponsive to touches. For more info see the notes for the isTouchEnabled
+ * unresponsive to touches. For more info see the notes for the touchEnabled
  * and touchableNode properties.
  */
 -(void) touchDisableAll;
@@ -3672,7 +3699,7 @@ typedef enum {
  *
  * By default, the child descriptor node is not touchable, even if this node is touchable. If, for
  * some reason you want the descriptor text to be touchable, you can retrieve the descriptor node
- * from the descriptorNode property, and set the isTouchEnabled property to YES.
+ * from the descriptorNode property, and set the touchEnabled property to YES.
  */
 @property(nonatomic, assign) BOOL shouldDrawDescriptor;
 
@@ -3736,7 +3763,7 @@ typedef enum {
  * By default, the child wireframe node is not touchable, even if this node is
  * touchable. If, for some reason you want the wireframe to be touchable, you can
  * retrieve the wireframe node from the wireframeBoxNode property, and set the
- * isTouchEnabled property to YES.
+ * touchEnabled property to YES.
  */
 @property(nonatomic, assign) BOOL shouldDrawWireframeBox;
 
@@ -3830,7 +3857,7 @@ typedef enum {
  *
  * By default, the child line node is not touchable, even if this node is touchable. If, for some
  * reason you want the wireframe to be touchable, you can retrieve the direction marker nodes via
- * the directionMarkers property, and set the isTouchEnabled property to YES.
+ * the directionMarkers property, and set the touchEnabled property to YES.
  */
 -(void) addDirectionMarkerColored: (ccColor4F) aColor inDirection: (CC3Vector) aDirection;
 
@@ -3918,7 +3945,7 @@ typedef enum {
  * By default, the displayed bounding volume node is not touchable, even if this
  * node is touchable. If, for some reason you want the displayed bounding volume
  * to be touchable, you can retrieve the bounding volume node from the displayNode
- * property of the bounding volume, and set its isTouchEnabled property to YES.
+ * property of the bounding volume, and set its touchEnabled property to YES.
  */
 @property(nonatomic, assign) BOOL shouldDrawBoundingVolume;
 

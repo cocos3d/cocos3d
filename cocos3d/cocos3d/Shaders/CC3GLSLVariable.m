@@ -144,6 +144,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 @implementation CC3GLSLAttribute
 
+-(GLenum) type { return super.type; }	// Keep compiler happy
+
 #if CC3_GLSL
 
 -(void) populateFromProgram {
@@ -177,6 +179,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	free(_glVarValue);
 	[super dealloc];
 }
+
+-(GLenum) type { return super.type; }	// Keep compiler happy
 
 // Protected property for copying
 -(GLvoid*) varValue { return _varValue; }

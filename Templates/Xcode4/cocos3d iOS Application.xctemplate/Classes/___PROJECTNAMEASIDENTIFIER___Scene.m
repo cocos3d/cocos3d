@@ -57,10 +57,18 @@
 	// nodes to the CC3Scene, if no customized resource subclass is needed.
 	[self addContentFromPODFile: @"hello-world.pod"];
 	
-	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex content in main memory because it is now redundant.
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and to
+	// save memory, release the vertex content in main memory because it is now redundant.
 	[self createGLBuffers];
 	[self releaseRedundantContent];
+	
+	// Select an appropriate shader program for each mesh node in this scene now. If this step
+	// is omitted, a shader program will be selected for each mesh node the first time that mesh
+	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
+	// as each shader program is loaded as needed the first time it is needed during drawing.
+	[self selectShaderPrograms];
+		
+	// ------------------------------------------
 	
 	// That's it! The scene is now constructed and is good to go.
 	

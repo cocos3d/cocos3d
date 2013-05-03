@@ -154,9 +154,7 @@
 #pragma mark -
 #pragma mark CC3SimpleLineNode
 
-@implementation CC3SimpleLineNode {
-	CC3Vector lineVertices[2];
-}
+@implementation CC3SimpleLineNode
 
 
 #pragma mark Allocation and initialization

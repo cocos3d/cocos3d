@@ -37,6 +37,13 @@
 
 /** A CC3ResourceNode that that wraps a CC3PODResource PVR POD resource. */
 @interface CC3PODResourceNode : CC3ResourceNode {}
+
+/** The number of frames of animation in the POD file. */
+@property(nonatomic, readonly) GLuint animationFrameCount;
+
+/** The frame rate of animation in the POD file, in frames per second. */
+@property(nonatomic, readonly) GLfloat animationFrameRate;
+
 @end
 
 

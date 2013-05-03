@@ -49,6 +49,19 @@
 -(Class) programClass { return [CC3GLProgram class]; }
 
 -(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+	CC3Material* mat = aMeshNode.material;
+	if ( !mat ) return self.pureColorProgram;
+	
+	CC3GLProgram* shaderProgram = mat.shaderProgram;
+	if ( !shaderProgram ) {
+		shaderProgram = [self selectProgramForMeshNode: aMeshNode];
+		mat.shaderProgram = shaderProgram;
+		LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, aMeshNode);
+	}
+	return shaderProgram;
+}
+
+-(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode {
 		
 	CC3Material* mat = aMeshNode.material;
 
@@ -86,11 +99,6 @@
 
 	// Default to the most flexible, but least efficient shaders
 	return [self configurableProgram: shouldAlphaTest];
-}
-
--(CC3GLProgram*) programForVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !visitor.shouldDecorateNode ) return self.pureColorProgram;
-	return [self programForMeshNode: visitor.currentMeshNode];
 }
 
 

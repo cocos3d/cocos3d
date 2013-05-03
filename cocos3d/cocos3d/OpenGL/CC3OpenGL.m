@@ -155,17 +155,18 @@
 		[self bindVertexContentToAttributeAt: vaIdx];
 	}
 	vaPtr->wasBound = YES;
+	value_MaxVertexAttribsUsed = MAX(value_MaxVertexAttribsUsed, vaIdx + 1);
 }
 
 -(void) bindVertexContentToAttributeAt: (GLint) vaIdx { CC3AssertUnimplemented(@"bindVertexContentToAttributeAt:"); }
 
 -(void) clearUnboundVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++)
 		vertexAttributes[vaIdx].wasBound = NO;
 }
 
 -(void) enableBoundVertexAttributes {
-	for (GLuint vaIdx = 0; vaIdx < value_GL_MAX_VERTEX_ATTRIBS; vaIdx++)
+	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++)
 		[self enableVertexAttribute: (vertexAttributes[vaIdx].wasBound) at: vaIdx];
 }
 
@@ -493,11 +494,14 @@
 					0, NSStringFromGLEnum(texelFormat), NSStringFromGLEnum(texelType), imageData);
 }
 
+// Activate the current texture unit, and keep track of the maximum
+// number of texture units that have been concurrently activated.
 -(void) activateTextureUnit: (GLuint) tuIdx {
 	cc3_CheckGLPrim(tuIdx, value_GL_ACTIVE_TEXTURE, isKnown_GL_ACTIVE_TEXTURE);
 	if ( !needsUpdate ) return;
 	glActiveTexture(GL_TEXTURE0 + tuIdx);
 	LogGLErrorTrace(@"glActiveTexture(%@)", NSStringFromGLEnum(GL_TEXTURE0 + tuIdx));
+	value_MaxTextureUnitsUsed = MAX(value_MaxTextureUnitsUsed, tuIdx + 1);
 }
 
 -(void) activateClientTextureUnit: (GLuint) tuIdx {}
@@ -565,8 +569,6 @@
 
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {}
 
--(void) enableTextureCoordinates: (BOOL) onOff at: (GLuint) tuIdx {}
-
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {}
 
 
@@ -628,6 +630,10 @@
 
 #pragma mark Shaders
 
+-(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode { return nil; }
+
+-(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+
 -(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(NSString*) defaultShaderPreamble { return @""; }
@@ -686,6 +692,8 @@
 
 /** Allocates and initializes the texture units. This must be invoked after the initPlatformLimits. */
 -(void) initTextureUnits {
+	value_MaxTextureUnitsUsed = 0;
+
 	value_GL_TEXTURE_BINDING_2D = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
 	value_GL_TEXTURE_BINDING_CUBE_MAP = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
 }
