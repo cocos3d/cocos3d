@@ -82,12 +82,12 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 			[uniform setFloat: (CCDirector.sharedDirector.displayLinkTime - visitor.deltaTime)];
 			return YES;
 		case kCC3PVRShamanSemanticViewportSize:
-			vp = visitor.scene.viewportManager.viewport;
+			vp = visitor.camera.viewport;
 			[uniform setPoint: ccp(vp.w, vp.h)];
 			return YES;
 		case kCC3PVRShamanSemanticViewportClipping:
 			// Applies the field of view angle to the narrower aspect.
-			vp = visitor.scene.viewportManager.viewport;
+			vp = visitor.camera.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;

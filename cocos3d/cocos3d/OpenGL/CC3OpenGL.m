@@ -470,7 +470,7 @@
 	return texID;
 }
 
--(void) deleteTextureID: (GLuint) texID {
+-(void) deleteTexture: (GLuint) texID {
 	if ( !texID ) return;		// Silently ignore zero texture ID
 	glDeleteTextures(1, &texID);
 	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
@@ -609,6 +609,88 @@
 -(void) setPerspectiveCorrectionHint: (GLenum) hint {}
 
 -(void) setPointSmoothingHint: (GLenum) hint {}
+
+
+#pragma mark Framebuffers
+
+-(GLuint) generateFramebufferID {
+	GLuint fbID;
+	glGenFramebuffers(1, &fbID);
+	LogGLErrorTrace(@"glGenFramebuffers(%i, %u)", 1, fbID);
+	return fbID;
+}
+
+-(void) deleteFramebuffer: (GLuint) fbID {
+	if ( !fbID ) return;		// Silently ignore zero ID
+	glDeleteFramebuffers(1, &fbID);
+	LogGLErrorTrace(@"glDeleteFramebuffers(%i, %u)", 1,fbID);
+}
+
+-(void) bindFramebuffer: (GLuint) fbID {
+	cc3_CheckGLPrim(fbID, value_GL_FRAMEBUFFER_BINDING, isKnown_GL_FRAMEBUFFER_BINDING);
+	if ( !needsUpdate ) return;
+	glBindFramebuffer(GL_FRAMEBUFFER, fbID);
+	LogGLErrorTrace(@"glBindFramebuffer(%@, %u)", NSStringFromGLEnum(GL_FRAMEBUFFER), fbID);
+}
+
+-(GLuint) generateRenderbufferID {
+	GLuint rbID;
+	glGenRenderbuffers(1, &rbID);
+	LogGLErrorTrace(@"glGenRenderbuffers(%i, %u)", 1, rbID);
+	return rbID;
+}
+
+-(void) deleteRenderbuffer: (GLuint) rbID {
+	if ( !rbID ) return;		// Silently ignore zero ID
+	glDeleteRenderbuffers(1, &rbID);
+	LogGLErrorTrace(@"glDeleteRenderbuffers(%i, %u)", 1,rbID);
+}
+
+-(void) bindRenderbuffer: (GLuint) rbID {
+	cc3_CheckGLPrim(rbID, value_GL_RENDERBUFFER_BINDING, isKnown_GL_RENDERBUFFER_BINDING);
+	if ( !needsUpdate ) return;
+	glBindRenderbuffer(GL_RENDERBUFFER, rbID);
+	LogGLErrorTrace(@"glBindRenderbuffer(%@, %u)", NSStringFromGLEnum(GL_RENDERBUFFER), rbID);
+}
+
+-(void) allocateStorageForRenderbuffer: (GLuint) rbID ofSize: (CC3IntSize) size andFormat: (GLenum) format {
+	[self bindRenderbuffer: rbID];
+	glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
+	LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
+					NSStringFromGLEnum(format), size.width, size.height);
+}
+
+-(void) bindRenderbuffer: (GLuint) rbID toFrameBuffer: (GLuint) fbID asAttachment: (GLenum) attachment {
+	[self bindFramebuffer: fbID];
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbID);
+	LogGLErrorTrace(@"glFramebufferRenderbuffer(%@, %@, %@, %u)", NSStringFromGLEnum(GL_FRAMEBUFFER),
+					NSStringFromGLEnum(attachment), NSStringFromGLEnum(GL_RENDERBUFFER), rbID);
+}
+
+-(void) bindTexture2D: (GLuint) texID
+				 face: (GLenum) face
+		  mipmapLevel: (GLint) mipmapLevel
+		toFrameBuffer: (GLuint) fbID
+		 asAttachment: (GLenum) attachment {
+	CC3Assert(attachment != GL_STENCIL_ATTACHMENT, @"Textures cannot be attached to a framebuffer as a stencil attachment.");
+	[self bindFramebuffer: fbID];
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, face, texID, mipmapLevel);
+	LogGLErrorTrace(@"glFramebufferTexture2D(%@, %@, %@, %u, %i)", NSStringFromGLEnum(GL_FRAMEBUFFER),
+					NSStringFromGLEnum(attachment), NSStringFromGLEnum(face), texID, mipmapLevel);
+}
+
+-(BOOL) checkFramebufferStatus: (GLuint) fbID {
+	[self bindFramebuffer: fbID];
+	GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	LogGLErrorTrace(@"glCheckFramebufferStatus(%@)", NSStringFromGLEnum(GL_FRAMEBUFFER));
+	if (fbStatus == GL_FRAMEBUFFER_COMPLETE) return YES;
+	NSString* errTxt = [NSString stringWithFormat: @"Framebuffer %u is incomplete: %@", fbID, NSStringFromGLEnum(fbStatus)];
+	LogError(@"%@", errTxt);
+	CC3Assert(!GL_ERROR_ASSERTION_ENABLED,
+			   @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
+			   errTxt);
+	return NO;
+}
 
 
 #pragma mark Platform limits

@@ -1418,7 +1418,9 @@ globalIntersections: (CC3MeshIntersection*) intersections
 	GLfloat scaleToMaxSide = maxBBAxis / markerAxis;
 	GLfloat scaleToMinSide = minBBAxis / markerAxis;
 	GLfloat minAbsoluteScale = fabsf((maxBBAxis - minBBAxis) / markerAxis) * kCC3DirMarkerMinAbsoluteScale;
+	CC3_PUSH_NOSHADOW
 	return MAX(MAX(scaleToMaxSide, scaleToMinSide), minAbsoluteScale);
+	CC3_POP_NOSHADOW
 }
 
 // The proportional distance that the direction should protrude from the parent node
@@ -1449,8 +1451,10 @@ static GLfloat directionMarkerMinimumLength = 0;
 	CC3Vector pbbDirScale = cc3v([self calcScale: md.x bbMin: pbb.minimum.x bbMax: pbb.maximum.x],
 								 [self calcScale: md.y bbMin: pbb.minimum.y bbMax: pbb.maximum.y],
 								 [self calcScale: md.z bbMin: pbb.minimum.z bbMax: pbb.maximum.z]);
+	CC3_PUSH_NOSHADOW
 	GLfloat dirScale = MIN(pbbDirScale.x, MIN(pbbDirScale.y, pbbDirScale.z));
 	dirScale = dirScale * [[self class] directionMarkerScale];
+	CC3_POP_NOSHADOW
 
 	// Ensure that the direction marker has the minimum length specified by directionMarkerMinimumLength
 	if (directionMarkerMinimumLength) {

@@ -37,13 +37,13 @@
 
 
 /** Default value of the minUpdateInterval property. */
-static const ccTime kCC3DefaultMinimumUpdateInterval = 0.0;
+static const ccTime kCC3DefaultMinimumUpdateInterval = 0.0f;
 
 /** Default value of the maxUpdateInterval property. */
-static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0 / 15.0);
+static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0f / 15.0f);
 
 /** Default color for the ambient scene light. */
-static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 };
+static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1.0f };
 
 @class CC3Layer, CC3TouchedNodePicker, CC3ViewportManager;
 
@@ -232,24 +232,24 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * property for more information.
  */
 @interface CC3Scene : CC3Node {
-	CCArray* targettingNodes;
-	CCArray* lights;
-	CCArray* billboards;
-	CC3Layer* cc3Layer;
-	CC3ViewportManager* viewportManager;
-	CC3Camera* activeCamera;
-	CC3NodeSequencer* drawingSequencer;
-	CC3TouchedNodePicker* touchedNodePicker;
-	CC3PerformanceStatistics* performanceStatistics;
-	CC3NodeUpdatingVisitor* updateVisitor;
-	CC3NodeDrawingVisitor* drawVisitor;
-	CC3NodeDrawingVisitor* shadowVisitor;
-	CC3NodeTransformingVisitor* transformVisitor;
-	CC3NodeSequencerVisitor* drawingSequenceVisitor;
-	CC3Fog* fog;
-	ccColor4F ambientLight;
-	ccTime minUpdateInterval;
-	ccTime maxUpdateInterval;
+	CCArray* _targettingNodes;
+	CCArray* _lights;
+	CCArray* _billboards;
+	CC3Layer* _cc3Layer;
+	CC3ViewportManager* _viewportManager;
+	CC3Camera* _activeCamera;
+	CC3NodeSequencer* _drawingSequencer;
+	CC3TouchedNodePicker* _touchedNodePicker;
+	CC3PerformanceStatistics* _performanceStatistics;
+	CC3NodeUpdatingVisitor* _updateVisitor;
+	CC3NodeDrawingVisitor* _screenDrawVisitor;
+	CC3NodeDrawingVisitor* _shadowVisitor;
+	CC3NodeTransformingVisitor* _transformVisitor;
+	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
+	CC3Fog* _fog;
+	ccColor4F _ambientLight;
+	ccTime _minUpdateInterval;
+	ccTime _maxUpdateInterval;
 	ccTime _deltaFrameTime;
 	BOOL _shouldClearDepthBuffer : 1;
 }
@@ -650,6 +650,66 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark Drawing
 
 /**
+ * This method is invoked when the objects in the CC3Scene are to be drawn.
+ *
+ * Typcially this method is invoked automatically from the draw method of the CC3Layer instance
+ * on each frame rendering cycle. This method is invoked asynchronously to the model updating loop,
+ * to keep the processing of OpenGL ES drawing separate from model updates.
+ *
+ * This implementation establishes the 3D rendering environment, invokes the drawSceneContent method
+ * to draw the contents of this scene, reverts to the 2D rendering environment of the CC3Layer, and
+ * renders any 2D overlay billboards.
+ *
+ * If you want to customize the scene rendering flow, such as performing multiple-passes, or
+ * adding post-processing effects, you should override the drawSceneContent method.
+ *
+ * If the scene was touched by the user (finger or mouse), this method invokes the node picking
+ * algorithm to determine the node that is under the touch point. This is performed prior to
+ * invoking the drawSceneContent method.
+ *
+ * This method is invoked automatically during each rendering frame. Usually, the application
+ * never needs to invoke this method directly.
+ */
+-(void) drawScene;
+
+/**
+ * Template method that draws the content of the scene.
+ *
+ * This method is invoked automatically by the drawScene method, once the 3D environment has
+ * been established. Once this method is complete, the 2D rendering environment will be
+ * re-established automatically, and any 2D billboard overlays will be rendered. This method
+ * does not need to take care of any of this set-up and tear-down.
+ *
+ * This implementation turns on the lighting contained within the scene, and performs a single
+ * rendering pass of the nodes in the scene using the CC3NodeDrawingVisitor held in the
+ * screenDrawVisitor property.
+ *
+ * You can override this method to customize the scene rendering flow, such as performing
+ * multiple rendering passes, or adding post-processing effects.
+ */
+-(void) drawSceneContent;
+
+/**
+ * Template method that opens the GL drawing environment for 3D drawing.
+ *
+ * This method is invoked automatically during the transition between 2D and 3D drawing,
+ * including between the CC3Layer and the CC3Scene, and when returning from rendering
+ * a CC3Billboard containing a 2D cocos2d CCNode. Normally the application never needs
+ * to invoke this method directly.
+ */
+-(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Template method that reverts the GL drawing environment back to the configuration
+ * needed for 2D drawing.
+ *
+ * This method is invoked automatically during the transition back to 2D drawing, incluing
+ * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 2D
+ * cocos2d CCNode. Normally the application never needs to invoke this method directly.
+ */
+-(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
  * Indicates whether the OpenGL depth buffer should be cleared when transitioning between
  * 2D and 3D drawing (in either direction).
  *
@@ -709,22 +769,22 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
 /**
- * The visitor that is used to visit the nodes to draw them to the GL engine.
+ * The visitor that is used to visit the nodes to draw them to the screen.
  *
- * This property defaults to an instance of the class returned by the drawVisitorClass method.
+ * This property defaults to an instance of the class returned by the screenDrawVisitorClass method.
  * The application can set a different visitor if desired.
  */
-@property(nonatomic, retain) CC3NodeDrawingVisitor* drawVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* screenDrawVisitor;
 
 /**
  * Returns the class of visitor that will automatically be instantiated into the
- * drawVisitor property.
+ * screenDrawVisitor property.
  *
  * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation
  * returns CC3NodeDrawingVisitor. Subclasses may override to customize the behaviour
  * of the drawing visits.
  */
--(id) drawVisitorClass;
+-(id) screenDrawVisitorClass;
 
 /**
  * The visitor that is used to visit shadow nodes to draw them to the GL engine.
@@ -742,35 +802,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * The application can set a different visitor if desired.
  */
 @property(nonatomic, retain) CC3NodeSequencerVisitor* drawingSequenceVisitor;
-
-/**
- * This method is invoked periodically when the objects in the CC3Scene are to be drawn.
- *
- * Typcially this method is invoked automatically from the draw method of the CC3Layer instance.
- * This method is invoked asynchronously to the model updating loop, to keep the processing of
- * OpenGL ES drawing separate from model updates.
- *
- * This method is invoked automatically during each rendering frame. Usually, the application
- * never needs to invoke this method directly.
- */
--(void) drawScene;
-
-/** 
- * Template method that opens the GL drawing environment for 3D drawing.
- *
- * This method is invoked automatically during the transition between 2D and 3D drawing.
- * Normally the application never needs to invoke this method directly.
- */
--(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Template method that reverts the GL drawing environment back to the configuration
- * needed for 2D drawing.
- *
- * This method is invoked automatically during the transition back to 2D drawing.
- * Normally the application never needs to invoke this method directly.
- */
--(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Touch handling
@@ -1019,23 +1050,21 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * being picked and dispatched to the CC3Scene on each pair of  rendering and updating passes.
  */
 @interface CC3TouchedNodePicker : NSObject {
-	CC3NodePickingVisitor* pickVisitor;
-	CC3Scene* scene;
-	CC3Node* pickedNode;
-	uint touchQueue[kCC3TouchQueueLength];
-	uint queuedTouchCount;
-	CGPoint touchPoint;
-	BOOL wasTouched;
-	BOOL wasPicked;
+	CC3NodePickingVisitor* _pickVisitor;
+	CC3Scene* _scene;
+	CC3Node* _pickedNode;
+	uint _touchQueue[kCC3TouchQueueLength];
+	uint _queuedTouchCount;
+	CGPoint _touchPoint;
+	BOOL _wasTouched;
+	BOOL _wasPicked;
 }
 
 /**
- * The visitor that is used to visit the nodes to draw them when picking
- * a node from touch selection.
+ * The visitor that is used to visit the nodes to draw them when picking a node from touch selection.
  *
- * This property defaults to an instance of the class returned by the
- * pickVisitorClass method of the CC3Scene.
- * The application can set a different visitor if desired.
+ * This property defaults to an instance of the class returned by the pickVisitorClass method of the
+ * CC3Scene. The application can set a different visitor if desired.
  */
 @property(nonatomic, retain) CC3NodePickingVisitor* pickVisitor;
 
@@ -1047,12 +1076,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 
 /** Allocates and initializes an autoreleased instance on the specified CC3Scene. */
 +(id) pickerOnScene: (CC3Scene*) aCC3Scene;
-
-/** @deprecated Renamed to initOnScene:. */
--(id) initOnWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to pickerOnScene:. */
-+(id) handlerOnWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates that a node should be picked for the touch event of the specified
@@ -1108,20 +1131,20 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
 #pragma mark CC3ViewportManager
 
 /**
- * CC3ViewportManager manages the GL viewport and device orientation for the 3D scene,
- * including handling coordinate system rotation based on the device orientation,
- * and conversion of locations and points between the 3D and 2D coordinate systems. 
+ * CC3ViewportManager updates the GL viewport and device orientation for the active camera of
+ * the 3D scene, including handling coordinate system rotation based on the device orientation,
+ * and conversion of locations and points between the 3D and 2D coordinate systems.
  */
 @interface CC3ViewportManager : NSObject {
-	CC3Matrix* deviceRotationMatrix;
-	CC3Scene* scene;
-	CGRect layerBounds;
-	CC3Viewport viewport;
-	CC3Vector glToCC2PointMapX;
-	CC3Vector glToCC2PointMapY;
-	CC3Vector cc2ToGLPointMapX;
-	CC3Vector cc2ToGLPointMapY;
-	BOOL isFullView : 1;
+	CC3Matrix* _deviceRotationMatrix;
+	CC3Scene* _scene;
+	CGRect _layerBounds;
+	CC3Viewport _viewport;
+	CC3Vector _glToCC2PointMapX;
+	CC3Vector _glToCC2PointMapY;
+	CC3Vector _cc2ToGLPointMapX;
+	CC3Vector _cc2ToGLPointMapY;
+	BOOL _isFullView : 1;
 }
 
 /** The bounding box of the CC3Layer the scene is drawing within. */
@@ -1133,9 +1156,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * size will be the same as the rectangle returned by the layerBounds property.
  */
 @property(nonatomic, readonly) CGRect layerBoundsLocal;
-
-/** The viewport used by the 3D scene. */
-@property(nonatomic, readonly) CC3Viewport viewport;
 
 /**
  * A rotation matrix to hold the transform required to align with the current device orientation.
@@ -1165,41 +1185,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * ensure that superclass state is copied as well.
  */
 -(void) populateFrom: (CC3ViewportManager*) another;
-
-/** @deprecated Renamed to initOnScene:. */
--(id) initOnWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Renamed to viewportManagerOnScene:. */
-+(id) viewportManagerOnWorld: (CC3Scene*) aCC3Scene DEPRECATED_ATTRIBUTE;
-
-
-#pragma mark Drawing
-
-/**
- * Template method that opens the viewport for 3D drawing by setting the viewport to the
- * dimensions of the layer.
- *
- * Also invokes the openClippingWithVisitor: method so that GL drawing for this scene
- * does not extend beyond the layer bounds.
- */
--(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Template method that closes the viewport for 3D drawing by setting the viewport
- * dimensions back to the window bounds.
- *
- * Also invokes the closeClippingWithVisitor: method.
- */
--(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * If the viewport does not cover the entire window, a scissor rectangle is defined to cover
- * the viewport area so that GL drawing of the scene does not extend beyond the viewport bounds.
- */
--(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/** Disables any scissor testing to the viewport bounds that was enabled by the openClipping method. */
--(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
 #pragma mark Converting points
@@ -1249,7 +1234,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2, 0.2, 0.2, 1.0 
  * points, in both directions. These conversion mappings are used by the complimentary methods
  * glPointFromCC2Point: and cc2PointFromGLPoint:.
  *
- * The viewport is set to match the specified bounds.
+ * The viewport of the active camera of the scene is set to match the specified bounds.
  *
  * The device rotation matrix is calculated from the angle of rotation associated with each
  * device orientation.

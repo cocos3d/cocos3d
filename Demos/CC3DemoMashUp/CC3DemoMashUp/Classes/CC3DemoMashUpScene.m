@@ -400,7 +400,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	cam.location = cc3v(2.0, 1.0, 0.0);		// Relative to the parent beach ball
 //	cam.target = teapotSatellite;			// Look toward the rainbow teapot...
 //	cam.shouldTrackTarget = YES;			// ...and track it as it moves
-
 }
 
 /** Configure the lighting. */
@@ -1294,23 +1293,23 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) addFog {
 	self.fog = [CC3Fog fog];
-	fog.visible = NO;
-	fog.color = ccc3(128, 128, 180);		// A slightly bluish fog.
+	_fog.visible = NO;
+	_fog.color = ccc3(128, 128, 180);		// A slightly bluish fog.
 
 	// Choose one of GL_LINEAR, GL_EXP and GL_EXP2
-	fog.attenuationMode = GL_EXP2;
+	_fog.attenuationMode = GL_EXP2;
 
 	// If using GL_EXP or GL_EXP2, the density property will have effect.
-	fog.density = 0.0017;
+	_fog.density = 0.0017;
 	
 	// If using GL_LINEAR, the start and end distance properties will have effect.
-	fog.startDistance = 200.0;
-	fog.endDistance = 1500.0;
+	_fog.startDistance = 200.0;
+	_fog.endDistance = 1500.0;
 
 	// To make things a bit more interesting, set up a repeating up/down cycle to
 	// change the color of the fog from the original bluish to reddish, and back again.
 	GLfloat tintTime = 4.0f;
-	ccColor3B startColor = fog.color;
+	ccColor3B startColor = _fog.color;
 	ccColor3B endColor = ccc3(180, 128, 128);		// A slightly redish fog.
 	CCActionInterval* tintDown = [CCTintTo actionWithDuration: tintTime
 														  red: endColor.r
@@ -1321,7 +1320,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													  green: startColor.g
 													   blue: startColor.b];
 	CCActionInterval* tintCycle = [CCSequence actionOne: tintDown two: tintUp];
-	[fog runAction: [CCRepeatForever actionWithAction: tintCycle]];
+	[_fog runAction: [CCRepeatForever actionWithAction: tintCycle]];
 }
 
 /**
@@ -2095,6 +2094,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 /** Update the location and direction of looking of the 3D camera */
 -(void) updateCameraFromControls: (ccTime) dt {
+	CC3Camera* cam = self.activeCamera;
 	
 	// Update the location of the player (the camera)
 	if ( playerLocationControl.x || playerLocationControl.y ) {
@@ -2110,18 +2110,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		// in turn are set by the joystick, and combined into a single directional vector.
 		// This represents the movement of the camera. The new location is simply the old
 		// camera location plus the movement.
-		CC3Vector moveVector = CC3VectorAdd(CC3VectorScaleUniform(activeCamera.globalRightDirection, delta.x),
-											CC3VectorScaleUniform(activeCamera.globalForwardDirection, delta.y));
-		activeCamera.location = CC3VectorAdd(activeCamera.location, moveVector);
+		CC3Vector moveVector = CC3VectorAdd(CC3VectorScaleUniform(cam.globalRightDirection, delta.x),
+											CC3VectorScaleUniform(cam.globalForwardDirection, delta.y));
+		cam.location = CC3VectorAdd(cam.location, moveVector);
 	}
 
 	// Update the direction the camera is pointing by panning and inclining using rotation.
 	if ( playerDirectionControl.x || playerDirectionControl.y ) {
 		CGPoint delta = ccpMult(playerDirectionControl, dt * 30.0);		// Factor to set speed of rotation.
-		CC3Vector camRot = activeCamera.rotation;
+		CC3Vector camRot = cam.rotation;
 		camRot.y -= delta.x;
 		camRot.x += delta.y;
-		activeCamera.rotation = camRot;	
+		cam.rotation = camRot;	
 	}
 }
 
@@ -2131,27 +2131,27 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * is handled by a CCActionInterval, so that the movement appears smooth and animated.
  */
 -(void) switchCameraTarget {
-	if (camTarget == origCamTarget) {
+	if (camTarget == origCamTarget)
 		camTarget = globe;
-	} else if (camTarget == globe) {
+	else if (camTarget == globe)
 		camTarget = beachBall;
-	} else if (camTarget == beachBall) {
+	else if (camTarget == beachBall)
 		camTarget = teapotTextured;
-	} else if (camTarget == teapotTextured) {
+	else if (camTarget == teapotTextured)
 		camTarget = mascot;
-	} else if (camTarget == mascot) {
+	else if (camTarget == mascot)
 		camTarget = woodenSign;
-	} else if (camTarget == woodenSign) {
+	else if (camTarget == woodenSign)
 		camTarget = floatingHead;
-	} else if (camTarget == floatingHead) {
+	else if (camTarget == floatingHead)
 		camTarget = dieCube;
-	} else {
+	else
 		camTarget = origCamTarget;
-	}
-	self.activeCamera.target = nil;			// Ensure the camera is not locked to the original target
-	[self.activeCamera stopAllActions];
-	[self.activeCamera runAction: [CC3RotateToLookAt actionWithDuration: 2.0
-														 targetLocation: camTarget.globalLocation]];
+	
+	CC3Camera* cam = self.activeCamera;
+	cam.target = nil;			// Ensure the camera is not locked to the original target
+	[cam stopAllActions];
+	[cam runAction: [CC3RotateToLookAt actionWithDuration: 2.0 targetLocation: camTarget.globalLocation]];
 	LogInfo(@"Camera target toggled to %@", camTarget);
 }
 
@@ -2228,14 +2228,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Node* spotLight = [self getNodeNamed: kSpotlightName];
 	
 	if (sun.visible) {
-		if (fog.visible) {		// Cycle to spotlight
+		if (_fog.visible) {		// Cycle to spotlight
 			sun.visible = NO;
-			fog.visible = NO;
+			_fog.visible = NO;
 		} else {				// Cycle to fog
-			fog.visible = YES;
+			_fog.visible = YES;
 		}
 	} else {					// Cycle to sun and clear skies
-		fog.visible = NO;
+		_fog.visible = NO;
 		sun.visible = YES;
 	}
 	// If the sun is shining, turn on the CC3Light from the POD file, and turn off the spotlight,
@@ -2294,7 +2294,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 #pragma mark Gesture handling
 
--(void) startMovingCamera { cameraMoveStartLocation = activeCamera.location; }
+-(void) startMovingCamera { cameraMoveStartLocation = self.activeCamera.location; }
 
 -(void) stopMovingCamera {}
 
@@ -2302,15 +2302,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 #define kCamPinchMovementUnit		250
 
 -(void) moveCameraBy:  (CGFloat) aMovement {
+	CC3Camera* cam = self.activeCamera;
 
 	// Convert to a logarithmic scale, zero is backwards, one is unity, and above one is forward.
 	GLfloat camMoveDist = logf(aMovement) * kCamPinchMovementUnit;
 
-	CC3Vector moveVector = CC3VectorScaleUniform(activeCamera.globalForwardDirection, camMoveDist);
-	activeCamera.location = CC3VectorAdd(cameraMoveStartLocation, moveVector);
+	CC3Vector moveVector = CC3VectorScaleUniform(cam.globalForwardDirection, camMoveDist);
+	cam.location = CC3VectorAdd(cameraMoveStartLocation, moveVector);
 }
 
--(void) startPanningCamera { cameraPanStartRotation = activeCamera.rotation; }
+-(void) startPanningCamera { cameraPanStartRotation = self.activeCamera.rotation; }
 
 -(void) stopPanningCamera {}
 
@@ -2319,15 +2320,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CGPoint panRot = ccpMult(aMovement, 90);		// Full pan swipe is 90 degrees
 	camRot.y += panRot.x;
 	camRot.x -= panRot.y;
-	activeCamera.rotation = camRot;	
+	self.activeCamera.rotation = camRot;
 }
 
 -(void) startDraggingAt: (CGPoint) touchPoint { [self pickNodeFromTapAt: touchPoint]; }
 
 -(void) dragBy: (CGPoint) aMovement atVelocity: (CGPoint) aVelocity {
-	if (selectedNode == dieCube || selectedNode == texCubeSpinner) {
+	if (selectedNode == dieCube || selectedNode == texCubeSpinner)
 		[self rotate: ((SpinningNode*)selectedNode) fromSwipeVelocity: aVelocity];
-	}
 }
 
 -(void) stopDragging { selectedNode = nil; }
@@ -2597,7 +2597,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
 	[desc appendFormat: @"You selected %@", aNode];
 	[desc appendFormat: @" located at %@", NSStringFromCC3Vector(aNode.globalLocation)];
-	[desc appendFormat: @", or at %@ in 2D.", NSStringFromCC3Vector([activeCamera projectNode: aNode])];
+	[desc appendFormat: @", or at %@ in 2D.", NSStringFromCC3Vector([self.activeCamera projectNode: aNode])];
 	[desc appendFormat: @"\nThe actual node touched was %@", localNode];
 	[desc appendFormat: @" at %@ on its boundary", NSStringFromCC3Vector(nodeTouchLoc)];
 	[desc appendFormat: @" (%@ globally).", NSStringFromCC3Vector(puncturedNodes.closestGlobalPunctureLocation)];

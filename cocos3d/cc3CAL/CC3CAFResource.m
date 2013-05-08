@@ -145,7 +145,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 			  @"%@ cannot read CAF file format version %i. The maximum supported version is %i",
 			  self, _fileVersion, kCC3MaxCAFFileVersion);
 	
-	if (_fileVersion >= 1300) _isCompressed = reader.readInteger;
+	if (_fileVersion >= 1300) _isCompressed = (reader.readInteger != 0);
 	CC3Assert( !_isCompressed, @"%@ cannot read compressed animation content."
 			  @" Re-export the CAF file with uncompressed animation content.", self);
 
@@ -180,7 +180,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 	if (frameCount <= 0) return YES;
 
 	// Create and populate the animation instance
-	CC3ArrayNodeAnimation* anim = [CC3ArrayNodeAnimation animationWithFrameCount: frameCount];
+	CC3ArrayNodeAnimation* anim = [CC3ArrayNodeAnimation animationWithFrameCount: (GLuint)frameCount];
 	if ( ![self populateAnimation: anim from: reader] ) return NO;
 
 	// Create the node, add the animation to it, and add it to the nodes array
@@ -209,8 +209,8 @@ static BOOL _defaultShouldSwapYZ = YES;
 	CC3Vector* locations = anim.allocateLocations;
 	CC3Quaternion* quaternions = anim.allocateQuaternions;
 
-	NSInteger frameCount = anim.frameCount;
-	for (NSInteger fIdx = 0; fIdx < frameCount; fIdx++) {
+	GLuint frameCount = anim.frameCount;
+	for (GLuint fIdx = 0; fIdx < frameCount; fIdx++) {
 		
 		// Frame time, normalized to range between 0 and 1.
 		frameTimes[fIdx] = CLAMP(reader.readFloat / _animationDuration, 0.0f, 1.0f);

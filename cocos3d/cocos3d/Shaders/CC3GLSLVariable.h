@@ -71,12 +71,12 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 	CC3GLProgram* _program;
 	NSString* _name;
 	GLenum _type;
-	GLenum _semantic : 16;
-	GLint _location : 16;
-	GLuint _index : 12;
-	CC3GLSLVariableScope _scope : 4;
-	GLint _size : 8;
+	GLenum _semantic;
+	GLint _location;
+	GLuint _index;
+	GLint _size;
 	GLuint _semanticIndex : 8;
+	CC3GLSLVariableScope _scope : 4;
 }
 
 /** The GL program object containing this variable. */

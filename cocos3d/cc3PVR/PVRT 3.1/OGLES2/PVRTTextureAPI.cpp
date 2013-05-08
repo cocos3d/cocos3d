@@ -14,13 +14,15 @@
 
 ******************************************************************************/
 
+#pragma GCC diagnostic ignored "-Wshadow"	// patched for cocos3d by Bill Hollings
+
 #include <string.h>
 #include <stdlib.h>
 
-//#include "PVRTContext.h"				// patched for cocos3d by Bill Hollings
+//#include "PVRTContext.h"					// patched for cocos3d by Bill Hollings
 #include "PVRTgles2Ext.h"
 
-#if CC3_OGLES_2							// patched for cocos3d by Bill Hollings
+#if CC3_OGLES_2								// patched for cocos3d by Bill Hollings
 
 #include "PVRTTexture.h"
 #include "PVRTTextureAPI.h"
@@ -28,7 +30,7 @@
 #include "PVRTFixedPoint.h"
 #include "PVRTMap.h"
 #include "PVRTMatrix.h"
-//#include "PVRTMisc.h"					// patched for cocos3d by Bill Hollings
+//#include "PVRTMisc.h"						// patched for cocos3d by Bill Hollings
 #include "PVRTResourceFile.h"
 
 /*****************************************************************************

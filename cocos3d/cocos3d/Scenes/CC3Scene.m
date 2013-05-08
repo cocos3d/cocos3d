@@ -50,29 +50,16 @@
 -(id) transformVisitorClass;
 @end
 
-@interface CC3Scene (TemplateMethods)
--(void) activeCameraChangedFrom: (CC3Camera*) oldCam;
--(void) updateCamera: (ccTime) dt;
--(void) updateTargets: (ccTime) dt;
--(void) updateFog: (ccTime) dt;
--(void) updateShadows: (ccTime) dt;
--(void) updateBillboards: (ccTime) dt;
--(void) collectFrameInterval;
--(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor;
--(void) checkNeedShadowVisitor;
--(void) updateDrawSequence;
--(BOOL) addToDrawingSequencer: (CC3Node*) aNode;
--(BOOL) removeFromDrawingSequencer: (CC3Node*) aNode;
-@end
-
 
 @implementation CC3Scene
 
-@synthesize cc3Layer, activeCamera, ambientLight, minUpdateInterval, maxUpdateInterval;
-@synthesize touchedNodePicker, drawingSequencer, drawingSequenceVisitor;
-@synthesize drawVisitor, shadowVisitor, updateVisitor, transformVisitor;
-@synthesize viewportManager, performanceStatistics, fog, lights;
-@synthesize shouldClearDepthBuffer=_shouldClearDepthBuffer;
+@synthesize cc3Layer=_cc3Layer, ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
+@synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
+@synthesize drawingSequencer=_drawingSequencer, drawingSequenceVisitor=_drawingSequenceVisitor;
+@synthesize screenDrawVisitor=_screenDrawVisitor, shadowVisitor=_shadowVisitor;
+@synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
+@synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
+@synthesize fog=_fog, lights=_lights, shouldClearDepthBuffer=_shouldClearDepthBuffer;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -80,71 +67,75 @@
  * Make sure they are all made nil in addition to being released here.
  */
 - (void)dealloc {
-	cc3Layer = nil;							// Not retained
+	_cc3Layer = nil;							// Not retained
 	self.viewportManager = nil;				// Use setter to release and make nil
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.touchedNodePicker = nil;			// Use setter to release and make nil
-	self.drawVisitor = nil;					// Use setter to release and make nil
+	self.screenDrawVisitor = nil;			// Use setter to release and make nil
 	self.shadowVisitor = nil;				// Use setter to release and make nil
 	self.updateVisitor = nil;				// Use setter to release and make nil
 	self.transformVisitor = nil;			// Use setter to release and make nil
 	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
-	[targettingNodes release];
-	targettingNodes = nil;
-	[lights release];
-	lights = nil;
-	[billboards release];
-	billboards = nil;
+	[_targettingNodes release];
+	_targettingNodes = nil;
+	[_lights release];
+	_lights = nil;
+	[_billboards release];
+	_billboards = nil;
 	
     [super dealloc];
 }
 
--(CC3UIViewController*) controller { return cc3Layer.controller; }
+-(CC3UIViewController*) controller { return _cc3Layer.controller; }
 
--(CC3Camera*) activeCamera { return activeCamera; }
+-(CC3Camera*) activeCamera { return _activeCamera; }
 
 -(void) setActiveCamera: (CC3Camera*) aCamera {
-	if (aCamera != activeCamera) {
-		CC3Camera* oldCam = activeCamera;
-		activeCamera = [aCamera retain];
-		[self activeCameraChangedFrom: oldCam];
-		[oldCam release];
-	}
+	if (aCamera == _activeCamera) return;
+	CC3Camera* oldCam = _activeCamera;
+	_activeCamera = [aCamera retain];
+	[self activeCameraChangedFrom: oldCam];
+	[oldCam release];
 }
 
 /** The active camera has changed. Update whoever cares. */
 -(void) activeCameraChangedFrom: (CC3Camera*) oldCam {
 
+	CC3Camera* newCam = self.activeCamera;
+	
+	// Update the visitors that make use of the active camera
+	self.updateVisitor.camera = newCam;
+	self.screenDrawVisitor.camera = newCam;
+	self.shadowVisitor.camera = newCam;
+	self.touchedNodePicker.pickVisitor.camera = newCam;
+
+	// Ensure camera screen-rendering configuration is preserved
+	newCam.viewport = oldCam.viewport;
+	newCam.hasInfiniteDepthOfField = oldCam.hasInfiniteDepthOfField;
+
 	// For any targetting nodes that were targetted to the old camera,
 	// set the target to the new camera.
-	CCArray* targNodes = [targettingNodes autoreleasedCopy];
-	for (CC3Node* tn in targNodes) {
+	CCArray* targNodes = [_targettingNodes autoreleasedCopy];
+	for (CC3Node* tn in targNodes)
 		// If the node should always target the camera, or if the target
 		// is already the old camera, set its target to the new camera.
-		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) {
-			tn.target = activeCamera;
-		}
-	}
+		if (tn.shouldAutotargetCamera || (oldCam && (tn.target == oldCam))) tn.target = newCam;
 	
 	// Move other non-target camera listeners (eg- shadow casting volumes) over
 	CCArray* camListeners = [oldCam.transformListeners autoreleasedCopy];
 	for(id<CC3NodeTransformListenerProtocol> aListener in camListeners) {
 		[oldCam removeTransformListener: aListener];
-		[activeCamera addTransformListener: aListener];
+		[newCam addTransformListener: aListener];
 	}
-	
-	// Ensure infinite depth of field is preserved
-	activeCamera.hasInfiniteDepthOfField = oldCam.hasInfiniteDepthOfField;
 }
 
 -(void) setFog: (CC3Fog*) aFog {
-	if (aFog != fog) {
-		[fog stopAllActions];		// Ensure all actions stopped before releasing
-		[fog release];
-		fog = [aFog retain];
-	}
+	if (aFog == _fog) return;
+	[_fog stopAllActions];		// Ensure all actions stopped before releasing
+	[_fog release];
+	_fog = [aFog retain];
 }
 
 // Deprecated
@@ -158,23 +149,23 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		targettingNodes = [[CCArray array] retain];
-		lights = [[CCArray array] retain];
-		billboards = [[CCArray array] retain];
+		_targettingNodes = [[CCArray array] retain];
+		_lights = [[CCArray array] retain];
+		_billboards = [[CCArray array] retain];
 		_shouldClearDepthBuffer = YES;
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
-		self.drawVisitor = [[self drawVisitorClass] visitor];
+		self.screenDrawVisitor = [[self screenDrawVisitorClass] visitor];
 		self.shadowVisitor = nil;
 		self.updateVisitor = [[self updateVisitorClass] visitor];
 		self.transformVisitor = [[self transformVisitorClass] visitor];
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
-		fog = nil;
-		activeCamera = nil;
-		ambientLight = kCC3DefaultLightColorAmbientScene;
-		minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
-		maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
+		_fog = nil;
+		_activeCamera = nil;
+		_ambientLight = kCC3DefaultLightColorAmbientScene;
+		_minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
+		_maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
 		_deltaFrameTime = 0;
 		[self initializeScene];
 		LogGLErrorState(@"after initializing %@", self);
@@ -195,27 +186,27 @@
 	// Lights, targetting nodes, billboards & drawing sequence collections,
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
-	[viewportManager populateFrom: another.viewportManager];
+	[_viewportManager populateFrom: another.viewportManager];
 	
-	[drawingSequencer release];
-	drawingSequencer = [another.drawingSequencer copy];					// retained
+	[_drawingSequencer release];
+	_drawingSequencer = [another.drawingSequencer copy];						// retained
 	
-	[performanceStatistics release];
-	performanceStatistics = [another.performanceStatistics copy];		// retained
+	[_performanceStatistics release];
+	_performanceStatistics = [another.performanceStatistics copy];			// retained
 
-	self.drawVisitor = [[another.drawVisitor class] visitor];			// retained
-	self.shadowVisitor = [[another.shadowVisitor class] visitor];		// retained
-	self.updateVisitor = [[another.updateVisitor class] visitor];		// retained
-	self.transformVisitor = [[another.transformVisitor class] visitor];	// retained
+	self.screenDrawVisitor = [[another.screenDrawVisitor class] visitor];	// retained
+	self.shadowVisitor = [[another.shadowVisitor class] visitor];			// retained
+	self.updateVisitor = [[another.updateVisitor class] visitor];			// retained
+	self.transformVisitor = [[another.transformVisitor class] visitor];		// retained
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
-	[fog release];
-	fog = [another.fog copy];											// retained
+	[_fog release];
+	_fog = [another.fog copy];												// retained
 	
-	ambientLight = another.ambientLight;
-	minUpdateInterval = another.minUpdateInterval;
-	maxUpdateInterval = another.maxUpdateInterval;
+	_ambientLight = another.ambientLight;
+	_minUpdateInterval = another.minUpdateInterval;
+	_maxUpdateInterval = another.maxUpdateInterval;
 	_shouldClearDepthBuffer = another.shouldClearDepthBuffer;
 }
 
@@ -246,22 +237,22 @@
  * Does nothing if this instance is not running.
  */
 -(void) updateScene: (ccTime) dt {
-	[performanceStatistics addUpdateTime: dt];
+	[_performanceStatistics addUpdateTime: dt];
 	if( !self.isRunning) return;
 
 	// Clamp the specified interval to a range defined by the minimum and maximum
 	// update intervals. If the maximum update interval limit is zero or negative,
 	// its value is ignored, and the dt value is not limited to a maximum value.
-	_deltaFrameTime = CLAMP(dt, minUpdateInterval,
-							(maxUpdateInterval > 0.0 ? maxUpdateInterval : dt));
+	_deltaFrameTime = CLAMP(dt, _minUpdateInterval,
+							(_maxUpdateInterval > 0.0 ? _maxUpdateInterval : dt));
 	
 	LogTrace(@"******* %@ starting update: %.2f ms (clamped from %.2f ms)",
 			 self, _deltaFrameTime * 1000.0, dt * 1000.0);
 	
-	[touchedNodePicker dispatchPickedNode];
+	[_touchedNodePicker dispatchPickedNode];
 	
-	updateVisitor.deltaTime = _deltaFrameTime;
-	[updateVisitor visit: self];
+	_updateVisitor.deltaTime = _deltaFrameTime;
+	[_updateVisitor visit: self];
 	
 	[self updateTargets: _deltaFrameTime];
 	[self updateCamera: _deltaFrameTime];
@@ -276,7 +267,7 @@
 -(void) updateScene {
 	BOOL wasRunning = isRunning;
 	isRunning = YES;
-	[self updateScene: minUpdateInterval];
+	[self updateScene: _minUpdateInterval];
 	isRunning = wasRunning;
 }
 
@@ -285,22 +276,20 @@
  * Iterates through all the targetting nodes in this scene, updating their target tracking.
  */
 -(void) updateTargets: (ccTime) dt {
-	transformVisitor.shouldVisitChildren = YES;
-	transformVisitor.shouldLocalizeToStartingNode = NO;
-	for (CC3Node* tn in targettingNodes) {
-		[tn trackTargetWithVisitor: transformVisitor];
-	}
+	_transformVisitor.shouldVisitChildren = YES;
+	_transformVisitor.shouldLocalizeToStartingNode = NO;
+	for (CC3Node* tn in _targettingNodes) [tn trackTargetWithVisitor: _transformVisitor];
 }
 
-/** Template method to update the camera's projection. */
--(void) updateCamera: (ccTime) dt { [activeCamera buildProjection]; }
+/** Template method to update the camera. */
+-(void) updateCamera: (ccTime) dt {}
 
 /** Template method to update any fog characteristics. */
--(void) updateFog: (ccTime) dt { [fog update: dt]; }
+-(void) updateFog: (ccTime) dt { [_fog update: dt]; }
 
 /** Template method to update shadows cast by the lights. */
 -(void) updateShadows: (ccTime) dt {
-	for (CC3Light* lgt in lights) [lgt updateShadows];
+	for (CC3Light* lgt in _lights) [lgt updateShadows];
 }
 
 /**
@@ -308,8 +297,8 @@
  * Iterates through all billboards, instructing them to align with the camera if needed.
  */
 -(void) updateBillboards: (ccTime) dt {
-	for (CC3Billboard* bb in billboards) [bb alignToCamera: activeCamera];
-	LogTrace(@"%@ updated %u billboards", self, billboards.count);
+	for (CC3Billboard* bb in _billboards) [bb alignToCamera: _activeCamera];
+	LogTrace(@"%@ updated %u billboards", self, _billboards.count);
 }
 
 /**
@@ -326,36 +315,31 @@
 #pragma mark Drawing
 
 -(void) drawScene {
-
+	if ( !self.visible ) return;
+	
 	// Check and clear any GL error that occurred before 3D code
 	LogGLErrorState(@"before drawing %@", self);
 	LogTrace(@"******* %@ starting drawing visit", self);
-
-	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 	
-	if (self.visible) {
-		[self open3DWithVisitor: drawVisitor];
-		[self openViewportWithVisitor: drawVisitor];
-		[self open3DCameraWithVisitor: drawVisitor];
+	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 
-		[touchedNodePicker pickTouchedNode];
-		
-		[self illuminateWithVisitor: drawVisitor];
-		
-		[self visitForDrawingWithVisitor: drawVisitor];
-		[self drawShadowsWithVisitor: drawVisitor];
-		
-		[self darkenWithVisitor: drawVisitor];
-		[self close3DCameraWithVisitor: drawVisitor];
-		[self closeViewportWithVisitor: drawVisitor];
-		[self close3DWithVisitor: drawVisitor];
-		[self clearDepthTestingWithVisitor: drawVisitor];
-		[self draw2DBillboardsWithVisitor: drawVisitor];	// Back to 2D now
-	}
+	[self open3DWithVisitor: _screenDrawVisitor];
+	[_touchedNodePicker pickTouchedNode];
+	
+	[self drawSceneContent];
+
+	[self close3DWithVisitor: _screenDrawVisitor];
+	[self draw2DBillboardsWithVisitor: _screenDrawVisitor];	// Back to 2D now
 	
 	// Check and clear any GL error that occurred during 3D code
 	LogGLErrorState(@"after drawing %@", self);
 	LogTrace(@"******* %@ exiting drawing visit", self);
+}
+
+-(void) drawSceneContent {
+	[self illuminateWithVisitor: _screenDrawVisitor];
+	[self visitForDrawingWithVisitor: _screenDrawVisitor];
+//	[self drawShadowsWithVisitor: _shadowVisitor];
 }
 
 /**
@@ -363,14 +347,12 @@
  * and add it to the performance statistics.
  */
 -(void) collectFrameInterval {
-	if (performanceStatistics)
-		[performanceStatistics addFrameTime: [[CCDirector sharedDirector] frameInterval]];
+	if (_performanceStatistics)
+		[_performanceStatistics addFrameTime: [[CCDirector sharedDirector] frameInterval]];
 }
 
 -(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
-
-	CC3OpenGL* gl = visitor.gl;
 
 	// Ensure that the first material and mesh will be rendered, even if same as last one
 	// that was rendered on the previous cycle.
@@ -378,7 +360,7 @@
 	[CC3Mesh resetSwitching];
 	
 	// Align the 3D GL state cache with current 2D settings
-	[gl align3DStateCache];
+	[visitor.gl align3DStateCache];
 }
 
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -398,10 +380,10 @@
 	[gl unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
 	
 	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
-	visitor.currentTextureUnitIndex = 0;
-	[visitor.gl disableTexturingFrom: 1];
+	[gl disableTexturingFrom: 1];
 	[gl enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
 	[gl bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
+	visitor.currentTextureUnitIndex = 0;
 	[CC3TextureUnit bindDefaultWithVisitor: visitor];
 
 	// Ensure texture unit zero is the active texture unit. Code above might leave another active.
@@ -413,6 +395,26 @@
 	
 	gl.cullFace = GL_BACK;
 	gl.frontFace = GL_CCW;
+
+	// Darken the scene by turning lighting and fog off
+	[gl enableLighting: NO];
+	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
+	[gl enableFog: NO];
+
+	// Set depth testing to 2D values.
+	gl.depthFunc = GL_LEQUAL;
+	gl.depthMask = YES;
+	
+	// If 2D uses depth testing, clear the depth buffer, otherwise turn depth testing off
+	if (_shouldClearDepthBuffer)
+		[gl clearDepthBuffer];
+	else
+		[gl enableDepthTest: NO];
+	
+	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
+	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+	[gl enableScissorTest: NO];
 	
 	[gl align2DStateCache];		// Align the 2D GL state cache with current settings
 }
@@ -423,38 +425,38 @@
  * Configures depth testing parameters for 2D. If the depth buffer should be cleared, do so.
  * Otherwise, disable depth testing for 2D.
  */
--(void) clearDepthTestingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGL* gl = visitor.gl;
-	gl.depthFunc = GL_LEQUAL;
-	gl.depthMask = YES;
+//-(void) clearDepthTestingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	CC3OpenGL* gl = visitor.gl;
+////	gl.depthFunc = GL_LEQUAL;
+////	gl.depthMask = YES;
+//
+////	[gl enableFog: NO];
+//
+//	if (_shouldClearDepthBuffer)
+//		[gl clearDepthBuffer];
+//	else
+//		[gl enableDepthTest: NO];
+//}
 
-	[gl enableFog: NO];
+///** Template method that opens the 3D viewport. */
+//-(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	[_viewportManager openWithVisitor: visitor];
+//}
+//
+///** Template method that closes the 3D viewport. */
+//-(void) closeViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	[_viewportManager closeWithVisitor: visitor];
+//}
 
-	if (_shouldClearDepthBuffer)
-		[gl clearDepthBuffer];
-	else
-		[gl enableDepthTest: NO];
-}
-
-/** Template method that opens the 3D viewport. */
--(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[viewportManager openWithVisitor: visitor];
-}
-
-/** Template method that closes the 3D viewport. */
--(void) closeViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[viewportManager closeWithVisitor: visitor];
-}
-
-/** Template method that opens the 3D camera. */
--(void) open3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[activeCamera openWithVisitor: visitor];
-}
-
-/** Template method that closes the 3D camera. This is the compliment of the open3DCamera method. */
--(void) close3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[activeCamera closeWithVisitor: visitor];
-}
+///** Template method that opens the 3D camera. */
+//-(void) open3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	[_activeCamera openWithVisitor: visitor];
+//}
+//
+///** Template method that closes the 3D camera. This is the compliment of the open3DCamera method. */
+//-(void) close3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	[_activeCamera closeWithVisitor: visitor];
+//}
 
 /**
  * Template method that turns on lighting of the 3D scene. Turns on global ambient lighting,
@@ -464,39 +466,38 @@
 -(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[CC3Light disableReservedLightsWithVisitor: visitor];	// disable any lights used by 2D scene
 
-	CC3OpenGL* gl = visitor.gl;
-	[gl enableLighting: self.isIlluminated];
-
 	LogTrace(@"%@ lighting is %@", self, (self.isIlluminated ? @"on" : @"off"));
-	
+
+	CC3OpenGL* gl = visitor.gl;
+
 	// Set the ambient light for the whole scene
-	gl.sceneAmbientLightColor = ambientLight;
+	gl.sceneAmbientLightColor = _ambientLight;
 
 	// Turn on any individual lights
-	for (CC3Light* lgt in lights) [lgt turnOnWithVisitor: visitor];
+	for (CC3Light* lgt in _lights) [lgt turnOnWithVisitor: visitor];
 
-	[self drawFogWithVisitor: drawVisitor];
+	[self drawFogWithVisitor: _screenDrawVisitor];
 }
 
 /** Template method that turns off lighting of the 3D scene. */
--(void) darkenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3OpenGL* gl = visitor.gl;
-	[gl enableLighting: NO];
-	for (CC3Light* lgt in lights) [lgt turnOffWithVisitor: visitor];
-	[gl enableFog: NO];
-}
+//-(void) darkenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	CC3OpenGL* gl = visitor.gl;
+//	[gl enableLighting: NO];
+//	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
+//	[gl enableFog: NO];
+//}
 
 
 -(BOOL) isIlluminated {
-	return (lights.count > 0 ||
-			!(ccc4FEqual(ambientLight, kCCC4FBlack) ||
-			  ccc4FEqual(ambientLight, kCCC4FBlackTransparent)));
+	return (_lights.count > 0 ||
+			!(ccc4FEqual(_ambientLight, kCCC4FBlack) ||
+			  ccc4FEqual(_ambientLight, kCCC4FBlackTransparent)));
 }
 
 -(ccColor4F) totalIllumination {
 	ccColor4F totLgt = self.ambientLight;
 	LogTrace(@"Start with scene ambient illumination %@", NSStringFromCCC4F(totLgt));
-	for (CC3Light* lgt in lights) {
+	for (CC3Light* lgt in _lights) {
 		if (lgt.visible) {
 			LogTrace(@"Adding illumination from %@", lgt.fullDescription);
 			ccColor4F la = lgt.ambientColor;
@@ -512,22 +513,21 @@
 
 -(void) updateRelativeLightIntensities {
 	ccColor4F totLgt = self.totalIllumination;
-	for (CC3Light* lgt in lights) [lgt updateRelativeIntensityFrom: totLgt];
+	for (CC3Light* lgt in _lights) [lgt updateRelativeIntensityFrom: totLgt];
 }
 
--(BOOL) doesContainShadows { return shadowVisitor != nil; }
+-(BOOL) doesContainShadows { return _shadowVisitor != nil; }
 
 /** Template method to draw shadows cast by the lights. */
--(void) drawShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.doesContainShadows) {
-		visitor.gl.clearStencil = 0;
-		for (CC3Light* lgt in lights) [lgt drawShadowsWithVisitor: shadowVisitor];
-	}
+-(void) drawShadowsWithVisitor:  (CC3NodeDrawingVisitor*) visitor {
+	if ( !self.doesContainShadows ) return;
+	visitor.gl.clearStencil = 0;
+	for (CC3Light* lgt in _lights) [lgt drawShadowsWithVisitor: visitor];
 }
 
 /** If this scene contains fog, draw it, otherwise unbind fog from the GL engine. */
 -(void) drawFogWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (fog) [fog drawWithVisitor: visitor];
+	if (_fog) [_fog drawWithVisitor: visitor];
 	else [visitor.gl enableFog: NO];
 }
 
@@ -536,51 +536,52 @@
  * This is invoked after close3D, so the drawing of billboards occurs in 2D.
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ drawing %i billboards", self, billboards.count);
+	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
 
-	[viewportManager openClippingWithVisitor: visitor];
+//	[_viewportManager openClippingWithVisitor: visitor];
+//	[visitor openViewport];
 
-	CGRect lb = viewportManager.layerBoundsLocal;
-	for (CC3Billboard* bb in billboards) [bb draw2dWithinBounds: lb];
+	CGRect lb = _viewportManager.layerBoundsLocal;
+	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: lb];
 	
-	[viewportManager closeClippingWithVisitor: visitor];
+//	[_viewportManager closeClippingWithVisitor: visitor];
+//	[visitor closeViewport];
 }
 
 /** Visits this scene for drawing (or picking) using the specified visitor. */
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.deltaTime = _deltaFrameTime;
 	visitor.shouldClearDepthBuffer = self.shouldClearDepthBuffer;
-	visitor.drawingSequencer = drawingSequencer;
+	visitor.drawingSequencer = _drawingSequencer;
 	visitor.shouldVisitChildren = YES;
 	[visitor visit: self];
 }
 
--(id) drawVisitorClass { return [CC3NodeDrawingVisitor class]; }
+-(id) screenDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
 
 
 #pragma mark Drawing sequencer
 
--(BOOL) isUsingDrawingSequence { return (drawingSequencer != nil); }
+-(BOOL) isUsingDrawingSequence { return (_drawingSequencer != nil); }
 
 /**
  * Property setter overridden to add all the decendent nodes of this scene
  * into the new  node sequencer.
  */
 -(void) setDrawSequencer:(CC3NodeSequencer*) aNodeSequencer {
-	id oldDSS = drawingSequencer;
-	drawingSequencer = [aNodeSequencer retain];
+	id oldDSS = _drawingSequencer;
+	_drawingSequencer = [aNodeSequencer retain];
 	[oldDSS release];
 
 	CCArray* allNodes = [self flatten];
-	for (CC3Node* aNode in allNodes) {
-		[drawingSequencer add: aNode withVisitor: drawingSequenceVisitor];
-	}
+	for (CC3Node* aNode in allNodes)
+		[_drawingSequencer add: aNode withVisitor: _drawingSequenceVisitor];
 }
 
 -(void) updateDrawSequence {
-	if (drawingSequencer && drawingSequencer.allowSequenceUpdates) {
-		[drawingSequencer updateSequenceWithVisitor: drawingSequenceVisitor];
-		LogTrace(@"%@ updated %@", self, [drawingSequencer fullDescription]);
+	if (_drawingSequencer && _drawingSequencer.allowSequenceUpdates) {
+		[_drawingSequencer updateSequenceWithVisitor: _drawingSequenceVisitor];
+		LogTrace(@"%@ updated %@", self, [_drawingSequencer fullDescription]);
 	}
 }
 
@@ -590,11 +591,9 @@
  * drawingSequencer and then re-add it.
  */
 -(void) descendantDidModifySequencingCriteria: (CC3Node*) aNode {
-	if (drawingSequencer) {
-		if ([drawingSequencer remove: aNode withVisitor: drawingSequenceVisitor]) {
-			[drawingSequencer add: aNode withVisitor: drawingSequenceVisitor];
-		}
-	}
+	if (_drawingSequencer)
+		if ([_drawingSequencer remove: aNode withVisitor: _drawingSequenceVisitor])
+			[_drawingSequencer add: aNode withVisitor: _drawingSequenceVisitor];
 }
 
 
@@ -618,22 +617,22 @@
 	for (CC3Node* addedNode in allAdded) {
 	
 		// Attempt to add the node to the draw sequence sorter.
-		[drawingSequencer add: addedNode withVisitor: drawingSequenceVisitor];
+		[_drawingSequencer add: addedNode withVisitor: _drawingSequenceVisitor];
 		
 		// If the node has a target, add it to the collection of such nodes
 		if (addedNode.hasTarget) {
 			LogTrace(@"Adding targetting node %@", addedNode.fullDescription);
-			[targettingNodes addObject: addedNode];
+			[_targettingNodes addObject: addedNode];
 		}
 		
 		// If the node is a light, add it to the collection of lights
-		if (addedNode.isLight) [lights addObject: addedNode];
+		if (addedNode.isLight) [_lights addObject: addedNode];
 		
 		// if the node is the first camera to be added, make it the active camera.
-		if (addedNode.isCamera && !activeCamera) self.activeCamera = (CC3Camera*)addedNode;
+		if (addedNode.isCamera && !_activeCamera) self.activeCamera = (CC3Camera*)addedNode;
 		
 		// If the node is a billboard, add it to the collection of billboards
-		if (addedNode.isBillboard) [billboards addObject: addedNode];
+		if (addedNode.isBillboard) [_billboards addObject: addedNode];
 		
 		// If the node is a shadow, check if we need to add the shadow visitor
 		if (addedNode.isShadowVolume) [self checkNeedShadowVisitor];
@@ -655,19 +654,19 @@
 	for (CC3Node* removedNode in allRemoved) {
 		
 		// Attempt to remove the node to the draw sequence sorter.
-		[drawingSequencer remove: removedNode withVisitor: drawingSequenceVisitor];
+		[_drawingSequencer remove: removedNode withVisitor: _drawingSequenceVisitor];
 		
 		// If the node has a target, remove it from the collection of such nodes
 		if (removedNode.hasTarget) {
 			LogTrace(@"Removing targetting node %@", removedNode);
-			[targettingNodes removeObjectIdenticalTo: removedNode];
+			[_targettingNodes removeObjectIdenticalTo: removedNode];
 		}
 		
 		// If the node is a light, remove it from the collection of lights
-		if (removedNode.isLight) [lights removeObjectIdenticalTo: removedNode];
+		if (removedNode.isLight) [_lights removeObjectIdenticalTo: removedNode];
 		
 		// If the node is a billboard, remove it from the collection of billboards
-		if (removedNode.isBillboard) [billboards removeObjectIdenticalTo: removedNode];
+		if (removedNode.isBillboard) [_billboards removeObjectIdenticalTo: removedNode];
 		
 		// If the node is a shadow, check if we need to remove the shadow visitor
 		if (removedNode.isShadowVolume) [self checkNeedShadowVisitor];
@@ -681,13 +680,13 @@
  */
 -(void) didSetTargetInDescendant: (CC3Node*) aNode {
 	if (aNode.hasTarget) {
-		if ( ![targettingNodes containsObject: aNode] ) {
+		if ( ![_targettingNodes containsObject: aNode] ) {
 			LogTrace(@"Adding targetting node %@ with target %@", aNode, aNode.target);
-			[targettingNodes addObject: aNode];
+			[_targettingNodes addObject: aNode];
 		}
 	} else {
 		LogTrace(@"Removing targetting node %@", aNode);
-		[targettingNodes removeObjectIdenticalTo: aNode];
+		[_targettingNodes removeObjectIdenticalTo: aNode];
 	}
 }
 
@@ -697,9 +696,9 @@
  */
 -(void) checkNeedShadowVisitor {
 	BOOL needsShadowVisitor = NO;
-	for (CC3Light* lgt in lights) needsShadowVisitor |= lgt.hasShadows;
-	if (needsShadowVisitor && !shadowVisitor) self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
-	if (!needsShadowVisitor && shadowVisitor) self.shadowVisitor = nil;
+	for (CC3Light* lgt in _lights) needsShadowVisitor |= lgt.hasShadows;
+	if (needsShadowVisitor && !_shadowVisitor) self.shadowVisitor = [CC3ShadowDrawingVisitor visitor];
+	if (!needsShadowVisitor && _shadowVisitor) self.shadowVisitor = nil;
 }
 
 
@@ -724,7 +723,7 @@
 }
 
 -(void) pickNodeFromTouchEvent: (uint) tType at: (CGPoint) tPoint {
-	[touchedNodePicker pickNodeFromTouchEvent: tType at: tPoint];
+	[_touchedNodePicker pickNodeFromTouchEvent: tType at: tPoint];
 }
 
 /** Default does nothing. Subclasses that handle touch events will override. */
@@ -742,17 +741,17 @@
 
 @implementation CC3TouchedNodePicker
 
-@synthesize pickVisitor;
+@synthesize pickVisitor=_pickVisitor;
 
 -(void) dealloc {
-	[pickVisitor release];
-	scene = nil;			// not retained
-	pickedNode = nil;		// not retained
+	[_pickVisitor release];
+	_scene = nil;			// not retained
+	_pickedNode = nil;		// not retained
 	[super dealloc];
 }
 
 /** Returns the touch point mapped to the device-oriented GL coordinate space. */
--(CGPoint) glTouchPoint { return [scene.viewportManager glPointFromCC2Point: touchPoint]; }
+-(CGPoint) glTouchPoint { return [_scene.viewportManager glPointFromCC2Point: _touchPoint]; }
 
 
 #pragma mark Allocation and initialization
@@ -761,13 +760,13 @@
 
 -(id) initOnScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		scene = aCC3Scene;
-		self.pickVisitor = [[scene pickVisitorClass] visitor];
-		touchPoint = CGPointZero;
-		wasTouched = NO;
-		wasPicked = NO;
-		pickedNode = nil;
-		queuedTouchCount = 0;
+		_scene = aCC3Scene;
+		self.pickVisitor = [[_scene pickVisitorClass] visitor];
+		_touchPoint = CGPointZero;
+		_wasTouched = NO;
+		_wasPicked = NO;
+		_pickedNode = nil;
+		_queuedTouchCount = 0;
 	}
 	return self;
 }
@@ -775,10 +774,6 @@
 +(id) pickerOnScene: (CC3Scene*) aCC3Scene {
 	return [[[self alloc] initOnScene: aCC3Scene] autorelease];
 }
-
-// Deprecated
--(id) initOnWorld: (CC3Scene*) aCC3Scene { return [self initOnScene: aCC3Scene]; }
-+(id) handlerOnWorld: (CC3Scene*) aCC3Scene { return [self pickerOnScene: aCC3Scene]; }
 
 
 #pragma mark Touch handling
@@ -788,58 +783,55 @@
 	// If the touch type is different than the previous touch type,
 	// add the touch type to the queue. Only the types are queued...not the location.
 	@synchronized(self) {
-		if (queuedTouchCount == 0 || tType != touchQueue[queuedTouchCount - 1] ) {
-			if (queuedTouchCount == kCC3TouchQueueLength) queuedTouchCount = 0;
-			touchQueue[queuedTouchCount++] = tType;
-			wasTouched = YES;
+		if (_queuedTouchCount == 0 || tType != _touchQueue[_queuedTouchCount - 1] ) {
+			if (_queuedTouchCount == kCC3TouchQueueLength) _queuedTouchCount = 0;
+			_touchQueue[_queuedTouchCount++] = tType;
+			_wasTouched = YES;
 		}
 	}
 
 	// Update the touch location, even if the touch type is the same as the previous touch.
-	touchPoint = tPoint;
+	_touchPoint = tPoint;
 
 	LogTrace(@"%@ touched %@ at %@. Queue length now %u.", self, NSStringFromTouchType(tType),
 			 NSStringFromCGPoint(touchPoint), queuedTouchCount);
 }
 
 -(void) pickTouchedNode {
-	if (wasTouched) {
-		wasTouched = NO;
+	if (_wasTouched) {
+		_wasTouched = NO;
 
-		[scene visitForDrawingWithVisitor: pickVisitor];
-		pickedNode = pickVisitor.pickedNode;
+		[_scene visitForDrawingWithVisitor: _pickVisitor];
+		_pickedNode = _pickVisitor.pickedNode;
 
-		wasPicked = YES;
+		_wasPicked = YES;
 	}
 }
 
 -(void) dispatchPickedNode {
-	if (wasPicked) {
-		wasPicked = NO;
+	if (_wasPicked) {
+		_wasPicked = NO;
 		
 		uint touchesToDispatch[kCC3TouchQueueLength];
 
 		uint touchCount;
 		@synchronized(self) {
-			touchCount = queuedTouchCount;
-			memcpy(touchesToDispatch, touchQueue, (touchCount * sizeof(uint)));
-			queuedTouchCount = 0;
+			touchCount = _queuedTouchCount;
+			memcpy(touchesToDispatch, _touchQueue, (touchCount * sizeof(uint)));
+			_queuedTouchCount = 0;
 		}
 
 		for (int i = 0; i < touchCount; i++) {
 			LogTrace(@"%@ dispatching %@ with picked node %@ at %@ GL %@ touched node %@",
-					 self, NSStringFromTouchType(touchQueue[i]), pickedNode.touchableNode,
-					 NSStringFromCGPoint(touchPoint), NSStringFromCGPoint(self.glTouchPoint), pickedNode);
-
-			[scene nodeSelected: pickedNode.touchableNode byTouchEvent: touchQueue[i] at: touchPoint];
+					 self, NSStringFromTouchType(_touchQueue[i]), _pickedNode.touchableNode,
+					 NSStringFromCGPoint(_touchPoint), NSStringFromCGPoint(self.glTouchPoint), _pickedNode);
+			[_scene nodeSelected: _pickedNode.touchableNode byTouchEvent: _touchQueue[i] at: _touchPoint];
 		}
-		pickedNode = nil;	// Clear the node once it has been dispatched
+		_pickedNode = nil;	// Clear the node once it has been dispatched
 	}
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@", [self class]];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 @end
 
@@ -847,29 +839,21 @@
 #pragma mark -
 #pragma mark CC3ViewportManager
 
-@interface CC3ViewportManager (TemplateMethods)
--(void) updateDeviceRotationAngle:(GLfloat) anAngle;
-@property(nonatomic, readonly) CC3Vector glToCC2PointMapX;
-@property(nonatomic, readonly) CC3Vector glToCC2PointMapY;
-@property(nonatomic, readonly) CC3Vector cc2ToGLPointMapX;
-@property(nonatomic, readonly) CC3Vector cc2ToGLPointMapY;
-@end
-
 
 @implementation CC3ViewportManager
 
-@synthesize layerBounds, viewport, deviceRotationMatrix, isFullView;
+@synthesize layerBounds=_layerBounds, deviceRotationMatrix=_deviceRotationMatrix, isFullView=_isFullView;
 
 -(void) dealloc {
-	[deviceRotationMatrix release];
-	scene = nil;			// not retained
+	[_deviceRotationMatrix release];
+	_scene = nil;			// not retained
 	[super dealloc];
 }
 
 -(CGRect) layerBoundsLocal {
 	CGRect localBounds;
 	localBounds.origin = CGPointMake(0.0, 0.0);
-	localBounds.size = layerBounds.size;
+	localBounds.size = _layerBounds.size;
 	return localBounds;
 }
 
@@ -879,15 +863,15 @@
 
 -(id) initOnScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		scene = aCC3Scene;
+		_scene = aCC3Scene;
 		self.deviceRotationMatrix = [CC3AffineMatrix matrix];
-		layerBounds = CGRectZero;
-		viewport = CC3ViewportMake(0, 0, 0, 0);
-		glToCC2PointMapX = cc3v( 1.0,  0.0, 0.0 );
-		glToCC2PointMapY = cc3v( 0.0,  1.0, 0.0 );
-		cc2ToGLPointMapX = cc3v( 1.0,  0.0, 0.0 );
-		cc2ToGLPointMapY = cc3v( 0.0,  1.0, 0.0 );
-		isFullView = NO;
+		_layerBounds = CGRectZero;
+		_viewport = CC3ViewportMake(0, 0, 0, 0);
+		_glToCC2PointMapX = cc3v( 1.0,  0.0, 0.0 );
+		_glToCC2PointMapY = cc3v( 0.0,  1.0, 0.0 );
+		_cc2ToGLPointMapX = cc3v( 1.0,  0.0, 0.0 );
+		_cc2ToGLPointMapY = cc3v( 0.0,  1.0, 0.0 );
+		_isFullView = NO;
 	}
 	return self;
 }
@@ -896,30 +880,25 @@
 	return [[[self alloc] initOnScene: aCC3Scene] autorelease];
 }
 
-// Deprecated
--(id) initOnWorld: (CC3Scene*) aCC3Scene { return [self initOnScene: aCC3Scene]; }
-+(id) viewportManagerOnWorld: (CC3Scene*) aCC3Scene { return [self viewportManagerOnScene: aCC3Scene]; }
-
 // Protected properties for copying
--(CC3Vector) glToCC2PointMapX { return glToCC2PointMapX; }
--(CC3Vector) glToCC2PointMapY { return glToCC2PointMapY; }
--(CC3Vector) cc2ToGLPointMapX { return cc2ToGLPointMapX; }
--(CC3Vector) cc2ToGLPointMapY { return cc2ToGLPointMapY; }
+-(CC3Vector) glToCC2PointMapX { return _glToCC2PointMapX; }
+-(CC3Vector) glToCC2PointMapY { return _glToCC2PointMapY; }
+-(CC3Vector) cc2ToGLPointMapX { return _cc2ToGLPointMapX; }
+-(CC3Vector) cc2ToGLPointMapY { return _cc2ToGLPointMapY; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // The scene ivar is set by the new CC3Scene, since it changes with the copy.
 -(void) populateFrom: (CC3ViewportManager*) another {
 
-	[deviceRotationMatrix release];
-	deviceRotationMatrix = [another.deviceRotationMatrix copy];		//retained
+	[_deviceRotationMatrix release];
+	_deviceRotationMatrix = [another.deviceRotationMatrix copy];		//retained
 
-	layerBounds = another.layerBounds;
-	viewport = another.viewport;
-	glToCC2PointMapX = another.glToCC2PointMapX;
-	glToCC2PointMapY = another.glToCC2PointMapY;
-	cc2ToGLPointMapX = another.cc2ToGLPointMapX;
-	cc2ToGLPointMapY = another.cc2ToGLPointMapY;
+	_layerBounds = another.layerBounds;
+	_glToCC2PointMapX = another.glToCC2PointMapX;
+	_glToCC2PointMapY = another.glToCC2PointMapY;
+	_cc2ToGLPointMapX = another.cc2ToGLPointMapX;
+	_cc2ToGLPointMapY = another.cc2ToGLPointMapY;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -931,32 +910,32 @@
 
 #pragma mark Drawing
 
--(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
-			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
-	visitor.gl.viewport = viewport;
-	[self openClippingWithVisitor: visitor];
-}
+//-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
+//			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
+//	visitor.gl.viewport = viewport;
+//	[self openClippingWithVisitor: visitor];
+//}
+//
+//-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	LogTrace(@"%@ closing 3D viewport %@ as %@fullscreen", self,
+//			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
+//	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+//	visitor.gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+//	[self closeClippingWithVisitor: visitor];
+//}
 
--(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ closing 3D viewport %@ as %@fullscreen", self,
-			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
-	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-	visitor.gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
-	[self closeClippingWithVisitor: visitor];
-}
-
--(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !isFullView ) {
-		CC3OpenGL* gl = visitor.gl;
-		[gl enableScissorTest: YES];
-		gl.scissor = viewport;
-	}
-}
-
--(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor.gl enableScissorTest: NO];
-}
+//-(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	if ( !isFullView ) {
+//		CC3OpenGL* gl = visitor.gl;
+//		[gl enableScissorTest: YES];
+//		gl.scissor = viewport;
+//	}
+//}
+//
+//-(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	[visitor.gl enableScissorTest: NO];
+//}
 
 
 #pragma mark Converting points
@@ -967,8 +946,8 @@
  */
 -(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point {
 	CC3Vector homogeneousPoint = cc3v(cc2Point.x, cc2Point.y, 1.0);
-	return ccp(CC3VectorDot(cc2ToGLPointMapX, homogeneousPoint),
-			   CC3VectorDot(cc2ToGLPointMapY, homogeneousPoint));	
+	return ccp(CC3VectorDot(_cc2ToGLPointMapX, homogeneousPoint),
+			   CC3VectorDot(_cc2ToGLPointMapY, homogeneousPoint));
 }
 
 /**
@@ -977,8 +956,8 @@
  */
 -(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint {
 	CC3Vector homogeneousPoint = cc3v(glPoint.x, glPoint.y, 1.0);
-	return ccp(CC3VectorDot(glToCC2PointMapX, homogeneousPoint),
-			   CC3VectorDot(glToCC2PointMapY, homogeneousPoint));
+	return ccp(CC3VectorDot(_glToCC2PointMapX, homogeneousPoint),
+			   CC3VectorDot(_glToCC2PointMapY, homogeneousPoint));
 }
 
 
@@ -1027,9 +1006,9 @@
 	CGSize bSz = bounds.size;
 
 	// Mark whether the viewport covers the full UIView. Test both Portrait and Landscape orientations.
-	isFullView = (CGPointEqualToPoint(bOrg, CGPointZero) &&
-				  (CGSizeEqualToSize(bSz, winSz) ||
-				   CGSizeEqualToSize(bSz, CGSizeMake(winSz.height, winSz.width))));
+	_isFullView = (CGPointEqualToPoint(bOrg, CGPointZero) &&
+				   (CGSizeEqualToSize(bSz, winSz) ||
+					CGSizeEqualToSize(bSz, CGSizeMake(winSz.height, winSz.width))));
 	
 	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
 	GLfloat c2g = CC_CONTENT_SCALE_FACTOR();		// Ratio of CC2 points to GL pixels...
@@ -1045,10 +1024,10 @@
 			vp.w = (GLint)(bSz.height);
 			vp.h = (GLint)(bSz.width);
 			
-			glToCC2PointMapX = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
-			glToCC2PointMapY = cc3v(  g2c,  0.0, -vp.x * g2c );
-			cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
-			cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
+			_glToCC2PointMapX = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
+			_glToCC2PointMapY = cc3v(  g2c,  0.0, -vp.x * g2c );
+			_cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
+			_cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
 			
 			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
@@ -1063,10 +1042,10 @@
 			vp.w = (GLint)(bSz.height);
 			vp.h = (GLint)(bSz.width);
 			
-			glToCC2PointMapX = cc3v(  0.0,  g2c, -vp.y * g2c );
-			glToCC2PointMapY = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
-			cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
-			cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
+			_glToCC2PointMapX = cc3v(  0.0,  g2c, -vp.y * g2c );
+			_glToCC2PointMapY = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
+			_cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
+			_cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
 			
 			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
@@ -1081,10 +1060,10 @@
 			vp.w = (GLint)bSz.width;
 			vp.h = (GLint)bSz.height;
 			
-			glToCC2PointMapX = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
-			glToCC2PointMapY = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
-			cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
-			cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
+			_glToCC2PointMapX = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
+			_glToCC2PointMapY = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
+			_cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
+			_cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
 			
 			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
@@ -1100,10 +1079,10 @@
 			vp.w = (GLint)bSz.width;
 			vp.h = (GLint)bSz.height;
 			
-			glToCC2PointMapX = cc3v(  g2c,  0.0, -vp.x * g2c );
-			glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
-			cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
-			cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
+			_glToCC2PointMapX = cc3v(  g2c,  0.0, -vp.x * g2c );
+			_glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
+			_cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
+			_cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
 
 			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
@@ -1112,9 +1091,10 @@
 	}
 	
 	// Set the layerBounds and viewport, and tell the camera that we've been updated
-	layerBounds = bounds;
-	viewport = vp;
-	[scene.activeCamera markProjectionDirty];
+	_layerBounds = bounds;
+	CC3Camera* cam = _scene.activeCamera;
+	cam.viewport = vp;
+	cam.shouldClipToViewport = !_isFullView;
 }
 
 /**
@@ -1122,9 +1102,9 @@
  * camera's transfom as dirty so that the camera's modelview matrix will be rebuilt.
  */
 -(void) updateDeviceRotationAngle:(GLfloat) anAngle {
-	[deviceRotationMatrix populateIdentity];
-	[deviceRotationMatrix rotateBy: cc3v(0.0f, 0.0f, anAngle)];
-	[scene.activeCamera markTransformDirty];
+	[_deviceRotationMatrix populateIdentity];
+	[_deviceRotationMatrix rotateBy: cc3v(0.0f, 0.0f, anAngle)];
+	[_scene.activeCamera markTransformDirty];
 }
 
 @end

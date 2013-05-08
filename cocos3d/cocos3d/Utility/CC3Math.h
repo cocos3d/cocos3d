@@ -56,27 +56,39 @@
 
 /** Returns -1, 0 or +1 if the arguement is negative, zero or positive respectively. */
 #ifndef SIGN
-	#define SIGN(A)	((A) < 0 ? -1 :((A) > 0 ? 1 : 0))
+#define SIGN(A)	({							\
+	__typeof__(A) __a = (A);				\
+	__a < 0 ? -1 : (__a > 0 ? 1 : 0);		\
+})
 #endif
 
 /** Returns the value clamped to be between the min and max values */
 #ifndef CLAMP
-	#define CLAMP(val, min, max) (MIN(MAX((val), (min)), (max)))
+#define CLAMP(val, min, max) ({							\
+	__typeof__(val) __v = (val);						\
+	__typeof__(min) __mn = (min);						\
+	__typeof__(max) __mx = (max);						\
+	__v < __mn ? __mn : (__v > __mx ? __mx : __v);		\
+})
 #endif
 
 /** Returns a weighted average of the two values, where weight is between zero and one, inclusive. */
-#define CC3WAVG(val1, val2, weight) ((val1) + (((val2) - (val1)) * CLAMP(weight, 0.0, 1.0)))
+#ifndef CC3WAVG
+#define CC3WAVG(val1, val2, weight) ({						\
+	__typeof__(val1) __v1 = (val1);							\
+	__v1 + (((val2) - __v1) * CLAMP((weight), 0.0, 1.0));	\
+})
+#endif
 
 /**
  * Returns the logical exclusive-OR of the specified two expressions.
  *
- * For logical expressions, this is more precise than the bitwise ^ operator,
- * because it works correctly even if either exp1 or exp2 evaluates to avalue
- * that is not explicitly either YES (1) or NO (0). Furthermore, it is efficient,
- * as it evaluates each expression only once.
+ * For logical expressions, this is more precise than the bitwise ^ operator, because it works
+ * correctly even if either exp1 or exp2 evaluates to a value that is not explicitly either
+ * YES (1) or NO (0). Furthermore, it is efficient, as it evaluates each expression only once.
  */
 #ifndef XOR
-	#define XOR(exp1, exp2) ((exp1) ? !(exp2) : (exp2))
+#define XOR(exp1, exp2) ((exp1) ? !(exp2) : (exp2))
 #endif
 
 /** Returns the positive or negative modulo remainder of value divided by period. */
@@ -130,12 +142,8 @@ static inline float CC3SemiCyclicAngle(float angle) {
 	float modAngle = CC3CyclicAngle(angle);
 
 	// Adjust to +/- 180 degrees
-	if(modAngle > kCC3SemiCircleDegrees) {
-		return modAngle - kCC3CircleDegrees;
-	}
-	if(modAngle < -kCC3SemiCircleDegrees) {
-		return modAngle + kCC3CircleDegrees;
-	}
+	if(modAngle > kCC3SemiCircleDegrees) return modAngle - kCC3CircleDegrees;
+	if(modAngle < -kCC3SemiCircleDegrees) return modAngle + kCC3CircleDegrees;
 	return modAngle;
 }
 
@@ -158,11 +166,10 @@ static inline float CC3CyclicDifference(float minuend, float subtrahend, float p
 	// If the difference is outside the range (period/2 >= diff >= -period/2),
 	// adjust it so that it takes the difference in the other direction to
 	// arrive at a smaller change.
-	if(diff > semiPeriod) {
+	if(diff > semiPeriod)
 		diff -= period;
-	} else if(diff < -semiPeriod) {
+	else if(diff < -semiPeriod)
 		diff += period;
-	}
 	return diff;
 }
 
@@ -174,7 +181,7 @@ static inline float CC3CyclicDifference(float minuend, float subtrahend, float p
  */
 static inline bool CC3IsWithinTolerance(float value, float benchmarkValue, float aTolerance) {
 	// If no tolerance, short-circuit the test.
-	return (aTolerance)
+	return aTolerance
 				? (fabsf(value - benchmarkValue) <= fabsf(aTolerance))
 				: (value == benchmarkValue);
 }
@@ -185,19 +192,13 @@ static inline bool CC3IsWithinTolerance(float value, float benchmarkValue, float
 #define kRandomUIntMax 0x100000000LL
 
 /** Returns a random unsigned integer over the full unsigned interger range (between 0 and 0xFFFFFFFF). */
-static inline NSUInteger CC3RandomUInt() {
-	return arc4random();
-}
+static inline NSUInteger CC3RandomUInt() { return arc4random(); }
 
 /** Returns a random unsigned integer between 0 inclusive and the specified max exclusive. */
-static inline NSUInteger CC3RandomUIntBelow(NSUInteger max) {
-	return CC3RandomUInt() % max;
-}
+static inline NSUInteger CC3RandomUIntBelow(NSUInteger max) { return CC3RandomUInt() % max; }
 
 /** Returns a random double between 0.0 inclusive and 1.0 exclusive. */
-static inline double CC3RandomDouble() {
-	return (double)CC3RandomUInt() / (double)kRandomUIntMax;
-}
+static inline double CC3RandomDouble() { return (double)CC3RandomUInt() / (double)kRandomUIntMax; }
 
 /** Returns a random double between the specified min inclusive and the specified max exclusive. */
 static inline double CC3RandomDoubleBetween(double min, double max) {
@@ -205,9 +206,7 @@ static inline double CC3RandomDoubleBetween(double min, double max) {
 }
 
 /** Returns a random float between 0.0 inclusive and 1.0 exclusive. */
-static inline float CC3RandomFloat() {
-	return (float)CC3RandomDouble();
-}
+static inline float CC3RandomFloat() { return (float)CC3RandomDouble(); }
 
 /** Returns a random float between the specified min inclusive and the specified max exclusive. */
 static inline float CC3RandomFloatBetween(float min, float max) {

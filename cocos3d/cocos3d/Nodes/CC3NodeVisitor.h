@@ -115,14 +115,11 @@
 /**
  * The camera that is viewing the 3D scene.
  *
- * Access to the active camera is needed for many node visitations, such as updates and drawing.
+ * Access to the camera is needed for many node visitations, such as updates and drawing.
  * If this property is not set in advance, it is retrieved automatically from the activeCamera
  * property of the starting node, at the beginning of a visitation run.
- *
- * This property is cleared at the end of each visitation run to ensure that the camera that is
- * currently active is always used.
  */
-@property(nonatomic, assign) CC3Camera* camera;
+@property(nonatomic, retain) CC3Camera* camera;
 
 /**
  * The CC3Node that is currently being visited.
@@ -405,13 +402,11 @@
 @property(nonatomic, retain) CC3OpenGL* gl;
 
 /**
- * The node sequencer that contains the drawable nodes, in the sequence in which
- * they will be drawn.
+ * The node sequencer that contains the drawable nodes, in the sequence in which they will be drawn.
  *
- * If this property is not nil, the nodes will be drawn in the order they appear
- * in the node sequencer. If this property is set to nil, the visitor will
- * traverse the node tree during the visitation run, drawing each node that contains
- * local content as it is encountered.
+ * If this property is not nil, the nodes will be drawn in the order they appear in the node sequencer.
+ * If this property is set to nil, the visitor will traverse the node tree during the visitation run,
+ * drawing each node that contains local content as it is encountered.
  */
 @property(nonatomic, assign) CC3NodeSequencer* drawingSequencer;
 

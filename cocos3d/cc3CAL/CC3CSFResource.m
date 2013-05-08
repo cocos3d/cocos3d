@@ -160,7 +160,7 @@
 
 	// Retrieve the name chars into a buffer, create an NSString from it, and release the buffer.
 	NSString* nodeName = nil;
-	NSInteger nameLen = reader.readInteger;
+	NSUInteger nameLen = (NSUInteger)reader.readInteger;
 	if (nameLen > 0) {
 		char cNodeName[nameLen];
 		[reader read: nameLen bytes: cNodeName];

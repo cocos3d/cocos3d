@@ -45,10 +45,10 @@
 -(void) transformMatrixChanged;
 @end
 
-@interface CC3Camera (TemplateMethods)
--(void) loadProjectionMatrix;
--(void) loadViewMatrix;
-@end
+//@interface CC3Camera (TemplateMethods)
+//-(void) loadProjectionMatrix;
+//-(void) loadViewMatrix;
+//@end
 
 @interface CC3LightCameraBridgeVolume (TemplateMethods)
 @property(nonatomic, assign) CC3Light* light;
@@ -532,11 +532,6 @@
 	// Paint the shadow to the screen. Only areas that have been marked as being
 	// in the stencil buffer as being in the shadow of this light will be shaded.
 	[visitor visit: stencilledShadowPainter];
-	
-	// Restore the projection and modelview matrices back to those of the camera
-	CC3Camera* cam = visitor.camera;
-	[cam loadViewMatrix];
-	[cam loadProjectionMatrix];
 }
 
 -(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor {

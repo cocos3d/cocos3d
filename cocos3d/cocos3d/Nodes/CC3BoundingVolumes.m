@@ -834,11 +834,13 @@
 -(void) transformVolume {
 	[super transformVolume];
 
+	CC3_PUSH_NOSHADOW
 	// Expand the radius by the global scale of the node. In case the node's global scale is not
 	// uniform, use the largest of the three scale axes to ensure the scaled object is contained
 	// within the sphere, and ensure that the radius is positive even if scale is negative.
 	CC3Vector ngs = _node.globalScale;
 	globalRadius = radius * ABS(MAX(MAX(ngs.x, ngs.y), ngs.z));
+	CC3_POP_NOSHADOW
 }
 
 

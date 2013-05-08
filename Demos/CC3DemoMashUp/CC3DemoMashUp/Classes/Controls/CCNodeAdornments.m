@@ -81,7 +81,7 @@
 
 // A (hopefully) unique tag that identifies the currently activated fade-in
 // or fade-out action. This tag is used to cancel the action if needed. 
-#define kFadeActionTag 0xfade0001
+#define kFadeActionTag		(NSInteger)0xfade0001
 
 
 @implementation CCNodeAdornmentOverlayFader

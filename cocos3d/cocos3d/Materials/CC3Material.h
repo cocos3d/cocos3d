@@ -36,25 +36,25 @@
 
 
 /** Default material color under ambient lighting. */
-static const ccColor4F kCC3DefaultMaterialColorAmbient = { 0.2, 0.2, 0.2, 1.0 };
+static const ccColor4F kCC3DefaultMaterialColorAmbient = { 0.2f, 0.2f, 0.2f, 1.0f };
 
 /** Default material color under diffuse lighting. */
-static const ccColor4F kCC3DefaultMaterialColorDiffuse = { 0.8, 0.8, 0.8, 1.0 };
+static const ccColor4F kCC3DefaultMaterialColorDiffuse = { 0.8f, 0.8f, 0.8f, 1.0f };
 
 /** Default material color under specular lighting. */
-static const ccColor4F kCC3DefaultMaterialColorSpecular = { 0.0, 0.0, 0.0, 1.0 };
+static const ccColor4F kCC3DefaultMaterialColorSpecular = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 /** Default emissive material color. */
-static const ccColor4F kCC3DefaultMaterialColorEmission = { 0.0, 0.0, 0.0, 1.0 };
+static const ccColor4F kCC3DefaultMaterialColorEmission = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 /** Default material shininess. */
-static const GLfloat kCC3DefaultMaterialShininess = 0.0;
+static const GLfloat kCC3DefaultMaterialShininess = 0.0f;
 
 /** Maximum material shininess allowed by OpenGL ES. */
-static const GLfloat kCC3MaximumMaterialShininess = 128.0;
+static const GLfloat kCC3MaximumMaterialShininess = 128.0f;
 
 /** Default material reflectivity. */
-static const GLfloat kCC3DefaultMaterialReflectivity = 0.0;
+static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 
 
 #pragma mark -

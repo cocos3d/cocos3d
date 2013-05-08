@@ -50,42 +50,12 @@
 @property(nonatomic, readonly) CC3Matrix* globalRotationMatrix;
 @end
 
-@interface CC3Camera (TemplateMethods)
-@property(nonatomic, readonly) CC3ViewportManager* viewportManager;
--(void) buildModelViewMatrix;
--(void) openProjection;
--(void) closeProjection;
--(void) openView;
--(void) closeView;
--(void) loadProjectionMatrix;
--(void) loadViewMatrix;
--(void) ensureAtRootAncestor;
--(void) ensureSceneUpdated: (BOOL) checkScene;
--(void) moveToShowAllOf: (CC3Node*) aNode
-		 whileLookingAt: (CC3Vector) targetLoc
-		  fromDirection: (CC3Vector) aDirection
-			withPadding: (GLfloat) padding
-			 checkScene: (BOOL) checkScene;
--(void) moveWithDuration: (ccTime) t
-			 toShowAllOf: (CC3Node*) aNode
-		  whileLookingAt: (CC3Vector) targetLoc
-		   fromDirection: (CC3Vector) aDirection
-			 withPadding: (GLfloat) padding
-			  checkScene: (BOOL) checkScene;
--(CC3Vector) calculateLocationToShowAllOf: (CC3Node*) aNode
-						   whileLookingAt: (CC3Vector) targetLoc
-							fromDirection: (CC3Vector) aDirection
-							  withPadding: (GLfloat) padding
-							   checkScene: (BOOL) checkScene;
-@property(nonatomic, readonly) CGSize fovRatios;
-@end
-
-
 @implementation CC3Camera
 
 @synthesize nearClippingDistance=_nearClippingDistance, farClippingDistance=_farClippingDistance;
-@synthesize frustum=_frustum, fieldOfView=_fieldOfView, viewMatrix=_viewMatrix;
+@synthesize viewport=_viewport, frustum=_frustum, fieldOfView=_fieldOfView, viewMatrix=_viewMatrix;
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
+@synthesize shouldClipToViewport=_shouldClipToViewport;
 
 -(void) dealloc {
 	[_viewMatrix release];
@@ -105,17 +75,26 @@
 }
 
 -(void) setFieldOfView:(GLfloat) anAngle {
+	if (anAngle == _fieldOfView) return;
 	_fieldOfView = anAngle;
 	[self markProjectionDirty];
 }
 
 -(void) setNearClippingDistance: (GLfloat) aDistance {
+	if (aDistance == _nearClippingDistance) return;
 	_nearClippingDistance = aDistance;
 	[self markProjectionDirty];
 }
 
 -(void) setFarClippingDistance: (GLfloat) aDistance {
+	if (aDistance == _farClippingDistance) return;
 	_farClippingDistance = aDistance;
+	[self markProjectionDirty];
+}
+
+-(void) setViewport: (CC3Viewport) viewport {
+	if (CC3ViewportsAreEqual(viewport, _viewport)) return;
+	_viewport = viewport;
 	[self markProjectionDirty];
 }
 
@@ -165,6 +144,8 @@
 		_fieldOfView = kCC3DefaultFieldOfView;
 		_nearClippingDistance = kCC3DefaultNearClippingDistance;
 		_farClippingDistance = kCC3DefaultFarClippingDistance;
+		_viewport = CC3ViewportMake(0, 0, 0, 0);
+		_shouldClipToViewport = NO;
 		_hasInfiniteDepthOfField = NO;
 		_isOpen = NO;
 	}
@@ -266,11 +247,10 @@
  */
 -(void) buildProjection  {
 	if(_isProjectionDirty) {
-		CC3Viewport vp = self.viewportManager.viewport;
-		CC3Assert(vp.h, @"Camera projection matrix cannot be updated before setting the viewport");
+		CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.", self, NSStringFromCC3Viewport(_viewport));
 
 		[_frustum populateFrom: self.effectiveFieldOfView
-					andAspect: ((GLfloat) vp.w / (GLfloat) vp.h)
+					andAspect: ((GLfloat) _viewport.w / (GLfloat) _viewport.h)
 				  andNearClip: _nearClippingDistance
 				   andFarClip: _farClippingDistance];
 
@@ -281,48 +261,56 @@
 	}
 }
 
--(void) buildPerspective { [self buildProjection]; }	// Deprecated
-
 
 #pragma mark Drawing
 
 -(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Opening %@", self);
+	LogTrace(@"%@ opening with %@", self, visitor);
 	_isOpen = YES;
-	[self openProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor];
-	[self openViewWithVisitor: (CC3NodeDrawingVisitor*) visitor];
+	[self openViewportWithVisitor: visitor];
+	[self openProjectionWithVisitor: visitor];
+	[self openViewWithVisitor: visitor];
 }
 
 -(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Closing %@", self);
+	LogTrace(@"%@ closing with %@", self, visitor);
 	_isOpen = NO;
 	[self closeViewWithVisitor: visitor];
 	[self closeProjectionWithVisitor: visitor];
 }
 
+-(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"%@ opening viewport %@ with %@", self, NSStringFromCC3Viewport(_viewport), visitor);
+	CC3OpenGL* gl = visitor.gl;
+	gl.viewport = _viewport;
+	[gl enableScissorTest: _shouldClipToViewport];
+	if (_shouldClipToViewport) gl.scissor = _viewport;
+}
+
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
 -(void) openProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Opening %@ 3D projection", self);
+	LogTrace(@"%@ opening projection with %@", self, visitor);
+	[self buildProjection];
 	[visitor.gl pushProjectionMatrixStack];
 	[self loadProjectionMatrixWithVisitor: visitor];
 }
 
 /** Template method that pops the projectionMatrix from the GL projection matrix stack. */
 -(void) closeProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Closing %@ 3D projection", self);
+	LogTrace(@"%@ closing projection with %@", self, visitor);
 	[visitor.gl popProjectionMatrixStack];
 }
 
 /** Template method that pushes the GL modelview matrix stack, and loads the viewMatrix into it. */
 -(void) openViewWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Opening %@ modelview", self);
+	LogTrace(@"%@ opening modelview with %@", self, visitor);
 	[visitor.gl pushModelviewMatrixStack];
 	[self loadViewMatrixWithVisitor: visitor];
 }
 
 /** Template method that pops the viewMatrix from the GL modelview matrix stack. */
 -(void) closeViewWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Closing %@ modelview", self);
+	LogTrace(@"%@ closing modelview with %@", self, visitor);
 	[visitor.gl popModelviewMatrixStack];
 }
 
@@ -670,6 +658,7 @@
  * (width & height) to the near clip distance.
  */
 -(CGSize) fovRatios {
+	[self buildProjection];
 	switch(CCDirector.sharedDirector.deviceOrientation) {
 		case UIDeviceOrientationLandscapeLeft:
 		case UIDeviceOrientationLandscapeRight:
@@ -708,9 +697,9 @@
 	projectedLoc = CC3VectorAverage(projectedLoc, kCC3VectorUnitCube);
 	
 	// Map the X & Y components of the projected location (now between 0 and 1) to viewport coordinates.
-	CC3Viewport vp = self.viewportManager.viewport;
-	projectedLoc.x = vp.x + (vp.w * projectedLoc.x);
-	projectedLoc.y = vp.y + (vp.h * projectedLoc.y);
+	CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.", self, NSStringFromCC3Viewport(_viewport));
+	projectedLoc.x = _viewport.x + (_viewport.w * projectedLoc.x);
+	projectedLoc.y = _viewport.y + (_viewport.h * projectedLoc.y);
 	
 	// Using the vector from the camera to the 3D location, determine whether or not the
 	// 3D location is in front of the camera by using the dot-product of that vector and
@@ -729,7 +718,7 @@
 	
 	LogTrace(@"%@ projecting location %@ to %@ and orienting with device to %@ using viewport %@",
 				  self, NSStringFromCC3Vector(a3DLocation), NSStringFromCC3Vector(projectedLoc),
-				  NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(self.viewportManager.viewport));
+				  NSStringFromCC3Vector(orientedLoc), NSStringFromCC3Viewport(_viewport));
 	return orientedLoc;
 }
 
@@ -766,14 +755,14 @@
 	// be expressed in terms of the relationship between the layer width and height and
 	// the constant viewport height. The Z-coordinate at the near clipping plane is
 	// negative since the camera points down the negative Z axis in its local coordinates.
-	CGFloat vph = self.viewportManager.viewport.h;
-	GLfloat xNearTopRight = _frustum.top * (lb.width / vph);
-	GLfloat yNearTopRight = _frustum.top * (lb.height / vph);
+	[self buildProjection];		// Ensure that the camera's frustum is up to date.
+	GLfloat xNearTopRight = _frustum.top * (lb.width / _viewport.h);
+	GLfloat yNearTopRight = _frustum.top * (lb.height / _viewport.h);
 	GLfloat zNearTopRight = -_frustum.near;
 	
 	LogTrace(@"%@ view point %@ mapped to proportion (%.3f, %.3f) of top-right corner: (%.3f, %.3f) of view bounds %@ and viewport %@",
 				  [self class], NSStringFromCGPoint(glPoint), xp, yp, xNearTopRight, yNearTopRight,
-				  NSStringFromCGSize(lb), NSStringFromCC3Viewport(self.viewportManager.viewport));
+				  NSStringFromCGSize(lb), NSStringFromCC3Viewport(_viewport));
 	
 	// We now have the location of the the top-right corner of the view, at the near
 	// clipping plane, taking into account device orientation. We can now map the glPoint
@@ -1002,9 +991,9 @@
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @"left: %.3f, right: %.3f, ", _left, _right];
-	[desc appendFormat: @"top: %.3f, bottom: %.3f, ", _top, _bottom];
-	[desc appendFormat: @"near: %.3f, far: %.3f", _near, _far];
+	[desc appendFormat: @" left: %.3f, right: %.3f", _left, _right];
+	[desc appendFormat: @", top: %.3f, bottom: %.3f", _top, _bottom];
+	[desc appendFormat: @", near: %.3f, far: %.3f", _near, _far];
 	[desc appendFormat: @"\n\tleftPlane: %@", NSStringFromCC3Plane(self.leftPlane)];
 	[desc appendFormat: @"\n\trightPlane: %@", NSStringFromCC3Plane(self.rightPlane)];
 	[desc appendFormat: @"\n\ttopPlane: %@", NSStringFromCC3Plane(self.topPlane)];

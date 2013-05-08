@@ -198,7 +198,7 @@
 
 -(void) align2DStateCache {
 	ccGLBlendFunc(value_GL_BLEND_SRC, value_GL_BLEND_DST);
-	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D);
+	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D[value_GL_ACTIVE_TEXTURE]);
 	
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);

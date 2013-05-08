@@ -456,10 +456,10 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
 -(void) update: (ccTime) dt DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the init method instead, and set emitter property directly. */
--(id) initFromEmitter: (CC3ParticleEmitter*) anEmitter;
+-(id) initFromEmitter: (CC3PointParticleEmitter*) anEmitter;
 
 /** @deprecated Use the particle method instead, and set emitter property directly. */
-+(id) particleFromEmitter: (CC3ParticleEmitter*) anEmitter;
++(id) particleFromEmitter: (CC3PointParticleEmitter*) anEmitter;
 
 @end
 

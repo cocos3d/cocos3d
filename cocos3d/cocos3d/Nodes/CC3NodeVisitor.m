@@ -52,16 +52,6 @@
 #pragma mark -
 #pragma mark CC3NodeVisitor
 
-@interface CC3NodeVisitor (TemplateMethods)
--(void) process: (CC3Node*) aNode;
--(void) processBeforeChildren: (CC3Node*) aNode;
--(void) processChildrenOf: (CC3Node*) aNode;
--(void) processAfterChildren: (CC3Node*) aNode;
--(void) open;
--(void) close;
--(void) processRemovals;
-@end
-
 @implementation CC3NodeVisitor
 
 @synthesize currentNode=_currentNode, startingNode=_startingNode;
@@ -70,7 +60,8 @@
 -(void) dealloc {
 	_currentNode = nil;				// not retained
 	_startingNode = nil;			// not retained
-	_camera = nil;					// not retained
+	[_camera release];
+//	_camera = nil;					// not retained
 	[_pendingRemovals release];
 	[super dealloc];
 }
@@ -84,7 +75,7 @@
 
 	if (!_startingNode) {				// If this is the first node, start up
 		_startingNode = aNode;			// Not retained
-		if (!_camera) self.camera = aNode.activeCamera;	// Retrieve and cache the camera using setter. Not retained
+		if (!_camera) self.camera = aNode.activeCamera;	// Retrieve and cache the camera using setter.
 		[self open];					// Open the visitor
 	}
 
@@ -92,8 +83,8 @@
 
 	if (aNode == _startingNode) {		// If we're back to the first node, finish up
 		[self close];					// Close the visitor
-		_camera = nil;					// Not retained
-		_startingNode = nil;				// Not retained
+//		_camera = nil;					// Not retained
+		_startingNode = nil;			// Not retained
 	}
 	
 	_currentNode = nil;					// Done with this node now.
@@ -399,11 +390,6 @@
 #pragma mark -
 #pragma mark CC3NodeDrawingVisitor
 
-@interface CC3NodeDrawingVisitor (TemplateMethods)
--(BOOL) shouldDrawNode: (CC3Node*) aNode;
--(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode;
-@end
-
 @implementation CC3NodeDrawingVisitor
 
 @synthesize gl=_gl, drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
@@ -452,17 +438,10 @@
 	}
 }
 
-/** Populates the cached view and projection matrices. */
--(void) setCamera:(CC3Camera *)camera {
-	super.camera = camera;
-	[self populateProjMatrixFrom: camera.projectionMatrix];
-	[self populateViewMatrixFrom: camera.viewMatrix];
-}
-
 /**
- * Attaches the CC3OpenGL instance, initializes mesh and material context switching, prepares
- * GL programs for rendering, and optionally clears the depth buffer every time drawing begins
- * so that 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
+ * Initializes mesh and material context switching, opens the camera, prepares GL programs
+ * for rendering, and optionally clears the depth buffer every time drawing begins so that
+ * 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
  */
 -(void) open {
 	[super open];
@@ -471,8 +450,26 @@
 	[CC3Mesh resetSwitching];
 	[CC3GLProgram willBeginDrawingScene];
 	
+	[self openCamera];
+	
 	if (_shouldClearDepthBuffer) [self.gl clearDepthBuffer];
 }
+
+/** Template method that opens the 3D camera. */
+-(void) openCamera {
+	[_camera openWithVisitor: self];
+	[self populateProjMatrixFrom: _camera.projectionMatrix];
+	[self populateViewMatrixFrom: _camera.viewMatrix];
+}
+
+/** Close the camera. */
+-(void) close {
+	[self closeCamera];
+	[super close];
+}
+
+/** Close the camera. This is the compliment of the openCamera method. */
+-(void) closeCamera { [_camera closeWithVisitor: self]; }
 
 -(void) draw: (CC3Node*) aNode {
 	[aNode drawWithVisitor: self];
@@ -585,13 +582,6 @@
 #pragma mark -
 #pragma mark CC3NodePickingVisitor
 
-@interface CC3NodePickingVisitor (TemplateMethods)
--(void) paintNode: (CC3Node*) aNode;
--(ccColor4B) colorFromNodeTag: (GLuint) tag;
--(GLuint) tagFromColor: (ccColor4B) color;
--(void) drawBackdrop;
-@end
-
 @implementation CC3NodePickingVisitor
 
 @synthesize pickedNode=_pickedNode;
@@ -610,10 +600,7 @@
 }
 
 /**
- * Clears the pickedNode property, ensures that lighting, blending, and fog are turned off,
- * so that nodes can be drawn in pure colors, and remembers the current color value so that
- * is can be restored after picking. This is necessary when the scene has no lighting, to
- * avoid flicker on materials and textures.
+ * Clears the pickedNode property.
  * 
  * Superclass implementation also clears the depth buffer so that the real drawing pass
  * will have a clear depth buffer. Otherwise, pixels from farther objects will not be drawn,
@@ -630,11 +617,6 @@
 	
 	[_pickedNode release];
 	_pickedNode = nil;
-	
-	CC3OpenGL* gl = self.gl;
-	[gl enableLighting: NO];
-	[gl enableBlend: NO];
-	[gl enableFog: NO];
 	
 	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
 	[CCDirector.sharedDirector.ccGLView openPicking];
@@ -766,19 +748,21 @@
 	LogTrace(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
 }
 
+// During visual testing, change this value to better distingusih the colors between nodes
+#define kTagShift	0
+
 /**
  * Maps the specified integer tag to a color, by spreading the bits of the integer across
  * the red, green and blue unsigned bytes of the color. This permits 2^24 objects to be
- * encoded by colors. This is the compliment of the tagFromColor: method. The alpha value
- * is set to zero to ensure that the painting is not visible under translucent nodes,
- * especially when translucent nodes are directly painted over the device camera.
+ * encoded by colors. This is the compliment of the tagFromColor: method.
  */
 -(ccColor4B) colorFromNodeTag: (GLuint) tag {
+	tag <<= kTagShift;
 	GLuint mask = 255;
 	GLubyte r = (tag >> 16) & mask;
 	GLubyte g = (tag >> 8) & mask;
 	GLubyte b = tag & mask;
-	return ccc4(r, g, b, 0);	// Zero alpha to ensure coloring is not visible
+	return ccc4(r, g, b, 0);	// Alpha ignored during pure-color painting
 }
 
 /**
@@ -786,7 +770,7 @@
  * colors into a single integer value. This is the compliment of the colorFromNodeTag: method.
  */
 -(GLuint) tagFromColor: (ccColor4B) color {
-	return ((GLuint)color.r << 16) | ((GLuint)color.g << 8) | (GLuint)color.b;
+	return (((GLuint)color.r << 16) | ((GLuint)color.g << 8) | (GLuint)color.b) >> kTagShift;
 }
 
 -(NSString*) fullDescription {

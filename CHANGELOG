@@ -134,7 +134,7 @@ cocos3d 2.0.0 - 2013/05/31
 	- [API change] Removed CC3Frustum viewProjectionMatrix property.
 - [API change] Changed values of kCCC4FLightGray and kCCC4FDarkGray to evenly divide luminosity over the range (kCCC4FBlack, kCCC4FDarkGray, kCCC4FGray, kCCC4FLightGray, kCCC4FWhite) in four even steps.
 - [API change] Combined the shouldClearDepthBufferBefore2D & shouldClearDepthBufferBefore3D properties of CC3Scene into a single shouldClearDepthBuffer property and deprecated the originals.
-- [API change] Renamed CC3ViewportManager openViewport & closeViewport methods to open & close respectively.
+- [API change] Moved functionality in CC3ViewportManager openViewport & closeViewport methods to CC3Camera.
 - [API change] Renamed CC3EAGLView to CC3GLView for consistency between views used between OpenGL ES 2, OpenGL ES 1.1 & OpenGL.
 - [API change] Renamed CC3VertexLocations firstElement to firstVertex and deprecated the CC3DrawableVertexArray firstElement property.
 
@@ -147,7 +147,9 @@ cocos3d 2.0.0 - 2013/05/31
 	- CC3Scene open3DWithVisitor: and close3DWithVisitor: methods now manually control GL state configuration transition between 2D and 3D environments.
 		- override these methods to alter GL state transitions between 2D & 3D.
 
-- CC3DeviceCameraOverlayUIViewController now uses AVFounation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
+- [API change] Numerous classes, methods, and properties that were previously deprecated in previous 0.x versions of cocos3d have now been removed.
+
+- CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
 
 - Fixed issue where the homegeneous position of a directional light in a POD file where not interpreted in the same way as PVRShaman
 	- [API change] CC3PODLight now uses the globalUpDirection to set the GL position of a directional POD light

@@ -602,7 +602,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticCameraFrustum:
 			// Applies the field of view angle to the narrower aspect.
-			vp = visitor.scene.viewportManager.viewport;
+			vp = visitor.camera.viewport;
 			GLfloat aspect = (GLfloat) vp.w / (GLfloat) vp.h;
 			CC3Camera* cam = visitor.camera;
 			GLfloat fovWidth, fovHeight;
@@ -616,7 +616,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setVector4: CC3Vector4Make(fovWidth, fovHeight, cam.nearClippingDistance, cam.farClippingDistance)];
 			return YES;
 		case kCC3SemanticViewport:
-			vp = visitor.scene.viewportManager.viewport;
+			vp = visitor.camera.viewport;
 			[uniform setIntVector4: CC3IntVector4Make(vp.x, vp.y, vp.w, vp.h)];
 			return YES;
 			
@@ -1196,8 +1196,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	// CAMERA -----------------
 	[self mapVarName: @"u_cc3CameraPositionGlobal" toSemantic: kCC3SemanticCameraLocationGlobal];		/**< (vec3) Location of the camera in global coordinates. */
 	[self mapVarName: @"u_cc3CameraPositionModel" toSemantic: kCC3SemanticCameraLocationModelSpace];	/**< (vec3) Location of the camera in local coordinates of model (not camera). */
-	[self mapVarName: @"u_cc3CameraFrustum" toSemantic: kCC3SemanticCameraFrustum];					/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
-	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];						/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
+	[self mapVarName: @"u_cc3CameraFrustum" toSemantic: kCC3SemanticCameraFrustum];						/**< (vec4) Dimensions of the camera frustum (FOV width (radians), FOV height (radians), near clip, far clip). */
+	[self mapVarName: @"u_cc3CameraViewport" toSemantic: kCC3SemanticViewport];							/**< (int4) The viewport rectangle in pixels (x, y, width, height). */
 	
 	// MATERIALS --------------
 	[self mapVarName: @"u_cc3Color" toSemantic: kCC3SemanticColor];									/**< (vec4) Color when lighting & materials are not in use. */

@@ -932,10 +932,12 @@ static GLfloat deviceScaleFactor = 0.0f;
  * these true bottom left and top right corners.
  */
 -(CGRect) makeRectFromQuad: (CC_PARTICLE_QUAD_TYPE) quad {
+	CC3_PUSH_NOSHADOW
 	CGFloat blx = MIN(quad.bl.vertices.x, MIN(quad.br.vertices.x, MIN(quad.tl.vertices.x, quad.tr.vertices.x)));
 	CGFloat bly = MIN(quad.bl.vertices.y, MIN(quad.br.vertices.y, MIN(quad.tl.vertices.y, quad.tr.vertices.y)));
 	CGFloat trx = MAX(quad.bl.vertices.x, MAX(quad.br.vertices.x, MAX(quad.tl.vertices.x, quad.tr.vertices.x)));
 	CGFloat try = MAX(quad.bl.vertices.y, MAX(quad.br.vertices.y, MAX(quad.tl.vertices.y, quad.tr.vertices.y)));
+	CC3_POP_NOSHADOW
 	return CGRectMake(blx, bly, trx - blx, try - bly);
 }
 

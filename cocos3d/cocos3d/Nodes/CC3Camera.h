@@ -66,56 +66,52 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the parent node. Or the camera node itself might have a light node attached as a child,
  * so that the light will move along with the camera, and point where the camera points.
  *
- * However, when adding a camera to an assembly of nodes, be aware of whether the parent
- * nodes use scaling. To construct the viewMatrix, the camera makes heavy use of
- * matrix inversion of the cummulative transform matrix of the camera's transforms and
- * the transforms of all its ancestors. If scaling has not been added to any ancestor
- * nodes, the cummulative transform will be a Rigid transform. Inverting a Rigid transform
- * matrix is much, much faster (orders of magnitude) than inverting a matrix that contains
- * scaling and is therefore not rigid. If possible, try to avoid applying scaling to the
- * ancestor nodes of this camera.
+ * However, when adding a camera to an assembly of nodes, be aware of whether the parent nodes
+ * use scaling. To construct the viewMatrix, the camera makes heavy use of matrix inversion of the
+ * cummulative transform matrix of the camera's transforms and the transforms of all its ancestors.
+ * If scaling has not been added to any ancestor nodes, the cummulative transform will be a Rigid
+ * transform. Inverting a Rigid transform matrix is much, much faster (orders of magnitude) than
+ * inverting a matrix that contains scaling and is therefore not rigid. If possible, try to avoid
+ * applying scaling to the ancestor nodes of this camera.
  *
  * CC3Camera can be pointed in a particular direction, or can be made to track a target
  * node as that node moves, or the camera moves.
  *
- * The camera can be configured for either perspective or parallel projection, using
- * the isUsingParallelProjection property. By default, the camera will use perspective
- * projection.
+ * The camera can be configured for either perspective or parallel projection, using the
+ * isUsingParallelProjection property. By default, the camera will use perspective projection.
  *
- * You can use the projectLocation: and projectNode: methods to project global locations
- * within the 3D scene into 2D view coordinates, indicating where on the screen a 3D
- * object appears.
+ * You can use the projectLocation: and projectNode: methods to project global locations within
+ * the 3D scene into 2D view coordinates, indicating where on the screen a 3D object appears.
  *
- * You can use the unprojectPoint: and unprojectPoint:ontoPlane: methods to project a
- * 2D screen position into either a ray (a line) in the 3D scene, or into a specific 
- * intersection location on a 3D plane.
+ * You can use the unprojectPoint: and unprojectPoint:ontoPlane: methods to project a 2D screen
+ * position into either a ray (a line) in the 3D scene, or into a specific intersection location
+ * on a 3D plane.
  *
- * You can use the  moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of
- * methods to have the camera automatically focus on, and display all of, a particular
- * node, or even the whole scene itself.
+ * You can use the  moveToShowAllOf:... or moveWithDuration:toShowAllOf: family of methods to
+ * have the camera automatically focus on, and display all of, a particular node, or even the
+ * whole scene itself.
  *
- * Scaling a camera is a null operation because it scales everything, including the size
- * of objects, but also the distance from the camera to those objects. The effects cancel
- * out, and visually it appears that nothing has changed.
+ * Scaling a camera is a null operation because it scales everything, including the size of objects,
+ * but also the distance from the camera to those objects. The effects cancel out, and visually it
+ * appears that nothing has changed.
  *
- * Therefore, for cameras, the scale and uniformScale properties are not applied to the
- * transform matrix. Instead, the uniformScale property acts as a zoom factor (as if the
- * camera lens is zoomed in or out), and influences the fieldOfView property accordingly.
- * See the description of the fieldOfView property for more information about zooming.
+ * Therefore, for cameras, the scale and uniformScale properties are not applied to the transform
+ * matrix. Instead, the uniformScale property acts as a zoom factor (as if the camera lens is zoomed
+ * in or out), and influences the fieldOfView property accordingly. See the description of the
+ * fieldOfView property for more information about zooming.
  *
  * If you find that objects in the periphery of your view appear elongated, you can adjust
  * the fieldOfView and/or uniformScale properties to reduce this "fish-eye" effect.
  * See the notes of the fieldOfView property for more on this.
  *
- * For cameras, any change in the projection parameters, such as fieldOfView, scale,
- * near or far clipping distances, is considered a transform change, and the
- * transformListeners are sent a notification via the nodeWasTransformed: method
- * when the projection matrix is recalculated.
+ * For cameras, any change in the projection parameters, such as fieldOfView, scale, near or far
+ * clipping distances, is considered a transform change, and the transformListeners are sent a
+ * notification via the nodeWasTransformed: method when the projection matrix is recalculated.
  */
 @interface CC3Camera : CC3Node {
 	CC3Matrix* _viewMatrix;
-//	CC3Matrix* _viewMatrixInverted;
 	CC3Frustum* _frustum;
+	CC3Viewport _viewport;
 	GLfloat _fieldOfView;
 	GLfloat _nearClippingDistance;
 	GLfloat _farClippingDistance;
@@ -123,6 +119,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	BOOL _hasInfiniteDepthOfField : 1;
 	BOOL _isProjectionDirty : 1;
 	BOOL _isViewMatrixInvertedDirty : 1;
+	BOOL _shouldClipToViewport : 1;
 }
 
 /** Returns whether this node is a camera. Returns YES. */
@@ -200,6 +197,20 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 /** @deprecated Renamed to farClippingDistance. */
 @property(nonatomic, assign) GLfloat farClippingPlane DEPRECATED_ATTRIBUTE;
+
+/**
+ * The viewport to which the camera will render its view.
+ *
+ * This property must be set prior to attempting to render the camera's view.
+ */
+@property(nonatomic, assign) CC3Viewport viewport;
+
+/**
+ * Indicates whether a scissor test should be used to ensure that redering remains within the viewport.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldClipToViewport;
 
 /**
  * The frustum of the camera.
@@ -309,20 +320,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * to invoke this method directly.
  */
 -(void) markProjectionDirty;
-
-/**
- * Updates the projection matrix if the projection parameters have been changed.
- *
- * For cameras, a change in projection is considered a transform change, so the
- * transformListeners are sent a notification via the nodeWasTransformed: method.
- *
- * This method is invoked automatically from the CC3Scene after all updates have been made to the
- * models in the 3D scene. Usually, the application never needs to invoke this method directly.
- */
--(void) buildProjection;
-
-/** @deprecated Renamed to buildProjection. */
--(void) buildPerspective DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Drawing

@@ -130,6 +130,9 @@ typedef struct {
 	
 	GLuint value_GL_ACTIVE_TEXTURE;
 	GLuint value_MaxTextureUnitsUsed;
+	
+	GLuint value_GL_FRAMEBUFFER_BINDING;
+	GLuint value_GL_RENDERBUFFER_BINDING;
 
 	BOOL valueCap_GL_BLEND : 1;
 	BOOL valueCap_GL_CULL_FACE : 1;
@@ -181,6 +184,9 @@ typedef struct {
 	BOOL isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING : 1;
 	
 	BOOL isKnown_GL_ACTIVE_TEXTURE : 1;
+	
+	BOOL isKnown_GL_FRAMEBUFFER_BINDING : 1;
+	BOOL isKnown_GL_RENDERBUFFER_BINDING : 1;
 
 }
 
@@ -585,8 +591,8 @@ typedef struct {
 /** Generates and returns a new texture ID. */
 -(GLuint) generateTextureID;
 
-/** Deletes the texture with the specified texture ID from the GL engine. */
--(void) deleteTextureID: (GLuint) texID;
+/** Deletes the texture with the specified ID from the GL engine. */
+-(void) deleteTexture: (GLuint) texID;
 
 /**
  * Loads the specified texture image data, with the specified characteristics,
@@ -739,6 +745,55 @@ typedef struct {
 
 /** Sets the point smooting hint. */
 -(void) setPointSmoothingHint: (GLenum) hint;
+
+
+#pragma mark Framebuffers
+
+/** Generates and returns a new framebuffer ID. */
+-(GLuint) generateFramebufferID;
+
+/** Deletes the framebuffer with the specified ID from the GL engine. */
+-(void) deleteFramebuffer: (GLuint) fbID;
+
+/** Makes the framebuffer with the specified ID the current framebuffer in the GL engine. */
+-(void) bindFramebuffer: (GLuint) fbID;
+
+/** Generates and returns a new renderbuffer ID. */
+-(GLuint) generateRenderbufferID;
+
+/** Deletes the renderbuffer with the specified ID from the GL engine. */
+-(void) deleteRenderbuffer: (GLuint) rbID;
+
+/** Makes the renderbuffer with the specified ID the current renderbuffer in the GL engine. */
+-(void) bindRenderbuffer: (GLuint) rbID;
+
+/** 
+ * Allocates storage for the renderbuffer with the specified ID, sufficient
+ * to render an image of the specified size in the  specified pixel format.
+ */
+-(void) allocateStorageForRenderbuffer: (GLuint) rbID ofSize: (CC3IntSize) size andFormat: (GLenum) format;
+
+/** Binds the specified renderbuffer to the specified framebuffer as the specified attachement. */
+-(void) bindRenderbuffer: (GLuint) rbID toFrameBuffer: (GLuint) fbID asAttachment: (GLenum) attachment;
+
+/** 
+ * Binds the specified mipmap level of the specified face of the specified texture to the
+ * specified framebuffer as the specified attachement.
+ */
+-(void) bindTexture2D: (GLuint) texID
+				 face: (GLenum) face
+		  mipmapLevel: (GLint) mipmapLevel
+		toFrameBuffer: (GLuint) fbID
+		 asAttachment: (GLenum) attachment;
+
+/** 
+ * Checks the completeness status of the specified framebuffer, and returns YES if the framebuffer
+ * is complete and ready to be drawn to, or NO if the framebuffer is not ready to be drawn to. 
+ *
+ * If the framebuffer is not complete, an error is logged, and, if the GL_ERROR_ASSERTION_ENABLED
+ * compiler build setting is set, an assertion error is raised.
+ */
+-(BOOL) checkFramebufferStatus: (GLuint) fbID;
 
 
 #pragma mark Platform limits

@@ -91,9 +91,10 @@
 #pragma mark Drawing
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	BOOL isFogging = self.visible && visitor.shouldDecorateNode;
 	CC3OpenGL* gl = visitor.gl;
-	[gl enableFog: visible];
-	if (visible) {
+	[gl enableFog: isFogging];
+	if (isFogging) {
 		LogTrace(@"Drawing %@", self);
 		gl.fogMode = attenuationMode;
 		gl.fogColor = floatColor;

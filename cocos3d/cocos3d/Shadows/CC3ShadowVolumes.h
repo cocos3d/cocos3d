@@ -35,7 +35,7 @@
 #import "CC3Billboard.h"
 
 /** The suggested default shadow volume vertex offset factor. */
-static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001;
+static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
 
 
 #pragma mark -

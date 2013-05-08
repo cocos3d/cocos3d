@@ -85,22 +85,6 @@ CC3BoundingBox CC3BoundingBoxEngulfLocation(CC3BoundingBox bb, CC3Vector aLoc) {
 	return bbOut;
 }
 
-/**
- * Returns the location that the specified ray intersects the specified bounding box,
- * on the side of the bounding box that has the specified normal, but only if the
- * intersection distance is less than the specified previous intersection location.
- *
- * The distance measurement is specified in the W component of the returned 4D vector.
- *
- * If the ray does not intersect the specified side of the bounding box, if the side
- * is behind the ray, or if the intersection distance is larger than that for the
- * specified previous intersection location is returned.
- *
- * This method first creates the plane on which the side exists, finds the intersection
- * of the ray and that plane, determines whether the intersection location is actually
- * within the bounding box, and then tests whether the intersection distance is less
- * than for the specified previous intersection.
- */
 CC3Vector4 CC3RayIntersectionOfBoundingBoxSide(CC3Ray aRay, CC3BoundingBox bb, CC3Vector sideNormal, CC3Vector4 prevHit) {
 	
 	// Determine which corner to use from the direction of the edge plane normal,
@@ -424,25 +408,6 @@ CC3Sphere CC3SphereUnion(CC3Sphere s1, CC3Sphere s2) {
 	return rslt;
 }
 
-/**
- * Returns the coefficients of the quadratic equation that describes the points of
- * intersection between the specified ray and sphere.
- *
- * Given the equation for a sphere at the origin:  x*x + y*y + z*z = r*r, and the
- * equation for a ray in the same frame of reference: p = s + tv, where s is the
- * ray start, v is the ray direction, and p is a point on the ray, we can solve for
- * the intersection points of the ray and sphere. The result is a quadratic equation
- * in t: at*t + bt + c = 0, where: a = v*v, b = 2(s.v), and c = s*s - r*r.
- *
- * The a, b and c elements of the returned CC3Plane structure contain the a, b and c
- * coefficients of the quadratic equation, respectively. The d element of the returned
- * CC3Plane structure contains the discriminant of the quadratic equation (d = b*b - 4ac).
- *
- * The returned quadratic coefficients are not a plane.
- * The CC3Plane structure is simply used for convenience.
- *
- * Reference: Mathematics for 3D Game Programming and Computer Graphics, 3rd ed. book, by Eric Lengyel
- */ 
 CC3Plane CC3RaySphereIntersectionEquation(CC3Ray aRay, CC3Sphere aSphere) {
 	// The quadratic intersection equation assumes the sphere is at the origin,
 	// so translate the ray to the sphere's reference frame.
@@ -464,7 +429,7 @@ CC3Plane CC3RaySphereIntersectionEquation(CC3Ray aRay, CC3Sphere aSphere) {
 }
 
 BOOL CC3DoesRayIntersectSphere(CC3Ray aRay, CC3Sphere aSphere) {
-	// Intersection occurs if the discriminant, of the quadratic equation that
+	// Intersection occurs if the discriminant of the quadratic equation that
 	// describes the points of intersection between the ray and sphere, is not negative.
 	return CC3RaySphereIntersectionEquation(aRay, aSphere).d >= 0.0f;
 }

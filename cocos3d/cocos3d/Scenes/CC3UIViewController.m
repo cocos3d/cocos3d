@@ -34,6 +34,7 @@
 #import "CC3GLView-GL.h"
 #import "CC3GLView-GLES2.h"
 #import "CC3GLView-GLES1.h"
+#import "CC3Foundation.h"
 
 #if CC3_IOS
 
@@ -193,9 +194,11 @@
 
 #pragma mark Device orientation
 
+CC3_PUSH_NOSELECTOR
 +(BOOL) isPadUI { return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad; }
 
 +(BOOL) isPhoneUI { return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone; }
+CC3_POP_NOSELECTOR
 
 /**
  * UIKit callback template method invoked automatically when device rotation is changed.

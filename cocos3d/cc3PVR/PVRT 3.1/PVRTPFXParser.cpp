@@ -17,6 +17,9 @@
 /*****************************************************************************
 ** Includes
 ******************************************************************************/
+
+#pragma GCC diagnostic ignored "-Wshadow"	// patched for cocos3d by Bill Hollings
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

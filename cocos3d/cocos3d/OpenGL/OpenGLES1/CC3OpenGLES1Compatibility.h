@@ -42,9 +42,21 @@
 #define glClearDepth					glClearDepthf
 #define glGenerateMipmap				glGenerateMipmapOES
 
+// Framebuffers
+#define glGenFramebuffers				glGenFramebuffersOES
+#define glDeleteFramebuffers			glDeleteFramebuffersOES
+#define glBindFramebuffer				glBindFramebufferOES
+#define glGenRenderbuffers				glGenRenderbuffersOES
+#define glDeleteRenderbuffers			glDeleteRenderbuffersOES
+#define glBindRenderbuffer				glBindRenderbufferOES
+#define glRenderbufferStorage			glRenderbufferStorageOES
+#define glFramebufferRenderbuffer		glFramebufferRenderbufferOES
+#define glFramebufferTexture2D			glFramebufferTexture2DOES
+
+#define GL_FRAMEBUFFER					GL_FRAMEBUFFER_OES
+#define GL_RENDERBUFFER					GL_RENDERBUFFER_OES
 
 // General symbolic constants
-
 #ifndef GL_DEPTH_COMPONENT16
 #define GL_DEPTH_COMPONENT16			GL_DEPTH_COMPONENT16_OES
 #endif

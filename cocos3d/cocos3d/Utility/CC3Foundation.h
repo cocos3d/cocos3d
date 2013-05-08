@@ -353,9 +353,9 @@ static inline CC3Vector CC3VectorNormalize(CC3Vector v) {
  * ensure that none of the components of the original is zero.
  */
 static inline CC3Vector CC3VectorInvert(CC3Vector v) {
-	return cc3v(1.0 / v.x,
-				1.0 / v.y,
-				1.0 / v.z);	
+	return cc3v(1.0f / v.x,
+				1.0f / v.y,
+				1.0f / v.z);
 }
 
 /**
@@ -483,6 +483,392 @@ static inline CC3Vector CC3VectorLerp(CC3Vector v1, CC3Vector v2, GLfloat blendF
 	if (blendFactor == 1.0f) return v2;
 	return CC3VectorAdd(v1, CC3VectorScaleUniform(CC3VectorDifference(v2, v1), blendFactor));
 }
+
+
+#pragma mark -
+#pragma mark Cartesian vector in 4D homogeneous coordinate space structure and functions
+
+/** A homogeneous vector in 4D graphics matrix space. */
+typedef struct {
+	GLfloat x;			/**< The X-componenent of the vector. */
+	GLfloat y;			/**< The Y-componenent of the vector. */
+	GLfloat z;			/**< The Z-componenent of the vector. */
+	GLfloat w;			/**< The homogeneous ratio factor. */
+} CC3Vector4;
+
+/** A CC3Vector4 of zero length at the origin. */
+static const CC3Vector4 kCC3Vector4Zero = { 0.0, 0.0, 0.0, 0.0 };
+
+/**
+ * A CC3Vector4 location at the origin.
+ * As a definite location, the W component is 1.0.
+ */
+static const CC3Vector4 kCC3Vector4ZeroLocation = { 0.0, 0.0, 0.0, 1.0 };
+
+/** The null CC3Vector4. It cannot be drawn, but is useful for marking an uninitialized vector. */
+static const CC3Vector4 kCC3Vector4Null = {INFINITY, INFINITY, INFINITY, INFINITY};
+
+/** Returns a string description of the specified CC3Vector4 struct in the form "(x, y, z, w)" */
+static inline NSString* NSStringFromCC3Vector4(CC3Vector4 v) {
+	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", v.x, v.y, v.z, v.w];
+}
+
+/** Returns a CC3Vector4 structure constructed from the vector components. */
+static inline CC3Vector4 CC3Vector4Make(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	CC3Vector4 v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+	v.w = w;
+	return v;
+}
+
+/** Returns a CC3Vector4 structure constructed from a 3D vector and a w component. */
+static inline CC3Vector4 CC3Vector4FromCC3Vector(CC3Vector v, GLfloat w) {
+	return CC3Vector4Make(v.x, v.y, v.z, w);
+}
+
+/**
+ * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D location.
+ *
+ * The W component of the returned vector is set to 1.0.
+ */
+static inline CC3Vector4 CC3Vector4FromLocation(CC3Vector aLocation) {
+	return CC3Vector4FromCC3Vector(aLocation, 1.0f);
+}
+
+/**
+ * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D direction.
+ *
+ * The W component of the returned vector is set to 0.0.
+ */
+static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
+	return CC3Vector4FromCC3Vector(aDirection, 0.0f);
+}
+
+/**
+ * Returns a CC3Vector structure constructed from a CC3Vector4,
+ * by simply ignoring the w component of the 4D vector.
+ */
+static inline CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) { return *(CC3Vector*)&v; }
+
+/** Returns whether the two vectors are equal by comparing their respective components. */
+static inline BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
+	return (v1.x == v2.x &&
+			v1.y == v2.y &&
+			v1.z == v2.z &&
+			v1.w == v2.w);
+}
+
+/** Returns whether the specified vector is equal to the zero vector, specified by kCC3Vector4Zero. */
+static inline BOOL CC3Vector4IsZero(CC3Vector4 v) {
+	return CC3Vector4sAreEqual(v, kCC3Vector4Zero);
+}
+
+/** Returns whether the specified vector is equal to the null vector, specified by kCC3Vector4Null. */
+static inline BOOL CC3Vector4IsNull(CC3Vector4 v) {
+	return CC3Vector4sAreEqual(v, kCC3Vector4Null);
+}
+
+/**
+ * Returns whether the vector represents a direction, rather than a location.
+ *
+ * It is directional if the w component is zero.
+ */
+static inline BOOL CC3Vector4IsDirectional(CC3Vector4 v) { return (v.w == 0.0); }
+
+/**
+ * Returns whether the vector represents a location, rather than a direction.
+ *
+ * It is locational if the w component is not zero.
+ */
+static inline BOOL CC3Vector4IsLocational(CC3Vector4 v) { return !CC3Vector4IsDirectional(v); }
+
+/**
+ * If the specified homogeneous vector represents a location (w is not zero), returns a
+ * homoginized copy of the vector, by dividing each component by the w-component (including
+ * the w-component itself, leaving it with a value of one). If the specified vector is a
+ * direction (w is zero), or is already homogenized (w is one) the vector is returned unchanged.
+ */
+static inline CC3Vector4 CC3Vector4Homogenize(CC3Vector4 v) {
+	if (v.w == 0.0f || v.w == 1.0f) return v;
+	GLfloat oow = 1.0f / v.w;
+	return CC3Vector4Make(v.x * oow,
+						  v.y * oow,
+						  v.z * oow,
+						  1.0f);
+}
+
+/**
+ * Returns a CC3Vector structure constructed from a CC3Vector4. The CC3Vector4 is first
+ * homogenized (via CC3Vector4Homogenize), before copying the resulting x, y & z
+ * coordinates into the CC3Vector.
+ */
+static inline CC3Vector CC3VectorFromHomogenizedCC3Vector4(CC3Vector4 v) {
+	return CC3VectorFromTruncatedCC3Vector4(CC3Vector4Homogenize(v));
+}
+
+/** Returns the result of scaling the original vector by the corresponding scale factor uniformly along all axes. */
+static inline CC3Vector4 CC3Vector4ScaleUniform(CC3Vector4 v, GLfloat scale) {
+	return CC3Vector4Make(v.x * scale,
+						  v.y * scale,
+						  v.z * scale,
+						  v.w * scale);
+}
+
+/**
+ * Returns the result of scaling the original vector by the corresponding scale
+ * factor uniformly along the X, Y & Z axes. The W component is left unchanged.
+ *
+ * Use this method for scaling 4D homgeneous coordinates.
+ */
+static inline CC3Vector4 CC3Vector4HomogeneousScaleUniform(CC3Vector4 v, GLfloat scale) {
+	return CC3Vector4Make(v.x * scale,
+						  v.y * scale,
+						  v.z * scale,
+						  v.w);
+}
+
+/** Returns the dot-product of the two given vectors (v1 . v2). */
+static inline GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
+	return	((v1.x * v2.x) +
+			 (v1.y * v2.y) +
+			 (v1.z * v2.z) +
+			 (v1.w * v2.w));
+}
+
+/**
+ * Returns the square of the scalar length of the specified vector from the origin, including
+ * the w-component. This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
+ *
+ * This function is useful for comparing vector sizes without having to run an expensive
+ * square-root calculation.
+ */
+static inline GLfloat CC3Vector4LengthSquared(CC3Vector4 v) { return CC3Vector4Dot(v, v); }
+
+/**
+ * Returns the scalar length of the specified vector from the origin, including the w-component
+ * This is calculated as sqrt(x*x + y*y + z*z + w*w) and will always be positive.
+ */
+static inline GLfloat CC3Vector4Length(CC3Vector4 v) {
+	// Avoid expensive sqrt calc if vector is unit length or zero
+	GLfloat lenSq = CC3Vector4LengthSquared(v);
+	return (lenSq == 1.0f || lenSq == 0.0f) ? lenSq : sqrtf(lenSq);
+}
+
+/** Returns a normalized copy of the specified vector so that its length is 1.0. The w-component is also normalized. */
+static inline CC3Vector4 CC3Vector4Normalize(CC3Vector4 v) {
+	GLfloat lenSq = CC3Vector4LengthSquared(v);
+	if (lenSq == 0.0f || lenSq == 1.0f) return v;
+	return CC3Vector4ScaleUniform(v, (1.0f / sqrtf(lenSq)));
+}
+
+/** Returns a vector that is the negative of the specified vector in all dimensions, including W. */
+static inline CC3Vector4 CC3Vector4Negate(CC3Vector4 v) {
+	return CC3Vector4Make(-v.x, -v.y, -v.z, -v.w);
+}
+
+/**
+ * Returns a vector that is the negative of the specified homogeneous
+ * vector in the X, Y & Z axes. The W component is left unchanged.
+ */
+static inline CC3Vector4 CC3Vector4HomogeneousNegate(CC3Vector4 v) {
+	return CC3Vector4Make(-v.x, -v.y, -v.z, v.w);
+}
+
+/**
+ * Returns the result of adding the two specified vectors, by adding the
+ * corresponding components of both vectors.
+ *
+ * If one vector is a location (W=1) and the other is a direction (W=0),
+ * this can be thought of as a translation of the location in that direction.
+ */
+static inline CC3Vector4 CC3Vector4Add(CC3Vector4 v, CC3Vector4 translation) {
+	return CC3Vector4Make(v.x + translation.x,
+						  v.y + translation.y,
+						  v.z + translation.z,
+						  v.w + translation.w);
+}
+
+/**
+ * Returns the difference between two vectors, by subtracting the subtrahend from the
+ * minuend, which is accomplished by subtracting each of the corresponding components.
+ *
+ * If both vectors are locations (W=1), the result will be a direction (W=0).
+ */
+static inline CC3Vector4 CC3Vector4Difference(CC3Vector4 minuend, CC3Vector4 subtrahend) {
+	return CC3Vector4Make(minuend.x - subtrahend.x,
+						  minuend.y - subtrahend.y,
+						  minuend.z - subtrahend.z,
+						  minuend.w - subtrahend.w);
+}
+
+
+#pragma mark -
+#pragma mark Quaternions
+
+/** A struct representing a quaternion. */
+typedef CC3Vector4 CC3Quaternion;
+
+/** A CC3Quaternion that represents the identity quaternion. */
+static const CC3Quaternion kCC3QuaternionIdentity = { 0.0, 0.0, 0.0, 1.0 };
+
+/** @deprecated Replaced by kCC3QuaternionIdentity. */
+static const CC3Vector4 kCC3Vector4QuaternionIdentity DEPRECATED_ATTRIBUTE = { 0.0, 0.0, 0.0, 1.0 };
+
+/** A CC3Vector4 of zero length at the origin. */
+static const CC3Quaternion kCC3QuaternionZero = { 0.0, 0.0, 0.0, 0.0 };
+
+/** The null CC3Quaternion. Useful for marking an uninitialized quaternion. */
+static const CC3Vector4 kCC3QuaternionNull = {INFINITY, INFINITY, INFINITY, INFINITY};
+
+/** Returns a string description of the specified CC3Quaternion struct in the form "(x, y, z, w)" */
+static inline NSString* NSStringFromCC3Quaternion(CC3Quaternion q) { return NSStringFromCC3Vector4(q); }
+
+/** Returns a CC3Quaternion structure constructed from the vector components. */
+static inline CC3Quaternion CC3QuaternionMake(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	return CC3Vector4Make(x, y, z, w);
+}
+
+/** Returns whether the two quaterions are equal by comparing their respective components. */
+static inline BOOL CC3QuaternionsAreEqual(CC3Quaternion q1, CC3Quaternion q2) {
+	return CC3Vector4sAreEqual(q1, q2);
+}
+
+/** Returns whether the specified quaternion is equal to the zero quaternion, specified by kCC3QuaternionZero. */
+static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZero(q); }
+
+/** Returns whether the specified quaternion is equal to the null quaternion, specified by kCC3QuaternionNull. */
+static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
+
+/** Returns the vector component (X, Y, Z) of the specified quaternion. */
+static inline CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) {
+	return CC3VectorFromTruncatedCC3Vector4(q);
+}
+
+/** Returns a quaternion that is the negative of the specified quaterion in all dimensions, including W. */
+static inline CC3Quaternion CC3QuaternionNegate(CC3Quaternion q) { return CC3Vector4Negate(q); }
+
+/** Returns a normalized copy of the specified quaternion so that its length is 1.0. The w-component is also normalized. */
+static inline CC3Quaternion CC3QuaternionNormalize(CC3Quaternion q) { return CC3Vector4Normalize(q); }
+
+/**
+ * Returns a quaternion that is the conjugate of the specified quaterion.
+ * The X, Y, Z dimensions are negated, but the W is not.
+ */
+static inline CC3Quaternion CC3QuaternionConjugate(CC3Quaternion q) {
+	return CC3QuaternionMake(-q.x, -q.y, -q.z, q.w);
+}
+
+/** Returns the result of scaling the original quaternion by the corresponding scale factor uniformly along all axes. */
+static inline CC3Quaternion CC3QuaternionScaleUniform(CC3Quaternion q, GLfloat scale) {
+	return CC3Vector4ScaleUniform(q, scale);
+}
+
+/** Returns the dot-product of the two given quaternions (q1 . q2). */
+static inline GLfloat CC3QuaternionDot(CC3Quaternion q1, CC3Quaternion q2) { return CC3Vector4Dot(q1, q2); }
+
+/**
+ * Returns the square of the scalar length (or magnitude) of the specified quaternion.
+ * This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
+ *
+ * This function is useful for comparing vector sizes without having to run an expensive
+ * square-root calculation.
+ */
+static inline GLfloat CC3QuaternionLengthSquared(CC3Quaternion q) { return CC3Vector4LengthSquared(q); }
+
+/**
+ * Returns the scalar length (or magnitude) of the specified quaternion.
+ * This is calculated as sqrt(x*x + y*y + z*z + w*w) and will always be positive.
+ */
+static inline GLfloat CC3QuaternionLength(CC3Quaternion q) { return CC3Vector4Length(q); }
+
+/**
+ * Returns the inverse of the specified quaterion.
+ *
+ * The inverse of a quaternion is another quaternion such that multiplying a quaternion by
+ * its inverse results in the identity quaternion.
+ *
+ * The returned inverse quaternion is calculated as the conjugate of the specified quaternion
+ * divided by the square of the length of the specified quaternion.
+ */
+static inline CC3Quaternion CC3QuaternionInvert(CC3Quaternion q) {
+	return CC3QuaternionScaleUniform(CC3QuaternionConjugate(q), 1.0f / CC3QuaternionLengthSquared(q));
+}
+
+/** Returns the result of multiplying qL on the left by qR on the right. */
+static inline CC3Quaternion CC3QuaternionMultiply(CC3Quaternion qL, CC3Quaternion qR) {
+	return CC3QuaternionMake((qL.w * qR.x) + (qL.x * qR.w) + (qL.y * qR.z) - (qL.z * qR.y),
+							 (qL.w * qR.y) - (qL.x * qR.z) + (qL.y * qR.w) + (qL.z * qR.x),
+							 (qL.w * qR.z) + (qL.x * qR.y) - (qL.y * qR.x) + (qL.z * qR.w),
+							 (qL.w * qR.w) - (qL.x * qR.x) - (qL.y * qR.y) - (qL.z * qR.z));
+}
+
+/**
+ * Converts the specified vector that represents an rotation in axis-angle form
+ * to the corresponding quaternion. The X, Y & Z components of the incoming vector
+ * contain the rotation axis, and the W component specifies the angle, in degrees.
+ */
+static inline CC3Quaternion CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
+	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
+	// the rotation angle (negated for right-handed coordinate system), then:
+	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
+	
+	GLfloat halfAngle = -DegreesToRadians(axisAngle.w) / 2.0f;		// negate for RH system
+	CC3Vector axis = CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(axisAngle));
+	return CC3Vector4FromCC3Vector(CC3VectorScaleUniform(axis, sinf(halfAngle)), cosf(halfAngle));
+}
+
+/**
+ * Converts the specified quaternion to a vector that represents a rotation in
+ * axis-angle form. The X, Y & Z components of the returned vector contain the
+ * rotation axis, and the W component specifies the angle, in degrees.
+ */
+static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Quaternion quaternion) {
+	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
+	// the rotation angle (negated for right-handed coordinate system), then:
+	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
+	// ra = acos(q.w) * 2
+	// (rx, ry, rz) = (q.x, q.y, q.z) / sin(ra/2)
+	
+	CC3Vector4 q = CC3Vector4Normalize(quaternion);
+	GLfloat halfAngle = -acosf(q.w);						// Negate to preserve orientation
+	GLfloat angle = -RadiansToDegrees(halfAngle) * 2.0f;		// Negate for RH system
+	
+	// If angle is zero, rotation axis is undefined. Use zero vector.
+	CC3Vector axis;
+	if (halfAngle != 0.0f)
+		axis = CC3VectorScaleUniform(CC3VectorFromQuaternion(q), 1.0f / sinf(halfAngle));
+	else
+		axis = kCC3VectorZero;
+	
+	return CC3Vector4FromCC3Vector(axis, angle);
+}
+
+/**
+ * Converts the specified Euler angle rotational vector to a quaternion.
+ *
+ * The specified rotation vector contains three Euler angles measured in degrees.
+ */
+CC3Quaternion CC3QuaternionFromRotation(CC3Vector aRotation);
+
+/**
+ * Converts the specified quaternion to a Euler angle rotational vector.
+ *
+ * The returned rotation vector contains three Euler angles measured in degrees.
+ */
+CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion);
+
+/**
+ * Returns a spherical linear interpolation between two quaternions, based on the blendFactor.
+ * which should be between zero and one inclusive. The returned quaternion is calculated as
+ * q1 + (blendFactor * (q2 - q1)). If the blendFactor is either zero or one exactly, this
+ * function short-circuits to simply return q1 or q2 respectively.
+ */
+CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor);
+
+/** @deprecated Replaced by CC3QuaternionSlerp. */
+CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark -
@@ -748,6 +1134,25 @@ static inline CC3BoundingBox CC3BoundingBoxScaleUniform(CC3BoundingBox bb, GLflo
  */
 CC3Vector CC3RayIntersectionOfBoundingBox(CC3Ray aRay, CC3BoundingBox bb);
 
+/**
+ * Returns the location that the specified ray intersects the specified bounding box,
+ * on the side of the bounding box that has the specified normal, but only if the
+ * intersection distance is less than the specified previous intersection location.
+ *
+ * The distance measurement is specified in the W component of the returned 4D vector.
+ *
+ * If the ray does not intersect the specified side of the bounding box, if the side
+ * is behind the ray, or if the intersection distance is larger than that for the
+ * specified previous intersection location is returned.
+ *
+ * This method first creates the plane on which the side exists, finds the intersection
+ * of the ray and that plane, determines whether the intersection location is actually
+ * within the bounding box, and then tests whether the intersection distance is less
+ * than for the specified previous intersection.
+ */
+CC3Vector4 CC3RayIntersectionOfBoundingBoxSide(CC3Ray aRay, CC3BoundingBox bb,
+											   CC3Vector sideNormal, CC3Vector4 prevHit);
+
 
 #pragma mark -
 #pragma mark 3D angular vector structure and functions
@@ -787,7 +1192,7 @@ static inline CC3AngularVector CC3AngularVectorMake(GLfloat heading, GLfloat inc
 static inline CC3AngularVector CC3AngularVectorFromVector(CC3Vector aCoord) {
 	CC3AngularVector av;
 	av.radius = CC3VectorLength(aCoord);
-	av.inclination = av.radius ? RadiansToDegrees(asinf(aCoord.y / av.radius)) : 0.0;	
+	av.inclination = av.radius ? RadiansToDegrees(asinf(aCoord.y / av.radius)) : 0.0f;
 	av.heading = RadiansToDegrees(atan2f(aCoord.x, -aCoord.z));
 	return av;
 }
@@ -827,392 +1232,6 @@ static inline CC3AngularVector CC3AngularVectorDifference(CC3AngularVector minue
 	difference.radius = minuend.radius - subtrahend.radius;
 	return difference;
 }
-
-
-#pragma mark -
-#pragma mark Cartesian vector in 4D homogeneous coordinate space structure and functions
-
-/** A homogeneous vector in 4D graphics matrix space. */
-typedef struct {
-	GLfloat x;			/**< The X-componenent of the vector. */
-	GLfloat y;			/**< The Y-componenent of the vector. */
-	GLfloat z;			/**< The Z-componenent of the vector. */
-	GLfloat w;			/**< The homogeneous ratio factor. */
-} CC3Vector4;
-
-/** A CC3Vector4 of zero length at the origin. */
-static const CC3Vector4 kCC3Vector4Zero = { 0.0, 0.0, 0.0, 0.0 };
-
-/**
- * A CC3Vector4 location at the origin.
- * As a definite location, the W component is 1.0.
- */
-static const CC3Vector4 kCC3Vector4ZeroLocation = { 0.0, 0.0, 0.0, 1.0 };
-
-/** The null CC3Vector4. It cannot be drawn, but is useful for marking an uninitialized vector. */
-static const CC3Vector4 kCC3Vector4Null = {INFINITY, INFINITY, INFINITY, INFINITY};
-
-/** Returns a string description of the specified CC3Vector4 struct in the form "(x, y, z, w)" */
-static inline NSString* NSStringFromCC3Vector4(CC3Vector4 v) {
-	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", v.x, v.y, v.z, v.w];
-}
-
-/** Returns a CC3Vector4 structure constructed from the vector components. */
-static inline CC3Vector4 CC3Vector4Make(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-	CC3Vector4 v;
-	v.x = x;
-	v.y = y;
-	v.z = z;
-	v.w = w;
-	return v;
-}
-
-/** Returns a CC3Vector4 structure constructed from a 3D vector and a w component. */
-static inline CC3Vector4 CC3Vector4FromCC3Vector(CC3Vector v, GLfloat w) {
-	return CC3Vector4Make(v.x, v.y, v.z, w);
-}
-
-/** 
- * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D location.
- *
- * The W component of the returned vector is set to 1.0.
- */
-static inline CC3Vector4 CC3Vector4FromLocation(CC3Vector aLocation) {
-	return CC3Vector4FromCC3Vector(aLocation, 1.0f);
-}
-
-/**
- * Returns a CC3Vector4 homogeneous coordinate constructed from a 3D direction.
- *
- * The W component of the returned vector is set to 0.0.
- */
-static inline CC3Vector4 CC3Vector4FromDirection(CC3Vector aDirection) {
-	return CC3Vector4FromCC3Vector(aDirection, 0.0f);
-}
-
-/**
- * Returns a CC3Vector structure constructed from a CC3Vector4,
- * by simply ignoring the w component of the 4D vector.
- */
-static inline CC3Vector CC3VectorFromTruncatedCC3Vector4(CC3Vector4 v) { return *(CC3Vector*)&v; }
-
-/** Returns whether the two vectors are equal by comparing their respective components. */
-static inline BOOL CC3Vector4sAreEqual(CC3Vector4 v1, CC3Vector4 v2) {
-	return (v1.x == v2.x &&
-			v1.y == v2.y &&
-			v1.z == v2.z &&
-			v1.w == v2.w);
-}
-
-/** Returns whether the specified vector is equal to the zero vector, specified by kCC3Vector4Zero. */
-static inline BOOL CC3Vector4IsZero(CC3Vector4 v) {
-	return CC3Vector4sAreEqual(v, kCC3Vector4Zero);
-}
-
-/** Returns whether the specified vector is equal to the null vector, specified by kCC3Vector4Null. */
-static inline BOOL CC3Vector4IsNull(CC3Vector4 v) {
-	return CC3Vector4sAreEqual(v, kCC3Vector4Null);
-}
-
-/**
- * Returns whether the vector represents a direction, rather than a location.
- *
- * It is directional if the w component is zero.
- */
-static inline BOOL CC3Vector4IsDirectional(CC3Vector4 v) { return (v.w == 0.0); }
-
-/**
- * Returns whether the vector represents a location, rather than a direction.
- *
- * It is locational if the w component is not zero.
- */
-static inline BOOL CC3Vector4IsLocational(CC3Vector4 v) { return !CC3Vector4IsDirectional(v); }
-
-/**
- * If the specified homogeneous vector represents a location (w is not zero), returns a 
- * homoginized copy of the vector, by dividing each component by the w-component (including
- * the w-component itself, leaving it with a value of one). If the specified vector is a
- * direction (w is zero), or is already homogenized (w is one) the vector is returned unchanged.
- */
-static inline CC3Vector4 CC3Vector4Homogenize(CC3Vector4 v) {
-	if (v.w == 0.0f || v.w == 1.0f) return v;
-	GLfloat oow = 1.0f / v.w;
-	return CC3Vector4Make(v.x * oow,
-						  v.y * oow,
-						  v.z * oow,
-						  1.0f);
-}
-
-/**
- * Returns a CC3Vector structure constructed from a CC3Vector4. The CC3Vector4 is first
- * homogenized (via CC3Vector4Homogenize), before copying the resulting x, y & z
- * coordinates into the CC3Vector.
- */
-static inline CC3Vector CC3VectorFromHomogenizedCC3Vector4(CC3Vector4 v) {
-	return CC3VectorFromTruncatedCC3Vector4(CC3Vector4Homogenize(v));
-}
-
-/** Returns the result of scaling the original vector by the corresponding scale factor uniformly along all axes. */
-static inline CC3Vector4 CC3Vector4ScaleUniform(CC3Vector4 v, GLfloat scale) {
-	return CC3Vector4Make(v.x * scale,
-						  v.y * scale,
-						  v.z * scale,
-						  v.w * scale);
-}
-
-/**
- * Returns the result of scaling the original vector by the corresponding scale
- * factor uniformly along the X, Y & Z axes. The W component is left unchanged.
- *
- * Use this method for scaling 4D homgeneous coordinates.
- */
-static inline CC3Vector4 CC3Vector4HomogeneousScaleUniform(CC3Vector4 v, GLfloat scale) {
-	return CC3Vector4Make(v.x * scale,
-						  v.y * scale,
-						  v.z * scale,
-						  v.w);
-}
-
-/** Returns the dot-product of the two given vectors (v1 . v2). */
-static inline GLfloat CC3Vector4Dot(CC3Vector4 v1, CC3Vector4 v2) {
-	return	((v1.x * v2.x) +
-			 (v1.y * v2.y) +
-			 (v1.z * v2.z) +
-			 (v1.w * v2.w));
-}
-
-/**
- * Returns the square of the scalar length of the specified vector from the origin, including
- * the w-component. This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
- *
- * This function is useful for comparing vector sizes without having to run an expensive
- * square-root calculation.
- */
-static inline GLfloat CC3Vector4LengthSquared(CC3Vector4 v) { return CC3Vector4Dot(v, v); }
-
-/**
- * Returns the scalar length of the specified vector from the origin, including the w-component
- * This is calculated as sqrt(x*x + y*y + z*z + w*w) and will always be positive.
- */
-static inline GLfloat CC3Vector4Length(CC3Vector4 v) {
-	// Avoid expensive sqrt calc if vector is unit length or zero
-	GLfloat lenSq = CC3Vector4LengthSquared(v);
-	return (lenSq == 1.0f || lenSq == 0.0f) ? lenSq : sqrtf(lenSq);
-}
-
-/** Returns a normalized copy of the specified vector so that its length is 1.0. The w-component is also normalized. */
-static inline CC3Vector4 CC3Vector4Normalize(CC3Vector4 v) {
-	GLfloat lenSq = CC3Vector4LengthSquared(v);
-	if (lenSq == 0.0f || lenSq == 1.0f) return v;
-	return CC3Vector4ScaleUniform(v, (1.0f / sqrtf(lenSq)));
-}
-
-/** Returns a vector that is the negative of the specified vector in all dimensions, including W. */
-static inline CC3Vector4 CC3Vector4Negate(CC3Vector4 v) {
-	return CC3Vector4Make(-v.x, -v.y, -v.z, -v.w);
-}
-
-/**
- * Returns a vector that is the negative of the specified homogeneous
- * vector in the X, Y & Z axes. The W component is left unchanged.
- */
-static inline CC3Vector4 CC3Vector4HomogeneousNegate(CC3Vector4 v) {
-	return CC3Vector4Make(-v.x, -v.y, -v.z, v.w);
-}
-
-/**
- * Returns the result of adding the two specified vectors, by adding the
- * corresponding components of both vectors.
- * 
- * If one vector is a location (W=1) and the other is a direction (W=0),
- * this can be thought of as a translation of the location in that direction.
- */
-static inline CC3Vector4 CC3Vector4Add(CC3Vector4 v, CC3Vector4 translation) {
-	return CC3Vector4Make(v.x + translation.x,
-						  v.y + translation.y,
-						  v.z + translation.z,
-						  v.w + translation.w);
-}
-
-/**
- * Returns the difference between two vectors, by subtracting the subtrahend from the
- * minuend, which is accomplished by subtracting each of the corresponding components.
- *
- * If both vectors are locations (W=1), the result will be a direction (W=0).
- */
-static inline CC3Vector4 CC3Vector4Difference(CC3Vector4 minuend, CC3Vector4 subtrahend) {
-	return CC3Vector4Make(minuend.x - subtrahend.x,
-						  minuend.y - subtrahend.y,
-						  minuend.z - subtrahend.z,
-						  minuend.w - subtrahend.w);
-}
-
-
-#pragma mark -
-#pragma mark Quaternions
-
-/** A struct representing a quaternion. */
-typedef CC3Vector4 CC3Quaternion;
-
-/** A CC3Quaternion that represents the identity quaternion. */
-static const CC3Quaternion kCC3QuaternionIdentity = { 0.0, 0.0, 0.0, 1.0 };
-
-/** @deprecated Replaced by kCC3QuaternionIdentity. */
-static const CC3Vector4 kCC3Vector4QuaternionIdentity DEPRECATED_ATTRIBUTE = { 0.0, 0.0, 0.0, 1.0 };
-
-/** A CC3Vector4 of zero length at the origin. */
-static const CC3Quaternion kCC3QuaternionZero = { 0.0, 0.0, 0.0, 0.0 };
-
-/** The null CC3Quaternion. Useful for marking an uninitialized quaternion. */
-static const CC3Vector4 kCC3QuaternionNull = {INFINITY, INFINITY, INFINITY, INFINITY};
-
-/** Returns a string description of the specified CC3Quaternion struct in the form "(x, y, z, w)" */
-static inline NSString* NSStringFromCC3Quaternion(CC3Quaternion q) { return NSStringFromCC3Vector4(q); }
-
-/** Returns a CC3Quaternion structure constructed from the vector components. */
-static inline CC3Quaternion CC3QuaternionMake(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-	return CC3Vector4Make(x, y, z, w);
-}
-
-/** Returns whether the two quaterions are equal by comparing their respective components. */
-static inline BOOL CC3QuaternionsAreEqual(CC3Quaternion q1, CC3Quaternion q2) {
-	return CC3Vector4sAreEqual(q1, q2);
-}
-
-/** Returns whether the specified quaternion is equal to the zero quaternion, specified by kCC3QuaternionZero. */
-static inline BOOL CC3QuaternionIsZero(CC3Quaternion q) { return CC3Vector4IsZero(q); }
-
-/** Returns whether the specified quaternion is equal to the null quaternion, specified by kCC3QuaternionNull. */
-static inline BOOL CC3QuaternionIsNull(CC3Quaternion q) { return CC3Vector4IsNull(q); }
-
-/** Returns the vector component (X, Y, Z) of the specified quaternion. */
-static inline CC3Vector CC3VectorFromQuaternion(CC3Quaternion q) {
-	return CC3VectorFromTruncatedCC3Vector4(q);
-}
-
-/** Returns a quaternion that is the negative of the specified quaterion in all dimensions, including W. */
-static inline CC3Quaternion CC3QuaternionNegate(CC3Quaternion q) { return CC3Vector4Negate(q); }
-
-/** Returns a normalized copy of the specified quaternion so that its length is 1.0. The w-component is also normalized. */
-static inline CC3Quaternion CC3QuaternionNormalize(CC3Quaternion q) { return CC3Vector4Normalize(q); }
-
-/** 
- * Returns a quaternion that is the conjugate of the specified quaterion.
- * The X, Y, Z dimensions are negated, but the W is not.
- */
-static inline CC3Quaternion CC3QuaternionConjugate(CC3Quaternion q) {
-	return CC3QuaternionMake(-q.x, -q.y, -q.z, q.w);
-}
-
-/** Returns the result of scaling the original quaternion by the corresponding scale factor uniformly along all axes. */
-static inline CC3Quaternion CC3QuaternionScaleUniform(CC3Quaternion q, GLfloat scale) {
-	return CC3Vector4ScaleUniform(q, scale);
-}
-
-/** Returns the dot-product of the two given quaternions (q1 . q2). */
-static inline GLfloat CC3QuaternionDot(CC3Quaternion q1, CC3Quaternion q2) { return CC3Vector4Dot(q1, q2); }
-
-/**
- * Returns the square of the scalar length (or magnitude) of the specified quaternion.
- * This is calculated as (x*x + y*y + z*z + w*w) and will always be positive.
- *
- * This function is useful for comparing vector sizes without having to run an expensive
- * square-root calculation.
- */
-static inline GLfloat CC3QuaternionLengthSquared(CC3Quaternion q) { return CC3Vector4LengthSquared(q); }
-
-/**
- * Returns the scalar length (or magnitude) of the specified quaternion.
- * This is calculated as sqrt(x*x + y*y + z*z + w*w) and will always be positive.
- */
-static inline GLfloat CC3QuaternionLength(CC3Quaternion q) { return CC3Vector4Length(q); }
-
-/**
- * Returns the inverse of the specified quaterion.
- *
- * The inverse of a quaternion is another quaternion such that multiplying a quaternion by
- * its inverse results in the identity quaternion.
- * 
- * The returned inverse quaternion is calculated as the conjugate of the specified quaternion
- * divided by the square of the length of the specified quaternion.
- */
-static inline CC3Quaternion CC3QuaternionInvert(CC3Quaternion q) {
-	return CC3QuaternionScaleUniform(CC3QuaternionConjugate(q), 1.0f / CC3QuaternionLengthSquared(q));
-}
-
-/** Returns the result of multiplying qL on the left by qR on the right. */
-static inline CC3Quaternion CC3QuaternionMultiply(CC3Quaternion qL, CC3Quaternion qR) {
-	return CC3QuaternionMake((qL.w * qR.x) + (qL.x * qR.w) + (qL.y * qR.z) - (qL.z * qR.y),
-							 (qL.w * qR.y) - (qL.x * qR.z) + (qL.y * qR.w) + (qL.z * qR.x),
-							 (qL.w * qR.z) + (qL.x * qR.y) - (qL.y * qR.x) + (qL.z * qR.w),
-							 (qL.w * qR.w) - (qL.x * qR.x) - (qL.y * qR.y) - (qL.z * qR.z));
-}
-
-/**
- * Converts the specified vector that represents an rotation in axis-angle form
- * to the corresponding quaternion. The X, Y & Z components of the incoming vector
- * contain the rotation axis, and the W component specifies the angle, in degrees.
- */
-static inline CC3Quaternion CC3QuaternionFromAxisAngle(CC3Vector4 axisAngle) {
-	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
-	// the rotation angle (negated for right-handed coordinate system), then:
-	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
-	
-	GLfloat halfAngle = -DegreesToRadians(axisAngle.w) / 2.0;		// negate for RH system
-	CC3Vector axis = CC3VectorNormalize(CC3VectorFromTruncatedCC3Vector4(axisAngle));
-	return CC3Vector4FromCC3Vector(CC3VectorScaleUniform(axis, sinf(halfAngle)), cosf(halfAngle));
-}
-
-/**
- * Converts the specified quaternion to a vector that represents a rotation in
- * axis-angle form. The X, Y & Z components of the returned vector contain the
- * rotation axis, and the W component specifies the angle, in degrees.
- */
-static inline CC3Vector4 CC3AxisAngleFromQuaternion(CC3Quaternion quaternion) {
-	// If q is a quaternion, (rx, ry, rz) is the rotation axis, and ra is
-	// the rotation angle (negated for right-handed coordinate system), then:
-	// q = ( sin(ra/2)*rx, sin(ra/2)*ry, sin(ra/2)*rz, cos(ra/2) )
-	// ra = acos(q.w) * 2
-	// (rx, ry, rz) = (q.x, q.y, q.z) / sin(ra/2)
-	
-	CC3Vector4 q = CC3Vector4Normalize(quaternion);
-	GLfloat halfAngle = -acosf(q.w);						// Negate to preserve orientation
-	GLfloat angle = -RadiansToDegrees(halfAngle) * 2.0;		// Negate for RH system
-	
-	// If angle is zero, rotation axis is undefined. Use zero vector.
-	CC3Vector axis;
-	if (halfAngle != 0.0f)
-		axis = CC3VectorScaleUniform(CC3VectorFromQuaternion(q), 1.0 / sinf(halfAngle));
-	else
-		axis = kCC3VectorZero;
-
-	return CC3Vector4FromCC3Vector(axis, angle);
-}
-
-/**
- * Converts the specified Euler angle rotational vector to a quaternion.
- *
- * The specified rotation vector contains three Euler angles measured in degrees.
- */
-CC3Quaternion CC3QuaternionFromRotation(CC3Vector aRotation);
-
-/**
- * Converts the specified quaternion to a Euler angle rotational vector.
- *
- * The returned rotation vector contains three Euler angles measured in degrees.
- */
-CC3Vector CC3RotationFromQuaternion(CC3Quaternion aQuaternion);
-
-/**
- * Returns a spherical linear interpolation between two quaternions, based on the blendFactor.
- * which should be between zero and one inclusive. The returned quaternion is calculated as
- * q1 + (blendFactor * (q2 - q1)). If the blendFactor is either zero or one exactly, this
- * function short-circuits to simply return q1 or q2 respectively.
- */
-CC3Quaternion CC3QuaternionSlerp(CC3Quaternion q1, CC3Quaternion q2, GLfloat blendFactor);
-
-/** @deprecated Replaced by CC3QuaternionSlerp. */
-CC3Vector4 CC3Vector4Slerp(CC3Vector4 v1, CC3Vector4 v2, GLfloat blendFactor) DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark -
@@ -1459,7 +1478,7 @@ static inline CC3Plane CC3PlaneNegate(CC3Plane p) {
 
 /** Returns a normalized copy of the specified CC3Plane so that the length of its normal (a, b, c) is 1.0 */
 static inline CC3Plane CC3PlaneNormalize(CC3Plane p) {
-	GLfloat ooNormLen = 1.0 / CC3VectorLength(CC3PlaneNormal(p));
+	GLfloat ooNormLen = 1.0f / CC3VectorLength(CC3PlaneNormal(p));
 	return CC3PlaneMake(p.a * ooNormLen,
 						p.b * ooNormLen,
 						p.c * ooNormLen,
@@ -1587,6 +1606,27 @@ BOOL CC3DoesRayIntersectSphere(CC3Ray aRay, CC3Sphere aSphere);
  * the exit location of the ray.
  */
 CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere);
+
+/**
+ * Returns the coefficients of the quadratic equation that describes the points of
+ * intersection between the specified ray and sphere.
+ *
+ * Given the equation for a sphere at the origin:  x*x + y*y + z*z = r*r, and the
+ * equation for a ray in the same frame of reference: p = s + tv, where s is the
+ * ray start, v is the ray direction, and p is a point on the ray, we can solve for
+ * the intersection points of the ray and sphere. The result is a quadratic equation
+ * in t: at*t + bt + c = 0, where: a = v*v, b = 2(s.v), and c = s*s - r*r.
+ *
+ * The a, b and c elements of the returned CC3Plane structure contain the a, b and c
+ * coefficients of the quadratic equation, respectively. The d element of the returned
+ * CC3Plane structure contains the discriminant of the quadratic equation (d = b*b - 4ac).
+ *
+ * The returned quadratic coefficients are not a plane.
+ * The CC3Plane structure is simply used for convenience.
+ *
+ * Reference: Mathematics for 3D Game Programming and Computer Graphics, 3rd ed. book, by Eric Lengyel
+ */
+CC3Plane CC3RaySphereIntersectionEquation(CC3Ray aRay, CC3Sphere aSphere);
 
 
 #pragma mark -
@@ -1862,10 +1902,10 @@ static inline BOOL CCC4BAreEqual(ccColor4B c1, ccColor4B c2) {
  */
 static inline ccColor4F CCC4FAdd(ccColor4F rgba, ccColor4F translation) {
 	ccColor4F result;
-	result.r = CLAMP(rgba.r + translation.r, 0.0, 1.0);
-	result.g = CLAMP(rgba.g + translation.g, 0.0, 1.0);
-	result.b = CLAMP(rgba.b + translation.b, 0.0, 1.0);
-	result.a = CLAMP(rgba.a + translation.a, 0.0, 1.0);
+	result.r = CLAMP(rgba.r + translation.r, 0.0f, 1.0f);
+	result.g = CLAMP(rgba.g + translation.g, 0.0f, 1.0f);
+	result.b = CLAMP(rgba.b + translation.b, 0.0f, 1.0f);
+	result.a = CLAMP(rgba.a + translation.a, 0.0f, 1.0f);
 	return result;
 }
 
@@ -1876,10 +1916,10 @@ static inline ccColor4F CCC4FAdd(ccColor4F rgba, ccColor4F translation) {
  */
 static inline ccColor4F CCC4FDifference(ccColor4F minuend, ccColor4F subtrahend) {
 	ccColor4F result;
-	result.r = CLAMP(minuend.r - subtrahend.r, 0.0, 1.0);
-	result.g = CLAMP(minuend.g - subtrahend.g, 0.0, 1.0);
-	result.b = CLAMP(minuend.b - subtrahend.b, 0.0, 1.0);
-	result.a = CLAMP(minuend.a - subtrahend.a, 0.0, 1.0);
+	result.r = CLAMP(minuend.r - subtrahend.r, 0.0f, 1.0f);
+	result.g = CLAMP(minuend.g - subtrahend.g, 0.0f, 1.0f);
+	result.b = CLAMP(minuend.b - subtrahend.b, 0.0f, 1.0f);
+	result.a = CLAMP(minuend.a - subtrahend.a, 0.0f, 1.0f);
 	return result;
 }
 
@@ -1899,10 +1939,10 @@ static inline ccColor4F CCC4FUniformTranslate(ccColor4F rgba, GLfloat offset) {
  */
 static inline ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
 	ccColor4F result;
-	result.r = CLAMP(rgba.r * scale, 0.0, 1.0);
-	result.g = CLAMP(rgba.g * scale, 0.0, 1.0);
-	result.b = CLAMP(rgba.b * scale, 0.0, 1.0);
-	result.a = CLAMP(rgba.a * scale, 0.0, 1.0);
+	result.r = CLAMP(rgba.r * scale, 0.0f, 1.0f);
+	result.g = CLAMP(rgba.g * scale, 0.0f, 1.0f);
+	result.b = CLAMP(rgba.b * scale, 0.0f, 1.0f);
+	result.a = CLAMP(rgba.a * scale, 0.0f, 1.0f);
 	return result;
 }
 
@@ -1912,10 +1952,10 @@ static inline ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
  */
 static inline ccColor4F CCC4FModulate(ccColor4F rgba, ccColor4F modulation) {
 	ccColor4F result;
-	result.r = CLAMP(rgba.r * modulation.r, 0.0, 1.0);
-	result.g = CLAMP(rgba.g * modulation.g, 0.0, 1.0);
-	result.b = CLAMP(rgba.b * modulation.b, 0.0, 1.0);
-	result.a = CLAMP(rgba.a * modulation.a, 0.0, 1.0);
+	result.r = CLAMP(rgba.r * modulation.r, 0.0f, 1.0f);
+	result.g = CLAMP(rgba.g * modulation.g, 0.0f, 1.0f);
+	result.b = CLAMP(rgba.b * modulation.b, 0.0f, 1.0f);
+	result.a = CLAMP(rgba.a * modulation.a, 0.0f, 1.0f);
 	return result;
 }
 
@@ -1941,9 +1981,9 @@ static inline ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GL
  */
 static inline ccColor4F CCC4FBlendAlpha(ccColor4F rgba) {
 	ccColor4F result;
-	result.r = CLAMP(rgba.r * rgba.a, 0.0, 1.0);
-	result.g = CLAMP(rgba.g * rgba.a, 0.0, 1.0);
-	result.b = CLAMP(rgba.b * rgba.a, 0.0, 1.0);
+	result.r = CLAMP(rgba.r * rgba.a, 0.0f, 1.0f);
+	result.g = CLAMP(rgba.g * rgba.a, 0.0f, 1.0f);
+	result.b = CLAMP(rgba.b * rgba.a, 0.0f, 1.0f);
 	result.a = rgba.a;
 	return result;
 }
@@ -1959,9 +1999,9 @@ static inline ccColor4F CCC4FBlendAlpha(ccColor4F rgba) {
 static inline ccColor4B CCC4BBlendAlpha(ccColor4B rgba) {
 	GLfloat alpha = rgba.a * kCC3OneOver255;
 	ccColor4B result;
-	result.r = CLAMP(rgba.r * alpha, 0.0, 255);
-	result.g = CLAMP(rgba.g * alpha, 0.0, 255);
-	result.b = CLAMP(rgba.b * alpha, 0.0, 255);
+	result.r = CLAMP((rgba.r * alpha), 0, 255);
+	result.g = CLAMP((rgba.g * alpha), 0, 255);
+	result.b = CLAMP((rgba.b * alpha), 0, 255);
 	result.a = rgba.a;
 	return result;
 }
@@ -2044,10 +2084,21 @@ static inline void CC3SetBit(GLbitfield* bits, GLuint bitIdx, BOOL val) {
 	CC3AssertC(bitIdx < (8 * sizeof(*bits)), @"Bit index %u is too large for the bitfield.", bitIdx);
 	GLbitfield marker = 1;
 	marker <<= bitIdx;
-	if (val) {
+	if (val)
 		*bits |= marker;
-	} else {
+	else
 		*bits &= ~marker;
-	}
 }
+
+/** Temporarily turn off compiler warnings for hidden variable shadowing. */
+#define CC3_PUSH_NOSHADOW	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wshadow\"")
+
+/** Resume compiler warnings for hidden variable shadowing. */
+#define CC3_POP_NOSHADOW	_Pragma("GCC diagnostic pop")
+
+/** Temporarily turn off compiler warnings of unimplemented selectors. */
+#define CC3_PUSH_NOSELECTOR	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wselector\"")
+
+/** Resume compiler warnings of unimplemented selectors. */
+#define CC3_POP_NOSELECTOR	_Pragma("GCC diagnostic pop")
 

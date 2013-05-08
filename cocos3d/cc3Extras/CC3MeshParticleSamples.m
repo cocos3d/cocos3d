@@ -174,10 +174,10 @@
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
 		ccColor4F currColor = self.color4F;
-		ccColor4F newColor = ccc4f(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0, 1.0),
-								   CLAMP(currColor.g + (colorVelocity.g * dt), 0.0, 1.0),
-								   CLAMP(currColor.b + (colorVelocity.b * dt), 0.0, 1.0),
-								   CLAMP(currColor.a + (colorVelocity.a * dt), 0.0, 1.0));
+		ccColor4F newColor = ccc4f(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.g + (colorVelocity.g * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.b + (colorVelocity.b * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.a + (colorVelocity.a * dt), 0.0f, 1.0f));
 		self.color4F = newColor;
 		LogTrace(@"Updating color of %@ from %@ to %@", self,
 					  NSStringFromCCC4F(currColor), NSStringFromCCC4F(newColor));
