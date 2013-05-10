@@ -200,7 +200,6 @@
 		A99EA5581731580400595FE0 /* CC3TexturableMaterial.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A99EA4D11731580400595FE0 /* CC3TexturableMaterial.vsh */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
-		A9C13D11172C8866009B1365 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9C13D10172C8866009B1365 /* Skybox.pvr */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
@@ -679,7 +678,6 @@
 		A99EA4D11731580400595FE0 /* CC3TexturableMaterial.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableMaterial.vsh; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
-		A9C13D10172C8866009B1365 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = Skybox.pvr; path = "../../../../../../PowerVR/SDKPackage 3.1/SDK_3.1/Examples/Advanced/Skybox2/OGLES2/Skybox.pvr"; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
@@ -1007,7 +1005,6 @@
 		A91153621723A27F004A87FC /* EnvMap */ = {
 			isa = PBXGroup;
 			children = (
-				A9C13D10172C8866009B1365 /* Skybox.pvr */,
 				A91153631723A27F004A87FC /* EnvMap.pfx */,
 				A91153641723A27F004A87FC /* EnvMapNegX.jpg */,
 				A91153651723A27F004A87FC /* EnvMapNegY.jpg */,
@@ -2112,7 +2109,6 @@
 				A911536E1723A27F004A87FC /* EnvMapPosX.jpg in Resources */,
 				A911536F1723A27F004A87FC /* EnvMapPosY.jpg in Resources */,
 				A91153701723A27F004A87FC /* EnvMapPosZ.jpg in Resources */,
-				A9C13D11172C8866009B1365 /* Skybox.pvr in Resources */,
 				A99EA4D21731580400595FE0 /* Cal3D File Formats.txt in Resources */,
 				A99EA4EE1731580400595FE0 /* PVRT_Removed_Files.txt in Resources */,
 				A9E76845173411F80069F8BC /* ChangeLog in Resources */,
