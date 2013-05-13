@@ -98,6 +98,12 @@ static inline CC3IntPoint CC3IntPointMake(GLint x, GLint y) {
 	return v;
 }
 
+/** Returns a CC3IntPoint structure constructed from the specified CGPoint. */
+static inline CC3IntPoint CC3IntPointFromCGPoint(CGPoint pt) { return CC3IntPointMake(pt.x, pt.y); }
+
+/** Returns a CGPoint structure constructed from the specified CC3IntPoint. */
+static inline CGPoint CGPointFromCC3IntPoint(CC3IntPoint ipt) { return CGPointMake(ipt.x, ipt.y); }
+
 /** An integer 2D size. */
 typedef struct {
 	GLint width;			/**< The width measurement. */
@@ -116,6 +122,12 @@ static inline CC3IntSize CC3IntSizeMake(GLint w, GLint h) {
 	sz.height = h;
 	return sz;
 }
+
+/** Returns a CC3IntSize structure constructed from the specified CGSize. */
+static inline CC3IntSize CC3IntSizeFromCGSize(CGSize sz) { return CC3IntSizeMake(sz.width, sz.height); }
+
+/** Returns a CGSize structure constructed from the specified CC3IntSize. */
+static inline CGSize CGSizeFromCC3IntSize(CC3IntSize isz) { return CGSizeMake(isz.width, isz.height); }
 
 /** A struct representing an integer tessellation. */
 typedef CC3IntPoint CC3Tessellation;

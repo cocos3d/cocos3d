@@ -2376,6 +2376,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3NodeSequencer.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Scenes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Scenes</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Scenes/CC3Scene.h</key>
 		<dict>
 			<key>Group</key>
@@ -3370,6 +3394,8 @@
 		<string>cocos3d/cocos3d/Scenes/CC3Layer.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3NodeSequencer.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3NodeSequencer.m</string>
+		<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.h</string>
+		<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3UIViewController.h</string>

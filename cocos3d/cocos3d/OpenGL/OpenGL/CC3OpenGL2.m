@@ -132,12 +132,10 @@
 
 	// Ensure texture units not larger than the fixed pipeline texture units,
 	// regardless of whether fixed or programmable pipeline is in effect.
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	value_GL_MAX_TEXTURE_UNITS = [self getInteger: GL_MAX_TEXTURE_UNITS];
 	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 	
-	glGetIntegerv(GL_MAX_SAMPLES, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES), value_GL_MAX_SAMPLES);
+	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES];
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 

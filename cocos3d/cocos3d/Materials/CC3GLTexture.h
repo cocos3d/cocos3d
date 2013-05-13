@@ -49,10 +49,17 @@
  * check the cache for an existing instance, and to automatically load an instance into the cache
  * from that file if it has not already been loaded.
  *
- * CC3GLTexture is the root of a class cluster for loading different file types. Depending on the
- * file type, the initFromFile: and textureFromFile: methods may return an instance of a class that
- * is different than the receiver. You can use the textureClassForFile: method to determine the
- * cluster subclass whose instance will be returned by these methods for a particular file.
+ * CC3GLTexture is the root of a class cluster organized for loading different file types, for
+ * both 2D and cube textures. When loading a texture from a single file, use the allocation and
+ * initialization methods from this root CC3GLTexture class. Depending on the file type, the
+ * initFromFile: and textureFromFile: methods may return an instance of a class that is different
+ * than the receiver. You can use the textureClassForFile: method to determine the cluster subclass
+ * whose instance will be returned by these methods for a particular file.
+ *
+ * You can also use specific subclasses when you know the type of texture that you want. Use the
+ * CC3GLTexture2D class to create a 2D texture from a CGImage, or to create an empty 2D texture that
+ * can be uses as a rendering surface. Similarly, use the CC3GLTextureCube class to create a cube
+ * texture from six CGImages, or to create an empty cube texture that can be uses as a rendering surface
  *
  * To improve both performance and texture quality, by default, instances whose width and height
  * are a power-of-two (see the isPOT property) automatically generate a mipmap when a texture is
@@ -65,12 +72,11 @@
  *
  * Under iOS and OSX, most texture formats are loaded updside-down. This is because the vertical
  * axis of the coordinate system of OpenGL is inverted relative to the iOS or OSX view coordinate
- * system. The isFlippedVerically property can be used to ensure that textures are displayed with
- * the correct orientation. When a CC3Texture is applied to a mesh, the mesh will be adjusted
- * automatically if the texture is vertically flipped.
- *
- * Generally, you do not use this class cluster directly. Instead, you will typically load textures
- * through the CC3Texture class, which will manage access to the correct instance of this class cluster.
+ * system. Subclasses that may loaded upside-down can be configured to automatically flip the texture
+ * right-way up during loading. In addition, the isFlippedVerically property indicates whether the
+ * texture is upside down. This can be used to ensure that textures are displayed with the correct
+ * orientation. When a CC3Texture is applied to a mesh, the mesh will be adjusted automatically if
+ * the texture is upside down.
  */
 @interface CC3GLTexture : CC3Identifiable {
 	GLuint _textureID;
@@ -488,13 +494,13 @@
 @interface CC3GLTexture2D : CC3GLTexture
 
 /**
- * Indicates whether this instance will flip texture vertically during loading.
+ * Indicates whether this instance will flip the texture vertically during loading.
  *
- * Under iOS and OSX, most textures are loaded into memory upside-down because of the difference
- * in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
+ * Under iOS and OSX, most GL textures are loaded into memory upside-down because of the 
+ * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
  *
  * If this property is set to YES during loading, the texture will be flipped in memory so
- * that is is oriented the right way up.
+ * that it is oriented the right way up.
  *
  * It is possible to compensate for an upside-down using texture coordinates. You can set
  * this property to NO prior to loading in order to leave the texture upside-down and use
@@ -523,6 +529,40 @@
  */
 +(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
 
+
+#pragma mark Allocation and Initialization
+
+/**
+ * Initializes this instance from the content in the specified CGImage.
+ *
+ * The name property of this instance will be nil.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
+-(id) initWithCGImage: (CGImageRef) cgImg;
+
+/**
+ * Initializes this instance from the specified texture properties, without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine, with space allocated for a
+ * texture of the specified size and content type. Content can be added later by using this
+ * texture as a rendering surface.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
+
 @end
 
 
@@ -535,6 +575,42 @@
  * This class is used for all cube-map texture types except PVR.
  */
 @interface CC3GLTextureCube : CC3GLTexture
+
+/**
+ * Indicates whether this instance will flip the textures vertically during loading.
+ *
+ * Under iOS and OSX, most GL textures are loaded into memory upside-down because of the
+ * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
+ *
+ * If this property is set to YES during loading, the face textures will be flipped in
+ * memory so that they are oriented the right way up.
+ *
+ * It is possible to compensate for an upside-down using texture coordinates. You can set
+ * this property to NO prior to loading in order to leave the texture upside-down and use
+ * texture coordinates to compensate.
+ *
+ * The initial value of this property is set to the value of the class-side
+ * defaultShouldFlipVerticallyOnLoad property.
+ */
+@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Texture file loading
@@ -630,6 +706,25 @@
  * path pattern string.
  */
 -(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern;
+
+/**
+ * Sets the specified image into the specified cube face target.
+ *
+ * The specified cube face target can be one of the following:
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ *
+ * In order to complete this cube texture, this method should be invoked once for each
+ * of these six face targets.
+ *
+ * This method does not automatically generate a mipmap. If you want a mipmap, you should
+ * invoke the generateMipmap method once all six faces have been loaded.
+ */
+-(void) setCubeFace: (GLenum) faceTarget toCGImage: (CGImageRef) cgImg;
 
 
 #pragma mark Allocation and initialization
@@ -774,6 +869,22 @@
  */
 +(id) textureFromFilePattern: (NSString*) aFilePathPattern;
 
+/**
+ * Initializes this instance from the specified texture properties, without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine, with space allocated for six
+ * texture faces of the specified size and content type. Content can be added later by using
+ * this texture as a rendering surface.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
+
 @end
 
 
@@ -802,7 +913,7 @@
 #pragma mark Allocation and Initialization
 
 /**
- * Initializes this instance by loaded content from the specified file.
+ * Initializes this instance with content loaded from the specified file.
  *
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
@@ -811,5 +922,16 @@
  * Returns nil if the file could not be loaded.
  */
 -(id) initFromFile: (NSString*) aFilePath;
+
+/** Initializes this instance with content in the specified CGImage. */
+-(id) initWithCGImage: (CGImageRef) cgImg;
+
+/** 
+ * Initializes this instance to define the properties of a texture, without defining any
+ * specific content.
+ *
+ * This instance can be used to initialize an empty CC3GLTexture, to which content can be added later.
+ */
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
 
 @end

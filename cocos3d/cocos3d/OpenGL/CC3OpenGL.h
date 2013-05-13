@@ -796,7 +796,16 @@ typedef struct {
 -(BOOL) checkFramebufferStatus: (GLuint) fbID;
 
 
-#pragma mark Platform limits
+#pragma mark Platform & GL info
+
+/** Returns the current value in the GL engine of the specified integer parameter. */
+-(GLint) getInteger: (GLenum) param;
+
+/** Returns the current value in the GL engine of the specified float parameter. */
+-(GLfloat) getFloat: (GLenum) param;
+
+/** Returns the current value in the GL engine of the specified string parameter. */
+-(NSString*) getString: (GLenum) param;
 
 /** 
  * Returns the maximum number of lights supported by the platform,

@@ -31,6 +31,7 @@
 
 #import "CC3Camera.h"
 #import "CC3NodeSequencer.h"
+#import "CC3RenderSurfaces.h"
 #import "CC3PerformanceStatistics.h"
 #import "CC3Fog.h"
 #import "CC3UIViewController.h"
@@ -247,6 +248,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
 	CC3Fog* _fog;
+	id<CC3RenderSurface> _screenRenderSurface;
 	ccColor4F _ambientLight;
 	ccTime _minUpdateInterval;
 	ccTime _maxUpdateInterval;
@@ -572,10 +574,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /**
  * If the value of this property is greater than zero, it will be used as the upper limit
- * accepted by the updateScene: method. Values sent to the updateScene: method that are
- * larger than this maximum will be clamped to this limit. If the value of this property
- * is zero (or negative), the updateScene: method will use the value that is passed to it
- * unchanged.
+ * accepted by the updateScene: method. Values sent to the updateScene: method that are larger
+ * than this maximum will be clamped to this limit. If the value of this property is zero
+ * (or negative), the updateScene: method will use the value that is passed to it unchanged.
  *
  * Resource limitations, and activities around start-up and shut-down, can sometimes cause
  * an occasional large interval between consecutive updates. These large intervals can
@@ -767,6 +768,13 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
+
+/** 
+ * The render surface being used to draw to the screen.
+ *
+ * When this render surface is active, all drawing activity is rendered to the screen framebuffers.
+ */
+@property(nonatomic, retain) id<CC3RenderSurface> screenRenderSurface;
 
 /**
  * The visitor that is used to visit the nodes to draw them to the screen.

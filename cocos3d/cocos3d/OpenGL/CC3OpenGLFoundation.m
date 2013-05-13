@@ -64,6 +64,12 @@ NSString* GetGLErrorText(GLenum errCode) {
 	}
 }
 
+static BOOL _shouldLogGLCalls = NO;
+
+void CC3StartLoggingGLCalls(void) { _shouldLogGLCalls = YES; }
+
+void CC3StopLoggingGLCalls(void) { _shouldLogGLCalls = NO; }
+
 void DoLogGLErrorState(NSString* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
@@ -76,9 +82,10 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 		CC3AssertC(!GL_ERROR_ASSERTION_ENABLED,
 				  @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
 				  errText);
-	} else {
-		// Change this to LogDebug to log all GL calls
-		LogTrace(@"%@", [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease]);
+	} else if (_shouldLogGLCalls) {
+		NSString* glTxt = [[NSString alloc] initWithFormat: fmt arguments: args];
+		printf("%s\n", [glTxt UTF8String]);
+		[glTxt release];
 	}
 	va_end(args);
 }

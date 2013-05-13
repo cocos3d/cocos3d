@@ -275,7 +275,8 @@
  * Refer the the documentation of this method in the parent CC3ParticleEmitter class for a complete
  * description of the emission process.
  *
- * The emitted particle will be assigned the template mesh defined in the particleTemplateMesh property.
+ * If the specified particle does not have a templateMesh, it will be assigned the template mesh
+ * defined in the particleTemplateMesh property of this emitter.
  */
 -(BOOL) emitParticle: (id<CC3MeshParticleProtocol>) aParticle;
 

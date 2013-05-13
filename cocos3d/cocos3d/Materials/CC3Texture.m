@@ -96,12 +96,27 @@
 
 #pragma mark Allocation and Initialization
 
--(id) initFromFile: (NSString*) aFilePath { return [self initWithName: nil fromFile: aFilePath]; }
+-(id) initWithGLTexture: (CC3GLTexture*) texture {
+	if ( (self = [self init]) ) {
+		self.texture = texture;
+	}
+	return self;
+}
 
-+(id) textureFromFile: (NSString*) aFilePath { return [[[self alloc] initFromFile: aFilePath] autorelease]; }
++(id) textureWithGLTexture: (CC3GLTexture*) texture {
+	return [[[self alloc] initWithGLTexture: texture] autorelease];
+}
 
--(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilePath {
-	if ( (self = [self initWithName: aName]) ) {
+-(id) initWithCGImage: (CGImageRef) cgImg {
+	return [self initWithGLTexture: [[[CC3GLTexture2D alloc] initWithCGImage: cgImg] autorelease]];
+}
+
++(id) textureWithCGImage: (CGImageRef) cgImg {
+	return [[[self alloc] initWithCGImage: cgImg] autorelease];
+}
+
+-(id) initFromFile: (NSString*) aFilePath {
+	if ( (self = [self init]) ) {
 		if ( ![self loadTextureFile: aFilePath] ) {
 			[self release];
 			return nil;
@@ -110,9 +125,7 @@
 	return self;
 }
 
-+(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFilePath {
-	return [[[self alloc] initWithName: aName fromFile: aFilePath] autorelease];
-}
++(id) textureFromFile: (NSString*) aFilePath { return [[[self alloc] initFromFile: aFilePath] autorelease]; }
 
 -(id) initCubeMapFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
 				   posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath

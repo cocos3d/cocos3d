@@ -56,8 +56,7 @@
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
+	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 

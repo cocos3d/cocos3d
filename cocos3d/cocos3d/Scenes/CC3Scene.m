@@ -60,14 +60,15 @@
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
 @synthesize fog=_fog, lights=_lights, shouldClearDepthBuffer=_shouldClearDepthBuffer;
+@synthesize screenRenderSurface=_screenRenderSurface;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
  * didRemoveDescendant:, which references several of these instance variables.
  * Make sure they are all made nil in addition to being released here.
  */
-- (void)dealloc {
-	_cc3Layer = nil;							// Not retained
+-(void) dealloc {
+	_cc3Layer = nil;						// Not retained
 	self.viewportManager = nil;				// Use setter to release and make nil
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
@@ -77,6 +78,7 @@
 	self.updateVisitor = nil;				// Use setter to release and make nil
 	self.transformVisitor = nil;			// Use setter to release and make nil
 	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
+	self.screenRenderSurface = nil;			// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
 	[_targettingNodes release];
 	_targettingNodes = nil;
@@ -161,16 +163,22 @@
 		self.updateVisitor = [[self updateVisitorClass] visitor];
 		self.transformVisitor = [[self transformVisitorClass] visitor];
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
+		self.screenRenderSurface = [CC3RetrievedFramebufferRenderSurface surface];
 		_fog = nil;
 		_activeCamera = nil;
 		_ambientLight = kCC3DefaultLightColorAmbientScene;
 		_minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
 		_maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
 		_deltaFrameTime = 0;
-		[self initializeScene];
+		[self initializeSceneAndClose3D];
 		LogGLErrorState(@"after initializing %@", self);
 	}
 	return self;
+}
+
+-(void) initializeSceneAndClose3D {
+	[self initializeScene];
+	[self close3DWithVisitor: _screenDrawVisitor];
 }
 
 // Default does nothing. Subclasses will customize.
@@ -369,7 +377,10 @@
 	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
 	
 	CC3OpenGL* gl = visitor.gl;
-
+	
+	// Make sure the drawing surface is set back to the screen framebuffer
+	[_screenRenderSurface activateWithVisitor: visitor];
+	
 	// Restore 2D standard blending
 	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
 	[gl setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
@@ -420,45 +431,6 @@
 }
 
 /**
- * This method is invoked when 3D content drawing has been completed.
- *
- * Configures depth testing parameters for 2D. If the depth buffer should be cleared, do so.
- * Otherwise, disable depth testing for 2D.
- */
-//-(void) clearDepthTestingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	CC3OpenGL* gl = visitor.gl;
-////	gl.depthFunc = GL_LEQUAL;
-////	gl.depthMask = YES;
-//
-////	[gl enableFog: NO];
-//
-//	if (_shouldClearDepthBuffer)
-//		[gl clearDepthBuffer];
-//	else
-//		[gl enableDepthTest: NO];
-//}
-
-///** Template method that opens the 3D viewport. */
-//-(void) openViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	[_viewportManager openWithVisitor: visitor];
-//}
-//
-///** Template method that closes the 3D viewport. */
-//-(void) closeViewportWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	[_viewportManager closeWithVisitor: visitor];
-//}
-
-///** Template method that opens the 3D camera. */
-//-(void) open3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	[_activeCamera openWithVisitor: visitor];
-//}
-//
-///** Template method that closes the 3D camera. This is the compliment of the open3DCamera method. */
-//-(void) close3DCameraWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	[_activeCamera closeWithVisitor: visitor];
-//}
-
-/**
  * Template method that turns on lighting of the 3D scene. Turns on global ambient lighting,
  * and iterates through the CC3Light instances, turning them on. If the 2D scene uses any
  * lights, they are disabled.
@@ -478,15 +450,6 @@
 
 	[self drawFogWithVisitor: _screenDrawVisitor];
 }
-
-/** Template method that turns off lighting of the 3D scene. */
-//-(void) darkenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	CC3OpenGL* gl = visitor.gl;
-//	[gl enableLighting: NO];
-//	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
-//	[gl enableFog: NO];
-//}
-
 
 -(BOOL) isIlluminated {
 	return (_lights.count > 0 ||
@@ -537,15 +500,8 @@
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
-
-//	[_viewportManager openClippingWithVisitor: visitor];
-//	[visitor openViewport];
-
 	CGRect lb = _viewportManager.layerBoundsLocal;
 	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: lb];
-	
-//	[_viewportManager closeClippingWithVisitor: visitor];
-//	[visitor closeViewport];
 }
 
 /** Visits this scene for drawing (or picking) using the specified visitor. */
@@ -729,9 +685,7 @@
 /** Default does nothing. Subclasses that handle touch events will override. */
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {}
 
--(id) pickVisitorClass {
-	return [CC3NodePickingVisitor class];
-}
+-(id) pickVisitorClass { return [CC3NodePickingVisitor class]; }
 
 @end
 
@@ -906,36 +860,6 @@
 	[aCopy populateFrom: self];
 	return aCopy;
 }
-
-
-#pragma mark Drawing
-
-//-(void) openWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	LogTrace(@"%@ opening 3D viewport %@ as %@fullscreen", self,
-//			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
-//	visitor.gl.viewport = viewport;
-//	[self openClippingWithVisitor: visitor];
-//}
-//
-//-(void) closeWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	LogTrace(@"%@ closing 3D viewport %@ as %@fullscreen", self,
-//			 NSStringFromCC3Viewport(viewport), (isFullView ? @"" : @"not "));
-//	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-//	visitor.gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
-//	[self closeClippingWithVisitor: visitor];
-//}
-
-//-(void) openClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	if ( !isFullView ) {
-//		CC3OpenGL* gl = visitor.gl;
-//		[gl enableScissorTest: YES];
-//		gl.scissor = viewport;
-//	}
-//}
-//
-//-(void) closeClippingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	[visitor.gl enableScissorTest: NO];
-//}
 
 
 #pragma mark Converting points

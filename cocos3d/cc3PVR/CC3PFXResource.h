@@ -224,12 +224,16 @@
 
 /** CC3PFXEffectTexture is a simple object that links a texture with a particular texture unit. */
 @interface CC3PFXEffectTexture : NSObject {
-	CC3Texture* _texture;
+	CC3GLTexture* _texture;
+	NSString* _name;
 	NSUInteger _textureUnitIndex;
 }
 
 /** The texture being linked to a particular texture unit. */
-@property(nonatomic, retain) CC3Texture* texture;
+@property(nonatomic, retain) CC3GLTexture* texture;
+
+/** The name of the texture as declared in the PFX file. */
+@property(nonatomic, retain) NSString* name;
 
 /** The index of the texture unit to which the texture should be applied. */
 @property(nonatomic, assign) NSUInteger textureUnitIndex;

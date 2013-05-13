@@ -141,18 +141,14 @@ extern "C" {
 
 		CC3Assert(!pfxTex->bRenderToTexture, @"%@ rendering to a texture is not supported", self);
 		
-		// Load texture
+		// Load texture and set texture parameters
 		NSString* texName = [NSString stringWithUTF8String: pfxTex->Name.c_str()];
 		NSString* texFile = [NSString stringWithUTF8String: pfxTex->FileName.c_str()];
-		CC3Texture* tex = [CC3Texture textureWithName: texName fromFile: texFile];
-		
-		// Set texture parameters
-		CC3GLTexture* texGL = tex.texture;
-		texGL.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
-		texGL.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
-		texGL.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
-		texGL.magnifyingFunction = GLMagnifyingFunctionFromETextureFilter(pfxTex->nMag);
-
+		CC3GLTexture* tex = [CC3GLTexture textureFromFile: texFile];
+		tex.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
+		tex.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
+		tex.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
+		tex.magnifyingFunction = GLMagnifyingFunctionFromETextureFilter(pfxTex->nMag);
 		if (tex)
 			[_texturesByName setObject: tex forKey: texName];	// Add to texture dictionary
 		else
@@ -173,7 +169,7 @@ extern "C" {
 }
 
 /** Returns the texture that was assigned the specified name in the PFX resource file. */
--(CC3Texture*) getTextureNamed: (NSString*) texName { return [_texturesByName objectForKey: texName]; }
+-(CC3GLTexture*) getTextureNamed: (NSString*) texName { return [_texturesByName objectForKey: texName]; }
 
 /**
  * Builds the rendering passes.
@@ -237,21 +233,24 @@ static Class _defaultSemanticDelegateClass = nil;
 	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
 	NSUInteger tuCnt = _textures.count;
 	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
-		CC3Texture* tex = [self getTextureForTextureUnit: tuIdx];
-		if (tex)
+		CC3PFXEffectTexture* pfxTex = [self getEffectTextureForTextureUnit: tuIdx];
+		if (pfxTex) {
+			CC3Texture* tex = [CC3Texture textureWithGLTexture: pfxTex.texture];
+			tex.name = pfxTex.name;
 			[material setTexture: tex forTextureUnit: tuIdx];
-		else
+		} else {
 			LogRez(@"%@ contains no texture for texture unit %u", self, tuIdx);
+		}
 	}
 }
 
 /**
- * Returns the texture to be applied to the specified texture unit,
+ * Returns the effect texture to be applied to the specified texture unit,
  * or nil if no texture is defined for that texture unit.
  */
--(CC3Texture*) getTextureForTextureUnit: (GLuint) texUnitIndex {
+-(CC3PFXEffectTexture*) getEffectTextureForTextureUnit: (GLuint) tuIdx {
 	for (CC3PFXEffectTexture* effectTex in _textures)
-		if (effectTex.textureUnitIndex == texUnitIndex) return effectTex.texture;
+		if (effectTex.textureUnitIndex == tuIdx) return effectTex;
 	return nil;
 }
 
@@ -288,10 +287,11 @@ static Class _defaultSemanticDelegateClass = nil;
 		
 		// Retrieve the texture from the PFX resource and add a CC3PFXEffectTexture
 		// linking the texture to the texture unit
-		CC3Texture* tex = [pfxRez getTextureNamed: texName];
+		CC3GLTexture* tex = [pfxRez getTextureNamed: texName];
 		if (tex) {
 			CC3PFXEffectTexture* effectTex = [CC3PFXEffectTexture new];
 			effectTex.texture = tex;
+			effectTex.name = texName;
 			effectTex.textureUnitIndex = tuIdx;
 			[_textures addObject: effectTex];
 			[effectTex release];
@@ -421,10 +421,11 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @implementation CC3PFXEffectTexture
 
-@synthesize texture=_texture, textureUnitIndex=_textureUnitIndex;
+@synthesize texture=_texture, name=_name, textureUnitIndex=_textureUnitIndex;
 
 -(void) dealloc {
 	[_texture release];
+	[_name release];
 	[super dealloc];
 }
 

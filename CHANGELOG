@@ -88,6 +88,8 @@ cocos3d 2.0.0 - 2013/05/31
 		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
 		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
 		- [API change] A number of CC3Texture properties have been deprecated and moved to the contained CC3GLTexture.
+		- CC3Texture, CC3GLTexture2D & CC3GLTextureCube can now be created from CGImage already in memory.
+		- Empty CC3GLTexture2D & CC3GLTextureCube can be created for use as a rendering surface.
 	- Improved support for NPOT textures
 		- CC3GLTexture only generates mipmaps if texture is POT
 		- CC3GLTexture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT

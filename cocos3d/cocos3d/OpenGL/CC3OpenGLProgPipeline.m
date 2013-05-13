@@ -60,9 +60,11 @@
 }
 
 -(void) bindVertexAttribute: (CC3GLSLAttribute*) attribute withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3Assert(attribute.semantic != kCC3SemanticNone, @"Cannot bind the attribute named %@ to the GL engine because"
-			  @"its semantic meaning is unknown. If the attribute name is correct, assign a semantic value to the"
-			  @" attribute in the configureVariable: method of your semantic delegate implementation.", self);
+	CC3Assert(attribute.semantic != kCC3SemanticNone, @"Cannot bind the attribute named %@ to the GL engine"
+			  @" because its semantic meaning is unknown. Check the attribute name. If the attribute name is"
+			  @" correct, but is not a standard cocos3d attribute name, assign a semantic value to the"
+			  @" attribute in the configureVariable: method of your semantic delegate implementation, or use"
+			  @" a PFX file to define the semantic for the attribute name.", attribute.name);
 	CC3VertexArray* va = [self vertexArrayForAttribute: attribute withVisitor: visitor];
 	[va bindContentToAttributeAt: attribute.location withVisitor: visitor];
 }
@@ -215,16 +217,13 @@
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 	
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_IMAGE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	value_GL_MAX_TEXTURE_UNITS = [self getInteger: GL_MAX_TEXTURE_IMAGE_UNITS];
 	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 	
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value_GL_MAX_VERTEX_ATTRIBS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_ATTRIBS), value_GL_MAX_VERTEX_ATTRIBS);
+	value_GL_MAX_VERTEX_ATTRIBS = [self getInteger: GL_MAX_VERTEX_ATTRIBS];
 	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 
-	value_GL_SHADING_LANGUAGE_VERSION = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_SHADING_LANGUAGE_VERSION)];
-	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_SHADING_LANGUAGE_VERSION));
+	value_GL_SHADING_LANGUAGE_VERSION = [[self getString: GL_SHADING_LANGUAGE_VERSION] retain];
 	LogInfo(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
 	
 	value_GL_MAX_CLIP_PLANES = kCC3MaxGLSLClipPlanes;

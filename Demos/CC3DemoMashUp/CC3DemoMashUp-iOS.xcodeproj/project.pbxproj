@@ -41,10 +41,12 @@
 		A92DA7CE1427B5980051AFFA /* SunlightButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AC1427B5980051AFFA /* SunlightButton48x48.png */; };
 		A92DA7D11427B5980051AFFA /* ZoomButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */; };
 		A9306A851445B23C0004EB5A /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9306A841445B23C0004EB5A /* HUDLayer.m */; };
+		A93110DC1739FD6800F2E9BE /* CC3RenderSurfaces.m in Sources */ = {isa = PBXBuildFile; fileRef = A93110DB1739FD6800F2E9BE /* CC3RenderSurfaces.m */; };
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
 		A933817014E16A9200FCA181 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A933816F14E16A9200FCA181 /* BeachBall.pod */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
+		A93FC632173DE11700F4B1DE /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A93FC631173DE11700F4B1DE /* TVTestCard.jpg */; };
 		A94736FB140E58E7006F410C /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */; };
 		A94736FC140E58E7006F410C /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CE140E58E7006F410C /* CC3DemoMashUpScene.m */; };
 		A94736FD140E58E7006F410C /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D1140E58E7006F410C /* CCNodeAdornments.m */; };
@@ -200,7 +202,6 @@
 		A99EA5581731580400595FE0 /* CC3TexturableMaterial.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A99EA4D11731580400595FE0 /* CC3TexturableMaterial.vsh */; };
 		A9AAF0081525E41000E1620A /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9AAF0071525E41000E1620A /* Bricks-Red.jpg */; };
 		A9AE3D7D14E46118002805DA /* Stamp.png in Resources */ = {isa = PBXBuildFile; fileRef = A9AE3D7C14E46118002805DA /* Stamp.png */; };
-		A9C13D11172C8866009B1365 /* Skybox.pvr in Resources */ = {isa = PBXBuildFile; fileRef = A9C13D10172C8866009B1365 /* Skybox.pvr */; };
 		A9C94ABE1451924700CE6BAD /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABC1451924700CE6BAD /* mallet.png */; };
 		A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9C94ABD1451924700CE6BAD /* mallet.pod */; };
 		A9CD198E156C1CFD00A0EDC4 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */; };
@@ -378,10 +379,13 @@
 		A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ZoomButton48x48.png; sourceTree = "<group>"; };
 		A9306A831445B23C0004EB5A /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
 		A9306A841445B23C0004EB5A /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
+		A93110DA1739FD6800F2E9BE /* CC3RenderSurfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3RenderSurfaces.h; sourceTree = "<group>"; };
+		A93110DB1739FD6800F2E9BE /* CC3RenderSurfaces.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3RenderSurfaces.m; sourceTree = "<group>"; };
 		A933812D14E09E9000FCA181 /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
 		A933816F14E16A9200FCA181 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeachBall.pod; sourceTree = "<group>"; };
 		A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Arial32BMGlyph.png; sourceTree = "<group>"; };
+		A93FC631173DE11700F4B1DE /* TVTestCard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TVTestCard.jpg; sourceTree = "<group>"; };
 		A94736CB140E58E7006F410C /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
 		A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
 		A94736CD140E58E7006F410C /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
@@ -679,7 +683,6 @@
 		A99EA4D11731580400595FE0 /* CC3TexturableMaterial.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableMaterial.vsh; sourceTree = "<group>"; };
 		A9AAF0071525E41000E1620A /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9AE3D7C14E46118002805DA /* Stamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Stamp.png; sourceTree = "<group>"; };
-		A9C13D10172C8866009B1365 /* Skybox.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; name = Skybox.pvr; path = "../../../../../../PowerVR/SDKPackage 3.1/SDK_3.1/Examples/Advanced/Skybox2/OGLES2/Skybox.pvr"; sourceTree = "<group>"; };
 		A9C94ABC1451924700CE6BAD /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mallet.png; sourceTree = "<group>"; };
 		A9C94ABD1451924700CE6BAD /* mallet.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = mallet.pod; sourceTree = "<group>"; };
 		A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earthmap1k.jpg; sourceTree = "<group>"; };
@@ -1007,7 +1010,6 @@
 		A91153621723A27F004A87FC /* EnvMap */ = {
 			isa = PBXGroup;
 			children = (
-				A9C13D10172C8866009B1365 /* Skybox.pvr */,
 				A91153631723A27F004A87FC /* EnvMap.pfx */,
 				A91153641723A27F004A87FC /* EnvMapNegX.jpg */,
 				A91153651723A27F004A87FC /* EnvMapNegY.jpg */,
@@ -1078,6 +1080,7 @@
 				A924D158171306F20061DDA0 /* tex_base.bmp */,
 				A9FF6E17170DF7B100FC35C8 /* tex_base.png */,
 				A924D159171306F20061DDA0 /* tex_base.pvr */,
+				A93FC631173DE11700F4B1DE /* TVTestCard.jpg */,
 				A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */,
 			);
 			name = Resources;
@@ -1488,6 +1491,8 @@
 				A99EA4841731580300595FE0 /* CC3Layer.m */,
 				A99EA4851731580300595FE0 /* CC3NodeSequencer.h */,
 				A99EA4861731580300595FE0 /* CC3NodeSequencer.m */,
+				A93110DA1739FD6800F2E9BE /* CC3RenderSurfaces.h */,
+				A93110DB1739FD6800F2E9BE /* CC3RenderSurfaces.m */,
 				A99EA4871731580300595FE0 /* CC3Scene.h */,
 				A99EA4881731580300595FE0 /* CC3Scene.m */,
 				A99EA4891731580300595FE0 /* CC3UIViewController.h */,
@@ -2112,11 +2117,11 @@
 				A911536E1723A27F004A87FC /* EnvMapPosX.jpg in Resources */,
 				A911536F1723A27F004A87FC /* EnvMapPosY.jpg in Resources */,
 				A91153701723A27F004A87FC /* EnvMapPosZ.jpg in Resources */,
-				A9C13D11172C8866009B1365 /* Skybox.pvr in Resources */,
 				A99EA4D21731580400595FE0 /* Cal3D File Formats.txt in Resources */,
 				A99EA4EE1731580400595FE0 /* PVRT_Removed_Files.txt in Resources */,
 				A9E76845173411F80069F8BC /* ChangeLog in Resources */,
 				A9E76846173411F80069F8BC /* CMakeLists.txt in Resources */,
+				A93FC632173DE11700F4B1DE /* TVTestCard.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2353,6 +2358,7 @@
 				A9E76850173411F80069F8BC /* vec2.c in Sources */,
 				A9E76851173411F80069F8BC /* vec3.c in Sources */,
 				A9E76852173411F80069F8BC /* vec4.c in Sources */,
+				A93110DC1739FD6800F2E9BE /* CC3RenderSurfaces.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

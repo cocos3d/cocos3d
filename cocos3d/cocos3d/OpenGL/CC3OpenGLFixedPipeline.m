@@ -571,19 +571,16 @@
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 	
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &value_GL_MAX_TEXTURE_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_TEXTURE_UNITS), value_GL_MAX_TEXTURE_UNITS);
+	value_GL_MAX_TEXTURE_UNITS = [self getInteger: GL_MAX_TEXTURE_UNITS];
 	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 	
 	// Initial estimate for allocating space. The actual value is set by the initVertexAttributes method.
 	value_GL_MAX_VERTEX_ATTRIBS = value_GL_MAX_TEXTURE_UNITS + kMAX_VTX_ATTRS_EX_TEXCOORD;
 
-	glGetIntegerv(GL_MAX_CLIP_PLANES, &value_GL_MAX_CLIP_PLANES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_CLIP_PLANES), value_GL_MAX_CLIP_PLANES);
+	value_GL_MAX_CLIP_PLANES = [self getInteger: GL_MAX_CLIP_PLANES];
 	LogInfo(@"Maximum clip planes: %u", value_GL_MAX_CLIP_PLANES);
 
-	glGetIntegerv(GL_MAX_LIGHTS, &value_GL_MAX_LIGHTS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_LIGHTS), value_GL_MAX_LIGHTS);
+	value_GL_MAX_LIGHTS = [self getInteger: GL_MAX_LIGHTS];
 	LogInfo(@"Maximum lights: %u", value_GL_MAX_LIGHTS);
 
 	value_GL_MAX_PALETTE_MATRICES = 0;		// Assume no bone skinning support

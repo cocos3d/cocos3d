@@ -36,6 +36,7 @@
 #import "CC3PODLight.h"
 #import "CC3PointParticles.h"
 #import "CC3MeshParticles.h"
+#import "CC3RenderSurfaces.h"
 #import "Models.h"
 
 
@@ -515,38 +516,42 @@ typedef enum {
  * teapot mesh instance, but can be transformed separately, and covered with different materials.
  */
 @interface CC3DemoMashUpScene : CC3Scene {
-	CGPoint playerDirectionControl;
-	CGPoint playerLocationControl;
-	CC3Vector cameraMoveStartLocation;
-	CC3Vector cameraPanStartRotation;
-	CC3PlaneNode* ground;
-	CC3MeshNode* teapotWhite;
-	CC3MeshNode* teapotTextured;
-	PhysicsMeshNode* teapotSatellite;
-	DoorMeshNode* brickWall;
-	CC3Node* beachBall;
-	CC3MeshNode* globe;
-	SpinningNode* dieCube;
-	SpinningNode* texCubeSpinner;
-	CC3MeshNode* mascot;
-	CC3Node* bumpMapLightTracker;
-	CC3MeshNode* woodenSign;
-	CC3MeshNode* floatingHead;
-	CC3Texture* signTex;
-	CC3Texture* stampTex;
-	CC3Texture* embossedStampTex;
-	CC3Texture* headTex;
-	CC3Texture* headBumpTex;
-	CC3Light* podLight;
-	CC3Node* origCamTarget;
-	CC3Node* camTarget;
-	CC3Node* selectedNode;
-	CGPoint lastTouchEventPoint;
-	struct timeval lastTouchEventTime;
-	CameraZoomType cameraZoomType;
-	CC3Ray lastCameraOrientation;
-	GLubyte bmLabelMessageIndex;
-	BOOL isManagingShadows;
+	CGPoint _playerDirectionControl;
+	CGPoint _playerLocationControl;
+	CC3Vector _cameraMoveStartLocation;
+	CC3Vector _cameraPanStartRotation;
+	CC3PlaneNode* _ground;
+	CC3MeshNode* _teapotWhite;
+	CC3MeshNode* _teapotTextured;
+	PhysicsMeshNode* _teapotSatellite;
+	DoorMeshNode* _brickWall;
+	CC3Node* _beachBall;
+	CC3MeshNode* _globe;
+	SpinningNode* _dieCube;
+	SpinningNode* _texCubeSpinner;
+	CC3MeshNode* _mascot;
+	CC3Node* _bumpMapLightTracker;
+	CC3MeshNode* _woodenSign;
+	CC3MeshNode* _floatingHead;
+	CC3Texture* _signTex;
+	CC3Texture* _stampTex;
+	CC3Texture* _embossedStampTex;
+	CC3Texture* _headTex;
+	CC3Texture* _headBumpTex;
+	CC3Camera* _robotCam;
+	CC3Light* _robotLamp;
+	CC3Node* _origCamTarget;
+	CC3Node* _camTarget;
+	CC3Camera* _runnerCam;
+	CC3Light* _runnerLamp;
+	CC3Node* _selectedNode;
+	CC3FramebufferRenderSurface* _tvSurface;
+	CGPoint _lastTouchEventPoint;
+	struct timeval _lastTouchEventTime;
+	CameraZoomType _cameraZoomType;
+	CC3Ray _lastCameraOrientation;
+	GLubyte _bmLabelMessageIndex;
+	BOOL _isManagingShadows;
 }
 
 /**

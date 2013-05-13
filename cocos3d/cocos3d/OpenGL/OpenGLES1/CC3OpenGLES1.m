@@ -161,16 +161,13 @@
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 	
-	glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES, &value_GL_MAX_PALETTE_MATRICES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_PALETTE_MATRICES_OES), value_GL_MAX_PALETTE_MATRICES);
+	value_GL_MAX_PALETTE_MATRICES = [self getInteger: GL_MAX_PALETTE_MATRICES_OES];
 	LogInfo(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
-	glGetIntegerv(GL_MAX_VERTEX_UNITS_OES, &value_GL_MAX_VERTEX_UNITS);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_VERTEX_UNITS_OES), value_GL_MAX_VERTEX_UNITS);
+	value_GL_MAX_VERTEX_UNITS = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
 	LogInfo(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
 	
-	glGetIntegerv(GL_MAX_SAMPLES_APPLE, &value_GL_MAX_SAMPLES);
-	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(GL_MAX_SAMPLES_APPLE), value_GL_MAX_SAMPLES);
+	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 

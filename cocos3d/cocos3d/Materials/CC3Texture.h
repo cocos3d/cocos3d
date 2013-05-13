@@ -293,6 +293,54 @@
 #pragma mark Allocation and Initialization
 
 /**
+ * Initializes this instance on the specified underlying GL texture.
+ *
+ * The name property of this instance will set to that of the specified GL texture.
+ */
+-(id) initWithGLTexture: (CC3GLTexture*) texture;
+
+/**
+ * Allocates and initializes an autoreleased instance on the specified underlying GL texture.
+ *
+ * The name property of this instance will set to that of the specified GL texture.
+ */
++(id) textureWithGLTexture: (CC3GLTexture*) texture;
+
+/**
+ * Initializes this instance with the content in the specified CGImage.
+ *
+ * The name property of this instance will be nil.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * Since textures can consume significant resources, if the same CGImage will be used for
+ * multiple instances of CC3Texture, you should avoid using this method. Instead, consider
+ * creating a single instance of CC3GLTexture2D from the CGImage, and assigning that instance
+ * to the texture cache using the CC3GLTexture2D addGLTexture: method. You can then retrieve
+ * that single GL texture instance from the cache via the getGLTextureNamed: method and assign
+ * it to the texture property of multiple CC3Texture instances.
+ */
+-(id) initWithCGImage: (CGImageRef) cgImg;
+
+/**
+ * Allocates and initializes an autoreleased instance with the content in the specified CGImage.
+ *
+ * The name property of this instance will be nil.
+ *
+ * If the class-side shouldGenerateMipmaps property is set to YES, a mipmap will be generated
+ * for the texture automatically.
+ *
+ * Since textures can consume significant resources, if the same CGImage will be used for
+ * multiple instances of CC3Texture, you should avoid using this method. Instead, consider
+ * creating a single instance of CC3GLTexture2D from the CGImage, and assigning that instance
+ * to the texture cache using the CC3GLTexture2D addGLTexture: method. You can then retrieve
+ * that single GL texture instance from the cache via the getGLTextureNamed: method and assign
+ * it to the texture property of multiple CC3Texture instances.
+ */
++(id) textureWithCGImage: (CGImageRef) cgImg;
+
+/**
  * Initializes this instance by loading the texture file at the specified file path.
  *
  * The specified file path may be either an absolute path, or a path relative to the
@@ -332,40 +380,6 @@
 +(id) textureFromFile: (NSString*) aFilePath;
 
 /**
- * Initializes this instance with the specified name and loaded from the texture file
- * at the specified file path.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances that have invoked this method on the same file path will share the
- * same instance of the underlying CC3GLTexture held in the texture property.
- *
- * Returns nil if the file could not be loaded.
- */
--(id) initWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
-
-/**
- * Allocates and initializes an autoreleased instance with the specified name and loaded
- * from the texture file at the specified file path.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Each texture file is globally cached upon loading. Invoking this method on multiple
- * instances of CC3Texture with the same file path will only load the file once.
- * All instances created by invoking this method on the same name will share the
- * same instance of the underlying CC3GLTexture held in the texture property.
- *
- * Returns nil if the file could not be loaded.
- */
-+(id) textureWithName: (NSString*) aName fromFile: (NSString*) aFilePath;
-
-/**
  * Initializes this instance by loading the six cube face textures at the specified file paths,
  * and returns whether all six files were successfully loaded.
  *
@@ -375,7 +389,7 @@
  *
  * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
  *
- * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * The underlying GL texture is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same posXFilePath file name will only load the textures
  * once. All instances that have invoked this method on the same posXFilePath file name will
  * share the same instance of the underlying CC3GLTexture held in the texture property.
@@ -399,7 +413,7 @@
  *
  * The name of this instance is set to the unqualified file name of the specified posXFilePath file path.
  *
- * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * The underlying GL texture is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same posXFilePath file name will only load the textures
  * once. All instances created by invoking this method on the same posXFilePath file name will
  * share the same instance of the underlying CC3GLTexture held in the texture property.
@@ -444,7 +458,7 @@
  * The name of this instance is set to the unqualified file name derived from substituting
  * an empty string into the format marker in the specified file path pattern string.
  *
- * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * The underlying GL texture is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path pattern will only load the textures once.
  * All instances that have invoked this method on the same file path pattern will share the
  * same instance of the underlying CC3GLTexture held in the texture property.
@@ -490,7 +504,7 @@
  * The name of this instance is set to the unqualified file name derived from substituting
  * an empty string into the format marker in the specified file path pattern string.
  *
- * Each underlying texture is globally cached upon loading. Invoking this method on multiple
+ * The underlying GL texture is globally cached upon loading. Invoking this method on multiple
  * instances of CC3Texture with the same file path pattern will only load the textures once.
  * All instances created by invoking this method on the same file path pattern will share the
  * same instance of the underlying CC3GLTexture held in the texture property.

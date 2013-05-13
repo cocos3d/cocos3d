@@ -531,7 +531,7 @@
 	if (CC3CheckGLuintAt(tuIdx, texID, stateArray, isKnownBits)) {
 		[self activateTextureUnit: tuIdx];
 		glBindTexture(target, texID);
-		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), tuIdx);
+		LogGLErrorTrace(@"glBindTexture(%@, %u)", NSStringFromGLEnum(target), texID);
 	}
 }
 
@@ -693,7 +693,27 @@
 }
 
 
-#pragma mark Platform limits
+#pragma mark Platform limits & info
+
+-(GLint) getInteger: (GLenum) param {
+	GLint val;
+	glGetIntegerv(param, &val);
+	LogGLErrorTrace(@"glGetIntegerv(%@)", NSStringFromGLEnum(param));
+	return val;
+}
+
+-(GLfloat) getFloat: (GLenum) param {
+	GLfloat val;
+	glGetFloatv(param, &val);
+	LogGLErrorTrace(@"glGetFloatv(%@)", NSStringFromGLEnum(param));
+	return val;
+}
+
+-(NSString*) getString: (GLenum) param {
+	NSString* val = [NSString stringWithUTF8String: (char*)glGetString(param)];
+	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(param));
+	return val;
+}
 
 -(GLuint) maxNumberOfLights { return value_GL_MAX_LIGHTS; }
 
@@ -754,16 +774,13 @@
 
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
-	value_GL_VENDOR = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_VENDOR)];
-	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_VENDOR));
+	value_GL_VENDOR = [[self getString: GL_VENDOR] retain];
 	LogInfo(@"GL vendor: %@", value_GL_VENDOR);
 
-	value_GL_RENDERER = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_RENDERER)];
-	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_RENDERER));
+	value_GL_RENDERER = [[self getString: GL_RENDERER] retain];
 	LogInfo(@"GL engine: %@", value_GL_RENDERER);
 	
-	value_GL_VERSION = [[NSString alloc] initWithUTF8String: (char*)glGetString(GL_VERSION)];
-	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(GL_VERSION));
+	value_GL_VERSION = [[self getString: GL_VERSION] retain];
 	LogInfo(@"GL version: %@", value_GL_VERSION);
 }
 
@@ -795,6 +812,8 @@ static CC3OpenGL* _sharedGL;
 	}
 	return _sharedGL;
 }
+
+-(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 
 @end
 

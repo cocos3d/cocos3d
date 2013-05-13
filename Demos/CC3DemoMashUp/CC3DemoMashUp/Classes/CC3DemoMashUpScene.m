@@ -83,6 +83,7 @@
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
 #define kEtchedMaskPFXEffect			@"EtchedEffect"
+#define kTVTestCardFile					@"TVTestCard.jpg"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -130,18 +131,25 @@
 #define kMalletName						@"Ellipse01"
 #define kRunningTrackName				@"RunningTrack"
 #define kRunnerName						@"Runner"
-#define kRunnerCameraName				@"RunnerCamera"
+#define kRunnerCameraName				@"Camera01"
 #define kRunnerLampName					@"Spot01"
 #define kLittleBrotherName				@"LittleBrother"
+#define kTVName							@"Television"
 
 #define	kMultiTextureCombinerLabel		@"Multi-texture combiner function: %@"
 
 #define kCameraMoveDuration				3.0
 #define kTeapotRotationActionTag		1
 
+
+// Size of the television
+#define kTVScale 40
+static CC3IntSize kTVTexSize = { (16 * kTVScale), (9 * kTVScale) };
+
 // Locations for the brick wall in open and closed position
 static CC3Vector kBrickWallOpenLocation = { -190, 150, -840 };
 static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
+
 
 @interface CCAction (PrivateMethods)
 // This method doesn't actually exist on CCAction, but it does on all subclasses we use in this project.
@@ -154,30 +162,36 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 @implementation CC3DemoMashUpScene
 
-@synthesize playerDirectionControl, playerLocationControl, isManagingShadows;
+@synthesize playerDirectionControl=_playerDirectionControl;
+@synthesize playerLocationControl=_playerLocationControl;
+@synthesize isManagingShadows=_isManagingShadows;
 
 -(void) dealloc {
-	ground = nil;
-	teapotWhite = nil;			// not retained
-	teapotTextured = nil;		// not retained
-	teapotSatellite = nil;		// not retained
-	brickWall = nil;			// not retained
-	podLight = nil;				// not retained
-	beachBall = nil;			// not retained
-	globe = nil;				// not retained
-	dieCube = nil;				// not retained
-	texCubeSpinner = nil;		// not retained
-	mascot = nil;				// not retained
-	bumpMapLightTracker = nil;	// not retained
-	woodenSign = nil;			// not retained
-	floatingHead = nil;			// not retained
-	camTarget = nil;			// not retained
-	origCamTarget = nil;		// not retained
-	[signTex release];
-	[stampTex release];
-	[embossedStampTex release];
-	[headTex release];
-	[headBumpTex release];
+	_ground = nil;				// not retained
+	_teapotWhite = nil;			// not retained
+	_teapotTextured = nil;		// not retained
+	_teapotSatellite = nil;		// not retained
+	_brickWall = nil;			// not retained
+	_robotCam = nil;			// not retained
+	_robotLamp = nil;			// not retained
+	_beachBall = nil;			// not retained
+	_globe = nil;				// not retained
+	_dieCube = nil;				// not retained
+	_texCubeSpinner = nil;		// not retained
+	_mascot = nil;				// not retained
+	_bumpMapLightTracker = nil;	// not retained
+	_woodenSign = nil;			// not retained
+	_floatingHead = nil;		// not retained
+	_camTarget = nil;			// not retained
+	_origCamTarget = nil;		// not retained
+	_runnerCam = nil;			// not retained
+	_runnerLamp = nil;			// not retained
+	[_signTex release];
+	[_stampTex release];
+	[_embossedStampTex release];
+	[_headTex release];
+	[_headBumpTex release];
+	[_tvSurface release];
 	
 	[super dealloc];
 }
@@ -188,9 +202,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * initializeScene method can focus on loading the artifacts of the 3D scene.
  */
 -(void) initCustomState {
-	isManagingShadows = NO;
-	playerDirectionControl = CGPointZero;
-	playerLocationControl = CGPointZero;
+	
+	_isManagingShadows = NO;
+	_playerDirectionControl = CGPointZero;
+	_playerLocationControl = CGPointZero;
 	
 	// Improve performance by avoiding clearing the depth buffer when transitioning
 	// between 2D content and 3D content. Since we are drawing 2D content on top of
@@ -206,19 +221,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	//
 	// To experiment with an alternate drawing order, set a different node sequence sorter
 	// by uncommenting one of the lines here and commenting out the others. The third option
-	// performs no grouping and draws the objects in the order they are added to the scene
-	// below. The fourth option does not use a drawing sequencer, and draws the objects
-	// hierarchically instead. With this, notice that the transparent beach ball now appears
-	// opaque, because it was added first, and is traversed ahead of other objects in the
-	// hierarchical assembly, resulting it in being drawn first, and so it cannot blend with
-	// the background.
+	// performs no grouping and draws the objects in the order they are added to the scene below.
+	// The fourth option does not use a drawing sequencer, and draws the objects hierarchically
+	// instead. With this, notice that the transparent beach ball now appears opaque, because
+	// it  was added first, and is traversed ahead of other objects in the hierarchical assembly,
+	// resulting it in being drawn first, and so it cannot blend with the background.
 	//
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
-	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
 	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-	//	self.drawingSequencer = nil;
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
+//	self.drawingSequencer = nil;
 	
 }
 
@@ -307,6 +321,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
 	
+	[self addTelevision];			// Add a television showing the view from the runner camera
+									// This demonstrates dynamic rendering-to-texture capabilities.
+	
 	[self configureLighting];		// Set up the lighting
 	[self configureCamera];			// Check out some interesting camera options.
 	
@@ -359,15 +376,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Camera* cam = self.activeCamera;
 
 	// Camera starts out embedded in the scene.
-	cameraZoomType = kCameraZoomNone;
+	_cameraZoomType = kCameraZoomNone;
 	
 	// The camera comes from the POD file and is actually animated.
 	// Stop the camera from being animated so the user can control it via the user interface.
 	[cam disableAnimation];
 	
 	// Keep track of which object the camera is pointing at
-	origCamTarget = cam.target;
-	camTarget = origCamTarget;
+	_origCamTarget = cam.target;
+	_camTarget = _origCamTarget;
 
 	// For cameras, the scale property determines camera zooming, and the effective field-of-view.
 	// You can adjust this value to play with camera zooming. Conversely, if you find that objects
@@ -410,17 +427,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	// Adjust the relative ambient and diffuse lighting of the main light to
 	// improve realisim, particularly on shadow effects.
-	podLight.diffuseColor = ccc4f(0.8, 0.8, 0.8, 1.0);
+	_robotLamp.diffuseColor = ccc4f(0.8, 0.8, 0.8, 1.0);
 	
 	// Another mechansim for adjusting shadow intensities is shadowIntensityFactor.
 	// For better effect, set here to a value less than one to lighten the shadows
 	// cast by the main light.
-	podLight.shadowIntensityFactor = 0.75f;
+	_robotLamp.shadowIntensityFactor = 0.75f;
 	
 	// The light from the robot POD file is animated to move back and forth, changing
 	// the lighting of the scene as it moves. To turn this animation off, comment out
 	// the following line. This can be useful when reviewing shadowing.
-//	[podLight disableAnimation];
+//	[_robotLamp disableAnimation];
 	
 }
 
@@ -429,23 +446,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * The ground is tessellated into many smaller faces to improve realism of spotlight.
  */
 -(void) addGround {
-	ground = [CC3PlaneNode nodeWithName: kGroundName];
-	[ground populateAsDiskWithRadius: 1500 andTessellation: CC3TessellationMake(8, 32)];
-	ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
+	_ground = [CC3PlaneNode nodeWithName: kGroundName];
+	[_ground populateAsDiskWithRadius: 1500 andTessellation: CC3TessellationMake(8, 32)];
+	_ground.texture = [CC3Texture textureFromFile: kGroundTextureFile];
 
 	// To experiment with repeating textures, uncomment the following line
-	[ground repeatTexture: (ccTex2F){10, 10}];	// Grass
-//	[ground repeatTexture: (ccTex2F){3, 3}];	// MountainGrass
+	[_ground repeatTexture: (ccTex2F){10, 10}];	// Grass
+//	[_ground repeatTexture: (ccTex2F){3, 3}];	// MountainGrass
 	
-	ground.location = cc3v(0.0, -100.0, 0.0);
-	ground.rotation = cc3v(-90.0, 180.0, 0.0);
-	ground.shouldCullBackFaces = NO;	// Show the ground from below as well.
-	ground.touchEnabled = YES;		// Allow the ground to be selected by touch events.
-	[ground retainVertexLocations];		// Retain location data in main memory, even when it
+	_ground.location = cc3v(0.0, -100.0, 0.0);
+	_ground.rotation = cc3v(-90.0, 180.0, 0.0);
+	_ground.shouldCullBackFaces = NO;	// Show the ground from below as well.
+	_ground.touchEnabled = YES;			// Allow the ground to be selected by touch events.
+	[_ground retainVertexLocations];	// Retain location data in main memory, even when it
 										// is buffered to a GL VBO via releaseRedundantContent,
 										// so that it may be accessed for further calculations
 										// when dropping objects on the ground.
-	[self addChild: ground];
+	[self addChild: _ground];
 }
 
 /**
@@ -527,23 +544,23 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addContentFromPODFile: podPath withName: kBeachBallRezNodeName];
 	
 	// Configure the bouncing beach ball
-	beachBall = [self getNodeNamed: kBeachBallName];
-	beachBall.location = cc3v(200.0, 200.0, -400.0);
-	beachBall.uniformScale = 50.0;
+	_beachBall = [self getNodeNamed: kBeachBallName];
+	_beachBall.location = cc3v(200.0, 200.0, -400.0);
+	_beachBall.uniformScale = 50.0;
 	
 	// Allow this beach ball node to be selected by touch events.
 	// The beach ball is actually a structural assembly containing four child nodes,
 	// one for each separately colored mesh. By marking the node assembly as touch-enabled,
 	// and NOT marking each component mesh node as touch-enabled, when any of the component
 	// nodes is touched, the entire beach ball structural node will be selected.
-	beachBall.touchEnabled = YES;
+	_beachBall.touchEnabled = YES;
 	
 	// Bounce the beach ball...simply...we're not trying for realistic physics here,
 	// but we can still do some fun and interesting stuff with Ease-actions.
 	GLfloat hangTime = 3.0f;
-	CC3Vector dropLocation = beachBall.location;
+	CC3Vector dropLocation = _beachBall.location;
 	CC3Vector landingLocation = dropLocation;
-	landingLocation.y = ground.location.y + 30.0f;
+	landingLocation.y = _ground.location.y + 30.0f;
 	
 	CCActionInterval* dropAction = [CC3MoveTo actionWithDuration: hangTime moveTo: landingLocation];
 	dropAction = [CCEaseOut actionWithAction: [CCEaseIn actionWithAction: dropAction rate: 4.0f] rate: 1.6f];
@@ -552,10 +569,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	riseAction = [CCEaseIn actionWithAction: [CCEaseOut actionWithAction: riseAction rate: 4.0f] rate: 1.6f];
 	
 	CCActionInterval* bounce = [CCSequence actionOne: dropAction two: riseAction];
-	[beachBall runAction: [CCRepeatForever actionWithAction: bounce]];
+	[_beachBall runAction: [CCRepeatForever actionWithAction: bounce]];
 	
 	// For extra realism, also rotate the beach ball as it bounces.
-	[beachBall runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+	[_beachBall runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																					rotateBy: cc3v(30.0, 0.0, 45.0)]]];
 }
 
@@ -573,24 +590,24 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	NSString* texPath = [docDir stringByAppendingPathComponent: kGlobeTextureFile];
 	
 	// Configure the rotating globe
-	globe = [CC3MeshNode nodeWithName: kGlobeName];		// not retained
-	[globe populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
-	globe.texture = [CC3Texture textureFromFile: texPath];
-	globe.location = cc3v(150.0, 200.0, -150.0);
-	globe.uniformScale = 50.0;
-	globe.ambientColor = kCCC4FLightGray;		// Increase the ambient reflection
-	globe.touchEnabled = YES;				// allow this node to be selected by touch events
+	_globe = [CC3MeshNode nodeWithName: kGlobeName];		// not retained
+	[_globe populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
+	_globe.texture = [CC3Texture textureFromFile: texPath];
+	_globe.location = cc3v(150.0, 200.0, -150.0);
+	_globe.uniformScale = 50.0;
+	_globe.ambientColor = kCCC4FLightGray;		// Increase the ambient reflection
+	_globe.touchEnabled = YES;				// allow this node to be selected by touch events
 	
 	// Rotate the globe
-	[globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+	[_globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				rotateBy: cc3v(0.0, 30.0, 0.0)]]];
-	[self addChild: globe];
+	[self addChild: _globe];
 
 	// For something interesting, uncomment the following lines to make the
 	// globe invisible, but still touchable, and still able to cast a shadow.
-//	globe.visible = NO;
-//	globe.shouldAllowTouchableWhenInvisible = YES;
-//	globe.shouldCastShadowsWhenInvisible = YES;
+//	_globe.visible = NO;
+//	_globe.shouldAllowTouchableWhenInvisible = YES;
+//	_globe.shouldCastShadowsWhenInvisible = YES;
 }
 
 /**
@@ -630,16 +647,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
 	// is loaded from the POD file. We can swap it out by creating a copy of the loaded
 	// POD node, using a different node class as the base.
-	dieCube = [[podDieCube copyWithName: kDieCubeName
-								asClass: [SpinningNode class]] autorelease];
+	_dieCube = [[podDieCube copyWithName: kDieCubeName
+								 asClass: [SpinningNode class]] autorelease];
 
 	// Now set some properties, including the friction, and add the die cube to the scene
-	dieCube.uniformScale = 30.0;
-	dieCube.location = cc3v(-200.0, 200.0, 0.0);
-	dieCube.touchEnabled = YES;
-	dieCube.friction = 1.0;
-	[self addChild: dieCube];
-
+	_dieCube.uniformScale = 30.0;
+	_dieCube.location = cc3v(-200.0, 200.0, 0.0);
+	_dieCube.touchEnabled = YES;
+	_dieCube.friction = 1.0;
+	[self addChild: _dieCube];
 }
 
 /**
@@ -679,14 +695,14 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Wrap the cube in a spinner node to allow it to be rotated by touch swipes.
 	// Give the spinner some friction so that it slows down over time one released.
 	itemName = [NSString stringWithFormat: @"%@-Spinner", texCube.name];
-	texCubeSpinner = [SpinningNode nodeWithName: itemName];
-	texCubeSpinner.friction = 1.0;
-	texCubeSpinner.location = cc3v(-200.0, 75.0, 0.0);
-	texCubeSpinner.touchEnabled = YES;
+	_texCubeSpinner = [SpinningNode nodeWithName: itemName];
+	_texCubeSpinner.friction = 1.0;
+	_texCubeSpinner.location = cc3v(-200.0, 75.0, 0.0);
+	_texCubeSpinner.touchEnabled = YES;
 
 	// Add the cube to the spinner and the spinner to the scene.
-	[texCubeSpinner addChild: texCube];
-	[self addChild: texCubeSpinner];
+	[_texCubeSpinner addChild: texCube];
+	[self addChild: _texCubeSpinner];
 }
 
 /** 
@@ -714,30 +730,30 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * the GL engine can be found in the diagram Docs/Diagrams/EnvCubeMap.jpg.
  */
 -(void) addTeapotAndSatellite {
-	teapotTextured = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: kTexturedTeapotName];
-	teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
+	_teapotTextured = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: kTexturedTeapotName];
+	_teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
 	
 	// Add two textures to the teapot. The first is a cube-map texture showing the six sides of
 	// an environmental cube surrounding the teapot, viewed from the teapot's perspective. Also
 	// add an effect loaded from a PFX file to render these textures. The six cube-map textures
 	// are loaded by specifying a file name substitution pattern. See the notes of the
 	// textureCubeMapFromFilePattern: method for more info.
-	[teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
-	[teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	teapotTextured.material.reflectivity = 0.7;		// Adjust up and down between zero and one.
+	[_teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
+	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
+	_teapotTextured.material.reflectivity = 0.7;		// Adjust up and down between zero and one.
 
 	// Add a second rainbow-colored teapot as a satellite of the textured teapot.
-	teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
-	teapotSatellite.mesh = CC3ModelSampleFactory.factory.multicoloredTeapotMesh;
-	teapotSatellite.material = [CC3Material shiny];
-	teapotSatellite.location = cc3v(0.3, 0.1, 0.0);
-	teapotSatellite.uniformScale = 0.4;
-	teapotSatellite.touchEnabled = YES;		// allow this node to be selected by touch events
-	[teapotTextured addChild: teapotSatellite];
+	_teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
+	_teapotSatellite.mesh = CC3ModelSampleFactory.factory.multicoloredTeapotMesh;
+	_teapotSatellite.material = [CC3Material shiny];
+	_teapotSatellite.location = cc3v(0.3, 0.1, 0.0);
+	_teapotSatellite.uniformScale = 0.4;
+	_teapotSatellite.touchEnabled = YES;		// allow this node to be selected by touch events
+	[_teapotTextured addChild: _teapotSatellite];
 	
-	teapotTextured.location = cc3v(0.0, 150.0, -650.0);
-	teapotTextured.uniformScale = 500.0;
-	[self addChild: teapotTextured];
+	_teapotTextured.location = cc3v(0.0, 150.0, -650.0);
+	_teapotTextured.uniformScale = 500.0;
+	[self addChild: _teapotTextured];
 	
 	// Rotate the teapots. The satellite orbits the textured teapot because it is
 	// a child node of the textured teapot, and orbits as the parent node rotates.
@@ -746,11 +762,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CCAction* teapotSpinAction = [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																						   rotateBy: cc3v(0.0, 60.0, 0.0)]];
 	teapotSpinAction.tag = kTeapotRotationActionTag;
-	[teapotTextured runAction: teapotSpinAction];
+	[_teapotTextured runAction: teapotSpinAction];
 
 	 // For effect, also rotate the satellite around its own axes.
-	[teapotSatellite runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
-																						  rotateBy: cc3v(30.0, 0.0, 45.0)]]];
+	[_teapotSatellite runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																						   rotateBy: cc3v(30.0, 0.0, 45.0)]]];
 }
 
 /**
@@ -782,7 +798,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// "Examples/Advanced/Skybox2/OGLES2/Skybox.pvr" in the SDK to this project, and
 	// uncomment the following line. To get the full effect of that skybox, you might also
 	// want to comment out the invocation of the addGround method in the initializeScene method.
-	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
+//	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
 }
 
 /**
@@ -792,21 +808,21 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addBrickWall {
 	// Create a parametric textured box as an open door.
-	brickWall = [DoorMeshNode nodeWithName: kBrickWallName];
-	brickWall.touchEnabled = YES;
-	[brickWall populateAsSolidBox: CC3BoundingBoxMake(-1.5, 0, -0.3, 1.5, 2.5, 0.3)];
-	brickWall.uniformScale = 40.0;
+	_brickWall = [DoorMeshNode nodeWithName: kBrickWallName];
+	_brickWall.touchEnabled = YES;
+	[_brickWall populateAsSolidBox: CC3BoundingBoxMake(-1.5, 0, -0.3, 1.5, 2.5, 0.3)];
+	_brickWall.uniformScale = 40.0;
 	
 	// Add a texture to the wall and repeat it. This creates a material automatically.
-	brickWall.texture = [CC3Texture textureFromFile: kBrickTextureFile];
-	[brickWall repeatTexture: (ccTex2F){4, 2}];
-	brickWall.ambientColor = kCCC4FWhite;			// Increase the ambient reflection so the backside is visible
+	_brickWall.texture = [CC3Texture textureFromFile: kBrickTextureFile];
+	[_brickWall repeatTexture: (ccTex2F){4, 2}];
+	_brickWall.ambientColor = kCCC4FWhite;			// Increase the ambient reflection so the backside is visible
 	
 	// Start with the wall in the open position
-	brickWall.isOpen = YES;
-	brickWall.location = kBrickWallOpenLocation;
-	brickWall.rotation = cc3v(0, -45, 0);
-	[self addChild: brickWall];
+	_brickWall.isOpen = YES;
+	_brickWall.location = kBrickWallOpenLocation;
+	_brickWall.rotation = cc3v(0, -45, 0);
+	[self addChild: _brickWall];
 }
 
 /** Loads a POD file containing an animated robot arm, a camera, and an animated light. */
@@ -824,8 +840,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	podRezNode.touchEnabled = YES;
 	[self addChild: podRezNode];
 	
+	// Retrieve the camera in the POD and cache it for later access.
+	_robotCam = (CC3Camera*)[podRezNode getNodeNamed: kRobotCameraName];
+	
 	// Retrieve the light from the POD resource so we can track its location as it moves via animation
-	podLight = (CC3Light*)[podRezNode getNodeNamed: kPODLightName];
+	_robotLamp = (CC3Light*)[podRezNode getNodeNamed: kPODLightName];
 	
 	// Start the animation of the robot arm and bouncing lamp from the PVR POD file contents.
 	// But we'll have a bit of fun with the animation, as follows.
@@ -883,10 +902,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * direction, since it is a directional light).
  */
 -(void) addLightMarker {
-	teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
-	teapotWhite.uniformScale = 200.0;
-	teapotWhite.touchEnabled = YES;		// allow this node to be selected by touch events
-	[self addChild: teapotWhite];
+	_teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
+	_teapotWhite.uniformScale = 200.0;
+	_teapotWhite.touchEnabled = YES;		// allow this node to be selected by touch events
+	[self addChild: _teapotWhite];
 }
 
 /**
@@ -905,7 +924,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.tessellation = CC3TessellationMake(4, 1);
 	bmLabel.fontFileName = @"Arial32BMGlyph.fnt";
 	bmLabel.labelString = @"Hello, world!";
-	bmLabelMessageIndex = 0;	// Keep track of which message is being displayed
+	_bmLabelMessageIndex = 0;	// Keep track of which message is being displayed
 	
 	bmLabel.location = cc3v(-150.0, 75.0, 500.0);
 	bmLabel.rotation = cc3v(0.0, 180.0, 0.0);
@@ -978,11 +997,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * the direction of the light source to create per-pixel luminosity that appears realistic.
  */
 -(void) addBumpMapLightTracker {
-	bumpMapLightTracker = [CC3Node nodeWithName: kBumpMapLightTrackerName];
-	bumpMapLightTracker.shouldTrackTarget = YES;
-	bumpMapLightTracker.isTrackingForBumpMapping = YES;
-	bumpMapLightTracker.target = podLight;
-	[self addChild: bumpMapLightTracker];
+	_bumpMapLightTracker = [CC3Node nodeWithName: kBumpMapLightTrackerName];
+	_bumpMapLightTracker.shouldTrackTarget = YES;
+	_bumpMapLightTracker.isTrackingForBumpMapping = YES;
+	_bumpMapLightTracker.target = _robotLamp;
+	[self addChild: _bumpMapLightTracker];
 }
 
 /**
@@ -993,17 +1012,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addWoodenSign {
 	// Texture for the basic wooden sign
-	signTex = [[CC3Texture textureFromFile: kSignTextureFile] retain];
+	_signTex = [[CC3Texture textureFromFile: kSignTextureFile] retain];
 
 	// Texture for the stamp overlay.
 	// Give it a configurable texture unit so we can play with the configuration.
-	stampTex = [[CC3Texture textureFromFile: kSignStampTextureFile] retain];
-	stampTex.textureUnit = [CC3ConfigurableTextureUnit textureUnit];
+	_stampTex = [[CC3Texture textureFromFile: kSignStampTextureFile] retain];
+	_stampTex.textureUnit = [CC3ConfigurableTextureUnit textureUnit];
 	
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	embossedStampTex = [[CC3Texture textureFromFile: kSignStampNormalsTextureFile] retain];
+	_embossedStampTex = [[CC3Texture textureFromFile: kSignStampNormalsTextureFile] retain];
 	
 	// Although there is also a dedicated CC3BumpMapTextureUnit that we'd usually
 	// use for bump-mapping, we use CC3ConfigurableTextureUnit instead, to demonstrate
@@ -1012,34 +1031,34 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	ctu.combineRGBFunction = GL_DOT3_RGB;
 	ctu.rgbSource1 = GL_CONSTANT;
 	ctu.rgbNormalMap = kCC3DOT3RGB_YZX;
-	embossedStampTex.textureUnit = ctu;
+	_embossedStampTex.textureUnit = ctu;
 	
 	// Create wooden sign, starting with wood sign texture
-	woodenSign = [CC3PlaneNode nodeWithName: kSignName];
-	[woodenSign populateAsCenteredRectangleWithSize: CGSizeMake(150.0, 150.0)
-									andTessellation: CC3TessellationMake(4, 4)];
-	woodenSign.texture = signTex;
+	_woodenSign = [CC3PlaneNode nodeWithName: kSignName];
+	[_woodenSign populateAsCenteredRectangleWithSize: CGSizeMake(150.0, 150.0)
+									 andTessellation: CC3TessellationMake(4, 4)];
+	_woodenSign.texture = _signTex;
 
 	// Add the stamp overlay texture
-	[woodenSign addTexture: stampTex];
+	[_woodenSign addTexture: _stampTex];
 
 	// Adjust the mesh to use only a section of the texture. This feature can be used to
 	// extract a texture from a texture atlas, so that a single loaded texture can be used
 	// to cover multiple meshes, with each mesh covered by a different section fo the texture.
-	woodenSign.textureRectangle = CGRectMake(0.4, 0.23, 0.35, 0.35);
+	_woodenSign.textureRectangle = CGRectMake(0.4, 0.23, 0.35, 0.35);
 
-	woodenSign.diffuseColor = kCCC4FCyan;
-	woodenSign.specularColor = kCCC4FLightGray;
-	woodenSign.touchEnabled = YES;		// Allow the sign to be selected by touch events.
+	_woodenSign.diffuseColor = kCCC4FCyan;
+	_woodenSign.specularColor = kCCC4FLightGray;
+	_woodenSign.touchEnabled = YES;		// Allow the sign to be selected by touch events.
 	
 	// The sign starts out in the X-Y plane and facing up the positive Z-axis.
 	// Rotate the sign 90 degrees so that it faces the center of the scene.
-	woodenSign.rotation = cc3v(0.0, 90.0, 0.0);
+	_woodenSign.rotation = cc3v(0.0, 90.0, 0.0);
 	
 	// Add a label below the sign that identifies which combiner method is being used.
 	// This label will be automatically updated whenever the user touches the wooden sign
 	// to switch the combiner function.
-	NSString* texEnvName = NSStringFromGLEnum(((CC3ConfigurableTextureUnit*)stampTex.textureUnit).combineRGBFunction);
+	NSString* texEnvName = NSStringFromGLEnum(((CC3ConfigurableTextureUnit*)_stampTex.textureUnit).combineRGBFunction);
 	NSString* lblStr = [NSString stringWithFormat: kMultiTextureCombinerLabel, texEnvName];
 	CCLabelTTF* bbLabel = [CCLabelTTF labelWithString: lblStr
 											 fontName: @"Arial"
@@ -1048,15 +1067,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bb.location = cc3v( 0.0, -90.0, 0.0 );
 	bb.color = ccMAGENTA;
 	bb.shouldUseLighting = NO;
-	[woodenSign addChild: bb];
+	[_woodenSign addChild: bb];
 	
 	// Allow the wooden sign to be viewed when the camera goes behind.
-	woodenSign.shouldCullBackFaces = NO;
+	_woodenSign.shouldCullBackFaces = NO;
 	
 	// Add the wooden sign to the bump-map light tracker so that when the bump-map
 	// texture overlay is displayed, it will interact with the light source.
-	woodenSign.location = cc3v(-600.0, 250.0, -200.0);
-	[bumpMapLightTracker addChild: woodenSign];
+	_woodenSign.location = cc3v(-600.0, 250.0, -200.0);
+	[_bumpMapLightTracker addChild: _woodenSign];
 }
 
 // Text to hold in userData of floating head and then log when the head is poked.
@@ -1092,13 +1111,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 														  fromFile: kHeadPODFile];
 
 	// Extract the floating head mesh node and set it to be touch enabled
-	floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
-	floatingHead.touchEnabled = YES;
-	floatingHead.diffuseColor = kCCC4FWhite;
-	floatingHead.ambientColor = kCCC4FGray;
+	_floatingHead = [podRezNode getMeshNodeNamed: kFloatingHeadName];
+	_floatingHead.touchEnabled = YES;
+	_floatingHead.diffuseColor = kCCC4FWhite;
+	_floatingHead.ambientColor = kCCC4FGray;
 	
 	// Demonstrate the use of applicaiton-specific data attached to a node.
-	floatingHead.userData = kDontPokeMe;
+	_floatingHead.userData = kDontPokeMe;
 	
 	// The floating head normal texture was created in a left-handed coordinate
 	// system (eg- DirectX). OpenGL uses a right-handed coordinate system.
@@ -1106,44 +1125,44 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// was coming from the opposite direction. We can correct for this by flipping
 	// the normal texture horizontally by flipping the textue mapping coordinates
 	// of the mesh horizontally.
-	[floatingHead flipTexturesHorizontally];
+	[_floatingHead flipTexturesHorizontally];
 
 	// The origin of the floating head mesh is at the bottom. It suits our purposes better to
 	// have the origin of the mesh at the center of geometry. The method we invoke here changes
 	// the value of every vertex in the mesh. So we should only ever want to do this once per mesh.
-	[floatingHead moveMeshOriginToCenterOfGeometry];
+	[_floatingHead moveMeshOriginToCenterOfGeometry];
 	
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	headBumpTex = [[CC3Texture textureFromFile: kHeadBumpFile] retain];
-	headBumpTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
-	headBumpTex.textureUnit.rgbNormalMap = kCC3DOT3RGB_YZX;
+	_headBumpTex = [[CC3Texture textureFromFile: kHeadBumpFile] retain];
+	_headBumpTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
+	_headBumpTex.textureUnit.rgbNormalMap = kCC3DOT3RGB_YZX;
 	
 	// Load the visible texture of the floating head, and add it as an overlay on the bump map texture.
-	headTex = [[CC3Texture textureFromFile: kHeadTextureFile] retain];
+	_headTex = [[CC3Texture textureFromFile: kHeadTextureFile] retain];
 
 	// The two textures are PVR textures pre-loaded with mipmaps.
 	// However, using the mipmap for this mesh creates a visual artifact around the
 	// fringe of the model. So we'll just use linear filtering on the main texture.
 	// Comment out these two lines if you want to see the difference.
-	headBumpTex.texture.minifyingFunction = GL_LINEAR;
-	headTex.texture.minifyingFunction = GL_LINEAR;
+	_headBumpTex.texture.minifyingFunction = GL_LINEAR;
+	_headTex.texture.minifyingFunction = GL_LINEAR;
 
 	// Add the bump-map texture and the color texture to the material.
-	floatingHead.material.texture = headBumpTex;		// replace the dummy texture
-	[floatingHead.material addTexture: headTex];
+	_floatingHead.material.texture = _headBumpTex;		// replace the dummy texture
+	[_floatingHead.material addTexture: _headTex];
 	
 	// Put the head node in an orienting wrapper so that we can orient it to face the camera.
 	// First turn the floating head to face right so that it points towards the side of the
 	// wrapper that will be kept facing the camera, and move the head to the origin of the wrapper.
 	// Add the orienting node to the bump-map light tracker so that the bump-map in the floating
 	// head will interact with the light source.
-	floatingHead.rotation = cc3v(0, -90, 0);
-	floatingHead.location = kCC3VectorZero;
-	CC3Node* headHolder = [floatingHead asCameraTrackingWrapper];
+	_floatingHead.rotation = cc3v(0, -90, 0);
+	_floatingHead.location = kCC3VectorZero;
+	CC3Node* headHolder = [_floatingHead asCameraTrackingWrapper];
 	headHolder.location = cc3v(-500.0, 200.0, 0.0);
-	[bumpMapLightTracker addChild: headHolder];
+	[_bumpMapLightTracker addChild: headHolder];
 }
 
 /**
@@ -1161,22 +1180,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// upside down. By telling the resource this, it will compensate during loading.
 	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
 								  expectsVerticallyFlippedTextures: YES];
-	mascot = [podRezNode getMeshNodeNamed: kMascotName];
-	CC3MeshNode* distractedMascot = [[mascot copyWithName: kDistractedMascotName] autorelease];
+	_mascot = [podRezNode getMeshNodeNamed: kMascotName];
+	CC3MeshNode* distractedMascot = [[_mascot copyWithName: kDistractedMascotName] autorelease];
 	
 	// Allow the mascots to be selected by touch events.
-	mascot.touchEnabled = YES;
+	_mascot.touchEnabled = YES;
 	distractedMascot.touchEnabled = YES;
 
 	// Scale the mascots
-	mascot.uniformScale = 22.0;
+	_mascot.uniformScale = 22.0;
 	distractedMascot.uniformScale = 22.0;
 	
 	// Create the wrapper for the mascot that stares back at the camera.
 	// Rotate the mascot in the wrapper so that the correct side faces the camera
 	// as the wrapper tracks the camera.
-	CC3Node* mascotHolder = [mascot asCameraTrackingWrapper];
-	mascot.rotation = cc3v(0, -90, 0);
+	CC3Node* mascotHolder = [_mascot asCameraTrackingWrapper];
+	_mascot.rotation = cc3v(0, -90, 0);
 	mascotHolder.location = cc3v(-450.0, 100.0, -575.0);
 	[self addChild: mascotHolder];
 
@@ -1188,7 +1207,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Node* distractedMascotHolder = [distractedMascot asTrackingWrapper];
 	distractedMascot.rotation = cc3v(0, -90, 0);
 	distractedMascotHolder.location = cc3v(-375.0, 100.0, -700.0);
-	distractedMascotHolder.target = teapotSatellite;
+	distractedMascotHolder.target = _teapotSatellite;
 	[self addChild: distractedMascotHolder];
 
 	// If you want to restrict the mascot to only rotating side-to-side around the
@@ -1382,25 +1401,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) addSkinnedRunners {
 
-	// Load the first running man from the POD file. Since the meshes were not specifically
-	// created for iOS, the textures will appear upside-down because it uses a texture type
-	// (png) that is loaded upside-down by iOS. We tell the resource that the mesh is not
-	// aligned to upside-down textures so that the texture coordinates will be flipped upside
-	// down automatically and the textures will appear right-way up.
+	// Load the first running man from the POD file.
 	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
 													  fromFile: kRunningManPODFile];
-	
-	// Remove the light provided in the POD so that it does not contribute to the lighting of
-	// the scene. We don't remove the POD's camera, but we rename it so that we can retrieve it
-	// distinctly from the camera loaded with the robot arm POD. All SDK POD files seem to use
-	// the same name for their included cameras. We also adjust the far clipping distance of the
-	// runner camera to match the main camera, and we set the depth of field to infinite so that
-	// it will display shadow volumes correctly.
-	[runner getNodeNamed: kRunnerLampName].visible = NO;
-	CC3Camera* runnerCam = (CC3Camera*)[runner getNodeNamed: @"Camera01"];
-	runnerCam.name = kRunnerCameraName;
-	runnerCam.farClippingDistance = self.activeCamera.farClippingDistance;
-	runnerCam.hasInfiniteDepthOfField = YES;
+
+	// Retrieve the camera in the POD and cache it for later access. Adjust the camera
+	// frustum to values that are more useful for this demo.
+	_runnerCam = (CC3Camera*)[runner getNodeNamed: kRunnerCameraName];
+	_runnerCam.farClippingDistance = self.activeCamera.farClippingDistance;
+	_runnerCam.hasInfiniteDepthOfField = YES;
+
+	// Retrieve the lamp in the POD, cache it for later access, and turn it off for now.
+	_runnerLamp = (CC3Light*)[runner getNodeNamed: kRunnerLampName];
+	_runnerLamp.visible = NO;
 
 	runner.touchEnabled = YES;		// make the runner touchable
 	
@@ -1408,11 +1421,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// This "running track" is really just a structural node on which we can place the man and
 	// then rotate the "track" to move the man. It's really just an invisible boom holding the man.
 	CC3Node* runningTrack = [CC3Node nodeWithName: kRunningTrackName];
-	runningTrack.location = ground.location;
+	runningTrack.location = _ground.location;
 	[self addChild: runningTrack];
 
 	// Place the man on the track, near the edge of the ground frame
-	runner.location = cc3v(0, 0, 900);
+	runner.location = cc3v(0, 0, 1100);
 	runner.rotation = cc3v(0, 90, 0);	// Rotate the entire POD resource so camera rotates as well
 	[runningTrack addChild: runner];
 
@@ -1435,7 +1448,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Node* runnerFigure = [runner getNodeNamed: runnerFigureName];
 	CC3Node* littleBrother = [[runnerFigure copyWithName: kLittleBrotherName] autorelease];
 	littleBrother.uniformScale = 0.75f;
-	littleBrother.location = cc3v(0, 0, 800);
+	littleBrother.location = cc3v(0, 0, 1000);
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
 	littleBrother.touchEnabled = YES;			// make the runner touchable
 	
@@ -1458,6 +1471,35 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
 	[littleBrother runAction: [CCRepeatForever actionWithAction: stride]];
+}
+
+/**
+ * Adds a television showing the view from the runner camera
+ * This demonstrates dynamic rendering-to-texture capabilities.
+ */
+-(void) addTelevision {
+	CC3GLTexture* tvTex = [[CC3GLTexture2D alloc] initWithSize: kTVTexSize
+												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+	_tvSurface = [CC3FramebufferRenderSurface new];
+	_tvSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: tvTex];
+	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithStorageForSize: kTVTexSize
+																	andPixelFormat: GL_DEPTH_COMPONENT16];
+	[_tvSurface validate];
+	[tvTex release];	// Retained by attachment & framebuffer
+	
+	CC3MeshNode* tv = [CC3MeshNode nodeWithName: kTVName];
+	[tv populateAsCenteredRectangleWithSize: CGSizeMake(16.0, 9.0)];	// HDTV aspect
+	[tv flipTexturesVertically];
+//	tv.texture = [CC3Texture textureFromFile: kTVTestCardFile];
+	tv.texture = [CC3Texture textureWithGLTexture: tvTex];
+	tv.shouldUseLighting = NO;
+	tv.location = cc3v(500.0, 100.0, -700.0);
+	tv.rotation = cc3v(0, -45, 0);
+	tv.uniformScale = 20.0;
+	tv.shouldCullBackFaces = NO;			// Show from behind as well.
+	tv.touchEnabled = YES;
+	tv.shouldDrawLocalContentWireframeBox = YES;
+	[self addChild: tv];
 }
 
 /**
@@ -2003,6 +2045,42 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 
+#pragma mark Drawing
+
+-(void) drawSceneContent {
+	[self illuminateWithVisitor: _screenDrawVisitor];
+	[self drawToTVScreenWithVisitor: _screenDrawVisitor];
+	
+	[self visitForDrawingWithVisitor: _screenDrawVisitor];
+	//	[self drawShadowsWithVisitor: _shadowVisitor];
+}
+
+-(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	LogTrace(@"Starting TV draw ---------------------------------------------------");
+
+	CC3Viewport vpCurr = _runnerCam.viewport;
+	BOOL lampOnCurr = _runnerLamp.visible;
+	
+	_runnerLamp.visible = YES;
+	_runnerCam.viewport = CC3ViewportMake(0, 0, kTVTexSize.width, kTVTexSize.height);
+	visitor.camera = _runnerCam;
+
+	[_tvSurface activate];
+
+	[_screenDrawVisitor.gl clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
+	[self visitForDrawingWithVisitor: _screenDrawVisitor];
+
+	[self.screenRenderSurface activate];
+
+	visitor.camera = self.activeCamera;
+	_runnerCam.viewport = vpCurr;
+	_runnerLamp.visible = lampOnCurr;
+
+	LogTrace(@"Ending TV draw ---------------------------------------------------\n");
+}
+
+
 #pragma mark Updating and user interactions
 
 /**
@@ -2039,7 +2117,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self updateCameraFromControls: visitor.deltaTime];
 	
 	// To show where the POD light is, track the small white teapot to the light location.
-	teapotWhite.location = podLight.location;
+	_teapotWhite.location = _robotLamp.location;
  }
 
 /** After all the nodes have been updated, check for collisions. */
@@ -2066,28 +2144,28 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) checkForCollisions {
 	
 	// Test whether the rainbow teapot intersects the brick wall.
-	if ( [teapotSatellite doesIntersectNode: brickWall] ) {
+	if ( [_teapotSatellite doesIntersectNode: _brickWall] ) {
 
 		// Get the direction from the teapot to the wall.
-		CC3Vector tpDir = CC3VectorDifference(brickWall.globalLocation, teapotSatellite.globalLocation);		
+		CC3Vector tpDir = CC3VectorDifference(_brickWall.globalLocation, _teapotSatellite.globalLocation);		
 
 		// If the teapot velocity is in the same direction as the vector from the
 		// teapot to the wall, it is heading towards the wall. If so, turn it around
 		// by getting the current spin action on the teapot holder and replacing it
 		// with the reverse spin.
-		if (CC3VectorDot(teapotSatellite.velocity, tpDir) > 0.0f) {
-			LogInfo(@"BANG! %@ hit %@", teapotSatellite, brickWall);
+		if (CC3VectorDot(_teapotSatellite.velocity, tpDir) > 0.0f) {
+			LogInfo(@"BANG! %@ hit %@", _teapotSatellite, _brickWall);
 			
 			// Get the current spinning action.
-			CCAction* spinAction = [teapotTextured getActionByTag: kTeapotRotationActionTag];
+			CCAction* spinAction = [_teapotTextured getActionByTag: kTeapotRotationActionTag];
 			
 			// Reverse it and give it a tag so we can find it again.
 			CCAction* revSpinAction = [spinAction reverse];
 			revSpinAction.tag = kTeapotRotationActionTag;
 
 			// Stop the old action and start the new one. 
-			[teapotTextured stopAction: spinAction];
-			[teapotTextured runAction: revSpinAction];
+			[_teapotTextured stopAction: spinAction];
+			[_teapotTextured runAction: revSpinAction];
 		}
 	}
 }
@@ -2097,10 +2175,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Camera* cam = self.activeCamera;
 	
 	// Update the location of the player (the camera)
-	if ( playerLocationControl.x || playerLocationControl.y ) {
+	if ( _playerLocationControl.x || _playerLocationControl.y ) {
 		
 		// Get the X-Y delta value of the control and scale it to something suitable
-		CGPoint delta = ccpMult(playerLocationControl, dt * 100.0);
+		CGPoint delta = ccpMult(_playerLocationControl, dt * 100.0);
 
 		// We want to move the camera forward and backward, and side-to-side,
 		// from the camera's (the user's) point of view.
@@ -2116,8 +2194,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 
 	// Update the direction the camera is pointing by panning and inclining using rotation.
-	if ( playerDirectionControl.x || playerDirectionControl.y ) {
-		CGPoint delta = ccpMult(playerDirectionControl, dt * 30.0);		// Factor to set speed of rotation.
+	if ( _playerDirectionControl.x || _playerDirectionControl.y ) {
+		CGPoint delta = ccpMult(_playerDirectionControl, dt * 30.0);		// Factor to set speed of rotation.
 		CC3Vector camRot = cam.rotation;
 		camRot.y -= delta.x;
 		camRot.x += delta.y;
@@ -2131,28 +2209,28 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * is handled by a CCActionInterval, so that the movement appears smooth and animated.
  */
 -(void) switchCameraTarget {
-	if (camTarget == origCamTarget)
-		camTarget = globe;
-	else if (camTarget == globe)
-		camTarget = beachBall;
-	else if (camTarget == beachBall)
-		camTarget = teapotTextured;
-	else if (camTarget == teapotTextured)
-		camTarget = mascot;
-	else if (camTarget == mascot)
-		camTarget = woodenSign;
-	else if (camTarget == woodenSign)
-		camTarget = floatingHead;
-	else if (camTarget == floatingHead)
-		camTarget = dieCube;
+	if (_camTarget == _origCamTarget)
+		_camTarget = _globe;
+	else if (_camTarget == _globe)
+		_camTarget = _beachBall;
+	else if (_camTarget == _beachBall)
+		_camTarget = _teapotTextured;
+	else if (_camTarget == _teapotTextured)
+		_camTarget = _mascot;
+	else if (_camTarget == _mascot)
+		_camTarget = _woodenSign;
+	else if (_camTarget == _woodenSign)
+		_camTarget = _floatingHead;
+	else if (_camTarget == _floatingHead)
+		_camTarget = _dieCube;
 	else
-		camTarget = origCamTarget;
+		_camTarget = _origCamTarget;
 	
 	CC3Camera* cam = self.activeCamera;
 	cam.target = nil;			// Ensure the camera is not locked to the original target
 	[cam stopAllActions];
-	[cam runAction: [CC3RotateToLookAt actionWithDuration: 2.0 targetLocation: camTarget.globalLocation]];
-	LogInfo(@"Camera target toggled to %@", camTarget);
+	[cam runAction: [CC3RotateToLookAt actionWithDuration: 2.0 targetLocation: _camTarget.globalLocation]];
+	LogInfo(@"Camera target toggled to %@", _camTarget);
 }
 
 /**
@@ -2218,8 +2296,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the landing craft to the ground, and locaizing it to the ground, will compensate for
 	// the existing transformations that have been applied to the ground. The result will be
 	// that the army will appear to land vertically and deploy horizontally, as expected.
-	landingCraft.location = ground.location;
-	[ground addAndLocalizeChild: landingCraft];
+	landingCraft.location = _ground.location;
+	[_ground addAndLocalizeChild: landingCraft];
 }
 
 /** Cycle between sunshine, fog and spotlight. */
@@ -2241,9 +2319,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// If the sun is shining, turn on the CC3Light from the POD file, and turn off the spotlight,
 	// and vice-versa if the sun is not shining. Set the target of the bump-map tracker to be the
 	// active light source.
-	podLight.visible = sun.visible;
-	spotLight.visible = !podLight.visible;
-	bumpMapLightTracker.target = podLight.visible ? podLight : spotLight;
+	_robotLamp.visible = sun.visible;
+	spotLight.visible = !_robotLamp.visible;
+	_bumpMapLightTracker.target = _robotLamp.visible ? _robotLamp : spotLight;
 	return sun.visible;
 }
 
@@ -2254,16 +2332,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) cycleZoom {
 	CC3Camera* cam = self.activeCamera;
 	[cam stopAllActions];						// Stop any current camera motion
-	switch (cameraZoomType) {
+	switch (_cameraZoomType) {
 
 		// Currently in normal view. Remember orientation of camera, turn on wireframe
 		// and move away from the scene along the line between the center of the scene
 		// and the camera until everything in the scene is visible.
 		case kCameraZoomNone:
-			lastCameraOrientation = CC3RayFromLocDir(cam.globalLocation, cam.globalForwardDirection);
+			_lastCameraOrientation = CC3RayFromLocDir(cam.globalLocation, cam.globalForwardDirection);
 			self.shouldDrawWireframeBox = YES;
 			[cam moveWithDuration: kCameraMoveDuration toShowAllOf: self];
-			cameraZoomType = kCameraZoomStraightBack;	// Mark new state
+			_cameraZoomType = kCameraZoomStraightBack;	// Mark new state
 			break;
 		
 		// Currently looking at the full scene.
@@ -2273,7 +2351,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			[cam moveWithDuration: kCameraMoveDuration
 					  toShowAllOf: self
 					fromDirection: cc3v(-1.0, 1.0, 1.0)];
-			cameraZoomType = kCameraZoomBackTopRight;	// Mark new state
+			_cameraZoomType = kCameraZoomBackTopRight;	// Mark new state
 			break;
 
 		// Currently in second full-scene view.
@@ -2283,10 +2361,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			self.shouldDrawDescriptor = NO;
 			self.shouldDrawWireframeBox = NO;
 			[cam runAction: [CC3MoveTo actionWithDuration: kCameraMoveDuration
-												   moveTo: lastCameraOrientation.startLocation]];
+												   moveTo: _lastCameraOrientation.startLocation]];
 			[cam runAction: [CC3RotateToLookTowards actionWithDuration: kCameraMoveDuration
-													  forwardDirection: lastCameraOrientation.direction]];
-			cameraZoomType = kCameraZoomNone;	// Mark new state
+													  forwardDirection: _lastCameraOrientation.direction]];
+			_cameraZoomType = kCameraZoomNone;	// Mark new state
 			break;
 	}
 }
@@ -2294,7 +2372,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 #pragma mark Gesture handling
 
--(void) startMovingCamera { cameraMoveStartLocation = self.activeCamera.location; }
+-(void) startMovingCamera { _cameraMoveStartLocation = self.activeCamera.location; }
 
 -(void) stopMovingCamera {}
 
@@ -2308,15 +2386,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	GLfloat camMoveDist = logf(aMovement) * kCamPinchMovementUnit;
 
 	CC3Vector moveVector = CC3VectorScaleUniform(cam.globalForwardDirection, camMoveDist);
-	cam.location = CC3VectorAdd(cameraMoveStartLocation, moveVector);
+	cam.location = CC3VectorAdd(_cameraMoveStartLocation, moveVector);
 }
 
--(void) startPanningCamera { cameraPanStartRotation = self.activeCamera.rotation; }
+-(void) startPanningCamera { _cameraPanStartRotation = self.activeCamera.rotation; }
 
 -(void) stopPanningCamera {}
 
 -(void) panCameraBy:  (CGPoint) aMovement {
-	CC3Vector camRot = cameraPanStartRotation;
+	CC3Vector camRot = _cameraPanStartRotation;
 	CGPoint panRot = ccpMult(aMovement, 90);		// Full pan swipe is 90 degrees
 	camRot.y += panRot.x;
 	camRot.x -= panRot.y;
@@ -2326,11 +2404,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) startDraggingAt: (CGPoint) touchPoint { [self pickNodeFromTapAt: touchPoint]; }
 
 -(void) dragBy: (CGPoint) aMovement atVelocity: (CGPoint) aVelocity {
-	if (selectedNode == dieCube || selectedNode == texCubeSpinner)
-		[self rotate: ((SpinningNode*)selectedNode) fromSwipeVelocity: aVelocity];
+	if (_selectedNode == _dieCube || _selectedNode == _texCubeSpinner)
+		[self rotate: ((SpinningNode*)_selectedNode) fromSwipeVelocity: aVelocity];
 }
 
--(void) stopDragging { selectedNode = nil; }
+-(void) stopDragging { _selectedNode = nil; }
 
 /** Set this parameter to adjust the rate of rotation from the length of swipe gesture. */
 #define kSwipeVelocityScale		400
@@ -2380,33 +2458,33 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	gettimeofday(&now, NULL);
 
 	// Time since last event
-	ccTime dt = (now.tv_sec - lastTouchEventTime.tv_sec) + (now.tv_usec - lastTouchEventTime.tv_usec) / 1000000.0f;
+	ccTime dt = (now.tv_sec - _lastTouchEventTime.tv_sec) + (now.tv_usec - _lastTouchEventTime.tv_usec) / 1000000.0f;
 
 	switch (touchType) {
 		case kCCTouchBegan:
 			[self pickNodeFromTouchEvent: touchType at: touchPoint];
 			break;
 		case kCCTouchMoved:
-			if (selectedNode == dieCube || selectedNode == texCubeSpinner) {
-				[self rotate: ((SpinningNode*)selectedNode) fromSwipeAt: touchPoint interval: dt];
+			if (_selectedNode == _dieCube || _selectedNode == _texCubeSpinner) {
+				[self rotate: ((SpinningNode*)_selectedNode) fromSwipeAt: touchPoint interval: dt];
 			}
 			break;
 		case kCCTouchEnded:
-			if (selectedNode == dieCube || selectedNode == texCubeSpinner) {
+			if (_selectedNode == _dieCube || _selectedNode == _texCubeSpinner) {
 				// If the user lifted the finger while in motion, let the cubes know
 				// that they can freewheel now. But if the user paused before lifting
 				// the finger, consider it stopped.
-				((SpinningNode*)selectedNode).isFreeWheeling = (dt < 0.5);
+				((SpinningNode*)_selectedNode).isFreeWheeling = (dt < 0.5);
 			}
-			selectedNode = nil;
+			_selectedNode = nil;
 			break;
 		default:
 			break;
 	}
 	
 	// For all event types, remember when and where the touchpoint was, for subsequent events.
-	lastTouchEventPoint = touchPoint;
-	lastTouchEventTime = now;
+	_lastTouchEventPoint = touchPoint;
+	_lastTouchEventTime = now;
 }
 
 /** Set this parameter to adjust the rate of rotation from the length of touch-move swipe. */
@@ -2431,7 +2509,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Get the direction and length of the movement since the last touch move event, in
 	// 2D screen coordinates. The 2D rotation axis is perpendicular to this movement.
-	CGPoint swipe2d = ccpSub(touchPoint, lastTouchEventPoint);
+	CGPoint swipe2d = ccpSub(touchPoint, _lastTouchEventPoint);
 	CGPoint axis2d = ccpPerp(swipe2d);
 	
 	// Project the 2D axis into a 3D axis by mapping the 2D X & Y screen coords
@@ -2473,13 +2551,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {
 
 	// If in "managing shadows" mode, cycle through a variety of shadowing techniques.
-	if (isManagingShadows) {
+	if (_isManagingShadows) {
 		[self cycleShadowFor: aNode];
 		return;
 	}
 	
 	// Remember the node that was selected
-	selectedNode = aNode;
+	_selectedNode = aNode;
 	
 	// Uncomment to toggle the display of a descriptor label on the node
 //	aNode.shouldDrawDescriptor = !aNode.shouldDrawDescriptor;
@@ -2489,22 +2567,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	if (!aNode) return;
 
-	if (aNode == ground) {
+	if (aNode == _ground) {
 		[self touchGroundAt: touchPoint];
-	} else if (aNode == beachBall) {
+	} else if (aNode == _beachBall) {
 		// If the beach ball is touched toggle its opacity.
 		[self touchBeachBallAt: touchPoint];
 		
 		// For fun, uncomment the following line to draw wireframe boxes around the beachball
 //		aNode.shouldDrawWireframeBox = !aNode.shouldDrawWireframeBox;
 		
-	} else if (aNode == brickWall) {
+	} else if (aNode == _brickWall) {
 		[self touchBrickWallAt: touchPoint];
-	} else if (aNode == woodenSign) {
+	} else if (aNode == _woodenSign) {
 		[self switchWoodenSign];
-	} else if (aNode == floatingHead) {
+	} else if (aNode == _floatingHead) {
 		[self toggleFloatingHeadConfiguration];
-	} else if (aNode == dieCube || aNode == texCubeSpinner) {
+	} else if (aNode == _dieCube || aNode == _texCubeSpinner) {
 		// These are spun by touch movement. Do nothing...and don't highlight
 	} else if (aNode == [self getNodeNamed: kRunnerName]) {
 		[self toggleActiveCamera];
@@ -2514,14 +2592,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self cycleLabelOf: (CC3BitmapLabelNode*)aNode];
 	} else if (aNode == [self getNodeNamed: @"Particles"]) {
 		[((CC3ParticleEmitter*)aNode) emitParticle];
-	} else if (aNode == teapotTextured || aNode == teapotSatellite) {
+	} else if (aNode == _teapotTextured || aNode == _teapotSatellite) {
 		
 		// Toggle wireframe box around the touched teapot's mesh
 		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
 		lcNode.shouldDrawLocalContentWireframeBox = !lcNode.shouldDrawLocalContentWireframeBox;
 		
 		// Toggle the large wireframe box around both teapots
-		teapotTextured.shouldDrawWireframeBox = !teapotTextured.shouldDrawWireframeBox;
+		_teapotTextured.shouldDrawWireframeBox = !_teapotTextured.shouldDrawWireframeBox;
 
 	// If the robot was touched, cycle through three particle hose options.
 	// If no particles are being emitting, turn on the point particle hose.
@@ -2540,7 +2618,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		}
 		
 		// If the globe was touched, toggle the opening of a HUD window displaying it up close.
-	} else if (aNode == globe ) {
+	} else if (aNode == _globe ) {
 		[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
 	}
 }
@@ -2619,13 +2697,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * ability to add cocos2d CCParticleSystems into the 3D scene.
  */
 -(void) touchGroundAt: (CGPoint) touchPoint {
-	CC3Plane groundPlane = ground.plane;
+	CC3Plane groundPlane = _ground.plane;
 	CC3Vector4 touchLoc = [self.activeCamera unprojectPoint: touchPoint ontoPlane: groundPlane];
 
 	// Make sure the projected touch is in front of the camera, not behind it
 	// (ie- cam is facing towards, not away from, the ground)
 	if (touchLoc.w > 0.0) {
-		CC3MeshNode* tp = [[teapotWhite copyWithName: kTeapotOrangeName] autorelease];
+		CC3MeshNode* tp = [[_teapotWhite copyWithName: kTeapotOrangeName] autorelease];
 		tp.color = ccORANGE;
 		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
 		
@@ -2637,7 +2715,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		// transformed by the ground plane's existing transform. Therefore, the teapot
 		// transform properties must be localized to properties that are relative to those
 		// of the ground plane. We can do that using the addAndLocalizeChild: method.
-		[ground addAndLocalizeChild: tp];
+		[_ground addAndLocalizeChild: tp];
 	}
 }
 
@@ -2654,23 +2732,23 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// descriptor node as a child to it when the beach ball is touched we can't trust
 	// the value of the isOpaque property of the beach ball node. Instead, we need to
 	// dig into one of its mesh node segments to determine its opaqueness.
-	BOOL isBallOpaque = [beachBall getNodeNamed: kBeachBallWhiteSegment].isOpaque;
-	beachBall.isOpaque = !isBallOpaque;
+	BOOL isBallOpaque = [_beachBall getNodeNamed: kBeachBallWhiteSegment].isOpaque;
+	_beachBall.isOpaque = !isBallOpaque;
 
 	// Also toggle the opacity. This is necessary only if the background layer
 	// is translucent and showing the device camera scene.
-	beachBall.opacity = beachBall.isOpaque ? 255 : (255 * 0.75);
+	_beachBall.opacity = _beachBall.isOpaque ? 255 : (255 * 0.75);
 }
 
 /** When the brick wall is touched, slide it back and forth to open or close it. */
 -(void) touchBrickWallAt: (CGPoint) touchPoint {
-	CC3Vector destination = brickWall.isOpen ? kBrickWallClosedLocation : kBrickWallOpenLocation;
+	CC3Vector destination = _brickWall.isOpen ? kBrickWallClosedLocation : kBrickWallOpenLocation;
 	CCActionInterval* moveAction = [CC3MoveTo actionWithDuration: 3.0 moveTo: destination];
 	// Add a little bounce for realism.
 	moveAction = [CCEaseElasticOut actionWithAction: moveAction period: 0.5];
-	[brickWall stopAllActions];
-	[brickWall runAction: moveAction];
-	brickWall.isOpen = !brickWall.isOpen;
+	[_brickWall stopAllActions];
+	[_brickWall runAction: moveAction];
+	_brickWall.isOpen = !_brickWall.isOpen;
 }
 
 /**
@@ -2685,15 +2763,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * the label that hovers above the wooden sign.
  */
 -(void) switchWoodenSign {
-	CC3Texture* mainTex = woodenSign.texture;
-	CC3Texture* stampOverlay = stampTex;
+	CC3Texture* mainTex = _woodenSign.texture;
+	CC3Texture* stampOverlay = _stampTex;
 	CC3ConfigurableTextureUnit* stampTU = (CC3ConfigurableTextureUnit*)stampOverlay.textureUnit;
 
 	// If showing embossed DOT3 multi-texture, switch it to stamped texture with modulation.
-	if (mainTex == embossedStampTex) {
-		[woodenSign removeAllTextures];
-		[woodenSign addTexture: signTex];
-		[woodenSign addTexture: stampTex];
+	if (mainTex == _embossedStampTex) {
+		[_woodenSign removeAllTextures];
+		[_woodenSign addTexture: _signTex];
+		[_woodenSign addTexture: _stampTex];
 		stampTU.combineRGBFunction = GL_MODULATE;
 	} else {
 		// Otherwise, showing stamped texture. Use the current combining function to
@@ -2714,10 +2792,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 				break;
 			case GL_SUBTRACT:
 				// Switch to the embossed texture showing DOT3. Must reverse the order of the textures.
-				[woodenSign removeAllTextures];
-				[woodenSign addTexture: embossedStampTex];
-				[woodenSign addTexture: signTex];
-				stampOverlay = embossedStampTex;		// For bump-map, the combiner function is in the main texture
+				[_woodenSign removeAllTextures];
+				[_woodenSign addTexture: _embossedStampTex];
+				[_woodenSign addTexture: _signTex];
+				stampOverlay = _embossedStampTex;		// For bump-map, the combiner function is in the main texture
 				stampTU = (CC3ConfigurableTextureUnit*)stampOverlay.textureUnit;
 				break;
 			default:
@@ -2732,7 +2810,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// property on the CC3Billboard to have the bounding box measured automatically
 	// on every update pass, at the cost of many unneccessary measurements when the
 	// label text does not change.
-	CC3Billboard* bbSign = (CC3Billboard*)[woodenSign getNodeNamed: kSignLabelName];
+	CC3Billboard* bbSign = (CC3Billboard*)[_woodenSign getNodeNamed: kSignLabelName];
 	id<CCLabelProtocol> signLabel = (id<CCLabelProtocol>)bbSign.billboard;
 	[signLabel setString: [NSString stringWithFormat: kMultiTextureCombinerLabel,
 						   NSStringFromGLEnum(stampTU.combineRGBFunction)]];
@@ -2749,17 +2827,17 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Clear all textures then, if moving to bump-mapping, add the bump-map texture first,
 	// then add the visible texture. Otherwise, skip the bump-map texture and just add the
 	// visible texture.
-	BOOL shouldBumpMap = (floatingHead.texture != headBumpTex);
-	[floatingHead removeAllTextures];
-	if (shouldBumpMap) [floatingHead addTexture: headBumpTex];
-	[floatingHead addTexture: headTex];
+	BOOL shouldBumpMap = (_floatingHead.texture != _headBumpTex);
+	[_floatingHead removeAllTextures];
+	if (shouldBumpMap) [_floatingHead addTexture: _headBumpTex];
+	[_floatingHead addTexture: _headTex];
 
 	// If running shaders under OpenGL ES 2.0, clear the shader program so that a different
 	// shader program will automatically be selected for the new texture configuration.
-	floatingHead.shaderProgram = nil;
+	_floatingHead.shaderProgram = nil;
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
-	if (floatingHead.userData) LogInfo(@"%@ says '%@'", floatingHead, floatingHead.userData);
+	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);
 }
 
 /** 
@@ -2767,31 +2845,27 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * When the runner's camera is active, turn on a local light to illuminate him.
  */
 -(void) toggleActiveCamera {
-	CC3Camera* robotCam = (CC3Camera*)[self getNodeNamed: kRobotCameraName];
-	CC3Camera* runnerCam = (CC3Camera*)[self getNodeNamed: kRunnerCameraName];
-	CC3Light* runnerLamp = (CC3Light*)[self getNodeNamed: kRunnerLampName];
-
-	if (self.activeCamera == robotCam) {
-		self.activeCamera = runnerCam;
-		runnerLamp.visible = YES;
+	if (self.activeCamera == _robotCam) {
+		self.activeCamera = _runnerCam;
+		_runnerLamp.visible = YES;
 	} else {
-		self.activeCamera = robotCam;
-		runnerLamp.visible = NO;
+		self.activeCamera = _robotCam;
+		_runnerLamp.visible = NO;
 	}
 }
 
 /** Cycles the specified bitmapped label node through a selection of label strings. */
 -(void) cycleLabelOf: (CC3BitmapLabelNode*) bmLabel {
-	switch (bmLabelMessageIndex) {
+	switch (_bmLabelMessageIndex) {
 		case 0:
 			bmLabel.labelString = @"Goodbye,\ncruel world.";
 			bmLabel.color = ccRED;
-			bmLabelMessageIndex++;
+			_bmLabelMessageIndex++;
 			break;
 		default:
 			bmLabel.labelString = @"Hello, world!";
 			bmLabel.color = ccc3(0, 220, 120);
-			bmLabelMessageIndex = 0;
+			_bmLabelMessageIndex = 0;
 			break;
 	}
 }
@@ -2800,14 +2874,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) cycleShadowFor: (CC3Node*) aNode {
 	
 	// Don't add a shadow to the ground
-	if (aNode == ground) return;
+	if (aNode == _ground) return;
 
 	// If the node already has a shadow volume, remove it, otherwise add one.
-	if ( [aNode hasShadowVolumesForLight: podLight] ) {
-		[aNode removeShadowVolumesForLight: podLight];
+	if ( [aNode hasShadowVolumesForLight: _robotLamp] ) {
+		[aNode removeShadowVolumesForLight: _robotLamp];
 		LogInfo(@"Removed shadow from: %@", aNode);
 	} else {
-		[aNode addShadowVolumesForLight: podLight];
+		[aNode addShadowVolumesForLight: _robotLamp];
 		
 		// In case we've added a shadow to the robot arm structure, make sure we remove
 		// the shadow on the billboard label it's carrying, because billboards with
@@ -2817,7 +2891,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		// The wooden sign is a planar mesh with no "other side", so it requires special
 		// configuration. We indicate that we want to shadow back faces as well as front
 		// faces, and we use vertex offsetting instead of decal offsetting.
-		if (aNode == woodenSign) {
+		if (aNode == _woodenSign) {
 			aNode.shouldShadowBackFaces = YES;
 			aNode.shadowOffsetUnits = 0;
 			aNode.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;

@@ -433,6 +433,25 @@ static NSMutableDictionary* _texturesByName = nil;
 	return self;
 }
 
+-(id) initWithCGImage: (CGImageRef) cgImg {
+	if ( (self = [self init]) ) {
+		id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
+		[self bindTextureContent: texContent toTarget: self.textureTarget];
+		[texContent release];		// Could be big, so get rid of it immediately
+	}
+	return self;
+}
+
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	if ( (self = [self init]) ) {
+		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
+		id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
+		[self bindTextureContent: texContent toTarget: self.textureTarget];
+		[texContent release];
+	}
+	return self;
+}
+
 -(BOOL) shouldFlipVerticallyOnLoad { return _shouldFlipVerticallyOnLoad; }
 
 -(void) setShouldFlipVerticallyOnLoad:(BOOL)shouldFlipVerticallyOnLoad {
@@ -514,6 +533,12 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 							  negZ: [NSString stringWithFormat: aFilePathPattern, @"NegZ"]];
 }
 
+-(void) setCubeFace: (GLenum) faceTarget toCGImage: (CGImageRef) cgImg {
+	id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
+	[self bindTextureContent: texContent toTarget: faceTarget];
+	[texContent release];		// Could be big, so get rid of it immediately
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -567,6 +592,21 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[self addGLTexture: tex];
 	[tex release];
 	return tex;
+}
+
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	if ( (self = [self init]) ) {
+		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
+		id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
+		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
+		[texContent release];
+	}
+	return self;
 }
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
@@ -633,6 +673,8 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 -(void) releaseData: (void*) data {}
 
 -(void) flipVertically {
+	if ( !_imageData ) return;		// If no data, nothing to flip!
+	
 	GLuint bytesPerTexel = 0;
 	switch(self.pixelFormat) {
 		case kCCTexture2DPixelFormat_RGBA8888:
@@ -676,6 +718,14 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 #pragma mark Allocation and Initialization
 
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	return [self initWithData: NULL
+				  pixelFormat: format
+				   pixelsWide: size.width
+				   pixelsHigh: size.height
+				  contentSize: CGSizeFromCC3IntSize(size)];
+}
+
 /** Overridden to set content parameters, but postpone loading the content into the GL engine. */
 -(id) initWithData: (const GLvoid*) data
 	   pixelFormat: (CCTexture2DPixelFormat) pixelFormat
@@ -698,31 +748,28 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 	return self;
 }
 
--(id) initFromFile: (NSString*) aFilePath {
+-(id) initWithCGImage: (CGImageRef) cgImg {
 #if CC3_IOS
-	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
 
 #if CC3_CC2_2
-	return [self initWithCGImage: uiImg.CGImage resolutionType: kCCResolutionUnknown];
+	return [self initWithCGImage: cgImg resolutionType: kCCResolutionUnknown];
 #endif	// CC3_CC2_2
 
 #if CC3_CC2_1
+	UIImage* uiImg = [UIImage imageWithCGImage: cgImg];
 	return [self initWithImage: uiImg resolutionType: kCCResolutionUnknown];
 #endif	// CC3_CC2_1
 
 #endif	// CC_IOS
 
 #if CC3_OSX
-	NSData *imgData = [NSData dataWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
-	NSBitmapImageRep* image = [NSBitmapImageRep imageRepWithData: imgData];
-	CGImageRef cgImg = image.CGImage;
 
 #if CC3_CC2_2
-#if (COCOS2D_VERSION >= 0x020100)
-	return [self initWithCGImage: cgImg resolutionType: kCCResolutionUnknown];
+#if (COCOS2D_VERSION < 0x020100)
+	return [super initWithCGImage: cgImg];
 #else
-	return [self initWithCGImage: cgImg];
-#endif	// (COCOS2D_VERSION >= 0x020100)
+	return [self initWithCGImage: cgImg resolutionType: kCCResolutionUnknown];
+#endif	// (COCOS2D_VERSION < 0x020100)
 #endif	// CC3_CC2_2
 
 #if CC3_CC2_1
@@ -731,6 +778,26 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 #endif	// CC_OSX
 
+}
+
+-(id) initFromFile: (NSString*) aFilePath {
+#if CC3_IOS
+	UIImage* uiImg = [UIImage imageWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	
+#if CC3_CC2_2
+	return [self initWithCGImage: uiImg.CGImage];
+#endif	// CC3_CC2_2
+	
+#if CC3_CC2_1
+	return [self initWithImage: uiImg resolutionType: kCCResolutionUnknown];
+#endif	// CC3_CC2_1
+	
+#endif	// CC_IOS
+	
+#if CC3_OSX
+	NSData* imgData = [NSData dataWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
+	return [self initWithCGImage: [NSBitmapImageRep imageRepWithData: imgData].CGImage];
+#endif	// CC_OSX
 }
 
 @end
