@@ -512,29 +512,28 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
 @property(nonatomic, retain) CC3StencilledShadowPainterNode* stencilledShadowPainter;
 
 /**
- * This property is used to adjust the shadow intensity as calculated when the
- * updateRelativeIntensityFrom: method is invoked. This property increases
- * flexibility by allowing the shadow intensity to be ajusted relative to that
- * calculated value to improve realisim.
+ * This property is used to adjust the shadow intensity as calculated when the 
+ * updateRelativeIntensityFrom: method is invoked. This property increases flexibility
+ * by allowing the shadow intensity to be ajusted relative to that calculated value to
+ * improve realisim.
  *
- * The intensity of shadows cast by this light is calculated by comparing the
- * intensity of the diffuse component of this light against the total ambient
- * and diffuse illumination from all lights, to get a measure of the fraction
- * of total scene illumination that is contributed by this light.
+ * The intensity of shadows cast by this light is calculated by comparing the intensity of
+ * the diffuse component of this light against the total ambient and diffuse illumination
+ * from all lights, to get a measure of the fraction of total scene illumination that is
+ * contributed by this light.
  *
- * Using this technique, the presence of multiple lights, or strong ambient
- * light, will serve to lighten the shadows cast by any single light. A single
- * light with no ambient light will cast completely opaque, black shadows.
+ * Using this technique, the presence of multiple lights, or strong ambient light, will
+ * serve to lighten the shadows cast by any single light. A single light with no ambient
+ * light will cast completely opaque, black shadows.
  *
- * That fraction, representing the fraction of overall light coming from this
- * light, is then multiplied by the value of this property to determine the
- * intensity (opacity) of the shadows cast by this light.
+ * That fraction, representing the fraction of overall light coming from this light, is
+ * then multiplied by the value of this property to determine the intensity (opacity) of
+ * the shadows cast by this light.
  *
- * This property must be zero or a positive value. A value between zero and
- * one will serve to to lighten the shadow, relative to the shadow intensity
- * (opacity) calculated from the relative intensity of this light, and a value
- * of greater than one will serve to darken the shadow, relative to that
- * calculated intensity.
+ * This property must be zero or a positive value. A value between zero and one will serve
+ * to to lighten the shadow, relative to the shadow intensity (opacity) calculated from the
+ * relative intensity of this light, and a value of greater than one will serve to darken
+ * the shadow, relative to that calculated intensity.
  *
  * The initial value of this property is one, meaning that the shadow intensity
  * calculated from the relative intensity of this light will be used without adjustment.

@@ -56,11 +56,11 @@
 @synthesize cc3Layer=_cc3Layer, ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
 @synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
 @synthesize drawingSequencer=_drawingSequencer, drawingSequenceVisitor=_drawingSequenceVisitor;
-@synthesize screenDrawVisitor=_screenDrawVisitor, shadowVisitor=_shadowVisitor;
+@synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
 @synthesize fog=_fog, lights=_lights, shouldClearDepthBuffer=_shouldClearDepthBuffer;
-@synthesize screenRenderSurface=_screenRenderSurface;
+@synthesize viewSurfaceManager=_viewSurfaceManager;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -73,19 +73,16 @@
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.touchedNodePicker = nil;			// Use setter to release and make nil
-	self.screenDrawVisitor = nil;			// Use setter to release and make nil
+	self.viewDrawingVisitor = nil;			// Use setter to release and make nil
 	self.shadowVisitor = nil;				// Use setter to release and make nil
 	self.updateVisitor = nil;				// Use setter to release and make nil
 	self.transformVisitor = nil;			// Use setter to release and make nil
 	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
-	self.screenRenderSurface = nil;			// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
+	[_viewSurfaceManager release];
 	[_targettingNodes release];
-	_targettingNodes = nil;
 	[_lights release];
-	_lights = nil;
 	[_billboards release];
-	_billboards = nil;
 	
     [super dealloc];
 }
@@ -109,7 +106,7 @@
 	
 	// Update the visitors that make use of the active camera
 	self.updateVisitor.camera = newCam;
-	self.screenDrawVisitor.camera = newCam;
+	self.viewDrawingVisitor.camera = newCam;
 	self.shadowVisitor.camera = newCam;
 	self.touchedNodePicker.pickVisitor.camera = newCam;
 
@@ -158,12 +155,11 @@
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
-		self.screenDrawVisitor = [[self screenDrawVisitorClass] visitor];
+		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
 		self.shadowVisitor = nil;
 		self.updateVisitor = [[self updateVisitorClass] visitor];
 		self.transformVisitor = [[self transformVisitorClass] visitor];
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
-		self.screenRenderSurface = [CC3RetrievedFramebufferRenderSurface surface];
 		_fog = nil;
 		_activeCamera = nil;
 		_ambientLight = kCC3DefaultLightColorAmbientScene;
@@ -178,7 +174,7 @@
 
 -(void) initializeSceneAndClose3D {
 	[self initializeScene];
-	[self close3DWithVisitor: _screenDrawVisitor];
+	[self close3DWithVisitor: _viewDrawingVisitor];
 }
 
 // Default does nothing. Subclasses will customize.
@@ -202,7 +198,7 @@
 	[_performanceStatistics release];
 	_performanceStatistics = [another.performanceStatistics copy];			// retained
 
-	self.screenDrawVisitor = [[another.screenDrawVisitor class] visitor];	// retained
+	self.viewDrawingVisitor = [[another.viewDrawingVisitor class] visitor];	// retained
 	self.shadowVisitor = [[another.shadowVisitor class] visitor];			// retained
 	self.updateVisitor = [[another.updateVisitor class] visitor];			// retained
 	self.transformVisitor = [[another.transformVisitor class] visitor];		// retained
@@ -224,8 +220,11 @@
 -(void) open {
 	[self play];
 	[self updateScene];
+	[self openSurfaces];
 	[self onOpen];
 }
+
+-(void) openSurfaces { self.viewSurfaceManager = self.controller.view.surfaceManager; }
 
 -(void) onOpen {}
 
@@ -322,7 +321,13 @@
 
 #pragma mark Drawing
 
--(void) drawScene {
+-(id<CC3RenderSurface>) viewSurface { return _viewSurfaceManager.renderingSurface; }
+
+-(id<CC3RenderSurface>) pickingSurface { return _viewSurfaceManager.pickingSurface; }
+
+-(void) drawScene { [self drawSceneWithVisitor: _viewDrawingVisitor]; }
+	
+-(void) drawSceneWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !self.visible ) return;
 	
 	// Check and clear any GL error that occurred before 3D code
@@ -331,23 +336,27 @@
 	
 	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 
-	[self open3DWithVisitor: _screenDrawVisitor];
+	[self open3DWithVisitor: visitor];
+	
 	[_touchedNodePicker pickTouchedNode];
 	
-	[self drawSceneContent];
+	[self drawSceneContentWithVisitor: visitor];
 
-	[self close3DWithVisitor: _screenDrawVisitor];
-	[self draw2DBillboardsWithVisitor: _screenDrawVisitor];	// Back to 2D now
+	[self close3DWithVisitor: visitor];
+	[self draw2DBillboardsWithVisitor: visitor];	// Back to 2D now
 	
 	// Check and clear any GL error that occurred during 3D code
 	LogGLErrorState(@"after drawing %@", self);
 	LogTrace(@"******* %@ exiting drawing visit", self);
 }
 
--(void) drawSceneContent {
-	[self illuminateWithVisitor: _screenDrawVisitor];
-	[self visitForDrawingWithVisitor: _screenDrawVisitor];
-//	[self drawShadowsWithVisitor: _shadowVisitor];
+-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self illuminateWithVisitor: visitor];
+
+	[self.viewSurface activateWithVisitor: visitor];
+	[self visitForDrawingWithVisitor: visitor];
+
+	[self drawShadowsWithVisitor: _shadowVisitor];
 }
 
 /**
@@ -378,8 +387,8 @@
 	
 	CC3OpenGL* gl = visitor.gl;
 	
-	// Make sure the drawing surface is set back to the screen framebuffer
-	[_screenRenderSurface activateWithVisitor: visitor];
+	// Make sure the drawing surface is set back to the view surface
+	[self.viewSurface activateWithVisitor: visitor];
 	
 	// Restore 2D standard blending
 	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
@@ -448,7 +457,7 @@
 	// Turn on any individual lights
 	for (CC3Light* lgt in _lights) [lgt turnOnWithVisitor: visitor];
 
-	[self drawFogWithVisitor: _screenDrawVisitor];
+	[self drawFogWithVisitor: _viewDrawingVisitor];
 }
 
 -(BOOL) isIlluminated {
@@ -513,7 +522,7 @@
 	[visitor visit: self];
 }
 
--(id) screenDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
+-(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
 
 
 #pragma mark Drawing sequencer
@@ -755,6 +764,7 @@
 	if (_wasTouched) {
 		_wasTouched = NO;
 
+		[_scene.pickingSurface activateWithVisitor: _pickVisitor];
 		[_scene visitForDrawingWithVisitor: _pickVisitor];
 		_pickedNode = _pickVisitor.pickedNode;
 

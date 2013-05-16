@@ -50,6 +50,9 @@
  */
 -(void) activate;
 
+/** Returns whether this surface is a multisampling surface. */
+@property(nonatomic, readonly) BOOL isMultisampling;
+
 @end
 
 
@@ -57,9 +60,9 @@
 #pragma mark CC3FramebufferAttachment
 
 /**
- * An instance of CC3FramebufferAttachment can be attached to a CC3FramebufferRenderSurface to
+ * An instance of CC3FramebufferAttachment can be attached to a CC3GLFramebuffer to
  * provide a buffer to which drawing can occur. The type of data that is drawn to the buffer
- * depends on how it is attached to the CC3FramebufferRenderSurface, and can include color data,
+ * depends on how it is attached to the CC3GLFramebuffer, and can include color data,
  * depth data, or stencil data.
  */
 @protocol CC3FramebufferAttachment <NSObject>
@@ -75,149 +78,127 @@
 
 @end
 
-
-#pragma mark -
-#pragma mark CC3FramebufferRenderSurface
-
-/**
- * Represents a rendering surface that uses an underlying framebuffer.
- *
- * Framebuffers hold between one and three attachments. Each attachment represents a rendering
- * surface that holds a particular type of drawn content: color content, depth content, or
- * stencil content. Typically, each of these attachments will be either a renderbuffer, a
- * texture (to support rendering to a texture, or nil, indicating that that type of content
- * is not being rendered.
- */
-@interface CC3FramebufferRenderSurface : NSObject <CC3RenderSurface> {
-	GLuint _fbID;
-	NSObject<CC3FramebufferAttachment>* _colorAttachment;
-	NSObject<CC3FramebufferAttachment>* _depthAttachment;
-	NSObject<CC3FramebufferAttachment>* _stencilAttachment;
-}
-
-/** The ID used to identify the underlying framebuffer to the GL engine. */
-@property(nonatomic, readonly) GLuint framebufferID;
-
-/** 
- * The rendering surface to which color data is rendered.
- *
- * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
- */
-@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* colorAttachment;
-
-/**
- * The rendering surface to which depth data is rendered.
- *
- * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
- */
-@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* depthAttachment;
-
-/**
- * The rendering surface to which stencil data is rendered.
- *
- * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
- */
-@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* stencilAttachment;
-
-/**
- * Validates that this framebuffer has a valid configuration in the GL engine.
- *
- * This property can be used to validate the configuration, once the attachments have been set.
- * If the configuration is not valid, an error is logged, and, if the GL_ERROR_ASSERTION_ENABLED
- * compiler build setting is set, an assertion error is raised.
- */
--(BOOL) validate;
-
-
-#pragma mark Allocation and initialization
-
-/** Allocates and initializes an autoreleased intance. */
-+(id) surface;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3RetrievedFramebufferRenderSurface
-
-/**
- * CC3RetrievedFramebufferRenderSurface is a specialized framebuffer surface that initializes
- * the value of the framebufferID property from the framebuffer that is currently bound to the
- * GL engine at the time the CC3RetrievedFramebufferRenderSurface instance is created.
- *
- * An instance of this class can be used to represent the default screen rendering framebuffer
- * when that framebuffer was created externally.
- */
-@interface CC3RetrievedFramebufferRenderSurface : CC3FramebufferRenderSurface
-@end
-
 	
 #pragma mark -
 #pragma mark CC3GLRenderbuffer
 
-/** CC3GLRenderbuffer represents an OpenGL renderbuffer. */
+/** 
+ * Represents an OpenGL renderbuffer.
+ *
+ * You can configure a CC3GLRenderbuffer instance for either on-screen or off-screen rendering.
+ */
 @interface CC3GLRenderbuffer : NSObject <CC3FramebufferAttachment> {
 	GLuint _rbID;
 	CC3IntSize _size;
 	GLenum _format;
+	GLuint _samples;
 }
 
 /** The ID used to identify the underlying renderbuffer to the GL engine. */
 @property(nonatomic, readonly) GLuint renderbufferID;
 
-/**
- * The size of the rendering surface of this renderbuffer in pixels.
- *
- * The initial value of this propery is (0, 0). If the allocateStorageForSize:andPixelFormat:
- * method is invoked, this property will be set to the value specified in that method. 
- * Otherwise, this property can be set directly if space is allocated elsewhere.
- */
-@property(nonatomic, assign) CC3IntSize size;
+/** The size of the rendering surface of this renderbuffer in pixels. */
+@property(nonatomic, readonly) CC3IntSize size;
 
-/** 
- * The format of each pixel in this renderbuffer.
- *
- * The initial value of this propery is GL_ZERO. If the allocateStorageForSize:andPixelFormat:
- * method is invoked, this property will be set to the value specified in that method.
- * Otherwise, this property can be set directly if space is allocated elsewhere.
- */
-@property(nonatomic, assign) GLenum format;
+/** The format of each pixel in this renderbuffer. */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
+/** Returns the number of samples used to define each pixel. */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 /**
- * Allocates storage space within GL memory for this buffer, sufficient to render an image of
- * the specified size in the  specified pixel format. The size and format properties of this
- * instance are set to the specified values.
+ * Resizes this instance to the specified size by allocating off-screen storage space within GL
+ * memory for this buffer, sufficient to render an image of the specified size, in the pixel
+ * format and number of samples indicated by the pixelFormat and pixelSamples properties.
  *
- * If this renderbuffer is rendering to the primary on-screen view, this method should not
- * be invoked.
+ * The size property is updated to reflect the new size.
  */
--(void) allocateStorageForSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
+-(void) resizeTo: (CC3IntSize) size;
+
+/**
+ * Resizes this instance by using the specified core animation layer as the underlying
+ * storage for this buffer.
+ *
+ * The size and format properties are updated to reflect the size and format of the
+ * specified core animation layer, and the pixelSamples property is set to one, since
+ * multisampling does not apply to the underlying core animation layer.
+ */
+-(void) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context;
+
+/** Presents the contents of this renderbuffer to the screen via the specified context. */
+-(void) presentToContext: (EAGLContext*) context;
 
 
 #pragma mark Allocation and initialization
 
-/** Allocates and initializes an autoreleased intance. */
+/**
+ * Allocates and initializes an autoreleased instance with one sample per pixel.
+ *
+ * The size and pixel format of this renderbuffer can be set by invoking the
+ * resizeFromCALayer:withContext: method.
+ */
 +(id) renderbuffer;
 
 /**
- * Initializes this instance and allocates storage space within GL memory for this buffer,
- * sufficient to render an image of the specified size in the  specified pixel format.
- * The size and format properties of this instance are set to the specified values.
+ * Initializes this instance and allocates off-screen storage space within GL memory for this
+ * buffer, sufficient to render an image of the specified size in the  specified pixel format.
  *
- * If this renderbuffer is rendering to the primary on-screen view, this method should not
- * be invoked. Instead, the instance should be initialized with the init method.
+ * The size and pixelFormat properties of this instance are set to the specified values.
+ * The pixelSamples property will be set to one.
+ *
+ * If this renderbuffer is rendering to the primary on-screen view, this method should not be invoked.
+ * Instead, initialize using the init method, and then use the allocateStorageFromCALayer:withContext:
+ * method to attach the instance to an underlying CALayer.
  */
--(id) initWithStorageForSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
 
 /**
- * Allocates and initializes an autoreleased instance and allocates storage space within GL memory
- * for this buffer, sufficient to render an image of the specified size in the specified pixel
- * format. The size and format properties of this instance are set to the specified values.
+ * Allocates and initializes an autoreleased instance and allocates off-screen storage space
+ * within GL memory for this buffer, sufficient to render an image of the specified size in
+ * the specified pixel format.
  *
- * If this renderbuffer is rendering to the primary on-screen view, this method should not be 
- * invoked. Instead, the instance should be allocated nad initialized with the renderbuffer method.
+ * The size and pixelFormat properties of this instance are set to the specified values.
+ * The pixelSamples property will be set to one.
+ *
+ * If this renderbuffer is rendering to the primary on-screen view, this method should not
+ * be invoked. Instead, allocate and initialize using the renderbuffer method, and then use the
+ * allocateStorageFromCALayer:withContext: method to attach the instance to an underlying CALayer.
  */
-+(id) renderbufferWithStorageForSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
++(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
+
+/**
+ * Initializes this instance with the specified pixel format and with one sample per pixel.
+ *
+ * The size of this renderbuffer can be set by invoking either the resizeTo: or 
+ * resizeFromCALayer:withContext: methods.
+ */
+-(id) initWithPixelFormat: (GLenum) format;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel format and
+ * with one sample per pixel.
+ *
+ * The size of this renderbuffer can be set by invoking either the resizeTo: or
+ * resizeFromCALayer:withContext: methods.
+ */
++(id) renderbufferWithPixelFormat: (GLenum) format;
+
+/**
+ * Initializes this instance with the specified pixel format and with number of samples per pixel.
+ *
+ * The size of this renderbuffer can be set by invoking either the resizeTo: or
+ * resizeFromCALayer:withContext: methods.
+ */
+-(id) initWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
+
+/**
+ * Allocates and initializes an autoreleased instance with the specified pixel format and
+ * number of samples per pixel.
+ *
+ * The size of this renderbuffer can be set by invoking either the resizeTo: or
+ * resizeFromCALayer:withContext: methods.
+ */
++(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
 
 @end
 
@@ -309,6 +290,193 @@
 +(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3GLFramebuffer
+
+/**
+ * Represents an OpenGL framebuffer.
+ *
+ * Framebuffers hold between one and three attachments. Each attachment represents a rendering
+ * surface that holds a particular type of drawn content: color content, depth content, or
+ * stencil content. Typically, each of these attachments will be either a renderbuffer, a
+ * texture (to support rendering to a texture, or nil, indicating that that type of content
+ * is not being rendered.
+ */
+@interface CC3GLFramebuffer : NSObject <CC3RenderSurface> {
+	GLuint _fbID;
+	NSObject<CC3FramebufferAttachment>* _colorAttachment;
+	NSObject<CC3FramebufferAttachment>* _depthAttachment;
+	NSObject<CC3FramebufferAttachment>* _stencilAttachment;
+}
+
+/** The ID used to identify the underlying framebuffer to the GL engine. */
+@property(nonatomic, readonly) GLuint framebufferID;
+
+/**
+ * The attachment to which color data is rendered.
+ *
+ * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
+ */
+@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* colorAttachment;
+
+/**
+ * The attachment to which depth data is rendered.
+ *
+ * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
+ */
+@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* depthAttachment;
+
+/**
+ * The attachment to which stencil data is rendered.
+ *
+ * Setting this property binds the attachment to the underlying framebuffer in the GL engine.
+ */
+@property(nonatomic, retain) NSObject<CC3FramebufferAttachment>* stencilAttachment;
+
+/**
+ * The attachment to which color data is rendered, cast as a CC3GLRenderbuffer.
+ *
+ * This is a convenience property for the common case of retrieving an attachement
+ * that is a renderbuffer. It is the responsibility of the invoker to ensure that
+ * the returned value actually is a CC3GLRenderbuffer.
+ */
+@property(nonatomic, readonly) CC3GLRenderbuffer* colorBuffer;
+
+/**
+ * The attachment to which depth data is rendered, cast as a CC3GLRenderbuffer.
+ *
+ * This is a convenience property for the common case of retrieving an attachement
+ * that is a renderbuffer. It is the responsibility of the invoker to ensure that
+ * the returned value actually is a CC3GLRenderbuffer.
+ */
+@property(nonatomic, readonly) CC3GLRenderbuffer* depthBuffer;
+
+/**
+ * The attachment to which stencil data is rendered, cast as a CC3GLRenderbuffer.
+ *
+ * This is a convenience property for the common case of retrieving an attachement
+ * that is a renderbuffer. It is the responsibility of the invoker to ensure that
+ * the returned value actually is a CC3GLRenderbuffer.
+ */
+@property(nonatomic, readonly) CC3GLRenderbuffer* stencilBuffer;
+
+/**
+ * Validates that this framebuffer has a valid configuration in the GL engine.
+ *
+ * This property can be used to validate the configuration, once the attachments have been set.
+ * If the configuration is not valid, an error is logged, and, if the GL_ERROR_ASSERTION_ENABLED
+ * compiler build setting is set, an assertion error is raised.
+ */
+-(BOOL) validate;
+
+
+#pragma mark Allocation and initialization
+
+/** Allocates and initializes an autoreleased intance. */
++(id) surface;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLViewSurfaceManager
+
+/**
+ * Manages the render surfaces used to render content to the OS view on the screen.
+ *
+ * Wraps the CC3GLFramebuffer that represents the view surface, an optional anti-aliasing
+ * multisampling CC3GLFramebuffer surface, and an optional separate surface for rendering
+ * during node picking from touch events.
+ *
+ * If multisampling is not in use, rendering is directed to the framebuffer in the the
+ * viewSurface property, which is attached to the underlying core animation layer.
+ * 
+ * If multisampling is used, rendering is directed to the framebuffer in the the
+ * multisampleSurface property, and then once rendering is complete, the multisampled
+ * surface is resolved into the view surface.
+ */
+@interface CC3GLViewSurfaceManager : NSObject {
+	CC3GLFramebuffer* _viewSurface;
+	CC3GLFramebuffer* _multisampleSurface;
+	CC3GLFramebuffer* _renderingSurface;
+	CC3GLFramebuffer* _pickingSurface;
+}
+
+/** The on-screen surface attached to the underlying core animation layer. */
+@property(nonatomic, retain) CC3GLFramebuffer* viewSurface;
+
+/**
+ * The surface used for off-screen multisample rendering.
+ *
+ * The value of this property may be nil if multisampleing is not in use.
+ */
+@property(nonatomic, retain) CC3GLFramebuffer* multisampleSurface;
+
+/**
+ * The surface to which rendering should be directed.
+ *
+ * If multisampling is in use, this property is initialized to the surface in the multisampleSurface
+ * property, otherwise it is initialized to the value of the viewSurface property.
+ */
+@property(nonatomic, retain) CC3GLFramebuffer* renderingSurface;
+
+/**
+ * The surface to which rendering for picking should be directed.
+ *
+ * In order for pixel colors to be read precisely, the surface in this property cannot use
+ * multisamplig. If multisampling is in use, this property is lazily initialized to a specialized
+ * non-multisampling surface. Otherwise, this property is lazily initialized to the surface in the
+ * viewSurface property.
+ *
+ * Lazy initialization is used in case touch picking is never actually used by the app.
+ */
+@property(nonatomic, retain) CC3GLFramebuffer* pickingSurface;
+
+/** The size of the rendering surface in pixels. */
+@property(nonatomic, readonly) CC3IntSize size;
+
+/** Returns the color format of the pixels. */
+@property(nonatomic, readonly) GLenum colorFormat;
+
+/** Returns the depth format of the pixels. */
+@property(nonatomic, readonly) GLenum depthFormat;
+
+/** 
+ * Returns the number of samples used to define each pixel.
+ *
+ * If this value is larger than one, then multisampling is in use.
+ */
+@property(nonatomic, readonly) GLuint pixelSamples;
+
+/** Resizes the framebuffers in this instance from the specified core animation layer. */
+-(BOOL) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context;
+
+/** 
+ * Presents the content of the viewSurface framebuffer to the screen, by swapping the
+ * buffers in the specified GL context in the underlying core animation layer.
+ *
+ * If multisampling is in use, the contents in the multisamplingSurface framebuffer are
+ * first resolved into the viewSurface framebuffer.
+ */
+-(void) presentToContext: (EAGLContext*) context;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance with the specified color and depth format, and with the specified
+ * number of samples per pixel. If anti-aliasing multisampling is to be used, the value of
+ * requestedSamples should be larger than one, but below the maximum number of samples per pixel
+ * defined by the platform, which can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples.
+ */
+-(id) initWithColorFormat: (GLenum) colorFormat
+		   andDepthFormat: (GLenum) depthFormat
+		  andPixelSamples: (GLuint) requestedSamples;
+
+@end
+
 
 
 

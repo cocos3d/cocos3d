@@ -41,6 +41,17 @@ NSString* NSStringFromGLEnum(GLenum gle) {
 	return [NSString stringWithUTF8String: CC3GLEnumName(gle)];
 }
 
+BOOL CC3DepthFormatIncludesStencil(GLenum depthFormat) {
+	switch (depthFormat) {
+		case GL_DEPTH24_STENCIL8_OES:
+		case GL_UNSIGNED_INT_24_8_OES:
+			return YES;
+			break;
+		default:
+			return NO;
+	}
+}
+
 NSString* GetGLErrorText(GLenum errCode) {
 	switch (errCode) {
 		case GL_NO_ERROR:

@@ -389,6 +389,7 @@
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _shouldClearDepthBuffer : 1;
+	BOOL _shouldDrawInClipSpace : 1;
 	BOOL _isVPMtxDirty : 1;
 	BOOL _isMVMtxDirty : 1;
 	BOOL _isMVPMtxDirty : 1;
@@ -441,12 +442,11 @@
 @property(nonatomic, assign) ccTime deltaTime;
 
 /**
- * Indicates whether nodes should decorate themselves with their configured material,
- * textures, or color arrays. In most cases, nodes should be drawn decorated. However,
- * specialized visitors may turn off normal decoration drawing in order to do
- * specialized coloring instead.
+ * Indicates whether nodes should decorate themselves with their configured material, textures,
+ * or color arrays. In most cases, nodes should be drawn decorated. However, specialized visitors
+ * may turn off normal decoration drawing in order to do specialized coloring instead.
  *
- * The default initial value is YES.
+ * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldDecorateNode;
 
@@ -457,6 +457,33 @@
  * of the CC3Scene.
  */
 @property(nonatomic, assign) BOOL shouldClearDepthBuffer;
+
+/**
+ * Indicates whether drawing should be performed in clip-space.
+ *
+ * The clip-space coordinate system is a transformation of the camera frustum, where the camera
+ * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
+ * in each of the X, Y & Z dimensions.
+ *
+ * With this property set to YES, a simple square plane node, with X & Y sides of length 2.0,
+ * centered on the origin and facing the +Z axis will fill the entire view. This makes it very
+ * easy to create backdrops and post-processing effects.
+ *
+ * To create a backdrop, attach that texture to a simple rectangular mesh node with sides of
+ * length 2.0 in the X-Y plane, centered on the origin, and then visit that single node with
+ * a drawing visitor with this property set to YES.
+ *
+ * To create post-processing effects, you can render your scene to a texture, attach that texture
+ * to a simple rectangular mesh node with sides of length 2.0 in the X-Y plane, centered on the
+ * origin, and then visit that single node with a drawing visitor with this property set to YES.
+ *
+ * Setting this property to YES has the effect of setting all combinations of the projection, view,
+ * and model matrices to identity matrices. The scene is effectivly drawn with an orthographic
+ * projection, looking down the negative Z axis, with X & Y axis dimensions normalized to +/-1.0 each.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL shouldDrawInClipSpace;
 
 /**
  * Draws the specified node. Invoked by the node itself when the node's local

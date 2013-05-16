@@ -545,7 +545,7 @@ typedef enum {
 	CC3Camera* _runnerCam;
 	CC3Light* _runnerLamp;
 	CC3Node* _selectedNode;
-	CC3FramebufferRenderSurface* _tvSurface;
+	CC3GLFramebuffer* _tvSurface;
 	CGPoint _lastTouchEventPoint;
 	struct timeval _lastTouchEventTime;
 	CameraZoomType _cameraZoomType;

@@ -1655,8 +1655,6 @@ static GLuint lastAssignedNodeTag;
 	LogTrace(@"%@ applying transform matrix: %@", self, transformMatrix);
 	[visitor populateModelMatrixFrom: transformMatrix];
 
-	[gl loadModelviewMatrix: visitor.modelViewMatrix];
-
 	[visitor draw: self];
 
 	[gl popModelviewMatrixStack];

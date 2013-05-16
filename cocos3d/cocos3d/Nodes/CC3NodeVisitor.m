@@ -126,9 +126,7 @@
 	CC3Node* currNode = _currentNode;	// Remember current node
 	
 	CCArray* children = aNode.children;
-	for (CC3Node* child in children) {
-		[self visit: child];
-	}
+	for (CC3Node* child in children) [self visit: child];
 
 	_currentNode = currNode;				// Restore current node
 }
@@ -167,9 +165,7 @@
 -(void) close { [self processRemovals]; }
 
 -(void) requestRemovalOf: (CC3Node*) aNode {
-	if (!_pendingRemovals) {
-		_pendingRemovals = [[CCArray array] retain];
-	}
+	if (!_pendingRemovals) _pendingRemovals = [[CCArray array] retain];
 	[_pendingRemovals addObject: aNode];
 }
 
@@ -397,6 +393,7 @@
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
 @synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
 @synthesize currentShaderProgram=_currentShaderProgram;
+@synthesize shouldDrawInClipSpace=_shouldDrawInClipSpace;
 
 -(void) dealloc {
 	[_gl release];
@@ -456,11 +453,7 @@
 }
 
 /** Template method that opens the 3D camera. */
--(void) openCamera {
-	[_camera openWithVisitor: self];
-	[self populateProjMatrixFrom: _camera.projectionMatrix];
-	[self populateViewMatrixFrom: _camera.viewMatrix];
-}
+-(void) openCamera { [_camera openWithVisitor: self]; }
 
 /** Close the camera. */
 -(void) close {
@@ -526,17 +519,20 @@
 }
 
 -(void) populateProjMatrixFrom: (CC3Matrix*) projMtx {
-	if (projMtx)
+	if (projMtx && !_shouldDrawInClipSpace)
 		[projMtx populateCC3Matrix4x4: &_projMatrix];
 	else
 		CC3Matrix4x4PopulateIdentity(&_projMatrix);
 
 	_isVPMtxDirty = YES;
 	_isMVPMtxDirty = YES;
+
+	// For fixed rendering pipeline, also load onto the matrix stack
+	[_gl loadProjectionMatrix: &_projMatrix];
 }
 
 -(void) populateViewMatrixFrom: (CC3Matrix*) viewMtx {
-	if (viewMtx)
+	if (viewMtx && !_shouldDrawInClipSpace)
 		[viewMtx populateCC3Matrix4x3: &_viewMatrix];
 	else
 		CC3Matrix4x3PopulateIdentity(&_viewMatrix);
@@ -544,16 +540,22 @@
 	_isVPMtxDirty = YES;
 	_isMVMtxDirty = YES;
 	_isMVPMtxDirty = YES;
+
+	// For fixed rendering pipeline, also load onto the matrix stack
+	[_gl loadModelviewMatrix: &_viewMatrix];
 }
 
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx {
-	if (modelMtx)
+	if (modelMtx && !_shouldDrawInClipSpace)
 		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
 	else
 		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
 
 	_isMVMtxDirty = YES;
 	_isMVPMtxDirty = YES;
+	
+	// For fixed rendering pipeline, also load onto the matrix stack
+	[_gl loadModelviewMatrix: self.modelViewMatrix];
 }
 
 
@@ -566,6 +568,7 @@
 		_currentShaderProgram = nil;
 		_shouldDecorateNode = YES;
 		_shouldClearDepthBuffer = YES;
+		_shouldDrawInClipSpace = NO;
 	}
 	return self;
 }
@@ -617,9 +620,6 @@
 	
 	[_pickedNode release];
 	_pickedNode = nil;
-	
-	// If multisampling antialiasing, bind the picking framebuffer before reading the pixel.
-	[CCDirector.sharedDirector.ccGLView openPicking];
 }
 
 /**
@@ -642,9 +642,6 @@
 	LogTrace(@"%@ picked %@ from color %@ at position %@",
 			 self, _pickedNode, NSStringFromCCC4B(pixColor),
 			 NSStringFromCGPoint(self.scene.touchedNodePicker.glTouchPoint));
-	
-	// If multisampling antialiasing, rebind the multisampling framebuffer
-	[CCDirector.sharedDirector.ccGLView closePicking];
 	
 	[self drawBackdrop];	// Draw the backdrop behind the 3D scene
 

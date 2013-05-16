@@ -1480,10 +1480,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addTelevision {
 	CC3GLTexture* tvTex = [[CC3GLTexture2D alloc] initWithSize: kTVTexSize
 												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
-	_tvSurface = [CC3FramebufferRenderSurface new];
+	_tvSurface = [CC3GLFramebuffer new];
 	_tvSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: tvTex];
-	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithStorageForSize: kTVTexSize
-																	andPixelFormat: GL_DEPTH_COMPONENT16];
+	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: kTVTexSize
+														  andPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
 	[tvTex release];	// Retained by attachment & framebuffer
 	
@@ -1493,9 +1493,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	tv.texture = [CC3Texture textureFromFile: kTVTestCardFile];
 	tv.texture = [CC3Texture textureWithGLTexture: tvTex];
 	tv.shouldUseLighting = NO;
-	tv.location = cc3v(500.0, 100.0, -700.0);
+	tv.location = cc3v(1000.0, 100.0, -1000.0);
 	tv.rotation = cc3v(0, -45, 0);
-	tv.uniformScale = 20.0;
+	tv.uniformScale = 40.0;
 	tv.shouldCullBackFaces = NO;			// Show from behind as well.
 	tv.touchEnabled = YES;
 	tv.shouldDrawLocalContentWireframeBox = YES;
@@ -2047,12 +2047,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 #pragma mark Drawing
 
--(void) drawSceneContent {
-	[self illuminateWithVisitor: _screenDrawVisitor];
-	[self drawToTVScreenWithVisitor: _screenDrawVisitor];
+-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self illuminateWithVisitor: visitor];
+
+	[self drawToTVScreenWithVisitor: visitor];
 	
-	[self visitForDrawingWithVisitor: _screenDrawVisitor];
-	//	[self drawShadowsWithVisitor: _shadowVisitor];
+	[self.viewSurface activateWithVisitor: visitor];
+	[self visitForDrawingWithVisitor: visitor];
+	[self drawShadowsWithVisitor: _shadowVisitor];
 }
 
 -(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -2068,10 +2070,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	[_tvSurface activate];
 
-	[_screenDrawVisitor.gl clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
-	[self visitForDrawingWithVisitor: _screenDrawVisitor];
-
-	[self.screenRenderSurface activate];
+	[visitor.gl clearColorAndDepthBuffers];
+	[self visitForDrawingWithVisitor: visitor];
 
 	visitor.camera = self.activeCamera;
 	_runnerCam.viewport = vpCurr;

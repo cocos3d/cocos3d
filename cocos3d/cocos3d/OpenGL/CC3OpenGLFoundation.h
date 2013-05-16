@@ -55,6 +55,9 @@
 /** Returns a string containing the name of the specified GL enumeration code. */
 NSString* NSStringFromGLEnum(GLenum gle);
 
+/** Returns whether the specified depth format includes a stencil buffer. */
+BOOL CC3DepthFormatIncludesStencil(GLenum depthFormat);
+
 /** Returns a text description of the specified GL error code. */
 NSString* GetGLErrorText(GLenum errCode);
 

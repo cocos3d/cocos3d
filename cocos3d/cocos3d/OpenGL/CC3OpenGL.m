@@ -392,6 +392,8 @@
 
 -(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
 
+-(void) clearColorAndDepthBuffers { [self clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)]; }
+
 -(ccColor4B) readPixelAt: (CGPoint) pixelPos {
 	ccColor4B pixColor;
 	glReadPixels((GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixColor);
@@ -626,11 +628,44 @@
 	LogGLErrorTrace(@"glDeleteFramebuffers(%i, %u)", 1,fbID);
 }
 
--(void) bindFramebuffer: (GLuint) fbID {
+/** Returns whether the specified framebuffer ID is the currently bound value. */
+-(BOOL) checkGLFramebufferID: (GLuint) fbID {
 	cc3_CheckGLPrim(fbID, value_GL_FRAMEBUFFER_BINDING, isKnown_GL_FRAMEBUFFER_BINDING);
-	if ( !needsUpdate ) return;
-	glBindFramebuffer(GL_FRAMEBUFFER, fbID);
-	LogGLErrorTrace(@"glBindFramebuffer(%@, %u)", NSStringFromGLEnum(GL_FRAMEBUFFER), fbID);
+	return !needsUpdate;
+}
+
+/** Returns whether the specified framebuffer target is the currently bound value. */
+-(BOOL) checkGLFramebufferTarget: (GLenum) fbTarg {
+	cc3_CheckGLPrim(fbTarg, value_GL_FRAMEBUFFER_Target, isKnown_GL_FRAMEBUFFER_Target);
+	return !needsUpdate;
+}
+
+-(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget {
+	if ( [self checkGLFramebufferID: fbID] && [self checkGLFramebufferTarget: fbTarget] ) return;
+	glBindFramebuffer(fbTarget, fbID);
+	LogGLErrorTrace(@"glBindFramebuffer(%@, %u)", NSStringFromGLEnum(fbTarget), fbID);
+}
+
+-(void) bindFramebuffer: (GLuint) fbID {
+	[self bindFramebuffer: fbID toTarget: GL_FRAMEBUFFER];
+}
+
+-(void) resolveMultisampleFramebuffer: (GLuint) fbSrcID intoFramebuffer: (GLuint) fbDstID {
+	[self bindFramebuffer: fbSrcID toTarget: GL_READ_FRAMEBUFFER_APPLE];
+	[self bindFramebuffer: fbDstID toTarget: GL_DRAW_FRAMEBUFFER_APPLE];
+	glResolveMultisampleFramebufferAPPLE();
+	LogGLErrorTrace(@"glResolveMultisampleFramebufferAPPLE()");
+	[self bindFramebuffer: fbSrcID toTarget: GL_FRAMEBUFFER];
+}
+
+-(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID {
+	[self bindFramebuffer: fbID];
+	glDiscardFramebufferEXT(GL_FRAMEBUFFER, count, attachments);
+	LogGLErrorTrace(@"glDiscardFramebufferEXT(%@. %i, %@, %@, %@)",
+					NSStringFromGLEnum(GL_FRAMEBUFFER), count,
+					NSStringFromGLEnum(count > 0 ? attachments[0] : 0),
+					NSStringFromGLEnum(count > 1 ? attachments[1] : 0),
+					NSStringFromGLEnum(count > 2 ? attachments[2] : 0));
 }
 
 -(GLuint) generateRenderbufferID {
@@ -653,15 +688,33 @@
 	LogGLErrorTrace(@"glBindRenderbuffer(%@, %u)", NSStringFromGLEnum(GL_RENDERBUFFER), rbID);
 }
 
--(void) allocateStorageForRenderbuffer: (GLuint) rbID ofSize: (CC3IntSize) size andFormat: (GLenum) format {
+-(void) allocateStorageForRenderbuffer: (GLuint) rbID
+							  withSize: (CC3IntSize) size
+							 andFormat: (GLenum) format
+							andSamples: (GLuint) pixelSamples {
 	[self bindRenderbuffer: rbID];
-	glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
-	LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
-					NSStringFromGLEnum(format), size.width, size.height);
+	if (pixelSamples > 1) {
+		glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, pixelSamples, format, size.width, size.height);
+		LogGLErrorTrace(@"glRenderbufferStorageMultisampleAPPLE(%@, %i, %@, %i, %i)",
+						NSStringFromGLEnum(GL_RENDERBUFFER), pixelSamples,
+						NSStringFromGLEnum(format), size.width, size.height);
+	} else {
+		glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
+		LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
+						NSStringFromGLEnum(format), size.width, size.height);
+	}
+}
+
+-(GLint) getRenderbufferParameterInteger: (GLenum) param {
+	GLint val;
+	glGetRenderbufferParameteriv(GL_RENDERBUFFER, param, &val);
+	LogGLErrorTrace(@"glGetRenderbufferParameteriv(%@)", NSStringFromGLEnum(param));
+	return val;
 }
 
 -(void) bindRenderbuffer: (GLuint) rbID toFrameBuffer: (GLuint) fbID asAttachment: (GLenum) attachment {
 	[self bindFramebuffer: fbID];
+	[self bindRenderbuffer: rbID];
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbID);
 	LogGLErrorTrace(@"glFramebufferRenderbuffer(%@, %@, %@, %u)", NSStringFromGLEnum(GL_FRAMEBUFFER),
 					NSStringFromGLEnum(attachment), NSStringFromGLEnum(GL_RENDERBUFFER), rbID);

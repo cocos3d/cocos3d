@@ -32,6 +32,9 @@
 #import "CC3IOSExtensions.h"
 #import "CC3OSXExtensions.h"
 #import "CC3CC2Extensions.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"
 
 #if CC3_IOS
 
@@ -82,8 +85,8 @@
 
 #pragma mark View management
 
-/** The view of a CC3UIViewController must be of type CCGLView. */
-@property(nonatomic, retain) CCGLView* view;
+/** The view of a CC3UIViewController must be of type CC3GLView. */
+@property(nonatomic, retain) CC3GLView* view;
 
 /**
  * Invoked automatically the first time the view property is requested, and is currently nil.
@@ -195,16 +198,17 @@
 /**
  * Indicates whether the view should be created with an underlying stencil buffer.
  *
- * This property is linked to the value of the viewDepthFormat property, and is provided as a
- * configuration convenience.
+ * This property is linked to the value of the viewDepthFormat property, and is provided
+ * as a configuration convenience.
  *
- * Setting this property to YES will set the value of the viewDepthFormat property to GL_DEPTH24_STENCIL8_OES.
- * Setting this property to NO will set the value of the viewDepthFormat property to GL_DEPTH_COMPONENT16.
+ * Setting this property to YES will set the value of the viewDepthFormat property to 
+ * GL_DEPTH24_STENCIL8_OES. Setting this property to NO will set the value of the 
+ * viewDepthFormat property to GL_DEPTH_COMPONENT16.
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
- * Reading this property will return YES if the value of the viewDepthFormat property is GL_DEPTH24_STENCIL8_OES,
- * and will return NO otherwise.
+ * Reading this property will return YES if the value of the viewDepthFormat property
+ * is GL_DEPTH24_STENCIL8_OES, and will return NO otherwise.
  *
  * The initial value of this property is NO.
  */
@@ -213,35 +217,34 @@
 /**
  * Indicates the number of OpenGL ES rendering samples to be used for each pixel in the view.
  *
- * This property is used by the loadView method as it creates the view, when the view property is first
- * accessed and the view property has not already been established.
+ * This property is used by the loadView method as it creates the view, when the view property
+ * is first accessed and the view property has not already been established.
  *
- * The initial value is one. You can set this property prior to referencing the view property of this
- * controller in order to have the view created with a different number of samples per pixel. Setting
- * this value to a number larger than one will smooth out the lines and edges of your displayed models.
+ * The initial value is one. You can set this property prior to referencing the view property
+ * of this controller in order to have the view created with a different number of samples
+ * per pixel. Setting this value to a number larger than one will smooth out the lines and 
+ * edges of your displayed models.
  *
- * The value set will be clamped to the maximum allowable value for the platform. That maximum value
- * can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples, and generally has a value of
- * four on all current devices that support multisampling.
+ * The value set will be clamped to the maximum allowable value for the platform. That maximum
+ * value can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples, and generally has a
+ * value of 4 on all current devices that support multisampling.
  *
- * Retrieving the value of the CC3OpenGL.sharedGL.maxNumberOfPixelSamples property can only be done
- * once the OpenGL ES context has been established, which is generally performed when the view is
- * created. This creates a bit of a chicken-and-egg situation where you might need the maximum pixel
- * samples value before you create the view, but can't retrieve it until the view has been created.
- * This particular value does not vary much from device to device, so the work-around is to determine
- * the maximum value at development time, and then select a pixel samples value accordingly.
+ * Retrieving the value of the CC3OpenGL.sharedGL.maxNumberOfPixelSamples property can only be
+ * done once the OpenGL ES context has been established, which is generally performed when the
+ * view is created. This creates a bit of a chicken-and-egg situation where you might need the
+ * maximum pixel samples value before you create the view, but can't retrieve it until the view
+ * has been created. This particular value does not vary much from device to device, so the 
+ * work-around is to determine the maximum value at development time, and then select a pixel
+ * samples value accordingly.
  *
- * Setting the value of this property to zero is the same as setting it to one, and either value will
- * effectively turn multisampling off.
+ * Setting the value of this property to zero is the same as setting it to one, and either
+ * value will effectively turn multisampling off.
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
- * Once the view property has been established, reading this property returns the pixelSamples property
- * of the view itself. Prior to the view being established, reading this property returns the value to
- * which it has been set. The initial value of this property is one.
- *
- * Multisampling is currently incompatible with using the stencil buffer. If the viewShouldUseStencilBuffer
- * property returns YES, the value of this property cannot be set higher than one .
+ * Once the view property has been established, reading this property returns the pixelSamples
+ * property of the view itself. Prior to the view being established, reading this property
+ * returns the value to which it has been set. The initial value of this property is one.
  */
 @property(nonatomic, assign) GLuint viewPixelSamples;
 

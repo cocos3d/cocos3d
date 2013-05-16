@@ -243,12 +243,12 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3TouchedNodePicker* _touchedNodePicker;
 	CC3PerformanceStatistics* _performanceStatistics;
 	CC3NodeUpdatingVisitor* _updateVisitor;
-	CC3NodeDrawingVisitor* _screenDrawVisitor;
+	CC3NodeDrawingVisitor* _viewDrawingVisitor;
 	CC3NodeDrawingVisitor* _shadowVisitor;
 	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
 	CC3Fog* _fog;
-	id<CC3RenderSurface> _screenRenderSurface;
+	CC3GLViewSurfaceManager* _viewSurfaceManager;
 	ccColor4F _ambientLight;
 	ccTime _minUpdateInterval;
 	ccTime _maxUpdateInterval;
@@ -657,16 +657,16 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * on each frame rendering cycle. This method is invoked asynchronously to the model updating loop,
  * to keep the processing of OpenGL ES drawing separate from model updates.
  *
- * This implementation establishes the 3D rendering environment, invokes the drawSceneContent method
- * to draw the contents of this scene, reverts to the 2D rendering environment of the CC3Layer, and
- * renders any 2D overlay billboards.
+ * This implementation establishes the 3D rendering environment, handles node picking, invokes
+ * the drawSceneContentWithVisitor: method to draw the contents of this scene, reverts to the 2D rendering
+ * environment of the CC3Layer, and renders any 2D overlay billboards.
  *
  * If you want to customize the scene rendering flow, such as performing multiple-passes, or
- * adding post-processing effects, you should override the drawSceneContent method.
+ * adding post-processing effects, you should override the drawSceneContentWithVisitor: method.
  *
  * If the scene was touched by the user (finger or mouse), this method invokes the node picking
  * algorithm to determine the node that is under the touch point. This is performed prior to
- * invoking the drawSceneContent method.
+ * invoking the drawSceneContentWithVisitor: method.
  *
  * This method is invoked automatically during each rendering frame. Usually, the application
  * never needs to invoke this method directly.
@@ -683,12 +683,12 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * This implementation turns on the lighting contained within the scene, and performs a single
  * rendering pass of the nodes in the scene using the CC3NodeDrawingVisitor held in the
- * screenDrawVisitor property.
+ * viewDrawingVisitor property.
  *
  * You can override this method to customize the scene rendering flow, such as performing
  * multiple rendering passes, or adding post-processing effects.
  */
--(void) drawSceneContent;
+-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that opens the GL drawing environment for 3D drawing.
@@ -769,30 +769,44 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /** Returns whether this instance is using a drawing sequencer. */
 @property(nonatomic, readonly) BOOL isUsingDrawingSequence;
 
-/** 
- * The render surface being used to draw to the screen.
+/**
+ * The view's surface manager. 
  *
- * When this render surface is active, all drawing activity is rendered to the screen framebuffers.
+ * The returned manager manages the surfaces that render directly to the view, including the
+ * surfaces in the viewSurface and pickingSurface properties, and manages the
+ * resolution of anti-aliasing multisampling.
+ *
+ * The initial value of this property is retrieved automatically from the view when this
+ * scene is first opened. Normally, the application never needs to set this property.
  */
-@property(nonatomic, retain) id<CC3RenderSurface> screenRenderSurface;
+@property(nonatomic, retain) CC3GLViewSurfaceManager* viewSurfaceManager;
 
 /**
- * The visitor that is used to visit the nodes to draw them to the screen.
+ * The render surface being used to draw to the view on the screen.
  *
- * This property defaults to an instance of the class returned by the screenDrawVisitorClass method.
+ * When this render surface is active, all drawing activity is rendered to the framebuffer
+ * attached to the view.
+ *
+ * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
+ */
+@property(nonatomic, readonly) id<CC3RenderSurface> viewSurface;
+
+/**
+ * The visitor that is used to visit the nodes to draw them to the view on the screen.
+ *
+ * This property defaults to an instance of the class returned by the viewDrawVisitorClass method.
  * The application can set a different visitor if desired.
  */
-@property(nonatomic, retain) CC3NodeDrawingVisitor* screenDrawVisitor;
+@property(nonatomic, retain) CC3NodeDrawingVisitor* viewDrawingVisitor;
 
 /**
  * Returns the class of visitor that will automatically be instantiated into the
- * screenDrawVisitor property.
+ * viewDrawingVisitor property.
  *
- * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation
- * returns CC3NodeDrawingVisitor. Subclasses may override to customize the behaviour
- * of the drawing visits.
+ * The returned class must be a subclass of CC3NodeDrawingVisitor. This implementation returns
+ * CC3NodeDrawingVisitor. Subclasses may override to customize the behaviour of the drawing visits.
  */
--(id) screenDrawVisitorClass;
+-(id) viewDrawVisitorClass;
 
 /**
  * The visitor that is used to visit shadow nodes to draw them to the GL engine.
@@ -1017,6 +1031,13 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * of the drawing visits.
  */
 -(id) pickVisitorClass;
+
+/** 
+ * The render surface being used to draw when picking nodes from touch events.
+ *
+ * The value of this property is retrieved from the surface manager in the viewSurfaceManager property.
+ */
+@property(nonatomic, readonly) id<CC3RenderSurface> pickingSurface;
 
 @end
 

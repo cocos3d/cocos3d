@@ -86,6 +86,7 @@
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
+	_viewController.viewPixelSamples = 4;
 	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];
@@ -93,7 +94,7 @@
 #endif
 
 -(void) applicationDidFinishLaunching: (UIApplication*) application {
-	
+
 	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images.
 	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565. You can change anytime.
 	CCTexture2D.defaultAlphaPixelFormat = kCCTexture2DPixelFormat_RGBA8888;

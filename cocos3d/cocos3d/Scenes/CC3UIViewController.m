@@ -31,10 +31,6 @@
 
 #import "CC3UIViewController.h"
 #import "CC3Logging.h"
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
-#import "CC3Foundation.h"
 
 #if CC3_IOS
 
@@ -69,22 +65,22 @@
 #endif
 
 #if CC3_CC2_1
--(CCGLView*) view { return (CCGLView*)super.view; }
+-(CC3GLView*) view { return (CC3GLView*)super.view; }
 #endif	// CC3_CC2_1
 #if CC3_CC2_2
 // In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
--(CCGLView*) view {
+-(CC3GLView*) view {
 	if ( !CC2_VIEW ) {
 		[self loadView];
 		[self viewDidLoad];
 	}
-	return (CCGLView*)super.view;
+	return (CC3GLView*)super.view;
 }
 #endif	// CC3_CC2_2
 
 /** Ensure that retina display is established if required. */
--(void) setView:(CCGLView *)view {
-	CC3Assert(!view || [view isKindOfClass: [CCGLView class]], @"%@ may only be attached to a CCGLView. %@ is not of that class.", self, view);
+-(void) setView:(CC3GLView *)view {
+	CC3Assert(!view || [view isKindOfClass: [CC3GLView class]], @"%@ may only be attached to a CC3GLView. %@ is not of that class.", self, view);
 	super.view = view;
 	[self checkRetinaDisplay];
 }
@@ -105,7 +101,6 @@
 
 -(GLuint) viewPixelSamples {
 	if (self.isViewLoaded) return self.view.pixelSamples;
-	if (self.viewShouldUseStencilBuffer) return 1;
 	return _viewPixelSamples;
 }
 

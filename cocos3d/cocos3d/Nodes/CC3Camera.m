@@ -68,6 +68,11 @@
 /** Overridden to return NO so that the forwardDirection aligns with the negative-Z-axis. */
 -(BOOL) shouldReverseForwardDirection { return NO; }
 
+-(CC3Frustum*) frustum {
+	[self buildProjection];
+	return _frustum;
+}
+
 -(CC3Matrix*) projectionMatrix {
 	return _hasInfiniteDepthOfField
 				? _frustum.infiniteProjectionMatrix
@@ -317,9 +322,7 @@
 /** Template method that loads the viewMatrix into the current GL modelview matrix. */
 -(void) loadViewMatrixWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ loading modelview matrix into GL: %@", self, _viewMatrix);
-	CC3Matrix4x3 mtx;
-	[self.viewMatrix populateCC3Matrix4x3: &mtx];
-	[visitor.gl loadModelviewMatrix: &mtx];
+	[visitor populateViewMatrixFrom: self.viewMatrix];
 }
 
 /**
@@ -330,9 +333,7 @@
 -(void) loadProjectionMatrixWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ loading %@finite projection matrix into GL: %@",
 			 self, (_hasInfiniteDepthOfField ? @"in" : @""), self.projectionMatrix);
-	CC3Matrix4x4 mtx;
-	[self.projectionMatrix populateCC3Matrix4x4: &mtx];
-	[visitor.gl loadProjectionMatrix: &mtx];
+	[visitor populateProjMatrixFrom: self.projectionMatrix];
 }
 
 

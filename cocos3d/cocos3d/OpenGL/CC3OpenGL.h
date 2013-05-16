@@ -132,6 +132,7 @@ typedef struct {
 	GLuint value_MaxTextureUnitsUsed;
 	
 	GLuint value_GL_FRAMEBUFFER_BINDING;
+	GLenum value_GL_FRAMEBUFFER_Target;
 	GLuint value_GL_RENDERBUFFER_BINDING;
 
 	BOOL valueCap_GL_BLEND : 1;
@@ -186,6 +187,7 @@ typedef struct {
 	BOOL isKnown_GL_ACTIVE_TEXTURE : 1;
 	
 	BOOL isKnown_GL_FRAMEBUFFER_BINDING : 1;
+	BOOL isKnown_GL_FRAMEBUFFER_Target : 1;
 	BOOL isKnown_GL_RENDERBUFFER_BINDING : 1;
 
 }
@@ -474,6 +476,14 @@ typedef struct {
 -(void) clearStencilBuffer;
 
 /**
+ * Clears the color and depth buffers.
+ *
+ * This is a convenience method to handle the common requirement for simultaneously
+ * clearning both the color and depth buffers.
+ */
+-(void) clearColorAndDepthBuffers;
+
+/**
  * Returns the color value of the pixel at the specified position in the GL color buffer.
  *
  * This method should be used with care, since it involves making a synchronous call to
@@ -758,6 +768,24 @@ typedef struct {
 /** Makes the framebuffer with the specified ID the current framebuffer in the GL engine. */
 -(void) bindFramebuffer: (GLuint) fbID;
 
+/** 
+ * Resolves the content in the specified multisample framebuffer into the specified framebuffer,
+ * and leaves the multisample framebuffer bound to the GL_FRAMEBUFFER target for further rendering.
+ */
+-(void) resolveMultisampleFramebuffer: (GLuint) fbSrcID intoFramebuffer: (GLuint) fbDstID;
+
+/**
+ * Discards the specified attachments from the specified framebuffer.
+ *
+ * The attachments parameter is an array of framebuffer attachments enums that is may include:
+ *  - GL_COLOR_ATTACHMENT0
+ *  - GL_DEPTH_ATTACHMENT
+ *  - GL_STENCIL_ATTACHMENT
+ *
+ * The count parameter indicates the length of this array.
+ */
+-(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID;
+
 /** Generates and returns a new renderbuffer ID. */
 -(GLuint) generateRenderbufferID;
 
@@ -768,10 +796,17 @@ typedef struct {
 -(void) bindRenderbuffer: (GLuint) rbID;
 
 /** 
- * Allocates storage for the renderbuffer with the specified ID, sufficient
- * to render an image of the specified size in the  specified pixel format.
+ * Allocates storage for the specified renderbuffer, sufficient to render an image of the
+ * specified size, in the specified pixel format, and with the specified number of samples
+ * per pixel, which will be a value larger than one if antialiasing multisampling is in use.
  */
--(void) allocateStorageForRenderbuffer: (GLuint) rbID ofSize: (CC3IntSize) size andFormat: (GLenum) format;
+-(void) allocateStorageForRenderbuffer: (GLuint) rbID
+							  withSize: (CC3IntSize) size
+							 andFormat: (GLenum) format
+							andSamples: (GLuint) pixelSamples;
+
+/** Returns the current value in the GL engine of the specified integer renderbuffer parameter. */
+-(GLint) getRenderbufferParameterInteger: (GLenum) param;
 
 /** Binds the specified renderbuffer to the specified framebuffer as the specified attachement. */
 -(void) bindRenderbuffer: (GLuint) rbID toFrameBuffer: (GLuint) fbID asAttachment: (GLenum) attachment;
@@ -786,9 +821,9 @@ typedef struct {
 		toFrameBuffer: (GLuint) fbID
 		 asAttachment: (GLenum) attachment;
 
-/** 
+/**
  * Checks the completeness status of the specified framebuffer, and returns YES if the framebuffer
- * is complete and ready to be drawn to, or NO if the framebuffer is not ready to be drawn to. 
+ * is complete and ready to be drawn to, or NO if the framebuffer is not ready to be drawn to.
  *
  * If the framebuffer is not complete, an error is logged, and, if the GL_ERROR_ASSERTION_ENABLED
  * compiler build setting is set, an assertion error is raised.

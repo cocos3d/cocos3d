@@ -378,11 +378,7 @@
 
 -(BOOL) hasShadows { return shadows && shadows.count > 0; }
 
--(void) updateShadows {
-	for (id<CC3ShadowProtocol> sv in shadows) {
-		[sv updateShadow];
-	}
-}
+-(void) updateShadows { for (id<CC3ShadowProtocol> sv in shadows) [sv updateShadow]; }
 
 /** Detaches old as camera listener, attaches new as camera listener, and attaches light. */
 -(void) setShadowCastingVolume: (CC3ShadowCastingVolume*) scVolume {
@@ -522,16 +518,11 @@
 	
 	// Set the projection and modelview matrices to identity to transform the simple
 	// rectangular stenciled shadow painter mesh so that it covers the full viewport.
-	CC3Matrix4x3 mvMtx;
-	CC3Matrix4x3PopulateIdentity(&mvMtx);
-	[gl loadModelviewMatrix: &mvMtx];
-	CC3Matrix4x4 projMtx;
-	CC3Matrix4x4PopulateIdentity(&projMtx);
-	[gl loadProjectionMatrix: &projMtx];
-
 	// Paint the shadow to the screen. Only areas that have been marked as being
 	// in the stencil buffer as being in the shadow of this light will be shaded.
+	visitor.shouldDrawInClipSpace = YES;
 	[visitor visit: stencilledShadowPainter];
+	visitor.shouldDrawInClipSpace = NO;
 }
 
 -(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor {
@@ -732,9 +723,8 @@ static GLuint lightPoolStartIndex = 0;
  * it is added to the array, and the vertexCount property is incremented.
  */
 -(void) addUniqueVertex: (CC3Vector) aLocation {
-	for (GLuint vtxIdx = 0; vtxIdx < vertexCount; vtxIdx++) {
+	for (GLuint vtxIdx = 0; vtxIdx < vertexCount; vtxIdx++)
 		if (CC3VectorsAreEqual(aLocation, vertices[vtxIdx])) return;
-	}
 	vertices[vertexCount++] = aLocation;
 }
 

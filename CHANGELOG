@@ -53,6 +53,17 @@ cocos3d 2.0.0 - 2013/05/31
 	- Xcode workspace cocos3d-iOS.workspace opens demos for running on iOS.
 	- Xcode workspace cocos3d-Mac.workspace opens demos for running on a Mac under OSX.
 
+- Added support for multi-pass rendering and render-to-texture
+	- Added CC3RenderSurface classes to provide off-screen framebuffer surfaces as rendering targets
+		- CC3GLView now uses underlying CC3GLViewSurfaceManager to manage framebuffers.
+		- Added CC3GLFramebuffer class to represent a GL framebuffer
+		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
+		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
+	- Refactored CC3Scene drawScene method to support multi-pass rendering
+		- CC3Scene drawSceneContents template method can be used by app to customize rendering passes
+	- Refactored CC3GLView classes to use a CC3GLViewSurfaceManager to manage surfaces that are tied to UIView & NSView (viewSurface, multisamplSurface & pickingSurface).
+		- CC3UIViewController now requires its view be a CC3GLView.
+
 - Animation enhancements:
 	- Added support for time-based key-frame animation.
 		- CC3Animation now supports the ability to have timed key-frame animation with variable frame timing and automatic interpolation between frames.
@@ -124,6 +135,9 @@ cocos3d 2.0.0 - 2013/05/31
 	- CC3PODResource supports saving underlying POD content back to a file.
 	- Added CC3PODResource saveAnimationToFile: method to save only the animation to a new POD file.
 		- This can be a useful development utility for creating multiple animation tracks for a single POD file for later blending.
+
+- Fixes to Shadow Volumes
+	- shadows volumes and stencils now available when multisampling active
 
 - Added several additional quaternion functions in CC3Foundation files, including quaternion multiplication, conjucation, and inversion.
 - Added CC3Node texture property as a convenience for changing the primary texture for all descendant mesh nodes.
