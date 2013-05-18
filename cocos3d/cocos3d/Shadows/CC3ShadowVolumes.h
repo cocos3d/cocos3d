@@ -33,6 +33,7 @@
 #import "CC3VertexSkinning.h"
 #import "CC3Light.h"
 #import "CC3Billboard.h"
+#import "CC3ParametricMeshNodes.h"
 
 /** The suggested default shadow volume vertex offset factor. */
 static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
@@ -113,13 +114,11 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
 /**
  * The mesh node used to paint the shadows cast by shadow volumes.
  *
- * Shadow volumes are used to define a stencil that is then used to draw dark
- * areas onto the viewport where mesh nodes are casting shadows. This painter
- * is used to draw those dark areas where the stencil indicates.
+ * Shadow volumes are used to define a stencil that is then used to draw dark areas onto the
+ * viewport in clip-space, where scene mesh nodes are casting shadows. This painter is used
+ * to draw those dark areas where the stencil indicates.
  */
-@interface CC3StencilledShadowPainterNode : CC3MeshNode <CC3ShadowProtocol> {
-	CC3Light* light;
-}
+@interface CC3StencilledShadowPainterNode : CC3ClipSpaceNode <CC3ShadowProtocol>
 @end
 
 

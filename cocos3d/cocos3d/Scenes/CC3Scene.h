@@ -247,13 +247,13 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3NodeDrawingVisitor* _shadowVisitor;
 	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
+	CC3MeshNode* _backdrop;
 	CC3Fog* _fog;
 	CC3GLViewSurfaceManager* _viewSurfaceManager;
 	ccColor4F _ambientLight;
 	ccTime _minUpdateInterval;
 	ccTime _maxUpdateInterval;
 	ccTime _deltaFrameTime;
-	BOOL _shouldClearDepthBuffer : 1;
 }
 
 /**
@@ -312,6 +312,27 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * invoke the remove method on the light itself, or the removeChild: method on its parent.
  */
 @property(nonatomic, readonly) CCArray* lights;
+
+/**
+ * To create a backdrop for this scene, set this to a CC3ClipSpaceNode instance, covered
+ * with either a solid pureColor or a texture.
+ *
+ * The backdrop appears behind everything else in the scene, and does not change as the
+ * camera moves around the scene. If you need to have more realistic scenery that changes
+ * as the camera moves and pans, consider adding a skybox to your scene instead of using
+ * a backdrop. You can create a skybox using a spherical or cube mesh, and applying a
+ * cube-mapped texture to it.
+ */
+@property(nonatomic, retain) CC3MeshNode* backdrop;
+
+/**
+ * If set, creates fog within the CC3Scene. Fog has a color and blends with the
+ * display of objects within the scene. Objects farther away from the camera are
+ * affected by the fog more than objects that are closer to the camera.
+ *
+ * The initial value is nil, indicating that the scene will contain no fog.
+ */
+@property(nonatomic, retain) CC3Fog* fog;
 
 /**
  * The touchedNodePicker picks the node under the point at which a touch event occurred.
@@ -389,14 +410,30 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @property(nonatomic, retain) CC3PerformanceStatistics* performanceStatistics;
 
+
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
+
 /**
- * If set, creates fog within the CC3Scene. Fog has a color and blends with the
- * display of objects within the scene. Objects farther away from the camera are
- * affected by the fog more than objects that are closer to the camera.
+ * Implementation of the CCRGBAProtocol color property.
  *
- * The initial value is nil, indicating that the scene will contain no fog.
+ * Returns the color of the node in the backdrop property, or if there is no backdrop,
+ * returns the value of the superclass implementation.
+ *
+ * Setting this property set the color of the node in the backdrop property, but does
+ * not propagate the color change to all descendant nodes.
  */
-@property(nonatomic, retain) CC3Fog* fog;
+@property(nonatomic, assign) ccColor3B color;
+
+/**
+ * Implementation of the CCRGBAProtocol opacity property.
+ *
+ * Returns the opacity of the node in the backdrop property, or if there is no backdrop,
+ * returns the value of the superclass implementation.
+ *
+ * Setting this property set the opacity of the node in the backdrop property, and
+ * propagates the opacity change to all descendant nodes.
+ */
+@property(nonatomic, assign) GLubyte opacity;
 
 
 #pragma mark Allocation and initialization
@@ -687,6 +724,20 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * You can override this method to customize the scene rendering flow, such as performing
  * multiple rendering passes, or adding post-processing effects.
+ *
+ * To maintain performance, by default, the depth buffer is not specifically cleared when 3D
+ * drawing begins. If this scene is drawing to a surface that already has depth information
+ * rendered, you should override this method, clear the depth buffer before continuing with
+ * 3D drawing, by invoking the following from within the overridden method:
+ *
+ *     [visitor.gl clearDepthBuffer];
+ *
+ * and then invoking this superclass implementation, or continuing with your own drawing logic.
+ *
+ * Examples of when the depth buffer should be cleared are when this scene is being drawn
+ * on top of other 3D content (as in a sub-window), or when any 2D content that is rendered
+ * behind the scene makes use of depth drawing. See also the closeDepthTestWithVisitor:
+ * method for more info about managing the depth buffer.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
@@ -711,37 +762,18 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Indicates whether the OpenGL depth buffer should be cleared when transitioning between
- * 2D and 3D drawing (in either direction).
+ * Template method that leaves depth testing in the state required by the 2D environment.
  *
- * If 2D content, such as menus and buttons, is being drawn using depth testing, then this property
- * should be set to YES. If 2D content is being drawn without depth testing, then this property can
- * be set to NO to skip the overhead of clearing of the depth buffer during transitions between 2D
- * and 3D drawing on each frame.
+ * Since most 2D drawing does not need to use depth testing, and clearing the depth buffer is
+ * a relatively costly operation, the standard behaviour is to simply turn depth testing off.
+ * However, subclasses can override this method to leave depth testing on and clear the depth
+ * buffer in order to permit 2D drawing to make use of depth testing.
  *
- * Clearing the depth buffer is a relatively expensive operation, and avoiding it when it is not
- * necessary can result in a performance improvement. Because of this, it is recommended that depth
- * testing be turned off during the drawing of 2D content, and this property be set to NO.
- *
- * Initially, depth testing is enabled when drawing 2D content. You can turn depth testing off for
- * the 2D content by invoking the following code once during the initialization of your application
- * after the CC3GLView has been created:
- *
- *   [CCDirector.sharedDirector setDepthTest: NO];
- *
- * By doing so, you will then be able to set this property to NO to avoid clearing the depth
- * buffer when transitioning between 2D and 3D drawing.
- *
- * Since depth testing is initially enabled for 2D content, the initial value of this property is YES.
- * After disabling depth testing for 2D content as described above, you can set this property to NO.
+ * This method is invoked automatically during the transition back to 2D drawing, incluing
+ * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 2D
+ * cocos2d CCNode. Normally the application never needs to invoke this method directly.
  */
-@property(nonatomic, assign) BOOL shouldClearDepthBuffer;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D DEPRECATED_ATTRIBUTE;
-
-/** @deprecated Use the shouldClearDepthBuffer propety instead. */
-@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D DEPRECATED_ATTRIBUTE;
+-(void) closeDepthTestWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * The node sequencer being used by this instance to order the drawing of child nodes.
@@ -824,6 +856,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * The application can set a different visitor if desired.
  */
 @property(nonatomic, retain) CC3NodeSequencerVisitor* drawingSequenceVisitor;
+
+/** @deprecated Depth clearing is now handled by app in drawSceneContentWithVisitor:. */
+@property(nonatomic, assign) BOOL shouldClearDepthBuffer;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore3D DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use the shouldClearDepthBuffer propety instead. */
+@property(nonatomic, assign) BOOL shouldClearDepthBufferBefore2D DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark Touch handling

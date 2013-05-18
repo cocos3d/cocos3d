@@ -852,47 +852,17 @@
 
 @implementation CC3StencilledShadowPainterNode
 
-@synthesize light;
-
--(void) dealloc {
-	light = nil;		// not retained
-	[super dealloc];
-}
-
 /** The shadow painter is always drawn. */
 -(BOOL) isShadowVisible { return YES; }
 
 
-#pragma mark Allocation and initialization
+#pragma mark CC3ShadowProtocol support
 
-/** Initializes the node with a rectangular mesh and black material. */
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		[self populateAsCenteredRectangleWithSize: CGSizeMake(2.0, 2.0)];
-		self.color = ccBLACK;
-		light = nil;
-	}
-	return self;
-}
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3ShadowVolumeMeshNode*) another {
-	[super populateFrom: another];
-	
-	self.light = another.light;						// not retained
-}
-
-/** Overridden to use an infinite bounding volume so that the shadow painter is always drawn. */
--(CC3NodeBoundingVolume*) defaultBoundingVolume {
-	return [CC3NodeInfiniteBoundingVolume boundingVolume];
-}
-
-
-#pragma mark Updating
-
-/** Nothing to update. */
 -(void) updateShadow {}
+
+-(CC3Light*) light { return nil; }
+
+-(void) setLight: (CC3Light*) light {}
 
 @end
 
@@ -905,7 +875,6 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_shouldVisitChildren = NO;
-		_shouldClearDepthBuffer = NO;
 	}
 	return self;
 }

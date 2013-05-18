@@ -335,6 +335,50 @@
 
 
 #pragma mark -
+#pragma mark CC3ClipSpaceNode
+
+@implementation CC3ClipSpaceNode
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+		[self populateAsCenteredRectangleWithSize: CGSizeMake(2.0f, 2.0f)];
+		self.shouldDisableDepthTest = YES;
+		self.shouldDisableDepthMask = YES;
+	}
+	return self;
+}
+
+/** Generally, we don't use lighting in clip-space, so turn it off by default. */
+-(void) setMaterial: (CC3Material*) aMaterial {
+	super.material = aMaterial;
+	self.shouldUseLighting = NO;
+}
+
+/** The camera frustum has no meaning in clip-space. */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return [CC3NodeInfiniteBoundingVolume boundingVolume]; }
+
+
+#pragma mark Allocation and initialization
+
++(id) nodeWithTexture: (CC3Texture*) texture {
+	CC3MeshNode* csn = [self node];
+	csn.texture = texture;
+	return csn;
+}
+
++(id) nodeWithColor: (ccColor4F) color {
+	CC3MeshNode* csn = [self node];
+	csn.pureColor = color;
+	return csn;
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark Deprecated CC3MeshNode parametric shapes
 
 @implementation CC3MeshNode (DeprecatedParametricShapes)

@@ -388,7 +388,6 @@
 	GLuint _currentTextureUnitIndex;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
-	BOOL _shouldClearDepthBuffer : 1;
 	BOOL _shouldDrawInClipSpace : 1;
 	BOOL _isVPMtxDirty : 1;
 	BOOL _isMVMtxDirty : 1;
@@ -449,14 +448,6 @@
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldDecorateNode;
-
-/**
- * Indicates whether the OpenGL depth buffer should be cleared before drawing the 3D scene.
- * 
- * This property is automatically set to the value of the shouldClearDepthBuffer property
- * of the CC3Scene.
- */
-@property(nonatomic, assign) BOOL shouldClearDepthBuffer;
 
 /**
  * Indicates whether drawing should be performed in clip-space.

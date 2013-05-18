@@ -50,9 +50,6 @@
  */
 -(void) activate;
 
-/** Returns whether this surface is a multisampling surface. */
-@property(nonatomic, readonly) BOOL isMultisampling;
-
 @end
 
 
@@ -362,6 +359,9 @@
  */
 @property(nonatomic, readonly) CC3GLRenderbuffer* stencilBuffer;
 
+/** Returns whether this surface is a multisampling surface. */
+@property(nonatomic, readonly) BOOL isMultisampling;
+
 /**
  * Validates that this framebuffer has a valid configuration in the GL engine.
  *
@@ -449,6 +449,9 @@
  * If this value is larger than one, then multisampling is in use.
  */
 @property(nonatomic, readonly) GLuint pixelSamples;
+
+/** Returns whether this surface is a multisampling surface. */
+@property(nonatomic, readonly) BOOL isMultisampling;
 
 /** Resizes the framebuffers in this instance from the specified core animation layer. */
 -(BOOL) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context;

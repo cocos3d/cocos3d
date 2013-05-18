@@ -70,22 +70,16 @@
 
 #pragma mark Allocation and initialization
 
-/** Overridden to invoke the initializeControls template method. */
--(void) initInitialState {
-	[super initInitialState];
-	_shouldAlwaysUpdateViewport = NO;
-	self.mousePriority = 0;
-	[self initializeControls];
+-(id) init {
+	if( (self = [super init]) ) {
+		_shouldAlwaysUpdateViewport = NO;
+		self.mousePriority = 0;
+		[self initializeControls];
+	}
+	return self;
 }
 
-// Spelling mistake on initial API...left in for backwards compatibility
--(void) initializeContols {}
-
-/**
- * For backwards compatibility, default invokes misspelled API method, which in turn does nothing.
- * Subclasses will override, and do not need to invoke this superclass implementation.
- */
--(void) initializeControls { [self initializeContols]; }
+-(void) initializeControls {}
 
 
 #pragma mark Transforming
@@ -117,7 +111,15 @@
 	[self updateViewport];
 }
 
--(BOOL) isOpaque { return self.isColored && self.opacity == 255; }
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
+
+-(ccColor3B) color { return _cc3Scene.color; }
+
+-(void)	setColor: (ccColor3B) color { _cc3Scene.color = color; }
+
+-(GLubyte) opacity { return _cc3Scene.opacity; }
+
+-(void) setOpacity: (GLubyte) opacity { _cc3Scene.opacity = opacity; }
 
 
 #pragma mark Updating layer

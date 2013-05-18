@@ -38,55 +38,33 @@
 
 @implementation CC3ControllableLayer
 
-@synthesize isColored=isColored_, alignContentSizeWithDeviceOrientation=alignContentSizeWithDeviceOrientation_;
+@synthesize alignContentSizeWithDeviceOrientation=_alignContentSizeWithDeviceOrientation;
 
 -(void) dealloc {
-	controller_ = nil;		// delegate - not retained
+	_controller = nil;		// delegate - not retained
     [super dealloc];
 }
 
 // Override to store the controller in the unretained iVar
--(CC3UIViewController*) controller { return controller_; }
--(void) setController: (CC3UIViewController*) aController { controller_ = aController; }
+-(CC3UIViewController*) controller { return _controller; }
+-(void) setController: (CC3UIViewController*) aController { _controller = aController; }
 
 
-#pragma mark Drawing
+#pragma mark Allocation and initialization
 
-// Initializes without a colored background.
-// Must avoid super init because as of cocos2d 1.1, it sets the contentSize to zero.
-- (id) init {
-	CGSize s = CCDirector.sharedDirector.winSize;
-	if( (self = [super initWithColor: ccc4(0,0,0,0) width: s.width  height: s.height]) ) {
-		isColored_ = NO;
-		[self initInitialState];
+-(id) init {
+	if( (self = [super init]) ) {
+		_alignContentSizeWithDeviceOrientation = YES;
+		[self initInitialState];	// Deprecated legacy
 	}
 	return self;
 }
 
-// Initializes with a colored background.
-- (id) initWithColor:(ccColor4B)color width:(GLfloat)w  height:(GLfloat) h {
-	LogTrace(@"%@ creating with width: %.1f height: %.1f", self, w, h);
-	if( (self = [super initWithColor: color width: w  height: h]) ) {
-		isColored_ = YES;
-		[self initInitialState];
-	}
-	return self;
-}
-
-// Initializes the instance, including setting the alignContentSizeWithDeviceOrientation property to YES.
--(void) initInitialState {
-	alignContentSizeWithDeviceOrientation_ = YES;
-}
-
-
-#pragma mark Drawing
-
-/**
- * Superclass template method override. If this layer has been configured with a background color,
- * and is not overlaying the device camera, the background color blend is drawn, otherwise it is not.
- */
--(void) draw { if(self.isColored && !self.isOverlayingDeviceCamera) [super draw]; }
-
+// Deprecated legacy
+-(id) initWithColor: (ccColor4B) color { return [self init]; }
++(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
+-(void) initInitialState {}
+-(BOOL) isColored { return NO; }
 
 #pragma mark Device orientation support
 
@@ -124,7 +102,7 @@
 
 #pragma mark Device camera support
 
--(BOOL) isOverlayingDeviceCamera { return controller_ ? controller_.isOverlayingDeviceCamera : NO; }
+-(BOOL) isOverlayingDeviceCamera { return _controller ? _controller.isOverlayingDeviceCamera : NO; }
 
 // If this layer is overlaying the device camera, the GL clear color is
 // set to transparent black, otherwise it is set to opaque black.

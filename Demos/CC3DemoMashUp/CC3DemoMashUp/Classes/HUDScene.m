@@ -32,8 +32,10 @@
 #import "HUDScene.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
+#import "CC3ParametricMeshNodes.h"
 
-#define kGlobeName		@"Globe"
+#define kGlobeName				@"Globe"
+#define kBackDropOpacityFactor	0.4
 
 
 @implementation HUDScene
@@ -41,6 +43,8 @@
 /** Create the camera and light. Other items are added from the main scene. */
 -(void) initializeScene {
 
+	self.backdrop = [CC3ClipSpaceNode node];
+	
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
 	cam.location = cc3v( 0.0, 0.0, 1.0 );
@@ -49,6 +53,23 @@
 	// Create a light and attach it to the camera.
 	CC3Light* lamp = [CC3Light nodeWithName: @"Lamp"];
 	[cam addChild: lamp];
+}
+
+/** 
+ * Since this scene is drawn as an overlay on top of the main scene, we must clear the depth
+ * buffer before drawing, so objects in this scene won't hide behind objects in the main scene.
+ */
+-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl clearDepthBuffer];
+	[super drawSceneContentWithVisitor: visitor];
+}
+
+-(GLubyte) opacity { return _backdrop.opacity / kBackDropOpacityFactor; }
+
+/** Whatever the opacity of this scene is set to, make the backdrop more transparent. */
+-(void) setOpacity: (GLubyte) opacity {
+	super.opacity = opacity;
+	_backdrop.opacity = opacity * kBackDropOpacityFactor;
 }
 
 /** Ensure the camera frames the globe. */

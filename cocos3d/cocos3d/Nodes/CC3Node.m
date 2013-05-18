@@ -1798,9 +1798,7 @@ static GLuint lastAssignedNodeTag;
 
 -(void) removeAllChildren {
 	CCArray* myKids = [children copy];
-	for (CC3Node* child in myKids) {
-		[self removeChild: child];
-	}
+	for (CC3Node* child in myKids) [self removeChild: child];
 	[myKids release];
 }
 
@@ -2485,21 +2483,15 @@ static ccColor4F wireframeBoxColor = { 1.0, 1.0, 0.0, 1.0 };	// kCCC4FYellow
 
 -(void) removeAllDirectionMarkers {
 	CCArray* dirMks = self.directionMarkers;
-	for (CC3Node* dm in dirMks) {
-		[dm remove];
-	}
-	for (CC3Node* child in children) {
-		[child removeAllDirectionMarkers];
-	}
+	for (CC3Node* dm in dirMks) [dm remove];
+	for (CC3Node* child in children) [child removeAllDirectionMarkers];
 }
 
 -(CCArray*) directionMarkers {
 	CCArray* dirMks = [CCArray array];
-	for (CC3Node* child in children) {
-		if ( [child isKindOfClass: [CC3DirectionMarkerNode class]] ) {
+	for (CC3Node* child in children)
+		if ( [child isKindOfClass: [CC3DirectionMarkerNode class]] )
 			[dirMks addObject: child];
-		}
-	}
 	return dirMks;
 }
 

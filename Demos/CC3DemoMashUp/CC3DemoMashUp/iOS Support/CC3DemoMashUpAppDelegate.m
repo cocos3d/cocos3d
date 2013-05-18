@@ -116,10 +116,7 @@
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
 	// Create the customized CC3Layer that supports 3D rendering.
-	// If we want to use AR and display the device camera, create without a background color
-	CC3Layer* cc3Layer = _viewController.isOverlayingDeviceCamera
-								? [CC3DemoMashUpLayer node]
-								: [CC3DemoMashUpLayer layerWithColor: ccc4(100, 120, 220, 255)];
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer node];
 	
 	// Create the customized 3D scene and attach it to the layer.
 	// Could also just create this inside the customer layer.

@@ -704,6 +704,66 @@
 
 
 #pragma mark -
+#pragma mark CC3ClipSpaceNode
+
+/**
+ * CC3ClipSpaceNode simplifies the creation of a simple rectangular node that can be used
+ * in the clip-space of the view in order to cover the view with a rectangular image. This
+ * provides an easy and convenient mechanism for creating backdrops and post-processing effects.
+ *
+ * The clip-space coordinate system is a transformation of the camera frustum, where the camera
+ * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
+ * in each of the X, Y & Z dimensions.
+ *
+ * The underlying mesh is populated as a simple rectangular mesh with width and height each
+ * of 2.0, centered at the origin, and laid out on the X-Y plane.
+ *
+ * This mesh can be covered with a solid material or a single texture. If this mesh
+ * is to be covered with a texture, use the texture property of this node to set
+ * the texture. If a solid color is desired, leave the texture property unassigned.
+ *
+ * If this node is drawn with a drawing visitor whose shouldDrawInClipSpace property is set
+ * to YES, this mesh will cover the entire view. As such, this mesh node can be used to easily
+ * create backdrops and post-processed image displays by drawing this node to the screen by
+ * visiting this node with a drawing visitor whose shouldDrawInClipSpace property set to YES.
+ *
+ * To create a backdrop, set the pureColor or texture property, or use the nodeWithTexture: 
+ * or nodeWithColor: convenience constructor methods. To create post-processing effects,
+ * render your scene to a texture that is attached to this mesh node.
+ *
+ * Normally, you want this node to completely cover the entire view, which it does by default,
+ * and you do not need to apply any transforms to this node. However, by applying location and
+ * scale transforms, you can configure this node so that it only covers a portion of the view.
+ * In doing so, keep in mind that clip-space, only the X & Y values of the location and scale
+ * properties are used, and that the coordinate system occupies a range between -1 and +1.
+ * In addition, in most cases, these nodes will not normally be included in the normal scene
+ * update cycle, so you should invoke the updateTransformMatrix method on this node after you
+ * have made any transform changes (location or scale).
+ *
+ * Since this node is being drawn in clip-space, depth testing and lighting are generally ignored.
+ * As such, the shouldDisableDepthTest and shouldDisableDepthMask properties are both initialized
+ * to YES, and the shouldUseLighting property is initialized to NO.
+ */
+@interface CC3ClipSpaceNode : CC3MeshNode
+
+/**
+ * Allocates and initializes and autoreleased instance covered with the specified texture.
+ *
+ * This is a convenience method for a common use of this class.
+ */
++(id) nodeWithTexture: (CC3Texture*) texture;
+
+/**
+ * Allocates and initializes and autoreleased instance covered with the specified color.
+ *
+ * This is a convenience method for a common use of this class.
+ */
++(id) nodeWithColor: (ccColor4F) color;
+
+@end
+
+
+#pragma mark -
 #pragma mark Deprecated CC3MeshNode parametric shapes
 
 @interface CC3MeshNode (DeprecatedParametricShapes)

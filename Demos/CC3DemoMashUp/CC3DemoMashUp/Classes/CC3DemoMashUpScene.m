@@ -140,6 +140,7 @@
 
 #define kCameraMoveDuration				3.0
 #define kTeapotRotationActionTag		1
+#define kSkyColor						ccc4f(0.4, 0.5, 0.9, 1.0)
 
 
 // Size of the television
@@ -207,12 +208,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_playerDirectionControl = CGPointZero;
 	_playerLocationControl = CGPointZero;
 	
-	// Improve performance by avoiding clearing the depth buffer when transitioning
-	// between 2D content and 3D content. Since we are drawing 2D content on top of
-	// the 3D content, we must also turn off depth testing when drawing 2D content.
-	[CCDirector.sharedDirector setDepthTest: NO];
-	self.shouldClearDepthBuffer = NO;
-	
 	// The order in which meshes are drawn to the GL engine can be tailored to your needs.
 	// The default is to draw opaque objects first, then alpha-blended objects in reverse
 	// Z-order. Since this example has lots of similar teapots and robots to draw in this
@@ -247,6 +242,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Set up any initial state tracked by this subclass
 	[self initCustomState];
 
+	[self addBackdrop];				// Add a sky-blue colored backdrop
+	
 //	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
 									// in the textured teapot added in the addTeapotAndSatellite method
 	
@@ -440,6 +437,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	[_robotLamp disableAnimation];
 	
 }
+
+/** Creates the clear-blue-sky backdrop. See the notes for the backdrop property for more info. */
+-(void) addBackdrop { self.backdrop = [CC3ClipSpaceNode nodeWithColor: kSkyColor]; }
 
 /**
  * Add a large circular grass-covered ground to give everything perspective.
@@ -2048,13 +2048,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 #pragma mark Drawing
 
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self illuminateWithVisitor: visitor];
-
-	[self drawToTVScreenWithVisitor: visitor];
+	[self illuminateWithVisitor: visitor];				// Light up your world!
 	
-	[self.viewSurface activateWithVisitor: visitor];
-	[self visitForDrawingWithVisitor: visitor];
-	[self drawShadowsWithVisitor: _shadowVisitor];
+	[self drawToTVScreenWithVisitor: visitor];			// Draw the scene to the TV screen
+	
+	[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
+	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
+	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
+	[self drawShadows];									// Shadows are drawn with a different visitor
 }
 
 -(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -2068,10 +2069,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_runnerCam.viewport = CC3ViewportMake(0, 0, kTVTexSize.width, kTVTexSize.height);
 	visitor.camera = _runnerCam;
 
-	[_tvSurface activate];
+	[_tvSurface activate];		// Draw to the texture in the TV surface, not the view
 
 	[visitor.gl clearColorAndDepthBuffers];
-	[self visitForDrawingWithVisitor: visitor];
+	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
+	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
 
 	visitor.camera = self.activeCamera;
 	_runnerCam.viewport = vpCurr;
@@ -2322,6 +2324,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_robotLamp.visible = sun.visible;
 	spotLight.visible = !_robotLamp.visible;
 	_bumpMapLightTracker.target = _robotLamp.visible ? _robotLamp : spotLight;
+	
+	// If the sun is shining, show a blue sky, otherwise a black night sky
+	_backdrop.pureColor = sun.visible ? kSkyColor : kCCC4FBlack;
+
 	return sun.visible;
 }
 

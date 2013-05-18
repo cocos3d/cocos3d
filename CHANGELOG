@@ -60,7 +60,11 @@ cocos3d 2.0.0 - 2013/05/31
 		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
 		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
 	- Refactored CC3Scene drawScene method to support multi-pass rendering
-		- CC3Scene drawSceneContents template method can be used by app to customize rendering passes
+		- CC3Scene drawSceneContentsWithVisitor: template method can be used by app to customize rendering passes
+		- Added CC3ClipSpaceNode for drawing full-screen images for backdrops and post-processing
+		- Added CC3Scene backdrop property to hold backdrop.
+			- [API change] CC3Layer no longer a subclass of CCColorLayer and no longer draws a colored backdrop
+		- [API change] CC3Scene shouldClearDepthBuffer deprecated
 	- Refactored CC3GLView classes to use a CC3GLViewSurfaceManager to manage surfaces that are tied to UIView & NSView (viewSurface, multisamplSurface & pickingSurface).
 		- CC3UIViewController now requires its view be a CC3GLView.
 

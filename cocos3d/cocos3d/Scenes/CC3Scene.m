@@ -59,13 +59,13 @@
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
-@synthesize fog=_fog, lights=_lights, shouldClearDepthBuffer=_shouldClearDepthBuffer;
+@synthesize backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize viewSurfaceManager=_viewSurfaceManager;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
  * didRemoveDescendant:, which references several of these instance variables.
- * Make sure they are all made nil in addition to being released here.
+ * Make sure they are all made nil in addition to being released here!
  */
 -(void) dealloc {
 	_cc3Layer = nil;						// Not retained
@@ -79,10 +79,14 @@
 	self.transformVisitor = nil;			// Use setter to release and make nil
 	self.drawingSequenceVisitor = nil;		// Use setter to release and make nil
 	self.fog = nil;							// Use setter to stop any actions
-	[_viewSurfaceManager release];
+	self.backdrop = nil;					// Use setter to stop any actions
+	self.viewSurfaceManager = nil;			// Use setter to release and make nil
 	[_targettingNodes release];
+	_targettingNodes = nil;
 	[_lights release];
+	_lights = nil;
 	[_billboards release];
+	_billboards = nil;
 	
     [super dealloc];
 }
@@ -130,18 +134,41 @@
 	}
 }
 
--(void) setFog: (CC3Fog*) aFog {
-	if (aFog == _fog) return;
+-(void) setBackdrop: (CC3MeshNode*) backdrop {
+	if (backdrop == _backdrop) return;
+	[_backdrop stopAllActions];		// Ensure all actions stopped before releasing
+	[_backdrop release];
+	_backdrop = [backdrop retain];
+}
+
+-(void) setFog: (CC3Fog*) fog {
+	if (fog == _fog) return;
 	[_fog stopAllActions];		// Ensure all actions stopped before releasing
 	[_fog release];
-	_fog = [aFog retain];
+	_fog = [fog retain];
 }
 
 // Deprecated
--(BOOL) shouldClearDepthBufferBefore2D { return self.shouldClearDepthBuffer; }
--(void) setShouldClearDepthBufferBefore2D: (BOOL) shouldClear { self.shouldClearDepthBuffer = shouldClear; }
--(BOOL) shouldClearDepthBufferBefore3D { return self.shouldClearDepthBuffer; }
--(void) setShouldClearDepthBufferBefore3D: (BOOL) shouldClear { self.shouldClearDepthBuffer = shouldClear; }
+-(BOOL) shouldClearDepthBuffer { return NO; }
+-(void) setShouldClearDepthBuffer: (BOOL) shouldClear {}
+-(BOOL) shouldClearDepthBufferBefore2D { return NO; }
+-(void) setShouldClearDepthBufferBefore2D: (BOOL) shouldClear {}
+-(BOOL) shouldClearDepthBufferBefore3D { return NO; }
+-(void) setShouldClearDepthBufferBefore3D: (BOOL) shouldClear {}
+
+
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
+
+-(ccColor3B) color { return _backdrop ? _backdrop.color : super.color; }
+
+-(void) setColor: (ccColor3B) color { _backdrop.color = color; }
+
+-(GLubyte) opacity { return _backdrop ? _backdrop.opacity : super.opacity; }
+
+-(void) setOpacity: (GLubyte) opacity {
+	_backdrop.opacity = opacity;
+	super.opacity = opacity;
+}
 
 
 #pragma mark Allocation and initialization
@@ -151,7 +178,6 @@
 		_targettingNodes = [[CCArray array] retain];
 		_lights = [[CCArray array] retain];
 		_billboards = [[CCArray array] retain];
-		_shouldClearDepthBuffer = YES;
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
@@ -160,6 +186,7 @@
 		self.updateVisitor = [[self updateVisitorClass] visitor];
 		self.transformVisitor = [[self transformVisitorClass] visitor];
 		self.drawingSequenceVisitor = [CC3NodeSequencerVisitor visitorWithScene: self];
+		_backdrop = nil;
 		_fog = nil;
 		_activeCamera = nil;
 		_ambientLight = kCC3DefaultLightColorAmbientScene;
@@ -205,13 +232,12 @@
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
-	[_fog release];
-	_fog = [another.fog copy];												// retained
+	self.backdrop = [another.backdrop autoreleasedCopy];
+	self.fog = [another.fog autoreleasedCopy];
 	
 	_ambientLight = another.ambientLight;
 	_minUpdateInterval = another.minUpdateInterval;
 	_maxUpdateInterval = another.maxUpdateInterval;
-	_shouldClearDepthBuffer = another.shouldClearDepthBuffer;
 }
 
 
@@ -351,12 +377,25 @@
 }
 
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self illuminateWithVisitor: visitor];
+	[self illuminateWithVisitor: visitor];				// Light up your world!
+	[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
+	
+	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
+	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
+	[self drawShadows];									// Shadows are drawn with a different visitor
+}
 
-	[self.viewSurface activateWithVisitor: visitor];
-	[self visitForDrawingWithVisitor: visitor];
+/** 
+ * Template method for drawing the special node in the backdrop property.
+ *
+ * The backdrop is not drawn if the scene is overlaying the device camera (augmented reality).
+ */
+-(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if ( !_backdrop || self.cc3Layer.isOverlayingDeviceCamera) return;
 
-	[self drawShadowsWithVisitor: _shadowVisitor];
+	visitor.shouldDrawInClipSpace = YES;
+	[visitor visit: _backdrop];
+	visitor.shouldDrawInClipSpace = NO;
 }
 
 /**
@@ -421,15 +460,10 @@
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
 	[gl enableFog: NO];
 
-	// Set depth testing to 2D values.
+	// Set depth testing to 2D values and turn off
 	gl.depthFunc = GL_LEQUAL;
 	gl.depthMask = YES;
-	
-	// If 2D uses depth testing, clear the depth buffer, otherwise turn depth testing off
-	if (_shouldClearDepthBuffer)
-		[gl clearDepthBuffer];
-	else
-		[gl enableDepthTest: NO];
+	[self closeDepthTestWithVisitor: visitor];
 	
 	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
 	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
@@ -437,6 +471,18 @@
 	[gl enableScissorTest: NO];
 	
 	[gl align2DStateCache];		// Align the 2D GL state cache with current settings
+}
+
+/** 
+ * Template method that leaves depth testing in the state required by the 2D environment.
+ *
+ * Since most 2D drawing does not need to use depth testing, and clearing the depth buffer is
+ * a relatively costly operation, the standard behaviour is to simply turn depth testing off.
+ * However, subclasses can override this method to leave depth testing on and clear the depth
+ * buffer in order to permit 2D drawing to make use of depth testing.
+ */
+-(void) closeDepthTestWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.gl enableDepthTest: NO];
 }
 
 /**
@@ -490,6 +536,9 @@
 
 -(BOOL) doesContainShadows { return _shadowVisitor != nil; }
 
+/** Draw the shadows with the specialized shadow visitor. */
+-(void) drawShadows { [self drawShadowsWithVisitor: _shadowVisitor]; }
+
 /** Template method to draw shadows cast by the lights. */
 -(void) drawShadowsWithVisitor:  (CC3NodeDrawingVisitor*) visitor {
 	if ( !self.doesContainShadows ) return;
@@ -516,7 +565,6 @@
 /** Visits this scene for drawing (or picking) using the specified visitor. */
 -(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.deltaTime = _deltaFrameTime;
-	visitor.shouldClearDepthBuffer = self.shouldClearDepthBuffer;
 	visitor.drawingSequencer = _drawingSequencer;
 	visitor.shouldVisitChildren = YES;
 	[visitor visit: self];
@@ -761,15 +809,24 @@
 }
 
 -(void) pickTouchedNode {
-	if (_wasTouched) {
-		_wasTouched = NO;
+	if ( !_wasTouched ) return;
+	
+	_wasTouched = NO;
+	_wasPicked = YES;
 
-		[_scene.pickingSurface activateWithVisitor: _pickVisitor];
-		[_scene visitForDrawingWithVisitor: _pickVisitor];
-		_pickedNode = _pickVisitor.pickedNode;
-
-		_wasPicked = YES;
-	}
+	CC3OpenGL* gl = _pickVisitor.gl;
+	
+	// Use the picking surface (which may be different than the view surface).
+	// Clear color & depth before to ensure clean slate. Clear depth after in
+	// case surface is shared with view surface.
+	// We don't bother drawing the backdrop for picking.
+	[_scene.pickingSurface activateWithVisitor: _pickVisitor];
+	[gl clearColorAndDepthBuffers];
+	[_scene visitForDrawingWithVisitor: _pickVisitor];
+	[gl clearDepthBuffer];
+	
+	//	[_scene drawBackdropWithVisitor: _pickVisitor];
+	_pickedNode = _pickVisitor.pickedNode;
 }
 
 -(void) dispatchPickedNode {

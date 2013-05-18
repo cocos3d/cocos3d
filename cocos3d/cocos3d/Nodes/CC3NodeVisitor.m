@@ -61,7 +61,6 @@
 	_currentNode = nil;				// not retained
 	_startingNode = nil;			// not retained
 	[_camera release];
-//	_camera = nil;					// not retained
 	[_pendingRemovals release];
 	[super dealloc];
 }
@@ -83,7 +82,6 @@
 
 	if (aNode == _startingNode) {		// If we're back to the first node, finish up
 		[self close];					// Close the visitor
-//		_camera = nil;					// Not retained
 		_startingNode = nil;			// Not retained
 	}
 	
@@ -389,7 +387,7 @@
 @implementation CC3NodeDrawingVisitor
 
 @synthesize gl=_gl, drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
-@synthesize shouldDecorateNode=_shouldDecorateNode, shouldClearDepthBuffer=_shouldClearDepthBuffer;
+@synthesize shouldDecorateNode=_shouldDecorateNode;
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
 @synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
 @synthesize currentShaderProgram=_currentShaderProgram;
@@ -417,7 +415,12 @@
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
 	return aNode.hasLocalContent
 			&& [self isNodeVisibleForDrawing: aNode]
-			&& [aNode doesIntersectFrustum: _camera.frustum];
+			&& [self doesNodeIntersectFrustum: aNode];
+}
+
+/** If we're drawing in clip-space, ignore the frustum. */
+-(BOOL) doesNodeIntersectFrustum: (CC3Node*) aNode {
+	return _shouldDrawInClipSpace || [aNode doesIntersectFrustum: _camera.frustum];
 }
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode { return aNode.visible; }
@@ -448,8 +451,6 @@
 	[CC3GLProgram willBeginDrawingScene];
 	
 	[self openCamera];
-	
-	if (_shouldClearDepthBuffer) [self.gl clearDepthBuffer];
 }
 
 /** Template method that opens the 3D camera. */
@@ -546,7 +547,7 @@
 }
 
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx {
-	if (modelMtx && !_shouldDrawInClipSpace)
+	if (modelMtx)
 		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
 	else
 		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
@@ -567,16 +568,15 @@
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
 		_shouldDecorateNode = YES;
-		_shouldClearDepthBuffer = YES;
 		_shouldDrawInClipSpace = NO;
 	}
 	return self;
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@, clear depth: %@",
+	return [NSString stringWithFormat: @"%@, drawing nodes in seq %@, tex: %i of %i units, decorating: %@",
 			[super fullDescription], _drawingSequencer, _currentTextureUnitIndex, _textureUnitCount,
-			NSStringFromBoolean(_shouldDecorateNode), NSStringFromBoolean(_shouldClearDepthBuffer)];
+			NSStringFromBoolean(_shouldDecorateNode)];
 }
 
 @end
@@ -643,8 +643,6 @@
 			 self, _pickedNode, NSStringFromCCC4B(pixColor),
 			 NSStringFromCGPoint(self.scene.touchedNodePicker.glTouchPoint));
 	
-	[self drawBackdrop];	// Draw the backdrop behind the 3D scene
-
 	[super close];
 }
 
@@ -661,82 +659,6 @@
 -(void) draw: (CC3Node*) aNode {
 	[self paintNode: aNode];
 	[super draw: aNode];
-}
-
-/**
- * Template method that draws the backdrop behind the 3D scene.
- *
- * This method is automatically invoked after the 3D scene has been drawn in pure solid colors, and
- * prior to the second redrawing with the true coloring, to provide an empty canvas on which to draw
- * the real scene, and to make sure that the depth buffer is cleared before the second redrawing.
- *
- * This implementation simply clears the GL color buffer to create an empty canvas. If the CC3Layer
- * has a colored background, that color is used to clear the GL color buffer, otherwise the current
- * GL clearing color is used.
- *
- * To minimize flicker, if the background is translucent, the color buffer is not cleared.
- *
- * In addition, the depth buffer needs to be cleared in between drawing the pure colors for node picking,
- * and drawing the real scene, to ensure that the the two passes do not interfere with each other, which
- * would cause flicker. To that end, if this visitor is configured NOT to clear the depth buffer at the
- * start of each drawing pass, the depth buffer is cleared here when the color buffer is cleared.
- *
- * This use of clearing the color buffer, instead of redrawing the CC3Layer backdrop, is used because
- * redrawing the CC3Layer involves delving back into the 2D scene, and losing knowledge of the GL state.
- *
- * Subclasses can override to do something more sophisticated with the background.
- */
--(void) drawBackdrop {
-	CC3OpenGL* gl = self.gl;
-	CC3Layer* cc3Layer = self.scene.cc3Layer;
-	
-	// Only clear the color if the layer is opaque. This is to stop flicker
-	// of the background if it is translucent. Unfortunately, flicker WILL occur
-	// if BOTH the object and the CC3Layer background are translucent.
-	GLbitfield colorFlag = cc3Layer.isOpaque ? GL_COLOR_BUFFER_BIT : 0;
-	
-	// If the depth buffer will not be cleared as part of normal drawing,
-	// do it now, while we are clearing the color buffer.
-	GLbitfield depthFlag = _shouldClearDepthBuffer ? 0 : GL_DEPTH_BUFFER_BIT;
-
-	// Ensure that the depth buffer is writable (may have been turned off during node drawing)
-	if (depthFlag) gl.depthMask = YES;
-	
-	// If the CC3Layer has a background color, use it as the GL clear color
-	if (colorFlag) {
-		if (cc3Layer.isColored) {
-			// Remember the current GL clear color
-			ccColor4F currClearColor = gl->value_GL_COLOR_CLEAR_VALUE;
-			
-			// Retrieve the CC3Layer background color
-			ccColor4F layerColor = CCC4FFromColorAndOpacity(cc3Layer.color, cc3Layer.opacity);
-			
-			// Set the GL clear color from the layer color
-			gl.clearColor = layerColor;
-			LogTrace(@"%@ clearing background to %@ color: %@ %@ clearing depth buffer", self,
-					 cc3Layer, NSStringFromCCC4F(layerColor), (depthFlag ? @"and" : @"but not"));
-			
-			// Clear the color buffer redraw the background, and depth buffer if required
-			[gl clearBuffers: (colorFlag | depthFlag)];
-			
-			// Reinstate the current GL clear color
-			gl.clearColor = currClearColor;
-			
-		} else {
-			// Otherwise use the current clear color
-			LogTrace(@"%@ clearing background to default clear color: %@ %@ clearing depth buffer",
-					 self, NSStringFromCCC4F(gl->value_GL_COLOR_CLEAR_VALUE),
-					 (depthFlag ? @"and" : @"but not"));
-			
-			// Clear the color buffer redraw the background, and depth buffer if required
-			[gl clearBuffers: (colorFlag | depthFlag)];
-		}
-	} else if (depthFlag) {
-		LogTrace(@"%@ clearing depth buffer", self);
-		[gl clearBuffers: depthFlag];		// Clear the depth buffer only
-	} else {
-		LogTrace(@"%@ clearing neither color or depth buffer", self);
-	}
 }
 
 /** Maps the specified node to a unique color, and paints the node with that color. */

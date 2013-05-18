@@ -376,13 +376,7 @@
 -(void) invade: (CCMenuItemToggle*) svMI { [self.mashUpScene invade]; }
 
 /** The user has pressed the cycle lights button. Tell the 3D scene. */
--(void) cycleLights: (CCMenuItemToggle*) svMI {
-	if ([self.mashUpScene cycleLights]) {
-		[self setColor: ccc3(100, 120, 220)];
-	} else {
-		[self setColor: ccBLACK];
-	}
-}
+-(void) cycleLights: (CCMenuItemToggle*) svMI { [self.mashUpScene cycleLights]; }
 
 /** The user has pressed the zoom button. Tell the 3D scene. */
 -(void) cycleZoom: (CCMenuItemToggle*) svMI { [self.mashUpScene cycleZoom]; }
@@ -428,7 +422,7 @@
 	// Create the HUD CC3Layer, with a semi-transparent background, set its position
 	// to the touch-point (offset by the size of the layer), and set its final size.
 	// Start it with a small scale.
-	hudLayer = [HUDLayer layerWithColor: CCC4BFromCCC4F(ccc4f(1.0, 1.0, 1.0, 0.2))];
+	hudLayer = [HUDLayer node];
 	hudLayer.position = ccpSub(touchPoint, ccpMult(ccpFromSize(hudSize), 0.5));
 	hudLayer.contentSize = hudSize;
 	hudLayer.scale = 0.1;
@@ -486,11 +480,10 @@
 
 /** Toggles between opening and closing the HUD window. */
 -(void) toggleGlobeHUDFromTouchAt: (CGPoint) touchPoint {
-	if (hudLayer) {
+	if (hudLayer)
 		[self closeGlobeHUDFromTouchAt: touchPoint];
-	} else {
+	else
 		[self openGlobeHUDFromTouchAt: touchPoint];
-	}
 }
 
 

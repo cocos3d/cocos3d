@@ -459,8 +459,7 @@
 -(void) checkStencilledShadowPainter {
 	if (shadows) {
 		if (!stencilledShadowPainter) {
-			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithName: @"SSP"];
-			self.stencilledShadowPainter.light = self;
+			self.stencilledShadowPainter = [CC3StencilledShadowPainterNode nodeWithColor: kCCC4FBlack];
 			[self.scene updateRelativeLightIntensities];	//  Must be done after the ivar is set.
 		}
 	} else {

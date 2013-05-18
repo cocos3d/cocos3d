@@ -131,24 +131,16 @@
  *      method, and managing event handlers and gesture recognizers in the onOpenCC3Layer
  *      and onCloseCC3Layer methods.
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
- *   -# Invoke the play method of your CC3Scene to enable dynamic behaviour for the 3D scene.
  *   -# Schedule regular updates in your CC3Layer instance by invoking either the
  *      scheduleUpdate or schedule:interval: method.
- *   -# Create a CC3UIViewController and run your CC3Layer instance by invoking the runSceneOnNode: method.
+ *   -# Create a CC3UIViewController and run your CC3Layer instance by invoking the
+ *      runSceneOnNode: method.
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;
 	CCArray* _cc3GestureRecognizers;
 	BOOL _shouldAlwaysUpdateViewport : 1;
 }
-
-/**
- * Returns whether this layer is opaque.
- *
- * Return YES if the isColored property returns YES and
- * the opacity property returns 255, otherwise returns NO.
- */
-@property(nonatomic, readonly) BOOL isOpaque;
 
 
 #pragma mark iOS Gesture recognizers and touch handling
@@ -223,13 +215,28 @@
 -(BOOL) handleTouchType: (uint) touchType at: (CGPoint) touchPoint;
 
 
+#pragma mark CCRGBAProtocol and CCBlendProtocol support
+
+/** 
+ * Implementation of the CCRGBAProtocol color property.
+ *
+ * Returns and changes the value of the same property on the cc3Scene.
+ */
+@property(nonatomic, assign) ccColor3B color;
+
+/**
+ * Implementation of the CCRGBAProtocol opacity property.
+ *
+ * Returns and changes the value of the same property on the cc3Scene.
+ */
+@property(nonatomic, assign) GLubyte opacity;
+
+
 #pragma mark Allocation and initialization
 
 /**
- * Template method that is invoked automatically during initialization, regardless
- * of the actual init* method that was invoked. Subclasses can override to set up their
- * 2D controls and other initial state without having to override all of the possible
- * superclass init methods.
+ * Template method that is invoked automatically during initialization. You can override
+ * this method to add 2D controls to the layer.
  *
  * This default implementation does nothing. It is not necessary to invoke this
  * superclass implementation when overriding in a subclass.
