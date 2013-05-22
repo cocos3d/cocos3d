@@ -46,6 +46,12 @@
 	BOOL _isTextureCube : 1;
 }
 
+/**
+ * PVR textures cannot be flipped after loading. This property is overridden so
+ * that changes are ignored, and to always return NO.
+ */
+@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
+
 @end
 
 
@@ -84,35 +90,6 @@
 
 /** Returns whether this texture is a six-sided cube-map texture. */
 @property(nonatomic, readonly) BOOL isTextureCube;
-
-
-#pragma mark Allocation and Initialization
-
-/**
- * Initializes this instance by loaded content from the specified PVR file.
- *
- * The specified file path may be either an absolute path, or a path relative to the
- * application resource directory. If the file is located directly in the application
- * resources directory, the specified file path can simply be the name of the file.
- *
- * Returns nil if the file could not be loaded.
- */
--(id) initFromFile: (NSString*) aFilePath;
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3PVRTextureContentCC
-
-/**
- * A helper class used by the CC3PVRGLTexture class cluster during the loading of a
- * texture from a PVR file using the cocos2d library.
- */
-@interface CC3PVRTextureContentCC : CCTexturePVR
-
-/** Returns the number of mipmaps, including the full image, in the texture. */
-@property (nonatomic, readonly) NSUInteger numberOfMipmaps;
 
 
 #pragma mark Allocation and Initialization

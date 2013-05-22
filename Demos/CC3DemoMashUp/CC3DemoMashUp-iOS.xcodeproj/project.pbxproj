@@ -46,7 +46,6 @@
 		A933817014E16A9200FCA181 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A933816F14E16A9200FCA181 /* BeachBall.pod */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
-		A93FC632173DE11700F4B1DE /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A93FC631173DE11700F4B1DE /* TVTestCard.jpg */; };
 		A94736FB140E58E7006F410C /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */; };
 		A94736FC140E58E7006F410C /* CC3DemoMashUpScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CE140E58E7006F410C /* CC3DemoMashUpScene.m */; };
 		A94736FD140E58E7006F410C /* CCNodeAdornments.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D1140E58E7006F410C /* CCNodeAdornments.m */; };
@@ -54,6 +53,7 @@
 		A94736FF140E58E7006F410C /* Joystick.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D5140E58E7006F410C /* Joystick.m */; };
 		A9473700140E58E7006F410C /* Models.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736D7140E58E7006F410C /* Models.m */; };
 		A95A5C5714E45AC00013359F /* Crate.png in Resources */ = {isa = PBXBuildFile; fileRef = A95A5C5514E45AC00013359F /* Crate.png */; };
+		A963B546174982F600A20B20 /* PostProc.pfx in Resources */ = {isa = PBXBuildFile; fileRef = A963B545174982F600A20B20 /* PostProc.pfx */; };
 		A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */; };
 		A96B35A114EF2689002A7363 /* GrassWithLeaves.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */; };
 		A96B35A214EF2689002A7363 /* MountainGrass.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A96B359D14EF2689002A7363 /* MountainGrass.jpg */; };
@@ -64,6 +64,8 @@
 		A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */; };
 		A971D3121663EC6E00769DC5 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30F1663EC6E00769DC5 /* fps_images.png */; };
 		A97A31301688FD6A004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A312F1688FD6A004CBAA1 /* fps_images_1.png */; };
+		A9883E16174C047300127768 /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9883E12174C047300127768 /* TVTestCard.jpg */; };
+		A9883E18174C4D0200127768 /* samsung_tv-med.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9883E17174C4D0200127768 /* samsung_tv-med.pod */; };
 		A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */; };
 		A99EA4D21731580400595FE0 /* Cal3D File Formats.txt in Resources */ = {isa = PBXBuildFile; fileRef = A99EA3AF1731580300595FE0 /* Cal3D File Formats.txt */; };
 		A99EA4D31731580400595FE0 /* CC3CAFResource.m in Sources */ = {isa = PBXBuildFile; fileRef = A99EA3B11731580300595FE0 /* CC3CAFResource.m */; };
@@ -385,7 +387,6 @@
 		A933816F14E16A9200FCA181 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeachBall.pod; sourceTree = "<group>"; };
 		A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Arial32BMGlyph.png; sourceTree = "<group>"; };
-		A93FC631173DE11700F4B1DE /* TVTestCard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TVTestCard.jpg; sourceTree = "<group>"; };
 		A94736CB140E58E7006F410C /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
 		A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpLayer.m; sourceTree = "<group>"; };
 		A94736CD140E58E7006F410C /* CC3DemoMashUpScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpScene.h; sourceTree = "<group>"; };
@@ -399,6 +400,7 @@
 		A94736D6140E58E7006F410C /* Models.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Models.h; sourceTree = "<group>"; };
 		A94736D7140E58E7006F410C /* Models.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Models.m; sourceTree = "<group>"; };
 		A95A5C5514E45AC00013359F /* Crate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Crate.png; sourceTree = "<group>"; };
+		A963B545174982F600A20B20 /* PostProc.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = PostProc.pfx; sourceTree = "<group>"; };
 		A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassCloseUp.jpg; sourceTree = "<group>"; };
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
 		A96B359D14EF2689002A7363 /* MountainGrass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = MountainGrass.jpg; sourceTree = "<group>"; };
@@ -412,6 +414,8 @@
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
 		A97A312F1688FD6A004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
+		A9883E12174C047300127768 /* TVTestCard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TVTestCard.jpg; sourceTree = "<group>"; };
+		A9883E17174C4D0200127768 /* samsung_tv-med.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = "samsung_tv-med.pod"; sourceTree = "<group>"; };
 		A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BallBoxTexture.png; sourceTree = "<group>"; };
 		A99EA3AF1731580300595FE0 /* Cal3D File Formats.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Cal3D File Formats.txt"; sourceTree = "<group>"; };
 		A99EA3B01731580300595FE0 /* CC3CAFResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3CAFResource.h; sourceTree = "<group>"; };
@@ -1068,6 +1072,7 @@
 				A9C94ABD1451924700CE6BAD /* mallet.pod */,
 				A9D9F3D916AA351F00FBCA91 /* Masks */,
 				A96B359D14EF2689002A7363 /* MountainGrass.jpg */,
+				A963B545174982F600A20B20 /* PostProc.pfx */,
 				A9E9EE6216AD7A1D0086F025 /* RunningMen */,
 				A9D58DBB14F5B44500C3A778 /* ShadowButton48x48.png */,
 				A92D8A0714F6B377009458BE /* ShadowButtonLatched48x48.png */,
@@ -1080,7 +1085,7 @@
 				A924D158171306F20061DDA0 /* tex_base.bmp */,
 				A9FF6E17170DF7B100FC35C8 /* tex_base.png */,
 				A924D159171306F20061DDA0 /* tex_base.pvr */,
-				A93FC631173DE11700F4B1DE /* TVTestCard.jpg */,
+				A9883E0E174C047300127768 /* TV */,
 				A92DA7AF1427B5980051AFFA /* ZoomButton48x48.png */,
 			);
 			name = Resources;
@@ -1130,6 +1135,15 @@
 			);
 			name = "iOS Support";
 			path = "CC3DemoMashUp/iOS Support";
+			sourceTree = "<group>";
+		};
+		A9883E0E174C047300127768 /* TV */ = {
+			isa = PBXGroup;
+			children = (
+				A9883E17174C4D0200127768 /* samsung_tv-med.pod */,
+				A9883E12174C047300127768 /* TVTestCard.jpg */,
+			);
+			path = TV;
 			sourceTree = "<group>";
 		};
 		A99EA3AD1731580300595FE0 /* cocos3d */ = {
@@ -2121,7 +2135,9 @@
 				A99EA4EE1731580400595FE0 /* PVRT_Removed_Files.txt in Resources */,
 				A9E76845173411F80069F8BC /* ChangeLog in Resources */,
 				A9E76846173411F80069F8BC /* CMakeLists.txt in Resources */,
-				A93FC632173DE11700F4B1DE /* TVTestCard.jpg in Resources */,
+				A963B546174982F600A20B20 /* PostProc.pfx in Resources */,
+				A9883E16174C047300127768 /* TVTestCard.jpg in Resources */,
+				A9883E18174C4D0200127768 /* samsung_tv-med.pod in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

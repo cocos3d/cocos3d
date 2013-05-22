@@ -181,29 +181,7 @@
 
 #pragma mark Drawing
 
-/**
- * CCNode template method to draw this layer. Overridden to draw the colored backdrop and
- * then delegates 3D drawing to the contained CC3Scene instance.
- */
 -(void) draw {
-	[self drawBackdrop];
-	[self drawWorld];		// Invoke legacy method in case legacy app has overridden drawWorld
-}
-
-/** Delegates to the superclass to draw a colored backdrop if it has been established */
--(void) drawBackdrop {
-	LogTrace(@"%@ drawing backdrop", self);
-	[super draw];
-}
-
-// Deprecated legacy drawing method
--(void) drawWorld { [self drawScene]; }
-
-/**
- * Draws the 3D scene by delegating to the visit method of the contained CC3Scene instance.
- * If the shouldAlwaysUpdateViewport property is set to YES, then the viewport is updated first.
- */
--(void) drawScene {
 	if (_shouldAlwaysUpdateViewport) [self updateViewport];
 	[_cc3Scene drawScene];
 }

@@ -42,6 +42,9 @@
 
 @implementation CC3PVRGLTexture
 
+-(BOOL) shouldFlipVerticallyOnLoad { return NO; }
+-(void) setShouldFlipVerticallyOnLoad: (BOOL) shouldFlipVerticallyOnLoad {}
+
 @synthesize isTextureCube=_isTextureCube;
 
 -(BOOL) isTexture2D { return !self.isTextureCube; }
@@ -61,7 +64,6 @@
 	_hasPremultipliedAlpha = texContent.hasPremultipliedAlpha;
 	_isTextureCube = texContent.isTextureCube;
 	_coverage = CGSizeMake(1.0, 1.0);				// PVR textures are always POT
-	_isFlippedVertically = NO;						// PVR textures are not flipped
 	
 	LogTrace(@"Bound PVR texture ID %u", _textureID);
 	
@@ -69,8 +71,6 @@
 	self.textureParameters = self.isTextureCube
 								? [CC3GLTextureCube class].defaultTextureParameters
 								: [CC3GLTexture2D class].defaultTextureParameters;
-	
-	if (self.class.shouldGenerateMipmaps) [self generateMipmap];
 }
 
 @end
@@ -129,31 +129,5 @@
 }
 
 #endif	// CC3_IOS
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3PVRTextureContentCC
-
-@implementation CC3PVRTextureContentCC
-
--(NSUInteger) numberOfMipmaps {
-#if CC3_CC2_1
-	return numberOfMipmaps_;
-#else
-	return super.numberOfMipmaps;
-#endif
-}
-
-#pragma mark Allocation and Initialization
-
-/** Init from superclass loading method, and allow the texture ID to be managed externally. */
--(id) initFromFile: (NSString*) aFilePath {
-	if ( (self = [self initWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)]) ) {
-		self.retainName = YES;
-	}
-	return self;
-}
 
 @end

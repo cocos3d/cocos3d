@@ -385,11 +385,6 @@
 	[self drawShadows];									// Shadows are drawn with a different visitor
 }
 
-/** 
- * Template method for drawing the special node in the backdrop property.
- *
- * The backdrop is not drawn if the scene is overlaying the device camera (augmented reality).
- */
 -(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !_backdrop || self.cc3Layer.isOverlayingDeviceCamera) return;
 
@@ -409,7 +404,11 @@
 
 -(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
+	[self setupDraw3DWithVisitor: visitor];
+}
 
+-(void) setupDraw3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	
 	// Ensure that the first material and mesh will be rendered, even if same as last one
 	// that was rendered on the previous cycle.
 	[CC3Material resetSwitching];
@@ -422,12 +421,27 @@
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ closing the 3D scene", self);
 	
-	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
-	
-	CC3OpenGL* gl = visitor.gl;
+	// Setup drawing configuration for cocos2d
+	[self setupDraw2DWithVisitor: visitor];
 	
 	// Make sure the drawing surface is set back to the view surface
 	[self.viewSurface activateWithVisitor: visitor];
+
+	// Close depth testing, either by turning it off, or clearing the depth buffer
+	[self closeDepthTestWithVisitor: visitor];
+	
+	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
+	CC3OpenGL* gl = visitor.gl;
+	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
+	[gl enableScissorTest: NO];
+}
+
+-(void) setupDraw2DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	
+	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+	
+	CC3OpenGL* gl = visitor.gl;
 	
 	// Restore 2D standard blending
 	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
@@ -460,20 +474,14 @@
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
 	[gl enableFog: NO];
 
-	// Set depth testing to 2D values and turn off
+	// Set depth testing to 2D values
 	gl.depthFunc = GL_LEQUAL;
 	gl.depthMask = YES;
-	[self closeDepthTestWithVisitor: visitor];
-	
-	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
-	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
-	[gl enableScissorTest: NO];
 	
 	[gl align2DStateCache];		// Align the 2D GL state cache with current settings
 }
 
-/** 
+/**
  * Template method that leaves depth testing in the state required by the 2D environment.
  *
  * Since most 2D drawing does not need to use depth testing, and clearing the depth buffer is
@@ -485,25 +493,18 @@
 	[visitor.gl enableDepthTest: NO];
 }
 
-/**
- * Template method that turns on lighting of the 3D scene. Turns on global ambient lighting,
- * and iterates through the CC3Light instances, turning them on. If the 2D scene uses any
- * lights, they are disabled.
- */
 -(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[CC3Light disableReservedLightsWithVisitor: visitor];	// disable any lights used by 2D scene
 
 	LogTrace(@"%@ lighting is %@", self, (self.isIlluminated ? @"on" : @"off"));
 
-	CC3OpenGL* gl = visitor.gl;
-
 	// Set the ambient light for the whole scene
-	gl.sceneAmbientLightColor = _ambientLight;
+	visitor.gl.sceneAmbientLightColor = _ambientLight;
 
 	// Turn on any individual lights
 	for (CC3Light* lgt in _lights) [lgt turnOnWithVisitor: visitor];
 
-	[self drawFogWithVisitor: _viewDrawingVisitor];
+	[self drawFogWithVisitor: visitor];
 }
 
 -(BOOL) isIlluminated {
@@ -536,7 +537,6 @@
 
 -(BOOL) doesContainShadows { return _shadowVisitor != nil; }
 
-/** Draw the shadows with the specialized shadow visitor. */
 -(void) drawShadows { [self drawShadowsWithVisitor: _shadowVisitor]; }
 
 /** Template method to draw shadows cast by the lights. */
@@ -825,7 +825,6 @@
 	[_scene visitForDrawingWithVisitor: _pickVisitor];
 	[gl clearDepthBuffer];
 	
-	//	[_scene drawBackdropWithVisitor: _pickVisitor];
 	_pickedNode = _pickVisitor.pickedNode;
 }
 

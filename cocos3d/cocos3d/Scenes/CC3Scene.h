@@ -204,13 +204,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * and then reads the color of the pixel under the touch point to identify the object
  * under the touch point. This is performed under the covers, and the scene is immediately
  * redrawn in true colors and textures before being presented to the screen, so the user
- * is never aware that the scene was drawn twice. However, be aware that, if a translucent
- * or transparent object has nothing but the CC3Layer background color behind it, AND that
- * CC3Layer background color is also translucent or transparent, you might notice an
- * unavoidable flicker of the translucent node. To avoid this, you can use a backdrop or
- * skybox in your 3D scene. This issue only occurs during node picking, and only when
- * BOTH the node and the CC3Layer background colors are translucent or transparent, and
- * the backgound color is directly behind the node.
+ * is never aware that the scene was drawn twice.
  *
  * Depending on the complexity of the application, it may instantiate a single CC3Scene,
  * instance, or multiple instances if the application progresses from scene to scene.
@@ -725,6 +719,12 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * You can override this method to customize the scene rendering flow, such as performing
  * multiple rendering passes, or adding post-processing effects.
  *
+ * Several template methods are available to provide "building blocks" to help you build
+ * the functionality in this method, and which you can individually customize as needed:
+ *   - illuminateWithVisitor: - turns on scene lighting
+ *   - drawBackdropWithVisitor: - draws an optional fixed backdrop
+ *   - drawShadows - draws shadows
+ *
  * To maintain performance, by default, the depth buffer is not specifically cleared when 3D
  * drawing begins. If this scene is drawing to a surface that already has depth information
  * rendered, you should override this method, clear the depth buffer before continuing with
@@ -741,25 +741,44 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
+/** Template method that draws shadows with the visitor in the shadowVisitor property. */
+-(void) drawShadows;
+
 /**
- * Template method that opens the GL drawing environment for 3D drawing.
+ * Template method that turns on lighting of the 3D scene.
+ *
+ * This method is usually invoked from the drawSceneContentWithVisitor: method.
+ *
+ * Default implementation turns on global ambient lighting, and each CC3Light instance.
+ */
+-(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Template method for drawing the special node in the backdrop property.
+ *
+ * The backdrop is not drawn if the scene is overlaying the device camera (augmented reality).
+ */
+-(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Template method that sets up the GL drawing environment for 3D drawing.
  *
  * This method is invoked automatically during the transition between 2D and 3D drawing,
  * including between the CC3Layer and the CC3Scene, and when returning from rendering
  * a CC3Billboard containing a 2D cocos2d CCNode. Normally the application never needs
  * to invoke this method directly.
  */
--(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) setupDraw3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Template method that reverts the GL drawing environment back to the configuration
+ * Template method that sets up the GL drawing environment back to the configuration
  * needed for 2D drawing.
  *
- * This method is invoked automatically during the transition back to 2D drawing, incluing
- * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 2D
- * cocos2d CCNode. Normally the application never needs to invoke this method directly.
+ * This method is invoked automatically during the transition to 2D drawing, including
+ * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 
+ * 2D cocos2d CCNode. Normally the application never needs to invoke this method directly.
  */
--(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) setupDraw2DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that leaves depth testing in the state required by the 2D environment.

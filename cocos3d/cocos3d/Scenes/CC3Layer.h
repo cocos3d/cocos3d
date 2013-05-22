@@ -43,8 +43,6 @@
  * will be rendered either over or under the 3D scene, based on their individual Z-order.
  * In particular, 2D controls such as menus, sprites, labels, health bars, joysticks, etc,
  * can be overlayed on the 3D scene simply by adding them as children of this layer.
- * Similarly, a 2D backdrop could be rendered behind the 3D scene by adding an appropriate
- * CCNode as a child with a negative Z-order.
  *
  * Like other CCNodes, this layer can be added to another 2D node, and given a contentSize,
  * position, and scale. You can even dynamically move and scale the embedded CC3Layer

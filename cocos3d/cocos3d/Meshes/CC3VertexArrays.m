@@ -1323,7 +1323,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 -(void) alignWithTexture: (CC3Texture*) texture {
 	if (!texture) return;
-	if ( XOR(_expectsVerticallyFlippedTextures, texture.isFlippedVertically) ) {
+	if ( XOR(_expectsVerticallyFlippedTextures, texture.isUpsideDown) ) {
 		[self alignWithInvertedTextureMapSize: texture.coverage];
 	} else {
 		[self alignWithTextureMapSize: texture.coverage];

@@ -272,7 +272,7 @@
  * same property on each CC3VertexTextureCoordinates instance created and loaded
  * by this resource. When a texture is assigned to cover the mesh, the value of
  * that CC3VertexTextureCoordinates property is used in combination with the value
- * of the isFlippedVertically property of a texture to determine whether the texture
+ * of the isUpsideDown property of a texture to determine whether the texture
  * coordinates should automatically be reoriented when displaying that texture.
  */
 @property(nonatomic, assign) BOOL expectsVerticallyFlippedTextures;

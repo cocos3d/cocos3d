@@ -165,7 +165,7 @@
  * For meshes that are based on vertex arrays, this property is used to set the same property on
  * each CC3VertexTextureCoordinates instance created and loaded by this resource. When a texture
  * is assigned to cover the mesh, the value of that CC3VertexTextureCoordinates property is used
- * in combination with the value of the isFlippedVertically property of a texture to determine
+ * in combination with the value of the isUpsideDown property of a texture to determine
  * whether the texture coordinates should automatically be reoriented when displaying that texture.
  * 
  * The initial value of this property is determined by the value of the class-side

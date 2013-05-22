@@ -82,14 +82,15 @@
 	GLuint _textureID;
 	CC3IntSize _size;
 	CGSize _coverage;
+	CCTexture2DPixelFormat _pixelFormat;
 	GLenum _minifyingFunction;
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
 	GLenum _verticalWrappingFunction;
 	BOOL _texParametersAreDirty : 1;
 	BOOL _hasMipmap : 1;
-	BOOL _isFlippedVertically : 1;
-	BOOL _shouldFlipVerticallyOnLoad : 1;		// Used by some subclasses
+	BOOL _isUpsideDown : 1;
+	BOOL _shouldFlipVerticallyOnLoad : 1;
 	BOOL _hasPremultipliedAlpha : 1;
 }
 
@@ -128,6 +129,9 @@
  */
 @property(nonatomic, readonly) CGSize coverage;
 
+/** Returns the pixel format of the texture. */
+@property(nonatomic, readonly) CCTexture2DPixelFormat pixelFormat;
+
 /**
  * Indicates whether the alpha channel of this texture has already been multiplied
  * into each of the RGB color channels.
@@ -149,7 +153,7 @@
  * The value of this property is determined from the contents of the texture file, but
  * you can set this property directly to override the value determined from the file.
  */
-@property(nonatomic, assign) BOOL isFlippedVertically;
+@property(nonatomic, assign) BOOL isUpsideDown;
 
 /**
  * Returns the GL target of this texture.
@@ -157,6 +161,42 @@
  * Returns GL_TEXTURE_2D if this is a 2D texture, or GL_TEXTURE_CUBE_MAP if this is a cube map texture.
  */
 @property(nonatomic, readonly) GLenum textureTarget;
+
+/**
+ * Indicates whether this instance will flip the texture vertically during loading.
+ *
+ * Under iOS and OSX, most GL textures are loaded into memory upside-down because of the
+ * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
+ *
+ * If this property is set to YES during loading, the texture will be flipped in memory so
+ * that it is oriented the right way up.
+ *
+ * It is possible to compensate for an upside-down using texture coordinates. You can set
+ * this property to NO prior to loading in order to leave the texture upside-down and use
+ * texture coordinates to compensate.
+ *
+ * The initial value of this property is set to the value of the class-side
+ * defaultShouldFlipVerticallyOnLoad property.
+ */
+@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value of this class-side property is YES, indicating that instances will flip
+ * all 2D textures the right way up during loading.
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Mipmaps
@@ -266,6 +306,9 @@
  * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the width of this texture is a
  * power-of-two. If the width is not a power-of-two, this property will always return GL_CLAMP_TO_EDGE.
  *
+ * This property must be set to GL_CLAMP_TO_EDGE when using this texture as a rendering target
+ * as an attachment to a rendering surface such as a framebuffer ("render-to-texture").
+ *
  * The initial value of this property is set by the defaultTextureParameters class-side property,
  * and will be GL_REPEAT if the width of this texture is a power-of-two, or GL_CLAMP_TO_EDGE if not.
  */
@@ -284,6 +327,9 @@
  *
  * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the height of this texture is a
  * power-of-two. If the height is not a power-of-two, this property will always return GL_CLAMP_TO_EDGE.
+ *
+ * This property must be set to GL_CLAMP_TO_EDGE when using this texture as a rendering target
+ * as an attachment to a rendering surface such as a framebuffer ("render-to-texture").
  *
  * The initial value of this property is set by the defaultTextureParameters class-side property,
  * and will be GL_REPEAT if the height of this texture is a power-of-two, or GL_CLAMP_TO_EDGE if not.
@@ -338,7 +384,10 @@
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
-#pragma mark Texture file loading
+#pragma mark Texture sizing and file loading
+
+/** Resizes this texture to the specified dimensions and clears all texture content. */
+-(void) resizeTo: (CC3IntSize) size;
 
 /**
  * Loads the single texture file at the specified file path, and returns whether the loading was successful.
@@ -493,42 +542,6 @@
  */
 @interface CC3GLTexture2D : CC3GLTexture
 
-/**
- * Indicates whether this instance will flip the texture vertically during loading.
- *
- * Under iOS and OSX, most GL textures are loaded into memory upside-down because of the 
- * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
- *
- * If this property is set to YES during loading, the texture will be flipped in memory so
- * that it is oriented the right way up.
- *
- * It is possible to compensate for an upside-down using texture coordinates. You can set
- * this property to NO prior to loading in order to leave the texture upside-down and use
- * texture coordinates to compensate.
- *
- * The initial value of this property is set to the value of the class-side
- * defaultShouldFlipVerticallyOnLoad property.
- */
-@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
-
-/**
- * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
- * for instances of this class.
- *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
- */
-+(BOOL) defaultShouldFlipVerticallyOnLoad;
-
-/**
- * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
- * for instances of this class.
- *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
- */
-+(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
-
 
 #pragma mark Allocation and Initialization
 
@@ -575,42 +588,6 @@
  * This class is used for all cube-map texture types except PVR.
  */
 @interface CC3GLTextureCube : CC3GLTexture
-
-/**
- * Indicates whether this instance will flip the textures vertically during loading.
- *
- * Under iOS and OSX, most GL textures are loaded into memory upside-down because of the
- * difference in vertical orientation between the OpenGL and CoreGraphics coordinate systems.
- *
- * If this property is set to YES during loading, the face textures will be flipped in
- * memory so that they are oriented the right way up.
- *
- * It is possible to compensate for an upside-down using texture coordinates. You can set
- * this property to NO prior to loading in order to leave the texture upside-down and use
- * texture coordinates to compensate.
- *
- * The initial value of this property is set to the value of the class-side
- * defaultShouldFlipVerticallyOnLoad property.
- */
-@property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
-
-/**
- * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
- * for instances of this class.
- *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
- */
-+(BOOL) defaultShouldFlipVerticallyOnLoad;
-
-/**
- * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
- * for instances of this class.
- *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
- */
-+(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Texture file loading
@@ -898,14 +875,26 @@
  */
 @interface CC3Texture2DContent : CCTexture2D {
 	const GLvoid* _imageData;
+	BOOL _isUpsideDown : 1;
 }
 
 /** Returns a pointer to the texture image data. */
 @property(nonatomic, readonly) const GLvoid* imageData;
 
+/**
+ * Indicates whether this texture is upside-down.
+ *
+ * The vertical axis of the coordinate system of OpenGL is inverted relative to the CoreGraphics
+ * view coordinate system. As a result, any texture content created from a CGImage will be upside
+ * down. This includes texture content loaded from a file by an instance of this class.
+ */
+@property(nonatomic, readonly) BOOL isUpsideDown;
+
 /** 
  * Flips this texture vertically, to compensate for the opposite orientation
  * of vertical graphical coordinates between OpenGL and iOS & OSX.
+ *
+ * The value of the isUpsideDown property is toggled after flipping.
  */
 -(void) flipVertically;
 
@@ -920,10 +909,16 @@
  * resources directory, the specified file path can simply be the name of the file.
  *
  * Returns nil if the file could not be loaded.
+ *
+ * The value of the isUpsideDown is set to YES.
  */
 -(id) initFromFile: (NSString*) aFilePath;
 
-/** Initializes this instance with content in the specified CGImage. */
+/** 
+ * Initializes this instance from the content in the specified CGImage.
+ *
+ * The value of the isUpsideDown is set to YES.
+ */
 -(id) initWithCGImage: (CGImageRef) cgImg;
 
 /** 
@@ -931,6 +926,8 @@
  * specific content.
  *
  * This instance can be used to initialize an empty CC3GLTexture, to which content can be added later.
+ *
+ * The value of the isUpsideDown is set to NO.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
 

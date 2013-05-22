@@ -57,7 +57,7 @@
 
 -(BOOL) hasPremultipliedAlpha { return (_texture && _texture.hasPremultipliedAlpha); }
 
--(BOOL) isFlippedVertically { return (_texture && _texture.isFlippedVertically); }
+-(BOOL) isUpsideDown { return (_texture && _texture.isUpsideDown); }
 
 -(BOOL) isTexture2D { return (_texture && _texture.isTexture2D); }
 
@@ -70,6 +70,9 @@
 -(void) setLightDirection: (CC3Vector) aDirection { _textureUnit.lightDirection = aDirection; }
 
 -(BOOL) isBumpMap { return (_textureUnit && _textureUnit.isBumpMap); }
+
+// Deprecated
+-(BOOL) isFlippedVertically { return self.isUpsideDown; }
 
 
 #pragma mark Texture file loading

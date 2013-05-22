@@ -49,6 +49,9 @@
 	CC3GLViewSurfaceManager* _surfaceManager;
 }
 
+/** This class requires a layer of type CAEAGLLayer. */
+@property(nonatomic, readonly, retain) CAEAGLLayer* layer;
+
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
 

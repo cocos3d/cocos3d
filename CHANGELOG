@@ -99,6 +99,7 @@ cocos3d 2.0.0 - 2013/05/31
 		- [API change] CC3NodesResource expectsVerticallyFlippedTextures property now defaults to NO.
 			- if you have a POD model that expects the texture to be upside down, use the CC3PODResourceNode nodeFromFile:expectsVerticallyFlippedTextures: method, passing YES to indicate that the mesh expects the texture to be upside-down.
 				- see the addMascots method in CC3DemoMashUpScene for an example of this use.
+		- [API change] Renamed CC3Texture isFlippedVertically property to isUpsideDown and deprecated isFlippedVertically.
 	- Added CC3GLTexture class cluster to represent loaded textures:
 		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
 		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
@@ -450,7 +451,7 @@ cocos3d 0.7.0 - 2012/04/12
     - The alignment of textures with meshes, for both NPOT and iOS-inverted textures is now completely automatic when a texture or material is assigned to a CC3MeshNode:
         - [API change] Deprecated CC3Node alignTextures and alignInvertedTextures methods.
         - [API change] Deprecated CC3Mesh alignWithTexturesIn: and alignWithInvertedTexturesIn: methods.
-        - CC3Texture now supports a isFlippedVertically property that is set during texture loading to indicate whether the texture was flipped vertically by the iOS on loading.
+        - CC3Texture now supports a isUpsideDown property that is set during texture loading to indicate whether the texture was flipped vertically by the iOS on loading.
 	    - CC3MeshNode, CC3Mesh, and CC3VertexTextureCoordinates now support a expectsVerticallyFlippedTextures property to indicate whether the mesh expects the texture to be vertically flipped.
 	    - The CC3Resource expectsVerticallyFlippedTextures property can be set prior to loading a resource to indicate whether the resource expects the textures to be flipped vertically.
 	    - CC3VertexArrayMesh textureCoordinatesForTextureUnit: now returns the highest number texture coordinates array if request is for a texture unit for which there is no texture coordinates.

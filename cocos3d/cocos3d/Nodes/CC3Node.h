@@ -2097,12 +2097,12 @@ typedef enum {
  * may result in textures being loaded upside-down.
  *
  * For each descendant mesh node, the value of this property is used in
- * combination with the value of the  isFlippedVertically property of a texture
+ * combination with the value of the  isUpsideDown property of a texture
  * to determine whether the texture will be oriented correctly when displayed
  * using these texture coordinates.
  *
  * When a texture or material is assigned to a mesh node, the value of this
- * property is compared with the isFlippedVertically property of the texture to
+ * property is compared with the isUpsideDown property of the texture to
  * automatically determine whether the texture coordinates of the mesh need to
  * be flipped vertically in order to display the texture correctly. If needed,
  * the texture coordinates will be flipped automatically. As part of that inversion,

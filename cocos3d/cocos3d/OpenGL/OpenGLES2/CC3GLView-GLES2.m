@@ -65,21 +65,20 @@
 	[super dealloc];
 }
 
+-(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
+
 -(CC3GLViewSurfaceManager*) surfaceManager { return _surfaceManager; }
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
-
 -(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
-	CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
-	
-	eaglLayer.opaque = YES;
-	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-									[NSNumber numberWithBool:preserveBackbuffer_],
-									kEAGLDrawablePropertyRetainedBacking,
-									pixelformat_,
-									kEAGLDrawablePropertyColorFormat,
-									nil];
+	self.layer.opaque = YES;
+	self.layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+									 [NSNumber numberWithBool:preserveBackbuffer_],
+									 kEAGLDrawablePropertyRetainedBacking,
+									 pixelformat_,
+									 kEAGLDrawablePropertyColorFormat,
+									 nil];
 
 	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2 sharegroup: sharegroup];
 	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
@@ -92,14 +91,11 @@
 	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithColorFormat: colorFormat
 															andDepthFormat: CC2_DEPTH_FORMAT
 														   andPixelSamples: CC2_REQUESTED_SAMPLES];
-	
-	discardFramebufferSupported_ = [[CCConfiguration sharedConfiguration] supportsDiscardFramebuffer];
-	
 	return YES;
 }
 
 -(void) layoutSubviews {
-	[_surfaceManager resizeFromCALayer: (CAEAGLLayer*)self.layer withContext: CC2_CONTEXT];
+	[_surfaceManager resizeFromCALayer: self.layer withContext: CC2_CONTEXT];
 	CC2_SIZE = CGSizeFromCC3IntSize(_surfaceManager.size);
 	[CCDirector.sharedDirector reshapeProjection: CC2_SIZE];		// Issue #914 #924
 	

@@ -493,11 +493,11 @@
  * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the 
- * isFlippedVertically property of a texture to determine whether the texture
+ * isUpsideDown property of a texture to determine whether the texture
  * will be oriented correctly when displayed using these texture coordinates.
  *
  * When a texture or material is assigned to this mesh node, the value of this
- * property is compared with the isFlippedVertically property of the texture to
+ * property is compared with the isUpsideDown property of the texture to
  * automatically determine whether these texture coordinates need to be flipped
  * vertically in order to display the texture correctly. If needed, the texture
  * coordinates will be flipped automatically. As part of that inversion, the
@@ -541,11 +541,11 @@
  * formats except PVR format will be oriented upside-down after loading.
  *
  * The value of this property is used in combination with the value of the 
- * isFlippedVertically property of a texture to determine whether the texture
+ * isUpsideDown property of a texture to determine whether the texture
  * will be oriented correctly when displayed using these texture coordinates.
  *
  * When a texture or material is assigned to this mesh node, the value of this
- * property is compared with the isFlippedVertically property of the texture to
+ * property is compared with the isUpsideDown property of the texture to
  * automatically determine whether these texture coordinates need to be flipped
  * vertically in order to display the texture correctly, and if needed, the
  * texture coordinates will be flipped automatically. As part of that inversion,

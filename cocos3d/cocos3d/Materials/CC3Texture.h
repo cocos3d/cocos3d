@@ -133,7 +133,10 @@
  * This is a convenience property that simply returns the value of the same property on the
  * underlying CC3GLTexture instance.
  */
-@property(nonatomic, readonly) BOOL isFlippedVertically;
+@property(nonatomic, readonly) BOOL isUpsideDown;
+
+/** @deprecated Renamed to isUpsideDown. */
+@property(nonatomic, readonly) BOOL isFlippedVertically DEPRECATED_ATTRIBUTE;
 
 /** Returns whether this texture is a standard two-dimentional texture. */
 @property(nonatomic, readonly) BOOL isTexture2D;

@@ -1897,6 +1897,36 @@ static inline GLfloat CCC4FIntensity(ccColor4F color) {
 	return (color.r + color.g + color.b) * kCC3OneThird;
 }
 
+/**
+ * Returns a grayscale reprsentation of the specified color. Each of the RGB components of
+ * the returned color contains a luma value calculated using the ITU-R BT.709 conversion
+ * for high-definition television (HDTV):
+ *
+ *   (0.2126 * R) + (0.7152 * G) + (0.0722 * B),
+ *
+ * where R, G & B are from the specified color. The alpha component of the returned color
+ * is the same as that of the specified color.
+ */
+static inline ccColor4F CCC4FGrayscaleBT709(ccColor4F color) {
+	GLfloat luma = (0.2126 * color.r) + (0.7152 * color.g) + (0.0722 * color.b);
+	return ccc4f(luma, luma, luma, color.a);
+}
+
+/**
+ * Returns a grayscale reprsentation of the specified color. Each of the RGB components of
+ * the returned color contains a luma value calculated using the ITU-R BT.601 conversion
+ * for standard-definition television (SDTV):
+ *
+ *   (0.299 * R) + (0.587 * G) + (0.114 * B),
+ *
+ * where R, G & B are from the specified color. The alpha component of the returned color
+ * is the same as that of the specified color.
+ */
+static inline ccColor4F CCC4FGrayscaleBT601(ccColor4F color) {
+	GLfloat luma = (0.299 * color.r) + (0.587 * color.g) + (0.114 * color.b);
+	return ccc4f(luma, luma, luma, color.a);
+}
+
 /** Returns whether the two colors are equal by comparing their respective components. */
 static inline BOOL CCC4FAreEqual(ccColor4F c1, ccColor4F c2) {
 	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;

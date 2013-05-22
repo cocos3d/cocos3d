@@ -1315,11 +1315,11 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the 
- * isFlippedVertically property of a texture to determine whether the texture
+ * isUpsideDown property of a texture to determine whether the texture
  * will be oriented correctly when displayed using these texture coordinates.
  *
  * The alignWithTexture: method compares the value of this property with the
- * isFlippedVertically property of the texture to automatically determine
+ * isUpsideDown property of the texture to automatically determine
  * whether these texture coordinates need to be flipped vertically in order
  * to display the texure correctly, and will do so if needed. As part
  * of that inversion, the value of this property will also be flipped, to
@@ -1425,14 +1425,14 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * specified texture.
  *
  * If the value of the expectsVerticallyFlippedTextures property is different
- * than the value of the isFlippedVertically property of the specified texture, the
+ * than the value of the isUpsideDown property of the specified texture, the
  * texture coordinates are not oriented vertically for the texture. To align them,
  * this method delegates to the alignWithInvertedTextureMapSize:, passing the mapSize
  * of the specified texture, to both align the texture coordinates to the usable size
  * of the texture, and to flip the texture coordinates to align with the texture.
  *
  * If the value of the expectsVerticallyFlippedTextures property is the same
- * as the value of the isFlippedVertically property of the specified texture, the
+ * as the value of the isUpsideDown property of the specified texture, the
  * texture coordinates are correctly oriented vertically for the texture. This
  * method delegates to the alignWithTextureMapSize:, passing the mapSize of the
  * specified texture, to align the texture coordinates to the usable size of

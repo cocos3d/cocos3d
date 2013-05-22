@@ -50,6 +50,14 @@ typedef enum {
 	kCameraZoomBackTopRight,	/**< Zoomed out to back top right view of complete scene. */
 } CameraZoomType;
 
+/** Enumeration of lighting options. */
+typedef enum {
+	kLightingSun,				/**< Sunshine. */
+	kLightingFog,				/**< Sunshine with fog. */
+	kLightingFlashlight,		/**< Nightime with flashlight. */
+	kLightingGrayscale,			/**< Sunshine with grayscale post-processing filter. */
+} LightingType;
+
 /**
  * A sample application-specific CC3Scene subclass that demonstrates a number of 3D features:
  *   - loading mesh models, cameras and lights from 3D model files stored in the PowerVR POD format
@@ -114,6 +122,8 @@ typedef enum {
  *   - Using OpenGL ES 2.0 shaders.
  *   - Loading PowerVR PFX effects files and applying them to materials
  *   - Environmental reflections using a cube mapped texture.
+ *   - Render-to-texture the scene for display within the scene.
+ *   - Render-to-texture to create additional visual effects using post-rendering image processing.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -289,6 +299,15 @@ typedef enum {
  * beach ball will actually select the node representing the complete beach ball, and the entire
  * beach ball is highlighted.
  *
+ * Behind the beach ball is a television. Touching the television will turn it on and have it
+ * display a feed from the camera tracking the two running men. This demonstrates the ability
+ * to render a scene (or a part of a scene) to a texture, and include that texture into the
+ * scene, as well as the abilty to use more than one camera to film the same scene. Take note
+ * of the TV image as the runners pass in front of the television. You will see an infinitely
+ * recursive image of the runners. Touching the television again will turn it off. Rendering
+ * to the television screen only occurs when the television is turned on and in view of the
+ * active camera.
+ *
  * Touching the switch-view button again will point the camera at yet another teapot, this one
  * textured with a metallic texture, and rotating on it's axis. When running GLSL shaders, under
  * either OpenGL ES 2.0 on iOS or OpenGL on OSX, this teapot reflects a static shot of the
@@ -450,13 +469,13 @@ typedef enum {
  * farther away an object is, the less visible it is through the fog. The effect of the fog
  * is best appreciated with the scene is full of the invading robot arms.
  *
- * Touching the illumination button a second time turns the sun and fog off and turns on a
- * spotlight that is attached to the camera. This spotlight is tightly focused. Objects that
- * are away from the center of the spotlight are illuminated less than objects in the center
- * of the spotlight. The intensity of the spotlight beam also attenuates with distance.
- * Objects that are farther away from the spotlight are less illumnated than objects that are
- * closer to the spotlight. Since it is attached to the camera, it moves as the camera moves,
- * as if you were walking through the scene carrying a flashlight.
+ * Touching the illumination button again turns the sun and fog off and turns on a spotlight
+ * that is attached to the camera. This spotlight is tightly focused. Objects that are away
+ * from the center of the spotlight are illuminated less than objects in the center of the
+ * spotlight. The intensity of the spotlight beam also attenuates with distance. Objects that
+ * are farther away from the spotlight are less illumnated than objects that are closer to
+ * the spotlight. Since it is attached to the camera, it moves as the camera moves, as if 
+ * you were walking through the scene carrying a flashlight.
  *
  * If you shine the spotlight on the purple floating head, you might notice two things.
  * The first is that the head is correctly illuminated from the position of the spotlight.
@@ -468,7 +487,13 @@ typedef enum {
  * illumination outside the beam of the spotlight. This is something to keep in mind when
  * combining the techniques of spotlights and bump-mapping.
  *
- * Touching the illumination button a third time will bring back the original sunshine.
+ * Touching the illumination button again displays the view in grayscale, as if using
+ * black & white film. This effect is created by rendering the scene in color to a texture
+ * and then rendering the texture to the screen using a shader that converts the texture
+ * colors to grayscale. This is only one example of such post-rendering processing. Using the
+ * same techique, you could add bloom effects, blurring, or other specialized colorizations.
+ *
+ * Touching the illumination button again will bring back the original sunshine.
  *
  * Touching the zoom button (with the plus-sign) rotates the camera so that it points
  * towards the center of the scene, and moves the camera away from the scene along the
@@ -544,14 +569,20 @@ typedef enum {
 	CC3Node* _camTarget;
 	CC3Camera* _runnerCam;
 	CC3Light* _runnerLamp;
+	CC3MeshNode* _tvScreen;
 	CC3Node* _selectedNode;
 	CC3GLFramebuffer* _tvSurface;
+	CC3GLFramebuffer* _preProcSurface;
+	CC3MeshNode* _postProcNode;
 	CGPoint _lastTouchEventPoint;
 	struct timeval _lastTouchEventTime;
 	CameraZoomType _cameraZoomType;
+	LightingType _lightingType;
 	CC3Ray _lastCameraOrientation;
 	GLubyte _bmLabelMessageIndex;
-	BOOL _isManagingShadows;
+	BOOL _isManagingShadows : 1;
+	BOOL _isDisplayingAsGrayscale : 1;
+	BOOL _isTVOn : 1;
 }
 
 /**
@@ -592,12 +623,13 @@ typedef enum {
 -(void) invade;
 
 /**
- * Cycles between different lighting conditions. Initially the sun is shining on a clear scene.
- * When this method is invoked, fog is displayed. Invoking a second time, the sun and fog are
- * removed and the spotlight is turned on. Invoking a third time re-ignites the sun.
- * Returns whether or not the sun is now on.
+ * Cycles between different lighting and post-processing conditions:
+ *   - Sunshine on a clear day.
+ *   - Sunshine on a foggy day.
+ *   - Nighttime with the scene lit by a flashlight
+ *   - Sunshine on a clear day through a black & white camera (grayscale).
  */
--(BOOL) cycleLights;
+-(void) cycleLights;
 
 /**
  * Toggles between zooming out to show the entire scene, and zooming back in to the

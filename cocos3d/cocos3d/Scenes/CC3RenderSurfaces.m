@@ -31,6 +31,7 @@
 
 #import "CC3RenderSurfaces.h"
 #import "CC3OpenGL.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark -
@@ -158,8 +159,9 @@
 	[super dealloc];
 }
 
+-(CC3IntSize) size { return _texture.size; }
 
-#pragma mark Framebuffer attachment
+-(void) resizeTo: (CC3IntSize) size { [_texture resizeTo: size]; }
 
 -(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
 	[CC3OpenGL.sharedGL bindTexture2D: _texture.textureID
@@ -200,9 +202,11 @@
 
 -(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
 	if ( (self = [super init]) ) {
-		_texture = [texture retain];
 		_face = face;
 		_mipmapLevel = mipmapLevel;
+		_texture = [texture retain];
+		_texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
+		_texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
 	}
 	return self;
 }
@@ -266,18 +270,6 @@
 	[_stencilAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
 }
 
--(CC3GLRenderbuffer*) colorBuffer { return (CC3GLRenderbuffer*)_colorAttachment; }
-
--(CC3GLRenderbuffer*) depthBuffer { return (CC3GLRenderbuffer*)_depthAttachment; }
-
--(CC3GLRenderbuffer*) stencilBuffer { return (CC3GLRenderbuffer*)_stencilAttachment; }
-
--(BOOL) isMultisampling {
-	CC3GLRenderbuffer* colAtt = self.colorBuffer;
-	if ( [colAtt isKindOfClass: [CC3GLRenderbuffer class]] ) return (colAtt.pixelSamples > 1);
-	return NO;
-}
-
 -(BOOL) validate { return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID]; }
 
 
@@ -286,8 +278,6 @@
 -(void) activateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.gl bindFramebuffer: self.framebufferID];
 }
-
--(void) activate { [CC3OpenGL.sharedGL bindFramebuffer: self.framebufferID]; }
 
 
 #pragma mark Allocation and initialization
@@ -312,15 +302,36 @@
 
 @implementation CC3GLViewSurfaceManager
 
-@synthesize viewSurface=_viewSurface, multisampleSurface=_multisampleSurface;
-@synthesize renderingSurface=_renderingSurface, pickingSurface=_pickingSurface;
-
 -(void) dealloc {
 	[_viewSurface release];
 	[_multisampleSurface release];
-	[_renderingSurface release];
 	[_pickingSurface release];
+	[_resizeableSurfaces release];
 	[super dealloc];
+}
+
+-(CC3GLFramebuffer*) viewSurface { return _viewSurface; }
+
+-(void) setViewSurface: (CC3GLFramebuffer*) surface {
+	if (surface == _viewSurface) return;
+	[self removeResizingSurface: _viewSurface];
+	[_viewSurface release];
+	_viewSurface = [surface retain];
+	[self addResizingSurface: surface];
+}
+
+-(CC3GLFramebuffer*) multisampleSurface { return _multisampleSurface; }
+
+-(void) setMultisampleSurface: (CC3GLFramebuffer*) surface {
+	if (surface == _multisampleSurface) return;
+	[self removeResizingSurface: _multisampleSurface];
+	[_multisampleSurface release];
+	_multisampleSurface = [surface retain];
+	[self addResizingSurface: surface];
+}
+
+-(CC3GLFramebuffer*) renderingSurface {
+	return _multisampleSurface ? _multisampleSurface : _viewSurface;
 }
 
 -(CC3GLFramebuffer*) pickingSurface {
@@ -330,62 +341,54 @@
 		else {
 			// If multisampling, create a new surface using the color buffer from viewSurface,
 			// and with a new non-multisampling and non-stencilling depth buffer.
-			CC3GLFramebuffer* pickSurf = [CC3GLFramebuffer new];
+			CC3GLFramebuffer* pickSurf = [CC3GLFramebuffer surface];
 			pickSurf.colorAttachment = _viewSurface.colorAttachment;
 
 			// Don't need stencil for picking, but otherwise match the rendering depth format
 			GLenum depthFormat = self.depthFormat;
 			if (depthFormat) {
 				if ( CC3DepthFormatIncludesStencil(depthFormat) ) depthFormat = GL_DEPTH_COMPONENT16;
-				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: pickSurf.colorBuffer.size
+				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: pickSurf.colorAttachment.size
 																	andPixelFormat: depthFormat];
 			}
 			if ( [pickSurf validate] ) self.pickingSurface = pickSurf;
-			[pickSurf release];
 		}
 	}
 	return _pickingSurface;
 }
 
--(CC3IntSize) size { return self.renderingSurface.colorBuffer.size; }
+-(void) setPickingSurface: (CC3GLFramebuffer*) surface {
+	if (surface == _pickingSurface) return;
+	[self removeResizingSurface: _pickingSurface];
+	[_pickingSurface release];
+	_pickingSurface = [surface retain];
+	[self addResizingSurface: surface];
+}
 
--(GLenum) colorFormat { return self.renderingSurface.colorBuffer.pixelFormat; }
+-(CC3GLRenderbuffer*) viewColorBuffer { return (CC3GLRenderbuffer*)_viewSurface.colorAttachment; }
 
--(GLenum) depthFormat { return self.renderingSurface.depthBuffer.pixelFormat; }
+-(CC3IntSize) size { return self.viewColorBuffer.size; }
 
--(GLuint) pixelSamples { return self.renderingSurface.colorBuffer.pixelSamples; }
+-(GLenum) colorFormat { return self.viewColorBuffer.pixelFormat; }
 
--(BOOL) isMultisampling { return self.renderingSurface.isMultisampling; }
+-(GLenum) depthFormat { return ((CC3GLRenderbuffer*)self.renderingSurface.depthAttachment).pixelFormat; }
+
+-(GLuint) pixelSamples { return ((CC3GLRenderbuffer*)self.renderingSurface.colorAttachment).pixelSamples; }
+
+-(BOOL) isMultisampling { return self.pixelSamples > 1; }
+
+-(CC3IntSize) multisamplingSize {
+	CC3IntSize baseSize = self.size;
+	switch (self.pixelSamples) {
+		case 4:
+			return CC3IntSizeMake(baseSize.width * 2, baseSize.height * 2);
+		default:
+			return baseSize;
+	}
+}
 
 
 #pragma mark Drawing
-
--(BOOL) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context {
-	
-	// Attach the view color buffer to the CALayer
-	[_viewSurface.colorBuffer resizeFromCALayer: layer withContext: context];
-	
-	// Retreive the new size of the screen buffer
-	CC3IntSize vsSize = _viewSurface.colorBuffer.size;
-	LogInfo(@"Screen rendering surface size changed to: %@", NSStringFromCC3IntSize(vsSize));
-	
-	// Resize the view depth buffer and validate the view surface.
-	// If multisampling, the screen depth buffer will be nil, and will be ignored.
-	[_viewSurface.depthBuffer resizeTo: vsSize];
-	if ( ![_viewSurface validate] ) return NO;
-	
-	// Re-allocate storage for the multisampling buffers and validate the multisampling surface.
-	if (_multisampleSurface) {
-		[_multisampleSurface.colorBuffer resizeTo: vsSize];
-		[_multisampleSurface.depthBuffer resizeTo: vsSize];
-		if ( ![_multisampleSurface validate] ) return NO;
-	}
-	
-	// If a distinct picking surface is in use, resize its depth buffer.
-	if (_pickingSurface != _viewSurface) [_pickingSurface.depthBuffer resizeTo: vsSize];
-	
-	return YES;
-}
 
 -(void) presentToContext: (EAGLContext*) context {
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
@@ -398,16 +401,62 @@
 	// Discard used buffers by assembling an array of framebuffer attachments to discard.
 	// If multisampling, discard multisampling color buffer.
 	// If using depth buffer, discard it from the rendering buffer (either multisampling or screen)
-	GLenum fbAtts[3];		// Make room for color, depth & stencil attachments
+	GLenum fbAtts[3];			// Make room for color, depth & stencil attachments
 	GLuint fbAttCount = 0;
 	CC3GLFramebuffer* rendSurf = self.renderingSurface;
 	if (_multisampleSurface) fbAtts[fbAttCount++] = GL_COLOR_ATTACHMENT0;
-	if (rendSurf.depthBuffer) fbAtts[fbAttCount++] = GL_DEPTH_ATTACHMENT;
-	if (rendSurf.stencilBuffer) fbAtts[fbAttCount++] = GL_STENCIL_ATTACHMENT;
+	if (rendSurf.depthAttachment) fbAtts[fbAttCount++] = GL_DEPTH_ATTACHMENT;
+	if (rendSurf.stencilAttachment) fbAtts[fbAttCount++] = GL_STENCIL_ATTACHMENT;
 	[gl discard: fbAttCount attachments: fbAtts fromFramebuffer: rendSurf.framebufferID];
 	
 	// Swap the renderbuffer onto the screen
-	[_viewSurface.colorBuffer presentToContext: context];
+	[self.viewColorBuffer presentToContext: context];
+}
+
+
+#pragma mark Surface resizing
+
+-(BOOL) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context {
+	BOOL success = YES;
+
+	CC3GLRenderbuffer* vcb = self.viewColorBuffer;
+	
+	// Attach the view color buffer to the CALayer
+	[vcb resizeFromCALayer: layer withContext: context];
+	
+	// Retreive the new size of the screen buffer
+	CC3IntSize size = vcb.size;
+	LogInfo(@"Screen rendering surface size changed to: %@", NSStringFromCC3IntSize(size));
+	
+	// Resize all attachments on registered surfaces, except the viewSurface color buffer,
+	// which was resized above, and validate each surface.
+	CCArray* resizedAttachments = [CCArray new];
+	[resizedAttachments addObject: vcb];
+	for (id<CC3RenderSurface> surface in _resizeableSurfaces) {
+		[self resizeAttachment: surface.colorAttachment to: size ifNotIn: resizedAttachments];
+		[self resizeAttachment: surface.depthAttachment to: size ifNotIn: resizedAttachments];
+		[self resizeAttachment: surface.stencilAttachment to: size ifNotIn: resizedAttachments];
+		if ( ![surface validate] ) success = NO;
+	}
+	[resizedAttachments release];
+	return success;
+}
+
+-(void) resizeAttachment: (id<CC3RenderSurfaceAttachment>) attachment
+					  to: (CC3IntSize) size
+				 ifNotIn: (CCArray*) alreadyResized {
+	if ( !attachment || [alreadyResized containsObject: attachment] ) return;
+	[attachment resizeTo: size];
+	[alreadyResized addObject: attachment];
+}
+
+-(void) addResizingSurface: (id<CC3RenderSurface>) surface {
+	if ( surface && ![_resizeableSurfaces containsObject: surface] )
+		[_resizeableSurfaces addObject: surface];
+}
+
+-(void) removeResizingSurface: (id<CC3RenderSurface>) surface {
+	if (surface) [_resizeableSurfaces removeObjectIdenticalTo: surface];
 }
 
 
@@ -418,22 +467,23 @@
 		  andPixelSamples: (GLuint) requestedSamples {
 
     if ( (self = [super init]) ) {
+		_resizeableSurfaces = [CCArray new];		// retained
 		
+		// Limit pixel samples to what the platform will support
 		GLuint samples = MIN(requestedSamples, CC3OpenGL.sharedGL.maxNumberOfPixelSamples);
 		
 		// Set up the view surface and color render buffer
-		_viewSurface = [CC3GLFramebuffer new];				// retained
-		_viewSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat];
+		CC3GLFramebuffer* vSurf = [CC3GLFramebuffer surface];
+		vSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat];
+		self.viewSurface = vSurf;					// retained
 		
 		// If using multisampling, also set up off-screen multisample frame and render buffers
 		if (samples > 1) {
-			_multisampleSurface = [CC3GLFramebuffer new];		// retained
-			_multisampleSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
-																				 andPixelSamples: samples];
+			CC3GLFramebuffer* msSurf = [CC3GLFramebuffer surface];
+			msSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
+																	andPixelSamples: samples];
+			self.multisampleSurface = msSurf;		// retained
 		}
-		
-		// Set the rendering surface to multisampleSurface if it exists, otherwise viewSurface.
-		self.renderingSurface = _multisampleSurface ? _multisampleSurface : _viewSurface;
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
 		// And if stencil buffer is combined with depth buffer, set it too.

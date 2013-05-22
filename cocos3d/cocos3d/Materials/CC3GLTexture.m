@@ -40,7 +40,9 @@
 @implementation CC3GLTexture
 
 @synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
-@synthesize isFlippedVertically=_isFlippedVertically, hasPremultipliedAlpha=_hasPremultipliedAlpha;
+@synthesize pixelFormat=_pixelFormat, hasPremultipliedAlpha=_hasPremultipliedAlpha;
+@synthesize isUpsideDown=_isUpsideDown;
+@synthesize shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
 
 -(void) dealloc {
 	[self deleteGLTexture];
@@ -69,20 +71,35 @@
 	return GL_ZERO;
 }
 
++(BOOL) defaultShouldFlipVerticallyOnLoad { return NO; }
+
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {}
+
+
 #pragma mark Binding content
 
+-(void) resizeTo: (CC3IntSize) size { [self bindSize: size andPixelFormat: self.pixelFormat]; }
+
+-(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	CC3Assert(NO, @"Size and pixel format of %@ cannot be set directly or changed", self);
+}
+
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
+	GLenum texelFormat, texelType;
+	GLuint byteAlignment;
+
+	if (texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad)
+		[self flipTextureContentVertically: texContent];
+	
+	[self ensureGLTexture];
 
 	_size = CC3IntSizeMake((GLint)texContent.pixelsWide, (GLint)texContent.pixelsHigh);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
+	_pixelFormat = texContent.pixelFormat;
 	_hasPremultipliedAlpha = texContent.hasPremultipliedAlpha;
+	_isUpsideDown = texContent.isUpsideDown;
 
-	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	GLenum texelFormat = GL_ZERO;
-	GLenum texelType = GL_ZERO;
-	GLuint byteAlignment = 1;
-	
-	switch(texContent.pixelFormat) {
+	switch(_pixelFormat) {
 		case kCCTexture2DPixelFormat_RGBA8888:
 			texelFormat = GL_RGBA;
 			texelType = GL_UNSIGNED_BYTE;
@@ -119,12 +136,16 @@
 			byteAlignment = CC3IntIsEven(_size.width) ? 2 : 1;
 			break;
 		default:
+			texelFormat = GL_ZERO;
+			texelType = GL_ZERO;
+			byteAlignment = 1;
 			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", texContent.pixelFormat);
 	}
 	
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit to work in
+	
 	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
-
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
 			   withSize: _size
@@ -299,7 +320,9 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(BOOL) loadFromFile: (NSString*) aFilePath {
-	return [self loadTarget: self.textureTarget fromFile: aFilePath];
+	BOOL wasLoaded = [self loadTarget: self.textureTarget fromFile: aFilePath];
+	if (wasLoaded && self.class.shouldGenerateMipmaps) [self generateMipmap];
+	return wasLoaded;
 }
 
 -(Class) textureContentClass {
@@ -309,7 +332,6 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(void) flipTextureContentVertically: (CC3Texture2DContent*) texContent {
 	[texContent flipVertically];
-	_isFlippedVertically = NO;
 }
 
 #pragma mark Allocation and initialization
@@ -319,10 +341,22 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 		_textureID = 0;
 		_size = CC3IntSizeMake(0, 0);
 		_coverage = CGSizeZero;
+		_pixelFormat = kCCTexture2DPixelFormat_Default;
 		_hasMipmap = NO;
-		_isFlippedVertically = YES;		// All but PVR textures start out flipped
 		_hasPremultipliedAlpha = NO;
+		_isUpsideDown = NO;
+		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
 		self.textureParameters = [[self class] defaultTextureParameters];
+	}
+	return self;
+}
+
+-(void) populateFrom: (CC3GLTexture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
+
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	if ( (self = [self init]) ) {
+		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
+		[self bindSize: size andPixelFormat: format];
 	}
 	return self;
 }
@@ -368,11 +402,9 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return CC3GLTexture2D.class;
 }
 
--(void) populateFrom: (CC3GLTexture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
-
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@ is %@flipped vertically and has %@ mipmap",
-			[super description], (self.isFlippedVertically ? @"" : @"not "),
+			[super description], (self.isUpsideDown ? @"" : @"not "),
 			(self.hasMipmap ? @"a" : @"no")];
 }
 
@@ -416,46 +448,28 @@ static NSMutableDictionary* _texturesByName = nil;
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
--(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
-	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
-	[self ensureGLTexture];
-	[super bindTextureContent: texContent toTarget: target];
-	if (self.class.shouldGenerateMipmaps) [self generateMipmap];
+-(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	id texContent = [[self.textureContentClass alloc] initWithSize: size
+													andPixelFormat: self.pixelFormat];
+	[self bindTextureContent: texContent toTarget: self.textureTarget];
+	[texContent release];
 }
 
 
 #pragma mark Allocation and initialization
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
-	}
-	return self;
-}
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
 	if ( (self = [self init]) ) {
 		id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
 		[self bindTextureContent: texContent toTarget: self.textureTarget];
 		[texContent release];		// Could be big, so get rid of it immediately
+		if (self.class.shouldGenerateMipmaps) [self generateMipmap];
 	}
 	return self;
 }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	if ( (self = [self init]) ) {
-		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
-		id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
-		[self bindTextureContent: texContent toTarget: self.textureTarget];
-		[texContent release];
-	}
-	return self;
-}
-
--(BOOL) shouldFlipVerticallyOnLoad { return _shouldFlipVerticallyOnLoad; }
-
--(void) setShouldFlipVerticallyOnLoad:(BOOL)shouldFlipVerticallyOnLoad {
-	_shouldFlipVerticallyOnLoad = shouldFlipVerticallyOnLoad;
+	return [super initWithSize: size andPixelFormat: format];
 }
 
 static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
@@ -480,12 +494,6 @@ static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
--(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
-	if (self.shouldFlipVerticallyOnLoad) [self flipTextureContentVertically: texContent];
-	[self ensureGLTexture];
-	[super bindTextureContent: texContent toTarget: target];
-}
-
 /** Default texture parameters for cube maps are different. */
 static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE };
 
@@ -493,6 +501,16 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 +(void) setDefaultTextureParameters: (ccTexParams) texParams { _defaultCubeMapTextureParameters = texParams; }
 
+-(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+	id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
+	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
+	[texContent release];
+}
 
 #pragma mark Texture file loading
 
@@ -595,31 +613,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 }
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	if ( (self = [self init]) ) {
-		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
-		id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Y];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
-		[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
-		[texContent release];
-	}
-	return self;
-}
-
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
-	}
-	return self;
-}
-
--(BOOL) shouldFlipVerticallyOnLoad { return _shouldFlipVerticallyOnLoad; }
-
--(void) setShouldFlipVerticallyOnLoad:(BOOL)shouldFlipVerticallyOnLoad {
-	_shouldFlipVerticallyOnLoad = shouldFlipVerticallyOnLoad;
+	return [super initWithSize: size andPixelFormat: format];
 }
 
 static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
@@ -656,7 +650,7 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 @implementation CC3Texture2DContent
 
-@synthesize imageData=_imageData;
+@synthesize imageData=_imageData, isUpsideDown=_isUpsideDown;
 
 -(void) dealloc {
 	[self deleteImageData];
@@ -713,17 +707,22 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 		LogTrace(@"Swapped %u bytes in %p between row %u at %p and row %u at %p",
 				 bytesPerRow, _imageData, rowIdx, lowerRow, (lastRowIdx - rowIdx), upperRow);
 	}
+	
+	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
 }
 
 
 #pragma mark Allocation and Initialization
 
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	return [self initWithData: NULL
-				  pixelFormat: format
-				   pixelsWide: size.width
-				   pixelsHigh: size.height
-				  contentSize: CGSizeFromCC3IntSize(size)];
+	if ( (self = [self initWithData: NULL
+						pixelFormat: format
+						 pixelsWide: size.width
+						 pixelsHigh: size.height
+						contentSize: CGSizeFromCC3IntSize(size)]) ) {
+		_isUpsideDown = NO;		// Empty texture is not upside down!
+	}
+	return self;
 }
 
 /** Overridden to set content parameters, but postpone loading the content into the GL engine. */
@@ -735,15 +734,16 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
 			 width, height, NSStringFromCGSize(size), pixelFormat, data);
-	if((self = [super init])) {
+	if( (self = [super init]) ) {
 		_imageData = data;
 		CC2_TEX_SIZE = size;
 		CC2_TEX_WIDTH = width;
 		CC2_TEX_HEIGHT = height;
 		CC2_TEX_FORMAT = pixelFormat;
-		CC2_TEX_MAXS = size.width / (float)width;
-		CC2_TEX_MAXT = size.height / (float)height;
-		CC2_TEX_HAS_PREMULT_ALPHA = NO;		// will be set by invoking method after
+		CC2_TEX_MAXS = width ? (size.width / (float)width) : 1.0f;
+		CC2_TEX_MAXT = height ? (size.height / (float)height) : 1.0f;
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		_isUpsideDown = YES;			// Assume upside down
 	}
 	return self;
 }

@@ -2087,11 +2087,11 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the
- * isFlippedVertically property of a texture to determine whether the texture
+ * isUpsideDown property of a texture to determine whether the texture
  * will be oriented correctly when displayed using these texture coordinates.
  *
  * The alignTextureUnit:withTexture: method compares the value of this property
- * with the isFlippedVertically property of the texture to automatically determine
+ * with the isUpsideDown property of the texture to automatically determine
  * whether these texture coordinates need to be flipped vertically in order to
  * display the texture correctly, and will do so if needed. As part of that inversion,
  * the value of this property will also be flipped, to indicate that the texture
@@ -2135,11 +2135,11 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * may result in textures being loaded upside-down.
  *
  * The value of this property is used in combination with the value of the
- * isFlippedVertically property of a texture to determine whether the texture
+ * isUpsideDown property of a texture to determine whether the texture
  * will be oriented correctly when displayed using these texture coordinates.
  *
  * The alignTextureUnit:withTexture: method compares the value of this property
- * with the isFlippedVertically property of the texture to automatically determine
+ * with the isUpsideDown property of the texture to automatically determine
  * whether these texture coordinates need to be flipped vertically in order to
  * display the texture correctly, and will do so if needed. As part of that inversion,
  * the value of this property for the specified texture unit will also be flipped,
@@ -2185,7 +2185,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * specified texture.
  *
  * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property
- * is different than the value of the isFlippedVertically property of the specified
+ * is different than the value of the isUpsideDown property of the specified
  * texture, the texture coordinates are not oriented vertically for the texture.
  * If so, this method also flips the texture coordinates to align with the texture.
  *

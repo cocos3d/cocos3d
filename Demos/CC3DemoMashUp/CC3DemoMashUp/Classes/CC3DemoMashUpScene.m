@@ -83,7 +83,9 @@
 #define kEtchedMaskPODFile				@"EtchedMask.pod"
 #define kMasksPFXFile					@"MaskEffects.pfx"
 #define kEtchedMaskPFXEffect			@"EtchedEffect"
+#define kTVPODFile						@"samsung_tv-med.pod"
 #define kTVTestCardFile					@"TVTestCard.jpg"
+#define kPostProcPFXFile				@"PostProc.pfx"
 
 // Model names
 #define kLandingCraftName				@"LandingCraft"
@@ -135,6 +137,8 @@
 #define kRunnerLampName					@"Spot01"
 #define kLittleBrotherName				@"LittleBrother"
 #define kTVName							@"Television"
+#define kTVScreenName					@"TVScreen"
+#define kTVRenderTextureName			@"TVRenderTexture"
 
 #define	kMultiTextureCombinerLabel		@"Multi-texture combiner function: %@"
 
@@ -187,12 +191,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_origCamTarget = nil;		// not retained
 	_runnerCam = nil;			// not retained
 	_runnerLamp = nil;			// not retained
+	_tvScreen = nil;			// not retained
 	[_signTex release];
 	[_stampTex release];
 	[_embossedStampTex release];
 	[_headTex release];
 	[_headBumpTex release];
 	[_tvSurface release];
+	[_preProcSurface release];
+	[_postProcNode release];
 	
 	[super dealloc];
 }
@@ -418,6 +425,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 /** Configure the lighting. */
 -(void) configureLighting {
+	
+	// Start out with a sunny day
+	_lightingType = kLightingSun;
+	_isDisplayingAsGrayscale = NO;
 
 	// Set the ambient scene lighting.
 	self.ambientLight = ccc4f(0.3, 0.3, 0.3, 1.0);
@@ -1476,30 +1487,90 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * Adds a television showing the view from the runner camera
  * This demonstrates dynamic rendering-to-texture capabilities.
+ *
+ * The television model POD file was exported from a Blender model created by Blend Swap artist
+ * "nhumrod", and downloaded from Blend Swap at http://www.blendswap.com/blends/view/63306
+ * under a CreativeCommons Zero license.
  */
 -(void) addTelevision {
+	
+	// Create an empty texture of a size and aspect (16x9) useful in an HDTV model, give it
+	// a name, and add it to the texture cache for later access, or use elsewhere.
 	CC3GLTexture* tvTex = [[CC3GLTexture2D alloc] initWithSize: kTVTexSize
 												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+	tvTex.name = kTVRenderTextureName;
+	[CC3GLTexture addGLTexture: tvTex];
+	[tvTex release];	// Retained by attachment & framebuffer & cache
+	
+	// Attach the texture to an off-screen framebuffer surface, along with matching depth
+	// attachement, and validate the surface.
 	_tvSurface = [CC3GLFramebuffer new];
 	_tvSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: tvTex];
 	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: kTVTexSize
 														  andPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
-	[tvTex release];	// Retained by attachment & framebuffer
-	
-	CC3MeshNode* tv = [CC3MeshNode nodeWithName: kTVName];
-	[tv populateAsCenteredRectangleWithSize: CGSizeMake(16.0, 9.0)];	// HDTV aspect
-	[tv flipTexturesVertically];
-//	tv.texture = [CC3Texture textureFromFile: kTVTestCardFile];
-	tv.texture = [CC3Texture textureWithGLTexture: tvTex];
-	tv.shouldUseLighting = NO;
-	tv.location = cc3v(1000.0, 100.0, -1000.0);
+
+	// Load a television model, extract the mesh node corresponding to the screen, and attach
+	// the TV test card image as its texture. Since this is a TV, it should not interact with
+	// lighting. Since we want to frequently access the TV screen mesh node, it is given a
+	// useful name, and cached in an instance variable of this scene.
+	CC3ResourceNode* tv = [CC3PODResourceNode nodeWithName: kTVName fromFile: kTVPODFile];
+	tv.location = cc3v(1000.0, -100.0, -1000.0);
 	tv.rotation = cc3v(0, -45, 0);
-	tv.uniformScale = 40.0;
-	tv.shouldCullBackFaces = NO;			// Show from behind as well.
+	tv.uniformScale = 750.0;
 	tv.touchEnabled = YES;
-	tv.shouldDrawLocalContentWireframeBox = YES;
+	_tvScreen = [tv getMeshNodeNamed: @"tv_set-submesh3"];	// Auto-named by PVRGeoPOD
+	_tvScreen.name = kTVScreenName;							// Give it a more friendly name
+	_tvScreen.diffuseColor = kCCC4FWhite;
+	_tvScreen.shouldUseLighting = NO;
+	_tvScreen.texture = [CC3Texture textureFromFile: kTVTestCardFile];
+	tv.shouldCullBackFaces = NO;				// Faces winding on model is messed up
+	_tvScreen.shouldCullFrontFaces = NO;		// Don't paint both front and back
 	[self addChild: tv];
+
+	_isTVOn = NO;		// Indicate TV is displaying test card
+}
+
+/**
+ * Adds post-rendering image processing capabilities.
+ *
+ * Adds an off-screen framebuffer surface backed by a texture. The scene can be rendered
+ * to this surface, and, using GLSL shaders, the texture attached to the surface can be
+ * processed by the shaders associated with a special post-processing node when draws
+ * the surface's texture to the view's rendering surface.
+ *
+ * Since this method accesses the view's surface manager, it must be invoked after the
+ * view has been created. This method is invoked from the onOpen method of this class,
+ * instead of from the initializeScene method,
+ */
+-(void) addPostProcessing {
+	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
+	CC3IntSize surfSize = surfMgr.size;
+	GLenum depthFormat = surfMgr.depthFormat;
+	
+	// Create the offscreen framebuffer with the same size and characteristics as the
+	// view's rendering surface.
+	CC3GLTexture* ppTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
+												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+	_preProcSurface = [CC3GLFramebuffer new];	// retained
+	_preProcSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: ppTex];
+	_preProcSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: surfSize
+															   andPixelFormat: depthFormat];
+	if ( CC3DepthFormatIncludesStencil(depthFormat) )
+		_preProcSurface.stencilAttachment = _preProcSurface.depthAttachment;
+	
+	[_preProcSurface validate];
+	[ppTex release];	// Retained by attachment & framebuffer
+
+	// Register this surface with the view's surface manager, so that this surface will be
+	// resized automatically whenever the view is resized.
+	[surfMgr addResizingSurface: _preProcSurface];
+
+	// Create a clip-space node that will render the off-screen surface texture to the screen.
+	// Load the node with shaders that convert the image into greyscale, making the scene
+	// appear as if it was filmed with black & white film.
+	_postProcNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: ppTex]] retain];
+	[_postProcNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
 }
 
 /**
@@ -2048,19 +2119,51 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 #pragma mark Drawing
 
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	// TODO - only draw to TV if TV is visible
+	//		- move clipspace selection to node
+	//		- add auto-selection of standard clip-space shaders
+	//		- easier construction of surfaces - especially when based on view surfaces
+	//		- automate TV screen viewport config
+	
 	[self illuminateWithVisitor: visitor];				// Light up your world!
 	
 	[self drawToTVScreenWithVisitor: visitor];			// Draw the scene to the TV screen
 	
-	[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
+	// If displaying grayscale, draw to an off-screen surface
+	if (_isDisplayingAsGrayscale) {
+		[_preProcSurface activateWithVisitor: visitor];		// Draw to the pre-processing texture surface, not the view
+		[visitor.gl clearColorAndDepthBuffers];				// Clear the buffers of pre-proc surface.
+	} else {
+		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view (buffers already cleared by cocos2d)
+	}
+	
 	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
 	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
 	[self drawShadows];									// Shadows are drawn with a different visitor
+	
+	// If displaying grayscale, draw the off-screen surface to the view surface
+	if (_isDisplayingAsGrayscale) {
+		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
+		visitor.shouldDrawInClipSpace = YES;
+		[visitor visit: _postProcNode];
+		visitor.shouldDrawInClipSpace = NO;
+	}
 }
 
+/**
+ * Draws the scene from the runners' camera perspective to the TV screen.
+ *
+ * This is done by temporarily setting the camera in the visitor to that of the runner-cam
+ * and changing the viewport to match the TV aspect (16x9), and activating the rendering
+ * surface that has the texture of the TV screen as its attachment.
+ */
 -(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 
-	LogTrace(@"Starting TV draw ---------------------------------------------------");
+	// As an optimization, don't bother rendering to texture if the TV is not on,
+	// or the TV is not in the field of view of the active view camera
+	if ( !_isTVOn || ![_tvScreen doesIntersectFrustum: visitor.camera.frustum]) return;
+
+	LogTrace(@"Drawing to TV");
 
 	CC3Viewport vpCurr = _runnerCam.viewport;
 	BOOL lampOnCurr = _runnerLamp.visible;
@@ -2069,17 +2172,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_runnerCam.viewport = CC3ViewportMake(0, 0, kTVTexSize.width, kTVTexSize.height);
 	visitor.camera = _runnerCam;
 
-	[_tvSurface activate];		// Draw to the texture in the TV surface, not the view
+	[_tvSurface activateWithVisitor: visitor];		// Draw to the texture in the TV surface, not the view
+	[visitor.gl clearColorAndDepthBuffers];			// Clear color & depth buffers on TV surface.
 
-	[visitor.gl clearColorAndDepthBuffers];
-	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
-	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
+	[self drawBackdropWithVisitor: visitor];		// Draw the backdrop if it exists
+	[self visitForDrawingWithVisitor: visitor];		// Draw the scene components
 
 	visitor.camera = self.activeCamera;
 	_runnerCam.viewport = vpCurr;
 	_runnerLamp.visible = lampOnCurr;
-
-	LogTrace(@"Ending TV draw ---------------------------------------------------\n");
 }
 
 
@@ -2095,6 +2196,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * entire scene, or some section of the scene, in order to troubleshoot the scene.
  */
 -(void) onOpen {
+	
+	// Add post-processing capabilities, demonstrating render-to-texture
+	// and post-rendering image processing.
+	[self addPostProcessing];
 
 	// Uncomment the first line to have the camera move to show the entire scene.
 	// Uncomment the second line to draw the bounding box of the scene.
@@ -2302,33 +2407,65 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[_ground addAndLocalizeChild: landingCraft];
 }
 
-/** Cycle between sunshine, fog and spotlight. */
--(BOOL) cycleLights {
+-(void) cycleLights {
 	CC3Node* sun = [self getNodeNamed: kSunName];
-	CC3Node* spotLight = [self getNodeNamed: kSpotlightName];
-	
-	if (sun.visible) {
-		if (_fog.visible) {		// Cycle to spotlight
+	CC3Node* flashLight = [self getNodeNamed: kSpotlightName];
+
+	// Cycle to the next lighting type, based on current lighting type
+	switch (_lightingType) {
+		case kLightingSun:
+			_lightingType = kLightingFog;
+			break;
+		case kLightingFog:
+			_lightingType = kLightingFlashlight;
+			break;
+		case kLightingFlashlight:
+			_lightingType = kLightingGrayscale;
+			break;
+		case kLightingGrayscale:
+			_lightingType = kLightingSun;
+			break;
+	}
+
+	// Configure the scene for the new lighting conditions
+	switch (_lightingType) {
+		case kLightingSun:
+			sun.visible = YES;
+			_fog.visible = NO;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.pureColor = kSkyColor;
+			_isDisplayingAsGrayscale = NO;
+			break;
+		case kLightingFog:
+			sun.visible = YES;
+			_fog.visible = YES;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.pureColor = kSkyColor;
+			_isDisplayingAsGrayscale = NO;
+			break;
+		case kLightingFlashlight:
 			sun.visible = NO;
 			_fog.visible = NO;
-		} else {				// Cycle to fog
-			_fog.visible = YES;
-		}
-	} else {					// Cycle to sun and clear skies
-		_fog.visible = NO;
-		sun.visible = YES;
+			_robotLamp.visible = NO;
+			flashLight.visible = YES;
+			_bumpMapLightTracker.target = flashLight;
+			_backdrop.pureColor = kCCC4FBlack;
+			_isDisplayingAsGrayscale = NO;
+			break;
+		case kLightingGrayscale:
+			sun.visible = YES;
+			_fog.visible = NO;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.pureColor = kSkyColor;
+			_isDisplayingAsGrayscale = YES;
+			break;
 	}
-	// If the sun is shining, turn on the CC3Light from the POD file, and turn off the spotlight,
-	// and vice-versa if the sun is not shining. Set the target of the bump-map tracker to be the
-	// active light source.
-	_robotLamp.visible = sun.visible;
-	spotLight.visible = !_robotLamp.visible;
-	_bumpMapLightTracker.target = _robotLamp.visible ? _robotLamp : spotLight;
-	
-	// If the sun is shining, show a blue sky, otherwise a black night sky
-	_backdrop.pureColor = sun.visible ? kSkyColor : kCCC4FBlack;
-
-	return sun.visible;
 }
 
 /**
@@ -2598,6 +2735,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[self cycleLabelOf: (CC3BitmapLabelNode*)aNode];
 	} else if (aNode == [self getNodeNamed: @"Particles"]) {
 		[((CC3ParticleEmitter*)aNode) emitParticle];
+	} else if (aNode == [self getNodeNamed: kTVName]) {
+		[self toggleTelevision];
 	} else if (aNode == _teapotTextured || aNode == _teapotSatellite) {
 		
 		// Toggle wireframe box around the touched teapot's mesh
@@ -2844,6 +2983,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
 	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.userData);
+}
+
+/**
+ * Turn the TV on or off by toggle the image on the TV between a static test pattern card and a
+ * texture generated dynamically by rendering the scene from the runner's camera into a texture.
+ */
+-(void) toggleTelevision {
+	_isTVOn = !_isTVOn;
+
+	NSString* tvTexName = _isTVOn ? kTVRenderTextureName : kTVTestCardFile;
+	CC3GLTexture* tvTex = [CC3GLTexture getGLTextureNamed: tvTexName];
+	_tvScreen.texture.texture = tvTex;
 }
 
 /** 
