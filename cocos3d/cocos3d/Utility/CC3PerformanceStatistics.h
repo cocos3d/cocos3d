@@ -46,17 +46,17 @@
  * application, you should reset the performance statistics at least every few seconds.
  */
 @interface CC3PerformanceStatistics : NSObject <NSCopying> {
-	GLuint updatesHandled;
-	ccTime accumulatedUpdateTime;
-	GLuint nodesUpdated;
-	GLuint nodesTransformed;
+	GLuint _updatesHandled;
+	ccTime _accumulatedUpdateTime;
+	GLuint _nodesUpdated;
+	GLuint _nodesTransformed;
 	
-	GLuint framesHandled;
-	ccTime accumulatedFrameTime;
-	GLuint nodesVisitedForDrawing;
-	GLuint nodesDrawn;
-	GLuint drawingCallsMade;
-	GLuint facesPresented;
+	GLuint _framesHandled;
+	ccTime _accumulatedFrameTime;
+	GLuint _nodesVisitedForDrawing;
+	GLuint _nodesDrawn;
+	GLuint _drawingCallsMade;
+	GLuint _facesPresented;
 }
 
 
@@ -281,8 +281,8 @@
  * least every few seconds.
  */
 @interface CC3PerformanceStatisticsHistogram : CC3PerformanceStatistics {
-	GLint updateRateHistogram[kCC3RateHistogramSize];
-	GLint frameRateHistogram[kCC3RateHistogramSize];
+	GLint _updateRateHistogram[kCC3RateHistogramSize];
+	GLint _frameRateHistogram[kCC3RateHistogramSize];
 }
 
 /**

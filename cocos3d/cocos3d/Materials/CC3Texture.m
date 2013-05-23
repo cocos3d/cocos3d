@@ -202,7 +202,7 @@
 
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_texture bindGLWithVisitor: visitor];
-	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
+	LogTrace(@"%@ bound to texture unit %u", self, visitor.currentTextureUnitIndex);
 }
 
 /** Binds the texture unit environment to the specified GL texture unit state. */

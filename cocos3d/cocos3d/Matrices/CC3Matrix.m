@@ -64,7 +64,7 @@
 
 @implementation CC3Matrix
 
-@synthesize isIdentity, isRigid;
+@synthesize isIdentity=_isIdentity, isRigid=_isRigid;
 
 
 #pragma mark Allocation and initialization
@@ -97,8 +97,8 @@
 
 -(void) populateZero {
 	[self implPopulateZero];
-	isIdentity = NO;
-	isRigid = NO;
+	_isIdentity = NO;
+	_isRigid = NO;
 }
 
 /** Template method. Subclasses will provide implementation. */
@@ -107,10 +107,10 @@
 }
 
 -(void) populateIdentity {
-	if (!isIdentity) {
+	if (!_isIdentity) {
 		[self implPopulateIdentity];
-		isIdentity = YES;
-		isRigid = YES;
+		_isIdentity = YES;
+		_isRigid = YES;
 	}
 }
 
@@ -124,8 +124,8 @@
 		[self populateIdentity];
 	} else {
 		[self implPopulateFrom: aMatrix];
-		isIdentity = NO;
-		isRigid = aMatrix.isRigid;
+		_isIdentity = NO;
+		_isRigid = aMatrix.isRigid;
 	}
 }
 
@@ -140,8 +140,8 @@
 
 -(void) populateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx {
 	[self implPopulateFromCC3Matrix3x3: mtx];
-	isIdentity = CC3Matrix3x3IsIdentity(mtx);
-	isRigid = isIdentity;
+	_isIdentity = CC3Matrix3x3IsIdentity(mtx);
+	_isRigid = _isIdentity;
 }
 
 -(void) implPopulateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx {
@@ -154,8 +154,8 @@
 
 -(void) populateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx {
 	[self implPopulateFromCC3Matrix4x3: mtx];
-	isIdentity = CC3Matrix4x3IsIdentity(mtx);
-	isRigid = isIdentity;
+	_isIdentity = CC3Matrix4x3IsIdentity(mtx);
+	_isRigid = _isIdentity;
 }
 
 -(void) implPopulateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx {
@@ -168,8 +168,8 @@
 
 -(void) populateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx {
 	[self implPopulateFromCC3Matrix4x4: mtx];
-	isIdentity = CC3Matrix4x4IsIdentity(mtx);
-	isRigid = isIdentity;
+	_isIdentity = CC3Matrix4x4IsIdentity(mtx);
+	_isRigid = _isIdentity;
 }
 
 -(void) implPopulateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx {
@@ -185,8 +185,8 @@
 		[self populateIdentity];
 	} else {
 		[self implPopulateFromRotation: aRotation];
-		isIdentity = NO;
-		isRigid = YES;
+		_isIdentity = NO;
+		_isRigid = YES;
 	}
 }
 
@@ -200,8 +200,8 @@
 		[self populateIdentity];
 	} else {
 		[self implPopulateFromQuaternion: aQuaternion];
-		isIdentity = NO;
-		isRigid = YES;
+		_isIdentity = NO;
+		_isRigid = YES;
 	}
 }
 
@@ -215,8 +215,8 @@
 		[self populateIdentity];
 	} else {
 		[self implPopulateFromScale: aScale];
-		isIdentity = NO;
-		isRigid = NO;
+		_isIdentity = NO;
+		_isRigid = NO;
 	}
 }
 
@@ -230,8 +230,8 @@
 		[self populateIdentity];
 	} else {
 		[self implPopulateFromTranslation: aTranslation];
-		isIdentity = NO;
-		isRigid = YES;
+		_isIdentity = NO;
+		_isRigid = YES;
 	}
 }
 
@@ -242,8 +242,8 @@
 
 -(void) populateToPointTowards: (CC3Vector) fwdDirection withUp: (CC3Vector) upDirection {
 	[self implPopulateToPointTowards: fwdDirection withUp: upDirection];
-	isIdentity = NO;
-	isRigid = YES;
+	_isIdentity = NO;
+	_isRigid = YES;
 }
 
 /** Template method. Subclasses will provide implementation. */
@@ -259,8 +259,8 @@
 	[self populateToPointTowards: fwdDir withUp: upDirection];
 	[self transpose];		
 	[self translateBy: CC3VectorNegate(eyeLocation)];
-	isIdentity = NO;
-	isRigid = YES;
+	_isIdentity = NO;
+	_isRigid = YES;
 }
 
 -(void) populateFromFrustumLeft: (GLfloat) left
@@ -271,8 +271,8 @@
 						 andFar: (GLfloat) far {
 	[self implPopulateFromFrustumLeft: left andRight: right andTop: top
 							andBottom: bottom andNear: near andFar: far];
-	isIdentity = NO;
-	isRigid = NO;
+	_isIdentity = NO;
+	_isRigid = NO;
 }
 
 -(void) implPopulateFromFrustumLeft: (GLfloat) left
@@ -290,8 +290,8 @@
 					  andBottom: (GLfloat) bottom
 						andNear: (GLfloat) near {
 	[self implPopulateFromFrustumLeft: left andRight: right andTop: top andBottom: bottom andNear: near];
-	isIdentity = NO;
-	isRigid = NO;
+	_isIdentity = NO;
+	_isRigid = NO;
 }
 
 -(void) implPopulateFromFrustumLeft: (GLfloat) left
@@ -310,8 +310,8 @@
 							  andFar: (GLfloat) far {
 	[self implPopulateOrthoFromFrustumLeft: left andRight: right andTop: top  
 								 andBottom: bottom andNear: near andFar: far];
-	isIdentity = NO;
-	isRigid = NO;
+	_isIdentity = NO;
+	_isRigid = NO;
 }
 
 -(void) implPopulateOrthoFromFrustumLeft: (GLfloat) left
@@ -329,8 +329,8 @@
 						   andBottom: (GLfloat) bottom
 							 andNear: (GLfloat) near {
 	[self implPopulateOrthoFromFrustumLeft: left andRight: right andTop: top andBottom: bottom andNear: near];
-	isIdentity = NO;
-	isRigid = NO;
+	_isIdentity = NO;
+	_isRigid = NO;
 }
 
 -(void) implPopulateOrthoFromFrustumLeft: (GLfloat) left
@@ -376,7 +376,7 @@
 -(void) rotateBy: (CC3Vector) aRotation {
 	if ( !CC3VectorsAreEqual(aRotation, kCC3VectorZero) ) {
 		[self implRotateBy: aRotation];
-		isIdentity = NO;
+		_isIdentity = NO;
 	}
 }
 
@@ -389,7 +389,7 @@
 -(void) rotateByQuaternion: (CC3Quaternion) aQuaternion {
 	if ( !CC3QuaternionsAreEqual(aQuaternion, kCC3QuaternionIdentity) ) {
 		[self implRotateByQuaternion: aQuaternion];
-		isIdentity = NO;
+		_isIdentity = NO;
 	}
 }
 
@@ -407,8 +407,8 @@
 -(void) scaleBy: (CC3Vector) aScale {
 	if ( !CC3VectorsAreEqual(aScale, kCC3VectorUnitCube) ) {
 		[self implScaleBy: aScale];
-		isIdentity = NO;
-		isRigid = NO;
+		_isIdentity = NO;
+		_isRigid = NO;
 	}
 }
 
@@ -421,7 +421,7 @@
 -(void) translateBy: (CC3Vector) aTranslation {
 	if ( !CC3VectorsAreEqual(aTranslation, kCC3VectorZero) ) {
 		[self implTranslateBy: aTranslation];
-		isIdentity = NO;
+		_isIdentity = NO;
 	}
 }
 
@@ -440,15 +440,15 @@
 	if (!aMatrix || aMatrix.isIdentity) return;
 	
 	// If this matrix is identity, it just becomes the other matrix
-	if (isIdentity) {
+	if (_isIdentity) {
 		[self populateFrom: aMatrix];
 		return;
 	}
 
 	// Otherwise, go through with the multiplication
 	[self implMultiplyBy: aMatrix];
-	isIdentity = NO;
-	if ( !aMatrix.isRigid ) isRigid = NO;
+	_isIdentity = NO;
+	if ( !aMatrix.isRigid ) _isRigid = NO;
 }
 
 /**
@@ -499,15 +499,15 @@
 	if (!aMatrix || aMatrix.isIdentity) return;
 	
 	// If this matrix is identity, it just becomes the other matrix
-	if (isIdentity) {
+	if (_isIdentity) {
 		[self populateFrom: aMatrix];
 		return;
 	}
 	
 	// Otherwise, go through with the multiplication
 	[self implLeftMultiplyBy: aMatrix];
-	isIdentity = NO;
-	if ( !aMatrix.isRigid ) isRigid = NO;
+	_isIdentity = NO;
+	if ( !aMatrix.isRigid ) _isRigid = NO;
 }
 
 /**
@@ -556,28 +556,28 @@
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformLocation: (CC3Vector) aLocation {
-	if (isIdentity) return aLocation;
+	if (_isIdentity) return aLocation;
 	CC3Assert(NO, @"%@ does not implement the transformLocation: method", self);
 	return kCC3VectorNull;
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformDirection: (CC3Vector) aDirection {
-	if (isIdentity) return aDirection;
+	if (_isIdentity) return aDirection;
 	CC3Assert(NO, @"%@ does not implement the transformDirection: method", self);
 	return kCC3VectorNull;
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector4) transformHomogeneousVector: (CC3Vector4) aVector {
-	if (isIdentity) return aVector;
+	if (_isIdentity) return aVector;
 	CC3Assert(NO, @"%@ does not implement the transformHomogeneousVector: method", self);
 	return kCC3Vector4Null;
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Ray) transformRay: (CC3Ray) aRay {
-	if (isIdentity) return aRay;
+	if (_isIdentity) return aRay;
 	CC3Ray rayOut;
 	rayOut.startLocation = [self transformLocation: aRay.startLocation];
 	rayOut.direction = [self transformDirection: aRay.direction];
@@ -586,14 +586,14 @@
 
 // Short-circuit if this is an identity matrix
 -(void) transpose {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Assert(NO, @"%@ does not implement the transpose method", self);
 }
 
 // Short-circuit if this is an identity or rigid matrix
 -(BOOL) invert {
-	if (isIdentity) return YES;
-	if (isRigid) {
+	if (_isIdentity) return YES;
+	if (_isRigid) {
 		[self invertRigid];
 		return YES;
 	}
@@ -602,14 +602,14 @@
 
 // Short-circuit if this is an identity or rigid matrix
 -(BOOL) invertAdjoint {
-	if (isIdentity) return YES;
+	if (_isIdentity) return YES;
 	CC3Assert(NO, @"%@ does not implement the invertAdjoint method", self);
 	return NO;
 }
 
 // Short-circuit if this is an identity matrix
 -(void) invertRigid {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Assert(NO, @"%@ does not implement the invertRigid method", self);
 }
 

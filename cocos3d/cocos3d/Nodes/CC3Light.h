@@ -80,21 +80,21 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * reserved for use by the 2D scene will not be used by the 3D scene.
  */
 @interface CC3Light : CC3Node {
-	CC3ShadowCastingVolume* shadowCastingVolume;
-	CC3CameraShadowVolume* cameraShadowVolume;
-	CC3StencilledShadowPainterNode* stencilledShadowPainter;
-	CCArray* shadows;
-	ccColor4F ambientColor;
-	ccColor4F diffuseColor;
-	ccColor4F specularColor;
+	CC3ShadowCastingVolume* _shadowCastingVolume;
+	CC3CameraShadowVolume* _cameraShadowVolume;
+	CC3StencilledShadowPainterNode* _stencilledShadowPainter;
+	CCArray* _shadows;
+	ccColor4F _ambientColor;
+	ccColor4F _diffuseColor;
+	ccColor4F _specularColor;
 	CC3AttenuationCoefficients _attenuation;
-	GLfloat spotExponent;
-	GLfloat spotCutoffAngle;
-	GLfloat shadowIntensityFactor;
-	GLuint lightIndex;
-	BOOL isDirectionalOnly : 1;
-	BOOL shouldCopyLightIndex : 1;
-	BOOL shouldCastShadowsWhenInvisible : 1;
+	GLfloat _spotExponent;
+	GLfloat _spotCutoffAngle;
+	GLfloat _shadowIntensityFactor;
+	GLuint _lightIndex;
+	BOOL _isDirectionalOnly : 1;
+	BOOL _shouldCopyLightIndex : 1;
+	BOOL _shouldCastShadowsWhenInvisible : 1;
 }
 
 /** Returns whether this node is a light. Returns YES. */
@@ -667,8 +667,8 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * locations, rays, shapes, and other bounding volumes intersect its volume.
  */
 @interface CC3LightCameraBridgeVolume : CC3BoundingVolume <CC3NodeTransformListenerProtocol> {
-	CC3Frustum* cameraFrustum;
-	CC3Light* light;
+	CC3Frustum* _cameraFrustum;
+	CC3Light* _light;
 }
 
 /**
@@ -710,10 +710,10 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * testing whether locations, rays, shapes, and other bounding volumes intersect its volume.
  */
 @interface CC3ShadowCastingVolume : CC3LightCameraBridgeVolume {
-	CC3Plane planes[11];
-	CC3Vector vertices[9];
-	GLuint planeCount;
-	GLuint vertexCount;
+	CC3Plane _planes[11];
+	CC3Vector _vertices[9];
+	GLuint _planeCount;
+	GLuint _vertexCount;
 }
 
 @end
@@ -734,8 +734,8 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * testing whether locations, rays, shapes, and other bounding volumes intersect its volume.
  */
 @interface CC3CameraShadowVolume : CC3LightCameraBridgeVolume {
-	CC3Plane planes[6];
-	CC3Vector vertices[5];
+	CC3Plane _planes[6];
+	CC3Vector _vertices[5];
 }
 
 /** The frustum vertex on the near clipping plane of the camera, at the intersection of the top and left sides. */

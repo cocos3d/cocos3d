@@ -496,6 +496,45 @@ static inline CC3Vector CC3VectorLerp(CC3Vector v1, CC3Vector v2, GLfloat blendF
 	return CC3VectorAdd(v1, CC3VectorScaleUniform(CC3VectorDifference(v2, v1), blendFactor));
 }
 
+/** 
+ * Minimum acceptable absolute value for a scale transformation component.
+ *
+ * This is used to ensure that scales used in transforms do not cause uninvertable matrices.
+ *
+ * The initial value is 1.0e-9f. Set this to another value if appropriate.
+ */
+static GLfloat kCC3ScaleMin = 1.0e-9f;
+
+/**
+ * Ensures the specified value can be used as a component in a scale vector. If the value is
+ * greater than kCC3ScaleMin or less than -kCC3ScaleMin, it is returned unchanced, otherwise
+ * either -kCC3ScaleMin or kCC3ScaleMin is returned, depending on whether the value is
+ * less than zero or not, respectively.
+ *
+ * This is used to ensure that scales used in transforms do not cause uninvertable matrices.
+ */
+static inline GLfloat CC3EnsureMinScaleAxis(GLfloat val) {
+	// Test in order of expected value, for fast return.
+	if (val > kCC3ScaleMin) return val;
+	if (val >= 0.0f) return kCC3ScaleMin;
+	if (val < -kCC3ScaleMin) return val;
+	return -kCC3ScaleMin;
+}
+
+/**
+ * Ensures the absolute value of each of the components in the specified scale vector
+ * is greater than kCC3ScaleMin. Any component between -kCC3ScaleMin and kCC3ScaleMin
+ * is replaced with -kCC3ScaleMin or kCC3ScaleMin depending on whether the component
+ * is less than zero or not, respectively.
+ *
+ * This can be used to ensure that scales used in transforms do not cause uninvertable matrices.
+ */
+static inline CC3Vector CC3EnsureMinScaleVector(CC3Vector scale) {
+	return cc3v(CC3EnsureMinScaleAxis(scale.x),
+				CC3EnsureMinScaleAxis(scale.y),
+				CC3EnsureMinScaleAxis(scale.z));
+}
+
 
 #pragma mark -
 #pragma mark Cartesian vector in 4D homogeneous coordinate space structure and functions

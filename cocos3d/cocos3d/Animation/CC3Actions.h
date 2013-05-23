@@ -83,8 +83,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * as the location, rotation, or scale) by some amount, or to some value over time.
  */
 @interface CC3TransformVectorAction : CCActionInterval <NSCopying> {
-	CC3Vector startVector;
-	CC3Vector diffVector;
+	CC3Vector _startVector;
+	CC3Vector _diffVector;
 }
 
 /**
@@ -161,7 +161,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
 
 /** CC3ScaleBy is a CCActionInterval that scales a target CC3Node by a specific scale factor. */
 @interface CC3ScaleBy : CC3TransformBy {
-	CC3Vector scaledDiffVector;
+	CC3Vector _scaledDiffVector;
 }
 
 /**
@@ -200,10 +200,10 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * node as the action runs.
  */
 @interface CC3RotateByAngle : CCActionInterval <NSCopying> {
-	CC3Vector rotationAxis;
-	CC3Vector activeRotationAxis;
-	GLfloat diffAngle;
-	ccTime prevTime;
+	CC3Vector _rotationAxis;
+	CC3Vector _activeRotationAxis;
+	GLfloat _diffAngle;
+	ccTime _prevTime;
 }
 
 /**
@@ -243,7 +243,7 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * CC3Node to some end value in some way.
  */
 @interface CC3TransformTo : CC3TransformVectorAction {
-	CC3Vector endVector;
+	CC3Vector _endVector;
 }
 
 /**
@@ -358,9 +358,9 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * travel -20 degrees, not the +340 degrees that would result from simple subtraction.
  */
 @interface CC3RotateToAngle : CCActionInterval <NSCopying> {
-	GLfloat startAngle;
-	GLfloat endAngle;
-	GLfloat diffAngle;
+	GLfloat _startAngle;
+	GLfloat _endAngle;
+	GLfloat _diffAngle;
 }
 
 /**
@@ -442,8 +442,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * movement by overriding the targetDirection property.
  */
 @interface CC3MoveDirectionallyBy : CCActionInterval <NSCopying> {
-	ccTime prevTime;
-	GLfloat	distance;
+	ccTime _prevTime;
+	GLfloat	_distance;
 }
 
 /**
@@ -557,8 +557,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * Instead, use one of the concrete subclasses.
  */
 @interface CC3TintTo : CCActionInterval <NSCopying> {
-	ccColor4F startColor;
-	ccColor4F endColor;
+	ccColor4F _startColor;
+	ccColor4F _endColor;
 }
 
 /**
@@ -926,8 +926,8 @@ typedef enum {							// Don't start at zero to avoid possible confusion with def
  * contained action will change from 0.5 to 0.75.
  */
 @interface CC3ActionRangeLimit : CCActionEase {
-	GLfloat rangeStart;
-	GLfloat rangeSpan;
+	GLfloat _rangeStart;
+	GLfloat _rangeSpan;
 }
 
 /**

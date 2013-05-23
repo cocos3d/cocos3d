@@ -157,9 +157,9 @@
  * method on the new CC3SkinMeshNode directly.
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
-	CCArray* skinSections;
-	CC3Matrix* restPoseTransformMatrix;
-	CC3DeformedFaceArray* deformedFaces;
+	CCArray* _skinSections;
+	CC3Matrix* _restPoseTransformMatrix;
+	CC3DeformedFaceArray* _deformedFaces;
 }
 
 /** The collection of CC3SkinSections that are managed by this node. */
@@ -252,10 +252,10 @@
  * array in the vertexWeights property of the mesh.
  */
 @interface CC3SkinSection : NSObject <NSCopying> {
-	CC3SkinMeshNode* node;
-	CCArray* skinnedBones;
-	GLint vertexStart;
-	GLint vertexCount;
+	CC3SkinMeshNode* _node;
+	CCArray* _skinnedBones;
+	GLint _vertexStart;
+	GLint _vertexCount;
 }
 
 /** Returns the number of bones in this skin section. */
@@ -494,7 +494,7 @@
  * transform matrix of the bone to the transform matrix for the skin mesh vertices.
  */
 @interface CC3Bone : CC3Node {
-	CC3Matrix* restPoseInvertedMatrix;
+	CC3Matrix* _restPoseInvertedMatrix;
 }
 
 
@@ -549,12 +549,12 @@
  * whenever the transform of either the bone or the skin mesh node changes.
  */
 @interface CC3SkinnedBone : NSObject <CC3NodeTransformListenerProtocol> {
-	CC3Bone* bone;
-	CC3SkinMeshNode* skinNode;
-	CC3Matrix* drawTransformMatrix;
-	CC3Matrix* skinTransformMatrix;
-	BOOL isDrawTransformDirty : 1;
-	BOOL isSkinTransformDirty : 1;
+	CC3Bone* _bone;
+	CC3SkinMeshNode* _skinNode;
+	CC3Matrix* _drawTransformMatrix;
+	CC3Matrix* _skinTransformMatrix;
+	BOOL _isDrawTransformDirty : 1;
+	BOOL _isSkinTransformDirty : 1;
 }
 
 /** Returns the bone whose transforms are being tracked. */
@@ -628,10 +628,10 @@
  * so that the faces can be rebuilt if the skin mesh node or any of the bones move.
  */
 @interface CC3DeformedFaceArray : CC3FaceArray {
-	CC3SkinMeshNode* node;
-	CC3Vector* deformedVertexLocations;
-	BOOL deformedVertexLocationsAreRetained : 1;
-	BOOL deformedVertexLocationsAreDirty : 1;
+	CC3SkinMeshNode* _node;
+	CC3Vector* _deformedVertexLocations;
+	BOOL _deformedVertexLocationsAreRetained : 1;
+	BOOL _deformedVertexLocationsAreDirty : 1;
 }
 
 /**

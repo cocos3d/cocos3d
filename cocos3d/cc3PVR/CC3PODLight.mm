@@ -39,23 +39,23 @@ extern "C" {
 
 @implementation CC3PODLight
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
--(int) podContentIndex { return podContentIndex; }
+-(GLint) podContentIndex { return _podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
+-(void) setPodContentIndex: (GLint) aPODIndex { _podContentIndex = aPODIndex; }
 
--(int) podParentIndex { return podParentIndex; }
+-(GLint) podParentIndex { return _podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
+-(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
--(int) podTargetIndex { return podTargetIndex; }
+-(GLint) podTargetIndex { return _podTargetIndex; }
 
--(void) setPodTargetIndex: (int) aPODIndex { podTargetIndex = aPODIndex; }
+-(void) setPodTargetIndex: (GLint) aPODIndex { _podTargetIndex = aPODIndex; }
 
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		// Get the light content
 		if (self.podContentIndex >= 0) {
@@ -99,10 +99,10 @@ extern "C" {
 -(void) populateFrom: (CC3PODLight*) another {
 	[super populateFrom: another];
 
-	podIndex = another.podIndex;
-	podContentIndex = another.podContentIndex;
-	podParentIndex = another.podParentIndex;
-	podTargetIndex = another.podTargetIndex;
+	_podIndex = another.podIndex;
+	_podContentIndex = another.podContentIndex;
+	_podParentIndex = another.podParentIndex;
+	_podTargetIndex = another.podTargetIndex;
 }
 
 // The direction of a light in a POD file is taken from the transform of the up direction!
@@ -112,7 +112,7 @@ extern "C" {
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], _podIndex];
 }
 
 @end

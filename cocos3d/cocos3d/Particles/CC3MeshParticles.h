@@ -184,7 +184,7 @@
  * emitter node, and is deallocated automatically when the emitter is released.
  */
 @interface CC3MeshParticleEmitter : CC3CommonVertexArrayParticleEmitter {
-	CC3Mesh* particleTemplateMesh;
+	CC3Mesh* _particleTemplateMesh;
 	BOOL _isParticleTransformDirty : 1;
 	BOOL _shouldTransformUnseenParticles : 1;
 }
@@ -392,11 +392,11 @@
  * access methods available to mesh nodes.
  */
 @interface CC3MeshParticle : CC3ParticleBase <CC3MeshParticleProtocol> {
-	CC3Rotator* rotator;
-	CC3Mesh* templateMesh;
-	CC3Vector location;
-	GLuint firstVertexOffset;
-	GLuint firstVertexIndexOffset;
+	CC3Rotator* _rotator;
+	CC3Mesh* _templateMesh;
+	CC3Vector _location;
+	GLuint _firstVertexOffset;
+	GLuint _firstVertexIndexOffset;
 	BOOL _isAlive : 1;
 	BOOL _isTransformDirty : 1;
 	BOOL _isColorDirty : 1;
@@ -933,7 +933,7 @@
  * scaling do not have to carry storage for scaling information.
  */
 @interface CC3ScalableMeshParticle : CC3MeshParticle {
-	CC3Vector scale;
+	CC3Vector _scale;
 }
 
 /**

@@ -603,7 +603,7 @@
  * and populate the mesh.
  */
 @interface CC3SimpleLineNode : CC3LineNode {
-	CC3Vector lineVertices[2];
+	CC3Vector _lineVertices[2];
 }
 
 /**
@@ -655,7 +655,7 @@
  * In addition, the bounding box of this mesh will not contribute to the bounding box of the parent.
  */
 @interface CC3TouchBox : CC3BoxNode {
-	BOOL shouldAlwaysMeasureParentBoundingBox : 1;
+	BOOL _shouldAlwaysMeasureParentBoundingBox : 1;
 }
 
 /**

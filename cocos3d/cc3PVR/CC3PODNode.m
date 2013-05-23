@@ -34,30 +34,30 @@
 
 @implementation CC3PODNode
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
--(int) podContentIndex { return podContentIndex; }
+-(GLint) podContentIndex { return _podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
+-(void) setPodContentIndex: (GLint) aPODIndex { _podContentIndex = aPODIndex; }
 
--(int) podParentIndex { return podParentIndex; }
+-(GLint) podParentIndex { return _podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
+-(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];
 
-	podIndex = another.podIndex;
-	podContentIndex = another.podContentIndex;
-	podParentIndex = another.podParentIndex;
+	_podIndex = another.podIndex;
+	_podContentIndex = another.podContentIndex;
+	_podParentIndex = another.podParentIndex;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], _podIndex];
 }
 
 @end

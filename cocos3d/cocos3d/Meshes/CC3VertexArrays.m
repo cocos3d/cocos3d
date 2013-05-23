@@ -277,7 +277,7 @@
 	}
 	
 	LogTrace(@"%@ changed vertex allocation from %u vertices at %p to %u vertices at %p",
-			 self, allocatedVertexCapacity, vertices, vtxCount, newVertices);
+			 self, _allocatedVertexCapacity, _vertices, vtxCount, newVertices);
 	
 	// Don't use vertices setter, because it will attempt to deallocate again.
 	// But do notify subclasses that the vertices have changed.
@@ -384,7 +384,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) deleteGLBuffer {
 	if (_bufferID) {
-		LogTrace(@"%@ deleting GL server buffer ID %i", self, bufferID);
+		LogTrace(@"%@ deleting GL server buffer ID %i", self, _bufferID);
 		[CC3OpenGL.sharedGL deleteBuffer: _bufferID];
 		_bufferID = 0;
 	}
@@ -557,7 +557,7 @@ static GLuint lastAssignedVertexArrayTag;
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (_stripCount) {
-		LogTrace(@"%@ drawing %u strips", self, stripCount);
+		LogTrace(@"%@ drawing %u strips", self, _stripCount);
 		GLuint startOfStrip = 0;
 		for (GLuint i = 0; i < _stripCount; i++) {
 			GLuint stripLen = _stripLengths[i];
@@ -914,9 +914,9 @@ static GLuint lastAssignedVertexArrayTag;
 	_centerOfGeometry = CC3BoundingBoxCenter(_boundingBox);
 	_boundaryIsDirty = NO;
 	LogTrace(@"%@ bounding box: (%@, %@) and center of geometry: %@", self,
-			 NSStringFromCC3Vector(boundingBox.minimum),
-			 NSStringFromCC3Vector(boundingBox.maximum),
-			 NSStringFromCC3Vector(centerOfGeometry));
+			 NSStringFromCC3Vector(_boundingBox.minimum),
+			 NSStringFromCC3Vector(_boundingBox.maximum),
+			 NSStringFromCC3Vector(_centerOfGeometry));
 }
 
 
@@ -941,7 +941,7 @@ static GLuint lastAssignedVertexArrayTag;
 		}
 		_radius = sqrtf(radiusSq);		// Now finally take the square-root
 		_radiusIsDirty = NO;
-		LogTrace(@"%@ setting radius to %.2f", self, radius);
+		LogTrace(@"%@ setting radius to %.2f", self, _radius);
 	}
 }
 

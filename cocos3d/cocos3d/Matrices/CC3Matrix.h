@@ -49,8 +49,8 @@
  * to apply a perspective projection to a linear or affine matrix).
  */
 @interface CC3Matrix : NSObject <NSCopying> {
-	BOOL isIdentity : 1;
-	BOOL isRigid : 1;
+	BOOL _isIdentity : 1;
+	BOOL _isRigid : 1;
 }
 
 /** 

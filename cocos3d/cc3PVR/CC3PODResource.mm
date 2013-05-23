@@ -257,16 +257,16 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing node data and building nodes
 
--(uint) nodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumNode : 0; }
+-(GLuint) nodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumNode : 0; }
 
--(CC3Node*) nodeAtIndex: (uint) nodeIndex {
+-(CC3Node*) nodeAtIndex: (GLuint) nodeIndex {
 	return (CC3Node*)[_allNodes objectAtIndex: nodeIndex];
 }
 
 -(CC3Node*) nodeNamed: (NSString*) aName {
 	NSString* lcName = [aName lowercaseString];
-	uint nCnt = self.nodeCount;
-	for (uint i = 0; i < nCnt; i++) {
+	GLuint nCnt = self.nodeCount;
+	for (GLuint i = 0; i < nCnt; i++) {
 		CC3Node* aNode = [self nodeAtIndex: i];
 		if ([[aNode.name lowercaseString] isEqualToString: lcName]) return aNode;
 	}
@@ -274,10 +274,10 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 -(void) buildNodes {
-	uint nCount = self.nodeCount;
+	GLuint nCount = self.nodeCount;
 
 	// Build the array containing ALL nodes in the PVRT structure
-	for (uint i = 0; i < nCount; i++) [_allNodes addObject: [self buildNodeAtIndex: i]];
+	for (GLuint i = 0; i < nCount; i++) [_allNodes addObject: [self buildNodeAtIndex: i]];
 
 	// Link the nodes with each other. This includes assembling the nodes into a structural
 	// parent-child hierarchy, and connecting targetting nodes with their targets.
@@ -288,7 +288,7 @@ static Class _defaultPFXResourceClass = nil;
 	}
 }
 
--(CC3Node*) buildNodeAtIndex: (uint) nodeIndex {
+-(CC3Node*) buildNodeAtIndex: (GLuint) nodeIndex {
 	// Mesh nodes are arranged first
 	if (nodeIndex < self.meshNodeCount) return [self buildMeshNodeAtIndex: nodeIndex];
 
@@ -304,14 +304,14 @@ static Class _defaultPFXResourceClass = nil;
 	return [self buildStructuralNodeAtIndex: nodeIndex];
 }
 
--(CC3Node*) buildStructuralNodeAtIndex: (uint) nodeIndex {
+-(CC3Node*) buildStructuralNodeAtIndex: (GLuint) nodeIndex {
 	if ( [self isBoneNode: nodeIndex] ) return [CC3PODBone nodeAtIndex: nodeIndex fromPODResource: self];
 	return [CC3PODNode nodeAtIndex: nodeIndex fromPODResource: self];
 }
 
--(PODStructPtr) nodePODStructAtIndex: (uint) nodeIndex { return &self.pvrtModelImpl->pNode[nodeIndex]; }
+-(PODStructPtr) nodePODStructAtIndex: (GLuint) nodeIndex { return &self.pvrtModelImpl->pNode[nodeIndex]; }
 
--(BOOL) isNodeIndex: (int) aNodeIndex ancestorOfNodeIndex: (int) childIndex {
+-(BOOL) isNodeIndex: (GLint) aNodeIndex ancestorOfNodeIndex: (GLint) childIndex {
 
 	// Return YES if nodes are the same
 	if (aNodeIndex == childIndex) return YES;
@@ -319,28 +319,28 @@ static Class _defaultPFXResourceClass = nil;
 	// Get the SPOD structure of the child, and extract the index of its parent node.
 	// Return no parent
 	SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: childIndex];
-	int parentIndex = psn->nIdxParent;
+	GLint parentIndex = psn->nIdxParent;
 	if (parentIndex < 0) return NO;
 
 	// Invoke recursion on the index of the parent node
 	return [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: parentIndex];
 }
 
--(BOOL) isBoneNode: (uint) aNodeIndex {
-	uint mCount = self.meshCount;
+-(BOOL) isBoneNode: (GLuint) aNodeIndex {
+	GLuint mCount = self.meshCount;
 	// Cycle through the meshes
-	for (uint mi = 0; mi < mCount; mi++) {
+	for (GLuint mi = 0; mi < mCount; mi++) {
 		SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: mi];
 		CPVRTBoneBatches* pbb = &psm->sBoneBatches;
 
 		// Cycle through the bone batches within each mesh
-		for (int batchIndex = 0; batchIndex < pbb->nBatchCnt; batchIndex++) {
-			int boneCount = pbb->pnBatchBoneCnt[batchIndex];
-			int* boneNodeIndices = &(pbb->pnBatches[batchIndex * pbb->nBatchBoneMax]);
+		for (GLint batchIndex = 0; batchIndex < pbb->nBatchCnt; batchIndex++) {
+			GLint boneCount = pbb->pnBatchBoneCnt[batchIndex];
+			GLint* boneNodeIndices = &(pbb->pnBatches[batchIndex * pbb->nBatchBoneMax]);
 
 			// Cycle through the bones of each batch. If the bone node is a child of
 			// the specified node, then the specified node is a bone as well.
-			for (int boneIndex = 0; boneIndex < boneCount; boneIndex++) {
+			for (GLint boneIndex = 0; boneIndex < boneCount; boneIndex++) {
 				if ( [self isNodeIndex: aNodeIndex ancestorOfNodeIndex: boneNodeIndices[boneIndex]] ) return YES;
 			}
 		}
@@ -369,13 +369,13 @@ static Class _defaultPFXResourceClass = nil;
 
 #pragma mark Accessing mesh data and building mesh nodes
 
--(uint) meshNodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumMeshNode : 0; }
+-(GLuint) meshNodeCount { return _pvrtModel ? self.pvrtModelImpl->nNumMeshNode : 0; }
 
 // mesh nodes appear first in the node array
--(CC3MeshNode*) meshNodeAtIndex: (uint) meshIndex { return (CC3MeshNode*)[self nodeAtIndex: meshIndex]; }
+-(CC3MeshNode*) meshNodeAtIndex: (GLuint) meshIndex { return (CC3MeshNode*)[self nodeAtIndex: meshIndex]; }
 
 /** If we are vertex skinning, return a skin mesh node, otherwise return a generic mesh node. */
--(CC3MeshNode*) buildMeshNodeAtIndex: (uint) meshNodeIndex {
+-(CC3MeshNode*) buildMeshNodeAtIndex: (GLuint) meshNodeIndex {
 	SPODNode* psn = (SPODNode*)[self meshNodePODStructAtIndex: meshNodeIndex];
 	SPODMesh* psm = (SPODMesh*)[self meshPODStructAtIndex: psn->nIdx];
 	if (psm->sBoneBatches.nBatchCnt)
@@ -384,77 +384,77 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 // mesh nodes appear first in the node array
--(PODStructPtr) meshNodePODStructAtIndex: (uint) meshIndex { return [self nodePODStructAtIndex: meshIndex]; }
+-(PODStructPtr) meshNodePODStructAtIndex: (GLuint) meshIndex { return [self nodePODStructAtIndex: meshIndex]; }
 
--(uint) meshCount { return _pvrtModel ? self.pvrtModelImpl->nNumMesh : 0; }
+-(GLuint) meshCount { return _pvrtModel ? self.pvrtModelImpl->nNumMesh : 0; }
 
 // Build the array containing all materials in the PVRT structure
 -(void) buildMeshes {
-	uint mCount = self.meshCount;
-	for (uint i = 0; i < mCount; i++) [_meshes addObject: [self buildMeshAtIndex: i]];
+	GLuint mCount = self.meshCount;
+	for (GLuint i = 0; i < mCount; i++) [_meshes addObject: [self buildMeshAtIndex: i]];
 }
 
--(CC3Mesh*) meshAtIndex: (uint) meshIndex { return (CC3Mesh*)[_meshes objectAtIndex: meshIndex]; }
+-(CC3Mesh*) meshAtIndex: (GLuint) meshIndex { return (CC3Mesh*)[_meshes objectAtIndex: meshIndex]; }
 
 // Deprecated method.
--(CC3Mesh*) meshModelAtIndex: (uint) meshIndex { return [self meshAtIndex: meshIndex]; }
+-(CC3Mesh*) meshModelAtIndex: (GLuint) meshIndex { return [self meshAtIndex: meshIndex]; }
 
--(CC3Mesh*) buildMeshAtIndex: (uint) meshIndex {
+-(CC3Mesh*) buildMeshAtIndex: (GLuint) meshIndex {
 	return [CC3PODMesh meshAtIndex: meshIndex fromPODResource: self];
 }
 
--(PODStructPtr) meshPODStructAtIndex: (uint) meshIndex { return &self.pvrtModelImpl->pMesh[meshIndex]; }
+-(PODStructPtr) meshPODStructAtIndex: (GLuint) meshIndex { return &self.pvrtModelImpl->pMesh[meshIndex]; }
 
 
 #pragma mark Accessing light data and building light nodes
 
--(uint) lightCount { return _pvrtModel ? self.pvrtModelImpl->nNumLight : 0; }
+-(GLuint) lightCount { return _pvrtModel ? self.pvrtModelImpl->nNumLight : 0; }
 
 // light nodes appear after all the mesh nodes in the node array
--(CC3Light*) lightAtIndex: (uint) lightIndex {
+-(CC3Light*) lightAtIndex: (GLuint) lightIndex {
 	return (CC3Light*)[self nodeAtIndex: (self.meshNodeCount + lightIndex)];
 }
 
--(CC3Light*) buildLightAtIndex: (uint) lightIndex {
+-(CC3Light*) buildLightAtIndex: (GLuint) lightIndex {
 	return [CC3PODLight nodeAtIndex: lightIndex fromPODResource: self];
 }
 
 // light nodes appear after all the mesh nodes in the node array
--(PODStructPtr) lightNodePODStructAtIndex: (uint) lightIndex {
+-(PODStructPtr) lightNodePODStructAtIndex: (GLuint) lightIndex {
 	return [self nodePODStructAtIndex: (self.meshNodeCount + lightIndex)];
 }
 
--(PODStructPtr) lightPODStructAtIndex: (uint) lightIndex { return &self.pvrtModelImpl->pLight[lightIndex]; }
+-(PODStructPtr) lightPODStructAtIndex: (GLuint) lightIndex { return &self.pvrtModelImpl->pLight[lightIndex]; }
 
 
 #pragma mark Accessing cameras data and building camera nodes
 
--(uint) cameraCount { return _pvrtModel ? self.pvrtModelImpl->nNumCamera : 0; }
+-(GLuint) cameraCount { return _pvrtModel ? self.pvrtModelImpl->nNumCamera : 0; }
 
--(CC3Camera*) cameraAtIndex: (uint) cameraIndex {
+-(CC3Camera*) cameraAtIndex: (GLuint) cameraIndex {
 	return (CC3Camera*)[self nodeAtIndex: (self.meshNodeCount + self.lightCount + cameraIndex)];
 }
 
--(CC3Camera*) buildCameraAtIndex: (uint) cameraIndex {
+-(CC3Camera*) buildCameraAtIndex: (GLuint) cameraIndex {
 	return [CC3PODCamera nodeAtIndex: cameraIndex fromPODResource: self];
 }
 
 // camera nodes appear after all the mesh nodes and light nodes in the node array
--(PODStructPtr) cameraNodePODStructAtIndex: (uint) cameraIndex {
+-(PODStructPtr) cameraNodePODStructAtIndex: (GLuint) cameraIndex {
 	return [self nodePODStructAtIndex: (self.meshNodeCount + self.lightCount + cameraIndex)];
 }
 
--(PODStructPtr) cameraPODStructAtIndex: (uint) cameraIndex {
+-(PODStructPtr) cameraPODStructAtIndex: (GLuint) cameraIndex {
 	return &self.pvrtModelImpl->pCamera[cameraIndex];
 }
 
 
 #pragma mark Accessing material data and building materials
 
--(uint) materialCount { return _pvrtModel ? self.pvrtModelImpl->nNumMaterial : 0; }
+-(GLuint) materialCount { return _pvrtModel ? self.pvrtModelImpl->nNumMaterial : 0; }
 
 // Fail safely when node references a material that is not in the POD
--(CC3Material*) materialAtIndex: (uint) materialIndex {
+-(CC3Material*) materialAtIndex: (GLuint) materialIndex {
 	if (materialIndex >= _materials.count) {
 		LogRez(@"This POD has no material at index %i", materialIndex);
 		return nil;
@@ -464,8 +464,8 @@ static Class _defaultPFXResourceClass = nil;
 
 -(CC3Material*) materialNamed: (NSString*) aName {
 	NSString* lcName = [aName lowercaseString];
-	uint mCnt = self.materialCount;
-	for (uint i = 0; i < mCnt; i++) {
+	GLuint mCnt = self.materialCount;
+	for (GLuint i = 0; i < mCnt; i++) {
 		CC3Material* aMat = [self materialAtIndex: i];
 		if ([[aMat.name lowercaseString] isEqualToString: lcName]) return aMat;
 	}
@@ -474,33 +474,33 @@ static Class _defaultPFXResourceClass = nil;
 
 // Build the array containing all materials in the PVRT structure
 -(void) buildMaterials {
-	uint mCount = self.materialCount;
-	for (uint i = 0; i < mCount; i++) [_materials addObject: [self buildMaterialAtIndex: i]];
+	GLuint mCount = self.materialCount;
+	for (GLuint i = 0; i < mCount; i++) [_materials addObject: [self buildMaterialAtIndex: i]];
 }
 
--(CC3Material*) buildMaterialAtIndex: (uint) materialIndex {
+-(CC3Material*) buildMaterialAtIndex: (GLuint) materialIndex {
 	return [CC3PODMaterial materialAtIndex: materialIndex fromPODResource: self];
 }
 
--(PODStructPtr) materialPODStructAtIndex: (uint) materialIndex {
+-(PODStructPtr) materialPODStructAtIndex: (GLuint) materialIndex {
 	return &self.pvrtModelImpl->pMaterial[materialIndex];
 }
 
 
 #pragma mark Accessing texture data and building textures
 
--(uint) textureCount { return _pvrtModel ? self.pvrtModelImpl->nNumTexture : 0; }
+-(GLuint) textureCount { return _pvrtModel ? self.pvrtModelImpl->nNumTexture : 0; }
 
--(CC3Texture*) textureAtIndex: (uint) textureIndex {
+-(CC3Texture*) textureAtIndex: (GLuint) textureIndex {
 	id tex = [_textures objectAtIndex: textureIndex];
 	return (tex != placeHolder) ? (CC3Texture*)tex : nil;
 }
 
 -(void) buildTextures {
-	uint tCount = self.textureCount;
+	GLuint tCount = self.textureCount;
 	
 	// Build the array containing all textures in the PVRT structure
-	for (uint i = 0; i < tCount; i++) {
+	for (GLuint i = 0; i < tCount; i++) {
 		CC3Texture* tex = [self buildTextureAtIndex: i];
 		// Add the texture, or if it couldn't be built, an empty texture
 		[_textures addObject: (tex ? tex : placeHolder)];
@@ -508,7 +508,7 @@ static Class _defaultPFXResourceClass = nil;
 }
 
 /** Loads the texture file from the directory indicated by the directory property. */
--(CC3Texture*) buildTextureAtIndex: (uint) textureIndex {
+-(CC3Texture*) buildTextureAtIndex: (GLuint) textureIndex {
 	SPODTexture* pst = (SPODTexture*)[self texturePODStructAtIndex: textureIndex];
 	NSString* texFile = [NSString stringWithUTF8String: pst->pszName];
 	NSString* texPath = [self.directory stringByAppendingPathComponent: texFile];
@@ -518,7 +518,7 @@ static Class _defaultPFXResourceClass = nil;
 	return tex;
 }
 
--(PODStructPtr) texturePODStructAtIndex: (uint) textureIndex {
+-(PODStructPtr) texturePODStructAtIndex: (GLuint) textureIndex {
 	return &self.pvrtModelImpl->pTexture[textureIndex];
 }
 

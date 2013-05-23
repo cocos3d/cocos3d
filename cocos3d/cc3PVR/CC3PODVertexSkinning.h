@@ -41,10 +41,10 @@
 
 /** A CC3SkinMeshNode extracted from a POD file. */
 @interface CC3PODSkinMeshNode : CC3SkinMeshNode {
-	int podIndex;
-	int podContentIndex;
-	int podParentIndex;
-	int podMaterialIndex;
+	GLint _podIndex;
+	GLint _podContentIndex;
+	GLint _podParentIndex;
+	GLint _podMaterialIndex;
 }
 @end
 
@@ -98,9 +98,9 @@
 
 /** A CC3Bone extracted from a POD file. */
 @interface CC3PODBone : CC3Bone {
-	int podIndex;
-	int podContentIndex;
-	int podParentIndex;
+	GLint _podIndex;
+	GLint _podContentIndex;
+	GLint _podParentIndex;
 }
 
 @end

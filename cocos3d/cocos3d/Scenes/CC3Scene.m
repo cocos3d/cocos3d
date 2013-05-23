@@ -298,10 +298,10 @@
 }
 
 -(void) updateScene {
-	BOOL wasRunning = isRunning;
-	isRunning = YES;
+	BOOL wasRunning = _isRunning;
+	_isRunning = YES;
 	[self updateScene: _minUpdateInterval];
-	isRunning = wasRunning;
+	_isRunning = wasRunning;
 }
 
 /** 
@@ -805,7 +805,7 @@
 	_touchPoint = tPoint;
 
 	LogTrace(@"%@ touched %@ at %@. Queue length now %u.", self, NSStringFromTouchType(tType),
-			 NSStringFromCGPoint(touchPoint), queuedTouchCount);
+			 NSStringFromCGPoint(_touchPoint), _queuedTouchCount);
 }
 
 -(void) pickTouchedNode {
@@ -1021,7 +1021,7 @@
 			
 			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
+					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
 			break;
 			
 		case UIDeviceOrientationLandscapeRight:
@@ -1039,7 +1039,7 @@
 			
 			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
+					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
 			break;
 			
 		case UIDeviceOrientationPortraitUpsideDown:
@@ -1057,7 +1057,7 @@
 			
 			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
+					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
 			break;
 			
 		case UIDeviceOrientationPortrait:
@@ -1076,7 +1076,7 @@
 
 			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
 					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (isFullView ? @"" : @"not "));
+					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
 			break;
 	}
 	

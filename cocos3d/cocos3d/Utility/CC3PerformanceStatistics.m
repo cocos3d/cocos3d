@@ -37,9 +37,11 @@
 
 @implementation CC3PerformanceStatistics
 
-@synthesize updatesHandled, accumulatedUpdateTime, nodesUpdated, nodesTransformed;
-@synthesize framesHandled, accumulatedFrameTime, nodesVisitedForDrawing;
-@synthesize nodesDrawn, drawingCallsMade, facesPresented;
+@synthesize updatesHandled=_updatesHandled, accumulatedUpdateTime=_accumulatedUpdateTime;
+@synthesize nodesUpdated=_nodesUpdated, nodesTransformed=_nodesTransformed;
+@synthesize framesHandled=_framesHandled, accumulatedFrameTime=_accumulatedFrameTime;
+@synthesize nodesDrawn=_nodesDrawn, nodesVisitedForDrawing=_nodesVisitedForDrawing;
+@synthesize drawingCallsMade=_drawingCallsMade, facesPresented=_facesPresented;
 
 -(void) dealloc {
 	[super dealloc];
@@ -49,99 +51,79 @@
 #pragma mark Accumulated update statistics
 
 -(void) addUpdateTime: (ccTime) deltaTime {
-	updatesHandled++;
-	accumulatedUpdateTime += deltaTime;
+	_updatesHandled++;
+	_accumulatedUpdateTime += deltaTime;
 }
 
--(void) addNodesUpdated: (GLuint) nodeCount {
-	nodesUpdated += nodeCount;
-}
+-(void) addNodesUpdated: (GLuint) nodeCount { _nodesUpdated += nodeCount; }
 
--(void) incrementNodesUpdated {
-	nodesUpdated++;
-}
+-(void) incrementNodesUpdated { _nodesUpdated++; }
 
--(void) addNodesTransformed: (GLuint) nodeCount {
-	nodesTransformed += nodeCount;
-}
+-(void) addNodesTransformed: (GLuint) nodeCount { _nodesTransformed += nodeCount; }
 
--(void) incrementNodesTransformed {
-	nodesTransformed++;
-}
+-(void) incrementNodesTransformed { _nodesTransformed++; }
 
 
 #pragma mark Accumulated frame drawing statistics
 
 -(void) addFrameTime: (ccTime) deltaTime {
-	framesHandled++;
-	accumulatedFrameTime += deltaTime;
+	_framesHandled++;
+	_accumulatedFrameTime += deltaTime;
 }
 
--(void) addNodesVisitedForDrawing: (GLuint) nodeCount {
-	nodesVisitedForDrawing += nodeCount;
-}
+-(void) addNodesVisitedForDrawing: (GLuint) nodeCount { _nodesVisitedForDrawing += nodeCount; }
 
--(void) incrementNodesVisitedForDrawing {
-	nodesVisitedForDrawing++;
-}
+-(void) incrementNodesVisitedForDrawing { _nodesVisitedForDrawing++; }
 
--(void) addNodesDrawn: (GLuint) nodeCount {
-	nodesDrawn += nodeCount;
-}
+-(void) addNodesDrawn: (GLuint) nodeCount { _nodesDrawn += nodeCount; }
 
--(void) incrementNodesDrawn {
-	nodesDrawn++;
-}
+-(void) incrementNodesDrawn { _nodesDrawn++; }
 
--(void) addDrawingCallsMade: (GLuint) callCount {
-	drawingCallsMade += callCount;
-}
+-(void) addDrawingCallsMade: (GLuint) callCount { _drawingCallsMade += callCount; }
 
--(void) addFacesPresented: (GLuint) faceCount {
-	facesPresented += faceCount;
-}
+-(void) addFacesPresented: (GLuint) faceCount { _facesPresented += faceCount; }
 
 -(void) addSingleCallFacesPresented: (GLuint) faceCount {
-	drawingCallsMade++;
-	facesPresented += faceCount;
+	_drawingCallsMade++;
+	_facesPresented += faceCount;
 }
 
 
 #pragma mark Averaged update statistics
 
 -(GLfloat) updateRate {
-	return accumulatedUpdateTime ? ((GLfloat)updatesHandled / accumulatedUpdateTime) : 0.0;
+	return _accumulatedUpdateTime ? ((GLfloat)_updatesHandled / _accumulatedUpdateTime) : 0.0;
 }
 
 -(GLfloat) averageNodesUpdatedPerUpdate {
-	return framesHandled ? ((GLfloat)nodesUpdated / (GLfloat)updatesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_nodesUpdated / (GLfloat)_updatesHandled) : 0.0;
 }
 
 -(GLfloat) averageNodesTransformedPerUpdate {
-	return framesHandled ? ((GLfloat)nodesTransformed / (GLfloat)updatesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_nodesTransformed / (GLfloat)_updatesHandled) : 0.0;
 }
 
 
 #pragma mark Average frame drawing statistics
 
 -(GLfloat) frameRate {
-	return (accumulatedFrameTime != 0.0f) ? ((GLfloat)framesHandled / accumulatedFrameTime) : 0.0;
+	return (_accumulatedFrameTime != 0.0f) ? ((GLfloat)_framesHandled / _accumulatedFrameTime) : 0.0;
 }
 
 -(GLfloat) averageNodesDrawnPerFrame {
-	return framesHandled ? ((GLfloat)nodesDrawn / (GLfloat)framesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_nodesDrawn / (GLfloat)_framesHandled) : 0.0;
 }
 
 -(GLfloat) averageNodesVisitedForDrawingPerFrame {
-	return framesHandled ? ((GLfloat)nodesVisitedForDrawing / (GLfloat)framesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_nodesVisitedForDrawing / (GLfloat)_framesHandled) : 0.0;
 }
 
 -(GLfloat) averageDrawingCallsMadePerFrame {
-	return framesHandled ? ((GLfloat)drawingCallsMade / (GLfloat)framesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_drawingCallsMade / (GLfloat)_framesHandled) : 0.0;
 }
 
 -(GLfloat) averageFacesPresentedPerFrame {
-	return framesHandled ? ((GLfloat)facesPresented / (GLfloat)framesHandled) : 0.0;
+	return _framesHandled ? ((GLfloat)_facesPresented / (GLfloat)_framesHandled) : 0.0;
 }
 
 
@@ -159,33 +141,33 @@
 }
 
 -(void) reset {
-	updatesHandled = 0;
-	accumulatedUpdateTime = 0;
-	nodesUpdated = 0;
-	nodesTransformed = 0;
+	_updatesHandled = 0;
+	_accumulatedUpdateTime = 0;
+	_nodesUpdated = 0;
+	_nodesTransformed = 0;
 	
-	framesHandled = 0;
-	accumulatedFrameTime = 0.0;
-	nodesVisitedForDrawing = 0;
-	nodesDrawn = 0;
-	drawingCallsMade = 0;
-	facesPresented = 0;
+	_framesHandled = 0;
+	_accumulatedFrameTime = 0.0;
+	_nodesVisitedForDrawing = 0;
+	_nodesDrawn = 0;
+	_drawingCallsMade = 0;
+	_facesPresented = 0;
 }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PerformanceStatistics*) another {
-	updatesHandled = another.updatesHandled;
-	accumulatedUpdateTime = another.accumulatedUpdateTime;
-	nodesUpdated = another.nodesUpdated;
-	nodesTransformed = another.nodesTransformed;
+	_updatesHandled = another.updatesHandled;
+	_accumulatedUpdateTime = another.accumulatedUpdateTime;
+	_nodesUpdated = another.nodesUpdated;
+	_nodesTransformed = another.nodesTransformed;
 	
-	framesHandled = another.framesHandled;
-	accumulatedFrameTime = another.accumulatedFrameTime;
-	nodesVisitedForDrawing = another.nodesVisitedForDrawing;
-	nodesDrawn = another.nodesDrawn;
-	drawingCallsMade = another.drawingCallsMade;
-	facesPresented = another.facesPresented;
+	_framesHandled = another.framesHandled;
+	_accumulatedFrameTime = another.accumulatedFrameTime;
+	_nodesVisitedForDrawing = another.nodesVisitedForDrawing;
+	_nodesDrawn = another.nodesDrawn;
+	_drawingCallsMade = another.drawingCallsMade;
+	_facesPresented = another.facesPresented;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -212,13 +194,9 @@
 
 @implementation CC3PerformanceStatisticsHistogram
 
--(GLint*) updateRateHistogram {
-	return updateRateHistogram;
-}
+-(GLint*) updateRateHistogram { return _updateRateHistogram; }
 
--(GLint*) frameRateHistogram {
-	return frameRateHistogram;
-}
+-(GLint*) frameRateHistogram { return _frameRateHistogram; }
 
 -(GLint) getIndexOfInterval: (ccTime) deltaTime {
 	return CLAMP((GLint)(1.0 / deltaTime), 0, kCC3RateHistogramSize - 1);
@@ -229,7 +207,7 @@
 
 -(void) addUpdateTime: (ccTime) deltaTime {
 	[super addUpdateTime: deltaTime];
-	updateRateHistogram[[self getIndexOfInterval: deltaTime]]++;
+	_updateRateHistogram[[self getIndexOfInterval: deltaTime]]++;
 }
 
 
@@ -237,7 +215,7 @@
 
 -(void) addFrameTime: (ccTime) deltaTime {
 	[super addFrameTime: deltaTime];
-	frameRateHistogram[[self getIndexOfInterval: deltaTime]]++;
+	_frameRateHistogram[[self getIndexOfInterval: deltaTime]]++;
 }
 
 
@@ -245,14 +223,14 @@
 
 -(void) reset {
 	[super reset];
-	memset(frameRateHistogram, 0, kCC3RateHistogramSize * sizeof(frameRateHistogram[0]));
-	memset(updateRateHistogram, 0, kCC3RateHistogramSize * sizeof(updateRateHistogram[0]));
+	memset(_frameRateHistogram, 0, kCC3RateHistogramSize * sizeof(_frameRateHistogram[0]));
+	memset(_updateRateHistogram, 0, kCC3RateHistogramSize * sizeof(_updateRateHistogram[0]));
 }
 
 -(void) populateFrom: (CC3PerformanceStatisticsHistogram*) another {
 	[super populateFrom: another];
-	memcpy(frameRateHistogram, another.frameRateHistogram, kCC3RateHistogramSize * sizeof(frameRateHistogram[0]));
-	memcpy(updateRateHistogram, another.updateRateHistogram, kCC3RateHistogramSize * sizeof(updateRateHistogram[0]));
+	memcpy(_frameRateHistogram, another.frameRateHistogram, kCC3RateHistogramSize * sizeof(_frameRateHistogram[0]));
+	memcpy(_updateRateHistogram, another.updateRateHistogram, kCC3RateHistogramSize * sizeof(_updateRateHistogram[0]));
 }
 
 -(NSString*) fullDescription {
@@ -260,11 +238,9 @@
 	[desc appendFormat: @"%@", self.description];
 	[desc appendFormat: @"\n\tRate\tFrames\tUpdates"];
 	for (int i = 0; i < kCC3RateHistogramSize; i++) {
-		GLint fpsCount = frameRateHistogram[i];
-		GLint upsCount = updateRateHistogram[i];
-		if (fpsCount || upsCount) {
-			[desc appendFormat: @"\n\t%u\t%u\t%u", i, fpsCount, upsCount];
-		}
+		GLint fpsCount = _frameRateHistogram[i];
+		GLint upsCount = _updateRateHistogram[i];
+		if (fpsCount || upsCount) [desc appendFormat: @"\n\t%u\t%u\t%u", i, fpsCount, upsCount];
 	}
 	return desc;
 }

@@ -244,23 +244,19 @@ typedef enum {
  * specifications, and read back as any of the other specifications.
  */
 @interface CC3MutableRotator : CC3Rotator {
-	CC3Matrix* rotationMatrix;
-	CC3Vector4 rotationVector;
-	GLubyte incrementalRotationCount;
-	GLubyte rotationType : 4;
-	GLubyte orthonormalizationStartColumnNumber : 2;
-	BOOL isRotationDirty : 1;
-	
-	// Allocated for CC3DirectionalRotator subclass to conserve state memory
-	BOOL shouldReverseForwardDirection : 1;
-
-	// Allocated for CC3TargettingRotator subclass to conserve state memory
-	GLubyte targettingConstraint : 4;
-	BOOL isNewTarget : 1;
-	BOOL shouldTrackTarget : 1;
-	BOOL shouldAutotargetCamera : 1;
-	BOOL isTrackingForBumpMapping : 1;
-	BOOL isTargetLocationDirty : 1;
+	CC3Matrix* _rotationMatrix;
+	CC3Vector4 _rotationVector;
+	GLubyte _incrementalRotationCount;
+	GLubyte _rotationType : 4;
+	GLubyte _targettingConstraint : 4;				// For CC3TargettingRotator subclass
+	GLubyte _orthonormalizationStartColumnNumber : 2;
+	BOOL _isRotationDirty : 1;
+	BOOL _shouldReverseForwardDirection : 1;		// For CC3DirectionalRotator subclass
+	BOOL _isNewTarget : 1;							// For CC3TargettingRotator subclass
+	BOOL _shouldTrackTarget : 1;					// For CC3TargettingRotator subclass
+	BOOL _shouldAutotargetCamera : 1;				// For CC3TargettingRotator subclass
+	BOOL _isTrackingForBumpMapping : 1;				// For CC3TargettingRotator subclass
+	BOOL _isTargetLocationDirty : 1;				// For CC3TargettingRotator subclass
 }
 
 /**
@@ -434,7 +430,7 @@ typedef enum {
  * or should rotate the positive-Z-axis to the forwardDirection.
  */
 @interface CC3DirectionalRotator : CC3MutableRotator {
-	CC3Vector referenceUpDirection;
+	CC3Vector _referenceUpDirection;
 }
 
 /**
@@ -551,7 +547,7 @@ typedef enum {
  * as the target node, or the node using this rotator, move.
  */
 @interface CC3TargettingRotator : CC3DirectionalRotator {
-	CC3Node* target;
+	CC3Node* _target;
 }
 
 /**

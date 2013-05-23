@@ -36,7 +36,7 @@
 
 /** A CC3Material whose content originates from POD resource data. */
 @interface CC3PODMaterial : CC3Material {
-	int podIndex;
+	GLint _podIndex;
 }
 
 /**

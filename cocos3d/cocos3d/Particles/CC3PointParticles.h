@@ -152,14 +152,14 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * emitter node, and is deallocated automatically when the emitter is released.
  */
 @interface CC3PointParticleEmitter : CC3CommonVertexArrayParticleEmitter {
-	CC3Vector globalCameraLocation;
+	CC3Vector _globalCameraLocation;
 	CC3AttenuationCoefficients _particleSizeAttenuation;
-	GLfloat particleSize;
-	GLfloat particleSizeMinimum;
-	GLfloat particleSizeMaximum;
-	BOOL shouldSmoothPoints : 1;
-	BOOL shouldNormalizeParticleSizesToDevice : 1;
-	BOOL areParticleNormalsDirty : 1;
+	GLfloat _particleSize;
+	GLfloat _particleSizeMinimum;
+	GLfloat _particleSizeMaximum;
+	BOOL _shouldSmoothPoints : 1;
+	BOOL _shouldNormalizeParticleSizesToDevice : 1;
+	BOOL _areParticleNormalsDirty : 1;
 }
 
 /** @deprecated Use the mesh property. */
@@ -394,8 +394,8 @@ static const CC3VertexContent kCC3PointParticleContentSize DEPRECATED_ATTRIBUTE 
  * CC3PointParticle provides accessors for the particle normal and size.
  */
 @interface CC3PointParticle : CC3ParticleBase <CC3PointParticleProtocol> {
-	GLuint particleIndex;
-	BOOL isAlive : 1;
+	GLuint _particleIndex;
+	BOOL _isAlive : 1;
 }
 
 /**

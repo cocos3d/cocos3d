@@ -38,35 +38,35 @@
 
 @implementation CC3MortalMeshParticle
 
-@synthesize lifeSpan, timeToLive;
+@synthesize lifeSpan=_lifeSpan, timeToLive=_timeToLive;
 
 -(void) setLifeSpan: (ccTime) anInterval {
-	lifeSpan = anInterval;
-	timeToLive = lifeSpan;
+	_lifeSpan = anInterval;
+	_timeToLive = _lifeSpan;
 }
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
-	timeToLive -= visitor.deltaTime;
-	if (timeToLive <= 0.0) self.isAlive = NO;
+	_timeToLive -= visitor.deltaTime;
+	if (_timeToLive <= 0.0) self.isAlive = NO;
 }
 
 - (NSString*) fullDescription {
 	return [NSMutableString stringWithFormat:@"%@\n\tlifeSpan: %.3f, timeToLive: %.3f",
-			[super fullDescription], lifeSpan, timeToLive];
+			[super fullDescription], _lifeSpan, _timeToLive];
 }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		lifeSpan = 0.0f;
-		timeToLive = 0.0f;
+		_lifeSpan = 0.0f;
+		_timeToLive = 0.0f;
 	}
 	return self;
 }
 
 -(void) populateFrom: (CC3MortalMeshParticle*) another {
 	[super populateFrom: another];
-	lifeSpan = another.lifeSpan;
-	timeToLive = another.timeToLive;
+	_lifeSpan = another.lifeSpan;
+	_timeToLive = another.timeToLive;
 }
 
 @end
@@ -77,7 +77,7 @@
 
 @implementation CC3SprayMeshParticle
 
-@synthesize velocity;
+@synthesize velocity=_velocity;
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[super updateBeforeTransform: visitor];
@@ -88,19 +88,19 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		velocity = kCC3VectorZero;
+		_velocity = kCC3VectorZero;
 	}
 	return self;
 }
 
 -(void) populateFrom: (CC3SprayMeshParticle*) another {
 	[super populateFrom: another];
-	velocity = another.velocity;
+	_velocity = another.velocity;
 }
 
 - (NSString*) fullDescription {
 	return [NSMutableString stringWithFormat:@"%@\n\tvelocity: %@",
-			[super fullDescription], NSStringFromCC3Vector(velocity)];
+			[super fullDescription], NSStringFromCC3Vector(_velocity)];
 }
 
 @end
@@ -111,39 +111,39 @@
 
 @implementation CC3UniformlyEvolvingMeshParticle
 
-@synthesize colorVelocity;
+@synthesize colorVelocity=_colorVelocity;
 
 -(CC3Vector) rotationVelocity {
-	switch (rotationVelocityType) {
+	switch (_rotationVelocityType) {
 		case kCC3RotationTypeAxisAngle: {
 			CC3Vector4 axisAngle = CC3Vector4FromCC3Vector(self.rotationAxis, self.rotationAngleVelocity);
 			return CC3RotationFromQuaternion(CC3QuaternionFromAxisAngle(axisAngle));
 		}
 		default:
-			return rotationVelocity;
+			return _rotationVelocity;
 	}
 }
 
 -(void) setRotationVelocity: (CC3Vector) aVector {
-	rotationVelocity = aVector;
-	rotationVelocityType = kCC3RotationTypeEuler;
+	_rotationVelocity = aVector;
+	_rotationVelocityType = kCC3RotationTypeEuler;
 }
 
 -(GLfloat) rotationAngleVelocity {
-	switch (rotationVelocityType) {
+	switch (_rotationVelocityType) {
 		case kCC3RotationTypeEuler: {
 			CC3Quaternion quat = CC3QuaternionFromRotation(self.rotationVelocity);
 			CC3Vector4 axisAngle = CC3AxisAngleFromQuaternion(quat);
 			return axisAngle.w;
 		}
 		default:
-			return rotationVelocity.x;
+			return _rotationVelocity.x;
 	}
 }
 
 -(void) setRotationAngleVelocity:(GLfloat) anAngle {
-	rotationVelocity = cc3v(anAngle, anAngle, anAngle);
-	rotationVelocityType = kCC3RotationTypeAxisAngle;
+	_rotationVelocity = cc3v(anAngle, anAngle, anAngle);
+	_rotationVelocityType = kCC3RotationTypeAxisAngle;
 }
 
 
@@ -155,7 +155,7 @@
 	
 	ccTime dt = visitor.deltaTime;
 	
-	switch (rotationVelocityType) {
+	switch (_rotationVelocityType) {
 		case kCC3RotationTypeEuler: {
 			CC3Vector rotVel = self.rotationVelocity;
 			if ( !CC3VectorIsZero(rotVel) ) [self rotateBy: CC3VectorScaleUniform(rotVel, dt)];
@@ -170,14 +170,14 @@
 			break;
 	}
 	
-	if ( self.hasColor && !CCC4FAreEqual(colorVelocity, kCCC4FBlackTransparent) ) {
+	if ( self.hasColor && !CCC4FAreEqual(_colorVelocity, kCCC4FBlackTransparent) ) {
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
 		ccColor4F currColor = self.color4F;
-		ccColor4F newColor = ccc4f(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0f, 1.0f),
-								   CLAMP(currColor.g + (colorVelocity.g * dt), 0.0f, 1.0f),
-								   CLAMP(currColor.b + (colorVelocity.b * dt), 0.0f, 1.0f),
-								   CLAMP(currColor.a + (colorVelocity.a * dt), 0.0f, 1.0f));
+		ccColor4F newColor = ccc4f(CLAMP(currColor.r + (_colorVelocity.r * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.g + (_colorVelocity.g * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.b + (_colorVelocity.b * dt), 0.0f, 1.0f),
+								   CLAMP(currColor.a + (_colorVelocity.a * dt), 0.0f, 1.0f));
 		self.color4F = newColor;
 		LogTrace(@"Updating color of %@ from %@ to %@", self,
 					  NSStringFromCCC4F(currColor), NSStringFromCCC4F(newColor));
@@ -190,26 +190,26 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		rotationVelocity = kCC3VectorZero;
-		rotationVelocityType = kCC3RotationTypeUnknown;
-		colorVelocity = kCCC4FBlackTransparent;
+		_rotationVelocity = kCC3VectorZero;
+		_rotationVelocityType = kCC3RotationTypeUnknown;
+		_colorVelocity = kCCC4FBlackTransparent;
 	}
 	return self;
 }
 
 // Protected properties for copying
--(GLubyte) rotationVelocityType { return rotationVelocityType; }
+-(GLubyte) rotationVelocityType { return _rotationVelocityType; }
 
 -(void) populateFrom: (CC3UniformlyEvolvingMeshParticle*) another {
 	[super populateFrom: another];
-	rotationVelocity = another.rotationVelocity;
-	rotationVelocityType = another.rotationVelocityType;
-	colorVelocity = another.colorVelocity;
+	_rotationVelocity = another.rotationVelocity;
+	_rotationVelocityType = another.rotationVelocityType;
+	_colorVelocity = another.colorVelocity;
 }
 
 - (NSString*) fullDescription {
 	return [NSMutableString stringWithFormat:@"%@\n\tvelocity: %@",
-			[super fullDescription], NSStringFromCC3Vector(velocity)];
+			[super fullDescription], NSStringFromCC3Vector(_velocity)];
 }
 
 @end
@@ -220,32 +220,32 @@
 
 @implementation CC3MultiTemplateMeshParticleEmitter
 
-@synthesize particleTemplateMeshes;
+@synthesize particleTemplateMeshes=_particleTemplateMeshes;
 
 -(void) dealloc {
-	[particleTemplateMeshes release];
+	[_particleTemplateMeshes release];
 	[super dealloc];
 }
 
 -(void) addParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
-	[particleTemplateMeshes addObject: aVtxArrayMesh];
+	[_particleTemplateMeshes addObject: aVtxArrayMesh];
 	LogTrace(@"%@ added particle template mesh %@ with %i vertices and %i vertex indices",
 				  self, aVtxArrayMesh, aVtxArrayMesh.vertexCount, aVtxArrayMesh.vertexIndexCount);
 }
 
 /** Removes the specified mesh from the collection of meshes in the particleTemplateMeshes property. */
 -(void) removeParticleTemplateMesh: (CC3Mesh*) aVtxArrayMesh {
-	[particleTemplateMeshes removeObjectIdenticalTo: aVtxArrayMesh];
+	[_particleTemplateMeshes removeObjectIdenticalTo: aVtxArrayMesh];
 }
 
 -(void) assignTemplateMeshToParticle: (id<CC3MeshParticleProtocol>) aParticle {
-	NSUInteger tmCount = particleTemplateMeshes.count + (particleTemplateMesh ? 1 : 0);
+	NSUInteger tmCount = _particleTemplateMeshes.count + (_particleTemplateMesh ? 1 : 0);
 	CC3Assert(tmCount > 0, @"No particle template meshes available in %@. Use the addParticleTemplateMesh: method to add template meshes for the particles.", self);
 
 	NSUInteger tmIdx = CC3RandomUIntBelow(tmCount);
-	aParticle.templateMesh = (tmIdx < particleTemplateMeshes.count)
-									? [particleTemplateMeshes objectAtIndex: tmIdx]
-									: particleTemplateMesh;
+	aParticle.templateMesh = (tmIdx < _particleTemplateMeshes.count)
+									? [_particleTemplateMeshes objectAtIndex: tmIdx]
+									: _particleTemplateMesh;
 }
 
 
@@ -253,7 +253,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		particleTemplateMeshes = [[CCArray array] retain];
+		_particleTemplateMeshes = [[CCArray array] retain];
 	}
 	return self;
 }

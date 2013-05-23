@@ -1530,10 +1530,10 @@ static GLuint lastAssignedMeshTag;
 
 @implementation CC3FaceArray
 
-@synthesize mesh, shouldCacheFaces;
+@synthesize mesh=_mesh, shouldCacheFaces=_shouldCacheFaces;
 
 -(void) dealloc {
-	mesh = nil;					// not retained
+	_mesh = nil;					// not retained
 	[self deallocateIndices];
 	[self deallocateCenters];
 	[self deallocateNormals];
@@ -1547,7 +1547,7 @@ static GLuint lastAssignedMeshTag;
  * on next access using the new mesh data.
  */
 -(void) setMesh: (CC3Mesh*) aMesh {
-	mesh = aMesh;		// not retained
+	_mesh = aMesh;		// not retained
 	[self deallocateIndices];
 	[self deallocateCenters];
 	[self deallocateNormals];
@@ -1557,8 +1557,8 @@ static GLuint lastAssignedMeshTag;
 
 /** If turning off, clears all caches except neighbours. */
 -(void) setShouldCacheFaces: (BOOL) shouldCache {
-	shouldCacheFaces = shouldCache;
-	if (!shouldCacheFaces) {
+	_shouldCacheFaces = shouldCache;
+	if (!_shouldCacheFaces) {
 		[self deallocateIndices];
 		[self deallocateCenters];
 		[self deallocateNormals];
@@ -1566,32 +1566,32 @@ static GLuint lastAssignedMeshTag;
 	}
 }
 
--(GLuint) faceCount { return mesh ? mesh.faceCount : 0;}
+-(GLuint) faceCount { return _mesh ? _mesh.faceCount : 0;}
 
--(CC3Face) faceAt: (GLuint) faceIndex { return mesh ? [mesh faceAt: faceIndex] : kCC3FaceZero; }
+-(CC3Face) faceAt: (GLuint) faceIndex { return _mesh ? [_mesh faceAt: faceIndex] : kCC3FaceZero; }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		mesh = nil;
-		shouldCacheFaces = NO;
-		indices = NULL;
-		indicesAreRetained = NO;
-		indicesAreDirty = YES;
-		centers = NULL;
-		centersAreRetained = NO;
-		centersAreDirty = YES;
-		normals = NULL;
-		normalsAreRetained = NO;
-		normalsAreDirty = YES;
-		planes = NULL;
-		planesAreRetained = NO;
-		planesAreDirty = YES;
-		neighbours = NULL;
-		neighboursAreRetained = NO;
-		neighboursAreDirty = YES;
+		_mesh = nil;
+		_shouldCacheFaces = NO;
+		_indices = NULL;
+		_indicesAreRetained = NO;
+		_indicesAreDirty = YES;
+		_centers = NULL;
+		_centersAreRetained = NO;
+		_centersAreDirty = YES;
+		_normals = NULL;
+		_normalsAreRetained = NO;
+		_normalsAreDirty = YES;
+		_planes = NULL;
+		_planesAreRetained = NO;
+		_planesAreDirty = YES;
+		_neighbours = NULL;
+		_neighboursAreRetained = NO;
+		_neighboursAreDirty = YES;
 	}
 	return self;
 }
@@ -1607,17 +1607,17 @@ static GLuint lastAssignedMeshTag;
 }
 
 // Phantom properties used during copying
--(BOOL) indicesAreRetained { return indicesAreRetained; }
--(BOOL) centersAreRetained { return centersAreRetained; }
--(BOOL) normalsAreRetained { return normalsAreRetained; }
--(BOOL) planesAreRetained { return planesAreRetained; }
--(BOOL) neighboursAreRetained { return neighboursAreRetained; }
+-(BOOL) indicesAreRetained { return _indicesAreRetained; }
+-(BOOL) centersAreRetained { return _centersAreRetained; }
+-(BOOL) normalsAreRetained { return _normalsAreRetained; }
+-(BOOL) planesAreRetained { return _planesAreRetained; }
+-(BOOL) neighboursAreRetained { return _neighboursAreRetained; }
 
--(BOOL) indicesAreDirty { return indicesAreDirty; }
--(BOOL) centersAreDirty { return centersAreDirty; }
--(BOOL) normalsAreDirty { return normalsAreDirty; }
--(BOOL) planesAreDirty { return planesAreDirty; }
--(BOOL) neighboursAreDirty { return neighboursAreDirty; }
+-(BOOL) indicesAreDirty { return _indicesAreDirty; }
+-(BOOL) centersAreDirty { return _centersAreDirty; }
+-(BOOL) normalsAreDirty { return _normalsAreDirty; }
+-(BOOL) planesAreDirty { return _planesAreDirty; }
+-(BOOL) neighboursAreDirty { return _neighboursAreDirty; }
 
 
 // Template method that populates this instance from the specified other instance.
@@ -1625,82 +1625,80 @@ static GLuint lastAssignedMeshTag;
 -(void) populateFrom: (CC3FaceArray*) another {
 	[super populateFrom: another];
 	
-	mesh = another.mesh;		// not retained
+	_mesh = another.mesh;		// not retained
 	
-	shouldCacheFaces = another.shouldCacheFaces;
+	_shouldCacheFaces = another.shouldCacheFaces;
 	
 	// If indices should be retained, allocate memory and copy the data over.
 	[self deallocateIndices];
 	if (another.indicesAreRetained) {
 		[self allocateIndices];
-		memcpy(indices, another.indices, (self.faceCount * sizeof(CC3FaceIndices)));
+		memcpy(_indices, another.indices, (self.faceCount * sizeof(CC3FaceIndices)));
 	} else {
-		indices = another.indices;
+		_indices = another.indices;
 	}
-	indicesAreDirty = another.indicesAreDirty;
+	_indicesAreDirty = another.indicesAreDirty;
 	
 	// If centers should be retained, allocate memory and copy the data over.
 	[self deallocateCenters];
 	if (another.centersAreRetained) {
 		[self allocateCenters];
-		memcpy(centers, another.centers, (self.faceCount * sizeof(CC3Vector)));
+		memcpy(_centers, another.centers, (self.faceCount * sizeof(CC3Vector)));
 	} else {
-		centers = another.centers;
+		_centers = another.centers;
 	}
-	centersAreDirty = another.centersAreDirty;
+	_centersAreDirty = another.centersAreDirty;
 	
 	// If normals should be retained, allocate memory and copy the data over.
 	[self deallocateNormals];
 	if (another.normalsAreRetained) {
 		[self allocateNormals];
-		memcpy(normals, another.normals, (self.faceCount * sizeof(CC3Vector)));
+		memcpy(_normals, another.normals, (self.faceCount * sizeof(CC3Vector)));
 	} else {
-		normals = another.normals;
+		_normals = another.normals;
 	}
-	normalsAreDirty = another.normalsAreDirty;
+	_normalsAreDirty = another.normalsAreDirty;
 	
 	// If planes should be retained, allocate memory and copy the data over.
 	[self deallocatePlanes];
 	if (another.planesAreRetained) {
 		[self allocatePlanes];
-		memcpy(planes, another.planes, (self.faceCount * sizeof(CC3Plane)));
+		memcpy(_planes, another.planes, (self.faceCount * sizeof(CC3Plane)));
 	} else {
-		planes = another.planes;
+		_planes = another.planes;
 	}
-	planesAreDirty = another.planesAreDirty;
+	_planesAreDirty = another.planesAreDirty;
 	
 	// If neighbours should be retained, allocate memory and copy the data over.
 	[self deallocateNeighbours];
 	if (another.neighboursAreRetained) {
 		[self allocateNeighbours];
-		memcpy(neighbours, another.neighbours, (self.faceCount * sizeof(CC3FaceNeighbours)));
+		memcpy(_neighbours, another.neighbours, (self.faceCount * sizeof(CC3FaceNeighbours)));
 	} else {
-		neighbours = another.neighbours;
+		_neighbours = another.neighbours;
 	}
-	neighboursAreDirty = another.neighboursAreDirty;
+	_neighboursAreDirty = another.neighboursAreDirty;
 }
 
 
 #pragma mark Indices
 
 -(CC3FaceIndices*) indices {
-	if (indicesAreDirty || !indices) {
-		[self populateIndices];
-	}
-	return indices;
+	if (_indicesAreDirty || !_indices) [self populateIndices];
+	return _indices;
 }
 
 -(void) setIndices: (CC3FaceIndices*) faceIndices {
 	[self deallocateIndices];			// Safely disposes existing vertices
-	indices = faceIndices;
+	_indices = faceIndices;
 }
 
 -(CC3FaceIndices) uncachedIndicesAt: (GLuint) faceIndex {
-	return [mesh uncachedFaceIndicesAt: faceIndex];
+	return [_mesh uncachedFaceIndicesAt: faceIndex];
 }
 
 -(CC3FaceIndices) indicesAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) return self.indices[faceIndex];
+	if (_shouldCacheFaces) return self.indices[faceIndex];
 	return [self uncachedIndicesAt: faceIndex];
 }
 
@@ -1708,53 +1706,53 @@ static GLuint lastAssignedMeshTag;
 	[self deallocateIndices];
 	GLuint faceCount = self.faceCount;
 	if (faceCount) {
-		indices = calloc(faceCount, sizeof(CC3FaceIndices));
-		indicesAreRetained = YES;
+		_indices = calloc(faceCount, sizeof(CC3FaceIndices));
+		_indicesAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u face indices", self, faceCount);
 	}
-	return indices;
+	return _indices;
 }
 
 -(void) deallocateIndices {
-	if (indicesAreRetained && indices) {
-		free(indices);
-		indices = NULL;
-		indicesAreRetained = NO;
+	if (_indicesAreRetained && _indices) {
+		free(_indices);
+		_indices = NULL;
+		_indicesAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated indices", self, self.faceCount);
 	}
 }
 
 -(void) populateIndices {
 	LogTrace(@"%@ populating %u face indices", self, self.faceCount);
-	if ( !indices ) [self allocateIndices];
+	if ( !_indices ) [self allocateIndices];
 	
 	GLuint faceCount = self.faceCount;
 	for (int faceIdx = 0; faceIdx < faceCount; faceIdx++) {
-		indices[faceIdx] = [self uncachedIndicesAt: faceIdx];
+		_indices[faceIdx] = [self uncachedIndicesAt: faceIdx];
 		
 		LogTrace(@"Face %i has indices %@", faceIdx,
-					  NSStringFromCC3FaceIndices(indices[faceIdx]));
+					  NSStringFromCC3FaceIndices(_indices[faceIdx]));
 	}
-	indicesAreDirty = NO;
+	_indicesAreDirty = NO;
 }
 
--(void) markIndicesDirty { indicesAreDirty = YES; }
+-(void) markIndicesDirty { _indicesAreDirty = YES; }
 
 
 #pragma mark Centers
 
 -(CC3Vector*) centers {
-	if (centersAreDirty || !centers) [self populateCenters];
-	return centers;
+	if (_centersAreDirty || !_centers) [self populateCenters];
+	return _centers;
 }
 
 -(void) setCenters: (CC3Vector*) faceCenters {
 	[self deallocateCenters];			// Safely disposes existing vertices
-	centers = faceCenters;
+	_centers = faceCenters;
 }
 
 -(CC3Vector) centerAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) return self.centers[faceIndex];
+	if (_shouldCacheFaces) return self.centers[faceIndex];
 	return CC3FaceCenter([self faceAt: faceIndex]);
 }
 
@@ -1762,54 +1760,54 @@ static GLuint lastAssignedMeshTag;
 	[self deallocateCenters];
 	GLuint faceCount = self.faceCount;
 	if (faceCount) {
-		centers = calloc(faceCount, sizeof(CC3Vector));
-		centersAreRetained = YES;
+		_centers = calloc(faceCount, sizeof(CC3Vector));
+		_centersAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u face centers", self, faceCount);
 	}
-	return centers;
+	return _centers;
 }
 
 -(void) deallocateCenters {
-	if (centersAreRetained && centers) {
-		free(centers);
-		centers = NULL;
-		centersAreRetained = NO;
+	if (_centersAreRetained && _centers) {
+		free(_centers);
+		_centers = NULL;
+		_centersAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated centers", self, self.faceCount);
 	}
 }
 
 -(void) populateCenters {
 	LogTrace(@"%@ populating %u face centers", self, self.faceCount);
-	if ( !centers ) [self allocateCenters];
+	if ( !_centers ) [self allocateCenters];
 	
 	GLuint faceCount = self.faceCount;
 	for (int faceIdx = 0; faceIdx < faceCount; faceIdx++) {
-		centers[faceIdx] = CC3FaceCenter([self faceAt: faceIdx]);
+		_centers[faceIdx] = CC3FaceCenter([self faceAt: faceIdx]);
 
 		LogTrace(@"Face %i has vertices %@ and center %@", faceIdx,
 					  NSStringFromCC3Face([self faceAt: faceIdx]),
-					  NSStringFromCC3Vector(centers[faceIdx]));
+					  NSStringFromCC3Vector(_centers[faceIdx]));
 	}
-	centersAreDirty = NO;
+	_centersAreDirty = NO;
 }
 
--(void) markCentersDirty { centersAreDirty = YES; }
+-(void) markCentersDirty { _centersAreDirty = YES; }
 
 
 #pragma mark Normals
 
 -(CC3Vector*) normals {
-	if (normalsAreDirty || !normals) [self populateNormals];
-	return normals;
+	if (_normalsAreDirty || !_normals) [self populateNormals];
+	return _normals;
 }
 
 -(void) setNormals: (CC3Vector*) faceNormals {
 	[self deallocateNormals];			// Safely disposes existing vertices
-	normals = faceNormals;
+	_normals = faceNormals;
 }
 
 -(CC3Vector) normalAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) return self.normals[faceIndex];
+	if (_shouldCacheFaces) return self.normals[faceIndex];
 	return CC3FaceNormal([self faceAt: faceIndex]);
 }
 
@@ -1817,54 +1815,54 @@ static GLuint lastAssignedMeshTag;
 	[self deallocateNormals];
 	GLuint faceCount = self.faceCount;
 	if (faceCount) {
-		normals = calloc(faceCount, sizeof(CC3Vector));
-		normalsAreRetained = YES;
+		_normals = calloc(faceCount, sizeof(CC3Vector));
+		_normalsAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u face normals", self, faceCount);
 	}
-	return normals;
+	return _normals;
 }
 
 -(void) deallocateNormals {
-	if (normalsAreRetained && normals) {
-		free(normals);
-		normals = NULL;
-		normalsAreRetained = NO;
+	if (_normalsAreRetained && _normals) {
+		free(_normals);
+		_normals = NULL;
+		_normalsAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated normals", self, self.faceCount);
 	}
 }
 
 -(void) populateNormals {
 	LogTrace(@"%@ populating %u face normals", self, self.faceCount);
-	if ( !normals ) [self allocateNormals];
+	if ( !_normals ) [self allocateNormals];
 	
 	GLuint faceCount = self.faceCount;
 	for (int faceIdx = 0; faceIdx < faceCount; faceIdx++) {
-		normals[faceIdx] = CC3FaceNormal([self faceAt: faceIdx]);
+		_normals[faceIdx] = CC3FaceNormal([self faceAt: faceIdx]);
 		
 		LogTrace(@"Face %i has vertices %@ and normal %@", faceIdx,
 					  NSStringFromCC3Face([self faceAt: faceIdx]),
-					  NSStringFromCC3Vector(normals[faceIdx]));
+					  NSStringFromCC3Vector(_normals[faceIdx]));
 	}
-	normalsAreDirty = NO;
+	_normalsAreDirty = NO;
 }
 
--(void) markNormalsDirty { normalsAreDirty = YES; }
+-(void) markNormalsDirty { _normalsAreDirty = YES; }
 
 
 #pragma mark Planes
 
 -(CC3Plane*) planes {
-	if (planesAreDirty || !planes) [self populatePlanes];
-	return planes;
+	if (_planesAreDirty || !_planes) [self populatePlanes];
+	return _planes;
 }
 
 -(void) setPlanes: (CC3Plane*) facePlanes {
 	[self deallocatePlanes];			// Safely disposes existing vertices
-	planes = facePlanes;
+	_planes = facePlanes;
 }
 
 -(CC3Plane) planeAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) return self.planes[faceIndex];
+	if (_shouldCacheFaces) return self.planes[faceIndex];
 	return CC3FacePlane([self faceAt: faceIndex]);
 }
 
@@ -1872,50 +1870,50 @@ static GLuint lastAssignedMeshTag;
 	[self deallocatePlanes];
 	GLuint faceCount = self.faceCount;
 	if (faceCount) {
-		planes = calloc(faceCount, sizeof(CC3Plane));
-		planesAreRetained = YES;
+		_planes = calloc(faceCount, sizeof(CC3Plane));
+		_planesAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u face planes", self, faceCount);
 	}
-	return planes;
+	return _planes;
 }
 
 -(void) deallocatePlanes {
-	if (planesAreRetained && planes) {
-		free(planes);
-		planes = NULL;
-		planesAreRetained = NO;
+	if (_planesAreRetained && _planes) {
+		free(_planes);
+		_planes = NULL;
+		_planesAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated planes", self, self.faceCount);
 	}
 }
 
 -(void) populatePlanes {
 	LogTrace(@"%@ populating %u face planes", self, self.faceCount);
-	if ( !planes ) [self allocatePlanes];
+	if ( !_planes ) [self allocatePlanes];
 	
 	GLuint faceCount = self.faceCount;
 	for (int faceIdx = 0; faceIdx < faceCount; faceIdx++) {
-		planes[faceIdx] = CC3FacePlane([self faceAt: faceIdx]);
+		_planes[faceIdx] = CC3FacePlane([self faceAt: faceIdx]);
 		
 		LogTrace(@"Face %i has vertices %@ and plane %@", faceIdx,
 					  NSStringFromCC3Face([self faceAt: faceIdx]),
-					  NSStringFromCC3Plane(planes[faceIdx]));
+					  NSStringFromCC3Plane(_planes[faceIdx]));
 	}
-	planesAreDirty = NO;
+	_planesAreDirty = NO;
 }
 
--(void) markPlanesDirty { planesAreDirty = YES; }
+-(void) markPlanesDirty { _planesAreDirty = YES; }
 
 
 #pragma mark Neighbours
 
 -(CC3FaceNeighbours*) neighbours {
-	if (neighboursAreDirty || !neighbours) [self populateNeighbours];
-	return neighbours;
+	if (_neighboursAreDirty || !_neighbours) [self populateNeighbours];
+	return _neighbours;
 }
 
 -(void) setNeighbours: (CC3FaceNeighbours*) faceNeighbours {
 	[self deallocateNeighbours];		// Safely disposes existing vertices
-	neighbours = faceNeighbours;
+	_neighbours = faceNeighbours;
 }
 
 -(CC3FaceNeighbours) neighboursAt: (GLuint) faceIndex {
@@ -1926,32 +1924,32 @@ static GLuint lastAssignedMeshTag;
 	[self deallocateNeighbours];
 	GLuint faceCount = self.faceCount;
 	if (faceCount) {
-		neighbours = calloc(faceCount, sizeof(CC3FaceNeighbours));
-		neighboursAreRetained = YES;
+		_neighbours = calloc(faceCount, sizeof(CC3FaceNeighbours));
+		_neighboursAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u face neighbours", self, faceCount);
 	}
-	return neighbours;
+	return _neighbours;
 }
 
 -(void) deallocateNeighbours {
-	if (neighboursAreRetained && neighbours) {
-		free(neighbours);
-		neighbours = NULL;
-		neighboursAreRetained = NO;
+	if (_neighboursAreRetained && _neighbours) {
+		free(_neighbours);
+		_neighbours = NULL;
+		_neighboursAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated neighbour structures", self, self.faceCount);
 	}
 }
 
 -(void) populateNeighbours {
 	LogTrace(@"%@ populating neighbours for %u faces", self, self.faceCount);
-	if ( !neighbours ) [self allocateNeighbours];
+	if ( !_neighbours ) [self allocateNeighbours];
 	
 	GLuint faceCnt = self.faceCount;
 	
 	// Break all neighbour links. Done in batch so that we can skip
 	// testing neighbour connections from both directions later.
 	for (int faceIdx = 0; faceIdx < faceCnt; faceIdx++) {
-		GLuint* neighbourEdge = neighbours[faceIdx].edges;
+		GLuint* neighbourEdge = _neighbours[faceIdx].edges;
 		neighbourEdge[0] = neighbourEdge[1] = neighbourEdge[2] = kCC3FaceNoNeighbour;
 	}
 	
@@ -1961,13 +1959,13 @@ static GLuint lastAssignedMeshTag;
 		// Get the neighbours of the current face, and if any of the edges still
 		// need to have a neighbour assigned, look for them. We check this early
 		// to avoid iterating through the remaining faces
-		GLuint* f1Neighbours = neighbours[f1Idx].edges;
+		GLuint* f1Neighbours = _neighbours[f1Idx].edges;
 		if (f1Neighbours[0] == kCC3FaceNoNeighbour ||
 			f1Neighbours[1] == kCC3FaceNoNeighbour ||
 			f1Neighbours[2] == kCC3FaceNoNeighbour) {
 
 			// For the current face, retrieve the vertex indices
-			GLuint* f1Vertices = [mesh faceIndicesAt: f1Idx].vertices;
+			GLuint* f1Vertices = [_mesh faceIndicesAt: f1Idx].vertices;
 			
 			// Iterate through all the faces beyond the current face
 			for (int f2Idx = f1Idx + 1; f2Idx < faceCnt; f2Idx++) {
@@ -1976,13 +1974,13 @@ static GLuint lastAssignedMeshTag;
 				// need to have a neighbour assigned, see if any of the edges between
 				// the current face and other face match. We check for neighbours early
 				// to avoid iterating through all the face combinations.
-				GLuint* f2Neighbours = neighbours[f2Idx].edges;
+				GLuint* f2Neighbours = _neighbours[f2Idx].edges;
 				if (f2Neighbours[0] == kCC3FaceNoNeighbour ||
 					f2Neighbours[1] == kCC3FaceNoNeighbour ||
 					f2Neighbours[2] == kCC3FaceNoNeighbour) {
 				
 					// For the other face, retrieve the vertex indices
-					GLuint* f2Vertices = [mesh faceIndicesAt: f2Idx].vertices;
+					GLuint* f2Vertices = [_mesh faceIndicesAt: f2Idx].vertices;
 					
 					// Compare each edge of the current face with each edge of the other face
 					for (int f1EdgeIdx = 0; f1EdgeIdx < 3; f1EdgeIdx++) {
@@ -2010,8 +2008,8 @@ static GLuint lastAssignedMeshTag;
 										f1Neighbours[f1EdgeIdx] = f2Idx;
 										f2Neighbours[f2EdgeIdx] = f1Idx;
 										LogTrace(@"Matched face %@ with face %@",
-													  NSStringFromCC3FaceIndices(f1Indices),
-													  NSStringFromCC3FaceIndices(f2Indices));
+													  NSStringFromCC3FaceIndices(_indices[f1Idx]),
+													  NSStringFromCC3FaceIndices(_indices[f2Idx]));
 									}
 								}
 							}
@@ -2020,15 +2018,15 @@ static GLuint lastAssignedMeshTag;
 				}
 			}
 			LogTrace(@"Face %i has indices %@ and neighbours %@", f1Idx,
-						  NSStringFromCC3FaceIndices([mesh faceIndicesAt: f1Idx]),
-						  NSStringFromCC3FaceNeighbours(neighbours[f1Idx]));
+						  NSStringFromCC3FaceIndices([_mesh faceIndicesAt: f1Idx]),
+						  NSStringFromCC3FaceNeighbours(_neighbours[f1Idx]));
 		}
 		
 	}
-	neighboursAreDirty = NO;
+	_neighboursAreDirty = NO;
 	LogTrace(@"%@ finished building neighbours", self);
 }
 
--(void) markNeighboursDirty { neighboursAreDirty = YES; }
+-(void) markNeighboursDirty { _neighboursAreDirty = YES; }
 
 @end

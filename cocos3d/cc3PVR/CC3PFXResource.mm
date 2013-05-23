@@ -512,11 +512,11 @@ static Class _defaultSemanticDelegateClass = nil;
 @implementation CC3Node (PFXEffects)
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
-	for (CC3Node* child in children) [child applyEffectNamed: effectName inPFXResourceNamed: rezName];
+	for (CC3Node* child in _children) [child applyEffectNamed: effectName inPFXResourceNamed: rezName];
 }
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
-	for (CC3Node* child in children) [child applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+	for (CC3Node* child in _children) [child applyEffectNamed: effectName inPFXResourceFile: aFilePath];
 }
 
 @end
@@ -534,14 +534,14 @@ static Class _defaultSemanticDelegateClass = nil;
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceNamed: (NSString*) rezName {
 	[self ensureMaterial];
-	[material applyEffectNamed: effectName inPFXResourceNamed: rezName];
+	[self.material applyEffectNamed: effectName inPFXResourceNamed: rezName];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceNamed: rezName];
 }
 
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath {
 	[self ensureMaterial];
-	[material applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+	[self.material applyEffectNamed: effectName inPFXResourceFile: aFilePath];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceFile: aFilePath];
 }

@@ -92,17 +92,17 @@
  * testing the 2D bounds of the 2D node against the bounds of the 2D drawing plane. 
  */
 @interface CC3Billboard : CC3MeshNode {
-	CCNode* billboard;
-	CGRect billboardBoundingRect;
-	CGPoint offsetPosition;
-	GLfloat unityScaleDistance;
-	CGPoint minimumBillboardScale;
-	CGPoint maximumBillboardScale;
-	GLuint textureUnitIndex;
-	BOOL shouldNormalizeScaleToDevice : 1;
-	BOOL shouldDrawAs2DOverlay : 1;
-	BOOL shouldAlwaysMeasureBillboardBoundingRect : 1;
-	BOOL shouldMaximizeBillboardBoundingRect : 1;
+	CCNode* _billboard;
+	CGRect _billboardBoundingRect;
+	CGPoint _offsetPosition;
+	GLfloat _unityScaleDistance;
+	CGPoint _minimumBillboardScale;
+	CGPoint _maximumBillboardScale;
+	GLuint _textureUnitIndex;
+	BOOL _shouldNormalizeScaleToDevice : 1;
+	BOOL _shouldDrawAs2DOverlay : 1;
+	BOOL _shouldAlwaysMeasureBillboardBoundingRect : 1;
+	BOOL _shouldMaximizeBillboardBoundingRect : 1;
 	BOOL _shouldUpdateUnseenBillboard : 1;
 	BOOL _billboardIsPaused : 1;
 }
@@ -570,8 +570,8 @@
  * the doesIntersectBounds: method.
  */
 @interface CC3BillboardBoundingBoxArea : CC3NodeBoundingArea {
-	CC3Vector vertices[4];
-	CC3Plane planes[6];
+	CC3Vector _vertices[4];
+	CC3Plane _planes[6];
 }
 
 /** @deprecated Use the superclass vertices property instead. */

@@ -2501,23 +2501,23 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * a face normal or plane is explicitly requested.
  */
 @interface CC3FaceArray : CC3Identifiable {
-	CC3Mesh* mesh;
-	CC3FaceIndices* indices;
-	CC3Vector* centers;
-	CC3Vector* normals;
-	CC3Plane* planes;
-	CC3FaceNeighbours* neighbours;
-	BOOL shouldCacheFaces;
-	BOOL indicesAreRetained;
-	BOOL centersAreRetained;
-	BOOL normalsAreRetained;
-	BOOL planesAreRetained;
-	BOOL neighboursAreRetained;
-	BOOL indicesAreDirty;
-	BOOL centersAreDirty;
-	BOOL normalsAreDirty;
-	BOOL planesAreDirty;
-	BOOL neighboursAreDirty;
+	CC3Mesh* _mesh;
+	CC3FaceIndices* _indices;
+	CC3Vector* _centers;
+	CC3Vector* _normals;
+	CC3Plane* _planes;
+	CC3FaceNeighbours* _neighbours;
+	BOOL _shouldCacheFaces;
+	BOOL _indicesAreRetained;
+	BOOL _centersAreRetained;
+	BOOL _normalsAreRetained;
+	BOOL _planesAreRetained;
+	BOOL _neighboursAreRetained;
+	BOOL _indicesAreDirty;
+	BOOL _centersAreDirty;
+	BOOL _normalsAreDirty;
+	BOOL _planesAreDirty;
+	BOOL _neighboursAreDirty;
 }
 
 /**

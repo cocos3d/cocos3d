@@ -79,8 +79,8 @@
  * minParticleLifeSpan and maxParticleLifeSpan properties of this navigator.
  */
 @interface CC3RandomMortalParticleNavigator : CC3ParticleNavigator {
-	ccTime minParticleLifeSpan;
-	ccTime maxParticleLifeSpan;
+	ccTime _minParticleLifeSpan;
+	ccTime _maxParticleLifeSpan;
 }
 
 /**
@@ -198,12 +198,12 @@
  * wide the spray will be, and you can set a range of speeds for the particles as they leave the emitter.
  */
 @interface CC3HoseParticleNavigator : CC3RandomMortalParticleNavigator <CC3NodeTransformListenerProtocol> {
-	CC3Node* nozzle;
-	CC3Matrix* nozzleMatrix;
-	CGSize nozzleShape;
-	GLfloat minParticleSpeed;
-	GLfloat maxParticleSpeed;
-	BOOL shouldPrecalculateNozzleTangents;
+	CC3Node* _nozzle;
+	CC3Matrix* _nozzleMatrix;
+	CGSize _nozzleShape;
+	GLfloat _minParticleSpeed;
+	GLfloat _maxParticleSpeed;
+	BOOL _shouldPrecalculateNozzleTangents : 1;
 }
 
 /**

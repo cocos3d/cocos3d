@@ -377,83 +377,83 @@ static NSMutableDictionary* _fontConfigurations = nil;
 @implementation CC3BitmapLabelNode
 
 -(void) dealloc {
-	[labelString release];
-	[fontFileName release];
-	[fontConfig release];
+	[_labelString release];
+	[_fontFileName release];
+	[_fontConfig release];
 	[super dealloc];
 }
 
--(GLfloat) lineHeight { return lineHeight ? lineHeight : fontConfig.commonHeight; }
+-(GLfloat) lineHeight { return _lineHeight ? _lineHeight : _fontConfig.commonHeight; }
 
 -(void) setLineHeight: (GLfloat) lineHt {
-	if (lineHt != lineHeight) {
-		lineHeight = lineHt;
+	if (lineHt != _lineHeight) {
+		_lineHeight = lineHt;
 		[self populateLabelMesh];
 	}
 }
 
--(NSString*) labelString { return labelString; }
+-(NSString*) labelString { return _labelString; }
 
 -(void) setLabelString: (NSString*) aString {
-	if ( ![aString isEqualToString: labelString] ) {
-		[labelString release];
-		labelString = [aString retain];
+	if ( ![aString isEqualToString: _labelString] ) {
+		[_labelString release];
+		_labelString = [aString retain];
 		[self populateLabelMesh];
 	}
 }
 
--(NSString*) fontFileName { return fontFileName; }
+-(NSString*) fontFileName { return _fontFileName; }
 
 -(void) setFontFileName: (NSString*) aFileName {
-	if ( ![aFileName isEqualToString: fontFileName] ) {
-		[fontFileName release];
-		fontFileName = [aFileName retain];
+	if ( ![aFileName isEqualToString: _fontFileName] ) {
+		[_fontFileName release];
+		_fontFileName = [aFileName retain];
 
-		[fontConfig release];
-		fontConfig = [[CC3BitmapFontConfiguration configurationFromFontFile: fontFileName] retain];
+		[_fontConfig release];
+		_fontConfig = [[CC3BitmapFontConfiguration configurationFromFontFile: _fontFileName] retain];
 
 		[self populateLabelMesh];
 	}
 }
 
--(NSTextAlignment) textAlignment { return textAlignment; }
+-(NSTextAlignment) textAlignment { return _textAlignment; }
 
 -(void) setTextAlignment: (NSTextAlignment) alignment {
-	if (alignment != textAlignment) {
-		textAlignment = alignment;
+	if (alignment != _textAlignment) {
+		_textAlignment = alignment;
 		[self populateLabelMesh];
 	}
 }
 
--(CGPoint) relativeOrigin { return relativeOrigin; }
+-(CGPoint) relativeOrigin { return _relativeOrigin; }
 
 -(void) setRelativeOrigin: (CGPoint) relOrigin {
-	if ( !CGPointEqualToPoint(relOrigin, relativeOrigin) ) {
-		relativeOrigin = relOrigin;
+	if ( !CGPointEqualToPoint(relOrigin, _relativeOrigin) ) {
+		_relativeOrigin = relOrigin;
 		[self populateLabelMesh];
 	}
 }
 
--(CC3Tessellation) tessellation { return tessellation; }
+-(CC3Tessellation) tessellation { return _tessellation; }
 
 -(void) setTessellation: (CC3Tessellation) aGrid {
-	if ( !((aGrid.x == tessellation.x) && (aGrid.y == tessellation.y)) ) {
-		tessellation = aGrid;
+	if ( !((aGrid.x == _tessellation.x) && (aGrid.y == _tessellation.y)) ) {
+		_tessellation = aGrid;
 		[self populateLabelMesh];
 	}
 }
 
--(GLfloat) fontSize { return fontConfig ? fontConfig.fontSize : 0; }
+-(GLfloat) fontSize { return _fontConfig ? _fontConfig.fontSize : 0; }
 
 -(GLfloat) baseline {
-	if ( !fontConfig ) return 0.0f;
-	return 1.0f - (GLfloat)fontConfig.baseline / (GLfloat)fontConfig.commonHeight;
+	if ( !_fontConfig ) return 0.0f;
+	return 1.0f - (GLfloat)_fontConfig.baseline / (GLfloat)_fontConfig.commonHeight;
 }
 
 #pragma mark Mesh population
 
 -(void) populateLabelMesh {
-	if (fontFileName && labelString) {
+	if (_fontFileName && _labelString) {
 		[self populateAsBitmapFontLabelFromString: self.labelString
 									 fromFontFile: self.fontFileName
 									andLineHeight: self.lineHeight
@@ -461,9 +461,9 @@ static NSMutableDictionary* _fontConfigurations = nil;
 								andRelativeOrigin: self.relativeOrigin
 								  andTessellation: self.tessellation];
 		[self markBoundingVolumeDirty];
-		if (mesh.isUsingGLBuffers) {
-			[mesh deleteGLBuffers];
-			[mesh createGLBuffers];
+		if (_mesh.isUsingGLBuffers) {
+			[_mesh deleteGLBuffers];
+			[_mesh createGLBuffers];
 		}
 	}
 }
@@ -473,13 +473,13 @@ static NSMutableDictionary* _fontConfigurations = nil;
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		labelString = @"hello, world";		// Fail-safe to display if nothing set
-		fontFileName = nil;
-		fontConfig = nil;
-		lineHeight = 0;
-		textAlignment = NSTextAlignmentLeft;
-		relativeOrigin = ccp(0,0);
-		tessellation = CC3TessellationMake(1,1);
+		_labelString = @"hello, world";		// Fail-safe to display if nothing set
+		_fontFileName = nil;
+		_fontConfig = nil;
+		_lineHeight = 0;
+		_textAlignment = NSTextAlignmentLeft;
+		_relativeOrigin = ccp(0,0);
+		_tessellation = CC3TessellationMake(1,1);
 	}
 	return self;
 }
@@ -487,10 +487,10 @@ static NSMutableDictionary* _fontConfigurations = nil;
 -(void) populateFrom: (CC3BitmapLabelNode*) another {
 	[super populateFrom: another];
 
-	relativeOrigin = another.relativeOrigin;
-	textAlignment = another.textAlignment;
-	tessellation = another.tessellation;
-	lineHeight = another.lineHeight;
+	_relativeOrigin = another.relativeOrigin;
+	_textAlignment = another.textAlignment;
+	_tessellation = another.tessellation;
+	_lineHeight = another.lineHeight;
 	self.fontFileName = another.fontFileName;
 	self.labelString = another.labelString;		// Will trigger repopulation
 }

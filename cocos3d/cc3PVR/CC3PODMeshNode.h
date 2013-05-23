@@ -55,10 +55,10 @@
  * This is a concrete implementation of the CC3Node category PVRPOD. 
  */
 @interface CC3PODMeshNode : CC3MeshNode {
-	int podIndex;
-	int podContentIndex;
-	int podParentIndex;
-	int podMaterialIndex;
+	GLint _podIndex;
+	GLint _podContentIndex;
+	GLint _podParentIndex;
+	GLint _podMaterialIndex;
 }
 
 @end

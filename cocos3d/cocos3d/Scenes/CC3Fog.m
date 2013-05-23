@@ -35,13 +35,14 @@
 
 @implementation CC3Fog
 
-@synthesize isRunning, visible, floatColor, attenuationMode, performanceHint;
-@synthesize density, startDistance, endDistance;
+@synthesize isRunning=_isRunning, visible=_visible, floatColor=_floatColor;
+@synthesize attenuationMode=_attenuationMode, performanceHint=_performanceHint;
+@synthesize density=_density, startDistance=_startDistance, endDistance=_endDistance;
 
 -(void) setIsRunning: (BOOL) shouldRun {
-	if (!isRunning && shouldRun) [self resumeAllActions];
-	if (isRunning && !shouldRun) [self pauseAllActions];
-	isRunning = shouldRun;
+	if (!_isRunning && shouldRun) [self resumeAllActions];
+	if (_isRunning && !shouldRun) [self pauseAllActions];
+	_isRunning = shouldRun;
 }
 
 
@@ -49,14 +50,14 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		isRunning = YES;
-		visible = YES;
-		floatColor = kCCC4FBlack;
-		attenuationMode = GL_EXP2;
-		performanceHint = GL_DONT_CARE;
-		density = 1.0;
-		startDistance = 0.0;
-		endDistance = 1.0;
+		_isRunning = YES;
+		_visible = YES;
+		_floatColor = kCCC4FBlack;
+		_attenuationMode = GL_EXP2;
+		_performanceHint = GL_DONT_CARE;
+		_density = 1.0;
+		_startDistance = 0.0;
+		_endDistance = 1.0;
 	}
 	return self;
 }
@@ -66,14 +67,14 @@
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Fog*) another {
-	isRunning = another.isRunning;
-	visible = another.visible;
-	floatColor = another.floatColor;
-	attenuationMode = another.attenuationMode;
-	performanceHint = another.performanceHint;
-	density = another.density;
-	startDistance = another.startDistance;
-	endDistance = another.endDistance;
+	_isRunning = another.isRunning;
+	_visible = another.visible;
+	_floatColor = another.floatColor;
+	_attenuationMode = another.attenuationMode;
+	_performanceHint = another.performanceHint;
+	_density = another.density;
+	_startDistance = another.startDistance;
+	_endDistance = another.endDistance;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
@@ -96,21 +97,21 @@
 	[gl enableFog: isFogging];
 	if (isFogging) {
 		LogTrace(@"Drawing %@", self);
-		gl.fogMode = attenuationMode;
-		gl.fogColor = floatColor;
-		gl.fogHint = performanceHint;
+		gl.fogMode = _attenuationMode;
+		gl.fogColor = _floatColor;
+		gl.fogHint = _performanceHint;
 		
-		switch (attenuationMode) {
+		switch (_attenuationMode) {
 			case GL_LINEAR:
-				gl.fogStart = startDistance;
-				gl.fogEnd = endDistance;
+				gl.fogStart = _startDistance;
+				gl.fogEnd = _endDistance;
 				break;
 			case GL_EXP:
 			case GL_EXP2:
-				gl.fogDensity = density;
+				gl.fogDensity = _density;
 				break;
 			default:
-				CC3Assert(NO, @"%@ encountered bad attenuation mode (%04X)", self, attenuationMode);
+				CC3Assert(NO, @"%@ encountered bad attenuation mode (%04X)", self, _attenuationMode);
 				break;
 		}
 	}
@@ -121,25 +122,23 @@
 
 /** Returns the value of the color property converted from float to integer components. */
 -(ccColor3B) color {
-	return ccc3(CCColorByteFromFloat(floatColor.r),
-				CCColorByteFromFloat(floatColor.g),
-				CCColorByteFromFloat(floatColor.b));
+	return ccc3(CCColorByteFromFloat(_floatColor.r),
+				CCColorByteFromFloat(_floatColor.g),
+				CCColorByteFromFloat(_floatColor.b));
 }
 
 /** Sets the color property by converting the specified integer color components to floats. */
 -(void) setColor: (ccColor3B) aColor {
-	floatColor.r = CCColorFloatFromByte(aColor.r);
-	floatColor.g = CCColorFloatFromByte(aColor.g);
-	floatColor.b = CCColorFloatFromByte(aColor.b);
+	_floatColor.r = CCColorFloatFromByte(aColor.r);
+	_floatColor.g = CCColorFloatFromByte(aColor.g);
+	_floatColor.b = CCColorFloatFromByte(aColor.b);
 }
 
 /** Returns the alpha component from the color property converted from a float to an integer. */
--(GLubyte) opacity {
-	return CCColorByteFromFloat(floatColor.a);
-}
+-(GLubyte) opacity { return CCColorByteFromFloat(_floatColor.a); }
 
 /** Sets the alpha component of the color property by converting the specified integer opacity to a float. */
--(void) setOpacity: (GLubyte) opacity { floatColor.a = CCColorFloatFromByte(opacity); }
+-(void) setOpacity: (GLubyte) opacity { _floatColor.a = CCColorFloatFromByte(opacity); }
 
 -(ccColor3B) displayedColor { return self.color; }
 
@@ -164,7 +163,7 @@
 
 -(CCAction*) runAction:(CCAction*) action {
 	CC3Assert( action != nil, @"Argument must be non-nil");
-	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !isRunning];
+	[CCDirector.sharedDirector.actionManager addAction: action target: self paused: !_isRunning];
 	return action;
 }
 

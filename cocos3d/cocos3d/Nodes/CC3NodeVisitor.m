@@ -90,7 +90,7 @@
 
 /** Template method that is invoked automatically during visitation to process the specified node. */
 -(void) process: (CC3Node*) aNode {
-	LogTrace(@"%@ visiting %@ %@ children", self, aNode, (shouldVisitChildren ? @"and" : @"but not"));
+	LogTrace(@"%@ visiting %@ %@ children", self, aNode, (_shouldVisitChildren ? @"and" : @"but not"));
 	
 	[self processBeforeChildren: aNode];	// Heavy lifting before visiting children
 	
@@ -309,7 +309,7 @@
 @synthesize deltaTime=_deltaTime;
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
-	LogTrace(@"Updating %@ after %.3f ms", aNode, deltaTime * 1000.0f);
+	LogTrace(@"Updating %@ after %.3f ms", aNode, _deltaTime * 1000.0f);
 	[self.performanceStatistics incrementNodesUpdated];
 	[aNode processUpdateBeforeTransform: self];
 
@@ -368,7 +368,7 @@
 
 		// Merge the node's bounding box into the aggregate bounding box
 		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3BoundingBox(nodeBox),
-				 aNode, NSStringFromCC3BoundingBox(boundingBox));
+				 aNode, NSStringFromCC3BoundingBox(_boundingBox));
 		_boundingBox = CC3BoundingBoxUnion(_boundingBox, nodeBox);
 	}
 }

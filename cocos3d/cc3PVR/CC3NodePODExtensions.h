@@ -54,7 +54,7 @@
  * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
  * override to map to an actual instance variable.
  */
-@property(nonatomic, assign) int podContentIndex;
+@property(nonatomic, assign) GLint podContentIndex;
 
 /**
  * The index of the parent node of this node.
@@ -64,7 +64,7 @@
  * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
  * override to map to an actual instance variable.
  */
-@property(nonatomic, assign) int podParentIndex;
+@property(nonatomic, assign) GLint podParentIndex;
 
 /**
  * The index of the node that is the target of this node.
@@ -74,7 +74,7 @@
  * variable, and always returns kCC3PODNilIndex. Concrete subclasses must
  * override to map to an actual instance variable.
  */
-@property(nonatomic, assign) int podTargetIndex;
+@property(nonatomic, assign) GLint podTargetIndex;
 
 /** Indicates whether this POD is a base node, meaning that it has no parent. */
 @property(nonatomic, readonly) BOOL isBasePODNode;
@@ -86,7 +86,7 @@
  * Allocates and initializes an autoreleased instance from the data of
  * this type at the specified index within the specified POD resource.
  */
-+(id) nodeAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
++(id) nodeAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
 
 /**
  * Returns the underlying SPODNode data structure from the specified resource,
@@ -95,7 +95,7 @@
  * The returned pointer must be cast to SPODNode before accessing any internals
  * of the data structure.
  */
--(PODStructPtr) nodePODStructAtIndex: (uint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
+-(PODStructPtr) nodePODStructAtIndex: (GLuint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
 
 /**
  * Create links to the nodes in the specified array.

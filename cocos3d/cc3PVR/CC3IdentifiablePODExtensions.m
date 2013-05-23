@@ -34,7 +34,7 @@
 
 @implementation CC3Identifiable (PVRPOD)
 
--(int) podIndex {return 0;}
+-(GLint) podIndex {return 0;}
 
 -(void) setPodIndex: (int) aPODIndex {}
 

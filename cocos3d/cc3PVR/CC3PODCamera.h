@@ -40,10 +40,10 @@
  * This is a concrete implementation of the CC3Node category PVRPOD. 
  */
 @interface CC3PODCamera : CC3Camera {
-	int podIndex;
-	int podContentIndex;
-	int podParentIndex;
-	int podTargetIndex;
+	GLint _podIndex;
+	GLint _podContentIndex;
+	GLint _podParentIndex;
+	GLint _podTargetIndex;
 }
 
 @end

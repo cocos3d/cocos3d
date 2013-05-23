@@ -43,7 +43,7 @@
  * only 3D linear transformations, this offers a storage savings over using a full 4x4 matrix.
  */
 @interface CC3LinearMatrix : CC3Matrix {
-	CC3Matrix3x3 contents;
+	CC3Matrix3x3 _contents;
 }
 
 

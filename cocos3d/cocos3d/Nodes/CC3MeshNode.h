@@ -96,24 +96,24 @@
  * shouldCullFrontFaces property to YES.
  */
 @interface CC3MeshNode : CC3LocalContentNode {
-	CC3Mesh* mesh;
-	CC3Material* material;
-	ccColor4F pureColor;
-	GLenum depthFunction;
-	GLfloat decalOffsetFactor;
-	GLfloat decalOffsetUnits;
-	GLfloat lineWidth;
-	GLenum lineSmoothingHint;
-	CC3NormalScaling normalScalingMethod : 4;
-	BOOL shouldSmoothLines : 1;
-	BOOL shouldDisableDepthMask : 1;
-	BOOL shouldDisableDepthTest : 1;
-	BOOL shouldCullFrontFaces : 1;
-	BOOL shouldCullBackFaces : 1;
-	BOOL shouldUseClockwiseFrontFaceWinding : 1;
-	BOOL shouldUseSmoothShading : 1;
-	BOOL shouldCastShadowsWhenInvisible : 1;
-	BOOL shouldApplyOpacityAndColorToMeshContent : 1;
+	CC3Mesh* _mesh;
+	CC3Material* _material;
+	ccColor4F _pureColor;
+	GLenum _depthFunction;
+	GLfloat _decalOffsetFactor;
+	GLfloat _decalOffsetUnits;
+	GLfloat _lineWidth;
+	GLenum _lineSmoothingHint;
+	CC3NormalScaling _normalScalingMethod : 4;
+	BOOL _shouldSmoothLines : 1;
+	BOOL _shouldDisableDepthMask : 1;
+	BOOL _shouldDisableDepthTest : 1;
+	BOOL _shouldCullFrontFaces : 1;
+	BOOL _shouldCullBackFaces : 1;
+	BOOL _shouldUseClockwiseFrontFaceWinding : 1;
+	BOOL _shouldUseSmoothShading : 1;
+	BOOL _shouldCastShadowsWhenInvisible : 1;
+	BOOL _shouldApplyOpacityAndColorToMeshContent : 1;
 }
 
 /**
@@ -1874,7 +1874,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
  * nodes are invisible, unless the CC3WireframeBoundingBoxNode itself is made invisible.
  */
 @interface CC3WireframeBoundingBoxNode : CC3LineNode {
-	BOOL shouldAlwaysMeasureParentBoundingBox : 1;
+	BOOL _shouldAlwaysMeasureParentBoundingBox : 1;
 }
 
 /**
@@ -1964,7 +1964,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
  * nodes are invisible, unless the CC3DirectionMarkerNode itself is made invisible.
  */
 @interface CC3DirectionMarkerNode : CC3WireframeBoundingBoxNode {
-	CC3Vector markerDirection;
+	CC3Vector _markerDirection;
 }
 
 /**

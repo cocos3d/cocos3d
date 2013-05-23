@@ -42,7 +42,7 @@
  * in a CC3Matrix4x4 structure of 16 GLfloat elements in column-major order.
  */
 @interface CC3ProjectionMatrix : CC3Matrix {
-	CC3Matrix4x4 contents;
+	CC3Matrix4x4 _contents;
 }
 
 @end

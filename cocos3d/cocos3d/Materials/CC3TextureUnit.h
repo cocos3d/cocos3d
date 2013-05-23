@@ -72,9 +72,9 @@ typedef enum {
  * configuration properties associated with the GL_COMBINE texture environment mode.
  */
 @interface CC3TextureUnit : NSObject <NSCopying, CCRGBAProtocol> {
-	GLenum textureEnvironmentMode;
-	ccColor4F constantColor;
-	GLubyte rgbNormalMap;
+	GLenum _textureEnvironmentMode;
+	ccColor4F _constantColor;
+	CC3DOT3RGB _rgbNormalMap : 4;
 }
 
 /**
@@ -221,20 +221,20 @@ typedef enum {
  * the texture will be combined with the output of previous texture units.
  */
 @interface CC3ConfigurableTextureUnit : CC3TextureUnit {
-	GLenum combineRGBFunction;
-	GLenum rgbSource0;
-	GLenum rgbSource1;
-	GLenum rgbSource2;
-	GLenum rgbOperand0;
-	GLenum rgbOperand1;
-	GLenum rgbOperand2;
-	GLenum combineAlphaFunction;
-	GLenum alphaSource0;
-	GLenum alphaSource1;
-	GLenum alphaSource2;
-	GLenum alphaOperand0;
-	GLenum alphaOperand1;
-	GLenum alphaOperand2;
+	GLenum _combineRGBFunction;
+	GLenum _rgbSource0;
+	GLenum _rgbSource1;
+	GLenum _rgbSource2;
+	GLenum _rgbOperand0;
+	GLenum _rgbOperand1;
+	GLenum _rgbOperand2;
+	GLenum _combineAlphaFunction;
+	GLenum _alphaSource0;
+	GLenum _alphaSource1;
+	GLenum _alphaSource2;
+	GLenum _alphaOperand0;
+	GLenum _alphaOperand1;
+	GLenum _alphaOperand2;
 }
 
 /**

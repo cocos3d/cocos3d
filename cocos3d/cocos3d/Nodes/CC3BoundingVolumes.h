@@ -52,10 +52,10 @@
  * time when testing intersections.
  */
 @interface CC3BoundingVolume : NSObject <NSCopying> {
-	BOOL isDirty : 1;
-	BOOL shouldIgnoreRayIntersection : 1;
-	BOOL shouldLogIntersections : 1;
-	BOOL shouldLogIntersectionMisses : 1;
+	BOOL _isDirty : 1;
+	BOOL _shouldIgnoreRayIntersection : 1;
+	BOOL _shouldLogIntersections : 1;
+	BOOL _shouldLogIntersectionMisses : 1;
 }
 
 /**
@@ -404,13 +404,13 @@
  */
 @interface CC3NodeBoundingVolume : CC3BoundingVolume {
 	CC3Node* _node;
-	CC3Vector centerOfGeometry;
-	CC3Vector globalCenterOfGeometry;
-	GLfloat cameraDistanceProduct;
+	CC3Vector _centerOfGeometry;
+	CC3Vector _globalCenterOfGeometry;
+	GLfloat _cameraDistanceProduct;
 	BOOL _shouldBuildFromMesh : 1;
-	BOOL shouldMaximize : 1;
-	BOOL isTransformDirty : 1;
-	BOOL shouldDraw : 1;
+	BOOL _shouldMaximize : 1;
+	BOOL _isTransformDirty : 1;
+	BOOL _shouldDraw : 1;
 }
 
 /** The node whose boundary this instance is keeping track of. */
@@ -692,8 +692,8 @@
  * can be set directly within the bounding volume via their respective properties.
  */
 @interface CC3NodeSphericalBoundingVolume : CC3NodeBoundingVolume {
-	GLfloat radius;
-	GLfloat globalRadius;
+	GLfloat _radius;
+	GLfloat _globalRadius;
 }
 
 /**
@@ -830,9 +830,9 @@
  * can be set directly within the bounding volume via the boundingBox property.
  */
 @interface CC3NodeBoundingBoxVolume : CC3NodeBoundingVolume {
-	CC3BoundingBox boundingBox;
-	CC3Vector vertices[8];
-	CC3Plane planes[6];
+	CC3BoundingBox _boundingBox;
+	CC3Vector _vertices[8];
+	CC3Plane _planes[6];
 }
 
 /**
@@ -891,7 +891,7 @@
  * bounding-box bounding volume, or even a full mesh-based bounding volume.
  */
 @interface CC3NodeTighteningBoundingVolumeSequence : CC3NodeBoundingVolume {
-	CCArray* boundingVolumes;
+	CCArray* _boundingVolumes;
 }
 
 /**

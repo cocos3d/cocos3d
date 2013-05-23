@@ -202,32 +202,32 @@ typedef enum {
  * debugging rendering problems.
  */
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
-	CCArray* children;
-	CC3Node* parent;
-	CC3Matrix* transformMatrix;
-	CC3Matrix* transformMatrixInverted;
-	CCArray* transformListeners;
-	CC3Matrix* globalRotationMatrix;
-	CC3Rotator* rotator;
-	CC3NodeBoundingVolume* boundingVolume;
+	CCArray* _children;
+	CC3Node* _parent;
+	CC3Matrix* _transformMatrix;
+	CC3Matrix* _transformMatrixInverted;
+	CCArray* _transformListeners;
+	CC3Matrix* _globalRotationMatrix;
+	CC3Rotator* _rotator;
+	CC3NodeBoundingVolume* _boundingVolume;
 	CCArray* _animationStates;
-	CC3Vector location;
-	CC3Vector globalLocation;
-	CC3Vector projectedLocation;
-	CC3Vector scale;
-	CC3Vector globalScale;
-	GLfloat boundingVolumePadding;
-	BOOL isTransformDirty : 1;
-	BOOL isTransformInvertedDirty : 1;
-	BOOL isGlobalRotationDirty : 1;
+	CC3Vector _location;
+	CC3Vector _globalLocation;
+	CC3Vector _projectedLocation;
+	CC3Vector _scale;
+	CC3Vector _globalScale;
+	GLfloat _boundingVolumePadding;
+	BOOL _isTransformDirty : 1;
+	BOOL _isTransformInvertedDirty : 1;
+	BOOL _isGlobalRotationDirty : 1;
 	BOOL _touchEnabled : 1;
-	BOOL shouldInheritTouchability : 1;
-	BOOL shouldAllowTouchableWhenInvisible : 1;
-	BOOL visible : 1;
-	BOOL isRunning : 1;
-	BOOL shouldAutoremoveWhenEmpty : 1;
-	BOOL shouldUseFixedBoundingVolume : 1;
-	BOOL shouldStopActionsWhenRemoved : 1;
+	BOOL _shouldInheritTouchability : 1;
+	BOOL _shouldAllowTouchableWhenInvisible : 1;
+	BOOL _visible : 1;
+	BOOL _isRunning : 1;
+	BOOL _shouldAutoremoveWhenEmpty : 1;
+	BOOL _shouldUseFixedBoundingVolume : 1;
+	BOOL _shouldStopActionsWhenRemoved : 1;
 	BOOL _isAnimationDirty : 1;
 	BOOL _cascadeColorEnabled;
 	BOOL _cascadeOpacityEnabled;
@@ -500,6 +500,12 @@ typedef enum {
  *
  * Unless non-uniform scaling is needed, it is recommended that you use the uniformScale
  * property instead.
+ * 
+ * To ensure that scales used in transforms do not cause singularities and uninvertable matrices,
+ * when this scale is applied to the transform of this node, the transform ensures the absolute
+ * value of each of the components in the specified scale vector is greater than kCC3ScaleMin.
+ * Any component between -kCC3ScaleMin and kCC3ScaleMin is replaced with -kCC3ScaleMin or
+ * kCC3ScaleMin, depending on whether the component is less than zero, or not, respectively.
  */
 @property(nonatomic, assign) CC3Vector scale;
 
@@ -518,6 +524,12 @@ typedef enum {
  * If non-uniform scaling is applied via the scale property, this uniformScale property will
  * return the length of the scale property vector divided by the length of a unit cube (sqrt(3.0)),
  * as an approximation of the overall scaling condensed to a single scalar value.
+ *
+ * To ensure that scales used in transforms do not cause singularities and uninvertable matrices,
+ * when this scale is applied to the transform of this node, the transform ensures the absolute
+ * value of the specified scale value is greater than kCC3ScaleMin. If the value is between
+ * -kCC3ScaleMin and kCC3ScaleMin, it is replaced with -kCC3ScaleMin or kCC3ScaleMin, depending
+ * on whether the component is less than zero, or not, respectively.
  */
 @property(nonatomic, assign) GLfloat uniformScale;
 
@@ -4020,8 +4032,8 @@ typedef enum {
  * defaultLocalContentWireframeBoxColor property.
  */
 @interface CC3LocalContentNode : CC3Node {
-	CC3BoundingBox globalLocalContentBoundingBox;
-	GLint zOrder;
+	CC3BoundingBox _globalLocalContentBoundingBox;
+	GLint _zOrder;
 }
 
 /**

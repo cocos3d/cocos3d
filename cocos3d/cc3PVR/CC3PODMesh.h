@@ -54,7 +54,7 @@
 
 /** A CC3Mesh whose content originates from POD resource data. */
 @interface CC3PODMesh : CC3Mesh {
-	int podIndex;
+	GLint _podIndex;
 }
 
 @end

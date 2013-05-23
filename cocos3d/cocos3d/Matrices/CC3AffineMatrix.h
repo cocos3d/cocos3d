@@ -49,7 +49,7 @@
  * be present, it is temporarily generated automatically.
  */
 @interface CC3AffineMatrix : CC3Matrix {
-	CC3Matrix4x3 contents;
+	CC3Matrix4x3 _contents;
 }
 
 

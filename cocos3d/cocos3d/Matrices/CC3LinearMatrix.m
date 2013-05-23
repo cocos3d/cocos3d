@@ -40,40 +40,40 @@
 #pragma mark Allocation and initialization
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ %@", self.class, NSStringFromCC3Matrix3x3(&contents)];
+	return [NSString stringWithFormat: @"%@ %@", self.class, NSStringFromCC3Matrix3x3(&_contents)];
 }
 
 
 #pragma mark Population
 
--(void) implPopulateZero { CC3Matrix3x3PopulateZero(&contents); }
+-(void) implPopulateZero { CC3Matrix3x3PopulateZero(&_contents); }
 
--(void) implPopulateIdentity { CC3Matrix3x3PopulateIdentity(&contents); }
+-(void) implPopulateIdentity { CC3Matrix3x3PopulateIdentity(&_contents); }
 
 // Double-dispatch to the other matrix
--(void) implPopulateFrom: (CC3Matrix*) aMatrix { [aMatrix populateCC3Matrix3x3: &contents]; }
+-(void) implPopulateFrom: (CC3Matrix*) aMatrix { [aMatrix populateCC3Matrix3x3: &_contents]; }
 
--(void) implPopulateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx { CC3Matrix3x3PopulateFrom3x3(&contents, mtx); }
+-(void) implPopulateFromCC3Matrix3x3: (CC3Matrix3x3*) mtx { CC3Matrix3x3PopulateFrom3x3(&_contents, mtx); }
 
--(void) populateCC3Matrix3x3: (CC3Matrix3x3*) mtx { CC3Matrix3x3PopulateFrom3x3(mtx, &contents); }
+-(void) populateCC3Matrix3x3: (CC3Matrix3x3*) mtx { CC3Matrix3x3PopulateFrom3x3(mtx, &_contents); }
 
--(void) implPopulateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx { CC3Matrix3x3PopulateFrom4x3(&contents, mtx); }
+-(void) implPopulateFromCC3Matrix4x3: (CC3Matrix4x3*) mtx { CC3Matrix3x3PopulateFrom4x3(&_contents, mtx); }
 
--(void) populateCC3Matrix4x3: (CC3Matrix4x3*) mtx { CC3Matrix4x3PopulateFrom3x3(mtx, &contents); }
+-(void) populateCC3Matrix4x3: (CC3Matrix4x3*) mtx { CC3Matrix4x3PopulateFrom3x3(mtx, &_contents); }
 
--(void) implPopulateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx { CC3Matrix3x3PopulateFrom4x4(&contents, mtx); }
+-(void) implPopulateFromCC3Matrix4x4: (CC3Matrix4x4*) mtx { CC3Matrix3x3PopulateFrom4x4(&_contents, mtx); }
 
--(void) populateCC3Matrix4x4: (CC3Matrix4x4*) mtx { CC3Matrix4x4PopulateFrom3x3(mtx, &contents); }
+-(void) populateCC3Matrix4x4: (CC3Matrix4x4*) mtx { CC3Matrix4x4PopulateFrom3x3(mtx, &_contents); }
 
 -(void) implPopulateFromRotation: (CC3Vector) aRotation {
-	CC3Matrix3x3PopulateFromRotationYXZ(&contents, aRotation);
+	CC3Matrix3x3PopulateFromRotationYXZ(&_contents, aRotation);
 }
 
 -(void) implPopulateFromQuaternion: (CC3Quaternion) aQuaternion {
-	CC3Matrix3x3PopulateFromQuaternion(&contents, aQuaternion);
+	CC3Matrix3x3PopulateFromQuaternion(&_contents, aQuaternion);
 }
 
--(void) implPopulateFromScale: (CC3Vector) aScale { CC3Matrix3x3PopulateFromScale(&contents, aScale); }
+-(void) implPopulateFromScale: (CC3Vector) aScale { CC3Matrix3x3PopulateFromScale(&_contents, aScale); }
 
 // Keep the compiler happy about interface re-declaration
 -(void) populateFromTranslation: (CC3Vector) aTranslation { [super populateFromTranslation: aTranslation]; }
@@ -82,7 +82,7 @@
 -(void) implPopulateFromTranslation: (CC3Vector) aTranslation { [self implPopulateIdentity]; }
 
 -(void) implPopulateToPointTowards: (CC3Vector) fwdDirection withUp: (CC3Vector) upDirection {
-	CC3Matrix3x3PopulateToPointTowards(&contents, fwdDirection, upDirection);
+	CC3Matrix3x3PopulateToPointTowards(&_contents, fwdDirection, upDirection);
 }
 
 // Keep the compiler happy about interface re-declaration
@@ -135,30 +135,30 @@
 
 #pragma mark Accessing content
 
--(CC3Vector) extractRotation { return CC3Matrix3x3ExtractRotationYXZ(&contents); }
+-(CC3Vector) extractRotation { return CC3Matrix3x3ExtractRotationYXZ(&_contents); }
 
--(CC3Quaternion) extractQuaternion { return CC3Matrix3x3ExtractQuaternion(&contents); }
+-(CC3Quaternion) extractQuaternion { return CC3Matrix3x3ExtractQuaternion(&_contents); }
 
--(CC3Vector) extractForwardDirection { return CC3Matrix3x3ExtractForwardDirection(&contents); }
+-(CC3Vector) extractForwardDirection { return CC3Matrix3x3ExtractForwardDirection(&_contents); }
 
--(CC3Vector) extractUpDirection { return CC3Matrix3x3ExtractUpDirection(&contents); }
+-(CC3Vector) extractUpDirection { return CC3Matrix3x3ExtractUpDirection(&_contents); }
 
--(CC3Vector) extractRightDirection { return CC3Matrix3x3ExtractRightDirection(&contents); }
+-(CC3Vector) extractRightDirection { return CC3Matrix3x3ExtractRightDirection(&_contents); }
 
 
 #pragma mark Matrix transformations
 
--(void) implRotateBy: (CC3Vector) aRotation { CC3Matrix3x3RotateYXZBy(&contents, aRotation); }
+-(void) implRotateBy: (CC3Vector) aRotation { CC3Matrix3x3RotateYXZBy(&_contents, aRotation); }
 
 -(void) implRotateByQuaternion: (CC3Quaternion) aQuaternion {
-	CC3Matrix3x3RotateByQuaternion(&contents, aQuaternion);
+	CC3Matrix3x3RotateByQuaternion(&_contents, aQuaternion);
 }
 
 -(void) orthonormalizeRotationStartingWith: (NSUInteger) startColNum {
-	CC3Matrix3x3Orthonormalize(&contents, startColNum);
+	CC3Matrix3x3Orthonormalize(&_contents, startColNum);
 }
 
--(void) implScaleBy: (CC3Vector) aScale { CC3Matrix3x3ScaleBy(&contents, aScale); }
+-(void) implScaleBy: (CC3Vector) aScale { CC3Matrix3x3ScaleBy(&_contents, aScale); }
 
 // Linear matrix unaffected by translation
 -(void) implTranslateBy: (CC3Vector) aTranslation {}
@@ -167,120 +167,120 @@
 #pragma mark Matrix multiplication
 
 -(void) implMultiplyBy: (CC3Matrix*) aMatrix {
-	[aMatrix multiplyIntoCC3Matrix3x3: &contents];
+	[aMatrix multiplyIntoCC3Matrix3x3: &_contents];
 }
 
 -(void) multiplyIntoCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix3x3 mRslt;
-	CC3Matrix3x3Multiply(&mRslt, mtx, &contents);
+	CC3Matrix3x3Multiply(&mRslt, mtx, &_contents);
 	CC3Matrix3x3PopulateFrom3x3(mtx, &mRslt);
 }
 
 -(void) multiplyByCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom3x3(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom3x3(&_contents, mtx);
 	} else {
 		CC3Matrix3x3 mRslt;
-		CC3Matrix3x3Multiply(&mRslt, &contents, mtx);
-		CC3Matrix3x3PopulateFrom3x3(&contents, &mRslt);
+		CC3Matrix3x3Multiply(&mRslt, &_contents, mtx);
+		CC3Matrix3x3PopulateFrom3x3(&_contents, &mRslt);
 	}
 }
 
 -(void) multiplyIntoCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix4x3 mRslt, mMine;
-	CC3Matrix4x3PopulateFrom3x3(&mMine, &contents);
+	CC3Matrix4x3PopulateFrom3x3(&mMine, &_contents);
 	CC3Matrix4x3Multiply(&mRslt, mtx, &mMine);
 	CC3Matrix4x3PopulateFrom4x3(mtx, &mRslt);
 }
 
 -(void) multiplyByCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom4x3(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom4x3(&_contents, mtx);
 	} else {
 		CC3Matrix4x3 mRslt, mMine;
-		CC3Matrix4x3PopulateFrom3x3(&mMine, &contents);
+		CC3Matrix4x3PopulateFrom3x3(&mMine, &_contents);
 		CC3Matrix4x3Multiply(&mRslt, &mMine, mtx);
-		CC3Matrix3x3PopulateFrom4x3(&contents, &mRslt);
+		CC3Matrix3x3PopulateFrom4x3(&_contents, &mRslt);
 	}
 }
 
 -(void) multiplyIntoCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix4x4 mRslt, mMine;
-	CC3Matrix4x4PopulateFrom3x3(&mMine, &contents);
+	CC3Matrix4x4PopulateFrom3x3(&mMine, &_contents);
 	CC3Matrix4x4Multiply(&mRslt, mtx, &mMine);
 	CC3Matrix4x4PopulateFrom4x4(mtx, &mRslt);
 }
 
 -(void) multiplyByCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom4x4(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom4x4(&_contents, mtx);
 	} else {
 		CC3Matrix4x4 mRslt, mMine;
-		CC3Matrix4x4PopulateFrom3x3(&mMine, &contents);
+		CC3Matrix4x4PopulateFrom3x3(&mMine, &_contents);
 		CC3Matrix4x4Multiply(&mRslt, &mMine, mtx);
-		CC3Matrix3x3PopulateFrom4x4(&contents, &mRslt);
+		CC3Matrix3x3PopulateFrom4x4(&_contents, &mRslt);
 	}
 }
 
 -(void) implLeftMultiplyBy: (CC3Matrix*) aMatrix {
-	[aMatrix leftMultiplyIntoCC3Matrix3x3: &contents];
+	[aMatrix leftMultiplyIntoCC3Matrix3x3: &_contents];
 }
 
 -(void) leftMultiplyIntoCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix3x3 mRslt;
-	CC3Matrix3x3Multiply(&mRslt, &contents, mtx);
+	CC3Matrix3x3Multiply(&mRslt, &_contents, mtx);
 	CC3Matrix3x3PopulateFrom3x3(mtx, &mRslt);
 }
 
 -(void) leftMultiplyByCC3Matrix3x3: (CC3Matrix3x3*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom3x3(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom3x3(&_contents, mtx);
 	} else {
 		CC3Matrix3x3 mRslt;
-		CC3Matrix3x3Multiply(&mRslt, mtx, &contents);
-		CC3Matrix3x3PopulateFrom3x3(&contents, &mRslt);
+		CC3Matrix3x3Multiply(&mRslt, mtx, &_contents);
+		CC3Matrix3x3PopulateFrom3x3(&_contents, &mRslt);
 	}
 }
 
 -(void) leftMultiplyIntoCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix4x3 mRslt, mMine;
-	CC3Matrix4x3PopulateFrom3x3(&mMine, &contents);
+	CC3Matrix4x3PopulateFrom3x3(&mMine, &_contents);
 	CC3Matrix4x3Multiply(&mRslt, &mMine, mtx);
 	CC3Matrix4x3PopulateFrom4x3(mtx, &mRslt);
 }
 
 -(void) leftMultiplyByCC3Matrix4x3: (CC3Matrix4x3*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom4x3(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom4x3(&_contents, mtx);
 	} else {
 		CC3Matrix4x3 mRslt, mMine;
-		CC3Matrix4x3PopulateFrom3x3(&mMine, &contents);
+		CC3Matrix4x3PopulateFrom3x3(&mMine, &_contents);
 		CC3Matrix4x3Multiply(&mRslt, mtx, &mMine);
-		CC3Matrix3x3PopulateFrom4x3(&contents, &mRslt);
+		CC3Matrix3x3PopulateFrom4x3(&_contents, &mRslt);
 	}
 }
 
 -(void) leftMultiplyIntoCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	if (isIdentity) return;
+	if (_isIdentity) return;
 	CC3Matrix4x4 mRslt, mMine;
-	CC3Matrix4x4PopulateFrom3x3(&mMine, &contents);
+	CC3Matrix4x4PopulateFrom3x3(&mMine, &_contents);
 	CC3Matrix4x4Multiply(&mRslt, &mMine, mtx);
 	CC3Matrix4x4PopulateFrom4x4(mtx, &mRslt);
 }
 
 -(void) leftMultiplyByCC3Matrix4x4: (CC3Matrix4x4*) mtx {
-	if (isIdentity) {
-		CC3Matrix3x3PopulateFrom4x4(&contents, mtx);
+	if (_isIdentity) {
+		CC3Matrix3x3PopulateFrom4x4(&_contents, mtx);
 	} else {
 		CC3Matrix4x4 mRslt, mMine;
-		CC3Matrix4x4PopulateFrom3x3(&mMine, &contents);
+		CC3Matrix4x4PopulateFrom3x3(&mMine, &_contents);
 		CC3Matrix4x4Multiply(&mRslt, mtx, &mMine);
-		CC3Matrix3x3PopulateFrom4x4(&contents, &mRslt);
+		CC3Matrix3x3PopulateFrom4x4(&_contents, &mRslt);
 	}
 }
 
@@ -289,45 +289,45 @@
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformLocation: (CC3Vector) aLocation {
-	if (isIdentity) return aLocation;
-	return CC3Matrix3x3TransformCC3Vector(&contents, aLocation);
+	if (_isIdentity) return aLocation;
+	return CC3Matrix3x3TransformCC3Vector(&_contents, aLocation);
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector) transformDirection: (CC3Vector) aDirection {
-	if (isIdentity) return aDirection;
-	return CC3Matrix3x3TransformCC3Vector(&contents, aDirection);
+	if (_isIdentity) return aDirection;
+	return CC3Matrix3x3TransformCC3Vector(&_contents, aDirection);
 }
 
 // Short-circuit if this is an identity matrix
 -(CC3Vector4) transformHomogeneousVector: (CC3Vector4) v {
-	if (isIdentity) return v;
+	if (_isIdentity) return v;
 	
 	CC3Vector4 vOut;
-	vOut.x = (contents.c1r1 * v.x) + (contents.c2r1 * v.y) + (contents.c3r1 * v.z);
-	vOut.y = (contents.c1r2 * v.x) + (contents.c2r2 * v.y) + (contents.c3r2 * v.z);
-	vOut.z = (contents.c1r3 * v.x) + (contents.c2r3 * v.y) + (contents.c3r3 * v.z);
+	vOut.x = (_contents.c1r1 * v.x) + (_contents.c2r1 * v.y) + (_contents.c3r1 * v.z);
+	vOut.y = (_contents.c1r2 * v.x) + (_contents.c2r2 * v.y) + (_contents.c3r2 * v.z);
+	vOut.z = (_contents.c1r3 * v.x) + (_contents.c2r3 * v.y) + (_contents.c3r3 * v.z);
 	vOut.w = v.w;
 	return vOut;
 }
 
 // Short-circuit if this is an identity matrix
 -(void) transpose {
-	if (isIdentity) return;
-	CC3Matrix3x3Transpose(&contents);
+	if (_isIdentity) return;
+	CC3Matrix3x3Transpose(&_contents);
 }
 
 // Short-circuit if this is an identity matrix
 -(BOOL) invertAdjoint {
-	if (isIdentity) return YES;
-	return CC3Matrix3x3InvertAdjoint(&contents);
+	if (_isIdentity) return YES;
+	return CC3Matrix3x3InvertAdjoint(&_contents);
 }
 
 // Short-circuit if this is an identity matrix
 // The inverse of a rigid linear matrix is equal to its transpose.
 -(void) invertRigid {
-	if (isIdentity) return;
-	CC3Matrix3x3Transpose(&contents);
+	if (_isIdentity) return;
+	CC3Matrix3x3Transpose(&_contents);
 }
 
 @end

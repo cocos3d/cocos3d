@@ -46,8 +46,8 @@
  * check the isAlive property before spending time making any further modifications.
  */
 @interface  CC3MortalMeshParticle  : CC3ScalableMeshParticle <CC3MortalParticleProtocol> {
-	ccTime lifeSpan;
-	ccTime timeToLive;
+	ccTime _lifeSpan;
+	ccTime _timeToLive;
 }
 
 /**
@@ -76,7 +76,7 @@
  * CC3SprayParticleProtocol to configure the particle to move in a straight line at a steady speed.
  */
 @interface  CC3SprayMeshParticle  : CC3MortalMeshParticle <CC3SprayParticleProtocol> {
-	CC3Vector velocity;
+	CC3Vector _velocity;
 }
 
 /**
@@ -106,9 +106,9 @@
 @interface CC3UniformlyEvolvingMeshParticle : CC3SprayMeshParticle
 													<CC3UniformlyRotatingParticleProtocol,
 													 CC3UniformlyFadingParticleProtocol> {
-	CC3Vector rotationVelocity;
-	GLubyte rotationVelocityType;
-	ccColor4F colorVelocity;
+	ccColor4F _colorVelocity;
+	CC3Vector _rotationVelocity;
+	GLubyte _rotationVelocityType;
 }
 
 @end
@@ -144,7 +144,7 @@
  * assigned to the particleTemplateMesh property.
  */
  @interface CC3MultiTemplateMeshParticleEmitter : CC3MeshParticleEmitter {
-	CCArray* particleTemplateMeshes;
+	CCArray* _particleTemplateMeshes;
 }
 
 /**

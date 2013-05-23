@@ -42,32 +42,31 @@
 
 @implementation CC3MortalPointParticle
 
-@synthesize lifeSpan, timeToLive;
+@synthesize lifeSpan=_lifeSpan, timeToLive=_timeToLive;
 
 -(void) setLifeSpan: (ccTime) anInterval {
-	lifeSpan = anInterval;
-	timeToLive = lifeSpan;
+	_lifeSpan = anInterval;
+	_timeToLive = _lifeSpan;
 }
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	ccTime dt = visitor.deltaTime;
-	timeToLive -= dt;
-	if (timeToLive <= 0.0) {
+	_timeToLive -= dt;
+	if (_timeToLive <= 0.0)
 		self.isAlive = NO;
-	} else {
+	else
 		[((id<CC3MortalPointParticleDeprecated>)self) updateLife: dt];
-	}
 }
 
 -(void) populateFrom: (CC3MortalPointParticle*) another {
 	[super populateFrom: another];
-	lifeSpan = another.lifeSpan;
-	timeToLive = another.timeToLive;
+	_lifeSpan = another.lifeSpan;
+	_timeToLive = another.timeToLive;
 }
 
 - (NSString*) fullDescription {
 	return [NSMutableString stringWithFormat:@"%@\n\tlifeSpan: %.3f, timeToLive: %.3f",
-			[super fullDescription], lifeSpan, timeToLive];
+			[super fullDescription], _lifeSpan, _timeToLive];
 }
 
 // Deprecated
@@ -94,7 +93,7 @@
 	return self;
 }
 
--(CC3RandomMortalParticleNavigator*) mortalParticleNavigator { return (CC3RandomMortalParticleNavigator*)particleNavigator; }
+-(CC3RandomMortalParticleNavigator*) mortalParticleNavigator { return (CC3RandomMortalParticleNavigator*)_particleNavigator; }
 
 -(ccTime) minParticleLifeSpan { return self.mortalParticleNavigator.minParticleLifeSpan; }
 
@@ -125,7 +124,7 @@
 
 @implementation CC3SprayPointParticle
 
-@synthesize velocity;
+@synthesize velocity=_velocity;
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[super updateBeforeTransform: visitor];
@@ -136,19 +135,19 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		velocity = kCC3VectorZero;
+		_velocity = kCC3VectorZero;
 	}
 	return self;
 }
 
 -(void) populateFrom: (CC3SprayPointParticle*) another {
 	[super populateFrom: another];
-	velocity = another.velocity;
+	_velocity = another.velocity;
 }
 
 - (NSString*) fullDescription {
 	return [NSMutableString stringWithFormat:@"%@\n\tvelocity: %@",
-			[super fullDescription], NSStringFromCC3Vector(velocity)];
+			[super fullDescription], NSStringFromCC3Vector(_velocity)];
 }
 
 @end
@@ -163,7 +162,7 @@
 
 @implementation CC3UniformlyEvolvingPointParticle
 
-@synthesize colorVelocity, sizeVelocity;
+@synthesize colorVelocity=_colorVelocity, sizeVelocity=_sizeVelocity;
 
 -(void) updateBeforeTransform: (CC3NodeUpdatingVisitor*) visitor {
 	[super updateBeforeTransform: visitor];
@@ -171,23 +170,23 @@
 	
 	ccTime dt = visitor.deltaTime;
 	
-	if (self.hasSize) self.size = self.size + (sizeVelocity * dt);
+	if (self.hasSize) self.size = self.size + (_sizeVelocity * dt);
 	
 	if (self.hasColor) {
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
 		ccColor4F currColor = self.color4F;
-		self.color4F = ccc4f(CLAMP(currColor.r + (colorVelocity.r * dt), 0.0f, 1.0f),
-							 CLAMP(currColor.g + (colorVelocity.g * dt), 0.0f, 1.0f),
-							 CLAMP(currColor.b + (colorVelocity.b * dt), 0.0f, 1.0f),
-							 CLAMP(currColor.a + (colorVelocity.a * dt), 0.0f, 1.0f));
+		self.color4F = ccc4f(CLAMP(currColor.r + (_colorVelocity.r * dt), 0.0f, 1.0f),
+							 CLAMP(currColor.g + (_colorVelocity.g * dt), 0.0f, 1.0f),
+							 CLAMP(currColor.b + (_colorVelocity.b * dt), 0.0f, 1.0f),
+							 CLAMP(currColor.a + (_colorVelocity.a * dt), 0.0f, 1.0f));
 	}
 }
 
 -(void) populateFrom: (CC3UniformlyEvolvingPointParticle*) another {
 	[super populateFrom: another];
-	sizeVelocity = another.sizeVelocity;
-	colorVelocity = another.colorVelocity;
+	_sizeVelocity = another.sizeVelocity;
+	_colorVelocity = another.colorVelocity;
 }
 
 @end
@@ -221,12 +220,12 @@
 	[super initializeParticle];
 
 	ccColor4F colVel = self.colorVelocity;
-	self.colorVelocity = ccc4f(colVel.r / lifeSpan,
-							   colVel.g / lifeSpan,
-							   colVel.b / lifeSpan,
-							   colVel.a / lifeSpan);
+	self.colorVelocity = ccc4f(colVel.r / _lifeSpan,
+							   colVel.g / _lifeSpan,
+							   colVel.b / _lifeSpan,
+							   colVel.a / _lifeSpan);
 	
-	self.sizeVelocity /= lifeSpan;
+	self.sizeVelocity /= _lifeSpan;
 }
 
 @end
@@ -237,8 +236,10 @@
 
 @implementation CC3VariegatedPointParticleHoseEmitter
 
-@synthesize minParticleStartingSize, maxParticleStartingSize, minParticleEndingSize, maxParticleEndingSize;
-@synthesize minParticleStartingColor, maxParticleStartingColor, minParticleEndingColor, maxParticleEndingColor;
+@synthesize minParticleStartingSize=_minParticleStartingSize, maxParticleStartingSize=_maxParticleStartingSize;
+@synthesize minParticleEndingSize=_minParticleEndingSize, maxParticleEndingSize=_maxParticleEndingSize;
+@synthesize minParticleStartingColor=_minParticleStartingColor, maxParticleStartingColor=_maxParticleStartingColor;
+@synthesize minParticleEndingColor=_minParticleEndingColor, maxParticleEndingColor=_maxParticleEndingColor;
 
 
 #pragma mark Allocation and initialization
@@ -250,14 +251,14 @@
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		self.particleNavigator = [CC3HoseParticleNavigator navigator];
 		self.particleClass = [CC3VariegatedPointParticle class];
-		minParticleStartingSize = kCC3DefaultParticleSize;
-		maxParticleStartingSize = kCC3DefaultParticleSize;
-		minParticleEndingSize = kCC3DefaultParticleSize;
-		maxParticleEndingSize = kCC3DefaultParticleSize;
-		minParticleStartingColor = kCCC4FWhite;
-		maxParticleStartingColor = kCCC4FWhite;
-		minParticleEndingColor = kCCC4FWhite;
-		maxParticleEndingColor = kCCC4FWhite;
+		_minParticleStartingSize = kCC3DefaultParticleSize;
+		_maxParticleStartingSize = kCC3DefaultParticleSize;
+		_minParticleEndingSize = kCC3DefaultParticleSize;
+		_maxParticleEndingSize = kCC3DefaultParticleSize;
+		_minParticleStartingColor = kCCC4FWhite;
+		_maxParticleStartingColor = kCCC4FWhite;
+		_minParticleEndingColor = kCCC4FWhite;
+		_maxParticleEndingColor = kCCC4FWhite;
 	}
 	return self;
 }
@@ -267,14 +268,14 @@
 -(void) populateFrom: (CC3VariegatedPointParticleHoseEmitter*) another {
 	[super populateFrom: another];
 	
-	minParticleStartingSize = another.minParticleStartingSize;
-	maxParticleStartingSize = another.maxParticleStartingSize;
-	minParticleEndingSize = another.minParticleEndingSize;
-	maxParticleEndingSize = another.maxParticleEndingSize;
-	minParticleStartingColor = another.minParticleStartingColor;
-	maxParticleStartingColor = another.maxParticleStartingColor;
-	minParticleEndingColor = another.minParticleEndingColor;
-	maxParticleEndingColor = another.maxParticleEndingColor;
+	_minParticleStartingSize = another.minParticleStartingSize;
+	_maxParticleStartingSize = another.maxParticleStartingSize;
+	_minParticleEndingSize = another.minParticleEndingSize;
+	_maxParticleEndingSize = another.maxParticleEndingSize;
+	_minParticleStartingColor = another.minParticleStartingColor;
+	_maxParticleStartingColor = another.maxParticleStartingColor;
+	_minParticleEndingColor = another.minParticleEndingColor;
+	_maxParticleEndingColor = another.maxParticleEndingColor;
 }
 
 
@@ -290,7 +291,7 @@
 	// difference of the start and end colors. This assumes that the color changes over one second.
 	// The particle itself will figure out how the overall change should be adjusted for its lifespan.
 	if (self.mesh.hasVertexColors) {
-		ccColor4F startColor = RandomCCC4FBetween(minParticleStartingColor, maxParticleStartingColor);
+		ccColor4F startColor = RandomCCC4FBetween(_minParticleStartingColor, _maxParticleStartingColor);
 		aParticle.color4F = startColor;
 		
 		// End color is treated differently. If any component of either min or max is negative,
@@ -300,10 +301,10 @@
 		// For exmaple, setting all color components to -1 and alpha to zero, indicates that
 		// the particle should stay the same color, but fade away.
 		ccColor4F endColor;
-		endColor.r = CC3RandomOrAlt(minParticleEndingColor.r, maxParticleEndingColor.r, startColor.r);
-		endColor.g = CC3RandomOrAlt(minParticleEndingColor.g, maxParticleEndingColor.g, startColor.g);
-		endColor.b = CC3RandomOrAlt(minParticleEndingColor.b, maxParticleEndingColor.b, startColor.b);
-		endColor.a = CC3RandomOrAlt(minParticleEndingColor.a, maxParticleEndingColor.a, startColor.a);
+		endColor.r = CC3RandomOrAlt(_minParticleEndingColor.r, _maxParticleEndingColor.r, startColor.r);
+		endColor.g = CC3RandomOrAlt(_minParticleEndingColor.g, _maxParticleEndingColor.g, startColor.g);
+		endColor.b = CC3RandomOrAlt(_minParticleEndingColor.b, _maxParticleEndingColor.b, startColor.b);
+		endColor.a = CC3RandomOrAlt(_minParticleEndingColor.a, _maxParticleEndingColor.a, startColor.a);
 		
 		// We have to do the math on each component instead of using the color math functions
 		// because the functions clamp prematurely, and we need negative values for the velocity.
@@ -317,13 +318,13 @@
 	// difference of the start and end sizes. This assumes that the color changes over one second.
 	// The particle itself will figure out how the overall change should be adjusted for its lifespan.
 	if(self.mesh.hasVertexPointSizes) {
-		GLfloat startSize = CC3RandomFloatBetween(minParticleStartingSize, maxParticleStartingSize);
+		GLfloat startSize = CC3RandomFloatBetween(_minParticleStartingSize, _maxParticleStartingSize);
 		aParticle.size = startSize;
 		
 		// End size is treated differently. If either min or max is negative, it indicates that
 		// the start size should be used, otherwise a random value between min and max is chosen.
 		// This allows a random size to be chosen, but to have it stay constant.
-		GLfloat endSize = CC3RandomOrAlt(minParticleEndingSize, maxParticleEndingSize, startSize);
+		GLfloat endSize = CC3RandomOrAlt(_minParticleEndingSize, _maxParticleEndingSize, startSize);
 		
 		aParticle.sizeVelocity = (endSize - startSize);
 	}
@@ -342,7 +343,7 @@
  */ 
 @implementation CC3PointParticleHoseEmitterDeprecated
 
--(CC3HoseParticleNavigator*) hoseNavigator { return (CC3HoseParticleNavigator*)particleNavigator; }
+-(CC3HoseParticleNavigator*) hoseNavigator { return (CC3HoseParticleNavigator*)_particleNavigator; }
 
 // Deprecated properties delegated to navigator
 -(CC3Node*) nozzle { return self.hoseNavigator.nozzle; }
@@ -376,5 +377,4 @@
 
 @implementation CC3PointParticleHoseEmitter
 @end
-
 

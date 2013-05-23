@@ -46,8 +46,8 @@
  * check the isAlive property before spending time making any further modifications.
  */
 @interface  CC3MortalPointParticle  : CC3PointParticle <CC3MortalParticleProtocol> {
-	ccTime lifeSpan;
-	ccTime timeToLive;
+	ccTime _lifeSpan;
+	ccTime _timeToLive;
 }
 
 /**
@@ -78,7 +78,6 @@
 #pragma mark CC3MortalPointParticleEmitter
 
 /**
- * Deprecated.
  * @deprecated Do not use this class. This class has been introduced into the hierarchy
  * strictly to permit the library to maintain the deprecated CC3MortalPointParticleEmitter
  * as a parent class of other deprecated classes in this library.
@@ -98,7 +97,6 @@
 
 DEPRECATED_ATTRIBUTE
 /**
- * Deprecated.
  * @deprecated This functionality has been separated into several more general classes. Use a
  * CC3PointParticleEmitter configured with a CC3RandomMortalParticleNavigator to emit particles
  * that support the CC3MortalParticleProtocol, such as particles of type CC3MortalPointParticle.
@@ -115,7 +113,7 @@ DEPRECATED_ATTRIBUTE
  * CC3SprayParticleProtocol to configure the particle to move in a straight line at a steady speed.
  */
 @interface  CC3SprayPointParticle  : CC3MortalPointParticle <CC3SprayParticleProtocol> {
-	CC3Vector velocity;
+	CC3Vector _velocity;
 }
 
 /**
@@ -190,8 +188,8 @@ DEPRECATED_ATTRIBUTE
 @interface  CC3UniformlyEvolvingPointParticle : CC3SprayPointParticle
 												<CC3UniformlyGrowingPointParticleProtocol,
 												CC3UniformlyFadingParticleProtocol> {
-	GLfloat sizeVelocity;
-	ccColor4F colorVelocity;
+	ccColor4F _colorVelocity;
+	GLfloat _sizeVelocity;
 }
 
 /**
@@ -294,14 +292,14 @@ static const ccColor4F kCC3ParticleFadeOut = { kCC3ParticleConstantComponent,
  * and size for each particle, each selected randomly from a range of values.
  */
 @interface CC3VariegatedPointParticleHoseEmitter : CC3PointParticleEmitter {
-	GLfloat minParticleStartingSize;
-	GLfloat maxParticleStartingSize;
-	GLfloat minParticleEndingSize;
-	GLfloat maxParticleEndingSize;
-	ccColor4F minParticleStartingColor;
-	ccColor4F maxParticleStartingColor;
-	ccColor4F minParticleEndingColor;
-	ccColor4F maxParticleEndingColor;
+	GLfloat _minParticleStartingSize;
+	GLfloat _maxParticleStartingSize;
+	GLfloat _minParticleEndingSize;
+	GLfloat _maxParticleEndingSize;
+	ccColor4F _minParticleStartingColor;
+	ccColor4F _maxParticleStartingColor;
+	ccColor4F _minParticleEndingColor;
+	ccColor4F _maxParticleEndingColor;
 }
 
 /**

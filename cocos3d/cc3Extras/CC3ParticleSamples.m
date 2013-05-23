@@ -38,14 +38,14 @@
 
 @implementation CC3RandomMortalParticleNavigator
 
-@synthesize minParticleLifeSpan, maxParticleLifeSpan;
+@synthesize minParticleLifeSpan=_minParticleLifeSpan, maxParticleLifeSpan=_maxParticleLifeSpan;
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3MortalParticleProtocol); }
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		minParticleLifeSpan = 0.0f;
-		maxParticleLifeSpan = 0.0f;
+		_minParticleLifeSpan = 0.0f;
+		_maxParticleLifeSpan = 0.0f;
 	}
 	return self;
 }
@@ -55,12 +55,12 @@
 -(void) populateFrom: (CC3RandomMortalParticleNavigator*) another {
 	[super populateFrom: another];
 	
-	minParticleLifeSpan = another.minParticleLifeSpan;
-	maxParticleLifeSpan = another.maxParticleLifeSpan;
+	_minParticleLifeSpan = another.minParticleLifeSpan;
+	_maxParticleLifeSpan = another.maxParticleLifeSpan;
 }
 
 -(void) initializeParticle: (id<CC3MortalParticleProtocol>) aParticle {
-	aParticle.lifeSpan = CC3RandomFloatBetween(minParticleLifeSpan, maxParticleLifeSpan);
+	aParticle.lifeSpan = CC3RandomFloatBetween(_minParticleLifeSpan, _maxParticleLifeSpan);
 }
 
 @end
@@ -88,12 +88,13 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 
 @implementation CC3HoseParticleNavigator
 
-@synthesize nozzleMatrix, minParticleSpeed, maxParticleSpeed;
-@synthesize shouldPrecalculateNozzleTangents;
+@synthesize nozzleMatrix=_nozzleMatrix;
+@synthesize minParticleSpeed=_minParticleSpeed, maxParticleSpeed=_maxParticleSpeed;
+@synthesize shouldPrecalculateNozzleTangents=_shouldPrecalculateNozzleTangents;
 
 -(void) dealloc {
 	self.nozzle = nil;			// Setter clears listener and releases nozzle
-	[nozzleMatrix release];
+	[_nozzleMatrix release];
 	[super dealloc];
 }
 
@@ -102,53 +103,53 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	[self checkNozzleParent];
 }
 
--(CC3Node*) nozzle { return nozzle; }
+-(CC3Node*) nozzle { return _nozzle; }
 
 -(void) setNozzle: (CC3Node*) aNode {
-	if (aNode == nozzle) return;
+	if (aNode == _nozzle) return;
 	
-	[nozzle removeTransformListener: self];
-	if (nozzle.parent == emitter) [nozzle remove];
-	[nozzle release];
+	[_nozzle removeTransformListener: self];
+	if (_nozzle.parent == _emitter) [_nozzle remove];
+	[_nozzle release];
 
-	nozzle = [aNode retain];
-	[nozzle addTransformListener: self];
+	_nozzle = [aNode retain];
+	[_nozzle addTransformListener: self];
 	[self checkNozzleParent];
 }
 
 /** If the nozzle does not have a parent, add it to the emitter. */
 -(void) checkNozzleParent {
-	if ( nozzle && !nozzle.parent ) {
-		if (emitter.name) nozzle.name = [NSString stringWithFormat: @"%@-Nozzle", emitter.name];
-		[emitter addChild: nozzle];
+	if ( _nozzle && !_nozzle.parent ) {
+		if (_emitter.name) _nozzle.name = [NSString stringWithFormat: @"%@-Nozzle", _emitter.name];
+		[_emitter addChild: _nozzle];
 	}
 }
 
 // Protected property for copying
--(CGSize) nozzleShape { return nozzleShape; }
+-(CGSize) nozzleShape { return _nozzleShape; }
 
 -(CGSize) dispersionAngle {
-	return shouldPrecalculateNozzleTangents
-				? CC3DispersionAngleFromShape(nozzleShape)
-				: nozzleShape;
+	return _shouldPrecalculateNozzleTangents
+				? CC3DispersionAngleFromShape(_nozzleShape)
+				: _nozzleShape;
 }
 
 #define kCC3TangentPrecalcThreshold 90.0f
 
 -(void) setDispersionAngle: (CGSize) dispAngle {
-	shouldPrecalculateNozzleTangents = (dispAngle.width < kCC3TangentPrecalcThreshold &&
+	_shouldPrecalculateNozzleTangents = (dispAngle.width < kCC3TangentPrecalcThreshold &&
 										dispAngle.height < kCC3TangentPrecalcThreshold);
-	nozzleShape = shouldPrecalculateNozzleTangents ? CC3ShapeFromDispersionAngle(dispAngle) : dispAngle;
+	_nozzleShape = _shouldPrecalculateNozzleTangents ? CC3ShapeFromDispersionAngle(dispAngle) : dispAngle;
 }
 
 /** If we're flipping from one to the other, convert the nozzleShape. */
 -(void) setShouldPrecalculateNozzleTangents: (BOOL) shouldPrecalc {
-	if ( shouldPrecalculateNozzleTangents && !shouldPrecalc ) {
-		nozzleShape = CC3DispersionAngleFromShape(nozzleShape);
-	} else if ( !shouldPrecalculateNozzleTangents && shouldPrecalc ) {
-		nozzleShape = CC3ShapeFromDispersionAngle(nozzleShape);
+	if ( _shouldPrecalculateNozzleTangents && !shouldPrecalc ) {
+		_nozzleShape = CC3DispersionAngleFromShape(_nozzleShape);
+	} else if ( !_shouldPrecalculateNozzleTangents && shouldPrecalc ) {
+		_nozzleShape = CC3ShapeFromDispersionAngle(_nozzleShape);
 	}
-	shouldPrecalculateNozzleTangents = shouldPrecalc;
+	_shouldPrecalculateNozzleTangents = shouldPrecalc;
 }
 
 
@@ -157,11 +158,11 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 -(id) init {
 	if ( (self = [super init]) ) {
 		self.nozzle = [CC3Node node];
-		nozzleMatrix = [CC3AffineMatrix new];
-		shouldPrecalculateNozzleTangents = YES;
+		_nozzleMatrix = [CC3AffineMatrix new];
+		_shouldPrecalculateNozzleTangents = YES;
 		self.dispersionAngle = CGSizeMake(15.0, 15.0);		// Set after so it will precalc
-		minParticleSpeed = 0.0f;
-		maxParticleSpeed = 0.0f;
+		_minParticleSpeed = 0.0f;
+		_maxParticleSpeed = 0.0f;
 	}
 	return self;
 }
@@ -172,27 +173,26 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	[super populateFrom: another];
 	
 	self.nozzle = another.nozzle;						// retained
-	nozzleMatrix = [another.nozzleMatrix copy];			// retained
-	nozzleShape = another.nozzleShape;
-	minParticleSpeed = another.minParticleSpeed;
-	maxParticleSpeed = another.maxParticleSpeed;
-	shouldPrecalculateNozzleTangents = another.shouldPrecalculateNozzleTangents;
+	_nozzleMatrix = [another.nozzleMatrix copy];			// retained
+	_nozzleShape = another.nozzleShape;
+	_minParticleSpeed = another.minParticleSpeed;
+	_maxParticleSpeed = another.maxParticleSpeed;
+	_shouldPrecalculateNozzleTangents = another.shouldPrecalculateNozzleTangents;
 }
 
 
 #pragma mark Updating
 
--(void) nodeWasTransformed: (CC3Node*) aNode { if (aNode == nozzle) [self buildNozzleMatrix]; }
+-(void) nodeWasTransformed: (CC3Node*) aNode { if (aNode == _nozzle) [self buildNozzleMatrix]; }
 
 -(void) nodeWasDestroyed: (CC3Node*) aNode {}
 
 -(void) buildNozzleMatrix {
-	if ( nozzle && nozzle.parent != emitter ) {
-		[nozzleMatrix populateFrom: nozzle.transformMatrix];
-		[nozzleMatrix leftMultiplyBy: emitter.transformMatrixInverted];
-	} else {
-		[nozzleMatrix populateIdentity];
-	}
+	if ( _nozzle && _nozzle.parent != _emitter ) {
+		[_nozzleMatrix populateFrom: _nozzle.transformMatrix];
+		[_nozzleMatrix leftMultiplyBy: _emitter.transformMatrixInverted];
+	} else
+		[_nozzleMatrix populateIdentity];
 }
 
 /**
@@ -204,25 +204,25 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 	
 	// The particle starts at the location of the nozzle, converted from the
 	// nozzle's local coordinate system to the emitter's local coordinate system.
-	aParticle.location = [nozzleMatrix transformLocation: kCC3VectorZero];
+	aParticle.location = [_nozzleMatrix transformLocation: kCC3VectorZero];
 	
 	// Speed of particle is randomized.
-	GLfloat emissionSpeed = CC3RandomFloatBetween(minParticleSpeed, maxParticleSpeed);
+	GLfloat emissionSpeed = CC3RandomFloatBetween(_minParticleSpeed, _maxParticleSpeed);
 
 	// Emission direction in the nozzle's local coordinate system is towards the negative
 	// Z-axis, with randomization in the X & Y directions based on the shape of the nozzle.
 	// Randomization is performed either on the dispersion angle, or on the tangents of the
 	// dispersion angle, depending on the value of the shouldPrecalculateNozzleTangents.
-	CGSize nozzleAspect = CGSizeMake(CC3RandomFloatBetween(-nozzleShape.width, nozzleShape.width),
-									 CC3RandomFloatBetween(-nozzleShape.height, nozzleShape.height));
-	if ( !shouldPrecalculateNozzleTangents ) nozzleAspect = CC3ShapeFromDispersionAngle(nozzleAspect);
+	CGSize nozzleAspect = CGSizeMake(CC3RandomFloatBetween(-_nozzleShape.width, _nozzleShape.width),
+									 CC3RandomFloatBetween(-_nozzleShape.height, _nozzleShape.height));
+	if ( !_shouldPrecalculateNozzleTangents ) nozzleAspect = CC3ShapeFromDispersionAngle(nozzleAspect);
 	CC3Vector emissionDir = CC3VectorNormalize(cc3v(nozzleAspect.width, nozzleAspect.height, 1.0f));
 
 	// The combination of emission speed and emission direction is the emission velocity in the
 	// nozzle's local coordinates. The particle velocity is then the nozzle emission velocity
 	// transformed by the nozzleMatrix to convert it to the emitter's local coordinates.
 	CC3Vector emissionVelocity = CC3VectorScaleUniform(emissionDir, emissionSpeed);
-	aParticle.velocity = [nozzleMatrix transformDirection: emissionVelocity];
+	aParticle.velocity = [_nozzleMatrix transformDirection: emissionVelocity];
 }
 
 @end

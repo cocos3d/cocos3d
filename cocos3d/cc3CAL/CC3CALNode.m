@@ -51,7 +51,7 @@
 
 -(CC3CALNode*) getNodeWithCALIndex: (GLint) calIndex {
 	if (_calIndex == calIndex) return self;
-	for (CC3Node* child in children) {
+	for (CC3Node* child in _children) {
 		CC3CALNode* childResult = [(CC3CALNode*)child getNodeWithCALIndex: calIndex];
 		if (childResult) return childResult;
 	}

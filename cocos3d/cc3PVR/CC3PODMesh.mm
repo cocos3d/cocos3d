@@ -38,7 +38,7 @@
 
 @implementation CC3Mesh (PVRPOD)
 
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: aPODIndex];
 		LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMesh(psm));
@@ -81,7 +81,7 @@
 	return self;
 }
 
-+(id) meshAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
++(id) meshAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
 
@@ -92,16 +92,16 @@
 
 @implementation CC3PODMesh
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODMesh*) another {
 	[super populateFrom: another];
 	
-	podIndex = another.podIndex;
+	_podIndex = another.podIndex;
 }
 
 // Deprecated texture inversion. When this is invoked on a POD mesh, it does need inversion.

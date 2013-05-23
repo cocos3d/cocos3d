@@ -179,6 +179,7 @@ cocos3d 2.0.0 - 2013/05/31
 - Fixed issue where incorrect symbolic links were created when a relative path is passed to the install_cocos3d script.
 - Fixed issue where CC3PODCamera animation pointed camera in an incorrect direction due to difference in coordinate systems expected by POD camera data.
 - Fixed bad access when copying CC3TargettingRotator from CC3DirectionalRotator due to miscasting.
+- Fixed zero node scale causing matrix singularities.
 - Fixed iOS 4.0 runtime issue in CC3UIViewController viewDidLayoutSubviews.
 - Added guard code to CC3NodeSphericalBoundingVolume to ensure that its globalRadius property will always be a positive value.
 - Removed bounding volume contents from the output of the CC3Node fullDescription method.

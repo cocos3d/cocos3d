@@ -165,8 +165,8 @@
  * A wide range of subclasses may be constructed to perform a variety of sequencing techniques.
  */
 @interface CC3NodeSequencer : NSObject <NSCopying> {
-	CC3NodeEvaluator* evaluator;
-	BOOL allowSequenceUpdates : 1;
+	CC3NodeEvaluator* _evaluator;
+	BOOL _allowSequenceUpdates : 1;
 }
 
 /**
@@ -343,7 +343,7 @@
  * Reading that property returns YES if any child sequencer returns YES, otherwise it returns NO.
  */
 @interface CC3BTreeNodeSequencer : CC3NodeSequencer {
-	CCArray* sequencers;
+	CCArray* _sequencers;
 }
 
 /** The array of child sequencers. */
@@ -408,7 +408,7 @@
  * The contents of the nodes array are not copied when this sequencer is copied.
  */
 @interface CC3NodeArraySequencer : CC3NodeSequencer {
-	CCArray* nodes;
+	CCArray* _nodes;
 }
 
 /**
@@ -470,7 +470,7 @@
  * objects that are behind them.
  */
 @interface CC3NodeArrayZOrderSequencer : CC3NodeArraySequencer {
-    BOOL shouldUseOnlyForwardDistance;
+    BOOL _shouldUseOnlyForwardDistance;
 }
 
 @end
@@ -557,8 +557,8 @@
  * using it to visit a sequencer.
  */
 @interface CC3NodeSequencerVisitor : NSObject {
-	CC3Scene* scene;
-	CCArray* misplacedNodes;
+	CC3Scene* _scene;
+	CCArray* _misplacedNodes;
 }
 
 /**

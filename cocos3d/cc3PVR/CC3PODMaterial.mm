@@ -37,15 +37,15 @@ extern "C" {
 #import "CC3PFXResource.h"
 
 @interface CC3PODMaterial (TemplateMethods)
--(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
--(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
+-(void) addTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
+-(void) addBumpMapTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez;
 @end
 
 @implementation CC3PODMaterial
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
 static GLfloat shininessExpansionFactor = 128.0f;
 
@@ -53,7 +53,7 @@ static GLfloat shininessExpansionFactor = 128.0f;
 
 +(void) setShininessExpansionFactor: (GLfloat) aFloat { shininessExpansionFactor = aFloat; }
 
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	SPODMaterial* psm = (SPODMaterial*)[aPODRez materialPODStructAtIndex: aPODIndex];
 	LogRez(@"Creating %@ at index %i from: %@", [self class], aPODIndex, NSStringFromSPODMaterial(psm));
 	if ( (self = [super initWithName: [NSString stringWithUTF8String: psm->pszName]]) ) {
@@ -87,22 +87,22 @@ static GLfloat shininessExpansionFactor = 128.0f;
 	return self;
 }
 
-+(id) materialAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
++(id) materialAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
 
 -(void) populateFrom: (CC3PODMaterial*) another {
 	[super populateFrom: another];
 
-	podIndex = another.podIndex;
+	_podIndex = another.podIndex;
 }
 
 /**
  * If the specified texture index is valid, extracts the texture from the POD resource
  * and adds it to this material.
  */
--(void) addTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if (aPODTexIndex >= 0 && aPODTexIndex < (int)aPODRez.textureCount) {
+-(void) addTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
+	if (aPODTexIndex >= 0 && aPODTexIndex < (GLint)aPODRez.textureCount) {
 		[self addTexture: [aPODRez textureAtIndex: aPODTexIndex]];
 	}
 }
@@ -111,8 +111,8 @@ static GLfloat shininessExpansionFactor = 128.0f;
  * If the specified texture index is valid, extracts the texture from the POD resource,
  * configures it as a bump-map texture, and adds it to this material.
  */
--(void) addBumpMapTexture: (int) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
-	if (aPODTexIndex >= 0 && aPODTexIndex < (int)aPODRez.textureCount) {
+-(void) addBumpMapTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
+	if (aPODTexIndex >= 0 && aPODTexIndex < (GLint)aPODRez.textureCount) {
 		CC3Texture* bmTex = [aPODRez textureAtIndex: aPODTexIndex];
 		bmTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
 		[self addTexture: bmTex];

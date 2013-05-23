@@ -41,12 +41,12 @@
  * The index of this object in the POD resource data.
  * This generally means the podIndex'th type of object of the class.
  */
-@property(nonatomic, assign) int podIndex;
+@property(nonatomic, assign) GLint podIndex;
 
 /**
  * Initializes this instance from the data of this type at
  * the specified index within the specified POD resource.
  */
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez;
 
 @end

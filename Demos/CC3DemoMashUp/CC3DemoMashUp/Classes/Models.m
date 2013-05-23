@@ -80,9 +80,9 @@
  */
 -(void) applyColorWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	[gl setLightAmbientColor: kCC3DefaultLightColorAmbient at: lightIndex];
-	[gl setLightDiffuseColor: kCC3DefaultLightColorDiffuse at: lightIndex];
-	[gl setLightSpecularColor: kCC3DefaultLightColorSpecular at: lightIndex];
+	[gl setLightAmbientColor: kCC3DefaultLightColorAmbient at: self.lightIndex];
+	[gl setLightDiffuseColor: kCC3DefaultLightColorDiffuse at: self.lightIndex];
+	[gl setLightSpecularColor: kCC3DefaultLightColorSpecular at: self.lightIndex];
 }
 
 @end
@@ -309,8 +309,8 @@
  */
 -(void) initializeParticle {
 	[super initializeParticle];
-	GLint zIndex = particleIndex / kParticlesPerSide;
-	GLint xIndex = particleIndex % kParticlesPerSide;
+	GLint zIndex = _particleIndex / kParticlesPerSide;
+	GLint xIndex = _particleIndex % kParticlesPerSide;
 	
 	GLfloat xStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
 	GLfloat zStart = -kParticlesPerSide * kParticlesSpacing / 2.0f;
@@ -343,7 +343,7 @@
 -(void) initializeParticle {
 	[super initializeParticle];
 
-	GLuint particleIndex = emitter.particleCount;
+	GLuint particleIndex = _emitter.particleCount;
 	GLint zIndex = particleIndex / kParticlesPerSide;
 	GLint xIndex = particleIndex % kParticlesPerSide;
 	
@@ -370,7 +370,7 @@
 
 /** Derive the texture rectangle from the particle index, in a modulus of eight options . */
 -(CGRect) textureRectangle {
-	NSUInteger particleIndex = emitter.particleCount;
+	NSUInteger particleIndex = _emitter.particleCount;
 	switch (particleIndex % 8) {
 		case 1:
 			return CGRectMake(0.25, kCC3OneThird, 0.25, kCC3OneThird);	// Front
@@ -446,7 +446,7 @@
 	
 	// Alternate between rotating right or left.
 	// Particles are always emitted at the end, so particle index should be randomly odd/even.
-	NSUInteger particleIndex = emitter.particleCount;
+	NSUInteger particleIndex = _emitter.particleCount;
 	float dirSign = CC3IntIsEven(particleIndex) ? 1 : -1;
 	self.rotationAngle = 0.0f;
 	self.rotationAngleVelocity = dirSign * CC3RandomFloatBetween(45.0, 120.0);
@@ -454,7 +454,7 @@
 	self.uniformScale = CC3RandomFloatBetween(0.5, 2.0);
 	
 	// Set the color velocity to change only the opacity, to fade the particle away
-	self.color4F = emitter.diffuseColor;
+	self.color4F = _emitter.diffuseColor;
 	self.colorVelocity = ccc4f(0.0f, 0.0f, 0.0f, -(1.0 / self.lifeSpan));
 }
 

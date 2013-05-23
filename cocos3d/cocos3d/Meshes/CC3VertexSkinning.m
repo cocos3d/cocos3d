@@ -84,17 +84,17 @@
 
 @implementation CC3SkinMeshNode
 
-@synthesize skinSections, restPoseTransformMatrix;
+@synthesize skinSections=_skinSections, restPoseTransformMatrix=_restPoseTransformMatrix;
 
 -(void) dealloc {
-	[skinSections release];
-	[restPoseTransformMatrix release];
-	[deformedFaces release];
+	[_skinSections release];
+	[_restPoseTransformMatrix release];
+	[_deformedFaces release];
 	[super dealloc];
 }
 
 -(CC3SkinSection*) skinSectionForVertexIndexAt: (GLint) index {
-	for (CC3SkinSection* skinSctn in skinSections)
+	for (CC3SkinSection* skinSctn in _skinSections)
 		if ( [skinSctn containsVertexIndex: index] ) return skinSctn;
 	return nil;
 }
@@ -112,18 +112,18 @@
 }
 
 -(CC3DeformedFaceArray*) deformedFaces {
-	if ( !deformedFaces ) {
+	if ( !_deformedFaces ) {
 		NSString* facesName = [NSString stringWithFormat: @"%@-DeformedFaces", self.name];
 		self.deformedFaces = [CC3DeformedFaceArray faceArrayWithName: facesName];
 	}
-	return deformedFaces;
+	return _deformedFaces;
 }
 
 -(void) setDeformedFaces: (CC3DeformedFaceArray*) aFaceArray {
-	id old = deformedFaces;
-	deformedFaces = [aFaceArray retain];
+	id old = _deformedFaces;
+	_deformedFaces = [aFaceArray retain];
 	[old release];
-	deformedFaces.node = self;
+	_deformedFaces.node = self;
 }
 
 -(CC3Face) deformedFaceAt: (GLuint) faceIndex {
@@ -151,9 +151,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		skinSections = [[CCArray array] retain];
-		restPoseTransformMatrix = [CC3AffineMatrix new];
-		deformedFaces = nil;
+		_skinSections = [[CCArray array] retain];
+		_restPoseTransformMatrix = [CC3AffineMatrix new];
+		_deformedFaces = nil;
 	}
 	return self;
 }
@@ -166,16 +166,16 @@
 	// The deformedFaces instance is not copied, since the deformed faces
 	// are different for each mesh node and is created lazily if needed.
 	
-	[restPoseTransformMatrix populateFrom: another.restPoseTransformMatrix];
+	[_restPoseTransformMatrix populateFrom: another.restPoseTransformMatrix];
 
-	[skinSections removeAllObjects];
+	[_skinSections removeAllObjects];
 	CCArray* otherSkinSections = another.skinSections;
 	for (CC3SkinSection* ss in otherSkinSections)
-		[skinSections addObject: [[ss copyForNode: self] autorelease]];		// retained in array
+		[_skinSections addObject: [[ss copyForNode: self] autorelease]];		// retained in array
 }
 
 -(void) reattachBonesFrom: (CC3Node*) aNode {
-	for (CC3SkinSection* skinSctn in skinSections) [skinSctn reattachBonesFrom: aNode];
+	for (CC3SkinSection* skinSctn in _skinSections) [skinSctn reattachBonesFrom: aNode];
 	[super reattachBonesFrom: aNode];
 }
 
@@ -183,7 +183,7 @@
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ with %lu skin sections",
-			super.description, (unsigned long)skinSections.count];
+			super.description, (unsigned long)_skinSections.count];
 }
 
 
@@ -191,11 +191,11 @@
 
 -(void) transformMatrixChanged {
 	[super transformMatrixChanged];
-	[deformedFaces clearDeformableCaches];		// Avoid creating lazily if not already created.
+	[_deformedFaces clearDeformableCaches];		// Avoid creating lazily if not already created.
 }
 
 /** Caches the transform matrix rest pose matrix. */
--(void) cacheRestPoseMatrix { [restPoseTransformMatrix populateFrom: transformMatrix]; }
+-(void) cacheRestPoseMatrix { [_restPoseTransformMatrix populateFrom: _transformMatrix]; }
 
 -(void) boneWasTransformed: (CC3Bone*) aBone { [self markTransformDirty]; }
 
@@ -232,10 +232,10 @@
 	
 	[gl enableMatrixPalette: YES];		// Enable the matrix palette
 	
-	[mesh bindWithVisitor: visitor];	// Bind the arrays
+	[_mesh bindWithVisitor: visitor];	// Bind the arrays
 	
-	for (CC3SkinSection* skinSctn in skinSections)
-		[skinSctn drawVerticesOfMesh: mesh withVisitor: visitor];
+	for (CC3SkinSection* skinSctn in _skinSections)
+		[skinSctn drawVerticesOfMesh: _mesh withVisitor: visitor];
 	
 	[gl enableMatrixPalette: NO];		// We are finished with the matrix pallete so disable it.
 }
@@ -271,32 +271,32 @@
 
 @implementation CC3SkinSection
 
-@synthesize vertexStart, vertexCount;
+@synthesize vertexStart=_vertexStart, vertexCount=_vertexCount;
 
 -(void) dealloc {
-	[skinnedBones release];
-	node = nil;				// not retained
+	[_skinnedBones release];
+	_node = nil;				// not retained
 	[super dealloc];
 }
 
--(GLuint) boneCount { return (GLuint)skinnedBones.count; }
+-(GLuint) boneCount { return (GLuint)_skinnedBones.count; }
 
 -(CCArray*) bones {
 	CCArray* bones = [CCArray array];
-	for (CC3SkinnedBone* sb in skinnedBones) [bones addObject: sb.bone];
+	for (CC3SkinnedBone* sb in _skinnedBones) [bones addObject: sb.bone];
 	return bones;
 }
 
 -(void) addBone: (CC3Bone*) aBone {
-	[skinnedBones addObject: [CC3SkinnedBone skinnedBoneWithSkin: node onBone: aBone]];
+	[_skinnedBones addObject: [CC3SkinnedBone skinnedBoneWithSkin: _node onBone: aBone]];
 }
 
 -(BOOL) containsVertexIndex: (GLint) aVertexIndex {
-	return (aVertexIndex >= vertexStart) && (aVertexIndex < vertexStart + vertexCount);
+	return (aVertexIndex >= _vertexStart) && (aVertexIndex < _vertexStart + _vertexCount);
 }
 
 -(CC3Vector)  deformedVertexLocationAt:  (GLuint) vtxIdx {
-	CC3Mesh* skinMesh = node.mesh;
+	CC3Mesh* skinMesh = _node.mesh;
 	
 	// The locations of this vertex before and after deformation.
 	// The latter is to be calculated and returned by this method.
@@ -311,7 +311,7 @@
 		// Get a bone and its weighting for this vertex.
 		GLfloat vtxWt = [skinMesh vertexWeightForVertexUnit: vuIdx at: vtxIdx];
 		GLuint vtxBoneIdx = [skinMesh vertexMatrixIndexForVertexUnit: vuIdx at: vtxIdx];
-		CC3SkinnedBone* skinnedBone = ((CC3SkinnedBone*)[skinnedBones objectAtIndex: vtxBoneIdx]);
+		CC3SkinnedBone* skinnedBone = ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: vtxBoneIdx]);
 		
 		// Use the bone to deform the vertex, apply the weighting for this bone,
 		// and add to the summed location.
@@ -319,13 +319,13 @@
 		CC3Vector wtdBoneDefLoc = CC3VectorScaleUniform(boneDefLoc, vtxWt);
 		defLoc = CC3VectorAdd(defLoc, wtdBoneDefLoc);
 
-		LogTrace(@"%@ vu: %i, bone at %i, weight %.3f transforming vertex at %i: %@ to %@ to wtd: %@ to sum: %@ %@ node rest pose: %@",
+		LogTrace(@"%@ vu: %i, bone at %i, weight %.3f transforming vertex at %i: %@ to %@ to wtd: %@ to sum: %@ node rest pose: %@",
 					  self, vuIdx, vtxBoneIdx, vtxWt, vtxIdx,
 					  NSStringFromCC3Vector(restLoc),
 					  NSStringFromCC3Vector(boneDefLoc),
 					  NSStringFromCC3Vector(wtdBoneDefLoc),
 					  NSStringFromCC3Vector(defLoc),
-					  bonePoseMtx, node.restPoseTransformMatrix);
+					  _node.restPoseTransformMatrix);
 	}
 	return defLoc;
 }
@@ -337,10 +337,10 @@
 
 -(id) initForNode: (CC3SkinMeshNode*) aNode {
 	if ( (self = [super init]) ) {
-		node = aNode;							// not retained
-		skinnedBones = [[CCArray array] retain];
-		vertexStart = 0;
-		vertexCount = 0;
+		_node = aNode;							// not retained
+		_skinnedBones = [[CCArray array] retain];
+		_vertexStart = 0;
+		_vertexCount = 0;
 	}
 	return self;
 }
@@ -353,17 +353,17 @@
 // bone with the same name as a descendant of the specified node.
 -(void) reattachBonesFrom: (CC3Node*) aNode {
 	CCArray* oldBones = self.bones;
-	[skinnedBones removeAllObjects];
+	[_skinnedBones removeAllObjects];
 	for (CC3Bone* ob in oldBones) [self addBone: (CC3Bone*)[aNode getNodeNamed: ob.name]];
 }
 
 -(void) populateFrom: (CC3SkinSection*) another {
 
-	vertexStart = another.vertexStart;
-	vertexCount = another.vertexCount;
+	_vertexStart = another.vertexStart;
+	_vertexCount = another.vertexCount;
 
 	// Each bone is retained but not copied, and will be swapped for copied bones via reattachBonesFrom:
-	[skinnedBones removeAllObjects];
+	[_skinnedBones removeAllObjects];
 	CCArray* otherBones = another.bones;
 	for (CC3Bone* bone in otherBones) [self addBone: bone];
 }
@@ -380,7 +380,7 @@
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ with %i bones, vertices from %u to %u for %@",
-			[self class], self.boneCount, vertexStart, (vertexStart + vertexCount - 1), node];
+			[self class], self.boneCount, _vertexStart, (_vertexStart + _vertexCount - 1), _node];
 }
 
 -(NSString*) fullDescription { return [NSString stringWithFormat: @"%@ %@", [self description], self.bones]; }
@@ -393,7 +393,7 @@
 #if !CC3_GLSL
 	GLuint boneCnt = self.boneCount;
 	for (GLuint boneNum = 0; boneNum < boneCnt; boneNum++) {
-		CC3SkinnedBone* sb = [skinnedBones objectAtIndex: boneNum];
+		CC3SkinnedBone* sb = [_skinnedBones objectAtIndex: boneNum];
 
 		// Load this palette matrix from the modelview matrix and the apply the bone draw matrix.
 		// Since the CC3SkinMeshNode does not transform the modelview stack, the modelview will
@@ -406,11 +406,11 @@
 #endif	// !CC3_GLSL
 
 	visitor.currentSkinSection = self;
-	[mesh drawVerticesFrom: vertexStart forCount: vertexCount withVisitor: visitor];
+	[mesh drawVerticesFrom: _vertexStart forCount: _vertexCount withVisitor: visitor];
 }
 
 -(CC3Matrix*) getDrawTransformMatrixForBoneAt: (GLuint) boneIdx {
-	return ((CC3SkinnedBone*)[skinnedBones objectAtIndex: boneIdx]).drawTransformMatrix;
+	return ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: boneIdx]).drawTransformMatrix;
 }
 
 @end
@@ -421,10 +421,10 @@
 
 @implementation CC3Bone
 
-@synthesize restPoseInvertedMatrix;
+@synthesize restPoseInvertedMatrix=_restPoseInvertedMatrix;
 
 -(void) dealloc {
-	[restPoseInvertedMatrix release];
+	[_restPoseInvertedMatrix release];
 	[super dealloc];
 }
 
@@ -434,7 +434,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		restPoseInvertedMatrix = [CC3AffineMatrix new];
+		_restPoseInvertedMatrix = [CC3AffineMatrix new];
 	}
 	return self;
 }
@@ -444,7 +444,7 @@
 -(void) populateFrom: (CC3Bone*) another {
 	[super populateFrom: another];
 	
-	[restPoseInvertedMatrix populateFrom: another.restPoseInvertedMatrix];
+	[_restPoseInvertedMatrix populateFrom: another.restPoseInvertedMatrix];
 }
 
 
@@ -452,19 +452,19 @@
 
 -(void) applyPoseTo: (CC3Matrix*) boneMatrix {
 	[boneMatrix populateFrom: self.transformMatrix];
-	[boneMatrix multiplyBy: restPoseInvertedMatrix];
+	[boneMatrix multiplyBy: _restPoseInvertedMatrix];
 }
 
 /** Inverts the transform matrix and caches it as the inverted rest pose matrix. */
 -(void) cacheRestPoseMatrix {
-	[restPoseInvertedMatrix populateFrom: transformMatrix];
-	[restPoseInvertedMatrix invert];
+	[_restPoseInvertedMatrix populateFrom: _transformMatrix];
+	[_restPoseInvertedMatrix invert];
 	LogTrace(@"%@ with global scale %@ and rest pose %@ %@ inverted to %@",
-			 self, NSStringFromCC3Vector(self.globalScale), transformMatrix,
-			 (restPoseInvertedMatrix.isRigid ? @"rigidly" : @"adjoint"), restPoseInvertedMatrix);
+			 self, NSStringFromCC3Vector(self.globalScale), _transformMatrix,
+			 (_restPoseInvertedMatrix.isRigid ? @"rigidly" : @"adjoint"), _restPoseInvertedMatrix);
 	LogTrace(@"Validating right multiply: %@ \nvalidating left multiply: %@",
-			 [CC3AffineMatrix matrixByMultiplying: transformMatrix by: restPoseInvertedMatrix],
-			 [CC3AffineMatrix matrixByMultiplying: restPoseInvertedMatrix by: transformMatrix]);
+			 [CC3AffineMatrix matrixByMultiplying: _transformMatrix by: _restPoseInvertedMatrix],
+			 [CC3AffineMatrix matrixByMultiplying: _restPoseInvertedMatrix by: _transformMatrix]);
 }
 
 @end
@@ -475,48 +475,48 @@
 
 @implementation CC3SkinnedBone
 
-@synthesize bone, skinNode;
+@synthesize bone=_bone, skinNode=_skinNode;
 
 -(void) dealloc {
-	[skinNode removeTransformListener: self];
-	skinNode = nil;		// Weak reference
+	[_skinNode removeTransformListener: self];
+	_skinNode = nil;		// Weak reference
 
-	[bone removeTransformListener: self];
-	bone = nil;			// Weak reference
+	[_bone removeTransformListener: self];
+	_bone = nil;			// Weak reference
 
-	[drawTransformMatrix release];
-	[skinTransformMatrix release];
+	[_drawTransformMatrix release];
+	[_skinTransformMatrix release];
 	[super dealloc];
 }
 
 -(void) markTransformDirty {
-	isSkinTransformDirty = YES;
-	isDrawTransformDirty = YES;
+	_isSkinTransformDirty = YES;
+	_isDrawTransformDirty = YES;
 }
 
 -(CC3Matrix*) drawTransformMatrix {
-	if ( !drawTransformMatrix ) drawTransformMatrix = [CC3AffineMatrix new];
-	if (isDrawTransformDirty) {
-		[bone applyPoseTo: drawTransformMatrix];
-		[drawTransformMatrix multiplyBy: skinNode.restPoseTransformMatrix];
-		isDrawTransformDirty = NO;
-		isSkinTransformDirty = YES;
+	if ( !_drawTransformMatrix ) _drawTransformMatrix = [CC3AffineMatrix new];
+	if (_isDrawTransformDirty) {
+		[_bone applyPoseTo: _drawTransformMatrix];
+		[_drawTransformMatrix multiplyBy: _skinNode.restPoseTransformMatrix];
+		_isDrawTransformDirty = NO;
+		_isSkinTransformDirty = YES;
 	}
-	return drawTransformMatrix;
+	return _drawTransformMatrix;
 }
 
 -(CC3Matrix*) skinTransformMatrix {
-	if ( !skinTransformMatrix ) skinTransformMatrix = [CC3AffineMatrix new];
-	if (isSkinTransformDirty) {
-		[skinTransformMatrix populateFrom: self.drawTransformMatrix];
-		[skinTransformMatrix leftMultiplyBy: skinNode.transformMatrixInverted];
-		isSkinTransformDirty = NO;
+	if ( !_skinTransformMatrix ) _skinTransformMatrix = [CC3AffineMatrix new];
+	if (_isSkinTransformDirty) {
+		[_skinTransformMatrix populateFrom: self.drawTransformMatrix];
+		[_skinTransformMatrix leftMultiplyBy: _skinNode.transformMatrixInverted];
+		_isSkinTransformDirty = NO;
 	}
-	return skinTransformMatrix;
+	return _skinTransformMatrix;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ for bone %@ of skin %@", self.class, bone, skinNode];
+	return [NSString stringWithFormat: @"%@ for bone %@ of skin %@", self.class, _bone, _skinNode];
 }
 
 
@@ -530,14 +530,14 @@
 	CC3Assert(aBone, @"%@ must be initialized with a bone.", self.class);
 	if ( (self = [super init]) ) {
 
-		skinNode = aNode;
-		[skinNode addTransformListener: self];
+		_skinNode = aNode;
+		[_skinNode addTransformListener: self];
 
-		bone = aBone;
-		[bone addTransformListener: self];
+		_bone = aBone;
+		[_bone addTransformListener: self];
 
-		drawTransformMatrix = nil;
-		skinTransformMatrix = nil;
+		_drawTransformMatrix = nil;
+		_skinTransformMatrix = nil;
 	}
 	return self;
 }
@@ -553,7 +553,7 @@
 /** Either the bone or skin node were transformed. Mark the transforms of this skinned bone dirty. */
 -(void) nodeWasTransformed: (CC3Node*) aNode {
 	[self markTransformDirty];
-	if (aNode == bone) [skinNode boneWasTransformed: bone];
+	if (aNode == _bone) [_skinNode boneWasTransformed: _bone];
 }
 
 /**
@@ -561,8 +561,8 @@
  * listener disappears before I do, clear the reference to it.
  */
 -(void) nodeWasDestroyed: (CC3Node*) aNode {
-	if (aNode == skinNode) skinNode = nil;
-	if (aNode == bone) bone = nil;
+	if (aNode == _skinNode) _skinNode = nil;
+	if (aNode == _bone) _bone = nil;
 }
 
 @end
@@ -573,7 +573,7 @@
 
 @implementation CC3DeformedFaceArray
 
-@synthesize node;
+@synthesize node=_node;
 
 -(void) dealloc {
 	self.node = nil;		// Will clear this object as a listener to the existing node.
@@ -586,7 +586,7 @@
  * on next access using the new mesh data.
  */
 -(void) setNode: (CC3SkinMeshNode*) aNode {
-	node = aNode;							// Weak link
+	_node = aNode;							// Weak link
 	self.mesh = aNode.mesh;
 	[self deallocateDeformedVertexLocations];
 }
@@ -597,7 +597,7 @@
  */
 -(void) setShouldCacheFaces: (BOOL) shouldCache {
 	super.shouldCacheFaces = shouldCache;
-	if ( !shouldCacheFaces ) [self deallocateDeformedVertexLocations];
+	if ( !_shouldCacheFaces ) [self deallocateDeformedVertexLocations];
 }
 
 -(void) clearDeformableCaches {
@@ -607,17 +607,17 @@
 	[self markDeformedVertexLocationsDirty];
 }
 
--(GLuint) vertexCount { return mesh ? mesh.vertexCount : 0;}
+-(GLuint) vertexCount { return _mesh ? _mesh.vertexCount : 0;}
 
 -(CC3Face) faceAt: (GLuint) faceIndex {
-	CC3FaceIndices faceIndices = [node faceIndicesAt: faceIndex];
-	if (shouldCacheFaces) {
+	CC3FaceIndices faceIndices = [_node faceIndicesAt: faceIndex];
+	if (_shouldCacheFaces) {
 		CC3Vector* vtxLocs = self.deformedVertexLocations;
 		return CC3FaceMake(vtxLocs[faceIndices.vertices[0]],
 						   vtxLocs[faceIndices.vertices[1]],
 						   vtxLocs[faceIndices.vertices[2]]);
 	} else {
-		CC3SkinSection* ss = [node skinSectionForFaceIndex: faceIndex];
+		CC3SkinSection* ss = [_node skinSectionForFaceIndex: faceIndex];
 		return CC3FaceMake([ss  deformedVertexLocationAt: faceIndices.vertices[0]],
 						   [ss  deformedVertexLocationAt: faceIndices.vertices[1]],
 						   [ss  deformedVertexLocationAt: faceIndices.vertices[2]]);
@@ -629,97 +629,91 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		node = nil;
-		deformedVertexLocations = NULL;
-		deformedVertexLocationsAreRetained = NO;
-		deformedVertexLocationsAreDirty = YES;
+		_node = nil;
+		_deformedVertexLocations = NULL;
+		_deformedVertexLocationsAreRetained = NO;
+		_deformedVertexLocationsAreDirty = YES;
 	}
 	return self;
 }
 
 // Phantom properties used during copying
--(BOOL) deformedVertexLocationsAreRetained { return deformedVertexLocationsAreRetained; }
--(BOOL) deformedVertexLocationsAreDirty { return deformedVertexLocationsAreDirty; }
+-(BOOL) deformedVertexLocationsAreRetained { return _deformedVertexLocationsAreRetained; }
+-(BOOL) deformedVertexLocationsAreDirty { return _deformedVertexLocationsAreDirty; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3DeformedFaceArray*) another {
 	[super populateFrom: another];
 	
-	node = another.node;		// not retained
+	_node = another.node;		// not retained
 	
 	// If deformed vertex locations should be retained, allocate memory and copy the data over.
 	[self deallocateDeformedVertexLocations];
 	if (another.deformedVertexLocationsAreRetained) {
 		[self allocateDeformedVertexLocations];
-		memcpy(deformedVertexLocations, another.deformedVertexLocations, (self.vertexCount * sizeof(CC3Vector)));
+		memcpy(_deformedVertexLocations, another.deformedVertexLocations, (self.vertexCount * sizeof(CC3Vector)));
 	} else {
-		deformedVertexLocations = another.deformedVertexLocations;
+		_deformedVertexLocations = another.deformedVertexLocations;
 	}
-	deformedVertexLocationsAreDirty = another.deformedVertexLocationsAreDirty;
+	_deformedVertexLocationsAreDirty = another.deformedVertexLocationsAreDirty;
 }
 
 
 #pragma mark Deformed vertex locations
 
 -(CC3Vector*) deformedVertexLocations {
-	if (deformedVertexLocationsAreDirty || !deformedVertexLocations) {
+	if (_deformedVertexLocationsAreDirty || !_deformedVertexLocations)
 		[self populateDeformedVertexLocations];
-	}
-	return deformedVertexLocations;
+	return _deformedVertexLocations;
 }
 
 -(void) setDeformedVertexLocations: (CC3Vector*) vtxLocs {
 	[self deallocateDeformedVertexLocations];			// Safely disposes existing vertices
-	deformedVertexLocations = vtxLocs;
+	_deformedVertexLocations = vtxLocs;
 }
 
 -(CC3Vector) deformedVertexLocationAt: (GLuint) vertexIndex fromFaceAt: (GLuint) faceIndex {
-	if (shouldCacheFaces) {
-		return self.deformedVertexLocations[vertexIndex];
-	}
-	return [[node skinSectionForFaceIndex: faceIndex]  deformedVertexLocationAt: vertexIndex];
+	if (_shouldCacheFaces) return self.deformedVertexLocations[vertexIndex];
+	return [[_node skinSectionForFaceIndex: faceIndex]  deformedVertexLocationAt: vertexIndex];
 }
 
 -(CC3Vector*) allocateDeformedVertexLocations {
 	[self deallocateDeformedVertexLocations];
 	GLuint vtxCount = self.vertexCount;
 	if (vtxCount) {
-		deformedVertexLocations = calloc(vtxCount, sizeof(CC3Vector));
-		deformedVertexLocationsAreRetained = YES;
+		_deformedVertexLocations = calloc(vtxCount, sizeof(CC3Vector));
+		_deformedVertexLocationsAreRetained = YES;
 		LogTrace(@"%@ allocated space for %u deformed vertex locations", self, vtxCount);
 	}
-	return deformedVertexLocations;
+	return _deformedVertexLocations;
 }
 
 -(void) deallocateDeformedVertexLocations {
-	if (deformedVertexLocationsAreRetained && deformedVertexLocations) {
-		free(deformedVertexLocations);
-		deformedVertexLocations = NULL;
-		deformedVertexLocationsAreRetained = NO;
+	if (_deformedVertexLocationsAreRetained && _deformedVertexLocations) {
+		free(_deformedVertexLocations);
+		_deformedVertexLocations = NULL;
+		_deformedVertexLocationsAreRetained = NO;
 		LogTrace(@"%@ deallocated %u previously allocated deformed vertex locations", self, self.vertexCount);
 	}
 }
 
 -(void) populateDeformedVertexLocations {
 	LogTrace(@"%@ populating %u deformed vertex locations", self, self.vertexCount);
-	if ( !deformedVertexLocations ) [self allocateDeformedVertexLocations];
+	if ( !_deformedVertexLocations ) [self allocateDeformedVertexLocations];
 	
 	// Mark all the location vectors in the cached array as unset, so we can keep
 	// track of which vertices have been set, as we iterate through the mesh vertices.
 	GLuint vtxCount = self.vertexCount;
-	for (int vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++) {
-		deformedVertexLocations[vtxIdx] = kCC3VectorNull;
-	}
+	for (int vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++)
+		_deformedVertexLocations[vtxIdx] = kCC3VectorNull;
 
 	// Determine whether the mesh is indexed.
 	// If it is, we iterate through the indexes.
 	// If it isn't, we iterate through the vertices.
-	GLuint vtxIdxCount = [mesh vertexIndexCount];
+	GLuint vtxIdxCount = [_mesh vertexIndexCount];
 	BOOL meshIsIndexed = (vtxIdxCount > 0);
-	if (!meshIsIndexed) {
-		vtxIdxCount = vtxCount;
-	}
+	if (!meshIsIndexed) vtxIdxCount = vtxCount;
 
 	// The skin sections are assigned to contiguous ranges of vertex indices.
 	// We can avoid looking up the skin section for each vertex by assuming that they
@@ -727,32 +721,32 @@
 	// and only change when needed.
 	
 	// Get the skin section of the first vertex
-	CC3SkinSection* ss = [node skinSectionForVertexIndexAt: 0];
+	CC3SkinSection* ss = [_node skinSectionForVertexIndexAt: 0];
 	for (int vtxIdxPos = 0; vtxIdxPos < vtxIdxCount; vtxIdxPos++) {
 
 		// Make sure the current skin section deforms this vertex, otherwise get the correct one
 		if ( ![ss containsVertexIndex: vtxIdxPos] ) {
-			ss = [node skinSectionForVertexIndexAt: vtxIdxPos];
+			ss = [_node skinSectionForVertexIndexAt: vtxIdxPos];
 			LogTrace(@"Selecting %@ for vertex at %i", ss, vtxIdxPos);
 		}
 		
 		// Get the actual vertex index. If the mesh is indexed, we look it up, from the vertex
 		// index position. If the mesh is not indexed, then it IS the vertex index position.
-		GLuint vtxIdx = meshIsIndexed ? [mesh vertexIndexAt: vtxIdxPos] : vtxIdxPos;
+		GLuint vtxIdx = meshIsIndexed ? [_mesh vertexIndexAt: vtxIdxPos] : vtxIdxPos;
 		
 		// If the cached vertex location has not yet been set, use the skin section to
 		// deform the vertex location at the current index, and set it into the cache array.
-		if ( CC3VectorIsNull(deformedVertexLocations[vtxIdx]) ) {
-			deformedVertexLocations[vtxIdx] = [ss  deformedVertexLocationAt: vtxIdx];
+		if ( CC3VectorIsNull(_deformedVertexLocations[vtxIdx]) ) {
+			_deformedVertexLocations[vtxIdx] = [ss deformedVertexLocationAt: vtxIdx];
 			
 			LogTrace(@"Setting deformed vertex %i to %@", vtxIdx,
-						  NSStringFromCC3Vector(deformedVertexLocations[vtxIdx]));
+						  NSStringFromCC3Vector(_deformedVertexLocations[vtxIdx]));
 		}
 	}
-	deformedVertexLocationsAreDirty = NO;
+	_deformedVertexLocationsAreDirty = NO;
 }
 
--(void) markDeformedVertexLocationsDirty { deformedVertexLocationsAreDirty = YES; }
+-(void) markDeformedVertexLocationsDirty { _deformedVertexLocationsAreDirty = YES; }
 
 @end
 
@@ -789,22 +783,22 @@
 
 @implementation CC3Node (Skinning)
 
--(CC3Vector) skeletalScale { return parent ? CC3VectorScale(parent.skeletalScale, scale) : scale; }
+-(CC3Vector) skeletalScale { return _parent ? CC3VectorScale(_parent.skeletalScale, _scale) : _scale; }
 
--(BOOL) isSkeletonRigid { return transformMatrix.isRigid; }
+-(BOOL) isSkeletonRigid { return _transformMatrix.isRigid; }
 
--(void) bindRestPose { for (CC3Node* child in children) [child bindRestPose]; }
+-(void) bindRestPose { for (CC3Node* child in _children) [child bindRestPose]; }
 
--(void) reattachBonesFrom: (CC3Node*) aNode { for (CC3Node* child in children) [child reattachBonesFrom: aNode]; }
+-(void) reattachBonesFrom: (CC3Node*) aNode { for (CC3Node* child in _children) [child reattachBonesFrom: aNode]; }
 
 -(BOOL) hasSoftBodyContent {
-	for (CC3Node* child in children) if (child.hasSoftBodyContent) return YES;
+	for (CC3Node* child in _children) if (child.hasSoftBodyContent) return YES;
 	return NO;
 }
 
 -(void) cacheRestPoseMatrix {}
 
--(CC3SoftBodyNode*) softBodyNode { return parent.softBodyNode; }
+-(CC3SoftBodyNode*) softBodyNode { return _parent.softBodyNode; }
 
 @end
 

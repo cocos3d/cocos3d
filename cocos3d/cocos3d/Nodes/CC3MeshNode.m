@@ -50,39 +50,39 @@
 
 @implementation CC3MeshNode
 
-@synthesize mesh, material, pureColor;
-@synthesize lineWidth, shouldSmoothLines, lineSmoothingHint;
+@synthesize mesh=_mesh, material=_material, pureColor=_pureColor, lineWidth=_lineWidth;
+@synthesize shouldSmoothLines=_shouldSmoothLines, lineSmoothingHint=_lineSmoothingHint;
 
 -(void) dealloc {
-	[mesh release];
-	[material release];
+	[_mesh release];
+	[_material release];
 	[super dealloc];
 }
 
 -(void) setName: (NSString*) aName {
 	super.name = aName;
-	[mesh deriveNameFrom: self];
-	[material deriveNameFrom: self];
+	[_mesh deriveNameFrom: self];
+	[_material deriveNameFrom: self];
 }
 
 // Sets the name of the mesh if needed then, if a bounding volume exists, forces it to
 // rebuild using the new mesh data, or creates a default bounding volume from the mesh.
 -(void) setMesh:(CC3Mesh *) aMesh {
-	[mesh autorelease];
-	mesh = [aMesh retain];
-	[mesh deriveNameFrom: self];
+	[_mesh autorelease];
+	_mesh = [aMesh retain];
+	[_mesh deriveNameFrom: self];
 
-	if ( !mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
+	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
 	
-	if (boundingVolume)
+	if (_boundingVolume)
 		[self markBoundingVolumeDirty];
 	else
 		self.boundingVolume = [self defaultBoundingVolume];
 }
 
 /** If a mesh does not yet exist, create it as a CC3Mesh with interleaved vertices. */
--(void) ensureMesh { if ( !mesh ) [self makeMesh]; }
+-(void) ensureMesh { if ( !_mesh ) [self makeMesh]; }
 
 /**
  * Template method to create a mesh for this node.
@@ -97,18 +97,18 @@
  * texture in the material.
  */
 -(void) setMaterial: (CC3Material*) aMaterial {
-	[material autorelease];
-	material = [aMaterial retain];
-	[material deriveNameFrom: self];
+	[_material autorelease];
+	_material = [aMaterial retain];
+	[_material deriveNameFrom: self];
 
-	if ( !mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
+	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
 
 	[self alignTextureUnits];
 }
 
 /** If a material does not yet exist, create it by invoking the makeMaterial method. */
--(void) ensureMaterial { if ( !material ) [self makeMaterial]; }
+-(void) ensureMaterial { if ( !_material ) [self makeMaterial]; }
 
 /**
  * Template method to create a material for this mesh node.
@@ -142,178 +142,178 @@
 	[self markBoundingVolumeDirty];
 }
 
--(CC3NodeBoundingVolume*) defaultBoundingVolume { return [mesh defaultBoundingVolume]; }
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return [_mesh defaultBoundingVolume]; }
 
 -(CC3BoundingBox) localContentBoundingBox {
-	return mesh
-			? CC3BoundingBoxAddUniformPadding(mesh.boundingBox, boundingVolumePadding)
+	return _mesh
+			? CC3BoundingBoxAddUniformPadding(_mesh.boundingBox, _boundingVolumePadding)
 			: kCC3BoundingBoxNull;
 }
 
--(BOOL) shouldCullBackFaces { return shouldCullBackFaces; }
+-(BOOL) shouldCullBackFaces { return _shouldCullBackFaces; }
 
 -(void) setShouldCullBackFaces: (BOOL) shouldCull {
-	shouldCullBackFaces = shouldCull;
+	_shouldCullBackFaces = shouldCull;
 	super.shouldCullBackFaces = shouldCull;
 }
 
--(BOOL) shouldCullFrontFaces { return shouldCullFrontFaces; }
+-(BOOL) shouldCullFrontFaces { return _shouldCullFrontFaces; }
 
 -(void) setShouldCullFrontFaces: (BOOL) shouldCull {
-	shouldCullFrontFaces = shouldCull;
+	_shouldCullFrontFaces = shouldCull;
 	super.shouldCullFrontFaces = shouldCull;
 }
 
--(BOOL) shouldUseClockwiseFrontFaceWinding { return shouldUseClockwiseFrontFaceWinding; }
+-(BOOL) shouldUseClockwiseFrontFaceWinding { return _shouldUseClockwiseFrontFaceWinding; }
 
 -(void) setShouldUseClockwiseFrontFaceWinding: (BOOL) shouldWindCW {
-	shouldUseClockwiseFrontFaceWinding = shouldWindCW;
+	_shouldUseClockwiseFrontFaceWinding = shouldWindCW;
 	super.shouldUseClockwiseFrontFaceWinding = shouldWindCW;
 }
 
--(BOOL) shouldUseSmoothShading { return shouldUseSmoothShading; }
+-(BOOL) shouldUseSmoothShading { return _shouldUseSmoothShading; }
 
 -(void) setShouldUseSmoothShading: (BOOL) shouldSmooth {
-	shouldUseSmoothShading = shouldSmooth;
+	_shouldUseSmoothShading = shouldSmooth;
 	super.shouldUseSmoothShading = shouldSmooth;
 }
 
--(BOOL) shouldCastShadowsWhenInvisible { return shouldCastShadowsWhenInvisible; }
+-(BOOL) shouldCastShadowsWhenInvisible { return _shouldCastShadowsWhenInvisible; }
 
 -(void) setShouldCastShadowsWhenInvisible: (BOOL) shouldCast {
-	shouldCastShadowsWhenInvisible = shouldCast;
+	_shouldCastShadowsWhenInvisible = shouldCast;
 	super.shouldCastShadowsWhenInvisible = shouldCast;
 }
 
--(CC3NormalScaling) normalScalingMethod { return normalScalingMethod; }
+-(CC3NormalScaling) normalScalingMethod { return _normalScalingMethod; }
 
 -(void) setNormalScalingMethod: (CC3NormalScaling) nsMethod {
-	normalScalingMethod = nsMethod;
+	_normalScalingMethod = nsMethod;
 	super.normalScalingMethod = nsMethod;
 }
 
--(BOOL) shouldDisableDepthMask { return shouldDisableDepthMask; }
+-(BOOL) shouldDisableDepthMask { return _shouldDisableDepthMask; }
 
 -(void) setShouldDisableDepthMask: (BOOL) shouldDisable {
-	shouldDisableDepthMask = shouldDisable;
+	_shouldDisableDepthMask = shouldDisable;
 	super.shouldDisableDepthMask = shouldDisable;
 }
 
--(BOOL) shouldDisableDepthTest { return shouldDisableDepthTest; }
+-(BOOL) shouldDisableDepthTest { return _shouldDisableDepthTest; }
 
 -(void) setShouldDisableDepthTest: (BOOL) shouldDisable {
-	shouldDisableDepthTest = shouldDisable;
+	_shouldDisableDepthTest = shouldDisable;
 	super.shouldDisableDepthTest = shouldDisable;
 }
 
--(GLenum) depthFunction { return (depthFunction != GL_NEVER) ? depthFunction : super.depthFunction; }
+-(GLenum) depthFunction { return (_depthFunction != GL_NEVER) ? _depthFunction : super.depthFunction; }
 
 -(void) setDepthFunction: (GLenum) depthFunc {
-	depthFunction = depthFunc;
+	_depthFunction = depthFunc;
 	super.depthFunction = depthFunc;
 }
 
--(GLfloat) decalOffsetFactor { return decalOffsetFactor ? decalOffsetFactor : super.decalOffsetFactor; }
+-(GLfloat) decalOffsetFactor { return _decalOffsetFactor ? _decalOffsetFactor : super.decalOffsetFactor; }
 
 -(void) setDecalOffsetFactor: (GLfloat) factor {
-	decalOffsetFactor = factor;
+	_decalOffsetFactor = factor;
 	super.decalOffsetFactor = factor;
 }
 
--(GLfloat) decalOffsetUnits { return decalOffsetUnits ? decalOffsetUnits : super.decalOffsetUnits; }
+-(GLfloat) decalOffsetUnits { return _decalOffsetUnits ? _decalOffsetUnits : super.decalOffsetUnits; }
 
 -(void) setDecalOffsetUnits: (GLfloat) units {
-	decalOffsetUnits = units;
+	_decalOffsetUnits = units;
 	super.decalOffsetUnits = units;
 }
 
 
 #pragma mark Material properties
 
--(BOOL) shouldUseLighting { return material ? material.shouldUseLighting : NO; }
+-(BOOL) shouldUseLighting { return _material ? _material.shouldUseLighting : NO; }
 
 -(void) setShouldUseLighting: (BOOL) useLighting {
 	if (useLighting) [self ensureMaterial];
-	material.shouldUseLighting = useLighting;
+	_material.shouldUseLighting = useLighting;
 	[super setShouldUseLighting: useLighting];	// pass along to any children
 }
 
 -(ccColor4F) ambientColor {
 	[self ensureMaterial];
-	return material.ambientColor;
+	return _material.ambientColor;
 }
 
 -(void) setAmbientColor:(ccColor4F) aColor {
 	[self ensureMaterial];
-	material.ambientColor = aColor;
+	_material.ambientColor = aColor;
 	[super setAmbientColor: aColor];	// pass along to any children
 }
 
 -(ccColor4F) diffuseColor {
 	[self ensureMaterial];
-	return material.diffuseColor;
+	return _material.diffuseColor;
 }
 
 -(void) setDiffuseColor:(ccColor4F) aColor {
 	[self ensureMaterial];
-	material.diffuseColor = aColor;
+	_material.diffuseColor = aColor;
 	[super setDiffuseColor: aColor];	// pass along to any children
 }
 
 -(ccColor4F) specularColor {
 	[self ensureMaterial];
-	return material.specularColor;
+	return _material.specularColor;
 }
 
 -(void) setSpecularColor:(ccColor4F) aColor {
 	[self ensureMaterial];
-	material.specularColor = aColor;
+	_material.specularColor = aColor;
 	[super setSpecularColor: aColor];	// pass along to any children
 }
 
 -(ccColor4F) emissionColor {
 	[self ensureMaterial];
-	return material.emissionColor;
+	return _material.emissionColor;
 }
 
 -(void) setEmissionColor:(ccColor4F) aColor {
 	[self ensureMaterial];
-	material.emissionColor = aColor;
+	_material.emissionColor = aColor;
 	[super setEmissionColor: aColor];	// pass along to any children
 }
 
 -(CC3Vector4) globalLightPosition {
-	return (material && material.hasBumpMap)
-				? [self.transformMatrix transformHomogeneousVector: CC3Vector4FromDirection(material.lightDirection)]
+	return (_material && _material.hasBumpMap)
+				? [self.transformMatrix transformHomogeneousVector: CC3Vector4FromDirection(_material.lightDirection)]
 				: [super globalLightPosition];
 }
 
 -(void) setGlobalLightPosition: (CC3Vector4) aPosition {
 	[self ensureMaterial];
 	CC3Vector4 localLtPos = [self.transformMatrixInverted transformHomogeneousVector: aPosition];
-	material.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
+	_material.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
 	[super setGlobalLightPosition: aPosition];
 }
 
 -(CC3GLProgramContext*) shaderContext {
 	[self ensureMaterial];
-	return material.shaderContext;
+	return _material.shaderContext;
 }
 
 -(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
 	[self ensureMaterial];
-	material.shaderContext = shaderContext;
+	_material.shaderContext = shaderContext;
 	super.shaderContext = shaderContext;	// pass along to any children
 }
 
 -(CC3GLProgram*) shaderProgram {
 	[self ensureMaterial];
-	return material.shaderProgram;
+	return _material.shaderProgram;
 }
 
 -(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
 	[self ensureMaterial];
-	material.shaderProgram = shaderProgram;
+	_material.shaderProgram = shaderProgram;
 	super.shaderProgram = shaderProgram;	// pass along to any children
 }
 
@@ -322,141 +322,141 @@
 
 -(ccColor3B) color {
 	[self ensureMaterial];
-	return material.color;
+	return _material.color;
 }
 
 -(void) setColor: (ccColor3B) color {
 	[self ensureMaterial];
-	material.color = color;
-	if (shouldApplyOpacityAndColorToMeshContent) mesh.color = color;	// for meshes with colored vertices
+	_material.color = color;
+	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.color = color;	// for meshes with colored vertices
 
-	pureColor.r = CCColorFloatFromByte(color.r);
-	pureColor.g = CCColorFloatFromByte(color.g);
-	pureColor.b = CCColorFloatFromByte(color.b);
+	_pureColor.r = CCColorFloatFromByte(color.r);
+	_pureColor.g = CCColorFloatFromByte(color.g);
+	_pureColor.b = CCColorFloatFromByte(color.b);
 
 	[super setColor: color];	// pass along to any children
 }
 
 -(GLubyte) opacity {
 	[self ensureMaterial];
-	return material.opacity;
+	return _material.opacity;
 }
 
 -(void) setOpacity: (GLubyte) opacity {
 	[self ensureMaterial];
-	material.opacity = opacity;
-	if (shouldApplyOpacityAndColorToMeshContent) mesh.opacity = opacity;	// for meshes with colored vertices
-	pureColor.a = CCColorFloatFromByte(opacity);
+	_material.opacity = opacity;
+	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.opacity = opacity;	// for meshes with colored vertices
+	_pureColor.a = CCColorFloatFromByte(opacity);
 
 	[super setOpacity: opacity];	// pass along to any children
 }
 
--(BOOL) isOpaque { return material ? material.isOpaque : YES; }
+-(BOOL) isOpaque { return _material ? _material.isOpaque : YES; }
 
 -(void) setIsOpaque: (BOOL) opaque {
 	[self ensureMaterial];
-	material.isOpaque = opaque;
-	if (opaque) pureColor.a = 1.0f;
+	_material.isOpaque = opaque;
+	if (opaque) _pureColor.a = 1.0f;
 	
 	[super setIsOpaque: opaque];	// pass along to any children
 }
 
 -(ccBlendFunc) blendFunc {
 	[self ensureMaterial];
-	return material.blendFunc;
+	return _material.blendFunc;
 }
 
 -(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
 	[self ensureMaterial];
-	material.blendFunc = aBlendFunc;
+	_material.blendFunc = aBlendFunc;
 	[super setBlendFunc: aBlendFunc];
 }
 
 -(BOOL) shouldDrawLowAlpha {
 	[self ensureMaterial];
-	return material.shouldDrawLowAlpha;
+	return _material.shouldDrawLowAlpha;
 }
 
 -(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
 	[self ensureMaterial];
-	material.shouldDrawLowAlpha = shouldDraw;
+	_material.shouldDrawLowAlpha = shouldDraw;
 }
 
--(BOOL) shouldApplyOpacityAndColorToMeshContent { return shouldApplyOpacityAndColorToMeshContent; }
+-(BOOL) shouldApplyOpacityAndColorToMeshContent { return _shouldApplyOpacityAndColorToMeshContent; }
 
 -(void) setShouldApplyOpacityAndColorToMeshContent: (BOOL) shouldApply {
-	shouldApplyOpacityAndColorToMeshContent = shouldApply;
+	_shouldApplyOpacityAndColorToMeshContent = shouldApply;
 	super.shouldApplyOpacityAndColorToMeshContent = shouldApply;
 }
 
 #pragma mark Line drawing configuration
 
--(GLfloat) lineWidth { return lineWidth; }
+-(GLfloat) lineWidth { return _lineWidth; }
 
 -(void) setLineWidth: (GLfloat) aLineWidth {
-	lineWidth = aLineWidth;
+	_lineWidth = aLineWidth;
 	super.lineWidth = aLineWidth;
 }
 
--(BOOL) shouldSmoothLines { return shouldSmoothLines; }
+-(BOOL) shouldSmoothLines { return _shouldSmoothLines; }
 
 -(void) setShouldSmoothLines: (BOOL) shouldSmooth {
-	shouldSmoothLines = shouldSmooth;
+	_shouldSmoothLines = shouldSmooth;
 	super.shouldSmoothLines = shouldSmooth;
 }
 
--(GLenum) lineSmoothingHint { return lineSmoothingHint; }
+-(GLenum) lineSmoothingHint { return _lineSmoothingHint; }
 
 -(void) setLineSmoothingHint: (GLenum) aHint {
-	lineSmoothingHint = aHint;
+	_lineSmoothingHint = aHint;
 	super.lineSmoothingHint = aHint;
 }
 
 
 #pragma mark Textures
 
--(GLuint) textureCount { return material ? material.textureCount : 0; }
+-(GLuint) textureCount { return _material ? _material.textureCount : 0; }
 
--(CC3Texture*) texture { return material.texture; }
+-(CC3Texture*) texture { return _material.texture; }
 
 -(void) setTexture: (CC3Texture*) aTexture {
 	if (aTexture) [self ensureMaterial];
-	material.texture = aTexture;
+	_material.texture = aTexture;
 	[self alignTextureUnit: 0];
 }
 
 -(void) addTexture: (CC3Texture*) aTexture {
 	[self ensureMaterial];
-	[material addTexture: aTexture];
+	[_material addTexture: aTexture];
 	GLuint texCount = self.textureCount;
 	if (texCount > 0) [self alignTextureUnit: (self.textureCount - 1)];
 }
 
--(void) removeAllTextures { [material removeAllTextures]; }
+-(void) removeAllTextures { [_material removeAllTextures]; }
 
 -(CC3Texture*) textureForTextureUnit: (GLuint) texUnit {
-	return [material textureForTextureUnit: texUnit];
+	return [_material textureForTextureUnit: texUnit];
 }
 
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
 	[self ensureMaterial];
-	[material setTexture: aTexture forTextureUnit: texUnit];
+	[_material setTexture: aTexture forTextureUnit: texUnit];
 	[self alignTextureUnit: texUnit];
 }
 
--(BOOL) expectsVerticallyFlippedTextures { return mesh.expectsVerticallyFlippedTextures; }
+-(BOOL) expectsVerticallyFlippedTextures { return _mesh.expectsVerticallyFlippedTextures; }
 
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
-	mesh.expectsVerticallyFlippedTextures = expectsFlipped;
+	_mesh.expectsVerticallyFlippedTextures = expectsFlipped;
 	super.expectsVerticallyFlippedTextures = expectsFlipped;
 }
 
 -(BOOL) expectsVerticallyFlippedTextureInTextureUnit: (GLuint) texUnit {
-	return [mesh expectsVerticallyFlippedTextureInTextureUnit: texUnit];
+	return [_mesh expectsVerticallyFlippedTextureInTextureUnit: texUnit];
 }
 
 -(void) expectsVerticallyFlippedTexture: (BOOL) expectsFlipped inTextureUnit: (GLuint) texUnit {
-	[mesh expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
+	[_mesh expectsVerticallyFlippedTexture: expectsFlipped inTextureUnit: texUnit];
 }
 
 -(void) alignTextureUnits {
@@ -465,78 +465,78 @@
 }
 
 -(void) alignTextureUnit: (GLuint) texUnit {
-	[mesh alignTextureUnit: texUnit withTexture: [self textureForTextureUnit: texUnit]];
+	[_mesh alignTextureUnit: texUnit withTexture: [self textureForTextureUnit: texUnit]];
 }
 
 // Deprecated
 -(void) alignTextures {
-	[mesh deprecatedAlignWithTexturesIn: material];
+	[_mesh deprecatedAlignWithTexturesIn: _material];
 	[super alignTextures];
 }
 
 // Deprecated
 -(void) alignInvertedTextures {
-	[mesh deprecatedAlignWithInvertedTexturesIn: material];
+	[_mesh deprecatedAlignWithInvertedTexturesIn: _material];
 	[super alignInvertedTextures];
 }
 
--(void) flipVerticallyTextureUnit: (GLuint) texUnit { [mesh flipVerticallyTextureUnit: texUnit]; }
+-(void) flipVerticallyTextureUnit: (GLuint) texUnit { [_mesh flipVerticallyTextureUnit: texUnit]; }
 
 -(void) flipTexturesVertically {
-	[mesh flipTexturesVertically];
+	[_mesh flipTexturesVertically];
 	[super flipTexturesVertically];
 }
 
--(void) flipHorizontallyTextureUnit: (GLuint) texUnit { [mesh flipHorizontallyTextureUnit: texUnit]; }
+-(void) flipHorizontallyTextureUnit: (GLuint) texUnit { [_mesh flipHorizontallyTextureUnit: texUnit]; }
 
 -(void) flipTexturesHorizontally {
-	[mesh flipTexturesHorizontally];
+	[_mesh flipTexturesHorizontally];
 	[super flipTexturesHorizontally];
 }
 
 -(void) repeatTexture: (ccTex2F) repeatFactor forTextureUnit: (GLuint) texUnit {
-	[mesh repeatTexture: repeatFactor forTextureUnit: texUnit];
+	[_mesh repeatTexture: repeatFactor forTextureUnit: texUnit];
 }
 
--(void) repeatTexture: (ccTex2F) repeatFactor { [mesh repeatTexture: repeatFactor]; }
+-(void) repeatTexture: (ccTex2F) repeatFactor { [_mesh repeatTexture: repeatFactor]; }
 
--(CGRect) textureRectangle { return mesh ? mesh.textureRectangle : kCC3UnitTextureRectangle; }
+-(CGRect) textureRectangle { return _mesh ? _mesh.textureRectangle : kCC3UnitTextureRectangle; }
 
--(void) setTextureRectangle: (CGRect) aRect { mesh.textureRectangle = aRect; }
+-(void) setTextureRectangle: (CGRect) aRect { _mesh.textureRectangle = aRect; }
 
 -(CGRect) textureRectangleForTextureUnit: (GLuint) texUnit {
-	return mesh ? [mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
+	return _mesh ? [_mesh textureRectangleForTextureUnit: texUnit] : kCC3UnitTextureRectangle;
 }
 
 -(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
-	[mesh setTextureRectangle: aRect forTextureUnit: texUnit];
+	[_mesh setTextureRectangle: aRect forTextureUnit: texUnit];
 }
 
 -(BOOL) isDrawingPointSprites { return (self.drawingMode == GL_POINTS) && (self.textureCount > 0); }
 
--(BOOL) hasPremultipliedAlpha { return material ? material.hasPremultipliedAlpha : NO; }
+-(BOOL) hasPremultipliedAlpha { return _material ? _material.hasPremultipliedAlpha : NO; }
 
--(BOOL) shouldApplyOpacityToColor { return material ? material.shouldApplyOpacityToColor : NO; }
+-(BOOL) shouldApplyOpacityToColor { return _material ? _material.shouldApplyOpacityToColor : NO; }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		pureColor = kCCC4FWhite;
-		shouldUseSmoothShading = YES;
-		shouldCullBackFaces = YES;
-		shouldCullFrontFaces = NO;
-		shouldUseClockwiseFrontFaceWinding = NO;
-		shouldDisableDepthMask = NO;
-		shouldDisableDepthTest = NO;
-		shouldCastShadowsWhenInvisible = NO;
-		depthFunction = GL_LEQUAL;
-		normalScalingMethod = kCC3NormalScalingAutomatic;
-		lineWidth = 1.0f;
-		shouldSmoothLines = NO;
-		lineSmoothingHint = GL_DONT_CARE;
-		shouldApplyOpacityAndColorToMeshContent = NO;
+		_pureColor = kCCC4FWhite;
+		_shouldUseSmoothShading = YES;
+		_shouldCullBackFaces = YES;
+		_shouldCullFrontFaces = NO;
+		_shouldUseClockwiseFrontFaceWinding = NO;
+		_shouldDisableDepthMask = NO;
+		_shouldDisableDepthTest = NO;
+		_shouldCastShadowsWhenInvisible = NO;
+		_depthFunction = GL_LEQUAL;
+		_normalScalingMethod = kCC3NormalScalingAutomatic;
+		_lineWidth = 1.0f;
+		_shouldSmoothLines = NO;
+		_lineSmoothingHint = GL_DONT_CARE;
+		_shouldApplyOpacityAndColorToMeshContent = NO;
 	}
 	return self;
 }
@@ -552,137 +552,137 @@
 	self.mesh = another.mesh;								// retained but not copied
 	self.material = [another.material autoreleasedCopy];	// retained
 	
-	pureColor = another.pureColor;
-	shouldUseSmoothShading = another.shouldUseSmoothShading;
-	shouldCullBackFaces = another.shouldCullBackFaces;
-	shouldCullFrontFaces = another.shouldCullFrontFaces;
-	shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
-	shouldDisableDepthMask = another.shouldDisableDepthMask;
-	shouldDisableDepthTest = another.shouldDisableDepthTest;
-	shouldCastShadowsWhenInvisible = another.shouldCastShadowsWhenInvisible;
-	depthFunction = another.depthFunction;
-	normalScalingMethod = another.normalScalingMethod;
-	lineWidth = another.lineWidth;
-	shouldSmoothLines = another.shouldSmoothLines;
-	lineSmoothingHint = another.lineSmoothingHint;
-	shouldApplyOpacityAndColorToMeshContent = another.shouldApplyOpacityAndColorToMeshContent;
+	_pureColor = another.pureColor;
+	_shouldUseSmoothShading = another.shouldUseSmoothShading;
+	_shouldCullBackFaces = another.shouldCullBackFaces;
+	_shouldCullFrontFaces = another.shouldCullFrontFaces;
+	_shouldUseClockwiseFrontFaceWinding = another.shouldUseClockwiseFrontFaceWinding;
+	_shouldDisableDepthMask = another.shouldDisableDepthMask;
+	_shouldDisableDepthTest = another.shouldDisableDepthTest;
+	_shouldCastShadowsWhenInvisible = another.shouldCastShadowsWhenInvisible;
+	_depthFunction = another.depthFunction;
+	_normalScalingMethod = another.normalScalingMethod;
+	_lineWidth = another.lineWidth;
+	_shouldSmoothLines = another.shouldSmoothLines;
+	_lineSmoothingHint = another.lineSmoothingHint;
+	_shouldApplyOpacityAndColorToMeshContent = another.shouldApplyOpacityAndColorToMeshContent;
 }
 
 -(void) createGLBuffers {
 	LogTrace(@"%@ creating GL server buffers", self);
-	[mesh createGLBuffers];
+	[_mesh createGLBuffers];
 	[super createGLBuffers];
 }
 
 -(void) deleteGLBuffers {
-	[mesh deleteGLBuffers];
+	[_mesh deleteGLBuffers];
 	[super deleteGLBuffers];
 }
 
--(BOOL) isUsingGLBuffers { return mesh.isUsingGLBuffers; }
+-(BOOL) isUsingGLBuffers { return _mesh.isUsingGLBuffers; }
 
 -(void) releaseRedundantContent {
-	[mesh releaseRedundantContent];
+	[_mesh releaseRedundantContent];
 	[super releaseRedundantContent];
 }
 
 -(void) retainVertexContent {
-	[mesh retainVertexContent];
+	[_mesh retainVertexContent];
 	[super retainVertexContent];
 }
 
 -(void) retainVertexLocations {
-	[mesh retainVertexLocations];
+	[_mesh retainVertexLocations];
 	[super retainVertexLocations];
 }
 
 -(void) retainVertexNormals {
-	[mesh retainVertexNormals];
+	[_mesh retainVertexNormals];
 	[super retainVertexNormals];
 }
 
 -(void) retainVertexTangents {
-	[mesh retainVertexTangents];
+	[_mesh retainVertexTangents];
 	[super retainVertexTangents];
 }
 
 -(void) retainVertexBitangents {
-	[mesh retainVertexBitangents];
+	[_mesh retainVertexBitangents];
 	[super retainVertexBitangents];
 }
 
 -(void) retainVertexColors {
-	[mesh retainVertexColors];
+	[_mesh retainVertexColors];
 	[super retainVertexColors];
 }
 
 -(void) retainVertexMatrixIndices {
-	[mesh retainVertexMatrixIndices];
+	[_mesh retainVertexMatrixIndices];
 	[super retainVertexMatrixIndices];
 }
 
 -(void) retainVertexWeights {
-	[mesh retainVertexWeights];
+	[_mesh retainVertexWeights];
 	[super retainVertexWeights];
 }
 
 -(void) retainVertexTextureCoordinates {
-	[mesh retainVertexTextureCoordinates];
+	[_mesh retainVertexTextureCoordinates];
 	[super retainVertexTextureCoordinates];
 }
 
 -(void) retainVertexIndices {
-	[mesh retainVertexIndices];
+	[_mesh retainVertexIndices];
 	[super retainVertexIndices];
 }
 
 -(void) doNotBufferVertexContent {
-	[mesh doNotBufferVertexContent];
+	[_mesh doNotBufferVertexContent];
 	[super doNotBufferVertexContent];
 }
 
 -(void) doNotBufferVertexLocations {
-	[mesh doNotBufferVertexLocations];
+	[_mesh doNotBufferVertexLocations];
 	[super doNotBufferVertexLocations];
 }
 
 -(void) doNotBufferVertexNormals {
-	[mesh doNotBufferVertexNormals];
+	[_mesh doNotBufferVertexNormals];
 	[super doNotBufferVertexNormals];
 }
 
 -(void) doNotBufferVertexTangents {
-	[mesh doNotBufferVertexTangents];
+	[_mesh doNotBufferVertexTangents];
 	[super doNotBufferVertexTangents];
 }
 
 -(void) doNotBufferVertexBitangents {
-	[mesh doNotBufferVertexBitangents];
+	[_mesh doNotBufferVertexBitangents];
 	[super doNotBufferVertexBitangents];
 }
 
 -(void) doNotBufferVertexColors {
-	[mesh doNotBufferVertexColors];
+	[_mesh doNotBufferVertexColors];
 	[super doNotBufferVertexColors];
 }
 
 -(void) doNotBufferVertexMatrixIndices {
-	[mesh doNotBufferVertexMatrixIndices];
+	[_mesh doNotBufferVertexMatrixIndices];
 	[super doNotBufferVertexMatrixIndices];
 }
 
 -(void) doNotBufferVertexWeights {
-	[mesh doNotBufferVertexWeights];
+	[_mesh doNotBufferVertexWeights];
 	[super doNotBufferVertexWeights];
 }
 
 -(void) doNotBufferVertexTextureCoordinates {
-	[mesh doNotBufferVertexTextureCoordinates];
+	[_mesh doNotBufferVertexTextureCoordinates];
 	[super doNotBufferVertexTextureCoordinates];
 }
 
 -(void) doNotBufferVertexIndices {
-	[mesh doNotBufferVertexIndices];
+	[_mesh doNotBufferVertexIndices];
 	[super doNotBufferVertexIndices];
 }
 
@@ -694,9 +694,9 @@
 
 #pragma mark Drawing
 
--(GLenum) drawingMode { return mesh ? mesh.drawingMode : GL_TRIANGLE_STRIP; }
+-(GLenum) drawingMode { return _mesh ? _mesh.drawingMode : GL_TRIANGLE_STRIP; }
 
--(void) setDrawingMode: (GLenum) aMode { mesh.drawingMode = aMode; }
+-(void) setDrawingMode: (GLenum) aMode { _mesh.drawingMode = aMode; }
 
 /**
  * Template method that uses template methods to configure drawing parameters
@@ -734,16 +734,16 @@
 	CC3OpenGL* gl = visitor.gl;
 
 	// Enable culling if either back or front should be culled.
-	[gl enableCullFace: (shouldCullBackFaces || shouldCullFrontFaces)];
+	[gl enableCullFace: (_shouldCullBackFaces || _shouldCullFrontFaces)];
 
 	// Set whether back, front or both should be culled.
 	// If neither should be culled, handled by capability so leave it as back culling.
-	gl.cullFace = shouldCullBackFaces
-						? (shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
-						: (shouldCullFrontFaces ? GL_FRONT : GL_BACK);
+	gl.cullFace = _shouldCullBackFaces
+						? (_shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
+						: (_shouldCullFrontFaces ? GL_FRONT : GL_BACK);
 
 	// Set the front face winding
-	gl.frontFace = shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
+	gl.frontFace = _shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
 }
 
 /**
@@ -770,9 +770,9 @@
 }
 
 -(CC3NormalScaling) effectiveNormalScalingMethod {
-	if ( !(mesh && mesh.hasVertexNormals) ) return kCC3NormalScalingNone;
+	if ( !(_mesh && _mesh.hasVertexNormals) ) return kCC3NormalScalingNone;
 
-	switch (normalScalingMethod) {
+	switch (_normalScalingMethod) {
 		case kCC3NormalScalingNormalize: return kCC3NormalScalingNormalize;
 		case kCC3NormalScalingRescale: return kCC3NormalScalingRescale;
 		case kCC3NormalScalingAutomatic:
@@ -796,10 +796,10 @@
 	CC3OpenGL* gl = visitor.gl;
 
 	// Set the smoothing model
-	gl.shadeModel = shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
+	gl.shadeModel = _shouldUseSmoothShading ? GL_SMOOTH : GL_FLAT;
 
 	// If per-vertex coloring is being used, attach it to the material
-	[gl enableColorMaterial: (visitor.shouldDecorateNode && mesh && mesh.hasVertexColors)];
+	[gl enableColorMaterial: (visitor.shouldDecorateNode && _mesh && _mesh.hasVertexColors)];
 }
 
 /**
@@ -809,9 +809,9 @@
  */
 -(void) configureDepthTesting: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	[gl enableDepthTest: !shouldDisableDepthTest];
-	gl.depthMask = !shouldDisableDepthMask;
-	gl.depthFunc = depthFunction;
+	[gl enableDepthTest: !_shouldDisableDepthTest];
+	gl.depthMask = !_shouldDisableDepthMask;
+	gl.depthFunc = _depthFunction;
 }
 
 /**
@@ -821,17 +821,17 @@
  */
 -(void) configureDecalParameters: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	BOOL hasDecalOffset = decalOffsetFactor || decalOffsetUnits;
+	BOOL hasDecalOffset = _decalOffsetFactor || _decalOffsetUnits;
 	[gl enablePolygonOffset: hasDecalOffset];
-	[gl setPolygonOffsetFactor: decalOffsetFactor units: decalOffsetUnits];
+	[gl setPolygonOffsetFactor: _decalOffsetFactor units: _decalOffsetUnits];
 }
 
 /** Template method to configure line drawing properties. */
 -(void) configureLineProperties: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
-	gl.lineWidth = lineWidth;
-	[gl enableLineSmoothing: shouldSmoothLines];
-	gl.lineSmoothingHint = lineSmoothingHint;
+	gl.lineWidth = _lineWidth;
+	[gl enableLineSmoothing: _shouldSmoothLines];
+	gl.lineSmoothingHint = _lineSmoothingHint;
 }
 
 /**
@@ -846,11 +846,11 @@
 
 /** Template method to configure the material properties in the GL engine. */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (material && visitor.shouldDecorateNode) {
-		[material drawWithVisitor: visitor];
+	if (_material && visitor.shouldDecorateNode) {
+		[_material drawWithVisitor: visitor];
 	} else {
 		[CC3Material unbindWithVisitor: visitor];
-		if (visitor.shouldDecorateNode) visitor.currentColor = pureColor;
+		if (visitor.shouldDecorateNode) visitor.currentColor = _pureColor;
 	}
 	// currentColor can be set by material, mesh node, or node picking visitor prior to this method.
 	visitor.gl.color = visitor.currentColor;
@@ -869,30 +869,30 @@
 
 
 /** Template method to draw the mesh to the GL engine. */
--(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [mesh drawWithVisitor: visitor]; }
+-(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [_mesh drawWithVisitor: visitor]; }
 
 
 #pragma mark Vertex management
 
--(CC3VertexContent) vertexContentTypes { return mesh ? mesh.vertexContentTypes : kCC3VertexContentNone; }
+-(CC3VertexContent) vertexContentTypes { return _mesh ? _mesh.vertexContentTypes : kCC3VertexContentNone; }
 
 -(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
 	[self ensureMesh];
-	mesh.vertexContentTypes = vtxContentTypes;
-	if ( !mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	_mesh.vertexContentTypes = vtxContentTypes;
+	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
+	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
 }
 
 
 #pragma mark Accessing vertex data
 
 -(void) moveMeshOriginTo: (CC3Vector) aLocation {
-	[mesh moveMeshOriginTo: aLocation];
+	[_mesh moveMeshOriginTo: aLocation];
 	[self markBoundingVolumeDirty];
 }
 
 -(void) moveMeshOriginToCenterOfGeometry {
-	[mesh moveMeshOriginToCenterOfGeometry];
+	[_mesh moveMeshOriginToCenterOfGeometry];
 	[self markBoundingVolumeDirty];
 }
 
@@ -900,118 +900,118 @@
 -(void) movePivotTo: (CC3Vector) aLocation { [self moveMeshOriginTo: aLocation]; }
 -(void) movePivotToCenterOfGeometry { [self moveMeshOriginToCenterOfGeometry]; }
 
--(GLuint) vertexCount { return mesh ? mesh.vertexCount : 0; }
+-(GLuint) vertexCount { return _mesh ? _mesh.vertexCount : 0; }
 
--(void) setVertexCount: (GLuint) vCount { mesh.vertexCount = vCount; }
+-(void) setVertexCount: (GLuint) vCount { _mesh.vertexCount = vCount; }
 
--(GLuint) vertexIndexCount { return mesh ? mesh.vertexIndexCount : 0; }
+-(GLuint) vertexIndexCount { return _mesh ? _mesh.vertexIndexCount : 0; }
 
--(void) setVertexIndexCount: (GLuint) vCount { mesh.vertexIndexCount = vCount; }
+-(void) setVertexIndexCount: (GLuint) vCount { _mesh.vertexIndexCount = vCount; }
 
 -(CC3Vector) vertexLocationAt: (GLuint) index {
-	return mesh ? [mesh vertexLocationAt: index] : kCC3VectorZero;
+	return _mesh ? [_mesh vertexLocationAt: index] : kCC3VectorZero;
 }
 
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) index {
-	[mesh setVertexLocation: aLocation at: index];
+	[_mesh setVertexLocation: aLocation at: index];
 	[self markBoundingVolumeDirty];
 }
 
 -(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) index {
-	return mesh ? [mesh vertexHomogeneousLocationAt: index] : kCC3Vector4ZeroLocation;
+	return _mesh ? [_mesh vertexHomogeneousLocationAt: index] : kCC3Vector4ZeroLocation;
 }
 
 -(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) index {
-	[mesh setVertexHomogeneousLocation: aLocation at: index];
+	[_mesh setVertexHomogeneousLocation: aLocation at: index];
 	[self markBoundingVolumeDirty];
 }
 
 -(CC3Vector) vertexNormalAt: (GLuint) index {
-	return mesh ? [mesh vertexNormalAt: index] : kCC3VectorUnitZPositive;
+	return _mesh ? [_mesh vertexNormalAt: index] : kCC3VectorUnitZPositive;
 }
 
 -(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) index {
-	[mesh setVertexNormal: aNormal at: index];
+	[_mesh setVertexNormal: aNormal at: index];
 }
 
 -(CC3Vector) vertexTangentAt: (GLuint) index {
-	return mesh ? [mesh vertexTangentAt: index] : kCC3VectorUnitXPositive;
+	return _mesh ? [_mesh vertexTangentAt: index] : kCC3VectorUnitXPositive;
 }
 
 -(void) setVertexTangent: (CC3Vector) aTangent at: (GLuint) index {
-	[mesh setVertexTangent: aTangent at: index];
+	[_mesh setVertexTangent: aTangent at: index];
 }
 
 -(CC3Vector) vertexBitangentAt: (GLuint) index {
-	return mesh ? [mesh vertexBitangentAt: index] : kCC3VectorUnitYPositive;
+	return _mesh ? [_mesh vertexBitangentAt: index] : kCC3VectorUnitYPositive;
 }
 
 -(void) setVertexBitangent: (CC3Vector) aTangent at: (GLuint) index {
-	[mesh setVertexBitangent: aTangent at: index];
+	[_mesh setVertexBitangent: aTangent at: index];
 }
 
--(GLenum) vertexColorType { return mesh ? mesh.vertexColorType : GL_FALSE; }
+-(GLenum) vertexColorType { return _mesh ? _mesh.vertexColorType : GL_FALSE; }
 
 -(ccColor4F) vertexColor4FAt: (GLuint) index {
-	return mesh ? [mesh vertexColor4FAt: index] : kCCC4FBlackTransparent;
+	return _mesh ? [_mesh vertexColor4FAt: index] : kCCC4FBlackTransparent;
 }
 
 -(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) index {
 	if (self.shouldApplyOpacityToColor) aColor = CCC4FBlendAlpha(aColor);
-	[mesh setVertexColor4F: aColor at: index];
+	[_mesh setVertexColor4F: aColor at: index];
 }
 
 -(ccColor4B) vertexColor4BAt: (GLuint) index {
-	return mesh ? [mesh vertexColor4BAt: index] : (ccColor4B){ 0, 0, 0, 0 };
+	return _mesh ? [_mesh vertexColor4BAt: index] : (ccColor4B){ 0, 0, 0, 0 };
 }
 
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) index {
 	if (self.shouldApplyOpacityToColor) aColor = CCC4BBlendAlpha(aColor);
-	[mesh setVertexColor4B: aColor at: index];
+	[_mesh setVertexColor4B: aColor at: index];
 }
 
--(GLuint) vertexUnitCount { return mesh ? mesh.vertexUnitCount : 0; }
+-(GLuint) vertexUnitCount { return _mesh ? _mesh.vertexUnitCount : 0; }
 
 -(GLfloat) vertexWeightForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return mesh ? [mesh vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
+	return _mesh ? [_mesh vertexWeightForVertexUnit: vertexUnit at: index] : 0.0f;
 }
 
 -(void) setVertexWeight: (GLfloat) aWeight forVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	[mesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
+	[_mesh setVertexWeight: aWeight forVertexUnit: vertexUnit at: index];
 }
 
--(GLfloat*) vertexWeightsAt: (GLuint) index { return mesh ? [mesh vertexWeightsAt: index] : NULL; }
+-(GLfloat*) vertexWeightsAt: (GLuint) index { return _mesh ? [_mesh vertexWeightsAt: index] : NULL; }
 
 -(void) setVertexWeights: (GLfloat*) weights at: (GLuint) index {
-	[mesh setVertexWeights: weights at: index];
+	[_mesh setVertexWeights: weights at: index];
 }
 
 -(GLuint) vertexMatrixIndexForVertexUnit: (GLuint) vertexUnit at: (GLuint) index {
-	return mesh ? [mesh vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
+	return _mesh ? [_mesh vertexMatrixIndexForVertexUnit: vertexUnit at: index] : 0;
 }
 
 -(void) setVertexMatrixIndex: (GLuint) aMatrixIndex
 			   forVertexUnit: (GLuint) vertexUnit
 						  at: (GLuint) index {
-	[mesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
+	[_mesh setVertexMatrixIndex: aMatrixIndex forVertexUnit: vertexUnit at: index];
 }
 
 -(GLvoid*) vertexMatrixIndicesAt: (GLuint) index {
-	return mesh ? [mesh vertexMatrixIndicesAt: index] : NULL;
+	return _mesh ? [_mesh vertexMatrixIndicesAt: index] : NULL;
 }
 
 -(void) setVertexMatrixIndices: (GLvoid*) mtxIndices at: (GLuint) index {
-	[mesh setVertexMatrixIndices: mtxIndices at: index];
+	[_mesh setVertexMatrixIndices: mtxIndices at: index];
 }
 
--(GLenum) matrixIndexType { return mesh.matrixIndexType; }
+-(GLenum) matrixIndexType { return _mesh.matrixIndexType; }
 
 -(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) index {
-	return mesh ? [mesh vertexTexCoord2FForTextureUnit: texUnit at: index] : (ccTex2F){ 0.0, 0.0 };
+	return _mesh ? [_mesh vertexTexCoord2FForTextureUnit: texUnit at: index] : (ccTex2F){ 0.0, 0.0 };
 }
 
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) index {
-	[mesh setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
+	[_mesh setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
 -(ccTex2F) vertexTexCoord2FAt: (GLuint) index {
@@ -1032,88 +1032,86 @@
 	[self setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: index];
 }
 
--(GLuint) vertexIndexAt: (GLuint) index { return mesh ? [mesh vertexIndexAt: index] : 0; }
+-(GLuint) vertexIndexAt: (GLuint) index { return _mesh ? [_mesh vertexIndexAt: index] : 0; }
 
 -(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) index {
-	[mesh setVertexIndex: vertexIndex at: index];
+	[_mesh setVertexIndex: vertexIndex at: index];
 }
 
--(void) updateVertexLocationsGLBuffer { [mesh updateVertexLocationsGLBuffer]; }
+-(void) updateVertexLocationsGLBuffer { [_mesh updateVertexLocationsGLBuffer]; }
 
--(void) updateVertexNormalsGLBuffer { [mesh updateVertexNormalsGLBuffer]; }
+-(void) updateVertexNormalsGLBuffer { [_mesh updateVertexNormalsGLBuffer]; }
 
--(void) updateVertexTangentsGLBuffer { [mesh updateVertexTangentsGLBuffer]; }
+-(void) updateVertexTangentsGLBuffer { [_mesh updateVertexTangentsGLBuffer]; }
 
--(void) updateVertexBitangentsGLBuffer { [mesh updateVertexBitangentsGLBuffer]; }
+-(void) updateVertexBitangentsGLBuffer { [_mesh updateVertexBitangentsGLBuffer]; }
 
--(void) updateVertexColorsGLBuffer { [mesh updateVertexColorsGLBuffer]; }
+-(void) updateVertexColorsGLBuffer { [_mesh updateVertexColorsGLBuffer]; }
 
--(void) updateVertexMatrixIndicesGLBuffer { [mesh updateVertexMatrixIndicesGLBuffer]; }
+-(void) updateVertexMatrixIndicesGLBuffer { [_mesh updateVertexMatrixIndicesGLBuffer]; }
 
--(void) updateVertexWeightsGLBuffer { [mesh updateVertexWeightsGLBuffer]; }
+-(void) updateVertexWeightsGLBuffer { [_mesh updateVertexWeightsGLBuffer]; }
 
 -(void) updateVertexTextureCoordinatesGLBufferForTextureUnit: (GLuint) texUnit {
-	[mesh updateVertexTextureCoordinatesGLBufferForTextureUnit: texUnit];
+	[_mesh updateVertexTextureCoordinatesGLBufferForTextureUnit: texUnit];
 }
 
 -(void) updateVertexTextureCoordinatesGLBuffer {
 	[self updateVertexTextureCoordinatesGLBufferForTextureUnit: 0];
 }
 
--(void) updateGLBuffers { [mesh updateGLBuffers]; }
+-(void) updateGLBuffers { [_mesh updateGLBuffers]; }
 
--(void) updateVertexIndicesGLBuffer { [mesh updateVertexIndicesGLBuffer]; }
+-(void) updateVertexIndicesGLBuffer { [_mesh updateVertexIndicesGLBuffer]; }
 
 
 #pragma mark Faces
 
--(BOOL) shouldCacheFaces { return mesh ? mesh.shouldCacheFaces : NO; }
+-(BOOL) shouldCacheFaces { return _mesh ? _mesh.shouldCacheFaces : NO; }
 
 -(void) setShouldCacheFaces: (BOOL) shouldCache {
-	mesh.shouldCacheFaces = shouldCache;
+	_mesh.shouldCacheFaces = shouldCache;
 	super.shouldCacheFaces = shouldCache;
 }
 
--(GLuint) faceCount {
-	return mesh ? mesh.faceCount : 0;
-}
+-(GLuint) faceCount { return _mesh ? _mesh.faceCount : 0; }
 
 -(CC3Face) faceAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceAt: faceIndex] : kCC3FaceZero;
+	return _mesh ? [_mesh faceAt: faceIndex] : kCC3FaceZero;
 }
 -(CC3Face) faceFromIndices: (CC3FaceIndices) faceIndices {
-	return mesh ? [mesh faceFromIndices: faceIndices] : kCC3FaceZero;
+	return _mesh ? [_mesh faceFromIndices: faceIndices] : kCC3FaceZero;
 }
 
 -(CC3FaceIndices) faceIndicesAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceIndicesAt: faceIndex] : kCC3FaceIndicesZero;
+	return _mesh ? [_mesh faceIndicesAt: faceIndex] : kCC3FaceIndicesZero;
 }
 
 -(CC3Vector) faceCenterAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceCenterAt: faceIndex] : kCC3VectorZero;
+	return _mesh ? [_mesh faceCenterAt: faceIndex] : kCC3VectorZero;
 }
 
 -(CC3Vector) faceNormalAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceNormalAt: faceIndex] : kCC3VectorZero;
+	return _mesh ? [_mesh faceNormalAt: faceIndex] : kCC3VectorZero;
 }
 
 -(CC3Plane) facePlaneAt: (GLuint) faceIndex {
-	return mesh ? [mesh facePlaneAt: faceIndex] : (CC3Plane){ 0.0, 0.0, 0.0, 0.0};
+	return _mesh ? [_mesh facePlaneAt: faceIndex] : (CC3Plane){ 0.0, 0.0, 0.0, 0.0};
 }
 
 -(CC3FaceNeighbours) faceNeighboursAt: (GLuint) faceIndex {
-	return mesh ? [mesh faceNeighboursAt: faceIndex] : (CC3FaceNeighbours){{ 0, 0, 0}};
+	return _mesh ? [_mesh faceNeighboursAt: faceIndex] : (CC3FaceNeighbours){{ 0, 0, 0}};
 }
 
 
 -(GLuint) faceCountFromVertexIndexCount: (GLuint) vc {
-	if (mesh) return [mesh faceCountFromVertexIndexCount: vc];
+	if (_mesh) return [_mesh faceCountFromVertexIndexCount: vc];
 	CC3Assert(NO, @"%@ has no mesh and cannot convert vertex count to face count.", self);
 	return 0;
 }
 
 -(GLuint) vertexIndexCountFromFaceCount: (GLuint) fc {
-	if (mesh) return [mesh vertexIndexCountFromFaceCount: fc];
+	if (_mesh) return [_mesh vertexIndexCountFromFaceCount: fc];
 	CC3Assert(NO, @"%@ has no mesh and cannot convert face count to vertex count.", self);
 	return 0;
 }
@@ -1127,12 +1125,12 @@
 		 ofLocalRay: (CC3Ray) aRay
 	acceptBackFaces: (BOOL) acceptBackFaces
 	acceptBehindRay: (BOOL) acceptBehind {
-	if ( !mesh ) return 0;
-	return [mesh findFirst: maxHitCount
-			 intersections: intersections
-				ofLocalRay: aRay
-		   acceptBackFaces: acceptBackFaces
-		   acceptBehindRay: acceptBehind];
+	if ( !_mesh ) return 0;
+	return [_mesh findFirst: maxHitCount
+			  intersections: intersections
+				 ofLocalRay: aRay
+			acceptBackFaces: acceptBackFaces
+			acceptBehindRay: acceptBehind];
 }
 
 -(GLuint) findFirst: (GLuint) maxHitCount
@@ -1140,7 +1138,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 		ofGlobalRay: (CC3Ray) aRay
 	acceptBackFaces: (BOOL) acceptBackFaces
 	acceptBehindRay: (BOOL) acceptBehind {
-	if ( !mesh ) return 0;
+	if ( !_mesh ) return 0;
 
 	// Convert the array to local coordinates and find intersections.
 	CC3Ray localRay = [self.transformMatrixInverted transformRay: aRay];
@@ -1233,7 +1231,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 @implementation CC3WireframeBoundingBoxNode
 
-@synthesize shouldAlwaysMeasureParentBoundingBox;
+@synthesize shouldAlwaysMeasureParentBoundingBox=_shouldAlwaysMeasureParentBoundingBox;
 
 -(BOOL) shouldIncludeInDeepCopy { return NO; }
 
@@ -1257,25 +1255,24 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 /** Overridden so that not touchable unless specifically set as such. */
 -(BOOL) isTouchable {
-	return (self.visible || shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
+	return (self.visible || _shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
 }
 
 /** Overridden so that can still be visible if parent is invisible, unless explicitly turned off. */
--(BOOL) visible { return visible; }
+-(BOOL) visible { return _visible; }
 
 /** For wireframe lines, if material is created dynamically, make sure it ignores lighting. */
 -(void) makeMaterial {
 	[super makeMaterial];
-	material.shouldUseLighting = NO;
+	_material.shouldUseLighting = NO;
 }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		shouldAlwaysMeasureParentBoundingBox = NO;
-	}
+	if ( (self = [super initWithTag: aTag withName: aName]) )
+		_shouldAlwaysMeasureParentBoundingBox = NO;
 	return self;
 }
 
@@ -1284,7 +1281,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 -(void) populateFrom: (CC3WireframeBoundingBoxNode*) another {
 	[super populateFrom: another];
 	
-	shouldAlwaysMeasureParentBoundingBox = another.shouldAlwaysMeasureParentBoundingBox;
+	_shouldAlwaysMeasureParentBoundingBox = another.shouldAlwaysMeasureParentBoundingBox;
 }
 
 -(void) releaseRedundantContent {
@@ -1299,9 +1296,8 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 /** If we should remeasure and update the bounding box dimensions, do so. */
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
-	if (shouldAlwaysMeasureParentBoundingBox) {
+	if (_shouldAlwaysMeasureParentBoundingBox)
 		[self updateFromParentBoundingBoxWithVisitor: visitor];
-	}
 }
 
 /** Measures the bounding box of the parent node and updates the vertex locations. */
@@ -1323,8 +1319,8 @@ globalIntersections: (CC3MeshIntersection*) intersections
  * or if parent doesn't have a bounding box.
  */
 -(CC3BoundingBox) parentBoundingBox {
-	if (parent) {
-		CC3BoundingBox pbb = parent.boundingBox;
+	if (_parent) {
+		CC3BoundingBox pbb = _parent.boundingBox;
 		if (!CC3BoundingBoxIsNull(pbb)) return pbb;
 	}
 	return kCC3BoundingBoxZero;
@@ -1343,8 +1339,8 @@ globalIntersections: (CC3MeshIntersection*) intersections
  * or kCC3BoundingBoxZero if no parent, or if parent doesn't have a bounding box.
  */
 -(CC3BoundingBox) parentBoundingBox {
-	if (parent && parent.hasLocalContent) {
-		CC3BoundingBox pbb = ((CC3LocalContentNode*)parent).localContentBoundingBox;
+	if (_parent && _parent.hasLocalContent) {
+		CC3BoundingBox pbb = ((CC3LocalContentNode*)_parent).localContentBoundingBox;
 		if (!CC3BoundingBoxIsNull(pbb)) return pbb;
 	}
 	return kCC3BoundingBoxZero;
@@ -1362,9 +1358,9 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 @implementation CC3DirectionMarkerNode
 
--(CC3Vector) markerDirection { return markerDirection; }
+-(CC3Vector) markerDirection { return _markerDirection; }
 
--(void) setMarkerDirection: (CC3Vector) aDirection { markerDirection = CC3VectorNormalize(aDirection); }
+-(void) setMarkerDirection: (CC3Vector) aDirection { _markerDirection = CC3VectorNormalize(aDirection); }
 
 -(void) setParent: (CC3Node*) aNode {
 	[super setParent: aNode];
@@ -1376,7 +1372,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		markerDirection = kCC3VectorUnitZNegative;
+		_markerDirection = kCC3VectorUnitZNegative;
 	}
 	return self;
 }
@@ -1386,7 +1382,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 -(void) populateFrom: (CC3DirectionMarkerNode*) another {
 	[super populateFrom: another];
 	
-	markerDirection = another.markerDirection;
+	_markerDirection = another.markerDirection;
 }
 
 
@@ -1499,11 +1495,11 @@ static GLfloat directionMarkerMinimumLength = 0;
 
 // Overridden so that not touchable unless specifically set as such
 -(BOOL) isTouchable {
-	return (self.visible || shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
+	return (self.visible || _shouldAllowTouchableWhenInvisible) && self.isTouchEnabled;
 }
 
 // Overridden so that can still be visible if parent is invisible, unless explicitly turned off.
--(BOOL) visible { return visible; }
+-(BOOL) visible { return _visible; }
 @end
 
 

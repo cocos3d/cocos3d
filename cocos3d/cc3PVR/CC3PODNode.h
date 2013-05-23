@@ -43,9 +43,9 @@
  * cannot implement the added internal state.
  */
 @interface CC3PODNode : CC3Node {
-	int podIndex;
-	int podContentIndex;
-	int podParentIndex;
+	GLint _podIndex;
+	GLint _podContentIndex;
+	GLint _podParentIndex;
 }
 
 @end

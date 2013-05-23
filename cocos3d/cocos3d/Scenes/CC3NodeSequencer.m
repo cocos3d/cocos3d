@@ -42,13 +42,9 @@
 
 @implementation CC3NodeEvaluator
 
--(BOOL) evaluate: (CC3Node*) aNode {
-	return NO;
-}
+-(BOOL) evaluate: (CC3Node*) aNode { return NO; }
 
-+(id) evaluator {
-	return [[[self alloc] init] autorelease];
-}
++(id) evaluator { return [[[self alloc] init] autorelease]; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -61,9 +57,7 @@
 	return aCopy;
 }
 
--(NSString*) description {
-	return [NSString stringWithFormat: @"%@", [self class]];
-}
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 @end
 
@@ -80,9 +74,7 @@
 
 @implementation CC3NodeAcceptor
 
--(BOOL) evaluate: (CC3Node*) aNode {
-	return YES;
-}
+-(BOOL) evaluate: (CC3Node*) aNode { return YES; }
 
 @end
 
@@ -93,16 +85,11 @@
 @implementation CC3LocalContentNodeEvaluator
 
 -(BOOL) evaluate: (CC3Node*) aNode {
-	if (aNode.hasLocalContent) {
-		return [self evaluateLocalContentNode: (CC3LocalContentNode*)aNode];
-	} else {
-		return NO;
-	}
+	if ( !aNode.hasLocalContent ) return NO;
+	return [self evaluateLocalContentNode: (CC3LocalContentNode*)aNode];
 }
 
--(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode {
-	return NO;
-}
+-(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode { return NO; }
 
 @end
 
@@ -112,9 +99,7 @@
 
 @implementation CC3LocalContentNodeAcceptor
 
--(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode {
-	return YES;
-}
+-(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode { return YES; }
 
 @end
 
@@ -124,9 +109,7 @@
 
 @implementation CC3OpaqueNodeAcceptor
 
--(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode {
-	return lcNode.isOpaque;
-}
+-(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode { return lcNode.isOpaque; }
 
 @end
 
@@ -136,9 +119,7 @@
 
 @implementation CC3TranslucentNodeAcceptor
 
--(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode {
-	return !lcNode.isOpaque;
-}
+-(BOOL) evaluateLocalContentNode: (CC3LocalContentNode*) lcNode { return !lcNode.isOpaque; }
 
 @end
 
@@ -148,10 +129,10 @@
 
 @implementation CC3NodeSequencer
 
-@synthesize evaluator, allowSequenceUpdates;
+@synthesize evaluator=_evaluator, allowSequenceUpdates=_allowSequenceUpdates;
 
 -(void) dealloc {
-	[evaluator release];
+	[_evaluator release];
 	[super dealloc];
 }
 
@@ -171,7 +152,7 @@
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super init]) ) {
 		self.evaluator = anEvaluator;
-		allowSequenceUpdates = YES;
+		_allowSequenceUpdates = YES;
 	}
 	return self;
 }
@@ -187,23 +168,19 @@
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // Subclasses that extend copying will override this method.
 -(void) populateFrom: (CC3NodeSequencer*) another {
-	allowSequenceUpdates = another.allowSequenceUpdates;
+	_allowSequenceUpdates = another.allowSequenceUpdates;
 }
 
 -(id) copyWithZone: (NSZone*) zone {
 	CC3NodeSequencer* aCopy = [[[self class] allocWithZone: zone]
-									initWithEvaluator: [evaluator autoreleasedCopy]];
+									initWithEvaluator: [_evaluator autoreleasedCopy]];
 	[aCopy populateFrom: self];
 	return aCopy;
 }
 
--(BOOL) add: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	return NO;
-}
+-(BOOL) add: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor { return NO; }
 
--(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	return NO;
-}
+-(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor { return NO; }
 
 -(BOOL) updateSequenceWithVisitor: (CC3NodeSequencerVisitor*) visitor {
 	[self identifyMisplacedNodesWithVisitor: visitor];
@@ -211,9 +188,8 @@
 		LogTrace(@"%@ detected %u misplaced nodes: %@",
 				 self, visitor.misplacedNodes.count, visitor.misplacedNodes);
 		for(CC3Node* aNode in visitor.misplacedNodes) {
-			if ([self remove: aNode withVisitor: visitor]) {
+			if ([self remove: aNode withVisitor: visitor])
 				[self add: aNode withVisitor: visitor];
-			}
 		}
 		[visitor clearMisplacedNodes];
 		return YES;
@@ -226,7 +202,7 @@
 -(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) nodeVisitor {}
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with evaluator %@", [self class], evaluator];
+	return [NSString stringWithFormat: @"%@ with evaluator %@", [self class], _evaluator];
 }
 
 -(NSString*) fullDescription { return self.description; }
@@ -239,16 +215,16 @@
 
 @implementation CC3BTreeNodeSequencer
 
-@synthesize sequencers;
+@synthesize sequencers=_sequencers;
 
 -(void) dealloc {
-	[sequencers release];
+	[_sequencers release];
 	[super dealloc];
 }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		sequencers = [[CCArray array] retain];
+		_sequencers = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -259,82 +235,62 @@
 	[super populateFrom: another];
 
 	CCArray* otherChildren = another.sequencers;
-	for (CC3NodeSequencer* otherChild in otherChildren) {
+	for (CC3NodeSequencer* otherChild in otherChildren)
 		[self addSequencer: [otherChild autoreleasedCopy]];
-	}
 }
 
 -(void) addSequencer: (CC3NodeSequencer*) aNodeSequencer {
-	[sequencers addObject: aNodeSequencer];
+	[_sequencers addObject: aNodeSequencer];
 }
 
 /** Iterates through the sequencers, adding it to the first one that accepts the node. */
 -(BOOL) add: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	if ( evaluator && [evaluator evaluate: aNode] ) {
-		for (CC3NodeSequencer* s in sequencers) {
-			if ([s add: aNode withVisitor: visitor]) {
-				return YES;
-			}
-		}
-	}
+	if ( _evaluator && [_evaluator evaluate: aNode] )
+		for (CC3NodeSequencer* s in _sequencers)
+			if ([s add: aNode withVisitor: visitor]) return YES;
 	return NO;
 }
 
 /** Iterates through the sequencers, asking each to remove the node. */
 -(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	for (CC3NodeSequencer* s in sequencers) {
-		if ([s remove: aNode withVisitor: visitor]) {
-			return YES;
-		}
-	}
+	for (CC3NodeSequencer* s in _sequencers)
+		if ([s remove: aNode withVisitor: visitor]) return YES;
 	return NO;
 }
 
 /** Iterates through the sequencers, collecting misplaced nodes in the visitor. */
 -(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
-	if (allowSequenceUpdates) {
-		for (CC3NodeSequencer* s in sequencers) {
+	if (_allowSequenceUpdates)
+		for (CC3NodeSequencer* s in _sequencers)
 			[s identifyMisplacedNodesWithVisitor: visitor];
-		}
-	}
 }
 
 -(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) aNodeVisitor {
-	for (CC3NodeSequencer* s in sequencers) {
-		[s visitNodesWithNodeVisitor: aNodeVisitor];
-	}
+	for (CC3NodeSequencer* s in _sequencers) [s visitNodesWithNodeVisitor: aNodeVisitor];
 }
 
 /** Concatenates the nodes from the contained sequencers into one array. */
 -(CCArray*) nodes {
 	CCArray* nodes = [CCArray array];
-	for (CC3NodeSequencer* s in sequencers) {
-		[nodes addObjectsFromArray: s.nodes];
-	}
+	for (CC3NodeSequencer* s in _sequencers) [nodes addObjectsFromArray: s.nodes];
 	return nodes;
 }
 
 -(BOOL) shouldUseOnlyForwardDistance {
-	for (CC3NodeSequencer* s in sequencers) {
-		if (s.shouldUseOnlyForwardDistance) {
-			return YES;
-		}
-	}
+	for (CC3NodeSequencer* s in _sequencers)
+		if (s.shouldUseOnlyForwardDistance) return YES;
 	return NO;
 }
 
 -(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {
-	for (CC3NodeSequencer* s in sequencers) {
-		s.shouldUseOnlyForwardDistance = onlyForward;
-	}
+	for (CC3NodeSequencer* s in _sequencers) s.shouldUseOnlyForwardDistance = onlyForward;
 }
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
 	[desc appendFormat: @"%@", [super fullDescription]];
-	for (CC3NodeSequencer* s in sequencers) {
+	for (CC3NodeSequencer* s in _sequencers)
 		[desc appendFormat: @"\n%@", [s fullDescription]];
-	}
 	return desc;
 }
 
@@ -368,15 +324,15 @@
 @implementation CC3NodeArraySequencer
 
 -(void) dealloc {
-	[nodes releaseAsUnretained];		// Clears without releasing each element.
+	[_nodes releaseAsUnretained];		// Clears without releasing each element.
 	[super dealloc];
 }
 
--(CCArray*) nodes { return [CCArray arrayWithArray: nodes]; }
+-(CCArray*) nodes { return [CCArray arrayWithArray: _nodes]; }
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		nodes = [[CCArray array] retain];
+		_nodes = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -388,21 +344,21 @@
  * YES, the node is added at the end of the array. Returns whether the node was added.
  */
 -(BOOL) add: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	if ( evaluator && [evaluator evaluate: aNode] ) {
-		NSUInteger nodeCount = nodes.count;
+	if ( _evaluator && [_evaluator evaluate: aNode] ) {
+		NSUInteger nodeCount = _nodes.count;
 		for (NSUInteger i = 0; i < nodeCount; i++) {
-			CC3Node* leftNode = i > 0 ? [nodes objectAtIndex: i - 1] : nil;
-			CC3Node* rightNode = [nodes objectAtIndex: i];
+			CC3Node* leftNode = i > 0 ? [_nodes objectAtIndex: i - 1] : nil;
+			CC3Node* rightNode = [_nodes objectAtIndex: i];
 			CC3Assert(aNode != rightNode, @"%@ already contains %@!", self, aNode);
 			if ( [self shouldInsertNode: aNode
 								between: leftNode
 									and: rightNode
 							withVisitor: visitor] ) {
-				[nodes insertUnretainedObject: aNode atIndex: i];
+				[_nodes insertUnretainedObject: aNode atIndex: i];
 				return YES;
 			}
 		}
-		[nodes addUnretainedObject: aNode];
+		[_nodes addUnretainedObject: aNode];
 		return YES;
 	}
 	return NO;
@@ -416,9 +372,9 @@
 }
 
 -(BOOL) remove: (CC3Node*) aNode withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	NSUInteger nodeIndex = [nodes indexOfObjectIdenticalTo: aNode];
+	NSUInteger nodeIndex = [_nodes indexOfObjectIdenticalTo: aNode];
 	if (nodeIndex != NSNotFound) {
-		[nodes removeUnretainedObjectAtIndex: nodeIndex];
+		[_nodes removeUnretainedObjectAtIndex: nodeIndex];
 		return YES;
 	}
 	return NO;
@@ -426,23 +382,19 @@
 
 -(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
 	// Leave if sequence updating should not happen or if there is nothing to sort.
-	if (!allowSequenceUpdates || nodes.count == 0) return;
+	if (!_allowSequenceUpdates || _nodes.count == 0) return;
 
-	for (CC3Node* aNode in nodes) {
-		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
+	for (CC3Node* aNode in _nodes)
+		if ( !(_evaluator && [_evaluator evaluate: aNode]) )
 			[visitor addMisplacedNode: aNode];
-		}
-	}
 }
 
 -(void) visitNodesWithNodeVisitor: (CC3NodeVisitor*) aNodeVisitor {
-	for (CC3Node* aNode in nodes) {
-		[aNodeVisitor visit: aNode];
-	}
+	for (CC3Node* aNode in _nodes) [aNodeVisitor visit: aNode];
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ with nodes: %@", [super fullDescription], [nodes fullDescription]];
+	return [NSString stringWithFormat: @"%@ with nodes: %@", [super fullDescription], [_nodes fullDescription]];
 }
 
 @end
@@ -453,17 +405,11 @@
 
 @implementation CC3NodeArrayZOrderSequencer
 
--(BOOL) shouldUseOnlyForwardDistance {
-	return shouldUseOnlyForwardDistance;
-}
-
--(void) setShouldUseOnlyForwardDistance: (BOOL) onlyForward {
-	shouldUseOnlyForwardDistance = onlyForward;
-}
+@synthesize shouldUseOnlyForwardDistance=_shouldUseOnlyForwardDistance;
 
 -(id) initWithEvaluator: (CC3NodeEvaluator*) anEvaluator {
 	if ( (self = [super initWithEvaluator: anEvaluator]) ) {
-		shouldUseOnlyForwardDistance = NO;
+		_shouldUseOnlyForwardDistance = NO;
 	}
 	return self;
 }
@@ -472,7 +418,7 @@
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3NodeArrayZOrderSequencer*) another {
 	[super populateFrom: another];
-	shouldUseOnlyForwardDistance = another.shouldUseOnlyForwardDistance;
+	_shouldUseOnlyForwardDistance = another.shouldUseOnlyForwardDistance;
 }
 
 /**
@@ -506,7 +452,7 @@
  */
 -(void) identifyMisplacedNodesWithVisitor: (CC3NodeSequencerVisitor*) visitor {
 	// Leave if sequence updating should not happen or if there is nothing to sort.
-	if (!allowSequenceUpdates || nodes.count == 0) return;
+	if (!_allowSequenceUpdates || _nodes.count == 0) return;
 
 	CC3Camera* cam = visitor.scene.activeCamera;
 	if (!cam) return;		// Can't do anything without a camera.
@@ -515,8 +461,8 @@
 	GLint prevZOrder = NSIntegerMax;
 	GLfloat prevCamDistProduct = kCC3MaxGLfloat;
 
-	for (CC3Node* aNode in nodes) {
-		if ( !(evaluator && [evaluator evaluate: aNode]) ) {
+	for (CC3Node* aNode in _nodes) {
+		if ( !(_evaluator && [_evaluator evaluate: aNode]) ) {
 			[visitor addMisplacedNode: aNode];
 		} else {
 			// Calculate the distance from the camera and cache it for insertion
@@ -528,7 +474,7 @@
                 // Determine the direction in which to measure from the camera. This will either be
                 // in the direction of a straight line between the camera and the node, or will be
                 // restricted to the direction "staight-out" from the camera.
-                CC3Vector measurementDirection = shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
+                CC3Vector measurementDirection = _shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
 
                 // Cache the dot product of the direction vector, and the vector between the node
 				// and the camera. This is a relative measure of the distance in that direction.
@@ -585,9 +531,7 @@
 -(BOOL) shouldInsertMeshNode: (CC3MeshNode*) aNode
 					 between: (CC3MeshNode*) leftNode
 						 and: (CC3MeshNode*) rightNode
-				 withVisitor: (CC3NodeSequencerVisitor*) visitor {
-	return NO;
-}
+				 withVisitor: (CC3NodeSequencerVisitor*) visitor { return NO; }
 
 @end
 
@@ -645,11 +589,11 @@
 
 @implementation CC3NodeSequencerVisitor
 
-@synthesize scene, misplacedNodes;
+@synthesize scene=_scene, misplacedNodes=_misplacedNodes;
 
 -(void) dealloc {
-	[misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
-	scene = nil;								// not retained
+	[_misplacedNodes releaseAsUnretained];		// Clears without releasing each element.
+	_scene = nil;								// not retained
 	[super dealloc];
 }
 
@@ -657,8 +601,8 @@
 
 -(id) initWithScene: (CC3Scene*) aCC3Scene {
 	if ( (self = [super init]) ) {
-		scene = aCC3Scene;			// not retained
-		misplacedNodes = [[CCArray array] retain];
+		_scene = aCC3Scene;			// not retained
+		_misplacedNodes = [[CCArray array] retain];
 	}
 	return self;
 }
@@ -667,14 +611,14 @@
 	return [[[self alloc] initWithScene: aCC3Scene] autorelease];
 }
 
--(BOOL) hasMisplacedNodes { return (misplacedNodes.count > 0); }
+-(BOOL) hasMisplacedNodes { return (_misplacedNodes.count > 0); }
 
--(void) addMisplacedNode: (CC3Node*) aNode { [misplacedNodes addUnretainedObject: aNode]; }
+-(void) addMisplacedNode: (CC3Node*) aNode { [_misplacedNodes addUnretainedObject: aNode]; }
 
--(void) clearMisplacedNodes { [misplacedNodes removeAllObjectsAsUnretained]; }
+-(void) clearMisplacedNodes { [_misplacedNodes removeAllObjectsAsUnretained]; }
 
 // Deprecated
--(CC3Scene*) world { return scene; }
+-(CC3Scene*) world { return _scene; }
 -(void) setWorld: (CC3Scene*) aCC3Scene { self.scene = aCC3Scene; }
 -(id) initWithWorld: (CC3Scene*) aCC3Scene { return [self initWithScene: aCC3Scene]; }
 +(id) visitorWithWorld: (CC3Scene*) aCC3Scene { return [self visitorWithScene: aCC3Scene]; }

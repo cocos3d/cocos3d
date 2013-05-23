@@ -380,21 +380,21 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * emitter node, and is deallocated automatically when the emitter is released.
  */
 @interface CC3ParticleEmitter : CC3MeshNode {
-	CCArray* particles;
-	CC3ParticleNavigator* particleNavigator;
-	Class particleClass;
-	GLuint maximumParticleCapacity;
-	GLuint particleCapacityExpansionIncrement;
-	GLuint particleCount;
-	ccTime emissionDuration;
-	ccTime elapsedTime;
-	ccTime emissionInterval;
-	ccTime timeSinceEmission;
-	BOOL shouldRemoveOnFinish : 1;
-	BOOL isEmitting : 1;
-	BOOL wasStarted : 1;
-	BOOL shouldUpdateParticlesBeforeTransform : 1;
-	BOOL shouldUpdateParticlesAfterTransform : 1;
+	CCArray* _particles;
+	CC3ParticleNavigator* _particleNavigator;
+	Class _particleClass;
+	GLuint _maximumParticleCapacity;
+	GLuint _particleCapacityExpansionIncrement;
+	GLuint _particleCount;
+	ccTime _emissionDuration;
+	ccTime _elapsedTime;
+	ccTime _emissionInterval;
+	ccTime _timeSinceEmission;
+	BOOL _shouldRemoveOnFinish : 1;
+	BOOL _isEmitting : 1;
+	BOOL _wasStarted : 1;
+	BOOL _shouldUpdateParticlesBeforeTransform : 1;
+	BOOL _shouldUpdateParticlesAfterTransform : 1;
 }
 
 /**
@@ -944,7 +944,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * particles must support in order to be prepared by this navigator during initialization.
  */
 @interface CC3ParticleNavigator : NSObject <NSCopying> {
-	CC3ParticleEmitter* emitter;
+	CC3ParticleEmitter* _emitter;
 }
 
 /**
@@ -1094,9 +1094,9 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * This class forms the basis of both point particle emitters and mesh particle emitters.
  */
 @interface CC3CommonVertexArrayParticleEmitter : CC3ParticleEmitter {
-	NSRange dirtyVertexRange;
-	NSRange dirtyVertexIndexRange;
-	BOOL wasVertexCapacityChanged;
+	NSRange _dirtyVertexRange;
+	NSRange _dirtyVertexIndexRange;
+	BOOL _wasVertexCapacityChanged;
 }
 
 @end
@@ -1110,7 +1110,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
  * CC3ParticleProtocol protocol.
  */
 @interface CC3ParticleBase : NSObject <CC3ParticleProtocol, CCRGBAProtocol, NSCopying> {
-	CC3ParticleEmitter* emitter;
+	CC3ParticleEmitter* _emitter;
 }
 
 /**

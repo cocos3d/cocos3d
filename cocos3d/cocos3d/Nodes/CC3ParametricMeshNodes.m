@@ -47,7 +47,7 @@
 								   kCC3VertexContentNormal |
 								   kCC3VertexContentTextureCoordinates);
 	}
-	return mesh;
+	return _mesh;
 }
 
 
@@ -109,9 +109,9 @@
 }
 
 -(void) populateAsWireBox: (CC3BoundingBox) box {
-	CC3Mesh* vaMesh = [CC3Mesh mesh];
-	[vaMesh populateAsWireBox: box];
-	self.mesh = vaMesh;		// Set mesh to update bounding volume
+	CC3Mesh* mesh = [CC3Mesh mesh];
+	[mesh populateAsWireBox: box];
+	self.mesh = mesh;		// Set mesh to update bounding volume
 }
 
 
@@ -140,11 +140,11 @@
 -(void) populateAsLineStripWith: (GLuint) vertexCount
 					   vertices: (CC3Vector*) vertices
 					  andRetain: (BOOL) shouldRetainVertices {
-	CC3Mesh* vaMesh = [CC3Mesh mesh];
-	[vaMesh populateAsLineStripWith: vertexCount
+	CC3Mesh* mesh = [CC3Mesh mesh];
+	[mesh populateAsLineStripWith: vertexCount
 						   vertices: vertices
 						  andRetain: shouldRetainVertices];
-	self.mesh = vaMesh;		// Set mesh to update bounding volume
+	self.mesh = mesh;		// Set mesh to update bounding volume
 }
 
 
@@ -161,9 +161,9 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		lineVertices[0] = kCC3VectorZero;
-		lineVertices[1] = kCC3VectorZero;
-		[self populateAsLineStripWith: 2 vertices: lineVertices andRetain: NO];
+		_lineVertices[0] = kCC3VectorZero;
+		_lineVertices[1] = kCC3VectorZero;
+		[self populateAsLineStripWith: 2 vertices: _lineVertices andRetain: NO];
 		[self retainVertexLocations];
 	}
 	return self;
@@ -189,15 +189,9 @@
 #pragma mark -
 #pragma mark CC3TouchBox
 
-@interface CC3TouchBox (TemplateMethods)
-@property(nonatomic, readonly) CC3BoundingBox parentBoundingBox;
--(void) populateBox: (CC3BoundingBox) aBox;
-
-@end
-
 @implementation CC3TouchBox
 
-@synthesize shouldAlwaysMeasureParentBoundingBox;
+@synthesize shouldAlwaysMeasureParentBoundingBox=_shouldAlwaysMeasureParentBoundingBox;
 
 -(CC3BoundingBox) box { return self.localContentBoundingBox; }
 
@@ -212,12 +206,12 @@
 -(void) setParent: (CC3Node*) aNode {
 	super.parent = aNode;
 	[self deriveNameFrom: aNode];
-	if ( !mesh ) self.box = self.parentBoundingBox;
+	if ( !_mesh ) self.box = self.parentBoundingBox;
 }
 
 -(NSString*) nameSuffix { return @"TouchBox"; }
 
--(CC3BoundingBox) parentBoundingBox { return parent ? parent.boundingBox : kCC3BoundingBoxNull; }
+-(CC3BoundingBox) parentBoundingBox { return _parent ? _parent.boundingBox : kCC3BoundingBoxNull; }
 
 -(BOOL) shouldContributeToParentBoundingBox { return NO; }
 
@@ -226,89 +220,87 @@
 
 -(void) populateBox: (CC3BoundingBox) aBox {
 	
-	CC3Mesh* vaMesh = [self prepareParametricMesh];
+	CC3Mesh* mesh = [self prepareParametricMesh];
 	
 	// Now update the vertex locations with the box data
 	GLuint vIdx = 0;
 	CC3Vector bbMin = aBox.minimum;
 	CC3Vector bbMax = aBox.maximum;
-	[vaMesh setVertexLocation: cc3v(bbMin.x, bbMin.y, bbMin.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMin.x, bbMin.y, bbMax.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMin.x, bbMax.y, bbMin.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMin.x, bbMax.y, bbMax.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMax.x, bbMin.y, bbMin.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMax.x, bbMin.y, bbMax.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMax.x, bbMax.y, bbMin.z) at: vIdx++];
-	[vaMesh setVertexLocation: cc3v(bbMax.x, bbMax.y, bbMax.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMin.x, bbMin.y, bbMin.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMin.x, bbMin.y, bbMax.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMin.x, bbMax.y, bbMin.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMin.x, bbMax.y, bbMax.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMax.x, bbMin.y, bbMin.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMax.x, bbMin.y, bbMax.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMax.x, bbMax.y, bbMin.z) at: vIdx++];
+	[mesh setVertexLocation: cc3v(bbMax.x, bbMax.y, bbMax.z) at: vIdx++];
 
-	[vaMesh updateVertexLocationsGLBuffer];
+	[mesh updateVertexLocationsGLBuffer];
 	[self markBoundingVolumeDirty];
 }
 
 /** Overridden because we only need vertex locations, and to allocate and populate indices. */
 -(CC3Mesh*) prepareParametricMesh {
-	if (mesh) return (CC3Mesh*)mesh;
+	if (_mesh) return _mesh;
 	
 	if (self.vertexContentTypes == kCC3VertexContentNone)
 		self.vertexContentTypes = kCC3VertexContentLocation;
 
-	
 	// Prepare the vertex content and allocate space for vertices and indices.
-	CC3Mesh* vaMesh = mesh;
-	vaMesh.allocatedVertexCapacity = 8;
-	vaMesh.allocatedVertexIndexCapacity = 36;
+	_mesh.allocatedVertexCapacity = 8;
+	_mesh.allocatedVertexIndexCapacity = 36;
 	
 	GLuint vIdx = 0;
 	
 	// Front
-	[vaMesh setVertexIndex: 1 at: vIdx++];
-	[vaMesh setVertexIndex: 5 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 3 at: vIdx++];
-	[vaMesh setVertexIndex: 1 at: vIdx++];
+	[_mesh setVertexIndex: 1 at: vIdx++];
+	[_mesh setVertexIndex: 5 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 3 at: vIdx++];
+	[_mesh setVertexIndex: 1 at: vIdx++];
 	
 	// Back
-	[vaMesh setVertexIndex: 0 at: vIdx++];
-	[vaMesh setVertexIndex: 2 at: vIdx++];
-	[vaMesh setVertexIndex: 6 at: vIdx++];
-	[vaMesh setVertexIndex: 6 at: vIdx++];
-	[vaMesh setVertexIndex: 4 at: vIdx++];
-	[vaMesh setVertexIndex: 0 at: vIdx++];
+	[_mesh setVertexIndex: 0 at: vIdx++];
+	[_mesh setVertexIndex: 2 at: vIdx++];
+	[_mesh setVertexIndex: 6 at: vIdx++];
+	[_mesh setVertexIndex: 6 at: vIdx++];
+	[_mesh setVertexIndex: 4 at: vIdx++];
+	[_mesh setVertexIndex: 0 at: vIdx++];
 	
 	// Left
-	[vaMesh setVertexIndex: 0 at: vIdx++];
-	[vaMesh setVertexIndex: 1 at: vIdx++];
-	[vaMesh setVertexIndex: 3 at: vIdx++];
-	[vaMesh setVertexIndex: 3 at: vIdx++];
-	[vaMesh setVertexIndex: 2 at: vIdx++];
-	[vaMesh setVertexIndex: 0 at: vIdx++];
+	[_mesh setVertexIndex: 0 at: vIdx++];
+	[_mesh setVertexIndex: 1 at: vIdx++];
+	[_mesh setVertexIndex: 3 at: vIdx++];
+	[_mesh setVertexIndex: 3 at: vIdx++];
+	[_mesh setVertexIndex: 2 at: vIdx++];
+	[_mesh setVertexIndex: 0 at: vIdx++];
 	
 	// Right
-	[vaMesh setVertexIndex: 4 at: vIdx++];
-	[vaMesh setVertexIndex: 6 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 5 at: vIdx++];
-	[vaMesh setVertexIndex: 4 at: vIdx++];
+	[_mesh setVertexIndex: 4 at: vIdx++];
+	[_mesh setVertexIndex: 6 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 5 at: vIdx++];
+	[_mesh setVertexIndex: 4 at: vIdx++];
 	
 	// Top
-	[vaMesh setVertexIndex: 2 at: vIdx++];
-	[vaMesh setVertexIndex: 3 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 7 at: vIdx++];
-	[vaMesh setVertexIndex: 6 at: vIdx++];
-	[vaMesh setVertexIndex: 2 at: vIdx++];
+	[_mesh setVertexIndex: 2 at: vIdx++];
+	[_mesh setVertexIndex: 3 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 7 at: vIdx++];
+	[_mesh setVertexIndex: 6 at: vIdx++];
+	[_mesh setVertexIndex: 2 at: vIdx++];
 	
 	// Bottom
-	[vaMesh setVertexIndex: 0 at: vIdx++];
-	[vaMesh setVertexIndex: 4 at: vIdx++];
-	[vaMesh setVertexIndex: 5 at: vIdx++];
-	[vaMesh setVertexIndex: 5 at: vIdx++];
-	[vaMesh setVertexIndex: 1 at: vIdx++];
-	[vaMesh setVertexIndex: 0 at: vIdx++];		
+	[_mesh setVertexIndex: 0 at: vIdx++];
+	[_mesh setVertexIndex: 4 at: vIdx++];
+	[_mesh setVertexIndex: 5 at: vIdx++];
+	[_mesh setVertexIndex: 5 at: vIdx++];
+	[_mesh setVertexIndex: 1 at: vIdx++];
+	[_mesh setVertexIndex: 0 at: vIdx++];		
 
-	return vaMesh;
+	return _mesh;
 }
 
 
@@ -316,7 +308,7 @@
 
 /** If we should remeasure and update the bounding box dimensions, do so. */
 -(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
-	if (shouldAlwaysMeasureParentBoundingBox) self.box = self.parentBoundingBox;
+	if (_shouldAlwaysMeasureParentBoundingBox) self.box = self.parentBoundingBox;
 }
 
 
@@ -324,7 +316,7 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		shouldAlwaysMeasureParentBoundingBox = NO;
+		_shouldAlwaysMeasureParentBoundingBox = NO;
 		self.visible = NO;
 		self.shouldAllowTouchableWhenInvisible = YES;
 	}

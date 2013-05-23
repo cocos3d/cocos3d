@@ -55,12 +55,6 @@
 -(void) updateParticleMeshWithVisitor: (CC3NodeUpdatingVisitor*) visitor;
 @end
 
-@interface CC3MeshParticleEmitter (TemplateMethods)
--(void) copyTemplateContentToParticle: (id<CC3MeshParticleProtocol>) aParticle;
--(BOOL) shouldTransformParticles: (CC3NodeTransformingVisitor*) visitor;
--(void) transformParticles;
-@end
-
 @interface CC3MeshParticle (TemplateMethods)
 @property(nonatomic, readonly) CC3Mesh* mesh;
 @property(nonatomic, readonly) BOOL shouldTrackTarget;
@@ -86,19 +80,19 @@
 @synthesize shouldTransformUnseenParticles=_shouldTransformUnseenParticles;
 
 -(void) dealloc {
-	[particleTemplateMesh release];
+	[_particleTemplateMesh release];
 	[super dealloc];
 }
 
 -(Protocol*) requiredParticleProtocol { return @protocol(CC3MeshParticleProtocol); }
 
--(CC3Mesh*) particleTemplateMesh { return particleTemplateMesh; }
+-(CC3Mesh*) particleTemplateMesh { return _particleTemplateMesh; }
 
 -(void) setParticleTemplateMesh: (CC3Mesh*) aMesh {
-	if (aMesh == particleTemplateMesh) return;
+	if (aMesh == _particleTemplateMesh) return;
 	
-	[particleTemplateMesh release];
-	particleTemplateMesh = [aMesh retain];
+	[_particleTemplateMesh release];
+	_particleTemplateMesh = [aMesh retain];
 
 	// Add vertex content if not already set, and align the drawing mode
 	if (self.vertexContentTypes == kCC3VertexContentNone)
@@ -106,8 +100,8 @@
 
 		self.drawingMode = aMesh.drawingMode;
 	LogTrace(@"Particle template mesh of %@ set to %@ drawing %@ with %i vertices and %i vertex indices",
-			 self, aVtxArrayMesh, NSStringFromGLEnum(self.drawingMode),
-			 aVtxArrayMesh.vertexCount, aVtxArrayMesh.vertexIndexCount);
+			 self, aMesh, NSStringFromGLEnum(self.drawingMode),
+			 aMesh.vertexCount, aMesh.vertexIndexCount);
 }
 
 -(CC3MeshNode*) particleTemplate { return nil; }
@@ -123,7 +117,7 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		self.particleClass = [CC3MeshParticle class];
-		particleTemplateMesh = nil;
+		_particleTemplateMesh = nil;
 		_isParticleTransformDirty = NO;
 		_shouldTransformUnseenParticles = YES;
 	}
@@ -184,8 +178,8 @@
 }
 
 -(void) assignTemplateMeshToParticle: (id<CC3MeshParticleProtocol>) aParticle {
-	CC3Assert(particleTemplateMesh, @"The particleTemplateMesh property of %@ must be set before particles can be emitted.", self);
-	aParticle.templateMesh = particleTemplateMesh;
+	CC3Assert(_particleTemplateMesh, @"The particleTemplateMesh property of %@ must be set before particles can be emitted.", self);
+	aParticle.templateMesh = _particleTemplateMesh;
 }
 
 -(void) initializeParticle: (id<CC3MeshParticleProtocol>) aParticle {
@@ -256,7 +250,7 @@
 		LogTrace(@"Removing %@ at %i by swapping particles of identical size.", aParticle, anIndex);
 		
 		// Move the last living particle into the slot that is being vacated
-		[particles exchangeObjectAtIndex: anIndex withObjectAtIndex: partCount];
+		[_particles exchangeObjectAtIndex: anIndex withObjectAtIndex: partCount];
 		
 		// Swap the vertex offsets of the two particles
 		deadParticle.firstVertexOffset = lastFirstVtx;
@@ -299,7 +293,7 @@
 		
 		// Remove the particle from particles collection,
 		// Do this last in case the particle is only being held by this collection.
-		[particles removeObjectAtIndex: anIndex];
+		[_particles removeObjectAtIndex: anIndex];
 		
 		// Adjust the firstVertexOffset and firstVertexIndexOffset properties of each remaining
 		// particle to fill in the gap created by removing the particle from the mesh arrays.
@@ -339,10 +333,10 @@
 
 -(void) transformParticles {
 	GLuint partCount = self.particleCount;
-	LogTrace(@"%@ transforming %i particles", self, particleCount);
+	LogTrace(@"%@ transforming %i particles", self, _particleCount);
 
 	for (GLuint partIdx = 0; partIdx < partCount; partIdx++) {
-		id<CC3MeshParticleProtocol> mp = [particles objectAtIndex: partIdx];
+		id<CC3MeshParticleProtocol> mp = [_particles objectAtIndex: partIdx];
 		[mp transformVertices];
 	}
 	_isParticleTransformDirty = NO;
@@ -356,15 +350,16 @@
 
 @implementation CC3MeshParticle
 
-@synthesize isTransformDirty=_isTransformDirty, rotator, templateMesh, isColorDirty=_isColorDirty;
+@synthesize isTransformDirty=_isTransformDirty, rotator=_rotator;
+@synthesize templateMesh=_templateMesh, isColorDirty=_isColorDirty;
 
 -(void) dealloc {
-	[rotator release];
-	[templateMesh release];
+	[_rotator release];
+	[_templateMesh release];
 	[super dealloc];
 }
 
--(CC3MeshParticleEmitter*) emitter { return (CC3MeshParticleEmitter*)emitter; }
+-(CC3MeshParticleEmitter*) emitter { return (CC3MeshParticleEmitter*)_emitter; }
 
 -(void) setEmitter: (CC3MeshParticleEmitter*) anEmitter {
 	CC3Assert([anEmitter isKindOfClass: [CC3MeshParticleEmitter class]], @"%@ may only be emitted by a CC3MeshParticleEmitter.", self);
@@ -377,25 +372,25 @@
 
 -(void) setIsAlive: (BOOL) alive { _isAlive = alive; }
 
--(GLuint) firstVertexOffset { return firstVertexOffset; }
+-(GLuint) firstVertexOffset { return _firstVertexOffset; }
 
--(void) setFirstVertexOffset: (GLuint) vtxOffset { firstVertexOffset = vtxOffset; }
+-(void) setFirstVertexOffset: (GLuint) vtxOffset { _firstVertexOffset = vtxOffset; }
 
--(GLuint) vertexCount { return templateMesh ? templateMesh.vertexCount : 0; }
+-(GLuint) vertexCount { return _templateMesh ? _templateMesh.vertexCount : 0; }
 
 -(NSRange) vertexRange { return NSMakeRange(self.firstVertexOffset, self.vertexCount); }
 
--(GLuint) firstVertexIndexOffset { return firstVertexIndexOffset; }
+-(GLuint) firstVertexIndexOffset { return _firstVertexIndexOffset; }
 
--(void) setFirstVertexIndexOffset: (GLuint) vtxIdxOffset { firstVertexIndexOffset = vtxIdxOffset; }
+-(void) setFirstVertexIndexOffset: (GLuint) vtxIdxOffset { _firstVertexIndexOffset = vtxIdxOffset; }
 
 -(GLuint) vertexIndexCount {
-	return self.hasVertexIndices ? templateMesh.vertexIndexCount : self.vertexCount;
+	return self.hasVertexIndices ? _templateMesh.vertexIndexCount : self.vertexCount;
 }
 
 -(NSRange) vertexIndexRange { return NSMakeRange(self.firstVertexIndexOffset, self.vertexIndexCount); }
 
--(BOOL) hasVertexIndices { return (templateMesh && templateMesh.hasVertexIndices); }
+-(BOOL) hasVertexIndices { return (_templateMesh && _templateMesh.hasVertexIndices); }
 
 
 #pragma mark Transformation properties
@@ -405,20 +400,20 @@
 	[self.emitter markParticleTransformDirty];
 }
 
--(CC3Vector) location { return location; }
+-(CC3Vector) location { return _location; }
 
 -(void) setLocation: (CC3Vector) aLocation {
-	location = aLocation;
+	_location = aLocation;
 	[self markTransformDirty];
 }
 
 -(void) translateBy: (CC3Vector) aVector { self.location = CC3VectorAdd(self.location, aVector); }
 
--(CC3Vector) rotation { return rotator.rotation; }
+-(CC3Vector) rotation { return _rotator.rotation; }
 
 -(void) setRotation: (CC3Vector) aRotation {
 	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aRotation, rotator.rotation) ) {
+	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aRotation, _rotator.rotation) ) {
 		self.mutableRotator.rotation = aRotation;
 		[self markTransformDirty];
 	}
@@ -431,11 +426,11 @@
 	}
 }
 
--(CC3Quaternion) quaternion { return rotator.quaternion; }
+-(CC3Quaternion) quaternion { return _rotator.quaternion; }
 
 -(void) setQuaternion: (CC3Quaternion) aQuaternion {
 	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3QuaternionsAreEqual(aQuaternion, rotator.quaternion) ) {
+	if ( !self.shouldTrackTarget && !CC3QuaternionsAreEqual(aQuaternion, _rotator.quaternion) ) {
 		self.mutableRotator.quaternion = aQuaternion;
 		[self markTransformDirty];
 	}
@@ -448,20 +443,20 @@
 	}
 }
 
--(CC3Vector) rotationAxis { return rotator.rotationAxis; }
+-(CC3Vector) rotationAxis { return _rotator.rotationAxis; }
 
 -(void) setRotationAxis: (CC3Vector) aDirection {
 	// This test for change avoids unnecessarily creating and transforming a mutable rotator
-	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aDirection, rotator.rotationAxis) ) {
+	if ( !self.shouldTrackTarget && !CC3VectorsAreEqual(aDirection, _rotator.rotationAxis) ) {
 		self.mutableRotator.rotationAxis = aDirection;
 		[self markTransformDirty];
 	}
 }
 
--(GLfloat) rotationAngle { return rotator.rotationAngle; }
+-(GLfloat) rotationAngle { return _rotator.rotationAngle; }
 
 -(void) setRotationAngle: (GLfloat) anAngle {
-	if ( !self.shouldTrackTarget && (anAngle != rotator.rotationAngle) ) {
+	if ( !self.shouldTrackTarget && (anAngle != _rotator.rotationAngle) ) {
 		self.mutableRotator.rotationAngle = anAngle;
 		[self markTransformDirty];
 	}
@@ -494,7 +489,7 @@
 
 -(CC3Vector) rightDirection { return self.directionalRotator.rightDirection; }
 
--(BOOL) shouldTrackTarget { return rotator.shouldTrackTarget; }
+-(BOOL) shouldTrackTarget { return _rotator.shouldTrackTarget; }
 
 
 #pragma mark Rotator
@@ -513,13 +508,13 @@
  * rotator with a directional rotator.
  */
 -(CC3MutableRotator*) mutableRotator {
-	if ( !rotator.isMutable ) {
-		CC3MutableRotator* mRotator = (CC3MutableRotator*)[[emitter mutableRotatorClass] rotator];
-		[mRotator populateFrom: rotator];
-		LogTrace(@"%@ swapping %@ for existing %@", self, mRotator, rotator);
+	if ( !_rotator.isMutable ) {
+		CC3MutableRotator* mRotator = (CC3MutableRotator*)[[_emitter mutableRotatorClass] rotator];
+		[mRotator populateFrom: _rotator];
+		LogTrace(@"%@ swapping %@ for existing %@", self, mRotator, _rotator);
 		self.rotator = mRotator;
 	}
-	return (CC3MutableRotator*)rotator;
+	return (CC3MutableRotator*)_rotator;
 }
 
 /**
@@ -539,14 +534,14 @@
  * rotator with a directional rotator.
  */
 -(CC3DirectionalRotator*) directionalRotator {
-	if ( !rotator.isDirectional ) {
-		CC3DirectionalRotator* dRotator = (CC3DirectionalRotator*)[[emitter directionalRotatorClass] rotator];
-		[dRotator populateFrom: rotator];
-		dRotator.shouldReverseForwardDirection = emitter.shouldReverseForwardDirection;
-		LogTrace(@"%@ swapping %@ for existing %@", self, dRotator, rotator);
+	if ( !_rotator.isDirectional ) {
+		CC3DirectionalRotator* dRotator = (CC3DirectionalRotator*)[[_emitter directionalRotatorClass] rotator];
+		[dRotator populateFrom: _rotator];
+		dRotator.shouldReverseForwardDirection = _emitter.shouldReverseForwardDirection;
+		LogTrace(@"%@ swapping %@ for existing %@", self, dRotator, _rotator);
 		self.rotator = dRotator;
 	}
-	return (CC3DirectionalRotator*)rotator;
+	return (CC3DirectionalRotator*)_rotator;
 }
 
 /**
@@ -566,14 +561,14 @@
  * rotator with a directional rotator.
  */
 -(CC3TargettingRotator*) targettingRotator {
-	if ( !rotator.isTargettable ) {
-		CC3TargettingRotator* tRotator = (CC3TargettingRotator*)[[emitter targettingRotatorClass] rotator];
-		[tRotator populateFrom: rotator];
-		tRotator.shouldReverseForwardDirection = emitter.shouldReverseForwardDirection;
-		LogTrace(@"%@ swapping %@ for existing %@", self, tRotator, rotator);
+	if ( !_rotator.isTargettable ) {
+		CC3TargettingRotator* tRotator = (CC3TargettingRotator*)[[_emitter targettingRotatorClass] rotator];
+		[tRotator populateFrom: _rotator];
+		tRotator.shouldReverseForwardDirection = _emitter.shouldReverseForwardDirection;
+		LogTrace(@"%@ swapping %@ for existing %@", self, tRotator, _rotator);
 		self.rotator = tRotator;
 	}
-	return (CC3TargettingRotator*)rotator;
+	return (CC3TargettingRotator*)_rotator;
 }
 
 
@@ -607,7 +602,7 @@
 -(void) setTextureRectangle: (CGRect) aRect forTextureUnit: (GLuint) texUnit {
 
 	// The texture coordinates of the template mesh, and its effective texture rectangle.
-	CC3VertexTextureCoordinates* tmplVtxTexCoords = [templateMesh textureCoordinatesForTextureUnit: texUnit];
+	CC3VertexTextureCoordinates* tmplVtxTexCoords = [_templateMesh textureCoordinatesForTextureUnit: texUnit];
 	CGRect tmplTexRect = tmplVtxTexCoords.effectiveTextureRectangle;
 
 	// Determine the origin of the texture rectangle of this particle, in UV coordinates.
@@ -643,7 +638,7 @@
 #pragma mark Transformations
 
 /** Returns whether the mesh vertices can be transformed using only translation. */
--(BOOL) doesUseTranslationOnly { return !rotator.isMutable; }
+-(BOOL) doesUseTranslationOnly { return !_rotator.isMutable; }
 
 // If no rotation or scale has been applied, perform an optimized translation operation
 // on the vertices, instead of a full tranformation.
@@ -664,8 +659,8 @@
 	LogTrace(@"%@ translating vertices", self);
 	GLuint vtxCount = self.vertexCount;
 	for (GLuint vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++) {
-		CC3Vector vtxLoc = [templateMesh vertexLocationAt: vtxIdx];
-		[self setVertexLocation: CC3VectorAdd(vtxLoc, location) at: vtxIdx];
+		CC3Vector vtxLoc = [_templateMesh vertexLocationAt: vtxIdx];
+		[self setVertexLocation: CC3VectorAdd(vtxLoc, _location) at: vtxIdx];
 	}
 }
 
@@ -684,13 +679,13 @@
 	
 	for (GLuint vtxIdx = 0; vtxIdx < vtxCount; vtxIdx++) {
 		// Transform the vertex location using the full transform matrix
-		CC3Vector4 vtxLoc = [templateMesh vertexHomogeneousLocationAt: vtxIdx];
+		CC3Vector4 vtxLoc = [_templateMesh vertexHomogeneousLocationAt: vtxIdx];
 		vtxLoc = CC3Matrix4x3TransformCC3Vector4(&tfmMtx, vtxLoc);
 		[self setVertexHomogeneousLocation: vtxLoc at: vtxIdx];
 		
 		// Transform the vertex normal using only the rotational transform to avoid scaling the normal.
 		if (hasNorms) {
-			CC3Vector vtxNorm = [templateMesh vertexNormalAt: vtxIdx];
+			CC3Vector vtxNorm = [_templateMesh vertexNormalAt: vtxIdx];
 			vtxNorm = [self.rotator transformDirection: vtxNorm];
 			[self setVertexNormal: vtxNorm at: vtxIdx];
 		}
@@ -720,8 +715,8 @@
 
 /** Template method that applies the rotation in the rotator to the specified transform matrix. */
 -(void) applyRotationTo: (CC3Matrix4x3*) mtx {
-	[rotator.rotationMatrix multiplyIntoCC3Matrix4x3: mtx];
-	LogTrace(@"%@ rotated to %@", self, NSStringFromCC3Vector(rotator.rotation));
+	[_rotator.rotationMatrix multiplyIntoCC3Matrix4x3: mtx];
+	LogTrace(@"%@ rotated to %@", self, NSStringFromCC3Vector(_rotator.rotation));
 }
 
 -(void) markColorDirty { _isColorDirty = YES; }
@@ -732,7 +727,7 @@
 	ccColor4F vtxColF;
 	ccColor4B vtxColB;
 	GLuint vCnt = self.vertexCount;
-	switch (emitter.vertexColorType) {
+	switch (_emitter.vertexColorType) {
 		case GL_FLOAT:
 			vtxColF = self.color4F;
 			for (GLuint vIdx = 0; vIdx < vCnt; vIdx++) [self setVertexColor4F: vtxColF at: vIdx];
@@ -753,51 +748,51 @@
 #pragma mark Accessing vertex data
 
 -(CC3Vector) vertexLocationAt: (GLuint) vtxIndex {
-	return [self.emitter vertexLocationAt: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexLocationAt: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexLocation: (CC3Vector) aLocation at: (GLuint) vtxIndex {
-	[self.emitter setVertexLocation: aLocation at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexLocation: aLocation at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(CC3Vector4) vertexHomogeneousLocationAt: (GLuint) vtxIndex {
-	return [self.emitter vertexHomogeneousLocationAt: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexHomogeneousLocationAt: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexHomogeneousLocation: (CC3Vector4) aLocation at: (GLuint) vtxIndex {
-	[self.emitter setVertexHomogeneousLocation: aLocation at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexHomogeneousLocation: aLocation at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(CC3Vector) vertexNormalAt: (GLuint) vtxIndex {
-	return [self.emitter vertexNormalAt: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexNormalAt: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexNormal: (CC3Vector) aNormal at: (GLuint) vtxIndex {
-	[self.emitter setVertexNormal: aNormal at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexNormal: aNormal at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(ccColor4F) vertexColor4FAt: (GLuint) vtxIndex {
-	return [self.emitter vertexColor4FAt: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexColor4FAt: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexColor4F: (ccColor4F) aColor at: (GLuint) vtxIndex {
-	[self.emitter setVertexColor4F: aColor at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexColor4F: aColor at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(ccColor4B) vertexColor4BAt: (GLuint) vtxIndex {
-	return [self.emitter vertexColor4BAt: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexColor4BAt: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexColor4B: (ccColor4B) aColor at: (GLuint) vtxIndex {
-	[self.emitter setVertexColor4B: aColor at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexColor4B: aColor at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(ccTex2F) vertexTexCoord2FForTextureUnit: (GLuint) texUnit at: (GLuint) vtxIndex {
-	return [self.emitter vertexTexCoord2FForTextureUnit: texUnit at: (firstVertexOffset + vtxIndex)];
+	return [self.emitter vertexTexCoord2FForTextureUnit: texUnit at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(void) setVertexTexCoord2F: (ccTex2F) aTex2F forTextureUnit: (GLuint) texUnit at: (GLuint) vtxIndex {
-	[self.emitter setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: (firstVertexOffset + vtxIndex)];
+	[self.emitter setVertexTexCoord2F: aTex2F forTextureUnit: texUnit at: (_firstVertexOffset + vtxIndex)];
 }
 
 -(ccTex2F) vertexTexCoord2FAt: (GLuint) vtxIndex {
@@ -809,12 +804,12 @@
 }
 
 -(GLuint) vertexIndexAt: (GLuint) vtxIndex {
-	return [self.emitter vertexIndexAt: (firstVertexIndexOffset + vtxIndex)] - firstVertexOffset;
+	return [self.emitter vertexIndexAt: (_firstVertexIndexOffset + vtxIndex)] - _firstVertexOffset;
 }
 
 -(void) setVertexIndex: (GLuint) vertexIndex at: (GLuint) vtxIndex {
-	[self.emitter setVertexIndex: (vertexIndex + firstVertexOffset)
-							  at: (firstVertexIndexOffset + vtxIndex)];
+	[self.emitter setVertexIndex: (vertexIndex + _firstVertexOffset)
+							  at: (_firstVertexIndexOffset + vtxIndex)];
 }
 
 -(BOOL) hasVertexLocations { return self.mesh.hasVertexLocations; }
@@ -831,10 +826,10 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		self.rotator = [CC3Rotator rotator];
-		templateMesh = nil;
-		location = kCC3VectorZero;
-		firstVertexOffset = 0;
-		firstVertexIndexOffset = 0;
+		_templateMesh = nil;
+		_location = kCC3VectorZero;
+		_firstVertexOffset = 0;
+		_firstVertexIndexOffset = 0;
 		_isTransformDirty = YES;		// Force transform on first update
 		_isColorDirty = YES;			// Force color update
 	}
@@ -844,10 +839,10 @@
 -(void) populateFrom: (CC3MeshParticle*) another {
 	[super populateFrom: another];
 	self.rotator = [another.rotator autoreleasedCopy];
-	templateMesh = another.templateMesh;	// not retained
-	location = another.location;
-	firstVertexOffset = another.firstVertexOffset;
-	firstVertexIndexOffset = another.firstVertexIndexOffset;
+	_templateMesh = another.templateMesh;	// not retained
+	_location = another.location;
+	_firstVertexOffset = another.firstVertexOffset;
+	_firstVertexIndexOffset = another.firstVertexIndexOffset;
 	_isTransformDirty = another.isTransformDirty;
 	_isColorDirty = another.isColorDirty;
 }
@@ -863,22 +858,22 @@
 
 #pragma mark Transformation properties
 
--(CC3Vector) scale { return scale; }
+-(CC3Vector) scale { return _scale; }
 
 -(void) setScale: (CC3Vector) aScale {
-	scale = aScale;
+	_scale = aScale;
 	[self markTransformDirty];
 }
 
 -(GLfloat) uniformScale {
 	return (self.isUniformlyScaledLocally)
-					? scale.x 
-					: CC3VectorLength(scale) / kCC3VectorUnitCubeLength;
+					? _scale.x
+					: CC3VectorLength(_scale) / kCC3VectorUnitCubeLength;
 }
 
 -(void) setUniformScale:(GLfloat) aValue { self.scale = cc3v(aValue, aValue, aValue); }
 
--(BOOL) isUniformlyScaledLocally { return (scale.x == scale.y) && (scale.x == scale.z); }
+-(BOOL) isUniformlyScaledLocally { return (_scale.x == _scale.y) && (_scale.x == _scale.z); }
 
 
 #pragma mark Transformations
@@ -886,7 +881,7 @@
 /** Returns whether the mesh vertices can be transformed using only translation. */
 -(BOOL) doesUseTranslationOnly { return super.doesUseTranslationOnly && self.isTransformRigid; }
 
--(BOOL) isTransformRigid { return CC3VectorsAreEqual(scale, kCC3VectorUnitCube); }
+-(BOOL) isTransformRigid { return CC3VectorsAreEqual(_scale, kCC3VectorUnitCube); }
 
 /** Invoke super, then apply the scaling transforms to the specified matrix data. */
 -(void) applyLocalTransformsTo: (CC3Matrix4x3*) mtx {
@@ -896,7 +891,7 @@
 
 /** Template method that applies the local scale property to the specified transform matrix. */
 -(void) applyScalingTo: (CC3Matrix4x3*) mtx {
-	CC3Matrix4x3ScaleBy(mtx, self.scale);
+	CC3Matrix4x3ScaleBy(mtx, CC3EnsureMinScaleVector(self.scale));
 	LogTrace(@"%@ scaled to %@", self, NSStringFromCC3Vector(self.scale));
 }
 
@@ -905,14 +900,14 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		scale = kCC3VectorUnitCube;
+		_scale = kCC3VectorUnitCube;
 	}
 	return self;
 }
 
 -(void) populateFrom: (CC3ScalableMeshParticle*) another {
 	[super populateFrom: another];
-	scale = another.scale;
+	_scale = another.scale;
 }
 
 @end

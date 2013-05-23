@@ -49,14 +49,14 @@
  * faster or nicer rendering quality.
  */
 @interface CC3Fog : NSObject <CCRGBAProtocol, NSCopying> {
-	ccColor4F floatColor;
-	GLenum attenuationMode;
-	GLenum performanceHint;
-	GLfloat density;
-	GLfloat startDistance;
-	GLfloat endDistance;
-	BOOL visible : 1;
-	BOOL isRunning : 1;
+	ccColor4F _floatColor;
+	GLenum _attenuationMode;
+	GLenum _performanceHint;
+	GLfloat _density;
+	GLfloat _startDistance;
+	GLfloat _endDistance;
+	BOOL _visible : 1;
+	BOOL _isRunning : 1;
 }
 
 /**

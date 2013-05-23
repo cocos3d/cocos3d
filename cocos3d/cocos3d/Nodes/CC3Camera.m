@@ -115,7 +115,7 @@
 // transformMatrix. This is because for a camera, scale acts as a zoom to change
 // the effective FOV, which is a projection quality, not a transformation quality.
 -(void) setScale: (CC3Vector) aScale {
-	scale = aScale;
+	_scale = aScale;
 	[self markProjectionDirty];
 }
 
@@ -209,9 +209,9 @@
  */
 -(void) applyScaling {
 	[self updateGlobalScale];	// Make sure globalScale is current first.
-	[transformMatrix scaleBy: CC3VectorInvert(globalScale)];
+	[_transformMatrix scaleBy: CC3VectorInvert(_globalScale)];
 	LogTrace(@"%@ scaled back by global %@ to counter parent scaling %@",
-			 self, NSStringFromCC3Vector(globalScale), transformMatrix);
+			 self, NSStringFromCC3Vector(_globalScale), _transformMatrix);
 }
 
 /**
@@ -219,7 +219,7 @@
  * or to unit scaling if no parent.
  */
 -(void) updateGlobalScale {
-	globalScale = parent ? parent.globalScale : kCC3VectorUnitCube;
+	_globalScale = _parent ? _parent.globalScale : kCC3VectorUnitCube;
 }
 
 /** Overridden to also build the modelview matrix. */
@@ -637,7 +637,7 @@
 	
 	LogTrace(@"%@ moving to %@ to show %@ at %@ within %@ with new farClip: %.3f", self,
 				  NSStringFromCC3Vector(CC3VectorAdd(targLoc, CC3VectorScaleUniform(camDir, maxCtrDist))),
-				  aNode, NSStringFromCC3Vector(targLoc), frustum, self.farClippingDistance);
+				  aNode, NSStringFromCC3Vector(targLoc), _frustum, self.farClippingDistance);
 	
 	// Return the new location of the camera,
 	return CC3VectorAdd(targLoc, CC3VectorScaleUniform(camDir, maxCtrDist));
@@ -778,7 +778,7 @@
 		// local coordinates. Convert it to global coordinates before returning.
 		// The ray direction is straight out from that global location in the 
 		// camera's globalForwardDirection.
-		ray.startLocation =  [transformMatrix transformLocation: pointLocNear];
+		ray.startLocation =  [_transformMatrix transformLocation: pointLocNear];
 		ray.direction = self.globalForwardDirection;
 	} else {
 		// The location on the near clipping plane is relative to the camera's local
@@ -1095,8 +1095,7 @@
 																		 (m.c3r4 - m.c3r3), (m.c4r4 - m.c4r3))));
 	[self buildVertices];
 	
-	LogTrace(@"Built planes for %@ from projection: %@ and view: %@",
-				  self.fullDescription, _finiteProjectionMatrix, _viewMatrix);
+	LogTrace(@"Built planes for %@ from projection: %@ and view: %@", self, _finiteProjectionMatrix, _viewMatrix);
 }
 
 -(void) buildVertices {

@@ -249,13 +249,13 @@ typedef struct {
  * mesh will be populated with location, normal and texture coordinates for each vertex.
  */
 @interface CC3BitmapLabelNode : CC3MeshNode {
-	NSString* labelString;
-	NSString* fontFileName;
-	CC3BitmapFontConfiguration* fontConfig;
-	NSTextAlignment textAlignment;
-	CGPoint relativeOrigin;
-	CC3Tessellation tessellation;
-	GLfloat lineHeight;
+	NSString* _labelString;
+	NSString* _fontFileName;
+	CC3BitmapFontConfiguration* _fontConfig;
+	NSTextAlignment _textAlignment;
+	CGPoint _relativeOrigin;
+	CC3Tessellation _tessellation;
+	GLfloat _lineHeight;
 }
 
 /**

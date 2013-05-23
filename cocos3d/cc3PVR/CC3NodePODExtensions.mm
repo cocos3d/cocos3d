@@ -42,29 +42,29 @@ extern "C" {
 @implementation CC3Node (PVRPOD)
 
 // Subclasses must override to use instance variable.
--(int) podContentIndex { return kCC3PODNilIndex; }
+-(GLint) podContentIndex { return kCC3PODNilIndex; }
 
 // Subclasses must override to use instance variable.
--(void) setPodContentIndex: (int) aPODIndex {}
+-(void) setPodContentIndex: (GLint) aPODIndex {}
 
 // Subclasses must override to use instance variable.
--(int) podParentIndex { return kCC3PODNilIndex; }
+-(GLint) podParentIndex { return kCC3PODNilIndex; }
 
 // Subclasses must override to use instance variable.
--(void) setPodParentIndex: (int) aPODIndex {}
+-(void) setPodParentIndex: (GLint) aPODIndex {}
 
 -(BOOL) isBasePODNode { return self.podParentIndex < 0; }
 
 // Subclasses must override to use instance variable.
--(int) podTargetIndex {return kCC3PODNilIndex;}
+-(GLint) podTargetIndex {return kCC3PODNilIndex;}
 
 // Subclasses must override to use instance variable.
--(void) setPodTargetIndex: (int) aPODIndex {}
+-(void) setPodTargetIndex: (GLint) aPODIndex {}
 
 
 #pragma mark Allocation and initialization
 
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	CC3Assert(![self isMemberOfClass:[CC3Node class]], @"%@ is an abstract class and should not be instantiated directly. Use a subclass instead.", [self class]);
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex fromPODResource: aPODRez];
@@ -83,7 +83,7 @@ extern "C" {
 	return self; 
 }
 
-+(id) nodeAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
++(id) nodeAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	return [[[self alloc] initAtIndex: aPODIndex fromPODResource: aPODRez] autorelease];
 }
 
@@ -174,7 +174,7 @@ extern "C" {
 
 -(CC3Vector) locationAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
-	int currFrameOffset = _animatedLocationIndices
+	GLint currFrameOffset = _animatedLocationIndices
 								? _animatedLocationIndices[frameIndex]
 								: (frameIndex * kPODAnimationLocationStride);
 	return *(CC3Vector*)&_animatedLocations[currFrameOffset];
@@ -182,7 +182,7 @@ extern "C" {
 
 -(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
-	int currFrameOffset = _animatedQuaternionsIndices
+	GLint currFrameOffset = _animatedQuaternionsIndices
 								? _animatedQuaternionsIndices[frameIndex]
 								: (frameIndex * kPODAnimationQuaternionStride);
 	return *(CC3Quaternion*)&_animatedQuaternions[currFrameOffset];
@@ -190,7 +190,7 @@ extern "C" {
 
 -(CC3Vector) scaleAtFrame: (GLuint) frameIndex {
 	frameIndex = MIN(frameIndex, _frameCount - 1);
-	int currFrameOffset = _animatedScaleIndices
+	GLint currFrameOffset = _animatedScaleIndices
 								? _animatedScaleIndices[frameIndex]
 								: (frameIndex * kPODAnimationScaleStride);
 	return *(CC3Vector*)&_animatedScales[currFrameOffset];

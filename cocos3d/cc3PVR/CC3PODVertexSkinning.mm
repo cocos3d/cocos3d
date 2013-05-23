@@ -42,32 +42,32 @@
 
 @implementation CC3PODSkinMeshNode
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
--(int) podContentIndex { return podContentIndex; }
+-(GLint) podContentIndex { return _podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
+-(void) setPodContentIndex: (GLint) aPODIndex { _podContentIndex = aPODIndex; }
 
--(int) podParentIndex { return podParentIndex; }
+-(GLint) podParentIndex { return _podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
+-(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
--(int) podMaterialIndex { return podMaterialIndex; }
+-(GLint) podMaterialIndex { return _podMaterialIndex; }
 
--(void) setPodMaterialIndex: (int) aPODIndex { podMaterialIndex = aPODIndex; }
+-(void) setPodMaterialIndex: (GLint) aPODIndex { _podMaterialIndex = aPODIndex; }
 
 /** Overridden to extract the bone batches from the associated POD mesh structure */
--(id) initAtIndex: (int) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
+-(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		if (self.podContentIndex >= 0) {
 			SPODMesh* psm = (SPODMesh*)[aPODRez meshPODStructAtIndex: self.podContentIndex];
-			int batchCount = psm->sBoneBatches.nBatchCnt;
-			for (int batchIndex = 0; batchIndex < batchCount; batchIndex++) {
-				[skinSections addObject: [CC3PODSkinSection skinSectionFromBatchAtIndex: batchIndex
-																		   fromSPODMesh: psm
-																				forNode: self]];
+			GLint batchCount = psm->sBoneBatches.nBatchCnt;
+			for (GLint batchIndex = 0; batchIndex < batchCount; batchIndex++) {
+				[_skinSections addObject: [CC3PODSkinSection skinSectionFromBatchAtIndex: batchIndex
+																			fromSPODMesh: psm
+																				 forNode: self]];
 			}
 		}
 	}
@@ -79,20 +79,20 @@
 -(void) populateFrom: (CC3PODSkinMeshNode*) another {
 	[super populateFrom: another];
 	
-	podIndex = another.podIndex;
-	podContentIndex = another.podContentIndex;
-	podParentIndex = another.podParentIndex;
-	podMaterialIndex = another.podMaterialIndex;
+	_podIndex = another.podIndex;
+	_podContentIndex = another.podContentIndex;
+	_podParentIndex = another.podParentIndex;
+	_podMaterialIndex = another.podMaterialIndex;
 }
 
 /** Link the nodes in the bone batches. */
 -(void) linkToPODNodes: (CCArray*) nodeArray {
 	[super linkToPODNodes: nodeArray];
-	for (CC3PODSkinSection* skinSctn in skinSections) [skinSctn linkToPODNodes: nodeArray];
+	for (CC3PODSkinSection* skinSctn in _skinSections) [skinSctn linkToPODNodes: nodeArray];
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], _podIndex];
 }
 
 @end
@@ -111,21 +111,21 @@
 	return self;
 }
 
--(id) initFromBatchAtIndex: (int) aBatchIndex
+-(id) initFromBatchAtIndex: (GLint) aBatchIndex
 			  fromSPODMesh: (PODStructPtr) aSPODMesh
 				   forNode: (CC3SkinMeshNode*) aNode {
 	SPODMesh* psm = (SPODMesh*)aSPODMesh;
 	if ( (self = [self initForNode: aNode]) ) {
 		CPVRTBoneBatches* pBatches = &psm->sBoneBatches;
-		int batchCount = pBatches->nBatchCnt;
+		GLint batchCount = pBatches->nBatchCnt;
 			
-		int currFaceOffset = pBatches->pnBatchOffset[aBatchIndex];
-		int nextFaceOffset = (aBatchIndex < batchCount - 1)
+		GLint currFaceOffset = pBatches->pnBatchOffset[aBatchIndex];
+		GLint nextFaceOffset = (aBatchIndex < batchCount - 1)
 									? pBatches->pnBatchOffset[aBatchIndex + 1]
 									: psm->nNumFaces;
 			
-		vertexStart = [aNode.mesh vertexIndexCountFromFaceCount: currFaceOffset];
-		vertexCount =  [aNode.mesh vertexIndexCountFromFaceCount: (nextFaceOffset - currFaceOffset)];
+		_vertexStart = [aNode.mesh vertexIndexCountFromFaceCount: currFaceOffset];
+		_vertexCount =  [aNode.mesh vertexIndexCountFromFaceCount: (nextFaceOffset - currFaceOffset)];
 			
 		_podBoneCount = pBatches->pnBatchBoneCnt[aBatchIndex];
 		_podBoneNodeIndices = &(pBatches->pnBatches[aBatchIndex * pBatches->nBatchBoneMax]);
@@ -133,7 +133,7 @@
 	return self;
 }
 
-+(id) skinSectionFromBatchAtIndex: (int) aBatchIndex
++(id) skinSectionFromBatchAtIndex: (GLint) aBatchIndex
 					 fromSPODMesh: (PODStructPtr) aSPODMesh
 						  forNode: (CC3SkinMeshNode*) aNode {
 	return [[[self alloc] initFromBatchAtIndex: aBatchIndex fromSPODMesh: aSPODMesh forNode: aNode] autorelease];
@@ -141,8 +141,8 @@
 }
 
 -(void) linkToPODNodes: (CCArray*) nodeArray {
-	for (int boneNum = 0; boneNum < _podBoneCount; boneNum++) {
-		int boneIndex = _podBoneNodeIndices[boneNum];
+	for (GLint boneNum = 0; boneNum < _podBoneCount; boneNum++) {
+		GLint boneIndex = _podBoneNodeIndices[boneNum];
 		CC3Bone* boneNode = [nodeArray objectAtIndex: boneIndex];
 		LogTrace(@"Adding bone node %@ at index %i to %@", boneNode, boneIndex, self);
 		[self addBone: boneNode];
@@ -164,30 +164,30 @@
 
 @implementation CC3PODBone
 
--(int) podIndex { return podIndex; }
+-(GLint) podIndex { return _podIndex; }
 
--(void) setPodIndex: (int) aPODIndex { podIndex = aPODIndex; }
+-(void) setPodIndex: (GLint) aPODIndex { _podIndex = aPODIndex; }
 
--(int) podContentIndex { return podContentIndex; }
+-(GLint) podContentIndex { return _podContentIndex; }
 
--(void) setPodContentIndex: (int) aPODIndex { podContentIndex = aPODIndex; }
+-(void) setPodContentIndex: (GLint) aPODIndex { _podContentIndex = aPODIndex; }
 
--(int) podParentIndex { return podParentIndex; }
+-(GLint) podParentIndex { return _podParentIndex; }
 
--(void) setPodParentIndex: (int) aPODIndex { podParentIndex = aPODIndex; }
+-(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];
 	
-	podIndex = another.podIndex;
-	podContentIndex = another.podContentIndex;
-	podParentIndex = another.podParentIndex;
+	_podIndex = another.podIndex;
+	_podContentIndex = another.podContentIndex;
+	_podParentIndex = another.podParentIndex;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], podIndex];
+	return [NSString stringWithFormat: @"%@ (POD index: %i)", [super description], _podIndex];
 }
 
 @end
