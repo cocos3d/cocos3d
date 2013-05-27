@@ -47,11 +47,14 @@ cocos3d 2.0.0 - 2013/05/31
 	- cocos3d can now be run on a Mac under OSX.
 		- can be linked to cocos2d 2.x to run OpenGL with a GLSL shader-based programmable pipeline.
 		- can be linked to cocos2d 1.x to run OpenGL with a fixed pipeline.
-	- Added cocos3d2 Mac Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 2.x.
-	- Added cocos3d1 Mac Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 1.x.
+	- Added cocos3d2 OSX Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 2.x.
+	- Added cocos3d1 OSX Application template in the OS X/cocos3d template area for building Mac app if using cocos2d 1.x.
 	- CC3DemoMashUp now comes with two Xcode projects: one for running under iOS and one for running on a Mac under OSX.
 	- Xcode workspace cocos3d-iOS.workspace opens demos for running on iOS.
 	- Xcode workspace cocos3d-Mac.workspace opens demos for running on a Mac under OSX.
+	- Refactored CC3UIViewController into parent CC3ViewController class and subclasses:
+		- CC3UIViewController for iOS
+		- Added new CC3NSViewController for OSX.
 
 - Added support for multi-pass rendering and render-to-texture
 	- Added CC3RenderSurface classes to provide off-screen framebuffer surfaces as rendering targets

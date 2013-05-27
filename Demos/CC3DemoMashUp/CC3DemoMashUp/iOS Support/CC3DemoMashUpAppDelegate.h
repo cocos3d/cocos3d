@@ -30,5 +30,9 @@
 #import <UIKit/UIKit.h>
 #import "CC3UIViewController.h"
 
-@interface CC3DemoMashUpAppDelegate : NSObject <UIApplicationDelegate>
+@interface CC3DemoMashUpAppDelegate : NSObject <UIApplicationDelegate> {
+	UIWindow* _window;
+	CC3DeviceCameraOverlayUIViewController* _viewController;
+}
+
 @end

@@ -799,6 +799,7 @@ typedef struct {
  * Allocates storage for the specified renderbuffer, sufficient to render an image of the
  * specified size, in the specified pixel format, and with the specified number of samples
  * per pixel, which will be a value larger than one if antialiasing multisampling is in use.
+ * If multi-sampling is not supported by the platform, the pixelSamples value is ignored.
  */
 -(void) allocateStorageForRenderbuffer: (GLuint) rbID
 							  withSize: (CC3IntSize) size

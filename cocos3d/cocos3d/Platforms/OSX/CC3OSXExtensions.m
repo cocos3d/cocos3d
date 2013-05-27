@@ -36,11 +36,5 @@
 
 #if CC3_OSX
 
-@implementation CC3UIViewController
--(BOOL) isOverlayingDeviceCamera { return NO; }
--(CCGLView*) view { return nil; }
--(void) setView: (CCGLView*) view {}
-@end
-
 #endif	// CC3_OSX
 

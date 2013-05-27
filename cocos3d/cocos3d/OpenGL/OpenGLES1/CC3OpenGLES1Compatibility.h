@@ -56,11 +56,25 @@
 #define GL_FRAMEBUFFER					GL_FRAMEBUFFER_OES
 #define GL_RENDERBUFFER					GL_RENDERBUFFER_OES
 
-// General symbolic constants
+// Depth and stencil buffers
+
+#ifndef GL_DEPTH24_STENCIL8
+#define GL_DEPTH24_STENCIL8				GL_DEPTH24_STENCIL8_OES
+#endif
+
+#ifndef GL_UNSIGNED_INT_24_8
+#define GL_UNSIGNED_INT_24_8			GL_UNSIGNED_INT_24_8_OES
+#endif
+
 #ifndef GL_DEPTH_COMPONENT16
 #define GL_DEPTH_COMPONENT16			GL_DEPTH_COMPONENT16_OES
 #endif
 
+#ifndef GL_DEPTH_COMPONENT24
+#define GL_DEPTH_COMPONENT24			GL_DEPTH_COMPONENT24_OES
+#endif
+
+// General symbolic constants
 #ifndef GL_INCR_WRAP
 #define GL_INCR_WRAP					GL_INCR_WRAP_OES
 #endif

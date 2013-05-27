@@ -37,10 +37,7 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-@implementation CC3DemoMashUpAppDelegate {
-	UIWindow* _window;
-	CC3DeviceCameraOverlayUIViewController *_viewController;
-}
+@implementation CC3DemoMashUpAppDelegate
 
 -(void) dealloc {
 	[_window release];
@@ -49,7 +46,17 @@
 }
 
 #if CC3_CC2_1
-/** In cocos2d 1.x, the view controller and CCDirector are different objects. */
+/**
+ * In cocos2d 1.x, the view controller and CCDirector are different objects.
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
+ */
 -(void) establishDirectorController {
 	
 	// Establish the type of CCDirector to use.
@@ -62,6 +69,7 @@
 	_viewController = [CC3DeviceCameraOverlayUIViewController new];
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
+	_viewController.viewPixelSamples = 4;
 	
 	// Create the CCDirector, set the frame rate, and attach the view.
 	CCDirector *director = CCDirector.sharedDirector;
@@ -81,6 +89,14 @@
  * In cocos2d 2.x, the view controller and CCDirector are one and the same, and we create the
  * controller using the singleton mechanism. To establish the correct CCDirector/UIViewController
  * class, this MUST be performed before any other references to the CCDirector singleton!!
+ *
+ * NOTE: As of iOS6, supported device orientations are an intersection of the mask established for the
+ * UIViewController (as set in this method here), and the values specified in the project 'Info.plist'
+ * file, under the 'Supported interface orientations' and 'Supported interface orientations (iPad)'
+ * keys. Specifically, although the mask here is set to UIInterfaceOrientationMaskAll, to ensure that
+ * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
+ * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
+ * landscape orientations. These settings can also be set on the Summary page of your project.
  */
 -(void) establishDirectorController {
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
@@ -140,8 +156,13 @@
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 
-	// Run the layer on the controller.
-	[_viewController runSceneOnNode: mainLayer];
+	// Set the layer in the controller
+	_viewController.controlledNode = mainLayer;
+
+	// Run the layer in the director
+	CCScene *scene = [CCScene node];
+	[scene addChild: mainLayer];
+	[CCDirector.sharedDirector runWithScene: scene];
 }
 
 -(void) applicationWillResignActive: (UIApplication*) application {

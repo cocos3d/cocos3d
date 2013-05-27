@@ -29,17 +29,18 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3UIViewController.h"
+#import "CC3ViewController.h"
+#import "CC3OSXExtensions.h"
 #import "CCLayer.h"
 
 
 /**
- * A CCLayer that can be controlled by a CC3UIViewController to automatically rotate when
+ * A CCLayer that can be controlled by a CC3ViewController to automatically rotate when
  * the device orientation changes, and to permit this layer to be overlaid on the device
  * camera if it exists, permitting "augmented reality" displays.
  */
 @interface CC3ControllableLayer : CCLayer {
-	CC3UIViewController* _controller;
+	CC3ViewController* _controller;
 	BOOL _alignContentSizeWithDeviceOrientation : 1;
 }
 
@@ -87,6 +88,36 @@
 
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use CC3Scene backdrop property instead. */
 @property(nonatomic, readonly) BOOL isColored DEPRECATED_ATTRIBUTE;
+
+@end
+
+
+#pragma mark -
+#pragma mark CCNode extension to support controlling nodes from a CC3UIViewController
+
+/** Extension to CCNode to support structural node hierarchies containing controlled nodes. */
+@interface CCNode (CC3ControllableLayer)
+
+/**
+ * The controller that is controlling this node. This property is available to support delegation from
+ * this node. This property is set automatically when this node is attached to the controller, and should
+ * not be set by the application directly.
+ *
+ * In this default implementation, setting the value of this property simply sets the value of the same
+ * property in each child CCNode to the same value. Reading the value of this property returns the value
+ * of the same property from the parent of this CCNode, or returns nil if this node has no parent.
+ */
+@property(nonatomic, assign) CC3ViewController* controller;
+
+/**
+ * Invoked automatically by a CC3ViewController when the orientation of the view (portrait, landscape,
+ * etc) has changed using UIKit autorotation. The CCNode may take action such as transposing its contentSize,
+ * or reorganizing its child nodes, to better fit the new screen shape.
+ *
+ * This default implementation simply invokes the same method on each child CCNode.
+ * Subclasses that support the ability to be controlled by a CC3ViewController will override.
+ */
+-(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation;
 
 @end
 

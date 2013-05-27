@@ -101,14 +101,14 @@
  * position property (for example, by using a CCMoveTo action).
  *
  * CC3Layer directly descends from CC3ControllableLayer, which means that it can optionally
- * be controlled by a CC3UIViewController instance. Doing so enables two features:
+ * be controlled by a CC3ViewController instance. Doing so enables two features:
  *   - Automatic rotatation the layer (both the 2D and 3D components) when the device orientation changes.
  *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and 3D scenes can
  *     participate in an augmented reality view perspective.
  *
- * With the CC3UIViewController attached, either or both of these features can be turned on
+ * With the CC3ViewController attached, either or both of these features can be turned on
  * or off. If neither of these features is required, there is no need to instantiate and
- * attach a CC3UIViewController, and the CC3Layer can be used without it.
+ * attach a CC3ViewController, and the CC3Layer can be used without it.
  *
  * For most applications, you will create subclasses of both CC3Layer and CC3Scene.
  * The customized subclass of CC3Scene manages the behaviour of the 3D resources.
@@ -131,7 +131,7 @@
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
  *   -# Schedule regular updates in your CC3Layer instance by invoking either the
  *      scheduleUpdate or schedule:interval: method.
- *   -# Create a CC3UIViewController and run your CC3Layer instance by invoking the
+ *   -# Create a CC3ViewController and run your CC3Layer instance by invoking the
  *      runSceneOnNode: method.
  */
 @interface CC3Layer : CC3ControllableLayer {

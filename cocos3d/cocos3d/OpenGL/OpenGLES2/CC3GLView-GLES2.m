@@ -30,10 +30,10 @@
  */
 
 #import "CC3GLView-GLES2.h"
+#import "CC3Logging.h"
 
 #if CC3_OGLES_2
 
-#import "CC3Logging.h"
 #import "CC3IOSExtensions.h"
 
 #if COCOS2D_VERSION < 0x020100
@@ -60,14 +60,14 @@
 
 @implementation CC3GLView
 
+@synthesize surfaceManager=_surfaceManager;
+
 -(void) dealloc {
 	[_surfaceManager release];
 	[super dealloc];
 }
 
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
-
--(CC3GLViewSurfaceManager*) surfaceManager { return _surfaceManager; }
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
@@ -95,16 +95,38 @@
 }
 
 -(void) layoutSubviews {
-	[_surfaceManager resizeFromCALayer: self.layer withContext: CC2_CONTEXT];
-	CC2_SIZE = CGSizeFromCC3IntSize(_surfaceManager.size);
-	[CCDirector.sharedDirector reshapeProjection: CC2_SIZE];		// Issue #914 #924
+	CC3IntSize size;
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	
-	// Notify controller...already done in iOS5 & above
-	if(CCConfiguration.sharedConfiguration.OSVersion < kCCiOSVersion_5_0 )
-		[self.viewController viewDidLayoutSubviews];
+	// Bind the renderbuffer that is the color attachment of the view and resize it from the layer
+	[gl bindRenderbuffer: _surfaceManager.viewColorBuffer.renderbufferID];
+	if( ![CC2_CONTEXT renderbufferStorage: GL_RENDERBUFFER fromDrawable: self.layer] ) {
+		LogError(@"Failed to allocate renderbuffer storage in GL context.");
+		return;
+	}
+
+	// Retrieve the new size of the renderbuffer from the GL engine
+	// and resize all surfaces in the surface manager to that new size.
+	size.width = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_WIDTH];
+	size.height = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_HEIGHT];
+	LogTrace(@"View resizing to %@", NSStringFromCC3IntSize(size));
+
+	[_surfaceManager resizeTo: size];
+
+	// Update the CCDirector with the new view size
+	CC2_SIZE = CGSizeFromCC3IntSize(size);
+	CCDirector *director = [CCDirector sharedDirector];
+	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
+	[director drawScene];						// avoid flicker
+	
 }
 
--(void) swapBuffers { [_surfaceManager presentToContext: CC2_CONTEXT]; }
+-(void) swapBuffers {
+	[_surfaceManager resolveMultisampling];
+	if( ![CC2_CONTEXT presentRenderbuffer: GL_RENDERBUFFER] )
+		LogError(@"Failed to swap renderbuffer to screen.");
+	
+}
 
 @end
 

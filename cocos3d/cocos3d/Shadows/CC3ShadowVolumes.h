@@ -66,7 +66,7 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
  * Shadow volumes use a stencil buffer to determine the areas that require shading. The stencil
  * buffer must be allocated within the EAGLView when the view is created and initialized.
  * On the iOS, the sencil buffer is combined with the depth buffer. You create a stencil buffer by
- * passing the value GL_DEPTH24_STENCIL8_OES as the depth format argument in the CC3GLView method
+ * passing the value GL_DEPTH24_STENCIL8 as the depth format argument in the CC3GLView method
  * viewWithFrame:pixelFormat:depthFormat:preserveBackbuffer:sharegroup:multiSampling:numberOfSamples:.
  */
 @interface CC3ShadowVolumeMeshNode : CC3MeshNode <CC3ShadowProtocol> {
@@ -187,7 +187,7 @@ static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;
  * Shadow volumes use a stencil buffer to determine the areas that require shading. The stencil
  * buffer must be allocated within the EAGLView when the view is created and initialized.
  * On the iOS, the sencil buffer is combined with the depth buffer. You create a stencil buffer by
- * passing the value GL_DEPTH24_STENCIL8_OES as the depth format argument in the CC3GLView method
+ * passing the value GL_DEPTH24_STENCIL8 as the depth format argument in the CC3GLView method
  * viewWithFrame:pixelFormat:depthFormat:preserveBackbuffer:sharegroup:multiSampling:numberOfSamples:.
  *
  * It is safe to invoke this method more than once with the same, or a different light. Only one

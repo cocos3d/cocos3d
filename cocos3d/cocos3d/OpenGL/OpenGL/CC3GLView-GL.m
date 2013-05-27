@@ -30,63 +30,115 @@
  */
 
 #import "CC3GLView-GL.h"
+#import "CC3Logging.h"
 
 #if CC3_OGL
 
-#if COCOS2D_VERSION < 0x020100
-#	define CC2_REQUESTED_SAMPLES requestedSamples_
-#	define CC2_RENDERER renderer_
-#	define CC2_SIZE size_
-#	define CC2_BACKING_WIDTH backingWidth_
-#	define CC2_BACKING_HEIGHT backingHeight_
-#	define CC2_SAMPLES_TO_USE samplesToUse_
-#	define CC2_DEPTH_BUFFER depthBuffer_
-#	define CC2_DEPTH_FORMAT depthFormat_
-#	define CC2_MULTISAMPLING multiSampling_
-#else
-#	define CC2_REQUESTED_SAMPLES _requestedSamples
-#	define CC2_RENDERER _renderer
-#	define CC2_SIZE _size
-#	define CC2_BACKING_WIDTH _backingWidth
-#	define CC2_BACKING_HEIGHT _backingHeight
-#	define CC2_SAMPLES_TO_USE _samplesToUse
-#	define CC2_DEPTH_BUFFER _depthBuffer
-#	define CC2_DEPTH_FORMAT _depthFormat
-#	define CC2_MULTISAMPLING _multiSampling
-#endif
-
-#import "CC3Logging.h"
-
-
 #pragma mark -
-#pragma mark CCGLView extensions
-
-@implementation CCGLView (CC3)
-
--(GLuint) pixelSamples { return 1; }
-//-(GLuint) pixelSamples { return CC2_REQUESTED_SAMPLES; }
-
--(void) openPicking {
-//	CC3Assert( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
-//				 [self class], [CC3GLView class]);
-}
-
--(void) closePicking {}
-
--(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
-
--(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer {}
-
-@end
-
-
-#pragma mark -
-#pragma mark CCGLView
+#pragma mark CC3GLView
 
 @implementation CC3GLView
 
+@synthesize surfaceManager=_surfaceManager;
+
+-(void) dealloc {
+	[_surfaceManager release];
+	[super dealloc];
+}
+
+-(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
+
+
+-(void) prepareOpenGL {
+	[super prepareOpenGL];
+	
+	GLint screenIdx = 0;
+	GLint colorSize;
+	GLint alphaSize;
+	GLint depthSize;
+	GLint stencilSize;
+	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
+
+	[pixFmt getValues: &colorSize forAttribute:NSOpenGLPFAColorSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &alphaSize forAttribute:NSOpenGLPFAAlphaSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &depthSize forAttribute:NSOpenGLPFADepthSize forVirtualScreen: screenIdx];
+	[pixFmt getValues: &stencilSize forAttribute:NSOpenGLPFAStencilSize forVirtualScreen: screenIdx];
+
+	GLenum colorFormat = CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
+	GLenum depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
+	GLuint sampleCount = 1;
+
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initSystemColorFormat: colorFormat
+															  andDepthFormat: depthFormat
+															 andPixelSamples: sampleCount];
+}
+
+-(void) reshape {
+	// We draw on a secondary thread through the display link
+	// When resizing the view, -reshape is called automatically on the main thread
+	// Add a mutex around to avoid the threads accessing the context simultaneously when resizing
+	
+	[self lockOpenGLContext];
+	
+	CGSize size = NSSizeToCGSize([self bounds].size);
+	LogTrace(@"Window resizing to %@", NSStringFromCGSize(size));
+
+	[_surfaceManager resizeTo: CC3IntSizeFromCGSize(size)];
+	
+	CCDirector *director = [CCDirector sharedDirector];
+	[director reshapeProjection: size];
+	[director drawScene];	// avoid flicker
+	
+	[self unlockOpenGLContext];
+}
+
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gesture {}
+
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gesture {}
 
 @end
 
+GLenum CC3GLColorFormatFromBitPlanes(GLint colorCount, GLint alphaCount) {
+	LogTrace(@"Color buffer size: %i, alpha size: %i", colorCount, alphaCount);
+	switch (alphaCount) {
+		case 0:
+			switch (colorCount) {
+				case 12: return GL_RGB4;
+				case 15: return GL_RGB5;
+				case 24: return GL_RGB8;
+				case 48: return GL_RGB16;
+			}
+		case 1:
+			if (colorCount == 16) return GL_RGB5_A1;
+		case 2:
+			if (colorCount == 8) return GL_RGBA2;
+			if (colorCount == 32) return GL_RGB10_A2;
+		case 4:
+			if (colorCount == 16) return GL_RGBA4;
+		case 8:
+			if (colorCount == 32) return GL_RGBA8;
+		case 12:
+			if (colorCount == 48) return GL_RGBA12;
+		case 16:
+			if (colorCount == 64) return GL_RGBA16;
+	}
+	CC3AssertC(NO, @"Unrecognized color buffer bit plane combination: color %i, alpha: %i", colorCount, alphaCount);
+	return GL_ZERO;
+}
+
+GLenum CC3GLDepthFormatFromBitPlanes(GLint depthCount, GLint stencilCount) {
+	LogTrace(@"Depth buffer size: %i, stencil size: %i", depthCount, stencilCount);
+
+	if (depthCount && stencilCount) return GL_DEPTH24_STENCIL8;
+
+	switch (depthCount) {
+		case 0: return GL_ZERO;
+		case 16: return GL_DEPTH_COMPONENT16;
+		case 24: return GL_DEPTH_COMPONENT24;
+		case 32: return GL_DEPTH_COMPONENT32;
+	}
+	CC3AssertC(NO, @"Unrecognized depth buffer bit plane combination: depth %i, stencil: %i", depthCount, stencilCount);
+	return GL_ZERO;
+}
 
 #endif	// CC3_OGL

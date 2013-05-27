@@ -46,8 +46,8 @@
 }
 
 // Override to store the controller in the unretained iVar
--(CC3UIViewController*) controller { return _controller; }
--(void) setController: (CC3UIViewController*) aController { _controller = aController; }
+-(CC3ViewController*) controller { return _controller; }
+-(void) setController: (CC3ViewController*) aController { _controller = aController; }
 
 
 #pragma mark Allocation and initialization
@@ -77,7 +77,7 @@
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
 
 /**
- * Invoked by the CC3UIViewController when the device orientation has changed. If configured to align
+ * Invoked by the CC3ViewController when the device orientation has changed. If configured to align
  * with the device orientation, transpose the contentSize when flipping between portrait and landscape.
  */
 -(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation {
@@ -113,6 +113,25 @@
 
 // Keep the compiler happy with method re-declaration for documentation
 -(void) onExit { [super onExit]; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CCNode extension to support controlling nodes from a CC3ViewController
+
+@implementation CCNode (CC3ViewController)
+
+-(CC3ViewController*) controller { return self.parent.controller; }
+
+-(void) setController: (CC3ViewController*) aController {
+	for (CCNode* child in self.children) child.controller = aController;
+}
+
+-(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation {
+	for (CCNode* child in self.children)
+		[child viewDidRotateFrom: oldOrientation to: newOrientation];
+}
 
 @end
 

@@ -35,6 +35,7 @@
 
 @interface CC3OpenGL (TemplateMethods)
 -(void) initPlatformLimits;
+-(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget;
 @end
 
 @implementation CC3OpenGLES2
@@ -47,6 +48,44 @@
 	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
 		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
 		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+	}
+}
+
+
+#pragma mark Framebuffers
+
+-(void) resolveMultisampleFramebuffer: (GLuint) fbSrcID intoFramebuffer: (GLuint) fbDstID {
+	[self bindFramebuffer: fbSrcID toTarget: GL_READ_FRAMEBUFFER_APPLE];
+	[self bindFramebuffer: fbDstID toTarget: GL_DRAW_FRAMEBUFFER_APPLE];
+	glResolveMultisampleFramebufferAPPLE();
+	LogGLErrorTrace(@"glResolveMultisampleFramebufferAPPLE()");
+	[self bindFramebuffer: fbSrcID toTarget: GL_FRAMEBUFFER];
+}
+
+-(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID {
+	[self bindFramebuffer: fbID];
+	glDiscardFramebufferEXT(GL_FRAMEBUFFER, count, attachments);
+	LogGLErrorTrace(@"glDiscardFramebufferEXT(%@. %i, %@, %@, %@)",
+					NSStringFromGLEnum(GL_FRAMEBUFFER), count,
+					NSStringFromGLEnum(count > 0 ? attachments[0] : 0),
+					NSStringFromGLEnum(count > 1 ? attachments[1] : 0),
+					NSStringFromGLEnum(count > 2 ? attachments[2] : 0));
+}
+
+-(void) allocateStorageForRenderbuffer: (GLuint) rbID
+							  withSize: (CC3IntSize) size
+							 andFormat: (GLenum) format
+							andSamples: (GLuint) pixelSamples {
+	[self bindRenderbuffer: rbID];
+	if (pixelSamples > 1) {
+		glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, pixelSamples, format, size.width, size.height);
+		LogGLErrorTrace(@"glRenderbufferStorageMultisampleAPPLE(%@, %i, %@, %i, %i)",
+						NSStringFromGLEnum(GL_RENDERBUFFER), pixelSamples,
+						NSStringFromGLEnum(format), size.width, size.height);
+	} else {
+		glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
+		LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
+						NSStringFromGLEnum(format), size.width, size.height);
 	}
 }
 

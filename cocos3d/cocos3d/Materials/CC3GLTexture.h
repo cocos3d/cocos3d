@@ -204,8 +204,8 @@
 /**
  * Returns whether a mipmap has been generated for this texture.
  *
- * If the class-side shouldGenerateMipmaps property is YES, mipmaps are generated automatically
- * when the texture data has been loaded.
+ * If the class-side shouldGenerateMipmaps property is YES, mipmaps are generated 
+ * automatically after the texture data has been loaded.
  *
  * Mipmaps can also be generated manually by invoking the generateMipmap method.
  */

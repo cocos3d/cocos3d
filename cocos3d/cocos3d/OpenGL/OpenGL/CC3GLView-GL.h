@@ -33,84 +33,41 @@
 
 #if CC3_OGL
 
-#import "CC3OpenGLFoundation.h"
-#import "CC3CC2Extensions.h"
-
-
-#pragma mark -
-#pragma mark CCGLView extensions
-
-/**
- * This extension category adds support for node-picking while multisampling antialiasing
- * is active, by defining the interface required by that support.
- */
-@interface CCGLView (CC3)
-
-/** Returns the number of samples used to define each pixel. */
-@property(nonatomic, readonly) GLuint pixelSamples;
-
-/**
- * Invoked before the rendering pass used during node-picking, which uses a specialized
- * coloring and pixel-reading algorithm to detect which node is under a touched pixel.
- *
- * This implementation does nothing other than log an error message if multisampling
- * antialiasing is active. Subclasses that support node-picking when multisampling is
- * active will override.
- */
--(void) openPicking;
-
-/**
- * Invoked after the rendering pass used during node-picking to restore normal rendering
- * operations.
- *
- * This implementation does nothing. Subclasses that support node-picking when multisampling
- * is active will override.
- */
--(void) closePicking;
-
-/** 
- * Adds the specified gesture recognizer.
- *
- * Gesture recognizers are not supported in OSX, so this method does nothing. 
- */
--(void) addGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
-
-/**
- * Removes the specified gesture recognizer.
- *
- * Gesture recognizers are not supported in OSX, so this method does nothing.
- */
--(void) removeGestureRecognizer: (UIGestureRecognizer*) gestureRecognizer;
-
-@end
+#import "CCGLView.h"
+#import "CC3RenderSurfaces.h"
+#import	"CC3OSXExtensions.h"
 
 
 #pragma mark -
 #pragma mark CC3GLView
 
 /**
- * If your application supports BOTH multisampling AND node-picking from touch events,
- * you should use this class instead of EAGLView.
+ * A UIView specialized for use by both cocos3d and cocos2d.
  *
- * The multisampling framebuffer used when multisampling antialiasing is active interferes
- * with node-picking from touch events, because the multisampling framebuffer does not support
- * the pixel reading operation required by the node-picking algorithm.
- *
- * This subclass adds support for node-picking while multisampling is active by adding an
- * additional framebuffer that links the existing resolve color buffer to a newly created
- * depth buffer. Rendering during node picking is directed to this specialized framebuffer,
- * which does support pixel reading, by invoking the openPicking method. Once node-picking
- * is complete, the multisampling framebuffer can be made active again for normal rendering
- * operations by invoking the closePicking method.
- *
- * The additional depth and frame buffers are only added if BOTH multisampling is active and
- * node-picking is being used. To preserve memory, the additional buffers will not be created
- * unless both multisampling and node-picking are active.
- *
- * The heavy lifting of this mechanism is handled by a specialized CC3ES1Renderer, which this
- * class creates and wraps.
+ * The UIView displaying 3D content must be of this type.
  */
-@interface CC3GLView : CCGLView
+@interface CC3GLView : CCGLView {
+	CC3GLViewSurfaceManager* _surfaceManager;
+}
+
+/** Returns the number of samples used to define each pixel. */
+@property(nonatomic, readonly) GLuint pixelSamples;
+
+/** The underlying view rendering surface. */
+@property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+
+/** Compatibility with iOS view signature. This implementation does nothing under OSX. */
+-(void) addGestureRecognizer: (UIGestureRecognizer*) gesture;
+
+/** Compatibility with iOS view signature. This implementation does nothing under OSX. */
+-(void) removeGestureRecognizer: (UIGestureRecognizer*) gesture;
+
 @end
+
+/** Returns the GL color format enum corresponding to the specified number of color and alpha bit planes. */
+GLenum CC3GLColorFormatFromBitPlanes(GLint colorCount, GLint alphaCount);
+
+/** Returns the GL depth format enum corresponding to the specified number of depth and stencil bit planes. */
+GLenum CC3GLDepthFormatFromBitPlanes(GLint depthCount, GLint stencilCount);
 
 #endif	// CC3_OGL

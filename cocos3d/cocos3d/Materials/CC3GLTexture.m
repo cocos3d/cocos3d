@@ -78,7 +78,10 @@
 
 #pragma mark Binding content
 
--(void) resizeTo: (CC3IntSize) size { [self bindSize: size andPixelFormat: self.pixelFormat]; }
+-(void) resizeTo: (CC3IntSize) size {
+	if ( CC3IntSizesAreEqual(size, _size) ) return;
+	[self bindSize: size andPixelFormat: self.pixelFormat];
+}
 
 -(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
 	CC3Assert(NO, @"Size and pixel format of %@ cannot be set directly or changed", self);
@@ -453,6 +456,7 @@ static NSMutableDictionary* _texturesByName = nil;
 													andPixelFormat: self.pixelFormat];
 	[self bindTextureContent: texContent toTarget: self.textureTarget];
 	[texContent release];
+	_hasMipmap = NO;
 }
 
 
@@ -510,6 +514,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Z];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
 	[texContent release];
+	_hasMipmap = NO;
 }
 
 #pragma mark Texture file loading
@@ -796,7 +801,8 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 	
 #if CC3_OSX
 	NSData* imgData = [NSData dataWithContentsOfFile: CC3EnsureAbsoluteFilePath(aFilePath)];
-	return [self initWithCGImage: [NSBitmapImageRep imageRepWithData: imgData].CGImage];
+	NSBitmapImageRep* image = [NSBitmapImageRep imageRepWithData: imgData];
+	return [self initWithCGImage: image.CGImage];
 #endif	// CC_OSX
 }
 

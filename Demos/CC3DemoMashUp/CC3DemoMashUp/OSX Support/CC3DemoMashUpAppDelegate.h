@@ -27,16 +27,16 @@
  * http://en.wikipedia.org/wiki/MIT_License
  */
 
-#import "CC3CC2Extensions.h"
+#import "CC3NSViewController.h"
 
-@interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate>
-{
-	NSWindow	*window_;
-	CCGLView	*glView_;
+@interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate> {
+	NSWindow* _window;
+	CC3GLView* _glView;
+	CC3NSViewController* _viewController;
 }
 
-@property (assign) IBOutlet NSWindow	*window;
-@property (assign) IBOutlet CCGLView	*glView;
+@property (assign) IBOutlet NSWindow* window;
+@property (assign) IBOutlet CC3GLView* glView;
 
 - (IBAction)toggleFullScreen:(id)sender;
 

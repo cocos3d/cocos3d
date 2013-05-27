@@ -164,11 +164,11 @@ static Class _instantiationClass = nil;
 	[self deletePickerBuffers];
 	BOOL wasSuccessful = [super resizeFromLayer: layer];
 
-	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8_OES).
+	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8).
 	// Attach it to the framebuffer.
-	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8_OES || depthFormat_ == GL_UNSIGNED_INT_24_8_OES)) {
-		glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBuffer_);
-	}
+	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8 || depthFormat_ == GL_UNSIGNED_INT_24_8))
+		glFramebufferRenderbufferOES(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
+
 	return wasSuccessful;
 }
 

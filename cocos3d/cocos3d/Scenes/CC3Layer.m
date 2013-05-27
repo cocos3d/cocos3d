@@ -162,9 +162,6 @@
 
 -(void) cc3AddGestureRecognizer: (UIGestureRecognizer*) gesture {
 	[self.cc3GestureRecognizers addObject: gesture];
-	CCGLView* v = self.controller.view;
-	[v addGestureRecognizer: gesture];
-	
 	[self.controller.view addGestureRecognizer: gesture];
 }
 

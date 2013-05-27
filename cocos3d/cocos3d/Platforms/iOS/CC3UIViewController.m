@@ -30,6 +30,7 @@
  */
 
 #import "CC3UIViewController.h"
+#import "CC3ControllableLayer.h"
 #import "CC3Logging.h"
 
 #if CC3_IOS
@@ -39,21 +40,12 @@
 #import <AVFoundation/AVMediaFormat.h>
 
 
-// The height of the device camera toolbar
-#define kDeviceCameraToolbarHeight 54.0
-
-
 #pragma mark CC3UIViewController implementation
 
 @implementation CC3UIViewController
 
-@synthesize controlledNode=_controlledNode, viewColorFormat=_viewColorFormat, viewDepthFormat=_viewDepthFormat;
+@synthesize viewColorFormat=_viewColorFormat, viewDepthFormat=_viewDepthFormat;
 @synthesize viewBounds=_viewBounds, viewPixelSamples=_viewPixelSamples, viewClass=_viewClass;
-
--(void) dealloc {
-	[_controlledNode release];
-    [super dealloc];
-}
 
 
 #pragma mark View management
@@ -64,9 +56,6 @@
 #	define CC2_VIEW __view
 #endif
 
-#if CC3_CC2_1
--(CC3GLView*) view { return (CC3GLView*)super.view; }
-#endif	// CC3_CC2_1
 #if CC3_CC2_2
 // In cocos2d 2.x, view is tracked separately and does not lazily init. Restore that functionality.
 -(CC3GLView*) view {
@@ -74,13 +63,12 @@
 		[self loadView];
 		[self viewDidLoad];
 	}
-	return (CC3GLView*)super.view;
+	return super.view;
 }
 #endif	// CC3_CC2_2
 
 /** Ensure that retina display is established if required. */
 -(void) setView:(CC3GLView *)view {
-	CC3Assert(!view || [view isKindOfClass: [CC3GLView class]], @"%@ may only be attached to a CC3GLView. %@ is not of that class.", self, view);
 	super.view = view;
 	[self checkRetinaDisplay];
 }
@@ -93,10 +81,10 @@
 
 -(GLenum) viewDepthFormat { return (self.isViewLoaded) ? self.view.depthFormat : _viewDepthFormat; }
 
--(BOOL) viewShouldUseStencilBuffer { return (self.viewDepthFormat == GL_DEPTH24_STENCIL8_OES); }
+-(BOOL) viewShouldUseStencilBuffer { return CC3DepthFormatIncludesStencil(self.viewDepthFormat); }
 
 -(void) setViewShouldUseStencilBuffer: (BOOL) viewShouldUseStencilBuffer {
-	self.viewDepthFormat = viewShouldUseStencilBuffer ? GL_DEPTH24_STENCIL8_OES : GL_DEPTH_COMPONENT16;
+	self.viewDepthFormat = (viewShouldUseStencilBuffer ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT16);
 }
 
 -(GLuint) viewPixelSamples {
@@ -133,58 +121,6 @@
 	return NO;
 #endif	// CC3_IOS
 }
-
-
-#pragma mark Scene management
-
--(CCNode*) controlledNode { return _controlledNode; }
-
--(void) setControlledNode: (CCNode*) aNode {
-	if (aNode == _controlledNode) return;
-
-	[_controlledNode release];
-	_controlledNode = [aNode retain];
-	aNode.controller = self;
-}
-
--(void) runSceneOnNode: (CCNode*) aNode {
-	self.controlledNode = aNode;
-
-	if ( !aNode || !_viewWasLaidOut ) return;
-
-	CCScene* scene;
-	if ( [aNode isKindOfClass: [CCScene class]] ) {
-		scene = (CCScene*)aNode;
-	} else {
-		scene = [CCScene node];
-		[scene addChild: aNode];
-	}
-
-	CCDirector* dir = CCDirector.sharedDirector;
-	if(dir.runningScene) [dir replaceScene: scene];
-	else [dir runWithScene: scene];
-}
-
-/**
- * Invoked from the UIView during layout, to ensure that the CCDirector is running a scene.
- *
- * If the CCDirector does not have a running scene, attempt to run a scene on the
- * CCNode being controlled by this controller.
- */
--(void) ensureScene { if ( !CCDirector.sharedDirector.hasScene ) [self runSceneOnNode: self.controlledNode]; }
-
--(void) viewDidLayoutSubviews {
-	// viewDidLayoutSubviews was introduced in iOS5. Make sure it's okay to propagate upwards
-	if ( [[self superclass] respondsToSelector: @selector(viewDidLayoutSubviews)] )
-		[super viewDidLayoutSubviews];
-	LogTrace(@"%@ viewDidLayoutSubviews", self);
-	_viewWasLaidOut = YES;
-	[self ensureScene];
-}
-
--(void) pauseAnimation { [[CCDirector sharedDirector] pause]; }
-
--(void) resumeAnimation { [[CCDirector sharedDirector] resume]; }
 
 
 #pragma mark Device orientation
@@ -257,7 +193,6 @@ CC3_POP_NOSELECTOR
 // CCDirector must be in portrait orientation for autorotation to work
 -(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
 	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
-		_viewWasLaidOut = NO;
 		_shouldUseRetina = NO;
 		self.viewClass = [CC3GLView class];
 		self.viewBounds = UIScreen.mainScreen.bounds;
@@ -277,12 +212,30 @@ CC3_POP_NOSELECTOR
 -(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 
 
-#pragma mark Deprecated functionality left over from CCNodeController
+#pragma mark Deprecated functionality
 
 -(BOOL) doesAutoRotate { return self.shouldAutorotate; }
 -(void) setDoesAutoRotate: (BOOL) doesAutoRotate { self.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll; }
 -(UIDeviceOrientation) defaultCCDeviceOrientation { return UIDeviceOrientationPortrait; }
 -(void) setDefaultCCDeviceOrientation: (UIDeviceOrientation) defaultCCDeviceOrientation {}
+
+-(void) runSceneOnNode: (CCNode*) aNode {
+	self.controlledNode = aNode;
+	
+	if (!aNode) return;
+	
+	CCScene* scene;
+	if ( [aNode isKindOfClass: [CCScene class]] ) {
+		scene = (CCScene*)aNode;
+	} else {
+		scene = [CCScene node];
+		[scene addChild: aNode];
+	}
+	
+	CCDirector* dir = CCDirector.sharedDirector;
+	if(dir.runningScene) [dir replaceScene: scene];
+	else [dir runWithScene: scene];
+}
 
 @end
 
@@ -401,22 +354,3 @@ CC3_POP_NOSELECTOR
 @end
 
 #endif // CC3_IOS
-
-
-#pragma mark -
-#pragma mark CCNode extension to support controlling nodes from a CC3UIViewController
-
-@implementation CCNode (CC3UIViewController)
-
--(CC3UIViewController*) controller { return self.parent.controller; }
-
--(void) setController: (CC3UIViewController*) aController {
-	for (CCNode* child in self.children) child.controller = aController;
-}
-
--(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation {
-	for (CCNode* child in self.children)
-		[child viewDidRotateFrom: oldOrientation to: newOrientation];
-}
-
-@end

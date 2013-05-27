@@ -646,27 +646,13 @@
 	LogGLErrorTrace(@"glBindFramebuffer(%@, %u)", NSStringFromGLEnum(fbTarget), fbID);
 }
 
--(void) bindFramebuffer: (GLuint) fbID {
-	[self bindFramebuffer: fbID toTarget: GL_FRAMEBUFFER];
-}
+-(void) bindFramebuffer: (GLuint) fbID { [self bindFramebuffer: fbID toTarget: GL_FRAMEBUFFER]; }
 
 -(void) resolveMultisampleFramebuffer: (GLuint) fbSrcID intoFramebuffer: (GLuint) fbDstID {
-	[self bindFramebuffer: fbSrcID toTarget: GL_READ_FRAMEBUFFER_APPLE];
-	[self bindFramebuffer: fbDstID toTarget: GL_DRAW_FRAMEBUFFER_APPLE];
-	glResolveMultisampleFramebufferAPPLE();
-	LogGLErrorTrace(@"glResolveMultisampleFramebufferAPPLE()");
 	[self bindFramebuffer: fbSrcID toTarget: GL_FRAMEBUFFER];
 }
 
--(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID {
-	[self bindFramebuffer: fbID];
-	glDiscardFramebufferEXT(GL_FRAMEBUFFER, count, attachments);
-	LogGLErrorTrace(@"glDiscardFramebufferEXT(%@. %i, %@, %@, %@)",
-					NSStringFromGLEnum(GL_FRAMEBUFFER), count,
-					NSStringFromGLEnum(count > 0 ? attachments[0] : 0),
-					NSStringFromGLEnum(count > 1 ? attachments[1] : 0),
-					NSStringFromGLEnum(count > 2 ? attachments[2] : 0));
-}
+-(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID {}
 
 -(GLuint) generateRenderbufferID {
 	GLuint rbID;
@@ -693,16 +679,9 @@
 							 andFormat: (GLenum) format
 							andSamples: (GLuint) pixelSamples {
 	[self bindRenderbuffer: rbID];
-	if (pixelSamples > 1) {
-		glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, pixelSamples, format, size.width, size.height);
-		LogGLErrorTrace(@"glRenderbufferStorageMultisampleAPPLE(%@, %i, %@, %i, %i)",
-						NSStringFromGLEnum(GL_RENDERBUFFER), pixelSamples,
-						NSStringFromGLEnum(format), size.width, size.height);
-	} else {
-		glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
-		LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
-						NSStringFromGLEnum(format), size.width, size.height);
-	}
+	glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
+	LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
+					NSStringFromGLEnum(format), size.width, size.height);
 }
 
 -(GLint) getRenderbufferParameterInteger: (GLenum) param {

@@ -13,10 +13,7 @@
 
 #define kAnimationFrameRate		60		// Animation frame rate
 
-@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate {
-	UIWindow* _window;
-	CC3DeviceCameraOverlayUIViewController* _viewController;
-}
+@implementation ___PROJECTNAMEASIDENTIFIER___AppDelegate
 
 -(void) dealloc {
 	[_window release];
@@ -35,9 +32,6 @@
  * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
  * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
  * landscape orientations. These settings can also be set on the Summary page of your project.
- *
- * Multisampling and stencil buffers cannot be used together. Setting the viewShouldUseStencilBuffer
- * property to YES will force the viewPixelSamples property to be 1.
  */
 -(void) establishDirectorController {
 	
@@ -79,9 +73,6 @@
  * all orienatations are enabled under iOS6, be sure that those settings in the 'Info.plist' file also
  * reflect all four orientation values. By default, the 'Info.plist' settings only enable the two
  * landscape orientations. These settings can also be set on the Summary page of your project.
- *
- * Multisampling and stencil buffers cannot be used together. Setting the viewShouldUseStencilBuffer
- * property to YES will force the viewPixelSamples property to be 1.
  */
 -(void) establishDirectorController {
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
@@ -141,8 +132,13 @@
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	
-	// Attach the layer to the controller and run a scene with it.
-	[_viewController runSceneOnNode: mainLayer];
+	// Set the layer in the controller
+	_viewController.controlledNode = mainLayer;
+	
+	// Run the layer in the director
+	CCScene *scene = [CCScene node];
+	[scene addChild: mainLayer];
+	[CCDirector.sharedDirector runWithScene: scene];
 }
 
 /** Pause the cocos3d/cocos2d action. */

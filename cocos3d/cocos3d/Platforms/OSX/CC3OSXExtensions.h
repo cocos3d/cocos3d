@@ -37,6 +37,9 @@
 
 #if CC3_OSX
 
+//#import "CC3GLView-GL.h"
+
+
 // OSX equivalents for iOS declarations
 #define UITouch						NSObject
 #define UIEvent						NSObject
@@ -88,10 +91,5 @@ typedef enum {
 #define UIInterfaceOrientationIsLandscape(orientation) ((orientation) == UIInterfaceOrientationLandscapeLeft || (orientation) == UIInterfaceOrientationLandscapeRight)
 
 @class CCGLView;
-
-@interface CC3UIViewController : NSObject
-@property(nonatomic, readonly) BOOL isOverlayingDeviceCamera;
-@property(nonatomic, retain) CCGLView* view;
-@end
 
 #endif	// CC3_OSX

@@ -1488,9 +1488,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * Adds a television showing the view from the runner camera
  * This demonstrates dynamic rendering-to-texture capabilities.
  *
- * The television model POD file was exported from a Blender model created by Blend Swap artist
- * "nhumrod", and downloaded from Blend Swap at http://www.blendswap.com/blends/view/63306
- * under a CreativeCommons Zero license.
+ * The television model POD file was created by exporting from a low-poly (decimated) version
+ * of a Blender model created by Blend Swap artist "nhumrod", and downloaded from Blend Swap
+ * at http://www.blendswap.com/blends/view/63306 under a CreativeCommons Zero license.
  */
 -(void) addTelevision {
 	
@@ -1524,8 +1524,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_tvScreen.diffuseColor = kCCC4FWhite;
 	_tvScreen.shouldUseLighting = NO;
 	_tvScreen.texture = [CC3Texture textureFromFile: kTVTestCardFile];
-	tv.shouldCullBackFaces = NO;				// Faces winding on model is messed up
-	_tvScreen.shouldCullFrontFaces = NO;		// Don't paint both front and back
+	tv.shouldCullBackFaces = NO;				// Faces winding on decimated model is inconsistent
+	_tvScreen.shouldCullFrontFaces = YES;		// But don't paint both front and back of screen
 	[self addChild: tv];
 
 	_isTVOn = NO;		// Indicate TV is displaying test card

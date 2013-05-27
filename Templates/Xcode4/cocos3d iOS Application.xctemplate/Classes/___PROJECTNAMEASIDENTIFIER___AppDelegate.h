@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "CC3UIViewController.h"
 
-@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <UIApplicationDelegate>
+@interface ___PROJECTNAMEASIDENTIFIER___AppDelegate : NSObject <UIApplicationDelegate> {
+	UIWindow* _window;
+	CC3DeviceCameraOverlayUIViewController* _viewController;
+}
 @end

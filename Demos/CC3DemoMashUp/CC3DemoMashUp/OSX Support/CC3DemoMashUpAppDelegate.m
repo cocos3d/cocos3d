@@ -34,29 +34,37 @@
 #import "CC3DemoMashUpScene.h"
 
 @implementation CC3DemoMashUpAppDelegate
-@synthesize window=window_, glView=glView_;
+
+@synthesize window=_window, glView=_glView;
 
 -(void) applicationDidFinishLaunching: (NSNotification*) aNotification {
-	CCDirectorMac *director = (CCDirectorMac*)CCDirector.sharedDirector;
+	CCDirectorMac* director = (CCDirectorMac*)CCDirector.sharedDirector;
 	
 	// enable FPS and SPF
 	[director setDisplayStats: YES];
 	
 	// connect the OpenGL view with the director
-	[director setView:glView_];
+	[director setView: _glView];
 	
 	// Must use kCCDirectorResize_NoScale to allow the CC3Layer to automatically fill
 	// the window as the window is resized, and to accurately track mouse events.
 	[director setResizeMode: kCCDirectorResize_NoScale];
 	
 	// Enable "moving" mouse event. Default no.
-	[window_ setAcceptsMouseMovedEvents: NO];
+	[_window setAcceptsMouseMovedEvents: NO];
 	
 	// Center main window
-	[window_ center];
+	[_window center];
 	
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layerWithColor: ccc4(100, 120, 220, 255)];
+	// ******** START OF COCOS3D SETUP CODE... ********
+
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer node];
 	cc3Layer.cc3Scene = [CC3DemoMashUpScene scene];
+
+	// Create the view controller to coordinate the CC3Layer and window view
+	_viewController = [CC3NSViewController new];	// retained
+	_viewController.view = _glView;
+	_viewController.controlledNode = cc3Layer;
 	
 	CCScene *scene = [CCScene node];
 	[scene addChild: cc3Layer];
@@ -69,7 +77,8 @@
 
 -(void) dealloc {
 	[[CCDirector sharedDirector] end];
-	[window_ release];
+	[_window release];
+	[_viewController release];
 	[super dealloc];
 }
 

@@ -2184,6 +2184,134 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Platforms/CC3OSExtensions.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/CC3OSExtensions.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>iOS</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>iOS</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>iOS</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>iOS</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>OSX</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>OSX</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>OSX</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Platforms</string>
+				<string>OSX</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Resources/CC3DataStreams.h</key>
 		<dict>
 			<key>Group</key>
@@ -2424,7 +2552,7 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3UIViewController.h</key>
+		<key>cocos3d/cocos3d/Scenes/CC3ViewController.h</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2433,11 +2561,11 @@
 				<string>Scenes</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3UIViewController.h</string>
+			<string>cocos3d/cocos3d/Scenes/CC3ViewController.h</string>
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>cocos3d/cocos3d/Scenes/CC3UIViewController.m</key>
+		<key>cocos3d/cocos3d/Scenes/CC3ViewController.m</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -2446,7 +2574,7 @@
 				<string>Scenes</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/cocos3d/Scenes/CC3UIViewController.m</string>
+			<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Shaders/CC3GLProgram.h</key>
 		<dict>
@@ -2677,30 +2805,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Utility/CC3Identifiable.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Logging.h</key>
 		<dict>
 			<key>Group</key>
@@ -2726,54 +2830,6 @@
 			<string>cocos3d/cocos3d/Utility/CC3Math.h</string>
 			<key>TargetIndices</key>
 			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3OSExtensions.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3OSExtensions.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3OSExtensions.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3OSExtensions.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3OSXExtensions.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3OSXExtensions.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Utility/CC3OSXExtensions.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Utility</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Utility/CC3OSXExtensions.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3PerformanceStatistics.h</key>
 		<dict>
@@ -3378,6 +3434,16 @@
 		<string>cocos3d/cocos3d/Particles/CC3Particles.m</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.h</string>
 		<string>cocos3d/cocos3d/Particles/CC3PointParticles.m</string>
+		<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.h</string>
+		<string>cocos3d/cocos3d/Platforms/CC3OSExtensions.m</string>
+		<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.h</string>
+		<string>cocos3d/cocos3d/Platforms/iOS/CC3IOSExtensions.m</string>
+		<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.h</string>
+		<string>cocos3d/cocos3d/Platforms/iOS/CC3UIViewController.m</string>
+		<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.h</string>
+		<string>cocos3d/cocos3d/Platforms/OSX/CC3NSViewController.m</string>
+		<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.h</string>
+		<string>cocos3d/cocos3d/Platforms/OSX/CC3OSXExtensions.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3DataStreams.h</string>
 		<string>cocos3d/cocos3d/Resources/CC3DataStreams.m</string>
 		<string>cocos3d/cocos3d/Resources/CC3NodesResource.h</string>
@@ -3398,8 +3464,8 @@
 		<string>cocos3d/cocos3d/Scenes/CC3RenderSurfaces.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
-		<string>cocos3d/cocos3d/Scenes/CC3UIViewController.h</string>
-		<string>cocos3d/cocos3d/Scenes/CC3UIViewController.m</string>
+		<string>cocos3d/cocos3d/Scenes/CC3ViewController.h</string>
+		<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.h</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.m</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</string>
@@ -3419,14 +3485,8 @@
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Identifiable.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Identifiable.m</string>
-		<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.h</string>
-		<string>cocos3d/cocos3d/Utility/CC3IOSExtensions.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Logging.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Math.h</string>
-		<string>cocos3d/cocos3d/Utility/CC3OSExtensions.h</string>
-		<string>cocos3d/cocos3d/Utility/CC3OSExtensions.m</string>
-		<string>cocos3d/cocos3d/Utility/CC3OSXExtensions.h</string>
-		<string>cocos3d/cocos3d/Utility/CC3OSXExtensions.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3PerformanceStatistics.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3PerformanceStatistics.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Rotator.h</string>

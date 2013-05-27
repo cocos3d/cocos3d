@@ -1,5 +1,5 @@
 /*
- * CC3OSExtensions.m
+ * CC3ViewController.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,22 +26,45 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3OSExtensions.h for full API documentation.
+ * See header file CC3ViewController.h for full API documentation.
  */
 
-#import "CC3OSExtensions.h"
+#import "CC3ViewController.h"
+#import "CC3ControllableLayer.h"
+#import "CC3Logging.h"
 
 
-#pragma mark -
-#pragma mark NSObject extensions
+@implementation CC3ViewController
 
-@implementation NSObject (CC3)
+@synthesize controlledNode=_controlledNode;
 
--(id) autoreleasedCopy { return [[self copy] autorelease]; }
+-(void) dealloc {
+	[_controlledNode release];
+    [super dealloc];
+}
 
-// Deprecated
--(id) copyAutoreleased { return [[self copy] autorelease]; }
+-(BOOL) isOverlayingDeviceCamera { return NO; }
+
+-(CC3GLView*) view { return (CC3GLView*)super.view; }
+
+-(void) setView:(CC3GLView *)view {
+	CC3Assert(!view || [view isKindOfClass: [CC3GLView class]], @"%@ may only be attached to a CC3GLView. %@ is not of that class.", self, view);
+	super.view = view;
+}
+
+-(CCNode*) controlledNode { return _controlledNode; }
+
+-(void) setControlledNode: (CCNode*) aNode {
+	if (aNode == _controlledNode) return;
+	
+	[_controlledNode release];
+	_controlledNode = [aNode retain];
+	aNode.controller = self;
+}
+
+-(void) pauseAnimation { [[CCDirector sharedDirector] pause]; }
+
+-(void) resumeAnimation { [[CCDirector sharedDirector] resume]; }
 
 @end
-
 

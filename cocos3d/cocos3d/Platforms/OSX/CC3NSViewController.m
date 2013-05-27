@@ -1,5 +1,5 @@
 /*
- * CC3OSExtensions.h
+ * CC3NSViewController.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -25,26 +25,15 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
+ * 
+ * See header file CC3NSViewController.h for full API documentation.
  */
 
-/** @file */	// Doxygen marker
+#import "CC3NSViewController.h"
 
+#if CC3_OSX
 
-/* Base library of extensions to operating system frameworks to support cocos3d. */
-
-#pragma mark -
-#pragma mark NSObject extensions
-
-/** Extension category to support cocos3d functionality. */
-@interface NSObject (CC3)
-
-/**
- * Convenience method to automatically autorelease when copying objects.
- * Invokes the copy method to create a copy of this instance, autoreleases it, and returns it.
- */
--(id) autoreleasedCopy;
-
-/** @deprecated Renamed to autoreleasedCopy to satisfy naming paradigm for copy... methods. */
--(id) copyAutoreleased DEPRECATED_ATTRIBUTE;
-
+@implementation CC3NSViewController
 @end
+
+#endif // CC3_OSX

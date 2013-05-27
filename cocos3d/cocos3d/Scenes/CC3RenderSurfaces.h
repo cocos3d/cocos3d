@@ -122,13 +122,15 @@
 #pragma mark -
 #pragma mark CC3GLRenderbuffer
 
-/** 
+/**
  * Represents an OpenGL renderbuffer.
- *
- * You can configure a CC3GLRenderbuffer instance for either on-screen or off-screen rendering.
  *
  * CC3GLRenderbuffer implements the CC3FramebufferAttachment, allowing it to be attached to a
  * framebuffer.
+ *
+ * This class represents a general off-screen renderbuffer, whose storage is allocated from
+ * GL memory. For the on-screen renderbuffer whose storage is shared by the view, use the
+ * CC3OnScreenGLRenderbuffer subclass.
  */
 @interface CC3GLRenderbuffer : NSObject <CC3FramebufferAttachment> {
 	GLuint _rbID;
@@ -145,19 +147,6 @@
 
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
-
-/**
- * Resizes this instance by using the specified core animation layer as the underlying
- * storage for this buffer.
- *
- * The size and pixelFormat properties are updated to reflect the size and format of the
- * specified core animation layer, and the pixelSamples property is set to one, since
- * multisampling does not apply to the underlying core animation layer.
- */
--(void) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context;
-
-/** Presents the contents of this renderbuffer to the screen via the specified context. */
--(void) presentToContext: (EAGLContext*) context;
 
 
 #pragma mark Allocation and initialization
@@ -230,6 +219,30 @@
  * resizeFromCALayer:withContext: methods.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OnScreenGLRenderbuffer
+
+/**
+ * CC3OnScreenGLRenderbuffer is a specialized renderbuffer whose contents are presented
+ * to the screen, and whose storage is provided by the view under iOS.
+ *
+ * In this class, the implementation of the resizeTo: method does not allocate storage
+ * within the GL engine, and sets the pixelFormat property by retrieving the value from
+ * the GL engine.
+ */
+@interface CC3OnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+
+/**
+ * Sets the size and retreives the pixelFormat property from the GL engine.
+ *
+ * As storage for renderbuffers of this class is provided by the view, this implementation
+ * does not allocate storage space within GL memory.
+ */
+-(void) resizeTo: (CC3IntSize) size;
 
 @end
 
@@ -403,6 +416,26 @@
 
 
 #pragma mark -
+#pragma mark CC3SystemGLFramebuffer
+
+/**
+ * Represents the virtual OpenGL framebuffer used by the OSX system to present to a window. 
+ *
+ * Each of the attachements should be a CC3SystemGLRenderbuffer.
+ */
+@interface CC3SystemGLFramebuffer : CC3GLFramebuffer
+@end
+
+
+#pragma mark -
+#pragma mark CC3SystemGLRenderbuffer
+
+/** Represents the virtual OpenGL framebuffer attachments used by the OSX system to present to a window. */
+@interface CC3SystemGLRenderbuffer : CC3GLRenderbuffer {}
+@end
+
+
+#pragma mark -
 #pragma mark CC3GLViewSurfaceManager
 
 /**
@@ -465,6 +498,12 @@
 /** Returns the depth format of the pixels. */
 @property(nonatomic, readonly) GLenum depthFormat;
 
+/** Returns the stencil format of the pixels. */
+@property(nonatomic, readonly) GLenum stencilFormat;
+
+/** The renderbuffer that is the colorAttachment to the framebuffer in the viewSurface property. */
+@property(nonatomic, readonly) CC3GLRenderbuffer* viewColorBuffer;
+
 /** 
  * Returns the number of samples used to define each pixel.
  *
@@ -485,20 +524,22 @@
  */
 @property(nonatomic, readonly) CC3IntSize multisamplingSize;
 
-/** 
- * Presents the content of the viewSurface framebuffer to the screen, by swapping the
- * buffers in the specified GL context in the underlying core animation layer.
+/**
+ * If the view supports multisampling, resolve the multisampling surface into the view surface.
  *
- * If multisampling is in use, the contents in the multisamplingSurface framebuffer are
- * first resolved into the viewSurface framebuffer.
+ * If framebuffer discarding is supported, this method also instructs the GL engine to allow the
+ * discarding of any framebuffers that are not needed for presenting the final image to the screen.
+ *
+ * Upon completion, this method leaves the renderbuffer that is attached to the view (in the
+ * viewColorBuffer property) bound to the GL engine, so that it can be presented to the view.
  */
--(void) presentToContext: (EAGLContext*) context;
+-(void) resolveMultisampling;
 
 
 #pragma mark Surface resizing
 
-/** Resizes the framebuffers in this instance from the specified core animation layer. */
--(BOOL) resizeFromCALayer: (CAEAGLLayer*) layer withContext: (EAGLContext*) context;
+/** Resizes the framebuffers in this instance to the specified size. */
+-(void) resizeTo: (CC3IntSize) size;
 
 /**
  * Registers the specified surface to be automatically resized when the view is resized.
@@ -531,11 +572,22 @@
  * number of samples per pixel. If anti-aliasing multisampling is to be used, the value of
  * requestedSamples should be larger than one, but below the maximum number of samples per pixel
  * defined by the platform, which can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples.
+ *
+ * This initialization method should only be used with iOS.
  */
 -(id) initWithColorFormat: (GLenum) colorFormat
 		   andDepthFormat: (GLenum) depthFormat
 		  andPixelSamples: (GLuint) requestedSamples;
 
+/**
+ * Initializes this instance to match the OSX window surface, with the specified color, depth,
+ * and stencil format, and with the specified number of samples per pixel.
+ *
+ * This initialization method should only be used with OSX.
+ */
+-(id) initSystemColorFormat: (GLenum) colorFormat
+			 andDepthFormat: (GLenum) depthFormat
+			andPixelSamples: (GLuint) samples;
 @end
 
 

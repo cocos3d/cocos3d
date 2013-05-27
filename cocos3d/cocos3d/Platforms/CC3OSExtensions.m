@@ -1,5 +1,5 @@
 /*
- * main.m
+ * CC3OSExtensions.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -12,10 +12,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,13 +25,25 @@
  * THE SOFTWARE.
  *
  * http://en.wikipedia.org/wiki/MIT_License
+ * 
+ * See header file CC3OSExtensions.h for full API documentation.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "CC3OSExtensions.h"
 
-#import "CC3GLView-GL.h"
 
-int main(int argc, char *argv[]) {
-	[CC3GLView load_];
-    return NSApplicationMain(argc,  (const char **) argv);
-}
+#pragma mark -
+#pragma mark NSObject extensions
+
+@implementation NSObject (CC3)
+
+-(id) autoreleasedCopy { return [[self copy] autorelease]; }
+
+// Deprecated
+-(id) copyAutoreleased { return [[self copy] autorelease]; }
+
+-(NSString*) fullDescription { return [self description]; }
+
+@end
+
+

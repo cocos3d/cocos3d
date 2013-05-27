@@ -104,6 +104,12 @@ static inline CC3IntPoint CC3IntPointFromCGPoint(CGPoint pt) { return CC3IntPoin
 /** Returns a CGPoint structure constructed from the specified CC3IntPoint. */
 static inline CGPoint CGPointFromCC3IntPoint(CC3IntPoint ipt) { return CGPointMake(ipt.x, ipt.y); }
 
+/** Returns whether the two points are equal by comparing their respective components. */
+static inline BOOL CC3IntPointsAreEqual(CC3IntPoint p1, CC3IntPoint p2) {
+	return	(p1.x == p2.x) &&
+			(p1.y == p2.y);
+}
+
 /** An integer 2D size. */
 typedef struct {
 	GLint width;			/**< The width measurement. */
@@ -128,6 +134,12 @@ static inline CC3IntSize CC3IntSizeFromCGSize(CGSize sz) { return CC3IntSizeMake
 
 /** Returns a CGSize structure constructed from the specified CC3IntSize. */
 static inline CGSize CGSizeFromCC3IntSize(CC3IntSize isz) { return CGSizeMake(isz.width, isz.height); }
+
+/** Returns whether the two sizes are equal by comparing their respective components. */
+static inline BOOL CC3IntSizesAreEqual(CC3IntSize s1, CC3IntSize s2) {
+	return	(s1.width == s2.width) &&
+			(s1.height == s2.height);
+}
 
 /** A struct representing an integer tessellation. */
 typedef CC3IntPoint CC3Tessellation;
@@ -159,6 +171,13 @@ static inline CC3IntVector CC3IntVectorMake(GLint x, GLint y, GLint z) {
 	return v;
 }
 
+/** Returns whether the two vectors are equal by comparing their respective components. */
+static inline BOOL CC3IntVectorsAreEqual(CC3IntVector v1, CC3IntVector v2) {
+	return	(v1.x == v2.x) &&
+			(v1.y == v2.y) &&
+			(v1.z == v2.z);
+}
+
 /** An integer 4D vector. */
 typedef struct {
 	GLint x;			/**< The X-componenent of the vector. */
@@ -180,6 +199,14 @@ static inline CC3IntVector4 CC3IntVector4Make(GLint x, GLint y, GLint z, GLint w
 	v.z = z;
 	v.w = w;
 	return v;
+}
+
+/** Returns whether the two vectors are equal by comparing their respective components. */
+static inline BOOL CC3IntVector4sAreEqual(CC3IntVector4 v1, CC3IntVector4 v2) {
+	return	(v1.x == v2.x) &&
+			(v1.y == v2.y) &&
+			(v1.z == v2.z) &&
+			(v1.w == v2.w);
 }
 
 

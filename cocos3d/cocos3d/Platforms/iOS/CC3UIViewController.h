@@ -29,12 +29,8 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3IOSExtensions.h"
-#import "CC3OSXExtensions.h"
+#import "CC3ViewController.h"
 #import "CC3CC2Extensions.h"
-#import "CC3GLView-GL.h"
-#import "CC3GLView-GLES2.h"
-#import "CC3GLView-GLES1.h"
 
 #if CC3_IOS
 
@@ -42,18 +38,13 @@
 
 @class CC3AVCameraView;
 
-// The superclass of the CC3UIViewController depends on whether we're using cocos2d 2.x or 1.x
-#if CC3_CC2_1
-#	define CC3UIVCSuperclass UIViewController
-#else
-#	define CC3UIVCSuperclass CCDirectorDisplayLink
-#endif
-
 
 #pragma mark -
 #pragma mark CC3UIViewController interface
 
 /**
+ * CC3UIViewController extends CC3ViewController to provide functionality specific to iOS.
+ *
  * An instance of CC3UIViewController manages a single CCNode (typically a CCLayer) as changes
  * occur to the device orientation (portrait, landscape, etc).
  *
@@ -70,15 +61,13 @@
  * of the view as the device orientation changes. Although the supportedInterfaceOrientations method is
  * defined in iOS6, for consistency, this property can also be used in iOS versions below iOS6.
  */
-@interface CC3UIViewController : CC3UIVCSuperclass {
-	CCNode* _controlledNode;
+@interface CC3UIViewController : CC3ViewController {
 	Class _viewClass;
 	NSString* _viewColorFormat;
 	NSUInteger _supportedInterfaceOrientations;
 	CGRect _viewBounds;
 	GLenum _viewDepthFormat;
 	GLuint _viewPixelSamples;
-	BOOL _viewWasLaidOut : 1;
 	BOOL _shouldUseRetina : 1;
 }
 
@@ -86,7 +75,7 @@
 #pragma mark View management
 
 /** The view of a CC3UIViewController must be of type CC3GLView. */
-@property(nonatomic, retain) CC3GLView* view;
+//@property(nonatomic, retain) CC3GLView* view;
 
 /**
  * Invoked automatically the first time the view property is requested, and is currently nil.
@@ -159,25 +148,24 @@
 /**
  * Indicates the depth format of the view.
  *
- * This property is used by the loadView method as it creates the view, when the view property is first
- * accessed and the view property has not already been established.
+ * This property is used by the loadView method as it creates the view, when the view property
+ * is first accessed and the view property has not already been established.
  *
  * The initial value is GL_DEPTH_COMPONENT16. You can set this property prior to referencing the
  * view property of this controller in order to have the view created with a different depth format.
  *
  * Valid values for this property are:
- * - GL_DEPTH_COMPONENT16 (or GL_DEPTH_COMPONENT16_OES)
- * - GL_DEPTH_COMPONENT24_OES
- * - GL_DEPTH24_STENCIL8_OES
+ * - GL_DEPTH_COMPONENT16	(or GL_DEPTH_COMPONENT16_OES)
+ * - GL_DEPTH_COMPONENT24	(or GL_DEPTH_COMPONENT24_OES)
+ * - GL_DEPTH24_STENCIL8	(or GL_DEPTH24_STENCIL8_OES)
  * - GL_ZERO
  *
- * GL_DEPTH_COMPONENT16 and GL_DEPTH_COMPONENT16_OES are aliases to each other, and both use
- * 16 bits per pixel to track depth.
+ * In the list above, the OES extension is optional.
  *
- * The value GL_DEPTH_COMPONENT24_OES uses 24 bits per pixel to track depth, and provides higher
- * fidelity in depth testing GL_DEPTH_COMPONENT16 (or GL_DEPTH_COMPONENT16_OES).
+ * The value GL_DEPTH_COMPONENT24 uses 24 bits per pixel to track depth, and provides higher
+ * fidelity in depth testing GL_DEPTH_COMPONENT16.
  *
- * The value GL_DEPTH24_STENCIL8_OES is required if shadow volumes, or other types of stencilling
+ * The value GL_DEPTH24_STENCIL8 is required if shadow volumes, or other types of stencilling
  * will be used in your 3D scene.
  *
  * The value GL_ZERO will turn off all depth testing. This is almost never used in a 3D scene.
@@ -187,9 +175,9 @@
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
- * Once the view property has been established, reading this property returns the depthFormat property
- * of the view itself. Prior to the view being established, reading this property returns the value to
- * which it has been set.
+ * Once the view property has been established, reading this property returns the depthFormat 
+ * property of the view itself. Prior to the view being established, reading this property
+ * returns the value to which it has been set.
  *
  * The initial value of this property is GL_DEPTH_COMPONENT16.
  */
@@ -202,13 +190,13 @@
  * as a configuration convenience.
  *
  * Setting this property to YES will set the value of the viewDepthFormat property to 
- * GL_DEPTH24_STENCIL8_OES. Setting this property to NO will set the value of the 
+ * GL_DEPTH24_STENCIL8. Setting this property to NO will set the value of the 
  * viewDepthFormat property to GL_DEPTH_COMPONENT16.
  *
  * To have effect, this property must be set before the view property is first accessed.
  *
  * Reading this property will return YES if the value of the viewDepthFormat property
- * is GL_DEPTH24_STENCIL8_OES, and will return NO otherwise.
+ * is GL_DEPTH24_STENCIL8, and will return NO otherwise.
  *
  * The initial value of this property is NO.
  */
@@ -257,88 +245,6 @@
 -(BOOL) enableRetinaDisplay: (BOOL) enable;
 
 
-#pragma mark Scene management
-
-/**
- * The CCNode that is being controlled by this controller. This is typically an instance of CCLayer.
- *
- * The application should keep this property synchronized with changes in the running scene of the
- * shared CCDirector. The convenience method runSceneOnNode: can be used to automatically handle
- * this coordination.
- *
- * If the view has not yet been added to the view hierarchy, you can either set this property directly,
- * or use the runSceneOnNode: to do so. Once the view has been subsequently added to the view hierarchy,
- * the viewDidAppear: method of this controller will check to see if the CCDirector is running a scene
- * yet, and if not will invoke the  runSceneOnNode: method of this controller with the value of this
- * controlledNode property as the argument.
- *
- * However, once the CCDirector is running a scene, you should invoke the runSceneOnNode: method
- * to change both the running scene, and this controlledNode property together, instead of setting
- * this property directly. If in doubt, use the runSceneOnNode: method instead of this property.
- */
-@property(nonatomic, retain) CCNode* controlledNode;
-
-/**
- * This is a convenience method designed to change the displayed cocos2d scene, and keep the CCNode
- * being controlled by this controller (typically an instance of CCLayer) synchronized with the scene
- * being run by the shared CCDirector.
- *
- * This method sets the controlledNode property of this controller to the specified node, wraps the
- * specified node in a CCScene (if it is not already a CCScene), and runs the new scene by invoking
- * either replaceScene: or runWithScene: on the shared CCDirector, depending on whether the director
- * is already running a scene.
- *
- * This method can be invoked either before or after the view associated with this controller has
- * been added to the view hierarchy. If after, the transition to the CCScene corresponding to the
- * specified CCNode will occur immediately. However, if this method is invoked before the view has
- * been added to the view hierarchy, this method has the same effect as setting the controlledNode
- * property directly, and the running of the CCScene corresponding to the specified CCNode will be
- * deferred until the view is added to the view hierarchy, at which point it will be run automatically.
- * This ensures that the view is in place, and the CCScene can derive its corresponding size before
- * an attempt is made to run that CCScene.
- *
- * Consequently, during app startup, when the view has not been loaded and the CCDirector does not
- * yet have a running scene, you can set the controlledNode property directly instead of invoking
- * this method. But once a scene is running, you should use this method to both change the scene,
- * and change the controlledNode property together. When in doubt, use this method instead of
- * setting the controlledNode property directly.
- */
--(void) runSceneOnNode: (CCNode*) aNode;
-
-/**
- * Standard UIViewController callback that is invoked automatically when the view has been laid out.
- *
- * If the CCDirector does not have a running scene, and the controlledNode property of this
- * controller is not nil, the runSceneOnNode: method is automatically invoked, with the
- * controlledNode of this controller as the argument.
- *
- * Subclasses that override this method to perform additional processing on view loading
- * should be sure to invoke this superclass implementation.
- *
- * Although this method was introduced in iOS5, it is invoked automatically from CC3GLView
- * and CC3GLView even when running under iOS4 and below.
- */
--(void) viewDidLayoutSubviews;
-
-/**
- * Reduces cocos2d/3d animation to a minimum.
- *
- * Invoke this method when you want to reliquish CPU to perform some other task, such as displaying
- * UIKit components. To ensure a responsive UI, you should invoke this method just before displaying
- * UIKit components, such as modal or popover controllers. Once the UIKit components have been
- * dismissed, you can use the resumeAnimation method to restore the original animation level.
- *
- * Use the resumeAnimation method to restore the original animation level.
- */
--(void) pauseAnimation;
-
-/**
- * Restores cocos2d/3d animation to its original operating level, after having been temporarily
- * reduced by a prior invocation of the pauseAnimation method.
- */
--(void) resumeAnimation;
-
-
 #pragma mark Device orientation
 
 /**
@@ -372,14 +278,6 @@
  */
 @property(nonatomic, assign) NSUInteger supportedInterfaceOrientations;
 
-/**
- * Indicates whether this controller is overlaying the view of the device camera.
- *
- * This base implementation always returns NO, indicating that the device camera is not being
- * displayed. Subclasses of UIViewController that support device camera overlay can override.
- */
-@property(nonatomic, assign, readonly) BOOL isOverlayingDeviceCamera;
-
 
 #pragma mark Instance initialization and management
 
@@ -392,13 +290,16 @@
 #endif
 
 
-#pragma mark Deprecated functionality left over from CCNodeController
+#pragma mark Deprecated functionality
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
 @property(nonatomic, assign) BOOL doesAutoRotate DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Use the supportedInterfaceOrientations property to define the allowed orientations. */
 @property(nonatomic, assign) UIDeviceOrientation defaultCCDeviceOrientation DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Set superclass controlledNode property and run layer in CCScene on CCDirector instead. */
+-(void) runSceneOnNode: (CCNode*) aNode DEPRECATED_ATTRIBUTE;
 
 @end
 
@@ -500,36 +401,6 @@
 @end
 
 #endif // CC3_IOS
-
-
-#pragma mark -
-#pragma mark CCNode extension to support controlling nodes from a CC3UIViewController
-
-/** Extension to CCNode to support structural node hierarchies containing controlled nodes. */
-@interface CCNode (CC3UIViewController)
-
-/**
- * The controller that is controlling this node. This property is available to support delegation from
- * this node. This property is set automatically when this node is attached to the controller, and should
- * not be set by the application directly.
- *
- * In this default implementation, setting the value of this property simply sets the value of the same
- * property in each child CCNode to the same value. Reading the value of this property returns the value
- * of the same property from the parent of this CCNode, or returns nil if this node has no parent.
- */
-@property(nonatomic, assign) CC3UIViewController* controller;
-
-/**
- * Invoked automatically by a CC3UIViewController when the orientation of the view (portrait, landscape,
- * etc) has changed using UIKit autorotation. The CCNode may take action such as transposing its contentSize,
- * or reorganizing its child nodes, to better fit the new screen shape.
- *
- * This default implementation simply invokes the same method on each child CCNode.
- * Subclasses that support the ability to be controlled by a CC3UIViewController will override.
- */
--(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation;
-
-@end
 
 
 #pragma mark Deprecated CCNodeController interface and ControlledCCNodeProtocol protocol

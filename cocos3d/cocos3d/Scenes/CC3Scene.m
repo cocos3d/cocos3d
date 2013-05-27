@@ -91,7 +91,7 @@
     [super dealloc];
 }
 
--(CC3UIViewController*) controller { return _cc3Layer.controller; }
+-(CC3ViewController*) controller { return _cc3Layer.controller; }
 
 -(CC3Camera*) activeCamera { return _activeCamera; }
 
