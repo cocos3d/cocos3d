@@ -30,8 +30,8 @@
 /** @file */	// Doxygen marker
 
 /**
- * When compiling against OpenGL ES 2, this file adds backward compatiblity to declarations
- * and functionality provided by OpenGL ES 1 under cocos3d.
+ * When compiling against OpenGL ES 2, this file adds compatiblity to declarations
+ * and functionality provided by OpenGL or OpenGL ES 1 under cocos3d.
  */
 
 #import "CC3Environment.h"
@@ -54,6 +54,10 @@
 
 
 // Depth and stencil buffers
+
+#ifndef GL_DEPTH_STENCIL
+#define GL_DEPTH_STENCIL				GL_DEPTH_STENCIL_OES
+#endif
 
 #ifndef GL_DEPTH24_STENCIL8
 #define GL_DEPTH24_STENCIL8				GL_DEPTH24_STENCIL8_OES

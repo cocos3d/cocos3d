@@ -199,7 +199,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[_headBumpTex release];
 	[_tvSurface release];
 	[_preProcSurface release];
-	[_postProcNode release];
+	[_grayscaleNode release];
+	[_depthImageNode release];
 	
 	[super dealloc];
 }
@@ -428,7 +429,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Start out with a sunny day
 	_lightingType = kLightingSun;
-	_isDisplayingAsGrayscale = NO;
 
 	// Set the ambient scene lighting.
 	self.ambientLight = ccc4f(0.3, 0.3, 0.3, 1.0);
@@ -1497,7 +1497,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Create an empty texture of a size and aspect (16x9) useful in an HDTV model, give it
 	// a name, and add it to the texture cache for later access, or use elsewhere.
 	CC3GLTexture* tvTex = [[CC3GLTexture2D alloc] initWithSize: kTVTexSize
-												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+												andPixelFormat: GL_RGBA
+												  andPixelType: GL_UNSIGNED_BYTE];
 	tvTex.name = kTVRenderTextureName;
 	[CC3GLTexture addGLTexture: tvTex];
 	[tvTex release];	// Retained by attachment & framebuffer & cache
@@ -1534,10 +1535,25 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * Adds post-rendering image processing capabilities.
  *
- * Adds an off-screen framebuffer surface backed by a texture. The scene can be rendered
- * to this surface, and, using GLSL shaders, the texture attached to the surface can be
- * processed by the shaders associated with a special post-processing node when draws
- * the surface's texture to the view's rendering surface.
+ * Adds an off-screen framebuffer surface backed by a texture to hold the color and a texture
+ * to hold the depth value. The scene can be rendered to this surface, and, using GLSL shaders,
+ * the textures attached to the surface can be processed by the shaders associated with a
+ * special post-processing node when draws one or the other of the surface's textures to the
+ * view's rendering surface.
+ *
+ * If we choose to render the color texture, we can process the values to perform visual
+ * operations such as grayscale or blurring. If we choose to render the depth texture, we
+ * can get a visualization of the values held in the depth buffer.
+ *
+ * Since this scene uses shadow volumes, we create the depth texture with a format that
+ * included a stencil buffer. Only the depth component of the combined depth-stencil buffer
+ * will be rendered to the screen when it is made viewable.
+ *
+ * We want the surface that we create to match the dimensions of the view, and we want it
+ * to automatically adjust if the view dimensions change. To do that, we construct the
+ * textures to be the same size as the view's surface. And then we register this new surface
+ * with the viewSurfaceManager to have it automatically update the dimensions of the textures
+ * whenever the dimensions of the view change.
  *
  * Since this method accesses the view's surface manager, it must be invoked after the
  * view has been created. This method is invoked from the onOpen method of this class,
@@ -1546,31 +1562,38 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) addPostProcessing {
 	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
 	CC3IntSize surfSize = surfMgr.size;
-	GLenum depthFormat = surfMgr.depthFormat;
 	
 	// Create the offscreen framebuffer with the same size and characteristics as the
-	// view's rendering surface.
-	CC3GLTexture* ppTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
-												andPixelFormat: kCCTexture2DPixelFormat_RGBA8888];
+	// view's rendering surface. Both the color and depth attachments are textures.
+	CC3GLTexture* gsTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
+												andPixelFormat: GL_RGBA
+												  andPixelType: GL_UNSIGNED_BYTE];
+	CC3GLTexture* dTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
+											   andPixelFormat: GL_DEPTH_STENCIL
+												 andPixelType: GL_UNSIGNED_INT_24_8];
 	_preProcSurface = [CC3GLFramebuffer new];	// retained
-	_preProcSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: ppTex];
-	_preProcSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: surfSize
-															   andPixelFormat: depthFormat];
-	if ( CC3DepthFormatIncludesStencil(depthFormat) )
-		_preProcSurface.stencilAttachment = _preProcSurface.depthAttachment;
-	
+	_preProcSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: gsTex];
+	_preProcSurface.depthAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: dTex];
+	_preProcSurface.stencilAttachment = _preProcSurface.depthAttachment;
 	[_preProcSurface validate];
-	[ppTex release];	// Retained by attachment & framebuffer
+	[gsTex release];	// Retained by attachment & framebuffer
+	[dTex release];		// Retained by attachment & framebuffer
 
 	// Register this surface with the view's surface manager, so that this surface will be
 	// resized automatically whenever the view is resized.
 	[surfMgr addResizingSurface: _preProcSurface];
 
-	// Create a clip-space node that will render the off-screen surface texture to the screen.
+	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_postProcNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: ppTex]] retain];
-	[_postProcNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
+	_grayscaleNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: gsTex]] retain];
+	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
+
+	// Create a clip-space node that will render the off-screen depth texture to the screen.
+	// Load the node with shaders that convert the image into greyscale, making the scene
+	// appear as if it was filmed with black & white film.
+	_depthImageNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: dTex]] retain];
+	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 }
 
 /**
@@ -2129,8 +2152,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	[self drawToTVScreenWithVisitor: visitor];			// Draw the scene to the TV screen
 	
-	// If displaying grayscale, draw to an off-screen surface
-	if (_isDisplayingAsGrayscale) {
+	// If displaying grayscale or depth buffer, draw to an off-screen surface
+	if (self.isDisplayingAsGrayscale || self.isDisplayingAsDepth) {
 		[_preProcSurface activateWithVisitor: visitor];		// Draw to the pre-processing texture surface, not the view
 		[visitor.gl clearColorAndDepthBuffers];				// Clear the buffers of pre-proc surface.
 	} else {
@@ -2142,10 +2165,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self drawShadows];									// Shadows are drawn with a different visitor
 	
 	// If displaying grayscale, draw the off-screen surface to the view surface
-	if (_isDisplayingAsGrayscale) {
+	if (self.isDisplayingAsGrayscale) {
 		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
 		visitor.shouldDrawInClipSpace = YES;
-		[visitor visit: _postProcNode];
+		[visitor visit: _grayscaleNode];
+		visitor.shouldDrawInClipSpace = NO;
+	}
+	
+	// If displaying depth buffer, draw the off-screen surface to the view surface
+	if (self.isDisplayingAsDepth) {
+		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
+		visitor.shouldDrawInClipSpace = YES;
+		[visitor visit: _depthImageNode];
 		visitor.shouldDrawInClipSpace = NO;
 	}
 }
@@ -2423,6 +2454,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_lightingType = kLightingGrayscale;
 			break;
 		case kLightingGrayscale:
+			_lightingType = kLightingDepth;
+			break;
+		case kLightingDepth:
 			_lightingType = kLightingSun;
 			break;
 	}
@@ -2436,7 +2470,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.pureColor = kSkyColor;
-			_isDisplayingAsGrayscale = NO;
 			break;
 		case kLightingFog:
 			sun.visible = YES;
@@ -2445,7 +2478,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.pureColor = kSkyColor;
-			_isDisplayingAsGrayscale = NO;
 			break;
 		case kLightingFlashlight:
 			sun.visible = NO;
@@ -2454,7 +2486,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = YES;
 			_bumpMapLightTracker.target = flashLight;
 			_backdrop.pureColor = kCCC4FBlack;
-			_isDisplayingAsGrayscale = NO;
 			break;
 		case kLightingGrayscale:
 			sun.visible = YES;
@@ -2463,10 +2494,21 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			flashLight.visible = NO;
 			_bumpMapLightTracker.target = _robotLamp;
 			_backdrop.pureColor = kSkyColor;
-			_isDisplayingAsGrayscale = YES;
+			break;
+		case kLightingDepth:
+			sun.visible = YES;
+			_fog.visible = NO;
+			_robotLamp.visible = YES;
+			flashLight.visible = NO;
+			_bumpMapLightTracker.target = _robotLamp;
+			_backdrop.pureColor = kSkyColor;
 			break;
 	}
 }
+
+-(BOOL) isDisplayingAsGrayscale { return _lightingType == kLightingGrayscale; }
+
+-(BOOL) isDisplayingAsDepth { return _lightingType == kLightingDepth; }
 
 /**
  * Cycle between current camera view and two views showing the complete scene.

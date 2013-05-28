@@ -64,6 +64,8 @@
 	_hasPremultipliedAlpha = texContent.hasPremultipliedAlpha;
 	_isTextureCube = texContent.isTextureCube;
 	_coverage = CGSizeMake(1.0, 1.0);				// PVR textures are always POT
+	_pixelFormat = texContent.pixelFormat;
+	_pixelType = texContent.pixelType;
 	
 	LogTrace(@"Bound PVR texture ID %u", _textureID);
 	
@@ -82,6 +84,7 @@
 @implementation CC3PVRTextureContent
 
 @synthesize textureID=_textureID, size=_size, isTextureCube=_isTextureCube;
+@synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
 @synthesize hasMipmap=_hasMipmap, hasPremultipliedAlpha=_hasPremultipliedAlpha;
 
 -(BOOL) isTexture2D { return !self.isTextureCube; }
@@ -111,11 +114,12 @@
 			[self release];
 			return nil;
 		}
-		
 		_size = CC3IntSizeMake(pvrHeader.u32Width, pvrHeader.u32Height);
 		_hasMipmap = (pvrHeader.u32MIPMapCount > 1);
 		_isTextureCube = (pvrHeader.u32NumFaces > 1);
 		_hasPremultipliedAlpha = ((pvrHeader.u32Flags & PVRTEX3_PREMULTIPLIED) != 0);
+		_pixelFormat = GL_ZERO;		// Unknown - could query from GL if needed
+		_pixelType = GL_ZERO;		// Unknown - could query from GL if needed
 	}
 	return self;
 }

@@ -31,7 +31,7 @@
 
 /**
  * When compiling against OpenGL ES 1, this file adds some compatibility with declarations
- * and functionality provided by OpenGL ES 2 under cocos3d.
+ * and functionality provided by OpenGL or OpenGL ES 2 under cocos3d.
  */
 
 #import "CC3Environment.h"
@@ -57,6 +57,10 @@
 #define GL_RENDERBUFFER					GL_RENDERBUFFER_OES
 
 // Depth and stencil buffers
+
+#ifndef GL_DEPTH_STENCIL
+#define GL_DEPTH_STENCIL				GL_DEPTH_STENCIL_OES
+#endif
 
 #ifndef GL_DEPTH24_STENCIL8
 #define GL_DEPTH24_STENCIL8				GL_DEPTH24_STENCIL8_OES

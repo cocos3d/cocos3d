@@ -65,6 +65,8 @@
 @interface CC3PVRTextureContent : NSObject {
 	GLuint _textureID;
 	CC3IntSize _size;
+	GLenum _pixelFormat;
+	GLenum _pixelType;
 	BOOL _hasMipmap : 1;
 	BOOL _isTextureCube : 1;
 	BOOL _hasPremultipliedAlpha : 1;
@@ -75,6 +77,21 @@
 
 /** The size of this texture in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
+
+/**
+ * Returns the pixel format of the texture.
+ *
+ * See the pixelFormat property of CC3GLTexture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
+/**
+ * Returns the pixel data type.
+ *
+ * Possible values depend on the value of the pixelFormat property. See the pixelType
+ * property of CC3GLTexture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelType;
 
 /** Returns whether this texture contains a mipmap. */
 @property(nonatomic, readonly) BOOL hasMipmap;

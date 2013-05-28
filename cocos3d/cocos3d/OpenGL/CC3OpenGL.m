@@ -704,7 +704,6 @@
 		  mipmapLevel: (GLint) mipmapLevel
 		toFrameBuffer: (GLuint) fbID
 		 asAttachment: (GLenum) attachment {
-	CC3Assert(attachment != GL_STENCIL_ATTACHMENT, @"Textures cannot be attached to a framebuffer as a stencil attachment.");
 	[self bindFramebuffer: fbID];
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, face, texID, mipmapLevel);
 	LogGLErrorTrace(@"glFramebufferTexture2D(%@, %@, %@, %u, %i)", NSStringFromGLEnum(GL_FRAMEBUFFER),

@@ -40,9 +40,9 @@
 @implementation CC3GLTexture
 
 @synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
-@synthesize pixelFormat=_pixelFormat, hasPremultipliedAlpha=_hasPremultipliedAlpha;
-@synthesize isUpsideDown=_isUpsideDown;
-@synthesize shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
+@synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
+@synthesize hasPremultipliedAlpha=_hasPremultipliedAlpha;
+@synthesize isUpsideDown=_isUpsideDown, shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
 
 -(void) dealloc {
 	[self deleteGLTexture];
@@ -80,71 +80,26 @@
 
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, _size) ) return;
-	[self bindSize: size andPixelFormat: self.pixelFormat];
+	_size = size;
+	[self bindEmptyContent];
 }
 
--(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	CC3Assert(NO, @"Size and pixel format of %@ cannot be set directly or changed", self);
-}
+-(void) bindEmptyContent { CC3AssertUnimplemented(@"bindEmptyContent"); }
 
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
-	GLenum texelFormat, texelType;
-	GLuint byteAlignment;
-
+	
 	if (texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad)
 		[self flipTextureContentVertically: texContent];
 	
 	[self ensureGLTexture];
-
+	
 	_size = CC3IntSizeMake((GLint)texContent.pixelsWide, (GLint)texContent.pixelsHigh);
 	_coverage = CGSizeMake(texContent.maxS, texContent.maxT);
-	_pixelFormat = texContent.pixelFormat;
+	_pixelFormat = texContent.pixelGLFormat;
+	_pixelType = texContent.pixelGLType;
 	_hasPremultipliedAlpha = texContent.hasPremultipliedAlpha;
 	_isUpsideDown = texContent.isUpsideDown;
-
-	switch(_pixelFormat) {
-		case kCCTexture2DPixelFormat_RGBA8888:
-			texelFormat = GL_RGBA;
-			texelType = GL_UNSIGNED_BYTE;
-			byteAlignment = 4;
-			break;
-		case kCCTexture2DPixelFormat_RGBA4444:
-			texelFormat = GL_RGBA;
-			texelType = GL_UNSIGNED_SHORT_4_4_4_4;
-			byteAlignment = CC3IntIsEven(_size.width) ? 4 : 2;
-			break;
-		case kCCTexture2DPixelFormat_RGB5A1:
-			texelFormat = GL_RGBA;
-			texelType = GL_UNSIGNED_SHORT_5_5_5_1;
-			byteAlignment = CC3IntIsEven(_size.width) ? 4 : 2;
-			break;
-		case kCCTexture2DPixelFormat_RGB565:
-			texelFormat = GL_RGB;
-			texelType = GL_UNSIGNED_SHORT_5_6_5;
-			byteAlignment = CC3IntIsEven(_size.width) ? 4 : 2;
-			break;
-		case kCCTexture2DPixelFormat_RGB888:
-			texelFormat = GL_RGB;
-			texelType = GL_UNSIGNED_BYTE;
-			byteAlignment = CC3IntIsEven(_size.width) ? 2 : 1;
-			break;
-		case kCCTexture2DPixelFormat_AI88:
-			texelFormat = GL_LUMINANCE_ALPHA;
-			texelType = GL_UNSIGNED_BYTE;
-			byteAlignment = CC3IntIsEven(_size.width) ? 4 : 2;
-			break;
-		case kCCTexture2DPixelFormat_A8:
-			texelFormat = GL_ALPHA;
-			texelType = GL_UNSIGNED_BYTE;
-			byteAlignment = CC3IntIsEven(_size.width) ? 2 : 1;
-			break;
-		default:
-			texelFormat = GL_ZERO;
-			texelType = GL_ZERO;
-			byteAlignment = 1;
-			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", texContent.pixelFormat);
-	}
-	
+		
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit to work in
 	
@@ -152,10 +107,37 @@
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
 			   withSize: _size
-			 withFormat: texelFormat
-			   withType: texelType
-	  withByteAlignment: byteAlignment
+			 withFormat: _pixelFormat
+			   withType: _pixelType
+	  withByteAlignment: self.byteAlignment
 					 at: tuIdx];
+}
+
+-(GLuint) byteAlignment {
+
+	// First see if we can figure it out based on pixel type
+	switch (_pixelType) {
+		case GL_UNSIGNED_SHORT:
+		case GL_UNSIGNED_SHORT_4_4_4_4:
+		case GL_UNSIGNED_SHORT_5_5_5_1:
+		case GL_UNSIGNED_SHORT_5_6_5:
+			return CC3IntIsEven(_size.width) ? 4 : 2;
+
+		case GL_UNSIGNED_INT:
+		case GL_UNSIGNED_INT_24_8:
+			return 4;
+	}
+
+	// Pixel type at this point is GL_UNSIGNED_BYTE.
+	// See if we can figure it out based on pixel format.
+	switch (_pixelFormat) {
+		case GL_RGBA: return 4;
+		case GL_LUMINANCE_ALPHA: return CC3IntIsEven(_size.width) ? 4 : 2;
+	}
+
+	// Boundary is at byte level, so check it based on whether
+	// texture width is divisible by either 4 or 2.
+	return CC3IntIsEven(_size.width) ? (CC3IntIsEven(_size.width / 2) ? 4 : 2) : 1;
 }
 
 
@@ -356,10 +338,13 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(void) populateFrom: (CC3GLTexture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
-		[self bindSize: size andPixelFormat: format];
+		_size = size;
+		_pixelFormat = format;
+		_pixelType = type;
+		[self bindEmptyContent];
 	}
 	return self;
 }
@@ -451,9 +436,10 @@ static NSMutableDictionary* _texturesByName = nil;
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
--(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	id texContent = [[self.textureContentClass alloc] initWithSize: size
-													andPixelFormat: self.pixelFormat];
+-(void) bindEmptyContent {
+	id texContent = [[self.textureContentClass alloc] initWithSize: self.size
+													andPixelFormat: self.pixelFormat
+													  andPixelType: self.pixelType];
 	[self bindTextureContent: texContent toTarget: self.textureTarget];
 	[texContent release];
 	_hasMipmap = NO;
@@ -472,8 +458,8 @@ static NSMutableDictionary* _texturesByName = nil;
 	return self;
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	return [super initWithSize: size andPixelFormat: format];
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [super initWithSize: size andPixelFormat: format andPixelType: type];
 }
 
 static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
@@ -505,8 +491,10 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 +(void) setDefaultTextureParameters: (ccTexParams) texParams { _defaultCubeMapTextureParameters = texParams; }
 
--(void) bindSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	id texContent = [[self.textureContentClass alloc] initWithSize: size andPixelFormat: format];
+-(void) bindEmptyContent {
+	id texContent = [[self.textureContentClass alloc] initWithSize: self.size
+													andPixelFormat: self.pixelFormat
+													  andPixelType: self.pixelType];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_NEGATIVE_X];
 	[self bindTextureContent: texContent toTarget: GL_TEXTURE_CUBE_MAP_POSITIVE_Y];
@@ -516,6 +504,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	[texContent release];
 	_hasMipmap = NO;
 }
+
 
 #pragma mark Texture file loading
 
@@ -617,8 +606,8 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	return tex;
 }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	return [super initWithSize: size andPixelFormat: format];
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [super initWithSize: size andPixelFormat: format andPixelType: type];
 }
 
 static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
@@ -656,6 +645,7 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 @implementation CC3Texture2DContent
 
 @synthesize imageData=_imageData, isUpsideDown=_isUpsideDown;
+@synthesize pixelGLFormat=_pixelGLFormat, pixelGLType=_pixelGLType;
 
 -(void) dealloc {
 	[self deleteImageData];
@@ -719,12 +709,20 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 
 #pragma mark Allocation and Initialization
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format {
-	if ( (self = [self initWithData: NULL
-						pixelFormat: format
-						 pixelsWide: size.width
-						 pixelsHigh: size.height
-						contentSize: CGSizeFromCC3IntSize(size)]) ) {
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	LogTrace(@"Creating empty texture width %u height %u content size %@ format %i data %p",
+			 size.width, size.height, NSStringFromCGSize(size), pixelFormat, data);
+	if( (self = [super init]) ) {
+		CC2_TEX_SIZE = CGSizeFromCC3IntSize(size);
+		CC2_TEX_WIDTH = size.width;
+		CC2_TEX_HEIGHT = size.height;
+		CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;	// Unused
+		CC2_TEX_MAXS = 1.0f;
+		CC2_TEX_MAXT = 1.0f;
+		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		_imageData = NULL;
+		_pixelGLFormat = format;
+		_pixelGLType = type;
 		_isUpsideDown = NO;		// Empty texture is not upside down!
 	}
 	return self;
@@ -740,7 +738,6 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 	LogTrace(@"Loading texture width %u height %u content size %@ format %i data %p",
 			 width, height, NSStringFromCGSize(size), pixelFormat, data);
 	if( (self = [super init]) ) {
-		_imageData = data;
 		CC2_TEX_SIZE = size;
 		CC2_TEX_WIDTH = width;
 		CC2_TEX_HEIGHT = height;
@@ -748,9 +745,48 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 		CC2_TEX_MAXS = width ? (size.width / (float)width) : 1.0f;
 		CC2_TEX_MAXT = height ? (size.height / (float)height) : 1.0f;
 		CC2_TEX_HAS_PREMULT_ALPHA = NO;
+		_imageData = data;
 		_isUpsideDown = YES;			// Assume upside down
+		[self updateFromPixelFormat];
 	}
 	return self;
+}
+
+-(void) updateFromPixelFormat {
+	switch(self.pixelFormat) {
+		case kCCTexture2DPixelFormat_RGBA8888:
+			_pixelGLFormat = GL_RGBA;
+			_pixelGLType = GL_UNSIGNED_BYTE;
+			break;
+		case kCCTexture2DPixelFormat_RGBA4444:
+			_pixelGLFormat = GL_RGBA;
+			_pixelGLType = GL_UNSIGNED_SHORT_4_4_4_4;
+			break;
+		case kCCTexture2DPixelFormat_RGB5A1:
+			_pixelGLFormat = GL_RGBA;
+			_pixelGLType = GL_UNSIGNED_SHORT_5_5_5_1;
+			break;
+		case kCCTexture2DPixelFormat_RGB565:
+			_pixelGLFormat = GL_RGB;
+			_pixelGLType = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+		case kCCTexture2DPixelFormat_RGB888:
+			_pixelGLFormat = GL_RGB;
+			_pixelGLType = GL_UNSIGNED_BYTE;
+			break;
+		case kCCTexture2DPixelFormat_AI88:
+			_pixelGLFormat = GL_LUMINANCE_ALPHA;
+			_pixelGLType = GL_UNSIGNED_BYTE;
+			break;
+		case kCCTexture2DPixelFormat_A8:
+			_pixelGLFormat = GL_ALPHA;
+			_pixelGLType = GL_UNSIGNED_BYTE;
+			break;
+		default:
+			_pixelGLFormat = GL_ZERO;
+			_pixelGLType = GL_ZERO;
+			CC3Assert(NO, @"Couldn't bind texture data in unexpected format %u", self.pixelFormat);
+	}
 }
 
 -(id) initWithCGImage: (CGImageRef) cgImg {

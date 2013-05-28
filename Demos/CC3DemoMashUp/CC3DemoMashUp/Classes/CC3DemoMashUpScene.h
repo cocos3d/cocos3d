@@ -56,6 +56,7 @@ typedef enum {
 	kLightingFog,				/**< Sunshine with fog. */
 	kLightingFlashlight,		/**< Nightime with flashlight. */
 	kLightingGrayscale,			/**< Sunshine with grayscale post-processing filter. */
+	kLightingDepth,				/**< Display the depth buffer using a post-processing filter. */
 } LightingType;
 
 /**
@@ -124,6 +125,7 @@ typedef enum {
  *   - Environmental reflections using a cube mapped texture.
  *   - Render-to-texture the scene for display within the scene.
  *   - Render-to-texture to create additional visual effects using post-rendering image processing.
+ *   - Render depth-to-texture to visualize the contents of the depth buffer.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -493,6 +495,12 @@ typedef enum {
  * colors to grayscale. This is only one example of such post-rendering processing. Using the
  * same techique, you could add bloom effects, blurring, or other specialized colorizations.
  *
+ * Touching the illumination button again displays a visualization of the contents of the
+ * depth buffer of the scene. This effect is created by attaching a texture as the depth
+ * buffer of an off-screen framebuffer surface, and then rendering the underlying texture
+ * to the screen using a shader that converts the depth values in the texture to a linearlized
+ * grayscale image.
+ *
  * Touching the illumination button again will bring back the original sunshine.
  *
  * Touching the zoom button (with the plus-sign) rotates the camera so that it points
@@ -573,7 +581,8 @@ typedef enum {
 	CC3Node* _selectedNode;
 	CC3GLFramebuffer* _tvSurface;
 	CC3GLFramebuffer* _preProcSurface;
-	CC3MeshNode* _postProcNode;
+	CC3MeshNode* _grayscaleNode;
+	CC3MeshNode* _depthImageNode;
 	CGPoint _lastTouchEventPoint;
 	struct timeval _lastTouchEventTime;
 	CameraZoomType _cameraZoomType;
@@ -581,7 +590,6 @@ typedef enum {
 	CC3Ray _lastCameraOrientation;
 	GLubyte _bmLabelMessageIndex;
 	BOOL _isManagingShadows : 1;
-	BOOL _isDisplayingAsGrayscale : 1;
 	BOOL _isTVOn : 1;
 }
 

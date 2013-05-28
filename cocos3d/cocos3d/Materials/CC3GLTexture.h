@@ -82,7 +82,8 @@
 	GLuint _textureID;
 	CC3IntSize _size;
 	CGSize _coverage;
-	CCTexture2DPixelFormat _pixelFormat;
+	GLenum _pixelFormat;
+	GLenum _pixelType;
 	GLenum _minifyingFunction;
 	GLenum _magnifyingFunction;
 	GLenum _horizontalWrappingFunction;
@@ -129,8 +130,41 @@
  */
 @property(nonatomic, readonly) CGSize coverage;
 
-/** Returns the pixel format of the texture. */
-@property(nonatomic, readonly) CCTexture2DPixelFormat pixelFormat;
+/** 
+ * Returns the pixel format of the texture.
+ *
+ * The returned value may be one of the following:
+ *   - GL_RGBA
+ *   - GL_RGB
+ *   - GL_ALPHA
+ *   - GL_LUMINANCE
+ *   - GL_LUMINANCE_ALPHA
+ *   - GL_DEPTH_COMPONENT
+ *   - GL_DEPTH_STENCIL
+ */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
+/** 
+ * Returns the pixel data type.
+ *
+ * Possible values depend on the value of the pixelFormat property as follows:
+ *
+ *   pixelFormat                pixelType
+ *   -----------                ---------
+ *   GL_RGBA                    GL_UNSIGNED_BYTE
+ *                              GL_UNSIGNED_SHORT_4_4_4_4
+ *                              GL_UNSIGNED_SHORT_5_5_5_1
+ *   GL_RGB                     GL_UNSIGNED_BYTE
+ *                              GL_UNSIGNED_SHORT_5_6_5
+ *   GL_ALPHA                   GL_UNSIGNED_BYTE
+ *   GL_LUMINANCE               GL_UNSIGNED_BYTE
+ *   GL_LUMINANCE_ALPHA         GL_UNSIGNED_BYTE
+ *   GL_DEPTH_COMPONENT         GL_UNSIGNED_SHORT
+ *                              GL_UNSIGNED_INT
+ *   GL_DEPTH_STENCIL           GL_UNSIGNED_INT_24_8
+ */
+@property(nonatomic, readonly) GLenum pixelType;
+
 
 /**
  * Indicates whether the alpha channel of this texture has already been multiplied
@@ -564,8 +598,11 @@
  * Initializes this instance from the specified texture properties, without providing content.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for a
- * texture of the specified size and content type. Content can be added later by using this
+ * texture of the specified size and pixel content. Content can be added later by using this
  * texture as a rendering surface.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
  *
  * The name property of this instance will be nil.
  *
@@ -574,7 +611,7 @@
  * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
  * to multple meshes.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
 @end
 
@@ -850,8 +887,11 @@
  * Initializes this instance from the specified texture properties, without providing content.
  *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for six
- * texture faces of the specified size and content type. Content can be added later by using
+ * texture faces of the specified size and pixel content. Content can be added later by using
  * this texture as a rendering surface.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
  *
  * The name property of this instance will be nil.
  *
@@ -860,7 +900,7 @@
  * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
  * to multple meshes.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
 @end
 
@@ -875,11 +915,28 @@
  */
 @interface CC3Texture2DContent : CCTexture2D {
 	const GLvoid* _imageData;
+	GLenum _pixelGLFormat;
+	GLenum _pixelGLType;
 	BOOL _isUpsideDown : 1;
 }
 
 /** Returns a pointer to the texture image data. */
 @property(nonatomic, readonly) const GLvoid* imageData;
+
+/**
+ * Returns the GL engine pixel format of the texture.
+ *
+ * See the pixelFormat property of CC3GLTexture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelGLFormat;
+
+/**
+ * Returns the pixel data type.
+ *
+ * Possible values depend on the value of the pixelFormat property. See the pixelType
+ * property of CC3GLTexture for the range of possible values.
+ */
+@property(nonatomic, readonly) GLenum pixelGLType;
 
 /**
  * Indicates whether this texture is upside-down.
@@ -929,6 +986,6 @@
  *
  * The value of the isUpsideDown is set to NO.
  */
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (CCTexture2DPixelFormat) format;
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
 @end
