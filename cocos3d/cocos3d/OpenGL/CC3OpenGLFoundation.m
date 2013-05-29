@@ -43,8 +43,8 @@ NSString* NSStringFromGLEnum(GLenum gle) {
 
 BOOL CC3DepthFormatIncludesStencil(GLenum depthFormat) {
 	switch (depthFormat) {
-		case GL_DEPTH24_STENCIL8:
-		case GL_UNSIGNED_INT_24_8:
+		case GL_DEPTH_STENCIL:			// textures
+		case GL_DEPTH24_STENCIL8:		// renderbuffers
 			return YES;
 			break;
 		default:

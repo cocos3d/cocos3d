@@ -338,13 +338,18 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(void) populateFrom: (CC3GLTexture*) another { CC3Assert(NO, @"%@ should not be copied.", self.class); }
 
--(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
 	if ( (self = [self init]) ) {
 		self.shouldFlipVerticallyOnLoad = NO;	// Nothing to flip
-		_size = size;
 		_pixelFormat = format;
 		_pixelType = type;
-		[self bindEmptyContent];
+	}
+	return self;
+}
+
+-(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	if ( (self = [self initWithPixelFormat: format andPixelType: type]) ) {
+		[self resizeTo: size];
 	}
 	return self;
 }
@@ -458,8 +463,20 @@ static NSMutableDictionary* _texturesByName = nil;
 	return self;
 }
 
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [super initWithPixelFormat: format andPixelType: type];
+}
+
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [[[self alloc] initWithPixelFormat: format andPixelType: type] autorelease];
+}
+
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
 	return [super initWithSize: size andPixelFormat: format andPixelType: type];
+}
+
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [[[self alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
@@ -606,8 +623,20 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	return tex;
 }
 
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [super initWithPixelFormat: format andPixelType: type];
+}
+
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [[[self alloc] initWithPixelFormat: format andPixelType: type] autorelease];
+}
+
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
 	return [super initWithSize: size andPixelFormat: format andPixelType: type];
+}
+
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type {
+	return [[[self alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
 static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;

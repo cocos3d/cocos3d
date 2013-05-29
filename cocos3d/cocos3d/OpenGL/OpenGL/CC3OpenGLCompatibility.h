@@ -53,7 +53,12 @@
 #endif
 
 
-// Depth and stencil buffers
+// Color, depth and stencil buffers
+
+
+#ifndef GL_RGB565
+#define GL_RGB565                         0x8D62
+#endif
 
 #ifndef GL_DEPTH_STENCIL
 #define GL_DEPTH_STENCIL				GL_DEPTH_STENCIL_EXT

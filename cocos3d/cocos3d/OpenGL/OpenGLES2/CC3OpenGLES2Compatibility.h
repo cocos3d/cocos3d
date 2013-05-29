@@ -53,7 +53,15 @@
 #endif
 
 
-// Depth and stencil buffers
+// Color, depth and stencil buffers
+
+#ifndef GL_RGB8
+#define GL_RGB8							GL_RGB8_OES
+#endif
+
+#ifndef GL_RGBA8
+#define GL_RGBA8						GL_RGBA8_OES
+#endif
 
 #ifndef GL_DEPTH_STENCIL
 #define GL_DEPTH_STENCIL				GL_DEPTH_STENCIL_OES
@@ -73,6 +81,10 @@
 
 #ifndef GL_DEPTH_COMPONENT24
 #define GL_DEPTH_COMPONENT24			GL_DEPTH_COMPONENT24_OES
+#endif
+
+#ifndef GL_DEPTH_COMPONENT32
+#define GL_DEPTH_COMPONENT32			  0x81A7
 #endif
 
 #ifndef GL_INCR_WRAP_OES

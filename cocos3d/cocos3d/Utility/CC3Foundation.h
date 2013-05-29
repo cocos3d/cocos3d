@@ -85,6 +85,9 @@ typedef struct {
 	GLint y;			/**< The Y-componenent of the point. */
 } CC3IntPoint;
 
+/** A CC3IntPoint at the origin. */
+static const CC3IntPoint kCC3IntPointZero = { 0, 0 };
+
 /** Returns a string description of the specified CC3IntPoint struct in the form "(x, y)" */
 static inline NSString* NSStringFromCC3IntPoint(CC3IntPoint v) {
 	return [NSString stringWithFormat: @"(%i, %i)", v.x, v.y];
@@ -115,6 +118,9 @@ typedef struct {
 	GLint width;			/**< The width measurement. */
 	GLint height;			/**< The height measurement. */
 } CC3IntSize;
+
+/** A CC3IntSize of zero extent. */
+static const CC3IntSize kCC3IntSizeZero = { 0, 0 };
 
 /** Returns a string description of the specified CC3IntSize struct in the form "(width, height)" */
 static inline NSString* NSStringFromCC3IntSize(CC3IntSize size) {

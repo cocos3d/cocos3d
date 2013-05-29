@@ -355,9 +355,9 @@
 
 #pragma mark Allocation and initialization
 
-+(id) nodeWithTexture: (CC3Texture*) texture {
++(id) nodeWithTexture: (CC3GLTexture*) texture {
 	CC3MeshNode* csn = [self node];
-	csn.texture = texture;
+	csn.texture = [CC3Texture textureWithGLTexture: texture];
 	return csn;
 }
 

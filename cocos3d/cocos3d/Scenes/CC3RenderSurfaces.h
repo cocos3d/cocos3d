@@ -31,43 +31,6 @@
 
 #import "CC3GLTexture.h"
 
-@protocol CC3RenderSurfaceAttachment;
-
-
-#pragma mark -
-#pragma mark CC3RenderSurface
-
-/** A CC3RenderSurface is a surface on which rendering or drawing can occur. */
-@protocol CC3RenderSurface <NSObject>
-
-/** The surface attachment to which color data is rendered. */
-@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> colorAttachment;
-
-/** The surface attachment to which depth data is rendered. */
-@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> depthAttachment;
-
-/** The surface attachment to which stencil data is rendered. */
-@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> stencilAttachment;
-
-/**
- * Validates that this surface has a valid configuration in the GL engine.
- *
- * This method should be invoked to validate the surface once all attachments
- * have been set or resized.
- */
--(BOOL) validate;
-
-
-#pragma mark Drawing
-
-/**
- * Activates this surface using the CC3OpenGL instance in the specified visitor.
- * Subsequent GL drawing activity will be rendered to this surface.
- */
--(void) activateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-@end
-
 
 #pragma mark -
 #pragma mark CC3RenderSurfaceAttachment
@@ -90,6 +53,64 @@
  * The size property is updated to reflect the new size.
  */
 -(void) resizeTo: (CC3IntSize) size;
+
+/** The format of each pixel in the buffer. */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3RenderSurface
+
+/** A CC3RenderSurface is a surface on which rendering or drawing can occur. */
+@protocol CC3RenderSurface <NSObject>
+
+/** 
+ * The surface attachment to which color data is rendered.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface.
+ */
+@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> colorAttachment;
+
+/**
+ * The surface attachment to which depth data is rendered.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface. For
+ * instance, the same depth attachment might be used when rendering to several different color
+ * attachments of different surfaces.
+ */
+@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> depthAttachment;
+
+/**
+ * The surface attachment to which stencil data is rendered.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface.
+ */
+@property(nonatomic, retain) id<CC3RenderSurfaceAttachment> stencilAttachment;
+
+/** The size of this surface in pixels. */
+@property(nonatomic, readonly) CC3IntSize size;
+
+/**
+ * Validates that this surface has a valid configuration in the GL engine.
+ *
+ * This method should be invoked to validate the surface once all attachments
+ * have been set or resized.
+ */
+-(BOOL) validate;
+
+
+#pragma mark Drawing
+
+/**
+ * Activates this surface using the CC3OpenGL instance in the specified visitor.
+ * Subsequent GL drawing activity will be rendered to this surface.
+ */
+-(void) activateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 @end
 
@@ -142,9 +163,6 @@
 /** The ID used to identify the renderbuffer to the GL engine. */
 @property(nonatomic, readonly) GLuint renderbufferID;
 
-/** The format of each pixel. */
-@property(nonatomic, readonly) GLenum pixelFormat;
-
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
 
@@ -165,10 +183,6 @@
  *
  * The size and pixelFormat properties of this instance are set to the specified values.
  * The pixelSamples property is set to one.
- *
- * If this renderbuffer is rendering to the primary on-screen view, this method should not be invoked.
- * Instead, initialize using the init method, and then use the resizeFromCALayer:withContext: method
- * to attach the instance to an underlying CALayer.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
 
@@ -179,18 +193,13 @@
  *
  * The size and pixelFormat properties of this instance are set to the specified values.
  * The pixelSamples property will be set to one.
- *
- * If this renderbuffer is rendering to the primary on-screen view, this method should not be invoked.
- * Instead, initialize using the renderbuffer method, and then use the resizeFromCALayer:withContext:
- * method to attach the instance to an underlying CALayer.
  */
 +(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
 
 /**
  * Initializes this instance with the specified pixel format and with one sample per pixel.
  *
- * The size of this renderbuffer can be set by invoking either the resizeTo: or 
- * resizeFromCALayer:withContext: methods.
+ * The size of this renderbuffer can be set by invoking the resizeTo: method.
  */
 -(id) initWithPixelFormat: (GLenum) format;
 
@@ -198,16 +207,14 @@
  * Allocates and initializes an autoreleased instance with the specified pixel format and
  * with one sample per pixel.
  *
- * The size of this renderbuffer can be set by invoking either the resizeTo: or
- * resizeFromCALayer:withContext: methods.
+ * The size of the renderbuffer can be set by invoking the resizeTo: method.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format;
 
 /**
  * Initializes this instance with the specified pixel format and with number of samples per pixel.
  *
- * The size of this renderbuffer can be set by invoking either the resizeTo: or
- * resizeFromCALayer:withContext: methods.
+ * The size of this renderbuffer can be set by invoking the resizeTo: method.
  */
 -(id) initWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
 
@@ -215,8 +222,7 @@
  * Allocates and initializes an autoreleased instance with the specified pixel format and
  * number of samples per pixel.
  *
- * The size of this renderbuffer can be set by invoking either the resizeTo: or
- * resizeFromCALayer:withContext: methods.
+ * The size of the renderbuffer can be set by invoking the resizeTo: method.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format andPixelSamples: (GLuint) samples;
 
@@ -363,6 +369,7 @@
  */
 @interface CC3GLFramebuffer : NSObject <CC3RenderSurface> {
 	GLuint _fbID;
+	CC3IntSize _size;
 	id<CC3FramebufferAttachment> _colorAttachment;
 	id<CC3FramebufferAttachment> _depthAttachment;
 	id<CC3FramebufferAttachment> _stencilAttachment;
@@ -376,6 +383,13 @@
  *
  * Implementation of the CC3RenderSurface colorAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
+ *
+ * When this property is set, if the size propery of this surface is not zero, and the
+ * attachment has no size, or has a size that is different than the size of this surface,
+ * the attachment is resized.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface.
  */
 @property(nonatomic, retain) id<CC3FramebufferAttachment> colorAttachment;
 
@@ -384,6 +398,18 @@
  *
  * Implementation of the CC3RenderSurface depthAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
+ *
+ * When this property is set, if the size propery of this surface is not zero, and the
+ * attachment has no size, or has a size that is different than the size of this surface,
+ * the attachment is resized.
+ *
+ * When this property is set, if the depth format of the attachment includes a stencil component,
+ * the stencilAttachment property is set to the this attachment as well.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface. For
+ * instance, the same depth attachment might be used when rendering to several different color
+ * attachments on different surfaces.
  */
 @property(nonatomic, retain) id<CC3FramebufferAttachment> depthAttachment;
 
@@ -392,8 +418,70 @@
  *
  * Implementation of the CC3RenderSurface stencilAttachment property. Framebuffer attachments
  * must also support the CC3FramebufferAttachment protocol.
+ *
+ * When this property is set, if the size propery of this surface is not zero, and the
+ * attachment has no size, or has a size that is different than the size of this surface,
+ * the attachment is resized.
+ *
+ * To save memory, attachments can be shared between surfaces of the same size, if the contents
+ * of the attachment are only required for the duration of the rendering to each surface.
  */
 @property(nonatomic, retain) id<CC3FramebufferAttachment> stencilAttachment;
+
+/**
+ * If color content is being rendered to a texture, this property can be used to access
+ * that texture.
+ *
+ * Setting this property wraps the specified texture in a CC3GLTextureFramebufferAttachment
+ * instance and sets it into the colorAttachment property.
+ *
+ * When this property is set, if the size propery of this surface is not zero, and the
+ * texture has no size, or has a size that is different than the size of this surface,
+ * the texture is resized.
+ *
+ * Reading this property returns the texture within the CC3GLTextureFramebufferAttachment
+ * in the colorAttachment property. It is an error to attempt to read this property if the
+ * depthAttachment property does not contain an instance of CC3GLTextureFramebufferAttachment.
+ *
+ * To save memory, textures can be shared between surfaces of the same size, if the contents
+ * of the texture are only required for the duration of the rendering to each surface.
+ */
+@property(nonatomic, retain) CC3GLTexture* colorTexture;
+
+/**
+ * If depth content is being rendered to a texture, this property can be used to access
+ * that texture.
+ *
+ * Setting this property wraps the specified texture in a CC3GLTextureFramebufferAttachment
+ * instance and sets it into the depthAttachment property, as well as the stencilAttachment
+ * property, if the depth format of the texture includes a stencil component.
+ *
+ * When this property is set, if the size propery of this surface is not zero, and the
+ * texture has no size, or has a size that is different than the size of this surface,
+ * the texture is resized.
+ *
+ * Reading this property returns the texture within the CC3GLTextureFramebufferAttachment
+ * in the depthAttachment property. It is an error to attempt to read this property if the
+ * depthAttachment property does not contain an instance of CC3GLTextureFramebufferAttachment.
+ *
+ * To save memory, textures can be shared between surfaces of the same size, if the contents
+ * of the texture are only required for the duration of the rendering to each surface.
+ */
+@property(nonatomic, retain) CC3GLTexture* depthTexture;
+
+/** 
+ * The size of this framebuffer surface in pixels.
+ *
+ * Returns the value of the same properties retrieved from any of the attachments (which
+ * must all have the same size for this framebuffer to be valid), or, if no attachments
+ * have been set, returns the value set during initialization.
+ *
+ * It is not possible to resize the surface directly. To do so, resize each of the
+ * attachments separately. Because attachments may be shared between surfaces, management
+ * of attachment sizing is left to the application, to avoid resizing the same attachment
+ * more than once, during any single resizing activity.
+ */
+@property(nonatomic, readonly) CC3IntSize size;
 
 /**
  * Implementation of the CC3RenderSurface validate method.
@@ -409,8 +497,25 @@
 
 #pragma mark Allocation and initialization
 
-/** Allocates and initializes an autoreleased instance. */
+/** Initializes this instance with zero size. */
+-(id) init;
+
+/** Allocates and initializes an autoreleased instance with zero size. */
 +(id) surface;
+
+/**
+ * Initializes this instance with the specified size.
+ *
+ * When attachments are assigned to this surface, each will be resized to the specified size.
+ */
+-(id) initWithSize: (CC3IntSize) size;
+
+/**
+ * Allocations and initializes an autoreleased instance with the specified size.
+ *
+ * When attachments are assigned to the instance, each will be resized to the specified size.
+ */
++(id) surfaceWithSize: (CC3IntSize) size;
 
 @end
 
@@ -441,14 +546,13 @@
 /**
  * Manages the render surfaces used to render content to the OS view on the screen.
  *
- * Wraps the CC3GLFramebuffer that represents the view surface, an optional anti-aliasing
- * multisampling CC3GLFramebuffer surface, and an optional separate surface for rendering
- * during node picking from touch events.
+ * Wraps the view's surface, an optional anti-aliasing multisampling surface, and an
+ * optional separate surface for rendering during node picking from touch events.
  *
- * If multisampling is not in use, rendering is directed to the framebuffer in the the
+ * If multisampling is not in use, rendering is directed to the surface in the the
  * viewSurface property, which is attached to the underlying core animation layer.
  * 
- * If multisampling is used, rendering is directed to the framebuffer in the the
+ * If multisampling is used, rendering is directed to the surface in the the 
  * multisampleSurface property, and then once rendering is complete, the multisampled
  * surface is resolved into the view surface.
  */
@@ -501,6 +605,50 @@
 /** Returns the stencil format of the pixels. */
 @property(nonatomic, readonly) GLenum stencilFormat;
 
+/** 
+ * Returns the texture pixel format that matches the format of the color attachment
+ * of the view's rendering surface.
+ *
+ * Under OpenGL, textures use different formatting than renderbuffers. When creating an
+ * off-screen surface that uses a texture as its color attachment, you can use the values
+ * returned by this property and the colorTexelType property to create a texture that
+ * matches the format of the color buffer of the view's rendering surface.
+ */
+@property(nonatomic, readonly) GLenum colorTexelFormat;
+
+/**
+ * Returns the texture pixel type that matches the format of the color attachment
+ * of the view's rendering surface.
+ *
+ * Under OpenGL, textures use different formatting than renderbuffers. When creating an
+ * off-screen surface that uses a texture as its color attachment, you can use the values
+ * returned by this property and the colorTexelFormat property to create a texture that
+ * matches the format of the color buffer of the view's rendering surface.
+ */
+@property(nonatomic, readonly) GLenum colorTexelType;
+
+/**
+ * Returns the texture pixel format that matches the format of the depth attachment
+ * of the view's rendering surface.
+ *
+ * Under OpenGL, textures use different formatting than renderbuffers. When creating an
+ * off-screen surface that uses a texture as its depth attachment, you can use the values
+ * returned by this property and the depthTexelType property to create a texture that
+ * matches the format of the depth buffer of the view's rendering surface.
+ */
+@property(nonatomic, readonly) GLenum depthTexelFormat;
+
+/**
+ * Returns the texture pixel type that matches the format of the depth attachment
+ * of the view's rendering surface.
+ *
+ * Under OpenGL, textures use different formatting than renderbuffers. When creating an
+ * off-screen surface that uses a texture as its depth attachment, you can use the values
+ * returned by this property and the depthTexelFormat property to create a texture that
+ * matches the format of the depth buffer of the view's rendering surface.
+ */
+@property(nonatomic, readonly) GLenum depthTexelType;
+
 /** The renderbuffer that is the colorAttachment to the framebuffer in the viewSurface property. */
 @property(nonatomic, readonly) CC3GLRenderbuffer* viewColorBuffer;
 
@@ -518,9 +666,9 @@
  * Returns the size of this surface in multisampling pixels.
  *
  * The value of this property will be larger than the value of the size property if
- * multisampling is in use. For example, if the value of the pixelSamples property
- * is 4, then the width and height returned by this property will be twice that
- * of the width and height of returned by the size property.
+ * multisampling is in use. For example, if the value of the pixelSamples property is 4,
+ * then the width and height returned by this property will be twice that of the width
+ * and height of returned by the size property.
  */
 @property(nonatomic, readonly) CC3IntSize multisamplingSize;
 
@@ -536,10 +684,7 @@
 -(void) resolveMultisampling;
 
 
-#pragma mark Surface resizing
-
-/** Resizes the framebuffers in this instance to the specified size. */
--(void) resizeTo: (CC3IntSize) size;
+#pragma mark Resizing surfaces
 
 /**
  * Registers the specified surface to be automatically resized when the view is resized.
@@ -548,21 +693,28 @@
  * the view is resized.
  *
  * If you have created an off-screen surface, and you want it to be resized automatically
- * whenever the view is resized, you can register it using this method.
+ * whenever the view is resized, you can register it using this method. Do not register a
+ * surface that you do not want resized when the view is resized.
+ *
+ * You can use the addSurfaceWithColorAttachmentType:andDepthAttachmentType: method to
+ * create and register a surface in one step.
  *
  * It is safe to register the same surface more than once, and it is safe to register two
  * surfaces that share one or more attachments. This implementation will ensure that each
  * attachment is resized only once for each view resizing.
  */
--(void) addResizingSurface: (id<CC3RenderSurface>) surface;
+-(void) addSurface: (id<CC3RenderSurface>) surface;
 
 /**
- * Removes the specified surface previously added with the addResizingSurface: method.
+ * Removes the specified surface previously added with the addSurface: method.
  *
  * It is safe to invoke this method even if the specified surface has never been added,
  * or has already been removed.
  */
--(void) removeResizingSurface: (id<CC3RenderSurface>) surface;
+-(void) removeSurface: (id<CC3RenderSurface>) surface;
+
+/** Resizes the framebuffers in this instance to the specified size. */
+-(void) resizeTo: (CC3IntSize) size;
 
 
 #pragma mark Allocation and initialization
@@ -590,6 +742,34 @@
 			andPixelSamples: (GLuint) samples;
 @end
 
+/** 
+ * Returns the texture format that matches the specified color renderbuffer format.
+ *
+ * Use this function along with the CC3TexelTypeFromRenderBufferColorFormat to determine
+ * the format and type of texture to create to match the specified renderbuffer format.
+ */
+GLenum CC3TexelFormatFromRenderbufferColorFormat(GLenum rbFormat);
 
+/**
+ * Returns the texture type that matches the specified color renderbuffer format.
+ *
+ * Use this function along with the CC3TexelFormatFromRenderBufferColorFormat to determine
+ * the format and type of texture to create to match the specified renderbuffer format.
+ */
+GLenum CC3TexelTypeFromRenderbufferColorFormat(GLenum rbFormat);
 
+/**
+ * Returns the texture format that matches the specified depth renderbuffer format.
+ *
+ * Use this function along with the CC3TexelTypeFromRenderBufferColorFormat to determine
+ * the format and type of texture to create to match the specified renderbuffer format.
+ */
+GLenum CC3TexelFormatFromRenderbufferDepthFormat(GLenum rbFormat);
 
+/**
+ * Returns the texture type that matches the specified depth renderbuffer format.
+ *
+ * Use this function along with the CC3TexelFormatFromRenderBufferColorFormat to determine
+ * the format and type of texture to create to match the specified renderbuffer format.
+ */
+GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat);

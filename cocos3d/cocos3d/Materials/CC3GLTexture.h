@@ -597,6 +597,43 @@
 /**
  * Initializes this instance from the specified texture properties, without providing content.
  *
+ * Once initialized, the texture will be bound to the GL engine when the resizeTo: method is
+ * invoked, providing the texture with a size.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Allocates and initializes an autoreleased instance from the specified texture properties,
+ * without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine when the resizeTo: method is
+ * invoked, providing the texture with a size.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Initializes this instance from the specified texture properties, without providing content.
+ *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for a
  * texture of the specified size and pixel content. Content can be added later by using this
  * texture as a rendering surface.
@@ -612,6 +649,26 @@
  * to multple meshes.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Allocates and initializes an autoreleased instance from the specified texture properties,
+ * without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine, with space allocated for a
+ * texture of the specified size and pixel content. Content can be added later by using this
+ * texture as a rendering surface.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
 @end
 
@@ -886,6 +943,43 @@
 /**
  * Initializes this instance from the specified texture properties, without providing content.
  *
+ * Once initialized, the texture will be bound to the GL engine when the resizeTo: method is
+ * invoked, providing the texture with a size.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
+-(id) initWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Allocates and initializes an autoreleased instance from the specified texture properties,
+ * without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine when the resizeTo: method is
+ * invoked, providing the texture with a size.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
++(id) textureWithPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Initializes this instance from the specified texture properties, without providing content.
+ *
  * Once initialized, the texture will be bound to the GL engine, with space allocated for six
  * texture faces of the specified size and pixel content. Content can be added later by using
  * this texture as a rendering surface.
@@ -901,6 +995,26 @@
  * to multple meshes.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
+
+/**
+ * Allocates and initializes an autoreleased instance from the specified texture properties,
+ * without providing content.
+ *
+ * Once initialized, the texture will be bound to the GL engine, with space allocated for a
+ * texture of the specified size and pixel content. Content can be added later by using this
+ * texture as a rendering surface.
+ *
+ * See the notes for the pixelFormat and pixelType properties for the range of values permitted
+ * for the corresponding format and type parameters here.
+ *
+ * The name property of this instance will be nil.
+ *
+ * Since textures can consume significant resources, you should assign this instance a name
+ * and add it to the texture cache by using the class-side addGLTexture: method. You can then
+ * retrieve the texture from the cache via the getGLTextureNamed: method to apply this texture
+ * to multple meshes.
+ */
++(id) textureWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
 @end
 

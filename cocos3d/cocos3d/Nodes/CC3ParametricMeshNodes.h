@@ -751,7 +751,7 @@
  *
  * This is a convenience method for a common use of this class.
  */
-+(id) nodeWithTexture: (CC3Texture*) texture;
++(id) nodeWithTexture: (CC3GLTexture*) texture;
 
 /**
  * Allocates and initializes and autoreleased instance covered with the specified color.

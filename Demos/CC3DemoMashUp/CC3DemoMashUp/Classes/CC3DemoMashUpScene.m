@@ -1494,22 +1494,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) addTelevision {
 	
-	// Create an empty texture of a size and aspect (16x9) useful in an HDTV model, give it
-	// a name, and add it to the texture cache for later access, or use elsewhere.
-	CC3GLTexture* tvTex = [[CC3GLTexture2D alloc] initWithSize: kTVTexSize
-												andPixelFormat: GL_RGBA
-												  andPixelType: GL_UNSIGNED_BYTE];
-	tvTex.name = kTVRenderTextureName;
-	[CC3GLTexture addGLTexture: tvTex];
-	[tvTex release];	// Retained by attachment & framebuffer & cache
-	
-	// Attach the texture to an off-screen framebuffer surface, along with matching depth
-	// attachement, and validate the surface.
-	_tvSurface = [CC3GLFramebuffer new];
-	_tvSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: tvTex];
-	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: kTVTexSize
-														  andPixelFormat: GL_DEPTH_COMPONENT16];
+	// Create an off-screen framebuffer surface of a size and aspect (16x9) useful in an
+	// HDTV model, attach an empty texture and depth buffer, and validate the surface.
+	_tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
+	_tvSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: GL_RGBA andPixelType: GL_UNSIGNED_BYTE];
+	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
+
+	// Give the empty texture a name, and add it to the texture cache for later access.
+	_tvSurface.colorTexture.name = kTVRenderTextureName;
+	[CC3GLTexture addGLTexture: _tvSurface.colorTexture];
 
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
@@ -1528,7 +1522,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	tv.shouldCullBackFaces = NO;				// Faces winding on decimated model is inconsistent
 	_tvScreen.shouldCullFrontFaces = YES;		// But don't paint both front and back of screen
 	[self addChild: tv];
-
+	
 	_isTVOn = NO;		// Indicate TV is displaying test card
 }
 
@@ -1536,63 +1530,50 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * Adds post-rendering image processing capabilities.
  *
  * Adds an off-screen framebuffer surface backed by a texture to hold the color and a texture
- * to hold the depth value. The scene can be rendered to this surface, and, using GLSL shaders,
+ * to hold the depth content. The scene can be rendered to this surface, and, using GLSL shaders,
  * the textures attached to the surface can be processed by the shaders associated with a
- * special post-processing node when draws one or the other of the surface's textures to the
+ * special post-processing node when drawing one or the other of the surface's textures to the
  * view's rendering surface.
  *
  * If we choose to render the color texture, we can process the values to perform visual
  * operations such as grayscale or blurring. If we choose to render the depth texture, we
  * can get a visualization of the values held in the depth buffer.
  *
- * Since this scene uses shadow volumes, we create the depth texture with a format that
- * included a stencil buffer. Only the depth component of the combined depth-stencil buffer
- * will be rendered to the screen when it is made viewable.
- *
- * We want the surface that we create to match the dimensions of the view, and we want it
- * to automatically adjust if the view dimensions change. To do that, we construct the
- * textures to be the same size as the view's surface. And then we register this new surface
- * with the viewSurfaceManager to have it automatically update the dimensions of the textures
- * whenever the dimensions of the view change.
+ * We want the surface that we create to match the dimensions and characteristics of the view,
+ * and we want it to automatically adjust if the view dimensions change. To do that, we construct
+ * the surface with the same size as the view's surface, and format the textures to be compatible
+ * with the format of the view's surface. And then we register this new surface with the
+ * viewSurfaceManager to have it automatically update the dimensions of the textures whenever
+ * the dimensions of the view change.
  *
  * Since this method accesses the view's surface manager, it must be invoked after the
  * view has been created. This method is invoked from the onOpen method of this class,
  * instead of from the initializeScene method,
  */
 -(void) addPostProcessing {
+	// Create the offscreen framebuffer with the same size and characteristics as the view's
+	// rendering surface, add color and depth texture attachments, and register the surface
+	// with the view's surface manager, so that this surface will be resized automatically
+	// whenever the view is resized.
 	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
-	CC3IntSize surfSize = surfMgr.size;
-	
-	// Create the offscreen framebuffer with the same size and characteristics as the
-	// view's rendering surface. Both the color and depth attachments are textures.
-	CC3GLTexture* gsTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
-												andPixelFormat: GL_RGBA
-												  andPixelType: GL_UNSIGNED_BYTE];
-	CC3GLTexture* dTex = [[CC3GLTexture2D alloc] initWithSize: surfSize
-											   andPixelFormat: GL_DEPTH_STENCIL
-												 andPixelType: GL_UNSIGNED_INT_24_8];
-	_preProcSurface = [CC3GLFramebuffer new];	// retained
-	_preProcSurface.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: gsTex];
-	_preProcSurface.depthAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: dTex];
-	_preProcSurface.stencilAttachment = _preProcSurface.depthAttachment;
+	_preProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
+	_preProcSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: surfMgr.colorTexelFormat
+															 andPixelType: surfMgr.colorTexelType];
+	_preProcSurface.depthTexture = [CC3GLTexture2D textureWithPixelFormat: surfMgr.depthTexelFormat
+															 andPixelType: surfMgr.depthTexelType];
 	[_preProcSurface validate];
-	[gsTex release];	// Retained by attachment & framebuffer
-	[dTex release];		// Retained by attachment & framebuffer
-
-	// Register this surface with the view's surface manager, so that this surface will be
-	// resized automatically whenever the view is resized.
-	[surfMgr addResizingSurface: _preProcSurface];
-
+	[surfMgr addSurface: _preProcSurface];
+	
 	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_grayscaleNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: gsTex]] retain];
+	_grayscaleNode = [[CC3ClipSpaceNode nodeWithTexture: _preProcSurface.colorTexture] retain];
 	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
-
+	
 	// Create a clip-space node that will render the off-screen depth texture to the screen.
-	// Load the node with shaders that convert the image into greyscale, making the scene
-	// appear as if it was filmed with black & white film.
-	_depthImageNode = [[CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureWithGLTexture: dTex]] retain];
+	// Load the node with shaders that convert the depth values into greyscale, visualizing
+	// the depth of field as a grayscale gradient.
+	_depthImageNode = [[CC3ClipSpaceNode nodeWithTexture: _preProcSurface.depthTexture] retain];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 }
 
@@ -3033,10 +3014,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) toggleTelevision {
 	_isTVOn = !_isTVOn;
-
 	NSString* tvTexName = _isTVOn ? kTVRenderTextureName : kTVTestCardFile;
-	CC3GLTexture* tvTex = [CC3GLTexture getGLTextureNamed: tvTexName];
-	_tvScreen.texture.texture = tvTex;
+	_tvScreen.texture.texture = [CC3GLTexture getGLTextureNamed: tvTexName];
 }
 
 /** 

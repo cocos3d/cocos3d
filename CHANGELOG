@@ -62,6 +62,7 @@ cocos3d 2.0.0 - 2013/05/31
 		- Added CC3GLFramebuffer class to represent a GL framebuffer
 		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
 		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
+		- Rendering to texture of both color and depth buffers permitted.
 	- Refactored CC3Scene drawScene method to support multi-pass rendering
 		- CC3Scene drawSceneContentsWithVisitor: template method can be used by app to customize rendering passes
 		- Added CC3ClipSpaceNode for drawing full-screen images for backdrops and post-processing

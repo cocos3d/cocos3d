@@ -189,6 +189,8 @@
 
 -(void) resizeTo: (CC3IntSize) size { [_texture resizeTo: size]; }
 
+-(GLenum) pixelFormat { return _texture.pixelFormat; }
+
 -(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {
 	[CC3OpenGL.sharedGL bindTexture2D: _texture.textureID
 								 face: _face
@@ -272,6 +274,7 @@
 
 -(void) setColorAttachment: (id<CC3FramebufferAttachment>) colorAttachment {
 	if (_colorAttachment == colorAttachment) return;
+	[self ensureSizeOfAttachment: colorAttachment];
 	[_colorAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
 	[_colorAttachment release];
 	_colorAttachment = [colorAttachment retain];
@@ -282,20 +285,55 @@
 
 -(void) setDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
 	if (_depthAttachment == depthAttachment) return;
+	[self ensureSizeOfAttachment: depthAttachment];
 	[_depthAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
 	[_depthAttachment release];
 	_depthAttachment = [depthAttachment retain];
 	[_depthAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_DEPTH_ATTACHMENT];
+
+	if ( CC3DepthFormatIncludesStencil(_depthAttachment.pixelFormat) )
+		self.stencilAttachment = _depthAttachment;
 }
 
 -(id<CC3FramebufferAttachment>) stencilAttachment { return _stencilAttachment; }
 
 -(void) setStencilAttachment: (id<CC3FramebufferAttachment>) stencilAttachment {
 	if (_stencilAttachment == stencilAttachment) return;
+	[self ensureSizeOfAttachment: stencilAttachment];
 	[_stencilAttachment unbindFromFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
 	[_stencilAttachment release];
 	_stencilAttachment = [stencilAttachment retain];
 	[_stencilAttachment bindToFramebuffer: self.framebufferID asAttachment: GL_STENCIL_ATTACHMENT];
+}
+
+-(void) ensureSizeOfAttachment: (id<CC3FramebufferAttachment>) attachment {
+	CC3IntSize mySize = self.size;
+	if ( CC3IntSizesAreEqual(mySize, kCC3IntSizeZero) ) return;
+	if ( CC3IntSizesAreEqual(mySize, attachment.size) ) return;
+	[attachment resizeTo: mySize];
+}
+
+-(CC3GLTexture*) colorTexture {
+	return ((CC3GLTextureFramebufferAttachment*)self.colorAttachment).texture;
+}
+
+-(void) setColorTexture: (CC3GLTexture*) colorTexture {
+	self.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: colorTexture];
+}
+
+-(CC3GLTexture*) depthTexture {
+	return ((CC3GLTextureFramebufferAttachment*)self.depthAttachment).texture;
+}
+
+-(void) setDepthTexture: (CC3GLTexture*) depthTexture {
+	self.depthAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: depthTexture];
+}
+
+-(CC3IntSize) size {
+	if (_colorAttachment) return _colorAttachment.size;
+	if (_depthAttachment) return _depthAttachment.size;
+	if (_stencilAttachment) return _stencilAttachment.size;
+	return _size;
 }
 
 -(BOOL) validate { return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID]; }
@@ -310,23 +348,30 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
+-(id) init { return [self initWithSize: CC3IntSizeMake(0, 0)]; }
+
+-(id) initWithSize: (CC3IntSize) size {
 	if ( (self = [super init]) ) {
 		_fbID = 0;
 		_colorAttachment = nil;
 		_depthAttachment = nil;
 		_stencilAttachment = nil;
+		_size = size;
 	}
 	return self;
 }
 
 +(id) surface { return [[[self alloc] init] autorelease]; }
 
++(id) surfaceWithSize: (CC3IntSize) size {
+	return [[((CC3GLFramebuffer*)[self alloc]) initWithSize: size] autorelease];
+}
+
 -(NSString*) description { return [NSString stringWithFormat: @"%@ %u", self.class, _fbID]; }
 
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
-	[desc appendFormat: @"%@", [self description]];
+	[desc appendFormat: @"%@ of size %@", [self description], NSStringFromCC3IntSize(self.size)];
 	if (_colorAttachment || _depthAttachment || _stencilAttachment) {
 		[desc appendFormat: @" with attachments:"];
 		if (_colorAttachment) [desc appendFormat: @"\n\tColor: %@", _colorAttachment];
@@ -372,20 +417,20 @@
 
 -(void) setViewSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _viewSurface) return;
-	[self removeResizingSurface: _viewSurface];
+	[self removeSurface: _viewSurface];
 	[_viewSurface release];
 	_viewSurface = [surface retain];
-	[self addResizingSurface: surface];
+	[self addSurface: surface];
 }
 
 -(CC3GLFramebuffer*) multisampleSurface { return _multisampleSurface; }
 
 -(void) setMultisampleSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _multisampleSurface) return;
-	[self removeResizingSurface: _multisampleSurface];
+	[self removeSurface: _multisampleSurface];
 	[_multisampleSurface release];
 	_multisampleSurface = [surface retain];
-	[self addResizingSurface: surface];
+	[self addSurface: surface];
 }
 
 -(CC3GLFramebuffer*) renderingSurface {
@@ -417,21 +462,29 @@
 
 -(void) setPickingSurface: (CC3GLFramebuffer*) surface {
 	if (surface == _pickingSurface) return;
-	[self removeResizingSurface: _pickingSurface];
+	[self removeSurface: _pickingSurface];
 	[_pickingSurface release];
 	_pickingSurface = [surface retain];
-	[self addResizingSurface: surface];
+	[self addSurface: surface];
 }
 
 -(CC3GLRenderbuffer*) viewColorBuffer { return (CC3GLRenderbuffer*)_viewSurface.colorAttachment; }
 
--(CC3IntSize) size { return self.viewColorBuffer.size; }
+-(CC3IntSize) size { return self.renderingSurface.colorAttachment.size; }
 
--(GLenum) colorFormat { return self.viewColorBuffer.pixelFormat; }
+-(GLenum) colorFormat { return self.renderingSurface.colorAttachment.pixelFormat; }
 
--(GLenum) depthFormat { return ((CC3GLRenderbuffer*)self.renderingSurface.depthAttachment).pixelFormat; }
+-(GLenum) depthFormat { return self.renderingSurface.depthAttachment.pixelFormat; }
 
--(GLenum) stencilFormat { return ((CC3GLRenderbuffer*)self.renderingSurface.stencilAttachment).pixelFormat; }
+-(GLenum) stencilFormat { return self.renderingSurface.stencilAttachment.pixelFormat; }
+
+-(GLenum) colorTexelFormat { return CC3TexelFormatFromRenderbufferColorFormat(self.colorFormat); }
+
+-(GLenum) colorTexelType { return CC3TexelTypeFromRenderbufferColorFormat(self.colorFormat); }
+
+-(GLenum) depthTexelFormat { return CC3TexelFormatFromRenderbufferDepthFormat(self.depthFormat); }
+
+-(GLenum) depthTexelType { return CC3TexelTypeFromRenderbufferDepthFormat(self.depthFormat); }
 
 -(GLuint) pixelSamples { return ((CC3GLRenderbuffer*)self.renderingSurface.colorAttachment).pixelSamples; }
 
@@ -440,40 +493,31 @@
 -(CC3IntSize) multisamplingSize {
 	CC3IntSize baseSize = self.size;
 	switch (self.pixelSamples) {
+		case 2:
 		case 4:
 			return CC3IntSizeMake(baseSize.width * 2, baseSize.height * 2);
+		case 6:
+		case 8:
+		case 9:
+			return CC3IntSizeMake(baseSize.width * 3, baseSize.height * 3);
+		case 16:
+			return CC3IntSizeMake(baseSize.width * 4, baseSize.height * 4);
 		default:
 			return baseSize;
 	}
 }
 
 
-#pragma mark Drawing
+#pragma mark Resizing surfaces
 
--(void) resolveMultisampling {
-	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	
-	// If it exists, resolve the multisample buffer into the screen buffer
-	if (_multisampleSurface)
-		[gl resolveMultisampleFramebuffer: _multisampleSurface.framebufferID
-						  intoFramebuffer: _viewSurface.framebufferID];
-	
-	// Discard used buffers by assembling an array of framebuffer attachments to discard.
-	// If multisampling, discard multisampling color buffer.
-	// If using depth buffer, discard it from the rendering buffer (either multisampling or screen)
-	GLenum fbAtts[3];			// Make room for color, depth & stencil attachments
-	GLuint fbAttCount = 0;
-	CC3GLFramebuffer* rendSurf = self.renderingSurface;
-	if (_multisampleSurface) fbAtts[fbAttCount++] = GL_COLOR_ATTACHMENT0;
-	if (rendSurf.depthAttachment) fbAtts[fbAttCount++] = GL_DEPTH_ATTACHMENT;
-	if (rendSurf.stencilAttachment) fbAtts[fbAttCount++] = GL_STENCIL_ATTACHMENT;
-	[gl discard: fbAttCount attachments: fbAtts fromFramebuffer: rendSurf.framebufferID];
-
-	[gl bindRenderbuffer: self.viewColorBuffer.renderbufferID];
+-(void) addSurface: (id<CC3RenderSurface>) surface {
+	if ( surface && ![_resizeableSurfaces containsObject: surface] )
+		[_resizeableSurfaces addObject: surface];
 }
 
-
-#pragma mark Surface resizing
+-(void) removeSurface: (id<CC3RenderSurface>) surface {
+	if (surface) [_resizeableSurfaces removeObjectIdenticalTo: surface];
+}
 
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, self.size) ) return;
@@ -501,13 +545,29 @@
 	LogTrace(@"Resizing %@ to: %@", attachment, NSStringFromCC3IntSize(size));
 }
 
--(void) addResizingSurface: (id<CC3RenderSurface>) surface {
-	if ( surface && ![_resizeableSurfaces containsObject: surface] )
-		[_resizeableSurfaces addObject: surface];
-}
 
--(void) removeResizingSurface: (id<CC3RenderSurface>) surface {
-	if (surface) [_resizeableSurfaces removeObjectIdenticalTo: surface];
+#pragma mark Drawing
+
+-(void) resolveMultisampling {
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	
+	// If it exists, resolve the multisample buffer into the screen buffer
+	if (_multisampleSurface)
+		[gl resolveMultisampleFramebuffer: _multisampleSurface.framebufferID
+						  intoFramebuffer: _viewSurface.framebufferID];
+	
+	// Discard used buffers by assembling an array of framebuffer attachments to discard.
+	// If multisampling, discard multisampling color buffer.
+	// If using depth buffer, discard it from the rendering buffer (either multisampling or screen)
+	GLenum fbAtts[3];			// Make room for color, depth & stencil attachments
+	GLuint fbAttCount = 0;
+	CC3GLFramebuffer* rendSurf = self.renderingSurface;
+	if (_multisampleSurface) fbAtts[fbAttCount++] = GL_COLOR_ATTACHMENT0;
+	if (rendSurf.depthAttachment) fbAtts[fbAttCount++] = GL_DEPTH_ATTACHMENT;
+	if (rendSurf.stencilAttachment) fbAtts[fbAttCount++] = GL_STENCIL_ATTACHMENT;
+	[gl discard: fbAttCount attachments: fbAtts fromFramebuffer: rendSurf.framebufferID];
+	
+	[gl bindRenderbuffer: self.viewColorBuffer.renderbufferID];
 }
 
 
@@ -542,14 +602,9 @@
 		}
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
-		// And if stencil buffer is combined with depth buffer, set it too.
-		if (depthFormat) {
-			CC3GLFramebuffer* rendSurf = self.renderingSurface;
-			rendSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat
-																	  andPixelSamples: samples];
-			if ( CC3DepthFormatIncludesStencil(depthFormat) )
-				rendSurf.stencilAttachment = rendSurf.depthAttachment;
-		}
+		if (depthFormat)
+			self.renderingSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat
+																				   andPixelSamples: samples];
 	}
     return self;
 }
@@ -565,12 +620,9 @@
 																	 andPixelSamples: samples];
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
-		// And if stencil buffer is combined with depth buffer, set it too.
 		if (depthFormat) {
 			vSurf.depthAttachment = [CC3SystemGLRenderbuffer renderbufferWithPixelFormat: depthFormat
-																					  andPixelSamples: samples];
-			if ( CC3DepthFormatIncludesStencil(depthFormat) )
-				vSurf.stencilAttachment = vSurf.depthAttachment;
+																		 andPixelSamples: samples];
 		}
 
 		self.viewSurface = vSurf;		// retained
@@ -584,4 +636,55 @@
 
 @end
 
+GLenum CC3TexelFormatFromRenderbufferColorFormat(GLenum rbFormat) {
+	switch (rbFormat) {
+		case GL_RGB565:
+		case GL_RGB8:
+			return GL_RGB;
+		case GL_RGBA4:
+		case GL_RGB5_A1:
+		case GL_RGBA8:
+		default:
+			return GL_RGBA;
+	}
+}
 
+GLenum CC3TexelTypeFromRenderbufferColorFormat(GLenum rbFormat) {
+	switch (rbFormat) {
+		case GL_RGB565:
+			return GL_UNSIGNED_SHORT_5_6_5;
+		case GL_RGBA4:
+			return GL_UNSIGNED_SHORT_4_4_4_4;
+		case GL_RGB5_A1:
+			return GL_UNSIGNED_SHORT_5_5_5_1;
+		case GL_RGB8:
+		case GL_RGBA8:
+		default:
+			return GL_UNSIGNED_BYTE;
+	}
+}
+
+GLenum CC3TexelFormatFromRenderbufferDepthFormat(GLenum rbFormat) {
+	switch (rbFormat) {
+		case GL_DEPTH24_STENCIL8:
+			return GL_DEPTH_STENCIL;
+		case GL_DEPTH_COMPONENT16:
+		case GL_DEPTH_COMPONENT24:
+		case GL_DEPTH_COMPONENT32:
+		default:
+			return GL_DEPTH_COMPONENT;
+	}
+}
+
+GLenum CC3TexelTypeFromRenderbufferDepthFormat(GLenum rbFormat) {
+	switch (rbFormat) {
+		case GL_DEPTH24_STENCIL8:
+			return GL_UNSIGNED_INT_24_8;
+		case GL_DEPTH_COMPONENT24:
+		case GL_DEPTH_COMPONENT32:
+			return GL_UNSIGNED_INT;
+		case GL_DEPTH_COMPONENT16:
+		default:
+			return GL_UNSIGNED_SHORT;
+	}
+}
