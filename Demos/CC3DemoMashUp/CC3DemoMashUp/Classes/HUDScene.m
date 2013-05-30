@@ -32,7 +32,7 @@
 #import "HUDScene.h"
 #import "CC3Camera.h"
 #import "CC3Light.h"
-#import "CC3ParametricMeshNodes.h"
+#import "CC3UtilityMeshNodes.h"
 
 #define kGlobeName				@"Globe"
 #define kBackDropOpacityFactor	0.4

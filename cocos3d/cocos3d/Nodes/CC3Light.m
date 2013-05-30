@@ -508,13 +508,9 @@
 	// This saves having to make the effort to clear the stencil buffer on the next round.
 	[gl setOpOnStencilFail: GL_ZERO onDepthFail: GL_ZERO onDepthPass: GL_ZERO];
 	
-	// Set the projection and modelview matrices to identity to transform the simple
-	// rectangular stenciled shadow painter mesh so that it covers the full viewport.
 	// Paint the shadow to the screen. Only areas that have been marked as being
 	// in the stencil buffer as being in the shadow of this light will be shaded.
-	visitor.shouldDrawInClipSpace = YES;
 	[visitor visit: _stencilledShadowPainter];
-	visitor.shouldDrawInClipSpace = NO;
 }
 
 -(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor {

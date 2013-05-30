@@ -386,12 +386,10 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize gl=_gl, drawingSequencer=_drawingSequencer, deltaTime=_deltaTime;
-@synthesize shouldDecorateNode=_shouldDecorateNode;
+@synthesize gl=_gl, deltaTime=_deltaTime;
+@synthesize shouldDecorateNode=_shouldDecorateNode, currentShaderProgram=_currentShaderProgram;
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
 @synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
-@synthesize currentShaderProgram=_currentShaderProgram;
-@synthesize shouldDrawInClipSpace=_shouldDrawInClipSpace;
 
 -(void) dealloc {
 	[_gl release];
@@ -410,6 +408,7 @@
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];
 	_currentSkinSection = nil;		// not retained
+	_currentShaderProgram = nil;	// not retained
 }
 
 -(BOOL) shouldDrawNode: (CC3Node*) aNode {
@@ -420,7 +419,7 @@
 
 /** If we're drawing in clip-space, ignore the frustum. */
 -(BOOL) doesNodeIntersectFrustum: (CC3Node*) aNode {
-	return _shouldDrawInClipSpace || [aNode doesIntersectFrustum: _camera.frustum];
+	return [aNode doesIntersectFrustum: _camera.frustum];
 }
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode { return aNode.visible; }
@@ -450,7 +449,17 @@
 	[CC3Mesh resetSwitching];
 	[CC3GLProgram willBeginDrawingScene];
 	
+	[self openScene];
 	[self openCamera];
+}
+
+/** If this visitor was started on a CC3Scene node, set up for drawing an entire scene. */
+-(void) openScene {
+	if ( !_startingNode.isScene) return;
+	CC3Scene* scene = self.scene;
+	_deltaTime = scene.deltaFrameTime;
+	_drawingSequencer = scene.drawingSequencer;
+	_shouldVisitChildren = YES;		// Set each time, because reset by sequencer
 }
 
 /** Template method that opens the 3D camera. */
@@ -459,6 +468,7 @@
 /** Close the camera. */
 -(void) close {
 	[self closeCamera];
+	_drawingSequencer = nil;		// not retained
 	[super close];
 }
 
@@ -520,10 +530,10 @@
 }
 
 -(void) populateProjMatrixFrom: (CC3Matrix*) projMtx {
-	if (projMtx && !_shouldDrawInClipSpace)
-		[projMtx populateCC3Matrix4x4: &_projMatrix];
-	else
+	if ( !projMtx || _currentNode.shouldDrawInClipSpace)
 		CC3Matrix4x4PopulateIdentity(&_projMatrix);
+	else
+		[projMtx populateCC3Matrix4x4: &_projMatrix];
 
 	_isVPMtxDirty = YES;
 	_isMVPMtxDirty = YES;
@@ -533,25 +543,25 @@
 }
 
 -(void) populateViewMatrixFrom: (CC3Matrix*) viewMtx {
-	if (viewMtx && !_shouldDrawInClipSpace)
-		[viewMtx populateCC3Matrix4x3: &_viewMatrix];
-	else
+	if ( !viewMtx || _currentNode.shouldDrawInClipSpace)
 		CC3Matrix4x3PopulateIdentity(&_viewMatrix);
-
+	else
+		[viewMtx populateCC3Matrix4x3: &_viewMatrix];
+	
 	_isVPMtxDirty = YES;
 	_isMVMtxDirty = YES;
 	_isMVPMtxDirty = YES;
-
+	
 	// For fixed rendering pipeline, also load onto the matrix stack
 	[_gl loadModelviewMatrix: &_viewMatrix];
 }
 
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx {
-	if (modelMtx)
-		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
-	else
+	if ( !modelMtx )
 		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
-
+	else
+		[modelMtx populateCC3Matrix4x3: &_modelMatrix];
+	
 	_isMVMtxDirty = YES;
 	_isMVPMtxDirty = YES;
 	
@@ -568,7 +578,6 @@
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
 		_shouldDecorateNode = YES;
-		_shouldDrawInClipSpace = NO;
 	}
 	return self;
 }

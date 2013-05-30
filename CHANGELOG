@@ -127,6 +127,11 @@ cocos3d 2.0.0 - 2013/05/31
 	- [API change] Merged CC3VertexLocationsBoundingVolume, CC3VertexLocationsSphericalBoundingVolume & CC3VertexLocationsBoundingBoxVolume classes into their parents and deprecated the subclasses.
 	- [API change] Removed CC3PODSkinMesh class. Use CC3PODMesh instead.
 
+- [API change] Moved many CC3MeshNode subclasses to CC3UtilityMeshNodes.h file:
+	- Moved from CC3MeshNode.h: CC3PlaneNode, CC3LineNode, CC3BoxNode, CC3WireframeBoundingBoxNode, CC3WireframeLocalContentBoundingBoxNode, CC3DirectionMarkerNode, CC3BoundingVolumeDisplayNode.
+	- Moved from CC3ParametricMeshNodes.h: CC3SimpleLineNode, CC3TouchBox, CC3ClipSpaceNode.
+	- [API change] include CC3UtilityMeshNodes.h to use these classes
+
 - [API change] CC3Camera and CC3Frustum modelviewMatrix renamed to viewMatrix for a more accurate semantic, and modelviewMatrix deprecated.
 - [API change] CC3Frustum modelviewProjectionMatrix renamed to viewProjectionMatrix for a more accurate semantic, and modelviewProjectionMatrix deprecated.
 - [API change] CC3Light attenuationCoefficients property renamed to attenuation, and attenuationCoefficients deprecated.

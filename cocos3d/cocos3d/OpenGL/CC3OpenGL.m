@@ -485,6 +485,11 @@
 			   withType: (GLenum) texelType
 	  withByteAlignment: (GLint) byteAlignment
 					 at: (GLuint) tuIdx {
+
+	CC3Assert(size.width <= [self maxTextureSizeForTarget: target] && size.height <= [self maxTextureSizeForTarget: target],
+			  @"%@ exceeds the maximum texture size, %u per side, for target %@",
+			  NSStringFromCC3IntSize(size), [self maxTextureSizeForTarget: target], NSStringFromGLEnum(target));
+
 	[self activateTextureUnit: tuIdx];
 	
 	glPixelStorei(GL_UNPACK_ALIGNMENT, byteAlignment);
@@ -678,6 +683,11 @@
 							  withSize: (CC3IntSize) size
 							 andFormat: (GLenum) format
 							andSamples: (GLuint) pixelSamples {
+	
+	CC3Assert(size.width <= self.maxRenderbufferSize && size.height <= self.maxRenderbufferSize,
+			  @"%@ exceeds the maximum renderbuffer size, %u per side",
+			  NSStringFromCC3IntSize(size), self.maxRenderbufferSize);
+	
 	[self bindRenderbuffer: rbID];
 	glRenderbufferStorage(GL_RENDERBUFFER, format, size.width, size.height);
 	LogGLErrorTrace(@"glRenderbufferStorage(%@, %@, %i, %i)", NSStringFromGLEnum(GL_RENDERBUFFER),
@@ -760,6 +770,27 @@
 
 -(GLuint) maxNumberOfPixelSamples { return value_GL_MAX_SAMPLES; }
 
+-(GLuint) maxTextureSize { return value_GL_MAX_TEXTURE_SIZE; }
+
+-(GLuint) maxRenderbufferSize { return value_GL_MAX_RENDERBUFFER_SIZE; }
+
+-(GLuint) maxCubeMapTextureSize { return value_GL_MAX_CUBE_MAP_TEXTURE_SIZE; }
+
+-(GLuint) maxTextureSizeForTarget: (GLenum) target {
+	switch (target) {
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+			return self.maxCubeMapTextureSize;
+		case GL_TEXTURE_2D:
+		default:
+			return self.maxTextureSize;
+	}
+}
+
 
 #pragma mark Shaders
 
@@ -813,6 +844,13 @@
 	
 	value_GL_VERSION = [[self getString: GL_VERSION] retain];
 	LogInfo(@"GL version: %@", value_GL_VERSION);
+	
+	value_GL_MAX_TEXTURE_SIZE = [self getInteger: GL_MAX_TEXTURE_SIZE];
+	LogInfo(@"Maximum texture size: %u", value_GL_MAX_TEXTURE_SIZE);
+	
+	value_GL_MAX_RENDERBUFFER_SIZE = [self getInteger: GL_MAX_RENDERBUFFER_SIZE];
+	LogInfo(@"Maximum renderbuffer size: %u", value_GL_MAX_RENDERBUFFER_SIZE);
+
 }
 
 /** Allocates and initializes the vertex attributes. This must be invoked after the initPlatformLimits. */

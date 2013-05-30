@@ -32,7 +32,7 @@
 
 
 #import "CC3Scene.h"
-#import "CC3MeshNode.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3PODLight.h"
 #import "CC3PointParticles.h"
 #import "CC3MeshParticles.h"
@@ -495,11 +495,10 @@ typedef enum {
  * colors to grayscale. This is only one example of such post-rendering processing. Using the
  * same techique, you could add bloom effects, blurring, or other specialized colorizations.
  *
- * Touching the illumination button again displays a visualization of the contents of the
- * depth buffer of the scene. This effect is created by attaching a texture as the depth
- * buffer of an off-screen framebuffer surface, and then rendering the underlying texture
- * to the screen using a shader that converts the depth values in the texture to a linearlized
- * grayscale image.
+ * Touching the illumination button again displays a visualization of the contents of the depth
+ * buffer of the scene. This effect is created by attaching a texture as the depth buffer of an
+ * off-screen framebuffer surface, and then rendering the underlying texture to the screen using
+ * a shader that converts the depth values in the texture to a linearized grayscale image.
  *
  * Touching the illumination button again will bring back the original sunshine.
  *

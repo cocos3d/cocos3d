@@ -250,6 +250,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	ccTime _deltaFrameTime;
 }
 
+/** Returns whether this node is a scene. Returns YES. */
+@property(nonatomic, readonly) BOOL isScene;
+
 /**
  * The CC3Layer that is holding this 3D scene.
  *
@@ -660,7 +663,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * This method is invoked automatically at each scheduled update. Usually, the application
  * never needs to invoke this method directly.
  */
--(void) updateScene: (ccTime)dt;
+-(void) updateScene: (ccTime) dt;
 
 /**
  * Invokes the updateScene: method with the value of the minUpdateInterval property.
@@ -677,6 +680,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * have been processed before the first rendering frame draws the contents of the scene.
  */
 -(void) updateScene;
+
+/** The delta time from the most recent invocation of the updateScene: method. */
+@property(nonatomic, readonly) ccTime deltaFrameTime;
 
 
 #pragma mark Drawing
@@ -716,14 +722,19 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * rendering pass of the nodes in the scene using the CC3NodeDrawingVisitor held in the
  * viewDrawingVisitor property.
  *
- * You can override this method to customize the scene rendering flow, such as performing
- * multiple rendering passes, or adding post-processing effects.
+ * The core of the drawing is handled by invoking the visit: method on the specified visitor,
+ * with this scene as the argument. Several template methods are available to provide
+ * "building blocks" to help you build the functionality in this method, and which you can
+ * individually customize as needed. The order of behavior of this method is:
+ *   - invoke illuminateWithVisitor:        - turns on scene lighting
+ *   - activate viewSurface					- activates the drawing surface
+ *   - invoke drawBackdropWithVisitor:      - draws an optional fixed backdrop
+ *   - invoke visit: on visitor				- draws the nodes in the drawingSequencer
+ *   - invoke drawShadows                   - draws shadows
  *
- * Several template methods are available to provide "building blocks" to help you build
- * the functionality in this method, and which you can individually customize as needed:
- *   - illuminateWithVisitor: - turns on scene lighting
- *   - drawBackdropWithVisitor: - draws an optional fixed backdrop
- *   - drawShadows - draws shadows
+ * You can override this method to customize the scene rendering flow, such as performing
+ * multiple rendering passes on different surfaces, or adding post-processing effects,
+ * using the template methods mentioned above.
  *
  * To maintain performance, by default, the depth buffer is not specifically cleared when 3D
  * drawing begins. If this scene is drawing to a surface that already has depth information
@@ -797,20 +808,18 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 /**
  * The node sequencer being used by this instance to order the drawing of child nodes.
  *
- * During drawing, the nodes can be traversed in the hierarchical order of the
- * node structural assembly, starting at the CC3Scene instance that forms the root node
- * of the node assembly. Alternately, and preferrably, the CC3Scene can use a
- * CC3NodeSequencer instance to arrange the nodes into a linear sequence, ordered and
- * grouped based on definable sorting priorities. This is beneficial, because it allows
- * the application to order and group drawing operations in ways that reduce the number
- * and scope of state changes within the GL engine, thereby improving performance and
- * throughput.
+ * During drawing, the nodes can be traversed in the hierarchical order of the node structural
+ * assembly, starting at the CC3Scene instance that forms the root node of the node assembly.
+ * Alternately, and preferrably, the CC3Scene can use a CC3NodeSequencer instance to arrange
+ * the nodes into a linear sequence, ordered and grouped based on definable sorting priorities.
+ * This is beneficial, because it allows the application to order and group drawing operations
+ * in ways that reduce the number and scope of state changes within the GL engine, thereby
+ * improving performance and throughput.
  * 
- * For example, when drawing, nodes could be grouped by the drawing sequencer so that
- * opaque objects are drawn prior to blended objects, and an application with many
- * objects that use the same material or mesh can be sorted so that nodes with like
- * materials or meshes are grouped together. It is highly recommended that you use a
- * CC3NodeSequencer.
+ * For example, when drawing, nodes could be grouped by the drawing sequencer so that opaque
+ * objects are drawn prior to blended objects, and an application with many objects that use
+ * the same material or mesh can be sorted so that nodes with like materials or meshes are
+ * grouped together. It is highly recommended that you use a CC3NodeSequencer.
  *
  * The default drawing sequencer includes only nodes with local content, and groups
  * them so that opaque nodes are drawn first, then nodes with blending.
@@ -1334,3 +1343,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation;
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3Node extension for scene
+
+@interface CC3Node (Scene)
+
+/** Returns whether this node is a scene. This implementation returns NO. */
+@property(nonatomic, readonly) BOOL isScene;
+
+@end
+

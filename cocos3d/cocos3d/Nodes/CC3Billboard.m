@@ -30,7 +30,7 @@
  */
 
 #import "CC3Billboard.h"
-#import "CC3Mesh.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
 

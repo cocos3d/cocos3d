@@ -59,7 +59,7 @@
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
-@synthesize backdrop=_backdrop, fog=_fog, lights=_lights;
+@synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize viewSurfaceManager=_viewSurfaceManager;
 
 /**
@@ -90,6 +90,8 @@
 	
     [super dealloc];
 }
+
+-(BOOL) isScene { return YES; }
 
 -(CC3ViewController*) controller { return _cc3Layer.controller; }
 
@@ -379,18 +381,14 @@
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[self illuminateWithVisitor: visitor];				// Light up your world!
 	[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-	
 	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
-	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
+	[visitor visit: self];								// Draw the scene components
 	[self drawShadows];									// Shadows are drawn with a different visitor
 }
 
 -(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if ( !_backdrop || self.cc3Layer.isOverlayingDeviceCamera) return;
-
-	visitor.shouldDrawInClipSpace = YES;
 	[visitor visit: _backdrop];
-	visitor.shouldDrawInClipSpace = NO;
 }
 
 /**
@@ -560,14 +558,6 @@
 	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
 	CGRect lb = _viewportManager.layerBoundsLocal;
 	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: lb];
-}
-
-/** Visits this scene for drawing (or picking) using the specified visitor. */
--(void) visitForDrawingWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	visitor.deltaTime = _deltaFrameTime;
-	visitor.drawingSequencer = _drawingSequencer;
-	visitor.shouldVisitChildren = YES;
-	[visitor visit: self];
 }
 
 -(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
@@ -822,7 +812,7 @@
 	// We don't bother drawing the backdrop for picking.
 	[_scene.pickingSurface activateWithVisitor: _pickVisitor];
 	[gl clearColorAndDepthBuffers];
-	[_scene visitForDrawingWithVisitor: _pickVisitor];
+	[_pickVisitor visit: _scene];
 	[gl clearDepthBuffer];
 	
 	_pickedNode = _pickVisitor.pickedNode;
@@ -1097,4 +1087,12 @@
 	[_scene.activeCamera markTransformDirty];
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3Node extension for scene
+
+@implementation CC3Node (Scene)
+-(BOOL) isScene { return NO; }
 @end

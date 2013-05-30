@@ -1580,6 +1580,8 @@ static GLuint lastAssignedNodeTag;
 
 -(void) checkDrawingOrder { for (CC3Node* child in _children) [child checkDrawingOrder]; }
 
+-(BOOL) shouldDrawInClipSpace { return NO; }
+
 
 #pragma mark Node structural hierarchy
 

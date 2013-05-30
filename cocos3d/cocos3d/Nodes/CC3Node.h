@@ -2598,6 +2598,26 @@ typedef enum {
  */
 -(void) checkDrawingOrder;
 
+/**
+ * Returns whether drawing should be performed in clip-space.
+ *
+ * The clip-space coordinate system is a transformation of the camera frustum, where the camera
+ * looks down the -Z axis, and entire coorinate system is normalized to cover the range +/-1.0
+ * in each of the X, Y & Z dimensions.
+ *
+ * When this property returns YES, a simple square plane node, with X & Y sides of length 2.0,
+ * centered on the origin and facing the +Z axis will fill the entire view. This makes it very
+ * easy to create backdrops and post-processing effects.
+ *
+ * When this property returns YES, all combinations of the projection, view, and model matrices
+ * will be set to identity matrices during rendering. The scene is effectivly drawn with an
+ * orthographic projection, looking down the negative Z axis, with X & Y axis dimensions
+ * normalized to +/-1.0 each.
+ *
+ * This implementation returns NO. Subclasses that are designed to render in clip-space will return YES.
+ */
+@property(nonatomic, readonly) BOOL shouldDrawInClipSpace;
+
 
 #pragma mark Node structural hierarchy
 

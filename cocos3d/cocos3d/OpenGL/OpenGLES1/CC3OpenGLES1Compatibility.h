@@ -55,6 +55,7 @@
 
 #define GL_FRAMEBUFFER					GL_FRAMEBUFFER_OES
 #define GL_RENDERBUFFER					GL_RENDERBUFFER_OES
+#define GL_MAX_RENDERBUFFER_SIZE		GL_MAX_RENDERBUFFER_SIZE_OES
 
 // Color, depth and stencil buffers
 
@@ -99,7 +100,7 @@
 #define GL_DECR_WRAP					GL_DECR_WRAP_OES
 #endif
 
-// Allow code to referenc the following enums, even though they are not usable under OpenGL ES 1.1.
+// Allow code to reference the following enums, even though they are not usable under OpenGL ES 1.1.
 #ifndef GL_TEXTURE_CUBE_MAP
 #define GL_TEXTURE_CUBE_MAP               0x8513
 #endif

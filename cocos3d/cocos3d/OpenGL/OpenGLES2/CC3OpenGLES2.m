@@ -97,6 +97,9 @@
 
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
 	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+	
+	value_GL_MAX_CUBE_MAP_TEXTURE_SIZE = [self getInteger: GL_MAX_CUBE_MAP_TEXTURE_SIZE];
+	LogInfo(@"Maximum cube map texture size: %u", value_GL_MAX_CUBE_MAP_TEXTURE_SIZE);
 }
 
 @end

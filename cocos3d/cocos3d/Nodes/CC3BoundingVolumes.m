@@ -31,7 +31,7 @@
 
 #import "CC3BoundingVolumes.h"
 #import "CC3Camera.h"
-#import "CC3ParametricMeshNodes.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3Light.h"
 #import "CC3IOSExtensions.h"
 

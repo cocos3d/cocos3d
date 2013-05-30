@@ -33,7 +33,7 @@
 #import "CC3VertexSkinning.h"
 #import "CC3Light.h"
 #import "CC3Billboard.h"
-#import "CC3ParametricMeshNodes.h"
+#import "CC3UtilityMeshNodes.h"
 
 /** The suggested default shadow volume vertex offset factor. */
 static const GLfloat kCC3DefaultShadowVolumeVertexOffsetFactor = 0.001f;

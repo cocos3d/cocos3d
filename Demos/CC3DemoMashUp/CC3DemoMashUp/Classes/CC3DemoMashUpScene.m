@@ -2142,23 +2142,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 	
 	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
-	[self visitForDrawingWithVisitor: visitor];			// Draw the scene components
+	[visitor visit: self];								// Draw the scene components
 	[self drawShadows];									// Shadows are drawn with a different visitor
 	
 	// If displaying grayscale, draw the off-screen surface to the view surface
 	if (self.isDisplayingAsGrayscale) {
 		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-		visitor.shouldDrawInClipSpace = YES;
 		[visitor visit: _grayscaleNode];
-		visitor.shouldDrawInClipSpace = NO;
 	}
 	
 	// If displaying depth buffer, draw the off-screen surface to the view surface
 	if (self.isDisplayingAsDepth) {
 		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-		visitor.shouldDrawInClipSpace = YES;
 		[visitor visit: _depthImageNode];
-		visitor.shouldDrawInClipSpace = NO;
 	}
 }
 
@@ -2186,9 +2182,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	[_tvSurface activateWithVisitor: visitor];		// Draw to the texture in the TV surface, not the view
 	[visitor.gl clearColorAndDepthBuffers];			// Clear color & depth buffers on TV surface.
-
 	[self drawBackdropWithVisitor: visitor];		// Draw the backdrop if it exists
-	[self visitForDrawingWithVisitor: visitor];		// Draw the scene components
+	[visitor visit: self];							// Draw the scene components
 
 	visitor.camera = self.activeCamera;
 	_runnerCam.viewport = vpCurr;

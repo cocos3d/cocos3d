@@ -124,6 +124,9 @@ typedef struct {
 	GLint value_GL_MAX_TEXTURE_UNITS;
 	GLint value_GL_MAX_VERTEX_ATTRIBS;
 	GLint value_GL_MAX_VERTEX_UNITS;
+	GLint value_GL_MAX_TEXTURE_SIZE;
+	GLint value_GL_MAX_CUBE_MAP_TEXTURE_SIZE;
+	GLint value_GL_MAX_RENDERBUFFER_SIZE;
 
 	GLuint value_GL_ARRAY_BUFFER_BINDING;
 	GLuint value_GL_ELEMENT_ARRAY_BUFFER_BINDING;
@@ -884,6 +887,18 @@ typedef struct {
  * or zero if the platform does not impose a limit.
  */
 @property(nonatomic, readonly) GLuint maxNumberOfPixelSamples;
+
+/** Returns the maximum size for a renderbuffer supported by the platform. */
+@property(nonatomic, readonly) GLuint maxRenderbufferSize;
+
+/** Returns the maximum size for a 2D texture supported by the platform. */
+@property(nonatomic, readonly) GLuint maxTextureSize;
+
+/** Returns the maximum size for a cube-map texture supported by the platform. */
+@property(nonatomic, readonly) GLuint maxCubeMapTextureSize;
+
+/** Returns the maximum size for a texture used for the specified target supported by the platform. */
+-(GLuint) maxTextureSizeForTarget: (GLenum) target;
 
 
 #pragma mark Shaders
