@@ -55,3 +55,26 @@ By linking to cocos2d 2.x, you will automatically use OpenGL ES 2.0, and by link
 cocos2d 1.x, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
 the use of OpenGL ES 2.0 and 1.1 within a single application.
 
+
+Creating POD 3D Model Files
+---------------------------
+
+cocos3d reads 3D model content from POD files.
+
+If you are using Blender, Maya, or 3DS Max as your 3D editor, you can install the PVRGeoPOD
+plugin from Imagination Technologies to export directly from your editor to the POD file format.
+
+For other editors, you can export your 3D model to a file in COLLADA 1.4 format, and then use
+the standalone PVRGeoPOD app to convert the COLLADA file to the POD format.
+
+Both the standalone and plugin versions of PVRGeoPOD are available free of charge from
+Imagination Technologies, the supplier of the GPU's used in iOS devices.
+
+Read the full instructions at http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/
+for more info on where to get the PVRGeoPOD converter, and how to use it to generate POD files.
+
+If you are using Blender as your 3D editor, and have many .blend files to export to POD format,
+you can use the command-line batch tool available in the "Tools/Blender-POD Batch Converter"
+folder in the cocos3d distribution. See the README.txt file in that folder for instructions.
+The "Blender-POD Batch Converter" tool was created by cocos3d user Nikita Medvedev.
+

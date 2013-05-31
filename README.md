@@ -328,29 +328,35 @@ the performance of cocos3d. You can also use this performance demo app to compar
 across different device types.
 
 
-Demo Models
------------
-
-Some of the POD models that appear in the demo and template apps were designed in Blender,
-exported to DAE, and converted to POD files using the PowerVR *PVRGeoPOD* converter.
-
-As a reference for the creation of your own 3D models for use in cocos3d, you can find the original
-Blender files and DAE files for these POD models in the Models folder in the cocos3d distribution.
-
-
 Creating POD 3D Model Files
 ---------------------------
 
-cocos3d reads 3D model content from POD files. If you are using a 3D editor, you can export
-your 3D model to a file in COLLADA 1.4 format, and then convert the COLLADA file to the POD
-format read by cocos3d.
+cocos3d reads 3D model content from POD files.
 
-To convert COLLADA files to POD files, you can use the *PVRGeoPOD* converter tool, which is available
-free of charge from Imagination Technologies, the supplier of the GPU's used in iOS devices.
+If you are using *Blender*, *Maya*, or *3DS Max* as your 3D editor, you can install the *PVRGeoPOD*
+plugin from Imagination Technologies to export directly from your editor to the POD file format.
+
+For other editors, you can export your 3D model to a file in `COLLADA 1.4` format, and then use
+the standalone *PVRGeoPOD* app to convert the COLLADA file to the POD format.
+
+Both the standalone and plugin versions of *PVRGeoPOD* are available free of charge from
+Imagination Technologies, the supplier of the GPU's used in iOS devices.
 
 Read the [full instructions](http://brenwill.com/2011/cocos3d-importing-converting-collada-to-pod/)
-for more info on where to get the *PVRGeoPOD* converter, and how to use it to convert COLLADA files
-to POD files.
+for more info on where to get the *PVRGeoPOD* converter, and how to use it to generate POD files.
+
+If you are using *Blender* as your 3D editor, and have many `.blend` files to export to POD format,
+you can use the command-line batch tool available in the `Tools/Blender-POD Batch Converter`
+folder in the cocos3d distribution. See the `README.txt` file in that folder for instructions.
+The *Blender-POD Batch Converter* tool was created by cocos3d user Nikita Medvedev.
 
 
+Demo Models
+-----------
+
+Some of the POD models that appear in the demo and template apps were designed in Blender and
+exported to POD files using the PowerVR *PVRGeoPOD* converter.
+
+As a reference for the creation of your own 3D models for use in cocos3d, you can find the original
+Blender files and DAE files for these POD models in the Models folder in the cocos3d distribution.
 
