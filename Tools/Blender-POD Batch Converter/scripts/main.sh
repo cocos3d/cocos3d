@@ -32,8 +32,7 @@
 #!/bin/sh
 
 # root directory of the pack. You can manually set all the directories
-dir=".."
-# dir="$(dirname "$(cd $(dirname "$0"); pwd)")" # parent_dir(current_dir(this script))
+dir="$(dirname "$(cd "$(dirname "$0")"; pwd)")" # parent_dir(current_dir(this script))
 
 # scripts paths
 exporter_path="$dir/scripts/exporter.py"
@@ -49,7 +48,7 @@ blender_path="/Applications/blender.app/Contents/MacOS/blender"
 collada2pod_path="$dir/Collada2POD/MacOS_x86_32/Collada2POD"
 
 # exporting models from Blender into .dae
-"$blender_path" --background --python "$exporter_path" -- "$blend_path" "$dae_path" 0 0
+"$blender_path" --background --python "$exporter_path" -- "$blend_path" "$dae_path" -exportLight=1 -exportCam=1
 
 # converting .dae into .pod
 perl "$converter_path" "$collada2pod_path" "$dae_path" "$pod_path"

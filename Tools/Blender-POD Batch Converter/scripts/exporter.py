@@ -48,12 +48,12 @@ else:
         bpy.ops.wm.open_mainfile(filepath=infile)
 
         # if you do not want to include light sources from your models,
-        if sys.argv[7] == '1':
+        if sys.argv[7] == '-exportLight=0':
             bpy.ops.object.select_by_type(extend=False, type='LAMP')
             bpy.ops.object.delete()
 
 		# you may also do not want to include cameras
-        if sys.argv[8] == '1':
+        if sys.argv[8] == '-exportCam=0':
             bpy.ops.object.select_by_type(extend=False, type='CAMERA')
             bpy.ops.object.delete()
 

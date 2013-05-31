@@ -52,6 +52,8 @@ while (my $file = readdir(DIR)) {
 	$out_file = $file;
 	$out_file =~ s/dae/pod/g;
 	
-	$command = "$collada -i=$in_dir/$file -o=$out_dir/$out_file";
+	# to change Collada2POD options, add them into this string, for example:
+	#$command = "\"$collada\" -i=\"$in_dir/$file\" -o=\"$out_dir/$out_file\" -ExportNormals=1 -SortVertices=1";
+	$command = "\"$collada\" -i=\"$in_dir/$file\" -o=\"$out_dir/$out_file\"";
 	system($command);
 }

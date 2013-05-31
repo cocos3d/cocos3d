@@ -26,11 +26,18 @@ COMPLEX USE:
 
 The first task - to export multiple files from Blender - is performed by "exporter.py" script in Python. The syntax is as follows:
 
-<path_to_Blender> --background --python <path_to_exporter.py> -- <path_to_directory_with_blend_files> <path_to_output_directory> <include light flag: 0 or 1> <include camera flag: 0 or 1>
+<path_to_Blender> --background --python <path_to_exporter.py> -- <path_to_directory_with_blend_files> <path_to_output_directory> -exportLight=<export light flag: 0 or 1> -exportCam=<include camera flag: 0 or 1>
 
 The script exports blend files from input directory as dae files into output directory. The search in input directory is not recursive, only files with ".blend" extension are handled. Export light flag is either 0 or 1, and it controls if script should export lights or not. The same thing with camera flag. The purpose for this is the common situation when there are lights and cameras in every scene, while we need to export only meshes. 
 
 The second task is to convert multiple dae files from input directory into pod ones. This refers to "converter.pl" script in Perl.  The syntax is as follows:
 perl converter.pl <path_to_Collada2POD> <path_to_input_directory> <path_to_output_directory>
+
+If you need to change Collada2POD convert options, you could add options as command arguments in that string in "converter.pl":
+$command = "\"$collada\" -i=\"$in_dir/$file\" -o=\"$out_dir/$out_file\"";
+For example, if you want to export normals and sort vertices:
+$command = "\"$collada\" -i=\"$in_dir/$file\" -o=\"$out_dir/$out_file\" -ExportNormals=1 -SortVertices=1";
+To see all available options within Collada2POD:
+./Collada2POD /?
 
 For convenience the third script was made - "main.sh" in bash. It has no arguments and it launches "exporter.py" and then "converter.pl". If your Blender is not located in standard directory "/Applications/blender.app/Contents/MacOS/blender", you will need to specify it. Also, you can change all directories in "main.sh" to whatever you want.
