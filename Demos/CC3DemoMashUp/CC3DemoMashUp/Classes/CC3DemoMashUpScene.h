@@ -126,6 +126,8 @@ typedef enum {
  *   - Render-to-texture the scene for display within the scene.
  *   - Render-to-texture to create additional visual effects using post-rendering image processing.
  *   - Render depth-to-texture to visualize the contents of the depth buffer.
+ *   - Read pixels from a framebuffer
+ *   - Replace framebuffer and texture pixels with programmatic content
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -306,9 +308,17 @@ typedef enum {
  * to render a scene (or a part of a scene) to a texture, and include that texture into the
  * scene, as well as the abilty to use more than one camera to film the same scene. Take note
  * of the TV image as the runners pass in front of the television. You will see an infinitely
- * recursive image of the runners. Touching the television again will turn it off. Rendering
- * to the television screen only occurs when the television is turned on and in view of the
- * active camera.
+ * recursive image of the runners!
+ *
+ * In the bottom-right corner of the TV screen is a small picture-in-picture window showing 
+ * the head of the smaller runner, and framed by a red border. This effect is created by 
+ * copying a rectangle of pixels from the TV screen surface, processing them in the CPU to
+ * add the border, and then pasting those pixels back into the surface (and the underlying
+ * texture) in a different location. This demonstrates the ability to process the contents
+ * of a rendered texture in application memory using the CPU.
+ *
+ * Touching the television again will turn it off. Rendering to the television screen occurs
+ * only when the television is turned on and in view of the active camera.
  *
  * Touching the switch-view button again will point the camera at yet another teapot, this one
  * textured with a metallic texture, and rotating on it's axis. When running GLSL shaders, under

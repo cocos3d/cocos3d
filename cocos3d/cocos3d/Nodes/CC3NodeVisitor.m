@@ -393,6 +393,7 @@
 
 -(void) dealloc {
 	[_gl release];
+	[_renderSurface release];
 	_drawingSequencer = nil;		// not retained
 	_currentSkinSection = nil;		// not retained
 	_currentShaderProgram = nil;	// not retained
@@ -402,6 +403,19 @@
 -(CC3OpenGL*) gl {
 	if ( !_gl) self.gl = CC3OpenGL.sharedGL;
 	return _gl;
+}
+
+-(id<CC3RenderSurface>) renderSurface {
+	if ( !_renderSurface ) self.renderSurface = self.defaultRenderSurface;
+	return _renderSurface;
+}
+
+-(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.viewSurface; }
+
+-(void) setRenderSurface: (id<CC3RenderSurface>) renderSurface {
+	if (renderSurface == _renderSurface) return;
+	[_renderSurface release];
+	_renderSurface = [renderSurface retain];
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
@@ -438,9 +452,8 @@
 }
 
 /**
- * Initializes mesh and material context switching, opens the camera, prepares GL programs
- * for rendering, and optionally clears the depth buffer every time drawing begins so that
- * 3D rendering will occur over top of any previously rendered 3D or 2D artifacts.
+ * Initializes mesh and material context switching, prepares GL programs, activates the
+ * rendering surface, and opens the scene and the camera.
  */
 -(void) open {
 	[super open];
@@ -448,10 +461,14 @@
 	[CC3Material resetSwitching];
 	[CC3Mesh resetSwitching];
 	[CC3GLProgram willBeginDrawingScene];
-	
+
+	[self activateRenderSurface];
 	[self openScene];
 	[self openCamera];
 }
+
+/** Activates the render surface. Subsequent GL drawing will be directed to this surface. */
+-(void) activateRenderSurface { [self.renderSurface activate]; }
 
 /** If this visitor was started on a CC3Scene node, set up for drawing an entire scene. */
 -(void) openScene {
@@ -574,6 +591,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		_renderSurface = nil;
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
@@ -611,22 +629,12 @@
 	return self;
 }
 
-/**
- * Clears the pickedNode property.
- * 
- * Superclass implementation also clears the depth buffer so that the real drawing pass
- * will have a clear depth buffer. Otherwise, pixels from farther objects will not be drawn,
- * since the  nearer objects were already drawn during color picking. This would be a problem
- * if the nearer object is translucent, because we expect to see some of the farther object
- * show through the translucent object. The result would be a noticable flicker in the nearer
- * translucent object.
- *
- * If multisampling antialiasing is being used, we must use a different framebuffer,
- * since the multisampling framebuffer does not support pixel reading.
- */
+/** Clears the render surface and the pickedNode property. */
 -(void) open {
 	[super open];
 	
+	[self.renderSurface clearColorAndDepthContent];
+
 	[_pickedNode release];
 	_pickedNode = nil;
 }
@@ -635,15 +643,14 @@
  * Reads the color of the pixel at the touch point, maps that to the tag of the CC3Node
  * that was touched, and sets the picked node in the pickedNode property.
  *
- * If antialiasing multisampling is active, after reading the color of the touched pixel,
- * the multisampling framebuffer is made active in preparation of normal drawing operations.
- *
- * Draws the backdrop to avoid flicker.
+ * Clears the depth buffer in case the primary scene rendering is using the same surface.
  */
 -(void) close {
 		
 	// Read the pixel from the framebuffer
-	ccColor4B pixColor = [self.gl readPixelAt: self.scene.touchedNodePicker.glTouchPoint];
+	ccColor4B pixColor;
+	CC3IntPoint touchPoint = CC3IntPointFromCGPoint(self.scene.touchedNodePicker.glTouchPoint);
+	[self.renderSurface readColorContentFrom: CC3ViewportMake(touchPoint.x, touchPoint.y, 1, 1) into: &pixColor];
 	
 	// Fetch the node whose tags is mapped from the pixel color
 	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
@@ -652,11 +659,15 @@
 			 self, _pickedNode, NSStringFromCCC4B(pixColor),
 			 NSStringFromCGPoint(self.scene.touchedNodePicker.glTouchPoint));
 	
+	[self.renderSurface clearDepthContent];
+
 	[super close];
 }
 
 
 #pragma mark Drawing
+
+-(id<CC3RenderSurface>) defaultRenderSurface { return self.scene.pickingSurface; }
 
 /**
  * Overridden because what matters here is not visibility, but touchability.

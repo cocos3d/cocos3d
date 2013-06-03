@@ -70,7 +70,8 @@ cocos3d 2.0.0 - 2013/05/31
 			- [API change] CC3Layer no longer a subclass of CCColorLayer and no longer draws a colored backdrop
 		- [API change] CC3Scene shouldClearDepthBuffer deprecated
 	- Refactored CC3GLView classes to use a CC3GLViewSurfaceManager to manage surfaces that are tied to UIView & NSView (viewSurface, multisamplSurface & pickingSurface).
-		- CC3UIViewController now requires its view be a CC3GLView.
+		- CC3ViewController now requires its view be a CC3GLView.
+		- CC3Layer now requires a CC3ViewController controller.
 
 - Animation enhancements:
 	- Added support for time-based key-frame animation.

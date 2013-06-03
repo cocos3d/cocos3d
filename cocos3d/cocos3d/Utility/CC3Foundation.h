@@ -1772,7 +1772,11 @@ static inline CC3AttenuationCoefficients CC3AttenuationCoefficientsLegalize(CC3A
 #pragma mark -
 #pragma mark Viewport structure and functions
 
-/** GL viewport data */
+/** 
+ * A rectangle defining a GL viewport.
+ *
+ * This can also be used for any rectangular group of pixels.
+ */
 typedef struct {
 	GLint x;				/**< The X-position of the bottom-left corner of the viewport. */
 	GLint y;				/**< The Y-position of the bottom-left corner of the viewport. */
@@ -1795,6 +1799,11 @@ static inline CC3Viewport CC3ViewportMake(GLint x, GLint y, GLint w, GLint h) {
 	return vp;
 }
 
+/** Returns a CC3Viewport constructed from the specified origin and size. */
+static inline CC3Viewport CC3ViewportFromOriginAndSize(CC3IntPoint origin, CC3IntSize size) {
+	return CC3ViewportMake(origin.x, origin.y, size.width, size.height);
+}
+
 /** Returns whether the two viewports are equal by comparing their respective components. */
 static inline BOOL CC3ViewportsAreEqual(CC3Viewport vp1, CC3Viewport vp2) {
 	return (vp1.x == vp2.x) && (vp1.y == vp2.y) && (vp1.w == vp2.w) && (vp1.h == vp2.h);
@@ -1813,6 +1822,45 @@ static inline BOOL CC3ViewportContainsPoint(CC3Viewport vp, CGPoint point) {
 /** Returns the dimensions of the specified viewport as a rectangle. */
 static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 	return CGRectMake(vp.x, vp.y, vp.w, vp.h);
+}
+
+
+#pragma mark -
+#pragma mark Color support
+
+/** Returns a GLfloat between 0 and 1 converted from the specified GLubyte value between 0 and 255. */
+static inline GLfloat CCColorFloatFromByte(GLubyte colorValue) {
+	return (GLfloat)colorValue * kCC3OneOver255;
+}
+
+/**
+ * Returns a GLubyte between 0 and 255 converted from the specified GLfloat value.
+ *
+ * The specified float value is clamped to between 0 and 1 before conversion, so that
+ * the Glubyte does not overflow or underflow, which would create unexpected colors.
+ */
+static inline GLubyte CCColorByteFromFloat(GLfloat colorValue) {
+	return (GLubyte)(CLAMP(colorValue, 0.0f, 1.0f) * 255.0f);
+}
+
+/**
+ * Returns the luminosity of the specified color as calculated using the ITU-R BT.709
+ * conversion for high-definition television (HDTV):
+ *
+ *   luminosity = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue),
+ */
+static inline GLfloat CC3LuminosityBT709(GLfloat red, GLfloat green, GLfloat blue) {
+	return (0.2126 * red) + (0.7152 * green) + (0.0722 * blue);
+}
+
+/**
+ * Returns the luminosity of the specified color as calculated using the ITU-R BT.601
+ * conversion for standard-definition television (SDTV):
+ *
+ *   luminosity = (0.299 * red) + (0.587 * green) + (0.114 * blue),
+ */
+static inline GLfloat CC3LuminosityBT601(GLfloat red, GLfloat green, GLfloat blue) {
+	return (0.299 * red) + (0.587 * green) + (0.114 * blue);
 }
 
 
@@ -1859,29 +1907,9 @@ static const ccColor4F kCCC4FBlack = { 0.0, 0.0, 0.0, 1.0 };
 /** Transparent Black */
 static const ccColor4F kCCC4FBlackTransparent = {0.0, 0.0, 0.0, 0.0};
 
-/** Returns a GLfloat between 0 and 1 converted from the specified GLubyte value between 0 and 255. */
-static inline GLfloat CCColorFloatFromByte(GLubyte colorValue) {
-	return (GLfloat)colorValue * kCC3OneOver255;
-}
-
-/**
- * Returns a GLubyte between 0 and 255 converted from the specified GLfloat value.
- *
- * The specified float value is clamped to between 0 and 1 before conversion, so that
- * the Glubyte does not overflow or underflow, which would create unexpected colors.
- */
-static inline GLubyte CCColorByteFromFloat(GLfloat colorValue) {
-	return (GLubyte)(CLAMP(colorValue, 0.0f, 1.0f) * 255.0f);
-}
-
 /** Returns a string description of the specified ccColor4F in the form "(r, g, b, a)" */
 static inline NSString* NSStringFromCCC4F(ccColor4F rgba) {
 	return [NSString stringWithFormat: @"(%.3f, %.3f, %.3f, %.3f)", rgba.r, rgba.g, rgba.b, rgba.a];
-}
-
-/** Returns a string description of the specified ccColor4B in the form "(r, g, b, a)" */
-static inline NSString* NSStringFromCCC4B(ccColor4B rgba) {
-	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", rgba.r, rgba.g, rgba.b, rgba.a];
 }
 
 #if COCOS2D_VERSION < 0x010100		// cocos2d 1.0 - exists in cocos2d versions above
@@ -1901,41 +1929,18 @@ static inline ccColor4F CCC4FMake(GLfloat red, GLfloat green, GLfloat blue, GLfl
 
 /** Returns a ccColor4F structure constructed from the specified ccColor4B */
 static inline ccColor4F CCC4FFromCCC4B(ccColor4B byteColor) {
-	ccColor4F color;
-	color.r = CCColorFloatFromByte(byteColor.r);
-	color.g = CCColorFloatFromByte(byteColor.g);
-	color.b = CCColorFloatFromByte(byteColor.b);
-	color.a = CCColorFloatFromByte(byteColor.a);
-	return color;
-}
-
-/** Returns a ccColor4B structure constructed from the specified ccColor4F */
-static inline ccColor4B CCC4BFromCCC4F(ccColor4F floatColor) {
-	ccColor4B color;
-	color.r = CCColorByteFromFloat(floatColor.r);
-	color.g = CCColorByteFromFloat(floatColor.g);
-	color.b = CCColorByteFromFloat(floatColor.b);
-	color.a = CCColorByteFromFloat(floatColor.a);
-	return color;
+	return ccc4f(CCColorFloatFromByte(byteColor.r),
+				 CCColorFloatFromByte(byteColor.g),
+				 CCColorFloatFromByte(byteColor.b),
+				 CCColorFloatFromByte(byteColor.a));
 }
 
 /** Returns a ccColor4F structure constructed from the specified ccColor3B and opacity. */
 static inline ccColor4F CCC4FFromColorAndOpacity(ccColor3B byteColor, GLubyte opacity) {
-	ccColor4F color;
-	color.r = CCColorFloatFromByte(byteColor.r);
-	color.g = CCColorFloatFromByte(byteColor.g);
-	color.b = CCColorFloatFromByte(byteColor.b);
-	color.a = CCColorFloatFromByte(opacity);
-	return color;
-}
-
-/** Returns a ccColor3B structure constructed from the specified ccColor4F */
-static inline ccColor3B CCC3BFromCCC4F(ccColor4F floatColor) {
-	ccColor3B color;
-	color.r = CCColorByteFromFloat(floatColor.r);
-	color.g = CCColorByteFromFloat(floatColor.g);
-	color.b = CCColorByteFromFloat(floatColor.b);
-	return color;
+	return ccc4f(CCColorFloatFromByte(byteColor.r),
+				 CCColorFloatFromByte(byteColor.g),
+				 CCColorFloatFromByte(byteColor.b),
+				 CCColorFloatFromByte(opacity));
 }
 
 /** Returns a ccColor4F structure constructed from the specified CoreGraphics CGColorRef. */
@@ -1969,43 +1974,8 @@ static inline GLfloat CCC4FIntensity(ccColor4F color) {
 	return (color.r + color.g + color.b) * kCC3OneThird;
 }
 
-/**
- * Returns a grayscale reprsentation of the specified color. Each of the RGB components of
- * the returned color contains a luma value calculated using the ITU-R BT.709 conversion
- * for high-definition television (HDTV):
- *
- *   (0.2126 * R) + (0.7152 * G) + (0.0722 * B),
- *
- * where R, G & B are from the specified color. The alpha component of the returned color
- * is the same as that of the specified color.
- */
-static inline ccColor4F CCC4FGrayscaleBT709(ccColor4F color) {
-	GLfloat luma = (0.2126 * color.r) + (0.7152 * color.g) + (0.0722 * color.b);
-	return ccc4f(luma, luma, luma, color.a);
-}
-
-/**
- * Returns a grayscale reprsentation of the specified color. Each of the RGB components of
- * the returned color contains a luma value calculated using the ITU-R BT.601 conversion
- * for standard-definition television (SDTV):
- *
- *   (0.299 * R) + (0.587 * G) + (0.114 * B),
- *
- * where R, G & B are from the specified color. The alpha component of the returned color
- * is the same as that of the specified color.
- */
-static inline ccColor4F CCC4FGrayscaleBT601(ccColor4F color) {
-	GLfloat luma = (0.299 * color.r) + (0.587 * color.g) + (0.114 * color.b);
-	return ccc4f(luma, luma, luma, color.a);
-}
-
 /** Returns whether the two colors are equal by comparing their respective components. */
 static inline BOOL CCC4FAreEqual(ccColor4F c1, ccColor4F c2) {
-	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
-}
-
-/** Returns whether the two colors are equal by comparing their respective components. */
-static inline BOOL CCC4BAreEqual(ccColor4B c1, ccColor4B c2) {
 	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
 }
 
@@ -2015,12 +1985,10 @@ static inline BOOL CCC4BAreEqual(ccColor4B c1, ccColor4B c2) {
  * This can also be thought of as a translation of the first color by the second.
  */
 static inline ccColor4F CCC4FAdd(ccColor4F rgba, ccColor4F translation) {
-	ccColor4F result;
-	result.r = CLAMP(rgba.r + translation.r, 0.0f, 1.0f);
-	result.g = CLAMP(rgba.g + translation.g, 0.0f, 1.0f);
-	result.b = CLAMP(rgba.b + translation.b, 0.0f, 1.0f);
-	result.a = CLAMP(rgba.a + translation.a, 0.0f, 1.0f);
-	return result;
+	return ccc4f(CLAMP(rgba.r + translation.r, 0.0f, 1.0f),
+				 CLAMP(rgba.g + translation.g, 0.0f, 1.0f),
+				 CLAMP(rgba.b + translation.b, 0.0f, 1.0f),
+				 CLAMP(rgba.a + translation.a, 0.0f, 1.0f));
 }
 
 /**
@@ -2029,12 +1997,10 @@ static inline ccColor4F CCC4FAdd(ccColor4F rgba, ccColor4F translation) {
  * Each of the resulting color components is clamped to be between 0.0 and 1.0.
  */
 static inline ccColor4F CCC4FDifference(ccColor4F minuend, ccColor4F subtrahend) {
-	ccColor4F result;
-	result.r = CLAMP(minuend.r - subtrahend.r, 0.0f, 1.0f);
-	result.g = CLAMP(minuend.g - subtrahend.g, 0.0f, 1.0f);
-	result.b = CLAMP(minuend.b - subtrahend.b, 0.0f, 1.0f);
-	result.a = CLAMP(minuend.a - subtrahend.a, 0.0f, 1.0f);
-	return result;
+	return ccc4f(CLAMP(minuend.r - subtrahend.r, 0.0f, 1.0f),
+				 CLAMP(minuend.g - subtrahend.g, 0.0f, 1.0f),
+				 CLAMP(minuend.b - subtrahend.b, 0.0f, 1.0f),
+				 CLAMP(minuend.a - subtrahend.a, 0.0f, 1.0f));
 }
 
 /**
@@ -2052,12 +2018,10 @@ static inline ccColor4F CCC4FUniformTranslate(ccColor4F rgba, GLfloat offset) {
  * Each of the resulting color components is clamped to be between 0.0 and 1.0.
  */
 static inline ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
-	ccColor4F result;
-	result.r = CLAMP(rgba.r * scale, 0.0f, 1.0f);
-	result.g = CLAMP(rgba.g * scale, 0.0f, 1.0f);
-	result.b = CLAMP(rgba.b * scale, 0.0f, 1.0f);
-	result.a = CLAMP(rgba.a * scale, 0.0f, 1.0f);
-	return result;
+	return ccc4f(CLAMP(rgba.r * scale, 0.0f, 1.0f),
+				 CLAMP(rgba.g * scale, 0.0f, 1.0f),
+				 CLAMP(rgba.b * scale, 0.0f, 1.0f),
+				 CLAMP(rgba.a * scale, 0.0f, 1.0f));
 }
 
 /**
@@ -2065,12 +2029,10 @@ static inline ccColor4F CCC4FUniformScale(ccColor4F rgba, GLfloat scale) {
  * components. Each of the resulting color components is clamped to be between 0.0 and 1.0.
  */
 static inline ccColor4F CCC4FModulate(ccColor4F rgba, ccColor4F modulation) {
-	ccColor4F result;
-	result.r = CLAMP(rgba.r * modulation.r, 0.0f, 1.0f);
-	result.g = CLAMP(rgba.g * modulation.g, 0.0f, 1.0f);
-	result.b = CLAMP(rgba.b * modulation.b, 0.0f, 1.0f);
-	result.a = CLAMP(rgba.a * modulation.a, 0.0f, 1.0f);
-	return result;
+	return ccc4f(CLAMP(rgba.r * modulation.r, 0.0f, 1.0f),
+				 CLAMP(rgba.g * modulation.g, 0.0f, 1.0f),
+				 CLAMP(rgba.b * modulation.b, 0.0f, 1.0f),
+				 CLAMP(rgba.a * modulation.a, 0.0f, 1.0f));
 }
 
 /**
@@ -2094,12 +2056,43 @@ static inline ccColor4F CCC4FBlend(ccColor4F baseColor, ccColor4F blendColor, GL
  * alpha when applied to the texels of a texture.
  */
 static inline ccColor4F CCC4FBlendAlpha(ccColor4F rgba) {
-	ccColor4F result;
-	result.r = CLAMP(rgba.r * rgba.a, 0.0f, 1.0f);
-	result.g = CLAMP(rgba.g * rgba.a, 0.0f, 1.0f);
-	result.b = CLAMP(rgba.b * rgba.a, 0.0f, 1.0f);
-	result.a = rgba.a;
-	return result;
+	return ccc4f(CLAMP(rgba.r * rgba.a, 0.0f, 1.0f),
+				 CLAMP(rgba.g * rgba.a, 0.0f, 1.0f),
+				 CLAMP(rgba.b * rgba.a, 0.0f, 1.0f),
+				 rgba.a);
+}
+
+/**
+ * Returns a random ccColor4F where each component value between the specified min inclusive and
+ * the specified max exclusive. This can be useful when creating particle systems.
+ */
+static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
+	return ccc4f(CC3RandomFloatBetween(min.r, max.r),
+				 CC3RandomFloatBetween(min.g, max.g),
+				 CC3RandomFloatBetween(min.b, max.b),
+				 CC3RandomFloatBetween(min.a, max.a));
+}
+
+
+#pragma mark -
+#pragma mark ccColor4B constants and functions
+
+/** Returns a string description of the specified ccColor4B in the form "(r, g, b, a)" */
+static inline NSString* NSStringFromCCC4B(ccColor4B rgba) {
+	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", rgba.r, rgba.g, rgba.b, rgba.a];
+}
+
+/** Returns whether the two colors are equal by comparing their respective components. */
+static inline BOOL CCC4BAreEqual(ccColor4B c1, ccColor4B c2) {
+	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
+}
+
+/** Returns a ccColor4B structure constructed from the specified ccColor4F */
+static inline ccColor4B CCC4BFromCCC4F(ccColor4F floatColor) {
+	return ccc4(CCColorByteFromFloat(floatColor.r),
+				CCColorByteFromFloat(floatColor.g),
+				CCColorByteFromFloat(floatColor.b),
+				CCColorByteFromFloat(floatColor.a));
 }
 
 /**
@@ -2112,35 +2105,35 @@ static inline ccColor4F CCC4FBlendAlpha(ccColor4F rgba) {
  */
 static inline ccColor4B CCC4BBlendAlpha(ccColor4B rgba) {
 	GLfloat alpha = rgba.a * kCC3OneOver255;
-	ccColor4B result;
-	result.r = CLAMP((rgba.r * alpha), 0, 255);
-	result.g = CLAMP((rgba.g * alpha), 0, 255);
-	result.b = CLAMP((rgba.b * alpha), 0, 255);
-	result.a = rgba.a;
-	return result;
-}
-
-/**
- * Returns a random ccColor4F where each component value between the specified min inclusive and
- * the specified max exclusive. This can be useful when creating particle systems.
- */
-static inline ccColor4F RandomCCC4FBetween(ccColor4F min, ccColor4F max) {
-	ccColor4F result;
-	result.r = CC3RandomFloatBetween(min.r, max.r);
-	result.g = CC3RandomFloatBetween(min.g, max.g);
-	result.b = CC3RandomFloatBetween(min.b, max.b);
-	result.a = CC3RandomFloatBetween(min.a, max.a);
-	return result;
+	return ccc4(CLAMP(rgba.r * alpha, 0, 255),
+				CLAMP(rgba.g * alpha, 0, 255),
+				CLAMP(rgba.b * alpha, 0, 255),
+				rgba.a);
 }
 
 
 #pragma mark -
 #pragma mark ccColor3B constants and functions
 
+/** Returns a string description of the specified ccColor3B in the form "(r, g, b)" */
+static inline NSString* NSStringFromCCC3B(ccColor3B rgb) {
+	return [NSString stringWithFormat: @"(%i, %i, %i)", rgb.r, rgb.g, rgb.b];
+}
+
 /** Returns whether the two colors are equal by comparing their respective components. */
 static inline BOOL CCC3BAreEqual(ccColor3B c1, ccColor3B c2) {
 	return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
+
+/** Returns a ccColor3B structure constructed from the specified ccColor4F */
+static inline ccColor3B CCC3BFromCCC4F(ccColor4F floatColor) {
+	return ccc3(CCColorByteFromFloat(floatColor.r),
+				CCColorByteFromFloat(floatColor.g),
+				CCColorByteFromFloat(floatColor.b));
+}
+
+/** Returns a ccColor3B structure constructed from the specified ccColor4B */
+static inline ccColor3B CCC3BFromCCC4B(ccColor4B color) { return *(ccColor3B*)&color; }
 
 /**
  * Returns an ccColor3B structure whose values are a weighted average of the specified base color and

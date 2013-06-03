@@ -132,7 +132,7 @@
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
 	// Create the customized CC3Layer that supports 3D rendering.
-	CC3Layer* cc3Layer = [CC3DemoMashUpLayer node];
+	CC3Layer* cc3Layer = [CC3DemoMashUpLayer layerWithController: _viewController];
 	
 	// Create the customized 3D scene and attach it to the layer.
 	// Could also just create this inside the customer layer.

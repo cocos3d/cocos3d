@@ -418,10 +418,7 @@
 -(void) bindGLWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 
-#pragma mark Texture sizing and file loading
-
-/** Resizes this texture to the specified dimensions and clears all texture content. */
--(void) resizeTo: (CC3IntSize) size;
+#pragma mark Texture content and sizing
 
 /**
  * Loads the single texture file at the specified file path, and returns whether the loading was successful.
@@ -451,6 +448,41 @@
  * cluster subclass to instantiate for loading the specified file.
  */
 -(BOOL) loadFromFile: (NSString*) aFilePath;
+
+/**
+ * Replaces a portion of the content of this texture by writing the specified array of pixels
+ * into the specified rectangular area within the specified target for this texture, The specified
+ * content replaces the texture data within the specified rectangle. The specified content array
+ * must be large enough to contain content for the number of pixels in the specified rectangle.
+ *
+ * Content is read from the specified array left to right across each row of pixels within
+ * the specified image rectangle, starting at the row at the bottom of the rectangle, and
+ * ending at the row at the top of the rectangle.
+ *
+ * Within the specified array, the pixel content should be packed tightly, with no gaps left
+ * at the end of each row. The last pixel of one row should immediately be followed by the
+ * first pixel of the next row.
+ *
+ * The pixels in the specified array are in standard 32-bit RGBA. If the pixelFormat and
+ * pixelType properties of this texture are not GL_RGBA and GL_UNSIGNED_BYTE, respectively,
+ * the pixels in the specified array will be converted to the format and type of this texture
+ * before being inserted into the texture. Be aware that this conversion will reduce the
+ * performance of this method. For maximum performance, match the format and type of this
+ * texture to the 32-bit RGBA format of the specified array, by setting the pixelFormat
+ * property to GL_RGBA and the pixelType property to GL_UNSIGNED_BYTE. However, keep in mind
+ * that the 32-bit RGBA format consumes more memory than most other formats, so if performance
+ * is of lesser concern, you may choose to minimize the memory requirements of this texture
+ * by setting the pixelFormat and pixelType properties to values that consume less memory.
+ *
+ * If this texture has mipmaps, they are not automatically updated. Once all desired content
+ * has been replaced, invoke the generateMipmap method to regenerate the mipmaps.
+ */
+-(void) replacePixels: (CC3Viewport) rect
+			 inTarget: (GLenum) target
+		  withContent: (ccColor4B*) colorArray;
+
+/** Resizes this texture to the specified dimensions and clears all texture content. */
+-(void) resizeTo: (CC3IntSize) size;
 
 
 #pragma mark Allocation and Initialization
@@ -577,6 +609,39 @@
 @interface CC3GLTexture2D : CC3GLTexture
 
 
+#pragma mark Texture content and sizing
+
+/**
+ * Replaces a portion of the content of this texture by writing the specified array of pixels
+ * into the specified rectangular area within this texture, The specified content replaces
+ * the texture data within the specified rectangle. The specified content array must be large
+ * enough to contain content for the number of pixels in the specified rectangle.
+ *
+ * Content is read from the specified array left to right across each row of pixels within
+ * the specified image rectangle, starting at the row at the bottom of the rectangle, and
+ * ending at the row at the top of the rectangle.
+ *
+ * Within the specified array, the pixel content should be packed tightly, with no gaps left
+ * at the end of each row. The last pixel of one row should immediately be followed by the
+ * first pixel of the next row.
+ *
+ * The pixels in the specified array are in standard 32-bit RGBA. If the pixelFormat and
+ * pixelType properties of this texture are not GL_RGBA and GL_UNSIGNED_BYTE, respectively,
+ * the pixels in the specified array will be converted to the format and type of this texture
+ * before being inserted into the texture. Be aware that this conversion will reduce the
+ * performance of this method. For maximum performance, match the format and type of this
+ * texture to the 32-bit RGBA format of the specified array, by setting the pixelFormat
+ * property to GL_RGBA and the pixelType property to GL_UNSIGNED_BYTE. However, keep in mind
+ * that the 32-bit RGBA format consumes more memory than most other formats, so if performance
+ * is of lesser concern, you may choose to minimize the memory requirements of this texture
+ * by setting the pixelFormat and pixelType properties to values that consume less memory.
+ *
+ * If this texture has mipmaps, they are not automatically updated. Once all desired content
+ * has been replaced, invoke the generateMipmap method to regenerate the mipmaps.
+ */
+-(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray;
+
+
 #pragma mark Allocation and Initialization
 
 /**
@@ -687,6 +752,25 @@
 #pragma mark Texture file loading
 
 /**
+ * Loads the specified image into the specified cube face target.
+ *
+ * The specified cube face target can be one of the following:
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ *
+ * In order to complete this cube texture, this method should be invoked once for each
+ * of these six face targets.
+ *
+ * This method does not automatically generate a mipmap. If you want a mipmap, you should
+ * invoke the generateMipmap method once all six faces have been loaded.
+ */
+-(void) loadCubeFace: (GLenum) faceTarget fromCGImage: (CGImageRef) cgImg;
+
+/**
  * Loads the texture file at the specified file path into the specified cube face target,
  * and returns whether the loading was successful.
  *
@@ -778,24 +862,40 @@
  */
 -(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern;
 
+
+#pragma mark Texture content and sizing
+
 /**
- * Sets the specified image into the specified cube face target.
+ * Replaces a portion of the content of this texture by writing the specified array of pixels
+ * into the specified rectangular area within the specified face of this texture, The specified
+ * content replaces the texture data within the specified rectangle. The specified content array
+ * must be large enough to contain content for the number of pixels in the specified rectangle.
  *
- * The specified cube face target can be one of the following:
- *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
- *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
- *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
- *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
- *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
- *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ * Content is read from the specified array left to right across each row of pixels within
+ * the specified image rectangle, starting at the row at the bottom of the rectangle, and
+ * ending at the row at the top of the rectangle.
  *
- * In order to complete this cube texture, this method should be invoked once for each
- * of these six face targets.
+ * Within the specified array, the pixel content should be packed tightly, with no gaps left
+ * at the end of each row. The last pixel of one row should immediately be followed by the
+ * first pixel of the next row.
  *
- * This method does not automatically generate a mipmap. If you want a mipmap, you should
- * invoke the generateMipmap method once all six faces have been loaded.
+ * The pixels in the specified array are in standard 32-bit RGBA. If the pixelFormat and
+ * pixelType properties of this texture are not GL_RGBA and GL_UNSIGNED_BYTE, respectively,
+ * the pixels in the specified array will be converted to the format and type of this texture
+ * before being inserted into the texture. Be aware that this conversion will reduce the
+ * performance of this method. For maximum performance, match the format and type of this
+ * texture to the 32-bit RGBA format of the specified array, by setting the pixelFormat
+ * property to GL_RGBA and the pixelType property to GL_UNSIGNED_BYTE. However, keep in mind
+ * that the 32-bit RGBA format consumes more memory than most other formats, so if performance
+ * is of lesser concern, you may choose to minimize the memory requirements of this texture
+ * by setting the pixelFormat and pixelType properties to values that consume less memory.
+ *
+ * If this texture has mipmaps, they are not automatically updated. Once all desired content
+ * has been replaced, invoke the generateMipmap method to regenerate the mipmaps.
  */
--(void) setCubeFace: (GLenum) faceTarget toCGImage: (CGImageRef) cgImg;
+-(void) replacePixels: (CC3Viewport) rect
+		   inCubeFace: (GLenum) faceTarget
+		  withContent: (ccColor4B*) colorArray;
 
 
 #pragma mark Allocation and initialization

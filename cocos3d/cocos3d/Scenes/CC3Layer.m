@@ -70,8 +70,9 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	if( (self = [super init]) ) {
+-(id) initWithController: (CC3ViewController*) controller {
+	CC3Assert(controller, @"%@ requires a controller for rendering a 3D scene.", self);
+	if( (self = [super initWithController: controller]) ) {
 		_shouldAlwaysUpdateViewport = NO;
 		self.mousePriority = 0;
 		[self initializeControls];

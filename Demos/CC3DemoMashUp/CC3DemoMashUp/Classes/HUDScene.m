@@ -60,7 +60,7 @@
  * buffer before drawing, so objects in this scene won't hide behind objects in the main scene.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor.gl clearDepthBuffer];
+	[visitor.renderSurface clearDepthContent];
 	[super drawSceneContentWithVisitor: visitor];
 }
 

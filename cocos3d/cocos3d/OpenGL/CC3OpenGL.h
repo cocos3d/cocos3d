@@ -137,6 +137,8 @@ typedef struct {
 	GLuint value_GL_FRAMEBUFFER_BINDING;
 	GLenum value_GL_FRAMEBUFFER_Target;
 	GLuint value_GL_RENDERBUFFER_BINDING;
+	GLuint value_GL_PACK_ALIGNMENT;
+	GLuint value_GL_UNPACK_ALIGNMENT;
 
 	BOOL valueCap_GL_BLEND : 1;
 	BOOL valueCap_GL_CULL_FACE : 1;
@@ -192,6 +194,8 @@ typedef struct {
 	BOOL isKnown_GL_FRAMEBUFFER_BINDING : 1;
 	BOOL isKnown_GL_FRAMEBUFFER_Target : 1;
 	BOOL isKnown_GL_RENDERBUFFER_BINDING : 1;
+	BOOL isKnown_GL_PACK_ALIGNMENT : 1;
+	BOOL isKnown_GL_UNPACK_ALIGNMENT : 1;
 
 }
 
@@ -444,58 +448,6 @@ typedef struct {
 /** Sets the viewport rectangle. */
 -(void) setViewport: (CC3Viewport) vp;
 
-/**
- * Clears the buffers identified by the specified bitmask, which is a bitwise OR
- * combination of one or more of the following masks: GL_COLOR_BUFFER_BIT,
- * GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT
- */
--(void) clearBuffers: (GLbitfield) mask;
-
-/**
- * Clears the color buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
--(void) clearColorBuffer;
-
-/**
- * Clears the depth buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
--(void) clearDepthBuffer;
-
-/**
- * Clears the stencil buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
--(void) clearStencilBuffer;
-
-/**
- * Clears the color and depth buffers.
- *
- * This is a convenience method to handle the common requirement for simultaneously
- * clearning both the color and depth buffers.
- */
--(void) clearColorAndDepthBuffers;
-
-/**
- * Returns the color value of the pixel at the specified position in the GL color buffer.
- *
- * This method should be used with care, since it involves making a synchronous call to
- * query the state of the GL engine. This method will not return until the GL engine has
- * executed all previous drawing commands in the pipeline. Excessive use of this method
- * will reduce GL throughput and performance.
- */
--(ccColor4B) readPixelAt: (CGPoint) pixelPos;
-
 
 #pragma mark Lighting
 
@@ -613,11 +565,26 @@ typedef struct {
  */
 -(void) loadTexureImage: (const GLvoid*) imageData
 			 intoTarget: (GLenum) target
+		  onMipmapLevel: (GLint) mipmapLevel
 			   withSize: (CC3IntSize) size
 			 withFormat: (GLenum) texelFormat
 			   withType: (GLenum) texelType
 	  withByteAlignment: (GLint) byteAlignment
 					 at: (GLuint) tuIdx;
+
+/**
+ * Loads the specified texture image data, with the specified characteristics, into the
+ * specified rectangular area within the texture at the specified target and texture unit,
+ * in GL memory. The image data replaces the texture data within the specified bounds.
+ */
+-(void) loadTexureSubImage: (const GLvoid*) imageData
+				intoTarget: (GLenum) target
+			 onMipmapLevel: (GLint) mipmapLevel
+			 intoRectangle: (CC3Viewport) rect
+				withFormat: (GLenum) texelFormat
+				  withType: (GLenum) texelType
+		 withByteAlignment: (GLint) byteAlignment
+						at: (GLuint) tuIdx;
 
 /** 
  * Sets the specified texture unit as the active texture unit. Subsequent changes made to
@@ -833,6 +800,91 @@ typedef struct {
  * compiler build setting is set, an assertion error is raised.
  */
 -(BOOL) checkFramebufferStatus: (GLuint) fbID;
+
+/**
+ * Clears the buffers identified by the specified bitmask, which is a bitwise OR
+ * combination of one or more of the following masks: GL_COLOR_BUFFER_BIT,
+ * GL_DEPTH_BUFFER_BIT, and GL_STENCIL_BUFFER_BIT
+ */
+-(void) clearBuffers: (GLbitfield) mask;
+
+/**
+ * Clears the color buffer.
+ *
+ * This is a convenience method. To clear more than one buffer, use the clearBuffers:
+ * method, passing in the buffers to clear, instead of invoking several distinct
+ * clear*Buffer methods.
+ */
+//-(void) clearColorBuffer;
+
+/**
+ * Clears the depth buffer.
+ *
+ * This is a convenience method. To clear more than one buffer, use the clearBuffers:
+ * method, passing in the buffers to clear, instead of invoking several distinct
+ * clear*Buffer methods.
+ */
+//-(void) clearDepthBuffer;
+
+/**
+ * Clears the stencil buffer.
+ *
+ * This is a convenience method. To clear more than one buffer, use the clearBuffers:
+ * method, passing in the buffers to clear, instead of invoking several distinct
+ * clear*Buffer methods.
+ */
+//-(void) clearStencilBuffer;
+
+/**
+ * Clears the color and depth buffers.
+ *
+ * This is a convenience method to handle the common requirement for simultaneously
+ * clearning both the color and depth buffers.
+ */
+//-(void) clearColorAndDepthBuffers;
+
+/**
+ * Reads the color content of the range of pixels defined by the specified rectangle from the
+ * GL color buffer of the currently bound framebuffer, into the specified array, which must be
+ * large enough to accommodate the number of pixels covered by the specified rectangle.
+ *
+ * Content is written to memory left to right across each row, starting at the row at the bottom
+ * of the image, and ending at the row at the top of the image. The pixel content is packed
+ * tightly into the specified array, with no gaps left at the end of each row. In memory, the
+ * last pixel of one row is immediately followed by the first pixel of the next row.
+ *
+ * If the specified framebuffer is not the active framebuffer, it is temporarily activated,
+ * long enough to read the contents, then the current framebuffer is reactivated. This allows
+ * pixels to be read from a secondary framebuffer while rendering to the active framebuffer.
+ *
+ * This method should be used with care, since it involves making a synchronous call to
+ * query the state of the GL engine. This method will not return until the GL engine has
+ * executed all previous drawing commands in the pipeline. Excessive use of this method
+ * will reduce GL throughput and performance.
+ */
+-(void) readPixelsIn: (CC3Viewport) rect  fromFramebuffer: (GLuint) fbID into: (ccColor4B*) colorArray;
+
+/**
+ * Sets the packing alignment when writing pixel content from the GL engine into application
+ * memory to the specified alignment, which may be 1, 2, 4 or 8.
+ *
+ * This value indicates whether each row of pixels should start at a 1, 2, 4 or 8 byte boundary.
+ * Depending on the width of the image, a value other than 1 may result in additional bytes being
+ * added at the end of each row of pixels, in order to maintain the specified byte alignment.
+ * The contents of those additional bytes is undefined.
+ */
+-(void) setPixelPackingAlignment: (GLint) byteAlignment;
+
+/**
+ * Sets the unpacking alignment when reading pixel content from application memory for copying
+ * into the GL engine to the specified alignment, which may be 1, 2, 4 or 8.
+ *
+ * This value indicates whether each row of pixels should start at a 1, 2, 4 or 8 byte boundary.
+ * Depending on the width of the image, a value other than 1 may require that the application
+ * add additional bytes to the end of each row of pixels, in order to maintain the specified
+ * byte alignment. The contents of those additional bytes is not copied into the GL engine.
+ */
+-(void) setPixelUnpackingAlignment: (GLint) byteAlignment;
 
 
 #pragma mark Platform & GL info

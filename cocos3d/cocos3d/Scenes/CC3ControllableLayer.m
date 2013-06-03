@@ -52,12 +52,21 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
+// Will fail assertion with nil controller
+-(id) init { return [self initWithController: nil]; }
+
+-(id) initWithController: (CC3ViewController*) controller {
+	CC3Assert(controller, @"%@ requires a controller.", self);
 	if( (self = [super init]) ) {
+		_controller = controller;		// not retained
 		_alignContentSizeWithDeviceOrientation = YES;
-		[self initInitialState];	// Deprecated legacy
+		[self initInitialState];		// Deprecated legacy
 	}
 	return self;
+}
+
++(id) layerWithController: (CC3ViewController*) controller {
+	return [[[self alloc] initWithController: controller] autorelease];
 }
 
 // Deprecated legacy

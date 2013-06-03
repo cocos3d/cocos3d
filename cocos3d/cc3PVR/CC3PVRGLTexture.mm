@@ -75,6 +75,13 @@
 								: [CC3GLTexture2D class].defaultTextureParameters;
 }
 
+/** Replacing pixels not supported in compressed PVR textures. */
+-(void) replacePixels: (CC3Viewport) rect
+			 inTarget: (GLenum) target
+		  withContent: (ccColor4B*) colorArray {
+	CC3AssertUnimplemented(@"replacePixels:inTarget:withContent:");
+}
+
 @end
 
 

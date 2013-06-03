@@ -35,12 +35,12 @@
 	
 	// ******** START OF COCOS3D SETUP CODE... ********
 	
-	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer node];
-	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
-	
 	// Create the view controller to coordinate the CC3Layer and window view
 	_viewController = [CC3NSViewController new];	// retained
 	_viewController.view = _glView;
+
+	CC3Layer* cc3Layer = [___PROJECTNAMEASIDENTIFIER___Layer layerWithController: _viewController];
+	cc3Layer.cc3Scene = [___PROJECTNAMEASIDENTIFIER___Scene scene];
 	_viewController.controlledNode = cc3Layer;
 	
 	CCScene *scene = [CCScene node];

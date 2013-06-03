@@ -719,30 +719,31 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * does not need to take care of any of this set-up and tear-down.
  *
  * This implementation turns on the lighting contained within the scene, and performs a single
- * rendering pass of the nodes in the scene using the CC3NodeDrawingVisitor held in the
- * viewDrawingVisitor property.
+ * rendering pass of the nodes in the scene.
  *
  * The core of the drawing is handled by invoking the visit: method on the specified visitor,
  * with this scene as the argument. Several template methods are available to provide
  * "building blocks" to help you build the functionality in this method, and which you can
  * individually customize as needed. The order of behavior of this method is:
  *   - invoke illuminateWithVisitor:        - turns on scene lighting
- *   - activate viewSurface					- activates the drawing surface
- *   - invoke drawBackdropWithVisitor:      - draws an optional fixed backdrop
- *   - invoke visit: on visitor				- draws the nodes in the drawingSequencer
+ *   - visit backdrop with visitor:			- draws an optional fixed backdrop
+ *   - visit scene with visitor				- draws the nodes in the drawingSequencer
  *   - invoke drawShadows                   - draws shadows
  *
  * You can override this method to customize the scene rendering flow, such as performing
- * multiple rendering passes on different surfaces, or adding post-processing effects,
- * using the template methods mentioned above.
+ * multiple rendering passes on different surfaces, or adding post-processing effects, using
+ * the template methods mentioned above.
  *
- * To maintain performance, by default, the depth buffer is not specifically cleared when 3D
- * drawing begins. If this scene is drawing to a surface that already has depth information
- * rendered, you should override this method, clear the depth buffer before continuing with
- * 3D drawing, by invoking the following from within the overridden method:
+ * Note that rendering output is directed to the render surface held in the renderSurface
+ * property of the visitor. By default, that is set to the render surface held in the viewSurface
+ * property of this scene. If you override this method, you can set the renderSurface property
+ * of the visitor to another surface, and then invoke this superclass implementation, to render
+ * this scene to a texture for later processing.
  *
- *     [visitor.gl clearDepthBuffer];
- *
+ * To maintain performance, by default, the depth buffer of the surface is not specifically
+ * cleared when 3D drawing begins. If this scene is drawing to a surface that already has 
+ * depth information rendered, you can override this method and clear the depth buffer before
+ * continuing with 3D drawing, by invoking clearDepthContent on the renderSurface of the visitor,
  * and then invoking this superclass implementation, or continuing with your own drawing logic.
  *
  * Examples of when the depth buffer should be cleared are when this scene is being drawn
@@ -763,13 +764,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * Default implementation turns on global ambient lighting, and each CC3Light instance.
  */
 -(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Template method for drawing the special node in the backdrop property.
- *
- * The backdrop is not drawn if the scene is overlaying the device camera (augmented reality).
- */
--(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that sets up the GL drawing environment for 3D drawing.

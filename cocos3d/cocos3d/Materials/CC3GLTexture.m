@@ -78,12 +78,6 @@
 
 #pragma mark Binding content
 
--(void) resizeTo: (CC3IntSize) size {
-	if ( CC3IntSizesAreEqual(size, _size) ) return;
-	_size = size;
-	[self bindEmptyContent];
-}
-
 -(void) bindEmptyContent { CC3AssertUnimplemented(@"bindEmptyContent"); }
 
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
@@ -106,6 +100,7 @@
 	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureImage: texContent.imageData
 			 intoTarget: target
+		  onMipmapLevel: 0
 			   withSize: _size
 			 withFormat: _pixelFormat
 			   withType: _pixelType
@@ -279,7 +274,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 
-#pragma mark Texture file loading
+#pragma mark Texture content and sizing
 
 -(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) aFilePath {
 	
@@ -318,6 +313,121 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 -(void) flipTextureContentVertically: (CC3Texture2DContent*) texContent {
 	[texContent flipVertically];
 }
+
+-(void) replacePixels: (CC3Viewport) rect
+			 inTarget: (GLenum) target
+		  withContent: (ccColor4B*) colorArray {
+	
+	// If needed, convert the contents of the array to the format and type of this texture
+	[self convertContent: colorArray ofLength: (rect.w * rect.h)];
+	
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	GLuint tuIdx = 0;		// Choose the texture unit to work in
+	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl loadTexureSubImage: (const GLvoid*) colorArray
+				intoTarget: target
+			 onMipmapLevel: 0
+			 intoRectangle: rect
+				withFormat: _pixelFormat
+				  withType: _pixelType
+		 withByteAlignment: 1
+						at: tuIdx];
+}
+
+/**
+ * Converts the pixels in the specified array to the format and type used by this texture.
+ * Upon completion, the specified pixel array will contain the converted pixels.
+ *
+ * Since the pixels in any possible converted format will never consume more memory than
+ * the pixels in the incoming 32-bit RGBA format, the conversion is perfomed in-place.
+ */
+-(void) convertContent: (ccColor4B*) colorArray ofLength: (GLuint) pixCount {
+	switch (_pixelType) {
+		case GL_UNSIGNED_BYTE:
+			switch (_pixelFormat) {
+				case GL_RGB: {
+					ccColor3B* rgbArray = (ccColor3B*)colorArray;
+					for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++)
+						rgbArray[pixIdx] = CCC3BFromCCC4B(colorArray[pixIdx]);
+					break;
+				}
+				case GL_ALPHA: {
+					GLubyte* bArray = (GLubyte*)colorArray;
+					for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++)
+						bArray[pixIdx] = colorArray[pixIdx].a;
+					break;
+				}
+				case GL_LUMINANCE: {
+					GLubyte* bArray = (GLubyte*)colorArray;
+					for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++) {
+						ccColor4B* pRGBA = colorArray + pixIdx;
+						GLfloat luma = CC3LuminosityBT709(CCColorFloatFromByte(pRGBA->r),
+														  CCColorFloatFromByte(pRGBA->g),
+														  CCColorFloatFromByte(pRGBA->b));
+						bArray[pixIdx] = CCColorByteFromFloat(luma);
+					}
+					break;
+				}
+				case GL_LUMINANCE_ALPHA: {
+					GLushort* usArray = (GLushort*)colorArray;
+					for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++) {
+						ccColor4B* pRGBA = colorArray + pixIdx;
+						GLfloat luma = CC3LuminosityBT709(CCColorFloatFromByte(pRGBA->r),
+														  CCColorFloatFromByte(pRGBA->g),
+														  CCColorFloatFromByte(pRGBA->b));
+						usArray[pixIdx] = (((GLushort)CCColorByteFromFloat(luma)  << 8) |
+										   ((GLushort)pRGBA->a));
+					}
+					break;
+				}
+				case GL_RGBA:		// Already in RGBA format so do nothing!
+				default:
+					break;
+			}
+			break;
+		case GL_UNSIGNED_SHORT_5_6_5: {
+			GLushort* usArray = (GLushort*)colorArray;
+			for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++) {
+				ccColor4B* pRGBA = colorArray + pixIdx;
+				usArray[pixIdx] = ((((GLushort)pRGBA->r >> 3) << 11) |
+								   (((GLushort)pRGBA->g >> 2) <<  5) |
+								   (((GLushort)pRGBA->b >> 3)));
+			}
+			break;
+		}
+		case GL_UNSIGNED_SHORT_4_4_4_4: {
+			GLushort* usArray = (GLushort*)colorArray;
+			for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++) {
+				ccColor4B* pRGBA = colorArray + pixIdx;
+				usArray[pixIdx] = ((((GLushort)pRGBA->r >> 4) << 12) |
+								   (((GLushort)pRGBA->g >> 4) <<  8) |
+								   (((GLushort)pRGBA->b >> 4) <<  4) |
+								   (((GLushort)pRGBA->a >> 4)));
+			}
+			break;
+		}
+		case GL_UNSIGNED_SHORT_5_5_5_1: {
+			GLushort* usArray = (GLushort*)colorArray;
+			for (GLuint pixIdx = 0; pixIdx < pixCount; pixIdx++) {
+				ccColor4B* pRGBA = colorArray + pixIdx;
+				usArray[pixIdx] = ((((GLushort)pRGBA->r >> 3) << 11) |
+								   (((GLushort)pRGBA->g >> 3) <<  6) |
+								   (((GLushort)pRGBA->b >> 3) <<  1) |
+								   (((GLushort)pRGBA->a >> 7)));
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+-(void) resizeTo: (CC3IntSize) size {
+	if ( CC3IntSizesAreEqual(size, _size) ) return;
+	_size = size;
+	[self bindEmptyContent];
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -451,6 +561,14 @@ static NSMutableDictionary* _texturesByName = nil;
 }
 
 
+#pragma mark Texture content and sizing
+
+
+-(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
+	[self replacePixels: rect inTarget: self.textureTarget withContent: colorArray];
+}
+
+
 #pragma mark Allocation and initialization
 
 -(id) initWithCGImage: (CGImageRef) cgImg {
@@ -530,6 +648,12 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	return NO;
 }
 
+-(void) loadCubeFace: (GLenum) faceTarget fromCGImage: (CGImageRef) cgImg {
+	id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
+	[self bindTextureContent: texContent toTarget: faceTarget];
+	[texContent release];		// Could be big, so get rid of it immediately
+}
+
 -(BOOL) loadCubeFace: (GLenum) faceTarget fromFile: (NSString*) aFilePath {
 	return [self loadTarget: faceTarget fromFile: aFilePath];
 }
@@ -562,10 +686,13 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 							  negZ: [NSString stringWithFormat: aFilePathPattern, @"NegZ"]];
 }
 
--(void) setCubeFace: (GLenum) faceTarget toCGImage: (CGImageRef) cgImg {
-	id texContent = [[self.textureContentClass alloc] initWithCGImage: cgImg];
-	[self bindTextureContent: texContent toTarget: faceTarget];
-	[texContent release];		// Could be big, so get rid of it immediately
+
+#pragma mark Texture content and sizing
+
+-(void) replacePixels: (CC3Viewport) rect
+		   inCubeFace: (GLenum) faceTarget
+		  withContent: (ccColor4B*) colorArray {
+	[self replacePixels: rect inTarget: faceTarget withContent: colorArray];
 }
 
 

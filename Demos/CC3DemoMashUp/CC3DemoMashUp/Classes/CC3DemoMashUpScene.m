@@ -449,8 +449,14 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 }
 
-/** Creates the clear-blue-sky backdrop. See the notes for the backdrop property for more info. */
--(void) addBackdrop { self.backdrop = [CC3ClipSpaceNode nodeWithColor: kSkyColor]; }
+/** 
+ * If we're not overlaying the device camera, creates the clear-blue-sky backdrop.
+ * See the notes for the backdrop property for more info. 
+ */
+-(void) addBackdrop {
+	if (self.cc3Layer.isOverlayingDeviceCamera) return;
+	self.backdrop = [CC3ClipSpaceNode nodeWithColor: kSkyColor];
+}
 
 /**
  * Add a large circular grass-covered ground to give everything perspective.
@@ -1496,8 +1502,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Create an off-screen framebuffer surface of a size and aspect (16x9) useful in an
 	// HDTV model, attach an empty texture and depth buffer, and validate the surface.
+	// Alpha is not required for this texture, so choose a more memory-efficient 16-bit RGB format.
+	// Similarly, since stencils will not be used, choose a more efficient 16-bit depth buffer.
 	_tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
-	_tvSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: GL_RGBA andPixelType: GL_UNSIGNED_BYTE];
+	_tvSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: GL_RGB
+														andPixelType: GL_UNSIGNED_SHORT_5_6_5];
 	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
 
@@ -2122,39 +2131,46 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 #pragma mark Drawing
 
+/**
+ * This scene has custom drawing requirements, perfoming multiple passes, based on user interaction.
+ *
+ * If the user has turned on the TV in the scene, we render one pass of the scene from the
+ * point of view of the camera that travels with the runners into a texture that is then
+ * displayed on the TV screen during the main scene rendering pass.
+ *
+ * If the user has selected either the display-grayscale or display-depth modes via the
+ * lighting button, the primary rendering pass is rendered to a texture, which is then
+ * presented to the view surface as a quad via a single-node rendering pass.
+ */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	// TODO - only draw to TV if TV is visible
-	//		- move clipspace selection to node
-	//		- add auto-selection of standard clip-space shaders
-	//		- easier construction of surfaces - especially when based on view surfaces
-	//		- automate TV screen viewport config
+
+	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
+	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
+	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
 	
-	[self illuminateWithVisitor: visitor];				// Light up your world!
+	[self illuminateWithVisitor: visitor];			// Light up your world!
 	
-	[self drawToTVScreenWithVisitor: visitor];			// Draw the scene to the TV screen
+	[self drawToTVScreenWithVisitor: visitor];		// Draw the scene to the TV screen
 	
-	// If displaying grayscale or depth buffer, draw to an off-screen surface
-	if (self.isDisplayingAsGrayscale || self.isDisplayingAsDepth) {
-		[_preProcSurface activateWithVisitor: visitor];		// Draw to the pre-processing texture surface, not the view
-		[visitor.gl clearColorAndDepthBuffers];				// Clear the buffers of pre-proc surface.
-	} else {
-		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view (buffers already cleared by cocos2d)
-	}
+	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
+	// if first. Otherwise, draw to view surface directly, without clearing because it
+	// was done at the beginning of the rendering cycle.
+	if (isPostProcessing) {
+		visitor.renderSurface = _preProcSurface;
+		[_preProcSurface clearColorAndDepthContent];
+	} else
+		visitor.renderSurface = self.viewSurface;
+
+	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
+	[visitor visit: self];					// Draw the scene components
+	[self drawShadows];						// Shadows are drawn with a different visitor
 	
-	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
-	[visitor visit: self];								// Draw the scene components
-	[self drawShadows];									// Shadows are drawn with a different visitor
-	
-	// If displaying grayscale, draw the off-screen surface to the view surface
-	if (self.isDisplayingAsGrayscale) {
-		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-		[visitor visit: _grayscaleNode];
-	}
-	
-	// If displaying depth buffer, draw the off-screen surface to the view surface
-	if (self.isDisplayingAsDepth) {
-		[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-		[visitor visit: _depthImageNode];
+	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
+	// to the view surface
+	if (isPostProcessing) {
+		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
+		visitor.renderSurface = self.viewSurface;	// Ensure drawing to the view
+		[visitor visit: imgNode];
 	}
 }
 
@@ -2180,14 +2196,64 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_runnerCam.viewport = CC3ViewportMake(0, 0, kTVTexSize.width, kTVTexSize.height);
 	visitor.camera = _runnerCam;
 
-	[_tvSurface activateWithVisitor: visitor];		// Draw to the texture in the TV surface, not the view
-	[visitor.gl clearColorAndDepthBuffers];			// Clear color & depth buffers on TV surface.
-	[self drawBackdropWithVisitor: visitor];		// Draw the backdrop if it exists
+	visitor.renderSurface = _tvSurface;				// Draw to the texture in the TV surface, not the view
+	[_tvSurface clearColorAndDepthContent];			// Clear color & depth of TV surface.
+	[visitor visit: self.backdrop];					// Draw the backdrop if it exists
 	[visitor visit: self];							// Draw the scene components
 
 	visitor.camera = self.activeCamera;
 	_runnerCam.viewport = vpCurr;
 	_runnerLamp.visible = lampOnCurr;
+	
+	[self pictureInPicture];		// Add a small PiP image in the bottom right of the TV screen
+}
+
+/**
+ * Adds a small picture-in-picture window in the TV screen by directly changing the TV screen texture.
+ *
+ * This is done by copying a rectangle of pixels from the rendering surface used to render
+ * the TV image, and then pasting them into a different location in the surface. Along the
+ * way, a border is added to the PiP image by directly setting pixel values.
+ */
+-(void) pictureInPicture {
+	// Define the source and destination rectangles within the surface
+	CC3IntSize pipSize = CC3IntSizeMake(kTVScale * 2, kTVScale * 2);
+	CC3IntPoint pipSrcOrg = CC3IntPointMake((10 * kTVScale), (5 * kTVScale));
+	CC3IntPoint pipDstOrg = CC3IntPointMake((13.5 * kTVScale), (0.5 * kTVScale));
+	CC3Viewport pipSrc = CC3ViewportFromOriginAndSize(pipSrcOrg, pipSize);
+	CC3Viewport pipDst = CC3ViewportFromOriginAndSize(pipDstOrg, pipSize);
+	
+	// Allocate a temporary array to hold the extracted image content
+	ccColor4B colorArray[pipSize.width * pipSize.height];
+	
+	// Copy a rectangle of image content from the surface, add the border,
+	// and paste it to a different location on the surface.
+	[_tvSurface readColorContentFrom: pipSrc into: colorArray];
+	[self addBorderToImage: colorArray ofSize: pipSize];
+	[_tvSurface replaceColorPixels: pipDst withContent: colorArray];
+}
+
+/** 
+ * Adds a border around the specified image array, which is of the specified rectangular size.
+ *
+ * Content in the specified image array is ordered from left to right across each row of
+ * pixels, starting the row at the bottom, and ending at the row at the top.
+ */
+-(void) addBorderToImage: (ccColor4B*) colorArray ofSize: (CC3IntSize) imgSize {
+	ccColor4B borderColor = ccc4(128, 0, 0, 255);
+
+	// Add the top and bottom borders
+	GLuint topRowStart = imgSize.width * (imgSize.height - 1);
+	for (GLuint colIdx = 0; colIdx < imgSize.width; colIdx++) {
+		colorArray[colIdx] = borderColor;					// Bottom row
+		colorArray[topRowStart + colIdx] = borderColor;		// First row
+	}
+	
+	// Add the left and right borders
+	for (GLuint rowIdx = 0; rowIdx < imgSize.height; rowIdx++) {
+		colorArray[imgSize.width * rowIdx] = borderColor;				// First column in row
+		colorArray[imgSize.width * (rowIdx + 1) - 1] = borderColor;		// Last column in row
+	}
 }
 
 
@@ -2481,10 +2547,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			break;
 	}
 }
-
--(BOOL) isDisplayingAsGrayscale { return _lightingType == kLightingGrayscale; }
-
--(BOOL) isDisplayingAsDepth { return _lightingType == kLightingDepth; }
 
 /**
  * Cycle between current camera view and two views showing the complete scene.

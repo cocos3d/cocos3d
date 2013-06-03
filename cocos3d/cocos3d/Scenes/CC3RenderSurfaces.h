@@ -46,6 +46,9 @@
 /** The size of this attachment in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;
 
+/** The format of each pixel in the buffer. */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
 /**
  * Resizes this attachment to the specified size by allocating off-screen storage space
  * within GL memory.
@@ -54,8 +57,35 @@
  */
 -(void) resizeTo: (CC3IntSize) size;
 
-/** The format of each pixel in the buffer. */
-@property(nonatomic, readonly) GLenum pixelFormat;
+/**
+ * If this attachment supports pixel replacement, replaces a portion of the content of this
+ * attachment by writing the specified array of pixels into the specified rectangular area
+ * within this attachment, The specified content replaces the pixel data within the specified
+ * rectangle. The specified content array must be large enough to contain content for the
+ * number of pixels in the specified rectangle.
+ *
+ * Not all attachments support pixel replacement. In particular, pixel replacement is 
+ * available only for color attachments whose content is provided by an underlying texture.
+ * Attachments that do not support pixel replacement will simply ignore this method.
+ *
+ * Content is read from the specified array left to right across each row of pixels within
+ * the specified image rectangle, starting at the row at the bottom of the rectangle, and
+ * ending at the row at the top of the rectangle.
+ *
+ * Within the specified array, the pixel content should be packed tightly, with no gaps left
+ * at the end of each row. The last pixel of one row should immediately be followed by the
+ * first pixel of the next row.
+ *
+ * The pixels in the specified array are in standard 32-bit RGBA. If the format of the
+ * underlying storage does not match this format, the specified array will be converted
+ * to the format of the underlying storage before being inserted. Be aware that this
+ * conversion will reduce the performance of this method. For maximum performance, match
+ * the format of the underlying storage to the 32-bit RGBA format of the specified array.
+ * However, keep in mind that the 32-bit RGBA format consumes more memory than most other
+ * formats, so if performance is of lesser concern, you may choose to minimize the memory
+ * requirements of this texture by choosing a more memory efficient storage format.
+ */
+-(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray;
 
 @end
 
@@ -65,6 +95,9 @@
 
 /** A CC3RenderSurface is a surface on which rendering or drawing can occur. */
 @protocol CC3RenderSurface <NSObject>
+
+/** The size of this surface in pixels. */
+@property(nonatomic, readonly) CC3IntSize size;
 
 /** 
  * The surface attachment to which color data is rendered.
@@ -92,8 +125,17 @@
  */
 @property(nonatomic, retain) id<CC3RenderSurfaceAttachment> stencilAttachment;
 
-/** The size of this surface in pixels. */
-@property(nonatomic, readonly) CC3IntSize size;
+/** Clears the color content of this surface, activating this surface if needed. */
+-(void) clearColorContent;
+
+/** Clears the depth content of this surface, activating this surface if needed. */
+-(void) clearDepthContent;
+
+/** Clears the stencil content of this surface, activating this surface if needed. */
+-(void) clearStencilContent;
+
+/** Clears the color and depth content of this surface, activating this surface if needed. */
+-(void) clearColorAndDepthContent;
 
 /**
  * Validates that this surface has a valid configuration in the GL engine.
@@ -104,13 +146,69 @@
 -(BOOL) validate;
 
 
+#pragma mark Content
+
+/**
+ * Reads the content of the range of pixels defined by the specified rectangle from the
+ * color attachment of this surface, into the specified array, which must be large enough
+ * to accommodate the number of pixels covered by the specified rectangle.
+ *
+ * Content is written to the specified array left to right across each row, starting at the
+ * row at the bottom of the image, and ending at the row at the top of the image. The pixel
+ * content is packed tightly into the specified array, with no gaps left at the end of each
+ * row. The last pixel of one row is immediately followed by the first pixel of the next row.
+ *
+ * This surface does not have to be the active surface to invoke this method. If this surface
+ * is not the active surface, it will temporarily be made active, and when pixel reading has
+ * finished, the currently active surface will be restored. This allows color to be read from
+ * one surface while rendering to another surface.
+ *
+ * This method should be used with care, since it involves making a synchronous call to
+ * query the state of the GL engine. This method will not return until the GL engine has
+ * executed all previous drawing commands in the pipeline. Excessive use of this method
+ * will reduce GL throughput and performance.
+ */
+-(void) readColorContentFrom: (CC3Viewport) rect into: (ccColor4B*) colorArray;
+
+/**
+ * If the colorAttachment of this surface supports pixel replacement, replaces a portion
+ * of the content of the color attachment by writing the specified array of pixels into
+ * the specified rectangular area within the attachment, The specified content replaces
+ * the pixel data within the specified rectangle. The specified content array must be
+ * large enough to contain content for the number of pixels in the specified rectangle.
+ *
+ * Not all color attachments support pixel replacement. In particular, pixel replacement is
+ * available only for color attachments whose content is provided by an underlying texture.
+ * If the color attachment does not support pixel replacement, this method will do nothing.
+ *
+ * Content is read from the specified array left to right across each row of pixels within
+ * the specified image rectangle, starting at the row at the bottom of the rectangle, and
+ * ending at the row at the top of the rectangle.
+ *
+ * Within the specified array, the pixel content should be packed tightly, with no gaps left
+ * at the end of each row. The last pixel of one row should immediately be followed by the
+ * first pixel of the next row.
+ *
+ * The pixels in the specified array are in standard 32-bit RGBA. If the format of the
+ * underlying storage does not match this format, the specified array will be converted
+ * to the format of the underlying storage before being inserted. Be aware that this
+ * conversion will reduce the performance of this method. For maximum performance, match
+ * the format of the underlying storage to the 32-bit RGBA format of the specified array.
+ * However, keep in mind that the 32-bit RGBA format consumes more memory than most other
+ * formats, so if performance is of lesser concern, you may choose to minimize the memory
+ * requirements of this texture by choosing a more memory efficient storage format.
+ */
+-(void) replaceColorPixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray;
+
+
 #pragma mark Drawing
 
 /**
- * Activates this surface using the CC3OpenGL instance in the specified visitor.
+ * Activates this surface in the GL engine.
+ *
  * Subsequent GL drawing activity will be rendered to this surface.
  */
--(void) activateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) activate;
 
 @end
 

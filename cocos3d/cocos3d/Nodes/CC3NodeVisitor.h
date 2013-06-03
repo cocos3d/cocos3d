@@ -36,6 +36,7 @@
 
 @class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3GLProgram;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
+@protocol CC3RenderSurface;
 
 
 #pragma mark -
@@ -376,6 +377,7 @@
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
 	CC3GLProgram* _currentShaderProgram;
+	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
 	CC3Matrix4x4 _projMatrix;
 	CC3Matrix4x3 _viewMatrix;
@@ -453,7 +455,31 @@
 -(void) draw: (CC3Node*) aNode;
 
 
-#pragma mark Accessing node contents
+#pragma mark Accessing scene content
+
+/**
+ * The rendering surface to which this visitor is rendering.
+ *
+ * The surface will be activated at the beginning of each visitation run.
+ *
+ * If not set beforehand, this property will be initialized to the value of the 
+ * defaultRenderSurface property the first time it is accessed.
+ *
+ * This property is is not cleared at the end of the visitation run. It is retained so that
+ * this visitor can be used to render multiple node assemblies and complete multiple drawing
+ * passes without having to set the surface each time.
+ */
+@property(nonatomic, retain) id<CC3RenderSurface> renderSurface;
+
+/**
+ * Template property that returns the initial value of the renderSurface property.
+ *
+ * This implementation returns the scene's viewSurface. Since it relies on the scene property
+ * haveing a value, this property will be nil unless a visitation run is in progress.
+ *
+ * Subclasses may override to return a different surface.
+ */
+@property(nonatomic, readonly) id<CC3RenderSurface> defaultRenderSurface;
 
 /**
  * During the drawing of nodes that use vertex skinning, this property holds the skin

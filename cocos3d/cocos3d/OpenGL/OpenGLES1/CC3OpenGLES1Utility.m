@@ -202,6 +202,9 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_RGBA: return "GL_RGBA";
 		case GL_LUMINANCE: return "GL_LUMINANCE";
 		case GL_LUMINANCE_ALPHA: return "GL_LUMINANCE_ALPHA";
+		case GL_UNSIGNED_SHORT_5_6_5: return "GL_UNSIGNED_SHORT_5_6_5";
+		case GL_UNSIGNED_SHORT_4_4_4_4: return "GL_UNSIGNED_SHORT_4_4_4_4";
+		case GL_UNSIGNED_SHORT_5_5_5_1: return "GL_UNSIGNED_SHORT_5_5_5_1";
 			
 		// Shading Model
 		case GL_SHADE_MODEL: return "GL_SHADE_MODEL";
@@ -264,6 +267,7 @@ char* CC3GLEnumName(GLenum gle) {
 //		case GL_FALSE: return "GL_FALSE";
 
 		// Texture Environment parameters
+		case GL_MAX_TEXTURE_SIZE: return "GL_MAX_TEXTURE_SIZE";
 		case GL_TEXTURE_ENV: return "GL_TEXTURE_ENV";
 		case GL_TEXTURE_ENV_MODE: return "GL_TEXTURE_ENV_MODE";
 		case GL_TEXTURE_ENV_COLOR: return "GL_TEXTURE_ENV_COLOR";
@@ -431,12 +435,14 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_RENDERBUFFER_ALPHA_SIZE: return "GL_RENDERBUFFER_ALPHA_SIZE";
 		case GL_RENDERBUFFER_DEPTH_SIZE: return "GL_RENDERBUFFER_DEPTH_SIZE";
 		case GL_RENDERBUFFER_STENCIL_SIZE: return "GL_RENDERBUFFER_STENCIL_SIZE";
-
+			
 		case GL_DEPTH_COMPONENT16: return "GL_DEPTH_COMPONENT16";
 		case GL_DEPTH_COMPONENT24: return "GL_DEPTH_COMPONENT24";
 		case GL_DEPTH24_STENCIL8: return "GL_DEPTH24_STENCIL8";
-		case GL_RGB8_OES: return "GL_RGB8_OES";
-		case GL_RGBA8_OES: return "GL_RGBA8_OES";
+		case GL_DEPTH_STENCIL: return "GL_DEPTH_STENCIL";
+		case GL_RGB8: return "GL_RGB8";
+		case GL_RGBA8: return "GL_RGBA8";
+		case GL_UNSIGNED_INT_24_8: return "GL_UNSIGNED_INT_24_8";
 
 		// Miscellaneous & extensions
 		case GL_MAX_SAMPLES_APPLE: return "GL_MAX_SAMPLES_APPLE";
@@ -444,6 +450,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_RENDERER: return "GL_RENDERER";
 		case GL_VERSION: return "GL_VERSION";
 		case GL_EXTENSIONS: return "GL_EXTENSIONS";
+		case GL_PACK_ALIGNMENT: return "GL_PACK_ALIGNMENT";
 		case GL_UNPACK_ALIGNMENT: return "GL_UNPACK_ALIGNMENT";
 			
 		default:

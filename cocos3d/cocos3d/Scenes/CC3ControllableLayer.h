@@ -80,6 +80,17 @@
  */
 @property(nonatomic, readonly) BOOL isOverlayingDeviceCamera;
 
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance to be controlled by the specified controller, which may not be nil. */
+-(id) initWithController: (CC3ViewController*) controller;
+
+/** 
+ * Allocates and initializes an autoreleased instance controlled by the specified controller,
+ * which may not be nil. */
++(id) layerWithController: (CC3ViewController*) controller;
+
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use init instead. */
 -(id) initWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
 

@@ -252,6 +252,7 @@
 	[self onOpen];
 }
 
+/** Template method that is invoked when the scene is first opened. */
 -(void) openSurfaces { self.viewSurfaceManager = self.controller.view.surfaceManager; }
 
 -(void) onOpen {}
@@ -379,16 +380,10 @@
 }
 
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self illuminateWithVisitor: visitor];				// Light up your world!
-	[self.viewSurface activateWithVisitor: visitor];	// Ensure drawing to the view
-	[self drawBackdropWithVisitor: visitor];			// Draw the backdrop if it exists
-	[visitor visit: self];								// Draw the scene components
-	[self drawShadows];									// Shadows are drawn with a different visitor
-}
-
--(void) drawBackdropWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !_backdrop || self.cc3Layer.isOverlayingDeviceCamera) return;
-	[visitor visit: _backdrop];
+	[self illuminateWithVisitor: visitor];		// Light up your world!
+	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
+	[visitor visit: self];						// Draw the scene components
+	[self drawShadows];							// Shadows are drawn with a different visitor
 }
 
 /**
@@ -423,7 +418,7 @@
 	[self setupDraw2DWithVisitor: visitor];
 	
 	// Make sure the drawing surface is set back to the view surface
-	[self.viewSurface activateWithVisitor: visitor];
+	[self.viewSurface activate];
 
 	// Close depth testing, either by turning it off, or clearing the depth buffer
 	[self closeDepthTestWithVisitor: visitor];
@@ -803,17 +798,9 @@
 	
 	_wasTouched = NO;
 	_wasPicked = YES;
-
-	CC3OpenGL* gl = _pickVisitor.gl;
 	
-	// Use the picking surface (which may be different than the view surface).
-	// Clear color & depth before to ensure clean slate. Clear depth after in
-	// case surface is shared with view surface.
-	// We don't bother drawing the backdrop for picking.
-	[_scene.pickingSurface activateWithVisitor: _pickVisitor];
-	[gl clearColorAndDepthBuffers];
+	// Draw the scene for node picking. Don't bother drawing the backdrop.
 	[_pickVisitor visit: _scene];
-	[gl clearDepthBuffer];
 	
 	_pickedNode = _pickVisitor.pickedNode;
 }

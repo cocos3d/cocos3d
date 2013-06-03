@@ -381,27 +381,6 @@
 	LogGLErrorTrace(@"glViewport%@", NSStringFromCC3Viewport(vp));
 }
 
--(void) clearBuffers: (GLbitfield) mask {
-	glClear(mask);
-	LogGLErrorTrace(@"glClear(%x)", mask);
-}
-
--(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
-
--(void) clearDepthBuffer { [self clearBuffers: GL_DEPTH_BUFFER_BIT]; }
-
--(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
-
--(void) clearColorAndDepthBuffers { [self clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)]; }
-
--(ccColor4B) readPixelAt: (CGPoint) pixelPos {
-	ccColor4B pixColor;
-	glReadPixels((GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixColor);
-	LogGLErrorTrace(@"glReadPixels(%i, %i, %i, %i, %@, %@, %@)", (GLint)pixelPos.x, (GLint)pixelPos.y, 1, 1,
-					NSStringFromGLEnum(GL_RGBA), NSStringFromGLEnum(GL_UNSIGNED_BYTE), NSStringFromCCC4B(pixColor));
-	return pixColor;
-}
-
 
 #pragma mark Lighting
 
@@ -480,6 +459,7 @@
 
 -(void) loadTexureImage: (const GLvoid*) imageData
 			 intoTarget: (GLenum) target
+		  onMipmapLevel: (GLint) mipmapLevel
 			   withSize: (CC3IntSize) size
 			 withFormat: (GLenum) texelFormat
 			   withType: (GLenum) texelType
@@ -491,14 +471,28 @@
 			  NSStringFromCC3IntSize(size), [self maxTextureSizeForTarget: target], NSStringFromGLEnum(target));
 
 	[self activateTextureUnit: tuIdx];
-	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, byteAlignment);
-	LogGLErrorTrace(@"glPixelStorei(%@, %i)", NSStringFromGLEnum(GL_UNPACK_ALIGNMENT), byteAlignment);
-	
-	glTexImage2D(target, 0, texelFormat, size.width, size.height, 0, texelFormat, texelType, imageData);
+	[self setPixelUnpackingAlignment: byteAlignment];
+	glTexImage2D(target, mipmapLevel, texelFormat, size.width, size.height, 0, texelFormat, texelType, imageData);
 	LogGLErrorTrace(@"glTexImage2D(%@, %i, %@, %i, %i, %i, %@, %@, %p)",
-					NSStringFromGLEnum(target), 0, NSStringFromGLEnum(texelFormat), size.width, size.height,
+					NSStringFromGLEnum(target), mipmapLevel, NSStringFromGLEnum(texelFormat), size.width, size.height,
 					0, NSStringFromGLEnum(texelFormat), NSStringFromGLEnum(texelType), imageData);
+}
+
+-(void) loadTexureSubImage: (const GLvoid*) imageData
+				intoTarget: (GLenum) target
+			 onMipmapLevel: (GLint) mipmapLevel
+			 intoRectangle: (CC3Viewport) rect
+				withFormat: (GLenum) texelFormat
+				  withType: (GLenum) texelType
+		 withByteAlignment: (GLint) byteAlignment
+						at: (GLuint) tuIdx {
+
+	[self activateTextureUnit: tuIdx];
+	[self setPixelUnpackingAlignment: byteAlignment];
+	glTexSubImage2D(target, mipmapLevel, rect.x, rect.y, rect.w, rect.h, texelFormat, texelType, imageData);
+	LogGLErrorTrace(@"glTexSubImage2D(%@, %i, %i, %i, %i, %i, %@, %@, %p)",
+					NSStringFromGLEnum(target), mipmapLevel, rect.x, rect.y, rect.w, rect.h,
+					NSStringFromGLEnum(texelFormat), NSStringFromGLEnum(texelType), imageData);
 }
 
 // Activate the current texture unit, and keep track of the maximum
@@ -731,6 +725,42 @@
 			   @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
 			   errTxt);
 	return NO;
+}
+-(void) clearBuffers: (GLbitfield) mask {
+	glClear(mask);
+	LogGLErrorTrace(@"glClear(%x)", mask);
+}
+
+//-(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
+
+//-(void) clearDepthBuffer { [self clearBuffers: GL_DEPTH_BUFFER_BIT]; }
+
+//-(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
+
+//-(void) clearColorAndDepthBuffers { [self clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)]; }
+
+-(void) readPixelsIn: (CC3Viewport) rect  fromFramebuffer: (GLuint) fbID into: (ccColor4B*) colorArray {
+	GLuint currFB = value_GL_FRAMEBUFFER_BINDING;
+	[self bindFramebuffer: fbID];
+	[self setPixelPackingAlignment: 1];
+	glReadPixels(rect.x, rect.y, rect.w, rect.h, GL_RGBA, GL_UNSIGNED_BYTE, colorArray);
+	LogGLErrorTrace(@"glReadPixels(%i, %i, %i, %i, %@, %@, %@)", rect.x, rect.y, rect.w, rect.h,
+					NSStringFromGLEnum(GL_RGBA), NSStringFromGLEnum(GL_UNSIGNED_BYTE), NSStringFromCCC4B(colorArray[0]));
+	[self bindFramebuffer: currFB];
+}
+
+-(void) setPixelPackingAlignment: (GLint) byteAlignment {
+	cc3_CheckGLPrim(byteAlignment, value_GL_PACK_ALIGNMENT, isKnown_GL_PACK_ALIGNMENT);
+	if ( !needsUpdate ) return;
+	glPixelStorei(GL_PACK_ALIGNMENT, byteAlignment);
+	LogGLErrorTrace(@"glPixelStorei(%@, %i)", NSStringFromGLEnum(GL_PACK_ALIGNMENT), byteAlignment);
+}
+
+-(void) setPixelUnpackingAlignment: (GLint) byteAlignment {
+	cc3_CheckGLPrim(byteAlignment, value_GL_UNPACK_ALIGNMENT, isKnown_GL_UNPACK_ALIGNMENT);
+	if ( !needsUpdate ) return;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, byteAlignment);
+	LogGLErrorTrace(@"glPixelStorei(%@, %i)", NSStringFromGLEnum(GL_UNPACK_ALIGNMENT), byteAlignment);
 }
 
 

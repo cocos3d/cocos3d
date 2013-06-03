@@ -67,8 +67,14 @@
  *   - projection and unprojection between the 2D and 3D coordinate systems, including
  *     projecting touch events onto 3D nodes, will not work correctly.
  *
- * CC3Layer descends from CCLayerColor, and will draw a colored background behind both 2D
- * and 3D content if configured with a background color.
+ * CC3Layer directly descends from CC3ControllableLayer, which means that it requires and
+ * is controlled by a CC3ViewController instance. In addition to linking the 3D scene to
+ * the view, the controller provides:
+ *   - Automatic rotatation the layer (both the 2D and 3D components) when the device orientation changes.
+ *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and 3D scenes can
+ *     participate in an augmented reality view perspective.
+ *
+ * Either or both of these features can be turned on or off.
  *
  * To make use of the standard cocos2d model updatating functionality to update and animate
  * the 3D scene, use the scheduleUpdate or schedule:interval: methods of CC3Layer to invoke
@@ -100,16 +106,6 @@
  * You can even dyanamically move your CC3Layer around within the window, by changing the
  * position property (for example, by using a CCMoveTo action).
  *
- * CC3Layer directly descends from CC3ControllableLayer, which means that it can optionally
- * be controlled by a CC3ViewController instance. Doing so enables two features:
- *   - Automatic rotatation the layer (both the 2D and 3D components) when the device orientation changes.
- *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and 3D scenes can
- *     participate in an augmented reality view perspective.
- *
- * With the CC3ViewController attached, either or both of these features can be turned on
- * or off. If neither of these features is required, there is no need to instantiate and
- * attach a CC3ViewController, and the CC3Layer can be used without it.
- *
  * For most applications, you will create subclasses of both CC3Layer and CC3Scene.
  * The customized subclass of CC3Scene manages the behaviour of the 3D resources.
  * The customized subclass of CC3Layer manages the 2D artifacts, such as menus, sprites,
@@ -123,16 +119,15 @@
  * on swapping 3D scenes, see the notes on the cc3Scene property.
  * 
  * To create and use your CC3Layer and CC3Scene pair, follow these steps:
+ *   -# Create a CC3ViewController.
+ *   -# Instantiate your CC3Layer subclass on the controller, adding any 2D controls in the
+ *      initializeControls method, and managing event handlers and gesture recognizers in the
+ *      onOpenCC3Layer and onCloseCC3Layer methods.
  *   -# Instantiate your CC3Scene class, including creating or loading 3D file resources
  *      in the initializeScene method.
- *   -# Instantiate your CC3Layer subclass, adding any 2D controls in the initializeControls
- *      method, and managing event handlers and gesture recognizers in the onOpenCC3Layer
- *      and onCloseCC3Layer methods.
  *   -# Attach your CC3Scene to the cc3Scene property of your CC3Layer.
  *   -# Schedule regular updates in your CC3Layer instance by invoking either the
  *      scheduleUpdate or schedule:interval: method.
- *   -# Create a CC3ViewController and run your CC3Layer instance by invoking the
- *      runSceneOnNode: method.
  */
 @interface CC3Layer : CC3ControllableLayer {
 	CC3Scene* _cc3Scene;

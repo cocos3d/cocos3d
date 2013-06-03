@@ -58,6 +58,10 @@
 	_rbID = 0;
 }
 
+-(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
+	CC3AssertUnimplemented(@"replacePixels:withContent:");
+}
+
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, _size) ) return;
 
@@ -207,6 +211,10 @@
 						 asAttachment: attachment];
 }
 
+-(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
+	[_texture replacePixels: rect inTarget: _face withContent: colorArray];
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -339,11 +347,40 @@
 -(BOOL) validate { return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID]; }
 
 
+#pragma mark Content
+
+-(void) clearColorContent {
+	[self activate];
+	[CC3OpenGL.sharedGL clearBuffers: GL_COLOR_BUFFER_BIT];
+}
+
+-(void) clearDepthContent {
+	[self activate];
+	[CC3OpenGL.sharedGL clearBuffers: GL_DEPTH_BUFFER_BIT];
+}
+
+-(void) clearStencilContent {
+	[self activate];
+	[CC3OpenGL.sharedGL clearBuffers: GL_STENCIL_BUFFER_BIT];
+}
+
+-(void) clearColorAndDepthContent {
+	[self activate];
+	[CC3OpenGL.sharedGL clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
+}
+
+-(void) readColorContentFrom: (CC3Viewport) rect into: (ccColor4B*) colorArray {
+	[CC3OpenGL.sharedGL readPixelsIn: rect fromFramebuffer: self.framebufferID into: colorArray];
+}
+
+-(void) replaceColorPixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
+	[_colorAttachment replacePixels: rect withContent: colorArray];
+}
+
+
 #pragma mark Drawing
 
--(void) activateWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor.gl bindFramebuffer: self.framebufferID];
-}
+-(void) activate { [CC3OpenGL.sharedGL bindFramebuffer: self.framebufferID]; }
 
 
 #pragma mark Allocation and initialization
