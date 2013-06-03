@@ -45,6 +45,10 @@ my $out_dir = $ARGV[2];
 
 opendir(DIR, $in_dir) or die $!;
 
+if (!(-d "cgi-bin") || !(-e "cgi-bin")) {
+	system("mkdir $out_dir");
+}
+
 while (my $file = readdir(DIR)) {
 	
 	next if ($file !~ m/\.dae/);
