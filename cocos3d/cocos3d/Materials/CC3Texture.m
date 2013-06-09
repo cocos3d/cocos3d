@@ -189,6 +189,7 @@
 	return [NSString stringWithFormat: @"%@ for %@", super.description, _texture];
 }
 
+
 #pragma mark Drawing
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {

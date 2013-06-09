@@ -326,16 +326,18 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 }
 
 // Check the first texture, hen check in the overlays array
--(BOOL) hasBumpMap {
-	if (_texture && _texture.isBumpMap) return YES;
-	for (CC3Texture* ot in _textureOverlays) if (ot.isBumpMap) return YES;
+-(CC3Texture*) textureCube {
+	if (_texture && _texture.isTextureCube) return _texture;
+	for (CC3Texture* ot in _textureOverlays) if (ot.isTextureCube) return ot;
 	return NO;
 }
 
+-(BOOL) hasTextureCube { return (self.textureCube != nil); }
+
 // Check the first texture, hen check in the overlays array
--(BOOL) hasTextureCube {
-	if (_texture && _texture.isTextureCube) return YES;
-	for (CC3Texture* ot in _textureOverlays) if (ot.isTextureCube) return YES;
+-(BOOL) hasBumpMap {
+	if (_texture && _texture.isBumpMap) return YES;
+	for (CC3Texture* ot in _textureOverlays) if (ot.isBumpMap) return YES;
 	return NO;
 }
 

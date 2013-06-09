@@ -238,6 +238,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3PerformanceStatistics* _performanceStatistics;
 	CC3NodeUpdatingVisitor* _updateVisitor;
 	CC3NodeDrawingVisitor* _viewDrawingVisitor;
+	CC3NodeDrawingVisitor* _envMapDrawingVisitor;
 	CC3NodeDrawingVisitor* _shadowVisitor;
 	CC3NodeTransformingVisitor* _transformVisitor;
 	CC3NodeSequencerVisitor* _drawingSequenceVisitor;
@@ -740,6 +741,14 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * of the visitor to another surface, and then invoke this superclass implementation, to render
  * this scene to a texture for later processing.
  *
+ * When overriding the drawSceneContentWithVisitor: method with your own specialized rendering,
+ * steps, be careful to avoid recursive loops when rendering to textures and environment maps.
+ * For example, you might typically override drawSceneContentWithVisitor: to include steps to
+ * render environment maps for reflections, etc. In that case, you should also override the
+ * drawSceneContentForEnvironmentMapWithVisitor: to render the scene without those additional
+ * steps, to avoid the inadvertenly invoking an infinite recursive rendering of a scene to a
+ * texture while the scene is already being rendered to that texture.
+ *
  * To maintain performance, by default, the depth buffer of the surface is not specifically
  * cleared when 3D drawing begins. If this scene is drawing to a surface that already has 
  * depth information rendered, you can override this method and clear the depth buffer before
@@ -752,6 +761,29 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * method for more info about managing the depth buffer.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/**
+ * Template method that draws the content of the scene for use in an environment map texture.
+ *
+ * This implementation invokes the clearColorAndDepthContent method on the surface returned by
+ * the visitor's renderSurface property, to clear the color and depth content from the environment
+ * map buffers, and then invokes the drawSceneContentWithVisitor: method of this scene, rendering
+ * the entire scene to the environment map, in exacly the same way the scene is rendered to the view.
+ *
+ * You can override this method to perform rendering tailored for environment maps. For instance,
+ * an environment map typically may not require complete fidelity, and to conserve performance,
+ * you may want to simplify the scene, or avoid certain costly activities such as drawing shadows,
+ * multi-pass rendering, or post-rendering processing.
+ *
+ * When overriding the drawSceneContentWithVisitor: method with your own specialized rendering,
+ * steps, be careful to avoid recursive loops when rendering to textures and environment maps.
+ * For example, you might typically override drawSceneContentWithVisitor: to include steps to
+ * render environment maps for reflections, etc. In that case, you should also override the
+ * drawSceneContentForEnvironmentMapWithVisitor: to render the scene without those additional
+ * steps, to avoid the inadvertenly invoking an infinite recursive rendering of a scene to a
+ * texture while the scene is already being rendered to that texture.
+ */
+-(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /** Template method that draws shadows with the visitor in the shadowVisitor property. */
 -(void) drawShadows;
@@ -861,6 +893,16 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * CC3NodeDrawingVisitor. Subclasses may override to customize the behaviour of the drawing visits.
  */
 -(id) viewDrawVisitorClass;
+
+/** 
+ * The visitor that is used to visit the nodes to draw them to an environment map texture.
+ *
+ * If not set directly, the first time it is accessed, a new instance of the class
+ * returned by the viewDrawVisitorClass method will be created and set into this property.
+ * The isDrawingEnvironmentMap property of that visitor is set to YES, and the camera 
+ * property is set to a new camera whose fieldOfView property is set to 90 degrees.
+ */
+@property(nonatomic, retain) CC3NodeDrawingVisitor* envMapDrawingVisitor;
 
 /**
  * The visitor that is used to visit shadow nodes to draw them to the GL engine.

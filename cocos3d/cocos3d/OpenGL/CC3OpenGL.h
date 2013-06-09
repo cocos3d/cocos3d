@@ -809,41 +809,6 @@ typedef struct {
 -(void) clearBuffers: (GLbitfield) mask;
 
 /**
- * Clears the color buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
-//-(void) clearColorBuffer;
-
-/**
- * Clears the depth buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
-//-(void) clearDepthBuffer;
-
-/**
- * Clears the stencil buffer.
- *
- * This is a convenience method. To clear more than one buffer, use the clearBuffers:
- * method, passing in the buffers to clear, instead of invoking several distinct
- * clear*Buffer methods.
- */
-//-(void) clearStencilBuffer;
-
-/**
- * Clears the color and depth buffers.
- *
- * This is a convenience method to handle the common requirement for simultaneously
- * clearning both the color and depth buffers.
- */
-//-(void) clearColorAndDepthBuffers;
-
-/**
  * Reads the color content of the range of pixels defined by the specified rectangle from the
  * GL color buffer of the currently bound framebuffer, into the specified array, which must be
  * large enough to accommodate the number of pixels covered by the specified rectangle.

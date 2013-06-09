@@ -41,8 +41,9 @@
 
 @synthesize textureID=_textureID, size=_size, coverage=_coverage, hasMipmap=_hasMipmap;
 @synthesize pixelFormat=_pixelFormat, pixelType=_pixelType;
-@synthesize hasPremultipliedAlpha=_hasPremultipliedAlpha;
-@synthesize isUpsideDown=_isUpsideDown, shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
+@synthesize hasPremultipliedAlpha=_hasPremultipliedAlpha, isUpsideDown=_isUpsideDown;
+@synthesize shouldFlipVerticallyOnLoad=_shouldFlipVerticallyOnLoad;
+@synthesize shouldFlipHorizontallyOnLoad=_shouldFlipHorizontallyOnLoad;
 
 -(void) dealloc {
 	[self deleteGLTexture];
@@ -71,9 +72,21 @@
 	return GL_ZERO;
 }
 
+-(GLenum) initialAttachmentFace {
+	CC3AssertUnimplemented(@"initialAttachmentFace");
+	return GL_ZERO;
+}
+
+
+#pragma mark Texture transformations
+
 +(BOOL) defaultShouldFlipVerticallyOnLoad { return NO; }
 
 +(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {}
+
++(BOOL) defaultShouldFlipHorizontallyOnLoad { return NO; }
+
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip {}
 
 
 #pragma mark Binding content
@@ -82,8 +95,7 @@
 
 -(void) bindTextureContent: (CC3Texture2DContent*) texContent toTarget: (GLenum) target {
 	
-	if (texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad)
-		[self flipTextureContentVertically: texContent];
+	[self checkTextureOrientation: texContent];
 	
 	[self ensureGLTexture];
 	
@@ -310,8 +322,16 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return nil;
 }
 
--(void) flipTextureContentVertically: (CC3Texture2DContent*) texContent {
-	[texContent flipVertically];
+-(void) checkTextureOrientation: (CC3Texture2DContent*) texContent {
+	BOOL flipHorz = self.shouldFlipHorizontallyOnLoad;
+	BOOL flipVert = texContent.isUpsideDown && self.shouldFlipVerticallyOnLoad;
+	
+	if (flipHorz && flipVert)
+		[texContent rotateHalfCircle];		// Do both in one pass
+	else if (flipHorz)
+		[texContent flipHorizontally];
+	else if (flipVert)
+		[texContent flipVertically];
 }
 
 -(void) replacePixels: (CC3Viewport) rect
@@ -323,7 +343,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;		// Choose the texture unit to work in
-	[gl bindTexture: _textureID toTarget: target at: tuIdx];
+	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureSubImage: (const GLvoid*) colorArray
 				intoTarget: target
 			 onMipmapLevel: 0
@@ -441,6 +461,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 		_hasPremultipliedAlpha = NO;
 		_isUpsideDown = NO;
 		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
+		_shouldFlipHorizontallyOnLoad = self.class.defaultShouldFlipHorizontallyOnLoad;
 		self.textureParameters = [[self class] defaultTextureParameters];
 	}
 	return self;
@@ -549,6 +570,8 @@ static NSMutableDictionary* _texturesByName = nil;
 
 -(GLenum) textureTarget { return GL_TEXTURE_2D; }
 
+-(GLenum) initialAttachmentFace { return GL_TEXTURE_2D; }
+
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
 -(void) bindEmptyContent {
@@ -566,6 +589,25 @@ static NSMutableDictionary* _texturesByName = nil;
 
 -(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray {
 	[self replacePixels: rect inTarget: self.textureTarget withContent: colorArray];
+}
+
+
+#pragma mark Texture transformations
+
+static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
+
++(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlip2DVerticallyOnLoad; }
+
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlip2DVerticallyOnLoad = shouldFlip;
+}
+
+static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
+
++(BOOL) defaultShouldFlipHorizontallyOnLoad { return _defaultShouldFlip2DHorizontallyOnLoad; }
+
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlip2DHorizontallyOnLoad = shouldFlip;
 }
 
 
@@ -597,14 +639,6 @@ static NSMutableDictionary* _texturesByName = nil;
 	return [[[self alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
-static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
-
-+(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlip2DVerticallyOnLoad; }
-
-+(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
-	_defaultShouldFlip2DVerticallyOnLoad = shouldFlip;
-}
-
 @end
 
 
@@ -616,6 +650,8 @@ static BOOL _defaultShouldFlip2DVerticallyOnLoad = YES;
 -(BOOL) isTextureCube { return YES; }
 
 -(GLenum) textureTarget { return GL_TEXTURE_CUBE_MAP; }
+
+-(GLenum) initialAttachmentFace { return GL_TEXTURE_CUBE_MAP_POSITIVE_X; }
 
 -(Class) textureContentClass { return CC3Texture2DContent.class; }
 
@@ -696,6 +732,25 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 }
 
 
+#pragma mark Texture transformations
+
+static BOOL _defaultShouldFlipCubeVerticallyOnLoad = NO;
+
++(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlipCubeVerticallyOnLoad; }
+
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlipCubeVerticallyOnLoad = shouldFlip;
+}
+
+static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
+
++(BOOL) defaultShouldFlipHorizontallyOnLoad { return _defaultShouldFlipCubeHorizontallyOnLoad; }
+
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip {
+	_defaultShouldFlipCubeHorizontallyOnLoad = shouldFlip;
+}
+
+
 #pragma mark Allocation and initialization
 
 -(id) initFromFilesPosX: (NSString*) posXFilePath negX: (NSString*) negXFilePath
@@ -766,14 +821,6 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 	return [[[self alloc] initWithSize: size andPixelFormat: format andPixelType: type] autorelease];
 }
 
-static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
-
-+(BOOL) defaultShouldFlipVerticallyOnLoad { return _defaultShouldFlipCubeVerticallyOnLoad; }
-
-+(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip {
-	_defaultShouldFlipCubeVerticallyOnLoad = shouldFlip;
-}
-
 @end
 
 
@@ -817,46 +864,99 @@ static BOOL _defaultShouldFlipCubeVerticallyOnLoad = YES;
 /** Overridden to do nothing so that texture data is retained until bound to the GL engine. */
 -(void) releaseData: (void*) data {}
 
--(void) flipVertically {
-	if ( !_imageData ) return;		// If no data, nothing to flip!
-	
-	GLuint bytesPerTexel = 0;
+-(GLuint) bytesPerPixel {
 	switch(self.pixelFormat) {
 		case kCCTexture2DPixelFormat_RGBA8888:
-			bytesPerTexel = 4;
-			break;
+			return 4;
+		case kCCTexture2DPixelFormat_RGB888:
+			return 3;
 		case kCCTexture2DPixelFormat_RGB565:
 		case kCCTexture2DPixelFormat_RGBA4444:
 		case kCCTexture2DPixelFormat_RGB5A1:
-			bytesPerTexel = 2;
-			break;
-		case kCCTexture2DPixelFormat_RGB888:
-			bytesPerTexel = 3;
-			break;
 		case kCCTexture2DPixelFormat_AI88:
-			bytesPerTexel = 2;
+			return 2;
 			break;
 		case kCCTexture2DPixelFormat_A8:
-			bytesPerTexel = 1;
+			return 1;
 			break;
 		default:
-			CC3Assert(NO, @"Couldn't flip texture data in unexpected format %u", self.pixelFormat);
+			CC3Assert(NO, @"%@ encountered unexpected format %u", self, self.pixelFormat);
+			return 0;
 	}
+}
 
-	GLuint bytesPerRow = (GLuint)self.pixelsWide * bytesPerTexel;
+-(void) flipVertically {
+	if ( !_imageData ) return;		// If no data, nothing to flip!
+	
+	GLubyte* pixData = (GLubyte*)_imageData;
+	GLuint bytesPerRow = (GLuint)self.pixelsWide * self.bytesPerPixel;
 	GLubyte tmpRow[bytesPerRow];
 	
-	GLuint rowCnt = (GLuint)CC2_TEX_HEIGHT;
+	GLuint rowCnt = (GLuint)self.pixelsHigh;
 	GLuint lastRowIdx = rowCnt - 1;
 	GLuint halfRowCnt = rowCnt / 2;
 	for (GLuint rowIdx = 0; rowIdx < halfRowCnt; rowIdx++) {
-		GLubyte* lowerRow = (GLubyte*)_imageData + (bytesPerRow * rowIdx);
-		GLubyte* upperRow = (GLubyte*)_imageData + (bytesPerRow * (lastRowIdx - rowIdx));
+		GLubyte* lowerRow = pixData + (bytesPerRow * rowIdx);
+		GLubyte* upperRow = pixData + (bytesPerRow * (lastRowIdx - rowIdx));
 		memcpy(tmpRow, upperRow, bytesPerRow);
 		memcpy(upperRow, lowerRow, bytesPerRow);
 		memcpy(lowerRow, tmpRow, bytesPerRow);
 		LogTrace(@"Swapped %u bytes in %p between row %u at %p and row %u at %p",
 				 bytesPerRow, _imageData, rowIdx, lowerRow, (lastRowIdx - rowIdx), upperRow);
+	}
+	
+	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
+}
+
+-(void) flipHorizontally {
+	if ( !_imageData ) return;		// If no data, nothing to flip!
+
+	GLuint rowCnt = (GLuint)self.pixelsHigh;
+	GLuint colCnt = (GLuint)self.pixelsWide;
+	GLuint lastColIdx = colCnt - 1;
+	GLuint halfColCnt = colCnt / 2;
+
+	GLubyte* rowStart = (GLubyte*)_imageData;
+	GLuint bytesPerPixel = self.bytesPerPixel;
+	GLuint bytesPerRow = bytesPerPixel * colCnt;
+	GLubyte tmpPixel[bytesPerPixel];
+	
+	for (GLuint rowIdx = 0; rowIdx < rowCnt; rowIdx++) {
+		for (GLuint colIdx = 0; colIdx < halfColCnt; colIdx++) {
+			GLubyte* firstPixel = rowStart + (bytesPerPixel * colIdx);
+			GLubyte* lastPixel = rowStart + (bytesPerPixel * (lastColIdx - colIdx));
+			memcpy(tmpPixel, firstPixel, bytesPerPixel);
+			memcpy(firstPixel, lastPixel, bytesPerPixel);
+			memcpy(lastPixel, tmpPixel, bytesPerPixel);
+		}
+		rowStart += bytesPerRow;
+	}
+}
+
+-(void) rotateHalfCircle {
+	if ( !_imageData ) return;		// If no data, nothing to rotate!
+	
+	GLuint rowCnt = (GLuint)self.pixelsHigh;
+	GLuint lastRowIdx = rowCnt - 1;
+	GLuint halfRowCnt = (rowCnt + 1) / 2;		// Use ceiling to capture any middle row: (A+B-1)/B
+	GLuint colCnt = (GLuint)self.pixelsWide;
+	GLuint lastColIdx = colCnt - 1;
+	
+	GLubyte* pixData = (GLubyte*)_imageData;
+	GLuint bytesPerPixel = self.bytesPerPixel;
+	GLuint bytesPerRow = bytesPerPixel * colCnt;
+	GLubyte tmpPixel[bytesPerPixel];
+	
+	for (GLuint rowIdx = 0; rowIdx < halfRowCnt; rowIdx++) {
+		GLubyte* lowerRow = pixData + (bytesPerRow * rowIdx);
+		GLubyte* upperRow = pixData + (bytesPerRow * (lastRowIdx - rowIdx));
+		for (GLuint colIdx = 0; colIdx < colCnt; colIdx++) {
+			GLubyte* firstPixel = lowerRow + (bytesPerPixel * colIdx);
+			GLubyte* lastPixel = upperRow + (bytesPerPixel * (lastColIdx - colIdx));
+			memcpy(tmpPixel, firstPixel, bytesPerPixel);
+			memcpy(firstPixel, lastPixel, bytesPerPixel);
+			memcpy(lastPixel, tmpPixel, bytesPerPixel);
+		}
 	}
 	
 	_isUpsideDown = !_isUpsideDown;		// Orientation has changed

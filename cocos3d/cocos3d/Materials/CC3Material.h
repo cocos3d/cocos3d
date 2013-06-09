@@ -701,13 +701,11 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 @property(nonatomic, readonly) BOOL shouldApplyOpacityToColor;
 
 /**
- * Returns whether this material contains a texture that is configured as a bump-map.
+ * Returns a cube-map texture if this material contains such a texture, or nil if it does not.
  *
- * Returns YES only if one of the textures that was added to this material (either
- * through the texture property or the addTexture: method) returns YES from its
- * isBumpMap property. Otherwise, this property returns NO.
+ * This is a convenience property that returns the first cube-map texture that was added.
  */
-@property(nonatomic, readonly) BOOL hasBumpMap;
+@property(nonatomic, readonly) CC3Texture* textureCube;
 
 /** 
  * Returns whether this material contains a texture that is a six-sided cube-map texture.
@@ -717,6 +715,15 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * Otherwise, this property returns NO.
  */
 @property(nonatomic, readonly) BOOL hasTextureCube;
+
+/**
+ * Returns whether this material contains a texture that is configured as a bump-map.
+ *
+ * Returns YES only if one of the textures that was added to this material (either
+ * through the texture property or the addTexture: method) returns YES from its
+ * isBumpMap property. Otherwise, this property returns NO.
+ */
+@property(nonatomic, readonly) BOOL hasBumpMap;
 
 /**
  * The direction, in local tangent coordinates, of the light source that is to

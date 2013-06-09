@@ -9,7 +9,7 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
-cocos3d 2.0.0 - 2013/05/31
+cocos3d 2.0.0 - 2013/07/01
 -------------------------------------
 
 - Added support for OpenGL ES 2.0 & cocos2d 2.x.
@@ -56,13 +56,15 @@ cocos3d 2.0.0 - 2013/05/31
 		- CC3UIViewController for iOS
 		- Added new CC3NSViewController for OSX.
 
-- Added support for multi-pass rendering and render-to-texture
+- Added support for multi-pass rendering, render-to-texture, and dynamic environment maps:
 	- Added CC3RenderSurface classes to provide off-screen framebuffer surfaces as rendering targets
 		- CC3GLView now uses underlying CC3GLViewSurfaceManager to manage framebuffers.
 		- Added CC3GLFramebuffer class to represent a GL framebuffer
 		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
 		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
 		- Rendering to texture of both color and depth buffers permitted.
+	- Added CC3GLEnvironmentMapTexture as a target to dynamically render an environmental cube-map to.
+		- CC3DemoMashUp demonstrates dynamic reflection generation (objects moving in a reflecton)
 	- Refactored CC3Scene drawScene method to support multi-pass rendering
 		- CC3Scene drawSceneContentsWithVisitor: template method can be used by app to customize rendering passes
 		- Added CC3ClipSpaceNode for drawing full-screen images for backdrops and post-processing

@@ -100,6 +100,14 @@
 @property(nonatomic, readonly) CC3IntSize size;
 
 /** 
+ * Returns whether this surface is an off-screen surface.
+ *
+ * Returns YES if this surface is rendering to off-screen memory, such as textures or
+ * off-screen renderbuffers. Returns NO if this surface is rendering directly to the screen.
+ */
+@property(nonatomic, readonly) BOOL isOffScreen;
+
+/** 
  * The surface attachment to which color data is rendered.
  *
  * To save memory, attachments can be shared between surfaces of the same size, if the contents
@@ -125,16 +133,28 @@
  */
 @property(nonatomic, retain) id<CC3RenderSurfaceAttachment> stencilAttachment;
 
-/** Clears the color content of this surface, activating this surface if needed. */
+/** 
+ * Clears the color content of this surface, activating this surface and enabling
+ * color writing if needed.
+ */
 -(void) clearColorContent;
 
-/** Clears the depth content of this surface, activating this surface if needed. */
+/** 
+ * Clears the depth content of this surface, activating this surface and enabling
+ * depth writing if needed. 
+ */
 -(void) clearDepthContent;
 
-/** Clears the stencil content of this surface, activating this surface if needed. */
+/** 
+ * Clears the stencil content of this surface, activating this surface and enabling
+ * stencil writing if needed.
+ */
 -(void) clearStencilContent;
 
-/** Clears the color and depth content of this surface, activating this surface if needed. */
+/** 
+ * Clears the color and depth content of this surface, activating this surface and enabling
+ * color and depth writing if needed.
+ */
 -(void) clearColorAndDepthContent;
 
 /**
@@ -249,7 +269,7 @@
  *
  * This class represents a general off-screen renderbuffer, whose storage is allocated from
  * GL memory. For the on-screen renderbuffer whose storage is shared by the view, use the
- * CC3OnScreenGLRenderbuffer subclass.
+ * CC3IOSOnScreenGLRenderbuffer subclass.
  */
 @interface CC3GLRenderbuffer : NSObject <CC3FramebufferAttachment> {
 	GLuint _rbID;
@@ -328,17 +348,16 @@
 
 
 #pragma mark -
-#pragma mark CC3OnScreenGLRenderbuffer
+#pragma mark CC3IOSOnScreenGLRenderbuffer
 
 /**
- * CC3OnScreenGLRenderbuffer is a specialized renderbuffer whose contents are presented
+ * CC3IOSOnScreenGLRenderbuffer is a specialized renderbuffer whose contents are presented
  * to the screen, and whose storage is provided by the view under iOS.
  *
- * In this class, the implementation of the resizeTo: method does not allocate storage
- * within the GL engine, and sets the pixelFormat property by retrieving the value from
- * the GL engine.
+ * In this class, the implementation of the resizeTo: method does not allocate storage within
+ * the GL engine, and sets the pixelFormat property by retrieving the value from the GL engine.
  */
-@interface CC3OnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+@interface CC3IOSOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
 
 /**
  * Sets the size and retreives the pixelFormat property from the GL engine.
@@ -364,8 +383,14 @@
 	GLint _mipmapLevel;
 }
 
-/** The texture to bind as an attachment to the framebuffer, and into which rendering will occur. */
-@property(nonatomic, retain, readonly) CC3GLTexture* texture;
+/** 
+ * The texture to bind as an attachment to the framebuffer, and into which rendering will occur. 
+ *
+ * When the value of this property is set, both the horizontalWrappingFunction and
+ * verticalWrappingFunction properties of the texture will be set to GL_CLAMP_TO_EDGE,
+ * as required when using a texture as a rendering target.
+ */
+@property(nonatomic, retain) CC3GLTexture* texture;
 
 /** 
  * The target face within the texture into which rendering is to occur.
@@ -398,56 +423,44 @@
 
 #pragma mark Allocation and initialization
 
-/** 
- * Initializes this instance to render to mipmap level zero of the specified 2D texture.
+/**
+ * Allocates and initializes an autoreleased instance to render to mipmap level zero
+ * of an unspecified 2D texture. 
  *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
+ * The texture must be set using the texure property before rendering.
  */
++(id) attachment;
+
+/** Initializes this instance to render to mipmap level zero of the specified 2D texture. */
 -(id) initWithTexture: (CC3GLTexture*) texture;
 
 /** 
  * Allocates and initializes an autoreleased instance to render to mipmap level zero
  * of the specified 2D texture. 
- *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
  */
 +(id) attachmentWithTexture: (CC3GLTexture*) texture;
 
 /**
  * Initializes this instance to render to mipmap level zero of the specified face of the
  * specified texture.
- *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
  */
 -(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face;
 
 /**
  * Allocates and initializes an autoreleased instance to render to mipmap level zero of the
  * specified face of the specified texture.
- *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
  */
 +(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face;
 
 /**
  * Initializes this instance to render to the specified mipmap level of the specified face
  * of the specified texture.
- *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
  */
 -(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
 
 /**
  * Allocates and initializes an autoreleased instance to render to the specified mipmap level
  * of the specified face of the specified texture.
- *
- * Both the horizontalWrappingFunction and verticalWrappingFunction properties of the specified
- * texture will be set to GL_CLAMP_TO_EDGE, as required when using a texture as a rendering target.
  */
 +(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
 
@@ -582,6 +595,13 @@
 @property(nonatomic, readonly) CC3IntSize size;
 
 /**
+ * Returns whether this surface is an off-screen surface.
+ *
+ * Always returns YES. Subclasses that are used for on-screen rendering will override.
+ */
+@property(nonatomic, readonly) BOOL isOffScreen;
+
+/**
  * Implementation of the CC3RenderSurface validate method.
  *
  * Validates that this framebuffer has a valid configuration in the GL engine.
@@ -619,22 +639,171 @@
 
 
 #pragma mark -
-#pragma mark CC3SystemGLFramebuffer
+#pragma mark CC3IOSOnScreenGLFramebuffer
 
-/**
- * Represents the virtual OpenGL framebuffer used by the OSX system to present to a window. 
- *
- * Each of the attachements should be a CC3SystemGLRenderbuffer.
- */
-@interface CC3SystemGLFramebuffer : CC3GLFramebuffer
+/** Represents a framebuffer used by the IOS system to present to a window. */
+@interface CC3IOSOnScreenGLFramebuffer : CC3GLFramebuffer
 @end
 
 
 #pragma mark -
-#pragma mark CC3SystemGLRenderbuffer
+#pragma mark CC3OSXOnScreenGLFramebuffer
+
+/**
+ * Represents the virtual OpenGL framebuffer used by the OSX system to present to a window. 
+ *
+ * Each of the attachements should be a CC3OSXOnScreenGLRenderbuffer.
+ */
+@interface CC3OSXOnScreenGLFramebuffer : CC3GLFramebuffer
+@end
+
+
+#pragma mark -
+#pragma mark CC3OSXOnScreenGLRenderbuffer
 
 /** Represents the virtual OpenGL framebuffer attachments used by the OSX system to present to a window. */
-@interface CC3SystemGLRenderbuffer : CC3GLRenderbuffer {}
+@interface CC3OSXOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLEnvironmentMapTexture
+
+/** 
+ * A texture that supports an environment map created by rendering the scene from the node's
+ * perspective in all six axis directions.
+ */
+@interface CC3GLEnvironmentMapTexture : CC3GLTextureCube {
+	CC3GLFramebuffer* _renderSurface;
+	GLfloat _numberOfFacesPerSnapshot;
+	GLfloat _faceCount;
+	GLenum _currentFace;
+}
+
+
+#pragma mark Drawing
+
+/**
+ * Indicates the number of faces of the cube-map that will be generated on each invocation
+ * of the generateSnapshotOfScene:fromGlobalLocation:withVisitor: method.
+ * 
+ * Generating each face in the cube-map requires rendering the scene from the perspective of
+ * a camera facing towards that face, and generating a full cube-map requires six separate
+ * scene renderings. Depending on the complexity of the scene, this can be quite costly.
+ *
+ * However, in most situations, an environment map does not require high-fideility, and the
+ * workload can be spread over time by not generating all of the cube-map faces on every snapshot.
+ *
+ * You can use this property to control the number of cube-map faces that will be generated each
+ * time a snapshot is taken using the generateSnapshotOfScene:fromGlobalLocation:withVisitor: method.
+ *
+ * The maximum value of this property is 6, indicating that all six faces should be generated
+ * each time the generateSnapshotOfScene:fromGlobalLocation:withVisitor: method is invoked.
+ * Setting this property to a smaller value will cause fewer faces to be generated on each
+ * snapshot, thereby spreading the workload out over time. On each invocation, a different set
+ * of faces will be generated, in a cycle, ensuring that each face will be generated at some point.
+ *
+ * As an example, setting this value to 2 will cause only 2 of the 6 faces of the cube-map to
+ * be generated each time the generateSnapshotOfScene:fromGlobalLocation:withVisitor: is invoked.
+ * Therefore, it would take 3 snapshot invocations to generate all 6 sides of the cube-map.
+ *
+ * You can even set this property to a fractional value less than one to spread the updating
+ * of the faces out even further. For example, if the value of this property is set to 0.25,
+ * the generateSnapshotOfScene:fromGlobalLocation:withVisitor: method will only generate one
+ * face of this cube-map texture every fourth time it is invoked. On the other three invocations,
+ * the generateSnapshotOfScene:fromGlobalLocation:withVisitor: method will do nothing. Therefore,
+ * with the value of this property set to 0.25, it would take 24 snapshot invocations to generate
+ * all 6 sides of this cube-map.
+ *
+ * The initial value of this property is 1, indicating that one face of the cube-map will be
+ * generated on each invocation of the generateSnapshotOfScene:fromGlobalLocation:withVisitor:
+ * method. With this value, it will take six invocations to generate all six sides of the cube-map.
+ *
+ * To ensure a complete cube-map, the first time the generateSnapshotOfScene:fromGlobalLocation:withVisitor:
+ * method is invoked, the value of this property is ignored, and all six faces of the cube-map
+ * are generated.
+ */
+@property(nonatomic, assign) GLfloat numberOfFacesPerSnapshot;
+
+/**
+ * Generates up to 6 faces of this cube-map, by creating a view of the specified scene,
+ * from the specified global location, once for each face of this cube-mapped texture.
+ *
+ * The scene's drawSceneContentForEnvironmentMapWithVisitor: method is invoked to render the
+ * scene as an environment map. The specified visitor is not used to visit the scene when
+ * drawing the environment map. Instead, the visitor in the scene's envMapDrawingVisitor
+ * property is retrieved and used.
+ *
+ * The first time this method is invoked, all 6 cube-map faces will be generated. The behaviour
+ * on subsequent invocations depends on the value of the numberOfFacesPerSnapshot property, and
+ * subsequent invocations may not regenerate all faces. See the notes for the numberOfFacesPerSnapshot
+ * property for more information about partially-regenerating the cube-map as a compromise between
+ * environment-map fidelity and performance.
+ *
+ * Typcally, you would invoke this method on each frame rendering loop, and use the
+ * numberOfFacesPerSnapshot property to control how often the texture is updated.
+ */
+-(void) generateSnapshotOfScene: (CC3Scene*) scene
+			 fromGlobalLocation: (CC3Vector) location
+					withVisitor: (CC3NodeDrawingVisitor*) visitor;
+
+/** Returns the surface to which the environment will be rendered. */
+@property(nonatomic, retain, readonly) CC3GLFramebuffer* renderSurface;
+
+
+#pragma mark Allocation and initialization
+
+/**
+ * Initializes this instance with a rendering surface constructed from a new cube-map texture
+ * with the economical 16-bit GL_RGB/GL_UNSIGNED_SHORT_5_6_5 pixelFormat/pixelType, and the
+ * specified depth attachment, which must not be nil and must have a square size.
+ *
+ * The cube-map texture will have the same size as the specified depth attachment.
+ */
+-(id) initWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Allocates and initializes an autoreleased instance with a rendering surface constructed
+ * from a new cube-map texture with whose pixelFormat and pixelType properties are set to
+ * GL_RGBA and GL_UNSIGNED_BYTE, respectively, and the specified depth attachment, which
+ * must not be nil and must have a square size.
+ *
+ * The cube-map texture will have the same size as the specified depth attachment.
+ */
++(id) textureWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Initializes this instance with a rendering surface constructed from a new cube-map texture
+ * with the specified pixel format and type, and the specified depth attachment, which must
+ * not be nil and must have a square size.
+ *
+ * The cube-map texture will have the same size as the specified depth attachment.
+ *
+ * Be aware that the possible combinations of color and depth pixel formats is quite limited
+ * with cube-mapped framebuffer attachments. If you have trouble finding a suitable combination,
+ * you can use the initWithDepthAttachment: method, which invokes this method with GL_RGBA as
+ * the colorFormat and GL_UNSIGNED_BYTE as the colorType.
+ */
+-(id) initWithColorPixelFormat: (GLenum) colorFormat
+			 andColorPixelType: (GLenum) colorType
+			andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
+/**
+ * Allocates and initializes an autoreleased instance with a rendering surface constructed
+ * from a new cube-map texture with the specified pixel format and type, and the specified
+ * depth attachment, which must not be nil and must have a square size.
+ *
+ * The cube-map texture will have the same size as the specified depth attachment.
+ *
+ * Be aware that the possible combinations of color and depth pixel formats is quite limited
+ * with cube-mapped framebuffer attachments. If you have trouble finding a suitable combination,
+ * you can use the textureWithDepthAttachment: method, which invokes this method with GL_RGBA
+ * as the colorFormat and GL_UNSIGNED_BYTE as the colorType.
+ */
++(id) textureWithColorPixelFormat: (GLenum) colorFormat
+				andColorPixelType: (GLenum) colorType
+			   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+
 @end
 
 

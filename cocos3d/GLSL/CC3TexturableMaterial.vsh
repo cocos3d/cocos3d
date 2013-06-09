@@ -282,7 +282,7 @@ void main() {
 	v_distEye = length(vtxPosEye.xyz);
 	
 	// Environmental mapping reflection vector, transformed to global coordinates
-	v_reflectDirGlobal = (u_cc3MatrixViewInv * vec4(reflect(-vtxPosEye.xyz, vtxNormEye), 0.0)).xyz;
+	v_reflectDirGlobal = (u_cc3MatrixViewInv * vec4(reflect(vtxPosEye.xyz, vtxNormEye), 0.0)).xyz;
 	
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
 	if (u_cc3LightIsUsingLighting)

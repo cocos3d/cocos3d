@@ -57,6 +57,7 @@
 @synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
 @synthesize drawingSequencer=_drawingSequencer, drawingSequenceVisitor=_drawingSequenceVisitor;
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
+@synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
@@ -74,6 +75,7 @@
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.touchedNodePicker = nil;			// Use setter to release and make nil
 	self.viewDrawingVisitor = nil;			// Use setter to release and make nil
+	self.envMapDrawingVisitor = nil;		// Use setter to release and make nil
 	self.shadowVisitor = nil;				// Use setter to release and make nil
 	self.updateVisitor = nil;				// Use setter to release and make nil
 	self.transformVisitor = nil;			// Use setter to release and make nil
@@ -184,6 +186,7 @@
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
 		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
 		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
+		self.envMapDrawingVisitor = nil;
 		self.shadowVisitor = nil;
 		self.updateVisitor = [[self updateVisitorClass] visitor];
 		self.transformVisitor = [[self transformVisitorClass] visitor];
@@ -225,12 +228,13 @@
 	_drawingSequencer = [another.drawingSequencer copy];						// retained
 	
 	[_performanceStatistics release];
-	_performanceStatistics = [another.performanceStatistics copy];			// retained
+	_performanceStatistics = [another.performanceStatistics copy];				// retained
 
-	self.viewDrawingVisitor = [[another.viewDrawingVisitor class] visitor];	// retained
-	self.shadowVisitor = [[another.shadowVisitor class] visitor];			// retained
-	self.updateVisitor = [[another.updateVisitor class] visitor];			// retained
-	self.transformVisitor = [[another.transformVisitor class] visitor];		// retained
+	// Env map visitor is created lazily
+	self.viewDrawingVisitor = [[another.viewDrawingVisitor class] visitor];		// retained
+	self.shadowVisitor = [[another.shadowVisitor class] visitor];				// retained
+	self.updateVisitor = [[another.updateVisitor class] visitor];				// retained
+	self.transformVisitor = [[another.transformVisitor class] visitor];			// retained
 	self.drawingSequenceVisitor = [[another.drawingSequenceVisitor class] visitorWithScene: self];	// retained
 	self.touchedNodePicker = [[another.touchedNodePicker class] pickerOnScene: self];		// retained
 
@@ -384,6 +388,11 @@
 	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
 	[visitor visit: self];						// Draw the scene components
 	[self drawShadows];							// Shadows are drawn with a different visitor
+}
+
+-(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.renderSurface clearColorAndDepthContent];
+	[self drawSceneContentWithVisitor: visitor];
 }
 
 /**
@@ -556,6 +565,16 @@
 }
 
 -(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
+
+-(CC3NodeDrawingVisitor*) envMapDrawingVisitor {
+	if ( !_envMapDrawingVisitor ) {
+		self.envMapDrawingVisitor = [[self viewDrawVisitorClass] visitor];
+		_envMapDrawingVisitor.isDrawingEnvironmentMap = YES;
+		_envMapDrawingVisitor.camera = [CC3Camera nodeWithName: @"EnvMapCamera"];
+		_envMapDrawingVisitor.camera.fieldOfView = 90.0f;
+	}
+	return _envMapDrawingVisitor;
+}
 
 
 #pragma mark Drawing sequencer

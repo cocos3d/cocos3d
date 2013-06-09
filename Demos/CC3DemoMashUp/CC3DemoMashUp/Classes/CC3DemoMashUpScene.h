@@ -120,14 +120,15 @@ typedef enum {
  *   - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
  *   - bitmapped font text labels
  *   - moving individual vertex location programmatically
- *   - Using OpenGL ES 2.0 shaders.
- *   - Loading PowerVR PFX effects files and applying them to materials
- *   - Environmental reflections using a cube mapped texture.
- *   - Render-to-texture the scene for display within the scene.
- *   - Render-to-texture to create additional visual effects using post-rendering image processing.
- *   - Render depth-to-texture to visualize the contents of the depth buffer.
- *   - Read pixels from a framebuffer
- *   - Replace framebuffer and texture pixels with programmatic content
+ *   - using OpenGL ES 2.0 shaders.
+ *   - loading PowerVR PFX effects files and applying them to materials
+ *   - environmental reflections using a cube mapped texture.
+ *   - render-to-texture the scene for display within the scene.
+ *   - render-to-texture to create additional visual effects using post-rendering image processing.
+ *   - render depth-to-texture to visualize the contents of the depth buffer.
+ *   - read pixels from a framebuffer
+ *   - replace framebuffer and texture pixels with programmatic content
+ *   - dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -322,11 +323,11 @@ typedef enum {
  *
  * Touching the switch-view button again will point the camera at yet another teapot, this one
  * textured with a metallic texture, and rotating on it's axis. When running GLSL shaders, under
- * either OpenGL ES 2.0 on iOS or OpenGL on OSX, this teapot reflects a static shot of the
- * environment. This reflection effect is created by applying a static cube-mapped texture to
- * the teapot. To see the environment that is being reflected, uncomment the addSkyBox invocation
- * in the initializeScene method.
- 
+ * either OpenGL ES 2.0 on iOS or OpenGL on OSX, this teapot dynamically reflects the environment.
+ * This reflection effect is created by applying a cube-mapped texture to the teapot, and
+ * dynamically rendering that texture on each frame. As objects move around in the scene, their
+ * reflections in the teapot move correspondingly.
+ * 
  * This reflective teapot has another smaller rainbow-colored teapot as a satellite. This satellite
  * is colored with a color gradient using a color array, and orbits around the teapot, and rotates
  * on it's own axes. The rainbow teapot is a child node of the textured teapot node, and rotates
@@ -586,6 +587,7 @@ typedef enum {
 	CC3Node* _camTarget;
 	CC3Camera* _runnerCam;
 	CC3Light* _runnerLamp;
+	CC3GLEnvironmentMapTexture* _envMapTex;
 	CC3MeshNode* _tvScreen;
 	CC3Node* _selectedNode;
 	CC3GLFramebuffer* _tvSurface;

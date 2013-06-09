@@ -385,7 +385,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setBoolean: visitor.currentMeshNode.drawingMode == GL_POINTS];
 			return YES;
 
-#pragma mark Setting Environment matrix semantics
+#pragma mark Setting environment matrix semantics
 		// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelLocalMatrix:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
@@ -1147,7 +1147,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3VertexHasTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether a vertex tangent is available. */
 	[self mapVarName: @"u_cc3VertexHasBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether a vertex bitangent is available. */
 	[self mapVarName: @"u_cc3VertexHasColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether a vertex color is available. */
-	[self mapVarName: @"u_cc3VertexHasWeights" toSemantic: kCC3SemanticHasVertexWeight];					/**< (bool) Whether a vertex weight is available. */
+	[self mapVarName: @"u_cc3VertexHasWeights" toSemantic: kCC3SemanticHasVertexWeight];				/**< (bool) Whether a vertex weight is available. */
 	[self mapVarName: @"u_cc3VertexHasMatrixIndices" toSemantic: kCC3SemanticHasVertexMatrixIndex];		/**< (bool) Whether a vertex matrix index is available. */
 	[self mapVarName: @"u_cc3VertexHasTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether a vertex texture coordinate is available. */
 	[self mapVarName: @"u_cc3VertexHasPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether a vertex point size is available. */

@@ -77,9 +77,21 @@ NSString* GetGLErrorText(GLenum errCode) {
 
 static BOOL _shouldLogGLCalls = NO;
 
-void CC3StartLoggingGLCalls(void) { _shouldLogGLCalls = YES; }
+void CC3StartLoggingGLCalls(void) {
+#if GL_ERROR_TRACING_ENABLED
+	printf("Starting GL logging.\n");
+	_shouldLogGLCalls = YES;
+#else
+	printf("GL call logging is not enabled. To enable, set the compiler build setting GL_ERROR_TRACING_ENABLED to 1.\n");
+#endif
+}
 
-void CC3StopLoggingGLCalls(void) { _shouldLogGLCalls = NO; }
+void CC3StopLoggingGLCalls(void) {
+#if GL_ERROR_TRACING_ENABLED
+	printf("Stopping GL logging.\n");
+	_shouldLogGLCalls = NO;
+#endif
+}
 
 void DoLogGLErrorState(NSString* fmt, ...) {
 	va_list args;

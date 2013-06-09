@@ -67,6 +67,13 @@
 
 -(CC3PerformanceStatistics*) performanceStatistics { return _startingNode.performanceStatistics; }
 
+-(CC3Camera*) camera {
+	if ( !_camera ) self.camera = self.defaultCamera;
+	return _camera;
+}
+
+-(CC3Camera*) defaultCamera { return _startingNode.activeCamera; }
+
 -(void) visit: (CC3Node*) aNode {
 	if (!aNode) return;					// Must have a node to work on
 	
@@ -74,7 +81,6 @@
 
 	if (!_startingNode) {				// If this is the first node, start up
 		_startingNode = aNode;			// Not retained
-		if (!_camera) self.camera = aNode.activeCamera;	// Retrieve and cache the camera using setter.
 		[self open];					// Open the visitor
 	}
 
@@ -386,7 +392,7 @@
 
 @implementation CC3NodeDrawingVisitor
 
-@synthesize gl=_gl, deltaTime=_deltaTime;
+@synthesize gl=_gl, deltaTime=_deltaTime, isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
 @synthesize shouldDecorateNode=_shouldDecorateNode, currentShaderProgram=_currentShaderProgram;
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
 @synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
@@ -433,7 +439,7 @@
 
 /** If we're drawing in clip-space, ignore the frustum. */
 -(BOOL) doesNodeIntersectFrustum: (CC3Node*) aNode {
-	return [aNode doesIntersectFrustum: _camera.frustum];
+	return [aNode doesIntersectFrustum: self.camera.frustum];
 }
 
 -(BOOL) isNodeVisibleForDrawing: (CC3Node*) aNode { return aNode.visible; }
@@ -480,7 +486,19 @@
 }
 
 /** Template method that opens the 3D camera. */
--(void) openCamera { [_camera openWithVisitor: self]; }
+-(void) openCamera {
+	CC3Camera* cam = self.camera;
+	id<CC3RenderSurface> surf = self.renderSurface;
+
+	// If rendering off-screen, set the camera viewport to cover the surface.
+	if (surf.isOffScreen) {
+		_onScreenViewport = cam.viewport;
+		CC3IntSize surfSize = surf.size;
+		cam.viewport = CC3ViewportMake(0, 0, surfSize.width, surfSize.height);
+	}
+	
+	[cam openWithVisitor: self];
+}
 
 /** Close the camera. */
 -(void) close {
@@ -490,7 +508,13 @@
 }
 
 /** Close the camera. This is the compliment of the openCamera method. */
--(void) closeCamera { [_camera closeWithVisitor: self]; }
+-(void) closeCamera {
+	CC3Camera* cam = self.camera;
+	[cam closeWithVisitor: self];
+	
+	// If rendering off-screen, reset the camera viewport back to the layer bounds
+	if (self.renderSurface.isOffScreen) cam.viewport = _onScreenViewport;
+}
 
 -(void) draw: (CC3Node*) aNode {
 	[aNode drawWithVisitor: self];
@@ -596,6 +620,7 @@
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
 		_shouldDecorateNode = YES;
+		_isDrawingEnvironmentMap = NO;
 	}
 	return self;
 }

@@ -32,6 +32,7 @@
 #import "CC3RenderSurfaces.h"
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
+#import "CC3Scene.h"
 
 
 #pragma mark -
@@ -135,9 +136,9 @@
 
 
 #pragma mark -
-#pragma mark CC3SystemGLRenderbuffer
+#pragma mark CC3OSXOnScreenGLRenderbuffer
 
-@implementation CC3SystemGLRenderbuffer
+@implementation CC3OSXOnScreenGLRenderbuffer
 
 -(GLuint) renderbufferID { return 0; }
 
@@ -158,9 +159,9 @@
 
 
 #pragma mark -
-#pragma mark CC3OnScreenGLRenderbuffer
+#pragma mark CC3IOSOnScreenGLRenderbuffer
 
-@implementation CC3OnScreenGLRenderbuffer
+@implementation CC3IOSOnScreenGLRenderbuffer
 
 /** Sets the size and retreives the pixelFormat property from the GL engine. */
 -(void) resizeTo: (CC3IntSize) size {
@@ -182,11 +183,21 @@
 
 @implementation CC3GLTextureFramebufferAttachment
 
-@synthesize texture=_texture, face=_face, mipmapLevel=_mipmapLevel;
+@synthesize face=_face, mipmapLevel=_mipmapLevel;
 
 -(void) dealloc {
 	[_texture release];
 	[super dealloc];
+}
+
+-(CC3GLTexture*) texture { return _texture; }
+
+-(void) setTexture: (CC3GLTexture*) texture {
+	if (texture == _texture) return;
+	[_texture release];
+	_texture = [texture retain];
+	_texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
+	_texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
 }
 
 -(CC3IntSize) size { return _texture.size; }
@@ -220,8 +231,10 @@
 
 -(id) init { return [self initWithTexture: nil]; }
 
++(id) attachment { return [[[self alloc] init] autorelease]; }
+
 -(id) initWithTexture: (CC3GLTexture*) texture {
-	return [self initWithTexture: texture usingFace: GL_TEXTURE_2D];
+	return [self initWithTexture: texture usingFace: texture.initialAttachmentFace];
 }
 
 +(id) attachmentWithTexture: (CC3GLTexture*) texture {
@@ -240,9 +253,7 @@
 	if ( (self = [super init]) ) {
 		_face = face;
 		_mipmapLevel = mipmapLevel;
-		_texture = [texture retain];
-		_texture.horizontalWrappingFunction = GL_CLAMP_TO_EDGE;
-		_texture.verticalWrappingFunction = GL_CLAMP_TO_EDGE;
+		self.texture = texture;
 	}
 	return self;
 }
@@ -344,29 +355,47 @@
 	return _size;
 }
 
--(BOOL) validate { return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID]; }
+-(BOOL) isOffScreen { return YES; }
+
+-(BOOL) validate {
+	CC3Assert(!CC3IntSizesAreEqual(self.size, kCC3IntSizeZero), @"%@ cannot have a zero size.", self);
+	return [CC3OpenGL.sharedGL checkFramebufferStatus: self.framebufferID];
+}
 
 
 #pragma mark Content
 
 -(void) clearColorContent {
 	[self activate];
-	[CC3OpenGL.sharedGL clearBuffers: GL_COLOR_BUFFER_BIT];
+
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	gl.colorMask = ccc4(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	[gl clearBuffers: GL_COLOR_BUFFER_BIT];
 }
 
 -(void) clearDepthContent {
 	[self activate];
-	[CC3OpenGL.sharedGL clearBuffers: GL_DEPTH_BUFFER_BIT];
+	
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	gl.depthMask = YES;
+	[gl clearBuffers: GL_DEPTH_BUFFER_BIT];
 }
 
 -(void) clearStencilContent {
 	[self activate];
-	[CC3OpenGL.sharedGL clearBuffers: GL_STENCIL_BUFFER_BIT];
+	
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	gl.stencilMask = ~0;
+	[gl clearBuffers: GL_STENCIL_BUFFER_BIT];
 }
 
 -(void) clearColorAndDepthContent {
 	[self activate];
-	[CC3OpenGL.sharedGL clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
+	
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	gl.depthMask = YES;
+	gl.colorMask = ccc4(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	[gl clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
 }
 
 -(void) readColorContentFrom: (CC3Viewport) rect into: (ccColor4B*) colorArray {
@@ -422,9 +451,21 @@
 
 
 #pragma mark -
-#pragma mark CC3SystemGLFramebuffer
+#pragma mark CC3IOSOnScreenGLFramebuffer
 
-@implementation CC3SystemGLFramebuffer
+@implementation CC3IOSOnScreenGLFramebuffer
+
+-(BOOL) isOffScreen { return NO; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OSXOnScreenGLFramebuffer
+
+@implementation CC3OSXOnScreenGLFramebuffer
+
+-(BOOL) isOffScreen { return NO; }
 
 -(GLuint) framebufferID { return 0; }
 
@@ -433,6 +474,233 @@
 -(void) deleteGLFramebuffer {}
 
 -(BOOL) validate { return YES; }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLEnvironmentMapTexture
+
+@implementation CC3GLEnvironmentMapTexture
+
+@synthesize renderSurface=_renderSurface;
+@synthesize numberOfFacesPerSnapshot=_numberOfFacesPerSnapshot;
+
+-(void) dealloc {
+	[_renderSurface release];
+	[super dealloc];
+}
+
+
+#pragma mark Drawing
+
+// Clamp to between zero and six
+-(void) setNumberOfFacesPerSnapshot: (GLfloat) numberOfFacesPerSnapshot {
+	_numberOfFacesPerSnapshot = CLAMP(numberOfFacesPerSnapshot, 0.0, 6.0);
+}
+
+-(void) generateSnapshotOfScene: (CC3Scene*) scene
+			 fromGlobalLocation: (CC3Vector) location
+					withVisitor: (CC3NodeDrawingVisitor*) visitor {
+
+	LogTrace(@"%@ generating snapshot", self);
+
+	// Determine how many cube-map faces to render on this snapshot
+	GLuint facesToGenerate = self.facesToGenerate;
+	if ( !facesToGenerate ) return;
+	
+	// Get the scen and the cube-map visitor, and set the render surface to that of this texture.
+	CC3NodeDrawingVisitor* envMapVisitor = scene.envMapDrawingVisitor;
+	envMapVisitor.renderSurface = self.renderSurface;
+
+	// Locate the camera of the cube-map visitor at the specified location,
+	CC3Camera* envMapCam = envMapVisitor.camera;
+	envMapCam.location = location;
+	
+	// If the scene has an active camera, match the near and far clip distances, in an attempt
+	// to capture the same scene content that is being viewed by the active camera.
+	CC3Camera* sceneCam = scene.activeCamera;
+	if (sceneCam) {
+		envMapCam.nearClippingDistance = sceneCam.nearClippingDistance;
+		envMapCam.farClippingDistance = sceneCam.farClippingDistance;
+	}
+	
+	for (GLuint faceIdx = 0; faceIdx < facesToGenerate; faceIdx++) {
+
+		[self moveToNextFace];
+		
+		// Bind the texture face to the framebuffer
+		CC3GLTextureFramebufferAttachment* fbAtt = (CC3GLTextureFramebufferAttachment*)_renderSurface.colorAttachment;
+		fbAtt.face = _currentFace;
+		[fbAtt bindToFramebuffer: _renderSurface.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
+		
+		// Point the camera towards the face
+		envMapCam.forwardDirection = self.cameraDirection;
+		envMapCam.referenceUpDirection = self.upDirection;
+		[envMapCam updateTransformMatrix];		// TODO - use static transform visitor!
+
+		LogTrace(@"%@ rendering face %@ by looking to %@", self, NSStringFromGLEnum(_currentFace),
+				 NSStringFromCC3Vector(envMapCam.forwardDirection));
+
+		// Draw the scene to the texture face
+		[scene drawSceneContentForEnvironmentMapWithVisitor: envMapVisitor];
+	}
+}
+
+-(void) paintFace {
+	CC3IntSize faceSize = _renderSurface.size;
+	GLuint pixCnt = faceSize.width * faceSize.height;
+	ccColor4B canvas[pixCnt];
+	ccColor4B faceColor = self.faceColor;
+	for (GLuint pixIdx = 0; pixIdx < pixCnt; pixIdx++) canvas[pixIdx] = faceColor;
+	[_renderSurface replaceColorPixels: CC3ViewportFromOriginAndSize(kCC3IntPointZero, faceSize)
+						   withContent: canvas];
+}
+
+-(ccColor4B) faceColor {
+	switch (_currentFace) {
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+			return CCC4BFromCCC4F(kCCC4FRed);
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+			return CCC4BFromCCC4F(kCCC4FRed);
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+			return CCC4BFromCCC4F(kCCC4FGreen);
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+			return CCC4BFromCCC4F(kCCC4FGreen);
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+			return CCC4BFromCCC4F(kCCC4FBlue);
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+			return CCC4BFromCCC4F(kCCC4FBlue);
+		default:
+			break;
+	}
+	CC3Assert(NO, @"%@ encountered unknown cube-map face %@", self, NSStringFromGLEnum(_currentFace));
+	return CCC4BFromCCC4F(kCCC4FWhite);
+}
+
+/**
+ * Returns the number of faces to generate on this snapshot.
+ *
+ * Updates the face count by adding the number of faces to generate on this snapshot,
+ * and returns the count as an integer. Subtract the number that will be generated on
+ * this snapshot from the running count. This math means that even if the number of
+ * faces per snapshot does not divide evenly into an integer number, over time the rate
+ * will average out to the value of the numberOfFacesPerSnapshot property.
+ *
+ * If this is the first snapshot, this property will return 6.
+ */
+-(GLuint) facesToGenerate {
+	if ( !_currentFace) return 6;				// Generate all 6 faces on first snapshot
+	
+	_faceCount += _numberOfFacesPerSnapshot;
+	GLuint facesToGenerate = _faceCount;		// Convert to int (rounding down)
+	_faceCount -= facesToGenerate;				// Reduce by number that will be done now
+	return facesToGenerate;
+}
+
+/** 
+ * Update the reference to the current face.
+ *
+ * GL face enums are guaranteed to be consecutive integers. 
+ * Increment until we get to the end, then cycle back to the beginning.
+ * If we're just starting out, start at the beginning.
+ */
+-(void) moveToNextFace {
+	switch (_currentFace) {
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+			_currentFace++;
+			break;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+		case GL_ZERO:
+		default:
+			_currentFace = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+			break;
+	}
+}
+
+/** Returns the direction to point the camera in order to render the current cube-map face. */
+-(CC3Vector) cameraDirection {
+	switch (_currentFace) {
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+			return kCC3VectorUnitXPositive;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+			return kCC3VectorUnitXNegative;
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+			return kCC3VectorUnitYPositive;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+			return kCC3VectorUnitYNegative;
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+			return kCC3VectorUnitZPositive;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+			return kCC3VectorUnitZNegative;
+		default:
+			break;
+	}
+	CC3Assert(NO, @"%@ encountered unknown cube-map face %@", self, NSStringFromGLEnum(_currentFace));
+	return kCC3VectorNull;
+}
+
+/** Returns the direction to orient the top of the camera to render the current cube-map face. */
+-(CC3Vector) upDirection {
+	switch (_currentFace) {
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+			return kCC3VectorUnitYNegative;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+			return kCC3VectorUnitYNegative;
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+			return kCC3VectorUnitZPositive;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+			return kCC3VectorUnitZNegative;
+		case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+			return kCC3VectorUnitYNegative;
+		case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+			return kCC3VectorUnitYNegative;
+		default:
+			break;
+	}
+	CC3Assert(NO, @"%@ encountered unknown cube-map face %@", self, NSStringFromGLEnum(_currentFace));
+	return kCC3VectorNull;
+}
+
+
+#pragma mark Allocation and initialization
+
+-(id) initWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initWithColorPixelFormat: GL_RGBA
+						andColorPixelType: GL_UNSIGNED_BYTE
+					   andDepthAttachment: depthAttachment];
+}
+
++(id) textureWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initWithDepthAttachment: depthAttachment] autorelease];
+}
+
+-(id) initWithColorPixelFormat: (GLenum) colorFormat
+			 andColorPixelType: (GLenum) colorType
+			andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	if ( (self = [super initWithPixelFormat: colorFormat andPixelType: colorType]) ) {
+		_faceCount = 0.0f;
+		_numberOfFacesPerSnapshot = 1.0f;
+		_currentFace = GL_ZERO;
+		_renderSurface = [CC3GLFramebuffer new];		// retained
+		_renderSurface.depthAttachment = depthAttachment;
+		_renderSurface.colorTexture = self;
+		[_renderSurface validate];
+	}
+	return self;
+}
+
++(id) textureWithColorPixelFormat: (GLenum) colorFormat
+				andColorPixelType: (GLenum) colorType
+			   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initWithColorPixelFormat: colorFormat
+								 andColorPixelType: colorType
+								andDepthAttachment: depthAttachment] autorelease];
+}
 
 @end
 
@@ -626,13 +894,13 @@
 		GLuint samples = MIN(requestedSamples, CC3OpenGL.sharedGL.maxNumberOfPixelSamples);
 		
 		// Set up the view surface and color render buffer
-		CC3GLFramebuffer* vSurf = [CC3GLFramebuffer surface];
-		vSurf.colorAttachment = [CC3OnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat];
+		CC3GLFramebuffer* vSurf = [CC3IOSOnScreenGLFramebuffer surface];
+		vSurf.colorAttachment = [CC3IOSOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat];
 		self.viewSurface = vSurf;					// retained
 		
 		// If using multisampling, also set up off-screen multisample frame and render buffers
 		if (samples > 1) {
-			CC3GLFramebuffer* msSurf = [CC3GLFramebuffer surface];
+			CC3GLFramebuffer* msSurf = [CC3IOSOnScreenGLFramebuffer surface];
 			msSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																	andPixelSamples: samples];
 			self.multisampleSurface = msSurf;		// retained
@@ -652,15 +920,14 @@
     if ( (self = [self init]) ) {
 		
 		// Set up the view surface and color render buffer
-		CC3GLFramebuffer* vSurf = [CC3SystemGLFramebuffer surface];
-		vSurf.colorAttachment = [CC3SystemGLRenderbuffer renderbufferWithPixelFormat: colorFormat
+		CC3GLFramebuffer* vSurf = [CC3OSXOnScreenGLFramebuffer surface];
+		vSurf.colorAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																	 andPixelSamples: samples];
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
-		if (depthFormat) {
-			vSurf.depthAttachment = [CC3SystemGLRenderbuffer renderbufferWithPixelFormat: depthFormat
+		if (depthFormat)
+			vSurf.depthAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: depthFormat
 																		 andPixelSamples: samples];
-		}
 
 		self.viewSurface = vSurf;		// retained
 	}

@@ -92,6 +92,7 @@
 	BOOL _hasMipmap : 1;
 	BOOL _isUpsideDown : 1;
 	BOOL _shouldFlipVerticallyOnLoad : 1;
+	BOOL _shouldFlipHorizontallyOnLoad : 1;
 	BOOL _hasPremultipliedAlpha : 1;
 }
 
@@ -192,9 +193,21 @@
 /**
  * Returns the GL target of this texture.
  *
- * Returns GL_TEXTURE_2D if this is a 2D texture, or GL_TEXTURE_CUBE_MAP if this is a cube map texture.
+ * Returns GL_TEXTURE_2D if this is a 2D texture, or GL_TEXTURE_CUBE_MAP
+ * if this is a cube map texture.
  */
 @property(nonatomic, readonly) GLenum textureTarget;
+
+/**
+ * Returns the GL face to use when initially attaching this texture to a framebuffer.
+ *
+ * Returns GL_TEXTURE_2D if this is a 2D texture, or GL_TEXTURE_CUBE_MAP_POSITIVE_X 
+ * if this is a cube map texture.
+ */
+@property(nonatomic, readonly) GLenum initialAttachmentFace;
+
+
+#pragma mark Texture transformations
 
 /**
  * Indicates whether this instance will flip the texture vertically during loading.
@@ -215,11 +228,23 @@
 @property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
 
 /**
+ * Indicates whether this instance will flip the texture horizontally during loading.
+ *
+ * Some types of textures (notably cube-map textures) are stored in GL memory horizontally flipped.
+ *
+ * If this property is set to YES during loading, the texture will be flipped horizontally in memory.
+ *
+ * The initial value of this property is set to the value of the class-side
+ * defaultShouldFlipHorizontallyOnLoad property.
+ */
+@property(nonatomic, assign) BOOL shouldFlipHorizontallyOnLoad;
+
+/**
  * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
  * for instances of this class.
  *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
+ * Each subclass can have a different value for this class-side property. See the notes for
+ * this property on each subclass to understand the initial value.
  */
 +(BOOL) defaultShouldFlipVerticallyOnLoad;
 
@@ -227,10 +252,28 @@
  * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
  * for instances of this class.
  *
- * The initial value of this class-side property is YES, indicating that instances will flip
- * all 2D textures the right way up during loading.
+ * Each subclass can have a different value for this class-side property. See the notes for
+ * this property on each subclass to understand the initial value.
  */
 +(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipHorizontallyOnLoad
+ * for instances of this class.
+ *
+ * Each subclass can have a different value for this class-side property. See the notes for
+ * this property on each subclass to understand the initial value.
+ */
++(BOOL) defaultShouldFlipHorizontallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * Each subclass can have a different value for this class-side property. See the notes for
+ * this property on each subclass to understand the initial value.
+ */
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Mipmaps
@@ -455,6 +498,15 @@
  * content replaces the texture data within the specified rectangle. The specified content array
  * must be large enough to contain content for the number of pixels in the specified rectangle.
  *
+ * If this is a standard 2D texture, the target must be GL_TEXTURE_2D. If this is a cube-map
+ * texture, the specified target can be one of the following:
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ *
  * Content is read from the specified array left to right across each row of pixels within
  * the specified image rectangle, starting at the row at the bottom of the rectangle, and
  * ending at the row at the top of the rectangle.
@@ -640,6 +692,39 @@
  * has been replaced, invoke the generateMipmap method to regenerate the mipmaps.
  */
 -(void) replacePixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray;
+
+
+#pragma mark Texture transformations
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value for 2D textures is YES, indicating that a 2D texture that has been loaded
+ * in upsdide-down will be fipped the right way up.
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value for 2D textures is YES, indicating that a 2D texture that has been loaded
+ * in upsdide-down will be fipped the right way up.
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipHorizontallyOnLoad
+ * for instances of this class. The initial value for 2D textures is NO.
+ */
++(BOOL) defaultShouldFlipHorizontallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipHorizontallyOnLoad
+ * for instances of this class. The initial value for 2D textures is NO.
+ */
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Allocation and Initialization
@@ -871,6 +956,14 @@
  * content replaces the texture data within the specified rectangle. The specified content array
  * must be large enough to contain content for the number of pixels in the specified rectangle.
  *
+ * The specified cube face target can be one of the following:
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+ *   - GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+ *   - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+ *
  * Content is read from the specified array left to right across each row of pixels within
  * the specified image rectangle, starting at the row at the bottom of the rectangle, and
  * ending at the row at the top of the rectangle.
@@ -896,6 +989,51 @@
 -(void) replacePixels: (CC3Viewport) rect
 		   inCubeFace: (GLenum) faceTarget
 		  withContent: (ccColor4B*) colorArray;
+
+
+#pragma mark Texture transformations
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value for cube-map textures is NO, indicating that a cube-map texture that
+ * has been loaded in upsdide-down will be left upside-down. This is because cube-mapped
+ * textures need to be stored in GL memory rotated by 180 degrees (flipped both vertically
+ * and horizontally).
+ */
++(BOOL) defaultShouldFlipVerticallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipVerticallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value for cube-map textures is NO, indicating that a cube-map texture that
+ * has been loaded in upsdide-down will be left upside-down. This is because cube-mapped
+ * textures need to be stored in GL memory rotated by 180 degrees (flipped both vertically
+ * and horizontally).
+ */
++(void) setDefaultShouldFlipVerticallyOnLoad: (BOOL) shouldFlip;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipHorizontallyOnLoad
+ * for instances of this class. 
+ * 
+ * The initial value for cube-map textures is YES, indicating that the texture will be flipped
+ * horizontally. This is because cube-mapped textures need to be stored in GL memory rotated
+ * by 180 degrees (flipped both vertically and horizontally).
+ */
++(BOOL) defaultShouldFlipHorizontallyOnLoad;
+
+/**
+ * This class-side property determines the initial value of the shouldFlipHorizontallyOnLoad
+ * for instances of this class.
+ *
+ * The initial value for cube-map textures is YES, indicating that the texture will be flipped
+ * horizontally. This is because cube-mapped textures need to be stored in GL memory rotated
+ * by 180 degrees (flipped both vertically and horizontally).
+ */
++(void) setDefaultShouldFlipHorizontallyOnLoad: (BOOL) shouldFlip;
 
 
 #pragma mark Allocation and initialization
@@ -1152,6 +1290,9 @@
  */
 @property(nonatomic, readonly) GLenum pixelGLType;
 
+/** Returns the number of bytes in each pixel of content. */
+@property(nonatomic, readonly) GLuint bytesPerPixel;
+
 /**
  * Indicates whether this texture is upside-down.
  *
@@ -1161,6 +1302,9 @@
  */
 @property(nonatomic, readonly) BOOL isUpsideDown;
 
+
+#pragma mark Transforming image in memory
+
 /** 
  * Flips this texture vertically, to compensate for the opposite orientation
  * of vertical graphical coordinates between OpenGL and iOS & OSX.
@@ -1168,6 +1312,19 @@
  * The value of the isUpsideDown property is toggled after flipping.
  */
 -(void) flipVertically;
+
+/** Flips this texture horizontally. */
+-(void) flipHorizontally;
+
+/**
+ * Rotates the image by 180 degrees. 
+ *
+ * This is equivalent to combined vertical and horizontal flips, but is executed
+ * in one pass for efficiency.
+ *
+ * The value of the isUpsideDown property is toggled after rotating.
+ */
+-(void) rotateHalfCircle;
 
 
 #pragma mark Allocation and Initialization

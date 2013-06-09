@@ -731,14 +731,6 @@
 	LogGLErrorTrace(@"glClear(%x)", mask);
 }
 
-//-(void) clearColorBuffer { [self clearBuffers: GL_COLOR_BUFFER_BIT]; }
-
-//-(void) clearDepthBuffer { [self clearBuffers: GL_DEPTH_BUFFER_BIT]; }
-
-//-(void) clearStencilBuffer { [self clearBuffers: GL_STENCIL_BUFFER_BIT]; }
-
-//-(void) clearColorAndDepthBuffers { [self clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)]; }
-
 -(void) readPixelsIn: (CC3Viewport) rect  fromFramebuffer: (GLuint) fbID into: (ccColor4B*) colorArray {
 	GLuint currFB = value_GL_FRAMEBUFFER_BINDING;
 	[self bindFramebuffer: fbID];

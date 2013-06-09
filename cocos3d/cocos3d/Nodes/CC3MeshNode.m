@@ -867,7 +867,6 @@
 	[super selectShaderPrograms];
 }
 
-
 /** Template method to draw the mesh to the GL engine. */
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor { [_mesh drawWithVisitor: visitor]; }
 

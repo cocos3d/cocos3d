@@ -192,6 +192,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_runnerCam = nil;			// not retained
 	_runnerLamp = nil;			// not retained
 	_tvScreen = nil;			// not retained
+	_envMapTex = nil;			// not retained
 	[_signTex release];
 	[_stampTex release];
 	[_embossedStampTex release];
@@ -252,10 +253,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	[self addBackdrop];				// Add a sky-blue colored backdrop
 	
-//	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
-									// in the textured teapot added in the addTeapotAndSatellite method
-	
 	[self addGround];				// Add a ground plane to provide some perspective to the user
+	
+//	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
+									// in the reflective runner added in the addSkinnedRunners method
 
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
 	
@@ -726,40 +727,55 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * Adds a large textured teapot and a small multicolored teapot orbiting it.
  * 
  * When running with GLSL shaders under OpenGL ES 2.0 on iOS, or OpenGL on OSX, the textured
- * teapot reflects the surrounding environment. This is performed by adding a cube-map texture
- * to the teapot. A cube-map texture actually consists of six textures, each representing a view
- * of the scene from one of the six scene axes. As a convenience, the six textures are loaded
- * using a file-name pattern.
+ * teapot reflects the surrounding environment dynamically. This is performed by adding a
+ * environmental cube-map texture to the teapot. A cube-map texture actually consists of six
+ * textures, each representing a view of the scene from one of the six scene axes. The reflection
+ * texture is updated each frame (see the generateTeapotEnvironmentMapWithVisitor method), so
+ * the teapot reflects the dynamic scene. As objects move around the scene, they are reflected
+ * in the teapot.
  *
- * The default program matcher assigns the GLSL shaders CC3SingleTextureReflect.vsh and
- * CC3SingleTextureReflect.fsh to the reflective teapot.
+ * The default program matcher assigns the GLSL shaders CC3TexturableMaterial.vsh and
+ * CC3SingleTextureReflect.fsh shaders to the reflective teapot.
  *
- * In this example, the six cube-map textures include markers to illustrate which texture is which.
- *
- * The reflectivity property of the material covering the mesh node can be used to control how
- * reflective the surface is.
- *
- * Cube maps can also be used to draw skyboxes. To see the environment that is being reflected
- * into the teapot, uncomment the addSkyBox invocation in the initializeScene method.
- *
- * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
- * A representation of how the six textures appear related to each other after being loaded into
- * the GL engine can be found in the diagram Docs/Diagrams/EnvCubeMap.jpg.
+ * The textured teapot actually has two textures. The first is the reflective cube-map, and the
+ * second can provide an optional surface material effect (in this case brushed metal), that
+ * blends with the reflection, to more realistically mimic a non-silvered reflective material.
+ * The reflectivity property of the material covering the teapot adjusts the blend between the
+ * reflective and material textures, and can be used to control how reflective the surface is.
+ * For demonstative effect, the reflectivity property is set to the maximum value of 1.0, making
+ * the material fully reflective (like a mirror or chrome), and none of the brushed metal texture
+ * shows through. You can reduce the reflectivity value to dull the reflection and show more of
+ * the brushed metal surface.
  */
 -(void) addTeapotAndSatellite {
 	_teapotTextured = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: kTexturedTeapotName];
 	_teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
 	
 	// Add two textures to the teapot. The first is a cube-map texture showing the six sides of
-	// an environmental cube surrounding the teapot, viewed from the teapot's perspective. Also
-	// add an effect loaded from a PFX file to render these textures. The six cube-map textures
-	// are loaded by specifying a file name substitution pattern. See the notes of the
-	// textureCubeMapFromFilePattern: method for more info.
-	[_teapotTextured addTexture: [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"]];
+	// a real-time reflective environmental cube surrounding the teapot, viewed from the teapot's
+	// perspective. The reflection is dynamically generated as objects move around the scene.
+	// A second texture is added to provide an optional surface material (eg- brushed metal).
+	// The material reflectivity property adjusts how reflective the surface is, by adjusting the
+	// blend between the two textures. Lower the reflectivity towards zero to show some of the
+	// underlying material. Since the enviornment map texture renders the scene, it requires a
+	// depth buffer, so we create a depth buffer of the same size, and attach it here. If you had
+	// multiple reflective objects, you could use the same depth buffer for all of them if the
+	// textures are the same size. Since generating an environment map texture requires rendering
+	// the scene from each of the six axis directions, it can be quite costly. You can use the
+	// numberOfFacesPerSnapshot property to adjust how often the reflective faces are updated, to
+	// trade off real-time accuracy and performance. See the notes of that property for more info.
+	GLint envMapDim = 256;
+	CC3GLRenderbuffer* depthBuff = [CC3GLRenderbuffer renderbufferWithSize: CC3IntSizeMake(envMapDim, envMapDim)
+															andPixelFormat: GL_DEPTH_COMPONENT16];
+	_envMapTex = [CC3GLEnvironmentMapTexture textureWithDepthAttachment: depthBuff];
+	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
+	
+	[_teapotTextured addTexture: [CC3Texture textureWithGLTexture: _envMapTex]];
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	_teapotTextured.material.reflectivity = 0.7;		// Adjust up and down between zero and one.
-
-	// Add a second rainbow-colored teapot as a satellite of the textured teapot.
+	_teapotTextured.material.reflectivity = 1.0;
+	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
+	
+	// Add a second rainbow-colored teapot as a satellite of the reflective teapot.
 	_teapotSatellite = [PhysicsMeshNode nodeWithName: kRainbowTeapotName];
 	_teapotSatellite.mesh = CC3ModelSampleFactory.factory.multicoloredTeapotMesh;
 	_teapotSatellite.material = [CC3Material shiny];
@@ -772,10 +788,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_teapotTextured.uniformScale = 500.0;
 	[self addChild: _teapotTextured];
 	
-	// Rotate the teapots. The satellite orbits the textured teapot because it is
-	// a child node of the textured teapot, and orbits as the parent node rotates.
-	// We give the rotation action a tag so we can find it again when the satellite
-	// teapot collides with the brick wall and we need to change the motion.
+	// Rotate the teapots. The satellite orbits the reflective teapot because it is a child node of the
+	// reflective teapot, and orbits as the parent node rotates. We give the rotation action a tag so we can
+	// find it again when the satellite teapot collides with the brick wall and we need to change the motion.
 	CCAction* teapotSpinAction = [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																						   rotateBy: cc3v(0.0, 60.0, 0.0)]];
 	teapotSpinAction.tag = kTeapotRotationActionTag;
@@ -795,12 +810,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * In this example, the six cube-map textures include markers to illustrate which texture is which.
  *
  * Cube maps can also be used to render environmental reflections on objects. This skybox is reflected
- * into the reflective teapot added in the addTeapotAndSatellite method. The teapot will reflect
- * this skybox texture even if the skybox itself is not added.
- *
- * Because of the nature of cube-mapped textures, each of these six textures is flipped horizontally.
- * A representation of how the six textures appear related to each other after being loaded into
- * the GL engine can be found in the diagram Docs/Diagrams/EnvCubeMap.jpg.
+ * into the reflective runner added in the addSkinnedRunners method. The runner will reflect this skybox
+ * texture even if the skybox itself is not added.
  */
 -(void) addSkyBox {
 	CC3MeshNode* skyBox = [CC3MeshNode nodeWithName: @"SkyBox"];
@@ -810,12 +821,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[skyBox applyEffectNamed: @"SkyBox" inPFXResourceFile: @"EnvMap.pfx"];
 	[self addChild: skyBox];
 
-	// PVR files can contain an entire cube-map in a single file (and all the mipmaps too).
-	// To try it out, if you have downloaded the PowerVr SDK, add the file found at
-	// "Examples/Advanced/Skybox2/OGLES2/Skybox.pvr" in the SDK to this project, and
-	// uncomment the following line. To get the full effect of that skybox, you might also
-	// want to comment out the invocation of the addGround method in the initializeScene method.
+	// PVR files can contain an entire cube-map (and all the mipmaps too) in a single file.
+	// To try it out when running on iOS, uncomment the following line.
 //	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
+
+	[_ground remove];	// Remove the ground, because the skybox already includes a ground
 }
 
 /**
@@ -1409,12 +1419,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
- * Adds two running men to the scene. The men runs endless laps around the scene. The men's meshes
+ * Adds two running men to the scene. The men run endless laps around the scene. The men's meshes
  * employ vertex skinning and an animated bone skeleton to simulate smooth motion and realistic
  * joint flexibility. Under a programmable rendering pipeline, the smaller man also sports a
- * reflective skin that reflects the environment, using a cube-map texture. 
+ * reflective skin that reflects the environment, using a static cube-map texture. 
  *
- * For a more complete explanation of cube-mapping, see the notes for the addTeapotAndSatellite method.
+ * In contrast to the reflective teapot in the addTeapotAndSatellite method, the reflective runner
+ * here has a static cube-map texture. Such a texture is typically generated once, usually at
+ * development time, and does not dynamically update as the scene contents change. The benefit
+ * to using a static environment map is that it does not required repeatitive regeneration, and
+ * is therefore much more efficient than a fully dynamic enviornment map, such as used on the
+ * reflective teapot.
+ *
+ * Cube maps can also be used to draw skyboxes. To see the environment that is being reflected
+ * into the reflective runner, uncomment the addSkyBox invocation in the initializeScene method.
  */
 -(void) addSkinnedRunners {
 
@@ -1469,25 +1487,26 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
 	littleBrother.touchEnabled = YES;			// make the runner touchable
 	
-	// Turn the smaller runner into a little liquid-metal Terminator 2!
-	// This is done by locating the mesh nodes within the figure, adding a cube-map environment
-	// texture to each, and setting the reflectivity of each mesh node.
-	CC3Material* mat;
-	GLfloat lbReflect = 1.0;	// Lower the reflectivity property towards zero to show some of the runner's suit.
-	CC3Texture* envMapTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
-	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
-	[mat addTexture: envMapTex];
-	mat.reflectivity = lbReflect;
-	mat = [littleBrother getMeshNodeNamed: @"Legs_LowPoly"].material;
-	[mat addTexture: envMapTex];
-	mat.reflectivity = lbReflect;
-	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
-	[mat addTexture: envMapTex];
-	mat.reflectivity = lbReflect;
-
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
 	[littleBrother runAction: [CCRepeatForever actionWithAction: stride]];
+	
+	// Turn the smaller runner into a little liquid-metal Terminator 2!
+	// This is done by locating the mesh nodes within the figure, adding a static cube-map
+	// environment-map texture to each, and setting the reflectivity of each mesh node.
+	CC3Material* mat;
+	GLfloat lbReflect = 1.0;	// Lower the reflectivity towards zero to show some of the runner's suit.
+
+	CC3Texture* emTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
+	[mat addTexture: emTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"Legs_LowPoly"].material;
+	[mat addTexture: emTex];
+	mat.reflectivity = lbReflect;
+	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
+	[mat addTexture: emTex];
+	mat.reflectivity = lbReflect;
 }
 
 /**
@@ -2134,6 +2153,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * This scene has custom drawing requirements, perfoming multiple passes, based on user interaction.
  *
+// * If the scene is being rendered in order to populate the reflective environment map texture
+// * used by the reflective teapot, do only the basic steps to keep performance reasonable,
+// * and to avoid certain potential recursive loops of nested scene rendering.
+ *
  * If the user has turned on the TV in the scene, we render one pass of the scene from the
  * point of view of the camera that travels with the runners into a texture that is then
  * displayed on the TV screen during the main scene rendering pass.
@@ -2143,14 +2166,19 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * presented to the view surface as a quad via a single-node rendering pass.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-
-	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
-	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
-	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
 	
 	[self illuminateWithVisitor: visitor];			// Light up your world!
 	
 	[self drawToTVScreenWithVisitor: visitor];		// Draw the scene to the TV screen
+	
+	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
+	// environment-map cube-map texture for it by taking snapshots of the scene in all
+	// six axis directions from its position.
+	[self generateTeapotEnvironmentMapWithVisitor: visitor];
+	
+	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
+	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
+	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
 	
 	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
 	// if first. Otherwise, draw to view surface directly, without clearing because it
@@ -2160,7 +2188,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[_preProcSurface clearColorAndDepthContent];
 	} else
 		visitor.renderSurface = self.viewSurface;
-
+	
 	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
 	[visitor visit: self];					// Draw the scene components
 	[self drawShadows];						// Shadows are drawn with a different visitor
@@ -2175,11 +2203,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
+ * When drawing an environment map, don't bother with shadows, avoid all the post-rendering
+ * processing, don't redraw the TV. And avoid an infinitely recursive issue where rendering
+ * the scene for the texture triggers a recursive nested scene render!
+ */
+-(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[visitor.renderSurface clearColorAndDepthContent];
+	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
+	[visitor visit: self];					// Draw the scene components
+}
+
+/**
  * Draws the scene from the runners' camera perspective to the TV screen.
  *
- * This is done by temporarily setting the camera in the visitor to that of the runner-cam
- * and changing the viewport to match the TV aspect (16x9), and activating the rendering
- * surface that has the texture of the TV screen as its attachment.
+ * This is done by temporarily setting the camera in the visitor to that of the runner-cam,
+ * turning on the runner-cam light to better illuminate the runners, and activating the
+ * rendering surface that has the texture of the TV screen as its attachment.
  */
 -(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 
@@ -2189,20 +2228,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	LogTrace(@"Drawing to TV");
 
-	CC3Viewport vpCurr = _runnerCam.viewport;
 	BOOL lampOnCurr = _runnerLamp.visible;
-	
-	_runnerLamp.visible = YES;
-	_runnerCam.viewport = CC3ViewportMake(0, 0, kTVTexSize.width, kTVTexSize.height);
-	visitor.camera = _runnerCam;
+	_runnerLamp.visible = YES;					// Temporarily turn the runner-cam's light on
+	visitor.camera = _runnerCam;				// and switch to the runner-cam view.
 
-	visitor.renderSurface = _tvSurface;				// Draw to the texture in the TV surface, not the view
-	[_tvSurface clearColorAndDepthContent];			// Clear color & depth of TV surface.
-	[visitor visit: self.backdrop];					// Draw the backdrop if it exists
-	[visitor visit: self];							// Draw the scene components
+	visitor.renderSurface = _tvSurface;			// Draw to the texture in the TV surface, not the view
+	[_tvSurface clearColorAndDepthContent];		// Clear color & depth of TV surface.
+	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
+	[visitor visit: self];						// Draw the scene components
 
-	visitor.camera = self.activeCamera;
-	_runnerCam.viewport = vpCurr;
+	visitor.camera = self.activeCamera;			// Go back to the regular camera.
 	_runnerLamp.visible = lampOnCurr;
 	
 	[self pictureInPicture];		// Add a small PiP image in the bottom right of the TV screen
@@ -2254,6 +2289,24 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		colorArray[imgSize.width * rowIdx] = borderColor;				// First column in row
 		colorArray[imgSize.width * (rowIdx + 1) - 1] = borderColor;		// Last column in row
 	}
+}
+
+/** 
+ * If we're not already in the middle of generating an environment map, and the reflective metal
+ * teapot is visible, generate an environment-map cube-map texture for it by taking snapshots of
+ * the scene in all six axis directions from its position. We don't want the teapot to
+ * self-reflect, so we make it invisible while we are rendering the scene from the teapot's center.
+ */
+-(void) generateTeapotEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.isDrawingEnvironmentMap ||
+		![_teapotTextured doesIntersectFrustum: visitor.camera.frustum] ) return;
+
+	BOOL isVis = _teapotTextured.visible;
+	_teapotTextured.visible = NO;			// Hide the teapot from itself
+	[_envMapTex generateSnapshotOfScene: self
+					 fromGlobalLocation: _teapotTextured.globalCenterOfGeometry
+							withVisitor: visitor];
+	_teapotTextured.visible = isVis;
 }
 
 

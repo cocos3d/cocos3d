@@ -45,11 +45,18 @@
 -(BOOL) shouldFlipVerticallyOnLoad { return NO; }
 -(void) setShouldFlipVerticallyOnLoad: (BOOL) shouldFlipVerticallyOnLoad {}
 
+-(BOOL) shouldFlipHorizontallyOnLoad { return NO; }
+-(void) setShouldFlipHorizontallyOnLoad: (BOOL) shouldFlipHorizontallyOnLoad {}
+
 @synthesize isTextureCube=_isTextureCube;
 
 -(BOOL) isTexture2D { return !self.isTextureCube; }
 
 -(GLenum) textureTarget { return self.isTextureCube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D; }
+
+-(GLenum) initialAttachmentFace {
+	return self.isTextureCube ? GL_TEXTURE_CUBE_MAP_POSITIVE_X : GL_TEXTURE_2D;
+}
 
 -(Class) textureContentClass { return CC3PVRTextureContent.class; }
 

@@ -116,11 +116,20 @@
 /**
  * The camera that is viewing the 3D scene.
  *
- * Access to the camera is needed for many node visitations, such as updates and drawing.
- * If this property is not set in advance, it is retrieved automatically from the activeCamera
- * property of the starting node, at the beginning of a visitation run.
+ * If this property is not set in advance, it is lazily initialized to the value
+ * of the defaultCamera property when first accessed during a visitation run.
+ *
+ * The value of this property is not cleared at the end of the visitation run.
  */
 @property(nonatomic, retain) CC3Camera* camera;
+
+/**
+ * The default camera to use when visiting a node assembly.
+ *
+ * This implementation returns the activeCamera property of the starting node.
+ * Subclasses may override.
+ */
+@property(nonatomic, readonly) CC3Camera* defaultCamera;
 
 /**
  * The CC3Node that is currently being visited.
@@ -385,11 +394,13 @@
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
+	CC3Viewport _onScreenViewport;
 	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
 	GLuint _currentTextureUnitIndex;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
+	BOOL _isDrawingEnvironmentMap : 1;
 	BOOL _isVPMtxDirty : 1;
 	BOOL _isMVMtxDirty : 1;
 	BOOL _isMVPMtxDirty : 1;
@@ -440,6 +451,17 @@
  * The initial value of this property is YES.
  */
 @property(nonatomic, assign) BOOL shouldDecorateNode;
+
+/**
+ * Indicates whether this visitor is rendering an environment map to a texture.
+ *
+ * Environment maps typically do not require full detail. This property can be used during
+ * drawing to make optimization decisions such as to avoid drawing certain more complex
+ * content when creating an environment map.
+ *
+ * The initial value of this property is NO.
+ */
+@property(nonatomic, assign) BOOL isDrawingEnvironmentMap;
 
 /**
  * Draws the specified node. Invoked by the node itself when the node's local
@@ -559,20 +581,13 @@
  * CC3NodePickingVisitor is a CC3NodeDrawingVisitor that is passed to a node when
  * it is visited during node picking operations using color-buffer based picking.
  *
- * The visit: method must be invoked with a CC3Scene instance as the arguement.
+ * The visit: method must be invoked with a CC3Scene instance as the argument.
  *
  * Node picking is the act of picking a 3D node from user input, such as a touch.
  * One method of accomplishing this is to draw the scene such that each object is
  * drawn in a unique solid color. Once the scene is drawn, the color of the pixel
  * that has been touched can be read from the OpenGL ES color buffer, and mapped
- * back to the object that was painted with that color. This drawing is performed
- * in the background so that the user is unaware of the specialized coloring.
- *
- * If antialiasing multisampling is active, before reading the color of the touched
- * pixel, the multisampling framebuffer is resolved to the resolve framebuffer,
- * and the resolve framebuffer is made active so that the color of the touched pixel
- * can be read. After reading the color of the touched pixel, the multisampling
- * framebuffer is made active in preparation of normal drawing operations.
+ * back to the object that was painted with that color.
  */
 @interface CC3NodePickingVisitor : CC3NodeDrawingVisitor {
 	CC3Node* _pickedNode;

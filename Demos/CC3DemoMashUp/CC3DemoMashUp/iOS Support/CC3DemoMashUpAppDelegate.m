@@ -148,7 +148,7 @@
 //	cc3Layer.position = ccp(30.0, 30.0);
 //	cc3Layer.contentSize = CGSizeMake(winSize.width - 100.0, winSize.width - 40.0);
 //	cc3Layer.alignContentSizeWithDeviceOrientation = YES;
-//	mainLayer = [CC3ControllableLayer node];
+//	mainLayer = [CC3ControllableLayer layerWithController: _viewController];
 //	[mainLayer addChild: cc3Layer];
 	
 	// A smaller 3D layer can even be moved around on the screen dyanmically. To see this in action,
