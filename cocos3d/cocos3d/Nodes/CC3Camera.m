@@ -53,7 +53,7 @@
 @implementation CC3Camera
 
 @synthesize nearClippingDistance=_nearClippingDistance, farClippingDistance=_farClippingDistance;
-@synthesize viewport=_viewport, frustum=_frustum, fieldOfView=_fieldOfView, viewMatrix=_viewMatrix;
+@synthesize viewport=_viewport, fieldOfView=_fieldOfView, viewMatrix=_viewMatrix;
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
 @synthesize shouldClipToViewport=_shouldClipToViewport;
 
@@ -71,6 +71,14 @@
 -(CC3Frustum*) frustum {
 	[self buildProjection];
 	return _frustum;
+}
+
+/** Establish backpointer from frustum. */
+-(void) setFrustum: (CC3Frustum*) frustum {
+	if (frustum == _frustum) return;
+	[_frustum release];
+	_frustum = [frustum retain];
+	_frustum.camera = self;
 }
 
 -(CC3Matrix*) projectionMatrix {
@@ -143,7 +151,7 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_viewMatrix = [CC3AffineMatrix new];
-		self.frustum = [CC3Frustum frustumOnViewMatrix: _viewMatrix];
+		self.frustum = [CC3Frustum frustum];
 		_isProjectionDirty = YES;
 		_isViewMatrixInvertedDirty = YES;
 		_fieldOfView = kCC3DefaultFieldOfView;
@@ -160,13 +168,14 @@
 // Protected properties for copying
 -(BOOL) isProjectionDirty { return _isProjectionDirty; }
 -(BOOL) isViewMatrixInvertedDirty { return _isViewMatrixInvertedDirty; }
+-(CC3Frustum*) rawFrustum { return _frustum; }
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3Camera*) another {
 	[super populateFrom: another];
 	
-	self.frustum = [another.frustum autoreleasedCopy];		// retained
+	self.frustum = [another.rawFrustum autoreleasedCopy];	// retained
 
 	[_viewMatrix populateFrom: another.viewMatrix];
 
@@ -218,9 +227,7 @@
  * Scaling does not apply to cameras. Sets the globalScale to that of the parent node,
  * or to unit scaling if no parent.
  */
--(void) updateGlobalScale {
-	_globalScale = _parent ? _parent.globalScale : kCC3VectorUnitCube;
-}
+-(void) updateGlobalScale { _globalScale = _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to also build the modelview matrix. */
 -(void) transformMatrixChanged {
@@ -252,7 +259,8 @@
  */
 -(void) buildProjection  {
 	if(_isProjectionDirty) {
-		CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.", self, NSStringFromCC3Viewport(_viewport));
+		CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
+				  self, NSStringFromCC3Viewport(_viewport));
 
 		[_frustum populateFrom: self.effectiveFieldOfView
 					andAspect: ((GLfloat) _viewport.w / (GLfloat) _viewport.h)
@@ -698,7 +706,8 @@
 	projectedLoc = CC3VectorAverage(projectedLoc, kCC3VectorUnitCube);
 	
 	// Map the X & Y components of the projected location (now between 0 and 1) to viewport coordinates.
-	CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.", self, NSStringFromCC3Viewport(_viewport));
+	CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
+			  self, NSStringFromCC3Viewport(_viewport));
 	projectedLoc.x = _viewport.x + (_viewport.w * projectedLoc.x);
 	projectedLoc.y = _viewport.y + (_viewport.h * projectedLoc.y);
 	
@@ -841,12 +850,12 @@
 @implementation CC3Frustum
 
 @synthesize top=_top, bottom=_bottom, left=_left, right=_right, near=_near, far=_far;
-@synthesize viewMatrix=_viewMatrix, isUsingParallelProjection=_isUsingParallelProjection;
+@synthesize camera=_camera, isUsingParallelProjection=_isUsingParallelProjection;
 
 -(void) dealloc {
-	[_viewMatrix release];
 	[_finiteProjectionMatrix release];
 	[_infiniteProjectionMatrix release];
+	_camera = nil;			// not retained
 	[super dealloc];
 }
 
@@ -911,6 +920,7 @@
 -(CC3Vector) farBottomRight { return self.vertices[kCC3FarBtmRgtIdx]; }
 
 // Deprecated
+-(CC3Matrix*) viewMatrix { return _camera.viewMatrix; }
 -(CC3Matrix*) modelviewMatrix { return self.viewMatrix; }
 
 -(CC3Matrix*) finiteProjectionMatrix {
@@ -921,12 +931,9 @@
 
 #pragma mark Allocation and initialization
 
--(id) init { return [self initOnViewMatrix: [CC3AffineMatrix matrix]]; }
-
--(id) initOnViewMatrix: (CC3Matrix*) aMtx {
+-(id) init {
 	if ( (self = [super init]) ) {
 		_top = _bottom = _left = _right = _near = _far = 0.0f;
-		_viewMatrix = [aMtx retain];
 		_finiteProjectionMatrix = [CC3ProjectionMatrix new];
 		_infiniteProjectionMatrix = nil;
 		_isUsingParallelProjection = NO;
@@ -935,9 +942,7 @@
 	return self;
 }
 
-+(id) frustumOnViewMatrix: (CC3Matrix*) aMtx {
-	return [[[self alloc] initOnViewMatrix: aMtx] autorelease];
-}
++(id) frustum { return [[[self alloc] init] autorelease]; }
 
 // Protected properties for copying
 -(BOOL) isInfiniteProjectionDirty { return _isInfiniteProjectionDirty; }
@@ -1021,13 +1026,12 @@
  * of the isUsingParallelProjection property.
  */
 -(void) populateProjectionMatrix {
-	if (_isUsingParallelProjection) {
+	if (_isUsingParallelProjection)
 		[_finiteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right andTop: _top
 											  andBottom: _bottom andNear: _near andFar: _far];
-	} else {
+	else
 		[_finiteProjectionMatrix populateFromFrustumLeft: _left andRight: _right andTop: _top
 										andBottom: _bottom andNear: _near andFar: _far];
-	}
 	_isInfiniteProjectionDirty = YES;
 }
 
@@ -1076,7 +1080,7 @@
 -(void) buildPlanes{
 	CC3Matrix4x4 projMtx, viewMtx, m;
 	[_finiteProjectionMatrix populateCC3Matrix4x4: &projMtx];
-	[_viewMatrix populateCC3Matrix4x4: &viewMtx];
+	[_camera.viewMatrix populateCC3Matrix4x4: &viewMtx];
 	CC3Matrix4x4Multiply(&m, &projMtx, &viewMtx);
 	
 	_planes[kCC3BotmIdx] = CC3PlaneNegate(CC3PlaneNormalize(CC3PlaneMake((m.c1r4 + m.c1r2), (m.c2r4 + m.c2r2),
@@ -1095,7 +1099,7 @@
 																		 (m.c3r4 - m.c3r3), (m.c4r4 - m.c4r3))));
 	[self buildVertices];
 	
-	LogTrace(@"Built planes for %@ from projection: %@ and view: %@", self, _finiteProjectionMatrix, _viewMatrix);
+	LogTrace(@"Built planes for %@ from projection: %@ and view: %@", self, _finiteProjectionMatrix, _camera.viewMatrix);
 }
 
 -(void) buildVertices {

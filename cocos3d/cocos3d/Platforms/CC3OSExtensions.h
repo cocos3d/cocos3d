@@ -32,6 +32,9 @@
 
 /* Base library of extensions to operating system frameworks to support cocos3d. */
 
+#import <Foundation/Foundation.h>
+
+
 #pragma mark -
 #pragma mark NSObject extensions
 

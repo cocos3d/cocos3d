@@ -31,6 +31,8 @@
 
 /* Base library of definitions and functions for operating in a 3D scene. */
 
+#import <Foundation/Foundation.h>
+
 
 #pragma mark Basic math support
 

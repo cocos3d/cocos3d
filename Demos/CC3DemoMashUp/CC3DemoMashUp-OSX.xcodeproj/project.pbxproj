@@ -645,7 +645,6 @@
 		A9742D91170DD6A8001FD5A2 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		A9742D92170DD6A8001FD5A2 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A9742D93170DD6A8001FD5A2 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		A9742D94170DD6A8001FD5A2 /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
 		A9742D9C170DD72B001FD5A2 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Arial32BMGlyph.fnt; path = ../Common/Resources/Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A9742D9D170DD72B001FD5A2 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Arial32BMGlyph.png; path = ../Common/Resources/Arial32BMGlyph.png; sourceTree = "<group>"; };
 		A9742D9E170DD72B001FD5A2 /* ArrowLeftButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ArrowLeftButton48x48.png; path = ../Common/Resources/ArrowLeftButton48x48.png; sourceTree = "<group>"; };
@@ -1538,7 +1537,6 @@
 				A9742D91170DD6A8001FD5A2 /* icon.icns */,
 				A9742D92170DD6A8001FD5A2 /* Info.plist */,
 				A9742D93170DD6A8001FD5A2 /* main.m */,
-				A9742D94170DD6A8001FD5A2 /* Prefix.pch */,
 			);
 			name = "OSX Support";
 			path = "CC3DemoMashUp/OSX Support";
@@ -2522,8 +2520,6 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "CC3DemoMashUp/OSX Support/Prefix.pch";
 				HEADER_SEARCH_PATHS = ../../cocos2d/kazmath/include;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				OTHER_LDFLAGS = (
@@ -2542,8 +2538,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "CC3DemoMashUp/OSX Support/Prefix.pch";
 				HEADER_SEARCH_PATHS = ../../cocos2d/kazmath/include;
 				INFOPLIST_FILE = "CC3DemoMashUp/OSX Support/Info.plist";
 				OTHER_LDFLAGS = (

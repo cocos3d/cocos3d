@@ -30,6 +30,7 @@
  */
 
 #import "CC3UtilityMeshNodes.h"
+#import "CC3Scene.h"
 
 
 @interface CC3Node (TemplateMethods)
@@ -309,11 +310,6 @@
 #pragma mark -
 #pragma mark CC3WireframeBoundingBoxNode
 
-@interface CC3WireframeBoundingBoxNode (TemplateMethods)
--(void) updateFromParentBoundingBoxWithVisitor: (CC3NodeUpdatingVisitor*) visitor;
-@property(nonatomic, readonly) CC3BoundingBox parentBoundingBox;
-@end
-
 @implementation CC3WireframeBoundingBoxNode
 
 @synthesize shouldAlwaysMeasureParentBoundingBox=_shouldAlwaysMeasureParentBoundingBox;
@@ -437,10 +433,6 @@
 #pragma mark -
 #pragma mark CC3DirectionMarkerNode
 
-@interface CC3DirectionMarkerNode (TemplateMethods)
--(CC3Vector) calculateLineEnd;
-@end
-
 @implementation CC3DirectionMarkerNode
 
 -(CC3Vector) markerDirection { return _markerDirection; }
@@ -450,6 +442,19 @@
 -(void) setParent: (CC3Node*) aNode {
 	[super setParent: aNode];
 	[self updateFromParentBoundingBox];
+}
+
+/** 
+ * Overridden to establish a default parent bounding box for parents that have no bounding
+ * box, such as cameras and lights. The default parent box is calculated as 10% of the size
+ * of the entire scene.
+ */
+-(CC3BoundingBox) parentBoundingBox {
+	CC3BoundingBox pbb = super.parentBoundingBox;
+	if ( !CC3BoundingBoxIsZero(pbb) ) return pbb;
+
+	CC3Vector bbDim = CC3VectorScaleUniform(CC3BoundingBoxSize(self.scene.boundingBox), 0.05f);
+	return CC3BoundingBoxFromMinMax(CC3VectorNegate(bbDim), bbDim);
 }
 
 

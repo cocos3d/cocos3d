@@ -29,6 +29,8 @@
 
 /** @file */	// Doxygen marker
 
+#import "CC3OpenGLFoundation.h"
+
 
 @class CC3GLSLVariable, CC3GLSLUniform, CC3NodeDrawingVisitor;
 

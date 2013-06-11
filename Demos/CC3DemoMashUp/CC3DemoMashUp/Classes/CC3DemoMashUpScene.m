@@ -2153,10 +2153,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * This scene has custom drawing requirements, perfoming multiple passes, based on user interaction.
  *
-// * If the scene is being rendered in order to populate the reflective environment map texture
-// * used by the reflective teapot, do only the basic steps to keep performance reasonable,
-// * and to avoid certain potential recursive loops of nested scene rendering.
- *
  * If the user has turned on the TV in the scene, we render one pass of the scene from the
  * point of view of the camera that travels with the runners into a texture that is then
  * displayed on the TV screen during the main scene rendering pass.

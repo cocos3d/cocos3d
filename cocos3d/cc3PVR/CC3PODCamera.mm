@@ -58,6 +58,9 @@
 	SPODNode* psn = (SPODNode*)[self nodePODStructAtIndex: aPODIndex fromPODResource: aPODRez];
 	[self adjustQuaternionsIn: psn withAnimationFrameCount: aPODRez.animationFrameCount];
 
+	// Remove all scaling animation content, since it affects the effective FOV of the camera.
+	[self clearScaleContentIn: psn];
+
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		// Get the camera content
 		if (self.podContentIndex >= 0) {
@@ -77,10 +80,35 @@
 }
 
 /**
- * The camera is aligned along a different axis in the exporter than in cocos3d. This method runs
- * through the quaternions in the rotation animation array (including the initial rotation setting
- * in the first element even if rotation animation is not used), and rotates each by a fixed offset
- * (90 degrees around the X-axis).
+ * In cocos3d, scaling a camera affects the effective field of view. In a POD file, scale
+ * info is meaningless and should be ignored. This is handled here by clearing the scale
+ * animation flag, and clearing the scale animation content before building the camera node.
+ */
+-(void) clearScaleContentIn: (SPODNode*) psn {
+	
+	psn->nAnimFlags &= ~ePODHasScaleAni;	// Clear the scale animation flag
+
+	free(psn->pfAnimScale);
+	psn->pfAnimScale = NULL;
+
+	free(psn->pnAnimScaleIdx);
+	psn->pnAnimScaleIdx = NULL;
+}
+
+/**
+ * Cameras in cocos3d are oriented to the OpenGL standard of pointing down the -Z axis, with
+ * the UP direction pointing up the +Y axis. However, the camera is a POD file is oriented
+ * so that it points down the -Y axis, with the up direction pointing down the -Z axis.
+ *
+ * The POD orientation can be aligned with the OpenGL orientation by rotating the camera
+ * -90 degrees around the +X axis.
+ *
+ * This method runs through the quaternions in the rotation animation array (including the
+ * initial rotation setting in the first element, even if rotation animation is not used),
+ * and prepreds a fixed -90 degrees rotation around the X-axis to each quaternion. This is
+ * done by creating a -90 degree +X axis rotation quaternion, multiplying it by each of the
+ * quaternions in the rotation animation array, and placing eac of the results back in the
+ * rotation animation array.
  */
 -(void) adjustQuaternionsIn: (SPODNode*) psn withAnimationFrameCount: (GLuint) numFrames {
 	if ( !psn->pfAnimRotation ) return;
@@ -91,7 +119,7 @@
 	// If rotation is animated, determine how many quaternions it includes
 	if (psn->nAnimFlags & ePODHasRotationAni) {
 		qCnt = numFrames;		// Assume animation not index and uses numFrames frames
-
+		
 		// If using indexed animation, find the largest index to determine number of quaternions.
 		// Animation indices are by floats, not quaternions.
 		if(psn->pnAnimRotationIdx) {
@@ -105,13 +133,14 @@
 		}
 	}
 	
-	// Offset each quaternion by a 90 degree rotation around X-axis.
-	CC3Vector4 axisAngle = CC3Vector4FromCC3Vector(kCC3VectorUnitXPositive, 90.0f);
+	// Offset each quaternion by a -90 degree rotation around X-axis.
+	CC3Vector4 axisAngle = CC3Vector4FromCC3Vector(kCC3VectorUnitXPositive, -90.0f);
 	CC3Quaternion offsetQuat = CC3QuaternionFromAxisAngle(axisAngle);
 	
 	CC3Quaternion* quaternions = (CC3Quaternion*)psn->pfAnimRotation;
 	for (GLuint qIdx = 0; qIdx < qCnt; qIdx++)
-		quaternions[qIdx] = CC3QuaternionMultiply(quaternions[qIdx], offsetQuat);
+		// Rotate first by offset rotation, then by animation rotation
+		quaternions[qIdx] = CC3QuaternionMultiply(offsetQuat, quaternions[qIdx]);
 	
 	LogRez(@"%@ adjusted %i rotation quaternions by %@", self, qCnt, NSStringFromCC3Quaternion(offsetQuat));
 }

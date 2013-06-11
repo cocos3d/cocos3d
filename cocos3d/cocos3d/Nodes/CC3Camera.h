@@ -1126,7 +1126,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * locations, rays, shapes, and other bounding volumes intersect the volume of the frustum.
  */
 @interface CC3Frustum : CC3BoundingVolume {
-	CC3Matrix* _viewMatrix;
+	CC3Camera* _camera;
 	CC3Matrix* _finiteProjectionMatrix;
 	CC3Matrix* _infiniteProjectionMatrix;
 	CC3Plane _planes[6];
@@ -1140,6 +1140,16 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	BOOL _isUsingParallelProjection : 1;
 	BOOL _isInfiniteProjectionDirty : 1;
 }
+
+/**
+ * The camera whose frustum this is.
+ *
+ * This link-back property is set automatically when this frustum is set into the frustum
+ * property of the camera. Usually the application should never set this property directly.
+ *
+ * This is a weak reference to avoid a retain cycle between the camera and the frustum.
+ */
+@property(nonatomic, assign) CC3Camera* camera;
 
 /** The distance from view center to the top of this frustum at the near clipping plane. */
 @property(nonatomic, readonly) GLfloat top;
@@ -1201,25 +1211,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 /** Returns the location of the far bottom right corner of this frustum, in the global coordinate system. */
 @property(nonatomic, assign, readonly) CC3Vector farBottomRight;
 
-
-#pragma mark Allocation and initialization
-
-/** Initializes this instance on the specified view matrix. */
--(id) initOnViewMatrix: (CC3Matrix*) aMtx;
-
-/** Allocates and initializes an autoreleased instance on the specified view matrix. */
-+(id) frustumOnViewMatrix: (CC3Matrix*) aMtx;
-
-/**
- * The view matrix of the camera.
- *
- * If the contents of the matrix change, invoking the markDirty method to let this instance know.
- */
-@property(nonatomic, readonly) CC3Matrix* viewMatrix;
-
-/** @deprecated Renamed to viewMatrix for a more accurate semantic. */
-@property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
-
 /** A finite projection matrix with the far end at the distance given by the far property. */
 @property(nonatomic, readonly) CC3Matrix* finiteProjectionMatrix;
 
@@ -1238,6 +1229,12 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  */
 @property(nonatomic, assign) BOOL isUsingParallelProjection;
 
+
+#pragma mark Allocation and initialization
+
+/** Allocates and initializes an autoreleased instance. */
++(id) frustum;
+
 /**
  * Sets the six frustum clipping planes and the projectionMatrix from the specified view parameters.
  *
@@ -1252,6 +1249,12 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 /** @deprecated Renamed to markDirty. */
 -(void) markPlanesDirty DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Use the same property on the camera instead. */
+@property(nonatomic, readonly) CC3Matrix* viewMatrix DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to viewMatrix for a more accurate semantic. */
+@property(nonatomic, readonly) CC3Matrix* modelviewMatrix DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to doesIntersectLocation:. */
 -(BOOL) doesIntersectPointAt: (CC3Vector) aLocation DEPRECATED_ATTRIBUTE;

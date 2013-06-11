@@ -880,7 +880,12 @@ static inline CC3Quaternion CC3QuaternionInvert(CC3Quaternion q) {
 	return CC3QuaternionScaleUniform(CC3QuaternionConjugate(q), 1.0f / CC3QuaternionLengthSquared(q));
 }
 
-/** Returns the result of multiplying qL on the left by qR on the right. */
+/**
+ * Returns the result of multiplying qL on the left by qR on the right.
+ *
+ * This represents a concatenation of two rotations, so that a point rotated by the result is
+ * equivalent to the point being rotated first by qL and then by qR: (qL.qR).p == qR.(qL.p).
+ */
 static inline CC3Quaternion CC3QuaternionMultiply(CC3Quaternion qL, CC3Quaternion qR) {
 	return CC3QuaternionMake((qL.w * qR.x) + (qL.x * qR.w) + (qL.y * qR.z) - (qL.z * qR.y),
 							 (qL.w * qR.y) - (qL.x * qR.z) + (qL.y * qR.w) + (qL.z * qR.x),
@@ -1100,6 +1105,14 @@ static inline CC3BoundingBox CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfl
 static inline BOOL CC3BoundingBoxesAreEqual(CC3BoundingBox bb1, CC3BoundingBox bb2) {
 	return CC3VectorsAreEqual(bb1.minimum, bb2.minimum)
 		&& CC3VectorsAreEqual(bb1.maximum, bb2.maximum);
+}
+
+/**
+ * Returns whether the specified bounding box is equal to
+ * the zero bounding box, specified by kCC3BoundingBoxZero.
+ */
+static inline BOOL CC3BoundingBoxIsZero(CC3BoundingBox bb) {
+	return CC3BoundingBoxesAreEqual(bb, kCC3BoundingBoxZero);
 }
 
 /**

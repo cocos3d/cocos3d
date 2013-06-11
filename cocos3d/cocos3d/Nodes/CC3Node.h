@@ -3882,6 +3882,11 @@ typedef enum {
  * The length of the child node is set from the boundingBox property of this node, so that the
  * line protrudes somewhat from this node.
  *
+ * When using this method on a node that does not have an effective bounding box, such as a
+ * light or camera, a length will be automatically calculated as a fraction of the scene size.
+ * You can also set the CC3DirectionMarkerNode.directionMarkerMinimumLength class-side property
+ * to establish a minimum length for the axis markers.
+ *
  * You can add more than one direction marker, and assign different colors to each.
  *
  * This feature can be useful during development in helping to determine the rotational orientation
@@ -3898,7 +3903,12 @@ typedef enum {
  * from the origin of this node to a location somewhat outside the node in the direction of the
  * forwardDirection property, in the node's local coordinate system, and in the direction of the
  * globalForwardDirection property, in the global coordinate system of the scene.
- * 
+ *
+ * When using this method on a node that does not have an effective bounding box, such as a
+ * light or camera, a length will be automatically calculated as a fraction of the scene size.
+ * You can also set the CC3DirectionMarkerNode.directionMarkerMinimumLength class-side property
+ * to establish a minimum length for the axis markers.
+ *
  * See the addDirectionMarkerColored:inDirection: method for more info.
  */
 -(void) addDirectionMarker;
@@ -3912,7 +3922,12 @@ typedef enum {
  *
  * The lines are color-coded red, green and blue for the X, Y & Z axes, respectively, as an
  * easy (RGB <=> XYZ) mnemonic.
- * 
+ *
+ * When using this method on a node that does not have an effective bounding box, such as a
+ * light or camera, a length will be automatically calculated as a fraction of the scene size.
+ * You can also set the CC3DirectionMarkerNode.directionMarkerMinimumLength class-side property
+ * to establish a minimum length for the axis markers.
+ *
  * See the addDirectionMarkerColored:inDirection: method for more info.
  */
 -(void) addAxesDirectionMarkers;
