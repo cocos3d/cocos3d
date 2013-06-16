@@ -842,11 +842,6 @@
 -(void) updateIfNeeded;
 @end
 
-@interface CC3Frustum (TemplateMethods)
--(void) populateProjectionMatrix;
--(void) buildVertices;
-@end
-
 @implementation CC3Frustum
 
 @synthesize top=_top, bottom=_bottom, left=_left, right=_right, near=_near, far=_far;
@@ -861,32 +856,32 @@
 
 -(void) setTop: (GLfloat) aValue {
 	_top = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(void) setBottom: (GLfloat) aValue {
 	_bottom = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(void) setLeft: (GLfloat) aValue {
 	_left = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(void) setRight: (GLfloat) aValue {
 	_right = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(void) setNear: (GLfloat) aValue {
 	_near = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(void) setFar: (GLfloat) aValue {
 	_far = aValue;
-	[self markDirty];
+	[self markProjectionDirty];
 }
 
 -(CC3Plane*) planes {
@@ -924,7 +919,7 @@
 -(CC3Matrix*) modelviewMatrix { return self.viewMatrix; }
 
 -(CC3Matrix*) finiteProjectionMatrix {
-	[self updateIfNeeded];
+	[self buildProjectionMatrixIfNeeded ];
 	return _finiteProjectionMatrix;
 }
 
@@ -938,6 +933,7 @@
 		_infiniteProjectionMatrix = nil;
 		_isUsingParallelProjection = NO;
 		_isInfiniteProjectionDirty = YES;
+		_isProjectionDirty = YES;
 	}
 	return self;
 }
@@ -988,10 +984,14 @@
 	_bottom = -_top;
 	_left = -_right;
 	
-	[self markDirty];
+	[self markProjectionDirty];
 	
 	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
 			 self, fieldOfView, nearClip, nearClip, farClip);
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ of %@", super.description, _camera];
 }
 
 -(NSString*) fullDescription {
@@ -1020,19 +1020,26 @@
 
 #pragma mark Projection matrices
 
+-(void) markProjectionDirty { _isProjectionDirty = YES; }
+
 /**
- * Template method that populates the projection matrix from the frustum.
- * Uses either orthographic or perspective projection, depending on the value
- * of the isUsingParallelProjection property.
+ * Template method that populates the projection matrix from the frustum. Uses either orthographic
+ * or perspective projection, depending on the value of the isUsingParallelProjection property.
  */
--(void) populateProjectionMatrix {
+-(void) buildProjectionMatrixIfNeeded {
+	if ( !_isProjectionDirty ) return;
+
 	if (_isUsingParallelProjection)
 		[_finiteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right andTop: _top
-											  andBottom: _bottom andNear: _near andFar: _far];
+													andBottom: _bottom andNear: _near andFar: _far];
 	else
 		[_finiteProjectionMatrix populateFromFrustumLeft: _left andRight: _right andTop: _top
-										andBottom: _bottom andNear: _near andFar: _far];
+											   andBottom: _bottom andNear: _near andFar: _far];
+	_isProjectionDirty = NO;
 	_isInfiniteProjectionDirty = YES;
+	[self markDirty];	// mark dirty as bounding volume (planes and vertices)
+	
+	LogTrace(@"%@ populated projection matrix %@", self, _finiteProjectionMatrix);
 }
 
 /**
@@ -1047,7 +1054,6 @@
  * is accessed, and is cached until it is marked dirty again.
  */
 -(CC3Matrix*) infiniteProjectionMatrix {
-	[self updateIfNeeded];		// Make sure properties are up to date
 	if (!_infiniteProjectionMatrix) {
 		_infiniteProjectionMatrix = [CC3ProjectionMatrix new];
 		_isInfiniteProjectionDirty = YES;
@@ -1070,16 +1076,13 @@
 
 #pragma mark Updating
 
-/** Make sure projection matrix is current. */
--(void) buildVolume { [self populateProjectionMatrix]; }
-
 /**
  * Builds the six planes that define the frustum volume,
  * using the modelview matrix and the finite projection matrix.
  */
 -(void) buildPlanes{
 	CC3Matrix4x4 projMtx, viewMtx, m;
-	[_finiteProjectionMatrix populateCC3Matrix4x4: &projMtx];
+	[self.finiteProjectionMatrix populateCC3Matrix4x4: &projMtx];
 	[_camera.viewMatrix populateCC3Matrix4x4: &viewMtx];
 	CC3Matrix4x4Multiply(&m, &projMtx, &viewMtx);
 	

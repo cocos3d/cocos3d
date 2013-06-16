@@ -65,20 +65,17 @@
 	[_material deriveNameFrom: self];
 }
 
-// Sets the name of the mesh if needed then, if a bounding volume exists, forces it to
-// rebuild using the new mesh data, or creates a default bounding volume from the mesh.
+// Sets the name of the mesh if needed and marks the bounding volume as dirty.
 -(void) setMesh:(CC3Mesh *) aMesh {
-	[_mesh autorelease];
+	if (aMesh == _mesh) return;
+	[_mesh release];
 	_mesh = [aMesh retain];
 	[_mesh deriveNameFrom: self];
 
 	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
 	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
 	
-	if (_boundingVolume)
-		[self markBoundingVolumeDirty];
-	else
-		self.boundingVolume = [self defaultBoundingVolume];
+	[self markBoundingVolumeDirty];
 }
 
 /** If a mesh does not yet exist, create it as a CC3Mesh with interleaved vertices. */
@@ -136,18 +133,15 @@
 // Support for deprecated CC3MeshModel class
 -(void) setMeshModel: (CC3Mesh*) aMesh { self.mesh = aMesh; }
 
-// After setting the bounding volume, forces it to build its volume from the mesh
--(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
-	[super setBoundingVolume: aBoundingVolume];
-	[self markBoundingVolumeDirty];
-}
-
--(CC3NodeBoundingVolume*) defaultBoundingVolume { return [_mesh defaultBoundingVolume]; }
-
--(CC3BoundingBox) localContentBoundingBox {
-	return _mesh
-			? CC3BoundingBoxAddUniformPadding(_mesh.boundingBox, _boundingVolumePadding)
-			: kCC3BoundingBoxNull;
+/**
+ * Returns a bounding volume that first checks against the spherical boundary, and then checks
+ * against a bounding box. The spherical boundary is fast to check, but is not as accurate as
+ * the bounding box for many meshes. The bounding box is more accurate, but is more expensive
+ * to check than the spherical boundary. The bounding box is only checked if the spherical
+ * boundary does not indicate that the mesh is outside the frustum.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume {
+	return [CC3NodeSphereThenBoxBoundingVolume boundingVolume];
 }
 
 -(BOOL) shouldCullBackFaces { return _shouldCullBackFaces; }
@@ -884,6 +878,20 @@
 
 
 #pragma mark Accessing vertex data
+
+-(CC3Vector) centerOfGeometry {
+	return _children ? super.centerOfGeometry : self.localContentCenterOfGeometry;
+}
+
+-(CC3Vector) localContentCenterOfGeometry {
+	return _mesh ? _mesh.centerOfGeometry : kCC3VectorZero;
+}
+
+-(CC3BoundingBox) localContentBoundingBox {
+	return _mesh
+			? CC3BoundingBoxAddUniformPadding(_mesh.boundingBox, _boundingVolumePadding)
+			: kCC3BoundingBoxNull;
+}
 
 -(void) moveMeshOriginTo: (CC3Vector) aLocation {
 	[_mesh moveMeshOriginTo: aLocation];

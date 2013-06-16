@@ -422,14 +422,12 @@
 }
 
 /**
- * If either the Z-order of the node of interest is greater than the Z-order
- * of the rightNode, or the Z-order is equal, and the distance from the node of interest to the camera
- * is greater than the distance from the rightNode to the camera, return YES,
- * otherwise return NO.
+ * If either the Z-order of the node of interest is greater than the Z-order of the rightNode,
+ * or the Z-order is equal, and the distance from the node of interest to the camera is greater
+ * than the distance from the rightNode to the camera, return YES, otherwise return NO.
  * 
- * Since the array is traversed from front to back, the node will have already
- * been tested against the leftNode. Nodes without a boundingVolume are added
- * to the end of the array.
+ * Since the array is traversed from front to back, the node will have already been tested
+ * against the leftNode. Nodes without a boundingVolume are added to the end of the array.
  */
 -(BOOL) shouldInsertNode: (CC3Node*) aNode
 				 between: (CC3Node*) leftNode
@@ -441,9 +439,7 @@
 	if (aNode.zOrder < rightNode.zOrder) return NO;
 
 	// Next check camera distance based on bounding volume centers.
-	CC3NodeBoundingVolume* bv = aNode.boundingVolume;
-	CC3NodeBoundingVolume* rtBV = rightNode.boundingVolume;
-	return (bv && rtBV && bv.cameraDistanceProduct >= rtBV.cameraDistanceProduct);
+	return (aNode.cameraDistanceProduct >= rightNode.cameraDistanceProduct);
 }
 
 /**
@@ -462,42 +458,38 @@
 	GLfloat prevCamDistProduct = kCC3MaxGLfloat;
 
 	for (CC3Node* aNode in _nodes) {
-		if ( !(_evaluator && [_evaluator evaluate: aNode]) ) {
+		if ( !(_evaluator && [_evaluator evaluate: aNode]) )
 			[visitor addMisplacedNode: aNode];
-		} else {
-			// Calculate the distance from the camera and cache it for insertion
-			CC3NodeBoundingVolume* bv = aNode.boundingVolume;
-			if (bv) {
-				// Get vector from node's center of geometry to camera.
-				CC3Vector node2Cam = CC3VectorDifference(bv.globalCenterOfGeometry, camGlobalLoc);
-
-                // Determine the direction in which to measure from the camera. This will either be
-                // in the direction of a straight line between the camera and the node, or will be
-                // restricted to the direction "staight-out" from the camera.
-                CC3Vector measurementDirection = _shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
-
-                // Cache the dot product of the direction vector, and the vector between the node
-				// and the camera. This is a relative measure of the distance in that direction.
-				// In the case of measuring along the line between the node and camera, it will be
-				// the square of the distance. Comparing the squares of the distance instead of the
-				// distance itself also has the benefit of avoiding expensive square-root calculations.
-				bv.cameraDistanceProduct = CC3VectorDot(node2Cam, measurementDirection);
-			}
+		else {
+			// Get vector from node's center of geometry to camera.
+			CC3Vector node2Cam = CC3VectorDifference(aNode.globalCenterOfGeometry, camGlobalLoc);
+			
+			// Determine the direction in which to measure from the camera. This will either be
+			// in the direction of a straight line between the camera and the node, or will be
+			// restricted to the direction "staight-out" from the camera.
+			CC3Vector measureDir = _shouldUseOnlyForwardDistance ? cam.forwardDirection : node2Cam;
+			
+			// Cache the dot product of the direction vector, and the vector between the node
+			// and the camera. This is a relative measure of the distance in that direction.
+			// In the case of measuring along the line between the node and camera, it will be
+			// the square of the distance. Comparing the squares of the distance instead of the
+			// distance itself also has the benefit of avoiding expensive square-root calculations.
+			GLfloat camDistProd = CC3VectorDot(node2Cam, measureDir);
+			aNode.cameraDistanceProduct = camDistProd;
 
 			// If this node is closer than the previous node in the array, update the
 			// previous Z-order and distance value. Otherwise, mark the node as misplaced.
 			// Explicit Z-order overrides actual distance.
 			if ( aNode.zOrder < prevZOrder ) {
 				prevZOrder = aNode.zOrder;
-				prevCamDistProduct = bv.cameraDistanceProduct;
-			} else if ( aNode.zOrder > prevZOrder ) {
+				prevCamDistProduct = camDistProd;
+			} else if ( aNode.zOrder > prevZOrder )
 				[visitor addMisplacedNode: aNode];
-			} else if ( bv.cameraDistanceProduct <= prevCamDistProduct ) {
+			  else if ( camDistProd <= prevCamDistProduct ) {
 				prevZOrder = aNode.zOrder;
-				prevCamDistProduct = bv.cameraDistanceProduct;
-			} else {
+				prevCamDistProduct = camDistProd;
+			} else
 				[visitor addMisplacedNode: aNode];
-			}
 		}
 	}
 }

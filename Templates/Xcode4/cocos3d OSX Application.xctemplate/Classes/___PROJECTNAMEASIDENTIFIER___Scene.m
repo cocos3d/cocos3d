@@ -68,6 +68,27 @@
 	// as each shader program is loaded as needed the first time it is needed during drawing.
 	[self selectShaderPrograms];
 	
+	// With complex scenes, the drawing of objects that are not within view of the camera will
+	// consume GPU resources unnecessarily, and potentially degrading app performance. We can
+	// avoid drawing objects that are not within view of the camera by assigning a bounding
+	// volume to each mesh node. Once assigned, the bounding volume is automatically checked
+	// to see if it intersects the camera's frustum before the mesh node is drawn. If the node's
+	// bounding volume intersects the camera frustum, the node will be drawn. If the bounding
+	// volume does not intersect the camera's frustum, the node will not be visible to the camera,
+	// and the node will not be drawn. Bounding volumes can also be used for collision detection
+	// between nodes. You can create bounding volumes automatically for most rigid (non-skinned)
+	// objects by using the createBoundingVolumes on a node. This will create bounding volumes
+	// for all decendant rigid mesh nodes of that node. Invoking the method on your scene will
+	// create bounding volumes for all rigid mesh nodes in the scene. Bounding volumes are not
+	// automatically created for skinned meshes that modify vertices using bones. Because the
+	// vertices can be moved arbitrarily by the bones, you must create and assign bounding
+	// volumes to skinned mesh nodes yourself, by determining the extent of the bounding
+	// volume you need, and creating a bounding volume that matches it. Finally, checking
+	// bounding volumes involves a small computation cost. For objects that you know will be
+	// in front of the camera at all times, you can skip creating a bounding volume for that
+	// node, letting it be drawn on each frame.
+	[self createBoundingVolumes];
+	
 	// ------------------------------------------
 	
 	// That's it! The scene is now constructed and is good to go.

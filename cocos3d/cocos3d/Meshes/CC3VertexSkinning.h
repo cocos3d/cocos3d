@@ -151,10 +151,37 @@
  * After creating a copy of the skeleton bone node assembly as well, you can use the
  * reattachBonesFrom: method to attach the skin mesh node to the new skeleton.
  *
- * When copying a CC3SkinMeshNode as part of copying a CC3SoftBodyNode instance, a copy
- * of the skeleton is also created, and the reattachBonesFrom: method is automatically
- * invoked. When copying CC3SoftBodyNode, you do not need to invoke the reattachBonesFrom:
- * method on the new CC3SkinMeshNode directly.
+ * When copying a CC3SkinMeshNode as part of copying a CC3SoftBodyNode instance, a copy of
+ * the skeleton is also created, and the reattachBonesFrom: method is automatically invoked.
+ * When copying CC3SoftBodyNode, you do not need to invoke the reattachBonesFrom: method on
+ * the new CC3SkinMeshNode directly.
+ *
+ * The use of bounding volumes with skinned meshes can be tricky, because the locations of
+ * the vertices are affected both by the location of the mesh node, as with any mesh, but
+ * alsob by the location of the bones. In addition, bone transformation is handled by the
+ * GPU, and unless the CPU is also tasked with transforming each vertex, it is difficult
+ * for the app to know the true range of the vertices.
+ *
+ * Because of this, the createBoundingVolumes method will be ignored by instances of this
+ * class, and a bounding volume will not automatically be assigned to this node, to ensure
+ * that the mesh will not be culled when it shouldn't if the automatic bounding volume is
+ * not the correct shape. This mesh will therefore be drawn for each frame, even if it is
+ * not in front of the camera (ie- inside the camera's frustum).
+ *
+ * It is left to the application to determine the best approach to managing the assignment
+ * of a bounding volume, possibly using one of the following approaches:
+ *
+ *   - You can choose to leave this node with no bounding volume, and allow it to be drawn
+ *     on each frame. This may be the easiest approach if performance is not critical.
+ *
+ *   - Or, manually create a bounding volume of the right size and shape for the movement of
+ *     the vertices from the perspective of a root bone of the skeleton. Assign the bounding
+ *     volume to the root bone by using the boundingVolume property on the root bone and,
+ *     once it has been assigned a root bone of the skeleton, use the setSkeletalBoundingVolume:
+ *     method on an ancestor node of all of the CC3SkinMeshNodes that are to use that bounding
+ *     volume, to assign that bounding volume to all of the appropriate CC3SkinMeshNodes.
+ *     A good choice to target for the invocation of this method might be the CC3SoftBodyNode
+ *     of the model, or even the CC3ResourceNode above it, if loaded from a file.
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
 	CCArray* _skinSections;
@@ -759,8 +786,11 @@
 /** CC3Node extension to support ancestors and descendants that make use of vertex skinning. */
 @interface CC3Node (Skinning)
 
-/** @deprecated The transform matrix now keeps track of whether it is a rigid transform. */
-@property(nonatomic, readonly) BOOL isSkeletonRigid;
+/**
+ * Returns the nearest structural ancestor node that is a soft-body node,
+ * or returns nil if no ancestor nodes are soft-body nodes.
+ */
+@property(nonatomic, readonly) CC3SoftBodyNode* softBodyNode;
 
 /**
  * Binds the rest pose of any skeletons contained within the descendants of this node.
@@ -813,13 +843,32 @@
 -(void) reattachBonesFrom: (CC3Node*) aNode;
 
 /**
- * Returns the nearest structural ancestor node that is a soft-body node,
- * or returns nil if no ancestor nodes are soft-body nodes.
+ * Mesh nodes whose vertices are deformable by bones are not automatically assigned a bounding
+ * volume, because the vertices are not completely under control of the mesh node, complicating
+ * the definition of the boundary. Creating bounding volumes for skinned mesh nodes is left to
+ * the application.
+ *
+ * If the bones are animated independently from the mesh node, it is possible that the bones
+ * will move the entire mesh far away from the mesh node. In this situation, it is better to
+ * have the bounding volume controlled by one of the root bones of the model, but still allow
+ * the skinned mesh nodes use this bounding volume to determine if the vertices are within
+ * the camera's field of view.
+ *
+ * To do this, manually create a bounding volume of the right size and shape for the movement
+ * of the vertices from the perspective of a root bone of the skeleton. Assign the bounding
+ * volume to the root bone by using the boundingVolume property, and once it has been assigned
+ * to the skeleton, use this method on an ancestor node of all of the skinned mesh nodes that
+ * are to use that bounding volume, to assign that bounding volume to all of the appropriate
+ * skinned mesh nodes. A good choice to target for the invocation of this method might be the
+ * CC3SoftBodyNode of the model, or even the CC3ResourceNode above it, if loaded from a file.
  */
-@property(nonatomic, readonly) CC3SoftBodyNode* softBodyNode;
+-(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume;
 
 /** Returns the aggregate scale of this node relative to its closest soft-body ancestor. */
 @property(nonatomic, readonly) CC3Vector skeletalScale;
+
+/** @deprecated The transform matrix now keeps track of whether it is a rigid transform. */
+@property(nonatomic, readonly) BOOL isSkeletonRigid;
 
 @end
 

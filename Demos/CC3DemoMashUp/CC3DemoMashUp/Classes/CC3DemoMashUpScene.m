@@ -345,6 +345,32 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self createGLBuffers];
 	[self releaseRedundantContent];
 
+	// This scene is quite complex, containing many objects. As the user moves the camera
+	// around the scene, objects move in and out of the camera's field of view. At any time,
+	// there may be a number of objects that are out of view of the camera. With such a scene
+	// layout, we can save significant GPU processing by not drawing those objects. To make
+	// that happen, we assign a bounding volume to each of the mesh nodes. Once that is done,
+	// only those objects whose bounding volumes intersect the camera frustum will be drawn.
+	// Bounding volumes can also be used for collision detection between nodes. You can see
+	// the effect of not using bounding volumes on drawing perfomance by commenting out the
+	// following line and taking note of the drop in performance for this scene. However,
+	// testing bounding volumes against the camera's frustum does take some CPU processing,
+	// and in scenes where all or most of the objects are in front of the camera at all times,
+	// using bounding volumes may actually result in slightly lower performance. By including
+	// or not including the line below, you can test both scenarios and decide which approach
+	// is best for your particular scene. Bounding volumes are not automatically created for
+	// skinned meshes, such as the runners and mallet. See the addSkinnedRunners and
+	// addSkinnedMallet methods to see how those bounding volumes are added manually.
+	[self createBoundingVolumes];
+
+	// The following line displays the bounding volumes of each node. The bounding volume of
+	// most nodes (except the globe) contains both a spherical and bounding-box bounding volume
+	// to optimize testing. For something extra cool, touch the robot arm to see the bounding
+	// volume of the particle emitter grow and shrink dynamically. Use the joystick controls
+	// to back the camera away to get the full effect. You can also turn on this property on
+	// individual nodes or node structures. See the CC3Node class notes.
+//	self.shouldDrawAllBoundingVolumes = YES;
+	
 	// Select an appropriate shader program for each mesh node in this scene now. If this step
 	// is omitted, a shader program will be selected for each mesh node the first time that mesh
 	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
@@ -352,26 +378,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self selectShaderPrograms];
 	
 	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
-	// during debugging, or to display the bounding volumes, used for collision detection and
-	// visual culling, uncomment one or more of the following lines. The first line displays
+	// during debugging, uncomment one or more of the following lines. The first line displays
 	// short descriptive text for each node (including class, node name & tag). The second line
 	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
 	// line shows the bounding boxes of all nodes, including those with local content AND
-	// structural nodes. The fourth line displays the bounding volumes of each node. Bounding
-	// volumes are used to determine when a node is within the camera frustum, and thus appears
-	// on-screen. Nodes that are not visible on screen are not rendered. Bounding volumes are
-	// also used for collision detection. The bounding volume of most nodes (except the globe)
-	// contains both a spherical and bounding-box bounding volume to optimize testing.
-	// For something extra cool, touch the robot arm to see the bounding volume of the particle
-	// emitter grow and shrink dynamically. Use the joystick controls to back the camera away to
-	// get the full effect. You can also turn on any of these properties at a more granular level
+	// structural nodes. You can also turn on any of these properties at a more granular level
 	// by using these and similar methods on individual nodes or node structures. See the CC3Node
 	// class notes. This family of properties can be particularly useful during development to
 	// track down display issues.
 //	self.shouldDrawAllDescriptors = YES;
 //	self.shouldDrawAllLocalContentWireframeBoxes = YES;
 //	self.shouldDrawAllWireframeBoxes = YES;
-//	self.shouldDrawAllBoundingVolumes = YES;
 	
 	// The full node structure of the scene is logged using the following line.
 	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
@@ -608,7 +625,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	NSString* texPath = [docDir stringByAppendingPathComponent: kGlobeTextureFile];
 	
 	// Configure the rotating globe
-	_globe = [CC3MeshNode nodeWithName: kGlobeName];		// not retained
+	_globe = [CC3SphereNode nodeWithName: kGlobeName];		// not retained
 	[_globe populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
 	_globe.texture = [CC3Texture textureFromFile: texPath];
 	_globe.location = cc3v(150.0, 200.0, -150.0);
@@ -814,7 +831,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * texture even if the skybox itself is not added.
  */
 -(void) addSkyBox {
-	CC3MeshNode* skyBox = [CC3MeshNode nodeWithName: @"SkyBox"];
+	CC3MeshNode* skyBox = [CC3SphereNode nodeWithName: @"SkyBox"];
 	[skyBox populateAsSphereWithRadius: 1600.0f andTessellation: CC3TessellationMake(24, 24)];
 	skyBox.shouldCullBackFaces = NO;
 	skyBox.texture = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
@@ -1389,22 +1406,25 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the normals to be individually re-normalized after being transformed.
 	mallet.normalScalingMethod = kCC3NormalScalingNormalize;
 
-	// The mallet can flex well outside its initial mesh bounding box.
-	// Define a fixed bounding volume that includes the full range of the mallet motion
-	// during vertex skinning. In this case, a simple way of determining this is to use the
-	// bounding box of the parent node that includes the anvils, which we can get by logging.
-	// The first two commented lines below were used during development to help determine
-	// the size of the bounding box of the parent node.
+	// Because the mallet is a skinned model, it is not automatically assigned a bounding volume,
+	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
+	// however, because the mallet is a complex model and is often out of view of the camera, we
+	// can reduce processing costs by giving it a fixed bounding volume whose size we determine
+	// at development time, and we manually set the bounding volume into the mallet. Define a
+	// fixed bounding volume that includes the full range of the mallet motion during vertex
+	// skinning. In this case, a simple way of determining this is to use the bounding box of
+	// the parent node that includes the anvils, which we can get by logging. The first two
+	// commented lines below were used during development to help determine the size of the
+	// bounding box of the parent node. Finally, we can use the mallet.shouldDrawBoundingVolume
+	// property to visually verify that the bounding volume fits to the mallet node.
 //	mallet.shouldDrawLocalContentWireframeBox = YES;
 //	LogDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
-
+	CC3BoundingBox bb = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
+	mallet.boundingVolume = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
 	mallet.shouldUseFixedBoundingVolume = YES;
-	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)mallet.boundingVolume;
-	bv.sphericalBoundingVolume.radius = 1500.0;
-	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
+//	mallet.shouldDrawBoundingVolume = YES;		// Verify visually and adjust above box accordingly
 
 	malletAndAnvils.touchEnabled = YES;		// make the mallet touchable
-	
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
 	malletAndAnvils.uniformScale = 0.15;
@@ -1439,7 +1459,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Load the first running man from the POD file.
 	CC3ResourceNode* runner = [CC3PODResourceNode nodeWithName: kRunnerName
 													  fromFile: kRunningManPODFile];
-
+	
 	// Retrieve the camera in the POD and cache it for later access. Adjust the camera
 	// frustum to values that are more useful for this demo.
 	_runnerCam = (CC3Camera*)[runner getNodeNamed: kRunnerCameraName];
@@ -1464,6 +1484,41 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	runner.rotation = cc3v(0, 90, 0);	// Rotate the entire POD resource so camera rotates as well
 	[runningTrack addChild: runner];
 
+	// Because the runner is a skinned model, it is not automatically assigned a bounding volume,
+	// and will be be drawn even if it is not in front of the camera. We can leave it like this,
+	// however, because the runner is a complex model and is often out of view of the camera,
+	// we can reduce processing costs by giving it a fixed bounding volume whose size we
+	// determine at development time, and we manually set the bounding volume into the runner:
+	//   - Start by extracting the bounding box of the rest pose of the model. Because this is
+	//     happening before the scene has been updated, it is not always safe to invoke the
+	//     boundingBox property at runtime because it can mess with node target alignment.
+	//     If this issue arises (as it does here with the POD camera target), we can log the
+	//     result at dev time and hardcode it.
+	//   - Use the bounding box to create a fixed bounding volume around the model
+	//   - Set the bounding volume into the root node of the skeleton within the model.
+	//     This is the node that you want the bounding volume to track as it moves.
+	//   - Use the shouldUseFixedBoundingVolume property to mark the bounding volume as
+	//     having a fixed size.
+	//   - Set the shouldDrawBoundingVolume property to YES to visualize the bounding volume.
+	//   - Use the setSkeletalBoundingVolume: method on the entire model to force all skinned
+	//     mesh nodes within the model to use the bounding volume being controlled by the skeleton.
+	//   - Visually check the bounding volume. If okay, go with it.
+	//   - Use CC3BoundingBoxTranslate and CC3BoundingBoxScale to modify the bounding box
+	//     extracted from the model (or just hardcode a modified bounding box) to position
+	//     and size the bounding volume around the model and verify visually.
+	LogTrace(@"Runner box: %@", NSStringFromCC3BoundingBox(runner.boundingBox));	// Extract bounding box
+	CC3BoundingBox bb = CC3BoundingBoxFromMinMax(cc3v(-76.982, 18.777, -125.259),
+												 cc3v(61.138, 268.000, 96.993));
+	bb = CC3BoundingBoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
+	bb = CC3BoundingBoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
+	CC3NodeBoundingVolume* bv = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
+	CC3Node* skeleton = [runner getNodeNamed: @"D_CharacterControl"];
+	skeleton.boundingVolume = bv;						// BV is controlled by skeleton root
+	skeleton.shouldUseFixedBoundingVolume = YES;		// Don't want the BV to change
+//	skeleton.shouldDrawBoundingVolume = YES;			// Visualize the BV
+//	[skeleton addAxesDirectionMarkers];					// Indicate the orientation
+	runner.skeletalBoundingVolume = bv;					// All skinned mesh nodes in model should use BV
+	
 	// Run, man, run!
 	// The POD node contains animation to move the skinned character through a running stride.
 	CCActionInterval* stride = [CC3Animate actionWithDuration: 2.4];
@@ -1496,7 +1551,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// environment-map texture to each, and setting the reflectivity of each mesh node.
 	CC3Material* mat;
 	GLfloat lbReflect = 1.0;	// Lower the reflectivity towards zero to show some of the runner's suit.
-
 	CC3Texture* emTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
 	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
 	[mat addTexture: emTex];
@@ -1871,7 +1925,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Mesh* boxMesh = boxModel.mesh;
 
 	// Sphere template mesh
-	CC3MeshNode* ballModel = [CC3MeshNode node];
+	CC3MeshNode* ballModel = [CC3SphereNode node];
 	[ballModel populateAsSphereWithRadius: (kPartMeshDim * 1.5) andTessellation: CC3TessellationMake(8, 7)];
 	ballModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	ballModel.textureRectangle = CGRectMake(0, 0.75, 1, 0.25);	// Top part of texture is ball texture
@@ -2318,7 +2372,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * entire scene, or some section of the scene, in order to troubleshoot the scene.
  */
 -(void) onOpen {
-	
+
 	// Add post-processing capabilities, demonstrating render-to-texture
 	// and post-rendering image processing.
 	[self addPostProcessing];

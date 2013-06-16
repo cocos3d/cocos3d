@@ -263,6 +263,18 @@
 
 
 #pragma mark -
+#pragma mark CC3SphereNode
+
+@implementation CC3SphereNode
+
+-(CC3NodeBoundingVolume*) defaultBoundingVolume {
+	return [CC3NodeSphericalBoundingVolume boundingVolume];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3ClipSpaceNode
 
 @implementation CC3ClipSpaceNode
@@ -287,7 +299,7 @@
 }
 
 /** The camera frustum has no meaning in clip-space. */
--(CC3NodeBoundingVolume*) defaultBoundingVolume { return [CC3NodeInfiniteBoundingVolume boundingVolume]; }
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
 
 
 #pragma mark Allocation and initialization

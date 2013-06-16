@@ -170,9 +170,8 @@ typedef enum {
  * CC3Nodes support the cocos2d CCAction class hierarchy. Nodes can be translated, rotated,
  * and scaled in three dimensions, or made to point towards a direction (for cameras and
  * lights), all under control of cocos2d CCActions. As with other CCActions, these actions
- * can be combined into action sequences or repeating actions, or modified with cocos2d
- * ease actions. See the class CC3TransformTo and its subclasses for actions that operate
- * on CC3Nodes.
+ * can be combined into action sequences or repeating actions, or modified with cocos2d ease
+ * actions. See the class CC3TransformTo and its subclasses for actions that operate on CC3Nodes.
  *
  * When populating your scene, you can easily create hordes of similar nodes using the copy
  * and copyWithName: methods. Those methods effect deep copies to allow each copy to be
@@ -190,6 +189,30 @@ typedef enum {
  * a parent node. Selection of nodes based on touch events is handled by CC3Scene. The
  * nodeSelected:byTouchEvent:at: callback method of your customized CC3Scene will be
  * invoked to indicate which node has been touched.
+ *
+ * With complex scenes, the drawing of objects that are not within view of the camera will
+ * consume GPU resources unnecessarily, and potentially degrading app performance. We can
+ * avoid drawing objects that are not within view of the camera by assigning a bounding
+ * volume to each mesh node. Once assigned, the bounding volume is automatically checked
+ * to see if it intersects the camera's frustum before the mesh node is drawn. If the mesh
+ * node's bounding volume intersects the camera frustum, the node will be drawn. If the
+ * bounding volume does not intersect the camera's frustum, the node will not be visible
+ * to the camera, and the node will not be drawn. Bounding volumes can also be used for
+ * collision detection between nodes.
+ *
+ * You can create bounding volumes automatically for most rigid (non-skinned) objects by
+ * invoking the createBoundingVolumes on a node. This will create bounding volumes for all
+ * decendant rigid mesh nodes of that node. Invoking the method on your scene will create
+ * bounding volumes for all rigid mesh nodes in the scene. 
+ *
+ * Bounding volumes are not automatically created for skinned meshes that modify vertices
+ * using bones. Because the vertices can be moved arbitrarily by the bones, you must create
+ * and assign bounding volumes to skinned mesh nodes yourself, by determining the extent of
+ * the bounding volume you need, and creating a bounding volume that matches it. 
+ *
+ * Checking bounding volumes involves a small computation cost. For objects that you know 
+ * will be in front of the camera at all times, you can skip creating a bounding volume for 
+ * that node, letting it be drawn on each frame.
  *
  * You can cause a wireframe box to be drawn around the node and all its descendants by
  * setting the shouldDrawWireframeBox property to YES. This can be particularly useful
@@ -217,6 +240,7 @@ typedef enum {
 	CC3Vector _scale;
 	CC3Vector _globalScale;
 	GLfloat _boundingVolumePadding;
+	GLfloat _cameraDistanceProduct;
 	BOOL _isTransformDirty : 1;
 	BOOL _isTransformInvertedDirty : 1;
 	BOOL _isGlobalRotationDirty : 1;
@@ -576,36 +600,6 @@ typedef enum {
 +(void) setDefaultScaleTolerance: (GLfloat) aTolerance DEPRECATED_ATTRIBUTE;
 
 /**
- * The bounding volume of this node. This is used by culling during drawing operations,
- * it can be used by the application to detect when two nodes intersect in space
- * (collision detection), and it can be used to determine whether a node intersects
- * a specific location, ray, or plane.
- *
- * Different shapes of boundaries are available, permitting tradeoffs between
- * accuracy and computational processing time.
- *
- * By default, nodes do not have a bounding volume. Subclasses may set a suitable
- * bounding volume.
- *
- * You can make the bounding volume of any node visible by setting the
- * shouldDrawBoundingVolume property to YES. You can use the shouldDrawAllBoundingVolumes
- * property to make the bounding volumes of this node and all its descendants visible
- * by setting the shouldDrawAllBoundingVolumes property to YES.
- */
-@property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
-
-/**
- * Padding that is added to all edges of the bounding volume, when the bounding volume or the
- * boundingBox property is determined.
- *
- * You can use this to establish a "buffer zone" around the node when creating bounding volumes
- * or when working with the boundingBox of this node.
- *
- * The initial value of this property is zero.
- */
-@property(nonatomic, assign) GLfloat boundingVolumePadding;
-
-/**
  * Returns the smallest axis-aligned bounding box that surrounds any local content
  * of this node, plus all descendants of this node.
  *
@@ -666,6 +660,27 @@ typedef enum {
  * node has children. See the notes for that property for more info.
  */
 @property(nonatomic, readonly) CC3Vector globalCenterOfGeometry;
+
+/**
+ * A measure of the distance from the camera to the global center of geometry of the node.
+ * This is used to test the Z-order of this node to determine rendering order.
+ *
+ * For nodes whose rendering order depends on distance to the camera (eg- translucent nodes),
+ * this property is set automatically when the nodes are sequenced for drawing. The application
+ * will generally make no use of this property directly.
+ *
+ * Do not use the value of this property as the true distance from the node to the camera.
+ * This measure is not the actual distance from the camera to the node, but it is related
+ * to that distance, and increases monotonically as the distance to the camera increases.
+ *
+ * Different node sequencers may measure distance differently. If the node sequencer uses
+ * the true distance from the camera to the node, this property will be set to the square
+ * of that distance to avoid making the computationally expensive and unnecessary square-root
+ * calculation. If the node sequencer compares distance in one direction only, such as only
+ * in the forwardDirection of the camera, or only the Z-axis component of the distance, the
+ * value will be somewhat different than the square of the distance.
+ */
+@property(nonatomic, assign) GLfloat cameraDistanceProduct;
 
 /**
  * The current location of this node, as projected onto the 2D viewport coordinate space.
@@ -2520,6 +2535,82 @@ typedef enum {
 -(id) transformVisitorClass;
 
 
+#pragma mark Bounding volumes
+
+/**
+ * The bounding volume of this node. This is used by culling during drawing operations, it can
+ * be used by the application to detect when two nodes intersect in space (collision detection),
+ * and it can be used to determine whether a node intersects a specific location, ray, or plane.
+ *
+ * Different shapes of boundaries are available, permitting tradeoffs between accuracy
+ * and computational processing time.
+ *
+ * By default, nodes do not have a bounding volume. You can add a bounding volume by setting
+ * this property directly, or you can invoke the createBoundingVolumes on a node to have a
+ * bounding volume created for each descendant node that requires one.
+ *
+ * You can make the bounding volume of any node visible by setting the shouldDrawBoundingVolume
+ * property to YES. You can use the shouldDrawAllBoundingVolumes property to make the bounding
+ * volumes of this node and all its descendants visible by setting the shouldDrawAllBoundingVolumes
+ * property to YES.
+ *
+ * In most cases, each node has its own bounding volume. However, when using bounding volumes
+ * with skin mesh nodes whose vertices are influenced by separate bone nodes, it sometimes makes
+ * sense to share the bounding volume between one of the primary skeleton bones and the skin
+ * mesh node, so that the bone can control the movement and shape of the bounding volume, and
+ * the skin node can use that same bounding volume to determine whether its vertices are
+ * intersecting another bounding volume, including the camera frustum.
+ *
+ * You employ this technique by assigning the bounding volume to the bone first, making it the
+ * primary node for the bounding volume, and then assigning the same bounding volume to the
+ * skin node (or maybe even more than one skin node), to allow the bounding volume to determine
+ * the camera visibility of the skin node, and to detect collisions for the skin node.
+ */
+@property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
+
+/**
+ * If this node has no bounding volume, sets the boundingVolume property to the value
+ * returned by the defaultBoundingVolume property.
+ * 
+ * This method is propagated to all descendant nodes, to create bounding volumes for all
+ * descendant nodes, as defined by the defaultBoundingVolume property of each descendant.
+ *
+ * It is safe to invoke this method more than once. Each node that creates a bounding volume
+ * will do so only if it does not already have a bounding volume.
+ */
+-(void) createBoundingVolumes;
+
+/**
+ * Deletes the bounding volume of this node and all descendant nodes, by setting 
+ * the boundingVolume property of this node and all descendant nodes to nil.
+ */
+-(void) deleteBoundingVolumes;
+
+/**
+ * Returns an allocated, initialized, autorelease instance of the bounding volume to
+ * be used by this node.
+ *
+ * This method is invoked automatically by the createBoundingVolumes method to populate
+ * the boundingVolume property.
+ *
+ * Structural nodes do not generally require a bounding volume, and this implementation
+ * simply returns nil. Subclasses with drawable content, including all mesh nodes, will
+ * override this property to provide a suitable bounding volume.
+ */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume;
+
+/**
+ * Padding that is added to all edges of the bounding volume, when the bounding volume or the
+ * boundingBox property is determined.
+ *
+ * You can use this to establish a "buffer zone" around the node when creating bounding volumes
+ * or when working with the boundingBox of this node.
+ *
+ * The initial value of this property is zero.
+ */
+@property(nonatomic, assign) GLfloat boundingVolumePadding;
+
+
 #pragma mark Drawing
 
 /**
@@ -2542,22 +2633,25 @@ typedef enum {
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Returns whether the bounding volume of this node intersects the specified camera frustum.
- * This check does not include checking children, only the local content.
+ * Returns whether the content of this node intersects the specified frustum.
  *
- * This method is invoked automatically during the drawing operations of each frame to determine
- * whether this node does not intersect the camera frustum, should be culled from the visible
- * nodes and not drawn. A return value of YES will cause the node to be drawn, a return value
- * of NO will cause the node to be culled and not drawn.
+ * This method is invoked automatically during the drawing operations of each frame to
+ * determine whether this node does not intersect the camera frustum, should be culled
+ * from the visible nodes and not drawn. A return value of YES will cause the node to
+ * be drawn, a return value of NO will cause the node to be culled and not drawn.
  *
- * Culling nodes that are not visible to the camera is an important performance enhancement. The
- * node should strive to be as accurate as possible in returning whether it intersects the camera's
- * frustum. Incorrectly returning YES will cause wasted processing within the GL engine. Incorrectly
- * returning NO will cause a node that should at least be partially visible to not be drawn.
+ * If this node has a bounding volume, returns whether the bounding volume of this node
+ * intersects the specified camera frustum, by invoking the doesIntersectBoundingVolume:
+ * method of this node.
  *
- * This implementation simply delegates to the more general doesIntersectBoundingVolume: method.
- * However, subclasses may override to take special action when testing for the specific case
- * of intersection with the camera frustum.
+ * If this node does not have a bounding volume, returns YES. Nodes without a bounding
+ * volume will always be drawn.
+ *
+ * Culling nodes that are not visible to the camera is an important performance enhancement.
+ * The node should strive to be as accurate as possible in returning whether it intersects
+ * the camera's frustum. Incorrectly returning YES will cause wasted processing within the
+ * GL engine. Incorrectly returning NO will cause a node that should at least be partially
+ * visible to not be drawn.
  */
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum;
 
@@ -3176,9 +3270,8 @@ typedef enum {
  * frustum of the camera.
  *
  * This implementation delegates to this node's boundingVolume. Nodes without a bounding
- * volume will not intersect any other bounding volume. With that design in mind, if
- * either the bounding volume of this node, or the otherBoundingVolume is nil, this
- * method returns NO
+ * volume will not intersect any other bounding volume. With that design in mind, if either
+ * the bounding volume of this node, or the otherBoundingVolume is nil, this method returns NO
  */
 -(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume;
 

@@ -2443,16 +2443,8 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 		forCount: (GLuint) vertexCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/**
- * Returns an allocated, initialized, autorelease instance of the bounding volume to
- * be used by the CC3MeshNode that wraps this mesh. This method is invoked automatically
- * by the CC3MeshNode instance when this mesh is attached to the CC3MeshNode.
- *
- * This abstract implementation always returns nil, and the node will never be considered
- * to be inside the camera frustum, or to intersect with any other bounding volume.
- * Subclasses will override to provide an appropriate and useful bounding volume instance.
- */
--(CC3NodeBoundingVolume*) defaultBoundingVolume;
+/** @deprecated No longer used. The bounding volume is now created in the same method in CC3MeshNode. */
+-(CC3NodeBoundingVolume*) defaultBoundingVolume DEPRECATED_ATTRIBUTE;
 
 /**
  * Resets the tracking of the mesh switching functionality.

@@ -86,10 +86,12 @@
  * the encapsulated 2D CCNode billboard. When reading the color and opacity properties
  * of the CC3Billboard, the value returned will be that of the 2D CCNode.
  *
- * A CC3Billboard can, and should, have a bounding volume, but the bounding volume
- * must be an instance of a subclass of CC3NodeBoundingArea, which maps the 2D boundary
- * of the 2D node into the 3D scene, and when shouldDrawAs2DOverlay is YES, handles
- * testing the 2D bounds of the 2D node against the bounds of the 2D drawing plane. 
+ * A CC3Billboard can, and should, have a bounding volume, but the bounding volume must be an
+ * instance of a subclass of CC3NodeBoundingArea, which maps the 2D boundary of the 2D node
+ * into the 3D scene, and when shouldDrawAs2DOverlay is YES, handles testing the 2D bounds of
+ * the 2D node against the bounds of the 2D drawing plane. The default bounding volume, as
+ * returned by the defaultBoundingVolume method, and created when the createBoundingVolumes
+ * method is invoked, is an instance of CC3BillboardBoundingBoxArea.
  */
 @interface CC3Billboard : CC3MeshNode {
 	CCNode* _billboard;
@@ -442,6 +444,12 @@
 +(GLfloat) deviceScaleFactor;
 
 
+#pragma mark Bounding volumes
+
+/** The bounding volume of this node must be an instance of CC3NodeBoundingArea or one of its subclasses. */
+@property(nonatomic, retain) CC3NodeBoundingArea* boundingVolume;
+
+
 #pragma mark Allocation and initialization
 
 /** Initializes this instance with the specified tag, name and 2D node to be drawn. */
@@ -564,10 +572,9 @@
 #pragma mark CC3BillboardBoundingBoxArea interface
 
 /**
- * A CC3NodeBoundingArea, used exclusively with CC3Billboards, that uses the
- * billboardBoundingRect property of the CC3Billboard as the bounding area, and checks
- * the bounding area against a given bounding box (typically from the CC3Layer), using
- * the doesIntersectBounds: method.
+ * A CC3NodeBoundingArea, used exclusively with CC3Billboards, that uses the billboardBoundingRect
+ * property of the CC3Billboard as the bounding area, and checks the bounding area against a given
+ * bounding box (typically from the CC3Layer), using the doesIntersectBounds: method.
  */
 @interface CC3BillboardBoundingBoxArea : CC3NodeBoundingArea {
 	CC3Vector _vertices[4];

@@ -1384,11 +1384,10 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 	[visitor.currentShaderProgram populateDrawScopeUniformsWithVisitor: visitor];
 	
-	if (_vertexIndices) {
+	if (_vertexIndices)
 		[_vertexIndices drawWithVisitor: visitor];
-	} else {
+	else
 		[_vertexLocations drawWithVisitor: visitor];
-	}
 }
 
 /**
@@ -1406,20 +1405,13 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 	[visitor.currentShaderProgram populateDrawScopeUniformsWithVisitor: visitor];
 
-	if (_vertexIndices) {
+	if (_vertexIndices)
 		[_vertexIndices drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
-	} else {
+	else
 		[_vertexLocations drawFrom: vertexIndex forCount: vertexCount withVisitor: visitor];
-	}
 }
 
-/**
- * Returns a bounding volume that first checks against the spherical boundary, and then checks
- * against a bounding box. The spherical boundary is fast to check, but is not as accurate as
- * the bounding box for many meshes. The bounding box is more accurate, but is more expensive
- * to check than the spherical boundary. The bounding box is only checked if the spherical
- * boundary does not indicate that the mesh is outside the frustum.
- */
+// Deprecated
 -(CC3NodeBoundingVolume*) defaultBoundingVolume { return [CC3NodeSphereThenBoxBoundingVolume boundingVolume]; }
 
 // The tag of the mesh that was most recently drawn to the GL engine.

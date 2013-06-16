@@ -1139,6 +1139,7 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	GLfloat _far;
 	BOOL _isUsingParallelProjection : 1;
 	BOOL _isInfiniteProjectionDirty : 1;
+	BOOL _isProjectionDirty : 1;
 }
 
 /**

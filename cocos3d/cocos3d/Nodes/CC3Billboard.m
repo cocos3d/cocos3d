@@ -40,15 +40,7 @@
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) drawMeshWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
-@end
-
-@interface CC3Billboard (TemplateMethods)
--(CGRect) measureBillboardBoundingRect;
--(void) align2DToCamera:(CC3Camera*) camera;
--(void) align3DToCamera:(CC3Camera*) camera;
--(void) updateBoundingMesh;
--(void) normalizeBillboardScaleToDevice;
-@property(nonatomic, readonly) BOOL hasDynamicBoundingRect;
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 @end
 
 @implementation CC3Billboard
@@ -129,11 +121,11 @@
 		
 		CGRect currRect = [self measureBillboardBoundingRect];
 		
-		if (_shouldMaximizeBillboardBoundingRect && !CGRectIsNull(_billboardBoundingRect)) {
+		if (_shouldMaximizeBillboardBoundingRect && !CGRectIsNull(_billboardBoundingRect))
 			self.billboardBoundingRect = CGRectUnion(_billboardBoundingRect, currRect);
-		} else {
+		else
 			self.billboardBoundingRect = currRect;
-		}
+		
 		LogTrace(@"%@ billboard bounding rect updated to %@", [self class], NSStringFromCGRect(_billboardBoundingRect));
 	}
 	return _billboardBoundingRect;
@@ -208,7 +200,6 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		self.boundingVolume = [CC3BillboardBoundingBoxArea boundingVolume];
 		self.color = ccWHITE;
 		self.billboard = nil;
 		_billboardBoundingRect = CGRectNull;
@@ -303,8 +294,6 @@
 	GLfloat yMax = 1.0f;
 	int vCount = 4;
 	
-	// Interleave the vertex locations, normals and tex coords
-	// Create vertex location array, allocating enough space for the stride of the full structure
 	CC3VertexLocations* locArray = [CC3VertexLocations vertexArray];
 	locArray.drawingMode = GL_TRIANGLE_STRIP;			// Location array will do the drawing as a strip
 	locArray.vertexStride = 0;							// Tightly packed locations only
@@ -456,6 +445,22 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 #pragma mark Drawing
 
+
+#pragma mark Bounding volumes
+
+-(CC3NodeBoundingArea*) boundingVolume { return (CC3NodeBoundingArea*)super.boundingVolume; }
+
+/** Verify that the bounding volume is of the right type. */
+-(void) setBoundingVolume: (CC3NodeBoundingArea*) boundingVolume {
+	CC3Assert( [boundingVolume isKindOfClass: [CC3NodeBoundingArea class]],
+			  @"%@ requires that the boundingVolume property be of type CC3NodeBoundingArea.", self);
+	super.boundingVolume = boundingVolume;
+}
+
+-(CC3NodeBoundingVolume*) defaultBoundingVolume {
+	return [CC3BillboardBoundingBoxArea boundingVolume];
+}
+
 /** Overridden to return YES only if this billboard should draw in 3D. */
 -(BOOL) hasLocalContent { return !_shouldDrawAs2DOverlay; }
 
@@ -464,7 +469,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  * transitions from being inside or outside the camera frustum.
  */
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	BOOL doesIntersect = [super doesIntersectBoundingVolume: aFrustum];
+	BOOL doesIntersect = [super doesIntersectFrustum: aFrustum];
 
 	if (_billboard && !_shouldUpdateUnseenBillboard) {
 		if (doesIntersect && _billboardIsPaused) {
@@ -485,7 +490,7 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 /**
- * During normal drawing, establish 2D drawing environment. This is done befoe
+ * During normal drawing, establish 2D drawing environment.
  * Don't configure anything if painting for node picking.
  */
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -496,8 +501,11 @@ static GLfloat deviceScaleFactor = 0.0f;
 	}
 }
 
-/** The cocos2d CCNode will supply its own shaders. */
--(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+/** The cocos2d CCNode will supply its own shaders, but still need shader during node picking. */
+-(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	if (visitor.shouldDecorateNode) return;
+	[super applyShaderProgramWithVisitor: visitor];
+}
 
 /**
  * During normal drawing, draw the cocos2d node.
@@ -511,7 +519,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 		// This is done by creating and drawing an underlying rectangle mesh that
 		// is sized the same as the 2D node.
 		[self ensureBoundingMesh];
-		LogTrace(@"%@ drawing picking rectangle mesh %@", self, _mesh);
 		[super drawMeshWithVisitor: visitor];
 	}
 }
@@ -542,14 +549,14 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 -(BOOL) doesIntersectBounds: (CGRect) bounds {
 	if (_boundingVolume) {
-		BOOL intersects = [((CC3NodeBoundingArea*)_boundingVolume) doesIntersectBounds: bounds];
+		BOOL intersects = [self.boundingVolume doesIntersectBounds: bounds];
 		LogTrace(@"%@ bounded by %@ %@ %@", self, _boundingVolume,
 					  (intersects ? @"intersects" : @"does not intersect"), NSStringFromCGRect(bounds));
 
 		// Uncomment and change name to verify culling:
 //		if (!intersects && ([self.name isEqualToString: @"MyNodeName"])) {
 //			LogDebug(@"%@ bounded by %@ does not intersect %@",
-//						  self, boundingVolume, NSStringFromCGRect(bounds));
+//						  self, _boundingVolume, NSStringFromCGRect(bounds));
 //		}
 		return intersects;
 	}
@@ -603,10 +610,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 			  andOrientationAxis: (CC3Vector) orientationAxis;
 -(void) appendPlanesTo: (NSMutableString*) desc;
 -(void) appendVerticesTo: (NSMutableString*) desc;
-@end
-
-@interface CC3BillboardBoundingBoxArea (TemplateMethods)
-@property(nonatomic, readonly) CGRect billboardBoundingRect;
 @end
 
 @implementation CC3BillboardBoundingBoxArea

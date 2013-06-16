@@ -719,13 +719,13 @@
 	GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	LogGLErrorTrace(@"glCheckFramebufferStatus(%@)", NSStringFromGLEnum(GL_FRAMEBUFFER));
 	if (fbStatus == GL_FRAMEBUFFER_COMPLETE) return YES;
-	NSString* errTxt = [NSString stringWithFormat: @"Framebuffer %u is incomplete: %@", fbID, NSStringFromGLEnum(fbStatus)];
-	LogError(@"%@", errTxt);
+	LogError(@"%@", [NSString stringWithFormat: @"Framebuffer %u is incomplete: %@", fbID, NSStringFromGLEnum(fbStatus)]);
 	CC3Assert(!GL_ERROR_ASSERTION_ENABLED,
 			   @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
-			   errTxt);
+			   [NSString stringWithFormat: @"Framebuffer %u is incomplete: %@", fbID, NSStringFromGLEnum(fbStatus)]);
 	return NO;
 }
+
 -(void) clearBuffers: (GLbitfield) mask {
 	glClear(mask);
 	LogGLErrorTrace(@"glClear(%x)", mask);

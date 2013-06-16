@@ -236,12 +236,10 @@
 }
 
 /**
- * Overridden to use an infinite bounding volume so that the shadow volume
+ * Overridden to return nil so that the shadow volume
  * will always be drawn when made visible during development.
  */
--(CC3NodeBoundingVolume*) defaultBoundingVolume {
-	return [CC3NodeInfiniteBoundingVolume boundingVolume];
-}
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
 
 /** Returns this node's parent, cast as a mesh node. */
 -(CC3MeshNode*) shadowCaster { return (CC3MeshNode*)_parent; }

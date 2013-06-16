@@ -434,7 +434,7 @@
 
 @implementation CC3NodeBoundingVolume
 
-@synthesize shouldMaximize=_shouldMaximize, cameraDistanceProduct=_cameraDistanceProduct;
+@synthesize shouldMaximize=_shouldMaximize;
 
 -(void) dealloc {
 	_node = nil;			// not retained
@@ -444,14 +444,18 @@
 -(CC3Node*) node { return _node; }
 
 -(void) setNode: (CC3Node*) node {
+	CC3Assert( !_node || !node, @"%@ may have only one primary node. If you want to change the"
+			  @" primary node, first set this property to nil, then set the new node.", self);
 	_node = node;
-	self.shouldBuildFromMesh = YES;		// Actual value will be determined by node type.
+
+	// Update whether the BV should be built from the mesh
+	self.shouldBuildFromMesh = self.shouldBuildFromMesh;
 }
 
 -(BOOL) shouldBuildFromMesh { return _shouldBuildFromMesh; }
 
 -(void) setShouldBuildFromMesh: (BOOL) shouldBuildFromMesh {
-	_shouldBuildFromMesh = shouldBuildFromMesh && [_node isKindOfClass: [CC3MeshNode class]];
+	_shouldBuildFromMesh = shouldBuildFromMesh && ( (_node == nil) || [_node isKindOfClass: [CC3MeshNode class]]);
 }
 
 -(CC3Vector*) vertices {
@@ -489,10 +493,9 @@
 -(id) init {
 	if ( (self = [super init]) ) {
 		_node = nil;
-		_shouldBuildFromMesh = NO;
+		_shouldBuildFromMesh = YES;		// Assume YES. Will be set to no if not assigned to mesh node
 		_centerOfGeometry = kCC3VectorZero;
 		_globalCenterOfGeometry = kCC3VectorZero;
-		_cameraDistanceProduct = 0.0f;
 		_shouldMaximize = NO;
 		_isTransformDirty = YES;
 		_shouldDraw = NO;
@@ -510,7 +513,6 @@
 
 	_centerOfGeometry = another.centerOfGeometry;
 	_globalCenterOfGeometry = another.globalCenterOfGeometry;
-	_cameraDistanceProduct = another.cameraDistanceProduct;
 	_shouldMaximize = another.shouldMaximize;
 	_isTransformDirty = another.isTransformDirty;
 	_shouldDraw = another.shouldDraw;
@@ -587,9 +589,7 @@
 }
 
 // Deprecated and replaced by doesIntersect:
--(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	return [self doesIntersect: aFrustum];
-}
+-(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum { return [self doesIntersect: aFrustum]; }
 
 
 #pragma mark Drawing bounding volume
@@ -884,6 +884,30 @@
 	dn.location = self.centerOfGeometry;
 }
 
+
+#pragma mark Allocation and initialization
+
+// Don't delegate to initFromSphere: because this intializer must leave _shouldBuildFromMesh alone
+-(id) init {
+	if ( (self = [super init]) ) {
+		_radius = 0.0f;
+	}
+	return self;
+}
+
+-(id) initFromSphere: (CC3Sphere) sphere {
+	if ( (self = [super init]) ) {
+		_centerOfGeometry = sphere.center;
+		_radius = sphere.radius;
+		_shouldBuildFromMesh = NO;		// We want a fixed volume
+	}
+	return self;
+}
+
++(id) boundingVolumeFromSphere: (CC3Sphere) sphere {
+	return [[[self alloc] initFromSphere: sphere] autorelease];
+}
+
 @end
 
 
@@ -933,13 +957,6 @@
 
 // Deprecated
 -(CC3Vector*) globalBoundingBoxVertices { return self.vertices; }
-
--(id) init {
-	if ( (self = [super init]) ) {
-		_boundingBox = kCC3BoundingBoxZero;
-	}
-	return self;
-}
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
@@ -1036,6 +1053,29 @@
 	[dn populateAsSolidBox: self.boundingBox];
 	[dn doNotBufferVertexContent];
 }
+
+
+#pragma mark Allocation and initialization
+
+// Don't delegate to initFromBox: because this intializer must leave _shouldBuildFromMesh alone
+-(id) init {
+	if ( (self = [super init]) ) {
+		_boundingBox = kCC3BoundingBoxZero;
+	}
+	return self;
+}
+
+-(id) initFromBox: (CC3BoundingBox) box {
+	if ( (self = [super init]) ) {
+		_centerOfGeometry = CC3BoundingBoxCenter(box);
+		_boundingBox = box;
+		_shouldBuildFromMesh = NO;		// We want a fixed volume
+	}
+	return self;
+}
+
++(id) boundingVolumeFromBox: (CC3BoundingBox) box {
+	return [[[self alloc] initFromBox: box] autorelease]; }
 
 @end
 
@@ -1227,17 +1267,27 @@
 
 -(CC3NodeBoundingBoxVolume*) boxBoundingVolume { return [_boundingVolumes objectAtIndex: 1]; }
 
-+(id) boundingVolumeWithSphere: (CC3NodeSphericalBoundingVolume*) sphereBV
-						andBox: (CC3NodeBoundingBoxVolume*) boxBV {
++(id) boundingVolume {
+	return [self boundingVolumeWithSphereVolume: [CC3NodeSphericalBoundingVolume boundingVolume]
+								   andBoxVolume: [CC3NodeBoundingBoxVolume boundingVolume]];
+}
+
++(id) boundingVolumeWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
+						andBoxVolume: (CC3NodeBoundingBoxVolume*) boxBV {
 	CC3NodeSphereThenBoxBoundingVolume* sbbv = [super boundingVolume];
 	[sbbv addBoundingVolume: sphereBV];
 	[sbbv addBoundingVolume: boxBV];
 	return sbbv;
 }
 
-+(id) boundingVolume {
-	return [self boundingVolumeWithSphere: [CC3NodeSphericalBoundingVolume boundingVolume]
-								   andBox: [CC3NodeBoundingBoxVolume boundingVolume]];
++(id) boundingVolumeFromSphere: (CC3Sphere) sphere
+						andBox: (CC3BoundingBox) box {
+	return [self boundingVolumeWithSphereVolume: [CC3NodeSphericalBoundingVolume boundingVolumeFromSphere: sphere]
+								   andBoxVolume: [CC3NodeBoundingBoxVolume boundingVolumeFromBox: box]];
+}
+
++(id) boundingVolumeCircumscribingBox: (CC3BoundingBox) box {
+	return [self boundingVolumeFromSphere: CC3SphereFromCircumscribingBox(box) andBox: box];
 }
 
 // Deprecated

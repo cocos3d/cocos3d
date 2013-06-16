@@ -175,18 +175,6 @@
  */
 @property(nonatomic, readonly) CC3NormalScaling effectiveNormalScalingMethod;
 
-/**
- * Returns an allocated, initialized, autorelease instance of the bounding volume to
- * be used by this node.
- *
- * This method is invoked automatically when the mesh property is set if no bounding
- * volume has been assigned.
- *
- * This implementation delegates to the mesh by invoking the same method on the mesh.
- * Subclasses will override to provide alternate default bounding volumes.
- */
--(CC3NodeBoundingVolume*) defaultBoundingVolume;
-
 
 #pragma mark Material coloring
 

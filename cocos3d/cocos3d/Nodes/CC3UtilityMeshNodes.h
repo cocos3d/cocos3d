@@ -144,7 +144,7 @@
  * simply to identify box meshes as such. However, in future, additional state or behaviour may
  * be added to this class.
  *
- * You can use the following convenience method to aid in constructing a CC3BoxNode instance:
+ * You can use one of the following convenience methods to aid in constructing a CC3BoxNode instance:
  *   - populateAsSolidBox:
  *   - populateAsSolidBox:withCorner:
  *   - populateAsWireBox:
@@ -228,6 +228,27 @@
  */
 @property(nonatomic, assign) BOOL shouldAlwaysMeasureParentBoundingBox;
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3SphereNode
+
+/**
+ * CC3SphereNode is a type of CC3MeshNode that is specialized to display a simple sphere mesh.
+ *
+ * Since a sphere is a mesh like any other mesh, the functionality required to create and
+ * manipulate sphere meshes is present in the CC3MeshNode class, and if you choose, you can
+ * create and manage sphere meshes using that class alone.
+ *
+ * However, when using bounding volumes, CC3SphereNode returns a spherical bounding volume
+ * from the defaultBoundingVolume method, instead of the default bounding volume for a
+ * standard mesh node. This provides a better fit of the bounding volume around the mesh.
+ *
+ * You can use the following convenience method to aid in constructing a CC3SphereNode instance:
+ *   - populateAsSphereWithRadius:andTessellation:
+ */
+@interface CC3SphereNode : CC3MeshNode
 @end
 
 

@@ -120,7 +120,7 @@
 // After populating, set spherical bounding volume
 -(void) populateAsSphereWithRadius: (GLfloat) radius andTessellation: (CC3Tessellation) divsPerAxis {
 	[[self prepareParametricMesh] populateAsSphereWithRadius: radius andTessellation: divsPerAxis];
-	self.boundingVolume = [CC3NodeSphericalBoundingVolume boundingVolume];
+//	self.boundingVolume = [CC3NodeSphericalBoundingVolume boundingVolume];
 }
 
 

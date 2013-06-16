@@ -512,8 +512,10 @@
 	CC3Camera* cam = self.camera;
 	[cam closeWithVisitor: self];
 	
-	// If rendering off-screen, reset the camera viewport back to the layer bounds
-	if (self.renderSurface.isOffScreen) cam.viewport = _onScreenViewport;
+	// If rendering off-screen, and a previous layer viewport was set,
+	// reset the camera viewport back to the layer bounds
+	if ( self.renderSurface.isOffScreen && !CC3ViewportIsZero(_onScreenViewport) )
+		cam.viewport = _onScreenViewport;
 }
 
 -(void) draw: (CC3Node*) aNode {

@@ -202,6 +202,15 @@
 
 #pragma mark Drawing
 
+/** Overridden to skip auto-creating a bounding volume. */
+-(void) createBoundingVolume {}
+
+/** Use this bounding volume, then pass along to my descendants. */
+-(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume {
+	self.boundingVolume = boundingVolume;
+	super.skeletalBoundingVolume = boundingVolume;
+}
+
 /**
  * Overridden to skip the manipulation of the modelview matrix stack.
  *
@@ -217,7 +226,6 @@
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"Drawing %@", self);
 	[visitor populateModelMatrixFrom: nil];
-//	[visitor populateModelMatrixFrom: transformMatrix];
 	[visitor draw: self];
 }
 
@@ -799,6 +807,10 @@
 -(void) cacheRestPoseMatrix {}
 
 -(CC3SoftBodyNode*) softBodyNode { return _parent.softBodyNode; }
+
+-(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume {
+	for (CC3Node* child in _children) child.skeletalBoundingVolume = boundingVolume;
+}
 
 @end
 

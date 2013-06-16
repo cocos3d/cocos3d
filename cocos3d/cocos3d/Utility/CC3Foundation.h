@@ -1179,7 +1179,7 @@ static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, CC3Vect
 }
 
 /**
- * Returns a bounding box that has the same dimensions as the specified bounding box, but with
+ * Returns a box that has the same dimensions as the specified  box, but with
  * each corner expanded outward by the specified amount of padding.
  *
  * The padding value is added to all three components of the maximum vector, and subtracted
@@ -1187,6 +1187,34 @@ static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, CC3Vect
  */
 static inline CC3BoundingBox CC3BoundingBoxAddUniformPadding(CC3BoundingBox bb, GLfloat padding) {
 	return (padding != 0.0f) ? CC3BoundingBoxAddPadding(bb, cc3v(padding, padding, padding)) : bb;
+}
+
+/** Returns a box constructed by translating the specified box by the specified translation offset. */
+static inline CC3BoundingBox CC3BoundingBoxTranslate(CC3BoundingBox bb, CC3Vector offset) {
+	CC3BoundingBox bbXltd;
+	bbXltd.maximum = CC3VectorAdd(bb.maximum, offset);
+	bbXltd.minimum = CC3VectorAdd(bb.minimum, offset);
+	return bbXltd;
+}
+
+/**
+ * Returns a box constructed by translating the specified box by a translation that is a
+ * fraction of the box size, as determined by the specified offsetScale. For example, a
+ * value of -0.2 in the X-component of the offsetScale, will move the box 20% of its
+ * dimension in the X-axis, in the direction of the negative X-axis.
+ */
+static inline CC3BoundingBox CC3BoundingBoxTranslateFractionally(CC3BoundingBox bb,
+																 CC3Vector offsetScale) {
+	return CC3BoundingBoxTranslate(bb, CC3VectorScale(CC3BoundingBoxSize(bb), offsetScale));
+}
+
+/**
+ * Returns a bounding box of the same size as the specified bounding box, and whose center
+ * lies at the origin of the coordinate system. This effectivly moves the bounding box so
+ * that its center is at the origin.
+ */
+static inline CC3BoundingBox CC3BoundingBoxMoveCenterToOrigin(CC3BoundingBox bb) {
+	return CC3BoundingBoxTranslate(bb, CC3VectorNegate(CC3BoundingBoxCenter(bb)));
 }
 
 /**
@@ -1670,6 +1698,13 @@ static inline CC3Sphere CC3SphereMake(CC3Vector center, GLfloat radius) {
 	return s;
 }
 
+/** Returns a CC3Spere that circumscribes the specified box. */
+static inline CC3Sphere CC3SphereFromCircumscribingBox(CC3BoundingBox box) {
+	CC3Vector center = CC3BoundingBoxCenter(box);
+	GLfloat radius = CC3VectorDistance(box.maximum, center);
+	return CC3SphereMake(center, radius);
+}
+
 /** Returns whether the specified location lies within the specified sphere. */
 static inline BOOL CC3IsLocationWithinSphere(CC3Vector aLocation, CC3Sphere aSphere) {
 	// Compare the squares of the distances to avoid taking an expensive square root. 
@@ -1797,6 +1832,9 @@ typedef struct {
 	GLsizei h;				/**< The height of the viewport. */
 } CC3Viewport;
 
+/** An empty or undefined viewport. */
+static const CC3Viewport kCC3ViewportZero = { 0, 0, 0, 0 };
+
 /** Returns a string description of the specified CC3Viewport struct in the form "(x, y, w, h)" */
 static inline NSString* NSStringFromCC3Viewport(CC3Viewport vp) {
 	return [NSString stringWithFormat: @"(%i, %i, %i, %i)", vp.x, vp.y, vp.w, vp.h];
@@ -1820,6 +1858,11 @@ static inline CC3Viewport CC3ViewportFromOriginAndSize(CC3IntPoint origin, CC3In
 /** Returns whether the two viewports are equal by comparing their respective components. */
 static inline BOOL CC3ViewportsAreEqual(CC3Viewport vp1, CC3Viewport vp2) {
 	return (vp1.x == vp2.x) && (vp1.y == vp2.y) && (vp1.w == vp2.w) && (vp1.h == vp2.h);
+}
+
+/** Returns whether the specified viewport is equal to the zero viewport, specified by kCC3ViewportZero. */
+static inline BOOL CC3ViewportIsZero(CC3Viewport vp) {
+	return CC3ViewportsAreEqual(vp, kCC3ViewportZero);
 }
 
 /**

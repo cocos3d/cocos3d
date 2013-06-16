@@ -62,6 +62,7 @@
 @synthesize shouldUseFixedBoundingVolume=_shouldUseFixedBoundingVolume;
 @synthesize shouldStopActionsWhenRemoved=_shouldStopActionsWhenRemoved;
 @synthesize isTransformDirty=_isTransformDirty, isRunning=_isRunning;
+@synthesize cameraDistanceProduct=_cameraDistanceProduct;
 
 -(void) dealloc {
 	self.target = nil;							// Removes myself as listener
@@ -209,14 +210,6 @@
 +(GLfloat) defaultScaleTolerance { return 0.0f; }
 +(void) setDefaultScaleTolerance: (GLfloat) aTolerance {}
 
--(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
-	CC3NodeBoundingVolume* oldBV = _boundingVolume;
-	_boundingVolume = [aBoundingVolume retain];
-	_boundingVolume.shouldIgnoreRayIntersection = oldBV.shouldIgnoreRayIntersection;
-	[oldBV release];
-	_boundingVolume.node = self;
-}
-
 // Derived from projected location, but only if in front of the camera
 -(CGPoint) projectedPosition {
 	return (_projectedLocation.z > 0.0)
@@ -249,12 +242,12 @@
 
 /** Set the new target and notify that I am now tracking a target. */
 -(void) setTarget: (CC3Node*) aNode {
-	if (aNode != self.target) {
-		[self.target removeTransformListener: self];
-		self.targettingRotator.target = aNode;
-		[self.target addTransformListener: self];
-		[self didSetTargetInDescendant: self];
-	}
+	if (aNode == self.target) return;
+
+	[self.target removeTransformListener: self];
+	self.targettingRotator.target = aNode;
+	[self.target addTransformListener: self];
+	[self didSetTargetInDescendant: self];
 }
 
 -(BOOL) hasTarget { return (self.target != nil); }
@@ -915,6 +908,7 @@
 		_projectedLocation = kCC3VectorZero;
 		_scale = kCC3VectorUnitCube;
 		_globalScale = kCC3VectorUnitCube;
+		_cameraDistanceProduct = 0.0f;
 		_isTransformDirty = YES;			// Force transform notification on first update
 		_touchEnabled = NO;
 		_shouldInheritTouchability = YES;
@@ -981,7 +975,7 @@
 	_rotator = [another.rotator copy];						// retained
 	
 	[_boundingVolume release];
-	_boundingVolume = [another.boundingVolume copy];			// retained
+	_boundingVolume = [another.boundingVolume copy];		// retained
 	_boundingVolume.node = self;
 	_boundingVolumePadding = another.boundingVolumePadding;
 	_shouldUseFixedBoundingVolume = another.shouldUseFixedBoundingVolume;
@@ -1001,6 +995,7 @@
 	_shouldAutoremoveWhenEmpty = another.shouldAutoremoveWhenEmpty;
 	_cascadeColorEnabled = another.isCascadeColorEnabled;
 	_cascadeOpacityEnabled = another.isCascadeOpacityEnabled;
+	_cameraDistanceProduct = another.cameraDistanceProduct;
 	
 	self.shouldDrawDescriptor = another.shouldDrawDescriptor;		// May create a child node
 	self.shouldDrawWireframeBox = another.shouldDrawWireframeBox;	// May create a child node
@@ -1226,11 +1221,10 @@ static GLuint lastAssignedNodeTag;
 /** Check if target location needs to be updated from target, and do so if needed. */
 -(void) updateTargetLocation {
 	if (self.shouldUpdateToTarget) {
-		if (self.isTrackingForBumpMapping) {
+		if (self.isTrackingForBumpMapping)
 			self.globalLightPosition = self.target.globalHomogeneousPosition;
-		} else {
+		else
 			self.targetLocation = self.target.globalLocation;
-		}
 	}
 }
 
@@ -1324,11 +1318,10 @@ static GLuint lastAssignedNodeTag;
 
 /** Template method to update the rotator transform from the targetLocation. */
 -(void) applyTargetLocation {
-	if (self.isTargettingConstraintLocal) {
+	if (self.isTargettingConstraintLocal)
 		[self applyTargetLocationAsLocal];
-	} else {
+	else
 		[self applyTargetLocationAsGlobal];
-	}
 }
 
 /**
@@ -1544,6 +1537,41 @@ static GLuint lastAssignedNodeTag;
 	return _globalRotationMatrix;
 }
 
+
+#pragma mark Bounding volumes
+
+-(void) setBoundingVolume:(CC3NodeBoundingVolume *) aBoundingVolume {
+	if (aBoundingVolume == _boundingVolume) return;
+	
+	aBoundingVolume.shouldIgnoreRayIntersection = _boundingVolume.shouldIgnoreRayIntersection;
+	[_boundingVolume release];
+	_boundingVolume = [aBoundingVolume retain];
+	
+	// If the bounding volume has not been assigned to a node yet, this node will be the primary
+	// node of the bounding volume. Otherwise, this node is a secondary node, is tracking the
+	// bounding volume, but should not influence the bounding volume characteristics.
+	if ( !_boundingVolume.node ) {
+		_boundingVolume.node = self;
+		[self markBoundingVolumeDirty];
+	} else
+		_shouldUseFixedBoundingVolume = YES;
+
+}
+
+-(void) createBoundingVolumes {
+	if ( !_boundingVolume ) [self createBoundingVolume];
+	for (CC3Node* child in _children) [child createBoundingVolumes];
+}
+
+-(void) createBoundingVolume { self.boundingVolume = [self defaultBoundingVolume]; }
+
+-(void) deleteBoundingVolumes {
+	self.boundingVolume = nil;
+	for (CC3Node* child in _children) [child deleteBoundingVolumes];
+}
+
+-(CC3NodeBoundingVolume*) defaultBoundingVolume { return nil; }
+
 /**
  * Template method that marks the bounding volume as needing a transform.
  * The bounding volume will be lazily updated next time it is accessed.
@@ -1555,12 +1583,17 @@ static GLuint lastAssignedNodeTag;
 // Deprecated method
 -(void) rebuildBoundingVolume { [self markBoundingVolumeDirty]; }
 
+-(BOOL) shouldDrawBoundingVolume { return _boundingVolume ? _boundingVolume.shouldDraw : NO; }
+
+-(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw { _boundingVolume.shouldDraw = shouldDraw; }
+
 
 #pragma mark Drawing
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
+	if ( !_boundingVolume ) return YES;
 	return [self doesIntersectBoundingVolume: aFrustum];
 }
 
@@ -2428,12 +2461,6 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 +(void) setDirectionMarkerColor: (ccColor4F) aColor { directionMarkerColor = aColor; }
 
 -(BOOL) shouldContributeToParentBoundingBox { return NO; }
-
--(BOOL) shouldDrawBoundingVolume {
-	return _boundingVolume ? _boundingVolume.shouldDraw : NO;
-}
-
--(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw { _boundingVolume.shouldDraw = shouldDraw; }
 
 -(BOOL) shouldDrawAllBoundingVolumes {
 	if (self.shouldDrawBoundingVolume) return YES;

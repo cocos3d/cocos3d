@@ -401,12 +401,23 @@
  * For meshes, the center of geometry is calculated from the vertex locations, via specialized
  * subclasses of CC3NodeBoundingVolume. For other nodes, it can be set directly within the
  * bounding volume via the centerOfGeometry property.
+ *
+ * In most cases, each node has its own bounding volume. However, when using bounding volumes
+ * with skin mesh nodes whose vertices are influenced by separate bone nodes, it often makes
+ * sense to share the bounding volume between one of the primary skeleton bones and the skin
+ * mesh nodes, so that the bone can control the movement and shape of the bounding volume,
+ * and the skin node can use that same bounding volume to determine whether its vertices are
+ * intersecting another bounding volume, including the camera frustum.
+ *
+ * You employ this technique by assigning the bounding volume to the bone first, using the
+ * boundingVolume property of the skeleton bone node, and then assigning the same bounding
+ * volume to all skin nodes affected by that skeleton, using the setSkeletalBoundingVolume:
+ * method on a common ancestor node of all the affected skin mesh nodes.
  */
 @interface CC3NodeBoundingVolume : CC3BoundingVolume {
 	CC3Node* _node;
 	CC3Vector _centerOfGeometry;
 	CC3Vector _globalCenterOfGeometry;
-	GLfloat _cameraDistanceProduct;
 	BOOL _shouldBuildFromMesh : 1;
 	BOOL _shouldMaximize : 1;
 	BOOL _isTransformDirty : 1;
@@ -422,7 +433,9 @@
  *
  * The node must be a CC3MeshNode for this property to be set to YES.
  *
- * The initial value of this property is YES if the node is a type of CC3MeshNode, and is NO otherwise.
+ * The initial value of this property will be NO if this bounding volume was created with
+ * specific dimensions, or if the node is not a type of CC3MeshNode. Otherwise, the initial
+ * value of this property will be YES.
  */
 @property(nonatomic, assign) BOOL shouldBuildFromMesh;
 
@@ -452,26 +465,6 @@
  * This is updated automatically by the transformVolume method of this bounding volume.
  */
 @property(nonatomic, readonly) CC3Vector globalCenterOfGeometry;
-
-/**
- * A measure of the distance from the camera to the centre of geometry of the node.
- * This is used to test the Z-order of this node to determine rendering order.
- *
- * For nodes whose rendering order depends on distance to the camera (translucent nodes),
- * this property is set automatically once the global location of the node and the camera
- * are determined. The application will generally make no use of this property.
- *
- * Do not use the value of this property as the true distance from the node to the camera.
- * This measure is not the actual distance from the camera to the node, but it is related
- * to that distance.
- *
- * Different node sequencers may measure distance differently. If the node sequencer uses
- * the true distance from the camera to the node, this property will be set to the square
- * of that distance to avoid making the computationally expensive and unnecessary square-root
- * calculation. In addition, some node sequencers may compare distance in one direction only,
- * such as only in the forwardDirection of the camera, or only the Z-axis component of the distance.
- */
-@property(nonatomic, assign) GLfloat cameraDistanceProduct;
 
 /**
  * If the value of this property is set to YES, the boundary of this volume will only
@@ -681,10 +674,9 @@
 #pragma mark CC3NodeSphericalBoundingVolume interface
 
 /**
- * A bounding volume that forms a sphere around a single point. When applied to a node, 
- * the center of the sphere is the node's center of geometry, and this class indicates
- * that the node intersects another bounding volume if any part of the sphere intersects
- * that bounding volume.
+ * A bounding volume that forms a sphere around a single point. When applied to a node, the
+ * center of the sphere is the node's center of geometry, and this class indicates that the node
+ * intersects another bounding volume if any part of the sphere intersects that bounding volume.
  *
  * The radius of the sphere must cover the node, and is scaled automatically to match
  * the globalScale of the node. For meshes, the center of geometry and local radius are
@@ -803,6 +795,21 @@
 						   planes: (CC3Plane*) otherPlanes
 							 from: (CC3BoundingVolume*) otherBoundingVolume;
 
+
+#pragma mark Allocation and initialization
+
+/** 
+ * Initializes this instance from the specified sphere,
+ * and sets the shouldBuildFromMesh property to NO.
+ */
+-(id) initFromSphere: (CC3Sphere) sphere;
+
+/** 
+ * Allocates and initializes an autoreleased instance from the specified sphere,
+ * and sets the shouldBuildFromMesh property to NO.
+ */
++(id) boundingVolumeFromSphere: (CC3Sphere) sphere;
+
 @end
 
 
@@ -859,6 +866,21 @@
 
 /** @deprecated Use the superclass vertices property instead. */
 @property(nonatomic, readonly) CC3Vector* globalBoundingBoxVertices DEPRECATED_ATTRIBUTE;
+
+
+#pragma mark Allocation and initialization
+
+/** 
+ * Initializes this instance from the specified bounding box,
+ * and sets the shouldBuildFromMesh property to NO.
+ */
+-(id) initFromBox: (CC3BoundingBox) box;
+
+/** 
+ * Allocates and initializes an autoreleased instance from the specified bounding box,
+ * and sets the shouldBuildFromMesh property to NO.
+ */
++(id) boundingVolumeFromBox: (CC3BoundingBox) box;
 
 @end
 
@@ -1042,8 +1064,22 @@
 +(id) boundingVolume;
 
 /** Allocates and returns an autoreleased instance containing the specified bounding volumes. */
-+(id) boundingVolumeWithSphere: (CC3NodeSphericalBoundingVolume*) sphereBV
-						andBox: (CC3NodeBoundingBoxVolume*) boxBV;
++(id) boundingVolumeWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
+						andBoxVolume: (CC3NodeBoundingBoxVolume*) boxBV;
+
+/** 
+ * Allocates and returns an autoreleased instance containing spherical and box bounding
+ * volumes created from the specified sphere and box, respectively.
+ */
++(id) boundingVolumeFromSphere: (CC3Sphere) sphere
+						andBox: (CC3BoundingBox) box;
+
+/**
+ * Allocates and returns an autoreleased instance containing spherical and box bounding
+ * volumes created from the specified box. The spherical bounding volume is created by
+ * circumscribine the box.
+ */
++(id) boundingVolumeCircumscribingBox: (CC3BoundingBox) box;
 
 /**@deprecated Use boundingVolume instead. */
 +(id) vertexLocationsSphereandBoxBoundingVolume DEPRECATED_ATTRIBUTE;
