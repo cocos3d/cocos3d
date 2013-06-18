@@ -326,7 +326,7 @@
  *
  * Thanks to cocos3d user andyman for contributing the prototype code and texture template file for this method.
  */
--(void) populateAsSolidBox: (CC3BoundingBox) box;
+-(void) populateAsSolidBox: (CC3Box) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified bounding box, which
@@ -365,7 +365,7 @@
  *
  * Thanks to cocos3d user andyman for contributing the prototype code and texture template file for this method.
  */
--(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box;
+-(void) populateAsCubeMappedSolidBox: (CC3Box) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified bounding box, which
@@ -416,7 +416,7 @@
  *
  * Thanks to cocos3d user andyman for contributing the prototype code and texture template file for this method.
  */
--(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner;
+-(void) populateAsSolidBox: (CC3Box) box withCorner: (CGPoint) corner;
 
 /**
  * Populates this instance as a wire-frame box with the specified dimensions.
@@ -429,7 +429,7 @@
  *
  * This is a convenience method for creating a simple, but useful, shape.
  */
--(void) populateAsWireBox: (CC3BoundingBox) box;
+-(void) populateAsWireBox: (CC3Box) box;
 
 
 #pragma mark Populating parametric sphere

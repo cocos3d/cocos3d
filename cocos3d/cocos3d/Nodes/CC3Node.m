@@ -565,27 +565,27 @@
 
 // Creates a specialized transforming visitor that traverses the node hierarchy below
 // this node, accumulating a bounding box that surrounds all descendant nodes.
--(CC3BoundingBox) boundingBox {
-	if ( !_children ) return kCC3BoundingBoxNull;	// Short-circuit if no children
+-(CC3Box) boundingBox {
+	if ( !_children ) return kCC3BoxNull;	// Short-circuit if no children
 	CC3NodeBoundingBoxVisitor* bbVisitor = [CC3NodeBoundingBoxVisitor visitor];
 	bbVisitor.shouldLocalizeToStartingNode = YES;
 	[bbVisitor visit: self];
-	LogTrace(@"Measured %@ bounding box: %@", self, NSStringFromCC3BoundingBox(bbVisitor.boundingBox));
+	LogTrace(@"Measured %@ bounding box: %@", self, NSStringFromCC3Box(bbVisitor.boundingBox));
 	return bbVisitor.boundingBox;
 }
 
 // Creates a specialized transforming visitor that traverses the node hierarchy below
 // this node, accumulating a bounding box that surrounds all descendant nodes.
--(CC3BoundingBox) globalBoundingBox {
+-(CC3Box) globalBoundingBox {
 	CC3NodeBoundingBoxVisitor* bbVisitor = [CC3NodeBoundingBoxVisitor visitor];
 	[bbVisitor visit: self];
-	LogTrace(@"Measured %@ global bounding box: %@", self, NSStringFromCC3BoundingBox(bbVisitor.boundingBox));
+	LogTrace(@"Measured %@ global bounding box: %@", self, NSStringFromCC3Box(bbVisitor.boundingBox));
 	return bbVisitor.boundingBox;
 }
 
 -(CC3Vector) centerOfGeometry {
-	CC3BoundingBox bb = self.boundingBox;
-	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
+	CC3Box bb = self.boundingBox;
+	return CC3BoxIsNull(bb) ? kCC3VectorZero : CC3BoxCenter(bb);
 }
 
 -(CC3Vector) globalCenterOfGeometry {
@@ -2346,8 +2346,8 @@ static CGFloat descriptorFontSize = 8.0;
 	// this node on each update pass to allow the wireframe to grow and shrink
 	// along with the bounding box of this node and its descendants
 	if(!wf && shouldDraw) {
-		CC3BoundingBox bb = self.boundingBox;
-		if ( !CC3BoundingBoxIsNull(bb) ) {
+		CC3Box bb = self.boundingBox;
+		if ( !CC3BoxIsNull(bb) ) {
 			wf = [CC3WireframeBoundingBoxNode nodeWithName: [self wireframeBoxName]];
 			[wf populateAsWireBox: bb];
 			wf.pureColor = self.initialWireframeBoxColor;
@@ -2513,27 +2513,27 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 }
 
 // Overridden to return the localContentBoundingBox if no children.
--(CC3BoundingBox) boundingBox { return _children ? super.boundingBox : self.localContentBoundingBox; }
+-(CC3Box) boundingBox { return _children ? super.boundingBox : self.localContentBoundingBox; }
 
--(CC3BoundingBox) localContentBoundingBox { return kCC3BoundingBoxNull; }
+-(CC3Box) localContentBoundingBox { return kCC3BoxNull; }
 
 -(CC3Vector) localContentCenterOfGeometry {
-	CC3BoundingBox bb = self.localContentBoundingBox;
-	return CC3BoundingBoxIsNull(bb) ? kCC3VectorZero : CC3BoundingBoxCenter(bb);
+	CC3Box bb = self.localContentBoundingBox;
+	return CC3BoxIsNull(bb) ? kCC3VectorZero : CC3BoxCenter(bb);
 }
 
 -(CC3Vector) globalLocalContentCenterOfGeometry {
 	return [_transformMatrix transformLocation: self.localContentCenterOfGeometry];
 }
 
--(CC3BoundingBox) globalLocalContentBoundingBox {
+-(CC3Box) globalLocalContentBoundingBox {
 	
 	// If the global bounding box is null, rebuild it, otherwise return it.
-	if (CC3BoundingBoxIsNull(_globalLocalContentBoundingBox)) {
+	if (CC3BoxIsNull(_globalLocalContentBoundingBox)) {
 		
 		// Get the mesh bounding box (in local coords). If it's null, return null.
-		CC3BoundingBox mbb = self.localContentBoundingBox;
-		if (CC3BoundingBoxIsNull(mbb)) return kCC3BoundingBoxNull;
+		CC3Box mbb = self.localContentBoundingBox;
+		if (CC3BoxIsNull(mbb)) return kCC3BoxNull;
 		
 		// The eight vertices of the transformed mesh bounding box
 		CC3Vector gbbVertices[8];
@@ -2556,11 +2556,11 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 		
 		// Construct the global mesh bounding box that surrounds the eight global vertices
 		for (int i = 0; i < 8; i++)
-			_globalLocalContentBoundingBox = CC3BoundingBoxEngulfLocation(_globalLocalContentBoundingBox, gbbVertices[i]);
+			_globalLocalContentBoundingBox = CC3BoxEngulfLocation(_globalLocalContentBoundingBox, gbbVertices[i]);
 
 		LogTrace(@"%@ transformed local content bounding box: %@ to global %@ using: %@",
-				 self, NSStringFromCC3BoundingBox(mbb),
-				 NSStringFromCC3BoundingBox(_globalLocalContentBoundingBox), tMtx);
+				 self, NSStringFromCC3Box(mbb),
+				 NSStringFromCC3Box(_globalLocalContentBoundingBox), tMtx);
 	}
 	return _globalLocalContentBoundingBox;
 }
@@ -2576,7 +2576,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_globalLocalContentBoundingBox = kCC3BoundingBoxNull;
+		_globalLocalContentBoundingBox = kCC3BoxNull;
 		_zOrder = 0;
 	}
 	return self;
@@ -2585,7 +2585,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // The globalLocalContentBoundingBox is left uncopied so that it will start at
-// kCC3BoundingBoxNull and be lazily created on next access.
+// kCC3BoxNull and be lazily created on next access.
 -(void) populateFrom: (CC3LocalContentNode*) another {
 	[super populateFrom: another];
 
@@ -2601,7 +2601,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 /** Overridden to force a lazy recalculation of the globalLocalContentBoundingBox. */
 -(void) transformMatrixChanged {
 	[super transformMatrixChanged];
-	_globalLocalContentBoundingBox = kCC3BoundingBoxNull;
+	_globalLocalContentBoundingBox = kCC3BoxNull;
 }
 
 
@@ -2645,8 +2645,8 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 	// normally change shape, the bounding box is NOT set to update its vertices
 	// by default from the bounding box of this node on each update pass.
 	if(!wf && shouldDraw) {
-		CC3BoundingBox mbb = self.localContentBoundingBox;
-		if ( !CC3BoundingBoxIsNull(mbb) ) {
+		CC3Box mbb = self.localContentBoundingBox;
+		if ( !CC3BoxIsNull(mbb) ) {
 			wf = [CC3WireframeLocalContentBoundingBoxNode nodeWithName: [self localContentWireframeBoxName]];
 			[wf populateAsWireBox: mbb];
 			wf.pureColor = self.initialLocalContentWireframeBoxColor;

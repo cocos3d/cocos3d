@@ -865,7 +865,7 @@
 
 -(CC3Vector) locationOfRayIntesection: (CC3Ray) localRay {
 	if (_shouldIgnoreRayIntersection) return kCC3VectorNull;
-	return CC3RayIntersectionOfSphere(localRay, self.sphere);
+	return CC3RayIntersectionWithSphere(localRay, self.sphere);
 }
 
 
@@ -912,9 +912,9 @@
 
 
 #pragma mark -
-#pragma mark CC3NodeBoundingBoxVolume implementation
+#pragma mark CC3NodeBoxBoundingVolume implementation
 
-@implementation CC3NodeBoundingBoxVolume
+@implementation CC3NodeBoxBoundingVolume
 
 /**
  * If building from the mesh, finds the bounding box that currently encompasses all the vertices.
@@ -925,17 +925,17 @@
 -(void) buildVolume {
 	if ( !_shouldBuildFromMesh ) return;
 
-	CC3BoundingBox newBB = ((CC3MeshNode*)self.node).localContentBoundingBox;	// Includes possible padding
-	_boundingBox = _shouldMaximize ? CC3BoundingBoxUnion(newBB, _boundingBox) : newBB;
-	_centerOfGeometry = CC3BoundingBoxCenter(_boundingBox);
+	CC3Box newBB = ((CC3MeshNode*)self.node).localContentBoundingBox;	// Includes possible padding
+	_boundingBox = _shouldMaximize ? CC3BoxUnion(newBB, _boundingBox) : newBB;
+	_centerOfGeometry = CC3BoxCenter(_boundingBox);
 }
 
--(CC3BoundingBox) boundingBox {
+-(CC3Box) boundingBox {
 	[self updateIfNeeded];
 	return _boundingBox;
 }
 
--(void) setBoundingBox: (CC3BoundingBox) aBoundingBox {
+-(void) setBoundingBox: (CC3Box) aBoundingBox {
 	_boundingBox = aBoundingBox;
 	_isDirty = NO;
 	[self markTransformDirty];
@@ -960,7 +960,7 @@
 
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
--(void) populateFrom: (CC3NodeBoundingBoxVolume*) another {
+-(void) populateFrom: (CC3NodeBoxBoundingVolume*) another {
 	[super populateFrom: another];
 
 	_boundingBox = another.boundingBox;
@@ -1025,7 +1025,7 @@
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 200];
 	[desc appendFormat: @"%@", self.description];
-	[desc appendFormat: @" with bounding box: %@", NSStringFromCC3BoundingBox(self.boundingBox)];
+	[desc appendFormat: @" with bounding box: %@", NSStringFromCC3Box(self.boundingBox)];
 	[self appendPlanesTo: desc];
 	[self appendVerticesTo: desc];
 	return desc;
@@ -1036,7 +1036,7 @@
 
 -(CC3Vector) locationOfRayIntesection: (CC3Ray) localRay {
 	if (_shouldIgnoreRayIntersection) return kCC3VectorNull;
-	return CC3RayIntersectionOfBoundingBox(localRay, self.boundingBox);
+	return CC3RayIntersectionWithBox(localRay, self.boundingBox);
 }
 
 
@@ -1060,23 +1060,27 @@
 // Don't delegate to initFromBox: because this intializer must leave _shouldBuildFromMesh alone
 -(id) init {
 	if ( (self = [super init]) ) {
-		_boundingBox = kCC3BoundingBoxZero;
+		_boundingBox = kCC3BoxZero;
 	}
 	return self;
 }
 
--(id) initFromBox: (CC3BoundingBox) box {
+-(id) initFromBox: (CC3Box) box {
 	if ( (self = [super init]) ) {
-		_centerOfGeometry = CC3BoundingBoxCenter(box);
+		_centerOfGeometry = CC3BoxCenter(box);
 		_boundingBox = box;
 		_shouldBuildFromMesh = NO;		// We want a fixed volume
 	}
 	return self;
 }
 
-+(id) boundingVolumeFromBox: (CC3BoundingBox) box {
++(id) boundingVolumeFromBox: (CC3Box) box {
 	return [[[self alloc] initFromBox: box] autorelease]; }
 
+@end
+
+// Deprecated class
+@implementation CC3NodeBoundingBoxVolume
 @end
 
 
@@ -1265,15 +1269,15 @@
 
 -(CC3NodeSphericalBoundingVolume*) sphericalBoundingVolume { return [_boundingVolumes objectAtIndex: 0]; }
 
--(CC3NodeBoundingBoxVolume*) boxBoundingVolume { return [_boundingVolumes objectAtIndex: 1]; }
+-(CC3NodeBoxBoundingVolume*) boxBoundingVolume { return [_boundingVolumes objectAtIndex: 1]; }
 
 +(id) boundingVolume {
 	return [self boundingVolumeWithSphereVolume: [CC3NodeSphericalBoundingVolume boundingVolume]
-								   andBoxVolume: [CC3NodeBoundingBoxVolume boundingVolume]];
+								   andBoxVolume: [CC3NodeBoxBoundingVolume boundingVolume]];
 }
 
 +(id) boundingVolumeWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
-						andBoxVolume: (CC3NodeBoundingBoxVolume*) boxBV {
+						andBoxVolume: (CC3NodeBoxBoundingVolume*) boxBV {
 	CC3NodeSphereThenBoxBoundingVolume* sbbv = [super boundingVolume];
 	[sbbv addBoundingVolume: sphereBV];
 	[sbbv addBoundingVolume: boxBV];
@@ -1281,12 +1285,12 @@
 }
 
 +(id) boundingVolumeFromSphere: (CC3Sphere) sphere
-						andBox: (CC3BoundingBox) box {
+						andBox: (CC3Box) box {
 	return [self boundingVolumeWithSphereVolume: [CC3NodeSphericalBoundingVolume boundingVolumeFromSphere: sphere]
-								   andBoxVolume: [CC3NodeBoundingBoxVolume boundingVolumeFromBox: box]];
+								   andBoxVolume: [CC3NodeBoxBoundingVolume boundingVolumeFromBox: box]];
 }
 
-+(id) boundingVolumeCircumscribingBox: (CC3BoundingBox) box {
++(id) boundingVolumeCircumscribingBox: (CC3Box) box {
 	return [self boundingVolumeFromSphere: CC3SphereFromCircumscribingBox(box) andBox: box];
 }
 

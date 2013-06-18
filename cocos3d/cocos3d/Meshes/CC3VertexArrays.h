@@ -876,7 +876,7 @@
  */
 @interface CC3VertexLocations : CC3DrawableVertexArray {
 	GLuint _firstVertex;
-	CC3BoundingBox _boundingBox;
+	CC3Box _boundingBox;
 	CC3Vector _centerOfGeometry;
 	GLfloat _radius;
 	BOOL _boundaryIsDirty : 1;
@@ -900,7 +900,7 @@
 @property(nonatomic, assign) GLuint firstElement DEPRECATED_ATTRIBUTE;
 
 /** Returns the axially-aligned bounding box of this mesh. */
-@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+@property(nonatomic, readonly) CC3Box boundingBox;
 
 /** Returns the center of geometry of this mesh. */
 @property(nonatomic, readonly) CC3Vector centerOfGeometry;

@@ -1207,7 +1207,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(CC3Vector) centerOfGeometry { return _vertexLocations ? _vertexLocations.centerOfGeometry : kCC3VectorZero; }
 
--(CC3BoundingBox) boundingBox { return _vertexLocations ? _vertexLocations.boundingBox : kCC3BoundingBoxNull; }
+-(CC3Box) boundingBox { return _vertexLocations ? _vertexLocations.boundingBox : kCC3BoxNull; }
 
 -(GLfloat) radius { return _vertexLocations ? _vertexLocations.radius : 0.0; }
 

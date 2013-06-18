@@ -979,7 +979,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			[uniform setVector: visitor.currentMeshNode.mesh.boundingBox.maximum];
 			return YES;
 		case kCC3SemanticBoundingBoxSize:
-			[uniform setVector: CC3BoundingBoxSize(visitor.currentMeshNode.mesh.boundingBox)];
+			[uniform setVector: CC3BoxSize(visitor.currentMeshNode.mesh.boundingBox)];
 			return YES;
 		case kCC3SemanticAnimationFraction:
 			[uniform setFloat: [visitor.currentMeshNode animationTimeOnTrack: 0]];

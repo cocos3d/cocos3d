@@ -205,11 +205,11 @@
  * the value of this property directly, you can create a mesh box that is of a different size
  * than the parent bounding box.
  *
- * Setting this property to kCC3BoundingBoxNull will remove the underlying mesh.
+ * Setting this property to kCC3BoxNull will remove the underlying mesh.
  *
- * The initial value of this property is kCC3BoundingBoxNull.
+ * The initial value of this property is kCC3BoxNull.
  */
-@property(nonatomic, assign) CC3BoundingBox box;
+@property(nonatomic, assign) CC3Box box;
 
 /**
  * Indicates whether the dimensions of this node should automatically be remeasured on each update pass.

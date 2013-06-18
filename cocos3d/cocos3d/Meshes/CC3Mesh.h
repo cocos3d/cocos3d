@@ -1978,7 +1978,7 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 @property(nonatomic, readonly) CC3Vector centerOfGeometry;
 
 /** Returns the the smallest axis-aligned-bounding-box (AABB) that surrounds the mesh. */
-@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+@property(nonatomic, readonly) CC3Box boundingBox;
 
 /**
  * Returns the radius of a spherical boundary, centered on the centerOfGeometry,

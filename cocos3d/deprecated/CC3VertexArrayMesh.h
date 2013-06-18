@@ -63,9 +63,9 @@ DEPRECATED_ATTRIBUTE
 DEPRECATED_ATTRIBUTE
 /**
  * Deprecated.
- * @deprecated Functionality moved to parent CC3NodeBoundingBoxVolume class.
+ * @deprecated Functionality moved to parent CC3NodeBoxBoundingVolume class.
  */
-@interface CC3VertexLocationsBoundingBoxVolume : CC3NodeBoundingBoxVolume
+@interface CC3VertexLocationsBoundingBoxVolume : CC3NodeBoxBoundingVolume
 @end
 
 

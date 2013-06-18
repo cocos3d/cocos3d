@@ -17,8 +17,8 @@ cocos3d 2.0.0 - 2013/07/01
 - Two cocos3d Xcode template projects are provided:
     - cocos3d1 Application - for use with OpenGL ES 1.1 and cocos2d 1.x.
     - cocos3d2 Application - for use with OpenGL ES 2.0 and cocos2d 2.x.
-- cocos3d Workspace and demo apps: CC3DemoMashUp, CC3Demo3DTiles and CC3Performance are pre-configured to use cocos2d 2.1.
-    - to use cocos2d 2.0, 1.1 or 1.0.1, in any of these projects:
+- cocos3d Workspace and demo apps: CC3DemoMashUp, CC3Demo3DTiles and CC3Performance are pre-configured to use cocos2d 2.0.
+    - to use cocos2d 2.1, 1.1 or 1.0.1, in any of these projects:
 	    - delete the reference to the cocos2d group in the Xcode Project Navigator panel.
 	    - run the install_cocos3d script and identify the version of cocos2d to be linked.
 		- add the newly linked cocos2d files to the project by dragging the cocos2d folder from the cocos3d distribution folder to the Xcode Project Navigator panel.
@@ -128,6 +128,9 @@ cocos3d 2.0.0 - 2013/07/01
 		- If the vertices generally stay near the mesh node, you can use meshNode.boundingVolume = meshNode.defaultBoundingVolume to create a standard mesh-based bounding volume.
 		- If the vertices can move quite far from the mesh node location, you can manually create a bounding volume around a key bone that moves the vertices along with it, and that surrounds the entire mesh as it moves.
 			- Bounding nodes can now be assigned to more than one node. The first node it is assigned to becomes the primary node and controls the bounding volume.
+	- CC3BoundingBox struct renamed to CC3Box
+		- CC3NodeBoundingBoxVolume renamed to CC3NodeBoxBoundingVolume
+		- CC3BoundingBox... functions renamed to CC3Box...
 
 - CC3Resource instances are now cached through the resourceFromFile: method which can be repeatedly invoked without loading from file more than once
 - Added CC3NodesResource as subclass of CC3Resource and superclass of CC3PODResource

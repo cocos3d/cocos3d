@@ -605,7 +605,7 @@ typedef enum {
  *
  * The returned bounding box is specfied in the local coordinate system of this node.
  *
- * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
+ * Returns kCC3BoxNull if this node has no local content or descendants.
  *
  * The computational cost of reading this property depends on whether the node has children.
  * For a node without children, this property can be read quickly from the cached bounding
@@ -616,7 +616,7 @@ typedef enum {
  * of any descendant node, this property must measured dynamically on each access,
  * by traversing all descendant nodes. This is a computationally expensive method.
  */
-@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+@property(nonatomic, readonly) CC3Box boundingBox;
 
 /**
  * Returns the smallest axis-aligned bounding box that surrounds any local content
@@ -624,13 +624,13 @@ typedef enum {
  *
  * The returned bounding box is specfied in the global coordinate system of the 3D scene.
  *
- * Returns kCC3BoundingBoxNull if this node has no local content or descendants.
+ * Returns kCC3BoxNull if this node has no local content or descendants.
  *
  * Since the bounding box of a node can change based on the locations, rotations, or
  * scales of any descendant node, this property is measured dynamically on each access,
  * by traversing all descendant nodes. This is a computationally expensive method.
  */
-@property(nonatomic, readonly) CC3BoundingBox globalBoundingBox;
+@property(nonatomic, readonly) CC3Box globalBoundingBox;
 
 /**
  * Returns the center of geometry of this node, including any local content of
@@ -1306,7 +1306,7 @@ typedef enum {
  * bounding volume from being recalculated every time the vertex content is changed.
  *
  * See the note for the various subclasses of CC3NodeBoundingVolume
- * (eg- CC3NodeBoundingBoxVolume and CC3NodeSphericalBoundingVolume) to learn how
+ * (eg- CC3NodeBoxBoundingVolume and CC3NodeSphericalBoundingVolume) to learn how
  * to set the properties of the bounding volumes, to fix them to a particular range.
  */
 @property(nonatomic, assign) BOOL shouldUseFixedBoundingVolume;
@@ -2549,11 +2549,6 @@ typedef enum {
  * this property directly, or you can invoke the createBoundingVolumes on a node to have a
  * bounding volume created for each descendant node that requires one.
  *
- * You can make the bounding volume of any node visible by setting the shouldDrawBoundingVolume
- * property to YES. You can use the shouldDrawAllBoundingVolumes property to make the bounding
- * volumes of this node and all its descendants visible by setting the shouldDrawAllBoundingVolumes
- * property to YES.
- *
  * In most cases, each node has its own bounding volume. However, when using bounding volumes
  * with skin mesh nodes whose vertices are influenced by separate bone nodes, it sometimes makes
  * sense to share the bounding volume between one of the primary skeleton bones and the skin
@@ -2565,6 +2560,13 @@ typedef enum {
  * primary node for the bounding volume, and then assigning the same bounding volume to the
  * skin node (or maybe even more than one skin node), to allow the bounding volume to determine
  * the camera visibility of the skin node, and to detect collisions for the skin node.
+ *
+ * You can make the bounding volume of any node visible by setting the shouldDrawBoundingVolume
+ * property to YES. You can use the shouldDrawAllBoundingVolumes property to make the bounding
+ * volumes of this node and all its descendants visible by setting the shouldDrawAllBoundingVolumes
+ * property to YES. This can be quite helpful during development time to help determine the size
+ * and shape of a manually-assigned bounding volume, such as those assigned to skinned mesh nodes
+ * as described above.
  */
 @property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
 
@@ -4160,7 +4162,7 @@ typedef enum {
  * defaultLocalContentWireframeBoxColor property.
  */
 @interface CC3LocalContentNode : CC3Node {
-	CC3BoundingBox _globalLocalContentBoundingBox;
+	CC3Box _globalLocalContentBoundingBox;
 	GLint _zOrder;
 }
 
@@ -4176,9 +4178,9 @@ typedef enum {
  * Returns the smallest axis-aligned bounding box that surrounds the local
  * content of this node, in the local coordinate system of this node.
  *
- * If this node has no local content, returns kCC3BoundingBoxNull.
+ * If this node has no local content, returns kCC3BoxNull.
  */
-@property(nonatomic, readonly) CC3BoundingBox localContentBoundingBox;
+@property(nonatomic, readonly) CC3Box localContentBoundingBox;
 
 /**
  * Returns the center of geometry of the local content of this node,
@@ -4195,7 +4197,7 @@ typedef enum {
  * Returns the smallest axis-aligned bounding box that surrounds the local
  * content of this node, in the global coordinate system of the 3D scene.
  *
- * If this node has no local content, returns kCC3BoundingBoxNull.
+ * If this node has no local content, returns kCC3BoxNull.
  *
  * The value of this property is calculated by transforming the eight vertices derived
  * from the localContentBoundingBox property, using the transformMatrix of this node,
@@ -4205,7 +4207,7 @@ typedef enum {
  * globalLocalContentBoundingBox will generally be significantly larger than the
  * localContentBoundingBox. 
  */
-@property(nonatomic, readonly) CC3BoundingBox globalLocalContentBoundingBox;
+@property(nonatomic, readonly) CC3Box globalLocalContentBoundingBox;
 
 /**
  * Checks that this node is in the correct drawing order relative to other nodes.

@@ -887,10 +887,10 @@
 	return _mesh ? _mesh.centerOfGeometry : kCC3VectorZero;
 }
 
--(CC3BoundingBox) localContentBoundingBox {
+-(CC3Box) localContentBoundingBox {
 	return _mesh
-			? CC3BoundingBoxAddUniformPadding(_mesh.boundingBox, _boundingVolumePadding)
-			: kCC3BoundingBoxNull;
+			? CC3BoxAddUniformPadding(_mesh.boundingBox, _boundingVolumePadding)
+			: kCC3BoxNull;
 }
 
 -(void) moveMeshOriginTo: (CC3Vector) aLocation {

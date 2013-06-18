@@ -337,7 +337,7 @@
  * Thanks to cocos3d user andyman for contributing the prototype code and texture
  * template file for this method.
  */
--(void) populateAsSolidBox: (CC3BoundingBox) box;
+-(void) populateAsSolidBox: (CC3Box) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified
@@ -379,7 +379,7 @@
  * Thanks to cocos3d user andyman for contributing the prototype code and texture
  * template file for this method.
  */
--(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box;
+-(void) populateAsCubeMappedSolidBox: (CC3Box) box;
 
 /**
  * Populates this instance as a simple rectangular box mesh from the specified
@@ -438,7 +438,7 @@
  * Thanks to cocos3d user andyman for contributing the prototype code and texture
  * template file for this method.
  */
--(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner;
+-(void) populateAsSolidBox: (CC3Box) box withCorner: (CGPoint) corner;
 
 /**
  * Populates this instance as a wire-frame box with the specified dimensions.
@@ -454,7 +454,7 @@
  *
  * This is a convenience method for creating a simple, but useful, shape.
  */
--(void) populateAsWireBox: (CC3BoundingBox) box;
+-(void) populateAsWireBox: (CC3Box) box;
 
 
 #pragma mark Populating parametric sphere
@@ -669,10 +669,10 @@
  * @deprecated Use populateAsSolidBox:, as it creates a box mesh
  * that can be covered with either a texture or a solid color.
  */
--(void) populateAsTexturedBox: (CC3BoundingBox) box DEPRECATED_ATTRIBUTE;
+-(void) populateAsTexturedBox: (CC3Box) box DEPRECATED_ATTRIBUTE;
 
 /** @deprecated Renamed to populateAsSolidBox:withCorner:. */
--(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner DEPRECATED_ATTRIBUTE;
+-(void) populateAsTexturedBox: (CC3Box) box withCorner: (CGPoint) corner DEPRECATED_ATTRIBUTE;
 
 @end
 

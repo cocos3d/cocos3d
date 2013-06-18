@@ -349,7 +349,7 @@
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_boundingBox = kCC3BoundingBoxNull;
+		_boundingBox = kCC3BoxNull;
 		_shouldRestoreTransforms = YES;
 	}
 	return self;
@@ -357,7 +357,7 @@
 
 -(void) open {
 	[super open];
-	_boundingBox = kCC3BoundingBoxNull;
+	_boundingBox = kCC3BoxNull;
 }
 
 -(void) processAfterChildren: (CC3Node*) aNode {
@@ -368,20 +368,20 @@
 		// is the starting node, don't apply transform to bounding box, because we want
 		// the bounding box in the local coordinate system of the startingNode
 		CC3LocalContentNode* lcNode = (CC3LocalContentNode*)aNode;
-		CC3BoundingBox nodeBox = (_shouldLocalizeToStartingNode && (aNode == _startingNode))
+		CC3Box nodeBox = (_shouldLocalizeToStartingNode && (aNode == _startingNode))
 									? lcNode.localContentBoundingBox
 									: lcNode.globalLocalContentBoundingBox;
 
 		// Merge the node's bounding box into the aggregate bounding box
-		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3BoundingBox(nodeBox),
-				 aNode, NSStringFromCC3BoundingBox(_boundingBox));
-		_boundingBox = CC3BoundingBoxUnion(_boundingBox, nodeBox);
+		LogTrace(@"Merging %@ from %@ into %@", NSStringFromCC3Box(nodeBox),
+				 aNode, NSStringFromCC3Box(_boundingBox));
+		_boundingBox = CC3BoxUnion(_boundingBox, nodeBox);
 	}
 }
 
 -(NSString*) fullDescription {
 	return [NSString stringWithFormat: @"%@, box: %@",
-			[super fullDescription], NSStringFromCC3BoundingBox(_boundingBox)];
+			[super fullDescription], NSStringFromCC3Box(_boundingBox)];
 }
 
 @end

@@ -1066,75 +1066,75 @@ static inline NSString* NSStringFromCC3TexturedVertex(CC3TexturedVertex vertex) 
 #pragma mark Bounding box structure and functions
 
 /**
- * Defines an axially-aligned-bounding-box (AABB), describing
+ * Defines an axially-aligned-box or bounding-box (AABB), describing
  * a 3D volume by specifying the minimum and maximum 3D corners.
  */
 typedef struct {
 	CC3Vector minimum;			/**< The minimum corner (bottom-left-rear). */
 	CC3Vector maximum;			/**< The maximum corner (top-right-front). */
-} CC3BoundingBox;
+} CC3Box;
 
-/** A CC3BoundingBox of zero origin and dimensions. */
-static const CC3BoundingBox kCC3BoundingBoxZero = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
+/** A CC3Box of zero origin and dimensions. */
+static const CC3Box kCC3BoxZero = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
 
 /** The null bounding box. It cannot be drawn, but is useful for marking an uninitialized bounding box. */
-static const CC3BoundingBox kCC3BoundingBoxNull = { {INFINITY, INFINITY, INFINITY}, {INFINITY, INFINITY, INFINITY} };
+static const CC3Box kCC3BoxNull = { {INFINITY, INFINITY, INFINITY}, {INFINITY, INFINITY, INFINITY} };
 
-/** Returns a string description of the specified CC3BoundingBox struct. */
-static inline NSString* NSStringFromCC3BoundingBox(CC3BoundingBox bb) {
+/** Returns a string description of the specified CC3Box struct. */
+static inline NSString* NSStringFromCC3Box(CC3Box bb) {
 	return [NSString stringWithFormat: @"(Min: %@, Max: %@)",
 			NSStringFromCC3Vector(bb.minimum), NSStringFromCC3Vector(bb.maximum)];
 }
 
-/** Returns a CC3BoundingBox structure constructed from the min and max vertices. */
-static inline CC3BoundingBox CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) {
-	CC3BoundingBox bb;
+/** Returns a CC3Box structure constructed from the min and max vertices. */
+static inline CC3Box CC3BoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) {
+	CC3Box bb;
 	bb.minimum = minVtx;
 	bb.maximum = maxVtx;
 	return bb;
 }
 
-/** Returns a CC3BoundingBox structure constructed from the min and max components. */
-static inline CC3BoundingBox CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
+/** Returns a CC3Box structure constructed from the min and max components. */
+static inline CC3Box CC3BoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
 												GLfloat maxX, GLfloat maxY, GLfloat maxZ) {
-	return CC3BoundingBoxFromMinMax(CC3VectorMake(minX, minY, minZ),
+	return CC3BoxFromMinMax(CC3VectorMake(minX, minY, minZ),
 									CC3VectorMake(maxX, maxY, maxZ));
 }
 
 /** Returns whether the two bounding boxes are equal by comparing their respective components. */
-static inline BOOL CC3BoundingBoxesAreEqual(CC3BoundingBox bb1, CC3BoundingBox bb2) {
+static inline BOOL CC3BoxesAreEqual(CC3Box bb1, CC3Box bb2) {
 	return CC3VectorsAreEqual(bb1.minimum, bb2.minimum)
 		&& CC3VectorsAreEqual(bb1.maximum, bb2.maximum);
 }
 
 /**
  * Returns whether the specified bounding box is equal to
- * the zero bounding box, specified by kCC3BoundingBoxZero.
+ * the zero bounding box, specified by kCC3BoxZero.
  */
-static inline BOOL CC3BoundingBoxIsZero(CC3BoundingBox bb) {
-	return CC3BoundingBoxesAreEqual(bb, kCC3BoundingBoxZero);
+static inline BOOL CC3BoxIsZero(CC3Box bb) {
+	return CC3BoxesAreEqual(bb, kCC3BoxZero);
 }
 
 /**
  * Returns whether the specified bounding box is equal to
- * the null bounding box, specified by kCC3BoundingBoxNull.
+ * the null bounding box, specified by kCC3BoxNull.
  */
-static inline BOOL CC3BoundingBoxIsNull(CC3BoundingBox bb) {
-	return CC3BoundingBoxesAreEqual(bb, kCC3BoundingBoxNull);
+static inline BOOL CC3BoxIsNull(CC3Box bb) {
+	return CC3BoxesAreEqual(bb, kCC3BoxNull);
 }
 
 /** Returns the geometric center of the specified bounding box. */
-static inline CC3Vector CC3BoundingBoxCenter(CC3BoundingBox bb) {
+static inline CC3Vector CC3BoxCenter(CC3Box bb) {
 	return CC3VectorAverage(bb.minimum, bb.maximum);
 }
 
 /** Returns the size of the specified bounding box, between the minimum to maximum corners. */
-static inline CC3Vector CC3BoundingBoxSize(CC3BoundingBox bb) {
+static inline CC3Vector CC3BoxSize(CC3Box bb) {
 	return CC3VectorDifference(bb.maximum, bb.minimum);
 }
 
 /** Returns whether the specified bounding box contains the specified location. */
-static inline BOOL CC3BoundingBoxContainsLocation(CC3BoundingBox bb, CC3Vector aLoc) {
+static inline BOOL CC3BoxContainsLocation(CC3Box bb, CC3Vector aLoc) {
 	if (aLoc.x > bb.maximum.x) return NO;
 	if (aLoc.x < bb.minimum.x) return NO;
 	if (aLoc.y > bb.maximum.y) return NO;
@@ -1145,23 +1145,23 @@ static inline BOOL CC3BoundingBoxContainsLocation(CC3BoundingBox bb, CC3Vector a
 }
 
 /**
- * Returns the smallest CC3BoundingBox that contains both the specified bounding box
+ * Returns the smallest CC3Box that contains both the specified bounding box
  * and location. If the specified bounding box is null, returns a bounding box of zero
  * size at the specified location.
  */
-CC3BoundingBox CC3BoundingBoxEngulfLocation(CC3BoundingBox bb, CC3Vector aLoc);
+CC3Box CC3BoxEngulfLocation(CC3Box bb, CC3Vector aLoc);
 
 /**
- * Returns the smallest CC3BoundingBox that contains the two specified bounding boxes.
+ * Returns the smallest CC3Box that contains the two specified bounding boxes.
  * If either bounding box is the null bounding box, simply returns the other bounding box
  * (which may also be the null bounding box).
  */
-static inline CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3BoundingBox bb2) {
-	if(CC3BoundingBoxIsNull(bb1)) return bb2;
-	if(CC3BoundingBoxIsNull(bb2)) return bb1;
+static inline CC3Box CC3BoxUnion(CC3Box bb1, CC3Box bb2) {
+	if(CC3BoxIsNull(bb1)) return bb2;
+	if(CC3BoxIsNull(bb2)) return bb1;
 	
-	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.minimum);
-	bb1 = CC3BoundingBoxEngulfLocation(bb1, bb2.maximum);
+	bb1 = CC3BoxEngulfLocation(bb1, bb2.minimum);
+	bb1 = CC3BoxEngulfLocation(bb1, bb2.maximum);
 	return bb1;
 }
 
@@ -1171,8 +1171,8 @@ static inline CC3BoundingBox CC3BoundingBoxUnion(CC3BoundingBox bb1, CC3Bounding
  *
  * The padding value is added to the maximum vector, and subtracted from the minimum vector.
  */
-static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, CC3Vector padding) {
-	CC3BoundingBox bbPadded;
+static inline CC3Box CC3BoxAddPadding(CC3Box bb, CC3Vector padding) {
+	CC3Box bbPadded;
 	bbPadded.maximum = CC3VectorAdd(bb.maximum, padding);
 	bbPadded.minimum = CC3VectorDifference(bb.minimum, padding);
 	return bbPadded;
@@ -1185,13 +1185,13 @@ static inline CC3BoundingBox CC3BoundingBoxAddPadding(CC3BoundingBox bb, CC3Vect
  * The padding value is added to all three components of the maximum vector, and subtracted
  * from all three components of the minimum vector.
  */
-static inline CC3BoundingBox CC3BoundingBoxAddUniformPadding(CC3BoundingBox bb, GLfloat padding) {
-	return (padding != 0.0f) ? CC3BoundingBoxAddPadding(bb, cc3v(padding, padding, padding)) : bb;
+static inline CC3Box CC3BoxAddUniformPadding(CC3Box bb, GLfloat padding) {
+	return (padding != 0.0f) ? CC3BoxAddPadding(bb, cc3v(padding, padding, padding)) : bb;
 }
 
 /** Returns a box constructed by translating the specified box by the specified translation offset. */
-static inline CC3BoundingBox CC3BoundingBoxTranslate(CC3BoundingBox bb, CC3Vector offset) {
-	CC3BoundingBox bbXltd;
+static inline CC3Box CC3BoxTranslate(CC3Box bb, CC3Vector offset) {
+	CC3Box bbXltd;
 	bbXltd.maximum = CC3VectorAdd(bb.maximum, offset);
 	bbXltd.minimum = CC3VectorAdd(bb.minimum, offset);
 	return bbXltd;
@@ -1203,9 +1203,9 @@ static inline CC3BoundingBox CC3BoundingBoxTranslate(CC3BoundingBox bb, CC3Vecto
  * value of -0.2 in the X-component of the offsetScale, will move the box 20% of its
  * dimension in the X-axis, in the direction of the negative X-axis.
  */
-static inline CC3BoundingBox CC3BoundingBoxTranslateFractionally(CC3BoundingBox bb,
+static inline CC3Box CC3BoxTranslateFractionally(CC3Box bb,
 																 CC3Vector offsetScale) {
-	return CC3BoundingBoxTranslate(bb, CC3VectorScale(CC3BoundingBoxSize(bb), offsetScale));
+	return CC3BoxTranslate(bb, CC3VectorScale(CC3BoxSize(bb), offsetScale));
 }
 
 /**
@@ -1213,8 +1213,8 @@ static inline CC3BoundingBox CC3BoundingBoxTranslateFractionally(CC3BoundingBox 
  * lies at the origin of the coordinate system. This effectivly moves the bounding box so
  * that its center is at the origin.
  */
-static inline CC3BoundingBox CC3BoundingBoxMoveCenterToOrigin(CC3BoundingBox bb) {
-	return CC3BoundingBoxTranslate(bb, CC3VectorNegate(CC3BoundingBoxCenter(bb)));
+static inline CC3Box CC3BoxMoveCenterToOrigin(CC3Box bb) {
+	return CC3BoxTranslate(bb, CC3VectorNegate(CC3BoxCenter(bb)));
 }
 
 /**
@@ -1224,8 +1224,8 @@ static inline CC3BoundingBox CC3BoundingBoxMoveCenterToOrigin(CC3BoundingBox bb)
  * This has the effect of multiplying each component of each of the vectors representing the
  * minimum and maximum corners of the box by the corresponding component in the scale vector.
  */
-static inline CC3BoundingBox CC3BoundingBoxScale(CC3BoundingBox bb, CC3Vector scale) {
-	CC3BoundingBox bbScaled;
+static inline CC3Box CC3BoxScale(CC3Box bb, CC3Vector scale) {
+	CC3Box bbScaled;
 	bbScaled.maximum = CC3VectorScale(bb.maximum, scale);
 	bbScaled.minimum = CC3VectorScale(bb.minimum, scale);
 	return bbScaled;
@@ -1238,8 +1238,8 @@ static inline CC3BoundingBox CC3BoundingBoxScale(CC3BoundingBox bb, CC3Vector sc
  * This has the effect of multiplying each component of each of the vectors representing the
  * minimum and maximum corners of the box by the scale value.
  */
-static inline CC3BoundingBox CC3BoundingBoxScaleUniform(CC3BoundingBox bb, GLfloat scale) {
-	CC3BoundingBox bbScaled;
+static inline CC3Box CC3BoxScaleUniform(CC3Box bb, GLfloat scale) {
+	CC3Box bbScaled;
 	bbScaled.maximum = CC3VectorScaleUniform(bb.maximum, scale);
 	bbScaled.minimum = CC3VectorScaleUniform(bb.minimum, scale);
 	return bbScaled;
@@ -1257,7 +1257,7 @@ static inline CC3BoundingBox CC3BoundingBoxScaleUniform(CC3BoundingBox bb, GLflo
  *
  * The ray may start inside the bounding box, and the exit location of the ray will be returned.
  */
-CC3Vector CC3RayIntersectionOfBoundingBox(CC3Ray aRay, CC3BoundingBox bb);
+CC3Vector CC3RayIntersectionWithBox(CC3Ray aRay, CC3Box bb);
 
 /**
  * Returns the location that the specified ray intersects the specified bounding box,
@@ -1275,8 +1275,80 @@ CC3Vector CC3RayIntersectionOfBoundingBox(CC3Ray aRay, CC3BoundingBox bb);
  * within the bounding box, and then tests whether the intersection distance is less
  * than for the specified previous intersection.
  */
-CC3Vector4 CC3RayIntersectionOfBoundingBoxSide(CC3Ray aRay, CC3BoundingBox bb,
-											   CC3Vector sideNormal, CC3Vector4 prevHit);
+CC3Vector4 CC3RayIntersectionWithBoxSide(CC3Ray aRay, CC3Box bb,
+										 CC3Vector sideNormal, CC3Vector4 prevHit);
+
+/** @deprecated Renamed to CC3Box. */
+typedef CC3Box CC3BoundingBox DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to kCC3BoxZero. */
+#define kCC3BoundingBoxZero		kCC3BoxZero
+
+/** @deprecated Renamed to kCC3BoxNull. */
+#define kCC3BoundingBoxNull		kCC3BoxNull
+
+/** @deprecated Renamed to NSStringFromCC3Box. */
+NSString* NSStringFromCC3BoundingBox(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxFromMinMax. */
+CC3Box CC3BoundingBoxFromMinMax(CC3Vector minVtx, CC3Vector maxVtx) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxMake. */
+CC3Box CC3BoundingBoxMake(GLfloat minX, GLfloat minY, GLfloat minZ,
+						  GLfloat maxX, GLfloat maxY, GLfloat maxZ) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxesAreEqual. */
+BOOL CC3BoundingBoxesAreEqual(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxIsZero. */
+BOOL CC3BoundingBoxIsZero(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxIsNull. */
+BOOL CC3BoundingBoxIsNull(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxCenter. */
+CC3Vector CC3BoundingBoxCenter(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxSize. */
+CC3Vector CC3BoundingBoxSize(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxContainsLocation. */
+BOOL CC3BoundingBoxContainsLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxEngulfLocation. */
+CC3Box CC3BoundingBoxEngulfLocation(CC3Box bb, CC3Vector aLoc) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxUnion. */
+CC3Box CC3BoundingBoxUnion(CC3Box bb1, CC3Box bb2) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxAddPadding. */
+CC3Box CC3BoundingBoxAddPadding(CC3Box bb, CC3Vector padding) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxAddUniformPadding. */
+CC3Box CC3BoundingBoxAddUniformPadding(CC3Box bb, GLfloat padding) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxTranslate. */
+CC3Box CC3BoundingBoxTranslate(CC3Box bb, CC3Vector offset) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxTranslateFractionally. */
+CC3Box CC3BoundingBoxTranslateFractionally(CC3Box bb,
+										   CC3Vector offsetScale) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxMoveCenterToOrigin. */
+CC3Box CC3BoundingBoxMoveCenterToOrigin(CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxScale. */
+CC3Box CC3BoundingBoxScale(CC3Box bb, CC3Vector scale) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3BoxScaleUniform. */
+CC3Box CC3BoundingBoxScaleUniform(CC3Box bb, GLfloat scale) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3RayIntersectionWithBox. */
+CC3Vector CC3RayIntersectionWithBoundingBox(CC3Ray aRay, CC3Box bb) DEPRECATED_ATTRIBUTE;
+
+/** @deprecated Renamed to CC3RayIntersectionWithBoxSide. */
+CC3Vector4 CC3RayIntersectionWithBoundingBoxSide(CC3Ray aRay, CC3Box bb,
+												 CC3Vector sideNormal, CC3Vector4 prevHit) DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark -
@@ -1699,8 +1771,8 @@ static inline CC3Sphere CC3SphereMake(CC3Vector center, GLfloat radius) {
 }
 
 /** Returns a CC3Spere that circumscribes the specified box. */
-static inline CC3Sphere CC3SphereFromCircumscribingBox(CC3BoundingBox box) {
-	CC3Vector center = CC3BoundingBoxCenter(box);
+static inline CC3Sphere CC3SphereFromCircumscribingBox(CC3Box box) {
+	CC3Vector center = CC3BoxCenter(box);
 	GLfloat radius = CC3VectorDistance(box.maximum, center);
 	return CC3SphereMake(center, radius);
 }
@@ -1737,7 +1809,10 @@ BOOL CC3DoesRayIntersectSphere(CC3Ray aRay, CC3Sphere aSphere);
  * The ray may start inside the sphere, in which case, the returned location represents
  * the exit location of the ray.
  */
-CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere);
+CC3Vector CC3RayIntersectionWithSphere(CC3Ray aRay, CC3Sphere aSphere);
+
+/** @deprecated Renamed to CC3RayIntersectionWithSphere. */
+CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) DEPRECATED_ATTRIBUTE;
 
 /**
  * Returns the coefficients of the quadratic equation that describes the points of

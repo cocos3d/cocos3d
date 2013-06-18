@@ -96,19 +96,19 @@
 
 #pragma mark Populating parametric boxes
 
--(void) populateAsSolidBox: (CC3BoundingBox) box {
+-(void) populateAsSolidBox: (CC3Box) box {
 	[[self prepareParametricMesh] populateAsSolidBox: box];
 }
 
--(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box {
+-(void) populateAsCubeMappedSolidBox: (CC3Box) box {
 	[[self prepareParametricMesh] populateAsCubeMappedSolidBox: box];
 }
 
--(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
+-(void) populateAsSolidBox: (CC3Box) box withCorner: (CGPoint) corner {
 	[[self prepareParametricMesh] populateAsSolidBox: box withCorner: corner];
 }
 
--(void) populateAsWireBox: (CC3BoundingBox) box {
+-(void) populateAsWireBox: (CC3Box) box {
 	CC3Mesh* mesh = [CC3Mesh mesh];
 	[mesh populateAsWireBox: box];
 	self.mesh = mesh;		// Set mesh to update bounding volume
@@ -266,12 +266,12 @@
 }
 
 // Deprecated
--(void) populateAsTexturedBox: (CC3BoundingBox) box {
+-(void) populateAsTexturedBox: (CC3Box) box {
 	[self populateAsSolidBox: box withCorner: ccp((1.0 / 4.0), (1.0 / 3.0))];
 }
 
 // Deprecated
--(void) populateAsTexturedBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
+-(void) populateAsTexturedBox: (CC3Box) box withCorner: (CGPoint) corner {
 	[self populateAsSolidBox: box withCorner: corner];
 }
 

@@ -150,9 +150,9 @@
 -(void) resetBillboardBoundingRect { self.billboardBoundingRect = CGRectNull; }
 
 /** Calculate bounding box from bounding rect of 2D node. */
--(CC3BoundingBox) localContentBoundingBox {
+-(CC3Box) localContentBoundingBox {
 	CGRect bRect = self.billboardBoundingRect;
-	return CC3BoundingBoxMake(CGRectGetMinX(bRect), CGRectGetMinY(bRect), 0.0,
+	return CC3BoxMake(CGRectGetMinX(bRect), CGRectGetMinY(bRect), 0.0,
 							  CGRectGetMaxX(bRect), CGRectGetMaxY(bRect), 0.0);
 }
 
@@ -819,9 +819,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 
 @implementation CC3NodeDescriptor
 
--(CC3BoundingBox) localContentBoundingBox { return kCC3BoundingBoxNull; }
+-(CC3Box) localContentBoundingBox { return kCC3BoxNull; }
 
--(CC3BoundingBox) globalLocalContentBoundingBox { return kCC3BoundingBoxNull; }
+-(CC3Box) globalLocalContentBoundingBox { return kCC3BoxNull; }
 
 -(BOOL) shouldIncludeInDeepCopy { return NO; }
 

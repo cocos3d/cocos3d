@@ -48,7 +48,7 @@
 @implementation CC3PlaneNode
 
 -(CC3Plane) plane {
-	CC3BoundingBox bb = self.mesh.boundingBox;
+	CC3Box bb = self.mesh.boundingBox;
 	
 	// Get three points on the plane by using three corners of the mesh bounding box.
 	CC3Vector p1 = bb.minimum;
@@ -129,10 +129,10 @@
 
 @synthesize shouldAlwaysMeasureParentBoundingBox=_shouldAlwaysMeasureParentBoundingBox;
 
--(CC3BoundingBox) box { return self.localContentBoundingBox; }
+-(CC3Box) box { return self.localContentBoundingBox; }
 
--(void) setBox: (CC3BoundingBox) aBox {
-	if (CC3BoundingBoxIsNull(aBox)) {
+-(void) setBox: (CC3Box) aBox {
+	if (CC3BoxIsNull(aBox)) {
 		self.mesh = nil;
 	} else {
 		[self populateBox: aBox];
@@ -147,14 +147,14 @@
 
 -(NSString*) nameSuffix { return @"TouchBox"; }
 
--(CC3BoundingBox) parentBoundingBox { return _parent ? _parent.boundingBox : kCC3BoundingBoxNull; }
+-(CC3Box) parentBoundingBox { return _parent ? _parent.boundingBox : kCC3BoxNull; }
 
 -(BOOL) shouldContributeToParentBoundingBox { return NO; }
 
 
 #pragma mark Population as a box
 
--(void) populateBox: (CC3BoundingBox) aBox {
+-(void) populateBox: (CC3Box) aBox {
 	
 	CC3Mesh* mesh = [self prepareParametricMesh];
 	
@@ -395,7 +395,7 @@
 
 /** Measures the bounding box of the parent node and updates the vertex locations. */
 -(void) updateFromParentBoundingBoxWithVisitor: (CC3NodeUpdatingVisitor*) visitor {
-	CC3BoundingBox pbb = self.parentBoundingBox;
+	CC3Box pbb = self.parentBoundingBox;
 	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.minimum.y, pbb.minimum.z) at: 0];
 	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.minimum.y, pbb.maximum.z) at: 1];
 	[self setVertexLocation: cc3v(pbb.minimum.x, pbb.maximum.y, pbb.minimum.z) at: 2];
@@ -408,15 +408,15 @@
 }
 
 /**
- * Returns the parent's bounding box, or kCC3BoundingBoxZero if no parent,
+ * Returns the parent's bounding box, or kCC3BoxZero if no parent,
  * or if parent doesn't have a bounding box.
  */
--(CC3BoundingBox) parentBoundingBox {
+-(CC3Box) parentBoundingBox {
 	if (_parent) {
-		CC3BoundingBox pbb = _parent.boundingBox;
-		if (!CC3BoundingBoxIsNull(pbb)) return pbb;
+		CC3Box pbb = _parent.boundingBox;
+		if (!CC3BoxIsNull(pbb)) return pbb;
 	}
-	return kCC3BoundingBoxZero;
+	return kCC3BoxZero;
 }
 
 @end
@@ -429,14 +429,14 @@
 
 /**
  * Overridden to return the parent's local content bounding box,
- * or kCC3BoundingBoxZero if no parent, or if parent doesn't have a bounding box.
+ * or kCC3BoxZero if no parent, or if parent doesn't have a bounding box.
  */
--(CC3BoundingBox) parentBoundingBox {
+-(CC3Box) parentBoundingBox {
 	if (_parent && _parent.hasLocalContent) {
-		CC3BoundingBox pbb = ((CC3LocalContentNode*)_parent).localContentBoundingBox;
-		if (!CC3BoundingBoxIsNull(pbb)) return pbb;
+		CC3Box pbb = ((CC3LocalContentNode*)_parent).localContentBoundingBox;
+		if (!CC3BoxIsNull(pbb)) return pbb;
 	}
-	return kCC3BoundingBoxZero;
+	return kCC3BoxZero;
 }
 
 @end
@@ -461,12 +461,12 @@
  * box, such as cameras and lights. The default parent box is calculated as 10% of the size
  * of the entire scene.
  */
--(CC3BoundingBox) parentBoundingBox {
-	CC3BoundingBox pbb = super.parentBoundingBox;
-	if ( !CC3BoundingBoxIsZero(pbb) ) return pbb;
+-(CC3Box) parentBoundingBox {
+	CC3Box pbb = super.parentBoundingBox;
+	if ( !CC3BoxIsZero(pbb) ) return pbb;
 
-	CC3Vector bbDim = CC3VectorScaleUniform(CC3BoundingBoxSize(self.scene.boundingBox), 0.05f);
-	return CC3BoundingBoxFromMinMax(CC3VectorNegate(bbDim), bbDim);
+	CC3Vector bbDim = CC3VectorScaleUniform(CC3BoxSize(self.scene.boundingBox), 0.05f);
+	return CC3BoxFromMinMax(CC3VectorNegate(bbDim), bbDim);
 }
 
 
@@ -543,7 +543,7 @@ static GLfloat directionMarkerMinimumLength = 0;
  * because that is the side it will intersect. Finally, multiply by an overall scale factor.
  */
 -(CC3Vector) calculateLineEnd {
-	CC3BoundingBox pbb = self.parentBoundingBox;
+	CC3Box pbb = self.parentBoundingBox;
 	CC3Vector md = self.markerDirection;
 	
 	CC3Vector pbbDirScale = cc3v([self calcScale: md.x bbMin: pbb.minimum.x bbMax: pbb.maximum.x],

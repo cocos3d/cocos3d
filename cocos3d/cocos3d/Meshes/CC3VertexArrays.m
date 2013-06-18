@@ -865,7 +865,7 @@ static GLuint lastAssignedVertexArrayTag;
 }
 
 /** Returns the boundingBox, building it if necessary. */
--(CC3BoundingBox) boundingBox {
+-(CC3Box) boundingBox {
 	[self buildBoundingBoxIfNecessary];
 	return _boundingBox;
 }
@@ -911,7 +911,7 @@ static GLuint lastAssignedVertexArrayTag;
 	}
 	_boundingBox.minimum = vlMin;
 	_boundingBox.maximum = vlMax;
-	_centerOfGeometry = CC3BoundingBoxCenter(_boundingBox);
+	_centerOfGeometry = CC3BoxCenter(_boundingBox);
 	_boundaryIsDirty = NO;
 	LogTrace(@"%@ bounding box: (%@, %@) and center of geometry: %@", self,
 			 NSStringFromCC3Vector(_boundingBox.minimum),
@@ -989,7 +989,7 @@ static GLuint lastAssignedVertexArrayTag;
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		_firstVertex = 0;
 		_centerOfGeometry = kCC3VectorZero;
-		_boundingBox = kCC3BoundingBoxZero;
+		_boundingBox = kCC3BoxZero;
 		_radius = 0.0;
 		[self markBoundaryDirty];
 	}

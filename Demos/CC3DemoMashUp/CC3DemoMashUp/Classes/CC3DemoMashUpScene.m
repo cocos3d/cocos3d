@@ -707,7 +707,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Create a parametric textured cube, centered on the local origin.
 	CC3BoxNode* texCube = [CC3BoxNode nodeWithName: kTexturedCubeName];
-	[texCube populateAsSolidBox: CC3BoundingBoxMake(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f)];
+	[texCube populateAsSolidBox: CC3BoxMake(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f)];
 	texCube.uniformScale = 30.0;
 
 	// Add a texture to the textured cube. This creates a material automatically.
@@ -854,7 +854,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Create a parametric textured box as an open door.
 	_brickWall = [DoorMeshNode nodeWithName: kBrickWallName];
 	_brickWall.touchEnabled = YES;
-	[_brickWall populateAsSolidBox: CC3BoundingBoxMake(-1.5, 0, -0.3, 1.5, 2.5, 0.3)];
+	[_brickWall populateAsSolidBox: CC3BoxMake(-1.5, 0, -0.3, 1.5, 2.5, 0.3)];
 	_brickWall.uniformScale = 40.0;
 	
 	// Add a texture to the wall and repeat it. This creates a material automatically.
@@ -1418,8 +1418,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// bounding box of the parent node. Finally, we can use the mallet.shouldDrawBoundingVolume
 	// property to visually verify that the bounding volume fits to the mallet node.
 //	mallet.shouldDrawLocalContentWireframeBox = YES;
-//	LogDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3BoundingBox(malletAndAnvils.boundingBox));
-	CC3BoundingBox bb = CC3BoundingBoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
+//	LogDebug(@"%@ bounding box %@", malletAndAnvils, NSStringFromCC3Box(malletAndAnvils.boundingBox));
+	CC3Box bb = CC3BoxMake(-257.0, -1685.0, -1200.0, 266.0, 0.0, 1200.0);
 	mallet.boundingVolume = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
 	mallet.shouldUseFixedBoundingVolume = YES;
 //	mallet.shouldDrawBoundingVolume = YES;		// Verify visually and adjust above box accordingly
@@ -1503,14 +1503,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	//   - Use the setSkeletalBoundingVolume: method on the entire model to force all skinned
 	//     mesh nodes within the model to use the bounding volume being controlled by the skeleton.
 	//   - Visually check the bounding volume. If okay, go with it.
-	//   - Use CC3BoundingBoxTranslate and CC3BoundingBoxScale to modify the bounding box
+	//   - Use CC3BoxTranslate and CC3BoxScale to modify the bounding box
 	//     extracted from the model (or just hardcode a modified bounding box) to position
 	//     and size the bounding volume around the model and verify visually.
-	LogTrace(@"Runner box: %@", NSStringFromCC3BoundingBox(runner.boundingBox));	// Extract bounding box
-	CC3BoundingBox bb = CC3BoundingBoxFromMinMax(cc3v(-76.982, 18.777, -125.259),
+	LogTrace(@"Runner box: %@", NSStringFromCC3Box(runner.boundingBox));	// Extract bounding box
+	CC3Box bb = CC3BoxFromMinMax(cc3v(-76.982, 18.777, -125.259),
 												 cc3v(61.138, 268.000, 96.993));
-	bb = CC3BoundingBoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
-	bb = CC3BoundingBoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
+	bb = CC3BoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
+	bb = CC3BoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
 	CC3NodeBoundingVolume* bv = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
 	CC3Node* skeleton = [runner getNodeNamed: @"D_CharacterControl"];
 	skeleton.boundingVolume = bv;						// BV is controlled by skeleton root
@@ -1732,7 +1732,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	#define kMeshParticleCubeExtent 10.0f
 	CC3BoxNode* templateModel = [CC3BoxNode nodeWithName: kTexturedCubeName];
-	[templateModel populateAsSolidBox: CC3BoundingBoxMake(-kMeshParticleCubeExtent,
+	[templateModel populateAsSolidBox: CC3BoxMake(-kMeshParticleCubeExtent,
 														  -kMeshParticleCubeExtent, 
 														  -kMeshParticleCubeExtent,
 														   kMeshParticleCubeExtent,
@@ -1835,7 +1835,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	emitter.shouldUseFixedBoundingVolume = YES;
 //	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)emitter.boundingVolume;
 //	bv.sphericalBoundingVolume.radius = 900.0;
-//	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-659.821, -408.596, -657.981, 651.606, 806.223, 637.516);
+//	bv.boxBoundingVolume.boundingBox = CC3BoxMake(-659.821, -408.596, -657.981, 651.606, 806.223, 637.516);
 
 	// Shows the emitter name and location when the particles are touched
 	emitter.touchEnabled = YES;
@@ -1918,7 +1918,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// Box template mesh
 	CC3BoxNode* boxModel = [CC3BoxNode node];
-	[boxModel populateAsSolidBox: CC3BoundingBoxMake(-kPartMeshDim, -kPartMeshDim, -kPartMeshDim,
+	[boxModel populateAsSolidBox: CC3BoxMake(-kPartMeshDim, -kPartMeshDim, -kPartMeshDim,
 													  kPartMeshDim, kPartMeshDim, kPartMeshDim)];
 	boxModel.texture = [CC3Texture textureFromFile: kMeshParticleTextureFile];
 	boxModel.textureRectangle = CGRectMake(0, 0, 1, 0.75);	// Bottom part of texture is box texture
@@ -1969,7 +1969,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	emitter.shouldUseFixedBoundingVolume = YES;
 //	CC3NodeSphereThenBoxBoundingVolume* bv = (CC3NodeSphereThenBoxBoundingVolume*)emitter.boundingVolume;
 //	bv.sphericalBoundingVolume.radius = 750.0;
-//	bv.boxBoundingVolume.boundingBox = CC3BoundingBoxMake(-400.0, -100.0, -500.0, 500.0, 750.0, 500.0);
+//	bv.boxBoundingVolume.boundingBox = CC3BoxMake(-400.0, -100.0, -500.0, 500.0, 750.0, 500.0);
 	
 	// Even without a fixed bounding volume, you can still improve performance when the particles
 	// are not in view of the camera by setting the following property to NO.

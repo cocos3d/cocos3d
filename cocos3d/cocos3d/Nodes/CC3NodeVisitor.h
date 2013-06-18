@@ -347,7 +347,7 @@
  * will be in the global coordinate system of the 3D scene.
  */
 @interface CC3NodeBoundingBoxVisitor : CC3NodeTransformingVisitor {
-	CC3BoundingBox _boundingBox;
+	CC3Box _boundingBox;
 }
 
 /**
@@ -358,11 +358,11 @@
  * will be in the global coordinate system of the 3D scene.
  *
  * If none of the startingNode or its descendants have any local content, this
- * property will return kCC3BoundingBoxNull.
+ * property will return kCC3BoxNull.
  *
- * The initial value of this property will be kCC3BoundingBoxNull.
+ * The initial value of this property will be kCC3BoxNull.
  */
-@property(nonatomic, readonly) CC3BoundingBox boundingBox;
+@property(nonatomic, readonly) CC3Box boundingBox;
 
 @end
 

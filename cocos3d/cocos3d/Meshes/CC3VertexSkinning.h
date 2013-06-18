@@ -181,7 +181,10 @@
  *     method on an ancestor node of all of the CC3SkinMeshNodes that are to use that bounding
  *     volume, to assign that bounding volume to all of the appropriate CC3SkinMeshNodes.
  *     A good choice to target for the invocation of this method might be the CC3SoftBodyNode
- *     of the model, or even the CC3ResourceNode above it, if loaded from a file.
+ *     of the model, or even the CC3ResourceNode above it, if loaded from a file. During
+ *     development, you can use the shouldDrawBoundingVolume property to make the bounding
+ *     volume visible, to aid in determining and setting the right size and shape for it.
+ *
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
 	CCArray* _skinSections;
@@ -861,6 +864,9 @@
  * are to use that bounding volume, to assign that bounding volume to all of the appropriate
  * skinned mesh nodes. A good choice to target for the invocation of this method might be the
  * CC3SoftBodyNode of the model, or even the CC3ResourceNode above it, if loaded from a file.
+ *
+ * During development, you can use the shouldDrawBoundingVolume property to make the bounding
+ * volume visible, to aid in determining and setting the right size and shape for it. 
  */
 -(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume;
 

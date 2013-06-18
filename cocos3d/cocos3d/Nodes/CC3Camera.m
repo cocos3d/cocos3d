@@ -576,10 +576,10 @@
 	CC3Vector rtDir = CC3Matrix3x3ExtractRightDirection(&rotMtx);
 	
 	// Determine the eight vertices, of the node's bounding box, in the global coordinate system
-	CC3BoundingBox gbb = aNode.globalBoundingBox;
+	CC3Box gbb = aNode.globalBoundingBox;
 
 	// If a target location has not been specified, use the center of the node's global bounding box
-	if (CC3VectorIsNull(targLoc)) targLoc = CC3BoundingBoxCenter(gbb);
+	if (CC3VectorIsNull(targLoc)) targLoc = CC3BoxCenter(gbb);
 
 	CC3Vector bbMin = gbb.minimum;
 	CC3Vector bbMax = gbb.maximum;

@@ -814,7 +814,7 @@
 
 
 #pragma mark -
-#pragma mark CC3NodeBoundingBoxVolume interface
+#pragma mark CC3NodeBoxBoundingVolume interface
 
 /**
  * A bounding volume that forms an axially aligned bounding box (AABB) around the node,
@@ -836,8 +836,8 @@
  * box is calculated from the vertex locations. For other nodes, the local bounding box
  * can be set directly within the bounding volume via the boundingBox property.
  */
-@interface CC3NodeBoundingBoxVolume : CC3NodeBoundingVolume {
-	CC3BoundingBox _boundingBox;
+@interface CC3NodeBoxBoundingVolume : CC3NodeBoundingVolume {
+	CC3Box _boundingBox;
 	CC3Vector _vertices[8];
 	CC3Plane _planes[6];
 }
@@ -860,9 +860,9 @@
  * set the shouldUseFixedBoundingVolume property of the node to YES, to stop automatic
  * recalculation of this bounding volume whenever the underlying mesh vertices change.
  *
- * The initial value of this property is kCC3BoundingBoxZero.
+ * The initial value of this property is kCC3BoxZero.
  */
-@property(nonatomic, assign) CC3BoundingBox boundingBox;
+@property(nonatomic, assign) CC3Box boundingBox;
 
 /** @deprecated Use the superclass vertices property instead. */
 @property(nonatomic, readonly) CC3Vector* globalBoundingBoxVertices DEPRECATED_ATTRIBUTE;
@@ -874,14 +874,22 @@
  * Initializes this instance from the specified bounding box,
  * and sets the shouldBuildFromMesh property to NO.
  */
--(id) initFromBox: (CC3BoundingBox) box;
+-(id) initFromBox: (CC3Box) box;
 
 /** 
  * Allocates and initializes an autoreleased instance from the specified bounding box,
  * and sets the shouldBuildFromMesh property to NO.
  */
-+(id) boundingVolumeFromBox: (CC3BoundingBox) box;
++(id) boundingVolumeFromBox: (CC3Box) box;
 
+@end
+
+DEPRECATED_ATTRIBUTE
+/**
+ * Deprecated.
+ * @deprecated Renamed to CC3NodeBoxBoundingVolume.
+ */
+@interface CC3NodeBoundingBoxVolume : CC3NodeBoxBoundingVolume
 @end
 
 
@@ -1042,7 +1050,7 @@
 
 /**
  * CC3NodeSphereThenBoxBoundingVolume is a CC3NodeTighteningBoundingVolumeSequence that contains
- * a single CC3NodeSphericalBoundingVolume and a single CC3NodeBoundingBoxVolume, in that order.
+ * a single CC3NodeSphericalBoundingVolume and a single CC3NodeBoxBoundingVolume, in that order.
  *
  * The spherical bounding volume is tested first, and if it passes, the bounding box volume is
  * tested next. This combination benefits from the fast testing capabilities of the spherical
@@ -1055,31 +1063,31 @@
 @property(nonatomic, readonly) CC3NodeSphericalBoundingVolume* sphericalBoundingVolume;
 
 /** The box bounding volume that is tested only if the test against the spherical bounding volume passes. */
-@property(nonatomic, readonly) CC3NodeBoundingBoxVolume* boxBoundingVolume;
+@property(nonatomic, readonly) CC3NodeBoxBoundingVolume* boxBoundingVolume;
 
 /**
  * Allocates and initializes an autoreleased instance containing a standard
- * CC3NodeSphericalBoundingVolume and a standard CC3NodeBoundingBoxVolume.
+ * CC3NodeSphericalBoundingVolume and a standard CC3NodeBoxBoundingVolume.
  */
 +(id) boundingVolume;
 
 /** Allocates and returns an autoreleased instance containing the specified bounding volumes. */
 +(id) boundingVolumeWithSphereVolume: (CC3NodeSphericalBoundingVolume*) sphereBV
-						andBoxVolume: (CC3NodeBoundingBoxVolume*) boxBV;
+						andBoxVolume: (CC3NodeBoxBoundingVolume*) boxBV;
 
 /** 
  * Allocates and returns an autoreleased instance containing spherical and box bounding
  * volumes created from the specified sphere and box, respectively.
  */
 +(id) boundingVolumeFromSphere: (CC3Sphere) sphere
-						andBox: (CC3BoundingBox) box;
+						andBox: (CC3Box) box;
 
 /**
  * Allocates and returns an autoreleased instance containing spherical and box bounding
  * volumes created from the specified box. The spherical bounding volume is created by
  * circumscribine the box.
  */
-+(id) boundingVolumeCircumscribingBox: (CC3BoundingBox) box;
++(id) boundingVolumeCircumscribingBox: (CC3Box) box;
 
 /**@deprecated Use boundingVolume instead. */
 +(id) vertexLocationsSphereandBoxBoundingVolume DEPRECATED_ATTRIBUTE;

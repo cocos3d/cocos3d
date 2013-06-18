@@ -316,7 +316,7 @@
 
 #pragma mark Populating parametric boxes
 
--(void) populateAsSolidBox: (CC3BoundingBox) box {
+-(void) populateAsSolidBox: (CC3Box) box {
 	GLfloat w = box.maximum.x - box.minimum.x;		// Width of the box
 	GLfloat h = box.maximum.y - box.minimum.y;		// Height of the box
 	GLfloat d = box.maximum.z - box.minimum.z;		// Depth of the box
@@ -325,13 +325,13 @@
 	[self populateAsSolidBox: box withCorner: ccp((d / ufw), (d / ufh))];
 }
 
--(void) populateAsCubeMappedSolidBox: (CC3BoundingBox) box {
+-(void) populateAsCubeMappedSolidBox: (CC3Box) box {
 	[self populateAsSolidBox: box withCorner: ccp((1.0 / 4.0), (1.0 / 3.0))];
 }
 
 // Thanks to cocos3d user andyman for contributing the prototype code and texture
 // template file for this method.
--(void) populateAsSolidBox: (CC3BoundingBox) box withCorner: (CGPoint) corner {
+-(void) populateAsSolidBox: (CC3Box) box withCorner: (CGPoint) corner {
 
 	CC3Vector boxMin = box.minimum;
 	CC3Vector boxMax = box.maximum;
@@ -473,7 +473,7 @@ static const GLubyte wireBoxIndexData[] = {
 	0, 4, 1, 5, 2, 6, 3, 7,
 };
 
--(void) populateAsWireBox: (CC3BoundingBox) box {
+-(void) populateAsWireBox: (CC3Box) box {
 	CC3Vector boxMin = box.minimum;
 	CC3Vector boxMax = box.maximum;
 	GLuint vertexCount = 8;
