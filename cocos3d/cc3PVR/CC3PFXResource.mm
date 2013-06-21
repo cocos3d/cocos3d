@@ -144,7 +144,7 @@ extern "C" {
 		// Load texture and set texture parameters
 		NSString* texName = [NSString stringWithUTF8String: pfxTex->Name.c_str()];
 		NSString* texFile = [NSString stringWithUTF8String: pfxTex->FileName.c_str()];
-		CC3GLTexture* tex = [CC3GLTexture textureFromFile: texFile];
+		CC3Texture* tex = [CC3Texture textureFromFile: texFile];
 		tex.horizontalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapS);
 		tex.verticalWrappingFunction = GLTextureWrapFromETextureWrap(pfxTex->nWrapT);
 		tex.minifyingFunction = GLMinifyingFunctionFromMinAndMipETextureFilters(pfxTex->nMin, pfxTex->nMIP);
@@ -169,7 +169,7 @@ extern "C" {
 }
 
 /** Returns the texture that was assigned the specified name in the PFX resource file. */
--(CC3GLTexture*) getTextureNamed: (NSString*) texName { return [_texturesByName objectForKey: texName]; }
+-(CC3Texture*) getTextureNamed: (NSString*) texName { return [_texturesByName objectForKey: texName]; }
 
 /**
  * Builds the rendering passes.
@@ -234,13 +234,10 @@ static Class _defaultSemanticDelegateClass = nil;
 	NSUInteger tuCnt = _textures.count;
 	for (GLuint tuIdx = 0; tuIdx < tuCnt; tuIdx++) {
 		CC3PFXEffectTexture* pfxTex = [self getEffectTextureForTextureUnit: tuIdx];
-		if (pfxTex) {
-			CC3Texture* tex = [CC3Texture textureWithGLTexture: pfxTex.texture];
-			tex.name = pfxTex.name;
-			[material setTexture: tex forTextureUnit: tuIdx];
-		} else {
+		if (pfxTex)
+			[material setTexture: pfxTex.texture forTextureUnit: tuIdx];
+		else
 			LogRez(@"%@ contains no texture for texture unit %u", self, tuIdx);
-		}
 	}
 }
 
@@ -287,7 +284,7 @@ static Class _defaultSemanticDelegateClass = nil;
 		
 		// Retrieve the texture from the PFX resource and add a CC3PFXEffectTexture
 		// linking the texture to the texture unit
-		CC3GLTexture* tex = [pfxRez getTextureNamed: texName];
+		CC3Texture* tex = [pfxRez getTextureNamed: texName];
 		if (tex) {
 			CC3PFXEffectTexture* effectTex = [CC3PFXEffectTexture new];
 			effectTex.texture = tex;

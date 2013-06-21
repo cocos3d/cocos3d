@@ -26,21 +26,21 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3PVRGLTexture.h for full API documentation.
+ * See header file CC3PVRTexture.h for full API documentation.
  */
 
-#import "CC3PVRGLTexture.h"
+#import "CC3PVRTexture.h"
 #import "CC3PVRTTexture.h"
 
 
 #pragma mark -
-#pragma mark CC3PVRGLTexture
+#pragma mark CC3PVRTexture
 
-@interface CC3GLTexture (TemplateMethods)
+@interface CC3Texture (TemplateMethods)
 -(void) deleteGLTexture;
 @end
 
-@implementation CC3PVRGLTexture
+@implementation CC3PVRTexture
 
 -(BOOL) shouldFlipVerticallyOnLoad { return NO; }
 -(void) setShouldFlipVerticallyOnLoad: (BOOL) shouldFlipVerticallyOnLoad {}
@@ -78,8 +78,8 @@
 	
 	// Update the texture parameters depending on whether the PVR file is 2D or cube-map.
 	self.textureParameters = self.isTextureCube
-								? [CC3GLTextureCube class].defaultTextureParameters
-								: [CC3GLTexture2D class].defaultTextureParameters;
+								? [CC3TextureCube class].defaultTextureParameters
+								: [CC3Texture2D class].defaultTextureParameters;
 }
 
 /** Replacing pixels not supported in compressed PVR textures. */

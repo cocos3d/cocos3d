@@ -29,7 +29,6 @@
 
 /** @file */	// Doxygen marker
 
-//#import "CC3OpenGLESTextures.h"
 #import "CC3NodeVisitor.h"
 #import "CCProtocols.h"
 
@@ -55,16 +54,21 @@ typedef enum {
 #pragma mark CC3TextureUnit
 
 /** 
- * CC3TextureUnit is used by CC3Texture to configure the GL texture unit to which the
- * texture is being applied. Notably, the texture unit defines how the texture is to
- * be combined with textures from other texture units in a multi-texture layout.
+ * In fixed rendering pipeline (without shaders), CC3TextureUnit is used by certain classes
+ * in the CC3Texture class-cluster to configure the GL texture environment to which the
+ * texture is being applied. Notably, the texture unit defines how the texture is to be
+ * combined with textures from other texture units in a multi-texture layout.
  *
- * With multi-texturing, several textures can be overlaid and combined in interesting
- * ways onto a single material. Each texture is processed by a GL texture unit, and
- * is combined with the textures already processed by other texture units. The source
- * and type of combining operation can be individually configured by subclasses of
- * this class. Support for bump-mapping as one of these combining configurations is
- * explicitly provided by the CC3BumpMapTextureUnit subclass.
+ * CC3TextureUnit is not typically used in a programmable rendering pipeline containing
+ * GLSL shaders. However, for certain techniques, such as object-space bump-mapping, a
+ * CC3TextureUnit can be used to carry additional environmental parameters for the shaders.
+ *
+ * With fixed-pipeline multi-texturing, several textures can be overlaid and combined in
+ * interesting ways onto a single material. Each texture is processed by a GL texture unit,
+ * and is combined with the textures already processed by other texture units. The source
+ * and type of combining operation can be individually configured by subclasses of this class.
+ * Support for bump-mapping as one of these combining configurations is explicitly provided
+ * by the CC3BumpMapTextureUnit subclass.
  *
  * This base CC3TextureUnit class permits setting a variety of texture environment
  * modes via the textureEnvironmentMode property. For the full range of configuration

@@ -1,5 +1,5 @@
 /*
- * CC3PVRGLTexture.h
+ * CC3PVRTexture.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -30,19 +30,27 @@
 /** @file */	// Doxygen marker
 
 
-#import "CC3GLTexture.h"
+#import "CC3Texture.h"
 #import "CCTexturePVR.h"
 
 
 #pragma mark -
-#pragma mark CC3PVRGLTexture
+#pragma mark CC3PVRTexture
 
 /** 
  * The representation of a PVR texture that has been loaded into the GL engine.
  *
  * This class is used for all 2D and cube-map textures loaded from a PVR file type.
+ *
+ * This class is part of a class-cluster under the parent CC3Texture class. Although you can
+ * invoke an instance creation method on this class directly, you will more commonly invoke
+ * them on the CC3Texture class instead. The creation and initialization methods will ensure
+ * that the correct subclass for the texture type, and in some cases, the texture file type,
+ * is created and returned. Because of this class-cluster structure, be aware that the class
+ * of the instance returned by an instance creation or initialization method may be different
+ * than the receiver of that method.
  */
-@interface CC3PVRGLTexture : CC3GLTexture {
+@interface CC3PVRTexture : CC3Texture {
 	BOOL _isTextureCube : 1;
 }
 
@@ -52,6 +60,12 @@
  */
 @property(nonatomic, assign) BOOL shouldFlipVerticallyOnLoad;
 
+/**
+ * PVR textures cannot be flipped after loading. This property is overridden so
+ * that changes are ignored, and to always return NO.
+ */
+@property(nonatomic, assign) BOOL shouldFlipHorizontallyOnLoad;
+
 @end
 
 
@@ -59,7 +73,7 @@
 #pragma mark CC3PVRTextureContent
 
 /**
- * A helper class used by the CC3PVRGLTexture class cluster during the loading of a
+ * A helper class used by the CC3PVRTexture class cluster during the loading of a
  * texture from a PVR file using the PowerVR library.
  */
 @interface CC3PVRTextureContent : NSObject {
@@ -81,7 +95,7 @@
 /**
  * Returns the pixel format of the texture.
  *
- * See the pixelFormat property of CC3GLTexture for the range of possible values.
+ * See the pixelFormat property of CC3Texture for the range of possible values.
  */
 @property(nonatomic, readonly) GLenum pixelFormat;
 
@@ -89,7 +103,7 @@
  * Returns the pixel data type.
  *
  * Possible values depend on the value of the pixelFormat property. See the pixelType
- * property of CC3GLTexture for the range of possible values.
+ * property of CC3Texture for the range of possible values.
  */
 @property(nonatomic, readonly) GLenum pixelType;
 

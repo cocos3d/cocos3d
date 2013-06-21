@@ -784,10 +784,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	GLint envMapDim = 256;
 	CC3GLRenderbuffer* depthBuff = [CC3GLRenderbuffer renderbufferWithSize: CC3IntSizeMake(envMapDim, envMapDim)
 															andPixelFormat: GL_DEPTH_COMPONENT16];
-	_envMapTex = [CC3GLEnvironmentMapTexture textureWithDepthAttachment: depthBuff];
+	_envMapTex = [CC3EnvironmentMapTexture textureCubeWithDepthAttachment: depthBuff];
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
-	[_teapotTextured addTexture: [CC3Texture textureWithGLTexture: _envMapTex]];
+	[_teapotTextured addTexture: _envMapTex];
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
 	_teapotTextured.material.reflectivity = 1.0;
 	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
@@ -834,7 +834,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3MeshNode* skyBox = [CC3SphereNode nodeWithName: @"SkyBox"];
 	[skyBox populateAsSphereWithRadius: 1600.0f andTessellation: CC3TessellationMake(24, 24)];
 	skyBox.shouldCullBackFaces = NO;
-	skyBox.texture = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	skyBox.texture = [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
 	[skyBox applyEffectNamed: @"SkyBox" inPFXResourceFile: @"EnvMap.pfx"];
 	[self addChild: skyBox];
 
@@ -1060,13 +1060,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	// Texture for the stamp overlay.
 	// Give it a configurable texture unit so we can play with the configuration.
-	_stampTex = [[CC3Texture textureFromFile: kSignStampTextureFile] retain];
+	_stampTex = [[CC3TextureUnitTexture textureFromFile: kSignStampTextureFile] retain];
 	_stampTex.textureUnit = [CC3ConfigurableTextureUnit textureUnit];
 	
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	_embossedStampTex = [[CC3Texture textureFromFile: kSignStampNormalsTextureFile] retain];
+	_embossedStampTex = [[CC3TextureUnitTexture textureFromFile: kSignStampNormalsTextureFile] retain];
 	
 	// Although there is also a dedicated CC3BumpMapTextureUnit that we'd usually
 	// use for bump-mapping, we use CC3ConfigurableTextureUnit instead, to demonstrate
@@ -1179,7 +1179,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	_headBumpTex = [[CC3Texture textureFromFile: kHeadBumpFile] retain];
+	_headBumpTex = [[CC3TextureUnitTexture textureFromFile: kHeadBumpFile] retain];
 	_headBumpTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
 	_headBumpTex.textureUnit.rgbNormalMap = kCC3DOT3RGB_YZX;
 	
@@ -1191,7 +1191,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// fringe of the model. So we'll just use linear filtering on the main texture.
 	// Comment out these two lines if you want to see the difference.
 	_headBumpTex.texture.minifyingFunction = GL_LINEAR;
-	_headTex.texture.minifyingFunction = GL_LINEAR;
+	_headTex.minifyingFunction = GL_LINEAR;
 
 	// Add the bump-map texture and the color texture to the material.
 	_floatingHead.material.texture = _headBumpTex;		// replace the dummy texture
@@ -1551,7 +1551,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// environment-map texture to each, and setting the reflectivity of each mesh node.
 	CC3Material* mat;
 	GLfloat lbReflect = 1.0;	// Lower the reflectivity towards zero to show some of the runner's suit.
-	CC3Texture* emTex = [CC3Texture textureCubeMapFromFilePattern: @"EnvMap%@.jpg"];
+	CC3Texture* emTex = [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
 	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
 	[mat addTexture: emTex];
 	mat.reflectivity = lbReflect;
@@ -1578,14 +1578,14 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Alpha is not required for this texture, so choose a more memory-efficient 16-bit RGB format.
 	// Similarly, since stencils will not be used, choose a more efficient 16-bit depth buffer.
 	_tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
-	_tvSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: GL_RGB
-														andPixelType: GL_UNSIGNED_SHORT_5_6_5];
+	_tvSurface.colorTexture = [CC3Texture textureWithPixelFormat: GL_RGB
+													andPixelType: GL_UNSIGNED_SHORT_5_6_5];
 	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
 
 	// Give the empty texture a name, and add it to the texture cache for later access.
 	_tvSurface.colorTexture.name = kTVRenderTextureName;
-	[CC3GLTexture addGLTexture: _tvSurface.colorTexture];
+	[CC3Texture addTexture: _tvSurface.colorTexture];
 
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
@@ -1606,6 +1606,22 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self addChild: tv];
 	
 	_isTVOn = NO;		// Indicate TV is displaying test card
+	
+	// Demonstrate the ability to extract a CCTexture2D from a CC3Texture.
+	// For some interesting fun, extract a cocos2d CCTexture2D instance from the texture
+	// underpinning the TV surface, and replace the cocos2d label node in the billboard held
+	// by the robot arm with a CCSprite holding the CCTexture2D. The robot arm ends up holding
+	// a smaller version of the TV screen. You have to touch the TV screen to activate it.
+	// Because the TV screen is only updated with new rendered content when the big-screen
+	// TV is viewable by the active camera, the portable TV held by the robot arm will only
+	// display dynamic video if the larger TV is in the camera view as well. You can comment
+	// out the optimization line in the drawToTVScreenWithVisitor: method to have both TV's
+	// show live video at all times.
+//	CCSprite* portableTV = [CCSprite spriteWithTexture: [_tvSurface.colorTexture asCCTexture2D]];
+//	portableTV.flipY = YES;
+//	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
+//	bb.uniformScale = 0.1;
+//	bb.billboard = portableTV;
 }
 
 /**
@@ -1639,10 +1655,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// whenever the view is resized.
 	CC3GLViewSurfaceManager* surfMgr = self.viewSurfaceManager;
 	_preProcSurface = [[CC3GLFramebuffer alloc] initWithSize: surfMgr.size];	// retained
-	_preProcSurface.colorTexture = [CC3GLTexture2D textureWithPixelFormat: surfMgr.colorTexelFormat
-															 andPixelType: surfMgr.colorTexelType];
-	_preProcSurface.depthTexture = [CC3GLTexture2D textureWithPixelFormat: surfMgr.depthTexelFormat
-															 andPixelType: surfMgr.depthTexelType];
+	_preProcSurface.colorTexture = [CC3Texture textureWithPixelFormat: surfMgr.colorTexelFormat
+														 andPixelType: surfMgr.colorTexelType];
+	_preProcSurface.depthTexture = [CC3Texture textureWithPixelFormat: surfMgr.depthTexelFormat
+														 andPixelType: surfMgr.depthTexelType];
 	[_preProcSurface validate];
 	[surfMgr addSurface: _preProcSurface];
 	
@@ -2132,7 +2148,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	emitter.position = ccp(0.0, 0.0);
 	emitter.duration = 0.75;
 	emitter.autoRemoveOnFinish = YES;
-
+	
 	// Create the 3D billboard node to hold the 2D particle emitter.
 	// The bounding volume is removed so that the flames will not be culled as the
 	// camera pans away from the flames. This is suitable since the particle system
@@ -3092,7 +3108,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) switchWoodenSign {
 	CC3Texture* mainTex = _woodenSign.texture;
-	CC3Texture* stampOverlay = _stampTex;
+	CC3TextureUnitTexture* stampOverlay = _stampTex;
 	CC3ConfigurableTextureUnit* stampTU = (CC3ConfigurableTextureUnit*)stampOverlay.textureUnit;
 
 	// If showing embossed DOT3 multi-texture, switch it to stamped texture with modulation.
@@ -3175,7 +3191,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 -(void) toggleTelevision {
 	_isTVOn = !_isTVOn;
 	NSString* tvTexName = _isTVOn ? kTVRenderTextureName : kTVTestCardFile;
-	_tvScreen.texture.texture = [CC3GLTexture getGLTextureNamed: tvTexName];
+	_tvScreen.texture = [CC3Texture getTextureNamed: tvTexName];
 }
 
 /** 

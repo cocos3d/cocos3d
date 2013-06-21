@@ -427,14 +427,12 @@ static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
 	self.shaderContext = another.shaderContext;		// retained
 	
 	[_texture release];
-	_texture = [another.texture copy];			// retained - don't want to trigger texturesHaveChanged
+	_texture = [another.texture retain];			// retained - don't want to trigger texturesHaveChanged
 	
 	// Remove any existing overlays and add the overlays from the other material.
 	[_textureOverlays removeAllObjects];
 	CCArray* otherOTs = another.textureOverlays;
-	for (CC3Texture* ot in otherOTs) {
-		[self addTexture: [ot autoreleasedCopy]];	// retained by collection
-	}
+	for (CC3Texture* ot in otherOTs) [self addTexture: ot];	// retained by collection
 }
 
 -(NSString*) fullDescription {
@@ -517,7 +515,7 @@ static GLuint lastAssignedMaterialTag;
 }
 
 /**
- * Draw the texture property and the texture overlays using separate GL texture units
+ * Draws the texture property and the texture overlays using separate GL texture units
  * The visitor keeps track of which texture unit is being processed, with each texture
  * incrementing the current texture unit index as it draws. GL texture units that were
  * not used by the texture and texture overlays are disabled.
@@ -525,11 +523,17 @@ static GLuint lastAssignedMaterialTag;
 -(void) drawTexturesWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	visitor.currentTextureUnitIndex = 0;
 
-	[_texture drawWithVisitor: visitor];
+	[self drawTexture: _texture withVisitor: visitor];
 
-	for (CC3Texture* ot in _textureOverlays) [ot drawWithVisitor: visitor];
+	for (CC3Texture* ot in _textureOverlays) [self drawTexture: ot withVisitor: visitor];
 	
 	[visitor disableUnusedTextureUnits];
+}
+
+/** Draws the specified texture to the GL engine, and then increments the texture unit. */
+-(void) drawTexture: (CC3Texture*) texture withVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[texture drawWithVisitor: visitor];
+	visitor.currentTextureUnitIndex += 1;	// Move to next texture unit
 }
 
 -(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {

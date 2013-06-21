@@ -63,7 +63,7 @@ cocos3d 2.0.0 - 2013/07/01
 		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
 		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
 		- Rendering to texture of both color and depth buffers permitted.
-	- Added CC3GLEnvironmentMapTexture as a target to dynamically render an environmental cube-map to.
+	- Added CC3EnvironmentMapTexture as a target to dynamically render an environmental cube-map to.
 		- CC3DemoMashUp demonstrates dynamic reflection generation (objects moving in a reflecton)
 	- Refactored CC3Scene drawScene method to support multi-pass rendering
 		- CC3Scene drawSceneContentsWithVisitor: template method can be used by app to customize rendering passes
@@ -106,16 +106,21 @@ cocos3d 2.0.0 - 2013/07/01
 		- [API change] CC3NodesResource expectsVerticallyFlippedTextures property now defaults to NO.
 			- if you have a POD model that expects the texture to be upside down, use the CC3PODResourceNode nodeFromFile:expectsVerticallyFlippedTextures: method, passing YES to indicate that the mesh expects the texture to be upside-down.
 				- see the addMascots method in CC3DemoMashUpScene for an example of this use.
-		- [API change] Renamed CC3Texture isFlippedVertically property to isUpsideDown and deprecated isFlippedVertically.
-	- Added CC3GLTexture class cluster to represent loaded textures:
-		- subclasses of CC3GLTexture support 2D, cube-map, and PVR textures
-		- [API change] CC3Texture texture property now contains instance of CC3GLTexture instead of CC3Texture2D.
-		- [API change] A number of CC3Texture properties have been deprecated and moved to the contained CC3GLTexture.
-		- CC3Texture, CC3GLTexture2D & CC3GLTextureCube can now be created from CGImage already in memory.
-		- Empty CC3GLTexture2D & CC3GLTextureCube can be created for use as a rendering surface.
+		- [API change] Renamed CC3Texture isFlippedVertically property to isUpsideDown.
+	- [API change] Added CC3Texture class cluster to represent loaded textures:
+		- subclasses of CC3Texture support 2D, cube-map, and PVR textures
+		- [API change] CC3Texture no longer supports texture units
+			- [API change] Use CC3TextureUnitTexture subclass when a texture unit required
+		- CC3Textures can now be created from CGImage already in memory.
+		- Empty CC3Textures can be created for use as a rendering surface.
+		- [API change] CC3Texture no longer holds a CCTexture2D instance, but a CCTexture2D can be created from a CC3Texture via the asCCTexture2D method.
 	- Improved support for NPOT textures
-		- CC3GLTexture only generates mipmaps if texture is POT
-		- CC3GLTexture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
+		- CC3Texture only generates mipmaps if texture is POT
+		- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
+
+- Added tools to help automate the creation of many POD files from COLLADA and Blender:
+	- Tools available in Tools/Blender-POD Batch Converter folder
+	- Contributed by Nikita Medvedev (@medvedNick). Many thanks!
 
 - Added CC3Remove action to remove a node as part of an action sequence. Can be used as part of a CCSequence to remove a node after some other action, such as CCFadeOut, has finished.
 

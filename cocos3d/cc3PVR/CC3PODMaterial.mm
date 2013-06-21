@@ -113,7 +113,8 @@ static GLfloat shininessExpansionFactor = 128.0f;
  */
 -(void) addBumpMapTexture: (GLint) aPODTexIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if (aPODTexIndex >= 0 && aPODTexIndex < (GLint)aPODRez.textureCount) {
-		CC3Texture* bmTex = [aPODRez textureAtIndex: aPODTexIndex];
+		CC3Texture* tex = [aPODRez textureAtIndex: aPODTexIndex];
+		CC3TextureUnitTexture* bmTex = [CC3TextureUnitTexture textureWithTexture: tex];
 		bmTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
 		[self addTexture: bmTex];
 	}

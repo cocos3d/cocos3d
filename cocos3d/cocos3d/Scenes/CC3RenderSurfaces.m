@@ -179,9 +179,9 @@
 
 
 #pragma mark -
-#pragma mark CC3GLTextureFramebufferAttachment
+#pragma mark CC3TextureFramebufferAttachment
 
-@implementation CC3GLTextureFramebufferAttachment
+@implementation CC3TextureFramebufferAttachment
 
 @synthesize face=_face, mipmapLevel=_mipmapLevel;
 
@@ -190,9 +190,9 @@
 	[super dealloc];
 }
 
--(CC3GLTexture*) texture { return _texture; }
+-(CC3Texture*) texture { return _texture; }
 
--(void) setTexture: (CC3GLTexture*) texture {
+-(void) setTexture: (CC3Texture*) texture {
 	if (texture == _texture) return;
 	[_texture release];
 	_texture = [texture retain];
@@ -233,23 +233,23 @@
 
 +(id) attachment { return [[[self alloc] init] autorelease]; }
 
--(id) initWithTexture: (CC3GLTexture*) texture {
+-(id) initWithTexture: (CC3Texture*) texture {
 	return [self initWithTexture: texture usingFace: texture.initialAttachmentFace];
 }
 
-+(id) attachmentWithTexture: (CC3GLTexture*) texture {
-	return [[((CC3GLTextureFramebufferAttachment*)[self alloc]) initWithTexture: texture] autorelease];
++(id) attachmentWithTexture: (CC3Texture*) texture {
+	return [[((CC3TextureFramebufferAttachment*)[self alloc]) initWithTexture: texture] autorelease];
 }
 
--(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face {
+-(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
 	return [self initWithTexture: texture usingFace: face andLevel: 0];
 }
 
-+(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face {
++(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face {
 	return [[[self alloc] initWithTexture: texture usingFace: face ] autorelease];
 }
 
--(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
+-(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
 	if ( (self = [super init]) ) {
 		_face = face;
 		_mipmapLevel = mipmapLevel;
@@ -258,7 +258,7 @@
 	return self;
 }
 
-+(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
++(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel {
 	return [[[self alloc] initWithTexture: texture usingFace: face andLevel: mipmapLevel] autorelease];
 }
 
@@ -332,20 +332,20 @@
 	[attachment resizeTo: mySize];
 }
 
--(CC3GLTexture*) colorTexture {
-	return ((CC3GLTextureFramebufferAttachment*)self.colorAttachment).texture;
+-(CC3Texture*) colorTexture {
+	return ((CC3TextureFramebufferAttachment*)self.colorAttachment).texture;
 }
 
--(void) setColorTexture: (CC3GLTexture*) colorTexture {
-	self.colorAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: colorTexture];
+-(void) setColorTexture: (CC3Texture*) colorTexture {
+	self.colorAttachment = [CC3TextureFramebufferAttachment attachmentWithTexture: colorTexture];
 }
 
--(CC3GLTexture*) depthTexture {
-	return ((CC3GLTextureFramebufferAttachment*)self.depthAttachment).texture;
+-(CC3Texture*) depthTexture {
+	return ((CC3TextureFramebufferAttachment*)self.depthAttachment).texture;
 }
 
--(void) setDepthTexture: (CC3GLTexture*) depthTexture {
-	self.depthAttachment = [CC3GLTextureFramebufferAttachment attachmentWithTexture: depthTexture];
+-(void) setDepthTexture: (CC3Texture*) depthTexture {
+	self.depthAttachment = [CC3TextureFramebufferAttachment attachmentWithTexture: depthTexture];
 }
 
 -(CC3IntSize) size {
@@ -479,9 +479,9 @@
 
 
 #pragma mark -
-#pragma mark CC3GLEnvironmentMapTexture
+#pragma mark CC3EnvironmentMapTexture
 
-@implementation CC3GLEnvironmentMapTexture
+@implementation CC3EnvironmentMapTexture
 
 @synthesize renderSurface=_renderSurface;
 @synthesize numberOfFacesPerSnapshot=_numberOfFacesPerSnapshot;
@@ -530,7 +530,7 @@
 		[self moveToNextFace];
 		
 		// Bind the texture face to the framebuffer
-		CC3GLTextureFramebufferAttachment* fbAtt = (CC3GLTextureFramebufferAttachment*)_renderSurface.colorAttachment;
+		CC3TextureFramebufferAttachment* fbAtt = (CC3TextureFramebufferAttachment*)_renderSurface.colorAttachment;
 		fbAtt.face = _currentFace;
 		[fbAtt bindToFramebuffer: _renderSurface.framebufferID asAttachment: GL_COLOR_ATTACHMENT0];
 		
@@ -669,20 +669,20 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [self initWithColorPixelFormat: GL_RGBA
-						andColorPixelType: GL_UNSIGNED_BYTE
-					   andDepthAttachment: depthAttachment];
+-(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [self initCubeWithColorPixelFormat: GL_RGBA
+							andColorPixelType: GL_UNSIGNED_BYTE
+						   andDepthAttachment: depthAttachment];
 }
 
-+(id) textureWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initWithDepthAttachment: depthAttachment] autorelease];
++(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initCubeWithDepthAttachment: depthAttachment] autorelease];
 }
 
--(id) initWithColorPixelFormat: (GLenum) colorFormat
-			 andColorPixelType: (GLenum) colorType
-			andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	if ( (self = [super initWithPixelFormat: colorFormat andPixelType: colorType]) ) {
+-(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
+				 andColorPixelType: (GLenum) colorType
+				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	if ( (self = [super initCubeWithPixelFormat: colorFormat andPixelType: colorType]) ) {
 		_faceCount = 0.0f;
 		_numberOfFacesPerSnapshot = 1.0f;
 		_currentFace = GL_ZERO;
@@ -694,12 +694,12 @@
 	return self;
 }
 
-+(id) textureWithColorPixelFormat: (GLenum) colorFormat
-				andColorPixelType: (GLenum) colorType
-			   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
-	return [[[self alloc] initWithColorPixelFormat: colorFormat
-								 andColorPixelType: colorType
-								andDepthAttachment: depthAttachment] autorelease];
++(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
+					andColorPixelType: (GLenum) colorType
+				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment {
+	return [[[self alloc] initCubeWithColorPixelFormat: colorFormat
+									 andColorPixelType: colorType
+									andDepthAttachment: depthAttachment] autorelease];
 }
 
 @end

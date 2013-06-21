@@ -117,17 +117,19 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * Each texture unit combines its texture with the output of the previous texture unit
  * in the chain. Combining textures is quite flexible under OpenGL, and there are many
  * ways that each texture can be combined with the output of the previous texture unit.
- * The way that a particular texture combines with the previous textures is defined by
- * an instance of CC3TextureUnit, held in the textureUnit property of each texture that
- * was added to the material.
  *
- * For example, to configure a material for bump-mapping, add a texture that contains a
- * normal vector at each pixel instead of a color, and set the textureUnit property of
- * the texture to a CC3BumpMapTextureUnit. You can then combine the output of this
- * bump-mapping with an additional texture that contains the image that will be visible,
- * to provide a detailed 3D bump-mapped surface. To do so, add that second texture to
- * the material, with a texture unit that defines how that addtional texture is to be
- * combined with the output of the bump-mapped texture.
+ * Under fixed-pipeline rendering, such as with OpenGL ES 1.1, the way that a particular
+ * texture combines with the previous textures is defined by an instance of CC3TextureUnit,
+ * held in the textureUnit property of each texture that was added to the material.
+ * To support a texture unit, the texture must be of type CC3TextureUnitTexture.
+ *
+ * For example, to configure a material for bump-mapping, add a CC3TextureUnitTexture
+ * instance that contains a normal vector at each pixel instead of a color, and set the
+ * textureUnit property of the texture to a CC3BumpMapTextureUnit. You can then combine 
+ * the output of this bump-mapping with an additional texture that contains the image
+ * that will be visible, to provide a detailed 3D bump-mapped surface. To do so, add that
+ * second texture to the material, with a texture unit that defines how that addtional
+ * texture is to be combined with the output of the bump-mapped texture.
  *
  * The maximum number of texture units is platform dependent, and can be read from the
  * CC3OpenGL.sharedGL.maxNumberOfTextureUnits property. This effectively defines how many

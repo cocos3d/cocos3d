@@ -476,28 +476,6 @@
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3PVRFoundation.mm</string>
 		</dict>
-		<key>cocos3d/cc3PVR/CC3PVRGLTexture.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/CC3PVRGLTexture.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cc3PVR/CC3PVRGLTexture.mm</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cc3PVR</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cc3PVR/CC3PVRGLTexture.mm</string>
-		</dict>
 		<key>cocos3d/cc3PVR/CC3PVROpenGLFoundation.h</key>
 		<dict>
 			<key>Group</key>
@@ -531,6 +509,28 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.m</string>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PVRTexture.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PVRTexture.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cc3PVR/CC3PVRTexture.mm</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cc3PVR</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cc3PVR/CC3PVRTexture.mm</string>
 		</dict>
 		<key>cocos3d/cc3PVR/CC3PVRTModelPOD.h</key>
 		<dict>
@@ -1192,30 +1192,6 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Materials/CC3GLTexture.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Materials</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Materials/CC3GLTexture.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Materials/CC3GLTexture.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Materials</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Materials/CC3GLTexture.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Materials/CC3Material.h</key>
 		<dict>
@@ -3318,11 +3294,11 @@
 		<string>cocos3d/cc3PVR/CC3PODVertexSkinning.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRFoundation.mm</string>
-		<string>cocos3d/cc3PVR/CC3PVRGLTexture.h</string>
-		<string>cocos3d/cc3PVR/CC3PVRGLTexture.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVROpenGLFoundation.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRShamanGLProgramSemantics.m</string>
+		<string>cocos3d/cc3PVR/CC3PVRTexture.h</string>
+		<string>cocos3d/cc3PVR/CC3PVRTexture.mm</string>
 		<string>cocos3d/cc3PVR/CC3PVRTModelPOD.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRTPFXParser.h</string>
 		<string>cocos3d/cc3PVR/CC3PVRTTexture.h</string>
@@ -3377,8 +3353,6 @@
 		<string>cocos3d/cocos3d/Animation/CC3Actions.m</string>
 		<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.h</string>
 		<string>cocos3d/cocos3d/Animation/CC3NodeAnimation.m</string>
-		<string>cocos3d/cocos3d/Materials/CC3GLTexture.h</string>
-		<string>cocos3d/cocos3d/Materials/CC3GLTexture.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3Material.h</string>
 		<string>cocos3d/cocos3d/Materials/CC3Material.m</string>
 		<string>cocos3d/cocos3d/Materials/CC3Texture.h</string>

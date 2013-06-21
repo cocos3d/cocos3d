@@ -153,6 +153,7 @@ typedef enum {
  *   - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
  *   - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
  *   - Skybox using a cube mapped texture.
+ *   - cocos2d CCSprite displaying the television screen rendered texture
  *
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached to the
  * end of the rotating arm, demonstrating the technique of embedding a 2D CCNode into the 3D scene.
@@ -577,17 +578,17 @@ typedef enum {
 	CC3MeshNode* _woodenSign;
 	CC3MeshNode* _floatingHead;
 	CC3Texture* _signTex;
-	CC3Texture* _stampTex;
-	CC3Texture* _embossedStampTex;
+	CC3TextureUnitTexture* _stampTex;
+	CC3TextureUnitTexture* _embossedStampTex;
 	CC3Texture* _headTex;
-	CC3Texture* _headBumpTex;
+	CC3TextureUnitTexture* _headBumpTex;
 	CC3Camera* _robotCam;
 	CC3Light* _robotLamp;
 	CC3Node* _origCamTarget;
 	CC3Node* _camTarget;
 	CC3Camera* _runnerCam;
 	CC3Light* _runnerLamp;
-	CC3GLEnvironmentMapTexture* _envMapTex;
+	CC3EnvironmentMapTexture* _envMapTex;
 	CC3MeshNode* _tvScreen;
 	CC3Node* _selectedNode;
 	CC3GLFramebuffer* _tvSurface;

@@ -29,7 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLTexture.h"
+#import "CC3Texture.h"
 
 
 #pragma mark -
@@ -371,14 +371,14 @@
 
 
 #pragma mark -
-#pragma mark CC3GLTextureFramebufferAttachment
+#pragma mark CC3TextureFramebufferAttachment
 
 /**
- * CC3GLTextureFramebufferAttachment is a framebuffer attachment that uses a texture
+ * CC3TextureFramebufferAttachment is a framebuffer attachment that uses a texture
  * as the rendering buffer.
  */
-@interface CC3GLTextureFramebufferAttachment : NSObject <CC3FramebufferAttachment> {
-	CC3GLTexture* _texture;
+@interface CC3TextureFramebufferAttachment : NSObject <CC3FramebufferAttachment> {
+	CC3Texture* _texture;
 	GLenum _face;
 	GLint _mipmapLevel;
 }
@@ -390,7 +390,7 @@
  * verticalWrappingFunction properties of the texture will be set to GL_CLAMP_TO_EDGE,
  * as required when using a texture as a rendering target.
  */
-@property(nonatomic, retain) CC3GLTexture* texture;
+@property(nonatomic, retain) CC3Texture* texture;
 
 /** 
  * The target face within the texture into which rendering is to occur.
@@ -432,37 +432,37 @@
 +(id) attachment;
 
 /** Initializes this instance to render to mipmap level zero of the specified 2D texture. */
--(id) initWithTexture: (CC3GLTexture*) texture;
+-(id) initWithTexture: (CC3Texture*) texture;
 
 /** 
  * Allocates and initializes an autoreleased instance to render to mipmap level zero
  * of the specified 2D texture. 
  */
-+(id) attachmentWithTexture: (CC3GLTexture*) texture;
++(id) attachmentWithTexture: (CC3Texture*) texture;
 
 /**
  * Initializes this instance to render to mipmap level zero of the specified face of the
  * specified texture.
  */
--(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face;
+-(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face;
 
 /**
  * Allocates and initializes an autoreleased instance to render to mipmap level zero of the
  * specified face of the specified texture.
  */
-+(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face;
++(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face;
 
 /**
  * Initializes this instance to render to the specified mipmap level of the specified face
  * of the specified texture.
  */
--(id) initWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
+-(id) initWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
 
 /**
  * Allocates and initializes an autoreleased instance to render to the specified mipmap level
  * of the specified face of the specified texture.
  */
-+(id) attachmentWithTexture: (CC3GLTexture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
++(id) attachmentWithTexture: (CC3Texture*) texture usingFace: (GLenum) face andLevel: (GLint) mipmapLevel;
 
 @end
 
@@ -543,27 +543,27 @@
  * If color content is being rendered to a texture, this property can be used to access
  * that texture.
  *
- * Setting this property wraps the specified texture in a CC3GLTextureFramebufferAttachment
+ * Setting this property wraps the specified texture in a CC3TextureFramebufferAttachment
  * instance and sets it into the colorAttachment property.
  *
  * When this property is set, if the size propery of this surface is not zero, and the
  * texture has no size, or has a size that is different than the size of this surface,
  * the texture is resized.
  *
- * Reading this property returns the texture within the CC3GLTextureFramebufferAttachment
+ * Reading this property returns the texture within the CC3TextureFramebufferAttachment
  * in the colorAttachment property. It is an error to attempt to read this property if the
- * depthAttachment property does not contain an instance of CC3GLTextureFramebufferAttachment.
+ * depthAttachment property does not contain an instance of CC3TextureFramebufferAttachment.
  *
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) CC3GLTexture* colorTexture;
+@property(nonatomic, retain) CC3Texture* colorTexture;
 
 /**
  * If depth content is being rendered to a texture, this property can be used to access
  * that texture.
  *
- * Setting this property wraps the specified texture in a CC3GLTextureFramebufferAttachment
+ * Setting this property wraps the specified texture in a CC3TextureFramebufferAttachment
  * instance and sets it into the depthAttachment property, as well as the stencilAttachment
  * property, if the depth format of the texture includes a stencil component.
  *
@@ -571,14 +571,14 @@
  * texture has no size, or has a size that is different than the size of this surface,
  * the texture is resized.
  *
- * Reading this property returns the texture within the CC3GLTextureFramebufferAttachment
+ * Reading this property returns the texture within the CC3TextureFramebufferAttachment
  * in the depthAttachment property. It is an error to attempt to read this property if the
- * depthAttachment property does not contain an instance of CC3GLTextureFramebufferAttachment.
+ * depthAttachment property does not contain an instance of CC3TextureFramebufferAttachment.
  *
  * To save memory, textures can be shared between surfaces of the same size, if the contents
  * of the texture are only required for the duration of the rendering to each surface.
  */
-@property(nonatomic, retain) CC3GLTexture* depthTexture;
+@property(nonatomic, retain) CC3Texture* depthTexture;
 
 /** 
  * The size of this framebuffer surface in pixels.
@@ -667,13 +667,13 @@
 
 
 #pragma mark -
-#pragma mark CC3GLEnvironmentMapTexture
+#pragma mark CC3EnvironmentMapTexture
 
 /** 
- * A texture that supports an environment map created by rendering the scene from the node's
- * perspective in all six axis directions.
+ * A texture that supports an environment map created by rendering the scene from the
+ * node's perspective in all six axis directions.
  */
-@interface CC3GLEnvironmentMapTexture : CC3GLTextureCube {
+@interface CC3EnvironmentMapTexture : CC3TextureCube {
 	CC3GLFramebuffer* _renderSurface;
 	GLfloat _numberOfFacesPerSnapshot;
 	GLfloat _faceCount;
@@ -760,7 +760,7 @@
  *
  * The cube-map texture will have the same size as the specified depth attachment.
  */
--(id) initWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+-(id) initCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 /**
  * Allocates and initializes an autoreleased instance with a rendering surface constructed
@@ -770,7 +770,7 @@
  *
  * The cube-map texture will have the same size as the specified depth attachment.
  */
-+(id) textureWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
++(id) textureCubeWithDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 /**
  * Initializes this instance with a rendering surface constructed from a new cube-map texture
@@ -784,9 +784,9 @@
  * you can use the initWithDepthAttachment: method, which invokes this method with GL_RGBA as
  * the colorFormat and GL_UNSIGNED_BYTE as the colorType.
  */
--(id) initWithColorPixelFormat: (GLenum) colorFormat
-			 andColorPixelType: (GLenum) colorType
-			andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
+-(id) initCubeWithColorPixelFormat: (GLenum) colorFormat
+				 andColorPixelType: (GLenum) colorType
+				andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 /**
  * Allocates and initializes an autoreleased instance with a rendering surface constructed
@@ -800,9 +800,9 @@
  * you can use the textureWithDepthAttachment: method, which invokes this method with GL_RGBA
  * as the colorFormat and GL_UNSIGNED_BYTE as the colorType.
  */
-+(id) textureWithColorPixelFormat: (GLenum) colorFormat
-				andColorPixelType: (GLenum) colorType
-			   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
++(id) textureCubeWithColorPixelFormat: (GLenum) colorFormat
+					andColorPixelType: (GLenum) colorType
+				   andDepthAttachment: (id<CC3FramebufferAttachment>) depthAttachment;
 
 @end
 
