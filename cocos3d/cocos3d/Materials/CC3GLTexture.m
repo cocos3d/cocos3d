@@ -188,7 +188,7 @@ static BOOL _shouldGenerateMipmaps = YES;
 }
 
 -(GLenum) horizontalWrappingFunction {
-	return self.isPOTWidth ? _horizontalWrappingFunction : GL_CLAMP_TO_EDGE;
+	return self.isPOT ? _horizontalWrappingFunction : GL_CLAMP_TO_EDGE;
 }
 
 -(void) setHorizontalWrappingFunction: (GLenum) horizontalWrappingFunction {
@@ -197,7 +197,7 @@ static BOOL _shouldGenerateMipmaps = YES;
 }
 
 -(GLenum) verticalWrappingFunction {
-	return self.isPOTHeight ? _verticalWrappingFunction : GL_CLAMP_TO_EDGE;
+	return self.isPOT ? _verticalWrappingFunction : GL_CLAMP_TO_EDGE;
 }
 
 -(void) setVerticalWrappingFunction: (GLenum) verticalWrappingFunction {
