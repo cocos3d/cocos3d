@@ -407,7 +407,7 @@ static GLuint lastAssignedVertexArrayTag;
 	if (_bufferID) {											// use GL buffer if it exists
 		LogTrace(@"%@ binding GL buffer containing %u vertices", self, _vertexCount);
 		[visitor.gl bindBuffer: _bufferID toTarget: self.bufferTarget];
-		[self bindContent: (GLvoid*)_elementOffset toAttributeAt: vaIdx withVisitor: visitor];
+		[self bindContent: ((GLvoid*)0 + _elementOffset) toAttributeAt: vaIdx withVisitor: visitor];	// Cast handles OSX 64-bit pointers
 	} else if (_vertexCount && _vertices) {					// use local client array if it exists
 		LogTrace(@"%@ using local array containing %u vertices", self, _vertexCount);
 		[visitor.gl unbindBufferTarget: self.bufferTarget];

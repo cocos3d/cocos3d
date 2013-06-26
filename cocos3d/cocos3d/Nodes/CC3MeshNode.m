@@ -688,7 +688,7 @@
 
 #pragma mark Drawing
 
--(GLenum) drawingMode { return _mesh ? _mesh.drawingMode : GL_TRIANGLE_STRIP; }
+-(GLenum) drawingMode { return _mesh ? _mesh.drawingMode : GL_TRIANGLES; }
 
 -(void) setDrawingMode: (GLenum) aMode { _mesh.drawingMode = aMode; }
 

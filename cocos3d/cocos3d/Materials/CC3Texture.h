@@ -473,14 +473,16 @@
  *   - GL_MIRRORED_REPEAT: Repeats the texture across the mesh, altering between
  *                         the texture and a mirror-image of the texture.
  *
- * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the width of this texture is a
- * power-of-two. If the width is not a power-of-two, this property will always return GL_CLAMP_TO_EDGE.
+ * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the isPOT property returns
+ * YES, indicating that both width and height dimensions of this texture are a power-of-two.
+ * Otherwise, this property will always return GL_CLAMP_TO_EDGE.
  *
  * This property must be set to GL_CLAMP_TO_EDGE when using this texture as a rendering target
  * as an attachment to a rendering surface such as a framebuffer ("render-to-texture").
  *
- * The initial value of this property is set by the defaultTextureParameters class-side property,
- * and will be GL_REPEAT if the width of this texture is a power-of-two, or GL_CLAMP_TO_EDGE if not.
+ * The initial value of this property is set by the defaultTextureParameters class-side
+ * property, and will be GL_REPEAT if the dimensions of this texture are a power-of-two,
+ * or GL_CLAMP_TO_EDGE if not.
  */
 @property(nonatomic, assign) GLenum horizontalWrappingFunction;
 
@@ -495,36 +497,40 @@
  *   - GL_MIRRORED_REPEAT: Repeats the texture across the mesh, altering between
  *                         the texture and a mirror-image of the texture.
  *
- * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the height of this texture is a
- * power-of-two. If the height is not a power-of-two, this property will always return GL_CLAMP_TO_EDGE.
+ * The values GL_REPEAT and GL_MIRRORED_REPEAT can only be set if the isPOT property returns
+ * YES, indicating that both width and height dimensions of this texture are a power-of-two.
+ * Otherwise, this property will always return GL_CLAMP_TO_EDGE.
  *
  * This property must be set to GL_CLAMP_TO_EDGE when using this texture as a rendering target
  * as an attachment to a rendering surface such as a framebuffer ("render-to-texture").
  *
- * The initial value of this property is set by the defaultTextureParameters class-side property,
- * and will be GL_REPEAT if the height of this texture is a power-of-two, or GL_CLAMP_TO_EDGE if not.
+ * The initial value of this property is set by the defaultTextureParameters class-side
+ * property, and will be GL_REPEAT if the dimensions of this texture are a power-of-two,
+ * or GL_CLAMP_TO_EDGE if not.
  */
 @property(nonatomic, assign) GLenum verticalWrappingFunction;
 
 /**
- * A convenience method to accessing the following four texture parameters
+ * A convenience method to accessing the following four texture parameter properties
  * using a cocos2d ccTexParams structure:
  *   - minifyingFunction
  *   - magnifyingFunction
  *   - horizontalWrappingFunction
- *   - shouldRepeatVertically
+ *   - verticalWrappingFunction
  *
- * The initial value of this property is set by the defaultTextureParameters class-side property.
+ * The value of each component of this structure will be the same as the corresponding
+ * property on this instance. See the notes for each of those properties for an indication
+ * of the initial values for each of those properties.
  */
 @property(nonatomic, assign) ccTexParams textureParameters;
 
 /**
- * The default values for the textureParameters property
+ * The default values for the textureParameters property 
  * (with the initial values of this class-side property):
  *   - minifyingFunction (GL_LINEAR_MIPMAP_NEAREST)
  *   - magnifyingFunction (GL_LINEAR)
  *   - horizontalWrappingFunction (GL_REPEAT)
- *   - shouldRepeatVertically (GL_REPEAT)
+ *   - verticalWrappingFunction (GL_REPEAT)
  */
 +(ccTexParams) defaultTextureParameters;
 
@@ -534,7 +540,7 @@
  *   - minifyingFunction (GL_LINEAR_MIPMAP_NEAREST)
  *   - magnifyingFunction (GL_LINEAR)
  *   - horizontalWrappingFunction (GL_REPEAT)
- *   - shouldRepeatVertically (GL_REPEAT)
+ *   - verticalWrappingFunction (GL_REPEAT)
  *
  * You can change the value of this class-side property to affect
  * any textures subsequently created or loaded from a file.

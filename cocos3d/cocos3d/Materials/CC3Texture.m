@@ -31,6 +31,7 @@
 
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
+#import "CC3OSXExtensions.h"
 
 
 #pragma mark -
@@ -215,7 +216,7 @@ static BOOL _shouldGenerateMipmaps = YES;
 }
 
 -(GLenum) horizontalWrappingFunction {
-	return self.isPOTWidth ? _horizontalWrappingFunction : GL_CLAMP_TO_EDGE;
+	return self.isPOT ? _horizontalWrappingFunction : GL_CLAMP_TO_EDGE;
 }
 
 -(void) setHorizontalWrappingFunction: (GLenum) horizontalWrappingFunction {
@@ -224,7 +225,7 @@ static BOOL _shouldGenerateMipmaps = YES;
 }
 
 -(GLenum) verticalWrappingFunction {
-	return self.isPOTHeight ? _verticalWrappingFunction : GL_CLAMP_TO_EDGE;
+	return self.isPOT ? _verticalWrappingFunction : GL_CLAMP_TO_EDGE;
 }
 
 -(void) setVerticalWrappingFunction: (GLenum) verticalWrappingFunction {
@@ -288,13 +289,6 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	[gl setTextureMagnifyFunc: self.magnifyingFunction inTarget: target at: tuIdx];
 	[gl setTextureHorizWrapFunc: self.horizontalWrappingFunction inTarget: target at: tuIdx];
 	[gl setTextureVertWrapFunc: self.verticalWrappingFunction inTarget: target at: tuIdx];
-	
-	LogTrace(@"Setting parameters for %@ minifying: %@, magnifying: %@, horiz wrap: %@, vert wrap: %@, ",
-			 self.fullDescription,
-			 NSStringFromGLEnum(self.minifyingFunction),
-			 NSStringFromGLEnum(self.magnifyingFunction),
-			 NSStringFromGLEnum(self.horizontalWrappingFunction),
-			 NSStringFromGLEnum(self.verticalWrappingFunction));
 	
 	_texParametersAreDirty = NO;
 }
@@ -623,9 +617,22 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ is %@flipped vertically and has %@ mipmap",
-			[super description], (self.isUpsideDown ? @"" : @"not "),
-			(self.hasMipmap ? @"a" : @"no")];
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];
+	[desc appendFormat: @"%@", self.description];
+	[desc appendFormat: @" (ID: %u)", self.textureID];
+	[desc appendFormat: @" of type %@", (self.isTextureCube ? @"cube" : @"2D")];
+	[desc appendFormat: @", size: %@", NSStringFromCC3IntSize(self.size)];
+	[desc appendFormat: @", coverage: %@", NSStringFromCGSize(self.coverage)];
+	[desc appendFormat: @", pixel format/type: %@/%@", NSStringFromGLEnum(self.pixelFormat),
+															NSStringFromGLEnum(self.pixelType)];
+	[desc appendFormat: @", is %@upside down", (self.isUpsideDown ? @"" : @"not ")];
+	[desc appendFormat: @", has %@ mipmap", (self.hasMipmap ? @"a" : @"no")];
+	[desc appendFormat: @", alpha is %@pre-multiplied", (self.hasPremultipliedAlpha ? @"" : @"not ")];
+	[desc appendFormat: @", minifying: %@", NSStringFromGLEnum(self.minifyingFunction)];
+	[desc appendFormat: @", magnifying: %@", NSStringFromGLEnum(self.magnifyingFunction)];
+	[desc appendFormat: @", horz wrap: %@", NSStringFromGLEnum(self.horizontalWrappingFunction)];
+	[desc appendFormat: @", vert wrap: %@", NSStringFromGLEnum(self.verticalWrappingFunction)];
+	return desc;
 }
 
 // Class variable tracking the most recent tag value assigned for CC3Textures.
@@ -1127,7 +1134,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 -(NSString*) fullDescription {
-	return [NSString stringWithFormat: @"%@ for %@", super.description, _texture];
+	return [NSString stringWithFormat: @"%@ with texture %@ in %@", self,
+			_texture.fullDescription, _textureUnit.fullDescription];
 }
 
 @end
@@ -1422,7 +1430,7 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 /** Clear the name so that  */
 -(void) dealloc {
 	CC2_TEX_NAME = 0;
-	LogDebug(@"Deallocating %@ (GL ID = %u)", self, CC2_TEX_NAME);
+	LogTrace(@"Deallocating %@ (GL ID = %u)", self, CC2_TEX_NAME);
 	[super dealloc];
 }
 

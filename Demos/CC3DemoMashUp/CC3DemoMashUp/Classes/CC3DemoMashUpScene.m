@@ -40,11 +40,9 @@
 #import "CCLabelTTF.h"
 #import "CGPointExtension.h"
 #import "CCTouchDispatcher.h"
-#import "CCParticleExamples.h"
 #import "CC3PODNode.h"
 #import "CC3PODResourceNode.h"
 #import "CC3BoundingVolumes.h"
-#import "CC3ParametricMeshNodes.h"
 #import "CC3PointParticleSamples.h"
 #import "CC3MeshParticleSamples.h"
 #import "CC3MeshParticles.h"
@@ -694,8 +692,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Adds a parametric textured cube that rotates by swiping, similar to the die cube
- * (see the note for the addDieCube method to learn how this is done.
+ * Adds a parametric textured cube that rotates by swiping, similar to the die cube.
  *
  * This is a single box mesh (not constructed from six separate plane meshes), and is
  * wrapped by a single texture, that wraps around all six sides of the cube. The texture

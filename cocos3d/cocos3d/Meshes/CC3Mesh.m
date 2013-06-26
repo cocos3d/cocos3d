@@ -1344,7 +1344,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 -(GLenum) drawingMode {
 	if (_vertexIndices) return _vertexIndices.drawingMode;
 	if (_vertexLocations) return _vertexLocations.drawingMode;
-	return super.drawingMode;
+	return GL_TRIANGLES;
 }
 
 -(void) setDrawingMode: (GLenum) aMode {
