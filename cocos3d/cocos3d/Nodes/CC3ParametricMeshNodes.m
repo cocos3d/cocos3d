@@ -33,6 +33,11 @@
 #import "CGPointExtension.h"
 
 
+@interface CC3Node (TemplateMethods)
+@property(nonatomic, assign, readwrite) CC3Node* parent;
+@end
+
+
 #pragma mark -
 #pragma mark CC3MeshNode parametric shapes extension
 

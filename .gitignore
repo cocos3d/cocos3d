@@ -16,8 +16,9 @@ dsa_priv.pem
 *.perspectivev3
 *.pbxuser
 
-# Xcode 4
+# Xcode
 xcuserdata/
+xcshareddata/
 project.xcworkspace/
 
 # cocos2d
