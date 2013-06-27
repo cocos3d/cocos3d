@@ -3407,7 +3407,7 @@ static void InterleaveArray(
 		memcpy(pInterleaved + i * nStride + nOffset, (char*)data.pData + i * data.nStride, data.nStride);
 
 	FREE(data.pData);
-	data.pData		= (unsigned char*)nOffset;
+	data.pData		= ((unsigned char*)0 + nOffset);	// patched for cocos3d by Bill Hollings
 	data.nStride	= nStride;
 	nOffset			+= PVRTModelPODDataStride(data) + nPadding;
 }

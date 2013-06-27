@@ -58,6 +58,10 @@
 
 -(void) setPodMaterialIndex: (GLint) aPODIndex { _podMaterialIndex = aPODIndex; }
 
+-(GLuint) podUserDataSize { return _podUserDataSize; }
+
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
+
 /** Overridden to extract the bone batches from the associated POD mesh structure */
 -(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
@@ -176,8 +180,10 @@
 
 -(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
+-(GLuint) podUserDataSize { return _podUserDataSize; }
+
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
+
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];
 	

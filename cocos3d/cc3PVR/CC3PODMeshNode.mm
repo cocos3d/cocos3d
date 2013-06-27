@@ -88,6 +88,10 @@
 
 -(void) setPodMaterialIndex: (GLint) aPODIndex { _podMaterialIndex = aPODIndex; }
 
+-(GLuint) podUserDataSize { return _podUserDataSize; }
+
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
+
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 -(void) populateFrom: (CC3PODMeshNode*) another {

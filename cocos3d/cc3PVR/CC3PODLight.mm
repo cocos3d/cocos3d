@@ -55,6 +55,10 @@ extern "C" {
 
 -(void) setPodTargetIndex: (GLint) aPODIndex { _podTargetIndex = aPODIndex; }
 
+-(GLuint) podUserDataSize { return _podUserDataSize; }
+
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
+
 -(id) initAtIndex: (GLint) aPODIndex fromPODResource: (CC3PODResource*) aPODRez {
 	if ( (self = [super initAtIndex: aPODIndex fromPODResource: aPODRez]) ) {
 		// Get the light content

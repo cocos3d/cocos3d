@@ -46,8 +46,10 @@
 
 -(void) setPodParentIndex: (GLint) aPODIndex { _podParentIndex = aPODIndex; }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
+-(GLuint) podUserDataSize { return _podUserDataSize; }
+
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { _podUserDataSize = podUserDataSize; }
+
 -(void) populateFrom: (CC3PODNode*) another {
 	[super populateFrom: another];
 

@@ -53,13 +53,19 @@ extern "C" {
 // Subclasses must override to use instance variable.
 -(void) setPodParentIndex: (GLint) aPODIndex {}
 
--(BOOL) isBasePODNode { return self.podParentIndex < 0; }
-
 // Subclasses must override to use instance variable.
 -(GLint) podTargetIndex {return kCC3PODNilIndex;}
 
 // Subclasses must override to use instance variable.
 -(void) setPodTargetIndex: (GLint) aPODIndex {}
+
+// Subclasses must override to use instance variable.
+-(GLuint) podUserDataSize { return 0; }
+
+// Subclasses must override to use instance variable.
+-(void) setPodUserDataSize: (GLuint) podUserDataSize { CC3AssertUnimplemented(@"setPodUserDataSize:"); }
+
+-(BOOL) isBasePODNode { return self.podParentIndex < 0; }
 
 
 #pragma mark Allocation and initialization
@@ -72,6 +78,7 @@ extern "C" {
 		self.name = [NSString stringWithUTF8String: psn->pszName];
 		self.podContentIndex = psn->nIdx;
 		self.podParentIndex = psn->nIdxParent;
+
 		if (psn->pfAnimPosition) self.location = *(CC3Vector*)psn->pfAnimPosition;
 		if (psn->pfAnimRotation) self.quaternion = *(CC3Quaternion*)psn->pfAnimRotation;
 		if (psn->pfAnimScale) self.scale = *(CC3Vector*)psn->pfAnimScale;
@@ -79,6 +86,11 @@ extern "C" {
 		if ([CC3PODNodeAnimation sPODNodeDoesContainAnimation: (PODStructPtr)psn])
 			self.animation = [CC3PODNodeAnimation animationFromSPODNode: (PODStructPtr)psn
 														 withFrameCount: aPODRez.animationFrameCount];
+		
+		// Assign any user data and take ownership of managing its memory
+		self.podUserDataSize = psn->nUserDataSize;
+		self.userData = psn->pUserData;
+		psn->pUserData = NULL;		// Clear reference so SPODNode won't try to free it.
 	}
 	return self; 
 }

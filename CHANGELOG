@@ -199,6 +199,10 @@ cocos3d 2.0.0 - 2013/07/01
 
 - CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.
 
+- CC3PODNode userData and podUserDataSize properties now populated from user data in POD files.
+- [API change] CC3Identifiable automatically frees the memory pointed to by userData during deallocation.
+	- Added CC3Identifiable sharedUserData property for user data that should not be freed automatically.
+
 - Fixes to Shadow Volumes
 	- shadows volumes and stencils now available when multisampling active
 

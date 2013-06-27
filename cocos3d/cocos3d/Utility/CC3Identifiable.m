@@ -33,7 +33,7 @@
 
 @implementation CC3Identifiable
 
-@synthesize tag=_tag, name=_name, userData=_userData;
+@synthesize tag=_tag, name=_name;
 
 static GLint instanceCount = 0;
 
@@ -62,6 +62,20 @@ static GLint instanceCount = 0;
 	return nil;
 }
 
+-(GLvoid*) userData { return _userData; }
+
+-(void) setUserData: (GLvoid*) userData {
+	[self releaseUserData];
+	_userData = userData;
+}
+
+-(GLvoid*) sharedUserData { return _userData ? *((GLvoid**)_userData) : NULL; }
+
+-(void) setSharedUserData: (GLvoid*) sharedUserData {
+	GLvoid** udp = malloc(sizeof(GLvoid*));
+	*udp = sharedUserData;
+	self.userData = udp;
+}
 
 #pragma mark Allocation and initialization
 
@@ -83,18 +97,12 @@ static GLint instanceCount = 0;
 	return self;
 }
 
--(void) initUserData {}
-
--(void) releaseUserData {}
-
 // Template method that populates this instance from the specified other instance.
 // This method is invoked automatically during object copying via the copyWithZone: method.
 // Subclasses that extend copying will override this method.
 -(void) populateFrom: (CC3Identifiable*) another {
 	[self copyUserDataFrom: another];
 }
-
--(void) copyUserDataFrom: (CC3Identifiable*) another {}
 
 // Implementation to keep compiler happy so this method can be included in interface for documentation.
 -(id) copy { return [super copy]; }
@@ -120,6 +128,12 @@ static GLint instanceCount = 0;
 }
 
 -(BOOL) shouldIncludeInDeepCopy { return YES; }
+
+-(void) initUserData { _userData = NULL; }
+
+-(void) releaseUserData { if (_userData) free(_userData); }
+
+-(void) copyUserDataFrom: (CC3Identifiable*) another {}
 
 // Class variable tracking the most recent tag value assigned. This class variable is 
 // automatically incremented whenever the method nextTag is called.
