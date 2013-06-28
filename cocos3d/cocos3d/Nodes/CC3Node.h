@@ -1532,12 +1532,39 @@ typedef enum {
  * However, if the shader program must be loaded and compiled, there can be a noticable
  * pause in drawing a mesh node for the first time if lazy assignment is used.
  *
+ * Shader selection is driven by the characteristics of each mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderPrograms method to cause a different shader program to be selected for each
+ * mesh node, based on the new mesh node and material characteristics. You can also invoke
+ * the clearShaderProgram on a specific mesh node to cause only the shader program of that
+ * mesh node to be cleared.
+ *
  * Shader selection is handled by an implementation of the CC3GLProgramMatcher held in the
  * CC3GLProgram programMatcher class-side property. The application can therefore customize
  * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
  * class-side property
  */
 -(void) selectShaderPrograms;
+
+/**
+ * Clears the shader program from each descendant mesh node, allowing a new shader to be selected
+ * for each mesh node, either directly by subsequently invoking the selectShaderPrograms method,
+ * or automatically the next time each mesh node is drawn.
+ *
+ * Shader selection is driven by the characteristics of each mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderPrograms method to cause a different shader program to be selected for
+ * each mesh node, based on the new mesh node and material characteristics. 
+ *
+ * You can also invoke the clearShaderProgram on a specific mesh node to cause only the
+ * shader program of that mesh node to be cleared.
+ *
+ * This method is equivalent to setting the shaderProgram property to nil on each descendant
+ * mesh node.
+ */
+-(void) clearShaderPrograms;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

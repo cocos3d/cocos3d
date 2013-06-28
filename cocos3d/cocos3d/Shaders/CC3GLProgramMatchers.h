@@ -73,8 +73,8 @@
  * already, a shader program is selected, based on the characteristics of the mesh node and
  * the material, the selected shader program is set into the material, and is returned.
  *
- * The returned program will be compiled and linked, and will have a semantics delegate assigned
- * in the semanticDelegate property.
+ * The returned program will be compiled and linked, and will have a semantics delegate 
+ * assigned in the semanticDelegate property.
  *
  * The implementation is responsible for determining how to match the specified mesh node to an
  * appropriate GL program, and each implementations may have a different matching methodology.

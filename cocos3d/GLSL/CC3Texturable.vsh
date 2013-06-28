@@ -1,5 +1,5 @@
 /*
- * CC3TexturableMaterial.vsh
+ * CC3Texturable.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings

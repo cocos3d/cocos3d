@@ -310,9 +310,11 @@
 	return csn;
 }
 
+// Use diffuseColor to force material and use clip-space shaders
 +(id) nodeWithColor: (ccColor4F) color {
 	CC3MeshNode* csn = [self node];
-	csn.pureColor = color;
+//	csn.pureColor = color;
+	csn.diffuseColor = color;
 	return csn;
 }
 

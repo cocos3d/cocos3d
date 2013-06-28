@@ -467,11 +467,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 /** 
  * If we're not overlaying the device camera, creates the clear-blue-sky backdrop.
- * See the notes for the backdrop property for more info. 
+ * Or install a textured backdrop by uncommenting the last line of this method.
+ * See the notes for the backdrop property for more info.
  */
 -(void) addBackdrop {
 	if (self.cc3Layer.isOverlayingDeviceCamera) return;
 	self.backdrop = [CC3ClipSpaceNode nodeWithColor: kSkyColor];
+//	self.backdrop = [CC3ClipSpaceNode nodeWithTexture: [CC3Texture textureFromFile: kBrickTextureFile]];
 }
 
 /**
@@ -748,7 +750,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * the teapot reflects the dynamic scene. As objects move around the scene, they are reflected
  * in the teapot.
  *
- * The default program matcher assigns the GLSL shaders CC3TexturableMaterial.vsh and
+ * The default program matcher assigns the GLSL shaders CC3Texturable.vsh and
  * CC3SingleTextureReflect.fsh shaders to the reflective teapot.
  *
  * The textured teapot actually has two textures. The first is the reflective cube-map, and the
@@ -3177,7 +3179,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 	// If running shaders under OpenGL ES 2.0, clear the shader program so that a different
 	// shader program will automatically be selected for the new texture configuration.
-	_floatingHead.shaderProgram = nil;
+	[_floatingHead clearShaderProgram];
 	
 	// Demonstrate the use of application-specific data attached to a node, by logging the data.
 	if (_floatingHead.userData) LogInfo(@"%@ says '%@'", _floatingHead, _floatingHead.sharedUserData);

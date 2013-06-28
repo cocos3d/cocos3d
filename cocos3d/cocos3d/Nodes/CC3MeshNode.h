@@ -262,10 +262,34 @@
  * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
  * class-side property
  *
+ * Shader selection is driven by the characteristics of the mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderProgram method to cause a different shader program to be selected, based
+ * on the new mesh node and material characteristics.
+ *
  * This method differs from the selectShaderPrograms method in that this method does not
  * propagate to any descendant nodes.
  */
 -(void) selectShaderProgram;
+
+/**
+ * Clears the shader program from this mesh node, allowing a new shader to be selected, either
+ * directly by subsequently invoking the selectShaderProgram method, or automatically the next
+ * time this node is drawn.
+ *
+ * Shader selection is driven by the characteristics of the mesh node and its material,
+ * including the number of textures, whether alpha testing is used, etc. If you change 
+ * any of these characteristics that affect the shader selection, you can invoke the
+ * clearShaderProgram method to cause a different shader program to be selected, based
+ * on the new mesh node and material characteristics.
+ *
+ * This method is equivalent to setting the shaderProgram property to nil.
+ *
+ * This method differs from the clearShaderPrograms method in that this method does not
+ * propagate to any descendant nodes.
+ */
+-(void) clearShaderProgram;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

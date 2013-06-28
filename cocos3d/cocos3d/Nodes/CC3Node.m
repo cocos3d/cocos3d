@@ -773,6 +773,8 @@
 
 -(void) selectShaderPrograms { for (CC3Node* child in _children) [child selectShaderPrograms]; }
 
+-(void) clearShaderPrograms { for (CC3Node* child in _children) [child clearShaderPrograms]; }
+
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 

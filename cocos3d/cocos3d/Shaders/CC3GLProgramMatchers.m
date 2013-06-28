@@ -63,13 +63,18 @@
 
 -(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode {
 		
+	GLuint texCnt = aMeshNode.textureCount;
 	CC3Material* mat = aMeshNode.material;
-
+	
 	// No material
 	if ( !mat ) return self.pureColorProgram;
 	
-	GLuint texCnt = mat.textureCount;
 	BOOL shouldAlphaTest = !mat.shouldDrawLowAlpha;
+	
+	if (aMeshNode.shouldDrawInClipSpace) {
+		if (texCnt == 0) return [self clipSpaceNoTextureProgram: shouldAlphaTest];
+		if (texCnt == 1) return [self clipSpaceSingleTextureProgram: shouldAlphaTest];
+	}
 	
 	// Material without texture
 	if (texCnt == 0) return [self noTextureProgram: shouldAlphaTest];
@@ -113,33 +118,33 @@
 }
 
 -(CC3GLProgram*) configurableProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
 }
 
 -(CC3GLProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3SingleTextureAlphaTest.fsh"
 											   : @"CC3SingleTexture.fsh")];
 }
 
 -(CC3GLProgram*) singleTextureReflectiveProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3SingleTextureReflectAlphaTest.fsh"
 											   : @"CC3SingleTextureReflect.fsh")];
 }
 
 -(CC3GLProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3NoTextureAlphaTest.fsh"
 											   : @"CC3NoTexture.fsh")];
 }
 
 -(CC3GLProgram*) noTextureReflectiveProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3NoTextureReflectAlphaTest.fsh"
 											   : @"CC3NoTextureReflect.fsh")];
@@ -153,18 +158,29 @@
 }
 
 -(CC3GLProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3BumpMapObjectSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapObjectSpace.fsh")];
 }
 
 -(CC3GLProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
-	return [self programFromVertexShaderFile: @"CC3TexturableMaterial.vsh"
+	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3BumpMapTangentSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapTangentSpace.fsh")];
 }
+
+-(CC3GLProgram*) clipSpaceSingleTextureProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+					   andFragmentShaderFile: @"CC3ClipSpaceSingleTexture.fsh"];
+}
+
+-(CC3GLProgram*) clipSpaceNoTextureProgram: (BOOL) shouldAlphaTest {
+	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+					   andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
+}
+
 
 -(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
 					   andFragmentShaderFile: (NSString*) fshFilename {

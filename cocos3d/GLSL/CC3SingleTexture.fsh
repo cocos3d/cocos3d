@@ -30,7 +30,7 @@
 /**
  * This fragment shader provides a general single-texture shader.
  *
- * CC3TexturableMaterial.vsh is the vertex shader paired with this fragment shader.
+ * CC3Texturable.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3GLProgramSemanticsByVarName instance.
