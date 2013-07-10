@@ -33,7 +33,7 @@
  * This shader is used during node picking and when a node does not have a material.
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  */
 
 precision mediump float;

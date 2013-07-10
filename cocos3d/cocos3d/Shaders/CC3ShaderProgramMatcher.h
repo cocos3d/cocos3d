@@ -1,5 +1,5 @@
 /*
- * CC3GLProgramMatchers.h
+ * CC3ShaderProgramMatcher.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,28 +29,32 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLProgram.h"
+#import "CC3ShaderProgram.h"
 
 @class CC3MeshNode, CC3NodeDrawingVisitor;
 
+// Legacy naming support
+#define CC3GLProgramMatcher				CC3ShaderProgramMatcher
+#define CC3GLProgramMatcherBase			CC3ShaderProgramMatcherBase
+
 
 #pragma mark -
-#pragma mark CC3GLProgramMatcher
+#pragma mark CC3ShaderProgramMatcher
 
 /**
- * CC3GLProgramMatcher describes the behaviour required to match nodes and materials to an
+ * CC3ShaderProgramMatcher describes the behaviour required to match nodes and materials to an
  * appropriate GL program for rendering a particular node.
  *
- * Under OpenGL ES 2, every drawable mesh node requires a CC3GLProgram to be rendered. Typically,
+ * Under OpenGL ES 2, every drawable mesh node requires a CC3ShaderProgram to be rendered. Typically,
  * the application will deliberately assign a specific GL program to each material, through the
  * shaderProgram or shaderContext properties of the material, and in some cases, this may be
  * defined during model loading from resources.
  *
- * When a model is created or loaded without a specific CC3GLProgram assigned, the material will retrieve
+ * When a model is created or loaded without a specific CC3ShaderProgram assigned, the material will retrieve
  * an appropriate default shader from the shader cache. The shader cache maintains an instance of an
  * implementation of this protocol and delegates to it to match the model to a suitable GL program.
  */
-@protocol CC3GLProgramMatcher <NSObject>
+@protocol CC3ShaderProgramMatcher <NSObject>
 
 /**
  * Returns a shader program suitable for painting mesh nodes in a solid color.
@@ -58,7 +62,7 @@
  * This shader program is used when a mesh node does not have a material, or when
  * painting a mesh node for node picking during user interaction.
  */
-@property(nonatomic, readonly) CC3GLProgram* pureColorProgram;
+@property(nonatomic, readonly) CC3ShaderProgram* pureColorProgram;
 
 /**
  * Returns the shader program to use to draw the specified mesh node.
@@ -82,54 +86,54 @@
  * Implementations are responsible for compiling, linking, and assigning a semantics
  * delegate to the program.
  */
--(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
 
 /** The semantic delegate that will be attached to any program created by this matcher. */
-@property(nonatomic, retain) id<CC3GLProgramSemanticsDelegate> semanticDelegate;
+@property(nonatomic, retain) id<CC3ShaderProgramSemanticsDelegate> semanticDelegate;
 
 @end
 
 
 #pragma mark -
-#pragma mark CC3GLProgramMatcherBase
+#pragma mark CC3ShaderProgramMatcherBase
 
 /**
- * CC3GLProgramMatcherBase is a basic implementation of the CC3GLProgramMatcher protocol.
+ * CC3ShaderProgramMatcherBase is a basic implementation of the CC3ShaderProgramMatcher protocol.
  *
  * It looks at aspects of the mesh node, such as number of texture units, bump-mapping, etc.
  * To determine the appropriate GL program for a particular mesh node. All programs matched
  * using this implementation will be assigned the semantics delegate from the semanticDelegate
  * property of this instance.
  */
-@interface CC3GLProgramMatcherBase : NSObject <CC3GLProgramMatcher> {
-	id<CC3GLProgramSemanticsDelegate> _semanticDelegate;
-	CC3GLProgram* _pureColorProgram;
+@interface CC3ShaderProgramMatcherBase : NSObject <CC3ShaderProgramMatcher> {
+	id<CC3ShaderProgramSemanticsDelegate> _semanticDelegate;
+	CC3ShaderProgram* _pureColorProgram;
 }
 
 /**
- * Returns a program compiled from the specified vertex and fragment shader files.
+ * Returns a program compiled and linked from the specified vertex and fragment shader files,
+ * and attached to the delegate in the semanticDelegate property of this instance.
  *
- * The program name is constructed from the vertex and fragment shader filenames using the
- * programNameFromVertexShaderFile:andFragmentShaderFile: method of the class in the
- * glProgramClass property, and the program is retrieved from the program cache on that class.
+ * The specified file paths may be either absolute paths, or relative to the application
+ * resource directory. If the files are located directly in the application resources
+ * directory, the specified file paths can simply be the names of the files.
  *
- * If a program with that name has not yet been cached, and instance of the program class is
- * created and compiled from the two shader files, the shaderDelegate property of the program
- * is set to the semanticDelegate property of this instance, the program is linked, and added
- * to the cache in the program class.
+ * Programs are cached. If the program was already loaded and is in the cache, it is retrieved
+ * and returned. If the program has not in the cache, it is loaded, compiled, and linked, placed
+ * into the cache, and returned. It is therefore safe to invoke this method any time the program
+ * is needed, without having to worry that the program will be repeatedly loaded and compiled
+ * from the files.
  *
  * This method is invoked automatically from the programForMeshNode: method when a required
- * program needs to be established. Generally, this instance caches the resulting program
- * each time this method is invoked, so it is only invoked once for any particular pair of
- * vertex and fragment shader filenames.
+ * program needs to be established.
  */
--(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
-					   andFragmentShaderFile: (NSString*) fshFilename;
+-(CC3ShaderProgram*) programFromVertexShaderFile: (NSString*) vshFilePath
+					   andFragmentShaderFile: (NSString*) fshFilePath;
 
 /**
  * Property that determines the class of GL program to instantiate when required.
  *
- * This property returns the CC3GLProgram class. Subclasses may override.
+ * This property returns the CC3ShaderProgram class. Subclasses may override.
  */
 @property(nonatomic, readonly) Class programClass;
 

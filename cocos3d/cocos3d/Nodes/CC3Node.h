@@ -36,7 +36,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CCAction.h"
 #import "CCProtocols.h"
-#import "CC3GLProgramContext.h"
+#import "CC3ShaderProgramContext.h"
 
 @class CC3NodeDrawingVisitor, CC3Scene, CC3Camera, CC3Frustum, CC3Texture;
 @class CC3NodeAnimation, CC3NodeAnimationState, CC3NodeDescriptor, CC3WireframeBoundingBoxNode;
@@ -1491,7 +1491,7 @@ typedef enum {
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
+@property(nonatomic, retain) CC3ShaderProgramContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to decorate the descendant nodes.
@@ -1510,7 +1510,7 @@ typedef enum {
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram;
 
 /**
  * Selects an appropriate shader program for each descendant mesh node.
@@ -1540,9 +1540,9 @@ typedef enum {
  * the clearShaderProgram on a specific mesh node to cause only the shader program of that
  * mesh node to be cleared.
  *
- * Shader selection is handled by an implementation of the CC3GLProgramMatcher held in the
- * CC3GLProgram programMatcher class-side property. The application can therefore customize
- * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
+ * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher held in the
+ * CC3ShaderProgram programMatcher class-side property. The application can therefore customize
+ * shader program selection by establishing a custom instance in the CC3ShaderProgram programMatcher
  * class-side property
  */
 -(void) selectShaderPrograms;

@@ -257,10 +257,10 @@
  * shader program must be loaded and compiled, there can be a noticable pause in drawing a
  * mesh node for the first time if lazy assignment is used.
  *
- * Shader selection is handled by an implementation of the CC3GLProgramMatcher held in the
- * CC3GLProgram programMatcher class-side property. The application can therefore customize
- * shader program selection by establishing a custom instance in the CC3GLProgram programMatcher
- * class-side property
+ * Shader selection is handled by an implementation of the CC3ShaderProgramMatcher 
+ * held in the CC3ShaderProgram programMatcher class-side property. The application 
+ * can therefore customize shader program selection by establishing a custom instance
+ * in the CC3ShaderProgram programMatcher class-side property
  *
  * Shader selection is driven by the characteristics of the mesh node and its material,
  * including the number of textures, whether alpha testing is used, etc. If you change

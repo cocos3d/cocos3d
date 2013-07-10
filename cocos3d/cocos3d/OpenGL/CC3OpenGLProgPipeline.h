@@ -97,7 +97,13 @@
  */
 @interface CC3OpenGLProgPipeline : CC3OpenGL {
 	NSString* value_GL_SHADING_LANGUAGE_VERSION;
+	
+	GLuint value_GL_CURRENT_PROGRAM;
+
+	BOOL isKnown_GL_CURRENT_PROGRAM : 1;
+	
 }
+
 @end
 
 #endif	// CC3_GLSL

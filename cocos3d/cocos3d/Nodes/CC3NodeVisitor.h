@@ -34,7 +34,7 @@
 #import "CC3PerformanceStatistics.h"
 #import "CC3OpenGL.h"
 
-@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3GLProgram;
+@class CC3Node, CC3MeshNode, CC3Camera, CC3Light, CC3Scene, CC3ShaderProgram;
 @class CC3Material, CC3TextureUnit, CC3Mesh, CC3NodeSequencer, CC3SkinSection;
 @protocol CC3RenderSurface;
 
@@ -385,7 +385,7 @@
 @interface CC3NodeDrawingVisitor : CC3NodeVisitor {
 	CC3NodeSequencer* _drawingSequencer;
 	CC3SkinSection* _currentSkinSection;
-	CC3GLProgram* _currentShaderProgram;
+	CC3ShaderProgram* _currentShaderProgram;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
 	CC3Matrix4x4 _projMatrix;
@@ -517,7 +517,7 @@
  *
  * This property is set automatically by the program when it binds to the GL engine.
  */
-@property(nonatomic, assign) CC3GLProgram* currentShaderProgram;
+@property(nonatomic, assign) CC3ShaderProgram* currentShaderProgram;
 
 /**
  * The current color used during drawing if no materials or lighting are engaged.

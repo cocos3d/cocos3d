@@ -42,7 +42,7 @@
  * specialized shaders that have been tuned and optimized to a specific needs of each model.
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  *
  * In order to reduce the number of uniform variables, this shader supports two texture units.
  * This can be increased by changing the MAX_TEXTURES macro definition below.

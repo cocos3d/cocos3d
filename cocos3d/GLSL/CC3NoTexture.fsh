@@ -33,7 +33,7 @@
  * CC3Texturable.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  */
 
 // Fog modes.

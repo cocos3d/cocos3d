@@ -32,7 +32,8 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode, CC3GLProgram, CC3GLSLAttribute;
+@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode, CC3ShaderProgram;
+@class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
 
 /** Indicates that vertex attribute array is not available. */
 #define kCC3VertexAttributeIndexUnavailable		-1
@@ -553,8 +554,8 @@ typedef struct {
 
 #pragma mark Textures
 
-/** Generates and returns a new texture ID. */
--(GLuint) generateTextureID;
+/** Generates a new texture and returns its ID. */
+-(GLuint) generateTexture;
 
 /** Deletes the texture with the specified ID from the GL engine. */
 -(void) deleteTexture: (GLuint) texID;
@@ -730,7 +731,7 @@ typedef struct {
 #pragma mark Framebuffers
 
 /** Generates and returns a new framebuffer ID. */
--(GLuint) generateFramebufferID;
+-(GLuint) generateFramebuffer;
 
 /** Deletes the framebuffer with the specified ID from the GL engine. */
 -(void) deleteFramebuffer: (GLuint) fbID;
@@ -757,7 +758,7 @@ typedef struct {
 -(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID;
 
 /** Generates and returns a new renderbuffer ID. */
--(GLuint) generateRenderbufferID;
+-(GLuint) generateRenderbuffer;
 
 /** Deletes the renderbuffer with the specified ID from the GL engine. */
 -(void) deleteRenderbuffer: (GLuint) rbID;
@@ -920,20 +921,85 @@ typedef struct {
 
 #pragma mark Shaders
 
-/** Selects and returns the shader program suitable for drawing the specified mesh node. */
--(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode;
+/** 
+ * Generates a new shader of the specifed type and returns its ID.
+ *
+ * The shaderType parameter must be one of the following values:
+ *   - GL_VERTEX_SHADER
+ *   - GL_FRAGMENT_SHADER
+ */
+-(GLuint) generateShader: (GLenum) shaderType;
 
-/** Binds the GL program associated with the mesh node being drawn by the specified visitor. */
--(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor;
+/** Deletes the shader with the specified ID from the GL engine. */
+-(void) deleteShader: (GLuint) shaderID;
 
-/** Binds the specified GLSL program. */
--(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor;
+/**
+ * Compiles the specified shader from the specified GLSL source code strings, which is an
+ * array of NSStrings each containing GLSL source code.
+ *
+ * You can use the getShaderWasCompiled: method to determine whether compilation was successful,
+ * and the getLogForShader: method to retrieve the reason for any unsuccessful compilation.
+ */
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources;
+
+/** Returns whether the specified shader was successfully compiled. */
+-(BOOL) getShaderWasCompiled: (GLuint) shaderID;
+
+/** Returns the integer value of the specified GL engine parameter for the specified shader. */
+-(GLint) getIntegerParameter: (GLenum) param forShader: (GLuint) shaderID;
+
+/** Returns the GL status info log for the specified shader. */
+-(NSString*) getLogForShader: (GLuint) shaderID;
+
+/** Returns the GLSL source code for the specified shader. */
+-(NSString*) getSourceCodeForShader: (GLuint) shaderID;
 
 /**
  * Returns a string containing platform-specific GLSL source code to be used as a
  * preamble for the vertex and fragment shader source code when compiling the shaders.
  */
 -(NSString*) defaultShaderPreamble;
+
+/** Generates a new GLSL program and returns its ID. */
+-(GLuint) generateShaderProgram;
+
+/** Deletes the shader program with the specified ID from the GL engine. */
+-(void) deleteShaderProgram: (GLuint) programID;
+
+/** Attaches the specified shader to the specified shader program. */
+-(void) attachShader: (GLuint) shaderID toShaderProgram: (GLuint) programID;
+
+/** Detaches the specified shader from the specified shader program. */
+-(void) detachShader: (GLuint) shaderID fromShaderProgram: (GLuint) programID;
+
+/** 
+ * Links the specified shader program.
+ *
+ * You can use the getShaderProgramWasLinked: method to determine whether linking was successful,
+ * and the getLogForShaderProgram: method to retrieve the reason for any unsuccessful link attempt.
+ */
+-(void) linkShaderProgram: (GLuint) programID;
+
+/** Returns whether the specified shader was successfully linked. */
+-(BOOL) getShaderProgramWasLinked: (GLuint) programID;
+
+/** Returns the integer value of the specified GL engine parameter for the specified shader program. */
+-(GLint) getIntegerParameter: (GLenum) param forShaderProgram: (GLuint) programID;
+
+/** Binds the specified GLSL program as the program to be used for subsequent rendering. */
+-(void) useShaderProgram: (GLuint) programID;
+
+/** Returns the GL status info log for the GL program. */
+-(NSString*) getLogForShaderProgram: (GLuint) programID;
+
+/** Populates the specified GLSL variable with info retrieved from the GL engine. */
+-(void) populateShaderProgramVariable: (CC3GLSLVariable*) var;
+
+/** 
+ * Ensures that the shader program for the specified GLSL uniform is active, 
+ * then sets the value of the uniform into the GL engine.
+ */
+-(void) setShaderProgramUniformValue: (CC3GLSLUniform*) uniform;
 
 
 #pragma mark Aligning 2D & 3D caches

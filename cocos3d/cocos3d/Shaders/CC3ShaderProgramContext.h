@@ -1,5 +1,5 @@
 /*
- * CC3GLProgramContext.h
+ * CC3ShaderProgramContext.h
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -29,17 +29,19 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3GLProgram.h"
+#import "CC3ShaderProgram.h"
 #import "CC3GLSLVariable.h"
 
+// Legacy naming support
+#define CC3GLProgramContext				CC3ShaderProgramContext
 
 #pragma mark -
-#pragma mark CC3GLProgramContext
+#pragma mark CC3ShaderProgramContext
 
 /** 
- * CC3GLProgramContext holds a CC3GLProgram for a particular use, such as a by a particular node.
+ * CC3ShaderProgramContext holds a CC3ShaderProgram for a particular use, such as a by a particular node.
  *
- * A single CC3GLProgram object can be used by many nodes and other contexts. The CC3GLProgramContext
+ * A single CC3ShaderProgram object can be used by many nodes and other contexts. The CC3ShaderProgramContext
  * contains state and behaviour specific to a particular use of the program, including providing
  * storage for local values for certain customized program variables in use by the node.
  *
@@ -52,8 +54,8 @@
  * of any uniform variable with a defined semantic is derived automatically from the environment,
  * and cannot be retrieved or set directly.
 */
-@interface CC3GLProgramContext : NSObject {
-	CC3GLProgram* _program;
+@interface CC3ShaderProgramContext : NSObject {
+	CC3ShaderProgram* _program;
 	CCArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
 }
@@ -63,7 +65,7 @@
  *
  * Setting this property will redefine the variables that can be retrieved via the uniform... methods.
  */
-@property(nonatomic, retain) CC3GLProgram* program;
+@property(nonatomic, retain) CC3ShaderProgram* program;
 
 
 #pragma mark Uniforms
@@ -189,10 +191,10 @@
 #pragma mark Allocation and initialization
 
 /** Initializes this instance for use with the specified program. */
--(id) initForProgram: (CC3GLProgram*) program;
+-(id) initForProgram: (CC3ShaderProgram*) program;
 
 /** Allocates and initializes an autoreleased instance for use with the specified program. */
-+(id) contextForProgram: (CC3GLProgram*) program;
++(id) contextForProgram: (CC3ShaderProgram*) program;
 
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;

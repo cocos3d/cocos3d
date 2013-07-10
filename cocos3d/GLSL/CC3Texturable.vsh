@@ -55,7 +55,7 @@
  *   - CC3MultiTextureConfigurable.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  */
 
 // Increase these if more textures, lights, or bones per skin section are required.

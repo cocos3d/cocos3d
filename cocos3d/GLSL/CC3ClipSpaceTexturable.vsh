@@ -36,7 +36,7 @@
  *   - CC3ClipSpaceNoTexture.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  */
 
 precision mediump float;

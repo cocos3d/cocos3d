@@ -1,5 +1,5 @@
 /*
- * CC3GLProgramMatchers.m
+ * CC3ShaderProgramMatchers.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,17 +26,17 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3GLProgramMatchers.h for full API documentation.
+ * See header file CC3ShaderProgramMatcher.h for full API documentation.
  */
 
-#import "CC3GLProgramMatchers.h"
+#import "CC3ShaderProgramMatcher.h"
 #import "CC3MeshNode.h"
 
 
 #pragma mark -
-#pragma mark CC3GLProgramMatcherBase
+#pragma mark CC3ShaderProgramMatcherBase
 
-@implementation CC3GLProgramMatcherBase
+@implementation CC3ShaderProgramMatcherBase
 
 @synthesize semanticDelegate=_semanticDelegate;
 
@@ -46,22 +46,22 @@
 	[super dealloc];
 }
 
--(Class) programClass { return [CC3GLProgram class]; }
+-(Class) programClass { return [CC3ShaderProgram class]; }
 
--(CC3GLProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
 	CC3Material* mat = aMeshNode.material;
 	if ( !mat ) return self.pureColorProgram;
 	
-	CC3GLProgram* shaderProgram = mat.shaderProgram;
+	CC3ShaderProgram* shaderProgram = mat.shaderProgram;
 	if ( !shaderProgram ) {
-		shaderProgram = [self selectProgramForMeshNode: aMeshNode];
+		shaderProgram = [self selectShaderProgramForMeshNode: aMeshNode];
 		mat.shaderProgram = shaderProgram;
 		LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, aMeshNode);
 	}
 	return shaderProgram;
 }
 
--(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode {
+-(CC3ShaderProgram*) selectShaderProgramForMeshNode: (CC3MeshNode*) aMeshNode {
 		
 	GLuint texCnt = aMeshNode.textureCount;
 	CC3Material* mat = aMeshNode.material;
@@ -110,96 +110,82 @@
 #pragma mark Program options
 
 /** This property is accessed quite frequently for activities like node picking, so cache the program here. */
--(CC3GLProgram*) pureColorProgram {
+-(CC3ShaderProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
 		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
 										andFragmentShaderFile: @"CC3PureColor.fsh"];
 	return _pureColorProgram;
 }
 
--(CC3GLProgram*) configurableProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) configurableProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
 }
 
--(CC3GLProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) singleTextureProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3SingleTextureAlphaTest.fsh"
 											   : @"CC3SingleTexture.fsh")];
 }
 
--(CC3GLProgram*) singleTextureReflectiveProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) singleTextureReflectiveProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3SingleTextureReflectAlphaTest.fsh"
 											   : @"CC3SingleTextureReflect.fsh")];
 }
 
--(CC3GLProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) noTextureProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3NoTextureAlphaTest.fsh"
 											   : @"CC3NoTexture.fsh")];
 }
 
--(CC3GLProgram*) noTextureReflectiveProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) noTextureReflectiveProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3NoTextureReflectAlphaTest.fsh"
 											   : @"CC3NoTextureReflect.fsh")];
 }
 
--(CC3GLProgram*) pointSpriteProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) pointSpriteProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3PointSprites.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3PointSpritesAlphaTest.fsh"
 											   : @"CC3PointSprites.fsh")];
 }
 
--(CC3GLProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) bumpMapObjectSpaceProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3BumpMapObjectSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapObjectSpace.fsh")];
 }
 
--(CC3GLProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) bumpMapTangentSpaceProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3Texturable.vsh"
 					   andFragmentShaderFile: (shouldAlphaTest
 											   ? @"CC3BumpMapTangentSpaceAlphaTest.fsh"
 											   : @"CC3BumpMapTangentSpace.fsh")];
 }
 
--(CC3GLProgram*) clipSpaceSingleTextureProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) clipSpaceSingleTextureProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 					   andFragmentShaderFile: @"CC3ClipSpaceSingleTexture.fsh"];
 }
 
--(CC3GLProgram*) clipSpaceNoTextureProgram: (BOOL) shouldAlphaTest {
+-(CC3ShaderProgram*) clipSpaceNoTextureProgram: (BOOL) shouldAlphaTest {
 	return [self programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
 					   andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
 }
 
-
--(CC3GLProgram*) programFromVertexShaderFile: (NSString*) vshFilename
-					   andFragmentShaderFile: (NSString*) fshFilename {
-	Class progClz = self.programClass;
-	
-	// Fetch and return program from cache if it has already been loaded
-	NSString* progName = [progClz programNameFromVertexShaderFile: vshFilename
-											andFragmentShaderFile: fshFilename];
-	CC3GLProgram* prog = [[progClz getProgramNamed: progName] retain];		// retained
-	if (prog) return prog;
-	
-	// Compile, link and cache the program
-	prog = [[progClz alloc] initWithName: progName
-					 andSemanticDelegate: self.semanticDelegate
-					fromVertexShaderFile: vshFilename
-				   andFragmentShaderFile: fshFilename];
-	[progClz addProgram: prog];		// Add the new program to the cache
-	[prog release];
-	return prog;
+-(CC3ShaderProgram*) programFromVertexShaderFile: (NSString*) vshFilePath
+					   andFragmentShaderFile: (NSString*) fshFilePath {
+	return [self.programClass programWithSemanticDelegate: self.semanticDelegate
+									 fromVertexShaderFile: vshFilePath
+									andFragmentShaderFile: fshFilePath];
 }
 
 
@@ -214,7 +200,7 @@
 }
 
 -(void) initSemanticDelegate {
-	CC3GLProgramSemanticsByVarName* sd = [CC3GLProgramSemanticsByVarName new];
+	CC3ShaderProgramSemanticsByVarName* sd = [CC3ShaderProgramSemanticsByVarName new];
 	[sd populateWithDefaultVariableNameMappings];
 	_semanticDelegate = sd;		// retained by "new" above
 }

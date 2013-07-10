@@ -33,7 +33,7 @@
 #import "CC3Resource.h"
 #import "CC3PVRFoundation.h"
 #import "CC3MeshNode.h"
-#import "CC3GLProgram.h"
+#import "CC3ShaderProgram.h"
 
 
 /**
@@ -105,11 +105,11 @@
 
 /**
  * CC3PFXEffect represents a single effect within a PFX resource file. It combines the shader
- * code referenced by the effect into a CC3GLProgram, and the textures used by that program.
+ * code referenced by the effect into a CC3ShaderProgram, and the textures used by that program.
  */
 @interface CC3PFXEffect : NSObject {
 	NSString* _name;
-	CC3GLProgram* _glProgram;
+	CC3ShaderProgram* _shaderProgram;
 	CCArray* _textures;
 	CCArray* _variables;
 }
@@ -117,8 +117,8 @@
 /** Returns the name of this effect. */
 @property(nonatomic, retain, readonly) NSString* name;
 
-/** The GL program used to render this effect. */
-@property(nonatomic, retain, readonly) CC3GLProgram* glProgram;
+/** The shader program used to render this effect. */
+@property(nonatomic, retain, readonly) CC3ShaderProgram* shaderProgram;
 
 /**
  * The textures used in this effect. Each element of this array is an instance of CC3PFXEffectTexture
@@ -171,14 +171,14 @@
  * with standard default semantics defined by the semantic delegate associated with the program matcher.
  * If a GLSL variable cannot be configured based on a semantic definition for its name within the
  * PFX effect, configuration of the variable is delegated to the standard semantic delegate at
- * CC3GLProgram.programMatcher.semanticDelegate. It is even possible to load shaders that use only
+ * CC3ShaderProgram.programMatcher.semanticDelegate. It is even possible to load shaders that use only
  * standard semantic naming, without having to define any semantics within the PFX effect.
  *
  * This is an abstract implementation. Subclasses can override the semanticForPFXSemanticName:
  * method for simple name-based mapping, or can override the resolveSemanticForVariableConfiguration:
  * for more complex mapping.
  */
-@interface CC3PFXGLProgramSemantics : CC3GLProgramSemanticsByVarName
+@interface CC3PFXGLProgramSemantics : CC3ShaderProgramSemanticsByVarName
 
 /**
  * Populates this instance with the mappings between variable names and semantics defined
@@ -244,6 +244,7 @@
 #pragma mark -
 #pragma mark CC3Material extension to support PFX effects
 
+/** Extension to support PFX effects. */
 @interface CC3Material (PFXEffects)
 
 /**
@@ -266,6 +267,7 @@
 #pragma mark -
 #pragma mark CC3Node extension to support PFX effects
 
+/** Extension to support PFX effects. */
 @interface CC3Node (PFXEffects)
 
 /**
@@ -283,3 +285,30 @@
 -(void) applyEffectNamed: (NSString*) effectName inPFXResourceFile: (NSString*) aFilePath;
 
 @end
+
+
+#pragma mark -
+#pragma mark CC3Shader extension to support PFX effects
+
+/** Extension to support PFX effects. */
+@interface CC3Shader (PFXEffects)
+
+/**
+ * Returns an instance compiled from GLSL source code identified by the specified PFX shader
+ * specification in the specified PFX resource loader.
+ *
+ * Shaders loaded through this method are cached. If the shader was already loaded and is in
+ * the cache, it is retrieved and returned. If the shader has not in the cache, it is created
+ * compiled from GLSL code identified by the specified PFX shader specification, and added to
+ * the shader cache. It is safe to invoke this method any time the shader is needed, without
+ * having to worry that the shader will be repeatedly loaded and compiled.
+ *
+ * If the shader is created and compiled, the GLSL code may be embedded in the PFX file, or
+ * may be contained in a separate GLSL source code file, as defined by the PFX shader spec.
+ *
+ * To clear a shader instance from the cache, use the removeShader: method.
+ */
++(id) shaderFromPFXShader: (PFXClassPtr) pSPVRTPFXParserShader inPFXResource: (CC3PFXResource*) pfxRez;
+
+@end
+

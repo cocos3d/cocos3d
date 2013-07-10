@@ -30,7 +30,7 @@
  */
 
 #import "CC3Material.h"
-#import "CC3GLProgramMatchers.h"
+#import "CC3ShaderProgramMatcher.h"
 #import "CC3CC2Extensions.h"
 #import "CC3IOSExtensions.h"
 
@@ -124,9 +124,9 @@
 	return self.shouldApplyOpacityToColor ? CCC4FBlendAlpha(self.emissionColor) : self.emissionColor;
 }
 
--(CC3GLProgram*) shaderProgram { return _shaderContext.program; }
+-(CC3ShaderProgram*) shaderProgram { return _shaderContext.program; }
 
--(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+-(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
 
 	// Do nothing if not changing
 	if (shaderProgram == self.shaderProgram) return;
@@ -144,7 +144,7 @@
 	}
 	
 	// Shader program does not exist, so create a new one on the program
-	self.shaderContext = [CC3GLProgramContext contextForProgram: shaderProgram];
+	self.shaderContext = [CC3ShaderProgramContext contextForProgram: shaderProgram];
 }
 
 

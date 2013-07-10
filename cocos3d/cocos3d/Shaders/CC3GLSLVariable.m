@@ -30,9 +30,11 @@
  */
 
 #import "CC3GLSLVariable.h"
-#import "CC3GLProgram.h"
+#import "CC3ShaderProgram.h"
+#import "CC3NodeVisitor.h"
 #import "CC3OpenGLFoundation.h"
 #import "CC3OpenGLUtility.h"
+#import "CC3OpenGL.h"
 
 
 NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
@@ -64,7 +66,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 #pragma mark Allocation and initialization
 
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
+-(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
 	if ( (self = [super init]) ) {
 		_index = index;
 		_semantic = kCC3SemanticNone;
@@ -76,7 +78,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	return self;
 }
 
-+(id) variableInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
++(id) variableInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
 	return [[[self alloc] initInProgram: program atIndex: index] autorelease];
 }
 
@@ -103,20 +105,22 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	_scope = another.scope;
 }
 
--(void) populateFromProgram {}
+-(void) populateFromProgram {
+	_semantic = kCC3SemanticNone;
+	_semanticIndex = 0;
+	[CC3OpenGL.sharedGL populateShaderProgramVariable: self];
+	[self normalizeName];
+}
 
-/**
- * Returns a valid variable name constructed from the specified null-terminated C string.
- * If the name includes a subscript suffix ([0]) at the end, it is removed and the resulting
- * string is returned without the suffix.
- */
--(NSString*) variableNameFrom: (const char *) cName {
-	NSString* name = [NSString stringWithUTF8String: cName];
+/** Ensures this variable has a valid name, by removing the subscript suffix ([0]), if it exists. */
+-(void) normalizeName {
 	NSString* subStr = @"[0]";
-	NSInteger subStartIdx = name.length - subStr.length;
-	if ( subStartIdx > 0 && [[name substringFromIndex: subStartIdx] isEqualToString: subStr] )
-		return [name substringToIndex: subStartIdx];
-	return name;
+	NSInteger subStartIdx = _name.length - subStr.length;
+	if ( _name && (subStartIdx > 0) && [[_name substringFromIndex: subStartIdx] isEqualToString: subStr] ) {
+		NSString* name = [_name substringToIndex: subStartIdx];
+		[_name release];
+		[_name = name retain];		// retained
+	}
 }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ named %@", self.class, _name]; }
@@ -146,26 +150,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(GLenum) type { return super.type; }	// Keep compiler happy
 
-#if CC3_GLSL
-
--(void) populateFromProgram {
-	_semantic = kCC3SemanticNone;
-	
-	GLint maxNameLen = [_program maxAttributeNameLength];
-	char cName[maxNameLen];
-	
-	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"glGetActiveAttrib(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
-	
-	_location = glGetAttribLocation(_program.programID, cName);
-	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
-	
-	[_name release];
-	_name = [[self variableNameFrom: cName] retain];	// retained
-}
-
-#endif	// CC3_GLSL
-
 @end
 
 
@@ -187,7 +171,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 #pragma mark Allocation and initialization
 
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index {
+-(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index {
 	// Initialized before populateFromProgram is invoked in parent initializer.
 	_varLen = 0;
 	_varValue = NULL;
@@ -486,18 +470,9 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 #pragma mark Updating the GL engine
 
-
-#if CC3_GLSL
-
+/** Also allocate space for the uniform value. */
 -(void) populateFromProgram {
-	_semantic = kCC3SemanticNone;
-	_semanticIndex = 0;
-	
-	GLint maxNameLen = [_program maxUniformNameLength];
-	char cName[maxNameLen];
-	
-	glGetActiveUniform(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
-	LogGLErrorTrace(@"glGetActiveUniform(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
+	[super populateFromProgram];
 	
 	_varLen = CC3GLElementTypeSize(_type) * _size;
 	free(_varValue);
@@ -505,93 +480,18 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	free(_glVarValue);
 	_glVarValue = calloc(_varLen, 1);
 	
-	_location = glGetUniformLocation(_program.programID, cName);
-	LogGLErrorTrace(@"glGetUniformLocation(%u, \"%s\")", _program.programID, cName);
-	
-	[_name release];
-	_name = [[self variableNameFrom: cName] retain];	// retained
-	
 	LogTrace(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
 }
 
 /** Overridden to update the GL state engine if the value was changed. */
--(BOOL) updateGLValue {
+-(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	if (memcmp(_glVarValue, _varValue, _varLen) != 0) {
 		memcpy(_glVarValue, _varValue, _varLen);
-		[self setGLValue];
+		[visitor.gl setShaderProgramUniformValue: self];
 		return YES;
 	}
 	return NO;
 }
-
--(void) setGLValue {
-	switch (_type) {
-			
-		case GL_FLOAT:
-			glUniform1fv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform1fv(%i, %i, %.3f) setting %@", _location, _size, *(GLfloat*)_glVarValue, self.name);
-			break;
-		case GL_FLOAT_VEC2:
-			glUniform2fv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform2fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCGPoint(*(CGPoint*)_glVarValue), self.name);
-			break;
-		case GL_FLOAT_VEC3:
-			glUniform3fv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform3fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3Vector(*(CC3Vector*)_glVarValue), self.name);
-			break;
-		case GL_FLOAT_VEC4:
-			glUniform4fv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform4fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
-			break;
-			
-		case GL_FLOAT_MAT2:
-			glUniformMatrix2fv(_location, _size, GL_FALSE, _glVarValue);
-			LogGLErrorTrace(@"glUniformMatrix2fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
-			break;
-		case GL_FLOAT_MAT3:
-			glUniformMatrix3fv(_location, _size, GL_FALSE, _glVarValue);
-			LogGLErrorTrace(@"glUniformMatrix3fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Matrix3x3((CC3Matrix3x3*)_glVarValue), self.name);
-			break;
-		case GL_FLOAT_MAT4:
-			glUniformMatrix4fv(_location, _size, GL_FALSE, _glVarValue);
-			LogGLErrorTrace(@"glUniformMatrix4fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Matrix4x4((CC3Matrix4x4*)_glVarValue), self.name);
-			break;
-			
-		case GL_INT:
-		case GL_SAMPLER_2D:
-		case GL_SAMPLER_CUBE:
-		case GL_BOOL:
-			glUniform1iv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform1iv(%i, %i, %i) setting %@", _location, _size, *(GLint*)_glVarValue, self.name);
-			break;
-		case GL_INT_VEC2:
-		case GL_BOOL_VEC2:
-			glUniform2iv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform2iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntPoint(*(CC3IntPoint*)_glVarValue), self.name);
-			break;
-		case GL_INT_VEC3:
-		case GL_BOOL_VEC3:
-			glUniform3iv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform3iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntVector(*(CC3IntVector*)_glVarValue), self.name);
-			break;
-		case GL_INT_VEC4:
-		case GL_BOOL_VEC4:
-			glUniform4iv(_location, _size, _glVarValue);
-			LogGLErrorTrace(@"glUniform4iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntVector4(*(CC3IntVector4*)_glVarValue), self.name);
-			break;
-			
-		default:
-			CC3Assert(NO, @"%@ could not set GL engine state value because type %@ is not understood",
-					  self, NSStringFromGLEnum(_type));
-			break;
-	}
-}
-
-#else
-
--(BOOL) updateGLValue { return NO; }
-
-#endif	// CC3_GLSL
 
 @end
 
@@ -600,9 +500,6 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 #pragma mark CC3GLSLUniformOverride
 
 @implementation CC3GLSLUniformOverride
-
--(BOOL) updateGLValue { return NO; }
--(void) setGLValue {}
-
+-(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor { return NO; }
 @end
 

@@ -31,6 +31,7 @@
 
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
+#import "CC3GLSLVariable.h"
 
 #if CC3_OGLES_2
 #	import "CC3OpenGLES2.h"
@@ -180,6 +181,7 @@
 }
 
 -(void) deleteBuffer: (GLuint) buffID  {
+	if ( !buffID ) return;		// Silently ignore zero ID
 	glDeleteBuffers(1, &buffID);
 	LogGLErrorTrace(@"glDeleteBuffers(%i, %u)", 1, buffID);
 }
@@ -444,7 +446,7 @@
 
 #pragma mark Textures
 
--(GLuint) generateTextureID {
+-(GLuint) generateTexture {
 	GLuint texID;
 	glGenTextures(1, &texID);
 	LogGLErrorTrace(@"glGenTextures(%i, %u)", 1, texID);
@@ -614,7 +616,7 @@
 
 #pragma mark Framebuffers
 
--(GLuint) generateFramebufferID {
+-(GLuint) generateFramebuffer {
 	GLuint fbID;
 	glGenFramebuffers(1, &fbID);
 	LogGLErrorTrace(@"glGenFramebuffers(%i, %u)", 1, fbID);
@@ -628,7 +630,7 @@
 }
 
 /** Returns whether the specified framebuffer ID is the currently bound value. */
--(BOOL) checkGLFramebufferID: (GLuint) fbID {
+-(BOOL) checkGLFramebuffer: (GLuint) fbID {
 	cc3_CheckGLPrim(fbID, value_GL_FRAMEBUFFER_BINDING, isKnown_GL_FRAMEBUFFER_BINDING);
 	return !needsUpdate;
 }
@@ -640,7 +642,7 @@
 }
 
 -(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget {
-	if ( [self checkGLFramebufferID: fbID] && [self checkGLFramebufferTarget: fbTarget] ) return;
+	if ( [self checkGLFramebuffer: fbID] && [self checkGLFramebufferTarget: fbTarget] ) return;
 	glBindFramebuffer(fbTarget, fbID);
 	LogGLErrorTrace(@"glBindFramebuffer(%@, %u)", NSStringFromGLEnum(fbTarget), fbID);
 }
@@ -653,7 +655,7 @@
 
 -(void) discard: (GLsizei) count attachments: (const GLenum*) attachments fromFramebuffer: (GLuint) fbID {}
 
--(GLuint) generateRenderbufferID {
+-(GLuint) generateRenderbuffer {
 	GLuint rbID;
 	glGenRenderbuffers(1, &rbID);
 	LogGLErrorTrace(@"glGenRenderbuffers(%i, %u)", 1, rbID);
@@ -761,20 +763,20 @@
 -(GLint) getInteger: (GLenum) param {
 	GLint val;
 	glGetIntegerv(param, &val);
-	LogGLErrorTrace(@"glGetIntegerv(%@)", NSStringFromGLEnum(param));
+	LogGLErrorTrace(@"glGetIntegerv(%@, %i)", NSStringFromGLEnum(param), val);
 	return val;
 }
 
 -(GLfloat) getFloat: (GLenum) param {
 	GLfloat val;
 	glGetFloatv(param, &val);
-	LogGLErrorTrace(@"glGetFloatv(%@)", NSStringFromGLEnum(param));
+	LogGLErrorTrace(@"glGetFloatv(%@, %.6f)", NSStringFromGLEnum(param), val);
 	return val;
 }
 
 -(NSString*) getString: (GLenum) param {
 	NSString* val = [NSString stringWithUTF8String: (char*)glGetString(param)];
-	LogGLErrorTrace(@"glGetString(%@)", NSStringFromGLEnum(param));
+	LogGLErrorTrace(@"glGetString(%@, %@)", NSStringFromGLEnum(param), val);
 	return val;
 }
 
@@ -816,13 +818,43 @@
 
 #pragma mark Shaders
 
--(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode { return nil; }
+-(GLuint) generateShader: (GLenum) shaderType { return 0; }
 
--(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(void) deleteShader: (GLuint) shaderID  {}
 
--(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {}
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources {}
+
+-(BOOL) getShaderWasCompiled: (GLuint) shaderID { return NO; }
+
+-(GLint) getIntegerParameter: (GLenum) param forShader: (GLuint) shaderID { return 0; }
+
+-(NSString*) getLogForShader: (GLuint) shaderID { return nil; }
+
+-(NSString*) getSourceCodeForShader: (GLuint) shaderID { return nil; }
 
 -(NSString*) defaultShaderPreamble { return @""; }
+
+-(GLuint) generateShaderProgram { return 0; }
+
+-(void) deleteShaderProgram: (GLuint) programID {}
+
+-(void) attachShader: (GLuint) shaderID toShaderProgram: (GLuint) programID {}
+
+-(void) detachShader: (GLuint) shaderID fromShaderProgram: (GLuint) programID {}
+
+-(void) linkShaderProgram: (GLuint) programID {}
+
+-(BOOL) getShaderProgramWasLinked: (GLuint) programID { return NO; }
+
+-(GLint) getIntegerParameter: (GLenum) param forShaderProgram: (GLuint) programID { return 0; }
+
+-(void) useShaderProgram: (GLuint) programID {}
+
+-(NSString*) getLogForShaderProgram: (GLuint) programID { return nil; }
+
+-(void) populateShaderProgramVariable: (CC3GLSLVariable*) var {}
+
+-(void) setShaderProgramUniformValue: (CC3GLSLUniform*) uniform {}
 
 
 #pragma mark Aligning 2D & 3D caches

@@ -35,7 +35,7 @@
  *   - CC3PointSpritesAlphaTest.fsh
  *
  * The semantics of the variables in this shader can be mapped using a
- * CC3GLProgramSemanticsByVarName instance.
+ * CC3ShaderProgramSemanticsByVarName instance.
  */
 
 // Increase these if more lights are desired.

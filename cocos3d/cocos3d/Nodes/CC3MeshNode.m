@@ -33,7 +33,7 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3Mesh.h"
 #import "CC3Light.h"
-#import "CC3GLProgramMatchers.h"
+#import "CC3ShaderProgramMatcher.h"
 #import "CC3IOSExtensions.h"
 
 
@@ -289,23 +289,23 @@
 	[super setGlobalLightPosition: aPosition];
 }
 
--(CC3GLProgramContext*) shaderContext {
+-(CC3ShaderProgramContext*) shaderContext {
 	[self ensureMaterial];
 	return _material.shaderContext;
 }
 
--(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
+-(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
 	[self ensureMaterial];
 	_material.shaderContext = shaderContext;
 	super.shaderContext = shaderContext;	// pass along to any children
 }
 
--(CC3GLProgram*) shaderProgram {
+-(CC3ShaderProgram*) shaderProgram {
 	[self ensureMaterial];
 	return _material.shaderProgram;
 }
 
--(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+-(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
 	[self ensureMaterial];
 	_material.shaderProgram = shaderProgram;
 	super.shaderProgram = shaderProgram;	// pass along to any children
@@ -851,10 +851,16 @@
 }
 
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor.gl bindProgramWithVisitor: visitor];
+	CC3ShaderProgram* shaderProgram;
+	if (visitor.shouldDecorateNode)
+		shaderProgram = [CC3ShaderProgram.programMatcher programForMeshNode: self];
+	else
+		shaderProgram = CC3ShaderProgram.programMatcher.pureColorProgram;
+
+	[shaderProgram bindWithVisitor: visitor];
 }
 
--(void) selectShaderProgram { [CC3OpenGL.sharedGL selectProgramForMeshNode: self]; }
+-(void) selectShaderProgram { [CC3ShaderProgram.programMatcher programForMeshNode: self]; }
 
 -(void) selectShaderPrograms {
 	[self selectShaderProgram];

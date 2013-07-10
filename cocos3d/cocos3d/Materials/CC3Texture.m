@@ -51,7 +51,7 @@
 	[super dealloc];
 }
 
--(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTextureID; }
+-(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
 
 -(void) deleteGLTexture {
 	[CC3OpenGL.sharedGL deleteTexture: _textureID];

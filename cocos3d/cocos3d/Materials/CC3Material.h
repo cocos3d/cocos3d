@@ -32,7 +32,7 @@
 #import "CC3Texture.h"
 #import "CCProtocols.h"
 #import "CC3NodeVisitor.h"
-#import "CC3GLProgramContext.h"
+#import "CC3ShaderProgramContext.h"
 
 
 /** Default material color under ambient lighting. */
@@ -168,7 +168,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 @interface CC3Material : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol> {
 	CC3Texture* _texture;
 	CCArray* _textureOverlays;
-	CC3GLProgramContext* _shaderContext;
+	CC3ShaderProgramContext* _shaderContext;
 	ccColor4F _ambientColor;
 	ccColor4F _diffuseColor;
 	ccColor4F _specularColor;
@@ -556,7 +556,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3GLProgramContext* shaderContext;
+@property(nonatomic, retain) CC3ShaderProgramContext* shaderContext;
 
 /**
  * The GLSL program (vertex & fragment shaders) used to decorate this material.
@@ -570,7 +570,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  *
  * This property is used only when running under OpenGL ES 2.
  */
-@property(nonatomic, retain) CC3GLProgram* shaderProgram;
+@property(nonatomic, retain) CC3ShaderProgram* shaderProgram;
 
 
 #pragma mark Textures

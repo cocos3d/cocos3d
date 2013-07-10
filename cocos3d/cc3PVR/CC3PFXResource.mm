@@ -36,7 +36,7 @@ extern "C" {
 #import "CC3PVRTPFXParser.h"
 #import "CC3PVRShamanGLProgramSemantics.h"
 #import "CC3PODResource.h"
-#import "CC3GLProgramMatchers.h"
+#import "CC3ShaderProgramMatcher.h"
 
 
 @implementation CC3PFXResource
@@ -211,11 +211,11 @@ static Class _defaultSemanticDelegateClass = nil;
 
 @implementation CC3PFXEffect
 
-@synthesize name=_name, glProgram=_glProgram, textures=_textures, variables=_variables;
+@synthesize name=_name, shaderProgram=_shaderProgram, textures=_textures, variables=_variables;
 
 -(void) dealloc {
 	[_name release];
-	[_glProgram release];
+	[_shaderProgram release];
 	[_textures release];
 	[_variables release];
 	[super dealloc];
@@ -227,7 +227,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) populateMaterial: (CC3Material*) material {
 
 	// Set the GL program into the material
-	material.shaderProgram = _glProgram;
+	material.shaderProgram = _shaderProgram;
 
 	// Set each texture into its associated texture unit
 	// After parsing, the ordering might not be consecutive, so look each up by texture unit index
@@ -262,17 +262,17 @@ static Class _defaultSemanticDelegateClass = nil;
 		CPVRTPFXParser* pfxParser = (CPVRTPFXParser*)pCPVRTPFXParser;
 		SPVRTPFXParserEffect* pfxEffect = (SPVRTPFXParserEffect*)pSPVRTPFXParserEffect;
 		_name = [[NSString stringWithUTF8String: pfxEffect->Name.c_str()] retain];	// retained
-		[self initTexturesFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
-		[self initVariablesFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
-		[self initGLProgramFrom: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
+		[self initTexturesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
+		[self initVariablesForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
+		[self initShaderProgramForPFXEffect: pfxEffect fromPFXParser: pfxParser inPFXResource: pfxRez];
 	}
 	return self;
 }
 
 /** Initializes the effect textures in the textures property.  */
--(void) initTexturesFrom: (SPVRTPFXParserEffect*) pfxEffect
-		   fromPFXParser: (CPVRTPFXParser*) pfxParser
-		   inPFXResource: (CC3PFXResource*) pfxRez  {
+-(void) initTexturesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
+				   fromPFXParser: (CPVRTPFXParser*) pfxParser
+				   inPFXResource: (CC3PFXResource*) pfxRez  {
 	_textures = [CCArray new];	// retained
 	
 	CPVRTArray<SPVRTPFXParserEffectTexture> effectTextures = pfxEffect->Textures;
@@ -299,9 +299,9 @@ static Class _defaultSemanticDelegateClass = nil;
 }
 
 /** Initializes the variables configurations in the variables property. */
--(void) initVariablesFrom: (SPVRTPFXParserEffect*) pfxEffect
-		   fromPFXParser: (CPVRTPFXParser*) pfxParser
-		   inPFXResource: (CC3PFXResource*) pfxRez  {
+-(void) initVariablesForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
+					fromPFXParser: (CPVRTPFXParser*) pfxParser
+					inPFXResource: (CC3PFXResource*) pfxRez  {
 	_variables = [CCArray new];		// retained
 	[self addVariablesFrom: pfxEffect->Attributes];
 	[self addVariablesFrom: pfxEffect->Uniforms];
@@ -320,44 +320,37 @@ static Class _defaultSemanticDelegateClass = nil;
 	}
 }
 
-/** Initializes the CC3GLProgram built from the shaders defined for this effect. */
--(void) initGLProgramFrom: (SPVRTPFXParserEffect*) pfxEffect
-			fromPFXParser: (CPVRTPFXParser*) pfxParser
-			inPFXResource: (CC3PFXResource*) pfxRez {
-	SPVRTPFXParserShader* vShader = [self getVertexShaderNamed: pfxEffect->VertexShaderName.c_str()
-												 fromPFXParser: pfxParser];
-	SPVRTPFXParserShader* fShader = [self getFragmentShaderNamed: pfxEffect->FragmentShaderName.c_str()
-												   fromPFXParser: pfxParser];
-	NSString* progName = [self getProgramNameFromVertexShader: vShader andFragmentShader: fShader];
+/** Initializes the CC3ShaderProgram built from the shaders defined for this effect. */
+-(void) initShaderProgramForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
+						fromPFXParser: (CPVRTPFXParser*) pfxParser
+						inPFXResource: (CC3PFXResource*) pfxRez {
 
-	Class progClz = self.glProgramClass;
+	// Retrieve or create the vertex shader
+	SPVRTPFXParserShader* pfxVtxShader = [self getPFXVertexShaderForPFXEffect: pfxEffect
+																fromPFXParser: pfxParser];
+	CC3VertexShader* vtxShader = [CC3VertexShader shaderFromPFXShader: pfxVtxShader
+														inPFXResource: pfxRez];
 
-	// Fetch and return program from cache if it has already been loaded
-	_glProgram = [[progClz getProgramNamed: progName] retain];		// retained
-	if (_glProgram) {
-		LogRez(@"Attached cached GL program named %@", progName);
-		return;
-	}
+	// Retrieve or create the fragment shader
+	SPVRTPFXParserShader* pfxFragShader = [self getPFXFragmentShaderForPFXEffect: pfxEffect
+																   fromPFXParser: pfxParser];
+	CC3FragmentShader* fragShader = [CC3FragmentShader shaderFromPFXShader: pfxFragShader
+															 inPFXResource: pfxRez];
 	
-	LogRez(@"Attaching GL program named %@ compiled from\n\tvertex shader %@\n\tfragment shader %@",
-		   progName, NSStringFromSPVRTPFXParserShader(vShader), NSStringFromSPVRTPFXParserShader(fShader));
-
-	// Compile, link and cache the program
 	CC3PFXGLProgramSemantics* semanticDelegate = [self semanticDelegateFrom: pfxEffect
 															  fromPFXParser: pfxParser
 															  inPFXResource: pfxRez];
-	_glProgram = [[progClz alloc] initWithName: progName
-						   andSemanticDelegate: semanticDelegate
-						 fromVertexShaderBytes: [self getShaderCode: vShader]
-						andFragmentShaderBytes: [self getShaderCode: fShader]];		// retained
-	[progClz addProgram: _glProgram];		// Add the new program to the cache
+
+	_shaderProgram = [self.shaderProgramClass programWithSemanticDelegate: semanticDelegate
+														 withVertexShader: vtxShader
+													   withFragmentShader: fragShader];
 }
 
 /**
- * Template property to determine the class of GL program to instantiate.
- * The returned class must be a subclass of CC3GLProgram.
+ * Template property to determine the class of shader program to instantiate.
+ * The returned class must be a subclass of CC3ShaderProgram.
  */
--(Class) glProgramClass { return [CC3GLProgram class]; }
+-(Class) shaderProgramClass { return [CC3ShaderProgram class]; }
 
 /** Template method to create, populate, and return the semantic delegate to use in the GL program. */
 -(CC3PFXGLProgramSemantics*) semanticDelegateFrom: (SPVRTPFXParserEffect*) pfxEffect
@@ -368,40 +361,28 @@ static Class _defaultSemanticDelegateClass = nil;
 	return [semanticDelegate autorelease];
 }
 
-/** Returns the vertex shader that was assigned the specified name in the PFX resource file. */
--(SPVRTPFXParserShader*) getVertexShaderNamed: (const char*) cName fromPFXParser: (CPVRTPFXParser*) pfxParser {
+/** Returns the PFX vertex shader that was assigned the specified name in the PFX resource file. */
+-(SPVRTPFXParserShader*) getPFXVertexShaderForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
+										  fromPFXParser: (CPVRTPFXParser*) pfxParser {
+	const char* sName = pfxEffect->VertexShaderName.c_str();
 	GLuint sCnt = pfxParser->GetNumberVertexShaders();
 	for (GLuint sIdx = 0; sIdx < sCnt; sIdx++) {
 		const SPVRTPFXParserShader& pfxShader = pfxParser->GetVertexShader(sIdx);
-		if (strcmp(pfxShader.Name.c_str(), cName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
+		if (strcmp(pfxShader.Name.c_str(), sName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
 	}
 	return NULL;
 }
 
-/** Returns the fragment shader that was assigned the specified name in the PFX resource file. */
--(SPVRTPFXParserShader*) getFragmentShaderNamed: (const char*) cName fromPFXParser: (CPVRTPFXParser*) pfxParser  {
+/** Returns the PFX fragment shader that was assigned the specified name in the PFX resource file. */
+-(SPVRTPFXParserShader*) getPFXFragmentShaderForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
+											fromPFXParser: (CPVRTPFXParser*) pfxParser  {
+	const char* sName = pfxEffect->FragmentShaderName.c_str();
 	GLuint sCnt = pfxParser->GetNumberFragmentShaders();
 	for (GLuint sIdx = 0; sIdx < sCnt; sIdx++) {
 		const SPVRTPFXParserShader& pfxShader = pfxParser->GetFragmentShader(sIdx);
-		if (strcmp(pfxShader.Name.c_str(), cName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
+		if (strcmp(pfxShader.Name.c_str(), sName) == 0) return (SPVRTPFXParserShader*)&pfxShader;
 	}
 	return NULL;
-}
-
-/** Returns a program name as a combination of the identifier keys from the specified vertex and fragment shaders. */
--(NSString*) getProgramNameFromVertexShader: (SPVRTPFXParserShader*) vShader
-						  andFragmentShader: (SPVRTPFXParserShader*) fShader  {
-	return [NSString stringWithFormat: @"%@-%@", [self getShaderKey: vShader], [self getShaderKey: fShader]];
-}
-
-/** 
- * Returns a unique identifier key for the specified shader. For a file-based shader, this will be just
- * the file name. For embedded shader code, it is a combination of the effect name and shader name.
- */
--(NSString*) getShaderKey: (SPVRTPFXParserShader*) pfxShader {
-	return (pfxShader->bUseFileName)
-				? [NSString stringWithUTF8String: pfxShader->pszGLSLfile]
-				: [NSString stringWithFormat: @"%@-%@", self.name, [NSString stringWithUTF8String: pfxShader->Name.c_str()]];
 }
 
 /** Returns the shader code for the specified shader. */
@@ -459,7 +440,7 @@ static Class _defaultSemanticDelegateClass = nil;
 /** Overridden to allow default naming semantics to be combined with PFX-defined semantics. */
 -(BOOL) configureVariable: (CC3GLSLVariable*) variable {
 	return ([super configureVariable: variable] ||
-			[CC3GLProgram.programMatcher.semanticDelegate configureVariable: variable]);
+			[CC3ShaderProgram.programMatcher.semanticDelegate configureVariable: variable]);
 }
 
 -(void) populateWithVariableNameMappingsFromPFXEffect: (CC3PFXEffect*) pfxEffect {
@@ -541,6 +522,47 @@ static Class _defaultSemanticDelegateClass = nil;
 	[self.material applyEffectNamed: effectName inPFXResourceFile: aFilePath];
 	[self alignTextureUnits];
 	[super applyEffectNamed: effectName inPFXResourceFile: aFilePath];
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3Shader extension to support PFX effects
+
+@implementation CC3Shader (PFXEffects)
+
++(id) shaderFromPFXShader: (PFXClassPtr) pSPVRTPFXParserShader inPFXResource: (CC3PFXResource*) pfxRez {
+	SPVRTPFXParserShader* pfxShader = (SPVRTPFXParserShader*)pSPVRTPFXParserShader;
+	NSString* shaderName;
+	CC3Shader* shader;
+	if (pfxShader->bUseFileName) {
+		// Derive the shader name, attempt to retrieve it from the shader cache, and return it is if exists already.
+		NSString* shaderFilePath = [NSString stringWithUTF8String: pfxShader->pszGLSLfile];
+		shaderName = [self shaderNameFromFilePath: shaderFilePath];
+		shader = [self getShaderNamed: shaderName];
+		if (shader) return shader;
+
+		// Compile a new shader from the source code in the shader file
+		shader = [[self alloc] initFromSourceCodeFile: shaderFilePath];
+	} else {
+		// Derive the shader name, attempt to retrieve it from the shader cache, and return it is if exists already.
+		shaderName = [NSString stringWithUTF8String: pfxShader->Name.c_str()];
+		shaderName = [NSString stringWithFormat: @"%@-%@", pfxRez.name, shaderName];
+		shader = [self getShaderNamed: shaderName];
+		if (shader) return shader;
+		
+		// Compile a new shader from the source code embedded in the PFX file
+		NSString* shaderSource = [NSString stringWithUTF8String: pfxShader->pszGLSLcode];
+		shader = [[self alloc] initWithName: shaderName fromSourceCode: shaderSource];
+	}
+
+	LogRez(@"%@ created from %@", shader, NSStringFromSPVRTPFXParserShader(pfxShader));
+	
+	// Add the shader to the shader cache and return it.
+	[CC3Shader addShader: shader];
+	[shader release];
+	return shader;
 }
 
 @end

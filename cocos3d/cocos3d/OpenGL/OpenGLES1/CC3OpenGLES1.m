@@ -30,7 +30,7 @@
  */
 
 #import "CC3OpenGLES1.h"
-#import "CC3GLProgramSemantics.h"
+#import "CC3ShaderProgramSemantics.h"
 
 #if CC3_OGLES_1
 

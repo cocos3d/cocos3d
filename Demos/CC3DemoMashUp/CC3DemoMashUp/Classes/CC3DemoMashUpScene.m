@@ -1393,7 +1393,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * simulate smooth motion and realistic flexibility.
  */
 -(void) addSkinnedMallet {
-	// Load the POD file and remove its cmera since we won't need it.
+	// Load the POD file and remove its camera since we won't need it.
 	// This is not actually necessary, but demonstrates that the resources loaded from
 	// a POD file, including the resource node, are just nodes that can be manipulated
 	// like any other node assembly.
@@ -1519,7 +1519,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	skeleton.shouldDrawBoundingVolume = YES;			// Visualize the BV
 //	[skeleton addAxesDirectionMarkers];					// Indicate the orientation
 	runner.skeletalBoundingVolume = bv;					// All skinned mesh nodes in model should use BV
-	
+
 	// Run, man, run!
 	// The POD node contains animation to move the skinned character through a running stride.
 	CCActionInterval* stride = [CC3Animate actionWithDuration: 2.4];
@@ -2074,7 +2074,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// be retrieved from the environment.
 	CC3Matrix4x4 customMtx;
 	CC3Matrix4x4PopulateIdentity(&customMtx);	// Could be any matrix...but just make it an identity
-	CC3GLProgramContext* progCtx = mask.material.shaderContext;
+	CC3ShaderProgramContext* progCtx = mask.material.shaderContext;
 	CC3GLSLUniform* progUniform = [progCtx uniformOverrideNamed: @"CustomMatrix"];
 	progUniform.matrix4x4 = &customMtx;
 	

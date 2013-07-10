@@ -52,7 +52,7 @@
 	return _rbID;
 }
 
--(void) ensureGLRenderbuffer { if (!_rbID) _rbID = CC3OpenGL.sharedGL.generateRenderbufferID; }
+-(void) ensureGLRenderbuffer { if (!_rbID) _rbID = CC3OpenGL.sharedGL.generateRenderbuffer; }
 
 -(void) deleteGLRenderbuffer {
 	[CC3OpenGL.sharedGL deleteRenderbuffer: _rbID];
@@ -282,7 +282,7 @@
 	return _fbID;
 }
 
--(void) ensureGLFramebuffer { if (!_fbID) _fbID = CC3OpenGL.sharedGL.generateFramebufferID; }
+-(void) ensureGLFramebuffer { if (!_fbID) _fbID = CC3OpenGL.sharedGL.generateFramebuffer; }
 
 -(void) deleteGLFramebuffer {
 	[CC3OpenGL.sharedGL deleteFramebuffer: _fbID];

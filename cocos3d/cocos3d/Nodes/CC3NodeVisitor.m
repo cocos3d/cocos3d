@@ -466,7 +466,7 @@
 
 	[CC3Material resetSwitching];
 	[CC3Mesh resetSwitching];
-	[CC3GLProgram willBeginDrawingScene];
+	[CC3ShaderProgram willBeginDrawingScene];
 
 	[self activateRenderSurface];
 	[self openScene];

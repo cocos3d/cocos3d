@@ -2576,102 +2576,6 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
 		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgram.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgram.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgram.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgram.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.m</string>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
-		<key>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</key>
-		<dict>
-			<key>Group</key>
-			<array>
-				<string>cocos3d</string>
-				<string>cocos3d</string>
-				<string>Shaders</string>
-			</array>
-			<key>Path</key>
-			<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</string>
-		</dict>
 		<key>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</key>
 		<dict>
 			<key>Group</key>
@@ -2695,6 +2599,102 @@
 			</array>
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgram.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgram.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgram.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgram.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.m</string>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Shaders</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.m</string>
 		</dict>
 		<key>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.h</key>
 		<dict>
@@ -3099,6 +3099,36 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3BumpMapTangentSpaceAlphaTest.fsh</string>
 		</dict>
+		<key>cocos3d/GLSL/CC3ClipSpaceNoTexture.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3ClipSpaceNoTexture.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3ClipSpaceSingleTexture.fsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3ClipSpaceSingleTexture.fsh</string>
+		</dict>
+		<key>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</string>
+		</dict>
 		<key>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</key>
 		<dict>
 			<key>Group</key>
@@ -3239,7 +3269,7 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</string>
 		</dict>
-		<key>cocos3d/GLSL/CC3TexturableMaterial.vsh</key>
+		<key>cocos3d/GLSL/CC3Texturable.vsh</key>
 		<dict>
 			<key>Group</key>
 			<array>
@@ -3247,7 +3277,7 @@
 				<string>GLSL</string>
 			</array>
 			<key>Path</key>
-			<string>cocos3d/GLSL/CC3TexturableMaterial.vsh</string>
+			<string>cocos3d/GLSL/CC3Texturable.vsh</string>
 		</dict>
 	</dict>
 	<key>Nodes</key>
@@ -3466,16 +3496,16 @@
 		<string>cocos3d/cocos3d/Scenes/CC3Scene.m</string>
 		<string>cocos3d/cocos3d/Scenes/CC3ViewController.h</string>
 		<string>cocos3d/cocos3d/Scenes/CC3ViewController.m</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.h</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgram.m</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.h</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramContext.m</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.h</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramMatchers.m</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.h</string>
-		<string>cocos3d/cocos3d/Shaders/CC3GLProgramSemantics.m</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.h</string>
 		<string>cocos3d/cocos3d/Shaders/CC3GLSLVariable.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgram.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgram.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramContext.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramMatcher.m</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.h</string>
+		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.m</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.h</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>
@@ -3511,6 +3541,9 @@
 		<string>cocos3d/GLSL/CC3BumpMapObjectSpaceAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3BumpMapTangentSpace.fsh</string>
 		<string>cocos3d/GLSL/CC3BumpMapTangentSpaceAlphaTest.fsh</string>
+		<string>cocos3d/GLSL/CC3ClipSpaceNoTexture.fsh</string>
+		<string>cocos3d/GLSL/CC3ClipSpaceSingleTexture.fsh</string>
+		<string>cocos3d/GLSL/CC3ClipSpaceTexturable.vsh</string>
 		<string>cocos3d/GLSL/CC3MultiTextureConfigurable.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTexture.fsh</string>
 		<string>cocos3d/GLSL/CC3NoTextureAlphaTest.fsh</string>
@@ -3525,7 +3558,7 @@
 		<string>cocos3d/GLSL/CC3SingleTextureAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3SingleTextureReflect.fsh</string>
 		<string>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</string>
-		<string>cocos3d/GLSL/CC3TexturableMaterial.vsh</string>
+		<string>cocos3d/GLSL/CC3Texturable.vsh</string>
 	</array>
 </dict>
 </plist>

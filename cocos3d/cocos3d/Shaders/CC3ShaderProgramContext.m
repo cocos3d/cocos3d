@@ -1,5 +1,5 @@
 /*
- * CC3GLProgramContext.m
+ * CC3ShaderProgramContext.m
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -26,16 +26,16 @@
  *
  * http://en.wikipedia.org/wiki/MIT_License
  * 
- * See header file CC3GLProgramContext.h for full API documentation.
+ * See header file CC3ShaderProgramContext.h for full API documentation.
  */
 
-#import "CC3GLProgramContext.h"
+#import "CC3ShaderProgramContext.h"
 
 
 #pragma mark -
-#pragma mark CC3GLProgramContext
+#pragma mark CC3ShaderProgramContext
 
-@implementation CC3GLProgramContext
+@implementation CC3ShaderProgramContext
 
 -(void) dealloc {
 	[_program release];
@@ -44,9 +44,9 @@
 	[super dealloc];
 }
 
--(CC3GLProgram*) program { return _program; }
+-(CC3ShaderProgram*) program { return _program; }
 
--(void) setProgram:(CC3GLProgram*) program {
+-(void) setProgram:(CC3ShaderProgram*) program {
 	if (program == _program) return;
 	[_program release];
 	_program = [program retain];
@@ -114,7 +114,8 @@
 	// This can occur when drawing with a different program, such as during node picking.
 	if (uniform.program != _program) return NO;
 
-	// Find the matching 
+	// Find the matching uniform override by comparing locations
+	// and set the value of the incoming uniform from it
 	for (CC3GLSLUniform* var in _uniforms) {
 		if (var.location == uniform.location) {
 			[uniform setValueFromUniform: var];
@@ -129,14 +130,14 @@
 
 -(id) init { return [self initForProgram: nil]; }
 
--(id) initForProgram: (CC3GLProgram*) program {
+-(id) initForProgram: (CC3ShaderProgram*) program {
 	if ( (self = [super init]) ) {
 		self.program = program;								// retained & will clear overrides
 	}
 	return self;
 }
 
-+(id) contextForProgram: (CC3GLProgram*) program {
++(id) contextForProgram: (CC3ShaderProgram*) program {
 	return [[[self alloc] initForProgram: program] autorelease];
 }
 

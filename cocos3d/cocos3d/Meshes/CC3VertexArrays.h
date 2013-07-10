@@ -32,7 +32,7 @@
 #import "CC3Identifiable.h"
 #import "CC3Material.h"
 #import "CC3NodeVisitor.h"
-#import "CC3GLProgramSemantics.h"
+#import "CC3ShaderProgramSemantics.h"
 
 
 #pragma mark -

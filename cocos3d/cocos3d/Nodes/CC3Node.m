@@ -747,27 +747,27 @@
 	self.globalLightPosition = CC3Vector4FromLocation(aLocation);
 }
 
--(CC3GLProgramContext*) shaderContext {
+-(CC3ShaderProgramContext*) shaderContext {
 	for (CC3Node* child in _children) {
-		CC3GLProgramContext* shaderContext = child.shaderContext;
+		CC3ShaderProgramContext* shaderContext = child.shaderContext;
 		if (shaderContext) return shaderContext;
 	}
 	return nil;
 }
 
--(void) setShaderContext: (CC3GLProgramContext*) shaderContext {
+-(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
 	for (CC3Node* child in _children) child.shaderContext = shaderContext;
 }
 
--(CC3GLProgram*) shaderProgram {
+-(CC3ShaderProgram*) shaderProgram {
 	for (CC3Node* child in _children) {
-		CC3GLProgram* program = child.shaderProgram;
+		CC3ShaderProgram* program = child.shaderProgram;
 		if (program) return program;
 	}
 	return nil;
 }
 
--(void) setShaderProgram: (CC3GLProgram*) shaderProgram {
+-(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
 	for (CC3Node* child in _children) child.shaderProgram = shaderProgram;
 }
 

@@ -33,7 +33,7 @@
 #import "CC3Foundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3GLProgram;
+@class CC3ShaderProgram, CC3NodeDrawingVisitor;
 
 
 /**
@@ -68,7 +68,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * or an array of any of those types, as indicated by the type and size properties.
  */
 @interface CC3GLSLVariable : NSObject <NSCopying> {
-	CC3GLProgram* _program;
+	CC3ShaderProgram* _program;
 	NSString* _name;
 	GLenum _type;
 	GLenum _semantic;
@@ -80,7 +80,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 }
 
 /** The GL program object containing this variable. */
-@property(nonatomic, assign, readonly) CC3GLProgram* program;
+@property(nonatomic, assign, readonly) CC3ShaderProgram* program;
 
 /**
  * The index of this variable within the GL program object.
@@ -168,10 +168,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 #pragma mark Allocation and initialization
 
 /** Initializes this instance at the specified index within the specified program. */
--(id) initInProgram: (CC3GLProgram*) program atIndex: (GLuint) index;
+-(id) initInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index;
 
 /** Allocates and initializes an autoreleased instance at the specified index within the specified program. */
-+(id) variableInProgram: (CC3GLProgram*) program atIndex: (GLuint) index;
++(id) variableInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index;
 
 /**
  * Returns a newly allocated (retained) copy of this instance. The new copy will be an instance
@@ -719,19 +719,16 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 -(void) setValueFromUniform: (CC3GLSLUniform*) uniform;
 
 /**
- * Invoked after all of the content of the variable has been set using the set... methods,
- * in order to have the value of this variable set into the GL engine.
+ * Invoked during drawing after all of the content of the variable has been set using
+ * the set... methods, in order to have the value of this variable set into the GL engine.
  *
  * The GL engine is only updated if the content of this variable has changed.
  * Returns whether the value has changed and was updated into the GL engine.
  *
- * The base implementation does nothing, and simply returns NO. Subclasses that actually
- * interact with the GL engine will override.
- *
  * This method is invoked automatically during uniform population.
  * The application normally never needs to invoke this method.
  */
--(BOOL) updateGLValue;
+-(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 @end
 
@@ -740,7 +737,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 #pragma mark CC3GLSLUniformOverride
 
 /**
- * Instances of this class are held in the CC3GLProgramContext to allow the value of a uniform
+ * Instances of this class are held in the CC3ShaderProgramContext to allow the value of a uniform
  * to be set directly by the application, on a node-by-node basis, to override the value retrieved
  * automatically from the scene via the semantic context of the uniform variable.
  *

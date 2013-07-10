@@ -30,20 +30,29 @@
  */
 
 #import "CC3OpenGLProgPipeline.h"
-#import "CC3GLProgramMatchers.h"
+#import "CC3ShaderProgramMatcher.h"
 #import "CC3NodeVisitor.h"
 #import "CC3MeshNode.h"
 
 #if CC3_GLSL
 
 #import "kazmath/GL/matrix.h"	// Only cocos2d 2.x
-#import "CC3GLProgram.h"
+#import "CC3ShaderProgram.h"
 
 @interface CC3OpenGL (TemplateMethods)
 -(void) clearUnboundVertexAttributes;
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 @end
+
+@interface CC3GLSLVariable (ProgPipeline)
+-(void) populateFromGL;
+@end
+
+@interface CC3GLSLUniform (ProgPipeline)
+-(void) setGLValue;
+@end
+
 
 @implementation CC3OpenGLProgPipeline
 
@@ -171,44 +180,161 @@
 
 #pragma mark Shaders
 
--(CC3GLProgram*) selectProgramForMeshNode: (CC3MeshNode*) aMeshNode {
-	return [CC3GLProgram.programMatcher programForMeshNode: aMeshNode];
+-(GLuint) generateShader: (GLenum) shaderType {
+    GLuint shaderID = glCreateShader(shaderType);
+	LogGLErrorTrace(@"glCreateShader(%@) = %u", NSStringFromGLEnum(shaderType), shaderID);
+	return shaderID;
 }
 
--(void) bindProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3GLProgram* shaderProgram;
-	if (visitor.shouldDecorateNode)
-		shaderProgram = [self selectProgramForMeshNode: visitor.currentMeshNode];
-	else
-		shaderProgram = CC3GLProgram.programMatcher.pureColorProgram;
-	[self bindProgram: shaderProgram  withVisitor: visitor];
+-(void) deleteShader: (GLuint) shaderID {
+	if ( !shaderID ) return;		// Silently ignore zero ID
+	glDeleteShader(shaderID);
+	LogGLErrorTrace(@"glDeleteShader(%u)", shaderID);
 }
 
--(void) bindProgram: (CC3GLProgram*) program withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Drawing %@ with %@", visitor.currentMeshNode, program);
-	[program bindWithVisitor: visitor];
+-(void) compileShader: (GLuint) shaderID fromSourceCodeStrings: (NSArray*) glslSources {
+	GLuint scCnt = (GLuint)glslSources.count;
 
-	[self clearUnboundVertexAttributes];
-	[program populateVertexAttributesWithVisitor: visitor];
-	[self enableBoundVertexAttributes];
+	// Extract the source code into an array of null-terminated C-strings.
+	const GLchar* srcBtyes[scCnt];
+	for (GLuint scIdx = 0; scIdx < scCnt; scIdx++)
+		srcBtyes[scIdx] = ((NSString*)[glslSources objectAtIndex: scIdx]).UTF8String;
+
+	glShaderSource(shaderID, scCnt, srcBtyes, NULL);
+	LogGLErrorTrace(@"glShaderSource(%u, %u, %p, %p)", shaderID, scCnt, srcBtyes, NULL);
 	
-	[program populateNodeScopeUniformsWithVisitor: visitor];
+	glCompileShader(shaderID);
+	LogGLErrorTrace(@"glCompileShader(%u)", shaderID);
+}
+
+-(BOOL) getShaderWasCompiled: (GLuint) shaderID {
+	if ( !shaderID ) return NO;
+    return ([self getIntegerParameter: GL_COMPILE_STATUS forShader: shaderID] > 0);
+}
+
+-(GLint) getIntegerParameter: (GLenum) param forShader: (GLuint) shaderID {
+	GLint val;
+    glGetShaderiv(shaderID, param, &val);
+	LogGLErrorTrace(@"glGetShaderiv(%u, %@, %i)", shaderID, NSStringFromGLEnum(param), val);
+	return val;
+}
+
+-(NSString*) getLogForShader: (GLuint) shaderID {
+	GLint strLen = [self getIntegerParameter: GL_INFO_LOG_LENGTH forShader: shaderID];
+	if (strLen < 1) return nil;
+	
+	GLint charsRetrieved = 0;
+	GLchar contentBytes[strLen];
+	glGetShaderInfoLog(shaderID, strLen, &charsRetrieved, contentBytes);
+	LogGLErrorTrace(@"glGetShaderInfoLog(%u, %i, %i, \"%s\")", shaderID, strLen, charsRetrieved, contentBytes);
+	
+	return [NSString stringWithUTF8String: contentBytes];
+}
+
+-(NSString*) getSourceCodeForShader: (GLuint) shaderID {
+	GLint strLen = [self getIntegerParameter: GL_SHADER_SOURCE_LENGTH forShader: shaderID];
+	if (strLen < 1) return nil;
+	
+	GLint charsRetrieved = 0;
+	GLchar contentBytes[strLen];
+	glGetShaderSource(shaderID, strLen, &charsRetrieved, contentBytes);
+	LogGLErrorTrace(@"glGetShaderSource(%u, %i, %i, \"%s\")", shaderID, strLen, charsRetrieved, contentBytes);
+	
+	return [NSString stringWithUTF8String: contentBytes];
+}
+
+-(GLuint) generateShaderProgram {
+    GLuint programID = glCreateProgram();
+	LogGLErrorTrace(@"glCreateProgram() = %u", programID);
+	return programID;
+}
+
+-(void) deleteShaderProgram: (GLuint) programID {
+	if ( !programID ) return;		// Silently ignore zero ID
+	glDeleteProgram(programID);
+	LogGLErrorTrace(@"glDeleteProgram(%u)", programID);
+}
+
+-(void) attachShader: (GLuint) shaderID toShaderProgram: (GLuint) programID {
+	if ( !shaderID || !programID ) return;		// Silently ignore zero IDs
+	glAttachShader(programID, shaderID);
+	LogGLErrorTrace(@"glAttachShader(%u, %u)", programID, shaderID);
+}
+
+-(void) detachShader: (GLuint) shaderID fromShaderProgram: (GLuint) programID {
+	if ( !shaderID || !programID ) return;		// Silently ignore zero IDs
+	glDetachShader(programID, shaderID);
+	LogGLErrorTrace(@"glDetachShader(%u, %u)", programID, shaderID);
+}
+
+-(void) linkShaderProgram: (GLuint) programID {
+	if ( !programID ) return;		// Silently ignore zero ID
+	glLinkProgram(programID);
+	LogGLErrorTrace(@"glLinkProgram(%u)", programID);
+}
+
+-(BOOL) getShaderProgramWasLinked: (GLuint) programID {
+	if ( !programID ) return NO;
+    return ([self getIntegerParameter: GL_LINK_STATUS forShaderProgram: programID] > 0);
+}
+
+-(GLint) getIntegerParameter: (GLenum) param forShaderProgram: (GLuint) programID {
+	GLint val;
+    glGetProgramiv(programID, param, &val);
+	LogGLErrorTrace(@"glGetProgramiv(%u, %@, %i)", programID, NSStringFromGLEnum(param), val);
+	return val;
+}
+
+-(void) useShaderProgram: (GLuint) programID {
+	cc3_CheckGLPrim(programID, value_GL_CURRENT_PROGRAM, isKnown_GL_CURRENT_PROGRAM);
+	if ( !needsUpdate ) return;
+	glUseProgram(programID);
+	LogGLErrorTrace(@"glUseProgram(%u)", programID);
+}
+
+-(NSString*) getLogForShaderProgram: (GLuint) programID {
+	GLint strLen = [self getIntegerParameter: GL_INFO_LOG_LENGTH forShaderProgram: programID];
+	if (strLen < 1) return nil;
+	
+	GLint charsRetrieved = 0;
+	GLchar contentBytes[strLen];
+	glGetProgramInfoLog(programID, strLen, &charsRetrieved, contentBytes);
+	LogGLErrorTrace(@"glGetProgramInfoLog(%u, %i, %i, \"%s\")", programID, strLen, charsRetrieved, contentBytes);
+	
+	return [NSString stringWithUTF8String: contentBytes];
+}
+
+-(void) populateShaderProgramVariable: (CC3GLSLVariable*) var { [var populateFromGL]; }
+
+-(void) setShaderProgramUniformValue: (CC3GLSLUniform*) uniform {
+	[self useShaderProgram: uniform.program.programID];
+	[uniform setGLValue];
 }
 
 
 #pragma mark Aligning 2D & 3D caches
 
 -(void) align2DStateCache {
+	[super align2DStateCache];
+	
 	ccGLBlendFunc(value_GL_BLEND_SRC, value_GL_BLEND_DST);
 	ccGLBindTexture2DN(value_GL_ACTIVE_TEXTURE, value_GL_TEXTURE_BINDING_2D[value_GL_ACTIVE_TEXTURE]);
 	
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_None);
 	ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
 	
+	ccGLUseProgram(0);
+	
 #if COCOS2D_VERSION < 0x020100
 	if (valueCap_GL_BLEND) ccGLEnable(CC_GL_BLEND);
 	else ccGLEnable(0);
 #endif
+}
+
+-(void) align3DStateCache {
+	[super align3DStateCache];
+	
+	isKnown_GL_CURRENT_PROGRAM = NO;
 }
 
 
@@ -243,6 +369,137 @@
 	value_MaxVertexAttribsUsed = kCCVertexAttrib_MAX;
 }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLVariable
+
+/** Extension for GL engine interaction */
+@implementation CC3GLSLVariable (ProgPipeline)
+-(void) populateFromGL { CC3AssertUnimplemented(@"populateFromGL"); }
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLAttribute
+
+/** Extension for GL engine interaction */
+@implementation CC3GLSLAttribute (ProgPipeline)
+
+-(void) populateFromGL {
+
+	GLint maxNameLen = [_program maxAttributeNameLength];
+	char cName[maxNameLen];
+
+	glGetActiveAttrib(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
+	LogGLErrorTrace(@"glGetActiveAttrib(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
+
+	_location = glGetAttribLocation(_program.programID, cName);
+	LogGLErrorTrace(@"glGetAttribLocation(%u, \"%s\")", _program.programID, cName);
+
+	[_name release];
+	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLUniform
+
+/** Extension for GL engine interaction */
+@implementation CC3GLSLUniform (ProgPipeline)
+
+-(void) populateFromGL {
+	
+	GLint maxNameLen = [_program maxUniformNameLength];
+	char cName[maxNameLen];
+	
+	glGetActiveUniform(_program.programID, _index, maxNameLen, NULL, &_size, &_type, cName);
+	LogGLErrorTrace(@"glGetActiveUniform(%u, %u, %i, NULL, %i, %@, \"%s\")", _program.programID, _index, maxNameLen, _size, NSStringFromGLEnum(_type), cName);
+	
+	_location = glGetUniformLocation(_program.programID, cName);
+	LogGLErrorTrace(@"glGetUniformLocation(%u, \"%s\")", _program.programID, cName);
+	
+	[_name release];
+	_name = [[NSString stringWithUTF8String: cName] retain];	// retained
+}
+
+/** Set the value of this uniform in the GL engine, based on the content type. */
+-(void) setGLValue {
+	
+	switch (_type) {
+		
+		case GL_FLOAT:
+			glUniform1fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform1fv(%i, %i, %.3f) setting %@", _location, _size, *(GLfloat*)_glVarValue, self.name);
+			break;
+		case GL_FLOAT_VEC2:
+			glUniform2fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform2fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCGPoint(*(CGPoint*)_glVarValue), self.name);
+			break;
+		case GL_FLOAT_VEC3:
+			glUniform3fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform3fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3Vector(*(CC3Vector*)_glVarValue), self.name);
+			break;
+		case GL_FLOAT_VEC4:
+			glUniform4fv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform4fv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
+			break;
+		
+		case GL_FLOAT_MAT2:
+			glUniformMatrix2fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix2fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Vector4(*(CC3Vector4*)_glVarValue), self.name);
+			break;
+		case GL_FLOAT_MAT3:
+			glUniformMatrix3fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix3fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Matrix3x3((CC3Matrix3x3*)_glVarValue), self.name);
+			break;
+		case GL_FLOAT_MAT4:
+			glUniformMatrix4fv(_location, _size, GL_FALSE, _glVarValue);
+			LogGLErrorTrace(@"glUniformMatrix4fv(%i, %i, GL_FALSE, %@) setting %@", _location, _size, NSStringFromCC3Matrix4x4((CC3Matrix4x4*)_glVarValue), self.name);
+			break;
+		
+		case GL_INT:
+		case GL_SAMPLER_2D:
+		case GL_SAMPLER_CUBE:
+		case GL_BOOL:
+			glUniform1iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform1iv(%i, %i, %i) setting %@", _location, _size, *(GLint*)_glVarValue, self.name);
+			break;
+		case GL_INT_VEC2:
+		case GL_BOOL_VEC2:
+			glUniform2iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform2iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntPoint(*(CC3IntPoint*)_glVarValue), self.name);
+			break;
+		case GL_INT_VEC3:
+		case GL_BOOL_VEC3:
+			glUniform3iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform3iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntVector(*(CC3IntVector*)_glVarValue), self.name);
+			break;
+		case GL_INT_VEC4:
+		case GL_BOOL_VEC4:
+			glUniform4iv(_location, _size, _glVarValue);
+			LogGLErrorTrace(@"glUniform4iv(%i, %i, %@) setting %@", _location, _size, NSStringFromCC3IntVector4(*(CC3IntVector4*)_glVarValue), self.name);
+			break;
+		
+		default:
+			CC3Assert(NO, @"%@ could not set GL engine state value because type %@ is not understood",
+					  self, NSStringFromGLEnum(_type));
+		break;
+	}
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3GLSLUniformOverride
+
+/** Extension for GL engine interaction */
+@implementation CC3GLSLUniformOverride (ProgPipeline)
+-(void) setGLValue {}
 @end
 
 #endif	// CC3_GLSL
