@@ -133,6 +133,7 @@
 			   withType: _pixelType
 	  withByteAlignment: self.byteAlignment
 					 at: tuIdx];
+	[self bindTextureParametersAt: tuIdx usingGL: gl];
 }
 
 -(GLuint) byteAlignment {
@@ -271,20 +272,17 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 	[gl enableTexturing: YES inTarget: target at: tuIdx];
 	[gl bindTexture: _textureID toTarget: target at: tuIdx];
-	[self bindTextureParametersWithVisitor: visitor];
+	[self bindTextureParametersAt: tuIdx usingGL: gl];
 
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
 
 /** If the texture parameters are dirty, binds them to the GL texture unit state. */
--(void) bindTextureParametersWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) bindTextureParametersAt: (GLuint) tuIdx usingGL: (CC3OpenGL*) gl {
 	if ( !_texParametersAreDirty ) return;
-
-	CC3OpenGL* gl = visitor.gl;
-	GLuint tuIdx = visitor.currentTextureUnitIndex;
+		
+	// Use property accessors to allow adjustments from the raw values
 	GLenum target = self.textureTarget;
-	
-	// Use property access to allow adjustments from the raw values
 	[gl setTextureMinifyFunc: self.minifyingFunction inTarget: target at: tuIdx];
 	[gl setTextureMagnifyFunc: self.magnifyingFunction inTarget: target at: tuIdx];
 	[gl setTextureHorizWrapFunc: self.horizontalWrappingFunction inTarget: target at: tuIdx];
@@ -470,7 +468,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 		_isUpsideDown = NO;
 		_shouldFlipVerticallyOnLoad = self.class.defaultShouldFlipVerticallyOnLoad;
 		_shouldFlipHorizontallyOnLoad = self.class.defaultShouldFlipHorizontallyOnLoad;
-		self.textureParameters = [[self class] defaultTextureParameters];
+		self.textureParameters = self.class.defaultTextureParameters;	// Marks params dirty
 	}
 	return self;
 }

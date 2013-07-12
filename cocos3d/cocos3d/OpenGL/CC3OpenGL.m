@@ -48,6 +48,7 @@
 @implementation CC3OpenGL
 
 -(void) dealloc {
+	[_extensions release];
 	[value_GL_VENDOR release];
 	[value_GL_RENDERER release];
 	[value_GL_VERSION release];
@@ -816,6 +817,23 @@
 }
 
 
+#pragma mark GL Extensions
+
+// Dummy implementation to keep compiler happy with @selector(caseInsensitiveCompare:)
+// in implementation of extensions property.
+-(NSComparisonResult) caseInsensitiveCompare: (NSString*) string { return NSOrderedSame; }
+
+-(NSArray*) extensions {
+	if ( !_extensions )
+		_extensions = [[[[[self getString: GL_EXTENSIONS]
+						  componentsSeparatedByCharactersInSet:
+						  [NSCharacterSet whitespaceCharacterSet]]
+						 filteredArrayUsingPredicate: [NSPredicate predicateWithFormat: @"length > 0"]]
+						sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)] retain];
+	return _extensions;
+}
+
+
 #pragma mark Shaders
 
 -(GLuint) generateShader: (GLenum) shaderType { return 0; }
@@ -884,6 +902,7 @@
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
+		[self initExtensions];
 	}
 	return self;
 }
@@ -918,6 +937,18 @@
 
 	value_GL_TEXTURE_BINDING_2D = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
 	value_GL_TEXTURE_BINDING_CUBE_MAP = calloc(value_GL_MAX_TEXTURE_UNITS, sizeof(GLuint));
+}
+
+/** Performs any required initialization for GL extensions supported by this platform. */
+-(void) initExtensions {
+	LogInfo(@"GL extensions supported by this platform: %@", self.extensionsDescription);
+}
+
+/** Returns a description of the available extensions. */
+-(NSString*) extensionsDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 1000];
+	for (NSString* ext in self.extensions) [desc appendFormat: @"\n\t%@", ext];
+	return desc;
 }
 
 /** Returns the appropriate class cluster subclass instance. */

@@ -80,6 +80,7 @@ typedef struct {
 	NSString* value_GL_VENDOR;
 	NSString* value_GL_RENDERER;
 	NSString* value_GL_VERSION;
+	NSArray* _extensions;
 	
 	CC3VertexAttr* vertexAttributes;
 	GLuint value_MaxVertexAttribsUsed;
@@ -917,6 +918,12 @@ typedef struct {
 
 /** Returns the maximum size for a texture used for the specified target supported by the platform. */
 -(GLuint) maxTextureSizeForTarget: (GLenum) target;
+
+
+#pragma mark GL Extensions
+
+/** Returns an array containing the names of the GL extensions supported by the platform. */
+@property(nonatomic, readonly) NSArray* extensions;
 
 
 #pragma mark Shaders
