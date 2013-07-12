@@ -229,24 +229,44 @@
  */
 +(id) resourceFromFile: (NSString*) aFilePath;
 
+/** 
+ * Returns a resource name derived from the specified file path.
+ *
+ * This method is used to standardize the naming of shaders, to ease in adding and retrieving
+ * resources to and from the cache, and is used to create the name for each resource that is
+ * loaded from a file.
+ *
+ * This implementation returns the lastComponent of the specified file path.
+ */
++(NSString*) resourceNameFromFilePath: (NSString*) aFilePath;
+
 
 #pragma mark Resource cache
 
-/** 
+/**
+ * Adds the specified resource to the collection of loaded resources.
+ *
+ * Resources are accessible via their names through the getResourceNamed: method, and each
+ * resource name should be unique. If a resource with the same name as the specified resource
+ * already exists in this cache, an assertion error is raised.
+ *
+ * This cache is a weak cache, meaning that it does not hold strong references to the resources
+ * that are added to it. As a result, the specified resource will automatically be deallocated
+ * and removed from this cache once all external strong references to it have been released.
+ */
++(void) addResource: (CC3Resource*) resource;
+
+/**
  * Returns the cached resource with the specified name,
  * or nil if a resource with that name has not been cached.
  */
 +(CC3Resource*) getResourceNamed: (NSString*) rezName;
 
-/**
- * Adds the specified resource to the resource cache. Resources are indexed in the cache using
- * the name property of the resource. If a resource already exists in the cache with the same
- * name, it is replaced by the specified resource.
- */
-+(void) addResource: (CC3Resource*) resource;
-
 /** Removes the specified resource from the resource cache. */
 +(void) removeResource: (CC3Resource*) resource;
+
+/** Removes the resource with the specified name from the resource cache. */
++(void) removeResourceNamed: (NSString*) name;
 
 /** Removes all resources from the cache. */
 +(void) removeAllResources;

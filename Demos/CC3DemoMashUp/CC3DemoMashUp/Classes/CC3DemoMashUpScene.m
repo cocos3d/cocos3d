@@ -136,7 +136,6 @@
 #define kLittleBrotherName				@"LittleBrother"
 #define kTVName							@"Television"
 #define kTVScreenName					@"TVScreen"
-#define kTVRenderTextureName			@"TVRenderTexture"
 
 #define	kMultiTextureCombinerLabel		@"Multi-texture combiner function: %@"
 
@@ -196,6 +195,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[_embossedStampTex release];
 	[_headTex release];
 	[_headBumpTex release];
+	[_tvTestCardTex release];
 	[_tvSurface release];
 	[_preProcSurface release];
 	[_grayscaleNode release];
@@ -1584,10 +1584,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
 
-	// Give the empty texture a name, and add it to the texture cache for later access.
-	_tvSurface.colorTexture.name = kTVRenderTextureName;
-	[CC3Texture addTexture: _tvSurface.colorTexture];
-
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
 	// lighting. Since we want to frequently access the TV screen mesh node, it is given a
@@ -1597,13 +1593,17 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	tv.rotation = cc3v(0, -45, 0);
 	tv.uniformScale = 750.0;
 	tv.touchEnabled = YES;
+	tv.shouldCullBackFaces = NO;				// Faces winding on decimated model is inconsistent
 	_tvScreen = [tv getMeshNodeNamed: @"tv_set-submesh3"];	// Auto-named by PVRGeoPOD
 	_tvScreen.name = kTVScreenName;							// Give it a more friendly name
 	_tvScreen.diffuseColor = kCCC4FWhite;
 	_tvScreen.shouldUseLighting = NO;
-	_tvScreen.texture = [CC3Texture textureFromFile: kTVTestCardFile];
-	tv.shouldCullBackFaces = NO;				// Faces winding on decimated model is inconsistent
 	_tvScreen.shouldCullFrontFaces = YES;		// But don't paint both front and back of screen
+
+	// Start with a test card displayed on the TV
+	_tvTestCardTex = [[CC3Texture textureFromFile: kTVTestCardFile] retain];
+	_tvScreen.texture = _tvTestCardTex;
+	
 	[self addChild: tv];
 	
 	_isTVOn = NO;		// Indicate TV is displaying test card
@@ -3191,8 +3191,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) toggleTelevision {
 	_isTVOn = !_isTVOn;
-	NSString* tvTexName = _isTVOn ? kTVRenderTextureName : kTVTestCardFile;
-	_tvScreen.texture = [CC3Texture getTextureNamed: tvTexName];
+	_tvScreen.texture = _isTVOn ? _tvSurface.colorTexture : _tvTestCardTex;
 }
 
 /** 

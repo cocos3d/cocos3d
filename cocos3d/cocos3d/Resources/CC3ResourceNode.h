@@ -86,9 +86,14 @@
 /**
  * The underlying CC3NodesResource instance containing the 3D nodes.
  * 
- * Setting this property will remove all child nodes of this CC3ResourceNode
- * and replace them with the nodes extracted from the nodes property of the
- * new CC3NodesResource instance, if they have already been loaded.
+ * Setting this property to a resource will remove all child nodes of this instance and
+ * replace them with the nodes extracted from the nodes property of the new resoure instance,
+ * if it has already been loaded.
+ *
+ * Setting this property to nil will release the underlying resource, but will not remove
+ * any child nodes of this instance. Once the underlying resource is released, it will be
+ * removed from the resource cache, and its memory reclaimed, if no other object retains a
+ * strong references to it.
  *
  * If this node has not yet been assigned a name, it will be set to the name
  * of the resource when this property is set.

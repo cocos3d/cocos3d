@@ -61,7 +61,7 @@
 }
 
 +(id) resourceFromFile: (NSString*) aFilePath expectsVerticallyFlippedTextures: (BOOL) flipped {
-	CC3NodesResource* rez = (CC3NodesResource*)[self getResourceNamed: aFilePath.lastPathComponent];
+	CC3NodesResource* rez = (CC3NodesResource*)[self getResourceNamed: [self resourceNameFromFilePath: aFilePath]];
 	if (rez) return rez;
 	
 	rez = [self resource];								// autoreleased

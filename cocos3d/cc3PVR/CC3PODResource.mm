@@ -71,6 +71,8 @@ static const id placeHolder = [NSObject new];
 
 -(CPVRTModelPOD*) pvrtModelImpl { return (CPVRTModelPOD*)_pvrtModel; }
 
+-(void) createCPVRTModelPOD { if ( !_pvrtModel ) _pvrtModel = new CPVRTModelPOD(); }
+
 -(void) deleteCPVRTModelPOD {
 	if (_pvrtModel) delete self.pvrtModelImpl;
 	_pvrtModel = NULL;
@@ -79,7 +81,7 @@ static const id placeHolder = [NSObject new];
 static Class _defaultPFXResourceClass = nil;
 
 +(Class) defaultPFXResourceClass {
-	if ( !_defaultPFXResourceClass) self.defaultPFXResourceClass = [CC3PFXResource class];
+	if ( !_defaultPFXResourceClass ) self.defaultPFXResourceClass = [CC3PFXResource class];
 	return _defaultPFXResourceClass;
 }
 
@@ -90,7 +92,7 @@ static Class _defaultPFXResourceClass = nil;
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_pvrtModel = new CPVRTModelPOD();
+		_pvrtModel = NULL;
 		_allNodes = [[CCArray array] retain];
 		_meshes = [[CCArray array] retain];
 		_materials = [[CCArray array] retain];
@@ -112,6 +114,7 @@ static Class _defaultPFXResourceClass = nil;
 
 	CPVRTResourceFile::SetReadPath([dirName stringByAppendingString: @"/"].UTF8String);
 	
+	[self createCPVRTModelPOD];
 	BOOL wasLoaded = (self.pvrtModelImpl->ReadFromFile(fileName.UTF8String) == PVR_SUCCESS);
 	
 	if (wasLoaded && _shouldAutoBuild) [self build];

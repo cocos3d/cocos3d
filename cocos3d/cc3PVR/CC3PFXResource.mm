@@ -560,9 +560,8 @@ static Class _defaultSemanticDelegateClass = nil;
 	LogRez(@"%@ created from %@", shader, NSStringFromSPVRTPFXParserShader(pfxShader));
 	
 	// Add the shader to the shader cache and return it.
-	[CC3Shader addShader: shader];
-	[shader release];
-	return shader;
+	[self addShader: shader];
+	return [shader autorelease];
 }
 
 @end

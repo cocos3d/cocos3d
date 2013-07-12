@@ -590,6 +590,7 @@ typedef enum {
 	CC3Light* _runnerLamp;
 	CC3EnvironmentMapTexture* _envMapTex;
 	CC3MeshNode* _tvScreen;
+	CC3Texture* _tvTestCardTex;
 	CC3Node* _selectedNode;
 	CC3GLFramebuffer* _tvSurface;
 	CC3GLFramebuffer* _preProcSurface;

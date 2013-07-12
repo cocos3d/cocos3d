@@ -109,11 +109,14 @@
 
 #pragma mark Program options
 
-/** This property is accessed quite frequently for activities like node picking, so cache the program here. */
+/** 
+ * This property is accessed quite frequently for activities like node picking,
+ * so make is directly accessible.
+ */
 -(CC3ShaderProgram*) pureColorProgram {
 	if ( !_pureColorProgram )
-		_pureColorProgram = [self programFromVertexShaderFile: @"CC3PureColor.vsh"
-										andFragmentShaderFile: @"CC3PureColor.fsh"];
+		_pureColorProgram = [[self programFromVertexShaderFile: @"CC3PureColor.vsh"
+										 andFragmentShaderFile: @"CC3PureColor.fsh"] retain];
 	return _pureColorProgram;
 }
 

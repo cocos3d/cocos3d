@@ -31,6 +31,33 @@
 
 #import "CC3Foundation.h"
 
+
+#pragma mark CC3Cacheable
+
+/**
+ * Defines an object that can be held in a cache.
+ *
+ * Objects are cached and retrieved by name.
+ *
+ * A cache may choose to hold an object directly, or it may choose to hold the object in a
+ * wrapper object. A wrapper is typically used when the cache does not want to retain the
+ * cached object, in order to permit the object to be automatically cleared from the cache
+ * once the object is not retained elsewhere, and is being deallocated.
+ *
+ * In order for this automatic cache clearing to work, the object being cached must be aware
+ * of where it is cached, and must remove itself from the cache as part of its deallocation
+ * behaviour.
+ */
+@protocol CC3Cacheable <NSObject>
+
+/** Returns the object that has been cached. */
+@property(nonatomic, readonly) id cachedObject;
+
+@end
+
+
+#pragma mark CC3Identifiable
+
 /**
  * This is a base subclass for any class that uses tags or names to identify individual instances.
  * Instances can be initialized with either or both a tag and a name. Instances initialized without
@@ -42,7 +69,7 @@
  * When overriding initialization, subclasses typically need only override the most generic
  * initializer, initWithTag:withName:.
  */
-@interface CC3Identifiable : NSObject <NSCopying> {
+@interface CC3Identifiable : NSObject <CC3Cacheable, NSCopying> {
 	GLuint _tag;
 	NSString* _name;
 	GLvoid* _userData;
@@ -56,9 +83,15 @@
 @property(nonatomic, assign) GLuint tag;
 
 /**
- * An arbitrary name for this node. It is not necessary to give all identifiable objects a name,
- * but can be useful for retrieving objects at runtime, and for identifying objects during development.
- * Names need not be unique, are not automatically assigned, and leaving the name as nil is acceptable.
+ * An arbitrary name for this object. It is not necessary to give all identifiable objects
+ * a name, but can be useful for retrieving objects at runtime, and for identifying objects
+ * during development. 
+ *
+ * In general, names need not be unique, are not automatically assigned, and leaving the name
+ * as nil is acceptable.
+ *
+ * Some subclasses are designed so that their instances can be cached. For instances of those
+ * subclasses, the name is required, and must be unique.
  */
 @property(nonatomic, retain) NSString* name;
 
@@ -153,6 +186,9 @@
  * nil from this property to indicate that automatic naming should not be performed.
  */
 @property(nonatomic, readonly) NSString* nameSuffix;
+
+/** Implementation of the CC3Cacheable protocol. Simply returns this object. */
+@property(nonatomic, readonly) id cachedObject;
 
 
 #pragma mark Allocation and initialization
@@ -438,3 +474,30 @@
 -(NSString*) fullDescription;
 
 @end
+
+
+#pragma mark CC3WeakCacheWrapper
+
+/**
+ * An instance of CC3WeakCacheWrapper is used within a cache to hold an object that is to
+ * be cached, without retaining that object. This permits the object to be deallocated once
+ * it has been released from all retained references outside the cache.
+ *
+ * Implements the CC3Cacheable protocol. The wrapped object is returned in the cachedObject property.
+ */
+@interface CC3WeakCacheWrapper : NSObject <CC3Cacheable> {
+	id _cachedObject;
+}
+
+
+#pragma mark Allocation and initialization
+
+/** Initializes this instance to wrap the specified object to be cached. */
+-(id) initWith: (id) cachedObject;
+
+/** Allocates and initializes an autoreleased instance to wrap the specified object to be cached. */
++(id) wrapperWith: (id) cachedObject;
+
+@end
+
+

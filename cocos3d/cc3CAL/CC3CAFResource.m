@@ -80,7 +80,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 }
 
 +(id) resourceFromFile: (NSString*) cafFilePath linkedToCSFFile: (NSString*) csfFilePath {
-	CC3CAFResource* rez = (CC3CAFResource*)[self getResourceNamed: cafFilePath.lastPathComponent];
+	CC3CAFResource* rez = (CC3CAFResource*)[self getResourceNamed: [self resourceNameFromFilePath: cafFilePath]];
 	if (rez) {
 		if (!rez.wasCSFResourceAttached)
 			[rez linkToCSFResource: [CC3CSFResource resourceFromFile: csfFilePath]];
@@ -89,8 +89,7 @@ static BOOL _defaultShouldSwapYZ = YES;
 	
 	rez = [[self alloc] initFromFile: cafFilePath linkedToCSFFile: csfFilePath];
 	[self addResource: rez];
-	[rez release];
-	return rez;
+	return [rez autorelease];
 }
 
 

@@ -1055,26 +1055,47 @@
  */
 +(id) textureCubeWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format andPixelType: (GLenum) type;
 
+/**
+ * Returns a texture name derived from the specified file path.
+ *
+ * This method is used to standardize the naming of textures, to ease in adding and retrieving
+ * textures to and from the cache, and is used to create the name for each texture that is
+ * loaded from a file.
+ *
+ * This implementation returns the lastComponent of the specified file path.
+ */
++(NSString*) textureNameFromFilePath: (NSString*) aFilePath;
 
-#pragma mark GL Texture cache
+
+#pragma mark Texture cache
 
 /**
  * Adds the specified texture to the collection of loaded textures.
  *
- * Textures are accessible via their names through the getTextureNamed: method, and should
- * be unique. If a texture with the same name as the specified texture already exists in
- * this cache, an assertion error is raised.
+ * Textures are accessible via their names through the getTextureNamed: method, and each
+ * texture name should be unique. If a texture with the same name as the specified texture
+ * already exists in this cache, an assertion error is raised.
+ *
+ * This cache is a weak cache, meaning that it does not hold strong references to the textures
+ * that are added to it. As a result, the specified texture will automatically be deallocated
+ * and removed from this cache once all external strong references to it have been released.
  */
 +(void) addTexture: (CC3Texture*) texture;
 
 /** Returns the texture with the specified name, or nil if a texture with that name has not been added. */
 +(CC3Texture*) getTextureNamed: (NSString*) name;
 
-/** Removes the specified texture from the collection of loaded programs. */
+/** Removes the specified texture from the texture cache. */
 +(void) removeTexture: (CC3Texture*) texture;
 
-/** Removes the texture with the specified name from the collection of loaded textures. */
+/** Removes the texture with the specified name from the texture cache. */
 +(void) removeTextureNamed: (NSString*) name;
+
+/** Removes all loaded textures from the cache. */
++(void) removeAllTextures;
+
+/** Removes this texture instance from the cache. */
+-(void) remove;
 
 @end
 

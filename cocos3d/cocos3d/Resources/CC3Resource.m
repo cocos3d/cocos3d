@@ -38,6 +38,7 @@
 @synthesize directory=_directory, isBigEndian=_isBigEndian, wasLoaded=_wasLoaded;
 
 -(void) dealloc {
+	[self remove];		// remove this instance from the cache
 	[_directory release];
 	[super dealloc];
 }
@@ -54,7 +55,7 @@
 	LogRez(@"--------------------------------------------------");
 	LogRez(@"Loading resources from file '%@'", absFilePath);
 	
-	if (!_name) self.name = absFilePath.lastPathComponent;
+	if (!_name) self.name = [self.class resourceNameFromFilePath: absFilePath];
 	if (!_directory) self.directory = [absFilePath stringByDeletingLastPathComponent];
 	
 	MarkRezActivityStart();
@@ -103,14 +104,15 @@
 }
 
 +(id) resourceFromFile: (NSString*) aFilePath {
-	id rez = [self getResourceNamed: aFilePath.lastPathComponent];
+	id rez = [self getResourceNamed: [self resourceNameFromFilePath: aFilePath]];
 	if (rez) return rez;
 
 	rez = [[self alloc] initFromFile: aFilePath];
 	[self addResource: rez];
-	[rez release];
-	return rez;
+	return [rez autorelease];
 }
+
++(NSString*) resourceNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name]; }
 
@@ -119,27 +121,28 @@
 
 static NSMutableDictionary* _resourcesByName = nil;
 
-+(CC3Resource*) getResourceNamed: (NSString*) rezName { return [_resourcesByName objectForKey: rezName]; }
-
 +(void) addResource: (CC3Resource*) resource {
 	if ( !resource ) return;
 	CC3Assert(resource.name, @"%@ cannot be added to the resource cache because its name property is nil.", resource);
+	CC3Assert( ![self getResourceNamed: resource.name], @"%@ already contains a resource named %@. Remove it first before adding another.", self, resource.name);
 	if ( !_resourcesByName ) _resourcesByName = [NSMutableDictionary new];		// retained
-	[_resourcesByName setObject: resource forKey: resource.name];
+	[_resourcesByName setObject: [CC3WeakCacheWrapper wrapperWith: resource] forKey: resource.name];
 }
 
-+(void) removeResource: (CC3Resource*) resource {
-	NSString* rezName = resource.name;
-	if (resource == [self getResourceNamed: rezName]) {
-		[_resourcesByName removeObjectForKey: rezName];
-	} else {
-		LogInfo(@"%@ was not removed from the resource cache because it is not the instance that is cached under name %@", resource, rezName);
-	}
++(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_resourcesByName objectForKey: name]; }
+
++(CC3Resource*) getResourceNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
+
++(void) removeResource: (CC3Resource*) resource { [self removeResourceNamed: resource.name]; }
+
++(void) removeResourceNamed: (NSString*) name {
+	LogRez(@"Removing resource named %@ from cache.", name);
+	[_resourcesByName removeObjectForKey: name];
 }
 
 +(void) removeAllResources { [_resourcesByName removeAllObjects]; }
 
--(void) remove { [[self class] removeResource: self]; }
+-(void) remove { [self.class removeResource: self]; }
 
 
 #pragma mark Tag allocation

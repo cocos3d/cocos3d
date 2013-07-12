@@ -34,8 +34,6 @@
 
 @implementation CC3ResourceNode
 
-@synthesize resource=_resource;
-
 -(void) dealloc {
 	[_resource release];
 	[super dealloc];
@@ -47,23 +45,22 @@
 }
 
 -(void) addResourceNodes {
-	for (CC3Node* aNode in self.resource.nodes) [self addChild: aNode];
-	LogRez(@"%@ added resource %@ with node structure: %@", self, self.resource,
-				[self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
-										withIndent: 1]);
+	if ( !_resource ) return;
+	
+	[self removeAllChildren];
+	for (CC3Node* aNode in _resource.nodes) [self addChild: aNode];
+	LogRez(@"%@ added resource %@ with node structure: %@", self, _resource,
+		   [self appendStructureDescriptionTo: [NSMutableString stringWithCapacity: 1000]
+								   withIndent: 1]);
 }
 
--(CC3NodesResource*) resource {
-	if (!_resource) self.resource = [self.resourceClass resource];
-	return _resource;
-}
+-(CC3NodesResource*) resource { return _resource; }
 
 -(void) setResource: (CC3NodesResource*) aResource {
 	if (aResource == _resource) return;
-	[self removeAllChildren];
 	[_resource release];
 	_resource = [aResource retain];
-	if (!_name) { self.name = self.resource.name; }
+	if (!_name) { self.name = _resource.name; }
 	[self addResourceNodes];
 }
 
@@ -122,10 +119,10 @@
 
 #pragma mark Aligning texture coordinates to NPOT and iOS-inverted textures
 
--(BOOL) expectsVerticallyFlippedTextures { return self.resource.expectsVerticallyFlippedTextures; }
+-(BOOL) expectsVerticallyFlippedTextures { return _resource.expectsVerticallyFlippedTextures; }
 
 -(void) setExpectsVerticallyFlippedTextures: (BOOL) expectsFlipped {
-	self.resource.expectsVerticallyFlippedTextures = expectsFlipped;
+	_resource.expectsVerticallyFlippedTextures = expectsFlipped;
 }
 
 

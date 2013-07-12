@@ -44,6 +44,7 @@
 @synthesize shaderPreamble=_shaderPreamble;
 
 -(void) dealloc {
+	[self remove];		// remove this instance from the cache
 	[self deleteGLShader];
 	[_shaderPreamble release];
 	[super dealloc];
@@ -117,8 +118,7 @@
 	
 	shader = [[self alloc] initFromSourceCodeFile: aFilePath];
 	[self addShader: shader];
-	[shader release];
-	return shader;
+	return [shader autorelease];
 }
 
 -(NSString*) glslSourceFromFile: (NSString*) aFilePath {
@@ -156,18 +156,26 @@ static NSMutableDictionary* _shadersByName = nil;
 
 +(void) addShader: (CC3Shader*) shader {
 	if ( !shader ) return;
+	CC3Assert(shader.name, @"%@ cannot be added to the shader cache because its name property is nil.", shader);
 	CC3Assert( ![self getShaderNamed: shader.name], @"%@ already contains a shader named %@. Remove it first before adding another.", self, shader.name);
 	if ( !_shadersByName ) _shadersByName = [NSMutableDictionary new];		// retained
-	[_shadersByName setObject: shader forKey: shader.name];
+	[_shadersByName setObject: [CC3WeakCacheWrapper wrapperWith: shader] forKey: shader.name];
 }
 
-+(CC3Shader*) getShaderNamed: (NSString*) name { return [_shadersByName objectForKey: name]; }
++(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_shadersByName objectForKey: name]; }
+
++(CC3Shader*) getShaderNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
 
 +(void) removeShader: (CC3Shader*) shader { [self removeShaderNamed: shader.name]; }
 
-+(void) removeShaderNamed: (NSString*) name { [_shadersByName removeObjectForKey: name]; }
++(void) removeShaderNamed: (NSString*) name {
+	LogRez(@"Removing shader named %@ from cache.", name);
+	[_shadersByName removeObjectForKey: name];
+}
 
 +(void) removeAllShaders { [_shadersByName removeAllObjects]; }
+
+-(void) remove { [self.class removeShader: self]; }
 
 @end
 
@@ -200,6 +208,7 @@ static NSMutableDictionary* _shadersByName = nil;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
 
 -(void) dealloc {
+	[self remove];					// remove this instance from the cache
 	self.vertexShader = nil;		// use setter to detach shader from program
 	self.fragmentShader = nil;		// use setter to detach shader from program
 	[self deleteGLProgram];
@@ -488,8 +497,7 @@ static NSMutableDictionary* _shadersByName = nil;
 									withVertexShader: vertexShader
 								  withFragmentShader: fragmentShader];
 	[self addProgram: program];
-	[program release];
-	return program;
+	return [program autorelease];
 }
 
 -(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
@@ -543,20 +551,30 @@ static NSMutableDictionary* _programsByName = nil;
 
 +(void) addProgram: (CC3ShaderProgram*) program {
 	if ( !program ) return;
+	CC3Assert(program.name, @"%@ cannot be added to the program cache because its name property is nil.", program);
 	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@. Remove it first before adding another.", self, program.name);
 	if ( !_programsByName ) _programsByName = [NSMutableDictionary new];		// retained
-	[_programsByName setObject: program forKey: program.name];
+	[_programsByName setObject: [CC3WeakCacheWrapper wrapperWith: program] forKey: program.name];
 }
 
-+(CC3ShaderProgram*) getProgramNamed: (NSString*) name { return [_programsByName objectForKey: name]; }
++(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_programsByName objectForKey: name]; }
+
++(CC3ShaderProgram*) getProgramNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
 
 +(void) removeProgram: (CC3ShaderProgram*) program { [self removeProgramNamed: program.name]; }
 
-+(void) removeProgramNamed: (NSString*) name { [_programsByName removeObjectForKey: name]; }
++(void) removeProgramNamed: (NSString*) name {
+	LogRez(@"Removing shader program named %@ from cache.", name);
+	[_programsByName removeObjectForKey: name];
+}
+
++(void) removeAllPrograms { [_programsByName removeAllObjects]; }
+
+-(void) remove { [self.class removeProgram: self]; }
 
 +(void) willBeginDrawingScene {
 	[_programsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-		[obj willBeginDrawingScene];
+		[[obj cachedObject] willBeginDrawingScene];
 	}];
 }
 

@@ -47,6 +47,7 @@
 @synthesize shouldFlipHorizontallyOnLoad=_shouldFlipHorizontallyOnLoad;
 
 -(void) dealloc {
+	[self remove];		// remove this instance from the cache
 	[self deleteGLTexture];
 	[super dealloc];
 }
@@ -296,7 +297,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 
 -(BOOL) loadTarget: (GLenum) target fromFile: (NSString*) aFilePath {
 	
-	if (!_name) self.name = aFilePath.lastPathComponent;
+	if (!_name) self.name = [self.class textureNameFromFilePath: aFilePath];
 	
 #if LOGGING_REZLOAD
 	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
@@ -507,15 +508,16 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 +(id) textureFromFile: (NSString*) aFilePath {
-	id tex = [self getTextureNamed: aFilePath.lastPathComponent];
+	id tex = [self getTextureNamed: [self textureNameFromFilePath: aFilePath]];
 	if (tex) return tex;
 	
 	Class texClz = [self textureClassForFile: aFilePath];
 	tex = [[texClz alloc] initFromFile: aFilePath];
 	[self addTexture: tex];
-	[tex release];
-	return tex;
+	return [tex autorelease];
 }
+
++(NSString*) textureNameFromFilePath: (NSString*) aFilePath { return aFilePath.lastPathComponent; }
 
 +(Class) textureClassForCGImage { return CC3Texture2D.class; }
 
@@ -564,7 +566,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 						  posY: (NSString*) posYFilePath negY: (NSString*) negYFilePath
 						  posZ: (NSString*) posZFilePath negZ: (NSString*) negZFilePath {
 	
-	id tex = [self getTextureNamed: posXFilePath.lastPathComponent];
+	id tex = [self getTextureNamed: [self textureNameFromFilePath: posXFilePath]];
 	if (tex) return tex;
 	
 	Class texClz = [self.class textureClassForCube];
@@ -572,8 +574,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 										   posY: posYFilePath negY: negYFilePath
 										   posZ: posZFilePath negZ: negZFilePath];
 	[self addTexture: tex];
-	[tex release];
-	return tex;
+	return [tex autorelease];
 }
 
 -(id) initCubeFromFilePattern: (NSString*) aFilePathPattern {
@@ -581,15 +582,14 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 +(id) textureCubeFromFilePattern: (NSString*) aFilePathPattern {
-	NSString* texName = ((NSString*)[NSString stringWithFormat: aFilePathPattern, @""]).lastPathComponent;
+	NSString* texName = [self textureNameFromFilePath: [NSString stringWithFormat: aFilePathPattern, @""]];
 	
 	id tex = [self getTextureNamed: texName];
 	if (tex) return tex;
 	
 	tex = [[[self textureClassForCube] alloc] initCubeFromFilePattern: aFilePathPattern];
 	[self addTexture: tex];
-	[tex release];
-	return tex;
+	return [tex autorelease];
 }
 
 -(id) initCubeWithPixelFormat: (GLenum) format andPixelType: (GLenum) type {
@@ -642,22 +642,32 @@ static GLuint _lastAssignedTextureTag;
 +(void) resetTagAllocation { _lastAssignedTextureTag = 0; }
 
 
-#pragma mark GL Texture cache
+#pragma mark Texture cache
 
 static NSMutableDictionary* _texturesByName = nil;
 
 +(void) addTexture: (CC3Texture*) texture {
 	if ( !texture ) return;
 	CC3Assert(texture.name, @"%@ cannot be added to the texture cache because its name property is nil.", texture);
+	CC3Assert( ![self getTextureNamed: texture.name], @"%@ already contains a texture named %@. Remove it first before adding another.", self, texture.name);
 	if ( !_texturesByName ) _texturesByName = [NSMutableDictionary new];		// retained
-	[_texturesByName setObject: texture forKey: texture.name];
+	[_texturesByName setObject: [CC3WeakCacheWrapper wrapperWith: texture] forKey: texture.name];
 }
 
-+(CC3Texture*) getTextureNamed: (NSString*) name { return [_texturesByName objectForKey: name]; }
++(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_texturesByName objectForKey: name]; }
+
++(CC3Texture*) getTextureNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
 
 +(void) removeTexture: (CC3Texture*) texture { [self removeTextureNamed: texture.name]; }
 
-+(void) removeTextureNamed: (NSString*) name { [_texturesByName removeObjectForKey: name]; }
++(void) removeTextureNamed: (NSString*) name {
+	LogRez(@"Removing texture named %@ from cache.", name);
+	[_texturesByName removeObjectForKey: name];
+}
+
++(void) removeAllTextures { [_texturesByName removeAllObjects]; }
+
+-(void) remove { [self.class removeTexture: self]; }
 
 @end
 
@@ -806,7 +816,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 -(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern {
 	
-	if (!_name) self.name = ((NSString*)[NSString stringWithFormat: aFilePathPattern, @""]).lastPathComponent;
+	if (!_name) self.name = [self.class textureNameFromFilePath: [NSString stringWithFormat: aFilePathPattern, @""]];
 
 	return [self loadFromFilesPosX: [NSString stringWithFormat: aFilePathPattern, @"PosX"]
 							  negX: [NSString stringWithFormat: aFilePathPattern, @"NegX"]

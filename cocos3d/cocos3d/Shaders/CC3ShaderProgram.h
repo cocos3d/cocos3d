@@ -185,7 +185,10 @@
  * Returns a shader name derived from the specified file path.
  *
  * This method is used to standardize the naming of shaders, to ease in adding and retrieving
- * shaders to and from the cache.
+ * shaders to and from the cache, and is used to create the name for each shader that is
+ * loaded from a file.
+ *
+ * This implementation returns the lastComponent of the specified file path.
  */
 +(NSString*) shaderNameFromFilePath: (NSString*) aFilePath;
 
@@ -197,9 +200,13 @@
  *
  * The specified shader should be compiled prior to being added here.
  *
- * Shaders are accessible via their names through the getShaderNamed: method, and should be
- * unique. If a shader with the same name as the specified shader already exists in this cache,
- * an assertion error is raised.
+ * Shaders are accessible via their names through the getShaderNamed: method, and each
+ * shader name should be unique. If a shader with the same name as the specified shader
+ * already exists in this cache, an assertion error is raised.
+ *
+ * This cache is a weak cache, meaning that it does not hold strong references to the shaders
+ * that are added to it. As a result, the specified shader will automatically be deallocated
+ * and removed from this cache once all external strong references to it have been released.
  */
 +(void) addShader: (CC3Shader*) shader;
 
@@ -207,7 +214,7 @@
 +(CC3Shader*) getShaderNamed: (NSString*) name;
 
 /** 
- * Removes the specified shader from the collection of loaded shaders. If the shader is
+ * Removes the specified shader from the shader cache. If the shader is
  * not retained elsewhere, it will be deallocated, and will be removed from the GL engine.
  *
  * Removing a shader from the GL engine does not affect the operation of shaders that have
@@ -217,7 +224,7 @@
 +(void) removeShader: (CC3Shader*) shader;
 
 /**
- * Removes the shader with the specified name from the collection of loaded shaders.
+ * Removes the shader with the specified name from the shader cache.
  * If the shader is not retained elsewhere, it will be deallocated, and will be removed
  * from the GL engine.
  *
@@ -235,6 +242,9 @@
  * your CC3ShaderPrograms from the loaded shaders.
  */
 +(void) removeAllShaders;
+
+/** Removes this shader instance from the cache. */
+-(void) remove;
 
 @end
 
@@ -520,20 +530,30 @@
  *
  * The specified program should be compiled and linked prior to being added here.
  *
- * Programs are accessible via their names through the getProgramNamed: method, and should be unique.
- * If a program with the same name as the specified program already exists in this cache, an assertion
- * error is raised.
+ * Programs are accessible via their names through the getProgramNamed: method, and each
+ * program name should be unique. If a program with the same name as the specified program
+ * already exists in this cache, an assertion error is raised.
+ *
+ * This cache is a weak cache, meaning that it does not hold strong references to the programs
+ * that are added to it. As a result, the specified program will automatically be deallocated
+ * and removed from this cache once all external strong references to it have been released.
  */
 +(void) addProgram: (CC3ShaderProgram*) program;
 
 /** Returns the program with the specified name, or nil if a program with that name has not been added. */
 +(CC3ShaderProgram*) getProgramNamed: (NSString*) name;
 
-/** Removes the specified program from the collection of loaded programs. */
+/** Removes the specified program from the program cache. */
 +(void) removeProgram: (CC3ShaderProgram*) program;
 
-/** Removes the program with the specified name from the collection of loaded programs. */
+/** Removes the program with the specified name from the program cache. */
 +(void) removeProgramNamed: (NSString*) name;
+
+/** Removes all loaded programs from the cache. */
++(void) removeAllPrograms;
+
+/** Removes this program instance from the cache. */
+-(void) remove;
 
 /**
  * Invoked to indicate that scene drawing is about to begin.

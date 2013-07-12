@@ -62,7 +62,7 @@
  * This shader program is used when a mesh node does not have a material, or when
  * painting a mesh node for node picking during user interaction.
  */
-@property(nonatomic, readonly) CC3ShaderProgram* pureColorProgram;
+@property(nonatomic, retain, readonly) CC3ShaderProgram* pureColorProgram;
 
 /**
  * Returns the shader program to use to draw the specified mesh node.
