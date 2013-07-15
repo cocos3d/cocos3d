@@ -57,9 +57,9 @@
 	p3.x = bb.maximum.x;
 	
 	// Transform these points.
-	p1 = [self.transformMatrix transformLocation: p1];
-	p2 = [self.transformMatrix transformLocation: p2];
-	p3 = [self.transformMatrix transformLocation: p3];
+	p1 = [self.globalTransformMatrix transformLocation: p1];
+	p2 = [self.globalTransformMatrix transformLocation: p2];
+	p3 = [self.globalTransformMatrix transformLocation: p3];
 	
 	// Create and return a plane from these points.
 	return CC3PlaneFromLocations(p1, p2, p3);

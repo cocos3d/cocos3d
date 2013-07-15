@@ -84,7 +84,7 @@
 -(void) incrementNodesUpdated;
 
 /**
- * The total number of nodes whose transformMatrix was recalculated
+ * The total number of nodes whose globalTransformMatrix was recalculated
  * since the reset method was last invoked.
  */
 @property(nonatomic, readonly) GLuint nodesTransformed;
@@ -185,7 +185,7 @@
 @property(nonatomic, readonly) GLfloat averageNodesUpdatedPerUpdate;
 
 /**
- * The average nodes whose transformMatrix was recalculated per update, calculated
+ * The average nodes whose globalTransformMatrix was recalculated per update, calculated
  * by dividing the nodesTransformed property by the updatesHandled property.
  */
 @property(nonatomic, readonly) GLfloat averageNodesTransformedPerUpdate;

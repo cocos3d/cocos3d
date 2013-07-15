@@ -651,10 +651,10 @@ static GLfloat deviceScaleFactor = 0.0f;
 	CGPoint bbMax = ccp(CGRectGetMaxX(br), CGRectGetMaxY(br));
 	
 	// Construct all 4 corner vertices of the local bounding box and transform each to global coordinates
-	_vertices[0] = [_node.transformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
-	_vertices[1] = [_node.transformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
-	_vertices[2] = [_node.transformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
-	_vertices[3] = [_node.transformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
+	_vertices[0] = [_node.globalTransformMatrix transformLocation: cc3v(bbMin.x, bbMin.y, 0.0)];
+	_vertices[1] = [_node.globalTransformMatrix transformLocation: cc3v(bbMin.x, bbMax.y, 0.0)];
+	_vertices[2] = [_node.globalTransformMatrix transformLocation: cc3v(bbMax.x, bbMin.y, 0.0)];
+	_vertices[3] = [_node.globalTransformMatrix transformLocation: cc3v(bbMax.x, bbMax.y, 0.0)];
 	
 	LogTrace(@"%@ bounding volume transformed %@ MinMax(%@, %@) to (%@, %@, %@, %@)", _node,
 			 NSStringFromCGRect(br),
@@ -670,7 +670,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  */
 -(void) buildPlanes {
 	CC3Vector normal;
-	CC3Matrix* tMtx = _node.transformMatrix;
+	CC3Matrix* tMtx = _node.globalTransformMatrix;
 	CC3Vector bbMin = _vertices[0];
 	CC3Vector bbMax = _vertices[3];
 	

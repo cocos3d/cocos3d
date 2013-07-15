@@ -278,13 +278,13 @@
 
 -(CC3Vector4) globalLightPosition {
 	return (_material && _material.hasBumpMap)
-				? [self.transformMatrix transformHomogeneousVector: CC3Vector4FromDirection(_material.lightDirection)]
+				? [self.globalTransformMatrix transformHomogeneousVector: CC3Vector4FromDirection(_material.lightDirection)]
 				: [super globalLightPosition];
 }
 
 -(void) setGlobalLightPosition: (CC3Vector4) aPosition {
 	[self ensureMaterial];
-	CC3Vector4 localLtPos = [self.transformMatrixInverted transformHomogeneousVector: aPosition];
+	CC3Vector4 localLtPos = [self.globalTransformMatrixInverted transformHomogeneousVector: aPosition];
 	_material.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
 	[super setGlobalLightPosition: aPosition];
 }
@@ -1161,7 +1161,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 	if ( !_mesh ) return 0;
 
 	// Convert the array to local coordinates and find intersections.
-	CC3Ray localRay = [self.transformMatrixInverted transformRay: aRay];
+	CC3Ray localRay = [self.globalTransformMatrixInverted transformRay: aRay];
 	GLuint hitCount = [self findFirst: maxHitCount
 						intersections: intersections
 						   ofLocalRay: localRay
@@ -1171,7 +1171,7 @@ globalIntersections: (CC3MeshIntersection*) intersections
 	// Convert the intersections to global coordinates.
 	for (GLuint hitIdx = 0; hitIdx < hitCount; hitIdx++) {
 		CC3MeshIntersection* hit = &intersections[hitIdx];
-		hit->location = [self.transformMatrix transformLocation: hit->location];
+		hit->location = [self.globalTransformMatrix transformLocation: hit->location];
 		hit->distance = CC3VectorDistance(hit->location, aRay.startLocation);
 	}
 

@@ -243,11 +243,11 @@
  * of the startingNode.
  *
  * If this property is set to NO, the transforms of all ancestors of each node, all the
- * way to CC3Scene, will be included when calculating the transformMatrix and global
+ * way to CC3Scene, will be included when calculating the globalTransformMatrix and global
  * properties of that node. This is the normal situation.
  *
  * If this property is set to YES the transforms of the startingNode and its ancestors,
- * right up to the CC3Scene, will be ignored. The result is that the transformMatrix
+ * right up to the CC3Scene, will be ignored. The result is that the globalTransformMatrix
  * and all global properties (globalLocation, etc) will be relative to the startingNode.
  
  * This can be useful when you want to coordinate node positioning within a particular
@@ -259,7 +259,7 @@
  * ignoring the transforms of the ancestor nodes of the node whose local bounding box
  * is being calculated.
  *
- * Setting this property to YES will force the recalculation of the transformMatrix of
+ * Setting this property to YES will force the recalculation of the globalTransformMatrix of
  * each node visited, to ensure that they are relative to the startingNode. Further,
  * once the visitation run is complete, if this property is set to YES, the close
  * method will rebuild the transformMatrices of the startingNode and its descendants,
@@ -299,7 +299,7 @@
  * Returns the transform matrix to use as the parent matrix when transforming the
  * specified node.
  * 
- * This usually returns the value of the parentTransformMatrix of the specified node.
+ * This usually returns the value of the parentGlobalTransformMatrix of the specified node.
  * However, if the shouldLocalizeToStartingNode property is set to YES and the
  * startingNode is either the specified node or its parent, this method returns nil.
  */
@@ -338,7 +338,7 @@
 
 /**
  * Specialized transforming visitor that measures the bounding box of a node and all
- * its descendants, by traversing each descendant node, ensuring each transformMatrix
+ * its descendants, by traversing each descendant node, ensuring each globalTransformMatrix
  * is up to date, and accumulating a bounding box that encompasses the local content
  * of the startingNode and all of its descendants.
  *

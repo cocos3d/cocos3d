@@ -74,8 +74,9 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * inverting a matrix that contains scaling and is therefore not rigid. If possible, try to avoid
  * applying scaling to the ancestor nodes of this camera.
  *
- * CC3Camera can be pointed in a particular direction, or can be made to track a target
- * node as that node moves, or the camera moves.
+ * Like any CC3Node, CC3Camera can be pointed in a specific direction, pointed at a specific
+ * location, or at a specific node by setting the forwardDirection, targetLocation, or target
+ * properties, respectively.
  *
  * The camera can be configured for either perspective or parallel projection, using the
  * isUsingParallelProjection property. By default, the camera will use perspective projection.
@@ -222,10 +223,10 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 
 /**
  * The matrix that holds the transform from model space to view space. This matrix is distinct
- * from the camera's transformMatrix, which, like that of all nodes, reflects the location,
+ * from the camera's globalTransformMatrix, which, like that of all nodes, reflects the location,
  * rotation and scale of the camera node in the 3D scene space.
  *
- * In contrast, the viewMatrix combines the inverse of the camera's transformMatrix
+ * In contrast, the viewMatrix combines the inverse of the camera's globalTransformMatrix
  * (because any movement of the camera in scene space has the opposite effect on the view),
  * with the deviceRotationMatrix from the viewportManager of the CC3Scene, to account for
  * the impact of device orientation on the view.

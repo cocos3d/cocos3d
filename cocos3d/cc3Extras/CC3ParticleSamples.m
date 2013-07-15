@@ -189,8 +189,8 @@ static inline CGSize CC3DispersionAngleFromShape(CGSize anAspect) {
 
 -(void) buildNozzleMatrix {
 	if ( _nozzle && _nozzle.parent != _emitter ) {
-		[_nozzleMatrix populateFrom: _nozzle.transformMatrix];
-		[_nozzleMatrix leftMultiplyBy: _emitter.transformMatrixInverted];
+		[_nozzleMatrix populateFrom: _nozzle.globalTransformMatrix];
+		[_nozzleMatrix leftMultiplyBy: _emitter.globalTransformMatrixInverted];
 	} else
 		[_nozzleMatrix populateIdentity];
 }

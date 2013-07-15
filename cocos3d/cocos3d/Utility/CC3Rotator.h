@@ -238,7 +238,7 @@ typedef enum {
  * Subclasses may also specify other rotational mechanisms (such as pointing).
  *
  *
- * The rotator maintains an internal rotationMatrix, separate from the node's transformMatrix,
+ * The rotator maintains an internal rotationMatrix, separate from the node's globalTransformMatrix,
  * and the rotator can use this rotationMatrix to convert between different rotational
  * specifications. As such, the rotation of a node can be set using any one of the above
  * specifications, and read back as any of the other specifications.

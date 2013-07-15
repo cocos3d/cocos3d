@@ -195,6 +195,8 @@ cocos3d 2.0.0 - 2013/07/01
 	- CC3Scene open3DWithVisitor: and close3DWithVisitor: methods now manually control GL state configuration transition between 2D and 3D environments.
 		- override these methods to alter GL state transitions between 2D & 3D.
 
+- [API change] Renamed CC3Node transformMatrix, transformMatrixInverted and parentTransformMatrix to  globalTransformMatrix, globalTransformMatrixInverted and parentGlobalTransformMatrix, respectively and deprecated originals.
+
 - [API change] Numerous classes, methods, and properties that were previously deprecated in previous 0.x versions of cocos3d have now been removed.
 
 - CC3DeviceCameraOverlayUIViewController now uses AVFoundation framework instead of UIImagePickerController to display device camera behind 3D scene for Augmented Reality apps.

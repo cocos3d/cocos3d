@@ -536,7 +536,7 @@
 -(void) markTransformDirty { _isTransformDirty = YES; }
 
 /**
- * Builds the volume if needed, then transforms it with the node's transformMatrix.
+ * Builds the volume if needed, then transforms it with the node's globalTransformMatrix.
  * The transformation will occur if either the transform is marked as dirty, or the
  * bounding volume is being rebuilt.
  */
@@ -567,7 +567,7 @@
 -(void) transformVolume {
 	_globalCenterOfGeometry = CC3VectorsAreEqual(_centerOfGeometry, kCC3VectorZero)
 								? _node.globalLocation
-								: [_node.transformMatrix transformLocation: _centerOfGeometry];
+								: [_node.globalTransformMatrix transformLocation: _centerOfGeometry];
 }
 
 
@@ -581,11 +581,11 @@
 -(CC3Vector) globalLocationOfGlobalRayIntesection: (CC3Ray) aRay {
 	if ( !_node || _shouldIgnoreRayIntersection ) return kCC3VectorNull;
 
-	CC3Ray localRay = [_node.transformMatrixInverted transformRay: aRay];
+	CC3Ray localRay = [_node.globalTransformMatrixInverted transformRay: aRay];
 	CC3Vector puncture = [self locationOfRayIntesection: localRay];
 	return CC3VectorIsNull(puncture)
 				? puncture
-				: [_node.transformMatrix transformLocation: puncture];
+				: [_node.globalTransformMatrix transformLocation: puncture];
 }
 
 // Deprecated and replaced by doesIntersect:
@@ -969,7 +969,7 @@
 -(void) transformVolume {
 	[super transformVolume];
 
-	CC3Matrix* tMtx = _node.transformMatrix;
+	CC3Matrix* tMtx = _node.globalTransformMatrix;
 
 	// Get the corners of the local bounding box
 	CC3Vector bbMin = _boundingBox.minimum;
@@ -993,7 +993,7 @@
  */
 -(void) buildPlanes {
 	CC3Vector normal;
-	CC3Matrix* tMtx = _node.transformMatrix;
+	CC3Matrix* tMtx = _node.globalTransformMatrix;
 	CC3Vector bbMin = _vertices[0];
 	CC3Vector bbMax = _vertices[7];
 	

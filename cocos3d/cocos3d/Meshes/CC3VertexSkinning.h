@@ -230,7 +230,7 @@
 #pragma mark Transformations
 
 /**
- * Callback method that will be invoked when the transformMatrix of the specified bone has changed.
+ * Callback method that will be invoked when the globalTransformMatrix of the specified bone has changed.
  * The transform matrix of this node is marked as dirty, so that the changes are propagated to
  * descendant nodes, such as shadow volumes, and to update the deformedFaces property.
  *

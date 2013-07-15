@@ -195,7 +195,7 @@
 }
 
 /** Caches the transform matrix rest pose matrix. */
--(void) cacheRestPoseMatrix { [_restPoseTransformMatrix populateFrom: _transformMatrix]; }
+-(void) cacheRestPoseMatrix { [_restPoseTransformMatrix populateFrom: _globalTransformMatrix]; }
 
 -(void) boneWasTransformed: (CC3Bone*) aBone { [self markTransformDirty]; }
 
@@ -459,20 +459,20 @@
 #pragma mark Transformations
 
 -(void) applyPoseTo: (CC3Matrix*) boneMatrix {
-	[boneMatrix populateFrom: self.transformMatrix];
+	[boneMatrix populateFrom: self.globalTransformMatrix];
 	[boneMatrix multiplyBy: _restPoseInvertedMatrix];
 }
 
 /** Inverts the transform matrix and caches it as the inverted rest pose matrix. */
 -(void) cacheRestPoseMatrix {
-	[_restPoseInvertedMatrix populateFrom: _transformMatrix];
+	[_restPoseInvertedMatrix populateFrom: _globalTransformMatrix];
 	[_restPoseInvertedMatrix invert];
 	LogTrace(@"%@ with global scale %@ and rest pose %@ %@ inverted to %@",
-			 self, NSStringFromCC3Vector(self.globalScale), _transformMatrix,
+			 self, NSStringFromCC3Vector(self.globalScale), _globalTransformMatrix,
 			 (_restPoseInvertedMatrix.isRigid ? @"rigidly" : @"adjoint"), _restPoseInvertedMatrix);
 	LogTrace(@"Validating right multiply: %@ \nvalidating left multiply: %@",
-			 [CC3AffineMatrix matrixByMultiplying: _transformMatrix by: _restPoseInvertedMatrix],
-			 [CC3AffineMatrix matrixByMultiplying: _restPoseInvertedMatrix by: _transformMatrix]);
+			 [CC3AffineMatrix matrixByMultiplying: _globalTransformMatrix by: _restPoseInvertedMatrix],
+			 [CC3AffineMatrix matrixByMultiplying: _restPoseInvertedMatrix by: _globalTransformMatrix]);
 }
 
 @end
@@ -517,7 +517,7 @@
 	if ( !_skinTransformMatrix ) _skinTransformMatrix = [CC3AffineMatrix new];
 	if (_isSkinTransformDirty) {
 		[_skinTransformMatrix populateFrom: self.drawTransformMatrix];
-		[_skinTransformMatrix leftMultiplyBy: _skinNode.transformMatrixInverted];
+		[_skinTransformMatrix leftMultiplyBy: _skinNode.globalTransformMatrixInverted];
 		_isSkinTransformDirty = NO;
 	}
 	return _skinTransformMatrix;
@@ -793,7 +793,7 @@
 
 -(CC3Vector) skeletalScale { return _parent ? CC3VectorScale(_parent.skeletalScale, _scale) : _scale; }
 
--(BOOL) isSkeletonRigid { return _transformMatrix.isRigid; }
+-(BOOL) isSkeletonRigid { return _globalTransformMatrix.isRigid; }
 
 -(void) bindRestPose { for (CC3Node* child in _children) [child bindRestPose]; }
 

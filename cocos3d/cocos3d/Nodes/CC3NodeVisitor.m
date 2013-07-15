@@ -295,7 +295,7 @@
 	CC3Node* parentNode = aNode.parent;
 	BOOL localizeToThisNode = _shouldLocalizeToStartingNode && (aNode == _startingNode ||
 															   parentNode == _startingNode);
-	return localizeToThisNode ? nil : aNode.parentTransformMatrix;
+	return localizeToThisNode ? nil : aNode.parentGlobalTransformMatrix;
 }
 
 -(NSString*) fullDescription {
@@ -766,7 +766,7 @@
 	if ( (self = [super init]) ) {
 		_node = [aNode retain];
 		_punctureLocation = [aNode locationOfGlobalRayIntesection: aRay];
-		_globalPunctureLocation = [aNode.transformMatrix transformLocation: _punctureLocation];
+		_globalPunctureLocation = [aNode.globalTransformMatrix transformLocation: _punctureLocation];
 		_sqGlobalPunctureDistance = CC3VectorDistanceSquared(_globalPunctureLocation, aRay.startLocation);
 	}
 	return self;

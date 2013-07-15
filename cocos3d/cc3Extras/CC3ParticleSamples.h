@@ -331,7 +331,7 @@
  * each particle from the local coordinates of the nozzle to the local coordinates of the emitter.
  *
  * If the nozzle has been assigned a different parent than the emitter, this matrix is recalculated
- * during each update by combining the transformMatrix of the nozzle and the transformMatrixInverted
+ * during each update by combining the globalTransformMatrix of the nozzle and the globalTransformMatrixInverted
  * of the emitter.
  */
 @property(nonatomic, retain, readonly) CC3Matrix* nozzleMatrix;

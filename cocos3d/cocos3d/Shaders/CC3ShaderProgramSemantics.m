@@ -389,15 +389,15 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelLocalMatrix:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			[visitor.currentMeshNode.parent.globalTransformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.globalTransformMatrix populateCC3Matrix4x3: &tfmMtx];
 			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
 			[uniform setMatrix4x3: &mRslt4x3];
 			return YES;
 		case kCC3SemanticModelLocalMatrixInv:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			[visitor.currentMeshNode.parent.globalTransformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.globalTransformMatrix populateCC3Matrix4x3: &tfmMtx];
 			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
 			// Now invert
 			CC3Matrix4x3InvertAdjoint(&mRslt4x3);
@@ -405,8 +405,8 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticModelLocalMatrixInvTran:
 			// Get local matrix as P(-1).T where T is node transform P(-1) is inv-xfm of parent
-			[visitor.currentMeshNode.parent.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
-			[visitor.currentMeshNode.transformMatrix populateCC3Matrix4x3: &tfmMtx];
+			[visitor.currentMeshNode.parent.globalTransformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.globalTransformMatrix populateCC3Matrix4x3: &tfmMtx];
 			CC3Matrix4x3Multiply(&mRslt4x3, &m4x3, &tfmMtx);
 			CC3Matrix3x3PopulateFrom4x3(&m3x3, &mRslt4x3);
 			CC3Matrix3x3InvertAdjointTranspose(&m3x3);
@@ -597,7 +597,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticCameraLocationModelSpace:
 			// Transform the global camera location to the local model space
-			[uniform setVector: [visitor.currentMeshNode.transformMatrixInverted
+			[uniform setVector: [visitor.currentMeshNode.globalTransformMatrixInverted
 								 transformLocation: visitor.camera.globalLocation]];
 			return YES;
 		case kCC3SemanticCameraFrustum:
@@ -692,7 +692,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticLightInvertedPositionModelSpace:
 			isInverted = YES;
 		case kCC3SemanticLightPositionModelSpace:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.globalTransformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
 				CC3Vector4 ltPos = light.globalHomogeneousPosition;
@@ -749,7 +749,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			}
 			return YES;
 		case kCC3SemanticLightSpotDirectionModelSpace:
-			[visitor.currentMeshNode.transformMatrixInverted populateCC3Matrix4x3: &m4x3];
+			[visitor.currentMeshNode.globalTransformMatrixInverted populateCC3Matrix4x3: &m4x3];
 			for (GLuint i = 0; i < uniformSize; i++) {
 				CC3Light* light = [visitor lightAt: (semanticIndex + i)];
 				CC3Vector spotDir = light.globalForwardDirection;

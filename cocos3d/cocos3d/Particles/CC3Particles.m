@@ -853,7 +853,7 @@
 
 -(void) setLocation: (CC3Vector) aLocation {}
 
--(CC3Vector) globalLocation { return [self.emitter.transformMatrix transformLocation: self.location]; }
+-(CC3Vector) globalLocation { return [self.emitter.globalTransformMatrix transformLocation: self.location]; }
 
 -(ccColor4F) color4F { return _emitter.diffuseColor; }
 

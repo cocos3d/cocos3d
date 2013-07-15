@@ -80,7 +80,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *                              on each of child node of this node.
  *
  *   - updateAfterTransform:  - periodically update the activity of your 3D scene after
- *                              the automatic recalulation of the node's transformMatrix
+ *                              the automatic recalulation of the node's globalTransformMatrix
  *                              and prior to the automatic invoking the same method on each
  *                              of child node of this node.
  *
@@ -102,11 +102,11 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *
  * You should override the updateBeforeTransform: method if you need to make changes to
  * the transform properties (location, rotation, scale), of any node. These changes will
- * them automatically be applied to the transformMatrix of the node and its child nodes.
+ * them automatically be applied to the globalTransformMatrix of the node and its child nodes.
  *
  * You should override the updateAfterTransform: method if you need access to the
  * global transform properties (globalLocation, globalRotation, globalScale), of a node
- * since these properties are only valid after the transformMatrix has been recalculated.
+ * since these properties are only valid after the globalTransformMatrix has been recalculated.
  * An example of where access to the global transform properties would be useful is in
  * the execution of collision detection algorithms.
  *
@@ -650,9 +650,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *   -# Checks isRunning property of this instance, and exits immediately if not running.
  *   -# If needed, clamps the dt property to the value in maxUpdateInterval property.
  *   -# Invokes updateBeforeTransform: on this instance.
- *   -# Triggers recalculation of the transformMatrix on this node.
+ *   -# Triggers recalculation of the globalTransformMatrix on this node.
  *   -# Updates each child (including invoking updateBeforeTransform:, recalulating the child
- *      node's transformMatrix, and invoking updateAfterTransform: on each descendant, in order).
+ *      node's globalTransformMatrix, and invoking updateAfterTransform: on each descendant, in order).
  *   -# Invokes updateAfterTransform: on this instance.
  *   -# Updates target tracking in the active camera, and all lights and billboards.
  *

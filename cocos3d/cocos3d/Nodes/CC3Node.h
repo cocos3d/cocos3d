@@ -88,11 +88,11 @@ typedef enum {
  * A transform listener can be registered with a node via the addTransformListener: method.
  *
  * Each listener registered with a node will be sent the nodeWasTransformed: notification
- * message when the transformMatrix of this node is recalculated, or is set directly.
+ * message when the globalTransformMatrix of this node is recalculated, or is set directly.
  */
 @protocol CC3NodeTransformListenerProtocol <CC3NodeListenerProtocol>
 
-/** Callback method that will be invoked when the transformMatrix of the specified node has changed. */
+/** Callback method that will be invoked when the globalTransformMatrix of the specified node has changed. */
 -(void) nodeWasTransformed: (CC3Node*) aNode;
 
 @end
@@ -144,15 +144,15 @@ typedef enum {
  * 
  * You should override updateAfterTransform: only if you need to make use of the global
  * properties of the node or its child nodes, such as globalLocation, globalRotation, or
- * globalScale. These properties are valid only after the transformMatrix has been
+ * globalScale. These properties are valid only after the globalTransformMatrix has been
  * calculated, and are therefore not valid within the updateBeforeTransform: method.
  * However, if you make any changes to the transform properties (location, rotation, scale)
  * of a node within the updateAfterTransform: method, you must invoke the updateTransformMatrices
- * method on that node in order to have the changes applied to the node's transformMatrix.
+ * method on that node in order to have the changes applied to the node's globalTransformMatrix.
  * 
  * Note that you do NOT need to invoke the updateTransformMatrices method for any changes
  * made in the updateBeforeTransform: method, since those changes will automatically be
- * applied to the transformMatrix.
+ * applied to the globalTransformMatrix.
  *
  * The second place a node is touched is the transformAndDrawWithVisitor: method,
  * which is automaticaly invoked during each frame rendering cycle. You should have
@@ -227,8 +227,8 @@ typedef enum {
 @interface CC3Node : CC3Identifiable <CCRGBAProtocol, CCBlendProtocol, CC3NodeTransformListenerProtocol> {
 	CCArray* _children;
 	CC3Node* _parent;
-	CC3Matrix* _transformMatrix;
-	CC3Matrix* _transformMatrixInverted;
+	CC3Matrix* _globalTransformMatrix;
+	CC3Matrix* _globalTransformMatrixInverted;
 	CCArray* _transformListeners;
 	CC3Matrix* _globalRotationMatrix;
 	CC3Rotator* _rotator;
@@ -267,7 +267,7 @@ typedef enum {
 /**
  * The location of the node in 3D space, relative to the global origin.
  * 
- * This is calculated by using the transformMatrix to tranform the local origin (0,0,0).
+ * This is calculated by using the globalTransformMatrix to tranform the local origin (0,0,0).
  */
 @property(nonatomic, readonly) CC3Vector globalLocation;
 
@@ -428,7 +428,7 @@ typedef enum {
 
 /**
  * The direction in which this node is pointing, relative to the global
- * coordinate system. This is calculated by using the transformMatrix
+ * coordinate system. This is calculated by using the globalTransformMatrix
  * to translate the forwardDirection.
  *
  * The value returned is of unit length. 
@@ -487,7 +487,7 @@ typedef enum {
 
 /**
  * The direction that is considered to be 'up' for this node, relative to the
- * global coordinate system. This is calculated by using the transformMatrix to
+ * global coordinate system. This is calculated by using the globalTransformMatrix to
  * translate the upDirection. As the node is rotated from its default orientation,
  * this value will be different than the referenceUpDirection, which is fixed and
  * independent of the orientation of the node.
@@ -513,7 +513,7 @@ typedef enum {
 /**
  * The direction that is considered to be "off to the right" for this node,
  * relative to the global coordinate system. This is calculated by using the
- * transformMatrix to translate the rightDirection.
+ * globalTransformMatrix to translate the rightDirection.
  *
  * The value returned is of unit length. 
  */
@@ -576,26 +576,26 @@ typedef enum {
  *
  * A rigid transform contains only rotation and translation transformations, and does not include scaling.
  *
- * This implementation returns the value of the isRigid property of the transformMatrix.
+ * This implementation returns the value of the isRigid property of the globalTransformMatrix.
  */
 @property(nonatomic, readonly) BOOL isTransformRigid;
 
 /**
  * @deprecated This property is no longer needed, since the rigidity of a node transform is
- * now tracked by the transformMatrix itself. This property will always return zero. Setting
+ * now tracked by the globalTransformMatrix itself. This property will always return zero. Setting
  * this property will have no effect.
  */
 @property(nonatomic, assign) GLfloat scaleTolerance DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated This property is no longer needed, since the rigidity of a node transform is
- * now tracked by the transformMatrix itself. This property will always return zero.
+ * now tracked by the globalTransformMatrix itself. This property will always return zero.
  */
 +(GLfloat) defaultScaleTolerance DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated This property is no longer needed, since the rigidity of a node transform is
- * now tracked by the transformMatrix itself. Setting this property will have no effect.
+ * now tracked by the globalTransformMatrix itself. Setting this property will have no effect.
  */
 +(void) setDefaultScaleTolerance: (GLfloat) aTolerance DEPRECATED_ATTRIBUTE;
 
@@ -819,7 +819,7 @@ typedef enum {
  * forwardDirection, retrieving the targetLocation comes with two caveats.
  *
  * The first caveat is that calculating a targetLocation requires the global location of
- * this node, which is only calculated when the node's transformMatrix is calculated after
+ * this node, which is only calculated when the node's globalTransformMatrix is calculated after
  * all model updates have been processed. This means that, depending on when you access
  * this property, the calculated targetLocation may be one frame behind the real value.
  * 
@@ -2225,14 +2225,14 @@ typedef enum {
  * This template method is invoked periodically whenever the 3D nodes are to be updated.
  *
  * This method provides this node with an opportunity to perform update activities before any
- * changes are applied to the transformMatrix of the node. The similar and complimentary method
- * updateAfterTransform: is automatically invoked after the transformMatrix has been recalculated.
+ * changes are applied to the globalTransformMatrix of the node. The similar and complimentary method
+ * updateAfterTransform: is automatically invoked after the globalTransformMatrix has been recalculated.
  * If you need to make changes to the transform properties (location, rotation, scale) of the node,
  * or any child nodes, you should override this method to perform those changes.
  *
  * The global transform properties of a node (globalLocation, globalRotation, globalScale)
  * will not have accurate values when this method is run, since they are only valid after
- * the transformMatrix has been updated. If you need to make use of the global properties
+ * the globalTransformMatrix has been updated. If you need to make use of the global properties
  * of a node (such as for collision detection), override the udpateAfterTransform: method
  * instead, and access those properties there.
  *
@@ -2271,19 +2271,19 @@ typedef enum {
  * This template method is invoked periodically whenever the 3D nodes are to be updated.
  *
  * This method provides this node with an opportunity to perform update activities after
- * the transformMatrix of the node has been recalculated. The similar and complimentary
- * method updateBeforeTransform: is automatically invoked before the transformMatrix
+ * the globalTransformMatrix of the node has been recalculated. The similar and complimentary
+ * method updateBeforeTransform: is automatically invoked before the globalTransformMatrix
  * has been recalculated.
  *
  * The global transform properties of a node (globalLocation, globalRotation, globalScale)
  * will have accurate values when this method is run, since they are only valid after the
- * transformMatrix has been updated. If you need to make use of the global properties
+ * globalTransformMatrix has been updated. If you need to make use of the global properties
  * of a node (such as for collision detection), override this method.
  *
- * Since the transformMatrix has already been updated when this method is invoked, if
+ * Since the globalTransformMatrix has already been updated when this method is invoked, if
  * you override this method and make any changes to the transform properties (location,
  * rotation, scale) of any node, you should invoke the updateTransformMatrices method of
- * that node, to have its transformMatrix, and those of its child nodes, recalculated.
+ * that node, to have its globalTransformMatrix, and those of its child nodes, recalculated.
  *
  * This abstract template implementation does nothing. Subclasses that need access to
  * their global transform properties will override accordingly. Subclasses that override
@@ -2354,7 +2354,7 @@ typedef enum {
  * of this node, or any of its structural ancestor nodes has changed.
  *
  * Each listener in this list will be sent the nodeWasTransformed: notification
- * message when the transformMatrix of this node is recalculated, or is set directly.
+ * message when the globalTransformMatrix of this node is recalculated, or is set directly.
  *
  * Objects can be added to this list by using the addTransformListener: method.
  *
@@ -2379,7 +2379,7 @@ typedef enum {
  * of this node, or any of its structural ancestor nodes has changed.
  *
  * The listener will be sent the nodeWasTransformed: notification message whenever
- * the transformMatrix of this node is recalculated, or is set directly.
+ * the globalTransformMatrix of this node is recalculated, or is set directly.
  *
  * Once added by this method, the newly added listener is immediately sent the
  * nodeWasTransformed: notification message, so that the listener is aware of
@@ -2435,39 +2435,71 @@ typedef enum {
  */
 -(void) nodeWasDestroyed: (CC3Node*) aNode;
 
-
 /**
- * The transformation matrix derived from the location, rotation and scale transform properties
- * of this node and any ancestor nodes.
+ * The global transformation matrix derived from the location, rotation and scale transform
+ * properties of this node and all ancestor nodes.
  *
  * This matrix is recalculated automatically when the node is updated.
  *
- * The transformation matrix for each node is global, in that it includes the transforms of
- * all ancestors to the node. This streamlines rendering in that it allows the transform of
- * each drawable node to be applied directly, and allows the order in which drawable nodes
- * are drawn to be independent of the node structural hierarchy.
- *
- * Setting this property udpates the globalLocation and globalScale properties.
+ * This transform matrix includes the transforms of all ancestors to the node. This streamlines
+ * rendering in that it allows the transform of each drawable node to be applied directly, and
+ * allows the order in which drawable nodes are drawn to be independent of the node structural
+ * hierarchy.
  */
-@property(nonatomic, retain) CC3Matrix* transformMatrix;
+@property(nonatomic, retain) CC3Matrix* globalTransformMatrix;
+
+/** 
+ * @deprecated Renamed to globalTransformMatrix.
+ *
+ * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * behaviour in any legacy code that depends on the older functionality provided by this property.
+ * Convert your code now.
+ */
+@property(nonatomic, retain) CC3Matrix* transformMatrix DEPRECATED_ATTRIBUTE;
 
 /**
- * Returns the transform matrix of the parent node. Returns nil if there is no parent.
+ * Returns the matrix inversion of the globalTransformMatrix.
+ *
+ * This can be useful for converting global transform properties, such as global
+ * location, rotation and scale to the local coordinate system of the node.
+ */
+@property(nonatomic, readonly) CC3Matrix* globalTransformMatrixInverted;
+
+/**
+ * @deprecated Renamed to globalTransformMatrixInverted.
+ *
+ * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * behaviour in any legacy code that depends on the older functionality provided by this property.
+ * Convert your code now.
+ */
+@property(nonatomic, readonly) CC3Matrix* transformMatrixInverted DEPRECATED_ATTRIBUTE;
+
+/**
+ * Returns the global transform matrix of the parent node, or nil if this node has no parent.
  * 
  * This template property is used by this class to base the transform of this node on
  * the transform of its parent. A subclass may override to return nil if it determines
  * that it wants to ignore the parent transform when calculating its own transform.
  */
-@property(nonatomic, readonly) CC3Matrix* parentTransformMatrix;
+@property(nonatomic, readonly) CC3Matrix* parentGlobalTransformMatrix;
+
+/**
+ * @deprecated Renamed to parentGlobalTransformMatrix.
+ *
+ * This property will be redefined in a future release of cocos3d, and will result in incorrect
+ * behaviour in any legacy code that depends on the older functionality provided by this property.
+ * Convert your code now.
+ */
+@property(nonatomic, readonly) CC3Matrix* parentTransformMatrix DEPRECATED_ATTRIBUTE;
 
 /**
  * Indicates whether any of the transform properties, location, rotation, or scale
- * have been changed, and so the transformMatrix of this node needs to be recalculated.
+ * have been changed, and so the globalTransformMatrix of this node needs to be recalculated.
  *
  * This property is automatically set to YES when one of those properties have been
- * changed, and is reset to NO once the transformMatrix has been recalculated.
+ * changed, and is reset to NO once the globalTransformMatrix has been recalculated.
  *
- * Recalculation of the transformMatrix occurs automatically when the node is updated.
+ * Recalculation of the globalTransformMatrix occurs automatically when the node is updated.
  */
 @property(nonatomic, readonly) BOOL isTransformDirty;
 
@@ -2480,15 +2512,7 @@ typedef enum {
 -(void) markTransformDirty;
 
 /**
- * Returns the matrix inversion of the transformMatrix.
- * 
- * This can be useful for converting global transform properties, such as global
- * location, rotation and scale to the local coordinate system of the node.
- */
-@property(nonatomic, readonly) CC3Matrix* transformMatrixInverted;
-
-/**
- * Applies the transform properties (location, rotation, scale) to the transformMatrix
+ * Applies the transform properties (location, rotation, scale) to the globalTransformMatrix
  * of this node, and all descendant nodes.
  *
  * To ensure that the transforms are accurately applied, this method also automatically
@@ -2499,13 +2523,13 @@ typedef enum {
  * between the invocations of the updateBeforeTransform: and updateAfterTransform: methods.
  *
  * Changes that you make to the transform properties within the updateBeforeTransform:
- * method will automatically be applied to the transformMatrix of the node. Because of this,
+ * method will automatically be applied to the globalTransformMatrix of the node. Because of this,
  * it's best to make any changes to the transform properties in that method.
  *
  * However, if you need to make changes to the transform properties in the
  * updateAfterTransform: method of a node, after you have made all your changes to the
  * node properties, you should then invoke this method on the node, in order to have
- * those changes applied to the transformMatrix.
+ * those changes applied to the globalTransformMatrix.
  *
  * Similarly, if you have updated the transform properties of this node asynchronously
  * through an event callback, and want those changes to be immediately reflected in
@@ -2514,14 +2538,14 @@ typedef enum {
 -(void) updateTransformMatrices;
 
 /**
- * Applies the transform properties (location, rotation, scale) to the transformMatrix
+ * Applies the transform properties (location, rotation, scale) to the globalTransformMatrix
  * of this node, but NOT to any descendant nodes.
  *
  * To ensure that the transforms are accurately applied, this method also automatically
  * ensures that the transform matrices of any ancestor nodes are also updated, if needed,
  * before updating this node and its descendants.
  *
- * Use this method only when you know that you only need the transformMatrix of the
+ * Use this method only when you know that you only need the globalTransformMatrix of the
  * specific node updated, and not the matrices of the decendants of that node, or if
  * you will manually update the transformMatrices of the descendant nodes. If in doubt,
  * use the updateTransformMatrices method instead.
@@ -2824,7 +2848,7 @@ typedef enum {
  *
  * If you are invoking this method from the updateBeforeTransform: of the node
  * being added, this node, or any ancestor node (including your CC3Scene), the
- * transformMatrix of the node being added (and its descendant nodes) will
+ * globalTransformMatrix of the node being added (and its descendant nodes) will
  * automatically be updated. However, if you are invoking this method from the
  * updateAfterTransform: method, you should invoke the updateTransformMatrices
  * method on the node being added after this method is finished, to ensure that
@@ -2861,12 +2885,12 @@ typedef enum {
  * being added. To ensure that both matrices are each up to date, this method
  * invokes updateTransformMatrix method on both this node and the node being
  * added. You can therefore invoke this method without having to consider
- * whether the transformMatrix has been calculated already.
+ * whether the globalTransformMatrix has been calculated already.
  *
  * This method changes the transform properties of the node being added.
  * If you are invoking this method from the updateBeforeTransform: of the node
  * being added, this node, or any ancestor node (including your CC3Scene), the
- * transformMatrix of the node being added (and its descendant nodes) will
+ * globalTransformMatrix of the node being added (and its descendant nodes) will
  * automatically be updated. However, if you are invoking this method from the
  * updateAfterTransform: method, you should invoke the updateTransformMatrices
  * method on the node being added after this method is finished, to ensure that
@@ -4216,7 +4240,7 @@ typedef enum {
  * If this node has no local content, returns the value of the globalLocation property.
  *
  * The value of this property is calculated by transforming the value of the
- * localContentCenterOfGeometry property, using the transformMatrix of this node.
+ * localContentCenterOfGeometry property, using the globalTransformMatrix of this node.
  */
 @property(nonatomic, readonly) CC3Vector globalLocalContentCenterOfGeometry;
 
@@ -4227,7 +4251,7 @@ typedef enum {
  * If this node has no local content, returns kCC3BoxNull.
  *
  * The value of this property is calculated by transforming the eight vertices derived
- * from the localContentBoundingBox property, using the transformMatrix of this node,
+ * from the localContentBoundingBox property, using the globalTransformMatrix of this node,
  * and constructing another bounding box that surrounds all eight transformed vertices.
  *
  * Since all bounding boxes are axis-aligned (AABB), if this node is rotated, the

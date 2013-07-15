@@ -285,7 +285,7 @@
 			
 			// Get the direction to the camera and transform it to local coordinates
 			CC3Vector camDir = CC3VectorDifference(_globalCameraLocation, self.globalLocation);
-			camDir = [self.transformMatrixInverted transformDirection: camDir];
+			camDir = [self.globalTransformMatrixInverted transformDirection: camDir];
 			for (id<CC3PointParticleProtocol> p in _particles) [p pointNormalAt: camDir];
 		}
 	}
@@ -304,7 +304,7 @@
 -(void) setParticleNormal: (id<CC3PointParticleProtocol>) pointParticle {
 	if (self.hasIlluminatedNormals) {
 		CC3Vector camDir = CC3VectorDifference(_globalCameraLocation, self.globalLocation);
-		camDir = [self.transformMatrixInverted transformDirection: camDir];
+		camDir = [self.globalTransformMatrixInverted transformDirection: camDir];
 		[pointParticle pointNormalAt: camDir];
 	}
 }

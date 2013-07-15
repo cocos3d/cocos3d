@@ -1127,7 +1127,7 @@ static const GLuint kCC3ParticlesNoMax = UINT_MAX;
 /**
  * The location of the particle in 3D space, relative to the global origin.
  *
- * This is calculated by using the transformMatrix of the emitter to transform
+ * This is calculated by using the globalTransformMatrix of the emitter to transform
  * the location of this particle.
  */
 @property(nonatomic, readonly) CC3Vector globalLocation;

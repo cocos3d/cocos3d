@@ -285,7 +285,7 @@
 -(CC3Vector4) shadowVolumeVertexOffsetForLightAt: (CC3Vector4) localLightPos {
 	CC3Vector scLoc = self.shadowCaster.localContentCenterOfGeometry;
 	CC3Vector lgtLoc = CC3VectorFromTruncatedCC3Vector4(localLightPos);
-	CC3Vector camLoc = [self.shadowCaster.transformMatrixInverted
+	CC3Vector camLoc = [self.shadowCaster.globalTransformMatrixInverted
 							transformLocation: self.activeCamera.globalLocation];	
 
 	// Get a unit offset vector in the direction away from the light
@@ -328,7 +328,7 @@
 	
 	// Transform the 4D position of the light into the local coordinates of the shadow caster.
 	CC3Vector4 lightPosition = _light.globalHomogeneousPosition;
-	CC3Vector4 localLightPosition = [scNode.transformMatrixInverted
+	CC3Vector4 localLightPosition = [scNode.globalTransformMatrixInverted
 									 transformHomogeneousVector: lightPosition];
 	
 	// Determine whether we want to nudge the shadow volume vertices away from the shadow caster
@@ -352,8 +352,8 @@
 	LogTrace(@"%@ global light location: %@ shadow local light: %@ %@ inverted: %@",
 				  self, NSStringFromCC3Vector4(lightPosition),
 				  NSStringFromCC3Vector4(localLightPosition),
-				  scNode.transformMatrix,
-				  scNode.transformMatrixInverted);
+				  scNode.globalTransformMatrix,
+				  scNode.globalTransformMatrixInverted);
 	
 	// Iterate through all the faces in the mesh of the shadow caster.
 	for (GLuint faceIdx = 0; faceIdx < faceCnt; faceIdx++) {

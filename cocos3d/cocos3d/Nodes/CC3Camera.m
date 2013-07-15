@@ -120,7 +120,7 @@
 -(void) setFarClippingPlane: (GLfloat) aDistance { self.farClippingDistance = aDistance; }
 
 // Overridden to mark the frustum's projection matrix dirty instead of the
-// transformMatrix. This is because for a camera, scale acts as a zoom to change
+// globalTransformMatrix. This is because for a camera, scale acts as a zoom to change
 // the effective FOV, which is a projection quality, not a transformation quality.
 -(void) setScale: (CC3Vector) aScale {
 	_scale = aScale;
@@ -218,9 +218,9 @@
  */
 -(void) applyScaling {
 	[self updateGlobalScale];	// Make sure globalScale is current first.
-	[_transformMatrix scaleBy: CC3VectorInvert(_globalScale)];
+	[_globalTransformMatrix scaleBy: CC3VectorInvert(_globalScale)];
 	LogTrace(@"%@ scaled back by global %@ to counter parent scaling %@",
-			 self, NSStringFromCC3Vector(_globalScale), _transformMatrix);
+			 self, NSStringFromCC3Vector(_globalScale), _globalTransformMatrix);
 }
 
 /**
@@ -237,14 +237,14 @@
 
 /**
  * Template method to rebuild the viewMatrix from the deviceRotationMatrix, which
- * is managed by the CC3Scene's viewportManager, and the inverse of the transformMatrix.
- * Invoked automatically whenever the transformMatrix or device orientation are changed.
+ * is managed by the CC3Scene's viewportManager, and the inverse of the globalTransformMatrix.
+ * Invoked automatically whenever the globalTransformMatrix or device orientation are changed.
  */
 -(void) buildModelViewMatrix {
 	[_viewMatrix populateFrom: self.viewportManager.deviceRotationMatrix];
 	LogTrace(@"%@ applied device rotation matrix %@", self, _viewMatrix);
 
-	[_viewMatrix multiplyBy: self.transformMatrixInverted];
+	[_viewMatrix multiplyBy: self.globalTransformMatrixInverted];
 	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, _viewMatrix);
 
 	// Mark the inverted view matrix as dirty, and let the frustum know that the contents
@@ -733,7 +733,7 @@
 }
 
 -(CC3Vector) projectLocation: (CC3Vector) aLocal3DLocation onNode: (CC3Node*) aNode {
-	return [self projectLocation: [aNode.transformMatrix transformLocation: aLocal3DLocation]];
+	return [self projectLocation: [aNode.globalTransformMatrix transformLocation: aLocal3DLocation]];
 }
 
 -(CC3Vector) projectNode: (CC3Node*) aNode {
@@ -787,7 +787,7 @@
 		// local coordinates. Convert it to global coordinates before returning.
 		// The ray direction is straight out from that global location in the 
 		// camera's globalForwardDirection.
-		ray.startLocation =  [_transformMatrix transformLocation: pointLocNear];
+		ray.startLocation =  [_globalTransformMatrix transformLocation: pointLocNear];
 		ray.direction = self.globalForwardDirection;
 	} else {
 		// The location on the near clipping plane is relative to the camera's local
