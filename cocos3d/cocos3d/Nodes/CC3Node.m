@@ -52,7 +52,6 @@
 
 @synthesize parent=_parent, children=_children;
 @synthesize rotator=_rotator, location=_location, scale=_scale;
-@synthesize globalLocation=_globalLocation, globalScale=_globalScale;
 @synthesize projectedLocation=_projectedLocation, visible=_visible;
 @synthesize boundingVolume=_boundingVolume, boundingVolumePadding=_boundingVolumePadding;
 @synthesize transformListeners=_transformListeners;
@@ -84,6 +83,8 @@
 	_location = aLocation;
 	[self markTransformDirty];
 }
+
+-(CC3Vector) globalLocation { return [_globalTransformMatrix transformLocation: kCC3VectorZero]; }
 
 -(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
 
@@ -197,6 +198,8 @@
 -(void) setUniformScale:(GLfloat) aValue { self.scale = cc3v(aValue, aValue, aValue); }
 
 -(BOOL) isUniformlyScaledLocally { return (_scale.x == _scale.y) && (_scale.x == _scale.z); }
+
+-(CC3Vector) globalScale { return _parent ? CC3VectorScale(_parent.globalScale, _scale) : _scale; }
 
 -(BOOL) isUniformlyScaledGlobally {
 	return self.isUniformlyScaledLocally && (_parent ? _parent.isUniformlyScaledGlobally : YES);
@@ -906,10 +909,8 @@
 		_boundingVolumePadding = 0.0f;
 		_shouldUseFixedBoundingVolume = NO;
 		_location = kCC3VectorZero;
-		_globalLocation = kCC3VectorZero;
 		_projectedLocation = kCC3VectorZero;
 		_scale = kCC3VectorUnitCube;
-		_globalScale = kCC3VectorUnitCube;
 		_cameraDistanceProduct = 0.0f;
 		_isTransformDirty = YES;			// Force transform notification on first update
 		_touchEnabled = NO;
@@ -967,10 +968,8 @@
 	_isGlobalRotationDirty = YES;							// create or rebuild lazily
 	
 	_location = another.location;
-	_globalLocation = another.globalLocation;
 	_projectedLocation = another.projectedLocation;
 	_scale = another.scale;
-	_globalScale = another.globalScale;
 	_isTransformDirty = another.isTransformDirty;
 
 	[_rotator release];
@@ -1238,7 +1237,7 @@ static GLuint lastAssignedNodeTag;
 	if (_globalTransformMatrix != aMatrix) {
 		[_globalTransformMatrix release];
 		_globalTransformMatrix = [aMatrix retain];
-		[self updateGlobalOrientation];
+		[self markGlobalRotationDirty];
 		[self transformMatrixChanged];
 		[self notifyTransformListeners];
 	}
@@ -1302,12 +1301,7 @@ static GLuint lastAssignedNodeTag;
 }
 
 /** Template method that applies the local location property to the transform matrix. */
--(void) applyTranslation {
-	[_globalTransformMatrix translateBy: _location];
-	[self updateGlobalLocation];
-	LogTrace(@"%@ translated to %@, globally %@ %@", self, NSStringFromCC3Vector(_location),
-			 NSStringFromCC3Vector(_globalLocation), _globalTransformMatrix);
-}
+-(void) applyTranslation { [_globalTransformMatrix translateBy: _location]; }
 
 /**
  * Template method that applies the rotation in the rotator to the transform matrix.
@@ -1436,17 +1430,12 @@ static GLuint lastAssignedNodeTag;
 /** Apply the rotational state of the rotator to the transform matrix. */
 -(void) applyRotator {
 	[_rotator applyRotationTo: _globalTransformMatrix];
-	[self updateGlobalRotation];
+	[self markGlobalRotationDirty];
 	LogTrace(@"%@ rotated to %@ %@", self, NSStringFromCC3Vector(_rotator.rotation), _globalTransformMatrix);
 }
 
 /** Template method that applies the local scale property to the transform matrix. */
--(void) applyScaling {
-	[_globalTransformMatrix scaleBy: CC3EnsureMinScaleVector(_scale)];
-	[self updateGlobalScale];
-	LogTrace(@"%@ scaled to %@, globally %@ %@", self, NSStringFromCC3Vector(_scale),
-				  NSStringFromCC3Vector(_globalScale), _globalTransformMatrix);
-}
+-(void) applyScaling { [_globalTransformMatrix scaleBy: CC3EnsureMinScaleVector(_scale)]; }
 
 /**
  * Template method that is invoked automatically whenever the transform matrix of this node
@@ -1476,27 +1465,8 @@ static GLuint lastAssignedNodeTag;
 	}
 }
 
-/**
- * Template method that updates the global orientation properties
- * (globalLocation, globalRotation & globalScale).
- */
--(void) updateGlobalOrientation {
-	[self updateGlobalLocation];
-	[self updateGlobalRotation];
-	[self updateGlobalScale];
-}
-
-/**
- * Template method to update the globalLocation property.
- * Keeps track of whether the globalLocation is changed by this method.
- */
--(void) updateGlobalLocation { _globalLocation = [_globalTransformMatrix transformLocation: kCC3VectorZero]; }
-
-/** Template method to update the globalRotation property. */
--(void) updateGlobalRotation { _isGlobalRotationDirty = YES; }
-
-/** Template method to update the globalScale property. */
--(void) updateGlobalScale { _globalScale = _parent ? CC3VectorScale(_parent.globalScale, _scale) : _scale; }
+/** Marks the global rotation as dirty and in need of recalculation. */
+-(void) markGlobalRotationDirty { _isGlobalRotationDirty = YES; }
 
 /**
  * Returns the inverse of the globalTransformMatrix.

@@ -235,10 +235,8 @@ typedef enum {
 	CC3NodeBoundingVolume* _boundingVolume;
 	CCArray* _animationStates;
 	CC3Vector _location;
-	CC3Vector _globalLocation;
 	CC3Vector _projectedLocation;
 	CC3Vector _scale;
-	CC3Vector _globalScale;
 	GLfloat _boundingVolumePadding;
 	GLfloat _cameraDistanceProduct;
 	BOOL _isTransformDirty : 1;

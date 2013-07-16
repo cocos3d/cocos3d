@@ -46,7 +46,6 @@
 @interface CC3Node (TemplateMethods)
 -(void) transformMatrixChanged;
 -(void) notifyTransformListeners;
--(void) updateGlobalScale;
 @property(nonatomic, readonly) CC3Matrix* globalRotationMatrix;
 @end
 
@@ -206,28 +205,22 @@
  * is not applied to the transform matrix of the camera. Instead it is used to adjust the
  * field of view to create a zooming effect. See the notes for the fieldOfView property.
  *
- * This implementation sets the globalScale to that of the parent node, or to unit scaling
- * if no parent. The globalScale is then used to unwind all scaling from the camera, globally,
- * because any inherited scaling will scale the frustum, and cause undesirable clipping
- * artifacts, particularly at the near clipping plane.
+ * This implementation uses the globalScale property to unwind all scaling from the camera,
+ * globally, because any inherited scaling will scale the frustum, and cause undesirable
+ * clipping artifacts, particularly at the near clipping plane.
  *
  * For example, if the camera is mounted on another node that is scaled to ten times, the
  * near clipping plane of the camera will be scaled away from the camera by ten times,
  * resulting in unwanted clipping around the fringes of the view. For this reason, an inverse
  * scale of 1/10 is applied to the transform to counteract this effect.
  */
--(void) applyScaling {
-	[self updateGlobalScale];	// Make sure globalScale is current first.
-	[_globalTransformMatrix scaleBy: CC3VectorInvert(_globalScale)];
-	LogTrace(@"%@ scaled back by global %@ to counter parent scaling %@",
-			 self, NSStringFromCC3Vector(_globalScale), _globalTransformMatrix);
-}
+-(void) applyScaling { [_globalTransformMatrix scaleBy: CC3VectorInvert(self.globalScale)]; }
 
 /**
- * Scaling does not apply to cameras. Sets the globalScale to that of the parent node,
- * or to unit scaling if no parent.
+ * Scaling does not apply to cameras. Return the globalScale of the parent node, 
+ * or unit scaling if no parent.
  */
--(void) updateGlobalScale { _globalScale = _parent ? _parent.globalScale : kCC3VectorUnitCube; }
+-(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to also build the modelview matrix. */
 -(void) transformMatrixChanged {

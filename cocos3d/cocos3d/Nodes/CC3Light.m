@@ -40,8 +40,6 @@
 #pragma mark CC3Light 
 
 @interface CC3Node (TemplateMethods)
--(void) updateGlobalLocation;
--(void) updateGlobalScale;
 -(void) transformMatrixChanged;
 @end
 
@@ -252,13 +250,13 @@
 }
 
 /** Scaling does not apply to lights. */
--(void) applyScaling { [self updateGlobalScale]; }
+-(void) applyScaling {}
 
 /**
- * Scaling does not apply to lights. Sets the globalScale to that of the parent node,
- * or to unit scaling if no parent.
+ * Scaling does not apply to lights. Return the globalScale of the parent node,
+ * or unit scaling if no parent.
  */
--(void) updateGlobalScale { _globalScale = _parent ? _parent.globalScale : kCC3VectorUnitCube; }
+-(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
 /** Overridden to update the camera shadow frustum with the global location of this light */
 -(void) transformMatrixChanged {
