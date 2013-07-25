@@ -127,7 +127,7 @@ print_template_banner(){
 	echo ''
 }
 
-# Copies Xcode 4 project-based templates
+# Copies Xcode project-based templates
 copy_xc4_project_templates(){
 	TEMPLATE_DIR="${BASE_TEMPLATE_4_DIR}/${COCOS3D_TEMPLATE_4_DIR}/"
 

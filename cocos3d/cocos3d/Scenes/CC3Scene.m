@@ -425,7 +425,7 @@
 	
 	// Setup drawing configuration for cocos2d
 	[self setupDraw2DWithVisitor: visitor];
-	
+
 	// Make sure the drawing surface is set back to the view surface
 	[self.viewSurface activate];
 
@@ -437,6 +437,9 @@
 	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
 	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
 	[gl enableScissorTest: NO];
+
+	// Disable fog. Done outside setupDraw2DWithVisitor: because fog applies to billboards
+	[gl enableFog: NO];
 }
 
 -(void) setupDraw2DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -471,10 +474,8 @@
 	gl.cullFace = GL_BACK;
 	gl.frontFace = GL_CCW;
 
-	// Darken the scene by turning lighting and fog off
+	// Darken the scene by turning lighting off
 	[gl enableLighting: NO];
-	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
-	[gl enableFog: NO];
 
 	// Set depth testing to 2D values
 	gl.depthFunc = GL_LEQUAL;

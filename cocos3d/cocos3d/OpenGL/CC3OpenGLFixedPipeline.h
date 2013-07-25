@@ -53,10 +53,10 @@
 	GLbitfield isKnownCap_GL_TEXTURE_COORD_ARRAY;	// Track up to 32 texture units
 	
 	GLenum* values_GL_TEXTURE_ENV_MODE;
-	GLbitfield isKnown_GL_TEXTURE_ENV_MODE : 1;		// Track up to 32 texture units
+	GLbitfield isKnown_GL_TEXTURE_ENV_MODE;			// Track up to 32 texture units
 
 	ccColor4F* values_GL_TEXTURE_ENV_COLOR;
-	GLbitfield isKnown_GL_TEXTURE_ENV_COLOR : 1;	// Track up to 32 texture units
+	GLbitfield isKnown_GL_TEXTURE_ENV_COLOR;		// Track up to 32 texture units
 	
 	ccColor4F value_GL_CURRENT_COLOR;
 

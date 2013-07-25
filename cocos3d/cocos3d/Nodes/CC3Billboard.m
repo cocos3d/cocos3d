@@ -33,6 +33,7 @@
 #import "CC3UtilityMeshNodes.h"
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
+#import "CC3OpenGLFixedPipeline.h"
 
 
 @interface CC3MeshNode (TemplateMethods)
@@ -443,9 +444,6 @@ static GLfloat deviceScaleFactor = 0.0f;
 }
 
 
-#pragma mark Drawing
-
-
 #pragma mark Bounding volumes
 
 -(CC3NodeBoundingArea*) boundingVolume { return (CC3NodeBoundingArea*)super.boundingVolume; }
@@ -488,6 +486,22 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(BOOL) doesIntersectBoundingVolume: (CC3BoundingVolume*) otherBoundingVolume {
 	return (!_shouldDrawAs2DOverlay) && [super doesIntersectBoundingVolume: otherBoundingVolume];
 }
+
+
+#pragma mark Drawing
+
+#if !CC3_GLSL
+/** Restore lights to previous state. */
+-(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	CC3OpenGLFixedPipeline* gl = (CC3OpenGLFixedPipeline*)visitor.gl;
+	
+	BOOL isLit = gl->valueCap_GL_LIGHTING;
+	
+	[super drawWithVisitor: visitor];
+
+	[gl enableLighting: isLit];
+}
+#endif	// !CC3_GLSL
 
 /**
  * During normal drawing, establish 2D drawing environment.

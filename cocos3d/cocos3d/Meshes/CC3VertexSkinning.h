@@ -158,11 +158,11 @@
  *
  * The use of bounding volumes with skinned meshes can be tricky, because the locations of
  * the vertices are affected both by the location of the mesh node, as with any mesh, but
- * alsob by the location of the bones. In addition, bone transformation is handled by the
+ * also by the location of the bones. In addition, bone transformation is handled by the
  * GPU, and unless the CPU is also tasked with transforming each vertex, it is difficult
  * for the app to know the true range of the vertices.
  *
- * Because of this, the createBoundingVolumes method will be ignored by instances of this
+ * Because of this, the createBoundingVolume method will be ignored by instances of this
  * class, and a bounding volume will not automatically be assigned to this node, to ensure
  * that the mesh will not be culled when it shouldn't if the automatic bounding volume is
  * not the correct shape. This mesh will therefore be drawn for each frame, even if it is

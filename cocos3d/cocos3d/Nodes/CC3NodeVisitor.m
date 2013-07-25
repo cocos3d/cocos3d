@@ -498,6 +498,14 @@
 	}
 	
 	[cam openWithVisitor: self];
+
+#if !CC3_GLSL
+	// Hack for OpenGL & OpenGL ES fixed pipeline to force update of light position/direction
+	// AFTER modelview matrix has been updated, as required by OpenGL fixed pipeline.
+	// See http://www.opengl.org/archives/resources/faq/technical/lights.htm#ligh0050
+	[self.scene illuminateWithVisitor: self];
+#endif	// !CC3_GLSL
+
 }
 
 /** Close the camera. */
@@ -519,6 +527,7 @@
 }
 
 -(void) draw: (CC3Node*) aNode {
+	LogTrace(@"Drawing %@", aNode);
 	[aNode drawWithVisitor: self];
 	[self.performanceStatistics incrementNodesDrawn];
 }

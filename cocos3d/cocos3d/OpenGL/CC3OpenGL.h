@@ -35,6 +35,7 @@
 @class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode, CC3ShaderProgram;
 @class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
 
+
 /** Indicates that vertex attribute array is not available. */
 #define kCC3VertexAttributeIndexUnavailable		-1
 
@@ -927,6 +928,12 @@ typedef struct {
 
 
 #pragma mark Shaders
+
+/** Returns a shader program suitable for painting mesh nodes in a solid color. */
+@property(nonatomic, retain, readonly) CC3ShaderProgram* pureColorProgram;
+
+/** Returns the shader program to use to draw the specified mesh node. */
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode;
 
 /** 
  * Generates a new shader of the specifed type and returns its ID.

@@ -351,7 +351,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_ALPHA_SCALE: return "GL_ALPHA_SCALE";
 //		case GL_COORD_REPLACE_OES: return "GL_COORD_REPLACE_OES";
 
-			// Cube maps
+		// Cube maps
 		case GL_TEXTURE_CUBE_MAP: return "GL_TEXTURE_CUBE_MAP";
 		case GL_TEXTURE_CUBE_MAP_POSITIVE_X: return "GL_TEXTURE_CUBE_MAP_POSITIVE_X";
 		case GL_TEXTURE_CUBE_MAP_NEGATIVE_X: return "GL_TEXTURE_CUBE_MAP_NEGATIVE_X";

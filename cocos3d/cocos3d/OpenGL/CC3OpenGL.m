@@ -32,6 +32,7 @@
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
 #import "CC3GLSLVariable.h"
+#import "CC3ShaderProgramMatcher.h"
 
 #if CC3_OGLES_2
 #	import "CC3OpenGLES2.h"
@@ -835,6 +836,14 @@
 
 
 #pragma mark Shaders
+
+-(CC3ShaderProgram*) pureColorProgram { return nil; }
+
+-(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode { return nil; }
+
+-(id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate { return nil; }
+
+-(void) setSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate {}
 
 -(GLuint) generateShader: (GLenum) shaderType { return 0; }
 

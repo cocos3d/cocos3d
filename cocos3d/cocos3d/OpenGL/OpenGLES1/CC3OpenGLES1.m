@@ -34,11 +34,17 @@
 
 #if CC3_OGLES_1
 
+// Assertion macro to ensure only 2D textures are used
+#define CC3Assert2DTexture(TARGET) CC3Assert((TARGET) == GL_TEXTURE_2D, @"Texture target %@ is"	\
+			@" not available. OpenGLES 1.1 supports only 2D textures.", NSStringFromGLEnum(TARGET))
+
+
 @interface CC3OpenGLFixedPipeline (TemplateMethods)
 -(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx;
 -(void) bindVertexContentToAttributeAt: (GLint) vaIdx;
 -(void) initPlatformLimits;
 -(void) initNonTextureVertexAttributes;
+-(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget;
 @end
 
 @implementation CC3OpenGLES1
@@ -88,44 +94,42 @@
 
 #pragma mark Textures
 
-/** 
- * If target is not GL_TEXTURE_2D, we're trying to bind the texture to an illegal target.
- * In that case, just bind the GL_TEXTURE_2D to no texture.
- */
+/** Ensure target is GL_TEXTURE_2D. */
 -(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
-	if (target != GL_TEXTURE_2D) {
-		target = GL_TEXTURE_2D;
-		texID = 0;
-	}
+	CC3Assert2DTexture(target);
 	[super bindTexture: texID toTarget: target at: tuIdx];
 }
 
 /** Ensure target is GL_TEXTURE_2D. */
 -(void) loadTexureImage: (const GLvoid*) imageData
 			 intoTarget: (GLenum) target
+		  onMipmapLevel: (GLint) mipmapLevel
 			   withSize: (CC3IntSize) size
 			 withFormat: (GLenum) texelFormat
 			   withType: (GLenum) texelType
 	  withByteAlignment: (GLint) byteAlignment
 					 at: (GLuint) tuIdx {
-	if (target == GL_TEXTURE_2D)
-		[super loadTexureImage: imageData
-					intoTarget: target
-					  withSize: size
-					withFormat: texelFormat
-					  withType: texelType
-			 withByteAlignment: byteAlignment
-							at: tuIdx];
+	CC3Assert2DTexture(target);
+	[super loadTexureImage: (const GLvoid*) imageData
+				intoTarget: target
+			 onMipmapLevel: mipmapLevel
+				  withSize: size
+				withFormat: texelFormat
+				  withType: texelType
+		 withByteAlignment: byteAlignment
+						at: tuIdx];
 }
 
 /** Ensure target is GL_TEXTURE_2D. */
 -(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx {
-	if (target == GL_TEXTURE_2D) [super setTexParamEnum: pName inTarget: target to: val at: tuIdx];
+	CC3Assert2DTexture(target);
+	[super setTexParamEnum: pName inTarget: target to: val at: tuIdx];
 }
 
 /** Ensure target is GL_TEXTURE_2D. */
 -(void) generateMipmapForTarget: (GLenum)target at: (GLuint) tuIdx {
-	if (target == GL_TEXTURE_2D) [super generateMipmapForTarget: target at: tuIdx];
+	CC3Assert2DTexture(target);
+	[super generateMipmapForTarget: target at: tuIdx];
 }
 
 -(void) enablePointSpriteCoordReplace: (BOOL) onOff at: (GLuint) tuIdx {
@@ -138,8 +142,10 @@
 
 -(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
 	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
-	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
 		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
+	}
 }
 
 

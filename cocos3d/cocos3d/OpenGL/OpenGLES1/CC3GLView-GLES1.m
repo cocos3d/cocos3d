@@ -33,194 +33,96 @@
 #import "CC3GLView-GLES1.h"
 
 #if CC3_OGLES_1
-#import "CC3Logging.h"
-#import "CCConfiguration.h"
+
 #import "CC3IOSExtensions.h"
-#import "cocos2d.h"
+#import "CC3Logging.h"
+
+#define CC2_REQUESTED_SAMPLES requestedSamples_
+#define CC2_PIXEL_FORMAT pixelformat_
+#define CC2_DEPTH_FORMAT depthFormat_
+#define CC2_CONTEXT context_
+#define CC2_SIZE size_
 
 
 #pragma mark -
-#pragma mark EAGLView extensions
+#pragma mark CCGLView
 
-@interface EAGLView (TemplateMethods)
--(BOOL) setupSurfaceWithSharegroup: (EAGLSharegroup*) sharegroup;
+@interface CCGLView (TemplateMethods)
+-(unsigned int) convertPixelFormat:(NSString*) pixelFormat;
 @end
-
-@implementation EAGLView (CC3)
-
--(GLuint) pixelSamples { return requestedSamples_; }
-
--(void) openPicking {
-	CC3Assert( !self.multiSampling, @"%@ does not support node picking when configured for multisampling. Use the %@ class instead.",
-			  [self class], [CC3GLView class]);
-}
-
--(void) closePicking {}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3GLView
 
 @implementation CC3GLView
 
--(GLuint) pixelSamples { return ((CC3ES1Renderer*)renderer_).pixelSamples; }
+@synthesize surfaceManager=_surfaceManager;
 
--(void) openPicking { [((CC3ES1Renderer*)renderer_) openPicking]; }
-
--(void) closePicking { [((CC3ES1Renderer*)renderer_) closePicking]; }
-
-/** Forces the underlying renderer to be created as a CC3ES2Renderer. */
--(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
-	ES1Renderer.instantiationClass = CC3ES1Renderer.class;
-	BOOL rslt = [super setupSurfaceWithSharegroup: sharegroup];
-	ES1Renderer.instantiationClass = nil;
-	return rslt;
-}
-
-/** Overridden to remove the unnecessary redraw while still in old orientation. */
--(void) layoutSubviews {
-	[renderer_ resizeFromLayer: (CAEAGLLayer*)self.layer];
-	size_ = [renderer_ backingSize];
-	[CCDirector.sharedDirector reshapeProjection: size_];			// Issue #914 #924
-	
-	// Notify controller...already done in iOS5 & above
-	if(CCConfiguration.sharedConfiguration.OSVersion < kCCiOSVersion_5_0_0 )
-		[self.viewController viewDidLayoutSubviews];
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark ES1Renderer extension
-
-@implementation ES1Renderer (CC3ES1Renderer)
-
-/** The ES1Renderer cluster class to be instantiated when the alloc method is invoked. */
-static Class _instantiationClass = nil;
-
-+(Class) instantiationClass { return _instantiationClass; }
-
-+(void) setInstantiationClass: (Class) aClass  {
-	CC3Assert(aClass == nil || [aClass isSubclassOfClass: [ES1Renderer class]],
-			  @"%@ is not a subclass of ES1Renderer.", aClass);
-	_instantiationClass = aClass;
-}
-
-/** Invoke the superclass alloc method, bypassing the alloc method of this class. */
-+(id) allocBase { return [super alloc]; }
-
-/**
- * If the instantiationClass property is not nil, allocates an instance of that
- * subclass, so that additional state and behaviour can be added to renderers,
- * without having to change where they are instantiated.
- *
- * If the instantiationClass property is nil, allocates an instance of this class.
- */
-+(id) alloc { return _instantiationClass ? [_instantiationClass alloc] : [self allocBase]; }
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3ES1Renderer
-
-@interface CC3ES1Renderer (TemplateMethods)
--(void) deletePickerBuffers;
-@end
-
-@implementation CC3ES1Renderer
-
-- (void)dealloc {
-	[self deletePickerBuffers];
+-(void) dealloc {
+	[_surfaceManager release];
 	[super dealloc];
 }
 
-/** Bypass the superclass alloc, which can redirect back here, causing an infinite loop. */
-+(id) alloc { return [self allocBase]; }
+-(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
--(GLuint) pixelSamples { return samplesToUse_; }
+-(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
--(id) initWithDepthFormat: (GLuint) depthFormat
-		   withPixelFormat: (GLuint) pixelFormat
-			withSharegroup: (EAGLSharegroup*) sharegroup
-		 withMultiSampling: (BOOL) multiSampling
-	   withNumberOfSamples: (GLuint) requestedSamples {
-
-    if ((self = [super initWithDepthFormat: depthFormat
-						   withPixelFormat: pixelFormat
-							withSharegroup: sharegroup
-						 withMultiSampling: multiSampling
-					   withNumberOfSamples: requestedSamples])) {
-		pickerFrameBuffer = 0;
-		pickerDepthBuffer = 0;
-    }
-    return self;
-}
-
--(BOOL) resizeFromLayer: (CAEAGLLayer*) layer {
-	[self deletePickerBuffers];
-	BOOL wasSuccessful = [super resizeFromLayer: layer];
-
-	// If we want a stencil buffer, it must be combined with the depth buffer (GL_DEPTH24_STENCIL8).
-	// Attach it to the framebuffer.
-	if (wasSuccessful && (depthFormat_ == GL_DEPTH24_STENCIL8 || depthFormat_ == GL_UNSIGNED_INT_24_8))
-		glFramebufferRenderbufferOES(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
-
-	return wasSuccessful;
-}
-
--(void) deletePickerBuffers {
-	if(pickerFrameBuffer) {
-		glDeleteFramebuffersOES(1, &pickerFrameBuffer);
-		pickerFrameBuffer = 0;
-	}
-	if(pickerDepthBuffer) {
-		glDeleteRenderbuffersOES(1, &pickerDepthBuffer);
-		pickerDepthBuffer = 0;
-	}
-}
-
--(void) openPicking {
-	if ( !multiSampling_ ) return;
-
-	if ( !pickerFrameBuffer ) {
-		
-		// Generate a new picker FBO and bind existing resolve color buffer to it
-		glGenFramebuffersOES(1, &pickerFrameBuffer);
-		glBindFramebufferOES(GL_FRAMEBUFFER_OES, pickerFrameBuffer);
-		glBindRenderbufferOES(GL_RENDERBUFFER_OES, self.colorRenderBuffer);
-		glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, self.colorRenderBuffer);
-		
-		// Generate a new depth render buffer and bind it to picker FBO
-		if (depthFormat_) {
-			glGenRenderbuffersOES(1, &pickerDepthBuffer);
-			glBindRenderbufferOES(GL_RENDERBUFFER_OES, pickerDepthBuffer);
-			glRenderbufferStorageOES(GL_RENDERBUFFER_OES, depthFormat_, backingWidth_, backingHeight_);
-			glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, pickerDepthBuffer);
-			LogTrace(@"Picker depth buffer %u format: %x, w: %i h: %i", pickerDepthBuffer, depthFormat_, backingWidth_, backingHeight_);
-		}
-		// Verify the framebuffer
-		GLenum fbStatus = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
-		if (fbStatus != GL_FRAMEBUFFER_COMPLETE_OES) {
-			LogError(@"Failed to make complete picker framebuffer object %x", fbStatus);
-			[self deletePickerBuffers];
-		}
+-(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
+	self.layer.opaque = YES;
+	self.layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+									 [NSNumber numberWithBool:preserveBackbuffer_],
+									 kEAGLDrawablePropertyRetainedBacking,
+									 pixelformat_,
+									 kEAGLDrawablePropertyColorFormat,
+									 nil];
+	
+	CC2_CONTEXT = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1 sharegroup: sharegroup];
+	if ( !CC2_CONTEXT || ![EAGLContext setCurrentContext: CC2_CONTEXT] ) {
+		CC3Assert(NO, @"Could not create EAGLContext.");
+		[self release];
+		return NO;
 	}
 	
-	// Bind the dedicated picker framebuffer to which drawing operations will be directed
-	// during node rendering during node picking.
-	if(pickerFrameBuffer) {
-		glBindFramebufferOES(GL_FRAMEBUFFER_OES, pickerFrameBuffer);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
+	GLenum colorFormat = [self convertPixelFormat: CC2_PIXEL_FORMAT];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithColorFormat: colorFormat
+															andDepthFormat: CC2_DEPTH_FORMAT
+														   andPixelSamples: CC2_REQUESTED_SAMPLES];
+	return YES;
 }
 
--(void) closePicking { if (multiSampling_) glBindFramebufferOES(GL_FRAMEBUFFER_OES, self.msaaFrameBuffer); }
+-(void) layoutSubviews {
+	CC3IntSize size;
+	CC3OpenGL* gl = CC3OpenGL.sharedGL;
+	
+	// Bind the renderbuffer that is the color attachment of the view and resize it from the layer
+	[gl bindRenderbuffer: _surfaceManager.viewColorBuffer.renderbufferID];
+	if( ![CC2_CONTEXT renderbufferStorage: GL_RENDERBUFFER fromDrawable: self.layer] ) {
+		LogError(@"Failed to allocate renderbuffer storage in GL context.");
+		return;
+	}
+	
+	// Retrieve the new size of the renderbuffer from the GL engine
+	// and resize all surfaces in the surface manager to that new size.
+	size.width = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_WIDTH];
+	size.height = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_HEIGHT];
+	LogTrace(@"View resizing to %@", NSStringFromCC3IntSize(size));
+	
+	[_surfaceManager resizeTo: size];
+	
+	// Update the CCDirector with the new view size
+	CC2_SIZE = CGSizeFromCC3IntSize(size);
+	CCDirector *director = [CCDirector sharedDirector];
+	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
+	[director drawScene];						// avoid flicker
+	
+}
+
+-(void) swapBuffers {
+	[_surfaceManager resolveMultisampling];
+	if( ![CC2_CONTEXT presentRenderbuffer: GL_RENDERBUFFER] )
+		LogError(@"Failed to swap renderbuffer to screen.");
+	
+}
 
 @end
+
 
 // Deprecated
 @implementation CC3EAGLView

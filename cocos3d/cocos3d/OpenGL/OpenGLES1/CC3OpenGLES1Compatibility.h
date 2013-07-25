@@ -53,9 +53,28 @@
 #define glFramebufferRenderbuffer		glFramebufferRenderbufferOES
 #define glFramebufferTexture2D			glFramebufferTexture2DOES
 
+// Undef first since core frameworks can include ES2 in later SDK's
+#undef GL_FRAMEBUFFER
+#undef GL_RENDERBUFFER
+#undef GL_MAX_RENDERBUFFER_SIZE
+#undef GL_RENDERBUFFER_WIDTH
+#undef GL_RENDERBUFFER_HEIGHT
+
 #define GL_FRAMEBUFFER					GL_FRAMEBUFFER_OES
 #define GL_RENDERBUFFER					GL_RENDERBUFFER_OES
 #define GL_MAX_RENDERBUFFER_SIZE		GL_MAX_RENDERBUFFER_SIZE_OES
+#define GL_RENDERBUFFER_WIDTH			GL_RENDERBUFFER_WIDTH_OES
+#define GL_RENDERBUFFER_HEIGHT			GL_RENDERBUFFER_HEIGHT_OES
+
+#define GL_TEXTURE_CUBE_MAP                              0x8513
+#define GL_TEXTURE_BINDING_CUBE_MAP                      0x8514
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_X                   0x8515
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X                   0x8516
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y                   0x8517
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y                   0x8518
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z                   0x8519
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z                   0x851A
+#define GL_MAX_CUBE_MAP_TEXTURE_SIZE                     0x851C
 
 // Color, depth and stencil buffers
 

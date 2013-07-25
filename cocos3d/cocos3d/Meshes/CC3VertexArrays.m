@@ -1269,6 +1269,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 			ptc->v = (ny + (origV * nh)) * mh + hx;				// Calc new value
 		}
 	}
+	[self updateGLBuffer];
 }
 
 -(void) alignWithTextureMapSize: (CGSize) texMapSize {
@@ -1296,7 +1297,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 		ptc->v = (ptc->v - currVertXln) * mapRatio.height + newVertXln;
 	}
 	_mapSize = texMapSize;	// Remember what we've set the map size to
-
+	[self updateGLBuffer];
 }
 
 -(void) alignWithInvertedTextureMapSize: (CGSize) texMapSize {
@@ -1318,6 +1319,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	_mapSize = texMapSize;
 	_expectsVerticallyFlippedTextures = !_expectsVerticallyFlippedTextures;
 	
+	[self updateGLBuffer];
 	LogTrace(@"%@ aligned and flipped vertically", self);
 }
 
@@ -1347,6 +1349,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->v = minV + maxV - ptc->v;
 	}
+	[self updateGLBuffer];
 }
 
 -(void) flipHorizontally {
@@ -1361,6 +1364,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u = minU + maxU - ptc->u;
 	}
+	[self updateGLBuffer];
 }
 
 -(void) repeatTexture: (ccTex2F) repeatFactor {

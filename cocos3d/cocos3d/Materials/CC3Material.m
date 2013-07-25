@@ -533,7 +533,7 @@ static GLuint lastAssignedMaterialTag;
 /** Draws the specified texture to the GL engine, and then increments the texture unit. */
 -(void) drawTexture: (CC3Texture*) texture withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[texture drawWithVisitor: visitor];
-	visitor.currentTextureUnitIndex += 1;	// Move to next texture unit
+	if (texture) visitor.currentTextureUnitIndex += 1;	// Move to next texture unit
 }
 
 -(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor {

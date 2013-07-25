@@ -274,6 +274,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	[gl enableTexturing: YES inTarget: target at: tuIdx];
 	[gl bindTexture: _textureID toTarget: target at: tuIdx];
 	[self bindTextureParametersAt: tuIdx usingGL: gl];
+	[self bindTextureEnvironmentWithVisitor: visitor];
 
 	LogTrace(@"%@ bound to texture unit %u", self, tuIdx);
 }
@@ -290,6 +291,11 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	[gl setTextureVertWrapFunc: self.verticalWrappingFunction inTarget: target at: tuIdx];
 	
 	_texParametersAreDirty = NO;
+}
+
+/** Binds the default texture unit environment to the GL engine. */
+-(void) bindTextureEnvironmentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[CC3TextureUnit bindDefaultWithVisitor: visitor];
 }
 
 
@@ -1016,23 +1022,14 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 #pragma mark Drawing
 
+/**
+ * Draw wrapped texture, then draw texture unit.
+ * Wrapped texture resets texture unit bindings to default, so if no texture unit,
+ * will behave with default behaviour.
+ */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ( !_texture ) return;
-	[self bindTextureWithVisitor: visitor];
-	[self bindTextureEnvironmentWithVisitor: visitor];
-}
-
--(void) bindTextureWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[_texture drawWithVisitor: visitor];
-	LogTrace(@"%@ bound to texture unit %u", self, visitor.currentTextureUnitIndex);
-}
-
-/** Binds the texture unit environment to the specified texture unit state. */
--(void) bindTextureEnvironmentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (_textureUnit)
-		[_textureUnit bindWithVisitor: visitor];
-	else
-		[CC3TextureUnit bindDefaultWithVisitor: visitor];
+	[_textureUnit bindWithVisitor: visitor];	// If no textureUnit, default set by texture
 }
 
 
@@ -1452,7 +1449,9 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		CC2_TEX_SIZE = CGSizeMake((CGFloat)CC2_TEX_WIDTH * CC2_TEX_MAXS, (CGFloat)CC2_TEX_HEIGHT * CC2_TEX_MAXT);
 		CC2_TEX_FORMAT = kCCTexture2DPixelFormat_Default;
 		CC2_TEX_HAS_PREMULT_ALPHA = texture.hasPremultipliedAlpha;
+#if CC3_CC2_2
 		CC2_TEX_HAS_MIPMAP = texture.hasMipmap;
+#endif
 	}
 	return self;
 }

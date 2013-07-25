@@ -853,14 +853,14 @@
 -(void) applyShaderProgramWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgram* shaderProgram;
 	if (visitor.shouldDecorateNode)
-		shaderProgram = [CC3ShaderProgram.programMatcher programForMeshNode: self];
+		shaderProgram = [CC3OpenGL.sharedGL programForMeshNode: self];
 	else
-		shaderProgram = CC3ShaderProgram.programMatcher.pureColorProgram;
+		shaderProgram = CC3OpenGL.sharedGL.pureColorProgram;
 
 	[shaderProgram bindWithVisitor: visitor];
 }
 
--(void) selectShaderProgram { [CC3ShaderProgram.programMatcher programForMeshNode: self]; }
+-(void) selectShaderProgram { [CC3OpenGL.sharedGL programForMeshNode: self]; }
 
 -(void) selectShaderPrograms {
 	[self selectShaderProgram];

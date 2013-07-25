@@ -767,17 +767,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_teapotTextured = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: kTexturedTeapotName];
 	_teapotTextured.touchEnabled = YES;		// allow this node to be selected by touch events
 	
-	// Add two textures to the teapot. The first is a cube-map texture showing the six sides of
-	// a real-time reflective environmental cube surrounding the teapot, viewed from the teapot's
-	// perspective. The reflection is dynamically generated as objects move around the scene.
-	// A second texture is added to provide an optional surface material (eg- brushed metal).
-	// The material reflectivity property adjusts how reflective the surface is, by adjusting the
-	// blend between the two textures. Lower the reflectivity towards zero to show some of the
-	// underlying material. Since the enviornment map texture renders the scene, it requires a
-	// depth buffer, so we create a depth buffer of the same size, and attach it here. If you had
-	// multiple reflective objects, you could use the same depth buffer for all of them if the
-	// textures are the same size. Since generating an environment map texture requires rendering
-	// the scene from each of the six axis directions, it can be quite costly. You can use the
+#if !CC3_OGLES_1
+	// If cube-maps are available, add two textures to the teapot. The first is a cube-map texture
+	// showing the six sides of a real-time reflective environmental cube surrounding the teapot,
+	// viewed from the teapot's perspective. The reflection is dynamically generated as objects
+	// move around the scene. A second texture is added to provide an optional surface material
+	// (eg- brushed metal). The material reflectivity property adjusts how reflective the surface
+	// is, by adjusting the blend between the two textures. Lower the reflectivity towards zero to
+	// show some of the underlying material. Since the enviornment map texture renders the scene,
+	// it requires a depth buffer, so we create a depth buffer of the same size, and attach it here.
+	// If you had multiple reflective objects, you could use the same depth buffer for all of them
+	// if the textures are the same size. Since generating an environment map texture requires
+	// rendering the scene from each of the six axis directions, it can be quite costly. You can use the
 	// numberOfFacesPerSnapshot property to adjust how often the reflective faces are updated, to
 	// trade off real-time accuracy and performance. See the notes of that property for more info.
 	GLint envMapDim = 256;
@@ -787,6 +788,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
+#endif	// !CC3_OGLES_1
+
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
 	_teapotTextured.material.reflectivity = 1.0;
 	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
@@ -1049,9 +1052,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 /**
  * Adds a multi-texture sign, consisting of a combination of a wooden sign texture
- * and a stamp texture that are combined during rendering. Several styles of combining
+ * and a stamp texture that are combined during rendering. Several styles of combining 
  * (including bump-mapping) can be cycled through by repeatedly touching the sign.
- * The sign acts as a halo object, always facing the camera.
  */
 -(void) addWoodenSign {
 	// Texture for the basic wooden sign
@@ -1508,8 +1510,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	//     extracted from the model (or just hardcode a modified bounding box) to position
 	//     and size the bounding volume around the model and verify visually.
 	LogTrace(@"Runner box: %@", NSStringFromCC3Box(runner.boundingBox));	// Extract bounding box
-	CC3Box bb = CC3BoxFromMinMax(cc3v(-76.982, 18.777, -125.259),
-												 cc3v(61.138, 268.000, 96.993));
+	CC3Box bb = CC3BoxFromMinMax(cc3v(-76.982, 18.777, -125.259), cc3v(61.138, 268.000, 96.993));
 	bb = CC3BoxTranslateFractionally(bb, cc3v(0.0f, -0.1f, 0.1f));	// Move it if necessary
 	bb = CC3BoxScale(bb, cc3v(1.0f, 1.1f, 1.0f));					// Size it if necessary
 	CC3NodeBoundingVolume* bv = [CC3NodeSphereThenBoxBoundingVolume boundingVolumeCircumscribingBox: bb];
@@ -1547,11 +1548,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	stride = [CC3Animate actionWithDuration: 1.6];
 	[littleBrother runAction: [CCRepeatForever actionWithAction: stride]];
 	
-	// Turn the smaller runner into a little liquid-metal Terminator 2!
+#if !CC3_OGLES_1
+	// If cube-maps are available, turn the smaller runner into a little liquid-metal Terminator 2!
 	// This is done by locating the mesh nodes within the figure, adding a static cube-map
 	// environment-map texture to each, and setting the reflectivity of each mesh node.
 	CC3Material* mat;
-	GLfloat lbReflect = 1.0;	// Lower the reflectivity towards zero to show some of the runner's suit.
+	GLfloat lbReflect = 1.0;	// You can lower the reflectivity towards zero to show some of the runner's suit.
 	CC3Texture* emTex = [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
 	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
 	[mat addTexture: emTex];
@@ -1562,6 +1564,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
 	[mat addTexture: emTex];
 	mat.reflectivity = lbReflect;
+#endif	// !CC3_OGLES_1
 }
 
 /**

@@ -324,7 +324,7 @@ static Class _defaultSemanticDelegateClass = nil;
 -(void) initShaderProgramForPFXEffect: (SPVRTPFXParserEffect*) pfxEffect
 						fromPFXParser: (CPVRTPFXParser*) pfxParser
 						inPFXResource: (CC3PFXResource*) pfxRez {
-
+#if CC3_GLSL
 	// Retrieve or create the vertex shader
 	SPVRTPFXParserShader* pfxVtxShader = [self getPFXVertexShaderForPFXEffect: pfxEffect
 																fromPFXParser: pfxParser];
@@ -344,6 +344,7 @@ static Class _defaultSemanticDelegateClass = nil;
 	_shaderProgram = [self.shaderProgramClass programWithSemanticDelegate: semanticDelegate
 														 withVertexShader: vtxShader
 													   withFragmentShader: fragShader];
+#endif	// CC3_GLSL
 }
 
 /**

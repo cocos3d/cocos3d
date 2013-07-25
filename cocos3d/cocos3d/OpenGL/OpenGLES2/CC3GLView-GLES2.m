@@ -30,11 +30,11 @@
  */
 
 #import "CC3GLView-GLES2.h"
-#import "CC3Logging.h"
 
 #if CC3_OGLES_2
 
 #import "CC3IOSExtensions.h"
+#import "CC3Logging.h"
 
 #if COCOS2D_VERSION < 0x020100
 #	define CC2_REQUESTED_SAMPLES requestedSamples_

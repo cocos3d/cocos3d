@@ -307,11 +307,14 @@
 	}
 }
 
+/** 
+ * For fixed pipeline, need to update light position/direction after modelview matrix
+ * is updated, even if light position/direction does not change.
+ * See http://www.opengl.org/archives/resources/faq/technical/lights.htm#ligh0050
+ */
 -(void) setLightPosition: (CC3Vector4) pos at: (GLuint) ltIdx {
-	if (CC3CheckGLVector4At(ltIdx, pos, valueLight_GL_POSITION, &isKnownLight_GL_POSITION)) {
-		glLightfv((GL_LIGHT0 + ltIdx), GL_POSITION, (GLfloat*)&pos);
-		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_POSITION), NSStringFromCC3Vector4(pos));
-	}
+	glLightfv((GL_LIGHT0 + ltIdx), GL_POSITION, (GLfloat*)&pos);
+	LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_POSITION), NSStringFromCC3Vector4(pos));
 }
 
 -(void) setLightAttenuation: (CC3AttenuationCoefficients) ac at: (GLuint) ltIdx {
@@ -329,11 +332,14 @@
 	}
 }
 
+/**
+ * For fixed pipeline, need to update light  spot direction after modelview matrix
+ * is updated, even if light spot direction does not change.
+ * See http://www.opengl.org/archives/resources/faq/technical/lights.htm#ligh0050
+ */
 -(void) setSpotlightDirection: (CC3Vector) dir at: (GLuint) ltIdx {
-	if (CC3CheckGLVectorAt(ltIdx, dir, valueLight_GL_SPOT_DIRECTION, &isKnownLight_GL_SPOT_DIRECTION)) {
-		glLightfv((GL_LIGHT0 + ltIdx), GL_SPOT_DIRECTION, (GLfloat*)&dir);
-		LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_DIRECTION), NSStringFromCC3Vector(dir));
-	}
+	glLightfv((GL_LIGHT0 + ltIdx), GL_SPOT_DIRECTION, (GLfloat*)&dir);
+	LogGLErrorTrace(@"glLightfv(%@, %@, %@)", NSStringFromGLEnum(GL_LIGHT0 + ltIdx), NSStringFromGLEnum(GL_SPOT_DIRECTION), NSStringFromCC3Vector(dir));
 }
 
 -(void) setSpotlightFadeExponent: (GLfloat) val at: (GLuint) ltIdx {
