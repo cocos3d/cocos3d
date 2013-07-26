@@ -42,6 +42,7 @@ cocos3d 2.0.0 - 2013/07/01
 - Added support for tangent and bitangent vertex content
     - Added CC3VertexTangents vertex array
 	- Added CC3Mesh vertexTangents and vertexBitangents properties and associated operational methods.
+	- Added flipNormals method to CC3MeshNode, CC3Mesh & CC3VertexNormals to reverse the directions of all the normals in a mesh.
 
 - Added support for Mac OSX.
 	- cocos3d can now be run on a Mac under OSX.

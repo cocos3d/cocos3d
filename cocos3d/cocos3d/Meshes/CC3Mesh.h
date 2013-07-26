@@ -302,6 +302,9 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** Returns whether this mesh contains content for vertex normals. */
 @property(nonatomic, readonly) BOOL hasVertexNormals;
 
+/** Reverses the direction of all of the normals in this mesh. */
+-(void) flipNormals;
+
 /**
  * The vertex array instance managing the tangent content for the vertices.
  *

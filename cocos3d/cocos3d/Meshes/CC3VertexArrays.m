@@ -1012,6 +1012,14 @@ static GLuint lastAssignedVertexArrayTag;
 	*(CC3Vector*)[self addressOfElement: index] = aNormal;
 }
 
+-(void) flipNormals {
+	GLuint vtxCnt = self.vertexCount;
+	for (GLuint vtxIdx = 0; vtxIdx < vtxCnt; vtxIdx++) {
+		CC3Vector* pn = [self addressOfElement: vtxIdx];
+		*pn = CC3VectorNegate(*pn);
+	}
+}
+
 
 #pragma mark Allocation and initialization
 

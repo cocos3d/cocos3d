@@ -149,6 +149,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 -(BOOL) hasVertexNormals { return (_vertexNormals != nil); }
 
+-(void) flipNormals { [_vertexNormals flipNormals]; }
+
 -(CC3VertexTangents*) vertexTangents { return _vertexTangents; }
 
 -(void) setVertexTangents: (CC3VertexTangents*) vtxTans {

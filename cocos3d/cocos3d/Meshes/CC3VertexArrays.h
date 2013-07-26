@@ -1112,6 +1112,9 @@
  */
 -(void) setNormal: (CC3Vector) aNormal at: (GLuint) index;
 
+/** Reverses the direction of all of the normals in this mesh. */
+-(void) flipNormals;
+
 @end
 
 

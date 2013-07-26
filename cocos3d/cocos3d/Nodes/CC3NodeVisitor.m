@@ -446,12 +446,16 @@
 
 -(void) processChildrenOf: (CC3Node*) aNode {
 	if (_drawingSequencer) {
-		CC3Node* currNode = _currentNode;	// Remember current node
+		// Remember current node and whether children should be visited
+		CC3Node* currNode = _currentNode;
+		BOOL currSVC = _shouldVisitChildren;
 
-		_shouldVisitChildren = NO;
+		_shouldVisitChildren = NO;	// Don't delve into node hierarchy if using sequencer
 		[_drawingSequencer visitNodesWithNodeVisitor: self];
 
-		_currentNode = currNode;				// Restore current node
+		// Restore current node and whether children should be visited
+		_shouldVisitChildren = currSVC;
+		_currentNode = currNode;
 	} else {
 		[super processChildrenOf: aNode];
 	}
@@ -482,7 +486,6 @@
 	CC3Scene* scene = self.scene;
 	_deltaTime = scene.deltaFrameTime;
 	_drawingSequencer = scene.drawingSequencer;
-	_shouldVisitChildren = YES;		// Set each time, because reset by sequencer
 }
 
 /** Template method that opens the 3D camera. */

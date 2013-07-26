@@ -1083,7 +1083,9 @@
 -(void) doNotBufferVertexIndices { for (CC3Node* child in _children) [child doNotBufferVertexIndices]; }
 
 
-#pragma mark Texture alignment
+#pragma mark Texture and normal alignment
+
+-(void) flipNormals { for (CC3Node* child in _children) [child flipNormals]; }
 
 -(BOOL) expectsVerticallyFlippedTextures {
 	for (CC3Node* child in _children) if (child.expectsVerticallyFlippedTextures) return YES;

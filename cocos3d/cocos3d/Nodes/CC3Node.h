@@ -2136,7 +2136,10 @@ typedef enum {
 -(void) doNotBufferVertexIndices;
 
 
-#pragma mark Texture alignment
+#pragma mark Texture and normal alignment
+
+/** Reverses the direction of all of the normals in the meshes of all descendant nodes. */
+-(void) flipNormals;
 
 /**
  * Indicates whether the texture coordinates of the meshes of the descendants

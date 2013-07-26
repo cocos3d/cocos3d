@@ -954,6 +954,11 @@
 	[_mesh setVertexNormal: aNormal at: index];
 }
 
+-(void) flipNormals {
+	[_mesh flipNormals];
+	[super flipNormals];
+}
+
 -(CC3Vector) vertexTangentAt: (GLuint) index {
 	return _mesh ? [_mesh vertexTangentAt: index] : kCC3VectorUnitXPositive;
 }
