@@ -362,11 +362,12 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self createBoundingVolumes];
 
 	// The following line displays the bounding volumes of each node. The bounding volume of
-	// most nodes (except the globe) contains both a spherical and bounding-box bounding volume
-	// to optimize testing. For something extra cool, touch the robot arm to see the bounding
-	// volume of the particle emitter grow and shrink dynamically. Use the joystick controls
-	// to back the camera away to get the full effect. You can also turn on this property on
-	// individual nodes or node structures. See the CC3Node class notes.
+	// all mesh nodes, except the globe, contains both a spherical and bounding-box bounding
+	// volume, to optimize testing. For something extra cool, touch the robot arm to see the
+	// bounding volume of the particle emitter grow and shrink dynamically. Use the joystick
+	// controls or gestures to back the camera away to get the full effect. You can also turn
+	// on this property on individual nodes or node structures. See the notes for this property
+	// and the shouldDrawBoundingVolume property in the CC3Node class notes.
 //	self.shouldDrawAllBoundingVolumes = YES;
 	
 	// Select an appropriate shader program for each mesh node in this scene now. If this step

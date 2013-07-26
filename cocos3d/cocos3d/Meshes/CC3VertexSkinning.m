@@ -203,7 +203,15 @@
 #pragma mark Drawing
 
 /** Overridden to skip auto-creating a bounding volume. */
--(void) createBoundingVolume {}
+-(void) createBoundingVolumes {
+	for (CC3Node* child in _children) [child createBoundingVolumes];
+}
+
+/** Overridden to auto-create a bounding volume. */
+-(void) createSkinnedBoundingVolumes {
+	if ( !_boundingVolume ) [self createBoundingVolume];
+	for (CC3Node* child in _children) [child createSkinnedBoundingVolumes];
+}
 
 /** Use this bounding volume, then pass along to my descendants. */
 -(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume {

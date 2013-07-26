@@ -162,7 +162,7 @@
  * GPU, and unless the CPU is also tasked with transforming each vertex, it is difficult
  * for the app to know the true range of the vertices.
  *
- * Because of this, the createBoundingVolume method will be ignored by instances of this
+ * Because of this, the createBoundingVolumes method will be ignored by instances of this
  * class, and a bounding volume will not automatically be assigned to this node, to ensure
  * that the mesh will not be culled when it shouldn't if the automatic bounding volume is
  * not the correct shape. This mesh will therefore be drawn for each frame, even if it is
@@ -185,6 +185,12 @@
  *     development, you can use the shouldDrawBoundingVolume property to make the bounding
  *     volume visible, to aid in determining and setting the right size and shape for it.
  *
+ *   - If you know that the vertices of the skinned mesh node will not move beyond the static
+ *     bounding volume defined by the vertices in the rest pose, you can invoke the
+ *     createBoundingVolume method to have bounding volume created automatically from the rest
+ *     pose of the skinned mesh node. If this is a common requirement, you can also use the
+ *     createSkinnedBoundingVolumes methods on any ancestor node to have bounding volumes
+ *     automatically created for all descendant skinned mesh nodes.
  */
 @interface CC3SkinMeshNode : CC3MeshNode {
 	CCArray* _skinSections;

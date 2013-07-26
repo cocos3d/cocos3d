@@ -1547,6 +1547,10 @@ static GLuint lastAssignedNodeTag;
 
 -(void) createBoundingVolume { self.boundingVolume = [self defaultBoundingVolume]; }
 
+-(void) createSkinnedBoundingVolumes {
+	for (CC3Node* child in _children) [child createSkinnedBoundingVolumes];
+}
+
 -(void) deleteBoundingVolumes {
 	self.boundingVolume = nil;
 	for (CC3Node* child in _children) [child deleteBoundingVolumes];

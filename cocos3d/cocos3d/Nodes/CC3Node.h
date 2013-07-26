@@ -2598,8 +2598,9 @@ typedef enum {
  * and computational processing time.
  *
  * By default, nodes do not have a bounding volume. You can add a bounding volume by setting
- * this property directly, or you can invoke the createBoundingVolumes on a node to have a
- * bounding volume created for each descendant node that requires one.
+ * this property directly, you can invoke the createBoundingVolume method to have a bounding
+ * volume created automatically, or you can invoke the createBoundingVolumes method to have
+ * a bounding volume created for each descendant node that requires one.
  *
  * In most cases, each node has its own bounding volume. However, when using bounding volumes
  * with skin mesh nodes whose vertices are influenced by separate bone nodes, it sometimes makes
@@ -2622,17 +2623,44 @@ typedef enum {
  */
 @property(nonatomic, retain) CC3NodeBoundingVolume* boundingVolume;
 
+/** Sets the boundingVolume property to the value returned by the defaultBoundingVolume property. */
+-(void) createBoundingVolume;
+
 /**
- * If this node has no bounding volume, sets the boundingVolume property to the value
- * returned by the defaultBoundingVolume property.
+ * If this node has no bounding volume, invokes the createBoundingVolume method to set the
+ * boundingVolume property to the value returned by the defaultBoundingVolume property.
  * 
  * This method is propagated to all descendant nodes, to create bounding volumes for all
  * descendant nodes, as defined by the defaultBoundingVolume property of each descendant.
+ *
+ * This method does not automatically create a bounding volume for skinned mesh node descendants.
+ * To do so, you must also invoke the createSkinnedBoundingVolumes method. See the notes of
+ * that method for an explanation.
  *
  * It is safe to invoke this method more than once. Each node that creates a bounding volume
  * will do so only if it does not already have a bounding volume.
  */
 -(void) createBoundingVolumes;
+
+/**
+ * Invokes the createBoundingVolume on any skinned mesh node descendants, if they do not
+ * already have a bounding volume.
+ *
+ * Skinned mesh nodes are designed to move vertices under the control of external bone nodes.
+ * Because of this, the vertices might move well beyond the bounds of a static bounding volume
+ * created from the rest pose of the skinned mesh node. For this reason, bounding volumes are
+ * not generally automatically created for skinned mesh nodes by the createBoundingVolumes
+ * method, and the bounding volumes of skinned mesh nodes are typically created by the app,
+ * by determining the maximal extent that the vertices will move, and manually assigning a
+ * larger bounding volume to cover that full extent.
+ *
+ * However, if you know that the vertices of the skinned mesh nodes descendants of this node
+ * will not move beyond the static bounding volume defined by the vertices in their rest poses,
+ * you can invoke this method to have bounding volumes created automatically from the rest
+ * poses of each descendant skinned mesh nodes. This method will not affect the bounding
+ * volumes of any non-skinned descendant nodes.
+ */
+-(void) createSkinnedBoundingVolumes;
 
 /**
  * Deletes the bounding volume of this node and all descendant nodes, by setting 
