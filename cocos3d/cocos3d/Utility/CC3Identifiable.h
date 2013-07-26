@@ -29,31 +29,7 @@
 
 /** @file */	// Doxygen marker
 
-#import "CC3Foundation.h"
-
-
-#pragma mark CC3Cacheable
-
-/**
- * Defines an object that can be held in a cache.
- *
- * Objects are cached and retrieved by name.
- *
- * A cache may choose to hold an object directly, or it may choose to hold the object in a
- * wrapper object. A wrapper is typically used when the cache does not want to retain the
- * cached object, in order to permit the object to be automatically cleared from the cache
- * once the object is not retained elsewhere, and is being deallocated.
- *
- * In order for this automatic cache clearing to work, the object being cached must be aware
- * of where it is cached, and must remove itself from the cache as part of its deallocation
- * behaviour.
- */
-@protocol CC3Cacheable <NSObject>
-
-/** Returns the object that has been cached. */
-@property(nonatomic, readonly) id cachedObject;
-
-@end
+#import "CC3Cache.h"
 
 
 #pragma mark CC3Identifiable
@@ -186,9 +162,6 @@
  * nil from this property to indicate that automatic naming should not be performed.
  */
 @property(nonatomic, readonly) NSString* nameSuffix;
-
-/** Implementation of the CC3Cacheable protocol. Simply returns this object. */
-@property(nonatomic, readonly) id cachedObject;
 
 
 #pragma mark Allocation and initialization
@@ -472,31 +445,6 @@
  * substantial content can override to provide much more information.
  */
 -(NSString*) fullDescription;
-
-@end
-
-
-#pragma mark CC3WeakCacheWrapper
-
-/**
- * An instance of CC3WeakCacheWrapper is used within a cache to hold an object that is to
- * be cached, without retaining that object. This permits the object to be deallocated once
- * it has been released from all retained references outside the cache.
- *
- * Implements the CC3Cacheable protocol. The wrapped object is returned in the cachedObject property.
- */
-@interface CC3WeakCacheWrapper : NSObject <CC3Cacheable> {
-	id _cachedObject;
-}
-
-
-#pragma mark Allocation and initialization
-
-/** Initializes this instance to wrap the specified object to be cached. */
--(id) initWith: (id) cachedObject;
-
-/** Allocates and initializes an autoreleased instance to wrap the specified object to be cached. */
-+(id) wrapperWith: (id) cachedObject;
 
 @end
 

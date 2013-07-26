@@ -77,8 +77,6 @@ static GLint instanceCount = 0;
 	self.userData = udp;
 }
 
--(id) cachedObject { return self; }
-
 
 #pragma mark Allocation and initialization
 
@@ -153,35 +151,5 @@ static GLuint lastAssignedTag;
 -(NSString*) fullDescription { return [self description]; }
 
 +(GLint) instanceCount { return instanceCount; }
-
-@end
-
-
-#pragma mark CC3WeakCacheWrapper
-
-@implementation CC3WeakCacheWrapper
-
--(void) dealloc {
-	_cachedObject = nil;	// not retained
-	[super dealloc];
-}
-
--(id) cachedObject { return _cachedObject; }
-
-
-#pragma mark Allocation and initialization
-
-/** Initializes this instance to wrap the specified object to be cached. */
--(id) initWith: (id) cachedObject {
-	if ( (self = [super init]) ) {
-		_cachedObject = cachedObject;	// not retained
-	}
-	return self;
-}
-
-/** Allocates and initializes an autoreleased instance to wrap the specified object to be cached. */
-+(id) wrapperWith: (id) cachedObject {
-	return [[[self alloc] initWith: cachedObject] autorelease];
-}
 
 @end

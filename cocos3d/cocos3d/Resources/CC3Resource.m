@@ -119,28 +119,22 @@
 
 #pragma mark Resource cache
 
-static NSMutableDictionary* _resourcesByName = nil;
+static CC3Cache* _resourceCache = nil;
 
 +(void) addResource: (CC3Resource*) resource {
-	if ( !resource ) return;
-	CC3Assert(resource.name, @"%@ cannot be added to the resource cache because its name property is nil.", resource);
-	CC3Assert( ![self getResourceNamed: resource.name], @"%@ already contains a resource named %@. Remove it first before adding another.", self, resource.name);
-	if ( !_resourcesByName ) _resourcesByName = [NSMutableDictionary new];		// retained
-	[_resourcesByName setObject: [CC3WeakCacheWrapper wrapperWith: resource] forKey: resource.name];
+	if ( !_resourceCache ) _resourceCache = [[CC3Cache weakCacheForType: @"resource"] retain];	// retained
+	[_resourceCache addObject: resource];
 }
 
-+(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_resourcesByName objectForKey: name]; }
-
-+(CC3Resource*) getResourceNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
-
-+(void) removeResource: (CC3Resource*) resource { [self removeResourceNamed: resource.name]; }
-
-+(void) removeResourceNamed: (NSString*) name {
-	LogRez(@"Removing resource named %@ from cache.", name);
-	[_resourcesByName removeObjectForKey: name];
++(CC3Resource*) getResourceNamed: (NSString*) name {
+	return (CC3Resource*)[_resourceCache getObjectNamed: name];
 }
 
-+(void) removeAllResources { [_resourcesByName removeAllObjects]; }
++(void) removeResource: (CC3Resource*) resource { [_resourceCache removeObject: resource]; }
+
++(void) removeResourceNamed: (NSString*) name { [_resourceCache removeObjectNamed: name]; }
+
++(void) removeAllResources { [_resourceCache removeAllObjects]; }
 
 -(void) remove { [self.class removeResource: self]; }
 

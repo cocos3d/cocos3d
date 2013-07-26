@@ -152,28 +152,22 @@ static GLuint _lastAssignedShaderTag = 0;
 
 #pragma mark Shader cache
 
-static NSMutableDictionary* _shadersByName = nil;
+static CC3Cache* _shaderCache = nil;
 
 +(void) addShader: (CC3Shader*) shader {
-	if ( !shader ) return;
-	CC3Assert(shader.name, @"%@ cannot be added to the shader cache because its name property is nil.", shader);
-	CC3Assert( ![self getShaderNamed: shader.name], @"%@ already contains a shader named %@. Remove it first before adding another.", self, shader.name);
-	if ( !_shadersByName ) _shadersByName = [NSMutableDictionary new];		// retained
-	[_shadersByName setObject: [CC3WeakCacheWrapper wrapperWith: shader] forKey: shader.name];
+	if ( !_shaderCache ) _shaderCache = [[CC3Cache weakCacheForType: @"shader"] retain];	// retained
+	[_shaderCache addObject: shader];
 }
 
-+(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_shadersByName objectForKey: name]; }
-
-+(CC3Shader*) getShaderNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
-
-+(void) removeShader: (CC3Shader*) shader { [self removeShaderNamed: shader.name]; }
-
-+(void) removeShaderNamed: (NSString*) name {
-	LogRez(@"Removing shader named %@ from cache.", name);
-	[_shadersByName removeObjectForKey: name];
++(CC3Shader*) getShaderNamed: (NSString*) name {
+	return (CC3Shader*)[_shaderCache getObjectNamed: name];
 }
 
-+(void) removeAllShaders { [_shadersByName removeAllObjects]; }
++(void) removeShader: (CC3Shader*) shader { [_shaderCache removeObject: shader]; }
+
++(void) removeShaderNamed: (NSString*) name { [_shaderCache removeObjectNamed: name]; }
+
++(void) removeAllShaders { [_shaderCache removeAllObjects]; }
 
 -(void) remove { [self.class removeShader: self]; }
 
@@ -547,34 +541,28 @@ static GLuint _lastAssignedProgramTag = 0;
 
 #pragma mark Program cache
 
-static NSMutableDictionary* _programsByName = nil;
+static CC3Cache* _programCache = nil;
 
 +(void) addProgram: (CC3ShaderProgram*) program {
-	if ( !program ) return;
-	CC3Assert(program.name, @"%@ cannot be added to the program cache because its name property is nil.", program);
-	CC3Assert( ![self getProgramNamed: program.name], @"%@ already contains a program named %@. Remove it first before adding another.", self, program.name);
-	if ( !_programsByName ) _programsByName = [NSMutableDictionary new];		// retained
-	[_programsByName setObject: [CC3WeakCacheWrapper wrapperWith: program] forKey: program.name];
+	if ( !_programCache ) _programCache = [[CC3Cache weakCacheForType: @"shader program"] retain];	// retained
+	[_programCache addObject: program];
 }
 
-+(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_programsByName objectForKey: name]; }
-
-+(CC3ShaderProgram*) getProgramNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
-
-+(void) removeProgram: (CC3ShaderProgram*) program { [self removeProgramNamed: program.name]; }
-
-+(void) removeProgramNamed: (NSString*) name {
-	LogRez(@"Removing shader program named %@ from cache.", name);
-	[_programsByName removeObjectForKey: name];
++(CC3ShaderProgram*) getProgramNamed: (NSString*) name {
+	return (CC3ShaderProgram*)[_programCache getObjectNamed: name];
 }
 
-+(void) removeAllPrograms { [_programsByName removeAllObjects]; }
++(void) removeProgram: (CC3ShaderProgram*) program { [_programCache removeObject: program]; }
+
++(void) removeProgramNamed: (NSString*) name { [_programCache removeObjectNamed: name]; }
+
++(void) removeAllPrograms { [_programCache removeAllObjects]; }
 
 -(void) remove { [self.class removeProgram: self]; }
 
 +(void) willBeginDrawingScene {
-	[_programsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-		[[obj cachedObject] willBeginDrawingScene];
+	[_programCache enumerateObjectsUsingBlock: ^(CC3ShaderProgram* obj, BOOL* stop) {
+		[obj willBeginDrawingScene];
 	}];
 }
 

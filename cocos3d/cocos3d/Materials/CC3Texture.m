@@ -650,28 +650,22 @@ static GLuint _lastAssignedTextureTag;
 
 #pragma mark Texture cache
 
-static NSMutableDictionary* _texturesByName = nil;
+static CC3Cache* _textureCache = nil;
 
 +(void) addTexture: (CC3Texture*) texture {
-	if ( !texture ) return;
-	CC3Assert(texture.name, @"%@ cannot be added to the texture cache because its name property is nil.", texture);
-	CC3Assert( ![self getTextureNamed: texture.name], @"%@ already contains a texture named %@. Remove it first before adding another.", self, texture.name);
-	if ( !_texturesByName ) _texturesByName = [NSMutableDictionary new];		// retained
-	[_texturesByName setObject: [CC3WeakCacheWrapper wrapperWith: texture] forKey: texture.name];
+	if ( !_textureCache ) _textureCache = [[CC3Cache weakCacheForType: @"texture"] retain];	// retained
+	[_textureCache addObject: texture];
 }
 
-+(id<CC3Cacheable>) cacheEntryAt: (NSString*) name { return [_texturesByName objectForKey: name]; }
-
-+(CC3Texture*) getTextureNamed: (NSString*) name { return [self cacheEntryAt: name].cachedObject; }
-
-+(void) removeTexture: (CC3Texture*) texture { [self removeTextureNamed: texture.name]; }
-
-+(void) removeTextureNamed: (NSString*) name {
-	LogRez(@"Removing texture named %@ from cache.", name);
-	[_texturesByName removeObjectForKey: name];
++(CC3Texture*) getTextureNamed: (NSString*) name {
+	return (CC3Texture*)[_textureCache getObjectNamed: name];
 }
 
-+(void) removeAllTextures { [_texturesByName removeAllObjects]; }
++(void) removeTexture: (CC3Texture*) texture { [_textureCache removeObject: texture]; }
+
++(void) removeTextureNamed: (NSString*) name { [_textureCache removeObjectNamed: name]; }
+
++(void) removeAllTextures { [_textureCache removeAllObjects]; }
 
 -(void) remove { [self.class removeTexture: self]; }
 
