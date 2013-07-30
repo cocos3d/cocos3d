@@ -2,7 +2,13 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Demos/CC3DemoMashUp/CC3DemoMashUp-OSX.xcodeproj">
+      location = "group:Projects/CC3DemoMashUp/CC3DemoMashUp-OSX.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Projects/cocos3d-library/cocos3d-library-OSX.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Projects/cocos2d-library/cocos2d-library-OSX.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:README.md">

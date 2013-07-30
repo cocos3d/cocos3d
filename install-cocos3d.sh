@@ -155,8 +155,8 @@ copy_xc4_project_templates(){
 
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
-	copy_files "Demos/Common/Resources/fps_images_1.png" "$DST_DIR"
+	copy_files "Projects/Common/Resources/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/fps_images_1.png" "$DST_DIR"
 
 # Copy OpenGL ES 2 Template
 	TEMPLATE="cocos3d iOS Application"
@@ -170,7 +170,7 @@ copy_xc4_project_templates(){
 
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/hello-world.pod" "$DST_DIR"
 
 # Copy OpenGL OSX Template (cocos2d 1.x)
 	TEMPLATE="cocos3d OSX Application"
@@ -189,7 +189,7 @@ copy_xc4_project_templates(){
 
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/hello-world.pod" "$DST_DIR"
 
 # Copy OpenGL OSX Template (cocos2d 2.x)
 	TEMPLATE="cocos3d OSX Application"
@@ -208,7 +208,7 @@ copy_xc4_project_templates(){
 
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
-	copy_files "Demos/Common/Resources/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/hello-world.pod" "$DST_DIR"
 
 # Copy Base cocos3d project settings
 	TEMPLATE="cocos3d-base"

@@ -454,7 +454,7 @@
 	if (!cam) return;		// Can't do anything without a camera.
 
 	CC3Vector camGlobalLoc = cam.globalLocation;
-	GLint prevZOrder = NSIntegerMax;
+	GLint prevZOrder = kCC3MaxGLint;
 	GLfloat prevCamDistProduct = kCC3MaxGLfloat;
 
 	for (CC3Node* aNode in _nodes) {

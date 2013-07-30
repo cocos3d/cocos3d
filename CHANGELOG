@@ -9,7 +9,7 @@ http://www.brenwill.com
 +++++++++++++++++++++++++++++++++++++
 
 
-cocos3d 2.0.0 - 2013/07/01
+cocos3d 2.0.0 - 2013/08/31
 -------------------------------------
 
 - Added support for OpenGL ES 2.0 & cocos2d 2.x.
@@ -75,6 +75,10 @@ cocos3d 2.0.0 - 2013/07/01
 	- Refactored CC3GLView classes to use a CC3GLViewSurfaceManager to manage surfaces that are tied to UIView & NSView (viewSurface, multisamplSurface & pickingSurface).
 		- CC3ViewController now requires its view be a CC3GLView.
 		- CC3Layer now requires a CC3ViewController controller.
+
+- Added cocos3d and cocos2d static library projects to the cocos3d distribution
+	- available in the cocos3d-iOS.workspace and cocos3d-OSX.workspace Xcode workspaces
+	- also available in the Project folder
 
 - Animation enhancements:
 	- Added support for time-based key-frame animation.

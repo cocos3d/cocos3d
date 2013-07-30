@@ -12,13 +12,14 @@ Table of Contents
 - Installation
 - cocos2d & OpenGL Version Compatibility
 - Creating Your First cocos3d Project
+- cocos3d and cocos2d Static Libraries
 - Documentation
 - Demo Applications
     - CC3DemoMashUp - demos all important cocos3d features
     - CC3Demo3DTiles - demos displaying many tiled 3D scenes in a single window
     - CC3Performance - demos collecting cocos3d performance statistics
-- Demo Models
 - Creating POD 3D Model Files
+- Demo Models
 
 
 About cocos3d
@@ -52,9 +53,11 @@ games and applications using Objective-C.
 - Mesh data can freely, and automatically, use OpenGL vertex buffer objects to improve performance and memory management.
 - Culling of 3D objects outside of the camera frustum is automatic, based on pluggable, customizable object bounding volumes.
 - Automatic ordering and grouping of 3D objects minimizes OpenGL state changes and improves rendering performance. Pluggable sorters allow easy customization of object sorting, ordering, and grouping for optimal application performance.
+- Rendering to texture for dynamic textures within a scene, or to create sophisticated post-processing effects.
+- Automatic rendering of the scene to an environment map texture, to create automatic environment reflections and refractions.
 - Integrated particle systems:
-- 3D point particles provide efficient but sophisticated particle effects.
-- 3D mesh particles allow particles to be created from any 3D mesh template (eg- spheres, cones, boxes, POD models, etc).
+	- 3D point particles provide efficient but sophisticated particle effects.
+	- 3D mesh particles allow particles to be created from any 3D mesh template (eg- spheres, cones, boxes, POD models, etc).
 - Automatic OpenGL state machine shadowing means that the OpenGL functions are invoked only when a state really has changed, thereby reducing OpenGL engine calls, and increasing OpenGL throughput.
 - Sophisticated performance metrics API and tools collect real-time application drawing and updating performance statistics, for logging or real-time display.
 - Sophisticated math library eliminates the need to use OpenGL ES function calls for matrix mathematics.
@@ -134,11 +137,11 @@ version, and if you want to use a fixed pipeline using OpenGL ES 1.1 (iOS) or Op
 you must use a `cocos2d 1.x` version.
 
 Because of this, you cannot mix the use of fixed and programmable pipelines within a single app.
-However, you can easily change whether an app uses a programmable or fixed rendering pipeline
-by changing the version of `cocos2d` that is linked, by following these steps within any Xcode
-project (including any of the included demo apps):
+However, you can easily change whether an app uses a programmable or fixed rendering pipeline by
+changing the version of `cocos2d` that is linked, by following these steps within any Xcode project
+(including the included `cocos2d-library-iOS` and `cocos2d-library-OSX` static library projects):
 
-1. Delete the reference to the cocos2d group in the Xcode Project Navigator panel.
+1. Delete the reference to the *cocos2d* group in the Xcode Project Navigator panel.
 2. Run the `install-cocos3d.sh` script again and identify the new version of cocos2d to be linked.
    Keep in mind that you must link `cocos2d 2.x` if you want to use OpenGL ES 2.0 (iOS) or
    OpenGL (OSX) with a programmable rendering pipeline, and you must link `cocos2d 1.x` if
@@ -167,17 +170,44 @@ want to use the *cocos3d1 iOS Application* template and OpenGL ES 1.1, your coco
 must be linked to a `cocos2d 1.x` version, as described above.
 
 To get started with your first cocos3d Mac OSX project, open Xcode 4, click on the File->New->NewProject...
-menu selection, and select either the *cocos3d2 Mac Application* or the *cocos3d1 Mac Application* project
+menu selection, and select either the *cocos3d2 OSX Application* or the *cocos3d1 OSX Application* project
 template from the cocos3d template group in the OS X section, depending on whether you want to use
 OpenGL with a programmable rendering pipeline, or a configurable fixed rendering pipeline, respectively.
 
-Remember that if you want to use the *cocos3d2 Mac Application* template and OpenGL with a programmable
+Remember that if you want to use the *cocos3d2 OSX Application* template and OpenGL with a programmable
 pipeline, your cocos3d installation must be linked to a `cocos2d 2.x` version, as described above, and
-if you want to use the *cocos3d1 Mac Application* template and OpenGL with a fixed pipeline, your cocos3d
+if you want to use the *cocos3d1 OSX Application* template and OpenGL with a fixed pipeline, your cocos3d
 installation must be linked to a `cocos2d 1.x` version, as described above.
 
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.
+
+
+cocos3d and cocos2d Static Libraries
+------------------------------------
+
+The cocos3d distribution includes Xcode projects to build static libraries for cocos3d and cocos2d.
+These are available in the `cocos3d-iOS.xcworkspace` and `cocos3d-OSX.xcworkspace` Xcode workspaces,
+and the Xcode projects are also individually available in the `cocos3d-library` and `cocos2d-library`
+folders under the `Projects` folder in the cocos3d distribution.
+
+Neither the cocos3d or cocos2d frameworks currently use Automatic Reference Counting (ARC) and,
+in addition to helping to organize your development environment, using these static libraries is
+a convenient way to add cocos3d and cocos2d to application projects that make use of ARC.
+
+You can add these static library projects as sub-projects of your Xcode app project. Instructions
+for adding a static library to your app project are available through Apple's documentation, or
+can be found by searching the web. You can also reference how these static libraries have been
+added to the demo apps, also available in the `Projects` folder in the cocos3d distribution.
+
+Like any static library, the compiled cocos3d static library includes only executable code, and does
+not include the standard cocos3d GLSL shader files. If you use the cocos3d static library in your
+application project, and want to use the standard cocos3d GLSL shader files, you should also drag
+the `cocos3d/GLSL` folder in the cocos3d distribution to the Xcode Project Navigator panel of your
+application project. One further step is required because, by default, Xcode treats these GLSL files
+as source code files, rather than resource files. After dragging the GLSL files to your application
+project in Xcode, select your project in the Xcode Project Navigator, select the Build Phases tab, 
+and move all of the .vsh and .fsh files from the Compile Sources list to the Copy Bundle Resources list.
 
 
 Documentation
@@ -199,9 +229,9 @@ applications that are included in the cocos3d distribution. These demos, particu
 `CC3DemoMashUp` app, will help you understand how to use cocos3d, and demonstrate many of the
 key features and capabilities of cocos3d.
 
-For convenience, to access all of the demos together, open either the *cocos3d-iOS.xcworkspace*
-or *cocos3d-Mac.xcworkspace* Xcode workspace. You can also open each demo project individually
-in the Demos folder.
+For convenience, to access all of the demos together, open either the `cocos3d-iOS.xcworkspace`
+or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
+in the Projects folder.
 
 At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build
@@ -232,15 +262,18 @@ showcases many interesting features of cocos3d, including:
 - translucent and transparent textures
 - coloring a mesh with a per-vertex color blend
 - multi-texturing an object using texture units by combining several individual textures into overlays
-- DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model with few actual vertices
+- DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
+  with few actual vertices
 - Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
-- Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be manipulated independently of the skeleton of the original.
+- Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
+  manipulated independently of the skeleton of the original.
 - animating 3D models using a variety of standard cocos2d CCActionIntervals
 - overlaying the 3D scene with 2D cocos2d controls such as joysticks and buttons
 - embedding 2D cocos2d text labels into the 3D scene
 - incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
 - emitting 3D point particles from a moving nozzle, with realistic distance attenuation
-- emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle, with each particle moving, rotating, and fading independently
+- emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
+  with each particle moving, rotating, and fading independently
 - creating a tightly focused spotlight whose intensity attenuates with distance
 - directing the 3D camera to track a particular target object
 - directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
@@ -250,8 +283,10 @@ showcases many interesting features of cocos3d, including:
 - adding a small CC3Layer/CC3Scene pair as a child window to a larger CC3Layer/CC3Scene pair.
 - moving, scaling and fading a CC3Layer and its CC3Scene
 - creating parametric boxes and texturing all six sides of the box with a single texture.
-- adding an object as a child of another, but keeping the original orientation of the child 
-- handling touch-move events to create swipe gestures to spin a 3D object using rotation around an arbitrary axis
+- adding an object as a child of another, but keeping the original orientation of the child
+  (addAndLocalizeChild:)
+- handling touch-move events to create swipe gestures to spin a 3D object using rotation
+  around an arbitrary axis
 - toggling between opacity and translucency using the isOpaque property
 - choosing to cull or display backfaces (shouldCullBackFaces)
 - creating and deploying many independent copies of a node, while sharing the underlying mesh data
@@ -275,7 +310,16 @@ showcases many interesting features of cocos3d, including:
 - using tap gestures to select 3D objects, and pan gestures to spin 3D objects
 - bitmapped font text labels
 - moving individual vertex location programmatically
-  
+- using OpenGL ES 2.0 shaders.
+- loading PowerVR PFX effects files and applying them to materials
+- environmental reflections using a cube mapped texture.
+- render-to-texture the scene for display within the scene.
+- render-to-texture to create additional visual effects using post-rendering image processing.
+- render depth-to-texture to visualize the contents of the depth buffer.
+- read pixels from a framebuffer
+- replace framebuffer and texture pixels with programmatic content
+- dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
+
 In addition, there are a number of interesting options for you to play with by uncommenting
 certain lines of code in the methods of this class that build objects in the 3D scene,
 including experimenting with:
@@ -299,6 +343,8 @@ including experimenting with:
 - displaying a dynamic bounding box on a 3D particle emitter.
 - making use of a fixed bounding volume for the 3D particle emitter to improve performance.
 - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
+- Skybox using a cube mapped texture.
+- cocos2d CCSprite displaying the television screen rendered texture
 
 
 CC3Demo3DTiles
