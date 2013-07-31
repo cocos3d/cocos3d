@@ -110,17 +110,27 @@
 }
 
 -(BOOL) checkRetinaDisplay {
-#if CC3_IOS
 #if CC3_CC2_2
 	return [super enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_2
 #if CC3_CC2_1
 	return [CCDirector.sharedDirector enableRetinaDisplay: _shouldUseRetina];
 #endif	// CC3_CC2_1
-#else
-	return NO;
-#endif	// CC3_IOS
 }
+
+#if COCOS2D_VERSION >= 0x020100
+/** 
+ * Override CCDirectorIOS implementation to NOT draw the scene right away, otherwise
+ * on iOS 5 and below, the scene will be drawn before the view is laid out.
+ */
+- (void)runWithScene: (CCScene*) scene {
+	NSAssert( scene != nil, @"Argument must be non-nil");
+	NSAssert(_runningScene == nil, @"This command can only be used to start the CCDirector. There is already a scene present.");
+	[self pushScene:scene];
+}
+#endif
+
+
 
 
 #pragma mark Device orientation

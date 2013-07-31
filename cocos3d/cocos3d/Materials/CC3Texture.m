@@ -32,6 +32,7 @@
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
 #import "CC3OSXExtensions.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark -
@@ -1374,7 +1375,11 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 #if CC3_CC2_1
 	UIImage* uiImg = [UIImage imageWithCGImage: cgImg];
+#if COCOS2D_VERSION < 0x010100
+	return [self initWithImage: uiImg];
+#else
 	return [self initWithImage: uiImg resolutionType: kCCResolutionUnknown];
+#endif // COCOS2D_VERSION < 0x010100
 #endif	// CC3_CC2_1
 
 #endif	// CC_IOS
@@ -1406,7 +1411,11 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 #endif	// CC3_CC2_2
 	
 #if CC3_CC2_1
+#if COCOS2D_VERSION < 0x010100
+	return [self initWithImage: uiImg];
+#else
 	return [self initWithImage: uiImg resolutionType: kCCResolutionUnknown];
+#endif // COCOS2D_VERSION < 0x010100
 #endif	// CC3_CC2_1
 	
 #endif	// CC_IOS

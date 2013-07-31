@@ -438,7 +438,8 @@
 	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
 	[gl enableScissorTest: NO];
 
-	// Disable fog. Done outside setupDraw2DWithVisitor: because fog applies to billboards
+	// Disable lights and fog. Done outside setupDraw2DWithVisitor: because they apply to billboards
+	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
 	[gl enableFog: NO];
 }
 

@@ -587,4 +587,7 @@ enum {
     kCCiOSVersion_5_0_0 = 0x05000000,
     kCCiOSVersion_6_0_0 = 0x06000000
 };
-#endif
+
+#define kCCTexture2DPixelFormat_RGB888	255
+
+#endif // COCOS2D_VERSION < 0x010100

@@ -90,7 +90,7 @@ directory and run the install-cocos3d script as follows:
 
 	For example:
 
-		./install-cocos3d.sh -f -2 "../cocos2d-iphone-2.0"
+		./install-cocos3d.sh -f -2 "../cocos2d-iphone"
 
 	The cocos2d distribution must be available and identified using the -2 switch so the
 	installer can link the cocos2d libraries to the cocos3d templates and demo projects.<br/><br/>
@@ -111,25 +111,27 @@ example, let's say you have a development directory named `MyCocosDev`, into whi
 download and unzip both cocos2d and cocos3d. You'll end up with a directory structure like:
 
 	MyCocosDev
-		cocos2d-iphone-2.0
+		cocos2d-iphone
 		cocos3d-2.0.0
 
-First, in a Terminal session, install cocos2d by navigating to the `cocos2d-iphone-2.0`
-directory and running:
+First, in a Terminal session, install cocos2d by navigating to the `cocos2d-iphone` directory
+and running:
 
 	./install-templates.sh -f -u
 
 Then, navigate to the `cocos3d-2.0.0` directory and install cocos3d by running:
 
-	./install-cocos3d.sh -f -2 "../cocos2d-iphone-2.0"
+	./install-cocos3d.sh -f -2 "../cocos2d-iphone"
 
 
 cocos2d & OpenGL Version Compatibility
 -----------------------------------------
 
-cocos3d is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1 (iOS)
-or OpenGL (OSX), and is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
-OpenGL ES 2.0 (iOS) or OpenGL (OSX).
+cocos3d under iOS is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
+OpenGL ES 2.0, and is compatible with `cocos2d` `1.1` and `1.0.1`, for using fixed-pipeline OpenGL ES 1.1.
+
+cocos3d under OSX is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
+OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` and `1.0.1` under OSX.
 
 When linking to a cocos2d library version, keep in mind that if you want to use shaders and a
 programmable pipeline using OpenGL ES 2.0 (iOS) or OpenGL (OSX), you must use a `cocos2d 2.x`
@@ -141,15 +143,19 @@ However, you can easily change whether an app uses a programmable or fixed rende
 changing the version of `cocos2d` that is linked, by following these steps within any Xcode project
 (including the included `cocos2d-library-iOS` and `cocos2d-library-OSX` static library projects):
 
-1. Delete the reference to the *cocos2d* group in the Xcode Project Navigator panel.
+1. Delete the reference to the *cocos2d* group in the Xcode Project Navigator panel. If you are
+   using the cocos2d static library, you will find this group in the `cocos2d-library-iOS` or
+   `cocos2d-library-OSX` project.
 2. Run the `install-cocos3d.sh` script again and identify the new version of cocos2d to be linked.
    Keep in mind that you must link `cocos2d 2.x` if you want to use OpenGL ES 2.0 (iOS) or
    OpenGL (OSX) with a programmable rendering pipeline, and you must link `cocos2d 1.x` if
    you want to use OpenGL ES 1.x (iOS) or OpenGL (OSX) with a fixed rendering pipeline.
 3. Add the newly linked cocos2d files to the project by dragging the `cocos2d` folder from
-   the cocos3d distribution folder to the Xcode Project Navigator panel.
+   the cocos3d distribution folder to the Xcode Project Navigator panel. If you are using the
+   cocos2d static library, you will drag the folder into the `cocos2d-library-iOS` or
+   `cocos2d-library-OSX` project.
 
-At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
+At the time of this release, the current stable version of cocos2d is `2.1`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build
 and run the demo apps with a different version of cocos2d, follow the steps described above.
 
@@ -209,6 +215,11 @@ as source code files, rather than resource files. After dragging the GLSL files 
 project in Xcode, select your project in the Xcode Project Navigator, select the Build Phases tab, 
 and move all of the .vsh and .fsh files from the Compile Sources list to the Copy Bundle Resources list.
 
+Finally, the cocos3d and cocos2d static libraries require linking to certain other support libraries.
+To direct Xcode to link with these support libraries, in your application project build settings,
+make sure the Other Linker Flags entry (`OTHER_LDFLAGS`) includes the following entries:
+	-ObjC -lz -lstdc++
+
 
 Documentation
 -------------
@@ -233,7 +244,7 @@ For convenience, to access all of the demos together, open either the `cocos3d-i
 or `cocos3d-OSX.xcworkspace` Xcode workspace. You can also open each demo project individually
 in the Projects folder.
 
-At the time of this release, the current stable version of cocos2d is `2.0`, and by default,
+At the time of this release, the current stable version of cocos2d is `2.1`, and by default,
 the demo apps within the cocos3d distribution are pre-configured to use that version. To build
 and run the demo apps with a different version of cocos2d, follow the steps described above in
 the section about cocos2d version compatibility.

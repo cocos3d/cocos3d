@@ -13,7 +13,7 @@ Getting Started
 ---------------
 
 This starter application presents a 3D take on the ubiquitous "hello, world" application,
-and can be compiled to run on any iOS devices.
+and can be compiled to run on a Mac running OSX.
 
 The content of the scene is constructed in the initializeScene method in the
 ___PROJECTNAMEASIDENTIFIER___Scene.m file. To add your own 3D content, edit that method.
@@ -36,11 +36,12 @@ When adapting this template project for your own application, don't forget to re
 'hello-world.pod' from the Resources folder of your project!
 
 
-cocos2d & OpenGL ES Version Compatibility
+cocos2d & OpenGL Version Compatibility
 -----------------------------------------
 
-cocos3d is compatible with cocos2d 1.0.1 and 1.1, for using fixed-pipeline OpenGL ES 1.1,
-and is compatible with cocos2d 2.0 and 2.1, for using programmable-pipeline OpenGL ES 2.0.
+cocos3d under OSX is compatible with `cocos2d` `2.1` and `2.0`, for using programmable-pipeline
+OpenGL (OSX). cocos3d is not compatible with `cocos2d` `1.1` and `1.0.1` under OSX. By linking
+to cocos2d 2.x, you will automatically use OpenGL with a programmable pipeline using GLSL shaders.
 
 This template application will use whichever version of cocos2d you indicated when you ran
 the install_cocos3d.sh script. You can easily change the version of cocos2d that is linked
@@ -50,10 +51,6 @@ to this project by following these steps within Xcode:
 2. Run the install_cocos3d script and identify the new version of cocos2d to be linked.
 3. Add the newly linked cocos2d files to the project by dragging the cocos2d folder from
    the cocos3d distribution folder to the Xcode Project Navigator panel.
-
-By linking to cocos2d 2.x, you will automatically use OpenGL ES 2.0, and by linking to
-cocos2d 1.x, you will automatically use OpenGL ES 1.1. Because of this, you cannot mix
-the use of OpenGL ES 2.0 and 1.1 within a single application.
 
 
 Creating POD 3D Model Files

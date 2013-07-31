@@ -66,10 +66,8 @@
 		<dict>
 			<key>GCC_VERSION</key>
 			<string></string>
-			<key>GCC_THUMB_SUPPORT[arch=armv6]</key>
-			<string>NO</string>
 			<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-			<string>3.0</string>
+			<string>4.0</string>
 			<key>OTHER_LDFLAGS</key>
 			<array>
 				<string>-lz</string>
@@ -78,10 +76,6 @@
 			</array>
 			<key>TARGETED_DEVICE_FAMILY</key>
 			<string>1,2</string>
-			<key>WARNING_CFLAGS</key>
-			<array>
-				<string>-Wall</string>
-			</array>
 		</dict>
 	</dict>
 	<key>Targets</key>

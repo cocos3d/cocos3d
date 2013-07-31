@@ -42,12 +42,14 @@
 #	define CC2_DEPTH_FORMAT depthFormat_
 #	define CC2_CONTEXT context_
 #	define CC2_SIZE size_
+#	define CC2_PRESERVE_BACKBUFFER preserveBackbuffer_
 #else
 #	define CC2_REQUESTED_SAMPLES _requestedSamples
 #	define CC2_PIXEL_FORMAT _pixelformat
 #	define CC2_DEPTH_FORMAT _depthFormat
 #	define CC2_CONTEXT _context
 #	define CC2_SIZE _size
+#	define CC2_PRESERVE_BACKBUFFER _preserveBackbuffer
 #endif
 
 
@@ -74,9 +76,9 @@
 -(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
 	self.layer.opaque = YES;
 	self.layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-									 [NSNumber numberWithBool:preserveBackbuffer_],
+									 [NSNumber numberWithBool: CC2_PRESERVE_BACKBUFFER],
 									 kEAGLDrawablePropertyRetainedBacking,
-									 pixelformat_,
+									 CC2_PIXEL_FORMAT,
 									 kEAGLDrawablePropertyColorFormat,
 									 nil];
 
