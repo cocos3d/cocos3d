@@ -55,7 +55,7 @@
 
 @synthesize cc3Layer=_cc3Layer, ambientLight=_ambientLight, touchedNodePicker=_touchedNodePicker;
 @synthesize minUpdateInterval=_minUpdateInterval, maxUpdateInterval=_maxUpdateInterval;
-@synthesize drawingSequencer=_drawingSequencer, drawingSequenceVisitor=_drawingSequenceVisitor;
+@synthesize drawingSequenceVisitor=_drawingSequenceVisitor;
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
@@ -583,18 +583,23 @@
 
 -(BOOL) isUsingDrawingSequence { return (_drawingSequencer != nil); }
 
+-(CC3NodeSequencer*) drawingSequencer { return _drawingSequencer; }
+
 /**
  * Property setter overridden to add all the decendent nodes of this scene
  * into the new  node sequencer.
  */
--(void) setDrawSequencer:(CC3NodeSequencer*) aNodeSequencer {
-	id oldDSS = _drawingSequencer;
+-(void) setDrawingSequencer:(CC3NodeSequencer*) aNodeSequencer {
+	if (aNodeSequencer == _drawingSequencer) return;
+	
+	[_drawingSequencer release];
 	_drawingSequencer = [aNodeSequencer retain];
-	[oldDSS release];
-
-	CCArray* allNodes = [self flatten];
-	for (CC3Node* aNode in allNodes)
-		[_drawingSequencer add: aNode withVisitor: _drawingSequenceVisitor];
+	
+	if (_drawingSequencer) {
+		CCArray* allNodes = [self flatten];
+		for (CC3Node* aNode in allNodes)
+			[_drawingSequencer add: aNode withVisitor: _drawingSequenceVisitor];
+	}
 }
 
 -(void) updateDrawSequence {
