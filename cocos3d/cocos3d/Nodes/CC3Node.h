@@ -2875,13 +2875,18 @@ typedef enum {
  * It is safe to invoke this method more than once for the same child node.
  * This method does nothing if the child already has this node as its parent.
  *
- * If you are invoking this method from the updateBeforeTransform: of the node
- * being added, this node, or any ancestor node (including your CC3Scene), the
- * globalTransformMatrix of the node being added (and its descendant nodes) will
- * automatically be updated. However, if you are invoking this method from the
- * updateAfterTransform: method, you should invoke the updateTransformMatrices
- * method on the node being added after this method is finished, to ensure that
- * the transform matrices are udpated.
+ * If you are invoking this method from the updateBeforeTransform: of the node being added,
+ * this node, or any ancestor node (including your CC3Scene), the globalTransformMatrix of
+ * the node being added (and its descendant nodes) will automatically be updated. However,
+ * if you are invoking this method from the updateAfterTransform: method, you should invoke
+ * the updateTransformMatrices method on the node being added after this method is finished,
+ * to ensure that the transform matrices are udpated.
+ *
+ * If this method is being invoked from a background thread (ie- not the main rendering thread)
+ * AND this node is already part of a scene, this operation will automatically be deferred and
+ * queued onto the main operation queue, to be performed on teh main rendering thread prior to
+ * the next rendeirng cycle. This is to ensure that the node is not added while the scene is
+ * being rendered, to avoid race conditions.
  */
 -(void) addChild: (CC3Node*) aNode;
 

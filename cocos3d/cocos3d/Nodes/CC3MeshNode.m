@@ -34,7 +34,7 @@
 #import "CC3Mesh.h"
 #import "CC3Light.h"
 #import "CC3ShaderProgramMatcher.h"
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 
 
 @interface CC3Node (TemplateMethods)

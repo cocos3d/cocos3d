@@ -32,7 +32,6 @@
 #import "CC3Particles.h"
 #import "CC3UtilityMeshNodes.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 #import "CC3Scene.h"
 #import <objc/runtime.h>
 

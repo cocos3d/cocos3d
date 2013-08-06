@@ -34,7 +34,7 @@
 
 #if CC3_OGLES_1
 
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 #import "CC3Logging.h"
 
 #define CC2_REQUESTED_SAMPLES requestedSamples_
@@ -62,6 +62,12 @@
 
 -(CAEAGLLayer*) layer { return (CAEAGLLayer*)super.layer; }
 
+-(GLenum) colorFormat { return [self convertPixelFormat: CC2_PIXEL_FORMAT]; }
+
+-(GLenum) depthFormat { return super.depthFormat; }
+
+-(GLuint) requestedSamples { return CC2_REQUESTED_SAMPLES; }
+
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
 -(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup {
@@ -80,10 +86,7 @@
 		return NO;
 	}
 	
-	GLenum colorFormat = [self convertPixelFormat: CC2_PIXEL_FORMAT];
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithColorFormat: colorFormat
-															andDepthFormat: CC2_DEPTH_FORMAT
-														   andPixelSamples: CC2_REQUESTED_SAMPLES];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 	return YES;
 }
 

@@ -33,7 +33,6 @@
 #import "CC3DemoMashUpScene.h"
 #import "CC3Actions.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 #import "HUDLayer.h"
 #import "HUDScene.h"
 #import "ccMacros.h"

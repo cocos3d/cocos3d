@@ -39,7 +39,8 @@
 
 @implementation CC3GLView
 
-@synthesize surfaceManager=_surfaceManager;
+@synthesize surfaceManager=_surfaceManager, requestedSamples=_requestedSamples;
+@synthesize colorFormat=_colorFormat, depthFormat=_depthFormat;
 
 -(void) dealloc {
 	[_surfaceManager release];
@@ -48,6 +49,7 @@
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
+-(NSOpenGLContext*) context { return self.openGLContext; }
 
 -(void) prepareOpenGL {
 	[super prepareOpenGL];
@@ -57,20 +59,18 @@
 	GLint alphaSize;
 	GLint depthSize;
 	GLint stencilSize;
+	
 	NSOpenGLPixelFormat* pixFmt = self.pixelFormat;
-
 	[pixFmt getValues: &colorSize forAttribute:NSOpenGLPFAColorSize forVirtualScreen: screenIdx];
 	[pixFmt getValues: &alphaSize forAttribute:NSOpenGLPFAAlphaSize forVirtualScreen: screenIdx];
 	[pixFmt getValues: &depthSize forAttribute:NSOpenGLPFADepthSize forVirtualScreen: screenIdx];
 	[pixFmt getValues: &stencilSize forAttribute:NSOpenGLPFAStencilSize forVirtualScreen: screenIdx];
 
-	GLenum colorFormat = CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
-	GLenum depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
-	GLuint sampleCount = 1;
+	_colorFormat = CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
+	_depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
+	_requestedSamples = 1;
 
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initSystemColorFormat: colorFormat
-															  andDepthFormat: depthFormat
-															 andPixelSamples: sampleCount];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 }
 
 -(void) reshape {

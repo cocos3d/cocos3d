@@ -52,11 +52,30 @@
 /** This class requires a layer of type CAEAGLLayer. */
 @property(nonatomic, readonly, retain) CAEAGLLayer* layer;
 
-/** Returns the number of samples used to define each pixel. */
-@property(nonatomic, readonly) GLuint pixelSamples;
-
 /** The underlying view rendering surface. */
 @property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+
+/** Returns the GL color format of the pixels. */
+@property(nonatomic, readonly) GLenum colorFormat;
+
+/** Returns the GL depth format of the pixels. */
+@property(nonatomic, readonly) GLenum depthFormat;
+
+/**
+ * Returns the number of samples that was requested to be used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the pixelSamples
+ * property because that property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint requestedSamples;
+
+/** 
+ * Returns the actual number of samples used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the requestedSamples
+ * property because this property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint pixelSamples;
 
 @end
 

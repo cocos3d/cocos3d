@@ -762,6 +762,10 @@
 
 #pragma mark Platform limits & info
 
+-(void) flush { glFlush(); }
+
+-(void) finish { glFinish(); }
+
 -(GLint) getInteger: (GLenum) param {
 	GLint val;
 	glGetIntegerv(param, &val);
@@ -905,8 +909,8 @@
 
 #pragma mark Allocation and initialization
 
--(id) init {
-	if ( (self = [super init]) ) {
+-(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
+	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
 		[self initPlatformLimits];
 		[self initVertexAttributes];
@@ -966,17 +970,18 @@
 	return [super alloc];
 }
 
-static CC3OpenGL* _sharedGL;
+static CC3OpenGL* _renderGL = nil;
+static CC3OpenGL* _bgGL = nil;
 
 +(CC3OpenGL*) sharedGL {
-	if (!_sharedGL) {
-		_sharedGL = [self alloc];
-		[_sharedGL init];
+	if (NSThread.isMainThread) {
+		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];	// retained
+		return _renderGL;
+	} else {
+		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"];	// retained
+		return _bgGL;
 	}
-	return _sharedGL;
 }
-
--(NSString*) description { return [NSString stringWithFormat: @"%@", self.class]; }
 
 @end
 

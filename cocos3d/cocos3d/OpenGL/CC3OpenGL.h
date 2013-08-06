@@ -29,6 +29,7 @@
 
 /** @file */	// Doxygen marker
 
+#import "CC3Identifiable.h"
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
@@ -75,7 +76,7 @@ typedef struct {
  * change requests made to the GL engine, and will only forward such requests to the GL engine
  * if the state really is changing.
  */
-@interface CC3OpenGL : NSObject {
+@interface CC3OpenGL : CC3Identifiable {
 @public
 
 	NSString* value_GL_VENDOR;
@@ -857,6 +858,12 @@ typedef struct {
 
 #pragma mark Platform & GL info
 
+/** Flushes the GL buffer to the GL hardware. */
+-(void) flush;
+
+/** Flushes the GL buffer to the GL hardware, and returns only when all GL commands have finished. */
+-(void) finish;
+
 /** Returns the current value in the GL engine of the specified integer parameter. */
 -(GLint) getInteger: (GLenum) param;
 
@@ -1035,7 +1042,17 @@ typedef struct {
 
 #pragma mark Allocation and initialization
 
-/** Returns the shared singleton instance, creating it if necessary. */
+/** 
+ * Returns the shared singleton instance for the currently running thread, creating it if necessary.
+ *
+ * Within OpenGL, the state of the GL engine is tracked per thread. To support this, although the
+ * interface is as a singleton, this implementation actually keeps track of a CC3OpenGL instance
+ * per thread, and will return the appropriate instance according to which thread the invocation
+ * of this method is occuring.
+ *
+ * Currently, a maximum of two instances are supported, one for the main rendering thread, and one
+ * for a single background thread that can be used for loading resources, textures, and shaders.
+ */
 +(CC3OpenGL*) sharedGL;
 
 @end

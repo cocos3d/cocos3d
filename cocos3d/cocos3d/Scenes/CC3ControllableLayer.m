@@ -30,7 +30,6 @@
  */
 
 #import "CC3ControllableLayer.h"
-#import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
 #import "CC3OpenGL.h"
 #import "CC3Logging.h"

@@ -30,7 +30,7 @@
 /** @file */	// Doxygen marker
 
 #import "CC3ViewController.h"
-#import "CC3OSXExtensions.h"
+#import "CC3OSExtensions.h"
 #import "CCLayer.h"
 
 

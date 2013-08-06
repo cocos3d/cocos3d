@@ -38,7 +38,6 @@
 #import "CC3ShadowVolumes.h"
 #import "CC3AffineMatrix.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 #import "CGPointExtension.h"
 #import "ccMacros.h"
 

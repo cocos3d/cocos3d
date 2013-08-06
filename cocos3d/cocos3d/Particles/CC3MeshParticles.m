@@ -31,7 +31,7 @@
 
 #import "CC3MeshParticles.h"
 #import "CC3Camera.h"
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 #import "CGPointExtension.h"
 
 

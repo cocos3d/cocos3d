@@ -30,7 +30,7 @@
  */
 
 #import "CC3Mesh.h"
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 
 NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 100];

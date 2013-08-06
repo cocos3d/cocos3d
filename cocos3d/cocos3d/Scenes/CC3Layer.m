@@ -32,7 +32,6 @@
 #import "CC3Layer.h"
 #import "CC3OpenGLFoundation.h"
 #import "CC3Environment.h"
-#import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
 #import "CC3GLView-GL.h"
 #import "CC3GLView-GLES2.h"

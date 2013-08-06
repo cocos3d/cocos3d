@@ -35,7 +35,7 @@
 
 #import "CCGLView.h"
 #import "CC3RenderSurfaces.h"
-#import	"CC3OSXExtensions.h"
+#import	"CC3OSExtensions.h"
 
 
 #pragma mark -
@@ -48,13 +48,38 @@
  */
 @interface CC3GLView : CCGLView {
 	CC3GLViewSurfaceManager* _surfaceManager;
+	GLenum _colorFormat;
+	GLenum _depthFormat;
+	GLuint _requestedSamples;
 }
-
-/** Returns the number of samples used to define each pixel. */
-@property(nonatomic, readonly) GLuint pixelSamples;
 
 /** The underlying view rendering surface. */
 @property(nonatomic, retain, readonly) CC3GLViewSurfaceManager* surfaceManager;
+
+/** Returns the GL color format of the pixels. */
+@property(nonatomic, readonly) GLenum colorFormat;
+
+/** Returns the GL depth format of the pixels. */
+@property(nonatomic, readonly) GLenum depthFormat;
+
+/**
+ * Returns the number of samples that was requested to be used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the pixelSamples
+ * property because that property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint requestedSamples;
+
+/**
+ * Returns the actual number of samples used to define each pixel.
+ *
+ * This may return a value that is different than the value returned by the requestedSamples
+ * property because this property is limited by the capabilities of the platform.
+ */
+@property(nonatomic, readonly) GLuint pixelSamples;
+
+/** The OpenGL context used by this view. */
+@property(nonatomic,readonly) NSOpenGLContext *context;
 
 /** Compatibility with iOS view signature. This implementation does nothing under OSX. */
 -(void) addGestureRecognizer: (UIGestureRecognizer*) gesture;

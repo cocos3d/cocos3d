@@ -32,8 +32,7 @@
 
 /* Base library of extensions to cocos2d to support cocos3d. */
 
-#import "CC3OSXExtensions.h"
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 
 
 #pragma mark -

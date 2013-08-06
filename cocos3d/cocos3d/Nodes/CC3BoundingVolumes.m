@@ -33,7 +33,7 @@
 #import "CC3Camera.h"
 #import "CC3UtilityMeshNodes.h"
 #import "CC3Light.h"
-#import "CC3IOSExtensions.h"
+#import "CC3OSExtensions.h"
 
 
 /**

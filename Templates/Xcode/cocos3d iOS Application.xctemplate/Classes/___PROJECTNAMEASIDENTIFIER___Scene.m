@@ -173,7 +173,7 @@
 	// can uncomment the following to track how the camera moves, where it ends up, and what
 	// the camera's clipping distances are, in order to determine how to position and configure
 	// the camera to view the entire scene.
-//	LogDebug(@"Camera: %@", activeCamera.fullDescription);
+//	LogDebug(@"Camera: %@", self.activeCamera.fullDescription);
 }
 
 

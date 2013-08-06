@@ -153,5 +153,23 @@ NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation)
 	}
 }
 
+
+#pragma mark -
+#pragma mark Open GL Context
+
+@implementation EAGLContext (CC3)
+
+-(void) ensureCurrentContext {
+	if (self.class.currentContext != self) self.class.currentContext = self;
+}
+
++(void) clearCurrentContext { self.currentContext = nil; }
+
+-(CC3GLContext*) asSharedContext {
+	return [[self.class alloc] initWithAPI: self.API sharegroup: self.sharegroup];
+}
+
+@end
+
 #endif	// CC3_IOS
 

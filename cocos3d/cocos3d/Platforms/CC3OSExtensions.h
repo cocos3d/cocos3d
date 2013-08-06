@@ -34,6 +34,9 @@
 
 #import <Foundation/Foundation.h>
 
+#import "CC3iOSExtensions.h"
+#import "CC3OSXExtensions.h"
+
 
 #pragma mark -
 #pragma mark NSObject extensions

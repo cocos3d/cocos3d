@@ -33,12 +33,12 @@
 /* Base library of extensions to iOS frameworks to support cocos3d. */
 
 #import "CC3Environment.h"
-#import "CC3OSExtensions.h"
 
 #if CC3_IOS
 
 #import <UIKit/UIGestureRecognizer.h>
 #import <UIKit/UIColor.h>
+#import "CC3OpenGLFoundation.h"
 
 // Define when compiling with lower SDK's
 #ifndef __IPHONE_5_0
@@ -48,9 +48,8 @@
 #	define __IPHONE_6_0     60000
 #endif
 
-
-// iOS equivalents for OSX declarations
-#define NSEvent						NSObject
+/** iOS equivalents for OSX declaration */
+#define NSEvent		NSObject
 
 
 #pragma mark -
@@ -195,6 +194,33 @@ static inline UIDeviceOrientation CC3UIDeviceOrientationFromUIInterfaceOrientati
 
 
 #pragma mark -
+#pragma mark Open GL Context
+
+/** GL context under iOS */
+#define CC3GLContext	EAGLContext
+
+/** Extension category to support cocos3d functionality. */
+@interface EAGLContext (CC3)
+
+/** Ensures this GL context is the GL context for the currently running thread. */
+-(void) ensureCurrentContext;
+
+/** Clears the GL context for the currently running thread. */
++(void) clearCurrentContext;
+
+/** 
+ * Returns a GL context that shares GL content with this context.
+ *
+ * The returned context can be used wherever a separate GL context that shares common GL
+ * content with this is required. Typically, this method is used to retrieve a secondary
+ * GL context to be used for background loading on a different thread.
+ */
+-(CC3GLContext*) asSharedContext;
+
+@end
+
+
+#pragma mark -
 #pragma mark Miscellaneous extensions and functions
 
 /** Returns a string description of the specified UIInterfaceOrientation. */
@@ -202,5 +228,6 @@ NSString* NSStringFromUIInterfaceOrientation(UIInterfaceOrientation uiOrientatio
 
 /** Returns a string description of the specified UIDeviceOrientation. */
 NSString* NSStringFromUIDeviceOrientation(UIDeviceOrientation deviceOrientation);
+
 
 #endif	// CC3_IOS

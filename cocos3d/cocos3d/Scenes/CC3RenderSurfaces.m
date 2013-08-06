@@ -33,6 +33,9 @@
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
 #import "CC3Scene.h"
+#import "CC3GLView-GL.h"
+#import "CC3GLView-GLES2.h"
+#import "CC3GLView-GLES1.h"
 
 
 #pragma mark -
@@ -710,11 +713,15 @@
 
 @implementation CC3GLViewSurfaceManager
 
+@synthesize view=_view, backgrounder=_backgrounder;
+
 -(void) dealloc {
+	_view = nil;						// not retained
 	[_viewSurface release];
 	[_multisampleSurface release];
 	[_pickingSurface release];
 	[_resizeableSurfaces release];
+	[_backgrounder release];
 	[super dealloc];
 }
 
@@ -812,6 +819,13 @@
 	}
 }
 
+-(CC3GLBackgrounder*) backgrounder {
+	if ( !_backgrounder ) {
+		_backgrounder = [[CC3GLBackgrounder alloc] initWithGLContext: [_view.context asSharedContext]];	// retained
+	}
+	return _backgrounder;
+}
+
 
 #pragma mark Resizing surfaces
 
@@ -885,15 +899,17 @@
     return self;
 }
 
--(id) initWithColorFormat: (GLenum) colorFormat
-		   andDepthFormat: (GLenum) depthFormat
-		  andPixelSamples: (GLuint) requestedSamples {
+-(id) initWithView: (CC3GLView*) view {
     if ( (self = [self init]) ) {
 		
+		_view = view;		// not retained
+		
 		// Limit pixel samples to what the platform will support
+		GLuint requestedSamples = _view.requestedSamples;
 		GLuint samples = MIN(requestedSamples, CC3OpenGL.sharedGL.maxNumberOfPixelSamples);
 		
 		// Set up the view surface and color render buffer
+		GLenum colorFormat = _view.colorFormat;
 		CC3GLFramebuffer* vSurf = [CC3IOSOnScreenGLFramebuffer surface];
 		vSurf.colorAttachment = [CC3IOSOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat];
 		self.viewSurface = vSurf;					// retained
@@ -907,6 +923,7 @@
 		}
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
+		GLenum depthFormat = _view.depthFormat;
 		if (depthFormat)
 			self.renderingSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat
 																				   andPixelSamples: samples];
@@ -914,20 +931,26 @@
     return self;
 }
 
--(id) initSystemColorFormat: (GLenum) colorFormat
-			 andDepthFormat: (GLenum) depthFormat
-			andPixelSamples: (GLuint) samples {
+-(id) initWithSystemView: (CC3GLView*) view {
     if ( (self = [self init]) ) {
 		
+		_view = view;		// not retained
+		
+		// Limit pixel samples to what the platform will support
+		GLuint requestedSamples = _view.requestedSamples;
+		GLuint samples = MIN(requestedSamples, CC3OpenGL.sharedGL.maxNumberOfPixelSamples);
+		
 		// Set up the view surface and color render buffer
+		GLenum colorFormat = _view.colorFormat;
 		CC3GLFramebuffer* vSurf = [CC3OSXOnScreenGLFramebuffer surface];
 		vSurf.colorAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat
-																	 andPixelSamples: samples];
+																		  andPixelSamples: samples];
 		
 		// If using depth testing, attach a depth buffer to the rendering surface.
+		GLenum depthFormat = _view.depthFormat;
 		if (depthFormat)
 			vSurf.depthAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: depthFormat
-																		 andPixelSamples: samples];
+																			  andPixelSamples: samples];
 
 		self.viewSurface = vSurf;		// retained
 	}

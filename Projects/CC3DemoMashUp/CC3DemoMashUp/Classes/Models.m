@@ -32,7 +32,6 @@
 #import "Models.h"
 #import "CC3ActionInterval.h"
 #import "CCActionInstant.h"
-#import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
 
 #define kDropHeight 700.0

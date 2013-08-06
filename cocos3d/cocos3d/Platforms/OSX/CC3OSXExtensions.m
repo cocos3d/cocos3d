@@ -29,12 +29,26 @@
  * See header file CC3OSXExtensions.h for full API documentation.
  */
 
-#import "CC3CC2Extensions.h"
 #import "CC3OSXExtensions.h"
-#import "CC3Foundation.h"
 
 
 #if CC3_OSX
+
+
+#pragma mark -
+#pragma mark Open GL Context
+
+@implementation NSOpenGLContext (CC3)
+
+-(void) ensureCurrentContext {
+	if (self.class.currentContext != self) [self makeCurrentContext];
+}
+
+-(CC3GLContext*) asSharedContext {
+	return [[self.class alloc] initWithFormat: ((CCGLView*)self.view).pixelFormat shareContext: self];
+}
+
+@end
 
 #endif	// CC3_OSX
 

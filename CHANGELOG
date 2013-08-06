@@ -76,6 +76,8 @@ cocos3d 2.0.0 - 2013/08/31
 		- CC3ViewController now requires its view be a CC3GLView.
 		- CC3Layer now requires a CC3ViewController controller.
 
+- Added support for loading resources, textures and shaders on a background thread.
+
 - Added cocos3d and cocos2d static library projects to the cocos3d distribution
 	- available in the cocos3d-iOS.workspace and cocos3d-OSX.workspace Xcode workspaces
 	- also available in the Project folder

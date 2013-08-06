@@ -31,7 +31,6 @@
 
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
-#import "CC3OSXExtensions.h"
 #import "CC3CC2Extensions.h"
 
 

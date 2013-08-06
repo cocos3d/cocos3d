@@ -30,6 +30,9 @@
 /** @file */	// Doxygen marker
 
 #import "CC3Texture.h"
+#import "CC3Backgrounder.h"
+
+@class CC3GLView;
 
 
 #pragma mark -
@@ -824,11 +827,16 @@
  * surface is resolved into the view surface.
  */
 @interface CC3GLViewSurfaceManager : NSObject {
+	CC3GLView* _view;
 	CCArray* _resizeableSurfaces;
 	CC3GLFramebuffer* _viewSurface;
 	CC3GLFramebuffer* _multisampleSurface;
 	CC3GLFramebuffer* _pickingSurface;
+	CC3GLBackgrounder* _backgrounder;
 }
+
+/** The GL view whose surface is being managed by this instance. */
+@property(nonatomic, assign, readonly) CC3GLView* view;
 
 /** The on-screen surface attached to the underlying core animation layer. */
 @property(nonatomic, retain) CC3GLFramebuffer* viewSurface;
@@ -950,6 +958,14 @@
  */
 -(void) resolveMultisampling;
 
+/**
+ * Returns a backgrounder that can be used to perform cetain GL tasks, such as loading
+ * resources, textures and shaders on a background thread.
+ *
+ * If not set beforehand, the instance in this property is lazily created.
+ */
+@property(nonatomic, retain) CC3GLBackgrounder* backgrounder;
+
 
 #pragma mark Resizing surfaces
 
@@ -987,26 +1003,19 @@
 #pragma mark Allocation and initialization
 
 /**
- * Initializes this instance with the specified color and depth format, and with the specified
- * number of samples per pixel. If anti-aliasing multisampling is to be used, the value of
- * requestedSamples should be larger than one, but below the maximum number of samples per pixel
- * defined by the platform, which can be retrieved from CC3OpenGL.sharedGL.maxNumberOfPixelSamples.
+ * Initializes this instance for the specified view.
  *
  * This initialization method should only be used with iOS.
  */
--(id) initWithColorFormat: (GLenum) colorFormat
-		   andDepthFormat: (GLenum) depthFormat
-		  andPixelSamples: (GLuint) requestedSamples;
+-(id) initWithView: (CC3GLView*) view;
 
 /**
- * Initializes this instance to match the OSX window surface, with the specified color, depth,
- * and stencil format, and with the specified number of samples per pixel.
+ * Initializes this instance for the specified view.
  *
  * This initialization method should only be used with OSX.
  */
--(id) initSystemColorFormat: (GLenum) colorFormat
-			 andDepthFormat: (GLenum) depthFormat
-			andPixelSamples: (GLuint) samples;
+-(id) initWithSystemView: (CC3GLView*) view;
+
 @end
 
 /** 

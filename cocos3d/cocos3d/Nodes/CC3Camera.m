@@ -33,7 +33,6 @@
 #import "CC3Scene.h"
 #import "CC3ProjectionMatrix.h"
 #import "CC3Actions.h"
-#import "CC3IOSExtensions.h"
 #import "CC3CC2Extensions.h"
 #import "CC3AffineMatrix.h"
 

@@ -35,7 +35,6 @@
 #import "CC3BoundingVolumes.h"
 #import "CC3Scene.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 
 #pragma mark -
 #pragma mark CC3NodeEvaluator

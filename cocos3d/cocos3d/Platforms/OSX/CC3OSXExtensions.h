@@ -33,14 +33,10 @@
 /* Base library of extensions to iOS frameworks to support cocos3d. */
 
 #import "CC3Environment.h"
-#import "CC3OSExtensions.h"
 
 #if CC3_OSX
 
-//#import "CC3GLView-GL.h"
-
-
-// OSX equivalents for iOS declarations
+/** OSX equivalents for iOS declaration */
 #define UITouch						NSObject
 #define UIEvent						NSObject
 #define UIGestureRecognizer			NSObject
@@ -90,6 +86,30 @@ typedef enum {
 #define UIInterfaceOrientationIsPortrait(orientation)  ((orientation) == UIInterfaceOrientationPortrait || (orientation) == UIInterfaceOrientationPortraitUpsideDown)
 #define UIInterfaceOrientationIsLandscape(orientation) ((orientation) == UIInterfaceOrientationLandscapeLeft || (orientation) == UIInterfaceOrientationLandscapeRight)
 
-@class CCGLView;
+//@class CCGLView;
+
+
+#pragma mark -
+#pragma mark Open GL Context
+
+/** GL context under iOS */
+#define CC3GLContext	NSOpenGLContext
+
+/** Extension category to support cocos3d functionality. */
+@interface NSOpenGLContext (CC3)
+
+/** Ensures this GL context is the GL context for the currently running thread. */
+-(void) ensureCurrentContext;
+
+/**
+ * Returns a GL context that shares GL content with this context.
+ *
+ * The returned context can be used wherever a separate GL context that shares common GL
+ * content with this is required. Typically, this method is used to retrieve a secondary
+ * GL context to be used for background loading on a different thread.
+ */
+-(CC3GLContext*) asSharedContext;
+
+@end
 
 #endif	// CC3_OSX

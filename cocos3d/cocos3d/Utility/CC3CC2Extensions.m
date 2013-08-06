@@ -30,7 +30,6 @@
  */
 
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 #import "CC3Logging.h"
 #import "uthash.h"
 

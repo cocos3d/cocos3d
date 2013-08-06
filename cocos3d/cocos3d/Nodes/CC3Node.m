@@ -42,7 +42,6 @@
 #import "CC3AffineMatrix.h"
 #import "CC3LinearMatrix.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 #import "CC3Texture.h"
 
 
@@ -1622,27 +1621,49 @@ static GLuint lastAssignedNodeTag;
 
 -(CC3Camera*) activeCamera { return self.scene.activeCamera; }
 
-/** Adds a child node and invokes didAddDescendant: so action can be taken by subclasses. */
+/** 
+ * Adds the specified node as a child of this node without queuing.
+ *
+ * If this action is occuring on a background thread, and this node is already part of
+ * the scene being rendered, the operation is queued for execution on the rendering thread,
+ * to avoid the possibility of adding a node in the middle of a render iteration.
+ */
 -(void) addChild: (CC3Node*) aNode {
+	if (NSThread.isMainThread || !self.scene)
+		[self addChildNow: aNode];
+	else
+		[self addChildOnRenderThread: aNode];
+}
+
+/** Adds the specified node as a child of this node without queuing. */
+-(void) addChildNow: (CC3Node*) aNode {
 	// Don't add if child is nil or is already a child of this node
 	CC3Assert(aNode, @"Child CC3Node cannot be nil");
 	if(aNode.parent == self) return;
-
+	
 	// Remove node from its existing parent after temporarily clearing the action cleanup flag.
 	BOOL origCleanupFlag = aNode.shouldStopActionsWhenRemoved;
 	aNode.shouldStopActionsWhenRemoved = NO;
 	[aNode remove];
 	aNode.shouldStopActionsWhenRemoved = origCleanupFlag;
-
+	
 	// Lazily create the children array if needed
 	if(!_children) _children = [[CCArray array] retain];
-
+	
 	[_children addObject: aNode];
 	aNode.parent = self;
 	aNode.isRunning = self.isRunning;
 	[self didAddDescendant: aNode];
 	[aNode wasAdded];
 	LogTrace(@"After adding %@, %@ now has children: %@", aNode, self, _children);
+}
+
+/** 
+ * Queues an operation to add the specified node as a child of this node from the thread
+ * that is performing rendering.
+ */
+-(void) addChildOnRenderThread: (CC3Node*) aNode {
+	[NSOperationQueue.mainQueue addOperationWithBlock: ^{ [self addChildNow: aNode]; }];
 }
 
 /**

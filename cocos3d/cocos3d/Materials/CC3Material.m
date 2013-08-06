@@ -32,7 +32,6 @@
 #import "CC3Material.h"
 #import "CC3ShaderProgramMatcher.h"
 #import "CC3CC2Extensions.h"
-#import "CC3IOSExtensions.h"
 
 
 @implementation CC3Material

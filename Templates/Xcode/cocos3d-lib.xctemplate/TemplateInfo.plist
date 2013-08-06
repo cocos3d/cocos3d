@@ -2720,6 +2720,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3Backgrounder.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3Backgrounder.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3Backgrounder.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3Backgrounder.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Cache.h</key>
 		<dict>
 			<key>Group</key>
@@ -3532,6 +3556,8 @@
 		<string>cocos3d/cocos3d/Shaders/CC3ShaderProgramSemantics.m</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.h</string>
 		<string>cocos3d/cocos3d/Shadows/CC3ShadowVolumes.m</string>
+		<string>cocos3d/cocos3d/Utility/CC3Backgrounder.h</string>
+		<string>cocos3d/cocos3d/Utility/CC3Backgrounder.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Cache.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Cache.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>
