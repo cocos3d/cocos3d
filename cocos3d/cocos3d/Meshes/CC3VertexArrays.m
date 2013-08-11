@@ -348,14 +348,6 @@ static GLuint lastAssignedVertexArrayTag;
 		_bufferID = [gl generateBuffer];
 		[gl bindBuffer: _bufferID toTarget: targBuf];
 		[gl loadBufferTarget: targBuf withData: _vertices ofLength: buffSize forUse: _bufferUsage];
-		
-		GLenum errCode = glGetError();
-		if (errCode) {
-			LogInfo(@"%@ could not create GL buffer with ID %i of type %@ because of %@. Using local memory arrays instead.",
-					self, self.bufferID, NSStringFromGLEnum(self.bufferTarget), GetGLErrorText(errCode));
-			[self deleteGLBuffer];
-		}
-		[gl unbindBufferTarget: targBuf];
 	} else {
 		LogTrace(@"%@ NOT creating GL server buffer because shouldAllowVertexBuffering is %@ or buffer ID already set to %i",
 				 self, NSStringFromBoolean(_shouldAllowVertexBuffering), _bufferID);

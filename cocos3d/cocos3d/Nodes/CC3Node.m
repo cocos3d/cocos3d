@@ -1638,7 +1638,7 @@ static GLuint lastAssignedNodeTag;
 /** Adds the specified node as a child of this node without queuing. */
 -(void) addChildNow: (CC3Node*) aNode {
 	// Don't add if child is nil or is already a child of this node
-	CC3Assert(aNode, @"Child CC3Node cannot be nil");
+	CC3Assert(aNode, @"Child node cannot be nil");
 	if(aNode.parent == self) return;
 	
 	// Remove node from its existing parent after temporarily clearing the action cleanup flag.
@@ -1655,7 +1655,7 @@ static GLuint lastAssignedNodeTag;
 	aNode.isRunning = self.isRunning;
 	[self didAddDescendant: aNode];
 	[aNode wasAdded];
-	LogTrace(@"After adding %@, %@ now has children: %@", aNode, self, _children);
+	LogTrace(@"%@ added to parent %@", aNode, self);
 }
 
 /** 

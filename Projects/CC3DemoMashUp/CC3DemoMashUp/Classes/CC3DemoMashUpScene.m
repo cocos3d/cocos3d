@@ -142,6 +142,8 @@
 #define kCameraMoveDuration				3.0
 #define kTeapotRotationActionTag		1
 #define kSkyColor						ccc4f(0.4, 0.5, 0.9, 1.0)
+#define kFadeInDuration					1.0f
+#define kNoFadeIn						0.0f
 
 
 // Size of the television
@@ -205,6 +207,148 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
+ * Add the initial content to the scene.
+ *
+ * Once the scene is displayed and running, additional content is added asynchronously in
+ * the addSceneContentAsynchronously method, which is invoked on a background thread by the
+ * CC3GLBackgrounder available through the backgrounder property of the viewSurfaceManager.
+ */
+-(void) initializeScene {
+	
+	[self initCustomState];			// Set up any initial state tracked by this subclass
+
+	[self addBackdrop];				// Add a sky-blue colored backdrop
+	
+	[self addGround];				// Add a ground plane to provide some perspective to the user
+	
+//	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
+									// in the reflective runner added in the addSkinnedRunners method
+
+	[self addRobot];				// Add an animated robot arm, a light, and a camera. This POD file
+									// contains the primary camera of this scene.
+	
+	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
+	
+//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
+									// point particles hanging in the scene.
+	
+//	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
+									// hanging in the scene.
+	
+	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
+									// The hose is turned on and off when the robot arm is touched.
+	
+	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
+									// The hose is turned on and off when the robot arm is touched.
+	
+	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
+									// and floating head. This must happen after main light is
+									// loaded from the POD file (in addRobot).
+	
+	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
+	
+	[self addSpotlight];			// Add a spotlight to the camera.
+									// This spotlight will be turned on when the sun is turned off.
+	
+	[self addFog];					// Adds fog to the scene. This is initially invisible.
+	
+	[self configureLighting];		// Set up the lighting
+	[self configureCamera];			// Check out some interesting camera options.
+	
+	// Configure all content added so far in a standard manner. This illustrates how CC3Node
+	// properties and methods can be applied to large assemblies of nodes, and even the entire
+	// scene itself, allowing us to perform this only once, for all current scene content.
+	// For content that is added dynamically after this initial content, this method will also
+	// be invoked on each new content component.
+	[self configureForScene: self andMaterializeWithDuration: kNoFadeIn];
+	
+	// The existing node structure of the scene is logged using the following line.
+	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
+}
+
+/** Define a thread-pausing macro. */
+# define DramaticPause()			[NSThread sleepForTimeInterval: 0.3f]
+
+/**
+ * Adds additional scene content dynamically and asynchronously.
+ *
+ * This method is invoked from a code block that is run on a background thread by the 
+ * CC3GLBackgrounder available through the backgrounder property of the viewSurfaceManager.
+ * It adds content dynamically and asynchronously after rendering has begun on the rendering thread.
+ *
+ * To emphasize that the loading is happening on a background thread while the existing scene
+ * is running, this method takes a small pause before loading each model. This pause is purely
+ * for dramatic effect for the purposes of this demo app. Pauses are NOT required before normal
+ * background model loading.
+ */
+-(void) addSceneContentAsynchronously {
+
+	DramaticPause();				// Pause dramatically
+	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
+	
+	DramaticPause();				// Pause dramatically
+	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
+
+	DramaticPause();				// Pause dramatically
+	[self addBitmapLabel];			// Add a bitmapped string label
+	
+	DramaticPause();				// Pause dramatically
+	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
+	
+	DramaticPause();				// Pause dramatically
+	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
+	
+	DramaticPause();				// Pause dramatically
+	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
+	
+	DramaticPause();				// Pause dramatically
+	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
+	
+	DramaticPause();				// Pause dramatically
+	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
+
+	DramaticPause();				// Pause dramatically
+	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
+									// containing transparency. The band as a whole fades in and out
+									// periodically. This demonstrates managing opacity and translucency
+									// at both the texture and material level.
+	
+	DramaticPause();				// Pause dramatically
+	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
+	
+	DramaticPause();				// Pause dramatically
+	[self addTelevision];			// Add a television showing the view from the runner camera
+									// This demonstrates dynamic rendering-to-texture capabilities.
+	
+	DramaticPause();				// Pause dramatically
+	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
+	
+	DramaticPause();				// Pause dramatically
+	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
+									// This must happen after camera is loaded (in addRobot).
+
+	DramaticPause();
+	[self addWoodenSign];			// Add the multi-texture wooden sign.
+									// This must happen after camera is loaded (in addRobot).
+	
+	DramaticPause();				// Pause dramatically
+	[self addFloatingHead];			// Add the bump-mapped floating head.
+									// This must happen after camera is loaded (in addRobot).
+
+	DramaticPause();				// Pause dramatically
+	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
+	
+	DramaticPause();				// Pause dramatically
+	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
+									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
+	
+	DramaticPause();				// Pause dramatically
+	[self addMascots];				// Add the cocos3d mascot.
+	
+}
+
+/**
  * Invoked by the customized initializeScene to set up any initial state for
  * this customized scene. This is broken into a separate method so that the
  * initializeScene method can focus on loading the artifacts of the 3D scene.
@@ -232,314 +376,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// You can of course write your own node sequencers to customize to your specific
 	// app needs. Best to change the node sequencer before any model objects are added.
 	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
-//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
-//	self.drawingSequencer = nil;
-	
-}
-
-/**
- * Adds the 3D objects to the scene, loading some models from POD files, and building others
- * algorithmically. The loading of different features within the scene is broken into a sequence
- * of template methods. If you want to play with not loading certain elements, simply comment
- * out one the invocations of these template methods within this method.
- */
-//-(void) initializeScene {
-//
-//	// Set up any initial state tracked by this subclass
-//	[self initCustomState];
-//
-//	[self addBackdrop];				// Add a sky-blue colored backdrop
-//
-//	[self addGround];				// Add a ground plane to provide some perspective to the user
-//
-////	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
-//									// in the reflective runner added in the addSkinnedRunners method
-//
-//	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
-//
-////	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
-//
-//	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
-//
-//	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
-//
-//	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
-//
-//	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
-//
-//	[self addRobot];				// Add an animated robot arm, a light, and a camera
-//
-//	[self addBitmapLabel];			// Add a bitmapped string label
-//
-//	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
-//
-////	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
-//									// point particles hanging in the scene.
-//
-////	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
-//									// hanging in the scene.
-//
-//	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
-//									// The hose is turned on and off when the robot arm is touched.
-//
-//	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
-//									// The hose is turned on and off when the robot arm is touched.
-//
-//	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
-//									// containing transparency. The band as a whole fades in and out
-//									// periodically. This demonstrates managing opacity and translucency
-//									// at both the texture and material level.
-//
-//	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
-//
-//	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
-//
-//	[self addMascots];				// Add the cocos3d mascot.
-//									// This must happen after camera is loaded (in addRobot).
-//
-//	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
-//									// and floating head. This must happen after main light is
-//									// loaded from the POD file (in addRobot).
-//
-//	[self addWoodenSign];			// Add the multi-texture wooden sign.
-//									// This must happen after camera is loaded (in addRobot).
-//
-//	[self addFloatingHead];			// Add the bump-mapped floating head.
-//									// This must happen after camera is loaded (in addRobot).
-//
-//	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
-//
-//	[self addSpotlight];			// Add a spotlight to the camera.
-//									// This spotlight will be turned on when the sun is turned off.
-//
-//	[self addFog];					// Adds fog to the scene. This is initially invisible.
-//
-//	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
-//
-//	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
-//
-//	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-//									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-//
-//	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-//									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-//
-//	[self addTelevision];			// Add a television showing the view from the runner camera
-//									// This demonstrates dynamic rendering-to-texture capabilities.
-//
-//	[self configureLighting];		// Set up the lighting
-//	[self configureCamera];			// Check out some interesting camera options.
-//
-//	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
-//	// to save memory, release the vertex data in main memory because it is now redundant.
-//	// However, because we can add shadow volumes dynamically to any node, we need to keep the
-//	// vertex location, index and skinning data of all meshes around to build shadow volumes.
-//	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
-//	[self retainVertexLocations];
-//	[self retainVertexIndices];
-//	[self retainVertexWeights];
-//	[self retainVertexMatrixIndices];
-//	[self createGLBuffers];
-//	[self releaseRedundantContent];
-//
-//	// This scene is quite complex, containing many objects. As the user moves the camera
-//	// around the scene, objects move in and out of the camera's field of view. At any time,
-//	// there may be a number of objects that are out of view of the camera. With such a scene
-//	// layout, we can save significant GPU processing by not drawing those objects. To make
-//	// that happen, we assign a bounding volume to each of the mesh nodes. Once that is done,
-//	// only those objects whose bounding volumes intersect the camera frustum will be drawn.
-//	// Bounding volumes can also be used for collision detection between nodes. You can see
-//	// the effect of not using bounding volumes on drawing perfomance by commenting out the
-//	// following line and taking note of the drop in performance for this scene. However,
-//	// testing bounding volumes against the camera's frustum does take some CPU processing,
-//	// and in scenes where all or most of the objects are in front of the camera at all times,
-//	// using bounding volumes may actually result in slightly lower performance. By including
-//	// or not including the line below, you can test both scenarios and decide which approach
-//	// is best for your particular scene. Bounding volumes are not automatically created for
-//	// skinned meshes, such as the runners and mallet. See the addSkinnedRunners and
-//	// addSkinnedMallet methods to see how those bounding volumes are added manually.
-//	[self createBoundingVolumes];
-//
-//	// The following line displays the bounding volumes of each node. The bounding volume of
-//	// all mesh nodes, except the globe, contains both a spherical and bounding-box bounding
-//	// volume, to optimize testing. For something extra cool, touch the robot arm to see the
-//	// bounding volume of the particle emitter grow and shrink dynamically. Use the joystick
-//	// controls or gestures to back the camera away to get the full effect. You can also turn
-//	// on this property on individual nodes or node structures. See the notes for this property
-//	// and the shouldDrawBoundingVolume property in the CC3Node class notes.
-////	self.shouldDrawAllBoundingVolumes = YES;
-//
-//	// Select an appropriate shader program for each mesh node in this scene now. If this step
-//	// is omitted, a shader program will be selected for each mesh node the first time that mesh
-//	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
-//	// as each shader program is loaded as needed the first time it is needed during drawing.
-//	[self selectShaderPrograms];
-//
-//	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
-//	// during debugging, uncomment one or more of the following lines. The first line displays
-//	// short descriptive text for each node (including class, node name & tag). The second line
-//	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
-//	// line shows the bounding boxes of all nodes, including those with local content AND
-//	// structural nodes. You can also turn on any of these properties at a more granular level
-//	// by using these and similar methods on individual nodes or node structures. See the CC3Node
-//	// class notes. This family of properties can be particularly useful during development to
-//	// track down display issues.
-////	self.shouldDrawAllDescriptors = YES;
-////	self.shouldDrawAllLocalContentWireframeBoxes = YES;
-////	self.shouldDrawAllWireframeBoxes = YES;
-//
-//	// The full node structure of the scene is logged using the following line.
-//	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
-//}
-
--(void) initializeScene {
-	
-	// Set up any initial state tracked by this subclass
-	[self initCustomState];
-
-	[self addBackdrop];				// Add a sky-blue colored backdrop
-	
-	[self addGround];				// Add a ground plane to provide some perspective to the user
-	
-//	[self addSkyBox];				// Add a skybox around the scene. This is the skybox that is reflected
-									// in the reflective runner added in the addSkinnedRunners method
-
-	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
-	
-	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
-	
-	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
-	
-	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
-	
-	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
-	
-	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
-
-	[self addRobot];				// Add an animated robot arm, a light, and a camera
-	
-	[self addBitmapLabel];			// Add a bitmapped string label
-	
-	[self addProjectedLabel];		// Attach a text label to the hand of the animated robot.
-	
-//	[self addPointParticles];		// Uncomment to add a platform of multi-colored, light-interactive,
-									// point particles hanging in the scene.
-	
-//	[self addMeshParticles];		// Uncomment to add a platform of multi-colored, mesh particles
-									// hanging in the scene.
-	
-	[self addPointHose];			// Attach a point particle hose to the hand of the animated robot.
-									// The hose is turned on and off when the robot arm is touched.
-	
-	[self addMeshHose];				// Attach a point particle hose to the hand of the animated robot.
-									// The hose is turned on and off when the robot arm is touched.
-	
-	[self addFloatingRing];			// Add a large yellow band floating above the ground, using a texture
-									// containing transparency. The band as a whole fades in and out
-									// periodically. This demonstrates managing opacity and translucency
-									// at both the texture and material level.
-	
-	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
-	
-	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
-	
-	[self addMascots];				// Add the cocos3d mascot.
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addBumpMapLightTracker];	// Add a light tracker for the bump-maps in the wooden sign
-									// and floating head. This must happen after main light is
-									// loaded from the POD file (in addRobot).
-	
-	[self addWoodenSign];			// Add the multi-texture wooden sign.
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addFloatingHead];			// Add the bump-mapped floating head.
-									// This must happen after camera is loaded (in addRobot).
-	
-	[self addSun];					// Add a cocos2d particle emitter as the sun in the sky.
-	
-	[self addSpotlight];			// Add a spotlight to the camera.
-									// This spotlight will be turned on when the sun is turned off.
-	
-	[self addFog];					// Adds fog to the scene. This is initially invisible.
-	
-	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
-	
-	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
-
-	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-	
-	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
-									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-
-	[self addTelevision];			// Add a television showing the view from the runner camera
-									// This demonstrates dynamic rendering-to-texture capabilities.
-	
-	[self configureLighting];		// Set up the lighting
-	[self configureCamera];			// Check out some interesting camera options.
-	
-	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
-	// to save memory, release the vertex data in main memory because it is now redundant.
-	// However, because we can add shadow volumes dynamically to any node, we need to keep the
-	// vertex location, index and skinning data of all meshes around to build shadow volumes.
-	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
-	[self retainVertexLocations];
-	[self retainVertexIndices];
-	[self retainVertexWeights];
-	[self retainVertexMatrixIndices];
-	[self createGLBuffers];
-	[self releaseRedundantContent];
-
-	// This scene is quite complex, containing many objects. As the user moves the camera
-	// around the scene, objects move in and out of the camera's field of view. At any time,
-	// there may be a number of objects that are out of view of the camera. With such a scene
-	// layout, we can save significant GPU processing by not drawing those objects. To make
-	// that happen, we assign a bounding volume to each of the mesh nodes. Once that is done,
-	// only those objects whose bounding volumes intersect the camera frustum will be drawn.
-	// Bounding volumes can also be used for collision detection between nodes. You can see
-	// the effect of not using bounding volumes on drawing perfomance by commenting out the
-	// following line and taking note of the drop in performance for this scene. However,
-	// testing bounding volumes against the camera's frustum does take some CPU processing,
-	// and in scenes where all or most of the objects are in front of the camera at all times,
-	// using bounding volumes may actually result in slightly lower performance. By including
-	// or not including the line below, you can test both scenarios and decide which approach
-	// is best for your particular scene. Bounding volumes are not automatically created for
-	// skinned meshes, such as the runners and mallet. See the addSkinnedRunners and
-	// addSkinnedMallet methods to see how those bounding volumes are added manually.
-	[self createBoundingVolumes];
-
-	// The following line displays the bounding volumes of each node. The bounding volume of
-	// all mesh nodes, except the globe, contains both a spherical and bounding-box bounding
-	// volume, to optimize testing. For something extra cool, touch the robot arm to see the
-	// bounding volume of the particle emitter grow and shrink dynamically. Use the joystick
-	// controls or gestures to back the camera away to get the full effect. You can also turn
-	// on this property on individual nodes or node structures. See the notes for this property
-	// and the shouldDrawBoundingVolume property in the CC3Node class notes.
-//	self.shouldDrawAllBoundingVolumes = YES;
-	
-	// Select an appropriate shader program for each mesh node in this scene now. If this step
-	// is omitted, a shader program will be selected for each mesh node the first time that mesh
-	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
-	// as each shader program is loaded as needed the first time it is needed during drawing.
-	[self selectShaderPrograms];
-	
-	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
-	// during debugging, uncomment one or more of the following lines. The first line displays
-	// short descriptive text for each node (including class, node name & tag). The second line
-	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
-	// line shows the bounding boxes of all nodes, including those with local content AND
-	// structural nodes. You can also turn on any of these properties at a more granular level
-	// by using these and similar methods on individual nodes or node structures. See the CC3Node
-	// class notes. This family of properties can be particularly useful during development to
-	// track down display issues.
-//	self.shouldDrawAllDescriptors = YES;
-//	self.shouldDrawAllLocalContentWireframeBoxes = YES;
-//	self.shouldDrawAllWireframeBoxes = YES;
-	
-	// The full node structure of the scene is logged using the following line.
-	LogInfo(@"The structure of this scene is: %@", [self structureDescription]);
+	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
+	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
+	//	self.drawingSequencer = nil;
 }
 
 /** Various options for configuring interesting camera behaviours. */
@@ -615,35 +454,84 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 }
 
--(void) configureFreshContent {
+/**
+ * Configures the specified node and all its descendants for use in the scene, and then fades
+ * them in over the specified duration, in seconds. Specifying zero for the duration will 
+ * instantly materialize the node without employing any fading.
+ *
+ * This scene is highly complex, and it helps to configure the nodes within it in a standardized
+ * manner, including whether we use VBO's to manage the vertices, whether the vertices need to
+ * also be retained in main memory, whether bounding volumes are required, and to force early
+ * selection of shaders for use with the nodes.
+ *
+ * The specified node can be the root of an arbitrarily complex node tree, and the behaviour
+ * applied in this method is propagated to all descendant nodes of the specified node, and the
+ * materialization fading will be applied to the entire node tree. The specified node can even
+ * be the entire scene itself.
+ */
+-(void) configureForScene: (CC3Node*) aNode andMaterializeWithDuration: (ccTime) duration {
 	
-}
-
--(void) addFreshContent {
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
+	// to save memory, release the vertex data in main memory because it is now redundant.
+	// However, because we can add shadow volumes dynamically to any node, we need to keep the
+	// vertex location, index and skinning data of all meshes around to build shadow volumes.
+	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
+	[aNode retainVertexLocations];
+	[aNode retainVertexIndices];
+	[aNode retainVertexWeights];
+	[aNode retainVertexMatrixIndices];
+	[aNode createGLBuffers];
+	[aNode releaseRedundantContent];
 	
+	// This scene is quite complex, containing many objects. As the user moves the camera
+	// around the scene, objects move in and out of the camera's field of view. At any time,
+	// there may be a number of objects that are out of view of the camera. With such a scene
+	// layout, we can save significant GPU processing by not drawing those objects. To make
+	// that happen, we assign a bounding volume to each mesh node. Once that is done, only
+	// those objects whose bounding volumes intersect the camera frustum will be drawn.
+	// Bounding volumes can also be used for collision detection between nodes. You can see
+	// the effect of not using bounding volumes on drawing perfomance by commenting out the
+	// following line and taking note of the drop in performance for this scene. However,
+	// testing bounding volumes against the camera's frustum does take some CPU processing,
+	// and in scenes where all or most of the objects are in front of the camera at all times,
+	// using bounding volumes may actually result in slightly lower performance. By including
+	// or not including the line below, you can test both scenarios and decide which approach
+	// is best for your particular scene. Bounding volumes are not automatically created for
+	// skinned meshes, such as the runners and mallet. See the addSkinnedRunners and
+	// addSkinnedMallet methods to see how those bounding volumes are added manually.
+	[aNode createBoundingVolumes];
+	
+	// The following line displays the bounding volumes of each node. The bounding volume of
+	// all mesh nodes, except the globe, contains both a spherical and bounding-box bounding
+	// volume, to optimize testing. For something extra cool, touch the robot arm to see the
+	// bounding volume of the particle emitter grow and shrink dynamically. Use the joystick
+	// controls or gestures to back the camera away to get the full effect. You can also turn
+	// on this property on individual nodes or node structures. See the notes for this property
+	// and the shouldDrawBoundingVolume property in the CC3Node class notes.
+//	aNode.shouldDrawAllBoundingVolumes = YES;
+	
+	// Select an appropriate shader program for each mesh node in this scene now. If this step
+	// is omitted, a shader program will be selected for each mesh node the first time that mesh
+	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
+	// as each shader program is loaded as needed the first time it is needed during drawing.
+	[aNode selectShaderPrograms];
+	
+	// For an interesting effect, to draw text descriptors and/or bounding boxes on every node
+	// during debugging, uncomment one or more of the following lines. The first line displays
+	// short descriptive text for each node (including class, node name & tag). The second line
+	// displays bounding boxes of only those nodes with local content (eg- meshes). The third
+	// line shows the bounding boxes of all nodes, including those with local content AND
+	// structural nodes. You can also turn on any of these properties at a more granular level
+	// by using these and similar methods on individual nodes or node structures. See the CC3Node
+	// class notes. This family of properties can be particularly useful during development to
+	// track down display issues.
+//	aNode.shouldDrawAllDescriptors = YES;
+//	aNode.shouldDrawAllLocalContentWireframeBoxes = YES;
+//	aNode.shouldDrawAllWireframeBoxes = YES;
+	
+	// Use a standard CCAction to fade the node in over the specified duration
+	if (duration > 0.0f) [aNode runAction: [CCFadeIn actionWithDuration: duration]];
 }
-
-//-(void) testThreads {
-//	
-//	NSUInteger iterCnt = 10000 * 1000;
-//	BOOL val = NO;
-//	
-//	MarkRezActivityStart();
-//	for (NSUInteger i = 0; i < iterCnt; i++) {
-//		//		val = ([NSThread currentThread] != nil);
-//		//		val = [NSThread isMainThread];
-//		val = [self isMainThread];
-//	}
-//	NSTimeInterval dur = GetRezActivityDuration();
-//	LogDebug(@"Completed '%u' loops in %.4f s (%.4f us per loop) with result %@",
-//			 iterCnt, dur, dur * 1000000.0 / (double)iterCnt, NSStringFromBoolean(val));
-//	
-//	LogDebug(@"Main queue max concurrency: %i",
-//			 [NSOperationQueue.mainQueue maxConcurrentOperationCount]);
-//	
-//}
-//
-//-(BOOL) isMainThread { return YES; }
 
 /** 
  * If we're not overlaying the device camera, creates the clear-blue-sky backdrop.
@@ -709,6 +597,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
 	floater.touchEnabled = YES;
 	floater.shouldDrawLocalContentWireframeBox = YES;
+
+	// Ring is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: floater andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: floater];
 
 	// Fade the floating ring in and out
@@ -756,10 +647,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Load the POD file from the application Documents directory. It will also
 	// load any needed textures from that directory as well.
-	[self addContentFromPODFile: podPath withName: kBeachBallRezNodeName];
+	CC3ResourceNode* bbRez = [CC3PODResourceNode nodeWithName: kBeachBallRezNodeName fromFile: podPath];
 	
 	// Configure the bouncing beach ball
-	_beachBall = [self getNodeNamed: kBeachBallName];
+	_beachBall = [bbRez getNodeNamed: kBeachBallName];
 	_beachBall.location = cc3v(200.0, 200.0, -400.0);
 	_beachBall.uniformScale = 50.0;
 	
@@ -789,6 +680,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// For extra realism, also rotate the beach ball as it bounces.
 	[_beachBall runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																					rotateBy: cc3v(30.0, 0.0, 45.0)]]];
+	
+	// Beach ball is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _beachBall andMaterializeWithDuration: kFadeInDuration];
+	[self addChild: _beachBall];
 }
 
 /**
@@ -816,6 +711,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Rotate the globe
 	[_globe runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				 rotateBy: cc3v(0.0, 30.0, 0.0)]]];
+	
+	// Cube is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _globe andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _globe];
 	
 	// For something interesting, uncomment the following lines to make the
@@ -870,6 +768,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_dieCube.location = cc3v(-200.0, 200.0, 0.0);
 	_dieCube.touchEnabled = YES;
 	_dieCube.friction = 1.0;
+	
+	// Cube is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _dieCube andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _dieCube];
 }
 
@@ -916,6 +817,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 
 	// Add the cube to the spinner and the spinner to the scene.
 	[_texCubeSpinner addChild: texCube];
+	
+	// Cube is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _texCubeSpinner andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _texCubeSpinner];
 }
 
@@ -985,6 +889,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	_teapotTextured.location = cc3v(0.0, 150.0, -650.0);
 	_teapotTextured.uniformScale = 500.0;
+	
+	// Teapots are added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _teapotTextured andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _teapotTextured];
 	
 	// Rotate the teapots. The satellite orbits the reflective teapot because it is a child node of the
@@ -1048,6 +955,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_brickWall.isOpen = YES;
 	_brickWall.location = kBrickWallOpenLocation;
 	_brickWall.rotation = cc3v(0, -45, 0);
+	
+	// Wall is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _brickWall andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _brickWall];
 }
 
@@ -1104,6 +1014,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	teapotRed.location = cc3v(100.0, 0.0, 0.0);
 	teapotRed.uniformScale = 100.0;
 	teapotRed.touchEnabled = YES;		// allow this node to be selected by touch events
+	
+	// Teapot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: teapotRed andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: teapotRed];
 	
 	// Green teapot is at postion 100 on the Y-axis
@@ -1111,6 +1024,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Node* teapotGreen = [[teapotRed copyWithName:  kTeapotGreenName] autorelease];
 	teapotGreen.diffuseColor = ccc4f(0.0, 0.7, 0.0, 1.0);
 	teapotGreen.location = cc3v(0.0, 100.0, 0.0);
+
+	// Teapot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: teapotGreen andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: teapotGreen];
 	
 	// Blue teapot is at postion 100 on the Z-axis
@@ -1118,6 +1034,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Node* teapotBlue = [[teapotRed copyWithName:  kTeapotBlueName] autorelease];
 	teapotBlue.diffuseColor = ccc4f(0.0, 0.0, 0.7, 1.0);
 	teapotBlue.location = cc3v(0.0, 0.0, 100.0);
+
+	// Teapot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: teapotBlue andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: teapotBlue];
 }
 
@@ -1131,6 +1050,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
 	_teapotWhite.uniformScale = 200.0;
 	_teapotWhite.touchEnabled = YES;		// allow this node to be selected by touch events
+	
+	// Teapot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _teapotWhite andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: _teapotWhite];
 }
 
@@ -1159,6 +1081,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.shouldUseLighting = NO;
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
 	bmLabel.touchEnabled = YES;
+
+	// Label is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: bmLabel andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: bmLabel];
 	[bmLabel runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				  rotateBy: cc3v(0, 30, 0)]]];
@@ -1300,6 +1225,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Add the wooden sign to the bump-map light tracker so that when the bump-map
 	// texture overlay is displayed, it will interact with the light source.
 	_woodenSign.location = cc3v(-600.0, 250.0, -200.0);
+
+	// Sign is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _woodenSign andMaterializeWithDuration: kFadeInDuration];
 	[_bumpMapLightTracker addChild: _woodenSign];
 }
 
@@ -1389,6 +1317,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_floatingHead.location = kCC3VectorZero;
 	CC3Node* headHolder = [_floatingHead asCameraTrackingWrapper];
 	headHolder.location = cc3v(-500.0, 200.0, 0.0);
+
+	// Head is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: headHolder andMaterializeWithDuration: kFadeInDuration];
 	[_bumpMapLightTracker addChild: headHolder];
 }
 
@@ -1424,6 +1355,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Node* mascotHolder = [_mascot asCameraTrackingWrapper];
 	_mascot.rotation = cc3v(0, -90, 0);
 	mascotHolder.location = cc3v(-450.0, 100.0, -575.0);
+
+	// Mascot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: mascotHolder andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: mascotHolder];
 
 	// Arrange for the mascot to be distracted by the rainbow teapot's movements.
@@ -1435,6 +1369,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	distractedMascot.rotation = cc3v(0, -90, 0);
 	distractedMascotHolder.location = cc3v(-375.0, 100.0, -700.0);
 	distractedMascotHolder.target = _teapotSatellite;
+
+	// Mascot is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: distractedMascotHolder andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: distractedMascotHolder];
 
 	// If you want to restrict the mascot to only rotating side-to-side around the
@@ -1611,7 +1548,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	malletAndAnvils.location = cc3v(300.0, 95.0, 300.0);
 	malletAndAnvils.rotation = cc3v(0.0, -45.0, 0.0);
 	malletAndAnvils.uniformScale = 0.15;
-	[self addChild: malletAndAnvils];
 	
 	CCActionInterval* hammering = [CC3Animate actionWithDuration: 3.0];
 	[malletAndAnvils runAction: [CCRepeatForever actionWithAction: hammering]];
@@ -1619,6 +1555,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Spin the mallet and anvils around for effect
 	[malletAndAnvils runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																						  rotateBy: cc3v(0.0, 10.0, 0.0)]]];
+
+	// Mallet is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: malletAndAnvils andMaterializeWithDuration: kFadeInDuration];
+	[self addChild: malletAndAnvils];
 }
 
 /**
@@ -1660,7 +1600,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// then rotate the "track" to move the man. It's really just an invisible boom holding the man.
 	CC3Node* runningTrack = [CC3Node nodeWithName: kRunningTrackName];
 	runningTrack.location = _ground.location;
-	[self addChild: runningTrack];
 
 	// Place the man on the track, near the edge of the ground frame
 	runner.location = cc3v(0, 0, 1100);
@@ -1745,6 +1684,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[mat addTexture: emTex];
 	mat.reflectivity = lbReflect;
 #endif	// !CC3_OGLES_1
+	
+	// Runners are added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: runningTrack andMaterializeWithDuration: kFadeInDuration];
+	[self addChild: runningTrack];
 }
 
 /**
@@ -1766,7 +1709,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													andPixelType: GL_UNSIGNED_SHORT_5_6_5];
 	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
 	[_tvSurface validate];
-
+	
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
 	// lighting. Since we want to frequently access the TV screen mesh node, it is given a
@@ -1782,11 +1725,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_tvScreen.diffuseColor = kCCC4FWhite;
 	_tvScreen.shouldUseLighting = NO;
 	_tvScreen.shouldCullFrontFaces = YES;		// But don't paint both front and back of screen
-
+	
 	// Start with a test card displayed on the TV
 	_tvTestCardTex = [[CC3Texture textureFromFile: kTVTestCardFile] retain];
 	_tvScreen.texture = _tvTestCardTex;
 	
+	// TV is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: tv andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: tv];
 	
 	_isTVOn = NO;		// Indicate TV is displaying test card
@@ -2269,6 +2214,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3Vector maskOffset = CC3VectorScaleUniform(mask.location, maskHolder.uniformScale);
 	maskHolder.location = CC3VectorDifference(cc3v(-750.0, 100.0, -500.0), maskOffset);
 
+	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: maskHolder andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: maskHolder];
 
 	// Make the mask touchable and animate it.
@@ -2311,6 +2258,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	mask.uniformScale = 4.0;
 	mask.location = cc3v(-750.0, 50.0, -500.0);
+
+	// Mask is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: mask andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: mask];
 	
 	// Make the mask touchable and animate it.
@@ -2573,13 +2523,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) onOpen {
 
-	[self.viewSurfaceManager.backgrounder runBlock: ^{
-		[self addFreshContent];
-	}];
-
 	// Add post-processing capabilities, demonstrating render-to-texture
 	// and post-rendering image processing.
 	[self addPostProcessing];
+	
+	// Add additional scene content dynamically and asynchronously on a background thread
+	// after rendering has begun on the rendering thread. We use the GL backgrounder provided
+	// by the viewSurfaceManager to accomplish this. Asynchronous loading must be initiated
+	// after the scene has been attached to the view. It cannot be started in the
+	// initializeScene method.
+	[self.viewSurfaceManager.backgrounder runBlock: ^{
+		[self addSceneContentAsynchronously];
+	}];
 
 	// Uncomment the first line to have the camera move to show the entire scene.
 	// Uncomment the second line to draw the bounding box of the scene.

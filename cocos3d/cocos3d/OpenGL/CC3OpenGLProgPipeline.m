@@ -100,13 +100,9 @@
 	CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 	glVertexAttribPointer(vaIdx, vaPtr->elementSize, vaPtr->elementType,
 						  vaPtr->shouldNormalize, vaPtr->vertexStride, vaPtr->vertices);
-	LogGLErrorTrace(@"glVertexAttribPointer(%i, %i, %@, %i, %p)", vaIdx, vaPtr->elementSize,
-					NSStringFromGLEnum(vaPtr->elementType), vaPtr->vertexStride, vaPtr->vertices);
-}
-
--(void) clearUnboundVertexAttributes {
-	[super clearUnboundVertexAttributes];
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
+	LogGLErrorTrace(@"glVertexAttribPointer(%i, %i, %@, %@, %i, %p)", vaIdx, vaPtr->elementSize,
+					NSStringFromGLEnum(vaPtr->elementType), NSStringFromBoolean(vaPtr->shouldNormalize),
+					vaPtr->vertexStride, vaPtr->vertices);
 }
 
 -(void) enable2DVertexAttributes {
@@ -124,8 +120,10 @@
 	}
 }
 
-// Mark position, color & tex coords as unknown
 -(void) align3DVertexAttributeState {
+	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
+
+	// Mark position, color & tex coords as unknown
 	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		switch (vaIdx) {
 			case kCCVertexAttrib_Position:

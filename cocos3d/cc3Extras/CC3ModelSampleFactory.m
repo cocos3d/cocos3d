@@ -56,17 +56,17 @@
 -(void) initTeapotVertexArrays {
 	
 	// Vertex locations come from the teapot.h header file
-	teapotVertexLocations = [CC3VertexLocations vertexArrayWithName: @"TeapotVertices"];
+	teapotVertexLocations = [[CC3VertexLocations vertexArrayWithName: @"TeapotVertices"] retain];
 	teapotVertexLocations.vertexCount = num_teapot_vertices;
 	teapotVertexLocations.vertices = teapot_vertices;
 	
 	// Vertex normals come from the teapot.h header file
-	teapotVertexNormals = [CC3VertexNormals vertexArrayWithName: @"TeapotNormals"];
+	teapotVertexNormals = [[CC3VertexNormals vertexArrayWithName: @"TeapotNormals"] retain];
 	teapotVertexNormals.vertexCount = num_teapot_normals;
 	teapotVertexNormals.vertices = teapot_normals;
 	
 	// Vertex indices populated from the run-length array in the teapot.h header file
-	teapotVertexIndices = [CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"];
+	teapotVertexIndices = [[CC3VertexIndices vertexArrayWithName: @"TeapotIndicies"] retain];
 	[teapotVertexIndices populateFromRunLengthArray: (GLushort*)new_teapot_indicies
 										   ofLength: num_teapot_indices];
 	teapotVertexIndices.drawingMode = GL_TRIANGLE_STRIP;
@@ -92,7 +92,7 @@
 	// Create a color array to assign colors to each vertex in a simple gradient pattern.
 	// This would never happen in practice. Normally, the color array would be applied
 	// and extracted as part of the creation of a mesh in a visual editor.
-	teapotVertexColors = [CC3VertexColors vertexArrayWithName: @"TeapotColors"];
+	teapotVertexColors = [[CC3VertexColors vertexArrayWithName: @"TeapotColors"] retain];
 	teapotVertexColors.allocatedVertexCapacity = vCount;
 	ccColor4B* vCols = (ccColor4B*)teapotVertexColors.vertices;
 	for (GLuint i=0; i < vCount; i++) {
@@ -105,7 +105,7 @@
 	// Progamatically create a texture array to map an arbitrary texture to the mesh vertices
 	// in the X-Y plane. This would never happen in practice. Normally, the texture array would
 	// be painted and extracted as part of the creation of a mesh in a 3D visual editor.
-	teapotVertexTextureCoordinates = [CC3VertexTextureCoordinates vertexArrayWithName: @"TeapotTexture"];
+	teapotVertexTextureCoordinates = [[CC3VertexTextureCoordinates vertexArrayWithName: @"TeapotTexture"] retain];
 	teapotVertexTextureCoordinates.allocatedVertexCapacity = vCount;
 	ccTex2F* vTexCoord = (ccTex2F*)teapotVertexTextureCoordinates.vertices;
 	for (GLuint i=0; i < vCount; i++) {
@@ -121,14 +121,14 @@
 	[self initTeapotVertexArrays];
 	
 	// Mesh to support a teapot with single-colored material
-	unicoloredTeapotMesh = [self makeTeapotMeshNamed: @"UnicoloredTeapot"];
+	unicoloredTeapotMesh = [[self makeTeapotMeshNamed: @"UnicoloredTeapot"] retain];
 	
 	// Mesh to support a teapot with separately colored vertices
-	multicoloredTeapotMesh = [self makeTeapotMeshNamed: @"MulticolorTeapot"];
+	multicoloredTeapotMesh = [[self makeTeapotMeshNamed: @"MulticolorTeapot"] retain];
 	multicoloredTeapotMesh.vertexColors = teapotVertexColors;
 	
 	// Mesh to support a teapot with a textured surface
-	texturedTeapotMesh = [self makeTeapotMeshNamed: @"TexturedTeapot"];
+	texturedTeapotMesh = [[self makeTeapotMeshNamed: @"TexturedTeapot"] retain];
 	texturedTeapotMesh.vertexTextureCoordinates = teapotVertexTextureCoordinates;
 }
 

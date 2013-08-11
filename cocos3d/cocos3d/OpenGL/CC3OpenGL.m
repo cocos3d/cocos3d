@@ -196,7 +196,6 @@
 		cc3_CheckGLPrim(buffId, value_GL_ARRAY_BUFFER_BINDING, isKnown_GL_ARRAY_BUFFER_BINDING);
 		if ( !needsUpdate ) return;
 	}
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
 	glBindBuffer(target, buffId);
 	LogGLErrorTrace(@"glBindBuffer(%@, %u)", NSStringFromGLEnum(target), buffId);
 }
