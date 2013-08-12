@@ -48,14 +48,13 @@
 
 
 #pragma mark -
-#pragma mark CC3Scene extensions to support PVR POD content
+#pragma mark CC3Node extensions to support PVR POD resource content
 
 /**
- * This category extends CC3Scene to add convenience methods for loading
- * POD content directly into the CC3Scene instance, adding the extracted
- * and configured nodes as child nodes to the CC3Scene.
+ * This category extends CC3Node to add convenience methods for loading POD content directly into
+ * the CC3Node instance, adding the extracted and configured nodes as child nodes to the CC3Node.
  */
-@interface CC3Scene (PVRPOD)
+@interface CC3Node (PVRPODRez)
 
 /**
  * Instantiates an instance of CC3PODResourceNode, loads it from the POD file at
@@ -67,6 +66,19 @@
  * resources directory, the specified file path can simply be the name of the file.
  * 
  * The name of the resource node will be that of the file.
+ *
+ * If this method is being invoked from a background thread (ie- not the main rendering thread)
+ * AND this node is already part of a scene, this operation will automatically be deferred and
+ * queued onto the main operation queue, to be performed on teh main rendering thread prior to
+ * the next rendeirng cycle. This is to ensure that the node is not added while the scene is
+ * being rendered, to avoid race conditions.
+ *
+ * In this situation, subsequent code executed on the background thread should not rely on the
+ * specified node, or any of its descendants, having been added to the receiver or the scene.
+ * For example, invoking this method on the background thread, followed by getNodeNamed: to the
+ * receiver (or any of its ancestors), will almost certainly return nil, because this method
+ * will have been deferred to the main thread, and will, almost certainly, not have been run by
+ * the time the subsequent getNodeNamed: method is run on the background thread.
  */
 -(void) addContentFromPODFile: (NSString*) aFilepath;
 
@@ -78,6 +90,19 @@
  * The specified file path may be either an absolute path, or a path relative to the
  * application resource directory. If the file is located directly in the application
  * resources directory, the specified file path can simply be the name of the file.
+ *
+ * If this method is being invoked from a background thread (ie- not the main rendering thread)
+ * AND this node is already part of a scene, this operation will automatically be deferred and
+ * queued onto the main operation queue, to be performed on teh main rendering thread prior to
+ * the next rendeirng cycle. This is to ensure that the node is not added while the scene is
+ * being rendered, to avoid race conditions.
+ *
+ * In this situation, subsequent code executed on the background thread should not rely on the
+ * specified node, or any of its descendants, having been added to the receiver or the scene.
+ * For example, invoking this method on the background thread, followed by getNodeNamed: to the
+ * receiver (or any of its ancestors), will almost certainly return nil, because this method
+ * will have been deferred to the main thread, and will, almost certainly, not have been run by
+ * the time the subsequent getNodeNamed: method is run on the background thread.
  */
 -(void) addContentFromPODFile: (NSString*) aFilepath withName: (NSString*) aName;
 

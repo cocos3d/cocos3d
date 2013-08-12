@@ -48,9 +48,9 @@
 
 
 #pragma mark -
-#pragma mark CC3Scene extensions to support PVR POD content
+#pragma mark CC3Node extensions to support PVR POD content
 
-@implementation CC3Scene (PVRPOD)
+@implementation CC3Node (PVRPODRez)
 
 -(void) addContentFromPODFile: (NSString*) aFilepath {
 	[self addChild: [CC3PODResourceNode nodeFromFile: aFilepath]];

@@ -2887,6 +2887,13 @@ typedef enum {
  * queued onto the main operation queue, to be performed on teh main rendering thread prior to
  * the next rendeirng cycle. This is to ensure that the node is not added while the scene is
  * being rendered, to avoid race conditions.
+ *
+ * In this situation, subsequent code executed on the background thread should not rely on the
+ * specified node, or any of its descendants, having been added to the receiver or the scene.
+ * For example, invoking this method on the background thread, followed by getNodeNamed: to the
+ * receiver (or any of its ancestors), will almost certainly return nil, because this method
+ * will have been deferred to the main thread, and will, almost certainly, not have been run by
+ * the time the subsequent getNodeNamed: method is run on the background thread.
  */
 -(void) addChild: (CC3Node*) aNode;
 
