@@ -40,6 +40,7 @@
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 -(void) initTextureUnits;
+-(void) align3DVertexAttributeState;
 @end
 
 @implementation CC3OpenGLFixedPipeline
@@ -194,6 +195,8 @@
 
 // Mark position, color & first tex coords as unknown
 -(void) align3DVertexAttributeState {
+	[super align3DVertexAttributeState];
+
 	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {
 		CC3VertexAttr* vaPtr = &vertexAttributes[vaIdx];
 		switch (vaPtr->semantic) {

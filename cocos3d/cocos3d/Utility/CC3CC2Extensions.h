@@ -57,12 +57,6 @@
 #endif	// CC3_CC2_1
 
 /** Add state caching aliases for compatiblity with 2.1 and above */
-#if CC3_CC2_1
-#	define ccGLBindVAO(vao)
-#elif CC3_CC2_2 && COCOS2D_VERSION < 0x020100
-#	define ccGLBindVAO(vao) glBindVertexArray(vao)
-#endif
-
 #if CC3_CC2_2 && COCOS2D_VERSION < 0x020100
 #	define ccGLBindTexture2DN(texUnit, texID)		\
 	ccGLActiveTexture(GL_TEXTURE0 + (texUnit));		\

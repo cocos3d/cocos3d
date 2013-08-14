@@ -48,6 +48,8 @@
 
 @implementation CC3OpenGL
 
+@synthesize isPrimaryContext=_isPrimaryContext;
+
 -(void) dealloc {
 	[_extensions release];
 	[value_GL_VENDOR release];
@@ -196,6 +198,7 @@
 		cc3_CheckGLPrim(buffId, value_GL_ARRAY_BUFFER_BINDING, isKnown_GL_ARRAY_BUFFER_BINDING);
 		if ( !needsUpdate ) return;
 	}
+	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
 	glBindBuffer(target, buffId);
 	LogGLErrorTrace(@"glBindBuffer(%@, %u)", NSStringFromGLEnum(target), buffId);
 }
@@ -216,6 +219,23 @@
 				 forLength: (GLsizeiptr) length {
 	glBufferSubData(target, offset, length, buffPtr);
 	LogGLErrorTrace(@"glBufferSubData(%@, %i, %i, %p)", NSStringFromGLEnum(target), offset, length, buffPtr);
+}
+
+-(void) bindVertexArrayObject: (GLuint) vaoId {
+
+#if COCOS2D_VERSION >= 0x020100
+	// If this is the primary context, use cocos2d state management. This method can be invoked from
+	// outside the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
+	if (_isPrimaryContext) {
+		ccGLBindVAO(vaoId);
+		return;
+	}
+#endif
+	
+	cc3_CheckGLPrim(vaoId, value_GL_VERTEX_ARRAY_BINDING, isKnown_GL_VERTEX_ARRAY_BINDING);
+	if ( !needsUpdate ) return;
+	glBindVertexArray(vaoId);
+	LogGLErrorTrace(@"glBindVertexArray(%u)", vaoId);
 }
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {
@@ -902,7 +922,7 @@
 }
 
 -(void) align3DVertexAttributeState {
-	CC3AssertUnimplemented(@"align3DVertexAttributeState");
+	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
 }
 
 
@@ -911,12 +931,21 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
 		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+		[self initPrimaryContextProperty];
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
 		[self initExtensions];
 	}
 	return self;
+}
+
+/** 
+ * Sets the isPrimaryContext property to YES if this instance is tracking state for
+ * the GL context on the main thread.
+ */
+-(void) initPrimaryContextProperty {
+	_isPrimaryContext = NSThread.isMainThread;
 }
 
 /** Template method to retrieve the GL platform limits. */

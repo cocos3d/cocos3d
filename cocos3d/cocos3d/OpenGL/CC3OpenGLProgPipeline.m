@@ -40,9 +40,9 @@
 #import "CC3ShaderProgram.h"
 
 @interface CC3OpenGL (TemplateMethods)
--(void) clearUnboundVertexAttributes;
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
+-(void) align3DVertexAttributeState;
 @end
 
 @interface CC3GLSLVariable (ProgPipeline)
@@ -121,7 +121,7 @@
 }
 
 -(void) align3DVertexAttributeState {
-	ccGLBindVAO(0);		// Ensure that a VAO was not left in place by cocos2d
+	[super align3DVertexAttributeState];
 
 	// Mark position, color & tex coords as unknown
 	for (GLuint vaIdx = 0; vaIdx < value_MaxVertexAttribsUsed; vaIdx++) {

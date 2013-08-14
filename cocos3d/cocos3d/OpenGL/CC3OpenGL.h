@@ -77,6 +77,8 @@ typedef struct {
  * if the state really is changing.
  */
 @interface CC3OpenGL : CC3Identifiable {
+	BOOL _isPrimaryContext : 1;
+
 @public
 
 	NSString* value_GL_VENDOR;
@@ -134,7 +136,8 @@ typedef struct {
 
 	GLuint value_GL_ARRAY_BUFFER_BINDING;
 	GLuint value_GL_ELEMENT_ARRAY_BUFFER_BINDING;
-	
+	GLuint value_GL_VERTEX_ARRAY_BINDING;
+
 	GLuint value_GL_ACTIVE_TEXTURE;
 	GLuint value_MaxTextureUnitsUsed;
 	
@@ -192,7 +195,8 @@ typedef struct {
 	
 	BOOL isKnown_GL_ARRAY_BUFFER_BINDING : 1;
 	BOOL isKnown_GL_ELEMENT_ARRAY_BUFFER_BINDING : 1;
-	
+	BOOL isKnown_GL_VERTEX_ARRAY_BINDING : 1;
+
 	BOOL isKnown_GL_ACTIVE_TEXTURE : 1;
 	
 	BOOL isKnown_GL_FRAMEBUFFER_BINDING : 1;
@@ -202,6 +206,12 @@ typedef struct {
 	BOOL isKnown_GL_UNPACK_ALIGNMENT : 1;
 
 }
+
+/**
+ * Returns whether this instance is tracking state for the primary rendering GL context
+ * on the main thread.
+ */
+@property(nonatomic, readonly) BOOL isPrimaryContext;
 
 
 #pragma mark Capabilities
@@ -366,6 +376,9 @@ typedef struct {
 				  withData: (GLvoid*) buffPtr
 				startingAt: (GLintptr) offset
 				 forLength: (GLsizeiptr) length;
+
+/** Binds the VAO with the specified ID. */
+-(void) bindVertexArrayObject: (GLuint) vaoId;
 
 /**
  * Draws vertices bound by the vertex pointers using the specified draw mode,
