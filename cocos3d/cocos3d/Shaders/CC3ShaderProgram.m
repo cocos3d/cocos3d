@@ -465,9 +465,37 @@ static CC3Cache* _shaderCache = nil;
 	return self;
 }
 
+-(id) initWithVertexShader: (CC3VertexShader*) vertexShader
+		 andFragmentShader: (CC3FragmentShader*) fragmentShader {
+	return [self initWithSemanticDelegate: self.class.programMatcher.semanticDelegate
+						 withVertexShader: vertexShader
+						andFragmentShader: fragmentShader];
+}
+
++(id) programWithVertexShader: (CC3VertexShader*) vertexShader
+			andFragmentShader: (CC3FragmentShader*) fragmentShader {
+	return [self programWithSemanticDelegate: self.programMatcher.semanticDelegate
+							withVertexShader: vertexShader
+						   andFragmentShader: fragmentShader];
+}
+
+-(id) initFromVertexShaderFile: (NSString*) vshFilePath
+		 andFragmentShaderFile: (NSString*) fshFilePath {
+	return [self initWithSemanticDelegate: self.class.programMatcher.semanticDelegate
+					 fromVertexShaderFile: vshFilePath
+					andFragmentShaderFile: fshFilePath];
+}
+
++(id) programFromVertexShaderFile: (NSString*) vshFilePath
+			andFragmentShaderFile: (NSString*) fshFilePath {
+	return [self programWithSemanticDelegate: self.programMatcher.semanticDelegate
+						fromVertexShaderFile: vshFilePath
+					   andFragmentShaderFile: fshFilePath];
+}
+
 -(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
 			  withVertexShader: (CC3VertexShader*) vertexShader
-			withFragmentShader: (CC3FragmentShader*) fragmentShader {
+			 andFragmentShader: (CC3FragmentShader*) fragmentShader {
 	NSString* progName = [self.class programNameFromVertexShaderName: vertexShader.name
 											   andFragmentShaderName: fragmentShader.name];
 	if ( (self = [self initWithName: progName]) ) {
@@ -481,7 +509,7 @@ static CC3Cache* _shaderCache = nil;
 
 +(id) programWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
 				 withVertexShader: (CC3VertexShader*) vertexShader
-			   withFragmentShader: (CC3FragmentShader*) fragmentShader {
+				andFragmentShader: (CC3FragmentShader*) fragmentShader {
 	NSString* progName = [self programNameFromVertexShaderName: vertexShader.name
 										 andFragmentShaderName: fragmentShader.name];
 	id program = [self getProgramNamed: progName];
@@ -489,7 +517,7 @@ static CC3Cache* _shaderCache = nil;
 	
 	program = [[self alloc] initWithSemanticDelegate: semanticDelegate
 									withVertexShader: vertexShader
-								  withFragmentShader: fragmentShader];
+								   andFragmentShader: fragmentShader];
 	[self addProgram: program];
 	return [program autorelease];
 }
@@ -499,7 +527,7 @@ static CC3Cache* _shaderCache = nil;
 		 andFragmentShaderFile: (NSString*) fshFilePath {
 	return [self initWithSemanticDelegate: semanticDelegate
 						 withVertexShader: [CC3VertexShader shaderFromSourceCodeFile: vshFilePath]
-					   withFragmentShader: [CC3FragmentShader shaderFromSourceCodeFile: fshFilePath]];
+						andFragmentShader: [CC3FragmentShader shaderFromSourceCodeFile: fshFilePath]];
 }
 
 +(id) programWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
@@ -507,7 +535,7 @@ static CC3Cache* _shaderCache = nil;
 			andFragmentShaderFile: (NSString*) fshFilePath {
 	return [self programWithSemanticDelegate: semanticDelegate
 							withVertexShader: [CC3VertexShader shaderFromSourceCodeFile: vshFilePath]
-						  withFragmentShader: [CC3FragmentShader shaderFromSourceCodeFile: fshFilePath]];
+						   andFragmentShader: [CC3FragmentShader shaderFromSourceCodeFile: fshFilePath]];
 }
 
 +(NSString*) programNameFromVertexShaderName: (NSString*) vertexShaderName

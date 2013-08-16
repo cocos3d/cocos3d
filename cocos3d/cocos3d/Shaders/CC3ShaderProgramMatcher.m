@@ -91,11 +91,11 @@
 	}
 	
 	// Bump-mapping using a tangent-space normal map texture.
-	if (texCnt > 0 && aMeshNode.mesh.hasVertexTangents)
+	if (texCnt > 1 && aMeshNode.mesh.hasVertexTangents)
 		return [self bumpMapTangentSpaceProgram: shouldAlphaTest];
 	
 	// Bump-mapping using an object-space normal map texture.
-	if (texCnt > 0 && mat.hasBumpMap)
+	if (texCnt > 1 && mat.hasBumpMap)
 		return [self bumpMapObjectSpaceProgram: shouldAlphaTest];
 	
 	// Single texture with no configurable texture unit

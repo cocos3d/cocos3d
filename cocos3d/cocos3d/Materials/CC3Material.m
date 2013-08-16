@@ -202,11 +202,11 @@
 
 -(void) updateDisplayedOpacity: (GLubyte) opacity {}
 
-static ccBlendFunc defaultBlendFunc = {GL_ONE, GL_ZERO};
+static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 
-+(ccBlendFunc) defaultBlendFunc { return defaultBlendFunc; }
++(ccBlendFunc) defaultBlendFunc { return _defaultBlendFunc; }
 
-+(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc { defaultBlendFunc = aBlendFunc; }
++(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc { _defaultBlendFunc = aBlendFunc; }
 
 
 #pragma mark Textures

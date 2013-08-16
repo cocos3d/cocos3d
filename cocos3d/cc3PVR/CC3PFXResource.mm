@@ -343,7 +343,7 @@ static Class _defaultSemanticDelegateClass = nil;
 
 	_shaderProgram = [self.shaderProgramClass programWithSemanticDelegate: semanticDelegate
 														 withVertexShader: vtxShader
-													   withFragmentShader: fragShader];
+														andFragmentShader: fragShader];
 #endif	// CC3_GLSL
 }
 

@@ -412,6 +412,111 @@
 #pragma mark Allocation and initialization
 
 /**
+ * Initializes this instance by linking the specified vertex shader and fragment shader
+ * into this program.
+ * 
+ * The semanticDelegate property is set to the default semantic delegate returned from the
+ * semanticDelegate property of the program matcher in the class-side programMatcher property.
+ *
+ * This method uses the programNameFromVertexShaderName:andFragmentShaderName: method to
+ * set the name of this instance from the names of the vertex and fragment shaders.
+ *
+ * Since a single GL program can be used by many nodes and materials, shaders are cached.
+ * Before invoking this method, you should invoke the class-side getProgramNamed: method to
+ * detemine whether a GL program with the specified name exists already, and after invoking
+ * this method, you should use the class-side addProgram: method to add the new GL program
+ * instance to the program cache.
+ */
+-(id) initWithVertexShader: (CC3VertexShader*) vertexShader
+		 andFragmentShader: (CC3FragmentShader*) fragmentShader;
+
+/**
+ * Returns an instance by linking the specified vertex shader and fragment shader into this program.
+ *
+ * The semanticDelegate property is set to the default semantic delegate returned from the
+ * semanticDelegate property of the program matcher in the class-side programMatcher property.
+ *
+ * Programs loaded through this method are cached. If the program was already loaded and is in
+ * the cache, it is retrieved and returned. If the program has not in the cache, it is loaded,
+ * compiled, and linked, placed into the cache, and returned. It is therefore safe to invoke
+ * this method any time the program is needed, without having to worry that the program will
+ * be repeatedly loaded and compiled from the files.
+ *
+ * This method uses the programNameFromVertexShaderName:andFragmentShaderName: method to
+ * set the name of the instance from the names of the vertex and fragment shaders, and to
+ * attempt to retrieve the program from the cache, prior to creating a new program.
+ *
+ * To clear a program instance from the cache, use the removeProgram: method.
+ *
+ * To create the program directly, bypassing the cache, use the alloc and
+ * initWithSemanticDelegate:withVertexShader:withFragmentShader: methods. This
+ * technique can be used to create the same program twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ */
++(id) programWithVertexShader: (CC3VertexShader*) vertexShader
+			andFragmentShader: (CC3FragmentShader*) fragmentShader;
+
+/**
+ * Initializes this instance by compiling and linking the GLSL source code loaded from the
+ * specified vertex and fragment shader files.
+ *
+ * If a shader has already been loaded, compiled, and cached, the cached shader will be
+ * reused, and will not be reloaded and recompiled from the file.
+ *
+ * The specified file paths may be either absolute paths, or relative to the application
+ * resource directory. If the files are located directly in the application resources
+ * directory, the specified file paths can simply be the names of the files.
+ *
+ * The semanticDelegate property is set to the default semantic delegate returned from the
+ * semanticDelegate property of the program matcher in the class-side programMatcher property.
+ *
+ * This method uses the programNameFromVertexShaderName:andFragmentShaderName: method to
+ * set the name of this instance from the names of the vertex and fragment shaders.
+ *
+ * Since a single GL program can be used by many nodes and materials, shaders are cached.
+ * Before invoking this method, you should invoke the class-side getProgramNamed: method to
+ * detemine whether a GL program with the specified name exists already, and after invoking
+ * this method, you should use the class-side addProgram: method to add the new GL program
+ * instance to the program cache.
+ */
+-(id) initFromVertexShaderFile: (NSString*) vshFilePath
+		 andFragmentShaderFile: (NSString*) fshFilePath;
+
+/**
+ * Returns an instance by compiling and linking the GLSL source code loaded from the
+ * specified vertex and fragment shader files.
+ *
+ * If either shader has already been loaded, compiled, and cached, the cached shader will
+ * be reused, and will not be reloaded and recompiled from the file.
+ *
+ * The specified file paths may be either absolute paths, or relative to the application
+ * resource directory. If the files are located directly in the application resources
+ * directory, the specified file paths can simply be the names of the files.
+ *
+ * The semanticDelegate property is set to the default semantic delegate returned from the
+ * semanticDelegate property of the program matcher in the class-side programMatcher property.
+ *
+ * Programs loaded through this method are cached. If the program was already loaded and is in
+ * the cache, it is retrieved and returned. If the program has not in the cache, it is loaded,
+ * compiled, and linked, placed into the cache, and returned. It is therefore safe to invoke
+ * this method any time the program is needed, without having to worry that the program will
+ * be repeatedly loaded and compiled from the files.
+ *
+ * This method uses the programNameFromVertexShaderName:andFragmentShaderName: method to
+ * set the name of the instance from the names of the vertex and fragment shaders, and to
+ * attempt to retrieve the program from the cache, prior to creating a new program.
+ *
+ * To clear a program instance from the cache, use the removeProgram: method.
+ *
+ * To create the program directly, bypassing the cache, use the alloc and
+ * initWithSemanticDelegate:fromVertexShaderFile:andFragmentShaderFile: methods. This
+ * technique can be used to create the same program twice, if needed for some reason.
+ * Each distinct instance can then be given its own name, and added to the cache separately.
+ */
++(id) programFromVertexShaderFile: (NSString*) vshFilePath
+			andFragmentShaderFile: (NSString*) fshFilePath;
+
+/**
  * Initializes this instance by attaching the specified semantic delegate, and linking the
  * specified vertex shader and fragment shader into this program.
  *
@@ -426,7 +531,7 @@
  */
 -(id) initWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
 			  withVertexShader: (CC3VertexShader*) vertexShader
-			withFragmentShader: (CC3FragmentShader*) fragmentShader;
+			 andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
  * Returns an instance by attaching the specified semantic delegate, and linking the
@@ -451,7 +556,7 @@
  */
 +(id) programWithSemanticDelegate: (id<CC3ShaderProgramSemanticsDelegate>) semanticDelegate
 				 withVertexShader: (CC3VertexShader*) vertexShader
-			   withFragmentShader: (CC3FragmentShader*) fragmentShader;
+				andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
  * Initializes this instance by attaching the specified semantic delegate, and compiling and

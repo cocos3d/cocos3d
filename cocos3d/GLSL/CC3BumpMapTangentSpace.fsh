@@ -36,7 +36,7 @@
  * An optional second texture in texture unit 1 contains the visible texture to be applied on
  * top of the bump-mapped texture. If this texture is not available, the fragment color is used.
  *
- * CC3BumpMapTangentSpace.vsh is the vertex shader paired with this fragment shader.
+ * CC3Texturable.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3ShaderProgramSemanticsByVarName instance.
