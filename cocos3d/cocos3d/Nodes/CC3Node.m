@@ -2022,6 +2022,95 @@ static GLuint lastAssignedNodeTag;
 																		forNode: self]];
 }
 
+-(GLuint) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime {
+	return [self addAnimationFrom: startTime to: endTime ofBaseTrack: 0];
+}
+
+-(GLuint) addAnimationFrom: (ccTime) startTime
+						to: (ccTime) endTime
+			   ofBaseTrack: (GLuint) baseTrackID {
+	GLuint trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationFrom: startTime to: endTime ofBaseTrack: baseTrackID asTrack: trackID];
+	return trackID;
+}
+
+-(void) addAnimationFrom: (ccTime) startTime to: (ccTime) endTime asTrack: (GLuint) trackID {
+	[self addAnimationFrom: startTime to: endTime ofBaseTrack: 0 asTrack: trackID];
+}
+
+-(void) addAnimationFrom: (ccTime) startTime
+					  to: (ccTime) endTime
+			 ofBaseTrack: (GLuint) baseTrackID
+				 asTrack: (GLuint) trackID {
+
+	// Retrieve the base animation, and contruct a partial animation on it
+	CC3NodeAnimation* baseAnim = [self getAnimationOnTrack: baseTrackID];
+	if (baseAnim) {
+		[self addAnimation: [CC3NodeAnimationSegment animationOnAnimation: baseAnim
+																	 from: startTime
+																	   to: endTime]
+				   asTrack: trackID];
+	}
+
+	// Propagate to children
+	for (CC3Node* child in self.children) {
+		[child addAnimationFrom: startTime
+							 to: endTime
+					ofBaseTrack: baseTrackID
+						asTrack: trackID];
+	}
+}
+
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex {
+	return [self addAnimationFromFrame: startFrameIndex
+							   toFrame: endFrameIndex
+						   ofBaseTrack: 0];
+}
+
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex
+					ofBaseTrack: (GLuint) baseTrackID {
+	GLuint trackID = [CC3NodeAnimationState generateTrackID];
+	[self addAnimationFromFrame: startFrameIndex
+						toFrame: endFrameIndex
+					ofBaseTrack: baseTrackID
+						asTrack: trackID];
+	return trackID;
+}
+
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+					  asTrack: (GLuint) trackID {
+	[self addAnimationFromFrame: startFrameIndex
+						toFrame: endFrameIndex
+					ofBaseTrack: 0
+						asTrack: trackID];
+}
+
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+				  ofBaseTrack: (GLuint) baseTrackID
+					  asTrack: (GLuint) trackID {
+	
+	// Retrieve the base animation, and contruct a partial animation on it
+	CC3NodeAnimation* baseAnim = [self getAnimationOnTrack: baseTrackID];
+	if (baseAnim) {
+		[self addAnimation: [CC3NodeAnimationSegment animationOnAnimation: baseAnim
+																fromFrame: startFrameIndex
+																  toFrame: endFrameIndex]
+				   asTrack: trackID];
+	}
+	
+	// Propagate to children
+	for (CC3Node* child in self.children) {
+		[child addAnimationFromFrame: startFrameIndex
+							 toFrame: endFrameIndex
+						 ofBaseTrack: baseTrackID
+							 asTrack: trackID];
+	}
+}
+
 -(CC3NodeAnimationState*) getAnimationStateForAnimation: (CC3NodeAnimation*) animation {
 	for (CC3NodeAnimationState* as in _animationStates) if (as.animation == animation) return as;
 	return nil;

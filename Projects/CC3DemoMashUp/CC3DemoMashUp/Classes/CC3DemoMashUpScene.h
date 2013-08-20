@@ -59,6 +59,13 @@ typedef enum {
 	kLightingDepth,				/**< Display the depth buffer using a post-processing filter. */
 } LightingType;
 
+/** Enumeration of dragon motion options. */
+typedef enum {
+	kDragonStill,			/**< No motion. */
+	kDragonFlapping,		/**< Flapping. */
+	kDragonGliding,			/**< Gliding. */
+} DragonMotion;
+
 /**
  * A sample application-specific CC3Scene subclass that demonstrates a number of 3D features:
  *   - loading mesh models, cameras and lights from 3D model files stored in the PowerVR POD format
@@ -453,10 +460,6 @@ typedef enum {
  *     loaded from a POD file to add additional functionality to that node. This is done here
  *     so that the POD class can be swapped for one that controls the freewheeling and friction.
  *
- * The die cube POD file was created from a Blender model available from the Blender
- * "Two dice" modeling tutorial available online at:
- * http://wiki.blender.org/index.php/Doc:Tutorials/Modeling/Two_dice
- * 
  * Below the die cube is a multi-colored cube created parametrically and wrapped on all six
  * sides by a single texture. The texture is laid out specifically to wrap around box nodes.
  * See the BoxTexture.png image to see the layout of a texture that will be wrapped around
@@ -472,6 +475,19 @@ typedef enum {
  * 
  * Touching the switch-view button one final time will point the camera back at the animated
  * robot arm.
+ *
+ * Flying high above the scene is an dragon. Each time the dragon is touched it switches to
+ * a different animated movement. The transition from one movement to the next is smooth,
+ * regardless of when the dragon is touched. This demonstrates the ability to apply multiple
+ * animation tracks to a model, blend them together, and to smoothly transition between those
+ * tracks by using a cross-fade action to dynamically adjust the relative blending weight of
+ * each animation track. 
+ *
+ * This dragon example also demonstrates the ability to concatenate many discrete animated
+ * movements into a single long animation within a 3D editor, and single POD file, and then 
+ * to extract each distinct movement into its own animation track within cocos3d, so that 
+ * each can be applied by itself to the model, repeated in a loop, or blended with other
+ * animated movements.
  *
  * Touching the invasion button (with the grid of dots on it) will unleash an army of robots,
  * by copying the main robot arm many times, and deploying the copies around the grid. Notice
@@ -596,6 +612,10 @@ typedef enum {
 	CC3GLFramebuffer* _preProcSurface;
 	CC3MeshNode* _grayscaleNode;
 	CC3MeshNode* _depthImageNode;
+	CC3Node* _dragon;
+	GLuint _dragonGlideTrack;
+	GLuint _dragonFlapTrack;
+	DragonMotion _dragonMotion;
 	CGPoint _lastTouchEventPoint;
 	struct timeval _lastTouchEventTime;
 	CameraZoomType _cameraZoomType;

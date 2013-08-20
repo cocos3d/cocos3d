@@ -159,7 +159,7 @@
 +(id) animationWithFrameCount: (GLuint) numFrames;
 
 
-#pragma mark Updating
+#pragma mark Animating
 
 /**
  * Updates the location, quaternion, and scale of the specified animation state based on the
@@ -380,6 +380,151 @@
 
 
 #pragma mark -
+#pragma mark CC3NodeAnimationSegment
+
+/**
+ * A CC3NodeAnimationSegment plays a segment of the animation data contained within another
+ * CC3NodeAnimation.
+ *
+ * An instance of CC3NodeAnimationSegment is constructed with a reference to an underlying
+ * base animation, along with references to start and end times within that underlying animation.
+ *
+ * The CC3NodeAnimationSegment maps its standard zero-to-one animation range to the segment
+ * of the base animation defined by the start and end times of the CC3NodeAnimationSegment.
+ *
+ * As an example, a CC3NodeAnimationSegment with a startTime of 0.2 and endTime of 0.5 maps
+ * the full 0.0 - 1.0 animation range to the frames contained within the range of 0.2 - 0.5
+ * in the base animation. In this case, requesting the animation of frames at times 0.0, 0.4
+ * and 1.0 from the CC3NodeAnimationSegment instance will result in the animation of the
+ * frames at times 0.2, 0.32, 0.5 from the base animation (0.32 = 0.2 + (0.5 - 0.2) * 0.4).
+ *
+ * The values of all read-only properties and methods are retrieved from the underlying base animation.
+ */
+@interface CC3NodeAnimationSegment : CC3NodeAnimation {
+	CC3NodeAnimation* _baseAnimation;
+	ccTime _startTime;
+	ccTime _endTime;
+}
+
+/** The CC3NodeAnimation containing the underlying animation data. */
+@property(nonatomic, retain, readonly) CC3NodeAnimation* baseAnimation;
+
+/**
+ * The time within the underlying animation data that corresponds to the first frame of animation
+ * that will be animated by this instance.
+ *
+ * The value of this property must be between zero and one, with zero and one indicating the
+ * beginning and end of the underlying animation data, respectively.
+ *
+ * See the class notes for more information about how to set the values of the startTime and
+ * endTime properties to create an animation segment from the underlying animation data.
+ */
+@property(nonatomic, assign) ccTime startTime;
+
+/**
+ * The time within the underlying animation data that corresponds to the last frame of animation
+ * that will be animated by this instance.
+ *
+ * The value of this property must be between zero and one, with zero and one indicating the
+ * beginning and end of the underlying animation data, respectively.
+ *
+ * See the class notes for more information about how to set the values of the startTime and
+ * endTime properties to create an animation segment from the underlying animation data.
+ */
+@property(nonatomic, assign) ccTime endTime;
+
+/**
+ * The index of the first frame that will be animated from the underlying animation data.
+ *
+ * The value of this property will be between zero and one less than the value of the frameCount
+ * property.
+ *
+ * This is a convenience property. Setting the value of this property sets the value of the 
+ * startTime property by determining the time of the frame in the underlying base animation 
+ * data corresponding to the frame index. The value derived depends on the number of frames
+ * of animation in the underlying animation data, and whether it has linear or variable frame
+ * timing. The use of this property makes most sense when the frame timing is linear (a constant
+ * time between each pair of consecutive frames).
+ *
+ * See the class notes for more information about how to set the values of the startTime and
+ * endTime properties to create an animation segment from the underlying animation data.
+ */
+@property(nonatomic, assign) GLuint startFrameIndex;
+
+/**
+ * The index of the last frame that will be animated from the underlying animation data.
+ *
+ * The value of this property will be between zero and one less than the value of the frameCount
+ * property.
+ *
+ * This is a convenience property. Setting the value of this property sets the value of the
+ * endTime property by determining the time of the frame in the underlying base animation
+ * data corresponding to the frame index. The value derived depends on the number of frames
+ * of animation in the underlying animation data, and whether it has linear or variable frame
+ * timing. The use of this property makes most sense when the frame timing is linear (a constant
+ * time between each pair of consecutive frames).
+ *
+ * See the class notes for more information about how to set the values of the startTime and
+ * endTime properties to create an animation segment from the underlying animation data.
+ */
+@property(nonatomic, assign) GLuint endFrameIndex;
+
+
+#pragma mark Allocation and initialization
+
+/** 
+ * Initializes this instance to animate a segment of the specified base animation.
+ *
+ * Initially, this animation will use the entire base animation. You can limit the range
+ * to a segment of the full animation by setting the startTime and endTime properties.
+ */
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate a segment of the specified
+ * base animation.
+ *
+ * Initially, this animation will use the entire base animation. You can limit the range
+ * to a segment of the full animation by setting the startTime and endTime properties.
+ */
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation;
+
+/**
+ * Initializes this instance to animate a segment of the specified base animation, and with
+ * the startTime and endTime properties set to the specified value.
+ */
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation
+				 from: (ccTime) startTime
+				   to: (ccTime) endTime;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate a segment of the specified
+ * base animation, and with the startTime and endTime properties set to the specified value.
+ */
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation
+					  from: (ccTime) startTime
+						to: (ccTime) endTime;
+
+/**
+ * Initializes this instance to animate a segment of the specified base animation, and with
+ * the startFrameIndex and endFrameIndex properties set to the specified value.
+ */
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation
+			fromFrame: (GLuint) startFrameIndex
+			  toFrame: (GLuint) endFrameIndex;
+
+/**
+ * Allocates and initializes an autoreleased instance to animate a segment of the specified
+ * animation, and with the startTime and endTime properties to the specified value.
+ */
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation
+				 fromFrame: (GLuint) startFrameIndex
+				   toFrame: (GLuint) endFrameIndex;
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3NodeAnimationState
 
 /**
@@ -548,7 +693,7 @@
 @property(nonatomic, readonly) BOOL hasVariableFrameTiming;
 
 
-#pragma mark Updating
+#pragma mark Animating
 
 /**
  * Updates the currentFrame, location, quaternion, and scale of this instance based on the

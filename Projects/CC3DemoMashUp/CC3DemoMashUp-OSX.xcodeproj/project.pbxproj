@@ -43,6 +43,13 @@
 		A96E0CD4170DC8060044CA2A /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */; };
 		A96E0CD6170DC8060044CA2A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD5170DC8060044CA2A /* AppKit.framework */; };
 		A96E0CD8170DC8060044CA2A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A96E0CD7170DC8060044CA2A /* Foundation.framework */; };
+		A97398F317C2CA6F00C17D89 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398F217C2CA6F00C17D89 /* BeachBall.pod */; };
+		A97398F517C2CA8000C17D89 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398F417C2CA8000C17D89 /* DieCube.pod */; };
+		A97398FD17C2CA8F00C17D89 /* Dragon-diffuse.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398F717C2CA8F00C17D89 /* Dragon-diffuse.jpg */; };
+		A97398FE17C2CA8F00C17D89 /* Dragon-eye.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398F817C2CA8F00C17D89 /* Dragon-eye.jpg */; };
+		A97398FF17C2CA8F00C17D89 /* Dragon-normals.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398F917C2CA8F00C17D89 /* Dragon-normals.jpg */; };
+		A973990117C2CA8F00C17D89 /* Dragon.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398FB17C2CA8F00C17D89 /* Dragon.pod */; };
+		A973990217C2CA8F00C17D89 /* DRAGON_LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = A97398FC17C2CA8F00C17D89 /* DRAGON_LICENSE.txt */; };
 		A9742D95170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9742D8C170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.m */; };
 		A9742D96170DD6A8001FD5A2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9742D8D170DD6A8001FD5A2 /* InfoPlist.strings */; };
 		A9742D97170DD6A8001FD5A2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = A9742D8F170DD6A8001FD5A2 /* MainMenu.xib */; };
@@ -52,7 +59,6 @@
 		A9742DD3170DD72B001FD5A2 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742D9D170DD72B001FD5A2 /* Arial32BMGlyph.png */; };
 		A9742DD4170DD72B001FD5A2 /* ArrowLeftButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742D9E170DD72B001FD5A2 /* ArrowLeftButton48x48.png */; };
 		A9742DD5170DD72B001FD5A2 /* BallBoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742D9F170DD72B001FD5A2 /* BallBoxTexture.png */; };
-		A9742DD6170DD72B001FD5A2 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA0170DD72B001FD5A2 /* BeachBall.pod */; };
 		A9742DD7170DD72B001FD5A2 /* BoxTexture.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA1170DD72B001FD5A2 /* BoxTexture.png */; };
 		A9742DD8170DD72B001FD5A2 /* Bricks-Red.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA2170DD72B001FD5A2 /* Bricks-Red.jpg */; };
 		A9742DD9170DD72B001FD5A2 /* ButtonRing48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA3170DD72B001FD5A2 /* ButtonRing48x48.png */; };
@@ -62,7 +68,6 @@
 		A9742DDE170DD72B001FD5A2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA8170DD72B001FD5A2 /* Default.png */; };
 		A9742DDF170DD72B001FD5A2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DA9170DD72B001FD5A2 /* Default-568h@2x.png */; };
 		A9742DE0170DD72B001FD5A2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DAA170DD72B001FD5A2 /* Default@2x.png */; };
-		A9742DE1170DD72B001FD5A2 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9742DAB170DD72B001FD5A2 /* DieCube.pod */; };
 		A9742DE2170DD72B001FD5A2 /* earthmap1k.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9742DAC170DD72B001FD5A2 /* earthmap1k.jpg */; };
 		A9742DE3170DD72B001FD5A2 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9742DAD170DD72B001FD5A2 /* Earth_1024.jpg */; };
 		A9742DE4170DD72B001FD5A2 /* fire.png in Resources */ = {isa = PBXBuildFile; fileRef = A9742DAE170DD72B001FD5A2 /* fire.png */; };
@@ -198,6 +203,13 @@
 		A96E0CD3170DC8060044CA2A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A96E0CD5170DC8060044CA2A /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A96E0CD7170DC8060044CA2A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A97398F217C2CA6F00C17D89 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
+		A97398F417C2CA8000C17D89 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = "../../Models/Die Cube/DieCube.pod"; sourceTree = "<group>"; };
+		A97398F717C2CA8F00C17D89 /* Dragon-diffuse.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-diffuse.jpg"; sourceTree = "<group>"; };
+		A97398F817C2CA8F00C17D89 /* Dragon-eye.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-eye.jpg"; sourceTree = "<group>"; };
+		A97398F917C2CA8F00C17D89 /* Dragon-normals.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-normals.jpg"; sourceTree = "<group>"; };
+		A97398FB17C2CA8F00C17D89 /* Dragon.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Dragon.pod; sourceTree = "<group>"; };
+		A97398FC17C2CA8F00C17D89 /* DRAGON_LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DRAGON_LICENSE.txt; sourceTree = "<group>"; };
 		A9742D8B170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpAppDelegate.h; sourceTree = "<group>"; };
 		A9742D8C170DD6A8001FD5A2 /* CC3DemoMashUpAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3DemoMashUpAppDelegate.m; sourceTree = "<group>"; };
 		A9742D8E170DD6A8001FD5A2 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -209,7 +221,6 @@
 		A9742D9D170DD72B001FD5A2 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Arial32BMGlyph.png; path = ../Common/Resources/Arial32BMGlyph.png; sourceTree = "<group>"; };
 		A9742D9E170DD72B001FD5A2 /* ArrowLeftButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ArrowLeftButton48x48.png; path = ../Common/Resources/ArrowLeftButton48x48.png; sourceTree = "<group>"; };
 		A9742D9F170DD72B001FD5A2 /* BallBoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = BallBoxTexture.png; path = ../Common/Resources/BallBoxTexture.png; sourceTree = "<group>"; };
-		A9742DA0170DD72B001FD5A2 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = ../Common/Resources/BeachBall.pod; sourceTree = "<group>"; };
 		A9742DA1170DD72B001FD5A2 /* BoxTexture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = BoxTexture.png; path = ../Common/Resources/BoxTexture.png; sourceTree = "<group>"; };
 		A9742DA2170DD72B001FD5A2 /* Bricks-Red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "Bricks-Red.jpg"; path = "../Common/Resources/Bricks-Red.jpg"; sourceTree = "<group>"; };
 		A9742DA3170DD72B001FD5A2 /* ButtonRing48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ButtonRing48x48.png; path = ../Common/Resources/ButtonRing48x48.png; sourceTree = "<group>"; };
@@ -219,7 +230,6 @@
 		A9742DA8170DD72B001FD5A2 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Common/Resources/Default.png; sourceTree = "<group>"; };
 		A9742DA9170DD72B001FD5A2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Common/Resources/Default-568h@2x.png"; sourceTree = "<group>"; };
 		A9742DAA170DD72B001FD5A2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Common/Resources/Default@2x.png"; sourceTree = "<group>"; };
-		A9742DAB170DD72B001FD5A2 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = ../Common/Resources/DieCube.pod; sourceTree = "<group>"; };
 		A9742DAC170DD72B001FD5A2 /* earthmap1k.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = earthmap1k.jpg; path = ../Common/Resources/earthmap1k.jpg; sourceTree = "<group>"; };
 		A9742DAD170DD72B001FD5A2 /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = Earth_1024.jpg; path = ../Common/Resources/Earth_1024.jpg; sourceTree = "<group>"; };
 		A9742DAE170DD72B001FD5A2 /* fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire.png; path = ../Common/Resources/fire.png; sourceTree = "<group>"; };
@@ -404,6 +414,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		A97398F617C2CA8F00C17D89 /* Dragon */ = {
+			isa = PBXGroup;
+			children = (
+				A97398F717C2CA8F00C17D89 /* Dragon-diffuse.jpg */,
+				A97398F817C2CA8F00C17D89 /* Dragon-eye.jpg */,
+				A97398F917C2CA8F00C17D89 /* Dragon-normals.jpg */,
+				A97398FB17C2CA8F00C17D89 /* Dragon.pod */,
+				A97398FC17C2CA8F00C17D89 /* DRAGON_LICENSE.txt */,
+			);
+			name = Dragon;
+			path = ../../Models/Dragon;
+			sourceTree = "<group>";
+		};
 		A9742D8A170DD6A8001FD5A2 /* OSX Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -426,7 +449,7 @@
 				A9742D9D170DD72B001FD5A2 /* Arial32BMGlyph.png */,
 				A9742D9E170DD72B001FD5A2 /* ArrowLeftButton48x48.png */,
 				A9742D9F170DD72B001FD5A2 /* BallBoxTexture.png */,
-				A9742DA0170DD72B001FD5A2 /* BeachBall.pod */,
+				A97398F217C2CA6F00C17D89 /* BeachBall.pod */,
 				A9742DA1170DD72B001FD5A2 /* BoxTexture.png */,
 				A9742DA2170DD72B001FD5A2 /* Bricks-Red.jpg */,
 				A9742DA3170DD72B001FD5A2 /* ButtonRing48x48.png */,
@@ -436,7 +459,8 @@
 				A9742DA8170DD72B001FD5A2 /* Default.png */,
 				A9742DA9170DD72B001FD5A2 /* Default-568h@2x.png */,
 				A9742DAA170DD72B001FD5A2 /* Default@2x.png */,
-				A9742DAB170DD72B001FD5A2 /* DieCube.pod */,
+				A97398F417C2CA8000C17D89 /* DieCube.pod */,
+				A97398F617C2CA8F00C17D89 /* Dragon */,
 				A9742DAC170DD72B001FD5A2 /* earthmap1k.jpg */,
 				A9742DAD170DD72B001FD5A2 /* Earth_1024.jpg */,
 				A99204FB1726E58F005E96CE /* EnvMap */,
@@ -641,6 +665,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A97398F317C2CA6F00C17D89 /* BeachBall.pod in Resources */,
 				A9FF6DFF170DE83F00FC35C8 /* BumpMap.fsh in Resources */,
 				A96881DF17A739D6007FA5F0 /* CC3ClipSpaceNoTexture.fsh in Resources */,
 				A96881E617A739D6007FA5F0 /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
@@ -654,7 +679,6 @@
 				A96881E717A739D6007FA5F0 /* CC3PointSprites.fsh in Resources */,
 				A9742DD4170DD72B001FD5A2 /* ArrowLeftButton48x48.png in Resources */,
 				A9742DD5170DD72B001FD5A2 /* BallBoxTexture.png in Resources */,
-				A9742DD6170DD72B001FD5A2 /* BeachBall.pod in Resources */,
 				A9742DD7170DD72B001FD5A2 /* BoxTexture.png in Resources */,
 				A9742DD8170DD72B001FD5A2 /* Bricks-Red.jpg in Resources */,
 				A9742DD9170DD72B001FD5A2 /* ButtonRing48x48.png in Resources */,
@@ -664,9 +688,9 @@
 				A9742DDC170DD72B001FD5A2 /* Crate.png in Resources */,
 				A96881F017A739D6007FA5F0 /* CC3Texturable.vsh in Resources */,
 				A9742DDE170DD72B001FD5A2 /* Default.png in Resources */,
+				A97398FF17C2CA8F00C17D89 /* Dragon-normals.jpg in Resources */,
 				A9742DDF170DD72B001FD5A2 /* Default-568h@2x.png in Resources */,
 				A9742DE0170DD72B001FD5A2 /* Default@2x.png in Resources */,
-				A9742DE1170DD72B001FD5A2 /* DieCube.pod in Resources */,
 				A9742DE2170DD72B001FD5A2 /* earthmap1k.jpg in Resources */,
 				A9742DE3170DD72B001FD5A2 /* Earth_1024.jpg in Resources */,
 				A9742DE4170DD72B001FD5A2 /* fire.png in Resources */,
@@ -675,7 +699,9 @@
 				A9742DE6170DD72B001FD5A2 /* fps_images-ipadhd.png in Resources */,
 				A9742DE7170DD72B001FD5A2 /* fps_images.png in Resources */,
 				A9742DE8170DD72B001FD5A2 /* fps_images_1.png in Resources */,
+				A97398F517C2CA8000C17D89 /* DieCube.pod in Resources */,
 				A96881E317A739D6007FA5F0 /* CC3NoTexture.fsh in Resources */,
+				A973990217C2CA8F00C17D89 /* DRAGON_LICENSE.txt in Resources */,
 				A9742DE9170DD72B001FD5A2 /* Grass.jpg in Resources */,
 				A96881DE17A739D6007FA5F0 /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
 				A9742DEA170DD72B001FD5A2 /* GrassWithLeaves.jpg in Resources */,
@@ -687,6 +713,7 @@
 				A9742DED170DD72B001FD5A2 /* Head.pod in Resources */,
 				A9742DF1170DD72B001FD5A2 /* Icon-72.png in Resources */,
 				A9742DF2170DD72B001FD5A2 /* Icon-Small-50.png in Resources */,
+				A973990117C2CA8F00C17D89 /* Dragon.pod in Resources */,
 				A9742DF3170DD72B001FD5A2 /* Icon-Small.png in Resources */,
 				A96881DB17A739D6007FA5F0 /* CC3BumpMapObjectSpace.fsh in Resources */,
 				A9742DF4170DD72B001FD5A2 /* Icon-Small@2x.png in Resources */,
@@ -721,10 +748,12 @@
 				A9FF6E04170DE83F00FC35C8 /* Reflection.png in Resources */,
 				A96881DD17A739D6007FA5F0 /* CC3BumpMapTangentSpace.fsh in Resources */,
 				A9FF6E05170DE83F00FC35C8 /* ReflectiveMask.pod in Resources */,
+				A97398FE17C2CA8F00C17D89 /* Dragon-eye.jpg in Resources */,
 				A9FF6E08170DED6600FC35C8 /* tex_arm.png in Resources */,
 				A9FF6E09170DED6600FC35C8 /* tex_base.png in Resources */,
 				A9FF6E0C170DF27D00FC35C8 /* Head_clonespace.png in Resources */,
 				A96881E117A739D6007FA5F0 /* CC3ClipSpaceTexturable.vsh in Resources */,
+				A97398FD17C2CA8F00C17D89 /* Dragon-diffuse.jpg in Resources */,
 				A9FF6E0D170DF27D00FC35C8 /* Head_diffuse.png in Resources */,
 				A9FF6E0F170DF69E00FC35C8 /* Stamp-nm.png in Resources */,
 				A9FF6E1D170E0C3B00FC35C8 /* Head_diffuse.bmp in Resources */,

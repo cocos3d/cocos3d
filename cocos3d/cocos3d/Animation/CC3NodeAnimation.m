@@ -78,11 +78,11 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ with %u frames", [self class], _frameCount];
+	return [NSString stringWithFormat: @"%@ with %u frames", [self class], self.frameCount];
 }
 
 
-#pragma mark Updating
+#pragma mark Animating
 
 // Deprecated
 -(void) establishFrameAt: (ccTime) t forNode: (CC3Node*) aNode { [aNode.animationState establishFrameAt: t]; }
@@ -177,9 +177,9 @@ static ccTime _interpolationEpsilon = 0.1f;
 }
 
 -(ccTime) timeAtFrame: (GLuint) frameIndex {
-	GLfloat currIdx = frameIndex;
+	GLfloat thisIdx = frameIndex;
 	GLfloat lastIdx = _frameCount - 1;
-	return CLAMP(currIdx / lastIdx, 0.0f, 1.0f);
+	return CLAMP(thisIdx / lastIdx, 0.0f, 1.0f);
 }
 
 /**
@@ -395,6 +395,126 @@ static ccTime _interpolationEpsilon = 0.1f;
 
 
 #pragma mark -
+#pragma mark CC3NodeAnimationSegment
+
+@implementation CC3NodeAnimationSegment
+
+@synthesize baseAnimation=_baseAnimation, startTime=_startTime, endTime=_endTime;
+
+-(void) dealloc {
+	[_baseAnimation release];
+	[super dealloc];
+}
+
+-(GLuint) frameCount { return _baseAnimation.frameCount; }
+
+-(BOOL) shouldInterpolate { return _baseAnimation.shouldInterpolate; }
+
+-(void) setShouldInterpolate: (BOOL)shouldInterpolate {
+	_baseAnimation.shouldInterpolate = shouldInterpolate;
+}
+
+-(BOOL) isAnimatingLocation { return _baseAnimation.isAnimatingLocation; }
+
+-(BOOL) isAnimatingQuaternion { return _baseAnimation.isAnimatingQuaternion; }
+
+-(BOOL) isAnimatingScale { return _baseAnimation.isAnimatingScale; }
+
+-(BOOL) hasVariableFrameTiming { return _baseAnimation.hasVariableFrameTiming; }
+
+-(GLuint) startFrameIndex { return [_baseAnimation frameIndexAt: self.startTime]; }
+
+-(void) setStartFrameIndex: (GLuint) startFrameIndex {
+	self.startTime = [_baseAnimation timeAtFrame: startFrameIndex];
+}
+
+-(GLuint) endFrameIndex { return [_baseAnimation frameIndexAt: self.endTime]; }
+
+-(void) setEndFrameIndex: (GLuint) endFrameIndex {
+	self.endTime = [_baseAnimation timeAtFrame: endFrameIndex];
+}
+
+
+#pragma mark Allocation and initialization
+
+// Will raise assertion because base animation cannot be nil.
+-(id) init { return [self initOnAnimation: nil]; }
+
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation {
+	return [self initOnAnimation: baseAnimation from: 0.0f to: 1.0f];
+}
+
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation {
+	return [[[self alloc] initOnAnimation: baseAnimation] autorelease];
+}
+
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
+	CC3Assert(baseAnimation, @"%@ cannot be initialized without a base animation", self);
+	if ( (self = [super initWithFrameCount: 0]) ) {
+		_baseAnimation = [baseAnimation retain];
+		_startTime = startTime;
+		_endTime = endTime;
+	}
+	return self;
+}
+
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation from: (ccTime) startTime to: (ccTime) endTime {
+	return [[[self alloc] initOnAnimation: baseAnimation from: startTime to: endTime] autorelease];
+}
+
+-(id) initOnAnimation: (CC3NodeAnimation*) baseAnimation
+			fromFrame: (GLuint) startFrameIndex
+			  toFrame: (GLuint) endFrameIndex {
+	if ( (self = [self initOnAnimation: baseAnimation]) ) {
+		self.startFrameIndex = startFrameIndex;
+		self.endFrameIndex = endFrameIndex;
+	}
+	return self;
+}
+
++(id) animationOnAnimation: (CC3NodeAnimation*) baseAnimation
+				 fromFrame: (GLuint) startFrameIndex
+				   toFrame: (GLuint) endFrameIndex {
+	return [[[self alloc] initOnAnimation: baseAnimation
+								fromFrame: startFrameIndex
+								  toFrame: endFrameIndex] autorelease];
+}
+
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%@ on %@", [self class], _baseAnimation];
+}
+
+
+#pragma mark Animating
+
+/**
+ * Overridden to interpret the specified time as within the range specified by the startTime
+ * and endTime properties, and then to retrieve the corresponding frame index from the base
+ * animation.
+ */
+-(GLuint) frameIndexAt: (ccTime) t {
+	ccTime adjTime = _startTime + ((_endTime - _startTime) * t);
+	return [_baseAnimation frameIndexAt: adjTime];
+}
+
+-(ccTime) timeAtFrame: (GLuint) frameIndex { return [_baseAnimation timeAtFrame: frameIndex]; }
+
+-(CC3Vector) locationAtFrame: (GLuint) frameIndex {
+	return [_baseAnimation locationAtFrame: frameIndex];
+}
+
+-(CC3Quaternion) quaternionAtFrame: (GLuint) frameIndex {
+	return [_baseAnimation quaternionAtFrame: frameIndex];
+}
+
+-(CC3Vector) scaleAtFrame: (GLuint) frameIndex  {
+	return [_baseAnimation scaleAtFrame: frameIndex];
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CC3NodeAnimationState
 
 @implementation CC3NodeAnimationState
@@ -466,7 +586,7 @@ static ccTime _interpolationEpsilon = 0.1f;
 -(BOOL) hasVariableFrameTiming { return _animation.hasVariableFrameTiming; }
 
   
-#pragma mark Updating
+#pragma mark Animating
 
 -(void) establishFrameAt: (ccTime) t {
 	_animationTime = t;

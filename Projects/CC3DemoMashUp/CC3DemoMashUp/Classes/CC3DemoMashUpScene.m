@@ -145,6 +145,9 @@
 #define kFadeInDuration					1.0f
 #define kNoFadeIn						0.0f
 
+#define kFlappingActionTag				77
+#define kGlidingActionTag				78
+
 
 // Size of the television
 #define kTVScale 40
@@ -345,6 +348,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	DramaticPause();				// Pause dramatically
 	[self addMascots];				// Add the cocos3d mascot.
+	
+	DramaticPause();				// Pause dramatically
+	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
 	
 }
 
@@ -2224,6 +2230,71 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 }
 
 /**
+ * Adds a dragon flying in a circular path above the scene.
+ *
+ * When first seen, the dragon is flying by flapping its wings. Touching the dragon causes it
+ * to start gliding. Touching it again causes it to go back to flapping. The transition between
+ * flapping and gliding occurs smoothly, regardless of when the dragon is touched.
+ *
+ * Flapping and gliding are handled by two separate tracks of animation, and the transition
+ * is done by animating the relative blending weights beween the two tracks by using an
+ * animation cross-fade action. Animated cross-fading ensures a smooth transition between
+ * the distinct animations, regardless of where in each animation cycle it is started.
+ * Try touching the dragon when its wings are at the top of the flap, or the bottom of the
+ * flap. Either way, the transition to the gliding animation is smoothly blended.
+ *
+ * The dragon model was created in Blender by Aleksandra Sebastian, and is available on
+ * Blend Swap at http://www.blendswap.com/blends/view/67196. It is used here under a
+ * Creative Commons Attribution 3.0 CC-BY license, requiring attribution to the author.
+ * All animation was added to the model after acquisition. The animated and modified
+ * Blender model is available in the Models folder of the cocos3d distribution.
+ * The dragon POD file was created by exporting directly to POD from within Blender.
+ */
+-(void) addDragon {
+	CC3ResourceNode* dgnRez = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
+	_dragon = [dgnRez getNodeNamed: @"Dragon.pod-SoftBody"];
+	_dragon.touchEnabled = YES;
+	
+	// The model animation that was loaded from the POD into track zero is a concatenation of
+	// several separate movements, such as gliding and flapping. Extract the distinct movements
+	// from the base animation and add those distinct movement animations as separate tracks.
+	_dragonGlideTrack = [_dragon addAnimationFromFrame: 0 toFrame: 60];
+	_dragonFlapTrack = [_dragon addAnimationFromFrame: 61 toFrame: 108];
+	
+	// The dragon model now contains three animation tracks: a gliding track, a flapping track,
+	// and the original concatenation of animation loaded from the POD file into track zero.
+	// Any of these tracks can be played or blended by adjusting the relative weightings of each
+	// track. We want to start with the dragon flying and flapping its wings. So, we give the
+	// flapping track a weight of one, and the gliding and original tracks a weighting of zero.
+	// In general, once the movement tracks have been created, you will set track zero, containing
+	// the original animation concatenation, to a weighting of zero, and leave it there.
+	[_dragon setAnimationBlendingWeight: 0.0f onTrack: 0];
+	[_dragon setAnimationBlendingWeight: 0.0f onTrack: _dragonGlideTrack];
+	[_dragon setAnimationBlendingWeight: 1.0f onTrack: _dragonFlapTrack];
+	
+	// Now create an animate action to actually run the flapping animation, and make it repeat
+	// in a loop. We give it a known tag so that we can identify it to stop it later, after
+	// we transition to a different movement.
+	CC3Animate* flap = [CC3Animate actionWithDuration: 1.5 onTrack: _dragonFlapTrack];
+	CCAction* flapping = [CCRepeatForever actionWithAction: flap];
+	flapping.tag = kFlappingActionTag;
+	[_dragon runAction: flapping];
+	_dragonMotion = kDragonFlapping;	// Keep track of which animation is currently active
+	
+	// Add the dragon to a wrapper node that can be rotated to make the dragon fly in a circular
+	// path. Locate the dragon up and away from the point of rotation of the wrapper, and rotate
+	// the dragon itself within the wrapper, to make it face the direction of rotation, which is
+	// the direction it is flying. Then add the flight path wrapper to the scene.
+	CC3Node* flightPath = [_dragon asOrientingWrapper];
+	_dragon.location = cc3v(0, 800, 1300);
+	_dragon.rotation = cc3v(0, -90, 15);
+	_dragon.uniformScale = 5.0;
+	[flightPath runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
+																				  rotateBy: cc3v(0, -15, 0)]]];
+	[self addChild: flightPath];
+}
+
+/**
  * Adds a floating mask that uses two textures to create a tangent-space bump-mapped surface
  * when running under OpenGL ES 2.0.
  *
@@ -3104,7 +3175,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			[pointHose play];
 		}
 		
-		// If the globe was touched, toggle the opening of a HUD window displaying it up close.
+	// If the dragon was touched, cycle through several different animations for the dragon
+	} else if (aNode == _dragon ) {
+		[self cycleDragonMotion];
+
+	// If the globe was touched, toggle the opening of a HUD window displaying it up close.
 	} else if (aNode == _globe ) {
 		[((CC3DemoMashUpLayer*)self.cc3Layer) toggleGlobeHUDFromTouchAt: touchPoint];
 	}
@@ -3395,5 +3470,96 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		LogInfo(@"Added shadow to: %@", aNode);
 	}
 }
+
+/**
+ * When the dragon node is touched, cycle through several different animations, smoothly
+ * transitioning between the current and new animations by using animation cross-fading
+ * which blends the two animations together using animated blending weights.
+ */
+-(void) cycleDragonMotion {
+	switch (_dragonMotion) {
+		case kDragonFlapping:
+			[self dragonTransitionToGliding];
+			break;
+		
+		case kDragonStill:
+		case kDragonGliding:
+		default:
+			[self dragonTransitionToFlapping];
+			break;
+	}
+}
+
+/**
+ * Smoothly transitions the dragon from flapping animation to gliding animation.
+ *
+ * Flapping and gliding are handled by two separate tracks of animation, and the transition
+ * is done by animating the relative blending weights beween the two tracks by using an
+ * animation cross-fade action. Animated cross-fading ensures a smooth transition between
+ * the distinct animations, regardless of where in each animation cycle it is started.
+ *
+ * In addition, once the cross-fading transition has finished, the old animation will no longer
+ * be visibly affecting the dragon, and can be shut down to save unnecessary processing. We do
+ * this after the transition has complted to avoid an abrupt transtion that would occur if the
+ * old animation track was stopped while it was still visible.
+ */
+-(void)	dragonTransitionToGliding {
+	
+	// Create the gliding animation action and start it running on the dragon
+	CC3Animate* glide = [CC3Animate actionWithDuration: 2.0 onTrack: _dragonGlideTrack];
+	CCAction* gliding = [CCRepeatForever actionWithAction: glide];
+	gliding.tag = kGlidingActionTag;
+	[_dragon runAction: gliding];
+	
+	// The dragon is currently running the flapping animation at full weight and the gliding animation
+	// at zero weight. Cross-fade from flapping to gliding over a short time period, then shut
+	// down the flapping animation, so we're not wasting time animating it when it's not visible.
+	CCActionInterval* crossFade = [CC3AnimationCrossFade actionWithDuration: 0.5
+																  fromTrack: _dragonFlapTrack
+																	toTrack: _dragonGlideTrack];
+	CCCallFunc* stopFlapping = [CCCallFunc actionWithTarget: self selector: @selector(dragonStopFlapping)];
+	[_dragon runAction: [CCSequence actionOne: crossFade two: stopFlapping]];
+	
+	_dragonMotion = kDragonGliding;		// Dragon is gliding now
+}
+
+/** 
+ * Smoothly transitions the dragon from gliding animation to flapping animation.
+ *
+ * Flapping and gliding are handled by two separate tracks of animation, and the transition
+ * is done by animating the relative blending weights beween the two tracks by using an
+ * animation cross-fade action. Animated cross-fading ensures a smooth transition between
+ * the distinct animations, regardless of where in each animation cycle it is started.
+ *
+ * In addition, once the cross-fading transition has finished, the old animation will no longer
+ * be visibly affecting the dragon, and can be shut down to save unnecessary processing. We do 
+ * this after the transition has complted to avoid an abrupt transtion that would occur if the
+ * old animation track was stopped while it was still visible.
+ */
+-(void)	dragonTransitionToFlapping {
+	
+	// Create the flapping animation action and start it running on the dragon
+	CC3Animate* flap = [CC3Animate actionWithDuration: 2.0 onTrack: _dragonFlapTrack];
+	CCAction* flapping = [CCRepeatForever actionWithAction: flap];
+	flapping.tag = kFlappingActionTag;
+	[_dragon runAction: flapping];
+	
+	// The dragon is currently running the gliding animation at full weight and the flapping animation
+	// at zero weight. Cross-fade from gliding to flapping over a short time period, then shut
+	// down the gliding animation, so we're not wasting time animating it when it's not visible.
+	CCActionInterval* crossFade = [CC3AnimationCrossFade actionWithDuration: 0.5
+																  fromTrack: _dragonGlideTrack
+																	toTrack: _dragonFlapTrack];
+	CCCallFunc* stopGliding = [CCCallFunc actionWithTarget: self selector: @selector(dragonStopGliding)];
+	[_dragon runAction: [CCSequence actionOne: crossFade two: stopGliding]];
+	
+	_dragonMotion = kDragonFlapping;		// Dragon is flapping now
+}
+
+/** Stop the CC3Animate action that is running the dragon's flapping animation. */
+-(void) dragonStopFlapping { [_dragon stopActionByTag: kFlappingActionTag]; }
+
+/** Stop the CC3Animate action that is running the dragon's gliding animation. */
+-(void) dragonStopGliding { [_dragon stopActionByTag: kGlidingActionTag]; }
 
 @end

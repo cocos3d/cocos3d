@@ -25,7 +25,6 @@
 		A92DA7B31427B5980051AFFA /* cocos3dMascot.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7911427B5980051AFFA /* cocos3dMascot.png */; };
 		A92DA7B41427B5980051AFFA /* cocos3dMascot.pod in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7921427B5980051AFFA /* cocos3dMascot.pod */; };
 		A92DA7B71427B5980051AFFA /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7951427B5980051AFFA /* Default.png */; };
-		A92DA7B81427B5980051AFFA /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7961427B5980051AFFA /* DieCube.pod */; };
 		A92DA7B91427B5980051AFFA /* fire.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7971427B5980051AFFA /* fire.png */; };
 		A92DA7BC1427B5980051AFFA /* GridButton48x48.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA79A1427B5980051AFFA /* GridButton48x48.png */; };
 		A92DA7BD1427B5980051AFFA /* Head.pod in Resources */ = {isa = PBXBuildFile; fileRef = A92DA79B1427B5980051AFFA /* Head.pod */; };
@@ -44,7 +43,6 @@
 		A92E872C17A6E5F8003B859E /* libcocos3d-library-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A92E872317A6E4DA003B859E /* libcocos3d-library-iOS.a */; };
 		A9306A851445B23C0004EB5A /* HUDLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9306A841445B23C0004EB5A /* HUDLayer.m */; };
 		A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A933812D14E09E9000FCA181 /* Earth_1024.jpg */; };
-		A933817014E16A9200FCA181 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A933816F14E16A9200FCA181 /* BeachBall.pod */; };
 		A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */; };
 		A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */ = {isa = PBXBuildFile; fileRef = A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */; };
 		A94736FB140E58E7006F410C /* CC3DemoMashUpLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A94736CC140E58E7006F410C /* CC3DemoMashUpLayer.m */; };
@@ -86,6 +84,13 @@
 		A971D3101663EC6E00769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30D1663EC6E00769DC5 /* fps_images-hd.png */; };
 		A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */; };
 		A971D3121663EC6E00769DC5 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D30F1663EC6E00769DC5 /* fps_images.png */; };
+		A97398DE17C2C79000C17D89 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398DD17C2C79000C17D89 /* BeachBall.pod */; };
+		A97398E017C2C79E00C17D89 /* DieCube.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398DF17C2C79D00C17D89 /* DieCube.pod */; };
+		A97398E817C2C7BC00C17D89 /* Dragon-diffuse.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398E217C2C7BC00C17D89 /* Dragon-diffuse.jpg */; };
+		A97398E917C2C7BC00C17D89 /* Dragon-eye.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398E317C2C7BC00C17D89 /* Dragon-eye.jpg */; };
+		A97398EA17C2C7BC00C17D89 /* Dragon-normals.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A97398E417C2C7BC00C17D89 /* Dragon-normals.jpg */; };
+		A97398EC17C2C7BC00C17D89 /* Dragon.pod in Resources */ = {isa = PBXBuildFile; fileRef = A97398E617C2C7BC00C17D89 /* Dragon.pod */; };
+		A97398ED17C2C7BC00C17D89 /* DRAGON_LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = A97398E717C2C7BC00C17D89 /* DRAGON_LICENSE.txt */; };
 		A97A31301688FD6A004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A312F1688FD6A004CBAA1 /* fps_images_1.png */; };
 		A9883E16174C047300127768 /* TVTestCard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9883E12174C047300127768 /* TVTestCard.jpg */; };
 		A9883E18174C4D0200127768 /* samsung_tv-med.pod in Resources */ = {isa = PBXBuildFile; fileRef = A9883E17174C4D0200127768 /* samsung_tv-med.pod */; };
@@ -179,7 +184,6 @@
 		A92DA7911427B5980051AFFA /* cocos3dMascot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cocos3dMascot.png; sourceTree = "<group>"; };
 		A92DA7921427B5980051AFFA /* cocos3dMascot.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocos3dMascot.pod; sourceTree = "<group>"; };
 		A92DA7951427B5980051AFFA /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		A92DA7961427B5980051AFFA /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = DieCube.pod; sourceTree = "<group>"; };
 		A92DA7971427B5980051AFFA /* fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fire.png; sourceTree = "<group>"; };
 		A92DA79A1427B5980051AFFA /* GridButton48x48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GridButton48x48.png; sourceTree = "<group>"; };
 		A92DA79B1427B5980051AFFA /* Head.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Head.pod; sourceTree = "<group>"; };
@@ -200,7 +204,6 @@
 		A9306A831445B23C0004EB5A /* HUDLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDLayer.h; sourceTree = "<group>"; };
 		A9306A841445B23C0004EB5A /* HUDLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDLayer.m; sourceTree = "<group>"; };
 		A933812D14E09E9000FCA181 /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
-		A933816F14E16A9200FCA181 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeachBall.pod; sourceTree = "<group>"; };
 		A93B2AA71695E6A6007144C7 /* Arial32BMGlyph.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Arial32BMGlyph.fnt; sourceTree = "<group>"; };
 		A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Arial32BMGlyph.png; sourceTree = "<group>"; };
 		A94736CB140E58E7006F410C /* CC3DemoMashUpLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3DemoMashUpLayer.h; sourceTree = "<group>"; };
@@ -250,6 +253,13 @@
 		A971D30D1663EC6E00769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D30E1663EC6E00769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A971D30F1663EC6E00769DC5 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
+		A97398DD17C2C79000C17D89 /* BeachBall.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = BeachBall.pod; path = "../../../Models/Beach Ball/BeachBall.pod"; sourceTree = "<group>"; };
+		A97398DF17C2C79D00C17D89 /* DieCube.pod */ = {isa = PBXFileReference; lastKnownFileType = file; name = DieCube.pod; path = "../../../Models/Die Cube/DieCube.pod"; sourceTree = "<group>"; };
+		A97398E217C2C7BC00C17D89 /* Dragon-diffuse.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-diffuse.jpg"; sourceTree = "<group>"; };
+		A97398E317C2C7BC00C17D89 /* Dragon-eye.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-eye.jpg"; sourceTree = "<group>"; };
+		A97398E417C2C7BC00C17D89 /* Dragon-normals.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "Dragon-normals.jpg"; sourceTree = "<group>"; };
+		A97398E617C2C7BC00C17D89 /* Dragon.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Dragon.pod; sourceTree = "<group>"; };
+		A97398E717C2C7BC00C17D89 /* DRAGON_LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DRAGON_LICENSE.txt; sourceTree = "<group>"; };
 		A97A312F1688FD6A004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
 		A9883E12174C047300127768 /* TVTestCard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TVTestCard.jpg; sourceTree = "<group>"; };
 		A9883E17174C4D0200127768 /* samsung_tv-med.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = "samsung_tv-med.pod"; sourceTree = "<group>"; };
@@ -373,7 +383,7 @@
 				A93B2AA81695E6A6007144C7 /* Arial32BMGlyph.png */,
 				A92DA78E1427B5980051AFFA /* ArrowLeftButton48x48.png */,
 				A99CD83715866E1C00B5BAC3 /* BallBoxTexture.png */,
-				A933816F14E16A9200FCA181 /* BeachBall.pod */,
+				A97398DD17C2C79000C17D89 /* BeachBall.pod */,
 				A92C6A11144A272900B15941 /* BoxTexture.png */,
 				A9AAF0071525E41000E1620A /* Bricks-Red.jpg */,
 				A92DA7901427B5980051AFFA /* ButtonRing48x48.png */,
@@ -383,7 +393,8 @@
 				A92DA7951427B5980051AFFA /* Default.png */,
 				A9E33FBF163ACE2F00569E58 /* Default-568h@2x.png */,
 				A9E33FC0163ACE2F00569E58 /* Default@2x.png */,
-				A92DA7961427B5980051AFFA /* DieCube.pod */,
+				A97398DF17C2C79D00C17D89 /* DieCube.pod */,
+				A97398E117C2C7BC00C17D89 /* Dragon */,
 				A9CD198D156C1CFD00A0EDC4 /* earthmap1k.jpg */,
 				A933812D14E09E9000FCA181 /* Earth_1024.jpg */,
 				A91153621723A27F004A87FC /* EnvMap */,
@@ -524,6 +535,19 @@
 			path = "CC3DemoMashUp/iOS Support";
 			sourceTree = "<group>";
 		};
+		A97398E117C2C7BC00C17D89 /* Dragon */ = {
+			isa = PBXGroup;
+			children = (
+				A97398E217C2C7BC00C17D89 /* Dragon-diffuse.jpg */,
+				A97398E317C2C7BC00C17D89 /* Dragon-eye.jpg */,
+				A97398E417C2C7BC00C17D89 /* Dragon-normals.jpg */,
+				A97398E617C2C7BC00C17D89 /* Dragon.pod */,
+				A97398E717C2C7BC00C17D89 /* DRAGON_LICENSE.txt */,
+			);
+			name = Dragon;
+			path = ../../../Models/Dragon;
+			sourceTree = "<group>";
+		};
 		A9883E0E174C047300127768 /* TV */ = {
 			isa = PBXGroup;
 			children = (
@@ -648,9 +672,9 @@
 				A92DA7B31427B5980051AFFA /* cocos3dMascot.png in Resources */,
 				A92DA7B41427B5980051AFFA /* cocos3dMascot.pod in Resources */,
 				A92DA7B71427B5980051AFFA /* Default.png in Resources */,
-				A92DA7B81427B5980051AFFA /* DieCube.pod in Resources */,
 				A92DA7B91427B5980051AFFA /* fire.png in Resources */,
 				A92DA7BC1427B5980051AFFA /* GridButton48x48.png in Resources */,
+				A97398E917C2C7BC00C17D89 /* Dragon-eye.jpg in Resources */,
 				A92DA7BD1427B5980051AFFA /* Head.pod in Resources */,
 				A92DA7C11427B5980051AFFA /* Icon-72.png in Resources */,
 				A92DA7C21427B5980051AFFA /* Icon-Small-50.png in Resources */,
@@ -663,13 +687,14 @@
 				A92DA7CA1427B5980051AFFA /* JoystickThumb.png in Resources */,
 				A92DA7CB1427B5980051AFFA /* Shine48x48.png in Resources */,
 				A96881AF17A738D8007FA5F0 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
+				A97398ED17C2C7BC00C17D89 /* DRAGON_LICENSE.txt in Resources */,
 				A92DA7CE1427B5980051AFFA /* SunlightButton48x48.png in Resources */,
 				A92DA7D11427B5980051AFFA /* ZoomButton48x48.png in Resources */,
 				A92C6A12144A272900B15941 /* BoxTexture.png in Resources */,
 				A9C94ABE1451924700CE6BAD /* mallet.png in Resources */,
 				A9C94ABF1451924700CE6BAD /* mallet.pod in Resources */,
+				A97398DE17C2C79000C17D89 /* BeachBall.pod in Resources */,
 				A933812E14E09E9000FCA181 /* Earth_1024.jpg in Resources */,
-				A933817014E16A9200FCA181 /* BeachBall.pod in Resources */,
 				A95A5C5714E45AC00013359F /* Crate.png in Resources */,
 				A9AE3D7D14E46118002805DA /* Stamp.png in Resources */,
 				A96B35A014EF2689002A7363 /* GrassCloseUp.jpg in Resources */,
@@ -685,6 +710,7 @@
 				A96881AE17A738D8007FA5F0 /* CC3ClipSpaceNoTexture.fsh in Resources */,
 				A99CD83815866E1C00B5BAC3 /* BallBoxTexture.png in Resources */,
 				A9E33FC1163ACE2F00569E58 /* Default-568h@2x.png in Resources */,
+				A97398E017C2C79E00C17D89 /* DieCube.pod in Resources */,
 				A9E33FC2163ACE2F00569E58 /* Default@2x.png in Resources */,
 				A971D3101663EC6E00769DC5 /* fps_images-hd.png in Resources */,
 				A971D3111663EC6E00769DC5 /* fps_images-ipadhd.png in Resources */,
@@ -693,6 +719,8 @@
 				A97A31301688FD6A004CBAA1 /* fps_images_1.png in Resources */,
 				A93B2AA91695E6A6007144C7 /* Arial32BMGlyph.fnt in Resources */,
 				A93B2AAA1695E6A6007144C7 /* Arial32BMGlyph.png in Resources */,
+				A97398EA17C2C7BC00C17D89 /* Dragon-normals.jpg in Resources */,
+				A97398EC17C2C7BC00C17D89 /* Dragon.pod in Resources */,
 				A96881AB17A738D8007FA5F0 /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
 				A96881B417A738D8007FA5F0 /* CC3NoTextureReflect.fsh in Resources */,
 				A9D9F3E316AA351F00FBCA91 /* BaseTex.png in Resources */,
@@ -708,6 +736,7 @@
 				A9E9EE6B16AD7A1D0086F025 /* body.png in Resources */,
 				A9E9EE6C16AD7A1D0086F025 /* legs.png in Resources */,
 				A96881B217A738D8007FA5F0 /* CC3NoTexture.fsh in Resources */,
+				A97398E817C2C7BC00C17D89 /* Dragon-diffuse.jpg in Resources */,
 				A9E9EE6F16AD7A1D0086F025 /* man.pod in Resources */,
 				A96881BA17A738D8007FA5F0 /* CC3PureColor.vsh in Resources */,
 				A9FF6E12170DF78600FC35C8 /* Head_clonespace.png in Resources */,

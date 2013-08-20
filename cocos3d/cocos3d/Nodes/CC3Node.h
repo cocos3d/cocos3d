@@ -3579,6 +3579,304 @@ typedef enum {
  */
 -(void) addAnimation: (CC3NodeAnimation*) animation asTrack: (GLuint) trackID;
 
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation in track zero, which is the default track used during animation loading. A new
+ * animation track ID is assigned, the new animation is added to this node on that animation
+ * track, and the track ID is returned.
+ *
+ * The start and end times of the animation segment are defined by startTime and endTime,
+ * each of which are specified as a fraction of the total animation contained in the base
+ * animation track. Each of startTime and endTime must therefore be between zero and one.
+ *
+ * For example, if you wish to create a new animation track that plays the middle third of
+ * an existing animation track, you would pass 0.3333 and 0.6667 as the startTime and endTime
+ * parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(GLuint) addAnimationFrom: (ccTime) startTime
+						to: (ccTime) endTime;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation track specified by baseTrackID. A new animation track ID is assigned, the new animation
+ * is added to this node on that animation track, and the track ID is returned.
+ *
+ * The start and end times of the animation segment are defined by startTime and endTime,
+ * each of which are specified as a fraction of the total animation contained in the base
+ * animation track. Each of startTime and endTime must therefore be between zero and one.
+ *
+ * For example, if you wish to create a new animation track that plays the middle third of
+ * an existing animation track, you would pass 0.3333 and 0.6667 as the startTime and endTime
+ * parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(GLuint) addAnimationFrom: (ccTime) startTime
+						to: (ccTime) endTime
+			   ofBaseTrack: (GLuint) baseTrackID;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation in track zero, which is the default track used during animation loading. The new
+ * animation is added to this node on the animation track specified by trackID.
+ *
+ * The start and end times of the animation segment are defined by startTime and endTime,
+ * each of which are specified as a fraction of the total animation contained in the base
+ * animation track. Each of startTime and endTime must therefore be between zero and one.
+ *
+ * For example, if you wish to create a new animation track that plays the middle third of
+ * an existing animation track, you would pass 0.3333 and 0.6667 as the startTime and endTime
+ * parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(void) addAnimationFrom: (ccTime) startTime
+					  to: (ccTime) endTime
+				 asTrack: (GLuint) trackID;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation track specified by baseTrackID. The new animation is added to this node on the
+ * animation track specified by trackID.
+ *
+ * The start and end times of the animation segment are defined by startTime and endTime, 
+ * each of which are specified as a fraction of the total animation contained in the base
+ * animation track. Each of startTime and endTime must therefore be between zero and one.
+ *
+ * For example, if you wish to create a new animation track that plays the middle third of
+ * an existing animation track, you would pass 0.3333 and 0.6667 as the startTime and endTime
+ * parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(void) addAnimationFrom: (ccTime) startTime
+					  to: (ccTime) endTime
+			 ofBaseTrack: (GLuint) baseTrackID
+				 asTrack: (GLuint) trackID;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation in track zero, which is the default track used during animation loading. A new
+ * animation track ID is assigned, the new animation is added to this node on that animation
+ * track, and the track ID is returned.
+ *
+ * The start and end frames of the animation segment are defined by startFrameIndex and
+ * endFrameIndex, each of which identify a frame in the base animation track, inclusively.
+ * Frame indexing is zero-based, so the first frame is identified as frame index zero.
+ *
+ * For example, if you wish to create a new animation track that plays frames 10 through 20,
+ * inclusively, of an existing animation track, you would pass 10 and 20 as the startFrameIndex
+ * and endFrameIndex parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation track specified by baseTrackID. A new animation track ID is assigned, the new animation
+ * is added to this node on that animation track, and the track ID is returned.
+ *
+ * The start and end frames of the animation segment are defined by startFrameIndex and
+ * endFrameIndex, each of which identify a frame in the base animation track, inclusively.
+ * Frame indexing is zero-based, so the first frame is identified as frame index zero.
+ *
+ * For example, if you wish to create a new animation track that plays frames 10 through 20,
+ * inclusively, of an existing animation track, you would pass 10 and 20 as the startFrameIndex
+ * and endFrameIndex parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(GLuint) addAnimationFromFrame: (GLuint) startFrameIndex
+						toFrame: (GLuint) endFrameIndex
+					ofBaseTrack: (GLuint) baseTrackID;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation in track zero, which is the default track used during animation loading. The new
+ * animation is added to this node on the animation track specified by trackID.
+ *
+ * The start and end frames of the animation segment are defined by startFrameIndex and
+ * endFrameIndex, each of which identify a frame in the base animation track, inclusively.
+ * Frame indexing is zero-based, so the first frame is identified as frame index zero.
+ *
+ * For example, if you wish to create a new animation track that plays frames 10 through 20,
+ * inclusively, of an existing animation track, you would pass 10 and 20 as the startFrameIndex
+ * and endFrameIndex parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+					  asTrack: (GLuint) trackID;
+
+/**
+ * Many animated characters require the animation of multiple distinct movements. For example, a
+ * bird character might have distinct flapping, landing, and pecking movements. A human character
+ * might have distinct running, crouching and shooting movements.
+ *
+ * It is often useful to provide all of these movements as one long animation, and to play the
+ * animation segments for specific movements as required by the application. Our human character
+ * might run for a while, then crouch, take a few shots, and then start running again, all under
+ * control of the application, by extracting and playing the animation segment for each movement,
+ * in turn, from the single long animation that contains all the movements.
+ *
+ * To support this behaviour, you can load the entire long animation into one track of animation,
+ * and then use this method to create a separate animation track that contains only the animation
+ * for a single movement. You can then animate only that movement, or repeat only that movement
+ * in a loop (such as running or flying), or blend that movement with other animation tracks to
+ * allow your human character to run and shoot at the same time, or smoothly transition your bird
+ * from the flapping movement to the landing movement.
+ *
+ * This method creates and adds a new animation track that plays only a segment of the existing
+ * animation track specified by baseTrackID. The new animation is added to this node on the
+ * animation track specified by trackID.
+ *
+ * The start and end frames of the animation segment are defined by startFrameIndex and
+ * endFrameIndex, each of which identify a frame in the base animation track, inclusively.
+ * Frame indexing is zero-based, so the first frame is identified as frame index zero.
+ *
+ * For example, if you wish to create a new animation track that plays frames 10 through 20,
+ * inclusively, of an existing animation track, you would pass 10 and 20 as the startFrameIndex
+ * and endFrameIndex parameters, respectively.
+ *
+ * This method is automatically propagated to all descendant nodes, so you only need to invoke
+ * this method on a single ancestor node (eg- the root node of your character).
+ */
+-(void) addAnimationFromFrame: (GLuint) startFrameIndex
+					  toFrame: (GLuint) endFrameIndex
+				  ofBaseTrack: (GLuint) baseTrackID
+					  asTrack: (GLuint) trackID;
+
 /** Removes the specified animation from this node. */
 -(void) removeAnimation: (CC3NodeAnimation*) animation;
 

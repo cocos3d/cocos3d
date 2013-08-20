@@ -1,0 +1,11 @@
+IMPORTANT LICENSE INFORMATION:
+
+The dragon model was downloaded from Blend Swap at: http://www.blendswap.com/blends/view/67196.
+It was created in Blender by Aleksandra Sebastian (user Szani on Blend Swap), and is used here
+under a Creative Commons Attribution 3.0 (CC-BY) license, requiring attribution to the author. 
+
+Under the Creative Commons Attribution 3.0 license, you can use this model for any 
+purpose you see fit, even commercially, as long as you give credit to the original author.
+
+All animation was added to the model after acquisition from the original author.
+
