@@ -133,6 +133,46 @@ copy_xc4_project_templates(){
 # Remove any pre-cocos3d-2.0 templates
 	rm -rf "$TEMPLATE_DIR""cocos3d Application.xctemplate"
 
+# Copy cocos3d library files references
+	TEMPLATE="cocos3d-lib"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	echo ...copying cocos3d files to $TEMPLATE template
+	copy_files "cocos3d" "$DST_DIR"
+
+# Copy base cocos3d project settings
+	TEMPLATE="cocos3d-base"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+# Copy base cocos3d iOS project settings
+	TEMPLATE="cocos3d-base-ios"
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
+	DST_DIR="$DST_DIR""/Resources"
+	cp -r "Projects/Common/Resources/Icons/" "$DST_DIR"
+	cp -r "Projects/Common/Resources/LaunchImages/" "$DST_DIR"
+
+# Copy base cocos3d OSX project settings
+	TEMPLATE="cocos3d-base-osx"
+
+# Also remove any older Mac named templates
+	DST_DIR="$TEMPLATE_DIR""cocos3d-base-mac.xctemplate"
+	rm_dst_dir
+
+	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
+	check_dst_dir
+	echo ...copying $TEMPLATE template files
+	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
+
 # Copy OpenGL ES 1 Template
 	TEMPLATE="cocos3d iOS Application"
 	DST_DIR="$TEMPLATE_DIR""cocos3d1 iOS Application.xctemplate"
@@ -208,35 +248,6 @@ copy_xc4_project_templates(){
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
 	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
-
-# Copy Base cocos3d project settings
-	TEMPLATE="cocos3d-base"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-# Copy Base cocos3d OSX project settings
-	TEMPLATE="cocos3d-base-osx"
-
-	# Also remove any older Mac named templates
-	DST_DIR="$TEMPLATE_DIR""cocos3d-base-mac.xctemplate"
-	rm_dst_dir
-
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-# Copy cocos3d library files references
-	TEMPLATE="cocos3d-lib"
-	DST_DIR="$TEMPLATE_DIR""$TEMPLATE.xctemplate"
-	check_dst_dir
-	echo ...copying $TEMPLATE template files
-	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
-
-	echo ...copying cocos3d files to $TEMPLATE template
-	copy_files "cocos3d" "$DST_DIR"
 
 	echo done!
 }

@@ -2,18 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>Identifier</key>
+	<string>org.cocos3d.cocos3d2TemplateiOS</string>
+	<key>Description</key>
+	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS device. This template requires that cocos2d 2.x is installed.</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+	<key>Concrete</key>
+	<true/>
 	<key>Ancestors</key>
 	<array>
-		<string>com.cocos2d-v2.base</string>
-		<string>com.cocos2d-v2.iosbase</string>
 		<string>com.cocos2d-v2.cocos2dlib</string>
 		<string>com.cocos2d-v2.cocosdenshionlib</string>
 		<string>com.cocos2d-v2.kazmathlib</string>
 		<string>org.cocos3d.cocos3dLib</string>
 		<string>org.cocos3d.cocos3dBase</string>
+		<string>org.cocos3d.cocos3dBaseIOS</string>
 	</array>
-	<key>Concrete</key>
-	<true/>
 	<key>Definitions</key>
 	<dict>
 		<key>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</key>
@@ -83,13 +88,6 @@
 			<key>Path</key>
 			<string>main.m</string>
 		</dict>
-		<key>README!</key>
-		<dict>
-			<key>Path</key>
-			<string>README!.txt</string>
-			<key>TargetIndices</key>
-			<array/>
-		</dict>
 		<key>Resources/hello-world.pod</key>
 		<dict>
 			<key>Group</key>
@@ -100,15 +98,8 @@
 			<string>Resources/hello-world.pod</string>
 		</dict>
 	</dict>
-	<key>Description</key>
-	<string>A simple cocos3d &quot;hello, world&quot; application using OpenGL ES 2.0 on an iOS device. You can use this as the starting point for any cocos3d application that uses OpenGL ES 2.0 on an iOS device. This template requires that cocos2d 2.x is installed.</string>
-	<key>Identifier</key>
-	<string>org.cocos3d.cocos3d2iOSTemplate</string>
-	<key>Kind</key>
-	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
 	<key>Nodes</key>
 	<array>
-		<string>README!</string>
 		<string>main.m</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___AppDelegate.m</string>
@@ -117,26 +108,6 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
-	</array>
-	<key>Options</key>
-	<array>
-		<dict>
-			<key>Identifier</key>
-			<string>deviceFamily</string>
-			<key>Units</key>
-			<dict>
-				<key>iPad</key>
-				<dict>
-					<key>Definitions</key>
-					<dict/>
-				</dict>
-				<key>iPhone</key>
-				<dict>
-					<key>Definitions</key>
-					<dict/>
-				</dict>
-			</dict>
-		</dict>
 	</array>
 </dict>
 </plist>

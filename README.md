@@ -1,4 +1,4 @@
-<img src="http://www.cocos2d-iphone.org/downloads/cocos2d_logo.png">
+<img src="http://www.brenwill.com/docs/cocos3d/Logos/cocos3d-Banner-150h.png">
 
 Copyright (c) 2010-2013 The Brenwill Workshop Ltd. All rights reserved.
 
@@ -16,8 +16,6 @@ Table of Contents
 - Documentation
 - Demo Applications
     - CC3DemoMashUp - demos all important cocos3d features
-    - CC3Demo3DTiles - demos displaying many tiled 3D scenes in a single window
-    - CC3Performance - demos collecting cocos3d performance statistics
 - Creating POD 3D Model Files
 - Demo Models
 
@@ -35,8 +33,9 @@ games and applications using Objective-C.
 - Seamless integration with cocos2d. Rendering of all 3D model objects occurs within a special cocos2d layer, which fits seamlessly into the cocos2d node hierarchy, allowing 2D nodes such as controls, labels, and health bars to be drawn under, over, or beside 3D model objects. With this design, 2D objects, 3D objects, and sound can interact with each other to create a rich, synchronized audio-visual experience.
 - Seamless integration with the iOS UIViewController framework.
 - Pluggable loading framework for 3D models exported from familiar 3D editors such as Blender, 3ds Max or Cheetah3D, or through industry standard 3D object files such as Collada or PowerVR POD, or even from your own customized object file formats.
+- Loading 3D models, textures and GLSL shaders can be performed on a background thread while the scene is being displayed, and automatically added to the scene when loading is complete.
 - 3D models can be selected and positioned by touch events and gestures, allowing intuitive user interaction with the objects in the 3D world.
-- 3D models can include animation sequences, with full or fractional animation.
+- 3D models can include animation sequences, with full or fractional animation, in multiple tracks. Animation tracks can be blended together, and cross-fading actions can be used to smoothly transition between tracks.
 - 3D model objects can be arranged in sophisticated structural assemblies, allowing child objects to be moved and oriented relative to their parent structure.
 - 3D models and assemblies can be easily duplicated. Each duplicated model can be independently controlled, animated, colored, or textured. But fear not, underlying mesh data is shared between models. You can quickly and easily create swarming hoards to populate your 3D world, without worrying about device memory limitations.
 - 3D models, cameras, and lighting can be manipulated and animated using familiar cocos2d Actions, allowing you to quickly and easily control the dynamics of your 3D world, in a familiar, and easy-to-use programming paradigm.
@@ -165,25 +164,20 @@ Creating Your First cocos3d Project
 
 The `install-cocos3d.sh` script also installs several convenient Xcode project templates.
 
-To get started with your first cocos3d iOS project, open Xcode 4, click on the File->New->NewProject...
+To get started with your first cocos3d iOS project, open Xcode, click on the File->New->NewProject...
 menu selection, and select either the *cocos3d2 iOS Application* or the *cocos3d1 iOS Application*
 project template from the cocos3d template group in the iOS section, depending on whether you want to
 use OpenGL ES 2.0, or OpenGL ES 1.1, respectively.
 
-Remember that if you want to use the *cocos3d2 iOS Application* template and OpenGL ES 2.0, your
-cocos3d installation must be linked to a `cocos2d 2.x` version, as described above, and if you
-want to use the *cocos3d1 iOS Application* template and OpenGL ES 1.1, your cocos3d installation
-must be linked to a `cocos2d 1.x` version, as described above.
+If you want to use the *cocos3d2 iOS Application* template and OpenGL ES 2.0, your cocos3d installation
+must be linked to a `cocos2d 2.x` version, as described above. If you want to use the *cocos3d1 iOS
+Application* template and OpenGL ES 1.1, your cocos3d installation must be linked to a `cocos2d 1.x`
+version, as described above.
 
-To get started with your first cocos3d Mac OSX project, open Xcode 4, click on the File->New->NewProject...
-menu selection, and select either the *cocos3d2 OSX Application* or the *cocos3d1 OSX Application* project
-template from the cocos3d template group in the OS X section, depending on whether you want to use
-OpenGL with a programmable rendering pipeline, or a configurable fixed rendering pipeline, respectively.
-
-Remember that if you want to use the *cocos3d2 OSX Application* template and OpenGL with a programmable
-pipeline, your cocos3d installation must be linked to a `cocos2d 2.x` version, as described above, and
-if you want to use the *cocos3d1 OSX Application* template and OpenGL with a fixed pipeline, your cocos3d
-installation must be linked to a `cocos2d 1.x` version, as described above.
+To get started with your first cocos3d Mac OSX project, open Xcode, click on the File->New->NewProject...
+menu selection, and select the *cocos3d2 OSX Application* project template from the cocos3d template group
+in the OS X section. The *cocos3d2 OSX Application* template uses the OpenGL programmable pipeline and 
+your cocos3d installation must be linked to a `cocos2d 2.x` version, as described above.
 
 The template project starts with a working 3D variation on the familiar *hello, world*
 application, and you can use it as a starting point for your own application.
@@ -330,6 +324,8 @@ showcases many interesting features of cocos3d, including:
 - read pixels from a framebuffer
 - replace framebuffer and texture pixels with programmatic content
 - dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
+- apply multiple animation tracks to a model, blend them together, and smoothly transition between
+  animation tracks using a cross-fade action.
 
 In addition, there are a number of interesting options for you to play with by uncommenting
 certain lines of code in the methods of this class that build objects in the 3D scene,
@@ -356,33 +352,6 @@ including experimenting with:
 - permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
 - Skybox using a cube mapped texture.
 - cocos2d CCSprite displaying the television screen rendered texture
-
-
-CC3Demo3DTiles
---------------
-
-A simple demo that lays out multiple small cocos3d scenes as layers in a larger cocos2d layer.
-The effect is a grid of tiles, with each tile displaying a separate 3D scene, each containing
-its own camera and lighting. The main node in each 3D tile can be rotated under touch control.
-
-This demonstrates the ability to simply include 3D objects in an otherwise 2D game, and techniques
-for optimizing under those conditions. It also demonstrates touch control when many 3D scene are
-visible concurrently, and the ability to add app data to nodes using the userData property.
-
-The CC3Demo3DTiles demo app also demonstrates the use of the cocos2d `RootController` with cocos3d.
-
-
-CC3Performance
---------------
-
-This is a simple demo of the performance characteristics of cocos3d. It demonstrates how to
-collect statistics about your application's performance. In doing so, it presents a number
-of model scenarios, and through the user interface, you can control the type of model loaded
-and how many copies to render.
-
-You can dynamically experiment with how different model types, sizes and quantities affects
-the performance of cocos3d. You can also use this performance demo app to compare performance
-across different device types.
 
 
 Creating POD 3D Model Files

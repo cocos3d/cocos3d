@@ -136,6 +136,8 @@ typedef enum {
  *   - read pixels from a framebuffer
  *   - replace framebuffer and texture pixels with programmatic content
  *   - dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
+ *   - apply multiple animation tracks to a model, blend them together, and smoothly transition between
+ *     animation tracks using a cross-fade action.
  *
  * In addition, there are a number of interesting options for you to play with by uncommenting
  * certain lines of code in the methods of this class that build objects in the 3D scene,

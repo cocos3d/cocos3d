@@ -41,6 +41,7 @@
 // GL functions
 #define glClearDepth					glClearDepthf
 #define glGenerateMipmap				glGenerateMipmapOES
+#define glBindVertexArray				glBindVertexArrayOES
 
 // Framebuffers
 #define glGenFramebuffers				glGenFramebuffersOES

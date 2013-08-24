@@ -16,15 +16,9 @@
 		<string>macosx</string>
 		<key>SharedSettings</key>
 		<dict>
-			<key>ARCHS</key>
-			<string>$(ARCHS_STANDARD_32_64_BIT)</string>
 			<key>MACOSX_DEPLOYMENT_TARGET</key>
 			<string>10.7</string>
-			<key>GCC_WARN_64_TO_32_BIT_CONVERSION</key>
-			<string>YES</string>
 		</dict>
-		<key>Configurations</key>
-		<dict/>
 	</dict>
 	<key>Targets</key>
 	<array>
@@ -38,33 +32,6 @@
 				<string>AppKit</string>
 				<string>Foundation</string>
 			</array>
-			<key>SharedSettings</key>
-			<dict>
-				<key>OTHER_LDFLAGS</key>
-				<array>
-					<string>-lz</string>
-					<string>-ObjC</string>
-				</array>
-				<key>GCC_ENABLE_OBJC_EXCEPTIONS</key>
-				<string>YES</string>
-			</dict>
-			<key>Configurations</key>
-			<dict>
-				<key>Debug</key>
-				<dict>
-					<key>COPY_PHASE_STRIP</key>
-					<string>NO</string>
-					<key>GCC_DYNAMIC_NO_PIC</key>
-					<string>NO</string>
-				</dict>
-				<key>Release</key>
-				<dict>
-					<key>COPY_PHASE_STRIP</key>
-					<string>YES</string>
-					<key>DEBUG_INFORMATION_FORMAT</key>
-					<string>dwarf-with-dsym</string>
-				</dict>
-			</dict>
 		</dict>
 	</array>
 	<key>Definitions</key>
