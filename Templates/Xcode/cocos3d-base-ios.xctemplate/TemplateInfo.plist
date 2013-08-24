@@ -104,140 +104,190 @@
 			<key>TargetIndices</key>
 			<array/>
 		</dict>
-		<key>Resources/Default.png</key>
-		<dict>
-			<key>Group</key>
-			<string>Resources</string>
-			<key>Path</key>
-			<string>Resources/Default.png</string>
-		</dict>
-		<key>Resources/Default-568h@2x.png</key>
-		<dict>
-			<key>Group</key>
-			<string>Resources</string>
-			<key>Path</key>
-			<string>Resources/Default-568h@2x.png</string>
-		</dict>
-		<key>Resources/Default-Portrait~ipad.png</key>
-		<dict>
-			<key>Group</key>
-			<string>Resources</string>
-			<key>Path</key>
-			<string>Resources/Default-Portrait~ipad.png</string>
-		</dict>
-		<key>Resources/Default-Landscape~ipad.png</key>
-		<dict>
-			<key>Group</key>
-			<string>Resources</string>
-			<key>Path</key>
-			<string>Resources/Default-Landscape~ipad.png</string>
-		</dict>
 		<key>Resources/Icon-29.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-29.png</string>
 		</dict>
 		<key>Resources/Icon-29@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-29@2x.png</string>
 		</dict>
 		<key>Resources/Icon-40.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-40.png</string>
 		</dict>
 		<key>Resources/Icon-40@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-40@2x.png</string>
 		</dict>
 		<key>Resources/Icon-50.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-50.png</string>
 		</dict>
 		<key>Resources/Icon-50@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-50@2x.png</string>
 		</dict>
 		<key>Resources/Icon-57.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-57.png</string>
 		</dict>
 		<key>Resources/Icon-57@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-57@2x.png</string>
 		</dict>
 		<key>Resources/Icon-60.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-60.png</string>
 		</dict>
 		<key>Resources/Icon-60@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-60@2x.png</string>
 		</dict>
 		<key>Resources/Icon-72.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-72.png</string>
 		</dict>
 		<key>Resources/Icon-72@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-72@2x.png</string>
 		</dict>
 		<key>Resources/Icon-76.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-76.png</string>
 		</dict>
 		<key>Resources/Icon-76@2x.png</key>
 		<dict>
 			<key>Group</key>
-			<string>Resources</string>
+			<array>
+				<string>Resources</string>
+				<string>Icons</string>
+			</array>
 			<key>Path</key>
 			<string>Resources/Icon-76@2x.png</string>
+		</dict>
+		<key>Resources/Default.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+				<string>Launch Images</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/Default.png</string>
+		</dict>
+		<key>Resources/Default-568h@2x.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+				<string>Launch Images</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/Default-568h@2x.png</string>
+		</dict>
+		<key>Resources/Default-Portrait~ipad.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+				<string>Launch Images</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/Default-Portrait~ipad.png</string>
+		</dict>
+		<key>Resources/Default-Landscape~ipad.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+				<string>Launch Images</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/Default-Landscape~ipad.png</string>
 		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
 		<string>Resources/Info.plist</string>
-		<string>Resources/Default.png</string>
-		<string>Resources/Default-568h@2x.png</string>
-		<string>Resources/Default-Portrait~ipad.png</string>
-		<string>Resources/Default-Landscape~ipad.png</string>
 		<string>Resources/Icon-29.png</string>
 		<string>Resources/Icon-29@2x.png</string>
 		<string>Resources/Icon-40.png</string>
@@ -252,6 +302,10 @@
 		<string>Resources/Icon-72@2x.png</string>
 		<string>Resources/Icon-76.png</string>
 		<string>Resources/Icon-76@2x.png</string>
+		<string>Resources/Default.png</string>
+		<string>Resources/Default-568h@2x.png</string>
+		<string>Resources/Default-Portrait~ipad.png</string>
+		<string>Resources/Default-Landscape~ipad.png</string>
 	</array>
 </dict>
 </plist>

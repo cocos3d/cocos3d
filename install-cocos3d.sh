@@ -158,8 +158,8 @@ copy_xc4_project_templates(){
 	copy_files "Templates/Xcode/$TEMPLATE.xctemplate/" "$DST_DIR"
 
 	DST_DIR="$DST_DIR""/Resources"
-	cp -r "Projects/Common/Resources/Icons/" "$DST_DIR"
-	cp -r "Projects/Common/Resources/LaunchImages/" "$DST_DIR"
+	copy_files "Projects/Common/Resources/Icons/" "$DST_DIR"
+	copy_files "Projects/Common/Resources/LaunchImages/" "$DST_DIR"
 
 # Copy base cocos3d OSX project settings
 	TEMPLATE="cocos3d-base-osx"
