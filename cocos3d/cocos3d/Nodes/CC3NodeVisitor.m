@@ -537,8 +537,11 @@
 
 -(void) disableUnusedTextureUnits {
 	_textureUnitCount = _currentTextureUnitIndex;
+	_nextUnassignedTextureSampler = _textureUnitCount;
 	[_gl disableTexturingFrom: _currentTextureUnitIndex];
 }
+
+-(GLuint) nextUnassignedTextureSampler { return _nextUnassignedTextureSampler++; }
 
 
 #pragma mark Accessing node contents
@@ -633,6 +636,12 @@
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
+		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
+		CC3Matrix4x3PopulateIdentity(&_viewMatrix);
+		CC3Matrix4x4PopulateIdentity(&_projMatrix);
+		_isVPMtxDirty = YES;
+		_isMVMtxDirty = YES;
+		_isMVPMtxDirty = YES;
 		_shouldDecorateNode = YES;
 		_isDrawingEnvironmentMap = NO;
 	}

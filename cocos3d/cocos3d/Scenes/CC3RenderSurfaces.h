@@ -284,6 +284,22 @@
 /** The ID used to identify the renderbuffer to the GL engine. */
 @property(nonatomic, readonly) GLuint renderbufferID;
 
+/** 
+ * Returns the format of each pixel in the buffer.
+ *
+ * The returned value may be one of the following:
+ *   - GL_RGB8
+ *   - GL_RGBA8
+ *   - GL_RGBA4
+ *   - GL_RGB5_A1
+ *   - GL_RGB565
+ *   - GL_DEPTH_COMPONENT16
+ *   - GL_DEPTH_COMPONENT24
+ *   - GL_DEPTH24_STENCIL8
+ *   - GL_STENCIL_INDEX8
+ */
+@property(nonatomic, readonly) GLenum pixelFormat;
+
 /** Returns the number of samples used to define each pixel. */
 @property(nonatomic, readonly) GLuint pixelSamples;
 
@@ -303,7 +319,9 @@
  * buffer, sufficient to render an image of the specified size in the  specified pixel format.
  *
  * The size and pixelFormat properties of this instance are set to the specified values.
- * The pixelSamples property is set to one.
+ * The pixelSamples property is set to one. 
+ * 
+ * See the pixelFormat property for allowable values for the format parameter.
  */
 -(id) initWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
 
@@ -314,11 +332,15 @@
  *
  * The size and pixelFormat properties of this instance are set to the specified values.
  * The pixelSamples property will be set to one.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
  */
 +(id) renderbufferWithSize: (CC3IntSize) size andPixelFormat: (GLenum) format;
 
 /**
  * Initializes this instance with the specified pixel format and with one sample per pixel.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of this renderbuffer can be set by invoking the resizeTo: method.
  */
@@ -328,12 +350,16 @@
  * Allocates and initializes an autoreleased instance with the specified pixel format and
  * with one sample per pixel.
  *
+ * See the pixelFormat property for allowable values for the format parameter.
+ *
  * The size of the renderbuffer can be set by invoking the resizeTo: method.
  */
 +(id) renderbufferWithPixelFormat: (GLenum) format;
 
 /**
  * Initializes this instance with the specified pixel format and with number of samples per pixel.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of this renderbuffer can be set by invoking the resizeTo: method.
  */
@@ -342,6 +368,8 @@
 /**
  * Allocates and initializes an autoreleased instance with the specified pixel format and
  * number of samples per pixel.
+ *
+ * See the pixelFormat property for allowable values for the format parameter.
  *
  * The size of the renderbuffer can be set by invoking the resizeTo: method.
  */

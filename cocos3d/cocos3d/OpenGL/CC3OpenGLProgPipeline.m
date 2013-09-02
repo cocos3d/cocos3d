@@ -373,6 +373,10 @@
 	value_MaxVertexAttribsUsed = kCCVertexAttrib_MAX;
 }
 
+-(void) initShaderProgramPrewarmer {
+	self.shaderProgramPrewarmer = [CC3ShaderProgramPrewarmer prewarmerWithName: self.name];
+}
+
 @end
 
 

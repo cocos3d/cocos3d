@@ -398,6 +398,7 @@
 	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
 	GLuint _currentTextureUnitIndex;
+	GLuint _nextUnassignedTextureSampler;
 	ccTime _deltaTime;
 	BOOL _shouldDecorateNode : 1;
 	BOOL _isDrawingEnvironmentMap : 1;
@@ -428,12 +429,26 @@
 -(void) disableUnusedTextureUnits;
 
 /**
- * The number of texture units being drawn.
+ * Returns the number of texture units being drawn.
  *
  * The value of this property is set by the disableUnusedTextureUnits method, which is invoked
  * by the node's material, and is then consumed by the mesh when binding texture coordinates.
  */
 @property(nonatomic, readonly) GLuint textureUnitCount;
+
+/**
+ * Returns the value to use for the next texture sampler that does not have an corresponding
+ * texture in the current material.
+ *
+ * This property is accessed whenever the current material has fewer textures than texture
+ * samplers declared in the shader program, and is accessed once for each of the surplus shader
+ * program texture samplers (both 2D and cube-map samplers), in order to assign them a value
+ * that is not already consumed by a valid texture from the material.
+ *
+ * As each material is drawn, the value of this property starts at the value of the
+ * textureUnitCount property, and then increments by one each time this property is accessed.
+ */
+@property(nonatomic, readonly) GLuint nextUnassignedTextureSampler;
 
 /**
  * This property gives the interval, in seconds, since the previous frame.

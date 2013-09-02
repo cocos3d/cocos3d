@@ -38,8 +38,8 @@
 // Legacy naming support
 #define CC3GLProgram					CC3ShaderProgram
 
-@class CC3ShaderProgramContext, CC3NodeDrawingVisitor;
-@protocol CC3ShaderProgramMatcher;
+@protocol CC3ShaderProgramMatcher, CC3RenderSurface;
+@class CC3ShaderProgramContext, CC3NodeDrawingVisitor, CC3MeshNode;
 
 
 #pragma mark -
@@ -362,6 +362,8 @@
  * to invoking this method.
  */
 -(void) link;
+
+-(void) prewarm;
 
 
 #pragma mark Binding
@@ -714,3 +716,64 @@
 
 @end
 
+
+#pragma mark -
+#pragma mark CC3ShaderProgramPrewarmer
+
+/**
+ * Utility class that pre-warms shader programs by using them to render a small mesh node
+ * to an off-screen surface.
+ *
+ * The GL engine may choose to defer some final shader program compilation steps until the
+ * first time the shader program is used to render a mesh. This can cause the first frame of
+ * the first mesh drawn with the shader program to take significantly longer than subsequent
+ * renderings with that shader program, which can often result in a transient, but noticable,
+ * "freezing" of the scene. This is particularly apparent for new meshes that are added to
+ * the scene at any point other than during scene initialization.
+ *
+ * To avoid this, this class contains a small mesh and an off-screen rendering surface to which
+ * the mesh can be rendered using a shader program, in order to force that shader program to
+ * perform its final compilation and linking steps at a controlled, and predicatble, time.
+ */
+@interface CC3ShaderProgramPrewarmer : CC3Identifiable {
+	id<CC3RenderSurface> _prewarmingSurface;
+	CC3MeshNode* _prewarmingMeshNode;
+	CC3NodeDrawingVisitor* _drawingVisitor;
+}
+
+/** 
+ * The surface to which the prewarmingMeshNode is rendered in order to pre-warm a shader program.
+ *
+ * If not set directly, this property will be initialized to a minimal off-screen surface that
+ * contains only a color buffer, with no depth buffer.
+ */
+@property(nonatomic, retain) id<CC3RenderSurface> prewarmingSurface;
+
+/** 
+ * The mesh node that is rendered to the prewarmingSurface in order to pre-warm a shader program.
+ *
+ * If not set directly, this property will be lazily initialized to a minimal mesh consisting
+ * of a single triangular face containing only location content in the verticies.
+ */
+@property(nonatomic, retain) CC3MeshNode* prewarmingMeshNode;
+
+/** 
+ * The drawing visitor used to render the prewarmingMeshNode to the prewarmingSurface.
+ *
+ * If not set directly, this property will be lazily initialized to a a basic drawing visitor.
+ */
+@property(nonatomic, retain) CC3NodeDrawingVisitor* drawingVisitor;
+
+/** 
+ * Pre-warms the specified shader program by rendering the prewarmingMeshNode
+ * to the prewarmingSurface. 
+ */
+-(void) prewarm: (CC3ShaderProgram*) program;
+
+
+#pragma mark Allocation and initialization
+
+/** Allocates and initializes an autoreleased instance with the specifie name. */
++(id) prewarmerWithName: (NSString*) name;
+
+@end

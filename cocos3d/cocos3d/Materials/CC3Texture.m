@@ -32,6 +32,7 @@
 #import "CC3Texture.h"
 #import "CC3PVRTexture.h"
 #import "CC3CC2Extensions.h"
+#import "CC3ShaderProgramSemantics.h"
 
 
 #pragma mark -
@@ -64,6 +65,11 @@
 -(BOOL) isPOTHeight { return (_size.height == ccNextPOT(_size.height)); }
 
 -(BOOL) isPOT { return self.isPOTWidth && self.isPOTHeight; }
+
+-(GLenum) samplerSemantic {
+	CC3AssertUnimplemented(@"samplerSemantic");
+	return kCC3SemanticNone;
+}
 
 -(BOOL) isTexture2D { return NO; }
 
@@ -677,6 +683,8 @@ static CC3Cache* _textureCache = nil;
 
 @implementation CC3Texture2D
 
+-(GLenum) samplerSemantic { return kCC3SemanticTexture2DSampler; }
+
 -(BOOL) isTexture2D { return YES; }
 
 -(GLenum) textureTarget { return GL_TEXTURE_2D; }
@@ -750,6 +758,8 @@ static BOOL _defaultShouldFlip2DHorizontallyOnLoad = NO;
 #pragma mark CC3TextureCube
 
 @implementation CC3TextureCube
+
+-(GLenum) samplerSemantic { return kCC3SemanticTextureCubeSampler; }
 
 -(BOOL) isTextureCube { return YES; }
 
@@ -925,6 +935,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(BOOL) isPOTHeight { return _texture.isPOTHeight; }
 
 -(BOOL) isPOT { return _texture.isPOT; }
+
+-(GLenum) samplerSemantic { return _texture.samplerSemantic; }
 
 -(BOOL) isTexture2D { return _texture.isTexture2D; }
 

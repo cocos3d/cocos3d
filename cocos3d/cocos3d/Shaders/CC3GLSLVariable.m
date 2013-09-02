@@ -225,10 +225,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 			((CC3Vector*)_varValue)[index] = *(CC3Vector*)&value;
 			return;
 		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT2:
 			((CC3Vector4*)_varValue)[index] = value;
 			return;
 			
-		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
 			CC3Assert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
@@ -334,10 +334,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 		case GL_FLOAT_VEC2:
 		case GL_FLOAT_VEC3:
 		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT2:
 			[self setVector4: CC3Vector4Make(value.x, value.y, value.z, value.w) at: index];
 			return;
 			
-		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
 			CC3Assert(NO, @"%@ attempted to set scalar or vector when matrix type %@ expected.",
@@ -390,10 +390,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 		case GL_FLOAT_VEC2:
 		case GL_FLOAT_VEC3:
 		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT2:
 			[self setColor4F: CCC4FFromCCC4B(value)];
 			return;
 			
-		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
 			CC3Assert(NO, @"%@ attempted to set color when matrix type %@ expected.",
@@ -429,10 +429,10 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 		case GL_FLOAT_VEC2:
 		case GL_FLOAT_VEC3:
 		case GL_FLOAT_VEC4:
+		case GL_FLOAT_MAT2:
 			[self setVector4: CC3Vector4Make(value.r, value.g, value.b, value.a) at: index];
 			return;
 
-		case GL_FLOAT_MAT2:
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
 			CC3Assert(NO, @"%@ attempted to set color when matrix type %@ expected.",
@@ -480,8 +480,60 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	free(_glVarValue);
 	_glVarValue = calloc(_varLen, 1);
 	
+	[self populateInitialValue];
+	
 	LogTrace(@"%@ populated varValue: %p, glVarValue: %p", self, _varValue, _glVarValue);
 }
+
+/** Populates the initial values of the uniform, based on the size and type. */
+-(void) populateInitialValue {
+	for (GLuint vIdx = 0 ; vIdx < _size; vIdx++) {
+		CC3Matrix3x3 m3x3;
+		CC3Matrix4x4 m4x4;
+		
+		switch (_type) {
+				
+			case GL_FLOAT:
+			case GL_FLOAT_VEC2:
+			case GL_FLOAT_VEC3:
+			case GL_FLOAT_VEC4:
+				[self setVector4: CC3Vector4Make(0.0f, 0.0f, 0.0f, 1.0f) at: vIdx];
+				return;
+				
+			case GL_FLOAT_MAT2:
+				[self setVector4: CC3Vector4Make(1.0f, 0.0f, 0.0f, 1.0f) at: vIdx];
+				return;
+			case GL_FLOAT_MAT3:
+				CC3Matrix3x3PopulateIdentity(&m3x3);
+				[self setMatrix3x3: &m3x3 at: vIdx];
+				return;
+			case GL_FLOAT_MAT4:
+				CC3Matrix4x4PopulateIdentity(&m4x4);
+				[self setMatrix4x4: &m4x4 at: vIdx];
+				return;
+				
+			case GL_INT:
+			case GL_INT_VEC2:
+			case GL_INT_VEC3:
+			case GL_INT_VEC4:
+			case GL_SAMPLER_2D:
+			case GL_SAMPLER_CUBE:
+			case GL_BOOL:
+			case GL_BOOL_VEC2:
+			case GL_BOOL_VEC3:
+			case GL_BOOL_VEC4:
+				[self setIntVector4: CC3IntVector4Make(0, 0, 0, 1) at: vIdx];
+				return;
+				
+			default:
+				CC3Assert(NO, @"%@ could not set value because type %@ is not understood",
+						  self, NSStringFromGLEnum(_type));
+				return;
+		}
+	}
+	
+}
+
 
 /** Overridden to update the GL state engine if the value was changed. */
 -(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor {

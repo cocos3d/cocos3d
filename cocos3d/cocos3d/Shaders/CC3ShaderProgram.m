@@ -34,6 +34,8 @@
 #import "CC3ShaderProgramMatcher.h"
 #import "CC3NodeVisitor.h"
 #import "CC3Material.h"
+#import "CC3RenderSurfaces.h"
+#import "CC3ParametricMeshNodes.h"
 
 
 #pragma mark -
@@ -389,6 +391,11 @@ static CC3Cache* _shaderCache = nil;
 	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
 }
 
+-(void) prewarm {
+	LogRez(@"Pre-warming %@", self);
+	[CC3OpenGL.sharedGL.shaderProgramPrewarmer prewarm: self];
+}
+
 
 #pragma mark Binding
 
@@ -503,6 +510,7 @@ static CC3Cache* _shaderCache = nil;
 		self.vertexShader = vertexShader;
 		self.fragmentShader = fragmentShader;
 		[self link];
+		[self prewarm];
 	}
 	return self;
 }
@@ -609,6 +617,64 @@ static id<CC3ShaderProgramMatcher> _programMatcher = nil;
 	_programMatcher = [programMatcher retain];
 	[old release];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3ShaderProgramPrewarmer
+
+@implementation CC3ShaderProgramPrewarmer
+
+@synthesize prewarmingSurface=_prewarmingSurface;
+@synthesize prewarmingMeshNode=_prewarmingMeshNode;
+@synthesize drawingVisitor=_drawingVisitor;
+
+-(id<CC3RenderSurface>) prewarmingSurface {
+	if ( !_prewarmingSurface ) {
+		self.prewarmingSurface = [CC3GLFramebuffer surfaceWithSize: CC3IntSizeMake(4, 4)];	// retained
+		_prewarmingSurface.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_RGBA4];
+		[_prewarmingSurface validate];
+	}
+	return _prewarmingSurface;
+}
+
+-(CC3MeshNode*) prewarmingMeshNode {
+	if ( !_prewarmingMeshNode ) {
+		
+		// Create mesh node that only has vertex locations
+		self.prewarmingMeshNode = [CC3MeshNode nodeWithName: @"ShaderPrewarmer"];	// retained
+		_prewarmingMeshNode.vertexContentTypes = kCC3VertexContentLocation;
+		
+		// Populate the mesh as a single triangular face
+		CC3Face triangle = CC3FaceMake(kCC3VectorZero, kCC3VectorUnitXPositive, kCC3VectorUnitYPositive);
+		ccTex2F texCoords[3] = { {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0} };				// unused
+		[_prewarmingMeshNode populateAsTriangle: triangle withTexCoords: texCoords andTessellation: 1];
+
+		// Create VBOs in the GL engine and release the mesh from memory
+		[_prewarmingMeshNode createGLBuffers];
+		[_prewarmingMeshNode releaseRedundantContent];
+	}
+	return _prewarmingMeshNode;
+}
+
+-(CC3NodeDrawingVisitor*) drawingVisitor {
+	if ( !_drawingVisitor ) self.drawingVisitor = [CC3NodeDrawingVisitor visitor];
+	return _drawingVisitor;
+}
+
+-(void) prewarm: (CC3ShaderProgram*) program {
+	self.prewarmingMeshNode.shaderProgram = program;
+	self.prewarmingMeshNode.shaderContext.shouldEnforceCustomOverrides = NO;
+	self.drawingVisitor.renderSurface = self.prewarmingSurface;
+	[self.prewarmingSurface activate];
+	[self.drawingVisitor visit: self.prewarmingMeshNode];
+}
+
+
+#pragma mark Allocation and initialization
+
++(id) prewarmerWithName: (NSString*) name { return [[[self alloc] initWithName: name] autorelease]; }
 
 @end
 

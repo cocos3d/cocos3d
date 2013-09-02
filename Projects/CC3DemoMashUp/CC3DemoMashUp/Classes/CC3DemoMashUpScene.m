@@ -2291,6 +2291,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_dragon.uniformScale = 5.0;
 	[flightPath runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0
 																				  rotateBy: cc3v(0, -15, 0)]]];
+
+	// Dragon is added on on background thread. Configure it for the scene, and fade it in slowly.
+	[self configureForScene: _dragon andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: flightPath];
 }
 

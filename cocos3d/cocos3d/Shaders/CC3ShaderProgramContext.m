@@ -37,6 +37,8 @@
 
 @implementation CC3ShaderProgramContext
 
+@synthesize shouldEnforceCustomOverrides=_shouldEnforceCustomOverrides;
+
 -(void) dealloc {
 	[_program release];
 	[_uniforms release];
@@ -122,6 +124,10 @@
 			return YES;
 		}
 	}
+
+	// If the semantic is unknown, and no override was found, return whether a default is okay
+	if (uniform.semantic == kCC3SemanticNone) return !_shouldEnforceCustomOverrides;
+	
 	return NO;
 }
 
@@ -132,6 +138,7 @@
 
 -(id) initForProgram: (CC3ShaderProgram*) program {
 	if ( (self = [super init]) ) {
+		_shouldEnforceCustomOverrides = YES;
 		self.program = program;								// retained & will clear overrides
 	}
 	return self;

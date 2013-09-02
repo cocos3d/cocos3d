@@ -43,10 +43,11 @@
  *    - CC3Assert can be used with a variable number of arguments without the need for
  *      NSAssert1(), NSAssert2(), etc.
  *
- * Like the NSAssert() functions, you can turn assertions off in production code by setting
- * NS_BLOCK_ASSERTIONS to 1 in your compiler build settings. Doing so completely removes the
- * corresponding assertion invocations from the compiled code, thus eliminating both the
- * memory and CPU overhead that the assertion calls would add
+ * Like the NSAssert() functions, you can turn assertions off in production code by either setting
+ * NS_BLOCK_ASSERTIONS to 1 in your compiler build settings, or setting the ENABLE_NS_ASSERTIONS
+ * compiler setting to NO. Doing so completely removes the corresponding assertion invocations
+ * from the compiled code, thus eliminating both the memory and CPU overhead that the assertion
+ * calls would add
  *
  * A special CC3AssertUnimplemented(name) assertion function is provided to conveniently raise
  * an assertion exception when some expected functionality is unimplemented. This might be used

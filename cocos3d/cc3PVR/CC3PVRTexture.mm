@@ -31,6 +31,7 @@
 
 #import "CC3PVRTexture.h"
 #import "CC3PVRTTexture.h"
+#import "CC3ShaderProgramSemantics.h"
 
 
 #pragma mark -
@@ -49,6 +50,10 @@
 -(void) setShouldFlipHorizontallyOnLoad: (BOOL) shouldFlipHorizontallyOnLoad {}
 
 @synthesize isTextureCube=_isTextureCube;
+
+-(GLenum) samplerSemantic {
+	return self.isTextureCube ? kCC3SemanticTextureCubeSampler : kCC3SemanticTexture2DSampler;
+}
 
 -(BOOL) isTexture2D { return !self.isTextureCube; }
 

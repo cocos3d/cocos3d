@@ -33,8 +33,9 @@
 #import "CC3OpenGLFoundation.h"
 #import "CC3Matrix4x4.h"
 
-@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode, CC3ShaderProgram;
+@class CC3NodeDrawingVisitor, CC3Mesh, CC3MeshNode;
 @class CC3GLSLVariable, CC3GLSLUniform, CC3GLSLAttribute;
+@class CC3ShaderProgram, CC3ShaderProgramPrewarmer;
 
 
 /** Indicates that vertex attribute array is not available. */
@@ -77,6 +78,7 @@ typedef struct {
  * if the state really is changing.
  */
 @interface CC3OpenGL : CC3Identifiable {
+	CC3ShaderProgramPrewarmer* _shaderProgramPrewarmer;
 	BOOL _isPrimaryContext : 1;
 
 @public
@@ -1013,6 +1015,18 @@ typedef struct {
  * and the getLogForShaderProgram: method to retrieve the reason for any unsuccessful link attempt.
  */
 -(void) linkShaderProgram: (GLuint) programID;
+
+/**
+ * The shader prewarmer for this context.
+ *
+ * When loading, compiling and linking a shader program, some of the steps are deferred,
+ * within the GL engine, until the shader is first used to draw a mesh. This can result
+ * in a significant, unexpected, and undesired pause during the GL draw call.
+ *
+ * This prewarmer can be used to force that first draw call to be made immediately,
+ * and to an off-screen surface, so it won't be visible.
+ */
+@property(nonatomic, retain) CC3ShaderProgramPrewarmer* shaderProgramPrewarmer;
 
 /** Returns whether the specified shader was successfully linked. */
 -(BOOL) getShaderProgramWasLinked: (GLuint) programID;

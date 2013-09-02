@@ -558,6 +558,9 @@
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
+/** Returns the GLSL uniform texture sampler semantic for this type of texture. */
+@property(nonatomic, readonly) GLenum samplerSemantic;
+
 
 #pragma mark Texture content and sizing
 

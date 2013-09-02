@@ -49,8 +49,10 @@
 @implementation CC3OpenGL
 
 @synthesize isPrimaryContext=_isPrimaryContext;
+@synthesize shaderProgramPrewarmer=_shaderProgramPrewarmer;
 
 -(void) dealloc {
+	[_shaderProgramPrewarmer release];
 	[_extensions release];
 	[value_GL_VENDOR release];
 	[value_GL_RENDERER release];
@@ -936,6 +938,7 @@
 		[self initVertexAttributes];
 		[self initTextureUnits];
 		[self initExtensions];
+		[self initShaderProgramPrewarmer];
 	}
 	return self;
 }
@@ -991,6 +994,8 @@
 	for (NSString* ext in self.extensions) [desc appendFormat: @"\n\t%@", ext];
 	return desc;
 }
+
+-(void) initShaderProgramPrewarmer { _shaderProgramPrewarmer = nil; }
 
 /** Returns the appropriate class cluster subclass instance. */
 +(id) alloc {

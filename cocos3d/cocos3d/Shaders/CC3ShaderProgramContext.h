@@ -58,6 +58,7 @@
 	CC3ShaderProgram* _program;
 	CCArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
+	BOOL _shouldEnforceCustomOverrides : 1;
 }
 
 /**
@@ -66,6 +67,32 @@
  * Setting this property will redefine the variables that can be retrieved via the uniform... methods.
  */
 @property(nonatomic, retain) CC3ShaderProgram* program;
+
+/**
+ * Indicates whether this context should ensure that all uniforms with an unknown semantic
+ * must have a uniform override established.
+ *
+ * Uniform variables whose semantic is unknown cannot be resolved automatically from scene
+ * content, and generally require that a uniform override be established in this context,
+ * in order for a meaningful uniform value to be passed to the shader program.
+ *
+ * If the value of this property is YES, when a uniform of unknown semantic is processed by
+ * the populateUniform:withVisitor: method, and a uniform override has not been established
+ * in this context for that uniform by the application, the populateUniform:withVisitor: 
+ * method will return NO. This will generally result in an assertion error being raised.
+ *
+ * If the value of this property is NO, the populateUniform:withVisitor: method will return 
+ * YES under the same conditions. This will cause the uniform to use its current value, which
+ * might be an initial default identity value, or might be a value set by another mesh node
+ * that is using the same shader program.
+ *
+ * The initial value of this property is YES, indicating that the application must provide
+ * an override for any uniform whose semantic is unknown. In most cases, you should leave
+ * the value of this property set to YES, to avoid unpredictable behaviour. However, there
+ * might be some occasions, particularly when the value is never set by any mesh node, and
+ * the default identity value is acceptable.
+ */
+@property(nonatomic, assign) BOOL shouldEnforceCustomOverrides;
 
 
 #pragma mark Uniforms
@@ -173,7 +200,16 @@
  * content of the specified uniform is updated from the content held in the matching override uniform
  * in this context. If no matching override uniform exists within this context, nothing happens.
  *
- * Returns whether the specified uniform was updated.
+ * Returns whether the specified uniform was updated. If the uniform was not updated, and the
+ * semantic of the uniform is unknown, the value returned by this method depends on the value of
+ * the shouldEnforceCustomOverrides property. If this context does not update a uniform  whose
+ * semantic is unknown, and the shouldEnforceCustomOverrides property is set to YES (the default),
+ * this method will return NO, indicating that the uniform is unresolvable, and likely in error. 
+ * This will typically result in an assertion error being raised, to indicate that the application
+ * should set the override. However, if the shouldEnforceCustomOverrides property is set to NO,
+ * this method will return YES under the same conditions, which will cause the shader program
+ * to use the current value of the uniform variable, which might be an initial default identity
+ * value, or might be a value set by another mesh node that is using the same shader program.
  *
  * This context can keep track of content to be used for any uniform in the associated program.
  * This contextual content can be used for uniforms whose content cannot be extracted from a

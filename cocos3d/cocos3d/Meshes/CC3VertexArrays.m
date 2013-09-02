@@ -967,9 +967,24 @@ static GLuint lastAssignedVertexArrayTag;
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super drawFrom: vtxIdx forCount: vtxCount withVisitor: visitor];
+
+//	MarkRezActivityStart();
+	
 	[visitor.gl drawVerticiesAs: _drawingMode
 					 startingAt: (_firstVertex + vtxIdx)
 					 withLength: vtxCount];
+
+//	if (NSThread.isMainThread) {
+//		NSTimeInterval drawDur = GetRezActivityDuration() * 1000.0;
+//		if (drawDur > 5.0) {
+//			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@ (slow)",
+//					 self, visitor.currentMeshNode, _bufferID, visitor.currentShaderProgram, drawDur, visitor.gl);
+////		} else {
+////			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@",
+////					 self, visitor.currentMeshNode, _bufferID, visitor.currentShaderProgram, drawDur, visitor.gl);
+//		}
+//	}
+
 }
 
 
@@ -1432,6 +1447,9 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 /** Vertex indices are not part of vertex content. */
 -(void) bindContent: (GLvoid*) pointer toAttributeAt: (GLint) vaIdx withVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
+
+#pragma mark Drawing
+
 -(void) drawFrom: (GLuint) vtxIdx
 		forCount: (GLuint) vtxCount
 	 withVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -1441,43 +1459,24 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	firstVtx += (self.vertexStride * vtxIdx);
 	firstVtx += _elementOffset;
 	
+//	MarkRezActivityStart();
+	
 	[visitor.gl drawIndicies: firstVtx
 					ofLength: vtxCount
 					 andType: _elementType
 						  as: _drawingMode];
-}
-
--(void) populateFromRunLengthArray: (GLushort*) runLenArray ofLength: (GLuint) rlaLen {
-	GLuint elemNum, rlaIdx, runNum;
 	
-	// Iterate through the runs in the array to count
-	// the number of runs and total number of vertices
-	runNum = 0;
-	elemNum = 0;
-	rlaIdx = 0;
-	while(rlaIdx < rlaLen) {
-		GLushort runLength = runLenArray[rlaIdx];
-		elemNum += runLength;
-		rlaIdx += runLength + 1;
-		runNum++;
-	}
+//	if (NSThread.isMainThread) {
+//		NSTimeInterval drawDur = GetRezActivityDuration() * 1000.0;
+//		if (drawDur > 5.0) {
+//			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@ (slow)",
+//					 self, visitor.currentMeshNode, _bufferID, visitor.currentShaderProgram, drawDur, visitor.gl);
+////		} else {
+////			LogDebug(@"%@ from %@ drawn from buffer %u by %@ in %.3f ms on %@",
+////					 self, visitor.currentMeshNode, _bufferID, visitor.currentShaderProgram, drawDur, visitor.gl);
+//		}
+//	}
 	
-	// Allocate space for the vertices and the runs
-	self.allocatedVertexCapacity = elemNum;
-	[self allocateStripLengths: runNum];
-	
-	// Iterate through the runs in the array, copying the 
-	// vertices and run-lengths to this vertex index array
-	runNum = 0;
-	elemNum = 0;
-	rlaIdx = 0;
-	while(rlaIdx < rlaLen) {
-		GLushort runLength = runLenArray[rlaIdx++];
-		_stripLengths[runNum++] = runLength;
-		for (int i = 0; i < runLength; i++) {
-			[self setIndex: runLenArray[rlaIdx++] at: elemNum++];
-		}
-	}
 }
 
 
@@ -1529,6 +1528,39 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 }
 
 +(GLenum) defaultSemantic { return kCC3SemanticNone; }
+
+-(void) populateFromRunLengthArray: (GLushort*) runLenArray ofLength: (GLuint) rlaLen {
+	GLuint elemNum, rlaIdx, runNum;
+	
+	// Iterate through the runs in the array to count
+	// the number of runs and total number of vertices
+	runNum = 0;
+	elemNum = 0;
+	rlaIdx = 0;
+	while(rlaIdx < rlaLen) {
+		GLushort runLength = runLenArray[rlaIdx];
+		elemNum += runLength;
+		rlaIdx += runLength + 1;
+		runNum++;
+	}
+	
+	// Allocate space for the vertices and the runs
+	self.allocatedVertexCapacity = elemNum;
+	[self allocateStripLengths: runNum];
+	
+	// Iterate through the runs in the array, copying the
+	// vertices and run-lengths to this vertex index array
+	runNum = 0;
+	elemNum = 0;
+	rlaIdx = 0;
+	while(rlaIdx < rlaLen) {
+		GLushort runLength = runLenArray[rlaIdx++];
+		_stripLengths[runNum++] = runLength;
+		for (int i = 0; i < runLength; i++) {
+			[self setIndex: runLenArray[rlaIdx++] at: elemNum++];
+		}
+	}
+}
 
 @end
 

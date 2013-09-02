@@ -652,11 +652,11 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 -(CC3Texture*) getTextureNamed: (NSString*) aName;
 
 /**
- * Returns the texture that will be processed by the texture unit with the specified
- * index, which should be a number between zero, and one less than the value of the
- * textureCount property.
+ * Returns the texture that will be processed by the texture unit with the specified index.
+ * Texture unit indices start at zero.
  *
- * The value returned will be nil if there are no textures.
+ * The value returned will be nil if there are no textures, or if the specified index is
+ * greater than one less than the value of the textureCount property.
  */
 -(CC3Texture*) textureForTextureUnit: (GLuint) texUnit;
 
