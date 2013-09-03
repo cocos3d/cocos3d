@@ -4499,8 +4499,8 @@ typedef enum {
  * intersects the bounding volume of this node), if the shouldLogIntersections property of
  * the other bounding volume is also set to YES.
  *
- * The shouldLogIntersections property of this node and the other bounding
- * volumes must both be set to YES for the log message to be output.
+ * The shouldLogIntersections property of this node and the other bounding volumes must
+ * both be set to YES for the log message to be output.
  *
  * The initial value of this property is NO.
  *

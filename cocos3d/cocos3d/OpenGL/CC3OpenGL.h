@@ -211,7 +211,7 @@ typedef struct {
 
 /**
  * Returns whether this instance is tracking state for the primary rendering GL context
- * on the main thread.
+ * on the rendering thread.
  */
 @property(nonatomic, readonly) BOOL isPrimaryContext;
 
@@ -1069,6 +1069,12 @@ typedef struct {
 
 #pragma mark Allocation and initialization
 
+/**
+ * Initializes this instance with the specified name, and marking whether this is the
+ * primary GL rendering context.
+ */
+-(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext;
+
 /** 
  * Returns the shared singleton instance for the currently running thread, creating it if necessary.
  *
@@ -1077,8 +1083,8 @@ typedef struct {
  * per thread, and will return the appropriate instance according to which thread the invocation
  * of this method is occuring.
  *
- * Currently, a maximum of two instances are supported, one for the main rendering thread, and one
- * for a single background thread that can be used for loading resources, textures, and shaders.
+ * Currently, a maximum of two instances are supported, one for the primary rendering thread, and
+ * one for a single background thread that can be used for loading resources, textures, and shaders.
  */
 +(CC3OpenGL*) sharedGL;
 

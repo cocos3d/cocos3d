@@ -175,7 +175,7 @@
  * the 2D node is embedded in the 3D scene, and the following applies:
  *  - For static 2D nodes, such as buttons, 2D sprites, or static text labels, the
  *    simplest thing to do is leave this property with the default value and allow
- *    it to be lazily measureed from the 2D node the first time it is accessed, and
+ *    it to be lazily measured from the 2D node the first time it is accessed, and
  *    cached for subsequent accesses.
  *  - For 2D nodes whose boundary change under app control, such as a text label,
  *    you can also allow this property to be lazily initialized, and then use the

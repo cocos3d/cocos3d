@@ -295,21 +295,22 @@ typedef enum {
  * facing away from the light and the entire plane appears dark. Understanding this behaviour helps
  * to understand the interaction between lighting, faces, and normals in any object.
  *
- * Touching the switch-view button again will point the camera at a bouncing, rotating
- * beach ball. This beach ball is actually semi-transparent, and you can see objects through
- * the ball. This is particularly apparent if you move the camera so that it is behind the
- * ball, and look back through the ball at the robot arm. To be multi-colored, the beach
- * ball sports several materials. This is done by constructing the beach ball as a parent
- * node with four child nodes (and meshes), one for each colored material. This breakdown
- * is handled by the POD file exporter, and is automatically reconstructed during standard
- * loading from a POD file here. This demonstrates the parent-child nature of nodes. Moving
- * and rotating the parent beach ball node moves and rotates the children automatically.
- *
- * Touching the beach ball will toggle the beach ball between translucent and fully opaque,
+ * Touching the switch-view button again will point the camera at a bouncing, rotating beach ball.
+ * Touching the beach ball will toggle the beach ball between fully opaque and translucent,
  * demonstrating how the isOpaque property can be used to conveniently change the transparency
  * of a node. See the notes for the isOpaque property on CC3Material for more on this property,
  * and its interaction with other material properties.
- * 
+ *
+ * When the beach ball is translucent, you can see objects through the ball. This is particularly
+ * apparent if you move the camera so that it is behind the ball, and look back through the ball
+ * at the other objects in the scene.
+ *
+ * To be multi-colored, the beach ball sports several materials. This is done by constructing the
+ * beach ball as a parent node with four child nodes (and meshes), one for each colored material.
+ * This breakdown is handled by the POD file exporter, and is automatically reconstructed during
+ * standard loading from a POD file here. This demonstrates the parent-child nature of nodes.
+ * Moving and rotating the parent beach ball node moves and rotates the children automatically.
+ *
  * Although the beach ball is constructed from four separate mesh nodes, touching any part of the
  * beach ball will actually select the node representing the complete beach ball, and the entire
  * beach ball is highlighted.

@@ -70,7 +70,7 @@
 	_depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
 	_requestedSamples = 1;
 
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithSystemView: self];
 }
 
 -(void) reshape {

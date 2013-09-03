@@ -1218,7 +1218,15 @@ static GLuint lastAssignedNodeTag;
 	if (aNode == self.target) [self updateTargetLocation];
 }
 
--(void) nodeWasDestroyed: (CC3Node*) aNode { if (aNode == self.target) self.target = nil; }
+-(void) nodeWasDestroyed: (CC3Node*) aNode {
+	if (aNode == self.target) {
+		// Don't use setTarget: nil because the old target is now destroyed and setTarget: will
+		// attempt to remove this node from the target's transform listeners, which will create
+		// a race condition, since this is being called from the transform listeners array.
+		self.targettingRotator.target = nil;
+		[self didSetTargetInDescendant: self];
+	}
+}
 
 /** Check if target location needs to be updated from target, and do so if needed. */
 -(void) updateTargetLocation {
@@ -1460,10 +1468,9 @@ static GLuint lastAssignedNodeTag;
 /** Notify the transform listeners that the node has been destroyed. */
 -(void) notifyDestructionListeners {
 	// Log with super description, because all of the subclass info is invalid.
-	LogTrace(@"%@ notifying %i listeners of destruction", [super description], _transformListeners.count);
-	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in _transformListeners) {
+	LogTrace(@"%@ notifying %lu listeners of destruction", [super description], (unsigned long)_transformListeners.count);
+	for (id<CC3NodeTransformListenerProtocol> xfmLisnr in _transformListeners)
 		[xfmLisnr nodeWasDestroyed: self];
-	}
 }
 
 /** Marks the global rotation as dirty and in need of recalculation. */
@@ -1629,7 +1636,7 @@ static GLuint lastAssignedNodeTag;
  * to avoid the possibility of adding a node in the middle of a render iteration.
  */
 -(void) addChild: (CC3Node*) aNode {
-	if (NSThread.isMainThread || !self.scene)
+	if (CC3OpenGL.sharedGL.isPrimaryContext || !self.scene)
 		[self addChildNow: aNode];
 	else
 		[self addChildOnRenderThread: aNode];

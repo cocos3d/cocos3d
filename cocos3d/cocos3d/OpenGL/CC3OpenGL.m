@@ -930,10 +930,11 @@
 
 #pragma mark Allocation and initialization
 
--(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
-	if ( (self = [super initWithTag: aTag withName: aName]) ) {
+-(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext {
+	if ( (self = [super initWithName: aName]) ) {
+		_isPrimaryContext = isPrimaryContext;
 		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
-		[self initPrimaryContextProperty];
+		LogInfo(@"Starting GL context %@", self);
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
@@ -941,14 +942,6 @@
 		[self initShaderProgramPrewarmer];
 	}
 	return self;
-}
-
-/** 
- * Sets the isPrimaryContext property to YES if this instance is tracking state for
- * the GL context on the main thread.
- */
--(void) initPrimaryContextProperty {
-	_isPrimaryContext = NSThread.isMainThread;
 }
 
 /** Template method to retrieve the GL platform limits. */
@@ -1007,11 +1000,14 @@ static CC3OpenGL* _renderGL = nil;
 static CC3OpenGL* _bgGL = nil;
 
 +(CC3OpenGL*) sharedGL {
-	if (NSThread.isMainThread) {
-		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Rendering Engine"];	// retained
+	NSThread* currThread = NSThread.currentThread;
+	if (currThread == CCDirector.sharedDirector.runningThread || currThread.isMainThread) {
+		if (!_renderGL) _renderGL = [[self alloc] initWithName: @"Primary Engine"
+											  asPrimaryContext: YES];	// retained
 		return _renderGL;
 	} else {
-		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"];	// retained
+		if (!_bgGL) _bgGL = [[self alloc] initWithName: @"Background Engine"
+									  asPrimaryContext: NO];			// retained
 		return _bgGL;
 	}
 }
