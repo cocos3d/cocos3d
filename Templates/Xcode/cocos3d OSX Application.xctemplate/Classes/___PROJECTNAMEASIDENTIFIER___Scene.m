@@ -167,13 +167,7 @@
  *
  * For more info, read the notes of this method on CC3Node.
  */
--(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {
-	// If you have uncommented the moveWithDuration: invocation in the onOpen: method, you
-	// can uncomment the following to track how the camera moves, where it ends up, and what
-	// the camera's clipping distances are, in order to determine how to position and configure
-	// the camera to view the entire scene.
-//	LogDebug(@"Camera: %@", self.activeCamera.fullDescription);
-}
+-(void) updateAfterTransform: (CC3NodeUpdatingVisitor*) visitor {}
 
 
 #pragma mark Scene opening and closing
@@ -190,10 +184,8 @@
  */
 -(void) onOpen {
 
-	// Move the camera to frame the scene. You can uncomment the LogDebug line in the
-	// updateAfterTransform: method to track how the camera moves, where it ends up, and
-	// what the camera's clipping distances are, in order to determine how to position
-	// and configure the camera to view your entire scene. Then you can remove this code.
+	// Move the camera to frame the scene. The resulting configuration of the camera is output as
+	// a [debug] log message, so you know where the camera needs to be in order to view your scene.
 	[self.activeCamera moveWithDuration: 3.0 toShowAllOf: self withPadding: 0.5f];
 
 	// Uncomment this line to draw the bounding box of the scene.

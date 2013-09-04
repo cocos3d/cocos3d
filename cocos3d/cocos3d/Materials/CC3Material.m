@@ -464,15 +464,11 @@ static GLuint lastAssignedMaterialTag;
 #pragma mark Drawing
 
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if ([self switchingMaterial]) {
-		LogTrace(@"Drawing %@", self);
-		[self applyAlphaTestWithVisitor: visitor];
-		[self applyBlendWithVisitor: visitor];
-		[self applyColorsWithVisitor: visitor];
-		[self drawTexturesWithVisitor: visitor];
-	} else {
-		LogTrace(@"Reusing currently bound %@", self);
-	}
+	LogTrace(@"Drawing %@", self);
+	[self applyAlphaTestWithVisitor: visitor];
+	[self applyBlendWithVisitor: visitor];
+	[self applyColorsWithVisitor: visitor];
+	[self drawTexturesWithVisitor: visitor];
 }
 
 /**
@@ -549,26 +545,6 @@ static GLuint lastAssignedMaterialTag;
 	[gl enableBlend: NO];
 	[gl enableAlphaTesting: NO];
 	[gl disableTexturingFrom: 0];
-	[self resetSwitching];
-}
-
-
-#pragma mark Material context switching
-
-// The tag of the material that was most recently drawn to the GL engine.
-// The GL engine is only updated when a material with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with the
-// same material are drawn together, to minimize context switching within the GL engine.
-static GLuint currentMaterialTag = 0;
-
-+(void) resetSwitching {
-	currentMaterialTag = 0;
-}
-
--(BOOL) switchingMaterial {
-	BOOL shouldSwitch = currentMaterialTag != _tag;
-	currentMaterialTag = _tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
 }
 
 @end

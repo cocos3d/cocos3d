@@ -409,13 +409,6 @@
 }
 
 -(void) setupDraw3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
-	// Ensure that the first material and mesh will be rendered, even if same as last one
-	// that was rendered on the previous cycle.
-	[CC3Material resetSwitching];
-	[CC3Mesh resetSwitching];
-	
-	// Align the 3D GL state cache with current 2D settings
 	[visitor.gl align3DStateCache];
 }
 

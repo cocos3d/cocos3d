@@ -2449,14 +2449,6 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
 /** @deprecated No longer used. The bounding volume is now created in the same method in CC3MeshNode. */
 -(CC3NodeBoundingVolume*) defaultBoundingVolume DEPRECATED_ATTRIBUTE;
 
-/**
- * Resets the tracking of the mesh switching functionality.
- *
- * This is invoked automatically by the CC3Scene at the beginning of each frame drawing cycle.
- * Usually, the application never needs to invoke this method directly.
- */
-+(void) resetSwitching;
-
 
 #pragma mark Allocation and initialization
 

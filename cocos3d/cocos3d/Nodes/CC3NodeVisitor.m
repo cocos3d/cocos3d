@@ -461,15 +461,10 @@
 	}
 }
 
-/**
- * Initializes mesh and material context switching, prepares GL programs, activates the
- * rendering surface, and opens the scene and the camera.
- */
+/** Prepares GL programs, activates the rendering surface, and opens the scene and the camera. */
 -(void) open {
 	[super open];
 
-	[CC3Material resetSwitching];
-	[CC3Mesh resetSwitching];
 	[CC3ShaderProgram willBeginDrawingScene];
 
 	[self activateRenderSurface];

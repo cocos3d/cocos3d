@@ -834,15 +834,4 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  */
 +(void) unbindWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-
-#pragma mark Material context switching
-
-/**
- * Resets the tracking of the material switching functionality.
- *
- * This is invoked automatically by the CC3Scene at the beginning of each frame
- * drawing cycle. Usually, the application never needs to invoke this method directly.
- */
-+(void) resetSwitching;
-
 @end

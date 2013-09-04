@@ -209,7 +209,7 @@
 
 /** Overridden to auto-create a bounding volume. */
 -(void) createSkinnedBoundingVolumes {
-	if ( !_boundingVolume ) [self createBoundingVolume];
+	[self createBoundingVolume];
 	for (CC3Node* child in _children) [child createSkinnedBoundingVolumes];
 }
 
@@ -815,6 +815,10 @@
 -(void) cacheRestPoseMatrix {}
 
 -(CC3SoftBodyNode*) softBodyNode { return _parent.softBodyNode; }
+
+-(void) createSkinnedBoundingVolumes {
+	for (CC3Node* child in _children) [child createSkinnedBoundingVolumes];
+}
 
 -(void) setSkeletalBoundingVolume: (CC3NodeBoundingVolume*) boundingVolume {
 	for (CC3Node* child in _children) child.skeletalBoundingVolume = boundingVolume;

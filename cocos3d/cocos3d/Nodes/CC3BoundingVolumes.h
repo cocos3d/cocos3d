@@ -579,6 +579,12 @@
  */
 @property(nonatomic, assign) BOOL shouldDraw;
 
+/** The color used when this bounding volume is displayed. */
+-(ccColor3B) displayNodeColor;
+
+/** The opacity used when this bounding volume is displayed. */
+-(GLubyte) displayNodeOpacity;
+
 @end
 
 

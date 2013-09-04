@@ -2038,11 +2038,10 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Add the emitter to the scene
 	[self addChild: emitter];
 
-	// To see the bounding volumes of the emitter, uncomment the following line.
-	// The bounding volume of most nodes contains both a spherical and bounding-box
-	// bounding volume to optimize intersection testing. Touch the robot arm to see
-	// the bounding volume of the particle emitter grow and shrink dynamically.
-	// Use the joystick controls to back the camera away to get the full effect.
+	// To see the bounding volume of the emitter, set this shouldDrawBoundingVolume property to YES.
+	// The bounding volume of most nodes contains both a spherical and bounding-box bounding volume
+	// to optimize intersection testing. Touch the robot arm to see the bounding volume of the
+	// particle emitter grow and shrink dynamically. Back the camera away to get the full effect.
 	emitter.shouldDrawBoundingVolume = NO;
 }
 

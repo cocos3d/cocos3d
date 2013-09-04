@@ -1367,10 +1367,7 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 }
 
 -(void) bindWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (self.switchingMesh)
-		[visitor.gl bindMesh: self withVisitor: visitor];
-	else
-		LogTrace(@"Reusing currently bound %@", self);
+	[visitor.gl bindMesh: self withVisitor: visitor];
 }
 
 /**
@@ -1415,31 +1412,6 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 
 // Deprecated
 -(CC3NodeBoundingVolume*) defaultBoundingVolume { return [CC3NodeSphereThenBoxBoundingVolume boundingVolume]; }
-
-// The tag of the mesh that was most recently drawn to the GL engine.
-// The GL engine is only updated when a mesh with a different tag is presented.
-// This allows for optimization by ordering the drawing of objects so that objects with
-// the same mesh are drawn together, to minimize context switching within the GL engine.
-static GLuint currentMeshTag = 0;
-
-/**
- * Returns whether this mesh is different than the mesh that was most recently
- * drawn to the GL engine. To improve performance, meshes are only bound if they need to be.
- *
- * If appropriate, the application can arrange CC3MeshNodes in the CC3Scene so that nodes
- * using the same mesh are drawn together, to minimize the number of mesh binding
- * changes in the GL engine.
- *
- * This method is invoked automatically by the draw method to test whether this mesh needs
- * to be bound to the GL engine before drawing.
- */
--(BOOL) switchingMesh {
-	BOOL shouldSwitch = currentMeshTag != _tag;
-	currentMeshTag = _tag;		// Set anyway - either it changes or it doesn't.
-	return shouldSwitch;
-}
-
-+(void) resetSwitching { currentMeshTag = 0; }
 
 
 #pragma mark Allocation and initialization

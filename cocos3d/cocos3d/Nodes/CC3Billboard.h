@@ -90,7 +90,7 @@
  * instance of a subclass of CC3NodeBoundingArea, which maps the 2D boundary of the 2D node
  * into the 3D scene, and when shouldDrawAs2DOverlay is YES, handles testing the 2D bounds of
  * the 2D node against the bounds of the 2D drawing plane. The default bounding volume, as
- * returned by the defaultBoundingVolume method, and created when the createBoundingVolumes
+ * returned by the defaultBoundingVolume method, and created when the createBoundingVolume
  * method is invoked, is an instance of CC3BillboardBoundingBoxArea.
  */
 @interface CC3Billboard : CC3MeshNode {

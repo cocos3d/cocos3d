@@ -1546,15 +1546,13 @@ static GLuint lastAssignedNodeTag;
 
 }
 
--(void) createBoundingVolumes {
-	if ( !_boundingVolume ) [self createBoundingVolume];
-	for (CC3Node* child in _children) [child createBoundingVolumes];
+-(void) createBoundingVolume {
+	if ( !_boundingVolume ) self.boundingVolume = [self defaultBoundingVolume];
 }
 
--(void) createBoundingVolume { self.boundingVolume = [self defaultBoundingVolume]; }
-
--(void) createSkinnedBoundingVolumes {
-	for (CC3Node* child in _children) [child createSkinnedBoundingVolumes];
+-(void) createBoundingVolumes {
+	[self createBoundingVolume];
+	for (CC3Node* child in _children) [child createBoundingVolumes];
 }
 
 -(void) deleteBoundingVolumes {
@@ -1577,7 +1575,10 @@ static GLuint lastAssignedNodeTag;
 
 -(BOOL) shouldDrawBoundingVolume { return _boundingVolume ? _boundingVolume.shouldDraw : NO; }
 
--(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw { _boundingVolume.shouldDraw = shouldDraw; }
+-(void) setShouldDrawBoundingVolume: (BOOL) shouldDraw {
+	if (shouldDraw) [self createBoundingVolume];
+	_boundingVolume.shouldDraw = shouldDraw;
+}
 
 
 #pragma mark Drawing
@@ -2583,6 +2584,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 }
 
 -(void) setShouldLogIntersections: (BOOL) shouldLog {
+	if (shouldLog) [self createBoundingVolume];
 	_boundingVolume.shouldLogIntersections = shouldLog;
 	for (CC3Node* child in _children) child.shouldLogIntersections = shouldLog;
 }
@@ -2594,6 +2596,7 @@ static ccColor4F directionMarkerColor = { 1.0, 0.0, 0.0, 1.0 };		// kCCC4FRed
 }
 
 -(void) setShouldLogIntersectionMisses: (BOOL) shouldLog {
+	if (shouldLog) [self createBoundingVolume];
 	_boundingVolume.shouldLogIntersectionMisses = shouldLog;
 	for (CC3Node* child in _children) child.shouldLogIntersectionMisses = shouldLog;
 }

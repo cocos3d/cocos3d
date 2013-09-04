@@ -410,14 +410,12 @@
 		  fromDirection: (CC3Vector) aDirection
 			withPadding: (GLfloat) padding
 			 checkScene: (BOOL) checkScene {
-	self.location = [self calculateLocationToShowAllOf: aNode
-										whileLookingAt: targetLoc
-										 fromDirection: aDirection
-										   withPadding: padding
-											checkScene: checkScene];
-	self.forwardDirection = CC3VectorNegate(aDirection);
-	[self ensureAtRootAncestor];
-	[self updateTransformMatrices];
+	[self moveWithDuration: 0.0f
+			   toShowAllOf: aNode
+			whileLookingAt: targetLoc
+			 fromDirection: aDirection
+			   withPadding: padding
+				checkScene: checkScene];
 }
 
 -(void) moveWithDuration: (ccTime) t toShowAllOf: (CC3Node*) aNode {
@@ -517,9 +515,20 @@
 											  withPadding: padding
 											   checkScene: checkScene];
 	CC3Vector newFwdDir = CC3VectorNegate(aDirection);
+	LogDebug(@"%@ \n\tmoving to: %@ \n\tpointing towards: %@ \n\tnear clipping distance: %.3f"
+			 @"\n\tfar clipping distance: %.3f \n\tto show all of: %@",
+			 self, NSStringFromCC3Vector(newLoc), NSStringFromCC3Vector(newFwdDir),
+			 self.nearClippingDistance, self.farClippingDistance, aNode);
+
 	[self ensureAtRootAncestor];
-	[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
-	[self runAction: [CC3RotateToLookTowards actionWithDuration: t forwardDirection: newFwdDir]];
+	if (t > 0.0f) {
+		[self runAction: [CC3MoveTo actionWithDuration: t moveTo: newLoc]];
+		[self runAction: [CC3RotateToLookTowards actionWithDuration: t forwardDirection: newFwdDir]];
+	} else {
+		self.location = newLoc;
+		self.forwardDirection = newFwdDir;
+		[self updateTransformMatrices];
+	}
 }
 
 /**

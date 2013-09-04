@@ -882,6 +882,25 @@
 /** @deprecated The transform matrix now keeps track of whether it is a rigid transform. */
 @property(nonatomic, readonly) BOOL isSkeletonRigid;
 
+/**
+ * Invokes the createBoundingVolume on any skinned mesh node descendants.
+ *
+ * Skinned mesh nodes are designed to move vertices under the control of external bone nodes.
+ * Because of this, the vertices might move well beyond the bounds of a static bounding volume
+ * created from the rest pose of the skinned mesh node. For this reason, bounding volumes are
+ * not generally automatically created for skinned mesh nodes by the createBoundingVolumes
+ * method, and the bounding volumes of skinned mesh nodes are typically created by the app,
+ * by determining the maximal extent that the vertices will move, and manually assigning a
+ * larger bounding volume to cover that full extent.
+ *
+ * However, if you know that the vertices of the skinned mesh nodes descendants of this node
+ * will not move beyond the static bounding volume defined by the vertices in their rest poses,
+ * you can invoke this method to have bounding volumes created automatically from the rest
+ * poses of each descendant skinned mesh nodes. This method will not affect the bounding
+ * volumes of any non-skinned descendant nodes.
+ */
+-(void) createSkinnedBoundingVolumes;
+
 @end
 
 
