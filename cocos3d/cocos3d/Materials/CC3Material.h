@@ -179,6 +179,7 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 	GLfloat _alphaTestReference;
 	ccBlendFunc _blendFunc;
 	BOOL _shouldUseLighting : 1;
+	BOOL _shouldBlendAtFullOpacity : 1;
 }
 
 /**
@@ -325,9 +326,9 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * with a pre-multiplied alpha channel, set sourceBlend to GL_ONE, so that the pre-multiplied alpha of
  * the source will blend with the destination correctly.
  *
- * Opaque materials can be managed slightly more efficiently than translucent materials. If a material
- * really does not allow other materials to be seen behind it, you should ensure that the sourceBlend
- * and destinationBlend properties are set to GL_ONE and GL_ZERO, respectively, to optimize rendering
+ * Opaque materials can be managed more efficiently than translucent materials. If a material really
+ * does not allow other materials to be seen behind it, you should ensure that the sourceBlend and
+ * destinationBlend properties are set to GL_ONE and GL_ZERO, respectively, to optimize rendering
  * performance. The performance improvement is small, but can add up if a large number of opaque
  * objects are rendered as if they were translucent.
  *
@@ -354,9 +355,9 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * alpha below one, or by covering this material with a texture that contains an alpha channel
  * (including a pre-multiplied alpha channel), set the destinationBlend to GL_ONE_MINUS_SRC_ALPHA.
  *
- * Opaque materials can be managed slightly more efficiently than translucent materials. If a material
- * really does not allow other materials to be seen behind it, you should ensure that the sourceBlend
- * and destinationBlend properties are set to GL_ONE and GL_ZERO, respectively, to optimize rendering
+ * Opaque materials can be managed more efficiently than translucent materials. If a material really
+ * does not allow other materials to be seen behind it, you should ensure that the sourceBlend and
+ * destinationBlend properties are set to GL_ONE and GL_ZERO, respectively, to optimize rendering
  * performance. The performance improvement is small, but can add up if a large number of opaque
  * objects are rendered as if they were translucent.
  *
@@ -389,9 +390,9 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * property to be set to NO, which, as described above, will also affect the sourceBlend and
  * destinationBlend properties, so that the translucency will be blended correctly.
  *
- * However, setting the opacity property to 255 will NOT automatically cause this isOpaque property
- * to be set to YES. Even if the opacity of the material is full, the texture may contain translucency,
- * which would be ignored if the isOpaque property were to be set to YES.
+ * Setting the opacity property to 255 will automatically cause this isOpaque property to be set to
+ * YES (affecting the sourceBlend and destinationBlend properties), unless the shouldBlendAtFullOpacity
+ * property is set to YES, in which case the isOpaque property will be left set to NO.
  *
  * Setting this property can be thought of as a convenient way to switch between the two most
  * common types of blending combinations. For finer control of blending, set the sourceBlend
@@ -404,6 +405,29 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
  * can add up if a large number of opaque objects are rendered as if they were translucent.
  */
 @property(nonatomic, assign) BOOL isOpaque;
+
+/**
+ * Indicates whether blending should be applied even when the material is at full opacity.
+ *
+ * If this property is set to NO, when the opacity property of this material is set to full 
+ * opacity (255), the isOpaque property will be set to YES, which in turn will set the
+ * sourceBlend property to GL_ONE and the destinationBlend property to GL_ZERO, effectively 
+ * turning blending off. This allows a node that is opaque to be faded, but when fading is
+ * complete, and full opacity is restored, the node will be set fully opaque, which improves
+ * performance and the affects the rendering order of the node relative to other nodes.
+ *
+ * If this property is set to YES, when the opacity property of this material is set to full
+ * opacity (255), the isOpaque property will be set to NO, which will leave the sourceBlend
+ * and destination properties at their current values, generally leaving blending enabled.
+ * This is useful when using fading on a material that contains textures that in turn contain
+ * transparency. When this material reaches full opacity, blending will be left enabled, and
+ * the transparent sections of the textures will continue to be rendered correctly.
+ *
+ * The default value of this property is NO. You should set this property to YES if this
+ * material contains textures with transparent sections AND you intend to fade the node
+ * out and in using the opacity property.
+ */
+@property(nonatomic, assign) BOOL shouldBlendAtFullOpacity;
 
 /**
  * Indicates the alpha test function that is used to determine if a pixel should be
@@ -549,6 +573,9 @@ static const GLfloat kCC3DefaultMaterialReflectivity = 0.0f;
 
 /** Sets the default GL material source and destination blend function used for new instances. */
 +(void) setDefaultBlendFunc: (ccBlendFunc) aBlendFunc;
+
+
+#pragma mark Shaders
 
 /**
  * The GLSL program context containing the GLSL program (vertex & fragment shaders) used to

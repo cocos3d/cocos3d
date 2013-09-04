@@ -345,7 +345,22 @@
 	[super setOpacity: opacity];	// pass along to any children
 }
 
--(BOOL) isOpaque { return _material ? _material.isOpaque : YES; }
+-(BOOL) shouldBlendAtFullOpacity {
+	[self ensureMaterial];
+	return _material.shouldBlendAtFullOpacity;
+}
+
+-(void) setShouldBlendAtFullOpacity: (BOOL) shouldBlend {
+	[self ensureMaterial];
+	_material.shouldBlendAtFullOpacity = shouldBlend;
+	
+	[super setShouldBlendAtFullOpacity: shouldBlend];	// pass along to any children
+}
+
+-(BOOL) isOpaque {
+	[self ensureMaterial];
+	return _material.isOpaque;
+}
 
 -(void) setIsOpaque: (BOOL) opaque {
 	[self ensureMaterial];

@@ -1605,6 +1605,24 @@ typedef enum {
 @property(nonatomic, assign) GLubyte opacity;
 
 /**
+ * Implementation of the CCBlendProtocol blendFunc property.
+ *
+ * This is a convenience property that gets and sets the same property of the material
+ * of all descendant nodes
+ *
+ * Querying this property returns the value of the same property from the first
+ * descendant node that supports materials, or {GL_ONE, GL_ZERO} if no descendant
+ * nodes support materials. Setting this property sets the same property on the
+ * materials in all descendant nodes.
+ *
+ * Before setting this property, for this property to have affect on descendant
+ * mesh nodes, you must assign a material to each of those nodes using its material
+ * property, or assign a texture to those mesh nodes using the texture property,
+ * which will automatically create a material to hold the texture.
+ */
+@property(nonatomic, assign) ccBlendFunc blendFunc;
+
+/**
  * Indicates whether the content of this node and its descendants is opaque.
  *
  * Returns NO if at least one descendant is not opaque, as determined by its isOpaque
@@ -1626,23 +1644,19 @@ typedef enum {
  */
 @property(nonatomic, assign) BOOL isOpaque;
 
+
 /**
- * Implementation of the CCBlendProtocol blendFunc property.
+ * Indicates whether blending should be applied even when the material is at full opacity
+ * on each descendant node.
  *
- * This is a convenience property that gets and sets the same property of the material
- * of all descendant nodes
+ * Setting the value of this property sets the same property on the material of each
+ * descendant mesh node. Reading this property returns YES if this property is set to
+ * YES in the material of any descendant node, otherwise this method returns NO.
  *
- * Querying this property returns the value of the same property from the first
- * descendant node that supports materials, or {GL_ONE, GL_ZERO} if no descendant
- * nodes support materials. Setting this property sets the same property on the
- * materials in all descendant nodes.
- *
- * Before setting this property, for this property to have affect on descendant
- * mesh nodes, you must assign a material to each of those nodes using its material
- * property, or assign a texture to those mesh nodes using the texture property,
- * which will automatically create a material to hold the texture.
+ * See the CC3Material shouldBlendAtFullOpacity property for a description of the
+ * effect this property has on blending when changing the opacity of a node.
  */
-@property(nonatomic, assign) ccBlendFunc blendFunc;
+@property(nonatomic, assign) BOOL shouldBlendAtFullOpacity;
 
 /**
  * For descendant mesh nodes whose mesh contains per-vertex color content, this property indicates

@@ -382,10 +382,11 @@ cocos3d 0.7.2 - 2012/11/11
 	- Reviewed and removed a large number of redundant GL state setting calls
     - Bitfields now used for most BOOL instance variables.
 
-- Improved support for textures containing pre-multiplied alpha:
+- Improved support for textures containing transparency and pre-multiplied alpha:
     - The CC3Material isOpaque property will now set the sourceBlend property to GL_ONE if the texture contains pre-multiplied alpha. 
 	- When a material contains a texture with pre-multiplied alpha, all material color properties will be blended with their alpha component prior to being submitted to the GL engine.
 	- When setting a vertex color using the CC3MeshNode setVertexColor4B:at: or setVertexColor4F:at: methods, if the texture applied to the mesh contains pre-multiplied alpha, the vertex color will be blended with its alpha component before the vertex color is set.
+	- Added shouldBlendAtFullOpacity property to CC3Material and CC3Node to help control how changing the opacity of a material affects the blending properties.
 
 - CC3Node and CC3Rotator added additional directional rotation capabilities:
     - Targetting rotation can now be performed in either the local or global coordinate systems.

@@ -297,9 +297,7 @@ typedef enum {
  *
  * Touching the switch-view button again will point the camera at a bouncing, rotating beach ball.
  * Touching the beach ball will toggle the beach ball between fully opaque and translucent,
- * demonstrating how the isOpaque property can be used to conveniently change the transparency
- * of a node. See the notes for the isOpaque property on CC3Material for more on this property,
- * and its interaction with other material properties.
+ * demonstrating how the opacity property can be used to conveniently change transparency.
  *
  * When the beach ball is translucent, you can see objects through the ball. This is particularly
  * apparent if you move the camera so that it is behind the ball, and look back through the ball

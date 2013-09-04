@@ -580,6 +580,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * textures. You can see through the transparent areas to the scene behind the texture. The texture
  * as a whole fades in and out periodically, and rotates around the vertical (Y) axis.
  *
+ * The use of the shouldBlendAtFullOpacity property ensures that the transparent parts of the
+ * texture will still be alpha blended, even when the floating ring is set to full opacity.
+ *
  * As the ring rotates, both sides are visible. This is because the shouldCullBackFaces property is
  * set to NO, so that both sides of each face are rendered. However, one side appears bright and
  * colorful and the other appears dark. Surprisingly, it is the front sides of the faces that appear
@@ -602,6 +605,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	floater.location = cc3v(400.0, 150.0, -250.0);
 	floater.shouldCullBackFaces = NO;			// Show from behind as well.
 	floater.touchEnabled = YES;
+	floater.shouldBlendAtFullOpacity = YES;
 	floater.shouldDrawLocalContentWireframeBox = YES;
 
 	// Ring is added on on background thread. Configure it for the scene, and fade it in slowly.
@@ -3283,25 +3287,15 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	}
 }
 
-/**
- * If the node is the beach ball, toggle it between opaque and translucent.
- * Note that the alpha values of all the colors stay the same, it's only
- * the blending functions that change. See the notes for the isOpaque property
- * of CC3Material for more on the interaction between this property and the
- * other material properties.
- */
+/** If the node is the beach ball, toggle it between opaque and translucent. */
 -(void) touchBeachBallAt: (CGPoint) touchPoint {
 
 	// Because the beach ball is a composite node, and we add a fading touch location
 	// descriptor node as a child to it when the beach ball is touched we can't trust
-	// the value of the isOpaque property of the beach ball node. Instead, we need to
-	// dig into one of its mesh node segments to determine its opaqueness.
-	BOOL isBallOpaque = [_beachBall getNodeNamed: kBeachBallWhiteSegment].isOpaque;
-	_beachBall.isOpaque = !isBallOpaque;
-
-	// Also toggle the opacity. This is necessary only if the background layer
-	// is translucent and showing the device camera scene.
-	_beachBall.opacity = _beachBall.isOpaque ? 255 : (255 * 0.75);
+	// the value of the opacity property of the beach ball parent node. Instead, we
+	// need to dig into one of its mesh node segments to determine its opacity.
+	GLubyte bbOpacity = [_beachBall getNodeNamed: kBeachBallWhiteSegment].opacity;
+	_beachBall.opacity = (bbOpacity == 255) ? (255 * 0.75) : 255;
 }
 
 /** When the brick wall is touched, slide it back and forth to open or close it. */

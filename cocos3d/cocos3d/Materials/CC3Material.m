@@ -42,6 +42,7 @@
 @synthesize blendFunc=_blendFunc, shouldUseLighting=_shouldUseLighting;
 @synthesize alphaTestFunction=_alphaTestFunction, alphaTestReference=_alphaTestReference;
 @synthesize shaderContext=_shaderContext;
+@synthesize shouldBlendAtFullOpacity=_shouldBlendAtFullOpacity;
 
 -(void) dealloc {
 	[_texture release];
@@ -180,10 +181,12 @@
 	_specularColor.a = af;
 	_emissionColor.a = af;
 
-	// As a convenience, if we're trying to reduce opacity, make sure the isOpaque
-	// flag is compatible with that. We do NOT force it the other way, because the
-	// texture may contain translucency, even if the material colors are fully opaque.
-	if (opacity < 255) self.isOpaque = NO;
+	// As a convenience, set the blending to be compatible with the opacity level.
+	// If the opacity has been reduced below full, set isOpaque to NO to ensure alpha
+	// blending will occur. If the opacity is full, set isOpaque to YES only if if the
+	// shouldBlendAtFullOpacity flag is set to YES. This ensures that a texture
+	// with transparency will still blend, even when this material is at full opacity.
+	self.isOpaque = (opacity == 255 && !self.shouldBlendAtFullOpacity);
 }
 
 -(ccColor3B) displayedColor { return self.color; }
@@ -377,6 +380,7 @@ static ccBlendFunc _defaultBlendFunc = {GL_ONE, GL_ZERO};
 		_shininess = kCC3DefaultMaterialShininess;
 		_reflectivity = kCC3DefaultMaterialReflectivity;
 		_blendFunc = [[self class] defaultBlendFunc];
+		_shouldBlendAtFullOpacity = NO;
 		_alphaTestFunction = GL_ALWAYS;
 		_alphaTestReference = 0.0f;
 		_shouldUseLighting = YES;

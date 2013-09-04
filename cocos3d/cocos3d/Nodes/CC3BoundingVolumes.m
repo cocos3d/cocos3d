@@ -657,8 +657,11 @@
 		dn.color = self.displayNodeColor;
 		dn.opacity = self.displayNodeOpacity;
 
-		dn.decalOffsetFactor = -2.0f;		// Move towards the camera to avoid...
-		dn.decalOffsetUnits = 0.0f;			// ...Z-fighting with object node itself
+		// Set drawing order and decal properties to minimize Z-fighting between the
+		// bounding volume display and the node which the bounding volume surrounds.
+		dn.zOrder = _node.zOrder - 1;
+		dn.decalOffsetFactor = -5.0f;
+		dn.decalOffsetUnits = -5.0f;
 
 		dn.shouldDisableDepthMask = YES;	// Don't update depth mask, to allow later...
 											// ..overlapping transparencies to all be drawn

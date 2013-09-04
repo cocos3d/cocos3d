@@ -836,6 +836,15 @@
 
 -(void) updateDisplayedOpacity: (GLubyte) opacity {}
 
+-(ccBlendFunc) blendFunc {
+	for (CC3Node* child in _children) return child.blendFunc;	// From first child if exists
+	return (ccBlendFunc){GL_ONE, GL_ZERO};
+}
+
+-(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
+	for (CC3Node* child in _children) child.blendFunc = aBlendFunc;
+}
+
 -(BOOL) isOpaque {
 	for (CC3Node* child in _children) if(!child.isOpaque) return NO;
 	return YES;
@@ -845,13 +854,13 @@
 	for (CC3Node* child in _children) child.isOpaque = opaque;
 }
 
--(ccBlendFunc) blendFunc {
-	for (CC3Node* child in _children) return child.blendFunc;	// From first child if exists
-	return (ccBlendFunc){GL_ONE, GL_ZERO};
+-(BOOL) shouldBlendAtFullOpacity {
+	for (CC3Node* child in _children) if(child.shouldBlendAtFullOpacity) return YES;
+	return NO;
 }
 
--(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
-	for (CC3Node* child in _children) child.blendFunc = aBlendFunc;
+-(void) setShouldBlendAtFullOpacity: (BOOL) shouldBlend {
+	for (CC3Node* child in _children) child.shouldBlendAtFullOpacity = shouldBlend;
 }
 
 -(BOOL) shouldApplyOpacityAndColorToMeshContent {
