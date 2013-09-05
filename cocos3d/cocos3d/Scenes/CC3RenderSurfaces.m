@@ -409,6 +409,44 @@
 	[_colorAttachment replacePixels: rect withContent: colorArray];
 }
 
+-(CGImageRef) createCGImageFrom: (CC3Viewport) rect {
+	
+	// Get the image specs
+	size_t imgWidth = rect.w;
+	size_t imgHeight = rect.h;
+	size_t bitsPerComponent		= 8;
+	size_t bytesPerRow			= sizeof(ccColor4B) * imgWidth;
+	CGColorSpaceRef colorSpace	= CGColorSpaceCreateDeviceRGB();
+	CGBitmapInfo bitmapInfo		= kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault;
+	
+	// Fill a temporary array of pixels from the content of this surface
+	ccColor4B* pixels = malloc(bytesPerRow * imgHeight);
+	CC3Assert(pixels, @"%@ couldn't allocate enough memory to create CGImage.", self)
+	[self readColorContentFrom: rect into: pixels];
+	
+	// Flip the image content vertically to convert from OpenGL to CGImageRef coordinate systems.
+	CC3FlipVertically((GLubyte*)pixels, (GLuint)imgHeight, (GLuint)bytesPerRow);
+	
+	// Create a CGImageRef by creating a bitmap context from the pixels, and extracing a
+	// CGImageRef from it. We deliberately don't use CGImageCreate, because it does not copy
+	// the data out of the pixels array, which means we couldn't free the pixels array in
+	// this method, resulting in a memory leak.
+	CGContextRef drawCtx = CGBitmapContextCreate(pixels, imgWidth, imgHeight,
+												 bitsPerComponent, bytesPerRow,
+												 colorSpace, bitmapInfo);
+	CGImageRef image = CGBitmapContextCreateImage(drawCtx);
+
+	CGContextRelease(drawCtx);
+	CGColorSpaceRelease(colorSpace);
+	free(pixels);
+
+	return image;
+}
+
+-(CGImageRef) createCGImage {
+	return [self createCGImageFrom: CC3ViewportFromOriginAndSize(CC3IntPointMake(0, 0), self.size)];
+}
+
 
 #pragma mark Drawing
 

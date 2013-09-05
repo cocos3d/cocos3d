@@ -133,8 +133,9 @@ typedef enum {
  *   - render-to-texture the scene for display within the scene.
  *   - render-to-texture to create additional visual effects using post-rendering image processing.
  *   - render depth-to-texture to visualize the contents of the depth buffer.
- *   - read pixels from a framebuffer
+ *   - read pixels from a rendered framebuffer
  *   - replace framebuffer and texture pixels with programmatic content
+ *   - create CGImageRef from a rendered framebuffer
  *   - dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
  *   - apply multiple animation tracks to a model, blend them together, and smoothly transition between
  *     animation tracks using a cross-fade action.
@@ -328,7 +329,10 @@ typedef enum {
  * of a rendered texture in application memory using the CPU.
  *
  * Touching the television again will turn it off. Rendering to the television screen occurs
- * only when the television is turned on and in view of the active camera.
+ * only when the television is turned on and in view of the active camera. In addition, whenever
+ * you turn the television off, the current image on the television screen is extracted and 
+ * saved to a JPEG file at Documents/TV.jpg. This demonstrates the ability to extract a 
+ * CGImageRef from the contents of a rendered scene.
  *
  * Touching the switch-view button again will point the camera at yet another teapot, this one
  * textured with a metallic texture, and rotating on it's axis. When running GLSL shaders, under

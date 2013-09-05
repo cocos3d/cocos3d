@@ -58,12 +58,13 @@ cocos3d 2.0.0 - 2013/08/31
 		- Added new CC3NSViewController for OSX.
 
 - Added support for multi-pass rendering, render-to-texture, and dynamic environment maps:
-	- Added CC3RenderSurface classes to provide off-screen framebuffer surfaces as rendering targets
+	- Added CC3RenderSurface classes to provide both on-screen and off-screen framebuffer surfaces as rendering targets
 		- CC3GLView now uses underlying CC3GLViewSurfaceManager to manage framebuffers.
 		- Added CC3GLFramebuffer class to represent a GL framebuffer
 		- Added CC3GLRenderbuffer class to represent a GL renderbuffer
 		- Added CC3GLTextureFramebufferAttachment to allow using a texture as a framebuffer rendering target
 		- Rendering to texture of both color and depth buffers permitted.
+		- Added CC3RenderSurface createCGImage and createCGImageFrom: methods to extract CGImageRef from a rendered surface
 	- Added CC3EnvironmentMapTexture as a target to dynamically render an environmental cube-map to.
 		- CC3DemoMashUp demonstrates dynamic reflection generation (objects moving in a reflecton)
 	- Refactored CC3Scene drawScene method to support multi-pass rendering

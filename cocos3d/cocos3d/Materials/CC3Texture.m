@@ -1219,23 +1219,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 -(void) flipVertically {
 	if ( !_imageData ) return;		// If no data, nothing to flip!
-	
-	GLubyte* pixData = (GLubyte*)_imageData;
-	GLuint bytesPerRow = (GLuint)self.pixelsWide * self.bytesPerPixel;
-	GLubyte tmpRow[bytesPerRow];
-	
-	GLuint rowCnt = (GLuint)self.pixelsHigh;
-	GLuint lastRowIdx = rowCnt - 1;
-	GLuint halfRowCnt = rowCnt / 2;
-	for (GLuint rowIdx = 0; rowIdx < halfRowCnt; rowIdx++) {
-		GLubyte* lowerRow = pixData + (bytesPerRow * rowIdx);
-		GLubyte* upperRow = pixData + (bytesPerRow * (lastRowIdx - rowIdx));
-		memcpy(tmpRow, upperRow, bytesPerRow);
-		memcpy(upperRow, lowerRow, bytesPerRow);
-		memcpy(lowerRow, tmpRow, bytesPerRow);
-		LogTrace(@"Swapped %u bytes in %p between row %u at %p and row %u at %p",
-				 bytesPerRow, _imageData, rowIdx, lowerRow, (lastRowIdx - rowIdx), upperRow);
-	}
+
+	CC3FlipVertically((GLubyte*)_imageData,
+					  (GLuint)self.pixelsHigh,
+					  (GLuint)self.pixelsWide * self.bytesPerPixel);
 	
 	_isUpsideDown = !_isUpsideDown;		// Orientation has changed
 }

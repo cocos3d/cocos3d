@@ -486,3 +486,24 @@ CC3Vector CC3RayIntersectionOfSphere(CC3Ray aRay, CC3Sphere aSphere) {
 	return CC3RayIntersectionWithSphere(aRay, aSphere);
 }
 
+
+#pragma mark -
+#pragma mark Miscellaneous extensions and functionality
+
+void CC3FlipVertically(GLubyte* rowMajorData, GLuint rowCount, GLuint bytesPerRow) {
+	if ( !rowMajorData ) return;		// If no data, nothing to flip!
+	
+	GLubyte tmpRow[bytesPerRow];
+	GLuint lastRowIdx = rowCount - 1;
+	GLuint halfRowCnt = rowCount / 2;
+	for (GLuint rowIdx = 0; rowIdx < halfRowCnt; rowIdx++) {
+		GLubyte* lowerRow = rowMajorData + (bytesPerRow * rowIdx);
+		GLubyte* upperRow = rowMajorData + (bytesPerRow * (lastRowIdx - rowIdx));
+		memcpy(tmpRow, upperRow, bytesPerRow);
+		memcpy(upperRow, lowerRow, bytesPerRow);
+		memcpy(lowerRow, tmpRow, bytesPerRow);
+		LogTrace(@"Swapped %u bytes in %p between row %u at %p and row %u at %p",
+				 bytesPerRow, rowMajorData, rowIdx, lowerRow, (lastRowIdx - rowIdx), upperRow);
+	}
+}
+

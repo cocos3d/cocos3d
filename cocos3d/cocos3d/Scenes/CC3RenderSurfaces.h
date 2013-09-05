@@ -223,6 +223,23 @@
  */
 -(void) replaceColorPixels: (CC3Viewport) rect withContent: (ccColor4B*) colorArray;
 
+/**
+ * Returns a newly created CGImageRef from the contents of this surface that are contained
+ * within the specified rectangle. The size of the returned image will be the same as the
+ * size of the rectangle.
+ *
+ * You are responsible for releasing the returned image by calling the CGImageRelease function.
+ */
+-(CGImageRef) createCGImageFrom: (CC3Viewport) rect;
+
+/**
+ * Returns a newly created CGImageRef from the contents of this surface. 
+ * The size of the returned image will be the same as the size of this surface.
+ *
+ * You are responsible for releasing the returned image by calling the CGImageRelease function.
+ */
+-(CGImageRef) createCGImage;
+
 
 #pragma mark Drawing
 

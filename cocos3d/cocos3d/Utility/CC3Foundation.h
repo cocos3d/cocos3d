@@ -2328,6 +2328,21 @@ static inline void CC3SetBit(GLbitfield* bits, GLuint bitIdx, BOOL val) {
 		*bits &= ~marker;
 }
 
+/**
+ * Reverses the order of the rows in the specified data block.
+ * The transformation is performed in-place.
+ *
+ * This function can be useful for vertically flipping the contents of a texture or image,
+ * which is a common requirement when transferring content data between an OpenGL texture
+ * and an iOS or OSX image. Or it may be used to reverse the order of the rows of any
+ * row-major memory structure.
+ *
+ * The specified data block is assumed to be in row-major order, containing the specified
+ * number of rows, and with the specified number of bytes in each row. The total number of
+ * bytes in the data block must be at least (bytesPerRow * rowCount).
+ */
+void CC3FlipVertically(GLubyte* rowMajorData, GLuint rowCount, GLuint bytesPerRow);
+
 /** Temporarily turn off compiler warnings for hidden variable shadowing. */
 #define CC3_PUSH_NOSHADOW	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wshadow\"")
 

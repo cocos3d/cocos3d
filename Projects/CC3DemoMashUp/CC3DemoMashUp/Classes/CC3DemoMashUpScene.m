@@ -3401,13 +3401,51 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * Turn the TV on or off by toggle the image on the TV between a static test pattern card and a
  * texture generated dynamically by rendering the scene from the runner's camera into a texture.
+ *
+ * To demonstrate extracting an iOS or OSX image from a render surface, every time we turn the
+ * TV off, we create a CGImageRef from the TV screen image, and save it to a JPEG file.
  */
 -(void) toggleTelevision {
 	_isTVOn = !_isTVOn;
 	_tvScreen.texture = _isTVOn ? _tvSurface.colorTexture : _tvTestCardTex;
+	
+	if (!_isTVOn) [self saveTVImage];
 }
 
 /** 
+ * Extracts the image from the TV screen, converts it into an OS image,
+ * and saves it to a JPEG file in the Documents directory.
+ */
+-(void) saveTVImage {
+	NSString* docDir = [NSHomeDirectory() stringByAppendingPathComponent: @"Documents"];
+	NSString* imgPath = [docDir stringByAppendingPathComponent: @"TV.jpg"];
+
+	// Extract a CGImageRef from either the entire TV surface, or just a section (by uncommenting below)
+	CGImageRef tvImgRef = _tvSurface.createCGImage;
+//	CGImageRef tvImgRef = [_tvSurface createCGImageFrom: CC3ViewportMake(230, 100, 256, 256)];
+	
+#if CC3_IOS
+	// Convert the CGImageRef to a UIImage and save it as a JPEG file.
+	UIImage* tvImg	= [UIImage imageWithCGImage: tvImgRef];
+	NSData* imgData = UIImageJPEGRepresentation(tvImg, 0.9f);
+	[imgData writeToFile: imgPath atomically: YES];
+#endif	// CC3_IOS
+
+#if CC3_OSX
+	// Create an image destination and save the CGImageRef to it.
+	CFURLRef url = (CFURLRef)[NSURL fileURLWithPath:imgPath];
+	CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, kUTTypeJPEG, 1, NULL);
+	CGImageDestinationAddImage(dest, tvImgRef, nil);
+	CGImageDestinationFinalize(dest);
+	CFRelease(dest);
+#endif	// CC3_OSX
+	
+	// Don't forget to release the CGImageRef!
+	CGImageRelease(tvImgRef);
+	LogInfo(@"TV image saved to file: %@", imgPath);
+}
+
+/**
  * Toggle between the main scene camera and the camera running along with the runner.
  * When the runner's camera is active, turn on a local light to illuminate him.
  */
