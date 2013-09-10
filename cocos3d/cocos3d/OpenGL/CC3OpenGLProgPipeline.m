@@ -57,6 +57,7 @@
 @implementation CC3OpenGLProgPipeline
 
 -(void) dealloc {
+	[_shaderProgramPrewarmer release];
 	[value_GL_SHADING_LANGUAGE_VERSION release];
 	[super dealloc];
 }
@@ -178,6 +179,14 @@
 
 
 #pragma mark Shaders
+
+-(CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer { return _shaderProgramPrewarmer; }
+
+-(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {
+	if (shaderProgramPrewarmer == _shaderProgramPrewarmer) return;
+	[_shaderProgramPrewarmer release];
+	_shaderProgramPrewarmer = [shaderProgramPrewarmer retain];
+}
 
 -(CC3ShaderProgram*) pureColorProgram { return CC3ShaderProgram.programMatcher.pureColorProgram; }
 
@@ -349,13 +358,13 @@
 	[super initPlatformLimits];
 	
 	value_GL_MAX_TEXTURE_UNITS = [self getInteger: GL_MAX_TEXTURE_IMAGE_UNITS];
-	LogInfo(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
+	LogInfoIfPrimary(@"Maximum texture units: %u", value_GL_MAX_TEXTURE_UNITS);
 	
 	value_GL_MAX_VERTEX_ATTRIBS = [self getInteger: GL_MAX_VERTEX_ATTRIBS];
-	LogInfo(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
+	LogInfoIfPrimary(@"Maximum vertex attributes: %u", value_GL_MAX_VERTEX_ATTRIBS);
 
 	value_GL_SHADING_LANGUAGE_VERSION = [[self getString: GL_SHADING_LANGUAGE_VERSION] retain];
-	LogInfo(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
+	LogInfoIfPrimary(@"GLSL version: %@", value_GL_SHADING_LANGUAGE_VERSION);
 	
 	value_GL_MAX_CLIP_PLANES = kCC3MaxGLSLClipPlanes;
 

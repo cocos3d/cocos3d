@@ -34,7 +34,13 @@
 #if CC3_OGLES_2
 
 /** Manages the OpenGLES 2.0 state for a single GL context. */
-@interface CC3OpenGLES2 : CC3OpenGLProgPipeline {}
+@interface CC3OpenGLES2 : CC3OpenGLProgPipeline {
+
+@public
+	CC3Vector value_Vertex_Shader_Precision[6];
+	CC3Vector value_Fragment_Shader_Precision[6];
+}
+
 @end
 
 #endif	// CC3_OGLES_2

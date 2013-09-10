@@ -206,13 +206,13 @@
 	[super initPlatformLimits];
 	
 	value_GL_MAX_PALETTE_MATRICES = [self getInteger: GL_MAX_PALETTE_MATRICES_OES];
-	LogInfo(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
+	LogInfoIfPrimary(@"Maximum palette matrices (max bones per mesh): %u", value_GL_MAX_PALETTE_MATRICES);
 	
 	value_GL_MAX_VERTEX_UNITS = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
-	LogInfo(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
+	LogInfoIfPrimary(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
 	
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 
 /** Initialize the vertex attributes that are not texture coordinates. */

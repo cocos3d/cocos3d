@@ -1158,6 +1158,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * a circle whose center is behind the text. The effect is like a marquee on a round tower.
  * This example demonstrates both the use of bitmapped text labels, and the ability to
  * manipulate the locations of vertices programmatically.
+ *
+ * The use of the shouldBlendAtFullOpacity property ensures that the transparent parts of the
+ * texture will still be alpha blended, even when the label is set to full opacity.
  */
 -(void) addBitmapLabel {
 	CylinderLabel* bmLabel = [CylinderLabel nodeWithName: kBitmapLabelName];
@@ -1175,6 +1178,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.color = ccc3(0, 220, 120);
 	bmLabel.shouldUseLighting = NO;
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
+	bmLabel.shouldBlendAtFullOpacity = YES;		// We're fading in, so ensure blending remains
 	bmLabel.touchEnabled = YES;
 
 	// Label is added on on background thread. Configure it for the scene, and fade it in slowly.

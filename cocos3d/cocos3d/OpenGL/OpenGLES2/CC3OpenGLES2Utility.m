@@ -209,6 +209,12 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: return "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH";
 		case GL_SHADING_LANGUAGE_VERSION: return "GL_SHADING_LANGUAGE_VERSION";
 		case GL_CURRENT_PROGRAM: return "GL_CURRENT_PROGRAM";
+		case GL_LOW_FLOAT: return "GL_LOW_FLOAT";
+		case GL_MEDIUM_FLOAT: return "GL_MEDIUM_FLOAT";
+		case GL_HIGH_FLOAT: return "GL_HIGH_FLOAT";
+		case GL_LOW_INT: return "GL_LOW_INT";
+		case GL_MEDIUM_INT: return "GL_MEDIUM_INT";
+		case GL_HIGH_INT: return "GL_HIGH_INT";
 			
 		// LogicOp
 //		case GL_CLEAR: return "GL_CLEAR";

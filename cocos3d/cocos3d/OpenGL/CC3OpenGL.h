@@ -78,7 +78,6 @@ typedef struct {
  * if the state really is changing.
  */
 @interface CC3OpenGL : CC3Identifiable {
-	CC3ShaderProgramPrewarmer* _shaderProgramPrewarmer;
 	BOOL _isPrimaryContext : 1;
 
 @public
@@ -942,6 +941,102 @@ typedef struct {
 /** Returns the maximum size for a texture used for the specified target supported by the platform. */
 -(GLuint) maxTextureSizeForTarget: (GLenum) target;
 
+/**
+ * Returns the minimum precision value of the shader variable of the specified type for a
+ * vertex shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * For float variable types, this value is the (+/-) minimum resolvable value.
+ * For int variable types, this is the absolute minimum negative value.
+ * 
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) vertexShaderVarRangeMin: (GLenum) precisionType;
+
+/**
+ * Returns the maximum precision value of the shader variable of the specified type for a
+ * vertex shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * For float variable types, this value is the (+/-) maximum value.
+ * For int variable types, this is the absolute maximum positive value.
+ *
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) vertexShaderVarRangeMax: (GLenum) precisionType;
+
+/**
+ * Returns the resolvable precision of the shader variable of the specified type within a
+ * vertex shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) vertexShaderVarPrecision: (GLenum) precisionType;
+
+/**
+ * Returns the minimum precision value of the shader variable of the specified type for a
+ * fragment shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * For float variable types, this value is the (+/-) minimum resolvable value.
+ * For int variable types, this is the absolute minimum negative value.
+ *
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) fragmentShaderVarRangeMin: (GLenum) precisionType;
+
+/**
+ * Returns the maximum precision value of the shader variable of the specified type for a
+ * fragment shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * For float variable types, this value is the (+/-) maximum value.
+ * For int variable types, this is the absolute maximum positive value.
+ *
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) fragmentShaderVarRangeMax: (GLenum) precisionType;
+
+/**
+ * Returns the resolvable precision of the shader variable of the specified type within a
+ * fragment shader, or returns zero if the platform does not support shader precision modifiers.
+ *
+ * The precisionType argument must be one of:
+ *  - GL_LOW_FLOAT
+ *  - GL_MEDIUM_FLOAT
+ *  - GL_HIGH_FLOAT
+ *  - GL_LOW_INT
+ *  - GL_MEDIUM_INT
+ *  - GL_HIGH_INT
+ */
+-(GLfloat) fragmentShaderVarPrecision: (GLenum) precisionType;
+
 
 #pragma mark GL Extensions
 
@@ -1048,6 +1143,13 @@ typedef struct {
  * then sets the value of the uniform into the GL engine.
  */
 -(void) setShaderProgramUniformValue: (CC3GLSLUniform*) uniform;
+
+/**
+ * Releases the shader compiler and its resources from the GL engine.
+ *
+ * It will be restored automatically on the next shader compilation request.
+ */
+-(void) releaseShaderCompiler;
 
 
 #pragma mark Aligning 2D & 3D caches
@@ -1244,4 +1346,14 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
 		sArray[idx].IS_KNOWN = YES;									\
 		needsUpdate = YES;											\
 	}
+
+/**
+ * If info logging is enabled AND this is the primary context, logs the specified
+ * info message, otherwise does nothing.
+ */
+#if LOGGING_LEVEL_INFO
+#	define LogInfoIfPrimary(fmt, ...)	if (self.isPrimaryContext) LogInfo(fmt, ##__VA_ARGS__)
+#else
+#	define LogInfoIfPrimary(fmt, ...)
+#endif
 

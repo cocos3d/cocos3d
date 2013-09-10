@@ -49,10 +49,8 @@
 @implementation CC3OpenGL
 
 @synthesize isPrimaryContext=_isPrimaryContext;
-@synthesize shaderProgramPrewarmer=_shaderProgramPrewarmer;
 
 -(void) dealloc {
-	[_shaderProgramPrewarmer release];
 	[_extensions release];
 	[value_GL_VENDOR release];
 	[value_GL_RENDERER release];
@@ -842,6 +840,18 @@
 	}
 }
 
+-(GLfloat) vertexShaderVarRangeMin: (GLenum) precisionType { return 0.0f; }
+
+-(GLfloat) vertexShaderVarRangeMax: (GLenum) precisionType { return 0.0f; }
+
+-(GLfloat) vertexShaderVarPrecision: (GLenum) precisionType { return 0.0f; }
+
+-(GLfloat) fragmentShaderVarRangeMin: (GLenum) precisionType { return 0.0f; }
+
+-(GLfloat) fragmentShaderVarRangeMax: (GLenum) precisionType { return 0.0f; }
+
+-(GLfloat) fragmentShaderVarPrecision: (GLenum) precisionType { return 0.0f; }
+
 
 #pragma mark GL Extensions
 
@@ -861,6 +871,10 @@
 
 
 #pragma mark Shaders
+
+-(CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer { return nil; }
+
+-(void) setShaderProgramPrewarmer: (CC3ShaderProgramPrewarmer*) shaderProgramPrewarmer {}
 
 -(CC3ShaderProgram*) pureColorProgram { return nil; }
 
@@ -908,6 +922,8 @@
 
 -(void) setShaderProgramUniformValue: (CC3GLSLUniform*) uniform {}
 
+-(void) releaseShaderCompiler {}
+
 
 #pragma mark Aligning 2D & 3D caches
 
@@ -933,11 +949,12 @@
 -(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext {
 	if ( (self = [super initWithName: aName]) ) {
 		_isPrimaryContext = isPrimaryContext;
-		LogInfo(@"Third dimension provided by %@", NSStringFromCC3Version());
+		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
 		LogInfo(@"Starting GL context %@", self);
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
+		[self initShaderPrecisions];
 		[self initExtensions];
 		[self initShaderProgramPrewarmer];
 	}
@@ -947,19 +964,19 @@
 /** Template method to retrieve the GL platform limits. */
 -(void) initPlatformLimits {
 	value_GL_VENDOR = [[self getString: GL_VENDOR] retain];
-	LogInfo(@"GL vendor: %@", value_GL_VENDOR);
+	LogInfoIfPrimary(@"GL vendor: %@", value_GL_VENDOR);
 
 	value_GL_RENDERER = [[self getString: GL_RENDERER] retain];
-	LogInfo(@"GL engine: %@", value_GL_RENDERER);
+	LogInfoIfPrimary(@"GL engine: %@", value_GL_RENDERER);
 	
 	value_GL_VERSION = [[self getString: GL_VERSION] retain];
-	LogInfo(@"GL version: %@", value_GL_VERSION);
+	LogInfoIfPrimary(@"GL version: %@", value_GL_VERSION);
 	
 	value_GL_MAX_TEXTURE_SIZE = [self getInteger: GL_MAX_TEXTURE_SIZE];
-	LogInfo(@"Maximum texture size: %u", value_GL_MAX_TEXTURE_SIZE);
+	LogInfoIfPrimary(@"Maximum texture size: %u", value_GL_MAX_TEXTURE_SIZE);
 	
 	value_GL_MAX_RENDERBUFFER_SIZE = [self getInteger: GL_MAX_RENDERBUFFER_SIZE];
-	LogInfo(@"Maximum renderbuffer size: %u", value_GL_MAX_RENDERBUFFER_SIZE);
+	LogInfoIfPrimary(@"Maximum renderbuffer size: %u", value_GL_MAX_RENDERBUFFER_SIZE);
 
 }
 
@@ -978,7 +995,7 @@
 
 /** Performs any required initialization for GL extensions supported by this platform. */
 -(void) initExtensions {
-	LogInfo(@"GL extensions supported by this platform: %@", self.extensionsDescription);
+	LogInfoIfPrimary(@"GL extensions supported by this platform: %@", self.extensionsDescription);
 }
 
 /** Returns a description of the available extensions. */
@@ -988,7 +1005,9 @@
 	return desc;
 }
 
--(void) initShaderProgramPrewarmer { _shaderProgramPrewarmer = nil; }
+-(void) initShaderPrecisions {}
+
+-(void) initShaderProgramPrewarmer {}
 
 /** Returns the appropriate class cluster subclass instance. */
 +(id) alloc {

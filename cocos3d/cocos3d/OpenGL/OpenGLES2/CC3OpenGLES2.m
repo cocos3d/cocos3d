@@ -92,16 +92,142 @@
 }
 
 
+#pragma mark Shaders
+
+-(void) releaseShaderCompiler {
+	glReleaseShaderCompiler();
+	LogGLErrorTrace(@"glReleaseShaderCompiler()");
+}
+
+#pragma mark Platform limits & info
+
+
+-(GLfloat) vertexShaderVarRangeMin: (GLenum) precisionType {
+	return value_Vertex_Shader_Precision[precisionType - GL_LOW_FLOAT].x;
+}
+
+-(GLfloat) vertexShaderVarRangeMax: (GLenum) precisionType {
+	return value_Vertex_Shader_Precision[precisionType - GL_LOW_FLOAT].y;
+}
+
+-(GLfloat) vertexShaderVarPrecision: (GLenum) precisionType {
+	return value_Vertex_Shader_Precision[precisionType - GL_LOW_FLOAT].z;
+}
+
+-(GLfloat) fragmentShaderVarRangeMin: (GLenum) precisionType {
+	return value_Fragment_Shader_Precision[precisionType - GL_LOW_FLOAT].x;
+}
+
+-(GLfloat) fragmentShaderVarRangeMax: (GLenum) precisionType {
+	return value_Fragment_Shader_Precision[precisionType - GL_LOW_FLOAT].y;
+}
+
+-(GLfloat) fragmentShaderVarPrecision: (GLenum) precisionType {
+	return value_Fragment_Shader_Precision[precisionType - GL_LOW_FLOAT].z;
+}
+
+
 #pragma mark Allocation and initialization
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
 
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
-	LogInfo(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	value_GL_MAX_CUBE_MAP_TEXTURE_SIZE = [self getInteger: GL_MAX_CUBE_MAP_TEXTURE_SIZE];
-	LogInfo(@"Maximum cube map texture size: %u", value_GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+	LogInfoIfPrimary(@"Maximum cube map texture size: %u", value_GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+}
+
+-(void) initShaderPrecisions {
+	value_Vertex_Shader_Precision[0] = [self getShaderPrecision: GL_LOW_FLOAT forShader:GL_VERTEX_SHADER];
+	value_Vertex_Shader_Precision[1] = [self getShaderPrecision: GL_MEDIUM_FLOAT forShader:GL_VERTEX_SHADER];
+	value_Vertex_Shader_Precision[2] = [self getShaderPrecision: GL_HIGH_FLOAT forShader:GL_VERTEX_SHADER];
+	value_Vertex_Shader_Precision[3] = [self getShaderPrecision: GL_LOW_INT forShader:GL_VERTEX_SHADER];
+	value_Vertex_Shader_Precision[4] = [self getShaderPrecision: GL_MEDIUM_INT forShader:GL_VERTEX_SHADER];
+	value_Vertex_Shader_Precision[5] = [self getShaderPrecision: GL_HIGH_INT forShader:GL_VERTEX_SHADER];
+	
+	value_Fragment_Shader_Precision[0] = [self getShaderPrecision: GL_LOW_FLOAT forShader:GL_FRAGMENT_SHADER];
+	value_Fragment_Shader_Precision[1] = [self getShaderPrecision: GL_MEDIUM_FLOAT forShader:GL_FRAGMENT_SHADER];
+	value_Fragment_Shader_Precision[2] = [self getShaderPrecision: GL_HIGH_FLOAT forShader:GL_FRAGMENT_SHADER];
+	value_Fragment_Shader_Precision[3] = [self getShaderPrecision: GL_LOW_INT forShader:GL_FRAGMENT_SHADER];
+	value_Fragment_Shader_Precision[4] = [self getShaderPrecision: GL_MEDIUM_INT forShader:GL_FRAGMENT_SHADER];
+	value_Fragment_Shader_Precision[5] = [self getShaderPrecision: GL_HIGH_INT forShader:GL_FRAGMENT_SHADER];
+}
+
+-(CC3Vector) getShaderPrecision: (GLenum) precisionType forShader: (GLenum) shaderType {
+	CC3Vector precision;
+	CC3IntVector logPrecision;
+	
+	glGetShaderPrecisionFormat(shaderType, precisionType, &logPrecision.x, &logPrecision.z);
+	LogGLErrorTrace(@"glGetShaderPrecisionFormat(%@, %@, %i, %i, %i)",
+					NSStringFromGLEnum(shaderType), NSStringFromGLEnum(precisionType),
+					logPrecision.x, logPrecision.y, logPrecision.z);
+	
+	switch (precisionType) {
+		case GL_LOW_FLOAT:
+			logPrecision.x = logPrecision.z;	// Returns 0 - but seems to be +/- 0-1 range, so use precision instead
+			precision.x = powf(2.0, -logPrecision.x);
+			precision.y = powf(2.0, logPrecision.y);
+			precision.z = powf(2.0, -logPrecision.z);
+			[self logShader: shaderType  forQualifier: @"lowp" floatPrecision: precision logPrecision: logPrecision];
+			break;
+		case GL_MEDIUM_FLOAT:
+			precision.x = powf(2.0, -logPrecision.x);
+			precision.y = powf(2.0, logPrecision.y);
+			precision.z = powf(2.0, -logPrecision.z);
+			[self logShader: shaderType  forQualifier: @"mediump" floatPrecision: precision logPrecision: logPrecision];
+			break;
+		case GL_HIGH_FLOAT:
+			precision.x = powf(2.0, -logPrecision.x);
+			precision.y = powf(2.0, logPrecision.y);
+			precision.z = powf(2.0, -logPrecision.z);
+			[self logShader: shaderType  forQualifier: @"highp" floatPrecision: precision logPrecision: logPrecision];
+			break;
+		case GL_LOW_INT:
+			precision.x = -1 << logPrecision.x;
+			precision.y =  1 << logPrecision.y;
+			precision.z = 1.0;
+			[self logShader: shaderType  forQualifier: @"lowp" intPrecision: precision logPrecision: logPrecision];
+			break;
+		case GL_MEDIUM_INT:
+			precision.x = -1 << logPrecision.x;
+			precision.y =  1 << logPrecision.y;
+			precision.z = 1.0;
+			[self logShader: shaderType  forQualifier: @"mediump" intPrecision: precision logPrecision: logPrecision];
+			break;
+		case GL_HIGH_INT:
+			precision.x = -1 << logPrecision.x;
+			precision.y =  1 << logPrecision.y;
+			precision.z = 1.0;
+			[self logShader: shaderType  forQualifier: @"highp" intPrecision: precision logPrecision: logPrecision];
+			break;
+		default:
+			LogError(@"Unexpected shader precision: %@", NSStringFromGLEnum(precisionType));
+			break;
+	}
+	
+	return precision;
+}
+
+-(void) logShader: (GLenum) shaderType
+	 forQualifier: (NSString*) qualifier
+   floatPrecision: (CC3Vector) precision
+	 logPrecision: (CC3IntVector) logPrecision {
+	LogInfoIfPrimary(@"Range %@ shader %@ float: (min: (+/-)%g, max: (+/-)%g, precision: %g) log2: %@",
+					 ((shaderType == GL_VERTEX_SHADER) ? @"vertex" : @"fragment"),
+					 qualifier, precision.x, precision.y, precision.z,
+					 NSStringFromCC3IntVector(logPrecision));
+}
+
+-(void) logShader: (GLenum) shaderType
+	 forQualifier: (NSString*) qualifier
+	 intPrecision: (CC3Vector) precision
+	 logPrecision: (CC3IntVector) logPrecision {
+	LogInfoIfPrimary(@"Range %@ shader %@ int: (min: %i, max: %i, precision: %i) log2: %@",
+					 ((shaderType == GL_VERTEX_SHADER) ? @"vertex" : @"fragment"),
+					 qualifier, (GLint)precision.x, (GLint)precision.y, (GLint)precision.z,
+					 NSStringFromCC3IntVector(logPrecision));
 }
 
 @end
