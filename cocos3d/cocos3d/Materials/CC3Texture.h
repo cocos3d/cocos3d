@@ -1069,8 +1069,19 @@
  */
 +(NSString*) textureNameFromFilePath: (NSString*) aFilePath;
 
+/**
+ * Returns a description formatted as a source-code line for loading this texture from a file.
+ *
+ * During development time, you can log this string, then copy and paste it into a pre-loading
+ * function within your app code.
+ */
+-(NSString*) constructorDescription;
+
 
 #pragma mark Texture cache
+
+/** Removes this texture instance from the cache. */
+-(void) remove;
 
 /**
  * Adds the specified texture to the collection of loaded textures.
@@ -1094,11 +1105,55 @@
 /** Removes the texture with the specified name from the texture cache. */
 +(void) removeTextureNamed: (NSString*) name;
 
-/** Removes all loaded textures from the cache. */
+/**
+ * Removes from the cache all textures that are instances of any subclass of the receiver.
+ *
+ * You can use this method to selectively remove specific types of texturs, based on
+ * the texture class, by invoking this method on that class. If you invoke this method
+ * on the CC3Texture class, this cache will be compltely cleared. However, if you invoke
+ * this method on one of its subclasses, only those textures that are instances of that
+ * subclass (or one of its subclasses in turn) will be removed, leaving the remaining
+ * textures in the cache.
+ */
 +(void) removeAllTextures;
 
-/** Removes this texture instance from the cache. */
--(void) remove;
+/**
+ * Returns whether textures are being pre-loaded.
+ *
+ * See the setIsPreloading setter method for a description of how and when to use this property.
+ */
++(BOOL) isPreloading;
+
+/**
+ * Sets whether textures are being pre-loaded.
+ *
+ * Textures that are added to this cache while the value of this property is YES will be
+ * strongly cached and cannot be deallocated until specifically removed from this cache.
+ * You must manually remove any textures added to this cache while the value of this
+ * property is YES.
+ *
+ * Textures that are added to this cache while the value of this property is NO will be
+ * weakly cached, and will automatically be deallocated and removed from this cache once
+ * all references to the resource outside this cache are released.
+ *
+ * You can set the value of this property at any time, and can vary it between YES and NO
+ * to accomodate your specific loading patterns.
+ *
+ * The initial value of this property is NO, meaning that textures will be weakly cached
+ * in this cache, and will automatically be removed if not used in the scene. You can set
+ * this property to YES in order to pre-load textures that will not be immediately used
+ * in the scene, but which you wish to keep in the cache for later use.
+ */
++(void) setIsPreloading: (BOOL) isPreloading;
+
+/**
+ * Returns a description of the contents of this cache, with each entry formatted as a
+ * source-code line for loading the texture from a file.
+ *
+ * During development time, you can log this string, then copy and paste it into a
+ * pre-loading function within your app code.
+ */
++(NSString*) cachedTexturesDescription;
 
 @end
 

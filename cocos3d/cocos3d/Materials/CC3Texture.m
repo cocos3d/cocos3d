@@ -645,6 +645,10 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	return desc;
 }
 
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ textureFromFile: @\"%@\"];", [self class], self.name];
+}
+
 // Class variable tracking the most recent tag value assigned for CC3Textures.
 // This class variable is automatically incremented whenever the method nextTag is called.
 static GLuint _lastAssignedTextureTag;
@@ -656,10 +660,16 @@ static GLuint _lastAssignedTextureTag;
 
 #pragma mark Texture cache
 
+-(void) remove { [self.class removeTexture: self]; }
+
 static CC3Cache* _textureCache = nil;
 
-+(void) addTexture: (CC3Texture*) texture {
++(void) ensureCache {
 	if ( !_textureCache ) _textureCache = [[CC3Cache weakCacheForType: @"texture"] retain];	// retained
+}
+
++(void) addTexture: (CC3Texture*) texture {
+	[self ensureCache];
 	[_textureCache addObject: texture];
 }
 
@@ -671,9 +681,22 @@ static CC3Cache* _textureCache = nil;
 
 +(void) removeTextureNamed: (NSString*) name { [_textureCache removeObjectNamed: name]; }
 
-+(void) removeAllTextures { [_textureCache removeAllObjects]; }
++(void) removeAllTextures { [_textureCache removeAllObjectsOfType: self];}
 
--(void) remove { [self.class removeTexture: self]; }
++(BOOL) isPreloading { return _textureCache ? !_textureCache.isWeak : NO; }
+
++(void) setIsPreloading: (BOOL) isPreloading {
+	[self ensureCache];
+	_textureCache.isWeak = !isPreloading;
+}
+
++(NSString*) cachedTexturesDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[_textureCache enumerateObjectsUsingBlock: ^(CC3Texture* tex, BOOL* stop) {
+		if ( [tex isKindOfClass: self] ) [desc appendFormat: @"\n\t%@", tex.constructorDescription];
+	}];
+	return desc;
+}
 
 @end
 
@@ -826,7 +849,7 @@ static ccTexParams _defaultCubeMapTextureParameters = { GL_LINEAR_MIPMAP_NEAREST
 
 -(BOOL) loadFromFilePattern: (NSString*) aFilePathPattern {
 	
-	if (!_name) self.name = [self.class textureNameFromFilePath: [NSString stringWithFormat: aFilePathPattern, @""]];
+	if (!_name) self.name = [self.class textureNameFromFilePath: aFilePathPattern];
 
 	return [self loadFromFilesPosX: [NSString stringWithFormat: aFilePathPattern, @"PosX"]
 							  negX: [NSString stringWithFormat: aFilePathPattern, @"NegX"]
@@ -899,6 +922,10 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 		_pixelType = type;
 	}
 	return self;
+}
+
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ textureCubeFromFilePattern: @\"%@\"];", [self class], self.name];
 }
 
 @end

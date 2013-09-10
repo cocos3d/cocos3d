@@ -219,6 +219,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 -(void) initializeScene {
 	
 	[self initCustomState];			// Set up any initial state tracked by this subclass
+	
+	[self preloadShaderPrograms];	// Loads, compiles, links, and pre-warms all shader programs
+									// will be used by this scene.
 
 	[self addBackdrop];				// Add a sky-blue colored backdrop
 	
@@ -351,7 +354,26 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	DramaticPause();				// Pause dramatically
 	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
+
+	// Log a list of the shader programs that are being used by the scene. During development,
+	// we can use this list as a starting point for populating the preloadShaderPrograms method.
+	LogRez(@"The following list contains the shader programs currently in use in this scene."
+		   @" You can copy and paste much of this list into the preloadShaderPrograms method"
+		   @" in order to pre-load the shader programs during scene initialization. %@",
+		   [CC3ShaderProgram cachedProgramsDescription]);
 	
+	// Log a list of the PFX resources that are being used by the scene. During development, we can
+	// use this list as a starting point for adding PFX files to the preloadShaderPrograms method.
+	// When initially building this list, set the CC3Resource.isPreloading to YES and leave it there.
+	LogRez(@"The following list contains the resource files currently in use in this scene."
+		   @" You can copy the PFX resources from this list and paste them into the"
+		   @" preloadShaderPrograms method, in order to pre-load additional shader programs"
+		   @" that originate in PFX files, during scene initialization. %@",
+		   [CC3PFXResource cachedResourcesDescription]);
+	
+	// Remove the pre-loaded PFX resources, now that we no longer need them.
+	// Other weakly-cached PFX resources will have been automatically removed already.
+	[CC3PFXResource removeAllResources];
 }
 
 /**
@@ -385,6 +407,69 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupMeshes];
 	//	self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirstGroupTextures];
 	//	self.drawingSequencer = nil;
+}
+
+/**
+ * Pre-loads the shader programs that will be used in this scene.
+ *
+ * The GL drivers often leave the final stages of shader compilation and configuration until
+ * the first time the shader program is used to render an object. This can often introduce a
+ * short, unwanted pause if the shader program is loaded while the scene is running.
+ *
+ * Unfortunately, although resources such as models, textures, and shader programs can be loaded
+ * on a background thread, the final stages of shader programs compilation must be performed on
+ * the primary rendering thread. Because of this, the only way to avoid an unwanted pause while
+ * a shader program compilation is finalized is to therefore perform all shader program loading
+ * prior to the scene being displayed, including shader programs that may not be required until
+ * additional content is loaded later in the scene on a background thread.
+ *
+ * In order to ensure that the shader programs will be available when the models are loaded
+ * at a later point in the scene (usually via background loading), the cache must be configured
+ * to retain the loaded shader programs even though they will not immediately be used to display
+ * any models. This is done by turning on the value of the class-side isPreloading property.
+ */
+-(void) preloadShaderPrograms {
+#if CC3_GLSL
+
+	// Strongly cache the shader programs loaded here, so they'll be availble
+	// when models are loaded on the background loading thread.
+	CC3ShaderProgram.isPreloading = YES;
+
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3BumpMapObjectSpace.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3MultiTextureConfigurable.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTextureAlphaTest.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"BumpMap.vsh"
+							andFragmentShaderFile: @"BumpMap.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PureColor.vsh"
+							andFragmentShaderFile: @"CC3PureColor.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3SingleTextureReflect.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3NoTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3PointSprites.vsh"
+							andFragmentShaderFile: @"CC3PointSprites.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3ClipSpaceTexturable.vsh"
+							andFragmentShaderFile: @"CC3ClipSpaceNoTexture.fsh"];
+	[CC3ShaderProgram programFromVertexShaderFile: @"CC3Texturable.vsh"
+							andFragmentShaderFile: @"CC3BumpMapTangentSpace.fsh"];
+
+	// Now pre-load shader programs that originate in PFX resources
+	CC3Resource.isPreloading = YES;
+
+	[CC3PFXResource resourceFromFile: kPostProcPFXFile];
+	[CC3PFXResource resourceFromFile: kMasksPFXFile];
+	
+	// All done with shader pre-loading...let me know if any further shader programs are loaded
+	// during the scene operation.
+	CC3Resource.isPreloading = NO;
+	CC3ShaderProgram.isPreloading = NO;
+
+#endif	// CC3_GLSL
 }
 
 /** Various options for configuring interesting camera behaviours. */

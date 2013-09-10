@@ -86,7 +86,7 @@
 	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
 			  @"%@ failed to compile because:\n%@", self,
 			  [CC3OpenGL.sharedGL getLogForShader: self.shaderID]);
-	LogRez(@"Compiled %@ in %.4f seconds", self, GetRezActivityDuration());
+	LogRez(@"Compiled %@ in %.3f ms", self, GetRezActivityDuration() * 1000);
 }
 
 -(NSString*) platformPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
@@ -132,7 +132,7 @@
 	NSString* glslSrcStr = [NSString stringWithContentsOfFile: absFilePath encoding: NSUTF8StringEncoding error: &err];
 	CC3Assert(!err, @"Could not load GLSL file '%@' because %@, (code %li), failure reason %@",
 			  absFilePath, err.localizedDescription, (long)err.code, err.localizedFailureReason);
-	LogRez(@"Loaded GLSL source from file %@ in %.4f seconds", aFilePath, GetRezActivityDuration());
+	LogRez(@"Loaded GLSL source from file %@ in %.3f ms", aFilePath, GetRezActivityDuration() * 1000);
 	return glslSrcStr;
 }
 
@@ -140,6 +140,10 @@
 
 -(NSString*) description {
 	return [NSString stringWithFormat: @"%@ (ID: %u)", [super description], _shaderID];
+}
+
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ shaderFromSourceCodeFile: @\"%@\"];", [self class], self.name];
 }
 
 
@@ -154,10 +158,16 @@ static GLuint _lastAssignedShaderTag = 0;
 
 #pragma mark Shader cache
 
+-(void) remove { [self.class removeShader: self]; }
+
 static CC3Cache* _shaderCache = nil;
 
-+(void) addShader: (CC3Shader*) shader {
++(void) ensureCache {
 	if ( !_shaderCache ) _shaderCache = [[CC3Cache weakCacheForType: @"shader"] retain];	// retained
+}
+
++(void) addShader: (CC3Shader*) shader {
+	[self ensureCache];
 	[_shaderCache addObject: shader];
 }
 
@@ -169,9 +179,22 @@ static CC3Cache* _shaderCache = nil;
 
 +(void) removeShaderNamed: (NSString*) name { [_shaderCache removeObjectNamed: name]; }
 
-+(void) removeAllShaders { [_shaderCache removeAllObjects]; }
++(void) removeAllShaders { [_shaderCache removeAllObjectsOfType: self];}
 
--(void) remove { [self.class removeShader: self]; }
++(BOOL) isPreloading { return _shaderCache ? !_shaderCache.isWeak : NO; }
+
++(void) setIsPreloading: (BOOL) isPreloading {
+	[self ensureCache];
+	_shaderCache.isWeak = !isPreloading;
+}
+
++(NSString*) cachedShadersDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[_shaderCache enumerateObjectsUsingBlock: ^(CC3Shader* shdr, BOOL* stop) {
+		if ( [shdr isKindOfClass: self] ) [desc appendFormat: @"\n\t%@", shdr.constructorDescription];
+	}];
+	return desc;
+}
 
 @end
 
@@ -310,6 +333,11 @@ static CC3Cache* _shaderCache = nil;
 
 -(void) willBeginDrawingScene { [self markSceneScopeDirty]; }
 
+-(void) resetGLState {
+	for (CC3GLSLUniform* var in _uniformsSceneScope) var.isGLStateKnown = NO;
+	for (CC3GLSLUniform* var in _uniformsNodeScope) var.isGLStateKnown = NO;
+	for (CC3GLSLUniform* var in _uniformsDrawScope) var.isGLStateKnown = NO;
+}
 
 #pragma mark Linking
 
@@ -324,7 +352,7 @@ static CC3Cache* _shaderCache = nil;
 	CC3Assert([CC3OpenGL.sharedGL getShaderProgramWasLinked: self.programID],
 			  @"%@ could not be linked because:\n%@", self,
 			  [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID]);
-	LogRez(@"Linked %@ in %.4f seconds", self, GetRezActivityDuration());	// Timing before config vars
+	LogRez(@"Linked %@ in %.3f ms", self, GetRezActivityDuration() * 1000);	// Timing before config vars
 	
 	[self configureUniforms];
 	[self configureAttributes];
@@ -352,7 +380,7 @@ static CC3Cache* _shaderCache = nil;
 		[self addUniform: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
 	}
-	LogRez(@"%@ configured %u uniforms in %.4f seconds", self, varCnt, GetRezActivityDuration());
+	LogRez(@"%@ configured %u uniforms in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
 }
 
 /** Adds the specified uniform to the appropriate internal collection, based on variable scope. */
@@ -388,12 +416,13 @@ static CC3Cache* _shaderCache = nil;
 		[_attributes addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
 	}
-	LogRez(@"%@ configured %u attributes in %.4f seconds", self, varCnt, GetRezActivityDuration());
+	LogRez(@"%@ configured %u attributes in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
 }
 
 -(void) prewarm {
-	LogRez(@"Pre-warming %@", self);
-	[CC3OpenGL.sharedGL.shaderProgramPrewarmer prewarm: self];
+	MarkRezActivityStart();
+	[CC3OpenGL.sharedGL.shaderProgramPrewarmer prewarmShaderProgram: self];
+	LogRez(@"%@ pre-warmed in %.3f ms", self, GetRezActivityDuration() * 1000);
 }
 
 
@@ -565,6 +594,11 @@ static CC3Cache* _shaderCache = nil;
 	return desc;
 }
 
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ programFromVertexShaderFile: @\"%@\" andFragmentShaderFile: @\"%@\"];",
+			[self class], self.vertexShader.name, self.fragmentShader.name];
+}
+
 
 #pragma mark Tag allocation
 
@@ -577,10 +611,24 @@ static GLuint _lastAssignedProgramTag = 0;
 
 #pragma mark Program cache
 
+-(void) remove { [self.class removeProgram: self]; }
+
 static CC3Cache* _programCache = nil;
 
-+(void) addProgram: (CC3ShaderProgram*) program {
++(void) ensureCache {
 	if ( !_programCache ) _programCache = [[CC3Cache weakCacheForType: @"shader program"] retain];	// retained
+}
+
++(void) addProgram: (CC3ShaderProgram*) program {
+	if ( !self.isPreloading ) {
+		LogInfo(@"%@ is likely being compiled and linked outside of a pre-load stage, which"
+				@" may cause a short, unexpected pause in the drawing of the scene, while the"
+				@" final stages of compilation and configuration are carried out. If this is"
+				@" the case, consider pre-loading this shader program during scene initialization."
+				@" See the notes of the %@ setIsPreloading: class-side method for more information"
+				@" on pre-loading.", program, self);
+	}
+	[self ensureCache];
 	[_programCache addObject: program];
 }
 
@@ -592,14 +640,27 @@ static CC3Cache* _programCache = nil;
 
 +(void) removeProgramNamed: (NSString*) name { [_programCache removeObjectNamed: name]; }
 
-+(void) removeAllPrograms { [_programCache removeAllObjects]; }
++(void) removeAllPrograms { [_programCache removeAllObjectsOfType: self];}
 
--(void) remove { [self.class removeProgram: self]; }
++(BOOL) isPreloading { return _programCache ? !_programCache.isWeak : NO; }
+
++(void) setIsPreloading: (BOOL) isPreloading {
+	[self ensureCache];
+	_programCache.isWeak = !isPreloading;
+}
 
 +(void) willBeginDrawingScene {
-	[_programCache enumerateObjectsUsingBlock: ^(CC3ShaderProgram* obj, BOOL* stop) {
-		[obj willBeginDrawingScene];
+	[_programCache enumerateObjectsUsingBlock: ^(CC3ShaderProgram* prog, BOOL* stop) {
+		[prog willBeginDrawingScene];
 	}];
+}
+
++(NSString*) cachedProgramsDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[_programCache enumerateObjectsUsingBlock: ^(CC3ShaderProgram* prog, BOOL* stop) {
+		if ( [prog isKindOfClass: self] ) [desc appendFormat: @"\n\t%@", prog.constructorDescription];
+	}];
+	return desc;
 }
 
 
@@ -663,12 +724,19 @@ static id<CC3ShaderProgramMatcher> _programMatcher = nil;
 	return _drawingVisitor;
 }
 
--(void) prewarm: (CC3ShaderProgram*) program {
-	self.prewarmingMeshNode.shaderProgram = program;
-	self.prewarmingMeshNode.shaderContext.shouldEnforceCustomOverrides = NO;
-	self.drawingVisitor.renderSurface = self.prewarmingSurface;
-	[self.prewarmingSurface activate];
-	[self.drawingVisitor visit: self.prewarmingMeshNode];
+-(void) prewarmShaderProgram: (CC3ShaderProgram*) program {
+	CC3MeshNode* pwNode = self.prewarmingMeshNode;
+	id<CC3RenderSurface> pwSurface = self.prewarmingSurface;
+	CC3NodeDrawingVisitor* pwVisitor = self.drawingVisitor;
+
+	pwNode.shaderProgram = program;
+	pwNode.shaderContext.shouldEnforceCustomOverrides = NO;
+	pwNode.shaderContext.shouldEnforceVertexAttributes = NO;
+	pwVisitor.renderSurface = pwSurface;
+	[pwSurface activate];
+	[pwVisitor visit: pwNode];
+	[program resetGLState];		// Reset GL state. Needed if pre-warming in background...
+								// ... GL context, since state is different between contexts.
 }
 
 

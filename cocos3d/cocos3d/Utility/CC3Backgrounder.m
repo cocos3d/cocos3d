@@ -85,7 +85,6 @@
 	[super runBlock: ^{
 		[_glContext ensureCurrentContext];
 		block();
-		[CC3OpenGL.sharedGL flush];
 	}];
 }
 

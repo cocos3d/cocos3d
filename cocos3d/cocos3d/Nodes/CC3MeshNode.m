@@ -712,6 +712,7 @@
  * and the material, draws the mesh, and cleans up the drawing state.
  */
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	LogTrace(@"Drawing %@", self);
 	[self configureDrawingParameters: visitor];		// Before material is configured.
 	[self configureMaterialWithVisitor: visitor];
 	[self applyShaderProgramWithVisitor: visitor];

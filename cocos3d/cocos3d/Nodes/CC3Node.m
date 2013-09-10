@@ -1595,12 +1595,12 @@ static GLuint lastAssignedNodeTag;
 -(void) drawWithVisitor: (CC3NodeDrawingVisitor*) visitor {}
 
 -(BOOL) doesIntersectFrustum: (CC3Frustum*) aFrustum {
-	if ( !_boundingVolume ) return YES;
+	if ( !_boundingVolume || !aFrustum ) return YES;
 	return [self doesIntersectBoundingVolume: aFrustum];
 }
 
 -(void) transformAndDrawWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"Drawing %@", self);
+	LogTrace(@"Transforming and drawing %@", self);
 	CC3OpenGL* gl = visitor.gl;
 
 	[gl pushModelviewMatrixStack];
@@ -1649,7 +1649,7 @@ static GLuint lastAssignedNodeTag;
 	if (CC3OpenGL.sharedGL.isPrimaryContext || !self.scene)
 		[self addChildNow: aNode];
 	else
-		[self addChildOnRenderThread: aNode];
+		[self addChildFromBackgroundThread: aNode];
 }
 
 /** Adds the specified node as a child of this node without queuing. */
@@ -1676,10 +1676,16 @@ static GLuint lastAssignedNodeTag;
 }
 
 /** 
- * Queues an operation to add the specified node as a child of this node from the thread
- * that is performing rendering.
+ * Invoked when a child is being added on a background thread, and this parent node is
+ * already part of the scene.
+ *
+ * Since the scene may be in the process of being rendered, the child is not added immediately.
+ * Instead, all GL activity on this thread is allowed to finish, to ensure all GL components
+ * of the node are in place, and then an operation to add the specified node as a child of
+ * this node is queued to the thread that is performing rendering.
  */
--(void) addChildOnRenderThread: (CC3Node*) aNode {
+-(void) addChildFromBackgroundThread: (CC3Node*) aNode {
+	[CC3OpenGL.sharedGL finish];
 	[NSOperationQueue.mainQueue addOperationWithBlock: ^{ [self addChildNow: aNode]; }];
 }
 

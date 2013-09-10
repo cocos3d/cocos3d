@@ -54,20 +54,23 @@
 			  @" cache already contains a %@ named %@. Remove it first before adding another.",
 			  obj, _typeName, _typeName, objName);
 
-	if (_isWeak) obj = [CC3WeakCacheWrapper wrapperWith: obj];
+	CC3CacheableWrapper* wrap = nil;
+	if (_isWeak)
+		wrap = [CC3WeakCacheableWrapper wrapperWith: obj];
+	else
+		wrap = [CC3StrongCacheableWrapper wrapperWith: obj];
 
 	[self lock];
-	[_objectsByName setObject: obj forKey: objName];
+	[_objectsByName setObject: wrap forKey: objName];
 	[self unlock];
 }
 
 -(id<CC3Cacheable>) getObjectNamed: (NSString*) name {
 	[self lock];
-	id obj = [_objectsByName objectForKey: name];
+	CC3CacheableWrapper* wrap = [_objectsByName objectForKey: name];
 	[self unlock];
 
-	if (_isWeak) obj = ((CC3WeakCacheWrapper*)obj).cachedObject;
-	return obj;
+	return [wrap cachedObject];
 }
 
 -(void) removeObject: (id<CC3Cacheable>) obj { [self removeObjectNamed: obj.name]; }
@@ -87,11 +90,20 @@
 	[self unlock];
 }
 
+-(void) removeAllObjectsOfType: (Class) type {
+	[self lock];
+	NSDictionary* cacheCopy = [_objectsByName copy];
+	[cacheCopy enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL* stop) {
+		if ( [obj isKindOfClass: type] ) [_objectsByName removeObjectForKey: key];
+	}];
+	[self unlock];
+	[cacheCopy release];
+}
+
 -(void) enumerateObjectsUsingBlock: (void (^) (id<CC3Cacheable> obj, BOOL* stop)) block {
 	[self lock];
 	[_objectsByName enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL* stop) {
-		if (_isWeak) obj = ((CC3WeakCacheWrapper*)obj).cachedObject;
-		block(obj, stop);
+		block([obj cachedObject], stop);
 	}];
 	[self unlock];
 }
@@ -132,21 +144,33 @@
 @end
 
 
-#pragma mark CC3WeakCacheWrapper
+#pragma mark CC3CacheableWrapper
 
-@implementation CC3WeakCacheWrapper
+@implementation CC3CacheableWrapper
 
-@synthesize cachedObject=_cachedObject;
+-(id<CC3Cacheable>) cachedObject { return _cachedObject; }
+
+
+#pragma mark Allocation and initialization
+
+// Ignores the object to be cached. Subclasses will determine how to store it.
+-(id) initWith: (id<CC3Cacheable>) cachedObject { return [self init]; }
+
++(id) wrapperWith: (id<CC3Cacheable>) cachedObject {
+	return [[[self alloc] initWith: cachedObject] autorelease];
+}
+
+@end
+
+
+#pragma mark CC3WeakCacheableWrapper
+
+@implementation CC3WeakCacheableWrapper
 
 -(void) dealloc {
 	_cachedObject = nil;	// not retained
 	[super dealloc];
 }
-
--(NSString*) name { return _cachedObject.name; }
-
-
-#pragma mark Allocation and initialization
 
 -(id) initWith: (id<CC3Cacheable>) cachedObject {
 	if ( (self = [super init]) ) {
@@ -155,8 +179,23 @@
 	return self;
 }
 
-+(id) wrapperWith: (id<CC3Cacheable>) cachedObject {
-	return [[[self alloc] initWith: cachedObject] autorelease];
+@end
+
+
+#pragma mark CC3StrongCacheableWrapper
+
+@implementation CC3StrongCacheableWrapper
+
+-(void) dealloc {
+	[_cachedObject release];
+	[super dealloc];
+}
+
+-(id) initWith: (id<CC3Cacheable>) cachedObject {
+	if ( (self = [super init]) ) {
+		_cachedObject = [cachedObject retain];
+	}
+	return self;
 }
 
 @end

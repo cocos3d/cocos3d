@@ -38,6 +38,7 @@
 @implementation CC3ShaderProgramContext
 
 @synthesize shouldEnforceCustomOverrides=_shouldEnforceCustomOverrides;
+@synthesize shouldEnforceVertexAttributes=_shouldEnforceVertexAttributes;
 
 -(void) dealloc {
 	[_program release];
@@ -139,6 +140,7 @@
 -(id) initForProgram: (CC3ShaderProgram*) program {
 	if ( (self = [super init]) ) {
 		_shouldEnforceCustomOverrides = YES;
+		_shouldEnforceVertexAttributes = YES;
 		self.program = program;								// retained & will clear overrides
 	}
 	return self;

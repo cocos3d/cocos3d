@@ -55,7 +55,8 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 @implementation CC3GLSLVariable
 
 @synthesize program=_program, index=_index, location=_location, name=_name;
-@synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex, scope=_scope;
+@synthesize type=_type, size=_size, semantic=_semantic, semanticIndex=_semanticIndex;
+@synthesize scope=_scope, isGLStateKnown=_isGLStateKnown;
 
 -(void) dealloc {
 	_program = nil;			// not retained
@@ -103,11 +104,13 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	_semantic = another.semantic;
 	_semanticIndex = another.semanticIndex;
 	_scope = another.scope;
+	_isGLStateKnown = another.isGLStateKnown;
 }
 
 -(void) populateFromProgram {
 	_semantic = kCC3SemanticNone;
 	_semanticIndex = 0;
+	_isGLStateKnown = NO;
 	[CC3OpenGL.sharedGL populateShaderProgramVariable: self];
 	[self normalizeName];
 }
@@ -534,12 +537,11 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	
 }
 
-
-/** Overridden to update the GL state engine if the value was changed. */
 -(BOOL) updateGLValueWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	if (memcmp(_glVarValue, _varValue, _varLen) != 0) {
+	if ( !_isGLStateKnown || memcmp(_glVarValue, _varValue, _varLen) != 0 ) {
 		memcpy(_glVarValue, _varValue, _varLen);
 		[visitor.gl setShaderProgramUniformValue: self];
+		_isGLStateKnown = YES;
 		return YES;
 	}
 	return NO;

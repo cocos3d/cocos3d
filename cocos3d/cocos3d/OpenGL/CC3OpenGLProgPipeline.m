@@ -69,10 +69,11 @@
 }
 
 -(void) bindVertexAttribute: (CC3GLSLAttribute*) attribute withVisitor: (CC3NodeDrawingVisitor*) visitor {
-	CC3Assert(attribute.semantic != kCC3SemanticNone, @"Cannot bind the attribute named %@ to the GL engine"
-			  @" because its semantic meaning is unknown. Check the attribute name. If the attribute name is"
-			  @" correct, but is not a standard cocos3d attribute name, assign a semantic value to the"
-			  @" attribute in the configureVariable: method of your semantic delegate implementation, or use"
+	CC3Assert(attribute.semantic != kCC3SemanticNone || !visitor.currentMeshNode.shaderContext.shouldEnforceVertexAttributes,
+			  @"Cannot bind the attribute named %@ to the GL engine because its semantic meaning"
+			  @" is unknown. Check the attribute name. If the attribute name is correct, but is"
+			  @" not a standard cocos3d attribute name, assign a semantic value to the attribute"
+			  @" in the configureVariable: method of your semantic delegate implementation, or use"
 			  @" a PFX file to define the semantic for the attribute name.", attribute.name);
 	CC3VertexArray* va = [self vertexArrayForAttribute: attribute withVisitor: visitor];
 	[va bindContentToAttributeAt: attribute.location withVisitor: visitor];

@@ -59,6 +59,7 @@
 	CCArray* _uniforms;
 	NSMutableDictionary* _uniformsByName;
 	BOOL _shouldEnforceCustomOverrides : 1;
+	BOOL _shouldEnforceVertexAttributes : 1;
 }
 
 /**
@@ -93,6 +94,23 @@
  * the default identity value is acceptable.
  */
 @property(nonatomic, assign) BOOL shouldEnforceCustomOverrides;
+
+/**
+ * Indicates whether this context should ensure that all vertex attributes have a valid semantic.
+ *
+ * If the value of this property is YES, when a vertex attribute variable of unknown semantic
+ * is processed, an assertion error will be raised. 
+ *
+ * If the value of this property is NO, no assertion error will be raised, and the attribute
+ * will remain unpopulated. Under these conditions, the shader may render the node in an
+ * unexpected manner.
+ *
+ * The initial value of this property is YES, indicating that the application must ensure
+ * that all vertex attributes must have a valid, resolvable semantic. You may set the value
+ * of this property to NO if your shader has been designed to handle the case where the
+ * vertex attribute is not set.
+ */
+@property(nonatomic, assign) BOOL shouldEnforceVertexAttributes;
 
 
 #pragma mark Uniforms

@@ -116,13 +116,23 @@
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@ from file %@", self.class, self.name]; }
 
+-(NSString*) constructorDescription {
+	return [NSString stringWithFormat: @"[%@ resourceFromFile: @\"%@\"];", [self class], self.name];
+}
+
 
 #pragma mark Resource cache
 
+-(void) remove { [self.class removeResource: self]; }
+
 static CC3Cache* _resourceCache = nil;
 
-+(void) addResource: (CC3Resource*) resource {
++(void) ensureCache {
 	if ( !_resourceCache ) _resourceCache = [[CC3Cache weakCacheForType: @"resource"] retain];	// retained
+}
+
++(void) addResource: (CC3Resource*) resource {
+	[self ensureCache];
 	[_resourceCache addObject: resource];
 }
 
@@ -134,9 +144,22 @@ static CC3Cache* _resourceCache = nil;
 
 +(void) removeResourceNamed: (NSString*) name { [_resourceCache removeObjectNamed: name]; }
 
-+(void) removeAllResources { [_resourceCache removeAllObjects]; }
++(void) removeAllResources { [_resourceCache removeAllObjectsOfType: self];}
 
--(void) remove { [self.class removeResource: self]; }
++(BOOL) isPreloading { return _resourceCache ? !_resourceCache.isWeak : NO; }
+
++(void) setIsPreloading: (BOOL) isPreloading {
+	[self ensureCache];
+	_resourceCache.isWeak = !isPreloading;
+}
+
++(NSString*) cachedResourcesDescription {
+	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
+	[_resourceCache enumerateObjectsUsingBlock: ^(CC3Resource* rez, BOOL* stop) {
+		if ( [rez isKindOfClass: self] ) [desc appendFormat: @"\n\t%@", rez.constructorDescription];
+	}];
+	return desc;
+}
 
 
 #pragma mark Tag allocation

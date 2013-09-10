@@ -1644,7 +1644,6 @@ typedef enum {
  */
 @property(nonatomic, assign) BOOL isOpaque;
 
-
 /**
  * Indicates whether blending should be applied even when the material is at full opacity
  * on each descendant node.
@@ -2725,8 +2724,8 @@ typedef enum {
  * intersects the specified camera frustum, by invoking the doesIntersectBoundingVolume:
  * method of this node.
  *
- * If this node does not have a bounding volume, returns YES. Nodes without a bounding
- * volume will always be drawn.
+ * Returns YES always if the specified frustum is nil, or if this node does not have a
+ * bounding volume. Nodes without a bounding volume will always be drawn.
  *
  * Culling nodes that are not visible to the camera is an important performance enhancement.
  * The node should strive to be as accurate as possible in returning whether it intersects

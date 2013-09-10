@@ -192,8 +192,20 @@
  */
 +(NSString*) shaderNameFromFilePath: (NSString*) aFilePath;
 
+/**
+ * Returns a description formatted as a source-code line for loading this shader from a source code file.
+ *
+ * During development time, you can log this string, then copy and paste it into a pre-loading
+ * function within your app code, if you want to load shaders individually. However, normally,
+ * your shaders will be loaded, compiled, and cached as a result of creating a shader program.
+ */
+-(NSString*) constructorDescription;
+
 
 #pragma mark Shader cache
+
+/** Removes this shader instance from the cache. */
+-(void) remove;
 
 /**
  * Adds the specified shader to the collection of loaded shaders.
@@ -234,17 +246,58 @@
  */
 +(void) removeShaderNamed: (NSString*) name;
 
-/** 
- * Removes all loaded shaders from the cache.
+/**
+ * Removes from the cache all shaders that are instances of any subclass of the receiver.
  *
  * Removing cached shaders does not affect the operation of shaders that have been linked
  * into a CC3ShaderProgram. It is common to invoke this method after you have created all of
  * your CC3ShaderPrograms from the loaded shaders.
+ *
+ * You can use this method to selectively remove specific types of shaders, based on the
+ * shader class, by invoking this method on that class. If you invoke this method on the
+ * CC3Shader class, this cache will be compltely cleared. However, if you invoke this method
+ * on one of its subclasses, only those shaders that are instances of that subclass (or one
+ * of its subclasses in turn) will be removed, leaving the remaining shaders in the cache.
  */
 +(void) removeAllShaders;
 
-/** Removes this shader instance from the cache. */
--(void) remove;
+/**
+ * Returns whether shaders are being pre-loaded.
+ *
+ * See the setIsPreloading setter method for a description of how and when to use this property.
+ */
++(BOOL) isPreloading;
+
+/**
+ * Sets whether shaders are being pre-loaded.
+ *
+ * Shaders that are added to this cache while the value of this property is YES will be strongly
+ * cached and cannot be deallocated until specifically removed from this cache. You must manually
+ * remove any shaders added to this cache while the value of this property is YES.
+ *
+ * Shaders that are added to this cache while the value of this property is NO will be weakly
+ * cached, and will automatically be deallocated and removed from this cache once all references
+ * to the shader program outside this cache are released.
+ *
+ * You can set the value of this property at any time, and can vary it between YES and NO
+ * to accomodate your specific loading patterns.
+ *
+ * The initial value of this property is NO, meaning that shaders will be weakly cached in this
+ * cache, and will automatically be removed if not used by a shader program. You can set this
+ * property to YES in order to pre-load shaders that will not be immediately used in the scene,
+ * but which you wish to keep in the cache for later use.
+ */
++(void) setIsPreloading: (BOOL) isPreloading;
+
+/**
+ * Returns a description of the contents of this cache, with each entry formatted as a
+ * source-code line for loading the shader from a source code file.
+ *
+ * During development time, you can log this string, then copy and paste it into a pre-loading
+ * function within your app code, if you want to load shaders individually. However, normally,
+ * your shaders will be loaded, compiled, and cached as a result of creating a shader program.
+ */
++(NSString*) cachedShadersDescription;
 
 @end
 
@@ -296,10 +349,22 @@
 /** Returns the GL program ID. */
 @property(nonatomic, readonly) GLuint programID;
 
-/** The vertex shader used by this program. */
+/** 
+ * The vertex shader used by this program.
+ *
+ * Normally this property is set during initialization. If you set this property directly,
+ * you must invoke the link method, and optionally, the prewarm method, once both shaders
+ * have been set via this property and the fragmentShader property.
+ */
 @property(nonatomic, retain) CC3VertexShader* vertexShader;
 
-/** The fragment shader used by this program. */
+/**
+ * The fragment shader used by this program.
+ *
+ * Normally this property is set during initialization. If you set this property directly,
+ * you must invoke the link method, and optionally, the prewarm method, once both shaders
+ * have been set via this property and the vertexShader property.
+ */
 @property(nonatomic, retain) CC3FragmentShader* fragmentShader;
 
 /**
@@ -360,9 +425,33 @@
  *
  * The vertexShader, fragmentShader, and semanticDelegate properties must be set prior
  * to invoking this method.
+ *
+ * This method is automatically invoked during instance initialization if the vertex and
+ * fragment shaders are provided. If you create this instance without shaders and add them
+ * later, you can invoke this method once the vertexShader and fragmentShader properties
+ * have been set.
  */
 -(void) link;
 
+/**
+ * Pre-warms this shader program by using it to render a small mesh node to an off-screen surface.
+ *
+ * The GL engine may choose to defer some final shader program compilation steps until the
+ * first time the shader program is used to render a mesh. This can cause the first frame of
+ * the first mesh drawn with the shader program to take significantly longer than subsequent
+ * renderings with that shader program, which can often result in a transient, but noticable,
+ * "freezing" of the scene. This is particularly apparent for new meshes that are added to
+ * the scene at any point other than during scene initialization.
+ *
+ * To avoid this, this method can be invoked to cause this shader program to render a small
+ * mesh to an off-screen rendering surface, in order to force this shader program to perform
+ * its final compilation and linking steps at a controlled, and predicatble, time.
+ *
+ * This method is automatically invoked during instance initialization if the vertex and
+ * fragment shaders are provided. If you create this instance without shaders and add them
+ * later, you can invoke this method once the vertexShader and fragmentShader properties
+ * have been set, and the link method has been invoked.
+ */
 -(void) prewarm;
 
 
@@ -410,13 +499,19 @@
  */
 -(void) willBeginDrawingScene;
 
+/**
+ * Resets the GL state management used by this shader program, including the values of
+ * all variables.
+ */
+-(void) resetGLState;
+
 
 #pragma mark Allocation and initialization
 
 /**
- * Initializes this instance by linking the specified vertex shader and fragment shader
- * into this program.
- * 
+ * Initializes this instance by setting the vertexShader and programShader properties to the
+ * specified shaders, and invoking the link and prewarm methods to prepare this instance for use.
+ *
  * The semanticDelegate property is set to the default semantic delegate returned from the
  * semanticDelegate property of the program matcher in the class-side programMatcher property.
  *
@@ -433,7 +528,8 @@
 		 andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
- * Returns an instance by linking the specified vertex shader and fragment shader into this program.
+ * Returns an instance by setting the vertexShader and programShader properties to the 
+ * specified shaders, and invoking the link and prewarm methods to prepare the instance for use.
  *
  * The semanticDelegate property is set to the default semantic delegate returned from the
  * semanticDelegate property of the program matcher in the class-side programMatcher property.
@@ -459,7 +555,11 @@
 			andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
- * Initializes this instance by compiling and linking the GLSL source code loaded from the
+ * Initializes this instance by setting the vertexShader and programShader properties to shaders
+ * compiled from the GLSL source code loaded from the specified files, and invoking the link and
+ * prewarm methods to prepare this instance for use.
+ *
+ Initializes this instance by compiling and linking the GLSL source code loaded from the
  * specified vertex and fragment shader files.
  *
  * If a shader has already been loaded, compiled, and cached, the cached shader will be
@@ -485,8 +585,9 @@
 		 andFragmentShaderFile: (NSString*) fshFilePath;
 
 /**
- * Returns an instance by compiling and linking the GLSL source code loaded from the
- * specified vertex and fragment shader files.
+ * Returns an instance by setting the vertexShader and programShader properties to shaders
+ * compiled from the GLSL source code loaded from the specified files, and invoking the link
+ * and prewarm methods to prepare the instance for use.
  *
  * If either shader has already been loaded, compiled, and cached, the cached shader will
  * be reused, and will not be reloaded and recompiled from the file.
@@ -519,8 +620,9 @@
 			andFragmentShaderFile: (NSString*) fshFilePath;
 
 /**
- * Initializes this instance by attaching the specified semantic delegate, and linking the
- * specified vertex shader and fragment shader into this program.
+ * Initializes this instance by setting the semanticDelegate property to the specified
+ * semantic delgate, setting the vertexShader and programShader properties to the specified
+ * shaders, and invoking the link and prewarm methods to prepare this instance for use.
  *
  * This method uses the programNameFromVertexShaderName:andFragmentShaderName: method to
  * set the name of this instance from the names of the vertex and fragment shaders.
@@ -536,8 +638,9 @@
 			 andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
- * Returns an instance by attaching the specified semantic delegate, and linking the
- * specified vertex shader and fragment shader into this program.
+ * Returns an instance by setting the semanticDelegate property to the specified semantic
+ * delgate, setting the vertexShader and programShader properties to the specified shaders,
+ * and invoking the link and prewarm methods to prepare the instance for use.
  *
  * Programs loaded through this method are cached. If the program was already loaded and is in
  * the cache, it is retrieved and returned. If the program has not in the cache, it is loaded,
@@ -561,8 +664,10 @@
 				andFragmentShader: (CC3FragmentShader*) fragmentShader;
 
 /**
- * Initializes this instance by attaching the specified semantic delegate, and compiling and
- * linking the GLSL source code loaded from the specified vertex and fragment shader files.
+ * Initializes this instance by setting the semanticDelegate property to the specified
+ * semantic delgate, setting the vertexShader and programShader properties to shaders
+ * compiled from the GLSL source code loaded from the specified files, and invoking the
+ * link and prewarm methods to prepare this instance for use.
  *
  * If a shader has already been loaded, compiled, and cached, the cached shader will be
  * reused, and will not be reloaded and recompiled from the file.
@@ -585,8 +690,10 @@
 		 andFragmentShaderFile: (NSString*) fshFilePath;
 
 /**
- * Returns an instance by attaching the specified semantic delegate, and compiling and
- * linking the GLSL source code loaded from the specified vertex and fragment shader files.
+ * Returns an instance by setting the semanticDelegate property to the specified semantic
+ * delgate, setting the vertexShader and programShader properties to shaders compiled from
+ * the GLSL source code loaded from the specified files, and invoking the link and prewarm
+ * methods to prepare this instance for use.
  *
  * If either shader has already been loaded, compiled, and cached, the cached shader will
  * be reused, and will not be reloaded and recompiled from the file.
@@ -629,8 +736,19 @@
 /** Returns a detailed description of this instance, including a description of each uniform and attribute. */
 -(NSString*) fullDescription;
 
+/** 
+ * Returns a description formatted as a source-code line for loading this program from shader source code files.
+ *
+ * During development time, you can log this string, then copy and paste it into a pre-loading
+ * function within your app code.
+ */
+-(NSString*) constructorDescription;
+
 
 #pragma mark Program cache
+
+/** Removes this program instance from the cache. */
+-(void) remove;
 
 /**
  * Adds the specified program to the collection of loaded programs.
@@ -656,11 +774,57 @@
 /** Removes the program with the specified name from the program cache. */
 +(void) removeProgramNamed: (NSString*) name;
 
-/** Removes all loaded programs from the cache. */
+/**
+ * Removes from the cache all shader programs that are instances of any subclass of the receiver.
+ *
+ * You can use this method to selectively remove specific types of shader programs, based on
+ * the shader program class, by invoking this method on that class. If you invoke this method
+ * on the CC3ShaderProgram class, this cache will be compltely cleared. However, if you invoke
+ * this method on one of its subclasses, only those shader programs that are instances of that
+ * subclass (or one of its subclasses in turn) will be removed, leaving the remaining shader 
+ * programs in the cache.
+ */
 +(void) removeAllPrograms;
 
-/** Removes this program instance from the cache. */
--(void) remove;
+/** 
+ * Returns whether shader programs are being pre-loaded.
+ *
+ * See the setIsPreloading setter method for a description of how and when to use this property.
+ */
++(BOOL) isPreloading;
+
+/**
+ * Sets whether shader programs are being pre-loaded.
+ *
+ * Shader programs that are added to this cache while the value of this property is YES will
+ * be strongly cached and cannot be deallocated until specifically removed from this cache.
+ * You must manually remove any shader programs added to this cache while the value of this
+ * property is YES.
+ *
+ * Shader programs that are added to this cache while the value of this property is NO will
+ * be weakly cached, and will automatically be deallocated and removed from this cache once
+ * all references to the shader program outside this cache are released.
+ *
+ * If you will be loading resources such as models and textures on a background thread while
+ * the scene is running, you will find that any shader programs that are loaded while the
+ * scene is running will often create a brief, but noticable, pause in the scene while the
+ * final stages of the shader program are conmpiled and configured.
+ *
+ * You can avoid this pause by pre-loading all of the shader programs that your scene will
+ * need during scene initialization. They will then automatically be recalled from this cache
+ * when needed by the models that you load mid-scene. In order for them to be available in
+ * this cache at that time, the value of this property must be set to YES for the duration
+ * of the pre-loading stage during scene initialization.
+ *
+ * You can set the value of this property at any time, and can vary it between YES and NO
+ * to accomodate your specific loading patterns.
+ *
+ * The initial value of this property is NO, meaning that shader programs will be weakly
+ * cached in this cache, and will automatically be removed if not used by a model. You can
+ * set this property to YES in order to pre-load shader programs that will not be immediately
+ * used in the scene, but which you wish to keep in the cache for later use.
+ */
++(void) setIsPreloading: (BOOL) isPreloading;
 
 /**
  * Invoked to indicate that scene drawing is about to begin.
@@ -668,6 +832,16 @@
  * This method invokes the same method on each instance in the cache.
  */
 +(void) willBeginDrawingScene;
+
+/**
+ * Returns a description of the contents of this cache, with each entry formatted as a
+ * source-code line for loading the shader program from shader source code files.
+ *
+ * During development time, you can log this string, then copy and paste it into a 
+ * pre-loading function within your app code.
+ */
++(NSString*) cachedProgramsDescription;
+
 
 
 #pragma mark Program matching
@@ -764,16 +938,13 @@
  */
 @property(nonatomic, retain) CC3NodeDrawingVisitor* drawingVisitor;
 
-/** 
- * Pre-warms the specified shader program by rendering the prewarmingMeshNode
- * to the prewarmingSurface. 
- */
--(void) prewarm: (CC3ShaderProgram*) program;
+/** Pre-warms the specified shader program by rendering the prewarmingMeshNode to the prewarmingSurface. */
+-(void) prewarmShaderProgram: (CC3ShaderProgram*) program;
 
 
 #pragma mark Allocation and initialization
 
-/** Allocates and initializes an autoreleased instance with the specifie name. */
+/** Allocates and initializes an autoreleased instance with the specified name. */
 +(id) prewarmerWithName: (NSString*) name;
 
 @end

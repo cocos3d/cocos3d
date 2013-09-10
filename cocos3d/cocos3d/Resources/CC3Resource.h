@@ -240,8 +240,19 @@
  */
 +(NSString*) resourceNameFromFilePath: (NSString*) aFilePath;
 
+/**
+ * Returns a description formatted as a source-code line for loading this resource from its file.
+ *
+ * During development time, you can log this string, then copy and paste it into a pre-loading
+ * function within your app code.
+ */
+-(NSString*) constructorDescription;
+
 
 #pragma mark Resource cache
+
+/** Removes this resource instance from the cache. */
+-(void) remove;
 
 /**
  * Adds the specified resource to the collection of loaded resources.
@@ -268,11 +279,55 @@
 /** Removes the resource with the specified name from the resource cache. */
 +(void) removeResourceNamed: (NSString*) name;
 
-/** Removes all resources from the cache. */
+/** 
+ * Removes from the cache all resources that are instances of any subclass of the receiver.
+ *
+ * You can use this method to selectively remove specific types of resources, based on
+ * the resource class, by invoking this method on that class. If you invoke this method
+ * on the CC3Resource class, this cache will be compltely cleared. However, if you invoke
+ * this method on one of its subclasses, only those resources that are instances of that
+ * subclass (or one of its subclasses in turn) will be removed, leaving the remaining
+ * resources in the cache.
+ */
 +(void) removeAllResources;
 
-/** Removes this resource instance from the cache. */
--(void) remove;
+/**
+ * Returns whether resources are being pre-loaded.
+ *
+ * See the setIsPreloading setter method for a description of how and when to use this property.
+ */
++(BOOL) isPreloading;
+
+/**
+ * Sets whether resources are being pre-loaded.
+ *
+ * Resources that are added to this cache while the value of this property is YES will be
+ * strongly cached and cannot be deallocated until specifically removed from this cache.
+ * You must manually remove any resources added to this cache while the value of this 
+ * property is YES.
+ *
+ * Resources that are added to this cache while the value of this property is NO will be
+ * weakly cached, and will automatically be deallocated and removed from this cache once
+ * all references to the resource outside this cache are released.
+ *
+ * You can set the value of this property at any time, and can vary it between YES and NO
+ * to accomodate your specific loading patterns.
+ *
+ * The initial value of this property is NO, meaning that resources will be weakly cached
+ * in this cache, and will automatically be removed if not used in the scene. You can set
+ * this property to YES in order to pre-load resources that will not be immediately used
+ * in the scene, but which you wish to keep in the cache for later use.
+ */
++(void) setIsPreloading: (BOOL) isPreloading;
+
+/**
+ * Returns a description of the contents of this cache, with each entry formatted as a
+ * source-code line for loading the resource from its file.
+ *
+ * During development time, you can log this string, then copy and paste it into a
+ * pre-loading function within your app code.
+ */
++(NSString*) cachedResourcesDescription;
 
 
 #pragma mark Deprecated functionality

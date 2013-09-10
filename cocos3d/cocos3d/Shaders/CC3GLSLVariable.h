@@ -77,6 +77,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 	GLint _size;
 	GLuint _semanticIndex : 8;
 	CC3GLSLVariableScope _scope : 4;
+	BOOL _isGLStateKnown : 1;
 }
 
 /** The GL program object containing this variable. */
@@ -163,6 +164,19 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * and some other variables, such as bone matrices, need to be populated on each draw call.
  */
 @property(nonatomic, assign) CC3GLSLVariableScope scope;
+
+/**
+ * Indicates whether the value of the variable in the shader program is known.
+ *
+ * To maintain efficient performance, the value of this variable will be set in the shader
+ * program only if the value of this variable has been changed since the last time it was
+ * set in the GL engine.
+ 
+ * Setting the value of this property to NO will cause the value in the GL engine to be set
+ * the next time the shader program is used, regardless of whether the value of this variable
+ * has been changed since the last time the shader program was used.
+ */
+@property(nonatomic, assign) BOOL isGLStateKnown;
 
 
 #pragma mark Allocation and initialization
@@ -719,7 +733,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 -(void) setValueFromUniform: (CC3GLSLUniform*) uniform;
 
 /**
- * Invoked during drawing after all of the content of the variable has been set using
+ * Invoked during drawing, after all of the content of the variable has been set using
  * the set... methods, in order to have the value of this variable set into the GL engine.
  *
  * The GL engine is only updated if the content of this variable has changed.
