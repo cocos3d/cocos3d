@@ -36,33 +36,37 @@
 #pragma mark CC3Backgrounder
 
 /**
- * An instance of CC3Backgrounder performs activity on a background thread via an
- * internal operation queue.
+ * An instance of CC3Backgrounder performs activity on a background thread by submitting
+ * tasks to a Grand Central Dispatch (GCD) queue.
  */
 @interface CC3Backgrounder : NSObject {
-	NSOperationQueue* _operationQueue;
+	long _queuePriority;
 }
 
-/** 
- * The queue on which background operations are run.
+/**
+ * Specifies the priority of the GCD global dispatch queue to which background tasks are dispatched.
  *
- * You should not add operations directly to this queue. Instead, use one of the queuing
- * method provided by this instance, such as runBlock:, because subclasses may expect to
- * be able to perform additional activities around the queuing of the operation.
+ * Setting this property will affect any subsequent tasks submitted to the runBlock: method.
  *
- * The initial value is a new instance of NSOperationQueue, but this property can be set
- * to some other queue if required.
+ * The value of this property must be one of the following GCD constants:
+ *	- DISPATCH_QUEUE_PRIORITY_HIGH
+ *	- DISPATCH_QUEUE_PRIORITY_DEFAULT
+ *	- DISPATCH_QUEUE_PRIORITY_LOW
+ *	- DISPATCH_QUEUE_PRIORITY_BACKGROUND (available starting with iOS 5)
+ *
+ * The initial value of this property is DISPATCH_QUEUE_PRIORITY_BACKGROUND when running
+ * under iOS 5 or above, or DISPATCH_QUEUE_PRIORITY_LOW otherwise.
  */
-@property(nonatomic, retain) NSOperationQueue* operationQueue;
+@property(nonatomic, assign) long queuePriority;
 
 
 #pragma mark Backgrounding tasks
 
 /** 
- * Runs the specified block of code by adding it to the contained operation queue.
+ * Runs the specified block of code by dispatching it to the global GCD queue identified
+ * by the value of the queuePriority property.
  *
- * This method simply adds the block to the queue in the operationQueue property. You should use
- * this method instead of adding the block directly to the operationQueue, because subclasses
+ * You should use this method instead of dispatching to a GCD queue directly, because subclasses
  * may override this method to perform additional activities around the queuing of the block.
  */
 -(void) runBlock: (void (^)(void))block;

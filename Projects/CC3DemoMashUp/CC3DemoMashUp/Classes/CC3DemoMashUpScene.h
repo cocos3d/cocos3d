@@ -168,7 +168,13 @@ typedef enum {
  * The camera initially opens on a scene of an animated robot arm with a 2D label attached to the
  * end of the rotating arm, demonstrating the technique of embedding a 2D CCNode into the 3D scene.
  * The robot arm is loaded from a POD file, along with the moving light and the camera.
- * 
+ *
+ * As you watch, additional objects appear in the scene. These objects are loaded from files
+ * on a background thread, and seamlessly inserted into the scene. For dramatic effect, each
+ * object is faded in using a fade action. The background thread pauses before addin each new
+ * object, to extend the activity over time. This is also strictly for dramatic effect here.
+ * The entire scene takes between 10 and 15 seconds to appear.
+ *
  * Most of the 3D objects are selectable by touching. Touching any of the 3D objects with
  * your finger will display the location of the touch on the object itself, in the 3D
  * coordinate system of the touched node. This is performed by converting the 2D touch

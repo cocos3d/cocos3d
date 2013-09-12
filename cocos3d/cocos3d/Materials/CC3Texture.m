@@ -175,12 +175,17 @@
 
 -(void) generateMipmap {
 	if ( self.hasMipmap || !self.isPOT) return;
+	
+	MarkRezActivityStart();
+
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	GLuint tuIdx = 0;	// Choose the texture unit to work in
 	GLenum target = self.textureTarget;
 	[gl bindTexture: _textureID toTarget: target at: tuIdx];
 	[gl generateMipmapForTarget: target at: tuIdx];
 	_hasMipmap = YES;
+
+	LogRez(@"%@ generated mipmap in %.3f ms", self, GetRezActivityDuration() * 1000);
 }
 
 /** Indicates whether Mipmaps should automatically be generated for any loaded textures. */
@@ -311,9 +316,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	
 	if (!_name) self.name = [self.class textureNameFromFilePath: aFilePath];
 	
-#if LOGGING_REZLOAD
-	NSTimeInterval startTime = [NSDate timeIntervalSinceReferenceDate];
-#endif
+	MarkRezActivityStart();
 	
 	id content = [[self.textureContentClass alloc] initFromFile: aFilePath];
 	if ( !content ) {
@@ -325,8 +328,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	
 	[content release];		// Could be big, so get rid of it immediately
 	
-	LogRez(@"%@ loaded from file %@ in %.4f seconds",
-		   self, aFilePath, ([NSDate timeIntervalSinceReferenceDate] - startTime));
+	LogRez(@"%@ loaded from file %@ in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
 	return YES;
 }
 
@@ -594,7 +596,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 }
 
 +(id) textureCubeFromFilePattern: (NSString*) aFilePathPattern {
-	NSString* texName = [self textureNameFromFilePath: [NSString stringWithFormat: aFilePathPattern, @""]];
+	NSString* texName = [self textureNameFromFilePath: aFilePathPattern];
 	
 	id tex = [self getTextureNamed: texName];
 	if (tex) return tex;

@@ -220,8 +220,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	[self initCustomState];			// Set up any initial state tracked by this subclass
 	
-	[self preloadShaderPrograms];	// Loads, compiles, links, and pre-warms all shader programs
-									// will be used by this scene.
+	[self preloadAssets];			// Loads, compiles, links, and pre-warms all shader programs
+									// used by this scene, and certain textures.
 
 	[self addBackdrop];				// Add a sky-blue colored backdrop
 	
@@ -273,7 +273,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /** Define a thread-pausing macro. */
-# define DramaticPause()			[NSThread sleepForTimeInterval: 0.3f]
+# define DramaticPause()			[NSThread sleepForTimeInterval: 0.75f]
 
 /**
  * Adds additional scene content dynamically and asynchronously.
@@ -286,30 +286,35 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * is running, this method takes a small pause before loading each model. This pause is purely
  * for dramatic effect for the purposes of this demo app. Pauses are NOT required before normal
  * background model loading.
+ *
+ * Certain assets, notably shader programs, will cause short, but unavoidable, delays in the
+ * rendering of the scene, because certain finalization steps from shader compilation occur on
+ * the main thread. Shaders and certain other critical assets are pre-loaded in the preloadAssets
+ * method, which is invoked prior to the opening of this scene.
  */
 -(void) addSceneContentAsynchronously {
 
 	DramaticPause();				// Pause dramatically
 	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
 
 	DramaticPause();				// Pause dramatically
 	[self addBitmapLabel];			// Add a bitmapped string label
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addSkinnedMallet];		// Adds a flexible mallet to the scene, showing bone skinning.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addSkinnedRunners];		// Adds two running figures to the scene, showing bone skinning.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addDieCube];				// Add a game die whose rotation is controlled by touch-swipe user action
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addTexturedCube];			// Add another cube, this one textured, below the die cube.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addGlobe];				// Add a rotating globe from a parametric sphere covered by a texture
 
@@ -318,17 +323,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 									// containing transparency. The band as a whole fades in and out
 									// periodically. This demonstrates managing opacity and translucency
 									// at both the texture and material level.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addBeachBall];			// Add a transparent bouncing beach ball...exported from Blender
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addTelevision];			// Add a television showing the view from the runner camera
 									// This demonstrates dynamic rendering-to-texture capabilities.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addBrickWall];			// Add a brick wall that can block the path of the satellite teapot
 									// This must happen after camera is loaded (in addRobot).
@@ -336,7 +341,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	DramaticPause();
 	[self addWoodenSign];			// Add the multi-texture wooden sign.
 									// This must happen after camera is loaded (in addRobot).
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addFloatingHead];			// Add the bump-mapped floating head.
 									// This must happen after camera is loaded (in addRobot).
@@ -344,33 +349,33 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	DramaticPause();				// Pause dramatically
 	[self addReflectiveMask];		// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addEtchedMask];			// Adds a floating mask that uses GLSL shaders loaded via a PowerVR
 									// PFX file. Under OpenGL ES 1.1, mask appears with a default texture.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addMascots];				// Add the cocos3d mascot.
-	
+
 	DramaticPause();				// Pause dramatically
 	[self addDragon];				// Add a flying dragon that demos blending between animation tracks
 
 	// Log a list of the shader programs that are being used by the scene. During development,
-	// we can use this list as a starting point for populating the preloadShaderPrograms method.
+	// we can use this list as a starting point for populating the preloadAssets method.
 	LogRez(@"The following list contains the shader programs currently in use in this scene."
-		   @" You can copy and paste much of this list into the preloadShaderPrograms method"
+		   @" You can copy and paste much of this list into the preloadAssets method"
 		   @" in order to pre-load the shader programs during scene initialization. %@",
 		   [CC3ShaderProgram cachedProgramsDescription]);
-	
+
 	// Log a list of the PFX resources that are being used by the scene. During development, we can
-	// use this list as a starting point for adding PFX files to the preloadShaderPrograms method.
+	// use this list as a starting point for adding PFX files to the preloadAssets method.
 	// When initially building this list, set the CC3Resource.isPreloading to YES and leave it there.
 	LogRez(@"The following list contains the resource files currently in use in this scene."
 		   @" You can copy the PFX resources from this list and paste them into the"
-		   @" preloadShaderPrograms method, in order to pre-load additional shader programs"
+		   @" preloadAssets method, in order to pre-load additional shader programs"
 		   @" that originate in PFX files, during scene initialization. %@",
 		   [CC3PFXResource cachedResourcesDescription]);
-	
+
 	// Remove the pre-loaded PFX resources, now that we no longer need them.
 	// Other weakly-cached PFX resources will have been automatically removed already.
 	[CC3PFXResource removeAllResources];
@@ -410,7 +415,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /**
- * Pre-loads the shader programs that will be used in this scene.
+ * Pre-loads certain assets, such as shader programs, and certain textures, prior to the
+ * scene being displayed.
+ *
+ * Much of the scene is loaded on a background thread, while the scene is visible. However,
+ * the handling of some assets on the background thread can interrupt the main rendering thread.
  *
  * The GL drivers often leave the final stages of shader compilation and configuration until
  * the first time the shader program is used to render an object. This can often introduce a
@@ -427,8 +436,15 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * at a later point in the scene (usually via background loading), the cache must be configured
  * to retain the loaded shader programs even though they will not immediately be used to display
  * any models. This is done by turning on the value of the class-side isPreloading property.
+ *
+ * In addition, the automatic creation of mipmaps on larger textures, particularly cube-map 
+ * textures (which require a set of six mipmaps), can cause excessive work for the GPU in
+ * the background, which can spill over into a delay on the primary rendering thread.
+ *
+ * As a result, a large cube-map texture is loaded here and cached, for later access once
+ * the model that uses it is loaded in the background.
  */
--(void) preloadShaderPrograms {
+-(void) preloadAssets {
 #if CC3_GLSL
 
 	// Strongly cache the shader programs loaded here, so they'll be availble
@@ -470,6 +486,16 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3ShaderProgram.isPreloading = NO;
 
 #endif	// CC3_GLSL
+	
+	// The automatic generation of mipmap in the environment map texture on the background
+	// thread causes a short delay in rendering on the main thread. The text glyph texture
+	// also requires substantial time for mipmap generation. For such textures, by loading
+	// the texture, creating the mipmap, and caching the texture here, we can avoid the delay.
+	// All other textures are loaded on the background thread.
+	CC3Texture.isPreloading = YES;
+	[CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
+	[CC3Texture textureFromFile: @"Arial32BMGlyph.png"];
+	CC3Texture.isPreloading = NO;
 }
 
 /** Various options for configuring interesting camera behaviours. */

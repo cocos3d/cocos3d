@@ -37,28 +37,44 @@
 
 @implementation CC3Backgrounder
 
-@synthesize operationQueue=_operationQueue;
+@synthesize queuePriority=_queuePriority;
 
 -(void) dealloc {
-	[_operationQueue release];
 	[super dealloc];
 }
 
 #pragma mark Backgrounding tasks
 
--(void) runBlock: (void (^)(void))block { [_operationQueue addOperationWithBlock: block]; }
-
+-(void) runBlock: (void (^)(void))block {
+	dispatch_async(dispatch_get_global_queue(_queuePriority, 0), block);
+}
 
 #pragma mark Allocation and initialization
 
 -(id) init {
 	if ( (self = [super init]) ) {
-		_operationQueue = [NSOperationQueue new];		// retained
+		[self initQueuePriority];
 	}
 	return self;
 }
 
 +(id) backgrounder { return [[[self alloc] init] autorelease]; }
+
+/** Set the appropriate initial queue priority based on the OS version. */
+-(void) initQueuePriority {
+
+#if CC3_IOS
+	if( CCConfiguration.sharedConfiguration.OSVersion >= kCCiOSVersion_5_0 )
+		_queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
+	else
+		_queuePriority = DISPATCH_QUEUE_PRIORITY_LOW;
+#endif	// CC3_IOS
+
+#if CC3_OSX
+	_queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
+#endif	// CC3_OSX
+
+}
 
 @end
 
@@ -77,10 +93,7 @@
 
 #pragma mark Backgrounding tasks
 
-/** 
- * Overridden to ensure that the contained GL context is active on the current thread,
- * and to ensure all changes in GL state are flushed to the GL hardware.
- */
+/** Overridden to ensure that the contained GL context is active on the current thread. */
 -(void) runBlock: (void (^)(void))block {
 	[super runBlock: ^{
 		[_glContext ensureCurrentContext];

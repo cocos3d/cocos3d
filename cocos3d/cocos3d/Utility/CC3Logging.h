@@ -219,9 +219,13 @@
 #if LOGGING_LEVEL_DEBUG
 #	define LogTimedDebug(fmt, ...) LOG_FORMAT(fmt, @"debug", ##__VA_ARGS__)
 #	define LogCleanDebug(fmt, ...) LOG_FORMAT_CLEAN(fmt, @"debug", ##__VA_ARGS__)
+#	define MarkDebugActivityStart() NSTimeInterval _DEBUG_START_TIME_ = [NSDate timeIntervalSinceReferenceDate]
+#	define GetDebugActivityDuration() ([NSDate timeIntervalSinceReferenceDate] - _DEBUG_START_TIME_)
 #else
 #	define LogTimedDebug(...)
 #	define LogCleanDebug(...)
+#	define MarkDebugActivityStart()
+#	define GetDebugActivityDuration() 0.0
 #endif
 #define LogDebug(fmt, ...) LogCleanDebug(fmt, ##__VA_ARGS__)
 

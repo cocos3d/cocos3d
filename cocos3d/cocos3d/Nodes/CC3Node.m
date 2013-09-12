@@ -1641,15 +1641,15 @@ static GLuint lastAssignedNodeTag;
 /** 
  * Adds the specified node as a child of this node without queuing.
  *
- * If this action is occuring on a background thread, and this node is already part of
- * the scene being rendered, the operation is queued for execution on the rendering thread,
- * to avoid the possibility of adding a node in the middle of a render iteration.
+ * If this action is occuring on a background thread, and this node is already part of the
+ * scene being rendered, the operation is queued for execution on the rendering thread, to
+ * avoid the possibility of adding a node in the middle of a render iteration.
  */
 -(void) addChild: (CC3Node*) aNode {
-	if (CC3OpenGL.sharedGL.isPrimaryContext || !self.scene)
-		[self addChildNow: aNode];
-	else
+	if ( !CC3OpenGL.sharedGL.isPrimaryContext && self.scene )
 		[self addChildFromBackgroundThread: aNode];
+	else
+		[self addChildNow: aNode];
 }
 
 /** Adds the specified node as a child of this node without queuing. */
@@ -1686,7 +1686,7 @@ static GLuint lastAssignedNodeTag;
  */
 -(void) addChildFromBackgroundThread: (CC3Node*) aNode {
 	[CC3OpenGL.sharedGL finish];
-	[NSOperationQueue.mainQueue addOperationWithBlock: ^{ [self addChildNow: aNode]; }];
+	dispatch_async(dispatch_get_main_queue(), ^{ [self addChildNow: aNode]; });
 }
 
 /**

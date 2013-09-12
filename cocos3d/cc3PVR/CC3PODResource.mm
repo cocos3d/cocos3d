@@ -146,7 +146,7 @@ static Class _defaultPFXResourceClass = nil;
 	BOOL wasSaved = (self.pvrtModelImpl->SavePOD(absFilePath.UTF8String) == PVR_SUCCESS);
 	
 	if (wasSaved)
-		LogRez(@"%@ saved resources to file '%@' in %.4f seconds", self, aFilePath, GetRezActivityDuration());
+		LogRez(@"%@ saved resources to file '%@' in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000);
 	else
 		LogError(@"%@ could not save resources to file '%@'", self, absFilePath);
 	
@@ -216,7 +216,7 @@ static Class _defaultPFXResourceClass = nil;
 	delete pod;
 	
 	if (wasSaved)
-		LogRez(@"%@ saved animation content to file '%@' in %.4f seconds", self, aFilePath, GetRezActivityDuration());
+		LogRez(@"%@ saved animation content to file '%@' in %.3f ms", self, aFilePath, GetRezActivityDuration() * 1000.0);
 	else
 		LogError(@"%@ could not save animation content to file '%@'", self, absFilePath);
 	

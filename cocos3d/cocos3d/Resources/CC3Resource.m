@@ -63,7 +63,7 @@
 	_wasLoaded = [self processFile: absFilePath];	// Main subclass loading method
 	
 	if (_wasLoaded)
-		LogRez(@"Loaded resources from file '%@' in %.4f seconds", aFilePath, GetRezActivityDuration());
+		LogRez(@"Loaded resources from file '%@' in %.3f seconds", aFilePath, GetRezActivityDuration() * 1000);
 	else
 		LogError(@"Could not load resource file '%@'", absFilePath);
 	

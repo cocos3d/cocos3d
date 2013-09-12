@@ -47,6 +47,9 @@
 #ifndef __IPHONE_6_0
 #	define __IPHONE_6_0     60000
 #endif
+#ifndef __IPHONE_7_0
+#	define __IPHONE_7_0     70000
+#endif
 
 /** iOS equivalents for OSX declaration */
 #define NSEvent		NSObject
