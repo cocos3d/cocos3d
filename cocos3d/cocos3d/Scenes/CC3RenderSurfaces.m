@@ -540,9 +540,7 @@
 	_numberOfFacesPerSnapshot = CLAMP(numberOfFacesPerSnapshot, 0.0, 6.0);
 }
 
--(void) generateSnapshotOfScene: (CC3Scene*) scene
-			 fromGlobalLocation: (CC3Vector) location
-					withVisitor: (CC3NodeDrawingVisitor*) visitor {
+-(void) generateSnapshotOfScene: (CC3Scene*) scene fromGlobalLocation: (CC3Vector) location {
 
 	LogTrace(@"%@ generating snapshot", self);
 
@@ -627,12 +625,8 @@
  * this snapshot from the running count. This math means that even if the number of
  * faces per snapshot does not divide evenly into an integer number, over time the rate
  * will average out to the value of the numberOfFacesPerSnapshot property.
- *
- * If this is the first snapshot, this property will return 6.
  */
 -(GLuint) facesToGenerate {
-	if ( !_currentFace) return 6;				// Generate all 6 faces on first snapshot
-	
 	_faceCount += _numberOfFacesPerSnapshot;
 	GLuint facesToGenerate = _faceCount;		// Convert to int (rounding down)
 	_faceCount -= facesToGenerate;				// Reduce by number that will be done now

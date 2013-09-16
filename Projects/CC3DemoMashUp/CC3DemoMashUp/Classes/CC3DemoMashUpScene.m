@@ -995,6 +995,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[_teapotTextured addTexture: _envMapTex];
 #endif	// !CC3_OGLES_1
 
+	// Add a brushed metal texture (with or without the reflective texture added above).
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
 	_teapotTextured.material.reflectivity = 1.0;
 	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
@@ -2696,8 +2697,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	BOOL isVis = _teapotTextured.visible;
 	_teapotTextured.visible = NO;			// Hide the teapot from itself
 	[_envMapTex generateSnapshotOfScene: self
-					 fromGlobalLocation: _teapotTextured.globalCenterOfGeometry
-							withVisitor: visitor];
+					 fromGlobalLocation: _teapotTextured.globalCenterOfGeometry];
 	_teapotTextured.visible = isVis;
 }
 

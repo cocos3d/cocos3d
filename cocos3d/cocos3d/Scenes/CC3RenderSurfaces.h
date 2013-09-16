@@ -766,34 +766,20 @@
  * The initial value of this property is 1, indicating that one face of the cube-map will be
  * generated on each invocation of the generateSnapshotOfScene:fromGlobalLocation:withVisitor:
  * method. With this value, it will take six invocations to generate all six sides of the cube-map.
- *
- * To ensure a complete cube-map, the first time the generateSnapshotOfScene:fromGlobalLocation:withVisitor:
- * method is invoked, the value of this property is ignored, and all six faces of the cube-map
- * are generated.
  */
 @property(nonatomic, assign) GLfloat numberOfFacesPerSnapshot;
 
 /**
- * Generates up to 6 faces of this cube-map, by creating a view of the specified scene,
+ * Generates up to six faces of this cube-map, by creating a view of the specified scene,
  * from the specified global location, once for each face of this cube-mapped texture.
  *
  * The scene's drawSceneContentForEnvironmentMapWithVisitor: method is invoked to render the
- * scene as an environment map. The specified visitor is not used to visit the scene when
- * drawing the environment map. Instead, the visitor in the scene's envMapDrawingVisitor
- * property is retrieved and used.
+ * scene as an environment map, using the visitor in the scene's envMapDrawingVisitor property.
  *
- * The first time this method is invoked, all 6 cube-map faces will be generated. The behaviour
- * on subsequent invocations depends on the value of the numberOfFacesPerSnapshot property, and
- * subsequent invocations may not regenerate all faces. See the notes for the numberOfFacesPerSnapshot
- * property for more information about partially-regenerating the cube-map as a compromise between
- * environment-map fidelity and performance.
- *
- * Typcally, you would invoke this method on each frame rendering loop, and use the
+ * Typcally, you invoke this method on each frame rendering loop, and use the 
  * numberOfFacesPerSnapshot property to control how often the texture is updated.
  */
--(void) generateSnapshotOfScene: (CC3Scene*) scene
-			 fromGlobalLocation: (CC3Vector) location
-					withVisitor: (CC3NodeDrawingVisitor*) visitor;
+-(void) generateSnapshotOfScene: (CC3Scene*) scene fromGlobalLocation: (CC3Vector) location;
 
 /** Returns the surface to which the environment will be rendered. */
 @property(nonatomic, retain, readonly) CC3GLFramebuffer* renderSurface;
