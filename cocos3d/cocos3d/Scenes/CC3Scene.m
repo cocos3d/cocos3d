@@ -61,6 +61,7 @@
 @synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize viewSurfaceManager=_viewSurfaceManager;
+@synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
 
 /**
  * Descendant nodes will be removed by superclass. Their removal may invoke
@@ -197,6 +198,8 @@
 		_minUpdateInterval = kCC3DefaultMinimumUpdateInterval;
 		_maxUpdateInterval = kCC3DefaultMaximumUpdateInterval;
 		_deltaFrameTime = 0;
+		_timeAtOpen = 0;
+		_elapsedTimeSinceOpened = 0;
 		[self initializeSceneAndClose3D];
 		LogGLErrorState(@"after initializing %@", self);
 	}
@@ -249,6 +252,8 @@
 #pragma mark Updating scene state
 
 -(void) open {
+	_timeAtOpen = NSDate.timeIntervalSinceReferenceDate;
+	_elapsedTimeSinceOpened = 0;
 	[self play];
 	[self updateScene];
 	[self openSurfaces];
@@ -273,10 +278,11 @@
 
 /**
  * If needed, clamps the specified interval value, then invokes a sequence of template methods.
- * Does nothing if this instance is not running.
+ * Does nothing except update times if this instance is not running.
  */
 -(void) updateScene: (ccTime) dt {
-	[_performanceStatistics addUpdateTime: dt];
+	[self updateTimes: dt];
+
 	if( !self.isRunning) return;
 
 	// Clamp the specified interval to a range defined by the minimum and maximum
@@ -308,6 +314,12 @@
 	_isRunning = YES;
 	[self updateScene: _minUpdateInterval];
 	_isRunning = wasRunning;
+}
+
+/** Updates various scene timing values. */
+-(void) updateTimes: (ccTime) dt {
+	_elapsedTimeSinceOpened = NSDate.timeIntervalSinceReferenceDate - _timeAtOpen;
+	[_performanceStatistics addUpdateTime: dt];
 }
 
 /** 

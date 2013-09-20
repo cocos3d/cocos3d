@@ -207,12 +207,12 @@ typedef enum {
 
 	// TIME ------------------
 	kCC3SemanticFrameTime,						/**< (float) Time in seconds since the last frame. */
-	kCC3SemanticApplicationTime,				/**< (float) Application time in seconds. */
-	kCC3SemanticApplicationTimeSine,			/**< (vec4) Sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
-	kCC3SemanticApplicationTimeCosine,			/**< (vec4) Cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
-	kCC3SemanticApplicationTimeTangent,			/**< (vec4) Tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+	kCC3SemanticSceneTime,						/**< (vec2) The real time, in seconds, since the scene was opened, and the fractional part of that time (T, fmod(T, 1)). */
+	kCC3SemanticSceneTimeSine,					/**< (vec4) Sine of the scene time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	kCC3SemanticSceneTimeCosine,				/**< (vec4) Cosine of the scene time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	kCC3SemanticSceneTimeTangent,				/**< (vec4) Tangent of the scene time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 	
-	// MISC ENVIRONMENT
+	// MISC ENVIRONMENT -------
 	kCC3SemanticDrawCountCurrentFrame,			/**< (int) Number of draw calls so far in this frame. */
 	kCC3SemanticRandomNumber,					/**< (float) A random number between 0 and 1. */
 	
@@ -478,6 +478,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(void) populateWithDefaultVariableNameMappings;
 
 /**
+ * @deprecated
  * Populates this instance with the default cocos3d mappings between variable names and
  * semantics that are based on uniforms collected together into structures.
  *
@@ -490,7 +491,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
  * approach. For new iOS applications, and for all OSX applications, you should use the semantic
  * uniform name mappings defined by the populateWithDefaultVariableNameMappings method.
  */
--(void) populateWithStructuredVariableNameMappings;
+-(void) populateWithStructuredVariableNameMappings DEPRECATED_ATTRIBUTE;
 
 /**
  * @deprecated

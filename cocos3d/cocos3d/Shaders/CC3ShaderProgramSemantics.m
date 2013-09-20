@@ -189,10 +189,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		// TIME ------------------
 		case kCC3SemanticFrameTime: return @"kCC3SemanticFrameTime";
 			
-		case kCC3SemanticApplicationTime: return @"kCC3SemanticApplicationTime";
-		case kCC3SemanticApplicationTimeSine: return @"kCC3SemanticApplicationTimeSine";
-		case kCC3SemanticApplicationTimeCosine: return @"kCC3SemanticApplicationTimeCosine";
-		case kCC3SemanticApplicationTimeTangent: return @"kCC3SemanticApplicationTimeTangent";
+		case kCC3SemanticSceneTime: return @"kCC3SemanticSceneTime";
+		case kCC3SemanticSceneTimeSine: return @"kCC3SemanticSceneTimeSine";
+		case kCC3SemanticSceneTimeCosine: return @"kCC3SemanticSceneTimeCosine";
+		case kCC3SemanticSceneTimeTangent: return @"kCC3SemanticSceneTimeTangent";
 
 		// MISC ENVIRONMENT ---------
 		case kCC3SemanticViewport: return @"kCC3SemanticViewport";
@@ -308,10 +308,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticFogEndDistance:
 			
 		case kCC3SemanticFrameTime:
-		case kCC3SemanticApplicationTime:
-		case kCC3SemanticApplicationTimeSine:
-		case kCC3SemanticApplicationTimeCosine:
-		case kCC3SemanticApplicationTimeTangent:
+		case kCC3SemanticSceneTime:
+		case kCC3SemanticSceneTimeSine:
+		case kCC3SemanticSceneTimeCosine:
+		case kCC3SemanticSceneTimeTangent:
 			
 			return kCC3GLSLVariableScopeScene;
 			
@@ -343,7 +343,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	CC3Matrix4x3 m4x3,  mRslt4x3, tfmMtx, *pm4x3;
 	CC3Matrix3x3 m3x3;
 	CC3Viewport vp;
-	ccTime appTime;
+	ccTime sceneTime;
 	GLuint boneCnt = 0, tuCnt = 0, texCnt = 0;
 	BOOL isInverted = NO, isPtEmitter = NO;
 	
@@ -1007,29 +1007,30 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticFrameTime:
 			[uniform setFloat: visitor.deltaTime];
 			return YES;
-		case kCC3SemanticApplicationTime:
-			[uniform setFloat: CCDirector.sharedDirector.displayLinkTime];
+		case kCC3SemanticSceneTime:
+			sceneTime = visitor.scene.elapsedTimeSinceOpened;
+			[uniform setPoint: ccp(sceneTime, fmodf(sceneTime, 1.0))];
 			return YES;
-		case kCC3SemanticApplicationTimeSine:
-			appTime = CCDirector.sharedDirector.displayLinkTime;
-			[uniform setVector4: CC3Vector4Make(sinf(appTime),
-												sinf(appTime/2.0f),
-												sinf(appTime/4.0f),
-												sinf(appTime/8.0f))];
+		case kCC3SemanticSceneTimeSine:
+			sceneTime = visitor.scene.elapsedTimeSinceOpened;
+			[uniform setVector4: CC3Vector4Make(sinf(sceneTime),
+												sinf(sceneTime / 2.0f),
+												sinf(sceneTime / 4.0f),
+												sinf(sceneTime / 8.0f))];
 			return YES;
-		case kCC3SemanticApplicationTimeCosine:
-			appTime = CCDirector.sharedDirector.displayLinkTime;
-			[uniform setVector4: CC3Vector4Make(cosf(appTime),
-												cosf(appTime/2.0f),
-												cosf(appTime/4.0f),
-												cosf(appTime/8.0f))];
+		case kCC3SemanticSceneTimeCosine:
+			sceneTime = visitor.scene.elapsedTimeSinceOpened;
+			[uniform setVector4: CC3Vector4Make(cosf(sceneTime),
+												cosf(sceneTime / 2.0f),
+												cosf(sceneTime / 4.0f),
+												cosf(sceneTime / 8.0f))];
 			return YES;
-		case kCC3SemanticApplicationTimeTangent:
-			appTime = CCDirector.sharedDirector.displayLinkTime;
-			[uniform setVector4: CC3Vector4Make(tanf(appTime),
-												tanf(appTime/2.0f),
-												tanf(appTime/4.0f),
-												tanf(appTime/8.0f))];
+		case kCC3SemanticSceneTimeTangent:
+			sceneTime = visitor.scene.elapsedTimeSinceOpened;
+			[uniform setVector4: CC3Vector4Make(tanf(sceneTime),
+												tanf(sceneTime / 2.0f),
+												tanf(sceneTime / 4.0f),
+												tanf(sceneTime / 8.0f))];
 			return YES;
 			
 #pragma mark Setting miscellaneous semantics
@@ -1239,22 +1240,22 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 
 	// The semantics below mimic OpenGL ES 1.1 configuration functionality for combining texture units.
 	// In most shaders, these will be left unused in favor of customized the texture combining in GLSL code.
-	[self mapVarName: @"u_cc3TextureUnitColor" toSemantic: kCC3SemanticTexUnitConstantColor];							/**< (vec4[]) The constant color of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitColor" toSemantic: kCC3SemanticTexUnitConstantColor];						/**< (vec4[]) The constant color of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitMode" toSemantic: kCC3SemanticTexUnitMode];									/**< (int[]) Environment mode of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitCombineRGBFunction" toSemantic: kCC3SemanticTexUnitCombineRGBFunction];		/**< (int[]) RBG combiner function of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitRGBSource0" toSemantic: kCC3SemanticTexUnitSource0RGB];						/**< (int[]) The RGB of source 0 of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitRGBSource1" toSemantic: kCC3SemanticTexUnitSource1RGB];						/**< (int[]) The RGB of source 1 of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitRGBSource2" toSemantic: kCC3SemanticTexUnitSource2RGB];						/**< (int[]) The RGB of source 2 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitRGBOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB];						/**< (int[]) The RGB combining operand of source 0 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitRGBOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB];						/**< (int[]) The RGB combining operand of source 1 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitRGBOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB];						/**< (int[]) The RGB combining operand of source 2 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand0" toSemantic: kCC3SemanticTexUnitOperand0RGB];					/**< (int[]) The RGB combining operand of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand1" toSemantic: kCC3SemanticTexUnitOperand1RGB];					/**< (int[]) The RGB combining operand of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitRGBOperand2" toSemantic: kCC3SemanticTexUnitOperand2RGB];					/**< (int[]) The RGB combining operand of source 2 of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitCombineAlphaFunction" toSemantic: kCC3SemanticTexUnitCombineAlphaFunction];	/**< (int[]) Alpha combiner function of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitAlphaSource0" toSemantic: kCC3SemanticTexUnitSource0Alpha];					/**< (int[]) The alpha of source 0 of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitAlphaSource1" toSemantic: kCC3SemanticTexUnitSource1Alpha];					/**< (int[]) The alpha of source 1 of each texture unit. */
 	[self mapVarName: @"u_cc3TextureUnitAlphaSource2" toSemantic: kCC3SemanticTexUnitSource2Alpha];					/**< (int[]) The alpha of source 2 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitAlphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha];					/**< (int[]) The alpha combining operand of source 0 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitAlphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha];					/**< (int[]) The alpha combining operand of source 1 of each texture unit. */
-	[self mapVarName: @"u_cc3TextureUnitAlphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha];					/**< (int[]) The alpha combining operand of source 2 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand0" toSemantic: kCC3SemanticTexUnitOperand0Alpha];				/**< (int[]) The alpha combining operand of source 0 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand1" toSemantic: kCC3SemanticTexUnitOperand1Alpha];				/**< (int[]) The alpha combining operand of source 1 of each texture unit. */
+	[self mapVarName: @"u_cc3TextureUnitAlphaOperand2" toSemantic: kCC3SemanticTexUnitOperand2Alpha];				/**< (int[]) The alpha combining operand of source 2 of each texture unit. */
 	
 	// MODEL ----------------
 	[self mapVarName: @"u_cc3ModelCenterOfGeometry" toSemantic: kCC3SemanticCenterOfGeometry];		/**< (vec3) The center of geometry of the model in the model's local coordinates. */
@@ -1265,21 +1266,26 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3ModelAnimationFraction" toSemantic: kCC3SemanticAnimationFraction];	/**< (float) Fraction of the model's animation that has been viewed (range 0-1). */
 	
 	// PARTICLES ------------
-	[self mapVarName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];				/**< (bool) Whether the vertices are being drawn as points. */
-	[self mapVarName: @"u_cc3PointSize" toSemantic: kCC3SemanticPointSize];								/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
+	[self mapVarName: @"u_cc3IsDrawingPoints" toSemantic: kCC3SemanticIsDrawingPoints];						/**< (bool) Whether the vertices are being drawn as points. */
+	[self mapVarName: @"u_cc3PointSize" toSemantic: kCC3SemanticPointSize];									/**< (float) Default size of points, if not specified per-vertex in a vertex attribute array. */
 	[self mapVarName: @"u_cc3PointSizeAttenuation" toSemantic: kCC3SemanticPointSizeAttenuation];			/**< (vec3) Point size distance attenuation coefficients. */
 	[self mapVarName: @"u_cc3PointMinimumSize" toSemantic: kCC3SemanticPointSizeMinimum];					/**< (float) Minimum size points will be allowed to shrink to. */
 	[self mapVarName: @"u_cc3PointMaximumSize" toSemantic: kCC3SemanticPointSizeMaximum];					/**< (float) Maximum size points will be allowed to grow to. */
 	[self mapVarName: @"u_cc3PointShouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];	/**< (bool) Whether points should be interpeted as textured sprites. */
 	
 	// TIME ------------------
-	[self mapVarName: @"u_cc3FrameTime" toSemantic: kCC3SemanticFrameTime];						/**< (float) The time in seconds since the last frame. */
-	[self mapVarName: @"u_cc3AppTime" toSemantic: kCC3SemanticApplicationTime];					/**< (float) The application time in seconds. */
-	[self mapVarName: @"u_cc3AppTimeSine" toSemantic: kCC3SemanticApplicationTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
-	[self mapVarName: @"u_cc3AppTimeCosine" toSemantic: kCC3SemanticApplicationTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
-	[self mapVarName: @"u_cc3AppTimeTangent" toSemantic: kCC3SemanticApplicationTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+	[self mapVarName: @"u_cc3FrameTime" toSemantic: kCC3SemanticFrameTime];				/**< (float) The time in seconds since the last frame. */
+	[self mapVarName: @"u_cc3SceneTime" toSemantic: kCC3SemanticSceneTime];				/**< (vec2) The real time, in seconds, since the scene was opened, and the fractional part of that time (T, fmod(T, 1)). */
+	[self mapVarName: @"u_cc3SceneTimeSin" toSemantic: kCC3SemanticSceneTimeSine];		/**< (vec4) Sine of the scene time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	[self mapVarName: @"u_cc3SceneTimeCos" toSemantic: kCC3SemanticSceneTimeCosine];	/**< (vec4) Cosine of the scene time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	[self mapVarName: @"u_cc3SceneTimeTan" toSemantic: kCC3SemanticSceneTimeTangent];	/**< (vec4) Tangent of the scene time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 
-	// MISC ENVIRONMENT ---------
+	[self mapVarName: @"u_cc3AppTime" toSemantic: kCC3SemanticSceneTime];				/**< @deprecated Use u_cc3SceneTime instead. */
+	[self mapVarName: @"u_cc3AppTimeSine" toSemantic: kCC3SemanticSceneTimeSine];		/**< @deprecated Use u_cc3SceneTimeSin instead. */
+	[self mapVarName: @"u_cc3AppTimeCosine" toSemantic: kCC3SemanticSceneTimeCosine];	/**< @deprecated Use u_cc3SceneTimeCos instead. */
+	[self mapVarName: @"u_cc3AppTimeTangent" toSemantic: kCC3SemanticSceneTimeTangent];	/**< @deprecated Use u_cc3SceneTimeTan instead. */
+
+	// MISC ENVIRONMENT --------
 	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */
 	[self mapVarName: @"u_cc3Random" toSemantic: kCC3SemanticRandomNumber];					/**< (float) A random number between 0 and 1. */
 
@@ -1437,11 +1443,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	[self mapVarName: @"u_cc3Points.shouldDisplayAsSprites" toSemantic: kCC3SemanticPointSpritesIsEnabled];	/**< (bool) Whether points should be interpeted as textured sprites. */
 	
 	// TIME ------------------
-	[self mapVarName: @"u_cc3Time.frameTime" toSemantic: kCC3SemanticFrameTime];						/**< (float) The time in seconds since the last frame. */
-	[self mapVarName: @"u_cc3Time.appTime" toSemantic: kCC3SemanticApplicationTime];					/**< (float) The application time in seconds. */
-	[self mapVarName: @"u_cc3Time.appTimeSine" toSemantic: kCC3SemanticApplicationTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
-	[self mapVarName: @"u_cc3Time.appTimeCosine" toSemantic: kCC3SemanticApplicationTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
-	[self mapVarName: @"u_cc3Time.appTimeTangent" toSemantic: kCC3SemanticApplicationTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+	[self mapVarName: @"u_cc3Time.appTime" toSemantic: kCC3SemanticSceneTime];					/**< @deprecated Use sceneTime instead. */
+	[self mapVarName: @"u_cc3Time.appTimeSine" toSemantic: kCC3SemanticSceneTimeSine];			/**< @deprecated Use sceneTimeSin instead. */
+	[self mapVarName: @"u_cc3Time.appTimeCosine" toSemantic: kCC3SemanticSceneTimeCosine];		/**< @deprecated Use sceneTimeCos instead. */
+	[self mapVarName: @"u_cc3Time.appTimeTangent" toSemantic: kCC3SemanticSceneTimeTangent];	/**< @deprecated Use sceneTimeTan instead. */
 	
 	// MISC ENVIRONMENT ---------
 	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */
@@ -1623,10 +1628,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// TIME ------------------
 	[self mapVarName: @"u_cc3Time.frameTime" toSemantic: kCC3SemanticFrameTime];						/**< (float) The time in seconds since the last frame. */
-	[self mapVarName: @"u_cc3Time.appTime" toSemantic: kCC3SemanticApplicationTime];					/**< (float) The application time in seconds. */
-	[self mapVarName: @"u_cc3Time.appTimeSine" toSemantic: kCC3SemanticApplicationTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
-	[self mapVarName: @"u_cc3Time.appTimeCosine" toSemantic: kCC3SemanticApplicationTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
-	[self mapVarName: @"u_cc3Time.appTimeTangent" toSemantic: kCC3SemanticApplicationTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
+	[self mapVarName: @"u_cc3Time.appTime" toSemantic: kCC3SemanticSceneTime];					/**< (float) The application time in seconds. */
+	[self mapVarName: @"u_cc3Time.appTimeSine" toSemantic: kCC3SemanticSceneTimeSine];			/**< (vec4) The sine of the application time (sin(T), sin(T/2), sin(T/4), sin(T/8)). */
+	[self mapVarName: @"u_cc3Time.appTimeCosine" toSemantic: kCC3SemanticSceneTimeCosine];		/**< (vec4) The cosine of the application time (cos(T), cos(T/2), cos(T/4), cos(T/8)). */
+	[self mapVarName: @"u_cc3Time.appTimeTangent" toSemantic: kCC3SemanticSceneTimeTangent];		/**< (vec4) The tangent of the application time (tan(T), tan(T/2), tan(T/4), tan(T/8)). */
 	
 	// MISC ENVIRONMENT ---------
 	[self mapVarName: @"u_cc3DrawCount" toSemantic: kCC3SemanticDrawCountCurrentFrame];		/**< (int) The number of draw calls so far in this frame. */

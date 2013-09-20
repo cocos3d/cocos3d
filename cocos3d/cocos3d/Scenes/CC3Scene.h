@@ -246,6 +246,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CC3Fog* _fog;
 	CC3GLViewSurfaceManager* _viewSurfaceManager;
 	ccColor4F _ambientLight;
+	NSTimeInterval _timeAtOpen;
+	NSTimeInterval _elapsedTimeSinceOpened;
 	ccTime _minUpdateInterval;
 	ccTime _maxUpdateInterval;
 	ccTime _deltaFrameTime;
@@ -684,6 +686,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /** The delta time from the most recent invocation of the updateScene: method. */
 @property(nonatomic, readonly) ccTime deltaFrameTime;
+
+/** 
+ * The elapsed real-time, measured in seconds, since this scene was last opened.
+ *
+ * The value of this property will be zero until, and whenever, the onOpen method is invoked.
+ * After the scene is opened, the value of this property will be updated on each update frame,
+ * and indicates how long this scene has been open.
+ */
+@property(nonatomic, readonly) NSTimeInterval elapsedTimeSinceOpened;
 
 
 #pragma mark Drawing

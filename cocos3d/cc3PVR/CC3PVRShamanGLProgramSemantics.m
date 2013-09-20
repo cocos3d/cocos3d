@@ -79,7 +79,7 @@ NSString* NSStringFromCC3PVRShamanSemantic(CC3PVRShamanSemantic semantic) {
 			return YES;
 		case kCC3PVRShamanSemanticElapsedTimeLastFrame:
 			// Time of last frame. Just subtract frame time from current time
-			[uniform setFloat: (CCDirector.sharedDirector.displayLinkTime - visitor.deltaTime)];
+			[uniform setFloat: (visitor.scene.elapsedTimeSinceOpened - visitor.deltaTime)];
 			return YES;
 		case kCC3PVRShamanSemanticViewportSize:
 			vp = visitor.camera.viewport;
@@ -196,15 +196,15 @@ static NSMutableDictionary* _semanticsByPVRShamanSemanticName = nil;
 	[self addSemantic: kCC3PVRShamanSemanticViewportSize forPVRShamanSemanticName: @"VIEWPORTPIXELSIZE"];
 	[self addSemantic: kCC3PVRShamanSemanticViewportClipping forPVRShamanSemanticName: @"VIEWPORTCLIPPING"];
 	
-	[self addSemantic: kCC3SemanticApplicationTime forPVRShamanSemanticName: @"TIME"];
-	[self addSemantic: kCC3SemanticApplicationTimeCosine forPVRShamanSemanticName: @"TIMECOS"];
-	[self addSemantic: kCC3SemanticApplicationTimeSine forPVRShamanSemanticName: @"TIMESIN"];
-	[self addSemantic: kCC3SemanticApplicationTimeTangent forPVRShamanSemanticName: @"TIMETAN"];
+	[self addSemantic: kCC3SemanticSceneTime forPVRShamanSemanticName: @"TIME"];
+	[self addSemantic: kCC3SemanticSceneTimeCosine forPVRShamanSemanticName: @"TIMECOS"];
+	[self addSemantic: kCC3SemanticSceneTimeSine forPVRShamanSemanticName: @"TIMESIN"];
+	[self addSemantic: kCC3SemanticSceneTimeTangent forPVRShamanSemanticName: @"TIMETAN"];
 
-	[self addSemantic: kCC3SemanticApplicationTime forPVRShamanSemanticName: @"TIME2PI"];
-	[self addSemantic: kCC3SemanticApplicationTimeCosine forPVRShamanSemanticName: @"TIME2PICOS"];
-	[self addSemantic: kCC3SemanticApplicationTimeSine forPVRShamanSemanticName: @"TIME2PISIN"];
-	[self addSemantic: kCC3SemanticApplicationTimeTangent forPVRShamanSemanticName: @"TIME2PITAN"];
+	[self addSemantic: kCC3SemanticSceneTime forPVRShamanSemanticName: @"TIME2PI"];
+	[self addSemantic: kCC3SemanticSceneTimeCosine forPVRShamanSemanticName: @"TIME2PICOS"];
+	[self addSemantic: kCC3SemanticSceneTimeSine forPVRShamanSemanticName: @"TIME2PISIN"];
+	[self addSemantic: kCC3SemanticSceneTimeTangent forPVRShamanSemanticName: @"TIME2PITAN"];
 
 	[self addSemantic: kCC3PVRShamanSemanticElapsedTimeLastFrame forPVRShamanSemanticName: @"LASTTIME"];
 	[self addSemantic: kCC3SemanticFrameTime forPVRShamanSemanticName: @"ELAPSEDTIME"];
