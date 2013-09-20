@@ -188,6 +188,13 @@
 	if ( !buffID ) return;		// Silently ignore zero ID
 	glDeleteBuffers(1, &buffID);
 	LogGLErrorTrace(@"glDeleteBuffers(%i, %u)", 1, buffID);
+
+	// If the deleted buffer is currently bound, the GL engine will automatically
+	// bind to the empty buffer ID (0). Update the state tracking accordingly.
+	if (value_GL_ARRAY_BUFFER_BINDING == buffID)
+		value_GL_ARRAY_BUFFER_BINDING = 0;
+	if (value_GL_ELEMENT_ARRAY_BUFFER_BINDING == buffID)
+		value_GL_ELEMENT_ARRAY_BUFFER_BINDING = 0;
 }
 
 -(void) bindBuffer: (GLuint) buffId  toTarget: (GLenum) target {
@@ -478,6 +485,16 @@
 	if ( !texID ) return;		// Silently ignore zero texture ID
 	glDeleteTextures(1, &texID);
 	LogGLErrorTrace(@"glDeleteTextures(%i, %u)", 1, texID);
+
+	// If the deleted texture is currently bound to a texture unit, the GL engine will automatically
+	// bind the default texture ID (0) to that texture unit. Update the state tracking accordingly.
+	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
+	for (GLuint tuIdx = 0; tuIdx < maxTexUnits; tuIdx++) {
+		if (value_GL_TEXTURE_BINDING_2D[tuIdx] == texID)
+			value_GL_TEXTURE_BINDING_2D[tuIdx] = 0;
+		if (value_GL_TEXTURE_BINDING_CUBE_MAP[tuIdx] == texID)
+			value_GL_TEXTURE_BINDING_CUBE_MAP[tuIdx] = 0;
+	}
 }
 
 -(void) loadTexureImage: (const GLvoid*) imageData
@@ -532,7 +549,13 @@
 
 -(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx {}
 
--(void) disableTexturingFrom: (GLuint) tuIdx { CC3AssertUnimplemented(@"disableTexturingFrom:"); }
+-(void) disableTexturingAt: (GLuint) tuIdx { CC3AssertUnimplemented(@"disableTexturingAt:"); }
+
+-(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
+	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
+	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++)
+		[self disableTexturingAt: tuIdx];
+}
 
 -(void) bindTexture: (GLuint) texID toTarget: (GLenum) target at: (GLuint) tuIdx {
 	GLuint* stateArray;
@@ -648,6 +671,10 @@
 	if ( !fbID ) return;		// Silently ignore zero ID
 	glDeleteFramebuffers(1, &fbID);
 	LogGLErrorTrace(@"glDeleteFramebuffers(%i, %u)", 1,fbID);
+	
+	// If the deleted buffer is currently bound, the GL engine will automatically
+	// bind to the empty buffer ID (0). Update the state tracking accordingly.
+	if (value_GL_FRAMEBUFFER_BINDING == fbID) value_GL_FRAMEBUFFER_BINDING = 0;
 }
 
 /** Returns whether the specified framebuffer ID is the currently bound value. */
@@ -687,6 +714,10 @@
 	if ( !rbID ) return;		// Silently ignore zero ID
 	glDeleteRenderbuffers(1, &rbID);
 	LogGLErrorTrace(@"glDeleteRenderbuffers(%i, %u)", 1,rbID);
+	
+	// If the deleted buffer is currently bound, the GL engine will automatically
+	// bind to the empty buffer ID (0). Update the state tracking accordingly.
+	if (value_GL_RENDERBUFFER_BINDING == rbID) value_GL_RENDERBUFFER_BINDING = 0;
 }
 
 -(void) bindRenderbuffer: (GLuint) rbID {

@@ -102,14 +102,11 @@
 	[super enableTexturing: onOff inTarget: target at: tuIdx];
 }
 
--(void) disableTexturingFrom: (GLuint) startTexUnitIdx {
-	GLuint maxTexUnits = value_MaxTextureUnitsUsed;
-	for (GLuint tuIdx = startTexUnitIdx; tuIdx < maxTexUnits; tuIdx++) {
-		[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
-		[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
-		[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
-		[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
-	}
+-(void) disableTexturingAt: (GLuint) tuIdx {
+	[self enableTexturing: NO inTarget: GL_TEXTURE_2D at: tuIdx];
+	[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: tuIdx];
+	[self enableTexturing: NO inTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
+	[self bindTexture: 0 toTarget: GL_TEXTURE_CUBE_MAP at: tuIdx];
 }
 
 

@@ -634,6 +634,12 @@ typedef struct {
 -(void) enableTexturing: (BOOL) onOff inTarget: (GLenum) target at: (GLuint) tuIdx;
 
 /**
+ * Disables texturing for all targets in the specified texture unit index, which must be a value
+ * between zero and the maximum number of texture units supported by the platform.
+ */
+-(void) disableTexturingAt: (GLuint) tuIdx;
+
+/**
  * Disables texturing for all targets in all texture units starting at, and above, the specified
  * texture unit index, which must be a value between zero and the maximum number of texture units
  * supported by the platform.

@@ -263,6 +263,8 @@
 	return programID;
 }
 
+// We don't need to clear the value_GL_CURRENT_PROGRAM, because shader program deletion is
+// lazy. The shader program won't actually be deleted until it is no longer the current program.
 -(void) deleteShaderProgram: (GLuint) programID {
 	if ( !programID ) return;		// Silently ignore zero ID
 	glDeleteProgram(programID);
