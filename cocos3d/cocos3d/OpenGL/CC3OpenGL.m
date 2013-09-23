@@ -956,9 +956,54 @@
 -(void) releaseShaderCompiler {}
 
 
-#pragma mark Aligning 2D & 3D caches
+#pragma mark Aligning 2D & 3D state
+
+-(void) alignFor2DDrawing {
+	
+	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+	
+	// Restore 2D standard blending
+	[self enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
+	[self setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
+	
+	// Enable vertex attributes needed for 2D, disable all others, unbind GL buffers.
+	[self enable2DVertexAttributes];
+	[self unbindBufferTarget: GL_ARRAY_BUFFER];
+	[self unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
+	
+	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
+	[self disableTexturingFrom: 1];
+	[self enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
+	[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
+	[self setTextureEnvMode: GL_MODULATE at: 0];
+	[self setTextureEnvColor: kCCC4FBlackTransparent at: 0];
+	
+	// Ensure texture unit zero is the active texture unit. Code above might leave another active.
+	[self activateTextureUnit: 0];
+	[self activateClientTextureUnit: 0];
+	
+	// Ensure GL_MODELVIEW matrix is active
+	[self activateMatrixStack: GL_MODELVIEW];
+	
+	self.cullFace = GL_BACK;
+	self.frontFace = GL_CCW;
+	
+	// Darken the scene by turning lighting off
+	[self enableLighting: NO];
+	
+	// Set depth testing to 2D values
+	self.depthFunc = GL_LEQUAL;
+	self.depthMask = YES;
+	
+	[self align2DStateCache];		// Align the 2D GL state cache with current settings
+}
 
 -(void) align2DStateCache {}
+
+-(void) alignFor3DDrawing {
+	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
+	[self align3DStateCache];
+}
 
 -(void) align3DStateCache {
 	isKnownCap_GL_BLEND = NO;
@@ -970,9 +1015,7 @@
 	[self align3DVertexAttributeState];
 }
 
--(void) align3DVertexAttributeState {
-	[self bindVertexArrayObject: 0];	// Ensure that a VAO was not left in place by cocos2d
-}
+-(void) align3DVertexAttributeState {}
 
 
 #pragma mark Allocation and initialization

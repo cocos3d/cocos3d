@@ -403,7 +403,7 @@
 	MarkDebugActivityStart();
 	[super drawScene];
 	NSTimeInterval drawDur = GetDebugActivityDuration();
-	if (drawDur > self.animationInterval * 3.0)
+	if (drawDur > 0.0667)	// 15 fps
 		LogDebug(@"Scene updated and drawn in %.3f ms (%.1f fps)",
 				 drawDur * 1000.0, 1.0 / drawDur);
 }

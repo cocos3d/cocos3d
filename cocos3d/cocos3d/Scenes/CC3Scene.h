@@ -809,26 +809,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 -(void) illuminateWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
 /**
- * Template method that sets up the GL drawing environment for 3D drawing.
- *
- * This method is invoked automatically during the transition between 2D and 3D drawing,
- * including between the CC3Layer and the CC3Scene, and when returning from rendering
- * a CC3Billboard containing a 2D cocos2d CCNode. Normally the application never needs
- * to invoke this method directly.
- */
--(void) setupDraw3DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
- * Template method that sets up the GL drawing environment back to the configuration
- * needed for 2D drawing.
- *
- * This method is invoked automatically during the transition to 2D drawing, including
- * between the CC3Scene and the CC3Layer, and when drawing a CC3Billboard containing a 
- * 2D cocos2d CCNode. Normally the application never needs to invoke this method directly.
- */
--(void) setupDraw2DWithVisitor: (CC3NodeDrawingVisitor*) visitor;
-
-/**
  * Template method that leaves depth testing in the state required by the 2D environment.
  *
  * Since most 2D drawing does not need to use depth testing, and clearing the depth buffer is

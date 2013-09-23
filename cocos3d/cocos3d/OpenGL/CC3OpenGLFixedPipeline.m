@@ -40,6 +40,7 @@
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 -(void) initTextureUnits;
+-(void) align3DStateCache;
 -(void) align3DVertexAttributeState;
 @end
 
@@ -565,7 +566,7 @@
 }
 
 
-#pragma mark Aligning 2D & 3D caches
+#pragma mark Aligning 2D & 3D state
 
 -(void) align3DStateCache {
 	[super align3DStateCache];

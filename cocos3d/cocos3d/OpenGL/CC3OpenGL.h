@@ -1158,21 +1158,24 @@ typedef struct {
 -(void) releaseShaderCompiler;
 
 
-#pragma mark Aligning 2D & 3D caches
+#pragma mark Aligning 2D & 3D state
 
 /**
- * Aligns the 2D state cache to that of this 3D cache.
+ * Aligns the state within the GL engine to be suitable for 2D drawing by cocos2d.
  *
- * This is invoked durin the transition from 3D back to 2D drawing.
+ * This is invoked automatically during the transition from 3D to 2D drawing. You can also  invoke
+ * this method if you perform 3D activities outside of the normal drawing loop, and you find that
+ * it interferes with subsequent 2D rendering by cocos2d. However, such occurrances should be rare,
+ * and in most circumstances you should never need to invoke this method.
  */
--(void) align2DStateCache;
+-(void) alignFor2DDrawing;
 
 /**
- * Aligns the 3D state cache to the GL state left by the 2D drawing.
+ * Aligns the state within the GL engine to be suitable for 3D drawing by cocos3d.
  *
- * This is invoked during the transition from 2D drawing to 3D drawing.
+ * This is invoked automatically during the transition from 2D to 3D drawing.
  */
--(void) align3DStateCache;
+-(void) alignFor3DDrawing;
 
 
 #pragma mark Allocation and initialization

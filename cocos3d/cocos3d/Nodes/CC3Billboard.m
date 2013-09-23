@@ -510,8 +510,9 @@ static GLfloat deviceScaleFactor = 0.0f;
 -(void) configureMaterialWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[super configureMaterialWithVisitor: visitor];
 	if (visitor.shouldDecorateNode) {
-		[visitor.scene setupDraw2DWithVisitor: visitor];
-		visitor.gl.depthMask = !_shouldDisableDepthMask;
+		CC3OpenGL* gl = visitor.gl;
+		[gl alignFor2DDrawing];
+		gl.depthMask = !_shouldDisableDepthMask;
 	}
 }
 
@@ -542,7 +543,7 @@ static GLfloat deviceScaleFactor = 0.0f;
  * Don't configure anything if painting for node picking.
  */
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor {
-	if (visitor.shouldDecorateNode) [visitor.scene setupDraw3DWithVisitor: visitor]; // Before super
+	if (visitor.shouldDecorateNode) [visitor.gl alignFor3DDrawing];
 	[super cleanupDrawingParameters: visitor];
 }
 

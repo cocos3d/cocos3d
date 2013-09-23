@@ -129,7 +129,7 @@
 	_isUpsideDown = texContent.isUpsideDown;
 		
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	GLuint tuIdx = 0;		// Choose the texture unit to work in
+	GLuint tuIdx = 0;		// Choose the texture unit in which to work
 	
 	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureImage: texContent.imageData
@@ -179,7 +179,7 @@
 	MarkRezActivityStart();
 
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	GLuint tuIdx = 0;	// Choose the texture unit to work in
+	GLuint tuIdx = 0;	// Choose the texture unit in which to work
 	GLenum target = self.textureTarget;
 	[gl bindTexture: _textureID toTarget: target at: tuIdx];
 	[gl generateMipmapForTarget: target at: tuIdx];
@@ -363,7 +363,7 @@ static ccTexParams _defaultTextureParameters = { GL_LINEAR_MIPMAP_NEAREST, GL_LI
 	[self convertContent: colorArray ofLength: (rect.w * rect.h)];
 	
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
-	GLuint tuIdx = 0;		// Choose the texture unit to work in
+	GLuint tuIdx = 0;		// Choose the texture unit in which to work
 	[gl bindTexture: _textureID toTarget: self.textureTarget at: tuIdx];
 	[gl loadTexureSubImage: (const GLvoid*) colorArray
 				intoTarget: target

@@ -417,18 +417,16 @@
 
 -(void) open3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening the 3D scene", self);
-	[self setupDraw3DWithVisitor: visitor];
-}
-
--(void) setupDraw3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[visitor.gl align3DStateCache];
+	[visitor.gl alignFor3DDrawing];
 }
 
 -(void) close3DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ closing the 3D scene", self);
+
+	CC3OpenGL* gl = visitor.gl;
 	
 	// Setup drawing configuration for cocos2d
-	[self setupDraw2DWithVisitor: visitor];
+	[gl alignFor2DDrawing];
 
 	// Make sure the drawing surface is set back to the view surface
 	[self.viewSurface activate];
@@ -437,56 +435,13 @@
 	[self closeDepthTestWithVisitor: visitor];
 	
 	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
-	CC3OpenGL* gl = visitor.gl;
 	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
 	gl.viewport = CC3ViewportMake(0, 0, winSz.width, winSz.height);
 	[gl enableScissorTest: NO];
 
-	// Disable lights and fog. Done outside setupDraw2DWithVisitor: because they apply to billboards
+	// Disable lights and fog. Done outside alignFor2DDrawing: because they apply to billboards
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
 	[gl enableFog: NO];
-}
-
--(void) setupDraw2DWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	
-	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
-	
-	CC3OpenGL* gl = visitor.gl;
-	
-	// Restore 2D standard blending
-	[gl enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
-	[gl setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
-	
-	// Enable vertex attributes needed for 2D, disable all others, unbind GL buffers.
-	[gl enable2DVertexAttributes];
-	[gl unbindBufferTarget: GL_ARRAY_BUFFER];
-	[gl unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
-	
-	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
-	[gl disableTexturingFrom: 1];
-	[gl enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
-	[gl bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
-	visitor.currentTextureUnitIndex = 0;
-	[CC3TextureUnit bindDefaultWithVisitor: visitor];
-
-	// Ensure texture unit zero is the active texture unit. Code above might leave another active.
-	[gl activateTextureUnit: 0];
-	[gl activateClientTextureUnit: 0];
-
-	// Ensure GL_MODELVIEW matrix is active
-	[gl activateMatrixStack: GL_MODELVIEW];
-	
-	gl.cullFace = GL_BACK;
-	gl.frontFace = GL_CCW;
-
-	// Darken the scene by turning lighting off
-	[gl enableLighting: NO];
-
-	// Set depth testing to 2D values
-	gl.depthFunc = GL_LEQUAL;
-	gl.depthMask = YES;
-	
-	[gl align2DStateCache];		// Align the 2D GL state cache with current settings
 }
 
 /**

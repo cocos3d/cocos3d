@@ -43,6 +43,8 @@
 -(void) initPlatformLimits;
 -(void) initVertexAttributes;
 -(void) align3DVertexAttributeState;
+-(void) align2DStateCache;
+-(void) align3DStateCache;
 @end
 
 @interface CC3GLSLVariable (ProgPipeline)
@@ -328,7 +330,7 @@
 }
 
 
-#pragma mark Aligning 2D & 3D caches
+#pragma mark Aligning 2D & 3D state
 
 -(void) align2DStateCache {
 	[super align2DStateCache];
