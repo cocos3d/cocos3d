@@ -21,13 +21,16 @@
 }
 
 /**
- * Constructs the 3D scene.
+ * Constructs the 3D scene prior to the scene being displayed.
  *
  * Adds 3D objects to the scene, loading a 3D 'hello, world' message
  * from a POD file, and creating the camera and light programatically.
  *
  * When adapting this template to your application, remove all of the content
  * of this method, and add your own to construct your 3D model scene.
+ *
+ * You can also load scene content asynchronously while the scene is being displayed by
+ * loading on a background thread. The
  *
  * NOTES:
  *
@@ -57,8 +60,8 @@
 	// nodes to the CC3Scene, if no customized resource subclass is needed.
 	[self addContentFromPODFile: @"hello-world.pod"];
 	
-	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex content in main memory because it is now redundant.
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and to
+	// save memory, release the vertex content in main memory because it is now redundant.
 	[self createGLBuffers];
 	[self releaseRedundantContent];
 	
@@ -67,7 +70,7 @@
 	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
 	// as each shader program is loaded as needed the first time it is needed during drawing.
 	[self selectShaderPrograms];
-	
+
 	// With complex scenes, the drawing of objects that are not within view of the camera will
 	// consume GPU resources unnecessarily, and potentially degrading app performance. We can
 	// avoid drawing objects that are not within view of the camera by assigning a bounding
@@ -88,6 +91,7 @@
 	// in front of the camera at all times, you can skip creating a bounding volume for that
 	// node, letting it be drawn on each frame.
 	[self createBoundingVolumes];
+
 	
 	// ------------------------------------------
 	
@@ -146,6 +150,27 @@
 	[helloTxt runAction: [CCRepeatForever actionWithAction: tintCycle]];
 }
 
+/**
+ * By populating this method, you can add add additional scene content dynamically and
+ * asynchronously after the scene is open.
+ *
+ * This method is invoked from a code block defined in the onOpen method, that is run on a
+ * background thread by the CC3GLBackgrounder available through the backgrounder property of
+ * the viewSurfaceManager. It adds content dynamically and asynchronously while rendering is
+ * running on the main rendering thread.
+ *
+ * You can add content on the background thread at any time while your scene is running, by
+ * defining a code block and running it on the backgrounder of the viewSurfaceManager. The
+ * example provided in the onOpen method is a template for how to do this, but it does not
+ * need to be invoked only from the onOpen method.
+ *
+ * Certain assets, notably shader programs, will cause short, but unavoidable, delays in the
+ * rendering of the scene, because certain finalization steps from shader compilation occur on
+ * the main thread. Shaders and certain other critical assets should be pre-loaded in the
+ * initializeScene method prior to the opening of this scene.
+ */
+-(void) addSceneContentAsynchronously {}
+
 
 #pragma mark Updating custom activity
 
@@ -183,6 +208,17 @@
  * For more info, read the notes of this method on CC3Scene.
  */
 -(void) onOpen {
+	
+	// Add additional scene content dynamically and asynchronously on a background thread
+	// after the scene is open and rendering has begun on the rendering thread. We use the
+	// GL backgrounder provided by the viewSurfaceManager to accomplish this. Asynchronous
+	// loading must be initiated after the scene has been attached to the view. It cannot
+	// be started in the initializeScene method. However, you do not need to start it only
+	// in this onOpen method. You can use the code here as a template for use whenever your
+	// app requires background content loading.
+	[self.viewSurfaceManager.backgrounder runBlock: ^{
+		[self addSceneContentAsynchronously];
+	}];
 
 	// Move the camera to frame the scene. The resulting configuration of the camera is output as
 	// a [debug] log message, so you know where the camera needs to be in order to view your scene.
@@ -199,6 +235,57 @@
  * For more info, read the notes of this method on CC3Scene.
  */
 -(void) onClose {}
+
+
+#pragma mark Drawing
+
+/**
+ * Template method that draws the content of the scene.
+ *
+ * This method is invoked automatically by the drawScene method, once the 3D environment has
+ * been established. Once this method is complete, the 2D rendering environment will be
+ * re-established automatically, and any 2D billboard overlays will be rendered. This method
+ * does not need to take care of any of this set-up and tear-down.
+ *
+ * This implementation turns on the lighting contained within the scene, and performs a single
+ * rendering pass of the nodes in the scene by invoking the visit: method on the specified
+ * visitor, with this scene as the argument.
+ *
+ * You can override this method to customize the scene rendering flow, such as performing
+ * multiple rendering passes on different surfaces, or adding post-processing effects, using
+ * the template methods mentioned above.
+ *
+ * Rendering output is directed to the render surface held in the renderSurface property of
+ * the visitor. By default, that is set to the render surface held in the viewSurface property
+ * of this scene. If you override this method, you can set the renderSurface property of the
+ * visitor to another surface, and then invoke this superclass implementation, to render this
+ * scene to a texture for later processing.
+ *
+ * When overriding the drawSceneContentWithVisitor: method with your own specialized rendering,
+ * steps, be careful to avoid recursive loops when rendering to textures and environment maps.
+ * For example, you might typically override drawSceneContentWithVisitor: to include steps to
+ * render environment maps for reflections, etc. In that case, you should also override the
+ * drawSceneContentForEnvironmentMapWithVisitor: to render the scene without those additional
+ * steps, to avoid the inadvertenly invoking an infinite recursive rendering of a scene to a
+ * texture while the scene is already being rendered to that texture.
+ *
+ * To maintain performance, by default, the depth buffer of the surface is not specifically
+ * cleared when 3D drawing begins. If this scene is drawing to a surface that already has
+ * depth information rendered, you can override this method and clear the depth buffer before
+ * continuing with 3D drawing, by invoking clearDepthContent on the renderSurface of the visitor,
+ * and then invoking this superclass implementation, or continuing with your own drawing logic.
+ *
+ * Examples of when the depth buffer should be cleared are when this scene is being drawn
+ * on top of other 3D content (as in a sub-window), or when any 2D content that is rendered
+ * behind the scene makes use of depth drawing. See also the closeDepthTestWithVisitor:
+ * method for more info about managing the depth buffer.
+ */
+-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+	[self illuminateWithVisitor: visitor];		// Light up your world!
+	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
+	[visitor visit: self];						// Draw the scene components
+	[self drawShadows];							// Shadows are drawn with a different visitor
+}
 
 
 #pragma mark Handling touch events 

@@ -69,24 +69,6 @@ NSString* GetGLErrorText(GLenum errCode);
 void DoLogGLErrorState(NSString* fmt, ...);
 
 /**
- * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, calling this function
- * will enable the logging of all subsequent GL calls made by the cocos3d framework. Logging
- * of GL calls will continute until CC3StopLoggingGLCalls() is called.
- *
- * This feature requires that the GL_ERROR_TRACING_ENABLED compiler build setting is turned on.
- * See the description of the GL_ERROR_TRACING_ENABLED compiler build setting for more info.
- */
-void CC3StartLoggingGLCalls(void);
-
-/**
- * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, and the CC3StartLoggingGLCalls()
- * function has previously been called to being logging all GL calls made by the cocos3d framework,
- * calling this function will stop any logging of subsequent GL calls. Logging of GL calls can be
- * restarted by calling CC3StartLoggingGLCalls() again.
- */
-void CC3StopLoggingGLCalls(void);
-
-/**
  * LogGLErrorState logs an ERROR level description of any glError that has occurred since it
  * was last called.
  *
@@ -152,8 +134,27 @@ void CC3StopLoggingGLCalls(void);
 #endif
 
 #if GL_ERROR_TRACING_ENABLED
-	#define LogGLErrorTrace(fmt, ...) LogGLErrorState(fmt, ##__VA_ARGS__)
+	#define LogGLErrorTrace(fmt, ...)		DoLogGLErrorState(fmt, ##__VA_ARGS__)
 #else
 	#define LogGLErrorTrace(...)
 #endif
+
+/**
+ * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, calling this function
+ * will enable the logging of all subsequent GL calls made by the cocos3d framework, including
+ * GL calls that do not result in a GL error. Logging of GL calls will continute until
+ * CC3StopLoggingGLCalls() is called.
+ *
+ * This feature requires that the GL_ERROR_TRACING_ENABLED compiler build setting is turned on.
+ * See the description of the GL_ERROR_TRACING_ENABLED compiler build setting for more info.
+ */
+void CC3StartLoggingGLCalls(void);
+
+/**
+ * If the GL_ERROR_TRACING_ENABLED compiler build setting is enabled, and the CC3StartLoggingGLCalls()
+ * function has previously been called to begin logging all GL calls made by the cocos3d framework,
+ * calling this function will stop any logging of subsequent GL calls. Logging of GL calls can be
+ * restarted by calling CC3StartLoggingGLCalls() again.
+ */
+void CC3StopLoggingGLCalls(void);
 

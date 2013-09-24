@@ -78,19 +78,17 @@ NSString* GetGLErrorText(GLenum errCode) {
 static BOOL _shouldLogGLCalls = NO;
 
 void CC3StartLoggingGLCalls(void) {
-#if GL_ERROR_TRACING_ENABLED
-	printf("Starting GL logging.\n");
-	_shouldLogGLCalls = YES;
-#else
-	printf("GL call logging is not enabled. To enable, set the compiler build setting GL_ERROR_TRACING_ENABLED to 1.\n");
-#endif
+	if ( !_shouldLogGLCalls ) {
+		printf("Starting GL logging.\n");
+		_shouldLogGLCalls = YES;
+	}
 }
 
 void CC3StopLoggingGLCalls(void) {
-#if GL_ERROR_TRACING_ENABLED
-	printf("Stopping GL logging.\n");
-	_shouldLogGLCalls = NO;
-#endif
+	if (_shouldLogGLCalls) {
+		printf("Stopping GL logging.\n");
+		_shouldLogGLCalls = NO;
+	}
 }
 
 void DoLogGLErrorState(NSString* fmt, ...) {
@@ -98,13 +96,16 @@ void DoLogGLErrorState(NSString* fmt, ...) {
 	va_start(args, fmt);
 	GLenum errCode = glGetError();
 	if (errCode) {
-		NSString* errText = [NSString stringWithFormat: @"[***GL ERROR***] %@ from %@.%@",
-							 GetGLErrorText(errCode), [[[NSString alloc] initWithFormat: fmt arguments: args] autorelease],
+		NSString* glTxt = [[NSString alloc] initWithFormat: fmt arguments: args];
+		NSString* errText = [[NSString alloc] initWithFormat: @"[***GL ERROR***] %@ from %@.%@",
+							 GetGLErrorText(errCode), glTxt,
 							 (GL_ERROR_TRACING_ENABLED ? @"" : @" To investigate further, set the preprocessor macro GL_ERROR_TRACING_ENABLED=1 in your project build settings.")];
 		printf("%s\n", [errText UTF8String]);
 		CC3AssertC(!GL_ERROR_ASSERTION_ENABLED,
 				  @"%@ To disable this assertion and just log the GL error, set the preprocessor macro GL_ERROR_ASSERTION_ENABLED=0 in your project build settings.\n",
 				  errText);
+		[glTxt release];
+		[errText release];
 	} else if (_shouldLogGLCalls) {
 		NSString* glTxt = [[NSString alloc] initWithFormat: fmt arguments: args];
 		printf("%s\n", [glTxt UTF8String]);

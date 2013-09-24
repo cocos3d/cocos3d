@@ -885,6 +885,9 @@
 		[surface validate];
 	}
 	[resizedAttachments release];
+
+	// After validating each surface, ensure we leave the rendering surface active for cocos2d
+	[self.renderingSurface activate];
 }
 
 -(void) resizeAttachment: (id<CC3RenderSurfaceAttachment>) attachment

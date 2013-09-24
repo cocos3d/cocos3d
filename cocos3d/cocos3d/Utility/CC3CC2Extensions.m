@@ -404,7 +404,7 @@
 	[super drawScene];
 	NSTimeInterval drawDur = GetDebugActivityDuration();
 	if (drawDur > 0.0667)	// 15 fps
-		LogDebug(@"Scene updated and drawn in %.3f ms (%.1f fps)",
+		LogDebug(@"Slow scene update and draw in %.3f ms (%.1f fps)",
 				 drawDur * 1000.0, 1.0 / drawDur);
 }
 #endif	// CC3_IOS && LOGGING_LEVEL_DEBUG

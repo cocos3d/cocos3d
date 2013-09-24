@@ -745,7 +745,8 @@
 -(GLint) getRenderbufferParameterInteger: (GLenum) param {
 	GLint val;
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, param, &val);
-	LogGLErrorTrace(@"glGetRenderbufferParameteriv(%@)", NSStringFromGLEnum(param));
+	LogGLErrorTrace(@"glGetRenderbufferParameteriv(%@, %@, %i)",
+					NSStringFromGLEnum(GL_RENDERBUFFER), NSStringFromGLEnum(param), val);
 	return val;
 }
 

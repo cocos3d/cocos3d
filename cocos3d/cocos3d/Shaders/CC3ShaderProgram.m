@@ -470,15 +470,17 @@ static CC3Cache* _shaderCache = nil;
 
 -(void) populateUniforms: (CCArray*) uniforms withVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3ShaderProgramContext* progCtx = visitor.currentMaterial.shaderContext;
-	for (CC3GLSLUniform* var in uniforms)
+	for (CC3GLSLUniform* var in uniforms) {
 		if ([progCtx populateUniform: var withVisitor: visitor] ||
 			[_semanticDelegate populateUniform: var withVisitor: visitor]) {
 			[var updateGLValueWithVisitor: visitor];
-		} else
+		} else {
 			CC3Assert(NO, @"%@ could not resolve the value of uniform %@ with semantic %@."
 					  " If this is a valid uniform, you should create a uniform override in the"
 					  " program context in your material in order to set the value of the uniform directly.",
 					  self, var.name, NSStringFromCC3Semantic(var.semantic));
+		}
+	}
 }
 
 
