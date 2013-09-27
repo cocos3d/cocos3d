@@ -55,7 +55,7 @@
 -(id) init { return [self initWithController: nil]; }
 
 -(id) initWithController: (CC3ViewController*) controller {
-	CC3Assert(controller, @"%@ requires a controller.", self);
+	CC3Assert(controller, @"%@ requires a CC3ViewController controller.", self);
 	if( (self = [super init]) ) {
 		_controller = controller;		// not retained
 		_alignContentSizeWithDeviceOrientation = YES;
@@ -68,11 +68,14 @@
 	return [[[self alloc] initWithController: controller] autorelease];
 }
 
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
+
 // Deprecated legacy
 -(id) initWithColor: (ccColor4B) color { return [self init]; }
 +(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
 -(void) initInitialState {}
 -(BOOL) isColored { return NO; }
+
 
 #pragma mark Device orientation support
 

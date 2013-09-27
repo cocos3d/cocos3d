@@ -52,8 +52,8 @@
  * artifacts.
  */
 @interface TileScene : CC3Scene {
-    CC3Node* mainNode;
-	CGPoint lastTouchEventPoint;
+    CC3Node* _mainNode;
+	CGPoint _lastTouchEventPoint;
 }
 
 /** Each TileScene displays a single, main node. */
@@ -63,13 +63,17 @@
 
 
 /**
- * Adds an extension category to CC3Node to add a property that indicates whether
- * this node should be colored. The value of this property is held in memory
- * pointed to by the userData property.
+ * Adds an extension category to CC3Node to add a property that indicates whether this node should
+ * be colored. The value of this property is held in memory pointed to by the userData property.
  */
 @interface CC3Node (TilesUserData)
 
-/** Indicates whether this node should be colored when it is added to the tile. */
+/** 
+ * Indicates whether this node should be colored when it is added to the tile.
+ *
+ * The value of this property is held in a memory space allocated by the setter method of
+ * this property, if needed.
+ */
 @property(nonatomic, assign) BOOL shouldColorTile;
 
 @end

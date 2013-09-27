@@ -35,9 +35,18 @@
 
 #import "Joystick.h"
 #import "CCNodeExtensions.h"
+#import "CC3CC2Extensions.h"
+#import "CC3Logging.h"
 
 /** The time it takes the thumb to spring back to center once the user lets go. */
 #define kThumbSpringBackDuration 1.0
+
+#if CC3_CC2_1
+#	define kJoystickEventPriority	kCCMenuTouchPriority
+#else
+#	define kJoystickEventPriority	kCCMenuHandlerPriority
+#endif
+
 
 @interface Joystick (Private)
 -(void) trackVelocity:(CGPoint) nodeTouchPoint;
@@ -63,6 +72,8 @@
 -(id) initWithThumb: (CCNode*) aNode andSize: (CGSize) size {
 	CC3Assert(aNode, @"Thumb node must not be nil");
 	if( (self = [super init]) ) {
+		self.mousePriority = kJoystickEventPriority;
+		self.mouseEnabled = YES;
 		self.touchEnabled = YES;
 		isTracking = NO;
 		velocity = CGPointZero;
@@ -108,30 +119,26 @@
 
 #pragma mark Event handling
 
-/** Handle touch events one at a time. */
--(void) registerWithTouchDispatcher {
-	[CCDirector.sharedDirector.touchDispatcher addTargetedDelegate: self
-														  priority: kCCMenuTouchPriority
-												   swallowsTouches:YES];
-	// Start with fresh state each time we register.
-	// Certain transitions, such as dynamically overlaying the device camera
-	// can cause abrupt breaks in targeted event state.
+/**
+ * Start with fresh state each time we register. Certain transitions, such as dynamically
+ * overlaying the device camera can cause abrupt breaks in targeted event state.
+ */
+-(void) onEnter {
+	[super onEnter];
 	[self resetVelocity];
 }
 
--(BOOL) ccTouchBegan: (UITouch *)touch withEvent: (UIEvent *)event {
-	if(!isTracking) {
-		CGSize cs = self.contentSize;
-		CGRect nodeBounds = CGRectMake(0, 0, cs.width, cs.height);
-		CGPoint nodeTouchPoint = [self convertTouchToNodeSpace: touch];
-		if(CGRectContainsPoint(nodeBounds, nodeTouchPoint)) {
-			isTracking = YES;
-			[thumbNode stopAllActions];
-			[self trackVelocity: nodeTouchPoint];
-			return YES;
-		}
-	}
-	return NO;
+/** Handle touch events one at a time. */
+-(void) registerWithTouchDispatcher {
+	[CCDirector.sharedDirector.touchDispatcher addTargetedDelegate: self
+														  priority: kJoystickEventPriority
+												   swallowsTouches:YES];
+}
+
+-(NSInteger) mouseDelegatePriority { return kJoystickEventPriority; }
+
+-(BOOL) ccTouchBegan: (UITouch*) touch withEvent: (UIEvent*) event {
+	return [self processTouchDownAt: [self convertTouchToNodeSpace: touch]];
 }
 
 -(void) ccTouchEnded: (UITouch *)touch withEvent: (UIEvent *)event {
@@ -147,6 +154,37 @@
 -(void) ccTouchMoved: (UITouch *)touch withEvent: (UIEvent *)event {
 	CC3Assert(isTracking, @"Touch moved that was never begun");
 	[self trackVelocity: [self convertTouchToNodeSpace: touch]];
+}
+
+-(BOOL) ccMouseDown:(NSEvent*) event {
+	return [self processTouchDownAt: [self cc3ConvertNSEventToNodeSpace: event]];
+}
+
+-(BOOL) ccMouseDragged: (NSEvent*) event {
+	BOOL isMine = isTracking;
+	if (isMine) [self trackVelocity: [self cc3ConvertNSEventToNodeSpace: event]];
+	return isMine;
+}
+
+-(BOOL) ccMouseUp: (NSEvent*) event {
+	BOOL isMine = isTracking;
+	if (isMine) [self resetVelocity];
+	return isMine;
+}
+
+/** Process an iOS touch down or OSX mouse down event at the specified point. */
+-(BOOL) processTouchDownAt: (CGPoint) localPoint {
+	if(isTracking) return NO;
+
+	CGSize cs = self.contentSize;
+	CGRect nodeBounds = CGRectMake(0, 0, cs.width, cs.height);
+	if(CGRectContainsPoint(nodeBounds, localPoint)) {
+		isTracking = YES;
+		[thumbNode stopAllActions];
+		[self trackVelocity: localPoint];
+		return YES;
+	}
+	return NO;
 }
 
 /**

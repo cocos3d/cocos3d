@@ -103,7 +103,7 @@
  * Initial value is kAdornmentOverZOrder, which places the adornment above the content
  * of the adorned CCNode.
  */
-@property(nonatomic, assign) int zOrder;
+@property(nonatomic, assign) NSInteger zOrder;
 
 /**
  * Most adornments will invoke a CCActionInterval when activated and deactivated in

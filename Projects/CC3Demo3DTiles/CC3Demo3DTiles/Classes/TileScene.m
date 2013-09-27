@@ -33,6 +33,7 @@
 #import "CC3Camera.h"
 #import "CC3Light.h"
 #import "CC3Actions.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CCTouchDispatcher.h"
 #import "CGPointExtension.h"
 
@@ -47,7 +48,7 @@
 @implementation TileScene
 
 -(void) dealloc {
-	mainNode = nil;			// retained as child
+	_mainNode = nil;			// retained as child
 	[super dealloc];
 }
 
@@ -56,13 +57,12 @@
 
 	// Improve performance by avoiding clearing the depth buffer when transitioning
 	// between 2D content and 3D content.
-	self.shouldClearDepthBufferBefore2D = NO;
-	self.shouldClearDepthBufferBefore3D = NO;
+	self.shouldClearDepthBuffer = NO;
 
 	// There are no translucent nodes that need to be reordered.
 	self.drawingSequencer = [CC3NodeArraySequencer sequencerWithEvaluator: [CC3LocalContentNodeAcceptor evaluator]];
 	self.drawingSequencer.allowSequenceUpdates = NO;
-							 
+
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
 	cam.location = cc3v( 0.0, 0.0, 1.0 );
@@ -87,28 +87,24 @@
 	self.ambientLight = kCCC4FBlackTransparent;
 }
 
--(CC3Node*) mainNode { return mainNode; }
+-(CC3Node*) mainNode { return _mainNode; }
 
 -(void) setMainNode: (CC3Node*) aNode {
-	[mainNode remove];		// remove any existing as child node
-	mainNode = aNode;
+	[_mainNode remove];		// remove any existing as child node
+	_mainNode = aNode;
 	[self addChild: aNode];
 }
 
 /** When the scene opens up, move the camera to frame the main node of the scene. */
--(void) onOpen { [self.activeCamera moveToShowAllOf: mainNode withPadding: 0.1]; }
+-(void) onOpen { [self.activeCamera moveToShowAllOf: _mainNode withPadding: 0.1]; }
 
 
 #pragma mark Touch events
 
 /**
  * Handle touch events in the scene:
- *   - Touch-down events are used to select nodes. Forward these to the touched node picker.
- *   - Touch-move events are used to generate a swipe gesture to rotate the die cube
- *   - Touch-up events are used to mark the die cube as freewheeling if the touch-up event
- *     occurred while the finger is moving.
- * This is a poor UI. We really should be using the touch-stationary event to mark definitively
- * whether the finger stopped before being lifted. But we're just working with what we have handy.
+ *   - Touch-move events are used to rotate the main node based on how the finger is moving.
+ *   - Touch-up events are used to give visual feedback via a tint-up-and-down.
  */
 -(void) touchEvent: (uint) touchType at: (CGPoint) touchPoint {
 	switch (touchType) {
@@ -118,14 +114,14 @@
 			[self rotateMainNodeFromSwipeAt: touchPoint];
 			break;
 		case kCCTouchEnded:
-			[self pickNodeFromTouchEvent: touchType at: touchPoint];
+			[self flashMainNodeAt: touchPoint];
 			break;
 		default:
 			break;
 	}
 	
 	// For all event types, remember where the touchpoint was, for subsequent events.
-	lastTouchEventPoint = touchPoint;
+	_lastTouchEventPoint = touchPoint;
 }
 
 
@@ -133,25 +129,22 @@
 #define kSwipeScale 0.6
 
 /**
- * Rotates the die cube, by determining the direction of each touch move event.
+ * Rotates the main node, by determining the direction of each touch move event.
  *
  * The touch-move swipe is measured in 2D screen coordinates, which are mapped to
  * 3D coordinates by recognizing that the screen's X-coordinate maps to the camera's
  * rightDirection vector, and the screen's Y-coordinates maps to the camera's upDirection.
  *
- * The cube rotates around an axis perpendicular to the swipe. The rotation angle is
+ * The node rotates around an axis perpendicular to the swipe. The rotation angle is
  * determined by the length of the touch-move swipe.
- *
- * To allow freewheeling after the finger is lifted, we set the spin speed and spin axis
- * in the die cube. We indicate for now that the cube is not freewheeling.
  */
 -(void) rotateMainNodeFromSwipeAt: (CGPoint) touchPoint {
 	
 	CC3Camera* cam = self.activeCamera;
 	
-	// Get the direction and length of the movement since the last touch move event, in
-	// 2D screen coordinates. The 2D rotation axis is perpendicular to this movement.
-	CGPoint swipe2d = ccpSub(touchPoint, lastTouchEventPoint);
+	// Get the direction and length of the movement since the last touch move event,
+	// in 2D screen coordinates. The 2D rotation axis is perpendicular to this movement.
+	CGPoint swipe2d = ccpSub(touchPoint, _lastTouchEventPoint);
 	CGPoint axis2d = ccpPerp(swipe2d);
 	
 	// Project the 2D axis into a 3D axis by mapping the 2D X & Y screen coords
@@ -160,40 +153,29 @@
 								  CC3VectorScaleUniform(cam.upDirection, axis2d.y));
 	GLfloat angle = ccpLength(swipe2d) * kSwipeScale;
 	
-	// Rotate the cube under direct finger control, by directly rotating by the angle
-	// and axis determined by the swipe. If the die cube is just to be directly controlled
-	// by finger movement, and is not to freewheel, this is all we have to do.
-	[mainNode rotateByAngle: angle aroundAxis: axis];
+	// Rotate the node under direct finger control, by directly rotating by the angle
+	// and axis determined by the swipe.
+	[_mainNode rotateByAngle: angle aroundAxis: axis];
 }
 
-// Tint the node to cyan and back again to provide user feedback to touch
--(void) nodeSelected: (CC3Node*) aNode byTouchEvent: (uint) touchType at: (CGPoint) touchPoint {
-	LogInfo(@"You selected %@ at %@, or %@ in 2D.", aNode,
-				 NSStringFromCC3Vector(aNode ? aNode.globalLocation : kCC3VectorZero),
-				 NSStringFromCC3Vector(aNode ? [activeCamera projectNode: aNode] : kCC3VectorZero));
+/** For dramatic effect, tint the node up and down when the user lets go. */
+-(void) flashMainNodeAt: (CGPoint) touchPoint {
 	CCActionInterval* tintUp = [CC3TintEmissionTo actionWithDuration: 0.2f colorTo: kCCC4FCyan];
 	CCActionInterval* tintDown = [CC3TintEmissionTo actionWithDuration: 0.5f colorTo: kCCC4FBlack];
-	[aNode runAction: [CCSequence actionOne: tintUp two: tintDown]];
+	[_mainNode runAction: [CCSequence actionOne: tintUp two: tintDown]];
 }
 
 @end
 
 
-/**
- * Demonstrates the initialization and disposal of application-specific userData by adding
- * custom extension categories to subclasses of CC3Identifiable (nodes, materials, meshes,
- * textures, etc).
- */
 @implementation CC3Node (TilesUserData)
 
-// Allocate memory to hold the user data, which in this case is a simple boolean.
--(void) initUserData {
-	userData = calloc(1, sizeof(BOOL));
-}
+-(BOOL) shouldColorTile { return self.userData ? *((BOOL*)self.userData) : NO; }
 
-// Free the memory occupied by the userData.
--(void) releaseUserData {
-	if (userData) { free(userData); }
+-(void) setShouldColorTile: (BOOL) shouldColor {
+	// If needed, allocate space for the user data and assign it to the userData property.
+	if ( !self.userData ) self.userData = malloc(sizeof(BOOL));
+	*((BOOL*)self.userData) = shouldColor;
 }
 
 // Copy the shouldColorTile property from the original instance.
@@ -201,10 +183,6 @@
 -(void) copyUserDataFrom:(CC3Node *)another {
 	self.shouldColorTile = another.shouldColorTile;
 }
-
--(BOOL) shouldColorTile { return *((BOOL*)userData); }
-
--(void) setShouldColorTile: (BOOL) shouldColor { *((BOOL*)userData) = shouldColor; }
 
 @end
 

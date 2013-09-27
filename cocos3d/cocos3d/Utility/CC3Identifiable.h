@@ -72,57 +72,6 @@
 @property(nonatomic, retain) NSString* name;
 
 /**
- * Application-specific data associated with this object.
- *
- * You can use this property to add any data you want to an instance of CC3Identifiable or its
- * concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.). Since this is a generic
- * pointer, you can store any type of data, such as an object, structure, primitive, or array.
- *
- * The data in this property is retained by this instance, and will automatically be freed
- * by the releaseUserData method when this instance is deallocated. If you have instances
- * that share access to common user data, you should use the sharedUserData property instead,
- * which does not automatically free the shared data on deallocation.
- *
- * To assist in managing this data, the methods initUserData and releaseUserData are invoked
- * automatically during the initialization and deallocation of each instance of this class.
- * You can override these methods by subclassing, or by adding extention categories to the
- * concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.),
- * to create, retain and dispose of the data.
- *
- * When copying instances of CC3Identifiable and its subclasses, the copyUserDataFrom: method
- * is invoked in the new copy so that it can copy the data in the original instance to the new
- * instance copy. In this abstract class, the copyUserDataFrom: method does nothing, but, if
- * appropriate, you can override the method by subclassing or by adding extention categories
- * to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture,
- * etc.), to copy whatever data you have in the userData property.
- */
-@property(nonatomic, assign) GLvoid* userData;
-
-/**
- * Application-specific data associated with this object, that is shared between multiple
- * instances and objects.
- *
- * This property is similar to the userData property (and makes use of the userData property),
- * but differs in that the user data is not automatically freed when this instance is deallocated.
- * This makes it suitable to reference user data that is shared between many objects.
- *
- * When this property is set to point to user data, the user data is wrapped in a container
- * pointer, which is set into the userData property. When this instance is deallocated, the
- * container pointer is automatically freed, but the underlying shared data is not. 
- *
- * When retrieving the user data via this property, the container pointer is automatically
- * dereferenced, and this property returns a pointer to the the actual underlying user data.
- *
- * When copying instances of CC3Identifiable and its subclasses, the copyUserDataFrom: method
- * is invoked in the new copy so that it can copy the data in the original instance to the new
- * instance copy. In this abstract class, the copyUserDataFrom: method does nothing, but, if
- * appropriate, you can override the method by subclassing or by adding extention categories
- * to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture,
- * etc.), to copy whatever data you have in the userData property.
- */
-@property(nonatomic, assign) GLvoid* sharedUserData;
-
-/**
  * If this instance does not already have a name, it is derived from the name of the specified
  * other CC3Identifiable, if it has one. If this instance has a name already, or if the other
  * CC3Identifiable does not have a name, the name of this instance is not changed.
@@ -164,6 +113,103 @@
 @property(nonatomic, readonly) NSString* nameSuffix;
 
 
+#pragma mark User data
+
+/**
+ * Application-specific data associated with this object.
+ *
+ * You can use this property to add any data you want to an instance of CC3Identifiable or its
+ * concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.). Since this is a generic
+ * pointer, you can store any type of data, such as an object, structure, primitive, or array.
+ *
+ * The data in this property is retained by this instance, and will automatically be freed
+ * by the releaseUserData method when this instance is deallocated. If you have instances
+ * that share access to common user data, you should use the sharedUserData property instead,
+ * which does not automatically free the shared data on deallocation.
+ *
+ * To assist in managing this data, the methods initUserData and releaseUserData are invoked
+ * automatically during the initialization and deallocation of each instance of this class.
+ * You can override these methods by subclassing, or by adding extention categories to the
+ * concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.),
+ * to create, retain and dispose of the data.
+ *
+ * When copying instances of CC3Identifiable and its subclasses, the copyUserDataFrom: method
+ * is invoked in the new copy so that it can copy the data in the original instance to the new
+ * instance copy. In this abstract class, the copyUserDataFrom: method does nothing, but, if
+ * appropriate, you can override the method by subclassing or by adding extention categories
+ * to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), to copy whatever data you have in the userData property.
+ */
+@property(nonatomic, assign) GLvoid* userData;
+
+/**
+ * Application-specific data associated with this object, that is shared between multiple
+ * instances and objects.
+ *
+ * This property is similar to the userData property (and makes use of the userData property),
+ * but differs in that the user data is not automatically freed when this instance is deallocated.
+ * This makes it suitable to reference user data that is shared between many objects.
+ *
+ * When this property is set to point to user data, the user data is wrapped in a container
+ * pointer, which is set into the userData property. When this instance is deallocated, the
+ * container pointer is automatically freed, but the underlying shared data is not.
+ *
+ * When retrieving the user data via this property, the container pointer is automatically
+ * dereferenced, and this property returns a pointer to the the actual underlying user data.
+ *
+ * When copying instances of CC3Identifiable and its subclasses, the copyUserDataFrom: method
+ * is invoked in the new copy so that it can copy the data in the original instance to the new
+ * instance copy. In this abstract class, the copyUserDataFrom: method does nothing, but, if
+ * appropriate, you can override the method by subclassing or by adding extention categories
+ * to the concrete subclasses of CC3Identifiable, (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), to copy whatever data you have in the userData property.
+ */
+@property(nonatomic, assign) GLvoid* sharedUserData;
+
+/**
+ * Invoked automatically from the init* family of methods to initialize the userData property.
+ *
+ * This implementation simply sets the userData property to NULL. You can override this method
+ * in a subclass or by creating extension categories for the concrete subclasses, (CC3Node,
+ * CC3Mesh, CC3Material, CC3Texture, etc.), if the userData can be initialized and retained
+ * in a self-contained manner.
+ *
+ * Alternately, you can leave this method unimplemented, and add accessor methods (eg- property
+ * methods) that work with the user data content that you define, and have the setter accessor
+ * allocate the appropriate content, and then use the userData property to set a pointer to
+ * that content in the userData property.
+ */
+-(void) initUserData;
+
+/**
+ * Invoked automatically from the dealloc method to release or dispose of the data referenced
+ * in the userData property.
+ *
+ * This implementation frees the memory pointed to by the userData property, and sets the
+ * property to NULL. You can override this method in a subclass or by creating extension
+ * categories for the concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.),
+ * if releasing the user data requires more sophisticated behaviour.
+ */
+-(void) releaseUserData;
+
+/**
+ * Invoked automatically when this instance has been created as a copy of the specified instance.
+ *
+ * In this abstract class, this method does nothing. You can override this method by creating
+ * extension categories for the concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture,
+ * etc.), to copy the userData referenced in the userData property of the specified
+ * instance to the userData property of this instance.
+ *
+ * When implementing this method, you must take into consideration whether the data is shared
+ * between the original instance and this instance. If the data is to be shared, use the
+ * sharedUserData property to set the user data into this instance. If the user data is not
+ * to be shared, and a fresh copy of the user data is to be assigned to this instance, use
+ * the userData property to set the user data, so that it will automatically be freed when
+ * this instance is deallocated.
+ */
+-(void) copyUserDataFrom: (CC3Identifiable*) another;
+
+
 #pragma mark Allocation and initialization
 
 /**
@@ -186,38 +232,6 @@
  * When overriding initialization, subclasses typically need only override this initializer.
  */
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName;
-
-/**
- * Invoked automatically from the init* family of methods to initialize the userData property.
- *
- * This implementation simply sets the userData property to NULL. You can override this method
- * in a subclass or by creating extension categories for the concrete subclasses, (CC3Node,
- * CC3Mesh, CC3Material, CC3Texture, etc.), if the userData can be initialized and retained in
- * a self-contained manner.
- */
--(void) initUserData;
-
-/**
- * Invoked automatically from the dealloc method to release or dispose of the data referenced
- * in the userData property.
- *
- * This implementation frees the memory pointed to by the userData property if it is not NULL.
- * You can override this method in a subclass or by creating extension categories for the
- * concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture, etc.), if releasing the
- * user data requires more sophisticated behaviour.
- */
--(void) releaseUserData;
-
-/**
- * Invoked automatically when this instance has been created as a copy of the specified
- * instance.
- *
- * In this abstract class, this method does nothing. You can override this method by creating
- * extension categories for the concrete subclasses (CC3Node, CC3Mesh, CC3Material, CC3Texture,
- * etc.), to copy the userData referenced in the userData property of the specified
- * instance to the userData property of this instance.
- */
--(void) copyUserDataFrom: (CC3Identifiable*) another;
 
 /**
  * Returns a newly allocated (retained) copy of this instance. The new copy will have

@@ -102,7 +102,7 @@
 #define kDieCubeName					@"DieCube"
 #define kDieCubePODName					@"Cube"
 #define kTexturedTeapotName				@"Teapot"
-#define kRainbowTeapotName				@"Satellite"
+#define kRainbowTeapotName				@"RainbowTeapot"
 #define kTeapotHolderName				@"TeapotHolder"
 #define kTeapotRedName					@"TeapotRed"
 #define kTeapotGreenName				@"TeapotGreen"

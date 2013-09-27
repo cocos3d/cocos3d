@@ -5,6 +5,9 @@
       location = "group:Projects/CC3DemoMashUp/CC3DemoMashUp-iOS.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:Projects/CC3Demo3DTiles/CC3Demo3DTiles-iOS.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Projects/cocos3d-library/cocos3d-library-iOS.xcodeproj">
    </FileRef>
    <FileRef

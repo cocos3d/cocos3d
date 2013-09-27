@@ -1030,7 +1030,13 @@
  */
 -(void) copyChildrenFrom: (CC3Node*) another {
 	CCArray* otherKids = another.children;
-	for (CC3Node* n in otherKids) if (n.shouldIncludeInDeepCopy) [self addChild: [n autoreleasedCopy]];
+	for (CC3Node* otherKid in otherKids) {
+		if (otherKid.shouldIncludeInDeepCopy) {
+			CC3Node* myKid = [otherKid copy];
+			[self addChild: myKid];
+			[myKid release];
+		}
+	}
 }
 
 // Implementations to keep compiler happy so this method can be included in interface for documentation.

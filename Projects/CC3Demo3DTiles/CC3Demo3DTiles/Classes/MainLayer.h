@@ -70,13 +70,16 @@
  * between 2D and 3D. Except in the most complicated situations, this should be
  * suitable for most apps.
  */
-@interface MainLayer : CCLayer {
-	CCMenuItem* increaseNodesMI;
-	CCMenuItem* decreaseNodesMI;
-	CCLabelTTF *label;
-	NSMutableArray* tiles;
-	NSMutableArray* templates;
-	uint tilesPerSide;
+@interface MainLayer : CC3ControllableLayer {
+	CCMenuItem* _increaseNodesMI;
+	CCMenuItem* _decreaseNodesMI;
+	CCLabelTTF* _label;
+	NSMutableArray* _tiles;
+	NSMutableArray* _templates;
+	CC3MeshNode* _backdropTemplate;
+	GLuint _tilesPerSide;
+	GLuint _glideTrack;
+	GLuint _flapTrack;
 }
 
 @end

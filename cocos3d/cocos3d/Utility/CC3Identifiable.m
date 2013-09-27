@@ -132,7 +132,10 @@ static GLint instanceCount = 0;
 
 -(void) initUserData { _userData = NULL; }
 
--(void) releaseUserData { if (_userData) free(_userData); }
+-(void) releaseUserData {
+	free(_userData);
+	_userData = NULL;
+}
 
 -(void) copyUserDataFrom: (CC3Identifiable*) another {}
 

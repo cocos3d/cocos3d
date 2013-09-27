@@ -104,29 +104,6 @@
 	[self alignTextureUnits];
 }
 
-/** If a material does not yet exist, create it by invoking the makeMaterial method. */
--(void) ensureMaterial { if ( !_material ) [self makeMaterial]; }
-
-/**
- * Template method to create a material for this mesh node.
- *
- * The new material's initial diffuse and ambient colors are modulated by the value of the
- * pureColor property to propagate any color changes already made into the material. The
- * initial value of pureColor is pure white, so if it has not been changed, the ambient and
- * diffuse colors of the material will take on their default initial values.
- *
- * This method is invoked automatically by the ensureMaterial method if a material is needed,
- * but has not yet been established.
- *
- * Subclasses may override to provide a different material.
- */
--(void) makeMaterial {
-	CC3Material* mat = [CC3Material material];
-	mat.ambientColor = CCC4FModulate(mat.ambientColor, self.pureColor);
-	mat.diffuseColor = CCC4FModulate(mat.diffuseColor, self.pureColor);
-	self.material = mat;
-}
-
 // Support for deprecated CC3MeshModel class
 -(CC3Mesh*) meshModel { return self.mesh; }
 
@@ -222,7 +199,7 @@
 }
 
 
-#pragma mark Material properties
+#pragma mark Materials
 
 -(BOOL) shouldUseLighting { return _material ? _material.shouldUseLighting : NO; }
 
@@ -232,47 +209,31 @@
 	[super setShouldUseLighting: useLighting];	// pass along to any children
 }
 
--(ccColor4F) ambientColor {
-	[self ensureMaterial];
-	return _material.ambientColor;
-}
+-(ccColor4F) ambientColor { return self.ensureMaterial.ambientColor; }
 
 -(void) setAmbientColor:(ccColor4F) aColor {
-	[self ensureMaterial];
-	_material.ambientColor = aColor;
+	self.ensureMaterial.ambientColor = aColor;
 	[super setAmbientColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) diffuseColor {
-	[self ensureMaterial];
-	return _material.diffuseColor;
-}
+-(ccColor4F) diffuseColor { return self.ensureMaterial.diffuseColor; }
 
 -(void) setDiffuseColor:(ccColor4F) aColor {
-	[self ensureMaterial];
-	_material.diffuseColor = aColor;
+	self.ensureMaterial.diffuseColor = aColor;
 	[super setDiffuseColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) specularColor {
-	[self ensureMaterial];
-	return _material.specularColor;
-}
+-(ccColor4F) specularColor { return self.ensureMaterial.specularColor; }
 
 -(void) setSpecularColor:(ccColor4F) aColor {
-	[self ensureMaterial];
-	_material.specularColor = aColor;
+	self.ensureMaterial.specularColor = aColor;
 	[super setSpecularColor: aColor];	// pass along to any children
 }
 
--(ccColor4F) emissionColor {
-	[self ensureMaterial];
-	return _material.emissionColor;
-}
+-(ccColor4F) emissionColor { return self.ensureMaterial.emissionColor; }
 
 -(void) setEmissionColor:(ccColor4F) aColor {
-	[self ensureMaterial];
-	_material.emissionColor = aColor;
+	self.ensureMaterial.emissionColor = aColor;
 	[super setEmissionColor: aColor];	// pass along to any children
 }
 
@@ -283,45 +244,44 @@
 }
 
 -(void) setGlobalLightPosition: (CC3Vector4) aPosition {
-	[self ensureMaterial];
 	CC3Vector4 localLtPos = [self.globalTransformMatrixInverted transformHomogeneousVector: aPosition];
-	_material.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
+	self.ensureMaterial.lightDirection = CC3VectorFromTruncatedCC3Vector4(localLtPos);
 	[super setGlobalLightPosition: aPosition];
 }
 
--(CC3ShaderProgramContext*) shaderContext {
-	[self ensureMaterial];
-	return _material.shaderContext;
-}
+-(CC3ShaderProgramContext*) shaderContext { return self.ensureMaterial.shaderContext; }
 
 -(void) setShaderContext: (CC3ShaderProgramContext*) shaderContext {
-	[self ensureMaterial];
-	_material.shaderContext = shaderContext;
+	self.ensureMaterial.shaderContext = shaderContext;
 	super.shaderContext = shaderContext;	// pass along to any children
 }
 
--(CC3ShaderProgram*) shaderProgram {
-	[self ensureMaterial];
-	return _material.shaderProgram;
-}
+-(CC3ShaderProgram*) shaderProgram { return self.ensureMaterial.shaderProgram; }
 
 -(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
-	[self ensureMaterial];
-	_material.shaderProgram = shaderProgram;
+	self.ensureMaterial.shaderProgram = shaderProgram;
 	super.shaderProgram = shaderProgram;	// pass along to any children
+}
+
+-(CC3Material*) ensureMaterial {
+	if ( !_material ) self.material = [self makeMaterial];
+	return _material;
+}
+
+-(CC3Material*) makeMaterial {
+	CC3Material* mat = [CC3Material material];
+	mat.ambientColor = CCC4FModulate(mat.ambientColor, self.pureColor);
+	mat.diffuseColor = CCC4FModulate(mat.diffuseColor, self.pureColor);
+	return mat;
 }
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support
 
--(ccColor3B) color {
-	[self ensureMaterial];
-	return _material.color;
-}
+-(ccColor3B) color { return self.ensureMaterial.color; }
 
 -(void) setColor: (ccColor3B) color {
-	[self ensureMaterial];
-	_material.color = color;
+	self.ensureMaterial.color = color;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.color = color;	// for meshes with colored vertices
 
 	_pureColor.r = CCColorFloatFromByte(color.r);
@@ -331,64 +291,44 @@
 	[super setColor: color];	// pass along to any children
 }
 
--(GLubyte) opacity {
-	[self ensureMaterial];
-	return _material.opacity;
-}
+-(GLubyte) opacity { return self.ensureMaterial.opacity; }
 
 -(void) setOpacity: (GLubyte) opacity {
-	[self ensureMaterial];
-	_material.opacity = opacity;
+	self.ensureMaterial.opacity = opacity;
 	if (_shouldApplyOpacityAndColorToMeshContent) _mesh.opacity = opacity;	// for meshes with colored vertices
 	_pureColor.a = CCColorFloatFromByte(opacity);
 
 	[super setOpacity: opacity];	// pass along to any children
 }
 
--(BOOL) shouldBlendAtFullOpacity {
-	[self ensureMaterial];
-	return _material.shouldBlendAtFullOpacity;
-}
+-(BOOL) shouldBlendAtFullOpacity { return self.ensureMaterial.shouldBlendAtFullOpacity; }
 
 -(void) setShouldBlendAtFullOpacity: (BOOL) shouldBlend {
-	[self ensureMaterial];
-	_material.shouldBlendAtFullOpacity = shouldBlend;
+	self.ensureMaterial.shouldBlendAtFullOpacity = shouldBlend;
 	
 	[super setShouldBlendAtFullOpacity: shouldBlend];	// pass along to any children
 }
 
--(BOOL) isOpaque {
-	[self ensureMaterial];
-	return _material.isOpaque;
-}
+-(BOOL) isOpaque { return self.ensureMaterial.isOpaque; }
 
 -(void) setIsOpaque: (BOOL) opaque {
-	[self ensureMaterial];
-	_material.isOpaque = opaque;
+	self.ensureMaterial.isOpaque = opaque;
 	if (opaque) _pureColor.a = 1.0f;
 	
 	[super setIsOpaque: opaque];	// pass along to any children
 }
 
--(ccBlendFunc) blendFunc {
-	[self ensureMaterial];
-	return _material.blendFunc;
-}
+-(ccBlendFunc) blendFunc { return self.ensureMaterial.blendFunc; }
 
 -(void) setBlendFunc: (ccBlendFunc) aBlendFunc {
-	[self ensureMaterial];
-	_material.blendFunc = aBlendFunc;
+	self.ensureMaterial.blendFunc = aBlendFunc;
 	[super setBlendFunc: aBlendFunc];
 }
 
--(BOOL) shouldDrawLowAlpha {
-	[self ensureMaterial];
-	return _material.shouldDrawLowAlpha;
-}
+-(BOOL) shouldDrawLowAlpha { return self.ensureMaterial.shouldDrawLowAlpha; }
 
 -(void) setShouldDrawLowAlpha: (BOOL) shouldDraw {
-	[self ensureMaterial];
-	_material.shouldDrawLowAlpha = shouldDraw;
+	self.ensureMaterial.shouldDrawLowAlpha = shouldDraw;
 }
 
 -(BOOL) shouldApplyOpacityAndColorToMeshContent { return _shouldApplyOpacityAndColorToMeshContent; }
@@ -435,8 +375,7 @@
 }
 
 -(void) addTexture: (CC3Texture*) aTexture {
-	[self ensureMaterial];
-	[_material addTexture: aTexture];
+	[self.ensureMaterial addTexture: aTexture];
 	GLuint texCount = self.textureCount;
 	if (texCount > 0) [self alignTextureUnit: (self.textureCount - 1)];
 }
@@ -448,8 +387,7 @@
 }
 
 -(void) setTexture: (CC3Texture*) aTexture forTextureUnit: (GLuint) texUnit {
-	[self ensureMaterial];
-	[_material setTexture: aTexture forTextureUnit: texUnit];
+	[self.ensureMaterial setTexture: aTexture forTextureUnit: texUnit];
 	[self alignTextureUnit: texUnit];
 }
 
@@ -559,7 +497,9 @@
 	[super populateFrom: another];
 	
 	self.mesh = another.mesh;								// retained but not copied
-	self.material = [another.material autoreleasedCopy];	// retained
+	CC3Material* matCopy = [another.material copy];
+	self.material = matCopy;								// retained
+	[matCopy release];
 	
 	_pureColor = another.pureColor;
 	_shouldUseSmoothShading = another.shouldUseSmoothShading;

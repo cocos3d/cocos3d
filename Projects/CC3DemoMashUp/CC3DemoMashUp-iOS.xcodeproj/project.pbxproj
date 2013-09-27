@@ -327,14 +327,14 @@
 			files = (
 				A92E872C17A6E5F8003B859E /* libcocos3d-library-iOS.a in Frameworks */,
 				A92E837617A6CB94003B859E /* libcocos2d-library-iOS.a in Frameworks */,
+				DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */,
+				506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */,
 				DCCBF1B70F6022AE0040855A /* CoreGraphics.framework in Frameworks */,
 				DCCBF1B90F6022AE0040855A /* Foundation.framework in Frameworks */,
+				DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */,
 				DCCBF1BB0F6022AE0040855A /* OpenGLES.framework in Frameworks */,
 				DCCBF1BD0F6022AE0040855A /* QuartzCore.framework in Frameworks */,
 				DCCBF1BF0F6022AE0040855A /* UIKit.framework in Frameworks */,
-				DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */,
-				DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */,
-				506EDBA5102F4C9F00A389B3 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,9 +356,9 @@
 				A92DA78D1427B5980051AFFA /* Resources */,
 				A968819317A738D8007FA5F0 /* GLSL */,
 				A96E0FF8170DCFB00044CA2A /* iOS Support */,
-				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				A92E871E17A6E4D9003B859E /* cocos3d-library-iOS.xcodeproj */,
 				A92E836E17A6CB18003B859E /* cocos2d-library-iOS.xcodeproj */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = CustomTemplate;
@@ -896,7 +896,6 @@
 					"LOGGING_ENABLED=1",
 					"LOGGING_LEVEL_TRACE=0",
 					"LOGGING_REZLOAD=1",
-					"GL_ERROR_TRACING_ENABLED=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;

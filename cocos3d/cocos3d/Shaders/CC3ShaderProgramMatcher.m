@@ -49,13 +49,10 @@
 -(Class) programClass { return [CC3ShaderProgram class]; }
 
 -(CC3ShaderProgram*) programForMeshNode: (CC3MeshNode*) aMeshNode {
-	CC3Material* mat = aMeshNode.material;
-	if ( !mat ) return self.pureColorProgram;
-	
-	CC3ShaderProgram* shaderProgram = mat.shaderProgram;
+	CC3ShaderProgram* shaderProgram = aMeshNode.shaderProgram;
 	if ( !shaderProgram ) {
 		shaderProgram = [self selectShaderProgramForMeshNode: aMeshNode];
-		mat.shaderProgram = shaderProgram;
+		aMeshNode.ensureMaterial.shaderProgram = shaderProgram;	// Set in material so it won't propagate to descendants
 		LogRez(@"Shader program %@ automatically selected for %@", shaderProgram, aMeshNode);
 	}
 	return shaderProgram;

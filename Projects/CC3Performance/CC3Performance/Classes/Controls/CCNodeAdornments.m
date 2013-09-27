@@ -30,20 +30,26 @@
  */
 
 #import "CCNodeAdornments.h"
+#import "CC3Logging.h"
+#import "CC3Environment.h"
 
 
 #pragma mark CCNodeAdornmentBase implementation
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_ZORDER zOrder_
+#else
+#	define CC2_ZORDER _zOrder
+#endif
 
 @implementation CCNodeAdornmentBase
 
 @synthesize actionDuration;
 
--(int) zOrder {
-	return [super zOrder];
-}
+-(NSInteger) zOrder { return [super zOrder]; }
 
--(void) setZOrder: (int) z {
-	zOrder_ = z;
+-(void) setZOrder: (NSInteger) z {
+	CC2_ZORDER = z;
 }
 
 // Abstract implementation does nothing.
@@ -52,18 +58,14 @@
 // Abstract implementation does nothing.
 -(void) deactivate {}
 
--(id) init {
-	return [self initWithActionDuration: 0.0];
-}
+-(id) init { return [self initWithActionDuration: 0.0]; }
 
-+(id) adornment {
-	return [[[self alloc] init] autorelease];
-}
++(id) adornment { return [[[self alloc] init] autorelease]; }
 
 -(id) initWithActionDuration: (ccTime) aDuration {
 	if( (self = [super init]) ) {
 		actionDuration = aDuration;
-		zOrder_ = kAdornmentOverZOrder;
+		self.zOrder = kAdornmentOverZOrder;
 	}
 	return self;
 }
@@ -79,7 +81,7 @@
 
 // A (hopefully) unique tag that identifies the currently activated fade-in
 // or fade-out action. This tag is used to cancel the action if needed. 
-#define kFadeActionTag 0xfade0001
+#define kFadeActionTag		(NSInteger)0xfade0001
 
 
 @implementation CCNodeAdornmentOverlayFader

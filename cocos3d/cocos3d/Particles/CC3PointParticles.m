@@ -44,7 +44,6 @@
 @end
 
 @interface CC3MeshNode (TemplateMethods)
--(void) ensureMaterial;
 -(void) configureDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 -(void) cleanupDrawingParameters: (CC3NodeDrawingVisitor*) visitor;
 @end
@@ -163,12 +162,12 @@
 }
 
 /** Overridden to configure for blending. */
--(void) makeMaterial {
+-(CC3Material*) makeMaterial {
 	CC3Material* mat = [CC3Material material];
 	mat.diffuseColor = kCCC4FWhite;
 	mat.sourceBlend = GL_SRC_ALPHA;
 	mat.destinationBlend = GL_ONE_MINUS_SRC_ALPHA;
-	self.material = mat;
+	return mat;
 }
 
 // Implementation of deprecated method, for other deprecated methods to invoke

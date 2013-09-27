@@ -176,7 +176,7 @@
 @property(nonatomic, readonly) CC3NormalScaling effectiveNormalScalingMethod;
 
 
-#pragma mark Material coloring
+#pragma mark Materials
 
 /**
  * If this value is set to YES, current lighting conditions will be taken into consideration
@@ -290,6 +290,30 @@
  * propagate to any descendant nodes.
  */
 -(void) clearShaderProgram;
+
+/** 
+ * If a material does not yet exist, this method invokes the makeMaterial method to create
+ * a suitable material, and sets it into the material property. Does nothing if this mesh
+ * node already has a material. Returns the material (existing or new).
+ *
+ * This method is invoked whenever a property is set that would affect the material.
+ * Usually, you will never need to invoke this method.
+ */
+-(CC3Material*) ensureMaterial;
+
+/**
+ * This template method creates a suitable material for this mesh node.
+ *
+ * The new material's initial diffuse and ambient colors are modulated by the value of the
+ * pureColor property to propagate any color changes already made into the material. The
+ * initial value of pureColor is pure white, so if it has not been changed, the ambient and
+ * diffuse colors of the material will take on their default initial values.
+ * Subclasses may override to provide a different material.
+ *
+ * This method is invoked automatically by the ensureMaterial method if a material is needed,
+ * but has not yet been established. Usually, you will never need to invoke this method.
+ */
+-(CC3Material*) makeMaterial;
 
 
 #pragma mark CCRGBAProtocol and CCBlendProtocol support

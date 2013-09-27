@@ -53,24 +53,21 @@
 
  -(void) setCc3Scene: (CC3Scene*) aScene {
 	 if (aScene != _cc3Scene) {
-		 [self closeCC3Scene];					// Close the old scene.
+		 [self closeCC3Scene];						// Close the old scene.
 		 [_cc3Scene wasRemoved];					// Stop actions in old scene (if shouldStopActionsWhenRemoved set).
-		 _cc3Scene.cc3Layer = nil;				// Detach this layer from old scene.
-		 [_cc3Scene autorelease];				// Release old scene if it's not assigned to another layer first
+		 _cc3Scene.cc3Layer = nil;					// Detach this layer from old scene.
+		 [_cc3Scene autorelease];					// Release old scene if it's not assigned to another layer first
 
-		 _cc3Scene = [aScene retain];			// Retain the new scene.
-		 _cc3Scene.cc3Layer = self;				// Point the scene back here
+		 _cc3Scene = [aScene retain];				// Retain the new scene.
+		 _cc3Scene.cc3Layer = self;					// Point the scene back here
 		 if (self.isRunning) [self openCC3Scene];	// If already running, open the new scene right away
 	 }
 }
-
--(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 
 #pragma mark Allocation and initialization
 
 -(id) initWithController: (CC3ViewController*) controller {
-	CC3Assert(controller, @"%@ requires a controller for rendering a 3D scene.", self);
 	if( (self = [super initWithController: controller]) ) {
 		_shouldAlwaysUpdateViewport = NO;
 		self.mousePriority = 0;

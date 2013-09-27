@@ -35,8 +35,9 @@
 #import "TileLayer.h"
 #import "TileScene.h"
 #import "CC3PODResourceNode.h"
-#import "CC3ParametricMeshNodes.h"
+#import "CC3UtilityMeshNodes.h"
 #import "CC3IOSExtensions.h"
+#import "CC3Actions.h"
 
 // Model names
 #define kBoxName				@"Box"
@@ -55,37 +56,25 @@
 #define kMinTileSideLen 8
 
 
-@interface MainLayer (TemplateMethods)
--(void) initializeControls;
--(void) addLabel;
--(void) addButtons;
--(CCMenuItem*) addButtonWithImageFile: (NSString*) imageFile withSelector: (SEL) callbackSelector;
--(void) positionControls;
--(void) addTiles;
--(void) addTileIn: (CGRect) bounds;
--(void) removeTiles;
--(void) initializeTemplates;
--(CC3Scene*) makeScene;
--(ccColor3B) pickNodeColor;
-@end
-
 // MainLayer implementation
 @implementation MainLayer
 
 - (void) dealloc {
-	[tiles release];
-	[templates release];
-	increaseNodesMI = nil;				// retained as child
-	decreaseNodesMI = nil;				// retained as child
+	[_tiles release];
+	[_templates release];
+	[_backdropTemplate release];
+	_increaseNodesMI = nil;				// retained as child
+	_decreaseNodesMI = nil;				// retained as child
 
 	[super dealloc];
 }
 
--(id) init {
-	if( (self=[super init])) {
-		tiles = [[NSMutableArray array] retain];
-		templates = [[NSMutableArray array] retain];
-		tilesPerSide = 1;
+-(id) initWithController: (CC3ViewController*) controller {
+	if( (self = [super initWithController: controller]) ) {
+		_tiles = [[NSMutableArray array] retain];
+		_templates = [[NSMutableArray array] retain];
+		_backdropTemplate = nil;
+		_tilesPerSide = 1;
 		[self initializeTemplates];
 		[self initializeControls];
 		[self addTiles];
@@ -111,22 +100,22 @@
 }
 
 -(void) addLabel {
-	label = [CCLabelTTF labelWithString:@"Tiles per side: 88" fontName:@"Arial" fontSize: 22];
-	label.anchorPoint = ccp(1.0, 0.0);		// Alight bottom-right
-	[self addChild: label z: 10];			// Draw on top
+	_label = [CCLabelTTF labelWithString:@"Tiles: 888" fontName:@"Arial" fontSize: 22];
+	_label.anchorPoint = ccp(1.0, 0.0);		// Alight bottom-right
+	[self addChild: _label z: 10];			// Draw on top
 }
 
 /** Creates buttons (actually single-item menus) for user interaction. */
 -(void) addButtons {
 	
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+	_increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(increaseNodesSelected:)];
 	
 	// Add button to allow user to decrease the number of nodes in the 3D scene.
-	decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+	_decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(decreaseNodesSelected:)];
-	decreaseNodesMI.rotation = 180.0f;
+	_decreaseNodesMI.rotation = 180.0f;
 }
 
 /**
@@ -138,7 +127,7 @@
 	AdornableMenuItemImage* mi;
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	mi = [AdornableMenuItemImage itemFromNormalImage: imageFile
+	mi = [AdornableMenuItemImage itemWithNormalImage: imageFile
 									   selectedImage: imageFile
 											  target: self
 											selector: callbackSelector];	
@@ -172,15 +161,15 @@
 	GLfloat xPos, yPos;
 	GLfloat middle = self.contentSize.height / 2.0;
 
-	xPos = self.contentSize.width - (increaseNodesMI.contentSize.width / 2.0);
+	xPos = self.contentSize.width - (_increaseNodesMI.contentSize.width / 2.0);
 
-	yPos = middle + (increaseNodesMI.contentSize.height / 2.0);
-	increaseNodesMI.position = ccp(xPos, yPos);
+	yPos = middle + (_increaseNodesMI.contentSize.height / 2.0);
+	_increaseNodesMI.position = ccp(xPos, yPos);
 	
-	yPos = middle - (decreaseNodesMI.contentSize.height / 2.0);
-	decreaseNodesMI.position = ccp(xPos, yPos);
+	yPos = middle - (_decreaseNodesMI.contentSize.height / 2.0);
+	_decreaseNodesMI.position = ccp(xPos, yPos);
 	
-	label.position =  ccp(self.contentSize.width , 0.0);
+	_label.position =  ccp(self.contentSize.width , 0.0);
 }
 
 #pragma mark Model Templates
@@ -190,39 +179,60 @@
 	CC3MeshNode* mn;
 	CC3ResourceNode* rezNode;
 
+	// The node to use as a backdrop for each scene.
+	// This can be shared between all tile scenes.
+	_backdropTemplate = [CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
+	[_backdropTemplate createGLBuffers];
+	[_backdropTemplate selectShaderPrograms];
+	
 	// Make a simple box template available. Only 6 faces per node.
 	mn = [CC3BoxNode nodeWithName: kBoxName];
-	CC3BoundingBox bBox;
-	bBox.minimum = cc3v(-1.0, -1.0, -1.0);
-	bBox.maximum = cc3v( 1.0,  1.0,  1.0);
-	[mn populateAsSolidBox: bBox];
-	mn.touchEnabled = YES;
+	[mn populateAsSolidBox: CC3BoxFromMinMax(cc3v(-1.0, -1.0, -1.0), cc3v( 1.0,  1.0,  1.0))];
 	mn.shouldColorTile = YES;
-	[templates addObject: mn];
+	[self configureAndAddTemplate: mn];
 	
 	// Mascot model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
+	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
+			  expectsVerticallyFlippedTextures: YES];
 	mn = [rezNode getMeshNodeNamed: kMascotName];
-	[mn remove];		// Remove from the POD resource
 	[mn moveMeshOriginToCenterOfGeometry];
 	mn.rotation = cc3v(0.0, -90.0, 0.0);
-	mn.touchEnabled = YES;
-	[templates addObject: mn];
+	[self configureAndAddTemplate: mn];
 	
 	// Die cube model from POD resource.
 	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	n = [rezNode getNodeNamed: kDieCubeName];
-	[n remove];		// Remove from the POD resource
-	n.touchEnabled = YES;
-	[templates addObject: n];
+	[self configureAndAddTemplate: n];
 	
 	// Beachball from POD resource with no texture, but with several subnodes
 	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
 	n = [rezNode getNodeNamed: kBeachBallName];
-	[n remove];		// Remove from the POD resource
 	n.isOpaque = YES;
-	n.touchEnabled = YES;
-	[templates addObject: n];
+	[self configureAndAddTemplate: n];
+
+	// Animated dragon from POD resource
+	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
+	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
+	
+	// The model animation that was loaded from the POD into track zero is a concatenation of
+	// several separate movements, such as gliding and flapping. Extract the distinct movements
+	// from the base animation and add those distinct movement animations as separate tracks.
+	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
+	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
+
+	[self configureAndAddTemplate: n];
+}
+
+/** 
+ * Provides standard configuration for the specified template model,
+ * and add it to the list of templates.
+ */
+-(void) configureAndAddTemplate: (CC3Node*) templateNode {
+	templateNode.touchEnabled = YES;
+	[templateNode createGLBuffers];
+	[templateNode releaseRedundantContent];
+	[templateNode selectShaderPrograms];
+	[_templates addObject: templateNode];
 }
 
 
@@ -232,14 +242,14 @@
 -(void) addTiles {
 	[self removeTiles];
 	CGSize mySize = self.contentSize;
-	CGSize gridSize = CGSizeMake(mySize.width - increaseNodesMI.contentSize.width,
+	CGSize gridSize = CGSizeMake(mySize.width - _increaseNodesMI.contentSize.width,
 								 mySize.height - kGridPadding);
-	CGSize tileSize = CGSizeMake(gridSize.width / tilesPerSide - kGridPadding,
-								 gridSize.height / tilesPerSide - kGridPadding);
+	CGSize tileSize = CGSizeMake(gridSize.width / _tilesPerSide - kGridPadding,
+								 gridSize.height / _tilesPerSide - kGridPadding);
 	
 	CGRect tileBounds = CGRectMake(kGridPadding, kGridPadding, tileSize.width, tileSize.height);
-	for (int r = 0; r < tilesPerSide; r++) {
-		for (int c = 0; c < tilesPerSide; c++) {
+	for (int r = 0; r < _tilesPerSide; r++) {
+		for (int c = 0; c < _tilesPerSide; c++) {
 			[self addTileIn: tileBounds];
 			tileBounds.origin.x += tileSize.width + kGridPadding;
 		}
@@ -248,7 +258,7 @@
 		tileBounds.origin.y += tileSize.height + kGridPadding;		// Move to next row
 	}
 	
-	label.string = [NSString stringWithFormat: @"Tiles per side: %u", tilesPerSide];
+	_label.string = [NSString stringWithFormat: @"Tiles: %u", _tilesPerSide * _tilesPerSide];
 }
 
 /**
@@ -256,12 +266,12 @@
  * and adds the CC3Layer to this layer.
  */
 -(void) addTileIn: (CGRect) bounds {
-	CC3Layer* tileLayer = [TileLayer layerWithColor: ccc4(50, 60, 110, 255)];
+	CC3Layer* tileLayer = [TileLayer layerWithController: self.controller];
 	tileLayer.position = bounds.origin;
 	tileLayer.contentSize = bounds.size;
 	tileLayer.cc3Scene = [self makeScene];
 	[self addChild: tileLayer];
-	[tiles addObject: tileLayer];
+	[_tiles addObject: tileLayer];
 }
 
 /**
@@ -271,17 +281,38 @@
 -(CC3Scene*) makeScene {
 	TileScene* scene = [TileScene scene];		// A new scene
 	
+	// Add the backdrop. Since it is not assigned a parent, it can be shared across all tile scenes.
+	scene.backdrop = _backdropTemplate;
+	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.
-	CC3Node* aNode = [[templates objectAtIndex: CC3RandomUIntBelow(templates.count)] autoreleasedCopy];
-//	CC3Node* aNode = [[templates objectAtIndex: 0] autoreleasedCopy];
+	CC3Node* aNode = [[_templates objectAtIndex: CC3RandomUIntBelow(_templates.count)] copy];
+//	CC3Node* aNode = [[templates objectAtIndex: 0] copy];	// Choose any index below template count
 
 	// The shouldColorTile property is actually tracked by the userData property!
-	if (aNode.shouldColorTile) {
-		aNode.color = [self pickNodeColor];
+	if (aNode.shouldColorTile) aNode.color = [self pickNodeColor];
+	
+	// If the node is animated, initiate a CC3Animate action on it
+	if (aNode.containsAnimation) {
+		
+		// The dragon model now contains three animation tracks: a gliding track, a flapping
+		// track, and the original concatenation of animation loaded from the POD file into
+		// track zero. We want the dragon flying and flapping its wings. So, we give the flapping
+		// track a weight of one, and the gliding and original tracks a weighting of zero.
+		[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
+		[aNode setAnimationBlendingWeight: 0.0f onTrack: _glideTrack];
+		[aNode setAnimationBlendingWeight: 1.0f onTrack: _flapTrack];
+
+		// Create the CC3Animate action to run the animation. The duration is randomized so
+		// that when multiple dragons are visible, they are not all flapping in unison.
+		ccTime flapTime = CC3RandomFloatBetween(1.0, 2.0);
+		CC3Animate* flap = [CC3Animate actionWithDuration: flapTime onTrack: _flapTrack];
+		[aNode runAction: [CCRepeatForever actionWithAction: flap]];
 	}
-	scene.mainNode = aNode;
-	[scene createGLBuffers];
+	
+	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access
+	[aNode release];			// Release copied node now that it's been added
+
 	return scene;
 }
 
@@ -304,19 +335,15 @@
 }
 
 -(void) removeTiles {
-	for (CCNode* child in tiles) {
-		[self removeChild: child cleanup: YES];
-	}
-	[tiles removeAllObjects];
+	for (CCNode* child in _tiles) [self removeChild: child cleanup: YES];
+	[_tiles removeAllObjects];
 }
 
 
 #pragma mark Updating
 
 -(void) update: (ccTime)dt {
-	for (CC3Layer* tile in tiles) {
-		[tile update: dt];
-	}
+	for (CC3Layer* tile in _tiles) [tile update: dt];
 }
 
 /**
@@ -326,7 +353,7 @@
 -(void) increaseNodesSelected: (CCMenuItemToggle*) menuItem {
 	CGSize cs = self.contentSize;
 	CGFloat maxTPS = MIN(cs.width, cs.height) / (kMinTileSideLen + kGridPadding);
-	tilesPerSide = MIN(tilesPerSide + 1, maxTPS);
+	_tilesPerSide = MIN(_tilesPerSide + 1, maxTPS);
 	[self addTiles];
 }
 
@@ -335,7 +362,7 @@
  * Remove one row and column, but always show at least one.
  */
 -(void) decreaseNodesSelected: (CCMenuItemToggle*) menuItem {
-	tilesPerSide = MAX(tilesPerSide - 1, 1);
+	_tilesPerSide = MAX(_tilesPerSide - 1, 1);
 	[self addTiles];
 }
 

@@ -16,6 +16,8 @@ Table of Contents
 - Documentation
 - Demo Applications
     - CC3DemoMashUp - demos all important cocos3d features
+    - CC3Demo3DTiles - demos adding running many concurrent layers and scenes
+    - CC3Performance - demos performance capabilities and testing
 - Creating POD 3D Model Files
 - Demo Models
 
@@ -27,38 +29,69 @@ cocos3d is a sophisticated, yet intuitive and easy-to-use, 3D application develo
 framework for the iOS platform. With cocos3d, you can build sophisticated, dynamic 3D
 games and applications using Objective-C.
 
-- Build 3D apps for iOS devices or Mac computers running OSX. The same 3D content and game logic will run unchanged under iOS or Mac OSX.
-- Use OpenGL programmable pipelines for sophisticated GLSL shader rendering, or use OpenGL fixed pipelines for simpler configurable rendering.
-- Supports OpenGL ES 2.0 or OpenGL ES 1.1 on iOS devices, and OpenGL programmable or fixed pipelines on Mac OSX.
-- Seamless integration with cocos2d. Rendering of all 3D model objects occurs within a special cocos2d layer, which fits seamlessly into the cocos2d node hierarchy, allowing 2D nodes such as controls, labels, and health bars to be drawn under, over, or beside 3D model objects. With this design, 2D objects, 3D objects, and sound can interact with each other to create a rich, synchronized audio-visual experience.
+- Build 3D apps for iOS devices or Mac computers running OSX. The same 3D content and game 
+  logic will run unchanged under iOS or Mac OSX.
+- Use OpenGL programmable pipelines for sophisticated GLSL shader rendering, or use OpenGL 
+  fixed pipelines for simpler configurable rendering.
+- Supports OpenGL ES 2.0 or OpenGL ES 1.1 on iOS devices, and OpenGL programmable or fixed 
+  pipelines on Mac OSX.
+- Seamless integration with cocos2d. Rendering of all 3D model objects occurs within a special 
+  cocos2d layer, which fits seamlessly into the cocos2d node hierarchy, allowing 2D nodes such 
+  as controls, labels, and health bars to be drawn under, over, or beside 3D model objects. 
+  With this design, 2D objects, 3D objects, and sound can interact with each other to create 
+  a rich, synchronized audio-visual experience.
 - Seamless integration with the iOS UIViewController framework.
-- Pluggable loading framework for 3D models exported from familiar 3D editors such as Blender, 3ds Max or Cheetah3D, or through industry standard 3D object files such as Collada or PowerVR POD, or even from your own customized object file formats.
-- Loading 3D models, textures and GLSL shaders can be performed on a background thread while the scene is being displayed, and automatically added to the scene when loading is complete.
-- 3D models can be selected and positioned by touch events and gestures, allowing intuitive user interaction with the objects in the 3D world.
-- 3D models can include animation sequences, with full or fractional animation, in multiple tracks. Animation tracks can be blended together, and cross-fading actions can be used to smoothly transition between tracks.
-- 3D model objects can be arranged in sophisticated structural assemblies, allowing child objects to be moved and oriented relative to their parent structure.
-- 3D models and assemblies can be easily duplicated. Each duplicated model can be independently controlled, animated, colored, or textured. But fear not, underlying mesh data is shared between models. You can quickly and easily create swarming hoards to populate your 3D world, without worrying about device memory limitations.
-- 3D models, cameras, and lighting can be manipulated and animated using familiar cocos2d Actions, allowing you to quickly and easily control the dynamics of your 3D world, in a familiar, and easy-to-use programming paradigm.
+- Pluggable loading framework for 3D models exported from familiar 3D editors such as Blender, 
+  3ds Max or Cheetah3D, or through industry standard 3D object files such as Collada or PowerVR POD,
+  or even from your own customized object file formats.
+- Loading 3D models, textures and GLSL shaders can be performed on a background thread while the
+  scene is being displayed, and automatically added to the scene when loading is complete.
+- 3D models can be selected and positioned by touch events and gestures, allowing intuitive user
+  interaction with the objects in the 3D world.
+- 3D models can include animation sequences, with full or fractional animation, in multiple tracks. 
+  Animation tracks can be blended together, and cross-fading actions can be used to smoothly 
+  transition between tracks.
+- 3D model objects can be arranged in sophisticated structural assemblies, allowing child objects
+  to be moved and oriented relative to their parent structure.
+- 3D models and assemblies can be easily duplicated. Each duplicated model can be independently
+  controlled, animated, colored, or textured. But fear not, underlying mesh data is shared between
+  models. You can quickly and easily create swarming hoards to populate your 3D world, without
+  worrying about device memory limitations.
+- 3D models, cameras, and lighting can be manipulated and animated using familiar cocos2d Actions,
+  allowing you to quickly and easily control the dynamics of your 3D world, in a familiar, and
+  easy-to-use programming paradigm.
 - 3D objects can be covered with dynamic materials and textures to create rich, realistic imagery.
 - Multi-texturing and bump-mapped textures are available, allowing you to create sophisticated surface effects.
-- Vertex skinning, also often referred to as bone rigging, allowing soft-body meshes to be realistically deformed based on the movement of an underlying skeleton constructed of bones and joints.
+- Vertex skinning, also often referred to as bone rigging, allowing soft-body meshes to be 
+  realistically deformed based on the movement of an underlying skeleton constructed of bones and joints.
 - Automatic shadowing of models using shadow volumes.
 - Collision detection between nodes.
-- Ray-casting for nodes intersected by a ray, and the local location of intersection on a node or mesh, right down to the exact mesh intersection location and face.
+- Ray-casting for nodes intersected by a ray, and the local location of intersection on a node
+  or mesh, right down to the exact mesh intersection location and face.
 - The 3D camera supports both perspective and orthographic projection options.
-- Objects can dynamically track other objects as they move around the world. The 3D camera can dynamically point towards an object as it moves, and other objects can dynamically point towards the camera as it moves.
+- Objects can dynamically track other objects as they move around the world. The 3D camera 
+  can dynamically point towards an object as it moves, and other objects can dynamically point
+  towards the camera as it moves.
 - Lighting effects include multiple lights, attenuation with distance, spotlights, and fog effects.
 - Mesh data can be shared between 3D objects, thereby saving precious device memory.
-- Mesh data can freely, and automatically, use OpenGL vertex buffer objects to improve performance and memory management.
-- Culling of 3D objects outside of the camera frustum is automatic, based on pluggable, customizable object bounding volumes.
-- Automatic ordering and grouping of 3D objects minimizes OpenGL state changes and improves rendering performance. Pluggable sorters allow easy customization of object sorting, ordering, and grouping for optimal application performance.
+- Mesh data can freely, and automatically, use OpenGL vertex buffer objects to improve performance
+  and memory management.
+- Culling of 3D objects outside of the camera frustum is automatic, based on pluggable, 
+  customizable object bounding volumes.
+- Automatic ordering and grouping of 3D objects minimizes OpenGL state changes and improves
+  rendering performance. Pluggable sorters allow easy customization of object sorting, ordering,
+  and grouping for optimal application performance.
 - Rendering to texture for dynamic textures within a scene, or to create sophisticated post-processing effects.
-- Automatic rendering of the scene to an environment map texture, to create automatic environment reflections and refractions.
+- Automatic rendering of the scene to an environment map texture, to create automatic environment
+  reflections and refractions.
 - Integrated particle systems:
 	- 3D point particles provide efficient but sophisticated particle effects.
-	- 3D mesh particles allow particles to be created from any 3D mesh template (eg- spheres, cones, boxes, POD models, etc).
-- Automatic OpenGL state machine shadowing means that the OpenGL functions are invoked only when a state really has changed, thereby reducing OpenGL engine calls, and increasing OpenGL throughput.
-- Sophisticated performance metrics API and tools collect real-time application drawing and updating performance statistics, for logging or real-time display.
+	- 3D mesh particles allow particles to be created from any 3D mesh template (eg- spheres,
+	  cones, boxes, POD models, etc).
+- Automatic OpenGL state machine shadowing means that the OpenGL functions are invoked only when a
+  state really has changed, thereby reducing OpenGL engine calls, and increasing OpenGL throughput.
+- Sophisticated performance metrics API and tools collect real-time application drawing and updating
+  performance statistics, for logging or real-time display.
 - Sophisticated math library eliminates the need to use OpenGL ES function calls for matrix mathematics.
 - Fully documented API written entirely in familiar Objective-C. No need to switch to C or C++ to work with 3D artifacts.
 - Extensive logging framework to trace program execution, including all OpenGL ES function calls.
@@ -246,112 +279,142 @@ the section about cocos2d version compatibility.
 The following demo apps are included in the cocos3d distribution:
 
 
-CC3DemoMashUp
--------------
+	CC3DemoMashUp
+	-------------
 
-Please read the class notes of the `CC3DemoMashUpScene` class for a full description of how to
-run and interact with this demo, and what features it covers.
+	Please read the class notes of the `CC3DemoMashUpScene` class for a full description of how to
+	run and interact with this demo, and what features it covers.
 
-Your camera hovers over a scene that includes animated robots, bouncing beach-balls,
-spinning globes, and a selection of animated teapots. This is a sophisticated demo that
-showcases many interesting features of cocos3d, including:
+	Your camera hovers over a scene that includes animated robots, bouncing beach-balls,
+	spinning globes, and a selection of animated teapots. This is a sophisticated demo that
+	showcases many interesting features of cocos3d, including:
 
-- loading mesh models, cameras and lights from 3D model files stored in the PowerVR POD format
-- creating mesh models from static header file data
-- sharing mesh data across several nodes with different materials
-- loading 3D models from a POD file converted from a Collada file created in a 3D editor (Blender)
-- assembling nodes into a hierarchical parent-child structual assembly.
-- programatic creation of spherical, box and plane meshes using parametric definitions.
-- texturing a 3D mesh from a CCTexture2D image
-- transparency and alpha-blending
-- translucent and transparent textures
-- coloring a mesh with a per-vertex color blend
-- multi-texturing an object using texture units by combining several individual textures into overlays
-- DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
-  with few actual vertices
-- Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
-- Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
-  manipulated independently of the skeleton of the original.
-- animating 3D models using a variety of standard cocos2d CCActionIntervals
-- overlaying the 3D scene with 2D cocos2d controls such as joysticks and buttons
-- embedding 2D cocos2d text labels into the 3D scene
-- incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
-- emitting 3D point particles from a moving nozzle, with realistic distance attenuation
-- emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
-  with each particle moving, rotating, and fading independently
-- creating a tightly focused spotlight whose intensity attenuates with distance
-- directing the 3D camera to track a particular target object
-- directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
-- directing an object to track another object, always facing (looking at) that object
-- selecting a 3D object by touching the object on the screen with a finger
-- placing a 3D object on another at a point that was touched with a finger
-- adding a small CC3Layer/CC3Scene pair as a child window to a larger CC3Layer/CC3Scene pair.
-- moving, scaling and fading a CC3Layer and its CC3Scene
-- creating parametric boxes and texturing all six sides of the box with a single texture.
-- adding an object as a child of another, but keeping the original orientation of the child
-  (addAndLocalizeChild:)
-- handling touch-move events to create swipe gestures to spin a 3D object using rotation
-  around an arbitrary axis
-- toggling between opacity and translucency using the isOpaque property
-- choosing to cull or display backfaces (shouldCullBackFaces)
-- creating and deploying many independent copies of a node, while sharing the underlying mesh data
-- drawing a descriptive text label on a node using CC3Node shouldDrawDescriptor property.
-- drawing a wireframe bounding box around a node using CC3Node shouldDrawWireframeBox property.
-- automatically zooming the camera out to view all objects in the scene
-- constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode
-- caching mesh data into GL vertex buffer objects and releasing vertex data from application memory
-- retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
-- moving the pivot location (origin) of a mesh to the center of geometry of the mesh.
-- attaching application-specific userData to any node
-- applying a texture to all six sides of a parametric box
-- displaying direction marker lines on a node to clarify its orientation during development.
-- displaying a repeating texture pattern across a mesh
-- creating and displaying shadow volumes to render shadows for selected nodes
-- detecting the local location of where a node was touched using ray tracing
-- collision detection between nodes
-- texturing a node with only a small section of single texture
-- using the CC3Scene onOpen method to initiate activity when a scene opens
-- using pinch and pan gestures to control the movement of the 3D camera
-- using tap gestures to select 3D objects, and pan gestures to spin 3D objects
-- bitmapped font text labels
-- moving individual vertex location programmatically
-- using OpenGL ES 2.0 shaders.
-- loading PowerVR PFX effects files and applying them to materials
-- environmental reflections using a cube mapped texture.
-- render-to-texture the scene for display within the scene.
-- render-to-texture to create additional visual effects using post-rendering image processing.
-- render depth-to-texture to visualize the contents of the depth buffer.
-- read pixels from a framebuffer
-- replace framebuffer and texture pixels with programmatic content
-- dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
-- apply multiple animation tracks to a model, blend them together, and smoothly transition between
-  animation tracks using a cross-fade action.
+	- loading mesh models, cameras and lights from 3D model files stored in the PowerVR POD format
+	- creating mesh models from static header file data
+	- sharing mesh data across several nodes with different materials
+	- loading 3D models from a POD file converted from a Collada file created in a 3D editor (Blender)
+	- assembling nodes into a hierarchical parent-child structual assembly.
+	- programatic creation of spherical, box and plane meshes using parametric definitions.
+	- texturing a 3D mesh from a CCTexture2D image
+	- transparency and alpha-blending
+	- translucent and transparent textures
+	- coloring a mesh with a per-vertex color blend
+	- multi-texturing an object using texture units by combining several individual textures into overlays
+	- DOT3 bump-map texturing of an object to provide high-resolution surface detail on a model
+	  with few actual vertices
+	- Vertex skinning with a soft-body mesh bending and flexing based on the movement of skeleton bone nodes.
+	- Copying soft-body nodes to create a completely separate character, with its own skeleton, that can be
+	  manipulated independently of the skeleton of the original.
+	- animating 3D models using a variety of standard cocos2d CCActionIntervals
+	- overlaying the 3D scene with 2D cocos2d controls such as joysticks and buttons
+	- embedding 2D cocos2d text labels into the 3D scene
+	- incorporating 2D cocos2d CCParticleEmitters into the 3D scene (as a sun and explosion fire)
+	- emitting 3D point particles from a moving nozzle, with realistic distance attenuation
+	- emitting two different types of 3D mesh particles, with distinct textures, from a moving nozzle,
+	  with each particle moving, rotating, and fading independently
+	- creating a tightly focused spotlight whose intensity attenuates with distance
+	- directing the 3D camera to track a particular target object
+	- directing an object to track the camera, always facing (looking at) the camera (aka halo objects)
+	- directing an object to track another object, always facing (looking at) that object
+	- selecting a 3D object by touching the object on the screen with a finger
+	- placing a 3D object on another at a point that was touched with a finger
+	- adding a small CC3Layer/CC3Scene pair as a child window to a larger CC3Layer/CC3Scene pair.
+	- moving, scaling and fading a CC3Layer and its CC3Scene
+	- creating parametric boxes and texturing all six sides of the box with a single texture.
+	- adding an object as a child of another, but keeping the original orientation of the child
+	  (addAndLocalizeChild:)
+	- handling touch-move events to create swipe gestures to spin a 3D object using rotation
+	  around an arbitrary axis
+	- toggling between opacity and translucency using the isOpaque property
+	- choosing to cull or display backfaces (shouldCullBackFaces)
+	- creating and deploying many independent copies of a node, while sharing the underlying mesh data
+	- drawing a descriptive text label on a node using CC3Node shouldDrawDescriptor property.
+	- drawing a wireframe bounding box around a node using CC3Node shouldDrawWireframeBox property.
+	- automatically zooming the camera out to view all objects in the scene
+	- constructing and drawing a highly tessellated rectangular plane mesh using CC3PlaneNode
+	- caching mesh data into GL vertex buffer objects and releasing vertex data from application memory
+	- retaining vertex location data in application memory (retainVertexLocations) for subsequent calculations
+	- moving the pivot location (origin) of a mesh to the center of geometry of the mesh.
+	- attaching application-specific userData to any node
+	- applying a texture to all six sides of a parametric box
+	- displaying direction marker lines on a node to clarify its orientation during development.
+	- displaying a repeating texture pattern across a mesh
+	- creating and displaying shadow volumes to render shadows for selected nodes
+	- detecting the local location of where a node was touched using ray tracing
+	- collision detection between nodes
+	- texturing a node with only a small section of single texture
+	- using the CC3Scene onOpen method to initiate activity when a scene opens
+	- using pinch and pan gestures to control the movement of the 3D camera
+	- using tap gestures to select 3D objects, and pan gestures to spin 3D objects
+	- bitmapped font text labels
+	- moving individual vertex location programmatically
+	- using OpenGL ES 2.0 shaders.
+	- loading PowerVR PFX effects files and applying them to materials
+	- environmental reflections using a cube mapped texture.
+	- render-to-texture the scene for display within the scene.
+	- render-to-texture to create additional visual effects using post-rendering image processing.
+	- render depth-to-texture to visualize the contents of the depth buffer.
+	- read pixels from a rendered framebuffer
+	- replace framebuffer and texture pixels with programmatic content
+	- create CGImageRef from a rendered framebuffer
+	- dynamically generate an environmental cube-map for creating a real-time dynamic reflective surfaces.
+	- apply multiple animation tracks to a model, blend them together, and smoothly transition between
+	  animation tracks using a cross-fade action.
 
-In addition, there are a number of interesting options for you to play with by uncommenting
-certain lines of code in the methods of this class that build objects in the 3D scene,
-including experimenting with:
+	In addition, there are a number of interesting options for you to play with by uncommenting
+	certain lines of code in the methods of this class that build objects in the 3D scene,
+	including experimenting with:
 
-- simple particle generator with multi-colored, light-interactive, particles
-- simple particle generator with meshes updated less frequently to conserve performance 
-- different options for ordering nodes when drawing, including ordering by mesh or texture
-- configuring the camera for parallel/isometric/orthographic projection instead of the default
-  perpective projection
-- mounting the camera on a moving object, in this case a bouncing ball
-- mounting the camera on a moving object, in this case a bouncing ball, and having the
-  camera stay focused on the rainbow teapot as both beach ball and teapot move and rotate
-- directing an object to track another object, always facing that object, but only
-  rotating in one direction (eg- side-to-side, but not up and down).
-- displaying 2D labels (eg- health-bars) overlayed on top of the 3D scene at locations projected from the position of 3D objects
-- disabling animation for a particular node, in this case the camera and light
-- invading with an army of teapots instead of robots
-- ignore lighting conditions when drawing a node to draw in pure colors and textures
-- initializing and disposing of users data by adding initUserData and releaseUserData method extension categories.
-- displaying descriptive text and wireframe bounding boxes on every node
-- displaying a dynamic bounding box on a 3D particle emitter.
-- making use of a fixed bounding volume for the 3D particle emitter to improve performance.
-- permitting a node to cast a shadow even when the node itself is invisible by using the shouldCastShadowsWhenInvisible property
-- Skybox using a cube mapped texture.
-- cocos2d CCSprite displaying the television screen rendered texture
+	- simple particle generator with multi-colored, light-interactive, particles
+	- simple particle generator with meshes updated less frequently to conserve performance 
+	- different options for ordering nodes when drawing, including ordering by mesh or texture
+	- configuring the camera for parallel/isometric/orthographic projection instead of the default
+	  perpective projection
+	- mounting the camera on a moving object, in this case a bouncing ball
+	- mounting the camera on a moving object, in this case a bouncing ball, and having the
+	  camera stay focused on the rainbow teapot as both beach ball and teapot move and rotate
+	- directing an object to track another object, always facing that object, but only
+	  rotating in one direction (eg- side-to-side, but not up and down).
+	- displaying 2D labels (eg- health-bars) overlayed on top of the 3D scene at locations 
+	  projected from the position of 3D objects
+	- disabling animation for a particular node, in this case the camera and light
+	- invading with an army of teapots instead of robots
+	- ignore lighting conditions when drawing a node to draw in pure colors and textures
+	- initializing and disposing of users data by adding initUserData and releaseUserData method 
+	  extension categories.
+	- displaying descriptive text and wireframe bounding boxes on every node
+	- displaying a dynamic bounding box on a 3D particle emitter.
+	- making use of a fixed bounding volume for the 3D particle emitter to improve performance.
+	- permitting a node to cast a shadow even when the node itself is invisible by using the 
+	  shouldCastShadowsWhenInvisible property
+	- Skybox using a cube mapped texture.
+	- cocos2d CCSprite displaying the television screen rendered texture
+
+
+   CC3Demo3DTiles
+   --------------
+
+   A simple demo that lays out multiple small cocos3d scenes as layers in a larger controllable
+   cocos2d layer. The effect is a grid of tiles, with each tile displaying a separate 3D scene,
+   each containing its own camera and lighting. The main node in each 3D tile can be rotated
+   under touch control.
+
+   This demonstrates the ability to simply include 3D objects in an otherwise 2D game, and 
+   techniques for optimizing under those conditions. It also demonstrates touch control when
+   many 3D scene are visible concurrently.
+
+
+   CC3Performance
+   --------------
+
+   This is a simple demo of the performance characteristics of cocos3d. It demonstrates how
+   to collect statistics about your application's performance. In doing so, it presents a 
+   number of model scenarios, and through the user interface, you can control the type of
+   model loaded and how many copies to render.
+
+   You can dynamically experiment with how different model types, sizes and quantities affect
+   the performance of cocos3d. You can also use this performance demo app to compare performance
+   across different device types.
 
 
 Creating POD 3D Model Files

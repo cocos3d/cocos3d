@@ -37,10 +37,6 @@
 @property(nonatomic, assign, readwrite) CC3Node* parent;
 @end
 
-@interface CC3MeshNode (TemplateMethods)
--(void) makeMaterial;
-@end
-
 
 #pragma mark -
 #pragma mark CC3PlaneNode
@@ -357,9 +353,10 @@
 -(BOOL) visible { return _visible; }
 
 /** For wireframe lines, if material is created dynamically, make sure it ignores lighting. */
--(void) makeMaterial {
-	[super makeMaterial];
-	_material.shouldUseLighting = NO;
+-(CC3Material*) makeMaterial {
+	CC3Material* mat = [super makeMaterial];
+	mat.shouldUseLighting = NO;
+	return mat;
 }
 
 
