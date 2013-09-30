@@ -47,42 +47,27 @@
 #define kPeakShineOpacity 255
 #define kButtonAdornmentScale 1.5
 
-@interface CC3Layer (TemplateMethods)
--(void) drawScene;
-@end
-
-@interface CC3PerformanceLayer (TemplateMethods)
--(void) addJoysticks;
--(void) addButtons;
--(void) addStatsLabels;
--(void) positionLocationJoystick;
--(void) positionButtons;
--(void) positionPerformanceLabels;
-@property(nonatomic, readonly) CC3PerformanceScene* performanceScene;
-@end
-
-
 @implementation CC3PerformanceLayer
 
 - (void)dealloc {
-	directionJoystick = nil;				// retained as child
-	locationJoystick = nil;					// retained as child
-	increaseNodesMI = nil;					// retained as child
-	decreaseNodesMI = nil;					// retained as child
-	nextNodeTypeMI = nil;					// retained as child
-	prevNodeTypeMI = nil;					// retained as child
-	animateNodesMI = nil;					// retained as child
-	nodeNameLabel = nil;					// retained as child
-	updateTitleLabel = nil;					// retained as child
-	updateRateLabel = nil;					// retained as child
-	nodesUpdatedLabel = nil;				// retained as child
-	nodesTransformedLabel = nil;			// retained as child
-	drawingTitleLabel = nil;				// retained as child
-	frameRateLabel = nil;					// retained as child
-	nodesVisitedForDrawingLabel = nil;		// retained as child
-	nodesDrawnLabel = nil;					// retained as child
-	drawCallsLabel = nil;					// retained as child
-	facesPresentedLabel = nil;				// retained as child
+	_directionJoystick = nil;				// retained as child
+	_locationJoystick = nil;				// retained as child
+	_increaseNodesMI = nil;					// retained as child
+	_decreaseNodesMI = nil;					// retained as child
+	_nextNodeTypeMI = nil;					// retained as child
+	_prevNodeTypeMI = nil;					// retained as child
+	_animateNodesMI = nil;					// retained as child
+	_nodeNameLabel = nil;					// retained as child
+	_updateTitleLabel = nil;				// retained as child
+	_updateRateLabel = nil;					// retained as child
+	_nodesUpdatedLabel = nil;				// retained as child
+	_nodesTransformedLabel = nil;			// retained as child
+	_drawingTitleLabel = nil;				// retained as child
+	_frameRateLabel = nil;					// retained as child
+	_nodesVisitedForDrawingLabel = nil;		// retained as child
+	_nodesDrawnLabel = nil;					// retained as child
+	_drawCallsLabel = nil;					// retained as child
+	_facesPresentedLabel = nil;				// retained as child
     [super dealloc];
 }
 
@@ -90,9 +75,7 @@
  * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.
  */
--(CC3PerformanceScene*) performanceScene {
-	return (CC3PerformanceScene*) cc3Scene;
-}
+-(CC3PerformanceScene*) performanceScene { return (CC3PerformanceScene*)super.cc3Scene; }
 
 /** Initialize all the 2D user controls. */
 -(void) initializeControls {
@@ -115,20 +98,20 @@
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
 	jsThumb.scale = thumbScale;
 	
-	directionJoystick = [Joystick joystickWithThumb: jsThumb
+	_directionJoystick = [Joystick joystickWithThumb: jsThumb
 											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
 	
-	directionJoystick.position = ccp(kJoystickSidePadding, kJoystickBottomPadding + kStatsLineSpacing);
-	[self addChild: directionJoystick];
+	_directionJoystick.position = ccp(kJoystickSidePadding, kJoystickBottomPadding + kStatsLineSpacing);
+	[self addChild: _directionJoystick];
 	
 	// The joystick that controls the player's (camera's) location
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
 	jsThumb.scale = thumbScale;
 	
-	locationJoystick = [Joystick joystickWithThumb: jsThumb
+	_locationJoystick = [Joystick joystickWithThumb: jsThumb
 										   andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
 	[self positionLocationJoystick];
-	[self addChild: locationJoystick];
+	[self addChild: _locationJoystick];
 }
 
 /**
@@ -140,7 +123,7 @@
 	AdornableMenuItemImage* mi;
 	
 	// Set up the menu item and position it in the bottom center of the layer
-	mi = [AdornableMenuItemImage itemFromNormalImage: imageFile
+	mi = [AdornableMenuItemImage itemWithNormalImage: imageFile
 									   selectedImage: imageFile
 											  target: self
 											selector: callbackSelector];	
@@ -169,25 +152,25 @@
 -(void) addButtons {
 
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+	_increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(increaseNodesSelected:)];
 
 	// Add button to allow user to decrease the number of nodes in the 3D scene.
-	decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+	_decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(decreaseNodesSelected:)];
-	decreaseNodesMI.rotation = 180.0f;
+	_decreaseNodesMI.rotation = 180.0f;
 	
 	// Add button to allow user to select the next node type.
-	nextNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									 withSelector: @selector(nextNodeTypeSelected:)];
+	_nextNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+									  withSelector: @selector(nextNodeTypeSelected:)];
 	
 	// Add button to allow user to select the previous node type.
-	prevNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
-									 withSelector: @selector(prevNodeTypeSelected:)];
-	prevNodeTypeMI.rotation = 180.0f;
+	_prevNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
+									  withSelector: @selector(prevNodeTypeSelected:)];
+	_prevNodeTypeMI.rotation = 180.0f;
 	
 	// Add button to allow user to increase the number of nodes in the 3D scene.
-	animateNodesMI = [self addButtonWithImageFile: kAnimateNodesButtonFileName
+	_animateNodesMI = [self addButtonWithImageFile: kAnimateNodesButtonFileName
 									  withSelector: @selector(animateNodesSelected:)];
 	
 	[self positionButtons];
@@ -206,25 +189,25 @@
 	CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
 	[CCTexture2D setDefaultAlphaPixelFormat: kCCTexture2DPixelFormat_RGBA4444];
 	
-	nodeNameLabel = [self addStatsLabel: @""];
-	nodeNameLabel.anchorPoint = ccp(0.5, 0.0);
-	[nodeNameLabel setColor: ccYELLOW];
+	_nodeNameLabel = [self addStatsLabel: @""];
+	_nodeNameLabel.anchorPoint = ccp(0.5, 0.0);
+	[_nodeNameLabel setColor: ccYELLOW];
 
-	updateTitleLabel = [self addStatsLabel: @"Updates:"];
-	[updateTitleLabel setColor: ccYELLOW];
+	_updateTitleLabel = [self addStatsLabel: @"Updates:"];
+	[_updateTitleLabel setColor: ccYELLOW];
 
-	updateRateLabel = [self addStatsLabel: @""];
-	nodesUpdatedLabel = [self addStatsLabel: @""];
-	nodesTransformedLabel = [self addStatsLabel: @""];
+	_updateRateLabel = [self addStatsLabel: @"0"];
+	_nodesUpdatedLabel = [self addStatsLabel: @"0"];
+	_nodesTransformedLabel = [self addStatsLabel: @"0"];
 	
-	drawingTitleLabel = [self addStatsLabel: @"Drawing:"];
-	[drawingTitleLabel setColor: ccYELLOW];
+	_drawingTitleLabel = [self addStatsLabel: @"Drawing:"];
+	[_drawingTitleLabel setColor: ccYELLOW];
 
-	frameRateLabel = [self addStatsLabel: @""];
-	nodesVisitedForDrawingLabel = [self addStatsLabel: @""];
-	nodesDrawnLabel = [self addStatsLabel: @""];
-	drawCallsLabel = [self addStatsLabel: @""];
-	facesPresentedLabel = [self addStatsLabel: @""];
+	_frameRateLabel = [self addStatsLabel: @"0"];
+	_nodesVisitedForDrawingLabel = [self addStatsLabel: @"0"];
+	_nodesDrawnLabel = [self addStatsLabel: @"0"];
+	_drawCallsLabel = [self addStatsLabel: @"0"];
+	_facesPresentedLabel = [self addStatsLabel: @"0"];
 
 	[CCTexture2D setDefaultAlphaPixelFormat: currentFormat];
 }
@@ -235,8 +218,8 @@
  * to keep the joystick in the correct location within the new layer dimensions.
  */
 -(void) positionLocationJoystick {
-	locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickSidePadding,
-									kJoystickBottomPadding + kStatsLineSpacing);
+	_locationJoystick.position = ccp(self.contentSize.width - kJoystickSideLength - kJoystickSidePadding,
+									 kJoystickBottomPadding + kStatsLineSpacing);
 }
 
 /**
@@ -247,22 +230,22 @@
 -(void) positionButtons {
 	GLfloat xPos;
 	GLfloat middle = self.contentSize.width / 2.0;
-	GLfloat yPosTop = ((kJoystickSideLength + increaseNodesMI.contentSize.height) / 2.0) 
+	GLfloat yPosTop = ((kJoystickSideLength + _increaseNodesMI.contentSize.height) / 2.0)
 						+ kJoystickBottomPadding - kAdornmentRingThickness;
-	GLfloat yPosBtm = ((kJoystickSideLength - decreaseNodesMI.contentSize.height) / 2.0)
+	GLfloat yPosBtm = ((kJoystickSideLength - _decreaseNodesMI.contentSize.height) / 2.0)
 						+ kJoystickBottomPadding + kAdornmentRingThickness;
 	GLfloat yPosMid = (kJoystickSideLength / 2.0) + kJoystickBottomPadding;
 
-	xPos = middle - (increaseNodesMI.contentSize.width);
-	increaseNodesMI.position = ccp(xPos, yPosTop);
-	decreaseNodesMI.position = ccp(xPos, yPosBtm);
+	xPos = middle - (_increaseNodesMI.contentSize.width);
+	_increaseNodesMI.position = ccp(xPos, yPosTop);
+	_decreaseNodesMI.position = ccp(xPos, yPosBtm);
 
 	xPos = middle;
-	animateNodesMI.position = ccp(xPos, yPosMid);
+	_animateNodesMI.position = ccp(xPos, yPosMid);
 	
-	xPos = middle + (nextNodeTypeMI.contentSize.width);
-	nextNodeTypeMI.position = ccp(xPos, yPosTop);
-	prevNodeTypeMI.position = ccp(xPos, yPosBtm);
+	xPos = middle + (_nextNodeTypeMI.contentSize.width);
+	_nextNodeTypeMI.position = ccp(xPos, yPosTop);
+	_prevNodeTypeMI.position = ccp(xPos, yPosBtm);
 }
 
 /**
@@ -271,35 +254,35 @@
  */
 -(void) positionPerformanceLabels {
 	CGFloat leftTab = kJoystickSidePadding;
-	CGFloat rightTab = locationJoystick.position.x - 32.0;
+	CGFloat rightTab = _locationJoystick.position.x - 32.0;
 	GLfloat vertPos = self.contentSize.height - kJoystickSidePadding;
 	
 	vertPos -= kStatsLineSpacing;
-	drawingTitleLabel.position = ccp(leftTab, vertPos);
-	updateTitleLabel.position = ccp(rightTab, vertPos);
+	_drawingTitleLabel.position = ccp(leftTab, vertPos);
+	_updateTitleLabel.position = ccp(rightTab, vertPos);
 	
 	vertPos -= kStatsLineSpacing;
-	frameRateLabel.position = ccp(leftTab, vertPos);
-	updateRateLabel.position = ccp(rightTab, vertPos);
+	_frameRateLabel.position = ccp(leftTab, vertPos);
+	_updateRateLabel.position = ccp(rightTab, vertPos);
 
 	vertPos -= kStatsLineSpacing;
-	nodesVisitedForDrawingLabel.position = ccp(leftTab, vertPos);
-	nodesUpdatedLabel.position = ccp(rightTab, vertPos);
+	_nodesVisitedForDrawingLabel.position = ccp(leftTab, vertPos);
+	_nodesUpdatedLabel.position = ccp(rightTab, vertPos);
 	
 	vertPos -= kStatsLineSpacing;
-	nodesDrawnLabel.position = ccp(leftTab, vertPos);
-	nodesTransformedLabel.position = ccp(rightTab, vertPos);
+	_nodesDrawnLabel.position = ccp(leftTab, vertPos);
+	_nodesTransformedLabel.position = ccp(rightTab, vertPos);
 	
 	vertPos -= kStatsLineSpacing;
-	drawCallsLabel.position = ccp(leftTab, vertPos);
+	_drawCallsLabel.position = ccp(leftTab, vertPos);
 
 	vertPos -= kStatsLineSpacing;
-	facesPresentedLabel.position = ccp(leftTab, vertPos);
+	_facesPresentedLabel.position = ccp(leftTab, vertPos);
 
 	// Center the name of the node type just above the buttons
-	nodeNameLabel.position = ccp(self.contentSize.width / 2.0,
-								 increaseNodesMI.position.y +
-								 (increaseNodesMI.contentSize.height / 2.0) + kJoystickSidePadding);
+	_nodeNameLabel.position = ccp(self.contentSize.width / 2.0,
+								  _increaseNodesMI.position.y +
+								  (_increaseNodesMI.contentSize.height / 2.0) + kJoystickSidePadding);
 }
 
 #pragma mark Updating
@@ -311,8 +294,8 @@
 -(void) update: (ccTime)dt {
 	
 	// Update the player direction and position in the scene from the joystick velocities
-	self.performanceScene.playerDirectionControl = directionJoystick.velocity;
-	self.performanceScene.playerLocationControl = locationJoystick.velocity;
+	self.performanceScene.playerDirectionControl = _directionJoystick.velocity;
+	self.performanceScene.playerLocationControl = _locationJoystick.velocity;
 	[super update: dt];
 }
 
@@ -329,13 +312,13 @@
 /** The user has pressed the button to select the next node type. Tell the 3D scene. */
 -(void) nextNodeTypeSelected: (CCMenuItemToggle*) menuItem {
 	[self.performanceScene nextNodeType];
-	[nodeNameLabel setString: self.performanceScene.templateNode.name];
+	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 /** The user has pressed the button to select the previous node type. Tell the 3D scene. */
 -(void) prevNodeTypeSelected: (CCMenuItemToggle*) menuItem {
 	[self.performanceScene prevNodeType];
-	[nodeNameLabel setString: self.performanceScene.templateNode.name];
+	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 /** The user has pressed the button to toggle between animating the nodes. Tell the 3D scene. */
@@ -364,39 +347,39 @@
 	// To get histograms of update and drawing rates, use
 	// CC3PerformanceStatisticsHistogram instead of CC3PerformanceStatistics.
 	// The histograms are printed to the log.
-	cc3Scene.performanceStatistics = [CC3PerformanceStatistics statistics];
-//	cc3Scene.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
+	aCC3Scene.performanceStatistics = [CC3PerformanceStatistics statistics];
+//	aCC3Scene.performanceStatistics = [CC3PerformanceStatisticsHistogram statistics];
 
-	[nodeNameLabel setString: self.performanceScene.templateNode.name];
+	[_nodeNameLabel setString: self.performanceScene.templateNode.name];
 }
 
 //Specifies how often stats should be updated, in seconds
 #define kStatisticsReportingInterval 0.5
 
 /** Overridden to update the performance statistics labels. */
--(void) drawScene {
-	[super drawScene];
-	CC3PerformanceStatistics* stats = cc3Scene.performanceStatistics;
+-(void) draw {
+	[super draw];
+	CC3PerformanceStatistics* stats = self.cc3Scene.performanceStatistics;
 	if (stats.accumulatedFrameTime >= kStatisticsReportingInterval) {
 
 		LogTrace(@"%@", stats.fullDescription);	// Log the results as well
 		
 		// Drawing statistics
-		[frameRateLabel setString: [NSString stringWithFormat: @"fps: %.0f", stats.frameRate]];
-		[nodesVisitedForDrawingLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
+		[_frameRateLabel setString: [NSString stringWithFormat: @"fps: %.0f", stats.frameRate]];
+		[_nodesVisitedForDrawingLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
 												 stats.averageNodesVisitedForDrawingPerFrame]];
-		[nodesDrawnLabel setString: [NSString stringWithFormat: @"drawn: %.0f",
+		[_nodesDrawnLabel setString: [NSString stringWithFormat: @"drawn: %.0f",
 									 stats.averageNodesDrawnPerFrame]];
-		[drawCallsLabel setString: [NSString stringWithFormat: @"gl calls: %.0f",
+		[_drawCallsLabel setString: [NSString stringWithFormat: @"gl calls: %.0f",
 									stats.averageDrawingCallsMadePerFrame]];
-		[facesPresentedLabel setString: [NSString stringWithFormat: @"faces: %.0f",
+		[_facesPresentedLabel setString: [NSString stringWithFormat: @"faces: %.0f",
 										 stats.averageFacesPresentedPerFrame]];
 
 		// Update statistics
-		[updateRateLabel setString: [NSString stringWithFormat: @"ups: %.0f", stats.updateRate]];
-		[nodesUpdatedLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
+		[_updateRateLabel setString: [NSString stringWithFormat: @"ups: %.0f", stats.updateRate]];
+		[_nodesUpdatedLabel setString: [NSString stringWithFormat: @"nodes: %.0f",
 									   stats.averageNodesUpdatedPerUpdate]];
-		[nodesTransformedLabel setString: [NSString stringWithFormat: @"xfmed: %.0f",
+		[_nodesTransformedLabel setString: [NSString stringWithFormat: @"xfmed: %.0f",
 										   stats.averageNodesTransformedPerUpdate]];
 
 		[stats reset];

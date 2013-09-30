@@ -48,10 +48,16 @@
 		case 0:				// If we don't want any nodes, just leave
 			break;
 		case 1: {			// For one node, just place the single copy at the origin
-			CC3Node* aNode = [templateNode autoreleasedCopy];
+			CC3Node* aNode = [templateNode copy];
 			aNode.location = kCC3VectorZero;
 			aNode.uniformScale *= 2.0;
+			
+			// Animation is on a particular partial track. Set the weight of the original
+			// animation to zero, so that it doesn't interfere with the desired track.
+			[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
+
 			[self addChild: aNode];
+			[aNode release];
 			break;
 		}
 		default: {			// Otherwise...lay out a grid of copies
@@ -69,18 +75,21 @@
 					GLfloat xLoc = xOrg + spacing * ix;
 					GLfloat zLoc = zOrg + spacing * iz;
 					
-					CC3Node* aNode = [templateNode autoreleasedCopy];
+					CC3Node* aNode = [templateNode copy];
 					aNode.location = cc3v(xLoc, 0.0f, zLoc);
 					aNode.uniformScale *= scaleFactor;
+					
+					// Animation is on a particular partial track. Set the weight of the original
+					// animation to zero, so that it doesn't interfere with the desired track.
+					[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
+					
 					[self addChild: aNode];
+					[aNode release];
 				}
 			}
 			break;
 		}
 	}
-	
-	[self createGLBuffers];			// Copy vertex data to OpenGL VBO's.
-	[self releaseRedundantContent];	// Release vertex data from main memory.
 	
 	// To help demonstrate that the hordes of nodes are being managed correctly,
 	// log the current number of nodes, before the new nodes have been created.

@@ -67,24 +67,24 @@
  * and not presented to the GL engine for drawing.
  */
 @interface CC3PerformanceLayer : CC3Layer {
-	Joystick* directionJoystick;
-	Joystick* locationJoystick;
-	CCMenuItem* increaseNodesMI;
-	CCMenuItem* decreaseNodesMI;
-	CCMenuItem* nextNodeTypeMI;
-	CCMenuItem* prevNodeTypeMI;
-	CCMenuItem* animateNodesMI;
-	CCLabelBMFont* nodeNameLabel;
-	CCLabelBMFont* updateTitleLabel;
-	CCLabelBMFont* updateRateLabel;
-	CCLabelBMFont* nodesUpdatedLabel;
-	CCLabelBMFont* nodesTransformedLabel;
-	CCLabelBMFont* drawingTitleLabel;
-	CCLabelBMFont* frameRateLabel;
-	CCLabelBMFont* nodesVisitedForDrawingLabel;
-	CCLabelBMFont* nodesDrawnLabel;
-	CCLabelBMFont* drawCallsLabel;
-	CCLabelBMFont* facesPresentedLabel;
+	Joystick* _directionJoystick;
+	Joystick* _locationJoystick;
+	CCMenuItem* _increaseNodesMI;
+	CCMenuItem* _decreaseNodesMI;
+	CCMenuItem* _nextNodeTypeMI;
+	CCMenuItem* _prevNodeTypeMI;
+	CCMenuItem* _animateNodesMI;
+	CCLabelBMFont* _nodeNameLabel;
+	CCLabelBMFont* _updateTitleLabel;
+	CCLabelBMFont* _updateRateLabel;
+	CCLabelBMFont* _nodesUpdatedLabel;
+	CCLabelBMFont* _nodesTransformedLabel;
+	CCLabelBMFont* _drawingTitleLabel;
+	CCLabelBMFont* _frameRateLabel;
+	CCLabelBMFont* _nodesVisitedForDrawingLabel;
+	CCLabelBMFont* _nodesDrawnLabel;
+	CCLabelBMFont* _drawCallsLabel;
+	CCLabelBMFont* _facesPresentedLabel;
 }
 
 @end

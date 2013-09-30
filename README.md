@@ -407,10 +407,10 @@ The following demo apps are included in the cocos3d distribution:
    CC3Performance
    --------------
 
-   This is a simple demo of the performance characteristics of cocos3d. It demonstrates how
-   to collect statistics about your application's performance. In doing so, it presents a 
-   number of model scenarios, and through the user interface, you can control the type of
-   model loaded and how many copies to render.
+   This is a simple demo of the performance characteristics of cocos3d. It demonstrates how to
+   collect detailed statistics about your application's performance. In doing so, it presents
+   a number of models, and, through the user interface, allows you to control the type of model
+   loaded, and how many copies to render.
 
    You can dynamically experiment with how different model types, sizes and quantities affect
    the performance of cocos3d. You can also use this performance demo app to compare performance

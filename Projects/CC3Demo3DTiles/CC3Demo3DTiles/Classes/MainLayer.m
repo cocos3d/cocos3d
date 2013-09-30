@@ -211,19 +211,18 @@
 	[self configureAndAddTemplate: n];
 
 	// Animated dragon from POD resource
-	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
-	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
-	
 	// The model animation that was loaded from the POD into track zero is a concatenation of
 	// several separate movements, such as gliding and flapping. Extract the distinct movements
 	// from the base animation and add those distinct movement animations as separate tracks.
+	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
+	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
 	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
 	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
 
 	[self configureAndAddTemplate: n];
 }
 
-/** 
+/**
  * Provides standard configuration for the specified template model,
  * and add it to the list of templates.
  */

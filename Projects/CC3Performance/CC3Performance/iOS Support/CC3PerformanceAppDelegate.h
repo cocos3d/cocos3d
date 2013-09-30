@@ -28,7 +28,10 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "CCNodeController.h"
+#import "CC3UIViewController.h"
 
-@interface CC3PerformanceAppDelegate : NSObject <UIApplicationDelegate>
+@interface CC3PerformanceAppDelegate : NSObject <UIApplicationDelegate> {
+	UIWindow* _window;
+	CC3UIViewController* _viewController;
+}
 @end

@@ -58,13 +58,15 @@
  * to understand how this works.
  */
 @interface CC3PerformanceScene : CC3Scene {
-	NSMutableArray* availableTemplateNodes;
-	CC3Node* templateNode;
-	NodeGrid* nodeGrid;
-	CGPoint playerDirectionControl;
-	CGPoint playerLocationControl;
-	uint perSideCount;
-	BOOL shouldAnimateNodes;
+	NSMutableArray* _availableTemplateNodes;
+	CC3Node* _templateNode;
+	NodeGrid* _nodeGrid;
+	CGPoint _playerDirectionControl;
+	CGPoint _playerLocationControl;
+	GLuint _perSideCount;
+	GLint _templateIndex;
+	GLuint _flapTrack;
+	BOOL _shouldAnimateNodes : 1;
 }
 
 @property(nonatomic, readonly) NSMutableArray* availableTemplateNodes;

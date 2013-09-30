@@ -37,6 +37,8 @@
 #import "CGPointExtension.h"
 #import "CC3PODResourceNode.h"
 #import "CC3UIViewController.h"
+#import "CC3UtilityMeshNodes.h"
+#import "CC3Actions.h"
 
 // Model names
 #define kNodeGridName			@"NodeGrid"
@@ -55,22 +57,17 @@
 #define kDieCubePODFile			@"DieCube.pod"
 
 
-@class CC3AnimatingVisitor;
-
-@interface CC3PerformanceScene (TemplateMethods)
--(void) layoutGrid;
--(void) updateCameraFromControls: (ccTime) dt;
-@end
-
 @implementation CC3PerformanceScene
 
-@synthesize availableTemplateNodes, templateNode, perSideCount, shouldAnimateNodes;
-@synthesize playerDirectionControl, playerLocationControl;
+@synthesize availableTemplateNodes=_availableTemplateNodes, templateNode=_templateNode;
+@synthesize perSideCount=_perSideCount, shouldAnimateNodes=_shouldAnimateNodes;
+@synthesize playerDirectionControl=_playerDirectionControl;
+@synthesize playerLocationControl=_playerLocationControl;
 
 -(void) dealloc {
-	[templateNode release];
-	[availableTemplateNodes release];
-	nodeGrid = nil;				// Not retained.
+	[_templateNode release];
+	[_availableTemplateNodes release];
+	_nodeGrid = nil;				// Not retained.
 	
 	[super dealloc];
 }
@@ -80,8 +77,8 @@
  * grid with copies of the new template node.
  */
 -(void) setTemplateNode:(CC3Node *) aNode {
-	id oldNode = templateNode;
-	templateNode = [aNode retain];
+	id oldNode = _templateNode;
+	_templateNode = [aNode retain];
 	[oldNode release];
 	[self layoutGrid];
 }
@@ -91,8 +88,15 @@
  * with the new number of copies of the template node.
  */
 -(void) setPerSideCount: (uint) aCount {
-	perSideCount = aCount;
+	_perSideCount = aCount;
 	[self layoutGrid];
+}
+
+/** When animation is turned on or off, if the node has animation, turn it on or off as well. */
+-(void) setShouldAnimateNodes: (BOOL) shouldAnimateNodes {
+	if (_shouldAnimateNodes == shouldAnimateNodes) return;
+	_shouldAnimateNodes = shouldAnimateNodes;
+	[self animationWasChanged];
 }
 
 /**
@@ -109,17 +113,14 @@
 -(void) initializeScene {
 	
 	// Improve performance by avoiding clearing the depth buffer when transitioning
-	// between 2D content and 3D content. Since we are drawing 2D content on top of
-	// the 3D content, we must also turn off depth testing when drawing 2D content.
-	self.shouldClearDepthBufferBefore2D = NO;
-	self.shouldClearDepthBufferBefore3D = NO;
-	[[CCDirector sharedDirector] setDepthTest: NO];
+	// between 2D content and 3D content.
+	self.shouldClearDepthBuffer = NO;
 	
 	// There are no translucent nodes that need to be reordered.
 	self.drawingSequencer = [CC3NodeArraySequencer sequencerWithEvaluator: [CC3LocalContentNodeAcceptor evaluator]];
 	self.drawingSequencer.allowSequenceUpdates = NO;
 
-	shouldAnimateNodes = NO;	// Start with static nodes.
+	_shouldAnimateNodes = NO;	// Start with static nodes.
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
@@ -134,28 +135,28 @@
 	[cam addChild: lamp];
 	
 	// Create the node grid and add it to the scene.
-	nodeGrid = [NodeGrid nodeWithName: kNodeGridName];
-	[self addChild: nodeGrid];
+	_nodeGrid = [NodeGrid nodeWithName: kNodeGridName];
+	[self addChild: _nodeGrid];
 	
 	// Populate the array of available templates.
-	availableTemplateNodes = [[NSMutableArray array] retain];
+	_availableTemplateNodes = [[NSMutableArray array] retain];
 	CC3Node* aNode;
+	CC3MeshNode* meshNode;
+	CC3LineNode* lineNode;
 	CC3ResourceNode* rezNode;
 	
 	// Make a simple plane template available. Only 2 faces per node.
 	CC3PlaneNode* planeNode = [CC3PlaneNode nodeWithName: @"Simple plane"];
 	[planeNode populateAsCenteredRectangleWithSize: CGSizeMake(30.0, 30.0)];
 	planeNode.texture = [CC3Texture textureFromFile: kLogoFileName];
-	[availableTemplateNodes addObject: planeNode];
+	[self configureAndAddTemplate: planeNode];
 	
 	// Make a simple box template available. Only 6 faces per node.
 	CC3BoxNode* boxNode = [CC3BoxNode nodeWithName: @"Simple box"];
-	CC3BoundingBox bBox;
-	bBox.minimum = cc3v(-10.0, -10.0, -10.0);
-	bBox.maximum = cc3v( 10.0,  10.0,  10.0);
-	[boxNode populateAsSolidBox: bBox];
+	CC3Box box = CC3BoxFromMinMax(cc3v(-10.0, -10.0, -10.0), cc3v( 10.0,  10.0,  10.0));
+	[boxNode populateAsSolidBox: box];
 	boxNode.color = ccORANGE;
-	[availableTemplateNodes addObject: boxNode];
+	[self configureAndAddTemplate: boxNode];
 
 	// Make a circular ring out of lines
 	#define kRingLineCount 36
@@ -167,82 +168,117 @@
 		ringVertices[i] = cc3v(rx, ry, 0.0);
 	}
 	ringVertices[kRingLineCount] = ringVertices[0];		// Join up to the start
-	CC3LineNode* lineNode = [CC3LineNode nodeWithName: @"Ring of lines"];
+	lineNode = [CC3LineNode nodeWithName: @"Ring of lines"];
 	[lineNode populateAsLineStripWith: (kRingLineCount + 1)
-						  vertices: ringVertices
-						 andRetain: YES];
+							 vertices: ringVertices
+							andRetain: YES];
 	lineNode.color = ccGREEN;
 	lineNode.lineWidth = 2.0;
 	lineNode.uniformScale = 10.0;
-	[availableTemplateNodes addObject: lineNode];	
+	[self configureAndAddTemplate: lineNode];
 	
 	// Mascot model from POD resource.
-	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile];
+	rezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
+			  expectsVerticallyFlippedTextures: YES];
 	aNode = [rezNode getNodeNamed: kMascotName];
-	[aNode remove];
 	aNode.name = @"Complex textured mesh with high face-count";
 	aNode.rotation = cc3v(0.0, -90.0, 0.0);
 	aNode.uniformScale = 5.0;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 	
 	// Die cube model from POD resource.
 	rezNode = [CC3PODResourceNode nodeFromFile: kDieCubePODFile];
 	aNode = [rezNode getNodeNamed: kDieCubeName];
-	[aNode remove];
 	aNode.name = @"Untextured mesh with very high face-count";
 	aNode.uniformScale = 10.0;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 	
 	// Globe with texture
-	CC3MeshNode* meshNode = [CC3MeshNode nodeWithName: kGlobeName];
+	meshNode = [CC3MeshNode nodeWithName: kGlobeName];
 	[meshNode populateAsSphereWithRadius: 1.0f andTessellation: CC3TessellationMake(32, 32)];
 	meshNode.texture = [CC3Texture textureFromFile: kGlobeTextureFile];
 	meshNode.name = @"Textured sphere with high face-count";
 	meshNode.rotation = cc3v(0.0, -90.0, 0.0);	// starting rotation
 	meshNode.uniformScale = 15.0;
-	[availableTemplateNodes addObject: meshNode];
+	[self configureAndAddTemplate: meshNode];
 	
 	// Beachball with no texture, but with several subnodes
 	rezNode = [CC3PODResourceNode nodeFromFile: kBeachBallFileName];
 	aNode = [rezNode getNodeNamed: kBeachBallName];
-	[aNode remove];
 	aNode.name = @"Opaque ball containing 4 subnodes";
 	aNode.uniformScale = 15.0;
 	aNode.isOpaque = YES;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 
 	// Translucent beachball
 	aNode = [aNode copy];
 	aNode.name = @"Translucent ball containing 4 subnodes";
 	aNode.isOpaque = NO;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 	
 	// Make a blue teapot template available.
 	aNode = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: @"Single-color teapot" withColor: kCCC4FBlue];
 	aNode.uniformScale = 100.0;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 	
 	// Make a multicolored teapot template available.
 	aNode = [[CC3ModelSampleFactory factory] makeMultiColoredTeapotNamed: @"Vertex-colored teapot"];
 	aNode.uniformScale = 100.0;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
 	
 	// Make a textured teapot template available.
-	aNode = [[CC3ModelSampleFactory factory] makeLogoTexturedTeapotNamed: @"Textured teapot"];
-	aNode.uniformScale = 100.0;
-	[availableTemplateNodes addObject: aNode];
+	meshNode = [CC3ModelSampleFactory.factory makeTexturableTeapotNamed: @"Textured teapot"];
+	meshNode.texture = [CC3Texture textureFromFile: kLogoFileName];
+	meshNode.uniformScale = 100.0;
+	[self configureAndAddTemplate: meshNode];
 
 	// Make a model template with a large number of faces available.
 	rezNode = [CC3PODResourceNode nodeFromFile: kHelloWorldFileName];
 	aNode = [rezNode getNodeNamed: kHelloWorldName];
-	[aNode remove];
-	aNode.name = @"Mesh with very high face count";
+	aNode.name = @"Mesh with high face count";
 	aNode.uniformScale = 12.0;
-	[availableTemplateNodes addObject: aNode];
+	[self configureAndAddTemplate: aNode];
+	
+	// Animated dragon from POD resource
+	// The model animation that was loaded from the POD into track zero is a concatenation of
+	// several separate movements, such as gliding and flapping. Extract the distinct movements
+	// from the base animation and add those distinct movement animations as separate tracks.
+	rezNode = [CC3PODResourceNode nodeFromFile: @"Dragon.pod"];
+	aNode = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
+	aNode.name = @"Skinned mesh with many animated bones.";
+	aNode.uniformScale = 0.5;
+	_flapTrack = [aNode addAnimationFromFrame: 61 toFrame: 108];
+	[self configureAndAddTemplate: aNode];
 	
 	// Start with one copy of the first available template node.
-	self.templateNode = (CC3Node*)[availableTemplateNodes objectAtIndex: 0];
+	_templateIndex = 0;
+	self.templateNode = (CC3Node*)[_availableTemplateNodes objectAtIndex: _templateIndex];
 	self.perSideCount = 1;
+}
+
+/**
+ * Provides standard configuration for the specified template model,
+ * and add it to the list of templates.
+ */
+-(void) configureAndAddTemplate: (CC3Node*) templateNode {
+	[templateNode createGLBuffers];
+	[templateNode releaseRedundantContent];
+	[templateNode selectShaderPrograms];
+	[_availableTemplateNodes addObject: templateNode];
+}
+
+
+#pragma mark Updating
+
+-(void) animationWasChanged {
+	if ( !_templateNode.containsAnimation) return;
+
+	if (_shouldAnimateNodes) {
+		CC3Animate* flap = [CC3Animate actionWithDuration: 1.5 onTrack: _flapTrack];
+		[self runAction: [CCRepeatForever actionWithAction: flap]];
+	} else {
+		[self stopAllActions];
+	}
 }
 
 /** 
@@ -260,10 +296,12 @@
 /** Update the location and direction of looking of the 3D camera */
 -(void) updateCameraFromControls: (ccTime) dt {
 	
+	CC3Camera* cam = self.activeCamera;
+	
 	// Update the location of the player (the camera)
-	if ( playerLocationControl.x || playerLocationControl.y ) {
+	if ( _playerLocationControl.x || _playerLocationControl.y ) {
 		// Get the X-Y delta value of the control and scale it to something suitable
-		CGPoint delta = ccpMult(playerLocationControl, dt * 100.0);
+		CGPoint delta = ccpMult(_playerLocationControl, dt * 100.0);
 		
 		// We want to move the camera up and down and side to side. Up will always be
 		// scene up (typically Y-axis), and side to side will be a line in the X-Z plane
@@ -271,56 +309,42 @@
 		// the X-Z plane, for convenience, combine these two axes (scene up and camera right)
 		// into a single control vector by simply adding them. You could also run these
 		// calculations independently instead of combining into one vector.
-		CC3Vector controlVector = CC3VectorAdd(activeCamera.rightDirection, activeCamera.referenceUpDirection);
+		CC3Vector controlVector = CC3VectorAdd(cam.rightDirection, _activeCamera.referenceUpDirection);
 		
 		// Scale the control vector by the control delta, using the X-component of the control
 		// delta value for both the X and Z axes of the camera's right vector. This represents
 		// the movement of the camera. The new location is simply the old location plus the movement.
-		activeCamera.location = CC3VectorAdd(activeCamera.location,
-											 CC3VectorScale(controlVector,
-															cc3v(delta.x, delta.y, delta.x)));
+		cam.location = CC3VectorAdd(cam.location, CC3VectorScale(controlVector,
+																 cc3v(delta.x, delta.y, delta.x)));
 	}
 	
 	// Update the direction the camera is pointing by panning and inclining.
-	if ( playerDirectionControl.x || playerDirectionControl.y ) {
-		CGPoint delta = ccpMult(playerDirectionControl, dt * 30.0);		// Factor to set speed of rotation.
-		CC3Vector camRot = activeCamera.rotation;
+	if ( _playerDirectionControl.x || _playerDirectionControl.y ) {
+		CGPoint delta = ccpMult(_playerDirectionControl, dt * 30.0);		// Factor to set speed of rotation.
+		CC3Vector camRot = cam.rotation;
 		camRot.y -= delta.x;
 		camRot.x += delta.y;
-		activeCamera.rotation = camRot;	
+		cam.rotation = camRot;
 	}
 }
 
 /** Layout (perSideCount * perSideCount) copies of the templateNode into a grid. */
--(void) layoutGrid {
-	[nodeGrid populateWith: self.templateNode perSide: self.perSideCount];
-}
+-(void) layoutGrid { [_nodeGrid populateWith: self.templateNode perSide: self.perSideCount]; }
 
--(void) increaseNodes {
-	self.perSideCount += 2;
-}
+-(void) increaseNodes { self.perSideCount++; }
 
--(void) decreaseNodes {
-	uint perSide = self.perSideCount;
-	if (perSide > 2) {
-		self.perSideCount = self.perSideCount - 2;
-	}
-}
+-(void) decreaseNodes { self.perSideCount = MAX(self.perSideCount - 1, 1); }
 
 -(void) nextNodeType {
-	int nextIndex = [availableTemplateNodes indexOfObjectIdenticalTo: self.templateNode] + 1;
-	if (nextIndex >= availableTemplateNodes.count) {
-		nextIndex = 0;
-	}
-	self.templateNode = [availableTemplateNodes objectAtIndex: nextIndex];
+	_templateIndex++;
+	if (_templateIndex >= _availableTemplateNodes.count) _templateIndex = 0;
+	self.templateNode = [_availableTemplateNodes objectAtIndex: _templateIndex];
 }
 
 -(void) prevNodeType {
-	int prevIndex = [availableTemplateNodes indexOfObjectIdenticalTo: self.templateNode] - 1;
-	if (prevIndex < 0) {
-		prevIndex = availableTemplateNodes.count - 1;
-	}
-	self.templateNode = [availableTemplateNodes objectAtIndex: prevIndex];
+	_templateIndex--;
+	if (_templateIndex < 0) _templateIndex = _availableTemplateNodes.count - 1;
+	self.templateNode = [_availableTemplateNodes objectAtIndex: _templateIndex];
 }
 
 /**
@@ -330,9 +354,7 @@
  * If the nodes should be animated, use a CC3AnimatingVisitor instance, otherwise use
  * a normal CC3NodeUpdatingVisitor instance.
  */
--(id) updateVisitorClass {
-	return [CC3AnimatingVisitor class];
-}
+-(id) updateVisitorClass { return [CC3AnimatingVisitor class]; }
 
 @end
 
@@ -351,13 +373,11 @@
  * the same name. For speed, the names are tested for identity, rather than content.
  */
 -(BOOL) nodeIsFromTemplate: (CC3Node*) aNode {
-	return (aNode.name == ((CC3PerformanceScene*)startingNode).templateNode.name);
+	return (aNode.name == ((CC3PerformanceScene*)self.startingNode).templateNode.name);
 }
 
 /** Returns whether the nodes should be animated. */
--(BOOL) shouldAnimateNodes {
-	return ((CC3PerformanceScene*)startingNode).shouldAnimateNodes;
-}
+-(BOOL) shouldAnimateNodes { return ((CC3PerformanceScene*)self.startingNode).shouldAnimateNodes; }
 
 /**
  * If the node is one of the copies of the template node, rotate it a bit.
@@ -365,11 +385,12 @@
  * so that each template copy rotates a little differently than any of the others.
  */
 -(void) processBeforeChildren: (CC3Node*) aNode {
-	if (self.shouldAnimateNodes && [self nodeIsFromTemplate: aNode]) {
+	if (self.shouldAnimateNodes && [self nodeIsFromTemplate: aNode] && !aNode.containsAnimation ) {
+		ccTime dt = self.deltaTime;
 		GLfloat direction = SIGN((GLfloat)(aNode.tag % 2) - 0.5);
 		GLfloat magnitude = (GLfloat)(aNode.tag % 8) + 4;
-		CC3Vector deltaRot = cc3v(direction * magnitude * 5.0 * deltaTime,
-								  direction * magnitude * 7.0 * deltaTime,
+		CC3Vector deltaRot = cc3v(direction * magnitude * 5.0 * dt,
+								  direction * magnitude * 7.0 * dt,
 								  0.0);
 		aNode.rotation = CC3VectorAdd(aNode.rotation, deltaRot);
 	}
