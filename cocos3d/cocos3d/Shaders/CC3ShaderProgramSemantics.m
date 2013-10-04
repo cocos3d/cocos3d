@@ -68,8 +68,10 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		case kCC3SemanticHasVertexTextureCoordinate: return @"kCC3SemanticHasVertexTextureCoordinate";
 		case kCC3SemanticHasVertexPointSize: return @"kCC3SemanticHasVertexPointSize";
 		case kCC3SemanticIsDrawingPoints: return @"kCC3SemanticIsDrawingPoints";
+		case kCC3SemanticShouldDrawFrontFaces: return @"kCC3SemanticShouldDrawFrontFaces";
+		case kCC3SemanticShouldDrawBackFaces: return @"kCC3SemanticShouldDrawBackFaces";
 
-		// ENVIRONMENT MATRICES --------------
+			// ENVIRONMENT MATRICES --------------
 		case kCC3SemanticModelLocalMatrix: return @"kCC3SemanticModelLocalMatrix";
 		case kCC3SemanticModelLocalMatrixInv: return @"kCC3SemanticModelLocalMatrixInv";
 		case kCC3SemanticModelLocalMatrixInvTran: return @"kCC3SemanticModelLocalMatrixInvTran";
@@ -383,6 +385,12 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 			return YES;
 		case kCC3SemanticIsDrawingPoints:
 			[uniform setBoolean: visitor.currentMeshNode.drawingMode == GL_POINTS];
+			return YES;
+		case kCC3SemanticShouldDrawFrontFaces:
+			[uniform setBoolean: !visitor.currentMeshNode.shouldCullFrontFaces];
+			return YES;
+		case kCC3SemanticShouldDrawBackFaces:
+			[uniform setBoolean: !visitor.currentMeshNode.shouldCullBackFaces];
 			return YES;
 
 #pragma mark Setting environment matrix semantics
@@ -1131,16 +1139,18 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 		[self mapVarName: [NSString stringWithFormat: @"a_cc3TexCoord%u", tuIdx] toSemantic: kCC3SemanticVertexTexture at: tuIdx];	/**< Vertex texture coordinate for a texture unit. */
 	
 	// VERTEX STATE --------------
-	[self mapVarName: @"u_cc3VertexHasNormal" toSemantic: kCC3SemanticHasVertexNormal];					/**< (bool) Whether a vertex normal is available. */
-	[self mapVarName: @"u_cc3VertexHasTangent" toSemantic: kCC3SemanticHasVertexTangent];				/**< (bool) Whether a vertex tangent is available. */
-	[self mapVarName: @"u_cc3VertexHasBitangent" toSemantic: kCC3SemanticHasVertexBitangent];			/**< (bool) Whether a vertex bitangent is available. */
-	[self mapVarName: @"u_cc3VertexHasColor" toSemantic: kCC3SemanticHasVertexColor];					/**< (bool) Whether a vertex color is available. */
-	[self mapVarName: @"u_cc3VertexHasWeights" toSemantic: kCC3SemanticHasVertexWeight];				/**< (bool) Whether a vertex weight is available. */
-	[self mapVarName: @"u_cc3VertexHasMatrixIndices" toSemantic: kCC3SemanticHasVertexMatrixIndex];		/**< (bool) Whether a vertex matrix index is available. */
-	[self mapVarName: @"u_cc3VertexHasTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];	/**< (bool) Whether a vertex texture coordinate is available. */
-	[self mapVarName: @"u_cc3VertexHasPointSize" toSemantic: kCC3SemanticHasVertexPointSize];			/**< (bool) Whether a vertex point size is available. */
+	[self mapVarName: @"u_cc3VertexHasNormal" toSemantic: kCC3SemanticHasVertexNormal];							/**< (bool) Whether a vertex normal is available. */
+	[self mapVarName: @"u_cc3VertexHasTangent" toSemantic: kCC3SemanticHasVertexTangent];						/**< (bool) Whether a vertex tangent is available. */
+	[self mapVarName: @"u_cc3VertexHasBitangent" toSemantic: kCC3SemanticHasVertexBitangent];					/**< (bool) Whether a vertex bitangent is available. */
+	[self mapVarName: @"u_cc3VertexHasColor" toSemantic: kCC3SemanticHasVertexColor];							/**< (bool) Whether a vertex color is available. */
+	[self mapVarName: @"u_cc3VertexHasWeights" toSemantic: kCC3SemanticHasVertexWeight];						/**< (bool) Whether a vertex weight is available. */
+	[self mapVarName: @"u_cc3VertexHasMatrixIndices" toSemantic: kCC3SemanticHasVertexMatrixIndex];				/**< (bool) Whether a vertex matrix index is available. */
+	[self mapVarName: @"u_cc3VertexHasTexCoord" toSemantic: kCC3SemanticHasVertexTextureCoordinate];			/**< (bool) Whether a vertex texture coordinate is available. */
+	[self mapVarName: @"u_cc3VertexHasPointSize" toSemantic: kCC3SemanticHasVertexPointSize];					/**< (bool) Whether a vertex point size is available. */
 	[self mapVarName: @"u_cc3VertexShouldNormalizeNormal" toSemantic: kCC3SemanticShouldNormalizeVertexNormal];	/**< (bool) Whether vertex normals should be normalized. */
-	[self mapVarName: @"u_cc3VertexShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];	/**< (bool) Whether vertex normals should be rescaled. */
+	[self mapVarName: @"u_cc3VertexShouldRescaleNormal" toSemantic: kCC3SemanticShouldRescaleVertexNormal];		/**< (bool) Whether vertex normals should be rescaled. */
+	[self mapVarName: @"u_cc3VertexShouldDrawFrontFaces" toSemantic: kCC3SemanticShouldDrawFrontFaces];			/**< (bool) Whether the front side of each face is to be drawn. */
+	[self mapVarName: @"u_cc3VertexShouldDrawBackFaces" toSemantic: kCC3SemanticShouldDrawBackFaces];			/**< (bool) Whether the back side of each face is to be drawn. */
 	
 	// ENVIRONMENT MATRICES --------------
 	[self mapVarName: @"u_cc3MatrixModelLocal" toSemantic: kCC3SemanticModelLocalMatrix];					/**< (mat4) Current model-to-parent matrix. */
@@ -1259,7 +1269,7 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic) {
 	
 	// MODEL ----------------
 	[self mapVarName: @"u_cc3ModelCenterOfGeometry" toSemantic: kCC3SemanticCenterOfGeometry];		/**< (vec3) The center of geometry of the model in the model's local coordinates. */
-	[self mapVarName: @"u_cc3ModelBoundingRadius" toSemantic: kCC3SemanticBoundingRadius];			/**< (vec3) The minimum corner of the model's bounding box in the model's local coordinates. */
+	[self mapVarName: @"u_cc3ModelBoundingRadius" toSemantic: kCC3SemanticBoundingRadius];			/**< (float) The radius of a sphere, located at the center of geometry, that encompasses all of the vertices, in the model's local coordinates. */
 	[self mapVarName: @"u_cc3ModelBoundingBoxMinimum" toSemantic: kCC3SemanticBoundingBoxMin];		/**< (vec3) The maximum corner of the model's bounding box in the model's local coordinates. */
 	[self mapVarName: @"u_cc3ModelBoundingBoxMaximum" toSemantic: kCC3SemanticBoundingBoxMax];		/**< (vec3) The dimensions of the model's bounding box in the model's local coordinates. */
 	[self mapVarName: @"u_cc3ModelBoundingBoxSize" toSemantic: kCC3SemanticBoundingBoxSize];		/**< (float) The radius of the model's bounding sphere in the model's local coordinates. */

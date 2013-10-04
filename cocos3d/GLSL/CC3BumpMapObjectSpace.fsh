@@ -45,12 +45,6 @@
 // Increase this if more textures are desired.
 #define MAX_TEXTURES			2
 
-// Fog modes.
-#define GL_LINEAR                 0x2601
-#define GL_EXP                    0x0800
-#define GL_EXP2                   0x0801
-
-
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
@@ -68,65 +62,55 @@ uniform lowp vec4	u_cc3TextureUnitColor[MAX_TEXTURES];	/**< Constant color of th
 
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-
-//-------------- CONSTANTS ----------------------
-const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
-
-//-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
-
+varying vec2		v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4	v_color;					/**< Fragment front-face color. */
+varying lowp vec4	v_colorBack;				/**< Fragment back-face color. */
+varying highp float v_distEye;					/**< Fragment distance in eye coordinates. */
 
 //-------------- FUNCTIONS ----------------------
 
 /**
- * Applies the texel from the bump map texture, using the specified texture fragment
- * and texture unit constant color.
- *
- * The light direction comes from the texture unit color, but is in range [0, 1].
- * Transforms the normal and light direction from range [0, 1] to [-1, 1], take dot product
- * for interaction between normal and light vector, sets it into each of the RGB components,
- * and modulates the fragment color.
+ * Returns the texel modulation from the normal retrieved from the bump map texture and the light
+ * direction taken from the texture unit constant color. Transforms the normal from range [0, 1] to
+ * [-1, 1], takes dot product for interaction between normal and light vector, and returns the result.
  */
-void applyBumpMapTexel(vec4 texColor, vec4 tuColor) {
-	fragColor.rgb *= vec3(4.0 * dot(texColor.rgb - kVec3Half, tuColor.rgb - kVec3Half));
+float bumpMapModulation(vec4 texNormal, vec4 ltDir) {
+	return 4.0 * dot((texNormal.xyz - 0.5), (ltDir.xyz - 0.5));
 }
 
-/** Applies the texel from the visible texture using simple modulation. */
-void applyVisibleTexel(vec4 texColor) { fragColor *= texColor; }
-
 /** Applies fog to the specified color and returns the adjusted color. */
-vec4 fogify(vec4 aColor) {
-	if (u_cc3FogIsEnabled) {
-		int mode = u_cc3FogAttenuationMode;
-		float vtxVisibility = 1.0;
-		
-		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-		} else if (mode == GL_EXP) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-d);
-		} else if (mode == GL_EXP2) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-(d * d));
-		}
-		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
+lowp vec4 fogify(lowp vec4 aColor) {
+	
+#	define GL_LINEAR                 0x2601
+#	define GL_EXP                    0x0800
+#	define GL_EXP2                   0x0801
+	
+	if ( !u_cc3FogIsEnabled ) return aColor;
+	
+	// Determine visibility based on fog attentuation characteristics and distance through fog
+	float visibility = 1.0;
+	if (u_cc3FogAttenuationMode == GL_LINEAR) {
+		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
+	} else if (u_cc3FogAttenuationMode == GL_EXP) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-d);
+	} else if (u_cc3FogAttenuationMode == GL_EXP2) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-(d * d));
 	}
+	visibility = clamp(visibility, 0.0, 1.0);
+	
+	// Mix alpha-adjusted fog color into fragment color based on visibility.
+	aColor.rgb = mix(u_cc3FogColor.rgb * aColor.a, aColor.rgb, visibility);
 	return aColor;
 }
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	fragColor = v_color;
-
-	if (u_cc3TextureCount > 0)
-		applyBumpMapTexel(texture2D(s_cc3Textures[0], v_texCoord[0]), u_cc3TextureUnitColor[0]);
-
-	if (u_cc3TextureCount > 1)
-		applyVisibleTexel(texture2D(s_cc3Textures[1], v_texCoord[1]));
-
+	lowp vec4 fragColor = gl_FrontFacing ? v_color : v_colorBack;
+	
+	if (u_cc3TextureCount > 1) fragColor *= texture2D(s_cc3Textures[1], v_texCoord[1]);
+	fragColor.rgb *= bumpMapModulation(texture2D(s_cc3Textures[0], v_texCoord[0]), u_cc3TextureUnitColor[0]);
+	
 	gl_FragColor = fogify(fragColor);
 }

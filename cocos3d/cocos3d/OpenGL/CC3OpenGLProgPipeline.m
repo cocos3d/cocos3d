@@ -330,6 +330,15 @@
 }
 
 
+#pragma mark Platform limits & info
+
+-(GLuint) maxNumberOfVertexShaderUniformVectors { return value_GL_MAX_VERTEX_UNIFORM_VECTORS; }
+
+-(GLuint) maxNumberOfFragmentShaderUniformVectors { return value_GL_MAX_FRAGMENT_UNIFORM_VECTORS; }
+
+-(GLuint) maxNumberOfShaderProgramVaryingVectors { return value_GL_MAX_VARYING_VECTORS; }
+
+
 #pragma mark Aligning 2D & 3D state
 
 -(void) align2DStateCache {
@@ -357,6 +366,13 @@
 
 
 #pragma mark Allocation and initialization
+
+-(id) initWithName: (NSString*) aName asPrimaryContext: (BOOL) isPrimaryContext {
+	if ( (self = [super initWithName: aName asPrimaryContext: isPrimaryContext]) ) {
+		[self initShaderProgramPrewarmer];
+	}
+	return self;
+}
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];

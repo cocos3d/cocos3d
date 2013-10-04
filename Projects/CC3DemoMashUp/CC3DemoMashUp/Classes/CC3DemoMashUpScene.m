@@ -273,7 +273,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 }
 
 /** Define a thread-pausing macro. */
-# define DramaticPause()			[NSThread sleepForTimeInterval: 0.75f]
+#define kDramaticPauseDuration	0.25f
+#define DramaticPause()			[NSThread sleepForTimeInterval: kDramaticPauseDuration]
 
 /**
  * Adds additional scene content dynamically and asynchronously.
@@ -379,6 +380,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Remove the pre-loaded PFX resources, now that we no longer need them.
 	// Other weakly-cached PFX resources will have been automatically removed already.
 	[CC3PFXResource removeAllResources];
+
+	LogRez(@"Finished loading on background thread!");
 }
 
 /**
@@ -493,8 +496,10 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// the texture, creating the mipmap, and caching the texture here, we can avoid the delay.
 	// All other textures are loaded on the background thread.
 	CC3Texture.isPreloading = YES;
-	[CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
 	[CC3Texture textureFromFile: @"Arial32BMGlyph.png"];
+#if !CC3_OGLES_1
+	[CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
+#endif	// !CC3_OGLES_1
 	CC3Texture.isPreloading = NO;
 }
 
@@ -646,8 +651,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	aNode.shouldDrawAllLocalContentWireframeBoxes = YES;
 //	aNode.shouldDrawAllWireframeBoxes = YES;
 	
-	// Use a standard CCAction to fade the node in over the specified duration
-	if (duration > 0.0f) [aNode runAction: [CCFadeIn actionWithDuration: duration]];
+	// Use a standard CCFadeIn to fade the node in over the specified duration
+	if (duration > 0.0f) {
+		aNode.opacity = 0;	// Needed for cocos2d 1.x, which doesn't start fade-in from zero opacity
+		[aNode runAction: [CCFadeIn actionWithDuration: duration]];
+	}
 }
 
 /** 
@@ -993,11 +1001,11 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
+	_teapotTextured.material.reflectivity = 0.7;	// Modify this (0-1) to change how reflective the teapot is
 #endif	// !CC3_OGLES_1
 
 	// Add a brushed metal texture (with or without the reflective texture added above).
 	[_teapotTextured addTexture: [CC3Texture textureFromFile: @"tex_base.png"]];
-	_teapotTextured.material.reflectivity = 1.0;
 	_teapotTextured.shouldUseLighting = NO;		// Ignore lighting to highlight reflections demo
 	
 	// Add a second rainbow-colored teapot as a satellite of the reflective teapot.
@@ -1042,6 +1050,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * texture even if the skybox itself is not added.
  */
 -(void) addSkyBox {
+#if !CC3_OGLES_1
 	CC3MeshNode* skyBox = [CC3SphereNode nodeWithName: @"SkyBox"];
 	[skyBox populateAsSphereWithRadius: 1600.0f andTessellation: CC3TessellationMake(24, 24)];
 	skyBox.shouldCullBackFaces = NO;
@@ -1054,6 +1063,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 //	skyBox.texture = [CC3Texture textureFromFile: @"Skybox.pvr"];
 
 	[_ground remove];	// Remove the ground, because the skybox already includes a ground
+#endif	// !CC3_OGLES_1
 }
 
 /**
@@ -1169,7 +1179,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  * direction, since it is a directional light).
  */
 -(void) addLightMarker {
-	_teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName withColor: kCCC4FWhite];
+	_teapotWhite = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotWhiteName
+																	withColor: kCCC4FWhite];
 	_teapotWhite.uniformScale = 200.0;
 	_teapotWhite.touchEnabled = YES;		// allow this node to be selected by touch events
 	
@@ -1203,7 +1214,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bmLabel.rotation = cc3v(0.0, 180.0, 0.0);
 	bmLabel.uniformScale = 2.0;
 	bmLabel.color = ccc3(0, 220, 120);
-	bmLabel.shouldUseLighting = NO;
 	bmLabel.shouldCullBackFaces = NO;			// Show from behind as well.
 	bmLabel.shouldBlendAtFullOpacity = YES;		// We're fading in, so ensure blending remains
 	bmLabel.touchEnabled = YES;
@@ -1221,7 +1231,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 											 fontSize: 18.0];
 	CC3Billboard* bb = [CC3Billboard nodeWithName: kBillboardName withBillboard: bbLabel];
 	bb.color = ccYELLOW;
-	bb.shouldUseLighting = NO;
 	
 	// The billboard is a one-sided rectangular mesh, and would not normally be visible
 	// from the back side. This is not an issue, since it is configured to always face
@@ -1342,7 +1351,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	CC3Billboard* bb = [CC3Billboard nodeWithName: kSignLabelName withBillboard: bbLabel];
 	bb.location = cc3v( 0.0, -90.0, 0.0 );
 	bb.color = ccMAGENTA;
-	bb.shouldUseLighting = NO;
 	[_woodenSign addChild: bb];
 	
 	// Allow the wooden sign to be viewed when the camera goes behind.
@@ -1541,7 +1549,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// and track the camera in 3D. The sun can be occluded by other nodes between
 	// it and the camera.
 
-	bb.shouldUseLighting = NO;		// Sun material not affected by lighting!
 	bb.uniformScale = 3.0;			// Find a suitable size
 
 	// 2D particle systems do not have a real contentSize and boundingBox, so we need to
@@ -1798,7 +1805,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// This is done by locating the mesh nodes within the figure, adding a static cube-map
 	// environment-map texture to each, and setting the reflectivity of each mesh node.
 	CC3Material* mat;
-	GLfloat lbReflect = 1.0;	// You can lower the reflectivity towards zero to show some of the runner's suit.
+	GLfloat lbReflect = 0.8;	// Move towards 0 to show more of the runner's suit...
+								// ...move towards 1 to make him more reflective.
 	CC3Texture* emTex = [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
 	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
 	[mat addTexture: emTex];
@@ -2374,6 +2382,18 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_dragon = [dgnRez getNodeNamed: @"Dragon.pod-SoftBody"];
 	_dragon.touchEnabled = YES;
 	
+#if !CC3_GLSL
+	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
+	// mapping texture that is applied to the dragon, and the result is that the dragon
+	// looks black. Extract the diffuse texture (from texture unit 1), remove all texture,
+	// and set the diffuse texture as the only texture (in texture unit 0).
+	CC3MeshNode* dgnBody = [_dragon getMeshNodeNamed: @"Dragon"];
+	CC3Material* dgnMat = dgnBody.material;
+	CC3Texture* dgnTex = [dgnMat textureForTextureUnit: 1];
+	[dgnMat removeAllTextures];
+	dgnMat.texture = dgnTex;
+#endif
+	
 	// The model animation that was loaded from the POD into track zero is a concatenation of
 	// several separate movements, such as gliding and flapping. Extract the distinct movements
 	// from the base animation and add those distinct movement animations as separate tracks.
@@ -2447,7 +2467,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// bump-mapping. The shaders in the PFX file are simpler than the default shaders and do not
 	// interact with material and lighting as effectively, and are therefore not as accurate.
 	// To load the PFX file, uncomment the following line.
-	//	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
+//	[mask applyEffectNamed: kEtchedMaskPFXEffect inPFXResourceFile: kMasksPFXFile];
 	
 	mask.uniformScale = 4.0;
 	mask.location = cc3v(-750.0, 50.0, -500.0);
@@ -2493,7 +2513,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the explosion and the camera.
 
 	bb.uniformScale = 0.25 * (1.0 / aNode.uniformScale);	// Find a suitable scale
-	bb.shouldUseLighting = NO;								// Solid coloring
 	bb.shouldInheritTouchability = NO;						// Don't allow flames to be touched
 
 	// If the 2D particle system uses point particles instead of quads, attenuate the
@@ -3386,8 +3405,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Make sure the projected touch is in front of the camera, not behind it
 	// (ie- cam is facing towards, not away from, the ground)
 	if (touchLoc.w > 0.0) {
-		CC3MeshNode* tp = [[_teapotWhite copyWithName: kTeapotOrangeName] autorelease];
-		tp.color = ccORANGE;
+		CC3MeshNode* tp = [[CC3ModelSampleFactory factory] makeUniColoredTeapotNamed: kTeapotOrangeName
+																		   withColor: kCCC4FOrange];
+		tp.uniformScale = 200.0;
 		tp.location = CC3VectorFromTruncatedCC3Vector4(touchLoc);
 		
 		[self addExplosionTo: tp];	// For effect, add an explosion as the teapot is placed

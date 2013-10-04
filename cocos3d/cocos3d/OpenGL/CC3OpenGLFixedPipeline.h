@@ -116,6 +116,8 @@
 	GLenum value_GL_MATRIX_MODE;
 	GLuint value_GL_MATRIX_PALETTE;
 
+	BOOL value_GL_LIGHT_MODEL_TWO_SIDE : 1;
+
 	BOOL valueCap_GL_ALPHA_TEST : 1;
 	BOOL valueCap_GL_COLOR_LOGIC_OP : 1;
 	BOOL valueCap_GL_COLOR_MATERIAL : 1;
@@ -156,6 +158,7 @@
 	BOOL isKnownAlphaFunc : 1;
 
 	BOOL isKnown_GL_LIGHT_MODEL_AMBIENT : 1;
+	BOOL isKnown_GL_LIGHT_MODEL_TWO_SIDE : 1;
 	BOOL isKnown_GL_FOG_COLOR : 1;
 	BOOL isKnown_GL_FOG_MODE : 1;
 	BOOL isKnown_GL_FOG_DENSITY : 1;

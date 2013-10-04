@@ -126,6 +126,15 @@
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+	
+	value_GL_MAX_VERTEX_UNIFORM_VECTORS = [self getInteger: GL_MAX_VERTEX_UNIFORM_COMPONENTS] / 4;
+	LogInfoIfPrimary(@"Maximum GLSL uniform vectors per vertex shader: %u", value_GL_MAX_VERTEX_UNIFORM_VECTORS);
+	
+	value_GL_MAX_FRAGMENT_UNIFORM_VECTORS = [self getInteger: GL_MAX_FRAGMENT_UNIFORM_COMPONENTS] / 4;
+	LogInfoIfPrimary(@"Maximum GLSL uniform vectors per fragment shader: %u", value_GL_MAX_FRAGMENT_UNIFORM_VECTORS);
+	
+	value_GL_MAX_VARYING_VECTORS = [self getInteger: GL_MAX_VARYING_FLOATS] / 4;
+	LogInfoIfPrimary(@"Maximum GLSL varying vectors per shader program: %u", value_GL_MAX_VARYING_VECTORS);
 
 	// Ensure texture units not larger than the fixed pipeline texture units,
 	// regardless of whether fixed or programmable pipeline is in effect.

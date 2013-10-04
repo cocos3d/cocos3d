@@ -115,6 +115,32 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 @property(nonatomic, readonly) GLint size;
 
 /**
+ * Returns the number of memory storage elements consumed by each instance of this variable.
+ *
+ * The value returned is dependent on the type property:
+ *   - scalar types consume 1 storage element per instance
+ *   - vector types consume 2, 3 or 4 storage elements per instance
+ *   - matrix types consume 4, 9 or 16 storage elements per instance
+ *
+ * If this variable represents an array (the size property returns a value greater than one),
+ * the value returned by this property indicates the number of storage elements required for
+ * a single component of the array. By contrast, the storageElementCount property returns the
+ * total number of storage elements required for the entire array.
+ */
+@property(nonatomic, readonly) GLuint typeStorageElementCount;
+
+/**
+ * Returns the number of memory storage elements consumed by this variable.
+ *
+ * If this variable represents an array (the size property returns a value greater than one),
+ * the value returned by this property indicates the number of storage elements required for
+ * the entire array.
+ *
+ * Returns the result of multipying the typeStorageElementCount property by the size property.
+ */
+@property(nonatomic, readonly) GLuint storageElementCount;
+
+/**
  * A symbolic constant indicating the semantic meaning of this variable.
  *
  * The value of this property is typically one of values in the CC3Semantic enumeration,
@@ -627,6 +653,49 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 -(void) setBoolean: (BOOL) value;
 
 /**
+ * Sets the value of this boolean vector uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the
+ * first element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with more than two components, the
+ * remaining components are set to zero.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY;
+
+/**
+ * Sets the value of this boolean vector uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the
+ * first element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with fewer than three components, the X & Y
+ * components will be used. If the type property indicates a vector type with more than three
+ * components, fourth component is set to zero.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ;
+
+/**
+ * Sets the value of this boolean vector uniform to the specified value.
+ *
+ * If this uniform has been declared as an array, this method sets the value of the
+ * first element in the array.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with fewer than four components, the X & Y,
+ * or X, Y & Z components are used.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ andW: (BOOL) bW;
+
+/**
  * Sets the element at the specified index in this uniform to the specified value.
  *
  * The specified index must be less than the value of the size property. This method may
@@ -639,6 +708,52 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
  * remaining components are set to zero.
  */
 -(void) setBoolean: (BOOL) value at: (GLuint) index;
+
+/**
+ * Sets the element at the specified index of this boolean vector uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with more than two components, the
+ * remaining components are set to zero.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY at: (GLuint) index;
+
+/**
+ * Sets the element at the specified index of this boolean vector uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with fewer than three components, the X & Y
+ * components will be used. If the type property indicates a vector type with more than three
+ * components, fourth component is set to zero.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ at: (GLuint) index;
+
+/**
+ * Sets the element at the specified index of this boolean vector uniform to the specified value.
+ *
+ * The specified index must be less than the value of the size property. This method may
+ * still be used when this uniform has not been declared as an array. In this case, the
+ * value of the size property will be one, and so the specified index must be zero.
+ *
+ * The type property of this instance can be any value other than one of matrix types.
+ * If the type property indicates a float type, the booleans are converted to floats.
+ * If the type property indicates a scalar, the X component is used.
+ * If the type property indicates a vector type with fewer than four components, the X & Y,
+ * or X, Y & Z components are used.
+ */
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ andW: (BOOL) bW at: (GLuint) index;
 
 /**
  * Sets the value of this uniform to the specified value.

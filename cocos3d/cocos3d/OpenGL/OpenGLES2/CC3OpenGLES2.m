@@ -128,7 +128,18 @@
 
 -(void) initPlatformLimits {
 	[super initPlatformLimits];
+	
+	value_GL_MAX_VERTEX_UNIFORM_VECTORS = [self getInteger: GL_MAX_VERTEX_UNIFORM_VECTORS];
+	LogInfoIfPrimary(@"Maximum GLSL uniform vectors per vertex shader: %u", value_GL_MAX_VERTEX_UNIFORM_VECTORS);
+	
+	value_GL_MAX_FRAGMENT_UNIFORM_VECTORS = [self getInteger: GL_MAX_FRAGMENT_UNIFORM_VECTORS];
+	LogInfoIfPrimary(@"Maximum GLSL uniform vectors per fragment shader: %u", value_GL_MAX_FRAGMENT_UNIFORM_VECTORS);
+	
+	value_GL_MAX_VARYING_VECTORS = [self getInteger: GL_MAX_VARYING_VECTORS];
+	LogInfoIfPrimary(@"Maximum GLSL varying vectors per shader program: %u", value_GL_MAX_VARYING_VECTORS);
 
+	[self initShaderPrecisions];
+	
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
 	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	

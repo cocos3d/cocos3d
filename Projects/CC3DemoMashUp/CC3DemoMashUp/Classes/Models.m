@@ -485,7 +485,8 @@
  *
  * The current X-component of the vertex location defines how far around the circle the vertex
  * will be located. Dividing this by the radius determines its positional angle in radians.
- * The new X- and Z-components of the vertex location can then be determined by trigonometry.
+ * The new X- and Z-components of the vertex location can then be determined by trigonometry,
+ * and the normal is set to point radially outward.
  *
  * Finally, the origin of the mesh is moved to the center of the circle, so that when this mesh
  * is positioned or rotated, it will be relative to the center of the circle. Since this may all be done
@@ -496,10 +497,11 @@
 	for (GLuint vIdx = 0; vIdx < vtxCount; vIdx++) {
 		CC3Vector vtxLoc = [self vertexLocationAt: vIdx];
 		GLfloat angleInRads = vtxLoc.x / radius;
-		[self setVertexLocation: cc3v((radius * sinf(angleInRads)),
-									  vtxLoc.y,
-									  (radius * (cosf(angleInRads) - 1.0f)))
-							 at: vIdx];
+
+		GLfloat s = sinf(angleInRads);
+		GLfloat c = cosf(angleInRads);
+		[self setVertexLocation: cc3v((radius * s), vtxLoc.y, (radius * (c - 1.0f))) at: vIdx];
+		[self setVertexNormal: cc3v(s, 0.0f, c) at: vIdx];
 	}
 	[self moveMeshOriginTo: cc3v(0, 0, -radius)];
 	[self updateGLBuffers];

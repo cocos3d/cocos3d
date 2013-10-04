@@ -126,6 +126,8 @@ cocos3d 2.0.0 - 2013/09/30
 		- CC3Texture only generates mipmaps if texture is POT
 		- CC3Texture horizontalWrappingFunction & verticalWrappingFunction now return only GL_CLAMP_TO_EDGE when texture is NPOT
 
+- Add support for two-sided lighting, so back faces are illuminated correctly when visible.
+
 - Added tools to help automate the creation of many POD files from COLLADA and Blender:
 	- Tools available in Tools/Blender-POD Batch Converter folder
 	- Contributed by Nikita Medvedev (@medvedNick). Many thanks!

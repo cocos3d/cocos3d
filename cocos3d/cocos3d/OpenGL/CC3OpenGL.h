@@ -472,6 +472,9 @@ typedef struct {
 /** Enable/disable lighting. */
 -(void) enableLighting: (BOOL) onOff;
 
+/** Enable/disable two-sided lighting. */
+-(void) enableTwoSidedLighting: (BOOL) onOff;
+
 /** Sets the color of the ambient scene lighting. */
 -(void) setSceneAmbientLightColor: (ccColor4F) color;
 
@@ -947,6 +950,15 @@ typedef struct {
 /** Returns the maximum size for a texture used for the specified target supported by the platform. */
 -(GLuint) maxTextureSizeForTarget: (GLenum) target;
 
+/** Returns the maximum number of GLSL uniform vectors allowed in each vertex shader. */
+@property(nonatomic, readonly) GLuint maxNumberOfVertexShaderUniformVectors;
+
+/** Returns the maximum number of GLSL uniform vectors allowed in each fragment shader. */
+@property(nonatomic, readonly) GLuint maxNumberOfFragmentShaderUniformVectors;
+
+/** Returns the maximum number of GLSL varying vectors allowed in each shader program. */
+@property(nonatomic, readonly) GLuint maxNumberOfShaderProgramVaryingVectors;
+
 /**
  * Returns the minimum precision value of the shader variable of the specified type for a
  * vertex shader, or returns zero if the platform does not support shader precision modifiers.
@@ -1308,7 +1320,7 @@ void CC3SetGLCapAt(GLenum cap, GLuint idx, BOOL val, GLbitfield* stateBits, GLbi
 		var = (val);									\
 		isKnown = YES;									\
 		needsUpdate = YES;								\
-}
+	}
 
 /**
  * Macro for checking the state of a single state primitive variable and updating the cached

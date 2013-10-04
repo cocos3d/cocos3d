@@ -40,7 +40,7 @@ precision mediump float;
 
 //-------------- UNIFORMS ----------------------
 
-uniform vec4 u_cc3Color;		/**< Color when lighting & materials are not in use. */
+uniform lowp vec4 u_cc3Color;		/**< Color when lighting & materials are not in use. */
 
 void main() {
 	gl_FragColor = u_cc3Color;

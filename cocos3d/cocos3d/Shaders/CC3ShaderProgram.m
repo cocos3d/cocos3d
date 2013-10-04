@@ -86,10 +86,16 @@
 	CC3Assert([CC3OpenGL.sharedGL getShaderWasCompiled: self.shaderID],
 			  @"%@ failed to compile because:\n%@", self,
 			  [CC3OpenGL.sharedGL getLogForShader: self.shaderID]);
-	LogRez(@"Compiled %@ in %.3f ms", self, GetRezActivityDuration() * 1000);
+
+#if LOGGING_REZLOAD
+	NSString* compLog = [CC3OpenGL.sharedGL getLogForShader: self.shaderID];
+	LogRez(@"Compiled %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
+		   (compLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", compLog] : @""));
+#endif	// LOGGING_REZLOAD
+
 }
 
--(NSString*) platformPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
+-(NSString*) defaultShaderPreamble { return CC3OpenGL.sharedGL.defaultShaderPreamble; }
 
 
 #pragma mark Allocation and initialization
@@ -97,7 +103,7 @@
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	CC3Assert(aName, @"%@ cannot be created without a name", [self class]);
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		self.shaderPreamble = self.platformPreamble;
+		self.shaderPreamble = self.defaultShaderPreamble;
 	}
 	return self;
 }
@@ -281,6 +287,18 @@ static CC3Cache* _shaderCache = nil;
 
 #pragma mark Variables
 
+-(GLuint) uniformCount {
+	return (GLuint)(_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count);
+}
+
+-(GLuint) uniformStorageElementCount {
+	GLuint seCnt = 0;
+	for (CC3GLSLUniform* var in _uniformsSceneScope) seCnt += var.storageElementCount;
+	for (CC3GLSLUniform* var in _uniformsNodeScope) seCnt += var.storageElementCount;
+	for (CC3GLSLUniform* var in _uniformsDrawScope) seCnt += var.storageElementCount;
+	return seCnt;
+}
+
 -(CC3GLSLUniform*) uniformNamed: (NSString*) varName {
 	for (CC3GLSLUniform* var in _uniformsSceneScope) if ( [var.name isEqualToString: varName] ) return var;
 	for (CC3GLSLUniform* var in _uniformsNodeScope) if ( [var.name isEqualToString: varName] ) return var;
@@ -308,6 +326,8 @@ static CC3Cache* _shaderCache = nil;
 		if (var.semantic == semantic && var.semanticIndex == semanticIndex) return var;
 	return nil;
 }
+
+-(GLuint) attributeCount { return (GLuint)_attributes.count; }
 
 -(CC3GLSLAttribute*) attributeNamed: (NSString*) varName {
 	for (CC3GLSLAttribute* var in _attributes) if ( [var.name isEqualToString: varName] ) return var;
@@ -352,7 +372,12 @@ static CC3Cache* _shaderCache = nil;
 	CC3Assert([CC3OpenGL.sharedGL getShaderProgramWasLinked: self.programID],
 			  @"%@ could not be linked because:\n%@", self,
 			  [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID]);
-	LogRez(@"Linked %@ in %.3f ms", self, GetRezActivityDuration() * 1000);	// Timing before config vars
+	
+#if LOGGING_REZLOAD
+	NSString* linkLog = [CC3OpenGL.sharedGL getLogForShaderProgram: self.programID];
+	LogRez(@"Linked %@ in %.3f ms%@", self, GetRezActivityDuration() * 1000,
+		   (linkLog ? [NSString stringWithFormat: @" with the following warnings:\n%@", linkLog] : @""));
+#endif	// LOGGING_REZLOAD
 	
 	[self configureUniforms];
 	[self configureAttributes];
@@ -587,8 +612,10 @@ static CC3Cache* _shaderCache = nil;
 -(NSString*) fullDescription {
 	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
 	[desc appendFormat: @"%@ with %@ and %@", self, _vertexShader, _fragmentShader];
-	[desc appendFormat: @". declaring %lu attributes and %lu uniforms:",
-	 (unsigned long)_attributes.count, (unsigned long)(_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count)];
+	[desc appendFormat: @". declaring %u attributes and %u uniforms, requiring at least"
+	 @" %u uniform storage elements (of %u platform storage elements):",
+	 self.attributeCount, self.uniformCount, self.uniformStorageElementCount,
+	 (CC3OpenGL.sharedGL.maxNumberOfVertexShaderUniformVectors * 4)];
 	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	for (CC3GLSLVariable* var in _uniformsSceneScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
 	for (CC3GLSLVariable* var in _uniformsNodeScope) [desc appendFormat: @"\n\t %@", var.fullDescription];

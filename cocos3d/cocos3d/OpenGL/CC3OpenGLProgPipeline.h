@@ -100,6 +100,10 @@
 	CC3ShaderProgramPrewarmer* _shaderProgramPrewarmer;
 	
 @public
+	GLint value_GL_MAX_VARYING_VECTORS;
+	GLint value_GL_MAX_VERTEX_UNIFORM_VECTORS;
+	GLint value_GL_MAX_FRAGMENT_UNIFORM_VECTORS;
+	
 	GLuint value_GL_CURRENT_PROGRAM;
 
 	BOOL isKnown_GL_CURRENT_PROGRAM : 1;

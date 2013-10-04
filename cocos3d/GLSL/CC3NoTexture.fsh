@@ -36,12 +36,6 @@
  * CC3ShaderProgramSemanticsByVarName instance.
  */
 
-// Fog modes.
-#define GL_LINEAR                 0x2601
-#define GL_EXP                    0x0800
-#define GL_EXP2                   0x0801
-
-
 precision mediump float;
 
 //-------------- UNIFORMS ----------------------
@@ -53,42 +47,43 @@ uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which f
 uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-
-//-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
+varying lowp vec4	v_color;					/**< Fragment front-face color. */
+varying lowp vec4	v_colorBack;				/**< Fragment back-face color. */
+varying highp float v_distEye;					/**< Fragment distance in eye coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
 
-/**
- * Applies fog to the specified color and returns the adjusted color.
- *
- * Most apps will not use fog, or will have more specific fogging needs, so this method and
- * its invocation should be removed by most apps.
- */
-vec4 fogify(vec4 aColor) {
-	if (u_cc3FogIsEnabled) {
-		int mode = u_cc3FogAttenuationMode;
-		float vtxVisibility = 1.0;
-		
-		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-		} else if (mode == GL_EXP) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-d);
-		} else if (mode == GL_EXP2) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-(d * d));
-		}
-		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
+/** Applies fog to the specified color and returns the adjusted color. */
+lowp vec4 fogify(lowp vec4 aColor) {
+	
+#	define GL_LINEAR                 0x2601
+#	define GL_EXP                    0x0800
+#	define GL_EXP2                   0x0801
+	
+	if ( !u_cc3FogIsEnabled ) return aColor;
+	
+	// Determine visibility based on fog attentuation characteristics and distance through fog
+	float visibility = 1.0;
+	if (u_cc3FogAttenuationMode == GL_LINEAR) {
+		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
+	} else if (u_cc3FogAttenuationMode == GL_EXP) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-d);
+	} else if (u_cc3FogAttenuationMode == GL_EXP2) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-(d * d));
 	}
+	visibility = clamp(visibility, 0.0, 1.0);
+	
+	// Mix alpha-adjusted fog color into fragment color based on visibility.
+	aColor.rgb = mix(u_cc3FogColor.rgb * aColor.a, aColor.rgb, visibility);
 	return aColor;
 }
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	gl_FragColor = fogify(v_color);
+	lowp vec4 fragColor = gl_FrontFacing ? v_color : v_colorBack;
+	
+	gl_FragColor = fogify(fragColor);
 }

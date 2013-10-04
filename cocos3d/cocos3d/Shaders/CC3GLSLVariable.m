@@ -64,6 +64,47 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	[super dealloc];
 }
 
+-(GLuint) typeStorageElementCount {
+	switch (_type) {	// 17
+			
+		case GL_FLOAT:
+		case GL_INT:
+		case GL_BOOL:
+		case GL_SAMPLER_2D:
+		case GL_SAMPLER_CUBE:
+			return 1;
+
+		case GL_FLOAT_VEC2:
+		case GL_INT_VEC2:
+		case GL_BOOL_VEC2:
+			return 2;
+
+		case GL_FLOAT_VEC3:
+		case GL_INT_VEC3:
+		case GL_BOOL_VEC3:
+			return 3;
+
+		case GL_FLOAT_VEC4:
+		case GL_INT_VEC4:
+		case GL_BOOL_VEC4:
+		case GL_FLOAT_MAT2:
+			return 4;
+			
+		case GL_FLOAT_MAT3:
+			return 9;
+			
+		case GL_FLOAT_MAT4:
+			return 16;
+			
+		default:
+			CC3Assert(NO, @"%@ could not establish typeStorageElementCount because type %@ is not understood",
+					  self, NSStringFromGLEnum(_type));
+			return 0;
+	}
+}
+
+-(GLuint) storageElementCount { return self.typeStorageElementCount * self.size; }
+	
 
 #pragma mark Allocation and initialization
 
@@ -135,6 +176,7 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	[desc appendFormat: @"\n\t\tIndex: %u", _index];
 	[desc appendFormat: @"\n\t\tType: %@", NSStringFromGLEnum(_type)];
 	[desc appendFormat: @"\n\t\tSize: %i", _size];
+	[desc appendFormat: @"\n\t\tStorage elements: %i", self.storageElementCount];
 	[desc appendFormat: @"\n\t\tSemantic: %@ (%u)", self.semanticName, _semantic];
 	[desc appendFormat: @"\n\t\tSemantic index: %u", _semanticIndex];
 	[desc appendFormat: @"\n\t\tScope: %@", NSStringFromCC3GLSLVariableScope(_scope)];
@@ -376,7 +418,34 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 
 -(void) setBoolean: (BOOL) value { [self setBoolean: value at: 0]; }
 
--(void) setBoolean: (BOOL) value at: (GLuint) index { [self setInteger: (value != 0) at: index]; }
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY {
+	[self setBooleanVectorX: bX andY: bY at: 0];
+}
+
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ {
+	[self setBooleanVectorX: bX andY: bY andZ: bZ at: 0];
+}
+
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ andW: (BOOL) bW {
+	[self setBooleanVectorX: bX andY: bY andZ: bZ andW: bW at: 0];
+}
+
+-(void) setBoolean: (BOOL) value at: (GLuint) index {
+	[self setBooleanVectorX: value andY: NO andZ: NO andW: NO at: index];
+	[self setInteger: (value != 0) at: index];
+}
+
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY at: (GLuint) index {
+	[self setBooleanVectorX: bX andY: bY andZ: NO andW: NO at: index];
+}
+
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ at: (GLuint) index {
+	[self setBooleanVectorX: bX andY: bY andZ: bZ andW: NO at: index];
+}
+
+-(void) setBooleanVectorX: (BOOL) bX andY: (BOOL) bY andZ: (BOOL) bZ andW: (BOOL) bW at: (GLuint) index {
+	[self setIntVector4: CC3IntVector4Make((bX != NO), (bY != NO), (bZ != NO), (bW != NO)) at: index];
+}
 
 -(void) setColor: (ccColor3B) value { [self setColor: value at: 0]; }
 

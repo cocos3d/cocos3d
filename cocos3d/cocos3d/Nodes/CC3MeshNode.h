@@ -131,29 +131,25 @@
 @property(nonatomic, retain) CC3Mesh* meshModel DEPRECATED_ATTRIBUTE;
 
 /**
- * The material covering this mesh node.
+ * If a mesh does not yet exist, this method invokes the makeMesh method to create
+ * a suitable mesh, and sets it into the mesh property. Does nothing if this mesh
+ * node already has a mesh. Returns the mesh (existing or new).
  *
- * If it is not explicitly set beforehand, the material will automatically be created
- * and assigned to the mesh node when a texture is added to the mesh node through the
- * texture property or the addTexture: method, or if any of the material properties
- * of the mesh node are set or accessed, including color, opacity, ambientColor,
- * diffuseColor, specularColor, emissionColor, blendFunc, or shouldDrawLowAlpha.
- * The material will automatically be created if either the isOpaque or
- * shouldUseLighting property is set, but not if they are simply read.
+ * This method is invoked whenever a property is set that would affect the mesh.
+ * Usually, you will never need to invoke this method.
  */
-@property(nonatomic, retain) CC3Material* material;
+-(CC3Mesh*) ensureMesh;
 
 /**
- * The pure, solid color used to paint the mesh if no material is established for this node.
- * This color is not not be affected by the lighting conditions. The mesh will always appear
- * in the same pure, solid color, regardless of the lighting sources.
+ * This template method creates a suitable mesh for this mesh node.
  *
- * If you do not want to use a material with this node, use this pureColor property to
- * set or access the color and opacity of this node. Setting or accessing any of the
- * other coloring properties (color, opacity, ambientColor, diffuseColor, specularColor,
- * or emissionColor) will create a material automatically.
+ * This implementation invokes [CC3Mesh mesh], and returns the result.
+ * Subclasses may override to provide a different mesh.
+ *
+ * This method is invoked automatically by the ensureMesh method if a mesh is needed,
+ * but has not yet been established. Usually, you will never need to invoke this method.
  */
-@property(nonatomic, assign) ccColor4F pureColor;
+-(CC3Mesh*) makeMesh;
 
 /**
  * Returns whether the underlying vertex content has been loaded into GL engine vertex
@@ -177,6 +173,31 @@
 
 
 #pragma mark Materials
+
+/**
+ * The material covering this mesh node.
+ *
+ * If it is not explicitly set beforehand, the material will automatically be created
+ * and assigned to the mesh node when a texture is added to the mesh node through the
+ * texture property or the addTexture: method, or if any of the material properties
+ * of the mesh node are set or accessed, including color, opacity, ambientColor,
+ * diffuseColor, specularColor, emissionColor, blendFunc, or shouldDrawLowAlpha.
+ * The material will automatically be created if either the isOpaque or
+ * shouldUseLighting property is set, but not if they are simply read.
+ */
+@property(nonatomic, retain) CC3Material* material;
+
+/**
+ * The pure, solid color used to paint the mesh if no material is established for this node.
+ * This color is not not be affected by the lighting conditions. The mesh will always appear
+ * in the same pure, solid color, regardless of the lighting sources.
+ *
+ * If you do not want to use a material with this node, use this pureColor property to
+ * set or access the color and opacity of this node. Setting or accessing any of the
+ * other coloring properties (color, opacity, ambientColor, diffuseColor, specularColor,
+ * or emissionColor) will create a material automatically.
+ */
+@property(nonatomic, assign) ccColor4F pureColor;
 
 /**
  * If this value is set to YES, current lighting conditions will be taken into consideration

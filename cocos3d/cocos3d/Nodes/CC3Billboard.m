@@ -165,6 +165,12 @@
 /** Only touchable if drawing in 3D. */
 -(BOOL) isTouchable { return (!_shouldDrawAs2DOverlay) && [super isTouchable]; }
 
+/** Overridden to ignore lighting, since cocos2d nodes have no normals. */
+-(void) setMaterial: (CC3Material*) aMaterial {
+	[super setMaterial: aMaterial];
+	aMaterial.shouldUseLighting = NO;
+}
+
 
 #pragma mark CCRGBAProtocol support
 

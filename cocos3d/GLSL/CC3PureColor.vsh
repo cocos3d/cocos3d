@@ -59,18 +59,17 @@ uniform lowp int	u_cc3BonesPerVertex;							/**< Number of bones influencing eac
 uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of bone matrices in the current mesh skin section in eye space. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;		/**< Vertex position. */
-attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
-attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
-attribute float a_cc3PointSize;			/**< Vertex point size. */
+attribute highp vec4	a_cc3Position;		/**< Vertex position. */
+attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (up to 4). */
+attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone matrix indices (up to 4). */
+attribute float			a_cc3PointSize;		/**< Vertex point size. */
 
 //-------------- CONSTANTS ----------------------
-const vec3 kVec3Zero = vec3(0.0, 0.0, 0.0);
+const vec4 kVec4Zero = vec4(0.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec4 vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
-
+highp vec4	vtxPosEye;		/**< The position of the vertex, in eye coordinates. High prec required for point sizing calcs. */
 
 //-------------- FUNCTIONS ----------------------
 
@@ -84,7 +83,7 @@ void vertexToEyeSpace() {
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 		
-		vtxPosEye = vec4(0.0);		// Start at zero to accumulate weighted values
+		vtxPosEye = kVec4Zero;		// Start at zero to accumulate weighted values
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
 				// Add position contribution from this bone
@@ -105,19 +104,16 @@ void vertexToEyeSpace() {
  * If the size is not needed, or if the size cannot be determined, returns the value one.
  */
 float pointSize() {
-	float size = 1.0;
-	if (u_cc3IsDrawingPoints) {
-		size = u_cc3VertexHasPointSize ? a_cc3PointSize : u_cc3PointSize;
-		if (u_cc3PointSizeAttenuation != kAttenuationNone) {
-			float ptDist = length(vtxPosEye.xyz);
-			vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
-			size /= sqrt(dot(attenuationEquation, u_cc3PointSizeAttenuation));
-		}
-		size = clamp(size, u_cc3PointMinimumSize, u_cc3PointMaximumSize);
+	if ( !u_cc3IsDrawingPoints ) return 1.0;
+	
+	float size = u_cc3VertexHasPointSize ? a_cc3PointSize : u_cc3PointSize;
+	if (u_cc3PointSizeAttenuation != kAttenuationNone) {
+		float ptDist = length(vtxPosEye.xyz);
+		vec3 attenuationEquation = vec3(1.0, ptDist, ptDist * ptDist);
+		size /= sqrt(dot(attenuationEquation, u_cc3PointSizeAttenuation));
 	}
-	return size;
+	return clamp(size, u_cc3PointMinimumSize, u_cc3PointMaximumSize);
 }
-
 
 //-------------- ENTRY POINT ----------------------
 void main() {

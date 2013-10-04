@@ -33,6 +33,8 @@
  * The shader actually expects two textures. One is the visible texture. The other is a cube-map
  * textures used to provide the environmental reflection.
  *
+ * If the alpha component of the fragment is lower than a specified level, the fragment is discarded.
+ *
  * CC3Texturable.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
@@ -41,12 +43,6 @@
 
 // Increase this if more textures are desired. Must match vertex shader declaration.
 #define MAX_TEXTURES			2
-
-// Fog modes.
-#define GL_LINEAR                 0x2601
-#define GL_EXP                    0x0800
-#define GL_EXP2                   0x0801
-
 
 precision mediump float;
 
@@ -65,47 +61,51 @@ uniform sampler2D	s_cc3Texture2D;				/**< Texture sampler. */
 uniform samplerCube	s_cc3TextureCube;			/**< Reflection cube-map texture sampler. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
-varying lowp vec4		v_color;					/**< Fragment base color. */
-varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
-varying mediump	vec3	v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
+varying vec2		v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4	v_color;					/**< Fragment front-face color. */
+varying lowp vec4	v_colorBack;				/**< Fragment back-face color. */
+varying highp float	v_distEye;					/**< Fragment distance in eye coordinates. */
+varying vec3		v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
 
 //-------------- FUNCTIONS ----------------------
 
-/**
- * Applies fog to the specified color and returns the adjusted color.
- *
- * Most apps will not use fog, or will have more specific fogging needs, so this method and
- * its invocation should be removed by most apps.
- */
-vec4 fogify(vec4 aColor) {
-	if (u_cc3FogIsEnabled) {
-		int mode = u_cc3FogAttenuationMode;
-		float vtxVisibility = 1.0;
-		
-		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-		} else if (mode == GL_EXP) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-d);
-		} else if (mode == GL_EXP2) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-(d * d));
-		}
-		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
+/** Applies fog to the specified color and returns the adjusted color. */
+lowp vec4 fogify(lowp vec4 aColor) {
+	
+#	define GL_LINEAR                 0x2601
+#	define GL_EXP                    0x0800
+#	define GL_EXP2                   0x0801
+	
+	if ( !u_cc3FogIsEnabled ) return aColor;
+	
+	// Determine visibility based on fog attentuation characteristics and distance through fog
+	float visibility = 1.0;
+	if (u_cc3FogAttenuationMode == GL_LINEAR) {
+		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
+	} else if (u_cc3FogAttenuationMode == GL_EXP) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-d);
+	} else if (u_cc3FogAttenuationMode == GL_EXP2) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-(d * d));
 	}
+	visibility = clamp(visibility, 0.0, 1.0);
+	
+	// Mix alpha-adjusted fog color into fragment color based on visibility.
+	aColor.rgb = mix(u_cc3FogColor.rgb * aColor.a, aColor.rgb, visibility);
 	return aColor;
 }
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	// Mix the texture color with the reflection color in proportion to the material reflectivity
-	vec4 fragColor = texture2D(s_cc3Texture2D, v_texCoord[0]);
-	vec4 reflectColor = textureCube(s_cc3TextureCube, v_reflectDirGlobal);
-	fragColor = mix(fragColor, reflectColor, u_cc3MaterialReflectivity) * v_color;
+	lowp vec4 fragColor = gl_FrontFacing ? v_color : v_colorBack;
+	fragColor = texture2D(s_cc3Texture2D, v_texCoord[0]) * fragColor;
 	
+	// Mix the fragment color with the reflection color in proportion to the material reflectivity
+	lowp vec4 reflectColor = textureCube(s_cc3TextureCube, v_reflectDirGlobal);
+	fragColor = mix(fragColor, reflectColor, u_cc3MaterialReflectivity);
+
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
 	if (fragColor.a >= u_cc3MaterialMinimumDrawnAlpha)
 		gl_FragColor = fogify(fragColor);

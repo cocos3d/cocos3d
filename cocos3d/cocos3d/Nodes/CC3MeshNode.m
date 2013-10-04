@@ -72,21 +72,25 @@
 	_mesh = [aMesh retain];
 	[_mesh deriveNameFrom: self];
 
-	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
+	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;	// Only if material exists
 	
 	[self markBoundingVolumeDirty];
 }
 
 /** If a mesh does not yet exist, create it as a CC3Mesh with interleaved vertices. */
--(void) ensureMesh { if ( !_mesh ) [self makeMesh]; }
+-(CC3Mesh*) ensureMesh {
+	if ( !_mesh ) self.mesh = [self makeMesh];
+	return _mesh;
+}
 
-/**
- * Template method to create a mesh for this node.
- *
- * Subclasses may override to provide a different material.
- */
--(void) makeMesh { self.mesh = [CC3Mesh mesh]; }
+-(CC3Mesh*) makeMesh { return [CC3Mesh mesh]; }
+
+// Support for deprecated CC3MeshModel class
+-(CC3Mesh*) meshModel { return self.mesh; }
+
+// Support for deprecated CC3MeshModel class
+-(void) setMeshModel: (CC3Mesh*) aMesh { self.mesh = aMesh; }
 
 /**
  * Sets the name of the material if needed, then checks the vertex content types and the
@@ -98,17 +102,23 @@
 	_material = [aMaterial retain];
 	[_material deriveNameFrom: self];
 
-	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;
+	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;
 
 	[self alignTextureUnits];
 }
 
-// Support for deprecated CC3MeshModel class
--(CC3Mesh*) meshModel { return self.mesh; }
+-(CC3Material*) ensureMaterial {
+	if ( !_material ) self.material = [self makeMaterial];
+	return _material;
+}
 
-// Support for deprecated CC3MeshModel class
--(void) setMeshModel: (CC3Mesh*) aMesh { self.mesh = aMesh; }
+-(CC3Material*) makeMaterial {
+	CC3Material* mat = [CC3Material material];
+	mat.ambientColor = CCC4FModulate(mat.ambientColor, self.pureColor);
+	mat.diffuseColor = CCC4FModulate(mat.diffuseColor, self.pureColor);
+	return mat;
+}
 
 /**
  * Returns a bounding volume that first checks against the spherical boundary, and then checks
@@ -261,18 +271,6 @@
 -(void) setShaderProgram: (CC3ShaderProgram*) shaderProgram {
 	self.ensureMaterial.shaderProgram = shaderProgram;
 	super.shaderProgram = shaderProgram;	// pass along to any children
-}
-
--(CC3Material*) ensureMaterial {
-	if ( !_material ) self.material = [self makeMaterial];
-	return _material;
-}
-
--(CC3Material*) makeMaterial {
-	CC3Material* mat = [CC3Material material];
-	mat.ambientColor = CCC4FModulate(mat.ambientColor, self.pureColor);
-	mat.diffuseColor = CCC4FModulate(mat.diffuseColor, self.pureColor);
-	return mat;
 }
 
 
@@ -692,6 +690,10 @@
 						? (_shouldCullFrontFaces ? GL_FRONT_AND_BACK : GL_BACK)
 						: (_shouldCullFrontFaces ? GL_FRONT : GL_BACK);
 
+	// If back faces are not being culled, then enable two-sided lighting,
+	// so that the lighting of the back faces uses negated normals.
+	[gl enableTwoSidedLighting: !_shouldCullBackFaces];
+	
 	// Set the front face winding
 	gl.frontFace = _shouldUseClockwiseFrontFaceWinding ? GL_CW : GL_CCW;
 }
@@ -841,8 +843,8 @@
 -(void) setVertexContentTypes: (CC3VertexContent) vtxContentTypes {
 	[self ensureMesh];
 	_mesh.vertexContentTypes = vtxContentTypes;
-	if ( !_mesh.hasVertexNormals ) self.shouldUseLighting = NO;
-	if ( !_mesh.hasVertexTextureCoordinates ) self.texture = nil;
+	if ( !_mesh.hasVertexNormals ) _material.shouldUseLighting = NO;	// Only if material exists
+	if ( !_mesh.hasVertexTextureCoordinates ) _material.texture = nil;	// Only if material exists
 }
 
 

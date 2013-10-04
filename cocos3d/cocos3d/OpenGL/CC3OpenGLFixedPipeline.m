@@ -278,6 +278,15 @@
 
 -(void) enableLighting: (BOOL) onOff { cc3_SetGLCap(GL_LIGHTING, onOff, valueCap_GL_LIGHTING, isKnownCap_GL_LIGHTING); }
 
+-(void) enableTwoSidedLighting: (BOOL) onOff {
+	if ( CC3BooleansAreEqual(onOff, value_GL_LIGHT_MODEL_TWO_SIDE) && isKnown_GL_LIGHT_MODEL_TWO_SIDE) return;
+
+	isKnown_GL_LIGHT_MODEL_TWO_SIDE = YES;
+	value_GL_LIGHT_MODEL_TWO_SIDE = onOff;
+	glLightModelx(GL_LIGHT_MODEL_TWO_SIDE, (onOff ? GL_TRUE : GL_FALSE));
+	LogGLErrorTrace(@"glLightModelx(%@, %@)", NSStringFromGLEnum(GL_LIGHT_MODEL_TWO_SIDE), NSStringFromBoolean(onOff));
+}
+
 -(void) setSceneAmbientLightColor: (ccColor4F) color {
 	cc3_CheckGLValue(color, CCC4FAreEqual(color, value_GL_LIGHT_MODEL_AMBIENT),
 					 value_GL_LIGHT_MODEL_AMBIENT, isKnown_GL_LIGHT_MODEL_AMBIENT);

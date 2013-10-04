@@ -31,6 +31,7 @@
 
 #import "CC3Backgrounder.h"
 #import "CC3OpenGL.h"
+#import "CC3CC2Extensions.h"
 
 
 #pragma mark CC3Backgrounder

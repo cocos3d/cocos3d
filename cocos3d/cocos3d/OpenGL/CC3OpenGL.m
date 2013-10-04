@@ -416,6 +416,8 @@
 
 -(void) enableLighting: (BOOL) onOff {}
 
+-(void) enableTwoSidedLighting: (BOOL) onOff {}
+
 -(void) setSceneAmbientLightColor: (ccColor4F) color {}
 
 -(void) enableLight: (BOOL) onOff at: (GLuint) ltIdx {}
@@ -872,6 +874,12 @@
 	}
 }
 
+-(GLuint) maxNumberOfVertexShaderUniformVectors { return 0; }
+
+-(GLuint) maxNumberOfFragmentShaderUniformVectors { return 0; }
+
+-(GLuint) maxNumberOfShaderProgramVaryingVectors { return 0; }
+
 -(GLfloat) vertexShaderVarRangeMin: (GLenum) precisionType { return 0.0f; }
 
 -(GLfloat) vertexShaderVarRangeMax: (GLenum) precisionType { return 0.0f; }
@@ -986,16 +994,6 @@
 	// Ensure GL_MODELVIEW matrix is active
 	[self activateMatrixStack: GL_MODELVIEW];
 	
-	self.cullFace = GL_BACK;
-	self.frontFace = GL_CCW;
-	
-	// Darken the scene by turning lighting off
-	[self enableLighting: NO];
-	
-	// Set depth testing to 2D values
-	self.depthFunc = GL_LEQUAL;
-	self.depthMask = YES;
-	
 	[self align2DStateCache];		// Align the 2D GL state cache with current settings
 }
 
@@ -1029,9 +1027,7 @@
 		[self initPlatformLimits];
 		[self initVertexAttributes];
 		[self initTextureUnits];
-		[self initShaderPrecisions];
 		[self initExtensions];
-		[self initShaderProgramPrewarmer];
 	}
 	return self;
 }
@@ -1079,10 +1075,6 @@
 	for (NSString* ext in self.extensions) [desc appendFormat: @"\n\t%@", ext];
 	return desc;
 }
-
--(void) initShaderPrecisions {}
-
--(void) initShaderProgramPrewarmer {}
 
 /** Returns the appropriate class cluster subclass instance. */
 +(id) alloc {

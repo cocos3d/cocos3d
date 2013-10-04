@@ -72,11 +72,11 @@ uniform highp mat4	u_cc3MatrixModelView;			/**< Current modelview matrix. */
 uniform mat3		u_cc3MatrixModelViewInvTran;	/**< Inverse-transpose of current modelview rotation matrix. */
 uniform highp mat4	u_cc3MatrixProj;				/**< Projection matrix. */
 
-uniform vec4		u_cc3Color;						/**< Color when lighting & materials are not in use. */
-uniform vec4		u_cc3MaterialAmbientColor;		/**< Ambient color of the material. */
-uniform vec4		u_cc3MaterialDiffuseColor;		/**< Diffuse color of the material. */
-uniform vec4		u_cc3MaterialSpecularColor;		/**< Specular color of the material. */
-uniform vec4		u_cc3MaterialEmissionColor;		/**< Emission color of the material. */
+uniform lowp vec4	u_cc3Color;						/**< Color when lighting & materials are not in use. */
+uniform lowp vec4	u_cc3MaterialAmbientColor;		/**< Ambient color of the material. */
+uniform lowp vec4	u_cc3MaterialDiffuseColor;		/**< Diffuse color of the material. */
+uniform lowp vec4	u_cc3MaterialSpecularColor;		/**< Specular color of the material. */
+uniform lowp vec4	u_cc3MaterialEmissionColor;		/**< Emission color of the material. */
 uniform float		u_cc3MaterialShininess;			/**< Shininess of the material. */
 
 uniform bool		u_cc3LightIsUsingLighting;						/**< Indicates whether any lighting is enabled */
@@ -96,30 +96,32 @@ uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing e
 uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];			/**< Array of bone matrices in the current mesh skin section in eye space. */
 uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 
-uniform bool u_cc3VertexHasNormal;				/**< Whether the vertex normal is available. */
-uniform bool u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
-uniform bool u_cc3VertexHasColor;				/**< Whether the vertex color is available. */
-uniform bool u_cc3VertexShouldNormalizeNormal;	/**< Whether the vertex normal should be normalized. */
-uniform bool u_cc3VertexShouldRescaleNormal;	/**< Whether the vertex normal should be rescaled. */
+uniform bool		u_cc3VertexHasTangent;				/**< Whether the vertex tangent is available. */
+uniform bool		u_cc3VertexHasColor;				/**< Whether the vertex color is available. */
+uniform bool		u_cc3VertexShouldNormalizeNormal;	/**< Whether the vertex normal should be normalized. */
+uniform bool		u_cc3VertexShouldRescaleNormal;		/**< Whether the vertex normal should be rescaled. */
+uniform bool		u_cc3VertexShouldDrawFrontFaces;	/**< Whether the front side of each face is to be drawn. */
+uniform bool		u_cc3VertexShouldDrawBackFaces;		/**< Whether the back side of each face is to be drawn. */
 
 //-------------- VERTEX ATTRIBUTES ----------------------
-attribute highp vec4 a_cc3Position;		/**< Vertex position. */
-attribute vec3 a_cc3Normal;				/**< Vertex normal. */
-attribute vec3 a_cc3Tangent;			/**< Vertex tangent. */
-attribute vec4 a_cc3Color;				/**< Vertex color. */
-attribute vec4 a_cc3BoneWeights;		/**< Vertex skinning bone weights (up to 4). */
-attribute vec4 a_cc3BoneIndices;		/**< Vertex skinning bone matrix indices (up to 4). */
-attribute vec2 a_cc3TexCoord0;			/**< Vertex texture coordinate for texture unit 0. */
-attribute vec2 a_cc3TexCoord1;			/**< Vertex texture coordinate for texture unit 1. */
-attribute vec2 a_cc3TexCoord2;			/**< Vertex texture coordinate for texture unit 2. */
-attribute vec2 a_cc3TexCoord3;			/**< Vertex texture coordinate for texture unit 3. */
+attribute highp vec4	a_cc3Position;		/**< Vertex position. */
+attribute vec3			a_cc3Normal;		/**< Vertex normal. */
+attribute vec3			a_cc3Tangent;		/**< Vertex tangent. */
+attribute lowp vec4		a_cc3Color;			/**< Vertex color. */
+attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (up to 4). */
+attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone matrix indices (up to 4). */
+attribute vec2			a_cc3TexCoord0;		/**< Vertex texture coordinate for texture unit 0. */
+attribute vec2			a_cc3TexCoord1;		/**< Vertex texture coordinate for texture unit 1. */
+attribute vec2			a_cc3TexCoord2;		/**< Vertex texture coordinate for texture unit 2. */
+attribute vec2			a_cc3TexCoord3;		/**< Vertex texture coordinate for texture unit 3. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
 varying vec2			v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
-varying lowp vec4		v_color;					/**< Fragment base color. */
+varying lowp vec4		v_color;					/**< Fragment front-face color. */
+varying lowp vec4		v_colorBack;				/**< Fragment back-face color. */
 varying highp float		v_distEye;					/**< Fragment distance in eye coordinates. */
 varying vec3			v_bumpMapLightDir;			/**< Direction to the first light in either tangent space or model space. */
-varying mediump	vec3	v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
+varying vec3			v_reflectDirGlobal;			/**< Fragment reflection vector direction in global coordinates. */
 
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0);
@@ -128,11 +130,10 @@ const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
 //-------------- LOCAL VARIABLES ----------------------
-highp vec4 vtxPosEye;		/**< The vertex position in eye coordinates. High prec to match vertex attribute. */
-vec3 vtxNormEye;			/**< The vertex normal in eye coordinates. */
-vec4 matColorAmbient;		/**< Ambient color of material...from either material or vertex colors. */
-vec4 matColorDiffuse;		/**< Diffuse color of material...from either material or vertex colors. */
-
+highp vec4	vtxPosEye;			/**< The vertex position in eye coordinates. High prec to match vertex attribute. */
+vec3		vtxNormEye;			/**< The vertex normal in eye coordinates. */
+lowp vec4	matColorAmbient;	/**< Ambient color of material...from either material or vertex colors. */
+lowp vec4	matColorDiffuse;	/**< Diffuse color of material...from either material or vertex colors. */
 
 //-------------- FUNCTIONS ----------------------
 
@@ -147,7 +148,7 @@ void vertexToEyeSpace() {
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 
 		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
-		vtxNormEye = vec3(0.0);
+		vtxNormEye = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
 				// Add position and normal contribution from this bone
@@ -163,69 +164,97 @@ void vertexToEyeSpace() {
 		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
 	}
-
-	if (u_cc3VertexShouldRescaleNormal) vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
-	if (u_cc3VertexShouldNormalizeNormal) vtxNormEye = normalize(vtxNormEye);
+	
+	if (u_cc3VertexShouldNormalizeNormal)
+		vtxNormEye = normalize(vtxNormEye);
+	else if (u_cc3VertexShouldRescaleNormal)
+		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
 }
 
-/** 
- * Returns the portion of vertex color attributed to illumination of the material by the light at the
+/**
+ * Returns a vector the contains the direction and intensity of light from the light at the
  * specified index, taking into consideration attenuation due to distance and spotlight dispersion.
  *
  * The use of highp on the floats is required due to the sensitivity of the calculations.
  * Compiler can crash when attempting to cast back and forth.
  */
-vec4 illuminateWith(int ltIdx) {
-	highp vec3 ltDir;
+highp vec4 illuminationFrom(int ltIdx) {
+
+	// Position vector from light. Use high precision for accuracy.
+	highp vec3 ltPos = u_cc3LightPositionEyeSpace[ltIdx].xyz;
+
+	// Directional light. Position is expected to be a normalized direction!
+	if (u_cc3LightPositionEyeSpace[ltIdx].w == 0.0) return highp vec4(ltPos, 1.0);
+	
+	// Positional light. Find the directional vector from vertex to light, but don't normalize yet.
+	ltPos -= vtxPosEye.xyz;
 	highp float intensity = 1.0;
 	
-	if (u_cc3LightPositionEyeSpace[ltIdx].w != 0.0) {
-		// Positional light. Find the direction from vertex to light.
-		ltDir = (u_cc3LightPositionEyeSpace[ltIdx] - vtxPosEye).xyz;
-		
-		// Calculate intensity due to distance attenuation (must be performed in high precision)
-		if (u_cc3LightAttenuation[ltIdx] != kAttenuationNone) {
-			highp float ltDist = length(ltDir);
-			highp vec3 distAtten = vec3(1.0, ltDist, ltDist * ltDist);
-			highp float distIntensity = 1.0 / dot(distAtten, u_cc3LightAttenuation[ltIdx]);	// needs highp
-			intensity *= min(abs(distIntensity), 1.0);
+	// Calculate intensity due to distance attenuation (must be performed in high precision)
+	if (u_cc3LightAttenuation[ltIdx] != kAttenuationNone) {
+		highp float ltDist = length(ltPos);
+		highp vec3 distAtten = highp vec3(1.0, ltDist, ltDist * ltDist);
+		highp float distIntensity = 1.0 / dot(distAtten, u_cc3LightAttenuation[ltIdx]);	// needs highp
+		intensity *= min(abs(distIntensity), 1.0);
+	}
+
+	ltPos = normalize(ltPos);	// Now normalize into a normalized direction vector.
+	
+	// Determine intensity due to spotlight component
+	highp float spotCutoffCos = u_cc3LightSpotCutoffAngleCosine[ltIdx];
+	if (spotCutoffCos >= 0.0) {
+		highp vec3 spotDirEye = u_cc3LightSpotDirectionEyeSpace[ltIdx];
+		highp float cosEyeDir = -dot(ltPos, spotDirEye);
+		if (cosEyeDir >= spotCutoffCos){
+			highp float spotExp = u_cc3LightSpotExponent[ltIdx];
+			intensity *= pow(cosEyeDir, spotExp);
+		} else {
+			intensity = 0.0;
 		}
-		ltDir = normalize(ltDir);
-		
-		// Determine intensity due to spotlight component
-		highp float spotCutoffCos = u_cc3LightSpotCutoffAngleCosine[ltIdx];
-		if (spotCutoffCos >= 0.0) {
-			highp vec3  spotDirEye = u_cc3LightSpotDirectionEyeSpace[ltIdx];
-			highp float cosEyeDir = -dot(ltDir, spotDirEye);
-			if (cosEyeDir >= spotCutoffCos){
-				highp float spotExp = u_cc3LightSpotExponent[ltIdx];
-				intensity *= pow(cosEyeDir, spotExp);
-			} else {
-				intensity = 0.0;
-			}
-		}
-    } else {
-		// Directional light. Vector is expected to be normalized!
-		ltDir = u_cc3LightPositionEyeSpace[ltIdx].xyz;
-    }
-	
-	// If no light intensity, short-circuit and return no color
-	if (intensity <= 0.0) return kVec4Zero;
-	
-	// Employ lighting equation to calculate vertex color
-	vec4 vtxColor = (u_cc3LightAmbientColor[ltIdx] * matColorAmbient);
-	vtxColor += (u_cc3LightDiffuseColor[ltIdx] * matColorDiffuse * max(0.0, dot(vtxNormEye, ltDir)));
-	
-	// Project normal onto half-plane vector to determine specular component
-	float specProj = dot(vtxNormEye, normalize(ltDir + kHalfPlaneOffset));
-	if (specProj > 0.0) {
-		vtxColor += (pow(specProj, u_cc3MaterialShininess) *
-					 u_cc3MaterialSpecularColor *
-					 u_cc3LightSpecularColor[ltIdx]);
 	}
 	
-	// Return the attenuated vertex color
-	return vtxColor * intensity;
+	return highp vec4(ltPos, intensity);	// Return combined light direction & intensity
+}
+
+/**
+ * Returns the portion of vertex color attributed to the specified illumination, which
+ * contains the direction and intensity of the light at the specified index. The color is
+ * determined by the interaction between the illumination and the specified vertex normal.
+ *
+ * The use of highp on the illumination is required due to the sensitivity of the
+ * calculations, as the compiler can crash when attempting to cast back and forth.
+ * Similarly, the use of the default mediump for the return value, instead of lowp,
+ * avoids a strange execution stalling during drawing if lowp is returned!
+ */
+vec4 illuminateWith(highp vec4 illumination, int ltIdx, vec3 vNorm) {
+
+	highp float intensity = illumination.w;
+	if (intensity <= 0.0) return kVec4Zero;		// If no intensity, short-circuit to no color
+
+	highp vec3 ltDir = illumination.xyz;
+	
+	// Employ lighting equation to calculate vertex color, using mediump for accuracy.
+	vec4 vtxColor = (u_cc3LightAmbientColor[ltIdx] * matColorAmbient);
+	vtxColor += (u_cc3LightDiffuseColor[ltIdx] * matColorDiffuse * max(0.0, dot(vNorm, ltDir)));
+	
+	// Project normal onto half-plane vector to determine specular component
+	float specProj = dot(vNorm, normalize(ltDir + kHalfPlaneOffset));
+	if (specProj > 0.0) vtxColor += (pow(specProj, u_cc3MaterialShininess) *
+									 u_cc3MaterialSpecularColor *
+									 u_cc3LightSpecularColor[ltIdx]);
+	
+	return vtxColor * intensity;	// Return the attenuated vertex color
+}
+
+/** Adjusts the vertex color by illuminating the material with each enabled light. */
+void illuminateVertex() {
+	for (int ltIdx = 0; ltIdx < MAX_LIGHTS; ltIdx++) {
+		if (u_cc3LightIsLightEnabled[ltIdx]) {
+			highp vec4 illum = illuminationFrom(ltIdx);
+			if (u_cc3VertexShouldDrawFrontFaces) v_color += illuminateWith(illum, ltIdx, vtxNormEye);
+			if (u_cc3VertexShouldDrawBackFaces) v_colorBack += illuminateWith(illum, ltIdx, -vtxNormEye);
+		}
+	}
 }
 
 /**
@@ -249,31 +278,8 @@ vec3 bumpMapDirectionForLight(int ltIdx) {
 	return ltDir;
 }
 
-/**
- * Returns the vertex color by starting with material emission and ambient scene lighting,
- * and then illuminating the material with each enabled light.
- */
-vec4 illuminate() {
-	vec4 vtxColor = u_cc3MaterialEmissionColor + (matColorAmbient * u_cc3LightSceneAmbientLightColor);
-
-	for (int ltIdx = 0; ltIdx < MAX_LIGHTS; ltIdx++)
-		if (u_cc3LightIsLightEnabled[ltIdx]) vtxColor += illuminateWith(ltIdx);
-	
-	vtxColor.a = matColorDiffuse.a;
-	
-	// If the model uses tanget-space bump-mapping, we need a variable to track the light direction.
-	// It's a varying because when using tangent-space normals, we need the light direction per fragment.
-	v_bumpMapLightDir = bumpMapDirectionForLight(0);
-	
-	return vtxColor;
-}
-
 //-------------- ENTRY POINT ----------------------
 void main() {
-
-	// If vertices have individual colors, use them for ambient and diffuse material colors.
-	matColorAmbient = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialAmbientColor;
-	matColorDiffuse = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialDiffuseColor;
 
 	// Transform vertex position and normal to eye space, in vtxPosEye and vtxNormEye, respectively.
 	vertexToEyeSpace();
@@ -285,10 +291,29 @@ void main() {
 	v_reflectDirGlobal = (u_cc3MatrixViewInv * vec4(reflect(vtxPosEye.xyz, vtxNormEye), 0.0)).xyz;
 	
 	// Determine the color of the vertex by applying material & lighting, or using a pure color
-	if (u_cc3LightIsUsingLighting)
-		v_color = illuminate();
-	else
+	if (u_cc3LightIsUsingLighting) {
+
+		// If vertices have individual colors, use them for ambient and diffuse material colors.
+		matColorAmbient = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialAmbientColor;
+		matColorDiffuse = u_cc3VertexHasColor ? a_cc3Color : u_cc3MaterialDiffuseColor;
+		
+		v_color = u_cc3MaterialEmissionColor + (matColorAmbient * u_cc3LightSceneAmbientLightColor);
+		v_colorBack = v_color;
+
+		illuminateVertex();
+
+		v_color.a = matColorDiffuse.a;
+		v_colorBack.a = matColorDiffuse.a;
+		
+		// If the model uses tanget-space bump-mapping, we need a variable to track the light direction.
+		// It's a varying because when using tangent-space normals, we need the light direction per fragment.
+		v_bumpMapLightDir = bumpMapDirectionForLight(0);
+
+	} else {
 		v_color = u_cc3VertexHasColor ? a_cc3Color : u_cc3Color;
+		v_colorBack = v_color;
+		v_bumpMapLightDir = kVec3Zero;
+	}
 	
 	// Fragment texture coordinates. Add more as needed.
 	v_texCoord[0] = a_cc3TexCoord0;

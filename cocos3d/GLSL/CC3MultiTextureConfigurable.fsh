@@ -29,23 +29,25 @@
 
 /**
  * This fragment shader provides a general configurable shader that replicates much of the
- * functionality of the fixed-pipeline of OpenGL ES 1.1. As such, this shader is suitable
- * for use as a default when a CC3Material has not been assigned a specific GL shader
- * program, and can make use of the configurability of CC3Material and CC3MeshNode.
+ * functionality of the fixed-pipeline of OpenGL ES 1.1 when configuring and blending multiple
+ * textures on a single model.
  *
- * CC3MultiTextureConfigurable.vsh is the vertex shader paired with this fragment shader.
+ * If the alpha component of the fragment is lower than a specified level, the fragment is discarded.
  *
- * When using this shader, be aware that the general nature and high-level of configurability
- * available with this shader means that it cannot be optimized to the same degree that a more
- * deliberately dedicated shader can be optimized. This shader may be used during early stages
- * of development, but for optimal performance, it is recommended that the application provide
- * specialized shaders that have been tuned and optimized to a specific needs of each model.
+ * In order to reduce the number of uniform variables, this shader supports two texture units.
+ * This can be increased by changing the MAX_TEXTURES macro definition below.
+ *
+ * CC3Texturable.vsh is the vertex shader paired with this fragment shader.
  *
  * The semantics of the variables in this shader can be mapped using a
  * CC3ShaderProgramSemanticsByVarName instance.
  *
- * In order to reduce the number of uniform variables, this shader supports two texture units.
- * This can be increased by changing the MAX_TEXTURES macro definition below.
+ * When using this shader, be aware that the general nature and high-level of configurability
+ * available with this shader means that it cannot be optimized to the same degree that a more
+ * deliberately dedicated shader can be optimized, and will run substantially slower than a
+ * bespoke shader. This shader may be used during early stages of development, but for optimal
+ * performance, it is recommended that the application provide specialized shaders that have
+ * been tuned and optimized to a specific needs of each model.
  */
 
 // Increase this if more textures are desired.
@@ -66,12 +68,7 @@
 #define GL_TEXTURE                0x1702
 #define GL_CONSTANT               0x8576
 #define GL_PREVIOUS               0x8578
-
-// Fog modes.
-#define GL_LINEAR                 0x2601
-#define GL_EXP                    0x0800
-#define GL_EXP2                   0x0801
-
+#define GL_PRIMARY_COLOR          0x8577
 
 precision mediump float;
 
@@ -100,17 +97,15 @@ uniform highp int	u_cc3TextureUnitAlphaSource0[MAX_TEXTURES];			/**< The source 
 uniform highp int	u_cc3TextureUnitAlphaSource1[MAX_TEXTURES];			/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
-varying vec2 v_texCoord[MAX_TEXTURES];		/**< Fragment texture coordinates. */
-varying lowp vec4 v_color;					/**< Fragment base color. */
-varying highp float v_distEye;				/**< Fragment distance in eye coordinates. */
-varying vec3 v_bumpMapLightDir;				/**< Direction to the first light in tangent space. */
-
-//-------------- CONSTANTS ----------------------
-const vec3 kVec3Half = vec3(0.5, 0.5, 0.5);
+varying vec2		v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
+varying lowp vec4	v_color;					/**< Fragment front-face color. */
+varying lowp vec4	v_colorBack;				/**< Fragment back-face color. */
+varying highp float	v_distEye;					/**< Fragment distance in eye coordinates. */
+varying vec3		v_bumpMapLightDir;			/**< Direction to the first light in tangent space. */
 
 //-------------- LOCAL VARIABLES ----------------------
-vec4 fragColor;
-
+lowp vec4 fragColor;
+lowp vec4 primaryColor;
 
 //-------------- FUNCTIONS ----------------------
 
@@ -125,70 +120,70 @@ vec4 fragColor;
  * the triple-source GL_INTERPOLATE function), and assumes that all source operands reference
  * the source component directly (ie- no (1 - src)).
  */
-void combineTexture(int tuIdx, vec4 texColor) {
+void combineTexture(lowp vec4 texColor, int tuIdx) {
 	int func, src0, src1;
+	lowp vec3 rgb0, rgb1;
+	lowp float a0, a1;
 	
 	// Extract the RGB components from the appropriate sources
 	func = u_cc3TextureUnitCombineRGBFunction[tuIdx];
 	src0 = u_cc3TextureUnitRGBSource0[tuIdx];
 	src1 = u_cc3TextureUnitRGBSource1[tuIdx];
 
-	vec3 rgb0 = texColor.rgb;		// GL_TEXTURE
-	if (src0 == GL_PREVIOUS) rgb0 = fragColor.rgb;
-	if (src0 == GL_CONSTANT) rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
+	// RGB of source 0, starting with default
+	if (src0 == GL_TEXTURE)				rgb0 = texColor.rgb;
+	else if (src0 == GL_PREVIOUS)		rgb0 = fragColor.rgb;
+	else if (src0 == GL_CONSTANT)		rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
+	else if (src0 == GL_PRIMARY_COLOR)	rgb0 = primaryColor.rgb;
 	
-	vec3 rgb1 = fragColor.rgb;		// GL_PREVIOUS
-	if (src1 == GL_TEXTURE) rgb1 = texColor.rgb;
-	if (src1 == GL_CONSTANT) rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
-
+	// RGB of source 1, starting with default
+	if (src1 == GL_PREVIOUS)			rgb1 = fragColor.rgb;
+	else if (src1 == GL_TEXTURE)		rgb1 = texColor.rgb;
+	else if (src1 == GL_CONSTANT)		rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
+	else if (src1 == GL_PRIMARY_COLOR)	rgb1 = primaryColor.rgb;
+	
 	// Combine the RGB components
-	if (func == GL_MODULATE)
-		fragColor.rgb = rgb0 * rgb1;
+	if (func == GL_MODULATE)			fragColor.rgb = rgb0 * rgb1;
+	else if (func == GL_ADD)			fragColor.rgb = rgb0 + rgb1;
+	else if (func == GL_ADD_SIGNED)		fragColor.rgb = rgb0 + rgb1 - 0.5;
+	else if (func == GL_SUBTRACT)		fragColor.rgb = rgb0 - rgb1;
+	else if (func == GL_REPLACE)		fragColor.rgb = rgb0;
 	else if (func == GL_DOT3_RGBA) {
 		if (u_cc3VertexHasTangent)		// Bump-map using tangent-space light dir
-			fragColor = vec4(2.0 * dot(rgb0 - kVec3Half, v_bumpMapLightDir));
+			fragColor = lowp vec4(2.0 * dot(rgb0 - 0.5, v_bumpMapLightDir));
 		else							// Bump-map using model-space light dir (from const color)
-			fragColor = vec4(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+			fragColor = lowp vec4(4.0 * dot(rgb0 - 0.5, rgb1 - 0.5));
 	}
 	else if (func == GL_DOT3_RGB) {
 		if (u_cc3VertexHasTangent)		// Bump-map using tangent-space light dir
-			fragColor.rgb = vec3(2.0 * dot(rgb0 - kVec3Half, v_bumpMapLightDir));
+			fragColor.rgb = lowp vec3(2.0 * dot(rgb0 - 0.5, v_bumpMapLightDir));
 		else							// Bump-map using model-space light dir (from const color)
-			fragColor.rgb = vec3(4.0 * dot(rgb0 - kVec3Half, rgb1 - kVec3Half));
+			fragColor.rgb = lowp vec3(4.0 * dot(rgb0 - 0.5, rgb1 - 0.5));
 	}
-	else if (func == GL_ADD)
-		fragColor.rgb = rgb0 + rgb1;
-	else if (func == GL_ADD_SIGNED)
-		fragColor.rgb = rgb0 + rgb1 - 0.5;
-	else if (func == GL_REPLACE)
-		fragColor.rgb = rgb0;
-	else if (func == GL_SUBTRACT)
-		fragColor.rgb = rgb0 - rgb1;
 	
 	// Extract the alpha components from the appropriate sources
 	func = u_cc3TextureUnitCombineAlphaFunction[tuIdx];
 	src0 = u_cc3TextureUnitAlphaSource0[tuIdx];
 	src1 = u_cc3TextureUnitAlphaSource1[tuIdx];
-
-	float a0 = texColor.a;			// GL_TEXTURE
-	if (src0 == GL_PREVIOUS) a0 = fragColor.a;
-	if (src0 == GL_CONSTANT) a0 = u_cc3TextureUnitColor[tuIdx].a;
 	
-	float a1 = fragColor.a;			// GL_PREVIOUS
-	if (src1 == GL_TEXTURE) a1 = texColor.a;
-	if (src1 == GL_CONSTANT) a1 = u_cc3TextureUnitColor[tuIdx].a;
-
+	// Alpha of source 0, starting with default
+	if (src0 == GL_TEXTURE)				a0 = texColor.a;
+	else if (src0 == GL_PREVIOUS)		a0 = fragColor.a;
+	else if (src0 == GL_CONSTANT)		a0 = u_cc3TextureUnitColor[tuIdx].a;
+	else if (src0 == GL_PRIMARY_COLOR)	a0 = primaryColor.a;
+	
+	// Alpha of source 1, starting with default
+	if (src1 == GL_PREVIOUS)			a1 = fragColor.a;
+	else if (src1 == GL_TEXTURE)		a1 = texColor.a;
+	else if (src1 == GL_CONSTANT)		a1 = u_cc3TextureUnitColor[tuIdx].a;
+	else if (src1 == GL_PRIMARY_COLOR)	a1 = primaryColor.a;
+	
 	// Combine the alpha components
-	if (func == GL_MODULATE)
-		fragColor.a = a0 * a1;
-	else if (func == GL_ADD)
-		fragColor.a = a0 + a1;
-	else if (func == GL_ADD_SIGNED)
-		fragColor.a = a0 + a1 - 0.5;
-	else if (func == GL_REPLACE)
-		fragColor.a = a0;
-	else if (func == GL_SUBTRACT)
-		fragColor.a = a0 - a1;
+	if (func == GL_MODULATE)			fragColor.a = a0 * a1;
+	else if (func == GL_ADD)			fragColor.a = a0 + a1;
+	else if (func == GL_ADD_SIGNED)		fragColor.a = a0 + a1 - 0.5;
+	else if (func == GL_SUBTRACT)		fragColor.a = a0 - a1;
+	else if (func == GL_REPLACE)		fragColor.a = a0;
 }
 
 /**
@@ -196,21 +191,22 @@ void combineTexture(int tuIdx, vec4 texColor) {
  * the fragment color already applied as defined by the texture unit parameters.
  */
 void applyTexture(int tuIdx) {
-	vec4 texColor = texture2D(s_cc3Textures[tuIdx], v_texCoord[tuIdx]);
+	lowp vec4 texColor = texture2D(s_cc3Textures[tuIdx], v_texCoord[tuIdx]);
 	int tuMode = u_cc3TextureUnitMode[tuIdx];
 	
-	if (tuMode == GL_MODULATE) {
+	if (tuMode == GL_COMBINE)
+		combineTexture(texColor, tuIdx);
+	else if (tuMode == GL_MODULATE)
 		fragColor *= texColor;
-	} else if (tuMode == GL_REPLACE) {
+	else if (tuMode == GL_DECAL)
+		fragColor.rgb = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
+	else if (tuMode == GL_REPLACE)
 		fragColor = texColor;
-	} else if (tuMode == GL_COMBINE) {
-		combineTexture(tuIdx, texColor);
-	} else if (tuMode == GL_ADD) {
+	else if (tuMode == GL_ADD) {
 		fragColor.rgb += texColor.rgb;
 		fragColor.a *= texColor.a;
-	} else if (tuMode == GL_DECAL) {
-		fragColor.rgb = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
-	} else if (tuMode == GL_BLEND) {
+	}
+	else if (tuMode == GL_BLEND) {
 		fragColor.rgb =  (fragColor.rgb * (1.0 - texColor.rgb)) + (u_cc3TextureUnitColor[tuIdx].rgb * texColor.rgb);
 		fragColor.a *= texColor.a;
 	}
@@ -222,7 +218,6 @@ void applyTexture(int tuIdx) {
  * color from the v_color varying input variable.
  */
 void applyTextures() {
-	fragColor = v_color;
 	for (int tuIdx = 0; tuIdx < MAX_TEXTURES; tuIdx++) {
 		if (tuIdx >= u_cc3TextureCount) return;		// Break out once we've applied all the textures
 		applyTexture(tuIdx);
@@ -230,29 +225,36 @@ void applyTextures() {
 }
 
 /** Applies fog to the specified color and returns the adjusted color. */
-vec4 fogify(vec4 aColor) {
-	if (u_cc3FogIsEnabled) {
-		int mode = u_cc3FogAttenuationMode;
-		float vtxVisibility = 1.0;
-		
-		if (mode == GL_LINEAR) {
-			vtxVisibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-		} else if (mode == GL_EXP) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-d);
-		} else if (mode == GL_EXP2) {
-			float d = u_cc3FogDensity * v_distEye;
-			vtxVisibility = exp(-(d * d));
-		}
-		vtxVisibility = clamp(vtxVisibility, 0.0, 1.0);
-		aColor.rgb =  mix(u_cc3FogColor.rgb, aColor.rgb, vtxVisibility);
+lowp vec4 fogify(lowp vec4 aColor) {
+	
+#	define GL_LINEAR                 0x2601
+#	define GL_EXP                    0x0800
+#	define GL_EXP2                   0x0801
+	
+	if ( !u_cc3FogIsEnabled ) return aColor;
+	
+	// Determine visibility based on fog attentuation characteristics and distance through fog
+	float visibility = 1.0;
+	if (u_cc3FogAttenuationMode == GL_LINEAR) {
+		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
+	} else if (u_cc3FogAttenuationMode == GL_EXP) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-d);
+	} else if (u_cc3FogAttenuationMode == GL_EXP2) {
+		float d = u_cc3FogDensity * v_distEye;
+		visibility = exp(-(d * d));
 	}
+	visibility = clamp(visibility, 0.0, 1.0);
+	
+	// Mix alpha-adjusted fog color into fragment color based on visibility.
+	aColor.rgb = mix(u_cc3FogColor.rgb * aColor.a, aColor.rgb, visibility);
 	return aColor;
 }
 
 //-------------- ENTRY POINT ----------------------
 void main() {
-	
+	primaryColor = gl_FrontFacing ? v_color : v_colorBack;
+	fragColor = primaryColor;
 	applyTextures();
 
 	// If the fragment passes the alpha test, fog it and draw it, otherwise discard
@@ -264,20 +266,23 @@ void main() {
 
 // ------------- ALTERNATE PERFORMANCE TESTING FUNCTIONS --------------
 
-// This is a dummy alternate to the applyTextures function. It deliberately applies zero textures.
-// By pretending to make use of the applyTexture() function, all of the uniforms remain active,
-// allowing the testing of the CPU overhead when setting large numbers of uniforms.
-void applyNoTextures() { for (int tuIdx = 0; tuIdx < 0; tuIdx++) applyTexture(tuIdx); }
+/**
+ * This is a dummy alternate to the applyTextures function. It deliberately applies zero textures.
+ * By pretending to make use of the applyTexture() function, all of the uniforms remain active,
+ * allowing the testing of the CPU overhead when setting large numbers of uniforms.
+ */
+//void applyNoTextures() { for (int tuIdx = 0; tuIdx < 0; tuIdx++) applyTexture(tuIdx); }
 
-// Alternate main function that deliberately applies no textures and directly assigns the fragment
-// color from the varying variable. The applyNoTextures function fools the compiler into thinking
-// that textures will be applied, thereby causing the compiler to keep all of the uniforms active.
-// This permits analysis of the overhead on the CPU of a large number of uniforms. To see the effect,
-// comment out the normal main function and uncomment this version. For even better performance,
-// comment out the call to applyNoTextures below, to avoid the binding of the additional uniforms.
-/*
-void main() {
-	applyNoTextures();
-	gl_FragColor = v_color;
-}
-*/
+/**
+ * Alternate main function that deliberately applies no textures and directly assigns the 
+ * fragment color from the varying variable. Uncomment the applyNoTextures function to fool
+ * the compiler into thinking that textures will be applied, thereby causing the compiler 
+ * to keep all of the uniforms active. This permits analysis of the overhead on the CPU of 
+ * a large number of uniforms. To see the effect, comment out the normal main function and
+ * uncomment this version. For even better performance, comment out the call to applyNoTextures
+ * below, to avoid the binding of the additional uniforms.
+ */
+//void main() {
+//	applyNoTextures();
+//	gl_FragColor = v_color;
+//}

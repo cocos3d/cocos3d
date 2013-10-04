@@ -574,10 +574,16 @@ enum {
 /** Returns the name of the specified touch type. */
 NSString* NSStringFromTouchType(uint tType);
 
+#if CC3_CC2_1
+/** Extend the iOS version enumerations for cocos2d 1.x. */
+enum {
+    kCCiOSVersion_5_0 = 0x05000000,
+};
+#endif // CC3_CC2_1
+
 #if COCOS2D_VERSION < 0x010100
 /** Extend the iOS version enumerations for cocos2d 1.0.1. */
 enum {
-    kCCiOSVersion_5_0_0 = 0x05000000,
     kCCiOSVersion_6_0_0 = 0x06000000
 };
 

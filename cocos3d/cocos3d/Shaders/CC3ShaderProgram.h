@@ -90,24 +90,28 @@
  * The content of this propery will be prepended to the source code of the shader source code.
  * You can use this property to include compiler builds settings, and other delarations.
  *
- * The initial value of this property is set to the value of the platformPreamble property.
- * If you change this property, you should concatenate the value of the platformPreamble to
+ * The initial value of this property is set to the value of the defaultShaderPreamble property.
+ * If you change this property, you should concatenate the value of the defaultShaderPreamble to
  * the additional preamble content that you require.
  */
 @property(nonatomic, retain) NSString* shaderPreamble;
 
 /**
- * Returns a string containing platform-specific GLSL source code to be used as a preamble
- * for the source code of the shader.
+ * Returns a string containing GLSL source code to be used as a default preamble for the
+ * source code of the shader.
  *
  * The value of this property defines the initial value of the shaderPreamble property.
  *
- * The value of this property is retrieved from CC3OpenGL.sharedGL.defaultShaderPreamble.
- * For OpenGL on the OSX platform, this property contains define statements to remove precision
- * qualifiers of all variables in the GLSL source code and to set the #version declaration.
- * For OpenGL ES 2.0 on the iOS platform, this property returns an empty string.
+ * To allow platform-specific requirements, the value of this property is retrieved from
+ * CC3OpenGL.sharedGL.defaultShaderPreamble. For OpenGL on the OSX platform, this property
+ * contains define statements to remove precision qualifiers of all variables in the GLSL
+ * source code and to set the #version declaration. For OpenGL ES 2.0 on the iOS platform,
+ * this property returns an empty string.
+ *
+ * Subclasses may override this property to return additional shader preamble content, such
+ * as standard define statements, etc.
  */
-@property(nonatomic, readonly) NSString* platformPreamble;
+@property(nonatomic, readonly) NSString* defaultShaderPreamble;
 
 
 #pragma mark Allocation and initialization
@@ -381,6 +385,12 @@
 /** Returns the length of the largest attribute name in this program. */
 @property(nonatomic, readonly) GLint maxAttributeNameLength;
 
+/** Returns the number of uniforms declared and in use by this program. */
+@property(nonatomic, readonly) GLuint uniformCount;
+
+/** Returns the number of memory storage elements consumed by the uniform variables used by this program. */
+@property(nonatomic, readonly) GLuint uniformStorageElementCount;
+
 /** 
  * Returns the uniform with the specified semantic and index,
  * or nil if no uniform is defined for the specified semantic.
@@ -399,22 +409,25 @@
 /** Returns the uniform at the specified location, or nil if no uniform is defined at the specified location. */
 -(CC3GLSLUniform*) uniformAtLocation: (GLint) uniformLocation;
 
+/** Returns the number of vertex attributes declared and in use by this program. */
+@property(nonatomic, readonly) GLuint attributeCount;
+
 /** 
- * Returns the attribute with the specified semantic and index,
+ * Returns the vertex attribute with the specified semantic and index,
  * or nil if no attribute is defined for the specified semantic.
  */
 -(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic at: (GLuint) semanticIndex;
 
 /**
- * Returns the attribute with the specified semantic at index zero,
+ * Returns the vertex attribute with the specified semantic at index zero,
  * or nil if no attribute is defined for the specified semantic.
  */
 -(CC3GLSLAttribute*) attributeForSemantic: (GLenum) semantic;
 
-/** Returns the attribute with the specified name, or nil if no attribute is defined for the specified name. */
+/** Returns the vertex attribute with the specified name, or nil if no attribute is defined for the specified name. */
 -(CC3GLSLAttribute*) attributeNamed: (NSString*) name;
 
-/** Returns the attribute at the specified location, or nil if no attribute is defined at the specified location. */
+/** Returns the vertex attribute at the specified location, or nil if no attribute is defined at the specified location. */
 -(CC3GLSLAttribute*) attributeAtLocation: (GLint) attrLocation;
 
 

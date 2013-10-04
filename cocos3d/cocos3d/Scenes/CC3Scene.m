@@ -428,10 +428,17 @@
 	// Setup drawing configuration for cocos2d
 	[gl alignFor2DDrawing];
 
+	// Re-align culling as expected by cocos2d
+	gl.cullFace = GL_BACK;
+	gl.frontFace = GL_CCW;
+
 	// Make sure the drawing surface is set back to the view surface
 	[self.viewSurface activate];
 
-	// Close depth testing, either by turning it off, or clearing the depth buffer
+	// Set depth testing to 2D values, and close depth testing,
+	// either by turning it off, or clearing the depth buffer
+	gl.depthFunc = GL_LEQUAL;
+	gl.depthMask = YES;
 	[self closeDepthTestWithVisitor: visitor];
 	
 	// Reset the viewport to the 2D canvas and disable scissor clipping to the viewport.
@@ -440,18 +447,12 @@
 	[gl enableScissorTest: NO];
 
 	// Disable lights and fog. Done outside alignFor2DDrawing: because they apply to billboards
+	[gl enableLighting: NO];
+	[gl enableTwoSidedLighting: NO];
 	for (CC3Light* lgt in _lights) [lgt turnOffWithVisitor: visitor];
 	[gl enableFog: NO];
 }
 
-/**
- * Template method that leaves depth testing in the state required by the 2D environment.
- *
- * Since most 2D drawing does not need to use depth testing, and clearing the depth buffer is
- * a relatively costly operation, the standard behaviour is to simply turn depth testing off.
- * However, subclasses can override this method to leave depth testing on and clear the depth
- * buffer in order to permit 2D drawing to make use of depth testing.
- */
 -(void) closeDepthTestWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.gl enableDepthTest: NO];
 }

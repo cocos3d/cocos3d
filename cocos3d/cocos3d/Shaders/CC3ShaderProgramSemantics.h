@@ -77,6 +77,8 @@ typedef enum {
 	kCC3SemanticHasVertexTextureCoordinate,		/**< (bool) Whether a vertex texture coordinate is available. */
 	kCC3SemanticHasVertexPointSize,				/**< (bool) Whether a vertex point size is available. */
 	kCC3SemanticIsDrawingPoints,				/**< (bool) Whether the vertices are being drawn as points. */
+	kCC3SemanticShouldDrawFrontFaces,			/**< (bool) Whether the front side of each face is to be drawn. */
+	kCC3SemanticShouldDrawBackFaces,			/**< (bool) Whether the back side of each face is to be drawn. */
 	
 	// ENVIRONMENT MATRICES --------------
 	kCC3SemanticModelLocalMatrix,				/**< (mat4) Current model-to-parent matrix. */
