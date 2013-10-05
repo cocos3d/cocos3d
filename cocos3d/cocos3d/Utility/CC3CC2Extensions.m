@@ -136,9 +136,10 @@
 -(BOOL) isTouchEnabled { return NO; }
 
 -(CGRect) globalBoundingBoxInPixels {
-	CGSize csp = self.contentSizeInPixels;
-	CGRect rect = CGRectMake(0, 0, csp.width, csp.height);
-	return CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
+	CGSize cs = self.contentSize;
+	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
+	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
+	return CC_RECT_POINTS_TO_PIXELS(rect);
 }
 
 -(void) updateViewport { [self.children makeObjectsPerformSelector:@selector(updateViewport)]; }
