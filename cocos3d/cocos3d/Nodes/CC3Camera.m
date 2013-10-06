@@ -80,6 +80,7 @@
 }
 
 -(CC3Matrix*) projectionMatrix {
+	[self buildProjection];
 	return _hasInfiniteDepthOfField
 				? _frustum.infiniteProjectionMatrix
 				: _frustum.finiteProjectionMatrix;
