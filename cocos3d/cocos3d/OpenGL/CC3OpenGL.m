@@ -974,16 +974,17 @@
 	// Restore 2D standard blending
 	[self enableBlend: YES];	// if director setAlphaBlending: NO, needs to be overridden
 	[self setBlendFuncSrc: CC_BLEND_SRC dst: CC_BLEND_DST];
+	[self enableAlphaTesting: NO];
 	
 	// Enable vertex attributes needed for 2D, disable all others, unbind GL buffers.
 	[self enable2DVertexAttributes];
 	[self unbindBufferTarget: GL_ARRAY_BUFFER];
 	[self unbindBufferTarget: GL_ELEMENT_ARRAY_BUFFER];
 	
-	// Disable all texture units above 0. Enable texture unit 0 but not bound to any texture.
-	[self disableTexturingFrom: 1];
+	// Disable, and remove both 2D & cube texture bindings from, all texture units.
+	// Then enable texture unit 0 for 2D textures only, and default texture unit blending.
+	[self disableTexturingFrom: 0];
 	[self enableTexturing: YES inTarget: GL_TEXTURE_2D at: 0];
-	[self bindTexture: 0 toTarget: GL_TEXTURE_2D at: 0];
 	[self setTextureEnvMode: GL_MODULATE at: 0];
 	[self setTextureEnvColor: kCCC4FBlackTransparent at: 0];
 	
@@ -991,7 +992,7 @@
 	[self activateTextureUnit: 0];
 	[self activateClientTextureUnit: 0];
 	
-	// Ensure GL_MODELVIEW matrix is active
+	// Ensure GL_MODELVIEW matrix is active under OGLES 1.1.
 	[self activateMatrixStack: GL_MODELVIEW];
 	
 	[self align2DStateCache];		// Align the 2D GL state cache with current settings

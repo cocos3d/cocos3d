@@ -475,6 +475,7 @@
 
 -(void) setTextureEnvMode: (GLenum) mode at: (GLuint) tuIdx {
 	if (CC3CheckGLuintAt(tuIdx, mode, values_GL_TEXTURE_ENV_MODE, &isKnown_GL_TEXTURE_ENV_MODE)) {
+		[self activateTextureUnit: tuIdx];
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode);
 		LogGLErrorTrace(@"glTexEnvi(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_ENV), NSStringFromGLEnum(GL_TEXTURE_ENV_MODE), NSStringFromGLEnum(mode));
 	}
@@ -482,6 +483,7 @@
 
 -(void) setTextureEnvColor: (ccColor4F) color at: (GLuint) tuIdx {
 	if (CC3CheckGLColorAt(tuIdx, color, values_GL_TEXTURE_ENV_COLOR, &isKnown_GL_TEXTURE_ENV_COLOR)) {
+		[self activateTextureUnit: tuIdx];
 		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, (GLfloat*)&color);
 		LogGLErrorTrace(@"glTexEnvfv(%@, %@, %@)", NSStringFromGLEnum(GL_TEXTURE_ENV), NSStringFromGLEnum(GL_TEXTURE_ENV_COLOR), NSStringFromCCC4F(color));
 	}
