@@ -296,7 +296,6 @@
 /** Template method that pushes the GL projection matrix stack, and loads the projectionMatrix into it. */
 -(void) openProjectionWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ opening projection with %@", self, visitor);
-	[self buildProjection];
 	[visitor.gl pushProjectionMatrixStack];
 	[self loadProjectionMatrixWithVisitor: visitor];
 }
@@ -920,11 +919,6 @@
 -(CC3Matrix*) viewMatrix { return _camera.viewMatrix; }
 -(CC3Matrix*) modelviewMatrix { return self.viewMatrix; }
 
--(CC3Matrix*) finiteProjectionMatrix {
-	[self buildProjectionMatrixIfNeeded ];
-	return _finiteProjectionMatrix;
-}
-
 
 #pragma mark Allocation and initialization
 
@@ -954,14 +948,6 @@
 	_right = another.right;
 	_near = another.near;
 	_far = another.far;
-	
-	[_finiteProjectionMatrix release];
-	_finiteProjectionMatrix = [another.finiteProjectionMatrix copy];		// retained
-	
-	[_infiniteProjectionMatrix release];
-	_infiniteProjectionMatrix = [another.infiniteProjectionMatrix copy];	// retained
-	_isInfiniteProjectionDirty = another.isInfiniteProjectionDirty;
-	
 	_isUsingParallelProjection = another.isUsingParallelProjection;
 }
 
@@ -1022,54 +1008,43 @@
 
 #pragma mark Projection matrices
 
--(void) markProjectionDirty { _isProjectionDirty = YES; }
-
-/**
- * Template method that populates the projection matrix from the frustum. Uses either orthographic
- * or perspective projection, depending on the value of the isUsingParallelProjection property.
- */
--(void) buildProjectionMatrixIfNeeded {
-	if ( !_isProjectionDirty ) return;
-
-	if (_isUsingParallelProjection)
-		[_finiteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right andTop: _top
-													andBottom: _bottom andNear: _near andFar: _far];
-	else
-		[_finiteProjectionMatrix populateFromFrustumLeft: _left andRight: _right andTop: _top
-											   andBottom: _bottom andNear: _near andFar: _far];
-	_isProjectionDirty = NO;
+-(void) markProjectionDirty {
+	_isProjectionDirty = YES;
 	_isInfiniteProjectionDirty = YES;
-	[self markDirty];	// mark dirty as bounding volume (planes and vertices)
-	
-	LogTrace(@"%@ populated projection matrix %@", self, _finiteProjectionMatrix);
+	[self markDirty];
 }
 
-/**
- * Returns the projection matrix modified to have an infinite depth of view,
- * by assuming a farClippingDistance set at infinity.
- *
- * Since this matrix is not commonly used, it is only calculated when the
- * finiateProjectionMatrix has changed, and then only on demand.
- *
- * When the finiteProjectionMatrix is recalculated, the infiniteProjectionMatrix
- * is marked as dirty. It is then recalculated the next time this property
- * is accessed, and is cached until it is marked dirty again.
- */
+-(CC3Matrix*) finiteProjectionMatrix {
+	if (_isProjectionDirty) {
+		if (_isUsingParallelProjection)
+			[_finiteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right
+														   andTop: _top andBottom: _bottom
+														  andNear: _near andFar: _far];
+		else
+			[_finiteProjectionMatrix populateFromFrustumLeft: _left andRight: _right
+													  andTop: _top andBottom: _bottom
+													 andNear: _near andFar: _far];
+		_isProjectionDirty = NO;
+	}
+	return _finiteProjectionMatrix;
+}
+
 -(CC3Matrix*) infiniteProjectionMatrix {
+	// Since this matrix is not commonly used, it is only calculated when the
+	// finiateProjectionMatrix has changed, and then only on demand.
 	if (!_infiniteProjectionMatrix) {
 		_infiniteProjectionMatrix = [CC3ProjectionMatrix new];
 		_isInfiniteProjectionDirty = YES;
 	}
 	if (_isInfiniteProjectionDirty) {
-		if (_isUsingParallelProjection) {
+		if (_isUsingParallelProjection)
 			[_infiniteProjectionMatrix populateOrthoFromFrustumLeft: _left andRight: _right
 															andTop: _top andBottom: _bottom
 														   andNear: _near];
-		} else {
+		else
 			[_infiniteProjectionMatrix populateFromFrustumLeft: _left andRight: _right
 													   andTop: _top andBottom: _bottom
 													  andNear: _near];
-		}
 		_isInfiniteProjectionDirty = NO;
 	}
 	return _infiniteProjectionMatrix;
@@ -1104,7 +1079,7 @@
 																		 (m.c3r4 - m.c3r3), (m.c4r4 - m.c4r3))));
 	[self buildVertices];
 	
-	LogTrace(@"Built planes for %@ from projection: %@ and view: %@", self, _finiteProjectionMatrix, _camera.viewMatrix);
+	LogTrace(@"Built planes for %@ from projection: %@ and view: %@", self, self.finiteProjectionMatrix, _camera.viewMatrix);
 }
 
 -(void) buildVertices {
