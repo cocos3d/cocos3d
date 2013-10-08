@@ -507,6 +507,7 @@
 -(void) drawShadowsWithVisitor:  (CC3NodeDrawingVisitor*) visitor {
 	if ( !self.doesContainShadows ) return;
 	visitor.gl.clearStencil = 0;
+	[visitor.renderSurface clearStencilContent];
 	for (CC3Light* lgt in _lights) [lgt drawShadowsWithVisitor: visitor];
 }
 

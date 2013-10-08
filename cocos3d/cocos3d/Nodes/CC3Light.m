@@ -484,13 +484,19 @@
 	}
 }
 
+/**
+ * Turns on stenciling and ensure the stencil buffer can be updated.
+ * Turns off writing to the color buffer, because the shadow volumes themselves are invisible.
+ */
 -(void) configureStencilParameters: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
 	[gl enableStencilTest: YES];
+	gl.stencilMask = ~0;
 	gl.colorMask = ccc4(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	[gl setStencilFunc: GL_ALWAYS reference: 0 mask: ~0];
 }
 
+/** Draws the clip-space rectangle on the screen, coloring only those pixels where the stencil is non-zero. */
 -(void) paintStenciledShadowsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	CC3OpenGL* gl = visitor.gl;
 	
@@ -502,15 +508,15 @@
 	// value in the stencil (and that pass the depth test) will be painted.
 	[gl setStencilFunc: GL_NOTEQUAL reference: 0 mask: ~0];
 	
-	// Clear any non-zero values from the stencil buffer as we paint the shadow.
-	// This saves having to make the effort to clear the stencil buffer on the next round.
-	[gl setOpOnStencilFail: GL_ZERO onDepthFail: GL_ZERO onDepthPass: GL_ZERO];
+	// Don't waste time updaing the stencil buffer now.
+	gl.stencilMask = 0;
 	
 	// Paint the shadow to the screen. Only areas that have been marked as being
 	// in the stencil buffer as being in the shadow of this light will be shaded.
 	[visitor visit: _stencilledShadowPainter];
 }
 
+/** Turns stenciling back off. */
 -(void) cleanupStencilParameters: (CC3NodeDrawingVisitor*) visitor {
 	[visitor.gl enableStencilTest: NO];
 }
@@ -597,7 +603,6 @@ static GLuint lightPoolStartIndex = 0;
 
 -(void) dealloc {
 	_light = nil;			// Not retained
-	_cameraFrustum = nil;	// Not retained
 	[super dealloc];
 }
 
@@ -625,7 +630,6 @@ static GLuint lightPoolStartIndex = 0;
 -(id) init {
 	if ( (self = [super init]) ) {
 		_light = nil;
-		_cameraFrustum = nil;
 	}
 	return self;
 }
@@ -645,18 +649,9 @@ static GLuint lightPoolStartIndex = 0;
  * Callback indicating that the camera has been transformed.
  * Sets the camera frustum (in case the camera has changed), and marks this volume as dirty.
  */
--(void) nodeWasTransformed: (CC3Node*) aNode {
-	if (aNode.isCamera) {
-		LogTrace(@"Updating %@ from transform notification from %@", self, aNode.fullDescription);
-		_cameraFrustum = ((CC3Camera*)aNode).frustum;
-		[self markDirty];
-	}
-}
+-(void) nodeWasTransformed: (CC3Node*) aNode { if (aNode.isCamera) [self markDirty]; }
 
-/** The camera was destroyed. Clear the cached camera frustum. */
--(void) nodeWasDestroyed: (CC3Node*) aNode {
-	if (aNode.isCamera) _cameraFrustum = nil;
-}
+-(void) nodeWasDestroyed: (CC3Node*) aNode {}
 
 /**
  * Returns whether the light is located in front of the plane.
@@ -764,7 +759,7 @@ static GLuint lightPoolStartIndex = 0;
 	_planeCount = 0;
 	_vertexCount = 0;
 	
-	CC3Frustum* cf = _cameraFrustum;
+    CC3Frustum* cf = _light.activeCamera.frustum;
 	
 	[self checkPlane: cf.leftPlane
 			withEdge: cf.farPlane at: cf.farBottomLeft
@@ -804,7 +799,7 @@ static GLuint lightPoolStartIndex = 0;
 
 	if ( !_light.isDirectionalOnly ) [self addUniqueVertex: self.lightPosition];
 	
-	LogTrace(@"Built %@ from %@", self.fullDescription, _cameraFrustum.fullDescription);
+	LogTrace(@"Built %@ from %@", self.fullDescription, cf.fullDescription);
 }
 
 @end
@@ -864,10 +859,11 @@ static GLuint lightPoolStartIndex = 0;
 
 /** Updates the vertices from the camera frustum. */
 -(void) buildVolume {
-	_vertices[kCC3TopLeftIdx] = _cameraFrustum.nearTopLeft;
-	_vertices[kCC3TopRgtIdx] = _cameraFrustum.nearTopRight;
-	_vertices[kCC3BtmLeftIdx] = _cameraFrustum.nearBottomLeft;
-	_vertices[kCC3BtmRgtIdx] = _cameraFrustum.nearBottomRight;
+    CC3Frustum* cf = _light.activeCamera.frustum;
+	_vertices[kCC3TopLeftIdx] = cf.nearTopLeft;
+	_vertices[kCC3TopRgtIdx] = cf.nearTopRight;
+	_vertices[kCC3BtmLeftIdx] = cf.nearBottomLeft;
+	_vertices[kCC3BtmRgtIdx] = cf.nearBottomRight;
 	_vertices[kCC3LightIdx] = self.lightPosition;
 }
 

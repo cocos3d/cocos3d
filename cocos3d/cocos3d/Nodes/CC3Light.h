@@ -667,7 +667,6 @@ static const CC3AttenuationCoefficients kCC3DefaultLightAttenuationCoefficients 
  * locations, rays, shapes, and other bounding volumes intersect its volume.
  */
 @interface CC3LightCameraBridgeVolume : CC3BoundingVolume <CC3NodeTransformListenerProtocol> {
-	CC3Frustum* _cameraFrustum;
 	CC3Light* _light;
 }
 
