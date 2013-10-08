@@ -107,7 +107,7 @@ uniform bool		u_cc3VertexShouldDrawBackFaces;		/**< Whether the back side of eac
 attribute highp vec4	a_cc3Position;		/**< Vertex position. */
 attribute vec3			a_cc3Normal;		/**< Vertex normal. */
 attribute vec3			a_cc3Tangent;		/**< Vertex tangent. */
-attribute lowp vec4		a_cc3Color;			/**< Vertex color. */
+attribute vec4			a_cc3Color;			/**< Vertex color. */
 attribute vec4			a_cc3BoneWeights;	/**< Vertex skinning bone weights (up to 4). */
 attribute vec4			a_cc3BoneIndices;	/**< Vertex skinning bone matrix indices (up to 4). */
 attribute vec2			a_cc3TexCoord0;		/**< Vertex texture coordinate for texture unit 0. */

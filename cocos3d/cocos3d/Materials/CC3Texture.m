@@ -1226,7 +1226,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 -(void) releaseData: (void*) data {}
 
 -(GLuint) bytesPerPixel {
-	switch(self.pixelFormat) {
+	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
+	switch(pixFmt) {
 		case kCCTexture2DPixelFormat_RGBA8888:
 			return 4;
 		case kCCTexture2DPixelFormat_RGB888:
@@ -1357,7 +1358,8 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 -(void) updateFromPixelFormat {
-	switch(self.pixelFormat) {
+	GLuint pixFmt = self.pixelFormat;	// Not all versions of cocos2d contain all enum values.
+	switch(pixFmt) {
 		case kCCTexture2DPixelFormat_RGBA8888:
 			_pixelGLFormat = GL_RGBA;
 			_pixelGLType = GL_UNSIGNED_BYTE;

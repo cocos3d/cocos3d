@@ -44,8 +44,8 @@
  * statistics and display them in real-time.
  *
  * Using another button, the user can also select whether the nodes in the scene are
- * animated or not. Animating the nodes adds load because the transformMatrix of each
- * node must be updated during each update.
+ * animated or not. Animating the nodes adds load because the globalTransformMatrix
+ * of each node must be updated during each update.
  *
  * This layer displays the following performance statistics:
  *
@@ -59,7 +59,7 @@
  * Updating:
  *   - updates per second
  *   - count of nodes updated per update pass
- *   - count of nodes whose transformMatrix was recalculated per update pass
+ *   - count of nodes whose globalTransformMatrix was recalculated per update pass
  *
  * There are also two joystick controls that allow the user to control the 3D camera.
  * By moving the camera, the user can move some of the coped nodes out of view, and

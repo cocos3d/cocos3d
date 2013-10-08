@@ -131,16 +131,28 @@
 -(CGSize) contentSizeInPixels { return CC_SIZE_POINTS_TO_PIXELS(self.contentSize); }
 
 -(CGRect) boundingBoxInPixels { return CC_RECT_POINTS_TO_PIXELS(self.boundingBox); }
-#endif
+#endif	// CC3_CC2_2
 
 -(BOOL) isTouchEnabled { return NO; }
 
+#if CC3_CC2_2
 -(CGRect) globalBoundingBoxInPixels {
 	CGSize cs = self.contentSize;
 	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
 	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
 	return CC_RECT_POINTS_TO_PIXELS(rect);
 }
+#endif	// CC3_CC2_2
+#if CC3_CC2_1	// Under cocos2d 1.x, don't Retina-scale rect origin!
+-(CGRect) globalBoundingBoxInPixels {
+	CGSize cs = self.contentSize;
+	CGRect rect = CGRectMake(0, 0, cs.width, cs.height);
+	rect = CGRectApplyAffineTransform(rect, [self nodeToWorldTransform]);
+	rect.size.width *= CC_CONTENT_SCALE_FACTOR();
+	rect.size.height *= CC_CONTENT_SCALE_FACTOR();
+	return rect;
+}
+#endif	// CC3_CC2_1
 
 -(void) updateViewport { [self.children makeObjectsPerformSelector:@selector(updateViewport)]; }
 

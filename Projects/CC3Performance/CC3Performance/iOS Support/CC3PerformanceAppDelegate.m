@@ -66,7 +66,7 @@
 	
 	// Create the view controller for the 3D view.
 	_viewController = [CC3UIViewController new];
-	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskLandscape;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
 	_viewController.viewPixelSamples = 4;
 	
@@ -99,7 +99,7 @@
  */
 -(void) establishDirectorController {
 	_viewController = CC3UIViewController.sharedDirector;
-	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskLandscape;
+	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = NO;	// No shadow volumes in this app
 	_viewController.viewPixelSamples = 4;
 	_viewController.animationInterval = (1.0f / kAnimationFrameRate);

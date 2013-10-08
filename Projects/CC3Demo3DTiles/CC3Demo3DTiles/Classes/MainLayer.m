@@ -218,6 +218,18 @@
 	n = [rezNode getNodeNamed: @"Dragon.pod-SoftBody"];
 	_glideTrack = [n addAnimationFromFrame: 0 toFrame: 60];
 	_flapTrack = [n addAnimationFromFrame: 61 toFrame: 108];
+	
+#if !CC3_GLSL
+	// The fixed pipeline of OpenGL ES 1.1 cannot make use of the tangent-space normal
+	// mapping texture that is applied to the dragon, and the result is that the dragon
+	// looks black. Extract the diffuse texture (from texture unit 1), remove all texture,
+	// and set the diffuse texture as the only texture (in texture unit 0).
+	CC3MeshNode* dgnBody = [rezNode getMeshNodeNamed: @"Dragon"];
+	CC3Material* dgnMat = dgnBody.material;
+	CC3Texture* dgnTex = [dgnMat textureForTextureUnit: 1];
+	[dgnMat removeAllTextures];
+	dgnMat.texture = dgnTex;
+#endif
 
 	[self configureAndAddTemplate: n];
 }

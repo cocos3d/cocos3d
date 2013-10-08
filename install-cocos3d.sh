@@ -201,6 +201,9 @@ copy_xc4_project_templates(){
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
 	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
+	copy_files "Projects/Common/Resources/fps_images-hd.png" "$DST_DIR"
+	copy_files "Projects/Common/Resources/fps_images-ipadhd.png" "$DST_DIR"
 
 # Remove old OpenGL OSX Template (cocos2d 1.x)
 	TEMPLATE="cocos3d OSX Application"
@@ -248,6 +251,7 @@ copy_xc4_project_templates(){
 	DST_DIR="$DST_DIR""/Resources"
 	check_dst_dir
 	copy_files "Models/Hello World/hello-world.pod" "$DST_DIR"
+	copy_files "Projects/Common/Resources/fps_images.png" "$DST_DIR"
 
 	echo done!
 }

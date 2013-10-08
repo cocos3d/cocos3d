@@ -97,6 +97,15 @@
 			<key>Path</key>
 			<string>Resources/hello-world.pod</string>
 		</dict>
+		<key>Resources/fps_images.png</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Resources</string>
+			</array>
+			<key>Path</key>
+			<string>Resources/fps_images.png</string>
+		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
@@ -108,6 +117,7 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.h</string>
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
+		<string>Resources/fps_images.png</string>
 	</array>
 </dict>
 </plist>

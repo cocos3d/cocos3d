@@ -43,8 +43,8 @@
  * statistics and display them in real-time.
  *
  * The user can also select whether the nodes in the scene are animated or not.
- * Animating the nodes adds load because the transformMatrix of each node must be
- * updated during each update.
+ * Animating the nodes adds load because the globalTransformMatrix of each node
+ * must be updated during each update.
  *
  * The statistics that are collected are available automatically in any cocos3d
  * application. You can collect performance statistics on your own application
@@ -98,7 +98,7 @@
 /**
  * Indicates whether the node copies should be animated.
  *
- * Animating adds load the the CPU because the transformMatrix of each node
+ * Animating adds load the the CPU because the globalTransformMatrix of each node
  * must be updated during each update pass.
  *
  * Animation of the nodes is performed by using a specialized CC3NodeUpdatingVisitor

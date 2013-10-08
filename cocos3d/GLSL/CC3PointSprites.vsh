@@ -83,7 +83,7 @@ uniform vec3		u_cc3PointSizeAttenuation;			/**< Coefficients of the size attenua
 //-------------- VERTEX ATTRIBUTES ----------------------
 attribute highp vec4	a_cc3Position;		/**< Vertex position. */
 attribute vec3			a_cc3Normal;		/**< Vertex normal. */
-attribute lowp vec4		a_cc3Color;			/**< Vertex color. */
+attribute vec4			a_cc3Color;			/**< Vertex color. */
 attribute float			a_cc3PointSize;		/**< Vertex point size. */
 
 //-------------- VARYING VARIABLE OUTPUTS ----------------------
