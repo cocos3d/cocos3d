@@ -65,9 +65,10 @@
  * Indicates whether this controller is overlaying the view of the device camera.
  *
  * This base implementation always returns NO, indicating that the device camera is not being
- * displayed. Subclasses that support device camera overlay can override.
+ * displayed, and setting this property has no effect. Subclasses that support device camera
+ * overlay can override.
  */
-@property(nonatomic, readonly) BOOL isOverlayingDeviceCamera;
+@property(nonatomic, assign) BOOL isOverlayingDeviceCamera;
 
 /** The view of a CC3ViewController must be of type CC3GLView. */
 @property(nonatomic, retain) CC3GLView* view;

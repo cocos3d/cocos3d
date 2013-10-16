@@ -35,11 +35,6 @@
 
 #if CC3_IOS
 
-#import <AVFoundation/AVCaptureInput.h>
-#import <AVFoundation/AVCaptureDevice.h>
-#import <AVFoundation/AVMediaFormat.h>
-
-
 #pragma mark CC3UIViewController implementation
 
 @implementation CC3UIViewController
@@ -246,120 +241,6 @@ CC3_POP_NOSELECTOR
 	if(dir.runningScene) [dir replaceScene: scene];
 	else [dir runWithScene: scene];
 }
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3DeviceCameraOverlayUIViewController
-
-@implementation CC3DeviceCameraOverlayUIViewController
-
--(void) dealloc {
-	[_deviceCameraView release];
-    [super dealloc];
-}
-
--(BOOL) isOverlayingDeviceCamera { return _isOverlayingDeviceCamera; }
-
--(void) setIsOverlayingDeviceCamera: (BOOL) aBool {
-	if(aBool != self.isOverlayingDeviceCamera) {
-		if(!aBool || self.isDeviceCameraAvailable) {
-
-			// Before switching, if the CCNode is running, send it onExit to stop it
-			BOOL nodeRunning = _controlledNode.isRunning;
-			if(nodeRunning) [_controlledNode onExit];
-
-			// Let subclasses of this controller know about the pending change
-			[self willChangeIsOverlayingDeviceCamera];
-
-			// Update the value
-			_isOverlayingDeviceCamera = aBool;
-
-			if(aBool) {
-				// If overlaying, set the background color to clear, and add the picker view.
-				UIView* myView = self.view;
-				UIWindow* window = myView.window;
-				myView.backgroundColor = [UIColor clearColor];
-				[window addSubview: self.deviceCameraView];
-				[window bringSubviewToFront: myView];
-				[_deviceCameraView.layer.session startRunning];
-			} else {
-				// If reverting, remove the clear background color, and remove the picker view from the window.
-				self.view.backgroundColor = nil;
-				[_deviceCameraView.layer.session stopRunning];
-				[_deviceCameraView removeFromSuperview];
-			}
-
-			// Let subclasses of this controller know that the change has happened
-			[self didChangeIsOverlayingDeviceCamera];
-
-			// After switching, if the CCNode was running, send it onEnter to restart it
-			if(nodeRunning) [_controlledNode onEnter];
-		}
-	}
-}
-
-// Default does nothing, subclasses can override
--(void) willChangeIsOverlayingDeviceCamera {}
-
-// Default does nothing, subclasses can override
--(void) didChangeIsOverlayingDeviceCamera {}
-
-// Check view first as simple shortcut...we'll only have a view if device camera is actually avaiable
--(BOOL) isDeviceCameraAvailable {
-	return _deviceCameraView || [UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera];
-}
-
--(CC3AVCameraView*) deviceCameraView {
-	if ( !_deviceCameraView && self.isDeviceCameraAvailable ) {
-		AVCaptureDevice* camDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
-		AVCaptureInput* avInput = [AVCaptureDeviceInput deviceInputWithDevice: camDevice error: nil];
-		AVCaptureSession* avSession = [[[AVCaptureSession alloc] init] autorelease];
-		[avSession addInput: avInput];
-		
-		_deviceCameraView = [[CC3AVCameraView alloc] initWithFrame: self.view.frame];
-		AVCaptureVideoPreviewLayer* avLayer = _deviceCameraView.layer;
-		avLayer.session = avSession;
-		avLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-	}
-	return _deviceCameraView;
-}
-
-
-#pragma mark Instance initialization and management
-
--(id) initWithNibName: (NSString*) nibNameOrNil bundle: (NSBundle*) nibBundleOrNil {
-	if( (self = [super initWithNibName: nibNameOrNil bundle: nibBundleOrNil]) ) {
-		_deviceCameraView = nil;
-		_isOverlayingDeviceCamera = NO;
-	}
-	return self;
-}
-
-+(id) controller { return [[[self alloc] init] autorelease]; }
-
--(void) didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-	
-	// If overlay view exists, and we're not currently overlaying the device camera, release it
-	if( !self.isOverlayingDeviceCamera ) {
-		[_deviceCameraView release];
-		_deviceCameraView = nil;
-	}
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CC3AVCameraView
-
-@implementation CC3AVCameraView
-
--(AVCaptureVideoPreviewLayer*) layer { return (AVCaptureVideoPreviewLayer*)super.layer; }
-
-+(Class) layerClass { return [AVCaptureVideoPreviewLayer class]; }
 
 @end
 

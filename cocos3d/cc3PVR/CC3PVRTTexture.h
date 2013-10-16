@@ -36,11 +36,11 @@
 #import "PVRTTexture.h"
 
 #if CC3_OGLES_1
-#import "PVRT 3.1/OGLES/PVRTTextureAPI.h"
+#import "PVRT_3.1/OGLES/PVRTTextureAPI.h"
 #endif
 
 #if CC3_OGLES_2
-#import "PVRT 3.1/OGLES2/PVRTTextureAPI.h"
+#import "PVRT_3.1/OGLES2/PVRTTextureAPI.h"
 #endif
 
 #undef BOOL						// resolve conflict with PVRT C++ definition of BOOL

@@ -27,7 +27,7 @@
 // No binary shaders are allowed on the iphone and so this value is not defined
 // Defining here allows for a more graceful fail of binary shader loading at runtime
 // which can be recovered from instead of fail at compile time
-#define GL_SGX_BINARY_IMG 0
+// #define GL_SGX_BINARY_IMG 0			// patched for cocos3d by Bill Hollings
 #else
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -141,7 +141,7 @@ public:
 	@Returns			True if the extension is supported
 	@Description		Queries for support of an extension
 	*************************************************************************/
-	static bool IsGLExtensionSupported(const char * const extension);
+	static bool IsGLExtensionSupported(const char* extension);	// patched for cocos3d by Bill Hollings
 };
 
 #endif /* _PVRTGLES2EXT_H_ */

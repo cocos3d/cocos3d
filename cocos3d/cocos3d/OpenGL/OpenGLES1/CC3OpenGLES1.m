@@ -208,7 +208,11 @@
 	value_GL_MAX_VERTEX_UNITS = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
 	LogInfoIfPrimary(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
 	
+#if APPORTABLE
+	value_GL_MAX_SAMPLES = 1;
+#else
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
+#endif	//!APPORTABLE
 	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 

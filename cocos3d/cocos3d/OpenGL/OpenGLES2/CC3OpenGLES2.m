@@ -140,7 +140,11 @@
 
 	[self initShaderPrecisions];
 	
+#if APPORTABLE
+	value_GL_MAX_SAMPLES = 1;
+#else
 	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
+#endif	//!APPORTABLE
 	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 	
 	value_GL_MAX_CUBE_MAP_TEXTURE_SIZE = [self getInteger: GL_MAX_CUBE_MAP_TEXTURE_SIZE];

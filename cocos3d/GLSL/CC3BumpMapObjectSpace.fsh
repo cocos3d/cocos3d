@@ -81,20 +81,20 @@ float bumpMapModulation(vec4 texNormal, vec4 ltDir) {
 /** Applies fog to the specified color and returns the adjusted color. */
 lowp vec4 fogify(lowp vec4 aColor) {
 	
-#	define GL_LINEAR                 0x2601
-#	define GL_EXP                    0x0800
-#	define GL_EXP2                   0x0801
+#	define k_GL_LINEAR                 0x2601
+#	define k_GL_EXP                    0x0800
+#	define k_GL_EXP2                   0x0801
 	
 	if ( !u_cc3FogIsEnabled ) return aColor;
 	
 	// Determine visibility based on fog attentuation characteristics and distance through fog
 	float visibility = 1.0;
-	if (u_cc3FogAttenuationMode == GL_LINEAR) {
+	if (u_cc3FogAttenuationMode == k_GL_LINEAR) {
 		visibility = (u_cc3FogEndDistance - v_distEye) / (u_cc3FogEndDistance - u_cc3FogStartDistance);
-	} else if (u_cc3FogAttenuationMode == GL_EXP) {
+	} else if (u_cc3FogAttenuationMode == k_GL_EXP) {
 		float d = u_cc3FogDensity * v_distEye;
 		visibility = exp(-d);
-	} else if (u_cc3FogAttenuationMode == GL_EXP2) {
+	} else if (u_cc3FogAttenuationMode == k_GL_EXP2) {
 		float d = u_cc3FogDensity * v_distEye;
 		visibility = exp(-(d * d));
 	}

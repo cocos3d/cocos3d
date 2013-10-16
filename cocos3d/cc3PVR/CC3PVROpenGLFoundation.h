@@ -29,12 +29,28 @@
 
 /** @file */	// Doxygen marker
 
-/** OS platform macros */
-# define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-# define CC3_OSX			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+/** Running on an Apple OS. Required for Apportable. */
+#ifndef __APPLE__
+#	define __APPLE__		1
+#endif
+
+/** Running on iOS */
+#ifndef CC3_IOS
+#	define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
+#endif
+
+/** Running on OSX */
+#ifndef CC3_OSX
+#	define CC3_OSX			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+#endif
+
+/** Running on Android via Apportable. Explicitly set as a build setting. */
+#ifndef APPORTABLE
+#	define APPORTABLE		0
+#endif
 
 #if CC3_IOS
-#	define TARGET_OS_IPHONE 1
+#	define TARGET_OS_IPHONE		1
 #endif
 
 /** Running some form of OpenGL ES under iOS. */

@@ -45,6 +45,8 @@
 
 -(BOOL) isOverlayingDeviceCamera { return NO; }
 
+-(void) setIsOverlayingDeviceCamera: (BOOL) isOverlayingDeviceCamera {}
+
 -(CC3GLView*) view { return (CC3GLView*)super.view; }
 
 -(void) setView:(CC3GLView *)view {

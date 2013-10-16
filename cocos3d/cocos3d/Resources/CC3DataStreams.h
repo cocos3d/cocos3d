@@ -84,31 +84,80 @@
 
 #pragma mark Reading stream content
 
-/** Reads the specified number of bytes into the specified byte array. */
--(void) read: (NSUInteger) count bytes: (char*) bytes;
+/** 
+ * Reads the specified number of bytes into the specified byte array, and advances the stream position.
+ *
+ * If ALL of the bytes cannot be read, then the entire array of bytes is zeroed,
+ * and the stream position, as returned by the postion property, is not advanced.
+ *
+ * Returns YES if the requested number of bytes was successfully read into the specified byte
+ * array, and the steam position was advanced. Otherwise, returns NO to indicate that none of
+ * the bytes were read, the stream position was not advanced, and the byte array was zeroed.
+ */
+-(BOOL) readAll: (NSUInteger) count bytes: (char*) bytes;
 
-/** Reads and returns a byte from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns a byte from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(char) readByte;
 
-/** Reads and returns an unsigned byte from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns an unsigned byte from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(unsigned char) readUnsignedByte;
 
-/** Reads and returns a float from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns a float from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(float) readFloat;
 
-/** Reads and returns a double from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns a double from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(double) readDouble;
 
-/** Reads and returns an integer from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns an integer from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(int) readInteger;
 
-/** Reads and returns an unsigned integer from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns an unsigned integer from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(unsigned int) readUnsignedInteger;
 
-/** Reads and returns a short from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns a short from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(short) readShort;
 
-/** Reads and returns an unsigned short from the current position in the stream, and advances the stream pointer. */
+/**
+ * Reads and returns an unsigned short from the current position in the stream,
+ * and advances the stream pointer.
+ *
+ * If the value could not be read, returns zero, and does not advance the stream position.
+ */
 -(unsigned short) readUnsignedShort;
 
 @end

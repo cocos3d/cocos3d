@@ -274,7 +274,7 @@ void CPVRTglesExt::LoadExtensions()
 @Returns			True if the extension is supported
 @Description		Queries for support of an extension
 *************************************************************************/
-bool CPVRTglesExt::IsGLExtensionSupported(const char * const extension)
+bool CPVRTglesExt::IsGLExtensionSupported(const char* extension)	// patched for cocos3d by Bill Hollings
 {
 	// The recommended technique for querying OpenGL extensions;
 	// from http://opengl.org/resources/features/OGLextensions/

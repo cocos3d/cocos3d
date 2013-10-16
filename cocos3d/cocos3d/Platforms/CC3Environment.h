@@ -32,11 +32,22 @@
 
 #import "cocos2d.h"
 
-/** OS platform macros */
-# define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-# define CC3_OSX			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+/** Running on iOS */
+#ifndef CC3_IOS
+#	define CC3_IOS			defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
+#endif
 
-/** Create convenience tests for whether we are linking to cocos2d 1.x or 2.x. */
+/** Running on OSX */
+#ifndef CC3_OSX
+#	define CC3_OSX			defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+#endif
+
+/** Running on Android via Apportable. Explicitly set as a build setting. */
+#ifndef APPORTABLE
+#	define APPORTABLE		0
+#endif
+
+/** Convenience tests for whether we are linking to cocos2d 1.x or 2.x. */
 #ifndef CC3_CC2_1
 #	define CC3_CC2_1		(COCOS2D_VERSION < 0x020000)
 #endif
@@ -68,3 +79,5 @@
 #ifndef CC3_GLSL
 #	define CC3_GLSL			(CC3_CC2_2)
 #endif
+
+

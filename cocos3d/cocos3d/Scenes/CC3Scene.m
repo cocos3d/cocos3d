@@ -429,6 +429,7 @@
 	[gl alignFor2DDrawing];
 
 	// Re-align culling as expected by cocos2d
+	[gl enableCullFace: NO];
 	gl.cullFace = GL_BACK;
 	gl.frontFace = GL_CCW;
 

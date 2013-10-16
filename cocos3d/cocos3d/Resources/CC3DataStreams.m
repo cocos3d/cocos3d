@@ -68,106 +68,66 @@
 
 #pragma mark Reading stream content
 
--(void) read: (NSUInteger) count bytes: (char*) bytes {
+-(BOOL) readAll: (NSUInteger) count bytes: (char*) bytes {
 	_readRange.length = count;
 	NSUInteger endRange = NSMaxRange(_readRange);
 	_wasReadBeyondEOF |= (endRange > _data.length);
 	if( !_wasReadBeyondEOF ) {
 		[_data getBytes: bytes range: _readRange];
 		_readRange.location = endRange;
+		return YES;
+	} else {
+		memset(bytes, 0, count);	// Couldn't read, so zero the result
+		return NO;
 	}
 }
 
 -(char) readByte {
-	char value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	char value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return value;
 }
 
 -(unsigned char) readUnsignedByte {
-	unsigned char value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	unsigned char value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return value;
 }
 
 -(float) readFloat {
 	NSSwappedFloat value;
-	value.v = 0;	// zero the internal value
-	[self read: sizeof(value) bytes: (char*)&value];
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigFloatToHost(value) : NSSwapLittleFloatToHost(value);
 }
 
 -(double) readDouble {
 	NSSwappedDouble value;
-	value.v = 0;	// zero the internal value
-	[self read: sizeof(value) bytes: (char*)&value];
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigDoubleToHost(value) : NSSwapLittleDoubleToHost(value);
 }
 
 -(int) readInteger {
-	int value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	int value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigIntToHost(value) : NSSwapLittleIntToHost(value);
 }
 
 -(unsigned int) readUnsignedInteger {
-	unsigned int value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	unsigned int value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigIntToHost(value) : NSSwapLittleIntToHost(value);
 }
 
 -(short) readShort {
-	short value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	short value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigShortToHost(value) : NSSwapLittleShortToHost(value);
 }
 
 -(unsigned short) readUnsignedShort {
-	unsigned  short value = 0;
-	[self read: sizeof(value) bytes: (char*)&value];
+	unsigned  short value;
+	[self readAll: sizeof(value) bytes: (char*)&value];
 	return _isBigEndian ? NSSwapBigShortToHost(value) : NSSwapLittleShortToHost(value);
 }
-
-//-(float) readFloat {
-//	float value = 0.0f;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(double) readDouble {
-//	double value = 0.0;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(int) readInteger {
-//	int value = 0;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(unsigned int) readUnsignedInteger {
-//	unsigned int value = 0;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(short) readShort {
-//	short value = 0;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(unsigned short) readUnsignedShort {
-//	unsigned  short value = 0;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
-//
-//-(void*) readPointer {
-//	void* value = NULL;
-//	[self read: sizeof(value) bytes: (char*)&value];
-//	return value;
-//}
 
 @end

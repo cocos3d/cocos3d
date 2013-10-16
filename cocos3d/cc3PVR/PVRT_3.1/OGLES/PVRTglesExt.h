@@ -405,7 +405,7 @@ public:
 	@Returns			True if the extension is supported
 	@Description		Queries for support of an extension
 	*************************************************************************/
-	static bool IsGLExtensionSupported(const char * const extension);
+	static bool IsGLExtensionSupported(const char* extension);	// patched for cocos3d by Bill Hollings
 	// The recommended technique for querying OpenGL extensions;
 	// from http://opengl.org/resources/features/OGLextensions/
 };

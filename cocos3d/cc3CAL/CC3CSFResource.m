@@ -163,7 +163,7 @@
 	NSUInteger nameLen = (NSUInteger)reader.readInteger;
 	if (nameLen > 0) {
 		char cNodeName[nameLen];
-		[reader read: nameLen bytes: cNodeName];
+		[reader readAll: nameLen bytes: cNodeName];
 		nodeName = [NSString stringWithUTF8String: cNodeName];
 	}
 
