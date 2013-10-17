@@ -32,6 +32,9 @@
 #include "CC3OpenGLUtility.h"
 
 #if CC3_OGLES_1
+
+#include "CC3OpenGLES1Compatibility.h"
+
 char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {
 		case GL_ZERO: return "GL_ZERO";
@@ -459,9 +462,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_DEPTH_STENCIL: return "GL_DEPTH_STENCIL";
 
 		// Miscellaneous & extensions
-#if !(APPORTABLE)
 		case GL_MAX_SAMPLES_APPLE: return "GL_MAX_SAMPLES_APPLE";
-#endif	//!APPORTABLE
 		case GL_VENDOR: return "GL_VENDOR";
 		case GL_RENDERER: return "GL_RENDERER";
 		case GL_VERSION: return "GL_VERSION";

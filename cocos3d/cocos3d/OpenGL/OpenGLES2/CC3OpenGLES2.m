@@ -35,8 +35,12 @@
 
 @interface CC3OpenGL (TemplateMethods)
 -(void) initPlatformLimits;
+-(void) initSurfaces;
 -(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget;
 @end
+
+
+#pragma mark CC3OpenGLES2
 
 @implementation CC3OpenGLES2
 
@@ -140,13 +144,6 @@
 
 	[self initShaderPrecisions];
 	
-#if APPORTABLE
-	value_GL_MAX_SAMPLES = 1;
-#else
-	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
-#endif	//!APPORTABLE
-	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
-	
 	value_GL_MAX_CUBE_MAP_TEXTURE_SIZE = [self getInteger: GL_MAX_CUBE_MAP_TEXTURE_SIZE];
 	LogInfoIfPrimary(@"Maximum cube map texture size: %u", value_GL_MAX_CUBE_MAP_TEXTURE_SIZE);
 }
@@ -240,6 +237,45 @@
 					 ((shaderType == GL_VERTEX_SHADER) ? @"vertex" : @"fragment"),
 					 qualifier, (GLint)precision.x, (GLint)precision.y, (GLint)precision.z,
 					 NSStringFromCC3IntVector(logPrecision));
+}
+
+@end
+
+
+#pragma mark CC3OpenGLES2IOS
+
+@implementation CC3OpenGLES2IOS
+
+-(void) initPlatformLimits {
+	[super initPlatformLimits];
+	
+	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+}
+
+@end
+
+
+#pragma mark CC3OpenGLES2Android
+
+@implementation CC3OpenGLES2Android
+
+-(void) initPlatformLimits {
+	[super initPlatformLimits];
+	
+	value_GL_MAX_SAMPLES = 1;
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+}
+
+-(void) initSurfaces {
+	[super initSurfaces];
+	
+	// Under Android, the on-screen surface is hardwired to framebuffer 0 and renderbuffer 0.
+	// Apportable assumes that the first allocation of each is for the on-screen surface, and
+	// therefore ignores that first allocation. We force that ignored allocation here, so that
+	// off-screen surfaces can be allocated before the primary on-screen surface.
+	[self generateRenderbuffer];
+	[self generateFramebuffer];
 }
 
 @end

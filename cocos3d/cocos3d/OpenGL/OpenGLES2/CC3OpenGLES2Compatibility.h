@@ -249,7 +249,6 @@
 #endif
 
 
-
 // Lighting and material symbolic constants
 
 #ifndef GL_LIGHT_MODEL_AMBIENT
@@ -314,5 +313,16 @@
 #ifndef GL_PROJECTION
 #define GL_PROJECTION                     0x1701
 #endif
+
+
+// Android compatibility
+
+#if APPORTABLE
+
+// GL_MAX_SAMPLES_APPLE is redefined to unusable value by Apportable. Set it back.
+#undef GL_MAX_SAMPLES_APPLE
+#define GL_MAX_SAMPLES_APPLE              0x8D57
+
+#endif	// APPORTABLE
 
 #endif	// CC3_OGLES_2

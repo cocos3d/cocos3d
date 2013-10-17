@@ -139,29 +139,6 @@
 
 
 #pragma mark -
-#pragma mark CC3OSXOnScreenGLRenderbuffer
-
-@implementation CC3OSXOnScreenGLRenderbuffer
-
--(GLuint) renderbufferID { return 0; }
-
--(void) ensureGLRenderbuffer {}
-
--(void) deleteGLRenderbuffer {}
-
--(void) resizeTo: (CC3IntSize) size { _size = size; }
-
-
-#pragma mark Framebuffer attachment
-
--(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
-
--(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3IOSOnScreenGLRenderbuffer
 
 @implementation CC3IOSOnScreenGLRenderbuffer
@@ -177,7 +154,40 @@
 	_samples = 1;
 }
 
+@end
 
+
+#pragma mark -
+#pragma mark CC3SystemOnScreenGLRenderbuffer
+
+@implementation CC3SystemOnScreenGLRenderbuffer
+
+-(GLuint) renderbufferID { return 0; }
+
+-(void) ensureGLRenderbuffer {}
+
+-(void) deleteGLRenderbuffer {}
+
+-(void) resizeTo: (CC3IntSize) size { _size = size; }
+
+-(void) bindToFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
+
+-(void) unbindFromFramebuffer: (GLuint) framebufferID asAttachment: (GLenum) attachment {}
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OSXOnScreenGLRenderbuffer
+
+@implementation CC3OSXOnScreenGLRenderbuffer
+@end
+
+
+#pragma mark -
+#pragma mark CC3AndroidOnScreenGLRenderbuffer
+
+@implementation CC3AndroidOnScreenGLRenderbuffer
 @end
 
 
@@ -502,9 +512,9 @@
 
 
 #pragma mark -
-#pragma mark CC3OSXOnScreenGLFramebuffer
+#pragma mark CC3SystemOnScreenGLFramebuffer
 
-@implementation CC3OSXOnScreenGLFramebuffer
+@implementation CC3SystemOnScreenGLFramebuffer
 
 -(BOOL) isOffScreen { return NO; }
 
@@ -516,6 +526,20 @@
 
 -(BOOL) validate { return YES; }
 
+@end
+
+
+#pragma mark -
+#pragma mark CC3OSXOnScreenGLFramebuffer
+
+@implementation CC3OSXOnScreenGLFramebuffer
+@end
+
+
+#pragma mark -
+#pragma mark CC3AndroidOnScreenGLFramebuffer
+
+@implementation CC3AndroidOnScreenGLFramebuffer
 @end
 
 
@@ -945,13 +969,13 @@
 		
 		// Set up the view surface and color render buffer
 		GLenum colorFormat = _view.colorFormat;
-		CC3GLFramebuffer* vSurf = [CC3IOSOnScreenGLFramebuffer surface];
-		vSurf.colorAttachment = [CC3IOSOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat];
+		CC3GLFramebuffer* vSurf = [CC3ViewFramebufferClass surface];
+		vSurf.colorAttachment = [CC3ViewColorRenderbufferClass renderbufferWithPixelFormat: colorFormat];
 		self.viewSurface = vSurf;					// retained
 		
 		// If using multisampling, also set up off-screen multisample frame and render buffers
 		if (samples > 1) {
-			CC3GLFramebuffer* msSurf = [CC3IOSOnScreenGLFramebuffer surface];
+			CC3GLFramebuffer* msSurf = [CC3GLFramebuffer surface];
 			msSurf.colorAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: colorFormat
 																	andPixelSamples: samples];
 			self.multisampleSurface = msSurf;		// retained
@@ -960,34 +984,8 @@
 		// If using depth testing, attach a depth buffer to the rendering surface.
 		GLenum depthFormat = _view.depthFormat;
 		if (depthFormat)
-			self.renderingSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat
-																				   andPixelSamples: samples];
-	}
-    return self;
-}
-
--(id) initWithSystemView: (CC3GLView*) view {
-    if ( (self = [self init]) ) {
-		
-		_view = view;		// not retained
-		
-		// Limit pixel samples to what the platform will support
-		GLuint requestedSamples = _view.requestedSamples;
-		GLuint samples = MIN(requestedSamples, CC3OpenGL.sharedGL.maxNumberOfPixelSamples);
-		
-		// Set up the view surface and color render buffer
-		GLenum colorFormat = _view.colorFormat;
-		CC3GLFramebuffer* vSurf = [CC3OSXOnScreenGLFramebuffer surface];
-		vSurf.colorAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: colorFormat
-																		  andPixelSamples: samples];
-		
-		// If using depth testing, attach a depth buffer to the rendering surface.
-		GLenum depthFormat = _view.depthFormat;
-		if (depthFormat)
-			vSurf.depthAttachment = [CC3OSXOnScreenGLRenderbuffer renderbufferWithPixelFormat: depthFormat
-																			  andPixelSamples: samples];
-
-		self.viewSurface = vSurf;		// retained
+			self.renderingSurface.depthAttachment = [CC3ViewDepthRenderbufferClass renderbufferWithPixelFormat: depthFormat
+																							   andPixelSamples: samples];
 	}
     return self;
 }

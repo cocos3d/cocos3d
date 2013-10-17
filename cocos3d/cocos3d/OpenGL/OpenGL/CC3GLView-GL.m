@@ -39,13 +39,15 @@
 
 @implementation CC3GLView
 
-@synthesize surfaceManager=_surfaceManager, requestedSamples=_requestedSamples;
+@synthesize surfaceManager=_surfaceManager;
 @synthesize colorFormat=_colorFormat, depthFormat=_depthFormat;
 
 -(void) dealloc {
 	[_surfaceManager release];
 	[super dealloc];
 }
+
+-(GLuint) requestedSamples { return 1; }
 
 -(GLuint) pixelSamples { return _surfaceManager.pixelSamples; }
 
@@ -68,9 +70,8 @@
 
 	_colorFormat = CC3GLColorFormatFromBitPlanes(colorSize, alphaSize);
 	_depthFormat = CC3GLDepthFormatFromBitPlanes(depthSize, stencilSize);
-	_requestedSamples = 1;
 
-	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithSystemView: self];
+	_surfaceManager = [[CC3GLViewSurfaceManager alloc] initWithView: self];
 }
 
 -(void) reshape {

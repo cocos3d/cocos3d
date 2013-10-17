@@ -37,6 +37,17 @@
 #import "CC3RenderSurfaces.h"
 #import "CC3CC2Extensions.h"
 
+// Define the framebuffer and renderbuffer classes underlying this view
+#if APPORTABLE
+#	define CC3ViewFramebufferClass			CC3AndroidOnScreenGLFramebuffer
+#	define CC3ViewColorRenderbufferClass	CC3AndroidOnScreenGLRenderbuffer
+#	define CC3ViewDepthRenderbufferClass	CC3AndroidOnScreenGLRenderbuffer
+#else
+#	define CC3ViewFramebufferClass			CC3IOSOnScreenGLFramebuffer
+#	define CC3ViewColorRenderbufferClass	CC3IOSOnScreenGLRenderbuffer
+#	define CC3ViewDepthRenderbufferClass	CC3GLRenderbuffer
+#endif	// APPORTABLE
+
 
 #pragma mark -
 #pragma mark CC3GLView

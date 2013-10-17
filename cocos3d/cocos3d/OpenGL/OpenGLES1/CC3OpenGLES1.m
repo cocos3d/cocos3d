@@ -47,6 +47,9 @@
 -(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget;
 @end
 
+
+#pragma mark CC3OpenGLES1
+
 @implementation CC3OpenGLES1
 
 
@@ -207,13 +210,6 @@
 	
 	value_GL_MAX_VERTEX_UNITS = [self getInteger: GL_MAX_VERTEX_UNITS_OES];
 	LogInfoIfPrimary(@"Available anti-aliasing samples: %u", value_GL_MAX_VERTEX_UNITS);
-	
-#if APPORTABLE
-	value_GL_MAX_SAMPLES = 1;
-#else
-	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
-#endif	//!APPORTABLE
-	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
 }
 
 /** Initialize the vertex attributes that are not texture coordinates. */
@@ -235,6 +231,45 @@
 	vaIdx++;
 	
 	value_GL_MAX_VERTEX_ATTRIBS = vaIdx;
+}
+
+@end
+
+
+#pragma mark CC3OpenGLES1IOS
+
+@implementation CC3OpenGLES1IOS
+
+-(void) initPlatformLimits {
+	[super initPlatformLimits];
+	
+	value_GL_MAX_SAMPLES = [self getInteger: GL_MAX_SAMPLES_APPLE];
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+}
+
+@end
+
+
+#pragma mark CC3OpenGLES1Android
+
+@implementation CC3OpenGLES1Android
+
+-(void) initPlatformLimits {
+	[super initPlatformLimits];
+	
+	value_GL_MAX_SAMPLES = 1;
+	LogInfoIfPrimary(@"Maximum anti-aliasing samples: %u", value_GL_MAX_SAMPLES);
+}
+
+-(void) initSurfaces {
+	[super initSurfaces];
+	
+	// Under Android, the on-screen surface is hardwired to framebuffer 0 and renderbuffer 0.
+	// Apportable assumes that the first allocation of each is for the on-screen surface, and
+	// therefore ignores that first allocation. We force that ignored allocation here, so that
+	// off-screen surfaces can be allocated before the primary on-screen surface.
+	[self generateRenderbuffer];
+	[self generateFramebuffer];
 }
 
 @end

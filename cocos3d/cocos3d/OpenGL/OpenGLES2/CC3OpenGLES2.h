@@ -33,6 +33,15 @@
 
 #if CC3_OGLES_2
 
+#if APPORTABLE
+#	define CC3OpenGLClass		CC3OpenGLES2Android
+#else
+#	define CC3OpenGLClass		CC3OpenGLES2IOS
+#endif	// APPORTABLE
+
+
+#pragma mark CC3OpenGLES2
+
 /** Manages the OpenGLES 2.0 state for a single GL context. */
 @interface CC3OpenGLES2 : CC3OpenGLProgPipeline {
 
@@ -40,6 +49,22 @@
 	CC3Vector value_Vertex_Shader_Precision[6];
 	CC3Vector value_Fragment_Shader_Precision[6];
 }
+
+@end
+
+
+#pragma mark CC3OpenGLES2IOS
+
+/** Manages the OpenGLES 2.0 state for a single GL context under iOS. */
+@interface CC3OpenGLES2IOS : CC3OpenGLES2
+
+@end
+
+
+#pragma mark CC3OpenGLES2Android
+
+/** Manages the OpenGLES 2.0 state for a single GL context under Android. */
+@interface CC3OpenGLES2Android : CC3OpenGLES2
 
 @end
 

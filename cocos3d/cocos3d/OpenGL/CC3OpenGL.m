@@ -30,20 +30,13 @@
  */
 
 #import "CC3OpenGL.h"
+#import "CC3OpenGLES2.h"
+#import "CC3OpenGLES1.h"
+#import "CC3OpenGL2.h"
+
 #import "CC3CC2Extensions.h"
 #import "CC3GLSLVariable.h"
 #import "CC3ShaderProgramMatcher.h"
-
-#if CC3_OGLES_2
-#	import "CC3OpenGLES2.h"
-#	define CC3OpenGLClass	CC3OpenGLES2
-#elif CC3_OGLES_1
-#	import "CC3OpenGLES1.h"
-#	define CC3OpenGLClass	CC3OpenGLES1
-#elif CC3_OGL
-#	import "CC3OpenGL2.h"
-#	define CC3OpenGLClass	CC3OpenGL2
-#endif
 
 
 @implementation CC3OpenGL
@@ -1026,6 +1019,7 @@
 		LogInfoIfPrimary(@"Third dimension provided by %@", NSStringFromCC3Version());
 		LogInfo(@"Starting GL context %@", self);
 		[self initPlatformLimits];
+		[self initSurfaces];
 		[self initVertexAttributes];
 		[self initTextureUnits];
 		[self initExtensions];
@@ -1052,12 +1046,15 @@
 
 }
 
-/** Allocates and initializes the vertex attributes. This must be invoked after the initPlatformLimits. */
+/** Initializes surfaces frameworks. */
+-(void) initSurfaces {}
+
+/** Initializes vertex attributes. This must be invoked after the initPlatformLimits. */
 -(void) initVertexAttributes {
 	vertexAttributes = calloc(value_GL_MAX_VERTEX_ATTRIBS, sizeof(CC3VertexAttr));
 }
 
-/** Allocates and initializes the texture units. This must be invoked after the initPlatformLimits. */
+/** Initializes the texture units. This must be invoked after the initPlatformLimits. */
 -(void) initTextureUnits {
 	value_MaxTextureUnitsUsed = 0;
 

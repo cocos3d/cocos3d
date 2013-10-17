@@ -37,6 +37,11 @@
 #import "CC3RenderSurfaces.h"
 #import	"CC3OSExtensions.h"
 
+// Define the framebuffer and renderbuffer classes underlying this view
+#define CC3ViewFramebufferClass			CC3OSXOnScreenGLFramebuffer
+#define CC3ViewColorRenderbufferClass	CC3OSXOnScreenGLRenderbuffer
+#define CC3ViewDepthRenderbufferClass	CC3OSXOnScreenGLRenderbuffer
+
 
 #pragma mark -
 #pragma mark CC3GLView

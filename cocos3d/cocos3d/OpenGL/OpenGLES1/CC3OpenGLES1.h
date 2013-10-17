@@ -33,8 +33,34 @@
 
 #if CC3_OGLES_1
 
+#if APPORTABLE
+#	define CC3OpenGLClass		CC3OpenGLES1Android
+#else
+#	define CC3OpenGLClass		CC3OpenGLES1IOS
+#endif	// APPORTABLE
+
+
+#pragma mark CC3OpenGLES1
+
 /** Manages the OpenGLES 1.1 state for a single GL context. */
 @interface CC3OpenGLES1 : CC3OpenGLFixedPipeline {}
 @end
+
+
+#pragma mark CC3OpenGLES1IOS
+
+/** Manages the OpenGLES 1.1 state for a single GL context under iOS. */
+@interface CC3OpenGLES1IOS : CC3OpenGLES1
+
+@end
+
+
+#pragma mark CC3OpenGLES1Android
+
+/** Manages the OpenGLES 1.1 state for a single GL context under Android. */
+@interface CC3OpenGLES1Android : CC3OpenGLES1
+
+@end
+
 
 #endif	// CC3_OGLES_1

@@ -34,6 +34,8 @@
 
 #if CC3_OGL
 
+#define CC3OpenGLClass		CC3OpenGL2
+
 #if CC3_GLSL
 #define CC3OGL2_SUPERCLASS	CC3OpenGLProgPipeline
 #else

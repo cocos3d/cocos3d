@@ -125,4 +125,14 @@
 #define GL_TEXTURE_CUBE_MAP               0x8513
 #endif
 
+// Android compatibility
+
+#if APPORTABLE
+
+// GL_MAX_SAMPLES_APPLE is redefined to unusable value by Apportable. Set it back.
+#undef GL_MAX_SAMPLES_APPLE
+#define GL_MAX_SAMPLES_APPLE              0x8D57
+
+#endif	// APPORTABLE
+
 #endif	// CC3_OGLES_1

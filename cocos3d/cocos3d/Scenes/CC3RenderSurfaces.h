@@ -419,6 +419,37 @@
 
 
 #pragma mark -
+#pragma mark CC3SystemOnScreenGLRenderbuffer
+
+/** 
+ * Represents the virtual OpenGL framebuffer attachments with renderbufferID = 0,
+ * used by some systems to present to a window.
+ */
+@interface CC3SystemOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+
+/** The ID used to identify the renderbuffer to the GL engine. Always returns zero. */
+@property(nonatomic, readonly) GLuint renderbufferID;
+
+@end
+
+
+#pragma mark -
+#pragma mark CC3OSXOnScreenGLRenderbuffer
+
+/** Represents the virtual OpenGL framebuffer attachments used by OSX to present to a window. */
+@interface CC3OSXOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer {}
+@end
+
+
+#pragma mark -
+#pragma mark CC3AndroidOnScreenGLRenderbuffer
+
+/** Represents the virtual OpenGL framebuffer attachments used by Android to present to a window. */
+@interface CC3AndroidOnScreenGLRenderbuffer : CC3SystemOnScreenGLRenderbuffer {}
+@end
+
+
+#pragma mark -
 #pragma mark CC3TextureFramebufferAttachment
 
 /**
@@ -689,8 +720,23 @@
 #pragma mark -
 #pragma mark CC3IOSOnScreenGLFramebuffer
 
-/** Represents a framebuffer used by the IOS system to present to a window. */
+/** Represents a framebuffer used by iOS to present to a window. */
 @interface CC3IOSOnScreenGLFramebuffer : CC3GLFramebuffer
+@end
+
+
+#pragma mark -
+#pragma mark CC3SystemOnScreenGLFramebuffer
+
+/**
+ * Represents the virtual OpenGL framebuffer with framebufferID = 0,
+ * used by some systems to present to a window.
+ */
+@interface CC3SystemOnScreenGLFramebuffer : CC3GLFramebuffer
+
+/** The ID used to identify the framebuffer to the GL engine. Always returns zero. */
+@property(nonatomic, readonly) GLuint framebufferID;
+
 @end
 
 
@@ -698,19 +744,19 @@
 #pragma mark CC3OSXOnScreenGLFramebuffer
 
 /**
- * Represents the virtual OpenGL framebuffer used by the OSX system to present to a window. 
+ * Represents the virtual OpenGL framebuffer used by OSX to present to a window.
  *
- * Each of the attachements should be a CC3OSXOnScreenGLRenderbuffer.
+ * Each of the attachments should be a CC3OSXOnScreenGLRenderbuffer.
  */
-@interface CC3OSXOnScreenGLFramebuffer : CC3GLFramebuffer
+@interface CC3OSXOnScreenGLFramebuffer : CC3SystemOnScreenGLFramebuffer
 @end
 
 
 #pragma mark -
-#pragma mark CC3OSXOnScreenGLRenderbuffer
+#pragma mark CC3AndroidOnScreenGLFramebuffer
 
-/** Represents the virtual OpenGL framebuffer attachments used by the OSX system to present to a window. */
-@interface CC3OSXOnScreenGLRenderbuffer : CC3GLRenderbuffer {}
+/** Represents the virtual OpenGL framebuffer used by Android to present to a window. */
+@interface CC3AndroidOnScreenGLFramebuffer : CC3SystemOnScreenGLFramebuffer
 @end
 
 
@@ -855,7 +901,7 @@
  * 
  * If multisampling is used, rendering is directed to the surface in the the 
  * multisampleSurface property, and then once rendering is complete, the multisampled
- * surface is resolved into the view surface.
+ * surface is resolved onto the view surface.
  */
 @interface CC3GLViewSurfaceManager : NSObject {
 	CC3GLView* _view;
@@ -1033,19 +1079,8 @@
 
 #pragma mark Allocation and initialization
 
-/**
- * Initializes this instance for the specified view.
- *
- * This initialization method should only be used with iOS.
- */
+/** Initializes this instance for the specified view. */
 -(id) initWithView: (CC3GLView*) view;
-
-/**
- * Initializes this instance for the specified view.
- *
- * This initialization method should only be used with OSX.
- */
--(id) initWithSystemView: (CC3GLView*) view;
 
 @end
 

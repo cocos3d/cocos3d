@@ -32,6 +32,9 @@
 #include "CC3OpenGLUtility.h"
 
 #if CC3_OGL
+
+#include "CC3OpenGLCompatibility.h"
+
 char* CC3GLEnumName(GLenum gle) {
 	switch (gle) {
 		case GL_ZERO: return "GL_ZERO";

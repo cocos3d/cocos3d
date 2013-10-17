@@ -388,7 +388,7 @@
 
 	[self close3DWithVisitor: visitor];
 	[self draw2DBillboardsWithVisitor: visitor];	// Back to 2D now
-	
+
 	// Check and clear any GL error that occurred during 3D code
 	LogGLErrorState(@"after drawing %@", self);
 	LogTrace(@"******* %@ exiting drawing visit", self);
