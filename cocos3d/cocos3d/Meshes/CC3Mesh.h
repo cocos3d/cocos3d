@@ -2183,25 +2183,28 @@ static inline CC3MeshIntersection* CC3NearestMeshIntersection(CC3MeshIntersectio
  * be padded to dimensions of a power-of-two on loading. The result is that the
  * texture will be physically larger than is expected by these texture coordinates.
  *
- * The usable area of the texture is indicated by its mapSize property, and invoking
- * this method will align these texture coordinates with the usable size of the
- * specified texture.
+ * The usable area of the texture is indicated by its mapSize property, and invoking this
+ * method will align these texture coordinates with the usable size of the specified texture.
  *
- * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property
- * is different than the value of the isUpsideDown property of the specified
- * texture, the texture coordinates are not oriented vertically for the texture.
- * If so, this method also flips the texture coordinates to align with the texture.
+ * If the value of the expectsVerticallyFlippedTexture:InTextureUnit: property is different
+ * than the value of the isUpsideDown property of the specified texture, the texture coordinates
+ * are not oriented vertically for the texture. If so, this method also flips the texture
+ * coordinates to align with the texture.
  *
- * Thhis method is invoked automatically when a texture is assigned to cover this
- * mesh in the mesh node. Normally, the application has no need to invoke this
- * method directly. However, you can invoke this method manually if you have
- * changed the texture coordinate alignment using the
- * expectsVerticallyFlippedTexture:inTextureUnit: method.
+ * This method is invoked automatically when a texture is assigned to cover this mesh in the
+ * mesh node. Normally, the application has no need to invoke this method directly. However,
+ * you can invoke this method manually if you have changed the texture coordinate alignment
+ * using the expectsVerticallyFlippedTexture:inTextureUnit: method.
  *
- * To avoid updating the texture coordinates when no change has occurred, if the
- * coordinates do not need to be flipped vertically, and the specified texture has
- * the same usable area as the texture used on the previous invocation (or has a
- * full usable area on the first invocation), this method does nothing.
+ * To avoid updating the texture coordinates when no change has occurred, if the coordinates
+ * do not need to be flipped vertically, and the specified texture has the same usable area
+ * as the texture used on the previous invocation (or has a full usable area on the first
+ * invocation), this method does nothing.
+ *
+ * If the number of texture coordinate arrays is less than the number of textures, the last
+ * texture coordinate array will be used by all remaining texture units. In this case, it
+ * will only be aligned for the texture in the same texture unit. Subsequent textures will
+ * use that same alignment.
  *
  * Care should be taken when using this method, as it changes the actual vertex content.
  * This may cause mapping conflicts if the same vertex content is shared by other

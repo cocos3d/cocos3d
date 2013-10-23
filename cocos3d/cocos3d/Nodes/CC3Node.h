@@ -1434,12 +1434,37 @@ typedef enum {
 @property(nonatomic, assign) ccColor4F emissionColor;
 
 /**
+ * The shininess of the materials of this node.
+ *
+ * Setting this property sets the same property on all child nodes.
+ * Querying this property returns the average value of querying this property on all child nodes.
+ * When querying this value on a large node assembly, be aware that this may be time-consuming.
+ */
+@property(nonatomic, assign) GLfloat shininess;
+
+/**
+ * The reflectivity of the materials of this node.
+ *
+ * Setting this property sets the same property on all child nodes.
+ * Querying this property returns the average value of querying this property on all child nodes.
+ * When querying this value on a large node assembly, be aware that this may be time-consuming.
+ */
+@property(nonatomic, assign) GLfloat reflectivity;
+
+/**
  * Convenience property for setting the texture covering all descendant mesh nodes.
  *
  * Setting the value of this property sets the same property in all descendant mesh nodes.
  * Querying the value of this property returns the first non-nil texture from a descendant mesh node.
  */
 @property(nonatomic, retain) CC3Texture* texture;
+
+/**
+ * Convenience method for adding a texture covering all descendant mesh nodes.
+ *
+ * Invoking this method invokes the same method on all descendant mesh nodes.
+ */
+-(void) addTexture: (CC3Texture*) aTexture;
 
 /**
  * When a mesh node is textured with a DOT3 bump-map (normal map) in object-space, this property

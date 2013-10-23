@@ -142,7 +142,13 @@ lowp vec4	matColorDiffuse;	/**< Diffuse color of material...from either material
  * variables. This function takes into consideration vertex skinning, if it is specified.
  */
 void vertexToEyeSpace() {
-	if (u_cc3BonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
+	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+
+		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+
+	} else {			// Mesh is bone-rigged for vertex skinning
+
 		// Copies of the indices and weights attibutes so they can be "rotated"
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
@@ -160,11 +166,8 @@ void vertexToEyeSpace() {
 				boneWeights = boneWeights.yzwx;
 			}
 		}
-	} else {		// No vertex skinning
-		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
-		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
 	}
-	
+
 	if (u_cc3VertexShouldNormalizeNormal)
 		vtxNormEye = normalize(vtxNormEye);
 	else if (u_cc3VertexShouldRescaleNormal)

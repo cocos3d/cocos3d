@@ -376,7 +376,7 @@
 	
 	// Check and clear any GL error that occurred before 3D code
 	LogGLErrorState(@"before drawing %@", self);
-	LogTrace(@"******* %@ starting drawing visit", self);
+	LogTrace(@"******* %@ entering drawing visit", self);
 	
 	[self collectFrameInterval];	// Collect the frame interval in the performance statistics.
 

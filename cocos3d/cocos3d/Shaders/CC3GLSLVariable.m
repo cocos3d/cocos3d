@@ -156,14 +156,26 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope) {
 	[self normalizeName];
 }
 
-/** Ensures this variable has a valid name, by removing the subscript suffix ([0]), if it exists. */
 -(void) normalizeName {
-	NSString* subStr = @"[0]";
-	NSInteger subStartIdx = _name.length - subStr.length;
-	if ( _name && (subStartIdx > 0) && [[_name substringFromIndex: subStartIdx] isEqualToString: subStr] ) {
+	if ( !_name ) return;
+	
+	NSUInteger nameLen = _name.length;
+	if ( nameLen < 4 ) return;		// Too short to have a "[n]" subscript
+
+	// No subscript, so don't make any changes to the name
+	if ( [_name characterAtIndex: (nameLen - 1)] != ']' )  return;
+	
+	// If the subscript is [0], remove it from the name
+	NSInteger subStartIdx = nameLen - 3;
+	if (( [_name characterAtIndex: subStartIdx] == '[' ) &&
+		( [_name characterAtIndex: (subStartIdx + 1)] == '0' )) {
 		NSString* name = [_name substringToIndex: subStartIdx];
 		[_name release];
 		[_name = name retain];		// retained
+	} else {
+		// We have a non-zero subscript. This variable is redundant to the zero-subscript
+		// variable, so mark it as such, but don't remove the subscript from the name.
+		self.semantic = kCC3SemanticRedundant;
 	}
 }
 

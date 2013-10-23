@@ -247,6 +247,20 @@
 	[super setEmissionColor: aColor];	// pass along to any children
 }
 
+-(GLfloat) shininess { return self.ensureMaterial.shininess; }
+
+-(void) setShininess: (GLfloat) shininess {
+	self.ensureMaterial.shininess = shininess;
+	[super setShininess: shininess];	// pass along to any children
+}
+
+-(GLfloat) reflectivity { return self.ensureMaterial.reflectivity; }
+
+-(void) setReflectivity: (GLfloat) reflectivity {
+	self.ensureMaterial.reflectivity = reflectivity;
+	[super setReflectivity: reflectivity];	// pass along to any children
+}
+
 -(CC3Vector4) globalLightPosition {
 	return (_material && _material.hasBumpMap)
 				? [self.globalTransformMatrix transformHomogeneousVector: CC3Vector4FromDirection(_material.lightDirection)]
@@ -370,12 +384,14 @@
 	if (aTexture) [self ensureMaterial];
 	_material.texture = aTexture;
 	[self alignTextureUnit: 0];
+	[super setTexture: aTexture];
 }
 
 -(void) addTexture: (CC3Texture*) aTexture {
 	[self.ensureMaterial addTexture: aTexture];
 	GLuint texCount = self.textureCount;
 	if (texCount > 0) [self alignTextureUnit: (self.textureCount - 1)];
+	[super addTexture: aTexture];
 }
 
 -(void) removeAllTextures { [_material removeAllTextures]; }

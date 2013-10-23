@@ -54,21 +54,21 @@
 #define MAX_TEXTURES			2
 
 // Texture constants to support OpenGL ES 1.1 conformant multi-texturing.
-#define GL_REPLACE                0x1E01
-#define GL_MODULATE               0x2100
-#define GL_DECAL                  0x2101
-#define GL_BLEND                  0x0BE2
-#define GL_ADD                    0x0104
-#define GL_COMBINE                0x8570
-#define GL_ADD_SIGNED             0x8574
-#define GL_INTERPOLATE            0x8575
-#define GL_SUBTRACT               0x84E7
-#define GL_DOT3_RGB               0x86AE
-#define GL_DOT3_RGBA              0x86AF
-#define GL_TEXTURE                0x1702
-#define GL_CONSTANT               0x8576
-#define GL_PREVIOUS               0x8578
-#define GL_PRIMARY_COLOR          0x8577
+#define k_GL_REPLACE                0x1E01
+#define k_GL_MODULATE               0x2100
+#define k_GL_DECAL                  0x2101
+#define k_GL_BLEND                  0x0BE2
+#define k_GL_ADD                    0x0104
+#define k_GL_COMBINE                0x8570
+#define k_GL_ADD_SIGNED             0x8574
+#define k_GL_INTERPOLATE            0x8575
+#define k_GL_SUBTRACT               0x84E7
+#define k_GL_DOT3_RGB               0x86AE
+#define k_GL_DOT3_RGBA              0x86AF
+#define k_GL_TEXTURE                0x1702
+#define k_GL_CONSTANT               0x8576
+#define k_GL_PREVIOUS               0x8578
+#define k_GL_PRIMARY_COLOR          0x8577
 
 precision mediump float;
 
@@ -131,30 +131,30 @@ void combineTexture(lowp vec4 texColor, int tuIdx) {
 	src1 = u_cc3TextureUnitRGBSource1[tuIdx];
 
 	// RGB of source 0, starting with default
-	if (src0 == GL_TEXTURE)				rgb0 = texColor.rgb;
-	else if (src0 == GL_PREVIOUS)		rgb0 = fragColor.rgb;
-	else if (src0 == GL_CONSTANT)		rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
-	else if (src0 == GL_PRIMARY_COLOR)	rgb0 = primaryColor.rgb;
+	if (src0 == k_GL_TEXTURE)				rgb0 = texColor.rgb;
+	else if (src0 == k_GL_PREVIOUS)		rgb0 = fragColor.rgb;
+	else if (src0 == k_GL_CONSTANT)		rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
+	else if (src0 == k_GL_PRIMARY_COLOR)	rgb0 = primaryColor.rgb;
 	
 	// RGB of source 1, starting with default
-	if (src1 == GL_PREVIOUS)			rgb1 = fragColor.rgb;
-	else if (src1 == GL_TEXTURE)		rgb1 = texColor.rgb;
-	else if (src1 == GL_CONSTANT)		rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
-	else if (src1 == GL_PRIMARY_COLOR)	rgb1 = primaryColor.rgb;
+	if (src1 == k_GL_PREVIOUS)			rgb1 = fragColor.rgb;
+	else if (src1 == k_GL_TEXTURE)		rgb1 = texColor.rgb;
+	else if (src1 == k_GL_CONSTANT)		rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
+	else if (src1 == k_GL_PRIMARY_COLOR)	rgb1 = primaryColor.rgb;
 	
 	// Combine the RGB components
-	if (func == GL_MODULATE)			fragColor.rgb = rgb0 * rgb1;
-	else if (func == GL_ADD)			fragColor.rgb = rgb0 + rgb1;
-	else if (func == GL_ADD_SIGNED)		fragColor.rgb = rgb0 + rgb1 - 0.5;
-	else if (func == GL_SUBTRACT)		fragColor.rgb = rgb0 - rgb1;
-	else if (func == GL_REPLACE)		fragColor.rgb = rgb0;
-	else if (func == GL_DOT3_RGBA) {
+	if (func == k_GL_MODULATE)			fragColor.rgb = rgb0 * rgb1;
+	else if (func == k_GL_ADD)			fragColor.rgb = rgb0 + rgb1;
+	else if (func == k_GL_ADD_SIGNED)		fragColor.rgb = rgb0 + rgb1 - 0.5;
+	else if (func == k_GL_SUBTRACT)		fragColor.rgb = rgb0 - rgb1;
+	else if (func == k_GL_REPLACE)		fragColor.rgb = rgb0;
+	else if (func == k_GL_DOT3_RGBA) {
 		if (u_cc3VertexHasTangent)		// Bump-map using tangent-space light dir
 			fragColor = lowp vec4(2.0 * dot(rgb0 - 0.5, v_bumpMapLightDir));
 		else							// Bump-map using model-space light dir (from const color)
 			fragColor = lowp vec4(4.0 * dot(rgb0 - 0.5, rgb1 - 0.5));
 	}
-	else if (func == GL_DOT3_RGB) {
+	else if (func == k_GL_DOT3_RGB) {
 		if (u_cc3VertexHasTangent)		// Bump-map using tangent-space light dir
 			fragColor.rgb = lowp vec3(2.0 * dot(rgb0 - 0.5, v_bumpMapLightDir));
 		else							// Bump-map using model-space light dir (from const color)
@@ -167,23 +167,23 @@ void combineTexture(lowp vec4 texColor, int tuIdx) {
 	src1 = u_cc3TextureUnitAlphaSource1[tuIdx];
 	
 	// Alpha of source 0, starting with default
-	if (src0 == GL_TEXTURE)				a0 = texColor.a;
-	else if (src0 == GL_PREVIOUS)		a0 = fragColor.a;
-	else if (src0 == GL_CONSTANT)		a0 = u_cc3TextureUnitColor[tuIdx].a;
-	else if (src0 == GL_PRIMARY_COLOR)	a0 = primaryColor.a;
+	if (src0 == k_GL_TEXTURE)				a0 = texColor.a;
+	else if (src0 == k_GL_PREVIOUS)		a0 = fragColor.a;
+	else if (src0 == k_GL_CONSTANT)		a0 = u_cc3TextureUnitColor[tuIdx].a;
+	else if (src0 == k_GL_PRIMARY_COLOR)	a0 = primaryColor.a;
 	
 	// Alpha of source 1, starting with default
-	if (src1 == GL_PREVIOUS)			a1 = fragColor.a;
-	else if (src1 == GL_TEXTURE)		a1 = texColor.a;
-	else if (src1 == GL_CONSTANT)		a1 = u_cc3TextureUnitColor[tuIdx].a;
-	else if (src1 == GL_PRIMARY_COLOR)	a1 = primaryColor.a;
+	if (src1 == k_GL_PREVIOUS)			a1 = fragColor.a;
+	else if (src1 == k_GL_TEXTURE)		a1 = texColor.a;
+	else if (src1 == k_GL_CONSTANT)		a1 = u_cc3TextureUnitColor[tuIdx].a;
+	else if (src1 == k_GL_PRIMARY_COLOR)	a1 = primaryColor.a;
 	
 	// Combine the alpha components
-	if (func == GL_MODULATE)			fragColor.a = a0 * a1;
-	else if (func == GL_ADD)			fragColor.a = a0 + a1;
-	else if (func == GL_ADD_SIGNED)		fragColor.a = a0 + a1 - 0.5;
-	else if (func == GL_SUBTRACT)		fragColor.a = a0 - a1;
-	else if (func == GL_REPLACE)		fragColor.a = a0;
+	if (func == k_GL_MODULATE)			fragColor.a = a0 * a1;
+	else if (func == k_GL_ADD)			fragColor.a = a0 + a1;
+	else if (func == k_GL_ADD_SIGNED)		fragColor.a = a0 + a1 - 0.5;
+	else if (func == k_GL_SUBTRACT)		fragColor.a = a0 - a1;
+	else if (func == k_GL_REPLACE)		fragColor.a = a0;
 }
 
 /**
@@ -194,19 +194,19 @@ void applyTexture(int tuIdx) {
 	lowp vec4 texColor = texture2D(s_cc3Textures[tuIdx], v_texCoord[tuIdx]);
 	int tuMode = u_cc3TextureUnitMode[tuIdx];
 	
-	if (tuMode == GL_COMBINE)
+	if (tuMode == k_GL_COMBINE)
 		combineTexture(texColor, tuIdx);
-	else if (tuMode == GL_MODULATE)
+	else if (tuMode == k_GL_MODULATE)
 		fragColor *= texColor;
-	else if (tuMode == GL_DECAL)
+	else if (tuMode == k_GL_DECAL)
 		fragColor.rgb = (texColor.rgb * texColor.a) + (fragColor.rgb * (1.0 - texColor.a));
-	else if (tuMode == GL_REPLACE)
+	else if (tuMode == k_GL_REPLACE)
 		fragColor = texColor;
-	else if (tuMode == GL_ADD) {
+	else if (tuMode == k_GL_ADD) {
 		fragColor.rgb += texColor.rgb;
 		fragColor.a *= texColor.a;
 	}
-	else if (tuMode == GL_BLEND) {
+	else if (tuMode == k_GL_BLEND) {
 		fragColor.rgb =  (fragColor.rgb * (1.0 - texColor.rgb)) + (u_cc3TextureUnitColor[tuIdx].rgb * texColor.rgb);
 		fragColor.a *= texColor.a;
 	}

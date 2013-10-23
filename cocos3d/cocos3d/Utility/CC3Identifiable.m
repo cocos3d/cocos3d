@@ -148,7 +148,7 @@ static GLuint lastAssignedTag;
 +(void) resetTagAllocation { lastAssignedTag = 0; }
 
 -(NSString*) description {
-	return [NSString stringWithFormat: @"%@ %@:%u", [self class], (_name ? _name : @"Unnamed"), _tag];
+	return [NSString stringWithFormat: @"%@ '%@':%u", [self class], (_name ? _name : @"Unnamed"), _tag];
 }
 
 -(NSString*) fullDescription { return [self description]; }

@@ -54,6 +54,9 @@
  */
 typedef enum {
 	kCC3SemanticNone = 0,						/**< No defined semantic usage. */
+	
+	// CONTROL SEMANTICS -----------
+	kCC3SemanticRedundant,						/**< Semantic usage is redundant. Typically used to identify repeated or redundant GLSL variables. */
 
 	// VERTEX CONTENT --------------
 	kCC3SemanticVertexLocation,					/**< Vertex location. */

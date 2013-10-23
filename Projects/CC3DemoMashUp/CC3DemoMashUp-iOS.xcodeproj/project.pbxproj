@@ -238,6 +238,7 @@
 		A94EF4F417C66D6900FA969E /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		A94EF4F517C66D6900FA969E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		A95A5C5514E45AC00013359F /* Crate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Crate.png; sourceTree = "<group>"; };
+		A95B479218119BBD007A3804 /* configuration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = configuration.json; path = "CC3DemoMashUp-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A963B545174982F600A20B20 /* PostProc.pfx */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = PostProc.pfx; sourceTree = "<group>"; };
 		A96B359B14EF2689002A7363 /* GrassCloseUp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassCloseUp.jpg; sourceTree = "<group>"; };
 		A96B359C14EF2689002A7363 /* GrassWithLeaves.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = GrassWithLeaves.jpg; sourceTree = "<group>"; };
@@ -356,6 +357,7 @@
 				A92DA78D1427B5980051AFFA /* Resources */,
 				A9F2131317FDF5AC009B0837 /* GLSL */,
 				A96E0FF8170DCFB00044CA2A /* iOS Support */,
+				A95B478C18119AD6007A3804 /* Android Support */,
 				A92E871E17A6E4D9003B859E /* cocos3d-library-iOS.xcodeproj */,
 				A92E836E17A6CB18003B859E /* cocos2d-library-iOS.xcodeproj */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -532,6 +534,14 @@
 				A94EF4F517C66D6900FA969E /* Default.png */,
 			);
 			path = LaunchImages;
+			sourceTree = "<group>";
+		};
+		A95B478C18119AD6007A3804 /* Android Support */ = {
+			isa = PBXGroup;
+			children = (
+				A95B479218119BBD007A3804 /* configuration.json */,
+			);
+			name = "Android Support";
 			sourceTree = "<group>";
 		};
 		A96E0FF8170DCFB00044CA2A /* iOS Support */ = {
@@ -981,7 +991,7 @@
 				1D6058950D05DD3E006BFB54 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "CC3DemoMashUp-iOS" */ = {
 			isa = XCConfigurationList;
@@ -990,7 +1000,7 @@
 				C01FCF5008A954540054247B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

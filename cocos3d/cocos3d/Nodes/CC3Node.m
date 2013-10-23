@@ -719,6 +719,36 @@
 	for (CC3Node* child in _children) child.emissionColor = color;
 }
 
+-(GLfloat) shininess {
+	GLfloat shininess = 0.0f;
+	NSUInteger childCnt = 0;
+	if (_children && (childCnt = _children.count) > 0) {
+		GLfloat sSum = 0.0f;
+		for (CC3Node* child in _children) sSum += child.shininess;
+		shininess = sSum / childCnt;
+	}
+	return shininess;
+}
+
+-(void) setShininess: (GLfloat) shininess {
+	for (CC3Node* child in _children) [child setShininess: shininess];
+}
+
+-(GLfloat) reflectivity {
+	GLfloat reflectivity = 0.0f;
+	NSUInteger childCnt = 0;
+	if (_children && (childCnt = _children.count) > 0) {
+		GLfloat rSum = 0.0f;
+		for (CC3Node* child in _children) rSum += child.reflectivity;
+		reflectivity = rSum / childCnt;
+	}
+	return reflectivity;
+}
+
+-(void) setReflectivity: (GLfloat) reflectivity {
+	for (CC3Node* child in _children) [child setReflectivity: reflectivity];
+}
+
 -(CC3Texture*) texture {
 	for (CC3Node* child in _children) {
 		CC3Texture* tex = child.texture;
@@ -728,7 +758,11 @@
 }
 
 -(void) setTexture: (CC3Texture*) texture {
-	for (CC3Node* child in _children) child.texture = texture;
+	for (CC3Node* child in _children) [child setTexture: texture];
+}
+
+-(void) addTexture: (CC3Texture*) texture {
+	for (CC3Node* child in _children) [child addTexture: texture];
 }
 
 -(CC3Vector4) globalLightPosition {

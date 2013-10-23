@@ -388,6 +388,9 @@
 /** Returns the number of uniforms declared and in use by this program. */
 @property(nonatomic, readonly) GLuint uniformCount;
 
+/** Returns a read-only array of the GLSL uniforms declared and used by this shader program. */
+@property(nonatomic, readonly) CCArray* uniforms;
+
 /** Returns the number of memory storage elements consumed by the uniform variables used by this program. */
 @property(nonatomic, readonly) GLuint uniformStorageElementCount;
 
@@ -411,6 +414,9 @@
 
 /** Returns the number of vertex attributes declared and in use by this program. */
 @property(nonatomic, readonly) GLuint attributeCount;
+
+/** Returns a read-only array of the GLSL attributes declared and used by this shader program. */
+@property(nonatomic, readonly) CCArray* attributes;
 
 /** 
  * Returns the vertex attribute with the specified semantic and index,

@@ -214,6 +214,17 @@ NSString* NSStringFromCC3GLSLVariableScope(CC3GLSLVariableScope scope);
 +(id) variableInProgram: (CC3ShaderProgram*) program atIndex: (GLuint) index;
 
 /**
+ * Ensures this variable has a valid name.
+ *  - Removes the subscript suffix ([0]), if it exists.
+ *  - Marks this variable as redundant, by setting the semantic to kCC3SemanticRedundant
+ *    if a subscript other than ([0]) exists.
+ *
+ * This method is invoked automatically when the instance is initialized. 
+ * Normally, you will never need to invoke this method.
+ */
+-(void) normalizeName;
+
+/**
  * Returns a newly allocated (retained) copy of this instance. The new copy will be an instance
  * of the specified class, whose content is copied from this instance.
  *

@@ -228,6 +228,7 @@ static CC3Cache* _shaderCache = nil;
 
 @implementation CC3ShaderProgram
 
+@synthesize attributes=_attributes;
 @synthesize semanticDelegate=_semanticDelegate;
 @synthesize maxUniformNameLength=_maxUniformNameLength;
 @synthesize maxAttributeNameLength=_maxAttributeNameLength;
@@ -289,6 +290,14 @@ static CC3Cache* _shaderCache = nil;
 
 -(GLuint) uniformCount {
 	return (GLuint)(_uniformsSceneScope.count + _uniformsNodeScope.count + _uniformsDrawScope.count);
+}
+
+-(CCArray*) uniforms {
+	CCArray* uniforms = [CCArray arrayWithCapacity: self.uniformCount];
+	[uniforms addObjectsFromArray: _uniformsSceneScope];
+	[uniforms addObjectsFromArray: _uniformsNodeScope];
+	[uniforms addObjectsFromArray: _uniformsDrawScope];
+	return uniforms;
 }
 
 -(GLuint) uniformStorageElementCount {
@@ -382,7 +391,24 @@ static CC3Cache* _shaderCache = nil;
 	[self configureUniforms];
 	[self configureAttributes];
 	
-	LogRez(@"Completed %@", self.fullDescription);
+#if LOGGING_REZLOAD
+	LogRez(@"Completed %@:", self.fullDescription);
+
+	NSArray* vars;
+	NSComparator varSorter = ^(CC3GLSLVariable* var1, CC3GLSLVariable* var2) {
+		return [var1.name compare: var2.name];
+	};
+	
+	// Include the full description of each attribute, sorted by name.
+	vars = [self.attributes getNSArray];
+	vars = [vars sortedArrayUsingComparator: varSorter];
+	for (CC3GLSLVariable* var in vars) LogRez(@"%@", var.fullDescription);
+	
+	// Include the full description of each uniform, sorted by name.
+	vars = [self.uniforms getNSArray];
+	vars = [vars sortedArrayUsingComparator: varSorter];
+	for (CC3GLSLVariable* var in vars) LogRez(@"%@", var.fullDescription);
+#endif	// LOGGING_REZLOAD
 }
 
 /** 
@@ -401,9 +427,13 @@ static CC3Cache* _shaderCache = nil;
 	_maxUniformNameLength = [gl getIntegerParameter: GL_ACTIVE_UNIFORM_MAX_LENGTH forShaderProgram: progID];
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLUniform* var = [CC3GLSLUniform variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate configureVariable: var];
-		[self addUniform: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program uniforms for this platform has not been exceeded.", var.fullDescription);
+		if (var.semantic != kCC3SemanticRedundant) {
+			[_semanticDelegate configureVariable: var];
+			[self addUniform: var];
+		} else {
+			LogRez(@"%@ is redundant and was not added to %@", var, self);
+		}
 	}
 	LogRez(@"%@ configured %u uniforms in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
 }
@@ -437,9 +467,13 @@ static CC3Cache* _shaderCache = nil;
 	_maxAttributeNameLength = [gl getIntegerParameter: GL_ACTIVE_ATTRIBUTE_MAX_LENGTH forShaderProgram: progID];
 	for (GLint varIdx = 0; varIdx < varCnt; varIdx++) {
 		CC3GLSLAttribute* var = [CC3GLSLAttribute variableInProgram: self atIndex: varIdx];
-		[_semanticDelegate configureVariable: var];
-		[_attributes addObject: var];
 		CC3Assert(var.location >= 0, @"%@ has an invalid location. Make sure the maximum number of program attributes for this platform has not been exceeded.", var.fullDescription);
+		if (var.semantic != kCC3SemanticRedundant) {
+			[_semanticDelegate configureVariable: var];
+			[_attributes addObject: var];
+		} else {
+			LogRez(@"%@ is redundant and was not added to %@", var, self);
+		}
 	}
 	LogRez(@"%@ configured %u attributes in %.3f ms", self, varCnt, GetRezActivityDuration() * 1000);
 }
@@ -607,20 +641,13 @@ static CC3Cache* _shaderCache = nil;
 	return [NSString stringWithFormat: @"%@-%@", vertexShaderName, fragmentShaderName];
 }
 
--(NSString*) description { return [NSString stringWithFormat: @"%@ named: %@", [self class], self.name]; }
+-(NSString*) description { return [NSString stringWithFormat: @"%@ (ID: %u)", [super description], _programID]; }
 
 -(NSString*) fullDescription {
-	NSMutableString* desc = [NSMutableString stringWithCapacity: 500];
-	[desc appendFormat: @"%@ with %@ and %@", self, _vertexShader, _fragmentShader];
-	[desc appendFormat: @". declaring %u attributes and %u uniforms, requiring at least"
-	 @" %u uniform storage elements (of %u platform storage elements):",
-	 self.attributeCount, self.uniformCount, self.uniformStorageElementCount,
-	 (CC3OpenGL.sharedGL.maxNumberOfVertexShaderUniformVectors * 4)];
-	for (CC3GLSLVariable* var in _attributes) [desc appendFormat: @"\n\t %@", var.fullDescription];
-	for (CC3GLSLVariable* var in _uniformsSceneScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
-	for (CC3GLSLVariable* var in _uniformsNodeScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
-	for (CC3GLSLVariable* var in _uniformsDrawScope) [desc appendFormat: @"\n\t %@", var.fullDescription];
-	return desc;
+	return [NSString stringWithFormat: @"%@ with %@ and %@, declaring %u attributes and %u uniforms"
+			" (requiring at least %u uniform storage elements, from %u platform storage elements)",
+			self, _vertexShader, _fragmentShader, self.attributeCount, self.uniformCount,
+			self.uniformStorageElementCount, (CC3OpenGL.sharedGL.maxNumberOfVertexShaderUniformVectors * 4)];
 }
 
 -(NSString*) constructorDescription {

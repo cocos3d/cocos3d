@@ -130,6 +130,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A95B479318119BC8007A3804 /* configuration.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = configuration.json; path = "cocos2d-library-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A9CD4A8D180F90B6002422A0 /* CCAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCAction.h; sourceTree = "<group>"; };
 		A9CD4A8E180F90B6002422A0 /* CCAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCAction.m; sourceTree = "<group>"; };
 		A9CD4A8F180F90B6002422A0 /* CCActionCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCActionCamera.h; sourceTree = "<group>"; };
@@ -399,6 +400,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A95B479018119B63007A3804 /* Android Support */ = {
+			isa = PBXGroup;
+			children = (
+				A95B479318119BC8007A3804 /* configuration.json */,
+			);
+			name = "Android Support";
+			sourceTree = "<group>";
+		};
 		A9CD4A8B180F90B6002422A0 /* cocos2d */ = {
 			isa = PBXGroup;
 			children = (
@@ -756,6 +765,7 @@
 				A9CD4A8B180F90B6002422A0 /* cocos2d */,
 				A9D8ED2B17A6009300FB443C /* Frameworks */,
 				A9D8ED2A17A6009300FB443C /* Products */,
+				A95B479018119B63007A3804 /* Android Support */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1039,7 +1049,7 @@
 				A9D8ED4B17A6009300FB443C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		A9D8ED4C17A6009300FB443C /* Build configuration list for PBXNativeTarget "cocos2d-library-iOS" */ = {
 			isa = XCConfigurationList;
@@ -1048,7 +1058,7 @@
 				A9D8ED4E17A6009300FB443C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

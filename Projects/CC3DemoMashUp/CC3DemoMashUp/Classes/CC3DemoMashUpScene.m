@@ -1001,7 +1001,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	_envMapTex.numberOfFacesPerSnapshot = 1.0f;		// Update only one side of the cube in each frame
 	
 	[_teapotTextured addTexture: _envMapTex];
-	_teapotTextured.material.reflectivity = 0.7;	// Modify this (0-1) to change how reflective the teapot is
+	_teapotTextured.reflectivity = 0.7;		// Modify this (0-1) to change how reflective the teapot is
 #endif	// !CC3_OGLES_1
 
 	// Add a brushed metal texture (with or without the reflective texture added above).
@@ -1799,26 +1799,17 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[runningTrack addChild: littleBrother];
 	stride = [CC3Animate actionWithDuration: 1.6];
 	[littleBrother runAction: [CCRepeatForever actionWithAction: stride]];
-	
+
 #if !CC3_OGLES_1
-	// If cube-maps are available, turn the smaller runner into a little liquid-metal Terminator 2!
-	// This is done by locating the mesh nodes within the figure, adding a static cube-map
-	// environment-map texture to each, and setting the reflectivity of each mesh node.
-	CC3Material* mat;
-	GLfloat lbReflect = 0.8;	// Move towards 0 to show more of the runner's suit...
-								// ...move towards 1 to make him more reflective.
-	CC3Texture* emTex = [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"];
-	mat = [littleBrother getMeshNodeNamed: @"Body_LowPoly"].material;
-	[mat addTexture: emTex];
-	mat.reflectivity = lbReflect;
-	mat = [littleBrother getMeshNodeNamed: @"Legs_LowPoly"].material;
-	[mat addTexture: emTex];
-	mat.reflectivity = lbReflect;
-	mat = [littleBrother getMeshNodeNamed: @"Belt"].material;
-	[mat addTexture: emTex];
-	mat.reflectivity = lbReflect;
+	// If cube-maps are available, give the little runner a reflective coating. This is done
+	// by adding a static cube-map environment-map texture to, and setting the reflectivity of,
+	// each mesh node contained within the smaller runner. You can adjust the value of the
+	// reflectivity property to shor more or less of the runner's suit. Moving the reflectivity
+	// towards 1 will make him appear like a little liquid-metal Terminator 2!
+	[littleBrother addTexture: [CC3Texture textureCubeFromFilePattern: @"EnvMap%@.jpg"]];
+	littleBrother.reflectivity = 0.4;
 #endif	// !CC3_OGLES_1
-	
+
 	// Runners are added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: runningTrack andMaterializeWithDuration: kFadeInDuration];
 	[self addChild: runningTrack];

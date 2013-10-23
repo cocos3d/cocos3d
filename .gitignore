@@ -21,8 +21,13 @@ xcuserdata/
 xcshareddata/
 project.xcworkspace/
 
-# cocos2d
-cocos2d/
+# cocos2d - use trailing star for symlinks
+cocos2d/*
+
+# Apportable
+.scons*
+**/*.approj/assets/
+**/*.approj/targets/
 
 # Generated files
 VersionX-revision.h
@@ -35,6 +40,7 @@ build/
 .hg
 .svn
 CVS
+
 # automatic backup files
 *~.nib
 *.swp

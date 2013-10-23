@@ -1257,6 +1257,8 @@ NSString* NSStringFromCC3VertexContent(CC3VertexContent vtxContent) {
 }
 
 -(void) alignTextureUnit: (GLuint) texUnit withTexture: (CC3Texture*) aTexture {
+	// Don't align if texture count > texture coordinates count
+	if (texUnit >= self.textureCoordinatesArrayCount) return;
 	[[self textureCoordinatesForTextureUnit: texUnit] alignWithTexture: aTexture];
 }
 

@@ -264,6 +264,29 @@
 @property(nonatomic, assign) ccColor4F emissionColor;
 
 /**
+ * The shininess of the material of this mesh node.
+ *
+ * The value of this property is clamped to between zero and kCC3MaximumMaterialShininess.
+ * The initial value of this property is kCC3DefaultMaterialShininess (zero).
+ */
+@property(nonatomic, assign) GLfloat shininess;
+
+/**
+ * The reflectivity of the material of this mesh node.
+ *
+ * This property can be used when the material is covered by an environmental reflection cube-map
+ * texture to indicate the weighting that should be applied to the reflection texture, relative to
+ * any other textures on the material. A value of zero indicates that the surface should be
+ * completely unreflective, and a value of one indicates that the surface is entirely reflective.
+ *
+ * This property requires a programmable pipeline and has no effect when running OpenGL ES 1.1.
+ *
+ * The value of this property is clamped to between zero and one.
+ * The initial value of this property is kCC3DefaultMaterialReflectivity (zero).
+ */
+@property(nonatomic, assign) GLfloat reflectivity;
+
+/**
  * Selects an appropriate shader program for this mesh node.
  *
  * When running under a programmable rendering pipeline, such as OpenGL ES 2.0 or OpenGL,
