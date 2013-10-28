@@ -504,7 +504,6 @@
 		[self setVertexNormal: cc3v(s, 0.0f, c) at: vIdx];
 	}
 	[self moveMeshOriginTo: cc3v(0, 0, -radius)];
-	[self updateGLBuffers];
 }
 
 -(void) populateAsBitmapFontLabelFromString: (NSString*) lblString

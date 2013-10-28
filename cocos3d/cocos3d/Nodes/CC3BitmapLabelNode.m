@@ -453,19 +453,24 @@ static NSMutableDictionary* _fontConfigurations = nil;
 #pragma mark Mesh population
 
 -(void) populateLabelMesh {
-	if (_fontFileName && _labelString) {
-		[self populateAsBitmapFontLabelFromString: self.labelString
-									 fromFontFile: self.fontFileName
-									andLineHeight: self.lineHeight
-								 andTextAlignment: self.textAlignment
-								andRelativeOrigin: self.relativeOrigin
-								  andTessellation: self.tessellation];
-		[self markBoundingVolumeDirty];
-		if (_mesh.isUsingGLBuffers) {
-			[_mesh deleteGLBuffers];
-			[_mesh createGLBuffers];
-		}
-	}
+	if ( !(_fontFileName && _labelString) ) return;
+
+	// If using GL buffers, delete them now, because the population mechanism triggers updates
+	// to existing buffers with the new vertex count (which will not match the buffers).
+	BOOL isUsingGLBuffers = _mesh.isUsingGLBuffers;
+	[_mesh deleteGLBuffers];
+
+	[self populateAsBitmapFontLabelFromString: self.labelString
+								 fromFontFile: self.fontFileName
+								andLineHeight: self.lineHeight
+							 andTextAlignment: self.textAlignment
+							andRelativeOrigin: self.relativeOrigin
+							  andTessellation: self.tessellation];
+	
+	// If using GL buffers, recreate them now.
+	if (isUsingGLBuffers) [_mesh createGLBuffers];
+
+	[self markBoundingVolumeDirty];
 }
 
 
