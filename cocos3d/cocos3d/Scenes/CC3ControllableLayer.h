@@ -35,35 +35,29 @@
 
 
 /**
- * A CCLayer that can be controlled by a CC3ViewController to automatically rotate when
- * the device orientation changes, and to permit this layer to be overlaid on the device
- * camera if it exists, permitting "augmented reality" displays.
+ * A CCLayer that keeps track of the CC3ViewController that is controlling the CC3GLView,
+ * and provides support for overlaying the device camera, and adapting to changes to the
+ * device orientation.
  */
 @interface CC3ControllableLayer : CCLayer {
 	CC3ViewController* _controller;
-	BOOL _alignContentSizeWithDeviceOrientation : 1;
 }
 
 
 #pragma mark Device orientation support
 
 /**
- * Indicates whether this layer should adjust its content size when the device orientation
- * changes. If this property is set to YES, when the device changes from any portrait
- * orientation to any landscape orientation, this layer will transpose its contentSize. 
- * The overall contentSize area remains the same size, but the axes will be aligned to the
- * new orientation. If this property is set to NO, the contentSize is not adjusted as the
+ * This callback method is invoked automatically whenever the contentSize property of this layer
+ * is changed. This method is not invoked if the contentSize property is set to its current value.
+ *
+ * Default implementation does nothing. Subclasses can override this method to organize child
+ * nodes or perspective to the new contentSize.
+ *
+ * When the device orientation changes, the CC3UIViewController will set the contentSize of
+ * the CCNode in its controlledNode property to match the new view size and shape. If the
+ * node being controlled is an instance of CC3ControllableLayer, this method will therefore
+ * automatically be invoked. Subclasses can use this to adapt to the new size caused by the
  * device orientation change.
- *
- * The initial value of this property is YES.
- */
-@property(nonatomic, assign) BOOL alignContentSizeWithDeviceOrientation;
-
-/**
- * Called automatically whenever the contentSize of this layer is changed.
- *
- * Default implementation does nothing. Superclasses that care that the content size
- * has changed will override.
  */
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize;
 
@@ -91,10 +85,22 @@
  * which may not be nil. */
 +(id) layerWithController: (CC3ViewController*) controller;
 
-/** @deprecated CC3ControllableLayer no longer draws a backdrop. Use init instead. */
+
+#pragma mark Deprecated functionality
+
+/** 
+ * @deprecated CC3ControllableLayer no longer automatically resizes on device orientation. 
+ * This property always returns NO, and setting this property has no effect. When the  device
+ * is rotated, the contentSize property of the CCNode held in the controlledNode property of the
+ * CC3UIViewController is set to match the new orientation. Override didUpdateContentSizeFrom:
+ * to react to this change.
+ */
+@property(nonatomic, assign) BOOL alignContentSizeWithDeviceOrientation DEPRECATED_ATTRIBUTE;
+
+/** @deprecated CC3ControllableLayer requires a controller and no longer draws a backdrop. Use initWithController: instead. */
 -(id) initWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
 
-/** @deprecated CC3ControllableLayer no longer draws a backdrop. Use node instead. */
+/** @deprecated CC3ControllableLayer requires a controller and no longer draws a backdrop. Use layerWithController: instead. */
 +(id) layerWithColor: (ccColor4B) color DEPRECATED_ATTRIBUTE;
 
 /** @deprecated CC3ControllableLayer no longer draws a backdrop. Use CC3Scene backdrop property instead. */
@@ -110,23 +116,29 @@
 @interface CCNode (CC3ControllableLayer)
 
 /**
- * The controller that is controlling this node. This property is available to support delegation from
- * this node. This property is set automatically when this node is attached to the controller, and should
- * not be set by the application directly.
+ * The controller that is controlling this node. This property is available to support delegation
+ * from this node. This property is set automatically when this node is attached to the controller,
+ * and should not be set by the application directly.
  *
- * In this default implementation, setting the value of this property simply sets the value of the same
- * property in each child CCNode to the same value. Reading the value of this property returns the value
- * of the same property from the parent of this CCNode, or returns nil if this node has no parent.
+ * In this default implementation, setting the value of this property simply sets the value of
+ * the same property in each child CCNode to the same value. Reading the value of this property
+ * returns the value of the same property from the parent of this CCNode, or returns nil if this
+ * node has no parent.
  */
 @property(nonatomic, assign) CC3ViewController* controller;
 
 /**
- * Invoked automatically by a CC3ViewController when the orientation of the view (portrait, landscape,
- * etc) has changed using UIKit autorotation. The CCNode may take action such as transposing its contentSize,
- * or reorganizing its child nodes, to better fit the new screen shape.
+ * Invoked automatically by a CC3UIViewController when the orientation of the view (portrait,
+ * landscape, etc) has changed using UIKit autorotation.
  *
  * This default implementation simply invokes the same method on each child CCNode.
- * Subclasses that support the ability to be controlled by a CC3ViewController will override.
+ * Subclasses that are interested in device changes will override.
+ *
+ * In addition to invoking this method, the controller will also set the contentSize of the
+ * CCNode in its controlledNode property to match the new view size. CCNode sublcasses can
+ * override the setContentSize: method to adapt to the new size. In particular, the
+ * CC3ControlledNode subclass automatically invokes the didUpdateContentSizeFrom: callback
+ * method when its contentSize property is changed.
  */
 -(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation;
 

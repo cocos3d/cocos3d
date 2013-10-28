@@ -70,9 +70,9 @@
  * CC3Layer directly descends from CC3ControllableLayer, which means that it requires and
  * is controlled by a CC3ViewController instance. In addition to linking the 3D scene to
  * the view, the controller provides:
- *   - Automatic rotatation the layer (both the 2D and 3D components) when the device orientation changes.
- *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and 3D scenes can
- *     participate in an augmented reality view perspective.
+ *   - Automatic resizing of the scene viewport when the contentSize of this layer changes.
+ *   - The CC3Layer can be overlaid on a device camera image stream so that both the 2D and
+ *     3D scenes can participate in an augmented reality view perspective.
  *
  * Either or both of these features can be turned on or off.
  *
@@ -341,8 +341,7 @@
 -(void) update: (ccTime)dt;
 
 /**
- * Updates the viewport of the contained CC3Scene instance with the dimensions
- * of this layer and the device orientation.
+ * Updates the viewport of the contained CC3Scene instance with the dimensions of this layer.
  *
  * This method is invoked automatically when the position, size, scale, or orientation
  * of this layer changes. You do not need to invoke this method when changing the position

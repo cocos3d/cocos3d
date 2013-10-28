@@ -410,17 +410,16 @@
 -(NSTimeInterval) displayLinkTime { return CC2_LAST_DISPLAY_TIME; }
 #endif
 
-#if CC3_IOS && LOGGING_LEVEL_DEBUG
-/** Log a message whenever the frame time is unexpectedly extended. */
--(void) drawScene {
-	MarkDebugActivityStart();
-	[super drawScene];
-	NSTimeInterval drawDur = GetDebugActivityDuration();
-	if (drawDur > 0.0667)	// 15 fps
-		LogDebug(@"Slow scene update and draw in %.3f ms (%.1f fps)",
-				 drawDur * 1000.0, 1.0 / drawDur);
-}
-#endif	// CC3_IOS && LOGGING_LEVEL_DEBUG
+/** Uncomment to log a debug message whenever the frame time is unexpectedly extended. */
+//-(void) drawScene {
+//	NSTimeInterval tooSlow = 0.0667;	// 15 fps - change as you like
+//	MarkDebugActivityStart();
+//	[super drawScene];
+//	NSTimeInterval drawDur = GetDebugActivityDuration();
+//	if (drawDur > tooSlow)
+//		LogDebug(@"Slow scene update and draw in %.3f ms (%.1f fps)",
+//				 drawDur * 1000.0, 1.0 / drawDur);
+//}
 
 @end
 

@@ -37,8 +37,6 @@
 
 @implementation CC3ControllableLayer
 
-@synthesize alignContentSizeWithDeviceOrientation=_alignContentSizeWithDeviceOrientation;
-
 -(void) dealloc {
 	_controller = nil;		// delegate - not retained
     [super dealloc];
@@ -57,8 +55,8 @@
 -(id) initWithController: (CC3ViewController*) controller {
 	CC3Assert(controller, @"%@ requires a CC3ViewController controller.", self);
 	if( (self = [super init]) ) {
+		LogDebug(@"%@ initialized to size %@", self, NSStringFromCGSize(self.contentSize));
 		_controller = controller;		// not retained
-		_alignContentSizeWithDeviceOrientation = YES;
 		[self initInitialState];		// Deprecated legacy
 	}
 	return self;
@@ -70,12 +68,6 @@
 
 -(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
-// Deprecated legacy
--(id) initWithColor: (ccColor4B) color { return [self init]; }
-+(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
--(void) initInitialState {}
--(BOOL) isColored { return NO; }
-
 
 #pragma mark Device orientation support
 
@@ -85,29 +77,9 @@
 	if( !CGSizeEqualToSize(aSize, oldSize) ) [self didUpdateContentSizeFrom: oldSize];
 }
 
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
-
-/**
- * Invoked by the CC3ViewController when the device orientation has changed. If configured to align
- * with the device orientation, transpose the contentSize when flipping between portrait and landscape.
- */
--(void) viewDidRotateFrom: (UIInterfaceOrientation) oldOrientation to: (UIInterfaceOrientation) newOrientation {
-	
-	if(self.alignContentSizeWithDeviceOrientation) {
-		// Explicit tests both ways, since xor or == will not be accurate if functions
-		// return truth values that are not exactly 1.
-		BOOL isChangingAspect = ((UIInterfaceOrientationIsLandscape(oldOrientation) &&
-								  UIInterfaceOrientationIsPortrait(newOrientation)) ||
-								 (UIInterfaceOrientationIsPortrait(oldOrientation) &&
-								  UIInterfaceOrientationIsLandscape(newOrientation)));
-		if (isChangingAspect) {
-			CGSize cs = self.contentSize;
-			self.contentSize = CGSizeMake(cs.height, cs.width);
-		}
-	}
-	
-	// Propagate to child nodes
-	[super viewDidRotateFrom: oldOrientation to: newOrientation];
+-(void) didUpdateContentSizeFrom: (CGSize) oldSize {
+	LogDebug(@"%@ content size changed from %@ to %@",
+			 self, NSStringFromCGSize(oldSize), NSStringFromCGSize(self.contentSize));
 }
 
 
@@ -122,8 +94,16 @@
 	CC3OpenGL.sharedGL.clearColor = self.isOverlayingDeviceCamera ? kCCC4FBlackTransparent : kCCC4FBlack;
 }
 
-// Keep the compiler happy with method re-declaration for documentation
--(void) onExit { [super onExit]; }
+
+#pragma mark Deprecated functionality
+
+-(BOOL) alignContentSizeWithDeviceOrientation { return NO; }
+-(void) setAlignContentSizeWithDeviceOrientation: (BOOL) alignContentSizeWithDeviceOrientation {}
+-(id) initWithColor: (ccColor4B) color { return [self init]; }
++(id) layerWithColor: (ccColor4B) color { return [[[self alloc] init] autorelease]; }
+-(void) initInitialState {}
+-(BOOL) isColored { return NO; }
+
 
 @end
 

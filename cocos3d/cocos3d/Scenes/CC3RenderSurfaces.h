@@ -136,30 +136,6 @@
  */
 @property(nonatomic, retain) id<CC3RenderSurfaceAttachment> stencilAttachment;
 
-/** 
- * Clears the color content of this surface, activating this surface and enabling
- * color writing if needed.
- */
--(void) clearColorContent;
-
-/** 
- * Clears the depth content of this surface, activating this surface and enabling
- * depth writing if needed. 
- */
--(void) clearDepthContent;
-
-/** 
- * Clears the stencil content of this surface, activating this surface and enabling
- * stencil writing if needed.
- */
--(void) clearStencilContent;
-
-/** 
- * Clears the color and depth content of this surface, activating this surface and enabling
- * color and depth writing if needed.
- */
--(void) clearColorAndDepthContent;
-
 /**
  * Validates that this surface has a valid configuration in the GL engine.
  *
@@ -170,6 +146,33 @@
 
 
 #pragma mark Content
+
+/**
+ * Clears the color content of this surface, activating this surface and enabling
+ * color writing if needed.
+ */
+-(void) clearColorContent;
+
+/**
+ * Clears the depth content of this surface, activating this surface and enabling
+ * depth writing if needed.
+ */
+-(void) clearDepthContent;
+
+/**
+ * Clears the stencil content of this surface, activating this surface and enabling
+ * stencil writing if needed.
+ */
+-(void) clearStencilContent;
+
+/**
+ * Clears the color and depth content of this surface, activating this surface and enabling
+ * color and depth writing if needed.
+ */
+-(void) clearColorAndDepthContent;
+
+/** Returns whether this surface supports reading the pixel content. */
+@property(nonatomic, readonly) BOOL isColorContentReadable;
 
 /**
  * Reads the content of the range of pixels defined by the specified rectangle from the
@@ -185,6 +188,9 @@
  * is not the active surface, it will temporarily be made active, and when pixel reading has
  * finished, the currently active surface will be restored. This allows color to be read from
  * one surface while rendering to another surface.
+ *
+ * Not all surfaces have readable color content. If the isColorContentReadable returns NO,
+ * the content read using this method may be unpredictable and inaccurate.
  *
  * This method should be used with care, since it involves making a synchronous call to
  * query the state of the GL engine. This method will not return until the GL engine has
@@ -326,8 +332,7 @@
 /**
  * Allocates and initializes an autoreleased instance with one sample per pixel.
  *
- * The size and pixel format of this renderbuffer can be set by invoking the
- * resizeFromCALayer:withContext: method.
+ * The size and pixel format of this renderbuffer can be set by invoking the resizeTo: method.
  */
 +(id) renderbuffer;
 
@@ -691,6 +696,14 @@
  */
 -(BOOL) validate;
 
+/** 
+ * Returns whether this surface supports reading the pixel content.
+ *
+ * In general, the color content within a framebuffer is readable, and so this property always
+ * returns YES. Specialized subclasses with unreadable color content may override to return NO.
+ */
+@property(nonatomic, readonly) BOOL isColorContentReadable;
+
 
 #pragma mark Allocation and initialization
 
@@ -757,6 +770,15 @@
 
 /** Represents the virtual OpenGL framebuffer used by Android to present to a window. */
 @interface CC3AndroidOnScreenGLFramebuffer : CC3SystemOnScreenGLFramebuffer
+
+/**
+ * Returns whether this surface supports reading the pixel content.
+ *
+ * The on-screen color content is not readable in the Android platform, 
+ * and so this property always returns NO.
+ */
+@property(nonatomic, readonly) BOOL isColorContentReadable;
+
 @end
 
 
@@ -936,14 +958,27 @@
 /**
  * The surface to which rendering for picking should be directed.
  *
- * In order for pixel colors to be read precisely, the surface in this property cannot use
- * multisampling. If multisampling is in use, this property is lazily initialized to a specialized
- * non-multisampling surface. Otherwise, this property is lazily initialized to the surface in the
- * viewSurface property.
+ * If the shouldUseDedicatedPickingSurface returns NO, this property returns the surface in
+ * the viewSurface property. However, if the shouldUseDedicatedPickingSurface returns YES,
+ * this property returns a dedicated surface created just for picking.
  *
  * Lazy initialization is used in case touch picking is never actually used by the app.
  */
 @property(nonatomic, retain) CC3GLFramebuffer* pickingSurface;
+
+/**
+ * Returns whether a dedicated surface should be created by the pickingSurface property.
+ *
+ * For economy, if the viewSurface is readable, it is used as the picking surface. However,
+ * if multi-sampling is being used, pixel position cannot be determined precisely. And in
+ * some platforms, the viewSurface may not be directly readable.
+ *
+ * In those situations, a separate dedicated picking surface is required, and this propety
+ * will return YES, and the pickingSurface property will create and use a dedicated surface.
+ * Otherwise, this property will return NO, and the pickingSurface property will use the
+ * surface in the viewSurface property for picking.
+ */
+@property(nonatomic, readonly) BOOL shouldUseDedicatedPickingSurface;
 
 /** The size of the rendering surface in pixels. */
 @property(nonatomic, readonly) CC3IntSize size;

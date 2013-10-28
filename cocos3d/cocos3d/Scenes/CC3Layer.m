@@ -192,15 +192,18 @@
 	[self updateViewport];
 }
 
-/**
- * Updates the viewport of the contained CC3Scene instance with the dimensions
- * of this layer and the device orientation.
- *
- * Invoked automatically when the position, size, or scale of this layer changes.
- */
 -(void) updateViewport {
-	[_cc3Scene.viewportManager updateBounds: self.globalBoundingBoxInPixels
-					  withDeviceOrientation: (UIDeviceOrientation)CCDirector.sharedDirector.deviceOrientation];
+	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
+	CGRect gbb = self.globalBoundingBoxInPixels;
+	
+	// Check whether the viewport covers the full UIView.
+	BOOL isFullView = (CGPointEqualToPoint(gbb.origin, CGPointZero) &&
+					   CGSizeEqualToSize(gbb.size, winSz));
+
+	CC3Camera* cam = self.cc3Scene.activeCamera;
+	cam.viewport = CC3ViewportFromCGRect(gbb);
+	cam.shouldClipToViewport = !isFullView;
+
 	[super updateViewport];
 }
 

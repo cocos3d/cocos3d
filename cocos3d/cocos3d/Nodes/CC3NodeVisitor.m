@@ -422,6 +422,18 @@
 	if (renderSurface == _renderSurface) return;
 	[_renderSurface release];
 	_renderSurface = [renderSurface retain];
+	[self alignCameraViewport];
+}
+
+-(void) setCamera: (CC3Camera*) camera {
+	[super setCamera: camera];
+	[self alignCameraViewport];
+}
+
+/** If the viewport of the camera has not been set directly, align it to the surface shape. */
+-(void) alignCameraViewport {
+	if ( CC3ViewportIsZero(_camera.viewport) )
+		_camera.viewport = CC3ViewportFromOriginAndSize(kCC3IntPointZero, self.renderSurface.size);
 }
 
 -(void) processBeforeChildren: (CC3Node*) aNode {
@@ -485,17 +497,7 @@
 
 /** Template method that opens the 3D camera. */
 -(void) openCamera {
-	CC3Camera* cam = self.camera;
-	id<CC3RenderSurface> surf = self.renderSurface;
-
-	// If rendering off-screen, set the camera viewport to cover the surface.
-	if (surf.isOffScreen) {
-		_onScreenViewport = cam.viewport;
-		CC3IntSize surfSize = surf.size;
-		cam.viewport = CC3ViewportMake(0, 0, surfSize.width, surfSize.height);
-	}
-	
-	[cam openWithVisitor: self];
+	[self.camera openWithVisitor: self];
 
 #if !CC3_GLSL
 	// Hack for OpenGL & OpenGL ES fixed pipeline to force update of light position/direction
@@ -514,15 +516,7 @@
 }
 
 /** Close the camera. This is the compliment of the openCamera method. */
--(void) closeCamera {
-	CC3Camera* cam = self.camera;
-	[cam closeWithVisitor: self];
-	
-	// If rendering off-screen, and a previous layer viewport was set,
-	// reset the camera viewport back to the layer bounds
-	if ( self.renderSurface.isOffScreen && !CC3ViewportIsZero(_onScreenViewport) )
-		cam.viewport = _onScreenViewport;
-}
+-(void) closeCamera { [self.camera closeWithVisitor: self]; }
 
 -(void) draw: (CC3Node*) aNode {
 	LogTrace(@"Drawing %@", aNode);
@@ -692,15 +686,14 @@
 		
 	// Read the pixel from the framebuffer
 	ccColor4B pixColor;
-	CC3IntPoint touchPoint = CC3IntPointFromCGPoint(self.scene.touchedNodePicker.glTouchPoint);
+	CC3IntPoint touchPoint = CC3IntPointFromCGPoint([self.camera glPointFromCC2Point: self.scene.touchedNodePicker.touchPoint]);
 	[self.renderSurface readColorContentFrom: CC3ViewportMake(touchPoint.x, touchPoint.y, 1, 1) into: &pixColor];
 	
 	// Fetch the node whose tags is mapped from the pixel color
 	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
 
-	LogTrace(@"%@ picked %@ from color %@ at position %@",
-			 self, _pickedNode, NSStringFromCCC4B(pixColor),
-			 NSStringFromCGPoint(self.scene.touchedNodePicker.glTouchPoint));
+	LogDebug(@"%@ picked %@ from color %@ at position %@", self, _pickedNode,
+			 NSStringFromCCC4B(pixColor), NSStringFromCC3IntPoint(touchPoint));
 	
 	[self.renderSurface clearDepthContent];
 
@@ -727,7 +720,7 @@
 /** Maps the specified node to a unique color, and paints the node with that color. */
 -(void) paintNode: (CC3Node*) aNode {
 	self.currentColor4B = [self colorFromNodeTag: aNode.tag];
-	LogTrace(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
+	LogDebug(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
 }
 
 // During visual testing, change this value to better distingusih the colors between nodes

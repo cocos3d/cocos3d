@@ -110,7 +110,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * notification via the nodeWasTransformed: method when the projection matrix is recalculated.
  */
 @interface CC3Camera : CC3Node {
-	CC3Matrix* _viewMatrix;
 	CC3Frustum* _frustum;
 	CC3Viewport _viewport;
 	GLfloat _fieldOfView;
@@ -119,7 +118,6 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	BOOL _isOpen : 1;
 	BOOL _hasInfiniteDepthOfField : 1;
 	BOOL _isProjectionDirty : 1;
-	BOOL _isViewMatrixInvertedDirty : 1;
 	BOOL _shouldClipToViewport : 1;
 }
 
@@ -222,14 +220,10 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 @property(nonatomic, retain) CC3Frustum* frustum;
 
 /**
- * The matrix that holds the transform from model space to view space. This matrix is distinct
- * from the camera's globalTransformMatrix, which, like that of all nodes, reflects the location,
- * rotation and scale of the camera node in the 3D scene space.
+ * The matrix that holds the transform from model space to view space. 
  *
- * In contrast, the viewMatrix combines the inverse of the camera's globalTransformMatrix
- * (because any movement of the camera in scene space has the opposite effect on the view),
- * with the deviceRotationMatrix from the viewportManager of the CC3Scene, to account for
- * the impact of device orientation on the view.
+ * This is a convenience method that simply returns the value of the
+ * globalTransformMatrixInverted property.
  */
 @property(nonatomic, readonly) CC3Matrix* viewMatrix;
 
@@ -1106,6 +1100,39 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * intersection is within those bounds.
  */
 -(CC3Vector4) unprojectPoint:(CGPoint)cc2Point ontoPlane: (CC3Plane) plane;
+
+/**
+ * Converts the specified point, which is in the coordinate system of the cocos2d layer,
+ * into the coordinate system used by the 3D GL environment, taking into consideration
+ * the size and position of the layer/viewport.
+ *
+ * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
+ * of the layer, which might not be in the corner of the UIView or screen.
+ *
+ * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying
+ * UIView, which does not rotate with device orientation, is always in portait orientation,
+ * and is always in the corner of the screen.
+ *
+ * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
+ * and the layer coordinates as relative to layer position and size.
+ */
+-(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point;
+
+/**
+ * Converts the specified point, which is in the coordinate system of the 3D GL environment,
+ * into the coordinate system used by the cocos2d layer, taking into consideration the size
+ * and position of the layer/viewport.
+ *
+ * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
+ * of the layer, which might not be in the corner of the UIView or screen.
+ *
+ * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying
+ * UIView, which is always in the corner of the screen.
+ *
+ * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
+ * and the layer coordinates as relative to layer position and size.
+ */
+-(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint;
 
 @end
 

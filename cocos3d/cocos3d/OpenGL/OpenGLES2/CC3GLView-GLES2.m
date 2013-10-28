@@ -100,7 +100,6 @@
 }
 
 -(void) layoutSubviews {
-	CC3IntSize size;
 	CC3OpenGL* gl = CC3OpenGL.sharedGL;
 	
 	// Bind the renderbuffer that is the color attachment of the view and resize it from the layer
@@ -110,20 +109,18 @@
 		return;
 	}
 
-	// Retrieve the new size of the renderbuffer from the GL engine
-	// and resize all surfaces in the surface manager to that new size.
-	size.width = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_WIDTH];
-	size.height = [gl getRenderbufferParameterInteger: GL_RENDERBUFFER_HEIGHT];
-	LogTrace(@"View resizing to %@", NSStringFromCC3IntSize(size));
+	// Get the size of the view in pixels from the view bounds.
+	CGSize viewSize = self.bounds.size;
+	CC2_SIZE = CGSizeMake(viewSize.width * CC_CONTENT_SCALE_FACTOR(),
+						  viewSize.height * CC_CONTENT_SCALE_FACTOR());
 
-	[_surfaceManager resizeTo: size];
+	// Resize all surfaces in the surface manager to the new view size.
+	[_surfaceManager resizeTo: CC3IntSizeFromCGSize(CC2_SIZE)];
 
 	// Update the CCDirector with the new view size
-	CC2_SIZE = CGSizeFromCC3IntSize(size);
 	CCDirector *director = [CCDirector sharedDirector];
 	[director reshapeProjection: CC2_SIZE];		// Issue #914 #924
 	[director drawScene];						// avoid flicker
-	
 }
 
 -(void) swapBuffers {
@@ -132,6 +129,8 @@
 		LogError(@"Failed to swap renderbuffer to screen.");
 	
 }
+
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 @end
 

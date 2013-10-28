@@ -58,7 +58,7 @@
 @synthesize viewDrawingVisitor=_viewDrawingVisitor, shadowVisitor=_shadowVisitor;
 @synthesize envMapDrawingVisitor=_envMapDrawingVisitor;
 @synthesize updateVisitor=_updateVisitor, transformVisitor=_transformVisitor;
-@synthesize viewportManager=_viewportManager, performanceStatistics=_performanceStatistics;
+@synthesize performanceStatistics=_performanceStatistics;
 @synthesize deltaFrameTime=_deltaFrameTime, backdrop=_backdrop, fog=_fog, lights=_lights;
 @synthesize viewSurfaceManager=_viewSurfaceManager;
 @synthesize elapsedTimeSinceOpened=_elapsedTimeSinceOpened;
@@ -70,7 +70,6 @@
  */
 -(void) dealloc {
 	_cc3Layer = nil;						// Not retained
-	self.viewportManager = nil;				// Use setter to release and make nil
 	self.drawingSequencer = nil;			// Use setter to release and make nil
 	self.activeCamera = nil;				// Use setter to release and make nil
 	self.touchedNodePicker = nil;			// Use setter to release and make nil
@@ -184,7 +183,6 @@
 		_billboards = [[CCArray array] retain];
 		self.touchedNodePicker = [CC3TouchedNodePicker pickerOnScene: self];
 		self.drawingSequencer = [CC3BTreeNodeSequencer sequencerLocalContentOpaqueFirst];
-		self.viewportManager = [CC3ViewportManager viewportManagerOnScene: self];
 		self.viewDrawingVisitor = [[self viewDrawVisitorClass] visitor];
 		self.envMapDrawingVisitor = nil;
 		self.shadowVisitor = nil;
@@ -224,7 +222,6 @@
 	// Lights, targetting nodes, billboards & drawing sequence collections,
 	// plus activeCamera will be populated as children are added.
 	// No need to configure node picker.
-	[_viewportManager populateFrom: another.viewportManager];
 	
 	[_drawingSequencer release];
 	_drawingSequencer = [another.drawingSequencer copy];						// retained
@@ -524,8 +521,9 @@
  */
 -(void) draw2DBillboardsWithVisitor: (CC3NodeDrawingVisitor*) visitor {
 	LogTrace(@"%@ drawing %i billboards", self, _billboards.count);
-	CGRect lb = _viewportManager.layerBoundsLocal;
-	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: lb];
+	CC3Viewport vp = self.activeCamera.viewport;
+	CGRect localBounds = CGRectMake(0.0f, 0.0f, vp.w, vp.h);
+	for (CC3Billboard* bb in _billboards) [bb draw2dWithinBounds: localBounds];
 }
 
 -(id) viewDrawVisitorClass { return [CC3NodeDrawingVisitor class]; }
@@ -725,7 +723,7 @@
 
 @implementation CC3TouchedNodePicker
 
-@synthesize pickVisitor=_pickVisitor;
+@synthesize pickVisitor=_pickVisitor, touchPoint=_touchPoint;
 
 -(void) dealloc {
 	[_pickVisitor release];
@@ -733,9 +731,6 @@
 	_pickedNode = nil;		// not retained
 	[super dealloc];
 }
-
-/** Returns the touch point mapped to the device-oriented GL coordinate space. */
--(CGPoint) glTouchPoint { return [_scene.viewportManager glPointFromCC2Point: _touchPoint]; }
 
 
 #pragma mark Allocation and initialization
@@ -822,252 +817,9 @@
 
 
 #pragma mark -
-#pragma mark CC3ViewportManager
-
-
-@implementation CC3ViewportManager
-
-@synthesize layerBounds=_layerBounds, deviceRotationMatrix=_deviceRotationMatrix, isFullView=_isFullView;
-
--(void) dealloc {
-	[_deviceRotationMatrix release];
-	_scene = nil;			// not retained
-	[super dealloc];
-}
-
--(CGRect) layerBoundsLocal {
-	CGRect localBounds;
-	localBounds.origin = CGPointMake(0.0, 0.0);
-	localBounds.size = _layerBounds.size;
-	return localBounds;
-}
-
-#pragma mark Allocation and initialization
-
--(id) init { return [self initOnScene: nil]; }
-
--(id) initOnScene: (CC3Scene*) aCC3Scene {
-	if ( (self = [super init]) ) {
-		_scene = aCC3Scene;
-		self.deviceRotationMatrix = [CC3AffineMatrix matrix];
-		_layerBounds = CGRectZero;
-		_viewport = CC3ViewportMake(0, 0, 0, 0);
-		_glToCC2PointMapX = cc3v( 1.0,  0.0, 0.0 );
-		_glToCC2PointMapY = cc3v( 0.0,  1.0, 0.0 );
-		_cc2ToGLPointMapX = cc3v( 1.0,  0.0, 0.0 );
-		_cc2ToGLPointMapY = cc3v( 0.0,  1.0, 0.0 );
-		_isFullView = NO;
-	}
-	return self;
-}
-
-+(id) viewportManagerOnScene: (CC3Scene*) aCC3Scene {
-	return [[[self alloc] initOnScene: aCC3Scene] autorelease];
-}
-
-// Protected properties for copying
--(CC3Vector) glToCC2PointMapX { return _glToCC2PointMapX; }
--(CC3Vector) glToCC2PointMapY { return _glToCC2PointMapY; }
--(CC3Vector) cc2ToGLPointMapX { return _cc2ToGLPointMapX; }
--(CC3Vector) cc2ToGLPointMapY { return _cc2ToGLPointMapY; }
-
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// The scene ivar is set by the new CC3Scene, since it changes with the copy.
--(void) populateFrom: (CC3ViewportManager*) another {
-
-	[_deviceRotationMatrix release];
-	_deviceRotationMatrix = [another.deviceRotationMatrix copy];		//retained
-
-	_layerBounds = another.layerBounds;
-	_glToCC2PointMapX = another.glToCC2PointMapX;
-	_glToCC2PointMapY = another.glToCC2PointMapY;
-	_cc2ToGLPointMapX = another.cc2ToGLPointMapX;
-	_cc2ToGLPointMapY = another.cc2ToGLPointMapY;
-}
-
--(id) copyWithZone: (NSZone*) zone {
-	CC3ViewportManager* aCopy = [[[self class] allocWithZone: zone] init];
-	[aCopy populateFrom: self];
-	return aCopy;
-}
-
-
-#pragma mark Converting points
-
-/**
- * Converts the projected position into 2D homogeneous coordinates by setting Z to 1.0, then
- * maps the X and Y of the homogeneous point by dotting it with the X and Y mapping vectors.
- */
--(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point {
-	CC3Vector homogeneousPoint = cc3v(cc2Point.x, cc2Point.y, 1.0);
-	return ccp(CC3VectorDot(_cc2ToGLPointMapX, homogeneousPoint),
-			   CC3VectorDot(_cc2ToGLPointMapY, homogeneousPoint));
-}
-
-/**
- * Converts the projected position into 2D homogeneous coordinates by setting Z to 1.0, then
- * maps the X and Y of the homogeneous point by dotting it with the X and Y mapping vectors.
- */
--(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint {
-	CC3Vector homogeneousPoint = cc3v(glPoint.x, glPoint.y, 1.0);
-	return ccp(CC3VectorDot(_glToCC2PointMapX, homogeneousPoint),
-			   CC3VectorDot(_glToCC2PointMapY, homogeneousPoint));
-}
-
-
-#pragma mark Device orientation
-
-/**
- * Using the specified view bounds and deviceOrientation, updates the GL viewport and the
- * device rotation matrix, and establishes conversion mappings between GL points and cocos2d
- * points, in both directions. These conversion mappings are used by the complimentary methods
- * glPointFromCC2Point: and cc2PointFromGLPoint:.
- *
- * Depending on orientation, the GL viewport needs to be moved around in the larger window to
- * keep it aligned with the layer content size and global position. We had to add one-pixel
- * padding in some cases to keep the viewport aligned with the layer position and size.
- *
- * The device rotation matrix is calculated from the angle of rotation associated with each
- * device orientation.
- *
- * The conversion mappings map back and forth between GL coordinates and cocos2d coordinates.
- * Each conversion mapping is a pair of vectors, each of which holds a transformation to
- * calculate either the X or Y coordinate of the final converted point. One can think of
- * the pair of vectors representing a 3x2 matrix. Like all matrix transformations, the
- * converted point is calculated as a series of dot-products between the vectors in the
- * matrix and the incoming point to be converted.
- *
- * The vectors are or order 3 to permit a constant translation component in the calculation.
- * Each of the X and Y components of the final point is therefore a mathematical combination
- * of both the X and Y component of the incoming point, plus the constant translation component.
- *
- * To include the constant translation component in the calculation, during conversion, the
- * incoming 2D point will be converted to a 3D vector with a Z-component set to one.
- *
- * If vx and vy are the pair of conversion mapping vectors, the resulting calculations
- * can be stated as:
- *   - Xout = (Xvx * Xin) + (Yvx * Yin) + (Zvx * 1.0)
- *   - Yout = (Xvy * Xin) + (Yvy * Yin) + (Zvy * 1.0)
- *
- * Thanks to cocos3d user Robert Szeleney who pointed out a previous issue where the
- * viewport bounds were unnecessarily being constrained to the window bounds, thereby
- * restricting the movement of the CC3Layer and 3D scene, and for suggesting the fix. 
- */
--(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation {
-	CGSize winSz = CCDirector.sharedDirector.winSizeInPixels;
-	CC3Viewport vp;
-	CGPoint bOrg = bounds.origin;
-	CGSize bSz = bounds.size;
-
-	// Mark whether the viewport covers the full UIView. Test both Portrait and Landscape orientations.
-	_isFullView = (CGPointEqualToPoint(bOrg, CGPointZero) &&
-				   (CGSizeEqualToSize(bSz, winSz) ||
-					CGSizeEqualToSize(bSz, CGSizeMake(winSz.height, winSz.width))));
-	
-	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
-	GLfloat c2g = CC_CONTENT_SCALE_FACTOR();		// Ratio of CC2 points to GL pixels...
-	GLfloat g2c = 1.0 / c2g;						// ...and its inverse.
-	
-	switch(deviceOrientation) {
-			
-		case UIDeviceOrientationLandscapeLeft:
-			[self updateDeviceRotationAngle: -90.0f];
-			
-			vp.x = (GLint)bOrg.y;
-			vp.y = (GLint)(winSz.width - (bOrg.x + bSz.width));
-			vp.w = (GLint)(bSz.height);
-			vp.h = (GLint)(bSz.width);
-			
-			_glToCC2PointMapX = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
-			_glToCC2PointMapY = cc3v(  g2c,  0.0, -vp.x * g2c );
-			_cc2ToGLPointMapX = cc3v(  0.0,  c2g,  vp.x );
-			_cc2ToGLPointMapY = cc3v( -c2g,  0.0,  vp.y + vp.h );
-			
-			LogTrace(@"Orienting to LandscapeLeft with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
-			break;
-			
-		case UIDeviceOrientationLandscapeRight:
-			[self updateDeviceRotationAngle: 90.0f];
-			
-			vp.x = (GLint)(winSz.height - (bOrg.y + bSz.height));
-			vp.y = (GLint)bOrg.x;
-			vp.w = (GLint)(bSz.height);
-			vp.h = (GLint)(bSz.width);
-			
-			_glToCC2PointMapX = cc3v(  0.0,  g2c, -vp.y * g2c );
-			_glToCC2PointMapY = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
-			_cc2ToGLPointMapX = cc3v(  0.0, -c2g,  vp.x + vp.w );
-			_cc2ToGLPointMapY = cc3v(  c2g,  0.0,  vp.y );
-			
-			LogTrace(@"Orienting to LandscapeRight with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
-			break;
-			
-		case UIDeviceOrientationPortraitUpsideDown:
-			[self updateDeviceRotationAngle: 180.0f];
-			
-			vp.x = (GLint)(winSz.width - (bOrg.x + bSz.width));
-			vp.y = (GLint)(winSz.height - (bOrg.y + bSz.height));
-			vp.w = (GLint)bSz.width;
-			vp.h = (GLint)bSz.height;
-			
-			_glToCC2PointMapX = cc3v( -g2c,  0.0, (vp.x + vp.w) * g2c );
-			_glToCC2PointMapY = cc3v(  0.0, -g2c, (vp.y + vp.h) * g2c );
-			_cc2ToGLPointMapX = cc3v( -c2g,  0.0,  vp.x + vp.w );
-			_cc2ToGLPointMapY = cc3v(  0.0, -c2g,  vp.y + vp.h );
-			
-			LogTrace(@"Orienting to PortraitUpsideDown with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
-			break;
-			
-		case UIDeviceOrientationPortrait:
-		default:
-			[self updateDeviceRotationAngle: 0.0f];
-			
-			vp.x = (GLint)bOrg.x;
-			vp.y = (GLint)bOrg.y;
-			vp.w = (GLint)bSz.width;
-			vp.h = (GLint)bSz.height;
-			
-			_glToCC2PointMapX = cc3v(  g2c,  0.0, -vp.x * g2c );
-			_glToCC2PointMapY = cc3v(  0.0,  g2c, -vp.y * g2c );
-			_cc2ToGLPointMapX = cc3v(  c2g,  0.0,  vp.x );
-			_cc2ToGLPointMapY = cc3v(  0.0,  c2g,  vp.y );
-
-			LogTrace(@"Orienting to Portrait with bounds: %@ in window: %@ and viewport: %@ is %@fullscreen",
-					 NSStringFromCGRect(bounds), NSStringFromCGSize(winSz),
-					 NSStringFromCC3Viewport(vp), (_isFullView ? @"" : @"not "));
-			break;
-	}
-	
-	// Set the layerBounds and viewport, and tell the camera that we've been updated
-	_layerBounds = bounds;
-	CC3Camera* cam = _scene.activeCamera;
-	cam.viewport = vp;
-	cam.shouldClipToViewport = !_isFullView;
-}
-
-/**
- * Rebuilds the deviceRotationMatrix from the specified rotation angle, and marks the
- * camera's transfom as dirty so that the camera's modelview matrix will be rebuilt.
- */
--(void) updateDeviceRotationAngle:(GLfloat) anAngle {
-	[_deviceRotationMatrix populateIdentity];
-	[_deviceRotationMatrix rotateBy: cc3v(0.0f, 0.0f, anAngle)];
-	[_scene.activeCamera markTransformDirty];
-}
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3Node extension for scene
 
 @implementation CC3Node (Scene)
 -(BOOL) isScene { return NO; }
 @end
+

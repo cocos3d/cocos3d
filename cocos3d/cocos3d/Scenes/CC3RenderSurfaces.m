@@ -411,6 +411,8 @@
 	[gl clearBuffers: (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)];
 }
 
+-(BOOL) isColorContentReadable { return YES; }
+
 -(void) readColorContentFrom: (CC3Viewport) rect into: (ccColor4B*) colorArray {
 	[CC3OpenGL.sharedGL readPixelsIn: rect fromFramebuffer: self.framebufferID into: colorArray];
 }
@@ -540,6 +542,9 @@
 #pragma mark CC3AndroidOnScreenGLFramebuffer
 
 @implementation CC3AndroidOnScreenGLFramebuffer
+
+-(BOOL) isColorContentReadable { return NO; }
+
 @end
 
 
@@ -807,22 +812,34 @@
 
 -(CC3GLFramebuffer*) pickingSurface {
 	if ( !_pickingSurface ) {
-		if ( !_multisampleSurface )
-			self.pickingSurface = _viewSurface;		// If not multisampling, use the viewSurface
-		else {
-			// If multisampling, create a new surface using the color buffer from viewSurface,
-			// and with a new non-multisampling and non-stencilling depth buffer.
-			CC3GLFramebuffer* pickSurf = [CC3GLFramebuffer surface];
-			pickSurf.colorAttachment = _viewSurface.colorAttachment;
-
+		if (self.shouldUseDedicatedPickingSurface) {
+			
+			// Create a new surface, using the color buffer from viewSurface if it is
+			// readable, or a new framebuffer if not, and with a new non-multisampling
+			// and non-stencilling depth buffer.
+			CC3GLFramebuffer* pickSurf = [CC3GLFramebuffer surfaceWithSize: _viewSurface.size];
+			pickSurf.colorAttachment = _viewSurface.isColorContentReadable
+											? _viewSurface.colorAttachment
+											: [CC3GLRenderbuffer renderbufferWithPixelFormat: _viewSurface.colorAttachment.pixelFormat];
+			
 			// Don't need stencil for picking, but otherwise match the rendering depth format
 			GLenum depthFormat = self.depthFormat;
 			if (depthFormat) {
 				if ( CC3DepthFormatIncludesStencil(depthFormat) ) depthFormat = GL_DEPTH_COMPONENT16;
-				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithSize: pickSurf.colorAttachment.size
-																	andPixelFormat: depthFormat];
+				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat];
 			}
+
+			LogDebug(@"Creating picking surface of size %@ with %@ color format %@ and depth format %@.",
+					 NSStringFromCC3IntSize(pickSurf.size),
+					 (_viewSurface.isColorContentReadable ? @"existing" : @"new"),
+					 NSStringFromGLEnum(pickSurf.colorAttachment.pixelFormat),
+					 NSStringFromGLEnum(depthFormat));
+			
 			if ( [pickSurf validate] ) self.pickingSurface = pickSurf;
+			
+		} else {
+			LogDebug(@"Reusing view surface as picking surface.");
+			self.pickingSurface = self.viewSurface;		// Use the viewSurface
 		}
 	}
 	return _pickingSurface;
@@ -834,6 +851,10 @@
 	[_pickingSurface release];
 	_pickingSurface = [surface retain];
 	[self addSurface: surface];
+}
+
+-(BOOL) shouldUseDedicatedPickingSurface {
+	return !(_viewSurface.isColorContentReadable && (_multisampleSurface == nil));
 }
 
 -(CC3GLRenderbuffer*) viewColorBuffer { return (CC3GLRenderbuffer*)_viewSurface.colorAttachment; }
@@ -897,7 +918,7 @@
 -(void) resizeTo: (CC3IntSize) size {
 	if ( CC3IntSizesAreEqual(size, self.size) ) return;
 
-	LogInfo(@"Screen rendering surface size changed to: %@", NSStringFromCC3IntSize(size));
+	LogInfo(@"View surface size set to: %@", NSStringFromCC3IntSize(size));
 	
 	// Resize all attachments on registered surfaces, except the viewSurface color buffer,
 	// which was resized above, and validate each surface.
@@ -920,7 +941,7 @@
 	if ( !attachment || [alreadyResized containsObject: attachment] ) return;
 	[attachment resizeTo: size];
 	[alreadyResized addObject: attachment];
-	LogTrace(@"Resizing %@ to: %@", attachment, NSStringFromCC3IntSize(size));
+	LogDebug(@"Resizing %@ to: %@", attachment, NSStringFromCC3IntSize(size));
 }
 
 

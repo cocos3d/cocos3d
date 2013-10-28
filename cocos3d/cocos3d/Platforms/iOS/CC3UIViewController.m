@@ -183,7 +183,27 @@ CC3_POP_NOSELECTOR
 
 /** UIKit callback template method invoked automatically when device rotation is changed.  */
 -(void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation duration:(NSTimeInterval)duration {
- 	[_controlledNode viewDidRotateFrom: self.interfaceOrientation to: uiOrientation];
+	LogDebug(@"%@ willRotateToInterfaceOrientation: %@", self, NSStringFromUIInterfaceOrientation(uiOrientation));
+	[super willRotateToInterfaceOrientation: uiOrientation duration: duration];
+}
+
+- (void)didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
+	LogDebug(@"%@ didRotateFromInterfaceOrientation: %@ with new size %@",
+			 self, NSStringFromUIInterfaceOrientation(uiOrientation),
+			 NSStringFromCGSize(self.view.bounds.size));
+	[super didRotateFromInterfaceOrientation: uiOrientation];
+ 	[_controlledNode viewDidRotateFrom: uiOrientation to: self.interfaceOrientation];
+}
+
+- (void)viewWillLayoutSubviews {
+	LogDebug(@"%@ viewWillLayoutSubviews", self);
+	[super viewWillLayoutSubviews];
+}
+
+- (void)viewDidLayoutSubviews {
+	LogDebug(@"%@ viewDidLayoutSubviews", self);
+	[super viewDidLayoutSubviews];
+	_controlledNode.contentSize = self.view.bounds.size;
 }
 
 -(BOOL) isOverlayingDeviceCamera { return NO; }

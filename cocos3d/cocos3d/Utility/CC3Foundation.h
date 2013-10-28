@@ -1950,7 +1950,12 @@ static inline BOOL CC3ViewportContainsPoint(CC3Viewport vp, CGPoint point) {
 	(point.y >= vp.y) && (point.y < vp.y + vp.h);
 }
 
-/** Returns the dimensions of the specified viewport as a rectangle. */
+/** Returns a CC3Viewport constructed from the specified CGRect. */
+static inline CC3Viewport CC3ViewportFromCGRect(CGRect rect) {
+	return CC3ViewportFromOriginAndSize(CC3IntPointFromCGPoint(rect.origin), CC3IntSizeFromCGSize(rect.size));
+}
+
+/** Returns a CGRect constructed from the specified viewport. */
 static inline CGRect CGRectFromCC3Viewport(CC3Viewport vp) {
 	return CGRectMake(vp.x, vp.y, vp.w, vp.h);
 }

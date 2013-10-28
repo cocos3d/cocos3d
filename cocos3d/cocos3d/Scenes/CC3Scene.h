@@ -46,7 +46,7 @@ static const ccTime kCC3DefaultMaximumUpdateInterval = (1.0f / 15.0f);
 /** Default color for the ambient scene light. */
 static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1.0f };
 
-@class CC3Layer, CC3TouchedNodePicker, CC3ViewportManager;
+@class CC3Layer, CC3TouchedNodePicker;
 
 
 #pragma mark -
@@ -231,7 +231,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 	CCArray* _lights;
 	CCArray* _billboards;
 	CC3Layer* _cc3Layer;
-	CC3ViewportManager* _viewportManager;
 	CC3Camera* _activeCamera;
 	CC3NodeSequencer* _drawingSequencer;
 	CC3TouchedNodePicker* _touchedNodePicker;
@@ -341,13 +340,6 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  * method when a node is to be picked from a particular touch event.
  */
 @property(nonatomic, retain) CC3TouchedNodePicker* touchedNodePicker;
-
-/**
- * The viewport manager manages the viewport and device orientation, including
- * handling coordinate rotation based on the device orientation, and conversion
- * of locations and points between the 3D and 2D coordinate systems. 
- */
-@property(nonatomic, retain) CC3ViewportManager* viewportManager;
 
 /** 
  * Returns whether this scene is illuminated.
@@ -1193,8 +1185,8 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 @property(nonatomic, retain) CC3NodePickingVisitor* pickVisitor;
 
-/** The most recent touch point in OpenGL ES coordinates. */
-@property(nonatomic, readonly) CGPoint glTouchPoint;
+/** The most recent touch point in cocos2d coordinates. */
+@property(nonatomic, readonly) CGPoint touchPoint;
 
 /** Initializes this instance on the specified CC3Scene. */
 -(id) initOnScene: (CC3Scene*) aCC3Scene;
@@ -1253,128 +1245,9 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 
 #pragma mark -
-#pragma mark CC3ViewportManager
-
-/**
- * CC3ViewportManager updates the GL viewport and device orientation for the active camera of
- * the 3D scene, including handling coordinate system rotation based on the device orientation,
- * and conversion of locations and points between the 3D and 2D coordinate systems.
- */
-@interface CC3ViewportManager : NSObject {
-	CC3Matrix* _deviceRotationMatrix;
-	CC3Scene* _scene;
-	CGRect _layerBounds;
-	CC3Viewport _viewport;
-	CC3Vector _glToCC2PointMapX;
-	CC3Vector _glToCC2PointMapY;
-	CC3Vector _cc2ToGLPointMapX;
-	CC3Vector _cc2ToGLPointMapY;
-	BOOL _isFullView : 1;
-}
-
-/** The bounding box of the CC3Layer the scene is drawing within. */
-@property(nonatomic, readonly) CGRect layerBounds;
-
-/**
- * The bounding box of the CC3Layer the scene is drawing within, in coordinates local
- * to the layer itself. The origin of the returned rectangle will be {0, 0}, and the
- * size will be the same as the rectangle returned by the layerBounds property.
- */
-@property(nonatomic, readonly) CGRect layerBoundsLocal;
-
-/**
- * A rotation matrix to hold the transform required to align with the current device orientation.
- * The rotation matrix is updated automatically whenever the device orientation changes.
- */
-@property(nonatomic, retain) CC3Matrix* deviceRotationMatrix;
-
-/** Returns whether the viewport covers the full UIView. */
-@property(nonatomic, readonly) BOOL isFullView;
-
-/** Initializes this instance on the specified CC3Scene. */
--(id) initOnScene: (CC3Scene*) aCC3Scene;
-
-/** Allocates and initializes an autoreleased instance on the specified CC3Scene. */
-+(id) viewportManagerOnScene: (CC3Scene*) aCC3Scene;
-
-/**
- * Template method that populates this instance from the specified other instance.
- *
- * This method is invoked automatically during object copying via the copy or
- * copyWithZone: method. In most situations, the application should use the
- * copy method, and should never need to invoke this method directly.
- * 
- * Subclasses that add additional instance state (instance variables) should extend
- * copying by overriding this method to copy that additional state. Superclass that
- * override this method should be sure to invoke the superclass implementation to
- * ensure that superclass state is copied as well.
- */
--(void) populateFrom: (CC3ViewportManager*) another;
-
-
-#pragma mark Converting points
-
-/**
- * Converts the specified point, which is in the coordinate system of the cocos2d layer,
- * into the coordinate system used by the 3D GL environment, taking into consideration
- * the size and position of the layer/viewport, and the orientation of the device.
- *
- * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
- * of the layer, which might be rotated relative to the device orientation, and which
- * might not be in the corner of the UIView or screen.
- *
- * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying 
- * UIView, which does not rotate with device orientation, is always in portait orientation,
- * and is always in the corner of the screen.
- *
- * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
- * and the layer coordinates as relative to layer position and size, and device orientation.
- */
--(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point;
-
-/**
- * Converts the specified point, which is in the coordinate system of the 3D GL environment,
- * into the coordinate system used by the cocos2d layer, taking into consideration the size
- * and position of the layer/viewport, and the orientation of the device.
- *
- * The cocos2d layer coordinates are relative, and measured from the bottom-left corner
- * of the layer, which might be rotated relative to the device orientation, and which
- * might not be in the corner of the UIView or screen.
- *
- * The GL cocordinates are absolute, relative to the bottom-left corner of the underlying 
- * UIView, which does not rotate with device orientation, is always in portait orientation,
- * and is always in the corner of the screen.
- *
- * One can think of the GL coordinates as absolute and fixed relative to the portrait screen,
- * and the layer coordinates as relative to layer position and size, and device orientation.
- */
--(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint;
-
-
-#pragma mark Device orientation
-
-/**
- * Using the specified view bounds and deviceOrientation, updates the GL viewport and the
- * device rotation matrix, and establishes conversion mappings between GL points and cocos2d
- * points, in both directions. These conversion mappings are used by the complimentary methods
- * glPointFromCC2Point: and cc2PointFromGLPoint:.
- *
- * The viewport of the active camera of the scene is set to match the specified bounds.
- *
- * The device rotation matrix is calculated from the angle of rotation associated with each
- * device orientation.
- *
- * This method is invoked automatically by the CC3Layer when the orientation of the
- * device changes. Usually, the application never needs to invoke this method directly.
- */
--(void) updateBounds: (CGRect) bounds withDeviceOrientation: (UIDeviceOrientation) deviceOrientation;
-
-@end
-
-
-#pragma mark -
 #pragma mark CC3Node extension for scene
 
+/** Extension to support scenes. */
 @interface CC3Node (Scene)
 
 /** Returns whether this node is a scene. This implementation returns NO. */

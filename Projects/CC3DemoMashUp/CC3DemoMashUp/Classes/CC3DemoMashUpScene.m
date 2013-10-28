@@ -201,7 +201,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[_headTex release];
 	[_headBumpTex release];
 	[_tvTestCardTex release];
-	[_tvSurface release];
+	[_tvDrawingVisitor release];
 	[_preProcSurface release];
 	[_grayscaleNode release];
 	[_depthImageNode release];
@@ -331,6 +331,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	DramaticPause();				// Pause dramatically
 	[self addTelevision];			// Add a television showing the view from the runner camera
 									// This demonstrates dynamic rendering-to-texture capabilities.
+									// Must be added after the skinned runners.
 
 	DramaticPause();				// Pause dramatically
 	[self addTeapotAndSatellite];	// Add a large textured teapot with a smaller satellite teapot
@@ -1829,11 +1830,24 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// HDTV model, attach an empty texture and depth buffer, and validate the surface.
 	// Alpha is not required for this texture, so choose a more memory-efficient 16-bit RGB format.
 	// Similarly, since stencils will not be used, choose a more efficient 16-bit depth buffer.
-	_tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
-	_tvSurface.colorTexture = [CC3Texture textureWithPixelFormat: GL_RGB
-													andPixelType: GL_UNSIGNED_SHORT_5_6_5];
-	_tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
-	[_tvSurface validate];
+	CC3GLFramebuffer*  tvSurface = [[CC3GLFramebuffer alloc] initWithSize: kTVTexSize];	// retained
+	tvSurface.colorTexture = [CC3Texture textureWithPixelFormat: GL_RGB andPixelType: GL_UNSIGNED_SHORT_5_6_5];
+	tvSurface.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: GL_DEPTH_COMPONENT16];
+	[tvSurface validate];
+	
+	// Now create a drawing visitor that will coordinate the drawing of the the TV screen
+	// Since the aspect of the TV screen surface is different than the main display, we don't
+	// want to reuse either the main camera, or the runner's camera. Instead, we create a
+	// dedicated drawing visitor, with it's own camera, which we copy from the runner's camera.
+	// and add it beside the runner's camera. We clear the new camera's existing viewport
+	// so that it will be set to match the aspect of the TV screen.
+	_tvDrawingVisitor = [[[self viewDrawVisitorClass] alloc] init];		// retained
+	_tvDrawingVisitor.renderSurface = tvSurface;
+	CC3Camera* tvCam = [_runnerCam copy];
+	[_runnerCam.parent addChild: tvCam];
+	tvCam.viewport = kCC3ViewportZero;		// Clear the camera viewport, so it will be set to match the TV surface
+	_tvDrawingVisitor.camera = tvCam;
+	[tvCam release];
 	
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
@@ -1877,6 +1891,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 //	bb.uniformScale = 0.1;
 //	bb.billboard = portableTV;
 }
+
+/** Convenience property that returns the rendering surface of the TV, cast to the correct class. */
+-(CC3GLFramebuffer*) tvSurface { return (CC3GLFramebuffer*)_tvDrawingVisitor.renderSurface; }
 
 /**
  * Adds post-rendering image processing capabilities.
@@ -2572,7 +2589,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	[self illuminateWithVisitor: visitor];			// Light up your world!
 	
-	[self drawToTVScreenWithVisitor: visitor];		// Draw the scene to the TV screen
+	// If the TV is on and the TV is in the field of view of the primary camera viewing
+	// the scene, draw the scene to the TV screen.
+	if (_isTVOn && [_tvScreen doesIntersectFrustum: visitor.camera.frustum]) [self drawToTVScreen];
 	
 	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
 	// environment-map cube-map texture for it by taking snapshots of the scene in all
@@ -2597,13 +2616,107 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[self drawShadows];						// Shadows are drawn with a different visitor
 	
 	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
-	// to the view surface
+	// to the view surface.
 	if (isPostProcessing) {
 		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
-		visitor.renderSurface = self.viewSurface;	// Ensure drawing to the view
+		
+		// If the layer is not full-screen, rendering the layer again will further reduce
+		// its shape. To compensate, temporarily clear the camera viewport so that it will
+		// be set to the size of the surface when the surface is attached to the visitor
+		// so that it draws the post-processed image to the entire view surface.
+		CC3Viewport vvp = visitor.camera.viewport;
+		visitor.camera.viewport = kCC3ViewportZero;
+		
+		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
 		[visitor visit: imgNode];
+
+		visitor.camera.viewport = vvp;		// Now set the viewport back to the layer's size.
 	}
 }
+
+//-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	
+//	[self illuminateWithVisitor: visitor];			// Light up your world!
+//	
+//	// If the TV is on and the TV is in the field of view of the primary camera viewing
+//	// the scene, draw the scene to the TV screen.
+//	if (_isTVOn && [_tvScreen doesIntersectFrustum: visitor.camera.frustum]) [self drawToTVScreen];
+//	
+//	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
+//	// environment-map cube-map texture for it by taking snapshots of the scene in all
+//	// six axis directions from its position.
+//	[self generateTeapotEnvironmentMapWithVisitor: visitor];
+//	
+//	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
+//	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
+//	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
+//	
+//	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
+//	// if first. Otherwise, draw to view surface directly, without clearing because it
+//	// was done at the beginning of the rendering cycle.
+//	CC3Viewport vvp;
+//	if (isPostProcessing) {
+//		
+//		vvp = visitor.camera.viewport;
+//		visitor.camera.viewport = kCC3ViewportZero;
+//		
+//		visitor.renderSurface = _preProcSurface;
+//		[_preProcSurface clearColorAndDepthContent];
+//	} else
+//		visitor.renderSurface = self.viewSurface;
+//	
+//	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
+//	[visitor visit: self];					// Draw the scene components
+//	[self drawShadows];						// Shadows are drawn with a different visitor
+//	
+//	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
+//	// to the view surface
+//	if (isPostProcessing) {
+//		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
+//		visitor.camera.viewport = vvp;
+//		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
+//		[visitor visit: imgNode];
+//	}
+//}
+
+//-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
+//	
+//	[self illuminateWithVisitor: visitor];			// Light up your world!
+//	
+//	// If the TV is on and the TV is in the field of view of the primary camera viewing
+//	// the scene, draw the scene to the TV screen.
+//	if (_isTVOn && [_tvScreen doesIntersectFrustum: visitor.camera.frustum]) [self drawToTVScreen];
+//	
+//	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
+//	// environment-map cube-map texture for it by taking snapshots of the scene in all
+//	// six axis directions from its position.
+//	[self generateTeapotEnvironmentMapWithVisitor: visitor];
+//	
+//	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
+//	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
+//	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
+//	
+//	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
+//	// if first. Otherwise, draw to view surface directly, without clearing because it
+//	// was done at the beginning of the rendering cycle.
+//	if (isPostProcessing) {
+//		visitor.renderSurface = _preProcSurface;
+//		[_preProcSurface clearColorAndDepthContent];
+//	} else
+//		visitor.renderSurface = self.viewSurface;
+//	
+//	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
+//	[visitor visit: self];					// Draw the scene components
+//	[self drawShadows];						// Shadows are drawn with a different visitor
+//	
+//	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
+//	// to the view surface
+//	if (isPostProcessing) {
+//		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
+//		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
+//		[visitor visit: imgNode];
+//	}
+//}
 
 /**
  * When drawing an environment map, don't bother with shadows, avoid all the post-rendering
@@ -2619,28 +2732,20 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /**
  * Draws the scene from the runners' camera perspective to the TV screen.
  *
- * This is done by temporarily setting the camera in the visitor to that of the runner-cam,
- * turning on the runner-cam light to better illuminate the runners, and activating the
- * rendering surface that has the texture of the TV screen as its attachment.
+ * The drawing is performed by a dedicated drawing visitor that contains its own camera
+ * in the same location as the camera loaded with the runners. A dedicated camera is used
+ * because the aspect of the TV screen (HDTV) is different than the main scene view.
  */
--(void) drawToTVScreenWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-
-	// As an optimization, don't bother rendering to texture if the TV is not on,
-	// or the TV is not in the field of view of the active view camera
-	if ( !_isTVOn || ![_tvScreen doesIntersectFrustum: visitor.camera.frustum]) return;
-
+-(void) drawToTVScreen {
 	LogTrace(@"Drawing to TV");
 
 	BOOL lampOnCurr = _runnerLamp.visible;
 	_runnerLamp.visible = YES;					// Temporarily turn the runner-cam's light on
-	visitor.camera = _runnerCam;				// and switch to the runner-cam view.
 
-	visitor.renderSurface = _tvSurface;			// Draw to the texture in the TV surface, not the view
-	[_tvSurface clearColorAndDepthContent];		// Clear color & depth of TV surface.
-	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
-	[visitor visit: self];						// Draw the scene components
+	[_tvDrawingVisitor.renderSurface clearColorAndDepthContent];	// Clear color & depth of TV surface.
+	[_tvDrawingVisitor visit: self.backdrop];						// Draw the backdrop if it exists
+	[_tvDrawingVisitor visit: self];								// Draw the scene components
 
-	visitor.camera = self.activeCamera;			// Go back to the regular camera.
 	_runnerLamp.visible = lampOnCurr;
 	
 	[self pictureInPicture];		// Add a small PiP image in the bottom right of the TV screen
@@ -2666,9 +2771,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Copy a rectangle of image content from the surface, add the border,
 	// and paste it to a different location on the surface.
-	[_tvSurface readColorContentFrom: pipSrc into: colorArray];
+	[self.tvSurface readColorContentFrom: pipSrc into: colorArray];
 	[self addBorderToImage: colorArray ofSize: pipSize];
-	[_tvSurface replaceColorPixels: pipDst withContent: colorArray];
+	[self.tvSurface replaceColorPixels: pipDst withContent: colorArray];
 }
 
 /** 
@@ -3533,7 +3638,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  */
 -(void) toggleTelevision {
 	_isTVOn = !_isTVOn;
-	_tvScreen.texture = _isTVOn ? _tvSurface.colorTexture : _tvTestCardTex;
+	_tvScreen.texture = _isTVOn ? self.tvSurface.colorTexture : _tvTestCardTex;
 	
 	if (!_isTVOn) [self saveTVImage];
 }
@@ -3547,7 +3652,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	NSString* imgPath = [docDir stringByAppendingPathComponent: @"TV.jpg"];
 
 	// Extract a CGImageRef from either the entire TV surface, or just a section (by uncommenting below)
-	CGImageRef tvImgRef = _tvSurface.createCGImage;
+	CGImageRef tvImgRef = self.tvSurface.createCGImage;
 //	CGImageRef tvImgRef = [_tvSurface createCGImageFrom: CC3ViewportMake(230, 100, 256, 256)];
 	
 #if CC3_IOS

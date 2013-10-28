@@ -78,15 +78,18 @@ highp vec4	vtxPosEye;		/**< The position of the vertex, in eye coordinates. High
  * This function takes into consideration vertex skinning, if it is specified.
  */
 void vertexToEyeSpace() {
-	if (u_cc3BonesPerVertex > 0) {		// Mesh is bone-rigged for vertex skinning
+	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+	} else {			// Mesh is bone-rigged for vertex skinning
+		
 		// Copies of the indices and weights attibutes so they can be "rotated"
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
 		
-		vtxPosEye = kVec4Zero;		// Start at zero to accumulate weighted values
+		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
 			if (i < u_cc3BonesPerVertex) {
-				// Add position contribution from this bone
+				// Add position and normal contribution from this bone
 				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
 				
 				// "Rotate" the vector components to the next vertex bone index
@@ -94,8 +97,6 @@ void vertexToEyeSpace() {
 				boneWeights = boneWeights.yzwx;
 			}
 		}
-	} else {		// No vertex skinning
-		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 	}
 }
 

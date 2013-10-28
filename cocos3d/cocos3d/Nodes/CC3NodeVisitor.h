@@ -394,7 +394,6 @@
 	CC3Matrix4x4 _viewProjMatrix;
 	CC3Matrix4x3 _modelViewMatrix;
 	CC3Matrix4x4 _modelViewProjMatrix;
-	CC3Viewport _onScreenViewport;
 	ccColor4F _currentColor;
 	GLuint _textureUnitCount;
 	GLuint _currentTextureUnitIndex;

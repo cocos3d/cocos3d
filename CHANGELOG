@@ -215,6 +215,8 @@ cocos3d 2.0.0 - 2013/09/30
 - [API change] CC3Identifiable automatically frees the memory pointed to by userData during deallocation.
 	- Added CC3Identifiable sharedUserData property for user data that should not be freed automatically.
 
+- [API change] Removed CC3ViewportManager class and moved remaining reduced functionality to CC3Layer updateViewport and CC3Camera.
+
 - Fixes to Shadow Volumes
 	- shadows volumes and stencils now available when multisampling active
 

@@ -57,7 +57,7 @@
     //   "write_external_storage"
     //   "write_settings"
     //   "xperia"
-    "FEATURES": ["opengles2","portrait"],
+    "FEATURES": ["opengles2","landscape"],
 
     // Preferred way of handling URLs in the code.
     // Leave it null for most cases.
@@ -77,7 +77,7 @@
 
     // Path to the image to use for the app's icon.
     // Usually something like "./Icon.png".
-    // "ICON": "",
+    "ICON": "./Icon-72.png",
 
     // A regular expression to determine which assets
     // should be compressed when building the final app.

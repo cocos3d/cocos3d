@@ -39,10 +39,11 @@
 			@" not available. OpenGLES 1.1 supports only 2D textures.", NSStringFromGLEnum(TARGET))
 
 
-@interface CC3OpenGLFixedPipeline (TemplateMethods)
+@interface CC3OpenGL (TemplateMethods)
 -(void) setTexParamEnum: (GLenum) pName inTarget: (GLenum) target to: (GLenum) val at: (GLuint) tuIdx;
 -(void) bindVertexContentToAttributeAt: (GLint) vaIdx;
 -(void) initPlatformLimits;
+-(void) initSurfaces;
 -(void) initNonTextureVertexAttributes;
 -(void) bindFramebuffer: (GLuint) fbID toTarget: (GLenum) fbTarget;
 @end

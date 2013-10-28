@@ -81,13 +81,11 @@
 	
 	[self lockOpenGLContext];
 	
-	CGSize size = NSSizeToCGSize([self bounds].size);
-	LogTrace(@"Window resizing to %@", NSStringFromCGSize(size));
-
-	[_surfaceManager resizeTo: CC3IntSizeFromCGSize(size)];
+	CC3IntSize size = CC3IntSizeFromCGSize(NSSizeToCGSize(self.bounds.size));
+	[_surfaceManager resizeTo: size];
 	
 	CCDirector *director = [CCDirector sharedDirector];
-	[director reshapeProjection: size];
+	[director reshapeProjection: CGSizeFromCC3IntSize(size)];
 	[director drawScene];	// avoid flicker
 	
 	[self unlockOpenGLContext];
@@ -96,6 +94,8 @@
 -(void) addGestureRecognizer: (UIGestureRecognizer*) gesture {}
 
 -(void) removeGestureRecognizer: (UIGestureRecognizer*) gesture {}
+
+-(NSString*) description { return [NSString stringWithFormat: @"%@", [self class]]; }
 
 @end
 

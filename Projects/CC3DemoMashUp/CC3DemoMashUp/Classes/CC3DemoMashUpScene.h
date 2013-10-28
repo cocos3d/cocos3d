@@ -619,7 +619,7 @@ typedef enum {
 	CC3MeshNode* _tvScreen;
 	CC3Texture* _tvTestCardTex;
 	CC3Node* _selectedNode;
-	CC3GLFramebuffer* _tvSurface;
+	CC3NodeDrawingVisitor* _tvDrawingVisitor;
 	CC3GLFramebuffer* _preProcSurface;
 	CC3MeshNode* _grayscaleNode;
 	CC3MeshNode* _depthImageNode;

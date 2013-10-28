@@ -51,12 +51,11 @@
 @implementation CC3Camera
 
 @synthesize nearClippingDistance=_nearClippingDistance, farClippingDistance=_farClippingDistance;
-@synthesize viewport=_viewport, fieldOfView=_fieldOfView, viewMatrix=_viewMatrix;
+@synthesize viewport=_viewport, fieldOfView=_fieldOfView;
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
 @synthesize shouldClipToViewport=_shouldClipToViewport;
 
 -(void) dealloc {
-	[_viewMatrix release];
 	[_frustum release];
 	[super dealloc];
 }
@@ -133,9 +132,6 @@
 	[self markProjectionDirty];
 }
 
-// The CC3Scene's viewport manager.
--(CC3ViewportManager*) viewportManager { return self.scene.viewportManager; }
-
 // Keep the compiler happy with the additional declaration
 // of this property on this class for documentation purposes
 -(CC3Vector) forwardDirection { return super.forwardDirection; }
@@ -149,10 +145,8 @@
 
 -(id) initWithTag: (GLuint) aTag withName: (NSString*) aName {
 	if ( (self = [super initWithTag: aTag withName: aName]) ) {
-		_viewMatrix = [CC3AffineMatrix new];
 		self.frustum = [CC3Frustum frustum];
 		_isProjectionDirty = YES;
-		_isViewMatrixInvertedDirty = YES;
 		_fieldOfView = kCC3DefaultFieldOfView;
 		_nearClippingDistance = kCC3DefaultNearClippingDistance;
 		_farClippingDistance = kCC3DefaultFarClippingDistance;
@@ -166,7 +160,6 @@
 
 // Protected properties for copying
 -(BOOL) isProjectionDirty { return _isProjectionDirty; }
--(BOOL) isViewMatrixInvertedDirty { return _isViewMatrixInvertedDirty; }
 -(CC3Frustum*) rawFrustum { return _frustum; }
 
 // Template method that populates this instance from the specified other instance.
@@ -176,13 +169,10 @@
 	
 	self.frustum = [another.rawFrustum autoreleasedCopy];	// retained
 
-	[_viewMatrix populateFrom: another.viewMatrix];
-
 	_fieldOfView = another.fieldOfView;
 	_nearClippingDistance = another.nearClippingDistance;
 	_farClippingDistance = another.farClippingDistance;
 	_isProjectionDirty = another.isProjectionDirty;
-	_isViewMatrixInvertedDirty = another.isViewMatrixInvertedDirty;
 	_isOpen = another.isOpen;
 }
 
@@ -195,8 +185,6 @@
 #pragma mark Transformations
 
 -(void) markProjectionDirty { _isProjectionDirty = YES; }
-
--(void) markViewMatrixInvertedDirty { _isViewMatrixInvertedDirty = YES; }
 
 /**
  * Scaling the camera is a null operation because it scales everything, including the size
@@ -222,29 +210,13 @@
  */
 -(CC3Vector) globalScale { return _parent ? _parent.globalScale : kCC3VectorUnitCube; }
 
-/** Overridden to also build the modelview matrix. */
+/** Overridden to also force the frustum to be rebuilt. */
 -(void) transformMatrixChanged {
 	[super transformMatrixChanged];
-	[self buildModelViewMatrix];
-}
-
-/**
- * Template method to rebuild the viewMatrix from the deviceRotationMatrix, which
- * is managed by the CC3Scene's viewportManager, and the inverse of the globalTransformMatrix.
- * Invoked automatically whenever the globalTransformMatrix or device orientation are changed.
- */
--(void) buildModelViewMatrix {
-	[_viewMatrix populateFrom: self.viewportManager.deviceRotationMatrix];
-	LogTrace(@"%@ applied device rotation matrix %@", self, _viewMatrix);
-
-	[_viewMatrix multiplyBy: self.globalTransformMatrixInverted];
-	LogTrace(@"%@ inverted transform applied to modelview matrix %@", self, _viewMatrix);
-
-	// Mark the inverted view matrix as dirty, and let the frustum know that the contents
-	// of the view matrix have changed.
-	[self markViewMatrixInvertedDirty];
 	[_frustum markDirty];
 }
+
+-(CC3Matrix*) viewMatrix { return self.globalTransformMatrixInverted; }
 
 /**
  * Template method to rebuild the frustum's projection matrix if the
@@ -321,7 +293,7 @@
 
 /** Template method that loads the viewMatrix into the current GL modelview matrix. */
 -(void) loadViewMatrixWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	LogTrace(@"%@ loading modelview matrix into GL: %@", self, _viewMatrix);
+	LogTrace(@"%@ loading modelview matrix into GL: %@", self, self.viewMatrix);
 	[visitor populateViewMatrixFrom: self.viewMatrix];
 }
 
@@ -696,7 +668,7 @@
 	// Convert specified location to a 4D homogeneous location vector
 	// and transform it using the modelview and projection matrices.
 	CC3Vector4 hLoc = CC3Vector4FromLocation(a3DLocation);
-	hLoc = [_viewMatrix transformHomogeneousVector: hLoc];
+	hLoc = [self.viewMatrix transformHomogeneousVector: hLoc];
 	hLoc = [self.projectionMatrix transformHomogeneousVector: hLoc];
 	
 	// Convert projected 4D vector back to 3D.
@@ -724,7 +696,7 @@
 	projectedLoc.z = frontOrBack * camToLocDist;
 	
 	// Map the projected point to the device orientation then return it
-	CGPoint ppt = [self.viewportManager cc2PointFromGLPoint: ccp(projectedLoc.x, projectedLoc.y)];
+	CGPoint ppt = [self cc2PointFromGLPoint: ccp(projectedLoc.x, projectedLoc.y)];
 	CC3Vector orientedLoc = cc3v(ppt.x, ppt.y, projectedLoc.z);
 	
 	LogTrace(@"%@ projecting location %@ to %@ and orienting with device to %@ using viewport %@",
@@ -735,6 +707,16 @@
 
 -(CC3Vector) projectLocation: (CC3Vector) aLocal3DLocation onNode: (CC3Node*) aNode {
 	return [self projectLocation: [aNode.globalTransformMatrix transformLocation: aLocal3DLocation]];
+}
+
+-(CGPoint) glPointFromCC2Point: (CGPoint) cc2Point {
+	// Scale from points to pixels, then add the viewport corner.
+	return ccpAdd(ccpMult(cc2Point, CC_CONTENT_SCALE_FACTOR()), ccp(_viewport.x, _viewport.y));
+}
+
+-(CGPoint) cc2PointFromGLPoint: (CGPoint) glPoint {
+	// Subtract the viewport corner, then scale from pixels to points.
+	return ccpMult(ccpSub(glPoint, ccp(_viewport.x, _viewport.y)), 1.0f / CC_CONTENT_SCALE_FACTOR());
 }
 
 -(CC3Vector) projectNode: (CC3Node*) aNode {
@@ -749,46 +731,24 @@
 	// CC_CONTENT_SCALE_FACTOR = 2.0 if Retina display active, or 1.0 otherwise.
 	CGPoint glPoint = ccpMult(cc2Point, CC_CONTENT_SCALE_FACTOR());
 	
-	// Express the glPoint X & Y as proportion of the layer dimensions, based
-	// on an origin in the center of the layer (the center of the camera's view).
-	CGSize lb = self.viewportManager.layerBounds.size;
-	GLfloat xp = ((2.0 * glPoint.x) / lb.width) - 1;
-	GLfloat yp = ((2.0 * glPoint.y) / lb.height) - 1;
-	
-	// Now that we have the location of the glPoint proportional to the layer dimensions,
-	// we need to map the layer dimensions onto the frustum near clipping plane.
-	// The layer dimensions change as device orientation changes, but the viewport
-	// dimensions remain the same. The field of view is always measured relative to the
-	// viewport height, independent of device orientation. We can find the top-right
-	// corner of the view on the near clipping plane (top-right is positive X & Y from
-	// the center of the camera's view) by multiplying by an orientation aspect in each
-	// direction. This orientation aspect depends on the device orientation, which can
-	// be expressed in terms of the relationship between the layer width and height and
-	// the constant viewport height. The Z-coordinate at the near clipping plane is
-	// negative since the camera points down the negative Z axis in its local coordinates.
-	[self buildProjection];		// Ensure that the camera's frustum is up to date.
-	GLfloat xNearTopRight = _frustum.top * (lb.width / _viewport.h);
-	GLfloat yNearTopRight = _frustum.top * (lb.height / _viewport.h);
-	GLfloat zNearTopRight = -_frustum.near;
-	
-	LogTrace(@"%@ view point %@ mapped to proportion (%.3f, %.3f) of top-right corner: (%.3f, %.3f) of view bounds %@ and viewport %@",
-				  [self class], NSStringFromCGPoint(glPoint), xp, yp, xNearTopRight, yNearTopRight,
-				  NSStringFromCGSize(lb), NSStringFromCC3Viewport(_viewport));
-	
-	// We now have the location of the the top-right corner of the view, at the near
-	// clipping plane, taking into account device orientation. We can now map the glPoint
-	// onto the near clipping plane by multiplying by the glPoint's proportional X & Y
-	// location, relative to the top-right corner of the view, which was calculated above.
-	CC3Vector pointLocNear = cc3v(xNearTopRight * xp,
-								  yNearTopRight * yp,
-								  zNearTopRight);
+	// Express the glPoint X & Y as proportion of the viewport dimensions.
+	CC3Viewport vp = self.viewport;
+	GLfloat xp = ((2.0 * glPoint.x) / vp.w) - 1;
+	GLfloat yp = ((2.0 * glPoint.y) / vp.h) - 1;
+
+	// Ensure that the camera's frustum is up to date, and then map the proportional point
+	// on the viewport to its position on the near clipping rectangle. The Z-coordinate is
+	// negative because the camera points down the negative Z axis in its local coordinates.
+	[self buildProjection];
+	CC3Vector pointLocNear = cc3v(_frustum.right * xp, _frustum.top * yp, -_frustum.near);
+
 	CC3Ray ray;
 	if (self.isUsingParallelProjection) {
 		// The location on the near clipping plane is relative to the camera's
 		// local coordinates. Convert it to global coordinates before returning.
 		// The ray direction is straight out from that global location in the 
 		// camera's globalForwardDirection.
-		ray.startLocation =  [_globalTransformMatrix transformLocation: pointLocNear];
+		ray.startLocation =  [self.globalTransformMatrix transformLocation: pointLocNear];
 		ray.direction = self.globalForwardDirection;
 	} else {
 		// The location on the near clipping plane is relative to the camera's local
