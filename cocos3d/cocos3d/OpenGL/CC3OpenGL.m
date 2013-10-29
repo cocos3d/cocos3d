@@ -222,20 +222,24 @@
 }
 
 -(void) bindVertexArrayObject: (GLuint) vaoId {
+	// Binding to VAO's is not supported on a background thread.
+	// iOS & OSX do support background VAO's, but they are not shared across contexts.
+	// Android seems to share the VAO binding state across contexts, which causes
+	// interference between threads.
+	if ( !_isPrimaryContext ) return;
 
 #if COCOS2D_VERSION >= 0x020100
-	// If this is the primary context, use cocos2d state management. This method can be invoked from
-	// outside the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
-	if (_isPrimaryContext) {
-		ccGLBindVAO(vaoId);
-		return;
-	}
-#endif
-	
+	// If available, use cocos2d state management. This method can be invoked from outside
+	// the main rendering path (ie- during buffer loading), so cocos2d state must be honoured.
+	ccGLBindVAO(vaoId);
+
+#else
 	cc3_CheckGLPrim(vaoId, value_GL_VERTEX_ARRAY_BINDING, isKnown_GL_VERTEX_ARRAY_BINDING);
 	if ( !needsUpdate ) return;
 	glBindVertexArray(vaoId);
 	LogGLErrorTrace(@"glBindVertexArray(%u)", vaoId);
+
+#endif	// COCOS2D_VERSION >= 0x020100
 }
 
 -(void) drawVerticiesAs: (GLenum) drawMode startingAt: (GLuint) start withLength: (GLuint) len {

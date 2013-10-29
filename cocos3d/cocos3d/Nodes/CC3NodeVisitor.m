@@ -692,7 +692,7 @@
 	// Fetch the node whose tags is mapped from the pixel color
 	_pickedNode = [[self.scene getNodeTagged: [self tagFromColor: pixColor]] retain];
 
-	LogDebug(@"%@ picked %@ from color %@ at position %@", self, _pickedNode,
+	LogTrace(@"%@ picked %@ from color %@ at position %@", self, _pickedNode,
 			 NSStringFromCCC4B(pixColor), NSStringFromCC3IntPoint(touchPoint));
 	
 	[self.renderSurface clearDepthContent];
@@ -720,7 +720,7 @@
 /** Maps the specified node to a unique color, and paints the node with that color. */
 -(void) paintNode: (CC3Node*) aNode {
 	self.currentColor4B = [self colorFromNodeTag: aNode.tag];
-	LogDebug(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
+	LogTrace(@"%@ painting %@ with color %@", self, aNode, NSStringFromCCC4B(self.currentColor4B));
 }
 
 // During visual testing, change this value to better distingusih the colors between nodes

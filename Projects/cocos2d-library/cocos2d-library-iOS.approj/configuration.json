@@ -161,7 +161,7 @@
     // or the value can be a dictionary specifying the value and the
     // environment that it should be used in, e.g.,
     // "SOME_DEFINE": {"value": "\"yep its building on android\"", "env": {"TARGET_OS": "android"}}
-    "defines": {},
+	"defines": { "CC_TEXTURE_ATLAS_USE_VAO": 0},
    
     // A list of dependencies.  Typically these correspond to
     // frameworks in the xcode project.

@@ -55,7 +55,6 @@
 -(id) initWithController: (CC3ViewController*) controller {
 	CC3Assert(controller, @"%@ requires a CC3ViewController controller.", self);
 	if( (self = [super init]) ) {
-		LogDebug(@"%@ initialized to size %@", self, NSStringFromCGSize(self.contentSize));
 		_controller = controller;		// not retained
 		[self initInitialState];		// Deprecated legacy
 	}
@@ -77,10 +76,7 @@
 	if( !CGSizeEqualToSize(aSize, oldSize) ) [self didUpdateContentSizeFrom: oldSize];
 }
 
--(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	LogDebug(@"%@ content size changed from %@ to %@",
-			 self, NSStringFromCGSize(oldSize), NSStringFromCGSize(self.contentSize));
-}
+-(void) didUpdateContentSizeFrom: (CGSize) oldSize {}
 
 
 #pragma mark Device camera support

@@ -181,27 +181,12 @@ CC3_POP_NOSELECTOR
 	 return CC3UIInterfaceOrientationMaskIncludesUIOrientation(_supportedInterfaceOrientations, uiOrientation);
 }
 
-/** UIKit callback template method invoked automatically when device rotation is changed.  */
--(void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) uiOrientation duration:(NSTimeInterval)duration {
-	LogDebug(@"%@ willRotateToInterfaceOrientation: %@", self, NSStringFromUIInterfaceOrientation(uiOrientation));
-	[super willRotateToInterfaceOrientation: uiOrientation duration: duration];
-}
-
 - (void)didRotateFromInterfaceOrientation: (UIInterfaceOrientation) uiOrientation {
-	LogDebug(@"%@ didRotateFromInterfaceOrientation: %@ with new size %@",
-			 self, NSStringFromUIInterfaceOrientation(uiOrientation),
-			 NSStringFromCGSize(self.view.bounds.size));
 	[super didRotateFromInterfaceOrientation: uiOrientation];
  	[_controlledNode viewDidRotateFrom: uiOrientation to: self.interfaceOrientation];
 }
 
-- (void)viewWillLayoutSubviews {
-	LogDebug(@"%@ viewWillLayoutSubviews", self);
-	[super viewWillLayoutSubviews];
-}
-
 - (void)viewDidLayoutSubviews {
-	LogDebug(@"%@ viewDidLayoutSubviews", self);
 	[super viewDidLayoutSubviews];
 	_controlledNode.contentSize = self.view.bounds.size;
 }

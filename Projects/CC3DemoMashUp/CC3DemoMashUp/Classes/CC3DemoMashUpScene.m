@@ -299,7 +299,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	[self addAxisMarkers];			// Add colored teapots to mark each coordinate axis
 
 	DramaticPause();				// Pause dramatically
-	[self addLightMarker];			// Add a small white teapot to show where the light is coming from
+	[self addLightMarker];			// Add a small white teapot to show the direction toward the light
 
 	DramaticPause();				// Pause dramatically
 	[self addBitmapLabel];			// Add a bitmapped string label

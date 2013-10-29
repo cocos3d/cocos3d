@@ -77,7 +77,7 @@
 
     // Path to the image to use for the app's icon.
     // Usually something like "./Icon.png".
-    "ICON": "./Icon-72.png",
+    "ICON": "../Common/Resources/Icons/Icon-72@2x.png",
 
     // A regular expression to determine which assets
     // should be compressed when building the final app.

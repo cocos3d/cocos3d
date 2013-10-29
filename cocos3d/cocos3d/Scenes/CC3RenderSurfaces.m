@@ -829,7 +829,7 @@
 				pickSurf.depthAttachment = [CC3GLRenderbuffer renderbufferWithPixelFormat: depthFormat];
 			}
 
-			LogDebug(@"Creating picking surface of size %@ with %@ color format %@ and depth format %@.",
+			LogTrace(@"Creating picking surface of size %@ with %@ color format %@ and depth format %@.",
 					 NSStringFromCC3IntSize(pickSurf.size),
 					 (_viewSurface.isColorContentReadable ? @"existing" : @"new"),
 					 NSStringFromGLEnum(pickSurf.colorAttachment.pixelFormat),
@@ -838,7 +838,7 @@
 			if ( [pickSurf validate] ) self.pickingSurface = pickSurf;
 			
 		} else {
-			LogDebug(@"Reusing view surface as picking surface.");
+			LogTrace(@"Reusing view surface as picking surface.");
 			self.pickingSurface = self.viewSurface;		// Use the viewSurface
 		}
 	}
@@ -941,7 +941,7 @@
 	if ( !attachment || [alreadyResized containsObject: attachment] ) return;
 	[attachment resizeTo: size];
 	[alreadyResized addObject: attachment];
-	LogDebug(@"Resizing %@ to: %@", attachment, NSStringFromCC3IntSize(size));
+	LogTrace(@"Resizing %@ to: %@", attachment, NSStringFromCC3IntSize(size));
 }
 
 

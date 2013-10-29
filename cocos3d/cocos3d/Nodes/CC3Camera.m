@@ -487,7 +487,7 @@
 											  withPadding: padding
 											   checkScene: checkScene];
 	CC3Vector newFwdDir = CC3VectorNegate(aDirection);
-	LogDebug(@"%@ \n\tmoving to: %@ \n\tpointing towards: %@ \n\tnear clipping distance: %.3f"
+	LogInfo(@"%@ \n\tmoving to: %@ \n\tpointing towards: %@ \n\tnear clipping distance: %.3f"
 			 @"\n\tfar clipping distance: %.3f \n\tto show all of: %@",
 			 self, NSStringFromCC3Vector(newLoc), NSStringFromCC3Vector(newFwdDir),
 			 self.nearClippingDistance, self.farClippingDistance, aNode);
