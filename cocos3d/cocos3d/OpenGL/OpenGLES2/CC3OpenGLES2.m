@@ -95,6 +95,20 @@
 
 #pragma mark Shaders
 
+-(NSString*) defaultShaderPreamble {
+#if APPORTABLE
+	return
+		@"#define CC3_PLATFORM_IOS 0\n"
+		@"#define CC3_PLATFORM_OSX 0\n"
+		@"#define CC3_PLATFORM_ANDROID 1\n";
+#else
+	return
+		@"#define CC3_PLATFORM_IOS 1\n"
+		@"#define CC3_PLATFORM_OSX 0\n"
+		@"#define CC3_PLATFORM_ANDROID 0\n";
+#endif	// APPORTABLE
+}
+
 -(void) releaseShaderCompiler {
 	glReleaseShaderCompiler();
 	LogGLErrorTrace(@"glReleaseShaderCompiler()");

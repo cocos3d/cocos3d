@@ -67,8 +67,8 @@
 #define k_GL_DOT3_RGBA              0x86AF
 #define k_GL_TEXTURE                0x1702
 #define k_GL_CONSTANT               0x8576
-#define k_GL_PREVIOUS               0x8578
 #define k_GL_PRIMARY_COLOR          0x8577
+#define k_GL_PREVIOUS               0x8578
 
 precision mediump float;
 
@@ -85,16 +85,16 @@ uniform highp float	u_cc3FogDensity;			/**< Fog density. */
 uniform highp float	u_cc3FogStartDistance;		/**< Distance from camera at which fogging effect starts. */
 uniform highp float	u_cc3FogEndDistance;		/**< Distance from camera at which fogging effect ends. */
 
-uniform lowp int	u_cc3TextureCount;									/**< Number of textures. */
+uniform int			u_cc3TextureCount;									/**< Number of textures. */
 uniform sampler2D	s_cc3Textures[MAX_TEXTURES];						/**< Texture samplers. */
 uniform lowp vec4	u_cc3TextureUnitColor[MAX_TEXTURES];				/**< Constant color of this texure unit (often used for normal mapping). */
-uniform highp int	u_cc3TextureUnitMode[MAX_TEXTURES];					/**< Texture environment mode for this texture unit. */
-uniform highp int	u_cc3TextureUnitCombineRGBFunction[MAX_TEXTURES];	/**< RGB combiner function for this texture unit. */
-uniform highp int	u_cc3TextureUnitRGBSource0[MAX_TEXTURES];			/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
-uniform highp int	u_cc3TextureUnitRGBSource1[MAX_TEXTURES];			/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
-uniform highp int	u_cc3TextureUnitCombineAlphaFunction[MAX_TEXTURES];	/**< Alpha combiner function for this texture unit. */
-uniform highp int	u_cc3TextureUnitAlphaSource0[MAX_TEXTURES];			/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
-uniform highp int	u_cc3TextureUnitAlphaSource1[MAX_TEXTURES];			/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
+uniform int			u_cc3TextureUnitMode[MAX_TEXTURES];					/**< Texture environment mode for this texture unit. */
+uniform int			u_cc3TextureUnitCombineRGBFunction[MAX_TEXTURES];	/**< RGB combiner function for this texture unit. */
+uniform int			u_cc3TextureUnitRGBSource0[MAX_TEXTURES];			/**< The source of the RGB components for arg0 of the combiner function in this texture unit. */
+uniform int			u_cc3TextureUnitRGBSource1[MAX_TEXTURES];			/**< The source of the RGB components for arg1 of the combiner function in this texture unit. */
+uniform int			u_cc3TextureUnitCombineAlphaFunction[MAX_TEXTURES];	/**< Alpha combiner function for this texture unit. */
+uniform int			u_cc3TextureUnitAlphaSource0[MAX_TEXTURES];			/**< The source of the alpha components for arg0 of the combiner function in this texture unit. */
+uniform int			u_cc3TextureUnitAlphaSource1[MAX_TEXTURES];			/**< The source of the alpha components for arg1 of the combiner function in this texture unit. */
 
 //-------------- VARYING VARIABLE INPUTS ----------------------
 varying vec2		v_texCoord[MAX_TEXTURES];	/**< Fragment texture coordinates. */
@@ -132,20 +132,20 @@ void combineTexture(lowp vec4 texColor, int tuIdx) {
 
 	// RGB of source 0, starting with default
 	if (src0 == k_GL_TEXTURE)				rgb0 = texColor.rgb;
-	else if (src0 == k_GL_PREVIOUS)		rgb0 = fragColor.rgb;
-	else if (src0 == k_GL_CONSTANT)		rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
+	else if (src0 == k_GL_PREVIOUS)			rgb0 = fragColor.rgb;
+	else if (src0 == k_GL_CONSTANT)			rgb0 = u_cc3TextureUnitColor[tuIdx].rgb;
 	else if (src0 == k_GL_PRIMARY_COLOR)	rgb0 = primaryColor.rgb;
 	
 	// RGB of source 1, starting with default
-	if (src1 == k_GL_PREVIOUS)			rgb1 = fragColor.rgb;
-	else if (src1 == k_GL_TEXTURE)		rgb1 = texColor.rgb;
-	else if (src1 == k_GL_CONSTANT)		rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
+	if (src1 == k_GL_PREVIOUS)				rgb1 = fragColor.rgb;
+	else if (src1 == k_GL_TEXTURE)			rgb1 = texColor.rgb;
+	else if (src1 == k_GL_CONSTANT)			rgb1 = u_cc3TextureUnitColor[tuIdx].rgb;
 	else if (src1 == k_GL_PRIMARY_COLOR)	rgb1 = primaryColor.rgb;
 	
 	// Combine the RGB components
 	if (func == k_GL_MODULATE)			fragColor.rgb = rgb0 * rgb1;
 	else if (func == k_GL_ADD)			fragColor.rgb = rgb0 + rgb1;
-	else if (func == k_GL_ADD_SIGNED)		fragColor.rgb = rgb0 + rgb1 - 0.5;
+	else if (func == k_GL_ADD_SIGNED)	fragColor.rgb = rgb0 + rgb1 - 0.5;
 	else if (func == k_GL_SUBTRACT)		fragColor.rgb = rgb0 - rgb1;
 	else if (func == k_GL_REPLACE)		fragColor.rgb = rgb0;
 	else if (func == k_GL_DOT3_RGBA) {
@@ -168,20 +168,20 @@ void combineTexture(lowp vec4 texColor, int tuIdx) {
 	
 	// Alpha of source 0, starting with default
 	if (src0 == k_GL_TEXTURE)				a0 = texColor.a;
-	else if (src0 == k_GL_PREVIOUS)		a0 = fragColor.a;
-	else if (src0 == k_GL_CONSTANT)		a0 = u_cc3TextureUnitColor[tuIdx].a;
+	else if (src0 == k_GL_PREVIOUS)			a0 = fragColor.a;
+	else if (src0 == k_GL_CONSTANT)			a0 = u_cc3TextureUnitColor[tuIdx].a;
 	else if (src0 == k_GL_PRIMARY_COLOR)	a0 = primaryColor.a;
 	
 	// Alpha of source 1, starting with default
-	if (src1 == k_GL_PREVIOUS)			a1 = fragColor.a;
-	else if (src1 == k_GL_TEXTURE)		a1 = texColor.a;
-	else if (src1 == k_GL_CONSTANT)		a1 = u_cc3TextureUnitColor[tuIdx].a;
+	if (src1 == k_GL_PREVIOUS)				a1 = fragColor.a;
+	else if (src1 == k_GL_TEXTURE)			a1 = texColor.a;
+	else if (src1 == k_GL_CONSTANT)			a1 = u_cc3TextureUnitColor[tuIdx].a;
 	else if (src1 == k_GL_PRIMARY_COLOR)	a1 = primaryColor.a;
 	
 	// Combine the alpha components
 	if (func == k_GL_MODULATE)			fragColor.a = a0 * a1;
 	else if (func == k_GL_ADD)			fragColor.a = a0 + a1;
-	else if (func == k_GL_ADD_SIGNED)		fragColor.a = a0 + a1 - 0.5;
+	else if (func == k_GL_ADD_SIGNED)	fragColor.a = a0 + a1 - 0.5;
 	else if (func == k_GL_SUBTRACT)		fragColor.a = a0 - a1;
 	else if (func == k_GL_REPLACE)		fragColor.a = a0;
 }
@@ -217,12 +217,29 @@ void applyTexture(int tuIdx) {
  * and returns the resulting fragment color. If there are no textures, returns the fragment
  * color from the v_color varying input variable.
  */
+#if (CC3_PLATFORM_IOS || CC3_PLATFORM_OSX)
 void applyTextures() {
+	// iOS doesn't handle the unrolled loop (required by Android) well here, so loop it
 	for (int tuIdx = 0; tuIdx < MAX_TEXTURES; tuIdx++) {
-		if (tuIdx >= u_cc3TextureCount) return;		// Break out once we've applied all the textures
+		if (tuIdx == u_cc3TextureCount) return;		// Break out once we've applied all the textures
 		applyTexture(tuIdx);
 	}
 }
+#endif	// (CC3_PLATFORM_IOS || CC3_PLATFORM_OSX)
+
+#if CC3_PLATFORM_ANDROID
+void applyTextures() {
+	// Android doesn't handle looping well here...so we unroll it
+	if (u_cc3TextureCount <= 0) return;
+	applyTexture(0);
+	if (u_cc3TextureCount <= 1) return;
+	applyTexture(1);
+//	if (u_cc3TextureCount <= 2) return;		// Uncomment to match MAX_TEXTURES
+//	applyTexture(2);
+//	if (u_cc3TextureCount <= 3) return;
+//	applyTexture(3);
+}
+#endif	// CC3_PLATFORM_ANDROID
 
 /** Applies fog to the specified color and returns the adjusted color. */
 lowp vec4 fogify(lowp vec4 aColor) {
@@ -252,6 +269,7 @@ lowp vec4 fogify(lowp vec4 aColor) {
 }
 
 //-------------- ENTRY POINT ----------------------
+
 void main() {
 	primaryColor = gl_FrontFacing ? v_color : v_colorBack;
 	fragColor = primaryColor;

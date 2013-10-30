@@ -118,7 +118,10 @@
 		@"#define precision //precision\n"
 		@"#define highp\n"
 		@"#define mediump\n"
-		@"#define lowp\n";
+		@"#define lowp\n"
+		@"#define CC3_PLATFORM_IOS 0\n"
+		@"#define CC3_PLATFORM_OSX 1\n"
+		@"#define CC3_PLATFORM_ANDROID 0\n";
 }
 
 
