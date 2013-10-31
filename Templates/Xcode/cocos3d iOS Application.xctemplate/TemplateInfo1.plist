@@ -106,6 +106,15 @@
 			<key>Path</key>
 			<string>Resources/fps_images_1.png</string>
 		</dict>
+		<key>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Apportable</string>
+			</array>
+			<key>Path</key>
+			<string>Apportable/configuration.json</string>
+		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
@@ -118,6 +127,7 @@
 		<string>Classes/___PROJECTNAMEASIDENTIFIER___Scene.m</string>
 		<string>Resources/hello-world.pod</string>
 		<string>Resources/fps_images_1.png</string>
+		<string>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</string>
 	</array>
 </dict>
 </plist>

@@ -124,6 +124,15 @@
 			<key>Path</key>
 			<string>Resources/fps_images-ipadhd.png</string>
 		</dict>
+		<key>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>Apportable</string>
+			</array>
+			<key>Path</key>
+			<string>Apportable/configuration.json</string>
+		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
@@ -138,6 +147,7 @@
 		<string>Resources/fps_images.png</string>
 		<string>Resources/fps_images-hd.png</string>
 		<string>Resources/fps_images-ipadhd.png</string>
+		<string>../___PROJECTNAMEASIDENTIFIER___.approj/configuration.json</string>
 	</array>
 </dict>
 </plist>

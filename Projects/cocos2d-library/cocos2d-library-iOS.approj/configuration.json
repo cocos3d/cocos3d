@@ -1,3 +1,10 @@
+//*****************************************************************************
+// This configuration file can be used with the Apportable SDK to build
+// this library to run on the Android mobile platform.
+//
+// You can learn more about the Apportable SDK here: http://www.apportable.com/
+//*****************************************************************************
+
 {
   "configuration_format_version": 2,
 

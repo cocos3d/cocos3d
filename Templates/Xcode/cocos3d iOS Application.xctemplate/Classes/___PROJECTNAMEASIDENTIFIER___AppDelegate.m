@@ -44,8 +44,8 @@
 	// Create the view controller for the 3D view.
 	_viewController = [CC3DeviceCameraOverlayUIViewController new];
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
-	_viewController.viewShouldUseStencilBuffer = NO;		// Set to YES if using shadow volumes
-	_viewController.viewPixelSamples = 1;					// Set to 4 for antialiasing multisampling
+	_viewController.viewShouldUseStencilBuffer = NO;	// Set to YES if using shadow volumes
+	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
 	
 	// Create the CCDirector, set the frame rate, and attach the view.
 	CCDirector *director = CCDirector.sharedDirector;
@@ -117,18 +117,19 @@
 	// Assign to a generic variable so we can uncomment options below to play with the capabilities
 	CC3ControllableLayer* mainLayer = cc3Layer;
 	
-	// The 3D layer can run either directly in the scene, or it can run as a smaller "sub-window"
-	// within any standard CCLayer. So you can have a mostly 2D window, with a smaller 3D window
-	// embedded in it. To experiment with this smaller embedded 3D window, uncomment the following lines:
-//	CGSize winSize = CCDirector.sharedDirector.winSize;
-//	cc3Layer.position = ccp(30.0, 30.0);
-//	cc3Layer.contentSize = CGSizeMake(winSize.width - 100.0, winSize.width - 40.0);
-//	cc3Layer.alignContentSizeWithDeviceOrientation = YES;
+	// The 3D layer can run either directly in the scene, or it can run as a smaller
+	// "sub-window" within any standard CCLayer. So you can have a mostly 2D window,
+	// with a smaller 3D window embedded in it. To experiment with this smaller, square,
+	// embedded 3D window, uncomment the following lines:
+//	CGSize cs = cc3Layer.contentSize;		// The layer starts out "full-screen".
+//	GLfloat sideLen = MIN(cs.width, cs.height) - 100.0f;
+//	cc3Layer.contentSize = CGSizeMake(sideLen, sideLen);
+//	cc3Layer.position = ccp(50.0, 50.0);
 //	mainLayer = [CC3ControllableLayer layerWithController: _viewController];
 //	[mainLayer addChild: cc3Layer];
 	
-	// A smaller 3D layer can even be moved around on the screen dyanmically. To see this in action,
-	// uncomment the lines above as described, and also uncomment the following two lines.
+	// The smaller 3D layer can even be moved around on the screen dyanmically. To see this in
+	// action, uncomment the lines above as described, and also uncomment the following two lines.
 //	cc3Layer.position = ccp(0.0, 0.0);
 //	[cc3Layer runAction: [CCMoveTo actionWithDuration: 15.0 position: ccp(500.0, 250.0)]];
 	

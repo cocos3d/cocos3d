@@ -8,8 +8,7 @@
 {
   "configuration_format_version": 2,
 
-  "default_target": {"project": "CC3DemoMashUp-iOS", "project_config": "Debug", "target": "CC3DemoMashUp"},
-
+  "default_target": {"project": "___PROJECTNAMEASIDENTIFIER___", "project_config": "Debug", "target": "___PROJECTNAMEASIDENTIFIER___"},
 
   // Dictionary of global configuration parameters.
   // These parameters are not taken from the xcode project,

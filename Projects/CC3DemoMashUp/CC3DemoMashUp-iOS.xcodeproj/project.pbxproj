@@ -357,7 +357,7 @@
 				A92DA78D1427B5980051AFFA /* Resources */,
 				A9F2131317FDF5AC009B0837 /* GLSL */,
 				A96E0FF8170DCFB00044CA2A /* iOS Support */,
-				A95B478C18119AD6007A3804 /* Android Support */,
+				A95B478C18119AD6007A3804 /* Apportable */,
 				A92E871E17A6E4D9003B859E /* cocos3d-library-iOS.xcodeproj */,
 				A92E836E17A6CB18003B859E /* cocos2d-library-iOS.xcodeproj */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -536,12 +536,12 @@
 			path = LaunchImages;
 			sourceTree = "<group>";
 		};
-		A95B478C18119AD6007A3804 /* Android Support */ = {
+		A95B478C18119AD6007A3804 /* Apportable */ = {
 			isa = PBXGroup;
 			children = (
 				A95B479218119BBD007A3804 /* configuration.json */,
 			);
-			name = "Android Support";
+			name = Apportable;
 			sourceTree = "<group>";
 		};
 		A96E0FF8170DCFB00044CA2A /* iOS Support */ = {

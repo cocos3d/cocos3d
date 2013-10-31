@@ -69,7 +69,7 @@
 	_viewController = [CC3DeviceCameraOverlayUIViewController new];
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
-	_viewController.viewPixelSamples = 4;
+	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
 	
 	// Create the CCDirector, set the frame rate, and attach the view.
 	CCDirector *director = CCDirector.sharedDirector;
@@ -102,7 +102,7 @@
 	_viewController = CC3DeviceCameraOverlayUIViewController.sharedDirector;
 	_viewController.supportedInterfaceOrientations = UIInterfaceOrientationMaskAll;
 	_viewController.viewShouldUseStencilBuffer = YES;	// Shadow volumes make use of stencil buffer
-	_viewController.viewPixelSamples = 4;
+	_viewController.viewPixelSamples = 1;				// Set to 4 for antialiasing multisampling
 	_viewController.animationInterval = (1.0f / kAnimationFrameRate);
 	_viewController.displayStats = YES;
 	[_viewController enableRetinaDisplay: YES];

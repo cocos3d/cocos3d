@@ -57,6 +57,9 @@ cocos3d 2.0.0 - 2013/09/30
 		- CC3UIViewController for iOS
 		- Added new CC3NSViewController for OSX.
 
+- Added support for Android via the Apportable SDK.
+	- Add demo apps and cocos3d Application template apps can be built and deployed using the Apportable SDK
+
 - Added support for multi-pass rendering, render-to-texture, and dynamic environment maps:
 	- Added CC3RenderSurface classes to provide both on-screen and off-screen framebuffer surfaces as rendering targets
 		- CC3GLView now uses underlying CC3GLViewSurfaceManager to manage framebuffers.

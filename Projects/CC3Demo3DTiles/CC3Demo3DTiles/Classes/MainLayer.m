@@ -155,7 +155,7 @@
 /**
  * Positions the view switching and invasion buttons between the two joysticks.
  * This is called at initialization, and anytime the content size of the layer changes
- * to keep the button in the correct location within the new layer dimensions.
+ * to keep the buttons in the correct location within the new layer dimensions.
  */
 -(void) positionControls {
 	GLfloat xPos, yPos;
@@ -172,6 +172,20 @@
 	_label.position =  ccp(self.contentSize.width , 0.0);
 }
 
+/** 
+ * Called automatically when the contentSize has changed. 
+ * Reposition the controls and tiles to match the new layer shape.
+ * This method will be invoked for the first time when this layer is first initialized,
+ * which is before the controls and templates have been created.
+ */
+-(void) didUpdateContentSizeFrom: (CGSize) oldSize {
+	LogDebug(@"Updating size of %@ from %@ to %@", self,
+			 NSStringFromCGSize(oldSize), NSStringFromCGSize(self.contentSize));
+	[super didUpdateContentSizeFrom: oldSize];
+	[self positionControls];
+	[self addTiles];
+}
+
 #pragma mark Model Templates
 
 -(void) initializeTemplates {
@@ -181,7 +195,7 @@
 
 	// The node to use as a backdrop for each scene.
 	// This can be shared between all tile scenes.
-	_backdropTemplate = [CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
+	_backdropTemplate = [[CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)] retain];
 	[_backdropTemplate createGLBuffers];
 	[_backdropTemplate selectShaderPrograms];
 	
@@ -290,6 +304,10 @@
  * and sets it as the main node of the scene.
  */
 -(CC3Scene*) makeScene {
+
+	// In no templates are available, return a nil scene.
+	if (_templates.count == 0) return nil;
+		
 	TileScene* scene = [TileScene scene];		// A new scene
 	
 	// Add the backdrop. Since it is not assigned a parent, it can be shared across all tile scenes.

@@ -8,7 +8,7 @@
 {
   "configuration_format_version": 2,
 
-  "default_target": {"project": "CC3DemoMashUp-iOS", "project_config": "Debug", "target": "CC3DemoMashUp"},
+  "default_target": {"project": "CC3Performance-iOS", "project_config": "Debug", "target": "CC3Performance"},
 
 
   // Dictionary of global configuration parameters.

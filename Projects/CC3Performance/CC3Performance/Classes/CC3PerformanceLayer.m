@@ -82,7 +82,6 @@
 	[self addJoysticks];
 	[self addButtons];
 	[self addStatsLabels];
-	[self positionPerformanceLabels];
 	[self scheduleUpdate];
 }
 
@@ -210,6 +209,8 @@
 	_facesPresentedLabel = [self addStatsLabel: @"0"];
 
 	[CCTexture2D setDefaultAlphaPixelFormat: currentFormat];
+
+	[self positionStatsLabels];
 }
 
 /**
@@ -252,7 +253,7 @@
  * Layout the performance labels in text table,
  * drawing stats on the left, update stats on the right.
  */
--(void) positionPerformanceLabels {
+-(void) positionStatsLabels {
 	CGFloat leftTab = kJoystickSidePadding;
 	CGFloat rightTab = _locationJoystick.position.x - 32.0;
 	GLfloat vertPos = self.contentSize.height - kJoystickSidePadding;
@@ -336,7 +337,7 @@
 	[super didUpdateContentSizeFrom: oldSize];
 	[self positionLocationJoystick];
 	[self positionButtons];
-	[self positionPerformanceLabels];
+	[self positionStatsLabels];
 }
 
 #pragma mark Drawing

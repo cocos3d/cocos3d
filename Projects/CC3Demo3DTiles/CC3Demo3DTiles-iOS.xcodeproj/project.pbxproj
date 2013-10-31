@@ -15,6 +15,7 @@
 		A92DA84D1427C6F00051AFFA /* cocos3dMascot.pod in Resources */ = {isa = PBXBuildFile; fileRef = A92DA8281427C6F00051AFFA /* cocos3dMascot.pod */; };
 		A92DA8521427C6F00051AFFA /* fire.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82D1427C6F00051AFFA /* fire.png */; };
 		A92DA8531427C6F00051AFFA /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA82E1427C6F00051AFFA /* fps_images.png */; };
+		A93C00391821B278003A0C43 /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A93C00381821B278003A0C43 /* configuration.json */; };
 		A9473C1214100DA5006F410C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1114100DA5006F410C /* QuartzCore.framework */; };
 		A9473C1414100DA5006F410C /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1314100DA5006F410C /* OpenGLES.framework */; };
 		A9473C1614100DA5006F410C /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9473C1514100DA5006F410C /* OpenAL.framework */; };
@@ -126,6 +127,7 @@
 		A92DA8281427C6F00051AFFA /* cocos3dMascot.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = cocos3dMascot.pod; sourceTree = "<group>"; };
 		A92DA82D1427C6F00051AFFA /* fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fire.png; sourceTree = "<group>"; };
 		A92DA82E1427C6F00051AFFA /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
+		A93C00381821B278003A0C43 /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3Demo3DTiles-iOS.approj/configuration.json"; sourceTree = "<group>"; };
 		A9473C0D14100DA5006F410C /* CC3Demo3DTiles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CC3Demo3DTiles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9473C1114100DA5006F410C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		A9473C1314100DA5006F410C /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -252,6 +254,14 @@
 			path = ../Common/Resources;
 			sourceTree = "<group>";
 		};
+		A93C00361821B1FD003A0C43 /* Apportable */ = {
+			isa = PBXGroup;
+			children = (
+				A93C00381821B278003A0C43 /* configuration.json */,
+			);
+			name = Apportable;
+			sourceTree = "<group>";
+		};
 		A9473C0214100DA5006F410C = {
 			isa = PBXGroup;
 			children = (
@@ -259,6 +269,7 @@
 				A92DA8201427C6F00051AFFA /* Resources */,
 				A9A35FC917F47C8500C76E2B /* GLSL */,
 				A9A3600217F47DBA00C76E2B /* iOS Support */,
+				A93C00361821B1FD003A0C43 /* Apportable */,
 				A9A35FF617F47CE600C76E2B /* cocos3d-library-iOS.xcodeproj */,
 				A9A35FFC17F47CF100C76E2B /* cocos2d-library-iOS.xcodeproj */,
 				A9473C1014100DA5006F410C /* Frameworks */,
@@ -509,6 +520,7 @@
 				A9A35FE817F47C8500C76E2B /* CC3NoTexture.fsh in Resources */,
 				A9A35FE717F47C8500C76E2B /* CC3MultiTextureConfigurable.fsh in Resources */,
 				A9A3602C17F47EA800C76E2B /* Icon-76@2x.png in Resources */,
+				A93C00391821B278003A0C43 /* configuration.json in Resources */,
 				A9A35FEB17F47C8500C76E2B /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
 				A9A35FF517F47C8500C76E2B /* CC3Texturable.vsh in Resources */,
 				A9A35FF117F47C8500C76E2B /* CC3SingleTexture.fsh in Resources */,

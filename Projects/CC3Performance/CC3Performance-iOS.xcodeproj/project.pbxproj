@@ -17,6 +17,7 @@
 		A92DA8111427B7870051AFFA /* JoystickThumb.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA7EE1427B7870051AFFA /* JoystickThumb.png */; };
 		A92DA81C1427B80E0051AFFA /* arial16.fnt in Resources */ = {isa = PBXBuildFile; fileRef = A92DA81A1427B80E0051AFFA /* arial16.fnt */; };
 		A92DA81D1427B80E0051AFFA /* arial16.png in Resources */ = {isa = PBXBuildFile; fileRef = A92DA81B1427B80E0051AFFA /* arial16.png */; };
+		A93C003B1821B283003A0C43 /* configuration.json in Resources */ = {isa = PBXBuildFile; fileRef = A93C003A1821B283003A0C43 /* configuration.json */; };
 		A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372B140E5983006F410C /* CC3PerformanceLayer.m */; };
 		A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372D140E5983006F410C /* CC3PerformanceScene.m */; };
 		A9473751140E5983006F410C /* NodeGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = A9473736140E5983006F410C /* NodeGrid.m */; };
@@ -131,6 +132,7 @@
 		A92DA7EE1427B7870051AFFA /* JoystickThumb.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = JoystickThumb.png; sourceTree = "<group>"; };
 		A92DA81A1427B80E0051AFFA /* arial16.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = arial16.fnt; sourceTree = "<group>"; };
 		A92DA81B1427B80E0051AFFA /* arial16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arial16.png; sourceTree = "<group>"; };
+		A93C003A1821B283003A0C43 /* configuration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = configuration.json; path = "CC3Performance-iOS.approj/configuration.json"; sourceTree = SOURCE_ROOT; };
 		A947372A140E5983006F410C /* CC3PerformanceLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceLayer.h; sourceTree = "<group>"; };
 		A947372B140E5983006F410C /* CC3PerformanceLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceLayer.m; sourceTree = "<group>"; };
 		A947372C140E5983006F410C /* CC3PerformanceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceScene.h; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				A92DA7D21427B7870051AFFA /* Resources */,
 				A94EEA0717F60B8E005A43E7 /* GLSL */,
 				A94EEA3417F60BA7005A43E7 /* iOS Support */,
+				A93C00371821B217003A0C43 /* Apportable */,
 				A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */,
 				A94EEA6E17F60DD2005A43E7 /* cocos2d-library-iOS.xcodeproj */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -294,6 +297,15 @@
 			);
 			name = Resources;
 			path = ../Common/Resources;
+			sourceTree = "<group>";
+		};
+		A93C00371821B217003A0C43 /* Apportable */ = {
+			isa = PBXGroup;
+			children = (
+				A93C003A1821B283003A0C43 /* configuration.json */,
+			);
+			name = Apportable;
+			path = ../CC3Demo3DTiles;
 			sourceTree = "<group>";
 		};
 		A9473727140E5983006F410C /* Classes */ = {
@@ -524,6 +536,7 @@
 				A94EEA5D17F60C99005A43E7 /* Icon-76.png in Resources */,
 				A94EEA9317F77E41005A43E7 /* Dragon-normals.jpg in Resources */,
 				A94EEA2F17F60B8E005A43E7 /* CC3SingleTexture.fsh in Resources */,
+				A93C003B1821B283003A0C43 /* configuration.json in Resources */,
 				A94EEA3317F60B8E005A43E7 /* CC3Texturable.vsh in Resources */,
 				A94EEA2617F60B8E005A43E7 /* CC3NoTexture.fsh in Resources */,
 				A92DA8011427B7870051AFFA /* fps_images.png in Resources */,

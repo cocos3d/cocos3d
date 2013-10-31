@@ -751,21 +751,21 @@
 			path = GL;
 			sourceTree = "<group>";
 		};
-		A95B479018119B63007A3804 /* Android Support */ = {
+		A95B479018119B63007A3804 /* Apportable */ = {
 			isa = PBXGroup;
 			children = (
 				A95B479318119BC8007A3804 /* configuration.json */,
 			);
-			name = "Android Support";
+			name = Apportable;
 			sourceTree = "<group>";
 		};
 		A9D8ED2017A6009300FB443C = {
 			isa = PBXGroup;
 			children = (
 				A924BD1E181DFE6100D40EF7 /* cocos2d */,
+				A95B479018119B63007A3804 /* Apportable */,
 				A9D8ED2B17A6009300FB443C /* Frameworks */,
 				A9D8ED2A17A6009300FB443C /* Products */,
-				A95B479018119B63007A3804 /* Android Support */,
 			);
 			sourceTree = "<group>";
 		};
