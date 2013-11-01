@@ -273,9 +273,9 @@
  * and add it to the list of templates.
  */
 -(void) configureAndAddTemplate: (CC3Node*) templateNode {
+	[templateNode selectShaderPrograms];
 	[templateNode createGLBuffers];
 	[templateNode releaseRedundantContent];
-	[templateNode selectShaderPrograms];
 	[_availableTemplateNodes addObject: templateNode];
 }
 

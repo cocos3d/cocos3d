@@ -2665,6 +2665,10 @@ typedef enum {
  * If this node has no bounding volume, sets the boundingVolume property
  * to the value returned by the defaultBoundingVolume property.
  *
+ * The automatic creation of a bounding volume relies on having the vertex locations in memory.
+ * Therefore, on mesh nodes, make sure that you invoke this method before invoking the
+ * releaseRedundantContent method, otherwise a bounding volume will not be created.
+ *
  * It is safe to invoke this method more than once. Each node that creates a
  * bounding volume will do so only if it does not already have a bounding volume.
  */
@@ -2675,6 +2679,10 @@ typedef enum {
  * returned by the defaultBoundingVolume property, and then propagates this same method to
  * all descendant nodes, to create bounding volumes for all all descendant nodes, as defined
  * by the defaultBoundingVolume property of each descendant.
+ *
+ * The automatic creation of a bounding volume relies on having the vertex locations in memory.
+ * Therefore, make sure that you invoke this method before invoking the releaseRedundantContent
+ * method, otherwise a bounding volume will not be created.
  *
  * This method does not automatically create a bounding volume for skinned mesh node descendants.
  * To do so, you must also invoke the createSkinnedBoundingVolumes method. See the notes of

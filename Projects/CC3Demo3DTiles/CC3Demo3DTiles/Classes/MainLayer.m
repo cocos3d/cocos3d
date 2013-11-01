@@ -254,9 +254,9 @@
  */
 -(void) configureAndAddTemplate: (CC3Node*) templateNode {
 	templateNode.touchEnabled = YES;
+	[templateNode selectShaderPrograms];
 	[templateNode createGLBuffers];
 	[templateNode releaseRedundantContent];
-	[templateNode selectShaderPrograms];
 	[_templates addObject: templateNode];
 }
 

@@ -594,18 +594,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) configureForScene: (CC3Node*) aNode andMaterializeWithDuration: (ccTime) duration {
 	
-	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
-	// to save memory, release the vertex data in main memory because it is now redundant.
-	// However, because we can add shadow volumes dynamically to any node, we need to keep the
-	// vertex location, index and skinning data of all meshes around to build shadow volumes.
-	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
-	[aNode retainVertexLocations];
-	[aNode retainVertexIndices];
-	[aNode retainVertexWeights];
-	[aNode retainVertexMatrixIndices];
-	[aNode createGLBuffers];
-	[aNode releaseRedundantContent];
-	
 	// This scene is quite complex, containing many objects. As the user moves the camera
 	// around the scene, objects move in and out of the camera's field of view. At any time,
 	// there may be a number of objects that are out of view of the camera. With such a scene
@@ -623,6 +611,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// skinned meshes, such as the runners and mallet. See the addSkinnedRunners and
 	// addSkinnedMallet methods to see how those bounding volumes are added manually.
 	[aNode createBoundingVolumes];
+	
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and
+	// to save memory, release the vertex data in main memory because it is now redundant.
+	// However, because we can add shadow volumes dynamically to any node, we need to keep the
+	// vertex location, index and skinning data of all meshes around to build shadow volumes.
+	// If we had added the shadow volumes before here, we wouldn't have to retain this data.
+	[aNode retainVertexLocations];
+	[aNode retainVertexIndices];
+	[aNode retainVertexWeights];
+	[aNode retainVertexMatrixIndices];
+	[aNode createGLBuffers];
+	[aNode releaseRedundantContent];
 	
 	// The following line displays the bounding volumes of each node. The bounding volume of
 	// all mesh nodes, except the globe, contains both a spherical and bounding-box bounding

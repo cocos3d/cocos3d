@@ -46,7 +46,7 @@
 	if ( (self = [super init]) ) {
 		_vertices = NULL;
 		_vertexCount = 0;
-//		allocatedVertexCapacity = 0;
+//		_allocatedVertexCapacity = 0;
 		_vertexStride = 0;
 		_bufferID = 0;
 		_bufferUsage = GL_STATIC_DRAW;
@@ -197,10 +197,10 @@
 }
 
 -(GLvoid*) interleaveWith: (CC3VertexArray*) otherVtxArray usingOffset: (GLuint) elemOffset {
-	self.vertices = otherVtxArray.vertices;
 	self.vertexStride = otherVtxArray.vertexStride;
 	self.vertexCount = otherVtxArray.vertexCount;
 	self.elementOffset = elemOffset;
+	self.vertices = otherVtxArray.vertices;		// Must do last, because can be cleared by other setters.
 	return (GLbyte*)self.vertices  + self.elementOffset;
 }
 
@@ -238,10 +238,8 @@
 -(GLuint) allocatedVertexCapacity { return _allocatedVertexCapacity; }
 
 -(void) setAllocatedVertexCapacity: (GLuint) vtxCount {
-	if (vtxCount != _allocatedVertexCapacity) {
-		CC3Assert((vtxCount == 0 || self.vertexStride > 0), @"%@ must have the stride defined before allocating vertices. Set the elementType and elementSize properties before setting the allocatedVertexCapacity property.", self);
-		[self allocateVertexCapacity: vtxCount];
-	}
+	CC3Assert((vtxCount == 0 || self.vertexStride > 0), @"%@ must have the stride defined before allocating vertices. Set the elementType and elementSize properties before setting the allocatedVertexCapacity property.", self);
+	[self allocateVertexCapacity: vtxCount];
 }
 
 /**
@@ -255,11 +253,15 @@
  * Returns NO if an error occurs, otherwise returns YES.
  */
 -(BOOL) allocateVertexCapacity: (GLuint) vtxCount {
-	if (_allocatedVertexCapacity == vtxCount) return YES;
-	
-	// If nothing has been allocated yet, ensure that we don't reallocate an externally set pointer
+
+	// If current capacity is zero, we may still have an externally set pointer. clear it now so that
+	// we don't reallocate it, or in case of reverting back to zero, we don't leave the pointer hanging.
 	if (_allocatedVertexCapacity == 0) _vertices = NULL;
-	
+
+	// If nothing is changing, we don't need to do anything else.
+	// Do this after testing for current zero capacity and clearing pointer.
+	if (_allocatedVertexCapacity == vtxCount) return YES;
+
 	GLvoid* newVertices = NULL;
 	
 	// Don't use realloc to free memory that was previously allocated. Behaviour of realloc is
@@ -386,11 +388,11 @@ static GLuint lastAssignedVertexArrayTag;
 -(BOOL) isUsingGLBuffer { return _bufferID != 0; }
 
 -(void) releaseRedundantContent {
-	if (_bufferID && _shouldReleaseRedundantContent) {
-		GLuint currVtxCount = _vertexCount;
-		self.allocatedVertexCapacity = 0;
-		_vertexCount = currVtxCount;		// Maintain vertexCount for drawing
-	}
+	if ( !(_bufferID && _shouldReleaseRedundantContent) ) return;
+
+	GLuint currVtxCount = _vertexCount;
+	self.allocatedVertexCapacity = 0;
+	_vertexCount = currVtxCount;		// Maintain vertexCount for drawing
 }
 
 // Deprecated

@@ -60,11 +60,6 @@
 	// nodes to the CC3Scene, if no customized resource subclass is needed.
 	[self addContentFromPODFile: @"hello-world.pod"];
 	
-	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and to
-	// save memory, release the vertex content in main memory because it is now redundant.
-	[self createGLBuffers];
-	[self releaseRedundantContent];
-	
 	// Select an appropriate shader program for each mesh node in this scene now. If this step
 	// is omitted, a shader program will be selected for each mesh node the first time that mesh
 	// node is drawn. Doing it now adds some additional time up front, but avoids potential pauses
@@ -89,8 +84,15 @@
 	// volume you need, and creating a bounding volume that matches it. Finally, checking
 	// bounding volumes involves a small computation cost. For objects that you know will be
 	// in front of the camera at all times, you can skip creating a bounding volume for that
-	// node, letting it be drawn on each frame.
+	// node, letting it be drawn on each frame. Since the automatic creation of bounding
+	// volumes depends on having the vertex location content in memory, be sure to invoke
+	// this method before invoking the releaseRedundantContent method.
 	[self createBoundingVolumes];
+	
+	// Create OpenGL buffers for the vertex arrays to keep things fast and efficient, and to
+	// save memory, release the vertex content in main memory because it is now redundant.
+	[self createGLBuffers];
+	[self releaseRedundantContent];
 
 	
 	// ------------------------------------------
