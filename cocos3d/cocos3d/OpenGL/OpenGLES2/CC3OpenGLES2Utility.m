@@ -259,6 +259,7 @@ char* CC3GLEnumName(GLenum gle) {
 		case GL_UNSIGNED_SHORT_5_6_5: return "GL_UNSIGNED_SHORT_5_6_5";
 		case GL_UNSIGNED_SHORT_4_4_4_4: return "GL_UNSIGNED_SHORT_4_4_4_4";
 		case GL_UNSIGNED_SHORT_5_5_5_1: return "GL_UNSIGNED_SHORT_5_5_5_1";
+		case GL_DEPTH_COMPONENT: return "GL_DEPTH_COMPONENT";
 			
 		// Shading Model
 		case GL_SHADE_MODEL: return "GL_SHADE_MODEL";

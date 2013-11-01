@@ -502,18 +502,15 @@
 	return self;
 }
 
-// Template method that populates this instance from the specified other instance.
-// This method is invoked automatically during object copying via the copyWithZone: method.
-// A copy is made of the material.
-// The mesh is simply retained, without creating a copy.
-// Both this node and the other node will share the mesh.
 -(void) populateFrom: (CC3MeshNode*) another {
 	[super populateFrom: another];
 	
-	self.mesh = another.mesh;								// retained but not copied
-	CC3Material* matCopy = [another.material copy];
-	self.material = matCopy;								// retained
-	[matCopy release];
+	// Don't use setters, to avoid side effects, including to bounding volume and tex coords.
+	// Both this node and the other node will share the mesh.
+	[_mesh release];
+	_mesh = [another.mesh retain];			// retained but not copied
+	[_material release];
+	_material = [another.material copy];	// retained
 	
 	_pureColor = another.pureColor;
 	_shouldUseSmoothShading = another.shouldUseSmoothShading;
