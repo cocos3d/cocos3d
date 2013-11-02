@@ -179,8 +179,6 @@
  * which is before the controls and templates have been created.
  */
 -(void) didUpdateContentSizeFrom: (CGSize) oldSize {
-	LogDebug(@"Updating size of %@ from %@ to %@", self,
-			 NSStringFromCGSize(oldSize), NSStringFromCGSize(self.contentSize));
 	[super didUpdateContentSizeFrom: oldSize];
 	[self positionControls];
 	[self addTiles];

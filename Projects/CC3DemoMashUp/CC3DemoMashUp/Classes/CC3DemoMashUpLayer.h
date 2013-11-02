@@ -37,8 +37,10 @@
  * A sample application-specific CC3Layer subclass that allows the user to interact with
  * the 3D scene using either gestures or overlay controls such as joysticks and buttons.
  * 
- * By default, this layer uses gestures to interact with the 3D nodes. You can turn gestures
- * off by setting the touchEnabled property to YES in the initializeControls method of this class.
+ * Under iOS, by default, this layer uses gestures to interact with the 3D nodes. You can 
+ * turn gestures off by setting the touchEnabled property to YES in the initializeControls
+ * method of this class. Gesture support under Android is less sophisticated, so by default,
+ * gestures are turned off when running under Android.
  *
  * With touchEnabled set to YES, gestures are turned off, and this layer and scene revert to
  * using basic touch events to interact with the 3D scene. Normally, you would use one or the

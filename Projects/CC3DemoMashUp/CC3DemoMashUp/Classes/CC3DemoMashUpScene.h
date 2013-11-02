@@ -252,8 +252,9 @@ typedef enum {
  * moving forward, back, left and right. By experimenting with these two joysticks, you should be
  * able to navigate the camera all around the 3D scene, looking behind, above, and below objects.
  *
- * You can also move the camera using gestures directly on the screen. A double-finger drag gesture
- * will pan the camera around the scene. And a pinch gesture will move the camera forwards or backwards.
+ * Under iOS, you can also move the camera using gestures directly on the screen. A double-finger
+ * drag gesture will pan the camera around the scene. And a pinch gesture will move the camera
+ * forwards or backwards. Gestures are not used when running under Android or OSX.
  *
  * Using the left joystick, you can redirect the camera to look far away in the direction
  * of the light source by extrapolating a line from the base of the robot arm through the
@@ -578,7 +579,8 @@ typedef enum {
  * Under iOS, you can select to use gestures for user interaction by setting the touchEnabled
  * property of the CC3DemoMashUpLayer to NO in its initializeControls method. If that property
  * is set to NO, the layer will use gestures for input, and if YES, the layer and scene will
- * use basic touch events to interact with the user.
+ * use basic touch events to interact with the user. Gestures are not used when running under
+ * Android or OSX.
  *
  * Under OSX, gestures are not supported, and so mouse events are used for user control.
  *

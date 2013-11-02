@@ -56,6 +56,9 @@
 #define kButtonAdornmentScale			1.5
 #define kHUDPadding						8
 
+// Gesture support under Android is less sophisticated and more challenging than under iOS.
+// When running on Android, avoid using gestures, and use underlying touch events instead.
+#define kShouldAvoidGestures			(APPORTABLE)
 
 @interface CC3Layer (TemplateMethods)
 -(BOOL) handleTouch: (UITouch*) touch ofType: (uint) touchType;
@@ -85,7 +88,7 @@
 	
 	// Set the touchEnabled property to NO to control the scene using iOS gestures,
 	// and to YES to control the scene using lower-level touch events.
-	self.touchEnabled = NO;
+	self.touchEnabled = kShouldAvoidGestures;
 	self.mouseEnabled = YES;	// Under OSX, use mouse events since gestures are not supported.
 	
 	[self addJoysticks];
