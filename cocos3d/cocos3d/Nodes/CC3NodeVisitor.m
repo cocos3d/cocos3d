@@ -436,6 +436,11 @@
 		_camera.viewport = CC3ViewportFromOriginAndSize(kCC3IntPointZero, self.renderSurface.size);
 }
 
+-(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor {
+	self.camera = otherVisitor.camera;
+	self.renderSurface = otherVisitor.renderSurface;
+}
+
 -(void) processBeforeChildren: (CC3Node*) aNode {
 	[self.performanceStatistics incrementNodesVisitedForDrawing];
 	if ([self shouldDrawNode: aNode]) [aNode transformAndDrawWithVisitor: self];

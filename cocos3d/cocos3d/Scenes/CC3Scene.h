@@ -732,7 +732,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  *   - invoke illuminateWithVisitor:        - turns on scene lighting
  *   - visit backdrop with visitor:			- draws an optional fixed backdrop
  *   - visit scene with visitor				- draws the nodes in the drawingSequencer
- *   - invoke drawShadows                   - draws shadows
+ *   - draw shadows using special visitor	- draws shadow volumes
  *
  * You can override this method to customize the scene rendering flow, such as performing
  * multiple rendering passes on different surfaces, or adding post-processing effects, using
@@ -788,8 +788,15 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
  */
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor;
 
-/** Template method that draws shadows with the visitor in the shadowVisitor property. */
--(void) drawShadows;
+/**
+ * Template method that draws shadows.
+ *
+ * The visitor passed in here should be the specialized visitor held in the shadowVisitor property.
+ * Before invoking this method, you can invoke the alignShotWith: method on the shadowVisitor to
+ * align the camera and renderSurface properties of the shadowVisitor with that of the main
+ * drawing visitor.
+ */
+-(void) drawShadowsWithVisitor:  (CC3NodeDrawingVisitor*) visitor;
 
 /**
  * Template method that turns on lighting of the 3D scene.

@@ -2613,8 +2613,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
 	[visitor visit: self];					// Draw the scene components
-	[self drawShadows];						// Shadows are drawn with a different visitor
 	
+	// Shadows are drawn with a specialized visitor
+	[self.shadowVisitor alignShotWith: visitor];
+	[self drawShadowsWithVisitor: self.shadowVisitor];
+
 	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
 	// to the view surface.
 	if (isPostProcessing) {
@@ -2633,90 +2636,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		visitor.camera.viewport = vvp;		// Now set the viewport back to the layer's size.
 	}
 }
-
-//-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	
-//	[self illuminateWithVisitor: visitor];			// Light up your world!
-//	
-//	// If the TV is on and the TV is in the field of view of the primary camera viewing
-//	// the scene, draw the scene to the TV screen.
-//	if (_isTVOn && [_tvScreen doesIntersectFrustum: visitor.camera.frustum]) [self drawToTVScreen];
-//	
-//	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
-//	// environment-map cube-map texture for it by taking snapshots of the scene in all
-//	// six axis directions from its position.
-//	[self generateTeapotEnvironmentMapWithVisitor: visitor];
-//	
-//	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
-//	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
-//	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
-//	
-//	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
-//	// if first. Otherwise, draw to view surface directly, without clearing because it
-//	// was done at the beginning of the rendering cycle.
-//	CC3Viewport vvp;
-//	if (isPostProcessing) {
-//		
-//		vvp = visitor.camera.viewport;
-//		visitor.camera.viewport = kCC3ViewportZero;
-//		
-//		visitor.renderSurface = _preProcSurface;
-//		[_preProcSurface clearColorAndDepthContent];
-//	} else
-//		visitor.renderSurface = self.viewSurface;
-//	
-//	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
-//	[visitor visit: self];					// Draw the scene components
-//	[self drawShadows];						// Shadows are drawn with a different visitor
-//	
-//	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
-//	// to the view surface
-//	if (isPostProcessing) {
-//		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
-//		visitor.camera.viewport = vvp;
-//		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
-//		[visitor visit: imgNode];
-//	}
-//}
-
-//-(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-//	
-//	[self illuminateWithVisitor: visitor];			// Light up your world!
-//	
-//	// If the TV is on and the TV is in the field of view of the primary camera viewing
-//	// the scene, draw the scene to the TV screen.
-//	if (_isTVOn && [_tvScreen doesIntersectFrustum: visitor.camera.frustum]) [self drawToTVScreen];
-//	
-//	// As a pre-processing pass, if the reflective metal teapot is visible, generate an
-//	// environment-map cube-map texture for it by taking snapshots of the scene in all
-//	// six axis directions from its position.
-//	[self generateTeapotEnvironmentMapWithVisitor: visitor];
-//	
-//	BOOL isDisplayingAsGrayscale = (_lightingType == kLightingGrayscale);
-//	BOOL isDisplayingAsDepth = (_lightingType == kLightingDepth);
-//	BOOL isPostProcessing = isDisplayingAsGrayscale || isDisplayingAsDepth;
-//	
-//	// If displaying grayscale or depth buffer, draw to an off-screen surface, clearing
-//	// if first. Otherwise, draw to view surface directly, without clearing because it
-//	// was done at the beginning of the rendering cycle.
-//	if (isPostProcessing) {
-//		visitor.renderSurface = _preProcSurface;
-//		[_preProcSurface clearColorAndDepthContent];
-//	} else
-//		visitor.renderSurface = self.viewSurface;
-//	
-//	[visitor visit: self.backdrop];			// Draw the backdrop if it exists
-//	[visitor visit: self];					// Draw the scene components
-//	[self drawShadows];						// Shadows are drawn with a different visitor
-//	
-//	// If displaying grayscale or depth buffer, draw the corresponding off-screen surface
-//	// to the view surface
-//	if (isPostProcessing) {
-//		CC3MeshNode* imgNode = isDisplayingAsDepth ? _depthImageNode : _grayscaleNode;
-//		visitor.renderSurface = self.viewSurface;		// Ensure drawing to the view
-//		[visitor visit: imgNode];
-//	}
-//}
 
 /**
  * When drawing an environment map, don't bother with shadows, avoid all the post-rendering
@@ -3717,22 +3636,26 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		[aNode removeShadowVolumesForLight: _robotLamp];
 		LogInfo(@"Removed shadow from: %@", aNode);
 	} else {
-		[aNode addShadowVolumesForLight: _robotLamp];
-		
-		// In case we've added a shadow to the robot arm structure, make sure we remove
-		// the shadow on the billboard label it's carrying, because billboards with
-		// transparency don't shadow well.
-		[[self getNodeNamed: kBillboardName] removeShadowVolumes];
-		
-		// The wooden sign is a planar mesh with no "other side", so it requires special
-		// configuration. We indicate that we want to shadow back faces as well as front
-		// faces, and we use vertex offsetting instead of decal offsetting.
-		if (aNode == _woodenSign) {
-			aNode.shouldShadowBackFaces = YES;
-			aNode.shadowOffsetUnits = 0;
-			aNode.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;
-		}
-		LogInfo(@"Added shadow to: %@", aNode);
+		// Since we're already running, spawn a background threaded task to create and
+		// populate the shadow volume, in order to reduce any unwanted animation pauses.
+		[self.viewSurfaceManager.backgrounder runBlock: ^{
+			[aNode addShadowVolumesForLight: _robotLamp];
+			
+			// In case we've added a shadow to the robot arm structure, make sure we remove
+			// the shadow on the billboard label it's carrying, because billboards with
+			// transparency don't shadow well.
+			[[self getNodeNamed: kBillboardName] removeShadowVolumes];
+			
+			// The wooden sign is a planar mesh with no "other side", so it requires special
+			// configuration. We indicate that we want to shadow back faces as well as front
+			// faces, and we use vertex offsetting instead of decal offsetting.
+			if (aNode == _woodenSign) {
+				aNode.shouldShadowBackFaces = YES;
+				aNode.shadowOffsetUnits = 0;
+				aNode.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;
+			}
+			LogInfo(@"Added shadow to: %@", aNode);
+		}];
 	}
 }
 

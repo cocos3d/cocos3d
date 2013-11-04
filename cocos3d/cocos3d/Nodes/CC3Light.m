@@ -508,7 +508,7 @@
 	// value in the stencil (and that pass the depth test) will be painted.
 	[gl setStencilFunc: GL_NOTEQUAL reference: 0 mask: ~0];
 	
-	// Don't waste time updaing the stencil buffer now.
+	// Don't waste time updating the stencil buffer now.
 	gl.stencilMask = 0;
 	
 	// Paint the shadow to the screen. Only areas that have been marked as being

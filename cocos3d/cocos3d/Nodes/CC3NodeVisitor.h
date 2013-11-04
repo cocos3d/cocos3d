@@ -478,6 +478,16 @@
 @property(nonatomic, assign) BOOL isDrawingEnvironmentMap;
 
 /**
+ * Aligns this visitor to use the same camera and rendering surface as the specified visitor.
+ *
+ * The camera and renderSurface properties of this visitor are set to those of the specified visitor.
+ *
+ * You can use this method to ensure that a secondary visitor (such as a shadow visitor, 
+ * or picking visitor), makes use of the same camera and surface as the primary visitor.
+ */
+-(void) alignShotWith: (CC3NodeDrawingVisitor*) otherVisitor;
+
+/**
  * Draws the specified node. Invoked by the node itself when the node's local
  * content is to be drawn.
  *

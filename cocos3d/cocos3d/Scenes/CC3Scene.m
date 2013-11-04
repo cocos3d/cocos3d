@@ -395,7 +395,10 @@
 	[self illuminateWithVisitor: visitor];		// Light up your world!
 	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
 	[visitor visit: self];						// Draw the scene components
-	[self drawShadows];							// Shadows are drawn with a different visitor
+	
+	// Shadows are drawn with a specialized visitor
+	[_shadowVisitor alignShotWith: visitor];
+	[self drawShadowsWithVisitor: _shadowVisitor];
 }
 
 -(void) drawSceneContentForEnvironmentMapWithVisitor: (CC3NodeDrawingVisitor*) visitor {
@@ -498,8 +501,6 @@
 }
 
 -(BOOL) doesContainShadows { return _shadowVisitor != nil; }
-
--(void) drawShadows { [self drawShadowsWithVisitor: _shadowVisitor]; }
 
 /** Template method to draw shadows cast by the lights. */
 -(void) drawShadowsWithVisitor:  (CC3NodeDrawingVisitor*) visitor {

@@ -52,36 +52,6 @@
 #pragma mark -
 #pragma mark CC3ShadowVolumeMeshNode
 
-@interface CC3ShadowVolumeMeshNode (TemplateMethods)
--(void) createShadowMesh;
--(void) checkShadowMaterial;
--(void) populateShadowMesh;
--(void) updateStencilAlgorithm;
--(CC3Vector4) shadowVolumeVertexOffsetForLightAt: (CC3Vector4) localLightPos;
--(BOOL) addShadowVolumeCapFor: (BOOL) isFaceLit
-						 face: (CC3Vector4*) vertices
-				   forLightAt: (CC3Vector4) lightPosition
-			  startingAtIndex: (GLuint*) shdwVtxIdx;
--(BOOL) addTerminatorLineFrom: (CC3Vector4) edgeStartLoc
-						   to: (CC3Vector4) edgeEndLoc
-			  startingAtIndex: (GLuint*) shdwVtxIdx;
--(BOOL) addShadowVolumeSideFrom: (CC3Vector4) edgeStartLoc
-							 to: (CC3Vector4) edgeEndLoc
-		  forDirectionalLightAt: (CC3Vector4) lightPosition
-				startingAtIndex: (GLuint*) shdwVtxIdx;
--(BOOL) addShadowVolumeSideFrom: (CC3Vector4) edgeStartLoc
-							 to: (CC3Vector4) edgeEndLoc
-						withCap: (BOOL) doesRequireCapping
-		   forLocationalLightAt: (CC3Vector4) lightPosition
-				startingAtIndex: (GLuint*) shdwVtxIdx;
--(CC3Vector4) expand: (CC3Vector4) edgeLoc awayFromLocationalLightAt: (CC3Vector4) lightLoc;
--(void) drawToStencilIncrementing: (BOOL) isIncrementing
-					  withVisitor: (CC3NodeDrawingVisitor*) visitor;
-@property(nonatomic, readonly) CC3MeshNode* shadowCaster;
-@property(nonatomic, readonly) BOOL isReadyToUpdate;
-@end
-
-
 @implementation CC3ShadowVolumeMeshNode
 
 @synthesize light=_light, shouldDrawTerminator=_shouldDrawTerminator;
@@ -878,7 +848,7 @@
 	return self;
 }
 
--(BOOL) shouldDrawNode: (CC3Node*) aNode { return ((CC3ShadowVolumeMeshNode*)aNode).isShadowVisible; }
+-(BOOL) shouldDrawNode: (CC3Node*) aNode { return aNode.isShadowVisible; }
 
 @end
 
@@ -1033,6 +1003,12 @@
 		child.shouldAddShadowVolumeEndCapsOnlyWhenNeeded = onlyWhenNeeded;
 }
 
+-(void) prewarmForShadowVolumes {
+	for (CC3Node* child in _children) [child prewarmForShadowVolumes];
+}
+
+-(BOOL) isShadowVisible { return NO; }
+
 @end
 
 
@@ -1046,24 +1022,40 @@
 	
 	NSString* svName = [NSString stringWithFormat: @"%@-SV-%@", self.name, aLight.name];
 	CC3Node<CC3ShadowProtocol>* sv = [[self shadowVolumeClass] nodeWithName: svName];
-	[aLight addShadow: sv];			// Add to light before notifying scene a descendant has been added
-	[self addChild: sv];
-	LogTrace(@"Added shadow volume %@ to %@", sv, self);
-
-//	sv.visible = YES;		// Uncomment to show all the shadow volumes
+	[sv selectShaderPrograms];
+//	sv.visible = YES;		// Uncomment to show the shadow volume itself !
 	
 	// Retain data required to build shadow volume mesh
 	[self retainVertexLocations];
 	[self retainVertexIndices];
 	self.shouldCacheFaces = YES;
+	
+	[self prewarmForShadowVolumes];		// Force heavy face calcs now instead of lazily during drawing.
 
 	// Set the active camera to infinite depth of field to accomodate infinite shadow volumes
 	self.activeCamera.hasInfiniteDepthOfField = YES;
+
+	[aLight addShadow: sv];			// Add to light before notifying scene a descendant has been added
+	[self addChild: sv];			// The last thing we do is add the SV to the scene...
+									// ...because we might be doing this on a background thread.
+	LogTrace(@"Added shadow volume %@ to %@", sv, self);
 
 	[super addShadowVolumesForLight: aLight];
 }
 
 -(id) shadowVolumeClass { return [CC3ShadowVolumeMeshNode class]; }
+
+-(void) prewarmForShadowVolumes {
+	if (self.faceCount == 0) return;
+
+	// Sample each face characteristics used during shadow volume creation,
+	// in order to force the face characteristics to be lazily populated.
+	[self deformedFaceAt: 0];
+	[self deformedFacePlaneAt: 0];
+	[self faceNeighboursAt: 0];
+	
+	[super prewarmForShadowVolumes];
+}
 
 @end
 
