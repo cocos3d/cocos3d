@@ -39,6 +39,15 @@
 #import "CC3IOSExtensions.h"
 #import "CC3Actions.h"
 
+/** Scale and position the buttons so they are usable at various screen resolutions. */
+#if APPORTABLE
+#	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
+#	define kControlPositionScale	kControlSizeScale
+#else
+#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlPositionScale	1.0
+#endif	// APPORTABLE
+
 // Model names
 #define kBoxName				@"Box"
 #define kBeachBallName			@"BeachBall"
@@ -52,8 +61,8 @@
 
 #define kArrowUpButtonFileName	@"ArrowUpButton48x48.png"
 #define kButtonRingFileName		@"ButtonRing48x48.png"
-#define kGridPadding 4
-#define kMinTileSideLen 8
+#define kGridPadding			(4 * kControlPositionScale)
+#define kMinTileSideLen			(8 * kControlPositionScale)
 
 
 // MainLayer implementation
@@ -100,8 +109,9 @@
 }
 
 -(void) addLabel {
-	_label = [CCLabelTTF labelWithString:@"Tiles: 888" fontName:@"Arial" fontSize: 22];
-	_label.anchorPoint = ccp(1.0, 0.0);		// Alight bottom-right
+	_label = [CCLabelTTF labelWithString:@"Tiles: 888" fontName:@"Arial" fontSize: 20];
+	_label.anchorPoint = ccp(1.0, 0.0);		// Align bottom-right
+	_label.scale = kControlPositionScale;	// Scale text for Android
 	[self addChild: _label z: 10];			// Draw on top
 }
 
@@ -144,6 +154,7 @@
 	// Attach the adornment to the menu item and center it on the menu item
 	adornment.position = ccpCompMult(ccpFromSize(mi.contentSize), mi.anchorPoint);
 	mi.adornment = adornment;
+	mi.scale = kControlSizeScale;
 	
 	CCMenu* viewMenu = [CCMenu menuWithItems: mi, nil];
 	viewMenu.position = CGPointZero;
@@ -161,12 +172,12 @@
 	GLfloat xPos, yPos;
 	GLfloat middle = self.contentSize.height / 2.0;
 
-	xPos = self.contentSize.width - (_increaseNodesMI.contentSize.width / 2.0);
+	xPos = self.contentSize.width - (_increaseNodesMI.contentSize.width / 2.0) * kControlSizeScale;
 
-	yPos = middle + (_increaseNodesMI.contentSize.height / 2.0);
+	yPos = middle + (_increaseNodesMI.contentSize.height / 2.0) * kControlSizeScale;
 	_increaseNodesMI.position = ccp(xPos, yPos);
 	
-	yPos = middle - (_decreaseNodesMI.contentSize.height / 2.0);
+	yPos = middle - (_decreaseNodesMI.contentSize.height / 2.0) * kControlSizeScale;
 	_decreaseNodesMI.position = ccp(xPos, yPos);
 	
 	_label.position =  ccp(self.contentSize.width , 0.0);
@@ -265,7 +276,7 @@
 -(void) addTiles {
 	[self removeTiles];
 	CGSize mySize = self.contentSize;
-	CGSize gridSize = CGSizeMake(mySize.width - _increaseNodesMI.contentSize.width,
+	CGSize gridSize = CGSizeMake(mySize.width - (_increaseNodesMI.contentSize.width * kControlSizeScale),
 								 mySize.height - kGridPadding);
 	CGSize tileSize = CGSizeMake(gridSize.width / _tilesPerSide - kGridPadding,
 								 gridSize.height / _tilesPerSide - kGridPadding);

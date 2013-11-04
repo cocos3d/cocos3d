@@ -34,18 +34,28 @@
 #import "ccMacros.h"
 
 
+/** Scale and position the buttons so they are usable at various screen resolutions. */
+#if APPORTABLE
+#	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
+#	define kControlPositionScale	kControlSizeScale
+#else
+#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlPositionScale	1.0
+#endif	// APPORTABLE
+
 /** Parameters for setting up the joystick and button controls */
-#define kJoystickThumbFileName  @"JoystickThumb.png"
-#define kJoystickSideLength  80.0
-#define kJoystickSidePadding  8.0
-#define kJoystickBottomPadding  12.0
-#define kStatsLineSpacing 16.0
-#define kAdornmentRingThickness  4.0
-#define kArrowUpButtonFileName @"ArrowUpButton48x48.png"
-#define kAnimateNodesButtonFileName @"GridButton48x48.png"
-#define kButtonRingFileName @"ButtonRing48x48.png"
-#define kPeakShineOpacity 255
-#define kButtonAdornmentScale 1.5
+#define kJoystickSideLength		(80.0 * kControlPositionScale)
+#define kJoystickSidePadding	(8.0 * kControlPositionScale)
+#define kJoystickBottomPadding	(12.0 * kControlPositionScale)
+#define kStatsLineSpacing		(16.0 * kControlPositionScale)
+#define kAdornmentRingThickness	(4.0 * kControlPositionScale)
+
+#define kJoystickThumbFileName		@"JoystickThumb.png"
+#define kArrowUpButtonFileName		@"ArrowUpButton48x48.png"
+#define kAnimateNodesButtonFileName	@"GridButton48x48.png"
+#define kButtonRingFileName			@"ButtonRing48x48.png"
+#define kPeakShineOpacity			255
+#define kButtonAdornmentScale		1.5
 
 @implementation CC3PerformanceLayer
 
@@ -89,13 +99,9 @@
 -(void) addJoysticks {
 	CCSprite* jsThumb;
 	
-	// Change thumb scale if you like smaller or larger controls.
-	// Initially, just compensate for Retina display.
-	GLfloat thumbScale = CC_CONTENT_SCALE_FACTOR();
-	
 	// The joystick that controls the player's (camera's) direction
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = thumbScale;
+	jsThumb.scale = kControlSizeScale;
 	
 	_directionJoystick = [Joystick joystickWithThumb: jsThumb
 											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
@@ -105,7 +111,7 @@
 	
 	// The joystick that controls the player's (camera's) location
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = thumbScale;
+	jsThumb.scale = kControlSizeScale;
 	
 	_locationJoystick = [Joystick joystickWithThumb: jsThumb
 										   andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
@@ -153,24 +159,29 @@
 	// Add button to allow user to increase the number of nodes in the 3D scene.
 	_increaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(increaseNodesSelected:)];
+	_increaseNodesMI.scale = kControlSizeScale;
 
 	// Add button to allow user to decrease the number of nodes in the 3D scene.
 	_decreaseNodesMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(decreaseNodesSelected:)];
 	_decreaseNodesMI.rotation = 180.0f;
+	_decreaseNodesMI.scale = kControlSizeScale;
 	
 	// Add button to allow user to select the next node type.
 	_nextNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(nextNodeTypeSelected:)];
+	_nextNodeTypeMI.scale = kControlSizeScale;
 	
 	// Add button to allow user to select the previous node type.
 	_prevNodeTypeMI = [self addButtonWithImageFile: kArrowUpButtonFileName
 									  withSelector: @selector(prevNodeTypeSelected:)];
 	_prevNodeTypeMI.rotation = 180.0f;
+	_prevNodeTypeMI.scale = kControlSizeScale;
 	
 	// Add button to allow user to increase the number of nodes in the 3D scene.
 	_animateNodesMI = [self addButtonWithImageFile: kAnimateNodesButtonFileName
 									  withSelector: @selector(animateNodesSelected:)];
+	_animateNodesMI.scale = kControlSizeScale;
 	
 	[self positionButtons];
 }
@@ -179,6 +190,7 @@
 -(CCLabelBMFont*) addStatsLabel: (NSString*) labelText {
 	CCLabelBMFont* aLabel = [CCLabelBMFont labelWithString: labelText fntFile:@"arial16.fnt"];
 	[aLabel setAnchorPoint: ccp(0.0, 0.0)];
+	aLabel.scale = kControlSizeScale;
 	[self addChild: aLabel];
 	return aLabel;
 }
@@ -231,20 +243,20 @@
 -(void) positionButtons {
 	GLfloat xPos;
 	GLfloat middle = self.contentSize.width / 2.0;
-	GLfloat yPosTop = ((kJoystickSideLength + _increaseNodesMI.contentSize.height) / 2.0)
+	GLfloat yPosTop = ((kJoystickSideLength + _increaseNodesMI.contentSize.height * kControlSizeScale) / 2.0)
 						+ kJoystickBottomPadding - kAdornmentRingThickness;
-	GLfloat yPosBtm = ((kJoystickSideLength - _decreaseNodesMI.contentSize.height) / 2.0)
+	GLfloat yPosBtm = ((kJoystickSideLength - _decreaseNodesMI.contentSize.height * kControlSizeScale) / 2.0)
 						+ kJoystickBottomPadding + kAdornmentRingThickness;
 	GLfloat yPosMid = (kJoystickSideLength / 2.0) + kJoystickBottomPadding;
 
-	xPos = middle - (_increaseNodesMI.contentSize.width);
+	xPos = middle - (_increaseNodesMI.contentSize.width * kControlSizeScale);
 	_increaseNodesMI.position = ccp(xPos, yPosTop);
 	_decreaseNodesMI.position = ccp(xPos, yPosBtm);
 
 	xPos = middle;
 	_animateNodesMI.position = ccp(xPos, yPosMid);
 	
-	xPos = middle + (_nextNodeTypeMI.contentSize.width);
+	xPos = middle + (_nextNodeTypeMI.contentSize.width * kControlSizeScale);
 	_nextNodeTypeMI.position = ccp(xPos, yPosTop);
 	_prevNodeTypeMI.position = ccp(xPos, yPosBtm);
 }

@@ -38,11 +38,21 @@
 #import "ccMacros.h"
 
 
+/** Scale and position the buttons so they are usable at various screen resolutions. */
+#if APPORTABLE
+#	define kControlSizeScale		(MAX(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) / 1024.0f)
+#	define kControlPositionScale	kControlSizeScale
+#else
+#	define kControlSizeScale		CC_CONTENT_SCALE_FACTOR()
+#	define kControlPositionScale	1.0
+#endif	// APPORTABLE
+
 /** Parameters for setting up the joystick and button controls */
+#define kJoystickSideLength				(80.0 * kControlPositionScale)
+#define kButtonGrid						(40.0 * kControlPositionScale)
+#define kJoystickPadding				(8.0 * kControlPositionScale)
+#define kHUDPadding						(8.0 * kControlPositionScale)
 #define kJoystickThumbFileName			@"JoystickThumb.png"
-#define kJoystickSideLength				80.0
-#define kJoystickPadding				8.0
-#define kButtonGrid						40.0
 #define kSwitchViewButtonFileName		@"ArrowLeftButton48x48.png"
 #define kInvasionButtonFileName			@"GridButton48x48.png"
 #define kSunlightButtonFileName			@"SunlightButton48x48.png"
@@ -54,7 +64,7 @@
 #define kGlobeName						@"Globe"
 #define kPeakShineOpacity				180
 #define kButtonAdornmentScale			1.5
-#define kHUDPadding						8
+
 
 // Gesture support under Android is less sophisticated and more challenging than under iOS.
 // When running on Android, avoid using gestures, and use underlying touch events instead.
@@ -104,13 +114,9 @@
 -(void) addJoysticks {
 	CCSprite* jsThumb;
 
-	// Change thumb scale if you like smaller or larger controls.
-	// Initially, just compensate for Retina display.
-	GLfloat thumbScale = CC_CONTENT_SCALE_FACTOR();
-
 	// The joystick that controls the player's (camera's) direction
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = thumbScale;
+	jsThumb.scale = kControlSizeScale;
 	
 	directionJoystick = [Joystick joystickWithThumb: jsThumb
 											andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
@@ -129,7 +135,7 @@
 	
 	// The joystick that controls the player's (camera's) location
 	jsThumb = [CCSprite spriteWithFile: kJoystickThumbFileName];
-	jsThumb.scale = thumbScale;
+	jsThumb.scale = kControlSizeScale;
 	
 	locationJoystick = [Joystick joystickWithThumb: jsThumb
 										   andSize: CGSizeMake(kJoystickSideLength, kJoystickSideLength)];
@@ -148,6 +154,7 @@
 												 selectedImage: kSwitchViewButtonFileName
 														target: self
 													  selector: @selector(switchViewSelected:)];
+	switchViewMI.scale = kControlSizeScale;
 	[self positionButtons];
 	
 	// Instead of having different normal and selected images, the toggle menu item uses an
@@ -192,6 +199,7 @@
 											   selectedImage: kInvasionButtonFileName
 													  target: self
 													selector: @selector(invade:)];
+	invasionMI.scale = kControlSizeScale;
 	[self positionButtons];
 	
 	// Instead of having different normal and selected images, the toggle menu item uses an
@@ -224,6 +232,7 @@
 											   selectedImage: kSunlightButtonFileName
 													  target: self
 													selector: @selector(cycleLights:)];
+	sunlightMI.scale = kControlSizeScale;
 	[self positionButtons];
 	
 	// Instead of having different normal and selected images, the toggle menu item uses an
@@ -257,6 +266,7 @@
 										   selectedImage: kZoomButtonFileName
 												  target: self
 												selector: @selector(cycleZoom:)];
+	zoomMI.scale = kControlSizeScale;
 	[self positionButtons];
 	
 	// Instead of having different normal and selected images, the toggle menu
@@ -292,6 +302,7 @@
 	shadowMI = [AdornableMenuItemToggle itemWithTarget: self
 											  selector: @selector(toggleShadows:)
 												 items: sb, sbl, nil];
+	shadowMI.scale = kControlSizeScale;
 	[self positionButtons];
 	
 	// Instead of having different normal and selected images, the toggle menu
