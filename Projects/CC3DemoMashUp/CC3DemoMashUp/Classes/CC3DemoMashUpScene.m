@@ -382,6 +382,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Other weakly-cached PFX resources will have been automatically removed already.
 	[CC3PFXResource removeAllResources];
 
+	_shouldAllowShadows = YES;
+
 	LogRez(@"Finished loading on background thread!");
 }
 
@@ -392,6 +394,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) initCustomState {
 	
+	_shouldAllowShadows = NO;
 	_isManagingShadows = NO;
 	_playerDirectionControl = CGPointZero;
 	_playerLocationControl = CGPointZero;
@@ -1264,6 +1267,9 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	bb.location = cc3v( 0.0, 90.0, 0.0 );
 	bb.shouldAutotargetCamera = YES;
 
+	// Billboards with transparency don't shadow well, so don't let this billboard cast a shadow.
+	bb.shouldCastShadows = NO;
+
 	[[self getNodeNamed: kRobotTopArm] addChild: bb];
 	
 	// 2) Overlaid above the 3D scene.
@@ -1356,6 +1362,13 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Allow the wooden sign to be viewed when the camera goes behind.
 	_woodenSign.shouldCullBackFaces = NO;
+	
+	// The wooden sign is a planar mesh with no "other side", so it requires special
+	// configuration when applying shadow volumes. We indicate that we want to shadow back
+	// faces as well as front faces, and we use vertex offsetting instead of decal offsetting.
+	_woodenSign.shouldShadowBackFaces = YES;
+	_woodenSign.shadowOffsetUnits = 0;
+	_woodenSign.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;
 	
 	// Add the wooden sign to the bump-map light tracker so that when the bump-map
 	// texture overlay is displayed, it will interact with the light source.
@@ -1863,11 +1876,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	_tvScreen.name = kTVScreenName;							// Give it a more friendly name
 	_tvScreen.diffuseColor = kCCC4FWhite;
 	_tvScreen.shouldUseLighting = NO;
-	_tvScreen.shouldCullFrontFaces = YES;		// But don't paint both front and back of screen
+	_tvScreen.shouldCullFrontFaces = YES;		// Don't paint both front and back of screen
 	
 	// Start with a test card displayed on the TV
+	// Keep the mesh texture coordinates in memory so we can swap textures of different sizes
 	_tvTestCardTex = [[CC3Texture textureFromFile: kTVTestCardFile] retain];
 	_tvScreen.texture = _tvTestCardTex;
+	[_tvScreen retainVertexTextureCoordinates];
 	
 	// TV is added on on background thread. Configure it for the scene, and fade it in slowly.
 	[self configureForScene: tv andMaterializeWithDuration: kFadeInDuration];
@@ -1920,6 +1935,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
  * instead of from the initializeScene method,
  */
 -(void) addPostProcessing {
+#if !CC3_OGLES_1	// Depth-texture not supported in OpenGL ES 1
+
 	// Create the offscreen framebuffer with the same size and characteristics as the view's
 	// rendering surface, add color and depth texture attachments, and register the surface
 	// with the view's surface manager, so that this surface will be resized automatically
@@ -1944,6 +1961,8 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the depth of field as a grayscale gradient.
 	_depthImageNode = [[CC3ClipSpaceNode nodeWithTexture: _preProcSurface.depthTexture] retain];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
+
+#endif	// !CC3_OGLES_1
 }
 
 /**
@@ -2981,7 +3000,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 			_lightingType = kLightingFlashlight;
 			break;
 		case kLightingFlashlight:
+#if CC3_OGLES_1
+			_lightingType = kLightingSun;	// Depth-texture not supported in OpenGL ES 1
+#else
 			_lightingType = kLightingGrayscale;
+#endif	// CC3_OGLES_1
 			break;
 		case kLightingGrayscale:
 			_lightingType = kLightingDepth;
@@ -3628,6 +3651,9 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 /** Cycles through a variety of shadowing options for the specified node. */
 -(void) cycleShadowFor: (CC3Node*) aNode {
 	
+	// Don't add shadows while async loading is happening
+	if ( !_shouldAllowShadows ) return;
+	
 	// Don't add a shadow to the ground
 	if (aNode == _ground) return;
 
@@ -3640,20 +3666,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 		// populate the shadow volume, in order to reduce any unwanted animation pauses.
 		[self.viewSurfaceManager.backgrounder runBlock: ^{
 			[aNode addShadowVolumesForLight: _robotLamp];
-			
-			// In case we've added a shadow to the robot arm structure, make sure we remove
-			// the shadow on the billboard label it's carrying, because billboards with
-			// transparency don't shadow well.
-			[[self getNodeNamed: kBillboardName] removeShadowVolumes];
-			
-			// The wooden sign is a planar mesh with no "other side", so it requires special
-			// configuration. We indicate that we want to shadow back faces as well as front
-			// faces, and we use vertex offsetting instead of decal offsetting.
-			if (aNode == _woodenSign) {
-				aNode.shouldShadowBackFaces = YES;
-				aNode.shadowOffsetUnits = 0;
-				aNode.shadowVolumeVertexOffsetFactor = kCC3DefaultShadowVolumeVertexOffsetFactor;
-			}
 			LogInfo(@"Added shadow to: %@", aNode);
 		}];
 	}

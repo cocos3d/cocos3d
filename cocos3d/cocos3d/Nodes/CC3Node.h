@@ -251,8 +251,9 @@ typedef enum {
 	BOOL _shouldUseFixedBoundingVolume : 1;
 	BOOL _shouldStopActionsWhenRemoved : 1;
 	BOOL _isAnimationDirty : 1;
-	BOOL _cascadeColorEnabled;
-	BOOL _cascadeOpacityEnabled;
+	BOOL _cascadeColorEnabled : 1;
+	BOOL _cascadeOpacityEnabled : 1;
+	BOOL _shouldCastShadows : 1;	// Used by subclasses - held here for conciseness
 }
 
 /**
@@ -2804,6 +2805,18 @@ typedef enum {
  * been added to the CC3Scene, either by itself, or as part of a node assembly.
  */
 -(void) checkDrawingOrder;
+
+/**
+ * Indicates whether this node should cast shadows, if shadows are applied to the node
+ * hierarchy to which this node belongs.
+ *
+ * Setting the value of this property sets the value of this property in all descendent nodes.
+ *
+ * The initial value of this property is YES. You can set the value of this property to NO
+ * on specific nodes that you do not want to cast shadows when shadows are applied to a
+ * hierarchy of nodes.
+ */
+@property(nonatomic, assign) BOOL shouldCastShadows;
 
 /**
  * Returns whether drawing should be performed in clip-space.

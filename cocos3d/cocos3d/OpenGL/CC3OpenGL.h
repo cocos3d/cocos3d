@@ -1061,6 +1061,19 @@ typedef struct {
 /** Returns an array containing the names of the GL extensions supported by the platform. */
 @property(nonatomic, readonly) NSArray* extensions;
 
+/**
+ * Returns whether this platform supports the GL extension with the specified name, which
+ * should be a string beginning with "GL_", and finishing with the name of the GL extension,
+ * as registered with the OpenGL standards bodies, or as specified by the GPU driver 
+ * manufacturer (eg. @"GL_OES_packed_depth_stencil").
+ *
+ * This method involves string comparisons in the internal collection of extension names.
+ * You should not use this test in time-critical code. If you need to frequently test for the
+ * presence of an extension (for example, within the render loop), you should invoke this method
+ * once at the beginning of your app, and cache the resulting boolean value elsewhere in your code.
+ */
+-(BOOL) supportsExtension: (NSString*) extensionName;
+
 
 #pragma mark Shaders
 

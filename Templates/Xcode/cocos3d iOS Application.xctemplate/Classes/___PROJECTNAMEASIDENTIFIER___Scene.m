@@ -249,9 +249,11 @@
  * re-established automatically, and any 2D billboard overlays will be rendered. This method
  * does not need to take care of any of this set-up and tear-down.
  *
- * This implementation turns on the lighting contained within the scene, and performs a single
- * rendering pass of the nodes in the scene by invoking the visit: method on the specified
- * visitor, with this scene as the argument.
+ * This implementation simply invokes the default parent behaviour, which turns on the lighting
+ * contained within the scene, and performs a single rendering pass of the nodes in the scene 
+ * by invoking the visit: method on the specified visitor, with this scene as the argument.
+ * Review the source code of the CC3Scene drawSceneContentWithVisitor: to understand the
+ * implementation details, and as a starting point for customization.
  *
  * You can override this method to customize the scene rendering flow, such as performing
  * multiple rendering passes on different surfaces, or adding post-processing effects, using
@@ -283,10 +285,7 @@
  * method for more info about managing the depth buffer.
  */
 -(void) drawSceneContentWithVisitor: (CC3NodeDrawingVisitor*) visitor {
-	[self illuminateWithVisitor: visitor];		// Light up your world!
-	[visitor visit: self.backdrop];				// Draw the backdrop if it exists
-	[visitor visit: self];						// Draw the scene components
-	[self drawShadows];							// Shadows are drawn with a different visitor
+	[super drawSceneContentWithVisitor: visitor];
 }
 
 

@@ -1018,7 +1018,8 @@
 @implementation CC3MeshNode (ShadowVolumes)
 
 -(void) addShadowVolumesForLight: (CC3Light*) aLight {
-	if ( [self getShadowVolumeForLight: aLight] ) return;
+	// If I shouldn't cast a shadow, or if I already have a shadow volume, just leave.
+	if ( !self.shouldCastShadows || [self getShadowVolumeForLight: aLight] ) return;
 	
 	NSString* svName = [NSString stringWithFormat: @"%@-SV-%@", self.name, aLight.name];
 	CC3Node<CC3ShadowProtocol>* sv = [[self shadowVolumeClass] nodeWithName: svName];

@@ -65,6 +65,7 @@
     //   "write_settings"
     //   "xperia"
 	"FEATURES": ["opengles2"],
+//	"FEATURES": [],					// If using OpenGLES 1.1
 
     // Preferred way of handling URLs in the code.
     // Leave it null for most cases.

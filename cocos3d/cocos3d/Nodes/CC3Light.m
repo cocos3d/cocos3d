@@ -342,7 +342,20 @@
 	super.shouldCastShadowsWhenInvisible = shouldCast;
 }
 
+/**
+ * If this action is occuring on a background thread, and this node is already part of the
+ * scene being rendered, the operation is queued for execution on the rendering thread, to
+ * avoid the possibility of adding a shadow in the middle of a render iteration.
+ */
 -(void) addShadow: (id<CC3ShadowProtocol>) aShadowNode {
+	if ( !CC3OpenGL.sharedGL.isPrimaryContext && self.scene )
+		[self addShadowFromBackgroundThread: aShadowNode];
+	else
+		[self addShadowNow: aShadowNode];
+}
+
+/** Adds the specified shadow to this light without queuing. */
+-(void) addShadowNow: (id<CC3ShadowProtocol>) aShadowNode {
 	CC3Assert(aShadowNode, @"Shadow cannot be nil");		// Don't add if child is nil
 	
 	if(!_shadows) _shadows = [[CCArray array] retain];
@@ -353,6 +366,20 @@
 	[self checkShadowCastingVolume];			// Make sure we have the shadow casting volume
 	[self checkCameraShadowVolume];				// Make sure we have the camera shadow volume
 	[self checkStencilledShadowPainter];		// Make sure we have the shadow painter
+}
+
+/**
+ * Invoked when a shadow is being added on a background thread, and this parent node is
+ * already part of the scene.
+ *
+ * Since the scene may be in the process of being rendered, the shadow is not added immediately.
+ * Instead, all GL activity on this thread is allowed to finish, to ensure all GL components of
+ * the shadow node are in place, and then an operation to add the specified shadow is queued to
+ * the thread that is performing rendering.
+ */
+-(void) addShadowFromBackgroundThread: (id<CC3ShadowProtocol>) aShadowNode {
+	[CC3OpenGL.sharedGL finish];
+	dispatch_async(dispatch_get_main_queue(), ^{ [self addShadowNow: aShadowNode]; });
 }
 
 -(void) removeShadow: (id<CC3ShadowProtocol>) aShadowNode {

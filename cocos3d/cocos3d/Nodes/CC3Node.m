@@ -964,6 +964,7 @@
 		_shouldAutoremoveWhenEmpty = NO;
 		_cascadeColorEnabled = YES;
 		_cascadeOpacityEnabled = YES;
+		_shouldCastShadows = YES;
 		self.globalTransformMatrix = [CC3AffineMatrix matrix];		// Has side effects...so do last (globalTransformMatrixInverted is built in some subclasses)
 	}
 	return self;
@@ -1039,6 +1040,7 @@
 	_cascadeColorEnabled = another.isCascadeColorEnabled;
 	_cascadeOpacityEnabled = another.isCascadeOpacityEnabled;
 	_cameraDistanceProduct = another.cameraDistanceProduct;
+	_shouldCastShadows = another.shouldCastShadows;
 	
 	self.shouldDrawDescriptor = another.shouldDrawDescriptor;		// May create a child node
 	self.shouldDrawWireframeBox = another.shouldDrawWireframeBox;	// May create a child node
@@ -1655,6 +1657,13 @@ static GLuint lastAssignedNodeTag;
 
 -(void) checkDrawingOrder { for (CC3Node* child in _children) [child checkDrawingOrder]; }
 
+-(BOOL) shouldCastShadows { return _shouldCastShadows; }
+
+-(void) setShouldCastShadows: (BOOL) shouldCastShadows {
+	_shouldCastShadows = shouldCastShadows;
+	for (CC3Node* child in _children) child.shouldCastShadows = shouldCastShadows;
+}
+
 -(BOOL) shouldDrawInClipSpace { return NO; }
 
 
@@ -1679,8 +1688,6 @@ static GLuint lastAssignedNodeTag;
 -(CC3Camera*) activeCamera { return self.scene.activeCamera; }
 
 /** 
- * Adds the specified node as a child of this node without queuing.
- *
  * If this action is occuring on a background thread, and this node is already part of the
  * scene being rendered, the operation is queued for execution on the rendering thread, to
  * avoid the possibility of adding a node in the middle of a render iteration.

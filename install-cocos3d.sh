@@ -123,7 +123,7 @@ copy_xc4_project_templates(){
 
 # If the cocos3d template directory does not exist, create it.
 	if [[ ! -d "$TEMPLATE_DIR" ]]; then
-		echo '...creating Xcode 4 cocos3d template folder'
+		echo '...creating Xcode cocos3d template folder'
 		echo ''
 		mkdir -p "$TEMPLATE_DIR"
 	fi

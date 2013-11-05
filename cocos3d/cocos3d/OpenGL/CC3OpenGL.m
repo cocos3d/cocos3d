@@ -906,6 +906,10 @@
 	return _extensions;
 }
 
+-(BOOL) supportsExtension: (NSString*) extensionName {
+	return [_extensions containsObject: extensionName];
+}
+
 
 #pragma mark Shaders
 

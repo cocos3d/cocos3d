@@ -529,16 +529,18 @@ typedef enum {
  * illumination outside the beam of the spotlight. This is something to keep in mind when
  * combining the techniques of spotlights and bump-mapping.
  *
- * Touching the illumination button again displays the view in grayscale, as if using
- * black & white film. This effect is created by rendering the scene in color to a texture
- * and then rendering the texture to the screen using a shader that converts the texture
- * colors to grayscale. This is only one example of such post-rendering processing. Using the
- * same techique, you could add bloom effects, blurring, or other specialized colorizations.
+ * If the device is running OpenGL ES 2.0, touching the illumination button again displays
+ * the view in grayscale, as if using black & white film. This effect is created by rendering
+ * the scene in color to a texture and then rendering the texture to the screen using a shader
+ * that converts the texture colors to grayscale. This is only one example of such post-rendering
+ * processing. Using the same techique, you could add bloom effects, blurring, or other
+ * specialized colorizations.
  *
- * Touching the illumination button again displays a visualization of the contents of the depth
- * buffer of the scene. This effect is created by attaching a texture as the depth buffer of an
- * off-screen framebuffer surface, and then rendering the underlying texture to the screen using
- * a shader that converts the depth values in the texture to a linearized grayscale image.
+ * If the device is running OpenGL ES 2.0, touching the illumination button again displays 
+ * a visualization of the contents of the depth buffer of the scene. This effect is created 
+ * by attaching a texture as the depth buffer of an off-screen framebuffer surface, and then
+ * rendering the underlying texture to the screen using a shader that converts the depth
+ * values in the texture to a linearized grayscale image.
  *
  * Touching the illumination button again will bring back the original sunshine.
  *
@@ -637,6 +639,7 @@ typedef enum {
 	GLubyte _bmLabelMessageIndex;
 	BOOL _isManagingShadows : 1;
 	BOOL _isTVOn : 1;
+	BOOL _shouldAllowShadows: 1;
 }
 
 /**
