@@ -274,28 +274,26 @@
 @property(nonatomic, retain, readonly) CC3Texture* texture;
 
 /**
- * Returns an instance of CCTexture2D that references the same texture in the GL engine.
- * You can use the returned CCTexture2D with cocos2d components, such as CCSprite.
+ * Returns a CCTexture2D based on the this CC3Texture.
+ *
+ * If the CCTextureCache contains a CCTexture2D cached under the same name as this CC3Texture
+ * (typically the file name), that CCTexture2D is retrieved from the cache and returned.
+ *
+ * If the CCTextureCache does not contain a CCTexture2D with the same name, a new CCTexture2D
+ * instance is allocated, initialized, and added to the CCTextureCache under the name of this
+ * CC3Texture. The new CCTexture2D and the this CC3Texture will reference the same GL texture
+ * object in the GL engine.
+ *
+ * Since the returned CCTexture2D is to be cached under the name of this CC3Texture, if this
+ * CC3Texture does not have a name, a unique name, based on the tag property, is assigned to
+ * this CC3Texture, and used to cache the returned CCTexture2D.
+ *
+ * You should not change the name of this CC3Texture after this method has been invoked.
  *
  * Textures in cocos2d are loaded upside down and remain that way, whereas CC3Textures are
- * loaded the right way up. Therefore, when creating a CCTexture2D using this method, it will
- * appear upside down when applied to a CCSprite. To correct this, set the flipY property of
- * the sprite to YES.
- *
- * The returned CCTexture2D instance is created dynamically, is returned autoreleased,
- * and is not automatically placed in the CCTextureCache texture cache.
- *
- * Management of the texture in the GL engine remains with this texture. Because of this,
- * you should keep in mind the following behaviour:
- *   - The returned CCTexture2D texture is an instance of CC3UnmanagedTexture2D, and will
- *     not automatically delete the texture from the GL engine when it is deallocated.
- *   - This texture instance will automatically delete the texture from the GL engine when
- *     this instance is deallocated. The returned CCTexture2D will then contain an invalid
- *     reference and will exhibit undefined behaviour. It will contain a reference either
- *     to a non-existent GL texture, or might possibly contain a reference to a different
- *     texture that was assigned the same texture ID in the GL engine after this texture
- *     released that ID. In either case, behaviour will be undefined. Do not make use of
- *     the returned CCTexture2D instance beyond the life of this texture instance.
+ * loaded the right way up. Therefore, if a new CCTexture2D is created using this method,
+ * it will appear upside down when applied to a CCSprite. To correct this, set the flipY 
+ * property of the sprite to YES.
  */
 -(CCTexture2D*) asCCTexture2D;
 
@@ -1662,21 +1660,47 @@
 /**
  * A specialized CCTexture2D that is returned from the CC3Texture asCCTexture2D method.
  *
- * Instances of this class do not delete the texture from the GL engine when being deallocated.
+ * Instances of this class do not delete the texture from the GL engine when being
+ * deallocated, unless the shouldManageGL property is set.
  */
-@interface CC3UnmanagedTexture2D : CCTexture2D
+@interface CC3UnmanagedTexture2D : CCTexture2D {
+	BOOL _shouldManageGL : 1;
+}
 
 /**
- * Initializes this instance based on the specified texture.
+ * Indicates whether this instance will delete the GL texture object in the GL engine
+ * when this instance is deallocated.
  *
- * This instance and the specified texture will reference the same texture in the GL engine.
+ * The initial value of this property is NO. It is automatically set to YES when the
+ * CC3Texture that created this instance is deallocated. You should never need to set
+ * this property directly.
+ */
+@property(nonatomic, assign) BOOL shouldManageGL;
+
+
+#pragma mark Allocation and initialization
+/**
+ * Initializes this instance based on the specified CC3Texture.
+ *
+ * This instance and the specified CC3Texture will reference the same GL texture object
+ * in the GL engine.
  */
 -(id) initFromCC3Texture: (CC3Texture*) texture;
 
 /**
- * Allocates and initializes an autoreleased instance based on the specified texture.
+ * Returns a CCTexture2D based on the specified CC3Texture.
  *
- * The returned instance and the specified texture will reference the same texture in the GL engine.
+ * If the CCTextureCache contains a CCTexture2D with the same name (typically the file name)
+ * as the specified CC3Texture, that CCTexture2D is retrieved and returned.
+ *
+ * If the CCTextureCache does not contain a CCTexture2D with the same name, a new instance
+ * of this class is allocated, initialized, and added to the CCTextureCache under the name
+ * of the specified CC3Texture. The new CCTexture2D instance and the specified CC3Texture 
+ * will reference the same GL texture object in the GL engine.
+ *
+ * Since the returned CCTexture2D is to be cached under the name of the specified CC3Texture,
+ * if the CC3Texture does not have a name, a unique name, based on the tag property is assigned
+ * to the CC3Texture, and used to cache the returned CCTexture2D.
  */
 +(id) textureFromCC3Texture: (CC3Texture*) texture;
 

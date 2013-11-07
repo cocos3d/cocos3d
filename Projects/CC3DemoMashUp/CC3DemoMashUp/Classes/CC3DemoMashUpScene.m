@@ -1897,14 +1897,16 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// a smaller version of the TV screen. You have to touch the TV screen to activate it.
 	// Because the TV screen is only updated with new rendered content when the big-screen
 	// TV is viewable by the active camera, the portable TV held by the robot arm will only
-	// display dynamic video if the larger TV is in the camera view as well. You can comment
-	// out the optimization line in the drawToTVScreenWithVisitor: method to have both TV's
-	// show live video at all times.
-//	CCSprite* portableTV = [CCSprite spriteWithTexture: [_tvSurface.colorTexture asCCTexture2D]];
-//	portableTV.flipY = YES;
-//	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
-//	bb.uniformScale = 0.1;
-//	bb.billboard = portableTV;
+	// display dynamic video if the larger TV is in the camera view as well. To view both
+	// the big TV and the portable TV updating together, move behind the robot arm and look
+	// back towards the big TV so that you can see both TV's displaying live video. You can
+	// also comment out the optimization line in the drawToTVScreenWithVisitor: method to
+	// have both TV's show live video at all times.
+	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture asCCTexture2D]];
+	portableTV.flipY = YES;
+	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
+	bb.uniformScale = 0.1;
+	bb.billboard = portableTV;
 }
 
 /** Convenience property that returns the rendering surface of the TV, cast to the correct class. */
@@ -2452,7 +2454,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// the dragon itself within the wrapper, to make it face the direction of rotation, which is
 	// the direction it is flying. Then add the flight path wrapper to the scene.
 	CC3Node* flightPath = [_dragon asOrientingWrapper];
-	_dragon.location = cc3v(0, 800, 1300);
+	_dragon.location = cc3v(0, 500, 1300);
 	_dragon.rotation = cc3v(0, -90, 15);
 	_dragon.uniformScale = 5.0;
 	[flightPath runAction: [CCRepeatForever actionWithAction: [CC3RotateBy actionWithDuration: 1.0

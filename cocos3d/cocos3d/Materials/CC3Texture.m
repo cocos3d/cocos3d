@@ -55,7 +55,20 @@
 
 -(void) ensureGLTexture { if (!_textureID) _textureID = CC3OpenGL.sharedGL.generateTexture; }
 
+/** 
+ * If a CCTexture2D with the same name and textureID exists in the CCTextureCache,
+ * instruct the CCTexture2D to take over management of the GL texture object in 
+ * the GL engine. Otherwise, delete the GL texture object from the GL engine.
+ */
 -(void) deleteGLTexture {
+	NSString* texName = self.name;
+	if (texName) {
+		CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
+		if (tex2D && (tex2D.name == _textureID)) {
+			tex2D.shouldManageGL = YES;
+			return;
+		}
+	}
 	[CC3OpenGL.sharedGL deleteTexture: _textureID];
 	_textureID = 0;
 }
@@ -1464,15 +1477,20 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 
 @implementation CC3UnmanagedTexture2D
 
-/** Clear the name so that  */
+@synthesize shouldManageGL=_shouldManageGL;
+
+/** 
+ * If I should not delete the GL texture object from the GL engine, set the reference
+ * to the GL texture object to zero, so the superclass will not attempt to delete it.
+ */
 -(void) dealloc {
-	CC2_TEX_NAME = 0;
-	LogTrace(@"Deallocating %@ (GL ID = %u)", self, CC2_TEX_NAME);
+	if ( !self.shouldManageGL ) CC2_TEX_NAME = 0;
 	[super dealloc];
 }
 
 -(id) initFromCC3Texture: (CC3Texture*) texture {
 	if( (self = [super init]) ) {
+		_shouldManageGL = NO;
 		CC2_TEX_NAME = texture.textureID;
 		CC2_TEX_WIDTH = texture.size.width;
 		CC2_TEX_HEIGHT = texture.size.height;
@@ -1489,7 +1507,17 @@ static BOOL _defaultShouldFlipCubeHorizontallyOnLoad = YES;
 }
 
 +(id) textureFromCC3Texture: (CC3Texture*) texture {
-	return [[[self alloc] initFromCC3Texture: texture] autorelease];
+	NSString* texName = texture.name;
+	if ( !texName ) {
+		texName = [NSString stringWithFormat: @"Texture_%i", texture.tag];
+		texture.name = texName;
+	}
+	CCTexture2D* tex2D = [CCTextureCache.sharedTextureCache textureForKey: texName];
+	if ( !tex2D ) {
+		tex2D = [[[self alloc] initFromCC3Texture: texture] autorelease];
+		[CCTextureCache.sharedTextureCache addTexture: tex2D named: texName];
+	}
+	return tex2D;
 }
 
 @end

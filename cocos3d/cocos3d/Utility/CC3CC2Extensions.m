@@ -306,6 +306,37 @@
 
 
 #pragma mark -
+#pragma mark CCTexture2D extension
+
+@implementation CCTexture2D (CC3)
+
+-(BOOL) shouldManageGL { return YES; }
+
+-(void) setShouldManageGL: (BOOL) shouldManageGL {}
+
+@end
+
+
+#pragma mark -
+#pragma mark CCTextureCache extension
+
+// Instance variables
+#define CC2_DICT_QUEUE		_dictQueue
+#define CC2_TEX_DICT		_textures
+
+@implementation CCTextureCache (CC3)
+
+-(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
+	if (tex2D)
+		dispatch_sync(CC2_DICT_QUEUE, ^{
+			[CC2_TEX_DICT setObject: tex2D forKey: texName];
+		});
+}
+
+@end
+
+
+#pragma mark -
 #pragma mark CCDirector extension
 
 @implementation CCDirector (CC3)

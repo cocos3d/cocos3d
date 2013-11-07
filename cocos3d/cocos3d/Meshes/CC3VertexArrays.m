@@ -1290,69 +1290,75 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 	[self updateGLBuffer];
 }
 
--(void) alignWithTextureMapSize: (CGSize) texMapSize {
-	CC3Assert((texMapSize.width && texMapSize.height),
+-(void) alignWithTextureCoverage: (CGSize) texCoverage {
+	CC3Assert((texCoverage.width && texCoverage.height),
 			  @"%@ mapsize %@ cannot have zero dimension",
-			  self, NSStringFromCGSize(texMapSize));
+			  self, NSStringFromCGSize(texCoverage));
 
 	// Don't waste time adjusting if nothing is changing
 	// (eg. POT textures, or new texture has same texture map as old).
-	if (CGSizeEqualToSize(texMapSize, _mapSize)) return;
+	if (CGSizeEqualToSize(texCoverage, _mapSize)) return;
 	
 	LogTrace(@"%@ aligning and changing map size from %@ to %@ but not flipping vertically",
-				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texMapSize));
+				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texCoverage));
 
 	// The scale factor
-	CGSize mapRatio = CGSizeMake(texMapSize.width / _mapSize.width, texMapSize.height / _mapSize.height);
+	CGSize mapRatio = CGSizeMake(texCoverage.width / _mapSize.width, texCoverage.height / _mapSize.height);
 	
 	// The amount by which to translate the image vertically
 	GLfloat currVertXln = 1.0f - _mapSize.height;
-	GLfloat newVertXln = 1.0f - texMapSize.height;
+	GLfloat newVertXln = 1.0f - texCoverage.height;
 	
 	for (GLuint i = 0; i < _vertexCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u *= mapRatio.width;
 		ptc->v = (ptc->v - currVertXln) * mapRatio.height + newVertXln;
 	}
-	_mapSize = texMapSize;	// Remember what we've set the map size to
+	_mapSize = texCoverage;	// Remember what we've set the map size to
 	[self updateGLBuffer];
 }
 
--(void) alignWithInvertedTextureMapSize: (CGSize) texMapSize {
-	CC3Assert((texMapSize.width && texMapSize.height),
+// Deprecated
+-(void) alignWithTextureMapSize: (CGSize) texCoverage { [self alignWithTextureCoverage: texCoverage]; }
+
+-(void) alignWithInvertedTextureCoverage: (CGSize) texCoverage {
+	CC3Assert((texCoverage.width && texCoverage.height),
 			  @"%@ mapsize %@ cannot have zero dimension",
-			  self, NSStringFromCGSize(texMapSize));
+			  self, NSStringFromCGSize(texCoverage));
 	LogTrace(@"%@ aligning and changing map size from %@ to %@ and flipping vertically",
-				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texMapSize));
+				  self, NSStringFromCGSize(_mapSize), NSStringFromCGSize(texCoverage));
 	
-	CGSize mapRatio = CGSizeMake(texMapSize.width / _mapSize.width, texMapSize.height / _mapSize.height);
+	CGSize mapRatio = CGSizeMake(texCoverage.width / _mapSize.width, texCoverage.height / _mapSize.height);
 	
 	for (GLuint i = 0; i < _vertexCount; i++) {
 		ccTex2F* ptc = (ccTex2F*)[self addressOfElement: i];
 		ptc->u *= mapRatio.width;
-		ptc->v = texMapSize.height - (ptc->v * mapRatio.height);
+		ptc->v = texCoverage.height - (ptc->v * mapRatio.height);
 	}
 
 	// Remember that we've flipped and what we've set the map size to
-	_mapSize = texMapSize;
+	_mapSize = texCoverage;
 	_expectsVerticallyFlippedTextures = !_expectsVerticallyFlippedTextures;
 	
 	[self updateGLBuffer];
 	LogTrace(@"%@ aligned and flipped vertically", self);
 }
 
+// Deprecated
+-(void) alignWithInvertedTextureMapSize: (CGSize) texCoverage { [self alignWithInvertedTextureCoverage: texCoverage]; }
+
 -(void) alignWithTexture: (CC3Texture*) texture {
 	if (!texture) return;
 	if ( XOR(_expectsVerticallyFlippedTextures, texture.isUpsideDown) ) {
-		[self alignWithInvertedTextureMapSize: texture.coverage];
+		[self alignWithInvertedTextureCoverage: texture.coverage];
 	} else {
-		[self alignWithTextureMapSize: texture.coverage];
+		[self alignWithTextureCoverage: texture.coverage];
 	}
 }
 
 -(void) alignWithInvertedTexture: (CC3Texture*) texture {
 	if (!texture) return;
-	[self alignWithInvertedTextureMapSize: texture.coverage];
+	[self alignWithInvertedTextureCoverage: texture.coverage];
 }
 
 -(void) flipVertically {
@@ -1387,7 +1393,7 @@ static BOOL defaultExpectsVerticallyFlippedTextures = NO;
 
 -(void) repeatTexture: (ccTex2F) repeatFactor {
 	CGSize repeatSize = CGSizeMake(repeatFactor.u * _mapSize.width, repeatFactor.v * _mapSize.height);
-	[self alignWithTextureMapSize: repeatSize];
+	[self alignWithTextureCoverage: repeatSize];
 }
 
 

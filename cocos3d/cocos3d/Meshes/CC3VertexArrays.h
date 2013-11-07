@@ -1330,7 +1330,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  *
  * The value of this property does not affect the behaviour of, nor
  * is affected by, the flipVertically , alignWithInvertedTexture:,
- * alignWithTextureMapSize:, or alignWithInvertedTextureMapSize: methods.
+ * alignWithTextureCoverage:, or alignWithInvertedTextureCoverage: methods.
  * 
  * The initial value of this property is determined by the value of the class-side
  * defaultExpectsVerticallyFlippedTextures property at the time an instance of
@@ -1375,12 +1375,12 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * The texture map size indicates the usable size of the texture, and invoking
  * this method will align these texture coordinates with that usable size.
  *
- * For the sake of efficiency, if the specified texMapSize is the same as the
+ * For the sake of efficiency, if the specified texCoverage is the same as the
  * value submitted in the previous invocation (or is equal to (1, 1) on the
  * first invocation), this method does nothing, to avoid updating the texture
  * coordinates when no change has occurred.
  *
- * For subsequent invocations, if the specified texMapSize is the same as the
+ * For subsequent invocations, if the specified texCoverage is the same as the
  * value submitted in the previous invocation, this method does nothing, to
  * avoid updating all the texture coordinates to the value they currently have.
  *
@@ -1388,7 +1388,10 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * This may cause mapping conflicts if the same vertex content is shared by other
  * CC3MeshNodes that use different textures.
  */
--(void) alignWithTextureMapSize: (CGSize) texMapSize;
+-(void) alignWithTextureCoverage: (CGSize) texCoverage;
+
+/** @deprecated Renamed to alignWithTextureCoverage:. */
+-(void) alignWithTextureMapSize: (CGSize) texCoverage DEPRECATED_ATTRIBUTE;
 
 /**
  * Aligns the texture coordinate array with the specfied texture map size,
@@ -1406,15 +1409,18 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * and this method can be used to compensate.
  *
  * This method vertically flips the texture coordinates on each invocation. As a
- * result, unlike the alignWithTextureMapSize: method, this method updates all the
+ * result, unlike the alignWithTextureCoverage: method, this method updates all the
  * texture coordinates on each invocation, regardless of whether the specified
- * texMapSize is the same as on the previous invocation.
+ * texCoverage is the same as on the previous invocation.
  *
  * Care should be taken when using this method, as it changes the actual vertex content.
  * This may cause mapping conflicts if the same vertex content is shared by other
  * CC3MeshNodes that use different textures.
  */
--(void) alignWithInvertedTextureMapSize: (CGSize) texMapSize;
+-(void) alignWithInvertedTextureCoverage: (CGSize) texCoverage;
+
+/** @deprecated Renamed to alignWithInvertedTextureCoverage:. */
+-(void) alignWithInvertedTextureMapSize: (CGSize) texCoverage DEPRECATED_ATTRIBUTE;
 
 /**
  * Aligns the texture coordinate array with the specfied texture.
@@ -1430,14 +1436,14 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * If the value of the expectsVerticallyFlippedTextures property is different
  * than the value of the isUpsideDown property of the specified texture, the
  * texture coordinates are not oriented vertically for the texture. To align them,
- * this method delegates to the alignWithInvertedTextureMapSize:, passing the mapSize
+ * this method delegates to the alignWithInvertedTextureCoverage:, passing the mapSize
  * of the specified texture, to both align the texture coordinates to the usable size
  * of the texture, and to flip the texture coordinates to align with the texture.
  *
  * If the value of the expectsVerticallyFlippedTextures property is the same
  * as the value of the isUpsideDown property of the specified texture, the
  * texture coordinates are correctly oriented vertically for the texture. This
- * method delegates to the alignWithTextureMapSize:, passing the mapSize of the
+ * method delegates to the alignWithTextureCoverage:, passing the mapSize of the
  * specified texture, to align the texture coordinates to the usable size of
  * the texture, but does not flip the texture coordinates.
  *
@@ -1474,7 +1480,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  *
  * This method vertically flips the texture coordinates on each invocation. As a
  * result, unlike the alignWithTexture: method, this method updates all texture
- * coordinates on each invocation, regardless of whether the specified texMapSize
+ * coordinates on each invocation, regardless of whether the specified texCoverage
  * is the same as on the previous invocation.
  *
  * Care should be taken when using this method, as it changes the actual vertex content.
@@ -1525,14 +1531,14 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * and top-right corners must lie between zero and one in both the X and Y directions.
  *
  * The dimensions of the rectangle in this property are independent of the size specified in
- * the  alignWithTextureMapSize: and alignWithInvertedTextureMapSize: methods. A unit rectangle
+ * the  alignWithTextureCoverage: and alignWithInvertedTextureCoverage: methods. A unit rectangle
  * value for this property will automatically take into consideration the adjustment made to
  * the mesh by those methods, and will display only the part of the texture defined by them.
  * Rectangular values for this property that are smaller than the unit rectangle will be
- * relative to the displayable area defined by alignWithTextureMapSize: and
- * alignWithInvertedTextureMapSize:.
+ * relative to the displayable area defined by alignWithTextureCoverage: and
+ * alignWithInvertedTextureCoverage:.
  *
- * As an example, if the alignWithTextureMapSize: method was used to limit the mesh to using
+ * As an example, if the alignWithTextureCoverage: method was used to limit the mesh to using
  * only 80% of the texture (perhaps when using a non-POT texture), and this property was set
  * to a rectangle with origin at (0.5, 0.0) and size (0.5, 0.5), the mesh will be covered by
  * the bottom-right quarter of the usable 80% of the overall texture.
@@ -1582,7 +1588,7 @@ static const CGRect kCC3UnitTextureRectangle = { {0.0, 0.0}, {1.0, 1.0} };
  * corresponding texture dimension.
  *
  * The dimensions of the repeatFactor are independent of the size specified in the
- * alignWithTextureMapSize: and alignWithInvertedTextureMapSize: methods, or derived
+ * alignWithTextureCoverage: and alignWithInvertedTextureCoverage: methods, or derived
  * from the texture by the alignWithTexture or alignWithInvertedTexture methods.
  * A value of 1.0 for an element in the specified repeatFactor will automatically
  * take into consideration the adjustment made to the mesh by those methods, and will

@@ -341,6 +341,37 @@ enum {
 
 
 #pragma mark -
+#pragma mark CCTexture2D extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCTexture2D (CC3)
+
+/** 
+ * Indicates whether this instance will delete the GL texture object in the GL engine
+ * when this instance is deallocated.
+ *
+ * Deleting the GL texture object is default behaviour for CCTexture2D. This property
+ * always returns YES, and setting this property has no effect. Subclasses that allow
+ * the option of managing the GL texture object elsewhere will override this property.
+ */
+@property(nonatomic, assign) BOOL shouldManageGL;
+
+@end
+
+
+#pragma mark -
+#pragma mark CCTextureCache extension
+
+/** Extension category to support cocos3d functionality. */
+@interface CCTextureCache (CC3)
+
+/** Adds (or replaces) the specified texture to the cache under the specified name. */
+-(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName;
+
+@end
+
+
+#pragma mark -
 #pragma mark CCDirector extension
 
 /** Extension category to support cocos3d functionality. */
