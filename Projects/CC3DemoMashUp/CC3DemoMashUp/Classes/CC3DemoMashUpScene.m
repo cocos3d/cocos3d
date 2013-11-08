@@ -382,8 +382,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Other weakly-cached PFX resources will have been automatically removed already.
 	[CC3PFXResource removeAllResources];
 
-	_shouldAllowShadows = YES;
-
 	LogRez(@"Finished loading on background thread!");
 }
 
@@ -394,7 +392,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) initCustomState {
 	
-	_shouldAllowShadows = NO;
 	_isManagingShadows = NO;
 	_playerDirectionControl = CGPointZero;
 	_playerLocationControl = CGPointZero;
@@ -1902,11 +1899,11 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// back towards the big TV so that you can see both TV's displaying live video. You can
 	// also comment out the optimization line in the drawToTVScreenWithVisitor: method to
 	// have both TV's show live video at all times.
-	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture asCCTexture2D]];
-	portableTV.flipY = YES;
-	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
-	bb.uniformScale = 0.1;
-	bb.billboard = portableTV;
+//	CCSprite* portableTV = [CCSprite spriteWithTexture: [tvSurface.colorTexture asCCTexture2D]];
+//	portableTV.flipY = YES;
+//	CC3Billboard* bb = (CC3Billboard*)[self getNodeNamed: kBillboardName];
+//	bb.uniformScale = 0.1;
+//	bb.billboard = portableTV;
 }
 
 /** Convenience property that returns the rendering surface of the TV, cast to the correct class. */
@@ -3652,9 +3649,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 /** Cycles through a variety of shadowing options for the specified node. */
 -(void) cycleShadowFor: (CC3Node*) aNode {
-	
-	// Don't add shadows while async loading is happening
-	if ( !_shouldAllowShadows ) return;
 	
 	// Don't add a shadow to the ground
 	if (aNode == _ground) return;

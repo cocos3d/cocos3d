@@ -40,6 +40,7 @@
  * tasks to a Grand Central Dispatch (GCD) queue.
  */
 @interface CC3Backgrounder : NSObject {
+	dispatch_queue_t _taskQueue;
 	long _queuePriority;
 }
 

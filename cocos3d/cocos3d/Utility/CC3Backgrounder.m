@@ -33,49 +33,83 @@
 #import "CC3OpenGL.h"
 #import "CC3CC2Extensions.h"
 
+/** The default backgrounder task queue name. */
+#define kCC3BackgrounderDefaultTaskQueueName	"org.cocos3d.backgrounder.default"
+
 
 #pragma mark CC3Backgrounder
 
 @implementation CC3Backgrounder
 
-@synthesize queuePriority=_queuePriority;
-
 -(void) dealloc {
+	[self deleteTaskQueue];
 	[super dealloc];
 }
+
+
+#pragma mark Task queue
+
+-(long) queuePriority { return _queuePriority; }
+
+-(void) setQueuePriority: (long) queuePriority {
+	if (queuePriority == _queuePriority) return;
+	_queuePriority = queuePriority;
+	[self updateTaskQueuePriority];
+}
+
+/** Set the appropriate initial queue priority based on the OS version. */
+-(void) initQueuePriority {
+	
+#if CC3_IOS
+	self.queuePriority = ((CCConfiguration.sharedConfiguration.OSVersion >= kCCiOSVersion_5_0)
+						  ? DISPATCH_QUEUE_PRIORITY_BACKGROUND
+						  : DISPATCH_QUEUE_PRIORITY_LOW);
+#endif	// CC3_IOS
+	
+#if CC3_OSX
+	self.queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
+#endif	// CC3_OSX
+	
+}
+
+/** Initialize the serial task queue. */
+-(void) initTaskQueue {
+	_taskQueue = dispatch_queue_create(kCC3BackgrounderDefaultTaskQueueName, NULL);
+}
+
+/** Delete the serial task queue. */
+-(void) deleteTaskQueue {
+	if ( !_taskQueue) return;
+	dispatch_release(_taskQueue);
+	_taskQueue = NULL;
+}
+
+/** Update the underlying target queue of the serial task queue to match the queue priority. */
+-(void) updateTaskQueuePriority {
+	if ( !_taskQueue ) return;
+	dispatch_set_target_queue(_taskQueue, dispatch_get_global_queue(_queuePriority, 0));
+}
+
 
 #pragma mark Backgrounding tasks
 
 -(void) runBlock: (void (^)(void))block {
-	dispatch_async(dispatch_get_global_queue(_queuePriority, 0), block);
+	if ( !_taskQueue) return;
+	dispatch_async(_taskQueue, block);
 }
+
 
 #pragma mark Allocation and initialization
 
 -(id) init {
 	if ( (self = [super init]) ) {
+		[self initTaskQueue];
 		[self initQueuePriority];
 	}
 	return self;
 }
 
 +(id) backgrounder { return [[[self alloc] init] autorelease]; }
-
-/** Set the appropriate initial queue priority based on the OS version. */
--(void) initQueuePriority {
-
-#if CC3_IOS
-	if( CCConfiguration.sharedConfiguration.OSVersion >= kCCiOSVersion_5_0 )
-		_queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
-	else
-		_queuePriority = DISPATCH_QUEUE_PRIORITY_LOW;
-#endif	// CC3_IOS
-
-#if CC3_OSX
-	_queuePriority = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
-#endif	// CC3_OSX
-
-}
 
 @end
 

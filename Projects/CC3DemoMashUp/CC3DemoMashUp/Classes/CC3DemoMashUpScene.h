@@ -639,7 +639,6 @@ typedef enum {
 	GLubyte _bmLabelMessageIndex;
 	BOOL _isManagingShadows : 1;
 	BOOL _isTVOn : 1;
-	BOOL _shouldAllowShadows: 1;
 }
 
 /**
