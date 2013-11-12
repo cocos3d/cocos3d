@@ -31,6 +31,7 @@
 
 
 #import "CC3Matrix.h"
+#import "CC3DataArray.h"
 #import "CC3PerformanceStatistics.h"
 #import "CC3OpenGL.h"
 
@@ -388,6 +389,9 @@
 	CC3ShaderProgram* _currentShaderProgram;
 	id<CC3RenderSurface> _renderSurface;
 	CC3OpenGL* _gl;
+	CC3DataArray* _boneMatricesGlobal;
+	CC3DataArray* _boneMatricesEyeSpace;
+	CC3DataArray* _boneMatricesModelSpace;
 	CC3Matrix4x4 _projMatrix;
 	CC3Matrix4x3 _viewMatrix;
 	CC3Matrix4x3 _modelMatrix;
@@ -594,6 +598,33 @@
 
 /** Populates the current model-to-global matrix from the specified matrix. */
 -(void) populateModelMatrixFrom: (CC3Matrix*) modelMtx;
+
+/**
+ * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
+ * in the global coordinate system.
+ * 
+ * This method has meaning only during the drawing of the currentSkinSection. Attempting to
+ * access this method at any other time will produced undefined results.
+ */
+-(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index;
+
+/**
+ * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
+ * in the coordinate system of the eye-space of the camera in the camera property.
+ *
+ * This method has meaning only during the drawing of the currentSkinSection. Attempting to
+ * access this method at any other time will produced undefined results.
+ */
+-(CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index;
+
+/**
+ * Returns a pointer to the bone matrix at the specified index, from the currentSkinSection,
+ * in the coordinate system of the mesh node in the currentMeshNode property.
+ *
+ * This method has meaning only during the drawing of the currentSkinSection. Attempting to
+ * access this method at any other time will produced undefined results.
+ */
+-(CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index;
 
 @end
 

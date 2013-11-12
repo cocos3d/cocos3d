@@ -835,20 +835,6 @@ static const GLfloat identityContents[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 	return quat;
 }
 
-/*
-+(CC3Vector) extractForwardDirectionFrom: (GLfloat*) aGLMatrix {
-	return cc3v(-aGLMatrix[8], -aGLMatrix[9], -aGLMatrix[10]);
-}
-
-+(CC3Vector) extractUpDirectionFrom: (GLfloat*) aGLMatrix {
-	return cc3v(aGLMatrix[4], aGLMatrix[5], aGLMatrix[6]);
-}
-
-+(CC3Vector) extractRightDirectionFrom: (GLfloat*) aGLMatrix {
-	return cc3v(aGLMatrix[0], aGLMatrix[1], aGLMatrix[2]);
-}
-*/
-
 +(CC3Vector) extractForwardDirectionFrom: (GLfloat*) aGLMatrix {
 	return CC3VectorNegate(*(CC3Vector*)&aGLMatrix[8]);
 }

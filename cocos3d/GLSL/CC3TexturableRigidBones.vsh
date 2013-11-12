@@ -1,5 +1,5 @@
 /*
- * CC3Texturable.vsh
+ * CC3TexturableRigidBones.vsh
  *
  * cocos3d 2.0.0
  * Author: Bill Hollings
@@ -93,6 +93,9 @@ uniform float		u_cc3LightSpotExponent[MAX_LIGHTS];				/**< Directional attenuati
 uniform float		u_cc3LightSpotCutoffAngleCosine[MAX_LIGHTS];	/**< Cosine of spotlight cutoff angle of each light. */
 
 uniform lowp int	u_cc3BonesPerVertex;									/**< Number of bones influencing each vertex. */
+uniform highp vec4	u_cc3BoneQuaternionsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone quaternions in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
+uniform highp vec3	u_cc3BoneTranslationsModelSpace[MAX_BONES_PER_BATCH];	/**< Array of bone translations in the current mesh skin section in model space (length of array is specified by u_cc3BoneCount). */
+// uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 uniform highp mat4	u_cc3BoneMatricesEyeSpace[MAX_BONES_PER_BATCH];			/**< Array of bone matrices in the current mesh skin section in eye space. */
 uniform mat3		u_cc3BoneMatricesInvTranEyeSpace[MAX_BONES_PER_BATCH];	/**< Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space. */
 
@@ -126,6 +129,7 @@ varying vec3			v_reflectDirGlobal;			/**< Fragment reflection vector direction i
 //-------------- CONSTANTS ----------------------
 const vec3 kVec3Zero = vec3(0.0);
 const vec4 kVec4Zero = vec4(0.0);
+const vec4 kVec4ZeroLoc = vec4(0.0, 0.0, 0.0, 1.0);
 const vec3 kAttenuationNone = vec3(1.0, 0.0, 0.0);
 const vec3 kHalfPlaneOffset = vec3(0.0, 0.0, 1.0);
 
@@ -137,22 +141,83 @@ lowp vec4	matColorDiffuse;	/**< Diffuse color of material...from either material
 
 //-------------- FUNCTIONS ----------------------
 
+/**
+ * Returns the specified vector rotated by the specified quaternion.
+ *
+ * This is a highly optimized version of the basic quaternion rotation equation: qvq(-1).
+ * Derivation of this algorithm can be found at:
+ * http://mollyrocket.com/forums/viewtopic.php?t=833&sid=3a84e00a70ccb046cfc87ac39881a3d0
+ */
+highp vec3 rotateWithQuaternion(highp vec3 v, highp vec4 q) {
+	highp vec3 t = 2.0 * cross(q.xyz, v);
+	return v + q.w * t + cross(q.xyz, t);
+}
+
+//highp vec3 rotateWithQuaternion(highp vec3 v, highp vec4 q) {
+//	return v;
+//}
+
 /** 
  * Transforms the vertex position and normal to eye space. Sets the vtxPosEye and vtxNormEye
  * variables. This function takes into consideration vertex skinning, if it is specified.
  */
 void vertexToEyeSpace() {
 	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
-
+		
 		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
 		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
-
+		
 	} else {			// Mesh is bone-rigged for vertex skinning
-
+		
 		// Copies of the indices and weights attibutes so they can be swizzled.
 		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
 		mediump vec4 boneWeights = a_cc3BoneWeights;
+		
+		vtxPosEye = kVec4ZeroLoc;				// Start at zero to accumulate weighted values
+		vtxNormEye = kVec3Zero;
+		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+			if (i < u_cc3BonesPerVertex) {
+				
+				// Get the bone rotation quaternion
+				highp vec4 q = u_cc3BoneQuaternionsModelSpace[boneIndices.x];
+				
+				// Rotate and translate the vertex position and add its weighted contribution.
+				highp vec3 vBone = rotateWithQuaternion(a_cc3Position.xyz, q);
+				vBone += u_cc3BoneTranslationsModelSpace[boneIndices.x];
+				vtxPosEye.xyz += (vBone * boneWeights.x);
+				
+				// Rotate the vertex normal and add its weighted contribution.
+				vtxNormEye += rotateWithQuaternion(a_cc3Normal, q) * boneWeights.x;
+				
+				// Swizzle the vector components to the next vertex bone index
+				boneIndices = boneIndices.yzwx;
+				boneWeights = boneWeights.yzwx;
+			}
+		}
+		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+//		vtxPosEye = u_cc3MatrixModelView * vtxPosEye;
+		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+	}
+	
+	if (u_cc3VertexShouldNormalizeNormal)
+		vtxNormEye = normalize(vtxNormEye);
+	else if (u_cc3VertexShouldRescaleNormal)
+		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+}
 
+
+void vertexToEyeSpaceMtx() {
+	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+		
+		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+		
+	} else {			// Mesh is bone-rigged for vertex skinning
+		
+		// Copies of the indices and weights attibutes so they can be swizzled.
+		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+		mediump vec4 boneWeights = a_cc3BoneWeights;
+		
 		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
 		vtxNormEye = kVec3Zero;
 		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
@@ -167,12 +232,86 @@ void vertexToEyeSpace() {
 			}
 		}
 	}
-
+	
 	if (u_cc3VertexShouldNormalizeNormal)
 		vtxNormEye = normalize(vtxNormEye);
 	else if (u_cc3VertexShouldRescaleNormal)
 		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
 }
+
+//void vertexToEyeSpace() {
+//	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+//		
+//		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+//		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+//		
+//	} else {			// Mesh is bone-rigged for vertex skinning
+//		
+//		// Copies of the indices and weights attibutes so they can be swizzled.
+//		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+//		mediump vec4 boneWeights = a_cc3BoneWeights;
+//		
+//		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
+//		vtxNormEye = kVec3Zero;
+//		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+//			if (i < u_cc3BonesPerVertex) {
+//				
+//				// Get the bone rotation quaternion
+//				highp vec4 q = u_cc3BoneQuaternionsEyeSpace[boneIndices.x];
+//				
+//				// Rotate and translate the vertex position and add its weighted contribution.
+//				highp vec3 vBone = rotateWithQuaternion(a_cc3Position.xyz, q);
+//				vBone += u_cc3BoneTranslationsEyeSpace[boneIndices.x];
+//				vtxPosEye.xyz += (vBone * boneWeights.x);
+//				
+//				// Rotate the vertex normal and add its weighted contribution.
+//				vtxNormEye += rotateWithQuaternion(a_cc3Normal, q) * boneWeights.x;
+//				
+//				// Swizzle the vector components to the next vertex bone index
+//				boneIndices = boneIndices.yzwx;
+//				boneWeights = boneWeights.yzwx;
+//			}
+//		}
+//	}
+//	
+//	if (u_cc3VertexShouldNormalizeNormal)
+//		vtxNormEye = normalize(vtxNormEye);
+//	else if (u_cc3VertexShouldRescaleNormal)
+//		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+//}
+
+//void vertexToEyeSpace() {
+//	if (u_cc3BonesPerVertex == 0) {		// No vertex skinning
+//		
+//		vtxPosEye = u_cc3MatrixModelView * a_cc3Position;
+//		vtxNormEye = u_cc3MatrixModelViewInvTran * a_cc3Normal;
+//		
+//	} else {			// Mesh is bone-rigged for vertex skinning
+//		
+//		// Copies of the indices and weights attibutes so they can be "rotated"
+//		mediump ivec4 boneIndices = ivec4(a_cc3BoneIndices);
+//		mediump vec4 boneWeights = a_cc3BoneWeights;
+//		
+//		vtxPosEye = kVec4Zero;					// Start at zero to accumulate weighted values
+//		vtxNormEye = kVec3Zero;
+//		for (lowp int i = 0; i < 4; ++i) {		// Max 4 bones per vertex
+//			if (i < u_cc3BonesPerVertex) {
+//				// Add position and normal contribution from this bone
+//				vtxPosEye += u_cc3BoneMatricesEyeSpace[boneIndices.x] * a_cc3Position * boneWeights.x;
+//				vtxNormEye += u_cc3BoneMatricesInvTranEyeSpace[boneIndices.x] * a_cc3Normal * boneWeights.x;
+//				
+//				// "Rotate" the vector components to the next vertex bone index
+//				boneIndices = boneIndices.yzwx;
+//				boneWeights = boneWeights.yzwx;
+//			}
+//		}
+//	}
+//	
+//	if (u_cc3VertexShouldNormalizeNormal)
+//		vtxNormEye = normalize(vtxNormEye);
+//	else if (u_cc3VertexShouldRescaleNormal)
+//		vtxNormEye = normalize(vtxNormEye);	// TODO - rescale without having to normalize
+//}
 
 /**
  * Returns a vector the contains the direction and intensity of light from the light at the

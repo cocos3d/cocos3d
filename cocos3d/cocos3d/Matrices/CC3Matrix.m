@@ -369,6 +369,11 @@
 	return kCC3VectorNull;
 }
 
+-(CC3Vector) extractTranslation {
+	CC3Assert(NO, @"%@ does not implement the extractTranslation method", self);
+	return kCC3VectorNull;
+}
+
 
 #pragma mark Matrix transformations
 

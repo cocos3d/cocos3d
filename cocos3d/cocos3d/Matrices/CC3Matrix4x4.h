@@ -382,7 +382,7 @@ static inline CC3Vector CC3Matrix4x4ExtractRotationZYX(const CC3Matrix4x4* mtx) 
 }
 
 /**
- * Extracts and returns the rotation quaternion from the specified matrix.
+ * Extracts and returns a unit rotation quaternion from the specified matrix.
  *
  * This algorithm uses the technique of finding the largest combination of the diagonal elements
  * to select which quaternion element (w,x,y,z) to solve for from the diagonal, and then using
@@ -405,23 +405,22 @@ static inline CC3Quaternion CC3Matrix4x4ExtractQuaternion(const CC3Matrix4x4* mt
 
 /** Extracts and returns the 'forward' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractForwardDirection(const CC3Matrix4x4* mtx) {
-	CC3Matrix3x3 mtx3;
-	CC3Matrix3x3PopulateFrom4x4(&mtx3, mtx);
-	return CC3Matrix3x3ExtractForwardDirection(&mtx3);
+	return CC3VectorNegate(CC3VectorFromTruncatedCC3Vector4(mtx->col3));
 }
 
 /** Extracts and returns the 'up' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractUpDirection(const CC3Matrix4x4* mtx) {
-	CC3Matrix3x3 mtx3;
-	CC3Matrix3x3PopulateFrom4x4(&mtx3, mtx);
-	return CC3Matrix3x3ExtractUpDirection(&mtx3);
+	return CC3VectorFromTruncatedCC3Vector4(mtx->col2);
 }
 
 /** Extracts and returns the 'right' direction vector from the rotation component of the specified matrix. */
 static inline CC3Vector CC3Matrix4x4ExtractRightDirection(const CC3Matrix4x4* mtx) {
-	CC3Matrix3x3 mtx3;
-	CC3Matrix3x3PopulateFrom4x4(&mtx3, mtx);
-	return CC3Matrix3x3ExtractRightDirection(&mtx3);
+	return CC3VectorFromTruncatedCC3Vector4(mtx->col1);
+}
+
+/** Extracts and returns the translation vector from the specified matrix. */
+static inline CC3Vector CC3Matrix4x4ExtractTranslation(const CC3Matrix4x4* mtx) {
+	return CC3VectorFromTruncatedCC3Vector4(mtx->col4);
 }
 
 

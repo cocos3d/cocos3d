@@ -83,7 +83,7 @@
 	[self markTransformDirty];
 }
 
--(CC3Vector) globalLocation { return [_globalTransformMatrix transformLocation: kCC3VectorZero]; }
+-(CC3Vector) globalLocation { return [_globalTransformMatrix extractTranslation]; }
 
 -(CC3Vector4) globalHomogeneousPosition { return CC3Vector4FromLocation(self.globalLocation); }
 

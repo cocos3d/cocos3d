@@ -178,7 +178,7 @@ CC3Vector CC3Matrix3x3ExtractRotationYXZ(const CC3Matrix3x3* mtx);
 CC3Vector CC3Matrix3x3ExtractRotationZYX(const CC3Matrix3x3* mtx);
 
 /**
- * Extracts and returns the rotation quaternion from the specified matrix.
+ * Extracts and returns a unit rotation quaternion from the specified matrix.
  *
  * This algorithm uses the technique of finding the largest combination of the diagonal elements
  * to select which quaternion element (w,x,y,z) to solve for from the diagonal, and then using

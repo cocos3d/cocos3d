@@ -112,16 +112,29 @@ typedef enum {
 	kCC3SemanticModelViewProjMatrixInv,			/**< (mat4) Inverse of current modelview-projection matrix. */
 	kCC3SemanticModelViewProjMatrixInvTran,		/**< (mat3) Inverse-transpose of current modelview-projection matrix. */
 	
-	// SKINNING MATRICES ----------------
+	// BONE SKINNING ----------------
 	kCC3SemanticBonesPerVertex,					/**< (int) Number of bones influencing each vertex (ie- number of weights/matrices specified on each vertex) */
-	kCC3SemanticBoneMatrixCount,				/**< (int) Length of the bone matrix arrays. */
-	kCC3SemanticBoneMatricesGlobal,				/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesInvTranGlobal,		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesEyeSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesInvTranEyeSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesModelSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneMatrixCount). */
-	kCC3SemanticBoneMatricesInvTranModelSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneMatrixCount). */
+	kCC3SemanticBoneCount,						/**< (int) Length of the bone arrays for the current skin section. */
+	
+	// BONE SKINNING MATRICES ----------------
+	kCC3SemanticBoneMatricesGlobal,				/**< (mat4[]) Array of bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneMatricesInvTranGlobal,		/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneMatricesEyeSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneMatricesInvTranEyeSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneMatricesModelSpace,			/**< (mat4[]) Array of bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneMatricesInvTranModelSpace,	/**< (mat3[]) Array of inverse-transposes of the bone matrices in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneCount). */
 
+	// BONE SKINNING DISCRETE TRANSFORMS
+	kCC3SemanticBoneQuaternionsGlobal,			/**< (vec4[]) Array of bone quaternions in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneTranslationsGlobal,			/**< (vec3[]) Array of bone translations in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneScalesGlobal,				/**< (vec3[]) Array of bone scales in the current mesh skin section in global coordinates (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneQuaternionsEyeSpace,		/**< (vec4[]) Array of bone quaternions in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneTranslationsEyeSpace,		/**< (vec3[]) Array of bone translations in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneScalesEyeSpace,				/**< (vec3[]) Array of bone scales in the current mesh skin section in eye space (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneQuaternionsModelSpace,		/**< (vec4[]) Array of bone quaternions in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneTranslationsModelSpace,		/**< (vec3[]) Array of bone translations in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneCount). */
+	kCC3SemanticBoneScalesModelSpace,			/**< (vec3[]) Array of bone scales in the current mesh skin section in local coordinates of model (length of array is specified by kCC3SemanticBoneCount). */
+	
 	// CAMERA -----------------
 	kCC3SemanticCameraLocationGlobal,			/**< (vec3) Location of the camera in global coordinates. */
 	kCC3SemanticCameraLocationModelSpace,		/**< (vec3) Location of the camera in local coordinates of model (not camera). */
@@ -517,4 +530,13 @@ NSString* NSStringFromCC3Semantic(CC3Semantic semantic);
 -(void) populateWithLegacyVariableNameMappings DEPRECATED_ATTRIBUTE;
 
 @end
+
+/** 
+ * Macro for asserting that the specified uniform is large enough
+ * to represent the number of bones in the specified skin section.
+ */
+#define CC3AssertBoneUniformForSkinSection(uniform, skinSection)						\
+	CC3Assert(skinSection.boneCount <= uniform.size,						\
+		@"%@ in %@ supports %i bones, which is not enough for %@.",			\
+		uniform, uniform.program, uniform.size, skinSection);
 

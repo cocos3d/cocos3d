@@ -303,6 +303,10 @@
 	return bones;
 }
 
+-(CC3Bone*) boneAt: (GLuint) boneIdx {
+	return ((CC3SkinnedBone*)[_skinnedBones objectAtIndex: boneIdx]).bone;
+}
+
 -(void) addBone: (CC3Bone*) aBone {
 	[_skinnedBones addObject: [CC3SkinnedBone skinnedBoneWithSkin: _node onBone: aBone]];
 }

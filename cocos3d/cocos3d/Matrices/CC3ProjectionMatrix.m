@@ -149,6 +149,8 @@
 
 -(CC3Vector) extractRightDirection { return CC3Matrix4x4ExtractRightDirection(&_contents); }
 
+-(CC3Vector) extractTranslation { return CC3Matrix4x4ExtractTranslation(&_contents); }
+
 
 #pragma mark Matrix transformations
 

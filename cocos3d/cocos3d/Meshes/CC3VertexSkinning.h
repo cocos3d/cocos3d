@@ -328,6 +328,9 @@
  */
 @property(nonatomic, retain, readonly) CCArray* bones;
 
+/** Returns the bone node at the specified index. */
+-(CC3Bone*) boneAt: (GLuint) boneIdx;
+
 /**
  * An index that indicates which vertex in the mesh begins this skin section.
  *

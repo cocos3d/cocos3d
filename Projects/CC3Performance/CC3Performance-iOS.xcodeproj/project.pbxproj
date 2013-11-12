@@ -21,28 +21,6 @@
 		A947374C140E5983006F410C /* CC3PerformanceLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372B140E5983006F410C /* CC3PerformanceLayer.m */; };
 		A947374D140E5983006F410C /* CC3PerformanceScene.m in Sources */ = {isa = PBXBuildFile; fileRef = A947372D140E5983006F410C /* CC3PerformanceScene.m */; };
 		A9473751140E5983006F410C /* NodeGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = A9473736140E5983006F410C /* NodeGrid.m */; };
-		A94EEA1E17F60B8E005A43E7 /* CC3BumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0817F60B8E005A43E7 /* CC3BumpMapObjectSpace.fsh */; };
-		A94EEA1F17F60B8E005A43E7 /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0917F60B8E005A43E7 /* CC3BumpMapObjectSpaceAlphaTest.fsh */; };
-		A94EEA2017F60B8E005A43E7 /* CC3BumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0A17F60B8E005A43E7 /* CC3BumpMapTangentSpace.fsh */; };
-		A94EEA2117F60B8E005A43E7 /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0B17F60B8E005A43E7 /* CC3BumpMapTangentSpaceAlphaTest.fsh */; };
-		A94EEA2217F60B8E005A43E7 /* CC3ClipSpaceNoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0C17F60B8E005A43E7 /* CC3ClipSpaceNoTexture.fsh */; };
-		A94EEA2317F60B8E005A43E7 /* CC3ClipSpaceSingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0D17F60B8E005A43E7 /* CC3ClipSpaceSingleTexture.fsh */; };
-		A94EEA2417F60B8E005A43E7 /* CC3ClipSpaceTexturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0E17F60B8E005A43E7 /* CC3ClipSpaceTexturable.vsh */; };
-		A94EEA2517F60B8E005A43E7 /* CC3MultiTextureConfigurable.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA0F17F60B8E005A43E7 /* CC3MultiTextureConfigurable.fsh */; };
-		A94EEA2617F60B8E005A43E7 /* CC3NoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1017F60B8E005A43E7 /* CC3NoTexture.fsh */; };
-		A94EEA2717F60B8E005A43E7 /* CC3NoTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1117F60B8E005A43E7 /* CC3NoTextureAlphaTest.fsh */; };
-		A94EEA2817F60B8E005A43E7 /* CC3NoTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1217F60B8E005A43E7 /* CC3NoTextureReflect.fsh */; };
-		A94EEA2917F60B8E005A43E7 /* CC3NoTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1317F60B8E005A43E7 /* CC3NoTextureReflectAlphaTest.fsh */; };
-		A94EEA2A17F60B8E005A43E7 /* CC3PointSprites.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1417F60B8E005A43E7 /* CC3PointSprites.fsh */; };
-		A94EEA2B17F60B8E005A43E7 /* CC3PointSprites.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1517F60B8E005A43E7 /* CC3PointSprites.vsh */; };
-		A94EEA2C17F60B8E005A43E7 /* CC3PointSpritesAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1617F60B8E005A43E7 /* CC3PointSpritesAlphaTest.fsh */; };
-		A94EEA2D17F60B8E005A43E7 /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1717F60B8E005A43E7 /* CC3PureColor.fsh */; };
-		A94EEA2E17F60B8E005A43E7 /* CC3PureColor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1817F60B8E005A43E7 /* CC3PureColor.vsh */; };
-		A94EEA2F17F60B8E005A43E7 /* CC3SingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1917F60B8E005A43E7 /* CC3SingleTexture.fsh */; };
-		A94EEA3017F60B8E005A43E7 /* CC3SingleTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1A17F60B8E005A43E7 /* CC3SingleTextureAlphaTest.fsh */; };
-		A94EEA3117F60B8E005A43E7 /* CC3SingleTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1B17F60B8E005A43E7 /* CC3SingleTextureReflect.fsh */; };
-		A94EEA3217F60B8E005A43E7 /* CC3SingleTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1C17F60B8E005A43E7 /* CC3SingleTextureReflectAlphaTest.fsh */; };
-		A94EEA3317F60B8E005A43E7 /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA1D17F60B8E005A43E7 /* CC3Texturable.vsh */; };
 		A94EEA3917F60BA7005A43E7 /* CC3PerformanceAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA3617F60BA7005A43E7 /* CC3PerformanceAppDelegate.m */; };
 		A94EEA3B17F60BA7005A43E7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A94EEA3817F60BA7005A43E7 /* main.m */; };
 		A94EEA3D17F60C58005A43E7 /* BeachBall.pod in Resources */ = {isa = PBXBuildFile; fileRef = A94EEA3C17F60C58005A43E7 /* BeachBall.pod */; };
@@ -79,6 +57,29 @@
 		A971D3161663ECD100769DC5 /* fps_images-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D3141663ECD100769DC5 /* fps_images-hd.png */; };
 		A971D3171663ECD100769DC5 /* fps_images-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = A971D3151663ECD100769DC5 /* fps_images-ipadhd.png */; };
 		A97A31321689002F004CBAA1 /* fps_images_1.png in Resources */ = {isa = PBXBuildFile; fileRef = A97A31311689002F004CBAA1 /* fps_images_1.png */; };
+		A9A453CD18326E59008D1F4B /* CC3BumpMapObjectSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453B618326E59008D1F4B /* CC3BumpMapObjectSpace.fsh */; };
+		A9A453CE18326E59008D1F4B /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453B718326E59008D1F4B /* CC3BumpMapObjectSpaceAlphaTest.fsh */; };
+		A9A453CF18326E59008D1F4B /* CC3BumpMapTangentSpace.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453B818326E59008D1F4B /* CC3BumpMapTangentSpace.fsh */; };
+		A9A453D018326E59008D1F4B /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453B918326E59008D1F4B /* CC3BumpMapTangentSpaceAlphaTest.fsh */; };
+		A9A453D118326E59008D1F4B /* CC3ClipSpaceNoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BA18326E59008D1F4B /* CC3ClipSpaceNoTexture.fsh */; };
+		A9A453D218326E59008D1F4B /* CC3ClipSpaceSingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BB18326E59008D1F4B /* CC3ClipSpaceSingleTexture.fsh */; };
+		A9A453D318326E59008D1F4B /* CC3ClipSpaceTexturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BC18326E59008D1F4B /* CC3ClipSpaceTexturable.vsh */; };
+		A9A453D418326E59008D1F4B /* CC3MultiTextureConfigurable.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BD18326E59008D1F4B /* CC3MultiTextureConfigurable.fsh */; };
+		A9A453D518326E59008D1F4B /* CC3NoTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BE18326E59008D1F4B /* CC3NoTexture.fsh */; };
+		A9A453D618326E59008D1F4B /* CC3NoTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453BF18326E59008D1F4B /* CC3NoTextureAlphaTest.fsh */; };
+		A9A453D718326E59008D1F4B /* CC3NoTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C018326E59008D1F4B /* CC3NoTextureReflect.fsh */; };
+		A9A453D818326E59008D1F4B /* CC3NoTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C118326E59008D1F4B /* CC3NoTextureReflectAlphaTest.fsh */; };
+		A9A453D918326E59008D1F4B /* CC3PointSprites.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C218326E59008D1F4B /* CC3PointSprites.fsh */; };
+		A9A453DA18326E59008D1F4B /* CC3PointSprites.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C318326E59008D1F4B /* CC3PointSprites.vsh */; };
+		A9A453DB18326E59008D1F4B /* CC3PointSpritesAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C418326E59008D1F4B /* CC3PointSpritesAlphaTest.fsh */; };
+		A9A453DC18326E59008D1F4B /* CC3PureColor.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C518326E59008D1F4B /* CC3PureColor.fsh */; };
+		A9A453DD18326E59008D1F4B /* CC3PureColor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C618326E59008D1F4B /* CC3PureColor.vsh */; };
+		A9A453DE18326E59008D1F4B /* CC3SingleTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C718326E59008D1F4B /* CC3SingleTexture.fsh */; };
+		A9A453DF18326E59008D1F4B /* CC3SingleTextureAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C818326E59008D1F4B /* CC3SingleTextureAlphaTest.fsh */; };
+		A9A453E018326E59008D1F4B /* CC3SingleTextureReflect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453C918326E59008D1F4B /* CC3SingleTextureReflect.fsh */; };
+		A9A453E118326E59008D1F4B /* CC3SingleTextureReflectAlphaTest.fsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453CA18326E59008D1F4B /* CC3SingleTextureReflectAlphaTest.fsh */; };
+		A9A453E218326E59008D1F4B /* CC3Texturable.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453CB18326E59008D1F4B /* CC3Texturable.vsh */; };
+		A9A453E318326E59008D1F4B /* CC3TexturableRigidBones.vsh in Resources */ = {isa = PBXBuildFile; fileRef = A9A453CC18326E59008D1F4B /* CC3TexturableRigidBones.vsh */; };
 		A9B6265F14E181AA002BB0DB /* Earth_1024.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A9B6265D14E181AA002BB0DB /* Earth_1024.jpg */; };
 		DC6640030F83B3EA000B3E49 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */; };
 		DC6640050F83B3EA000B3E49 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6640040F83B3EA000B3E49 /* OpenAL.framework */; };
@@ -139,28 +140,6 @@
 		A947372D140E5983006F410C /* CC3PerformanceScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceScene.m; sourceTree = "<group>"; };
 		A9473735140E5983006F410C /* NodeGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeGrid.h; sourceTree = "<group>"; };
 		A9473736140E5983006F410C /* NodeGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NodeGrid.m; sourceTree = "<group>"; };
-		A94EEA0817F60B8E005A43E7 /* CC3BumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpace.fsh; sourceTree = "<group>"; };
-		A94EEA0917F60B8E005A43E7 /* CC3BumpMapObjectSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpaceAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA0A17F60B8E005A43E7 /* CC3BumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpace.fsh; sourceTree = "<group>"; };
-		A94EEA0B17F60B8E005A43E7 /* CC3BumpMapTangentSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpaceAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA0C17F60B8E005A43E7 /* CC3ClipSpaceNoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceNoTexture.fsh; sourceTree = "<group>"; };
-		A94EEA0D17F60B8E005A43E7 /* CC3ClipSpaceSingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceSingleTexture.fsh; sourceTree = "<group>"; };
-		A94EEA0E17F60B8E005A43E7 /* CC3ClipSpaceTexturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceTexturable.vsh; sourceTree = "<group>"; };
-		A94EEA0F17F60B8E005A43E7 /* CC3MultiTextureConfigurable.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3MultiTextureConfigurable.fsh; sourceTree = "<group>"; };
-		A94EEA1017F60B8E005A43E7 /* CC3NoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTexture.fsh; sourceTree = "<group>"; };
-		A94EEA1117F60B8E005A43E7 /* CC3NoTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA1217F60B8E005A43E7 /* CC3NoTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflect.fsh; sourceTree = "<group>"; };
-		A94EEA1317F60B8E005A43E7 /* CC3NoTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA1417F60B8E005A43E7 /* CC3PointSprites.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.fsh; sourceTree = "<group>"; };
-		A94EEA1517F60B8E005A43E7 /* CC3PointSprites.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.vsh; sourceTree = "<group>"; };
-		A94EEA1617F60B8E005A43E7 /* CC3PointSpritesAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSpritesAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA1717F60B8E005A43E7 /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
-		A94EEA1817F60B8E005A43E7 /* CC3PureColor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.vsh; sourceTree = "<group>"; };
-		A94EEA1917F60B8E005A43E7 /* CC3SingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.fsh; sourceTree = "<group>"; };
-		A94EEA1A17F60B8E005A43E7 /* CC3SingleTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA1B17F60B8E005A43E7 /* CC3SingleTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflect.fsh; sourceTree = "<group>"; };
-		A94EEA1C17F60B8E005A43E7 /* CC3SingleTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
-		A94EEA1D17F60B8E005A43E7 /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
 		A94EEA3517F60BA7005A43E7 /* CC3PerformanceAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CC3PerformanceAppDelegate.h; sourceTree = "<group>"; };
 		A94EEA3617F60BA7005A43E7 /* CC3PerformanceAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CC3PerformanceAppDelegate.m; sourceTree = "<group>"; };
 		A94EEA3717F60BA7005A43E7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -202,6 +181,29 @@
 		A971D3141663ECD100769DC5 /* fps_images-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-hd.png"; sourceTree = "<group>"; };
 		A971D3151663ECD100769DC5 /* fps_images-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fps_images-ipadhd.png"; sourceTree = "<group>"; };
 		A97A31311689002F004CBAA1 /* fps_images_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images_1.png; sourceTree = "<group>"; };
+		A9A453B618326E59008D1F4B /* CC3BumpMapObjectSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpace.fsh; sourceTree = "<group>"; };
+		A9A453B718326E59008D1F4B /* CC3BumpMapObjectSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapObjectSpaceAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453B818326E59008D1F4B /* CC3BumpMapTangentSpace.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpace.fsh; sourceTree = "<group>"; };
+		A9A453B918326E59008D1F4B /* CC3BumpMapTangentSpaceAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3BumpMapTangentSpaceAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453BA18326E59008D1F4B /* CC3ClipSpaceNoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceNoTexture.fsh; sourceTree = "<group>"; };
+		A9A453BB18326E59008D1F4B /* CC3ClipSpaceSingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceSingleTexture.fsh; sourceTree = "<group>"; };
+		A9A453BC18326E59008D1F4B /* CC3ClipSpaceTexturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3ClipSpaceTexturable.vsh; sourceTree = "<group>"; };
+		A9A453BD18326E59008D1F4B /* CC3MultiTextureConfigurable.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3MultiTextureConfigurable.fsh; sourceTree = "<group>"; };
+		A9A453BE18326E59008D1F4B /* CC3NoTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTexture.fsh; sourceTree = "<group>"; };
+		A9A453BF18326E59008D1F4B /* CC3NoTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453C018326E59008D1F4B /* CC3NoTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflect.fsh; sourceTree = "<group>"; };
+		A9A453C118326E59008D1F4B /* CC3NoTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3NoTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453C218326E59008D1F4B /* CC3PointSprites.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.fsh; sourceTree = "<group>"; };
+		A9A453C318326E59008D1F4B /* CC3PointSprites.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSprites.vsh; sourceTree = "<group>"; };
+		A9A453C418326E59008D1F4B /* CC3PointSpritesAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PointSpritesAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453C518326E59008D1F4B /* CC3PureColor.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.fsh; sourceTree = "<group>"; };
+		A9A453C618326E59008D1F4B /* CC3PureColor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3PureColor.vsh; sourceTree = "<group>"; };
+		A9A453C718326E59008D1F4B /* CC3SingleTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTexture.fsh; sourceTree = "<group>"; };
+		A9A453C818326E59008D1F4B /* CC3SingleTextureAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453C918326E59008D1F4B /* CC3SingleTextureReflect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflect.fsh; sourceTree = "<group>"; };
+		A9A453CA18326E59008D1F4B /* CC3SingleTextureReflectAlphaTest.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3SingleTextureReflectAlphaTest.fsh; sourceTree = "<group>"; };
+		A9A453CB18326E59008D1F4B /* CC3Texturable.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3Texturable.vsh; sourceTree = "<group>"; };
+		A9A453CC18326E59008D1F4B /* CC3TexturableRigidBones.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CC3TexturableRigidBones.vsh; sourceTree = "<group>"; };
 		A9B6265D14E181AA002BB0DB /* Earth_1024.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Earth_1024.jpg; sourceTree = "<group>"; };
 		DC6640020F83B3EA000B3E49 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DC6640040F83B3EA000B3E49 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -246,7 +248,7 @@
 			children = (
 				A9473727140E5983006F410C /* Classes */,
 				A92DA7D21427B7870051AFFA /* Resources */,
-				A94EEA0717F60B8E005A43E7 /* GLSL */,
+				A9A453B518326E59008D1F4B /* GLSL */,
 				A94EEA3417F60BA7005A43E7 /* iOS Support */,
 				A93C00371821B217003A0C43 /* Apportable */,
 				A94EEA6817F60DC4005A43E7 /* cocos3d-library-iOS.xcodeproj */,
@@ -321,36 +323,6 @@
 			);
 			name = Classes;
 			path = CC3Performance/Classes;
-			sourceTree = "<group>";
-		};
-		A94EEA0717F60B8E005A43E7 /* GLSL */ = {
-			isa = PBXGroup;
-			children = (
-				A94EEA0817F60B8E005A43E7 /* CC3BumpMapObjectSpace.fsh */,
-				A94EEA0917F60B8E005A43E7 /* CC3BumpMapObjectSpaceAlphaTest.fsh */,
-				A94EEA0A17F60B8E005A43E7 /* CC3BumpMapTangentSpace.fsh */,
-				A94EEA0B17F60B8E005A43E7 /* CC3BumpMapTangentSpaceAlphaTest.fsh */,
-				A94EEA0C17F60B8E005A43E7 /* CC3ClipSpaceNoTexture.fsh */,
-				A94EEA0D17F60B8E005A43E7 /* CC3ClipSpaceSingleTexture.fsh */,
-				A94EEA0E17F60B8E005A43E7 /* CC3ClipSpaceTexturable.vsh */,
-				A94EEA0F17F60B8E005A43E7 /* CC3MultiTextureConfigurable.fsh */,
-				A94EEA1017F60B8E005A43E7 /* CC3NoTexture.fsh */,
-				A94EEA1117F60B8E005A43E7 /* CC3NoTextureAlphaTest.fsh */,
-				A94EEA1217F60B8E005A43E7 /* CC3NoTextureReflect.fsh */,
-				A94EEA1317F60B8E005A43E7 /* CC3NoTextureReflectAlphaTest.fsh */,
-				A94EEA1417F60B8E005A43E7 /* CC3PointSprites.fsh */,
-				A94EEA1517F60B8E005A43E7 /* CC3PointSprites.vsh */,
-				A94EEA1617F60B8E005A43E7 /* CC3PointSpritesAlphaTest.fsh */,
-				A94EEA1717F60B8E005A43E7 /* CC3PureColor.fsh */,
-				A94EEA1817F60B8E005A43E7 /* CC3PureColor.vsh */,
-				A94EEA1917F60B8E005A43E7 /* CC3SingleTexture.fsh */,
-				A94EEA1A17F60B8E005A43E7 /* CC3SingleTextureAlphaTest.fsh */,
-				A94EEA1B17F60B8E005A43E7 /* CC3SingleTextureReflect.fsh */,
-				A94EEA1C17F60B8E005A43E7 /* CC3SingleTextureReflectAlphaTest.fsh */,
-				A94EEA1D17F60B8E005A43E7 /* CC3Texturable.vsh */,
-			);
-			name = GLSL;
-			path = ../../cocos3d/GLSL;
 			sourceTree = "<group>";
 		};
 		A94EEA3417F60BA7005A43E7 /* iOS Support */ = {
@@ -439,6 +411,37 @@
 			path = ../../../Models/Dragon;
 			sourceTree = "<group>";
 		};
+		A9A453B518326E59008D1F4B /* GLSL */ = {
+			isa = PBXGroup;
+			children = (
+				A9A453B618326E59008D1F4B /* CC3BumpMapObjectSpace.fsh */,
+				A9A453B718326E59008D1F4B /* CC3BumpMapObjectSpaceAlphaTest.fsh */,
+				A9A453B818326E59008D1F4B /* CC3BumpMapTangentSpace.fsh */,
+				A9A453B918326E59008D1F4B /* CC3BumpMapTangentSpaceAlphaTest.fsh */,
+				A9A453BA18326E59008D1F4B /* CC3ClipSpaceNoTexture.fsh */,
+				A9A453BB18326E59008D1F4B /* CC3ClipSpaceSingleTexture.fsh */,
+				A9A453BC18326E59008D1F4B /* CC3ClipSpaceTexturable.vsh */,
+				A9A453BD18326E59008D1F4B /* CC3MultiTextureConfigurable.fsh */,
+				A9A453BE18326E59008D1F4B /* CC3NoTexture.fsh */,
+				A9A453BF18326E59008D1F4B /* CC3NoTextureAlphaTest.fsh */,
+				A9A453C018326E59008D1F4B /* CC3NoTextureReflect.fsh */,
+				A9A453C118326E59008D1F4B /* CC3NoTextureReflectAlphaTest.fsh */,
+				A9A453C218326E59008D1F4B /* CC3PointSprites.fsh */,
+				A9A453C318326E59008D1F4B /* CC3PointSprites.vsh */,
+				A9A453C418326E59008D1F4B /* CC3PointSpritesAlphaTest.fsh */,
+				A9A453C518326E59008D1F4B /* CC3PureColor.fsh */,
+				A9A453C618326E59008D1F4B /* CC3PureColor.vsh */,
+				A9A453C718326E59008D1F4B /* CC3SingleTexture.fsh */,
+				A9A453C818326E59008D1F4B /* CC3SingleTextureAlphaTest.fsh */,
+				A9A453C918326E59008D1F4B /* CC3SingleTextureReflect.fsh */,
+				A9A453CA18326E59008D1F4B /* CC3SingleTextureReflectAlphaTest.fsh */,
+				A9A453CB18326E59008D1F4B /* CC3Texturable.vsh */,
+				A9A453CC18326E59008D1F4B /* CC3TexturableRigidBones.vsh */,
+			);
+			name = GLSL;
+			path = ../../cocos3d/GLSL;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -520,68 +523,69 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9A453D018326E59008D1F4B /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
+				A9A453D318326E59008D1F4B /* CC3ClipSpaceTexturable.vsh in Resources */,
 				A94EEA9217F77E41005A43E7 /* Dragon-eye.jpg in Resources */,
+				A9A453DC18326E59008D1F4B /* CC3PureColor.fsh in Resources */,
+				A9A453E118326E59008D1F4B /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
+				A9A453D618326E59008D1F4B /* CC3NoTextureAlphaTest.fsh in Resources */,
 				A94EEA5917F60C99005A43E7 /* Icon-60.png in Resources */,
+				A9A453E318326E59008D1F4B /* CC3TexturableRigidBones.vsh in Resources */,
 				A92DA7F71427B7870051AFFA /* ArrowUpButton48x48.png in Resources */,
 				A94EEA6517F60CAD005A43E7 /* Default-Landscape~ipad.png in Resources */,
-				A94EEA3017F60B8E005A43E7 /* CC3SingleTextureAlphaTest.fsh in Resources */,
+				A9A453D518326E59008D1F4B /* CC3NoTexture.fsh in Resources */,
 				A92DA7F91427B7870051AFFA /* ButtonRing48x48.png in Resources */,
 				A92DA7FA1427B7870051AFFA /* cocos3dMascot.png in Resources */,
-				A94EEA2D17F60B8E005A43E7 /* CC3PureColor.fsh in Resources */,
-				A94EEA2017F60B8E005A43E7 /* CC3BumpMapTangentSpace.fsh in Resources */,
-				A94EEA2117F60B8E005A43E7 /* CC3BumpMapTangentSpaceAlphaTest.fsh in Resources */,
 				A94EEA5617F60C99005A43E7 /* Icon-50@2x.png in Resources */,
 				A92DA7FB1427B7870051AFFA /* cocos3dMascot.pod in Resources */,
 				A94EEA5317F60C99005A43E7 /* Icon-40.png in Resources */,
 				A94EEA5D17F60C99005A43E7 /* Icon-76.png in Resources */,
 				A94EEA9317F77E41005A43E7 /* Dragon-normals.jpg in Resources */,
-				A94EEA2F17F60B8E005A43E7 /* CC3SingleTexture.fsh in Resources */,
 				A93C003B1821B283003A0C43 /* configuration.json in Resources */,
-				A94EEA3317F60B8E005A43E7 /* CC3Texturable.vsh in Resources */,
-				A94EEA2617F60B8E005A43E7 /* CC3NoTexture.fsh in Resources */,
 				A92DA8011427B7870051AFFA /* fps_images.png in Resources */,
-				A94EEA2717F60B8E005A43E7 /* CC3NoTextureAlphaTest.fsh in Resources */,
+				A9A453CE18326E59008D1F4B /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
 				A94EEA6717F60CAD005A43E7 /* Default.png in Resources */,
 				A92DA8031427B7870051AFFA /* GridButton48x48.png in Resources */,
-				A94EEA2E17F60B8E005A43E7 /* CC3PureColor.vsh in Resources */,
-				A94EEA1E17F60B8E005A43E7 /* CC3BumpMapObjectSpace.fsh in Resources */,
-				A94EEA2217F60B8E005A43E7 /* CC3ClipSpaceNoTexture.fsh in Resources */,
-				A94EEA2317F60B8E005A43E7 /* CC3ClipSpaceSingleTexture.fsh in Resources */,
 				A94EEA5817F60C99005A43E7 /* Icon-57@2x.png in Resources */,
-				A94EEA2C17F60B8E005A43E7 /* CC3PointSpritesAlphaTest.fsh in Resources */,
-				A94EEA2A17F60B8E005A43E7 /* CC3PointSprites.fsh in Resources */,
-				A94EEA1F17F60B8E005A43E7 /* CC3BumpMapObjectSpaceAlphaTest.fsh in Resources */,
+				A9A453CF18326E59008D1F4B /* CC3BumpMapTangentSpace.fsh in Resources */,
 				A94EEA5117F60C99005A43E7 /* Icon-29.png in Resources */,
 				A94EEA5717F60C99005A43E7 /* Icon-57.png in Resources */,
 				A94EEA3D17F60C58005A43E7 /* BeachBall.pod in Resources */,
 				A94EEA5A17F60C99005A43E7 /* Icon-60@2x.png in Resources */,
+				A9A453E018326E59008D1F4B /* CC3SingleTextureReflect.fsh in Resources */,
+				A9A453D918326E59008D1F4B /* CC3PointSprites.fsh in Resources */,
 				A92DA8111427B7870051AFFA /* JoystickThumb.png in Resources */,
-				A94EEA2417F60B8E005A43E7 /* CC3ClipSpaceTexturable.vsh in Resources */,
+				A9A453DD18326E59008D1F4B /* CC3PureColor.vsh in Resources */,
 				A92DA81C1427B80E0051AFFA /* arial16.fnt in Resources */,
 				A94EEA9117F77E41005A43E7 /* Dragon-diffuse.jpg in Resources */,
+				A9A453D218326E59008D1F4B /* CC3ClipSpaceSingleTexture.fsh in Resources */,
+				A9A453D118326E59008D1F4B /* CC3ClipSpaceNoTexture.fsh in Resources */,
 				A92DA81D1427B80E0051AFFA /* arial16.png in Resources */,
 				A94EEA5B17F60C99005A43E7 /* Icon-72.png in Resources */,
-				A94EEA2517F60B8E005A43E7 /* CC3MultiTextureConfigurable.fsh in Resources */,
-				A94EEA2917F60B8E005A43E7 /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
 				A94EEA6617F60CAD005A43E7 /* Default-Portrait~ipad.png in Resources */,
 				A9B6265F14E181AA002BB0DB /* Earth_1024.jpg in Resources */,
 				A94EEA5E17F60C99005A43E7 /* Icon-76@2x.png in Resources */,
 				A94EEA5417F60C99005A43E7 /* Icon-40@2x.png in Resources */,
 				A94EEA5217F60C99005A43E7 /* Icon-29@2x.png in Resources */,
+				A9A453D418326E59008D1F4B /* CC3MultiTextureConfigurable.fsh in Resources */,
 				A94EEA3F17F60C66005A43E7 /* DieCube.pod in Resources */,
-				A94EEA3217F60B8E005A43E7 /* CC3SingleTextureReflectAlphaTest.fsh in Resources */,
+				A9A453D718326E59008D1F4B /* CC3NoTextureReflect.fsh in Resources */,
 				A971D3161663ECD100769DC5 /* fps_images-hd.png in Resources */,
+				A9A453DF18326E59008D1F4B /* CC3SingleTextureAlphaTest.fsh in Resources */,
+				A9A453DA18326E59008D1F4B /* CC3PointSprites.vsh in Resources */,
+				A9A453D818326E59008D1F4B /* CC3NoTextureReflectAlphaTest.fsh in Resources */,
+				A9A453DE18326E59008D1F4B /* CC3SingleTexture.fsh in Resources */,
+				A9A453DB18326E59008D1F4B /* CC3PointSpritesAlphaTest.fsh in Resources */,
+				A9A453CD18326E59008D1F4B /* CC3BumpMapObjectSpace.fsh in Resources */,
 				A94EEA5517F60C99005A43E7 /* Icon-50.png in Resources */,
 				A971D3171663ECD100769DC5 /* fps_images-ipadhd.png in Resources */,
+				A9A453E218326E59008D1F4B /* CC3Texturable.vsh in Resources */,
 				A94EEA6417F60CAD005A43E7 /* Default-568h@2x.png in Resources */,
 				A94EEA4117F60C76005A43E7 /* hello-world.pod in Resources */,
 				A94EEA5C17F60C99005A43E7 /* Icon-72@2x.png in Resources */,
 				A94EEA9517F77E41005A43E7 /* Dragon.pod in Resources */,
 				A94EEA9617F77E41005A43E7 /* DRAGON_LICENSE.txt in Resources */,
-				A94EEA2817F60B8E005A43E7 /* CC3NoTextureReflect.fsh in Resources */,
-				A94EEA3117F60B8E005A43E7 /* CC3SingleTextureReflect.fsh in Resources */,
 				A97A31321689002F004CBAA1 /* fps_images_1.png in Resources */,
-				A94EEA2B17F60B8E005A43E7 /* CC3PointSprites.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

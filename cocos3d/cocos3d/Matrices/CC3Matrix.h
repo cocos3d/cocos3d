@@ -320,7 +320,7 @@
  */
 -(CC3Vector) extractRotation;
 
-/** Extracts the rotation component of this matrix and returns it as a quaternion. */
+/** Extracts the rotation component of this matrix and returns it as a unit quaternion. */
 -(CC3Quaternion) extractQuaternion;
 
 /** Extracts and returns the 'forward' direction vector from the rotation component of this matrix. */
@@ -331,6 +331,9 @@
 
 /** Extracts and returns the 'right' direction vector from the rotation component of this matrix. */
 -(CC3Vector) extractRightDirection;
+
+/** Extracts and returns the translation vector from this matrix. */
+-(CC3Vector) extractTranslation;
 
 
 #pragma mark Matrix transformations

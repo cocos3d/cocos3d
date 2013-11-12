@@ -395,11 +395,14 @@
 @synthesize gl=_gl, deltaTime=_deltaTime, isDrawingEnvironmentMap=_isDrawingEnvironmentMap;
 @synthesize shouldDecorateNode=_shouldDecorateNode, currentShaderProgram=_currentShaderProgram;
 @synthesize currentTextureUnitIndex=_currentTextureUnitIndex, textureUnitCount=_textureUnitCount;
-@synthesize currentColor=_currentColor, currentSkinSection=_currentSkinSection;
+@synthesize currentColor=_currentColor;
 
 -(void) dealloc {
 	[_gl release];
 	[_renderSurface release];
+	[_boneMatricesGlobal release];
+	[_boneMatricesEyeSpace release];
+	[_boneMatricesModelSpace release];
 	_drawingSequencer = nil;		// not retained
 	_currentSkinSection = nil;		// not retained
 	_currentShaderProgram = nil;	// not retained
@@ -544,6 +547,13 @@
 
 -(void) setCurrentColor4B: (ccColor4B) color4B { self.currentColor = CCC4FFromCCC4B(color4B); }
 
+-(CC3SkinSection*) currentSkinSection { return _currentSkinSection; }
+
+-(void) setCurrentSkinSection: (CC3SkinSection*) currentSkinSection {
+	_currentSkinSection = currentSkinSection;
+	[self resetBoneMatrices];
+}
+
 
 #pragma mark Environmental matrices
 
@@ -621,6 +631,56 @@
 	[_gl loadModelviewMatrix: self.modelViewMatrix];
 }
 
+-(CC3Matrix4x3*) globalBoneMatrixAt: (GLuint) index {
+	[self ensureBoneMatrices: _boneMatricesGlobal forSpace: self.modelMatrix];
+	return [_boneMatricesGlobal elementAt: index];
+}
+
+-(CC3Matrix4x3*) eyeSpaceBoneMatrixAt: (GLuint) index {
+	[self ensureBoneMatrices: _boneMatricesEyeSpace forSpace: self.modelViewMatrix];
+	return [_boneMatricesEyeSpace elementAt: index];
+}
+
+-(CC3Matrix4x3*) modelSpaceBoneMatrixAt: (GLuint) index {
+	[self ensureBoneMatrices: _boneMatricesModelSpace forSpace: NULL];
+	return [_boneMatricesModelSpace elementAt: index];
+}
+
+/**
+ * Ensures that the specified bone matrix array has been populated from the bones of the
+ * current skin section. If the specified space matrix is not NULL, it is used to transform
+ * the bone matrices into some other space (eg- global space, eye space), otherwise, the
+ * bone matrices are left in their local space coordinates (model space).
+ * Once populated, the bone matrix array is marked as being ready, so it won't be populated
+ * again until being marked as not ready.
+ */
+-(void) ensureBoneMatrices: (CC3DataArray*) boneMatrices forSpace: (CC3Matrix4x3*) spaceMatrix {
+	if (boneMatrices.isReady) return;
+	
+	CC3Matrix4x3 sbMtx;
+	CC3SkinSection* skin = self.currentSkinSection;
+	GLuint boneCnt = skin.boneCount;
+	[boneMatrices ensureElementCapacity: boneCnt];
+	for (GLuint boneIdx = 0; boneIdx < boneCnt; boneIdx++) {
+		CC3Matrix* boneMtx = [skin getDrawTransformMatrixForBoneAt: boneIdx];
+		CC3Matrix4x3* pBoneSpaceMtx = [boneMatrices elementAt: boneIdx];
+		if (spaceMatrix) {
+			// Use the space matrix to transform the bone matrix.
+			[boneMtx populateCC3Matrix4x3: &sbMtx];
+			CC3Matrix4x3Multiply(pBoneSpaceMtx, spaceMatrix, &sbMtx);
+		} else
+			[boneMtx populateCC3Matrix4x3: pBoneSpaceMtx];	// Use the untransformed bone matrix.
+	}
+	boneMatrices.isReady = YES;
+}
+
+/** Resets the bone matrices so they will be populated when requested for the current skin section. */
+-(void) resetBoneMatrices {
+	_boneMatricesGlobal.isReady = NO;
+	_boneMatricesEyeSpace.isReady = NO;
+	_boneMatricesModelSpace.isReady = NO;
+}
+
 
 #pragma mark Allocation and initialization
 
@@ -630,6 +690,9 @@
 		_drawingSequencer = nil;
 		_currentSkinSection = nil;
 		_currentShaderProgram = nil;
+		_boneMatricesGlobal = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
+		_boneMatricesEyeSpace = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
+		_boneMatricesModelSpace = [[CC3DataArray alloc] initWithElementSize: sizeof(CC3Matrix4x3)];	// retained
 		CC3Matrix4x3PopulateIdentity(&_modelMatrix);
 		CC3Matrix4x3PopulateIdentity(&_viewMatrix);
 		CC3Matrix4x4PopulateIdentity(&_projMatrix);
