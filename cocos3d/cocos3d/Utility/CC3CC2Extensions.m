@@ -320,18 +320,40 @@
 #pragma mark -
 #pragma mark CCTextureCache extension
 
-// Instance variables
-#define CC2_DICT_QUEUE		_dictQueue
-#define CC2_TEX_DICT		_textures
-
 @implementation CCTextureCache (CC3)
 
+#if CC3_CC2_2
+#	define CC2_DICT_QUEUE		_dictQueue
+
+#if COCOS2D_VERSION < 0x020100
+#	define CC2_TEX_DICT			textures_
+#else
+#	define CC2_TEX_DICT			_textures
+#endif	// COCOS2D_VERSION < 0x020100
+
 -(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
-	if (tex2D)
-		dispatch_sync(CC2_DICT_QUEUE, ^{
-			[CC2_TEX_DICT setObject: tex2D forKey: texName];
-		});
+	if ( !tex2D ) return;
+	
+	dispatch_sync(CC2_DICT_QUEUE, ^{
+		[CC2_TEX_DICT setObject: tex2D forKey: texName];
+	});
 }
+
+#endif	// CC3_CC2_2
+
+#if CC3_CC2_1
+#	define CC2_DICT_LOCK		dictLock_
+#	define CC2_TEX_DICT			textures_
+
+-(void) addTexture: (CCTexture2D*) tex2D named: (NSString*) texName {
+	if ( !tex2D ) return;
+
+	[CC2_DICT_LOCK lock];
+	[CC2_TEX_DICT setObject: tex2D forKey: texName];
+	[CC2_DICT_LOCK unlock];
+}
+
+#endif	// CC3_CC2_2
 
 @end
 
