@@ -46,7 +46,7 @@
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
-	cam.location = cc3v( 0.0, 0.0, 6.0 );
+	cam.location = cc3v( 0.0, 0.0, 18.0 );
 	[self addChild: cam];
 
 	// Create a light, place it back and to the left at a specific

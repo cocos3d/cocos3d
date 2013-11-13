@@ -31,8 +31,14 @@
 
 #import "CC3Node.h"
 
+/** Defines the orientation of the camera's field of view measurement. */
+typedef enum {
+    CC3FieldOfViewOrientationUndefined,		/**< The FOV orientation is undefined. */
+    CC3FieldOfViewOrientationHorizontal,	/**< The FOV spans the horizontal aspect of the display surface. */
+    CC3FieldOfViewOrientationVertical,		/**< The FOV spans the vertical aspect of the display surface. */
+    CC3FieldOfViewOrientationDiagonal		/**< The FOV spans the diagonal aspect of the display surface. */
+} CC3FieldOfViewOrientation;
 
-@class CC3Scene;
 
 /** Default camera field of view. Measured in degrees. */
 static const GLfloat kCC3DefaultFieldOfView = 45.0f;
@@ -113,6 +119,8 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 	CC3Frustum* _frustum;
 	CC3Viewport _viewport;
 	GLfloat _fieldOfView;
+	CC3FieldOfViewOrientation _fieldOfViewOrientation;
+	UIInterfaceOrientation _fieldOfViewAspectOrientation;
 	GLfloat _nearClippingDistance;
 	GLfloat _farClippingDistance;
 	BOOL _isOpen : 1;
@@ -128,9 +136,42 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * The nominal field of view of this camera, in degrees. The initial value of this
  * property is set to kCC3DefaultFieldOfView.
  *
- * Since the device orientation can change at will, the field of view is associated with the
- * narrower of the two viewport dimensions (width or height), regardless of orientation.
- * This allows the perspective to stay the same as the device is rotated by the user.
+ * The effect of setting this property is affected by the fieldOfViewOrientation,
+ * fieldOfViewAspectOrientation, and  uniformScale properties.
+ *
+ * In handheld devices, the device orientation can change at will, changing the aspect ratio
+ * of the camera viewport. The fieldOfViewOrientation, and fieldOfViewAspectOrientation
+ * properties work together to establish and maintain a consistent perspective, regardless
+ * of the current aspect ratio.
+ *
+ * The fieldOfViewOrientation property indicates whether this fieldOfView value is measured
+ * horizontally, vertically, or diagonally across the display surface. 
+ *
+ * The fieldOfViewAspectOrientation property indicates the orientation (portrait or landscape)
+ * of the display surface to which this fieldOfView value is specified.
+ *
+ * The fieldOfViewOrientation and fieldOfViewAspectOrientation properties combine to
+ * determine whether the fieldOfView value is measured horizontally or vertically, and
+ * whether it was meant to be applied to the long or short side of the display surface.
+ * 
+ * Applying a field of view angle across the short side of the display surface will produce
+ * a somewhat different view perspective than if the same field of view value is applied
+ * across the long side of the display surface.
+ *
+ * Knowing these values, this camera can then automatically adjust the perspective, and keep
+ * it consistent, regardless of the actual orientation of the device and display surface.
+ *
+ * For example, if the fieldOfViewOrientation property indicates that the fieldOfView applies
+ * to the horizontal direction, and the fieldOfViewAspectOrientation indicates that the
+ * horizontal side is longer than the vertical side (landscape), the camera knows that the
+ * fieldOfView property should be applied to the long side, regardless of the orientation
+ * of the device and display surface. 
+ *
+ * As another example, a vertical fieldOfViewOrientation, combined with a landscape
+ * fieldOfViewAspectOrientation corresponds to the commonly-used Hor+ FOV technique.
+ *
+ * See the notes for the fieldOfViewOrientation and fieldOfViewAspectOrientation properties
+ * for more information about how they affect the use of the fieldOfView.
  *
  * The effective field of view is influenced by the value of the uniformScale property,
  * which, for cameras, acts as a zoom factor (as if the camera lens is zoomed in or out).
@@ -151,6 +192,51 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
  * the scene would vanish into the distance.
  */
 @property(nonatomic, assign) GLfloat fieldOfView;
+
+/**
+ * Indicates whether the value of the fieldOfView property is measured horizontally, 
+ * vertically, or diagonally across the display surface.
+ *
+ * This property works together with the fieldOfViewAspectOrientation property to ensure
+ * that the fieldOfView is applied to the camera's perspective on the display surface in
+ * a consistent manner, regardless of changes to the orientation of the display surface
+ * resulting from changes to the orientation of the device. See the notes for the
+ * fieldOfView property for more information about this interaction.
+ *
+ * The initial value of this property is CC3FieldOfViewOrientationDiagonal, indicating
+ * that the fieldOfView is measured diagonally across the display surface. This is a
+ * good general-purpose setting for framing a scene where it is not certain whether the
+ * scene will be displayed with portrait or landscape orientation.
+ *
+ * Specifying a vertical fieldOfViewOrientation is good when you want to frame a scene
+ * containing a character close-up, and you don't want the character's head to be clipped
+ * off if the device is rotated. Combining a vertical fieldOfViewOrientation and a horizontal
+ * fieldOfViewAspectOrientation corresponds to the commonly-used Hor+ FOV technique.
+ */
+@property(nonatomic, assign) CC3FieldOfViewOrientation fieldOfViewOrientation;
+
+/**
+ * Indicates the orientation (portrait or landscape) of the display surface to which the
+ * value of the fieldOfView value is specified.
+ *
+ * This property works together with the fieldOfViewOrientation property to ensure
+ * that the fieldOfView is applied to the camera's perspective on the display surface in
+ * a consistent manner, regardless of changes to the orientation of the display surface
+ * resulting from changes to the orientation of the device. See the notes for the
+ * fieldOfView property for more information about this interaction.
+ *
+ * This property is only concerned with whether the display surface orientation is
+ * portrait or landscape. It doesn't matter whether a portrait orientation is right-side-up
+ * or upside-down, or whether a landscape orientation is left or right. To indicate a portrait
+ * orientation, either UIInterfaceOrientationPortrait or UIInterfaceOrientationPortraitUpsideDown
+ * may be used, and to indicate a landscape orientation, either UIInterfaceOrientationLandscapeLeft
+ * or UIInterfaceOrientationLandscapeRight may be used.
+ *
+ * The initial value of this propety is UIInterfaceOrientationLandscapeLeft, indicating
+ * that the value of the fieldOfView propery is meant to apply to a display surface whose
+ * horizontal side is longer than its vertical side.
+ */
+@property(nonatomic, assign) UIInterfaceOrientation fieldOfViewAspectOrientation;
 
 /**
  * The effective field of view of this camera, in degrees.
@@ -1265,16 +1351,27 @@ static const GLfloat kCC3DefaultFrustumFitPadding = 0.02f;
 +(id) frustum;
 
 /**
+ * Sets the six frustum clipping planes and the projectionMatrix from the specified measurements.
+ * The left and bottom measurements are set to the negated right and top measurements, respectively.
+ */
+-(void) populateRight: (GLfloat) right
+			   andTop: (GLfloat) top
+			  andNear: (GLfloat) near
+			   andFar: (GLfloat) far;
+
+/**
+ * @deprecated Use populateRight:andTop:andNear:andFar: instead.
+ *
  * Sets the six frustum clipping planes and the projectionMatrix from the specified view parameters.
  *
- * The aspect parameter indicates the width:height ratio of the viewport. The field of view angle
+ * The aspect parameter indicates the width/height ratio of the viewport. The field of view angle
  * is applied to the narrower dimension, to ensure that overall perspective are consistent across
  * a simple transposition of the viewport dimensions (ie- a rotation of the viewport by 90 degrees).
  */
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
-		  andFarClip: (GLfloat) farClip;
+		  andFarClip: (GLfloat) farClip DEPRECATED_ATTRIBUTE;;
 
 /** @deprecated Renamed to markDirty. */
 -(void) markPlanesDirty DEPRECATED_ATTRIBUTE;

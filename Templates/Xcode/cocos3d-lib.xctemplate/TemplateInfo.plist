@@ -2831,6 +2831,30 @@
 			<key>Path</key>
 			<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.m</string>
 		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3DataArray.h</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3DataArray.h</string>
+			<key>TargetIndices</key>
+			<array/>
+		</dict>
+		<key>cocos3d/cocos3d/Utility/CC3DataArray.m</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>cocos3d</string>
+				<string>Utility</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/cocos3d/Utility/CC3DataArray.m</string>
+		</dict>
 		<key>cocos3d/cocos3d/Utility/CC3Foundation.h</key>
 		<dict>
 			<key>Group</key>
@@ -3353,6 +3377,16 @@
 			<key>Path</key>
 			<string>cocos3d/GLSL/CC3Texturable.vsh</string>
 		</dict>
+		<key>cocos3d/GLSL/CC3TexturableRigidBones.vsh</key>
+		<dict>
+			<key>Group</key>
+			<array>
+				<string>cocos3d</string>
+				<string>GLSL</string>
+			</array>
+			<key>Path</key>
+			<string>cocos3d/GLSL/CC3TexturableRigidBones.vsh</string>
+		</dict>
 	</dict>
 	<key>Nodes</key>
 	<array>
@@ -3591,6 +3625,8 @@
 		<string>cocos3d/cocos3d/Utility/CC3Cache.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3CC2Extensions.m</string>
+		<string>cocos3d/cocos3d/Utility/CC3DataArray.h</string>
+		<string>cocos3d/cocos3d/Utility/CC3DataArray.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.h</string>
 		<string>cocos3d/cocos3d/Utility/CC3Foundation.m</string>
 		<string>cocos3d/cocos3d/Utility/CC3Identifiable.h</string>
@@ -3639,6 +3675,7 @@
 		<string>cocos3d/GLSL/CC3SingleTextureReflect.fsh</string>
 		<string>cocos3d/GLSL/CC3SingleTextureReflectAlphaTest.fsh</string>
 		<string>cocos3d/GLSL/CC3Texturable.vsh</string>
+		<string>cocos3d/GLSL/CC3TexturableRigidBones.vsh</string>
 	</array>
 </dict>
 </plist>

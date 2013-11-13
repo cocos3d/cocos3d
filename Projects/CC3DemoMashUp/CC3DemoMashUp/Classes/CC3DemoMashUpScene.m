@@ -518,13 +518,18 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// Keep track of which object the camera is pointing at
 	_origCamTarget = cam.target;
 	_camTarget = _origCamTarget;
+	
+	// Set the field of view orientation to diagonal, to give a good overall average view of
+	// the scene, regardless of the shape of the viewing screen. As loaded from the POD file,
+	// the FOV is measured horizontally.
+	cam.fieldOfViewOrientation = CC3FieldOfViewOrientationDiagonal;
 
-	// For cameras, the scale property determines camera zooming, and the effective field-of-view.
+	// For cameras, the scale property determines camera zooming, and the effective field of view.
 	// You can adjust this value to play with camera zooming. Conversely, if you find that objects
 	// in the periphery of your view appear elongated, you can adjust the fieldOfView and/or
 	// uniformScale properties to reduce this "fish-eye" effect. See the notes of the CC3Camera
 	// fieldOfView property for more on this.
-	cam.uniformScale = 0.9;
+	cam.uniformScale = 0.5;
 	
 	// You can configure the camera to use orthographic projection instead of the default
 	// perspective projection by setting the isUsingParallelProjection property to YES.
@@ -1728,8 +1733,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 													  fromFile: kRunningManPODFile];
 	
 	// Retrieve the camera in the POD and cache it for later access. Adjust the camera
-	// frustum to values that are more useful for this demo.
+	// frustum to values that are more useful for this demo. Set the field of view to
+	// be measured in the vertical orientation, because the runner is vertically oriented
+	// and we want him to fit any shape surface in the vertical direction. This corresponds
+	// to the common Hor+ FOV approach.
 	_runnerCam = (CC3Camera*)[runner getNodeNamed: kRunnerCameraName];
+	_runnerCam.fieldOfViewOrientation = CC3FieldOfViewOrientationVertical;
 	_runnerCam.farClippingDistance = self.activeCamera.farClippingDistance;
 	_runnerCam.hasInfiniteDepthOfField = YES;
 

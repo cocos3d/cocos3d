@@ -37,7 +37,10 @@
 /**
  * A CC3Camera whose content originates from POD resource data.
  *
- * This is a concrete implementation of the CC3Node category PVRPOD. 
+ * This is a concrete implementation of the CC3Node category PVRPOD.
+ *
+ * In this implementation, the fieldOfViewOrientation is set to CC3FieldOfViewOrientationHorizontal
+ * since the fieldOfView value in a POD file is always specified as the horizontal field of view.
  */
 @interface CC3PODCamera : CC3Camera {
 	GLint _podIndex;

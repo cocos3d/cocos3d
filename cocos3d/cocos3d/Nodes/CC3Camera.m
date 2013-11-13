@@ -50,8 +50,6 @@
 
 @implementation CC3Camera
 
-@synthesize nearClippingDistance=_nearClippingDistance, farClippingDistance=_farClippingDistance;
-@synthesize viewport=_viewport, fieldOfView=_fieldOfView;
 @synthesize hasInfiniteDepthOfField=_hasInfiniteDepthOfField, isOpen=_isOpen;
 @synthesize shouldClipToViewport=_shouldClipToViewport;
 
@@ -85,11 +83,33 @@
 				: _frustum.finiteProjectionMatrix;
 }
 
+-(GLfloat) fieldOfView { return _fieldOfView; }
+
 -(void) setFieldOfView:(GLfloat) anAngle {
 	if (anAngle == _fieldOfView) return;
 	_fieldOfView = anAngle;
 	[self markProjectionDirty];
 }
+
+-(GLfloat) effectiveFieldOfView { return MIN(self.fieldOfView / self.uniformScale, kMaxEffectiveFOV); }
+
+-(CC3FieldOfViewOrientation) fieldOfViewOrientation { return _fieldOfViewOrientation; }
+
+-(void) setFieldOfViewOrientation: (CC3FieldOfViewOrientation) fieldOfViewOrientation {
+	if (fieldOfViewOrientation == _fieldOfViewOrientation) return;
+	_fieldOfViewOrientation = fieldOfViewOrientation;
+	[self markProjectionDirty];
+}
+
+-(UIInterfaceOrientation) fieldOfViewAspectOrientation { return _fieldOfViewAspectOrientation; }
+
+-(void) setFieldOfViewAspectOrientation: (UIInterfaceOrientation) fieldOfViewAspectOrientation {
+	if (fieldOfViewAspectOrientation == _fieldOfViewAspectOrientation) return;
+	_fieldOfViewAspectOrientation = fieldOfViewAspectOrientation;
+	[self markProjectionDirty];
+}
+
+-(GLfloat) nearClippingDistance { return _nearClippingDistance; }
 
 -(void) setNearClippingDistance: (GLfloat) aDistance {
 	if (aDistance == _nearClippingDistance) return;
@@ -97,19 +117,21 @@
 	[self markProjectionDirty];
 }
 
+-(GLfloat) farClippingDistance { return _farClippingDistance; }
+
 -(void) setFarClippingDistance: (GLfloat) aDistance {
 	if (aDistance == _farClippingDistance) return;
 	_farClippingDistance = aDistance;
 	[self markProjectionDirty];
 }
 
+-(CC3Viewport) viewport { return _viewport; }
+
 -(void) setViewport: (CC3Viewport) viewport {
 	if (CC3ViewportsAreEqual(viewport, _viewport)) return;
 	_viewport = viewport;
 	[self markProjectionDirty];
 }
-
--(GLfloat) effectiveFieldOfView { return MIN(self.fieldOfView / self.uniformScale, kMaxEffectiveFOV); }
 
 // Deprecated
 -(GLfloat) nearClippingPlane { return self.nearClippingDistance; }
@@ -148,6 +170,8 @@
 		self.frustum = [CC3Frustum frustum];
 		_isProjectionDirty = YES;
 		_fieldOfView = kCC3DefaultFieldOfView;
+		_fieldOfViewOrientation = CC3FieldOfViewOrientationDiagonal;
+		_fieldOfViewAspectOrientation = UIInterfaceOrientationLandscapeLeft;
 		_nearClippingDistance = kCC3DefaultNearClippingDistance;
 		_farClippingDistance = kCC3DefaultFarClippingDistance;
 		_viewport = CC3ViewportMake(0, 0, 0, 0);
@@ -170,6 +194,8 @@
 	self.frustum = [another.rawFrustum autoreleasedCopy];	// retained
 
 	_fieldOfView = another.fieldOfView;
+	_fieldOfViewOrientation = another.fieldOfViewOrientation;
+	_fieldOfViewAspectOrientation = another.fieldOfViewAspectOrientation;
 	_nearClippingDistance = another.nearClippingDistance;
 	_farClippingDistance = another.farClippingDistance;
 	_isProjectionDirty = another.isProjectionDirty;
@@ -227,16 +253,64 @@
 		CC3Assert(_viewport.h > 0 && _viewport.w > 0, @"%@ does not have a valid viewport: %@.",
 				  self, NSStringFromCC3Viewport(_viewport));
 
-		[_frustum populateFrom: self.effectiveFieldOfView
-					andAspect: ((GLfloat) _viewport.w / (GLfloat) _viewport.h)
-				  andNearClip: _nearClippingDistance
-				   andFarClip: _farClippingDistance];
-
+		CGPoint fovAspect = [self orientedFieldOfViewAspect];
+		[_frustum populateRight: (_nearClippingDistance * fovAspect.x)
+						 andTop: (_nearClippingDistance * fovAspect.y)
+						andNear: _nearClippingDistance
+						 andFar: _farClippingDistance];
+		
 		_isProjectionDirty = NO;
 		
 		// Notify the transform listeners that the projection has changed
 		[self notifyTransformListeners];
 	}
+}
+
+/**
+ * Returns a point representing the top-right corner of the near clipping plane,
+ * expressed as a proportional multiple of the nearClippingDistance.
+ *
+ * The returned point will have the same aspect ratio as the viewport. The component 
+ * values of the point are calculated taking into consideration the effectiveFieldOfView,
+ * fieldOfViewOrientation, and fieldOfViewAspectOrientation properties.
+ */
+-(CGPoint) orientedFieldOfViewAspect {
+	GLfloat halfFOV = self.effectiveFieldOfView / 2.0f;
+	GLfloat aspect = ((GLfloat) _viewport.w / (GLfloat) _viewport.h);
+	GLfloat right, top, diag, orientationCorrection;
+
+	switch (_fieldOfViewOrientation) {
+		
+		case CC3FieldOfViewOrientationVertical:
+			top = tanf(DegreesToRadians(halfFOV));
+			right = top * aspect;
+			orientationCorrection = 1.0f / aspect;
+			break;
+
+		case CC3FieldOfViewOrientationDiagonal:
+			diag = tanf(DegreesToRadians(halfFOV));
+			top = diag / sqrtf((aspect * aspect) + 1.0f);
+			right = top * aspect;
+			orientationCorrection = 1.0f;
+			break;
+		
+		case CC3FieldOfViewOrientationHorizontal:
+		default:
+			right = tanf(DegreesToRadians(halfFOV));
+			top = right / aspect;
+			orientationCorrection = aspect;
+			break;
+	}
+
+	// If the aspect doesn't match the intended orientation,
+	// bring them in alignment by scaling by the orientation correction.
+	if ((UIInterfaceOrientationIsLandscape(_fieldOfViewAspectOrientation) && (aspect < 1.0f)) ||
+		(UIInterfaceOrientationIsPortrait(_fieldOfViewAspectOrientation) && (aspect > 1.0f))) {
+		right *= orientationCorrection;
+		top *= orientationCorrection;
+	}
+
+	return ccp(right, top);
 }
 
 
@@ -911,29 +985,45 @@
 	_isUsingParallelProjection = another.isUsingParallelProjection;
 }
 
+-(void) populateRight: (GLfloat) right
+			   andTop: (GLfloat) top
+			  andNear: (GLfloat) near
+			   andFar: (GLfloat) far {
+	
+	_right = right;
+	_left = -_right;
+	_top = top;
+	_bottom = -_top;
+	_near = near;
+	_far = far;
+	
+	[self markProjectionDirty];
+	
+	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
+			 self, fieldOfView, nearClip, nearClip, farClip);
+}
+
 -(void) populateFrom: (GLfloat) fieldOfView
 		   andAspect: (GLfloat) aspect
 		 andNearClip: (GLfloat) nearClip
 		  andFarClip: (GLfloat) farClip {
-	
+
+	GLfloat rightClip, topClip;
 	GLfloat halfFOV = fieldOfView / 2.0f;
-	_near = nearClip;
-	_far = farClip;
 
 	// Apply the field of view angle to the narrower aspect.
 	if (aspect >= 1.0f) {			// Landscape
-		_top = _near * tanf(DegreesToRadians(halfFOV));
-		_right = _top * aspect;
+		topClip = nearClip * tanf(DegreesToRadians(halfFOV));
+		rightClip = topClip * aspect;
 	} else {						// Portrait
-		_right = _near * tanf(DegreesToRadians(halfFOV));
-		_top = _right / aspect;
+		rightClip = nearClip * tanf(DegreesToRadians(halfFOV));
+		topClip = rightClip / aspect;
 	}
-	
-	_bottom = -_top;
-	_left = -_right;
+
+	[self populateRight: rightClip andTop: topClip andNear: nearClip andFar: farClip];
 	
 	[self markProjectionDirty];
-	
+
 	LogTrace(@"%@ updated from FOV: %.3f, Aspect: %.3f, Near: %.3f, Far: %.3f",
 			 self, fieldOfView, nearClip, nearClip, farClip);
 }

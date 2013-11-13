@@ -124,7 +124,7 @@
 
 	// Create the camera, place it back a bit, and add it to the scene
 	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
-	cam.location = cc3v( 0.0, 100.0, 200.0 );
+	cam.location = cc3v( 0.0, 150.0, 300.0 );
 	cam.targetLocation = kCC3VectorZero;
 	[self addChild: cam];
 
