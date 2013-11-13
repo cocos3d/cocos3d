@@ -47,6 +47,7 @@
 
 @interface CC3Node (TemplateMethods)
 -(id) transformVisitorClass;
+@property(nonatomic, assign, readwrite) CC3Node* parent;	// Backdrop needs to have parent set
 @end
 
 
@@ -142,6 +143,7 @@
 	[_backdrop stopAllActions];		// Ensure all actions stopped before releasing
 	[_backdrop release];
 	_backdrop = [backdrop retain];
+	_backdrop.parent = self;
 }
 
 -(void) setFog: (CC3Fog*) fog {

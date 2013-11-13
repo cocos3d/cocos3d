@@ -32,7 +32,7 @@
 #import "CC3UtilityMeshNodes.h"
 #import "CC3Scene.h"
 
-
+// Expose CC3Node parent property as writeable, so subclasses can propagate to superclass.
 @interface CC3Node (TemplateMethods)
 @property(nonatomic, assign, readwrite) CC3Node* parent;
 @end
@@ -309,7 +309,6 @@
 // Use diffuseColor to force material and use clip-space shaders
 +(id) nodeWithColor: (ccColor4F) color {
 	CC3MeshNode* csn = [self node];
-//	csn.pureColor = color;
 	csn.diffuseColor = color;
 	return csn;
 }

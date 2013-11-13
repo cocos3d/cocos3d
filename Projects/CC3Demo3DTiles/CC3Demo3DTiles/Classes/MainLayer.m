@@ -203,7 +203,6 @@
 	CC3ResourceNode* rezNode;
 
 	// The node to use as a backdrop for each scene.
-	// This can be shared between all tile scenes.
 	_backdropTemplate = [[CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)] retain];
 	[_backdropTemplate createGLBuffers];
 	[_backdropTemplate selectShaderPrograms];
@@ -319,8 +318,8 @@
 		
 	TileScene* scene = [TileScene scene];		// A new scene
 	
-	// Add the backdrop. Since it is not assigned a parent, it can be shared across all tile scenes.
-	scene.backdrop = _backdropTemplate;
+	// Add the backdrop to the scene.
+	scene.backdrop = [_backdropTemplate autoreleasedCopy];
 	
 	// Choose either to display a random model in each tile, or the same model
 	// in each tile by uncommenting one of these lines and commenting out the other.

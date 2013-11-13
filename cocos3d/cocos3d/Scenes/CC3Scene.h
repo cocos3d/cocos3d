@@ -314,7 +314,7 @@ static const ccColor4F kCC3DefaultLightColorAmbientScene = { 0.2f, 0.2f, 0.2f, 1
 
 /**
  * To create a backdrop for this scene, set this to a CC3ClipSpaceNode instance, covered
- * with either a solid pureColor or a texture.
+ * with either a solid color, or a texture.
  *
  * The backdrop appears behind everything else in the scene, and does not change as the
  * camera moves around the scene. If you need to have more realistic scenery that changes
