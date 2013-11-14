@@ -59,28 +59,6 @@
 
 @implementation CC3PerformanceLayer
 
-- (void)dealloc {
-	_directionJoystick = nil;				// retained as child
-	_locationJoystick = nil;				// retained as child
-	_increaseNodesMI = nil;					// retained as child
-	_decreaseNodesMI = nil;					// retained as child
-	_nextNodeTypeMI = nil;					// retained as child
-	_prevNodeTypeMI = nil;					// retained as child
-	_animateNodesMI = nil;					// retained as child
-	_nodeNameLabel = nil;					// retained as child
-	_updateTitleLabel = nil;				// retained as child
-	_updateRateLabel = nil;					// retained as child
-	_nodesUpdatedLabel = nil;				// retained as child
-	_nodesTransformedLabel = nil;			// retained as child
-	_drawingTitleLabel = nil;				// retained as child
-	_frameRateLabel = nil;					// retained as child
-	_nodesVisitedForDrawingLabel = nil;		// retained as child
-	_nodesDrawnLabel = nil;					// retained as child
-	_drawCallsLabel = nil;					// retained as child
-	_facesPresentedLabel = nil;				// retained as child
-    [super dealloc];
-}
-
 /**
  * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.

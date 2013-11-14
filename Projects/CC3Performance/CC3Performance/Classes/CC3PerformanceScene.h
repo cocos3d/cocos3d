@@ -86,7 +86,7 @@
 @property(nonatomic, assign) CGPoint playerLocationControl;
 
 /** The node to be used as a template when creating copies for the grid. */
-@property(nonatomic, retain) CC3Node* templateNode;
+@property(nonatomic, strong) CC3Node* templateNode;
 
 /**
  * The number of nodes that are laid out per side on the square grid of nodes.

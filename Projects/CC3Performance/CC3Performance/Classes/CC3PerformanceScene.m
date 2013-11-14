@@ -64,22 +64,12 @@
 @synthesize playerDirectionControl=_playerDirectionControl;
 @synthesize playerLocationControl=_playerLocationControl;
 
--(void) dealloc {
-	[_templateNode release];
-	[_availableTemplateNodes release];
-	_nodeGrid = nil;				// Not retained.
-	
-	[super dealloc];
-}
-
 /**
  * When the template node is changed, layout the
  * grid with copies of the new template node.
  */
 -(void) setTemplateNode:(CC3Node *) aNode {
-	id oldNode = _templateNode;
-	_templateNode = [aNode retain];
-	[oldNode release];
+	_templateNode = aNode;
 	[self layoutGrid];
 }
 
@@ -139,7 +129,7 @@
 	[self addChild: _nodeGrid];
 	
 	// Populate the array of available templates.
-	_availableTemplateNodes = [[NSMutableArray array] retain];
+	_availableTemplateNodes = [NSMutableArray array];
 	CC3Node* aNode;
 	CC3MeshNode* meshNode;
 	CC3LineNode* lineNode;

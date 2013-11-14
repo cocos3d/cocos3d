@@ -59,11 +59,6 @@
 
 @synthesize velocity, angularVelocity;
 
-- (void)dealloc {
-	thumbNode = nil;	// retained via child node
-    [super dealloc];
-}
-
 /** The anchor point in terms of cocos2d points. */
 -(CGPoint) anchorPointInPoints {
 	return ccpCompMult(ccpFromSize(self.contentSize), self.anchorPoint);
@@ -90,7 +85,7 @@
 }
 
 +(id) joystickWithThumb: (CCNode*) aNode andSize: (CGSize) size {
-	return [[[self alloc] initWithThumb: aNode andSize: size] autorelease];
+	return [[self alloc] initWithThumb: aNode andSize: size];
 }
 
 -(id) initWithThumb: (CCNode*) aNode andBackdrop: (CCNode*) bgNode {
@@ -104,7 +99,7 @@
 }
 
 +(id) joystickWithThumb: (CCNode*) thumbNode andBackdrop: (CCNode*) backgroundNode {
-	return [[[self alloc] initWithThumb: thumbNode andBackdrop: backgroundNode] autorelease];
+	return [[self alloc] initWithThumb: thumbNode andBackdrop: backgroundNode];
 }
 
 /**

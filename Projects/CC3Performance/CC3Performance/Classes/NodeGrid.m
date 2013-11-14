@@ -57,7 +57,6 @@
 			[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
 
 			[self addChild: aNode];
-			[aNode release];
 			break;
 		}
 		default: {			// Otherwise...lay out a grid of copies
@@ -84,7 +83,6 @@
 					[aNode setAnimationBlendingWeight: 0.0f onTrack: 0];
 					
 					[self addChild: aNode];
-					[aNode release];
 				}
 			}
 			break;
