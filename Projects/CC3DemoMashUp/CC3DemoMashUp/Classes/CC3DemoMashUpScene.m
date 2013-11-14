@@ -173,42 +173,6 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 @synthesize playerLocationControl=_playerLocationControl;
 @synthesize isManagingShadows=_isManagingShadows;
 
--(void) dealloc {
-	_ground = nil;				// not retained
-	_teapotWhite = nil;			// not retained
-	_teapotTextured = nil;		// not retained
-	_teapotSatellite = nil;		// not retained
-	_brickWall = nil;			// not retained
-	_robotCam = nil;			// not retained
-	_robotLamp = nil;			// not retained
-	_beachBall = nil;			// not retained
-	_globe = nil;				// not retained
-	_dieCube = nil;				// not retained
-	_texCubeSpinner = nil;		// not retained
-	_mascot = nil;				// not retained
-	_bumpMapLightTracker = nil;	// not retained
-	_woodenSign = nil;			// not retained
-	_floatingHead = nil;		// not retained
-	_camTarget = nil;			// not retained
-	_origCamTarget = nil;		// not retained
-	_runnerCam = nil;			// not retained
-	_runnerLamp = nil;			// not retained
-	_tvScreen = nil;			// not retained
-	_envMapTex = nil;			// not retained
-	[_signTex release];
-	[_stampTex release];
-	[_embossedStampTex release];
-	[_headTex release];
-	[_headBumpTex release];
-	[_tvTestCardTex release];
-	[_tvDrawingVisitor release];
-	[_preProcSurface release];
-	[_grayscaleNode release];
-	[_depthImageNode release];
-	
-	[super dealloc];
-}
-
 /**
  * Add the initial content to the scene.
  *
@@ -895,8 +859,8 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	// We want this node to be a SpinningNode class instead of the CC3PODNode class that
 	// is loaded from the POD file. We can swap it out by creating a copy of the loaded
 	// POD node, using a different node class as the base.
-	_dieCube = [[podDieCube copyWithName: kDieCubeName
-								 asClass: [SpinningNode class]] autorelease];
+	_dieCube = [podDieCube copyWithName: kDieCubeName
+								 asClass: [SpinningNode class]];
 
 	// Now set some properties, including the friction, and add the die cube to the scene
 	_dieCube.uniformScale = 30.0;
@@ -1159,7 +1123,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Green teapot is at postion 100 on the Y-axis
 	// Create it by copying the red teapot.
-	CC3Node* teapotGreen = [[teapotRed copyWithName:  kTeapotGreenName] autorelease];
+	CC3Node* teapotGreen = [teapotRed copyWithName:  kTeapotGreenName];
 	teapotGreen.diffuseColor = ccc4f(0.0, 0.7, 0.0, 1.0);
 	teapotGreen.location = cc3v(0.0, 100.0, 0.0);
 
@@ -1169,7 +1133,7 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
 	
 	// Blue teapot is at postion 100 on the Z-axis
 	// Create it by copying the red teapot.
-	CC3Node* teapotBlue = [[teapotRed copyWithName:  kTeapotBlueName] autorelease];
+	CC3Node* teapotBlue = [teapotRed copyWithName:  kTeapotBlueName];
 	teapotBlue.diffuseColor = ccc4f(0.0, 0.0, 0.7, 1.0);
 	teapotBlue.location = cc3v(0.0, 0.0, 100.0);
 
@@ -1306,17 +1270,17 @@ static CC3Vector kBrickWallClosedLocation = { -115, 150, -765 };
  */
 -(void) addWoodenSign {
 	// Texture for the basic wooden sign
-	_signTex = [[CC3Texture textureFromFile: kSignTextureFile] retain];
+	_signTex = [CC3Texture textureFromFile: kSignTextureFile];
 
 	// Texture for the stamp overlay.
 	// Give it a configurable texture unit so we can play with the configuration.
-	_stampTex = [[CC3TextureUnitTexture textureFromFile: kSignStampTextureFile] retain];
+	_stampTex = [CC3TextureUnitTexture textureFromFile: kSignStampTextureFile];
 	_stampTex.textureUnit = [CC3ConfigurableTextureUnit textureUnit];
 	
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	_embossedStampTex = [[CC3TextureUnitTexture textureFromFile: kSignStampNormalsTextureFile] retain];
+	_embossedStampTex = [CC3TextureUnitTexture textureFromFile: kSignStampNormalsTextureFile];
 	
 	// Although there is also a dedicated CC3BumpMapTextureUnit that we'd usually
 	// use for bump-mapping, we use CC3ConfigurableTextureUnit instead, to demonstrate
@@ -1422,7 +1386,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Demonstrate the use of shared application-specific data attached to a node.
 	// We use the sharedUserData property because we don't want the static string to be
 	// deallocated when the floating head node is deallocated.
-	_floatingHead.sharedUserData = kDontPokeMe;
+	_floatingHead.sharedUserData = (__bridge GLvoid *)(kDontPokeMe);
 	
 	// The floating head normal texture was created in a left-handed coordinate
 	// system (eg- DirectX). OpenGL uses a right-handed coordinate system.
@@ -1440,12 +1404,12 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Texture that has a bump-map stamp, whose pixels contain normals instead of colors.
 	// Give it a texture unit configured for bump-mapping. The rgbNormalMap indicates how
 	// the X,Y & Z components of the normal are stored in the texture RGB components.
-	_headBumpTex = [[CC3TextureUnitTexture textureFromFile: kHeadBumpFile] retain];
+	_headBumpTex = [CC3TextureUnitTexture textureFromFile: kHeadBumpFile];
 	_headBumpTex.textureUnit = [CC3BumpMapTextureUnit textureUnit];
 	_headBumpTex.textureUnit.rgbNormalMap = kCC3DOT3RGB_YZX;
 	
 	// Load the visible texture of the floating head, and add it as an overlay on the bump map texture.
-	_headTex = [[CC3Texture textureFromFile: kHeadTextureFile] retain];
+	_headTex = [CC3Texture textureFromFile: kHeadTextureFile];
 
 	// The two textures are PVR textures pre-loaded with mipmaps.
 	// However, using the mipmap for this mesh creates a visual artifact around the
@@ -1489,7 +1453,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	CC3ResourceNode* podRezNode = [CC3PODResourceNode nodeFromFile: kMascotPODFile
 								  expectsVerticallyFlippedTextures: YES];
 	_mascot = [podRezNode getMeshNodeNamed: kMascotName];
-	CC3MeshNode* distractedMascot = [[_mascot copyWithName: kDistractedMascotName] autorelease];
+	CC3MeshNode* distractedMascot = [_mascot copyWithName: kDistractedMascotName];
 	
 	// Allow the mascots to be selected by touch events.
 	_mascot.touchEnabled = YES;
@@ -1810,7 +1774,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// either the whole POD resource node, or the specific soft-body node.
 	NSString* runnerFigureName = [NSString stringWithFormat: @"%@-SoftBody", kRunningManPODFile];
 	CC3Node* runnerFigure = [runner getNodeNamed: runnerFigureName];
-	CC3Node* littleBrother = [[runnerFigure copyWithName: kLittleBrotherName] autorelease];
+	CC3Node* littleBrother = [runnerFigure copyWithName: kLittleBrotherName];
 	littleBrother.uniformScale = 0.75f;
 	littleBrother.location = cc3v(0, 0, 1000);
 	littleBrother.rotation = cc3v(0, 90, 0);	// Copied runner was not rotated (its parent was)
@@ -1866,7 +1830,6 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	[_runnerCam.parent addChild: tvCam];
 	tvCam.viewport = kCC3ViewportZero;		// Clear the camera viewport, so it will be set to match the TV surface
 	_tvDrawingVisitor.camera = tvCam;
-	[tvCam release];
 	
 	// Load a television model, extract the mesh node corresponding to the screen, and attach
 	// the TV test card image as its texture. Since this is a TV, it should not interact with
@@ -1886,7 +1849,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	
 	// Start with a test card displayed on the TV
 	// Keep the mesh texture coordinates in memory so we can swap textures of different sizes
-	_tvTestCardTex = [[CC3Texture textureFromFile: kTVTestCardFile] retain];
+	_tvTestCardTex = [CC3Texture textureFromFile: kTVTestCardFile];
 	_tvScreen.texture = _tvTestCardTex;
 	[_tvScreen retainVertexTextureCoordinates];
 	
@@ -1961,13 +1924,13 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 	// Create a clip-space node that will render the off-screen color texture to the screen.
 	// Load the node with shaders that convert the image into greyscale, making the scene
 	// appear as if it was filmed with black & white film.
-	_grayscaleNode = [[CC3ClipSpaceNode nodeWithTexture: _preProcSurface.colorTexture] retain];
+	_grayscaleNode = [CC3ClipSpaceNode nodeWithTexture: _preProcSurface.colorTexture];
 	[_grayscaleNode applyEffectNamed: @"Grayscale" inPFXResourceFile: kPostProcPFXFile];
 	
 	// Create a clip-space node that will render the off-screen depth texture to the screen.
 	// Load the node with shaders that convert the depth values into greyscale, visualizing
 	// the depth of field as a grayscale gradient.
-	_depthImageNode = [[CC3ClipSpaceNode nodeWithTexture: _preProcSurface.depthTexture] retain];
+	_depthImageNode = [CC3ClipSpaceNode nodeWithTexture: _preProcSurface.depthTexture];
 	[_depthImageNode applyEffectNamed: @"Depth" inPFXResourceFile: kPostProcPFXFile];
 
 #endif	// !CC3_OGLES_1
@@ -3614,7 +3577,7 @@ static NSString* kDontPokeMe = @"Owww! Don't poke me!";
 
 #if CC3_OSX
 	// Create an image destination and save the CGImageRef to it.
-	CFURLRef url = (CFURLRef)[NSURL fileURLWithPath:imgPath];
+	CFURLRef url = (__bridge CFURLRef)[NSURL fileURLWithPath:imgPath];
 	CGImageDestinationRef dest = CGImageDestinationCreateWithURL(url, kUTTypeJPEG, 1, NULL);
 	CGImageDestinationAddImage(dest, tvImgRef, nil);
 	CGImageDestinationFinalize(dest);

@@ -165,6 +165,7 @@ extern "C" {
 																	fromPFXParser: pfxParser
 																	inPFXResource: self];
 		[_effectsByName setObject: effect forKey: effect.name];
+		[effect release];
 	}
 }
 

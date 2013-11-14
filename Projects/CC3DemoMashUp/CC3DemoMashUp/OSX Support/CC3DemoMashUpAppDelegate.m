@@ -77,9 +77,6 @@
 
 -(void) dealloc {
 	[[CCDirector sharedDirector] end];
-	[_window release];
-	[_viewController release];
-	[super dealloc];
 }
 
 #pragma mark AppDelegate - IBActions

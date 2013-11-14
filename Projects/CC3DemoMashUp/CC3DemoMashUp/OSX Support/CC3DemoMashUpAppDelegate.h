@@ -30,13 +30,13 @@
 #import "CC3NSViewController.h"
 
 @interface CC3DemoMashUpAppDelegate : NSObject <NSApplicationDelegate> {
-	NSWindow* _window;
-	CC3GLView* _glView;
+	NSWindow* __weak _window;
+	CC3GLView* __weak _glView;
 	CC3NSViewController* _viewController;
 }
 
-@property (assign) IBOutlet NSWindow* window;
-@property (assign) IBOutlet CC3GLView* glView;
+@property (weak) IBOutlet NSWindow* window;
+@property (weak) IBOutlet CC3GLView* glView;
 
 - (IBAction)toggleFullScreen:(id)sender;
 

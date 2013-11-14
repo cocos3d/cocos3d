@@ -39,11 +39,6 @@
 
 @implementation CC3DemoMashUpAppDelegate
 
--(void) dealloc {
-	[_window release];
-	[_viewController release];
-	[super dealloc];
-}
 
 #if CC3_CC2_1
 /**

@@ -76,18 +76,6 @@
 
 @implementation CC3DemoMashUpLayer
 
-- (void)dealloc {
-	directionJoystick = nil;		// retained as child
-	locationJoystick = nil;			// retained as child
-	switchViewMI = nil;				// retained as child
-	invasionMI = nil;				// retained as child
-	sunlightMI = nil;				// retained as child
-	zoomMI = nil;					// retained as child
-	shadowMI = nil;					// retained as child
-	hudLayer = nil;					// retained as child
-    [super dealloc];
-}
-
 /**
  * Returns the contained CC3Scene, cast into the appropriate type.
  * This is a convenience method to perform automatic casting.
@@ -531,7 +519,6 @@
 	tapSelector.numberOfTapsRequired = 1;
 	tapSelector.cancelsTouchesInView = NO;		// Ensures touches are passed to buttons
 	[self cc3AddGestureRecognizer: tapSelector];
-	[tapSelector release];
 	
 	// Register for single-finger dragging gestures used to spin the two cubes.
 	UIPanGestureRecognizer* dragPanner = [[UIPanGestureRecognizer alloc]
@@ -539,7 +526,6 @@
 	dragPanner.minimumNumberOfTouches = 1;
 	dragPanner.maximumNumberOfTouches = 1;
 	[self cc3AddGestureRecognizer: dragPanner];
-    [dragPanner release];
 
 	// Register for double-finger dragging to pan the camera.
 	UIPanGestureRecognizer* cameraPanner = [[UIPanGestureRecognizer alloc]
@@ -547,13 +533,11 @@
 	cameraPanner.minimumNumberOfTouches = 2;
 	cameraPanner.maximumNumberOfTouches = 2;
 	[self cc3AddGestureRecognizer: cameraPanner];
-    [cameraPanner release];
 	
 	// Register for double-finger dragging to pan the camera.
 	UIPinchGestureRecognizer* cameraMover = [[UIPinchGestureRecognizer alloc]
 											 initWithTarget: self action: @selector(handleCameraMove:)];
 	[self cc3AddGestureRecognizer: cameraMover];
-    [cameraMover release];
 }
 
 /**
