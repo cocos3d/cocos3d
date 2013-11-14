@@ -47,11 +47,6 @@
 
 @implementation TileScene
 
--(void) dealloc {
-	_mainNode = nil;			// retained as child
-	[super dealloc];
-}
-
 /** Constructs the 3D scene with a camera and light source, and a single mesh node. */
 -(void) initializeScene {
 

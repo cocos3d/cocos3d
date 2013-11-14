@@ -57,7 +57,7 @@
 }
 
 /** Each TileScene displays a single, main node. */
-@property(nonatomic, assign) CC3Node* mainNode;
+@property(nonatomic, strong) CC3Node* mainNode;
 
 @end
 

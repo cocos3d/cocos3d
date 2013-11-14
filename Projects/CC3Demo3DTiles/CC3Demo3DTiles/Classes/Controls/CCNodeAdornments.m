@@ -60,7 +60,7 @@
 
 -(id) init { return [self initWithActionDuration: 0.0]; }
 
-+(id) adornment { return [[[self alloc] init] autorelease]; }
++(id) adornment { return [[self alloc] init]; }
 
 -(id) initWithActionDuration: (ccTime) aDuration {
 	if( (self = [super init]) ) {
@@ -71,7 +71,7 @@
 }
 
 +(id) adornmentWithActionDuration: (ccTime) aDuration {
-	return [[[self alloc] initWithActionDuration: aDuration] autorelease];
+	return [[self alloc] initWithActionDuration: aDuration];
 }
 
 @end
@@ -88,11 +88,6 @@
 
 @synthesize peakOpacity, adornmentNode;
 
--(void) dealloc {
-	adornmentNode = nil;		// retained as child
-	[super dealloc];
-}
-
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration {
 	CC3Assert(aNode, @"CCNodeAdornment node must not be nil");
 	if( (self = [super initWithActionDuration: aDuration]) ) {
@@ -107,7 +102,7 @@
 }
 
 +(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity fadeDuration: (ccTime) aDuration {
-	return [[[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: (ccTime) aDuration] autorelease];
+	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity fadeDuration: (ccTime) aDuration];
 }
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity {
@@ -115,7 +110,7 @@
 }
 
 +(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode peakOpacity: (GLubyte) opacity {
-	return [[[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity] autorelease];
+	return [[self alloc] initWithAdornmentNode: aNode peakOpacity: opacity];
 }
 
 -(id) initWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {
@@ -123,7 +118,7 @@
 }
 
 +(id) adornmentWithAdornmentNode: (CCNode<CCRGBAProtocol>*) aNode {
-	return [[[self alloc] initWithAdornmentNode: aNode] autorelease];
+	return [[self alloc] initWithAdornmentNode: aNode];
 }
 
 // When activated, make the adornment node visible and establish an action
@@ -175,7 +170,7 @@
 }
 
 +(id) adornmentToScaleBy: (CGSize) aScale scaleDuration: (ccTime) aDuration {
-	return [[[self alloc] initToScaleBy: aScale scaleDuration: aDuration] autorelease];
+	return [[self alloc] initToScaleBy: aScale scaleDuration: aDuration];
 }
 
 -(id) initToScaleBy: (CGSize) aScale {
@@ -183,7 +178,7 @@
 }
 
 +(id) adornmentToScaleBy: (CGSize) aScale {
-	return [[[self alloc] initToScaleBy: aScale] autorelease];
+	return [[self alloc] initToScaleBy: aScale];
 }
 
 -(id) initToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration {
@@ -191,7 +186,7 @@
 }
 
 +(id) adornmentToScaleUniformlyBy: (float) aScale scaleDuration: (ccTime) aDuration {
-	return [[[self alloc] initToScaleUniformlyBy: aScale scaleDuration: aDuration] autorelease];
+	return [[self alloc] initToScaleUniformlyBy: aScale scaleDuration: aDuration];
 }
 
 -(id) initToScaleUniformlyBy: (float) aScale {
@@ -199,7 +194,7 @@
 }
 
 +(id) adornmentToScaleUniformlyBy: (float) aScale {
-	return [[[self alloc] initToScaleUniformlyBy: aScale] autorelease];
+	return [[self alloc] initToScaleUniformlyBy: aScale];
 }
 
 // Sets the value of originalScale from the current parent.
@@ -261,11 +256,6 @@
 
 @implementation AdornableMenuItemToggle
 
--(void) dealloc {
-	adornment = nil;		// retained as child
-	[super dealloc];
-}
-
 -(CCNode<CCNodeAdornmentProtocol>*) adornment {
 	return adornment;
 }
@@ -297,11 +287,6 @@
 #pragma mark AdornableMenuItemImage CCMenuItemToggle extention implementation
 
 @implementation AdornableMenuItemImage
-
--(void) dealloc {
-	adornment = nil;		// retained as child
-	[super dealloc];
-}
 
 -(CCNode<CCNodeAdornmentProtocol>*) adornment {
 	return adornment;

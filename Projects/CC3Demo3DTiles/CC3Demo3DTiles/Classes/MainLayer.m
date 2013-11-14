@@ -68,20 +68,10 @@
 // MainLayer implementation
 @implementation MainLayer
 
-- (void) dealloc {
-	[_tiles release];
-	[_templates release];
-	[_backdropTemplate release];
-	_increaseNodesMI = nil;				// retained as child
-	_decreaseNodesMI = nil;				// retained as child
-
-	[super dealloc];
-}
-
 -(id) initWithController: (CC3ViewController*) controller {
 	if( (self = [super initWithController: controller]) ) {
-		_tiles = [[NSMutableArray array] retain];
-		_templates = [[NSMutableArray array] retain];
+		_tiles = [NSMutableArray array];
+		_templates = [NSMutableArray array];
 		_backdropTemplate = nil;
 		_tilesPerSide = 1;
 		[self initializeTemplates];
@@ -203,7 +193,7 @@
 	CC3ResourceNode* rezNode;
 
 	// The node to use as a backdrop for each scene.
-	_backdropTemplate = [[CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)] retain];
+	_backdropTemplate = [CC3ClipSpaceNode nodeWithColor: ccc4f(0.2, 0.24, 0.43, 1.0)];
 	[_backdropTemplate createGLBuffers];
 	[_backdropTemplate selectShaderPrograms];
 	
@@ -348,7 +338,6 @@
 	}
 	
 	scene.mainNode = aNode;		// Set the node as the main node of the scene, for easy access
-	[aNode release];			// Release copied node now that it's been added
 
 	return scene;
 }
